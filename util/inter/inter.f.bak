@@ -271,7 +271,7 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
       REAL(KIND=R4), DIMENSION(3,2) :: ELO,EHI ! INTEG PANEL LIMITS
 !
       INTEGER(KIND=I4) :: LINES,MATPR  ! CURRENT LINE COUNT, MATERIAL NUMBER    
-      INTEGER(KIND=I4), PARAMETER :: MAXLIN=20 !MAXIMUM LINES PER PAGE
+      INTEGER(KIND=I4), PARAMETER :: MAXLIN=800 !MAXIMUM LINES PER PAGE
 !
 !     CROSS SECTIONS AT THERMAL, 2200 METERS AND 14MEV
 !
@@ -547,23 +547,21 @@ C...
             WRITE(IOUT,'(/)')
             LINES = LINES + 2
          END IF
-C...
-C        WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
-C        WRITE(IOUT,'(1x,3A)')                                          &
-C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
-C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-C    &          'Sig(Fiss)   Sig(E14)   '
-C        LINES = LINES + 3
-C     END IF
-C...
-      IF(IPRINT.EQ.1) THEN
-        IPRINT = 0
-        WRITE(NOUT,'(/3A)')                                              &       
+         WRITE(IOUT,'(1x,A,I5)') 'Material number (MAT) = ',MATP
+         WRITE(IOUT,'(1x,3A)')                                          &
      &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
      &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
-     &          'Sig(Fiss)   Sig(E14)   MAT'
-         LINES = LINES + 2
-      ENDIF
+     &          'Sig(Fiss)   Sig(E14)   '
+         LINES = LINES + 3
+      END IF
+C...
+C     IF(IPRINT.EQ.1) THEN
+C       IPRINT = 0
+C       WRITE(NOUT,'(3A)')                                              &       
+C    &          ' Z    A  LISO  LFS  MT  Reaction    Sig(2200)   ',     &       
+C    &          'Sig(Ezero)  Avg-Sigma  G-fact   Res Integ   ',         &       
+C    &          'Sig(Fiss)   Sig(E14)   MAT'
+C     ENDIF
 C...
    50 WRITE(IOUT,55) IZ,IA,TS,FS,MTP,MTDESC(IDESC),C025,CZERO,          &       
      &               SIGAV,GFACT,RESINT,SIGFAV,C14,MATP
