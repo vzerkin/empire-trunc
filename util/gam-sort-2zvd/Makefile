@@ -48,9 +48,9 @@ else ifeq ($(FC),lf90)
 
 endif
 
-OBJF =	gamma_sort.o
+OBJF =	gam-sort-2zvd.o
 
-gamma_sort.exe:   $(OBJF)
+gam-sort-2zvd.exe:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 clean:

@@ -1,18 +1,36 @@
       program gamm_sort
 
+	implicit none
       REAL*8 egd,u,gacs
 
       INTEGER Acn0, Acn, Mt, Mt0
-
-      INTEGER l,j1
+      INTEGER l,j1,toplot(4)
       INTEGER lw,j1w,lwmax,lwmin
       CHARACTER*5 nlj5
-      CHARACTER*10 egamm10
+      CHARACTER*13 egamm13
       LOGICAL lwrite
 
-C     Maximum and minimum spin of retrieved gamma transitions
-      lwmin=1
-      lwmax=5
+C     Maximum and minimum level to consider transition between
+
+      toplot = 0	
+
+      toplot(1) = 1  ! n,ng
+      toplot(2) = 0  ! n,2ng
+      toplot(3) = 0  ! n,3ng
+      toplot(4) = 0  ! n,4ng
+C       
+      lwmin = 2  ! We start to plot transitions from the second excited level
+	lwmax = 1
+
+      OPEN(10,file='GAM-SORT-2ZVD.INP',STATUS='OLD',ERR=10)
+      READ(10,*,END=10) ! Skipping column indicator 
+      READ(10,'(1x,100I1)',END=10) toplot
+      READ(10,*,END=10) lwmax 
+      CLOSE(10)
+  10  if(lwmax.gt.40) lwmax = 40
+	if(lwmax.le.1)  lwmax = 10
+
+      OPEN(106,FILE='GAMMA_INT.DAT', STATUS='OLD',ERR=120)
 
       OPEN(106,FILE='GAMMA_INT.DAT', STATUS='OLD',ERR=120)
       READ(106,'(1x,4i5,1x,3(g12.5,1x))',END=120) Mt0,Acn0
@@ -29,8 +47,12 @@ C     Maximum and minimum spin of retrieved gamma transitions
               READ(106,'(1x,4i5,1x,3(g12.5,1x))')
      &            Mt,Acn,l,j1,egd,u,gacs
 
+              ! skipping gammas with energy higher than 9.9999 MeV
+	        if(egd.gt.99.999999d0) cycle 
+
               IF(Acn.EQ.Acn0 .and. l.EQ.lw .and. j1.EQ.j1w) THEN 
-                write(egamm10,'(A3, 1H- ,i6.6)') 'nng',nint(egd*1000000)
+                write(egamm13,
+     &             '(A4, 1H- ,i8.8)')'znng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -40,8 +62,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
             ENDDO
 
             IF(lwrite) then
-              OPEN (105,FILE='GXS_'//egamm10//'_'//nlj5//'.zvd')
-              CALL OPEN_ZVV(105,'Empire '//egamm10,' ')
+              OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
                 READ(104,*)u,gacs
@@ -51,6 +73,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
               CALL CLOSE_ZVV(105,' ',' ')
               CLOSE(105)
             ENDIF
+
+            if(toplot(2).eq.0) cycle
 
             lwrite = .false.          
             REWIND 106
@@ -60,7 +84,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
      &            Mt,Acn,l,j1,egd,u,gacs
 
               IF(Acn.EQ.Acn0-1.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
-                write(egamm10,'(A3, 1H- ,i6.6)') '2ng',nint(egd*1000000)
+                write(egamm13,
+     &             '(A4, 1H- ,i8.8)')'z2ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -70,8 +95,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
             ENDDO
 
             IF(lwrite) then
-              OPEN (105,FILE='GXS_'//egamm10//'_'//nlj5//'.zvd')
-              CALL OPEN_ZVV(105,'Empire '//egamm10,' ')
+              OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
                 READ(104,*)u,gacs
@@ -82,6 +107,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
               CLOSE(105)
             ENDIF
 
+            if(toplot(3).eq.0) cycle
+
             lwrite = .false.          
             REWIND 106
 
@@ -90,7 +117,8 @@ C     Maximum and minimum spin of retrieved gamma transitions
      &            Mt,Acn,l,j1,egd,u,gacs
 
               IF(Acn.EQ.Acn0-2.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
-                write(egamm10,'(A3, 1H- ,i6.6)') '3ng',nint(egd*1000000)
+                write(egamm13,
+     &             '(A4, 1H- ,i8.8)')'z3ng',nint(egd*1000000)
                 OPEN(104, FILE='xs.tmp')
                 IF(gacs.gt.0.d0) THEN
                   WRITE(104,*)u,gacs
@@ -100,8 +128,41 @@ C     Maximum and minimum spin of retrieved gamma transitions
             ENDDO
 
             IF(lwrite) then
-              OPEN (105,FILE='GXS_'//egamm10//'_'//nlj5//'.zvd')
-              CALL OPEN_ZVV(105,'Empire '//egamm10,' ')
+              OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
+              REWIND 104 
+              DO while (.not.eof(104))
+                READ(104,*)u,gacs
+                WRITE (105,'(G10.3,2X,1P,E12.5)') u*1D6,gacs*1D-3
+              ENDDO
+              CLOSE(104,STATUS='delete')  
+              CALL CLOSE_ZVV(105,' ',' ')
+              CLOSE(105)
+            ENDIF
+
+            if(toplot(4).eq.0) cycle
+
+            lwrite = .false.          
+            REWIND 106
+
+            DO while (.not.eof(106)) 
+              READ(106,'(1x,4i5,1x,3(g12.5,1x))')
+     &            Mt,Acn,l,j1,egd,u,gacs
+
+              IF(Acn.EQ.Acn0-3.and. l.EQ.lw .and. j1.EQ.j1w) THEN 
+                write(egamm13,
+     &             '(A4, 1H- ,i8.8)')'z4ng',nint(egd*1000000)
+                OPEN(104, FILE='xs.tmp')
+                IF(gacs.gt.0.d0) THEN
+                  WRITE(104,*)u,gacs
+                  lwrite = .true.          
+                ENDIF
+              ENDIF
+            ENDDO
+
+            IF(lwrite) then
+              OPEN (105,FILE=egamm13//'_'//nlj5//'.zvd')
+              CALL OPEN_ZVV(105,'Empire '//egamm13,' ')
               REWIND 104 
               DO while (.not.eof(104))
                 READ(104,*)u,gacs
@@ -115,8 +176,7 @@ C     Maximum and minimum spin of retrieved gamma transitions
          ENDDO
       ENDDO
   999 STOP ' Success !'
-
-  120 STOP ' ERROR: GAMMA_INT.DAT FILE MISSING'
+  120 STOP 'ERROR: GAMMA_INT.DAT FILE MISSING'
       END
 C======================================================
       SUBROUTINE OPEN_ZVV(iout,tfunct,title)
@@ -127,7 +187,7 @@ C======================================================
       write(iout,'(A12,A)') 'fun: ',tfunct
       write(iout,'(A)')     'thick: 3'
       write(iout,'(A)')     'length:250'
-      write(iout,'(A)')     'color: 3'
+      write(iout,'(A)')     'color: 2'
       write(iout,'(A)')     'hide: 0'
       write(iout,'(A)')     'dash: 0'
       write(iout,'(A)')     'dot: 0'
