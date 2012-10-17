@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2881 $
+Ccc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-16 17:07:34 +0200 (Sa, 16 Jun 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -54,6 +54,7 @@ C
 
       REClev   = 0.d0
       CSDirlev = 0.d0
+
       POPmax   = 0.d0
       CSPrd    = 0.d0
       CSPfis   = 0.d0
@@ -94,6 +95,9 @@ C
 
       EMAx  = 0.d0
       ECUt  = 0.d0
+
+	PL_CN = 0.d0
+	PL_lmax = 0.d0
 
       return
       END
@@ -189,7 +193,7 @@ C*    Check if zero-order
          IF (Lmx.GE.1) THEN
 C*          Clear the coefficients field
             DO l = 1, Lmx
-               Qq(l + 1) = 0.
+               Qq(l + 1) = 0.d0
             ENDDO
 C*
 C*          Loop to find the appropriate Legendre order
@@ -204,7 +208,7 @@ C*          Loop to find the appropriate Legendre order
                   GOTO 100
                ENDIF
 C*             Check the difference between input and calculated points
-               Err = 0.
+               Err = 0.d0
                DO ip = 1, Np
                   d1 = POLLG1(Xp(ip),Qq(1),nlg)
                   yci = d1
@@ -289,7 +293,7 @@ C
 C Local variables
 C
       INTEGER l, n1
-      DOUBLE PRECISION pl(20), ss
+      DOUBLE PRECISION pl(64), ss
 C
 C
 C
@@ -301,7 +305,7 @@ C
 C
 C
 C     DIMENSION QL(1),PL(20)
-      IF (Nl.GE.20) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
+      IF (Nl.GE.64) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL PLNLEG(Uu,pl,Nl)
       n1 = Nl + 1
       ss = 0.
@@ -333,7 +337,7 @@ C Local variables
 C
       REAL FLOAT
       INTEGER l
-      Pl(1) = 1.
+      Pl(1) = 1.d0
       IF (Nl.LT.1) RETURN
       Pl(2) = Uu
       IF (Nl.LT.2) RETURN
@@ -343,6 +347,49 @@ C
       ENDDO
       END
 
+      DOUBLE PRECISION FUNCTION GET_DDXS(X,PL,COEFF,NL)
+C
+C-Title  : GET_DDXS Subroutine
+C-Purpose: Evaluate Legendre polynomials up to order NL
+C          Use Legendre coefficients to calculate the double diff. XS
+C
+C          DDXS = SUM_{n=0 to NL} { (2L+1)( COEFF(n)*Pn(n,X) }
+C          X= cos(theta) 
+C
+C-Author : R.Capote, Nuclear Data Section, IAEA, 2012
+C          Use recursive relations for Pn(x): Abramowitz & Stegun Table 22.7 (p.782) 
+C
+C-Description:
+C-D  Given the argument value X in the interval [-1,1], the
+C-D  polynomials up to order NL are calculated by a recurrence
+C-D  relation and stored in PL.
+C    PL(0) = 1 
+C    PL(1) = X
+C    PL(2) = (3*X*X - 1)/2 ...
+C
+C Dummy arguments
+C
+      INTEGER NL
+      DOUBLE PRECISION X
+      DOUBLE PRECISION PL(0:*),COEFF(0:*)
+C
+C Local variables
+C
+      INTEGER L
+
+      PL(0) = 1.d0
+C	GET_DDXS = COEFF(0)*PL(0) ! is equal 1 anyhow
+ 	GET_DDXS = COEFF(0)
+      IF (NL.LT.1) RETURN
+      PL(1) = X
+	GET_DDXS = GET_DDXS + 3*COEFF(1)*PL(1)
+      IF (NL.LT.2) RETURN
+      DO L = 1, NL - 1
+         PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
+	   GET_DDXS = GET_DDXS + ( 2*(L+1) + 1 )*COEFF(L+1)*PL(L+1)
+      ENDDO
+	RETURN
+      END
 
       SUBROUTINE MTXGUP(A,F,X,N,Ldig,Det)
 C-Title  : MTXGUP subroutine

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3132 $
+Ccc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-08 11:32:11 +0200 (Mo, 08 Okt 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -255,6 +255,9 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
+C        CN_isotropic = .True.     ! default
+         CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
+C        Important: CN_isotropic can be .False. only if ECIS is used for calculations (OPTMAN is not allowed)
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -553,13 +556,12 @@ C        Starting value of the number of angular points
            STOP 'FATAL: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
-         da = 180.0/(NDAng - 1)
+         da = 180.d0/(NDAng - 1)
          DO na = 1, NDAng
-           ANGles(na) = (na - 1)*da
-         ENDDO
-         DO na = 1, NDAng
-           CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
-           SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
+           ANGles(na)  = (na - 1)*da
+           CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
+           SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
          READ (5,*) A(0), Z(0)
@@ -1267,13 +1269,12 @@ C
             NANgela = NDAnghmx
             NDAng   = NDAnghmx
 C--------reset angles for inelastic calculations
-            da = 180.0/(NDAng - 1)
+            da = 180.d0/(NDAng - 1)
             DO na = 1, NDAng
-              ANGles(na) = (na - 1)*da
-            ENDDO
-            DO na = 1, NDAng
-              CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
-              SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
+              ANGles(na)  = (na - 1)*da
+              CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
+              SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
@@ -1840,8 +1841,8 @@ C-----WRITE heading on FILE6
          WRITE (8,*) ' '
          WRITE (8,'(60(''=''))')
          WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',G10.5,
-     &'' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
          WRITE (8,'(60(''=''))')
          WRITE (8,*) ' '
          WRITE (8,'('' Compound nucleus energy'',F9.3,'' MeV'')') EXCn
@@ -3013,15 +3014,15 @@ C-----WRITE heading on FILE12
       IF(LEVtarg.GT.1) THEN
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,''m INCIDENT ENERGY''                                ,G10.5,''
+     &I3,''m INCIDENT ENERGY''                             ,1P,D10.3,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,'' INCIDENT ENERGY ''                                ,G10.5,''
+     &I3,'' INCIDENT ENERGY ''                             ,1P,D10.3,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ENDIF
-      WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
+      WRITE (12,'('' COMPOUND NUCLEUS ENERGY '',F9.3,'' MeV'')') EXCn
       WRITE (12,*)
 
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
@@ -7227,7 +7228,7 @@ C-----
 
               PFNniu = val
               WRITE (8,'('' PFN NUBAR norm in all nuclei set to '',
-     &                      F8.3)') val
+     & F8.3)') val
 
             endif
             GOTO 100
@@ -7238,210 +7239,288 @@ C-----
             char1=' first hump  ' 
             CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char, char1)
             IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISv_n(1,i) = quant
-              ENDDO
+             DO i = 1, NDNUC
+               FISv_n(1,i) = val
+             ENDDO
+             WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char, val
+             WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char, val
             ELSE
-              FISv_n(1,nnuc) = quant
+             FISv_n(1,nnuc) = quant
+             WRITE (8 ,'(a35,''in '',I3,A2,'' set to '',F6.3)')
+     &          char, i2, SYMb(nnuc), quant
+             WRITE (12,'(a35,''in '',I3,A2,'' set to '',F6.3)')
+     &          char, i2, SYMb(nnuc), quant
             ENDIF 
             GOTO 100
          ENDIF
 C-----       
-         IF (name.EQ.'FISVF2') THEN
-            char =' Fission barrier second hump height '
-            char1=' second hump '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char, char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISv_n(2,i) = quant
-              ENDDO
-            ELSE
-              FISv_n(2,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISVF2') THEN
+         char =' Fission barrier second hump height '
+         char1='second hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISv_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISv_n(2,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISVF3') THEN
-            char =' Fission barrier third hump height  '
-            char1=' third hump  '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char, char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISv_n(3,i) = quant
-              ENDDO
-            ELSE
-              FISv_n(3,nnuc)=quant
-            ENDIF 
-            GOTO 100
-         ENDIF      
-C-----       
-         IF (name.EQ.'FISHO1') THEN
-            char =' Fission barrier first hump width   '
-            char1=' first hump  '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISh_n(1,i) = quant
-              ENDDO
-            ELSE
-              FISh_n(1,nnuc)=quant
-            ENDIF 
-            GOTO 100
-         ENDIF      
-C-----       
-         IF (name.EQ.'FISHO2') THEN
-            char =' Fission barrier second hump width  '
-            char1=' second hump '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISh_n(2,i) = quant
-              ENDDO
-            ELSE
-              FISh_n(2,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISVF3') THEN
+         char =' Fission barrier third hump height  '
+         char1=' third hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISv_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISv_n(3,nnuc)=quant
+         goto 100
+       ENDIF      
 C-----       
-         IF (name.EQ.'FISHO3') THEN
-            char =' Fission barrier third hump width   '
-            char1=' third hump  '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISh_n(3,i) = quant
-              ENDDO
-            ELSE
-              FISh_n(3,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISHO1') THEN
+         char =' Fission barrier first hump width   '
+         char1=' first hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISh_n(1,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISAT1') THEN
-            char =' L.d. a-parameter for first saddle  '
-            char1='first-saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISa_n(1,i) = quant
-              ENDDO
-            ELSE
-              FISa_n(1,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISHO2') THEN
+         char =' Fission barrier second hump width  '
+         char1='second hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISh_n(2,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISHO3') THEN
+         char =' Fission barrier third hump width   '
+         char1=' third hump  '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISh_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISh_n(3,nnuc)=quant
+         goto 100
+       ENDIF
+C-----       
+      IF (name.EQ.'FISAT1') THEN
+         char =' L.d.a-parameter for first saddle   '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
+         ENDIF
+         FISa_n(1,nnuc)=quant
+         goto 100
+       ENDIF
 C----             
-         IF (name.EQ.'FISAT2') THEN
-            char =' L.d. a-parameter for second saddle '
-            char1='second saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISa_n(2,i) = quant
-              ENDDO
-            ELSE
-              FISa_n(2,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISAT2') THEN
+         char =' L.d. a-parameter for second saddle '
+         char1='second saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISa_n(2,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISAT3') THEN
-            char =' L.d. a-parameter for third saddle  '
-            char1='third saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISa_n(3,i) = quant
-              ENDDO
-            ELSE
-              FISa_n(3,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISAT3') THEN
+         char =' L.d. a-parameter for third saddle  '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISa_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISa_n(3,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISDL1') THEN
-            char =' L.d. DEL-parameter for first saddle'
-            char1='first-saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISd_n(1,i) = quant
-              ENDDO
-            ELSE
-              FISd_n(1,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISDL1') THEN
+         char =' L.d.DEL-parameter for first saddle '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISd_n(1,nnuc)=quant
+         goto 100
+       ENDIF
 C----             
-         IF (name.EQ.'FISDL2') THEN
-            char =' L.d. DEL-parameter for second saddle'
-            char1='second saddle'
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISd_n(2,i) = quant
-              ENDDO
-            ELSE
-              FISd_n(2,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISDL2') THEN
+         char =' L.d.DEL-parameter for second saddle '
+         char1='second saddle'
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISd_n(2,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISDL3') THEN
-            char =' L.d. DEL-parameter for third saddle'
-            char1='third saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISd_n(3,i) = quant
-              ENDDO
-            ELSE
-              FISd_n(3,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISDL3') THEN
+         char =' L.d.DEL-parameter for third saddle '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISd_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISd_n(3,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISVE1') THEN
-            char =' Vib. enhancement for first saddle  '
-            char1='first-saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISn_n(1,i) = quant
-              ENDDO
-            ELSE
-              FISn_n(1,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISVE1') THEN
+         char =' Vib. enhancement for first saddle  '
+         char1='first-saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(1,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISn_n(1,nnuc)=quant
+         goto 100
+       ENDIF
 C----             
-         IF (name.EQ.'FISVE2') THEN
-            char =' Vib. enhancement for second saddle '
-            char1='second saddle'
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISn_n(2,i) = quant
-              ENDDO
-            ELSE
-              FISn_n(2,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISVE2') THEN
+         char =' Vib. enhancement for second saddle '
+         char1='second saddle'
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(2,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISn_n(2,nnuc)=quant
+         goto 100
+       ENDIF
 C-----       
-         IF (name.EQ.'FISVE3') THEN
-            char =' Vib. enhancement  for third saddle '
-            char1='third saddle '
-            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,char1)
-            IF (izar.EQ.0) THEN
-              DO i = 1, NDNUC
-                FISn_n(3,i) = quant
-              ENDDO
-            ELSE
-              FISn_n(3,nnuc)=quant
-            ENDIF 
-            GOTO 100
+      IF (name.EQ.'FISVE3') THEN
+         char =' Vib. enhancement  for third saddle '
+         char1='third saddle '
+         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+     &               char, char1)
+         IF (izar.EQ.0) THEN
+            DO i = 1, NDNUC
+               FISn_n(3,i) = val
+            ENDDO
+            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+     &          char,val
+            goto 100
          ENDIF
+         FISn_n(3,nnuc)=quant
+         goto 100
+       ENDIF
 C-----
          IF (name.EQ.'RANDOM') THEN
             if(nint(val).eq.0) goto 100             
@@ -7516,24 +7595,7 @@ C
       CHARACTER*13 char1
 
       izar = i1*1000 + i2
-      if(izar.EQ.0) then
-         IF(i3.ne.0 .and. IOPran.ne.0) THEN
-           WRITE (8,'(a35,'' global uncertainty'',
-     &         '' is equal to '',i2,''%'')') char,i3
-           sigma = val*i3*0.01
-           IF(IOPran.gt.0) then
-             quant = val + grand()*sigma
-           ELSE
-             quant = val + 1.732d0*(2*drand()-1.)*sigma
-           ENDIF
-           WRITE (8,'(a35,''factor sampled value : '',f8.3)')char, quant
-	   ELSE
-           quant = val
-         ENDIF
-         WRITE (8 ,'(a35,''in all nuclei set to '',F6.3)')char, quant
-         WRITE (12,'(a35,''in all nuclei set to '',F6.3)')char, quant
-         return
-	endif
+      IF (izar.EQ.0) RETURN
 
       CALL WHERE(izar,nnuc,iloc)
       IF (iloc.EQ.1) THEN
@@ -7556,11 +7618,10 @@ C
          WRITE (8,'(a35,''factor sampled value : '',f8.3)')char, quant
       ELSE
          quant = val
+         WRITE (8, '(a35,'' in '',I3,A2,
+     &        '' multiplied by '',F6.2)'  )char, i2, SYMb(nnuc),val
       ENDIF
-      WRITE (8 ,'(a35,''in '',I3,A2,'' set to '',F6.3)')
-     &          char, i2, SYMb(nnuc), quant
-      WRITE (12,'(a35,''in '',I3,A2,'' set to '',F6.3)')
-     &          char, i2, SYMb(nnuc), quant
+
       RETURN
       END
 C

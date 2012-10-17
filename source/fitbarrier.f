@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-06 19:00:15 +0200 (Mi, 06 Jun 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -33,7 +33,6 @@ C
      &                 tfdd(NFPARAB), tdr
 
       INTEGER j,k,kh,kw,iphas_opt
-
  
       REAL*8  abserr, epsa, epsb, phase_sub, faza2
       LOGICAL discrete
@@ -133,7 +132,7 @@ C-----subwell excitation energy
          ENDIF
          dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
          IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-            write(*,*) ' WARNING: For extremum ',k,
+            write(8,*) ' WARNING: For extremum ',k,
      &           ' phase integral is not accurate (',
      &           sngl(abserr/dmom*100.d0),' %)'
          ENDIF
@@ -158,7 +157,7 @@ C-----subwell excitation energy
          ENDIF
          dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
          IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-            write(*,*) ' WARNING: For extremum ',k,
+            write(8,*) ' WARNING: For extremum ',k,
      &           ' phase integral is not accurate (',
      &           sngl(abserr/dmom*100.d0),' %)'
          ENDIF
@@ -180,7 +179,7 @@ C-----subwell excitation energy
          ENDIF
          dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
          IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-            write(*,*) ' WARNING: For extremum ',k,
+            write(8,*) ' WARNING: For extremum ',k,
      &           ' phase integral is not accurate (',
      &           sngl(abserr/dmom*100.d0),' %)'
          ENDIF
@@ -212,7 +211,7 @@ C-----subwell excitation energy
          ENDIF
          dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
          IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.03) THEN
-            write(*,*) ' WARNING: For extremum ',k,
+            write(8,*) ' WARNING: For extremum ',k,
      &           ' phase integral is not accurate (',
      &           sngl(abserr/dmom*100.d0),' %)'
          ENDIF
@@ -571,11 +570,11 @@ C     Fitting parabola
         CALL ParabFit(iiextr(j), nrsm, rmiu, eps_1d, vdef_1d,
      &        centr,  heigth,  width, ucentr, uheigth, uwidth)
         IF(width.LT.0.05d0) CYCLE      ! Skipping very narrow peaks
-c       write(*,*) ' Def: ',sngl(EPS_1d(iiextr(j))),
-c     &         ' (',sngl(centr),' +/- ',sngl(ucentr),')'
-c       write(*,*) ' Heigth :',sngl(Vdef_1d(iiextr(j))),
-c     &         ' (',sngl(heigth),' +/- ',sngl(uheigth),')'
-c       write(*,*) ' Width :', sngl(width), ' +/- ', sngl(uwidth)
+C       write(*,*) ' Def: ',sngl(EPS_1d(iiextr(j))),
+C     &         ' (',sngl(centr),' +/- ',sngl(ucentr),')'
+C       write(*,*) ' Heigth :',sngl(Vdef_1d(iiextr(j))),
+C     &         ' (',sngl(heigth),' +/- ',sngl(uheigth),')'
+C       write(*,*) ' Width :', sngl(width), ' +/- ', sngl(uwidth)
 C--------------------------------------------------
 C       Initializes parabola's parameters
 C
@@ -656,7 +655,7 @@ C---- Momentum integrals are calculated
      &                    .false.)
                    dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
                    IF(dmom.gt.0.d0 .and. abserr.gt.dmom*0.053) THEN
-                        write(*,*) ' WARNING: For extremum ',k,
+                        write(8,*) ' WARNING: For extremum ',k,
      &                       ' phase integral is not accurate (',
      &                        sngl(abserr/dmom*100.d0),' %)',uexcit1,
      &                  vheigth(k),vwidth(k),discrete
@@ -673,7 +672,7 @@ C---- Momentum integrals are calculated
      &                   .true.)
                   dmom = GaussLegendre41(Fmoment1,epsa,epsb,abserr)
                   IF(dmom.gt.0.d0 .and. abserr.gT.dmom*0.053) THEN
-                     write(*,*) ' WARNING: For extremum ',k,
+                     write(8,*) ' WARNING: For extremum ',k,
      &                       ' phase integral is not accurate (',
      &                  sngl(abserr/dmom*100.d0),' %)',uexcit1,
      &                  vheigth(k),vwidth(k),discrete
@@ -803,7 +802,7 @@ C     enddo
 C     write(*,*) a(1),a(2),a(3)
 C     write(*,*) sigmaa(1),sigmaa(2),sigmaa(3)
 C
-c      write(*,*) ' PARABOLIC FITTING CHISQR = ',sngl(CHISQR)
+C     write(*,*) ' PARABOLIC FITTING CHISQR = ',sngl(CHISQR)
 
        HEIGTH = aa(1)
       uHEIGTH = siga(1)
@@ -1068,15 +1067,9 @@ C     Local variables
       REAL*8 slope
 
       is0 = -1
-
-
-
       if(ja.le.0) ja=1
-
       if(jb.gt.NFISBARPNT) jb=NFISBARPNT
-
       if(jb.le.0) jb=1
-
       
       IF(ABS(uexc-Vdef_1d(ja)).EQ.uexc-Vdef_1d(ja)) is0 = 1
       DO j=ja,jb

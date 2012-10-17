@@ -5,10 +5,10 @@
     integer*4, intent(in) :: npt             ! number of theta points
     real*8, intent(in)    :: awr             ! mass of target/neutron mass
     real*8, intent(in)    :: scl             ! scale factor for shape elastic diff crs (ELAred)
-    real*8, intent(in)    :: cmp             ! compound elastic cross section (ELCncs)
-    real*8, intent(in)    :: crs(*)          ! shape elastic cross sections (npt) (elada in main.f)
+    real*8, intent(in)    :: cmp(*)          ! compound elastic cross section (npt) (cel_da in main.f)
+    real*8, intent(in)    :: crs(*)          ! shape elastic cross sections (npt)   (elada  in main.f)
 
-    real*8, parameter :: pi = 3.1415926535897932384626433
+    real*8, parameter :: pi = 3.1415926535897932384626433d0
 
     ! it is assumed that these shape elastic diff crs sections are from
     ! empire where they are in the CM frame uniformly spaced from 0 -180 deg.
@@ -36,7 +36,7 @@
          qbt = sqrt(sbt)
          jak = (sbt*qbt)/(bet*bet*(bet+acm))
          labcos(i) = (1.D0 + bet*acm)/qbt
-         labcrs(i) = jak*(scl*crs(i) + cmp)
+         labcrs(i) = jak*(scl*crs(i) + cmp(i))
     end do
 
     ! now get mu-bar, the ave cos of reaction in lab

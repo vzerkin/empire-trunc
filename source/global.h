@@ -1,6 +1,6 @@
-C $Rev: 3060 $
+C $Rev: 3137 $
 C $Author: rcapote $
-C $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+C $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -48,14 +48,15 @@ C
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
      &                 FNwsomp(0:ndejc,0:ndnuc), TISomer,
-     &                 FNasomp(0:ndejc,0:ndnuc),
-     &                 FNrvomp(0:ndejc,0:ndnuc),
-     &                 FNrwvomp(0:ndejc,0:ndnuc),
+     &                 FNasomp(0:ndejc,0:ndnuc), 
+     &                 FNrvomp(0:ndejc,0:ndnuc),  CANGle(ndangecis), 
+     &                 FNrwvomp(0:ndejc,0:ndnuc),  
      &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),
      &                 FISv_n(NFHUMP,ndnuc), FISh_n(NFHUMP,ndnuc),
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
-     &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw 
+     &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,
+     &                 PL_CN(0:ndangecis,ndcollev)
 
       INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -75,11 +76,12 @@ C
      &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab), NRWel,
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
-     &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc)
+     &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
+     &        PL_lmax(ndcollev)
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
-     &        DYNam, COLfile   
+     &        DYNam, COLfile, CN_isotropic
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -213,7 +215,7 @@ C     COMMON /DEPTH / POTe
      &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta, 
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
-     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,
+     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,PL_CN,
      &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
       COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
@@ -221,7 +223,7 @@ C     COMMON /DEPTH / POTe
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
-     &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver
+     &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -257,11 +259,12 @@ C
      &                  NENdf, NENdfa, NEMn, NEMp, NEMa, NEXclusive,
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
-     &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs 
+     &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
+     &                  PL_lmax
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
-     &                  NUBarread, BENchm, CALctl, COLfile
+     &                  NUBarread, BENchm, CALctl, COLfile, CN_isotropic
       COMMON /GSA   / KEY_shape, KEY_gdrgfl
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt

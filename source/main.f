@@ -1,6 +1,6 @@
-cc   * $Rev: 3128 $
+cc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-09-28 19:33:00 +0200 (Fr, 28 Sep 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -22,17 +22,20 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)            ! NUMBAR
-      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
+      INTEGER npoints, iiextr(0:2*NFPARAB), nextr                        ! NUMBAR
 
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
 
       DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont       ! ECISXS
 
-      INTEGER*4 INDexf, INDexb, BUFfer(250)                               ! R250COM
+      INTEGER*4 INDexf, INDexb, BUFfer(250)                              ! R250COM
 
       DOUBLE PRECISION XCOs(NDAngecis)                                   ! KALB
 
       DOUBLE PRECISION ELTl(NDLW)
+      DOUBLE PRECISION pnl(0:NDAngecis,NDCOLLEV),leg_coeff(0:NDAngecis)
+
+      DOUBLE PRECISION xs_cn, xs_norm 
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
@@ -49,7 +52,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aafis, ares, atotsp, coef, ! controln, controlp,
+      DOUBLE PRECISION ares, atotsp, coef, ! controln, controlp,
      &                 corrmsd, csemax, csemist, csmsdl, csum, 
      &                 dang, ded, delang, echannel, xscclow, csinel,
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
@@ -62,6 +65,7 @@ C
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 totcorr,cseaprnt(ndecse,ndangecis),
+     &                 cel_da(NDAngecis),
 C                      -----------------------------------------------
 C                      PFNS quantities  
 C                      Total prompt fission spectra only for neutrons
@@ -100,12 +104,10 @@ C             Total prompt fission spectra only for neutrons
      &        nepfns
 C             -----------------------------------------------
       INTEGER max_prn
-      LOGICAL nvwful, fexist, skip_fiss, nonzero
+      LOGICAL nvwful, fexist, nonzero
       CHARACTER*21 reactionx, preaction(ndnuc)
 C
-
       PARAMETER (max_prn = 30) ! maximum number of reactions to print by cs2zvd
-
 C
       real*8, external :: mu_bar
 
@@ -165,7 +167,8 @@ C-----
      >    CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 
 C-----Clear CN elastic cross section (1/4*pi)
-      ELCncs = 0.0D+0           
+      ELCncs = 0.0D+0 
+      cel_da = 0.0D+0           
 C-----
 C-----Open file 41 with tabulated cross sections
 C-----
@@ -187,7 +190,7 @@ C-----
         ENDDO
         nuc_print = i
 
-        IF (A(0).gt.220) then 
+        IF (A(0).gt.220 .AND. ZEJc(NPRoject).EQ.0) then 
 C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
@@ -210,7 +213,7 @@ C        to include/exclude low-lying coupled states
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic*  ','   CN-el    ',
      &      ' Nonelast*  ','  CN-form   ','  Direct    ',
-     &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+     &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
@@ -229,7 +232,7 @@ C        to include/exclude low-lying coupled states
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','   CN-el    ',
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
-     &      'Coup-Chan   ','Pre-equil   ',' DWBA-disc  ',
+     &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
         ENDIF
@@ -239,9 +242,9 @@ C        to include/exclude low-lying coupled states
      &     10, SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
         WRITE(98,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Fiss-tot  ','  Fiss-1st  ','  Fiss-2nd  ',
-     &      '  Fiss-2nd  ','  Fiss-3rd  ','  Fiss-4rd  ',
-     &      '  Fiss-5th  ','  Fiss-6th  ','  Fiss-7th  ',
-     &      '  Fiss-8th  ','  Fiss-9th  '
+     &      '  Fiss-3rd  ','  Fiss-4rd  ','  Fiss-5th  ',
+     &      '  Fiss-6th  ','  Fiss-7th  ','  Fiss-8th  ',
+     &      '  Fiss-9th  ','  Fiss-10th '
         IF (FISspe.GT.0) THEN
           OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
@@ -724,14 +727,21 @@ C------------End of adding inelastic to continuum
         ENDDO
       ENDIF
 
-99015 FORMAT (' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
-     &        46x,40('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',///)
+99015 FORMAT (/' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
+     &        46x,40('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',/)
+99016 FORMAT (/' ',46x,'COMP. ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
+     &        46x,40('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',/)
 99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
 99025 FORMAT (' ',5x,4(1p,e12.5,2x,e12.5,6x))
-99029 FORMAT (' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',//,
-     &              ' ',46x,'  (only discrete levels are listed)',/,' '
-     &                 ,46x,36('*'),/,' ',56x,'CENTER-OF-MASS SYSTEM',
-     &      ///)
+99028 FORMAT ( ' ',46x,'DIRECT INEL. DIFFERENTIAL CROSS-SECTION',/,
+     &              ' ',46x,' (only discrete levels are listed)',/,' '
+     &                 ,46x,36('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',
+     &      /)
+99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
+     &              ' ',46x,'    (including compound + direct)',/,' '
+     &              ' ',46x,' (only discrete levels are listed)',/,' '
+     &                 ,46x,36('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',
+     &      /)
 99030 FORMAT ('  Angle ',10(6x,i2,'-level'))
 99031 FORMAT ('        ',9(5x,'E=',f7.4))
 99032 FORMAT ('        ',10(5x,'E=',f7.4))
@@ -748,7 +758,7 @@ C
          gang = 180.d0/(NDANG - 1)
          its = ncoll
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-           WRITE(8,99029)
+           WRITE(8,99028)
            WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))
            WRITE(8,99031) (ELV(ICOller(ilv),nnurec),ilv = 2,MIN(its,10))
            WRITE(8,99033) (XJLv(ICOller(ilv),nnurec)*
@@ -819,6 +829,7 @@ C
            WRITE (8,*) ' '
          ENDIF
       ENDIF
+
       ENDIF
 C
 C-----calculate transmission coefficients in outgoing channels
@@ -867,7 +878,7 @@ C-----------print transmission coefficients
       ENDDO     !over nuclei (nnuc)
 C
 C-----determination of transmission coeff.--done
-99011 FORMAT (1X,14(G10.4,1x))
+99011 FORMAT (1X,14(1P,E10.4,1x))
 C
 C     Skipping all emission calculations
 C     GOTO 99999
@@ -1458,19 +1469,104 @@ C--------------Write elastic to tape 12 and to tape 68
      &                                                         NANgela)
                   ENDIF
 99045             FORMAT (10X,8G15.5)
-                  WRITE (12,99050) ((ELAred*elada(iang) + ELCncs),
+
+                  IF(.not.CN_isotropic) then
+	              leg_coeff = 0.d0
+                    DO j = 0, PL_lmax(1)
+                      leg_coeff(j)=PL_CN(j,1)	    
+                    ENDDO
+
+                    xs_norm = leg_coeff(0)
+                    IF(xs_norm.gt.0.d0) then
+                      DO na = 1, NDANG
+                        xs_cn = 
+     &                    GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(1))
+C
+C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
+C    >                  'ANG=',ANGles(na),
+C    >                  ' CN ang. dist.=',xscn,'  isotr=',ELCncs
+	                
+                        cel_da(na) = xs_cn*(ELCncs/xs_norm)
+
+C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
+C    >                 'ANG=',ANGles(na),' ECIS CN ang. dist.=',xs_cn,
+C    >                     '  HF CN ang. distr.=',cel_da(na)
+                      ENDDO
+                    ENDIF
+
+                    WRITE (12,99050) ((ELAred*elada(iang)+cel_da(iang)),
      &                               iang = 1,NANgela)
-99050             FORMAT (9X,8E15.5)
-                  WRITE (12,*) ' '
-                  WRITE (12,*) ' '
-                  WRITE (12,*) ' Legendre coefficients expansion '
-                  WRITE (12,*) ' '
-                  WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-                  WRITE (12,*) ' '
-                  WRITE (12,'(9X,8D15.8)')
-     &              (ELAred*elleg(1) + ELCncs),
-     &              (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
-                  WRITE (12,*) ' '
+99050               FORMAT (9X,8E15.5)
+
+                    WRITE (12,*)' '
+                    WRITE (12,*)' '
+                    WRITE (12,*)' DIR Legendre coefficients expansion'
+                    WRITE (12,*)' '
+                    WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                    WRITE (12,*)' '
+                    WRITE (12,'(9X,8D15.8)')
+     &                 ELAred*elleg(1),
+     &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+                    WRITE (12,*)' '
+
+                    IF(PL_CN(0,1).gt.0.d0) then
+                      WRITE (12,*)
+     &                          ' CE Legendre coefficients expansion'
+                      WRITE (12,*)' '
+                      WRITE (12,'(1x,A7,I5)') 
+     &                          ' Lmax =',min(NDAng,PL_lmax(1))
+                      WRITE (12,*) ' '
+                      WRITE (12,'(9X,8D15.8)') ELCncs, 
+     &                  (PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
+     &                   iang = 2,min(NDAng,PL_lmax(1)))
+
+                      WRITE (12,*)' '
+                      WRITE (12,*)' Legendre coefficients expansion'
+                      WRITE (12,*)' '
+                      WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                      WRITE (12,*)' '
+                      WRITE (12,'(9X,8D15.8)')
+     &                 ELAred*elleg(1)+ELCncs, (ELAred*elleg(iang)+
+     &                 PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
+     &                 iang = 2,min(NDAng,neles))
+                      WRITE (12,*)' '
+
+                    ELSE
+
+                      WRITE (12,*)' '
+                      WRITE (12,*)' Legendre coefficients expansion'
+                      WRITE (12,*)' '
+                      WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                      WRITE (12,*)' '
+                      WRITE (12,'(9X,8D15.8)')
+     &                 ELAred*elleg(1)+ELCncs, 
+     &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+                      WRITE (12,*)' '
+
+                    ENDIF
+				   
+                  ELSE
+
+                    DO na = 1, NDANG
+                      cel_da(na) = ELCncs ! isotropic
+                    ENDDO
+
+                    WRITE (12,99050) ((ELAred*elada(iang)+cel_da(iang)),
+     &                               iang = 1,NANgela)
+
+                    WRITE (12,*) ' '
+                    WRITE (12,*) ' '
+                    WRITE (12,*) ' Legendre coefficients expansion '
+                    WRITE (12,*) ' '
+                    WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                    WRITE (12,*) ' '
+                    WRITE (12,'(9X,8D15.8)')
+     &                (ELAred*elleg(1) + ELCncs),
+     &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+                    WRITE (12,*) ' '
+
+                  ENDIF
+
                   IF (FITomp.LT.0) THEN
                     WRITE(40,'(F12.4,3D12.5)') 
      &                EINl,TOTcs*TOTred*totcorr,ABScs*FUSred
@@ -1485,7 +1581,7 @@ C---------------------locate position of the projectile among ejectiles
                       IF (ICAlangs.gt.0) THEN
                         DO iang = 1, NDANG
                           WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                           ELAred*elada(iang) + ELCncs,
+     &                           ELAred*elada(iang) + cel_da(iang),
      &                          (CSAlev(iang,ICOller(ilv),nejcec),
      &                           ilv = 2,MIN(its,10))
                         ENDDO
@@ -1496,7 +1592,7 @@ C---------------------locate position of the projectile among ejectiles
                       IF (ICAlangs.gt.0) THEN
                         DO iang = 1, NDANG
                           WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
-     &                           ELAred*elada(iang) + ELCncs
+     &                           ELAred*elada(iang) + cel_da(iang)
                         ENDDO
                       ENDIF
                     ENDIF
@@ -1568,7 +1664,6 @@ C                 before calling HRTW
             ENDIF
          ENDIF
 C
-         skip_fiss = .FALSE.
          cspg = 0.d0 
 
 C--------DO loop over c.n. excitation energy
@@ -1662,18 +1757,11 @@ C--------------------Look for the discrete level with the closest spin
                   ENDIF
 C-----------------
 C-----------------Fission ()
-                  IF(.NOT.skip_fiss) then
-                    IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
+                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
-                    IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
+                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
      &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-                  ELSE
-                    sumfis  = 0.d0
-                    aafis   = 0.d0
-                    DO m = 1, INT(FISmod(nnuc)) + 1
-                      sumfism(m) = 0.d0
-                    ENDDO
-                  ENDIF
+C-----------------
 C-----------------Normalization and accumulation
 C-----------------
                   xnor = POP(ke,jcn,ipar,nnuc)*step/DENhf
@@ -1685,10 +1773,13 @@ C
      &                       sumfism,ke,ipar,jcn,fisxse)
 C
 C-----------------Calculate total emission
+C
                   DO nejc = 0, NEJcm
                      csemist = csemist + CSEmis(nejc,nnuc)
                   ENDDO
                   csemist = csemist + CSFis
+C-----------------
+
  1470          ENDDO                !loop over decaying nucleus spin
             ENDDO                   !loop over decaying nucleus parity
 C
@@ -2156,10 +2247,138 @@ C----------CN contribution to elastic ddx
              WRITE (8,*) 'WARNING: CN elastic is 0'
            ELSE
              WRITE (8,*) ' CN elastic cross section   ',
-     &                     POPlv(LEVtarg,mt2)*CELred,' mb'
-             WRITE (8,*)
-     &          ' CN elastic angular distrib.', ELCncs, ' mb/str'
+     &                     sngl(POPlv(LEVtarg,mt2)*CELred),' mb'
+             IF(CN_isotropic) then   
+               WRITE (8,*)
+     &          ' Isotropic Compound Elastic=', ELCncs, ' mb/str'
+	       ELSE
+               WRITE (8,*) ' CN elastic cross section (ECIS) ',
+     &           4.d0*pi*sngl(PL_CN(0,1)),' mb' 
+               WRITE (8,*) 
+               WRITE (8,*) ' Nonisotropic Compound to discrete levels'
+               WRITE (8,*) '     including the Compound Elastic'
+               WRITE (8,*) 
+
+               leg_coeff = 0.d0
+               DO j = 0, PL_lmax(1)
+                 leg_coeff(j)=PL_CN(j,1)	    
+               ENDDO
+
+               xs_norm = leg_coeff(0)
+               IF(xs_norm.gt.0.d0) then
+                 DO na = 1, NDANG
+                   xs_cn = GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(1))
+                   cel_da(na) = xs_cn*(ELCncs/xs_norm)
+                 ENDDO
+               ENDIF
+
+               gang = 180.0/(NDAng - 1)
+               angstep = 180.0/(NANgela - 1)
+               WRITE (8,99016)
+               WRITE (8,99020)
+               DO iang = 1, NANgela/4 + 1
+                 imint = 4*(iang - 1) + 1
+                 imaxt = MIN0(4*iang,NANgela)
+                 WRITE (8,99025) 
+     &           ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
+               ENDDO
+
+               IF (ncoll.GT.0) THEN
+C----------------Locate position of the projectile among ejectiles
+                 CALL WHEREJC(IZAejc(0),nejcec,iloc)
+C
+                 WRITE (8,*) ' '
+                 its = ncoll
+                 IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
+                   WRITE(8,99029)
+                   WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))
+                   WRITE(8,99031) (ELV(ICOller(ilv),nnurec),
+     &               ilv = 2,MIN(its,10))
+                   WRITE(8,99033) (XJLv(ICOller(ilv),nnurec)*
+     &               LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
+     &               ilv = 2,MIN(its,10))  
+                   WRITE(8,*) ' '
+                   DO iang = 1, NDANG
+                     WRITE (8,99035) (iang - 1)*gang,
+     &               (CSAlev(iang,ICOller(ilv),nejcec),
+     &               ilv = 2,MIN(its,10)) 
+                   ENDDO
+                   WRITE(8,*) ' '
+                   WRITE(8,99040)(POPlv(ICOller(ilv),nnurec),
+     &               ilv= 2,MIN(its,10))
+C
+                   IF(its.gt.10) THEN
+                     WRITE(8,*) ' '
+                     WRITE(8,*) ' '
+                     WRITE(8,99030)(ICOller(ilv),ilv = 11,MIN(its,20))
+                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+     &                 ilv=11,MIN(its,20))
+                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
+     &                 ilv=11,MIN(its,20))  
+                     WRITE (8,*) ' '
+                     DO iang = 1, NDANG
+                       WRITE (8,99035) (iang - 1)*gang,
+     &                 (CSAlev(iang,ICOller(ilv),nejcec),
+     &                 ilv = 11,MIN(its,20))
+                     ENDDO
+                     WRITE (8,*) ' '
+                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+     &                 ilv = 11,MIN(its,20))
+                   ENDIF
+C
+                   IF(its.gt.20) THEN
+                     WRITE(8,*) ' '
+                     WRITE(8,*) ' '
+                     WRITE(8,99030)(ICOller(ilv),ilv = 21,MIN(its,30))
+                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+     &                 ilv=21,MIN(its,30))
+                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
+     &                 ilv=21,MIN(its,30))
+                     WRITE (8,*) ' '
+                     DO iang = 1, NDANG
+                       WRITE (8,99035) (iang - 1)*gang,
+     &                 (CSAlev(iang,ICOller(ilv),nejcec),
+     &                 ilv=21,MIN(its,30))
+                     ENDDO
+                     WRITE (8,*) ' '
+                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+     &                 ilv=21,MIN(its,30))
+                   ENDIF
+C
+C----------Because of the ENDF format restrictions the maximum
+C----------number of discrete levels is limited to 40
+C
+                   IF(its.gt.30) THEN
+                     WRITE(8,*) ' '
+                     WRITE(8,*) ' '
+                     WRITE(8,99030)(ICOller(ilv),ilv = 31,MIN(its,40))
+                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+     &                 ilv = 31,MIN(its,40))
+                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+     &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
+     &                 ilv = 31,MIN(its,40))
+                     WRITE (8,*) ' '
+                     DO iang = 1, NDANG
+                       WRITE (8,99035) (iang - 1)*gang,
+     &                 (CSAlev(iang,ICOller(ilv),nejcec),
+     &                 ilv = 31,MIN(its,40))
+                     ENDDO
+                     WRITE (8,*) ' '
+                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+     &                 ilv = 31,MIN(its,40))
+                   ENDIF
+
+                   WRITE (8,*) ' '
+                   WRITE (8,*) ' '
+                   WRITE (8,*) ' '
+                 ENDIF
+               ENDIF
+
+             ENDIF
            ENDIF
+           WRITE (8,*)
            WRITE (8,*)
          ENDIF
          checkXS = checkXS + CSPrd(nnuc)
@@ -2352,7 +2571,7 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       endif
 
       IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
-     &  WRITE(98,'(G10.5,1x,1P,(30E12.5))') EINl,
+     &  WRITE(98,'(1P,E10.4,1x,1P,(30E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,10,max_prn-1))
       CLOSE (80)
       CLOSE (79)
@@ -2923,7 +3142,7 @@ C                       ! Default value 1.32 MeV
         WRITE(12,*) ' ***'
         WRITE(12,*)
         WRITE (12,'(''  Total PFNS  for  Elab='',
-     &  G10.5,'' MeV, Norm='',F10.8)') EINl, ftmp
+     &  E10.4,'' MeV, Norm='',F10.8)') EINl, ftmp
 
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
@@ -3071,12 +3290,12 @@ C
 C     Elastic and Nonelastic modified for actinides
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states
 
-      IF (A(0).gt.220) then 
+      IF (A(0).gt.220 .AND. ZEJc(NPRoject).EQ.0) then 
 C        WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
 C    &      '  Total     ','  Elastic*  ','  Nonelast* ',
 C    &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
 C    &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
-        WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
+        WRITE(41,'(1P,E10.4,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
@@ -3084,10 +3303,10 @@ C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
 C                          Low-lying XS   and       CE         substracted from nonelastic
 C    &                  -   xscclow       -    4.d0*PI*ELCncs,
      &    TOTcsfis, 
-     &    mu_bar(amass(0),NANgela,ELAred,ELCncs,elada),xnub,
+     &    mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 C
-        WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
+        WRITE(107,'(1P,E10.4,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
@@ -3101,27 +3320,50 @@ C    &                   -   xscclow       -   4.d0*PI*ELCncs,
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
       ELSE
-        WRITE(41,'(G10.5,1x,1P,20E12.5)') EINl, TOTcs*TOTred*totcorr,
-     &    ELAcs*ELAred            + 4.d0*PI*ELCncs, ! CE added to elastic
-     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
-C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-C    &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
-     &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,ELCncs,elada), xnub,
+        IF (ZEJc(NPRoject).EQ.0) then 
+          WRITE(41,'(1P,E10.4,1x,1P,20E12.5)')EINl,TOTcs*TOTred*totcorr,
+     &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      ! CE added to elastic
+     &    TOTcs*TOTred*totcorr - ELAcs*ELAred 
+     &                             - 4.d0*PI*ELCncs,      ! CE substracted from nonelastic
+     &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada), xnub,
      &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 C
-        WRITE(107,'(G10.5,1x,1P,20E12.5)') EINl, 
+          WRITE(107,'(1P,E10.4,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-C                            CE  added to elastic
-     &    ELAcs*ELAred  +  4.d0*PI*ELCncs, 
-     &                   4.d0*PI*ELCncs,                  !CN_el
+     &    ELAcs*ELAred  +  4.d0*PI*ELCncs, 				  !CN_el (CE) added to elastic 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
-C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
-C                            CE  substracted from nonelastic
-C    &                  -  4.d0*PI*ELCncs,  
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
+        ELSE
+          WRITE(41,'(1P,E10.4,1x,1P,20E12.5)')EINl,TOTcs*TOTred*totcorr,
+     &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      !CN_el (CE) added to elastic 
+C
+C         Total is 0 for charged particles, no correction
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
+C
+     &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada), xnub,
+     &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
+C
+          WRITE(107,'(1P,E10.4,1x,1P,20E12.5)') EINl, 
+     &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
+     &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      !CN_el (CE) added to elastic 
+C
+C         Total is 0 for charged particles, no correction
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
+C
+     &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
+     &    xsdirect, xspreequ,                             !direct, preequil
+     &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
+     &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
+		ENDIF 
       ENDIF
 
       IF(ABScs.GT.0.) THEN
@@ -3134,7 +3376,6 @@ C    &                  -  4.d0*PI*ELCncs,
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
-
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
 
           WRITE (8,
@@ -3825,8 +4066,8 @@ C
         READ (5,*,ERR=11570,END=1200) EIN, NDAng, ICAlangs
         IF(NDAng.lt.2) THEN
             NDAng=2
-            ANGles(1) = 0.
-            ANGles(2) = 180.
+            ANGles(1) = 0.d0
+            ANGles(2) = 180.d0
         ELSE
             READ (5,*,ERR=11570,END=1200) (ANGles(na),na=1,NDAng)
         ENDIF
@@ -3838,10 +4079,8 @@ C
         ENDIF
       ENDIF
       GOTO 1250
-11570 write(8,*) 
-     &     'ERROR: Wrong input keyword ',trim(nextenergy)
-      write(*,*) 
-     &     'ERROR: Wrong input keyword ',trim(nextenergy)
+11570 write(8,*) 'ERROR: Wrong input keyword ',trim(nextenergy)
+      write(*,*) 'ERROR: Wrong input keyword ',trim(nextenergy)
       STOP
  1200 EIN = -1
  1250 IF (EIN.LT.0.0D0) THEN
@@ -3921,20 +4160,19 @@ C-----
         ENDIF
 C-------Set angles for inelastic calculations
         da = 180.0/(NDANG - 1)
-        DO na = 1, NDANG
-          ANGles(na) = (na - 1)*da
+        DO na = 1, NDAng
+          ANGles(na)  = (na - 1)*da
+          CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+          CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
+          SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
         ENDDO
       ENDIF
-      DO na = 1, NDANG
-        CANgler(na) = COS(ANGles(NDANG - na + 1)*PI/180.)
-        SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
-      ENDDO
 C     IF(.not.BENchm) FIRst_ein = .FALSE.
       FIRst_ein = .FALSE.
 C
       GOTO 1300
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
-99075 FORMAT (1X,F5.2,12G10.3)
+99075 FORMAT (1X,F5.2,12E10.3)
       END
 C
 C

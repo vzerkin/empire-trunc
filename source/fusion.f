@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3060 $
+Ccc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -40,19 +40,18 @@ C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, 
      &                 e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg
+     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, dtmp
+
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
-      DOUBLE PRECISION DMAX1
       LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal, lodd
       DOUBLE PRECISION E1, E2, SIGQD, XM1
-      REAL FLOAT, SNGL
       INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
-     &        nang, itmp2 
-      INTEGER IDNINT, INT, MIN0
+     &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
+
       INTEGER*4 PIPE
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
@@ -124,6 +123,7 @@ C--------Here the old calculated files are read
               ENDDO
             ENDIF
             CLOSE (45)
+
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
                WRITE (8,*)
@@ -131,11 +131,70 @@ C--------Here the old calculated files are read
                WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
                WRITE (8,*)
             ENDIF
+
+            IF (.NOT.CN_isotropic) THEN
+C
+C------------Legendre expansion (INCIDENT.LEG)
+C
+             OPEN (45,FILE = (ctldir//ctmp23//'.LEG'),
+     &           STATUS = 'old', ERR=55)
+             READ (45,*,ERR = 55, END = 55)
+             DO i = 1, ND_nlv ! loop over collective levels
+              READ (45,'(i5,1x,i4)',END = 55,ERR = 55) ilev1, ncoef1
+C             DIR PLs
+              DO j= 1 , ncoef1 ! skipping DIR expansion
+                READ (45,*,END = 55,ERR = 55)  
+              ENDDO
+C             CN PLs
+              READ (45,'(i5,1x,i4)',END = 55,ERR = 55) ilev2, ncoef2
+C-------------checking the correspondence of the excited states
+              IF (ilev1.NE.ilev2) THEN   
+                WRITE (8,*)
+     &          ' ERROR: DIR and CN level order do not coincide in .LEG'
+                STOP
+     &          ' ERROR: DIR and CN level order do not coincide in .LEG'
+              ENDIF
+              DO j= 1 , ncoef2 ! reading CN expansion
+                READ (45,'(2I5,D20.10)',END = 55,ERR = 55) 
+     &                      itmp1, itmp2, dtmp
+                if(dabs(dtmp).gt.1.d-8 .and. itmp2.LE.NDLW) then
+                  PL_lmax(i) = itmp2
+                  PL_CN(itmp2,i) = dtmp  
+                endif
+              ENDDO
+C	        write(*,*) 'CN ilev=',ilev2,
+C    &          ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
+  	        ENDDO
+            
+              CLOSE (45)
+
+              IF (IOUt.GT.1) THEN
+                WRITE (8,*)
+     &' CN angular distributions for incident channel read from file: '
+                WRITE (8,*) ' ', ctldir//ctmp23//'.LEG'
+                WRITE (8,*)
+              ENDIF
+            
+            ENDIF
+
+            WRITE(8,*) 
             WRITE(8,*) ' Maximum CN spin is ', maxlw
             WRITE(8,*) ' Spin dimension  is ', NDLW
             NLW = NDLW
             WRITE(8,*) 
+
             GOTO 300
+
+   55       CLOSE (45,STATUS = 'DELETE')
+            IF (FITomp.EQ.0) THEN
+              WRITE (8,*) 
+     &  'WARNING: PROBLEM READING CN ANG.DISTR. at Elab =', sngl(EINl)
+              WRITE (8,*) 
+     &  'WARNING: FILE WITH LEG. COEFF. (ext .LEG) HAS BEEN DELETED'
+            ENDIF
+            
+            GOTO 52
+
          ENDIF
 C
 C-------If (energy read from file do not coincide
@@ -143,15 +202,16 @@ C-------this nucleus should be recalculated (goto 300)
 C
    50    CLOSE (45,STATUS = 'DELETE')
          IF (FITomp.EQ.0) THEN
-         WRITE (8,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
+           WRITE (8,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
      &               ' REQUESTED ENERGY=', SNGL(ener)
-         WRITE (8,*) 'WARNING: FILE WITH TRANSM. COEFF.',
+           WRITE (8,*) 'WARNING: FILE WITH TRANSM. COEFF.',
      &               ' FOR INC.CHANNEL HAS BEEN DELETED'
-          ENDIF
+         ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
+
       ENDIF
 C-----Calculation of fusion cross section for photon induced reactions
-      IF (INT(AEJc(Npro)).EQ.0) THEN
+   52 IF (INT(AEJc(Npro)).EQ.0) THEN
          IF (SDRead) THEN
 C-----------Reading of spin distribution from file SDFILE
 C           If you have file "SDFILE" -> it is possible to use
@@ -389,6 +449,7 @@ C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
             WRITE (8,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
+
             einlab = -EINl
             IF (DIRect.EQ.1) THEN
 C--------------Saving KTRlom(0,0)
@@ -396,9 +457,9 @@ C--------------Saving KTRlom(0,0)
                KTRlom(0,0) = KTRompcc
                CCCalc = .TRUE.
             ENDIF
+
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
-
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
               CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab) 
@@ -408,11 +469,15 @@ C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
                 CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                 CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
               ENDIF
+
             ELSE
 
               IF (DEFormed) THEN
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
-                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,0)
+C
+C               Including CN calculation
+C
+                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab)
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                 ELSE
@@ -431,7 +496,9 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
      >                                  Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                 ENDIF
               ENDIF
+
             ENDIF
+
             IF (DIRect.EQ.1) THEN
 C--------------Restoring KTRlom(0,0)
                KTRlom(0,0) = itmp1
@@ -450,8 +517,10 @@ C-----------------LINUX
                   ctmp = 'cp ccm.TLJ INCIDENT.TLJ'
                   iwin = PIPE(ctmp)
 C                 Only Legendre elastic expansion is needed
-                  ctmp = 'cp ccm.LEG INCIDENT.LEG'
-                  iwin = PIPE(ctmp)
+                  IF(CN_isotropic) then
+                    ctmp = 'cp ccm.LEG INCIDENT.LEG'
+                    iwin = PIPE(ctmp)
+                  ENDIF
                ELSE
 C-----------------WINDOWS
                   ctmp = 'copy ccm.CS INCIDENT.CS >NUL'
@@ -459,12 +528,133 @@ C-----------------WINDOWS
                   ctmp = 'copy ccm.TLJ INCIDENT.TLJ >NUL'
                   iwin = PIPE(ctmp)
 C                 Only Legendre elastic expansion is needed
-                  ctmp = 'copy ccm.LEG INCIDENT.LEG >NUL'
-                  iwin = PIPE(ctmp)
+                  IF(CN_isotropic) then
+                    ctmp = 'copy ccm.LEG INCIDENT.LEG >NUL'
+                    iwin = PIPE(ctmp)
+                  ENDIF
                ENDIF
-C--------------Inelastic cross section (incident.ics)
+C
+C              CN_isotropic = .FALSE. 
+C              Joining dwba.LEG and ccm.LEG
+C
+               IF(.not.CN_isotropic) then
+C
+C                PL_CN(..) contains the CN Legendre coefficients,
+C
+C----------------Legendre expansion (INCIDENT.LEG)
+                 OPEN (47,FILE = 'INCIDENT.LEG')
+                 OPEN (45,FILE = 'dwba.LEG',STATUS = 'OLD',ERR = 180)
+                 READ (45,'(A80)',ERR = 180, END = 180) rstring ! first line is taken from DWBA
+                 OPEN (46,FILE = 'ccm.LEG' ,STATUS = 'OLD',ERR = 180)
+                 READ (46,*,ERR = 174, END = 174) 
+                 WRITE (47,'(A80)') rstring
+
+  174            DO i = 1, ND_nlv ! loop over collective levels
+
+C---------------------------------------------------------------------
+C                 Reading dwba.LEG (DWBA + CN calculations)
+C 
+                  READ (45,'(i5,1x,i4)',END = 180,ERR = 180) 
+     &                 ilev1, ncoef1
+                  if(ICOllev(i).GE.LEVcc) WRITE (47,'(i5,1x,i4,3x,A24)') 
+     &               ilev1, ncoef1, 'DWBA DIR. LEG. EXPANSION'
+
+C                 write(*,*) 'DWBA ilev=',ilev1,' #Ls=', ncoef1
+C
+C                 DWBA DIR PLs
+	            DO j= 1 , ncoef1 ! skipping DWBA DIR expansion
+                    READ (45,'(A80)',ERR = 180, END = 180) rstring 
+                    if(ICOllev(i).GE.LEVcc) 
+     &                WRITE (47,'(A80)') rstring
+                  ENDDO
+
+C                 DWBA CN PLs
+                  READ (45,'(i5,1x,i4)',END = 180,ERR = 180) 
+     &                 ilev2, ncoef2
+                  if(ICOllev(i).GE.LEVcc) WRITE (47,'(i5,1x,i4,3x,A24)') 
+     &               ilev2, ncoef2, 'DWBA  CN. LEG. EXPANSION'
+C
+C-----------------checking the correspondence of the excited states
+C
+                  IF (ilev1.NE.ilev2 ) THEN   
+                    WRITE (8,*)
+     &            ' ERROR: DWBA DIR and CN level order do not coincide'
+                     STOP
+     &            ' ERROR: DWBA DIR and CN level order do not coincide'
+                  ENDIF
+
+C	            write(*,*) 'CN DWBA ilev=',ilev2,' #Ls=', ncoef2
+C
+	            DO j= 1 , ncoef2 ! reading DWBA CN expansion
+                    READ (45,'(2I5,D20.10)',END = 180,ERR = 180) 
+     &                      itmp1, itmp2, dtmp
+
+	              if(ICOllev(itmp1).LT.LEVcc) cycle ! skipping CC levels
+                    WRITE (47,'(2I5,1P,D20.10)') itmp1, itmp2, dtmp
+
+                    if(dabs(dtmp).gt.1.d-8 .and. itmp2.LE.NDLW) then
+                      PL_lmax(i) = itmp2
+	                PL_CN(itmp2,i) = dtmp ! DWBA
+                    endif
+
+                  ENDDO
+
+C                 CN information from cc.LEG dismissed
+	            IF(ICOllev(i).GE.LEVcc) CYCLE 
+C---------------------------------------------------------------------
+C                 Reading cc.LEG (DWBA + CN calculations)
+C 
+                  READ  (46,'(i5,1x,i4)',END = 177,ERR = 177) 
+     &                 ilev1, ncoef1
+                  WRITE (47,'(i5,1x,i4,3x,A24)') 
+     &               ilev1, ncoef1, 'C.C. DIR. LEG. EXPANSION'
+
+C                 write(*,*) 'CC ilev=',ilev1,' #Ls=', ncoef1
+C
+C                 CC DIR PLs
+                  DO j= 1 , ncoef1 ! skipping CC DIR expansion
+                    READ (46,'(A80)',ERR = 177, END = 177) rstring ! first line is taken from DWBA
+                    WRITE (47,'(A80)') rstring
+                  ENDDO
+C                 CC CN PLs
+                  READ (46,'(i5,1x,i4)',END = 177,ERR = 177) 
+     &                 ilev2, ncoef2
+                  WRITE (47,'(i5,1x,i4,3x,A24)') 
+     &               ilev2, ncoef2, 'C.C.  CN. LEG. EXPANSION'
+
+                  IF (ilev1.NE.ilev2 ) THEN   
+                    WRITE (8,*)
+     &            ' ERROR: CC DIR and CN level order do not coincide'
+                     STOP
+     &            ' ERROR: CC DIR and CN level order do not coincide'
+                  ENDIF
+
+C                 write(*,*) 'CN CC ilev=',ilev2,' #Ls=', ncoef2
+
+	            DO j= 1 , ncoef2 ! reading CC CN expansion
+                    READ (46,'(2I5,D20.10)',END = 177,ERR = 177) 
+     &                       itmp1, itmp2, dtmp
+                    WRITE (47,'(2I5,1P,D20.10)') itmp1, itmp2, dtmp
+
+                    if(dabs(dtmp).gt.1.d-8 .and. itmp2.LT.NDLW) then
+                      PL_lmax(i) = itmp2
+	                PL_CN(itmp2,i) = dtmp ! CC
+                    endif
+
+                  ENDDO
+
+  177            ENDDO ! end of the loop over collective levels
+
+  180            CLOSE (45) ! ,STATUS = 'DELETE')
+                 CLOSE (46) ! ,STATUS = 'DELETE')
+                 CLOSE (47) 
+
+               ENDIF
+C
+C--------------Inelastic cross section (INCIDENT.ICS)
                OPEN (45,FILE = 'dwba.ICS',STATUS = 'OLD',ERR = 220)
                OPEN (46,FILE = 'ccm.ICS'   ,STATUS = 'OLD',ERR = 220)
+   
                OPEN (47,FILE = 'INCIDENT.ICS',STATUS = 'UNKNOWN')
                READ (45,'(A80)',END = 220,ERR = 220) rstring
                READ (46,'(A80)',END = 210,ERR = 210) ! first line is taken from dwba
@@ -477,7 +667,7 @@ C--------------Inelastic cross section (incident.ics)
   220          CLOSE (45,STATUS = 'DELETE')
                CLOSE (46,STATUS = 'DELETE')
                CLOSE (47)
-C--------------Angular distribution (incident.ang)
+C--------------Angular distribution (INCIDENT.ANG)
                OPEN (45,FILE = 'dwba.ANG',STATUS = 'OLD',ERR = 240)
                READ (45,'(A80)',ERR = 240, END = 240) rstring
                OPEN (46,FILE = 'ccm.ANG' ,STATUS = 'OLD',ERR = 240)
@@ -569,6 +759,7 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (8,*) ' ERROR: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
+         WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', maxlw
          WRITE(8,*) ' Spin dimension  is ', NDLW
          NLW = NDLW
@@ -707,7 +898,6 @@ C
       CLOSE (45)
 
   300 CONTINUE
-
 
 C-----Print elastic and direct cross sections from ECIS
       WRITE (8,*) ' '

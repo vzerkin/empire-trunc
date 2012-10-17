@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3091 $
+Ccc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-07 13:36:29 +0200 (Di, 07 Aug 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -42,11 +42,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &                 popll, pops, popt, xcse
-      REAL FLOAT
+      DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, xscalc,
+     &                 popll, pops, popt, xcse, xs_cn, xs_norm
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
-      INTEGER INT
+      INTEGER ilevcol, ilev
+      DOUBLE PRECISION leg_coeff(0:ndangecis),pnl(0:ndangecis)
+      DOUBLE PRECISION GET_DDXS
 C-----
 C-----Continuum
 C-----
@@ -155,14 +156,82 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
          ENDIF
 
 C--------Add isotropic CN contribution to direct ang. distributions
-1234     IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
+1234     IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. 
+     >       Nejc.NE.0 .AND. pop1.gt.0.d0 ) THEN
+
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
-            pop1 = pop1/4.0/PI
-            DO na = 1, NDANG
-               CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + pop1
-            ENDDO
+            xscalc = pop1/(4.d0*PI)  ! default isotropic
+                       
+	      IF((NEJc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
+C
+C             Check if the level is collective
+              ilevcol = 0 
+              do ilev=1,ND_nlv 
+                if(ICOller(ilev).eq.il)  then
+                  ilevcol   = ilev
+	            exit
+                endif                    
+              enddo
+
+	        if(ilevcol.gt.0) then 
+C               Collective level, calculating CN DA from Legendre expansion  
+C               write(*,*) 'Disc.lev=',il,'  CN xs(isotr )=',pop1
+C               write(*,*) 'Coll.lev=',ilevcol,
+C    &                     ' Coll.flag=',ilev_flag
+C               write(*,*) '--CN xs(4pi*A0)=',4.d0*PI*PL_CN(0,ilevcol)
+
+                DO j = 0, PL_lmax(ilevcol) ! Leg Exp stored for coll levels
+                  leg_coeff(j)=PL_CN(j,ilevcol) 	    
+                ENDDO
+
+                xs_norm = leg_coeff(0)
+                if(xs_norm.gt.0.d0) then
+C                 write(*,*) 'Lev # ',il, 'Col lev=',ilevcol 
+                  DO na = 1, NDANG
+                    xs_cn = 
+     &               GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(ilevcol))
+C
+C                   write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
+C    >              'ANG=',ANGles(na),
+C    >              ' CN ang. dist.=',xscn,'  isotr=',xcse
+
+                    CSAlev(na,il,Nejc) = 
+     >              CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc	                
+
+C                   if(na.le.2)
+C    >                write(*,'(1x,A4,F4.0,1x,3(A11,1p,d10.3,1x))') 
+C    >               'ANG=',ANGles(na),'ECIS dist.=',xs_cn,
+C    >                           'HF   dist.=',xs_cn*(xscalc/xs_norm),
+C    >                           'Isot dist.=',xscalc
+                  ENDDO
+                endif
+
+	        else
+
+C               Not collective level   
+                DO na = 1, NDANG
+                  CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
+                ENDDO
+
+              endif
+
+
+
+
+
+	      ELSE
+
+C             Not the inelastic channel OR isotropic CN DA
+C
+              DO na = 1, NDANG
+                CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
+              ENDDO
+
+            ENDIF
+
          ENDIF
       ENDDO
+	RETURN
       END
 
 

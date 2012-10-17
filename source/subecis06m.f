@@ -1,10 +1,12 @@
-Ccc   * $Rev: 3128 $
+Ccc   * $Rev: 3137 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-09-28 19:33:00 +0200 (Fr, 28 Sep 2012) $
+Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
 C     20. Aug. 2008
+C--------------------------------------------------------------------------------------
+C     October 2012 Printing changed if HF calculation undertaken (LO(81)=.TRUE.)
 C--------------------------------------------------------------------------------------
       SUBROUTINE ECIS(fname)
 
@@ -53,6 +55,7 @@ C
       CZ=137.03599911D0                                                 ECIS-036
 
 C     MR=95                                                             ECIS-037
+
       MR=101                                                            
       MW=96                                                             ECIS-038
       MS=97
@@ -109,6 +112,7 @@ C     MR=95                                                             ECIS-037
       CLOSE (97,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
       CLOSE (101)
+
       RETURN                                                            ECIS-041
       END                                                               ECIS-042
 C 19/11/05                                                      ECIS06  MEMO-000
@@ -13085,11 +13089,9 @@ C     DIMENSION W(*),V(*),Q(ISM,5),VAL(*)                               COPO-019
       ZZ=1.D0/C                                                         COPO-042
       IF (LT) GO TO 6                                                   COPO-043
       IF (L.NE.0.OR.LZ) GO TO 5                                         COPO-044
-      ZT=CCZ*VAL/Q(ISM,1)                                               COPO-045
 
-
+      ZT=CCZ*VAL/Q(ISM,1)                                               RCN
 C     ZT=CCZ*VAL(1)/Q(ISM,1)                                            COPO-045
-
 
     5 ZZ=ZT*ZZ                                                          COPO-046
     6 C=C*H/12.D0                                                       COPO-047
@@ -20093,7 +20095,7 @@ C TRANSFORMATION.                                                       SCHE-408
       LC=LCP-1                                                          SCHE-440
       BJ=0.5D0*DFLOAT(MC(ICP,JI,3))                                     SCHE-441
       IF (LO(56)) WRITE (MW,1002) NC1,NC2,IV,LC,BJ,B1,B2,B3,D1,D2       SCHE-442
-      IF (LO(60)) WRITE (94,10031) NC1,NC2,IV,LC,BJ,B1,B2,B3            SCHE-443
+      IF (LO(60)) WRITE (94,1003) NC1,NC2,IV,LC,BJ,B1,B2,B3             RCN
 C MULTIPLICATION BY THE COULOMB PHASE.                                  SCHE-444
    50 A1=DCOS(C1)                                                       SCHE-445
       A2=DSIN(C1)                                                       SCHE-446
@@ -20126,10 +20128,10 @@ C  HELICITY SCATTERING COEFFICIENTS.                                    SCHE-451
       READ (94,1001) U1,IPP,K1,K2                                       SCHE-473
       WRITE (60,1001) U1,IPP,K1,K2                                      SCHE-474
       DO 58 K=1,K2                                                      SCHE-475
-      READ (94,10031) K1,K2,K3,K4,BJ,B1,B2,B3                           SCHE-476
+      READ (94,1003) K1,K2,K3,K4,BJ,B1,B2,B3                            RCN
    58 WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                           SCHE-477
    59 CONTINUE                                                          SCHE-478
-C     CLOSE (94)                                                        SCHE-479
+C     CLOSE (94)                                                        RCN
    60 IF (.NOT.LO(65)) GO TO 61                                         SCHE-480
       NSA=7*(NLT+2*IPJ+1)+1                                             SCHE-481
       IF (NSA.GT.ID1) CALL MEMO('SCHE',ID1,NSA)                         SCHE-482
@@ -20208,8 +20210,8 @@ C CALCULATION OF THE NEW SCATTERING COEFFICIENTS.                       SCHE-537
      1  J',18X,'S MATRIX',20X,'|S|',7X,'PHASE /WITH COUL.')             SCHE-555
  1001 FORMAT (1X,F9.1,4X,A1,1X,I4,1X,I4)                                SCHE-556
  1002 FORMAT (1X,3I3,I5,F7.1,4X,1P,2D15.7,' I',4X,0P,3F11.8)            SCHE-557
- 1003 FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     SCHE-558
-10031 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     SCHE-558 
+C1003 FORMAT (1X,3(I2,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     SCHE-558
+ 1003 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),5X,F11.8)     RCN
  1004 FORMAT ('<S-MATRIX>',F10.2,1P,D20.8,0P,F10.2,2I5)                 SCHE-559
  1005 FORMAT (1X,3(I3,1X),I3,1X,F5.1,1X,2(1P,D15.7,0P,1X),'I',4X,F11.8) SCHE-560
  1006 FORMAT (' AMPLITUDE =',I3,D15.7,' (',D15.7,')  NEW',2D15.7,3X,'OLDSCHE-561
@@ -20893,28 +20895,22 @@ C COMPUTATION AT EQUIDISTANT ANGLES.                                    RESU-337
       IF (WV(5,1).EQ.0.D0) ND=3                                         RESU-344
       IF (LO(81)) ND=ND+1                                               RESU-345
       WRITE (58,1009) WV(1,1),WV(13,1),WV(2,1),IPI(4,1),ND              RESU-346
-
       WRITE (55,'(1x,F10.3,$)') Wv(13,1)
-
       IF (NCOLS.NE.1) WRITE (59,1010) WV(1,1),WV(13,1),WV(2,1),IPI(4,1),RESU-347
      1NCOLS-1                                                           RESU-348
    30 IF (WV(5,1).NE.0.D0) GO TO 31                                     RESU-349
-
-      IF (Lo(59)) WRITE (55,'(3x,F10.2,$)') Tx(1)
-
+      IF (LO(59)) WRITE (55,'(3x,F10.2,$)') Tx(1)
       WRITE (MW,1011) TX(1)                                             RESU-350
       IF (LO(59)) WRITE (58,1012) TX(1)                                 RESU-351
    31 RX=TX(1)-TX(2)                                                    RESU-352
       IF (LO(59)) WRITE (58,1012) RX                                    RESU-353
- 
-      IF (Lo(59)) THEN
+      IF (LO(59)) THEN
          IF (Wv(5,1).NE.0.D0) THEN
             WRITE (55,'(1x,F10.2)') rx
          ELSE
             WRITE (55,'(1x,F10.2,$)') rx
          ENDIF
       ENDIF
-
       IF (LO(81)) GO TO 32                                              RESU-354
       WRITE (MW,1013) RX                                                RESU-355
       GO TO 42                                                          RESU-356
@@ -20923,11 +20919,7 @@ C COMPOUND NUCLEUS RESULTS.                                             RESU-357
       NDP=2*NCOLL+NSP(1)+1                                              RESU-359
       RX=RX-TX(NCOLL+2)                                                 RESU-360
       WRITE (MW,1015) RX                                                RESU-361
-
       IF (LO(59)) WRITE (55,'(1x,F10.2,$)') RX                          RCN
-
-
-
       IF (LO(85)) WRITE (MW,1016) TX(NDP+1)                             RESU-362
       IF (LO(86)) WRITE (MW,1017) TX(NDP+2)                             RESU-363
       RX=TX(NDP+1)+TX(NDP+2)                                            RESU-364
@@ -21008,8 +21000,14 @@ C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
       IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-439
 
       IF (INIV.EQ.1) WRITE (55,'(1x,F10.2)') RX                         RCN
+      IF (LO(81)) THEN 
+        RRnoCN = RX-TX(NCOLL+INIV+1)                          
+      ELSE
+        RRnoCN = RX
+      ENDIF
+      IF (INIV.NE.1) WRITE (59,1034) RRnoCN,INIV-1
+C     IF (INIV.NE.1) WRITE (59,1034) RX,INIV-1                          RESU-440
 
-      IF (INIV.NE.1) WRITE (59,1034) RX,INIV-1                          RESU-440
    47 IF (LO(81)) WRITE (MW,1035) TX(NCOLL+INIV+1)                      RESU-441
       IF (LO(66)) GO TO 62                                              RESU-442
       IF (JG.LE.0) GO TO 57                                             RESU-443
@@ -21036,18 +21034,26 @@ C PSEUDO DO LOOP ON ANGLES.                                             RESU-447
       GO TO 51                                                          RESU-464
    52 WRITE (MW,1036) THETB,EX(2,1),EX(I3+1,1),EX(I4,1)                 RESU-465
    53 IF (.NOT.LO(64)) GO TO 54                                         RESU-466
-
 C     WRITE (66,1038) (MF(2,NIX+K-2),THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10RESU-467
 C    1),K=2,I3)                                                         RESU-468
-
-C     Printing only cross sections (MF(2,NIX+K-2)=0)                  
-      WRITE (66,10381)(THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10),K=2,2)        RCN
-
+C     Printing only (CN + direct) cross sections (MF(2,NIX+K-2)=0)           
+C     WRITE (66,10381)(THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10),K=2,2)        
+C
 C     IF (LO(81)) WRITE (66,1039) THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,ERESU-469
 C    1X(I4,1),(LG(K),K=6,10)                                            RESU-470
+C
+C     Printing only CN cross sections                   
+C     IF (LO(81)) WRITE (66,10381) THETA,EX(I3+1,1),(LG(K),K=1,5)          
+C     Printing only direct cross sections                   
+C     IF (LO(81)) WRITE (66,10381) THETA,EX(I4,1),(LG(K),K=6,10)           
 
-      IF (LO(81)) WRITE (66,10391)THETA,EX(I3+1,1),(LG(K),K=1,5),THETA,E  RCN
-     1X(I4,1),(LG(K),K=6,10)                                              RCN
+      IF (LO(81)) THEN
+C       Printing only direct cross sections (if CN is calculated)                  
+        WRITE (66,10381) THETA,EX(I4,1),(LG(K),K=6,10)           
+      ELSE
+C       Otherwise print total = direct cross sections (if no CN)
+        WRITE (66,10381)(THETA,EX(K,1),(CQ(L,NIX+K-2),L=6,10),K=2,2)        
+      ENDIF
 
    54 IF (I7.LE.0) GO TO 56                                             RESU-471
       DO 55 K=1,I7                                                      RESU-472
@@ -21138,17 +21144,10 @@ C FOR EQUIDISTANT ANGLES.                                               RESU-539
       WRITE (MW,1042) (CQ(L,NIX),L=6,10),LG                             RESU-557
       GO TO 70                                                          RESU-558
    69 WRITE (MW,1042) (CQ(L,NIX),L=6,10),LG,((CQ(L,K),L=6,10),K=NJX,NGX)RESU-559
+
 C  70 IF (LO(64)) WRITE (66,1043) INIV,SP2,SIGM(IPI(1,INIV)+1),I8,JG    RESU-560
-
-
 C     Printing only cross sections (01 instead of I8)
-
-
    70 IF (LO(64)) WRITE (66,1043) INIV,SP2,SIGM(IPI(1,INIV)+1),01,JG    RCN 
-
-
-
-
 
       IF (NGX.EQ.NFX) GO TO 71                                          RESU-561
       NJX=NGX+1                                                         RESU-562
@@ -21196,9 +21195,9 @@ C     Printing only cross sections (01 instead of I8)
  1009 FORMAT ('<CROSS-S.>',F10.2,1P,D20.8,0P,F10.2,2I5)                 RESU-604
  1010 FORMAT ('<INE.C.S.>',F10.2,1P,D20.8,0P,F10.2,2I5)                 RESU-605
  1011 FORMAT (6X,'==> TOTAL CROSS SECTION =',F14.6,' MILLIBARNS.')      RESU-606
-C1012 FORMAT (1P,D12.5)                                                 RESU-607
 
- 1012 FORMAT (1P,D15.8)                                                 RESU-607
+C1012 FORMAT (1P,D12.5)                                                 RESU-607
+ 1012 FORMAT (1P,D15.8)                                                  RCN
 
  1013 FORMAT (' TOTAL REACTION CROSS SECTION =',F14.6,' MILLIBARNS.')   RESU-608
  1014 FORMAT (' TOTAL REACTION CROSS SECTION =',F14.6,' MILLIBARNS',11X,RESU-609
@@ -21245,9 +21244,6 @@ C1012 FORMAT (1P,D12.5)                                                 RESU-607
 10381 FORMAT (3X,1P,2D12.5,5X,4A4,A2)                                   RCN
 
  1039 FORMAT (' -4',1P,2D12.5,5X,4A4,A2/' -5',2D12.5,5X,4A4,A2)         RESU-649
-
-10391 FORMAT (3X,1P,2D12.5,5X,4A4,A2/3X,2D12.5,5X,4A4,A2)               RCN
-
  1040 FORMAT (/' ANGULAR DISTRIBUTION OF COMPOUND SCATTERING ON LEVELS',RESU-650
      1I3,' TO',I3//6X,'ANGLE',6(I6,'-LEVEL',F5.1,A1))                   RESU-651
  1041 FORMAT (1X,F10.3,6F18.7)                                          RESU-652
@@ -23892,5 +23888,3 @@ C ERROR CODE.                                                           FIT2-180
    29 IR=-1                                                             FIT2-181
    30 RETURN                                                            FIT2-182
       END                                                               FIT2-183
-
-
