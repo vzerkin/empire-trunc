@@ -1,0 +1,26 @@
+  MT  Reactions Product     SF58
+   1  n,tot                     
+   4  n,inl                     
+  16  n,2n                      
+  17  n,3n                      
+  18  n,f                       
+  22  n,n+a                     
+  24  n,2n+a                    
+  28  n,n+p                     
+  29  n,n+2a                    
+  32  n,n+d                     
+  33  n,n+t                     
+  34  n,n+He3                   
+  42  n,2n+p                    
+  51  n,inl                 PAR/M-,SIG
+  57  n,inl                 PAR/M-,SIG
+ 102  n,g                       
+ 103  n,p                       
+ 104  n,d                       
+ 105  n,t                       
+ 106  n,He3                     
+ 107  n,a                       
+ 108  n,2a                      
+ 111  n,2p                      
+ 205  n,t                       
+ 207  n,a                       

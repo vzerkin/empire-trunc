@@ -1,0 +1,44 @@
+#! /bin/sh -
+#script to produce ZVView plots from the *-gam-tr.xsc files
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+file=$1
+work=`pwd`
+if [ "$1" = "" ]
+   then
+echo 'Gamma production cross sections ready to be plotted'
+echo ' '
+ls *-gam-tr.xsc
+echo ' '
+echo -n 'Choose one of the above (without .xsc extention!): '
+read file
+fi                          
+
+# Deleting previous plots
+if [ -f "$file-znng.zvd" ]; then
+ rm "$file-znng.zvd" 
+fi
+if [ -f "$file-z2ng.zvd" ]; then
+ rm "$file-z2ng.zvd" 
+fi
+if [ -f "$file-z3ng.zvd" ]; then
+ rm "$file-z3ng.zvd" 
+fi
+if [ -f "$file-z4ng.zvd" ]; then
+ rm "$file-z4ng.zvd" 
+fi
+
+#run gam2zvd to produce ZVView plots
+if [ -f "$file-gam-tr.xsc" ]; then
+  cp $file-gam-tr.xsc GAMMA_INT.DAT
+  rm -f GAM-SORT-2ZVD.INP
+  ln -sf $EMPIREDIR/util/gam-sort-2zvd/GAM-SORT-2ZVD.INP GAM-SORT-2ZVD.INP
+  #vi GAM-SORT-2ZVD.INP
+  $EMPIREDIR/util/gam-sort-2zvd/gam-sort-2zvd.exe 
+  rm GAMMA_INT.DAT GAM-SORT-2ZVD.INP
+fi
+exit
