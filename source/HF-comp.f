@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -162,18 +162,18 @@ C--------Add isotropic CN contribution to direct ang. distributions
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
             xscalc = pop1/(4.d0*PI)  ! default isotropic
                        
-	      IF((NEJc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
+            IF((NEJc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C
 C             Check if the level is collective
               ilevcol = 0 
               do ilev=1,ND_nlv 
                 if(ICOller(ilev).eq.il)  then
                   ilevcol   = ilev
-	            exit
+                  exit
                 endif                    
               enddo
 
-	        if(ilevcol.gt.0) then 
+              if(ilevcol.gt.0) then 
 C               Collective level, calculating CN DA from Legendre expansion  
 C               write(*,*) 'Disc.lev=',il,'  CN xs(isotr )=',pop1
 C               write(*,*) 'Coll.lev=',ilevcol,
@@ -181,7 +181,7 @@ C    &                     ' Coll.flag=',ilev_flag
 C               write(*,*) '--CN xs(4pi*A0)=',4.d0*PI*PL_CN(0,ilevcol)
 
                 DO j = 0, PL_lmax(ilevcol) ! Leg Exp stored for coll levels
-                  leg_coeff(j)=PL_CN(j,ilevcol) 	    
+                  leg_coeff(j)=PL_CN(j,ilevcol)           
                 ENDDO
 
                 xs_norm = leg_coeff(0)
@@ -196,7 +196,7 @@ C    >              'ANG=',ANGles(na),
 C    >              ' CN ang. dist.=',xscn,'  isotr=',xcse
 
                     CSAlev(na,il,Nejc) = 
-     >              CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc	                
+     >              CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
 
 C                   if(na.le.2)
 C    >                write(*,'(1x,A4,F4.0,1x,3(A11,1p,d10.3,1x))') 
@@ -206,7 +206,7 @@ C    >                           'Isot dist.=',xscalc
                   ENDDO
                 endif
 
-	        else
+              else
 
 C               Not collective level   
                 DO na = 1, NDANG
@@ -219,7 +219,7 @@ C               Not collective level
 
 
 
-	      ELSE
+            ELSE
 
 C             Not the inelastic channel OR isotropic CN DA
 C
@@ -231,7 +231,7 @@ C
 
          ENDIF
       ENDDO
-	RETURN
+      RETURN
       END
 
 

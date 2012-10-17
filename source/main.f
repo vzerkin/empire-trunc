@@ -1,6 +1,6 @@
-cc   * $Rev: 3137 $
+cc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1471,9 +1471,9 @@ C--------------Write elastic to tape 12 and to tape 68
 99045             FORMAT (10X,8G15.5)
 
                   IF(.not.CN_isotropic) then
-	              leg_coeff = 0.d0
+                    leg_coeff = 0.d0
                     DO j = 0, PL_lmax(1)
-                      leg_coeff(j)=PL_CN(j,1)	    
+                      leg_coeff(j)=PL_CN(j,1)       
                     ENDDO
 
                     xs_norm = leg_coeff(0)
@@ -1485,7 +1485,7 @@ C
 C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
 C    >                  'ANG=',ANGles(na),
 C    >                  ' CN ang. dist.=',xscn,'  isotr=',ELCncs
-	                
+                      
                         cel_da(na) = xs_cn*(ELCncs/xs_norm)
 
 C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
@@ -1544,7 +1544,7 @@ C    >                     '  HF CN ang. distr.=',cel_da(na)
                       WRITE (12,*)' '
 
                     ENDIF
-				   
+                           
                   ELSE
 
                     DO na = 1, NDANG
@@ -2251,7 +2251,7 @@ C----------CN contribution to elastic ddx
              IF(CN_isotropic) then   
                WRITE (8,*)
      &          ' Isotropic Compound Elastic=', ELCncs, ' mb/str'
-	       ELSE
+             ELSE
                WRITE (8,*) ' CN elastic cross section (ECIS) ',
      &           4.d0*pi*sngl(PL_CN(0,1)),' mb' 
                WRITE (8,*) 
@@ -2261,7 +2261,7 @@ C----------CN contribution to elastic ddx
 
                leg_coeff = 0.d0
                DO j = 0, PL_lmax(1)
-                 leg_coeff(j)=PL_CN(j,1)	    
+                 leg_coeff(j)=PL_CN(j,1)      
                ENDDO
 
                xs_norm = leg_coeff(0)
@@ -3330,7 +3330,7 @@ C    &                   -   xscclow       -   4.d0*PI*ELCncs,
 C
           WRITE(107,'(1P,E10.4,1x,1P,20E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred  +  4.d0*PI*ELCncs, 				  !CN_el (CE) added to elastic 
+     &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                          !CN_el (CE) added to elastic 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
@@ -3363,7 +3363,7 @@ C
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
-		ENDIF 
+            ENDIF 
       ENDIF
 
       IF(ABScs.GT.0.) THEN

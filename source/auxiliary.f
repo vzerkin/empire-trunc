@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -96,8 +96,8 @@ C
       EMAx  = 0.d0
       ECUt  = 0.d0
 
-	PL_CN = 0.d0
-	PL_lmax = 0.d0
+      PL_CN = 0.d0
+      PL_lmax = 0.d0
 
       return
       END
@@ -378,17 +378,17 @@ C
       INTEGER L
 
       PL(0) = 1.d0
-C	GET_DDXS = COEFF(0)*PL(0) ! is equal 1 anyhow
- 	GET_DDXS = COEFF(0)
+C     GET_DDXS = COEFF(0)*PL(0) ! is equal 1 anyhow
+      GET_DDXS = COEFF(0)
       IF (NL.LT.1) RETURN
       PL(1) = X
-	GET_DDXS = GET_DDXS + 3*COEFF(1)*PL(1)
+      GET_DDXS = GET_DDXS + 3*COEFF(1)*PL(1)
       IF (NL.LT.2) RETURN
       DO L = 1, NL - 1
          PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
-	   GET_DDXS = GET_DDXS + ( 2*(L+1) + 1 )*COEFF(L+1)*PL(L+1)
+         GET_DDXS = GET_DDXS + ( 2*(L+1) + 1 )*COEFF(L+1)*PL(L+1)
       ENDDO
-	RETURN
+      RETURN
       END
 
       SUBROUTINE MTXGUP(A,F,X,N,Ldig,Det)

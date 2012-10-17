@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -162,9 +162,9 @@ C-------------checking the correspondence of the excited states
                   PL_CN(itmp2,i) = dtmp  
                 endif
               ENDDO
-C	        write(*,*) 'CN ilev=',ilev2,
+C             write(*,*) 'CN ilev=',ilev2,
 C    &          ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
-  	        ENDDO
+              ENDDO
             
               CLOSE (45)
 
@@ -562,7 +562,7 @@ C
 C                 write(*,*) 'DWBA ilev=',ilev1,' #Ls=', ncoef1
 C
 C                 DWBA DIR PLs
-	            DO j= 1 , ncoef1 ! skipping DWBA DIR expansion
+                  DO j= 1 , ncoef1 ! skipping DWBA DIR expansion
                     READ (45,'(A80)',ERR = 180, END = 180) rstring 
                     if(ICOllev(i).GE.LEVcc) 
      &                WRITE (47,'(A80)') rstring
@@ -583,24 +583,24 @@ C
      &            ' ERROR: DWBA DIR and CN level order do not coincide'
                   ENDIF
 
-C	            write(*,*) 'CN DWBA ilev=',ilev2,' #Ls=', ncoef2
+C                 write(*,*) 'CN DWBA ilev=',ilev2,' #Ls=', ncoef2
 C
-	            DO j= 1 , ncoef2 ! reading DWBA CN expansion
+                  DO j= 1 , ncoef2 ! reading DWBA CN expansion
                     READ (45,'(2I5,D20.10)',END = 180,ERR = 180) 
      &                      itmp1, itmp2, dtmp
 
-	              if(ICOllev(itmp1).LT.LEVcc) cycle ! skipping CC levels
+                    if(ICOllev(itmp1).LT.LEVcc) cycle ! skipping CC levels
                     WRITE (47,'(2I5,1P,D20.10)') itmp1, itmp2, dtmp
 
                     if(dabs(dtmp).gt.1.d-8 .and. itmp2.LE.NDLW) then
                       PL_lmax(i) = itmp2
-	                PL_CN(itmp2,i) = dtmp ! DWBA
+                      PL_CN(itmp2,i) = dtmp ! DWBA
                     endif
 
                   ENDDO
 
 C                 CN information from cc.LEG dismissed
-	            IF(ICOllev(i).GE.LEVcc) CYCLE 
+                  IF(ICOllev(i).GE.LEVcc) CYCLE 
 C---------------------------------------------------------------------
 C                 Reading cc.LEG (DWBA + CN calculations)
 C 
@@ -631,14 +631,14 @@ C                 CC CN PLs
 
 C                 write(*,*) 'CN CC ilev=',ilev2,' #Ls=', ncoef2
 
-	            DO j= 1 , ncoef2 ! reading CC CN expansion
+                  DO j= 1 , ncoef2 ! reading CC CN expansion
                     READ (46,'(2I5,D20.10)',END = 177,ERR = 177) 
      &                       itmp1, itmp2, dtmp
                     WRITE (47,'(2I5,1P,D20.10)') itmp1, itmp2, dtmp
 
                     if(dabs(dtmp).gt.1.d-8 .and. itmp2.LT.NDLW) then
                       PL_lmax(i) = itmp2
-	                PL_CN(itmp2,i) = dtmp ! CC
+                      PL_CN(itmp2,i) = dtmp ! CC
                     endif
 
                   ENDDO

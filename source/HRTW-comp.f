@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3131 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-08 11:31:14 +0200 (Mo, 08 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -1427,7 +1427,7 @@ C
       PAR(i,ipa,l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
 
       xmas_npro = EJMass(Npro) 
-	xmas_ntrg = AMAss(Ntrg)
+      xmas_ntrg = AMAss(Ntrg)
 
       el = EINl
       relcal = .FALSE.

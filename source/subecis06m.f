@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -13058,12 +13058,8 @@ C WORKING AREA:                                                         COPO-015
 C            Q:       WHICH CAN BE AT THE SAME PLACE AS W.              COPO-016
 C***********************************************************************COPO-017
       IMPLICIT REAL*8 (A-H,O-Z)                                         COPO-018
-      DIMENSION W(*),V(*),Q(ISM,5)                                      COPO-019
-
-
+      DIMENSION W(*),V(*),Q(ISM,5)                                        RCN
 C     DIMENSION W(*),V(*),Q(ISM,5),VAL(*)                               COPO-019
-
-
       LOGICAL LT,LZ                                                     COPO-020
       IF (L.GE.0) GO TO 2                                               COPO-021
       DO 1 IS=1,ISM                                                     COPO-022

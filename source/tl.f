@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3191,7 +3191,7 @@ C     INLkey < 0  Calculation for coupled states only = CC
          elab = El
          ikey = -1
       ELSE
-	   CN_isotropic = .TRUE.
+         CN_isotropic = .TRUE.
          ecms = El
          ikey = +1
       ENDIF
@@ -3329,7 +3329,7 @@ C---------If channel is closed then eee < 0
           nuncoupled = nuncoupled + 1
         ENDDO
 C       For DWBA calculations, no additional levels are considered
-	  IF (Ldwba) nuncoupled = 0
+        IF (Ldwba) nuncoupled = 0
 
 C
 C       For CN calculation a card stating a total number of coupled and uncoupled levels + 1 continua
@@ -3347,15 +3347,15 @@ C-------CARD 7
 C     
 C
         nfiss_tr   = 0 ! for the time being, fission is neglected 
-	  IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
+        IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
 C
         ngamm_tr   = 0 !  for the time being, capture is internally calculated
-	  IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
+        IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
 C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
 C
-	ENDIF
+      ENDIF
 
 C-----ground state
 C     ch = '-'
@@ -3571,7 +3571,7 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-C	      do j = 1, nfiss_tr 
+C           do j = 1, nfiss_tr 
 C             WRITE (1,'(2f10.5)') fiss_tr(j),fiss_dof(j) !  fiss_tr(j),fiss_dof(j) should be defined
 C           enddo
           ENDIF 
@@ -3606,9 +3606,9 @@ C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
 C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
 C                           PAIRING GIVEN BY COOK)                      ECIS-953
 C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),	...
+C           WRITE(1,'(7f10.5)') Z(0),     ...
           ENDIF
-	  ENDIF
+        ENDIF
 
         nn2 = 2
         if(ea.ge.1000.d0) nn2=0 ! there is non non-locality
@@ -4020,7 +4020,7 @@ C-----From cms system to Lab (ECIS do inverse convertion)
          elab = El
          ikey = -1
       ELSE
-	   CN_isotropic = .TRUE.
+         CN_isotropic = .TRUE.
          ecms = El
          ikey = +1
       ENDIF
@@ -4043,7 +4043,7 @@ C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
         ECIs2(36:36) = 'F'  ! .TRUE. to consider gamma emission in HF
-C                        	  ! G(L) gamma emission should be properly trasferred 
+C                               ! G(L) gamma emission should be properly trasferred 
 C
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
 C
@@ -4136,7 +4136,7 @@ C           skipping coupled levels
             if(ICOllev(j).LT.LEVcc) CYCLE
             eee = elab - D_Elv(j)/xratio
             if (eee.LT.0.0001) EXIT
-	      nuncoupled = nuncoupled + 1
+            nuncoupled = nuncoupled + 1
           ENDDO
         ENDIF
 C
@@ -4155,15 +4155,15 @@ C-------CARD 7
 C     
 C
         nfiss_tr   = 0 ! for the time being, fission is neglected 
-	    IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
+          IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
 C
         ngamm_tr   = 0 !  for the time being, capture is neglected
-	    IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
+          IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
 C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
 C
-	ENDIF
+      ENDIF
 C
 C-----Matching radius calculated within ECIS
 C     WRITE(1, *)
@@ -4235,7 +4235,7 @@ C        Uncoupled levels
 C
          DO j = 2, ND_nlv
 C          skipping coupled levels
-	     if(ICOllev(j).LE.LEVcc) CYCLE
+           if(ICOllev(j).LE.LEVcc) CYCLE
            ch = '-'
            IF (D_Lvp(j).GT.0) ch = '+'
 C----------skipping closed channels
@@ -4381,7 +4381,7 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-C	      do j = 1, nfiss_tr 
+C           do j = 1, nfiss_tr 
 C             WRITE (1,'(2f10.5)') fiss_tr(j),fiss_dof(j) !  fiss_tr(j),fiss_dof(j) should be defined
 C           enddo
           ENDIF 
@@ -4416,9 +4416,9 @@ C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
 C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
 C                           PAIRING GIVEN BY COOK)                      ECIS-953
 C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),	...
+C           WRITE(1,'(7f10.5)') Z(0),     ...
           ENDIF
-	  ENDIF
+        ENDIF
 
         nn2 = 2
         if(ea.ge.1000.d0) nn2=0 ! there is non non-locality
@@ -4513,7 +4513,7 @@ C
 
         ENDDO
 
-	ELSE
+      ELSE
 
 C-------2) discrete levels
         DO j = 2, ND_nlv

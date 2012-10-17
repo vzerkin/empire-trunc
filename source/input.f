@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3137 $
+Ccc   * $Rev: 3138 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -7546,7 +7546,7 @@ C             WRITE (8,*) 'Random seeds :', 1, 104
               READ(94,*)  indexf, indexb
               CLOSE(94)
             endif
-            WRITE (8,*) 'Random seeds :', indexf, indexb			
+            WRITE (8,*) 'Random seeds :', indexf, indexb                
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
