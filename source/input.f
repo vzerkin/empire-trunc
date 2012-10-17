@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3138 $
+Ccc   * $Rev: 3142 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-17 21:05:30 +0200 (Mi, 17 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -255,8 +255,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
-C        CN_isotropic = .True.     ! default
-         CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
+         CN_isotropic = .True.     ! default
+C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
 C        Important: CN_isotropic can be .False. only if ECIS is used for calculations (OPTMAN is not allowed)
          CAlctl = .FALSE.
          CSRead = -2.d0
