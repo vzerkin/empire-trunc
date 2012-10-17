@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2971 $
+Ccc   * $Rev: 3136 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-21 13:39:20 +0200 (Sa, 21 Jul 2012) $
+Ccc   * $Date: 2012-10-17 18:41:35 +0200 (Mi, 17 Okt 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1545,7 +1545,7 @@ C--- Zero array elements that are irrelevant but that might be used.
       ee(2)=0.0
       DO j=1,12
         thsig(j,2)=0.0
-       ENDDO
+      ENDDO
 
 C--- The rest of the calculations have been written to OPTFIT.CAL
 C--- Data at the first energy are read from the file.
@@ -1594,8 +1594,10 @@ C--- Angular distributions
 
       chisqrd=chi2
 
-      write(*,*) 'chi2=',chi2
+      write(*,*) 'OMP fit Chi2=',chi2
       write(*,*)
+      write(8,*) 'OMP fit Chi2=',chi2
+      write(8,*)
 
       close(40)
 
