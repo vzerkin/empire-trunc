@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3138 $
+Ccc   * $Rev: 3149 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -46,7 +46,6 @@ C
      &                 popll, pops, popt, xcse, xs_cn, xs_norm
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER ilevcol, ilev
-      DOUBLE PRECISION leg_coeff(0:ndangecis),pnl(0:ndangecis)
       DOUBLE PRECISION GET_DDXS
 C-----
 C-----Continuum
@@ -175,29 +174,15 @@ C             Check if the level is collective
 
               if(ilevcol.gt.0) then 
 C               Collective level, calculating CN DA from Legendre expansion  
-C               write(*,*) 'Disc.lev=',il,'  CN xs(isotr )=',pop1
-C               write(*,*) 'Coll.lev=',ilevcol,
-C    &                     ' Coll.flag=',ilev_flag
-C               write(*,*) '--CN xs(4pi*A0)=',4.d0*PI*PL_CN(0,ilevcol)
-
-                DO j = 0, PL_lmax(ilevcol) ! Leg Exp stored for coll levels
-                  leg_coeff(j)=PL_CN(j,ilevcol)           
-                ENDDO
-
-                xs_norm = leg_coeff(0)
+C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
+C               write(*,*) 'Coll.lev=',ilevcol,' CN xs(4pi*A0)=',
+C    >             4.d0*PI*PL_CN(0,ilevcol)
+                xs_norm = PL_CN(0,ilevcol)
                 if(xs_norm.gt.0.d0) then
-C                 write(*,*) 'Lev # ',il, 'Col lev=',ilevcol 
                   DO na = 1, NDANG
-                    xs_cn = 
-     &               GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(ilevcol))
-C
-C                   write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
-C    >              'ANG=',ANGles(na),
-C    >              ' CN ang. dist.=',xscn,'  isotr=',xcse
-
+                    xs_cn = GET_DDXS(CANGLE(na),ilevcol)
                     CSAlev(na,il,Nejc) = 
      >              CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-
 C                   if(na.le.2)
 C    >                write(*,'(1x,A4,F4.0,1x,3(A11,1p,d10.3,1x))') 
 C    >               'ANG=',ANGles(na),'ECIS dist.=',xs_cn,
@@ -207,17 +192,11 @@ C    >                           'Isot dist.=',xscalc
                 endif
 
               else
-
 C               Not collective level   
                 DO na = 1, NDANG
                   CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
                 ENDDO
-
               endif
-
-
-
-
 
             ELSE
 

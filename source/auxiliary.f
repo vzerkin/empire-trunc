@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3138 $
+Ccc   * $Rev: 3149 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -325,8 +325,6 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
-C
-C
 C Dummy arguments
 C
       INTEGER Nl
@@ -347,13 +345,14 @@ C
       ENDDO
       END
 
-      DOUBLE PRECISION FUNCTION GET_DDXS(X,PL,COEFF,NL)
+      DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEVCOL)
 C
 C-Title  : GET_DDXS Subroutine
-C-Purpose: Evaluate Legendre polynomials up to order NL
-C          Use Legendre coefficients to calculate the double diff. XS
+C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS
 C
-C          DDXS = SUM_{n=0 to NL} { (2L+1)( COEFF(n)*Pn(n,X) }
+C          NL = PL_lmax(ILEVCOL)
+C
+C          DDXS = SUM_{n=0 to NL} { (2L+1)( PL_CN(n,ILEVCOL)*Pn(n,X) }
 C          X= cos(theta) 
 C
 C-Author : R.Capote, Nuclear Data Section, IAEA, 2012
@@ -367,26 +366,32 @@ C    PL(0) = 1
 C    PL(1) = X
 C    PL(2) = (3*X*X - 1)/2 ...
 C
+C    PL_lmax(ndcollev), PL_CN(0:ndangecis,ndcollev)
+C
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
 C Dummy arguments
 C
-      INTEGER NL
+      INTEGER ILEVCOL
       DOUBLE PRECISION X
-      DOUBLE PRECISION PL(0:*),COEFF(0:*)
 C
 C Local variables
 C
-      INTEGER L
+      INTEGER NL,L
+      DOUBLE PRECISION PL(0:NDANGecis)
 
+      NL = PL_lmax(ILEVCOL)
       PL(0) = 1.d0
-C     GET_DDXS = COEFF(0)*PL(0) ! is equal 1 anyhow
-      GET_DDXS = COEFF(0)
+C     GET_DDXS = COEFF(0)
+      GET_DDXS = PL_CN(0,ILEVCOL) ! *PL(0), PL(0) is equal 1 anyhow
       IF (NL.LT.1) RETURN
       PL(1) = X
-      GET_DDXS = GET_DDXS + 3*COEFF(1)*PL(1)
+      GET_DDXS = GET_DDXS + 3*PL_CN(1,ILEVCOL)*PL(1)
       IF (NL.LT.2) RETURN
       DO L = 1, NL - 1
          PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
-         GET_DDXS = GET_DDXS + ( 2*(L+1) + 1 )*COEFF(L+1)*PL(L+1)
+         GET_DDXS = GET_DDXS + ( 2*(L+1)+1 )*PL_CN(L+1,ILEVCOL)*PL(L+1)
       ENDDO
       RETURN
       END

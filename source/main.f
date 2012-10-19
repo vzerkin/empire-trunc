@@ -1,6 +1,6 @@
-cc   * $Rev: 3138 $
+cc   * $Rev: 3149 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -31,16 +31,13 @@ C
       INTEGER*4 INDexf, INDexb, BUFfer(250)                              ! R250COM
 
       DOUBLE PRECISION XCOs(NDAngecis)                                   ! KALB
-
       DOUBLE PRECISION ELTl(NDLW)
-      DOUBLE PRECISION pnl(0:NDAngecis,NDCOLLEV),leg_coeff(0:NDAngecis)
-
+      
+      DOUBLE PRECISION GET_DDXS
       DOUBLE PRECISION xs_cn, xs_norm 
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
-
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
-
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
       COMMON /ELASTIC/ ELTl
       COMMON /R250COM/ INDexf,INDexb,BUFfer
@@ -1293,9 +1290,9 @@ C    &  '' DWBA inelastic contribution '')')
       ENDIF
 C
       WRITE (12,*) ' '
-      WRITE (12,'('' FUSION CROSS SECTION = '',G12.5,'' mb'')')
+      WRITE (12,'('' FUSION CROSS SECTION = '',1P,E12.5,'' mb'')')
      &     CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred
-      WRITE (12,'('' TOTAL  CROSS SECTION = '',G13.6, '' mb'')')
+      WRITE (12,'('' TOTAL  CROSS SECTION = '',1P,E12.5,'' mb'')')
      &     TOTcs*TOTred*totcorr
       WRITE (12,*) ' '
 C
@@ -1456,8 +1453,12 @@ C--------------Write elastic to tape 12 and to tape 68
                   WRITE (12,'(1X,/,10X,40(1H-),/)')
                   WRITE (12,*) ' '
                   WRITE (12,
-     &                   '('' ELASTIC CROSS SECTION ='',G12.5,'' mb'')')
-     &                   ELAcs*ELAred + 4.d0*PI*ELCncs
+     &             '('' ELASTIC CROSS SECTION= '',1P,E12.5,'' mb'')')
+     &              ELAcs*ELAred + 4.d0*PI*ELCncs
+                  WRITE (12,*) ' '
+                  WRITE (12,
+     &             '('' COMP. ELASTIC CROSS SECTION ='',1P,E12.5,
+     &               '' mb'')') 4.d0*PI*ELCncs
                   WRITE (12,*) ' '
                   WRITE (12,*) ' Elastic angular distribution '
                   WRITE (12,*) ' '
@@ -1469,31 +1470,24 @@ C--------------Write elastic to tape 12 and to tape 68
      &                                                         NANgela)
                   ENDIF
 99045             FORMAT (10X,8G15.5)
+                  
+                  DO na = 1, NDANG
+                    cel_da(na) = ELCncs ! isotropic
+                  ENDDO
 
                   IF(.not.CN_isotropic) then
-                    leg_coeff = 0.d0
-                    DO j = 0, PL_lmax(1)
-                      leg_coeff(j)=PL_CN(j,1)       
-                    ENDDO
 
-                    xs_norm = leg_coeff(0)
+                    xs_norm = PL_CN(0,1)
                     IF(xs_norm.gt.0.d0) then
                       DO na = 1, NDANG
-                        xs_cn = 
-     &                    GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(1))
-C
-C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
-C    >                  'ANG=',ANGles(na),
-C    >                  ' CN ang. dist.=',xscn,'  isotr=',ELCncs
-                      
+                        xs_cn = GET_DDXS(CANGLE(na),1)
                         cel_da(na) = xs_cn*(ELCncs/xs_norm)
-
 C                       write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
 C    >                 'ANG=',ANGles(na),' ECIS CN ang. dist.=',xs_cn,
 C    >                     '  HF CN ang. distr.=',cel_da(na)
                       ENDDO
                     ENDIF
-
+                    
                     WRITE (12,99050) ((ELAred*elada(iang)+cel_da(iang)),
      &                               iang = 1,NANgela)
 99050               FORMAT (9X,8E15.5)
@@ -1504,8 +1498,7 @@ C    >                     '  HF CN ang. distr.=',cel_da(na)
                     WRITE (12,*)' '
                     WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                     WRITE (12,*)' '
-                    WRITE (12,'(9X,8D15.8)')
-     &                 ELAred*elleg(1),
+                    WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
      &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                     WRITE (12,*)' '
 
@@ -1525,8 +1518,8 @@ C    >                     '  HF CN ang. distr.=',cel_da(na)
                       WRITE (12,*)' '
                       WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                       WRITE (12,*)' '
-                      WRITE (12,'(9X,8D15.8)')
-     &                 ELAred*elleg(1)+ELCncs, (ELAred*elleg(iang)+
+                      WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs,
+     &                  (ELAred*elleg(iang) +
      &                 PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
      &                 iang = 2,min(NDAng,neles))
                       WRITE (12,*)' '
@@ -1538,19 +1531,14 @@ C    >                     '  HF CN ang. distr.=',cel_da(na)
                       WRITE (12,*)' '
                       WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                       WRITE (12,*)' '
-                      WRITE (12,'(9X,8D15.8)')
-     &                 ELAred*elleg(1)+ELCncs, 
-     &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+                      WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs, 
+     &                  (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                       WRITE (12,*)' '
 
                     ENDIF
                            
                   ELSE
-
-                    DO na = 1, NDANG
-                      cel_da(na) = ELCncs ! isotropic
-                    ENDDO
-
+                    
                     WRITE (12,99050) ((ELAred*elada(iang)+cel_da(iang)),
      &                               iang = 1,NANgela)
 
@@ -2247,7 +2235,7 @@ C----------CN contribution to elastic ddx
              WRITE (8,*) 'WARNING: CN elastic is 0'
            ELSE
              WRITE (8,*) ' CN elastic cross section   ',
-     &                     sngl(POPlv(LEVtarg,mt2)*CELred),' mb'
+     &                sngl(POPlv(LEVtarg,mt2)*CELred),' mb'
              IF(CN_isotropic) then   
                WRITE (8,*)
      &          ' Isotropic Compound Elastic=', ELCncs, ' mb/str'
@@ -2259,15 +2247,10 @@ C----------CN contribution to elastic ddx
                WRITE (8,*) '     including the Compound Elastic'
                WRITE (8,*) 
 
-               leg_coeff = 0.d0
-               DO j = 0, PL_lmax(1)
-                 leg_coeff(j)=PL_CN(j,1)      
-               ENDDO
-
-               xs_norm = leg_coeff(0)
+               xs_norm = PL_CN(0,1)
                IF(xs_norm.gt.0.d0) then
                  DO na = 1, NDANG
-                   xs_cn = GET_DDXS(CANGLE(na),pnl,leg_coeff,PL_lmax(1))
+                   xs_cn = GET_DDXS(CANGLE(na),1)
                    cel_da(na) = xs_cn*(ELCncs/xs_norm)
                  ENDDO
                ENDIF
@@ -2346,10 +2329,8 @@ C
                      WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
      &                 ilv=21,MIN(its,30))
                    ENDIF
-C
-C----------Because of the ENDF format restrictions the maximum
-C----------number of discrete levels is limited to 40
-C
+C                  Because of the ENDF format restrictions the maximum
+C                     number of discrete levels is limited to 40
                    IF(its.gt.30) THEN
                      WRITE(8,*) ' '
                      WRITE(8,*) ' '
@@ -2369,8 +2350,6 @@ C
                      WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
      &                 ilv = 31,MIN(its,40))
                    ENDIF
-
-                   WRITE (8,*) ' '
                    WRITE (8,*) ' '
                    WRITE (8,*) ' '
                  ENDIF
@@ -2378,7 +2357,6 @@ C
 
              ENDIF
            ENDIF
-           WRITE (8,*)
            WRITE (8,*)
          ENDIF
          checkXS = checkXS + CSPrd(nnuc)

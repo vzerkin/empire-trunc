@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3138 $
+Ccc   * $Rev: 3149 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2580,19 +2580,28 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
-      IF (ZEJc(Nejc).EQ.0) READ (45,*) TOTcs
-      READ (45,*) ABScs
+      IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) TOTcs
+      READ (45,*,END=300) ABScs
 C     IF (ZEJc(Nejc).EQ.0) READ (45,*) ELAcs
 C 300 CLOSE (45)
-      IF (.NOT.CN_isotropic) READ (45,*) ! reading total compound from ECIS
-      IF (ZEJc(Nejc).EQ.0) READ (45,*) ELAcs
+
+	dtmp = 0.d0
+      IF (.NOT.CN_isotropic) READ (45,*,END=300) dtmp ! reading total compound from ECIS (or ELAcs from OPTMAN)
+      IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
+
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) then
 C       write(*,*) 'ECIS abs:',ABScs,' el=',ELAcs
-        dtmp  = ABScs + ELAcs - TOTcs ! dtmp = Compound Elastic
-        ELAcs = ELAcs - dtmp ! substracting CE from ELAcs (total elastic)
+	  if (ELAcs.EQ.0.d0) then
+	    ELAcs = dtmp
+	  else
+          dtmp  = ABScs + ELAcs - TOTcs ! dtmp = Compound Elastic
+          ELAcs = ELAcs - dtmp ! substracting CE from ELAcs (total elastic)
+	  endif
 C       write(*,*) 'CE:',dtmp,' new el=',ELAcs
       ENDIF
+
   300 CLOSE (45)
+	IF (ZEJc(Nejc).EQ.0 .and. ELAcs.EQ.0.d0) ELAcs = dtmp 
 
       IF (ABScs.LE.0.D0) RETURN
 C
@@ -3135,7 +3144,7 @@ C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
-        convg=1.0d-10
+C       convg=1.0d-10
       endif
 
       ECIs1(21:21) = 'T'
@@ -3310,7 +3319,7 @@ C-----Matching radius
 C-----CARD 5
       WRITE (1,'(2f10.5,10x,1p,3(2x,d8.1))') 
 C    +    RStep,rmatch,convg,convg,convg
-     +    RStep,rmatch,convg,convg,1.d-5
+     +    RStep,rmatch,convg,convg,1.d-4
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
       WRITE (1,*)
 
@@ -3968,7 +3977,7 @@ C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
-        convg=1.0d-10
+C       convg=1.0d-10
       endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
@@ -4118,7 +4127,7 @@ C     only one potential for a full dispersive calculation
 C-----CARD 5
       WRITE (1,'(2f10.5,10x,1p,3(2x,d8.1))') 
 C    +    RStep,rmatch,convg,convg,convg
-     +    RStep,rmatch,convg,convg,1.d-5
+     +    RStep,rmatch,convg,convg,1.d-4
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
 C-----CARD 6
       WRITE(1, *)
