@@ -1,5 +1,5 @@
-! $Rev: 3134 $                                                         |
-! $Date: 2012-10-11 13:28:30 +0200 (Do, 11 Okt 2012) $                                                     
+! $Rev: 3145 $                                                         |
+! $Date: 2012-10-19 09:03:02 +0200 (Fr, 19 Okt 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.13   October 2012   A. Trkov
+!-V                        Trivial fix of an IF statement in CK35
 !-V         Version 8.12   October 2012   A. Trkov
 !-V                        Check for negative resonance widths
 !-V         Version 8.11   September 2012   A. Koning
@@ -222,9 +224,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.12'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
@@ -7769,11 +7771,8 @@
       NK = N1H
       DO N=1,NK
          CALL RDLIST
-         IF(N.EQ.1)  THEN
-            ELO = C1L
-         ELSE IF(N.EQ.NK) THEN
-            EHI = C2L
-         ENDIF
+         IF(N.EQ. 1) ELO = C1L
+         IF(N.EQ.NK) EHI = C2L
       END DO
       CALL STORF(MF,MT,ELO,EHI)
 !
