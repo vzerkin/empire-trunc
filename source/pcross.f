@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3060 $
+Ccc   * $Rev: 3146 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-10-19 13:16:53 +0200 (Fr, 19 Okt 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -258,6 +258,34 @@ C
 c         write(8,99003) Einl,sigr,cross(2),cross(5)
           dstrip =cross(2)
           dpickup=cross(5)
+        ENDIF
+      ENDIF
+
+      IF(Zejc(0).eq.2.D0 .and. Aejc(0).eq.3.D0) THEN
+        write(8,*)
+     &' He-3 Stripping and Pick-up Parameterization (C. Kalbach)'
+        write(8,*)
+        call DTRANS(iemin,iemax)
+        IF(DXSRED.GT.0.d0) then
+          scompn = Sigr - cross(2) -cross(3)
+          scompn = Sigr - cross(2) -cross(3)
+C
+          IF(scompn.le.0.d0) THEN
+            scompn  = 0.d0
+            dstrip  = Sigr/(cross(2)+cross(3))*cross(2)
+            dpickup = Sigr/(cross(2)+cross(3))*cross(3)
+            cross(2)= dstrip
+            cross(3)= dpickup
+            DO ienerg = 1, NDEX
+              spec(2,ienerg) = Sigr/(cross(2)+cross(3))*spec(2,ienerg)
+              spec(5,ienerg) = Sigr/(cross(2)+cross(3))*spec(3,ienerg)
+            ENDDO
+            write(8,99003) Einl,sigr,cross(2),cross(3)
+            WRITE (8,59010)
+          ENDIF
+c         write(8,99003) Einl,sigr,cross(2),cross(3)
+          dstrip =cross(2)
+          dpickup=cross(3)
         ENDIF
       ENDIF
 C

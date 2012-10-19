@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2767 $
+Ccc   * $Rev: 3146 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-04-05 11:50:34 +0200 (Do, 05 Apr 2012) $
+Ccc   * $Date: 2012-10-19 13:16:53 +0200 (Fr, 19 Okt 2012) $
 
 
       SUBROUTINE DTRANS(iemin,iemax)
@@ -22,17 +22,34 @@ C
       DOUBLE PRECISION ab,gdel,fac1,fac2,fk,ggg
 C     DOUBLE PRECISION bndd
       DOUBLE PRECISION spectr,sg
-      DIMENSION jno(4),jpo(4),jst(4)
+      INTEGER jno(4),jpo(4),jst(4),ioutp(4), istart, iend, istep
 
-      data jno/1,0,2,2/                  
-      data jpo/0,1,2,1/
-      data jst/2,2,1,2/
+      logical getout
+
+      data jno/1,0,2,2/ ! outgoing neutrons                  
+      data jpo/0,1,2,1/ ! outgoing protons
+      data jst/2,2,1,2/ ! (2s+1)
+      data ioutp/1,2,3,5/ ! EMPIRE outgoing particles
 C
-C 
 C
-C-----Only deuteron reactions allowed
-      if(Zejc(0).ne.1.D0.and.Aejc(0).ne.2.D0) return
-      if(DXSred.LE.0.d0) return
+      getout = .true. 
+C-----Deuteron reactions allowed
+      if( (Zejc(0).eq.1.D0.and.Aejc(0).eq.2.D0)) then
+        istart = 2
+        iend   = 4 
+        istep  = 2 
+        getout = .false. 
+      endif
+
+C-----He-3 reactions allowed
+      if( (Zejc(0).eq.2.D0.and.Aejc(0).eq.3.D0)) then
+        istart = 2
+        iend   = 3 
+        istep  = 1 
+        getout = .false. 
+      endif
+
+      if(DXSred.LE.0.d0 .or. getout) return
 
       ggg = GDIV
       if(GDIV.eq.0) ggg=13.d0
@@ -44,18 +61,18 @@ C-----gdel is the single-particle density for neutrons
         write(8,*) ' EMISSION SPECTRA : DIRECT reactions'
         write(8,*) 
       ENDIF
-C     irea=NDEjc
-      irea = 4 
-      do ip=2,irea,2
-         IF(IOUt.GE.3.and.ip.eq.2) write(8,*)'(d,p) stripping reaction'
-         IF(IOUt.GE.3.and.ip.eq.4) write(8,*)'(d,t) pick-up reaction'
+      
+      do ip=istart,iend,istep
+         IF(IOUt.GE.3.and.ip.eq.2) write(8,*)'(x,p) proton stripping'
+         IF(IOUt.GE.3.and.ip.eq.3) write(8,*)'(x,a) alpha pick-up   '
+         IF(IOUt.GE.3.and.ip.eq.4) write(8,*)'(x,t) triton pick-up  '
          ab = jno(ip)+jpo(ip)
          ares  = A(1) - ab
          zres  = Z(1) - jpo(ip)
 C        residual nuclei must be heavier than alpha
          if(ares.le.4. and. zres.le.2.) cycle
 
-         nnur = NREs(ip)
+         nnur = NREs(ioutp(ip))
          if (nnur.lt.0) cycle
 C--------Factors for stripping and pickup
          fac1=jst(ip)/3.*ab*(3800./ares)/Einl/(Einl+50.D0)**2
@@ -63,20 +80,22 @@ C--------Factors for stripping and pickup
          if(ip.eq.2) fk=fk*(3.0+35.0/(1.+exp((Einl-11.)/2.25)))
          fk=max(0.D0,fk)
          fac2=.0127*fk*gdel
-         DO ke = iemin(ip), iemax(ip)
+         DO ke = iemin(ioutp(ip)), iemax(ioutp(ip))
             ek = DE*(ke - 1)
-C-----------sigabs(ke,ip,nnur) was estimated in global
-            IF (ETL(5,ip,nnur).EQ.0) THEN
-               sg = SIGabs(ke+5,ip,nnur)
+C-----------sigabs(ke,ioutp(ip),nnur) was estimated in global
+            IF (ETL(5,ioutp(ip),nnur).EQ.0) THEN
+               sg = SIGabs(ke+5,ioutp(ip),nnur)
             ELSE
-               sg = SIGabs(ke,ip,nnur)
+               sg = SIGabs(ke,ioutp(ip),nnur)
             ENDIF
             spectr=sg*ek*fac1*fac2*DXSred
             if(spectr.le.0.D0) cycle
-            spec(ip,ke)=spectr
-            cross(ip)=cross(ip)+spectr*DE
-            IF(IOUt.GE.3) write(8,100) ek, spec(ip,ke)
-C           write(8,102)ke,ek,fac1,fac2,sg,spec(ip,ke)
+            spec(ioutp(ip),ke)=spectr
+            cross(ioutp(ip))=cross(ioutp(ip))+spectr*DE
+            IF(IOUt.GE.3) 
+     >        write(8,100) ek, spec(ioutp(ip),ke)
+C             write(8,102)
+C    >          ke,ek,fac1,fac2,sg,spec(ioutp(ip),ke)
          enddo
          IF(IOUt.GE.3) write(8,*) 
       enddo
