@@ -1,6 +1,6 @@
-cc   * $Rev: 3149 $
+cc   * $Rev: 3151 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Date: 2012-10-20 01:41:37 +0200 (Sa, 20 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3398,7 +3398,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    WRITE (8,'('' * Total         cross section scaled by '',
      &     G13.6)') TOTred
           IF(totcorr.gt.0) THEN
-            IF( abs(1.d0/totcorr - TOTred0).gt.0.00001d0) THEN
+            IF( abs(1.d0/totcorr - TOTred0).gt.0.001d0) THEN
               WRITE (108,'(2x,G12.5,3x,F10.6)') EINl, 1.d0/totcorr  
               WRITE (8,'('' *   set TOTRED '' , F13.6,
      &         '' to keep unchanged total'')') 1.d0/totcorr

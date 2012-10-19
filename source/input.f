@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3147 $
+Ccc   * $Rev: 3151 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 13:17:11 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Date: 2012-10-20 01:41:37 +0200 (Sa, 20 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2082,7 +2082,7 @@ Cpr         END DO
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
         WRITE(8,*) 'Nuclei marked with < in the table below produce only
-     &inclusive emission spectra'
+     & inclusive emission spectra'
       ENDIF
 
       WRITE (8,*) ' '
@@ -2094,7 +2094,7 @@ C-----LEVEL DENSITY for residual nuclei
       WRITE (8,*)
 
       DO i = 1, NDLW
-         DRTl(i) = 1.0
+         DRTl(i) = 1.d0
       ENDDO
       IF (FITlev.GT.0) THEN
 C--------remove potentially empty omp files
@@ -2158,40 +2158,37 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
 
-
          IF(ADIv.eq.3) then 
            WRITE (8,99003) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
      &          NLV(nnur),DEF(1,nnur),ROHfbp(nnur),ROHfba(nnur)
          ELSE 
            WRITE (8,99004) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
      &          NLV(nnur), DEF(1,nnur), ATIlnor(nnur) 
-      ENDIF
+         ENDIF
 
          IF (ADIv.NE.3.0D0) THEN
 
-            IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
+           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
 
-            IF (ADIv.GT.1.0D0) 
-     &      WRITE (8,'(1X,/,
+           IF (ADIv.GT.1.0D0) 
+     &       WRITE (8,'(1X,/,
      &        ''  TOTAL LEVEL DENSITY (TWICE THE SINGLE PARITY) FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
 
-            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+           WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
      &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
 
-            DO i = 1, NEX(nnur)
-
-            IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
-
-               rocumul = 0.D0
-               DO j = 1, NDLW
-                  rocumul = rocumul + RO(i,j,1,nnur)
-               ENDDO
+           DO i = 1, NEX(nnur)
+              IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+              rocumul = 0.D0
+              DO j = 1, NDLW
+                rocumul = rocumul + RO(i,j,1,nnur)
+              ENDDO
+              IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
                
-               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
-               WRITE (8,99010) EX(i,nnur), 2*rocumul,
+              WRITE (8,99010) EX(i,nnur), 2*rocumul,
      &              (2*RO(i,j,1,nnur),j = 1,11)
 c    &              (2*RO(i,j,1,nnur),j = 11,21)
 c    &              (2*RO(i,j,1,nnur),j = 21,31)     
@@ -2212,14 +2209,13 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
 
            DO i = 1, NEX(nnur)
-
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-           ELSE
+              ELSE
                 u = UEXcit(i,nnur)
-            ENDIF
+              ENDIF
 
-            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2244,11 +2240,11 @@ c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
 
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-            ELSE
+              ELSE
                 u = UEXcit(i,nnur)
-            ENDIF
+              ENDIF
 
-            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2273,16 +2269,16 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
                 u = EX(i,nnur)
               ELSE
                 u = UEXcit(i,nnur)
-            ENDIF
+              ENDIF
 
-            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
                  rocumul = rocumul + RO(i,j,2,nnur)
               ENDDO
-               
               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
+              
               WRITE (8,99010) u, rocumul,
      &              (RO(i,j,2,nnur),j = 1,11)
 c     &             (RO(i,j,2,nnur),j = 11,21)
