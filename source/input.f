@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3142 $
+Ccc   * $Rev: 3147 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 21:05:30 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-19 13:17:11 +0200 (Fr, 19 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -255,8 +255,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
-         CN_isotropic = .True.     ! default
-C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
+C        CN_isotropic = .True.     ! default
+         CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
 C        Important: CN_isotropic can be .False. only if ECIS is used for calculations (OPTMAN is not allowed)
          CAlctl = .FALSE.
          CSRead = -2.d0
@@ -552,8 +552,8 @@ C        Starting value of the number of angular points
 
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(8,*)
-     &        'ERROR: INCREASE NANgecis IN dimension.h UP TO ',NANgela
-           STOP 'FATAL: INCREASE NANgecis IN dimension.h'
+     &        ' ERROR: INCREASE NANgecis IN dimension.h UP TO ',NANgela
+           STOP ' ERROR: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
          da = 180.d0/(NDAng - 1)
@@ -566,8 +566,8 @@ C--------set angles for inelastic calculations
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN
-            WRITE (8,*) 'ERROR: Z > A, please correct input file'
-            STOP 'FATAL: Z > A, please correct input file'
+            WRITE (8,*) ' ERROR: Z > A, please correct input file'
+            STOP ' ERROR: Z > A, please correct input file'
          ENDIF
 
 C--------projectile
@@ -624,9 +624,9 @@ C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
 
          IF (NEMc.GT.0 .and. aclu.le.4) THEN
-           WRITE (8,*)'WARNING: Light clusters should be included explic
-     >itly (d,t,h,a)'
-           WRITE (8,*)'WARNING: Number of emitted clusters set to zero'
+           WRITE (8,*)' WARNING: Light clusters should be included expli
+     >citly (d,t,h,a)'
+           WRITE (8,*)' WARNING: Number of emitted clusters set to zero'
            NEMc = 0
          ENDIF
 
@@ -1174,27 +1174,27 @@ C
 C--------check input for consistency
 C
          IF(NEXclusive.GT.NDExclus) THEN
-            WRITE(8,*)'ERROR: NEXclusive =',NEXclusive
-            WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
-            WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
-            STOP 'INSUFFICIENT DIMENSION NDExclus'
+            WRITE(8,*)' ERROR: NEXclusive =',NEXclusive
+            WRITE(8,*)' INSUFFICIENT DIMENSION NDExclus'
+            WRITE(8,*)' INCREASE NDExclus AND RECOMPILE'
+            STOP ' INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 C
 C        Checking fission input consistency 
 C
          IF( FISshi(1).eq.1 .and. FISden(1).ne.0 )  THEN        
-            WRITE(8,*)  'WARNING: ',
+            WRITE(8,*)  ' WARNING: ',
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
+            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
             FISden(i) = 0
             ENDDO
          ENDIF
 
          IF( FISmod(1).GT.0 .and. FISden(1).ne.0 )  THEN        
-            WRITE(8,*)  'WARNING: ',
+            WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
+            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
                FISden(i) = 0
             ENDDO
@@ -1203,7 +1203,7 @@ C
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
-     &'WARNING: For HI induced reactions Lmax~100-150 may be needed'
+     &' WARNING: For HI induced reactions Lmax~100-150 may be needed'
             WRITE (8,*)         
          ENDIF
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
@@ -1279,17 +1279,17 @@ C--------reset angles for inelastic calculations
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
-c            WRITE (8,*) 'ERROR: NDAng IN dimension.h MUST BE 19 or 37'
+c            WRITE (8,*) ' ERROR: NDAng IN dimension.h MUST BE 19 or 37'
 c            WRITE (8,*)
-c     &'ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+c     &' ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
 c            WRITE (8,*)
-c     &'ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-c            STOP 'FATAL: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
+c     &' ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+c            STOP ' ERROR: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
 c         ENDIF
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (8,*) ' '
-            WRITE (8,*) 'ERROR: HMS allowed only for incident nucleons'
-            WRITE (8,*) 'ERROR: and gammas -  Execution STOPPED'
+            WRITE (8,*) ' ERROR: HMS allowed only for incident nucleons'
+            WRITE (8,*) ' ERROR: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
          IF (DIRect.GT.0 .AND. INT(AEJc(0)).EQ.0) THEN
@@ -1387,9 +1387,9 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
+     &          ' WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,2) = 0 ! MSD
                IDNa(2,2) = 0
                IDNa(3,2) = 0
@@ -1404,7 +1404,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                ENDIF
                PESpin = 0
                WRITE (8,*)
-     &          'WARNING: PE spin cut-off set as default (MSD is on)'
+     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 
@@ -1413,9 +1413,9 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
+     &          ' WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,2) = 0 ! MSD
                IDNa(2,2) = 0
                IDNa(3,2) = 0
@@ -1426,7 +1426,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IDNa(2,2) = 1
                  PESpin = 0
                  WRITE (8,*)
-     &          'WARNING: PE spin cut-off set as default (MSD is on)'
+     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
                IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
@@ -1434,7 +1434,7 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  PESpin = 0
                ENDIF
                WRITE (8,*)
-     &          'WARNING: PE spin cut-off set as default (MSD is on)'
+     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 C
@@ -1444,9 +1444,9 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                MSC = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          'WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
+     &          ' WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,3) = 0 ! MSC
                IDNa(2,3) = 0
                IDNa(3,3) = 0
@@ -1897,8 +1897,8 @@ C-------continuum using current DE, if not adjust DE
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
 
-      IF(2*NEXreq.GT.NDEX) WRITE(8,'(A,I4,A,A,I4)')  
-     & ' WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+      IF(2*NEXreq.GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
+     & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEXreq     
 
       DO i = 1, NEX(1)
@@ -2400,7 +2400,7 @@ C         Changed to RIPL-3 file
                Gg_obs = gggtmp*1000.0D0 !in meV
                GOTO 85
             ENDDO
-   75       WRITE (8,*) 'WARNING: empire/data/Ggamma.dat file not found'
+   75       WRITE (8,*)' WARNING: empire/data/Ggamma.dat file not found'
    85       CLOSE (47)
          ENDIF
       ENDIF
@@ -2712,7 +2712,7 @@ C         residual nuclei must be heavier than alpha
           IF (iloc.EQ.1) THEN
             WRITE(8,'(''ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
      &                izares
-            STOP ' FATAL: in PRINPUT: NUCLEUS NOT FOUND' 
+            STOP ' ERROR: NUCLEUS NOT FOUND in PRINPUT' 
           ENDIF
           IF(nejc.eq.1) WRITE (12,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
@@ -2961,7 +2961,7 @@ C        DO i = 1, NNUcd
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (8,*)
      &   'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
         IF (KTRlom(0,0).NE.KTRompcc .AND. DIRect.GT.0) WRITE (8,*)
-     &   'WARNING: The inelastic OMP is not equal to incident OMP ', 
+     &   ' WARNING: The inelastic OMP is not equal to incident OMP ', 
      &     KTRlom(0,0)
         DO nejc = 1, NEJcm
           ares = A(1) - AEJc(nejc)
@@ -2971,9 +2971,9 @@ C         residual nuclei must be heavier than alpha
           izares = INT(1000*zres + ares)
           CALL WHERE(izares,nnur,iloc)
           IF (iloc.EQ.1) THEN
-            WRITE(8,'(''ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
+            WRITE(8,'('' ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
      &                izares
-            STOP ' FATAL: in PRINPUT: NUCLEUS NOT FOUND' 
+            STOP ' ERROR: in PRINPUT: NUCLEUS NOT FOUND' 
           ENDIF
           IF(nejc.eq.1) WRITE (8,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
@@ -3333,8 +3333,8 @@ C     VERSIONNAME   = RIVOLI
       goto 7541
  7531 emp_ver='3.1.1 '
       emp_nam='Rivoli'
- 7541 WRITE(8,'(A44,A6,A3)') 
-     > '                        |    E M P I R E  -  ',emp_ver,'  |'
+ 7541 WRITE(8,'(A44,A6,A2)') 
+     > '                        |    E M P I R E  - ',emp_ver,' |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,'(A33,A6,A13)')
@@ -3343,7 +3343,7 @@ C     VERSIONNAME   = RIVOLI
      > '                       |                          |'
       GOTO 754
   753 WRITE (8,*)
-     > '                       |    E M P I R E  -  3.1   |'
+     > '                       |    E M P I R E  - 3.1    |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,*)
@@ -3779,7 +3779,7 @@ C
              ipoten = ABS(val)
              CALL FINDPOT(ki,ieof,ipoten)
              IF (ieof.NE.0) THEN
-                 WRITE (8,*) 'WARNING: Requested RIPL entry ', ipoten,
+                 WRITE (8,*) ' WARNING: Requested RIPL entry ', ipoten,
      &                        ' for inelastic scattering not found'
                  GOTO 100
              ENDIF
@@ -7579,7 +7579,7 @@ C
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED, check your INPUT file'')') name
-      STOP ' FATAL: INVALID FORMAT in input KEY, check your INPUT file '
+      STOP ' ERROR: INVALID FORMAT in input KEY, check your INPUT file '
       END
 C
       SUBROUTINE ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,
@@ -7818,9 +7818,9 @@ C-----Fermi energies calculated for all nuclei and projectile combinations
          ENDDO
       ENDDO
       RETURN
-  300 WRITE (8,*) 'ERROR: File '//
+  300 WRITE (8,*) ' ERROR: File '//
      &  trim(empiredir)//'/RIPL/masses/mass-frdm95.dat missing'  
-      STOP 'FATAL: File ../RIPL/masses/mass-frdm95.dat missing'
+      STOP ' ERROR: File ../RIPL/masses/mass-frdm95.dat missing'
       END
 C
 C
@@ -9657,7 +9657,7 @@ C--------Skipping levels with unknown spin in the discrete level region
 
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
-     &     'WARNING: Max.number of uncoupled coll. levels (99) reached'
+     &    ' WARNING: Max.number of uncoupled coll. levels (99) reached'
             GOTO 600
          ENDIF
 
@@ -10917,9 +10917,10 @@ Ccc
       IF(INT(Energy/DE+1).LT.Limit) RETURN
    10 NEX(1) = NEX(1) - 1
       IF(NEX(1).EQ.1) THEN
-         WRITE(8,*) 'ERROR DEFINING ENERGY STEP'
-         WRITE(8,*) 'REPORT TO mwherman@bnl.gov      '
-         STOP ' FATAL ERROR DEFINING ENERGY STEP'
+         WRITE(8,*) ' ERROR DEFINING ENERGY STEP'
+         WRITE(8,*) ' REPORT TO mwherman@bnl.gov & r.capotenoy@iaea.org'
+         STOP 
+     &    ' ERROR DEFINING ENERGY STEP: email to r.capotenoy@iaea.org'
       ENDIF
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       IF(INT(Energy/DE+1).GE.Limit) GOTO 10
