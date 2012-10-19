@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3149 $
+Ccc   * $Rev: 3150 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Date: 2012-10-20 01:41:12 +0200 (Sa, 20 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2283,7 +2283,7 @@ C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
       DOUBLE PRECISION culbar, ener
-      LOGICAL fexist, ltmp
+      LOGICAL fexist, ltmp, logtmp
       INTEGER i, ilv, ien, ien_beg, l, lmax
       INTEGER INT
       REAL SNGL
@@ -2398,6 +2398,11 @@ C
          ltmp = A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0) .AND.
      &          DIRect.EQ.2 .AND. AEJc(Nejc).LE.1
 
+C        saving the input value of the key CN_isotropic
+C        all Tls calculations calculate only the direct component (no CN)
+         logtmp = CN_isotropic  
+         CN_isotropic = .FALSE.     
+     
          DO i = ien_beg, Nen
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) GOTO 550
@@ -2427,6 +2432,9 @@ C----------------OPTMAN CC calc. (only coupled levels)
             ENDIF
 
   550    ENDDO
+
+C       restoring the input value of the key CN_isotropic
+        CN_isotropic = logtmp
 
          CLOSE (46)
          IF (IOUt.EQ.5) WRITE (8,*) ' Transm. coeff. written to file:',
@@ -2585,23 +2593,23 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
 C     IF (ZEJc(Nejc).EQ.0) READ (45,*) ELAcs
 C 300 CLOSE (45)
 
-	dtmp = 0.d0
+      dtmp = 0.d0
       IF (.NOT.CN_isotropic) READ (45,*,END=300) dtmp ! reading total compound from ECIS (or ELAcs from OPTMAN)
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
 
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) then
 C       write(*,*) 'ECIS abs:',ABScs,' el=',ELAcs
-	  if (ELAcs.EQ.0.d0) then
-	    ELAcs = dtmp
-	  else
+        if (ELAcs.EQ.0.d0) then
+          ELAcs = dtmp
+        else
           dtmp  = ABScs + ELAcs - TOTcs ! dtmp = Compound Elastic
           ELAcs = ELAcs - dtmp ! substracting CE from ELAcs (total elastic)
-	  endif
+        endif
 C       write(*,*) 'CE:',dtmp,' new el=',ELAcs
       ENDIF
 
   300 CLOSE (45)
-	IF (ZEJc(Nejc).EQ.0 .and. ELAcs.EQ.0.d0) ELAcs = dtmp 
+      IF (ZEJc(Nejc).EQ.0 .and. ELAcs.EQ.0.d0) ELAcs = dtmp 
 
       IF (ABScs.LE.0.D0) RETURN
 C
