@@ -5407,6 +5407,30 @@ in the FIT.OUT (\emph{{*}-ompfit.lst}) file. When a fit is complete, EMPIRE
 is run one last time with all options and energies given in the input
 file, excepting the fit ones. 
 
+\part{NUCLEAR ASTROPHYSICS\label{Chap:S-FACTOR}}
+
+   Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only (follows Cauldrons in the Cosmos by Claus E. Rolfs and William S. Rodney - University of Chicago Press 1988).
+
+The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/E dependence of the cross section.  It is generally expressed as:
+
+\begin{equation}
+S(E)=\sigma(E) E \exp[2\pi\eta]\end{equation}
+
+\noindent where $\sigma(E)$ is the cross section in b   
+and E is the center of mass energy in keV 
+
+\center {$2\pi\eta = 31.29Z$_{p}$Z$_{t}${\sqrt{\frac{\mu}{E}}}$}
+
+\center {\mu = M$_p$M$_t$/(M$_p$ + M$_t$)} 
+
+\noindent Z$_p$ is the charge of the projectile  and 
+Z$_t$ is the charge of the target
+
+\par The assumption is that within the Gamow window ($E = E$_0$ \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature T), the S-factor is constant (no energy dependence or very nearly a constant).  If S(E) $\neq$ S(E$_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.
+The current calculation of the S-factor in EMPIRE follows the above formalism and can output both gammas or neutrons in the exit channel (with either an $\alpha$ or proton in the incident channel).  
+
+
+
 
 \part{STRUCTURE  OF  EMPIRE CODE\label{Chap:code}}
 
