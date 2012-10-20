@@ -1,6 +1,6 @@
-cc   * $Rev: 3151 $
+cc   * $Rev: 3153 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-20 01:41:37 +0200 (Sa, 20 Okt 2012) $
+Ccc   * $Date: 2012-10-20 15:20:01 +0200 (Sa, 20 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -4147,6 +4147,15 @@ C-------Set angles for inelastic calculations
       ENDIF
 C     IF(.not.BENchm) FIRst_ein = .FALSE.
       FIRst_ein = .FALSE.
+C     
+C     Changing CN-isotropic to false if energy is too high as CN
+C     decay to discrete levels is negligible         
+C     ELV(NLV(0),0) is the energy of the last discrete level of the target nucleus
+      if(.not.CN_isotropic) then    
+C       Only for actinides, more conditions need to be added        
+C       depending on odd/even properties and mass number
+        if(A(0).gt.220 .and. EIN.ge.8.d0) CN_isotropic = .TRUE.
+      endif
 C
       GOTO 1300
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
@@ -4329,7 +4338,7 @@ C-------and find last non-zero cross section for printing
          DO ie = 1, NDEREC
             corr = corr + RECcse(ie,0,Nnuc)
             IF (RECcse(ie,0,Nnuc).GT.0) ilast = ie
-            write(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
+C           write(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
          ENDDO
          IF (corr.EQ.0) RETURN
 C        WRITE(8,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
