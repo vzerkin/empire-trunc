@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3151 $
+Ccc   * $Rev: 3154 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-20 01:41:37 +0200 (Sa, 20 Okt 2012) $
+Ccc   * $Date: 2012-10-21 18:04:05 +0200 (So, 21 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -254,10 +254,14 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          BETav = 4.d0          ! viscosity parameter
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
+C		 
+C--------CN anisotropy definition for discrete levels
+         CN_isotropic = .True.     ! default
+C
+C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
+C        Important: CN_isotropic can be .False. for the time being only for even-even targets.
+C
 C--------fusion parameters
-C        CN_isotropic = .True.     ! default
-         CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
-C        Important: CN_isotropic can be .False. only if ECIS is used for calculations (OPTMAN is not allowed)
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
