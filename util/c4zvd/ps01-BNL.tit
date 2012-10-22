@@ -37,10 +37,10 @@ LG_BOX4: 0 1280 435 40 0 5
 !TIT:  
 !TIT: {+239}Pu(n,tot)
 TIT2:
-!TIT3XY: 570 510
+TIT3XY: 570 510
 !X-SCALE: log
-!X-RANGE: 5 20
-!X-RANGE: 0.020 20
+X-RANGE: 5 20
+X-RANGE: 0.020 20
 !Y-SCALE: log
 !X-GRID: 0
 !Y-GRID: 0
@@ -56,9 +56,9 @@ TIT2:
 !x-long: Incident Neutron Energy
 legend: 2
 !Various experiments with the same symbol
-!mode: FIXSYM
+mode: FIXSYM
 !Various experiments with various symbol
-mode: varsym
+!mode: varsym
 !Show values next to points
 !showTxtPoints: 1
 showTxtPointBox: 1
