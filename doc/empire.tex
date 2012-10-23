@@ -2372,11 +2372,9 @@ the GSM this distinction follows naturally from the theory and does not
 depend on specific discrete levels that determine a matching energy.
 
 The influence of the superconducting pairing correlations on nuclear
-properties can be characterized by the value of the correlation function $%
-\Delta_0$, which determines directly the even-odd differences in the nuclear
+properties can be characterized by the value of the correlation function $\Delta_0$, which determines directly the even-odd differences in the nuclear
 binding energies and the energy gap of $2\Delta_0$ in the spectrum of
-quasi-particle excitations in even-even nuclei. The critical temperature $%
-T_{c}$ of the phase transition from a superfluid to a normal state is
+quasi-particle excitations in even-even nuclei. The critical temperature $T_{c}$ of the phase transition from a superfluid to a normal state is
 connected with the correlation function through the relation
 \begin{equation}
 T_{c} = 0.567 \Delta_0~.  \label{ig523}
@@ -2526,39 +2524,36 @@ the rotational and vibrational enhancements ($K_{rot}$, $K_{vib}$) and their dam
 \end{equation}
 \\ 
 {\bf Rotational enhancement.} In the adiabatic approximation, the rotational enhancement of the level
-density depends on the nuclear shape symmetry and can be written as \cite%
-{BM}
+density depends on the nuclear shape symmetry and can be written as \cite{BM}
 \begin{equation}
 K_{rot} = \left\{
 \begin{array}{ll}
 1 & \mathrm{for~spherical~nuclei ,} \\
-{\Im}_{\perp}T & \text{for~deformed~nuclei .}%
+{\Im}_{\perp}T & \text{for~deformed~nuclei .}
 \end{array}
 \right.  \label{Krot}
 \end{equation}
 This formula is valid if the mirror and axial symmetry
 of a deformed nuclei is assumed. The most stable nuclei of the rare-earth elements
  ($150 \le A\le 190$) and the actinides $A\ge 230$ are of this shape. For non-axial
-forms the rotational enhancement of the level density becomes greater \cite%
-{BM} (see fission level densities in Section~\ref{fission}).
+forms the rotational enhancement of the level density becomes greater \cite{BM} (see fission level densities in Section~\ref{fission}).
 \\
 Over the previous twenty years, some microscopic models have been developed
 to consider collective effects in highly excited nuclei. The results of all
 these models demonstrate the damping of level density enhancement factors
 with increase of excitation energy. On the basis of the level density
 calculations within the SU(3) model (oscillator mean field with 
-quadrupole-quadrupole interaction between particles), Hansen and Jensen \cite%
-{83H} obtained the following empirical function for the rotational damping factor
+quadrupole-quadrupole interaction between particles), Hansen and Jensen \cite{83H} obtained the following empirical function for the rotational damping factor
 \\
 \begin{equation}
 Q_{rot}=q_r\left[1-\frac{1}{{\Im}_{\perp}T}\right]+\frac{1}{{\Im}_{\perp}T}
 \label{ig5301}
-\end{equation}%
+\end{equation}
 with
 \begin{equation}
 q_{r}=\frac{1}{1+\exp [(U-U_{r})/d_{r}]}~,
 \label{ig530}
-\end{equation}%
+\end{equation}
 Originally it was supposed that the damping parameters could strongly depend upon
 nuclear deformations. However, the analysis of heavy nuclei fissilities
 \cite{90R,98J} shows that damping is independent of deformation with
@@ -2805,11 +2800,10 @@ with
 q_v=\frac{1}{\exp\left(1-\frac{T-T_{1/2}}{DT}\right)}\,.\label{Qvib}
 \end{equation}
 and  $T_{1/2}=1$ MeV , $DT=0.1$ MeV  taken as default.
- These constants are to
+These constants are to
  certain extent arbitrary, since there are no reliable global estimates
  deduced from experiments or theory. The above liquid drop expressions were
- preferred over the seemingly more advanced formulations, such as Eqs.~(\ref%
- {ig532}) -(\ref{ig535}), since the liquid drop approach, after including
+ preferred over the seemingly more advanced formulations, such as Eqs.~(\ref{ig532}) -(\ref{ig535}), since the liquid drop approach, after including
  damping of the vibrational enhancement, provides lower values supported by
 physically sound microscopic calculations.
 \\
@@ -2825,8 +2819,7 @@ compiled in RIPL-3. The original Myers-Swiatecki shell-corrections listed in
 %parameters are small and they relate to the different parametrizations of
 %the vibrational enhancements of the level densities.
 
-The CERNLIB code MINUIT was employed to minimize $f_{%
-\mathrm{rms}}$ quantity defined by 
+The CERNLIB code MINUIT was employed to minimize $f_{\mathrm{rms}}$ quantity defined by 
 \begin{equation}
 f_{rms}= \mathrm{e}xp \left[\frac{1}{N_e} \sum_{i=1}^{N_e} \ln^2 \frac{%
 D^i_{th}}{D^i_{exp}}\right]^{1/2} ,  \label{frms}
@@ -3003,8 +2996,7 @@ Another option (LEVDEN=3) to describe the nuclear level density implemented
 in EMPIRE is the  microscopic combinatorial approach developed during the RIPL-3
 project.  The method consists in using
 single-particle level schemes obtained from constrained axially symmetric
-Hartree-Fock-Bogoliubov  method (HFBM) based on the BSk14 Skyrme force \cite%
-{gsp07} to construct incoherent particle-hole (ph) state densities $\omega
+Hartree-Fock-Bogoliubov  method (HFBM) based on the BSk14 Skyrme force \cite{gsp07} to construct incoherent particle-hole (ph) state densities $\omega
 _{ph}(E_x,M,\pi )$ as functions of the excitation energy $E_x$, the spin
 projection $M$ (on the intrinsic symmetry axis of the nucleus) and the
 parity $\pi $. It is worth mentioning that this $HFB+BSk14$ method is also
@@ -5297,7 +5289,7 @@ added in the following cases:
 \begin{itemize}
 \item The cross section obtained by integrating the spectrum                  
    should agree with the value given directly in the                       
-   EMPIRE output file. If the difference exceeds 2%,                       
+   EMPIRE output file. If the difference exceeds 2\%,                       
    a warning message is written, giving the reaction                       
    MT number, the incident particle energy, the expected                   
    cross section (i.e. the value given directly in the                     
@@ -5306,7 +5298,7 @@ added in the following cases:
    Legendre polynomial expansion coefficients. If the                      
    distribution reconstructed from the Legendre polynomial                 
    coefficients differs from the pointwise values on the                   
-   EMPIRE output file by more than 5%, a warning message                   
+   EMPIRE output file by more than 5\%, a warning message                   
    is written, giving the reaction MT number, the outgoing                 
    particle ZA identifier, the incident and the outgoing                   
    particle energies and the percent difference in the                     
@@ -7377,7 +7369,7 @@ The degree of asymmetry has the following significance
 \begin{equation}
 B_{sym,h}=\left\{
 \begin{array}{lll}
-1 & {\rm axial,~ mirror~ symmetry}& h=1,\quad N$<$144) \\%({\rm ~inner~barrier} N$<$144) \\
+1 & {\rm axial,~ mirror~ symmetry}& h=1,\quad N<144) \\%({\rm ~inner~barrier} N$<$144) \\
 2 & {\rm axial~ asymmetry,~ mirror~ symmetry}& h=1,\quad N\geq 144) \\%({\rm ~inner~barrier} N\geq 144) \\
 3 & {\rm axial~ symmetry,~ mirror ~asymmetry}& h=2,(3)\\% ({\rm ~outer barrier(s)})\\
 \end{array}
@@ -9862,7 +9854,7 @@ brings the code closer to the users.
 
 %main users 
 First of all, we would like to acknowledge our colleagues whose work helped
-to prepare this paper H.I. Kim, G. Nobre, A. Palumbo, and M. Pigni  deserve  
+to prepare this paper H. I. Kim, G. P. A. Nobre, A. Palumbo, and M. Pigni  deserve  
 a special mention as the  major users of the code. Their 
 comments were of great value and enabled us to trace coding errors, improve
 stability and ease of use of the code. 
