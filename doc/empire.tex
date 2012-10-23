@@ -41,13 +41,21 @@
 \usepackage{enumitem}
 %\setdescription{labelsep=\textwidth}
 
+%\usepackage{authblk}
+
+\newenvironment{abstract}{
+%   \onehalfspacing%
+%    \chapter*{\centering Abstract}%
+}{}
+
 \begin{document}
+\begin{titlepage}
 \title{{\Huge
  EMPIRE--3.1 Rivoli} \\
 modular system for nuclear reaction calculations and nuclear data evaluation\\[5mm]
-{\Huge User's Manual}}\\
+{\Huge User's Manual}}
 \author{
-\texts{\large 
+\large 
 ~\\
 M. Herman$^{1}$, 
 R. Capote$^{2}$,
@@ -61,7 +69,7 @@ S Hoblit$^{1}$,
 Young-Sik Cho$^{8}$,
 V. Plujko$^{9}$,
 V. Zerkin$^{2}$.
-}{\large }\\[2mm]
+\\[2mm]
 \textsf{\normalsize 1) NNDC, Brookhaven National Laboratory, Upton, USA}\\
 \textsf{\normalsize e-mail: mwherman@bnl.gov}\\
 %
@@ -456,10 +464,8 @@ OPTMAN is able to analyze the collective level structure, E2, E3, E4 $\gamma
 -$transition probabilities and reaction data in a self-consistent manner.
 OPTMAN can be applied not only to heavy rotational nuclei  \cite{sukhjnst00,
 sukhnd2001U8}, but can be also applied
-very successfully even to a very light nucleus, namely $^{12}$C \cite%
-{chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
-vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite%
-{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. Many of those soft-rotor
+very successfully even to a very light nucleus, namely $^{12}$C \cite{chibaNP97,chibajnst00} and light one $^{28}$Si \cite{sun2003}, and also to
+vibrational nuclei such as $^{52}$Cr \cite{cr52}, $^{56}$Fe \cite{jeongJKPS00,fe56new} and $^{58}$Ni \cite{sukhPRC00}. Many of those soft-rotor
 potentials are available within the RIPL library, being therefore available for EMPIRE 
 calculations, once OPTMAN was included. 
 
@@ -472,8 +478,7 @@ allowing for calculations of the (p,n) cross sections with excitation of isobari
 states and therefore, making possible to derive Lane consistent potentials including a 
 new Lane-consistent Coulomb correction. 
 
-A complete OPTMAN\ code's manual \cite%
-{OPTMAN1,OPTMAN2} and its newest extension \cite{OPTMAN3} give details
+A complete OPTMAN\ code's manual \cite{OPTMAN1,OPTMAN2} and its newest extension \cite{OPTMAN3} give details
 of the soft-rotator theory, physical ideas and computation algorithms developed
 and incorporated into OPTMAN code, and description of input and output files, 
 allowing easy running, understanding and using of OPTMAN outputs. Interested readers 
@@ -532,8 +537,7 @@ function with the energy resolution defined by parameter RESOLF. However, the co
 $N$ is quite important for collective discrete levels as it determines the corresponding discrete level
 (e.g. if the collective level number is $N=5$, then the calculated cross sections are assigned to the 
 5th discrete level). The latest remark is important as it will be a mistake to assign them sequential
-consecutive numbers without checking the discrete level numbering in the corresponding EMPIRE file (
-$file.lev).
+consecutive numbers without checking the discrete level numbering in the corresponding EMPIRE file (\emph{{*}.lev}).
 
 For the DIRECT 1 option, the direct cross sections are exact but spherical transmission
 coefficients $T_{l}$ are used for subsequent preequilibrium and HF\index{Hauser-Feshbach}
@@ -877,24 +881,20 @@ single-particle energies  and wave functions used in TRISTAN were obtained from 
 Nilsson Hamiltonian with standard parameters. Pairing correlations were
 accounted for by the BCS method in the constant gap approximation . The
 resulting two-quasi-particle (2qp) excitation energies and wave functions
-determine the uncorrelated 2qp multipole nuclear Green functions $%
-G_{L}^{2qp}(\varepsilon )$. The uncorrelated $2qp$ response function for an
+determine the uncorrelated 2qp multipole nuclear Green functions $G_{L}^{2qp}(\varepsilon )$. The uncorrelated $2qp$ response function for an
 external one-body multipole field $U_{L}=v(r)Y_{L}$ is then $\chi
 _{L}^{2qp}(\varepsilon )=\langle c|\,U_{L}^{\dagger
 }\,G_{L}^{2qp}(\varepsilon )\,U_{L}|c\rangle $, $|c\rangle $ being an
 initial reference state. In the RPA schematic model a separable residual
-particle-hole interaction is assumed of the form $V^{sep}(1,2)=\sum_{L}%
-\kappa _{L}U_{L}(1)U_{L}(2)$. Then the quasi-particle RPA (QRPA) correlated
+particle-hole interaction is assumed of the form $V^{sep}(1,2)=\sum_{L}\kappa_{L}U_{L}(1)U_{L}(2)$. Then the quasi-particle RPA (QRPA) correlated
 response function for the operator $U_{L}$ is obtained from the
-Bethe-Salpeter (B-S) equation~\cite{fetter}:%
+Bethe-Salpeter (B-S) equation~\cite{fetter}:
 \begin{equation}
 \chi _{L}^{QRPA}{}(\varepsilon )=\chi {}_{L}^{2qp}(\varepsilon )+\kappa
 _{L}\chi ({}_{L}^{2qp}(\varepsilon )\chi {}_{L}^{QRPA}(\varepsilon )
 \end{equation}
 
-The multipole spectroscopic strength function of multipolarity $L$ is $%
-S_{L}(\varepsilon )=-Im\chi _{L}^{QRPA}(\varepsilon +i\Gamma /2)/\pi $, $%
-\Gamma $ being the spreading width. In the current version of EMPIRE we use
+The multipole spectroscopic strength function of multipolarity $L$ is $S_{L}(\varepsilon )=-Im\chi _{L}^{QRPA}(\varepsilon +i\Gamma /2)/\pi $, $\Gamma $ being the spreading width. In the current version of EMPIRE we use
 the TRISTAN module modified according to Ref.~\cite{Wienke:2008}. 
 A quadrupole deformation term, taken from the
 EMPIRE input, has been added to the
@@ -905,8 +905,7 @@ Consequently the uncorrelated $2qp$ multipole nuclear Green functions are
 not diagonal with respect to $L$. However, because of the symmetry with
 respect to the deformation axis both parity $\pi $ and angular momentum
 projection $K$ onto this axis are still conserved. The uncorrelated $2qp$
-multipole response function for the external one-body field $%
-U_{L,K}=v_{L,K}(r)Y_{L}^{K}$ then becomes:
+multipole response function for the external one-body field $U_{L,K}=v_{L,K}(r)Y_{L}^{K}$ then becomes:
 
 \begin{equation}
 \chi _{L,,K}^{2qp}(\varepsilon )=
@@ -943,8 +942,7 @@ calculations. In the IAEA
 evaluation for $^{232}$Th the missing strength in the continuum region of
 the neutron spectrum was filled up with a large number of fictitious
 collective levels embedded in the continuum. Similar approach has also been
-used in other ENDF/B-VII evaluations for important actinides, such as $%
-^{235,238}$U and $^{239}$Pu. The "deformed" MSD approach 
+used in other ENDF/B-VII evaluations for important actinides, such as $^{235,238}$U and $^{239}$Pu. The "deformed" MSD approach 
 allows to achieve similar result on a
 physically more sound basis. The method is computationally faster and has been
 implemented as a default in the current version of the
@@ -1397,13 +1395,11 @@ between two non-collective states \begin{equation}
 \textbf{(iv)} The matrix element $(\Pi^{-1})_{M4,(M+1)m}$ with $m$
 = 1, 2, and 3 describes the creation of a GDR in the next higher exciton
 class. In the current version of EMPIRE the total GDR width is taken
-to describe this process%
-\footnote{This may overestimate creation rate of the GDR. Other approaches are
+to describe this process\footnote{This may overestimate creation rate of the GDR. Other approaches are
 to use non-collective matrix element or the GDR width split among
 the neighboring classes. To activate these possibilities the user
 has to edit MSC\index{MSC}-NVWY\index{NVWY}.f file and uncomment
-adequate lines in both of the following ranges 1028-1036 and 1093-1106.%
-}. However, the creation of a GDR is possible only if a particle or
+adequate lines in both of the following ranges 1028-1036 and 1093-1106.}. However, the creation of a GDR is possible only if a particle or
 a hole has enough energy to create the GDR state. This is another
 consequence of the two-body nature of the residual interaction. A
 particle with the excitation energy of the GDR resonance is generally
@@ -1527,10 +1523,9 @@ and Ribansky~\cite{Ribansky:73}
 &&\lambda _{-}(E,n-2)\tau (n-2)-  \notag \\
 &&\left[ \lambda _{+}(E,n)+\lambda _{-}(E,n)+L(E,n)\right]  \notag \\
 &&\tau (n),  \label{master}
-\end{eqnarray}%
+\end{eqnarray}
 where $q_{t}(n)$ is the initial occupation probability of the composite
-nucleus in the state with the exciton number $n$, $\lambda _{+}(E,n)$ and $%
-\lambda _{-}(E,n)$ are the transition rates for decay to neighboring states,
+nucleus in the state with the exciton number $n$, $\lambda _{+}(E,n)$ and $\lambda _{-}(E,n)$ are the transition rates for decay to neighboring states,
 and $L(n,E)$ is the total emission rate integrated over emission energy for
 particles (protons $\pi ,$ neutrons $\nu $ and clusters) and $\gamma $-rays.
 Note that no spin is included in the PCROSS formulation, which is the main
@@ -1556,8 +1551,7 @@ _{a,b}^{r}(E_{inc})D_{a,b}(E_{inc})\times  \notag \\
 where $\sigma _{a,b}^{r}(E_{inc})$ is the cross section of the reaction
 $(a,b)$, $W_{b}(E,n,\epsilon _{b})$ is the probability of emission of a
 particle of type \textit{b} (or gamma ray) with energy $\epsilon _{b}$ from
-a state with $n$ excitons and excitation energy $E$ of the CN, and $%
-D_{a,b}(E_{inc})$ is the depletion factor, which takes into account the flux
+a state with $n$ excitons and excitation energy $E$ of the CN, and $D_{a,b}(E_{inc})$ is the depletion factor, which takes into account the flux
 loss as a result of the direct reaction processes. Using the direct reaction
 cross section $\sigma _{a,b}^{dir}(E_{inc})$, the
 depletion factor can be calculated in the following manner,
@@ -1575,14 +1569,13 @@ The equidistant spacing model has been used extensively to derive closed
 analytical formulae for partial state densities $\omega (p,h,U)$ employed in
 pre-equilibrium models (for a review see Ref.\cite{RIPL2}). At present,
 the PCROSS code uses the Williams formula~\cite{Williams:71}, where the Pauli
-correction $A(p,h)$ is calculated in accordance with Kalbach's method~\cite%
-{Kalbach:83}.
+correction $A(p,h)$ is calculated in accordance with Kalbach's method~\cite{Kalbach:83}.
 \begin{equation}
 \omega (p,h,E)=g\frac{\left( g(E-D)-A(p,h)\right) ^{p+h-1}}{p!h!(p+h-1)!}
-\end{equation}%
+\end{equation}
 \begin{equation*}
 A(p,h)=\frac{1}{4}\left[ p(p-1)+h(h-1)\right].
-\end{equation*}%
+\end{equation*}
 The state density $\omega (p,h,U)$ is set to zero when the excitation energy
 $E$ is less than the Pauli energy $\frac{1}{4g}\left[ p^{2}+h^{2})\right] $
 \cite{Baguer:89}. It was pointed out by Blann~\cite{Blann:72} that the state
@@ -1598,14 +1591,11 @@ Blann and Mignerey~\cite{Blann:72a} is used. This is based on experimental
 data of nucleon scattering and considers the Pauli principle in an
 approximate way. Using this parametrization and the
 particle-hole state densities from the Williams formula, one obtains
-the expressions for the internal transition rates found by Machner~\cite%
-{Machner:81}
+the expressions for the internal transition rates found by Machner~\cite{Machner:81}
 \begin{equation}
-\lambda _{+}(E,n)=\frac{1}{K_{mfp}}\left[ 1.4x10^{21}E^{\prime }-\frac{2}{n+1%
-}6x10^{18}E^{\prime 2}\right].  \label{transplus}
-\end{equation}%
-In the PCROSS code, the additional 3/8 factor introduced by Gupta~\cite%
-{Gupta:81} is taken into account on the r.h.s. of Eq.~(\ref{transplus}).
+\lambda _{+}(E,n)=\frac{1}{K_{mfp}}\left[ 1.4x10^{21}E^{\prime }-\frac{2}{n+1}6x10^{18}E^{\prime 2}\right].  \label{transplus}
+\end{equation}
+In the PCROSS code, the additional 3/8 factor introduced by Gupta~\cite{Gupta:81} is taken into account on the r.h.s. of Eq.~(\ref{transplus}).
 This factor results from the reduction of a two-component master equation
 (i.e. with the neutron-proton distinction) to an effective one-component
 equation~\cite{Gupta:81}. Taking also into account the direct reaction
@@ -1641,30 +1631,26 @@ reaction and is calculated as discussed by Gupta~\cite{Gupta:81}.
 \paragraph{Probability of cluster emission.}
 
 The module PCROSS includes a pre-equilibrium mechanism for clusters in the
-incoming and outgoing channels by including the Iwamoto-Harada model~\cite%
-{Iwamoto:82} parametrized and improved in~\cite{Sato:83,Shang:88,Shang:89}.
+incoming and outgoing channels by including the Iwamoto-Harada model~\cite{Iwamoto:82} parametrized and improved in~\cite{Sato:83,Shang:88,Shang:89}.
 In this model, the formation probability of a cluster takes into account
 excitons below and above the Fermi surface and avoids free parameters. In
 the Iwamoto-Harada model~the probability of emission of the cluster $\beta $
 with spin $s_{\beta }$, reduced mass $\mu _{\beta }$ and energy $\epsilon
-_{\beta }$ from a state with $n$ excitons is given by%
+_{\beta }$ from a state with $n$ excitons is given by
 \begin{eqnarray}
-W_{\beta }(E,n,\epsilon _{\beta })&=&\frac{2s_{\beta }+1}{\pi ^{2}\hbar ^{3}}%
+W_{\beta }(E,n,\epsilon _{\beta })&=&\frac{2s_{\beta }+1}{\pi ^{2}\hbar ^{3}}
 \mu _{\beta }\epsilon _{\beta }\sigma _{\beta }^{inv}(\epsilon _{\beta
 })\times  \notag \\
 &&\frac{\sum\limits_{l+m=\beta }F_{lm}^{\beta }(\epsilon _{\beta
 })Q_{lm}^{\beta }(p.h)\omega _{res}(p-l,h,U)}{\omega _{CN}(p,h,E)},  \notag \\
 &&
-\end{eqnarray}%
-where the factor $Q_{lm}^{\beta }(p,h)$ is the generalization of the factor $%
-Q_{b}(p,h)$ which takes into account the probability of the outgoing cluster
+\end{eqnarray}
+where the factor $Q_{lm}^{\beta }(p,h)$ is the generalization of the factor $Q_{b}(p,h)$ which takes into account the probability of the outgoing cluster
 $\beta $ being formed with $l$ particles situated above and $m$ below the
 Fermi surface ($\beta =l+m$)~\cite{Shang:89} and the factor $F_{lm}^{\beta
-}(\epsilon _{\beta })$ gives the probability of formation of the cluster $%
-\beta $ as a function of its energy. This last factor is calculated in
+}(\epsilon _{\beta })$ gives the probability of formation of the cluster $\beta $ as a function of its energy. This last factor is calculated in
 PCROSS following the unpublished parametrization based on the original
-calculations of the cluster formation probability by Iwamoto and Harada~\cite%
-{Iwamoto:82}.
+calculations of the cluster formation probability by Iwamoto and Harada~\cite{Iwamoto:82}.
 
 
 
@@ -1674,8 +1660,7 @@ in the $^{197}$Au(n,$\alpha $) reaction.
 
 \begin{figure}[tbph]
 \includegraphics[width=0.7\paperwidth]{hermanm1_f4.eps}
-\caption{Improvement in the description of the $^{179}$Au(n,$\protect\alpha $%
-) reaction achieved by employing the Iwamoto-Harada model for pre-equilibrium
+\caption{Improvement in the description of the $^{179}$Au(n,$\protect\alpha $) reaction achieved by employing the Iwamoto-Harada model for pre-equilibrium
 emission of $\protect\alpha $-particles.}
 \label{goldna}
 \end{figure}
@@ -1684,15 +1669,14 @@ emission of $\protect\alpha $-particles.}
 
 The probability of emission of gamma radiation (without spin selection
 rules) is derived in a way similar to the nucleon emission probability by
-applying the principle of detailed balance~\cite%
-{Pluyko:78,Betak:79,Akkermans:85} and can be expressed as%
+applying the principle of detailed balance~\cite{Pluyko:78,Betak:79,Akkermans:85} and can be expressed as
 \begin{eqnarray}
-W_{\gamma }(E,n,\epsilon _{\gamma })&=&\frac{1}{\pi ^{2}\hbar ^{3}c^{2}}%
+W_{\gamma }(E,n,\epsilon _{\gamma })&=&\frac{1}{\pi ^{2}\hbar ^{3}c^{2}}
 \epsilon _{\gamma }^{2}\sigma _{\gamma }^{inv}(\epsilon _{\gamma })\times
 \notag \\
 &&\frac{\sum\limits_{k}b(k\rightarrow n,\epsilon _{\gamma })\omega
 _{res}(p,h,U)}{\omega _{CN}(p,h,E)}.
-\end{eqnarray}%
+\end{eqnarray}
 Coefficients $b(k\rightarrow n,\epsilon _{\gamma })$ are the branching
 ratios derived by Gruppelaar and Akkermans~\cite{Akkermans:85}. The inverse
 reaction cross section $\sigma _{\gamma }^{inv}(\epsilon _{\gamma })$ in
@@ -1744,11 +1728,8 @@ The Hybrid Monte-Carlo Simulation (HMS) approach to the pre-equilibrium
 emission of nucleons has been formulated by M. Blann~\cite{Blann-HMS} as a
 hybrid-model~\cite{hybrid,hybrid1,hybrid2,hybrid3} inspired version of the
 intranuclear cascade approach. Contrary to other classical pre-equilibrium
-models, this approach avoids multi-exciton level densities%
-\index{p-h level densities}, which were shown by Bisplinghoff~\cite%
-{Bisplinghoff} to be used inconsistently in the exciton and in the hybrid
-formulations. The HMS%
-\index{HMS} model has a number of attractive features. First of all, there
+models, this approach avoids multi-exciton level densities\index{p-h level densities}, which were shown by Bisplinghoff~\cite{Bisplinghoff} to be used inconsistently in the exciton and in the hybrid
+formulations. The HMS\index{HMS} model has a number of attractive features. First of all, there
 are no physical limits on the number of pre-equilibrium emissions (apart from
 energy conservation). With the addition of linear momentum conservation by
 M. Chadwick and P. Oblo\v{z}insk\'{y}
@@ -1757,8 +1738,7 @@ These include cross sections for the production of residuals, light-particle
 double-differential spectra and spectra of recoils. Spin and
 excitation-energy dependent populations of residual nuclei can also be
 obtained, an essential feature for coupling the pre-equilibrium mechanism to
-the subsequent compound nucleus decay. The binding energies in the HMS%
-\index{HMS} model are thermodynamically correct. The DDHMS model proved to
+the subsequent compound nucleus decay. The binding energies in the HMS\index{HMS} model are thermodynamically correct. The DDHMS model proved to
 perform very well
 %up to at least 250 MeV, extending energy range of the EMPIRE applicability
 up to at least 250 MeV. %to the desired limit.
@@ -1795,12 +1775,10 @@ is given a chance to interact or be emitted with \emph{a priori} equal
 probability. The cascade ends when all excitons are bound. Below, we
 summarize various probability distributions which are used in concert with a
 random number generator. For choosing a collision partner, it is assumed that
-the unlike interaction is 3 times more probable than the like one ($%
-\sigma_{np}=3\sigma_{nn}$). Thus, for an incident neutron we have $P_{nn}$
+the unlike interaction is 3 times more probable than the like one ($\sigma_{np}=3\sigma_{nn}$). Thus, for an incident neutron we have $P_{nn}$
 and $P_{np}$ for the probability of exciting neutron and proton respectively
 \begin{equation}
-P_{nn}=%
-\frac{(A-Z)}{(A-Z)+3Z},  \label{Pnn}
+P_{nn}=\frac{(A-Z)}{(A-Z)+3Z},  \label{Pnn}
 \end{equation}
 
 \begin{equation}
@@ -1814,13 +1792,12 @@ P_{pp}=\frac{Z}{Z+3(A-Z)},  \label{Ppp}
 P_{pn}=1-P_{pp}.  \label{Ppn}
 \end{equation}
 The energy distribution of the scattered particles $P(\varepsilon)$ is given
-by the ratio of the $(n-1)-$ and $n$-exciton level densities%
-\index{p-h level densities} $\rho_{n}$
+by the ratio of the $(n-1)-$ and $n$-exciton level densities\index{p-h level densities} $\rho_{n}$
 \begin{equation}
-P(\varepsilon)d\varepsilon=%
+P(\varepsilon)d\varepsilon=
 \frac{\rho_{n-1}(E-\varepsilon)g}{\rho_{n}(E)}d\varepsilon,  \label{Penergy}
 \end{equation}
-with $n=2\, or\,3$ and%
+with $n=2\, or\,3$ and
 \begin{equation}
 \rho_{2}(E)=\frac{g(gV)}{2}\,\,\, if\,\,\, E>V,  \label{ro2u}
 \end{equation}
@@ -1834,18 +1811,15 @@ with $n=2\, or\,3$ and%
 Here, $V$ is the potential well depth. The emission probability is calculated
 as
 \begin{equation}
-P_{\nu}(\varepsilon-Q)=\frac{\lambda_{c}(\varepsilon-Q)}{\lambda_{c}(%
-\varepsilon-Q)+\lambda_{+}(\varepsilon)},  \label{Pnu}
+P_{\nu}(\varepsilon-Q)=\frac{\lambda_{c}(\varepsilon-Q)}{\lambda_{c}(\varepsilon-Q)+\lambda_{+}(\varepsilon)},  \label{Pnu}
 \end{equation}
 with the emission rate being
 \begin{equation}
-\lambda_{c}(\varepsilon-Q)\sim\frac{\sigma_{\nu}(\varepsilon-Q)(%
+\lambda_{c}(\varepsilon-Q)\sim\frac{\sigma_{\nu}(\varepsilon-Q)(
 \varepsilon-Q)(2S+1)\mu_{\nu}}{g}.  \label{lambdac}
 \end{equation}
 Here, $\sigma_{\nu}$ is the inverse reaction cross section, $Q$ is the binding
-energy, $g$ is the single-particle density, $S$ denotes nucleon spin, and $%
-\mu_{\nu}$ stands for the reduced nucleon mass. Following the hybrid%
-\index{HYBRID} model, $\lambda_{+}(\varepsilon)$ is calculated from the mean
+energy, $g$ is the single-particle density, $S$ denotes nucleon spin, and $\mu_{\nu}$ stands for the reduced nucleon mass. Following the hybrid\index{HYBRID} model, $\lambda_{+}(\varepsilon)$ is calculated from the mean
 free path of a nucleon in nuclear matter. The version which is actually
 implemented in EMPIRE was coded by M. Chadwick and extended to
 double-differential cross sections in collaboration with P. Oblo\v zinsk\' y
@@ -5409,24 +5383,26 @@ file, excepting the fit ones.
 
 \part{NUCLEAR ASTROPHYSICS\label{Chap:S-FACTOR}}
 
-   Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only (follows Cauldrons in the Cosmos by Claus E. Rolfs and William S. Rodney - University of Chicago Press 1988).
+Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only (follows Cauldrons in the Cosmos by Claus E. Rolfs and William S. Rodney - University of Chicago Press 1988).
 
-The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/E dependence of the cross section.  It is generally expressed as:
+The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/$E$ dependence of the cross section.  It is generally expressed as:
 
 \begin{equation}
-S(E)=\sigma(E) E \exp[2\pi\eta]\end{equation}
+S(E)=\sigma(E) E \exp[2\pi\eta]
+\end{equation}
+where $\sigma(E)$ is the cross section in b   
+and $E$ is the center of mass energy in keV,
 
-\noindent where $\sigma(E)$ is the cross section in b   
-and E is the center of mass energy in keV 
+\begin{equation}
+2\pi\eta = 31.29Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
+\end{equation}
+\begin{equation}
+\mu = M_pM_t/(M_p + M_t),
+\end{equation}
+where $Z_p$ is the charge of the projectile  and 
+$Z_t$ is the charge of the target.
 
-\center {$2\pi\eta = 31.29Z$_{p}$Z$_{t}${\sqrt{\frac{\mu}{E}}}$}
-
-\center {\mu = M$_p$M$_t$/(M$_p$ + M$_t$)} 
-
-\noindent Z$_p$ is the charge of the projectile  and 
-Z$_t$ is the charge of the target
-
-\par The assumption is that within the Gamow window ($E = E$_0$ \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature T), the S-factor is constant (no energy dependence or very nearly a constant).  If S(E) $\neq$ S(E$_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.
+The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature $T$), the S-factor is constant (no energy dependence or very nearly a constant).  If $S(E) \neq S(E_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.
 The current calculation of the S-factor in EMPIRE follows the above formalism and can output both gammas or neutrons in the exit channel (with either an $\alpha$ or proton in the incident channel).  
 
 
@@ -5586,7 +5562,7 @@ option for level densities may choose not to install them.
 % Users of \emph{x4cd} should ignore this file. 
 \end{itemize}
 Out of these files only \emph{empire-3.1.tgz} is required to run
-calculations, \emph{x4cd.tgz,} \emph{HFBCS-lev-dens.tgz,} and \emph{fis-lev-den.tgz}
+calculations, \emph{x4cd.tgz}, \emph{HFBCS-lev-dens.tgz}, and \emph{fis-lev-den.tgz}
 are optional and \emph{X4-2-17.tgz} is redundant if \emph{x4cd.tgz}
 can be used.
 
@@ -6522,8 +6498,8 @@ In bash, for example, the variable may be set in any of the bash setup files (.b
 \\
 \begin{verbatim}
 export EMPIREDIR=/path/to/empire
-\end{verbatim}
-\\
+\end{verbatim} \\
+%\\
 On Windows, the variable should be added to the registry.\\
 Again, setting the EMPIREDIR variable is only required in order to run a project some place other than in a
 direct sub-directory of the empire installation directory.
@@ -6651,7 +6627,7 @@ region\tabularnewline
 \hline
 \end{tabular}
 \end{table}
-\\
+%\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \subsubsection{List of available scripts}
@@ -7193,8 +7169,8 @@ It should be noted that there is a difference in the way EMPIRE accesses
 general input library in the first and subsequent runs of a given
 project. In the first run the code extracts relevant data from the
 input parameter library and creates local project files with discrete levels ({*}.\emph{lev}),
-collective levels (\emph{{*}-lev.col}), optical model parameters \emph{({*}-omp.ripl,}
-and \emph{{*}-omp.dir)}, fission parameters \emph{{*}-inp.fis)} and relevant 
+collective levels (\emph{{*}-lev.col}), optical model parameters (\emph{{*}-omp.ripl},
+and \emph{{*}-omp.dir}), fission parameters \emph{{*}-inp.fis} and relevant 
 EXFOR data ({*}.\emph{exf} and {*}.\emph{c4}) files. Once these files 
 exist the code uses them instead of the files contained in the general input library.
 This has two advantages: (i) time is spared because the case specific files are
@@ -7361,7 +7337,7 @@ inertial parameters ${\hbar^{2}}/{2\Im_{h(w)}}$ used in Eq.~\ref{tsrot} to build
 \item[- ]{L=15} -
 quadrupole deformations corresponding to the extrema of the fission barrier. The values printed
 correspond to the initial barrier parameters. If barrier parameters have been modified, EMPIRE calculates 
-and uses the new deformations which are printed in \emph{*-fiss.out} but not in\emph{ *-inp.fis}. Therefore
+and uses the new deformations which are printed in \emph{*-fiss.out} but not in \emph{*-inp.fis}. Therefore
 their change would have no impact.
 %
 \item[- ]{L=20+$w;~ (w=1,N_w$)}     -
@@ -8135,7 +8111,7 @@ library. In particular, deformation parameters (both static and dynamic) should 
 attention since cross sections are very sensitive to their values.
 Static deformation parameters can be modified automatically using the FITOMP option. 
 
-}\subsection{{*}-fiss.out (FISSION.OUT)\label{fissout}}
+\subsection{{*}-fiss.out (FISSION.OUT)\label{fissout}}
 
 Contains details of the fission calculations such quantities as level
 densities at saddles, fission transmission coefficients and fission
@@ -8202,7 +8178,7 @@ intended only for plotting and does not respect certain limits imposed
 by the ENDF-6 format.
 
 \subsection{{*}-mat.sen (SENSITIVITY.MATRIX)}
-Sensitivity matrix calculated with EMPIRE when KALMAN option in the main input is set to 1 and sensitivity input {*\emph{}-inp.sen} is present in the working directory.  The matrix contains a block for each model parameter that has been included in the sensitivity input. These blocks contain a line for each incident energy and a column for each reaction calculated by EMPIRE. The sensitivities printed in the matrix represent relative change of the cross section to the perturbation of the parameter but they are not divided by the perturbation (this is done later when the matrix is prepared to used by the KALMAN code). We choose this representation since it makes analyses of the sensitivities immediate - if the individual perturbations are reasonable the sensitivities can be compared directly without referring to the perturbation themselves.      
+Sensitivity matrix calculated with EMPIRE when KALMAN option in the main input is set to 1 and sensitivity input {*\emph{-inp.sen}} is present in the working directory.  The matrix contains a block for each model parameter that has been included in the sensitivity input. These blocks contain a line for each incident energy and a column for each reaction calculated by EMPIRE. The sensitivities printed in the matrix represent relative change of the cross section to the perturbation of the parameter but they are not divided by the perturbation (this is done later when the matrix is prepared to used by the KALMAN code). We choose this representation since it makes analyses of the sensitivities immediate - if the individual perturbations are reasonable the sensitivities can be compared directly without referring to the perturbation themselves.      
 
 
 \subsection{{*}.exf (EXFOR.DAT)}
@@ -8781,7 +8757,7 @@ MeV.}
 
 \end{figure}
 
-There are no restrictions on the contents of the input file ({*}.\emph{inp)}
+There are no restrictions on the contents of the input file ({*}.\emph{inp})
 used for displaying the cumulative plots except that the FITLEV record
 must be included with VAL different from 0. Dispositions that do not
 consider level densities are ignored as the code exits after the plots
@@ -9613,10 +9589,10 @@ An additional source of low uncertainties has been discussed in the contribution
 \section{Description of test cases}
 
 In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
-The benchmarks (\emph{subdirectory \\benchmarks)}) are intended for the verification of the local
+The benchmarks (\emph{subdirectory \\benchmarks}) are intended for the verification of the local
 installation, and most of them are single-energy calculations. About 15 benchmarks are currently 
 included with the system.
-The test cases (\emph{subdirectory \\test-cases)}) are intended to contain real
+The test cases (\emph{subdirectory \\test-cases}) are intended to contain real
 physical show cases, a few of them are provided. This directory will ideally expand in the future
 to include the best cases of succesful applications of EMPIRE-3.1 submitted by users.
 
@@ -10000,7 +9976,7 @@ Each record must be in the FORTRAN format:\\
 \begin{quote}
 FORMAT (A6,G10.5,4I5) {\bf NAME},VAL,I1,I2,I3,I4
 \end{quote}
-\\
+%\\
 Fixed format allows to avoid typing zeros if no input is needed for some 
 positional parameters.
 
@@ -10162,7 +10138,7 @@ not used in deriving phenomenological potentials. The exception is for dispersiv
 in this case the VS uncertainty is fully determined by the uncertainty of the imaginary surface
 potential (WS). The uncertainty of the spin-orbit potential is also not considered as its influence on calculated
 cross sections is small.\\
-The relative uncertainty in \% of the corresponding parameter (defined by letters \emph{a} and\emph{ b}) is given by VAL, 
+The relative uncertainty in \% of the corresponding parameter (defined by letters \emph{a} and \emph{b}) is given by VAL, 
  target's  Z and  A numbers are defined by I1 and I2, respectively. 
 I3 defines the outgoing particle, i.e., the incident particle for the inverse reaction (I3=1 for 
 neutron, I3=2 for protons, etc). \\
@@ -10212,7 +10188,7 @@ UOMPAS   2.5000   24    55   2
 \end{description}
 
 \section*{Scattering on collective levels}
-EMPIRE includes two coupled-channels codes: ECIS\index{ECIS}} and
+EMPIRE includes two coupled-channels codes: ECIS\index{ECIS} and
 OPTMAN\cite{OPTMAN1,OPTMAN2,OPTMAN3}. ECIS is the default optical model solver,
 but OPTMAN should be used for selected potentials, when soft-rotor 
 couplings are desired, as well as for actinide potentials that couple levels
