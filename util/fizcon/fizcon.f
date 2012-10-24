@@ -1,5 +1,5 @@
-! $Rev: 3145 $                                                         |
-! $Date: 2012-10-19 09:03:02 +0200 (Fr, 19 Okt 2012) $                                                     
+! $Rev: 3161 $                                                         |
+! $Date: 2012-10-24 18:28:28 +0200 (Mi, 24 Okt 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.14   October 2012   A. Trkov
+!-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.13   October 2012   A. Trkov
 !-V                        Trivial fix of an IF statement in CK35
 !-V         Version 8.12   October 2012   A. Trkov
@@ -222,12 +224,7 @@
 !
 !     FIZCON VERSION NUMBER
 !
-!+++MDC+++
-!...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
-!...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.13'
-!---MDC---
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -2680,6 +2677,12 @@
       REAL(KIND=R4) :: SPI
       REAL(KIND=R4) :: AWRIL
       REAL(KIND=R4) :: FL,AJLO,AJHI,AJ
+!
+!     READ AND TEST ENERGY DEPENDENT SCATTERING LENGTH
+!
+      IF(NRO.NE.0)   THEN
+         CALL RDTAB1
+      END IF
 !
 !     ALL PARAMETERS ENERGY DEPENDENT
 !
