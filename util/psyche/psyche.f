@@ -29,7 +29,9 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
-!-V         Version 8.07   September 2012   A. Koning
+!-V         Version 8.08   October2012       A. Trkov
+!-V                        Allow E-dependent scattering radius in URR
+!-V         Version 8.07   September 2012    A. Koning
 !-V                        Cleanup unused variables.
 !-V         Version 8.06   August 2012       A. Trkov
 !-V                        Fix initialisation of LNU
@@ -164,12 +166,7 @@
 !
 !     PSYCHE VERSION NUMBER
 !
-!+++MDC+++
-!...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
-!...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
-!---MDC---
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -1330,7 +1327,7 @@
 !           UNRESOLVED REGION
 !
             ELSE IF(LRU.EQ.2)   THEN
-               CALL CHKURR(IA,NI,LFW,LRF)
+               CALL CHKURR(IA,NI,LFW,LRF,NRE)
             END IF
          END DO
 !
@@ -1633,19 +1630,36 @@
 !
 !***********************************************************************
 !
-      SUBROUTINE CHKURR(IA,NI,LFW,LRF)
+      SUBROUTINE CHKURR(IA,NI,LFW,LRF,NRE)
 !
 !     TEST UNRESOLVED RESONANCE REGION
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: IA,NI,LFW,LRF
+      INTEGER(KIND=I4) :: IA,NI,LFW,LRF,NRE,III
 !
       INTEGER(KIND=I4) :: LSSF
       INTEGER(KIND=I4) :: L,NRS,NLS,NJS,MUF
       INTEGER(KIND=I4) :: IRP,NNINT,NE,NC
       INTEGER(KIND=I4) :: NL,NJ,J
       REAL(KIND=R4) :: A,AWRI,AJ,SPI,R
+!
+!     GET DEPENDENT SCATTERING RADIUS
+!
+      IF(NRO.GT.0)   THEN
+         CALL RDTAB1
+         NRED(NRE) = NR
+         NPED(NRE) = NP
+         DO III=1,NR
+            NBTED(III,NRE) = NBT(III)
+            JNTED(III,NRE) = JNT(III)
+         END DO
+         DO III=1,NP
+            CALL TESTAP(Y(III),APLO,APHI)
+            EP(III,NRE) = X(III)
+            APED(III,NRE) = Y(III)
+         END DO
+      END IF
 !
 !
       CALL STOFP(FLOAT(LFW))
