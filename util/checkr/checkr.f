@@ -1,5 +1,5 @@
-! $Rev: 2867 $                                                          | 
-! $Date: 2012-05-26 00:09:46 +0200 (Sa, 26 Mai 2012) $                                                     
+! $Rev: 3160 $                                                          | 
+! $Date: 2012-10-24 18:27:22 +0200 (Mi, 24 Okt 2012) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.19   October 2012 A. Trkov
+!-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.18   May 2012 A. Trkov
 !-V                        Standard Fortran ANS option set as default
 !-V                        but modified for compatibility with other
@@ -256,7 +258,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.18'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.19'
 !
 !     Define variable precision
 !
@@ -283,7 +285,7 @@
       INTEGER(KIND=I4), PARAMETER :: NISMAX=20       ! Number of isotopes
       INTEGER(KIND=I4), PARAMETER :: NERM6=12,NERM5=2! Resonance ranges
       INTEGER(KIND=I4), PARAMETER :: LRFM6=7,LRFM5=2 ! Allowed repres
-      INTEGER(KIND=I4), PARAMETER :: NSCLMAX=50      ! Scattering lengths
+      INTEGER(KIND=I4), PARAMETER :: NSCLMAX=500     ! Scattering lengths
       INTEGER(KIND=I4), PARAMETER :: NLSMAX=4        ! Resonance l-values
       INTEGER(KIND=I4), PARAMETER :: NLSCMAX=20      ! l-values for dsigma
       INTEGER(KIND=I4), PARAMETER :: NJSMAX=6        ! Resonance J-values
@@ -2646,6 +2648,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       INTEGER(KIND=I4) :: LFW
 !
       INTEGER(KIND=I4) :: LRF
+      INTEGER(KIND=I4) :: NRO,NAPS,NAPSM
       INTEGER(KIND=I4) :: LSSF,LSSFC
       INTEGER(KIND=I4) :: NLS,NJS
       INTEGER(KIND=I4) :: NL,NJ
@@ -2658,6 +2661,32 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       LRF = L2H
       CALL TEST1(LRF,1,2,'LRF',1)
+!
+!     TEST SCATTERING LENGTH REPRESENTATION
+!
+      NRO = N1H
+      IF(NFOR.GE.6)  THEN
+         CALL TEST1(NRO,0,1,'NRO',1)
+      END IF
+      IF(NFOR.GE.6)  THEN
+         NAPS = N2H
+         IF(NRO.EQ.1) THEN
+            NAPSM = 2
+         ELSE
+            NAPSM = 1
+         END IF
+         CALL TEST1(NAPS,0,NAPSM,'NAPS',1)
+         IF(IERX.EQ.1)  GO TO 100
+      END IF
+!
+!     READ ENERGY DEPENDENT SCATTERING LENGTH
+!
+      IF(NRO.GT.0) THEN
+         CALL RDTAB1
+         CALL TEST1(NP,1,NSCLMAX,'NP',1)
+         IF(IERX.EQ.1) GO TO 100
+      END IF
+!
 !
 !     ALL PARAMETERS ENERGY DEPENDENT
 !
