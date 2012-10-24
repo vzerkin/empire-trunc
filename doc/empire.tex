@@ -937,7 +937,7 @@ terms.
 
 Calculations accounting for nuclear deformation in MSD nicely
 reproduce the data in the direct continuum region  while the 
-"spherical" calculations underpredict the same data. 
+``spherical'' calculations underpredict the same data. 
 It should be stressed that, except
 for adjustment of dynamic deformations used in the coupled-channel
 calculations and the fission input,  these results were obtained without any  
@@ -946,7 +946,7 @@ calculations. In the IAEA
 evaluation for $^{232}$Th the missing strength in the continuum region of
 the neutron spectrum was filled up with a large number of fictitious
 collective levels embedded in the continuum. Similar approach has also been
-used in other ENDF/B-VII evaluations for important actinides, such as $^{235,238}$U and $^{239}$Pu. The "deformed" MSD approach 
+used in other ENDF/B-VII evaluations for important actinides, such as $^{235,238}$U and $^{239}$Pu. The ``deformed'' MSD approach 
 allows to achieve similar result on a
 physically more sound basis. The method is computationally faster and has been
 implemented as a default in the current version of the
@@ -1373,7 +1373,7 @@ configurations.
 \textbf{(ii)} The matrix element $(\Pi^{-1})_{Mm,(M+1)n}$, m, n=1,
 2, 3 describes the transition of a GDR-state in class $M$ to a GDR-state
 in class $(M+1)$. In such a transition the GDR is not affected and
-is just a \char`\"{}spectator\char`\"{}. This is again a consequence
+is just a ``spectator''. This is again a consequence
 of the two-body nature of the residual interaction. The subclasses
 1, 2, 3 differ only in the angular momenta of the non-collective states
 the GDR is built on. Since a transition among these states must not
@@ -2871,7 +2871,7 @@ a few with very small uncertainties.
 %\label{fig:EGSM-a-sys}
 %\end{figure}
 Notable feature of the EGSM parametrization is the vanishing role of the
-nuclear surface term  and the linear dependence of "experimental" asymptotic 
+nuclear surface term  and the linear dependence of ``experimental'' asymptotic 
 $\tilde{a}$ values on A.
 % (see Fig.\ref{fig:EGSM-a-tilde}). 
 In particular, we note complete absence of the shell
@@ -3248,7 +3248,7 @@ governed by excitation of the giant isovector dipole resonance (GDR). At
 energies around GDR, the imaginary part of the nuclear response function
 has a Lorentzian-like shape, therefore the realistic phenomenological
 models of the dipole strength function assume Lorentzian-like shapes.
-The scaling parameter (or ''width'' $\Gamma_\gamma(E_\gamma, T)$) of such shapes
+The scaling parameter (or ``width'' $\Gamma_\gamma(E_\gamma, T)$) of such shapes
 in a heated nucleus at the temperature $T$ is given by different
 expressions. It is governed by the damping of the collective states and its
 expression depends on the assumptions on the damping mechanism for the
@@ -4156,16 +4156,16 @@ concerning the preservation of the quantum number $K$ in the isomeric well(s).
 In the description of fission cross sections, one can consider two extreme
 limits: the first limit assumes that fission mainly proceeds through discrete
 transition states characterized by well-defined values of $K$ and is known as
-"no K-mixing" approximation; the second limit considers that the excitation of
+``no K-mixing'' approximation; the second limit considers that the excitation of
 internal degrees of freedom in the second well makes it possible for the
 nucleus to change its $K$ value during the time the energy is bound in
-internal motions and this effect is referred to as "full K-mixing". The effect
+internal motions and this effect is referred to as ``full K-mixing''. The effect
 of these approximations on the fission probability is very small, but they can
 affect significantly the angular correlations of the fission fragments
 ~\cite{Back:74}. The appropriate choice for the purpose of nuclear data
-evaluation is the "full K-mixing" approximation, not only for physical
+evaluation is the ``full K-mixing'' approximation, not only for physical
 reasons, but also because it can be applied for any excitation energy. 
-Formally, "full K-mixing" is described by adding the absorption from different
+Formally, ``full K-mixing'' is described by adding the absorption from different
 transition states irrespective of the associated $K$ value into a quantity
 preserving the spin and parity. 
 The continuum fission channels
@@ -4409,23 +4409,51 @@ $T$ is a nuclear temperature, and $\beta_{v}=3.2\cdot10^{-21}\, s^{-1}$
 is assumed to separate under-damped and over-damped motion.
 
 
-\subsection{Prompt Fission Neutrons}
+\section{Prompt Fission Neutrons}
 \label{pfns}
+
+The prompt fission neutrons play an important role in neutronics calculations for nuclear applications.
+It has been shown that estimated uncertainties in the prompt fission neutron spectrum can significantly impact the results of transport simulations
+for critical assemblies as well as reactor sensitivity calculations \cite{Talou:2011b}.  The main difficulty
+with the modeling of prompt fission neutron spectra (PFNS) is that their shape is not well defined experimentally.
+In addition, it is also important to know the PFNS as a function of both the fissioning
+nucleus and its excitation energy.  Due to this sensitivity, PFNS has to be included in the adjustment to avoid unphysical modification of other quantities, e.g., fission cross sections, that might result from compensating deficiencies in the PFNS. In the current version of the EMPIRE code we have implemented PFNS calculations using Los Alamos and Kornilov models. We have decided to include both formulations since there is a controversy regarding the lower energy part of the spectra - the Los Alamos model tends to predict lower values versus the Kornilov model. So far integral testing was mixed and there is no clear evidence which of the two models is more adequate. 
+
+
+
+
+\subsection{Los Alamos model for prompt fission neutron spectra}
+
 The Madland-Nix or Los Alamos model~\cite{Madland:82} constitutes the basis for the evaluation
 of prompt fission neutrons spectra in most current evaluated nuclear data libraries.
-Through a relatively simple and compact formalism, with only a handful of adjustable parameters, this model
-has been very successful in predicting the prompt neutrons spectra for neutron-induced as well as 
-spontaneous fission reactions for a wide range of nuclei and incident neutron energies. 
-More refined or/and elaborate versions of the Los Alamos model have been developed in recent years for 
-evaluation purposes, but they all rely on the implementation of this model in the first place. 
-The Los Alamos (LA) model is described at length in Ref.~\cite{Madland:82},
-and we will only summarize its main results here. 
-
-In this model, the prompt fission neutron spectrum 
-$N(E)$ is calculated as a function of the fissioning nucleus and its excitation energy. 
-Weisskopf statistical evaporation theory~\cite{Weisskopf:37} is used to explain the emission of 
-neutrons from an excited CN at a given temperature $T$, and a triangular distribution of initial fission 
+ According to the Los Alamos model \cite{Madland:82}, both the Watt
+and Maxwellian spectra neglect two important physical effects: 1) the distribution of fission-fragment
+residual nuclear temperature that results from the initial distribution of fission-fragment excitation
+energy and the subsequent cooling of the fragments as neutrons are emitted and 2) the energy dependence
+of the cross section for the inverse process of compound nucleus formation. Furthermore,
+the Maxwellian spectrum also neglects the center-of-mass motion of the fission fragments from which the
+neutrons are emitted; therefore, the agreement between spectra and data is achieved by adjusting
+parameters to values that are somewhat unphysical.   The Los Alamos model addresses
+these inconsistencies by taking the distribution of fission-fragment residual nuclear temperature to be
+triangular in shape, extending linearly from zero to a maximum value T$_{m}$, and calculating the
+energy-dependent compound nucleus cross section for representative average fission fragments by use of
+an optical model.  This permits $N(E)$ to be calculated easily for any fissioning nucleus
+at any excitation energy.  Weisskopf statistical
+evaporation theory \cite{Weisskopf:37} is used to explain the emission of neutrons from an excited compound
+nucleus (CN) at a given temperature $T$, and a triangular distribution of initial fission 
 fragments residual temperatures is assumed.
+
+This model is the basis for  evaluation
+of prompt fission neutrons spectra in most currently evaluated nuclear data libraries.
+This  relatively simple and compact formalism, with only a handful of adjustable parameters, 
+has been very successful in predicting the prompt fission neutrons spectra for neutron-induced as well as 
+spontaneous fission reactions for a wide range of actinides and incident neutron energies. 
+More refined and/or elaborate versions of the Los Alamos model have been developed in recent years for 
+evaluation purposes, but they all rely on the implementation of this model in the first place. 
+The Los Alamos (LA) model is described at length in Ref.~\cite{Madland:82}.
+We will only summarize its main features here. 
+
+
 
 %-- LA MODEL: c.m. neutron energy spectrum
 \subsubsection{Center-of-mass neutron energy spectrum}
@@ -4477,17 +4505,18 @@ light fragment and the other half from the heavy fragment.
 The average prompt fission neutrons multiplicity $\overline{\nu}_p$ is simply obtained from energy 
 conservation:
 \begin{eqnarray}
-\overline{\nu}_p=\frac{<E^*>-<E_\gamma^{tot}>}{<S_n>+<\epsilon>},
+\overline{\nu}_p=\frac{\left<E^*\right>-\left<E_\gamma^{tot}\right>}{\left<S_n\right>+\left<\epsilon\right>},
 \end{eqnarray}
-where $<E^*>$ is the average total excitation energy and is equal to
-\begin{eqnarray}
-<E^*>=<E_r>+B_n+E_n-<E_f^{tot}>.
-\end{eqnarray}
-$<E_r>$ is the average fission energy release, $B_n$ is the neutron binding energy of the target nucleus, 
-$E_n$ is the neutron incident energy, $<E_f^{tot}>$ is the average total fission-fragment kinetic energy, 
-$<E_\gamma^{tot}>$ is the average total energy carried away through gamma-ray emission, $<S_n>$ is the 
-average neutron separation energy of the fission fragments, and $<\epsilon>$ is the average energy of the 
+where $\left<E^*\right>$ is the average total excitation energy and is equal to
+\begin{equation}
+\left<E^*\right>=\left<E_r\right> + B_n + E_n - \left<E_f^{tot}\right>.
+\end{equation}
+$\left<E_r\right>$ is the average fission energy release, $B_n$ is the neutron binding energy of the target nucleus, 
+$E_n$ is the neutron incident energy, $\left<E_{f}^{tot}\right>$ is the average total fission-fragment kinetic energy, 
+$\left<E_\gamma^{tot}\right>$ is the average total energy carried away through gamma-ray emission, $\left<S_n\right>$ is the 
+average neutron separation energy of the fission fragments, and $\left<\epsilon\right>$ is the average energy of the 
 outgoing neutron in the center-of-mass reference frame.
+
 
 %-- LA MODEL: Multiple-chance fission
 \subsubsection{Multiple-chance fission}
@@ -4516,10 +4545,155 @@ The $i^{th}$ prompt neutron multiplicity $\overline{\nu}_i$ is given by
 \end{eqnarray}
 where the average total excitation energy for the $i^{th}$-chance fission is
 \begin{eqnarray}
-<E^*_i> = <E_r^i>+B_n(A)+E_n-<E_f^i> - \\
-\sum_{j=1}^{i-1}{\left( B_n(A-j+1)+<\epsilon_j> \right)}
+\left<E^*_i\right> & = & \left< E_r^i \right> + B_n(A)+E_n-\left<E_f^i\right> \nonumber \\
+& & - \sum_{j=1}^{i-1}{\left( B_n(A-j+1)+\left<\epsilon_j\right> \right)}
 \end{eqnarray}
-Here, $<\epsilon_j>$ it the mean kinetic energy of the neutron evaporated from the $(Z,A-j+1)$ nucleus.
+Here, $\left<\epsilon_j\right>$ it the mean kinetic energy of the neutron evaporated from the $(Z,A-j+1)$ nucleus.
+
+
+
+
+\subsection{Kornilov model for prompt fission neutron spectra}
+\label{sec:korn}
+
+The Kornilov model \cite{Kornilov:99} is actually a systematics that allows to calculate PFNS
+with an accuracy comparable, and sometimes even better, that the more physical Los Alamos model
+described above. The essential argument for including the Kornilov model in the EMPIRE code in
+addition to the Los Alamos model is the fact the both models differ in shape of the PFNS. The
+Kornilov model tends to provide results that are higher at low emission energies than the Los
+Alamos model. This difference has been shown to influence integral testing although not always
+in the right direction. Therefore, it has been considered important to use both models in the
+assimilation procedure, which eventually might help to decide which model performs better. 
+
+\newcommand{\tke}{T_{\rm KE}}
+The Kornilov model makes use of two Watt spectra to describe emission of neutrons with energy
+$E$ from  a fragment $i$ (low mass ($i=l$) and high mass ($i=h$)) created in the fission event
+induced by a neutron with energy $E_o$
+\begin{align}\label{Watt}
+W_i(E,E_{\nu i},T_i(E_o)) &= M(E,T_i(E_o)) \exp\left(-\frac{E_{\nu i}}{T_i(E_o)} \right) \frac{\sinh \left(\sqrt{bE}\right)}{\sqrt{bE}} \\ \nonumber
+b &= \frac{4E_{\nu i}}{T^2_i(E_o)},
+\end{align}
+where Maxwellian $M(E,T_i(E_o))$ is given by
+\begin{align}
+M(E,T_i(E_o)) = \frac{2\sqrt{E}}{T_i(E_o)\sqrt{\pi T_i(E_o)}} \exp \left( -\frac{E}{T_i(E_o)}\right).
+\end{align}
+This formula is obtained by assuming that neutron spectra are described by a Maxwellian $M(E,T_i(E_o))$
+in the center of mass system (CM) and transforming this spectra to the laboratory frame of reference
+(Lab). The temperature $T_i(E_o)$ of each fission fragment is made dependent on the incident neutron
+energy $E_o$. As in the Los Alamos model, it is assumed that neutron energy spectrum is an average
+over the spectra emitted from the both fragments. 
+\begin{eqnarray}
+F(E)=0.5 (W_l(E,E_{\nu l},T_l(E_o))+W_h(E,E_{\nu h},T_h(E_o)))
+%fragmPFNS(i) = 0.5d0*(fwatt(e,EniuH,Thf) + fwatt(e,EniuL,Tlf))
+\end{eqnarray}
+The $E_{\nu i}$ are calculated as
+\begin{eqnarray}\label{Eq:Enu}
+E_{\nu l} =  \frac{A_h}{A_l A} \alpha \tke \\ \nonumber
+E_{\nu h} =  \frac{A_l}{A_h A} \alpha \tke,
+%EniuH =  float(ial)/float(iah*iaf)*alpha*Efkin
+\end{eqnarray}
+where $A_l, A_h,$ and $A$ are masses of the two fission fragments and of the fissioning nucleus,
+$\alpha$ is  the adjustable parameter reducing available total kinetic energy  $\tke$, which in
+turn is calculated following Malinovskii {\em et. al.} \cite{Malinovskii:87}, where
+a heavy fragment with mass $A_h$ has atomic number $Z_h$ given by
+\begin{eqnarray}
+Z_h = \frac{Z}{A} A_h - 0.5
+%izh = (zf/af)*iah - 0.5
+\end{eqnarray}
+and accordingly for the low mass fragment we have
+\begin{eqnarray}
+Z_l &= Z - Z_h \\
+A_l &= A - A_h.
+%izl = izf - izh 
+%ial = iaf - iah
+\end{eqnarray}
+The default value of the $\alpha$ parameter in Eq.~\ref{Eq:Enu} is set according to Tab.~\ref{tab:alp}
+(1.0 is used for the nuclei not contained in Tab.~\ref{tab:alp}). In addition, $\alpha$ can be
+controlled through the input in order to scale the total kinetic energy $\tke$ entering the calculations.
+Values for $T_l$ and $T_h$ are calculated by
+\begin{equation}
+T_{l,h}^{x} = T_{l,h}^{\rm Cf}\sqrt{\frac{U^{x}A^{\rm Cf}}{U^{\rm Cf}A^{x}}}
+\end{equation}
+with $T_{l}^{\rm Cf} = 0.902$ MeV and $T_{h}^{\rm Cf} = 0.7675$ MeV, while $U = E_r + B_n + E_0 + \tke = U_0 + E_0$,
+where $E_r$ is the energy release, $B_n$ is the neutron binding energy, $E_0$ the projectile energy,
+and $\tke$ the total kinetic energy of the fragments. We used $U_0^{\rm Cf} = 32.9$ MeV.
+\begin{table*}[htb]
+\caption{Value of the parameter $\alpha$ from Eq.~\ref{Eq:Enu} used to adjust the total
+kinetic energy for various materials.}
+\label{tab:alp}
+\begin{center}
+\large
+\begin{tabular}{lc} \hline
+Material & $\alpha$ \\ \hline
+$^{232}$Th & 0.947 \\
+$^{233}$U & 0.920 \\
+$^{235}$U & 0.936 \\
+$^{238}$U & 0.880 \\
+$^{237}$Np & 0.873 \\
+$^{252}$Cf & 0.809 \\ \hline
+\end{tabular}
+\end{center}
+\end{table*}
+
+
+
+
+
+\subsection{Implementation of the PFNS in EMPIRE code}
+\label{sec:empimp}
+
+Both Los Alamos and Kornilov models were coded as EMPIRE subroutines and linked to
+the code resources so that all necessary input data are made automatically available
+to the subroutines. The PFNS specific input data are read in through the standard
+EMPIRE input subroutine and can be adjusted individually. The standard EMPIRE
+approach allowing to adjust model parameters in function of incident energy is also
+used for the PFNS parameters that can thus be made energy dependent. Four parameters
+are defined in Empire for fitting PFNS as follows.
+\begin{itemize}
+ \item PFNTKE: This parameter is used to scale the total kinetic energy of the fission
+    fragments, $\tke$.
+ \item PFNALP: This parameter is used to scale the value of $\alpha$ as defined in
+    Eq.~\ref{Eq:Enu}, which scales the energy of both the light and heavy fragments
+    $E_{\nu l}$ and $E_{\nu h}$.
+ \item PFNRAT: This parameter is used to adjust the ratio of the kinetic energy of the
+    light to heavy fragments, $E_{\nu l}/E_{\nu h}$.
+ \item PFNERE: Used to scale the total fission energy release $E_r$ as defined in
+   section \ref{sec:korn}.
+\end{itemize}
+All four of these parameters take a default value of 1.0; if unspecified the default values
+in the Empire code are used.
+
+The current implementation does not include neutrons emitted from the compound nucleus before
+the fission thus it is formally restricted to the first chance fission. This restriction
+makes the current implementation to be applicable at incident energies up to 3-4 MeV, the typical
+threshold for the (n,nf) reaction, which is generally sufficient for most reactor applications
+since fission spectrum practically disappears above 2 MeV.  
+
+EMPIRE has been extended to automatically retrieve experimental PFNS data from
+the EXFOR library and translate them into a form useful for plotting. Comparison plots showing
+results of calculations along with the experimental data can be generated from the EMPIRE GUI.
+An option is provided to plot calculated and experimental data normalized to the Maxwellian
+distribution at an arbitrary temperature. When choosing this option each experimental data
+set is divided by the Maxwellian value and normalized so that the integral of the spectrum
+is unity. The same procedure is applied also to the calculated results. Therefore, only
+shapes of the PFNS are compared while the absolute value is defined by the product of a
+fission cross section and multiplicity of fission neutrons at a given incident energy.
+An example plot obtained using this system is shown in Fig.~\ref{Fig-pfns}. The same figure 
+illustrates also sensitivity of the PFNS calculations to the perturbation of the 
+total kinetic energy of the fission fragments $\tke$ by 5\%. 
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figs/pfns-Edited}
+\caption{Calculated prompt fission neutron spectrum for thermal neutron induced fission
+on $^{239}$Pu compared with the experimental data. The effect of changing total kinetic
+energy of the fragments by 5\% in both direction is shown in red. The results are
+normalized to the Maxwellian distribution with $T=1.32$ MeV.}
+\label{Fig-pfns}
+\end{center}
+\end{figure}
+
+
 
 
 \part{NUCLEAR DATA EVALUATION\label{Chap:eval}}
@@ -5241,7 +5415,7 @@ prompts, which are the following:
      \item[1]  The points at reaction thresholds are added. The energy          
         points above threshold are as found in the EMPIRE output file.               
      \item[n]  Threshold points are entered, but in addition, each                
-        interval on the EMPIRE output is subdivided into "n"               
+        interval on the EMPIRE output is subdivided into ``n''               
         subintervals. Cross section values at intermediate points          
         are defined by a cubic spline fit.                                 
    \end{itemize}
@@ -6169,27 +6343,27 @@ EMPIRE execution most commonly involves the following four operation sequences,
 which are described in more detail below:
 
 \begin{itemize}
-\item "runE" sequence prepares data, runs the main calculation and
+\item ``runE'' sequence prepares data, runs the main calculation and
   prepares ZVView plots of pre-defined cross sections.
 
-\item "format" sequence generates the ENDF formatted file.
+\item ``format'' sequence generates the ENDF formatted file.
 
-\item "verify" sequence checks the ENDF file for formal correctness and
+\item ``verify'' sequence checks the ENDF file for formal correctness and
   internal consistency.
   
-\item "process" sequence performs post-processing to prepare a derived
+\item ``process'' sequence performs post-processing to prepare a derived
   ENDF file, from which more advanced plotting is done.
 \end{itemize}
 
 This complete sequence is intended for the production of evaluated 
 files in ENDF-6 format,
-but for theoretical modeling, the "runE" script is likely sufficient.
+but for theoretical modeling, the ``runE'' script is likely sufficient.
 However, in this case automatic plotting is limited to the cross sections.
 A more detailed description of the task sequences is described below.
 % Additional sequences are also defined to perform specific tasks.
 
 
-\subsection{"runE" sequence (Run EMPIRE)}
+\subsection{``runE'' sequence (Run EMPIRE)}
 
 The runE script sets up the environment for a new EMPIRE calculation
 and cleans-up the directories before launching a new EMPIRE calculation.
@@ -6209,18 +6383,18 @@ More specifically, the following tasks are performed:
   they are generated from the EXFOR file, if present.
 \end{itemize}
 
-The "project name" is defined at this step. Usually this identifies the
+The ``project name'' is defined at this step. Usually this identifies the
 nuclide that is being processed (e.g. mn55, w182, u235, etc.). The
 project name is used in the filenames and is implied in the sections
-below whenever the "*" appears in the filename.
+below whenever the ``*'' appears in the filename.
 
 
-\subsection{"format" sequence}
+\subsection{``format'' sequence}
 
 The following tasks are performed:
 
 \begin{itemize}
-\item EMPEND is executed to produce an ENDF file from the "short"
+\item EMPEND is executed to produce an ENDF file from the ``short''
   EMPIRE output (with extension *.OUT). The input file for EMPEND is generated
   within the script. The output file *-e.endf is produced.
   
@@ -6259,7 +6433,7 @@ The following tasks are performed:
 The final output ENDF file from this sequence of operations is *.endf.
 
 
-\subsection{"verify" sequence}
+\subsection{``verify'' sequence}
 
 The ENDF Utility codes CHECKR, FIZCON and PSYCHE are executed to verify
 formal correctness and internal consistency of the final ENDF file.
@@ -6267,7 +6441,7 @@ The input files are generated within the script. The output files are
 *-log.checkr, *-log.fizcon and *.log.psyche for the corresponding checking code.
 
 
-\subsection{"process" sequence}
+\subsection{``process'' sequence}
 
 The Pre-Pro codes and some of the codes from the ENDVER package are
 executed to prepare the ENDF-formatted data for plotting. 
@@ -6289,7 +6463,7 @@ scripts are executed on the ENDF file:
 \item SIXTAB converts double-differential data into angle-energy sets
   in tabular form (ENDF option LAW=7).
 
-\item "plotlst" script prepares the experimental data for
+\item ``plotlst'' script prepares the experimental data for
   plotting. It checks for the presence of the C4 file of experimental
   data and links auxilliary dictionary files for local use.
 
@@ -6299,7 +6473,7 @@ scripts are executed on the ENDF file:
 \end{itemize}
 
 
-\subsection{"run" sequence}
+\subsection{``run'' sequence}
 
 All the main processing sequences (`runE', `format', `process' and `verify') are executed one after another.
 
@@ -6630,10 +6804,10 @@ region\tabularnewline
 The following scripts are provided:
 
 \begin{description}[style=multiline,leftmargin=3cm]
-\item [{\textbf{runE}}] executes the "runE" sequence described in the previous section.
-\item [{\textbf{format}}] executes the "format" sequence described in the previous section.
-\item [{\textbf{process}}] executes the "process" sequence described in the previous section.
-\item [{\textbf{verify}}] executes the "verify" sequence described in the previous section.
+\item [{\textbf{runE}}] executes the ``runE'' sequence described in the previous section.
+\item [{\textbf{format}}] executes the ``format'' sequence described in the previous section.
+\item [{\textbf{process}}] executes the ``process'' sequence described in the previous section.
+\item [{\textbf{verify}}] executes the ``verify'' sequence described in the previous section.
 \item [{\textbf{run}}] executes all of the above sequences one after the other.
 \item [{\textbf{stanef}}] runs ENDF-6 format standardization code STANEF
 \item [{\textbf{c4}}] converts EXFOR data in the \emph{{*}.exf} file into
@@ -7310,8 +7484,8 @@ If FISOPT = 0 $\rightarrow$ FISOPT $>$ 0 one has to make sure that the number of
 extremum is the same.
 
 \noindent The \emph{{*}-inp.fis} file is divided into sections corresponding to each fissioning
-nucleus. Each section starts with the key-word "Isotope". Therefore in the following examples
-we will have as reference the line containing "Isotope" denoted L=1.
+nucleus. Each section starts with the key-word ``Isotope''. Therefore in the following examples
+we will have as reference the line containing ``Isotope'' denoted L=1.
 
 \paragraph {Example 1}
 Fission input created if FISSHI=0; FISOPT=0,1,2,3; FISBAR$<$3, FISDEN=0,2; FISDIS=0,1; FISMOD=0
@@ -7347,7 +7521,7 @@ by copying L=21 in L=22 also.
 %
 \item[- ]{L=25+$N_w$} -
 number of discrete states for the first hump $N_{dis}(h_1)$. It is writen and read as 'I2'  format starting after 
-"=" sign and has the maximum value equal to 30.  For FISOPT$>$0 The number of discrete states and their order 
+``='' sign and has the maximum value equal to 30.  For FISOPT$>$0 The number of discrete states and their order 
 ($K\pi$) must be the same. For FISOPT=0, the discrete states number might differ from one hump to another.
 However their values have to be equal to the number of lines below, associated to each discrete state.
 %
@@ -7865,7 +8039,7 @@ spin 4 (e.g. with these defaults all levels with excitation energy less than 2.4
 6.2 MeV for $^{56}$Fe are considered). Default selection rules for energy and spin could be modified in the input.
 
 A first sample, containing 16 collective levels in $^{238}$U including 5 coupled levels defined in the coupled-channel
-rigid-rotor potential RIPL 2408 is reproduced below. Please note the keyword "deformed" in the third line that defines the rigid-rotor
+rigid-rotor potential RIPL 2408 is reproduced below. Please note the keyword ``deformed'' in the third line that defines the rigid-rotor
 coupling model. In this sample file those collective levels are divided in three groups: 
 \begin{itemize}
 \item The first group contains five levels used in the Coupled Channels calculations (read from RIPL). These are the collective
@@ -7881,8 +8055,8 @@ in the \emph{{*}.lev} file (it implies that only first 20 levels can be used in 
 is also printed in the second line of the file, and corresponds to the parameter LEVCC defined in \emph{dimension.h}). 
 CC calculations can couple as many as LEVCC - 1 levels, if a larger number is needed, then the LEVCC parameter should
 be modified and EMPIRE code recompiled.     
-\item The third group, marked as "cont",  consists of duumy collective levels embedded in the continuum that may not be included
-in \emph{{*}.lev}. Their numbering follows the second group but actual numbers of these "dummy" levels have no importance.
+\item The third group, marked as ``cont'',  consists of duumy collective levels embedded in the continuum that may not be included
+in \emph{{*}.lev}. Their numbering follows the second group but actual numbers of these ``dummy'' levels have no importance.
 They might, but do not have to, coincide with some of the discrete levels in the original RIPL file. The levels in this
 group are used in the DWBA calculations to the continuum, and their scattering cross sections are spread among neighboring
 continuum energy bins using a gaussian function with the energy resolution defined by parameter RESOLF.
@@ -7943,7 +8117,7 @@ model for a particular \emph{iz, ia}
 \end{description}
 
 A second sample, containing 33 collective levels in $^{238}$U obtained for a rigid-soft rotor  coupled-channel 
-potential RIPL 2412 is reproduced below. Please note the keyword "dynamically deformed" in the third line that
+potential RIPL 2412 is reproduced below. Please note the keyword ``dynamically deformed'' in the third line that
 defines the rigid-soft rotor coupling model. All levels belong to the discrete region (continuum was defined to
 start above 1.3 MeV). Coupled channels correspond to level number < 30; there are 14 coupled channels in this case. 
 \begin{verbatim}
@@ -8008,7 +8182,7 @@ model for a particular \emph{iz, ia}
 \end{description}
 
 A third sample, containing 10 collective levels in $^{56}$Fe obtained for a soft-rotor  coupled-channel potential
-RIPL 2602 is reproduced below. Please note the keyword "soft" in the third line that defines the soft-rotor
+RIPL 2602 is reproduced below. Please note the keyword ``soft'' in the third line that defines the soft-rotor
 coupling model. All levels belong to the discrete region (continuum was defined to start 
 above 3.5 MeV). Coupled channels correspond to level number < 30; there are seven coupled channels in this case. 
 
@@ -8057,7 +8231,7 @@ model for a particular \emph{iz, ia}
 \end{description}
 
 A fourth and last sample, containing 10 collective levels in $^{56}$Fe obtained for a vibrational coupled-channel potential
-RIPL 425 is reproduced below. Please note the keyword "spherical" in the third line that defines the vibrational
+RIPL 425 is reproduced below. Please note the keyword ``spherical'' in the third line that defines the vibrational
 coupling model. All levels belong to the discrete region (continuum was defined to start 
 above 3.5 MeV). Coupled channels correspond to level number < 30; there are seven coupled channels in this case. 
 
@@ -8556,7 +8730,7 @@ ensured if EXFOR data were extracted by EMPIRE. Clicking the \fbox{Compare ENDF 
 button of the EMPIRE GUI launches ZVV GUI, as shown in Fig. \ref{fig:GUIZVV}.
 Note that the root-name of the project and \emph{work} directory are
 by default transferred to ZVV GUI. Comparisons can be made by pointing
-the \char`\"{}File 2:\char`\"{} and \char`\"{}File 3:\char`\"{} fields
+the ``File 2:'' and ``File 3:'' fields
 to other files containing ENDF formatted data (e.g., stored in \emph{case1}
 and \emph{case2} directories). We stress that while the first set
 is referenced through its directory and default names \emph{{*}-s.endf}
@@ -8567,11 +8741,9 @@ At this stage the system is ready to create the requested plots (\fbox{Create se
 button). One can also choose to create all plots at once (\fbox{Create all}
 button), although they can be viewed one by one or merged together.
 ZVV GUI can also be used to create simple ZVV plots by replacing the
-EMPIRE GUI function. Leaving labels related to \char`\"{}File 2:\char`\"{}
-and \char`\"{}File 3:\char`\"{} fields and suffix blank, simple ZVV
+EMPIRE GUI function. Leaving labels related to ``File 2:'' and ``File 3'' fields and suffix blank, simple ZVV
 plots can be created for all the reactions with just one mouse click.
-Setting the project field to \char`\"{}{*}\char`\"{} (without \char`\"{}
-\char`\"{}) creates plots for all reactions and targets for which
+Setting the project field to ``*'' (without ``'') creates plots for all reactions and targets for which
 \emph{{*}-s.endf} files exist in the \emph{work} directory. This comparison
 capability is not limited to the EMPIRE results; any evaluated file
 in the ENDF format can be compared with another ENDF file or with
@@ -8600,7 +8772,7 @@ function directly from the EMPIRE output. Hence, the user has to supply
 a string which unambiguously identifies the cross section. The \emph{gawk}
 script scans EMPIRE output (\emph{{*}.lst}) for the lines containing
 the specified string and extracts a number (cross section) followed
-by the \char`\"{}mb\char`\"{} string along with the respective incident
+by the ``mb'' string along with the respective incident
 energy value. The results are sent to ZVView\index{ZVView} for plotting. 
 
 
@@ -8703,7 +8875,7 @@ complete and consistent with the level density\index{level density}
 parametrization. If the whole package is properly installed, plots
 of cumulative number of levels will be stored in the \emph{{*}-cum.ps}
 file and can be inspected in the PostScript viewer (ghostview) by
-clicking on the \fbox{Levels} button in the \char`\"{}Plots:\char`\"{}
+clicking on the \fbox{Levels} button in the ``Plots:''
 section of the GUI. Two somewhat extreme examples of such plots are
 shown in Fig. \ref{fig: badfit} and \ref{fig: goodfit}. Fig. \ref{fig: badfit}
 demonstrates 10 levels in $^{96}$Pd, which could not be matched with
@@ -8822,7 +8994,7 @@ by the code is the following:
 \item [{\emph{{*}-omp.ripl}}] $\Longleftrightarrow$ \emph{OMPAR.RIPL}\index{RIPL} 
 \item [{\emph{{*}-lev.col}}] $\Longleftrightarrow$ \emph{TARGET\_COLL.DAT }
 \end{description}
-\noindent with \char`\"{}{*}\char`\"{} standing for the actual root-name
+\noindent with ``*'' standing for the actual root-name
 of the file. 
 
 
@@ -9167,7 +9339,7 @@ being within the uncertainty of the theoretical masses. However, this
 argument does not hold for nuclei close to the stability valley since
 experimental nuclear masses are known with a rather high accuracy.
 \item \textbf{Structure in the continuum part of the inelastic scattering
-spectrum \char`\"{}out of phase\char`\"{}} - this structure originates
+spectrum ``out of phase''} - this structure originates
 from the MSD\index{MSD} contribution. When the spectrum does not
 match experiment, the user may attempt to tune calculations by changing
 the positions of collective levels to which the response functions
