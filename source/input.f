@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3154 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-21 18:04:05 +0200 (So, 21 Okt 2012) $
+Ccc   * $Rev: 3165 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -254,13 +254,6 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          BETav = 4.d0          ! viscosity parameter
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
-C		 
-C--------CN anisotropy definition for discrete levels
-         CN_isotropic = .True.     ! default
-C
-C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
-C        Important: CN_isotropic can be .False. for the time being only for even-even targets.
-C
 C--------fusion parameters
          CAlctl = .FALSE.
          CSRead = -2.d0
@@ -271,21 +264,12 @@ C--------fusion parameters
          DFUs = 1.d0
          FUSred = 1.d0
          FCCred = 1.d0
-         FCOred = 1.d0
          TOTred = 1.d0
          ELAred = 1.d0
-         CELred = 1.d0
-         TOTred0 = 1.d0 
-         FUSred0 = 1.d0
-         FCCred0 = 1.d0
-         FCOred0 = 1.d0
-         ELAred0 = 1.d0
          rFUSred = 1.d0
          rFCCred = 1.d0
-         rFCOred = 1.d0
          rTOTred = 1.d0
          rELAred = 1.d0
-         rCELred = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -317,8 +301,6 @@ C        IX4ret = 1 copy C4 file
          IX4ret = 1
 
          NPRIm_g = 0       ! No primary gammas (default)
-         NNG_xs  = 0       ! Gamma production cross section not printed
-
 C
 C        PFNS keywords
 C        
@@ -450,9 +432,8 @@ C--------GDR parameters
          GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0d0
-         PEQc = 1.5   ! default PE
+         PEQc = 1.5  ! default PE
          MFPp = 1.5
-         PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
          NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
 
@@ -556,22 +537,23 @@ C        Starting value of the number of angular points
 
          IF(NANgela.GT.NDAngecis) THEN
            WRITE(8,*)
-     &        ' ERROR: INCREASE NANgecis IN dimension.h UP TO ',NANgela
-           STOP ' ERROR: INCREASE NANgecis IN dimension.h'
+     &        'ERROR: INCREASE NANgecis IN dimension.h UP TO ',NANgela
+           STOP 'FATAL: INCREASE NANgecis IN dimension.h'
          ENDIF
 C--------set angles for inelastic calculations
-         da = 180.d0/(NDAng - 1)
+         da = 180.0/(NDAng - 1)
          DO na = 1, NDAng
-           ANGles(na)  = (na - 1)*da
-           CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
-           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
-           SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+           ANGles(na) = (na - 1)*da
+         ENDDO
+         DO na = 1, NDAng
+           CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
+           SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN
-            WRITE (8,*) ' ERROR: Z > A, please correct input file'
-            STOP ' ERROR: Z > A, please correct input file'
+            WRITE (8,*) 'ERROR: Z > A, please correct input file'
+            STOP 'FATAL: Z > A, please correct input file'
          ENDIF
 
 C--------projectile
@@ -628,9 +610,9 @@ C--------NEMC  number of clusters emitted
          READ (5,*) NEMc, aclu, zclu
 
          IF (NEMc.GT.0 .and. aclu.le.4) THEN
-           WRITE (8,*)' WARNING: Light clusters should be included expli
-     >citly (d,t,h,a)'
-           WRITE (8,*)' WARNING: Number of emitted clusters set to zero'
+           WRITE (8,*)'WARNING: Light clusters should be included explic
+     >itly (d,t,h,a)'
+           WRITE (8,*)'WARNING: Number of emitted clusters set to zero'
            NEMc = 0
          ENDIF
 
@@ -1046,7 +1028,7 @@ C                                 ! that needs to be compiled into RIPL
 C
          ENDDO
 C
-C--------inteligent defaults *** done ***
+C--------intelligent defaults *** done ***
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
@@ -1178,27 +1160,27 @@ C
 C--------check input for consistency
 C
          IF(NEXclusive.GT.NDExclus) THEN
-            WRITE(8,*)' ERROR: NEXclusive =',NEXclusive
-            WRITE(8,*)' INSUFFICIENT DIMENSION NDExclus'
-            WRITE(8,*)' INCREASE NDExclus AND RECOMPILE'
-            STOP ' INSUFFICIENT DIMENSION NDExclus'
+            WRITE(8,*)'ERROR: NEXclusive =',NEXclusive
+            WRITE(8,*)'INSUFFICIENT DIMENSION NDExclus'
+            WRITE(8,*)'INCREASE NDExclus AND RECOMPILE'
+            STOP 'INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 C
 C        Checking fission input consistency 
 C
          IF( FISshi(1).eq.1 .and. FISden(1).ne.0 )  THEN        
-            WRITE(8,*)  ' WARNING: ',
+            WRITE(8,*)  'WARNING: ',
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
+            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
             FISden(i) = 0
             ENDDO
          ENDIF
 
          IF( FISmod(1).GT.0 .and. FISden(1).ne.0 )  THEN        
-            WRITE(8,*)  ' WARNING: ',
+            WRITE(8,*)  'WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
+            WRITE(8,*)  'WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
                FISden(i) = 0
             ENDDO
@@ -1207,7 +1189,7 @@ C
          WRITE (8,*)
          IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
             WRITE (8,*)
-     &' WARNING: For HI induced reactions Lmax~100-150 may be needed'
+     &'WARNING: For HI induced reactions Lmax~100-150 may be needed'
             WRITE (8,*)         
          ENDIF
          IF(IOPran.gt.0)  ! Gaussian 1 sigma error
@@ -1273,27 +1255,28 @@ C
             NANgela = NDAnghmx
             NDAng   = NDAnghmx
 C--------reset angles for inelastic calculations
-            da = 180.d0/(NDAng - 1)
+            da = 180.0/(NDAng - 1)
             DO na = 1, NDAng
-              ANGles(na)  = (na - 1)*da
-              CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
-              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
-              SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+              ANGles(na) = (na - 1)*da
+            ENDDO
+            DO na = 1, NDAng
+              CANgler(na) = COS(ANGles(NDAng - na + 1)*PI/180.)
+              SANgler(na) = SQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
-c            WRITE (8,*) ' ERROR: NDAng IN dimension.h MUST BE 19 or 37'
+c            WRITE (8,*) 'ERROR: NDAng IN dimension.h MUST BE 19 or 37'
 c            WRITE (8,*)
-c     &' ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
+c     &'ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
 c            WRITE (8,*)
-c     &' ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-c            STOP ' ERROR: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
+c     &'ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
+c            STOP 'FATAL: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
 c         ENDIF
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (8,*) ' '
-            WRITE (8,*) ' ERROR: HMS allowed only for incident nucleons'
-            WRITE (8,*) ' ERROR: and gammas -  Execution STOPPED'
+            WRITE (8,*) 'ERROR: HMS allowed only for incident nucleons'
+            WRITE (8,*) 'ERROR: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
          IF (DIRect.GT.0 .AND. INT(AEJc(0)).EQ.0) THEN
@@ -1391,9 +1374,9 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          ' WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
+     &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,2) = 0 ! MSD
                IDNa(2,2) = 0
                IDNa(3,2) = 0
@@ -1406,9 +1389,6 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                  IF (DIRect.EQ.0) IDNa(3,2) = 1
                  IDNa(4,2) = 1
                ENDIF
-               PESpin = 0
-               WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 
@@ -1417,9 +1397,9 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          ' WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
+     &          'WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,2) = 0 ! MSD
                IDNa(2,2) = 0
                IDNa(3,2) = 0
@@ -1428,17 +1408,11 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IF (NPRoject.EQ.1) THEN
                  IDNa(1,2) = 1
                  IDNa(2,2) = 1
-                 PESpin = 0
-                 WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
                IF (NPRoject.EQ.2) THEN
                  IDNa(3,2) = 1
                  IDNa(4,2) = 1
-                 PESpin = 0
                ENDIF
-               WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
             ENDIF
          ENDIF
 C
@@ -1448,9 +1422,9 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                MSC = 0
                WRITE (8,*) ''
                WRITE (8,*)
-     &          ' WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
+     &          'WARNING: MSC DISABLED FOR INCIDENT PARTICLES '
                WRITE (8,*)
-     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
+     &          'WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
                IDNa(1,3) = 0 ! MSC
                IDNa(2,3) = 0
                IDNa(3,3) = 0
@@ -1845,8 +1819,8 @@ C-----WRITE heading on FILE6
          WRITE (8,*) ' '
          WRITE (8,'(60(''=''))')
          WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',G10.5,
+     &'' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
          WRITE (8,'(60(''=''))')
          WRITE (8,*) ' '
          WRITE (8,'('' Compound nucleus energy'',F9.3,'' MeV'')') EXCn
@@ -1901,8 +1875,8 @@ C-------continuum using current DE, if not adjust DE
       WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
      &   NEXreq, NDEX
 
-      IF(2*NEXreq.GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
-     & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+      IF(2*NEXreq.GT.NDEX) WRITE(8,*)  
+     & ' WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEXreq     
 
       DO i = 1, NEX(1)
@@ -2085,8 +2059,8 @@ Cpr         END DO
 
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(8,*) 'Nuclei marked with < in the table below produce only
-     & inclusive emission spectra'
+        WRITE(8,*) 'Nuclei marked with < in the table below produce excl
+     &usive emission spectra'
       ENDIF
 
       WRITE (8,*) ' '
@@ -2098,7 +2072,7 @@ C-----LEVEL DENSITY for residual nuclei
       WRITE (8,*)
 
       DO i = 1, NDLW
-         DRTl(i) = 1.d0
+         DRTl(i) = 1.0
       ENDDO
       IF (FITlev.GT.0) THEN
 C--------remove potentially empty omp files
@@ -2162,37 +2136,40 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
 
+
          IF(ADIv.eq.3) then 
            WRITE (8,99003) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
      &          NLV(nnur),DEF(1,nnur),ROHfbp(nnur),ROHfba(nnur)
          ELSE 
            WRITE (8,99004) INT(Z(nnur)), SYMb(nnur), INT(A(nnur)),
      &          NLV(nnur), DEF(1,nnur), ATIlnor(nnur) 
-         ENDIF
+      ENDIF
 
          IF (ADIv.NE.3.0D0) THEN
 
-           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
+            IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
 
-           IF (ADIv.GT.1.0D0) 
-     &       WRITE (8,'(1X,/,
+            IF (ADIv.GT.1.0D0) 
+     &      WRITE (8,'(1X,/,
      &        ''  TOTAL LEVEL DENSITY (TWICE THE SINGLE PARITY) FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
 
-           WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
+            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
      &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
 
-           DO i = 1, NEX(nnur)
-              IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
-              rocumul = 0.D0
-              DO j = 1, NDLW
-                rocumul = rocumul + RO(i,j,1,nnur)
-              ENDDO
-              IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
+            DO i = 1, NEX(nnur)
+
+            IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+
+               rocumul = 0.D0
+               DO j = 1, NDLW
+                  rocumul = rocumul + RO(i,j,1,nnur)
+               ENDDO
                
-              WRITE (8,99010) EX(i,nnur), 2*rocumul,
+               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit               
+               WRITE (8,99010) EX(i,nnur), 2*rocumul,
      &              (2*RO(i,j,1,nnur),j = 1,11)
 c    &              (2*RO(i,j,1,nnur),j = 11,21)
 c    &              (2*RO(i,j,1,nnur),j = 21,31)     
@@ -2213,13 +2190,14 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
      &        ' MeV above the ',NLV(nnur),'-th discrete level'     
 
            DO i = 1, NEX(nnur)
+
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-              ELSE
+           ELSE
                 u = UEXcit(i,nnur)
-              ENDIF
+            ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2244,11 +2222,11 @@ c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
 
               IF(ADIv.eq.0) then
                 u = EX(i,nnur)
-              ELSE
+            ELSE
                 u = UEXcit(i,nnur)
-              ENDIF
+            ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2273,16 +2251,16 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
                 u = EX(i,nnur)
               ELSE
                 u = UEXcit(i,nnur)
-              ENDIF
+            ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+            IF(u.LT.ELV( NLV(nnur),nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
                  rocumul = rocumul + RO(i,j,2,nnur)
               ENDDO
+               
               IF(i.GE.10 .and. rocumul .LE. 0.1d0) exit
-              
               WRITE (8,99010) u, rocumul,
      &              (RO(i,j,2,nnur),j = 1,11)
 c     &             (RO(i,j,2,nnur),j = 11,21)
@@ -2400,7 +2378,7 @@ C         Changed to RIPL-3 file
                Gg_obs = gggtmp*1000.0D0 !in meV
                GOTO 85
             ENDDO
-   75       WRITE (8,*)' WARNING: empire/data/Ggamma.dat file not found'
+   75       WRITE (8,*) 'WARNING: empire/data/Ggamma.dat file not found'
    85       CLOSE (47)
          ENDIF
       ENDIF
@@ -2455,10 +2433,6 @@ C-------constructing input and filenames
       ENDIF
   100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
      &      ngamr, nmax, itmp2, qn
-C
-C     nlvr  is the total number of levels
-C     ngamr is the total number of gamma rays
-C
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
           READ (13,'(A1)',END = 300) dum
@@ -2482,7 +2456,6 @@ C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
           IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
 C---------limit to max. of 40 levels if ENDF active
           IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
-C
           IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
      &          = MIN(NDLV,nlvr)
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
@@ -2500,13 +2473,7 @@ C---------levels for nucleus NNUC copied to file *.lev
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
-            IF(ilv.gt.1 .and. ELV(ilv,Nnuc).le.0.00001d0) then 
-               WRITE(8,*) ' ERROR: Discrete level with Elv<0.00001 MeV' 
-               WRITE(8,'(1x,A,I3,A4,I3)') 
-     &         ' ERROR: Check your discrete levels for Z =',
-     &         NINT(Z(Nnuc)), ' A =', NINT(A(Nnuc))
-               STOP ' ERROR: See the long output for explanations'
-            ENDIF
+C
             IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
                 WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
@@ -2516,10 +2483,10 @@ C---------levels for nucleus NNUC copied to file *.lev
      &'('' Number of discrete levels changed from RIPL default of '',I3,
      &'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
              NLV(Nnuc) = max(ilv - 1,1)
-                IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
+              IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
                 GOTO 200
-              ENDIF
-            ENDIF
+           ENDIF
+         ENDIF
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
               NLV(Nnuc) = max(ilv - 1,1)
@@ -2712,7 +2679,7 @@ C         residual nuclei must be heavier than alpha
           IF (iloc.EQ.1) THEN
             WRITE(8,'(''ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
      &                izares
-            STOP ' ERROR: NUCLEUS NOT FOUND in PRINPUT' 
+            STOP ' FATAL: in PRINPUT: NUCLEUS NOT FOUND' 
           ENDIF
           IF(nejc.eq.1) WRITE (12,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
@@ -2961,7 +2928,7 @@ C        DO i = 1, NNUcd
         IF (KTRompcc.GT.0 .AND. DIRect.GT.0) WRITE (8,*)
      &   'Inelastic o. m. parameters: RIPL catalog number ', KTRompcc
         IF (KTRlom(0,0).NE.KTRompcc .AND. DIRect.GT.0) WRITE (8,*)
-     &   ' WARNING: The inelastic OMP is not equal to incident OMP ', 
+     &   'WARNING: The inelastic OMP is not equal to incident OMP ', 
      &     KTRlom(0,0)
         DO nejc = 1, NEJcm
           ares = A(1) - AEJc(nejc)
@@ -2971,9 +2938,9 @@ C         residual nuclei must be heavier than alpha
           izares = INT(1000*zres + ares)
           CALL WHERE(izares,nnur,iloc)
           IF (iloc.EQ.1) THEN
-            WRITE(8,'('' ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
+            WRITE(8,'(''ERROR: NO LOCATION ASCRIBED TO NUCLEUS '',I8)')
      &                izares
-            STOP ' ERROR: in PRINPUT: NUCLEUS NOT FOUND' 
+            STOP ' FATAL: in PRINPUT: NUCLEUS NOT FOUND' 
           ENDIF
           IF(nejc.eq.1) WRITE (8,*) 
      &      'Neutron   o. m. parameters: RIPL catalog number ',
@@ -3014,15 +2981,15 @@ C-----WRITE heading on FILE12
       IF(LEVtarg.GT.1) THEN
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,''m INCIDENT ENERGY''                             ,1P,D10.3,''
+     &I3,''m INCIDENT ENERGY''                                ,G10.5,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
-     &I3,'' INCIDENT ENERGY ''                             ,1P,D10.3,''
+     &I3,'' INCIDENT ENERGY ''                                ,G10.5,''
      &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
       ENDIF
-      WRITE (12,'('' COMPOUND NUCLEUS ENERGY '',F9.3,'' MeV'')') EXCn
+      WRITE (12,'('' COMPOUND NUCLEUS ENERGY'',F9.3,'' MeV'')') EXCn
       WRITE (12,*)
 
 C-----printing to the LIST.OUT for ENDF file ****** DONE *****
@@ -3327,14 +3294,12 @@ C
      >    ERR=753)
 C     VERSIONNUMBER = 3.1
 C     VERSIONNAME   = RIVOLI
-      read(23,'(16x,A5)',ERR=753,END=7531) emp_ver
-      read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
+      read(23,'(16x,A5)',ERR=753,END=753) emp_ver
+      read(23,'(16x,A6)',ERR=753,END=753) emp_nam
       close(23)
-      goto 7541
- 7531 emp_ver='3.1.1 '
-      emp_nam='Rivoli'
- 7541 WRITE(8,'(A44,A6,A2)') 
-     > '                        |    E M P I R E  - ',emp_ver,' |'
+
+      WRITE(8,'(A44,A5,A3)') 
+     > '                        |    E M P I R E  -  ',emp_ver ,'  |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,'(A33,A6,A13)')
@@ -3343,7 +3308,7 @@ C     VERSIONNAME   = RIVOLI
      > '                       |                          |'
       GOTO 754
   753 WRITE (8,*)
-     > '                       |    E M P I R E  - 3.1    |'
+     > '                       |    E M P I R E  -  3.1   |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,*)
@@ -3358,8 +3323,7 @@ C
       WRITE(8,30) source_rev
    30 FORMAT(24X,'| empire/source  rev. ',A5,'|')
       GOTO 756
-  755 emp_rev    = '     '
-      source_rev = '     '
+  755 emp_rev = "     "
       WRITE (8,*)'                       |       Not under SVN      |'
 C
   756 WRITE (8,*)'                       |                          |'
@@ -3386,12 +3350,11 @@ C
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
-     > trim(emp_ver), ' ',emp_nam
+     > trim(emp_ver), ' ',trim(emp_nam)
 
-      if(emp_rev.ne.'     ') then
-        WRITE (12,35) emp_rev
-   35 FORMAT(1X,'(SVN revision ',A5,') by M. Herman et al [EMP].',5X,' '
-     >      )
+      if(emp_rev(1:5).ne."     ") then
+        WRITE (12,35) trim(emp_rev)
+   35 FORMAT(1X,'(SVN revision ',A,') by M. Herman et al [EMP].',5X,' ')
       else
         WRITE (12,*)
      >             '(not under SVN) by M. Herman et al [EMP].          '
@@ -3466,7 +3429,7 @@ C
       name = '      '
       READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
          IF (name.EQ.'GO    ') THEN
-C           CLOSE(95)  ! SHOULD BE CLOSED IN MAIN.F
+            CLOSE(95)
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
@@ -3489,16 +3452,12 @@ C-----------Print some final input options
                  ENDIF 
                  IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
-         
-               INQUIRE (FILE = ('TARGET_COLL.DAT'),EXIST = fexist)
-               IF (.not.fexist) then
-                 WRITE (8,
+               WRITE (8,
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
-     &             ) ECUtcoll
-                 WRITE (8,
+     &     ) ECUtcoll
+               WRITE (8,
      &'('' Maximum spin of retrieved collective levels J <'',I1)') 
-     &             JCUtcoll+1
-               ENDIF
+     &         JCUtcoll+1
             ENDIF
 
             IF (KEY_shape.EQ.0) WRITE (8,
@@ -3605,7 +3564,7 @@ C--------DEGAS input
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
             PEQc = 0.
-            IF (val.GE.0.5 .AND. val.LE.3.D0) THEN
+            IF (val.GE.0.8 .AND. val.LE.3.D0) THEN
               PEQc = 1.
               MFPp = val
               WRITE (8,
@@ -3630,7 +3589,7 @@ C--------PCROSS input
      &          '('' Mean free path parameter sampled value : '',f5.2)')
      &          MFPp
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, MFPp, INDexf,INDexb
               else
                 WRITE (8,
@@ -3640,23 +3599,6 @@ C--------PCROSS input
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Recommended ~ 1.5)'')') MFPp
                endif
-             ENDIF
-            GOTO 100
-         ENDIF
-C
-         IF (name.EQ.'PESPIN') THEN
-            PESpin = 0
-            IF (val.GT.0) THEN
-              PESpin = 1
-              WRITE (8, '('' Exciton model spin cut-off taken as ~(p+h)*
-     &0.26*A^(2/3)'')')
-              WRITE(12, '('' Exciton model spin cut-off taken as ~(p+h)*
-     &0.26*A^(2/3)'')')
-             ELSE
-              WRITE (8,
-     &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
-              WRITE (12,
-     &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
              ENDIF
             GOTO 100
          ENDIF
@@ -3779,7 +3721,7 @@ C
              ipoten = ABS(val)
              CALL FINDPOT(ki,ieof,ipoten)
              IF (ieof.NE.0) THEN
-                 WRITE (8,*) ' WARNING: Requested RIPL entry ', ipoten,
+                 WRITE (8,*) 'WARNING: Requested RIPL entry ', ipoten,
      &                        ' for inelastic scattering not found'
                  GOTO 100
              ENDIF
@@ -3821,7 +3763,7 @@ C
      &  '('' Collective levels in continuum will be spread using a'')')
               WRITE (8,
      &  '('' Gaussian function. Gaussian sigma = 0.02+R*sqrt(E); ''
-     &       ''R = '',F8.3, '' keV'' )') WIDcoll*1000
+     &       ''R = '',F6.3, '' keV'' )') WIDcoll*1000
              ENDIF
             GOTO 100
          ENDIF
@@ -3836,22 +3778,6 @@ C
              ELSE
               WRITE (8 ,'('' Primary gammas not stored'')')
               WRITE (12,'('' Primary gammas not stored'')')
-             ENDIF
-            GOTO 100
-         ENDIF
-
-         IF (name.EQ.'GAMPRN') THEN
-            IF(val.gt.0) THEN
-              NNG_xs = 1
-              WRITE (8 , 
-     &          '('' Gamma production cross sections are printed'')')
-              WRITE (12,
-     &          '('' Gamma production cross sections are printed'')')
-             ELSE
-              WRITE (8 ,
-     &          '('' Gamma production cross sections not printed'')')
-              WRITE (12,
-     &          '('' Gamma production cross sections not printed'')')
              ENDIF
             GOTO 100
          ENDIF
@@ -4121,7 +4047,7 @@ C-----
          IF (name.EQ.'FCCRED') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
-     &          '('' Disc-lev. cross section uncertainty '',
+     &          '('' Direct cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
                  sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
@@ -4132,53 +4058,20 @@ C-----
                   FCCred = val + 1.732d0*(2*rFCCred-1.)*sigma
                 ENDIF
                 WRITE (8,
-     &     '('' Disc-lev. cross section was scaled by factor ''
+     &     '('' Direct cross section was scaled by factor ''
      &          ,f6.3)') FCCred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FCCred, INDexf,INDexb
             else
                 FCCred = val
                 WRITE (8,
-     &      '('' Disc-lev. cross section was scaled by factor '',
+     &      '('' Direct cross section was scaled by factor '',
      &            F6.3)') FCCred
                 WRITE (12,
-     &      '('' Disc-lev. cross section was scaled by factor '',
+     &      '('' Direct cross section was scaled by factor '',
      &           F6.3)') FCCred
             endif
-            FCCred0 = FCCred
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'FCORED') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' Contin.cross section uncertainty '',
-     &          '' is equal to '',i2,'' %'')') i1
-                 sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                  IF(rFCOred.eq.1.d0) rFCOred = grand()
-                  FCOred = val + rFCOred*sigma
-                ELSE
-                  IF(rFCOred.eq.1.d0) rFCOred = drand()
-                  FCOred = val + 1.732d0*(2*rFCOred-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &     '('' Contin.cross section was scaled by factor ''
-     &          ,f6.3)') FCOred
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, FCOred, INDexf,INDexb
-            else
-                FCOred = val
-                WRITE (8,
-     &      '('' Contin.cross section was scaled by factor '',
-     &            F6.3)') FCOred
-                WRITE (12,
-     &      '('' Contin.cross section was scaled by factor '',
-     &           F6.3)') FCOred
-            endif
-            FCOred0 = FCOred
             GOTO 100
          ENDIF
 C-----
@@ -4199,7 +4092,7 @@ C-----
      &      '('' Fusion cross section was scaled by factor ''
      &          ,f6.3)') FUSred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, FUSred, INDexf,INDexb
             else
                 FUSred = val
@@ -4210,7 +4103,6 @@ C-----
      &      '('' Fusion cross section was scaled by factor '',
      &           F6.3)') FUSred
             endif
-            FUSred0 = FUSred
             GOTO 100
          ENDIF
 C-----
@@ -4231,7 +4123,7 @@ C-----
      &          '('' Total cross section was scaled by factor ''
      &          ,f6.3)') TOTred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, TOTred, INDexf,INDexb
             else
                 TOTred = val
@@ -4242,7 +4134,6 @@ C-----
      &      '('' Total cross section was scaled by factor '',
      &          F6.3)') TOTred
             endif
-            TOTred0 = TOTred
             GOTO 100
          ENDIF
 C-----
@@ -4263,7 +4154,7 @@ C-----
      &          '('' Shape elastic cross section was scaled by factor ''
      &          ,f6.3)') ELAred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &             IPArCOV, ELAred, INDexf,INDexb
             else
                 ELAred = val
@@ -4273,38 +4164,6 @@ C-----
                 WRITE (12,
      &      '('' Shape elastic cross section was scaled by factor '',
      &          F6.3)') ELAred
-            endif
-            ELAred0 = ELAred
-            GOTO 100
-         ENDIF
-C-----------
-         IF (name.EQ.'CELRED') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' Compound elastic cross section uncertainty '',
-     &          '' is equal to '',i2,'' %'')') i1
-                sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                   IF(rCELred.eq.1.d0) rCELred = grand()
-                   CELred = val + rCELred*sigma
-                ELSE
-                   IF(rCELred.eq.1.d0) rCELred = drand()
-                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          ,f6.3)') CELred
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CELred, INDexf,INDexb
-            else
-                CELred = val
-                WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
-                WRITE (12,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
             endif
             GOTO 100
          ENDIF
@@ -4597,7 +4456,7 @@ C
      &        '('' Real volume potential depth sampled norm.factor : '',
      &        f5.2)') FNvvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4647,7 +4506,7 @@ C
      &        '('' Volume potential diffuseness sampled norm.factor : ''
      &        ,f5.2)') FNavomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4694,7 +4553,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '('' Imag. volume potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4742,7 +4601,7 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &      '('' Imag. surface potential depth sampled norm.factor : '',
      &        f5.2)') FNwsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4789,7 +4648,7 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
      &        '('' Surface potential diffuseness sampled norm.factor :''
      &        ,f5.2)') FNasomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4836,7 +4695,7 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      &        '('' Surface potential radius sampled norm. factor :''
      &        ,f5.2)') FNrsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNrsomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4883,7 +4742,7 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &        '('' Volume imaginary potential radius sampled factor :''
      &        ,f5.2)') FNrwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNrwvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4930,7 +4789,7 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
      &        '('' Volume real potential radius sampled factor :''
      &        ,f5.2)') FNrvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+                 write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, FNrvomp(i3,nnuc), INDexf,INDexb
             endif
             if(val.lt.0.) then
@@ -4981,7 +4840,7 @@ C-----
      &        '('' GDR first hump energy sampled value : '',f5.2)')
      &        GDRpar(1,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(1,nnuc), INDexf,INDexb
             else
               GDRpar(1,nnuc) = val
@@ -5031,7 +4890,7 @@ C-----
      &        '('' GDR first hump width sampled value : '',f5.2)')
      &        GDRpar(2,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(2,nnuc), INDexf,INDexb
             else
               GDRpar(2,nnuc) = val
@@ -5053,10 +4912,10 @@ C-----
               ENDDO
               WRITE (8,
      &        '('' GDR first hump cross section in all nuclei set to ''
-     &        ,F7.2)') val
+     &        ,F5.2)') val
               WRITE (12,
      &        '('' GDR first hump cross section in all nuclei set to ''
-     &        ,F7.2)') val
+     &        ,F5.2)') val
               GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -5079,18 +4938,18 @@ C-----
               ENDIF
               WRITE (8,
      &        '('' GDR first hump cross section sampled value : ''
-     &        ,f7.2)') GDRpar(3,nnuc)
+     &        ,f5.2)') GDRpar(3,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(3,nnuc), INDexf,INDexb
             else
               GDRpar(3,nnuc) = val
               WRITE (8,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
-     &      ,F7.2)') i2, SYMb(nnuc), val
+     &      ,F5.2)') i2, SYMb(nnuc), val
               WRITE (12,
      &      '('' GDR first hump cross section in '',I3,A2,'' set to ''
-     &      ,F7.2)') i2, SYMb(nnuc), val
+     &      ,F5.2)') i2, SYMb(nnuc), val
              endif
             GOTO 100
          ENDIF
@@ -5131,7 +4990,7 @@ C-----
      &        '('' GDR second hump energy sampled value : '',f5.2)')
      &        GDRpar(4,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(4,nnuc), INDexf,INDexb
             else
               GDRpar(4,nnuc) = val
@@ -5181,7 +5040,7 @@ C-----
      &        '('' GDR second hump width sampled value : '',f5.2)')
      &        GDRpar(5,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(5,nnuc), INDexf,INDexb
             else
               GDRpar(5,nnuc) = val
@@ -5203,10 +5062,10 @@ C-----
               ENDDO
               WRITE (8,
      &        '('' GDR second hump cross section in all nuclei set to ''
-     &        ,F7.2)') val
+     &        ,F5.2)') val
               WRITE (12,
      &        '('' GDR second hump cross section in all nuclei set to ''
-     &        ,F7.2)') val
+     &        ,F5.2)') val
               GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -5229,18 +5088,18 @@ C-----
               ENDIF
               WRITE (8,
      &        '('' GDR second hump cross section sampled value : ''
-     &        ,f7.2)') GDRpar(6,nnuc)
+     &        ,f5.2)') GDRpar(6,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GDRpar(6,nnuc), INDexf,INDexb
             else
               GDRpar(6,nnuc) = val
               WRITE (8,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
-     &      ,F7.2)') i2, SYMb(nnuc), val
+     &      ,F5.2)') i2, SYMb(nnuc), val
               WRITE (12,
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
-     &      ,F7.2)') i2, SYMb(nnuc), val
+     &      ,F5.2)') i2, SYMb(nnuc), val
              endif
             GOTO 100
          ENDIF
@@ -5722,7 +5581,7 @@ C-----
      &       '('' Shell correction in all nuclei multiplied by '',F6.2)'
      &       ) shelss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, shelss,INDexf,INDexb
              else
               DO i = 0, NDNUC
@@ -5757,7 +5616,7 @@ C-----
      &        '('' Shell correction dw sampled value : '',f8.3)')
      &        SHLlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, SHLlnor(nnuc),INDexf,INDexb
             else
               SHLlnor(nnuc) = val
@@ -5789,7 +5648,7 @@ C-----
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
              else
               DO i = 1, NDNUC
@@ -5823,7 +5682,7 @@ C-----
      &        '('' L.d. a-parameter sampled value : '',f8.3)')
      &        ATIlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, ATIlnor(nnuc),INDexf,INDexb
             else
               ATIlnor(nnuc) = val
@@ -5900,7 +5759,7 @@ C-----
      &        '('' Single particle l.d. parameter g sampled value : '',
      &        f8.3)') GTIlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, GTIlnor(nnuc),INDexf,INDexb
             else
               GTIlnor(nnuc) = val
@@ -6036,7 +5895,7 @@ C--------Tuning factors
      &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1),
      & TUNEpe(i1)
               IPArCOV = IPArCOV +1
-              WRITE(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              WRITE(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &           IPArCOV, TUNEpe(i1), INDexf,INDexb
             else
               TUNEpe(i1) = val
@@ -6076,7 +5935,7 @@ C--------Tuning factors
      &'('' Fission decay width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), TUNefi(nnuc)
               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &       IPArCOV, TUNefi(nnuc), INDexf,INDexb
  
             else
@@ -6134,7 +5993,7 @@ C--------Tuning factors
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+               write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb
              else
               TUNe(i3,nnuc) = val
@@ -6164,7 +6023,7 @@ C-----
               WRITE (8,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') DEFdyn
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &           IPArCOV, DEFdyn, INDexf,INDexb
             ELSE
               WRITE (8,
@@ -6191,7 +6050,7 @@ C-----
               WRITE (8,
      &'('' CC static deformation multiplied by'',F6.3)') DEFSTA
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &           IPArCOV, DEFsta, INDexf,INDexb
             ELSE
               WRITE (8,
@@ -6308,11 +6167,11 @@ C-----
      &EFItin(i1 + 1,i2 + 1)                                              ! nilsson
                else                                                      ! nilsson
                   WRITE (8,
-     &'('' Field strength of multipolarity/k'',I2''/''I1,'' fitted to th ! nilsson
-     &e level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)         ! nilsson
+     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
+     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
                   WRITE (12,
-     &'('' Field strength of multipolarity/k'',I2''/''I1,'' fitted to th ! nilsson
-     &e level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)         ! nilsson
+     &'('' Field strength of multipolarity/k'',I2''/''I1,''fitted to the ! nilsson
+     & level at '',F6.3,'' MeV'')') i1,i2,EFItin(i1 + 1,i2 + 1)          ! nilsson
                endif                                                     ! nilsson
             ENDIF                                                        ! nilsson
             GOTO 100
@@ -6403,10 +6262,10 @@ C-----
             GRin(1) = val
             IF (GRin(1).GT.0.0D0) WRITE (8,
      &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
-     & MeV'')') GRin(1)
+     &MeV'')') GRin(1)
             IF (GRin(1).GT.0.0D0) WRITE (12,
      &'('' Energy range for pairing calculations (MSD prot.)'',F6.3,''
-     & MeV'')') GRin(1)
+     &MeV'')') GRin(1)
             GOTO 100
          ENDIF
 C----
@@ -6543,7 +6402,7 @@ C-----shift parameter used to adjust HFB LD
               WRITE (8,
      &'('' GS HFB L.D. shift in all nuclei set to '',F8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
              else
               DO nnuc = 1, NDNUC
@@ -6576,7 +6435,7 @@ C-----shift parameter used to adjust HFB LD
      &        '('' GS HFB L.D. shift sampled value : '',f8.3)')
      &       ROHfbp(nnuc)
              IPArCOV = IPArCOV +1
-             write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+             write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb
             else
               ROHfbp(nnuc) = val
@@ -6609,7 +6468,7 @@ C-----pseudo a-parameter used to adjust HFB LD
               WRITE (8,
      &'('' GS HFB L.D. norm in all nuclei set to '',F8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
              else
               DO nnuc = 1, NDNUC
@@ -6642,7 +6501,7 @@ C-----pseudo a-parameter used to adjust HFB LD
      &        '('' GS HFB L.D. norm sampled value : '',f8.3)')
      &       ROHfba(nnuc)
              IPArCOV = IPArCOV +1
-             write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+             write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb
             else
               ROHfba(nnuc) = val
@@ -6660,7 +6519,7 @@ C--------checking for fission data in the optional input
          IF (name.EQ.'FISSHI') THEN
             izar = i1*1000 + i2
             IF (val.EQ.0) THEN
-               fstring = 'fission induced by light part.  '
+               fstring = 'fission of light projectiles    '
             ELSEIF (val.EQ.1) THEN
                fstring = 'HI-fission over 1-humped barrier'
             ELSEIF (val.EQ.2) THEN
@@ -7046,6 +6905,13 @@ C--------------------------------------------------------------------------
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
                 FISspe = nint(val)
+C               if(FISspe.eq.1) THEN 
+C                 WRITE (8,*) 
+C    &         ' WARNING: Los Alamos model will be implemented in 2012'
+C                 WRITE (8,*) 
+C    &         ' WARNING:      changing to Kornilov Model             '
+C                FISspe = 2
+C               ENDIF                
                 WRITE (8,*) 'Prompt fission neutron spectra calculated'
                 if(FISspe.eq.2) WRITE (8,*) ' using Kornilov''s model'
                 if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'
@@ -7099,7 +6965,7 @@ C-----
      &        '('' Fission Erel norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
  
             else
@@ -7129,7 +6995,7 @@ C-----
      &        '('' Fission TKE norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
  
             else
@@ -7159,7 +7025,7 @@ C-----
      &    '('' PFN R=TLight/THeavy norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
  
             else
@@ -7190,7 +7056,7 @@ C-----
      & '('' PFN alpha (Efrag ~ alpha*TKE) norm sampled value : '',
      & f8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
  
             else
@@ -7221,7 +7087,7 @@ C-----
      &        '('' PFN NUBAR norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+              write(95,'(1x,i5,1x,d12.6,1x,2i13)')
      &          IPArCOV, atilss,INDexf,INDexb
  
             else
@@ -7521,7 +7387,18 @@ C-----
          FISn_n(3,nnuc)=quant
          goto 100
        ENDIF
-C-----
+C*************************************
+         IF (name.EQ.'SFACT') THEN
+            if (nint(val).EQ.1 .OR. nint(val).EQ.2) THEN
+             SFAct = nint(val)
+!            CALL SFACT(i1,i2,i3,iloc,val,char,char1)
+            WRITE (8, '('' SFACTOR = '',i2)')  nint(val)
+             if (SFAct.eq.1) WRITE (8,*) 'S-FACTOR for (x,g) calculated'
+             if (SFAct.eq.2) WRITE (8,*) 'S-FACTOR for (x,n) calculated'
+            endif
+           goto 100       
+         ENDIF
+C**************************************
          IF (name.EQ.'RANDOM') THEN
             if(nint(val).eq.0) goto 100             
             if(nint(val).gt.0) then
@@ -7539,14 +7416,14 @@ C             If the file R250SEED.DAT does not exist,
 C             then starting seed is read
               iseed = abs(nint(val))
               if(iseed.le.1) iseed=1234567
-C             WRITE (8,*) 'Random seeds :', 1, 104
+              WRITE (8,*) 'Random seeds :', 1, 104
               Call R250Init(iseed)
             else
               OPEN(94,file='R250SEED.DAT',status='OLD')
               READ(94,*)  indexf, indexb
               CLOSE(94)
+              WRITE (8,*) 'Random seeds :', indexf, indexb
             endif
-            WRITE (8,*) 'Random seeds :', indexf, indexb                
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
@@ -7579,7 +7456,7 @@ C
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED, check your INPUT file'')') name
-      STOP ' ERROR: INVALID FORMAT in input KEY, check your INPUT file '
+      STOP ' FATAL: INVALID FORMAT in input KEY, check your INPUT file '
       END
 C
       SUBROUTINE ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,char,
@@ -7692,7 +7569,7 @@ C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          ia = MOD(izaf(k),1000)
          IF (iz.GT.130 .OR. ia.GT.400) cycle
 C        Corresponds to the definition of atomic mass excess in Audi
-         RESmas(iz,ia) = DBLE(REAL(ia)) + excess(k)/AMUmev 
+         RESmas(iz,ia) = REAL(ia) + excess(k)/AMUmev 
          EXCessmass(iz,ia) = excess(k)
       ENDDO
       DO iz = 6, 100
@@ -7818,9 +7695,9 @@ C-----Fermi energies calculated for all nuclei and projectile combinations
          ENDDO
       ENDDO
       RETURN
-  300 WRITE (8,*) ' ERROR: File '//
+  300 WRITE (8,*) 'ERROR: File '//
      &  trim(empiredir)//'/RIPL/masses/mass-frdm95.dat missing'  
-      STOP ' ERROR: File ../RIPL/masses/mass-frdm95.dat missing'
+      STOP 'FATAL: File ../RIPL/masses/mass-frdm95.dat missing'
       END
 C
 C
@@ -8773,7 +8650,7 @@ C     write(6,*)trim(empiredir)//trim(filename)
         write (*,*)' ',trim(empiredir)//trim(filename)
         WRITE (*,*)
         WRITE (8,
-     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+     & '('' WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
         write (8,*)' ',trim(empiredir)//trim(filename)
         WRITE (8,*)
         RETURN 
@@ -9180,7 +9057,7 @@ C
              WRITE (8,'(3x,3I5)') ND_nlv
              WRITE (12,'(3x,3I5)') ND_nlv
 
-           else
+       else
 
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv, 
@@ -9249,14 +9126,6 @@ C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
-C           Giant Resonances flag: negative deformation 
-            IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
-              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-              igreson = 1
-            ENDIF
-
             WRITE (8,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -9265,6 +9134,13 @@ C           Giant Resonances flag: negative deformation
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
+C           Giant Resonances flag: negative deformation 
+            IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
+              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+              igreson = 1
+            ENDIF
             WRITE (12,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -9382,6 +9258,7 @@ C
 C           For covariance calculation of dynamical deformation
             D_Def(i,2) = ftmp*DEFdyn
 C
+C           IF(D_Def(i,2).GT.0.05d0 .and. ICOllev(i).GE.LEVcc) then
 C           Giant Resonances flag: negative deformation 
             IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
               IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
@@ -9402,8 +9279,15 @@ C           Giant Resonances flag: negative deformation
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), abs(D_Def(i,2)), ctmp5
 C
+C
+C           Skipping Giant Resonances (negative deformation) 
+C           IF(D_Def(i,2).GT.0 .AND.
+C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
+C
 C           CHECKING EWSR (only for neutrons)
 C
+C           IF(D_Def(i,2).GT.0.d0 .AND.
+C    &            INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
             IF( INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
               ftmp = abs(D_Def(i,2))
               betasq=ftmp*ftmp
@@ -9430,19 +9314,19 @@ C
          write(8,*)
      >       '----------------------------------------------------------
      >-------'
-         IF(.not.SOFT) then
-           IF(DEFORMED) then
+      IF(.not.SOFT) then
+        IF(DEFORMED) then
              write(8,*) '  Rigid rotor model assumed' 
-           ELSE
+        ELSE
              write(8,*) '  Spherical model assumed' 
-           ENDIF
-         ELSE
-           IF(DYNam) then
+        ENDIF
+      ELSE
+        IF(DYNam) then
              write(8,*) '  Rigid-soft rotor model assumed' 
-           ELSE
+        ELSE
              write(8,*) '  Soft rotor model assumed' 
-           ENDIF
-         ENDIF
+        ENDIF
+      ENDIF
 
          write(8,*)'  States with number < ',LEVcc, 
      >             '  in the file *-lev.col coupled'
@@ -9457,8 +9341,6 @@ C
            if (sgqr.gt.0.) betagqr=sqrt(sgqr/egrcoll(2,1))
            if (sleor.gt.0.) betalegor=sqrt(sleor/egrcoll(3,1))
            if (sheor.gt.0.) betahegor=sqrt(sheor/egrcoll(3,2))
-         endif
-         if(      INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
            write(8,*)
      >       '==========================================================
      >======='
@@ -9477,7 +9359,7 @@ C
 
            write(8,*)
            write(8,*)
-     > ' If the GR deformation beta is >= 0, then the EWSR is exhausted'
+     > ' If the GR deformation beta is zero, then the EWSR is exhausted'
            write(8,*)
      >       '__________________________________________________________
      >_______'
@@ -9486,16 +9368,16 @@ C
      >       '__________________________________________________________
      >_______'
            if(betagmr.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GMR :',
+     >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GMR :',
      >       sgmr,egrcoll(0,1),ggrcoll(0,1),-betagmr
            if(betagqr.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GQR :',
+     >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') '  GQR :',
      >       sgqr,egrcoll(2,1),ggrcoll(2,1),-betagqr
            if(betalegor.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'leGOR :',
+     >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'leGOR :',
      >       sleor,egrcoll(3,1),ggrcoll(3,1),-betalegor
            if(betahegor.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'heGOR :',
+     >       write(8,'(1x,A7,2x,d12.6,1x,3(f6.3,2x),i3)') 'heGOR :',
      >       sheor,egrcoll(3,2),ggrcoll(3,2),-betahegor
            write(8,*)
      >       '==========================================================
@@ -9657,7 +9539,7 @@ C--------Skipping levels with unknown spin in the discrete level region
 
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
-     &    ' WARNING: Max.number of uncoupled coll. levels (99) reached'
+     &     'WARNING: Max.number of uncoupled coll. levels (99) reached'
             GOTO 600
          ENDIF
 
@@ -9736,7 +9618,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 2
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = beta2
                GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.4.D0 .AND. lvpr.EQ.1) THEN
@@ -9773,7 +9655,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = beta2
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.1.d0 .AND. lvpr.EQ.-1) THEN
@@ -9829,7 +9711,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = beta3
                GOTO 500
             ENDIF
             IF (ECUtcoll.GT.0. .AND. elvr.GE.ECUtcoll) GOTO 600
@@ -10917,10 +10799,9 @@ Ccc
       IF(INT(Energy/DE+1).LT.Limit) RETURN
    10 NEX(1) = NEX(1) - 1
       IF(NEX(1).EQ.1) THEN
-         WRITE(8,*) ' ERROR DEFINING ENERGY STEP'
-         WRITE(8,*) ' REPORT TO mwherman@bnl.gov & r.capotenoy@iaea.org'
-         STOP 
-     &    ' ERROR DEFINING ENERGY STEP: email to r.capotenoy@iaea.org'
+         WRITE(8,*) 'ERROR DEFINING ENERGY STEP'
+         WRITE(8,*) 'REPORT TO mwherman@bnl.gov      '
+         STOP ' FATAL ERROR DEFINING ENERGY STEP'
       ENDIF
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       IF(INT(Energy/DE+1).GE.Limit) GOTO 10

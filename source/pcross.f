@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3146 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 13:16:53 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Rev: 3165 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -125,7 +125,7 @@ C
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.0) pc = 2*ftmp  ! e-e
         IF (MOD(ac,2).EQ.0 .AND. MOD(zc,2).EQ.1) pc = 0.d0    ! o-o
       ENDIF
-C     We supress pairing if requested in input
+C     We suppress pairing if requested in input
 C     Pairing is implicitly considered in the distribution of discrete levels
       if(NPAirpe.eq.0) pc = 0.d0
 C-----Compound gamma emitting nucleus
@@ -178,7 +178,7 @@ C
          pair(nejc) = ftmp
          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.0) pair(nejc) = 2*ftmp
          IF (MOD(ar,2).EQ.0 .AND. MOD(zr,2).EQ.1) pair(nejc) = 0.d0
-C        We supress pairing if requested in input
+C        We suppress pairing if requested in input
 C        Pairing is implicitly considered in the distribution of discrete levels
          if(NPAirpe.eq.0) pair(nejc) = 0.d0
 C--------Maximum and minimum energy bin
@@ -702,7 +702,7 @@ Cmbc  PG Young, and S Chiba, to be published in the Nov 1995 issue of
 Cmbc  the Journal of Nucl. Sci and Tech. (Japan). The basic idea is
 Cmbc  to first calculate the Kalbach MSD a-parameter assuming a neutron
 Cmbc  projectile instead of a photon, and the modify a to account for
-Cmbc  (a) reduced forwward peaking since a photon carries less momentum;
+Cmbc  (a) reduced forward peaking since a photon carries less momentum;
 Cmbc  (b) less diffraction/refraction effects since the photon is undistorted.
 Cmbc  end of mbc code (more later)
 C%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

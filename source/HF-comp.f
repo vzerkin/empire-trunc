@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3149 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Rev: 3165 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -416,7 +416,7 @@ C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
-C-----Contribution comming straight from the current decay
+C-----Contribution coming straight from the current decay
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur))
      &       + Popt
@@ -986,7 +986,7 @@ Ccc   * output:SUM - SUM of transmission coefficients over all outgoing  *
 Ccc   *              channels for the requested decay (partial sums are  *
 Ccc   *              stored in SCRT and SCRTL arrays for continuum and   *
 Ccc   *              discrete levels respectively. SUMs for all ejectiles*
-Ccc   *              combine to the total Huser-Feshbach denominator.    *
+Ccc   *              combine to the total Hauser-Feshbach denominator.   *
 Ccc   *              Inverse of the latter multiplied by the population  *
 Ccc   *              of the (NNUC,IEC,JC,IPC) state is used to normalize *
 Ccc   *              SCRT and SCRTL matrices to give residual nucleus    *

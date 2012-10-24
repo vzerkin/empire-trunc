@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 3165 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
 
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
@@ -151,7 +151,7 @@ C
          KEYset = 1
 C        KEYset = 2
 C        KEYset = 3
-C         'KEYset' is key for choise of the input parameters
+C         'KEYset' is key for choice of the input parameters
 C         to calculate the width of the MLO response function.
 C         It specifies the input parameters in  the following way:
 C
