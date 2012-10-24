@@ -28,6 +28,11 @@
 %\def\labelitemiii{\normalfont\bfseries{--}}
 %}
 
+%\usepackage{tocstyle}
+%\usetocstyle{standard}
+%\settocfeature{raggedhook}{\raggedright}
+
+
 %\makeatother
 
 %\let\origdescription\description
@@ -158,7 +163,8 @@ running on Microsoft Windows.
 
 \tableofcontents{}
 
-\chapter{Introduction}
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
 
 The first version of EMPIRE code was released in 1980. This code originally
 contained the Hauser-Feshbach\index{Hauser-Feshbach} theory and the
@@ -4409,7 +4415,7 @@ $T$ is a nuclear temperature, and $\beta_{v}=3.2\cdot10^{-21}\, s^{-1}$
 is assumed to separate under-damped and over-damped motion.
 
 
-\section{Prompt Fission Neutrons}
+\subsection{Prompt Fission Neutrons}
 \label{pfns}
 
 The prompt fission neutrons play an important role in neutronics calculations for nuclear applications.
@@ -4422,7 +4428,7 @@ nucleus and its excitation energy.  Due to this sensitivity, PFNS has to be incl
 
 
 
-\subsection{Los Alamos model for prompt fission neutron spectra}
+\subsubsection{Los Alamos model for prompt fission neutron spectra}
 
 The Madland-Nix or Los Alamos model~\cite{Madland:82} constitutes the basis for the evaluation
 of prompt fission neutrons spectra in most current evaluated nuclear data libraries.
@@ -4456,7 +4462,7 @@ We will only summarize its main features here.
 
 
 %-- LA MODEL: c.m. neutron energy spectrum
-\subsubsection{Center-of-mass neutron energy spectrum}
+\paragraph{Center-of-mass neutron energy spectrum.}
 The neutron energy spectrum in the center-of-mass of a fission fragment is given by
 \begin{eqnarray} \label{eq:cmspec}
 \phi(\epsilon) = \frac{2\sigma_c(\epsilon)\epsilon}{T_m^2}\int_0^{T_m}k(T)T exp(-\epsilon/T)dT
@@ -4470,7 +4476,7 @@ Equation~(\ref{eq:cmspec}) was obtained by integrating over a triangular distrib
 a maximum temperature $T_m$.
 
 %-- LA MODEL: lab neutron energy spectrum
-\subsubsection{Laboratory neutron energy spectrum}
+\paragraph{Laboratory neutron energy spectrum.}
 In the laboratory system, the neutron energy spectrum $N(E)$ for a fission fragment moving with a kinetic 
 energy per nucleon $E_f$ is
 \begin{eqnarray} \label{eq:cm2lab}
@@ -4501,7 +4507,7 @@ In the last two equations, it is implicitly assumed that half of the emitted neu
 light fragment and the other half from the heavy fragment.
 
 %-- LA MODEL: average prompt neutrons multiplicity
-\subsubsection{Average prompt neutrons multiplicity}
+\paragraph{Average prompt neutrons multiplicity.}
 The average prompt fission neutrons multiplicity $\overline{\nu}_p$ is simply obtained from energy 
 conservation:
 \begin{eqnarray}
@@ -4519,7 +4525,7 @@ outgoing neutron in the center-of-mass reference frame.
 
 
 %-- LA MODEL: Multiple-chance fission
-\subsubsection{Multiple-chance fission}
+\paragraph{Multiple-chance fission.}
 
 At higher incident neutron energies, above the neutron binding energy, the excited compound system may 
 emit one or several neutrons before undergoing fission. Although the neutrons emitted prior to fission 
@@ -4553,7 +4559,7 @@ Here, $\left<\epsilon_j\right>$ it the mean kinetic energy of the neutron evapor
 
 
 
-\subsection{Kornilov model for prompt fission neutron spectra}
+\subsubsection{Kornilov model for prompt fission neutron spectra}
 \label{sec:korn}
 
 The Kornilov model \cite{Kornilov:99} is actually a systematics that allows to calculate PFNS
@@ -4639,7 +4645,7 @@ $^{252}$Cf & 0.809 \\ \hline
 
 
 
-\subsection{Implementation of the PFNS in EMPIRE code}
+\subsubsection{Implementation of the PFNS in EMPIRE code}
 \label{sec:empimp}
 
 Both Los Alamos and Kornilov models were coded as EMPIRE subroutines and linked to
@@ -4720,7 +4726,7 @@ Recent developments focused on the covariances and resonance region. Need to pro
 shaped development of the code over last 6 years. In parallel, there has been necessity that a wealth of information contained in the Atlas of Neutron Resonances makes its way to the new version of the evaluated library.  This motivated development of the resonance  module of EMPIRE, which also includes covariance capabilities.  These two aspects are leading subjects of this chapter, followed by the detailed description of the method used in EMPIRE for generating exclusive spectra, recoils, details of nuclear data formatting and fitting of the optical model potential.  
 
 
-\section{Resonance module}
+\chapter{Resonance module}
 
 \textbf{WARNING}: The module requires that electronic version of the Atlas be installed in the \emph{empire/Atlas}.  The copy rights for Atlas belong to the publisher (Elsevier), and until restrictions on its distribution are lifted most users will not be able to install  Atlas and therefore to use the resonance module of EMPIRE. 
 
@@ -4736,7 +4742,7 @@ verification of the procedure. The resonance parameters, their uncertainties and
 covariances are stored in ENDF-6 format. The formatted file can be later integrated 
 into an ENDF-6 file generated by the EMPIRE code.
 
-\subsubsection{Architecture of the module}
+\subsection{Architecture of the module}
 
 The module consists of the GUI script (resonance.tcl),  I/O and analysis tools
 (READRP and SCANR), the processing code (THERMX), and the physics computation  codes
@@ -4763,7 +4769,7 @@ for cross section generation, and KALMAN, empy and some additional scripts inclu
 addKalman.py and kalmanResonance for production of covariance matrix.
 To make it functional, 'xterm' also needs to be installed.
 
-\subsubsection{GUI control panel}
+\subsection{GUI control panel}
 
 At a start-up, the module reads all the necessary data for the target nucleus including individual,
 as well as average, resonance parameters from the Atlas of Neutron Resonances and RIPL
@@ -4810,7 +4816,7 @@ Resulting ENDF file including the resonance parameters and covariance matrix can
 [Z*1000+A]-res.endf by clicking on the ``Save cov.'' button on the bottom of the screen.
 Most tasks are performed in the background and their respective output files can be accessed through the ``Outputs'' menu on the top.
 
-\section{Determination of covariances}
+\chapter{Determination of covariances}
 In recent years there has been an increasing demand from nuclear
 research, industry, safety and regulatory bodies for best 
 estimate predictions of system performance, such as the design and operational 
@@ -4854,7 +4860,7 @@ The two approaches currently also differ regarding treatment of experimental dat
  both approaches within a single code system offers the user the choice of the appropriate method 
  for a given application.  
 
-\subsection{EMPIRE-KALMAN approach}
+\section{EMPIRE-KALMAN approach}
 The Kalman filter technique is used both in the resonance and in the fast neutron region. 
 It is based on minimum variance estimation and naturally combines covariances of model parameters, of experimental data and of cross sections. This universality is a major advantage of the method. KALMAN  uses  measurements along with their uncertainties to constrain covariances of the model parameters via  the sensitivity matrix. Then, the final cross section covariances are calculated from the updated covariances for model parameters.  This procedure consistently accounts  for  the experimental uncertainties and the uncertainties of the model parameters ensuring that the final cross section uncertainties are at least as good as the smaller of the two. We emphasize that under the term `reaction model' we 
 mean also the resonance region described by models such as the Multi-Level Breit-Wigner formalism. 
@@ -4965,7 +4971,7 @@ The evaluator may choose to perform a sequential  update using experimental data
 
 We note that EMPIRE-KALMAN system is a general and powerful tool for  evaluation of nuclear reactions.  In addition to  covariance calculations it may also  be used to adjust model parameters to reproduce experimental cross sections and other observables within the selected reaction models and initial uncertainties of model parameters. Therefore, the Kalman filter can be used throughout the whole evaluation procedure to ensure consistency between cross sections, model parameters, and related covariance matrices. 
 
-\subsection{EMPIRE-MC approach}
+\section{EMPIRE-MC approach}
 The Monte-Carlo (MC) method is used in EMPIRE only in the fast neutron region. 
 Its application to determination of covariances for the nuclear
 reaction observables is very transparent~\cite{Smith:04}. First, model
@@ -4990,7 +4996,7 @@ constitute a reliable benchmark for validating the faster but
 linear-model calculations with the KALMAN code.
 
 
-\subsection{EMPIRE resonance covariance module}
+\section{EMPIRE resonance covariance module}
 Generation of MF32 covariances  is achieved in several steps: 
 \begin{itemize}
  \item  Uncertainties for resonance parameters and thermal values  are retrieved from the electronic version of the 
@@ -5002,7 +5008,7 @@ into an MF=32 file of resonance parameter covariances in the compact representat
 
 The resonance module has been designed to ensure consistency among thermal cross section uncertainties and uncertainties of the resonance parameters, a feature that was not addressed during the development of the Atlas database.  Thermal cross sections are usually measured with higher accuracy than resonance parameters. In order to take advantage of their superior precision while still ensuring internal consistency of the estimated covariances, we have coupled the resonance module with the Kalman filter code, which allows for an objective adjustment of the original uncertainties. 
 
-\subsection{Inclusion of experimental data}
+\section{Inclusion of experimental data}
 \label{sec:expdata}
 
 \begin{figure}
@@ -5019,7 +5025,7 @@ experimental data. Thus, in the current practice, the prior (model-based
 cross section covariance), obtained with the EMPIRE-MC calculations,
 was fed into the Generalized Least Squares code ZOTT  incorporated in a more general GANDR system by D.W. Muir~\cite{Muir-nds:2008}.
 
-\subsection{Conclusions}
+\section{Conclusions}
 The cross section covariance capabilities of the EMPIRE code cover the full energy range relevant to applications, including thermal, resonance and fast neutron regions. This puts EMPIRE in a unique position to provide complete sets of covariance data for most of the nuclei, such as the fission products and structural materials. The code is also well capable of treating actinides.  The modules for estimating covariances for  neutron multiplicities and for fission spectra  are integrated into the EMPIRE code but need adequate parametrization.
 
 In the fast neutron region there are two complementary methods implemented in EMPIRE for determining covariances.  The Kalman filter approach is based on variance minimization  while the stochastic one is based on the Monte Carlo sampling followed by the GANDR least-squares fitting of experimental data.  The model-based covariances obtained with the two methods are practically equivalent. There is also a possibility of using KALMAN generated model-based prior with the GANDR code. 
@@ -5028,12 +5034,12 @@ In general, the KALMAN code turns out  to be  a very powerful and useful  tool f
 
 Serious concerns were raised  regarding extremely low uncertainties resulting from the least-squares analysis using model-generated priors.  These low uncertainties arise, in part, from the rigidity of the model predictions, {\it i.e.},  intrinsic model uncertainties which are not accounted for in the procedure.  Numerical experiments indicate that adding new degrees of freedom to the model has a desired effect on the output uncertainties and might be used to eliminate this deficiency.
 
-\section{ENDF formatting}
+\chapter{ENDF formatting}
 
 One of the primary design goals of the EMPIRE code is to perform
  theoretical calculations in support of nuclear data evaluation.  To this end the code must meet certain requirements that go beyond usual features of similar codes used in pure science, e.g., calculation of nuclear recoils needed for energy balance and exclusive spectra, and ENDF-6 formatting of all calculated physical quantities, such as cross sections, spectra, angular distributions, energy-angle correlated distributions, etc.  
 
-\subsection{Spectra of recoils}
+\section{Spectra of recoils}
 
 Energy spectra of recoils are calculated taking into account correlations
 between the excitation energy of the nucleus and the emission energy
@@ -5120,7 +5126,7 @@ possible emissions including summation over different ejectile types
 and parent/residue excitation energies. 
 
 
-\subsection{Exclusive spectra}
+\section{Exclusive spectra}
 
 EMPIRE may rearrange emission spectra to conform to the ENDF representation,
 which require that for a given reaction all pertinent subsequent emissions
@@ -5283,7 +5289,7 @@ When all three energy indices are needed, it is more convenient
 to calculate $POPcse_{d}(\bar{\alpha},\bar{\beta},\theta)$ directly.
 
 
-\subsection{EMPEND code }
+\section{EMPEND code }
 
 The ENDF formatted file is created by the user selecting the ENDF
 option in the input file ({*}.\emph{inp}). This instructs EMPIRE to
@@ -5397,7 +5403,7 @@ explicitly are not formatted. This option should not be used when
 ENDF formatting is required. By default, primary gammas are included
 in the photon spectrum in tabular form.
                                                                            
-\subsection{EMPEND Input instructions}
+\section{EMPEND Input instructions}
 
 The program can be executed interactively from a terminal                  
 screen. The required input is entered in response to the                   
@@ -5488,7 +5494,7 @@ formatting process.
 
 
 
-\section{Fitting Optical Model Parameters}
+\chapter{Fitting Optical Model Parameters}
 
 When the FITOMP option is selected in the input, EMPIRE will perform
 automatic fitting of parameters in the direct optical model parameter
@@ -5551,7 +5557,7 @@ in the FIT.OUT (\emph{{*}-ompfit.lst}) file. When a fit is complete, EMPIRE
 is run one last time with all options and energies given in the input
 file, excepting the fit ones. 
 
-\part{NUCLEAR ASTROPHYSICS\label{Chap:S-FACTOR}}
+\chapter{Nuclear astrophysics\label{Chap:S-FACTOR}}
 
 Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only (follows Cauldrons in the Cosmos by Claus E. Rolfs and William S. Rodney - University of Chicago Press 1988).
 
@@ -8830,7 +8836,7 @@ code:
 \part{WORKING NOTES} \label{Chap:work}
 
 
-\section{Avoiding problems}
+\chapter{Avoiding problems}
 
 Consideration and observation of the following remarks will help to
 avoid problems when running the EMPIRE code:
@@ -8866,7 +8872,7 @@ inelastic scattering are usually due to insufficiently dense mesh
 of incident energies.
 \end{itemize}
 
-\section{Fitting discrete levels}
+\chapter{Fitting discrete levels}
 
 Running EMPIRE with the FITLEV option is strongly recommended before
 any cross section calculations are attempted. This allows a check
@@ -8931,7 +8937,7 @@ must be included with VAL different from 0. Dispositions that do not
 consider level densities are ignored as the code exits after the plots
 are completed without performing any cross section calculations.
 
-\section{Handling OM potentials\index{RIPLomp}}
+\chapter{Handling OM potentials\index{RIPLomp}}
 
 Interface to the RIPL optical model segment has been developed by
 Capote. This interface allows the use of any type of Optical Model
@@ -8998,7 +9004,7 @@ by the code is the following:
 of the file. 
 
 
-\subsection{DWBA\index{DWBA} with RIPL OMP}
+\section{DWBA\index{DWBA} with RIPL OMP}
 
 Apply the DWBA model to the spherical vibrational nucleus $^{54}$Fe.
 Our goal is to perform calculations using default spherical RIPL potentials
@@ -9025,7 +9031,7 @@ dynamic deformations inside the \emph{{*}-lev.col} file (initial deformation
 values are 0.15 for quadrupole and 0.05 for octupole vibrations).
 
 
-\subsection{Coupled-Channels\index{Coupled-Channels} with RIPL spherical OMP}
+\section{Coupled-Channels\index{Coupled-Channels} with RIPL spherical OMP}
 
 Our goal is to perform calculations for $^{54}$Fe using default RIPL
 potentials for all the channels, but including inelastic scattering
@@ -9050,7 +9056,7 @@ runs by changing OMP inside the \emph{{*}-omp.dir} file or by changing
 dynamic deformations inside the \emph{{*}-lev.col} file.
 
 
-\subsection{Coupled-Channels\index{Coupled-Channels} with RIPL Coupled-Channels
+\section{Coupled-Channels\index{Coupled-Channels} with RIPL Coupled-Channels
 OMP for inelastic scattering}
 
 We intend to perform calculations for $^{153}$Eu using RIPL spherical
@@ -9083,7 +9089,7 @@ collective levels are stored together with the potential parameters
 inside the \emph{{*}-omp}.\emph{dir} file. 
 
 
-\subsection{Complete Coupled-Channels\index{Coupled-Channels} with RIPL CC OMP
+\section{Complete Coupled-Channels\index{Coupled-Channels} with RIPL CC OMP
 for inelastic scattering}
 
 Our aim is to perform exact calculations for $^{153}$Eu using
@@ -9119,7 +9125,7 @@ Note that the CC-OMP and the CC method are also used for the calculation
 of the fusion cross section.
 
 
-\section{Use of level densities}
+\chapter{Use of level densities}
 
 The variety of nuclear level densities\index{level densities} available
 in EMPIRE calls for additional guidance on their use. Only three options
@@ -9186,7 +9192,7 @@ and spins up to 30$\hbar$, which prevents their use for the Heavy
 Ion induced reactions well above the Coulomb barrier. 
 
 
-\section{Parameter tuning}
+\chapter{Parameter tuning}
 
 The parameter libraries and internal systematics contained in the
 EMPIRE code perform reasonably well in reproducing cross sections
@@ -9416,7 +9422,7 @@ refer to them by keywords defined in the input description (see Section
 \ref{sec: input}). 
 
 
-\subsubsection*{Fusion}
+\subsection{Fusion}
 
 We have to distinguish between Heavy Ion (HI) and Light Ion ($A<5$) or nucleon
 induced reactions. For HI induced reactions one may use following parameters to 
@@ -9461,7 +9467,7 @@ users are advised that blind modification of the OMP can easily produce
 physically unrealistic results. 
 
 
-\subsubsection*{Coupled-Channels\index{Coupled-Channels} (ECIS\index{ECIS})}
+\subsection{Coupled-Channels\index{Coupled-Channels} (ECIS\index{ECIS})}
 
 CC calculations are most sensitive to the deformations of collective
 levels, which can be adjusted by editing the \emph{{*}-lev.coll} file
@@ -9493,7 +9499,7 @@ imaginary part of the OMP (especially the imaginary surface component)
 will result in the higher cross sections.
 
 
-\subsubsection*{Multi-step Direct\index{MSD}}
+\subsection{Multi-step Direct\index{MSD}}
 
 The microscopic character of the MSD\index{MSD} model limits the
 possibilities of influencing the results compared with the classical
@@ -9532,7 +9538,7 @@ it. This procedure has no physical meaning and may eventually lead
 to the MSD emission being larger than the absorption cross section. 
 
 
-\subsubsection*{Multi-step Compound\index{MSC} }
+\subsection{Multi-step Compound\index{MSC} }
 
 The most significant MSC\index{MSC} contribution to the nucleon spectra
 is located between the Compound Nucleus (low energies) and the MSD\index{MSD}
@@ -9565,7 +9571,7 @@ the already low $\gamma$-emission through the MSC\index{MSC} mechanism.
 \end{description}
 
 
-\subsubsection*{Level densities}
+\subsection{Level densities}
 
 The Hauser-Feshbach results are very sensitive to the level densities\index{level densities},
 and more precisely to their ratio in the neighboring nuclei. Generally,
@@ -9630,7 +9636,7 @@ in systematics for $a$, that can be selected with the GCROA keyword:
 = -2 Ilijnov systematics (default).
 \end{description}
 
-\subsubsection*{Fission}
+\subsection{Fission}
 
 Fission can be scaled quite effectively with a number of parameters,
 especially in the HI induced reactions. The reduced dissipation coefficient
@@ -9684,7 +9690,7 @@ this parameter above the maximum spin for nucleus stability reduces
 or even eliminates the effect.
 \end{description}
 
-\subsubsection*{GDR parameters ($\gamma$-ray strength functions)}
+\subsection{GDR parameters ($\gamma$-ray strength functions)}
 
 The EMPIRE input file provides the user with a full control of the
 GDR parameters. This possibility might be worth trying as the present
@@ -9719,7 +9725,7 @@ by the sum rule, and users should ensure that the inputted values
 respect this limitation. 
 
 
-\subsubsection{Avoiding unreasonably low uncertainties}
+\subsection{Avoiding unreasonably low uncertainties}
 Quite often, Kalman filter analysis involving a vast amount of experimental data results in uncertainties that are far lower than systematic uncertainties even of the most precise measurement.  This happens in spite of the fact that proper experimental covariances, accounting for systematic uncertainties, are supplied as an input to the KALMAN code.  
  This issue rises serious concern and puts the validity of the approach in question. Therefore, it is important to understand the origin of low uncertainties in order to judge how far they can be trusted and how they can eventually be avoided. 
 
@@ -9754,7 +9760,7 @@ similar solution, correlated sampling of energy-dependent scaling parameters, ha
 
 An additional source of low uncertainties has been discussed in the contribution by Leeb~\cite{Leeb-nds:2008} to  the present Workshop - neglecting correlations among numerous experiments implies statistical independence  of the respective systematic uncertainties and leads to reducing final uncertainty below individual systematic uncertainty. We refer to the original paper by Leeb for a description of an approximate method allowing one to avoid this source of underestimation. 
 
-\section{Description of test cases}
+\chapter{Description of test cases}
 
 In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
 The benchmarks (\emph{subdirectory \\benchmarks}) are intended for the verification of the local
