@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3165 $
+Ccc   * $Rev: 3167 $
 Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Date: 2012-10-25 03:42:51 +0200 (Do, 25 Okt 2012) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -29,12 +29,13 @@ C
 
       CALL GETENV ('EMPIREDIR', empiredir)
 
-	   EMPtitle='   '
+	EMPtitle='   '
 C
 C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
-      if(empiredir(1:1).eq.' ') empiredir(1:3)='../'
+      if(empiredir(1:1).eq.' ') empiredir(1:3)='..'
+
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
 
       CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
@@ -362,11 +363,13 @@ C--- parameters and data for the fit.
           write(18,'(a35)') cmnd
           write(72,'(a35)') cmnd
           do i=1,1000
-            read(5,'(a35)',end=40) cmnd
+31          read(5,'(a35)',end=40) cmnd
             write(72,'(a35)') cmnd
+            if(cmnd(1:1).eq.'$' .or. cmnd(1:1).eq.'*' .or. 
+     >         cmnd(1:1).eq.'#' .or. cmnd(1:1).eq.'!') goto 31
 C--- Read the energy mesh from the lines after GO, if it is not specified
 C--- by FITGRD.
-            if(egrid(0).lt.0 .and. cmnd(1:1).ne.'$') then
+            if(egrid(0).lt.0) then
               ngrid=ngrid+1
               read(cmnd,*) egrid(ngrid)
               if(egrid(ngrid).lt.0.) egrid(0)=ngrid-0.9
@@ -1542,7 +1545,7 @@ C--- Zero array elements that are irrelevant but that might be used.
       ee(2)=0.0
       DO j=1,12
         thsig(j,2)=0.0
-       ENDDO
+      ENDDO
 
 C--- The rest of the calculations have been written to OPTFIT.CAL
 C--- Data at the first energy are read from the file.
@@ -1591,8 +1594,10 @@ C--- Angular distributions
 
       chisqrd=chi2
 
-      write(*,*) 'chi2=',chi2
+      write(*,*) 'OMP fit Chi2=',chi2
       write(*,*)
+      write(8,*) 'OMP fit Chi2=',chi2
+      write(8,*)
 
       close(40)
 
