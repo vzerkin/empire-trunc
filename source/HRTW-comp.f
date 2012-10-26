@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3144 $
+Ccc   * $Rev: 3170 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-18 00:36:45 +0200 (Do, 18 Okt 2012) $
+Ccc   * $Date: 2012-10-26 22:25:30 +0200 (Fr, 26 Okt 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -63,15 +63,15 @@ C-----do loop over decaying nucleus parity
       sumtg = 0.d0
       tgexper=0.d0
       IF(FIRst_ein .or. BENchm) THEN          
-        IF(EINl.LE.0.002d0) THEN
+        IF(EINl.LE.0.005d0) THEN
           WRITE(8,
      &    '(1x,''Renormalization of gamma-ray strength function'')')
       ELSE
           WRITE(8,'(1x,
-     &    ''WARNING: First incident energy Einc must be < 2keV for Do an
+     &  '' WARNING: First incident energy Einc must be < 5keV for Do an
      &d Gg calculations'')')
           WRITE(8,'(1x,
-     &    ''WARNING: for the renormalization of gamma-ray strength funct
+     &  '' WARNING: for the renormalization of gamma-ray strength funct
      &ion'')')
       ENDIF
         WRITE(8,'(1x,
@@ -1426,7 +1426,7 @@ C
       PAR(i,ipa,l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
 
       xmas_npro = EJMass(Npro) 
-	xmas_ntrg = AMAss(Ntrg)
+      xmas_ntrg = AMAss(Ntrg)
 
       el = EINl
       relcal = .FALSE.

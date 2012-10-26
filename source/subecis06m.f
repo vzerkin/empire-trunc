@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3138 $
+Ccc   * $Rev: 3170 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 19:00:57 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2012-10-26 22:25:30 +0200 (Fr, 26 Okt 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -56,7 +56,7 @@ C
 
 C     MR=95                                                             ECIS-037
 
-      MR=101                                                            
+      MR=111                                                            
       MW=96                                                             ECIS-038
       MS=97
 
@@ -81,10 +81,10 @@ C     MR=95                                                             ECIS-037
       OPEN (93,FILE = 'file93')
       OPEN (94,FILE = 'file94')
 
-      OPEN (96,FILE = TRIM(fname)//'.out')
-      OPEN (97,FILE = 'file97')
+      OPEN (MW,FILE = TRIM(fname)//'.out')
+      OPEN (MS,FILE = 'file97')
       OPEN (99,FILE = 'file99')
-      OPEN (101,FILE = TRIM(fname)//'.inp')
+      OPEN (MR,FILE = TRIM(fname)//'.inp')
 
       CALL THORA(MW)      
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-040
@@ -108,10 +108,10 @@ C     MR=95                                                             ECIS-037
       CLOSE (91,STATUS = 'delete')
       CLOSE (93,STATUS = 'delete')
       CLOSE (94,STATUS = 'delete')
-      CLOSE (96)
-      CLOSE (97,STATUS = 'delete')
+      CLOSE (MW)
+      CLOSE (MS,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
-      CLOSE (101)
+      CLOSE (MR)
 
       RETURN                                                            ECIS-041
       END                                                               ECIS-042
