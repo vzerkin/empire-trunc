@@ -164,7 +164,7 @@ running on Microsoft Windows.
 \tableofcontents{}
 
 \chapter*{Introduction}
-\addcontentsline{toc}{chapter}{Introduction}
+\addcontentsline{toc}{part}{Introduction}
 
 The first version of EMPIRE code was released in 1980. This code originally
 contained the Hauser-Feshbach\index{Hauser-Feshbach} theory and the
@@ -4866,11 +4866,33 @@ The two approaches currently also differ regarding treatment of experimental dat
  for a given application.  
 
 \section{EMPIRE-KALMAN approach}
-The Kalman filter technique is used both in the resonance and in the fast neutron region. 
-It is based on minimum variance estimation and naturally combines covariances of model parameters, of experimental data and of cross sections. This universality is a major advantage of the method. KALMAN  uses  measurements along with their uncertainties to constrain covariances of the model parameters via  the sensitivity matrix. Then, the final cross section covariances are calculated from the updated covariances for model parameters.  This procedure consistently accounts  for  the experimental uncertainties and the uncertainties of the model parameters ensuring that the final cross section uncertainties are at least as good as the smaller of the two. We emphasize that under the term `reaction model' we 
-mean also the resonance region described by models such as the Multi-Level Breit-Wigner formalism. 
+ 
 
-The key ingredient of the method is the sensitivity matrix, which represents complex nuclear reaction calculations. If we denote the combination of nuclear reaction models as an operator ${\bf \hat M}$ that transforms the vector of model parameters $\textbf{p}$ into a vector of cross sections $\boldsymbol\sigma ({\bf p})$ for a specific reaction channel, then the sensitivity matrix ${\bf S}$ can be interpreted as the linear term in the expansion of the operator ${\bf \hat M}$,
+In order to assess the direction of the gradient in the multi-parameter space that minimizes
+$\chi^2$, the fitting code has to evaluate how much the cross sections change when a certain
+parameter is varied in a given direction, i.e. the sensitivity of the cross section in respect
+to each parameter variation. This information is contained in the \textit{sensitivity matrix} file. 
+
+
+The Kalman filter technique is used both in the resonance and in the fast neutron region. 
+It is based on minimum variance estimation and naturally combines covariances of model parameters,
+of experimental data and of cross sections. This universality is a major advantage of the method.
+KALMAN  uses  measurements along with their uncertainties to constrain covariances of the model
+parameters via  the sensitivity matrix. Then, the final cross section covariances are calculated
+from the updated covariances for model parameters.  This procedure consistently accounts  for 
+the experimental uncertainties and the uncertainties of the model parameters ensuring that the
+final cross section uncertainties are at least as good as the smaller of the two. We emphasize
+that under the term ``reaction model'' we mean also the resonance region described by models such
+as the Multi-Level Breit-Wigner formalism. 
+
+\subsection{Sensitivity calculation}
+
+
+The key ingredient of the method is the sensitivity matrix, which represents complex nuclear reaction
+calculations. If we denote the combination of nuclear reaction models as an operator ${\bf \hat M}$
+that transforms the vector of model parameters $\textbf{p}$ into a vector of cross sections
+$\boldsymbol\sigma ({\bf p})$ for a specific reaction channel, then the sensitivity matrix ${\bf S}$
+can be interpreted as the linear term in the expansion of the operator ${\bf \hat M}$,
 % 
 \begin{gather}
 {\bf \hat M}{\bf p}= \boldsymbol\sigma({\bf p}) \nonumber\\
@@ -4904,8 +4926,9 @@ The experimental data, if available, are included through
 a sequential update of the parameter vector ${\bf p}$ and the related
 covariance matrix ${\bf P}$ as 
 \begin{eqnarray}
- & {\bf p}_{n+1} & ={\bf p}_{n}+{\bf P}_{n}{\bf S}^{\textrm{T}}{\bf Q}_{n+1}(\boldsymbol{\sigma}_{n+1}^{\textrm{exp}}-{\boldsymbol{\sigma}}({\bf p}_{n}))\nonumber \\
-\nonumber \\\\ & {\bf P}_{n+1} & ={\bf P}_{n}-{\bf P}_{n}{\bf S}^{\textrm{T}}{\bf Q}_{n+1}{\bf S}{\bf P}_{n}\,,\nonumber 
+ & {\bf p}_{n+1} & ={\bf p}_{n}+{\bf P}_{n}{\bf S}^{\textrm{T}}{\bf Q}_{n+1}(\boldsymbol{\sigma}_{n+1}^{\textrm{exp}}-
+      {\boldsymbol{\sigma}}({\bf p}_{n}))\nonumber \\
+& {\bf P}_{n+1} & ={\bf P}_{n}-{\bf P}_{n}{\bf S}^{\textrm{T}}{\bf Q}_{n+1}{\bf S}{\bf P}_{n}\,.
 \end{eqnarray}
 Here, 
 \begin{equation}
@@ -4955,15 +4978,24 @@ and, for $ i\ne k$,
 \Delta^{\textrm{sys}} \sigma^{\textrm{exp}}_{n}(E_k)\,.
 \end{equation}
 %
-An important  technical issue, which  has to be addressed in most of the covariance methods,  is ensuring that the energy grid, $E_i$, for the model calculations and experimental data is the same to enable matrix operations in 
-Eqs.~(4-\ref{eq:mtrxp}). In the KALMAN code this is achieved by bi-spline interpolation of model cross sections and sensitivity matrices.
+An important  technical issue, which  has to be addressed in most of the covariance
+methods,  is ensuring that the energy grid, $E_i$, for the model calculations and
+experimental data is the same to enable matrix operations in Eqs.~(4-\ref{eq:mtrxp}).
+In the KALMAN code this is achieved by bi-spline interpolation of model cross sections and sensitivity matrices.
 
-The above description can easily be generalized to account for correlations among different experiments. To this end one should construct a single vector containing all experimental points and the related covariance matrix, which now may contain blocks correlating different experiments. Only one  update is needed in such a case but the covariance matrices are much bigger (in the current implementation of the Kalman filter the model-based covariance matrix is expanded to match the experimental one).
+The above description can easily be generalized to account for correlations among different
+experiments. To this end one should construct a single vector containing all experimental
+points and the related covariance matrix, which now may contain blocks correlating different
+experiments. Only one  update is needed in such a case but the covariance matrices are much
+bigger (in the current implementation of the Kalman filter the model-based covariance matrix
+is expanded to match the experimental one).
 
 The quality and consistency of the evaluated cross sections can be
 assessed by scalar quantity 
 \begin{equation}
-\chi^{2}=\sum_{n=1}^{N}({\boldsymbol{\sigma}}_{n}^{\textrm{exp}}-{\boldsymbol{\sigma}}({\bf p}_{\textrm{N}}))^{\textrm{T}}({\bf C}_{n}^{\textrm{exp}})^{-1}({\boldsymbol{\sigma}}_{n}^{\textrm{exp}}-{\boldsymbol{\sigma}}({\bf p}_{\textrm{N}}))\,,\label{eq:chi2}
+\chi^{2}=\sum_{n=1}^{N}({\boldsymbol{\sigma}}_{n}^{\textrm{exp}} - 
+{\boldsymbol{\sigma}}({\bf p}_{\textrm{N}}))^{\textrm{T}}({\bf C}_{n}^{\textrm{exp}})^{-1}
+({\boldsymbol{\sigma}}_{n}^{\textrm{exp}}-{\boldsymbol{\sigma}}({\bf p}_{\textrm{N}}))\,,\label{eq:chi2}
 \end{equation}
 where ${\bf p}_{\textrm{N}}$ is the final set of model parameters
 corresponding to the inclusion of $N$ experiments. A value of $\chi^{2}$
@@ -4972,9 +5004,8 @@ the evaluated uncertainties. It is a fairly common practice to multiply
 such uncertainties by a square root of $\chi^{2}$ per degree of freedom
 to address this issue.
 
-The evaluator may choose to perform a sequential  update using experimental data for several/all  reactions or just for a single one. In the former  case, all considered reactions are correlated and unique set of parameters along with the related covariance matrix are produced. On the other hand, poor experimental data in one reaction channel can negatively influence predictions for other channels. 
 
-We note that EMPIRE-KALMAN system is a general and powerful tool for  evaluation of nuclear reactions.  In addition to  covariance calculations it may also  be used to adjust model parameters to reproduce experimental cross sections and other observables within the selected reaction models and initial uncertainties of model parameters. Therefore, the Kalman filter can be used throughout the whole evaluation procedure to ensure consistency between cross sections, model parameters, and related covariance matrices. 
+
 
 \section{EMPIRE-MC approach}
 The Monte-Carlo (MC) method is used in EMPIRE only in the fast neutron region. 
@@ -5499,68 +5530,6 @@ formatting process.
 
 
 
-\chapter{Fitting Optical Model Parameters}
-
-When the FITOMP option is selected in the input, EMPIRE will perform
-automatic fitting of parameters in the direct optical model parameter
-file, OMPAR.DIR (\emph{{*}-omp.dir}), and of deformation parameters in the
-file containing the collective target levels, TARGET\_COLL.DAT (\emph{{*}-lev.col}).
-The fitting procedure also uses the experimental data file in C4 format,
-C4.dat (\emph{{*}.c4}). To ensure the existence of these files, EMPIRE should
-be executed at least once before fitting begins and should be executed
-with the DIRECT option selected and an incident channel optical potential
-(initially) defined using the DIRPOT option, both in the initial run
-and during fitting. At the moment, the FITOMP option only works for
-neutron or proton scattering. 
-
-All data relevant to an optical model fit - total, elastic and collective
-inelastic cross sections and elastic and collective inelastic angular
-distributions - within the requested energy range are selected from
-the C4.dat file and included in the $\chi^{2}$ to be minimized. The
-data points in the $\chi^{2}$ are weighted in the standard manner
-using the experimental uncertainties given in the C4.dat file. Natural 
-element data can be inserted in the C4.dat file and used in the fit.
-In the case of neutron scattering, the file \emph{empire/RIPL/resonances/resonances0.dat}
-is also searched for an s-wave strength function, which is included
-in the experimental data set when found. 
-
-The lower limit of the energy range for calculations used in a fit
-is initially taken to be 1 keV while the upper limit is taken to be
-30 MeV, unless modified using the FITEMX option in the input. All
-relevant experimental data within this range in the C4.dat are included
-in the $\chi^{2}$. The incident energies given in the input file
-define the grid of energies used for calculations, unless the FITGRD
-option is used. When the input file energies are used, the data points
-outside of the energy interval they define are not taken into account.
-That is, the fitting procedure will interpolate calculations but will
-not extrapolate them. When the FITGRD option is used, the energy interval
-is extended to include all data points in the initial energy range.
-In both cases, the grid of incident energies is compared with those
-of the experimental data and superfluous values are eliminated to
-speed up the calculation. 
-
-The parameters to be adjusted are specified by using the FITabc or
-FITDEF options, described in more detail below. The RIPL parametrization
-described in Refs.~\cite{RIPL2,RIPL3} is used to identify the optical
-model parameters, any of which may be adjusted. The adjustable deformations
-are simply those of the collective level file. Quadrupole and hexadecapole
-deformations are permitted for nuclei identified as rotational, while
-quadrupole and octapole dynamical deformations are permitted for those identified
-as vibrational. The FITabc and FITDEF options typically identify the
-desired parameter and furnish a shift in its initial value and the
-maximum variation allowed during the fit with respect to its (shifted)
-initial value. If no parameter adjustment is requested or all adjustable
-(possibly shifted) parameters have a maximum allowed variation of
-zero, the $\chi^{2}$ is calculated but no fitting is performed. At
-most 20 parameters may be shifted and/or adjusted simultaneously.
-
-At present, the optical model fitting is performed using a simple
-numerical gradient search to minimize the $\chi^{2}$. The adjusted
-parameters are stored in the modified OMPAR.DIR (\emph{{*}-omp.dir}) and
-TARGET\_COLL.DAT (\emph{{*}-lev.col}) files. Information on the fit is written
-in the FIT.OUT (\emph{{*}-ompfit.lst}) file. When a fit is complete, EMPIRE
-is run one last time with all options and energies given in the input
-file, excepting the fit ones. 
 
 \chapter{Nuclear astrophysics\label{Chap:S-FACTOR}}
 
@@ -9130,74 +9099,10 @@ Note that the CC-OMP and the CC method are also used for the calculation
 of the fusion cross section.
 
 
-\chapter{Use of level densities}
-
-The variety of nuclear level densities\index{level densities} available
-in EMPIRE calls for additional guidance on their use. Only three options
-are recommended: Empire-specific, Gilbert-Cameron (GC) and HFB\index{HFB};
-all remaining options (such as ROCOL with level density parameter
-\emph{a=A/8)} are included for comparison but their accuracy is much
-lower than the three recommendations. The GC level densities, especially
-when adjusted to known experimental data, may be the most accurate
-at excitation energies up to the neutron binding and slightly above.
-However, GC level densities do not lend themselves to extrapolation
-to higher excitation energies and to nuclei far from the stability
-line. Energy extrapolation in GC might be dangerous because of the
-collective effects which are implicitly contained in the level density
-parameter \emph{a}. While this can be an acceptable approximation
-at low excitation energies for which level densities are fixed by
-fitting experimental data (discrete levels and neutron resonance spacings),
-there is no physical justification for extending such a treatment
-to higher energies. In fact, collective effects, as implicitly accounted
-for in the GC approach, increase exponentially with excitation energy
-instead of decreasing and eventually disappearing. In this respect,
-EMPIRE-specific and microscopic HFB\index{HFB} densities behave
-properly and should be preferred at excitation energies well above
-neutron binding. 
-
-EMPIRE-specific level densities\index{level densities}, in addition
-to explicit treatment of the collective effects and their damping,
-also include the effects of dynamic deformation, which is induced
-by the rotation of a nucleus at high spin. This deformation affects
-level densities through the modification of nuclear moments of inertia.
-The yrast line is taken into account by setting level densities to
-zero whenever the thermal energy available for single particle motion
-is negative. Thermal energy is calculated as the difference between
-the total excitation energy and the energy needed for rotation. Spin
-and energy ranges are also formally unlimited in the EMPIRE-specific
-level densities. These features make the approach particularly suited
-for the heavy ion and high-energy nucleon-induced reactions. On the
-other hand, EMPIRE-specific level densities are fitted to the experimental
-data in a manner similar to the GC, suggesting that their predictions
-at low energies should be comparable to those of GC or even better
-due to the use of the BCS\index{BCS} model below critical energy.
-Therefore, EMPIRE-specific level densities\index{level densities}
-are generally recommended, and are used as a default in the EMPIRE.
-
-However, EMPIRE-specific level densities suffer the same uncertainty
-as GC when extrapolating from the stability line, because both relay
-on experimental parameterization of the level density parameter \emph{a},
-which is only possible for stable or close to stable nuclei. For nuclei
-far from the stability line, the HFB\index{HFB} densities based
-on realistic schemes of single particle levels offer higher reliability.
-The physics involved in this approach is clearly superior to the treatment
-used in the two models discussed above, which makes HFB densities
-more suitable for extrapolation. In addition, the tabulated values
-provided by Goriely for RIPL\index{RIPL}-2 and available in EMPIRE
-were adjusted to the same experimental data as the other two phenomenological
-approaches. Therefore, results of the HFB model at low energies
-should not differ significantly from those provided by the GC or EMPIRE-specific
-models. Comparisons of cross section calculations for about 300 reactions
-on targets from $^{40}$Ca to $^{208}$Pb show that microscopic level
-densities\index{level densities} can compete with the phenomenological
-ones to the extent that makes them the preferred choice far from the
-stability line. On the other hand, one should keep in mind that tables
-of level densities are limited to excitation energies below 150 MeV
-and spins up to 30$\hbar$, which prevents their use for the Heavy
-Ion induced reactions well above the Coulomb barrier. 
+%\chapter{Use of level densities}
 
 
-\chapter{Parameter tuning}
+\chapter{Effects of parameter modifications}
 
 The parameter libraries and internal systematics contained in the
 EMPIRE code perform reasonably well in reproducing cross sections
@@ -9245,7 +9150,8 @@ the ENDF-6 format), and EMPIRE-specific level densities,
 microscopic level densities\index{level densities}\cite{HFBCS} instead
 of the EMPIRE-specific ones.
 \end{description}
-Fig. \ref{complot1}, \ref{complot2} and \ref{complot3} show comparison
+
+Figs. \ref{complot1}, \ref{complot2} and \ref{complot3} show comparison
 of the results obtained using the above sets of parameters in three
 sample cases. Differences of a factor of 2 are observed, and therefore 
 
@@ -9258,10 +9164,7 @@ sample cases. Differences of a factor of 2 are observed, and therefore
 \caption{\label{complot2}Comparison of experimental data with results calculated
 using three sets of parameters for the $^{52}$Cr(n,p) reaction (see
 text).}
-
 \end{figure}
-
-
 changing the default options may considerably improve the comparison
 with experimental data. However, this approach may still not be sufficient
 in some cases, and the next step would be to determine which reaction
@@ -9578,6 +9481,73 @@ the already low $\gamma$-emission through the MSC\index{MSC} mechanism.
 
 \section{Level densities}
 
+The variety of nuclear level densities\index{level densities} available
+in EMPIRE calls for additional guidance on their use. Only three options
+are recommended: Empire-specific, Gilbert-Cameron (GC) and HFB\index{HFB};
+all remaining options (such as ROCOL with level density parameter
+\emph{a=A/8)} are included for comparison but their accuracy is much
+lower than the three recommendations. The GC level densities, especially
+when adjusted to known experimental data, may be the most accurate
+at excitation energies up to the neutron binding and slightly above.
+However, GC level densities do not lend themselves to extrapolation
+to higher excitation energies and to nuclei far from the stability
+line. Energy extrapolation in GC might be dangerous because of the
+collective effects which are implicitly contained in the level density
+parameter \emph{a}. While this can be an acceptable approximation
+at low excitation energies for which level densities are fixed by
+fitting experimental data (discrete levels and neutron resonance spacings),
+there is no physical justification for extending such a treatment
+to higher energies. In fact, collective effects, as implicitly accounted
+for in the GC approach, increase exponentially with excitation energy
+instead of decreasing and eventually disappearing. In this respect,
+EMPIRE-specific and microscopic HFB\index{HFB} densities behave
+properly and should be preferred at excitation energies well above
+neutron binding. 
+
+EMPIRE-specific level densities\index{level densities}, in addition
+to explicit treatment of the collective effects and their damping,
+also include the effects of dynamic deformation, which is induced
+by the rotation of a nucleus at high spin. This deformation affects
+level densities through the modification of nuclear moments of inertia.
+The yrast line is taken into account by setting level densities to
+zero whenever the thermal energy available for single particle motion
+is negative. Thermal energy is calculated as the difference between
+the total excitation energy and the energy needed for rotation. Spin
+and energy ranges are also formally unlimited in the EMPIRE-specific
+level densities. These features make the approach particularly suited
+for the heavy ion and high-energy nucleon-induced reactions. On the
+other hand, EMPIRE-specific level densities are fitted to the experimental
+data in a manner similar to the GC, suggesting that their predictions
+at low energies should be comparable to those of GC or even better
+due to the use of the BCS\index{BCS} model below critical energy.
+Therefore, EMPIRE-specific level densities\index{level densities}
+are generally recommended, and are used as a default in the EMPIRE.
+
+However, EMPIRE-specific level densities suffer the same uncertainty
+as GC when extrapolating from the stability line, because both relay
+on experimental parameterization of the level density parameter \emph{a},
+which is only possible for stable or close to stable nuclei. For nuclei
+far from the stability line, the HFB\index{HFB} densities based
+on realistic schemes of single particle levels offer higher reliability.
+The physics involved in this approach is clearly superior to the treatment
+used in the two models discussed above, which makes HFB densities
+more suitable for extrapolation. In addition, the tabulated values
+provided by Goriely for RIPL\index{RIPL}-2 and available in EMPIRE
+were adjusted to the same experimental data as the other two phenomenological
+approaches. Therefore, results of the HFB model at low energies
+should not differ significantly from those provided by the GC or EMPIRE-specific
+models. Comparisons of cross section calculations for about 300 reactions
+on targets from $^{40}$Ca to $^{208}$Pb show that microscopic level
+densities\index{level densities} can compete with the phenomenological
+ones to the extent that makes them the preferred choice far from the
+stability line. On the other hand, one should keep in mind that tables
+of level densities are limited to excitation energies below 150 MeV
+and spins up to 30$\hbar$, which prevents their use for the Heavy
+Ion induced reactions well above the Coulomb barrier. 
+
+
+
+
 The Hauser-Feshbach results are very sensitive to the level densities\index{level densities},
 and more precisely to their ratio in the neighboring nuclei. Generally,
 changing level densities is the most effective way of adjusting cross
@@ -9758,260 +9728,911 @@ The baseline values are in red. }
 
 Our preliminary studies indicate that the Kalman filter  adjusts the uncertainty of the fictitious model parameter, $\Delta p_{\textrm{mod}}$,  to reproduce the smallest systematic uncertainty. Thus, if the whole energy range is adequately covered by the experimental data the final result is well-defined.  In the energy ranges without measurements the result, to some extent, depends on the initial (assumed) uncertainty of the new parameter, $\Delta p_{\textrm{mod}}$. Naturally, if no experimental data are available the discussed  contribution to the uncertainty is defined by $\Delta p_{\textrm{mod}}$. In such a case,  however,  the cross section uncertainties are determined primarily by the propagation of uncertainties of the genuine model parameters, which are  much larger than the intrinsic model uncertainties.  The latter can, therefore, be neglected especially since there should be no uncertainties small enough to raise any concern. The procedure is particularly useful to simulate intrinsic uncertainties in the optical model, \textit{i.e.}, it is meant to be applied to the total cross sections. These are often very well measured which, combined with the rigid shape of the optical model predictions, results in extremely low uncertainties. There is no need to invoke such a procedure for other nuclear reaction models, {\it e.g.}, compound nucleus and preequilibrium emission, since their formulations include parameters which, to a large extent,  provide for a scaling degree of freedom.
 
- Practical application of the method is illustrated in Fig.~\ref{fig:fictitiousscale} for the case of  total cross section on $^{90}$Zr. At energies above 3 MeV the standard EMPIRE-KALMAN method results in uncertainties of the order of 2\%, which is smaller than the 2.8\% adopted as a systematic error of experimental data, see the upper panel.  Including the scaling degree of freedom increases predicted uncertainties in the whole energy range as shown in the lower  panel.  In particular,  at energies above 3 MeV,  the calculated uncertainties are always above the expected 2.8\%  limit, indicating that the rigidity of the model  is responsible for the suspiciously small uncertainties. Simulating intrinsic model uncertainty by introducing scaling degree of freedom is a simple and effective way of alleviating the problem. 
+% Practical application of the method is illustrated in Fig.~\ref{fig:fictitiousscale} for the case of  total cross section on $^{90}$Zr. At energies above 3 MeV the standard EMPIRE-KALMAN method results in uncertainties of the order of 2\%, which is smaller than the 2.8\% adopted as a systematic error of experimental data, see the upper panel.  Including the scaling degree of freedom increases predicted uncertainties in the whole energy range as shown in the lower  panel.  In particular,  at energies above 3 MeV,  the calculated uncertainties are always above the expected 2.8\%  limit, indicating that the rigidity of the model  is responsible for the suspiciously small uncertainties. Simulating intrinsic model uncertainty by introducing scaling degree of freedom is a simple and effective way of alleviating the problem. 
 
-A conceptually
-similar solution, correlated sampling of energy-dependent scaling parameters, has also been adopted for the MC approach in EMPIRE. In this way, the minimum uncertainty of the calculated cross-section is limited by the uncertainty of the scaling parameter which is taken as the model uncertainty.
+%A conceptually
+%similar solution, correlated sampling of energy-dependent scaling parameters, has also been adopted for the MC approach in EMPIRE. In this way, the minimum uncertainty of the calculated cross-section is limited by the uncertainty of the scaling parameter which is taken as the model uncertainty.
 
- We note,  that scaling of the prior combined with the experimental systematic uncertainty might open the door for the Peelle's Pertinent Puzzle~\cite{Chiba:91}. The KALMAN predicted posterior cross sections may deviate from the experimental data,  as shown in the lower panel of Fig.~\ref{fig:fictitiousscale}, and  adequate measures should be taken to prevent it.
+% We note,  that scaling of the prior combined with the experimental systematic uncertainty might open the door for the Peelle's Pertinent Puzzle~\cite{Chiba:91}. The KALMAN predicted posterior cross sections may deviate from the experimental data,  as shown in the lower panel of Fig.~\ref{fig:fictitiousscale}, and  adequate measures should be taken to prevent it.
 
 An additional source of low uncertainties has been discussed in the contribution by Leeb~\cite{Leeb-nds:2008} to  the present Workshop - neglecting correlations among numerous experiments implies statistical independence  of the respective systematic uncertainties and leads to reducing final uncertainty below individual systematic uncertainty. We refer to the original paper by Leeb for a description of an approximate method allowing one to avoid this source of underestimation. 
 
-\chapter{Description of test cases}
 
-In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
-The benchmarks (\emph{subdirectory \\benchmarks}) are intended for the verification of the local
-installation, and most of them are single-energy calculations. About 15 benchmarks are currently 
-included with the system.
-The test cases (\emph{subdirectory \\test-cases}) are intended to contain real
-physical show cases, a few of them are provided. This directory will ideally expand in the future
-to include the best cases of succesful applications of EMPIRE-3.1 submitted by users.
 
-% Some typical examples of EMPIRE input files are presented below for
-% illustrative purpose only. No attempt was made to ensure that the
-% choice of parameters is suitable for reproducing the experimental
-% data. 
-% 
-% 
-% \subsection{Neutron capture}
-% 
-% Input is simplest if all defaults are accepted, and the .\emph{inp}
-% file consists only of the mandatory part end two closing records:
-% GO for the optional input, and -1 for the list of incident energies.
-% Since we are not interested in the production of residues after particle
-% emission in the case of a capture reaction, the number of particle
-% emissions can be set to 0. This setting does not mean that all particle
-% channels will be closed, for they will compete with $\gamma$-emission
-% from the Compound Nucleus. However, once the particles are emitted
-% from the Compound Nucleus, their fate will not be considered any further.
-% Therefore, particle emission spectra will only arise from the decay
-% of the Compound Nucleus. 
-% 
-% The input file contains an incident energy and specification of a
-% target and projectile: 
-% 
-% \begin{quotation}
-% \texttt{\scriptsize ~1.9~~~~~~~~~~~~~~~~ ;INCIDENT
-% ENERGY (IN LAB)}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 100. 42.~~~~~~~~~~~~ ;TARGET~ A ,
-% Z }{\scriptsize \par}
-% 
-% \texttt{\scriptsize 1.~~~ 0.~~~~~~~~~~~~ ;PROJECTILE
-% A, Z}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF PROTONS~ TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF ALPHAS~~ TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF L.I. TO
-% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-% 
-% \texttt{\scriptsize GO }{\scriptsize \par}
-% 
-% \texttt{\scriptsize -1.}~\\
-% {\scriptsize \par}
-% \end{quotation}
-% This input file can be extended to multiple-energy calculations by
-% including more incident energies (between GO and -1 record), as in
-% the Section \ref{sec: eval-calc}. Also particle channels can be easily
-% included by replacing zeros in lines 4 through 7 by the requested
-% number of emissions. Memory requirements increase rapidly with the
-% number of requested particle emissions, and the user is advised to
-% avoid asking for residues which can not be reached with the highest
-% incident energy to be considered in the calculations. As these nuclei
-% are not populated in the de-excitation chain, they hardly impinged
-% on the CPU time but occupy the same amount of memory as all the others.
-% 
-% 
-% \subsection{Heavy ion induced reaction}
-% 
-% Default input for heavy ion calculations is no more complicated than
-% that described above (the incident neutron is simply replaced by the
-% heavy ion). The code will automatically change the default for calculating
-% the fusion cross section from the optical model to the simplified
-% Coupled-Channels\index{Coupled-Channels} method (CCFUS\index{CCFUS}
-% \cite{CCFUS}). As listed in the example given below, we present a
-% more complicated input file in which several options are set explicitly
-% in the input for the $^{48}$Ca + $^{248}$Cm reaction leading to
-% the super-heavy element Z=116:
-% 
-% \begin{quotation}
-% \texttt{\scriptsize 240.0~~~~~~~~~~~~~~~ ;INCIDENT
-% ENERGY (IN LAB)}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 248. 96.~~~~~~~~~~~~ ;TARGET~ A ,
-% Z, Spin , parity (integer!!)}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 48.~ 20.~~~~~~~~~~~~ ;PROJECTILE
-% A, Z, SPIN}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 6~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF PROTONS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF LI
-% TO BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-% 
-% \texttt{\scriptsize IOUT~~~~~~ 3.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize NEX~~~~~~100.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize BETAV~~~~~ 8.6}{\scriptsize \par}
-% 
-% \texttt{\scriptsize SHRJ~~~~~ 20.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize SHRD~~~~~~ 3.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize NIXSH~~~~~ 1.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize LTURBO~~~~ 2.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize DEFPAR~~~~ 1.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize GO}{\scriptsize \par}
-% 
-% \texttt{\scriptsize -1. }{\scriptsize \par}
-% \end{quotation}
-% IOUT=3 is used to print more detailed output with respect to the default
-% option. NEX=100 increases the number of energy bins in discretization
-% of the continuum (default is 50). The viscosity parameter BETAV in
-% the fission channel is set to $8.6\cdot10^{-21}$ s$^{-1}$. The shell-correction
-% to the fission barrier is assumed to decrease to half at spin J=20
-% $\hbar$, with diffuseness of 3 $\hbar$, as specified by SHRJ and
-% SHRD, respectively. Nix-Moller shell corrections are selected \cite{masses}
-% with LTURBO is set to 3. This latter option has been used to speed
-% up the calculations, and is particularly useful for heavy ion induced
-% reactions which often involve high angular momenta. Calculations will
-% be performed for each second spin only, which should make the study
-% 4 times faster. However, in reality the increased speed of manipulation
-% is smaller but still sufficient to justify usage of the LTURBO option.
-% If the number of partial waves is large (say 50) the loss of accuracy
-% introduced by the LTURBO option is of the order of a few percent .
-% The last parameter DEFPAR (coefficient \emph{b} in Eq. \ref{defor})
-% is set to 1, which is actually the default value. The only advantage
-% of specifying this parameter in the optional input is that the value
-% will be printed at the beginning of the output, and might turn out
-% to be convenient for tracking different calculations if the parameter
-% is to be varied.
-% 
-% 
-% \subsection{MSD\index{MSD}+MSC\index{MSC}+HF calculation\label{sec: eval-calc}}
-% 
-% The following example illustrates an input file (.\emph{inp}) that
-% could be used to run first shot calculations when evaluating $^{100}$Mo
-% isotope. All the reactions of the type $^{100}$Mo(n, \emph{x}n \emph{y}p
-% \emph{z}$\alpha)$ with \emph{x}=0, 1, 2, \emph{y}= 0, 1 and \emph{z}=0,
-% 1 are considered. The energy range is between 0.1 and 20 MeV. The
-% Multi-step Direct\index{MSD} and Multi-step Compound\index{MSC}
-% mechanisms are taken into account. The optical model parameters of
-% Rapaport are selected (note the use of the positional parameter -
-% 1, which refers to neutrons). The ENDF option is set to allow for
-% processing the .\emph{out} file with EMPEND\index{EMPEND} code. The
-% results for the $^{100}$Mo(n,2n) $^{99}$Mo reaction obtained using
-% this input file are shown in Fig. \ref{fig: 100Mon2n}.
-% 
-% \begin{quotation}
-% \texttt{\scriptsize ~~0.1~~~~~~~~~~~~~~ ;INCIDENT
-% ENERGY (IN LAB)}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 100.~~42.~~~~~~~~~~ ;TARGET A , Z }{\scriptsize \par}
-% 
-% \texttt{\scriptsize ~~1.~~~0.~~~~~~~~~~ ;PROJECTILE
-% A, Z}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 2~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF PROTONS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
-% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~ ;NUMBER OF L.I. TO
-% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
-% 
-% \texttt{\scriptsize IOUT~~~~~~ 3. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize LEVDEN~~~~ 0. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize NEX~~~~~ 100. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize MSD~~~~~~~ 1. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize MSC ~~~~~~~1. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize ENDF~~~~~~ 1. }{\scriptsize \par}
-% 
-% \texttt{\scriptsize OMPOT~~~~~ 6.~~~~~~ 1}{\scriptsize \par}
-% 
-% \texttt{\scriptsize GO }{\scriptsize \par}
-% 
-% \texttt{\scriptsize 0.5}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 1.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 2.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 3.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 4.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 5.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 6.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 7.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 8.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 9.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 10.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 11.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 12.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 13.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 14.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 15.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 16.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 17.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 18.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize 20.}{\scriptsize \par}
-% 
-% \texttt{\scriptsize -1.}{\scriptsize \par}
-% \end{quotation}
 
-\section*{Acknowledgments}
+\chapter{Parameter fitting}
+
+
+
+\section{Fitting Optical Model Parameters}
+
+When the FITOMP option is selected in the input, EMPIRE will perform
+automatic fitting of parameters in the direct optical model parameter
+file, OMPAR.DIR (\emph{{*}-omp.dir}), and of deformation parameters in the
+file containing the collective target levels, TARGET\_COLL.DAT (\emph{{*}-lev.col}).
+The fitting procedure also uses the experimental data file in C4 format,
+C4.dat (\emph{{*}.c4}). To ensure the existence of these files, EMPIRE should
+be executed at least once before fitting begins and should be executed
+with the DIRECT option selected and an incident channel optical potential
+(initially) defined using the DIRPOT option, both in the initial run
+and during fitting. At the moment, the FITOMP option only works for
+neutron or proton scattering. 
+
+All data relevant to an optical model fit - total, elastic and collective
+inelastic cross sections and elastic and collective inelastic angular
+distributions - within the requested energy range are selected from
+the C4.dat file and included in the $\chi^{2}$ to be minimized. The
+data points in the $\chi^{2}$ are weighted in the standard manner
+using the experimental uncertainties given in the C4.dat file. Natural 
+element data can be inserted in the C4.dat file and used in the fit.
+In the case of neutron scattering, the file \emph{empire/RIPL/resonances/resonances0.dat}
+is also searched for an s-wave strength function, which is included
+in the experimental data set when found. 
+
+The lower limit of the energy range for calculations used in a fit
+is initially taken to be 1 keV while the upper limit is taken to be
+30 MeV, unless modified using the FITEMX option in the input. All
+relevant experimental data within this range in the C4.dat are included
+in the $\chi^{2}$. The incident energies given in the input file
+define the grid of energies used for calculations, unless the FITGRD
+option is used. When the input file energies are used, the data points
+outside of the energy interval they define are not taken into account.
+That is, the fitting procedure will interpolate calculations but will
+not extrapolate them. When the FITGRD option is used, the energy interval
+is extended to include all data points in the initial energy range.
+In both cases, the grid of incident energies is compared with those
+of the experimental data and superfluous values are eliminated to
+speed up the calculation. 
+
+The parameters to be adjusted are specified by using the FITabc or
+FITDEF options, described in more detail below. The RIPL parametrization
+described in Refs.~\cite{RIPL2,RIPL3} is used to identify the optical
+model parameters, any of which may be adjusted. The adjustable deformations
+are simply those of the collective level file. Quadrupole and hexadecapole
+deformations are permitted for nuclei identified as rotational, while
+quadrupole and octapole dynamical deformations are permitted for those identified
+as vibrational. The FITabc and FITDEF options typically identify the
+desired parameter and furnish a shift in its initial value and the
+maximum variation allowed during the fit with respect to its (shifted)
+initial value. If no parameter adjustment is requested or all adjustable
+(possibly shifted) parameters have a maximum allowed variation of
+zero, the $\chi^{2}$ is calculated but no fitting is performed. At
+most 20 parameters may be shifted and/or adjusted simultaneously.
+
+At present, the optical model fitting is performed using a simple
+numerical gradient search to minimize the $\chi^{2}$. The adjusted
+parameters are stored in the modified OMPAR.DIR (\emph{{*}-omp.dir}) and
+TARGET\_COLL.DAT (\emph{{*}-lev.col}) files. Information on the fit is written
+in the FIT.OUT (\emph{{*}-ompfit.lst}) file. When a fit is complete, EMPIRE
+is run one last time with all options and energies given in the input
+file, excepting the fit ones. 
+
+
+
+
+
+
+
+\section{Using Kalman filter for parameter fitting}
+\label{Sec:KalmanFitting}
+
+
+The multi-parameter, linearly fitting code KALMAN has proven to be very useful
+in  improving evaluation procedure. Starting from an initial input, KALMAN is
+able to determine an ``optimal'' set of parameters that minimizes the  overall $\chi^2$.
+In order to do this, KALMAN varies the values of a given set of parameters and analyzes
+the effects produced in the cross sections.  
+
+Below, when describing filenames and instructions for the command line, the string `*' was
+adopted to correspond to the main project name, that is, the root of EMPIRE's input filename
+(the filename without the extension `\texttt{.inp}')
+
+The Kalman utility within the Empire package was initially developed with the purpose of
+fitting only cross sections. However, the KALMAN code itself is completely oblivious to
+what quantity it is fitting since it simply receives as inputs only the experimental data
+sets for which the $\chi^2$ will be minimized, the original functions before the fit, the
+parameters that modify each function and their sensitivities. It is thus the role of the
+auxiliary codes and of the \textit{kalman} script to manipulate the information given by
+EMPIRE and write them in the appropriate format for the KALMAN code. Having this in mind,
+the Kalman utility was generalized in order to be able to also fit prompt fission neutron
+spectra (PFNS). Four PFNS-specific parameters were introduced into EMPIRE code: PFNTKE,
+PFNALP, PFNRAT, and PFNERE (see section \ref{sec:empimp}). Each incident energy produces a
+spectrum that is a function of the neutron outgoing energy. In order to accommodate
+bi-dimensional fits, such as that involved with PFNS, the whole Kalman process had to be
+modified. In the descriptions below the differences and similarities in format, structure
+and processing between fitting cross sections and PFNS will be detailed.
+
+
+
+We note that EMPIRE-KALMAN system is a general and powerful tool for evaluation of nuclear
+reactions.  In addition to  covariance calculations it may also  be used to adjust model
+parameters to reproduce experimental cross sections and other observables within the
+selected reaction models and initial uncertainties of model parameters. Therefore, the
+Kalman filter can be used throughout the whole evaluation procedure to ensure consistency
+between cross sections, model parameters, and related covariance matrices. 
+
+
+The evaluator may choose to perform a sequential  update using experimental data
+for several/all  reactions or just for a single one. In the former  case, all considered
+reactions are correlated and unique set of parameters along with the related covariance
+matrix are produced. On the other hand, poor experimental data in one reaction channel
+can negatively influence predictions for other channels. 
+
+
+
+
+\subsection{Calculation of sensitivity matrices}
+
+The sensitivity matrix file (`*\texttt{-mat.sen}' for cross sections, `*\texttt{-pfns-full-mat.sen}')
+for PFNS, may be obtained through two different manners: using one of Empire's own subroutines; or using
+a python script to break the calculation into smaller parts and submit them to be run
+in parallel. Both methods follow the same concept and they are described in the following
+subsections. Actually, the sensitivity contained in those files is not the true sensitivity,
+but rather the so-called \textit{realistic sensitivity}, which is the true sensitivity
+divided by the central value and multiplied by twice the interval of variation. The
+reason for this is that the realistic sensitivity provides much more information regarding
+the relative importance of the parameters.
+
+
+\subsubsection{Sequential calculations}
+
+By setting input parameter \texttt{KALMAN} to the value of 1 in EMPIRE's input, instead of
+performing a regular run of EMPIRE calculations, it will read the sensitivity input file
+in order to calculate the sensitivity matrices. This is very useful for simple fits and
+when access only to a sequential machine is available. However, when fitting more than
+just a few parameters, the sequential approach may take a prohibitive amount of time to
+conclude the calculation. As additional limitations, EMPIRE's sensitivity routines have
+not yet been prepared to generate sensitivity matrices for PFNS and for a certain class
+of cross-section parameters. For these reasons, it is  advised for the user to
+perform parallel calculations instead, in order to generate  sensitivity matrix files.
+
+\subsubsection{Parallel calculations (\textit{sensitivity.py} python script)}
+
+One may use the \textit{sensitivity.py} script, present in the `\texttt{empire/empy/qsubEmpire}'
+directory, to generate sensitivity-matrix file. This method splits the full calculation
+into single energy runs, submitting each incident energy for execution by a different processor node, shortening dramatically the total execution time. Firstly, it creates a directory,
+named `*\texttt{\_orig/}', to where all the original input files are copied, for the calculation
+of the cross sections corresponding to central values of the parameters. Afterwards, the script
+reads the sensitivity input file to determine which parameters are going to be varied. Then,
+for each parameter, it creates two directories with names of the form
+`*\texttt{\_}\textit{keyword}\texttt{\_}\textit{I1}\texttt{\_}\textit{I2}\texttt{\_}\textit{I3}\texttt{\_}\textit{I4}\texttt{plus/}' 
+and 
+`*\texttt{\_}\textit{keyword}\texttt{\_}\textit{I1}\texttt{\_}\textit{I2}\texttt{\_}\textit{I3}\texttt{\_}\textit{I4}\texttt{minus/}', 
+where \textit{keyword} is the parameter name, and \textit{I1}-\textit{I4} are the four parameter options.
+All input files are also copied to those directories. However, in each directory, the input file
+is modified by changing the value of the parameter corresponding to the directory name. If
+the directory has the suffix `\texttt{plus}' then the relative increment defined in the
+sensitivity input is added to the original parameter value. Likewise, for the directories
+with the suffix `\texttt{minus}', then the same relative increment is subtracted from the
+original parameter value. Inside each of those directories, the script \textit{qsubEmpire.py},
+located in `\texttt{empy/qsubEmpire/}' directory, is called. It then splits each run into
+separate directories with the same input parameters but containing only one value of
+incoming energy, and finally submits each of those as different jobs to different CPU's for calculation.
+
+The \textit{sensitivity.py} script has basically five execution options: 
+
+\begin{itemize}
+
+\item \textbf{-i}: Initializes the inputs and prepare to run. Executing with this option
+   simply creates the  `*\texttt{\_orig/}' directory and all the parameter directories
+   described above. However, \textit{qsubEmpire.py} script is not called, so the jobs are not submitted.
+
+\item \textbf{-r}: Calls \textit{qsubEmpire.py} script to submit jobs for running. This option should
+   only be executed after previous initialization (\textbf{-i})
+
+\item \textbf{-a} or \textbf{--analyze}: After running (option \textbf{-r}), this option may be used
+   to gather all the cross-section information from files `*\texttt{.xsc}' in the different directories
+   that were created and calculate the sensitivity matrix, creating the sensitivity matrix file `*\texttt{-mat.sen}'.
+
+\item \textbf{-p} or \textbf{--pfns}: After running (option \textbf{-r}), this option may be used to
+   reorganize and gather all the PFNS information from files `*\texttt{-pfns.out}' in the different directories
+   that were created and calculate the PFNS sensitivity matrix, creating the PFNS sensitivity matrix
+   file `*\texttt{-pfns-full-mat.sen}'.
+
+\item \textbf{-c} or \textbf{--clean}: This option is used to delete all the auxiliary directories that
+   might have been created by a previous initialization or run of \textit{sensitivity.py}
+
+\end{itemize}
+
+If executing \textit{sensitivity.py} without specifying any options, it assumes options \texttt{-i} and,
+sequentially, \texttt{-r}. There are some examples of the option usage below:
+
+\begin{quote}
+ \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -i \\
+ \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -r \\
+ \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235    \\
+ (this is equivalent of executing, in order, both commands above) \\
+ \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -a \\
+ \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -c \\
+\end{quote}
+
+
+
+
+
+
+\subsection{Kalman script}
+
+For KALMAN to run properly, its inputs (sensitivities, experimental data to be fitted, list of
+parameters, central values for cross sections and parameters, etc.) must be found in the appropriate
+files and in the expected format. Preparing those files manually for each run of KALMAN may prove to
+be a cumbersome and prone-to-error task. For this reason, it is convenient to use the \textit{kalman}
+script, from the `\texttt{scripts}' directory. This script connects the different ingredients needed
+for the fit and organizes the results in a clear way, with the help of auxiliary codes.
+
+The \textit{kalman} script is called in a very simple manner by providing values for a set of variables
+in the command line, right after the script call. These variables are referred in the script as
+\texttt{file}, \texttt{MT}, \texttt{MAT}, \texttt{EXPDAT}, \texttt{PFNS}, and \texttt{EINC}, in this
+order. The first option corresponds to the project name, that is, EMPIRE's regular input file name
+without the extension `\texttt{.inp}'. The second option is the MT number that should be fitted by
+KALMAN. The next string corresponds to the material number (MAT) of the target. The variable \texttt{EXPDAT}
+defines which experimental sets will be used in the fit, by assuming the values 0, 1, or 2.
+\texttt{EXPDAT}=0 implies that all experimental data will be ignored (no fit); \texttt{EXPDAT}=1 indicates
+that only experimental data for the selected MT will be considered; while \texttt{EXPDAT}=2 informs the
+KALMAN code that agreement to all experimental data available in the c4 file should be considered for
+fitting. At this point, it is relevant to state that, when \texttt{EXPDAT}=2, the data agreement of
+the cross section (or PFNS) for a given reaction (or incident energy) may not improve, or may even get
+worse after the fitting. This is due to the fact that the overall $\chi^2$ is being minimized and
+worsening of agreement with data for a given reaction (or incident energy) is likely being compensated
+by improvement of the agreement for all other reactions (or incident energies)
+When \texttt{PFNS} has value 0 (default), KALMAN will fit only cross sections, while when
+\texttt{PFNS}=1 it will fit prompt fission neutron spectra (PFNS). When \texttt{PFNS}=1, the variable
+\texttt{EINC} corresponds to the incident energy for which PFNS will be fitted. The options \texttt{PFNS}
+and \texttt{EINC} may be omitted when fitting cross sections since they serve only to fit PFNS. For the
+time being, these fits are independent and there is no correlation between cross sections and PFNS.
+
+Examples of valid calls of \textit{kalman} script:
+
+\begin{quote} 
+kalman pu239 18 9437 2
+
+kalman u235 18 9228 2 1 2.53E-8
+\end{quote}
+
+In order to run properly, KALMAN needs to find a list of files in the working directory, otherwise it
+will abort and print an error message. Those files are: the ENDF file (`*\texttt{.endf}'), the
+sensitivity input file (`*\texttt{-inp.sen}'), the sensitivity matrix file (`*\texttt{-mat.sen}'),
+and the EMPIRE's cross section file (`*\texttt{.xsc}'). If fitting PFNS instead of cross sections,
+the last two files aforementioned are not necessary. However, KALMAN will then need the content of
+files `*\texttt{-pfns.out}' and `*\texttt{-pfns-full-mat.sen}'.
+
+After finishing running, the \textit{kalman} script creates several output files containing important
+information regarding the fits. Such files, with a brief the description, are listed below:
+
+\begin{itemize}
+
+ \item `*\texttt{-out.kal}': Standard output from KALMAN. Contains information about 
+   the data sets used for fitting, the $\chi^2$ obtained, the final values for the fitted parameters 
+   and their corresponding uncertainties, and the correlation between parameters.
+
+ \item `*\texttt{-expcorr.kal}': Provides the fraction of the experimental uncertainty that corresponds
+   to systematical errors for each data set. This file is initially generated by the code `\texttt{genkal}',
+   as file `\texttt{fort.12}', having the default value of 0.200 for all experiments.
+
+ \item `*\texttt{-}\textit{MT}\texttt{-err.kal}', where \textit{MT} corresponds to the same script
+    variable \texttt{MT} which was selected in the command line: Contains the covariances and uncertainties of the fitted curve.
+
+ \item `*\texttt{-par.kal}': Model parameter correlations
+
+ \item `*\texttt{-xsc.kal}': Final curves found by KALMAN for all reactions (or incident energies, in the PFNS case)
+
+ \item `*\texttt{-cov.kal}': Contains the uncertainties (in units of \%) and correlations for all incident
+    (or outgoing in the PFNS case) energies.
+
+ \item `*\texttt{-expxsc.kal}': Contains the experimental data used in the fit.
+
+ \item `*\texttt{-parcorr.kal}': Contains a list of the varied parameters, with their initial
+     values (usually set to 1.0) and ranges of variation. Additionally, it also contains, correlation matrix for the parameters, which is usually diagonal in the first default calculation. This matrix might be changed or updated if the parameter correlation matrix is know. Then, true sensitivity matrices for each
+    reaction (or each incident energy, in the PFNS case) are printed.
+
+ \item `*\texttt{-pfns.kal}': File containing the PFNS for the fitted incident energies.
+
+ \item `*\texttt{-}\textit{MT}\texttt{-cov.gpd}', where \textit{MT} corresponds to the same script variable
+    \texttt{MT} which was selected in the command line: File to plot a three-dimensional graph of the
+    covariances using \texttt{gnuplot}
+
+ \item `*\texttt{-}\textit{MT}\texttt{-c4.gpd}', where \textit{MT} corresponds to the same script variable
+    \texttt{MT} which was selected in the command line: File that contains the experimental data for the
+    reaction corresponding to the \textit{MT} number used in the KALMAN fit. May be plotted together with
+    `*\texttt{-}\textit{MT}\texttt{-xsc.gpd}' using `\texttt{gnuplot}'.
+
+ \item `*\texttt{-PFNS-}\textit{INDEX}\texttt{-c4.gpd}': File that contains the pfns experimental data for
+    the incident energy corresponding to the index \textit{INDEX}, as listed in file `*\texttt{-pfns.kal}'.
+    May be plotted using `\texttt{gnuplot}'.
+
+  \item `*\texttt{-}\textit{MT}\texttt{-xsc.gpd}', where \textit{MT} corresponds to the same script variable
+    \texttt{MT} which was selected in the command line: Contains both the curves before and after the KALMAN
+    fit. It may be plotted together with `*\texttt{-}\textit{MT}\texttt{-c4.gpd}' using \texttt{gnuplot}.
+
+\end{itemize}
+
+Plots of the fit can be made using the information contained in files `*\texttt{.gpd}' with the help of the
+widely-available plotting tool `\texttt{gnuplot}'. Plots of the parameter correlations resulting from the KALMAN
+fits can be made with `\texttt{util/kalman/corr.gp}'; correlations of the PFNS parameters with
+(`\texttt{util/kalman/corr-pfns.gp}'. This plotting process is described in Section \ref{Sec:PostKalman}.
+
+\subsubsection{Experimental Data}
+
+For fitting either cross sections or PFNS, KALMAN needs access to the experimental data so it can calculate and
+compare the $\chi^2$ at each point. The codes `\texttt{c4tokal}' and `\texttt{pnt2kal}' read experimental data
+in computational format (c4 files) and write in a  way that is understandable by the KALMAN code. The former
+process cross section data while the latter PFNS data.
+
+%\subsubsection{Handling Cross-Section Experimental Data - c4tokal}
+\paragraph{Handling Cross-Section Experimental Data - c4tokal.}
+\label{c4tokal}
+
+The code `\texttt{c4tokal}' reads the cross-section experimental data from the file `*\texttt{-kal.c4}',
+if it exists. Otherwise, it looks for the existence of file `*\texttt{.c4}'. The reason for the additional
+`*\texttt{-kal.c4}' file is that it is common, during the fitting process, that one might want to exclude
+data points or even whole data sets from the fit. This way the user can edit the file `*\texttt{-kal.c4}'
+while keeping the original and more complete `*\texttt{.c4}' unaltered.
+
+EMPIRE's cross-section file `*\texttt{.xsc}' is read by `\texttt{c4tokal}' only to determine the number of
+different reactions printed out by Empire and their corresponding nomenclature. In addition, the sensitivity
+input file `*\texttt{-inp.sen}' is read to obtain the number of parameters to be varied in the fit.
+
+After gathering all this information, `\texttt{c4tokal}' creates a series of output files, which will be
+read by KALMAN. Below is a brief description of each of those files:
+
+\begin{itemize}
+ \item \textbf{fort.75}: contains data points, their absolute errors, and the MT number 
+ \item \textbf{fort.10}: contains only the data points
+ \item \textbf{fort.11}: contains only relative errors for each energy
+ \item \textbf{fort.12}: contains correlations between  different experiments
+ \item \textbf{KALMAN.INP}: automatically-generated input for the main KALMAN fitting code
+\end{itemize}
+
+
+%\subsubsection{Handling PFNS Experimental Data - pnt2kal}
+\paragraph{Handling PFNS Experimental Data - pnt2kal.}
+
+%\subsection{Experimental Data}
+
+When compared to cross-section fiting, preparing PFNS experimental data require additional steps due to the
+fact that PFNS is usually presented after normalization to Maxwellian. This normalization is often done
+because PFNS vary largely across the values of outgoing energy. Since the value of the temperature used
+in the Maxwellian normalization ($T_{maxw}$) is relatively arbitrary, different $T_{maxw}$ may be used
+to focus on different parts of the spectra.
+
+%\subsubsection{pnt2kal}
+
+Instead of calling `\texttt{c4tokal}, kalman script calls the code \texttt{pnt2kal} when fitting PFNS.
+This code  reads the normalized PFNS experimental data from an existing `*\texttt{.pnt}' file and
+converts it to the input format needed by KALMAN. If this file does not exist,
+`\texttt{pnt2kal} runs the code LSTTAB to read the PFNS data from the `*\texttt{.c4}' file and
+generate the corresponding normalized `*\texttt{.pnt}' file. In this case, the code PLOTLST is initially
+called to identify the index of the PFNS data in the c4 file (with output sent to file `\texttt{output.plotlst}').
+Then, the Maxwellian temperature $T_{maxw}$, to which the data will be normalized, is read from EMPIRE's
+PFNS output file, `*\texttt{-pfns.out}'. With that value, an input file for LSTTAB, `\texttt{input.lsttab}',
+is written. The files `*\texttt{-log.plotc4}', `*\texttt{.c4}', and `*\texttt{-s.endf}', together with the
+value of $T_{maxw}$, read from `*\texttt{-pfns.out}' are necessary to run LSTTAB. When LSTTAB is called
+by `\texttt{pnt2kal}, its standard output is written in the file `\texttt{output.lsttab}' and the standard
+pnt file `\texttt{LSTTAB.PNT}' is renamed to `*\texttt{.pnt}'.
+
+When the `*\texttt{.pnt}' is ready, the PFNS data and all its relevant information are read at once and
+stored in a structured variable. From this, the values of incident energies ($E_{inc}$) for which there
+are available data are extracted. Those values are compared to the ones used for the original Empire
+calculation of the PFNS, to check if PFNS were calculated at all incident energies found in the
+experimental `*\texttt{.pnt}' file. If not, `\texttt{pnt2kal}' aborts since it makes no sense to fit data without
+the initial calculation of its central values. In this case, an error message is printed with all the
+values of $E_{inc}$ and indicating which matches could be found in the PFNS output from EMPIRE.
+
+An important difference between integrating cross-section and PFNS fitting with EMPIRE is that, in the
+former case, the initial central values are already in an easily-readable format in the file `*\texttt{.xsc}',
+with the cross sections for each $E_{inc}$ in subsequent rows, and with the different reactions distributed
+in columns. In the PFNS case, however, the spectra are printed as sequential blocks for the different
+incident energies, with each block containing the distribution as a function of the outgoing energy. For
+KALMAN to be able to fit PFNS properly, the spectra have to be rewritten in a format similar to that of
+the cross sections in the file `*\texttt{.xsc}'. The code `\texttt{pnt2kal} does that by reading the
+spectra from file `*\texttt{-pfns.out}' and writing them in a reformatted file, with name `*\texttt{-pfns.fmt}'.
+In this new file the PFNS are written as function of the outgoing energy, with the different $E_{inc}$
+distributed in columns. This way, we have the correspondence expressed in Table \ref{Tab:xsec-pfns}
+
+\begin{table}[htb]
+\begin{center}
+\caption{Correspondence between cross-section and PFNS files}
+\label{Tab:xsec-pfns}
+\begin{tabular}{lcc}
+\hline
+\hline
+Quantity       & cross sections  & PFNS \\
+\hline
+File extension & `\texttt{.xsc}' & `\texttt{-pfns.fmt}' \\
+Rows           & incident energy & outgoing energy \\
+Columns        & reaction        & incident energy \\
+\hline
+\end{tabular} 
+\end{center}
+\end{table}
+
+%\textcolor{red}{ Maybe show snapshots of files .xsc, -pfns.out, and -pfns.fmt }
+
+As mentioned, the file `*\texttt{-pfns.fmt}' contains the PFNS at all incident energies calculated
+by EMPIRE. However, it is only necessary to provide to KALMAN those spectra at the same incident
+energies for which there are experimental data available in the `*\texttt{.pnt}' file. For this
+reason, `\texttt{pnt2kal} reads `*\texttt{-pfns.fmt}' and rewrites it in file `*\texttt{-pfns.kal}',
+keeping only the columns corresponding to $E_{inc}$ found in `*\texttt{.pnt}'. This trimming process
+is also done to the original PFNS sensitivity file, `*\texttt{-pfns-full-mat.sen}', with the outcome
+being printed in the file `*\texttt{-pfns-mat.sen}'. For doing this, the number of parameters is
+retrieved from the sensitivity input file `*\texttt{-inp.sen}'.
+
+Finally, `\texttt{pnt2kal}' creates and writes to files `\texttt{fort.75}', `\texttt{fort.10}',
+`\texttt{fort.11}', `\texttt{fort.12}', and `\texttt{KALMAN.INP}'. The contents of those files are
+the same as in the case of cross-section fitting (section \ref{c4tokal}), with the corresponding
+substitutions expressed in Table \ref{Tab:xsec-pfns}. In addition to those files, `\texttt{pnt2kal}'
+also writes to a temporary file, named `\texttt{ENERGYANDINDEX.TMP}', that contains some information
+needed later on by the \textit{kalman} script, such as number of incident energies, and index and
+value of $E_{inc}$ to be fitted. This file is deleted at the end of kalman script.
+
+
+\subsubsection{Central Values - genkal}
+
+The `\texttt{genkal}' code converts the cross sections and sensitivities for all reactions into the
+format needed by the KALMAN code. The cross sections are read from file `*\texttt{.xsc}' and are
+rewritten in file `\texttt{fort.50}' in such a way to present the central values for the cross sections
+as sequential blocks, each block corresponding to one of the reactions. The sensitivity matrices are
+read from `*\texttt{-mat.sen}' and rewritten into file `\texttt{fort.52}'. The initial intervals within
+each parameter may be varied by KALMAN are also written in the file `\texttt{fort.52}'. 
+
+The central values and sensitivities in the case of PFNS fitting are converted to KALMAN format by
+the same code `\texttt{genkal}' that does that for cross sections. File `\texttt{fort.50}' is
+written after reading the central spectra from file `*\texttt{-pfns.kal}'. It will have the PFNS
+rewritten as sequential blocks, with each block now corresponding to the spectrum distribution for
+each incident energy. The PFNS sensitivity matrix will be read from file `*\texttt{-pfns-mat.sen}'
+and stored again in the file `\texttt{fort.52}'. As in the cross section case, the relative intervals
+for parameter variation will also be written in `\texttt{fort.52}'.
+
+In both cross-section and PFNS cases, `\texttt{fort.52}' is renamed to `*\texttt{-parcorr.kal}' if
+such file does not exist beforehand. If file `*\texttt{-parcorr.kal}' exists, then it is copied
+over `\texttt{fort.52}' so, following the general EMPIRE policy,  the existing version is used rather than  the newly-generated one.
+The reason for this is that, after a given run of Kalman, a user might want to edit this file in order
+to modify some values, such as the range of variation for a given parameter. 
+
+\subsubsection{KALMAN code}
+
+If `\texttt{genkal}' and `\texttt{c4tokal}' (or `\texttt{pnt2kal}', in the PFNS case) have run
+properly, then all the files needed for KALMAN to run will be ready. However, before executing
+KALMAN, the \textit{kalman} script checks if the files `*\texttt{-expxsc.kal}', `*\texttt{-expcorr.kal}',
+and `*\texttt{-parcorr.kal}' exist. If so, the script renames them in such a way that the fitting
+code will use the existing files instead of the newly-generated ones. As mentioned above, this allows the user to
+manually modify those files according to specific needs, between two consecutive runs of KALMAN.  
+
+Afterwards, the \textit{kalman} script opens the standard KALMAN input file, \texttt{KALMAN.INP},
+previously created by either `\texttt{c4tokal}' or `\texttt{pnt2kal}', using a  text editor.
+At this point, the user may choose to edit this file to modify the default options before the actual
+run. Once the user is satisfied with the input file, should save it and close the editor window.
+This will trigger execution of the KALMAN code and start the actual fitting process.
+
+\subsubsection{Post-KALMAN processing}
+\label{Sec:PostKalman}
+
+After the KALMAN code completed fitting the experimental data sets and has found an optimal set of parameters
+that minimizes the $\chi^2$, the kalman script does a few more operations. Firstly, it
+renames the output files generated by KALMAN `\texttt{fort.13}', `\texttt{fort.14}', and `\texttt{fort.15}'
+into `*\texttt{-xsc.kal}', `*\texttt{-cov.kal}', and `*\texttt{-par.kal}', respectively. Secondly, it calls
+the code `\texttt{kalend}' which reads the KALMAN-generated covariance and writes it in the ENDF-6 format into
+file `*\texttt{-}\textit{MT}\texttt{-err.kal}'. Additionally, it also creates the files `\texttt{corrplot.d}'
+and `\texttt{xscplot.d}',  for plotting.
+
+Finally, before finishing, \textit{kalman} script uses \texttt{gnuplot} to plot the calculated covariances and
+pre- and post-fit curves to compare with experimental data. To do this, it uses the \texttt{gnuplot}-instruction
+file `\texttt{util/kalman/corr.gp}' (`\texttt{util/kalman/corr-pfns.gp}', in the case of fitting PFNS). Both
+files `\texttt{corr.gp}' and `\texttt{corr-pfns.gp}' are set to plot the covariances directly from file
+`\texttt{corrplot.d}'.  The curves before and after fitting are set to be taken from file `\texttt{xscplot.d}',
+for either cross-section or PFNS calculations. Both files `\texttt{corrplot.d}' and `\texttt{xscplot.d}' are
+directly generated by `\texttt{kalend}'.  The file containing the experimental data for plotting
+(`*\texttt{-}\textit{MT}\texttt{-c4.gpd}' for cross sections, or when plotting PFNS, 
+`*\texttt{-PFNS-}\textit{INDEX}\texttt{-c4.gpd}')
+was previously generated either by `\texttt{c4tokal}' (in the case of cross sections) or by
+`\texttt{pnt2kal}' (in the PFNS case). However, both `\texttt{corr.gp}' and `\texttt{corr-pfns.gp}' are set
+to take the experimental data from file `\texttt{expxscplot.d}'. Therefore, right before calling
+`\texttt{gnuplot}', \textit{kalman} script copies file `*\texttt{-}\textit{MT}\texttt{-c4.gpd}'
+(or `*\texttt{-PFNS-}\textit{INDEX}\texttt{-c4.gpd}', depending to which quantity has been fitted) to
+file `\texttt{expxscplot.d}'. 
+
+Once the `\texttt{gnuplot}' command is executed, the three-dimensional graph of the covariance should be
+plotted. Figure \ref{Fig:CorrU235} shows examples of such graphs for the case of fission (top pannel)
+and capture (bottom pannel) of neutrons inciding on $^{235}$U. 
+\begin{figure}[htb]
+ \begin{center}
+  \vspace{-0.0cm}
+  \includegraphics[trim = 5mm 60mm 5mm 50mm, clip,width=4.8in,angle=0.0]{figs/u235-fission-correlation-plot} \\
+  \vspace{-3.0cm}
+  \includegraphics[trim = 0mm -8mm 0mm 0mm, clip,width=5.0in,angle=0.0]{figs/u235-capture-correlation-plot} \\
+ \end{center}
+ \vspace{-4.5cm}
+ \caption{Correlation matrices for neutron-induced fission (top) and capture (bottom) reactions
+   ($MT=18$ and $102$, respectively) for material $^{235}$U.}
+ \label{Fig:CorrU235}
+\end{figure}
+After the user closes the covariance-graph window and hits enter on the terminal, the graph of prior- and
+post-KALMAN fitting curves is plotted. Figure \ref{Fig:PriorPostU235} shows the agreements with fission
+(top pannel) and capture (bottom pannel) experimental data of the calculated cross sections before
+(blue curve) and after (green curve) the fit. 
+\begin{figure}[htb]
+ \begin{center}
+  \vspace{-0.0cm}
+  \includegraphics[trim = 5mm 60mm 5mm 50mm, clip,width=4.7in,angle=0.0]{figs/u235-fission-prior-post} \\
+  \vspace{-3.0cm}
+  \includegraphics[trim = 0mm -8mm 0mm 0mm, clip,width=4.9in,angle=0.0]{figs/u235-capture-prior-post} \\
+ \end{center}
+ \vspace{-4.5cm}
+ \caption{Cross section for the neutron-induced fission (top) and capture (bottom) reactions 
+($MT=18$ and $102$, respectively) for material $^{235}$U, comparing the agreement with experimental
+data between the curves prior and post KALMAN fitting.}
+ \label{Fig:PriorPostU235}
+\end{figure}
+
+It is important to mention that this post-fitting calculation does not necessarily correspond to
+the exact  result that one should get when the new values of the parameters are put back into
+EMPIRE's input file for a new run of EMPIRE. This happens because the Kalman filter is a linear
+fitting code, which means that, the effect of perturbing a given parameter will be calculated by 
+linearly interpolating (or extrapolating) the sensitivity matrix. Hence the importance of choosing wisely the intervals
+of variation, both when obtaining the sensitivity matrix and when editing `*\texttt{-parcorr.kal}'
+to avoid falling out of the linearity regime. The final effect of fitting parameters through KALMAN
+will thus only be known after the new parameter values are put back into EMPIRE's input file and new
+cross sections or PFNS are calculated.
+
+\subsection{Fitting example: \texorpdfstring{$^{235}$U}{235U}}
+
+
+As an example, we present below the entire process of generating the central values, sensitivities,
+and KALMAN fits, with a complete set of commands, for the target material $^{235}$U.
+
+Once EMPIRE's initial input files have been defined and assuming EMPIRE's main input file is named
+as `\texttt{u235.inp}', one can run EMPIRE, generate ENDF-6 formatted file, and process it for
+plotting by issuing the following commands:
+\begin{quote}
+ \$EMPIREDIR/scripts/runE u235 \\
+ \$EMPIREDIR/scripts/format u235 9228 \\
+ \$EMPIREDIR/scripts/process u235 
+\end{quote}
+or, alternatively:
+\begin{quote}
+ \$EMPIREDIR/scripts/run u235 9228
+\end{quote}
+
+In order to calculate sensitivities, the sensitivity input file `\texttt{u235-inp.sen}' must be created,
+containing the list of parameters to be varied. This file may contain both cross-section and PFNS
+parameters. Since, at the time being, those fits are independent and uncorrelated, the cross-section
+sensitivity file (`\texttt{u235-mat.sen}') will contain zero sensitivities for the PFNS parameters and,
+likewise, the PFNS sensitivity file (`\texttt{u235-pfns-full-mat.sen}') will contain vanishing
+sensitivities for the cross-section parameters. To calculate the sensitivities and generate the
+sensitivity matrix files for both cross sections and PFNS one may use the commands:
+
+\begin{quote}
+  \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235    \\
+  \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -a \\
+  \$EMPIREDIR/empy/qsubEmpire/sensitivity.py u235 -p \\
+\end{quote}
+
+At this stage, all the files needed to start the fitting process have been generated. If the user
+chooses to fit cross sections taking into consideration experimental data for all reactions available
+in the \texttt{c4} file (`\texttt{u235.c4}'), and wishes to see the correlation and prior/post-fit
+graphs for fission reaction, for example, he/she may use the command:
+
+\begin{quote}
+kalman u235 18 9228 2
+\end{quote}
+The result of this KALMAN run is shown in Figures \ref{Fig:CorrU235} and \ref{Fig:PriorPostU235},
+top pannels. If, however, the user chooses instead to see the KALMAN predictions for capture,
+the following command may be used:
+
+\begin{quote}
+kalman u235 102
+\end{quote}
+Figures \ref{Fig:CorrU235} and \ref{Fig:PriorPostU235}, bottom panels, show the results of this run.
+
+To fit PFNS experimental data for all incident energies contained in the \texttt{c4} file
+(`\texttt{u235.c4}'), but to plot the KALMAN predictions for thermal energy, one may use the command:
+
+\begin{quote}
+kalman u235 18 9228 2 1 2.53E-8 
+\end{quote}
+
+After the final parameters, which may be found in this case in file `\texttt{u235-out.kal}', are
+put back into EMPIRE's main input file, `\texttt{u235.inp}, EMPIRE may be executed again with command:
+\begin{quote}
+ \$EMPIREDIR/scripts/run u235 9228
+\end{quote}
+to obtain the final results, for cross sections and PFNS, after the KALMAN fit
+Figures \ref{Fig:U235-fission}, \ref{Fig:U235-capture}, and \ref{Fig:U235-pfns} show examples of
+results for cross-section and PFNS fits for $^{235}$U using Kalman filter integrated with EMPIRE.
+
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 5mm 4mm 5mm 14mm, clip,width=\textwidth,angle=0.0]{figs/u235-fission} 
+ \end{center}
+ \vspace{-4mm}
+ \caption{Comparison between fission cross sections calculated by EMPIRE using input parameters
+  obtained before and after fitting using Kalman filter. Evaluation from ENDF/B-VII.1 library and
+  experimental data from EXFOR are also plotted.}
+ \label{Fig:U235-fission}
+\end{figure}
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 5mm 4mm 5mm 14mm, clip,width=\textwidth,angle=0.0]{figs/u235-capture} 
+ \end{center}
+ \vspace{-4mm}
+ \caption{Comparison between capture cross sections calculated by EMPIRE using input
+  parameters obtained before and after fitting using Kalman filter. Evaluation from
+  ENDF/B-VII.1 library and experimental data from EXFOR are also plotted. Even though
+  the agreement of the post-fit curve seems worse than that of the pre-fit one, this is
+  compensated by improvements at other reactions, minimizing the overall $\chi^2$. This
+  may happen when the option to fit data for all reactions is selected.}
+ \label{Fig:U235-capture}
+\end{figure}
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 4mm 4mm 4mm 5mm, clip,width=\textwidth,angle=-0.0]{figs/u235-pfns-LosAlamos} 
+ \end{center}
+ \vspace{-4mm}
+ \caption{Prompt fission neutron spectra (PFNS) for thermal neutrons calculated by EMPIRE
+  using a default input and input files containing PFNS parameters after different numbers
+  of KALMAN-EMPIRE iterations. For iterations 3 and 4, additionally to iterating a new sequence
+  of KALMAN and EMPIRE runs, some spurious data points were removed from the fitting process.}
+ \label{Fig:U235-pfns}
+\end{figure}
+
+
+
+
+\newcommand{\mub}{$\bar{\mu}$}
+\newcommand{\nub}{$\bar{\nu}$}
+\section{Fitting \texorpdfstring{\mub\ and \nub}{Mubar and Nubar} in Empire with Kalman}
+%\section{Fitting Mubar and Nubar in Empire with Kalman}
+
+The fitting code KALMAN, used within the EMPIRE nuclear modeling system, is a fitting package based on the
+Kalman fitting technique where a set of empire model parameters are adjusted to fit a set
+of data \cite{KALMAN}. The required input is
+only the data (observables) being fit, the predicted value for those data from the model, and the ``sensitivity''
+of each observable to each fitted parameter, where the ``sensitivity'' is simply the first derviative of the
+observable with respect to the fitted parameter. These sensitivities are calculated numerically. They
+are prepared as a matrix, where one dimension is the parameter index and the other is the index of the observable.
+For each parameter $x_{i}$, the sensitivity of observable $OB(j)$ is calculated by adjusting the parameter
+up and down by a given amount, and then calculating the observables for these adjusted
+parameters, which are designated with a superscript $+$ or $-$. The resulting sensitivity of the $jth$ observable to
+the $ith$ parameter is then simply given by
+
+\begin{equation}
+\label{Eq:sens}
+{\rm Sens}(j)_{i} = (OB(j)^{+} - OB(j)^{-})/(x_{i}^{+} - x_{i}^{-})
+\end{equation}
+
+This matrix of sensitivities, along with the predicted values of the observables without adjustment (often
+referred to as the ``central values,'' as the parameters are set to original values between the ``+'' and ``-''
+values, hence ``central'') are then used to adjust the parameters using the Kalman method to minimize the
+difference between the fitted value and the prepared set of observables in the standard C4 data format,
+using the usual definition of $\chi^{2}$ as the sum of differences between the model predictions $Y_{i}$
+and measured quantities $y_{i}$ divided by the measurement uncertainty $\sigma_{i}$. The sum of the
+squares of these ratios forms
+$\chi^{2}$,
+\begin{equation}
+\label{eqn_chi2}
+\chi^{2} = \sum_{i=1}^{n}((Y_{i} - y_{i})/\sigma_{i})^{2}
+\end{equation}
+where the summation is over all measured observables $n$. For further details about
+the Kalman approximation used in fitting see \cite{KALMAN}.
+
+This approach has been successfully used with the Empire package for fitting cross sections. It
+includes, but is not limited to, total, elastic, inelastic, (n,2n), fission, and capture. The user
+creates a file which lists each empire parameter to be fitted along with a displacement
+which limits the range of the parameter when fitted by the Kalman code and also to determine
+the ``+'' and ``-'' values of Eq.~\ref{Eq:sens} when calculating the
+sensitivity to the parameters for each fitted cross section. As such, these values should be
+chosen to be as large as possible as not to restrict the fit, but also not so large as to
+introduce nonlinearities into the calculation of the sensitivities. This amount varies for each
+parameter and its functional form within the EMPIRE code.
+
+Here we discuss an extension of this fitting that will allow one to fit in addition to the
+usual cross sections, the prompt neutron fission spectra (PFNS), the average cosine of the
+scattering angle for elastic neutron scattering (\mub), and the average number of neutrons
+produced in fission (\nub). For a detailed description of the PFNS fitting, see
+section~\ref{Sec:KalmanFitting}. The addition of \mub\ and \nub\ fitting in empire/kalman is described here.
+
+\subsection{\texorpdfstring{\mub}{Mubar} (Mubar)}
+
+When fitting EMPIRE calculations to experimental observables with Kalman, the data are prepared
+for the fitting code by the kalman script which controls the processing of
+the C4 data and the standard EMPIRE cross sections and sensitivities into the format used by the
+KALMAN code. A mapping function is used to map each reaction from EMPIRE to the corresponding
+MT as specified for that reaction in the C4 data file. 
+This is done for various MF3 cross sections, but not for angular distributions, etc. As a first
+step toward including sensitivity to the angular distributions we describe the addition of the
+capability of fitting the \mub\ as calculated by EMPIRE to experimental values. This involves 2
+steps: (i) fitting of the experimental elastic angular distributions to produce an experimental
+value for \mub\ with uncertainties and (ii) the addition of \mub\ as another ``reaction'' in the
+file of cross sections produced by EMPIRE for fitting with Kalman (the XSC file). Here we
+describe the preparation of both the experimental and calculated values.
+
+The experimental differential cross sections (C4 MF4/MT2) for elastic scattering are fit
+with a Legendre polynomial expansion to extract the coefficient from the fit for the first
+Legendre coefficient, which corresponds to \mub\ or the average scatting cosine (here, the
+0th Legendre parameter corresponds to the elastic scattering cross section). To fit these
+Legendre coefficients two similar approaches have been developed.
+
+In the first approach, ang\_mu.f code, developed by A. Trkov at BNL, scans the input C4 data file
+and each section of elastic scattering
+differential cross sections are fitted using standard least-squares with the
+sum of the squares of the differences between the experimental cross sections
+and the Legendre fit being minimized. This method will iterate the fit, automatically increasing
+the order of the fit until the maximum relative difference between the data and the fit are
+less than the maximum relative error in the diff. cross section divided by $\sqrt{2}$, but never
+less than 7\%.  The
+order of the fit is also never allowed to exceed $l=22$ or 2/3 the number of points in the angular
+distribution, whichever is smaller. This will produce a value for \mub\ for each elastic
+differential cross section encountered in the C4 file from the $0^{th}$ and $1^{st}$ Legendre
+moments as
+\begin{equation}
+\label{Eq:mubar}
+\bar{\mu} = \frac{c_{1}}{3 c_{0}}
+\end{equation}
+where the factor of 3 comes from re-normalizing the angular distribution by $2l+1$, with $l=1$.
+These fitted Legendre coefficients are written to the C4 file with MF154/MT2 which are paired
+with the calculated values for \mub\ from Empire, which are assigned to MF3/MT251. The files
+are processed and prepared for the Kalman fitting code by the routine c4tokal.f90.
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 15mm 15mm 0mm 0mm, clip,width=5.0in,angle=0.0]{figs/mubar} \\
+ \end{center}
+ \vspace{-4mm}
+ \caption{Legendre fit to differential cross section data at $\rm{E} = 550$ keV. There were 2 data sets
+ available at this energy. Each data set was adjusted by a scale factor that was fitted along
+ with the Legendre coefficients by including a penalty term in the $\chi^{2}$ (see Eq.~\ref{Eq:sclchi}).
+This resulted in a good fit to the data with only a 4th order Legendre fit with a final reduced $\chi^{2}$ of 1.92.}
+ \label{Fig:mufit}
+\end{figure}
+
+The Legendre fitting of the angular distributions will suffer if the number of data points
+is small or the data do not cover enough angular range to successfully constrain the fit. In an attempt
+to increase the coverage, when available, a second version of the Legendre fitting was
+developed that will group the data by incident neutron energy, which then may fit more than
+one C4 data section at once, increasing the number of points and angular coverage which
+may result in a better fit. In this version, the uncertainty of the individual data
+points are used in creating the $\chi^{2}$, as in Eq. \ref{eqn_chi2}. Each data set
+is assigned a systematic uncertainty and a scale factor is used to
+bring the various data sets into agreement, which is important to achieve a
+good fit when fitting more than one data set at a time.
+A scale factor $f$ for each data set is added to the definition of $\chi^{2}$ and
+a penalty term added for each data set weighted set's systematic error $\sigma_{f}$ 
+as shown in Eq.~\ref{Eq:sclchi} (see ref. \cite{Agostini:94}).
+\begin{equation}
+\label{Eq:sclchi}
+\chi^{2} = \sum_{i=1}^{n}((Y_{i} - fy_{i})/f\sigma_{i})^{2} + ((f-1)/\sigma_{f})^{2}
+\end{equation}
+The order of the Legendre fit was also automatically increased, where the order of the
+fit would increase until $\chi^{2} < 2.5$ but never allowed to exceed 2/3 of the total number
+of points being fit. This method yielded uncertainties on the coefficients
+of the Legendre polynomials which could then be directly propagated to an uncertainty in \mub\ 
+as defined in Eq.~\ref{Eq:mubar}. An example of this fitting procedure is shown in Figure~\ref{Fig:mufit}.
+Here 2 different data sets were each assigned a 5\% systematic error. The fit scaled the data set of
+Goswami, et. al. up by 5.5\% and the data set by E.Barnard, et. al., down approximately 5\%. The
+resulting angular distribution was fit using only a $4^{th}$ order Legendre polynomial
+with a reduced $\chi^{2}$ of 1.92. 
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 15mm 15mm 0mm 0mm, clip,width=5.0in,angle=0.0]{figs/bad_mubar} \\
+ \end{center}
+ \vspace{-4mm}
+ \caption{Legendre fit to differential cross section data at $E = 3.1 MeV$. An example of
+ a data set with too few points and too small angular coverage. The fit fails with negative
+ cross sections being produced, resulting in a nonsensical value for \mub.}
+ \label{Fig:badmu}
+\end{figure}
+
+These procedures for fitting \mub\ are fairly automated, but care must be taken and each fit must
+be visually checked. A common cause for a bad fit is simply insufficient
+angular coverage or too few points to constrain the fit, or both. An example of this type of failure
+is shown in Fig.~\ref{Fig:badmu}. Here, there are few data points and none at forward angles. The
+resulting fit has a negative cross section at forward angles. The resulting value for \mub\ is meaningless
+should not be used. 
+
+Another case where there are often problems are at high energy ($\rm{E}_{n} > 10$ MeV), where the
+angular distribution is very forward peaked. Fitting these distributions usually requires a very
+high order Legendre polynomial, which can easily become unconstrained at very forward or backward angles,
+resulting in a bad value for \mub. An example of such a fit at $E_{n} = 15$~MeV is shown in
+Fig.~\ref{Fig:bad_high}.
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 15mm 15mm 0mm 0mm, clip,width=5.0in,angle=0.0]{figs/bad_mubar_high} \\
+ \end{center}
+ \vspace{-4mm}
+ \caption{Legendre fit to differential cross section data at $E = 15$ MeV. Here the forward
+ angle peak of the angular distribution requires a very high order Legendre polynomial for a
+ good fit which results in a relatively good $\chi^{2}$ but the high oscillations at the
+rather unconstrained backward angles result in a bad value for \mub\ of -0.815.}
+ \label{Fig:bad_high}
+\end{figure}
+At high energy, it is often preferable to not fit the angular distribution but rather calculate
+\mub\ directly, determining the the average cosine of the differential cross section as
+\begin{equation}
+\label{Eq:direct_mubar}
+\bar{\mu} = \frac{\int_{-1}^{1} \frac{d\sigma(\theta)}{d\Omega} \cos\!\theta \, d\!\cos\!\theta}{\int_{-1}^{1} 
+\frac{d\sigma(\theta)}{d\Omega} \, d\!\cos\!\theta}.
+\end{equation}
+For the distribution shown in Fig.~\ref{Fig:bad_high}, calculating \mub\ 
+using Eq.~\ref{Eq:direct_mubar} results in a value of $0.82 \pm 0.03$, an acceptable
+value, rather than the result from the high-order Legendre fit of $-0.815 \pm 0.0002$, which is clearly wrong.
+
+Of course, to successfully use Eq.~\ref{Eq:direct_mubar} the angular coverage of the differential
+cross section must be
+sufficient to perform the integral. If this is not the case then
+there is little choice but to use a Legendre fit. In any case, care must be always taken when
+determining the value of \mub\ for a given elastic differential cross section. Each
+fit must be visually inspected and only those that result in a good fit without problems (e.g.,
+unconstrained or negative cross section, etc.) should be accepted for Kalman fitting. In the end, it
+is up to the evaluator to decide which method provides the best value for \mub\ from a given
+differential cross section. 
+The accepted values with uncertainties are appended to the C4 file as MF154/MT2 data,
+which are then paired with the EMPIRE cross predictions for \mub\ for fitting with Kalman. An
+example of a set of \mub\ derived from $^{238}$U elastic differential cross sections,
+with an EMPIRE calculation for \mub\ are shown in Fig.~\ref{Fig:empmu}.
+
+\begin{figure}[htb]
+ \begin{center}
+  \includegraphics[trim = 15mm 15mm 0mm 0mm, clip,width=5.0in,angle=0.0]{figs/mubar_empire} \\
+ \end{center}
+ \vspace{-4mm}
+ \caption{Values of \mub\ from fitted elastic differential cross sections for $^{238}$U shown
+ in red with uncertainties from the fit. The black curve is an EMPIRE calculation for \mub.
+ This curve is fit to the \mub\ data with the KALMAN code, which will adjust the EMPIRE 
+ parameters based on their calculated sensitivities for \mub.}
+ \label{Fig:empmu}
+\end{figure}
+
+The addition of calculated \mub\ to the list of cross sections output by EMPIRE required a minor
+addition to the EMPIRE code. The differential cross sections are stored internal to EMPIRE
+in the center-of-mass frame from $0^{\circ}$ to $180^{\circ}$, every $2^{\circ}$.
+As \mub\ is defined as the average cosine of the elastic
+scattered neutrons in the {\em Lab} frame, these differential cross sections are first boosted
+to Lab and then the distribution is integrated using Eq.~\ref{Eq:direct_mubar} to
+calculate \mub. This value is then written out to the *.xsc cross section file along with
+the other cross sections used for fitting with KALMAN. It will later be mapped to MF3/MT251,
+which is paired with \mub\ from the Legendre coefficients from fits to C4 data as MF154/MT2.
+
+\subsection{\texorpdfstring{\nub}{Nubar} (Nubar)}
+
+The number of neutrons produced per fission, \nub, can also be fit to data with the KALMAN
+code. Here, the the values for \nub\ to be fit are directly available in the C4 data file
+as MF1/MT452. These values need no further processing and are paired with the calculated
+\nub\ from EMPIRE by the c4tokal.f90 routine. Care must be taken with fitting \nub\ as
+EMPIRE does not calculate \nub\ but uses a distribution taken from an existing evaluated file, and scales it by
+a single parameter. Therefore, fitting \nub should only be done when adjusting the scale
+parameter in EMPIRE to fit new \nub\ data not being used by empire itself for \nub. In this
+case, the KALMAN code can be used. The only parameter that will be adjusted is the \nub\
+scaling parameter PFNNUI. This can be fit along with other cross section data or not. The
+parameters for the cross sections do not affect \nub, so there will be no correlations
+between the \nub\ scaling parameter PFNNUI and the other EMPIRE parameters. Of course, this
+single scaling parameter can also be set by hand in this case, by taking the ratio of
+the integral of the \nub\ spectrum used by EMPIRE to the integral of the \nub\ data being
+fit.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{Evaluation procedure}
+
+
+
+
+
+\chapter*{Acknowledgments}
+\addcontentsline{toc}{chapter}{Acknowledgments}
 
 EMPIRE is the result of an international cooperation towards open source
 software, as so successfully promoted by the General Public License. A number
@@ -10126,7 +10747,10 @@ by the International Atomic Energy Agency over last ten years.
 \bibliographystyle{prsty}
 \bibliography{scribus}
 
+
+
 \appendix
+
 \chapter{EMPIRE optional input keywords\label{InputList}}
 
 The optional input allows modifications to the default model parameters. 
@@ -11128,7 +11752,266 @@ $>0$ set to VAL.
 \end{description}
 
 
-\chapter{Appendix: ChangeLog}
+
+
+
+
+\chapter{Description of test cases}
+
+In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
+The benchmarks (subdirectory \emph{benchmarks}) are intended for the verification of the local
+installation, and most of them are single-energy calculations. About 15 benchmarks are currently 
+included with the system.
+The test cases (subdirectory \emph{test-cases}) are intended to contain real
+physical show cases, a few of them are provided. This directory will ideally expand in the future
+to include the best cases of succesful applications of EMPIRE-3.1 submitted by users.
+
+% Some typical examples of EMPIRE input files are presented below for
+% illustrative purpose only. No attempt was made to ensure that the
+% choice of parameters is suitable for reproducing the experimental
+% data. 
+% 
+% 
+% \subsection{Neutron capture}
+% 
+% Input is simplest if all defaults are accepted, and the .\emph{inp}
+% file consists only of the mandatory part end two closing records:
+% GO for the optional input, and -1 for the list of incident energies.
+% Since we are not interested in the production of residues after particle
+% emission in the case of a capture reaction, the number of particle
+% emissions can be set to 0. This setting does not mean that all particle
+% channels will be closed, for they will compete with $\gamma$-emission
+% from the Compound Nucleus. However, once the particles are emitted
+% from the Compound Nucleus, their fate will not be considered any further.
+% Therefore, particle emission spectra will only arise from the decay
+% of the Compound Nucleus. 
+% 
+% The input file contains an incident energy and specification of a
+% target and projectile: 
+% 
+% \begin{quotation}
+% \texttt{\scriptsize ~1.9~~~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 100. 42.~~~~~~~~~~~~ ;TARGET~ A ,
+% Z }{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1.~~~ 0.~~~~~~~~~~~~ ;PROJECTILE
+% A, Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS~ TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS~~ TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF L.I. TO
+% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO }{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1.}~\\
+% {\scriptsize \par}
+% \end{quotation}
+% This input file can be extended to multiple-energy calculations by
+% including more incident energies (between GO and -1 record), as in
+% the Section \ref{sec: eval-calc}. Also particle channels can be easily
+% included by replacing zeros in lines 4 through 7 by the requested
+% number of emissions. Memory requirements increase rapidly with the
+% number of requested particle emissions, and the user is advised to
+% avoid asking for residues which can not be reached with the highest
+% incident energy to be considered in the calculations. As these nuclei
+% are not populated in the de-excitation chain, they hardly impinged
+% on the CPU time but occupy the same amount of memory as all the others.
+% 
+% 
+% \subsection{Heavy ion induced reaction}
+% 
+% Default input for heavy ion calculations is no more complicated than
+% that described above (the incident neutron is simply replaced by the
+% heavy ion). The code will automatically change the default for calculating
+% the fusion cross section from the optical model to the simplified
+% Coupled-Channels\index{Coupled-Channels} method (CCFUS\index{CCFUS}
+% \cite{CCFUS}). As listed in the example given below, we present a
+% more complicated input file in which several options are set explicitly
+% in the input for the $^{48}$Ca + $^{248}$Cm reaction leading to
+% the super-heavy element Z=116:
+% 
+% \begin{quotation}
+% \texttt{\scriptsize 240.0~~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 248. 96.~~~~~~~~~~~~ ;TARGET~ A ,
+% Z, Spin , parity (integer!!)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 48.~ 20.~~~~~~~~~~~~ ;PROJECTILE
+% A, Z, SPIN}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 6~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~~ ;NUMBER OF LI
+% TO BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize IOUT~~~~~~ 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize NEX~~~~~~100.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize BETAV~~~~~ 8.6}{\scriptsize \par}
+% 
+% \texttt{\scriptsize SHRJ~~~~~ 20.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize SHRD~~~~~~ 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize NIXSH~~~~~ 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize LTURBO~~~~ 2.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize DEFPAR~~~~ 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO}{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1. }{\scriptsize \par}
+% \end{quotation}
+% IOUT=3 is used to print more detailed output with respect to the default
+% option. NEX=100 increases the number of energy bins in discretization
+% of the continuum (default is 50). The viscosity parameter BETAV in
+% the fission channel is set to $8.6\cdot10^{-21}$ s$^{-1}$. The shell-correction
+% to the fission barrier is assumed to decrease to half at spin J=20
+% $\hbar$, with diffuseness of 3 $\hbar$, as specified by SHRJ and
+% SHRD, respectively. Nix-Moller shell corrections are selected \cite{masses}
+% with LTURBO is set to 3. This latter option has been used to speed
+% up the calculations, and is particularly useful for heavy ion induced
+% reactions which often involve high angular momenta. Calculations will
+% be performed for each second spin only, which should make the study
+% 4 times faster. However, in reality the increased speed of manipulation
+% is smaller but still sufficient to justify usage of the LTURBO option.
+% If the number of partial waves is large (say 50) the loss of accuracy
+% introduced by the LTURBO option is of the order of a few percent .
+% The last parameter DEFPAR (coefficient \emph{b} in Eq. \ref{defor})
+% is set to 1, which is actually the default value. The only advantage
+% of specifying this parameter in the optional input is that the value
+% will be printed at the beginning of the output, and might turn out
+% to be convenient for tracking different calculations if the parameter
+% is to be varied.
+% 
+% 
+% \subsection{MSD\index{MSD}+MSC\index{MSC}+HF calculation\label{sec: eval-calc}}
+% 
+% The following example illustrates an input file (.\emph{inp}) that
+% could be used to run first shot calculations when evaluating $^{100}$Mo
+% isotope. All the reactions of the type $^{100}$Mo(n, \emph{x}n \emph{y}p
+% \emph{z}$\alpha)$ with \emph{x}=0, 1, 2, \emph{y}= 0, 1 and \emph{z}=0,
+% 1 are considered. The energy range is between 0.1 and 20 MeV. The
+% Multi-step Direct\index{MSD} and Multi-step Compound\index{MSC}
+% mechanisms are taken into account. The optical model parameters of
+% Rapaport are selected (note the use of the positional parameter -
+% 1, which refers to neutrons). The ENDF option is set to allow for
+% processing the .\emph{out} file with EMPEND\index{EMPEND} code. The
+% results for the $^{100}$Mo(n,2n) $^{99}$Mo reaction obtained using
+% this input file are shown in Fig. \ref{fig: 100Mon2n}.
+% 
+% \begin{quotation}
+% \texttt{\scriptsize ~~0.1~~~~~~~~~~~~~~ ;INCIDENT
+% ENERGY (IN LAB)}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 100.~~42.~~~~~~~~~~ ;TARGET A , Z }{\scriptsize \par}
+% 
+% \texttt{\scriptsize ~~1.~~~0.~~~~~~~~~~ ;PROJECTILE
+% A, Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 2~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF NEUTRONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF PROTONS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1~~~~~~~~~~~~~~~~~~ ;NUMBER
+% OF ALPHAS TO BE EMITTED}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0~ 0. 0.~~~~~~~~~~~ ;NUMBER OF L.I. TO
+% BE EMITTED AND ITS A AND Z}{\scriptsize \par}
+% 
+% \texttt{\scriptsize IOUT~~~~~~ 3. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize LEVDEN~~~~ 0. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize NEX~~~~~ 100. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize MSD~~~~~~~ 1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize MSC ~~~~~~~1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize ENDF~~~~~~ 1. }{\scriptsize \par}
+% 
+% \texttt{\scriptsize OMPOT~~~~~ 6.~~~~~~ 1}{\scriptsize \par}
+% 
+% \texttt{\scriptsize GO }{\scriptsize \par}
+% 
+% \texttt{\scriptsize 0.5}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 1.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 2.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 3.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 4.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 5.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 6.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 7.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 8.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 9.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 10.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 11.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 12.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 13.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 14.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 15.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 16.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 17.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 18.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize 20.}{\scriptsize \par}
+% 
+% \texttt{\scriptsize -1.}{\scriptsize \par}
+% \end{quotation}
+
+
+
+
+
+
+
+
+
+
+
+
+\chapter{ChangeLog}
 
 
 \section*{Changes in version 3.1 with respect to 2.19 \protect \\
