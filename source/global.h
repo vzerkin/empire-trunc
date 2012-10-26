@@ -1,6 +1,6 @@
-C $Rev: 3167 $
-C $Author: apalumbo $
-C $Date: 2012-10-25 03:42:51 +0200 (Do, 25 Okt 2012) $
+C $Rev: 3172 $
+C $Author: rcapote $
+C $Date: 2012-10-26 23:36:44 +0200 (Fr, 26 Okt 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -44,6 +44,7 @@ C
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),
      &                 EFB(nfparab),EFDis(nftrans,nfparab),
      &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)
+
       DOUBLE PRECISION FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,
@@ -77,11 +78,13 @@ C
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
-     &        PL_lmax(ndcollev), SFAct
+     &        PL_lmax(ndcollev), SFAct, INTerf
+	 
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,
      &        DYNam, COLfile, CN_isotropic
+
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
      &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
@@ -224,6 +227,7 @@ C     COMMON /DEPTH / POTe
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle 
+
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -260,7 +264,7 @@ C
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
-     &                  PL_lmax, SFAct
+     &                  PL_lmax, SFAct, INTerf
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,
@@ -272,4 +276,3 @@ C
       COMMON /TLCOEF/ TL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas
-
