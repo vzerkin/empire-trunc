@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3150 $
+Ccc   * $Rev: 3173 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-20 01:41:12 +0200 (Sa, 20 Okt 2012) $
+Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2302,13 +2302,22 @@ C-----Cleaning transmission coefficient matrix
             TTLl(i,l) = 0.D0
          ENDDO
       ENDDO
+
+      culbar = 0.8*ZEJc(Nejc)*Z(Nnuc)/(1 + A(Nnuc)**0.6666)
+      DO i = 2, Nen
+         IF (ETL(i,Nejc,Nnuc).GT.culbar) GOTO 250
+      ENDDO
+C     For this residual nucleus available energy is always 
+C     below Coulomb barrier; Calculations are not needed   
+      RETURN 
 C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
-      WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
+ 250  WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Nejc)), INT(AEJc(Nejc)), INT(Z(Nnuc)),
      &       INT(A(Nnuc)), INT(EINl*1000000)
+
       INQUIRE (FILE = (ctldir//ctmp23//'.BIN'),EXIST = fexist)
       IF (.NOT.fexist) GOTO 400
 C-----Here the previously calculated files should be read
@@ -2325,12 +2334,12 @@ C
          CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          IF (IOUt.EQ.5) THEN
-         WRITE (8,*) 'WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
-     &               ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=',
-     &               SNGL(ener)
-         WRITE (8,*)
-     &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
-          ENDIF
+           WRITE (8,*)
+     &       ' WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
+     &       ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=', SNGL(ener)
+           WRITE (8,*)
+     &       ' WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+         ENDIF
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
@@ -2343,9 +2352,9 @@ C
       GOTO 100
   200 CLOSE (45)
       IF (IOUt.EQ.5) CLOSE (46)
-      IF (IOUt.EQ.5) WRITE (8,*)
-     &                      'Transmission coefficients read from file: '
-     &                      , (ctldir//ctmp23//'.BIN')
+      IF (IOUt.GT.4) WRITE (8,*)
+     & 'Transmission coefficients for outgoing channel read from file: '
+     & , (ctldir//ctmp23//'.BIN')
       RETURN
 
   300 CLOSE (45,STATUS = 'DELETE')
@@ -2356,13 +2365,12 @@ C
             TTLl(i,l) = 0.D0
          ENDDO
       ENDDO
-      IF (IOUt.GT.0) WRITE (8,*) 'WARNING: ERROR WHEN READING TLs in ',
-     &                           ctmp23
-      IF (IOUt.EQ.5) THEN
+      WRITE (8,*) ' WARNING: ERROR WHEN READING TLs in ', ctmp23
+      IF (IOUt.GT.1) THEN
          WRITE (8,*)
-     &              'WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+     &      ' WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
          WRITE (8,*)
-     &           'WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
+     &      ' WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
       ENDIF
 C-----Coulomb barrier (somewhat decreased) setting lower energy limit
 C-----for transsmission coefficient calculations
@@ -2378,16 +2386,17 @@ C-----for transsmission coefficient calculations
 C
 C--------Running ECIS
 C
-         IF (IOUt.EQ.5) THEN
+         IF (IOUt.GT.1) THEN
             WRITE (8,*)
-            IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN
-               WRITE (8,*) ' CC transmission coefficients used for ',
-     &                     'outgoing channels'
+C           IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN
+            IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1 .AND.  
+     &          A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN 
+              WRITE (8,*) ' CC transmission coefficients used for the',
+     &                    ' inelastic outgoing channel'
             ELSE
-               WRITE (8,*) ' Spherical OM transmission coefficients',
-     &                     ' used for outgoing channels'
+              WRITE (8,*) ' Spherical OM transmission coefficients',
+     &                    ' used for outgoing channels'
             ENDIF
-            WRITE (8,*)
          ENDIF
 C--------OPEN Unit=46 for Tl output
          OPEN (UNIT = 46,STATUS = 'unknown',
@@ -2404,8 +2413,9 @@ C        all Tls calculations calculate only the direct component (no CN)
          CN_isotropic = .FALSE.     
      
          DO i = ien_beg, Nen
+
             ener = ETL(i,Nejc,Nnuc)
-            IF (ener.LE.0.1D-6) GOTO 550
+            IF (ener.LE.0.1D-6) CYCLE
 
             IF (.NOT.(ltmp)) THEN
 C
@@ -2431,16 +2441,14 @@ C----------------OPTMAN CC calc. (only coupled levels)
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
             ENDIF
 
-  550    ENDDO
+         ENDDO
 
-C       restoring the input value of the key CN_isotropic
-        CN_isotropic = logtmp
+C        restoring the input value of the key CN_isotropic
+         CN_isotropic = logtmp
 
          CLOSE (46)
-         IF (IOUt.EQ.5) WRITE (8,*) ' Transm. coeff. written to file:',
+	   IF (IOUT.GT.4) WRITE (8,*) ' Transm. coeff. written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-         IF (IOUt.EQ.5) WRITE (8,*)
-     &            ' ==================================================='
       ELSEIF (IOUt.EQ.5) THEN
          WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
      &          INT(AEJc(Nejc)), ' Z=', INT(ZEJc(Nejc)), ' S=',
@@ -2450,14 +2458,14 @@ C       restoring the input value of the key CN_isotropic
          WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1,A3,I2)') 'RESIDUAL: A=',
      &          INT(A(Nnuc)), ' Z=', INT(Z(Nnuc)), ' S=',
      &          SNGL(XJLv(ilv,Nnuc)), ' P=', INT(LVP(ilv,Nnuc))
-         WRITE (8,*) 'WARNING: For this residual nucleus'
-         WRITE (8,*) 'WARNING: available energy is always '
-         WRITE (8,*) 'WARNING: below coulomb barrier'
-         WRITE (8,*) 'WARNING: Calculations are not needed!'
+         WRITE (8,*) ' WARNING: For this residual nucleus'
+         WRITE (8,*) ' WARNING: available energy is always '
+         WRITE (8,*) ' WARNING: below Coulomb barrier'
+         WRITE (8,*) ' WARNING: Calculations are not needed!'
          WRITE (8,*)
       ENDIF
+      RETURN
       END
-
 
       SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc,Nnuc,Maxlw,Stl,Sel,Lvibrat)
 C
@@ -3223,7 +3231,8 @@ C       COMPOUND NUCLEUS
 C
         ECIs2(31:31) = 'T'  ! HF corrections (CN, etc)
 C       33- LO(83) NO ENGELBRETCH-WEIDENMULLER TRANSFORMATION IN CN       
-        ECIs2(33:33) = 'F'  ! E-W transformation used
+        IF(INTerf.eq.1) ECIs2(33:33) = 'F'  ! E-W transformation used
+        IF(INTerf.eq.0) ECIs2(33:33) = 'T'  ! E-W transformation NOT used
 C       34- LO(84) UNCOUPLED LEVELS FOR COMPOUND NUCLEUS. IT IS SET       
 C                .FALSE. IF NONE ARE READ.                              
         ECIs2(34:34) = 'T'  ! THERE ARE ALWAYS UNCOUPLED LEVELS
@@ -3599,6 +3608,8 @@ C         11-20   GAM(2) FOR L=1.
 C         .......................                               
 C         61-70   GAM(7) FOR L=6.                               
 C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
+C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
+C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
           IF(ngamm_tr.gt.0) THEN
 C           WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
 C
@@ -4050,7 +4061,8 @@ C       COMPOUND NUCLEUS
 C
         ECIs2(31:31) = 'T'  ! HF corrections (CN, etc)
 C       33- LO(83) NO ENGELBRETCH-WEIDENMULLER TRANSFORMATION IN CN       
-        ECIs2(33:33) = 'F'  ! E-W transformation used
+        IF(INTerf.eq.1) ECIs2(33:33) = 'F'  ! E-W transformation used
+        IF(INTerf.eq.0) ECIs2(33:33) = 'T'  ! E-W transformation NOT used
 C       34- LO(84) UNCOUPLED LEVELS FOR COMPOUND NUCLEUS. IT IS SET       
 C                .FALSE. IF NONE ARE READ.                              
         ECIs2(34:34) = 'T'  ! THERE ARE ALWAYS UNCOUPLED LEVELS
@@ -4059,8 +4071,8 @@ C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ
         ECIs2(35:35) = 'F'  ! .TRUE. must be used for fissiles !!!!
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
-        ECIs2(36:36) = 'F'  ! .TRUE. to consider gamma emission in HF
-C                               ! G(L) gamma emission should be properly trasferred 
+        ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
+C                           ! G(L) gamma emission should be properly trasferred 
 C
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
 C
@@ -4147,15 +4159,19 @@ C-----CARD 6
 
       IF(.not.CN_isotropic) then
 
-        IF (ND_nlv.GT.0) THEN
-          DO j = 2, ND_nlv
+C--------
+C       Uncoupled levels considered only in DWBA calculations
+C
+C       IF (ND_nlv.GT.0) THEN
+C         DO j = 2, ND_nlv
 C           skipping coupled levels
-            if(ICOllev(j).LT.LEVcc) CYCLE
-            eee = elab - D_Elv(j)/xratio
-            if (eee.LT.0.0001) EXIT
-            nuncoupled = nuncoupled + 1
-          ENDDO
-        ENDIF
+C           if(ICOllev(j).LT.LEVcc) CYCLE
+C           eee = elab - D_Elv(j)/xratio
+C           if (eee.LT.0.0001) EXIT
+C           nuncoupled = nuncoupled + 1
+C         ENDDO
+C       ENDIF
+C--------
 C
 C       For CN calculation a card stating a total number of coupled and uncoupled levels + 1 continua
 C        1- 5   NSP(1) NUMBER OF UNCOUPLED STATES AND CONTINUA. IF IT IS  ECIS-413
@@ -4172,10 +4188,10 @@ C-------CARD 7
 C     
 C
         nfiss_tr   = 0 ! for the time being, fission is neglected 
-          IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
+        IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
 C
         ngamm_tr   = 0 !  for the time being, capture is neglected
-          IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
+        IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
 C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
@@ -4215,11 +4231,11 @@ C--------In vibrational-rotational model IPH(j) is phonon number
             ENDIF
          ELSE
            IF(IPH(j).ge.1) then
-               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 1, 1, ch,
-     &             D_Elv(j)
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 1, 1, 
+     &             ch, D_Elv(j)
             ELSE
-               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, 1, ch,
-     &             D_Elv(j)
+               WRITE (1,'(f5.2,2i2,a1,5f10.5)') D_Xjlv(j), 0, 1, 
+     &             ch, D_Elv(j)
             ENDIF
          ENDIF
          IF (IPH(j).NE.0) THEN
@@ -4227,7 +4243,7 @@ C--------In vibrational-rotational model IPH(j) is phonon number
                npho = npho + 1
                lev(npho) = j
            endif
-            WRITE (1,'(10i5)') 1, IPH(j)
+           WRITE (1,'(10i5)') 1, IPH(j)
          ENDIF
       ENDDO
 C 
@@ -4246,25 +4262,28 @@ C--------L3_pho(lev(j)) = 0
          ENDDO
       ENDIF
 C
-      IF(.not.CN_isotropic) then
+
+C--------
+C       Uncoupled levels considered only in DWBA calculations
+C
+C     IF(.not.CN_isotropic) then
 C
 C        Uncoupled levels
 C
-         DO j = 2, ND_nlv
+C        DO j = 2, ND_nlv
 C          skipping coupled levels
-           if(ICOllev(j).LE.LEVcc) CYCLE
-           ch = '-'
-           IF (D_Lvp(j).GT.0) ch = '+'
-C----------skipping closed channels
-           eee = elab - D_Elv(j)/xratio
-           IF (eee.LT.0.0001) CYCLE
-           if(nppaa.gt.1) nwrite = nwrite + 1
-           WRITE (1,'(f5.2,2i2,a1,5f10.5)') 
-     &       D_Xjlv(j),0, nwrite, ch, D_Elv(j)
-         ENDDO
-
-      ENDIF
-
+C          if(ICOllev(j).LE.LEVcc) CYCLE
+C          ch = '-'
+C          IF (D_Lvp(j).GT.0) ch = '+'
+C          skipping closed channels
+C          eee = elab - D_Elv(j)/xratio
+C          IF (eee.LT.0.0001) CYCLE
+C          if(nppaa.gt.1) nwrite = nwrite + 1
+C          WRITE (1,'(f5.2,2i2,a1,5f10.5)') 
+C    &       D_Xjlv(j),0, nwrite, ch, D_Elv(j)
+C        ENDDO
+C     ENDIF
+C--------
 
 C-----Deformation of rotational band (only ground state band is present)
 C-----IdefCC   = maximum degree of deformation
@@ -4409,6 +4428,8 @@ C         11-20   GAM(2) FOR L=1.
 C         .......................                               
 C         61-70   GAM(7) FOR L=6.                               
 C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
+          WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
+          WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
           IF(ngamm_tr.gt.0) THEN
 C           WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
 C
@@ -4479,9 +4500,12 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
       IF (.not.CN_isotropic .and. IDRs.gt.0) then
 
         DO j = 2, ND_nlv
+C          skipping uncoupled levels
+           IF (ICOllev(j).GT.LEVcc) CYCLE
+
            eee = elab - D_Elv(j)/xratio
-C          skipping closed uncoupled levels
-           IF ((eee.LT.0.0001) .and. (ICOllev(j).GT.LEVcc)) CYCLE
+C          IF ((eee.LT.0.0001) .and. (ICOllev(j).GT.LEVcc)) CYCLE
+
 C----------SETPOTS : subroutine for optical model parameters
 C----------From  cms system to Lab
 C          ecms = eee
@@ -4536,6 +4560,7 @@ C-------2) discrete levels
         DO j = 2, ND_nlv
 C--------All levels with icollev(j)>LEVcc skipped
          IF (ICOllev(j).GT.LEVcc) CYCLE
+
          eee = elab - D_Elv(j)/xratio
 
          IF(IDRs.gt.0) then

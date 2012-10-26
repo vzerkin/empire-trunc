@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3167 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 03:42:51 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 3173 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -254,14 +254,10 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          BETav = 4.d0          ! viscosity parameter
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
-C		 
-C--------CN anisotropy definition for discrete levels
-         CN_isotropic = .True.     ! default
-C
-C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
-C        Important: CN_isotropic can be .False. for the time being only for even-even targets.
-C
 C--------fusion parameters
+C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
+         CN_isotropic = .True.     ! default
+C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -275,6 +271,8 @@ C--------fusion parameters
          TOTred = 1.d0
          ELAred = 1.d0
          CELred = 1.d0
+
+         CINred = 1.d0
          TOTred0 = 1.d0 
          FUSred0 = 1.d0
          FCCred0 = 1.d0
@@ -286,6 +284,8 @@ C--------fusion parameters
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
+
+         rCINred = 1.d0
          LEVtarg = 1
 C
 C--------Capote, additional input options
@@ -340,11 +340,15 @@ C
          DEFnuc = 0.d0
          RECoil = 1.d0     ! Default 
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
+C        S-factor default to zero
+         SFAct = 0
 C        IOPran = 1 ! Default gaussian 1 sigma error
          IOPran = 0 ! MC sampling off by default, 'RANDOM' turns it on
 C        IOPran = -1 ! Uniform 1 sigma error
 C--------Relativistic kinematics
          RELkin = .FALSE.
+         INTerf = 1 ! Engelbrecht-Weidenmuller transformation used by default
+C                     (if CN_isotropic)
 C--------Maximum energy to assume all levels are collective for DWBA calculations
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
@@ -1328,7 +1332,7 @@ C--------input consistency check  *** done ***
             NPRIm_g = 0
             WRITE (8,
      &'('' Primary gammas not stored: ENDF formatting is turned off'')')
-              WRITE (12,
+            WRITE (12,
      &'('' Primary gammas not stored: ENDF formatting is turned off'')')
             RECoil = 0.d0
             WRITE (8,
@@ -1338,7 +1342,6 @@ C--------input consistency check  *** done ***
      &'('' Recoils are not calculated as ENDF formatting is turned off''
      &)')
          ENDIF 
-
       ENDIF  ! END of EIN endif block (I)
 
 C************************************************************************
@@ -1896,14 +1899,16 @@ C-------continuum using current DE, if not adjust DE
         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 
+      WRITE(8,'(1x,''Number of requested energy points ='',i3,
+     &  ''   NDEX ='',i3)') NEXreq, NDEX
+      IF(2*NEX(1).GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
+     & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+     & ' value is ', 2*NEX(1)
+C     IF(2*NEXreq.GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
+C    & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
+C    & ' value is ', 2*NEXreq     
       WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Energy step in calculations ',DE*1000.d0,' keV'
-      WRITE(8,'(1x,''Number of energy points ='',i3,''   NDEX ='',i3)') 
-     &   NEXreq, NDEX
-
-      IF(2*NEXreq.GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
-     & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
-     & ' value is ', 2*NEXreq     
 
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
@@ -1988,23 +1993,24 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
      &         /(1.3d0*(AEJc(Nejc)**0.3333334 + A(Nnur)**0.3333334))
 
             IF (NEX(nnur).GT.NDEX) THEN
-               WRITE (8,*)
-
-               WRITE (8,'('' WARNING: NUMBER OF BINS '',I3,
+               IF(emaxr.ge.culbar) then 
+                 WRITE (8,*)
+                 WRITE (8,'(''  WARNING: NUMBER OF BINS '',I3,
      &                    '' IN RESIDUAL NUCLEUS '',I3,A1,A2,
      &         '' EXCEEDS DIMENSIONS '',I3)')  NEX(nnur), NINT(A(nnur)),
      &         '-',SYMb(nnur),NDEX
+                 WRITE (8,'(''  WARNING: EMAXr : '',F7.2,
+     &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
+               ENDIF
+               WRITE (8,*)
                WRITE (8,
-     &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
+     &         '(''  Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
      &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
      &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
                WRITE (8,*)
-     &          '         TO CONSIDER IT, YOU HAVE TO INCREASE ',
-     &          '        NDEX PARAMETER IN dimension.h'
-               WRITE (8,'('' WARNING: EMAXr : '',F7.2,
-     &            ''; COULOMB BARRIER : '',F7.2)') emaxr, culbar
+     &          ' To include it, increase NDEX in dimension.h'
                WRITE (8,*)
                EMAx(nnur) = 0.d0
                NEX(nnur) = 0
@@ -2500,8 +2506,8 @@ C---------levels for nucleus NNUC copied to file *.lev
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
-            IF(ilv.gt.1 .and. ELV(ilv,Nnuc).le.0.00001d0) then 
-               WRITE(8,*) ' ERROR: Discrete level with Elv<0.00001 MeV' 
+            IF(ilv.gt.1 .and. ELV(ilv,Nnuc).le.0.000005d0) then 
+               WRITE(8,*) ' ERROR: Discrete level with Elv<0.000005 MeV' 
                WRITE(8,'(1x,A,I3,A4,I3)') 
      &         ' ERROR: Check your discrete levels for Z =',
      &         NINT(Z(Nnuc)), ' A =', NINT(A(Nnuc))
@@ -2509,12 +2515,12 @@ C---------levels for nucleus NNUC copied to file *.lev
             ENDIF
             IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
-                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
-     & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
+                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum start  
+     &s at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
      &           NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
                 WRITE (8,
-     &'('' Number of discrete levels changed from RIPL default of '',I3,
-     &'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
+     &'('' Number of discrete levels changed from RIPL default of '',
+     &I3,'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
              NLV(Nnuc) = max(ilv - 1,1)
                 IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
                 GOTO 200
@@ -2523,33 +2529,32 @@ C---------levels for nucleus NNUC copied to file *.lev
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
               NLV(Nnuc) = max(ilv - 1,1)
-              WRITE (8,'('' WARNING:'')')
-              WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+              WRITE (8,'(''  WARNING:'')')
+              WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                   chelem, izr
               WRITE (8,
-     &'('' WARNING: Excited state '',I3,                             ''
+     &'(''  WARNING: Excited state '',I3,                             ''
      &is above neutron binding energy '',F6.3,                       ''
      &MeV'')') ilv, qn
-              WRITE (8,'('' WARNING: Number of levels set to '',I3)'
+              WRITE (8,'(''  WARNING: Number of levels set to '',I3)'
      &                   ) NLV(Nnuc)
               GOTO 200
             ENDIF
             IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
-              WRITE (8,'('' WARNING:'')')
-              WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+              WRITE (8,'(''  WARNING:'')')
+              WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
               WRITE (8,
-     &'('' WARNING: excited state No.'',I3,                          ''
+     &'(''  WARNING: excited state No.'',I3,                         ''
      &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
             ENDIF
 
             IF (ilv.EQ.1 .AND. XJLv(ilv,Nnuc).LT.0.) THEN
-              WRITE (8,'('' WARNING:'')')
-              WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+              WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
               WRITE (8,
-     &'('' WARNING: ground-state has no assigned spin/parity '')')
-              WRITE (8, '('' WARNING: assuming a default '')')
+     &'(''  WARNING: ground-state has no assigned spin/parity '')')
+              WRITE (8, '(''  WARNING: assuming a default '')')
               LVP(1,Nnuc) = 1
               XJLv(1,Nnuc) = 0.0
               IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
@@ -2559,8 +2564,8 @@ C
 
             IF (ilv.NE.1) THEN
               IF (ELV(ilv,Nnuc).EQ.0.) THEN
-                WRITE (8,'('' WARNING:'')')
-                WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+                WRITE (8,'(''  WARNING:'')')
+                WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
                 WRITE (8,
      &'('' WARNING: excited state '',I3,                             ''
@@ -2570,16 +2575,16 @@ C
               IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1
 
               IF (ndbrlin.GT.NDBR) THEN
-                WRITE (8,'('' WARNING:'')')
-                WRITE (8,'('' WARNING: Element ='',A5,2x,2HZ=,I3)')
+                WRITE (8,'(''  WARNING:'')')
+                WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
                 WRITE (8,
-     &'('' WARNING: too many gamma decays ='',                       I3)
+     &'(''  WARNING: too many gamma decays ='',                      I3)
      &') ndbrlin
                 WRITE (8,
-     &'('' WARNING: Dimension allows for ='',                        I3)
+     &'(''  WARNING: Dimension allows for ='',                       I3)
      &') NDBR
-                WRITE (8,'('' WARNING: some gammas discarded'')')
+                WRITE (8,'(''  WARNING: some gammas discarded'')')
               ENDIF
 C-------------clean BR matrix
               DO nbr = 1, NDBR
@@ -2636,7 +2641,7 @@ C--------------------only gamma decay is considered up to now
 
   300 IF(FILevel .AND. (.NOT.ADDnuc)) THEN
         IF(FIRst_ein) WRITE (8,
-     &  '('' WARNING: Levels for nucleus A='',I3,'' Z='',I3,
+     &  '(''  WARNING: Levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in local file (.lev). Default RIPL levels will be u
      &sed'')') ia, iz
         CLOSE(13)
@@ -2650,7 +2655,7 @@ C--------------------only gamma decay is considered up to now
         GOTO 100
       ENDIF
       IF(FIRst_ein) WRITE (8,
-     &  '('' WARNING: levels for nucleus A='',I3,'' Z='',I3,
+     &  '(''  WARNING: levels for nucleus A='',I3,'' Z='',I3,
      &  '' not found in the RIPL database '')') ia, iz
 
       IF(ADDnuc) THEN
@@ -2660,7 +2665,7 @@ C--------------------only gamma decay is considered up to now
       ENDIF
       RETURN
 
-  400 WRITE (8,'('' WARNING: RIPL levels database not found '')')
+  400 WRITE (8,'(''  WARNING: RIPL levels database not found '')')
       IF (.NOT.FILevel) CLOSE (13)
       RETURN
       END
@@ -3529,6 +3534,38 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
+            IF (.not.CN_isotropic) THEN          
+              WRITE (8,
+     &'('' CN angular distribution calculated by ECIS as anisotropic usi
+     &ng Blatt-Biedenharn coefficients.'')')
+              WRITE (12,
+     &'('' CN angular distribution calculated by ECIS as anisotropic usi
+     &ng Blatt-Biedenharn coefficients.'')')
+              IF (INTerf.EQ.0) THEN
+                WRITE (8,
+     &          '('' CN and Direct cross section added incoherently'')')
+                WRITE (12,
+     &          '('' CN and Direct cross section added incoherently'')')
+              ELSE
+                WRITE (8,'('' CN-direct interference by Engelbrecht - We
+     &idenmuller transformation Phys.Rev. C8(1973)859-862 '')')
+                WRITE(12,'('' CN-direct interference by Engelbrecht - We
+     &idenmuller transformation Phys.Rev. C8(1973)859-862 '')')
+              ENDIF
+            ELSE
+              WRITE (8,
+     &          '('' CN angular distribution assumed isotropic)'')')
+              WRITE (12,
+     &          '('' CN angular distribution assumed isotropic)'')')
+
+              IF (INTerf.EQ.1) INTerf=0
+
+              WRITE (8,
+     &          '('' CN and Direct cross section added incoherently'')')
+              WRITE (12,
+     &          '('' CN and Direct cross section added incoherently'')')
+            ENDIF 
+
             WRITE (8,*) ' '
             IF (OMPar_riplf .OR. OMParfcc) THEN
                WRITE (8,*) 'Existing, case specific, o.m.p. files: '
@@ -4278,37 +4315,99 @@ C-----
             GOTO 100
          ENDIF
 C-----------
-         IF (name.EQ.'CELRED') THEN
+         IF (name.EQ.'CINRED') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
-     &          '('' Compound elastic cross section uncertainty '',
+     &          '('' Compound inelastic cross section uncertainty '',
      &          '' is equal to '',i2,'' %'')') i1
                 sigma = val*i1*0.01
                 IF(IOPran.gt.0) then
-                   IF(rCELred.eq.1.d0) rCELred = grand()
-                   CELred = val + rCELred*sigma
+                   IF(rCINred.eq.1.d0) rCINred = grand()
+                   CINred = val + rCINred*sigma
                 ELSE
-                   IF(rCELred.eq.1.d0) rCELred = drand()
-                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
+                   IF(rCINred.eq.1.d0) rCINred = drand()
+                   CINred = val + 1.732d0*(2*rCINred-1.)*sigma
                 ENDIF
                 WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          ,f6.3)') CELred
+     &    '('' Compound inelastic cross section was scaled by factor ''
+     &          ,f6.3)') CINred
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CELred, INDexf,INDexb
+     &             IPArCOV, CINred, INDexf,INDexb
             else
-                CELred = val
+                CINred = val
                 WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
+     &    '('' Compound inelastic cross section was scaled by factor ''
+     &          F6.3)') CINred
                 WRITE (12,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
+     &    '('' Compound inelastic cross section was scaled by factor ''
+     &          F6.3)') CINred
             endif
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'CELRED') THEN
+
+            if(i1.ne.0 .and. IOPran.ne.0) then
+
+                WRITE (8,
+
+     &          '('' Compound elastic cross section uncertainty '',
+
+     &          '' is equal to '',i2,'' %'')') i1
+
+                sigma = val*i1*0.01
+
+                IF(IOPran.gt.0) then
+
+                   IF(rCELred.eq.1.d0) rCELred = grand()
+
+                   CELred = val + rCELred*sigma
+
+                ELSE
+
+                   IF(rCELred.eq.1.d0) rCELred = drand()
+
+                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
+
+                ENDIF
+
+                WRITE (8,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          ,f6.3)') CELred
+
+                IPArCOV = IPArCOV +1
+
+                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+
+     &             IPArCOV, CELred, INDexf,INDexb
+
+            else
+
+                CELred = val
+
+                WRITE (8,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          F6.3)') CELred
+
+                WRITE (12,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          F6.3)') CELred
+
+            endif
+
+            GOTO 100
+
+         ENDIF
+
+C-----
+
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
               BENchm = .TRUE.
@@ -6694,9 +6793,9 @@ C--------checking for fission data in the optional input
 C-----
          IF (name.EQ.'FISMOD') THEN
             IF(val.lt.0 .or. val.gt.2) THEN
-              WRITE (8,'('' ERROR: FISMOD ='',I1)') NINT(val)
+              WRITE (8,'(''  ERROR: FISMOD ='',I1)') NINT(val)
               WRITE (8,
-     &          '('' ERROR: FISMOD must be 0,1,2; default 0 used '')')
+     &         '(''  ERROR: FISMOD must be 0,1,2; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6726,9 +6825,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: FISMOD SETTING IGNORED'')')
+               WRITE (8,'(''  WARNING: FISMOD SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6762,9 +6861,9 @@ C        FISopt(Nnuc).EQ.3. = '  Same as 2 but with phases calculated only  '
 C                                along the corresponding parabola                         
          IF (name.EQ.'FISOPT') THEN
             IF(val.lt.0 .or. val.gt.3) THEN
-              WRITE (8,'('' ERROR: FISOPT ='',I1)') NINT(val)
+              WRITE (8,'(''  ERROR: FISOPT ='',I1)') NINT(val)
               WRITE (8,
-     &          '('' ERROR: FISOPT must be 0,1,2,3; default 0 used '')')
+     &         '(''  ERROR: FISOPT must be 0,1,2,3; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6794,9 +6893,9 @@ C                                along the corresponding parabola
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: FISOPT SETTING IGNORED'')')
+               WRITE (8,'(''  WARNING: FISOPT SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6885,9 +6984,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: FISBAR SETTING IGNORED'')')
+               WRITE (8,'(''  WARNING: FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6939,9 +7038,9 @@ C--------FISDEN(Nnuc)= 3 HFB
 C        
          IF (name.EQ.'FISDEN') THEN
             IF(nint(val).ne.0 .and. nint(val).ne.3) THEN
-              WRITE (8,'('' ERROR: FISDEN ='',I1)') NINT(val)
+              WRITE (8,'(''  ERROR: FISDEN ='',I1)') NINT(val)
               WRITE (8,
-     &          '('' ERROR: FISDEN must be 0 or 3; default 0 used '')')
+     &          '(''  ERROR: FISDEN must be 0 or 3; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -6963,9 +7062,9 @@ C
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: FISDEN SETTING IGNORED'')')
+               WRITE (8,'(''  WARNING: FISDEN SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6989,9 +7088,9 @@ C
 C-----
          IF (name.EQ.'FISDIS') THEN
             IF(val.lt.0 .or. val.gt.1) THEN
-              WRITE (8,'('' ERROR: FISDIS ='',I1)') NINT(val)
+              WRITE (8,'(''  ERROR: FISDIS ='',I1)') NINT(val)
               WRITE (8,
-     &          '('' ERROR: FISDIS must be 0 or 1; default 0 used '')')
+     &          '(''  ERROR: FISDIS must be 0 or 1; default 0 used '')')
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -7015,9 +7114,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: FISDIS SETTING IGNORED'')')
+               WRITE (8,'(''  WARNING: FISDIS SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -7046,16 +7145,17 @@ C--------------------------------------------------------------------------
             if(nint(val).ge.0 .and. nint(val).le.2) THEN
               if(nint(val).gt.0) then
                 FISspe = nint(val)
-                WRITE (8,*) 'Prompt fission neutron spectra calculated'
-                if(FISspe.eq.2) WRITE (8,*) ' using Kornilov''s model'
-                if(FISspe.eq.1) WRITE (8,*) ' using Los Alamos model'
+                if(FISspe.eq.2) WRITE (8,*) 
+     &'Prompt fission neutron spectra calculated using Kornilov model  '
+                if(FISspe.eq.1) WRITE (8,*) 
+     &'Prompt fission neutron spectra calculated using Los Alamos model'
               else
                 WRITE (8,*)
      &           'Prompt fission neutron spectra not calculated'
               endif
             else
                WRITE (8,
-     &         '('' WARNING: Fission spectrum key out of range (0-2) '',
+     &        '(''  WARNING: Fission spectrum key out of range (0-2) '',
      &         i2)') nint(val)
             endif
             GOTO 100
@@ -7074,9 +7174,9 @@ C
      &'('' Tmaxw for PFNS plot normalization set to '',F5.2)') val
             else  
               WRITE (8,
-     &'('' WARNING: Tmaxw for PFNS plot normalization out of range'')')
+     &'(''  WARNING: Tmaxw for PFNS plot normalization out of range'')')
               WRITE (8,
-     &'('' WARNING: Default value used, Tmaxw = 1.32 MeV '')')
+     &'(''  WARNING: Default value used, Tmaxw = 1.32 MeV '')')
             endif
             GOTO 100
          ENDIF
@@ -7256,26 +7356,26 @@ C-----
             GOTO 100
          ENDIF
 C-----       
-      IF (name.EQ.'FISVF2') THEN
-         char =' Fission barrier second hump height '
-         char1='second hump  '
-         CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
+         IF (name.EQ.'FISVF2') THEN
+            char =' Fission barrier second hump height '
+            char1='second hump  '
+            CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
      &               char, char1)
-         IF (izar.EQ.0) THEN
-            DO i = 1, NDNUC
+            IF (izar.EQ.0) THEN
+             DO i = 1, NDNUC
                FISv_n(2,i) = val
-            ENDDO
-            WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+             ENDDO
+             WRITE (8,'(a35,''multiplied in all nuclei by '',1f6.2)' )
      &          char,val
-            WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
+             WRITE (12,'(a35,''multiplied in all nuclei by '',1f6.2)' )
      &          char,val
+             goto 100
+            ENDIF
+            FISv_n(2,nnuc)=quant
             goto 100
          ENDIF
-         FISv_n(2,nnuc)=quant
-         goto 100
-       ENDIF
 C-----       
-      IF (name.EQ.'FISVF3') THEN
+         IF (name.EQ.'FISVF3') THEN
          char =' Fission barrier third hump height  '
          char1=' third hump  '
          CALL ADJUST(i1,i2,i3,iloc,izar,nnuc,quant,val,
@@ -7521,17 +7621,17 @@ C-----
          FISn_n(3,nnuc)=quant
          goto 100
        ENDIF
-C*************************************
+C-----
          IF (name.EQ.'SFACT') THEN
             if (nint(val).EQ.1 .OR. nint(val).EQ.2) THEN
              SFAct = nint(val)
-            WRITE (8, '('' SFACTOR = '',i2)')  nint(val)
+             WRITE (8, '('' SFACTOR = '',i2)')  nint(val)
              if (SFAct.eq.1) WRITE (8,*) 'S-FACTOR for (x,g) calculated'
              if (SFAct.eq.2) WRITE (8,*) 'S-FACTOR for (x,n) calculated'
             endif
            goto 100
          ENDIF
-C**************************************
+C-----
          IF (name.EQ.'RANDOM') THEN
             if(nint(val).eq.0) goto 100             
             if(nint(val).gt.0) then
@@ -7558,6 +7658,17 @@ C             WRITE (8,*) 'Random seeds :', 1, 104
             endif
             WRITE (8,*) 'Random seeds :', indexf, indexb                
 C--------------------------------------------------------------------------
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'INTERF') THEN
+            INTerf = 0  
+            IF (val.NE.0.d0) INTerf = 1
+            IF (INTerf.eq.0) 
+     &        WRITE (8,'('' CN-direct interference neglected'')')
+            IF (INTerf.eq.1) 
+     &        WRITE (8,'('' CN-direct interference by Engelbrecht - Weid
+     &enmuller transformation Phys.Rev. C8(1973)859-862 '')')
             GOTO 100
          ENDIF
 
@@ -8771,7 +8882,7 @@ C-----concatenate file name with the projectile path
         filename = '/EXFOR/gammas/'//trim(caz)
       ELSE
         WRITE (8,
-     & '('' WARNING: No EXFOR retrievals for these projectiles'')')
+     & '(''  WARNING: No EXFOR retrievals for these projectiles'')')
         WRITE (8,*)     
         RETURN
       ENDIF
@@ -10934,7 +11045,8 @@ Ccc
       ENDIF
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
       IF(INT(Energy/DE+1).GE.Limit) GOTO 10
-      WRITE(8,*) ' WARNING: Number of energy steps set to ',NEX(1)
+      WRITE(8,'(1x,A30,I5,A10,G10.5,A4)') 
+     &  'Number of energy steps set to ',NEX(1),   
+     &  ' for Einc=',EINl,' MeV'          
       RETURN
       END
-

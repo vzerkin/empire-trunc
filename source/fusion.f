@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3149 $
+Ccc   * $Rev: 3173 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -130,23 +130,18 @@ C--------Here the old calculated files are read
               WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
-              WRITE (8,*)
             ENDIF
 
             IF (.NOT.CN_isotropic) THEN
 C
 C-------------Legendre expansion (INCIDENT.LEG)
 C
-              DO j= 1 , ND_nlv ! skipping DIR expansion 
-                PL_lmax(i) = 0
-                DO itmp1=1,NDAngecis
-                  PL_CN(itmp2,i) = 0.d0
-                ENDDO
-              ENDDO
+              PL_lmax = 0
+              PL_CN   = 0.d0
 
               OPEN (45,FILE = (ctldir//ctmp23//'.LEG'),
      &           STATUS = 'old', ERR=55)
-              READ (45,*,ERR = 55, END = 55)
+              READ (45,*,ERR = 45, END = 45)
               DO i = 1, ND_nlv ! loop over collective levels
                READ (45,'(i5,1x,i4)',END = 45,ERR = 45) ilev1, ncoef1
               
@@ -178,7 +173,6 @@ C    &           ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
                 WRITE (8,*)
      &' CN angular distributions for incident channel read from file: '
                 WRITE (8,*) ' ', ctldir//ctmp23//'.LEG'
-                WRITE (8,*)
               ENDIF
             
             ENDIF
@@ -194,13 +188,13 @@ C    &           ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
    55       CLOSE (45,STATUS = 'DELETE')
             IF (FITomp.EQ.0) THEN
               WRITE (8,*) 
-     &  'WARNING: PROBLEM READING CN ANG.DISTR. at Elab =', sngl(EINl)
+     &  ' WARNING: PROBLEM READING CN ANG.DISTR. at Elab =', sngl(EINl)
               WRITE (8,*) 
-     &  'WARNING: FILE WITH LEG. COEFF. (ext .LEG) HAS BEEN DELETED'
+     &  ' WARNING: FILE WITH LEG. COEFF. (ext .LEG) DOES NOT EXIST'
               WRITE (*,*) 
-     &  'WARNING: PROBLEM READING CN ANG.DISTR. at Elab =', sngl(EINl)
+     &  ' WARNING: PROBLEM READING CN ANG.DISTR. at Elab =', sngl(EINl)
               WRITE (*,*) 
-     &  'WARNING: FILE WITH LEG. COEFF. (ext .LEG) HAS BEEN DELETED'
+     &  ' WARNING: FILE WITH LEG. COEFF. (ext .LEG) DOES NOT EXIST'
             ENDIF
             
             GOTO 52
@@ -212,10 +206,10 @@ C-------this nucleus should be recalculated (goto 300)
 C
    50    CLOSE (45,STATUS = 'DELETE')
          IF (FITomp.EQ.0) THEN
-           WRITE (8,*) 'WARNING: ENERGY MISMATCH:  Elab =', EINl,
-     &               ' REQUESTED ENERGY=', SNGL(ener)
-           WRITE (8,*) 'WARNING: FILE WITH TRANSM. COEFF.',
-     &               ' FOR INCID.CHANNEL HAS BEEN DELETED'
+           WRITE (8,*) ' WARNING: ENERGY MISMATCH:  Elab =', 
+     &       sngl(EINl),' REQUESTED ENERGY=', SNGL(ener)
+           WRITE (8,*) ' WARNING: FILE WITH TRANSM. COEFF.',
+     &                 ' FOR INCID.CHANNEL HAS BEEN DELETED'
          ENDIF
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
@@ -266,15 +260,14 @@ C--------END of spin distribution from file SDFILE
             JSTab(1) = NDLW
                           !stability limit not a problem for photoreactions
             IF (EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
-               WRITE (8,*) 'WARNING: '
-               WRITE (8,*) 'WARNING: ECN=', EIN, ' Elev=',
+               WRITE (8,*) ' WARNING: '
+               WRITE (8,*) ' WARNING: ECN=', EIN, ' Elev=',
      &                     ELV(NLV(Ntrg),Ntrg)
                WRITE (8,*)
-     &                   'WARNING: CN excitation energy below continuum'
+     &                 ' WARNING: CN excitation energy below continuum'
                WRITE (8,*)
-     &                   'WARNING: cut-off. zero reaction cross section'
-               WRITE (8,*) 'WARNING: will result'
-               WRITE (8,*) 'WARNING: '
+     &                 ' WARNING: cut-off. zero reaction cross section'
+               WRITE (8,*) ' WARNING: will result'
             ENDIF
 C-----------E1
             IF (IGE1.NE.0) THEN
@@ -1103,16 +1096,17 @@ C-----Print elastic and direct cross sections from ECIS
         ENDIF
       ENDIF
 
-      IF(TOTred.ne.1) then
+      IF(TOTred.NE.1) then
         FUSred = TOTred*FUSred0
         ELAred = TOTred*ELAred0     
         FCCred = TOTred*FCCred0 
         FCOred = TOTred*FCOred0 
-
-        WRITE (8,'(1x,A50,A50,F5.3)') 
-     > ' WARNING: FUSRED,ELARED, FCCRED and FCORED changed',
-     > ' to impose requested scaling of total by  TOTRED= ',
-     >     TOTred
+        if (TOTred.LT.0.997d0 .or. TOTred.GT.1.003d0) then
+          WRITE (8,'(1x,A50,A50,F5.3,A10,G10.5,A4)') 
+     >      ' WARNING: FUSRED,ELARED, FCCRED and FCORED changed',
+     >      ' to impose requested scaling of total by  TOTRED= ',
+     >      TOTred,' for Einc=',EINl,' MeV'
+        endif
         WRITE (8,'(1x,A22,F5.3)') ' Renormalized FUSRED :',FUSRED 
         WRITE (8,'(1x,A22,F5.3)') ' Renormalized ELARED :',ELARED 
         WRITE (8,'(1x,A22,F5.3)') ' Renormalized FCCRED :',FCCRED 
@@ -1413,9 +1407,9 @@ C
       ELSE
 
          WRITE (8,'(1X,
-     >  '' WARNING: Incident energy below the Bass fusion barrier'')')
+     >  ''  WARNING: Incident energy below the Bass fusion barrier'')')
          WRITE (8,'(1X,
-     >  '' WARNING: For the Bass model, fusion cross section = 0'')')
+     >  ''  WARNING: For the Bass model, fusion cross section = 0'')')
          WRITE (8,*)
          Csfus = 0.d0
       ENDIF
