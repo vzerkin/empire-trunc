@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3173 $
+Ccc   * $Rev: 3174 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-27 00:39:02 +0200 (Sa, 27 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2447,6 +2447,7 @@ C        restoring the input value of the key CN_isotropic
          CN_isotropic = logtmp
 
          CLOSE (46)
+
 	   IF (IOUT.GT.4) WRITE (8,*) ' Transm. coeff. written to file:',
      &                              (ctldir//ctmp23//'.BIN')
       ELSEIF (IOUt.EQ.5) THEN
@@ -4071,7 +4072,7 @@ C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ
         ECIs2(35:35) = 'F'  ! .TRUE. must be used for fissiles !!!!
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
-        ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
+        ECIs2(36:36) = 'F'  ! .TRUE. to consider gamma emission in HF
 C                           ! G(L) gamma emission should be properly trasferred 
 C
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
@@ -4428,8 +4429,8 @@ C         11-20   GAM(2) FOR L=1.
 C         .......................                               
 C         61-70   GAM(7) FOR L=6.                               
 C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
-          WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
-          WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
+C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
+C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
           IF(ngamm_tr.gt.0) THEN
 C           WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
 C
@@ -6486,4 +6487,3 @@ C
       DOM_INT = (resg1*hlgth1 + resg2*hlgth2 + corr)*(E - Ef)
      &          /(ACOS( - 1.D0))
       END
-
