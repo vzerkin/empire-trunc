@@ -1,6 +1,6 @@
-# $Rev: 3112 $
+# $Rev: 3169 $
 # $Author: rcapote $
-# $Date: 2012-08-20 17:24:42 +0200 (Mo, 20 Aug 2012) $
+# $Date: 2012-10-26 21:51:13 +0200 (Fr, 26 Okt 2012) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5702,9 +5702,11 @@ foreach el $stablist {
    set seninpexists [file exists $mulinputn-inp.sen]
    if {$seninpexists == 0 } {file copy $::env(EMPIREDIR)/scripts/skel-inp.sen $mulinputn-inp.sen}
    if {$cempire == 1 && [file exists $mulinputn.inp ]} {exec xterm -e $::env(EMPIREDIR)/scripts/runE $mulinputn}
-   if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $mulinputn 1111 }
+   #if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $mulinputn 1111 }
+   if {$cformat == 1 && [file exists $mulinputn.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $mulinputn}
    if {$cverify == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $mulinputn}
-   if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $mulinputn 1111 }
+   #if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $mulinputn 1111 }
+   if {$cprepro == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $mulinputn}
    if {$cplot == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $mulinputn}
    #if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
@@ -6176,9 +6178,11 @@ editFile $file.inp } \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
         -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file}
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file $mat }
+#if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file $mat }
+if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file}
 if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file}
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file $mat }
+#if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file $mat }
+if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file}
 if {$cplot == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file}
 #if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file}
 
