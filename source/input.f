@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3173 $
+Ccc   * $Rev: 3176 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-27 23:41:20 +0200 (Sa, 27 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -271,7 +271,6 @@ C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS.
          TOTred = 1.d0
          ELAred = 1.d0
          CELred = 1.d0
-
          CINred = 1.d0
          TOTred0 = 1.d0 
          FUSred0 = 1.d0
@@ -284,7 +283,6 @@ C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS.
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
-
          rCINred = 1.d0
          LEVtarg = 1
 C
@@ -4348,65 +4346,96 @@ C-----------
 C-----
          IF (name.EQ.'CELRED') THEN
 
+
             if(i1.ne.0 .and. IOPran.ne.0) then
 
+
                 WRITE (8,
+
 
      &          '('' Compound elastic cross section uncertainty '',
 
+
      &          '' is equal to '',i2,'' %'')') i1
+
 
                 sigma = val*i1*0.01
 
+
                 IF(IOPran.gt.0) then
+
 
                    IF(rCELred.eq.1.d0) rCELred = grand()
 
+
                    CELred = val + rCELred*sigma
+
 
                 ELSE
 
+
                    IF(rCELred.eq.1.d0) rCELred = drand()
+
 
                    CELred = val + 1.732d0*(2*rCELred-1.)*sigma
 
+
                 ENDIF
+
 
                 WRITE (8,
 
+
      &      '('' Compound elastic cross section was scaled by factor ''
+
 
      &          ,f6.3)') CELred
 
+
                 IPArCOV = IPArCOV +1
+
 
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
 
+
      &             IPArCOV, CELred, INDexf,INDexb
+
 
             else
 
+
                 CELred = val
+
 
                 WRITE (8,
 
+
      &      '('' Compound elastic cross section was scaled by factor ''
 
+
      &          F6.3)') CELred
+
 
                 WRITE (12,
 
+
      &      '('' Compound elastic cross section was scaled by factor ''
+
 
      &          F6.3)') CELred
 
+
             endif
+
 
             GOTO 100
 
+
          ENDIF
 
+
 C-----
+
 
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
