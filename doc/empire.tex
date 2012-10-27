@@ -11176,6 +11176,15 @@ of total cross section.
 \item [{CELRED}] The compound elastic cross section will be multiplied by VAL (default: 1.). \\
                  The relative uncertainty of the scaling factor in \% can be given by I1.\\
 This parameter may be used to simulate the CN resonances (obviously not included in the optical model). 
+It can also be used to simulate physical effects arising from the compound-direct processes interference
+(Engelbrecht-Weidenmuller transformation). The interference tends to reduce the compound elastic, increasing
+the compound inelastic cross sections. 
+
+\item [{CINRED}] The compound inelastic cross section to discrete levels will be multiplied by VAL (default: 1.). \\
+                 The relative uncertainty of the scaling factor in \% can be given by I1.\\
+This parameter may be used to simulate physical effects arising from the compound-direct processes interference
+(Engelbrecht-Weidenmuller transformation). The interference tends to reduce the compound elastic, increasing
+the compound inelastic cross sections. 
 
 \item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron on the target
                  nucleus will be multiplied by VAL). 
