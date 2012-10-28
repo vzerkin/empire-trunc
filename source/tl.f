@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3174 $
+Ccc   * $Rev: 3177 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 00:39:02 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-28 08:56:31 +0100 (So, 28 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2447,8 +2447,7 @@ C        restoring the input value of the key CN_isotropic
          CN_isotropic = logtmp
 
          CLOSE (46)
-
-	   IF (IOUT.GT.4) WRITE (8,*) ' Transm. coeff. written to file:',
+         IF (IOUT.GT.4) WRITE (8,*) ' Transm. coeff. written to file:',
      &                              (ctldir//ctmp23//'.BIN')
       ELSEIF (IOUt.EQ.5) THEN
          WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
