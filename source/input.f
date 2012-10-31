@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3176 $
+Ccc   * $Rev: 3178 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 23:41:20 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1050,6 +1050,17 @@ C
 C
 C--------inteligent defaults *** done ***
 C
+C
+C--------New energy header
+C
+         WRITE (8,*) ' '
+         WRITE (8,'(60(''=''))')
+         WRITE (8,
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EIN
+         WRITE (8,'(60(''=''))')
+         WRITE (8,*) ' '
+
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 
@@ -1545,7 +1556,7 @@ C-----------stop PCROSS nucleon channels if HMS active
          ENDIF
 C
 C--------print IDNa matrix
- 1256    WRITE (8,*) ' '
+ 1256    continue
          WRITE (8,*)
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
@@ -1842,15 +1853,10 @@ C-----set Q-value for CN production
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
          WRITE (8,*) ' '
-         WRITE (8,*) ' '
-         WRITE (8,*) ' '
-         WRITE (8,'(60(''=''))')
          WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV'')') iae, SYMbe(0), ia, SYMb(0), EINl
-         WRITE (8,'(60(''=''))')
-         WRITE (8,*) ' '
-         WRITE (8,'('' Compound nucleus energy'',F9.3,'' MeV'')') EXCn
+     &'('' Reaction '',I3,A2,''+'',I3,A2)') iae, SYMbe(0), ia, SYMb(0)
+         WRITE (8,'('' Incident particle energy'',F9.3,'' MeV'')') EIN
+         WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
       ENDIF
@@ -4070,11 +4076,11 @@ C    &           '('' Gilbert-Cameron level densities '')')
 C-----
          IF (name.EQ.'ECONT ') THEN
             izar = i1*1000 + i2
-         if(izar.eq.0) then
+            if(izar.eq.0) then
                WRITE (8,'('' WARNING: ECONT should be defined for a sele
      &cted nucleus, not globally. This value is ignored '')')
                GOTO 100
-         endif
+            endif
 C
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
@@ -4086,7 +4092,7 @@ C
             ENDIF
             if(val.ge.0.) then
               ECOnt(nnuc) = val
-           IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
+              IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
               WRITE (8,
      &        '('' Energy continuum for nucleus '',I3,A2,
      &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
@@ -4314,129 +4320,105 @@ C-----
          ENDIF
 C-----------
          IF (name.EQ.'CINRED') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
+            if(i1.ne.0) then
+C
+C             Specific discrete level scaled
+C 
+ 			if(i1.gt.min(40,NDLV) .or. i1.lt.1) then
+                WRITE (8,
+     &          '('' Compound inelastic cross section scaling of '',
+     &          '' discrete level # '',i3, 
+     &          '' dismissed (out of range) '')') i1
+	          GOTO 100
+	        endif
+
+ 			if(i1.eq.1) then
+                WRITE (8,
+     &          '('' Discrete level # 1 corresponds to the elastic chann
+     &el, use CELRED to scale the Comp. Elastic cross section'')') 
+	          GOTO 100
+	        endif
+C
+              if(i2.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Compound inelastic cross section uncertainty '',
-     &          '' is equal to '',i2,'' %'')') i1
-                sigma = val*i1*0.01
+     &          ''of discrete level # '',i2,''is equal to '',i2,
+     &          '' %'')') i1, i2
+                sigma = val*i2*0.01
                 IF(IOPran.gt.0) then
-                   IF(rCINred.eq.1.d0) rCINred = grand()
-                   CINred = val + rCINred*sigma
+                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = grand()
+                   CINred(i1) = val + rCINred(i1)*sigma
                 ELSE
-                   IF(rCINred.eq.1.d0) rCINred = drand()
-                   CINred = val + 1.732d0*(2*rCINred-1.)*sigma
+                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = drand()
+                   CINred(i1) = val + 1.732d0*(2*rCINred(i1)-1.)*sigma
                 ENDIF
                 WRITE (8,
-     &    '('' Compound inelastic cross section was scaled by factor ''
-     &          ,f6.3)') CINred
+     &   '('' Compound inelastic cross section  of discrete level # '',
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+                WRITE (8,'(''   (compensated by scaling the Compound Ela
+     &stic cross section)'')')
                 IPArCOV = IPArCOV +1
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CINred, INDexf,INDexb
-            else
-                CINred = val
+     &             IPArCOV, CINred(i1), INDexf,INDexb
+              else
+                CINred(i1) = val
                 WRITE (8,
-     &    '('' Compound inelastic cross section was scaled by factor ''
-     &          F6.3)') CINred
+     &   '('' Compound inelastic cross section  of discrete level # '',
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+                WRITE (8,'(''   (compensated by scaling the Compound Ela
+     &stic cross section)'')')
                 WRITE (12,
-     &    '('' Compound inelastic cross section was scaled by factor ''
-     &          F6.3)') CINred
-            endif
+     &   '('' Compound inelastic cross section  of discrete level # '',
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+                WRITE(12,'(''   (compensated by scaling the Compound Ela
+     &stic cross section)'')')
+              endif
+	      else
+
+              WRITE (8,
+     &   '('' Compound inelastic cross section scaling dismissed'',
+     &     '' no discrete level selected for scaling '')') 
+
+	      endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CELRED') THEN
-
+C               WRITE (8,
+C    &   '('' Compound elastic cross-section scaling is not active'',
+C    &   '' , please enquire with R. Capote at r.capotenoy@iaea.org'')') 
+C           GOTO 100
 
             if(i1.ne.0 .and. IOPran.ne.0) then
-
-
                 WRITE (8,
-
-
      &          '('' Compound elastic cross section uncertainty '',
-
-
      &          '' is equal to '',i2,'' %'')') i1
-
-
                 sigma = val*i1*0.01
-
-
                 IF(IOPran.gt.0) then
-
-
                    IF(rCELred.eq.1.d0) rCELred = grand()
-
-
                    CELred = val + rCELred*sigma
-
-
                 ELSE
-
-
                    IF(rCELred.eq.1.d0) rCELred = drand()
-
-
                    CELred = val + 1.732d0*(2*rCELred-1.)*sigma
-
-
                 ENDIF
-
-
                 WRITE (8,
-
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
-
      &          ,f6.3)') CELred
-
-
                 IPArCOV = IPArCOV +1
-
-
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-
-
      &             IPArCOV, CELred, INDexf,INDexb
-
-
             else
-
-
                 CELred = val
-
-
                 WRITE (8,
-
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
-
      &          F6.3)') CELred
-
-
                 WRITE (12,
-
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
-
      &          F6.3)') CELred
-
-
             endif
-
-
             GOTO 100
-
-
          ENDIF
-
-
 C-----
-
-
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
               BENchm = .TRUE.

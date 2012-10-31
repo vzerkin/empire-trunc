@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3165 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 3178 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, xscalc,
-     &                 popll, pops, popt, xcse, xs_cn, xs_norm
+     &  popll, pops, popt, xcse, xs_cn, xs_norm, dtmp, sum_cn
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER ilevcol, ilev
       DOUBLE PRECISION GET_DDXS
@@ -86,10 +86,31 @@ C-----
 C-----
 C-----Discrete levels
 C-----
-      DO il = 1, NLV(Nnur)
+      sum_cn = 0.d0
+C     DO il = 1, NLV(Nnur)
+      DO il = NLV(Nnur),1,-1	 ! The order changed to calculate the 
+                               !   Compound Elastic at the end of the loop 
          eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) RETURN
-         pop1 = Xnor*SCRtl(il,Nejc)
+C        IF (eemi.LT.0.0D0) RETURN
+         IF (eemi.LT.0.0D0) CYCLE
+C        pop1 = Xnor*SCRtl(il,Nejc)  
+         dtmp = Xnor*SCRtl(il,Nejc)  
+	   if( Nnuc      .eq.1 .and. Nejc.eq.NPRoject .and. 
+     &       CINRED(il).ne.1 .and. il.  ne.1       ) then  
+           pop1 = dtmp*CINRED(il) ! Compound inelastic scaling 
+	     sum_cn = sum_cn +	(1.d0-CINRED(il))*dtmp
+         else
+           pop1 = dtmp
+         endif
+  	   if(Nnuc.eq.1 .and. Nejc.eq.NPRoject .and. il.eq.1) 
+     &     pop1 = dtmp + sum_cn
+C      
+C	   Commented for the time being. Should be applied
+C        to all CN decay channels (including capture and fission)
+C
+C 	   if(Nnuc.eq.1 .and. Nejc.eq.NPRoject .and. il.eq.1) 
+C     &     pop1 = pop1 * CELred  ! Compound Elastic scaling
+C                                                          
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
 C--------Add contribution to recoils auxiliary matrix for discrete levels
@@ -155,13 +176,13 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
          ENDIF
 
 C--------Add isotropic CN contribution to direct ang. distributions
-1234     IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. 
+         IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. 
      >       Nejc.NE.0 .AND. pop1.gt.0.d0 ) THEN
 
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
             xscalc = pop1/(4.d0*PI)  ! default isotropic
                        
-            IF((NEJc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
+            IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C
 C             Check if the level is collective
               ilevcol = 0 
@@ -210,6 +231,7 @@ C
 
          ENDIF
       ENDDO
+
       RETURN
       END
 

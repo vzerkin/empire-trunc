@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3177 $
+Ccc   * $Rev: 3178 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-28 08:56:31 +0100 (So, 28 Okt 2012) $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2421,22 +2421,22 @@ C        all Tls calculations calculate only the direct component (no CN)
 C
 C--------------Spherical optical model is assumed, only one level (gs)
 C
-               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0)
+               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.)
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
 C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
 C--------------CC rotational calculation 
-               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener)
+               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.)
             ELSE
 C--------------CC vibrational calculation 
                IF (SOFt) THEN
 C----------------OPTMAN CC calc. (only coupled levels)
-                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener) 
+                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.) 
                ELSE
-                 CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., - 1)
+                 CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., -1,.TRUE.)
                ENDIF
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
             ENDIF
@@ -3042,7 +3042,7 @@ CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
 
 
-      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey)
+      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -3095,7 +3095,7 @@ C     Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
-      LOGICAL Ldwba,lodd
+      LOGICAL Ldwba,TL_calc
 C
 C Local variables
 C
@@ -3108,6 +3108,7 @@ C
       CHARACTER*1 ch
       DOUBLE PRECISION DABS
       INTEGER ncollx 
+      LOGICAL lodd
 
       INTEGER ikey, ip, iterm, j, ldwmax, nppaa,
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
@@ -3829,17 +3830,17 @@ C
 
       IF (Inlkey.EQ.0) THEN
         IF (IOPsys.EQ.0) THEN
-          ctmp = 'cp ecSPH.inp ecis06.inp'
+          ctmp = 'mv ecSPH.inp ecis06.inp'
           iwin = PIPE(ctmp)
         ELSE
-          iwin = PIPE('copy ecSPH.inp ecis06.inp >NUL')
+          iwin = PIPE('move ecSPH.inp ecis06.inp >NUL')
         ENDIF
       ELSE
         IF (IOPsys.EQ.0) THEN
-          ctmp = 'cp ecVIB.inp ecis06.inp'
+          ctmp = 'mv ecVIB.inp ecis06.inp'
           iwin = PIPE(ctmp)
         ELSE
-          iwin = PIPE('copy ecVIB.inp ecis06.inp >NUL')
+          iwin = PIPE('move ecVIB.inp ecis06.inp >NUL')
         ENDIF
       ENDIF
 C
@@ -3853,37 +3854,44 @@ C
 
       CALL ECIS('ecis06 ')
 
+C     restoring the input value of the key CN_isotropic
+      CN_isotropic = logtmp
+
+      IF(TL_calc) then
+         IF (IOPsys.EQ.0) THEN
+            ctmp = 'rm ecis06.inp ecis06.out'
+            iwin = PIPE(ctmp)
+         ELSE
+            iwin = PIPE('del ecis06.inp ecis06.out >NUL')
+         ENDIF
+	   RETURN
+	ENDIF
+
       IF (Inlkey.EQ.0) THEN
-C        CALL ECIS('ecSPH.inp','ECIS_SPH.out')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv ecis06.out ECIS_SPH.out'
             iwin = PIPE(ctmp)
-            ctmp = 'rm ecis06.inp'
+            ctmp = 'mv ecis06.inp ECIS_SPH.inp'
             iwin = PIPE(ctmp)
          ELSE
             iwin = PIPE('move ecis06.out ECIS_SPH.out >NUL')
-            iwin = PIPE('del ecis06.inp >NUL')
+            iwin = PIPE('move ecis06.inp ECIS_SPH.inp >NUL')
          ENDIF
       ELSE
-C        CALL ECIS('ecVIB.inp','ECIS_VIB.out')
-C        CALL ECIS('ecis06 ')
          IF (IOPsys.EQ.0) THEN
             ctmp = 'mv ecis06.out ECIS_VIB.out'
             iwin = PIPE(ctmp)
-            ctmp = 'rm ecis06.inp'
+            ctmp = 'mv ecis06.inp ECIS_VIB.inp'
             iwin = PIPE(ctmp)
          ELSE
             iwin = PIPE('move ecis06.out ECIS_VIB.out >NUL')
-            iwin = PIPE('del ecis06.inp >NUL')
+            iwin = PIPE('move ecis06.inp ECIS_VIB.inp >NUL')
          ENDIF
       ENDIF
-
-C     restoring the input value of the key CN_isotropic
-      CN_isotropic = logtmp
       RETURN 
       END
 
-      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El)
+      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -3934,6 +3942,7 @@ C     Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
+      LOGICAL TL_calc
 C
 C Local variables
 C
@@ -4709,10 +4718,10 @@ C
       CLOSE (UNIT = 1)
 
       IF (IOPsys.EQ.0) THEN
-        ctmp = 'cp ecVIBROT.inp ecis06.inp'
+        ctmp = 'mv ecVIBROT.inp ecis06.inp'
         iwin = PIPE(ctmp)
       ELSE
-        iwin = PIPE('copy ecVIBROT.inp ecis06.inp >NUL')
+        iwin = PIPE('move ecVIBROT.inp ecis06.inp >NUL')
       ENDIF
 
 C-----Running ECIS
@@ -4720,37 +4729,47 @@ C-----Running ECIS
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
       CALL ECIS('ecis06 ')
 
-      IF (npho.GT.0) THEN
-C        CALL ECIS('ecVIBROT.inp','ECIS_VIBROT.out')
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_VIBROT.out'
-            iwin = PIPE(ctmp)
-            ctmp = 'rm ecis06.inp'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_VIBROT.out >NUL')
-            iwin = PIPE('del ecis06.inp >NUL')
-         ENDIF
-      ELSE
-C        CALL ECIS('ecVIBROT.inp','ECIS_ROT.out')
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_ROT.out'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_ROT.out >NUL')
-         ENDIF
-      ENDIF
-
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
+      IF(TL_calc) then
+         IF (IOPsys.EQ.0) THEN
+            ctmp = 'rm ecis06.inp ecis06.out'
+            iwin = PIPE(ctmp)
+         ELSE
+            iwin = PIPE('del ecis06.inp ecis06.out')
+         ENDIF
+         RETURN
+	ENDIF
+
+      IF (npho.GT.0) THEN
+         IF (IOPsys.EQ.0) THEN
+            ctmp = 'mv ecis06.out ECIS_VIBROT.out'
+            iwin = PIPE(ctmp)
+            ctmp = 'mv ecis06.inp ECIS_VIBROT.inp'
+            iwin = PIPE(ctmp)
+         ELSE
+            iwin = PIPE('move ecis06.out ECIS_VIBROT.out >NUL')
+            iwin = PIPE('move ecis06.inp ECIS_VIBROT.inp >NUL')
+         ENDIF
+      ELSE
+         IF (IOPsys.EQ.0) THEN
+            ctmp = 'mv ecis06.out ECIS_ROT.out'
+            iwin = PIPE(ctmp)
+            ctmp = 'mv ecis06.inp ECIS_ROT.inp'
+            iwin = PIPE(ctmp)
+         ELSE
+            iwin = PIPE('move ecis06.out ECIS_ROT.out >NUL')
+            iwin = PIPE('move ecis06.inp ECIS_ROT.inp >NUL')
+         ENDIF
+      ENDIF
 
       RETURN
       END
 c----
 c     CCSOFTROTOR
 c----
-      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El)
+      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
@@ -4769,6 +4788,7 @@ C Dummy arguments
 C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
+      LOGICAL TL_calc
 C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -5184,6 +5204,25 @@ C
       ELSE
         iwin = PIPE(' optmand')
       ENDIF
+ 
+      IF(TL_calc) THEN
+        IF (IOPsys.EQ.0) THEN
+          ctmp = 'rm OPTMAN.INP OPTMAN.OUT'
+          iwin = PIPE(ctmp)
+        ELSE
+          iwin = PIPE('del OPTMAN.INP OPTMAN.OUT')
+        ENDIF
+	ELSE
+        IF (IOPsys.EQ.0) THEN
+          ctmp = 'mv OPTMAN.INP OPTMAN-INC.inp'
+          iwin = PIPE(ctmp)
+          ctmp = 'mv OPTMAN.OUT OPTMAN-INC.out'
+          iwin = PIPE(ctmp)
+        ELSE
+          iwin = PIPE('move OPTMAN.INP OPTMAN-INC.inp')
+          iwin = PIPE('move OPTMAN.OUT OPTMAN-INC.out')
+        ENDIF
+      ENDIF 
 
       RETURN
       END

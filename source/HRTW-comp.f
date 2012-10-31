@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3170 $
+Ccc   * $Rev: 3178 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-26 22:25:30 +0200 (Fr, 26 Okt 2012) $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -139,8 +139,7 @@ C
               H_Sweak = H_Sweak + sumfis
           ENDIF
 
-            IF (H_Sumtl.GT.0.0D0 .AND. (H_Sumtl - H_Sweak).GT.0.0D0)
-     &          THEN
+            IF (H_Sumtl.GT.0.0D0 .AND. H_Sumtl.GT.H_Sweak) THEN
                tlump = (H_Sumtl - H_Sweak)
      &                 /(10.0*(1.0 + (H_Sweak)/(H_Sumtl-H_Sweak)))
 C              !define a good Tlump
@@ -233,15 +232,9 @@ C--------------
 C--------------normalization and accumulation
 C--------------
                xnor = H_Abs(i,1)/DENhf
-C              stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
                IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)
-C--------------calculate total emission
-C              DO nejc = 0, NEJcm
-C                 csemist = csemist + CSEmis(nejc,nnuc)
-C              ENDDO
-C              csemist = csemist + CSFis
             ENDDO    !loop over partial wave contributions to CN state
 C
 C           Gamma width calculation
@@ -1274,7 +1267,7 @@ Ccc   *                                                         class:PPu*
 Ccc   *                      E L C O R R                                 *
 Ccc   *                                                                  *
 Ccc   * Corrects elastic widths for the elastic enhancement by adding    *
-Ccc   * appropriate addditional part to scartch matrices.                *
+Ccc   * appropriate addditional part to scratch matrices.                *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * input:NNUC - decaying nucleus index                              *
@@ -1354,7 +1347,7 @@ C--------------got a true elastic channel
                      IF (MEMel(iel,3).EQ.INT(2.0*s + 0.001) .AND.
      &                   MEMel(iel,2).EQ.l) THEN
                         kel = MEMel(iel,1)
-                        v = H_Tl(kel,1)
+                        v = H_Tl(kel,1) 
                      ENDIF
                   ENDDO
                ELSE

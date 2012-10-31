@@ -1,6 +1,6 @@
-cc   * $Rev: 3173 $
+cc   * $Rev: 3178 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -419,26 +419,6 @@ C-----
         DO iang = 1, min(NDAng,neles)
            READ (45,'(10x,D20.10)',END = 1400,ERR = 1400) elleg(iang)
         ENDDO
-
-C       if(.not.CN_isotropic) then
-C
-C         Reading CN elastic
-C
-C         READ (45,'(5x,i5)',END = 1400,ERR = 1400) neles
-C         WRITE(8,*) ' CN. ELASTIC LEG. EXPANSION READ from:', 
-C    &                 ctldir//ctmp23//'.LEG'
-C         if(neles.GT.0) THEN                
-C           DO j= 1 , min(NDAng,neles) ! reading CC CN expansion
-C             READ (45,'(5X,I5,D20.10)',END = 1400,ERR = 1400) 
-C    &                  itmp2, dtmp
-C             if(dabs(dtmp).gt.1.d-8 .and. itmp2.LT.NDLW) then
-C               PL_lmax(1) = itmp2  ! elastic channel = 1
-C               PL_CN(itmp2,1) = dtmp ! elastic channel = 1
-C             endif
-C           ENDDO
-C         endif 
-C       endif ! .not.CN_isotropic
-
         CLOSE(45)
 
         OPEN (45,FILE = (ctldir//ctmp23//'.ANG'),STATUS = 'OLD',
@@ -1833,6 +1813,9 @@ C--------Printout of results for the decay of NNUC nucleus
          DO il = 1, NLV(nnuc)
            dtmp = dtmp + POPlv(il,nnuc)
          ENDDO
+C
+C	   dtmp for nnuc = target is the total CN decay
+C
          IF(dtmp.LE.0.d0) GOTO 1525
 
          IF (ENDF(nnuc).gt.0) WRITE (8,
@@ -2262,9 +2245,7 @@ C--------down on the ground state
            WRITE (8,*) ' Shape elastic cross section',
      &                     ELAred*ELAcs, ' mb'
 C----------CN contribution to elastic ddx
-
-           ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI *CELred
-
+           ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
            if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
              CN_isotropic = .TRUE.
              WRITE(8,*)
@@ -2281,7 +2262,7 @@ C----------CN contribution to elastic ddx
              WRITE (8,*) ' WARNING: CN elastic is 0'
            ELSE
              WRITE (8,*) ' CN elastic cross section   ',
-     &                sngl(POPlv(LEVtarg,mt2)*CELred),' mb'
+     &                sngl(POPlv(LEVtarg,mt2)),' mb'
              IF(CN_isotropic) then   
                WRITE (8,*)
      &          ' Isotropic Compound Elastic=', sngl(ELCncs), ' mb/str'
@@ -3456,12 +3437,12 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
-        IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) THEN
+        IF (INT(ZEJc(0)).EQ.0 .and. ELCncs.gt.0.1d0) THEN
           WRITE (8,
      &  '('' * Compound elastic cross section (CE)            '',G13.6,
      &              '' mb  '')') 4.d0*PI*ELCncs
         ELSE
-          WRITE (8,*)
+          WRITE (8,'('' * '')') 
         ENDIF
         IF (INT(ZEJc(0)).EQ.0) THEN
           IF(TOTred.ne.1)
@@ -3485,11 +3466,18 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    WRITE (8,'('' * Comp. Elastic cross section scaled by '',
      &     G13.6)') CELred
         if(FCCred.ne.1)
-     &    WRITE (8,'('' * Discr. level  cross section scaled by '',
+     &    WRITE (8,'('' * Disc.lev. DIR cross section scaled by '',
      &     G13.6)') FCCred
         if(FCOred.ne.1)
-     &    WRITE (8,'('' * Contin. level cross section scaled by '',
+     &    WRITE (8,'('' * Cont.lev. DIR cross section scaled by '',
      &      G13.6)') FCOred
+        if (INT(ZEJc(0)).EQ.0) then
+	    DO i=1,NLV(0) ! loop over target discrete levels
+           IF(CINred(i).NE.1) WRITE (8,
+     >       '('' * Comp. inelastic cross section for target level # '',
+     &       i2,'' scaled by '',G13.6)') i, CINred(i)
+	    ENDDO
+	  endif
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
@@ -3498,7 +3486,6 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  '(''   Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
-
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
 
           WRITE (*,
@@ -3520,7 +3507,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
-        IF (INT(ZEJc(0)).EQ.0 .and. EIN.lE.10.d0) THEN
+        IF (INT(ZEJc(0)).EQ.0 .and. ELCncs.gt.0.1d0) THEN
           WRITE (*,
      &  '(''   Compound elastic cross section (CE)            '',G13.6,
      &              '' mb  '')') 4.d0*PI*ELCncs

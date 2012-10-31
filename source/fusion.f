@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3173 $
+Ccc   * $Rev: 3178 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-27 00:33:44 +0200 (Sa, 27 Okt 2012) $
+Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -421,7 +421,7 @@ C-----------DWBA calculation. All collective levels considered
                WRITE (8,*) '    to uncoupled coll. levels and continuum'
             ENDIF
 
-            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1)
+            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
 
             IF (DIRect.NE.3) THEN
                CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
@@ -465,7 +465,7 @@ C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
-              CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab) 
+              CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab,.FALSE.) 
 
               IF (ldbwacalc) THEN
 
@@ -613,7 +613,7 @@ C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
 C
 C               Including CN calculation
 C
-                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab)
+                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.)
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                 ELSE
@@ -635,7 +635,7 @@ C
                 ENDIF
               ELSE
 C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
-                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., - 1)
+                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., -1,.FALSE.)
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
                 ELSE
@@ -923,7 +923,7 @@ C-----------------checking the correspondence of the excited states
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
-            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0)
+            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
             CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3,ICAlangs)
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
