@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3178 $
+Ccc   * $Rev: 3179 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -129,7 +129,7 @@ C
 C           dencomp = H_Sumtl
             sumfis = 0.d0
 C
-          IF (FISsil(nnuc)) THEN
+            IF (FISsil(nnuc)) THEN
               IF (FISshi(nnuc).EQ.1.) THEN
                 CALL FISSION(nnuc,ke,jcn,sumfis)
               ELSE
@@ -137,7 +137,7 @@ C
               ENDIF
               H_Sumtl = H_Sumtl + sumfis
               H_Sweak = H_Sweak + sumfis
-          ENDIF
+            ENDIF
 
             IF (H_Sumtl.GT.0.0D0 .AND. H_Sumtl.GT.H_Sweak) THEN
                tlump = (H_Sumtl - H_Sweak)
@@ -400,11 +400,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
-     &                 smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
-      REAL FLOAT
+     &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr, sum_cn, dtmp
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2,
      &        ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
-      INTEGER INT, MIN0
       DOUBLE PRECISION VT
 C
 C
@@ -451,34 +449,34 @@ C--------------decay to the highest possible bin (non neutron only)
                IF (ZEJc(Nejc).NE.0.0D0) THEN
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
-C-----------------odd and even l-values treated separately
-C-----------------IP1 and IP2 decide to which parity each SUMTL  goes
+C-----------------odd and even L-values treated separately
+C-----------------ip1 and ip2 decide to which parity each SUMTL  goes
                   rho = RO(iermax,jr,ip1,Nnur)*DE*TUNe(Nejc,Nnuc)
-                  sumtl1 = 0.0
-                  DO l = lmin, lmax, 2      ! do loop over l
+                  sumtl1 = 0.d0
+                  DO L = lmin, lmax, 2      ! do loop over L
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(5,l,Nejc,Nnur))
+                        sumtl1 = sumtl1 + VT(TL(5,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'A Tl= ' , TL(5,l,Nejc,Nnur)
-                        CALL TL2VL(TL(5,l,Nejc,Nnur),rho)
-                        sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
+C                       WRITE(8,*)'A Tl= ' , TL(5,L,Nejc,Nnur)
+                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho)
+                        sumtl1 = sumtl1 + TL(5,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   rho = RO(iermax,jr,ip2,Nnur)*DE*TUNe(Nejc,Nnuc)
-                  sumtl2 = 0.0
-                  DO l = lmin + 1, lmax, 2
+                  sumtl2 = 0.d0
+                  DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(5,l,Nejc,Nnur))
+                        sumtl2 = sumtl2 + VT(TL(5,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'B Tl= ' , TL(5,l,Nejc,Nnur)
-                        CALL TL2VL(TL(5,l,Nejc,Nnur),rho)
-                        sumtl2 = sumtl2 + TL(5,l,Nejc,Nnur)
+C                       WRITE(8,*)'B Tl= ' , TL(5,L,Nejc,Nnur)
+                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho)
+                        sumtl2 = sumtl2 + TL(5,L,Nejc,Nnur)
                      ENDIF
-                  ENDDO                     ! over l
+                  ENDDO                     ! over L
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
      &               + sumtl1*RO(iermax,jr,ip1,Nnur)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
@@ -492,34 +490,34 @@ C-----------------CORR in the next lines accounts for the Tl interpolation
 C-----------------and integration over overlaping bins (2/3), it turned out it must
 C-----------------be energy step and also emission step dependent
                   corr = 0.4444/(DE - XN(Nnur) + XN(1))
-C-----------------do loop over l (odd and even l-values treated separately)
+C-----------------do loop over L (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   rho = RO(iermax,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
-                  sumtl1 = 0.0
-                  DO l = lmin, lmax, 2       ! do loop over l
+                  sumtl1 = 0.d0
+                  DO L = lmin, lmax, 2       ! do loop over L
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(6,l,Nejc,Nnur))
+                        sumtl1 = sumtl1 + VT(TL(6,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'C Tl= ' , TL(6,l,Nejc,Nnur)
-                        CALL TL2VL(TL(6,l,Nejc,Nnur),rho)
-                        sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
+C                       WRITE(8,*)'C Tl= ' , TL(6,L,Nejc,Nnur)
+                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho)
+                        sumtl1 = sumtl1 + TL(6,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   rho = RO(iermax,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
-                  sumtl2 = 0.0
-                  DO l = lmin + 1, lmax, 2
+                  sumtl2 = 0.d0
+                  DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(6,l,Nejc,Nnur))
+                        sumtl2 = sumtl2 + VT(TL(6,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'D Tl= ' , TL(6,l,Nejc,Nnur)
-                        CALL TL2VL(TL(6,l,Nejc,Nnur),rho)
-                        sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
+C                       WRITE(8,*)'D Tl= ' , TL(6,L,Nejc,Nnur)
+                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho)
+                        sumtl2 = sumtl2 + TL(6,L,Nejc,Nnur)
                      ENDIF
-                  ENDDO                      ! over l
+                  ENDDO                      ! over L
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
      &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
@@ -532,39 +530,39 @@ C--------------bin from the top excluded as already done)
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
                   IF (ier.EQ.1) THEN
-                     corr = 0.5
+                     corr = 0.5d0
                   ELSE
-                     corr = 1.0
+                     corr = 1.d0
                   ENDIF
-C-----------------do loop over l (odd and even l-values treated separately)
+C-----------------do loop over L (odd and even L-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   rho = RO(ier,jr,ip1,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
-                  sumtl1 = 0.0
-                  DO l = lmin, lmax, 2
+                  sumtl1 = 0.d0
+                  DO L = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(ietl,l,Nejc,Nnur))
+                        sumtl1 = sumtl1 + VT(TL(ietl,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'E Tl= ' , TL(ietl,l,Nejc,Nnur)
-                        CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho)
-                        sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
+C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
+                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho)
+                        sumtl1 = sumtl1 + TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   rho = RO(ier,jr,ip2,Nnur)*DE*corr*TUNe(Nejc,Nnuc)
-                  sumtl2 = 0.0
-                  DO l = lmin + 1, lmax, 2
+                  sumtl2 = 0.d0
+                  DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(ietl,l,Nejc,Nnur))
+                        sumtl2 = sumtl2 + VT(TL(ietl,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
-C                       WRITE(8,*)'F Tl= ' , TL(ietl,l,Nejc,Nnur)
-                        CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho)
-                        sumtl2 = sumtl2 + TL(ietl,l,Nejc,Nnur)
+C                       WRITE(8,*)'F Tl= ' , TL(ietl,L,Nejc,Nnur)
+                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho)
+                        sumtl2 = sumtl2 + TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
-C-----------------do loop over l   ***done***
+C-----------------do loop over L   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
      &               + sumtl1*RO(ier,jr,ip1,Nnur)
@@ -594,92 +592,105 @@ C--------
 C--------decay to discrete levels
 C--------
       ENDIF
-         DO i = 1, NLV(Nejc)
-            SCRtl(i,Nejc) = 0.0
+
+      DO i = 1, NLV(Nejc)
+         SCRtl(i,Nejc) = 0.0
+      ENDDO
+      IF (Nhrtw.EQ.0 .AND. IZA(Nnur).EQ.IZA(0)) THEN
+C-----clear memorized elastic channels when entering new J-pi CN state
+         iel = 1
+         DO i = 1, NDHRTW2
+            MEMel(i,1) = 0
+            MEMel(i,2) = 0
+            MEMel(i,3) = 0
          ENDDO
-         IF (Nhrtw.EQ.0 .AND. IZA(Nnur).EQ.IZA(0)) THEN
-C--------clear memorized elastic channels when entering new J-pi CN state
-            iel = 1
-            DO i = 1, NDHRTW2
-               MEMel(i,1) = 0
-               MEMel(i,2) = 0
-               MEMel(i,3) = 0
-            ENDDO
-         ENDIF
-         eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-C--------
-C--------do loop over discrete levels -----------------------------------
-C--------
-         DO i = 1, NLV(Nnur)
-            eout = eoutc - ELV(i,Nnur)
-C
-C           TUNe commented as it is dangerous to scale Ts for discrete levels
-C           It means cor becomes 1 always !
-C
-C           Dec. 2007, MH, RCN, MS
-C
-C           cor = TUNe(Nejc,Nnuc)
-C           IF (i.EQ.1) cor = 1.0
-            cor = 1.d0
-C-----------level above the bin
-            IF (eout.LT.0.0D0) GOTO 100
-            sumdl = 0.0
-            CALL TLLOC(Nnur,Nejc,eout,il,frde)
-            smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
-            smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
-            s = smin
-C-----------loop over channel spin ----------------------------------------
-   20       lmin = INT(ABS(xjc - s) + 1.01)
-            lmax = INT(xjc + s + 1.01)
-            lmax = MIN0(NLW,lmax)
-C-----------do loop over l ------------------------------------------------
-            DO l = lmin, lmax
-               ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-               IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0)) THEN
-                  tld = ELTl(l)
-               ELSE
-                  tld = TL(il,l,Nejc,Nnur)
-     &                  + frde*(TL(il + 1,l,Nejc,Nnur)
-     &                  - TL(il,l,Nejc,Nnur))
-               ENDIF
-               IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
-                  IF (Nhrtw.GT.0) THEN
-C--------------------entry with nhrtw>0
-                     sumdl = sumdl + VT(tld)*cor
-                  ELSE
-C--------------------entry with nhrtw=0
-                     CALL TL2VL(tld,cor)
-                     sumdl = sumdl + tld*cor
-C                    WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
-                     IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0) .AND.
+      ENDIF
+      eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
+C-----
+C-----do loop over discrete levels -----------------------------------
+C-----
+      sum_cn = 0.d0
+C     DO i = 1, NLV(Nnur)
+      DO i = NLV(Nnur),1,-1 ! Loop order changed to calculate the 
+C                           !    Compound Elastic at the end of the loop 
+         eout = eoutc - ELV(i,Nnur)
+         cor = 1.d0
+         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
+     &       i   .eq.LEVtarg) cor = CELred  
+C--------level above the bin
+C        IF (eout.LT.0.0D0) EXIT
+         IF (eout.LT.0.0D0) CYCLE
+         sumdl = 0.d0
+         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+         smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
+         smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
+         s = smin
+C--------loop over channel spin ----------------------------------------
+   20    lmin = INT(ABS(xjc - s) + 1.01)
+         lmax = INT(xjc + s + 1.01)
+         lmax = MIN0(NLW,lmax)
+C--------do loop over L ------------------------------------------------
+         DO L = lmin, lmax
+            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
+            IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0)) THEN
+              tld = ELTl(L)
+            ELSE
+              tld = TL(il,L,Nejc,Nnur)
+     &            + frde*(TL(il + 1,L,Nejc,Nnur)
+     &            - TL(il,L,Nejc,Nnur))
+            ENDIF
+            IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
+              IF (Nhrtw.GT.0) THEN
+C----------------entry with nhrtw>0
+                 sumdl = sumdl + VT(tld)*cor
+              ELSE
+C----------------entry with nhrtw=0
+                 CALL TL2VL(tld,cor)
+                 sumdl = sumdl + tld*cor
+C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
+                 IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0) .AND.
      &                   tld.GT.H_Tthr) THEN
-C-----------------------case of a strong elastic channel
-C-----------------------record position of Tl, l and channel spin
-                        MEMel(iel,1) = NH_lch
-                        MEMel(iel,2) = l
-                        MEMel(iel,3) = INT(2.0*s)
-C                       WRITE(8,*)'got elastic iel ', iel,
-C    &                     '  MEM# ',MEMel(iel,1),
-C    &                     '  MEMk ',MEMel(iel,2),
-C    &                     '  MEM2s ',MEMel(iel,3)
-                        iel = iel + 1
-                     ENDIF
-                  ENDIF
+C-------------------case of a strong elastic channel
+C-------------------record position of Tl, l and channel spin
+                    MEMel(iel,1) = NH_lch
+                    MEMel(iel,2) = l
+                    MEMel(iel,3) = INT(2.0*s)
+C                   WRITE(8,*)'got elastic iel ', iel,
+C    &              '  MEM# ',MEMel(iel,1),
+C    &              '  MEMk ',MEMel(iel,2),
+C    &              '  MEM2s ',MEMel(iel,3)
+                    iel = iel + 1
+                 ENDIF
                ENDIF
-            ENDDO
-C-----------do loop over l --- done ----------------------------------------
-            s = s + 1.
-            IF (s.LE.smax) GOTO 20
-C-----------loop over channel spin ------ done ----------------------------
-            SCRtl(i,Nejc) = sumdl
-            Sum = Sum + sumdl
-C           WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
+            ENDIF
          ENDDO
-C--------do loop over discrete levels --------- done --------------------
-  100 DENhf = DENhf + Sum
+C--------do loop over L --- done ----------------------------------------
+         s = s + 1.
+         IF (s.LE.smax) GOTO 20
+C--------loop over channel spin ------ done ----------------------------
+
+         dtmp = sumdl  
+         if( Nnuc     .eq.1 .and. Nejc.eq.NPRoject .and.
+     &       CINRED(i).ne.1 .and. i   .ne.1) then  
+            sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
+	      sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
+         else
+            sumdl = dtmp
+         endif
+
+         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
+     &       i   .eq.1) sumdl = dtmp + sum_cn  
+
+         SCRtl(i,Nejc) = sumdl
+         Sum = Sum + sumdl
+C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
+      ENDDO
+C-----do loop over discrete levels --------- done --------------------
+      DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
 Cpr   WRITE(8,*) 'TOTAL SUM=',SUM
-C--------decay to the continuum ------ done -----------------------------
+C-----decay to the continuum ------ done -----------------------------
+	RETURN
       END
 C
 C

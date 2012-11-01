@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3178 $
+Ccc   * $Rev: 3179 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -43,7 +43,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl, xscalc,
-     &  popll, pops, popt, xcse, xs_cn, xs_norm, dtmp, sum_cn
+     &  popll, pops, popt, xcse, xs_cn, xs_norm !, dtmp, sum_cn
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER ilevcol, ilev
       DOUBLE PRECISION GET_DDXS
@@ -86,31 +86,10 @@ C-----
 C-----
 C-----Discrete levels
 C-----
-      sum_cn = 0.d0
-C     DO il = 1, NLV(Nnur)
-      DO il = NLV(Nnur),1,-1	 ! The order changed to calculate the 
-                               !   Compound Elastic at the end of the loop 
+      DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
-C        IF (eemi.LT.0.0D0) RETURN
-         IF (eemi.LT.0.0D0) CYCLE
-C        pop1 = Xnor*SCRtl(il,Nejc)  
-         dtmp = Xnor*SCRtl(il,Nejc)  
-	   if( Nnuc      .eq.1 .and. Nejc.eq.NPRoject .and. 
-     &       CINRED(il).ne.1 .and. il.  ne.1       ) then  
-           pop1 = dtmp*CINRED(il) ! Compound inelastic scaling 
-	     sum_cn = sum_cn +	(1.d0-CINRED(il))*dtmp
-         else
-           pop1 = dtmp
-         endif
-  	   if(Nnuc.eq.1 .and. Nejc.eq.NPRoject .and. il.eq.1) 
-     &     pop1 = dtmp + sum_cn
-C      
-C	   Commented for the time being. Should be applied
-C        to all CN decay channels (including capture and fission)
-C
-C 	   if(Nnuc.eq.1 .and. Nejc.eq.NPRoject .and. il.eq.1) 
-C     &     pop1 = pop1 * CELred  ! Compound Elastic scaling
-C                                                          
+         IF (eemi.LT.0.0D0) RETURN
+         pop1 = Xnor*SCRtl(il,Nejc)  
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
 C--------Add contribution to recoils auxiliary matrix for discrete levels
@@ -555,7 +534,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax,
-     &                 smin, sumdl, sumtl1, sumtl2, xjc, xjr
+     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr, sum_cn, dtmp, cor
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
 C
@@ -678,50 +657,64 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
          Sum = Sum*DE        
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
       ENDIF
-C--------
-C--------decay to discrete levels
+C-----
+C-----decay to discrete levels
 C-----
       DO i = 1, NLV(Nejc)
          SCRtl(i,Nejc) = 0.d0
       ENDDO
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-C-----do loop over discrete levels -----------------------------------
-      DO i = 1, NLV(Nnur)
-            eout = eoutc - ELV(i,Nnur)
-C-----------level above the bin
-C           2.18+
-            IF (eout.LT.0.0D0) GOTO 100
-            sumdl = 0.d0
-            CALL TLLOC(Nnur,Nejc,eout,il,frde)
-            smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
-            smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
-            s = smin
-C-----------loop over channel spin ----------------------------------------
-   20       lmin = INT(ABS(xjc - s) + 1.01)
-            lmax = INT(xjc + s + 1.01)
-            lmax = MIN0(NLW,lmax)
-C-----------do loop over l ------------------------------------------------
-            DO l = lmin, lmax
-               ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-               IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
-     &                                + frde*(TL(il + 1,l,Nejc,Nnur)
-     &                                - TL(il,l,Nejc,Nnur))
-            ENDDO
-C-----------do loop over l --- done ----------------------------------------
-            s = s + 1.
-            IF (s.LE.smax) GOTO 20
-C-----------loop over channel spin ------ done ----------------------------
-C
-C           TUNe commented as it is dangerous to scale Ts for discrete levels 
-C           Dec. 2007, MH, RCN, MS 
-C           sumdl = sumdl*TUNe(Nejc,Nnuc)
-C
-            SCRtl(i,Nejc) = sumdl
-            Sum = Sum + sumdl
+
+      sum_cn = 0.d0
+C     DO i = 1, NLV(Nnur)
+      DO i = NLV(Nnur),1,-1 ! Loop order changed to calculate the 
+C                           !    Compound Elastic at the end of the loop 
+         eout = eoutc - ELV(i,Nnur)
+         cor = 1.d0
+         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
+     &       i   .eq.LEVtarg) cor = CELred  
+C--------level above the bin
+C        IF (eout.LT.0.0D0) EXIT
+         IF (eout.LT.0.0D0) CYCLE
+         sumdl = 0.d0
+         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+         smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
+         smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
+         s = smin
+C--------loop over channel spin ----------------------------------------
+   20    lmin = INT(ABS(xjc - s) + 1.01)
+         lmax = INT(xjc + s + 1.01)
+         lmax = MIN0(NLW,lmax)
+C--------do loop over l ------------------------------------------------
+         DO l = lmin, lmax
+           ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
+           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+     &                          - TL(il,l,Nejc,Nnur))
+         ENDDO
+C--------do loop over l --- done ----------------------------------------
+         s = s + 1.
+         IF (s.LE.smax) GOTO 20
+C--------loop over channel spin ------ done ----------------------------
+
+         dtmp = sumdl*cor  
+         if( Nnuc     .eq.1 .and. Nejc.eq.NPRoject .and.
+     &       CINRED(i).ne.1 .and. i   .ne.1) then  
+            sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
+	      sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
+         else
+            sumdl = dtmp
+         endif
+
+         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
+     &       i   .eq.1) sumdl = dtmp + sum_cn  
+
+         SCRtl(i,Nejc) = sumdl
+         Sum = Sum + sumdl
       ENDDO
 C-----do loop over discrete levels --------- done --------------------
 C
-  100 DENhf = DENhf + Sum
+      DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
       RETURN
       END

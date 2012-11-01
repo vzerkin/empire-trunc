@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3178 $
+Ccc   * $Rev: 3179 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1053,14 +1053,6 @@ C
 C
 C--------New energy header
 C
-         WRITE (8,*) ' '
-         WRITE (8,'(60(''=''))')
-         WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EIN
-         WRITE (8,'(60(''=''))')
-         WRITE (8,*) ' '
-
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 
@@ -1853,9 +1845,12 @@ C-----set Q-value for CN production
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
          WRITE (8,*) ' '
+         WRITE (8,'(60(''=''))')
          WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2)') iae, SYMbe(0), ia, SYMb(0)
-         WRITE (8,'('' Incident particle energy'',F9.3,'' MeV'')') EIN
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
+         WRITE (8,'(60(''=''))')
+         WRITE (8,*) ' '
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
@@ -3545,7 +3540,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
               WRITE (12,
      &'('' CN angular distribution calculated by ECIS as anisotropic usi
      &ng Blatt-Biedenharn coefficients.'')')
-              IF (INTerf.EQ.0) THEN
+              IF (INTerf.EQ.0 .or. SOFt) THEN
                 WRITE (8,
      &          '('' CN and Direct cross section added incoherently'')')
                 WRITE (12,
@@ -4384,11 +4379,6 @@ C
          ENDIF
 C-----
          IF (name.EQ.'CELRED') THEN
-C               WRITE (8,
-C    &   '('' Compound elastic cross-section scaling is not active'',
-C    &   '' , please enquire with R. Capote at r.capotenoy@iaea.org'')') 
-C           GOTO 100
-
             if(i1.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Compound elastic cross section uncertainty '',
