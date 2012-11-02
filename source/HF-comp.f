@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3179 $
+Ccc   * $Rev: 3181 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
+Ccc   * $Date: 2012-11-02 22:43:05 +0100 (Fr, 02 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -534,7 +534,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax,
-     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr, sum_cn, dtmp, cor
+     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr, cor, sum_cn, dtmp
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
 C
@@ -666,16 +666,15 @@ C-----
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
 
       sum_cn = 0.d0
-C     DO i = 1, NLV(Nnur)
-      DO i = NLV(Nnur),1,-1 ! Loop order changed to calculate the 
-C                           !    Compound Elastic at the end of the loop 
+      DO i = 1, NLV(Nnur)
+	  
+C        Elastic channels excluded, done after the loop
+         if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
+
          eout = eoutc - ELV(i,Nnur)
+         IF (eout.LT.0.0D0) EXIT
+
          cor = 1.d0
-         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
-     &       i   .eq.LEVtarg) cor = CELred  
-C--------level above the bin
-C        IF (eout.LT.0.0D0) EXIT
-         IF (eout.LT.0.0D0) CYCLE
          sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
@@ -697,28 +696,57 @@ C--------do loop over l --- done ----------------------------------------
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
 
-         dtmp = sumdl*cor  
-         if( Nnuc     .eq.1 .and. Nejc.eq.NPRoject .and.
-     &       CINRED(i).ne.1 .and. i   .ne.1) then  
-            sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
-	      sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
+         dtmp = sumdl  
+         if(IZA(Nnur).EQ.IZA(0).and.CINRED(i).ne.1) then  
+           sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
+           sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
          else
-            sumdl = dtmp
+           sumdl = dtmp
          endif
-
-         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
-     &       i   .eq.1) sumdl = dtmp + sum_cn  
 
          SCRtl(i,Nejc) = sumdl
          Sum = Sum + sumdl
       ENDDO
 C-----do loop over discrete levels --------- done --------------------
+
+      if(IZA(Nnur).EQ.IZA(0)) THEN
+
+         i = LEVtarg  
+         eout = eoutc - ELV(i,Nnur)
+         IF (eout.LT.0.0D0) GOTO 40
+
+         cor = CELred
+         sumdl = 0.d0
+         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+         smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
+         smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
+         s = smin
+C--------loop over channel spin ----------------------------------------
+   30    lmin = INT(ABS(xjc - s) + 1.01)
+         lmax = INT(xjc + s + 1.01)
+         lmax = MIN0(NLW,lmax)
+C--------do loop over l ------------------------------------------------
+         DO l = lmin, lmax
+           ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
+           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+     &                          - TL(il,l,Nejc,Nnur))
+         ENDDO
+C--------do loop over l --- done ----------------------------------------
+         s = s + 1.
+         IF (s.LE.smax) GOTO 30
+C--------loop over channel spin ------ done ----------------------------
+
+         sumdl = sumdl*cor + sum_cn  ! Correcting the Compound Elastic   
+
+         SCRtl(i,Nejc) = sumdl
+         Sum = Sum + sumdl
+      ENDIF
 C
-      DENhf = DENhf + Sum
+   40 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
       RETURN
       END
-
 
       SUBROUTINE DECAYD(Nnuc)
 Ccc

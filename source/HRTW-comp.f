@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3179 $
+Ccc   * $Rev: 3181 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
+Ccc   * $Date: 2012-11-02 22:43:05 +0100 (Fr, 02 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -25,7 +25,7 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
-     &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
+     &                 H_Tav,H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
       INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
       COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
@@ -170,7 +170,7 @@ C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
                H_Tav = 0.0
             ENDIF
 C           WRITE(8,*)'sum gamma ' , sumg
-C           WRITE(8,*)'sum fission redifined ' , sumfis
+C           WRITE(8,*)'sum fission redefined ' , sumfis
 C           WRITE(8,*)'total sum for this state ' , H_Sumtl
 C           WRITE(8,*)'sum Tl**2 for this state ' , H_Sumtls
 C           WRITE(8,*)'sum of weak for this state ' , H_Sweak
@@ -203,7 +203,7 @@ C              WRITE(8,*)' '
                NSCh = 0
 C--------------do loop over ejectiles (fission is not repeated)
                nhrtw = i
-               DENhf = 0.0
+               DENhf = 0.d0
                DO nejc = 1, NEJcm
 C                 emitted nuclei must be heavier than alpha
                   if(NREs(nejc).lt.0) cycle
@@ -226,7 +226,7 @@ C                 emitted nuclei must be heavier than alpha
                   if(NREs(nejc).lt.0) cycle
                   nnur = NREs(nejc)
                   IF (IZA(nnur).EQ.IZA(0))
-     &                CALL ELCORR(nnuc,ke,jcn,ip,nnur,nejc,nhrtw)
+     &              CALL ELCORR(nnuc,ke,jcn,ip,nnur,nejc,nhrtw)
                ENDDO
 C--------------
 C--------------normalization and accumulation
@@ -340,7 +340,7 @@ Ccc   *                      H R T W  _  D E C A Y                       *
 Ccc   *                (function to function version)                    *
 Ccc   *                                                                  *
 Ccc   * Calculates decay of a continuum state in nucleus NNUC into       *
-Ccc   * continuum anddiscrete states of the residual nucleus NNUR       *
+Ccc   * continuum and discrete states of the residual nucleus NNUR       *
 Ccc   * through the emission of the ejectile NEJC including width        *
 Ccc   * fluctuation correction according to HRTW theory.                 *
 Ccc   *                                                                  *
@@ -400,7 +400,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
-     &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr, sum_cn, dtmp
+     &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr, dtmp, sum_cn
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2,
      &        ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
       DOUBLE PRECISION VT
@@ -605,21 +605,21 @@ C-----clear memorized elastic channels when entering new J-pi CN state
             MEMel(i,3) = 0
          ENDDO
       ENDIF
+
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
 C-----
 C-----do loop over discrete levels -----------------------------------
 C-----
-      sum_cn = 0.d0
-C     DO i = 1, NLV(Nnur)
-      DO i = NLV(Nnur),1,-1 ! Loop order changed to calculate the 
-C                           !    Compound Elastic at the end of the loop 
+      sum_cn= 0.d0
+      DO i = 1, NLV(Nnur) 
+C        Elastic channels excluded, done after the loop
+         if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
+
          eout = eoutc - ELV(i,Nnur)
          cor = 1.d0
-         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
-     &       i   .eq.LEVtarg) cor = CELred  
-C--------level above the bin
-C        IF (eout.LT.0.0D0) EXIT
-         IF (eout.LT.0.0D0) CYCLE
+       
+         IF (eout.LT.0.0D0) EXIT
+
          sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
@@ -632,7 +632,64 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over L ------------------------------------------------
          DO L = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
-            IF (i.EQ.1 .AND. IZA(Nnur).EQ.IZA(0)) THEN
+            IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0)) THEN
+              tld = ELTl(L)
+            ELSE
+              tld = TL(il,L,Nejc,Nnur)
+     &            + frde*(TL(il + 1,L,Nejc,Nnur)
+     &            - TL(il,L,Nejc,Nnur))
+            ENDIF
+            IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
+              IF (Nhrtw.GT.0) THEN
+C----------------entry with nhrtw>0
+                 sumdl = sumdl + VT(tld)*cor
+              ELSE
+C----------------entry with nhrtw=0
+                 CALL TL2VL(tld,cor)
+                 sumdl = sumdl + tld*cor
+C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
+               ENDIF
+            ENDIF
+         ENDDO
+C--------do loop over L --- done ----------------------------------------
+         s = s + 1.
+         IF (s.LE.smax) GOTO 20
+C--------loop over channel spin ------ done ----------------------------
+
+         dtmp = sumdl  
+         if(IZA(Nnur).EQ.IZA(0).and.CINRED(i).ne.1) then  
+           sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
+           sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
+         else
+           sumdl = dtmp
+         endif
+
+         SCRtl(i,Nejc) = sumdl
+         Sum = Sum + sumdl
+C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
+      ENDDO
+
+      if(IZA(Nnur).EQ.IZA(0)) THEN
+	
+         i=LEVtarg  
+
+         eout = eoutc - ELV(i,Nnur)
+         cor = CELred
+         IF (eout.LT.0.0D0) GOTO 70
+
+         sumdl = 0.d0
+         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+         smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
+         smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
+         s = smin
+C--------loop over channel spin ----------------------------------------
+   30    lmin = INT(ABS(xjc - s) + 1.01)
+         lmax = INT(xjc + s + 1.01)
+         lmax = MIN0(NLW,lmax)
+C--------do loop over L ------------------------------------------------
+         DO L = lmin, lmax
+            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
+            IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0)) THEN
               tld = ELTl(L)
             ELSE
               tld = TL(il,L,Nejc,Nnur)
@@ -666,30 +723,20 @@ C    &              '  MEM2s ',MEMel(iel,3)
          ENDDO
 C--------do loop over L --- done ----------------------------------------
          s = s + 1.
-         IF (s.LE.smax) GOTO 20
+         IF (s.LE.smax) GOTO 30
 C--------loop over channel spin ------ done ----------------------------
-
-         dtmp = sumdl  
-         if( Nnuc     .eq.1 .and. Nejc.eq.NPRoject .and.
-     &       CINRED(i).ne.1 .and. i   .ne.1) then  
-            sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
-	      sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
-         else
-            sumdl = dtmp
-         endif
-
-         if( Nnuc.eq.1 .and. Nejc.eq.NPRoject .and.
-     &       i   .eq.1) sumdl = dtmp + sum_cn  
+         sumdl = sumdl + sum_cn  ! Correcting the Compound Elastic   
 
          SCRtl(i,Nejc) = sumdl
          Sum = Sum + sumdl
 C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
-      ENDDO
+      ENDIF
+
 C-----do loop over discrete levels --------- done --------------------
-      DENhf = DENhf + Sum
+   70 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
 Cpr   WRITE(8,*) 'TOTAL SUM=',SUM
-C-----decay to the continuum ------ done -----------------------------
+C-----decay to the continuum and discrete levels ------ done -----------------------------
 	RETURN
       END
 C
@@ -1270,7 +1317,6 @@ C
       GOTO 100
       END
 
-
       SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
 Ccc
 Ccc   ********************************************************************
@@ -1321,11 +1367,9 @@ C
       DOUBLE PRECISION EEF, VT1
       DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v,
      &                 xjc
-      REAL FLOAT
       INTEGER i, iel, il, ipar, kel, l, lmax, lmin
-      INTEGER INT, MIN0
 C
-C
+
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----
 C-----decay to discrete levels
@@ -1336,7 +1380,7 @@ C--------only target state considered
          eout = eoutc - ELV(i,Nnur)
          IF (eout.LT.DE) THEN
 C--------level above the bin
-            IF (eout.LT.0.0D0) GOTO 99999
+            IF (eout.LT.0.0D0) RETURN
          ENDIF
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
@@ -1364,7 +1408,7 @@ C--------------got a true elastic channel
                ELSE
                   v = VT1(tld,H_Tav,H_Sumtl)
                ENDIF
-               popadd = v*(EEF(tld,H_Tav,H_Sumtl) - 1.0)
+               popadd = v*(EEF(tld,H_Tav,H_Sumtl) - 1.0) 
                SCRtl(i,Nejc) = SCRtl(i,Nejc) + popadd
                SCRtem(Nejc) = SCRtem(Nejc) + popadd
             ENDIF
@@ -1373,7 +1417,8 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 50
 C--------loop over channel spin ------ done ----------------------------
-99999 END
+      RETURN
+      END
 
 
       SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
