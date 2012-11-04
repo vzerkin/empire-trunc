@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3181 $
+Ccc   * $Rev: 3182 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-02 22:43:05 +0100 (Fr, 02 Nov 2012) $
+Ccc   * $Date: 2012-11-04 16:43:27 +0100 (So, 04 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1053,9 +1053,7 @@ C Local variables
 C
       DOUBLE PRECISION E1, E2, XM1
       DOUBLE PRECISION eg, xjc
-      REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
-      INTEGER MAX0, MIN0
 C
       INTEGER Jr,lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
@@ -1094,8 +1092,6 @@ C
          cme = 0.307D0/ha
       ENDIF
 C
-Cp    jmin = MAX0(1, Jc - 2)
-Cp    jmax = MIN0(NLW, Jc + 2)
       jmin = 1
 Cp    jmin = MAX0(1, Jc - MAXmult)
       jmax = MIN0(NLW, Jc + MAXmult)
@@ -1106,13 +1102,13 @@ C
 C-----clear scratch matrix (continuum)
       DO j = 1, NLW
          DO i = 1, NEX(Nnuc)
-            SCRt(i,j,1,0) = 0.0
-            SCRt(i,j,2,0) = 0.0
+            SCRt(i,j,1,0) = 0.D0
+            SCRt(i,j,2,0) = 0.D0
          ENDDO
       ENDDO
 C-----clear scratch matrix (discrete levels)
       DO i = 1, NLV(Nnuc)
-         SCRtl(i,0) = 0.0
+         SCRtl(i,0) = 0.D0
       ENDDO
 C-----IPOS is a parity-index of final states reached by gamma
 C-----transitions which do not change parity (E2 and M1)
@@ -1135,7 +1131,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))*
      &            TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
-         xle(2) = E2(eg)*TUNe(0, Nnuc)
+         IF(MAXmult.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
          IF(MAXmult.GT.2) THEN
             xlm(2) = xle(2)*cme
             DO i = 3, MAXmult

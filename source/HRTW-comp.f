@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3181 $
+Ccc   * $Rev: 3182 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-02 22:43:05 +0100 (Fr, 02 Nov 2012) $
+Ccc   * $Date: 2012-11-04 16:43:27 +0100 (So, 04 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -118,17 +118,14 @@ C              WRITE(8,*)'sum for ejectile=' , nejc, sum
             ENDDO
 C-----------do loop over ejectiles       ***done***
 
-C-----------gamma emision is always a weak channel
+C-----------gamma emission is always a weak channel (one iteration)
             sumg = 0.0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
 C
-C-----------fission
-C
-C           dencomp = H_Sumtl
+C-----------fission is always a weak channel (one iteration)
             sumfis = 0.d0
-C
             IF (FISsil(nnuc)) THEN
               IF (FISshi(nnuc).EQ.1.) THEN
                 CALL FISSION(nnuc,ke,jcn,sumfis)
@@ -414,12 +411,12 @@ C     WRITE(8,*)' '
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----clear scratch matrices
 C     NSCh = 0
-      Sum = 0.0
-      SCRtem(Nejc) = 0.0
+      Sum = 0.D0
+      SCRtem(Nejc) = 0.D0
       DO j = 1, NLW
          DO i = 1, NEX(Nnur) + 1
-            SCRt(i,j,1,Nejc) = 0.0
-            SCRt(i,j,2,Nejc) = 0.0
+            SCRt(i,j,1,Nejc) = 0.D0
+            SCRt(i,j,2,Nejc) = 0.D0
          ENDDO
       ENDDO
       iexc = NEX(Nnuc) - NEXr(Nejc,Nnuc)
@@ -579,14 +576,6 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
             Sum = Sum - 0.5*(SCRt(1,j,1,Nejc) + SCRt(1,j,2,Nejc))
          ENDDO
          Sum = Sum*DE
-         IF (Nhrtw.GT.0) THEN
-            DO j = 1, NLW
-               DO i = 1, NEX(Nnur) + 1
-                  SCRt(i,j,1,Nejc) = SCRt(i,j,1,Nejc)
-                  SCRt(i,j,2,Nejc) = SCRt(i,j,2,Nejc)
-               ENDDO
-            ENDDO
-         ENDIF
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
 C--------
 C--------decay to discrete levels
@@ -594,7 +583,7 @@ C--------
       ENDIF
 
       DO i = 1, NLV(Nejc)
-         SCRtl(i,Nejc) = 0.0
+         SCRtl(i,Nejc) = 0.D0
       ENDDO
       IF (Nhrtw.EQ.0 .AND. IZA(Nnur).EQ.IZA(0)) THEN
 C-----clear memorized elastic channels when entering new J-pi CN state
@@ -705,7 +694,7 @@ C----------------entry with nhrtw=0
                  CALL TL2VL(tld,cor)
                  sumdl = sumdl + tld*cor
 C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
-                 IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0) .AND.
+                 IF (IZA(Nnur).EQ.IZA(0) .AND.
      &                   tld.GT.H_Tthr) THEN
 C-------------------case of a strong elastic channel
 C-------------------record position of Tl, l and channel spin
@@ -795,9 +784,7 @@ C
       DOUBLE PRECISION corr, eg, xjc
       DOUBLE PRECISION E1, E2, XM1
 C     DOUBLE PRECISION VT1
-      REAL FLOAT
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
-      INTEGER MAX0, MIN0
       INTEGER Jr, lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
      &                 scrtpos, scrtneg, hsumtls,  hscrtl
@@ -835,28 +822,24 @@ C
          cme = 0.307D0/ha
       ENDIF
 C
-Cp    jmin = MAX0(1, Jc - 2)
-Cp    jmax = MIN0(NLW, Jc + 2)
       jmin = 1
 Cp    jmin = MAX0(1, Jc - MAXmult)
       jmax = MIN0(NLW, Jc + MAXmult)
-C
-C
-      Sum = 0.0
-      SCRtem(0) = 0.0
+
+      Sum = 0.D0
+      SCRtem(0) = 0.D0
       xjc = FLOAT(Jc) + HIS(Nnuc)
-      jmin = MAX0(1,Jc - 2)
-      jmax = MIN0(NLW,Jc + 2)
+
 C-----clear scratch matrix (continuum)
       DO j = 1, NLW
          DO i = 1, NEX(Nnuc)
-            SCRt(i,j,1,0) = 0.0
-            SCRt(i,j,2,0) = 0.0
+            SCRt(i,j,1,0) = 0.D0
+            SCRt(i,j,2,0) = 0.D0
          ENDDO
       ENDDO
 C-----clear scratch matrix (dNH_lchrete levels)
       DO i = 1, NLV(Nnuc)
-         SCRtl(i,0) = 0.0
+         SCRtl(i,0) = 0.D0
       ENDDO
 C-----IPOS is a parity-index of final states reached by gamma
 C-----transitions which do not change parity (E2 and M1)
@@ -876,15 +859,15 @@ C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded)
       DO ier = Iec - 1, 1, -1
          IF (ier.EQ.1) THEN
-            corr = 0.5
+            corr = 0.5D0
          ELSE
-            corr = 1.0
+            corr = 1.0D0
          ENDIF
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
      &      *TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
-         xle(2) = E2(eg)*TUNe(0, Nnuc)
+         IF(MAXmult.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
          IF(MAXmult.GT.2) THEN
             xlm(2) = xle(2)*cme
             DO i = 3, MAXmult
@@ -893,23 +876,6 @@ C-----do loop over c.n. energies (loops over spins and parities expanded)
              xlm(i)= xle(i)*cme
             ENDDO
          ENDIF
-c        IF(Nhrtw.EQ.0)THEN
-c           DO i = 1, MAXmult
-c            xle(i) = xle(i)*TUNe(0, Nnuc)
-c            xlm(i) = xlm(i)*TUNe(0, Nnuc)
-c           ENDDO
-c        ELSE
-c           IF(MAXmult.EQ.2) THEN
-c             xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c             xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c             xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c           ELSE
-c             DO i = 1, MAXmult
-c               xle(i) = VT1(xle(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c               xlm(i) = VT1(xlm(i)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c             ENDDO
-c           ENDIF
-c        ENDIF
          DO Jr = 1, jmax
             xjr = FLOAT(Jr) + HIS(Nnuc)
             lambmin = MAX0(1,ABS(Jc-Jr))
@@ -980,23 +946,6 @@ C--------do loop over discrete levels -----------------------------------
                xlm(j) = xle(j)*cme
               ENDDO
              ENDIF
-c            IF(Nhrtw.EQ.0)THEN
-c             DO j = 1, lambmax
-c              xle(j) = xle(j)*TUNe(0, Nnuc)
-c              xlm(j) = xlm(j)*TUNe(0, Nnuc)
-c             ENDDO
-c            ELSE
-c             IF(lambmax.EQ.2) THEN
-c               xle(1) = VT1(xle(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c               xlm(1) = VT1(xlm(1)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c               xle(2) = VT1(xle(2)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c             ELSE
-c               DO j = 1, lambmax
-c                xle(j) = VT1(xle(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c                xlm(j) = VT1(xlm(j)* TUNe(0, Nnuc), H_Tav, H_Sumtl)
-c               ENDDO
-c             ENDIF
-c            ENDIF
              hscrtl = 0.0D0
              hsumtls = 0.0D0
              DO lamb = lambmin, lambmax
