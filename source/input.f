@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3179 $
+Ccc   * $Rev: 3183 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-01 07:58:30 +0100 (Do, 01 Nov 2012) $
+Ccc   * $Date: 2012-11-04 22:01:13 +0100 (So, 04 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2064,16 +2064,16 @@ C-----------determination of etl matrix
      &                            - EX(NEXr(nejc,nnuc),nnur)
      &                            - Q(nejc,nnuc)
             ELSE
-               ETL(5,nejc,nnur) = 0.
+               ETL(5,nejc,nnur) = 0.d0
             ENDIF
-            IF (nejc.EQ.1) ETL(5,nejc,nnur) = 0.
+            IF (nejc.EQ.1) ETL(5,nejc,nnur) = 0.d0
 Cpr         WRITE(8,*) 'etl(5,.),netl',etl(5,nejc,nnur),netl
 Cpr         etlmax=EX(NEX(NNUC),NNUC)-Q(NEJC,NNUC)
 Cpr         WRITE(8,*) 'etlmax',etlmax
-            ETL(1,nejc,nnur) = 0.
-            ETL(2,nejc,nnur) = 0.1*ETL(5,nejc,nnur)
-            ETL(3,nejc,nnur) = 0.2*ETL(5,nejc,nnur)
-            ETL(4,nejc,nnur) = 0.5*ETL(5,nejc,nnur)
+            ETL(1,nejc,nnur) = 0.d0
+            ETL(2,nejc,nnur) = 0.1d0*ETL(5,nejc,nnur)
+            ETL(3,nejc,nnur) = 0.2d0*ETL(5,nejc,nnur)
+            ETL(4,nejc,nnur) = 0.5d0*ETL(5,nejc,nnur)
             DO ietl = 6, netl
                ETL(ietl,nejc,nnur) = ETL(ietl - 1,nejc,nnur) + DE
             ENDDO
