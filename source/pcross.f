@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3165 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 3184 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-06 02:14:49 +0100 (Di, 06 Nov 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -32,10 +32,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 L(0:NDEJC,PMAX), XCOs(NDAngecis), VV
+      REAL*8 L(0:NDEJC,PMAX), VV
       INTEGER*4 NHEq
       COMMON /CALC5 / L, NHEq
-      COMMON /KALB/ XCOs
       COMMON /VWELL / VV
 
       DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
@@ -53,7 +52,7 @@ C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
-     &       r(4,PMAX,NDEJC), sg, theta, vvf, vsurf, wb, wda,
+     &       r(4,PMAX,NDEJC), sg, vvf, vsurf, wb, wda,
      &       dstrip, dbreak, dpickup, step, ggg
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
@@ -71,7 +70,7 @@ C
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
 C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls   
-      SAVE r, /KALB/, callpcross, /PFACT/
+      SAVE r, callpcross, /PFACT/
 C
 C
       DATA callpcross/.FALSE./
@@ -143,8 +142,8 @@ C     with energy as it is expected on physical basis.
 C
 C     Nmax = Aproj + NHEq -1 (is equal to NHEq for nucleon induced reactions)
 C
-C     Chinese group uses CHMax = 0.88, but it gives to hard PE spectrum in Th232
-C     so it was reduced by IAEA to 0.2.
+C     Chinese group uses CHMax = 0.88, but it gives too hard PE spectrum in Th232
+C     so it was reduced to 0.2 for the IAEA Th-232 evaluation.
 C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
@@ -187,9 +186,8 @@ C
 C        Assuming PE calculates over discrete levels' region as well
          nexrt = MAX(INT(excnq/DE + 1.0001),1)
 
-C        IDNa(1,6) = 0  ! discrete N is included even with ECIS active
-C        IDNa(3,6) = 0  ! discrete P is included even with ECIS active
-C        IDNa(5,6) = 1  ! gammas
+C        IDNa(1,6) = 0   ! discrete N is included even with ECIS active
+C        IDNa(3,6) = 0   ! discrete P is included even with ECIS active
 C        IDNa(11,6) = 0  ! discrete A is included even with ECIS active
 C        IDNa(12,6) = 0  ! discrete D is included even with ECIS active
 C        IDNa(13,6) = 0  ! discrete T is included even with ECIS active
@@ -223,12 +221,13 @@ C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
 
       WRITE (8,99020)
 C
-Cig---Direct reaction spectra for d,p and d,t only
+C-----Direct reaction spectra for d,p and d,t 
 C
       dbreak  = 0.d0
-        dstrip  = 0.d0 
+      dstrip  = 0.d0 
       dpickup = 0.d0
       scompn  = Sigr
+
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
         write(8,99002)
 99002   FORMAT (/5X,
@@ -260,7 +259,9 @@ c         write(8,99003) Einl,sigr,cross(2),cross(5)
           dpickup=cross(5)
         ENDIF
       ENDIF
-
+C
+C-----Direct reaction spectra for He3,p and He3,a 
+C
       IF(Zejc(0).eq.2.D0 .and. Aejc(0).eq.3.D0) THEN
         write(8,*)
      &' He-3 Stripping and Pick-up Parameterization (C. Kalbach)'
@@ -307,7 +308,7 @@ C     nexrt = MAX(INT(EXCn/DE + 1.0001),1)
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 C
-C-----EMISSION RATES CALCULATIONS FOLLOWS
+C-----EMISSION RATES CALCULATIONS FOLLOWS		    
 C
 C-----PRIMARY PARTICLE LOOP
 C
@@ -347,6 +348,7 @@ C        EMPIRE tuning factor is used (important to describe capture) RCN, june 
 C
 C--------PARTICLE-HOLE LOOP
 C
+
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
@@ -365,10 +367,11 @@ C           if (hh.eq.1) VV = vsurf
 C
 C
             ff2 = DENSW(gc,pc,p,hh,ec)
-            IF (ff2.EQ.0.) GOTO 50    
+            IF (ff2.EQ.0.) cycle
 C
 C-----------PRIMARY ENERGY CYCLE
 C
+
             DO ienerg = iemin(nejc), iemax(nejc)
                eee = DE*(ienerg - 1)
                er = EMAx(nnur) - eee
@@ -417,6 +420,7 @@ C--------------PREEQ GAMMA EMISSION
 C              write(8,'(1x,3i3,1x,7(d12.6,1x))')
 C    &             nejc,h1,ienerg,hlp1,sg,eee,wda,ff1,ff2,ff3
             ENDDO
+
 C-----------END OF EMISSION ENERGY LOOP
 C
 C-----------INTEGRATION PROCEDURE #1 (EMISSION RATES)
@@ -439,9 +443,11 @@ C
                ENDDO
                L(nejc,h1) = 0.5D0*hlp1*C1
             ENDIF
-   50    ENDDO
+         ENDDO
 C--------END OF PARTICLE-HOLE LOOP
+
       ENDDO
+
 C-----END OF EMITTED PARTICLE LOOP
 C
 C-----TRANSITION RATES CALCULATIONS FOLLOWS
@@ -514,9 +520,9 @@ C           endif
             step = 1.d0
             if(ienerg.eq.iemin(nejc) .OR.
      >         ienerg.eq.iemax(nejc) ) step=0.5d0
-            spec(nejc,ienerg) = spec(nejc,ienerg) + 
-     >                          scompn*emis*step
             hlp1 = hlp1 + scompn*emis*DE*step
+            spec(nejc,ienerg) = spec(nejc,ienerg) + scompn*emis*step
+
          ENDDO
          cross(nejc) = hlp1 + cross(nejc)  
          totemis = totemis + cross(nejc)
@@ -574,11 +580,6 @@ C         WRITE(8, *)'==========================='
       ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
-      do i=1,NDAng
-         theta=DBLE(i-1)/DBLE(NDAng-1)*pi
-         xcos(i)=cos(theta)
-      enddo
-
       totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
@@ -618,9 +619,9 @@ C           Kalbach systematic for PCROSS DDX calculations
 C           fanisot is assumed 1, i.e. pure PE emission
 C
             fanisot = 1.d0
-C           fmsd set to 0.d0 means isotropic distribution
+C           fanisot set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     &              ebind, eee, ftmp, fanisot, ddxs, NDAng)
+     &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
@@ -638,7 +639,7 @@ c     totemis=sigr*fr
       END
 
       SUBROUTINE KALBACH(Jcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
-     &Bin, Eps, Total, Fmsd, Sigma, NDang)
+     &Bin, Eps, Total, Fmsd, Sigma, Xcos, NDang)
 C
 C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
 C
@@ -684,8 +685,6 @@ C
       INCLUDE 'dimension.h'
       REAL*8 arg, a, xnorm, eps,total,fmsd, bin, elab, esys
       REAL*8 Sigma(NDAngecis), XCOs(NDAngecis)
-      COMMON /KALB/ XCOs
-      SAVE /KALB/
 Cmbc  MB Chadwick, added coding Oct 95, for photonuclear reactions
       jflagph=0
       jcomt = Jcom
@@ -1363,5 +1362,4 @@ C        SGAM = GAMMA ABSORPTION CROSS SECTION in mb
          SGAM = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
       ENDIF
       END
-
 

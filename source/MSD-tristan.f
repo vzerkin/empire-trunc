@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3060 $
+Ccc   * $Rev: 3184 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-08-05 03:44:39 +0200 (So, 05 Aug 2012) $
+Ccc   * $Date: 2012-11-06 02:14:49 +0100 (Di, 06 Nov 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3098,10 +3098,9 @@ C
       DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis)
-      DOUBLE PRECISION csmtot,csm1,csm2,eee
-      REAL FLOAT
+      DOUBLE PRECISION csmtot,csm1,eee
       INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
-      INTEGER INT
+
       IF (NEX(Nnuc).LT.1) THEN
          WRITE (8,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
          WRITE (8,*) ' ACCUMSD COMPLAINS NEGATIVE ENERGY FOR'
@@ -3219,14 +3218,14 @@ C
                pops = CSEmsd(icsp,Nejc)
 C              Commented on Dec 2011 by RCN, to keep integral of spectra = XS
 C              Uncommented on July 2012
-               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
-               IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
-     &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
-     &             - 0.5*CSEmsd(icsp,Nejc)
+C              IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
+C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
+C    &             - 0.5*CSEmsd(icsp,Nejc)
 
 C--------------DDX using portions
                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
@@ -3241,8 +3240,8 @@ C
 C           No recoils from gamma emission for the time being
 C
             nangle = NDANG
-            dang = 3.14159/FLOAT(nangle - 1)
-            coef = 2*3.14159*dang/DERec
+            dang = pi/FLOAT(nangle - 1)
+            coef = 2*pi*dang/DERec
             ecm = EINl - EIN
             IF(Nejc.NE.0) THEN
                DO ie = 1, nexrt
@@ -3283,9 +3282,11 @@ C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 )  return
       IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.0 )  return
       IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 )  return  
 
+      IF (Nejc.eq.0 .and. PEQc.GT.0 )  return  
+C     No recoils from gamma emission for the time being
+C     IF (Nejc.eq.0 .and. PEQc.GT.0 .and. IDNa(5,6).EQ.0 )  return  
       IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 )  return
       IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa(3,6).EQ.0 )  return
-      IF (Nejc.eq.0 .and. PEQc.GT.0 .and. IDNa(5,6).EQ.0 )  return  
       IF (Nejc.eq.3 .and. PEQc.GT.0 .and. IDNa(11,6).EQ.0 ) return
       IF (Nejc.eq.4 .and. PEQc.GT.0 .and. IDNa(12,6).EQ.0 ) return
       IF (Nejc.eq.5 .and. PEQc.GT.0 .and. IDNa(13,6).EQ.0 ) return
@@ -3293,9 +3294,16 @@ C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 )  return
 C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
-      IF (nexrt.LE.0) nexrt = 1
-      IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
+C     IF (nexrt.LE.0) nexrt = 1  ! changed to try getting better balance, Nov 2012
+C     IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
+      IF (ENDf(1).GT.0 .and. RECOIL.GT.0 
+     &   .and. nexrt.GT.0 .and. Nejc.gt.0) THEN
+C
+C           No recoils from gamma emission for the time being
+C
          nangle = NDANG
+         dang = pi/FLOAT(nangle - 1)
+         coef = 2*pi*dang/DERec
          DO ie = nexrt, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
             DO na = 1, nangle
@@ -3303,15 +3311,14 @@ C-----(NOTE: it is usually negative in such a case)
      &                   *CANgler(na)
                irec = erecoil/DERec + 1.001
                weight = (erecoil - (irec - 1)*DERec)/DERec
-               IF (irec + 1.GT.NDEREC) GOTO 50
+               IF (irec + 1.GT.NDEREC) EXIT
                csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coef*DE
-               IF (ie.EQ.nexrt) csmsdl = 0.5*csmsdl
                RECcse(irec,0,Nnur) = RECcse(irec,0,Nnur)
      &                               + csmsdl*(1.0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
      &            + csmsdl*weight
             ENDDO
-   50    ENDDO
+         ENDDO
       ENDIF
 C-----distribution of the MSD/PCROSS contribution to discrete levels
 C-----
@@ -3326,8 +3333,6 @@ C
        ENDDO
 
        IF(csm1.le.1.d-6) RETURN
-
-       csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
 
 C------MSD or PCROSS contribution is integrated over the discrete level region and
 C------distributed among 2+, 3- and 4+ levels (or those close to such for
@@ -3351,8 +3356,6 @@ C        Setting it to zero to delete discrete spectra before redistributing
            if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
          ENDIF
        ENDDO
-       csmsdl = csmsdl - 0.5*CSEmsd(next,Nejc)*DE
-C
 C
 C      Inelastic channel
 C
@@ -3430,8 +3433,6 @@ C
 
        IF(csm1.le.1.d-6) RETURN
 
-       csm2 = csm1 - 0.5*CSEmsd(next,Nejc)*DE
-
        csmtot = 0.d0
        xnor = 0.d0
 
@@ -3483,13 +3484,10 @@ C--------Store ang. dist.
 
       ENDIF
 
-      IF(csm2-csmtot.gt.0.1d0) then
+      IF(csm1-csmtot.gt.0.1d0) then
        write(8,*) 'WARNING: PE discrete levels for nejc=',nejc
        write(8,*) 'WARNING: Difference in in/out flux =',
-     &             sngl(csm2-csmtot)
-C     ELSE
-C      write(8,*) ' PE XS to discrete levels   ',sngl(csmtot),
-C    >              ' for nejc =',nejc
+     &             sngl(csm1-csmtot)
       ENDIF
       RETURN
       END
