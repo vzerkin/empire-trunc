@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3184 $
+Ccc   * $Rev: 3185 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-06 02:14:49 +0100 (Di, 06 Nov 2012) $
+Ccc   * $Date: 2012-11-06 03:35:03 +0100 (Di, 06 Nov 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -518,8 +518,8 @@ C             write(*,*)
 C    >       'nejc,IE,naver=',nejc,ienerg, NINT(xnaver(nejc,ienerg))
 C           endif
             step = 1.d0
-            if(ienerg.eq.iemin(nejc) .OR.
-     >         ienerg.eq.iemax(nejc) ) step=0.5d0
+C           if(ienerg.eq.iemin(nejc) .OR.
+C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
             hlp1 = hlp1 + scompn*emis*DE*step
             spec(nejc,ienerg) = spec(nejc,ienerg) + scompn*emis*step
 

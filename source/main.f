@@ -1,6 +1,6 @@
-cc   * $Rev: 3178 $
+cc   * $Rev: 3185 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-06 03:35:03 +0100 (Di, 06 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2476,11 +2476,10 @@ C------------Print residual nucleus population
                   DO i = 1, NEX(nnur)
                     poptot = poptot + POP(i,j,1,nnur) + POP(i,j,2,nnur)
                   ENDDO
-                  poptot = poptot 
-     &                   - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
-     &                   - 0.5*(POP(NEX(nnur),j,1,nnur) 
-     &                   +      POP(NEX(nnur),j,2,nnur))
-               
+C                 poptot = poptot 
+C    &                   - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
+C    &                   - 0.5*(POP(NEX(nnur),j,1,nnur) 
+C    &                   +      POP(NEX(nnur),j,2,nnur))
                 ENDDO
              ENDIF 
              poptot = poptot*DE
@@ -2722,10 +2721,10 @@ C                      ENDIF
                      ENDDO
                      IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                    (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
-                        DO nang = 1, NDANG
-                              !double the first bin to preserve integral in EMPEND
-                          cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-                        ENDDO
+C                       DO nang = 1, NDANG
+C                         double the first bin to preserve integral in EMPEND
+C                         cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                       ENDDO
                       ENDIF
                       DO ie = 1, nspec - 1
                                        ! print DDX spectrum
@@ -2808,10 +2807,10 @@ c     &                            (PI*spechk(i)*DE,i=1,3),spechk(4)*DE
 
                      IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                    (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
-                        DO nang = 1, NDANG
-                     !double the first bin to preserve integral in EMPEND
-                          cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-                        ENDDO
+C                       DO nang = 1, NDANG
+C                         double the first bin to preserve integral in EMPEND
+C                         cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                       ENDDO
                       ENDIF
                       DO ie = 1, nspec - 1
                                        ! print DDX spectrum
@@ -2832,8 +2831,8 @@ C
 C
 C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
 C-----------------double the first bin x-sec to preserve integral in EMPEND
-                  POPcse(0,nejc,1,INExc(nnuc)) =
-     &                  POPcse(0,nejc,1,INExc(nnuc))*2
+C                 POPcse(0,nejc,1,INExc(nnuc)) =
+C    &                  POPcse(0,nejc,1,INExc(nnuc))*2
                   WRITE (12,*) ' '
                   WRITE (12,'(''    Energy    mb/MeV'')')
 C                 WRITE (12,'('' Energy    mb/MeV'')')
