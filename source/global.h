@@ -1,6 +1,6 @@
-C $Rev: 3178 $
+C $Rev: 3190 $
 C $Author: rcapote $
-C $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+C $Date: 2012-11-07 15:03:17 +0100 (Mi, 07 Nov 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -107,6 +107,8 @@ C
      &                 POPcsed(0:ndex_d,2,ndecsed,0:ndexclus),
      &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
+C					   DDXS arrays defined only for neutrons and protons  
+     &                 POPcsea(ndangecis,0:ndex_d,2,ndecsed,0:ndexclus),  
      &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
      &                 0:ndexclus), POPhmsx(ndecsed,2,0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
@@ -199,7 +201,7 @@ C
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 C     COMMON /DEPTH / POTe
-      COMMON /ENDFEA/  POPcsed, POPcsedlab, POPcsealab, POPcseaf
+      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf, POPcsea
       COMMON /ENDFEMIS/ POPcs
       COMMON /ENDFSPEC/ POPcse
       COMMON /GLOBAL0/ EIN, EINl, EXCn, CSFus, CRL, DFUs, DE, BETav,

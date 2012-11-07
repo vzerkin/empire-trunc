@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3149 $
+Ccc   * $Rev: 3190 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-19 19:28:17 +0200 (Fr, 19 Okt 2012) $
+Ccc   * $Date: 2012-11-07 15:03:17 +0100 (Mi, 07 Nov 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -78,6 +78,7 @@ C
       POPlv    = 0.d0
       CSEmis   = 0.d0
       CSE      = 0.d0
+      POPcsea  = 0.d0
       POPcseaf = 0.d0
       POPcse   = 0.d0
       POPcsed  = 0.d0
