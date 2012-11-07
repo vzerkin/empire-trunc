@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3189 $
+Ccc   * $Rev: 3191 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-07 16:06:38 +0100 (Mi, 07 Nov 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2386,15 +2386,16 @@ C-----for transsmission coefficient calculations
 C
 C--------Running ECIS
 C
-         IF (IOUt.GT.1 .and. FIRST_ein) THEN
+         IF (IOUt.GT.1 .AND. FIRST_ein) THEN
             WRITE (8,*)
-            IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1 .AND.  
-     &          A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN 
-              WRITE (8,*) ' CC transmission coefficients used for the',
-     &                    ' inelastic outgoing channel'
-            ELSE
-              WRITE (8,*) ' Spherical OM transmission coefficients',
-     &                    ' used for outgoing channels'
+            IF (A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN
+              IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN 
+               WRITE (8,*) ' CC transmission coefficients used for the',
+     &                     ' inelastic outgoing channel'
+              ELSE
+               WRITE (8,*) ' Spherical OM transmission coefficients',
+     &                     ' used for the inelastic outgoing channel'
+              ENDIF 
             ENDIF
          ENDIF
 C--------OPEN Unit=46 for Tl output
