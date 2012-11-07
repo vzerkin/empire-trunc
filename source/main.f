@@ -1,6 +1,6 @@
-cc   * $Rev: 3187 $
+cc   * $Rev: 3189 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 01:37:43 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -55,7 +55,7 @@ C
      &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
      &                 emedg, emedh, emedn, emedp, erecoil, espec,
      &                 epre, ftmp, gang, grand, ! spechk(4),
-     &                 gtotsp, htotsp, piece, pope, poph, popl, popleft,
+     &                 gtotsp, htotsp, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), totsp, xnub,
@@ -2627,6 +2627,7 @@ C----
               DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
+
                 IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
                 ELSE
@@ -2634,6 +2635,7 @@ C----
                   iloc = 0
                 ENDIF
                 IF(iloc.NE.0) CYCLE
+
                 IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
                   iizaejc = 0
@@ -2678,11 +2680,11 @@ C---------------Exclusive DDX spectra (neutrons & protons)
                    WRITE (12,*) ' '
                    WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
+C------------------First emission reactions
+C------------------(discrete levels part)
                    IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                   (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
-                ! first emission reactions
-C-----------------------(discrete levels part)
-                     DO il = 1, NLV(nnuc)  !(levels)
+                     DO il = 1, NLV(nnuc)  ! discrete levels
                            espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                            IF (espec.GE.0) WRITE (12,
      &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
@@ -2690,42 +2692,22 @@ C-----------------------(discrete levels part)
      &                               0.d0),nang = 1,NDANG)
                      ENDDO
                    ENDIF
-C-----------------------(continuum part - same for all n and p)
+C------------------(continuum part - same for all n and p)
                    cseaprnt = 0.d0 ! clean DDX matrix
 
                    IF(LHMs.EQ.0) THEN
                      iprinted = 0
                      DO ie = 1, nspec ! reconstruct continuum DDX spectrum
-                       piece = CSEmsd(ie,nejc)
-                       IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
                        ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
-     &                            piece*POPcseaf(0,nejc,ie,INExc(nnuc))
-     &                             )/4.0/PI
+     &                   CSEmsd(ie,nejc)*
+     &                   POPcseaf(0,nejc,ie,INExc(nnuc)) )/4.D0/PI
                        IF(ftmp.LT.0.0d0) CYCLE
-
-C                      IF(ftmp.LT.0.0d0) THEN
-
-C                         ftmp = 0.0d0
-C                         IF(iprinted.eq.0) WRITE(8,*)
-C    &                          'WARNING: Corrective action to avoid',
-C    &                          ' negative ddx cross sections taken'
-C                         iprinted = 1
-C                         POPcseaf(0,nejc,ie,INExc(nnuc)) =
-C    &                           POPcse(0,nejc,ie,INExc(nnuc))/piece
-C                      ENDIF
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                       ftmp + CSEa(ie,nang,nejc,1)*
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
                        ENDDO
-                     ENDDO
-                     IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
-     &                    (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
-C                       DO nang = 1, NDANG
-C                         double the first bin to preserve integral in EMPEND
-C                         cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-C                       ENDDO
-                      ENDIF
+                      ENDDO
                       DO ie = 1, nspec - 1
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -2740,7 +2722,7 @@ C                       ENDDO
                       ENDDO
                       WRITE (12,*) ' '    
 C
-C                    Integrated spectrum
+C                     Integrated spectrum
 C
                       WRITE (12,'(10x,''Integrated Emission Spectra'')')
                       WRITE (12,'(10x,''    Energy    mb/MeV'')')
@@ -2761,7 +2743,6 @@ c                     spechk(1) = 0.0d0
 c                     spechk(2) = 0.0d0
 c                     spechk(3) = 0.0d0
                       DO ie = 1, nspec ! reconstruct continuum DDX spectrum
-c                       IF (ie.EQ.NEXr(nejc,1)) piece = 0.5*piece
                         csetmp(ie) = (POPcse(0,nejc,ie,INExc(nnuc))
      &                         - xnorm(nejc,INExc(nnuc))
      &                          * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
@@ -2787,14 +2768,14 @@ c     &                                              (spechk(i)*DE,i=1,3)
                      CALL HINTERMAT(0.0d0, DE/recorp, csetmp,
      &                     NDECSE, 0.0D0, DE, cseaprnt, NDECSE,
      &                      1, 0.0d0, nspec*DE)
-c                     spechk(1) = 0.0d0
-c                     spechk(2) = 0.0d0
-c                     spechk(3) = 0.0d0
-c                     spechk(4) = 0.0d0
+c                    spechk(1) = 0.0d0
+c                    spechk(2) = 0.0d0
+c                    spechk(3) = 0.0d0
+c                    spechk(4) = 0.0d0
                      DO ie=1,nspec
                        ftmp = recorp*cseaprnt(ie,1)
-c                       write(12,'(i5,3e15.5)') ie,csetmp(ie),
-c     &                cseaprnt(ie,1),POPcsedlab(0,nejc,ie,INExc(nnuc))
+c                      write(12,'(i5,3e15.5)') ie,csetmp(ie),
+c     &                 cseaprnt(ie,1),POPcsedlab(0,nejc,ie,INExc(nnuc))
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = ftmp + 
      &                          xnorm(nejc,INExc(nnuc))*
@@ -2814,26 +2795,19 @@ c     &                           (CAngler(nang)-CANgler(nang-1))
 c                          ENDIF
 c                         xcse = cseaprnt(ie,nang)
                        ENDDO
-c                     spechk(4) = spechk(4) + 
+c                      spechk(4) = spechk(4) + 
 c     &                         xnorm(nejc,INExc(nnuc))
 c     &                          * POPcsedlab(0,nejc,ie,INExc(nnuc))
                      ENDDO
-c                     write(12,'(a5,i5,4f15.4)')'sig1=',nnuc,
+c                    write(12,'(a5,i5,4f15.4)')'sig1=',nnuc,
 c     &                            (PI*spechk(i)*DE,i=1,3),spechk(4)*DE
 
-                     IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
-     &                    (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
-C                       DO nang = 1, NDANG
-C                         double the first bin to preserve integral in EMPEND
-C                         cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
-C                       ENDDO
-                      ENDIF
                       DO ie = 1, nspec - 1
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                       FLOAT(ie - 1)*DE/recorp,
      &                       (cseaprnt(ie,nang),nang = 1,NDANG)
-                        ENDDO
+                      ENDDO
                       DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -2851,11 +2825,10 @@ C                 POPcse(0,nejc,1,INExc(nnuc)) =
 C    &                  POPcse(0,nejc,1,INExc(nnuc))*2
                   WRITE (12,*) ' '
                   WRITE (12,'(''    Energy    mb/MeV'')')
-C                 WRITE (12,'('' Energy    mb/MeV'')')
                   WRITE (12,*) ' '
                   IF (nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN
-                                        ! first emission 
-                    DO il = 1, NLV(nnuc) ! (levels)
+C-------------------First emission 
+                    DO il = 1, NLV(nnuc) ! discrete levels
 C--------------------------Although DDX spectra are available for emission
 C--------------------------they are isotropic and only ang. integrated are
 C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
@@ -3083,31 +3056,8 @@ C
      &       '(''  Equivalent Tmaxwell '',G12.5,'' MeV'')') tequiv
               WRITE (8,*) ' '
 
-C            Partial fission spectra not needed in EMPEND, skipping the printout
-C    
-C             WRITE (12,
-C    &       '(''  Postfission <En> '', G12.5,'' MeV'')') eneutr
-C             WRITE (12,
-C    &       '(''  Equivalent Tmaxwell '',G12.5,'' MeV'')') tequiv
-C             WRITE (12,*) ' '
-
-C             WRITE (12,*) ' Spectrum of ', 'neutrons ',
-C    &             '(z,partfis) from CN ', ' ZAP= ', IZA(Nnuc)
-C             WRITE (12,*) ' '
-C             WRITE (12,
-C    &       '(''    Energy    mb/MeV       Ratio to Maxw'')')
-C             WRITE (12,*) ' '
-C             DO ie = 1, nepfns 
-C               WRITE (12,'(E10.4,E14.5,2x,E14.5)')
-C    &           enepfns(ie), post_fisn(ie)/deltae_pfns, ratio2maxw(ie)
-C               WRITE (73,'(E11.4,E14.5,4(2x,E14.5))')
-C    &               enepfns(ie), post_fisn(ie), ratio2maxw(ie)
-C             ENDDO
-C             WRITE (12,'(E10.4,E14.5,2x,E14.5)')
-C    &             enepfns(nepfns), 0.d0, 0.d0
             else
 
-C             WRITE  (12,'(''  No fission neutrons emitted'')')
               WRITE  (8 ,'(''  No fission neutrons emitted'')')
 
             endif
@@ -3263,11 +3213,9 @@ C-----Calculate double-differential spectra
 C     DO nejc = 0, NDEJC
 C          DO iesp = 1, NDECSE
 C            DO nang = 1, NDANG
-C               piece = CSEmsd(iesp,nejc)
-C               IF (iesp.EQ.NEXr(nejc,1)) piece = 0.5*piece
 C               CSEa(iesp,nang,nejc,0)
 C    &             = ((CSE(iesp,nejc,0)
-C    &             - piece*POPcseaf(0,nejc,iesp,0))
+C    &             - CSEmsd(iesp,nejc)*POPcseaf(0,nejc,iesp,0))
 C    &             /4.0/PI      + CSEa(iesp,nang,nejc,1)
 C    &             *POPcseaf(0,nejc,iesp,0))
 C            ENDDO
@@ -4214,12 +4162,13 @@ C-------Set angles for inelastic calculations
         DO na = 1, NDAng
           ANGles(na)  = (na - 1)*da
           CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+        ENDDO
+        DO na = 1, NDAng
           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
           SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
         ENDDO
       ENDIF
-C     IF(.not.BENchm) FIRst_ein = .FALSE.
-      FIRst_ein = .FALSE.
+      IF(.not.BENchm) FIRst_ein = .FALSE.
 C     
 C     Changing CN-isotropic to false if energy is too high as CN
 C     decay to discrete levels is negligible         

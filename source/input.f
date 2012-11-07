@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3186 $
+Ccc   * $Rev: 3189 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 01:07:20 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -568,7 +568,7 @@ C--------set angles for inelastic calculations
            CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
          ENDDO
          DO na = 1, NDAng
-           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
+           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
            SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
@@ -1286,7 +1286,7 @@ C--------reset angles for inelastic calculations
               CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
             ENDDO
             DO na = 1, NDAng
-              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
+              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
               SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
@@ -3536,6 +3536,8 @@ C-----------Print some final input options
 C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+
+            IF (ZEJc(0).GT.0) CN_isotropic = .TRUE.
 
             IF (.not.CN_isotropic) THEN          
               WRITE (8,

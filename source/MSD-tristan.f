@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3185 $
+Ccc   * $Rev: 3189 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-06 03:35:03 +0100 (Di, 06 Nov 2012) $
+Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3027,13 +3027,13 @@ C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
 C
-      DO ne = 1, nmax
-        DO na = 1, 3
+C     DO ne = 1, nmax
+C       DO na = 1, 3
 C          Eliminating the first three angles for continuity
 C          Small error introduced, DIRTY PATCH, RCN, July 2012  
-           CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
-        ENDDO
-      ENDDO
+C          CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
+C       ENDDO
+C     ENDDO
 C
       WRITE(8,*) ' '
       WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
@@ -3299,7 +3299,7 @@ C     IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
       IF (ENDf(1).GT.0 .and. RECOIL.GT.0 
      &   .and. nexrt.GT.0 .and. Nejc.gt.0) THEN
 C
-C           No recoils from gamma emission for the time being
+C        No recoils from gamma emission for the time being
 C
          nangle = NDANG
          dang = pi/FLOAT(nangle - 1)

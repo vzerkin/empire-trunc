@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3178 $
+Ccc   * $Rev: 3189 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2386,9 +2386,8 @@ C-----for transsmission coefficient calculations
 C
 C--------Running ECIS
 C
-         IF (IOUt.GT.1) THEN
+         IF (IOUt.GT.1 .and. FIRST_ein) THEN
             WRITE (8,*)
-C           IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN
             IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1 .AND.  
      &          A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN 
               WRITE (8,*) ' CC transmission coefficients used for the',
@@ -2565,17 +2564,39 @@ C--------(nlev=1 corresponds to the ground state)
          READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
+         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.GE.NDLW) then
+           WRITE (8,*)
+     &     ' ERROR: ECIS angular momentum bigger than NDLW '
+           WRITE (8,*)
+     &     ' ERROR: Set NDLW in dimension.h to ',l
+           WRITE (*,*)
+     &     ' ERROR: Set NDLW in dimension.h to ',l
+	     STOP ' ERROR: ECIS angular momentum bigger than NDLW '
+	   ENDIF
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
-            Maxlw = MAX(Maxlw,l)
-            if(Maxlw.GE.NDLW) Maxlw = NDLW - 1
+            Maxlw = l
          ENDIF
       ENDDO
       GOTO 100
   200 CLOSE (45)
+
+C     xmas_nejc = EJMass(Nejc)
+C     xmas_nnuc = AMAss(Nnuc)
+C     elab = EINl
+C     relcal = .FALSE.
+C     IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
+C     CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
+C     sabs = 0.D0
+C     DO l = 0, Maxlw
+C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+C     ENDDO
+C     sabs   = 10.d0*PI/ak2*sabs
+C     write(*,*) 'Calc. Sabs=',sabs,' Lmax',Maxlw
+
 C-----For vibrational the Tls must be multiplied by (2*XJLv(ilv,Nnuc) + 1)
 C     as the spin of the target nucleus is neglected for spherical and DWBA calcs
       IF (Lvibrat) THEN
@@ -2598,11 +2619,10 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) TOTcs
       READ (45,*,END=300) ABScs
-C     IF (ZEJc(Nejc).EQ.0) READ (45,*) ELAcs
-C 300 CLOSE (45)
 
       dtmp = 0.d0
-      IF (.NOT.CN_isotropic) READ (45,*,END=300) dtmp ! reading total compound from ECIS (or ELAcs from OPTMAN)
+      IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) 
+     >  READ (45,*,END=300) dtmp ! reading total compound from ECIS (or ELAcs from OPTMAN)
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
 
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) then
@@ -2637,6 +2657,29 @@ C-----Absorption and elastic cross sections in mb
       ENDDO
       sabs   = 10.d0*PI/ak2*sabs
       selast = 10.d0*PI/ak2*selast
+      
+      IF (abs(sabs-ABScs).gt.0.05*sabs) THEN ! 5% difference check
+         WRITE (8,*)
+         WRITE (8,*)
+     &     ' WARNING: ECIS ABScs absorption cross section ',ABScs
+         WRITE (8,*)
+     &     ' WARNING: Calc. sabs absorption cross section ',sabs
+         WRITE (8,*)
+     &        ' WARNING: sabs < ECIS ABS, increase NDLW !!!'
+         IF(ZEJc(Nejc).GT.0 .and.abs(sabs-ABScs).gt.0.05*sabs)
+     &     STOP '  ERROR: sabs < ECIS ABS, increase NDLW !!!'	 ! 5% error
+      ENDIF
+
+      IF (abs(sabs-ABScs).gt.1.D0) THEN ! 1 mb DIFFERENCE
+         WRITE (8,*) 
+         WRITE (8,*) 
+     &     ' WARNING: Sabs=',sngl(sabs),' Sabs(ECIS)=',sngl(ABScs)
+         WRITE (8,*)
+     &     ' WARNING: Calculated Sabs as sum over Tls assumed as a true 
+     &absoprtion'
+         WRITE (8,*) 
+         ABScs = sabs	   
+	ENDIF
 
       IF (sabs.LE.0.D0) RETURN
 
