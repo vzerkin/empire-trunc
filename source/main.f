@@ -1,6 +1,6 @@
-cc   * $Rev: 3185 $
+cc   * $Rev: 3187 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-06 03:35:03 +0100 (Di, 06 Nov 2012) $
+Ccc   * $Date: 2012-11-07 01:37:43 +0100 (Mi, 07 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2739,7 +2739,23 @@ C                       ENDDO
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                       ENDDO
                       WRITE (12,*) ' '    
-                   ELSE ! LHMs = 0
+C
+C                    Integrated spectrum
+C
+                      WRITE (12,'(10x,''Integrated Emission Spectra'')')
+                      WRITE (12,'(10x,''    Energy    mb/MeV'')')
+                      WRITE (12,*) ' '
+                      DO ie = 1, nspec - 1
+                        if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) cycle
+                        WRITE (12,'(10x,F10.5,E14.5)') FLOAT(ie - 1)
+     &                  *DE/recorp, 
+     &                  max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))*recorp
+                      ENDDO
+                                          ! exact endpoint
+                      WRITE (12,'(10x,F10.5,E14.5)') EMAx(nnuc)/recorp,
+     &                  max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))*recorp
+
+                   ELSE ! LHMs > 0
 c                     iprinted = 0
 c                     spechk(1) = 0.0d0
 c                     spechk(2) = 0.0d0
