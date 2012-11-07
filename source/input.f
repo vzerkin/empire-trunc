@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3183 $
+Ccc   * $Rev: 3186 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-04 22:01:13 +0100 (So, 04 Nov 2012) $
+Ccc   * $Date: 2012-11-07 01:07:20 +0100 (Mi, 07 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -257,7 +257,7 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
 C--------fusion parameters
 C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
          CN_isotropic = .True.     ! default
-C        CN_isotropic = .False.    ! (in development). CN anisotropy from ECIS. 
+C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -566,6 +566,8 @@ C--------set angles for inelastic calculations
          DO na = 1, NDAng
            ANGles(na)  = (na - 1)*da
            CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+         ENDDO
+         DO na = 1, NDAng
            CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
            SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
@@ -1282,6 +1284,8 @@ C--------reset angles for inelastic calculations
             DO na = 1, NDAng
               ANGles(na)  = (na - 1)*da
               CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+            ENDDO
+            DO na = 1, NDAng
               CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
               SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
             ENDDO
