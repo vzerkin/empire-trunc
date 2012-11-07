@@ -58,9 +58,9 @@ def runE(proj):
     rm('OUTPUT.DAT', 'LIST.DAT', 'OMPAR.RIPL', 'GAMMA.DAT', 'FUSION')
     rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT')
     rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
-    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT')
-    rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT')
-    rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP')
+    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
+    rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
+    rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
     rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
 
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
@@ -228,22 +228,26 @@ def runE(proj):
         mv('EXFOR.DAT',proj+'.exf',0)
     if not isEmpty('C4.DAT'):
         mv('C4.DAT',proj+'.c4',0)
+    if not isEmpty('ECIS_SPH.inp'):
+        mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
+    if not isEmpty('ECIS_SPH.out'):
+        mv('ECIS_SPH.out',proj+'-ecis-sph.out',0)
+    if not isEmpty('ECIS_VIB.inp'):
+        mv('ECIS_VIB.inp',proj+'-ecis-vib.inp',0)
     if not isEmpty('ECIS_VIB.out'):
         mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
-    #mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
+    if not isEmpty('ECIS_ROT.inp'):
+        mv('ECIS_ROT.inp',proj+'-ecis-rot.inp',0)
     if not isEmpty('ECIS_ROT.out'):
         mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
-    #mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
+    if not isEmpty('ECIS_VIBROT.inp'):
+        mv('ECIS_VIBROT.inp',proj+'-ecis-vibrot.inp',0)
     if not isEmpty('ECIS_VIBROT.out'):
-        mv('ECIS_VIBROT.out',proj+'-ecis-rot.out',0)
-    #mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
+        mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
+    if not isEmpty('OPTMAN.INP'):
+        mv('OPTMAN.INP',proj+'-optman.inp',0)
     if not isEmpty('OPTMAN.OUT'):
         mv('OPTMAN.OUT',proj+'-optman.out',0)
-    #mv('OPTMAN.OUT',proj+'-optman.out',0)
-    mv('OPTMAN.INP',proj+'-optman.in',0)
-    mv('ecVIB.inp',proj+'-ecis-vib.in',0)
-    mv('ecROT.inp',proj+'-ecis-rot.in',0)
-    mv('ecVIBROT.inp',proj+'-ecis-vibrot.in',0)
     mv('R250SEED.DAT',proj+'.rng',0)
     # fission chances and spectra for one energy run:
     if not isEmpty('FISS_XS.ZVD'):
@@ -285,6 +289,7 @@ def runE(proj):
     
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
+    rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')	
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ddhms.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT','MU_BAR.LST','MU_BAR.TMP')
     rm( glob('TARGET-*.tl'), glob('ecis06.*'))
