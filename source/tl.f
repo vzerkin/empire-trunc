@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3191 $
+Ccc   * $Rev: 3192 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 16:06:38 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-07 17:12:05 +0100 (Mi, 07 Nov 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2667,8 +2667,10 @@ C-----Absorption and elastic cross sections in mb
      &     ' WARNING: Calc. sabs absorption cross section ',sabs
          WRITE (8,*)
      &        ' WARNING: sabs < ECIS ABS, increase NDLW !!!'
-         IF(ZEJc(Nejc).GT.0 .and.abs(sabs-ABScs).gt.0.05*sabs)
-     &     STOP '  ERROR: sabs < ECIS ABS, increase NDLW !!!'	 ! 5% error
+         write(8,*) 'Calc. Sabs =',sngl(sabs),' Lmax',Maxlw
+         write(8,*) 'ECIS  ABScs=',sngl(ABScs)
+C        IF(ZEJc(Nejc).GT.0 .and.abs(sabs-ABScs).gt.0.05*sabs)
+C    &     STOP '  ERROR: sabs < ECIS ABS, increase NDLW !!!'	 ! 5% error
       ENDIF
 
       IF (abs(sabs-ABScs).gt.1.D0) THEN ! 1 mb DIFFERENCE
