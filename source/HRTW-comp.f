@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3182 $
+Ccc   * $Rev: 3193 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-04 16:43:27 +0100 (So, 04 Nov 2012) $
+Ccc   * $Date: 2012-11-09 21:22:57 +0100 (Fr, 09 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -397,7 +397,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION cor, corr, eout, eoutc, frde, hisr, rho, s, smax,
-     &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr, dtmp, sum_cn
+     &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2,
      &        ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
       DOUBLE PRECISION VT
@@ -599,13 +599,12 @@ C-----clear memorized elastic channels when entering new J-pi CN state
 C-----
 C-----do loop over discrete levels -----------------------------------
 C-----
-      sum_cn= 0.d0
       DO i = 1, NLV(Nnur) 
 C        Elastic channels excluded, done after the loop
          if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
 
          eout = eoutc - ELV(i,Nnur)
-         cor = 1.d0
+         cor  = CINRED(i)
        
          IF (eout.LT.0.0D0) EXIT
 
@@ -621,13 +620,9 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over L ------------------------------------------------
          DO L = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
-            IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0)) THEN
-              tld = ELTl(L)
-            ELSE
-              tld = TL(il,L,Nejc,Nnur)
+            tld = TL(il,L,Nejc,Nnur)
      &            + frde*(TL(il + 1,L,Nejc,Nnur)
      &            - TL(il,L,Nejc,Nnur))
-            ENDIF
             IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
               IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
@@ -644,15 +639,6 @@ C--------do loop over L --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
-
-         dtmp = sumdl  
-         if(IZA(Nnur).EQ.IZA(0).and.CINRED(i).ne.1) then  
-           sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
-           sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
-         else
-           sumdl = dtmp
-         endif
-
          SCRtl(i,Nejc) = sumdl
          Sum = Sum + sumdl
 C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
@@ -678,13 +664,7 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over L ------------------------------------------------
          DO L = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
-            IF (i.EQ.LEVtarg .AND. IZA(Nnur).EQ.IZA(0)) THEN
-              tld = ELTl(L)
-            ELSE
-              tld = TL(il,L,Nejc,Nnur)
-     &            + frde*(TL(il + 1,L,Nejc,Nnur)
-     &            - TL(il,L,Nejc,Nnur))
-            ENDIF
+            tld = ELTl(L)
             IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
               IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
@@ -694,8 +674,7 @@ C----------------entry with nhrtw=0
                  CALL TL2VL(tld,cor)
                  sumdl = sumdl + tld*cor
 C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
-                 IF (IZA(Nnur).EQ.IZA(0) .AND.
-     &                   tld.GT.H_Tthr) THEN
+                 IF (tld.GT.H_Tthr) THEN
 C-------------------case of a strong elastic channel
 C-------------------record position of Tl, l and channel spin
                     MEMel(iel,1) = NH_lch
@@ -714,8 +693,6 @@ C--------do loop over L --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
 C--------loop over channel spin ------ done ----------------------------
-         sumdl = sumdl + sum_cn  ! Correcting the Compound Elastic   
-
          SCRtl(i,Nejc) = sumdl
          Sum = Sum + sumdl
 C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
@@ -1254,7 +1231,7 @@ C
 C--------relative accuracy of V is set below and may be altered
 C--------to any resonable value.  
 C
-         IF (ABS(vd(i)-vp(i)).GT.0.001D0*vp(i)) GOTO 200
+         IF (ABS(vd(i)-vp(i)).GT.0.00005D0*vp(i)) GOTO 200
       ENDDO
       DO i = 1, Lch
          V(i,1) = vp(i)
