@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3182 $
+Ccc   * $Rev: 3194 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-04 16:43:27 +0100 (So, 04 Nov 2012) $
+Ccc   * $Date: 2012-11-09 21:36:14 +0100 (Fr, 09 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -534,7 +534,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax,
-     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr, cor, sum_cn, dtmp
+     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
 C
@@ -665,16 +665,14 @@ C-----
       ENDDO
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
 
-      sum_cn = 0.d0
       DO i = 1, NLV(Nnur)
-	  
+
 C        Elastic channels excluded, done after the loop
          if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
 
          eout = eoutc - ELV(i,Nnur)
          IF (eout.LT.0.0D0) EXIT
 
-         cor = 1.d0
          sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
@@ -695,17 +693,8 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
-
-         dtmp = sumdl  
-         if(IZA(Nnur).EQ.IZA(0).and.CINRED(i).ne.1) then  
-           sumdl  = CINRED(i)*dtmp  ! Compound inelastic scaling 
-           sum_cn = sum_cn + (1.d0-CINRED(i))*dtmp
-         else
-           sumdl = dtmp
-         endif
-
-         SCRtl(i,Nejc) = sumdl
-         Sum = Sum + sumdl
+         SCRtl(i,Nejc) = sumdl * CINRED(i) 
+         Sum = Sum + sumdl * CINRED(i) 
       ENDDO
 C-----do loop over discrete levels --------- done --------------------
 
@@ -715,7 +704,6 @@ C-----do loop over discrete levels --------- done --------------------
          eout = eoutc - ELV(i,Nnur)
          IF (eout.LT.0.0D0) GOTO 40
 
-         cor = CELred
          sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
@@ -736,11 +724,8 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
 C--------loop over channel spin ------ done ----------------------------
-
-         sumdl = sumdl*cor + sum_cn  ! Correcting the Compound Elastic   
-
-         SCRtl(i,Nejc) = sumdl
-         Sum = Sum + sumdl
+         SCRtl(i,Nejc) = sumdl*CELred
+         Sum = Sum + sumdl*CELred
       ENDIF
 C
    40 DENhf = DENhf + Sum
