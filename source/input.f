@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3189 $
+Ccc   * $Rev: 3197 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-12 03:01:38 +0100 (Mo, 12 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -271,6 +271,7 @@ C        CN_isotropic = .False.    ! CN anisotropy from ECIS.
          TOTred = 1.d0
          ELAred = 1.d0
          CELred = 1.d0
+
          CINred = 1.d0
          TOTred0 = 1.d0 
          FUSred0 = 1.d0
@@ -283,6 +284,7 @@ C        CN_isotropic = .False.    ! CN anisotropy from ECIS.
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
+
          rCINred = 1.d0
          LEVtarg = 1
 C
@@ -564,13 +566,21 @@ C        Starting value of the number of angular points
 C--------set angles for inelastic calculations
          da = 180.d0/(NDAng - 1)
          DO na = 1, NDAng
+
            ANGles(na)  = (na - 1)*da
+
            CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+
          ENDDO
+
          DO na = 1, NDAng
+
            CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
+
            SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+
          ENDDO
+
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN
@@ -1053,10 +1063,14 @@ C
 C--------inteligent defaults *** done ***
 C
 C
+
 C--------New energy header
+
 C
+
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
+
 
          IF( KTRlom(0,0).eq.2408 .and. DIRECT. LT. -0.1) then
             DIRECT = 1
@@ -1282,13 +1296,21 @@ C
 C--------reset angles for inelastic calculations
             da = 180.d0/(NDAng - 1)
             DO na = 1, NDAng
+
               ANGles(na)  = (na - 1)*da
+
               CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
+
             ENDDO
+
             DO na = 1, NDAng
+
               CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
+
               SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+
             ENDDO
+
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
@@ -1553,6 +1575,7 @@ C-----------stop PCROSS nucleon channels if HMS active
 C
 C--------print IDNa matrix
  1256    continue
+
          WRITE (8,*)
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
@@ -1848,14 +1871,23 @@ C-----set Q-value for CN production
       ENDIF
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
+
          WRITE (8,*) ' '
+
          WRITE (8,'(60(''=''))')
+
          WRITE (8,
+
      &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+
      &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
+
          WRITE (8,'(60(''=''))')
+
          WRITE (8,*) ' '
+
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
+
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
       ENDIF
@@ -3537,7 +3569,9 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
+
             IF (ZEJc(0).GT.0) CN_isotropic = .TRUE.
+
 
             IF (.not.CN_isotropic) THEN          
               WRITE (8,
@@ -4322,99 +4356,189 @@ C-----
 C-----------
          IF (name.EQ.'CINRED') THEN
             if(i1.ne.0) then
-C
-C             Specific discrete level scaled
-C 
- 			if(i1.gt.min(40,NDLV) .or. i1.lt.1) then
-                WRITE (8,
-     &          '('' Compound inelastic cross section scaling of '',
-     &          '' discrete level # '',i3, 
-     &          '' dismissed (out of range) '')') i1
-	          GOTO 100
-	        endif
 
- 			if(i1.eq.1) then
-                WRITE (8,
-     &          '('' Discrete level # 1 corresponds to the elastic chann
-     &el, use CELRED to scale the Comp. Elastic cross section'')') 
-	          GOTO 100
-	        endif
 C
-              if(i2.ne.0 .and. IOPran.ne.0) then
+
+C             Specific discrete level scaled
+
+C 
+
+                  if(i1.gt.min(40,NDLV) .or. i1.lt.1) then
+
                 WRITE (8,
-     &          '('' Compound inelastic cross section uncertainty '',
-     &          ''of discrete level # '',i2,''is equal to '',i2,
-     &          '' %'')') i1, i2
-                sigma = val*i2*0.01
-                IF(IOPran.gt.0) then
-                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = grand()
-                   CINred(i1) = val + rCINred(i1)*sigma
-                ELSE
-                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = drand()
-                   CINred(i1) = val + 1.732d0*(2*rCINred(i1)-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &   '('' Compound inelastic cross section  of discrete level # '',
-     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-                WRITE (8,'(''   (compensated by scaling the Compound Ela
-     &stic cross section)'')')
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CINred(i1), INDexf,INDexb
-              else
-                CINred(i1) = val
-                WRITE (8,
-     &   '('' Compound inelastic cross section  of discrete level # '',
-     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-                WRITE (8,'(''   (compensated by scaling the Compound Ela
-     &stic cross section)'')')
-                WRITE (12,
-     &   '('' Compound inelastic cross section  of discrete level # '',
-     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-                WRITE(12,'(''   (compensated by scaling the Compound Ela
-     &stic cross section)'')')
+
+     &          '('' Compound inelastic cross section scaling of '',
+
+     &          '' discrete level # '',i3, 
+
+     &          '' dismissed (out of range) '')') i1
+
+                GOTO 100
+
               endif
-	      else
+
+
+
+                  if(i1.eq.1) then
+
+                WRITE (8,
+
+     &          '('' Discrete level # 1 corresponds to the elastic chann
+
+     &el, use CELRED to scale the Comp. Elastic cross section'')') 
+
+                GOTO 100
+
+              endif
+
+C
+
+              if(i2.ne.0 .and. IOPran.ne.0) then
+
+                WRITE (8,
+
+     &          '('' Compound inelastic cross section uncertainty '',
+
+     &          ''of discrete level # '',i2,''is equal to '',i2,
+
+     &          '' %'')') i1, i2
+
+                sigma = val*i2*0.01
+
+                IF(IOPran.gt.0) then
+
+                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = grand()
+
+                   CINred(i1) = val + rCINred(i1)*sigma
+
+                ELSE
+
+                   IF(rCINred(i1).eq.1.d0) rCINred(i1) = drand()
+
+                   CINred(i1) = val + 1.732d0*(2*rCINred(i1)-1.)*sigma
+
+                ENDIF
+
+                WRITE (8,
+
+     &   '('' Compound inelastic cross section  of discrete level # '',
+
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+
+                WRITE (8,'(''   (compensated by scaling the Compound Ela
+
+     &stic cross section)'')')
+
+                IPArCOV = IPArCOV +1
+
+                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+
+     &             IPArCOV, CINred(i1), INDexf,INDexb
+
+              else
+
+                CINred(i1) = val
+
+                WRITE (8,
+
+     &   '('' Compound inelastic cross section  of discrete level # '',
+
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+
+                WRITE (8,'(''   (compensated by scaling the Compound Ela
+
+     &stic cross section)'')')
+
+                WRITE (12,
+
+     &   '('' Compound inelastic cross section  of discrete level # '',
+
+     &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
+
+                WRITE(12,'(''   (compensated by scaling the Compound Ela
+
+     &stic cross section)'')')
+
+              endif
+
+            else
+
+
 
               WRITE (8,
+
      &   '('' Compound inelastic cross section scaling dismissed'',
+
      &     '' no discrete level selected for scaling '')') 
 
-	      endif
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'CELRED') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' Compound elastic cross section uncertainty '',
-     &          '' is equal to '',i2,'' %'')') i1
-                sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                   IF(rCELred.eq.1.d0) rCELred = grand()
-                   CELred = val + rCELred*sigma
-                ELSE
-                   IF(rCELred.eq.1.d0) rCELred = drand()
-                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          ,f6.3)') CELred
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CELred, INDexf,INDexb
-            else
-                CELred = val
-                WRITE (8,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
-                WRITE (12,
-     &      '('' Compound elastic cross section was scaled by factor ''
-     &          F6.3)') CELred
+
+
             endif
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'CELRED') THEN
+
+            if(i1.ne.0 .and. IOPran.ne.0) then
+
+                WRITE (8,
+
+     &          '('' Compound elastic cross section uncertainty '',
+
+     &          '' is equal to '',i2,'' %'')') i1
+
+                sigma = val*i1*0.01
+
+                IF(IOPran.gt.0) then
+
+                   IF(rCELred.eq.1.d0) rCELred = grand()
+
+                   CELred = val + rCELred*sigma
+
+                ELSE
+
+                   IF(rCELred.eq.1.d0) rCELred = drand()
+
+                   CELred = val + 1.732d0*(2*rCELred-1.)*sigma
+
+                ENDIF
+
+                WRITE (8,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          ,f6.3)') CELred
+
+                IPArCOV = IPArCOV +1
+
+                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
+
+     &             IPArCOV, CELred, INDexf,INDexb
+
+            else
+
+                CELred = val
+
+                WRITE (8,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          F6.3)') CELred
+
+                WRITE (12,
+
+     &      '('' Compound elastic cross section was scaled by factor ''
+
+     &          F6.3)') CELred
+
+            endif
+
+            GOTO 100
+
+         ENDIF
+
+C-----
+
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
               BENchm = .TRUE.
@@ -7220,15 +7344,30 @@ C-----
 C-----         
          IF (name.EQ.'PFNTKE') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
+              if(i1.gt.20) then
+                    i1 = 20 
+                WRITE (8,
+     &        '('' Global Fission TKE normalization uncertainty '',
+     &        '' maximum is reset to '',i2,''%'')') i1
+              endif
               WRITE (8,
      &        '('' Global Fission TKE normalization uncertainty '',
      &        '' is equal to '',i2,''%'')') i1
+              WRITE (8,
+     &        '('' TKE PDF assumed uniform from 0.7 - 1 '')')
               sigma = val*i1*0.01
-              IF(IOPran.gt.0) then
-                atilss = val + grand()*sigma
-              ELSE
-                atilss = val + 1.732d0*(2*drand()-1.)*sigma
-              ENDIF
+C
+C             PFNtke scaling assumed to always reduce the mean value
+C             due to the meaning of the PFNtke as the reduction of the
+C             fission TKE due to the neutron emission during 
+C             the fiss. fragments' acceleration >>  PFNtke ranges from ~0.7 to 1.
+C
+              atilss = val - dabs(grand())*sigma
+C             IF(IOPran.gt.0) then
+C               atilss = val + grand()*sigma
+C             ELSE
+C               atilss = val + 1.732d0*(2*drand()-1.)*sigma
+C             ENDIF
               
               PFNtke = atilss
 
