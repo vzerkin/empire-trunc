@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3192 $
+Ccc   * $Rev: 3200 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 17:12:05 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-13 23:59:59 +0100 (Di, 13 Nov 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3207,7 +3207,7 @@ C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
-C       convg=1.0d-10
+        convg=1.0d-10
       endif
 
       ECIs1(21:21) = 'T'
@@ -3382,8 +3382,7 @@ C     only one potential for a full dispersive calculation
 C-----Matching radius
 C-----CARD 5
       WRITE (1,'(2f10.5,10x,1p,3(2x,d8.1))') 
-C    +    RStep,rmatch,convg,convg,convg
-     +    RStep,rmatch,convg,convg,1.d-4
+     +    RStep,rmatch,convg,convg,convg
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
       WRITE (1,*)
 
@@ -4051,7 +4050,7 @@ C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
       if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
         ECIs1(21:21) = 'T'
-C       convg=1.0d-10
+        convg=1.0d-10
       endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
@@ -4201,8 +4200,7 @@ C     only one potential for a full dispersive calculation
       WRITE (1,'(4i5,30x,i5)') ncollm, njmax, iterm, nppaa, jdm
 C-----CARD 5
       WRITE (1,'(2f10.5,10x,1p,3(2x,d8.1))') 
-C    +    RStep,rmatch,convg,convg,convg
-     +    RStep,rmatch,convg,convg,1.d-4
+     +    RStep,rmatch,convg,convg,convg
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
 C-----CARD 6
       WRITE(1, *)
