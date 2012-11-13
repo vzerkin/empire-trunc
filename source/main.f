@@ -1,6 +1,6 @@
-cc   * $Rev: 3189 $
+cc   * $Rev: 3199 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-13 23:39:37 +0100 (Di, 13 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -50,10 +50,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION ares, atotsp, coef, ! controln, controlp,
-     &                 corrmsd, csemax, csemist, csmsdl, csum, 
+     &                 corrmsd, csemax, csemist, csmsdl, csum, espec,
      &                 dang, ded, delang, echannel, xscclow, csinel,
-     &                 ecm, elada(NDAngecis), elleg(NDAngecis), emeda,
-     &                 emedg, emedh, emedn, emedp, erecoil, espec,
+     &                 ecm, elada(NDAngecis), elleg(NDAngecis), erecoil,
      &                 epre, ftmp, gang, grand, ! spechk(4),
      &                 gtotsp, htotsp, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
@@ -62,7 +61,9 @@ C
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 totcorr,cseaprnt(ndecse,ndangecis),
-     &                 cel_da(NDAngecis),
+     &                 cel_da(NDAngecis), totener_out, totener_in,
+     &                 emedg, emedn, emedp, emeda, emedd, emedt, emedh, 
+     &                 cmulg, cmuln, cmulp, cmula, cmuld, cmult, cmulh, 
 C                      -----------------------------------------------
 C                      PFNS quantities  
 C                      Total prompt fission spectra only for neutrons
@@ -71,13 +72,12 @@ C                             and assumed isotropic
      &                 post_fisn(NDEPFN),csepfns(NDEPFN), deltae_pfns,
      &                 ratio2maxw(NDEPFN),enepfns(NDEPFN),fmed, 
 C                      -----------------------------------------------
-     &                 csetmp(ndecse),ftmpA,ftmpB,
+     &                 csetmp(ndecse), ftmpA, ftmpB, csmax, val, dtmp,
      &                 fisxse, eps, checkprd,ftmp_gs,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
-      DOUBLE PRECISION gcs, ncs, pcs, acs, dcs, tcs, hcs, csmax
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -85,9 +85,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       CHARACTER*36 nextenergy
       CHARACTER*72 rtitle
       CHARACTER*72 inprecord,ctmp
-      DOUBLE PRECISION val, dtmp
 
-      REAL FLOAT
       INTEGER i, ia, iad, iam, iang, iang1, ib, icalled, nfission,
      &        icsh, icsl, ie, iizaejc, il, iloc, ilv, imaxt,
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
@@ -1941,7 +1939,7 @@ C--------gamma decay of discrete levels (DECAYD)
          IF (IOUt.GT.0) THEN
             WRITE (8,'(1X,/,10X,40(1H-),/)')
             WRITE (8,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.5,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
             IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
@@ -1951,59 +1949,45 @@ C--------gamma decay of discrete levels (DECAYD)
 
          IF (CSPrd(nnuc).GT.0.d0) THEN
 C----------Integrating exclusive population spectra (ENDF)
-           gtotsp = 0
-           xtotsp = 0
-           ptotsp = 0
-           atotsp = 0
-           dtotsp = 0
-           ttotsp = 0
-           htotsp = 0
-           ctotsp = 0
-           emedg = 0
-           emedn = 0
-           emedp = 0
-           emeda = 0
-           emedd = 0
-           emedt = 0
-           emedh = 0
-           emedc = 0
-           gcs = 0
-           ncs = 0
-           pcs = 0
-           acs = 0
-           dcs = 0
-           tcs = 0
-           hcs = 0
+           gtotsp = 0.d0
+           xtotsp = 0.d0
+           ptotsp = 0.d0
+           atotsp = 0.d0
+           dtotsp = 0.d0
+           ttotsp = 0.d0
+           htotsp = 0.d0
+           ctotsp = 0.d0
+           emedg = 0.d0
+           emedn = 0.d0
+           emedp = 0.d0
+           emeda = 0.d0
+           emedd = 0.d0
+           emedt = 0.d0
+           emedh = 0.d0
+           emedc = 0.d0
 C          write(*,'(2x,F3.0,1x,F3.0,2x,A3,2x,F3.1)') 
 C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
            IF (ENDf(nnuc).EQ.1) THEN
              DO ispec = 1, min(NEX(1) + 10,ndecsed)
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
-               gcs = gcs + CSE(ispec,0,nnuc)*DE
 C              Write(12,*) nnuc,ispec,'g: ',
 C     &           POPcse(0,0,ispec,INExc(nnuc)),CSE(ispec,0,nnuc) 
                xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
-               ncs = ncs + CSE(ispec,1,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'n: ',
 c     &           POPcse(0,1,ispec,INExc(nnuc)),CSE(ispec,1,nnuc) 
                ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
-               pcs = pcs + CSE(ispec,2,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'p: ',
 c     &           POPcse(0,2,ispec,INExc(nnuc)),CSE(ispec,2,nnuc) 
                atotsp = atotsp + POPcse(0,3,ispec,INExc(nnuc))*DE
-               acs = acs + CSE(ispec,3,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'a: ',
 c     &           POPcse(0,3,ispec,INExc(nnuc)),CSE(ispec,3,nnuc) 
                dtotsp = dtotsp + POPcse(0,4,ispec,INExc(nnuc))*DE
-               dcs = dcs + CSE(ispec,4,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'d: ',
 c     &          POPcse(0,4,ispec,INExc(nnuc)),CSE(ispec,4,nnuc) 
                ttotsp = ttotsp + POPcse(0,5,ispec,INExc(nnuc))*DE
-               tcs = tcs + CSE(ispec,5,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'t: ',
 c     &          POPcse(0,5,ispec,INExc(nnuc)),CSE(ispec,5,nnuc) 
                htotsp = htotsp + POPcse(0,6,ispec,INExc(nnuc))*DE
-               hcs = hcs + CSE(ispec,6,nnuc)*DE
 c              Write(12,*) nnuc,ispec,'h: ',
 c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc) 
                emedg=emedg+POPcse(0,0,ispec,INExc(nnuc))*DE*(ispec-1)*DE
@@ -2056,7 +2040,9 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &           ' mb    : ',A9) 
              ENDDO
              WRITE (12,*)
-
+C
+C            cmult = 
+C
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
              IF (xtotsp.NE.0) emedn = emedn/xtotsp
              IF (ptotsp.NE.0) emedp = emedp/ptotsp
@@ -2072,13 +2058,13 @@ C--------------(merely for checking purpose)
              IF (nnuc.EQ.mt91) THEN
                   nejc = 1
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') xtotsp
+     &                G12.6,'' mb  '')') xtotsp
                   WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') xtotsp
+     &                E12.6,'' mb  '')') xtotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
                   xtotsp = xtotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
@@ -2086,13 +2072,13 @@ c                 ENDDO
              ELSEIF (nnuc.EQ.mt649) THEN
                   nejc = 2
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') ptotsp
+     &                G12.6,'' mb  '')') ptotsp
                   WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') ptotsp
+     &                E12.6,'' mb  '')') ptotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
                   ptotsp = ptotsp + CSDirlev(1,nejc)     
 c                 DO ilev = 1, NLV(nnuc)
 c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
@@ -2100,13 +2086,13 @@ c                 ENDDO
              ELSEIF (nnuc.EQ.mt849) THEN
                   nejc = 3
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') atotsp
+     &                G12.6,'' mb  '')') atotsp
                   WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') atotsp
+     &                E12.6,'' mb  '')') atotsp
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                G12.5,'' mb  '')') CSDirlev(1,nejc)
+     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
                   atotsp = atotsp + CSDirlev(1,nejc)
 c                 DO ilev = 1, NLV(nnuc)
 c                    atotsp = atotsp + CSDirlev(ilev,nejc)
@@ -2188,12 +2174,38 @@ c                 ENDDO
      &                      POPcse(0,6,ispec,INExc(nnuc))
                ENDIF
              ENDDO
-             WRITE (8,*) '-----------------------------------------'
+             WRITE (8,*) '_________________________________________'
              WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                 dtotsp,ttotsp,htotsp,ctotsp
              WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
+C
+C            Calculating Q-balance
+C
+C            EIN - QPRod(nnuc) + ELV(LEVtarg,0)
+C
+             cmulg = gtotsp/CSPrd(nnuc)
+             cmuln = xtotsp/CSPrd(nnuc)
+             cmulp = ptotsp/CSPrd(nnuc)
+             cmula = atotsp/CSPrd(nnuc)
+             cmuld = dtotsp/CSPrd(nnuc)
+             cmult = ttotsp/CSPrd(nnuc)
+             cmulh = htotsp/CSPrd(nnuc)
+
+             WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
+     &                cmula, cmuld, cmult, cmulh
+
+	       totener_in  = ABS(EIN - QPRod(nnuc) + ELV(LEVtarg,0))
+
+             totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
+     &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
              WRITE (8,*) '-----------------------------------------'
+             WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
+     &                  '' Bal.='',F7.3,''%'')')
+     &	   totener_in , totener_out, 
+     &       (totener_in - totener_out)/totener_in*100.D0
+
+             WRITE (8,*) '*****************************************'
              WRITE (8,*) ' '
            ENDIF
          ENDIF
