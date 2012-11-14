@@ -1,6 +1,6 @@
-cc   * $Rev: 3201 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-14 15:06:31 +0100 (Mi, 14 Nov 2012) $
+cc   * $Rev: 3204 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-11-14 16:44:12 +0100 (Mi, 14 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -4022,6 +4022,17 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
        ENDIF        
 C-----End of ENDF spectra (inclusive)
 C
+C-----S-FACTOR call
+      IF(SFAct.EQ.1) THEN
+      CALL SFACTOR(S_factor)
+      ENDIF
+      IF(SFAct.EQ.2) THEN
+      CALL SFACTORn(csinel, S_factorn)
+      ENDIF
+      IF(SFAct.EQ.3) THEN
+      CALL SFACTORp(S_factorp)
+      ENDIF
+C------------------
  1155 IF( FITomp.GE.0 ) THEN
  1156   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
