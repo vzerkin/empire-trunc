@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3203 $
+Ccc   * $Rev: 3205 $
 Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-11-14 16:39:08 +0100 (Mi, 14 Nov 2012) $
+Ccc   * $Date: 2012-11-14 17:24:01 +0100 (Mi, 14 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -256,8 +256,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
 C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
-C        CN_isotropic = .True.     ! default
-         CN_isotropic = .False.    ! CN anisotropy from ECIS. 
+         CN_isotropic = .True.     ! default
+C         CN_isotropic = .False.    ! CN anisotropy from ECIS. 
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
