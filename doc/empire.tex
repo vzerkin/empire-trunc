@@ -5533,7 +5533,7 @@ formatting process.
 
 \chapter{Nuclear astrophysics\label{Chap:S-FACTOR}}
 
-Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only (follows Cauldrons in the Cosmos by Claus E. Rolfs and William S. Rodney - University of Chicago Press 1988).
+Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only \cite{RR}.
 
 The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/$E$ dependence of the cross section.  It is generally expressed as:
 
@@ -5553,9 +5553,12 @@ where $Z_p$ is the charge of the projectile  and
 $Z_t$ is the charge of the target.
 
 The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature $T$), the S-factor is constant (no energy dependence or very nearly a constant).  If $S(E) \neq S(E_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.  In most cases (for nonresonant reactions), a Taylor series expansion around zero energy (Maclaurin) is normally taken.  This now becomes an effective S-factor (S$_{eff}$(E$_{0}$)).
-The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence) and can output both gammas or neutrons in the exit channel (with either an $\alpha$ or proton in the incident channel).  
+The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).
+\par
+The keyword input to allow for the calculation of the S-factor is SFACT.  SFACT = 1 will calculate (x,$\gamma$); SFACT = 2 will calculate (x,n); SFACT = 3 will calculate (x,p or $\alpha$,p).  The output file has three columns: the first one is the incident center-of-mass energy, the second column is the cross section in barns and the third column is the S-factor given in MeV b.    
 
 
+*** More nuclear astrophysics formalism forthcoming
 
 
 \part{STRUCTURE  OF  EMPIRE CODE\label{Chap:code}}
