@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3197 $
+Ccc   * $Rev: 3202 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-12 03:01:38 +0100 (Mo, 12 Nov 2012) $
+Ccc   * $Date: 2012-11-14 15:55:33 +0100 (Mi, 14 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -256,8 +256,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
 C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
-         CN_isotropic = .True.     ! default
-C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
+C        CN_isotropic = .True.     ! default
+         CN_isotropic = .False.    ! CN anisotropy from ECIS. 
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -7344,30 +7344,16 @@ C-----
 C-----         
          IF (name.EQ.'PFNTKE') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
-              if(i1.gt.20) then
-                    i1 = 20 
-                WRITE (8,
-     &        '('' Global Fission TKE normalization uncertainty '',
-     &        '' maximum is reset to '',i2,''%'')') i1
-              endif
               WRITE (8,
      &        '('' Global Fission TKE normalization uncertainty '',
      &        '' is equal to '',i2,''%'')') i1
-              WRITE (8,
-     &        '('' TKE PDF assumed uniform from 0.7 - 1 '')')
               sigma = val*i1*0.01
-C
-C             PFNtke scaling assumed to always reduce the mean value
-C             due to the meaning of the PFNtke as the reduction of the
-C             fission TKE due to the neutron emission during 
-C             the fiss. fragments' acceleration >>  PFNtke ranges from ~0.7 to 1.
-C
-              atilss = val - dabs(grand())*sigma
-C             IF(IOPran.gt.0) then
-C               atilss = val + grand()*sigma
-C             ELSE
-C               atilss = val + 1.732d0*(2*drand()-1.)*sigma
-C             ENDIF
+
+              IF(IOPran.gt.0) then
+                atilss = val + grand()*sigma
+              ELSE
+                atilss = val + 1.732d0*(2*drand()-1.)*sigma
+              ENDIF
               
               PFNtke = atilss
 
@@ -7420,15 +7406,33 @@ C-----
 C-----         
          IF (name.EQ.'PFNALP') THEN
             if(i1.ne.0 .and. IOPran.ne.0) then
-              WRITE (8,
+              if(i1.gt.15) then
+                i1 = 15 
+                WRITE (8,
+     & '('' Global PFN alpha (Efrag ~ alpha*TKE) norm uncertainty '',
+     &        '' reset to maximum of 15 %'')') 
+              else
+                WRITE (8,
      & '('' Global PFN alpha (Efrag ~ alpha*TKE) norm uncertainty '',
      &        '' is equal to '',i2,''%'')') i1
+              endif  
+
+              if(val.gt.1.d0) then
+                WRITE (8,
+     & '('' Global PFN alpha (Efrag ~ alpha*TKE) must be <= 1'')')
+                val = 1.d0
+              endif
+
               sigma = val*i1*0.01
               IF(IOPran.gt.0) then
                 atilss = val + grand()*sigma
               ELSE
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
+C
+C             To avoid PFNalp > 1 !!!
+C 
+              if(atilss.gt.1.d0) atilss = 1.d0 - (atilss - 1.d0) 
               
               PFNalp = atilss
 
@@ -7442,9 +7446,15 @@ C-----
             else
 
               PFNalp = val
-              WRITE (8,
+              if(val.gt.1.d0) then
+                WRITE (8,
+     & '('' Global PFN alpha (Efrag ~ alpha*TKE) must be <= 1'')')
+                PFNalp = 1.d0
+              else
+                WRITE (8,
      & '('' PFN alpha (Efrag ~ alpha*TKE) norm in all nuclei set to '',
      & F8.3)') val
+              endif
             endif
             GOTO 100
          ENDIF
