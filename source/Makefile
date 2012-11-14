@@ -1,6 +1,6 @@
-#$Rev: 3059 $
-#$Author: rcapote $
-#$Date: 2012-08-05 02:19:04 +0200 (So, 05 Aug 2012) $
+#$Rev: 3209 $
+#$Author: apalumbo $
+#$Date: 2012-11-14 19:57:06 +0100 (Mi, 14 Nov 2012) $
 
 # set default fortran compiler:
 
@@ -124,7 +124,7 @@ OBJF =      HF-comp.o         MSC-NVWY.o        MSD-orion.o    MSD-tristan.o\
             gamma-strength-analytic.o           thora.o        empire_ctl.o\
             pfns.o            dtrans.o          fitbarrier.o   fis_io.o\
             plot-zvv.o    kailas07emp.o         systematics.o  open_files.o\
-            mubar.o
+            mubar.o           S-factor.o        S-factor-n.o   S-factor-p.o\
 
 all: 
 	$(MAKE) empire
