@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3189 $
+Ccc   * $Rev: 3206 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-07 13:59:45 +0100 (Mi, 07 Nov 2012) $
+Ccc   * $Date: 2012-11-14 18:27:54 +0100 (Mi, 14 Nov 2012) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -1874,7 +1874,7 @@ C
       END
 C
 C
-      SUBROUTINE SPLVL(I3,Amass,Nz,Iout)
+      SUBROUTINE SPLVL(I3,Amassi,Nz,Iout)
 C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
 C     Geel 09/2005
 C
@@ -1899,7 +1899,7 @@ C
 C
 C Dummy arguments
 C
-      DOUBLE PRECISION Amass
+      DOUBLE PRECISION Amassi
       INTEGER I3, Iout, Nz
 C
 C Local variables
@@ -1930,8 +1930,8 @@ C-----=0.0315 and vll(16,2)=0.0225 to avoid going out of dimension
 C-----also set vll(5,2) to 0.0225 instead of 0.0313 as in the original version.
       DATA uscal, uvec, rw0/51.5D0, 35.4D0, 1.27D0/
       pi = 4.*ATAN(1.D0)
-      dnz = (Amass - 2.*Nz)/Amass
-      a3 = Amass**(1./3.)
+      dnz = (Amassi - 2.*Nz)/Amassi
+      a3 = Amassi**(1./3.)
       rws = rw0*a3
       HOMega = 41.47/a3
       VLS(I3) = (5.0 + 8.0/a3**2)/HOMega
@@ -1961,10 +1961,10 @@ C
          xnp = Nz
       ELSE
          e0 = -(uscal - dnz*uvec)
-         rde = (Amass - 2.*Nz)*rde
-         xnp = Amass - Nz
+         rde = (Amassi - 2.*Nz)*rde
+         xnp = Amassi - Nz
       ENDIF
-      rmsd = 4.*pi*rde*rmsd/Amass
+      rmsd = 4.*pi*rde*rmsd/Amassi
 C                                                                       ! nilsson
 C     DO n = 1, 2000                                                    ! nilsson
 C        iocc(n) = 0                                                    ! nilsson
@@ -2005,7 +2005,7 @@ C
       IF (als.NE.0.0D0) VLS(I3) = als/HOMega
       als = VLS(I3)
       GAP(I3) = GAPin(I3)
-      IF (GAP(I3).LE.0.0D0) GAP(I3) = 12.0/SQRT(Amass)
+      IF (GAP(I3).LE.0.0D0) GAP(I3) = 12.0/SQRT(Amassi)
 C     ESPX=100.+ABS(E0)
       espx = 70.                                                         ! nilsson
       nqx = MIN(espx/HOMega,13.D0)
@@ -2040,7 +2040,7 @@ C
       IF(I3.EQ.1)THEN
          nnucl = Nz
       ELSE IF(I3.EQ.2)THEN
-         nnucl = INT(Amass) - Nz
+         nnucl = INT(Amassi) - Nz
       ENDIF
 C-----find out the Fermi level                                           ! nilsson
       numnuc = 0                                                         ! nilsson
