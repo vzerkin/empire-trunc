@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3202 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-14 15:55:33 +0100 (Mi, 14 Nov 2012) $
+Ccc   * $Rev: 3203 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-11-14 16:39:08 +0100 (Mi, 14 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -7779,11 +7779,12 @@ C-----
        ENDIF
 C-----
          IF (name.EQ.'SFACT') THEN
-            if (nint(val).EQ.1 .OR. nint(val).EQ.2) THEN
+             if (nint(val).GT.0 .OR. nint(val).LE.3) THEN
              SFAct = nint(val)
              WRITE (8, '('' SFACTOR = '',i2)')  nint(val)
              if (SFAct.eq.1) WRITE (8,*) 'S-FACTOR for (x,g) calculated'
              if (SFAct.eq.2) WRITE (8,*) 'S-FACTOR for (x,n) calculated'
+             if (SFAct.eq.3) WRITE (8,*) 'S-FACTOR for (x,p) calculated'
             endif
            goto 100
          ENDIF
