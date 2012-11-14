@@ -1,6 +1,6 @@
-cc   * $Rev: 3199 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-13 23:39:37 +0100 (Di, 13 Nov 2012) $
+cc   * $Rev: 3201 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-14 15:06:31 +0100 (Mi, 14 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1812,7 +1812,7 @@ C--------Printout of results for the decay of NNUC nucleus
            dtmp = dtmp + POPlv(il,nnuc)
          ENDDO
 C
-C	   dtmp for nnuc = target is the total CN decay
+C      dtmp for nnuc = target is the total CN decay
 C
          IF(dtmp.LE.0.d0) GOTO 1525
 
@@ -2195,14 +2195,14 @@ C
              WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
      &                cmula, cmuld, cmult, cmulh
 
-	       totener_in  = ABS(EIN - QPRod(nnuc) + ELV(LEVtarg,0))
+           totener_in  = EIN + QPRod(nnuc) + ELV(LEVtarg,0)
 
              totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
      &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
              WRITE (8,*) '-----------------------------------------'
              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
      &                  '' Bal.='',F7.3,''%'')')
-     &	   totener_in , totener_out, 
+     &     totener_in , totener_out, 
      &       (totener_in - totener_out)/totener_in*100.D0
 
              WRITE (8,*) '*****************************************'
@@ -3447,12 +3447,12 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    WRITE (8,'('' * Cont.lev. DIR cross section scaled by '',
      &      G13.6)') FCOred
         if (INT(ZEJc(0)).EQ.0) then
-	    DO i=1,NLV(0) ! loop over target discrete levels
+        DO i=1,NLV(0) ! loop over target discrete levels
            IF(CINred(i).NE.1) WRITE (8,
      >       '('' * Comp. inelastic cross section for target level # '',
      &       i2,'' scaled by '',G13.6)') i, CINred(i)
-	    ENDDO
-	  endif
+        ENDDO
+      endif
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
