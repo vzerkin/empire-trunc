@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3196 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-09 21:38:50 +0100 (Fr, 09 Nov 2012) $
+Ccc   * $Rev: 3207 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-14 18:29:21 +0100 (Mi, 14 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -844,7 +844,7 @@ C-----do loop over c.n. energies (loops over spins and parities expanded)
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
      &      *TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
-         IF(MAXmult.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
+         xle(2) = E2(eg)*TUNe(0, Nnuc)
          IF(MAXmult.GT.2) THEN
             xlm(2) = xle(2)*cme
             DO i = 3, MAXmult
@@ -914,7 +914,7 @@ C--------do loop over discrete levels -----------------------------------
              xle(1) = E1(Nnuc,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))
      &           *TUNe(0, Nnuc)
              xlm(1) = XM1(eg)*TUNe(0, Nnuc)
-             IF(lambmax.GE.2) xle(2) = E2(eg)*TUNe(0, Nnuc)
+             xle(2) = E2(eg)*TUNe(0, Nnuc)
              IF(lambmax.GT.2) THEN
               xlm(2) = xle(2)*cme
               DO j = 3, lambmax
