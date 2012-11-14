@@ -14,18 +14,19 @@ CC
 
        INCLUDE 'dimension.h'
        INCLUDE 'global.h'
-       REAL alpha, mu
+C       REAL alpha, mu
+       REAL mu
 
         OPEN (unit = 781, file = "sfactor.txt")
 CC        WRITE(781,*) 'Ecm, Cross Section (b), S_factor (MeV b)'
 CC        WRITE(781,*) 
          
-         alpha = A(0)/(A(0)+AEJc(0))
-         EIN = (EIN*1000)*alpha
+C         alpha = A(0)/(A(0)+AEJc(0))
+         EIN = EIN*1000
          mu = (A(0)*AEJc(0))/(A(0)+AEJc(0))
          eta = 31.29*Z(0)*ZEJc(0)*((mu/EIN)**0.5)
          S_factor = (((CSPrd(1)/1000)*EIN)/exp(-eta))
-         WRITE(781,50) EIN/1000, CSPrd(1)/1000, S_factor
+         WRITE(781,50) EIN/1000, CSPrd(1)/1000, S_factor/1000
    50    FORMAT(E10.4,4X,E12.6,4X,E12.6)
 C       RETURN
        END
