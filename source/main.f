@@ -1,6 +1,6 @@
-cc   * $Rev: 3204 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-11-14 16:44:12 +0100 (Mi, 14 Nov 2012) $
+cc   * $Rev: 3208 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-14 19:06:48 +0100 (Mi, 14 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -57,7 +57,7 @@ C
      &                 gtotsp, htotsp, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
      &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
-     &                 step, sum, sumfis, sumfism(NFMOD), totsp, xnub,
+     &                 step, sum, sumfis, sumfism(NFMOD), xnub,
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 totcorr,cseaprnt(ndecse,ndangecis),
@@ -78,6 +78,7 @@ C                      -----------------------------------------------
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
+      DOUBLE PRECISION S_factor,S_factorn,S_factorp
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -91,7 +92,7 @@ C     DOUBLE PRECISION taut,tauf,gamt,gamfis
      &        imint, ip, ipar, irec, ispec, itimes, its, iz, izares, j,
      &        jcn, ke, kemax, kemin, ltrmax, m, jz, jn, jzmx, jnmx, 
      &        nang, nbr, ncoll, nejc, nejcec, nnuc, jfiss, 
-     &        nnur, nnurec, nspec, neles, nxsp, npsp, ncon,
+     &        nnur, nnurec, nspec, neles, ncon,
      &        ikey1, ikey2, ikey3, ikey4, nuc_print, ilevcol,
 C             -----------------------------------------------
 C             PFNS quantities  
@@ -1812,7 +1813,7 @@ C--------Printout of results for the decay of NNUC nucleus
            dtmp = dtmp + POPlv(il,nnuc)
          ENDDO
 C
-C      dtmp for nnuc = target is the total CN decay
+C	   dtmp for nnuc = target is the total CN decay
 C
          IF(dtmp.LE.0.d0) GOTO 1525
 
@@ -2040,9 +2041,7 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &           ' mb    : ',A9) 
              ENDDO
              WRITE (12,*)
-C
-C            cmult = 
-C
+
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
              IF (xtotsp.NE.0) emedn = emedn/xtotsp
              IF (ptotsp.NE.0) emedp = emedp/ptotsp
@@ -2065,10 +2064,8 @@ C--------------(merely for checking purpose)
      &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+C                 Including discrete levels' population into the total
                   xtotsp = xtotsp + CSDirlev(1,nejc)
-c                 DO ilev = 1, NLV(nnuc)
-c                    xtotsp = xtotsp + CSDirlev(ilev,nejc)
-c                 ENDDO
              ELSEIF (nnuc.EQ.mt649) THEN
                   nejc = 2
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
@@ -2079,10 +2076,8 @@ c                 ENDDO
      &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+C                 Including discrete levels' population into the total
                   ptotsp = ptotsp + CSDirlev(1,nejc)     
-c                 DO ilev = 1, NLV(nnuc)
-c                    ptotsp = ptotsp + CSDirlev(ilev,nejc)
-c                 ENDDO
              ELSEIF (nnuc.EQ.mt849) THEN
                   nejc = 3
                   WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
@@ -2093,47 +2088,8 @@ c                 ENDDO
      &                E12.6,'' mb  '')') atotsp
                   WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
      &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+C                 Including discrete levels' population into the total
                   atotsp = atotsp + CSDirlev(1,nejc)
-c                 DO ilev = 1, NLV(nnuc)
-c                    atotsp = atotsp + CSDirlev(ilev,nejc)
-c                 ENDDO
-             ELSE
-                  IF(atotsp.LT.1.0d-8) THEN
-                    totsp = CSprd(nnuc) - dtotsp - htotsp - ttotsp
-                    IF(NDEJC.EQ.7) totsp = totsp - ctotsp
-                    nxsp = 0
-                    IF(xtotsp.GT.0.0d0) THEN
-                      nxsp=INT(xtotsp/totsp+0.5d0)
-                      IF(ttotsp.GT.0.0d0) THEN
-                        xnorm(1,INExc(nnuc)) =(nxsp*totsp+dtotsp)/xtotsp
-                        xtotsp = nxsp*totsp + dtotsp
-                       ELSE
-                        xnorm(1,INExc(nnuc)) = nxsp*totsp/xtotsp
-                        xtotsp = nxsp*totsp
-                       ENDIF
-                      POPcs(1,INExc(nnuc)) = xtotsp
-                      IF(ABS(1.0d0 - xnorm(1,INExc(nnuc))).GT.0.01d0) 
-     &                  WRITE(8,
-     &      '(''  WARNING! Exclusive neutron spectrum renormalized by'',
-     &                               f6.3)') xnorm(1,INExc(nnuc))
-                     ENDIF
-                    npsp = 0
-                    IF(ptotsp.GT.0.0d0) THEN
-                      npsp=INT(ptotsp/totsp+0.5d0)
-                      IF(htotsp.GT.0.0d0) THEN
-                        xnorm(2,INExc(nnuc)) =(npsp*totsp+dtotsp)/ptotsp
-                        ptotsp = npsp*totsp + dtotsp
-                       ELSE
-                        xnorm(2,INExc(nnuc)) = npsp*totsp/ptotsp
-                        ptotsp = npsp*totsp
-                       ENDIF
-                      POPcs(2,INExc(nnuc)) = ptotsp
-                      IF(ABS(1.0d0 - xnorm(2,INExc(nnuc))).GT.0.01d0) 
-     &                  WRITE(8,
-     &      '(''  WARNING! Exclusive  proton spectrum renormalized by'',
-     &                     f6.3)') xnorm(2,INExc(nnuc))
-                     ENDIF
-                   ENDIF
              ENDIF
 
              WRITE (8,*) ' '
@@ -2195,14 +2151,14 @@ C
              WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
      &                cmula, cmuld, cmult, cmulh
 
-           totener_in  = EIN + QPRod(nnuc) + ELV(LEVtarg,0)
+             totener_in=ABS(EIN+QPRod(nnuc)+ELV(LEVtarg,0))
 
              totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
      &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
              WRITE (8,*) '-----------------------------------------'
              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
      &                  '' Bal.='',F7.3,''%'')')
-     &     totener_in , totener_out, 
+     &	   totener_in , totener_out, 
      &       (totener_in - totener_out)/totener_in*100.D0
 
              WRITE (8,*) '*****************************************'
@@ -3447,12 +3403,12 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    WRITE (8,'('' * Cont.lev. DIR cross section scaled by '',
      &      G13.6)') FCOred
         if (INT(ZEJc(0)).EQ.0) then
-        DO i=1,NLV(0) ! loop over target discrete levels
+	    DO i=1,NLV(0) ! loop over target discrete levels
            IF(CINred(i).NE.1) WRITE (8,
      >       '('' * Comp. inelastic cross section for target level # '',
      &       i2,'' scaled by '',G13.6)') i, CINred(i)
-        ENDDO
-      endif
+	    ENDDO
+	  endif
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
@@ -3717,7 +3673,7 @@ C---------------Inclusive DDX spectrum (protons)
            ENDIF
          ENDIF
 C--------alphas
-         recorp = 1. + EJMass(3)/AMAss(1)
+         recorp = (1. + EJMass(3)/AMAss(1))
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -4023,16 +3979,10 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
 C-----End of ENDF spectra (inclusive)
 C
 C-----S-FACTOR call
-      IF(SFAct.EQ.1) THEN
-      CALL SFACTOR(S_factor)
-      ENDIF
-      IF(SFAct.EQ.2) THEN
-      CALL SFACTORn(csinel, S_factorn)
-      ENDIF
-      IF(SFAct.EQ.3) THEN
-      CALL SFACTORp(S_factorp)
-      ENDIF
-C------------------
+      IF(SFAct.EQ.1) CALL SFACTOR(S_factor)
+      IF(SFAct.EQ.2) CALL SFACTORn(csinel, S_factorn)
+      IF(SFAct.EQ.3) CALL SFACTORp(S_factorp)
+
  1155 IF( FITomp.GE.0 ) THEN
  1156   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
