@@ -109,6 +109,9 @@ c     98     fission XS
 c     99     ecis
 c    100     empire_ctl
 c    102     Non-RIPL potential
+C    781     S-factor
+C    782     S-factor
+C    783     S-factor
 
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
 
@@ -165,6 +168,9 @@ c    102     Non-RIPL potential
           endif
       endif
       if(.not.OMPAR_RIPLF) OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
+
+      OPEN (unit = 781, file = "sfactor.txt")
+      WRITE(781,*) 'Ecm(MeV), Cross Section (b), S-factor (MeV b)'
 
       return
       end subroutine open_files

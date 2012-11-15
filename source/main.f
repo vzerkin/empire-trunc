@@ -1,6 +1,6 @@
-cc   * $Rev: 3208 $
+cc   * $Rev: 3212 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-14 19:06:48 +0100 (Mi, 14 Nov 2012) $
+Ccc   * $Date: 2012-11-15 11:52:39 +0100 (Do, 15 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -78,7 +78,7 @@ C                      -----------------------------------------------
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
-      DOUBLE PRECISION S_factor,S_factorn,S_factorp
+      DOUBLE PRECISION SFACTOR
       CHARACTER*9 cejectile
       CHARACTER*3 ctldir
       CHARACTER*6 keyname
@@ -3979,10 +3979,15 @@ C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
 C-----End of ENDF spectra (inclusive)
 C
 C-----S-FACTOR call
-      IF(SFAct.EQ.1) CALL SFACTOR(S_factor)
-      IF(SFAct.EQ.2) CALL SFACTORn(csinel, S_factorn)
-      IF(SFAct.EQ.3) CALL SFACTORp(S_factorp)
-
+      s_factor = 0.d0
+      IF(SFAct.GT.0) THEN
+C       The charge of neutrons is zero, so s_factor here will be = 0 always for neutrons
+C       For charged particles CSPrd(1) can not be defined
+        IF(SFAct.EQ.1) s_factor = SFACTOR(CSPrd(1))  
+        IF(SFAct.EQ.2) s_factor = SFACTOR(csinel)
+        IF(SFAct.EQ.3) s_factor = SFACTOR(CSPrd(3))
+      ENDIF
+C        
  1155 IF( FITomp.GE.0 ) THEN
  1156   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
         IF(nextenergy(1:1).EQ.'$') THEN
@@ -4109,7 +4114,13 @@ C--------Saving random seeds
          ENDDO
          CLOSE(94)
          CLOSE(95)  ! FROM INPUT.F
-         close(102)
+         CLOSE(102)
+
+         IF(SFACT.GT.0) THEN
+           close(781)
+         ELSE
+           close(781,STATUS='DELETE')
+         ENDIF
          RETURN
       ENDIF
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN

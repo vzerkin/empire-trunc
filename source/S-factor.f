@@ -1,32 +1,44 @@
 Ccc     $Author: apalumbo $
 Ccc     $Date: 2012-11-14
 
-       SUBROUTINE SFACTOR(S_factor)
-       IMPLICIT REAL*8 (A-H,O-Z)
+      REAL*8 FUNCTION SFACTOR(Csection)
 
-CC  This program calculates the S-factor for a non-resonant reaction (x.g).
-CC  The energies are converted to keV and the cross section to barns and the 
-CC  S-factor is output in MeV barns (MeV*b).  Furthermore, the incident energy (lab
-CC  frame from EMPIRE) is converted to a center-of-mass energy and the
-CC  subsequent S-factor calculated accordingly - treatment follows Cauldrons
-CC  in the Cosmos - Rolfs and Rodney (University of Chicago Press - 1988) 
+CC  This program calculates the S-factor for a non-resonant reaction (x,n).
+CC  Input: Cross section Csection is in mb
+CC  The CMS energy EIN is taken from EMPIRE (in MeV)
+CC  S-factor is output in MeV barns (MeV*b). 
+CC  Treatment follows A.G.W.Cameron, Technical Report CRL-41, AECL-454 (Chalk River, Ontario, June 1957), p.30,31
+CC  Available online at http://www.fas.org/sgp/eprint/CRL-41.pdf 
+CC 
+CC  Treatment follows Cauldrons in the Cosmos - Rolfs and Rodney (University of Chicago Press - 1988) 
 CC  
 
-       INCLUDE 'dimension.h'
-       INCLUDE 'global.h'
-C       REAL alpha, mu
-       REAL mu
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 
-        OPEN (unit = 781, file = "sfactor.txt")
-CC        WRITE(781,*) 'Ecm, Cross Section (b), S_factor (MeV b)'
-CC        WRITE(781,*) 
+      REAL*8 Csection
+
+      REAL*8 mu, stmp, eta
+
+C     stmp in barn
+      stmp = Csection/1000
          
-C         alpha = A(0)/(A(0)+AEJc(0))
-         EIN = EIN*1000
-         mu = (A(0)*AEJc(0))/(A(0)+AEJc(0))
-         eta = 31.29*Z(0)*ZEJc(0)*((mu/EIN)**0.5)
-         S_factor = (((CSPrd(1)/1000)*EIN)/exp(-eta))
-         WRITE(781,50) EIN/1000, CSPrd(1)/1000, S_factor/1000
-   50    FORMAT(E10.4,4X,E12.6,4X,E12.6)
-C       RETURN
-       END
+      mu = (A(0)*AEJc(0))/(A(0)+AEJc(0))
+C
+C     CETa = ELE2/HHBarc*SQRT(AMUmev/2) 
+C     CETa = e^2 / (hbar C) SQRT( MASS*C^2 /2) = e^2 / hbar SQRT( AMUmev /2)
+C     The Sommerfeld factor eta can be calculated as CETa*SQRT(mu/EIN)*Zt*Ze
+C     eta = e^2*Zt*Ze / hbar SQRT( AMUmev*mu/ (2EIN)) where mu is adimensional, and EIN is the CMS energy in MeV
+      eta = CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN)
+C     
+      SFACTOR = EIN*stmp*exp(2*pi*eta)
+C
+C     etmp in keV
+C     etmp = EIN*1000
+C     eta = 31.29*Z(0)*ZEJc(0)*SQRT(mu/etmp)
+C     SFACTOR = EIN*stmp*exp(eta)
+
+      WRITE(781,50) EIN, stmp, SFACTOR
+   50 FORMAT(E10.4,4X,E12.6,4X,E12.6)
+      RETURN
+      END
