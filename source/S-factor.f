@@ -3,7 +3,7 @@ Cc    * $Author: rcapote $
 Ccc   * $Date: 2012-11-15 11:52:39 +0100 (Thu, 15 Nov 2012) $ 
       REAL*8 FUNCTION SFACTOR(Csection)
 
-CC  This program calculates the S-factor for a non-resonant reaction (x,n).
+CC  This program calculates the S-factor for a non-resonant reaction.
 CC  Input: Cross section Csection is in mb
 CC  The CMS energy EIN is taken from EMPIRE (in MeV)
 CC  S-factor is output in MeV barns (MeV*b). 
@@ -11,7 +11,9 @@ CC  Treatment follows A.G.W.Cameron, Technical Report CRL-41, AECL-454 (Chalk Ri
 CC  Available online at http://www.fas.org/sgp/eprint/CRL-41.pdf 
 CC 
 CC  Treatment follows Cauldrons in the Cosmos - Rolfs and Rodney (University of Chicago Press - 1988) 
+CC  Outlines in Empire.pdf
 CC  
+
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
