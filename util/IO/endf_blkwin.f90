@@ -59,7 +59,7 @@ module endf_line_io
 
     character*75, public, pointer :: endline                ! current line
     public filin, lnum                                      ! line #
-    public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num
+    public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
     public file_not_fixed, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
 
 !------------------------------------------------------------------------------
