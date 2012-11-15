@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2807 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Rev: 3222 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-15 18:55:20 +0100 (Do, 15 Nov 2012) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -143,7 +143,7 @@ C
       totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
       WRITE (8,99045)
-      WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
+      WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec 
 99045 FORMAT (24X,93('-'))
       END
@@ -291,7 +291,7 @@ C
       totspec = totspec*DE
 
       WRITE (8,99045)
-      WRITE (8,'(1x,''    Integrated spectrum   '',G12.5,''  mb'')')
+      WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec  
 
       RETURN

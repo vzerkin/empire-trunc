@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2947 $
+Ccc   * $Rev: 3222 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 16:51:30 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2012-11-15 18:55:20 +0100 (Do, 15 Nov 2012) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -1588,11 +1588,11 @@ C-----
 C     IF(GST.NE.0)CALL AUERST(1, 0, 0)
 C     CALL AUERST(1, 1, 0)
       IF (IOUt.GT.0) WRITE (8,
-     &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
+     &           '(2X,A2,'' MSC emission cross section'',G12.6,'' mb'')'
      &           ) SYMbe(1), CSMsc(1)
 C     CALL AUERST(1, 2, 0)
       IF (IOUt.GT.0) WRITE (8,
-     &           '(2X,A2,'' MSC emission cross section'',G12.5,'' mb'')'
+     &           '(2X,A2,'' MSC emission cross section'',G12.6,'' mb'')'
      &           ) SYMbe(2), CSMsc(2)
 99105 FORMAT (1X,12E11.4)
 99110 FORMAT (1X,/)

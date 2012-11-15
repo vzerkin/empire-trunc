@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3185 $
+Ccc   * $Rev: 3222 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-06 03:35:03 +0100 (Di, 06 Nov 2012) $
+Ccc   * $Date: 2012-11-15 18:55:20 +0100 (Do, 15 Nov 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -537,7 +537,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSEIF (nejc.ge.4) THEN !complex particle
                IF (IDNa(3 + nejc,6).EQ.0) THEN
@@ -546,7 +546,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSE !gamma
                IF (IDNa(5,6).EQ.0) THEN
@@ -555,7 +555,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
      &'' mb'',A12)') 'g ', cross(nejc), status
             ENDIF
 C---------We don't need this spectrum printout any more but I leave it

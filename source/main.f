@@ -1,6 +1,6 @@
-cc   * $Rev: 3212 $
+cc   * $Rev: 3222 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-15 11:52:39 +0100 (Do, 15 Nov 2012) $
+Ccc   * $Date: 2012-11-15 18:55:20 +0100 (Do, 15 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -56,7 +56,7 @@ C
      &                 epre, ftmp, gang, grand, ! spechk(4),
      &                 gtotsp, htotsp, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
-     &                 qstep, recorp, sgamc, spdif, spdiff, stauc,
+     &                 qstep, sgamc, spdif, spdiff, stauc,
      &                 step, sum, sumfis, sumfism(NFMOD), xnub,
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
@@ -76,6 +76,8 @@ C                      -----------------------------------------------
      &                 fisxse, eps, checkprd,ftmp_gs,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(2,NDExclus),xsdirect, xspreequ, xsmsc
+      DOUBLE PRECISION recorn, recorp, recora, record, recort, recorh 
+
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
       DOUBLE PRECISION SFACTOR
@@ -1844,7 +1846,7 @@ C
            IF(cspg.gt.0.d0) then
              WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,'(2x,
-     &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
+     &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
              WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,'(11x,A1,A12,A6,A5,4x,A12,A7,1x,A6,1x,A10)') 
      &       'i','    Elv(i)  ','Par  ',' Spin',
@@ -1859,7 +1861,7 @@ C
 
              WRITE (8,'(1X,/,10X,40(1H-),/)')
              WRITE (8,'(2x,
-     &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
+     &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
              WRITE (8,'(1X,/,10X,40(1H-),/)')
              WRITE (8,'(11x,A1,A12,A6,A5,4x,A12,A7,1x,A6,1x,A10)') 
      &       'i','    Elv(i)  ','Par  ',' Spin',
@@ -2042,13 +2044,20 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
              ENDDO
              WRITE (12,*)
 
+             recorn = 1.d0 + EJMass(1)/AMAss(nnuc)
+             recorp = 1.d0 + EJMass(2)/AMAss(nnuc)
+             recora = 1.d0 + EJMass(3)/AMAss(nnuc)
+             record = 1.d0 + EJMass(4)/AMAss(nnuc)
+             recort = 1.d0 + EJMass(5)/AMAss(nnuc)
+             recorh = 1.d0 + EJMass(6)/AMAss(nnuc)
+
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
-             IF (xtotsp.NE.0) emedn = emedn/xtotsp
-             IF (ptotsp.NE.0) emedp = emedp/ptotsp
-             IF (atotsp.NE.0) emeda = emeda/atotsp
-             IF (dtotsp.NE.0) emedd = emedd/dtotsp
-             IF (ttotsp.NE.0) emedt = emedt/ttotsp
-             IF (htotsp.NE.0) emedh = emedh/htotsp
+             IF (xtotsp.NE.0) emedn = emedn/xtotsp/recorn
+             IF (ptotsp.NE.0) emedp = emedp/ptotsp/recorp
+             IF (atotsp.NE.0) emeda = emeda/atotsp/recora
+             IF (dtotsp.NE.0) emedd = emedd/dtotsp/record
+             IF (ttotsp.NE.0) emedt = emedt/ttotsp/recort
+             IF (htotsp.NE.0) emedh = emedh/htotsp/recorh
              IF (ctotsp.NE.0) emedc = emedc/ctotsp
 C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
@@ -2152,16 +2161,15 @@ C
      &                cmula, cmuld, cmult, cmulh
 
              totener_in=ABS(EIN+QPRod(nnuc)+ELV(LEVtarg,0))
-
              totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
      &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
-             WRITE (8,*) '-----------------------------------------'
+             WRITE (8,*) '---------------------------------------------'
              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
-     &                  '' Bal.='',F7.3,''%'')')
+     &                  '' Balance ='',F7.2,''%'')')
      &	   totener_in , totener_out, 
      &       (totener_in - totener_out)/totener_in*100.D0
 
-             WRITE (8,*) '*****************************************'
+             WRITE (8,*) '*********************************************'
              WRITE (8,*) ' '
            ENDIF
          ENDIF
@@ -2393,23 +2401,23 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &           iz, SYMb(nnuc), ia, ftmp_gs
          ENDIF
          IF(CSFis.gt.0.)
-     &     WRITE (12,'(4x,''fission  cross section'',G12.5,''  mb'')') 
+     &     WRITE (12,'(4x,''fission  cross section'',E12.6,''  mb'')') 
      &          CSFis
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
-           WRITE (8,'(''  g  emission cross section'',G12.5,''  mb'')')
+           WRITE (8,'(''  g  emission cross section'',G12.6,''  mb'')')
      &          CSEmis(0,nnuc)
            WRITE (12,'(10x,
-     &                 '' g  emission cross section'',G12.5,''  mb'')')
+     &                 '' g  emission cross section'',E12.6,''  mb'')')
      &          CSEmis(0,nnuc)
 
            if(nnuc.eq.1) then
            WRITE (8,'(2x,
-     &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
+     &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
            WRITE (12,'(2x,
-     &     '' Primary g  emission cross section'',G12.5,''  mb'')') cspg
+     &     '' Primary g  emission cross section'',E12.6,''  mb'')') cspg
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
@@ -2431,7 +2439,7 @@ C------------Residual nuclei must be heavier than alpha
              IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
 
              WRITE (12,
-     &           '(11X,A2,'' emission cross section'',G12.5,''  mb'')')
+     &           '(11X,A2,'' emission cross section'',E12.6,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
@@ -2459,36 +2467,36 @@ C    &                   +      POP(NEX(nnur),j,2,nnur))
                IF(nejc.GT.2) THEN
                  poptot = poptot - POPcon(nnur)
                  poplev = poplev - POPdis(nnur)
-                ELSE
+               ELSE
                  poptot = poptot + CSHms(1,nnur) + CSHms(2,nnur)
-                ENDIF
+               ENDIF
              ENDIF
 
              if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
      &                          .and. ENDF(nnuc).gt.0) then
                WRITE (12,
-     &            '(13x,   '' total popul.continuum '',G12.5,''  mb'')')
+     &            '(13x,   '' total popul.continuum '',E12.6,''  mb'')')
      &            poptot
                WRITE (12,
-     &            '(13x,   '' total popul.disc.lev. '',G12.5,''  mb'')')
+     &            '(13x,   '' total popul.disc.lev. '',E12.6,''  mb'')')
      &            poplev
                WRITE (12,
-     &            '(13x,   '' total population      '',G12.5,''  mb'')')
+     &            '(13x,   '' total population      '',E12.6,''  mb'')')
      &            poplev + poptot
 
                WRITE (8,
-     &         '(1x,''    Total popul.continuum '',G12.5,''  mb'')')
+     &         '(1x,''    Total popul.continuum '',G12.6,''  mb'')')
      &          poptot
                WRITE (8,
-     &         '(1x,''    Total popul.disc.lev. '',G12.5,''  mb'')')
+     &         '(1x,''    Total popul.disc.lev. '',G12.6,''  mb'')')
      &          poplev
                WRITE (8,
-     &         '(1x,''    Total population      '',G12.5,''  mb'')')
+     &         '(1x,''    Total population      '',G12.6,''  mb'')')
      &          poplev + poptot
              endif
 
              WRITE (8,
-     &         '(2X,A2,'' emission cross section'',G12.5,''  mb'')')
+     &         '(2X,A2,'' emission cross section'',G12.6,''  mb'')')
      &          SYMbe(nejc), CSEmis(nejc,nnuc)
              WRITE (8,*) ' '
 
@@ -2635,9 +2643,9 @@ C----
 C
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
-                recorp = 1.0
-                IF (nejc.GT.0) 
-     &            recorp = 1. + EJMass(nejc)/AMAss(nnuc)
+                recorp = 1.d0
+                IF (nejc.GT.0 .and. RECoil.GT.0) 
+     &            recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
 
                 nspec = min(INT(recorp*EMAx(nnuc)/DE) + 2,NDECSE)-1
 C---------------Exclusive DDX spectra (neutrons & protons)
@@ -2681,7 +2689,7 @@ C------------------(continuum part - same for all n and p)
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                       FLOAT(ie - 1)*DE/recorp,
      &                       (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-                        ENDDO
+                      ENDDO
                       DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3128,7 +3136,7 @@ C       calculating the ratio for the 2nd point for interpolation of the outgoin
         ftmpB = 1.d0
         if (ftmp.gt.0) ftmpB = csepfns(2)/ftmp
 
-C       Interpolating and printing between the frist and the second point of the 
+C       Interpolating and printing between the first and the second point of the 
 C             outgoing energy grid enepfns(1) and enepfns(2)
         DO ie = 1, 31
           ftmp1 = ftmpA +  (ftmpB - ftmpA) *
@@ -3482,6 +3490,7 @@ C--------Print spectra of residues
             IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
      &        CALL PRINT_RECOIL(nnuc,reactionx)
          ENDDO !over decaying nuclei in ENDF spectra printout
+C
 C--------Print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 2
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3503,7 +3512,7 @@ C--------Exact endpoint
          DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,0,0)
          ENDDO
-         totspec = totspec - 0.5d0*(CSE(1,0,0) + CSE(nspec-1,0,0))
+C        totspec = totspec - 0.5d0*(CSE(1,0,0) + CSE(nspec-1,0,0))
          totspec = totspec*DE 
 
          WRITE (12,*) ' '    
@@ -3513,7 +3522,8 @@ C--------Exact endpoint
 
 C--------Print inclusive spectra of ejectiles
 C--------neutrons
-         recorp = (1. + EJMass(1)/AMAss(1))
+         recorp = 1.d0 
+         IF (LHMS.GT.0.or.RECoil.GT.0) recorp=(1.d0+EJMass(1)/AMAss(1))
          nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 2)
 
          IF(LHMS.GT.0) THEN
@@ -3521,9 +3531,9 @@ C--------neutrons
 C             Subtract HMS contribution to CM emission spectrum 
              CSE(ie,1,0) = CSE(ie,1,0) - CSEhms(ie,1,0)
                     ! clean DDX matrix
-             csetmp(ie) = 0.0
+             csetmp(ie) = 0.d0
              DO nang = 1, NDANG
-               cseaprnt(ie,nang) = 0.0
+               cseaprnt(ie,nang) = 0.d0
              ENDDO
            ENDDO
            CALL HINTERMAT(0.0d0, DE/recorp,CSE(1,1,0), NDECSE,
@@ -3559,7 +3569,7 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,1,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,1,0))
+C         totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,1,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3591,18 +3601,20 @@ C---------------Inclusive DDX spectrum (neutrons)
          ENDIF
 
 C--------protons
-         recorp = (1. + EJMass(2)/AMAss(1))
+         recorp = 1.d0
+         IF (LHMS.GT.0.or.RECoil.GT.0) recorp=(1.d0+EJMass(2)/AMAss(1))
          nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(2,1))/DE) + 2)
+
          IF(LHMS.GT.0) THEN
            DO ie = 1, nspec + 1
 C             Subtract HMS contribution to CM emission spectrum 
              CSE(ie,2,0) = CSE(ie,2,0) - CSEhms(ie,2,0)
                     ! clean DDX matrix
-             csetmp(ie) = 0.0
+             csetmp(ie) = 0.d0
              DO nang = 1, NDANG
-               cseaprnt(ie,nang) = 0.0
+               cseaprnt(ie,nang) = 0.d0
               ENDDO
-            ENDDO
+           ENDDO
            CALL HINTERMAT(0.0d0, DE/recorp, CSE(1,2,0), NDECSE,
      &                    0.0D0, DE, csetmp, NDECSE, 1, 0.0d0,
      &                    (nspec+1)*DE)
@@ -3628,21 +3640,15 @@ C             Subtract HMS contribution to CM emission spectrum
      &         max(0.d0,CSE(ie,2,0))
           ENDDO
 C---------Exact endpoint
-          IF(LHMS.EQ.0) THEN
-            WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(2,1),
+          WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(2,1)),
      &                              max(0.d0,CSE(nspec,2,0))
-            WRITE (12,'(F9.4,E15.5)') EMAx(1) - Q(2,1), 0.d0
-          ELSE
-            WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(2,1)),
-     &                              max(0.d0,CSE(nspec,2,0))
-            WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(2,1)), 0.d0
-          ENDIF
+          WRITE (12,'(F9.4,E15.5)') recorp*(EMAx(1) - Q(2,1)), 0.d0
 
           totspec = 0.d0
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,2,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,2,0) + CSE(nspec-1,2,0))
+C         totspec = totspec - 0.5d0*(CSE(1,2,0) + CSE(nspec-1,2,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3673,7 +3679,8 @@ C---------------Inclusive DDX spectrum (protons)
            ENDIF
          ENDIF
 C--------alphas
-         recorp = (1. + EJMass(3)/AMAss(1))
+         recorp = 1.d0
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(3)/AMAss(1))
          nspec = INT((EMAx(1) - Q(3,1))/DE) + 2
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3697,7 +3704,7 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,3,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,3,0) + CSE(nspec-1,3,0))
+C         totspec = totspec - 0.5d0*(CSE(1,3,0) + CSE(nspec-1,3,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3708,7 +3715,8 @@ C---------Exact endpoint
          ENDIF
          
 C--------deuterons
-         recorp = (1. + EJMass(4)/AMAss(1))
+         recorp = 1.d0
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(4)/AMAss(1))
          nspec = INT((EMAx(1) - Q(4,1))/DE) + 2
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3731,7 +3739,7 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,4,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,4,0))
+C         totspec = totspec - 0.5d0*(CSE(1,4,0) + CSE(nspec-1,4,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3742,7 +3750,8 @@ C---------Exact endpoint
          ENDIF
 
 C--------tritons
-         recorp = (1. + EJMass(5)/AMAss(1))
+         recorp = 1.d0
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(5)/AMAss(1))
          nspec = INT((EMAx(1) - Q(5,1))/DE) + 2
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3765,7 +3774,7 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,5,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,5,0) + CSE(nspec-1,5,0))
+C         totspec = totspec - 0.5d0*(CSE(1,5,0) + CSE(nspec-1,5,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3776,7 +3785,8 @@ C---------Exact endpoint
          ENDIF
 
 C--------helium-3
-         recorp = (1. + EJMass(6)/AMAss(1))
+         recorp = 1.d0
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(6)/AMAss(1))
          nspec = INT((EMAx(1) - Q(6,1))/DE) + 2
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3798,7 +3808,7 @@ C---------Exact endpoint
           DO ie = 1, nspec - 1
            totspec  = totspec  + CSE(ie,6,0)
           ENDDO
-          totspec = totspec - 0.5d0*(CSE(1,6,0) + CSE(nspec-1,6,0))
+C         totspec = totspec - 0.5d0*(CSE(1,6,0) + CSE(nspec-1,6,0))
           totspec = totspec*DE 
 
           WRITE (12,*) ' '    
@@ -3810,7 +3820,8 @@ C---------Exact endpoint
 
 C--------light ions
          IF (NDEJC.EQ.7) THEN
-           recorp = (1. + EJMass(NDEJC)/AMAss(1))
+           recorp = 1.d0
+           IF (RECoil.GT.0) recorp = (1. + EJMass(NDEJC)/AMAss(1))
            nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 2
            IF(nspec.gt.1) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
@@ -3835,8 +3846,8 @@ C------------exact endpoint
              DO ie = 1, nspec - 1
                totspec  = totspec  + CSE(ie,NDEJC,0)
              ENDDO
-             totspec = totspec - 
-     &                 0.5d0*(CSE(1,NDEJC,0) + CSE(nspec-1,NDEJC,0))
+C            totspec = totspec - 
+C    &                 0.5d0*(CSE(1,NDEJC,0) + CSE(nspec-1,NDEJC,0))
              totspec = totspec*DE 
 
              WRITE (12,*) ' '    
