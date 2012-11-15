@@ -5,8 +5,8 @@ module endf_lines
     ! author: Sam Hoblit, NNDC, BNL
     ! this module handles the I/O of endf lines keeping track of the
     ! control fields in columns 67:80 containing the MAT, MF, MT and
-    ! line number. These fields are accessed through the public routines
-    ! below. Access is also given to the lower-level routines that 
+    ! optional line numbers. These fields are accessed through the public
+    ! routines. Access is also given to the lower-level routines that
     ! actually read/write the lines to the ENDF file.
 
     implicit none
@@ -26,7 +26,6 @@ module endf_lines
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
 
-    integer*4 lnum                        ! current output ENDF line number
     character*9 lmft                      ! MAT, MF, MT in cols 66-75 of last section read
     character*9 cmft                      ! MAT, MF, MT in cols 66-75 of current line
     integer*4 istate                      ! current 'state' on input
@@ -45,15 +44,18 @@ module endf_lines
     contains
 !------------------------------------------------------------------------------
 
-    subroutine open_endfile(efil,qwrite,qover)
+    subroutine open_endfile(efil,qwrite,qover,qlin)
 
     implicit none
 
     character*(*), intent(in) :: efil             ! endf file name
     logical*4, intent(in) :: qwrite               ! true for output file
     logical*4, intent(in), optional :: qover      ! true to allow overwriting existing file
+    logical*4, intent(in), optional :: qlin       ! true to write line numbers in (76:80) on output
 
-    integer*4 status,iov
+    integer*4 status,iov,irs
+    character chr2*2
+
     if(qopen) call endf_error('Attempting to open an ENDF file when another already open',-1)
 
     iov = 0
@@ -63,10 +65,12 @@ module endf_lines
       endif
     endif
 
-    status = open_endf_file(efil,qwrite,iov)
+    status = open_endf_file(efil,qwrite,iov,qlin)
     if(status .lt. 0) then
-        if(status == file_not_80) then
-            erlin = efil//' contains record(s) that are NOT 80 characters!'
+        if(status == file_not_fixed) then
+            irs = get_endf_record_size()
+            write(chr2,'(I2)') irs
+            erlin = efil//' contains record(s) that are not all '//chr2//' characters!'
         else if(status == file_bad_read) then
             erlin = 'Read from ENDF file incomplete'
         else if(status == file_bad_write) then
@@ -120,6 +124,7 @@ module endf_lines
     integer*4, intent(in), optional :: errstat
 
     integer*4 ios,mft,i,j,k,ler,ix
+    character*5 clin
 
     ler = len_trim(errline)
 
@@ -154,13 +159,15 @@ module endf_lines
     mft = 100000*i + 1000*j + k
     if(mft .eq. 0) mft = -1
 
+    call get_last_line_num(clin)
+
     if(qwrt) then
         write(6,*) ' Last line written line number:',filin
-        write(6,'(1x,a80)') endline
+        write(6,'(1x,a75,a5)') endline,clin
         call close_endfile
     else
         write(6,*) ' Last line read line number:',filin
-        write(6,'(1x,a80)') endline
+        write(6,'(1x,a75,a5)') endline,clin
         call close_endfile
     endif
 
@@ -193,7 +200,7 @@ module endf_lines
 
     implicit none
 
-    integer, intent(in) :: nat
+    integer, intent(in) :: nat      ! MAT # to find in file
 
     integer*4 status,ios
     character*4 cmat
@@ -248,7 +255,8 @@ module endf_lines
         if(present(stat)) return
         if(status .eq. -1) then
             write(erlin,*) 'Hit end-of-file during read'
-            call endf_error(erlin,-1)
+            ! call endf_error(erlin,-1)
+            call endf_error(erlin)
         else
             write(erlin,*) 'Read returned error code :',status
             call endf_error(erlin)
@@ -431,10 +439,6 @@ module endf_lines
     if(.not.qwrt) call endf_error('Attempt to write to ENDF input file',-1)
 
     endline(67:75) = cmft
-
-    ! lnum = min(lnum+1, 99999)        ! max out
-    lnum = mod(lnum+1, 100000)        ! roll-over
-    write(endline(76:80),'(i5)') lnum
 
     status = put_endf_line()
     if(present(stat)) stat = status

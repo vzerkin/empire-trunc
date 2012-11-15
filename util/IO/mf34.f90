@@ -36,7 +36,7 @@ module ENDF_MF34_IO
         real awr
         integer ltt                     ! representation flag (1,2 or 3)
         integer nmt1                    ! number of sub-sections with MT1 .ge. MT
-        type (MF34_sect), pointer :: sct(:)        ! sections (nl)
+        type (MF34_sect), pointer :: sct(:)        ! sections (nmt1)
     end type
 
     private read_mf34_ni, write_mf34_ni

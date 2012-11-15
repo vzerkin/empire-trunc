@@ -239,7 +239,7 @@ module BASE_ENDF_IO
 
     subroutine read_mtx(x,n,m)
 
-    ! read triagonal matrix starting at next line
+    ! read general matrix starting at next line
 
     implicit none
 
@@ -261,7 +261,7 @@ module BASE_ENDF_IO
 
     subroutine get_mtx(x,n,m)
 
-    ! get triagonal matrix starting from current position
+    ! get general matrix starting from current position
 
     implicit none
 
@@ -349,7 +349,7 @@ module BASE_ENDF_IO
 
     subroutine read_real_pair(rp,n)
 
-    ! read n reals starting at next line
+    ! read n real pairs starting at next line
 
     implicit none
 
@@ -367,7 +367,7 @@ module BASE_ENDF_IO
 
     subroutine get_real_pair(rp,n)
 
-    ! read n reals starting at current position
+    ! read n real pairs starting at current position
 
     implicit none
 

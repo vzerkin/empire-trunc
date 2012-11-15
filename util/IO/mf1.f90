@@ -527,14 +527,14 @@ module ENDF_MF1_IO
     endline(34:66) = r1%auth
     call put_endline
 
-    endline = ' '
+    endline(1:66) = ' '
     endline(2:22) = r1%ref
     endline(23:32) = r1%ddate
     endline(34:43) = r1%rdate
     endline(56:63) = r1%endate
     call put_endline
 
-    endline = '----'
+    endline(1:66) = '----'
     endline(5:21) = r1%libtyp
     endline(23:30) = 'MATERIAL'
     write(endline(32:35),'(i4)',iostat=ios) r1%mat
@@ -561,11 +561,11 @@ module ENDF_MF1_IO
     endif
     call put_endline
 
-    endline = '-----'
+    endline(1:5) = '-----'
     endline(6:66) = r1%sublib
     call put_endline
 
-    endline = '------ENDF-X FORMAT'
+    endline(1:66) = '------ENDF-X FORMAT'
     write(endline(12:12),'(i1)',iostat=ios) r1%mfor
     if(ios .ne. 0) then
         write(erlin,*) 'Error writing format number in MF1/451 comment line 5'

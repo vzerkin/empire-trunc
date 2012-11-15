@@ -51,14 +51,14 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
    return fhn; 
 }
 
-int get_endf_buffer_(int *fhandl, int *numrec, void *buf)
+int get_endf_buffer_(int *fhandl, int *numbyt, void *buf)
 {
-   return read(*fhandl, buf, 81*(*numrec));
+   return read(*fhandl, buf, *numbyt);
 }
 
-int put_endf_buffer_(int *fhandl, int *numrec, void *buf)
+int put_endf_buffer_(int *fhandl, int *numbyt, void *buf)
 {
-   return write(*fhandl, buf, 81*(*numrec));
+   return write(*fhandl, buf, *numbyt);
 }
 
 int close_endf_blkfile_(int *fhandl)

@@ -65,7 +65,7 @@ module ENDF_IO
 
     public
 
-    character*80, parameter, private :: hdlin = ' $Rev::          $  $Date::            $                             1 0  0    0'
+    character*75, parameter, private :: hdlin = ' $Rev::          $  $Date::            $                             1 0  0'
 
     type endf_mat
         integer mat
@@ -97,7 +97,7 @@ module ENDF_IO
     end type
 
     type endf_file
-        character*80 hdline                    ! header line (line 0)
+        character*75 hdline                    ! header line (line 0)
         type (endf_mat), pointer :: mat        ! materials
     end type
 
@@ -216,7 +216,7 @@ module ENDF_IO
     integer*4, private :: inmat,nfil
     character*500, private :: endfil
     type (endf_file), pointer, private :: endf
-    logical*4 q_overwrite
+    logical*4 q_overwrite,q_lines
 
     ! hide these routines from end user
 
@@ -285,14 +285,14 @@ module ENDF_IO
     call open_endfile(endfil(1:nfil),.false.)
 
     ! first line, or "header" line, usually contains SVN tags
-    ! and ends with MAT,MF,MT all 0. Look for this and if found,
+    ! and ends with MAT=1, MF=MT=0. Look for this and if found,
     ! save this line as the header
 
     call get_endline
 
-    if(endline(71:80) .eq. hdlin(71:80)) then
+    if(endline(67:75) .eq. hdlin(67:75)) then
         endf%hdline = endline
-        endf%hdline(67:80) = hdlin(67:80)    ! reset these fields
+        endf%hdline(67:75) = hdlin(67:75)    ! reset these fields
         call get_endline
     else
         write(6,*) ' WARNING: No header line found in ',endfil(1:nfil)
@@ -466,13 +466,14 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    integer*4 function write_endf_file(filename,usend,qov)
+    integer*4 function write_endf_file(filename,usend,qov,qlin)
 
     implicit none
 
     character*(*), intent(in), target :: filename
     type (endf_file), intent(in), target :: usend
     logical*4, intent(in), optional :: qov
+    logical*4, intent(in), optional :: qlin
 
     integer*4, external :: endf_try
 
@@ -490,6 +491,12 @@ module ENDF_IO
        q_overwrite = .false.
     endif
 
+    if(present(qlin)) then
+       q_lines = qlin
+    else
+       q_lines = .false.
+    endif
+
     write_endf_file = endf_try(endf_file_writer)
 
     return
@@ -503,7 +510,7 @@ module ENDF_IO
 
     type (endf_mat), pointer :: mx
 
-    call open_endfile(endfil(1:nfil),.true.,q_overwrite)
+    call open_endfile(endfil(1:nfil),.true.,q_overwrite,q_lines)
 
     endline = endf%hdline
     call put_endline
