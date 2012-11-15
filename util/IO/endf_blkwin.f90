@@ -14,9 +14,10 @@ module endf_line_io
 
     integer*4, parameter :: nrc = 4096*4    ! number of endf_records in a block
 
-    integer*4, parameter :: file_not_fixed = -1000000   ! status code for file without fixed-length records
-    integer*4, parameter :: file_bad_read  = -2000000   ! status for bad number of read bytes
-    integer*4, parameter :: file_bad_write = -3000000   ! status for bad number of read bytes
+    integer*4, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
+    integer*4, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
+    integer*4, parameter :: file_bad_read  = -3000000   ! status for bad number of read bytes
+    integer*4, parameter :: file_bad_write = -4000000   ! status for bad number of read bytes
     integer*4 :: file_bytes_requested    ! for error reporting. Number of bytes requeseted for read/write
     integer*4 :: file_bytes_receieved    ! for error reporting. Number of bytes recieved for read/write
 
@@ -60,7 +61,7 @@ module endf_line_io
     character*75, public, pointer :: endline                ! current line
     public filin, lnum                                      ! line #
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
-    public file_not_fixed, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
+    public file_bad_form, file_not_fixed, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
 
 !------------------------------------------------------------------------------
     contains
@@ -123,7 +124,9 @@ module endf_line_io
         status = wait_for_buffer(0, m)
         if(m /= 90) then
             status = close_endf_blkfile()
-            open_endf_file = file_not_fixed
+            file_bytes_requested = 90
+            file_bytes_receieved = m
+            open_endf_file = file_bad_read
             return
         endif
 
@@ -155,7 +158,7 @@ module endf_line_io
             recsiz = 81
         else
             ! unknown format or garbled file
-            open_endf_file = file_not_fixed
+            open_endf_file = file_bad_form
             return
         endif
 

@@ -66,18 +66,21 @@ module endf_lines
     endif
 
     status = open_endf_file(efil,qwrite,iov,qlin)
-    if(status .lt. 0) then
-        if(status == file_not_fixed) then
+    if(status /= 0) then
+        select case(status)
+        case(file_bad_form)
+            erlin = efil//' has an unsupported record format'
+        case(file_not_fixed)
             irs = get_endf_record_size()
             write(chr2,'(I2)') irs
             erlin = efil//' contains record(s) that are not all '//chr2//' characters!'
-        else if(status == file_bad_read) then
+        case(file_bad_read)
             erlin = 'Read from ENDF file incomplete'
-        else if(status == file_bad_write) then
+        case(file_bad_write)
             erlin = 'Write to ENDF file incomplete'
-        else
+        case default
             write(erlin,*) 'Error opening ',efil,'  Error status =',status
-        endif
+        end select
         call endf_error(erlin)
     endif
 
@@ -101,9 +104,7 @@ module endf_lines
     integer*4 status
 
     status = close_endf_file()
-    if(status .lt. 0) then
-        write(6,*) ' WARNING: Close returned error code :',status
-    endif
+    if(status < 0) write(6,*) ' WARNING: Close returned error code :',status
     qopen = .false.
 
     return
@@ -142,7 +143,7 @@ module endf_lines
     if(.not.qopen) call endf_unwind(-1)
 
     if(present(errstat)) then
-        if(errstat .ne. 0) then
+        if(errstat /= 0) then
             call close_endfile
             call endf_unwind(errstat)
         endif
@@ -157,7 +158,7 @@ module endf_lines
     read(cmft(5:6),'(i2)',iostat=ios) j
     read(cmft(7:9),'(i3)',iostat=ios) k
     mft = 100000*i + 1000*j + k
-    if(mft .eq. 0) mft = -1
+    if(mft == 0) mft = -1
 
     call get_last_line_num(clin)
 
@@ -208,21 +209,21 @@ module endf_lines
     if(.not.qopen) return
     if(qwrt) call endf_error('Attempt to read from ENDF output file')
 
-    if((nat .le. 0) .or. (nat .gt. 9999)) then
+    if((nat <= 0) .or. (nat > 9999)) then
         write(erlin,*) 'Request to find illegal MAT # :',nat
         call endf_error(erlin,-1)
     endif
 
     write(cmat,'(i4)',iostat=ios) nat
-    if(ios .ne. 0) then
+    if(ios /= 0) then
         write(erlin,*) 'Error searching for MAT # :',nat
         call endf_error(erlin,-1)
     endif
 
-    do while(endline(67:70) .ne. cmat)
+    do while(endline(67:70) /= cmat)
         status = get_endf_line()
-        if(status .lt. 0) then
-            if(status .eq. -1) then
+        if(status < 0) then
+            if(status == -1) then
                 write(erlin,*) 'Hit end-of-file looking for MAT # :',nat
                 call endf_error(erlin,-1)
             else
@@ -251,9 +252,9 @@ module endf_lines
 
     status = get_endf_line()
     if(present(stat)) stat = status
-    if(status .lt. 0) then
+    if(status < 0) then
         if(present(stat)) return
-        if(status .eq. -1) then
+        if(status == -1) then
             write(erlin,*) 'Hit end-of-file during read'
             ! call endf_error(erlin,-1)
             call endf_error(erlin)
@@ -272,14 +273,14 @@ module endf_lines
         ! if nothing changed, just return
         ! otherwise look for end of section with MT=0
 
-        if(endline(67:75) .eq. cmft) return
+        if(endline(67:75) == cmft) return
 
         ! see what happened
 
-        if(endline(73:75) .ne. cmft(7:9)) then
-            if(cmft(7:9) .eq. '  0') then
+        if(endline(73:75) /= cmft(7:9)) then
+            if(cmft(7:9) == '  0') then
                 write(erlin,*) 'SEND record (MT=0) not found for MF=',lmft(5:6),',  MT=',lmft(7:9)
-            else if(endline(73:75) .eq. '  0') then
+            else if(endline(73:75) == '  0') then
                 write(erlin,*) 'Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else
                 if(qmt) then
@@ -290,7 +291,7 @@ module endf_lines
             endif
         endif
 
-        if(endline(71:72) .ne. cmft(5:6)) then
+        if(endline(71:72) /= cmft(5:6)) then
             if(qmf) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//'     on line',filin
                 return
@@ -298,7 +299,7 @@ module endf_lines
             write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
         endif
 
-        if(endline(67:70) .ne. cmft(1:4)) then
+        if(endline(67:70) /= cmft(1:4)) then
             if(qmat) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
                 return
@@ -313,7 +314,7 @@ module endf_lines
         ! last line read had MT=0
         ! see if next line has new MT or end of file with MF=0
 
-        if(endline(67:70) .ne. cmft(1:4)) then
+        if(endline(67:70) /= cmft(1:4)) then
             if(qmat) then
                 write(6,'(a,i10)') ' WARNING: '//erlin(1:len_trim(erlin))//' on line',filin
             else
@@ -322,11 +323,11 @@ module endf_lines
             endif
         endif
 
-        if(endline(71:72) .eq. cmft(5:6)) then
+        if(endline(71:72) == cmft(5:6)) then
             ! same MF - must be reading another MT section
             read(lmft(7:9),'(i3)') omt
             i = get_mt()
-            if(i .gt. omt) then
+            if(i > omt) then
                 istate = idata
                 cmft(7:9) = endline(73:75)
                 lmft = cmft
@@ -334,7 +335,7 @@ module endf_lines
                 return
             endif
             write(erlin,*) 'In MF',cmft(5:6),' found MT=',endline(73:75),' <= to previous MT=',lmft(7:9)
-        else if(endline(71:72) .eq. ' 0') then
+        else if(endline(71:72) == ' 0') then
             ! MF=0 -> changing files
             ! make sure MT is also still 0
             if(endline(73:75) == '  0') then
@@ -359,9 +360,9 @@ module endf_lines
 
         ! last record had MF=0. Here we're either ending material or starting new MF
 
-        if(endline(67:70) .ne. cmft(1:4)) then
+        if(endline(67:70) /= cmft(1:4)) then
             ! different MAT number. Must have MAT=0 to end last material
-            if(endline(67:70) .eq. '   0') then
+            if(endline(67:70) == '   0') then
                 istate = imend
                 return
             endif
@@ -381,7 +382,7 @@ module endf_lines
 
         read(lmft(5:6),'(i2)') omf
         i = get_mf()
-        if(i .gt. omf) then
+        if(i > omf) then
             istate = idata
             cmft(5:9) = endline(71:75)
             lmft = cmft
@@ -442,7 +443,7 @@ module endf_lines
 
     status = put_endf_line()
     if(present(stat)) stat = status
-    if(status .lt. 0) then
+    if(status < 0) then
         if(present(stat)) return
         write(erlin,*) 'Write returned error code :',status
         call endf_error(erlin)
@@ -541,7 +542,7 @@ module endf_lines
 
         ! only allow end of material (MAT=) when MF=0
 
-        if(mat .ne. 0) then
+        if(mat /= 0) then
             write(erlin,*)  'Attempting to set MAT to new value:',mat
             call endf_error(erlin)
         endif
@@ -608,7 +609,7 @@ module endf_lines
         ! old MF=0. new MF must be greater than last
 
         read(lmft(5:6),'(i2)') omf
-        if(mf .le. omf) then
+        if(mf <= omf) then
             write(erlin,*) 'Attempting to set MF ',mf ,' which is .LE. to previous MF=',lmft(5:6)
             call endf_error(erlin)
         endif
@@ -619,7 +620,7 @@ module endf_lines
 
         ! only allow end of file MF=0
 
-        if(mf .ne. 0) then
+        if(mf /= 0) then
             write(erlin,*) 'Out-of-sequence SET_MF to :',mf
             call endf_error(erlin)
         endif
@@ -666,7 +667,7 @@ module endf_lines
         ! old MT=0. new MT must be greater than last
 
         read(lmft(7:9),'(i3)') omt
-        if(mt .le. omt) then
+        if(mt <= omt) then
             write(erlin,*) 'Attempting to set MT to',mt ,' which is .LE. to previous MT=',lmft(7:9)
             call endf_error(erlin)
         endif
@@ -680,7 +681,7 @@ module endf_lines
 
         ! only allow end of data MT=0
 
-        if(mt .ne. 0) then
+        if(mt /= 0) then
             write(erlin,*) 'Out-of-sequence SET_MT to :',mt
             call endf_error(erlin)
         endif
