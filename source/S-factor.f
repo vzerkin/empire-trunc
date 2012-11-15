@@ -1,5 +1,6 @@
-Ccc     $Author: apalumbo $
-Ccc     $Date: 2012-11-14
+Ccc   * $Rev: 3167 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-10-25 03:42:51 +0200 (Thu, 25 Oct 2012) $
 
       REAL*8 FUNCTION SFACTOR(Csection)
 
