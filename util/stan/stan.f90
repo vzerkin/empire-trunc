@@ -7,13 +7,13 @@
     ! author: Sam Hoblit, NNDC, BNL
     ! routine to check format of ENDF-6 files
 
-    logical*4 qover
+    logical*4 qover,qlines
     integer*4 nout,nin,status
     character*200 outfile, infile
 
     type (endf_file) endf
 
-    call parse_cmd_line(outfile,nout,qover,infile,nin)
+    call parse_cmd_line(outfile,nout,qover,qlines,infile,nin)
 
     write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
@@ -26,7 +26,7 @@
     call reset_mf1
 
     write(6,*) ' Writing '//outfile(1:nout)
-    status = write_endf_file(outfile(1:nout),endf,qover)
+    status = write_endf_file(outfile(1:nout),endf,qover,qlines)
     if(status /= 0) then
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
@@ -69,13 +69,13 @@
 
 !-----------------------------------------------------
 
-    subroutine parse_cmd_line(outfile,nout,qovr,infile,nin)
+    subroutine parse_cmd_line(outfile,nout,qovr,qlin,infile,nin)
 
     use endf_io
 
     implicit none
 
-    logical*4, intent(out) :: qovr
+    logical*4, intent(out) :: qovr,qlin
     integer, intent(out) :: nout, nin
     character*(*), intent(out) :: outfile, infile
 
@@ -88,6 +88,7 @@
     infile = ' '
     outfile = ' '
     qovr = .false.
+    qlin = .false.
 
     i = 1
     call getarg(i,cmd)
@@ -121,6 +122,11 @@
 
            write(6,10) '  Previously existing output file may be overwritten'
            qovr = .true.
+
+       else if(cmd(1:len) == '-l') then
+
+           write(6,10) '  Output file will contain line numbers'
+           qlin = .true.
 
        else if(cmd(1:len) == '-ct') then
 
@@ -158,6 +164,8 @@
            write(6,10) '        the input filename with extension ".STN"'
            write(6,10) ' -f   : allows an existing file to be overwritten on output'
            write(6,10) '        the default is for the write to fail if output file already exists'
+           write(6,10) ' -l   : put ENDF line numbers in columns 76:80 of output file'
+           write(6,10) '        the default is no line numbers in output files'
            write(6,10)
            call endf_quit(0)
 
