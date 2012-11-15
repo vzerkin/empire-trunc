@@ -1,6 +1,9 @@
 ccc   * $Rev: 3212 $
 Cc    * $Author: rcapote $
-Ccc   * $Date: 2012-11-15 11:52:39 +0100 (Thu, 15 Nov 2012) $ 
+Ccc   * $Date: 2012-11-15 11:52:39 +0100 (Thu, 15 Nov 2012) $
+Cc    *
+CC    * Original formulation (3210) $Author: apalumbo$ (Wed, 14 Nov 2012) $
+ 
       REAL*8 FUNCTION SFACTOR(Csection)
 
 CC  This program calculates the S-factor for a non-resonant reaction.
@@ -11,8 +14,15 @@ CC  Treatment follows A.G.W.Cameron, Technical Report CRL-41, AECL-454 (Chalk Ri
 CC  Available online at http://www.fas.org/sgp/eprint/CRL-41.pdf 
 CC 
 CC  Treatment follows Cauldrons in the Cosmos - Rolfs and Rodney (University of Chicago Press - 1988) 
-CC  Outlines in Empire.pdf
-CC  
+CC  Outlined in Empire.pdf
+CC
+CC  A third treatment of the S-factor formulation follows from Nuclear Physics of Stars - Christian IliaCC  dis - (Wiley-Vch - 2007) 
+CC
+CC  The calculation of eta is consistent in both Rolfs/Rodney and Iliadis.  Cameron's formulation is
+CC  causing slight deviations in the S-factor formulation (in two tested cases of the capture - 106Cd
+CC  and 120Te) to the third decimal place.  Since the Incident energy is in MeV, the formulation of 
+CC  eta by C. Iliadis will be used.
+CC
 
 
       INCLUDE 'dimension.h'
@@ -31,9 +41,12 @@ C     CETa = ELE2/HHBarc*SQRT(AMUmev/2)
 C     CETa = e^2 / (hbar C) SQRT( MASS*C^2 /2) = e^2 / hbar SQRT( AMUmev /2)
 C     The Sommerfeld factor eta can be calculated as CETa*SQRT(mu/EIN)*Zt*Ze
 C     eta = e^2*Zt*Ze / hbar SQRT( AMUmev*mu/ (2EIN)) where mu is adimensional, and EIN is the CMS energy in MeV
-      eta = CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN)
+C**      eta = CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN)
+      eta = 0.989534*Z(0)*ZEJc(0)*SQRT(mu/EIN)
+      
 C     
-      SFACTOR = EIN*stmp*exp(2*pi*eta)
+C**      SFACTOR = EIN*stmp*exp(2*pi*eta)
+      SFACTOR = EIN*stmp*exp(eta)
 C
 C     etmp in keV
 C     etmp = EIN*1000
