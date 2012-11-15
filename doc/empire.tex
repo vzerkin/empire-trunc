@@ -5533,7 +5533,7 @@ formatting process.
 
 \chapter{Nuclear astrophysics\label{Chap:S-FACTOR}}
 
-Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only \cite{RR}.
+Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only \cite{iliadis:07} \cite{RR}.
 
 The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/$E$ dependence of the cross section.  It is generally expressed as:
 
@@ -5553,8 +5553,12 @@ where $Z_p$ is the charge of the projectile  and
 $Z_t$ is the charge of the target.
 
 The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature $T$), the S-factor is constant (no energy dependence or very nearly a constant).  If $S(E) \neq S(E_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.  In most cases (for nonresonant reactions), a Taylor series expansion around zero energy (Maclaurin) is normally taken.  This now becomes an effective S-factor (S$_{eff}$(E$_{0}$)).
-The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).
-\par
+The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).\par
+The above formalism holds with the exception that the approximation for $\eta$ is taken from \cite{iliadis:07}
+as  \begin{equation}
+2\pi\eta = 0.989534Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
+\end{equation}
+ and the E is in MeV. \par
 The keyword input to allow for the calculation of the S-factor is SFACT.  SFACT = 1 will calculate (x,$\gamma$); SFACT = 2 will calculate (x,n); SFACT = 3 will calculate (x,p or $\alpha$,p).  The output file has three columns: the first one is the incident center-of-mass energy, the second column is the cross section in barns and the third column is the S-factor given in MeV b.    
 
 
@@ -11747,6 +11751,11 @@ primary transitions only).
 \item [{BNDG}] Binding energy of ejectile I3 in nucleus Z=I1, A=I2 set
 to VAL (default calculated internally from RIPL nuclear masses).\\
 Uncertainty of the binding energy in \% may be given by I4. \\
+\item [{SFACT}] The removal of the s-wave Coulomb barrier transmission probability and
+the 1/E dependence of the cross section. \par
+= 1 outputs the S-factor for (x,$\gamma$) \par
+= 2 outputs the S-factor for (x,n) \par
+= 3 outputs the S-factor for (x,p) - in this case ($\alpha$,p)
 \item [{SHELNO}] Shell correction read from RIPL database will be multiplied
 by VAL for the nucleus with Z=I1 and A=I2. \\Uncertainty of the shell correction 
 value in \% may be given by I4 (default  1.0).\\ 
