@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3178 $
+Ccc   * $Rev: 3216 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-31 19:32:24 +0100 (Mi, 31 Okt 2012) $
+Ccc   * $Date: 2012-11-15 17:01:44 +0100 (Do, 15 Nov 2012) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -1281,8 +1281,8 @@ C-----------DIRECT=1 or DIRECT=2
       IF (IOUt.EQ.5) THEN
         WRITE (8,*)
         WRITE (8,*) 
-     &   '      CSFus(SUM_Tl)    CSFus+SINl+CC+SINlcont    ABScs(OMP) '
-        WRITE (8,'(4x,3(4x,D12.6,4x))')
+     &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
+        WRITE (8,'(4x,3(4x,D15.8,4x))')
      &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
         WRITE (8,*)
       ENDIF
