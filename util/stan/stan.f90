@@ -7,13 +7,13 @@
     ! author: Sam Hoblit, NNDC, BNL
     ! routine to check format of ENDF-6 files
 
-    logical*4 qover,qlines
+    logical*4 qover
     integer*4 nout,nin,status
     character*200 outfile, infile
 
     type (endf_file) endf
 
-    call parse_cmd_line(outfile,nout,qover,qlines,infile,nin)
+    call parse_cmd_line(outfile,nout,qover,infile,nin)
 
     write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
@@ -26,7 +26,7 @@
     call reset_mf1
 
     write(6,*) ' Writing '//outfile(1:nout)
-    status = write_endf_file(outfile(1:nout),endf,qover,qlines)
+    status = write_endf_file(outfile(1:nout),endf,qover)
     if(status /= 0) then
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
@@ -69,26 +69,25 @@
 
 !-----------------------------------------------------
 
-    subroutine parse_cmd_line(outfile,nout,qovr,qlin,infile,nin)
+    subroutine parse_cmd_line(outfile,nout,qovr,infile,nin)
 
     use endf_io
 
     implicit none
 
-    logical*4, intent(out) :: qovr,qlin
+    logical*4, intent(out) :: qovr
     integer, intent(out) :: nout, nin
     character*(*), intent(out) :: outfile, infile
 
-    integer*4 i,len
+    integer*4 i,len,m,n,stat
     logical*4 qx
-    character cmd*200
+    character cmd*200,dum*20
 
     nin = 0
     nout = 0
     infile = ' '
     outfile = ' '
     qovr = .false.
-    qlin = .false.
 
     i = 1
     call getarg(i,cmd)
@@ -126,7 +125,7 @@
        else if(cmd(1:len) == '-l') then
 
            write(6,10) '  Output file will contain line numbers'
-           qlin = .true.
+           call set_output_line_numbers(.true.)
 
        else if(cmd(1:len) == '-ct') then
 
@@ -137,12 +136,61 @@
 
            call set_io_verbose(.true.)
 
+       else if(cmd(1:2) == '-x') then
+
+           ! look for control flag
+
+           if(len == 2) then
+               ! assume they used a space as separator
+               i = i + 1
+               call getarg(i,dum)
+               n = len_trim(dum)
+               if((n <= 0) .or. (dum(1:1) == '-')) then
+                   write(6,*) ' ##### ERROR #####'
+                   write(6,*)
+                   write(6,*) ' Error parsing header control flag'
+                   call abort_stan
+               endif
+           else if(len==3) then
+               ! assume just a single number used
+               dum = cmd(3:3)
+               n = 1
+           else
+               if(cmd(3:3) == '=') then
+                  dum = cmd(4:len)
+                  n = len - 3
+               else
+                  dum = cmd(3:len)
+                  n = len - 2
+               endif
+           endif
+
+           ! try to read
+
+           read(dum(1:n),*,iostat=stat) m
+           if(stat /= 0) then
+               write(6,*) ' ##### ERROR #####'
+               write(6,*)
+               write(6,*) ' Error parsing header control flag'
+               call abort_stan
+           endif
+
+           select case(m)
+           case(0:2)
+               call set_header_control(m)
+           case default
+               write(6,*) ' ##### ERROR #####'
+               write(6,*)
+               write(6,*) ' Undefined flag specified for header action:',m
+               call abort_stan
+           end select
+
        else if(cmd(1:len) == '-h') then
 
            write(6,10)
            write(6,10) ' stan   version 1.0'
            write(6,10)
-           write(6,10) ' usage: stan [-h,im,if,it,v] [-o outfile] endf_file'
+           write(6,10) ' usage: stan [-h,im,if,it,v,l,x=n] [-o outfile] endf_file'
            write(6,10)
            write(6,10) ' -h   : prints this help message'
            write(6,10) ' -cm  : continue if the MAT number changes while processing a material.'
@@ -166,6 +214,11 @@
            write(6,10) '        the default is for the write to fail if output file already exists'
            write(6,10) ' -l   : put ENDF line numbers in columns 76:80 of output file'
            write(6,10) '        the default is no line numbers in output files'
+           write(6,10) ' -x=n : Set action for first line of ENDF file, the header or TPID line.'
+           write(6,10) '        The action is controlled by flag n:'
+           write(6,10) '          n=0) Default; no action taken. Header line left as is.'
+           write(6,10) '          n=1) Replace characters 1:66 in header with NNDC SVN tags.'
+           write(6,10) '          n=2) If NNDC SVN tags not present in header, abort STAN.'
            write(6,10)
            call endf_quit(0)
 
