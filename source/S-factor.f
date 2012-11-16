@@ -23,6 +23,7 @@ CC  Since the Incident energy is in MeV, the formulation of eta by C. Iliadis is
 CC
 CC  RC: Iliadis constant changed to use EMPIRE constants traceable to NIST (CODATA 2010 set)
 CC	Iliadis 0.989534 -> CETa * 2 * pi = 0.9895106848
+CC    Snew = S(Iliadis)*0.99997668 ! 1/1000 % accuracy
 CC
 
       INCLUDE 'dimension.h'
