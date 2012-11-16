@@ -2,12 +2,14 @@ ccc   $Rev: 3212 $
 Cc    $Author: rcapote $
 Ccc   $Date: 2012-11-15 11:52:39 +0100 (Thu, 15 Nov 2012) $
 C
-Cc    * Original formulation (3210) $Author: apalumbo$ (Wed, 14 Nov 2012) $
+Cc    $Original: 3210 $
+CC    $Author: apalumbo $ 
+CCc   $Date: 2012-11-14 $
  
       REAL*8 FUNCTION SFACTOR(Csection)
 
-CC  This program calculates the S-factor for a non-resonant reaction.
-CC  Input: Cross section Csection is in mb
+CC  This program calculates the S-factor for a non-resonant reaction (see manual for further details).
+CC  Input: Cross section Csection is in mb (but calculation must be done in b)
 CC  The CMS energy EIN is taken from EMPIRE (in MeV)
 CC  S-factor is output in MeV barns (MeV*b). 
 CC

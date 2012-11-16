@@ -1,7 +1,6 @@
-$DEBUG
-cc   * $Rev: 3230 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-16 03:00:52 +0100 (Fr, 16 Nov 2012) $
+cc   * $Rev: 3233 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2012-11-16 11:08:11 +0100 (Fr, 16 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
