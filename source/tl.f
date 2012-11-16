@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3200 $
+Ccc   * $Rev: 3232 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-13 23:59:59 +0100 (Di, 13 Nov 2012) $
+Ccc   * $Date: 2012-11-16 08:50:03 +0100 (Fr, 16 Nov 2012) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2659,31 +2659,6 @@ C-----Absorption and elastic cross sections in mb
       sabs   = 10.d0*PI/ak2*sabs
       selast = 10.d0*PI/ak2*selast
       
-      IF (abs(sabs-ABScs).gt.0.05*sabs) THEN ! 5% difference check
-         WRITE (8,*)
-         WRITE (8,*)
-     &     ' WARNING: ECIS ABScs absorption cross section ',ABScs
-         WRITE (8,*)
-     &     ' WARNING: Calc. sabs absorption cross section ',sabs
-         WRITE (8,*)
-     &        ' WARNING: sabs < ECIS ABS, increase NDLW !!!'
-         write(8,*) 'Calc. Sabs =',sngl(sabs),' Lmax',Maxlw
-         write(8,*) 'ECIS  ABScs=',sngl(ABScs)
-C        IF(ZEJc(Nejc).GT.0 .and.abs(sabs-ABScs).gt.0.05*sabs)
-C    &     STOP '  ERROR: sabs < ECIS ABS, increase NDLW !!!'	 ! 5% error
-      ENDIF
-
-      IF (abs(sabs-ABScs).gt.1.D0) THEN ! 1 mb DIFFERENCE
-         WRITE (8,*) 
-         WRITE (8,*) 
-     &     ' WARNING: Sabs=',sngl(sabs),' Sabs(ECIS)=',sngl(ABScs)
-         WRITE (8,*)
-     &     ' WARNING: Calculated Sabs as sum over Tls assumed as a true 
-     &absoprtion'
-         WRITE (8,*) 
-         ABScs = sabs	   
-	ENDIF
-
       IF (sabs.LE.0.D0) RETURN
 
       CSFus = ABScs
@@ -2715,6 +2690,32 @@ C          SINl = SINl + dtmp
          ENDIF
       ENDDO
   400 CLOSE (45)
+
+      IF (abs(sabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
+         WRITE (8,*)
+         WRITE (8,*)
+     &     ' WARNING: ECIS ABScs absorption cross section ',ABScs
+         WRITE (8,*)
+     &     ' WARNING: Calc. sabs absorption cross section ',sabs
+         WRITE (8,*) ' WARNING: sabs + SINlcc < ECIS ABS'
+         WRITE (8,*) ' WARNING: You may need to increase NDLW !!!'
+         write(8,*) 'Calc. Sabs   =',sngl(sabs),' Lmax',Maxlw
+         write(8,*) 'Calc. SINlcc =',sngl(SINlcc)
+         write(8,*) 'ECIS  ABScs  =',sngl(ABScs)
+         WRITE (8,*)
+      ENDIF
+
+C     IF (abs(sabs + SINlcc - ABScs).gt.1.D0) THEN ! 1 mb DIFFERENCE
+C        WRITE (8,*) 
+C        WRITE (8,*) 
+C    &    ' WARNING: Sabs=',sngl(sabs+SINlcc),' Sabs(ECIS)=',sngl(ABScs)
+C        WRITE (8,*)
+C    &     ' WARNING: Calculated Sabs as sum over Tls assumed as a true 
+C    &absoprtion'
+C        WRITE (8,*) 
+C        ABScs = sabs	   
+C     ENDIF
+
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 
       IF (SINlcc.GT.ABScs) THEN
@@ -2823,13 +2824,9 @@ C
       IF(SINlcc+SINl+SINlcont.LE.sabs) THEN 
         DO l = 0, Maxlw
           Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
-C         Stl(l + 1) = Stl(l + 1)*(sabs           - SINl -SINlcont)/sabs  ! ok
         ENDDO
         CSFus = ABScs - SINlcc - SINl - SINlcont
-C       CSFus = sabs           - SINl - SINlcont  ! ok
-
       ELSE 
-
          WRITE (8,*)
          WRITE (8,
      &'(1x,'' WARNING: CC cross section to coupled discrete levels ='',
