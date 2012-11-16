@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3207 $
+Ccc   * $Rev: 3229 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-14 18:29:21 +0100 (Mi, 14 Nov 2012) $
+Ccc   * $Date: 2012-11-16 02:08:59 +0100 (Fr, 16 Nov 2012) $
 C
 C
       SUBROUTINE HRTW
@@ -1010,8 +1010,8 @@ C        !strong or weak
       ELSE
          H_Sweak = H_Sweak + T*Rho
       ENDIF
+	  RETURN
       END
-
 
       DOUBLE PRECISION FUNCTION VT(Tl)
       INCLUDE 'dimension.h'
@@ -1073,8 +1073,8 @@ C
          NSCh = NSCh + 1
          VT = H_Tl(NSCh,1)
       ENDIF
+	  RETURN
       END
-
 
       DOUBLE PRECISION FUNCTION VT1(Tl,Tav,Sumtl)
 C
@@ -1111,13 +1111,13 @@ C
 C
 C Local variables
 C
-      VT1 = 0.0
+      VT1 = 0.D0
       IF (Sumtl.EQ.0.0D0) RETURN
       VT1 = Tl/Sumtl
-      VT1 = 1 + VT1*(EEF(Tl,Tav,Sumtl) - 1.0)
+      VT1 = 1.D0 + VT1*(EEF(Tl,Tav,Sumtl) - 1.D0)
       VT1 = Tl/VT1
+	  RETURN
       END
-
 
       DOUBLE PRECISION FUNCTION EEF(Tl,Tav,Sumtl)
 C
@@ -1148,16 +1148,16 @@ Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
 Ccc   *                                                               *
 Ccc   *****************************************************************
-      IF (Tl.LT.1.0D-10) THEN
-         EEF = 3.0
+      IF (Tl.LT.1.0D-15) THEN
+         EEF = 3.D0
          RETURN
       ENDIF
-      al = 4.*Tav/Sumtl*(1. + Tl/Sumtl)/(1. + 3.*Tav/Sumtl)
-      a = 87.0*(Tl - Tav)**2*Tl**5/Sumtl**7
-      EEF = 1.0 + 2.0/(1.0 + Tl**al) + a
+      al = 4*Tav/Sumtl*(1.D0 + Tl/Sumtl)/(1.D0 + 3*Tav/Sumtl)
+      a = 87.D0*(Tl - Tav)**2*Tl**5/Sumtl**7
+      EEF = 1.D0 + 2.D0/(1.D0 + Tl**al) + a
       IF(EEF.GT.3.D0) EEF = 3.D0
+	  RETURN
       END
-
 
       SUBROUTINE AUSTER(V,Tav,Sumtl,Sweak,Lch,Ndhrtw1)
 Ccc   *****************************************************************
@@ -1231,7 +1231,7 @@ C
 C--------relative accuracy of V is set below and may be altered
 C--------to any resonable value.  
 C
-         IF (ABS(vd(i)-vp(i)).GT.0.00005D0*vp(i)) GOTO 200
+         IF (ABS(vd(i)-vp(i)).GT.1.D-7*vp(i)) GOTO 200
       ENDDO
       DO i = 1, Lch
          V(i,1) = vp(i)
@@ -1295,7 +1295,6 @@ C
      &                 xjc
       INTEGER i, iel, il, ipar, kel, l, lmax, lmin
 C
-
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----
 C-----decay to discrete levels
@@ -1345,7 +1344,6 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
       RETURN
       END
-
 
       SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
 Ccc
@@ -1457,16 +1455,15 @@ C-----channel spin min and max
                   vl = H_Tl(kel,1)
                ENDIF
                IF (vl.NE.0.0D0) THEN
-                  H_Abs(Ich,1) = vl*coef*(FLOAT(2*Jcn + 1) - 2.0*s1)
+                  H_Abs(Ich,1) = vl*coef*(FLOAT(2*Jcn + 1) - 2*s1)
      &                           *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
                   H_Abs(Ich,2) = k
-                  H_Abs(Ich,3) = 2.0*chsp
+                  H_Abs(Ich,3) = 2*chsp
                   Ich = Ich + 1
                ENDIF
             ENDIF
          ENDDO
       ENDDO
       Ich = Ich - 1
+	  RETURN
       END
-
-

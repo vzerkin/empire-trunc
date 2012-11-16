@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3207 $
+Ccc   * $Rev: 3229 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-14 18:29:21 +0100 (Mi, 14 Nov 2012) $
+Ccc   * $Date: 2012-11-16 02:08:59 +0100 (Fr, 16 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1132,7 +1132,7 @@ C
             lambmax = xjc + xjr + 0.001
             lambmax = MIN0(lambmax,MAXmult)
             IF(lambmin.LE.lambmax)THEN
-            scrtpos = 0.0
+               scrtpos = 0.0
                scrtneg = 0.0
                DO lamb = lambmin, lambmax
                  IF(lamb/2*2.EQ.lamb)THEN
