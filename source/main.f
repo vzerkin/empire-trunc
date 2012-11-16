@@ -1,6 +1,6 @@
-cc   * $Rev: 3233 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-11-16 11:08:11 +0100 (Fr, 16 Nov 2012) $
+cc   * $Rev: 3237 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-16 13:40:21 +0100 (Fr, 16 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2486,10 +2486,10 @@ C------------Print residual nucleus population
                   DO i = 1, NEX(nnur)
                     poptot = poptot + POP(i,j,1,nnur) + POP(i,j,2,nnur)
                   ENDDO
-C                 poptot = poptot 
-C    &                   - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
-C    &                   - 0.5*(POP(NEX(nnur),j,1,nnur) 
-C    &                   +      POP(NEX(nnur),j,2,nnur))
+                  poptot = poptot 
+     &                   - 0.5*(POP(1,j,1,nnur) + POP(1,j,2,nnur))
+     &                   - 0.5*(POP(NEX(nnur),j,1,nnur) 
+     &                   +      POP(NEX(nnur),j,2,nnur))
                 ENDDO
              ENDIF 
              poptot = poptot*DE
