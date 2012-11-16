@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3170 $
+Ccc   * $Rev: 3228 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-26 22:25:30 +0200 (Fr, 26 Okt 2012) $
+Ccc   * $Date: 2012-11-16 02:07:48 +0100 (Fr, 16 Nov 2012) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -50,11 +50,14 @@ C
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
-      CM=931.494043D0                                                   ECIS-034
-      CHB=197.326968D0                                                  ECIS-035
-      CZ=137.03599911D0                                                 ECIS-036
-
-C     MR=95                                                             ECIS-037
+C     CM=931.494043D0    ! EMPIRE 3.1                                   ECIS-034
+      CM=931.494061D0    
+C     CHB=197.326968D0   ! EMPIRE 3.1                                   ECIS-035
+C     AMUmev= 9.31494061D+02  ! CODATA 2010
+C     HHBarc = 197.3269718D0  ! CODATA 2010
+      CHB    = 197.3269718D0   
+C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
+      CZ=137.035999074D0 ! CODATA 2010  (1/ALPHA)
 
       MR=111                                                            
       MW=96                                                             ECIS-038
