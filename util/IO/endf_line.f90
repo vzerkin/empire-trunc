@@ -22,6 +22,7 @@ module endf_lines
     logical*4 :: qmat = .false.           ! if true, chill when MAT changes unexpectedly
     logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
     logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
+    logical*4 :: qlin = .false.           ! if true, put line numbers in (76:80) of output files
 
     logical*4 qopen                       ! true when a file is open
     logical*4 qwrt                        ! true when open for output
@@ -36,7 +37,7 @@ module endf_lines
     public endline                        ! line supplied by endf_line_io
     integer, public :: ipos               ! current position on line
 
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal
 
@@ -44,14 +45,13 @@ module endf_lines
     contains
 !------------------------------------------------------------------------------
 
-    subroutine open_endfile(efil,qwrite,qover,qlin)
+    subroutine open_endfile(efil,qwrite,qover)
 
     implicit none
 
     character*(*), intent(in) :: efil             ! endf file name
     logical*4, intent(in) :: qwrite               ! true for output file
     logical*4, intent(in), optional :: qover      ! true to allow overwriting existing file
-    logical*4, intent(in), optional :: qlin       ! true to write line numbers in (76:80) on output
 
     integer*4 status,iov,irs
     character chr2*2
@@ -745,5 +745,16 @@ module endf_lines
 
     return
     end subroutine set_ignore_badmt
+
+!------------------------------------------------------------------------------
+
+    subroutine set_output_line_numbers(qm)
+
+    logical*4, intent(in) :: qm
+
+    qlin = qm
+
+    return
+    end subroutine set_output_line_numbers
 
 end module endf_lines

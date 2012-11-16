@@ -211,12 +211,14 @@ module ENDF_IO
         module procedure lc_mf40
     end interface lc_mf
 
-    ! local variables to store input parameters
+    ! local variables to store input/control parameters
 
-    integer*4, private :: inmat,nfil
-    character*500, private :: endfil
-    type (endf_file), pointer, private :: endf
-    logical*4 q_overwrite,q_lines
+    integer*4, private :: ihdr = 0                 ! controls disposition of 'header' or TPID line
+    integer*4, private :: inmat = 0                ! input MAT to read, if 0, read whole file
+    integer*4, private :: nfil                     ! # characters in endfil string
+    character*500, private :: endfil               ! ENDF file to read/write
+    type (endf_file), pointer, private :: endf     ! pointer to user's ENDF data type
+    logical*4, private :: q_overwrite = .false.    ! flag for overwriting existing output file
 
     ! hide these routines from end user
 
@@ -279,26 +281,51 @@ module ENDF_IO
     ! read an entire ENDF file, which may contain multiple materials.
     ! each material is scanned, and all MF files encountered are read in.
 
-    integer mat,status
+    integer mat,status,mf,mt
     type (endf_mat), pointer :: mx
 
     call open_endfile(endfil(1:nfil),.false.)
 
-    ! first line, or "header" line, usually contains SVN tags
-    ! and ends with MAT=1, MF=MT=0. Look for this and if found,
-    ! save this line as the header
+    ! the first line, the "header" or "TPID" (tape ID) line, is free-format
+    ! ascii in 1:66. It usually has MAT=1, and the ENDF manual says that it
+    ! must have MF=MT=0. The line should always be there; at the NNDC we put
+    ! SVN tags for the revision and date at the beginning. Make sure it's there.
+    ! If not, signal an error. Then look at the contents of 1:66 and take
+    ! the following action depending on the value of ihdr:
+    ! the contents of 
+    !  0) default - ignore the contents of 1:66
+    !  1) replace the contents with our SVN tags
+    !  2) issue an error and exit if SVN tags not present.
 
     call get_endline
 
-    if(endline(67:75) .eq. hdlin(67:75)) then
-        endf%hdline = endline
-        endf%hdline(67:75) = hdlin(67:75)    ! reset these fields
-        call get_endline
-    else
-        write(6,*) ' WARNING: No header line found in ',endfil(1:nfil)
-        write(6,*) ' Header will be set to standard header line with SVN tags'
-        endf%hdline = hdlin
+    mf = get_mf()
+    mt = get_mt()
+    if((mf /= 0) .or. (mt /= 0)) then
+        erlin = ' No header (TPID) or header without MF=MT=0 on first line'
+        call endf_error(erlin)
     endif
+
+    ! assume at this point we have a header line
+    ! check contents of 1:66 depending on ihdr
+
+    select case(ihdr)
+    case(1)
+        ! replace line with tags
+        write(6,*) ' Header line 1 (TPID) reset with SVN tags'
+        endf%hdline = hdlin
+    case(2)
+        ! require tags
+        if((endline(1:7) /= hdlin(1:7)) .or. (endline(21:27) /= hdlin(21:27))) then
+           erlin = ' Header line 1 (TPID) does not contain NNDC SVN tags'
+           call endf_error(erlin)
+        endif
+    case default
+        ! do nothing. Leave as is.
+        endf%hdline = endline
+    end select
+
+    call get_endline
 
     if(inmat > 0) call find_mat(inmat)
 
@@ -466,14 +493,13 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    integer*4 function write_endf_file(filename,usend,qov,qlin)
+    integer*4 function write_endf_file(filename,usend,qov)
 
     implicit none
 
     character*(*), intent(in), target :: filename
     type (endf_file), intent(in), target :: usend
     logical*4, intent(in), optional :: qov
-    logical*4, intent(in), optional :: qlin
 
     integer*4, external :: endf_try
 
@@ -491,12 +517,6 @@ module ENDF_IO
        q_overwrite = .false.
     endif
 
-    if(present(qlin)) then
-       q_lines = qlin
-    else
-       q_lines = .false.
-    endif
-
     write_endf_file = endf_try(endf_file_writer)
 
     return
@@ -510,7 +530,7 @@ module ENDF_IO
 
     type (endf_mat), pointer :: mx
 
-    call open_endfile(endfil(1:nfil),.true.,q_overwrite,q_lines)
+    call open_endfile(endfil(1:nfil),.true.,q_overwrite)
 
     endline = endf%hdline
     call put_endline
@@ -990,5 +1010,26 @@ module ENDF_IO
 
     return
     end function mtmod
+
+!------------------------------------------------------------------------------
+
+    subroutine set_header_control(ihd)
+
+    implicit none
+
+    integer*4, intent(in) :: ihd
+
+    if(ihd == 1) then
+       write(6,*) ' Header (TPID) line will be replaced with NNDC SVN tags'
+       ihdr = 1
+    else if(ihd == 2) then
+       write(6,*) ' Header (TPID) line required to contain NNDC SVN tags'
+       ihdr = 2
+    else
+       ihdr = 0
+    endif
+
+    return
+    end subroutine set_header_control
 
 end module ENDF_IO
