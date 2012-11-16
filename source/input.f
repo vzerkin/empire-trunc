@@ -1,6 +1,7 @@
-Ccc   * $Rev: 3205 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-11-14 17:24:01 +0100 (Mi, 14 Nov 2012) $
+$DEBUG
+Ccc   * $Rev: 3226 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-16 02:05:12 +0100 (Fr, 16 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -87,29 +88,36 @@ C-----They are passed through CONSTANT common block
 C
 C-----THE FOLLOWING DEFINITIONS COPIED FROM ECIS03 code (NEA DATA BANK)
 C
-C-----CONSTANTS COMPUTED FROM THE FUNDAMENTAL CONSTANTS, ATOMIC MASS, HBAR*C
-C-----AND ALPHA, AS GIVEN IN THE EUROPEAN PHYSICAL JOURNAL, PAGE 73, VOLUME
-C-----15 (2000) REFERRING FOR THESE VALUES TO THE 1998 CODATA SET WHICH MAY
-C-----BE FOUND AT http://physics.nist.gov/constants
+C-----CONSTANTS taken from the 2010 CODATA SET as given @ http://physics.nist.gov/constants
 C-----CM=931.494013 +/- 0.000037 MeV
 C-----The above value is the one used also in the ENDF-6 manual (April 2001, 2009)
-      AMUmev= 9.31494013D+02
-C-----CHB=197.3269601 +/- 0.0000078 (*1.0E-9 eV*cm)
-      HHBarc = 197.3269601D0
-C-----HHBarc = 1.97327053D+02  (EMPIRE v 2.18)
+C     AMUmev= 9.31494013D+02
+      AMUmev= 9.31494061D+02  ! CODATA 2010
+C-----HHBarc = 1.97327053D+02 ! EMPIRE 2.18
+C     HHBarc = 197.3269601D0  ! EMPIRE 3.1         
+      HHBarc = 197.3269718D0  ! MeV fm
       XNExc = 8.071323D0
 C-----From SCAT2000
       ampipm = 1.395688D+02
       ampi0 = 1.349645D+02
       AMPi = (2.D0*ampipm + ampi0)/3.D0
 C     ELE2 = e*e in MeV.fm
-      ELE2 = 1.4399652D+00
+C     ELE2 = 1.4399652D+00  ! change from CODATA 1998 to CODATA 2010
+C                           ! in alpha*hbarc = 1.00000006
+      ELE2 = 1.43996529D+00 ! CODATA 2010
+C     1/ALPHA = 137.035 999 074
+C     ALPHA = 7.297 352 5698(24) × 10-3
+C     eps0  = 8.854 187 817... × 10-12 F/m
+C     ELE2 = 4*pi**alpha*HBARC*eps0
 C-----Neutron mass = 1.008 664 915 60(55) u
-      AMUneu =  1.008665D0
+C     AMUneu =  1.008665D0	      ! EMPIRE 3.1
+      AMUneu =  1.00866491600D0	    
 C-----Nuclear proton mass = 1.007 276 466 88(13) u
-      AMUpro =  1.007276D0 
+C     AMUpro =  1.007276466812D0 	  ! EMPIRE 3.1
+      AMUpro =  1.007276466812D0 
 C-----Electron mass = 5.485 799 0945 x 10-4 u
-      AMUele = 0.00054857990945D0
+C     AMUele = 0.00054857990945D0	  ! EMPIRE 3.1
+      AMUele = 0.00054857990946D0	  
 C-----Atomic proton mass = AMUpro + AMUele
 C
 C mn    neutron mass  1.008 664 915 78 amu 
@@ -975,7 +983,6 @@ C--------Retrieve C4 experimental data  *** done ***
 
          NEXclusive = 0
          DO nnuc = 1, NNUcd
-            IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
 
             ENDf(nnuc) = 1
             ENDfa(nnuc) = 1
@@ -1014,6 +1021,11 @@ C
                ENDIF
             ENDDO
          ENDDO
+
+C        Finding target
+         DO nnuc = 1, NNUct
+            IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
+	   ENDDO
 
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
@@ -7781,7 +7793,6 @@ C-----
          IF (name.EQ.'SFACT') THEN
              if (nint(val).GT.0 .OR. nint(val).LE.3) THEN
              SFAct = nint(val)
-             WRITE (8, '('' SFACTOR = '',i2)')  nint(val)
              if (SFAct.eq.1) WRITE (8,*) 'S-FACTOR for (x,g) calculated'
              if (SFAct.eq.2) WRITE (8,*) 'S-FACTOR for (x,n) calculated'
              if (SFAct.eq.3) WRITE (8,*) 'S-FACTOR for (x,p) calculated'
