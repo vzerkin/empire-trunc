@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3222 $
+Ccc   * $Rev: 3231 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-15 18:55:20 +0100 (Do, 15 Nov 2012) $
+Ccc   * $Date: 2012-11-16 08:49:02 +0100 (Fr, 16 Nov 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -568,6 +568,14 @@ C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
 
+      fr = totemis/Sigr
+      WRITE (8,99015) totemis, fr
+C
+C     write(*,*) 'Middle of PCROSS :',
+C    >            sngl(totemis),sngl(xsinl),sngl(SIGr)
+C
+99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
+     &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
 
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
             WRITE (8,99016)
