@@ -169,9 +169,9 @@ C    783     S-factor
       endif
       if(.not.OMPAR_RIPLF) OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
 
-      OPEN (unit = 781, file = "S-Factor.txt")
-      WRITE(781,*) 'Ecm(MeV)   Cross Section(b)  S-factor(MeV b)'
-      WRITE(781,*) 
+      OPEN (unit = 781, file = "S-FACTOR.DAT")
+      WRITE(781,*) '#Ecm(MeV)  Cross Section(b)  S-factor(MeV b)'
+      WRITE(781,*) '#                                           '
 
       return
       end subroutine open_files

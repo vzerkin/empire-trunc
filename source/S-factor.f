@@ -43,7 +43,7 @@ C     CETa = e^2 / (hbar C) SQRT( MASS*C^2 /2) = e^2 / hbar SQRT( AMUmev /2)
 C     The Sommerfeld factor eta can be calculated as CETa*SQRT(mu/EIN)*Zt*Ze
 C     eta = e^2*Zt*Ze / hbar SQRT( AMUmev*mu/ (2EIN)) where mu is adimensional, and EIN is the CMS energy in MeV
 C     eta = CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN)
-	  eta = 2*pi*CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN) 
+      eta = 2*pi*CETa*Z(0)*ZEJc(0)*SQRT(mu/EIN) 
 C
 C     Using the latest value of CODATA 2010 constants I obtained:
 C     CETa * 2 * pi = 0.9895106848
