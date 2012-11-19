@@ -1,6 +1,6 @@
-cc   * $Rev: 3237 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-16 13:40:21 +0100 (Fr, 16 Nov 2012) $
+cc   * $Rev: 3244 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-11-19 15:13:57 +0100 (Mo, 19 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2282,8 +2282,8 @@ C----------CN contribution to elastic ddx
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
      &           4.d0*pi*ELCncs,  
-     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10)),
-     &           'ENG-WEID. TRANSF.'  
+     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10))!,
+!     &           'ENG-WEID. TRANSF.'  
                ELSE
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
      &           4.d0*pi*ELCncs,  
