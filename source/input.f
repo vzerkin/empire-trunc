@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3251 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-20 14:06:58 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Rev: 3252 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2012-11-20 22:50:39 +0100 (Di, 20 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4004,7 +4004,7 @@ C-----
             GOTO 100
          ENDIF
 
-         IF (name.EQ.'DEFNUC ') THEN
+         IF (name.EQ.'DEFNUC') THEN
             DEF(1,0) = val
             WRITE (8,
      &'('' Deformation of the target nucleus set to'',F6.3)') val
