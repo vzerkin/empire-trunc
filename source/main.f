@@ -1,6 +1,6 @@
-cc   * $Rev: 3248 $
+cc   * $Rev: 3249 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-20 12:10:01 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Date: 2012-11-20 12:15:34 +0100 (Di, 20 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2293,8 +2293,10 @@ C----------CN contribution to elastic ddx
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
      &           4.d0*pi*ELCncs,  
-     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10))!,
-!     &           'ENG-WEID. TRANSF.'  
+     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
+     &           'ENG-WEID. TRANSF.'  
+C    &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10))!,
+C    &           'ENG-WEID. TRANSF.'  
                ELSE
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
      &           4.d0*pi*ELCncs,  
@@ -2313,8 +2315,8 @@ C----------CN contribution to elastic ddx
                  ENDDO
                ENDIF
 
-               gang = 180.0/(NDAng - 1)
-               angstep = 180.0/(NANgela - 1)
+               gang = 180.d0/(NDAng - 1)
+               angstep = 180.d0/(NANgela - 1)
                WRITE (8,99016)
                WRITE (8,99020)
                DO iang = 1, NANgela/4 + 1
