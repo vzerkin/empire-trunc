@@ -1,6 +1,6 @@
-cc   * $Rev: 3244 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-11-19 15:13:57 +0100 (Mo, 19 Nov 2012) $
+cc   * $Rev: 3248 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-20 12:10:01 +0100 (Di, 20 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1002,7 +1002,7 @@ C        xsinl is calculated by MSD
 C--------Print inelastic PE double differential cross sections
          nejc = NPRoject
          nnur = NREs(nejc)
-         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.3) THEN
+         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.5) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
             DO its = 1, itimes
               iad = 1 + (its - 1)*11
@@ -1380,17 +1380,17 @@ C                 FISden(Nnuc)=0
          ENDIF
          ia = INT(A(nnuc))
 C--------Reset variables for life-time calculations
-         stauc = 0.0
-         sgamc = 0.0
-         csemist = 0.0
+         stauc = 0.d0
+         sgamc = 0.d0
+         csemist = 0.d0
          CSFis = 0.d0
          IF (FISmod(nnuc).GT.0.) THEN
             DO m = 1, INT(FISmod(nnuc)) + 1
                CSFism(m) = 0.d0
             ENDDO
          ENDIF
-         sumfis = 0.0
-         IF (IOUt.GT.0) THEN
+         sumfis = 0.d0
+         IF (IOUt.GT.0 .and. FIRst_ein) THEN
             WRITE (8,*) ' '
             WRITE (8,*) ' '
             WRITE (8,*) ' -------------------------------------'
@@ -1617,12 +1617,22 @@ C---------------------locate position of the projectile among ejectiles
 C--------Jump to end of loop after elastic when fitting
          If(FITomp.LT.0 .AND. nnuc.EQ.mt2) go to 1155
          POPmax(nnuc) = POPmax(nnuc)*0.0001
-         IF (POPmax(nnuc).EQ.0.0D0) THEN
-            WRITE (8,*) ' '
-            WRITE (8,*)
-     &                'Continuum of this nucleus has not been populated'
-            GOTO 1500
-         ENDIF
+C        if POPmax(nnuc) = 0 then, continuum of this nucleus has not been populated, skipping
+         IF (POPmax(nnuc).EQ.0.0D0) GOTO 1500 
+C        IF (POPmax(nnuc).EQ.0.0D0) THEN
+C           WRITE (8,*) ' '
+C           WRITE (8,*)
+C    &                'Continuum of this nucleus has not been populated'
+C           GOTO 1500
+C        ENDIF
+         if(.not.FIRst_ein) then
+           WRITE (8,*) ' '
+           WRITE (8,*) ' -------------------------------------'
+           WRITE (8,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)') nnuc,
+     &             ia, SYMb(nnuc)
+           WRITE (8,*) ' -------------------------------------'
+           WRITE (8,*) ' '
+         endif
 C--------Prepare gamma transition parameters
          CALL ULM(nnuc)
 C--------Calculate compound nucleus level density at saddle point
@@ -1632,7 +1642,7 @@ C--------Calculate compound nucleus level density at saddle point
                IF(FIRst_ein) WRITE (8,*)
      &         ' WARNING: For HI reactions (FISSHI =1), LD model at sadd
      &les is EGSM'
-               IF (IOUt.EQ.6) THEN
+               IF (IOUt.EQ.6 .and. FIRst_ein) THEN
                   WRITE (8,'(1X,/,'' Saddle point level density'',/)')
                   WRITE (8,99055) (EX(i,nnuc),(ROF(i,j,nnuc),j = 1,12),
      &                            i = 1,NEX(nnuc))
@@ -1745,14 +1755,14 @@ C
      &                         POP(ke,jcn,ipar,nnuc)*ded
 
 C--------------------Look for the discrete level with the closest spin
-                     xnl = 1.0
-                     spdiff = 100.
+                     xnl = 1.d0
+                     spdiff = 100.d0
                      DO il = 1, NLV(nnuc)
                         spdif = ABS(FLOAT(jcn) + HIS(nnur)
      &                          - XJLv(il,nnuc))
                         IF (spdif.LT.spdiff) THEN
                            spdiff = spdif
-                           xnl = 1.
+                           xnl = 1.d0
                         ELSE
                            IF (spdif.EQ.spdiff) xnl = xnl + 1.
                         ENDIF
@@ -1951,17 +1961,18 @@ C--------gamma decay of discrete levels (DECAYD)
 1525     ia = INT(A(nnuc))
          iz = INT(Z(nnuc))
          IF (IOUt.GT.0) THEN
-            WRITE (8,'(1X,/,10X,40(1H-),/)')
-            WRITE (8,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-     &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
-     &                             REAction(nnuc)
-            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
-     &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
-     &ons only)'',/)')
          ENDIF
 
          IF (CSPrd(nnuc).GT.0.d0) THEN
+           WRITE (8,'(1X,/,10X,40(1H-),/)')
+           WRITE (8,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+     &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+     &                             REAction(nnuc)
+           IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
+     &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
+     &ons only)'',/)')
+
 C----------Integrating exclusive population spectra (ENDF)
            gtotsp = 0.d0
            xtotsp = 0.d0
