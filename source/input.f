@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3234 $
+Ccc   * $Rev: 3247 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-16 13:01:43 +0100 (Fr, 16 Nov 2012) $
+Ccc   * $Date: 2012-11-20 12:09:37 +0100 (Di, 20 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -263,8 +263,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
 C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
+         CNAngd = 0
          CN_isotropic = .True.     ! default
-C        CN_isotropic = .False.    ! CN anisotropy from ECIS. 
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -355,7 +355,6 @@ C        IOPran = -1 ! Uniform 1 sigma error
 C--------Relativistic kinematics
          RELkin = .FALSE.
          INTerf = 1 ! Engelbrecht-Weidenmuller transformation used by default
-C                     (if CN_isotropic)
 C--------Maximum energy to assume all levels are collective for DWBA calculations
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
@@ -3580,9 +3579,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
 
-
-            IF (ZEJc(0).GT.0) CN_isotropic = .TRUE.
-
+            IF (ZEJc(0).GT.0 .or. CNAngd.eq.0) CN_isotropic = .TRUE.
 
             IF (.not.CN_isotropic) THEN          
               WRITE (8,
@@ -7836,6 +7833,17 @@ C--------------------------------------------------------------------------
             IF (INTerf.eq.1) 
      &        WRITE (8,'('' CN-direct interference by Engelbrecht - Weid
      &enmuller transformation Phys.Rev. C8(1973)859-862 '')')
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'CNANGD') THEN
+            CNAngd = 0  ! isotropic
+            IF (val.NE.0.d0) CNAngd = 1
+            IF (CNAngd.eq.0) THEN
+              WRITE (8,'('' CN angular distribution isotropic'')')
+            ELSE
+              WRITE (8,'('' CN angular distribution anisotropic'')')
+            ENDIF 
             GOTO 100
          ENDIF
 
