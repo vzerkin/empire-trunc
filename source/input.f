@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3247 $
+Ccc   * $Rev: 3251 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-20 12:09:37 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Date: 2012-11-20 14:06:58 +0100 (Di, 20 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3578,9 +3578,10 @@ C-----------Print some final input options
 C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF(MAXmult.GT.2)WRITE(8,
      &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
-
-            IF (ZEJc(0).GT.0 .or. CNAngd.eq.0) CN_isotropic = .TRUE.
-
+     
+            IF (ZEJc(0).GT.0 .or.  CNAngd.eq.0) CN_isotropic = .TRUE.
+            IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
+	    
             IF (.not.CN_isotropic) THEN          
               WRITE (8,
      &'('' CN angular distribution calculated by ECIS as anisotropic usi
