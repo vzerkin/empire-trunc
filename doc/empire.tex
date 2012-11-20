@@ -10855,6 +10855,32 @@ $>0$ HRTW width fluctuation correction up to the energy set by VAL.
 
 = 2 PFNS are calculated using Kornilov parameterization \cite{Kornilov:99}
 
+\item [{CNANGD}] Controls calculation of CN angular distribution.
+
+= 0 Compound nucleus (CN) angular distribution assumed isotropic (default)
+
+> 0 Compound nucleus (CN) angular distribution assumed anisotropic;
+    collective levels must be present and DIRECT>0.
+
+\item [{INTERF}] Controls calculation of interference effects between direct 
+    and compound decay.
+
+= 0 Compound nucleus (CN) and direct cross section are added incoherently (default)
+
+= 1 Compound nucleus (CN) and direct interference considered by Engelbrecht-
+      Weidenmuller transformation (see Phys.Rev. C8(1973)859-862). Collective
+	  levels must be present and DIRECT>0.
+
+\item [{FISSPE}] Controls calculation of prompt fission neutron spectra (PFNS).
+
+= 0 PFNS are not calculated (default)
+
+= 1 PFNS are calculated using Los Alamos model \cite{Madland:82}
+
+= 2 PFNS are calculated using Kornilov parameterization \cite{Kornilov:99}
+
+
+
 \item [{BENCHM}] Controls if benchmark calculation is requested. 
 
 = 0 no benchmark calculation (default),
