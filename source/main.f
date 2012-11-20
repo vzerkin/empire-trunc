@@ -1,6 +1,6 @@
-cc   * $Rev: 3249 $
+cc   * $Rev: 3250 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-20 12:15:34 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Date: 2012-11-20 14:05:51 +0100 (Di, 20 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1390,7 +1390,7 @@ C--------Reset variables for life-time calculations
             ENDDO
          ENDIF
          sumfis = 0.d0
-         IF (IOUt.GT.0 .and. FIRst_ein) THEN
+         IF (nnuc.eq.1) THEN
             WRITE (8,*) ' '
             WRITE (8,*) ' '
             WRITE (8,*) ' -------------------------------------'
@@ -1625,7 +1625,7 @@ C           WRITE (8,*)
 C    &                'Continuum of this nucleus has not been populated'
 C           GOTO 1500
 C        ENDIF
-         if(.not.FIRst_ein) then
+         IF (nnuc.GT.1) THEN
            WRITE (8,*) ' '
            WRITE (8,*) ' -------------------------------------'
            WRITE (8,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)') nnuc,
