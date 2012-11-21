@@ -1,6 +1,7 @@
-Ccc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 3254 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+C
 C
       SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
 C

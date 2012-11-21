@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3136 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:41:35 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Rev: 3254 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3136 $
+C CVS Version Management $Revision: 3254 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3136 $')
+99005 FORMAT ('  xddhms version: $Revision: 3254 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C

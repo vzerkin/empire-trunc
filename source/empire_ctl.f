@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3167 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 03:42:51 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 3254 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
 
       PROGRAM EMPIRE_CTL
 C

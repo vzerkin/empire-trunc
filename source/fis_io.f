@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2601 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2012-02-27 20:36:29 +0100 (Mo, 27 Feb 2012) $
+Ccc   * $Rev: 3254 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -439,9 +439,9 @@ C--------multiplier of atil
          HM(1,1)= 1.2
          HM(1,2)=H(1,1)
          HM(1,3)=H(1,1)
- 	   BFFm(1)=1.
-  	   BFFm(2)=2.
-  	   BFFm(3)=2.
+           BFFm(1)=1.
+           BFFm(2)=2.
+           BFFm(3)=2.
          DO m=1,int(FISmod(Nnuc))+1
             DO nr = 1, NRFdis(2)
 C--------------by default all widths are equal

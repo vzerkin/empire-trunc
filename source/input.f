@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3252 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2012-11-20 22:50:39 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Rev: 3254 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
