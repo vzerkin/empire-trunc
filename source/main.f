@@ -1,6 +1,6 @@
-cc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+cc   * $Rev: 3255 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-22 11:19:35 +0100 (Do, 22 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -456,10 +456,10 @@ C---------Get and add inelastic cross sections (including double-differential)
           DO i = 2, ND_nlv
            ilv = ICOller(i)
 
-	     IF(ilv.le.0) then
-	       WRITE(8,*) ' WARNING: Collective level #',ICOllev(i),
+           IF(ilv.le.0) then
+             WRITE(8,*) ' WARNING: Collective level #',ICOllev(i),
      &                  ' has wrong number, skipped'
-             CYCLE 		    
+             CYCLE                
            ENDIF
 C          RCN 2010 
            IF(ICOllev(i).le.LEVCC .and. SINlcc.le.0) exit
@@ -1398,23 +1398,23 @@ C--------Reset variables for life-time calculations
      &             ia, SYMb(nnuc)
             WRITE (8,*) ' -------------------------------------'
             WRITE (8,*) ' '
-         ENDIF
-         WRITE (12,*) ' '
-         WRITE (12,*)
+            WRITE (12,*) ' '
+            WRITE (12,*)
      &' ---------------------------------------------------------------'
-         IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
-            WRITE (12,
+            IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+              WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-         ELSE
-            WRITE (12,
+            ELSE
+              WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
-         ENDIF
-         WRITE (12,*)
+            ENDIF
+            WRITE (12,*)
      &' ---------------------------------------------------------------'
+         ENDIF
          IF (FITomp.LE.0) THEN
             IF (nnuc.NE.1) THEN
                IF (nnuc.EQ.mt91) THEN
@@ -1433,6 +1433,22 @@ C--------Reset variables for life-time calculations
                  dtmp = dtmp + CSDirlev(il,nejc)
                ENDDO
                IF(dtmp.LE.0.0) GOTO 1460
+               WRITE (12,*) ' '
+               WRITE (12,*)
+     &' ---------------------------------------------------------------'
+               IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+                 WRITE (12,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+               ELSE
+                 WRITE (12,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+               ENDIF
+               WRITE (12,*)
+     &' ---------------------------------------------------------------'
                WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
@@ -2214,7 +2230,7 @@ C
              WRITE (8,*) '---------------------------------------------'
              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
      &                  '' Balance ='',F7.2,''%'')')
-     &	      totener_in , totener_out, 
+     &            totener_in , totener_out, 
      &       (totener_in - totener_out)/totener_in*100.D0
              WRITE (8,*) '*********************************************'
 C            WRITE (8,
@@ -2422,7 +2438,7 @@ C                     number of discrete levels is limited to 40
          checkXS = checkXS + CSPrd(nnuc)
          WRITE (12,*) ' '
          WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',E12.6,
      &'' mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
          jz = INT(Z(1))-iz
          jn = INT(A(1))-ia-jz
@@ -2454,17 +2470,26 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0.) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
+           IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
+           WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
+     &       CSDirlev(1,nejc)
+           WRITE (12,'(11x,
+     &                 '' g  disc.lev cross section'',E12.6,'' mb'')')
+     &       CSDirlev(1,nejc)
+           ENDIF 
            WRITE (8,'(''  g  emission cross section'',G12.6,''  mb'')')
      &          CSEmis(0,nnuc)
-           WRITE (12,'(10x,
-     &                 '' g  emission cross section'',E12.6,''  mb'')')
+           WRITE (12,'(11x,
+     &                 '' g  emission cross section'',E12.6,'' mb'')')
      &          CSEmis(0,nnuc)
 
            if(nnuc.eq.1) then
            WRITE (8,'(2x,
      &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
-           WRITE (12,'(2x,
-     &     '' Primary g  emission cross section'',E12.6,''  mb'')') cspg
+           WRITE (12,'(3x,
+     &     '' Primary g  emission cross section'',E12.6, '' mb'')') cspg
+
+
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
@@ -2486,7 +2511,7 @@ C------------Residual nuclei must be heavier than alpha
              IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
 
              WRITE (12,
-     &           '(11X,A2,'' emission cross section'',E12.6,''  mb'')')
+     &           '(12X,A2,'' emission cross section'',E12.6,'' mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
@@ -3468,12 +3493,12 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &      G13.6)') FCOred
 
         if (INT(ZEJc(0)).EQ.0) then
-	      DO i=1,NLV(0) ! loop over target discrete levels
+            DO i=1,NLV(0) ! loop over target discrete levels
             IF(CINred(i).NE.1) WRITE (8,
      >       '('' * Comp. inelastic cross section for target level # '',
      &       i2,'' scaled by '',G13.6)') i, CINred(i)
-	      ENDDO
-	    endif
+            ENDDO
+        endif
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
@@ -4052,8 +4077,8 @@ C-----S-FACTOR call
 
       IF(SFAct.GT.0) THEN
         IF(SFAct.EQ.1) s_factor = SFACTOR(CSPrd(1))  
-        IF(SFAct.EQ.2) s_factor = SFACTOR(csinel)	 
-        IF(SFAct.EQ.3) s_factor = SFACTOR(CSPrd(3))	 
+        IF(SFAct.EQ.2) s_factor = SFACTOR(csinel)      
+        IF(SFAct.EQ.3) s_factor = SFACTOR(CSPrd(3))    
       ENDIF
 C        
  1155 IF( FITomp.GE.0 ) THEN
