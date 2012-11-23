@@ -1,6 +1,6 @@
-cc   * $Rev: 3255 $
+cc   * $Rev: 3256 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-22 11:19:35 +0100 (Do, 22 Nov 2012) $
+Ccc   * $Date: 2012-11-23 17:47:33 +0100 (Fr, 23 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1414,6 +1414,10 @@ C--------Reset variables for life-time calculations
             ENDIF
             WRITE (12,*)
      &' ---------------------------------------------------------------'
+            WRITE (12,
+     &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
+     &cade'')')
+               WRITE (12,'(1X,/,10X,40(1H-),/)')
          ENDIF
          IF (FITomp.LE.0) THEN
             IF (nnuc.NE.1) THEN
@@ -1960,10 +1964,10 @@ C-----------Write Int. Conv. Coefff. for discrete transitions
 C-------------Check for the number of branching ratios
               nbr = 0
               DO ib = 1, NDBR
-                IF (BR(il,ib,2,nnuc).EQ.0.) GOTO 1520
+                IF (BR(il,ib,2,nnuc).EQ.0.) EXIT
                 nbr = ib
               ENDDO
- 1520         WRITE (12,99065) il, ELV(il,nnuc), LVP(il,nnuc),
+              WRITE (12,99065) il, ELV(il,nnuc), LVP(il,nnuc),
      &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,3,nnuc)
      &                          ,ib = 1,nbr)
@@ -1976,8 +1980,6 @@ C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
 1525     ia = INT(A(nnuc))
          iz = INT(Z(nnuc))
-         IF (IOUt.GT.0) THEN
-         ENDIF
 
          IF (CSPrd(nnuc).GT.0.d0) THEN
            WRITE (8,'(1X,/,10X,40(1H-),/)')
@@ -2080,7 +2082,6 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &           ' population cross section ',G12.6,
      &           ' mb    : ',A9) 
              ENDDO
-             WRITE (12,*)
 
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
              IF (xtotsp.NE.0) emedn = emedn/xtotsp 
@@ -2096,36 +2097,36 @@ C--------------(merely for checking purpose)
              xnorm(2,INExc(nnuc)) = 1.0d0
              IF (nnuc.EQ.mt91) THEN
                nejc = 1
-               WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+               WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
      &                G12.6,'' mb  '')') xtotsp
-               WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') xtotsp
-               WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+               WRITE (12,'(6X,'' Cont. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') xtotsp
+               WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,'' mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(6X,'' Disc. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
-               WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+               WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
      &                G12.6,'' mb  '')') ptotsp
-               WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') ptotsp
-               WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+               WRITE (12,'(6X,'' Cont. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') ptotsp
+               WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,'' mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(6X,'' Disc. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
-               WRITE (8,'(11X,'' Cont. popul. before g-cascade '',
+               WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
      &                G12.6,'' mb  '')') atotsp
-               WRITE (8,'(11X,'' Disc. popul. before g-cascade '',
+               WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,'' mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(11X,'' Cont. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') atotsp
-               WRITE (12,'(11X,'' Disc. popul. before g-cascade '',
-     &                E12.6,'' mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(6X,'' Cont. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') atotsp
+               WRITE (12,'(6X,'' Disc. popul. before g-cascade '',
+     &                G12.6,'' mb  '')') CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)
              ELSE
                IF (LHMs.GT.0 .and. atotsp.LT.1.0d-8) THEN
@@ -2233,10 +2234,6 @@ C
      &            totener_in , totener_out, 
      &       (totener_in - totener_out)/totener_in*100.D0
              WRITE (8,*) '*********************************************'
-C            WRITE (8,
-C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-C    &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
-C    &                             REAction(nnuc)
              WRITE (8,*) ' '
            ENDIF
          ENDIF
@@ -2435,16 +2432,16 @@ C                     number of discrete levels is limited to 40
            ENDIF
            WRITE (8,*)
          ENDIF
-         checkXS = checkXS + CSPrd(nnuc)
-         WRITE (12,*) ' '
-         WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',E12.6,
-     &'' mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
-         jz = INT(Z(1))-iz
-         jn = INT(A(1))-ia-jz
-         checkprd = CSPrd(nnuc)
-         xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
          IF(CSPrd(nnuc).GT.0.d0) THEN
+           checkXS = checkXS + CSPrd(nnuc)
+           WRITE (12,*) ' '
+           WRITE (12,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
+     &''  mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
+           jz = INT(Z(1))-iz
+           jn = INT(A(1))-ia-jz
+           checkprd = CSPrd(nnuc)
+           xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
            metas = 0
            ftmp_gs = CSPrd(nnuc)
            DO l= NLV(Nnuc), 2, -1
@@ -2464,7 +2461,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &           iz, SYMb(nnuc), ia, ftmp_gs
          ENDIF
          IF(CSFis.gt.0.)
-     &     WRITE (12,'(4x,''fission  cross section'',E12.6,''  mb'')') 
+     &     WRITE (12,'(4x,''fission  cross section'',G12.5,''  mb'')') 
      &          CSFis
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
@@ -2473,23 +2470,20 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
            IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
-           WRITE (12,'(11x,
-     &                 '' g  disc.lev cross section'',E12.6,'' mb'')')
+           WRITE (12,'(10x,
+     &                 '' g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
            ENDIF 
            WRITE (8,'(''  g  emission cross section'',G12.6,''  mb'')')
-     &          CSEmis(0,nnuc)
-           WRITE (12,'(11x,
-     &                 '' g  emission cross section'',E12.6,'' mb'')')
-     &          CSEmis(0,nnuc)
-
+     &       CSEmis(0,nnuc)
+           WRITE (12,'(10x,
+     &                 '' g  emission cross section'',G12.6,''  mb'')')
+     &       CSEmis(0,nnuc)
            if(nnuc.eq.1) then
            WRITE (8,'(2x,
      &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
-           WRITE (12,'(3x,
-     &     '' Primary g  emission cross section'',E12.6, '' mb'')') cspg
-
-
+           WRITE (12,'(2x,
+     &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
            endif
          ENDIF
          xcross(0,jz,jn) = CSEmis(0,nnuc)
@@ -2509,9 +2503,8 @@ C------------Residual nuclei must be heavier than alpha
      &                                 nejc,nnuc,CSEmis(nejc,nnuc)
              IF(iloc.EQ.1) CYCLE
              IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
-
              WRITE (12,
-     &           '(12X,A2,'' emission cross section'',E12.6,'' mb'')')
+     &           '(11X,A2,'' emission cross section'',G12.6,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
@@ -2547,13 +2540,13 @@ C------------Print residual nucleus population
              if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
      &                          .and. ENDF(nnuc).gt.0) then
                WRITE (12,
-     &            '(13x,   '' total popul.continuum '',E12.6,''  mb'')')
+     &            '(13x,   '' total popul.continuum '',G12.6,''  mb'')')
      &            poptot
                WRITE (12,
-     &            '(13x,   '' total popul.disc.lev. '',E12.6,''  mb'')')
+     &            '(13x,   '' total popul.disc.lev. '',G12.6,''  mb'')')
      &            poplev
                WRITE (12,
-     &            '(13x,   '' total population      '',E12.6,''  mb'')')
+     &            '(13x,   '' total population      '',G12.6,''  mb'')')
      &            poplev + poptot
 
                WRITE (8,
@@ -2727,14 +2720,9 @@ C---------------Exclusive DDX spectra (neutrons & protons)
                    WRITE (12,*) ' '
                    WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
+
 C------------------First emission reactions
-
-
-
 C------------------(discrete levels part)
-
-
-
                    IF ((nnuc.EQ.mt91 .AND. nejc.EQ.1).OR.
      &                   (nnuc.EQ.mt649 .AND. nejc.EQ.2)) THEN
                      DO il = 1, NLV(nnuc)  ! discrete levels
@@ -2760,43 +2748,56 @@ C------------------(continuum part - same for all n and p)
      &                       ftmp + CSEa(ie,nang,nejc,1)*
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
                        ENDDO
-                      ENDDO
-                      DO ie = 1, nspec - 1
+                     ENDDO
+                     DO ie = 1, nspec - 1
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                       FLOAT(ie - 1)*DE/recorp,
      &                       (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-                      ENDDO
-                      DO ie = nspec, nspec + 1
+                     ENDDO
+                     DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                        EMAx(nnuc)/recorp,
      &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-                      ENDDO
-                      WRITE (12,*) ' '    
+                     ENDDO
+                     WRITE (12,*) ' '    
 C
-C                     Integrated spectrum
+C                    Integrated spectrum
 C
-                      WRITE (12,'(10x,''Integrated Emission Spectra'')')
-                      WRITE (12,'(10x,''    Energy    mb/MeV'')')
-                      WRITE (12,*) ' '
-                      DO ie = 1, nspec - 1
+                     WRITE (12,'(10x,''Integrated Emission Spectra'')')
+                     WRITE (12,'(10x,''    Energy    mb/MeV'')')
+                     WRITE (12,*) ' '
+                     dtmp = 0.d0
+                     DO ie = 1, nspec - 1
                         if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) cycle
                         WRITE (12,'(10x,F10.5,E14.5)') FLOAT(ie - 1)
      &                  *DE/recorp, 
      &                  max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))*recorp
-                      ENDDO
+                        dtmp = dtmp + POPcse(0,nejc,ie,INExc(nnuc))*DE         
+                     ENDDO
                                           ! exact endpoint
-                      WRITE (12,'(10x,F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                  max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))*recorp
+                     WRITE (12,'(10x,F10.5,E14.5)') EMAx(nnuc)/recorp,
+     &                 max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))*recorp
+
+	               dtmp = dtmp + 
+     &                   POPcse(0,nejc,nspec,INExc(nnuc))*0.5d0*DE 
+
+                     WRITE(12,*) 
+                     WRITE(12,'(10x,
+     &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
+                     WRITE(12,'(10x,
+     &                  ''Popul. cross section '',G12.6,'' mb'' )') 
+     &                  POPcs(nejc,INExc(nnuc))
+                     WRITE(12,*) 
 
                    ELSE ! LHMs > 0
 
-c                     iprinted = 0
-c                     spechk(1) = 0.0d0
-c                     spechk(2) = 0.0d0
-c                     spechk(3) = 0.0d0
-                      DO ie = 1, nspec ! reconstruct continuum DDX spectrum
+c                    iprinted = 0
+c                    spechk(1) = 0.0d0
+c                    spechk(2) = 0.0d0
+c                    spechk(3) = 0.0d0
+                     DO ie = 1, nspec ! reconstruct continuum DDX spectrum
                         csetmp(ie) = (POPcse(0,nejc,ie,INExc(nnuc))
      &                         - xnorm(nejc,INExc(nnuc))
      &                          * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
@@ -2856,73 +2857,65 @@ c     &                          * POPcsedlab(0,nejc,ie,INExc(nnuc))
 c                    write(12,'(a5,i5,4f15.4)')'sig1=',nnuc,
 c     &                            (PI*spechk(i)*DE,i=1,3),spechk(4)*DE
 
-                      DO ie = 1, nspec - 1
+                     DO ie = 1, nspec - 1
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                       FLOAT(ie - 1)*DE/recorp,
      &                       (cseaprnt(ie,nang),nang = 1,NDANG)
-                      ENDDO
-                      DO ie = nspec, nspec + 1
+                     ENDDO
+                     DO ie = nspec, nspec + 1
                                                ! exact DDX spectrum endpoint
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                        EMAx(nnuc)/recorp,
      &                        (cseaprnt(ie,nang),nang = 1,NDANG)
-                      ENDDO
-                      WRITE (12,*) ' '    
+                     ENDDO
+                     WRITE (12,*) ' '    
                    ENDIF
 C
                 ELSE !  then (nejc.GE.1 .AND. nejc.LE.2)
 C
-C-----------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
-C-----------------double the first bin x-sec to preserve integral in EMPEND
-C                 POPcse(0,nejc,1,INExc(nnuc)) =
-C    &                  POPcse(0,nejc,1,INExc(nnuc))*2
-                  WRITE (12,*) ' '
-                  WRITE (12,'(''    Energy    mb/MeV'')')
-                  WRITE (12,*) ' '
-                  IF (nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN
-C-------------------First emission 
-                    DO il = 1, NLV(nnuc) ! discrete levels
-C--------------------------Although DDX spectra are available for emission
-C--------------------------they are isotropic and only ang. integrated are
-C--------------------------printed (4*Pi*CSAlev(1,il,nejc)
-                       espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
-                       IF (espec.GE.0) WRITE (12,'(F10.5,E14.5)')
+C------------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
+C------------------double the first bin x-sec to preserve integral in EMPEND
+C                  POPcse(0,nejc,1,INExc(nnuc)) =
+C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
+                   WRITE (12,*) ' '
+                   WRITE (12,'(''    Energy    mb/MeV'')')
+                   WRITE (12,*) ' '
+                   IF (nnuc.EQ.mt849 .AND. nejc.EQ.3) THEN
+C--------------------First emission 
+                     DO il = 1, NLV(nnuc) ! discrete levels
+C-----------------------Although DDX spectra are available for emission
+C-----------------------they are isotropic and only ang. integrated are
+C-----------------------printed (4*Pi*CSAlev(1,il,nejc)
+                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
+                        IF (espec.GE.0) WRITE (12,'(F10.5,E14.5)')
      &                      -espec, max(CSAlev(1,il,nejc),0.d0)
      &                      *4.0*PI*recorp/DE
-                        ENDDO
-                        DO ie = 1, nspec - 1
-                                            ! MT=849 (continuum)
-                           if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0)
-     &                          cycle
-                           WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
-     &                        *DE/recorp,
-     &                        max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))
-     &                        *recorp
-                        ENDDO
-                                          ! MT=849 exact endpoint
-                        WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                        max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))
-     &                        *recorp
-                        WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                            0.d0
-                  ELSE  !all other emissions (continuum and levels together)
-                        DO ie = 1, nspec - 1
-                           if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0)
-     &                          cycle
-                           WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)
-     &                     *DE/recorp,
-     &                     max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))
-     &                     *recorp
-                        ENDDO
-                                                 ! exact endpoint
-                        WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                     max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))
-     &                     *recorp
-                        WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                            0.d0
-                  ENDIF
-               ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
+                     ENDDO
+                   ENDIF
+                   dtmp =0.d0           !alpha continuum and all other particles
+                   DO ie = 1, nspec - 1 !  (continuum and levels together)
+                     if(POPcse(0,nejc,ie,INExc(nnuc)).le.0.d0) cycle
+                     WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
+     &                  max(0.d0,POPcse(0,nejc,ie,INExc(nnuc)))*recorp
+                     dtmp = dtmp + POPcse(0,nejc,ie,INExc(nnuc))*DE         
+                   ENDDO
+                   dtmp = dtmp + 
+     &                   POPcse(0,nejc,nspec,INExc(nnuc))*0.5d0*DE 
+
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, !exact endpoint
+     &               max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))*recorp
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
+
+                   WRITE(12,*) 
+                   WRITE(12,'(2x,
+     &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
+                   WRITE(12,'(2x,
+     &                  ''Popul. cross section '',G12.6,'' mb'' )') 
+     &                  POPcs(nejc,INExc(nnuc))
+                   WRITE(12,*) 
+
+                ENDIF !  (nejc.GE.1 .AND. nejc.LE.2)
  1530         ENDDO   ! over ejectiles
               IF ((A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
                  CALL PRINT_RECOIL(nnuc,REAction(nnuc))
