@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3229 $
+Ccc   * $Rev: 3257 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-16 02:08:59 +0100 (Fr, 16 Nov 2012) $
+Ccc   * $Date: 2012-11-26 00:55:31 +0100 (Mo, 26 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -779,8 +779,8 @@ C
          nejc = 3
       ENDIF
       IF (IOUt.GT.2) WRITE (8,99005)
-99005 FORMAT (1X,////,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
-     &        1X,27('*'),//)
+99005 FORMAT (1X,/,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
+     &        1X,27('*'))
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
          IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND.
@@ -788,7 +788,7 @@ C
 C-----------Normal level without branching ratios
             IF (IOUt.GT.2) WRITE (8,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
-99010       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
+99010       FORMAT (1X,/,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with population ',G13.5,
      &              ' mb is not depopulated (g.s. transition assumed)')
 C-----------Well... let it go down to the ground state
@@ -822,7 +822,7 @@ C-----------Add gamma cascade population to the direct population
             POPlv(l,Nnuc) = POPlv(l,Nnuc) + CSDirlev(l,nejc)
             IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
-99012       FORMAT (1X,//,5X,'Level of energy  ',F8.4,' MeV',
+99012       FORMAT (1X,/,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with final population ',G13.5,
      &              ' mb is an isomer')
 C-----------We add it to the ground state to have correct total cross section
@@ -840,7 +840,7 @@ C-----------Normal level with branching ratios
             IF (popl.NE.0.0D0) THEN
                IF (IOUt.GT.2) WRITE (8,99015) ELV(l,Nnuc), LVP(l,Nnuc)
      &                               *XJLv(l,Nnuc), popl
-99015          FORMAT (1X//,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
+99015          FORMAT (1X/,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
      &                 ' level with final population ',G13.5,' mb',/,5X,
      &                 'Level populated ',4X,'E.gamma ',4X,
      &                 'Intensity  ',/)
@@ -857,7 +857,9 @@ C-----------Normal level with branching ratios
                      WRITE (8,
      &'(10X,''WARNING: Nucleus '',I3,''-'',A2,                        ''
      &level '',I3)') INT(A(Nnuc)), SYMb(Nnuc), l
-                     GOTO 99999
+
+                     RETURN
+
                   ENDIF
                   gacs = popl*BR(l,j,2,Nnuc)
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
@@ -908,7 +910,8 @@ C
             ENDIF
          ENDIF
   100 ENDDO
-99999 END
+      RETURN
+      END
 
       SUBROUTINE DECAYD_DIR(Nnuc, Nejc)
 Ccc
