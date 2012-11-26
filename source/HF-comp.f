@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3257 $
+Ccc   * $Rev: 3258 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-26 00:55:31 +0100 (Mo, 26 Nov 2012) $
+Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -842,24 +842,21 @@ C-----------Normal level with branching ratios
      &                               *XJLv(l,Nnuc), popl
 99015          FORMAT (1X/,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
      &                 ' level with final population ',G13.5,' mb',/,5X,
-     &                 'Level populated ',4X,'E.gamma ',4X,
-     &                 'Intensity  ',/)
+     &                 'Level populated ',5X,'Egamma ',3X,
+     &                 'Intensity (cross sect.)')
                DO j = 1, NDBR
                   j1 = NINT(BR(l,j,1,Nnuc))
                   IF (j1.EQ.0) GOTO 100
                   IF (j1.GE.l) THEN
-                     WRITE (8,99020)
-99020                FORMAT (10X,
-     &                       'WARNING: error in discrete level deca',
-     &                       'y data',/,10X,
-     &                       'Final level above the initial one',/,10X,
-     &                       'Further decay not considered ')
+                   WRITE (8,99020)
+99020                FORMAT (
+     &               10X,'WARNING: error in discrete level decay data',
+     &             /,10X,'WARNING: Final level above the initial one',
+     &             /,10X,'WARNING: Further decay not considered ')
                      WRITE (8,
-     &'(10X,''WARNING: Nucleus '',I3,''-'',A2,                        ''
-     &level '',I3)') INT(A(Nnuc)), SYMb(Nnuc), l
-
+     &             '(10X,''WARNING: Nucleus '',I3,''-'',A2,'' level '',
+     &             I3)') INT(A(Nnuc)), SYMb(Nnuc), l
                      RETURN
-
                   ENDIF
                   gacs = popl*BR(l,j,2,Nnuc)
                   POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
@@ -887,8 +884,7 @@ C-----------------NOTE: internal conversion taken into account
                      CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
                   ENDIF
                   IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
-     &                                  LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd,
-     &                                  gacs
+     &                            LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd, gacs
 C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C

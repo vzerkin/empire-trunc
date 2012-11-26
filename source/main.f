@@ -1,7 +1,6 @@
-$DEBUG
-cc   * $Rev: 3257 $
+cc   * $Rev: 3258 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-26 00:55:31 +0100 (Mo, 26 Nov 2012) $
+Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1430,12 +1429,6 @@ C--------Reset variables for life-time calculations
                  dtmp = dtmp + CSDirlev(il,nejc)
                ENDDO
                IF(dtmp.LE.0.0 .and. POPlv(1,nnuc).eq.0.d0) GOTO 1460
-C              WRITE (8,*) 
-C              WRITE (8,*) ' -------------------------------------'
-C              WRITE (8,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)')
-C    &              nnuc, ia, SYMb(nnuc)
-C              WRITE (8,*) ' -------------------------------------'
-C              WRITE (8,*) 
                WRITE (12,*) 
                WRITE (12,*)
      &' ---------------------------------------------------------------'
@@ -1488,7 +1481,6 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
                   ENDIF
                ENDDO
-C              IF(NLV(nnuc).gt.0) WRITE (12,'(1X,/,10X,40(1H-),/)')
 C
 C--------------Decay direct population of discrete levels by a neutron,
 C--------------proton or alpha without storing emitted gammas in the spectra.
@@ -2014,15 +2006,6 @@ C
          iz = INT(Z(nnuc))
 
          IF (CSPrd(nnuc).GT.0.d0) THEN
-C          WRITE (8,'(1X,/,10X,40(1H-),/)')
-C          WRITE (8,
-C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-C    &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
-C    &                             REAction(nnuc)
-C          WRITE (12,
-C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
-C    &''  mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
-
            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
@@ -2116,9 +2099,6 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &           POPcs(nejc,INExc(nnuc)),cejectile
 9753           FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section',G12.6,'  mb   : ',A9) 
-C                old
-C    &           ' population cross section ',G12.6,
-C    &           ' mb    : ',A9) 
              ENDDO
              WRITE (8,*)
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
@@ -2139,10 +2119,10 @@ C--------------(merely for checking purpose)
      &                G12.6,''  mb  '')') xtotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') xtotsp
-               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') xtotsp
+C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
@@ -2150,10 +2130,10 @@ C--------------(merely for checking purpose)
      &                G12.6,''  mb  '')') ptotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') ptotsp
-               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') ptotsp
+C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
@@ -2161,10 +2141,10 @@ C--------------(merely for checking purpose)
      &                G12.6,''  mb  '')') atotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') atotsp
-               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') atotsp
+C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)
              ELSE
                IF (LHMs.GT.0 .and. atotsp.LT.1.0d-8) THEN
@@ -2499,15 +2479,15 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
 
          WRITE (12,*)
          WRITE (8,*)
-		 IF(CSPrd(nnuc).gt.0.d0) then 
-C          WRITE (8,'(1X,/,10X,40(1H-),/)')
+         IF(CSPrd(nnuc).gt.0.d0) then 
            WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-     &'' mb  '',''reaction: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+     &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
            WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
-     &''  mb'')') iz, SYMb(nnuc), ia, CSPrd(nnuc)
+     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+     &                             REAction(nnuc)
          ENDIF
 
          checkprd = checkprd + CSFis
@@ -2677,9 +2657,9 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,10,max_prn-1))
       CLOSE (80)
       CLOSE (79)
+      WRITE (12,*) 
       WRITE (12,'('' Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-      WRITE (12,*) 
       WRITE (12,*) 
       WRITE (12,*) '*******************************************'
       WRITE (12,*) '* EMISSION SPECTRA at Einc =', sngl(EINl) 
@@ -3158,7 +3138,6 @@ C
             endif
                
 C           WRITE (12,*) ' '
-
             nfission = nfission + 1
 
          ENDIF  !  IF ( TOTcsfis > 0 & CSPfis(nnuc)> 0 & Z(0)==Z(nnuc) )
@@ -3287,10 +3266,10 @@ C             outgoing energy grid enepfns(1) and enepfns(2)
         WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &     enepfns(nepfns), 0.d0, 0.d0
         WRITE(8,*) '...   PFNS Output supressed for Epfns > 7 MeV '
+        WRITE (12,*)
       ENDIF
       
- 4536 WRITE (12,*) ' '
-      WRITE ( 8,*) ' ' 
+ 4536 CONTINUE
 C  
 C     end of PFNS calculations 
 C     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3607,6 +3586,11 @@ C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
+         WRITE (12,*) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*)    
 
 C--------Print spectra of residues
          reactionx = '(z,x)  '
@@ -3981,7 +3965,7 @@ C    &                 0.5d0*(CSE(1,NDEJC,0) + CSE(nspec-1,NDEJC,0))
 
            ENDIF
          ENDIF
-        WRITE (12,*) ' '
+         WRITE (12,*) ' '
        ENDIF
 
 C  Summary of exclusive emission cross sections
@@ -4575,13 +4559,9 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
-
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
-
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
-
       COMMON /IMAG  / TF, TDIr, TABs, TG2
-
 C
 C Dummy arguments
 C
@@ -4645,27 +4625,22 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
-
       DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
-
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
-
       COMMON /IMAG  / TF, TDIr, TABs, TG2
-
 C
 C Dummy arguments
 C
       DOUBLE PRECISION Sumfis, Xnor, Fisxse
       INTEGER Ipar, Jcn, Ke, M, Nnuc
       DOUBLE PRECISION Sumfism(NFMOD)
-
 C
 C Local variables
 C
       INTEGER INT
       INTEGER nejc, nnur, izares, iloc
       DOUBLE PRECISION ares, zres
-
+C
 C-----particles
       DO nejc = 1, NEJcm
          ares = A(nnuc) - AEJc(nejc)
@@ -4682,6 +4657,7 @@ C-----gammas
       CALL ACCUM(Ke,Nnuc,Nnuc,0,Xnor)
       CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + Xnor*SCRtem(0)
       POP(Ke,Jcn,Ipar,Nnuc) = 0.0
+
 C-----fission
       IF (FISmod(Nnuc).LT.0.1) THEN
          Fisxse = Sumfis*Xnor

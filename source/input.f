@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3258 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4365,189 +4365,97 @@ C-----
 C-----------
          IF (name.EQ.'CINRED') THEN
             if(i1.ne.0) then
-
 C
-
 C             Specific discrete level scaled
-
 C 
-
-                  if(i1.gt.min(40,NDLV) .or. i1.lt.1) then
-
-                WRITE (8,
-
+              if(i1.gt.min(40,NDLV) .or. i1.lt.1) then
+                  WRITE (8,
      &          '('' Compound inelastic cross section scaling of '',
-
      &          '' discrete level # '',i3, 
-
      &          '' dismissed (out of range) '')') i1
-
                 GOTO 100
-
               endif
 
-
-
-                  if(i1.eq.1) then
-
+              if(i1.eq.1) then
                 WRITE (8,
-
      &          '('' Discrete level # 1 corresponds to the elastic chann
-
      &el, use CELRED to scale the Comp. Elastic cross section'')') 
-
                 GOTO 100
-
               endif
-
 C
-
               if(i2.ne.0 .and. IOPran.ne.0) then
-
                 WRITE (8,
-
      &          '('' Compound inelastic cross section uncertainty '',
-
      &          ''of discrete level # '',i2,''is equal to '',i2,
-
      &          '' %'')') i1, i2
-
                 sigma = val*i2*0.01
-
                 IF(IOPran.gt.0) then
-
                    IF(rCINred(i1).eq.1.d0) rCINred(i1) = grand()
-
                    CINred(i1) = val + rCINred(i1)*sigma
-
                 ELSE
-
                    IF(rCINred(i1).eq.1.d0) rCINred(i1) = drand()
-
                    CINred(i1) = val + 1.732d0*(2*rCINred(i1)-1.)*sigma
-
                 ENDIF
-
                 WRITE (8,
-
      &   '('' Compound inelastic cross section  of discrete level # '',
-
      &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-
                 WRITE (8,'(''   (compensated by scaling the Compound Ela
-
      &stic cross section)'')')
-
                 IPArCOV = IPArCOV +1
-
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-
      &             IPArCOV, CINred(i1), INDexf,INDexb
-
               else
-
                 CINred(i1) = val
-
                 WRITE (8,
-
      &   '('' Compound inelastic cross section  of discrete level # '',
-
      &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-
                 WRITE (8,'(''   (compensated by scaling the Compound Ela
-
      &stic cross section)'')')
-
                 WRITE (12,
-
      &   '('' Compound inelastic cross section  of discrete level # '',
-
      &   i2,'' was scaled by factor '',f6.3)') i1, CINred(i1)
-
                 WRITE(12,'(''   (compensated by scaling the Compound Ela
-
      &stic cross section)'')')
-
               endif
-
             else
-
-
-
               WRITE (8,
-
      &   '('' Compound inelastic cross section scaling dismissed'',
-
      &     '' no discrete level selected for scaling '')') 
-
-
-
             endif
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CELRED') THEN
-
             if(i1.ne.0 .and. IOPran.ne.0) then
-
                 WRITE (8,
-
      &          '('' Compound elastic cross section uncertainty '',
-
      &          '' is equal to '',i2,'' %'')') i1
-
                 sigma = val*i1*0.01
-
                 IF(IOPran.gt.0) then
-
                    IF(rCELred.eq.1.d0) rCELred = grand()
-
                    CELred = val + rCELred*sigma
-
                 ELSE
-
                    IF(rCELred.eq.1.d0) rCELred = drand()
-
                    CELred = val + 1.732d0*(2*rCELred-1.)*sigma
-
                 ENDIF
-
                 WRITE (8,
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
      &          ,f6.3)') CELred
-
                 IPArCOV = IPArCOV +1
-
                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-
      &             IPArCOV, CELred, INDexf,INDexb
-
             else
-
                 CELred = val
-
                 WRITE (8,
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
      &          F6.3)') CELred
-
                 WRITE (12,
-
      &      '('' Compound elastic cross section was scaled by factor ''
-
      &          F6.3)') CELred
-
             endif
-
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'BENCHM') THEN
             IF(val.ne.0) then 
               BENchm = .TRUE.
@@ -9756,9 +9664,9 @@ C
            if (sheor.gt.0.) betahegor=sqrt(sheor/egrcoll(3,2))
          endif
          if(      INT(Aejc(0)).eq.1 .and. INT(Zejc(0)).eq.0   ) then
-           write(8,*)
-     >       '==========================================================
-     >======='
+C          write(8,*)
+C    >       '==========================================================
+C    >======='
            write(8,*)'  Energy Weighted Sum Rules for GIANT RESONANCES'
            write(8,*)
            write(8,*)
@@ -9794,9 +9702,9 @@ C
            if(betahegor.LT.1.d0)
      >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'heGOR :',
      >       sheor,egrcoll(3,2),ggrcoll(3,2),-betahegor
-           write(8,*)
-     >       '==========================================================
-     >======='
+C          write(8,*)
+C    >       '==========================================================
+C    >======='
            write(8,*)
          endif
 
