@@ -1,6 +1,6 @@
-cc   * $Rev: 3260 $
+cc   * $Rev: 3261 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-27 15:18:46 +0100 (Di, 27 Nov 2012) $
+Ccc   * $Date: 2012-11-27 17:04:40 +0100 (Di, 27 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -460,50 +460,45 @@ C---------Get and add inelastic cross sections (including double-differential)
            IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0) exit
            IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0) cycle
 
-           IF(ICOller(i).GT.40) then
-             WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
-     &                  ' has wrong number (bigger than 40)'
-             ilv = 40                 
-           ENDIF
-C
-C          D_Elv(i)        Collective level energy (in collective level file)
-C          ELV(ilv,nnurec) Discrete level energy
-           IF(ABS(D_Elv(i) - ELV(ilv,nnurec)).gt.0.0001d0) THEN
-	       itmp = 0
-	       DO iang = 2, NLV(nnurec)
-	         IF(D_Elv(i).LT.ELV(iang-1,NTArget)) then
-                 itmp = iang-1
-			   IF(abs(D_Elv(i)-ELV(iang-1,NTArget)).gt. 
-     &              abs(D_Elv(i)-ELV(iang,NTArget)) ) itmp = iang
-                 exit
-               ENDIF               
-             ENDDO
-	       IF(itmp.gt.0) then
-               WRITE(8,*)' WARNING: Energy of the collective level #',
-     &             ICOllev(i)
-               WRITE(8,*)
-     &      ' WARNING: not equal to the energy of the discrete level #', 
-     &           ilv
-               WRITE(8,*) 
-     &          ' WARNING: Cross section reassigned to discrete level #'
-     &           , itmp
-	         ilv        = itmp
-	         ICOller(i) = itmp
-	         ICOllev(i)	= itmp + LEVcc
-	         WRITE(8,*) 
-             ELSE
-               WRITE(8,*) 
-     &          ' ERROR: Delete the collective level #',ICOller(i)
-               STOP ' ERROR: see the long output'
-             ENDIF
-           ENDIF
-
-C          RCN 2010 
-           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0) exit
-           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0) cycle
-
            IF(ilv.LE.NLV(nnurec)) then
 
+             IF(ICOller(i).GT.40) then
+               WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
+     &                  ' has wrong number (bigger than 40)'
+               ilv = 40                 
+             ENDIF
+C
+C            D_Elv(i)        Collective level energy (in collective level file)
+C            ELV(ilv,nnurec) Discrete level energy
+             IF(ABS(D_Elv(i) - ELV(ilv,nnurec)).gt.0.0001d0) THEN
+	         itmp = 0
+	         DO iang = 2, NLV(nnurec)
+	           IF(D_Elv(i).LT.ELV(iang-1,NTArget)) then
+                   itmp = iang-1
+			     IF(abs(D_Elv(i)-ELV(iang-1,NTArget)).gt. 
+     &                abs(D_Elv(i)-ELV(iang,NTArget)) ) itmp = iang
+                   exit
+                 ENDIF               
+               ENDDO
+	         IF(itmp.gt.0) then
+                 WRITE(8,*)' WARNING: Energy of the collective level #',
+     &             ICOllev(i)
+                 WRITE(8,*)
+     &      ' WARNING: not equal to the energy of the discrete level #', 
+     &             ilv
+                 WRITE(8,*) 
+     &          ' WARNING: Cross section reassigned to discrete level #'
+     &           , itmp
+	           ilv        = itmp
+	           ICOller(i) = itmp
+	           ICOllev(i)	= itmp + LEVcc
+	           WRITE(8,*) 
+               ELSE
+                 WRITE(8,*) 
+     &            ' ERROR: Delete the collective level #',ICOller(i)
+                 STOP ' ERROR: see the long output'
+               ENDIF
+             ENDIF
 C
 C------------Adding inelastic to discrete levels
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
