@@ -1,6 +1,6 @@
-cc   * $Rev: 3258 $
+cc   * $Rev: 3260 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
+Ccc   * $Date: 2012-11-27 15:18:46 +0100 (Di, 27 Nov 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -448,6 +448,7 @@ C-----
           READ (46,*,END = 1400) ctmp ! To skip first line <INE.C.S.> ..
 C---------Get and add inelastic cross sections (including double-differential)
           DO i = 2, ND_nlv
+ 
            ilv = ICOller(i)
 
            IF(ilv.le.0) then
@@ -455,11 +456,54 @@ C---------Get and add inelastic cross sections (including double-differential)
      &                  ' has wrong number, skipped'
              CYCLE                
            ENDIF
+
+           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0) exit
+           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0) cycle
+
+           IF(ICOller(i).GT.40) then
+             WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
+     &                  ' has wrong number (bigger than 40)'
+             ilv = 40                 
+           ENDIF
+C
+C          D_Elv(i)        Collective level energy (in collective level file)
+C          ELV(ilv,nnurec) Discrete level energy
+           IF(ABS(D_Elv(i) - ELV(ilv,nnurec)).gt.0.0001d0) THEN
+	       itmp = 0
+	       DO iang = 2, NLV(nnurec)
+	         IF(D_Elv(i).LT.ELV(iang-1,NTArget)) then
+                 itmp = iang-1
+			   IF(abs(D_Elv(i)-ELV(iang-1,NTArget)).gt. 
+     &              abs(D_Elv(i)-ELV(iang,NTArget)) ) itmp = iang
+                 exit
+               ENDIF               
+             ENDDO
+	       IF(itmp.gt.0) then
+               WRITE(8,*)' WARNING: Energy of the collective level #',
+     &             ICOllev(i)
+               WRITE(8,*)
+     &      ' WARNING: not equal to the energy of the discrete level #', 
+     &           ilv
+               WRITE(8,*) 
+     &          ' WARNING: Cross section reassigned to discrete level #'
+     &           , itmp
+	         ilv        = itmp
+	         ICOller(i) = itmp
+	         ICOllev(i)	= itmp + LEVcc
+	         WRITE(8,*) 
+             ELSE
+               WRITE(8,*) 
+     &          ' ERROR: Delete the collective level #',ICOller(i)
+               STOP ' ERROR: see the long output'
+             ENDIF
+           ENDIF
+
 C          RCN 2010 
-           IF(ICOllev(i).le.LEVCC .and. SINlcc.le.0) exit
-           IF(ICOllev(i).gt.LEVCC .and. SINl+SINlcont.le.0) cycle
+           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0) exit
+           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
+
 C
 C------------Adding inelastic to discrete levels
              echannel = EX(NEX(1),1) - Q(nejcec,1) - ELV(ilv,nnurec)
@@ -1392,7 +1436,7 @@ C--------Reset variables for life-time calculations
          ENDIF
          sumfis = 0.d0
          IF (nnuc.eq.1) THEN
-            WRITE (12,*) 
+            WRITE (12,*)
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
@@ -1429,7 +1473,7 @@ C--------Reset variables for life-time calculations
                  dtmp = dtmp + CSDirlev(il,nejc)
                ENDDO
                IF(dtmp.LE.0.0 .and. POPlv(1,nnuc).eq.0.d0) GOTO 1460
-               WRITE (12,*) 
+               WRITE (12,*)
                WRITE (12,*)
      &' ---------------------------------------------------------------'
                IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
@@ -1481,6 +1525,7 @@ C-----------------These gammas should not go into MT=91, 649, or 849.
                      POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
                   ENDIF
                ENDDO
+               WRITE (12,'(1X,/,10X,40(1H-),/)')
 C
 C--------------Decay direct population of discrete levels by a neutron,
 C--------------proton or alpha without storing emitted gammas in the spectra.
@@ -1847,13 +1892,6 @@ C--------Printout of results for the decay of NNUC nucleus
 
            IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &          .OR. nnuc.EQ.mt649.OR.nnuc.EQ.mt849))  THEN 
-C                 WRITE (8,*) 
-C                 WRITE (8,*) ' -------------------------------------'
-C                 WRITE (8,'(I3,2X,''Decaying nucleus '',I3,''-'',A2)')
-C    &              nnuc, ia, SYMb(nnuc)
-C                 WRITE (8,*) ' -------------------------------------'
-C                 WRITE (8,*) 
-                  WRITE (12,*) 
                   WRITE (12,*)
      &' ---------------------------------------------------------------'
                   IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
@@ -1880,17 +1918,9 @@ C                 WRITE (8,*)
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
 
-             IF (IOUt.GT.0) THEN
-C              WRITE (8,'(1X,/,10X,''Discrete level population'')')
-C              WRITE (8,'(1X,/,10X,40(1H-),/)')
-             ENDIF
-
 	       WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
              WRITE (8,'(1X,/,10X,40(1H-),/)')
-C	       WRITE (12,
-C    &'(1X,/,10X,''Discrete level population before gamma cascade'')')
-C            WRITE (12,'(1X,/,10X,40(1H-),/)')
 
 	     ENDIF
 
@@ -2492,7 +2522,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
 
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
-         IF(CSEmis(0,nnuc).gt.0.) THEN
+         IF(CSEmis(0,nnuc).gt.0) THEN
            IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
            IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
@@ -2525,11 +2555,12 @@ C------------Residual nuclei must be heavier than alpha
              CALL WHERE(izares,nnur,iloc)
              checkprd = checkprd +  CSEmis(nejc,nnuc)
              xcross(nejc,jz,jn) = CSEmis(nejc,nnuc)
-             IF(iloc.EQ.1 .AND. CSEmis(nejc,nnuc).GT.0.0) WRITE (12,
+             IF(iloc.EQ.1 .AND. CSEmis(nejc,nnuc).GT.0) WRITE (12,
      &       '('' iloc=1! CSEmis('',i1,'','',i2,'')='',G12.5)')
      &                                 nejc,nnuc,CSEmis(nejc,nnuc)
              IF(iloc.EQ.1) CYCLE
-             IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
+C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
+             IF(CSEmis(nejc,nnuc).LE.0) CYCLE
              WRITE (12,
      &           '(11X,A2,'' emission cross section'',G12.6,''  mb'')')
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
@@ -2660,11 +2691,13 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
       WRITE (12,*) 
       WRITE (12,'('' Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-      WRITE (12,*) 
-      WRITE (12,*) '*******************************************'
-      WRITE (12,*) '* EMISSION SPECTRA at Einc =', sngl(EINl) 
-      WRITE (12,*) '*******************************************'
-      WRITE (12,*) 
+      IF(ENDf(1).GT.0) THEN 
+        WRITE (12,*) 
+        WRITE (12,*) '*******************************************'
+        WRITE (12,*) '* EMISSION SPECTRA at Einc =', sngl(EINl) 
+        WRITE (12,*) '*******************************************'
+        WRITE (12,*) 
+      ENDIF 
       WRITE (8,*) 
       WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
@@ -4214,11 +4247,7 @@ C
            CLOSE (73)
            CLOSE (74)
          ENDIF
-         IF(TOTcsfis.LE.1.D-10) THEN
-           CLOSE (98,STATUS = 'delete')
-         ELSE
-           CLOSE(98)
-         ENDIF  
+		 CLOSE (98)
 C--------Saving random seeds
          ftmp = grand()
          OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
@@ -4229,12 +4258,7 @@ C--------Saving random seeds
          CLOSE(94)
          CLOSE(95)  ! FROM INPUT.F
          CLOSE(102)
-
-         IF(SFACT.GT.0) THEN
-           close(781)
-         ELSE
-           close(781,STATUS='DELETE')
-         ENDIF
+         CLOSE(781)
          RETURN
       ENDIF
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN
