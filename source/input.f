@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3258 $
+Ccc   * $Rev: 3259 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
+Ccc   * $Date: 2012-11-27 11:38:05 +0100 (Di, 27 Nov 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3432,7 +3432,7 @@ C
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) ''
-      WRITE (12,*) trim(EMPtitle)
+      WRITE (12,'(A71)') EMPtitle(2:72)
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
