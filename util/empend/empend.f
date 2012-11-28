@@ -106,6 +106,7 @@ C-V           interpolation except in the tails, but only a single
 C-V           interpolation range can be defined in ENDF)
 C-V        - Reduce emission spectra thinning criterion from 1 to 0.5 %.
 C-V  12/07 Fix Eout for discrete levels when no recoils are given.
+C-V        Add to log file the printout of reactions summed into MT 5.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -428,13 +429,13 @@ c...
       WRITE(LTT,991) ' Initial list of MT numbers for MF3     '
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
 c...
-
+c...
       WRITE(LTT, * ) ' '
       WRITE(LTT,'(A)') '        MT       QM          QI'
       DO J=1,NXS
         WRITE(LTT,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
       END DO
-
+c...
 C*
 C* Redefine lower energy limit to first point, if not a neutron file
       IF(IZI.NE.1) EMIN=EIN(1)
@@ -459,7 +460,7 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
         CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA)
 C* Summ MT 5 contributions as necessary
         CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
-     &             ,RWO(LXS),QQM,QQI,MXE,MXT)
+     &             ,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER)
       END IF
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
@@ -1782,11 +1783,13 @@ C*          Check for non-zero fission cross section
       END DO
       RETURN
       END
-      SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSC,QQM,QQI,MXE,MXT)
+      SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSC,QQM,QQI,MXE,MXT
+     &                 ,LTT,LLG)
 C-Title  : Subroutine SUMMT5
 C-Purpose: Sum reactions contributing to MT 5
 C-Version:
 C-V  07/10 Extensive changes, change convention for MT5 summation
+C-V  12/07 Add unit numbers for diagnostic messages
 C-Description:
 C-D Scan all MT reaction values in MTH for MT>5
 C-D Compare with MT values in MT6 for reactions having differential data
@@ -1896,14 +1899,17 @@ C* (identified by MT=10*ZA+LFS, LFS>0).
           M5=MT-10*(MT/10)
           IF(M5.LT.5) GO TO 80
             DO J=1,NPT
+c...
+c...          print *,XSC(J,I5),XSC(J,IX),XSC(J,I5)+XSC(J,IX)
+c...
               XSC(J,I5)=XSC(J,I5)+XSC(J,IX)
             END DO
-            QQM(I5)=MAX(QQM(IX),QQM(I5))
-            QQI(I5)=QQM(I5)
+            QQ=MAX(QQM(IX),QQM(I5))
+            QQM(I5)=QQ
+            QQI(I5)=QQ
             KM=MT/10
-
-            print *,' Adding to MT5 production of ZA/Q',KM,QQM(I5)
-
+            WRITE(LTT,904) ' Added to MT5 the production of ZA/Q',KM,QQ
+            WRITE(LLG,904) ' Added to MT5 the production of ZA/Q',KM,QQ
 C*          -- Add alpha production to MT207
    20       IF(IZA+IZI-2004.LT.KM) GO TO 40
               KM=KM+2004
@@ -1937,6 +1943,7 @@ C*          -- Add neutron production to MT201
    80 CONTINUE
       END DO
       RETURN
+  904 FORMAT(A,I6,1P,E10.3)
       END
       SUBROUTINE FIXALF(LIN,IZI,IZA,NXS,NPT,MTH,XSC,QQM,QQI,MXE,MXT
      &                 ,RWO,MXRW,LTT,LER)
@@ -2140,9 +2147,9 @@ C* No action if population cross sections are present
       END IF
 C* Keep track of the incident energy index
       IF(REC( 1:10).EQ.' REACTION ') THEN
-
+c...
         jpr=0
-
+c...
         IEN=IEN+1
         READ(REC(50:60),*) EE
         NRSD=0
@@ -2159,8 +2166,10 @@ C* Monitor products from further decay of residuals
 C*      -- Identify possible products from particle emission
   112   READ (LIN,891,END=200) REC
 C*      -- Allow for the change of format (printout position shifted)
-        L1=12
-        IF(REC(5:26).EQ.'emission cross section') L1=2
+        L1= 2
+c...    IF(REC( 5:26).EQ.'emission cross section') L1=2
+        IF(REC(15:36).EQ.'emission cross section') L1=12
+        IF(REC(16:37).EQ.'emission cross section') L1=13
         L2=L1+24
         IF     (REC(L1:L2).EQ.'n  emission cross section') THEN
           JZAP=   1
@@ -2204,9 +2213,9 @@ C*      -- Define new residual
         IF(NRSD.GT.MXMCH) STOP 'FIXTRI ERROR - MXMCH limit exceeded'
         IZRSD(NRSD)=KZA
         XZRSD(NRSD)=XS
-
-        PRINT *,'   New',NRSD,KZA,JZA,JZAP,XS
-
+c...
+c...    PRINT *,'   New',NRSD,KZA,JZA,JZAP,XS
+c...
         GO TO 112
       END IF
 C*
@@ -2257,23 +2266,23 @@ C...
         NPROT=1
       END IF
 c...
-      IF(jen.ne.ien) then
-        print *,' '
-        PRINT *,'**** Energy point',JEN,ee
-        if(jpr.eq.0) then
-          do i=1,nrsd
-            print *,'   Nuclide',i,izrsd(i),xzrsd(i)
-          end do
-        end if
-        jpr=1
-        jen=ien
-      end if
+c...  IF(jen.ne.ien) then
+c...    print *,' '
+c...    PRINT *,'**** Energy point',JEN,ee
+c...    if(jpr.eq.0) then
+c...      do i=1,nrsd
+c...        print *,'   Nuclide',i,izrsd(i),xzrsd(i)
+c...      end do
+c...    end if
+c...    jpr=1
+c...    jen=ien
+c...  end if
 c...
       print *,'fixtri reaction ',REC(15:22),' ',REC(23:30),MTJ
-
+c...
       if(REC(15:28).EQ.'protons  (z,a)' .or.
      &   REC(15:28).EQ.'neutrons (z,a)') then
-        print *,'        found it'
+c...    print *,'        found it'
         ifound=1
       else
         ifound=0
@@ -2329,13 +2338,16 @@ C* Check if new Empire output with spectrum integral printout
         SS1=SS
         READ(REC(22:37),*) SS
         SS =SS/1000
-        print *,'  Integrated spectrum found SS,S1,dS%='
-     &         ,SS,SS1,100*(ss1/ss-1)
+c...
+c...    print *,'  Integrated spectrum found SS,S1,dS%='
+c... &         ,SS,SS1,100*(ss1/ss-1)
+c...
       END IF
-
-      if(ifound.eq.1) then
-        print *,'        proton spectrum integral, Z',ss,nprot
-      end if
+c...
+c...  if(ifound.eq.1) then
+c...    print *,'        proton spectrum integral, Z',ss,nprot
+c...  end if
+c...
 C* Calculate the reaction fraction
       IF(NRSD.LE.0) THEN
         STOP 'FIXTRI ERROR - NRSD=0'
@@ -2367,11 +2379,11 @@ C* Base reaction is the one initially assigned from residual
       CALL EMTIZA(IZI,IZA,JZA,MT0,MEQ)
       IF(MT0.EQ.600) MT0=649
       IF(MT0.EQ.800) MT0=849
-
-      if(ifound.eq.1) then
-        print *,'        mtj,mt0,jza',mtj,mt0,jza
-      end if
-
+c...
+c...  if(ifound.eq.1) then
+c...    print *,'        mtj,mt0,jza',mtj,mt0,jza
+c...  end if
+c...
 C* If spectrum for base reaction is given, no action is needed
 c...  IF(MTJ.EQ.MT0) GO TO 110
 C*    -- One more record was read - check if next spectrum
@@ -2381,11 +2393,11 @@ C* Define the next reaction with the same residual
       CALL EMTIZA(IZI,IZA,JZA,MT1,MEQ)
       IF(MT1.EQ.600) MT1=649
       IF(MT1.EQ.800) MT1=849
-
-      if(ifound.eq.1) then
-        print *,'        mtj,mt1',mtj,mt1
-      end if
-
+c...
+c...  if(ifound.eq.1) then
+c...    print *,'        mtj,mt1',mtj,mt1
+c...  end if
+c...
       IF(MT1.EQ.MTJ) THEN
         GO TO 132
       ELSE IF(MT1.GT.0) THEN
@@ -2414,11 +2426,11 @@ C* Find the indices of the reactions in the cross section array
         IF(MTH(I).EQ.MT0) I0=I
         IF(MTH(I).EQ.MT1) I1=I
       END DO
-
-      if(ifound.eq.1) then
-        print *,'    mtj,mt0,i0,i1',mtj,mt0,i0,i1
-      end if
-
+c...
+c...  if(ifound.eq.1) then
+c...    print *,'    mtj,mt0,i0,i1',mtj,mt0,i0,i1
+c...  end if
+c...
 C*
       IF(I0.EQ.0 .AND. MTJ.EQ.MT0) THEN
 C*      -- Reaction has spectrum but no cross section
@@ -2435,10 +2447,10 @@ C*      -- Subtract x.s. from spectrum for reaction',MTJ,' from',MT0
         JX =I1
 C...    XS0=DBLE(XSC(IEN,IX))
         XS0=DBLE(RWO(LPRD-1+IX))
-
-        print *,'   Subtracting mt1',mt1,nint(100*frc),'% from'
-     &         ,mt0,XSC(ien,ix),'=',XSC(ien,ix)-xs0*frc
-
+c...
+c...    print *,'   Subtracting mt1',mt1,nint(100*frc),'% from'
+c... &         ,mt0,XSC(ien,ix),'=',XSC(ien,ix)-xs0*frc
+c...
         XS =XSC(IEN,IX)
         XSC(IEN,IX)=XSC(IEN,IX)-XS0*FRC
 C*      -- Check if scaling is needed for (z,a) discrete levels
@@ -2446,9 +2458,9 @@ C*      -- Check if scaling is needed for (z,a) discrete levels
           FF=XSC(IEN,IX)/XS
           DO I=1,NXS
             IF(MTH(I).GE.800 .AND. MTH(I).LE.848) THEN
-
-              PRINT *,'   Scaling (z,a) discrete level',mth(i),ff
-
+c...
+c...          PRINT *,'   Scaling (z,a) discrete level',mth(i),ff
+c...
               XSC(IEN,I)=XSC(IEN,I)*FF
             END IF
           END DO
@@ -2477,9 +2489,9 @@ C* Check if reaction JZA exists
       END IF  
 C* Add the reaction from the integral
       XS1=DBLE(XSC(IEN,JX))
-
-        print *,'   Adding to mt1',mt1,xs1,'+',xs0*frc,'=',xs1+xs0*frc
-
+c...
+c...    print *,'   Adding to mt1',mt1,xs1,'+',xs0*frc,'=',xs1+xs0*frc
+c...
       XSC(IEN,JX)=XS1+XS0*FRC
 C*
 C* If reaction is not defined explicitly, assume (z,2n+2p+x)
@@ -2500,7 +2512,7 @@ c...
           IF(MTH(IX)/10.EQ.MT1/10 .AND. MTH(IX).NE.MT1) THEN
             XSC(IEN,IX)=XSC(IEN,IX)*FALF
 c...
-          print *,'Correcting isomeric reaction',mth(ix),' point',ien
+c...      print *,'Correcting isomeric reaction',mth(ix),' point',ien
 c...
           END IF
         END DO
@@ -2965,6 +2977,7 @@ C-
       DIMENSION   ANG(NAN),DST(*),PLG(*),RWO(MXR)
 C* Permissible tolerance for fitted angular distributions (fraction)
       DATA ETOL/ 0.010 /
+      DATA PI/3.1415926/
 C*
       LD   =1
       LP   =1
@@ -2972,7 +2985,12 @@ C*
       LOX  =MIN(LOMX,NAN-1)
       IF(LOX.GT.MAN) STOP 'ANGLEG ERROR - MAN limit exceeded'
       NOFIT=0
-C*
+C...
+C...  WRITE(LTT,*) 'Incident energy',EIN
+C...  WRITE(LTT,*) 'Eou,SP(int),SP(fit),dif'
+C...  WRITE(LER,*) 'Incident energy',EIN
+C...  WRITE(LER,*) 'Eou,SP(int),SP(fit),dif'
+C...
 C* Loop over all outgoing energy points
       DO I=1,NEN
         JPRNT  =0
@@ -2980,6 +2998,12 @@ C* Loop over all outgoing energy points
         DO J=1,LOX
           SCR(J)=0
         END DO
+C* Calculate the spectrum point from tabular angular distribution
+        SPP=0
+        DO J=2,NAN
+          SPP=SPP+(ANG(J-1)-ANG(J))*(DST(LD+J-1)+DST(LD+J))
+        END DO
+        SPP=SPP*PI
 c...
 c...       print *,'    Do lsqlgv for energy point',i,' of',nen
 c...
@@ -2996,7 +3020,14 @@ C...        print *,(dst(ld-1+j),j=1,5),'...',dst(ld+nan)
 C...        print *,eou,(scr(j),j=1,4)
 C...            stop
 C...    end if
-C*
+C...
+C...    IF(SPP.NE.0) THEN
+C...      SPL=SCR(1)*4*PI
+C...      ERL=100*(SPL/SPP-1)
+C...      WRITE(LTT,'(1P,3E10.3,0P,F10.2)') EOU,SPP,SPL,ERL
+C...      WRITE(LER,'(1P,3E10.3,0P,F10.2)') EOU,SPP,SPL,ERL
+C...    END IF
+C...
 C* Check for printout on exceeding tolerance limits
         IF(ERR.GT.5.*ETOL .OR. ERR.LT.0) THEN
 C*        Count the number of points with convergence problems
@@ -3166,6 +3197,7 @@ C*   ISPE Flag to mark that spectra other than (z,x) are given
       NXS=0
       NEN=0
       IMT=0
+      IDCY= 0
       IPOP=-2
       IPRG= 0
       ISPE= 0
@@ -3263,10 +3295,15 @@ C* Allow for metastable targets
      &                 'te of target '//REC(24:34)//'                '
         LISO=0
       END IF
+      IDCY=0
       NOQV=0
       IPOP=-1
 C* Read and check the energy
   201 READ (REC(51:60),994) EE
+c...
+c...  print *,' '
+c...  print *,'New energy point [MeV]',EE
+c...
       EE = EE*1.E6
       IF(NEN.LE.0) GO TO 206
       IF(EE.GT.EIN(NEN)) GO TO 206
@@ -3316,6 +3353,7 @@ C*      -- Loop to next record
 C*
 C* Next product nucleus data
   210 READ (REC(20:29),802) JZ,CH,JA
+      IDCY= 1
       JZA=JZ*1000+JA
 C* If residual equals target nucleus, read the mass
       IF(JZA  .EQ. IZA  ) THEN
@@ -3338,8 +3376,10 @@ C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
 C* All other cross sections are processed in the same way
       GO TO 310
 C*
-C* Product nucleus without "Decaying nucleus" section
-  212 READ (REC(2:11),802) JZ,CH,JA
+C* Check if "Decaying nucleus" section was processed
+  212 IF(IDCY.NE.0) GO TO 311
+C*    -- Product nucleus without "Decaying nucleus" section
+      READ (REC(2:11),802) JZ,CH,JA
       JZA=JZ*1000+JA
 C* Assign MT number from residual ZA
       CALL EMTIZA(IZI,IZA,JZA,MT,0)
@@ -3395,17 +3435,22 @@ C* Save the population cross section
           WRITE(LTT,904) '                Particle '//REC(59:67)
           WRITE(LTT,904) '                Population x.s. ignored '
           WRITE(LTT,904) ' '
-          print *,jpop,ipop,mt,ee
+c...
+c...      print *,jpop,ipop,mt,ee
+c...          
           GO TO 110
         END IF
         IPOP=IPOP+1
         READ (REC(37:50),*) XX
         XPOP(JPOP)=XX
+c...
+c...    print *,'jpop,ipop,mt,ee,xx',jpop,ipop,mt,ee,xx
+c...          
       END IF
-C* Check the next record for additional population cross sections
-      READ (LIN,891,END=700) REC
+C* Check for more population cross sections up to a blank line
+  218 READ (LIN,891,END=700) REC
       IF(REC(13:36).EQ.'population cross section'    ) GO TO 217
-      IF(REC(13:36).NE.'                        '    ) GO TO 111
+      IF(REC(13:36).NE.'                        '    ) GO TO 218
       IF(MT0.EQ.50 .OR. MT0.EQ.600 .OR. MT0.EQ.800) GO TO 351
       GO TO 310
 C*
@@ -3466,6 +3511,9 @@ C* Read the cross section
   311 READ (REC,803) XS
       IF(XS.LE.0) GO TO 110
       XG =-1
+c...
+c...  print *,'mt,xs,ee',mt,xs,ee
+c...
 C* Test for multiple reactions leading to the same residual
   312 XSPROD=XS
       XSSUM =0
@@ -3481,7 +3529,7 @@ C*      -- Check for significant differences
         END IF
         XSSUM=XSSUM+XS
 C...
-C...    print *,'mt,e,qm,qi,xs',mt,ee,qq,qi,xs
+c...    print *,'ipop,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
 C...
       END IF
 C* Reconstruct Q-values from MT and the binding energies
@@ -3518,8 +3566,8 @@ C...
 C...  print *,'New MT/Q',MT,QQ,QI ,ipop
 C...
       IF(ABS(QQ0-QQ) .GT. ABS(QQ)/10000) THEN
-        WRITE(LTT,'(A,I7,1P,E11.3,A,E11.3)')
-     &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ
+        WRITE(LTT,'(A,I7,1P,E11.3,2(A,E11.3))')
+     &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ, ' at E',EE
       END IF
       IXS=NXS
 C* Save Q-values and cross section for this reaction
@@ -3602,6 +3650,9 @@ C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,II,X,XS,NBR
+c...
+c...  print *,'Reading discrete level xs,xi,il,el',xs,xi,il,el,mt0+jl
+c...
 C*      -- Assign spin from first level when product=target
       IF(IZA.EQ.JZA .AND. IL.EQ.1) SPI=X
       DO WHILE (NBR.GT.7)
@@ -3663,6 +3714,9 @@ C* Reconstruct Q values from MT and the binding energies if necessary
       QI      =QM-EL
       QQM(IXS)=QM
       QQI(IXS)=QI
+c...
+c...  print *,'New discrete level MT,ee,xs',MT,ee,xs
+c...
 C* Enter cross section for this discrete level
   360 XSC(NEN,IXS)=XS*1.E-3
 C*      Save QI for this level
@@ -3693,6 +3747,9 @@ C* Q value for elastic scattering may be non-zero for metastable targets
 C* Positioned to read total (discrete+continuum) cross section
   390 CONTINUE
       READ (REC,803) XC
+c...
+c...  print *,'Discrete+continuum xs,ipop,xi',xc,ipop,xi
+c...
 C* If inelastic, add total inelastic
       IF(XC.GT.0 .AND. MT0.EQ.50) THEN
         MT=4
@@ -3750,7 +3807,13 @@ C* Test if reaction is already registered
       MTH(IXS)=MT
       QQM(IXS)=QM
       QQI(IXS)=QI
+c...
+c...  print *,'Define discrete level MT',MT,QM,QI
+c...
   396 XSC(NEN,IXS)=XS*1.E-3
+c...
+c...  print *,'Discrete level cross section',XS
+c...
       GO TO 110
 C*
 C* All data read
@@ -4519,9 +4582,9 @@ C* and the available energy at threshold
           EAVE=-QQI(IT)+ EE*AWR/(AWR+AWI)
           EAV0=-QQI(IT)+ETH*AWR/(AWR+AWI)
           YINS=(EAV0/EAVE)*(SPC/XS3)
-
-          print *,'yins,noe1',yins,spc/xs3
-
+c...
+c...      print *,'yins,noe1',yins,spc/xs3
+c...
 c...      YINS=            (SPC/XS3)
 C* Check that yield is positive
           IF(YINS.LT.-1E-6) THEN
@@ -5119,9 +5182,10 @@ C-
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR),NBT(1),INT(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
-      DATA XSMALL,SMALL,ZRO/ 1.0E-34, -34., 0./
+      DATA XSMALL,ZRO/ 1.0E-34, 0./
       DATA PTST/'        '/
 C* Initialize constants
+      SMALL=ALOG(XSMALL)
       ETHRM=0.0253
       QM=0.
       QI=0.
@@ -5211,21 +5275,25 @@ C* Define the output grid for spline interpolated function
       E2 =RWO(MX)
       RWO(LX)=E2
       RWO(LY)=RWO(MY)
-      DO 324 J=2,NEN
+      DO J=2,ME
         E1 =E2
-        E2 =EIN(J)
+        E2 =RWO(MX-1+J)
+        Y1 =RWO(MY-2+J)
         DE=(E2-E1)/FLOAT(NEP)
-        DO 323 K=1,NEP
+        DO K=1,NEP
           EE= E1+(K-1)*DE
-          IF(EE.LE.1.001*ETH) GO TO 323
-          RWO(LX+NE1)=EE
-          NE1=NE1+1
-  323   CONTINUE
-  324 CONTINUE
+          IF(EE.GT.1.001*ETH) THEN
+            RWO(LX+NE1)=EE
+            RWO(LY+NE1)=Y1
+            NE1=NE1+1
+          END IF
+        END DO
+      END DO
       RWO(LX+NE1)=RWO(MX-1+ME)
       RWO(LY+NE1)=RWO(MY-1+ME)
       NE1=NE1+1
-      IF(NE1.LE.2) GO TO 332
+C* Skip spline interpolation if less than 3 points or single interval
+      IF(NE1.LE.2 .OR. NEP.LE.1) GO TO 332
 C* Log-lin interpolate from threshold
       JX=MX
       JY=MY
