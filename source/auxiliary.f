@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3263 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-11-29 15:22:25 +0100 (Do, 29 Nov 2012) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -78,7 +78,7 @@ C
       POPlv    = 0.d0
       CSEmis   = 0.d0
       CSE      = 0.d0
-      POPcsea  = 0.d0
+C     POPcsea  = 0.d0
       POPcseaf = 0.d0
       POPcse   = 0.d0
       POPcsed  = 0.d0
