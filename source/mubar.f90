@@ -1,3 +1,7 @@
+!cc   * $Rev:   $
+!cc   * $Author:   $
+!cc   * $Date:  $
+
     real*8 function mu_bar(awr, npt, scl, cmp, crs)
 
     implicit none
