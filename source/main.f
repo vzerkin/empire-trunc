@@ -1,6 +1,6 @@
-cc   * $Rev: 3261 $
+cc   * $Rev: 3265 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-27 17:04:40 +0100 (Di, 27 Nov 2012) $
+Ccc   * $Date: 2012-12-02 19:32:05 +0100 (So, 02 Dez 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -46,6 +46,12 @@ C
       DOUBLE PRECISION eenc(500),signcf(500)
       INTEGER nrnc
       COMMON /inp_sp5/ eenc,signcf,nrnc
+
+      COMMON /PEXS/ crossBU, crossBUt,crossNT,crossNTt,bu,nt
+
+      DOUBLE PRECISION crossBU(0:NDEJC),crossNT(0:NDEJC),
+     &                 crossBUt,crossNTt,bu,nt
+
 C
 C Local variables
 C
@@ -180,6 +186,9 @@ C-----
         OPEN (107, FILE='EL_INEL.DAT'  , STATUS='unknown')
         OPEN (108, FILE='TOTCOR.DAT'   , STATUS='unknown')
         OPEN (110, FILE='CN-LEV-XS.DAT', STATUS='unknown')
+        OPEN (112, FILE='TRANSFER-XS.DAT', STATUS='unknown')
+        OPEN (113, FILE='BREAK-UP-XS.DAT', STATUS='unknown')
+
         i = 0
         DO nnuc=1,NNUcd
           if( REAction(nnuc)(1:2).eq.'(z' ) then
@@ -265,6 +274,17 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
      &   '(''   Elab     <Epfns>  nubar(TEST)  Tmaxw(equiv) '')')
           endif
         ENDIF
+
+        WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
+        WRITE(112,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
+     &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total NT ',
+     &   symbe(0),symbe(0),symbe(0),symbe(0),symbe(0),symbe(0)   
+
+        WRITE(113,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
+        WRITE(113,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
+     &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total BU ',
+     &   symbe(0),symbe(0),symbe(0),symbe(0),symbe(0),symbe(0) 
+       
       ENDIF
 C-----
 C-----Prepare Giant Resonance parameters - systematics
@@ -1028,6 +1048,10 @@ C        so it should not used for normalization
 C        xsinl is calculated by MSD
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis)
+         WRITE(112,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossNTt,
+     &        (crossNT(i),i=1,NDEJC)
+         WRITE(113,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossBUt,
+     &        (crossBU(i),i=1,NDEJC)
       ENDIF          ! PCRoss done
                                                      ! To include inel for (g,x)
       IF ((xsinl+totemis+(SINl+SINlcc)*FCCRED+SINlcont*FCOred).gt.0. !.AND. NPRoject.gt.0 
@@ -1752,7 +1776,7 @@ C--------DO loop over c.n. excitation energy
             IF (ENDf(1).GT.0) THEN
 C--------------Clean auxiliary particle spectra for calculation of recoils
                REClev = 0.d0           
-	         AUSpec = 0.d0
+               AUSpec = 0.d0
 C--------------Calculate population in the energy bin ke
                pope = 0.d0
                DO jcn = 1, NLW
@@ -4230,6 +4254,8 @@ C
          CLOSE (107)
          CLOSE (108)
          CLOSE (110)
+         CLOSE (112)
+         CLOSE (113)
          IF(DEGa.GT.0) THEN
            CLOSE (42)
          ELSE

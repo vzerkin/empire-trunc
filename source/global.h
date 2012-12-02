@@ -1,6 +1,6 @@
-C $Rev: 3263 $
+C $Rev: 3265 $
 C $Author: rcapote $
-C $Date: 2012-11-29 15:22:25 +0100 (Do, 29 Nov 2012) $
+C $Date: 2012-12-02 19:32:05 +0100 (So, 02 Dez 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -148,10 +148,10 @@ C
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),
      &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),
+     &                 TUNEbu(0:ndejc), TUNEnt(0:ndejc), 
      &                 VOMs(0:ndejc,0:ndnuc), TUNEfi(0:ndnuc),
      &                 VSO(0:ndejc,0:ndnuc), WIMag(NFHUMP-1,3),
-     &                 WOMs(0:ndejc,0:ndnuc),
-     &                 WOMv(0:ndejc,0:ndnuc),
+     &                 WOMs(0:ndejc,0:ndnuc), WOMv(0:ndejc,0:ndnuc),
      &                 WSO(0:ndejc,0:ndnuc), XJLv(ndlv,0:ndnuc),
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
@@ -175,6 +175,7 @@ C
      & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
+	  INTEGER BUReac(0:ndejc), NTReac(0:ndejc)
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
       DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
@@ -202,6 +203,10 @@ C
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 C     COMMON /DEPTH / POTe
 C     COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf, POPcsea
+
+
+
+
       COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
       COMMON /ENDFEMIS/ POPcs
       COMMON /ENDFSPEC/ POPcse
@@ -231,7 +236,7 @@ C     COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf, POPcsea
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
-     &                 CINred, rCINred	 
+     &                 CINred, rCINred, TUNebu, TUNent 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -268,7 +273,7 @@ C
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
-     &                  PL_lmax, SFAct, INTerf, CNAngd
+     &                  PL_lmax, SFAct, INTerf, CNAngd, BUReac, NTReac
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,

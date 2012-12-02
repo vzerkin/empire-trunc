@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3259 $
+Ccc   * $Rev: 3265 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-27 11:38:05 +0100 (Di, 27 Nov 2012) $
+Ccc   * $Date: 2012-12-02 19:32:05 +0100 (So, 02 Dez 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -193,6 +193,12 @@ C--------------Surface imaginary potential:
 C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
 C--------to turn off normalization to experimental Gg
          TUNe(0,1) = 0.999d0
+C--------
+         DO nejc = 0, NDEJC
+            TUNebu(nejc) = 1.d0
+            TUNent(nejc) = 1.d0
+         ENDDO 
+C
          DO nnuc = 1, NDNUC
             IZA(nnuc) = 0
 C-----------set level density parameters
@@ -278,7 +284,6 @@ C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular di
          TOTred = 1.d0
          ELAred = 1.d0
          CELred = 1.d0
-
          CINred = 1.d0
          TOTred0 = 1.d0 
          FUSred0 = 1.d0
@@ -291,7 +296,6 @@ C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular di
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
-
          rCINred = 1.d0
          LEVtarg = 1
 C
@@ -465,8 +469,13 @@ C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
          NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
-
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
+C
+C        Breakup and pickup reactions 
+C
+         BUReac = 0
+         NTReac = 0
+
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
          EHRtw = 0.d0
@@ -572,28 +581,19 @@ C        Starting value of the number of angular points
 C--------set angles for inelastic calculations
          da = 180.d0/(NDAng - 1)
          DO na = 1, NDAng
-
            ANGles(na)  = (na - 1)*da
-
            CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
-
          ENDDO
-
          DO na = 1, NDAng
-
            CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
-
            SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
-
          ENDDO
-
 C--------target
          READ (5,*) A(0), Z(0)
          IF (A(0).LT.Z(0)) THEN
             WRITE (8,*) ' ERROR: Z > A, please correct input file'
             STOP ' ERROR: Z > A, please correct input file'
          ENDIF
-
 C--------projectile
          READ (5,*) AEJc(0), ZEJc(0)
          IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
@@ -980,6 +980,8 @@ C--------Retrieve C4 experimental data  *** done ***
          NNUct = nnuc
 
          NEXclusive = 0
+         NPRoject = -1
+
          DO nnuc = 1, NNUcd
 
             ENDf(nnuc) = 1
@@ -1073,11 +1075,8 @@ C
 C--------inteligent defaults *** done ***
 C
 C
-
 C--------New energy header
-
 C
-
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 
@@ -1306,21 +1305,13 @@ C
 C--------reset angles for inelastic calculations
             da = 180.d0/(NDAng - 1)
             DO na = 1, NDAng
-
               ANGles(na)  = (na - 1)*da
-
               CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
-
             ENDDO
-
             DO na = 1, NDAng
-
               CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
-
               SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
-
             ENDDO
-
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
 c            WRITE (8,*) ' '
@@ -1867,7 +1858,6 @@ C-----------Defining ICOller(i)
                DIRect = 0
             ENDIF
       ENDIF
-
       EXCn = EIN + Q(0,1) + ELV(LEVtarg,0)
       EMAx(1) = EXCn
 C-----set Q-value for CN production
@@ -1881,23 +1871,14 @@ C-----set Q-value for CN production
       ENDIF
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
-
          WRITE (8,*) ' '
-
          WRITE (8,'(60(''=''))')
-
          WRITE (8,
-
      &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-
      &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
-
          WRITE (8,'(60(''=''))')
-
          WRITE (8,*) ' '
-
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
-
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
       ENDIF
@@ -3724,8 +3705,8 @@ C--------PCROSS input
                 WRITE (12,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Recommended ~ 1.5)'')') MFPp
-               endif
-             ENDIF
+              endif
+            ENDIF
             GOTO 100
          ENDIF
 C
@@ -3737,12 +3718,12 @@ C
      &0.26*A^(2/3)'')')
               WRITE(12, '('' Exciton model spin cut-off taken as ~(p+h)*
      &0.26*A^(2/3)'')')
-             ELSE
+            ELSE
               WRITE (8,
      &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
               WRITE (12,
      &'('' Exciton model spin cut-off taken as ~2*0.26*A^(2/3) '')')
-             ENDIF
+            ENDIF
             GOTO 100
          ENDIF
 C
@@ -3754,12 +3735,12 @@ C
      &'('' Discrete levels included in PCROSS calculations'')')
               WRITE (12,
      &'('' Discrete levels included in PCROSS calculations'')')
-             ELSE
+            ELSE
               WRITE (8,
      &'('' Discrete levels not included in PCROSS calculations'')')
               WRITE (12,
      &'('' Discrete levels not included in PCROSS calculations'')')
-             ENDIF
+            ENDIF
             GOTO 100
          ENDIF
 C
@@ -3772,12 +3753,12 @@ C
               WRITE (12,
      &'('' Pairing corrections are not considered in PCROSS calculations
      &'')')
-             ELSE
+            ELSE
               WRITE (8,
      &'('' Pairing corrections are considered in exciton model LDs'')')
               WRITE (12,
      &'('' Pairing corrections are considered in exciton model LDs'')')
-             ENDIF
+            ENDIF
             GOTO 100
          ENDIF
 C
@@ -3795,7 +3776,95 @@ C
      &        ''*sqrt(g*U)'')') CHMax
               WRITE (12,
      &'(''    being U the CN excitation energy '')')
-             ENDIF
+            ENDIF
+            GOTO 100
+         ENDIF
+C
+         IF (name.EQ.'BUREAC') THEN
+            IF (i1.LT.0 .OR. i1.GT.NDEJC) THEN
+               WRITE (8,
+     &              '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &'' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: Break-up cross section option'', 
+     &'' IGNORED'')')
+               GOTO 100
+            ENDIF
+            IF(i1.EQ.0)THEN
+               IF (val.LE.0) THEN
+	           val = 0
+			   WRITE (8,*) 'Break-up reactions not considered'    
+               ELSE
+			   WRITE (8,*)
+     & 'Break-up cross sections calculated with Kalbach 
+     & parameterization (IAEA FENDL-3 CRP)'
+	           val = 1  
+               ENDIF 
+               BUReac = val
+            ELSE ! i1 > 0
+               IF (val.LE.0) THEN
+                 BUReac(i1) = 0
+                 WRITE (8,
+     &              '('' Break-up reaction ('',a2,'','',a2,'')'',
+     &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
+                 WRITE (12,
+     &              '('' Break-up reaction ('',a2,'','',a2,'')'',
+     &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
+               ELSE
+                 BUReac(i1) = 1
+                 WRITE (8,
+     &              '('' Break-up ('',a2,'','',a2,'')'',
+     &'' cross section calculated with Kalbach parameterization'')') 
+     &              SYMbe(NPRoject), SYMbe(i1)              
+                 WRITE (12,
+     &              '('' Break-up ('',a2,'','',a2,'')'',
+     &'' cross section calculated with Kalbach parameterization'')') 
+     &              SYMbe(NPRoject), SYMbe(i1)              
+               ENDIF
+            ENDIF
+            GOTO 100
+         ENDIF
+	
+         IF (name.EQ.'NTREAC') THEN
+            IF (i1.LT.0 .OR. i1.GT.NDEJC) THEN
+               WRITE (8,
+     &              '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &'' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: Nucleon transfer cross section '',
+     &''IGNORED'')')
+               GOTO 100
+            ENDIF
+            IF(i1.EQ.0)THEN
+               IF (val.LE.0) THEN
+	           val = 0
+                 WRITE (8,*) 'Nucleon transfer reactions not considered'    
+               ELSE 
+	           val = 1
+                 WRITE (8,*)
+     & 'Nucleon transfer cross sections calculated with Kalbach ', 
+     & 'parameterization (IAEA FENDL-3 CRP)'
+               ENDIF
+               NTReac = val
+            ELSE ! i1>0
+               IF (val.LE.0) THEN
+                 NTReac(i1) = 0
+                 WRITE (8,
+     &             '('' Nucleon transfer reaction ('',a2,'','',a2,'')'',
+     &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
+                 WRITE (12,
+     &             '('' Nucleon transfer reaction ('',a2,'','',a2,'')'',
+     &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
+               ELSE
+                 BUReac(i1) = 1
+                 WRITE (8,
+     &              '('' Nucleon transfer ('',a2,'','',a2,'')'',
+     &'' cross section calculated with Kalbach parameterization'')') 
+     &              SYMbe(NPRoject), SYMbe(i1)  
+                 WRITE (12,
+     &              '('' Nucleon transfer ('',a2,'','',a2,'')'',
+     &'' cross section calculated with Kalbach parameterization'')')
+     &              SYMbe(NPRoject), SYMbe(i1)                
+               ENDIF
+            ENDIF
             GOTO 100
          ENDIF
 C
@@ -3819,7 +3888,7 @@ C           EcDWBA meaningless if Collective level file exists
          ENDIF
 C-----
          IF (name.EQ.'OMPOT ') THEN
-            IF (i1.LT.1 .OR. i1.GT.NEJcm) THEN
+            IF (i1.LT.1 .OR. i1.GT.NDEJC) THEN
                WRITE (8,
      &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
      &                  '' UNKNOWN'')') i1
@@ -5735,7 +5804,7 @@ C           Setting ENDFA for a single nucleus
          ENDIF
 C-----
          IF (name.EQ.'BNDG  ') THEN
-            IF (i3.LE.0 .OR. i3.GT.NEJcm) THEN
+            IF (i3.LE.0 .OR. i3.GT.NDEJC) THEN
                WRITE (8,
      &                '('' EJECTILE IDENTIFICATION '',I2,'' UNKNOWN'')')
      &                i3
@@ -6196,7 +6265,60 @@ C--------Tuning factors
             endif
             GOTO 100
          ENDIF
+C
+         IF (name.EQ.'TUNEBU') THEN
+            IF (i1.LT.0 .OR. i1.GT.NDEJC) THEN
+               WRITE (8,
+     &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &                  '' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: Break-up cross section tuning 
+     &                       IGNORED'')')
+               GOTO 100
+            ENDIF
+            IF(i1.EQ.0) THEN
+               TUNebu = val
+               write(8,'('' Break-up cross sections multiplied by '',
+     &           F7.3)') val
+            ELSE ! i1 > 0
+               TUNebu(i1) = val
+               WRITE ( 8,'('' Break-up ('',a2,'','',a2,
+     &           '') cross section multiplied by '',F7.3)') 
+     &           SYMbe(NPRoject),SYMbe(i1),val     
+               WRITE (12,'('' Break-up ('',a2,'','',a2,
+     &           '') cross section multiplied by '',F7.3)') 
+     &           SYMbe(NPRoject),SYMbe(i1),val     
+            ENDIF
+            GOTO 100
+         ENDIF
 
+         IF (name.EQ.'TUNENT') THEN
+            IF (i1.LT.0 .OR. i1.GT.NDEJC) THEN
+               WRITE (8,
+     &                '('' WARNING: EJECTILE IDENTIFICATION '',I2,
+     &                  '' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: Nucleon transfer cross section  
+     &                       tuning IGNORED'')')
+               GOTO 100
+            ENDIF
+            IF(i1.EQ.0)THEN
+               TUNent = val
+               write(8,
+     &           '('' Nucleon transfer cross sections multiplied by '', 
+     &           F7.3)') val
+            ELSE ! i1 > 0
+               TUNent(i1) = val
+               WRITE (8,
+     &           '('' Nucleon transfer cross section ('',a2,'','',a2,
+     &             '') multiplied by '',F7.3)') SYMbe(NPRoject),
+     &                SYMbe(i1),val 
+               WRITE (12,
+     &           '('' Nucleon transfer cross section ('',a2,'','',a2,
+     &             '') multiplied by '',F7.3)') SYMbe(NPRoject),
+     &                SYMbe(i1),val  
+            ENDIF         
+            GOTO 100
+         ENDIF
+C
          IF (name.EQ.'TUNEFI') THEN
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
