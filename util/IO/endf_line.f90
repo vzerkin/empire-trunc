@@ -24,9 +24,6 @@ module endf_lines
     logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
     logical*4 :: qlin = .false.           ! if true, put line numbers in (76:80) of output files
 
-    logical*4 qopen                       ! true when a file is open
-    logical*4 qwrt                        ! true when open for output
-
     character*9 lmft                      ! MAT, MF, MT in cols 66-75 of last section read
     character*9 cmft                      ! MAT, MF, MT in cols 66-75 of current line
     integer*4 istate                      ! current 'state' on input
@@ -45,35 +42,42 @@ module endf_lines
     contains
 !------------------------------------------------------------------------------
 
-    subroutine open_endfile(efil,qwrite,qover)
+    subroutine open_endfile(efil,nlin,qwrt,qover)
 
     implicit none
 
     character*(*), intent(in) :: efil             ! endf file name
-    logical*4, intent(in) :: qwrite               ! true for output file
+    integer*4, intent(inout) :: nlin              ! # lines in file
+    logical*4, intent(in) :: qwrt                 ! true for output file
     logical*4, intent(in), optional :: qover      ! true to allow overwriting existing file
 
     integer*4 status,iov,irs
-    character chr2*2
+    character chr2*2,chr3*3
 
-    if(qopen) call endf_error('Attempting to open an ENDF file when another already open',-1)
+    if(q_open) call endf_error('Attempting to open an ENDF file when another already open',-1)
 
     iov = 0
-    if(qwrite) then
+    if(qwrt) then
       if(present(qover)) then
          if(qover) iov = 1
       endif
     endif
 
-    status = open_endf_file(efil,qwrite,iov,qlin)
+    status = open_endf_file(efil,nlin,qwrt,iov,qlin)
     if(status /= 0) then
         select case(status)
         case(file_bad_form)
-            erlin = efil//' has an unsupported record format'
+            irs = get_endf_record_size()
+            if(irs > 0) then
+                write(chr3,'(i3)') irs
+                write(erlin,*) ' First line of ',efil,' has an unsupported record length of ',chr3
+            else
+                write(erlin,*) ' First line of ',efil,' has an unrecognized record format'
+            endif
         case(file_not_fixed)
             irs = get_endf_record_size()
             write(chr2,'(I2)') irs
-            erlin = efil//' contains record(s) that are not all '//chr2//' characters!'
+            erlin = efil//' contains record(s) that are not '//chr2//' characters!'
         case(file_bad_read)
             erlin = 'Read from ENDF file incomplete'
         case(file_bad_write)
@@ -85,8 +89,6 @@ module endf_lines
     endif
 
     lnum = -1
-    qopen = .true.
-    qwrt  = qwrite
     istate = imend
     ipos = 0
     cmft = '   1 0  0'      ! default for header line
@@ -105,7 +107,6 @@ module endf_lines
 
     status = close_endf_file()
     if(status < 0) write(6,*) ' WARNING: Close returned error code :',status
-    qopen = .false.
 
     return
     end subroutine close_endfile
@@ -140,7 +141,7 @@ module endf_lines
 
     ! check to see if we were reading/writing a file
 
-    if(.not.qopen) call endf_unwind(-1)
+    if(.not.q_open) call endf_unwind(-1)
 
     if(present(errstat)) then
         if(errstat /= 0) then
@@ -162,7 +163,7 @@ module endf_lines
 
     call get_last_line_num(clin)
 
-    if(qwrt) then
+    if(q_write) then
         write(6,*) ' Last line written line number:',filin
         write(6,'(1x,a75,a5)') endline,clin
         call close_endfile
@@ -206,8 +207,8 @@ module endf_lines
     integer*4 status,ios
     character*4 cmat
 
-    if(.not.qopen) return
-    if(qwrt) call endf_error('Attempt to read from ENDF output file')
+    if(.not.q_open) return
+    if(q_write) call endf_error('Attempt to read from ENDF output file')
 
     if((nat <= 0) .or. (nat > 9999)) then
         write(erlin,*) 'Request to find illegal MAT # :',nat
@@ -245,23 +246,30 @@ module endf_lines
     integer, intent(out), optional :: stat
 
     integer*4 i,omt,omf,status
+    character*2 chr2
 
-    if(.not.qopen) return
-
-    if(qwrt) call endf_error('Attempt to read from ENDF output file',-1)
+    if(.not.q_open) return
+    if(q_write) call endf_error('Attempt to read from ENDF output file',-1)
 
     status = get_endf_line()
     if(present(stat)) stat = status
     if(status < 0) then
         if(present(stat)) return
-        if(status == -1) then
+        select case(status)
+        case(-1)
             write(erlin,*) 'Hit end-of-file during read'
-            ! call endf_error(erlin,-1)
-            call endf_error(erlin)
-        else
+        case(file_not_fixed)
+            i = get_endf_record_size()
+            write(chr2,'(I2)') i
+            erlin = 'File contains record(s) that are not '//chr2//' characters!'
+        case(file_bad_read)
+            erlin = 'Read from ENDF file incomplete'
+        case(file_bad_write)
+            erlin = 'Write to ENDF file incomplete'
+        case default
             write(erlin,*) 'Read returned error code :',status
-            call endf_error(erlin)
-        endif
+        end select
+        call endf_error(erlin)
     endif
 
     ipos = 0
@@ -435,9 +443,8 @@ module endf_lines
 
     integer*4 status
 
-    if(.not.qopen) return
-
-    if(.not.qwrt) call endf_error('Attempt to write to ENDF input file',-1)
+    if(.not.q_open) return
+    if(.not.q_write) call endf_error('Attempt to write to ENDF input file',-1)
 
     endline(67:75) = cmft
 
@@ -466,9 +473,8 @@ module endf_lines
 
     get_mt = 0
 
-    if(.not.qopen) return
-
-    if(qwrt) call endf_error('Attempt to read MT from output file',-1)
+    if(.not.q_open) return
+    if(q_write) call endf_error('Attempt to read MT from output file',-1)
 
     read(endline(73:75),'(i3)',err=10) i
     get_mt = i
@@ -489,9 +495,8 @@ module endf_lines
 
     integer i
 
-    if(.not.qopen) return
-
-    if(qwrt) call endf_error('Attempt to read MF from output file',-1)
+    if(.not.q_open) return
+    if(q_write) call endf_error('Attempt to read MF from output file',-1)
 
     read(endline(71:72),'(i2)',err=10) i
     get_mf = i
@@ -512,9 +517,8 @@ module endf_lines
 
     integer i
 
-    if(.not.qopen) return
-
-    if(qwrt) call endf_error('Attempt to read MAT from output file',-1)
+    if(.not.q_open) return
+    if(q_write) call endf_error('Attempt to read MAT from output file',-1)
 
     read(endline(67:70),'(i4)',err=10) i
     get_mat = i
@@ -535,7 +539,7 @@ module endf_lines
 
     integer, intent(in) :: mat
 
-    if(.not.qopen) return
+    if(.not.q_open) return
 
     select case(istate)
     case(ifend)
@@ -594,7 +598,7 @@ module endf_lines
     integer, intent(in) :: mf
     integer omf
 
-    if(.not.qopen) return
+    if(.not.q_open) return
 
     select case(istate)
     case(imend)
@@ -652,7 +656,7 @@ module endf_lines
     integer, intent(in) :: mt
     integer omt
 
-    if(.not.qopen) return
+    if(.not.q_open) return
 
     select case(istate)
     case(imend,ifend)
@@ -685,7 +689,7 @@ module endf_lines
             write(erlin,*) 'Out-of-sequence SET_MT to :',mt
             call endf_error(erlin)
         endif
-        if(qwrt) istate = isend
+        if(q_write) istate = isend
         lnum = 99998
         cmft(7:9) = '  0'
 

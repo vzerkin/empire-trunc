@@ -60,6 +60,7 @@ module ENDF_IO
     use endf_mf34_io
     use endf_mf35_io
     use endf_mf40_io
+    use endf_queue
 
     implicit none
 
@@ -281,21 +282,21 @@ module ENDF_IO
     ! read an entire ENDF file, which may contain multiple materials.
     ! each material is scanned, and all MF files encountered are read in.
 
-    integer mat,status,mf,mt
+    integer mat,status,mf,mt,nlin
     type (endf_mat), pointer :: mx
 
-    call open_endfile(endfil(1:nfil),.false.)
+    call open_endfile(endfil(1:nfil),nlin,.false.)
 
     ! the first line, the "header" or "TPID" (tape ID) line, is free-format
-    ! ascii in 1:66. It usually has MAT=1, and the ENDF manual says that it
-    ! must have MF=MT=0. The line should always be there; at the NNDC we put
-    ! SVN tags for the revision and date at the beginning. Make sure it's there.
-    ! If not, signal an error. Then look at the contents of 1:66 and take
-    ! the following action depending on the value of ihdr:
-    ! the contents of 
+    ! ascii in 1:66. Here the MAT number is historically the Tape ID number
+    ! and it's usually 1. The ENDF manual requires this record have MF=MT=0.
+    ! The line should always be there; at the NNDC we use it to store SVN
+    ! tags for the revision and date. If it's not found, signal an error.
+    ! Then look at the contents of 1:66 and take the following action
+    ! depending on the value of ihdr:
     !  0) default - ignore the contents of 1:66
     !  1) replace the contents with our SVN tags
-    !  2) issue an error and exit if SVN tags not present.
+    !  2) issue an error and abort if SVN tags not found.
 
     call get_endline
 
@@ -505,9 +506,13 @@ module ENDF_IO
 
     nfil = len_trim(filename)
     if(nfil > 500) then
-        erlin = 'Filename too long:'//filename(1:nfil)
-        call endf_error(erlin)
+        write(6,*) ' ##### ERROR #####'
+        write(6,*)
+        write(6,*) ' Filename too long:'//filename(1:nfil)
+        write_endf_file = -2
+        return
     endif
+
     endfil = filename
     endf => usend
 
@@ -528,9 +533,41 @@ module ENDF_IO
 
     implicit none
 
+    integer*4 tlc
+    character*4 cat
     type (endf_mat), pointer :: mx
 
-    call open_endfile(endfil(1:nfil),.true.,q_overwrite)
+    ! first scan endf looking for required sections and resetting directories
+    ! get grand sum of total lines in file
+
+    tlc = 2      ! TPID header line & EOT line at end
+    mx => endf%mat
+    do while(associated(mx))
+
+        ! ENDF format requires MF1 & MT451
+
+        if(.not.associated(mx%mf1)) then
+            write(cat,'(I4)') mx%mat
+            erlin = 'Material '//cat//' contains no MF1'
+            call endf_error(erlin)
+        endif
+
+        if(.not.associated(mx%mf1%mt451)) then
+            write(cat,'(I4)') mx%mat
+            erlin = 'Material '//cat//' contains no MF1/MT451'
+            call endf_error(erlin)
+        endif
+
+        call set_mf1_directory(mx)
+        tlc = tlc + mat_lincnt(mx)
+
+        mx => mx%next
+
+    end do
+
+    ! open output file & write data
+
+    call open_endfile(endfil(1:nfil),tlc,.true.,q_overwrite)
 
     endline = endf%hdline
     call put_endline
@@ -540,7 +577,6 @@ module ENDF_IO
     do while(associated(mx))
 
         call set_mat(mx%mat)
-        call set_mf1_directory(mx)
 
         if(associated(mx%mf1))  call write_mf(mx%mf1)
         if(associated(mx%mf2))  call write_mf(mx%mf2)
@@ -685,10 +721,7 @@ module ENDF_IO
     type (MF1_sect_list), pointer :: drc(:), sc(:)
 
     ! without the ability to upcast, we must repeat
-    ! many operations here on a MF-by-MF basis. Ugh.
-
-    if(.not.associated(mx%mf1))       return
-    if(.not.associated(mx%mf1%mt451)) return
+    ! many operations here on a MF-by-MF basis. Ugh...
 
     nxc =  mx%mf1%mt451%nxc
     drc => mx%mf1%mt451%dir
@@ -1010,6 +1043,38 @@ module ENDF_IO
 
     return
     end function mtmod
+
+!------------------------------------------------------------------------------
+
+    integer*4 function mat_lincnt(mx)
+
+    implicit none
+
+    ! return the total number of lines needed for this mat
+
+    type (endf_mat), intent(in), target :: mx
+
+    integer*4 i,lc,lmf,nxc
+
+    type (MF1_sect_list), pointer :: drc(:)
+
+    nxc =  mx%mf1%mt451%nxc
+    drc => mx%mf1%mt451%dir
+
+    lc = 1
+    lmf = 0
+    do i = 1,nxc
+        lc = lc + drc(i)%nc + 1
+        if(drc(i)%mf /= lmf) then
+            lc = lc + 1
+            lmf = drc(i)%mf
+        endif
+    end do
+
+    mat_lincnt = lc
+
+    return
+    end function mat_lincnt
 
 !------------------------------------------------------------------------------
 

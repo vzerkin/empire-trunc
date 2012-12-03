@@ -14,24 +14,18 @@ module endf_line_io
 
     integer*4, parameter :: nrc = 4096*4    ! number of endf_records in a block
 
-    integer*4, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
-    integer*4, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
-    integer*4, parameter :: file_bad_read  = -3000000   ! status for bad number of read bytes
-    integer*4, parameter :: file_bad_write = -4000000   ! status for bad number of read bytes
-    integer*4 :: file_bytes_requested    ! for error reporting. Number of bytes requeseted for read/write
-    integer*4 :: file_bytes_receieved    ! for error reporting. Number of bytes recieved for read/write
+    character*1, parameter :: LF = char(10) ! line feed
+    character*1, parameter :: CR = char(13) ! carriage return
+    character*2, parameter :: CRLF = char(13)//char(10)  ! record terminators for Windows txt files
 
     integer*4 :: ibuf                       ! current buffer (0 or 1)
     integer*4 :: fbyts                      ! # bytes in input file
     integer*4 :: numrec                     ! # of records in input file
     integer*4 :: numred                     ! # of records read/wrote to/from file
     integer*4 :: curek                      ! "current" record in buffer
-    integer*4 :: filin                      ! "current" line # in file (public)
-    integer*4 :: lnum                       ! output ENDF line number -> (76:80)
     integer*4 :: mode                       ! input record format: 1=LF, 2=CRLF, 3=CR. always output LF.
     integer*4 :: recsiz                     ! number of bytes in endf records (including LF,CR)
-    logical*4 :: qwrite                     ! true if writing output; false for input
-    logical*4 :: qlins                      ! true if input or output has line numbers in (76:80)
+    logical*4 :: qlins                      ! true if writing line numbers in cols (76:80)
 
     type rec_status
         integer*4 status
@@ -58,31 +52,55 @@ module endf_line_io
 
 ! -----------  Public interface ---------------------------------------------
 
-    character*75, public, pointer :: endline                ! current line
-    public filin, lnum                                      ! line #
+    character*75, public, pointer :: endline                ! current line in file
+    integer*4, public :: filin = 0                          ! current line number in file
+    integer*4, public :: lnum = 0                           ! output ENDF line number in cols (76:80)
+    logical*4, public :: q_open = .false.                   ! true when file open
+    logical*4, public :: q_write = .false.                  ! true if writing output; false for input
+
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
-    public file_bad_form, file_not_fixed, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
+
+    ! for error reporting
+
+    integer*4, public, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
+    integer*4, public, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
+    integer*4, public, parameter :: file_bad_read  = -3000000   ! status code for bad number of read bytes
+    integer*4, public, parameter :: file_bad_write = -4000000   ! status code for bad number of read bytes
+    integer*4, public :: file_bytes_requested    ! Number of bytes requeseted for read/write
+    integer*4, public :: file_bytes_receieved    ! Number of bytes recieved for read/write
 
 !------------------------------------------------------------------------------
     contains
 !------------------------------------------------------------------------------
 
-    integer*4 function open_endf_file(endfile,qwrt,iover,qlin)
+    integer*4 function open_endf_file(endfile,nlin,qwrt,iover,qlin)
 
     implicit none
 
     character*(*), intent(in) :: endfile    ! endf file name
+    integer*4, intent(inout) :: nlin        ! # lines in file
     logical*4, intent(in) :: qwrt           ! set true when creating new file (writing)
     integer*4, intent(in) :: iover          ! set /= 0 to overwrite existing output file
     logical*4, intent(in) :: qlin           ! set true to add line numbers (76:80) to output records
 
-    integer*4 m,status
-    character*90 tlin
+    logical*4 qok
+    integer*4 i,m,status,nbyt
+    character*200 tlin
+
+    if(q_open) then
+        open_endf_file = -1
+        return
+    endif
 
     if(qwrt) then
-        status = open_endf_blkfile(endfile,1,iover)
+        if(qlin) then
+            nbyt = nlin*82
+        else
+            nbyt = nlin*77
+        endif
+        status = open_endf_blkfile(endfile,nbyt,1,iover)
     else
-        status = open_endf_blkfile(endfile,0,0)
+        status = open_endf_blkfile(endfile,nbyt,0,0)
     end if
 
     if(status /= 0) then
@@ -90,14 +108,16 @@ module endf_line_io
         return
     endif
 
-    qwrite = qwrt
+    q_write = qwrt
     filin = 0
 
-    if(qwrite) then
+    if(q_write) then
 
         ibuf = 0
         curek = 1
         numred = 0
+        mode = 2   ! on Windows, write CRLF records
+        q_open = .true.
         qlins = qlin
         buf(0)%nreq = 0
         buf(1)%nreq = 0
@@ -120,58 +140,65 @@ module endf_line_io
 
 	! look at 1st record to see what format we're dealing with
 
-        status = get_endf_buffer(0,90,tlin,0)
+        status = get_endf_buffer(0,200,tlin,0)
         status = wait_for_buffer(0, m)
-        if(m /= 90) then
+        if(m /= 200) then
             status = close_endf_blkfile()
-            file_bytes_requested = 90
+            file_bytes_requested = 200
             file_bytes_receieved = m
             open_endf_file = file_bad_read
             return
         endif
 
-        if(tlin(76:76) == char(13)) then
-            qlins = .false.
-            if(tlin(77:77) == char(10)) then
-                mode = 2    ! CRLF
-                recsiz = 77
+        ! look for record terminators LF & CR
+
+        i = 1
+        do while(i <= 200)
+            if(tlin(i:i) == LF) exit
+            i = i + 1
+        end do
+        if(i <= 200) then
+            ! found a LF. Look for preceding CR
+            if((i > 1) .and. (tlin(i-1:i-1) == CR)) then
+                mode = 2   ! CRLF
             else
-                mode = 3    ! CR
-                recsiz = 76
+                mode = 1   ! LF
             endif
-        else if(tlin(76:76) == char(10)) then
-            qlins = .false.
-            mode = 1    ! LF
-            recsiz = 76
-        else if(tlin(81:81) == char(13)) then
-            qlins = .true.
-            if(tlin(82:82) == char(10)) then
-                mode = 2    ! CRLF
-                recsiz = 82
-            else
-                mode = 3    ! CR
-                recsiz = 81
-            endif
-        else if(tlin(81:81) == char(10)) then
-            qlins = .true.
-            mode = 1    ! LF
-            recsiz = 81
+            recsiz = i
         else
-            ! unknown format or garbled file
+            ! no LF found - look for lone CR
+            i = 1
+            do while(i <= 200)
+                if(tlin(i:i) == CR) exit
+                i = i + 1
+            end do
+            if(i <= 200) then
+                mode = 3   ! CR
+                recsiz = i
+            else
+                mode = 0   ! no term found
+                recsiz = -1
+            endif
+        endif
+
+        select case(mode)
+        case(1,3)  ! LF or CR
+            qok = (recsiz == 76) .or. (recsiz == 81)
+        case(2)  ! CRLF
+            qok = (recsiz == 77) .or. (recsiz == 82)
+        case default
+            qok = .false.
+        end select
+
+        if(.not.qok) then
+            ! unsupported record length or garbled file.
+            ! only fixed 75 or 80 character records allowed.
+            status = close_endf_blkfile()
             open_endf_file = file_bad_form
             return
         endif
 
 	! we have a record format we understand
-        ! check that we have an even number of records
-
-        numrec = fbyts/recsiz
-        if(recsiz*numrec /= fbyts) then
-            status = close_endf_blkfile()
-            open_endf_file = file_not_fixed
-            return
-        endif
-
 	! allocate buffer according to record length
 
 	select case(recsiz)
@@ -190,8 +217,21 @@ module endf_line_io
         curek = 0
         numred = 0
         ibuf = 1
+        q_open = .true.
+        numrec = fbyts/recsiz
         call read_buf(0)
         nullify(endline)
+
+        ! check that we have an even number of records
+
+        if(recsiz*numrec /= fbyts) then
+            ! look for a record that is not the right length
+            call find_bad_record
+            open_endf_file = file_not_fixed
+            return
+        endif
+
+        nlin = numrec
 
     endif
 
@@ -206,13 +246,12 @@ module endf_line_io
 
     implicit none
 
-    integer*4 inx,nred,status,istat
+    integer*4 inx,nred,status
 
     ! make sure we're not trying to read past EOF
 
     if(curek >= numrec) then
-        ! at EOF
-        get_endf_line = -1
+        get_endf_line = -1   ! at EOF
         return
     endif
 
@@ -231,7 +270,6 @@ module endf_line_io
         ! make sure this read was queued ok
 
         if(buf(ibuf)%status /= 0) then
-            istat = close_endf_file()
             get_endf_line = status
             return
         endif
@@ -242,11 +280,9 @@ module endf_line_io
         status = wait_for_buffer(ibuf,nred)
 
         if(status /= 0) then
-            istat = close_endf_file()
             get_endf_line = status
             return
         else if(nred /= buf(ibuf)%nreq) then
-            istat = close_endf_file()
             file_bytes_requested = buf(ibuf)%nreq
             file_bytes_receieved = nred
             get_endf_line = file_bad_read
@@ -326,7 +362,7 @@ module endf_line_io
 
     implicit none
 
-    integer*4 status,nwrt,nof,istat
+    integer*4 status,nwrt,nof
 
     filin = filin + 1
 
@@ -336,11 +372,9 @@ module endf_line_io
         ! lnum = min(lnum+1, 99999)        ! max out
         lnum = mod(lnum+1, 100000)        ! roll-over
         write(z82(curek,ibuf)(76:80),'(i5)') lnum
-        z82(curek,ibuf)(81:81) = char(13)
-        z82(curek,ibuf)(82:82) = char(10)
+        z82(curek,ibuf)(81:82) = CRLF
     else
-        z77(curek,ibuf)(76:76) = char(13)
-        z77(curek,ibuf)(77:77) = char(10)
+        z77(curek,ibuf)(76:77) = CRLF
     endif
 
     ! if we haven't filled a buffer, just point to next line
@@ -372,7 +406,6 @@ module endf_line_io
     ! check status of write
 
     if(status /= 0) then
-        istat = close_endf_file()
         put_endf_line = status
         return
     endif
@@ -383,11 +416,9 @@ module endf_line_io
     if(buf(ibuf)%nreq > 0) then
         status = wait_for_buffer(ibuf,nwrt)
         if(status /= 0) then
-            istat = close_endf_file()
             put_endf_line = status
             return
         else if(nwrt /= buf(ibuf)%nreq) then
-            istat = close_endf_file()
             file_bytes_requested = buf(ibuf)%nreq
             file_bytes_receieved = nwrt
             put_endf_line = file_bad_write
@@ -404,6 +435,7 @@ module endf_line_io
         endline => z77(1,ibuf)(1:75)
     endif
     endline = ' '
+
     put_endf_line = 0
 
     return
@@ -419,10 +451,10 @@ module endf_line_io
 
     ! if writing, see if there are lines left in buffer
 
-    if(qwrite .and. (curek > 1)) then
+    status = 0
 
+    if(q_write .and. (curek > 1)) then
         ! flush output buffer to file
-
         nof = numred*recsiz
         buf(ibuf)%nreq = recsiz*(curek-1)
         if(qlins) then
@@ -430,9 +462,7 @@ module endf_line_io
         else
             status = put_endf_buffer(nof,buf(ibuf)%nreq,z77(1,ibuf),ibuf)
         endif
-
         ! wait for completion
-
         if(status == 0) then
            status = wait_for_buffer(ibuf,nwrt)
            if((status == 0) .and. (nwrt /= buf(ibuf)%nreq)) then
@@ -441,14 +471,15 @@ module endf_line_io
                status = file_bad_write
            endif
         endif
-        istat = close_endf_blkfile()
-
-    else
-        status = close_endf_blkfile()
     end if
+
+    istat = close_endf_blkfile()
+    if(status == 0) status = istat
 
     ! release buffers & return
 
+    q_open = .false.
+    q_write = .false.
     filin = 0
     nullify(endline)
     close_endf_file = status
@@ -467,7 +498,7 @@ module endf_line_io
 
     implicit none
 
-    integer*4 inx
+    integer*4 i,inx
     character*5, intent(out) :: clin
 
     ! this routine is here for error reporting only.
@@ -476,12 +507,12 @@ module endf_line_io
     ! from input if it had line numbers present.
     ! look for a line number in input buffer.
 
-    if(.not.qlins) then
+    if(recsiz < 80) then
         clin = '     '
         return
     endif
 
-    if(qwrite) then
+    if(q_write) then
 	select case(recsiz)
 	case(81)
             clin = z81(curek,ibuf)(76:80)
@@ -502,6 +533,18 @@ module endf_line_io
             clin = '     '
 	end select
     endif
+
+     ! clean string of any non-printables
+
+    do i = 1,5
+        inx = ichar(clin(i:i))
+        if((inx == 10) .or. (inx == 13)) then
+           clin(i:5) = ' '
+           exit
+        else if(inx < 32) then
+           clin(i:i) = ' '
+        endif
+    end do
 
     return
     end subroutine get_last_line_num
@@ -530,5 +573,32 @@ module endf_line_io
 
     return
     end function get_endf_record_size
+
+!------------------------------------------------------------------------------
+
+    subroutine find_bad_record
+
+    implicit none
+
+    ! look for a record in this file w/o the same record length
+    ! and terminators as the first record in file.
+
+    integer*4 status
+
+    if(q_write) return
+    if((mode < 1) .or. (mode > 3)) return
+
+    status = get_endf_line()
+    do while(status == 0)
+        if(mode < 3) then
+            if(endline(recsiz:recsiz) /= LF) exit
+        else
+            if(endline(recsiz:recsiz) /= CR) exit
+        endif
+        status = get_endf_line()
+     end do
+
+     return
+     end subroutine find_bad_record
 
 end module endf_line_io

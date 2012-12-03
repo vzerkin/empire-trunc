@@ -11,41 +11,40 @@ module endf_line_io
 
     private
 
-    integer*4, parameter :: lun = 20    ! fortran logical unit number
-
-    integer*4 :: filin                      ! file line #
-    integer*4 :: lnum                       ! output ENDF line number in (76:80)
-    integer*4 :: recsiz                     ! size read from file
-    logical*4 :: qwrite                     ! true if writing to output file, false if reading from input
+    integer*4, parameter :: lun = 20        ! fortran logical unit number
+    integer*4 :: recsiz                     ! record length
     logical*4 :: qlins                      ! true if input or output has line numbers in (76:80)
     character*80, target :: filine          ! full current line
 
-    ! the following error codes are used for error reporting. Not all used here.
-    ! but we must define these to maintain an identical interface to blk-mode
-
-    integer*4, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
-    integer*4, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
-    integer*4, parameter :: file_bad_read  = -3000000   ! status for bad number of read bytes
-    integer*4, parameter :: file_bad_write = -4000000   ! status for bad number of read bytes
-    integer*4 :: file_bytes_requested    ! for error reporting. Number of bytes requeseted for read/write
-    integer*4 :: file_bytes_receieved    ! for error reporting. Number of bytes recieved for read/write
-
     ! -----------  Public interface ------------------------------------------
 
-    character*75, pointer, public :: endline     ! current line
-    public filin, lnum                           ! file, line numbers
+    character*75, public, pointer :: endline                ! current line in file
+    integer*4, public :: filin = 0                          ! current line number in file
+    integer*4, public :: lnum = 0                           ! output ENDF line number in cols (76:80)
+    logical*4, public :: q_open = .false.                   ! true when file open
+    logical*4, public :: q_write = .false.                  ! true if writing output; false for input
+
     public open_endf_file, get_endf_line, put_endf_line, close_endf_file, get_last_line_num, get_endf_record_size
-    public file_bad_form, file_not_fixed, file_bad_read, file_bad_write, file_bytes_requested, file_bytes_receieved  ! error reporting
+
+    ! for error reporting
+
+    integer*4, public, parameter :: file_bad_form  = -1000000   ! status code for file with unsupported format
+    integer*4, public, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
+    integer*4, public, parameter :: file_bad_read  = -3000000   ! status code for bad number of read bytes
+    integer*4, public, parameter :: file_bad_write = -4000000   ! status code for bad number of read bytes
+    integer*4, public :: file_bytes_requested    ! Number of bytes requeseted for read/write
+    integer*4, public :: file_bytes_receieved    ! Number of bytes recieved for read/write
 
 !------------------------------------------------------------------------------
     contains
 !------------------------------------------------------------------------------
 
-    integer*4 function open_endf_file(efil,qwrt,iover,qlin)
+    integer*4 function open_endf_file(efil,nlin,qwrt,iover,qlin)
 
     implicit none
 
     character*(*), intent(in) :: efil       ! endf file name
+    integer*4, intent(inout) :: nlin        ! # lines in file (ignored here)
     logical*4, intent(in) :: qwrt           ! true if writing, false if reading
     integer*4, intent(in) :: iover          ! set /= 0 to overwrite existing file
     logical*4, intent(in) :: qlin           ! set true to add line numbers (76:80) to output records
@@ -53,9 +52,9 @@ module endf_line_io
     logical*4 qex
     integer*4 stat
 
-    qwrite = qwrt
+    q_write = qwrt
 
-    if(qwrite) then
+    if(q_write) then
 	qlins = qlin
 	if(qlins) then
 		recsiz = 80
@@ -92,9 +91,15 @@ module endf_line_io
         endif
     endif
 
-    endline => filine(1:75)
-    filine = ' '
     filin = 0
+    filine = ' '
+    if(stat == 0) then
+        q_open = .true.
+        endline => filine(1:75)
+    else
+        q_open = .false.
+        nullify(endline)
+    endif
 
     open_endf_file = stat
 
@@ -107,9 +112,14 @@ module endf_line_io
 
     implicit none
 
-    integer*4 stat
+    integer*4 stat,rsz
 
-    read(lun,'(a<recsiz>)',iostat=stat) filine
+    read(lun,'(q,a<rsz>)',iostat=stat) rsz,filine
+    if(rsz /= recsiz) then
+        get_endf_line = file_not_fixed
+        return
+    endif
+
     filin = filin + 1
 
     get_endf_line = stat
@@ -124,7 +134,6 @@ module endf_line_io
     implicit none
 
     integer*4 stat
-    character*5 chrum
 
     if(qlins) then
         ! lnum = min(lnum+1, 99999)        ! max out
@@ -153,6 +162,8 @@ module endf_line_io
     close(lun,iostat=stat)
     nullify(endline)
     filin = 0
+    q_open = .false.
+    q_write = .false.
 
     close_endf_file = stat
 

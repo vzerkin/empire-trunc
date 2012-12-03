@@ -1,0 +1,2599 @@
+module endf_queue
+
+    use endf_mf1_io
+    use endf_mf2_io
+    use endf_mf3_io
+    use endf_mf4_io
+    use endf_mf5_io
+    use endf_mf6_io
+    use endf_mf7_io
+    use endf_mf8_io
+    use endf_mf9_io
+    use endf_mf10_io
+    use endf_mf12_io
+    use endf_mf13_io
+    use endf_mf14_io
+    use endf_mf15_io
+    use endf_mf23_io
+    use endf_mf26_io
+    use endf_mf27_io
+    use endf_mf28_io
+    use endf_mf31_io
+    use endf_mf32_io
+    use endf_mf33_io
+    use endf_mf34_io
+    use endf_mf35_io
+    use endf_mf40_io
+
+    implicit none
+
+    ! This module provides generic routines to locate, remove and insert
+    ! an MF/MT section to/from a linked list of sections.
+
+    ! To remove or "pop" a section, use the 'pop' function specifying the
+    ! head of the list along with the MT number to find & remove. If it's
+    ! found in the list then pop removes the section and returns a
+    ! pointer to that section.
+
+    ! To insert, use the 'put' function, specifying the head of the list
+    ! and the section to insert. If a section is found in the list with
+    ! the same MT as the one to be inserted, put does not insert the
+    ! section and returns false. If there is not already a section with
+    ! the same MT as the one to be inserted, then put inserts the section
+    ! into the list and put returns true.
+
+    ! To locate a section with a given MT in a list, use 'find'. Here the
+    ! head of the list is provided along with the MT number to locate. If
+    ! a section with the specified MT is found, find returns a pointer
+    ! to that section; if not, it returns a pointer to null.
+
+    ! this is yet another example of where an abstract section class
+    ! would have come in quite handy. In Fortran95 we have to repeat
+    ! these basic functions over & over for every MF type....
+
+    private
+
+    interface pop
+        module procedure pop1
+        module procedure pop2
+        module procedure pop3
+        module procedure pop4
+        module procedure pop5
+        module procedure pop6
+        module procedure pop7
+        module procedure pop8
+        module procedure pop9
+        module procedure pop10
+        module procedure pop12
+        module procedure pop13
+        module procedure pop14
+        module procedure pop15
+        module procedure pop23
+        module procedure pop26
+        module procedure pop27
+        module procedure pop31
+        module procedure pop32
+        module procedure pop33
+        module procedure pop34
+        module procedure pop35
+        module procedure pop40
+    end interface
+
+    interface put
+        module procedure put1
+        module procedure put2
+        module procedure put3
+        module procedure put4
+        module procedure put5
+        module procedure put6
+        module procedure put7
+        module procedure put8
+        module procedure put9
+        module procedure put10
+        module procedure put12
+        module procedure put13
+        module procedure put14
+        module procedure put15
+        module procedure put23
+        module procedure put26
+        module procedure put27
+        module procedure put28
+        module procedure put31
+        module procedure put32
+        module procedure put33
+        module procedure put34
+        module procedure put35
+        module procedure put40
+    end interface
+
+    interface find
+        module procedure find1
+        module procedure find2
+        module procedure find3
+        module procedure find4
+        module procedure find5
+        module procedure find6
+        module procedure find7
+        module procedure find8
+        module procedure find9
+        module procedure find10
+        module procedure find12
+        module procedure find13
+        module procedure find14
+        module procedure find15
+        module procedure find23
+        module procedure find26
+        module procedure find27
+        module procedure find28
+        module procedure find31
+        module procedure find32
+        module procedure find33
+        module procedure find34
+        module procedure find35
+        module procedure find40
+    end interface
+
+    public :: pop,put,find
+
+    contains
+
+!-------------------------------------------------------------------------
+
+    function find1(hed,mt)
+
+    implicit none
+
+    type (mf_1), pointer :: find1
+    type (mf_1), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_1), pointer :: mf
+
+    nullify(find1)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find1 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find1
+
+!-------------------------------------------------------------------------
+
+    function find2(hed,mt)
+
+    implicit none
+
+    type (mf_2), pointer :: find2
+    type (mf_2), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_2), pointer :: mf
+
+    nullify(find2)
+    if(mt /= 151) return
+    find2 => hed
+
+    return
+    end function find2
+
+!-------------------------------------------------------------------------
+
+    function find3(hed,mt)
+
+    implicit none
+
+    type (mf_3), pointer :: find3
+    type (mf_3), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_3), pointer :: mf
+
+    nullify(find3)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find3 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find3
+
+!-------------------------------------------------------------------------
+
+    function find4(hed,mt)
+
+    implicit none
+
+    type (mf_4), pointer :: find4
+    type (mf_4), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_4), pointer :: mf
+
+    nullify(find4)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find4 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find4
+
+!-------------------------------------------------------------------------
+
+    function find5(hed,mt)
+
+    implicit none
+
+    type (mf_5), pointer :: find5
+    type (mf_5), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_5), pointer :: mf
+
+    nullify(find5)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find5 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find5
+
+!-------------------------------------------------------------------------
+
+    function find6(hed,mt)
+
+    implicit none
+
+    type (mf_6), pointer :: find6
+    type (mf_6), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_6), pointer :: mf
+
+    nullify(find6)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find6 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find6
+
+!-------------------------------------------------------------------------
+
+    function find7(hed,mt)
+
+    implicit none
+
+    type (mf_7), pointer :: find7
+    type (mf_7), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_7), pointer :: mf
+
+    nullify(find7)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find7 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find7
+
+!-------------------------------------------------------------------------
+
+    function find8(hed,mt)
+
+    implicit none
+
+    type (mf_8), pointer :: find8
+    type (mf_8), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_8), pointer :: mf
+
+    nullify(find8)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find8 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find8
+
+!-------------------------------------------------------------------------
+
+    function find9(hed,mt)
+
+    implicit none
+
+    type (mf_9), pointer :: find9
+    type (mf_9), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_9), pointer :: mf
+
+    nullify(find9)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find9 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find9
+
+!-------------------------------------------------------------------------
+
+    function find10(hed,mt)
+
+    implicit none
+
+    type (mf_10), pointer :: find10
+    type (mf_10), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_10), pointer :: mf
+
+    nullify(find10)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find10 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find10
+
+!-------------------------------------------------------------------------
+
+    function find12(hed,mt)
+
+    implicit none
+
+    type (mf_12), pointer :: find12
+    type (mf_12), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_12), pointer :: mf
+
+    nullify(find12)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find12 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find12
+
+!-------------------------------------------------------------------------
+
+    function find13(hed,mt)
+
+    implicit none
+
+    type (mf_13), pointer :: find13
+    type (mf_13), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_13), pointer :: mf
+
+    nullify(find13)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find13 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find13
+
+!-------------------------------------------------------------------------
+
+    function find14(hed,mt)
+
+    implicit none
+
+    type (mf_14), pointer :: find14
+    type (mf_14), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_14), pointer :: mf
+
+    nullify(find14)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find14 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find14
+
+!-------------------------------------------------------------------------
+
+    function find15(hed,mt)
+
+    implicit none
+
+    type (mf_15), pointer :: find15
+    type (mf_15), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_15), pointer :: mf
+
+    nullify(find15)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find15 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find15
+!-------------------------------------------------------------------------
+
+    function find23(hed,mt)
+
+    implicit none
+
+    type (mf_23), pointer :: find23
+    type (mf_23), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_23), pointer :: mf
+
+    nullify(find23)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find23 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find23
+
+!-------------------------------------------------------------------------
+
+    function find26(hed,mt)
+
+    implicit none
+
+    type (mf_26), pointer :: find26
+    type (mf_26), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_26), pointer :: mf
+
+    nullify(find26)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find26 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find26
+
+!-------------------------------------------------------------------------
+
+    function find27(hed,mt)
+
+    implicit none
+
+    type (mf_27), pointer :: find27
+    type (mf_27), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_27), pointer :: mf
+
+    nullify(find27)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find27 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find27
+
+!-------------------------------------------------------------------------
+
+    function find28(hed,mt)
+
+    implicit none
+
+    type (mf_28), pointer :: find28
+    type (mf_28), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_28), pointer :: mf
+
+    nullify(find28)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find28 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find28
+
+!-------------------------------------------------------------------------
+
+    function find31(hed,mt)
+
+    implicit none
+
+    type (mf_31), pointer :: find31
+    type (mf_31), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_31), pointer :: mf
+
+    nullify(find31)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find31 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find31
+
+!-------------------------------------------------------------------------
+
+    function find32(hed,mt)
+
+    implicit none
+
+    type (mf_32), pointer :: find32
+    type (mf_32), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_32), pointer :: mf
+
+    nullify(find32)
+
+    nullify(find32)
+    if(mt /= 151) return
+    find32 => hed
+
+    return
+    end function find32
+
+!-------------------------------------------------------------------------
+
+    function find33(hed,mt)
+
+    implicit none
+
+    type (mf_33), pointer :: find33
+    type (mf_33), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_33), pointer :: mf
+
+    nullify(find33)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find33 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find33
+
+!-------------------------------------------------------------------------
+
+    function find34(hed,mt)
+
+    implicit none
+
+    type (mf_34), pointer :: find34
+    type (mf_34), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_34), pointer :: mf
+
+    nullify(find34)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find34 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find34
+
+!-------------------------------------------------------------------------
+
+    function find35(hed,mt)
+
+    implicit none
+
+    type (mf_35), pointer :: find35
+    type (mf_35), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_35), pointer :: mf
+
+    nullify(find35)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find35 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find35
+
+!-------------------------------------------------------------------------
+
+    function find40(hed,mt)
+
+    implicit none
+
+    type (mf_40), pointer :: find40
+    type (mf_40), intent(in), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_40), pointer :: mf
+
+    nullify(find40)
+
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            mf => mf%next
+            cycle
+        else if(mf%mt == mt) then
+            find40 => mf
+        endif
+        exit
+    end do
+
+    return
+    end function find40
+
+!-------------------------------------------------------------------------
+
+    function pop1(hed,mt)
+
+    implicit none
+
+    type (mf_1), pointer :: pop1
+    type (mf_1), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_1), pointer :: lm,mf
+
+    nullify(pop1)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop1 => mf
+
+    return
+
+    end function pop1
+
+!-------------------------------------------------------------------------
+
+    function pop2(hed,mt)
+
+    implicit none
+
+    type (mf_2), pointer :: pop2
+    type (mf_2), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    ! MF2 is special : only 1 MT = 151
+
+    nullify(pop2)
+    if(mt /= 151) return
+    if(.not.associated(hed)) return
+    pop2 => hed
+    nullify(hed)
+
+    return
+
+    end function pop2
+
+!-------------------------------------------------------------------------
+
+    function pop3(hed,mt)
+
+    implicit none
+
+    type (mf_3), pointer :: pop3
+    type (mf_3), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_3), pointer :: lm,mf
+
+    nullify(pop3)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop3 => mf
+
+    return
+
+    end function pop3
+
+!-------------------------------------------------------------------------
+
+    function pop4(hed,mt)
+
+    implicit none
+
+    type (mf_4), pointer :: pop4
+    type (mf_4), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_4), pointer :: lm,mf
+
+    nullify(pop4)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop4 => mf
+
+    return
+
+    end function pop4
+
+!-------------------------------------------------------------------------
+
+    function pop5(hed,mt)
+
+    implicit none
+
+    type (mf_5), pointer :: pop5
+    type (mf_5), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_5), pointer :: lm,mf
+
+    nullify(pop5)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop5 => mf
+
+    return
+
+    end function pop5
+
+!-------------------------------------------------------------------------
+
+    function pop6(hed,mt)
+
+    implicit none
+
+    type (mf_6), pointer :: pop6
+    type (mf_6), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_6), pointer :: lm,mf
+
+    nullify(pop6)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop6 => mf
+
+    return
+
+    end function pop6
+
+!-------------------------------------------------------------------------
+
+    function pop7(hed,mt)
+
+    implicit none
+
+    type (mf_7), pointer :: pop7
+    type (mf_7), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_7), pointer :: lm,mf
+
+    nullify(pop7)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop7 => mf
+
+    return
+
+    end function pop7
+
+!-------------------------------------------------------------------------
+
+    function pop8(hed,mt)
+
+    implicit none
+
+    type (mf_8), pointer :: pop8
+    type (mf_8), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_8), pointer :: lm,mf
+
+    nullify(pop8)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop8 => mf
+
+    return
+
+    end function pop8
+
+!-------------------------------------------------------------------------
+
+    function pop9(hed,mt)
+
+    implicit none
+
+    type (mf_9), pointer :: pop9
+    type (mf_9), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_9), pointer :: lm,mf
+
+    nullify(pop9)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop9 => mf
+
+    return
+
+    end function pop9
+
+!-------------------------------------------------------------------------
+
+    function pop10(hed,mt)
+
+    implicit none
+
+    type (mf_10), pointer :: pop10
+    type (mf_10), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_10), pointer :: lm,mf
+
+    nullify(pop10)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop10 => mf
+
+    return
+
+    end function pop10
+
+!-------------------------------------------------------------------------
+
+    function pop12(hed,mt)
+
+    implicit none
+
+    type (mf_12), pointer :: pop12
+    type (mf_12), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_12), pointer :: lm,mf
+
+    nullify(pop12)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop12 => mf
+
+    return
+
+    end function pop12
+
+!-------------------------------------------------------------------------
+
+    function pop13(hed,mt)
+
+    implicit none
+
+    type (mf_13), pointer :: pop13
+    type (mf_13), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_13), pointer :: lm,mf
+
+    nullify(pop13)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop13 => mf
+
+    return
+
+    end function pop13
+
+!-------------------------------------------------------------------------
+
+    function pop14(hed,mt)
+
+    implicit none
+
+    type (mf_14), pointer :: pop14
+    type (mf_14), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_14), pointer :: lm,mf
+
+    nullify(pop14)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop14 => mf
+
+    return
+
+    end function pop14
+
+!-------------------------------------------------------------------------
+
+    function pop15(hed,mt)
+
+    implicit none
+
+    type (mf_15), pointer :: pop15
+    type (mf_15), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_15), pointer :: lm,mf
+
+    nullify(pop15)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop15 => mf
+
+    return
+
+    end function pop15
+
+!-------------------------------------------------------------------------
+
+    function pop23(hed,mt)
+
+    implicit none
+
+    type (mf_23), pointer :: pop23
+    type (mf_23), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_23), pointer :: lm,mf
+
+    nullify(pop23)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop23 => mf
+
+    return
+
+    end function pop23
+
+!-------------------------------------------------------------------------
+
+    function pop26(hed,mt)
+
+    implicit none
+
+    type (mf_26), pointer :: pop26
+    type (mf_26), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_26), pointer :: lm,mf
+
+    nullify(pop26)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop26 => mf
+
+    return
+
+    end function pop26
+
+!-------------------------------------------------------------------------
+
+    function pop27(hed,mt)
+
+    implicit none
+
+    type (mf_27), pointer :: pop27
+    type (mf_27), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_27), pointer :: lm,mf
+
+    nullify(pop27)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop27 => mf
+
+    return
+
+    end function pop27
+
+!-------------------------------------------------------------------------
+
+    function pop28(hed,mt)
+
+    implicit none
+
+    type (mf_28), pointer :: pop28
+    type (mf_28), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_28), pointer :: lm,mf
+
+    nullify(pop28)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop28 => mf
+
+    return
+
+    end function pop28
+
+!-------------------------------------------------------------------------
+
+    function pop31(hed,mt)
+
+    implicit none
+
+    type (mf_31), pointer :: pop31
+    type (mf_31), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_31), pointer :: lm,mf
+
+    nullify(pop31)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop31 => mf
+
+    return
+
+    end function pop31
+
+!-------------------------------------------------------------------------
+
+    function pop32(hed,mt)
+
+    implicit none
+
+    type (mf_32), pointer :: pop32
+    type (mf_32), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    ! MF32 is special : only 1 MT = 151
+
+    nullify(pop32)
+    if(mt /= 151) return
+    if(.not.associated(hed)) return
+    pop32 => hed
+    nullify(hed)
+
+    return
+
+    end function pop32
+
+!-------------------------------------------------------------------------
+
+    function pop33(hed,mt)
+
+    implicit none
+
+    type (mf_33), pointer :: pop33
+    type (mf_33), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_33), pointer :: lm,mf
+
+    nullify(pop33)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop33 => mf
+
+    return
+
+    end function pop33
+
+!-------------------------------------------------------------------------
+
+    function pop34(hed,mt)
+
+    implicit none
+
+    type (mf_34), pointer :: pop34
+    type (mf_34), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_34), pointer :: lm,mf
+
+    nullify(pop34)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop34 => mf
+
+    return
+
+    end function pop34
+
+!-------------------------------------------------------------------------
+
+    function pop35(hed,mt)
+
+    implicit none
+
+    type (mf_35), pointer :: pop35
+    type (mf_35), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_35), pointer :: lm,mf
+
+    nullify(pop35)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop35 => mf
+
+    return
+
+    end function pop35
+
+!-------------------------------------------------------------------------
+
+    function pop40(hed,mt)
+
+    implicit none
+
+    type (mf_40), pointer :: pop40
+    type (mf_40), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+
+    type (mf_40), pointer :: lm,mf
+
+    nullify(pop40)
+    if(.not.associated(hed)) return
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mt) then
+            exit
+        else
+            return
+        endif
+    end do
+
+    if(associated(lm)) then
+        lm%next => mf%next
+    else
+        hed => mf%next
+    endif
+
+    nullify(mf%next)
+    pop40 => mf
+
+    return
+
+    end function pop40
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put1(hed,mx)
+
+    implicit none
+
+    type (mf_1), intent(inout), pointer :: hed
+    type (mf_1), intent(inout), target :: mx
+
+    type (mf_1), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put1 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put1 = .true.
+
+    return
+    end function put1
+
+    ! MF32 is special : only 1 MT = 151
+
+    ! MF32 is special : only 1 MT = 151
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put2(hed,mx)
+
+    implicit none
+
+    type (mf_2), intent(inout), pointer :: hed
+    type (mf_2), intent(inout), target :: mx
+
+    ! MF2 is special : only 1 MT = 151
+
+    put2 = .false.
+    if(mx%mt /= 151) return
+    if(associated(hed)) return
+    hed => mx
+    put2 = .true.
+
+    return
+    end function put2
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put3(hed,mx)
+
+    implicit none
+
+    type (mf_3), intent(inout), pointer :: hed
+    type (mf_3), intent(inout), target :: mx
+
+    type (mf_3), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put3 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put3 = .true.
+
+    return
+    end function put3
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put4(hed,mx)
+
+    implicit none
+
+    type (mf_4), intent(inout), pointer :: hed
+    type (mf_4), intent(inout), target :: mx
+
+    type (mf_4), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put4 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put4 = .true.
+
+    return
+    end function put4
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put5(hed,mx)
+
+    implicit none
+
+    type (mf_5), intent(inout), pointer :: hed
+    type (mf_5), intent(inout), target :: mx
+
+    type (mf_5), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put5 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put5 = .true.
+
+    return
+    end function put5
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put6(hed,mx)
+
+    implicit none
+
+    type (mf_6), intent(inout), pointer :: hed
+    type (mf_6), intent(inout), target :: mx
+
+    type (mf_6), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put6 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put6 = .true.
+
+    return
+    end function put6
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put7(hed,mx)
+
+    implicit none
+
+    type (mf_7), intent(inout), pointer :: hed
+    type (mf_7), intent(inout), target :: mx
+
+    type (mf_7), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put7 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put7 = .true.
+
+    return
+    end function put7
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put8(hed,mx)
+
+    implicit none
+
+    type (mf_8), intent(inout), pointer :: hed
+    type (mf_8), intent(inout), target :: mx
+
+    type (mf_8), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put8 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put8 = .true.
+
+    return
+    end function put8
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put9(hed,mx)
+
+    implicit none
+
+    type (mf_9), intent(inout), pointer :: hed
+    type (mf_9), intent(inout), target :: mx
+
+    type (mf_9), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put9 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put9 = .true.
+
+    return
+    end function put9
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put10(hed,mx)
+
+    implicit none
+
+    type (mf_10), intent(inout), pointer :: hed
+    type (mf_10), intent(inout), target :: mx
+
+    type (mf_10), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put10 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put10 = .true.
+
+    return
+    end function put10
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put12(hed,mx)
+
+    implicit none
+
+    type (mf_12), intent(inout), pointer :: hed
+    type (mf_12), intent(inout), target :: mx
+
+    type (mf_12), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put12 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put12 = .true.
+
+    return
+    end function put12
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put13(hed,mx)
+
+    implicit none
+
+    type (mf_13), intent(inout), pointer :: hed
+    type (mf_13), intent(inout), target :: mx
+
+    type (mf_13), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put13 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put13 = .true.
+
+    return
+    end function put13
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put14(hed,mx)
+
+    implicit none
+
+    type (mf_14), intent(inout), pointer :: hed
+    type (mf_14), intent(inout), target :: mx
+
+    type (mf_14), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put14 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put14 = .true.
+
+    return
+    end function put14
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put15(hed,mx)
+
+    implicit none
+
+    type (mf_15), intent(inout), pointer :: hed
+    type (mf_15), intent(inout), target :: mx
+
+    type (mf_15), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put15 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put15 = .true.
+
+    return
+    end function put15
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put23(hed,mx)
+
+    implicit none
+
+    type (mf_23), intent(inout), pointer :: hed
+    type (mf_23), intent(inout), target :: mx
+
+    type (mf_23), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put23 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put23 = .true.
+
+    return
+    end function put23
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put26(hed,mx)
+
+    implicit none
+
+    type (mf_26), intent(inout), pointer :: hed
+    type (mf_26), intent(inout), target :: mx
+
+    type (mf_26), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put26 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put26 = .true.
+
+    return
+    end function put26
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put27(hed,mx)
+
+    implicit none
+
+    type (mf_27), intent(inout), pointer :: hed
+    type (mf_27), intent(inout), target :: mx
+
+    type (mf_27), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put27 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put27 = .true.
+
+    return
+    end function put27
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put28(hed,mx)
+
+    implicit none
+
+    type (mf_28), intent(inout), pointer :: hed
+    type (mf_28), intent(inout), target :: mx
+
+    type (mf_28), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put28 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put28 = .true.
+
+    return
+    end function put28
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put31(hed,mx)
+
+    implicit none
+
+    type (mf_31), intent(inout), pointer :: hed
+    type (mf_31), intent(inout), target :: mx
+
+    type (mf_31), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put31 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put31 = .true.
+
+    return
+    end function put31
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put32(hed,mx)
+
+    implicit none
+
+    type (mf_32), intent(inout), pointer :: hed
+    type (mf_32), intent(inout), target :: mx
+
+    ! MF32 is special : only 1 MT = 151
+
+    put32 = .false.
+    if(mx%mt /= 151) return
+    if(associated(hed)) return
+    hed => mx
+    put32 = .true.
+
+    return
+    end function put32
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put33(hed,mx)
+
+    implicit none
+
+    type (mf_33), intent(inout), pointer :: hed
+    type (mf_33), intent(inout), target :: mx
+
+    type (mf_33), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put33 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put33 = .true.
+
+    return
+    end function put33
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put34(hed,mx)
+
+    implicit none
+
+    type (mf_34), intent(inout), pointer :: hed
+    type (mf_34), intent(inout), target :: mx
+
+    type (mf_34), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put34 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put34 = .true.
+
+    return
+    end function put34
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put35(hed,mx)
+
+    implicit none
+
+    type (mf_35), intent(inout), pointer :: hed
+    type (mf_35), intent(inout), target :: mx
+
+    type (mf_35), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put35 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put35 = .true.
+
+    return
+    end function put35
+
+!-------------------------------------------------------------------------
+
+    logical*4 function put40(hed,mx)
+
+    implicit none
+
+    type (mf_40), intent(inout), pointer :: hed
+    type (mf_40), intent(inout), target :: mx
+
+    type (mf_40), pointer :: lm,mf
+
+    nullify(lm)
+    mf => hed
+    do while(associated(mf))
+        if(mf%mt < mx%mt) then
+            lm => mf
+            mf => mf%next
+        else if(mf%mt == mx%mt) then
+            put40 = .false.
+            return
+        else
+            exit
+        endif
+    end do
+
+    mx%next => mf
+    if(associated(lm)) then
+        lm%next => mx
+    else
+        hed => mx
+    endif
+
+    put40 = .true.
+
+    return
+    end function put40
+
+end module endf_queue

@@ -44,7 +44,7 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
       else
          flags = O_WRONLY|O_CREAT|O_EXCL;
       fhn = open(lfil, flags);
-      if(fhn>0) fchmod(fhn, 436);
+      if(fhn>=0) fchmod(fhn, 436);
       }
    else
       fhn = open(lfil, O_RDONLY);

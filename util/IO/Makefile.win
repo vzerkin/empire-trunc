@@ -27,7 +27,8 @@ OBJF = mf1.o mf2.o mf3.o mf4.o mf5.o mf6.o mf7.o mf8.o mf9.o\
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
 all : $(OBJF) endf.o
-endf.o : $(OBJF) endf_base.o endf_cov.o
+endf.o : $(OBJF) endf_base.o endf_cov.o endf_queue.o
+endf_queue.o : $(OBJF)
 endf_line.o : endf_win.o $(LINIO)
 endf_base.o : endf_line.o
 endf_cov.o : endf_base.o

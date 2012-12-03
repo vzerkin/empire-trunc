@@ -21,7 +21,7 @@ static ENDF_IO_BUFFER buf[2];
 static BOOL endf_open = FALSE;
 static HANDLE fhn;
 
-int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
+int open_endf_blkfile_(char *file, int *siz, int *flg, int *excl, int len)
 {
    int access, cflg;
    char lfil[len+1];
@@ -62,6 +62,14 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
                     FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,    /* allow async access */
                     NULL);                      /* no templates */
    if(fhn == INVALID_HANDLE_VALUE) return -1;
+
+   if(*flg) {
+      /* allocate space when making new file */
+      DWORD ptr = SetFilePointer(fhn, *siz, NULL, FILE_BEGIN);
+      if(ptr == INVALID_SET_FILE_POINTER) return GetLastError();
+      BOOL stat = SetEndOfFile(fhn);
+      if(!stat) return GetLastError();
+   }
 
    buf[0].olp.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
    buf[1].olp.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
