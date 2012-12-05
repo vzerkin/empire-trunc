@@ -225,60 +225,32 @@
 
 	integer*4, intent(in) :: mt
 
-	type (mf_5), pointer :: mf51,mf52,lm1,lm2
+	logical*4 qstat
+	type (mf_5), pointer :: mf51,mf52
 	type (mf_6), pointer :: mf6
 
-	mf6 => mat1%mf6
-	do while(associated(mf6))
-		if(mf6%mt == mt) then
-			return
-		else if(mf6%mt > 18) then
-			exit
-		endif
-		mf6 => mf6%next
-	end do
+	! first look for mt in mat1 for MF5 or MF6
+	! if found, no nothing.
 
-	nullify(lm1)
-	mf51 => mat1%mf5
-	do while(associated(mf51))
-		if(mf51%mt == mt) then
-			return
-		else if(mf51%mt > mt) then
-			exit
-		endif
-		lm1 => mf51
-		mf51 => mf51%next
-	end do
+	mf51 => find(mat1%mf5,mt)
+	if(associated(mf51)) return
 
-	nullify(lm2)
-	mf52 => mat2%mf5
-	do while(associated(mf52))
-		if(mf52%mt == mt) exit
-		lm2 => mf52
-		mf52 => mf52%next
-	end do
+	mf6 => find(mat1%mf6,mt)
+	if(associated(mf6)) return
+
+	! now try to get the mt from mat2
+
+	mf52 => pop(mat2%mf5,mt)
 	if(.not.associated(mf52)) then
 		if(mt /= 18) return
 		write(6,*) ' Donor ENDF file contains no MF5/MT18!'
 		stop 1
 	endif
 
-	! remove mf52 from mat2
+	! insert donor mt into mat1
 
-	if(associated(lm2)) then
-		lm2%next => mf52%next
-	else
-		mat2%mf5 => mf52%next
-	endif
-
-	! add it in to mat1
-
-	mf52%next => mf51
-	if(associated(lm1)) then
-		lm1%next => mf52
-	else
-		mat1%mf5 => mf52
-	endif
+	qstat = put(mat1%mf5,mf52)
+	if(.not.qstat) write(6,*)' Error inserting section into mat1'
 
 	write(6,'(a,I3,a)') '  MF5/MT',mt,' moved'
 
