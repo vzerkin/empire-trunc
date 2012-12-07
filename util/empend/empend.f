@@ -1,6 +1,7 @@
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2009/11/06 20:15:57 $ 
-Ccc   * $Id: empend.f,v 1.61 2010/09/08 23:29:00 trkov Exp $ 
+Ccc $Rev: 3160 $                                                          | 
+Ccc $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
+Ccc $Author: atrkov $                                                  
+Ccc $Id: empend.f,v 1.61 2010/09/08 23:29:00 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -107,6 +108,8 @@ C-V           interpolation range can be defined in ENDF)
 C-V        - Reduce emission spectra thinning criterion from 1 to 0.5 %.
 C-V  12/07 Fix Eout for discrete levels when no recoils are given.
 C-V        Add to log file the printout of reactions summed into MT 5.
+C-V  12/12 Read angle-integrated spectra to check and normalise double
+C-V        differential cross sections.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -4511,19 +4514,78 @@ c...          end do
 c...          stop
 c...       end if
 c...
+C* Check the spectrum against angle-integrated values
+      LSP=0
+      JSP=0
+      READ (LIN,891) REC
+      IF(REC(1:37).EQ.'          Integrated Emission Spectra') THEN
+C*      -- Read the angle integrated spectra if present
+        LSP=LSC
+        JSP=0
+        READ (LIN,891) REC
+        READ (LIN,891) REC
+  622   READ (LIN,891) REC
+        IF(REC(1:30).NE.'                              ') THEN
+          JSP=JSP+1
+          READ (REC,*) RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C...
+C...      print *,jsp,RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C...
+          GO TO 622
+        END IF
+      END IF
 C* Calculate the integral of the spectrum
-      SPC=0
-      EOU=RWO(L64)
-      PEU=RWO(L64+1)
+      SPC =0
+      EOU =RWO(L64)
+      PEU =0
+      LNRM=0
+      ENRM=0
+      RNRM=1
       LI =L64
-      DO I=2,NEP
-        LI =LI+LHI+2
+      DO I=1,NEP
         EOL=EOU
         PEL=PEU
         EOU=RWO(LI)
         PEU=RWO(LI+1)
-        SPC=SPC+(PEU+PEL)*(EOU-EOL)/2
+C*      -- Renormalise the distribution to match angle-integrated spectrum
+        IF(JSP.GT.0 .AND. MT6.GT.0) THEN
+          DO J=1,JSP
+            EJ =RWO(LSP+2*J-2)*1.e6
+            SJ =RWO(LSP+2*J-1)/(4*PI)
+            IF(NINT(EJ-EOU).EQ.0) THEN
+C...
+C...          print *,'Matching', EOU,EJ,PEU,SJ
+C...
+              IF(PEU.GT.0) THEN
+                IF(ABS(SJ-PEU).GT.PEU*0.02) THEN
+                  LL1=LHI+1
+                  DO L=1,LL1
+                    RWO(LI+L)=RWO(LI+L)*SJ/PEU
+                  END DO
+                  IF(ABS(SJ/PEU-1).GT.ABS(RNRM-1)) THEN
+                    ENRM=EOU
+                    RNRM=SJ/PEU
+                    LNRM=LNRM+1
+c...
+c...                WRITE(LTT,908) EE,EOU,100*(RNRM-1)
+                    WRITE(LER,908) EE,EOU,100*(RNRM-1)
+c...
+                  END IF
+                  PEU=SJ
+                END IF
+              END IF
+            END IF
+          END DO
+        END IF
+        IF(EOU.GT.0) SPC=SPC+(PEU+PEL)*(EOU-EOL)/2
+        LI =LI+LHI+2
       END DO
+C...
+      IF(LNRM.NE.0) THEN
+        WRITE(LTT,907) EE,EOU,100*(RNRM-1),LNRM
+        WRITE(LER,907) EE,EOU,100*(RNRM-1),LNRM
+      END IF
+C...
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
         WRITE(LTT,914) JT6,IZAP,EE,XS3,SPC
@@ -4812,6 +4874,10 @@ C*
   821 FORMAT(4F11.0,2I11,F4.2)
   822 FORMAT(6I11,I4)
   891 FORMAT(A136)
+  907 FORMAT(' EMPEND WARNING - At EIN',1P,E9.2,' Eou',E9.2
+     1      ,' spectrum renorma. max',F10.1,' % at',I4,' points')
+  908 FORMAT(' EMPEND WARNING - At EIN',1P,E9.2,' Eou',E9.2
+     1      ,' spectrum renormalised',F10.1,' %')
   909 FORMAT(' EMPEND WARNING - MT',I3,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
   910 FORMAT(' EMPEND WARNING - Can not recognise spectrum for '
