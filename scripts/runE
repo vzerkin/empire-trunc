@@ -50,6 +50,8 @@ def runE(proj):
     if not isEmpty(proj+'.lst'):
         cp(proj+'.lst', proj+'-prev.lst')
         print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
+        cp(proj+'.inp', proj+'-prev.inp')
+        print ('Preserved existing *.inp file as: %s' % proj+'-prev.inp')
     
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
