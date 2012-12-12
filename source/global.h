@@ -1,6 +1,6 @@
-C $Rev: 3265 $
+C $Rev: 3270 $
 C $Author: rcapote $
-C $Date: 2012-12-02 19:32:05 +0100 (So, 02 Dez 2012) $
+C $Date: 2012-12-12 16:24:19 +0100 (Mi, 12 Dez 2012) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -122,7 +122,7 @@ C
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,
-     &                 CINred(ndlv)
+     &                 CINred(ndlv), CELcor
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       CHARACTER*72 EMPtitle
@@ -156,7 +156,7 @@ C
      &                 XMAss(0:ndnuc), XMAss_ej(0:ndejc), XMInn(nfhump),
      &                 XN(0:ndnuc), XNEjc(0:ndejc), XNI,
      &                 YRAst(ndlw,ndnuc), Z(0:ndnuc), ZEJc(0:ndejc)
-      DOUBLE PRECISION rTOTRED,rFCCRED,rFUSRED,rELAred,rCELred 
+      DOUBLE PRECISION rTOTRED,rFCCRED,rFUSRED,rELAred,rCELred,rCELcor 
       DOUBLE PRECISION FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
 
       DOUBLE PRECISION rTUNEfi(0:ndnuc),rFCOred, rCINred(ndlv)
@@ -236,7 +236,7 @@ C     COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf, POPcsea
      &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
-     &                 CINred, rCINred, TUNebu, TUNent 
+     &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,

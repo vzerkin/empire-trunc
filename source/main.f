@@ -1,6 +1,6 @@
-cc   * $Rev: 3265 $
+cc   * $Rev: 3270 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-02 19:32:05 +0100 (So, 02 Dez 2012) $
+Ccc   * $Date: 2012-12-12 16:24:19 +0100 (Mi, 12 Dez 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -274,7 +274,6 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
      &   '(''   Elab     <Epfns>  nubar(TEST)  Tmaxw(equiv) '')')
           endif
         ENDIF
-
         WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
         WRITE(112,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total NT ',
@@ -284,7 +283,6 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
         WRITE(113,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total BU ',
      &   symbe(0),symbe(0),symbe(0),symbe(0),symbe(0),symbe(0) 
-       
       ENDIF
 C-----
 C-----Prepare Giant Resonance parameters - systematics
@@ -2344,7 +2342,7 @@ C--------down on the ground state
            WRITE (8,*) ' Shape elastic cross section',
      &                     ELAred*ELAcs, ' mb'
 C----------CN contribution to elastic ddx
-           ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
+           ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI * CELcor
            if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
              CN_isotropic = .TRUE.
              WRITE(8,*)
@@ -2361,24 +2359,24 @@ C----------CN contribution to elastic ddx
              WRITE (8,*) ' WARNING: CN elastic is 0'
            ELSE
              WRITE (8,*) ' CN elastic cross section   ',
-     &                sngl(POPlv(LEVtarg,mt2)),' mb'
+     &                sngl(POPlv(LEVtarg,mt2)*CELcor),' mb'
              IF(CN_isotropic) then   
                WRITE (8,*)
      &          ' Isotropic Compound Elastic=', sngl(ELCncs), ' mb/str'
              ELSE
                WRITE (8,*) ' CN elastic cross section (ECIS) ',
      &           sngl(4.d0*pi*PL_CN(0,1)),' mb' 
+               ftmp = 1.d0
+               if(PL_CN(0,ilevcol).gt.0.d0) ftmp = ELCncs/PL_CN(0,1)
                IF(INTerf.eq.1) then
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
-     &           4.d0*pi*ELCncs,  
-     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
+                 WRITE (110,'(1x,E12.5,3x,F8.4,3x,11(F9.2,1x),A17)') 
+     &           EINl, ftmp, 4.d0*pi*ELCncs,  
+     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
      &           'ENG-WEID. TRANSF.'  
-C    &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10))!,
-C    &           'ENG-WEID. TRANSF.'  
                ELSE
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') EINl, 
-     &           4.d0*pi*ELCncs,  
-     &          (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,min(ND_nlv,10))
+                 WRITE (110,'(1x,E12.5,3x,F8.4,3x,11(F9.2,1x),A17)') 
+     &           EINl, ftmp, 4.d0*pi*ELCncs,  
+     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
                WRITE (8,*) 
                WRITE (8,*) ' Nonisotropic Compound to discrete levels in
@@ -3428,9 +3426,6 @@ C    &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xs
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
-
-
-
      &                     4.d0*PI*ELCncs,                !CN_el
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
@@ -3557,6 +3552,9 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
         IF (INT(ZEJc(0)).EQ.0 .AND. CELred.ne.1)
      &    WRITE (8,'('' * Comp. Elastic cross section scaled by '',
      &     G13.6)') CELred
+        IF (INT(ZEJc(0)).EQ.0 .AND. CELcor.ne.1)
+     &    WRITE (8,'('' * Comp. Elastic cross section corrected by '',
+     &     G13.6)') CELcor
         if(FCCred.ne.1)
      &    WRITE (8,'('' * Disc.lev. DIR cross section scaled by '',
      &     G13.6)') FCCred
