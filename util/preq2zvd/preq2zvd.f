@@ -2,7 +2,7 @@
 C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       implicit none
       integer maxr,maxen
-      parameter(maxr=15,maxen=500)
+      parameter(maxr=16,maxen=500)
       integer nreac,iz,ia,ncol,nch,ios,ich
       integer i,j,nen,toplot(maxr)
       character*2 symb
@@ -17,10 +17,11 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
    
       toplot(2) = 1  ! elast
       toplot(3) = 1  ! compound elastic
-      toplot(4) = 1  ! nonel
-      toplot(5) = 1  ! CN-form
-      toplot(6) = 1  ! direct
-      toplot(8) = 1  ! preeq
+      toplot(4) = 1  ! shape elastic
+      toplot(5) = 1  ! nonel
+      toplot(6) = 1  ! CN-form
+      toplot(7) = 1  ! direct
+      toplot(9) = 1  ! preeq
 C       
       OPEN(10,file='PREQ2ZVD.INP',STATUS='OLD',ERR=10)
       READ(10,*) ! Skipping column indicator 
@@ -40,18 +41,19 @@ C  Pre-equil    DWBA-disc  DWBA-cont      MSD          MSC       PCROSS       HM
       creaction(1) ='(z,tot)     ' 
       creaction(2) ='(z,nel)     '
       creaction(3) ='(z,cel)     '
-      creaction(4) ='(z,non)     '
-      creaction(5) ='(z,fus)     '
-      creaction(6) ='(z,dir)     '
-      creaction(7) ='(z,CC)      '
-      creaction(8) ='(z,preq)    '
-      creaction(9) ='(z,dwba-dis)'
-      creaction(10)='(z,dwba-con)'
-      creaction(11)='(z,MSD)'
-      creaction(12)='(z,MSC)'
-      creaction(13)='(z,exciton) '
-      creaction(14)='(z,HMS)'
-      creaction(15)='(z,CC-2lev) '
+      creaction(4) ='(z,sel)     '
+      creaction(5) ='(z,non)     '
+      creaction(6) ='(z,fus)     '
+      creaction(7) ='(z,dir)     '
+      creaction(8) ='(z,CC)      '
+      creaction(9) ='(z,preq)    '
+      creaction(10)='(z,dwba-dis)'
+      creaction(11)='(z,dwba-con)'
+      creaction(12)='(z,MSD)'
+      creaction(13)='(z,MSC)'
+      creaction(14)='(z,exciton) '
+      creaction(15)='(z,HMS)'
+      creaction(16)='(z,CC-2lev) '
 
       nen = 0
       do i=1,maxen
@@ -78,7 +80,7 @@ C       Skipping plots
         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
      &    iz,symb,ia,trim(creaction(j))       
   
-        if(j.le.6 .or. j.eq.8 .or. j.eq.15) then 
+        if(j.le.7 .or. j.eq.9 .or. j.eq.16) then 
           if(j.eq.1) then 
             CALL OPEN_ZVV(20,caz,
      &        'Elastic and nonelastic cross sections ')
@@ -91,9 +93,9 @@ C       Skipping plots
           CALL CLOSE_ZVV(20,' ',' ')
         endif
 
-        if(j.eq.4 .or. j.eq.5 .or. j.eq.8 .or. 
-     &                (j.gt.9 .and. j.le.14)) then 
-          if(j.eq.4) then 
+        if(j.eq.5 .or. j.eq.6 .or. j.eq.9 .or. 
+     &                (j.gt.10 .and. j.le.15)) then 
+          if(j.eq.5) then 
             CALL OPEN_ZVV(21,caz,
      &      'CN and preequilibrium cross sections  ')
           else
