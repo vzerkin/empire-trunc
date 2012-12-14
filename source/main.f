@@ -1,16 +1,16 @@
-cc   * $Rev: 3270 $
+cc   * $Rev: 3271 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-12 16:24:19 +0100 (Mi, 12 Dez 2012) $
+Ccc   * $Date: 2012-12-14 08:35:20 +0100 (Fr, 14 Dez 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
-Ccc   *                                                         class:ppu*
-Ccc   *                         E M P I R E                              *
-Ccc   *                                                                  *
-Ccc   *               Used to be main of the EMPIRE code                 *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
+Ccc   *                                                         class:ppu        
+Ccc   *                         E M P I R E                                    
+Ccc   *                                                                        
+Ccc   *               Used to be main of the EMPIRE code 
+Ccc   *                                                 
+Ccc   *                                                 
 Ccc   ********************************************************************
 
       use nubar_reader
@@ -230,6 +230,7 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','   CN-el    ',
+     &      ' Shape-el   ',
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
@@ -249,6 +250,7 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','   CN-el    ',
+     &      ' Shape-el   ',
      &      ' Nonelast   ','  CN-form   ','  Direct    ',
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
@@ -3402,31 +3404,15 @@ C    &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
-C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-C                          Low-lying XS   and       CE         substracted from nonelastic
-C    &                  -   xscclow       -    4.d0*PI*ELCncs,
      &    TOTcsfis, 
      &    mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
-C
-C       WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
-C    &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-C                          Low-lying XS   and       CE         added to elastic
-C    &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
-C    &                   4.d0*PI*ELCncs,                  !CN_el
-C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
-C    &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  
-C                          Low-lying XS   and       CE         substracted from nonelastic
-C    &                   -   xscclow       -   4.d0*PI*ELCncs,  
-C    &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
-C    &    xsdirect, xspreequ,                             !direct, preequil
-C    &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
-C    &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
 
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
      &                     4.d0*PI*ELCncs,                !CN_el
+     &    ELAcs*ELAred                   ,                !shape elastic 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
@@ -3442,10 +3428,12 @@ C    &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xs
      &                             - 4.d0*PI*ELCncs,      ! CE substracted from nonelastic
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada), xnub,
      &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
-C
+
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
+     &                     4.d0*PI*ELCncs,                !CN_el
+     &    ELAcs*ELAred                   ,                !shape elastic 
      &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
@@ -3466,13 +3454,15 @@ C
 C
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      !CN_el (CE) added to elastic 
+     &    ELAcs*ELAred   + 4.d0*PI*ELCncs,                !CN_el (CE) added to elastic 
+     &                     4.d0*PI*ELCncs,                !CN_el
+     &    ELAcs*ELAred                   ,                !shape elastic 
 C
 C         Total is 0 for charged particles, no correction
 C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 C
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
+     &                             - 4.d0*PI*ELCncs,      ! CE substracted from nonelastic
 C
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
