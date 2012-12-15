@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3273 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2012-12-15 16:00:28 +0100 (Sa, 15 Dez 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -228,74 +228,69 @@ C
       dpickup = 0.d0
       scompn  = Sigr
 
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0 .and. DXSred.gt.0)THEN
         write(8,99002)
 99002   FORMAT (/5X,
      &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
      &//)
         call DTRANS(iemin,iemax)
-99003   FORMAT (7x,5F8.2)
-        IF(DXSRED.GT.0.d0) then
-          scompn = Sigr - cross(2) -cross(5)
-          scompn = Sigr - cross(2) -cross(5)
-C
-          IF(scompn.le.0.d0) THEN
-            scompn  = 0.d0
-            dstrip  = Sigr/(cross(2)+cross(5))*cross(2)
-            dpickup = Sigr/(cross(2)+cross(5))*cross(5)
-            cross(2)= dstrip
-            cross(5)= dpickup
-            DO ienerg = 1, NDEX
-              spec(2,ienerg) = Sigr/(cross(2)+cross(5))*spec(2,ienerg)
-              spec(5,ienerg) = Sigr/(cross(2)+cross(5))*spec(5,ienerg)
-            ENDDO
-            write(8,99003) Einl,sigr,cross(2),cross(5)
-            WRITE (8,59010)
-59010       FORMAT (/,1X,
-     &      'Warning: Direct emission exhausted reaction cross section')
-          ENDIF
-c         write(8,99003) Einl,sigr,cross(2),cross(5)
+        scompn = Sigr - cross(2) -cross(5)
+
+        IF(scompn.le.0.d0) THEN
+          scompn  = 0.01d0
+          dstrip  = (Sigr-0.01d0)/(cross(2)+cross(5))*cross(2)
+          dpickup = (Sigr-0.01d0)/(cross(2)+cross(5))*cross(5)
+          cross(2)= dstrip
+          cross(5)= dpickup
+          DO ienerg = 1, NDEX
+            spec(2,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(5))
+     &                     *spec(2,ienerg)
+            spec(5,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(5))
+     &                     *spec(5,ienerg)
+          ENDDO
+          WRITE (8,59010)
+        ELSE   
           dstrip =cross(2)
           dpickup=cross(5)
         ENDIF
+        write(8,'(7x,5F8.2)') Einl,sigr,cross(2),cross(5)
       ENDIF
 C
 C-----Direct reaction spectra for He3,p and He3,a 
 C
-      IF(Zejc(0).eq.2.D0 .and. Aejc(0).eq.3.D0) THEN
+      IF(Zejc(0).eq.2.D0 .and. Aejc(0).eq.3.D0 .and. DXSred.gt.0)THEN
         write(8,*)
      &' He-3 Stripping and Pick-up Parameterization (C. Kalbach)'
         write(8,*)
         call DTRANS(iemin,iemax)
-        IF(DXSRED.GT.0.d0) then
-          scompn = Sigr - cross(2) -cross(3)
-          scompn = Sigr - cross(2) -cross(3)
+        scompn = Sigr - cross(2) -cross(3)
 C
-          IF(scompn.le.0.d0) THEN
-            scompn  = 0.d0
-            dstrip  = Sigr/(cross(2)+cross(3))*cross(2)
-            dpickup = Sigr/(cross(2)+cross(3))*cross(3)
-            cross(2)= dstrip
-            cross(3)= dpickup
-            DO ienerg = 1, NDEX
-              spec(2,ienerg) = Sigr/(cross(2)+cross(3))*spec(2,ienerg)
-              spec(5,ienerg) = Sigr/(cross(2)+cross(3))*spec(3,ienerg)
-            ENDDO
-            write(8,99003) Einl,sigr,cross(2),cross(3)
-            WRITE (8,59010)
-          ENDIF
-c         write(8,99003) Einl,sigr,cross(2),cross(3)
+        IF(scompn.le.0.d0) THEN
+          scompn  = 0.01d0
+          dstrip  = (Sigr-0.01d0)/(cross(2)+cross(3))*cross(2)
+          dpickup = (Sigr-0.01d0)/(cross(2)+cross(3))*cross(3)
+          cross(2)= dstrip
+          cross(3)= dpickup
+          DO ienerg = 1, NDEX
+            spec(2,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(3))
+     &                     *spec(2,ienerg)
+            spec(3,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(3))
+     &                     *spec(3,ienerg)
+          ENDDO
+          WRITE (8,59010)
+59010     FORMAT (/,1X,
+     &      'Warning: Direct emission exhausted reaction cross section')
+        ELSE   
           dstrip =cross(2)
           dpickup=cross(3)
         ENDIF
+        write(8,'(7x,5F8.2)') Einl,sigr,cross(2),cross(3)
       ENDIF
 C
       IF(scompn.eq.0.d0) goto 60
 
-      WRITE (8,99005)
-99005 FORMAT (5X,' Preequilibrium decay (PCROSS)',/)
-      WRITE (8,99010) MFPp
-99010 FORMAT (/,1X,'Mean free path parameter = ',F4.2,/)
+      WRITE (8,'(5X,'' Preequilibrium decay (PCROSS)'',/)')
+      WRITE (8,'(/,1X,''Mean free path parameter = '',F5.2,/)') MFPp
 
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
@@ -537,7 +532,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSEIF (nejc.ge.4) THEN !complex particle
                IF (IDNa(3 + nejc,6).EQ.0) THEN
@@ -546,7 +541,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') SYMbe(nejc), cross(nejc), status
             ELSE !gamma
                IF (IDNa(5,6).EQ.0) THEN
@@ -555,7 +550,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                   status = "  (accepted)"
                ENDIF
                WRITE (8,
-     &'(1X,A2,'' PCROSS emission cross section'',G12.6,
+     &'(1X,A2,'' PCROSS emission cross section'',G12.5,
      &'' mb'',A12)') 'g ', cross(nejc), status
             ENDIF
 C---------We don't need this spectrum printout any more but I leave it
@@ -575,16 +570,16 @@ C     write(*,*) 'Middle of PCROSS :',
 C    >            sngl(totemis),sngl(xsinl),sngl(SIGr)
 C
 99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
-     &   ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
+     &    ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
 
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0) THEN
+      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0. and. DXSred.gt.0) THEN
             WRITE (8,99016)
-99016 FORMAT (/1x,'Kalbach parameterization for pick-up and stripping',
-     &           ' is considered')
+99016 FORMAT(/1x,'Kalbach parameterization for breakup, pick-up and ',
+     &             'stripping is used')
             WRITE (8,99017) dbreak,dstrip,dpickup
-99017 FORMAT (1X,'PCROSS deut breakup cross section  =',F8.2,' mb',/,
-     &        1X,'PCROSS d,p stripping cross section =',F8.2,' mb',/,
-     &        1X,'PCROSS d,t pickup cross section    =',F8.2,' mb')
+99017 FORMAT (1X,'PCROSS breakup   cross section =',F8.2,' mb',/,
+     &         1X,'PCROSS stripping cross section =',F8.2,' mb',/,
+     &         1X,'PCROSS pickup    cross section =',F8.2,' mb')
       ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
@@ -1072,15 +1067,14 @@ C--------------------------------------------------------------------
       ENDDO
       Ih2 = MIN(Ih2,NHEq)
       IF (IOUt.GE.3) WRITE (8,99018)  2*(Ih2-1) + Ap, Ih2, CHMax
-99018 FORMAT (/3X,'Nmax',I3,' Hmax =',I3,' Coeff. CHMax =',F4.2/)
+99018 FORMAT (/3X,'Nmax',I3,' Hmax =',I3,' Coeff. CHMax =',F5.2/)
       IF (IOUt.GE.3) WRITE (8,99020)
 99020 FORMAT (/3X,'TIME INTEGRALS OF TAU(N)'/3X,
      &        ' N   UP TO Nmax       ')
       IF (IOUt.GE.3) THEN
          DO h1 = 1, Ih2
             hhh = 2*(h1 - 1) + Ap
-            WRITE (8,99025) hhh, Em(h1)
-99025       FORMAT (I5,2E14.3)
+            WRITE (8,'(I5,2E14.3)') hhh, Em(h1)
          ENDDO
          WRITE (8,*)
       ENDIF

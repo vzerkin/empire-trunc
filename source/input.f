@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3270 $
+Ccc   * $Rev: 3273 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-12 16:24:19 +0100 (Mi, 12 Dez 2012) $
+Ccc   * $Date: 2012-12-15 16:00:28 +0100 (Sa, 15 Dez 2012) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -345,9 +345,10 @@ C
 C
          IOMwritecc = 0
          MODelecis = 0
-         EXClusiv = .TRUE. ! Default: All exclusive calculation
+         EXClusiv = .TRUE.! Default: All exclusive calculation
          WIDcoll = 0.05d0  ! Default = 50 keV resolution  
-         DXSred = 1.d0     ! scaling factor for direct processes in deuteron induced reactions
+C        Scaling factor for direct processes consideration for complex projectiles
+         DXSred = 0.d0     ! Default: supressed 
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
@@ -6808,18 +6809,18 @@ C-----
 C-----
          IF (name.EQ.'DXSRED') THEN
             IF (val.LE.0.d0) THEN
-             DXSred = 0.d0
+               DXSred = 0.d0
                WRITE ( 8,
-     &'('' Deuteron stripping/pick-up suppressed!'')')
+     &'('' Direct reactions for complex projectiles suppressed!'')')
                WRITE (12,
-     &'('' Deuteron stripping/pick-up suppressed!'')')
+     &'('' Direct reactions for complex projectiles suppressed!'')')
             ELSE
                DXSred = val
                WRITE ( 8,
-     &'('' Deuteron stripping/pick-up cross section'',
+     &'('' Direct-reaction cross sections for complex projectiles'',
      &  '' normalized by a factor '',F6.3)') DXSred
                WRITE (12,
-     &'('' Deuteron stripping/pick-up cross section'',
+     &'('' Direct-reaction cross sections for complex projectiles'',
      &  '' normalized by a factor '',F6.3)') DXSred
             ENDIF
             GOTO 100
