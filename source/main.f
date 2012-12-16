@@ -1,16 +1,16 @@
-cc   * $Rev: 3273 $
+cc   * $Rev: 3274 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-15 16:00:28 +0100 (Sa, 15 Dez 2012) $
+Ccc   * $Date: 2012-12-16 15:28:50 +0100 (So, 16 Dez 2012) $
 
       SUBROUTINE EMPIRE
 Ccc
 Ccc   ********************************************************************
-Ccc   *                                                         class:ppu*
-Ccc   *                         E M P I R E                              *
-Ccc   *                                                                  *
-Ccc   *               Used to be main of the EMPIRE code                 *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
+Ccc   *                                                         class:ppu        
+Ccc   *                         E M P I R E                                    
+Ccc   *                                                                        
+Ccc   *               Used to be main of the EMPIRE code 
+Ccc   *                                                 
+Ccc   *                                                 
 Ccc   ********************************************************************
 
       use nubar_reader
@@ -180,17 +180,24 @@ C-----
         OPEN (53,FILE='LOW_ENERGY.OUT', STATUS = 'UNKNOWN')
         OPEN (41, FILE='XSECTIONS.OUT' , STATUS='unknown')
 
+        IF (SFACT.gt.0) then
+          OPEN (unit = 781, file = "S-FACTOR.DAT")
+          WRITE(781,*) '#Ecm(MeV)  Cross Section(b)  S-factor(MeV b)'
+          WRITE(781,*) '#                                           '
+        ENDIF
+
         IF(NNG_xs.gt.0) 
      &    OPEN (104, FILE='GAMMA_INT.DAT', STATUS='unknown')
 
         OPEN (107, FILE='EL_INEL.DAT'  , STATUS='unknown')
         OPEN (108, FILE='TOTCOR.DAT'   , STATUS='unknown')
         OPEN (110, FILE='CN-LEV-XS.DAT', STATUS='unknown')
-        IF(DXSred.gt.0) then
+
+        IF (DXSred.gt.0) then             
           OPEN (112, FILE='TRANSFER-XS.DAT', STATUS='unknown')
           OPEN (113, FILE='BREAK-UP-XS.DAT', STATUS='unknown')
         ENDIF
-
+        
         i = 0
         DO nnuc=1,NNUcd
           if( REAction(nnuc)(1:2).eq.'(z' ) then
@@ -278,7 +285,7 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
      &   '(''   Elab     <Epfns>  nubar(TEST)  Tmaxw(equiv) '')')
           endif
         ENDIF
-        IF(DXSred.gt.0) then
+        IF (DXSred.gt.0) then                     
           WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
           WRITE(112,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total NT ',
@@ -1044,12 +1051,11 @@ C-----PCROSS exciton model calculations of preequilibrium contribution
 C-----including cluster emission by Iwamoto-Harada model and angular
 C-----distributions according to Kalbach systematics
 C-----
+C-----Kalbach parameterizations of direct reactions
+C-----   for complex projectiles also used
+C-----
       totemis = 0.d0
       IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
-C        ftmp = CSFus - xsinl
-C        RCN, Jan. 2006, xsinl is replacing PCROSS neutron emission
-C        so it should not used for normalization
-C        xsinl is calculated by MSD
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis)
          IF(DXSred.gt.0) then
@@ -1058,8 +1064,8 @@ C        xsinl is calculated by MSD
            WRITE(113,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossBUt,
      &        (crossBU(i),i=1,NDEJC)
          ENDIF
-      ENDIF          ! PCRoss done
-                                                     ! To include inel for (g,x)
+      ENDIF ! PCRoss done
+                                                                     ! To include inel for (g,x)
       IF ((xsinl+totemis+(SINl+SINlcc)*FCCRED+SINlcont*FCOred).gt.0. !.AND. NPRoject.gt.0 
      &    .AND. NREs(NPRoject).GE.0 ) THEN
 C--------Print inelastic PE double differential cross sections
@@ -4248,8 +4254,8 @@ C
          CLOSE (107)
          CLOSE (108)
          CLOSE (110)
-         IF(DXSred.gt.0) CLOSE (112)
-         IF(DXSred.gt.0) CLOSE (113)
+         IF (DXSred.gt.0) CLOSE (112)
+         IF (DXSred.gt.0) CLOSE (113)
          IF(DEGa.GT.0) THEN
            CLOSE (42)
          ELSE
@@ -4262,18 +4268,18 @@ C
            CLOSE (73)
            CLOSE (74)
          ENDIF
-		 CLOSE (98)
+         CLOSE (98)
 C--------Saving random seeds
          ftmp = grand()
          OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
          write(94,*)  indexf, indexb
-         Do i = 1, 250
+         DO i = 1, 250
           write(94,*) buffer(i)
          ENDDO
          CLOSE(94)
          CLOSE(95)  ! FROM INPUT.F
          CLOSE(102)
-         CLOSE(781)
+         IF (SFACT.GT.0) CLOSE(781)
          RETURN
       ENDIF
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3273 $
+Ccc   * $Rev: 3274 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-15 16:00:28 +0100 (Sa, 15 Dez 2012) $
+Ccc   * $Date: 2012-12-16 15:28:50 +0100 (So, 16 Dez 2012) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -10,7 +10,7 @@ C
       INCLUDE 'global.h'
 C
 C     FORMAL PARAMETERS:
-C     SIGR = REACTION CROSS SECTION
+C     Sigr = REACTION CROSS SECTION
 C                ---- OUTPUT -------
 C     CROss(NDEjc+1) = CHANNEL EMISSION CROSS SECTION
 C     FR = DEPLETION FACTOR FOR PREEQUILIBRIUM
@@ -253,7 +253,7 @@ C
           dstrip =cross(2)
           dpickup=cross(5)
         ENDIF
-        write(8,'(7x,5F8.2)') Einl,sigr,cross(2),cross(5)
+        write(8,'(7x,5F8.2)') Einl,sigr,scompn,cross(2),cross(5)
       ENDIF
 C
 C-----Direct reaction spectra for He3,p and He3,a 
@@ -284,13 +284,13 @@ C
           dstrip =cross(2)
           dpickup=cross(3)
         ENDIF
-        write(8,'(7x,5F8.2)') Einl,sigr,cross(2),cross(3)
+        write(8,'(7x,5F8.2)') Einl,sigr,scompn,cross(2),cross(3)
       ENDIF
 C
       IF(scompn.eq.0.d0) goto 60
 
-      WRITE (8,'(5X,'' Preequilibrium decay (PCROSS)'',/)')
-      WRITE (8,'(/,1X,''Mean free path parameter = '',F5.2,/)') MFPp
+      WRITE (8,'(/,5X,'' Preequilibrium decay (PCROSS)'',/)')
+      WRITE (8,'(/,1X,'' Mean free path parameter = '',F5.2,/)') MFPp
 
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
@@ -563,13 +563,13 @@ C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
 
-      fr = totemis/Sigr
+      fr = totemis/scompn
       WRITE (8,99015) totemis, fr
 C
 C     write(*,*) 'Middle of PCROSS :',
-C    >            sngl(totemis),sngl(xsinl),sngl(SIGr)
+C    >            sngl(totemis),sngl(xsinl),sngl(scompn)
 C
-99015 FORMAT (/1X,'PCROSS preequilibrium total cross section   =',F8.2,
+99015 FORMAT ( /1X,'PCROSS preequilibrium total cross section   =',F8.2,
      &    ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
 
       IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0. and. DXSred.gt.0) THEN
@@ -577,7 +577,7 @@ C
 99016 FORMAT(/1x,'Kalbach parameterization for breakup, pick-up and ',
      &             'stripping is used')
             WRITE (8,99017) dbreak,dstrip,dpickup
-99017 FORMAT (1X,'PCROSS breakup   cross section =',F8.2,' mb',/,
+99017 FORMAT ( 1X,'PCROSS breakup   cross section =',F8.2,' mb',/,
      &         1X,'PCROSS stripping cross section =',F8.2,' mb',/,
      &         1X,'PCROSS pickup    cross section =',F8.2,' mb')
       ENDIF
@@ -639,6 +639,7 @@ c     totemis=sigr*fr
       write(8,*) 
       WRITE (8,99020)
 99020 FORMAT (/' ',125('*')/)
+      RETURN
       END
 
       SUBROUTINE KALBACH(Jcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
