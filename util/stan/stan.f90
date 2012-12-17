@@ -18,6 +18,7 @@
     write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
     if(status /= 0) then
+        write(6,*)
         write(6,*) ' Error reading '//infile(1:nin)
         write(6,*) ' No output file written'
         call abort_stan
@@ -28,6 +29,7 @@
     write(6,*) ' Writing '//outfile(1:nout)
     status = write_endf_file(outfile(1:nout),endf,qover)
     if(status /= 0) then
+        write(6,*)
         write(6,*) ' Error writing '//outfile(1:nout)
         write(6,*) ' Output file may be incomplete'
         call abort_stan
@@ -101,8 +103,8 @@
            call getarg(i,outfile)
            nout = len_trim(outfile)
            if((nout <= 0) .or. (outfile(1:1) == '-')) then
-               write(6,*) ' ##### ERROR #####'
                write(6,*)
+               write(6,*) ' #####     ERROR     #####'
                write(6,*) ' Error parsing output filename'
                call abort_stan
            endif
@@ -146,8 +148,8 @@
                call getarg(i,dum)
                n = len_trim(dum)
                if((n <= 0) .or. (dum(1:1) == '-')) then
-                   write(6,*) ' ##### ERROR #####'
                    write(6,*)
+                   write(6,*) ' #####     ERROR     #####'
                    write(6,*) ' Error parsing header control flag'
                    call abort_stan
                endif
@@ -169,8 +171,8 @@
 
            read(dum(1:n),*,iostat=stat) m
            if(stat /= 0) then
-               write(6,*) ' ##### ERROR #####'
                write(6,*)
+               write(6,*) ' #####     ERROR     #####'
                write(6,*) ' Error parsing header control flag'
                call abort_stan
            endif
@@ -179,11 +181,49 @@
            case(0:2)
                call set_header_control(m)
            case default
-               write(6,*) ' ##### ERROR #####'
                write(6,*)
+               write(6,*) ' #####     ERROR     #####'
                write(6,*) ' Undefined flag specified for header action:',m
                call abort_stan
            end select
+
+       else if(cmd(1:2) == '-e') then
+
+           ! error limit flag
+
+           if(len == 2) then
+               ! assume they used a space as separator
+               i = i + 1
+               call getarg(i,dum)
+               n = len_trim(dum)
+               if((n <= 0) .or. (dum(1:1) == '-')) then
+                   write(6,*)
+                   write(6,*) ' #####     ERROR     #####'
+                   write(6,*) ' Error parsing error limit'
+                   call abort_stan
+               endif
+           else
+               if(cmd(3:3) == '=') then
+                  dum = cmd(4:len)
+                  n = len - 3
+               else
+                  dum = cmd(3:len)
+                  n = len - 2
+               endif
+           endif
+
+           ! try to read
+
+           m = 0
+           read(dum(1:n),*,iostat=stat) m
+           if((stat /= 0) .or. (m <= 0)) then
+               write(6,*)
+               write(6,*) ' #####     ERROR     #####'
+               write(6,*) ' Error parsing error limit'
+               call abort_stan
+           endif
+
+           call set_error_limit(m)
 
        else if(cmd(1:len) == '-h') then
 
@@ -214,6 +254,7 @@
            write(6,10) '        the default is for the write to fail if output file already exists'
            write(6,10) ' -l   : put ENDF line numbers in columns 76:80 of output file'
            write(6,10) '        the default is no line numbers in output files'
+           write(6,10) ' -e=n : Set limit of report errors in file to n.'
            write(6,10) ' -x=n : Set action for first line of ENDF file, the header or TPID line.'
            write(6,10) '        The action is controlled by flag n:'
            write(6,10) '          n=0) Default; no action taken. Header line left as is.'
@@ -224,8 +265,8 @@
 
        else if(cmd(1:1) == '-') then
 
-           write(6,*) ' ##### ERROR #####'
            write(6,*)
+           write(6,*) ' #####     ERROR     #####'
            write(6,*)' Unknown option : ', cmd(1:len)
            call abort_stan
 
@@ -242,8 +283,8 @@
            call getarg(i,cmd)
            len = len_trim(cmd)
            if(len > 0) then
-               write(6,*) ' ##### ERROR #####'
                write(6,*)
+               write(6,*) ' #####     ERROR     #####'
                write(6,*) ' Too many parameters specified on command line'
                call abort_stan
            endif
@@ -257,16 +298,16 @@
     end do
 
     if(nin == 0) then
-        write(6,*) ' ##### ERROR #####'
         write(6,*)
+        write(6,*) ' #####     ERROR     #####'
         write(6,*) ' Input ENDF file not specified on command line'
         call abort_stan
     endif
 
     inquire(file=infile(1:nin),exist=qx)
     if(.not.qx) then
-        write(6,*) ' ##### ERROR #####'
         write(6,*)
+        write(6,*) ' #####     ERROR     #####'
         write(6,*) ' Specified input file does not exist:',infile(1:nin)
         call abort_stan
     endif

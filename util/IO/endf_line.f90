@@ -38,7 +38,7 @@ module endf_lines
     integer, public :: errcnt             ! error counter
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
-    public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect
+    public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect, set_error_limit
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat
 
 !------------------------------------------------------------------------------
@@ -174,8 +174,8 @@ module endf_lines
         isev = 3
     end select
 
-    write(6,*) emg(isev)
     write(6,*)
+    write(6,*) emg(isev)
     write(6,*) ' ',errline(ix:ler)
 
     ! if we were reading/writing a file write last line processed
