@@ -209,8 +209,8 @@ module ENDF_MF1_IO
         call endf_error(erlin,-125)
     endif
 
-    call chk_siz(r1%nwd,'MF1 comments','NWD')
-    call chk_siz(r1%nxc,'MF1 directory','NXC')
+    call chk_siz(r1%nwd,'MF1 comments','NWD',0)
+    call chk_siz(r1%nxc,'MF1 directory','NXC',0)
     allocate(r1%cmnt(r1%nwd),r1%dir(r1%nxc),stat=n)
     if(n /= 0) call endf_badal
 
@@ -720,7 +720,8 @@ module ENDF_MF1_IO
     integer i,n
 
     if(associated(mf1%mt451)) then
-        deallocate(mf1%mt451%cmnt, mf1%mt451%dir,stat=n)
+        if(associated(mf1%mt451%cmnt)) deallocate(mf1%mt451%cmnt,stat=n)
+        if(associated(mf1%mt451%dir))  deallocate(mf1%mt451%dir,stat=n)
         deallocate(mf1%mt451,stat=n)
     else if(associated(mf1%mt452)) then
         if(associated(mf1%mt452%c)) deallocate(mf1%mt452%c,stat=n)

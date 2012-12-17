@@ -236,7 +236,7 @@ module endf_lines
     endif
 
     if(n < j) then
-        write(erlin,'(5a,i5)') ' Upper index of ',chrs,' invalid:',chrv,' = ',n
+        write(erlin,'(5a,i5)') ' Upper index of ',chrs,' invalid: ',chrv,' = ',n
         call endf_error(erlin)
     endif
 
@@ -302,12 +302,11 @@ module endf_lines
     implicit none
 
     integer*4 status,ios
-    character*4, parameter :: cmat = '   0'
 
     if(.not.q_open) return
     if(q_write) call endf_error('Attempt to read from ENDF output file',-500)
 
-    do while(endline(67:70) /= cmat)
+    do while(get_mat() /= 0)
         status = get_endf_line()
         if(status < 0) then
             if(status == -1) then
@@ -319,6 +318,9 @@ module endf_lines
             endif
         endif
     end do
+
+    istate = imend
+    cmft = '   0 0  0'
 
     return
     end subroutine skip_mat
@@ -334,14 +336,13 @@ module endf_lines
     implicit none
 
     integer*4 status
-    character*3, parameter :: cmt = '  0'
 
     skip_sect = 0
 
     if(.not.q_open) return
     if(q_write) call endf_error('Attempt to read from ENDF output file',-250)
 
-    do while(endline(73:75) /= cmt)
+    do while(get_mt() /= 0)
         status = get_endf_line()
         if(status < 0) then
             if(status == -1) then
