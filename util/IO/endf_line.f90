@@ -109,7 +109,10 @@ module endf_lines
     integer*4 status
 
     status = close_endf_file()
-    if(status < 0) write(6,*) ' WARNING: Close returned error code :',status
+    if(status < 0) then
+        write(erlin,*) ' Close returned error code :',status
+        call endf_error(erlin,30)
+    endif
 
     return
     end subroutine close_endfile

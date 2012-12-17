@@ -77,15 +77,16 @@ module ENDF_MF14_IO
 
         ! nl = # of anisotropic photons. Make sure it makes sense
 
-        if(nl .eq. 0) then
-            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-        else if(nl .lt. 0) then
+        if(nl == 0) then
+            erlin = ' No ang dist data specified with LTT=0 in MF14'
+            call endf_error(erlin,10)
+        else if(nl < 0) then
             write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
             call endf_error(erlin)
         endif
 
         allocate(mf14%isg(mf14%ni),mf14%aig(nl),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         do i = 1,mf14%ni
             call read_endf(mf14%isg(i)%eg,mf14%isg(i)%es, n, n, n, n)
         end do
@@ -95,24 +96,24 @@ module ENDF_MF14_IO
             ag => mf14%aig(i)
             call read_endf(ag%eg, ag%es, n, n, ag%nr, ag%ne)
             allocate(ag%inb(ag%nr),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             call read_endf(ag%inb,ag%nr)
 
-            if(mf14%ltt .eq. 1) then        ! Legendre
+            if(mf14%ltt == 1) then        ! Legendre
                 nullify(ag%tab)
                 allocate(ag%leg(ag%ne),stat=n)
-                if(n .ne. 0) call endf_badal
+                if(n /= 0) call endf_badal
                 do j = 1, ag%ne
                     lg => ag%leg(j)
                     call read_endf(xx, lg%e, n, n, lg%nl, n)
                     allocate(lg%a(lg%nl),stat=n)
-                    if(n .ne. 0) call endf_badal
+                    if(n /= 0) call endf_badal
                     call read_endf(lg%a,lg%nl)
                 end do
-            else if(mf14%ltt .eq. 2) then    ! tables
+            else if(mf14%ltt == 2) then    ! tables
                 nullify(ag%leg)
                 allocate(ag%tab(ag%ne),stat=n)
-                if(n .ne. 0) call endf_badal
+                if(n /= 0) call endf_badal
                 do j = 1, ag%ne
                     tb => ag%tab(j)
                     call read_endf(xx, tb%e, n, n, tb%mut%nr, tb%mut%np)
@@ -164,9 +165,10 @@ module ENDF_MF14_IO
 
         ! nl = # of anisotropic photons. Make sure it makes sense
 
-        if(nl .eq. 0) then
-            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-        else if(nl .lt. 0) then
+        if(nl == 0) then
+            erlin = ' No ang dist data specified with LTT=0 in MF14'
+            call endf_error(erlin,10)
+        else if(nl < 0) then
             write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
             call endf_error(erlin)
         endif
@@ -181,13 +183,13 @@ module ENDF_MF14_IO
             call write_endf(ag%eg, ag%es, 0, 0, ag%nr, ag%ne)
             call write_endf(ag%inb,ag%nr)
 
-            if(mf14%ltt .eq. 1) then        ! Legendre
+            if(mf14%ltt == 1) then        ! Legendre
                 do j = 1, ag%ne
                     lg => ag%leg(j)
                     call write_endf(zero, lg%e, 0, 0, lg%nl, 0)
                     call write_endf(lg%a,lg%nl)
                 end do
-            else if(mf14%ltt .eq. 2) then    ! tables
+            else if(mf14%ltt == 2) then    ! tables
                 do j = 1, ag%ne
                     tb => ag%tab(j)
                     call write_endf(zero, tb%e, 0, 0, tb%mut%nr, tb%mut%np)
@@ -226,7 +228,7 @@ module ENDF_MF14_IO
 
     integer i,j,nl,n
 
-    if(mf14%li .eq. 0) then
+    if(mf14%li == 0) then
         ! ang dist info 
         nl = mf14%nk - mf14%ni
         do i = 1,nl
@@ -266,9 +268,10 @@ module ENDF_MF14_IO
         ! ang dist info to write in
         nl = mf14%nk - mf14%ni
         ! nl = # of anisotropic photons. Make sure it makes sense
-        if(nl .eq. 0) then
-            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-        else if(nl .lt. 0) then
+        if(nl == 0) then
+            erlin = ' No ang dist data specified with LTT=0 in MF14'
+            call endf_error(erlin,10)
+        else if(nl < 0) then
             write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
             call endf_error(erlin)
         endif
@@ -278,11 +281,11 @@ module ENDF_MF14_IO
         do i = 1,nl
             ag => mf14%aig(i)
             l = l +(2*ag%nr+5)/6 + 1
-            if(mf14%ltt .eq. 1) then        ! Legendre
+            if(mf14%ltt == 1) then        ! Legendre
                 do j = 1, ag%ne
                     l = l + (ag%leg(j)%nl+5)/6 + 1
                 end do
-            else if(mf14%ltt .eq. 2) then    ! tables
+            else if(mf14%ltt == 2) then    ! tables
                 do j = 1, ag%ne
                     l = l + lc_tab1(ag%tab(j)%mut) + 1
                 end do
