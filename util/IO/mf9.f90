@@ -22,7 +22,6 @@ module ENDF_MF9_IO
     type MF_9
         type (mf_9), pointer :: next   ! next section
         integer mt                     ! MT
-        integer lc                     ! line count
         real za                        ! ZA for material
         real awr                       ! AWR for material
         integer lis                    ! level # of target
@@ -42,33 +41,19 @@ module ENDF_MF9_IO
 
     integer i,n
 
-    type (mf_9), pointer :: r9
     type (mf9_fnl_st), pointer :: fs
 
-    r9 => mf9
-    r9%mt = get_mt()
+    call get_endf(mf9%za, mf9%awr, mf9%lis, n, mf9%ns, n)
 
-    do
-        r9%next => null()
-        call get_endf(r9%za, r9%awr, r9%lis, n, r9%ns, n)
-
-        allocate(r9%fst(r9%ns),stat=n)
-        if(n .ne. 0) call endf_badal
-        do i = 1,r9%ns
-            fs => r9%fst(i)
-            call read_endf(fs%qm, fs%qi, fs%izap, fs%lfs, fs%mlt%nr, fs%mlt%np)
-            call read_endf(fs%mlt)
-        end do
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r9%next)
-        r9 => r9%next
-        r9%mt = i
-
+    allocate(mf9%fst(mf9%ns),stat=n)
+    if(n /= 0) call endf_badal
+    do i = 1,mf9%ns
+        fs => mf9%fst(i)
+        call read_endf(fs%qm, fs%qi, fs%izap, fs%lfs, fs%mlt%nr, fs%mlt%np)
+        call read_endf(fs%mlt)
     end do
 
+    return
     end subroutine read_mf9
 
 !------------------------------------------------------------------------------
@@ -80,30 +65,18 @@ module ENDF_MF9_IO
     type (mf_9), intent(in), target :: mf9
 
     integer i
-
-    type (mf_9), pointer :: r9
     type (mf9_fnl_st), pointer :: fs
 
-    r9 => mf9
-    call set_mf(9)
+    call set_mt(mf9%mt)
+    call write_endf(mf9%za, mf9%awr, mf9%lis, 0, mf9%ns, 0)
 
-    do while(associated(r9))
-
-        call set_mt(r9%mt)
-        call write_endf(r9%za, r9%awr, r9%lis, 0, r9%ns, 0)
-
-        do i = 1,r9%ns
-            fs => r9%fst(i)
-            call write_endf(fs%qm, fs%qi, fs%izap, fs%lfs, fs%mlt%nr, fs%mlt%np)
-            call write_endf(fs%mlt)
-        end do
-
-        call write_send
-        r9 => r9%next
-
+    do i = 1,mf9%ns
+        fs => mf9%fst(i)
+        call write_endf(fs%qm, fs%qi, fs%izap, fs%lfs, fs%mlt%nr, fs%mlt%np)
+        call write_endf(fs%mlt)
     end do
 
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf9
@@ -114,22 +87,16 @@ module ENDF_MF9_IO
 
     implicit none
 
-    type (mf_9), target :: mf9
-    type (mf_9), pointer :: r9,nx
+    type (mf_9) mf9
 
-    integer i
+    integer i,n
 
-    r9 => mf9
-    do while(associated(r9))
-        do i = 1,r9%ns
-            call del_tab1(r9%fst(i)%mlt)
-        end do
-        deallocate(r9%fst)
-        nx => r9%next
-        deallocate(r9)
-        r9 => nx
+    do i = 1,mf9%ns
+        call del_tab1(mf9%fst(i)%mlt)
     end do
+    deallocate(mf9%fst,stat=n)
 
+    return
     end subroutine del_mf9
 
 !------------------------------------------------------------------------------
@@ -138,24 +105,16 @@ module ENDF_MF9_IO
 
     implicit none
 
-    type (mf_9), target :: mf9
-    type (mf_9), pointer :: r9
+    type (mf_9), intent(in) :: mf9
 
-    integer i,l,mtc
+    integer i,l
 
-    mtc = 0
-    r9 => mf9
-    do while(associated(r9))
-        l = 1
-        do i = 1,r9%ns
-            l = l + lc_tab1(r9%fst(i)%mlt) + 1
-        end do
-        r9%lc = l
-        mtc = mtc + 1
-        r9 => r9%next
+    l = 1
+    do i = 1,mf9%ns
+        l = l + lc_tab1(mf9%fst(i)%mlt) + 1
     end do
 
-    lc_mf9 = mtc
+    lc_mf9 = l
 
     return
     end function lc_mf9

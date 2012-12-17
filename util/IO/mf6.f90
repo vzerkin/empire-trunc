@@ -116,7 +116,6 @@ module ENDF_MF6_IO
     type MF_6
         type (mf_6), pointer :: next            ! next section
         integer mt                              ! MT
-        integer lc                              ! line count
         real za                                 ! ZA for material
         real awr                                ! AWR for material
         integer lct                             ! ref system flag
@@ -142,62 +141,47 @@ module ENDF_MF6_IO
     integer i,n
     real xx
 
-    type (mf_6), pointer :: r6
     type (mf6_product), pointer :: sc
 
-    r6 => mf6
-    r6%mt = get_mt()
+    call get_endf(mf6%za, mf6%awr, n, mf6%lct, mf6%nk, n)
+    allocate(mf6%prd(mf6%nk),stat=n)
+    if(n .ne. 0) call endf_badal
 
-    do
-        r6%next => null()
+    do i = 1,mf6%nk
 
-        call get_endf(r6%za, r6%awr, n, r6%lct, r6%nk, n)
-        allocate(r6%prd(r6%nk),stat=n)
-        if(n .ne. 0) call endf_badal
+        sc => mf6%prd(i)
 
-        do i = 1,r6%nk
+        call read_endf(sc%zap, sc%awp, sc%lip, sc%law, sc%mul%nr, sc%mul%np)
+        call read_endf(sc%mul)
 
-            sc => r6%prd(i)
+        nullify(sc%law1, sc%law2, sc%law5, sc%law6, sc%law7)
 
-            call read_endf(sc%zap, sc%awp, sc%lip, sc%law, sc%mul%nr, sc%mul%np)
-            call read_endf(sc%mul)
-
-            nullify(sc%law1, sc%law2, sc%law5, sc%law6, sc%law7)
-
-            select case(sc%law)
-            case(0,3,4)
-                ! no law-specific info given
-            case(1)
-                allocate(sc%law1)
-                call read_law1(sc%law1)
-            case(2)
-                allocate(sc%law2)
-                call read_law2(sc%law2)
-            case(5)
-                allocate(sc%law5)
-                call read_law5(sc%law5)
-            case(6)
-                allocate(sc%law6)
-                call read_endf(sc%law6%apsx, xx, n, n, n, sc%law6%npsx)
-            case(7)
-                allocate(sc%law7)
-                call read_law7(sc%law7)
-            case default
-                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-                call endf_error(erlin)
-            end select
-
-        end do
-
-        i = next_mt()
-        if(i .eq. 0) return
-    
-        allocate(r6%next)
-        r6 => r6%next
-        r6%mt = i
+        select case(sc%law)
+        case(0,3,4)
+            ! no law-specific info given
+        case(1)
+            allocate(sc%law1)
+            call read_law1(sc%law1)
+        case(2)
+            allocate(sc%law2)
+            call read_law2(sc%law2)
+        case(5)
+            allocate(sc%law5)
+            call read_law5(sc%law5)
+        case(6)
+            allocate(sc%law6)
+            call read_endf(sc%law6%apsx, xx, n, n, n, sc%law6%npsx)
+        case(7)
+            allocate(sc%law7)
+            call read_law7(sc%law7)
+        case default
+            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+            call endf_error(erlin)
+        end select
 
     end do
 
+    return
     end subroutine read_mf6
 
 !------------------------------------------------------------------------------
@@ -323,6 +307,7 @@ module ENDF_MF6_IO
         call read_endf(l5%a,nw)
     end do
 
+    return
     end subroutine read_law5
 
 !------------------------------------------------------------------------------
@@ -366,51 +351,40 @@ module ENDF_MF6_IO
     implicit none
 
     type (mf_6), intent(in), target :: mf6
-    type (mf_6), pointer :: r6
 
     integer i
     type (mf6_product), pointer :: sc
 
-    r6 => mf6
-    call set_mf(6)
+    call set_mt(mf6%mt)
+    call write_endf(mf6%za, mf6%awr, 0, mf6%lct, mf6%nk, 0)
 
-    do while(associated(r6))
+    do i = 1,mf6%nk
 
-        call set_mt(r6%mt)
-        call write_endf(r6%za, r6%awr, 0, r6%lct, r6%nk, 0)
+        sc => mf6%prd(i)
+        call write_endf(sc%zap, sc%awp, sc%lip, sc%law, sc%mul%nr, sc%mul%np)
+        call write_endf(sc%mul)
 
-        do i = 1,r6%nk
-
-            sc => r6%prd(i)
-            call write_endf(sc%zap, sc%awp, sc%lip, sc%law, sc%mul%nr, sc%mul%np)
-            call write_endf(sc%mul)
-
-            select case(sc%law)
-            case(0,3,4)
-                ! no law-specific info given
-            case(1)
-                call write_law1(sc%law1)
-            case(2)
-                call write_law2(sc%law2)
-            case(5)
-                call write_law5(sc%law5)
-            case(6)
-                call write_endf(sc%law6%apsx, zero, 0, 0, 0, sc%law6%npsx)
-            case(7)
-                call write_law7(sc%law7)
-            case default
-                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-                call endf_error(erlin)
-            end select
-
-        end do
-
-        call write_send
-        r6 => r6%next
+        select case(sc%law)
+        case(0,3,4)
+            ! no law-specific info given
+        case(1)
+            call write_law1(sc%law1)
+        case(2)
+            call write_law2(sc%law2)
+        case(5)
+            call write_law5(sc%law5)
+        case(6)
+            call write_endf(sc%law6%apsx, zero, 0, 0, 0, sc%law6%npsx)
+        case(7)
+            call write_law7(sc%law7)
+        case default
+            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+            call endf_error(erlin)
+        end select
 
     end do
 
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf6
@@ -509,6 +483,7 @@ module ENDF_MF6_IO
         call write_endf(l5%a,nx)
     end do
 
+    return
     end subroutine write_law5
 
 !------------------------------------------------------------------------------
@@ -548,59 +523,49 @@ module ENDF_MF6_IO
 
     type (mf_6), target :: mf6
 
-    integer i,j,k
-
-    type (mf_6), pointer :: r6,nx
+    integer i,j,k,n
     type (mf6_product), pointer :: sc
 
-    r6 => mf6
-
-    do while(associated(r6))
-
-        do i = 1,r6%nk
-            sc => r6%prd(i)
-            if(associated(sc%law1)) then
-                do k = 1, sc%law1%ne
-                    do j = 1, sc%law1%ll(k)%nep
-                        deallocate(sc%law1%ll(k)%prm(j)%b)
-                    end do
-                    deallocate(sc%law1%ll(k)%prm)
+    do i = 1,mf6%nk
+        sc => mf6%prd(i)
+        if(associated(sc%law1)) then
+            do k = 1, sc%law1%ne
+                do j = 1, sc%law1%ll(k)%nep
+                    deallocate(sc%law1%ll(k)%prm(j)%b,stat=n)
                 end do
-                deallocate(sc%law1%itp, sc%law1%ll)
-                deallocate(sc%law1)
-            else if(associated(sc%law2)) then
-                do k = 1, sc%law2%ne
-                    deallocate(sc%law2%ll(k)%a)
+                deallocate(sc%law1%ll(k)%prm,stat=n)
+            end do
+            deallocate(sc%law1%itp, sc%law1%ll,stat=n)
+            deallocate(sc%law1,stat=n)
+        else if(associated(sc%law2)) then
+            do k = 1, sc%law2%ne
+                deallocate(sc%law2%ll(k)%a,stat=n)
+            end do
+            deallocate(sc%law2%itp, sc%law2%ll,stat=n)
+            deallocate(sc%law2,stat=n)
+        else if(associated(sc%law5)) then
+            do k = 1, sc%law5%ne
+                deallocate(sc%law5%ll(k)%a,stat=n)
+            end do
+            deallocate(sc%law5%itp, sc%law5%ll,stat=n)
+            deallocate(sc%law5,stat=n)
+        else if(associated(sc%law6)) then
+            deallocate(sc%law6,stat=n)
+        else if(associated(sc%law7)) then
+            do k = 1, sc%law7%ne
+                do j = 1, sc%law7%inc(k)%nmu
+                    call del_tab1(sc%law7%inc(k)%mu(j)%sec)
                 end do
-                deallocate(sc%law2%itp, sc%law2%ll)
-                deallocate(sc%law2)
-            else if(associated(sc%law5)) then
-                do k = 1, sc%law5%ne
-                    deallocate(sc%law5%ll(k)%a)
-                end do
-                deallocate(sc%law5%itp, sc%law5%ll)
-                deallocate(sc%law5)
-            else if(associated(sc%law6)) then
-                deallocate(sc%law6)
-            else if(associated(sc%law7)) then
-                do k = 1, sc%law7%ne
-                    do j = 1, sc%law7%inc(k)%nmu
-                        call del_tab1(sc%law7%inc(k)%mu(j)%sec)
-                    end do
-                    deallocate(sc%law7%inc(k)%itp, sc%law7%inc(k)%mu)
-                end do
-                deallocate(sc%law7%itp, sc%law7%inc)
-                deallocate(sc%law7)
-            endif
-        end do
-        deallocate(r6%prd)
-
-        nx => r6%next
-        deallocate(r6)
-        r6 => nx
-
+                deallocate(sc%law7%inc(k)%itp, sc%law7%inc(k)%mu,stat=n)
+            end do
+            deallocate(sc%law7%itp, sc%law7%inc,stat=n)
+            deallocate(sc%law7,stat=n)
+        endif
     end do
 
+    deallocate(mf6%prd,stat=n)
+
+    return
     end subroutine del_mf6
 
 !******************************************************************************
@@ -609,88 +574,77 @@ module ENDF_MF6_IO
 
     implicit none
 
-    type (mf_6), target :: mf6
-    type (mf_6), pointer :: r6
+    type (mf_6), intent(in), target :: mf6
     type (mf6_product), pointer :: sc
 
-    integer i,j,k,l,nx,mtc
+    integer i,j,k,l,nx
 
-    mtc = 0
-    r6 => mf6
-    do while(associated(r6))
+    l = 1
 
-        l = 1
+    do i = 1,mf6%nk
 
-        do i = 1,r6%nk
+        sc => mf6%prd(i)
+        l = l + lc_tab1(sc%mul) + 1
 
-            sc => r6%prd(i)
-            l = l + lc_tab1(sc%mul) + 1
-
-            select case(sc%law)
-            case(0,3,4)
-                ! no law-specific info given
-            case(1)
-                l = l + (2*sc%law1%nr+5)/6 + 1
-                do j = 1,sc%law1%ne
-                    l = l + (sc%law1%ll(j)%nep*(sc%law1%ll(j)%na+2) + 5)/6 + 1
-                end do
-            case(2)
-                l = l + (2*sc%law2%nr+5)/6 + 1
-                do j = 1,sc%law2%ne
-                    if(sc%law2%ll(j)%lang .eq. 0) then
-                        nx = sc%law2%ll(j)%nl
+        select case(sc%law)
+        case(0,3,4)
+            ! no law-specific info given
+        case(1)
+            l = l + (2*sc%law1%nr+5)/6 + 1
+            do j = 1,sc%law1%ne
+                l = l + (sc%law1%ll(j)%nep*(sc%law1%ll(j)%na+2) + 5)/6 + 1
+            end do
+        case(2)
+            l = l + (2*sc%law2%nr+5)/6 + 1
+            do j = 1,sc%law2%ne
+                if(sc%law2%ll(j)%lang .eq. 0) then
+                    nx = sc%law2%ll(j)%nl
+                else
+                    nx = 2*sc%law2%ll(j)%nl
+                endif
+                l = l + (nx+5)/6 + 1
+            end do
+        case(5)
+            l = l + (2*sc%law5%nr+5)/6 + 1
+            do j = 1,sc%law5%ne
+                select case(sc%law5%ll(j)%ltp)
+                case(1)
+                    if(sc%law5%lidp .eq. 0) then
+                        nx = 4*sc%law5%ll(j)%nl + 3
+                    else if(sc%law5%lidp .eq. 1) then
+                        nx = 3*sc%law5%ll(j)%nl + 3
                     else
-                        nx = 2*sc%law2%ll(j)%nl
-                    endif
-                    l = l + (nx+5)/6 + 1
-                end do
-            case(5)
-                l = l + (2*sc%law5%nr+5)/6 + 1
-                do j = 1,sc%law5%ne
-                    select case(sc%law5%ll(j)%ltp)
-                    case(1)
-                        if(sc%law5%lidp .eq. 0) then
-                            nx = 4*sc%law5%ll(j)%nl + 3
-                        else if(sc%law5%lidp .eq. 1) then
-                            nx = 3*sc%law5%ll(j)%nl + 3
-                        else
-                            write(erlin,*) 'Undefined LIDP in MF6, LAW5 encountered:',sc%law5%lidp
-                            call endf_error(erlin)
-                        endif
-                    case(2)
-                        nx = sc%law5%ll(j)%nl + 1
-                    case(3:)
-                        nx = 2*sc%law5%ll(j)%nl
-                    case default
-                        write(erlin,*) 'Undefined LTP ecountered in MF6, LAW5:',sc%law5%ll(j)%ltp
+                        write(erlin,*) 'Undefined LIDP in MF6, LAW5 encountered:',sc%law5%lidp
                         call endf_error(erlin)
-                    end select
-                    l = l + (nx+5)/6 + 1
+                    endif
+                case(2)
+                    nx = sc%law5%ll(j)%nl + 1
+                case(3:)
+                    nx = 2*sc%law5%ll(j)%nl
+                case default
+                    write(erlin,*) 'Undefined LTP ecountered in MF6, LAW5:',sc%law5%ll(j)%ltp
+                    call endf_error(erlin)
+                end select
+                l = l + (nx+5)/6 + 1
+            end do
+        case(6)
+            l = l + 1
+        case(7)
+            l = l + (2*sc%law7%nr+5)/6 + 1
+            do j = 1,sc%law7%ne
+                l = l + (2*sc%law7%inc(j)%nrm+5)/6 + 1
+                do k = 1,sc%law7%inc(j)%nmu
+                    l = l + lc_tab1(sc%law7%inc(j)%mu(k)%sec) + 1
                 end do
-            case(6)
-                l = l + 1
-            case(7)
-                l = l + (2*sc%law7%nr+5)/6 + 1
-                do j = 1,sc%law7%ne
-                    l = l + (2*sc%law7%inc(j)%nrm+5)/6 + 1
-                    do k = 1,sc%law7%inc(j)%nmu
-                        l = l + lc_tab1(sc%law7%inc(j)%mu(k)%sec) + 1
-                    end do
-                end do
-            case default
-                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-                call endf_error(erlin)
-            end select
-
-        end do
-
-        mtc = mtc + 1
-        r6%lc = l
-        r6 => r6%next
+            end do
+        case default
+            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+            call endf_error(erlin)
+        end select
 
     end do
 
-    lc_mf6 = mtc
+    lc_mf6 = l
 
     return
     end function lc_mf6

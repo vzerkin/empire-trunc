@@ -71,6 +71,7 @@ module endf_queue
         module procedure pop23
         module procedure pop26
         module procedure pop27
+        module procedure pop28
         module procedure pop31
         module procedure pop32
         module procedure pop33
@@ -133,11 +134,65 @@ module endf_queue
         module procedure find40
     end interface
 
-    public :: pop,put,find
+    interface del
+        module procedure del1
+        module procedure del2
+        module procedure del3
+        module procedure del4
+        module procedure del5
+        module procedure del6
+        module procedure del7
+        module procedure del8
+        module procedure del9
+        module procedure del10
+        module procedure del12
+        module procedure del13
+        module procedure del14
+        module procedure del15
+        module procedure del23
+        module procedure del26
+        module procedure del27
+        module procedure del28
+        module procedure del31
+        module procedure del32
+        module procedure del33
+        module procedure del34
+        module procedure del35
+        module procedure del40
+    end interface
+
+    interface cnt
+        module procedure cnt1
+        module procedure cnt2
+        module procedure cnt3
+        module procedure cnt4
+        module procedure cnt5
+        module procedure cnt6
+        module procedure cnt7
+        module procedure cnt8
+        module procedure cnt9
+        module procedure cnt10
+        module procedure cnt12
+        module procedure cnt13
+        module procedure cnt14
+        module procedure cnt15
+        module procedure cnt23
+        module procedure cnt26
+        module procedure cnt27
+        module procedure cnt28
+        module procedure cnt31
+        module procedure cnt32
+        module procedure cnt33
+        module procedure cnt34
+        module procedure cnt35
+        module procedure cnt40
+    end interface
+
+    public :: pop,put,find,del,cnt
 
     contains
 
-!-------------------------------------------------------------------------
+!=========================================================================
 
     function find1(hed,mt)
 
@@ -174,8 +229,6 @@ module endf_queue
     type (mf_2), pointer :: find2
     type (mf_2), intent(in), pointer :: hed
     integer*4, intent(in) :: mt
-
-    type (mf_2), pointer :: mf
 
     nullify(find2)
     if(mt /= 151) return
@@ -669,8 +722,6 @@ module endf_queue
     type (mf_32), intent(in), pointer :: hed
     integer*4, intent(in) :: mt
 
-    type (mf_32), pointer :: mf
-
     nullify(find32)
 
     nullify(find32)
@@ -792,7 +843,7 @@ module endf_queue
     return
     end function find40
 
-!-------------------------------------------------------------------------
+!=========================================================================
 
     function pop1(hed,mt)
 
@@ -1738,7 +1789,511 @@ module endf_queue
 
     end function pop40
 
+!=========================================================================
+
+    subroutine del1(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_1), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_1), pointer :: mf
+
+    mf = pop1(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf1(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del1
+
 !-------------------------------------------------------------------------
+
+    subroutine del2(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_2), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_2), pointer :: mf
+
+    mf = pop2(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf2(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del2
+
+!-------------------------------------------------------------------------
+
+    subroutine del3(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_3), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_3), pointer :: mf
+
+    mf = pop3(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf3(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del3
+
+!-------------------------------------------------------------------------
+
+    subroutine del4(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_4), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_4), pointer :: mf
+
+    mf = pop4(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf4(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del4
+
+!-------------------------------------------------------------------------
+
+    subroutine del5(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_5), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_5), pointer :: mf
+
+    mf = pop5(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf5(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del5
+
+!-------------------------------------------------------------------------
+
+    subroutine del6(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_6), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_6), pointer :: mf
+
+    mf = pop6(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf6(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del6
+
+!-------------------------------------------------------------------------
+
+    subroutine del7(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_7), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_7), pointer :: mf
+
+    mf = pop7(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf7(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del7
+
+!-------------------------------------------------------------------------
+
+    subroutine del8(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_8), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_8), pointer :: mf
+
+    mf = pop8(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf8(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del8
+
+!-------------------------------------------------------------------------
+
+    subroutine del9(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_9), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_9), pointer :: mf
+
+    mf = pop9(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf9(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del9
+
+!-------------------------------------------------------------------------
+
+    subroutine del10(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_10), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_10), pointer :: mf
+
+    mf = pop10(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf10(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del10
+
+!-------------------------------------------------------------------------
+
+    subroutine del12(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_12), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_12), pointer :: mf
+
+    mf = pop12(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf12(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del12
+
+!-------------------------------------------------------------------------
+
+    subroutine del13(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_13), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_13), pointer :: mf
+
+    mf = pop13(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf13(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del13
+
+!-------------------------------------------------------------------------
+
+    subroutine del14(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_14), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_14), pointer :: mf
+
+    mf = pop14(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf14(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del14
+
+!-------------------------------------------------------------------------
+
+    subroutine del15(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_15), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_15), pointer :: mf
+
+    mf = pop15(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf15(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del15
+
+!-------------------------------------------------------------------------
+
+    subroutine del23(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_23), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_23), pointer :: mf
+
+    mf = pop23(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf23(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del23
+
+!-------------------------------------------------------------------------
+
+    subroutine del26(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_26), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_26), pointer :: mf
+
+    mf = pop26(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf26(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del26
+
+!-------------------------------------------------------------------------
+
+    subroutine del27(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_27), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_27), pointer :: mf
+
+    mf = pop27(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf27(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del27
+
+!-------------------------------------------------------------------------
+
+    subroutine del28(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_28), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_28), pointer :: mf
+
+    mf = pop28(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf28(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del28
+
+!-------------------------------------------------------------------------
+
+    subroutine del31(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_31), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_31), pointer :: mf
+
+    mf = pop31(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf31(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del31
+
+!-------------------------------------------------------------------------
+
+    subroutine del32(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_32), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_32), pointer :: mf
+
+    mf = pop32(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf32(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del32
+
+!-------------------------------------------------------------------------
+
+    subroutine del33(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_33), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_33), pointer :: mf
+
+    mf = pop33(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf33(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del33
+
+!-------------------------------------------------------------------------
+
+    subroutine del34(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_34), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_34), pointer :: mf
+
+    mf = pop34(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf34(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del34
+
+!-------------------------------------------------------------------------
+
+    subroutine del35(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_35), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_35), pointer :: mf
+
+    mf = pop35(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf35(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del35
+
+!-------------------------------------------------------------------------
+
+    subroutine del40(hed,mt,qstat)
+
+    implicit none
+
+    type (mf_40), intent(inout), pointer :: hed
+    integer*4, intent(in) :: mt
+    logical*4, intent(out), optional :: qstat
+
+    logical*4 qs
+    type (mf_40), pointer :: mf
+
+    mf = pop40(hed,mt)
+    qs = associated(mf)
+    if(qs) call del_mf40(mf)
+    if(present(qstat)) qstat = qs
+
+    return
+    end subroutine del40
+
+!=========================================================================
 
     logical*4 function put1(hed,mx)
 
@@ -1774,10 +2329,6 @@ module endf_queue
 
     return
     end function put1
-
-    ! MF32 is special : only 1 MT = 151
-
-    ! MF32 is special : only 1 MT = 151
 
 !-------------------------------------------------------------------------
 
@@ -2595,5 +3146,579 @@ module endf_queue
 
     return
     end function put40
+
+!=========================================================================
+
+    integer*4 function cnt1(hed)
+
+    implicit none
+
+    type (mf_1), intent(inout), pointer :: hed
+
+    type (mf_1), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt1 = n
+
+    return
+    end function cnt1
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt2(hed)
+
+    implicit none
+
+    type (mf_2), intent(inout), pointer :: hed
+
+    integer*4 n
+
+    n = 0
+
+    if(associated(hed)) then
+        n = 1
+    else
+        n = 0
+    endif
+
+    cnt2 = n
+
+    return
+    end function cnt2
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt3(hed)
+
+    implicit none
+
+    type (mf_3), intent(inout), pointer :: hed
+
+    type (mf_3), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt3 = n
+
+    return
+    end function cnt3
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt4(hed)
+
+    implicit none
+
+    type (mf_4), intent(inout), pointer :: hed
+
+    type (mf_4), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt4 = n
+
+    return
+    end function cnt4
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt5(hed)
+
+    implicit none
+
+    type (mf_5), intent(inout), pointer :: hed
+
+    type (mf_5), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt5 = n
+
+    return
+    end function cnt5
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt6(hed)
+
+    implicit none
+
+    type (mf_6), intent(inout), pointer :: hed
+
+    type (mf_6), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt6 = n
+
+    return
+    end function cnt6
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt7(hed)
+
+    implicit none
+
+    type (mf_7), intent(inout), pointer :: hed
+
+    type (mf_7), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt7 = n
+
+    return
+    end function cnt7
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt8(hed)
+
+    implicit none
+
+    type (mf_8), intent(inout), pointer :: hed
+
+    type (mf_8), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt8 = n
+
+    return
+    end function cnt8
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt9(hed)
+
+    implicit none
+
+    type (mf_9), intent(inout), pointer :: hed
+
+    type (mf_9), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt9 = n
+
+    return
+    end function cnt9
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt10(hed)
+
+    implicit none
+
+    type (mf_10), intent(inout), pointer :: hed
+
+    type (mf_10), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt10 = n
+
+    return
+    end function cnt10
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt12(hed)
+
+    implicit none
+
+    type (mf_12), intent(inout), pointer :: hed
+
+    type (mf_12), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt12 = n
+
+    return
+    end function cnt12
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt13(hed)
+
+    implicit none
+
+    type (mf_13), intent(inout), pointer :: hed
+
+    type (mf_13), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt13 = n
+
+    return
+    end function cnt13
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt14(hed)
+
+    implicit none
+
+    type (mf_14), intent(inout), pointer :: hed
+
+    type (mf_14), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt14 = n
+
+    return
+    end function cnt14
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt15(hed)
+
+    implicit none
+
+    type (mf_15), intent(inout), pointer :: hed
+
+    type (mf_15), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt15 = n
+
+    return
+    end function cnt15
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt23(hed)
+
+    implicit none
+
+    type (mf_23), intent(inout), pointer :: hed
+
+    type (mf_23), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt23 = n
+
+    return
+    end function cnt23
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt26(hed)
+
+    implicit none
+
+    type (mf_26), intent(inout), pointer :: hed
+
+    type (mf_26), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt26 = n
+
+    return
+    end function cnt26
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt27(hed)
+
+    implicit none
+
+    type (mf_27), intent(inout), pointer :: hed
+
+    type (mf_27), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt27 = n
+
+    return
+    end function cnt27
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt28(hed)
+
+    implicit none
+
+    type (mf_28), intent(inout), pointer :: hed
+
+    type (mf_28), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt28 = n
+
+    return
+    end function cnt28
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt31(hed)
+
+    implicit none
+
+    type (mf_31), intent(inout), pointer :: hed
+
+    type (mf_31), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt31 = n
+
+    return
+    end function cnt31
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt32(hed)
+
+    implicit none
+
+    type (mf_32), intent(inout), pointer :: hed
+
+    integer*4 n
+
+    n = 0
+
+    if(associated(hed)) then
+        n = 1
+    else
+        n = 0
+    endif
+
+    cnt32 = n
+
+    return
+    end function cnt32
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt33(hed)
+
+    implicit none
+
+    type (mf_33), intent(inout), pointer :: hed
+
+    type (mf_33), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt33 = n
+
+    return
+    end function cnt33
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt34(hed)
+
+    implicit none
+
+    type (mf_34), intent(inout), pointer :: hed
+
+    type (mf_34), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt34 = n
+
+    return
+    end function cnt34
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt35(hed)
+
+    implicit none
+
+    type (mf_35), intent(inout), pointer :: hed
+
+    type (mf_35), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt35 = n
+
+    return
+    end function cnt35
+
+!-------------------------------------------------------------------------
+
+    integer*4 function cnt40(hed)
+
+    implicit none
+
+    type (mf_40), intent(inout), pointer :: hed
+
+    type (mf_40), pointer :: mf
+    integer*4 n
+
+    n = 0
+
+    mf => hed
+    do while(associated(mf))
+        n = n + 1
+        mf => mf%next
+    end do
+
+    cnt40 = n
+
+    return
+    end function cnt40
 
 end module endf_queue

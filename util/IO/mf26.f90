@@ -72,7 +72,6 @@ module ENDF_MF26_IO
     type MF_26
         type (mf_26), pointer :: next      ! next section
         integer mt                         ! MT
-        integer lc                         ! line count
         real za                            ! ZA for material
         real awr                           ! AWR for material
         integer nk                         ! # reaction product subsections
@@ -95,55 +94,39 @@ module ENDF_MF26_IO
 
     integer i,n
     real xx
-
-    type (mf_26), pointer :: r26
     type (mf26_product), pointer :: sc
 
-    r26 => mf26
-    r26%mt = get_mt()
+    call get_endf(mf26%za, mf26%awr, n, n, mf26%nk, n)
+    allocate(mf26%prd(mf26%nk),stat=n)
+    if(n .ne. 0) call endf_badal
 
-    do
-        r26%next => null()
+    do i = 1,mf26%nk
 
-        call get_endf(r26%za, r26%awr, n, n, r26%nk, n)
-        allocate(r26%prd(r26%nk),stat=n)
-        if(n .ne. 0) call endf_badal
+        sc => mf26%prd(i)
+        call read_endf(sc%zap, sc%awi, n, sc%law, sc%ytb%nr, sc%ytb%np)
+        call read_endf(sc%ytb)
 
-        do i = 1,r26%nk
+        nullify(sc%law1, sc%law2, sc%law8)
 
-            sc => r26%prd(i)
-            call read_endf(sc%zap, sc%awi, n, sc%law, sc%ytb%nr, sc%ytb%np)
-            call read_endf(sc%ytb)
-
-            nullify(sc%law1, sc%law2, sc%law8)
-
-            select case(sc%law)
-            case(1)
-                allocate(sc%law1)
-                call read_law1(sc%law1)
-            case(2)
-                allocate(sc%law2)
-                call read_law2(sc%law2)
-            case(8)
-                allocate(sc%law8)
-                call read_endf(xx, xx, n, n, sc%law8%etab%nr, sc%law8%etab%np)
-                call read_endf(sc%law8%etab)
-            case default
-                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error(erlin)
-            end select
-
-        end do
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r26%next)
-        r26 => r26%next
-        r26%mt = i
+        select case(sc%law)
+        case(1)
+            allocate(sc%law1)
+            call read_law1(sc%law1)
+        case(2)
+            allocate(sc%law2)
+            call read_law2(sc%law2)
+        case(8)
+            allocate(sc%law8)
+            call read_endf(xx, xx, n, n, sc%law8%etab%nr, sc%law8%etab%np)
+            call read_endf(sc%law8%etab)
+        case default
+            write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+            call endf_error(erlin)
+        end select
 
     end do
 
+    return
     end subroutine read_mf26
 
 !------------------------------------------------------------------------------
@@ -156,7 +139,6 @@ module ENDF_MF26_IO
 
     integer i,j,n,nw
     real xx
-
     type (mf26_law1_list), pointer :: l1
     type (mf26_law1_eprm), pointer :: pm
 
@@ -229,39 +211,30 @@ module ENDF_MF26_IO
     implicit none
 
     type (mf_26), intent(in), target :: mf26
-    type (mf_26), pointer :: r26
 
     integer i
     type (mf26_product), pointer :: sc
 
-    r26 => mf26
-    call set_mf(26)
-
-    do while(associated(r26))
-        call set_mt(r26%mt)
-        call write_endf(r26%za, r26%awr, 0, 0, r26%nk, 0)
-        do i = 1,r26%nk
-            sc => r26%prd(i)
-            call write_endf(sc%zap, sc%awi, 0, sc%law, sc%ytb%nr, sc%ytb%np)
-            call write_endf(sc%ytb)
-            select case(sc%law)
-            case(1)
-                call write_law1(sc%law1)
-            case(2)
-                call write_law2(sc%law2)
-            case(8)
-                call write_endf(zero, zero, 0, 0, sc%law8%etab%nr, sc%law8%etab%np)
-                call write_endf(sc%law8%etab)
-            case default
-                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error(erlin)
-            end select
-        end do
-        call write_send
-        r26 => r26%next
+    call set_mt(mf26%mt)
+    call write_endf(mf26%za, mf26%awr, 0, 0, mf26%nk, 0)
+    do i = 1,mf26%nk
+        sc => mf26%prd(i)
+        call write_endf(sc%zap, sc%awi, 0, sc%law, sc%ytb%nr, sc%ytb%np)
+        call write_endf(sc%ytb)
+        select case(sc%law)
+        case(1)
+            call write_law1(sc%law1)
+        case(2)
+            call write_law2(sc%law2)
+        case(8)
+            call write_endf(zero, zero, 0, 0, sc%law8%etab%nr, sc%law8%etab%np)
+            call write_endf(sc%law8%etab)
+        case default
+            write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+            call endf_error(erlin)
+        end select
     end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf26
@@ -325,45 +298,36 @@ module ENDF_MF26_IO
     implicit none
 
     type (mf_26), target :: mf26
-    type (mf_26), pointer :: r26,nx
 
-    integer i,j,k
+    integer i,j,k,n
     type (mf26_product), pointer :: sc
 
-    r26 => mf26
-    do while(associated(r26))
-
-        do k = 1,r26%nk
-            sc => r26%prd(k)
-            if(associated(sc%law1)) then
-                do i = 1,sc%law1%ne
-                    do j = 1,sc%law1%ll(i)%nep
-                        deallocate(sc%law1%ll(i)%prm(j)%b)
-                    end do
-                    deallocate(sc%law1%ll(i)%prm)
+    do k = 1,mf26%nk
+        sc => mf26%prd(k)
+        if(associated(sc%law1)) then
+            do i = 1,sc%law1%ne
+                do j = 1,sc%law1%ll(i)%nep
+                    deallocate(sc%law1%ll(i)%prm(j)%b,stat=n)
                 end do
-                deallocate(sc%law1%itp, sc%law1%ll)
-                deallocate(sc%law1)
-            else if(associated(sc%law2)) then
-                do i = 1,sc%law2%ne
-                    deallocate(sc%law2%ll(i)%a)
-                end do
-                deallocate(sc%law2%itp, sc%law2%ll)
-                deallocate(sc%law2)
-            else if(associated(sc%law8)) then
-                call del_tab1(sc%law8%etab)
-                deallocate(sc%law8)
-            endif
-
-        end do
-        deallocate(r26%prd)
-
-        nx => r26%next
-        deallocate(r26)
-        r26 => nx
+                deallocate(sc%law1%ll(i)%prm,stat=n)
+            end do
+            deallocate(sc%law1%itp, sc%law1%ll,stat=n)
+            deallocate(sc%law1,stat=n)
+        else if(associated(sc%law2)) then
+            do i = 1,sc%law2%ne
+                deallocate(sc%law2%ll(i)%a,stat=n)
+            end do
+            deallocate(sc%law2%itp, sc%law2%ll,stat=n)
+            deallocate(sc%law2,stat=n)
+        else if(associated(sc%law8)) then
+            call del_tab1(sc%law8%etab)
+            deallocate(sc%law8,stat=n)
+        endif
 
     end do
+    deallocate(mf26%prd,stat=n)
 
+    return
     end subroutine del_mf26
 
 !******************************************************************************
@@ -372,49 +336,41 @@ module ENDF_MF26_IO
 
     implicit none
 
-    type (mf_26), target :: mf26
-    type (mf_26), pointer :: r26
+    type (mf_26), intent(in), target :: mf26
 
-    integer i,j,l,nx,mtc
+    integer i,j,l,nx
     type (mf26_product), pointer :: sc
     type (mf26_law1_list), pointer :: l1
     type (mf26_law2_list), pointer :: l2
 
-    mtc = 0
-    r26 => mf26
-    do while(associated(r26))
-        l = 1
-        do i = 1,r26%nk
-            sc => r26%prd(i)
-            l = l + lc_tab1(sc%ytb) + 1
-            select case(sc%law)
-            case(1)
-                l = l + (2*sc%law1%nr+5)/6 + 1
-                do j = 1,sc%law1%ne
-                    l1 => sc%law1%ll(j)
-                    l = l + (l1%nep*(l1%na+2)+5)/6 + 1
-                end do
-            case(2)
-                l = l + (2*sc%law2%nr+5)/6 + 1
-                do j = 1,sc%law2%ne
-                    l2 => sc%law2%ll(j)
-                    nx = l2%nl
-                    if(l2%lang .ne. 0) nx = 2*nx
-                    l = l + (nx+5)/6 + 1
-                end do
-            case(8)
-                l = l + lc_tab1(sc%law8%etab) + 1
-            case default
-                write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
-                call endf_error(erlin)
-            end select
-        end do
-        r26%lc = l
-        r26 => r26%next
-        mtc = mtc + 1
+    l = 1
+    do i = 1,mf26%nk
+        sc => mf26%prd(i)
+        l = l + lc_tab1(sc%ytb) + 1
+        select case(sc%law)
+        case(1)
+            l = l + (2*sc%law1%nr+5)/6 + 1
+            do j = 1,sc%law1%ne
+                l1 => sc%law1%ll(j)
+                l = l + (l1%nep*(l1%na+2)+5)/6 + 1
+            end do
+        case(2)
+            l = l + (2*sc%law2%nr+5)/6 + 1
+            do j = 1,sc%law2%ne
+                l2 => sc%law2%ll(j)
+                nx = l2%nl
+                if(l2%lang .ne. 0) nx = 2*nx
+                l = l + (nx+5)/6 + 1
+            end do
+        case(8)
+            l = l + lc_tab1(sc%law8%etab) + 1
+        case default
+            write(erlin,*) 'Unrecognized LAW encountered in MF26:',sc%law
+            call endf_error(erlin)
+        end select
     end do
 
-    lc_mf26 = mtc
+    lc_mf26 = l
 
     return
     end function lc_mf26

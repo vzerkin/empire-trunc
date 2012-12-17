@@ -21,8 +21,6 @@ module ENDF_MF1_IO
     end type
 
     type MF1_451
-        real za
-        real awr
         integer lrp                               ! flag indicating file2. 0=no,1=yes,2=yes, but don't use
         integer lfi                               ! flag for fission: 0=no, 1=yes.
         integer nlib                              ! library identifier
@@ -61,8 +59,6 @@ module ENDF_MF1_IO
     !~~~~~~~~~~~~~~~~~~~~~~~~~ MT452  nubar = # neutrons/fission ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_452
-        real za
-        real awr
         integer lnu                               ! flag for poly or table
         integer nc                                ! number of terms in poly
         real, pointer :: c(:)                     ! coefs of polynomial
@@ -80,8 +76,6 @@ module ENDF_MF1_IO
     end type
 
     type MF1_455
-        real za
-        real awr
         integer lnu                               ! flag for represenation: 1=poly, 2=table
         integer ldg                               ! flag for E-dep:0=indep, 1=dep
         integer nc                                ! number of terms in poly for nubar
@@ -117,8 +111,6 @@ module ENDF_MF1_IO
     end type
 
     type MF1_458
-        real za
-        real awr
         integer nply                             ! max poly order. starts at 0
         type (MF1_458_terms), pointer :: cmp(:)
     end type
@@ -126,8 +118,6 @@ module ENDF_MF1_IO
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~  MT460  Delayed Photon Data  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     type MF1_460
-        real za
-        real awr
         integer lo                               ! rep flag: 1=discreet, 2=continuous
         integer ng                               ! # of photons (gammas)
         real, pointer :: e(:)                    ! energy of ith photon (ng)
@@ -141,7 +131,8 @@ module ENDF_MF1_IO
     type MF_1
         type (MF_1), pointer :: next
         integer mt
-        integer lc
+        real za
+        real awr
         type (MF1_451), pointer :: mt451
         type (MF1_452), pointer :: mt452
         type (MF1_455), pointer :: mt455
@@ -163,53 +154,38 @@ module ENDF_MF1_IO
 
     implicit none
 
-    type (mf_1), intent(out), target :: mf1
+    type (mf_1), intent(out) :: mf1
 
-    integer i
+    integer n
 
-    type (mf_1), pointer :: r1
+    call get_endf(mf1%za, mf1%awr, n, n, n, n)
+    nullify(mf1%mt451, mf1%mt452, mf1%mt455, mf1%mt456, mf1%mt458, mf1%mt460)
 
-    r1 => mf1
-    r1%mt = get_mt()
+    select case(mf1%mt)
+    case(451)
+        allocate(mf1%mt451)
+        call read_451(mf1%mt451)
+    case(452)
+        allocate(mf1%mt452)
+        call read_4526(mf1%mt452)
+    case(455)
+        allocate(mf1%mt455)
+        call read_455(mf1%mt455)
+    case(456)
+        allocate(mf1%mt456)
+        call read_4526(mf1%mt456)
+    case(458)
+        allocate(mf1%mt458)
+        call read_458(mf1%mt458)
+    case(460)
+        allocate(mf1%mt460)
+        call read_460(mf1%mt460)
+    case default
+        write(erlin,*) 'Undefined MT encountered in MF1: ', mf1%mt
+        call endf_error(erlin)
+    end select
 
-    do
-        r1%next => null()
-
-        nullify(r1%mt451, r1%mt452, r1%mt455, r1%mt456, r1%mt458, r1%mt460)
-
-        select case(r1%mt)
-        case(451)
-            allocate(r1%mt451)
-            call read_451(r1%mt451)
-        case(452)
-            allocate(r1%mt452)
-            call read_4526(r1%mt452)
-        case(455)
-            allocate(r1%mt455)
-            call read_455(r1%mt455)
-        case(456)
-            allocate(r1%mt456)
-            call read_4526(r1%mt456)
-        case(458)
-            allocate(r1%mt458)
-            call read_458(r1%mt458)
-        case(460)
-            allocate(r1%mt460)
-            call read_460(r1%mt460)
-        case default
-            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
-            call endf_error(erlin)
-        end select
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r1%next)
-        r1 => r1%next
-        r1%mt = i
-
-    end do
-
+    return
     end subroutine read_mf1
 
 !------------------------------------------------------------------------------
@@ -223,13 +199,20 @@ module ENDF_MF1_IO
     integer i,n,ios
     real xx
 
-    call get_endf(r1%za, r1%awr, r1%lrp, r1%lfi, r1%nlib, r1%nmod)
+    call get_endf(r1%lrp, r1%lfi, r1%nlib, r1%nmod)
     call read_endf(r1%elis, r1%sta, r1%lis, r1%liso, n, r1%nfor)
     call read_endf(r1%awi, r1%emax, r1%lrel, n, r1%nsub, r1%nver)
     call read_endf(r1%temp, xx, r1%ldrv, n, r1%nwd, r1%nxc)
 
+    if(r1%nfor < 6) then
+        write(erlin,'(a,i1)') ' Unsupported format number in MF1/451 NFOR = ',r1%nfor
+        call endf_error(erlin,-125)
+    endif
+
+    call chk_siz(r1%nwd,'MF1 comments','NWD')
+    call chk_siz(r1%nxc,'MF1 directory','NXC')
     allocate(r1%cmnt(r1%nwd),r1%dir(r1%nxc),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     do i = 1,r1%nwd
         call get_endline
@@ -252,17 +235,17 @@ module ENDF_MF1_IO
 
     r1%libtyp = r1%cmnt(3)(5:21)
     read(r1%cmnt(3)(32:35),'(i4)',iostat=ios) r1%mat
-    if(ios .ne. 0) r1%mat = 0
-    if(r1%cmnt(3)(45:52) .eq. 'REVISION') then
+    if(ios /= 0) r1%mat = 0
+    if(r1%cmnt(3)(45:52) == 'REVISION') then
         read(r1%cmnt(3)(54:56),*,iostat=ios) r1%irev
-        if(ios .ne. 0) r1%irev = 0
+        if(ios /= 0) r1%irev = 0
     else
         r1%irev = 0
     endif
 
     r1%sublib = r1%cmnt(4)(6:66)
     read(r1%cmnt(5)(12:12),'(i1)',iostat=ios) r1%mfor
-    if(ios .ne. 0) r1%mfor = 0
+    if(ios /= 0) r1%mfor = 0
 
     return
     end subroutine read_451
@@ -277,19 +260,20 @@ module ENDF_MF1_IO
 
     integer n
 
-    call get_endf(r2%za, r2%awr, n, r2%lnu, n, n)
+    call get_endf(n, r2%lnu, n, n)
 
-    if(r2%lnu .eq. 1) then
+    if(r2%lnu == 1) then
         nullify(r2%tb)
         call read_endf(n, n, r2%nc, n)
+        call chk_siz(r2%nc,'polynomial expansion','NC')
         allocate(r2%c(r2%nc),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(r2%c,r2%nc)
-    else if(r2%lnu .eq. 2) then
+    else if(r2%lnu == 2) then
         r2%nc = 0
         nullify(r2%c)
         allocate(r2%tb,stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(n, n, r2%tb%nr, r2%tb%np)
         call read_endf(r2%tb)
     else
@@ -311,20 +295,21 @@ module ENDF_MF1_IO
     integer i,j,n
     real xx
 
-    call get_endf(r5%za, r5%awr, r5%ldg, r5%lnu, n, n)
+    call get_endf(r5%ldg, r5%lnu, n, n)
 
-    if(r5%ldg .eq. 0) then
+    if(r5%ldg == 0) then
 
         ! here we have just one E-indep lambda/family
         ! the families are not interpolated.
 
         nullify(r5%lb)
         call read_endf(n, n, r5%nff, n)
+        call chk_siz(r5%nff,'precursor families','NFF')
         allocate(r5%lambda(r5%nff),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(r5%lambda,r5%nff)
 
-    else if(r5%ldg .eq. 1) then
+    else if(r5%ldg == 1) then
 
         ! here the families are E-dependent. We need to read in the E-inter table
         ! and the values for decay const lambda(x) and group abundancies alpha(y)
@@ -332,18 +317,21 @@ module ENDF_MF1_IO
 
         nullify(r5%lambda)
         allocate(r5%lb,stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(n, n, r5%lb%nr, r5%lb%ne)
+        call chk_siz(r5%lb%nr,'Interpolation table','NR')
+        call chk_siz(r5%lb%ne,'Delayed group energies','NE')
         allocate(r5%lb%itp(r5%lb%nr),r5%lb%e(r5%lb%ne),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(r5%lb%itp,r5%lb%nr)
 
         ! read first family to get 2*NFF in first (& every) record
 
         call read_endf(xx, r5%lb%e(1), n, n, i, n)
         r5%nff = i/2
+        call chk_siz(r5%nff,'precursor families','NFF')
         allocate(r5%lb%dgc(r5%lb%ne, r5%nff),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         do j = 1,r5%nff
             call get_endf(r5%lb%dgc(1,j)%x)
             call get_endf(r5%lb%dgc(1,j)%y)
@@ -368,17 +356,18 @@ module ENDF_MF1_IO
 
     ! now read in the nubars
 
-    if(r5%lnu .eq. 1) then
+    if(r5%lnu == 1) then
         nullify(r5%tb)
         call read_endf(n, n, r5%nc, n)
+        call chk_siz(r5%nc,'Polynomial expansion','NC')
         allocate(r5%c(r5%nc),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(r5%c,r5%nc)
-    else if(r5%lnu .eq. 2) then
+    else if(r5%lnu == 2) then
         r5%nc = 0
         nullify(r5%c)
         allocate(r5%tb,stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(n, n, r5%tb%nr, r5%tb%np)
         call read_endf(r5%tb)
     else
@@ -399,15 +388,16 @@ module ENDF_MF1_IO
 
     integer i,j,k,n
 
-    call get_endf(r8%za, r8%awr, n, n, n, n)
+    call get_endf(n, n, n, n)
     call read_endf(n, r8%nply, i, j)
-    if((i .ne. (18*(r8%nply+1))) .or. (j .ne. (9*(r8%nply+1)))) then
+    if((i /= (18*(r8%nply+1))) .or. (j /= (9*(r8%nply+1)))) then
         write(erlin,*)  'Inconsistent values for NT, NPLY in MF1/458 found: ',i,r8%nply
         call endf_error(erlin)
     endif
 
+    call chk_siz(r8%nply,'Polynomial expansion','NPLY',0)
     allocate(r8%cmp(0:r8%nply),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     do k = 0,r8%nply
         call read_reals(r8%cmp(k)%efr,18)
@@ -427,22 +417,24 @@ module ENDF_MF1_IO
     integer i,n
     real xx
 
-    call get_endf(r6%za, r6%awr, r6%lo, n, i, n)
+    call get_endf(r6%lo, n, i, n)
 
-    if(r6%lo .eq. 1) then
+    if(r6%lo == 1) then
         r6%ng = i
+        call chk_siz(r6%ng,'Number of discrete photons','NG')
         allocate(r6%e(r6%ng),r6%phot(r6%ng),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         do i = 1,r6%ng
             call read_endf(r6%e(i), xx, n, n, r6%phot(i)%nr, r6%phot(i)%np)
             call read_endf(r6%phot(i))
         end do
         r6%nnf = 0
         nullify(r6%lambda)
-    else if(r6%lo .eq. 2) then
+    else if(r6%lo == 2) then
         call read_endf(n, n, r6%nnf, n)
+        call chk_siz(r6%nnf,'Precursor families','NNF')
         allocate(r6%lambda(r6%nnf),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(r6%lambda,r6%nnf)
         r6%ng = 0
         nullify(r6%e,r6%phot)
@@ -460,50 +452,41 @@ module ENDF_MF1_IO
 
     implicit none
 
-    type (mf_1), intent(in), target :: mf1
-    type (mf_1), pointer :: r1
+    type (mf_1), intent(in) :: mf1
 
-    r1 => mf1
-    call set_mf(1)
+    call set_mt(mf1%mt)
 
-    do while(associated(r1))
+    select case(mf1%mt)
+    case(451)
+        call write_451(mf1%mt451,mf1%za,mf1%awr)
+    case(452)
+        call write_4526(mf1%mt452,mf1%za,mf1%awr)
+    case(455)
+        call write_455(mf1%mt455,mf1%za,mf1%awr)
+    case(456)
+        call write_4526(mf1%mt456,mf1%za,mf1%awr)
+    case(458)
+        call write_458(mf1%mt458,mf1%za,mf1%awr)
+    case(460)
+        call write_460(mf1%mt460,mf1%za,mf1%awr)
+    case default
+        write(erlin,*) 'Undefined MT encountered in MF1: ', mf1%mt
+        call endf_error(erlin)
+    end select
 
-        call set_mt(r1%mt)
-        select case(r1%mt)
-        case(451)
-            call write_451(r1%mt451)
-        case(452)
-            call write_4526(r1%mt452)
-        case(455)
-            call write_455(r1%mt455)
-        case(456)
-            call write_4526(r1%mt456)
-        case(458)
-            call write_458(r1%mt458)
-        case(460)
-            call write_460(r1%mt460)
-        case default
-            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
-            call endf_error(erlin)
-        end select
-
-        call write_send
-        r1 => r1%next
-
-    end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf1
 
 !------------------------------------------------------------------------------
 
-    subroutine write_451(r1)
+    subroutine write_451(r1,za,awr)
 
     implicit none
 
     type (mf1_451), intent(in) :: r1
+    real, intent(in) :: za,awr
 
     integer i,nmod,ios
 
@@ -514,7 +497,7 @@ module ENDF_MF1_IO
         nmod = max(nmod,r1%dir(i)%mod)
     end do
 
-    call write_endf(r1%za, r1%awr, r1%lrp, r1%lfi, r1%nlib, nmod)
+    call write_endf(za, awr, r1%lrp, r1%lfi, r1%nlib, nmod)
     call write_endf(r1%elis, r1%sta, r1%lis, r1%liso, 0, r1%nfor)
     call write_endf(r1%awi, r1%emax, r1%lrel, 0, r1%nsub, r1%nver)
     call write_endf(r1%temp, zero, r1%ldrv, 0, r1%nwd, r1%nxc)
@@ -538,23 +521,23 @@ module ENDF_MF1_IO
     endline(5:21) = r1%libtyp
     endline(23:30) = 'MATERIAL'
     write(endline(32:35),'(i4)',iostat=ios) r1%mat
-    if(ios .ne. 0) then
+    if(ios /= 0) then
         write(erlin,*) 'Error writing MAT in MF1/451 comment line 3'
         call endf_error(erlin)
     endif
-    if(r1%irev .gt. 0) then
+    if(r1%irev > 0) then
         endline(45:52) = 'REVISION'
-        if(r1%irev .lt. 10) then
+        if(r1%irev < 10) then
             write(endline(54:54),'(i1)',iostat=ios) r1%irev
-        else if(r1%irev .lt. 100) then
+        else if(r1%irev < 100) then
             write(endline(54:55),'(i2)',iostat=ios) r1%irev
-        else if(r1%irev .lt. 1000) then
+        else if(r1%irev < 1000) then
             write(endline(54:56),'(i3)',iostat=ios) r1%irev
         else
             write(erlin,*) 'Revision number too large in MF1/451, line 3:',r1%irev
             call endf_error(erlin)
         endif
-        if(ios .ne. 0) then
+        if(ios /= 0) then
             write(erlin,*) 'Error writing revision number in MF1/451 comment line 3'
             call endf_error(erlin)
         endif
@@ -567,7 +550,7 @@ module ENDF_MF1_IO
 
     endline(1:66) = '------ENDF-X FORMAT'
     write(endline(12:12),'(i1)',iostat=ios) r1%mfor
-    if(ios .ne. 0) then
+    if(ios /= 0) then
         write(erlin,*) 'Error writing format number in MF1/451 comment line 5'
         call endf_error(erlin)
     endif
@@ -591,18 +574,19 @@ module ENDF_MF1_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine write_4526(r2)
+    subroutine write_4526(r2,za,awr)
 
     implicit none
 
     type (mf1_452), intent(in)  :: r2
+    real, intent(in) :: za,awr
 
-    call write_endf(r2%za, r2%awr, 0, r2%lnu, 0, 0)
+    call write_endf(za, awr, 0, r2%lnu, 0, 0)
 
-    if(r2%lnu .eq. 1) then
+    if(r2%lnu == 1) then
         call write_endf(0, 0, r2%nc, 0)
         call write_endf(r2%c,r2%nc)
-    else if(r2%lnu .eq. 2) then
+    else if(r2%lnu == 2) then
         call write_endf(0, 0, r2%tb%nr, r2%tb%np)
         call write_endf(r2%tb)
     else
@@ -615,17 +599,18 @@ module ENDF_MF1_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine write_455(r5)
+    subroutine write_455(r5,za,awr)
 
     implicit none
 
     type (mf1_455), intent(in) :: r5
+    real, intent(in) :: za,awr
 
     integer i,j
 
-    call write_endf(r5%za, r5%awr, r5%ldg, r5%lnu, 0, 0)
+    call write_endf(za, awr, r5%ldg, r5%lnu, 0, 0)
 
-    if(r5%ldg .eq. 0) then
+    if(r5%ldg == 0) then
 
         ! here we have just one E-indep lambda/family
         ! the families are not interpolated.
@@ -633,7 +618,7 @@ module ENDF_MF1_IO
         call write_endf(0, 0, r5%nff, 0)
         call write_endf(r5%lambda,r5%nff)
 
-    else if(r5%ldg .eq. 1) then
+    else if(r5%ldg == 1) then
 
         ! here the families are E-dependent. We need to write in the E-inter table
         ! and the values for decay const lambda(x) and group abundancies alpha(y)
@@ -661,10 +646,10 @@ module ENDF_MF1_IO
 
     ! now write the nubars
 
-    if(r5%lnu .eq. 1) then
+    if(r5%lnu == 1) then
         call write_endf(0, 0, r5%nc, 0)
         call write_endf(r5%c,r5%nc)
-    else if(r5%lnu .eq. 2) then
+    else if(r5%lnu == 2) then
         call write_endf(0, 0, r5%tb%nr, r5%tb%np)
         call write_endf(r5%tb)
     else
@@ -677,15 +662,16 @@ module ENDF_MF1_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine write_458(r8)
+    subroutine write_458(r8,za,awr)
 
     implicit none
 
     type (mf1_458), intent(in) :: r8
+    real, intent(in) :: za,awr
 
     integer i
 
-    call write_endf(r8%za, r8%awr, 0, 0, 0, 0)
+    call write_endf(za, awr, 0, 0, 0, 0)
     call write_endf(zero, zero, 0, r8%nply, 18*(r8%nply+1), 9*(r8%nply+1))
     do i = 0,r8%nply
         call write_reals(r8%cmp(i)%efr,18)
@@ -696,22 +682,23 @@ module ENDF_MF1_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine write_460(r6)
+    subroutine write_460(r6,za,awr)
 
     implicit none
 
     type (mf1_460), intent(in) :: r6
+    real, intent(in) :: za,awr
 
     integer i
 
-    if(r6%lo .eq. 1) then
-        call write_endf(r6%za, r6%awr, r6%lo, 0, r6%ng, 0)
+    if(r6%lo == 1) then
+        call write_endf(za, awr, r6%lo, 0, r6%ng, 0)
         do i = 1,r6%ng
             call write_endf(r6%e(i), zero, i, 0, r6%phot(i)%nr, r6%phot(i)%np)
             call write_endf(r6%phot(i))
         end do
-    else if(r6%lo .eq. 2) then
-        call write_endf(r6%za, r6%awr, r6%lo, 0, 0, 0)
+    else if(r6%lo == 2) then
+        call write_endf(za, awr, r6%lo, 0, 0, 0)
         call write_endf(0, 0, r6%nnf, 0)
         call write_endf(r6%lambda,r6%nnf)
     else
@@ -728,54 +715,45 @@ module ENDF_MF1_IO
 
     implicit none
 
-    type (mf_1), target :: mf1
-    type (mf_1), pointer :: r1,nx
+    type (mf_1) mf1
 
-    integer i
+    integer i,n
 
-    r1 => mf1
-    do while(associated(r1))
-
-        if(associated(r1%mt451)) then
-            deallocate(r1%mt451%cmnt, r1%mt451%dir)
-            deallocate(r1%mt451)
-        else if(associated(r1%mt452)) then
-            if(associated(r1%mt452%c)) deallocate(r1%mt452%c)
-            if(associated(r1%mt452%tb)) call remove_tab1(r1%mt452%tb)
-            deallocate(r1%mt452)
-        else if(associated(r1%mt455)) then
-            if(associated(r1%mt455%lambda)) deallocate(r1%mt455%lambda)
-            if(associated(r1%mt455%lb)) then
-                deallocate(r1%mt455%lb%itp, r1%mt455%lb%e, r1%mt455%lb%dgc)
-                deallocate(r1%mt455%lb)
-            endif
-            if(associated(r1%mt455%c)) deallocate(r1%mt455%c)
-            if(associated(r1%mt455%tb)) call remove_tab1(r1%mt455%tb)
-            deallocate(r1%mt455)
-        else if(associated(r1%mt456)) then
-            if(associated(r1%mt456%c)) deallocate(r1%mt456%c)
-            if(associated(r1%mt456%tb)) call remove_tab1(r1%mt456%tb)
-            deallocate(r1%mt456)
-        else if(associated(r1%mt458)) then
-            deallocate(r1%mt458%cmp)
-            deallocate(r1%mt458)
-        else if(associated(r1%mt460)) then
-            if(associated(r1%mt460%e)) then
-                do i = 1,r1%mt460%ng
-                    call del_tab1(r1%mt460%phot(i))
-                end do
-                deallocate(r1%mt460%e, r1%mt460%phot)
-            endif
-            if(associated(r1%mt460%lambda)) deallocate(r1%mt460%lambda)
-            deallocate(r1%mt460)
+    if(associated(mf1%mt451)) then
+        deallocate(mf1%mt451%cmnt, mf1%mt451%dir,stat=n)
+        deallocate(mf1%mt451,stat=n)
+    else if(associated(mf1%mt452)) then
+        if(associated(mf1%mt452%c)) deallocate(mf1%mt452%c,stat=n)
+        if(associated(mf1%mt452%tb)) call remove_tab1(mf1%mt452%tb)
+        deallocate(mf1%mt452,stat=n)
+    else if(associated(mf1%mt455)) then
+        if(associated(mf1%mt455%lambda)) deallocate(mf1%mt455%lambda,stat=n)
+        if(associated(mf1%mt455%lb)) then
+            deallocate(mf1%mt455%lb%itp, mf1%mt455%lb%e, mf1%mt455%lb%dgc,stat=n)
+            deallocate(mf1%mt455%lb,stat=n)
         endif
+        if(associated(mf1%mt455%c)) deallocate(mf1%mt455%c,stat=n)
+        if(associated(mf1%mt455%tb)) call remove_tab1(mf1%mt455%tb)
+        deallocate(mf1%mt455,stat=n)
+    else if(associated(mf1%mt456)) then
+        if(associated(mf1%mt456%c)) deallocate(mf1%mt456%c,stat=n)
+        if(associated(mf1%mt456%tb)) call remove_tab1(mf1%mt456%tb)
+        deallocate(mf1%mt456,stat=n)
+    else if(associated(mf1%mt458)) then
+        deallocate(mf1%mt458%cmp,stat=n)
+        deallocate(mf1%mt458,stat=n)
+    else if(associated(mf1%mt460)) then
+        if(associated(mf1%mt460%e)) then
+            do i = 1,mf1%mt460%ng
+                call del_tab1(mf1%mt460%phot(i))
+            end do
+            deallocate(mf1%mt460%e, mf1%mt460%phot,stat=n)
+        endif
+        if(associated(mf1%mt460%lambda)) deallocate(mf1%mt460%lambda,stat=n)
+        deallocate(mf1%mt460,stat=n)
+    endif
 
-        nx => r1%next
-        deallocate(r1)
-        r1 => nx
-
-    end do
-
+    return
     end subroutine del_mf1
 
 !***********************************************************************************
@@ -784,82 +762,76 @@ module ENDF_MF1_IO
 
     implicit none
 
-    type (mf_1), target :: mf1
-    type (mf_1), pointer :: r1
+    type (mf_1), intent(in) :: mf1
 
-    integer i,l,mtc
+    integer i,l
 
-    mtc = 0
-    r1 => mf1
-    do while(associated(r1))
-        select case(r1%mt)
-        case(451)
-            l = r1%mt451%nwd + 4    ! don't include directory count at this point
-        case(452)
-            l = 1
-            if(r1%mt452%lnu .eq. 1) then
-                l = l + (r1%mt452%nc + 5)/6 + 1
-            else if(r1%mt452%lnu .eq. 2) then
-                l = l + lc_tab1(r1%mt452%tb) + 1
-            else
-                write(erlin,*) 'Undefined LNU specified in MF1,MT452:',r1%mt452%lnu
-                call endf_error(erlin)
-            end if
-        case(455)
-            l = 1
-            if(r1%mt455%ldg .eq. 0) then
-                l = l + (r1%mt455%nff+5)/6 + 1
-            else if(r1%mt455%ldg .eq. 1) then
-                l = l + (2*r1%mt455%lb%nr+5)/6 + 1
-                do i = 1,r1%mt455%lb%ne
-                    l = l + (2*r1%mt455%nff+5)/6 + 1
-                end do
-            else
-                write(erlin,*) 'Undefined LDG specified in MF1,MT455:',r1%mt455%ldg
-                call endf_error(erlin)
-            end if
-            if(r1%mt455%lnu .eq. 1) then
-                l = l + (r1%mt455%nc+5)/6 + 1
-            else if(r1%mt455%lnu .eq. 2) then
-                l = l + lc_tab1(r1%mt455%tb) + 1
-            else
-                write(erlin,*) 'Undefined LNU specified in MF1,MT455:',r1%mt455%lnu
-                call endf_error(erlin)
-            end if
-        case(456)
-            l = 1
-            if(r1%mt456%lnu .eq. 1) then
-                l = l + (r1%mt456%nc+5)/6 + 1
-            else if(r1%mt456%lnu .eq. 2) then
-                l = l + lc_tab1(r1%mt456%tb) + 1
-            else
-                write(erlin,*) 'Undefined LNU specified in MF1,MT456:',r1%mt456%lnu
-                call endf_error(erlin)
-            end if
-        case(458)
-            l = 3*(r1%mt458%nply+1) + 2
-        case(460)
-            if(r1%mt460%lo .eq. 1) then
-                l = 1
-                do i = 1,r1%mt460%ng
-                    l = l + lc_tab1(r1%mt460%phot(i)) + 1
-                end do
-            else if(r1%mt460%lo .eq. 2) then
-                l = (r1%mt460%nnf+5)/6 + 2
-            else
-                write(erlin,*) 'Undefined LO specified in MF1,MT460:',r1%mt460%lo
-                call endf_error(erlin)
-            end if
-        case default
-            write(erlin,*) 'Undefined MT encountered in MF1: ', r1%mt
+    l = 0
+
+    select case(mf1%mt)
+    case(451)
+        l = mf1%mt451%nwd + 4    ! don't include directory count at this point
+    case(452)
+        l = 1
+        if(mf1%mt452%lnu == 1) then
+            l = l + (mf1%mt452%nc + 5)/6 + 1
+        else if(mf1%mt452%lnu == 2) then
+            l = l + lc_tab1(mf1%mt452%tb) + 1
+        else
+            write(erlin,*) 'Undefined LNU specified in MF1,MT452:',mf1%mt452%lnu
             call endf_error(erlin)
-        end select
-        mtc = mtc + 1
-        r1%lc = l
-        r1 => r1%next
-    end do
+        end if
+    case(455)
+            l = 1
+        if(mf1%mt455%ldg == 0) then
+            l = l + (mf1%mt455%nff+5)/6 + 1
+        else if(mf1%mt455%ldg == 1) then
+            l = l + (2*mf1%mt455%lb%nr+5)/6 + 1
+            do i = 1,mf1%mt455%lb%ne
+                l = l + (2*mf1%mt455%nff+5)/6 + 1
+        end do
+        else
+            write(erlin,*) 'Undefined LDG specified in MF1,MT455:',mf1%mt455%ldg
+            call endf_error(erlin)
+        end if
+        if(mf1%mt455%lnu == 1) then
+            l = l + (mf1%mt455%nc+5)/6 + 1
+        else if(mf1%mt455%lnu == 2) then
+            l = l + lc_tab1(mf1%mt455%tb) + 1
+        else
+            write(erlin,*) 'Undefined LNU specified in MF1,MT455:',mf1%mt455%lnu
+            call endf_error(erlin)
+        end if
+    case(456)
+        l = 1
+        if(mf1%mt456%lnu == 1) then
+            l = l + (mf1%mt456%nc+5)/6 + 1
+        else if(mf1%mt456%lnu == 2) then
+            l = l + lc_tab1(mf1%mt456%tb) + 1
+        else
+            write(erlin,*) 'Undefined LNU specified in MF1,MT456:',mf1%mt456%lnu
+            call endf_error(erlin)
+        end if
+    case(458)
+        l = 3*(mf1%mt458%nply+1) + 2
+    case(460)
+        if(mf1%mt460%lo == 1) then
+            l = 1
+            do i = 1,mf1%mt460%ng
+                l = l + lc_tab1(mf1%mt460%phot(i)) + 1
+            end do
+        else if(mf1%mt460%lo == 2) then
+            l = (mf1%mt460%nnf+5)/6 + 2
+        else
+            write(erlin,*) 'Undefined LO specified in MF1,MT460:',mf1%mt460%lo
+            call endf_error(erlin)
+        end if
+    case default
+        write(erlin,*) 'Undefined MT encountered in MF1: ', mf1%mt
+        call endf_error(erlin)
+    end select
 
-    lc_mf1 = mtc
+    lc_mf1 = l
 
     return
     end function lc_mf1

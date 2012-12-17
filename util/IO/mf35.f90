@@ -28,7 +28,6 @@ module ENDF_MF35_IO
     type MF_35
         type (MF_35), pointer :: next
         integer mt
-        integer lc
         real za
         real awr
         integer nk                         ! number of sub-sections
@@ -46,31 +45,17 @@ module ENDF_MF35_IO
     implicit none
 
     type (mf_35), intent(out), target :: mf35
-    type (MF_35), pointer :: rc
 
     integer i,n
 
-    rc => mf35
-    rc%mt = get_mt()
-
-    do
-        rc%next => null()
-        call get_endf(rc%za, rc%awr, n, n, rc%nk, n)
-        allocate(rc%sct(rc%nk),stat=n)
-        if(n .ne. 0) call endf_badal
-        do i = 1,rc%nk
-            call read_mf35_list(rc%sct(i))
-        end do
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(rc%next)
-        rc => rc%next
-        rc%mt = i
-
+    call get_endf(mf35%za, mf35%awr, n, n, mf35%nk, n)
+    allocate(mf35%sct(mf35%nk),stat=n)
+    if(n /= 0) call endf_badal
+    do i = 1,mf35%nk
+        call read_mf35_list(mf35%sct(i))
     end do
 
+    return
     end subroutine read_mf35
 
 !------------------------------------------------------------------------------
@@ -115,24 +100,15 @@ module ENDF_MF35_IO
     implicit none
 
     type (mf_35), intent(in), target :: mf35
-    type (MF_35), pointer :: rc
 
     integer i
 
-    rc => mf35
-    call set_mf(35)
-
-    do while(associated(rc))
-        call set_mt(rc%mt)
-        call write_endf(rc%za, rc%awr, 0, 0, rc%nk, 0)
-        do i = 1,rc%nk
-            call write_mf35_list(rc%sct(i))
-        end do
-        call write_send
-        rc => rc%next
+    call set_mt(mf35%mt)
+    call write_endf(mf35%za, mf35%awr, 0, 0, mf35%nk, 0)
+    do i = 1,mf35%nk
+        call write_mf35_list(mf35%sct(i))
     end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf35
@@ -168,22 +144,16 @@ module ENDF_MF35_IO
 
     implicit none
 
-    type (mf_35), target :: mf35
-    type (MF_35), pointer :: rc,nx
+    type (mf_35) mf35
 
-    integer i
+    integer i,n
 
-    rc => mf35
-    do while(associated(rc))
-        do i = 1,rc%nk
-            deallocate(rc%sct(i)%ek, rc%sct(i)%cov)
-        end do
-        deallocate(rc%sct)
-        nx => rc%next
-        deallocate(rc)
-        rc => nx
+    do i = 1,mf35%nk
+        deallocate(mf35%sct(i)%ek, mf35%sct(i)%cov,stat=n)
     end do
+    deallocate(mf35%sct,stat=n)
 
+    return
     end subroutine del_mf35
 
 !******************************************************************************
@@ -192,32 +162,24 @@ module ENDF_MF35_IO
 
     implicit none
 
-    type (mf_35), target :: mf35
-    type (MF_35), pointer :: rc
+    type (mf_35), intent(in) :: mf35
 
-    integer i,l,mtc
+    integer i,l
 
-    mtc = 0
-    rc => mf35
-    do while(associated(rc))
-        l = 1
-        do i = 1,rc%nk
-            if(rc%sct(i)%ls .ne. 1) then
-                write(erlin,*) 'Undefined value for LS found in MF35:',rc%sct(i)%ls
-                call endf_error(erlin)
-            endif
-            if(rc%sct(i)%lb .ne. 7) then
-                write(erlin,*) 'Undefined value for LB found in MF35:',rc%sct(i)%lb
-                call endf_error(erlin)
-            endif
-            l = l + ((rc%sct(i)%ne*(rc%sct(i)%ne+1))/2+5)/6 + 1
-        end do
-        rc%lc = l
-        rc => rc%next
-        mtc = mtc + 1
+    l = 1
+    do i = 1,mf35%nk
+        if(mf35%sct(i)%ls .ne. 1) then
+            write(erlin,*) 'Undefined value for LS found in MF35:',mf35%sct(i)%ls
+            call endf_error(erlin)
+        endif
+        if(mf35%sct(i)%lb .ne. 7) then
+            write(erlin,*) 'Undefined value for LB found in MF35:',mf35%sct(i)%lb
+            call endf_error(erlin)
+        endif
+        l = l + ((mf35%sct(i)%ne*(mf35%sct(i)%ne+1))/2+5)/6 + 1
     end do
 
-    lc_mf35 = mtc
+    lc_mf35 = l
 
     return
     end function lc_mf35

@@ -40,7 +40,6 @@ module ENDF_MF14_IO
     type MF_14
         type (mf_14), pointer :: next  ! next section
         integer mt                     ! MT
-        integer lc                     ! line count
         real za                        ! ZA for material
         real awr                       ! AWR for material
         integer li                     ! isotropic flag
@@ -63,96 +62,81 @@ module ENDF_MF14_IO
 
     integer i,j,n,nl
     real xx
-
-    type (mf_14), pointer :: r14
     type (mf14_anisotropic_dist), pointer :: ag
     type (mf14_legendre_dist), pointer :: lg
     type (mf14_tabular_dist), pointer :: tb
 
-    r14 => mf14
-    r14%mt = get_mt()
+    call get_endf(mf14%za, mf14%awr, mf14%li, mf14%ltt, mf14%nk, mf14%ni)
 
-    do
-        r14%next => null()
-        call get_endf(r14%za, r14%awr, r14%li, r14%ltt, r14%nk, r14%ni)
+    select case(mf14%li)
+    case(0)
 
-        select case(r14%li)
-        case(0)
+        ! ang dist info to read in
 
-            ! ang dist info to read in
+        nl = mf14%nk - mf14%ni
 
-            nl = r14%nk - r14%ni
+        ! nl = # of anisotropic photons. Make sure it makes sense
 
-            ! nl = # of anisotropic photons. Make sure it makes sense
+        if(nl .eq. 0) then
+            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
+        else if(nl .lt. 0) then
+            write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
+            call endf_error(erlin)
+        endif
 
-            if(nl .eq. 0) then
-                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-            else if(nl .lt. 0) then
-                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+        allocate(mf14%isg(mf14%ni),mf14%aig(nl),stat=n)
+        if(n .ne. 0) call endf_badal
+        do i = 1,mf14%ni
+            call read_endf(mf14%isg(i)%eg,mf14%isg(i)%es, n, n, n, n)
+        end do
+
+        do i = 1,nl
+
+            ag => mf14%aig(i)
+            call read_endf(ag%eg, ag%es, n, n, ag%nr, ag%ne)
+            allocate(ag%inb(ag%nr),stat=n)
+            if(n .ne. 0) call endf_badal
+            call read_endf(ag%inb,ag%nr)
+
+            if(mf14%ltt .eq. 1) then        ! Legendre
+                nullify(ag%tab)
+                allocate(ag%leg(ag%ne),stat=n)
+                if(n .ne. 0) call endf_badal
+                do j = 1, ag%ne
+                    lg => ag%leg(j)
+                    call read_endf(xx, lg%e, n, n, lg%nl, n)
+                    allocate(lg%a(lg%nl),stat=n)
+                    if(n .ne. 0) call endf_badal
+                    call read_endf(lg%a,lg%nl)
+                end do
+            else if(mf14%ltt .eq. 2) then    ! tables
+                nullify(ag%leg)
+                allocate(ag%tab(ag%ne),stat=n)
+                if(n .ne. 0) call endf_badal
+                do j = 1, ag%ne
+                    tb => ag%tab(j)
+                    call read_endf(xx, tb%e, n, n, tb%mut%nr, tb%mut%np)
+                    call read_endf(tb%mut)
+                end do
+            else
+                write(erlin,*) 'Undefined value of LTT encountered in MF14:',mf14%ltt
                 call endf_error(erlin)
             endif
 
-            allocate(r14%isg(r14%ni),r14%aig(nl),stat=n)
-            if(n .ne. 0) call endf_badal
-            do i = 1,r14%ni
-                call read_endf(r14%isg(i)%eg,r14%isg(i)%es, n, n, n, n)
-            end do
+        end do
 
-            do i = 1,nl
+    case(1)
 
-                ag => r14%aig(i)
-                call read_endf(ag%eg, ag%es, n, n, ag%nr, ag%ne)
-                allocate(ag%inb(ag%nr),stat=n)
-                if(n .ne. 0) call endf_badal
-                call read_endf(ag%inb,ag%nr)
+        ! all isotropic - nothing to read in
 
-                if(r14%ltt .eq. 1) then        ! Legendre
-                    nullify(ag%tab)
-                    allocate(ag%leg(ag%ne),stat=n)
-                    if(n .ne. 0) call endf_badal
-                    do j = 1, ag%ne
-                        lg => ag%leg(j)
-                        call read_endf(xx, lg%e, n, n, lg%nl, n)
-                        allocate(lg%a(lg%nl),stat=n)
-                        if(n .ne. 0) call endf_badal
-                        call read_endf(lg%a,lg%nl)
-                    end do
-                else if(r14%ltt .eq. 2) then    ! tables
-                    nullify(ag%leg)
-                    allocate(ag%tab(ag%ne),stat=n)
-                    if(n .ne. 0) call endf_badal
-                    do j = 1, ag%ne
-                        tb => ag%tab(j)
-                        call read_endf(xx, tb%e, n, n, tb%mut%nr, tb%mut%np)
-                        call read_endf(tb%mut)
-                    end do
-                else
-                    write(erlin,*) 'Undefined value of LTT encountered in MF14:',r14%ltt
-                    call endf_error(erlin)
-                endif
+    case default
 
-            end do
+        write(erlin,*) 'Unrecognized value of LI encountered in MF14:',mf14%li
+        call endf_error(erlin)
 
-        case(1)
+    end select
 
-            ! all isotropic - nothing to read in
-
-        case default
-
-            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error(erlin)
-
-        end select
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r14%next)
-        r14 => r14%next
-        r14%mt = i
-
-    end do
-
+    return
     end subroutine read_mf14
 
 !---------------------------------------------------------------------------------------------
@@ -164,82 +148,70 @@ module ENDF_MF14_IO
     type (mf_14), intent(in), target :: mf14
 
     integer i,j,nl
-
-    type (mf_14), pointer :: r14
     type (mf14_anisotropic_dist), pointer :: ag
     type (mf14_legendre_dist), pointer :: lg
     type (mf14_tabular_dist), pointer :: tb
 
-    r14 => mf14
-    call set_mf(14)
+    call set_mt(mf14%mt)
+    call write_endf(mf14%za, mf14%awr, mf14%li, mf14%ltt, mf14%nk, mf14%ni)
 
-    do while(associated(r14))
+    select case(mf14%li)
+    case(0)
 
-        call set_mt(r14%mt)
-        call write_endf(r14%za, r14%awr, r14%li, r14%ltt, r14%nk, r14%ni)
+        ! ang dist info to write in
 
-        select case(r14%li)
-        case(0)
+        nl = mf14%nk - mf14%ni
 
-            ! ang dist info to write in
+        ! nl = # of anisotropic photons. Make sure it makes sense
 
-            nl = r14%nk - r14%ni
+        if(nl .eq. 0) then
+            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
+        else if(nl .lt. 0) then
+            write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
+            call endf_error(erlin)
+        endif
 
-            ! nl = # of anisotropic photons. Make sure it makes sense
+        do i = 1,mf14%ni
+            call write_endf(mf14%isg(i)%eg,mf14%isg(i)%es, 0, 0, 0, 0)
+        end do
 
-            if(nl .eq. 0) then
-                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-            else if(nl .lt. 0) then
-                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+        do i = 1,nl
+
+            ag => mf14%aig(i)
+            call write_endf(ag%eg, ag%es, 0, 0, ag%nr, ag%ne)
+            call write_endf(ag%inb,ag%nr)
+
+            if(mf14%ltt .eq. 1) then        ! Legendre
+                do j = 1, ag%ne
+                    lg => ag%leg(j)
+                    call write_endf(zero, lg%e, 0, 0, lg%nl, 0)
+                    call write_endf(lg%a,lg%nl)
+                end do
+            else if(mf14%ltt .eq. 2) then    ! tables
+                do j = 1, ag%ne
+                    tb => ag%tab(j)
+                    call write_endf(zero, tb%e, 0, 0, tb%mut%nr, tb%mut%np)
+                    call write_endf(tb%mut)
+                end do
+            else
+                write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',mf14%ltt
                 call endf_error(erlin)
             endif
 
-            do i = 1,r14%ni
-                call write_endf(r14%isg(i)%eg,r14%isg(i)%es, 0, 0, 0, 0)
-            end do
+        end do
 
-            do i = 1,nl
+    case(1)
 
-                ag => r14%aig(i)
-                call write_endf(ag%eg, ag%es, 0, 0, ag%nr, ag%ne)
-                call write_endf(ag%inb,ag%nr)
+        ! isotropic - nothing to write
 
-                if(r14%ltt .eq. 1) then        ! Legendre
-                    do j = 1, ag%ne
-                        lg => ag%leg(j)
-                        call write_endf(zero, lg%e, 0, 0, lg%nl, 0)
-                        call write_endf(lg%a,lg%nl)
-                    end do
-                else if(r14%ltt .eq. 2) then    ! tables
-                    do j = 1, ag%ne
-                        tb => ag%tab(j)
-                        call write_endf(zero, tb%e, 0, 0, tb%mut%nr, tb%mut%np)
-                        call write_endf(tb%mut)
-                    end do
-                else
-                    write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',r14%ltt
-                    call endf_error(erlin)
-                endif
+    case default
 
-            end do
+        write(erlin,*) 'Unrecognized value of LI encountered in MF14:',mf14%li
+        call endf_error(erlin)
 
-        case(1)
+    end select
 
-            ! isotropic - nothing to write
-
-        case default
-
-            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error(erlin)
-
-        end select
-
-        call write_send
-        r14 => r14%next
-
-    end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf14
@@ -250,40 +222,31 @@ module ENDF_MF14_IO
 
     implicit none
 
-    type (mf_14), target :: mf14
-    type (mf_14), pointer :: r14,nx
+    type (mf_14) mf14
 
-    integer i,j,nl
+    integer i,j,nl,n
 
-    r14 => mf14
-    do while(associated(r14))
+    if(mf14%li .eq. 0) then
+        ! ang dist info 
+        nl = mf14%nk - mf14%ni
+        do i = 1,nl
+            deallocate(mf14%aig(i)%inb,stat=n)
+            if(associated(mf14%aig(i)%leg)) then
+                do j = 1,mf14%aig(i)%ne
+                    deallocate(mf14%aig(i)%leg(j)%a,stat=n)
+                end do
+                deallocate(mf14%aig(i)%leg,stat=n)
+            else if(associated(mf14%aig(i)%tab)) then
+                do j = 1,mf14%aig(i)%ne
+                     call del_tab1(mf14%aig(i)%tab(j)%mut)
+                end do
+                deallocate(mf14%aig(i)%tab,stat=n)
+            endif
+        end do
+        deallocate(mf14%isg, mf14%aig,stat=n)
+    endif
 
-        if(r14%li .eq. 0) then
-            ! ang dist info 
-            nl = r14%nk - r14%ni
-            do i = 1,nl
-                deallocate(r14%aig(i)%inb)
-                if(associated(r14%aig(i)%leg)) then
-                    do j = 1,r14%aig(i)%ne
-                        deallocate(r14%aig(i)%leg(j)%a)
-                    end do
-                    deallocate(r14%aig(i)%leg)
-                else if(associated(r14%aig(i)%tab)) then
-                    do j = 1,r14%aig(i)%ne
-                         call del_tab1(r14%aig(i)%tab(j)%mut)
-                    end do
-                    deallocate(r14%aig(i)%tab)
-                endif
-            end do
-            deallocate(r14%isg, r14%aig)
-        endif
-
-        nx => r14%next
-        deallocate(r14)
-        r14 => nx
-
-    end do
-
+    return
     end subroutine del_mf14
 
 !---------------------------------------------------------------------------------------------
@@ -292,59 +255,50 @@ module ENDF_MF14_IO
 
     implicit none
 
-    type (mf_14), target :: mf14
+    type (mf_14), intent(in), target :: mf14
 
-    integer i,j,nl,l,mtc
-
-    type (mf_14), pointer :: r14
+    integer i,j,nl,l
     type (mf14_anisotropic_dist), pointer :: ag
 
-    mtc = 0
-    r14 => mf14
-    do while(associated(r14))
-        l = 1
-        select case(r14%li)
-        case(0)
-            ! ang dist info to write in
-            nl = r14%nk - r14%ni
-            ! nl = # of anisotropic photons. Make sure it makes sense
-            if(nl .eq. 0) then
-                write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
-            else if(nl .lt. 0) then
-                write(erlin,*) 'NK greater than NI in MF14:',r14%nk,r14%ni
+    l = 1
+    select case(mf14%li)
+    case(0)
+        ! ang dist info to write in
+        nl = mf14%nk - mf14%ni
+        ! nl = # of anisotropic photons. Make sure it makes sense
+        if(nl .eq. 0) then
+            write(6,*) ' WARNING: No ang dist data specified with LTT=0 in MF14'
+        else if(nl .lt. 0) then
+            write(erlin,*) 'NK greater than NI in MF14:',mf14%nk,mf14%ni
+            call endf_error(erlin)
+        endif
+
+        l = l + mf14%ni
+
+        do i = 1,nl
+            ag => mf14%aig(i)
+            l = l +(2*ag%nr+5)/6 + 1
+            if(mf14%ltt .eq. 1) then        ! Legendre
+                do j = 1, ag%ne
+                    l = l + (ag%leg(j)%nl+5)/6 + 1
+                end do
+            else if(mf14%ltt .eq. 2) then    ! tables
+                do j = 1, ag%ne
+                    l = l + lc_tab1(ag%tab(j)%mut) + 1
+                end do
+            else
+                write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',mf14%ltt
                 call endf_error(erlin)
             endif
+        end do
+    case(1)
+        ! isotropic - nothing to write
+    case default
+        write(erlin,*) 'Unrecognized value of LI encountered in MF14:',mf14%li
+        call endf_error(erlin)
+    end select
 
-            l = l + r14%ni
-
-            do i = 1,nl
-                ag => r14%aig(i)
-                l = l +(2*ag%nr+5)/6 + 1
-                if(r14%ltt .eq. 1) then        ! Legendre
-                    do j = 1, ag%ne
-                        l = l + (ag%leg(j)%nl+5)/6 + 1
-                    end do
-                else if(r14%ltt .eq. 2) then    ! tables
-                    do j = 1, ag%ne
-                        l = l + lc_tab1(ag%tab(j)%mut) + 1
-                    end do
-                else
-                    write(erlin,*) 'Unrecognized value of LTT encountered in MF14:',r14%ltt
-                    call endf_error(erlin)
-                endif
-            end do
-        case(1)
-            ! isotropic - nothing to write
-        case default
-            write(erlin,*) 'Unrecognized value of LI encountered in MF14:',r14%li
-            call endf_error(erlin)
-        end select
-        mtc = mtc + 1
-        r14%lc = l
-        r14 => r14%next
-    end do
-
-    lc_mf14 = mtc
+    lc_mf14 = l
 
     return
     end function lc_mf14

@@ -350,7 +350,6 @@ module ENDF_MF32_IO
 
     type MF_32
         integer :: mt = 151                        ! only 1 MT for MF32
-        integer lc                                 ! line count
         real za                                    ! ZA for material
         real awr                                   ! AWR for material
         integer nis                                ! # of isotopes
@@ -377,11 +376,14 @@ module ENDF_MF32_IO
     type (MF32_isotope), pointer :: iso
     type (MF32_range), pointer :: rng
 
+    if(mf32%mt /= 151) then
+         write(erlin,*) 'MF32 contains undefined section MT = ',mf32%mt
+         call endf_error(erlin)
+    endif
+
     call get_endf(mf32%za, mf32%awr, n, n, mf32%nis, n)
     allocate(mf32%iso(mf32%nis),stat=n)
     if(n .ne. 0) call endf_badal
-
-    mf32%mt = 151
 
     do i = 1, mf32%nis
 
@@ -449,11 +451,7 @@ module ENDF_MF32_IO
         end do
     end do
 
-    i = next_mt()
-    if(i .eq. 0) return
-
-    call endf_error('FEND record not found for MF32')
-
+    return
     end subroutine read_mf32
 
 !------------------------------------------------------------------------------
@@ -860,11 +858,14 @@ module ENDF_MF32_IO
     type (mf_32), intent(in), target :: mf32
 
     integer i,j,n
-
     type (MF32_isotope), pointer :: iso
     type (MF32_range), pointer :: rng
 
-    call set_mf(32)
+    if(mf32%mt /= 151) then
+         write(erlin,*) 'MF32 contains undefined section MT = ',mf32%mt
+         call endf_error(erlin)
+    endif
+
     call set_mt(151)
     call write_endf(mf32%za, mf32%awr, 0, 0, mf32%nis, 0)
 
@@ -917,7 +918,6 @@ module ENDF_MF32_IO
     end do
 
     call write_send
-    call write_fend
 
     return
     end subroutine write_mf32
@@ -936,7 +936,7 @@ module ENDF_MF32_IO
     type (MF32_BW_block), pointer :: blk
 
     call write_endf(bw%spi, bw%ap, 0, bw%lcomp, bw%nls, bw%isr)
-    if(bw%isr .gt. 0) call write_endf(zero, bw%dap, 0, 0, 0, 0)
+    if(bw%isr > 0) call write_endf(zero, bw%dap, 0, 0, 0, 0)
 
     select case(bw%lcomp)
     case(0)
@@ -1252,13 +1252,10 @@ module ENDF_MF32_IO
 
     implicit none
 
-    type (mf_32), pointer :: mf32
+    type (mf_32) mf32
 
-    integer i,j,n,l
-
+    integer i,j,n,l,m
     type (MF32_range), pointer :: rng
-
-    if(.not.associated(mf32)) return
 
     do i = 1, mf32%nis
         do j = 1,mf32%iso(i)%ner
@@ -1269,96 +1266,95 @@ module ENDF_MF32_IO
                 do n = 1,rng%ni
                     call del_ni(rng%nis(n))
                 end do
-                deallocate(rng%nis)
+                deallocate(rng%nis,stat=m)
             endif
 
             if(associated(rng%bw)) then
 
                 if(associated(rng%bw%old)) then
                     do n = 1, rng%bw%nls
-                        deallocate(rng%bw%old(n)%res)
+                        deallocate(rng%bw%old(n)%res,stat=m)
                     end do
-                    deallocate(rng%bw%old)
+                    deallocate(rng%bw%old,stat=m)
                 else if(associated(rng%bw%gen)) then
                     do n = 1, rng%bw%gen%nsrs
-                        deallocate(rng%bw%gen%blk(n)%res, rng%bw%gen%blk(n)%v)
+                        deallocate(rng%bw%gen%blk(n)%res, rng%bw%gen%blk(n)%v,stat=m)
                     end do
                     do n = 1, rng%bw%gen%nlrs
                         call del_ni(rng%bw%gen%lrc(n))
                     end do
-                    deallocate(rng%bw%gen%blk, rng%bw%gen%lrc)
-                    deallocate(rng%bw%gen)
+                    deallocate(rng%bw%gen%blk, rng%bw%gen%lrc,stat=m)
+                    deallocate(rng%bw%gen,stat=m)
                 else if(associated(rng%bw%cmp)) then
-                    deallocate(rng%bw%cmp%res)
+                    deallocate(rng%bw%cmp%res,stat=m)
                     call del_cmpt(rng%bw%cmp%cpv)
-                    deallocate(rng%bw%cmp)
+                    deallocate(rng%bw%cmp,stat=m)
                 endif
-                deallocate(rng%bw)
+                deallocate(rng%bw,stat=m)
 
             else if(associated(rng%rm)) then
 
-                if(associated(rng%rm%dap)) deallocate(rng%rm%dap)
+                if(associated(rng%rm%dap)) deallocate(rng%rm%dap,stat=m)
                 if(associated(rng%rm%gen)) then
                     do n = 1, rng%rm%gen%nsrs
-                        deallocate(rng%rm%gen%blk(n)%res, rng%rm%gen%blk(n)%v)
+                        deallocate(rng%rm%gen%blk(n)%res, rng%rm%gen%blk(n)%v,stat=m)
                     end do
                     do n = 1, rng%rm%gen%nlrs
                         call del_ni(rng%rm%gen%lrc(n))
                     end do
-                    deallocate(rng%rm%gen%blk, rng%rm%gen%lrc)
-                    deallocate(rng%rm%gen)
+                    deallocate(rng%rm%gen%blk, rng%rm%gen%lrc,stat=m)
+                    deallocate(rng%rm%gen,stat=m)
                 else if(associated(rng%rm%cmp)) then
-                    deallocate(rng%rm%cmp%res)
+                    deallocate(rng%rm%cmp%res,stat=m)
                     call del_cmpt(rng%rm%cmp%cpv)
-                    deallocate(rng%rm%cmp)
+                    deallocate(rng%rm%cmp,stat=m)
                 endif
-                deallocate(rng%rm)
+                deallocate(rng%rm,stat=m)
 
             else if(associated(rng%aa)) then
 
                 do n = 1, rng%aa%gen%nsrs
-                    deallocate(rng%aa%gen%blk(n)%res, rng%aa%gen%blk(n)%v)
+                    deallocate(rng%aa%gen%blk(n)%res, rng%aa%gen%blk(n)%v,stat=m)
                 end do
-                deallocate(rng%aa%gen%blk)
-                deallocate(rng%aa)
+                deallocate(rng%aa%gen%blk,stat=m)
+                deallocate(rng%aa,stat=m)
 
             else if(associated(rng%ml)) then
 
-                if(associated(rng%ml%dap)) deallocate(rng%ml%dap)
+                if(associated(rng%ml%dap)) deallocate(rng%ml%dap,stat=m)
                 if(associated(rng%ml%gen)) then
                     do n = 1,rng%ml%gen%njsx
-                        deallocate(rng%ml%gen%sp(n)%er,rng%ml%gen%sp(n)%gam)
+                        deallocate(rng%ml%gen%sp(n)%er,rng%ml%gen%sp(n)%gam,stat=m)
                     end do
-                    deallocate(rng%ml%gen%sp,rng%ml%gen%v)
-                    deallocate(rng%ml%gen)
+                    deallocate(rng%ml%gen%sp,rng%ml%gen%v,stat=m)
+                    deallocate(rng%ml%gen,stat=m)
                 else if(associated(rng%ml%cmp)) then
                     do l = 1,rng%ml%njs
-                        deallocate(rng%ml%cmp%sg(l)%er, rng%ml%cmp%sg(l)%der)
+                        deallocate(rng%ml%cmp%sg(l)%er, rng%ml%cmp%sg(l)%der,stat=m)
                         do n = 1,rng%ml%cmp%sg(l)%nch
-                            deallocate(rng%ml%cmp%sg(l)%chn(n)%gam, rng%ml%cmp%sg(l)%chn(n)%dgam)
+                            deallocate(rng%ml%cmp%sg(l)%chn(n)%gam, rng%ml%cmp%sg(l)%chn(n)%dgam,stat=m)
                         end do
-                        deallocate(rng%ml%cmp%sg(l)%chn)
+                        deallocate(rng%ml%cmp%sg(l)%chn,stat=m)
                     end do
-                    deallocate(rng%ml%cmp%pp, rng%ml%cmp%sg)
+                    deallocate(rng%ml%cmp%pp, rng%ml%cmp%sg,stat=m)
                     call del_cmpt(rng%ml%cmp%cpv)
-                    deallocate(rng%ml%cmp)
+                    deallocate(rng%ml%cmp,stat=m)
                 endif
-                deallocate(rng%ml)
+                deallocate(rng%ml,stat=m)
 
             else if(associated(rng%ur)) then
 
                 do l = 1,rng%ur%nls
-                    deallocate(rng%ur%lpm(l)%jpm)
+                    deallocate(rng%ur%lpm(l)%jpm,stat=m)
                 end do
-                deallocate(rng%ur%rv,rng%ur%lpm)
-                deallocate(rng%ur)
+                deallocate(rng%ur%rv,rng%ur%lpm,stat=m)
+                deallocate(rng%ur,stat=m)
 
             endif
         end do
-        deallocate(mf32%iso(i)%rng)
+        deallocate(mf32%iso(i)%rng,stat=m)
     end do
-    deallocate(mf32%iso)
-    deallocate(mf32)
+    deallocate(mf32%iso,stat=m)
 
     return
     end subroutine del_mf32
@@ -1369,8 +1365,7 @@ module ENDF_MF32_IO
 
     implicit none
 
-    type (mf_32), target :: mf32
-    type (mf_32), pointer :: r32
+    type (mf_32), intent(in), target :: mf32
 
     integer i,j,k,n,l,mp
 
@@ -1381,12 +1376,6 @@ module ENDF_MF32_IO
     type (MF32_AA_block), pointer :: ba
     type (mf32_ml_gen_spin_grp), pointer :: sp
     type (mf32_ml_cmp_spin_grp), pointer :: sg
-
-    r32 => mf32
-    if(.not.associated(r32)) then
-        lc_mf32 = 0
-        return
-    endif
 
     l = 1
 
@@ -1536,8 +1525,7 @@ module ENDF_MF32_IO
         end do
     end do
 
-    mf32%lc = l
-    lc_mf32 = 1
+    lc_mf32 = l
 
     return
     end function lc_mf32

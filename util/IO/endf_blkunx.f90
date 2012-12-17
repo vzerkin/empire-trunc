@@ -56,6 +56,7 @@ module endf_line_io
     integer*4, public, parameter :: file_not_fixed = -2000000   ! status code for file with non-fixed length records
     integer*4, public, parameter :: file_bad_read  = -3000000   ! status code for bad number of read bytes
     integer*4, public, parameter :: file_bad_write = -4000000   ! status code for bad number of read bytes
+    integer*4, public, parameter :: file_not_open  = -5000000   ! status when read/write to closed file
     integer*4, public :: file_bytes_requested    ! Number of bytes requeseted for read/write
     integer*4, public :: file_bytes_receieved    ! Number of bytes recieved for read/write
 
@@ -226,6 +227,11 @@ module endf_line_io
 
     integer*4 inx,numred,numbyt
 
+    if(.not.q_open) then
+        get_endf_line = file_not_open
+        return
+    endif
+
     ! make sure we're not trying to read past EOF
 
     if(curek >= numrec) then
@@ -284,6 +290,11 @@ module endf_line_io
     implicit none
 
     integer*4 numbyt,numwrt
+
+    if(.not.q_open) then
+        put_endf_line = file_not_open
+        return
+    endif
 
     filin = filin + 1
 
@@ -355,6 +366,11 @@ module endf_line_io
     implicit none
 
     integer*4 numbyt,status,numwrt,istat
+
+    if(.not.q_open) then
+        close_endf_file = 0
+        return
+    endif
 
     ! if writing, see if there are lines left in buffer
 
@@ -488,20 +504,24 @@ module endf_line_io
     ! and terminators as the first record in file. 
 
     integer*4 status
+    character*1 trm
 
-    if((mode < 1) .or. (mode > 3)) return
+    select case(mode)
+    case(1,2)
+       trm = LF
+    case(3)
+       trm = CR
+    case default
+       return
+    end select
 
     status = get_endf_line()
     do while(status == 0)
-        if(mode < 3) then
-            if(endline(recsiz:recsiz) /= LF) exit
-        else
-            if(endline(recsiz:recsiz) /= CR) exit
-        endif
+        if(endline(recsiz:recsiz) /= trm) exit
         status = get_endf_line()
-     end do
+    end do
 
-     return
-     end subroutine find_bad_record
+    return
+    end subroutine find_bad_record
 
 end module endf_line_io

@@ -282,7 +282,6 @@ module ENDF_MF2_IO
 
     type MF_2
         integer :: mt = 151                    	! only 1 MT for MF2
-        integer lc                             	! line count
         real za                                	! ZA for material
         real awr                               	! AWR for material
         integer nis                            	! # of isotopes
@@ -310,11 +309,14 @@ module ENDF_MF2_IO
     type (MF2_isotope), pointer :: iso
     type (MF2_range), pointer :: rng
 
+    if(mf2%mt /= 151) then
+         write(erlin,*) 'MF2 contains undefined section MT = ',mf2%mt
+         call endf_error(erlin)
+    endif
+
     call get_endf(mf2%za, mf2%awr, n, n, mf2%nis, n)
     allocate(mf2%iso(mf2%nis),stat=n)
     if(n .ne. 0) call endf_badal
-
-    mf2%mt = 151
 
     do i = 1, mf2%nis
 
@@ -381,11 +383,7 @@ module ENDF_MF2_IO
         end do
     end do
 
-    i = next_mt()
-    if(i .eq. 0) return
-
-    call endf_error('FEND record not found for MF2')
-
+    return
     end subroutine read_mf2
 
 !------------------------------------------------------------------------------
@@ -786,7 +784,11 @@ module ENDF_MF2_IO
     type (MF2_isotope), pointer :: iso
     type (MF2_range), pointer :: rng
 
-    call set_mf(2)
+    if(mf2%mt /= 151) then
+         write(erlin,*) 'MF2 contains undefined section MT = ',mf2%mt
+         call endf_error(erlin)
+    endif
+
     call set_mt(151)
     call write_endf(mf2%za, mf2%awr, 0, 0, mf2%nis, 0)
 
@@ -846,7 +848,6 @@ module ENDF_MF2_IO
     end do
 
     call write_send
-    call write_fend
 
     return
     end subroutine write_mf2
@@ -1162,9 +1163,9 @@ module ENDF_MF2_IO
 
     implicit none
 
-    type (mf_2), pointer :: mf2
+    type (mf_2) mf2
 
-    integer i,j,l,n
+    integer i,j,l,n,m
 
     type (MF2_isotope), pointer :: iso
     type (MF2_range), pointer :: rng
@@ -1178,76 +1179,75 @@ module ENDF_MF2_IO
             rng => iso%rng(j)
 
             if(associated(rng%sc)) then
-                deallocate(rng%sc)
+                deallocate(rng%sc,stat=m)
             else if(associated(rng%bw)) then
                 if(associated(rng%bw%ape)) call remove_tab1(rng%bw%ape)
                 do l = 1,rng%bw%nls
-                    deallocate(rng%bw%prm(l)%res)
+                    deallocate(rng%bw%prm(l)%res,stat=m)
                 end do
-                deallocate(rng%bw%prm)
-                deallocate(rng%bw)
+                deallocate(rng%bw%prm,stat=m)
+                deallocate(rng%bw,stat=m)
             else if(associated(rng%rm)) then
                 if(associated(rng%rm%ape)) call remove_tab1(rng%rm%ape)
                 do l = 1,rng%rm%nls
-                    deallocate(rng%rm%prm(l)%res)
+                    deallocate(rng%rm%prm(l)%res,stat=m)
                 end do
-                deallocate(rng%rm%prm)
-                deallocate(rng%rm)
+                deallocate(rng%rm%prm,stat=m)
+                deallocate(rng%rm,stat=m)
             else if(associated(rng%aa)) then
                 if(associated(rng%aa%ape)) call remove_tab1(rng%aa%ape)
                 do l = 1,rng%aa%nls
                     do n = 1, rng%aa%lpm(l)%njs
-                        deallocate(rng%aa%lpm(l)%jpm(n)%res)
+                        deallocate(rng%aa%lpm(l)%jpm(n)%res,stat=m)
                     end do
-                    deallocate(rng%aa%lpm(l)%jpm)
+                    deallocate(rng%aa%lpm(l)%jpm,stat=m)
                 end do
-                deallocate(rng%aa%lpm)
-                deallocate(rng%aa)
+                deallocate(rng%aa%lpm,stat=m)
+                deallocate(rng%aa,stat=m)
             else if(associated(rng%ml)) then
-                if(associated(rng%ml%pp)) deallocate(rng%ml%pp)
+                if(associated(rng%ml%pp)) deallocate(rng%ml%pp,stat=m)
                 do l = 1, rng%ml%njs
                     do n = 1,rng%ml%sg(l)%nch
-                        deallocate(rng%ml%sg(l)%chn(n)%gam)
+                        deallocate(rng%ml%sg(l)%chn(n)%gam,stat=m)
                     end do
-                    deallocate(rng%ml%sg(l)%chn, rng%ml%sg(l)%er)
+                    deallocate(rng%ml%sg(l)%chn, rng%ml%sg(l)%er,stat=m)
                     if(associated(rng%ml%sg(l)%bck)) then
                         if(associated(rng%ml%sg(l)%bck%rbr)) call remove_tab1(rng%ml%sg(l)%bck%rbr)
                         if(associated(rng%ml%sg(l)%bck%rbi)) call remove_tab1(rng%ml%sg(l)%bck%rbi)
-                        deallocate(rng%ml%sg(l)%bck)
+                        deallocate(rng%ml%sg(l)%bck,stat=m)
                     endif
                     if(associated(rng%ml%sg(l)%psf)) then
                         if(associated(rng%ml%sg(l)%psf%psr)) call remove_tab1(rng%ml%sg(l)%psf%psr)
                         if(associated(rng%ml%sg(l)%psf%psi)) call remove_tab1(rng%ml%sg(l)%psf%psi)
-                        deallocate(rng%ml%sg(l)%psf)
+                        deallocate(rng%ml%sg(l)%psf,stat=m)
                     endif
                 end do
-                deallocate(rng%ml%sg)
-                deallocate(rng%ml)
+                deallocate(rng%ml%sg,stat=m)
+                deallocate(rng%ml,stat=m)
             else if(associated(rng%ur)) then
-                if(associated(rng%ur%es)) deallocate(rng%ur%es)
+                if(associated(rng%ur%es)) deallocate(rng%ur%es,stat=m)
                 do l = 1,rng%ur%nls
                     if(associated(rng%ur%lpm(l)%jpm)) then
                         do n = 1,rng%ur%lpm(l)%njs
-                            if(associated(rng%ur%lpm(l)%jpm(n)%gf)) deallocate(rng%ur%lpm(l)%jpm(n)%gf)
+                            if(associated(rng%ur%lpm(l)%jpm(n)%gf)) deallocate(rng%ur%lpm(l)%jpm(n)%gf,stat=m)
                         end do
-                        deallocate(rng%ur%lpm(l)%jpm)
+                        deallocate(rng%ur%lpm(l)%jpm,stat=m)
                     endif
                     if(associated(rng%ur%lpm(l)%jpc)) then
                         do n = 1,rng%ur%lpm(l)%njs
-                            deallocate(rng%ur%lpm(l)%jpc(n)%fpm)
+                            deallocate(rng%ur%lpm(l)%jpc(n)%fpm,stat=m)
                         end do
-                        deallocate(rng%ur%lpm(l)%jpc)
+                        deallocate(rng%ur%lpm(l)%jpc,stat=m)
                     endif
                 end do
-                deallocate(rng%ur%lpm)
-                deallocate(rng%ur)
+                deallocate(rng%ur%lpm,stat=m)
+                deallocate(rng%ur,stat=m)
             end if
 
         end do
-        deallocate(iso%rng)
+        deallocate(iso%rng,stat=m)
     end do
-    deallocate(mf2%iso)
-    deallocate(mf2)
+    deallocate(mf2%iso,stat=m)
 
     return
     end subroutine del_mf2
@@ -1258,20 +1258,13 @@ module ENDF_MF2_IO
 
     implicit none
 
-    type (mf_2), target :: mf2
-    type (mf_2), pointer :: r2
+    type (mf_2), intent(in) :: mf2
 
     integer i,j,l,k,m,nx
 
     type (MF2_isotope), pointer :: iso
     type (MF2_range), pointer :: rng
     type (mf2_ml_spin_grp), pointer :: sg
-
-    r2 => mf2
-    if(.not.associated(r2)) then
-        lc_mf2 = 0
-        return
-    endif
 
     l = 1
 
@@ -1384,8 +1377,7 @@ module ENDF_MF2_IO
         end do
     end do
 
-    mf2%lc = l
-    lc_mf2 = 1
+    lc_mf2 = l
 
     return
     end function lc_mf2

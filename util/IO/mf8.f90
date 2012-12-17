@@ -151,7 +151,6 @@ module ENDF_MF8_IO
     type MF_8
         type (mf_8), pointer :: next            ! next section
         integer mt                              ! MT
-        integer lc                              ! line count
         real za                                 ! ZA for material
         real awr                                ! AWR for material
         type(mf8_nuclide),    pointer :: ncl    ! radioactive nuclide prod
@@ -171,42 +170,27 @@ module ENDF_MF8_IO
 
     implicit none
 
-    type (mf_8), intent(out), target :: mf8
-    type (mf_8), pointer :: r8
+    type (mf_8), intent(out) :: mf8
 
-    integer i,n
+    integer n
 
-    r8 => mf8
-    r8%mt = get_mt()
+    call get_endf(mf8%za, mf8%awr, n, n, n, n)
 
-    do
-        r8%next => null()
+    nullify(mf8%ncl, mf8%fpy, mf8%rdd)
 
-        call get_endf(r8%za, r8%awr, n, n, n, n)
+    select case(mf8%mt)
+    case(454,459)
+        allocate(mf8%fpy)
+        call read_fpy(mf8%fpy)
+    case(457)
+        allocate(mf8%rdd)
+        call read_rdd(mf8%rdd)
+    case default
+        allocate(mf8%ncl)
+        call read_ncl(mf8%ncl)
+    end select
 
-        nullify(r8%ncl, r8%fpy, r8%rdd)
-
-        select case(r8%mt)
-        case(454,459)
-            allocate(r8%fpy)
-            call read_fpy(r8%fpy)
-        case(457)
-            allocate(r8%rdd)
-            call read_rdd(r8%rdd)
-        case default
-            allocate(r8%ncl)
-            call read_ncl(r8%ncl)
-        end select
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r8%next)
-        r8 => r8%next
-        r8%mt = i
-
-    end do
-
+    return
     end subroutine read_mf8
 
 !------------------------------------------------------------------------------
@@ -222,19 +206,19 @@ module ENDF_MF8_IO
 
     call get_endf(nc%lis, nc%liso, nc%ns, nc%no)
     allocate(nc%prd(nc%ns),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     do i = 1,nc%ns
         pr => nc%prd(i)
         call read_endf(pr%zap, pr%elfs, pr%lmf, pr%lfs, nd, n)
-        if(nc%no .eq. 0) then
+        if(nc%no == 0) then
             pr%nd = nd/6
             allocate(pr%br(pr%nd),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             do j = 1,pr%nd
                 call read_reals(pr%br(j)%hl,6)
             end do
-        else if(nc%no .eq. 1) then
+        else if(nc%no == 1) then
             pr%nd = 0
             nullify(pr%br)
         else
@@ -262,29 +246,29 @@ module ENDF_MF8_IO
     call get_endf(ne1, n, n, n)
     yld%le = ne1-1
     allocate(yld%ep(ne1),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     ep => yld%ep(1)
     call read_endf(ep%e, xx, n, n, nn, ep%nfp)
-    if(nn .ne. 4*ep%nfp) then
+    if(nn /= 4*ep%nfp) then
         write(erlin,*) 'Inconsistent NFP, item count found in MF8:',ep%nfp,nn
         call endf_error(erlin)
     end if
     ep%itp = 0
 
     allocate(ep%c(ep%nfp),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
     call read_reals(ep%c(1)%zafp,nn)
 
     do i = 2,ne1
         ep => yld%ep(i)
         call read_endf(ep%e, xx, ep%itp, n, nn, ep%nfp)
-        if(nn .ne. 4*ep%nfp) then
+        if(nn /= 4*ep%nfp) then
             write(erlin,*) 'Inconsistent NFP, item count found in MF8:',ep%nfp,nn
             call endf_error(erlin)
         end if
         allocate(ep%c(ep%nfp),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_reals(ep%c(1)%zafp,nn)
     end do
 
@@ -314,26 +298,26 @@ module ENDF_MF8_IO
         call read_endf(rc%t12,rc%dt12, n, n, nc, n)
         rc%nc = nc/2
         allocate(rc%ex(rc%nc),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call get_endf(rc%ex, rc%nc)
 
         call read_endf(rc%spi, rc%par, n, n, nc, rc%ndk)
 
-        if(nc .ne. 6*rc%ndk) then
+        if(nc /= 6*rc%ndk) then
             write(erlin,*) 'Inconsistent NDK, NT found in MF8/MT457:',rc%ndk,nc
             call endf_error(erlin)
         endif
 
-        if(rc%ndk .gt. 0) then
+        if(rc%ndk > 0) then
             allocate(rc%dcm(rc%ndk),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             call read_reals(rc%dcm(1)%rtyp,6*rc%ndk)
         endif
 
-        if(rc%nsp .eq. 0) return
+        if(rc%nsp == 0) return
 
         allocate(rc%spt(rc%nsp),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
 
         do i = 1, rc%nsp
 
@@ -342,9 +326,9 @@ module ENDF_MF8_IO
             call read_endf(xx, sp%styp, sp%lcon, n, n, sp%ner)
             call read_reals(sp%dat%fd, 6)
 
-            if(sp%lcon .ne. 1) then
+            if(sp%lcon /= 1) then
                 allocate(sp%dsc(sp%ner),stat=n)
-                if(n .ne. 0) call endf_badal
+                if(n /= 0) call endf_badal
                 do j = 1, sp%ner
                     dsc => sp%dsc(j)
                     call read_endf(dsc%er, dsc%der, n, n, dsc%nt, n)
@@ -365,15 +349,15 @@ module ENDF_MF8_IO
                 end do
             endif
 
-            if(sp%lcon .ne. 0) then
+            if(sp%lcon /= 0) then
                 allocate(sp%con)
                 call read_endf(sp%con%rtyp, xx, n, sp%con%lcov, sp%con%rp%nr, sp%con%rp%np)
                 call read_endf(sp%con%rp)
-                if(sp%con%lcov .ne. 0) then
+                if(sp%con%lcov /= 0) then
                     allocate(sp%cov)
                     call read_endf(n, sp%cov%lb, n, sp%cov%npp)
                     allocate(sp%cov%ef(sp%cov%npp),stat=n)
-                    if(n .ne. 0) call endf_badal
+                    if(n /= 0) call endf_badal
                     call read_endf(sp%cov%ef, sp%cov%npp)
                 endif
             endif
@@ -409,27 +393,18 @@ module ENDF_MF8_IO
 
     implicit none
 
-    type (mf_8), intent(in), target :: mf8
-    type (mf_8), pointer :: r8
+    type (mf_8), intent(in) :: mf8
 
-    r8 => mf8
-    call set_mf(8)
-
-    do while(associated(r8))
-        call set_mt(r8%mt)
-        select case(r8%mt)
-        case(454,459)
-            call write_fpy(r8%za, r8%awr, r8%fpy)
-        case(457)
-            call write_rdd(r8%za, r8%awr, r8%rdd)
-        case default
-            call write_ncl(r8%za, r8%awr, r8%ncl)
-        end select
-        call write_send
-        r8 => r8%next
-    end do
-
-    call write_fend
+    call set_mt(mf8%mt)
+    select case(mf8%mt)
+    case(454,459)
+        call write_fpy(mf8%za, mf8%awr, mf8%fpy)
+    case(457)
+        call write_rdd(mf8%za, mf8%awr, mf8%rdd)
+    case default
+        call write_ncl(mf8%za, mf8%awr, mf8%ncl)
+    end select
+    call write_send
 
     return
     end subroutine write_mf8
@@ -451,11 +426,11 @@ module ENDF_MF8_IO
     do i = 1,nc%ns
         pr => nc%prd(i)
         call write_endf(pr%zap, pr%elfs, pr%lmf, pr%lfs, 6*pr%nd, 0)
-        if(nc%no .eq. 0) then
+        if(nc%no == 0) then
             do j = 1,pr%nd
                 call write_reals(pr%br(j)%hl,6)
             end do
-        else if(nc%no .ne. 1) then
+        else if(nc%no /= 1) then
             write(erlin,*) 'Undefined value for NO encounted in MF8:', nc%no
             call endf_error(erlin)
         endif
@@ -518,17 +493,17 @@ module ENDF_MF8_IO
             call write_endf(zero, sp%styp, sp%lcon, 0, 6, sp%ner)
             call write_reals(sp%dat%fd, 6)
 
-            if(sp%lcon .ne. 1) then
+            if(sp%lcon /= 1) then
                 do j = 1, sp%ner
                     call write_endf(sp%dsc(j)%er, sp%dsc(j)%der, 0, 0, sp%dsc(j)%nt, 0)
                     call write_reals(sp%dsc(j)%rtyp, sp%dsc(j)%nt)
                 end do
             endif
 
-            if(sp%lcon .ne. 0) then
+            if(sp%lcon /= 0) then
                 call write_endf(sp%con%rtyp, zero, 0, sp%con%lcov, sp%con%rp%nr, sp%con%rp%np)
                 call write_endf(sp%con%rp)
-                if(sp%con%lcov .ne. 0) then
+                if(sp%con%lcov /= 0) then
                     call write_endf(0, sp%cov%lb, 2*sp%cov%npp, sp%cov%npp)
                     call write_endf(sp%cov%ef, sp%cov%npp)
                 endif
@@ -561,52 +536,43 @@ module ENDF_MF8_IO
 
     implicit none
 
-    type (mf_8), target :: mf8
-    type (mf_8), pointer :: r8,nx
+    type (mf_8) :: mf8
 
-    integer i
+    integer i,n
 
-    r8 => mf8
-    do while(associated(r8))
-
-        if(associated(r8%fpy)) then
-            do i = 1,r8%fpy%le+1
-                deallocate(r8%fpy%ep(i)%c)
+    if(associated(mf8%fpy)) then
+        do i = 1,mf8%fpy%le+1
+            deallocate(mf8%fpy%ep(i)%c,stat=n)
+        end do
+        deallocate(mf8%fpy%ep,stat=n)
+        deallocate(mf8%fpy,stat=n)
+    else if(associated(mf8%rdd)) then
+        if(associated(mf8%rdd%ex)) deallocate(mf8%rdd%ex,stat=n)
+        if(associated(mf8%rdd%dcm)) deallocate(mf8%rdd%dcm,stat=n)
+        if(associated(mf8%rdd%spt)) then
+            do i = 1, mf8%rdd%nsp
+                if(associated(mf8%rdd%spt(i)%dsc)) deallocate(mf8%rdd%spt(i)%dsc,stat=n)
+                if(associated(mf8%rdd%spt(i)%con)) then
+                    call del_tab1(mf8%rdd%spt(i)%con%rp)
+                    deallocate(mf8%rdd%spt(i)%con,stat=n)
+                endif
+                if(associated(mf8%rdd%spt(i)%cov)) then
+                    deallocate(mf8%rdd%spt(i)%cov%ef,stat=n)
+                    deallocate(mf8%rdd%spt(i)%cov,stat=n)
+                endif
             end do
-            deallocate(r8%fpy%ep)
-            deallocate(r8%fpy)
-        else if(associated(r8%rdd)) then
-            if(associated(r8%rdd%ex)) deallocate(r8%rdd%ex)
-            if(associated(r8%rdd%dcm)) deallocate(r8%rdd%dcm)
-            if(associated(r8%rdd%spt)) then
-                do i = 1, r8%rdd%nsp
-                    if(associated(r8%rdd%spt(i)%dsc)) deallocate(r8%rdd%spt(i)%dsc)
-                    if(associated(r8%rdd%spt(i)%con)) then
-                        call del_tab1(r8%rdd%spt(i)%con%rp)
-                        deallocate(r8%rdd%spt(i)%con)
-                    endif
-                    if(associated(r8%rdd%spt(i)%cov)) then
-                        deallocate(r8%rdd%spt(i)%cov%ef)
-                        deallocate(r8%rdd%spt(i)%cov)
-                    endif
-                end do
-                deallocate(r8%rdd%spt)
-            endif
-            deallocate(r8%rdd)
-        else if(associated(r8%ncl)) then
-            do i = 1,r8%ncl%ns
-                if(associated(r8%ncl%prd(i)%br)) deallocate(r8%ncl%prd(i)%br)
-            end do
-            deallocate(r8%ncl%prd)
-            deallocate(r8%ncl)
+            deallocate(mf8%rdd%spt,stat=n)
         endif
+        deallocate(mf8%rdd,stat=n)
+    else if(associated(mf8%ncl)) then
+        do i = 1,mf8%ncl%ns
+            if(associated(mf8%ncl%prd(i)%br)) deallocate(mf8%ncl%prd(i)%br,stat=n)
+        end do
+        deallocate(mf8%ncl%prd,stat=n)
+        deallocate(mf8%ncl,stat=n)
+    endif
 
-        nx => r8%next
-        deallocate(r8)
-        r8 => nx
-
-    end do
-
+    return
     end subroutine del_mf8
 
 !******************************************************************************
@@ -615,66 +581,58 @@ module ENDF_MF8_IO
 
     implicit none
 
-    type (mf_8), target :: mf8
-    type (mf_8), pointer :: r8
+    type (mf_8), intent(in), target :: mf8
 
-    integer i,j,l,mtc
+    integer i,j,l
     type (mf8_decay_spectum), pointer :: sp
     type (mf8_nucprod), pointer :: pr
 
-    mtc = 0
-    r8 => mf8
-    do while(associated(r8))
-        select case(r8%mt)
+        select case(mf8%mt)
         case(454,459)
             l = 1
-            do i = 1,r8%fpy%le+1
-                l = l + (4*r8%fpy%ep(i)%nfp+5)/6 + 1
+            do i = 1,mf8%fpy%le+1
+                l = l + (4*mf8%fpy%ep(i)%nfp+5)/6 + 1
             end do
         case(457)
-            if(r8%rdd%nst .eq. 0) then
-                l = (2*r8%rdd%nc+5)/6 + (6*r8%rdd%ndk+5)/6 + 3
-                do i = 1, r8%rdd%nsp
-                    sp => r8%rdd%spt(i)
+            if(mf8%rdd%nst == 0) then
+                l = (2*mf8%rdd%nc+5)/6 + (6*mf8%rdd%ndk+5)/6 + 3
+                do i = 1, mf8%rdd%nsp
+                    sp => mf8%rdd%spt(i)
                     l = l + 2
-                    if(sp%lcon .ne. 1) then
+                    if(sp%lcon /= 1) then
                         do j = 1, sp%ner
                             l = l + (sp%dsc(j)%nt+5)/6 + 1
                         end do
                     endif
-                    if(sp%lcon .ne. 0) then
+                    if(sp%lcon /= 0) then
                         l = l + lc_tab1(sp%con%rp) + 1
-                        if(sp%con%lcov .ne. 0) then
+                        if(sp%con%lcov /= 0) then
                             l = l + (2*sp%cov%npp+5)/6 + 1
                         endif
                     endif
                 end do
-            else if(r8%rdd%nst .eq. 1) then
+            else if(mf8%rdd%nst == 1) then
                 l = 5    ! stable
             else
-                write(erlin,*) 'Undefined value for NST encounted in MF8/MT457:',r8%rdd%nst
+                write(erlin,*) 'Undefined value for NST encounted in MF8/MT457:',mf8%rdd%nst
                 call endf_error(erlin)
             end if
         case default
             l = 1
-            do i = 1,r8%ncl%ns
-                pr => r8%ncl%prd(i)
+            do i = 1,mf8%ncl%ns
+                pr => mf8%ncl%prd(i)
                 l = l + 1
-                if(r8%ncl%no .eq. 0) then
-                    l = l + r8%ncl%prd(i)%nd
-                else if(r8%ncl%no .ne. 1) then
-                    write(erlin,*) 'Undefined value for NO encounted in MF8:', r8%ncl%no
+                if(mf8%ncl%no == 0) then
+                    l = l + mf8%ncl%prd(i)%nd
+                else if(mf8%ncl%no /= 1) then
+                    write(erlin,*) 'Undefined value for NO encounted in MF8:', mf8%ncl%no
                     call endf_error(erlin)
                 endif
             end do
 
         end select
-        mtc = mtc + 1
-        r8%lc = l
-        r8 => r8%next
-    end do
 
-    lc_mf8 = mtc
+    lc_mf8 = l
 
     return
     end function lc_mf8

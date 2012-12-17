@@ -28,7 +28,6 @@ module ENDF_MF15_IO
     type MF_15
         type (mf_15), pointer :: next  ! next section
         integer mt                     ! MT
-        integer lc                     ! line count
         real za                        ! ZA for material
         real awr                       ! AWR for material
         integer nc                     ! # partial distributions
@@ -47,49 +46,33 @@ module ENDF_MF15_IO
 
     integer i,j,n
     real xx
-
-    type (mf_15), pointer :: r15
     type (mf15_dist), pointer :: ds
     type (mf15_tabular_dist), pointer :: tb
 
-    r15 => mf15
-    r15%mt = get_mt()
+    call get_endf(mf15%za, mf15%awr, n, n, mf15%nc, n)
+    allocate(mf15%dst(mf15%nc),stat=n)
+    if(n /= 0) call endf_badal
 
-    do
-        r15%next => null()
+    do i = 1,mf15%nc
 
-        call get_endf(r15%za, r15%awr, n, n, r15%nc, n)
-        allocate(r15%dst(r15%nc),stat=n)
-        if(n .ne. 0) call endf_badal
+        ds => mf15%dst(i)
+        call read_endf(xx, xx, n, ds%lf, ds%ptb%nr, ds%ptb%np)
+        call read_endf(ds%ptb)
 
-        do i = 1,r15%nc
+        call read_endf(xx, xx, n, n, ds%nr, ds%ne)
+        allocate(ds%inb(ds%nr), ds%gtb(ds%ne),stat=n)
+        if(n /= 0) call endf_badal
+        call read_endf(ds%inb,ds%nr)
 
-            ds => r15%dst(i)
-            call read_endf(xx, xx, n, ds%lf, ds%ptb%nr, ds%ptb%np)
-            call read_endf(ds%ptb)
-
-            call read_endf(xx, xx, n, n, ds%nr, ds%ne)
-            allocate(ds%inb(ds%nr), ds%gtb(ds%ne),stat=n)
-            if(n .ne. 0) call endf_badal
-            call read_endf(ds%inb,ds%nr)
-
-            do j = 1, ds%ne
-                tb => ds%gtb(j)
-                call read_endf(xx, tb%e, n, n, tb%gtb%nr, tb%gtb%np)
-                call read_endf(tb%gtb)
-            end do
-
+        do j = 1, ds%ne
+            tb => ds%gtb(j)
+            call read_endf(xx, tb%e, n, n, tb%gtb%nr, tb%gtb%np)
+            call read_endf(tb%gtb)
         end do
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r15%next)
-        r15 => r15%next
-        r15%mt = i
 
     end do
 
+    return
     end subroutine read_mf15
 
 !---------------------------------------------------------------------------------------------
@@ -102,37 +85,26 @@ module ENDF_MF15_IO
 
     integer i,j
 
-    type (mf_15), pointer :: r15
     type (mf15_dist), pointer :: ds
     type (mf15_tabular_dist), pointer :: tb
 
-    r15 => mf15
-    call set_mf(15)
+    call set_mt(mf15%mt)
+    call write_endf(mf15%za, mf15%awr, 0, 0, mf15%nc, 0)
 
-    do while(associated(r15))
-
-        call set_mt(r15%mt)
-        call write_endf(r15%za, r15%awr, 0, 0, r15%nc, 0)
-
-        do i = 1,r15%nc
-            ds => r15%dst(i)
-            call write_endf(zero, zero, 0, ds%lf, ds%ptb%nr, ds%ptb%np)
-            call write_endf(ds%ptb)
-            call write_endf(zero, zero, 0, 0, ds%nr, ds%ne)
-            call write_endf(ds%inb,ds%nr)
-            do j = 1, ds%ne
-                tb => ds%gtb(j)
-                call write_endf(zero, tb%e, 0, 0, tb%gtb%nr, tb%gtb%np)
-                call write_endf(tb%gtb)
-            end do
+    do i = 1,mf15%nc
+        ds => mf15%dst(i)
+        call write_endf(zero, zero, 0, ds%lf, ds%ptb%nr, ds%ptb%np)
+        call write_endf(ds%ptb)
+        call write_endf(zero, zero, 0, 0, ds%nr, ds%ne)
+        call write_endf(ds%inb,ds%nr)
+        do j = 1, ds%ne
+            tb => ds%gtb(j)
+            call write_endf(zero, tb%e, 0, 0, tb%gtb%nr, tb%gtb%np)
+            call write_endf(tb%gtb)
         end do
-
-        call write_send
-        r15 => r15%next
-
     end do
 
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf15
@@ -143,24 +115,16 @@ module ENDF_MF15_IO
 
     implicit none
 
-    type (mf_15), intent(out), target :: mf15
-    type (mf_15), pointer :: r15,nx
+    type (mf_15) mf15
 
-    integer i,j
+    integer i,j,n
 
-    r15 => mf15
-    do while(associated(r15))
-        do i = 1,r15%nc
-            call del_tab1(r15%dst(i)%ptb)
-            do j = 1, r15%dst(i)%ne
-                call del_tab1(r15%dst(i)%gtb(j)%gtb)
-            end do
-            deallocate(r15%dst(i)%inb, r15%dst(i)%gtb)
+    do i = 1,mf15%nc
+        call del_tab1(mf15%dst(i)%ptb)
+        do j = 1, mf15%dst(i)%ne
+            call del_tab1(mf15%dst(i)%gtb(j)%gtb)
         end do
-        deallocate(r15%dst)
-        nx => r15%next
-        deallocate(r15)
-        r15 => nx
+        deallocate(mf15%dst(i)%inb, mf15%dst(i)%gtb,stat=n)
     end do
 
     end subroutine del_mf15
@@ -171,30 +135,22 @@ module ENDF_MF15_IO
 
     implicit none
 
-    type (mf_15), target :: mf15
+    type (mf_15), intent(in), target :: mf15
 
-    integer i,j,l,mtc
+    integer i,j,l
 
-    type (mf_15), pointer :: r15
     type (mf15_dist), pointer :: ds
 
-    mtc = 0
-    r15 => mf15
-    do while(associated(r15))
-        l = 1
-        do i = 1,r15%nc
-            ds => r15%dst(i)
-            l = l + lc_tab1(ds%ptb) + (2*ds%nr+5)/6 + 2
-            do j = 1, ds%ne
-                l = l + lc_tab1(ds%gtb(j)%gtb) + 1
-            end do
+    l = 1
+    do i = 1,mf15%nc
+        ds => mf15%dst(i)
+        l = l + lc_tab1(ds%ptb) + (2*ds%nr+5)/6 + 2
+        do j = 1, ds%ne
+            l = l + lc_tab1(ds%gtb(j)%gtb) + 1
         end do
-        mtc = mtc + 1
-        r15%lc = l
-        r15 => r15%next
     end do
 
-    lc_mf15 = mtc
+    lc_mf15 = l
 
     return
     end function lc_mf15

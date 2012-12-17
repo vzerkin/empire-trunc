@@ -17,7 +17,8 @@
 */
 
 static struct stat file_stat;
-static jmp_buf savctx;
+static jmp_buf savctx[10];
+static icx=0;
 
 int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 {
@@ -85,17 +86,20 @@ void endf_quit_(int *status)
    return ;
 }
 
-int endf_try_(void (*rtn)())
+int endf_try_(void (*rtn)(), void *arg)
 {
    int stat;
-   stat = setjmp(savctx);
-   if(!stat) (*rtn)();
+   stat = setjmp(savctx[icx++]);
+   if(!stat) {
+      (*rtn)(arg);
+      icx--;
+   }
    return stat;
 }
 
 int endf_unwind_(int *val)
 {
-   longjmp(savctx,*val);
+   longjmp(savctx[--icx], *val);
    return 0;
 }
 

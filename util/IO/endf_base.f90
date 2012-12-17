@@ -91,10 +91,10 @@ module BASE_ENDF_IO
     ! -----------------  public interface  ------------------------------------
 
     public endline, erlin, ipos, zero, tab1, lc_tab1, real_pair, int_pair, set_output_line_numbers
-    public write_endf, put_endf, read_endf, get_endf, write_send, write_fend
-    public open_endfile, get_endline, put_endline, close_endfile, del_tab1, remove_tab1
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat
+    public write_endf, put_endf, read_endf, get_endf, write_send, write_fend, errcnt
+    public open_endfile, get_endline, put_endline, close_endfile, del_tab1, remove_tab1, skip_mat
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal, chk_siz
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat, skip_sect
 
 !------------------------------------------------------------------------------
     contains
@@ -110,20 +110,20 @@ module BASE_ENDF_IO
 
     type (tab1) tb
 
-    if(tb%nr .le. 0) then
+    if(tb%nr <= 0) then
         write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
         call endf_error(erlin)
     endif
 
-    if(tb%np .le. 0) then
+    if(tb%np <= 0) then
         write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
         call endf_error(erlin)
     endif
 
     allocate(tb%itp(tb%nr),tb%dat(tb%np),stat=istat)
-    if(istat .ne. 0) then
+    if(istat /= 0) then
         write(erlin,*) ' Error allocating TAB1 record'
-        call endf_error(erlin)
+        call endf_error(erlin,-500)
     endif
 
     call read_int_pair(tb%itp,tb%nr)
@@ -140,9 +140,10 @@ module BASE_ENDF_IO
 
     implicit none
 
+    integer*4 n
     type (tab1) tb
 
-    deallocate(tb%itp, tb%dat)
+    deallocate(tb%itp, tb%dat, stat=n)
 
     return
     end subroutine del_tab1
@@ -155,10 +156,11 @@ module BASE_ENDF_IO
 
     implicit none
 
+    integer*4 n
     type (tab1), pointer :: tb
 
-    deallocate(tb%itp, tb%dat)
-    deallocate(tb)
+    deallocate(tb%itp, tb%dat, stat=n)
+    deallocate(tb, stat=n)
 
     return
     end subroutine remove_tab1
@@ -198,7 +200,7 @@ module BASE_ENDF_IO
     integer, intent(in) :: n    ! size of array
     real, intent(out) :: x(n,n)    ! output array
 
-    if(n .le. 0) return
+    if(n <= 0) return
     call get_endline
     call get_tri(x,n)
 
@@ -221,7 +223,7 @@ module BASE_ENDF_IO
 
     do i = 1,n
         do j = i,n
-            if(ipos .eq. 6) call get_endline
+            if(ipos == 6) call get_endline
             ipos = ipos + 1
             read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
             x(i,j) = xx
@@ -246,7 +248,7 @@ module BASE_ENDF_IO
     integer, intent(in) :: n,m    ! size of array
     real, intent(out) :: x(n,m)    ! output array
 
-    if((n .le. 0) .or. (m .le. 0)) then
+    if((n <= 0) .or. (m <= 0)) then
         write(erlin,*) 'Read matrix with zero or negative size:',n,m
         call endf_error(erlin)
     endif
@@ -271,14 +273,14 @@ module BASE_ENDF_IO
     integer i,j
     real xx
 
-    if((n .le. 0) .or. (m .le. 0)) then
+    if((n <= 0) .or. (m <= 0)) then
         write(erlin,*) 'Read matrix with zero or negative size:',n,m
         call endf_error(erlin)
     endif
 
     do i = 1,n
         do j = 1,m
-            if(ipos .eq. 6) call get_endline
+            if(ipos == 6) call get_endline
             ipos = ipos + 1
             read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) xx
             x(i,j) = xx
@@ -304,12 +306,12 @@ module BASE_ENDF_IO
 
     integer i
 
-    if(n .le. 0) return
+    if(n <= 0) return
 
     call get_endline
 
     do i = 1,n
-        if(ipos .eq. 6) call get_endline
+        if(ipos == 6) call get_endline
         ipos = ipos + 1
         read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
     end do
@@ -334,7 +336,7 @@ module BASE_ENDF_IO
     integer i
 
     do i = 1,n
-        if(ipos .eq. 6) call get_endline
+        if(ipos == 6) call get_endline
         ipos = ipos + 1
         read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x(i)
     end do
@@ -356,7 +358,7 @@ module BASE_ENDF_IO
     integer, intent(in) :: n        ! # pairs to get
     type (real_pair), intent(out) :: rp(n)    ! output pairs
 
-    if(n .le. 0) return
+    if(n <= 0) return
     call get_endline
     call get_real_pair(rp,n)
 
@@ -377,7 +379,7 @@ module BASE_ENDF_IO
     integer i
 
     do i = 1,n
-        if(ipos .eq. 6) call get_endline
+        if(ipos == 6) call get_endline
         ipos = ipos + 1
         read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) rp(i)%x
         ipos = ipos + 1
@@ -422,7 +424,7 @@ module BASE_ENDF_IO
 
     real, intent(out) :: x    ! output variable
 
-    if(ipos .eq. 6) call get_endline
+    if(ipos == 6) call get_endline
     ipos = ipos + 1
     read(endline(jp(ipos):jp(ipos)+10),rfmt,err=10) x
 
@@ -445,10 +447,10 @@ module BASE_ENDF_IO
 
     integer i,j,m
 
-    if(n .le. 0) return
+    if(n <= 0) return
 
     j = 0
-    do while(j .lt. n)
+    do while(j < n)
         call get_endline
         m = min(j+3,n)
         read(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
@@ -476,10 +478,10 @@ module BASE_ENDF_IO
 
     integer i,j,m
 
-    if(n .le. 0) return
+    if(n <= 0) return
 
     j = 0
-    do while(j .lt. n)
+    do while(j < n)
         call get_endline
         m = min(j+6,n)
         read(endline,'(6I11)',err=10) (k(i),i=j+1,m)
@@ -590,12 +592,12 @@ module BASE_ENDF_IO
 
     type (tab1), intent(in) :: tb
 
-    if(tb%nr .le. 0) then
+    if(tb%nr <= 0) then
         write(erlin,*) 'TAB1 record with NR .LE. 0 : ',tb%nr
         call endf_error(erlin)
     endif
 
-    if(tb%np .le. 0) then
+    if(tb%np <= 0) then
         write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
         call endf_error(erlin)
     endif
@@ -631,7 +633,7 @@ module BASE_ENDF_IO
 
     real, intent(in) :: x1,x2,x3,x4,x5,x6
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
     endline(jp(1):jp(1)+10) = rlw(x1)
     endline(jp(2):jp(2)+10) = rlw(x2)
     endline(jp(3):jp(3)+10) = rlw(x3)
@@ -654,8 +656,8 @@ module BASE_ENDF_IO
     integer, intent(in) :: n    ! size of array
     real, intent(in) :: x(n,n)    ! output array
 
-    if(n .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(ipos /= 0) call put_endline
     call put_tri(x,n)
 
     return
@@ -678,7 +680,7 @@ module BASE_ENDF_IO
         do j = i,n
             ipos = ipos + 1
             endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
-            if(ipos .eq. 6) call put_endline
+            if(ipos == 6) call put_endline
         end do
     end do
 
@@ -696,9 +698,9 @@ module BASE_ENDF_IO
     integer, intent(in) :: n,m    ! size of array
     real, intent(in) :: x(n,m)    ! output array
 
-    if(n .le. 0) return
-    if(m .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(m <= 0) return
+    if(ipos /= 0) call put_endline
     call put_mtx(x,n,m)
 
     return
@@ -721,7 +723,7 @@ module BASE_ENDF_IO
         do j = 1,m
             ipos = ipos + 1
             endline(jp(ipos):jp(ipos)+10) = rlw(x(i,j))
-            if(ipos .eq. 6) call put_endline
+            if(ipos == 6) call put_endline
         end do
     end do
 
@@ -741,13 +743,13 @@ module BASE_ENDF_IO
 
     integer i
 
-    if(n .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(ipos /= 0) call put_endline
 
     do i = 1,n
         ipos = ipos + 1
         endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
-        if(ipos .eq. 6) call put_endline
+        if(ipos == 6) call put_endline
     end do
 
     return
@@ -769,7 +771,7 @@ module BASE_ENDF_IO
     do i = 1,n
         ipos = ipos + 1
         endline(jp(ipos):jp(ipos)+10) = rlw(x(i))
-        if(ipos .eq. 6) call put_endline
+        if(ipos == 6) call put_endline
     end do
 
     return
@@ -786,8 +788,8 @@ module BASE_ENDF_IO
     integer, intent(in) :: n        ! # pairs to write
     type (real_pair), intent(in) :: rp(n)    ! output pair
 
-    if(n .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(ipos /= 0) call put_endline
     call put_real_pair(rp,n)
 
     return
@@ -809,10 +811,10 @@ module BASE_ENDF_IO
     do i = 1,n
         ipos = ipos + 1
         endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%x)
-        if(ipos .eq. 6) call put_endline
+        if(ipos == 6) call put_endline
         ipos = ipos + 1
         endline(jp(ipos):jp(ipos)+10) = rlw(rp(i)%y)
-        if(ipos .eq. 6) call put_endline
+        if(ipos == 6) call put_endline
     end do
 
     return
@@ -828,7 +830,7 @@ module BASE_ENDF_IO
 
     real, intent(in) :: x
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
     endline(1:11) = rlw(x)
     ipos = 1
 
@@ -847,7 +849,7 @@ module BASE_ENDF_IO
 
     ipos = ipos + 1
     endline(jp(ipos):jp(ipos)+10) = rlw(x)
-    if(ipos .eq. 6) call put_endline
+    if(ipos == 6) call put_endline
 
     return
     end subroutine put_1r
@@ -865,14 +867,14 @@ module BASE_ENDF_IO
 
     integer i,j,m
 
-    if(n .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(ipos /= 0) call put_endline
 
     j = 0
-    do while(j .lt. n)
+    do while(j < n)
         m = min(j+3,n)
         write(endline,'(6I11)',err=10) (ip(i)%x,ip(i)%y,i=j+1,m)
-        if(m .eq. (j+3)) then
+        if(m == (j+3)) then
             call put_endline
         else
             ipos = m - j
@@ -899,14 +901,14 @@ module BASE_ENDF_IO
 
     integer i,j,m
 
-    if(n .le. 0) return
-    if(ipos .ne. 0) call put_endline
+    if(n <= 0) return
+    if(ipos /= 0) call put_endline
 
     j = 0
-    do while(j .lt. n)
+    do while(j < n)
         m = min(j+6,n)
         write(endline,'(6I11)',err=10) (k(i),i=j+1,m)
-        if(m .eq. (j+6)) then
+        if(m == (j+6)) then
             call put_endline
         else
             ipos = m - j
@@ -931,7 +933,7 @@ module BASE_ENDF_IO
     real, intent(in) :: x1,x2            ! reals
     integer, intent(in) :: i1,i2,i3,i4        ! integers
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
 
     endline(1:11) = rlw(x1)
     endline(12:22) = rlw(x2)
@@ -955,7 +957,7 @@ module BASE_ENDF_IO
 
     integer, intent(in) :: i1,i2,i3,i4        ! integers
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
 
     endline(1:22)  = ' 0.000000+0 0.000000+0'
     write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
@@ -980,12 +982,12 @@ module BASE_ENDF_IO
     integer, intent(in) :: i0,i1,i2,i3,i4        ! integers
 
     ! insist that i0 be 0
-    if(i0 .ne. 0) then
+    if(i0 /= 0) then
         write(erlin,*) 'Put 2f,4i line with leading blanks with non-zero leading int:',i0
         call endf_error(erlin)
     end if
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
 
     write(endline(23:66),'(4I11)',err=10) i1, i2, i3, i4
     call put_endline
@@ -1008,7 +1010,7 @@ module BASE_ENDF_IO
     character*13 dum
 
     write(dum,'(1PE13.6)',err=10) xx
-    if(dum(12:12) .eq. '0') then
+    if(dum(12:12) == '0') then
         dum(10:10) = dum(11:11)
         dum(11:11) = dum(13:13)
     else
@@ -1033,7 +1035,7 @@ module BASE_ENDF_IO
 
     ! written to file when done with an MT
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
 
     call set_mt(0)
     call write_2r4i(zero, zero, 0, 0, 0, 0)
@@ -1049,7 +1051,7 @@ module BASE_ENDF_IO
 
     ! written to file when done with an MF
 
-    if(ipos .ne. 0) call put_endline
+    if(ipos /= 0) call put_endline
 
     call set_mf(0)
     call write_2r4i(zero, zero, 0, 0, 0, 0)

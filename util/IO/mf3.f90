@@ -14,7 +14,6 @@ module ENDF_MF3_IO
     type MF_3
         type (MF_3), pointer :: next
         integer mt                   ! MT reaction
-        integer lc                   ! line count
         real za                      ! ZA
         real awr                     ! AWR
         real qm                      ! mass-diff Q-value
@@ -31,30 +30,15 @@ module ENDF_MF3_IO
 
     implicit none
 
-    type (mf_3), intent(out), target :: mf3
+    type (mf_3), intent(out) :: mf3
 
-    integer i,n
+    integer n
 
-    type (mf_3), pointer :: r3
+    call get_endf(mf3%za, mf3%awr, n, n, n, n)
+    call read_endf(mf3%qm, mf3%qi, n, mf3%lr, mf3%tb%nr, mf3%tb%np)
+    call read_endf(mf3%tb)
 
-    r3 => mf3
-    r3%mt = get_mt()
-
-    do
-        r3%next => null()
-        r3%lc = 0
-        call get_endf(r3%za, r3%awr, n, n, n, n)
-        call read_endf(r3%qm, r3%qi, n, r3%lr, r3%tb%nr, r3%tb%np)
-        call read_endf(r3%tb)
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r3%next)
-        r3 => r3%next
-        r3%mt = i
-    end do
-
+    return
     end subroutine read_mf3
 
 !------------------------------------------------------------------------------
@@ -63,22 +47,13 @@ module ENDF_MF3_IO
 
     implicit none
 
-    type (mf_3), intent(in), target :: mf3
-    type (mf_3), pointer :: r3
+    type (mf_3), intent(in) :: mf3
 
-    r3 => mf3
-    call set_mf(3)
-
-    do while(associated(r3))
-        call set_mt(r3%mt)
-        call write_endf(r3%za, r3%awr, 0, 0, 0, 0)
-        call write_endf(r3%qm, r3%qi, 0, r3%lr, r3%tb%nr, r3%tb%np)
-        call write_endf(r3%tb)
-        call write_send
-        r3 => r3%next
-    end do
-
-    call write_fend
+    call set_mt(mf3%mt)
+    call write_endf(mf3%za, mf3%awr, 0, 0, 0, 0)
+    call write_endf(mf3%qm, mf3%qi, 0, mf3%lr, mf3%tb%nr, mf3%tb%np)
+    call write_endf(mf3%tb)
+    call write_send
 
     return
     end subroutine write_mf3
@@ -89,17 +64,11 @@ module ENDF_MF3_IO
 
     implicit none
 
-    type (mf_3), target :: mf3
-    type (mf_3), pointer :: r3,nx
+    type (mf_3) mf3
 
-    r3 => mf3
-    do while(associated(r3))
-        call del_tab1(r3%tb)
-        nx => r3%next
-        deallocate(r3)
-        r3 => nx
-    end do
+    call del_tab1(mf3%tb)
 
+    return
     end subroutine del_mf3
 
 !------------------------------------------------------------------------------
@@ -108,20 +77,9 @@ module ENDF_MF3_IO
 
     implicit none
 
-    type (mf_3), target :: mf3
-    type (mf_3), pointer :: r3
+    type (mf_3), intent(in) :: mf3
 
-    integer mtc
-
-    mtc = 0
-    r3 => mf3
-    do while(associated(r3))
-        mtc = mtc + 1
-        r3%lc = lc_tab1(r3%tb) + 2
-        r3 => r3%next
-    end do
-
-    lc_mf3 = mtc
+    lc_mf3 = lc_tab1(mf3%tb) + 2
 
     return
     end function lc_mf3

@@ -43,7 +43,6 @@ module ENDF_MF4_IO
     type MF_4
         type (mf_4), pointer :: next          ! next section
         integer mt                            ! MT
-        integer lc                            ! line count
         real za                               ! ZA for material
         real awr                              ! AWR for material
         integer ltt                           ! flag
@@ -64,44 +63,30 @@ module ENDF_MF4_IO
 
     implicit none
 
-    type (mf_4), intent(out), target :: mf4
-    type (mf_4), pointer :: r4
+    type (mf_4), intent(out) :: mf4
 
-    integer i,n
+    integer n
 
-    r4 => mf4
-    r4%mt = get_mt()
+    call get_endf(mf4%za, mf4%awr, n, mf4%ltt, n, n)
+    call read_endf(mf4%li, mf4%lct, n, mf4%nm)
 
-    do
-        r4%next => null()
+    nullify(mf4%tb1, mf4%tb2)
 
-        call get_endf(r4%za, r4%awr, n, r4%ltt, n, n)
-        call read_endf(r4%li, r4%lct, n, r4%nm)
+    if((mf4%ltt .eq. 1) .and. (mf4%li .eq. 0)) then
+        call read_list(mf4)
+    else if((mf4%ltt .eq. 2) .and. (mf4%li .eq. 0)) then
+        call read_tab(mf4)
+    else if((mf4%ltt .eq. 0) .and. (mf4%li .eq. 1)) then
+        ! isotropic - nothing to read in
+    else if((mf4%ltt .eq. 3) .and. (mf4%li .eq. 0)) then
+        call read_list(mf4)
+        call read_tab(mf4)
+    else
+        write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',mf4%ltt, mf4%li
+        call endf_error(erlin)
+    endif
 
-        nullify(r4%tb1, r4%tb2)
-
-        if((r4%ltt .eq. 1) .and. (r4%li .eq. 0)) then
-            call read_list(r4)
-        else if((r4%ltt .eq. 2) .and. (r4%li .eq. 0)) then
-            call read_tab(r4)
-        else if((r4%ltt .eq. 0) .and. (r4%li .eq. 1)) then
-            ! isotropic - nothing to read in
-        else if((r4%ltt .eq. 3) .and. (r4%li .eq. 0)) then
-            call read_list(r4)
-            call read_tab(r4)
-        else
-            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error(erlin)
-        endif
-
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(r4%next)
-        r4 => r4%next
-        r4%mt = i
-    end do
-
+    return
     end subroutine read_mf4
 
 !------------------------------------------------------------------------------
@@ -168,38 +153,28 @@ module ENDF_MF4_IO
 
     implicit none
 
-    type (mf_4), intent(in), target :: mf4
-    type (mf_4), pointer :: r4
+    type (mf_4), intent(in) :: mf4
 
-    r4 => mf4
-    call set_mf(4)
+    call set_mt(mf4%mt)
 
-    do while(associated(r4))
+    call write_endf(mf4%za, mf4%awr, 0, mf4%ltt, 0, 0)
+    call write_endf(zero, mf4%awr, mf4%li, mf4%lct, 0, mf4%nm)
 
-        call set_mt(r4%mt)
-        call write_endf(r4%za, r4%awr, 0, r4%ltt, 0, 0)
-        call write_endf(zero, r4%awr, r4%li, r4%lct, 0, r4%nm)
+    if((mf4%ltt .eq. 1) .and. (mf4%li .eq. 0)) then
+        call write_list(mf4)
+    else if((mf4%ltt .eq. 2) .and. (mf4%li .eq. 0)) then
+        call write_tab(mf4)
+    else if((mf4%ltt .eq. 0) .and. (mf4%li .eq. 1)) then
+        ! isotropic - nothing to write
+    else if((mf4%ltt .eq. 3) .and. (mf4%li .eq. 0)) then
+        call write_list(mf4)
+        call write_tab(mf4)
+    else
+        write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',mf4%ltt, mf4%li
+        call endf_error(erlin)
+    endif
 
-        if((r4%ltt .eq. 1) .and. (r4%li .eq. 0)) then
-            call write_list(r4)
-        else if((r4%ltt .eq. 2) .and. (r4%li .eq. 0)) then
-            call write_tab(r4)
-        else if((r4%ltt .eq. 0) .and. (r4%li .eq. 1)) then
-            ! isotropic - nothing to write
-        else if((r4%ltt .eq. 3) .and. (r4%li .eq. 0)) then
-            call write_list(r4)
-            call write_tab(r4)
-        else
-            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error(erlin)
-        endif
-
-        call write_send
-        r4 => r4%next
-
-    end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf4
@@ -256,36 +231,27 @@ module ENDF_MF4_IO
 
     implicit none
 
-    type (mf_4), target :: mf4
-    type (mf_4), pointer :: r4,nx
+    type (mf_4) :: mf4
 
-    integer i
+    integer i,n
 
-    r4 => mf4
-    do while(associated(r4))
+    if(associated(mf4%tb1)) then
+        do i = 1,mf4%tb1%ne
+            deallocate(mf4%tb1%lst(i)%alp,stat=n)
+        end do
+        deallocate(mf4%tb1%lst,mf4%tb1%itp,stat=n)
+        deallocate(mf4%tb1,stat=n)
+    endif
 
-        if(associated(r4%tb1)) then
-            do i = 1,r4%tb1%ne
-                deallocate(r4%tb1%lst(i)%alp)
-            end do
-            deallocate(r4%tb1%lst,r4%tb1%itp)
-            deallocate(r4%tb1)
-        endif
+    if(associated(mf4%tb2)) then
+        do i = 1,mf4%tb2%ne
+            call del_tab1(mf4%tb2%lst(i)%tab)
+        end do
+        deallocate(mf4%tb2%lst,mf4%tb2%itp,stat=n)
+        deallocate(mf4%tb2,stat=n)
+    endif
 
-        if(associated(r4%tb2)) then
-            do i = 1,r4%tb2%ne
-                call del_tab1(r4%tb2%lst(i)%tab)
-            end do
-            deallocate(r4%tb2%lst,r4%tb2%itp)
-            deallocate(r4%tb2)
-        endif
-
-        nx => r4%next
-        deallocate(r4)
-        r4 => nx
-
-    end do
-
+    return
     end subroutine del_mf4
 
 !******************************************************************************
@@ -294,46 +260,39 @@ module ENDF_MF4_IO
 
     implicit none
 
-    type (mf_4), target :: mf4
-    type (mf_4), pointer :: r4
+    type (mf_4), intent(in) :: mf4
 
-    integer i,l,mtc
+    integer i,l
 
-    mtc = 0
-    r4 => mf4
-    do while(associated(r4))
-        l = 2
-        if((r4%ltt .eq. 1) .and. (r4%li .eq. 0)) then
-            l = l + (2*r4%tb1%nr + 5)/6 + 1
-            do i = 1,r4%tb1%ne
-                l = l + (r4%tb1%lst(i)%nl + 5)/6 + 1
-            end do
-        else if((r4%ltt .eq. 2) .and. (r4%li .eq. 0)) then
-            l = l + (2*r4%tb2%nr + 5)/6 + 1
-            do i = 1,r4%tb2%ne
-                l = l + lc_tab1(r4%tb2%lst(i)%tab) + 1
-            end do
-        else if((r4%ltt .eq. 0) .and. (r4%li .eq. 1)) then
-            ! isotropic - nothing 
-        else if((r4%ltt .eq. 3) .and. (r4%li .eq. 0)) then
-            l = l + (2*r4%tb1%nr + 5)/6 + 1
-            do i = 1,r4%tb1%ne
-                l = l + (r4%tb1%lst(i)%nl + 5)/6 + 1
-            end do
-            l = l + (2*r4%tb2%nr + 5)/6 + 1
-            do i = 1,r4%tb2%ne
-                l = l + lc_tab1(r4%tb2%lst(i)%tab) + 1
-            end do
-        else
-            write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',r4%ltt, r4%li
-            call endf_error(erlin)
-        endif
-        mtc = mtc + 1
-        r4%lc = l
-        r4 => r4%next
-    end do
+    l = 2
 
-    lc_mf4 = mtc
+    if((mf4%ltt .eq. 1) .and. (mf4%li .eq. 0)) then
+        l = l + (2*mf4%tb1%nr + 5)/6 + 1
+        do i = 1,mf4%tb1%ne
+            l = l + (mf4%tb1%lst(i)%nl + 5)/6 + 1
+        end do
+    else if((mf4%ltt .eq. 2) .and. (mf4%li .eq. 0)) then
+        l = l + (2*mf4%tb2%nr + 5)/6 + 1
+        do i = 1,mf4%tb2%ne
+            l = l + lc_tab1(mf4%tb2%lst(i)%tab) + 1
+        end do
+    else if((mf4%ltt .eq. 0) .and. (mf4%li .eq. 1)) then
+        ! isotropic - nothing 
+    else if((mf4%ltt .eq. 3) .and. (mf4%li .eq. 0)) then
+        l = l + (2*mf4%tb1%nr + 5)/6 + 1
+        do i = 1,mf4%tb1%ne
+            l = l + (mf4%tb1%lst(i)%nl + 5)/6 + 1
+        end do
+        l = l + (2*mf4%tb2%nr + 5)/6 + 1
+        do i = 1,mf4%tb2%ne
+            l = l + lc_tab1(mf4%tb2%lst(i)%tab) + 1
+        end do
+    else
+        write(erlin,*) 'Undefined combination of LTT and LI found in MF4:',mf4%ltt, mf4%li
+        call endf_error(erlin)
+    endif
+
+    lc_mf4 = l
 
     return
     end function lc_mf4

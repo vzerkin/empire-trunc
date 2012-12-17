@@ -31,7 +31,6 @@ module ENDF_MF34_IO
     type MF_34
         type (MF_34), pointer :: next
         integer mt
-        integer lc
         real za
         real awr
         integer ltt                     ! representation flag (1,2 or 3)
@@ -53,47 +52,33 @@ module ENDF_MF34_IO
 
     integer i,k,k1,l,n
     real xx
-
-    type (MF_34), pointer :: rc
     type (MF34_sect), pointer :: sc
 
-    rc => mf34
-    rc%mt = get_mt()
+    call get_endf(mf34%za, mf34%awr, n, mf34%ltt, n, mf34%nmt1)
+    allocate(mf34%sct(mf34%nmt1),stat=n)
+    if(n .ne. 0) call endf_badal
 
-    do
-        rc%next => null()
-        call get_endf(rc%za, rc%awr, n, rc%ltt, n, rc%nmt1)
-        allocate(rc%sct(rc%nmt1),stat=n)
+    do i = 1,mf34%nmt1
+
+        sc => mf34%sct(i)
+        call read_endf(xx, xx, sc%mat1, sc%mt1, sc%nl, sc%nl1)
+        allocate(sc%ssc(sc%nl,sc%nl1),stat=n)
         if(n .ne. 0) call endf_badal
 
-        do i = 1,rc%nmt1
-
-            sc => rc%sct(i)
-            call read_endf(xx, xx, sc%mat1, sc%mt1, sc%nl, sc%nl1)
-            allocate(sc%ssc(sc%nl,sc%nl1),stat=n)
-            if(n .ne. 0) call endf_badal
-
-            do l = 1,sc%nl
-                if(sc%mt1 .eq. rc%mt) then
-                    k1 = l        ! symmetric
-                else
-                    k1 = 1        ! asymmetrix
-                endif
-                do k = k1, sc%nl1
-                    call read_mf34_ni(sc%ssc(l,k))
-                end do
+        do l = 1,sc%nl
+            if(sc%mt1 .eq. mf34%mt) then
+                k1 = l        ! symmetric
+            else
+                k1 = 1        ! asymmetrix
+            endif
+            do k = k1, sc%nl1
+                call read_mf34_ni(sc%ssc(l,k))
             end do
-
         end do
 
-        i = next_mt()
-        if(i .eq. 0) return
-
-        allocate(rc%next)
-        rc => rc%next
-        rc%mt = i
     end do
 
+    return
     end subroutine read_mf34
 
 !------------------------------------------------------------------------------
@@ -133,35 +118,25 @@ module ENDF_MF34_IO
     type (mf_34), intent(in), target :: mf34
 
     integer i,k,k1,l
-
-    type (MF_34), pointer :: rc
     type (MF34_sect), pointer :: sc
 
-    rc => mf34
-    call set_mf(34)
-
-    do while(associated(rc))
-        call set_mt(rc%mt)
-        call write_endf(rc%za, rc%awr, 0, rc%ltt, 0, rc%nmt1)
-        do i = 1,rc%nmt1
-            sc => rc%sct(i)
-            call write_endf(sc%mat1, sc%mt1, sc%nl, sc%nl1)
-            do l = 1,sc%nl
-                if(sc%mt1 .eq. rc%mt) then
-                    k1 = l        ! symmetric
-                else
-                    k1 = 1        ! asymmetrix
-                endif
-                do k = k1, sc%nl1
-                    call write_mf34_ni(sc%ssc(l,k))
-                end do
+    call set_mt(mf34%mt)
+    call write_endf(mf34%za, mf34%awr, 0, mf34%ltt, 0, mf34%nmt1)
+    do i = 1,mf34%nmt1
+        sc => mf34%sct(i)
+        call write_endf(sc%mat1, sc%mt1, sc%nl, sc%nl1)
+        do l = 1,sc%nl
+            if(sc%mt1 .eq. mf34%mt) then
+                k1 = l        ! symmetric
+            else
+                k1 = 1        ! asymmetrix
+            endif
+            do k = k1, sc%nl1
+                call write_mf34_ni(sc%ssc(l,k))
             end do
         end do
-        call write_send
-        rc => rc%next
     end do
-
-    call write_fend
+    call write_send
 
     return
     end subroutine write_mf34
@@ -197,34 +172,28 @@ module ENDF_MF34_IO
     implicit none
 
     type (mf_34), target :: mf34
-    type (MF_34), pointer :: rc,nx
 
-    integer i,k,k1,l,n
+    integer i,k,k1,l,n,m
 
-    rc => mf34
-    do while(associated(rc))
-        do i = 1,rc%nmt1
-            do l = 1,rc%sct(i)%nl
-                if(rc%sct(i)%mt1 .eq. rc%mt) then
-                    k1 = l        ! symmetric
-                else
-                    k1 = 1        ! asymmetrix
-                endif
-                do k = k1, rc%sct(i)%nl1
-                    do n = 1, rc%sct(i)%ssc(l,k)%ni
-                        call del_ni(rc%sct(i)%ssc(l,k)%lst(n))
-                    end do
-                    deallocate(rc%sct(i)%ssc(l,k)%lst)
+    do i = 1,mf34%nmt1
+        do l = 1,mf34%sct(i)%nl
+            if(mf34%sct(i)%mt1 .eq. mf34%mt) then
+                k1 = l        ! symmetric
+            else
+                k1 = 1        ! asymmetrix
+            endif
+            do k = k1, mf34%sct(i)%nl1
+                do n = 1, mf34%sct(i)%ssc(l,k)%ni
+                    call del_ni(mf34%sct(i)%ssc(l,k)%lst(n))
                 end do
+                deallocate(mf34%sct(i)%ssc(l,k)%lst,stat=m)
             end do
-            deallocate(rc%sct(i)%ssc)
         end do
-        deallocate(rc%sct)
-        nx => rc%next
-        deallocate(rc)
-        rc => nx
+        deallocate(mf34%sct(i)%ssc,stat=m)
     end do
+    deallocate(mf34%sct,stat=m)
 
+    return
     end subroutine del_mf34
 
 !***********************************************************************************
@@ -233,46 +202,37 @@ module ENDF_MF34_IO
 
     implicit none
 
-    type (mf_34), target :: mf34
+    type (mf_34), intent(in), target :: mf34
 
-    integer i,j,k,k1,l,m,mtc
-
-    type (MF_34), pointer :: rc
+    integer i,j,k,k1,l,m
     type (MF34_sect), pointer :: sc
 
-    mtc = 0
-    rc => mf34
-    do while(associated(rc))
-        l = 1
-        do i = 1,rc%nmt1
-            sc => rc%sct(i)
-            l = l + 1
-            do j = 1,sc%nl
-                if(sc%mt1 .eq. rc%mt) then
-                    k1 = j        ! symmetric
-                else
-                    k1 = 1        ! asymmetrix
-                endif
-                do k = k1, sc%nl1
-                    l = l + 1
-                    do m = 1, sc%ssc(j,k)%ni
-                        select case(sc%ssc(j,k)%lst(m)%lb)
-                        case(0:2,5,6)    ! allowed
-                            l = l + lc_ni(sc%ssc(j,k)%lst(m),34)
-                        case default
-                            write(erlin,*) 'Undefined LB encountered in MF34 : ',sc%ssc(j,k)%lst(m)%lb
-                            call endf_error(erlin)
-                        end select
-                    end do
+    l = 1
+    do i = 1,mf34%nmt1
+        sc => mf34%sct(i)
+        l = l + 1
+        do j = 1,sc%nl
+            if(sc%mt1 .eq. mf34%mt) then
+                k1 = j        ! symmetric
+            else
+                k1 = 1        ! asymmetrix
+            endif
+            do k = k1, sc%nl1
+                l = l + 1
+                do m = 1, sc%ssc(j,k)%ni
+                    select case(sc%ssc(j,k)%lst(m)%lb)
+                    case(0:2,5,6)    ! allowed
+                        l = l + lc_ni(sc%ssc(j,k)%lst(m),34)
+                    case default
+                        write(erlin,*) 'Undefined LB encountered in MF34 : ',sc%ssc(j,k)%lst(m)%lb
+                        call endf_error(erlin)
+                    end select
                 end do
             end do
         end do
-        rc%lc = l
-        rc => rc%next
-        mtc = mtc + 1
     end do
 
-    lc_mf34 = mtc
+    lc_mf34 = l
 
     return
     end function lc_mf34

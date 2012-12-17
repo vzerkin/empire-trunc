@@ -16,7 +16,8 @@ typedef struct _endf_iobuf {
    OVERLAPPED olp;
 } ENDF_IO_BUFFER;
 
-static jmp_buf savctx;
+static icx=0;
+static jmp_buf savctx[10];
 static ENDF_IO_BUFFER buf[2];
 static BOOL endf_open = FALSE;
 static HANDLE fhn;
@@ -140,16 +141,19 @@ void endf_quit_(int *status)
    return ;
 }
 
-int endf_try_(void (*rtn)())
+int endf_try_(void (*rtn)(), void *arg)
 {
    int stat;
-   stat = setjmp(savctx);
-   if(!stat) (*rtn)();
+   stat = setjmp(savctx[icx++]);
+   if(!stat) {
+      (*rtn)(arg);
+      icx--;
+   }
    return stat;
 }
 
 int endf_unwind_(int *val)
 {
-   longjmp(savctx,*val);
+   longjmp(savctx[--icx], *val);
    return 0;
 }

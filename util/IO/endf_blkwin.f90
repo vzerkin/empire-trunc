@@ -584,21 +584,24 @@ module endf_line_io
     ! and terminators as the first record in file.
 
     integer*4 status
+    character*1 trm
 
-    if(q_write) return
-    if((mode < 1) .or. (mode > 3)) return
+    select case(mode)
+    case(1,2)
+       trm = LF
+    case(3)
+       trm = CR
+    case default
+       return
+    end select
 
     status = get_endf_line()
     do while(status == 0)
-        if(mode < 3) then
-            if(endline(recsiz:recsiz) /= LF) exit
-        else
-            if(endline(recsiz:recsiz) /= CR) exit
-        endif
+        if(endline(recsiz:recsiz) /= trm) exit
         status = get_endf_line()
-     end do
+    end do
 
-     return
-     end subroutine find_bad_record
+    return
+    end subroutine find_bad_record
 
 end module endf_line_io
