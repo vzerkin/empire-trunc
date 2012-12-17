@@ -231,7 +231,7 @@ module endf_lines
     endif
 
     if(n < j) then
-        write(erlin,'(5a,i)') ' Upper index of ',chrs,' invalid:',chrv,' = ',n
+        write(erlin,'(5a,i5)') ' Upper index of ',chrs,' invalid:',chrv,' = ',n
         call endf_error(erlin)
     endif
 
@@ -287,7 +287,7 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
-    subroutine skip_mat
+    subroutine skip_mat()
 
     ! use this routine to skip through an ENDF input file
     ! looking next MAT number. Look for end of material MAT=0.
@@ -320,7 +320,7 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
-    integer*4 function skip_sect
+    integer*4 function skip_sect()
 
     ! use this routine to skip to the end of the current
     ! section ==> skip ahead till MT=0. When done, leave
