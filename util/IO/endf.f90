@@ -310,36 +310,54 @@ module ENDF_IO
     !  1) replace the contents with our SVN tags
     !  2) issue an error and abort if SVN tags not found.
 
-    call get_endline
+    status = get_endf_line()
+    if(status < 0) then
+        if(status == -1) then
+            write(erlin,*) 'Hit end-of-file during read'
+        else
+            write(erlin,*) 'Read returned error code :',status
+        endif
+        call endf_error(erlin,-500+status)
+    endif
 
     mf = get_mf()
     mt = get_mt()
-    if((mf /= 0) .or. (mt /= 0)) then
-        erlin = ' No header (TPID) or header without MF=MT=0 on first line'
-        call endf_error(erlin,100)
-        endf%hdline = endline
-    endif
 
-    ! assume at this point we have a header line
-    ! check contents of 1:66 depending on ihdr
+    if((mf == 0) .and. (mt == 0)) then
 
-    select case(ihdr)
-    case(1)
-        ! replace line with tags
-        write(6,*) ' Header line 1 (TPID) reset with SVN tags'
-        endf%hdline = hdlin
-    case(2)
-        ! require tags
-        if((endline(1:7) /= hdlin(1:7)) .or. (endline(21:27) /= hdlin(21:27))) then
-           erlin = ' Header line 1 (TPID) does not contain NNDC SVN tags'
-           call endf_error(erlin)
+        ! we have a header line
+        ! check contents of 1:66 depending on ihdr
+
+        select case(ihdr)
+        case(1)
+            ! replace line with tags
+            write(6,*) ' Header line 1 (TPID) reset with SVN tags'
+            endf%hdline = hdlin
+        case(2)
+            ! require tags
+            if((endline(1:7) /= hdlin(1:7)) .or. (endline(21:27) /= hdlin(21:27))) then
+               erlin = ' Header line 1 (TPID) does not contain NNDC SVN tags'
+               call endf_error(erlin)
+            endif
+        case default
+            ! do nothing. Leave as is.
+            endf%hdline = endline
+        end select
+
+        call get_endline
+
+    else
+
+        if(ihdr == 2) then
+            mstat = -701        ! fatal - header required
+        else
+            mstat = 0           ! informational. use default header line
         endif
-    case default
-        ! do nothing. Leave as is.
-        endf%hdline = endline
-    end select
+        erlin = ' No header (TPID) or header without MF=MT=0 on first line'
+        call endf_error(erlin,mstat)
+        endf%hdline = hdlin
 
-    call get_endline
+    endif
 
     if(inmat > 0) call find_mat(inmat)
 
@@ -364,7 +382,6 @@ module ENDF_IO
 
         call clear_mat(mx)
         mx%mat = mat
-        call set_mat(mat)
 
         mstat = endf_try(read_mat,mx)
         if(mstat <= -200) then
@@ -1163,6 +1180,10 @@ module ENDF_IO
 
     write_endf_file = endf_try(endf_file_writer,0)
 
+    ! close file here in case something went wrong
+
+    call close_endfile
+
     return
     end function write_endf_file
 
@@ -1218,8 +1239,6 @@ module ENDF_IO
 
     call set_mat(-1)
     call write_endf(0, 0, 0, 0)
-
-    call close_endfile
 
     return
     end subroutine endf_file_writer

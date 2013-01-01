@@ -194,10 +194,11 @@ module ENDF_MF1_IO
 
     implicit none
 
-    type (mf1_451), intent(out) :: r1
+    type (mf1_451), intent(out), target :: r1
 
     integer i,n,ios
     real xx
+    character*66, pointer :: cmt
 
     call get_endf(r1%lrp, r1%lfi, r1%nlib, r1%nmod)
     call read_endf(r1%elis, r1%sta, r1%lis, r1%liso, n, r1%nfor)
@@ -223,29 +224,67 @@ module ENDF_MF1_IO
         call read_endf(r1%dir(i)%mf, r1%dir(i)%mt, r1%dir(i)%nc, r1%dir(i)%mod)
     end do
 
-    r1%zsymam = r1%cmnt(1)(1:11)
-    r1%alab   = r1%cmnt(1)(12:22)
-    r1%edate  = r1%cmnt(1)(23:32)
-    r1%auth   = r1%cmnt(1)(34:66)
+    ! the first 5 lines of comments usually have fixed fields containing
+    ! the symbolic name of the material, lab name, date, author, etc.
+    ! but these fields are NOT required and they may not be there. Look
+    ! at each line and try to extract these fields, if possible.
 
-    r1%ref    = r1%cmnt(2)(2:22)
-    r1%ddate  = r1%cmnt(2)(23:32)
-    r1%rdate  = r1%cmnt(2)(34:43)
-    r1%endate = r1%cmnt(2)(56:63)
-
-    r1%libtyp = r1%cmnt(3)(5:21)
-    read(r1%cmnt(3)(32:35),'(i4)',iostat=ios) r1%mat
-    if(ios /= 0) r1%mat = 0
-    if(r1%cmnt(3)(45:52) == 'REVISION') then
-        read(r1%cmnt(3)(54:56),*,iostat=ios) r1%irev
-        if(ios /= 0) r1%irev = 0
-    else
-        r1%irev = 0
+    r1%zsymam = ' '
+    r1%alab   = ' '
+    r1%edate  = ' '
+    r1%auth   = ' '
+    if(r1%nwd > 0) then
+        cmt => r1%cmnt(1)
+        if((cmt(4:4) == '-') .and. (cmt(7:7) == '-')) r1%zsymam = cmt(1:11)
+        r1%alab   = cmt(12:22)
+        r1%edate  = cmt(23:32)
+        r1%auth   = cmt(34:66)
     endif
 
-    r1%sublib = r1%cmnt(4)(6:66)
-    read(r1%cmnt(5)(12:12),'(i1)',iostat=ios) r1%mfor
-    if(ios /= 0) r1%mfor = 0
+    r1%ref    = ' '
+    r1%ddate  = ' '
+    r1%rdate  = ' '
+    r1%endate = ' '
+    if(r1%nwd > 1) then
+        cmt => r1%cmnt(2)
+        r1%ref = cmt(2:22)
+        if(cmt(23:26) == 'DIST') r1%ddate = cmt(23:32)
+        if(cmt(34:36) == 'REV')  r1%rdate = cmt(34:43)
+        r1%endate = cmt(56:63)
+    endif
+
+    r1%libtyp = ' '
+    r1%mat = 0
+    r1%irev = 0
+    if(r1%nwd > 2) then
+        cmt => r1%cmnt(3)
+        if(cmt(1:4) == '----') then
+            r1%libtyp = cmt(5:21)
+            if(cmt(23:31) == 'MATERIAL ') then
+                read(cmt(32:35),'(i4)',iostat=ios) r1%mat
+                if(ios /= 0) r1%mat = 0
+            endif
+            if(cmt(45:52) == 'REVISION') then
+                read(cmt(54:56),*,iostat=ios) r1%irev
+                if(ios /= 0) r1%irev = 0
+            endif
+        endif
+    endif
+
+    r1%sublib = ' '
+    if(r1%nwd > 3) then
+        cmt => r1%cmnt(4)
+        if(cmt(1:5) == '-----') r1%sublib = cmt(6:66)
+    endif
+
+    r1%mfor = 0
+    if(r1%nwd > 4) then
+        cmt => r1%cmnt(5)
+        if(cmt(1:6) == '------') then
+            read(cmt(12:12),'(i1)',iostat=ios) r1%mfor
+            if(ios /= 0) r1%mfor = 0
+        endif
+    endif
 
     return
     end subroutine read_451
@@ -502,59 +541,84 @@ module ENDF_MF1_IO
     call write_endf(r1%awi, r1%emax, r1%lrel, 0, r1%nsub, r1%nver)
     call write_endf(r1%temp, zero, r1%ldrv, 0, r1%nwd, r1%nxc)
 
-    ! remake comments 1-5 since they contain standardized fields
+    ! the first 5 lines of comments usually have fixed fields containing
+    ! the symbolic name of the material, lab name, date, author, etc.
+    ! but these fields are NOT required and they may not be there. 
+    ! check these fields and rebuild lines from sub-fields when specified.
 
-    endline(1:11) = r1%zsymam
-    endline(12:22) = r1%alab
-    endline(23:32) = r1%edate
-    endline(34:66) = r1%auth
-    call put_endline
-
-    endline(1:66) = ' '
-    endline(2:22) = r1%ref
-    endline(23:32) = r1%ddate
-    endline(34:43) = r1%rdate
-    endline(56:63) = r1%endate
-    call put_endline
-
-    endline(1:66) = '----'
-    endline(5:21) = r1%libtyp
-    endline(23:30) = 'MATERIAL'
-    write(endline(32:35),'(i4)',iostat=ios) r1%mat
-    if(ios /= 0) then
-        write(erlin,*) 'Error writing MAT in MF1/451 comment line 3'
-        call endf_error(erlin)
+    if(r1%nwd > 0) then
+        endline = r1%cmnt(1)
+        if((r1%zsymam(4:4) == '-') .and. (r1%zsymam(7:7) == '-')) endline(1:11) = r1%zsymam
+        endline(12:22) = r1%alab
+        endline(23:32) = r1%edate
+        endline(34:66) = r1%auth
+        call put_endline
     endif
-    if(r1%irev > 0) then
-        endline(45:52) = 'REVISION'
-        if(r1%irev < 10) then
-            write(endline(54:54),'(i1)',iostat=ios) r1%irev
-        else if(r1%irev < 100) then
-            write(endline(54:55),'(i2)',iostat=ios) r1%irev
-        else if(r1%irev < 1000) then
-            write(endline(54:56),'(i3)',iostat=ios) r1%irev
-        else
-            write(erlin,*) 'Revision number too large in MF1/451, line 3:',r1%irev
-            call endf_error(erlin)
+
+    if(r1%nwd > 1) then
+        endline = r1%cmnt(2)
+        endline(1:1) = ' '
+        endline(2:22) = r1%ref
+        if(r1%ddate(1:4) == 'DIST') endline(23:32) = r1%ddate
+        if(r1%rdate(1:3) == 'REV')  endline(34:43) = r1%rdate
+        endline(56:63) = r1%endate
+        call put_endline
+    endif
+
+    if(r1%nwd > 2) then
+        endline = r1%cmnt(3)
+        if((r1%mat > 0) .and. (r1%mat < 10000)) then
+            ! assume legal material number & write it
+            endline(1:4) = '----'
+            endline(5:21) = r1%libtyp
+            endline(22:30) = ' MATERIAL'
+            write(endline(32:35),'(i4)',iostat=ios) r1%mat
+            if(ios /= 0) then
+                write(erlin,*) 'Error writing MAT in MF1/451 comment line 3'
+                call endf_error(erlin)
+            endif
         endif
-        if(ios /= 0) then
-            write(erlin,*) 'Error writing revision number in MF1/451 comment line 3'
-            call endf_error(erlin)
+        if(r1%irev > 0) then
+            endline(45:52) = 'REVISION'
+            if(r1%irev < 10) then
+                write(endline(54:54),'(i1)',iostat=ios) r1%irev
+            else if(r1%irev < 100) then
+                write(endline(54:55),'(i2)',iostat=ios) r1%irev
+            else if(r1%irev < 1000) then
+                write(endline(54:56),'(i3)',iostat=ios) r1%irev
+            else
+                write(erlin,*) 'Revision number too large in MF1/451, line 3:',r1%irev
+                call endf_error(erlin)
+            endif
+            if(ios /= 0) then
+                write(erlin,*) 'Error writing revision number in MF1/451 comment line 3'
+                call endf_error(erlin)
+            endif
         endif
+        call put_endline
     endif
-    call put_endline
 
-    endline(1:5) = '-----'
-    endline(6:66) = r1%sublib
-    call put_endline
-
-    endline(1:66) = '------ENDF-X FORMAT'
-    write(endline(12:12),'(i1)',iostat=ios) r1%mfor
-    if(ios /= 0) then
-        write(erlin,*) 'Error writing format number in MF1/451 comment line 5'
-        call endf_error(erlin)
+    if(r1%nwd > 3) then
+        endline = r1%cmnt(4)
+        if(len_trim(r1%sublib) > 0) then
+            endline(1:5) = '-----'
+            endline(6:66) = r1%sublib
+        endif
+        call put_endline
     endif
-    call put_endline
+
+    if(r1%nwd > 4) then
+        endline = r1%cmnt(5)
+        if((r1%mfor > 0) .and. (r1%mfor < 10)) then
+            endline(1:66) = '------ENDF-X FORMAT'
+            write(endline(12:12),'(i1)',iostat=ios) r1%mfor
+            if(ios /= 0) then
+                write(erlin,*) 'Error writing format number in MF1/451 comment line 5'
+                call endf_error(erlin)
+            endif
+        endif
+        call put_endline
+    endif
 
     ! the rest of the comment lines are free-format strings
 
@@ -720,8 +784,7 @@ module ENDF_MF1_IO
     integer i,n
 
     if(associated(mf1%mt451)) then
-        if(associated(mf1%mt451%cmnt)) deallocate(mf1%mt451%cmnt,stat=n)
-        if(associated(mf1%mt451%dir))  deallocate(mf1%mt451%dir,stat=n)
+        if(associated(mf1%mt451%cmnt)) deallocate(mf1%mt451%cmnt,mf1%mt451%dir,stat=n)
         deallocate(mf1%mt451,stat=n)
     else if(associated(mf1%mt452)) then
         if(associated(mf1%mt452%c)) deallocate(mf1%mt452%c,stat=n)
@@ -730,7 +793,8 @@ module ENDF_MF1_IO
     else if(associated(mf1%mt455)) then
         if(associated(mf1%mt455%lambda)) deallocate(mf1%mt455%lambda,stat=n)
         if(associated(mf1%mt455%lb)) then
-            deallocate(mf1%mt455%lb%itp, mf1%mt455%lb%e, mf1%mt455%lb%dgc,stat=n)
+            if(associated(mf1%mt455%lb%itp)) deallocate(mf1%mt455%lb%itp, mf1%mt455%lb%e,stat=n)
+            if(associated(mf1%mt455%lb%dgc)) deallocate(mf1%mt455%lb%dgc,stat=n)
             deallocate(mf1%mt455%lb,stat=n)
         endif
         if(associated(mf1%mt455%c)) deallocate(mf1%mt455%c,stat=n)
@@ -741,7 +805,7 @@ module ENDF_MF1_IO
         if(associated(mf1%mt456%tb)) call remove_tab1(mf1%mt456%tb)
         deallocate(mf1%mt456,stat=n)
     else if(associated(mf1%mt458)) then
-        deallocate(mf1%mt458%cmp,stat=n)
+        if(associated(mf1%mt458%cmp)) deallocate(mf1%mt458%cmp,stat=n)
         deallocate(mf1%mt458,stat=n)
     else if(associated(mf1%mt460)) then
         if(associated(mf1%mt460%e)) then

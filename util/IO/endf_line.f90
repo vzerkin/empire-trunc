@@ -39,7 +39,7 @@ module endf_lines
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect, set_error_limit
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat, get_endf_line
 
 !------------------------------------------------------------------------------
     contains
@@ -260,8 +260,8 @@ module endf_lines
     integer*4 status,ios
     character*4 cmat
 
-    if(.not.q_open) return
-    if(q_write) call endf_error('Attempt to read from ENDF output file',-500)
+    if(.not.q_open) call endf_error('Attempt to find ENDF material with no file open',-250)
+    if(q_write) call endf_error('Attempt to find ENDF material in output file',-250)
 
     if((nat <= 0) .or. (nat > 9999)) then
         write(erlin,*) 'Request to find illegal MAT # :',nat
@@ -303,8 +303,8 @@ module endf_lines
 
     integer*4 status,ios
 
-    if(.not.q_open) return
-    if(q_write) call endf_error('Attempt to read from ENDF output file',-500)
+    if(.not.q_open) call endf_error('Attempt to skip ENDF material with no file open',-250)
+    if(q_write) call endf_error('Attempt to skip ENDF material on output file',-500)
 
     do while(get_mat() /= 0)
         status = get_endf_line()
@@ -339,8 +339,8 @@ module endf_lines
 
     skip_sect = 0
 
-    if(.not.q_open) return
-    if(q_write) call endf_error('Attempt to read from ENDF output file',-250)
+    if(.not.q_open) call endf_error('Attempt to skip ENDF section with no file open',-250)
+    if(q_write) call endf_error('Attempt to skip ENDF section of output file',-250)
 
     do while(get_mt() /= 0)
         status = get_endf_line()
@@ -355,7 +355,7 @@ module endf_lines
         endif
     end do
 
-    call set_mt(0)
+    cmft(7:9) = '  0'
     istate = isend
     call get_endline
     skip_sect = get_mt()
@@ -374,7 +374,7 @@ module endf_lines
     integer*4 i,k,m,omt,omf,status,ier
     character*2 chr2
 
-    if(.not.q_open) return
+    if(.not.q_open) call endf_error('Attempt to read ENDF file with no file open',-500)
     if(q_write) call endf_error('Attempt to read from ENDF output file',-250)
 
     status = get_endf_line()
@@ -530,8 +530,12 @@ module endf_lines
 
     case(imend)
 
-        ! between materials
-        ! just read lines - logic handled in read_endf_file
+        ! between materials -> last record had MAT=0 or header
+        ! check new MAT value in set_mat & set cmft from input
+
+        i = get_mat()                   ! from input line
+        call set_mat(i)                 ! check new MAT & set MF,MT=0
+        cmft(1:4) = endline(67:70)      ! use formatting from input file
 
     case default
 
@@ -552,7 +556,7 @@ module endf_lines
 
     implicit none
 
-    call set_mt(0)
+    cmft(7:9) = '  0'
     call get_endline
     istate = isend
     call get_endline
@@ -571,7 +575,7 @@ module endf_lines
 
     integer*4 status
 
-    if(.not.q_open) return
+    if(.not.q_open) call endf_error('Attempt to write ENDF file with no file open',-500)
     if(.not.q_write) call endf_error('Attempt to write to ENDF input file',-250)
 
     endline(67:75) = cmft
@@ -601,7 +605,7 @@ module endf_lines
 
     get_mt = 0
 
-    if(.not.q_open) return
+    if(.not.q_open) call endf_error('Attempt to read MT with no ENDF file open',-510)
     if(q_write) call endf_error('Attempt to read MT from output file',-250)
 
     read(endline(73:75),'(i3)',err=10) i
@@ -623,7 +627,7 @@ module endf_lines
 
     integer i
 
-    if(.not.q_open) return
+    if(.not.q_open) call endf_error('Attempt to read MF with no ENDF file open',-511)
     if(q_write) call endf_error('Attempt to read MF from output file',-1)
 
     read(endline(71:72),'(i2)',err=10) i
@@ -645,7 +649,7 @@ module endf_lines
 
     integer i
 
-    if(.not.q_open) return
+    if(.not.q_open) call endf_error('Attempt to read MAT with no ENDF file open',-512)
     if(q_write) call endf_error('Attempt to read MAT from output file',-250)
 
     read(endline(67:70),'(i4)',err=10) i
@@ -662,17 +666,18 @@ module endf_lines
     subroutine set_mat(mat)
 
     ! set MAT field
+    ! allow for input to check value & set fields in cmft
 
     implicit none
 
     integer, intent(in) :: mat
 
-    if(.not.q_open) return
+    if(.not.q_open)  call endf_error('Attempt to set MAT with no ENDF file open',-512)
 
     select case(istate)
     case(ifend)
 
-        ! only allow end of material (MAT=) when MF=0
+        ! only allow end of material (MAT=0) when MF=0
 
         if(mat /= 0) then
             write(erlin,*)  'Attempting to set MAT to new value:',mat
@@ -726,7 +731,8 @@ module endf_lines
     integer, intent(in) :: mf
     integer omf
 
-    if(.not.q_open) return
+    if(.not.q_open)  call endf_error('Attempt to set MF with no ENDF file open',-512)
+    if(.not.q_write) call endf_error('Attempt to set MF on input file',-250)
 
     select case(istate)
     case(imend)
@@ -784,7 +790,8 @@ module endf_lines
     integer, intent(in) :: mt
     integer omt
 
-    if(.not.q_open) return
+    if(.not.q_open)  call endf_error('Attempt to set MT with no ENDF file open',-512)
+    if(.not.q_write) call endf_error('Attempt to set MT on input file',-250)
 
     select case(istate)
     case(imend,ifend)
@@ -817,7 +824,7 @@ module endf_lines
             write(erlin,*) 'Out-of-sequence SET_MT to :',mt
             call endf_error(erlin)
         endif
-        if(q_write) istate = isend
+        istate = isend
         lnum = 99998
         cmft(7:9) = '  0'
 
