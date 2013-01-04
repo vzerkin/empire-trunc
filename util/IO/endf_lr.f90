@@ -41,6 +41,8 @@ module endf_line_io
 
     integer*4 function open_endf_file(efil,nlin,qwrt,iover,qlin)
 
+    ! open an ENDF file for processing
+
     implicit none
 
     character*(*), intent(in) :: efil       ! endf file name
@@ -78,16 +80,23 @@ module endf_line_io
     else
         ! open existing file for read & peek at file
         open(lun,file=efil,action='read',status='old',iostat=stat)
-        read(lun,'(q,a<recsiz>)',iostat=stat) recsiz,filine
-        rewind(lun)
-        if(recsiz == 80) then
-           qlins = .true.
-        else if(recsiz == 75) then
-           qlins = .false.
-        else
-           close(lun)
-           open_endf_file = file_bad_form
-           return
+        if(stat == 0) then
+            read(lun,'(a)',iostat=stat) filine
+            if(stat == 0) then
+                rewind(lun)
+                ! get record length from # bytes in 1st line
+                recsiz = len_trim(filine)
+                if(recsiz == 80) then
+                    qlins = .true.
+                else if(recsiz == 75) then
+                    qlins = .false.
+                else
+                    close(lun)
+                    stat = file_bad_form
+                endif
+            else
+                close(lun)
+            endif
         endif
     endif
 
@@ -110,19 +119,30 @@ module endf_line_io
 
     integer*4 function get_endf_line()
 
+    ! get a line from ENDF file
+    ! all lines in an ENDF file should be the same length
+    ! traditional ENDF files were 80 characters and had line numbers in (76:80)
+    ! a new shorted format has been approved that skips the line numbers and is 75 characters
+    ! only allow lines that have the same length as the first line in file = recsiz
+
     implicit none
 
-    integer*4 stat,rsz
+    integer*4 stat
 
-    read(lun,'(q,a<rsz>)',iostat=stat) rsz,filine
-    if(rsz /= recsiz) then
+    read(lun,'(a)',iostat=stat) filine
+    if(stat /= 0) then
+        get_endf_line = stat
+        return
+    endif
+
+    if(len_trim(filine) /= recsiz) then
         get_endf_line = file_not_fixed
         return
     endif
 
     filin = filin + 1
 
-    get_endf_line = stat
+    get_endf_line = 0
     return
 
     end function get_endf_line
@@ -130,6 +150,9 @@ module endf_line_io
 !------------------------------------------------------------------------------
 
     integer*4 function put_endf_line()
+
+    ! write a line to output ENDF file
+    ! only append line numbers in (76:80) if qlins is .true.
 
     implicit none
 
@@ -196,6 +219,9 @@ module endf_line_io
 !------------------------------------------------------------------------------
 
     integer*4 function get_endf_record_size()
+
+    ! return the record size of currently opened ENDF file
+    ! here, this is taken as the length of the first line in file
 
     implicit none
 
