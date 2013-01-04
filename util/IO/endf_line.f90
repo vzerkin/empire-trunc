@@ -23,6 +23,7 @@ module endf_lines
     logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
     logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
     logical*4 :: qlin = .false.           ! if true, put line numbers in (76:80) of output files
+    logical*4 :: qfst = .true.            ! set true when file opened for first read of header line
 
     integer*4 :: errlim = 50              ! limit of errors in file before giving up.
 
@@ -39,7 +40,7 @@ module endf_lines
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect, set_error_limit
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat, get_endf_line
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat
 
 !------------------------------------------------------------------------------
     contains
@@ -93,6 +94,7 @@ module endf_lines
 
     lnum = -1
     istate = imend
+    qfst = .true.
     ipos = 0
     cmft = '   1 0  0'      ! default for header line
     lmft = cmft
@@ -530,7 +532,15 @@ module endf_lines
 
     case(imend)
 
-        ! between materials -> last record had MAT=0 or header
+        ! check if this is the first read for this file. If so, see if this is a
+        ! header line (MF=MT=0). If so, don't set MAT, just return to caller.
+
+        if(qfst) then
+            qfst = .false.
+            if((get_mf() == 0) .and. (get_mt() == 0)) return    ! header line
+        endif
+
+        ! between materials -> last record had MAT=0
         ! check new MAT value in set_mat & set cmft from input
 
         i = get_mat()                   ! from input line

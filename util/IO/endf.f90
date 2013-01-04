@@ -215,11 +215,9 @@ module ENDF_IO
     ! local variables to store input/control parameters
 
     integer*4, private :: ihdr = 0                 ! controls disposition of 'header' or TPID line
-    integer*4, private :: inmat = 0                ! input MAT to read, if 0, read whole file
     integer*4, private :: nfil                     ! # characters in endfil string
     character*500, private :: endfil               ! ENDF file to read/write
     type (endf_file), pointer, private :: endf     ! pointer to user's ENDF data type
-    logical*4, private :: q_overwrite = .false.    ! flag for overwriting existing output file
 
     ! hide these routines from end user
 
@@ -254,7 +252,7 @@ module ENDF_IO
     type (endf_file), intent(out), target :: usend     ! endf output structure
     integer*4, intent(in), optional :: mat             ! mat # to read in
 
-    integer*4 stat
+    integer*4 stat,inmat
 
     nfil = len_trim(filename)
     if(nfil > 500) then
@@ -272,7 +270,7 @@ module ENDF_IO
 
     errcnt = 0
 
-    stat = endf_try(endf_file_reader,0)
+    stat = endf_try(endf_file_reader,inmat)
 
     call close_endfile        ! make sure file is closed
 
@@ -287,12 +285,14 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine endf_file_reader
+    subroutine endf_file_reader(inmat)
 
     implicit none
 
     ! read an entire ENDF file, which may contain multiple materials.
     ! each material is scanned, and all MF files encountered are read in.
+
+    integer*4, intent(in) :: inmat     ! input MAT to read in; if 0 -> read whole file
 
     integer mat,status,mf,mt,nlin,mstat
     type (endf_mat), pointer :: mx
@@ -310,12 +310,12 @@ module ENDF_IO
     !  1) replace the contents with our SVN tags
     !  2) issue an error and abort if SVN tags not found.
 
-    status = get_endf_line()
+    call get_endline(status)
     if(status < 0) then
         if(status == -1) then
-            write(erlin,*) 'Hit end-of-file during read'
+            write(erlin,*) 'File ',endfil(1:nfil),' is empty!'
         else
-            write(erlin,*) 'Read returned error code :',status
+            write(erlin,*) 'File read returned error code :',status
         endif
         call endf_error(erlin,-500+status)
     endif
@@ -353,7 +353,7 @@ module ENDF_IO
         else
             mstat = 0           ! informational. use default header line
         endif
-        erlin = ' No header (TPID) or header without MF=MT=0 on first line'
+        erlin = ' No header (TPID) with MF=MT=0 in first line of file'
         call endf_error(erlin,mstat)
         endf%hdline = hdlin
 
@@ -363,7 +363,11 @@ module ENDF_IO
 
     mat = get_mat()
     if(mat < 0) then
-        erlin = 'No materials found in '//endfil(1:nfil)
+        if(inmat == 0) then
+            erlin = 'No materials found in '//endfil(1:nfil)
+        else
+            write(erlin,'(a,i4,2a)') ' MAT # ',inmat,' not found in ',endfil(1:nfil)
+        endif
         call endf_error(erlin)
     endif
 
@@ -1160,6 +1164,8 @@ module ENDF_IO
     type (endf_file), intent(in), target :: usend
     logical*4, intent(in), optional :: qov
 
+    logical*4 qow
+
     nfil = len_trim(filename)
     if(nfil > 500) then
         write(6,*) ' ##### ERROR #####'
@@ -1173,12 +1179,12 @@ module ENDF_IO
     endf => usend
 
     if(present(qov)) then
-       q_overwrite = qov
+       qow = qov
     else
-       q_overwrite = .false.
+       qow = .false.
     endif
 
-    write_endf_file = endf_try(endf_file_writer,0)
+    write_endf_file = endf_try(endf_file_writer,qow)
 
     ! close file here in case something went wrong
 
@@ -1189,9 +1195,12 @@ module ENDF_IO
 
 !------------------------------------------------------------------------------
 
-    subroutine endf_file_writer
+    subroutine endf_file_writer(q_overwrite)
 
     implicit none
+
+    logical*4, intent(in) :: q_overwrite   ! file overwrite flag.
+                                           ! if true, allow overwriting existing file
 
     integer*4 tlc
     type (endf_mat), pointer :: mx

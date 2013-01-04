@@ -195,7 +195,7 @@ module endf_line_io
 
 !------------------------------------------------------------------------------
 
-    integer*4 function get_endf_record_size
+    integer*4 function get_endf_record_size()
 
     implicit none
 
