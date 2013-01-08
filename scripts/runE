@@ -82,14 +82,17 @@ def runE(proj):
         cp(proj+'-s.endf', proj+'-prev.endf')
         print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
     if not isEmpty(proj+'.lev'):
-        cp(proj+'.lev', 'LEVELS')
+        ln(proj+'.lev', 'LEVELS')     
+        #cp(proj+'.lev', 'LEVELS')
         print ('Using existing file with levels: %s' % proj+'.lev')
     if not isEmpty(proj+'-omp.ripl'):
-        cp(proj+'-omp.ripl', 'OMPAR.RIPL')
+        ln(proj+'-omp.ripl', 'OMPAR.RIPL')
+        #cp(proj+'-omp.ripl', 'OMPAR.RIPL')
         print('Using existing file with optical model par: %s' % 
                 proj+'-omp.ripl')
     if not isEmpty(proj+'-omp.dir'):
-        cp(proj+'-omp.dir','OMPAR.DIR')
+        ln(proj+'-omp.dir','OMPAR.DIR')
+        #cp(proj+'-omp.dir','OMPAR.DIR')
         print('Using existing file with optical model par (inel scatt): %s' % 
                 proj+'-omp.dir')
     # make symlink to transmission coefficient directory:
@@ -103,7 +106,8 @@ def runE(proj):
             pass
         os.mkdir('TL')  
     if not isEmpty(proj+'-lev.col'):
-        cp(proj+'-lev.col','TARGET_COLL.DAT')
+        ln(proj+'-lev.col','TARGET_COLL.DAT')
+        #cp(proj+'-lev.col','TARGET_COLL.DAT')
         print('Using existing file with collective levels: %s' % 
                 proj+'-lev.col')
     if not isEmpty(proj+'.fus'):
@@ -111,13 +115,15 @@ def runE(proj):
         print('Using existing file with fusion cross sections: %s' % 
                 proj+'.fus')
     if not isEmpty(proj+'-inp.fis'):
-        cp(proj+'-inp.fis','FISSION.INP')
+        ln(proj+'-inp.fis','FISSION.INP')
+        #cp(proj+'-inp.fis','FISSION.INP')
         print('Using existing file with fission input: %s' % proj+'-inp.fis')
     if not isEmpty(proj+'.exf'):
         cp(proj+'.exf','EXFOR.DAT')
         print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
     if not isEmpty(proj+'.c4'):
-        cp(proj+'.c4','C4.DAT')
+        ln(proj+'.c4','C4.DAT')
+        #cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (C4): %s' % proj+'.c4')
     if not isEmpty(proj+'-inp.sen'):
         cp(proj+'-inp.sen','SENSITIVITY.INP')
@@ -150,24 +156,27 @@ def runE(proj):
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
-    mv('LEVELS',proj+'.lev')
+    # Commented to avoid overwriting the existing file (not an output file)   
+    # mv('LEVELS',proj+'.lev')
     if not isEmpty('GAMMA_INT.DAT'):
         mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
     mv('EL_INEL.DAT',proj+'-preq.xsc',0)          # no message if not present    
     mv('XSECTIONS.OUT',proj+'.xsc',0)             # no message if not present
     mv('FISS_XS.OUT',proj+'-fiss.xsc',0)          # no message if not present
-    mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
+    # Commented to avoid overwriting the existing file (not an output file)   
+    # mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
     # mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present     
 
     if not (os.path.isdir(proj+'-tl')):
         mv('TL',proj+'-tl')
     if os.path.islink('TL'):
         os.unlink('TL')
-    
-    if not isEmpty('OMPAR.RIPL'):
-        cp('OMPAR.RIPL',proj+'-omp.ripl')
-    if not isEmpty('OMPAR.DIR'):
-        cp('OMPAR.DIR',proj+'-omp.dir')
+
+    # avoid overwriting, not INPUT files    
+    #if not isEmpty('OMPAR.RIPL'):
+    #    cp('OMPAR.RIPL',proj+'-omp.ripl')
+    #if not isEmpty('OMPAR.DIR'):
+    #    cp('OMPAR.DIR',proj+'-omp.dir')
         
     # FISSION.INP    
     #if not isEmpty(proj+'-inp.fis'):
@@ -221,15 +230,20 @@ def runE(proj):
         mv('SYSTEMATICS.TXT',proj+'.sys')
     if not isEmpty('SENSITIVITY.MATRIX'):
         mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
-
     
     # move files, no warning if files DNE:
     if not isEmpty('OMP_A.DAT'):
         mv('OMP_A.DAT',proj+'-aOMP.lst',0)
-    if not isEmpty('EXFOR.DAT'):
-        mv('EXFOR.DAT',proj+'.exf',0)
-    if not isEmpty('C4.DAT'):
-        mv('C4.DAT',proj+'.c4',0)
+    if not isEmpty('COVAR-PAR.DAT'):
+        mv('COVAR-PAR.DAT',proj+'-covar-par.dat',0)
+    if not isEmpty('TOTCOR.DAT'):
+        mv('TOTCOR.DAT',proj+'-totcor.dat',0)
+    # Commented to avoid overwriting the existing file (not an output file)   
+    #if not isEmpty('EXFOR.DAT'):
+    #    mv('EXFOR.DAT',proj+'.exf',0)
+    # Commented to avoid overwriting the existing file (not an output file)   
+    #if not isEmpty('C4.DAT'):
+    #    mv('C4.DAT',proj+'.c4',0)
     if not isEmpty('ECIS_SPH.inp'):
         mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
     if not isEmpty('ECIS_SPH.out'):
@@ -250,7 +264,11 @@ def runE(proj):
         mv('OPTMAN.INP',proj+'-optman.inp',0)
     if not isEmpty('OPTMAN.OUT'):
         mv('OPTMAN.OUT',proj+'-optman.out',0)
-    mv('R250SEED.DAT',proj+'.rng',0)
+    if isEmpty(proj+'.-1st-seed.rng'):
+        cp('R250SEED.DAT',proj+'-1st-seed.rng')		
+        print('Saving the RNG seed after the first run in the current directory')
+    if not isEmpty('R250SEED.DAT'):
+        mv('R250SEED.DAT',proj+'.rng')
     # fission chances and spectra for one energy run:
     if not isEmpty('FISS_XS.ZVD'):
         mv('FISS_XS.ZVD',proj+'-fiss.zvd',0)
@@ -264,8 +282,9 @@ def runE(proj):
         mv('PFNM.OUT',proj+'-pfnm.out',0)
     if not isEmpty('ddhms.out'):
         mv('ddhms.out',proj+'-hms.lst',0)
-    if not isEmpty('NUBAR.DAT'):
-        mv('NUBAR.DAT',proj+'-nubar.dat',0)
+    # Commented to avoid overwriting the existing file (not an output file)   
+    #if not isEmpty('NUBAR.DAT'):
+    #    mv('NUBAR.DAT',proj+'-nubar.dat',0)
 
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
@@ -287,8 +306,9 @@ def runE(proj):
             warnfile.write(line)
     warnfile.close()
     
+    # Delete temporal Input files
+    rm('LEVELS','FISSION.INP','C4.DAT','EXFOR.DAT','NUBAR.DAT')
     # Delete Temporary files
-    
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
     rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')	
@@ -296,13 +316,11 @@ def runE(proj):
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT','MU_BAR.LST','MU_BAR.TMP')
     rm( glob('TARGET-*.tl'), glob('ecis06.*'))
     rm('TARGET.LEV','OMP_A.DAT','angdis.p92','COVAR-PAR.DAT','ecis06_INC.LST')
-    rm('EXFOR.DAT')
     rm('C4SORTM.INP')    
     rm('c4sort.scr')        
     rm('C4SORT.TMP')        
     rm('INPUT')
     rm('INPUT.DAT')
-    rm('FISSION.INP')
     rm('OMPAR.DIR')
     rm('OMPdata.dat')
     rm('mt_x4r.txt')
@@ -322,7 +340,6 @@ def runE(proj):
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
     rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
-    rm('COVAR.DAT')
     rm('OPTFIT.CAL', 'OMPAR0.DIR', 'INPUT0.DAT')
     rm('OMPAR.DIR', 'LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')

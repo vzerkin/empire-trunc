@@ -67,9 +67,9 @@ $EMPIREDIR/scripts/runE $file
 #rm -rf $file-tl 
 #     or 
 # Removing TLs for the incident channel
-rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
+#rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
 # Removing TLs for the outgoing neutron channel
-rm -f $file-tl/000001_*.BIN
+#rm -f $file-tl/000001_*.BIN
 # Removing TLs for the outgoing proton channel
 #rm -f $file-tl/001001_*.BIN
 # Removing TLs for the outgoing alpha  channel
@@ -90,9 +90,16 @@ rm -f $file-tl/000001_*.BIN
 #$EMPIREDIR/util/empend/empend <EMPEND.INP
 #rm EMPEND.INP empmf1.tmp empend.log
 mv $file.xsc  XS$fnum
+if [ $sweep -le 5]
+ then
 mv $file.lst  LST$fnum
+fi    
 mv $file.out  OUT$fnum
+# Saving the RNG seed
+mv $file.rng  RNG$fnum
 #mv $file.endf OUT$fnum.endf
+# Saving also sampled parameters
+mv $file-covar-par.dat  PAR$fnum
 let sweep=sweep+1
 done
 # Calculating and plotting covariances
