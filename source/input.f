@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3284 $
+Ccc   * $Rev: 3286 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-01-08 19:45:35 +0100 (Di, 08 Jän 2013) $
+Ccc   * $Date: 2013-01-08 21:23:28 +0100 (Di, 08 Jän 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -7903,13 +7903,12 @@ C             then starting seed is read
      &           iseed	      		 
 	      else	 
                 WRITE (8,*) 
-     &           'Random seed number from input :', iseed
+     &           'RNG reinitialized, RNG seed from input :', iseed 
+                WRITE (12,*) 
+     &           'RNG reinitialized, RNG seed from input :', iseed 
               endif		 
-
               Call R250Init(iseed)
-              WRITE (8,*) 'RNG renitialized, starting seeds :', 
-     &                     indexf, indexb                		
-              OPEN(94,file='R250SEED-input.DAT')	
+              OPEN(94,file='R250SEED-default.DAT')	
               WRITE(94,*)  indexf, indexb
               Do i = 1, 250
                 WRITE(94,*) buffer(i)
@@ -7924,10 +7923,17 @@ C             then starting seed is read
                 READ(94,*) buffer(i)
               ENDDO
               CLOSE(94)	
-              WRITE (8,*) 'Using RNG seeds from *.rng file :', 
-     &                     indexf, indexb                		
+              WRITE (8 ,*) 'Using RNG seeds from *.rng file :' 
+              WRITE (12,*) 'Using RNG seeds from *.rng file :' 
 
             endif
+
+            WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                		
+            WRITE (8 ,*) 'RNG buffer(1)    ', buffer(1)
+            WRITE (8 ,*) 'RNG buffer(250)  ', buffer(250)
+            WRITE (12,*) 'RNG indexes     ', indexf, indexb                		
+            WRITE (12,*) 'RNG buffer(1)   ', buffer(1)
+            WRITE (12,*) 'RNG buffer(250) ', buffer(250)
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF

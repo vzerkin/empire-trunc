@@ -1,6 +1,6 @@
-cc   * $Rev: 3284 $
+cc   * $Rev: 3286 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-01-08 19:45:35 +0100 (Di, 08 Jän 2013) $
+Ccc   * $Date: 2013-01-08 21:23:28 +0100 (Di, 08 Jän 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -4240,6 +4240,8 @@ C
          CLOSE (8)
          CLOSE (11)
          CLOSE (12)
+
+
          CLOSE (13)
          IF (FILevel) CLOSE (14)
          CLOSE (15,STATUS = 'delete')
@@ -4269,17 +4271,56 @@ C
            CLOSE (74)
          ENDIF
          CLOSE (98)
-C--------Saving random seeds
-         ftmp = grand()
-         OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
-         write(94,*)  indexf, indexb
-         DO i = 1, 250
-          write(94,*) buffer(i)
-         ENDDO
-         CLOSE(94)
+         IF (IOPran.NE.0) then
+C----------Saving random seeds
+           ftmp = grand()
+           OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
+           write(94,*)  indexf, indexb
+           DO i = 1, 250
+             write(94,*) buffer(i)
+           ENDDO
+           CLOSE(94)
+           WRITE (8,*)
+           WRITE (12,*)
+
+           WRITE (8 ,*) ' Saving RNG status :'
+           WRITE (12,*) ' Saving RNG status :'
+           WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                		
+           WRITE (8 ,*) 'RNG buffer(1)    ', buffer(1)
+           WRITE (8 ,*) 'RNG buffer(250)  ', buffer(250)
+           WRITE (12,*) 'RNG indexes     ', indexf, indexb                		
+           WRITE (12,*) 'RNG buffer(1)   ', buffer(1)
+           WRITE (12,*) 'RNG buffer(250) ', buffer(250)
+
+           WRITE (8,*)
+           WRITE (12,*)
+
+           WRITE (95,'(A2)') '# '
+           WRITE (95,'(A21)') '# Saving RNG status :'
+           WRITE (95,'(A21,2(1x,I10))') 
+     &     '# RNG indexes        ', indexf, indexb                		
+           WRITE (95,'(A21,2(1x,I10))') 
+     &     '# RNG buffer(1)      ', buffer(1)                		
+           WRITE (95,'(A21,2(1x,I10))') 
+     &     '# RNG buffer(250)    ', buffer(250)              		
+         ENDIF
+
          CLOSE(95)  ! FROM INPUT.F
          CLOSE(102)
          IF (SFACT.GT.0) CLOSE(781)
+
+         WRITE (12,*) ' '
+         WRITE (12,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
+         WRITE (*,*) '.'
+         WRITE (*,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
+         WRITE (8,*) ' '
+         WRITE (8,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
+
+         CALL THORA(8)
+
+         CLOSE (8)
+         CLOSE (12)
+
          RETURN
       ENDIF
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN
@@ -4290,7 +4331,8 @@ C--------Saving random seeds
          STOP
       ENDIF
       epre = EIN
-      IF (IOPran.ne.0) WRITE(95,*) EINl, '******* Incident Energy'      
+      IF (IOPran.ne.0) 
+     &     WRITE(95,'(A19,2x,D12.6)') '# Incident Energy :',EINl
 C-----
 C-----
       IF(FITomp.GE.0) THEN
