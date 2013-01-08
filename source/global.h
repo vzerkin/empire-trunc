@@ -1,6 +1,6 @@
-C $Rev: 3270 $
+C $Rev: 3284 $
 C $Author: rcapote $
-C $Date: 2012-12-12 16:24:19 +0100 (Mi, 12 Dez 2012) $
+C $Date: 2013-01-08 19:45:35 +0100 (Di, 08 Jän 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -78,7 +78,7 @@ C
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
-     &        PL_lmax(ndcollev), SFAct, INTerf
+     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov
 	 
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
@@ -273,7 +273,8 @@ C
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
-     &                  PL_lmax, SFAct, INTerf, CNAngd, BUReac, NTReac
+     &                  PL_lmax, SFAct, INTerf, CNAngd, BUReac, NTReac,
+     &                  IPArcov      
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,

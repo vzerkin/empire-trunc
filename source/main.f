@@ -1,6 +1,6 @@
-cc   * $Rev: 3274 $
+cc   * $Rev: 3284 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-16 15:28:50 +0100 (So, 16 Dez 2012) $
+Ccc   * $Date: 2013-01-08 19:45:35 +0100 (Di, 08 Jän 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -4290,6 +4290,7 @@ C--------Saving random seeds
          STOP
       ENDIF
       epre = EIN
+      IF (IOPran.ne.0) WRITE(95,*) EINl, '******* Incident Energy'      
 C-----
 C-----
       IF(FITomp.GE.0) THEN

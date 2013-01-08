@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3273 $
+Ccc   * $Rev: 3284 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-15 16:00:28 +0100 (Sa, 15 Dez 2012) $
+Ccc   * $Date: 2013-01-08 19:45:35 +0100 (Di, 08 Jän 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -131,20 +131,33 @@ C
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
 
-      INQUIRE(file='R250SEED.DAT',exist=fexist)
-      if(fexist) then
-        OPEN(94,file='R250SEED.DAT',status='OLD')
-        READ(94,*)  indexf, indexb
-        Do i = 1, 250
-          READ(94,*) buffer(i)
-        ENDDO
-        CLOSE(94)
-      else
+C     INQUIRE(file='R250SEED.DAT',exist=fexist)
+C     if(fexist) then
+C        OPEN(94,file='R250SEED.DAT',status='OLD')
+C        READ(94,*)  indexf, indexb
+C        Do i = 1, 250
+C          READ(94,*) buffer(i)
+C        ENDDO
+C        CLOSE(94)	
+C        WRITE (8,*) 'Using RNG seeds from *.rng file :', 
+C     &           indexf, indexb
+C      else
+C      
 C       If the file R250SEED.DAT does not exist, then DEFAULT
 C       starting seed is used
-        iseed = 1234567
-        Call R250Init(iseed)
-      endif
+C        iseed = 1234567
+C        WRITE (8,*) 'Default iseed used :', iseed
+C        Call R250Init(iseed)
+C        WRITE (8,*) 'RNG renitialized, starting seeds :', 
+C     &              indexf, indexb	
+C        OPEN(94,file='R250SEED-default.DAT')	
+C        WRITE(94,*)  indexf, indexb
+C        Do i = 1, 250
+C          WRITE(94,*) buffer(i)
+C        ENDDO
+C	CLOSE(94)
+C
+C     endif
 
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
@@ -356,9 +369,11 @@ C        Scaling factor for direct processes consideration for complex projectil
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
 C        S-factor default to zero
          SFAct = 0
-C        IOPran = 1 ! Default gaussian 1 sigma error
-         IOPran = 0 ! MC sampling off by default, 'RANDOM' turns it on
+       	 
+C        IOPran = 1  ! Default gaussian 1 sigma error
+         IOPran = 0  ! MC sampling off by default, 'RANDOM' turns it on
 C        IOPran = -1 ! Uniform 1 sigma error
+         IPArcov= 0  ! Counter of sampled parameters  
 C--------Relativistic kinematics
          RELkin = .FALSE.
          INTerf = 1 ! Engelbrecht-Weidenmuller transformation used by default
@@ -3324,7 +3339,7 @@ C
       CHARACTER*72 rtitle
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
-      INTEGER IPArCOV
+C     INTEGER IPArCOV
       INTEGER INT
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver
@@ -3351,7 +3366,7 @@ C-----initialization of TRISTAN input parameters  *** done ***
 C
 C      By default, no covariance calculation is done
 C
-      IPArCOV = 0
+C      IPArCOV = 0
 
    11 CONTINUE
 
@@ -3500,7 +3515,6 @@ C
       name = '      '
       READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
          IF (name.EQ.'GO    ') THEN
-C           CLOSE(95)  ! SHOULD BE CLOSED IN MAIN.F
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
@@ -3699,8 +3713,8 @@ C--------PCROSS input
      &          '('' Mean free path parameter sampled value : '',f5.2)')
      &          MFPp
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, MFPp, INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, MFPp, INDexf, INDexb, name
               else
                 WRITE (8,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
@@ -4292,8 +4306,8 @@ C-----
      &     '('' Disc-lev. cross section was scaled by factor ''
      &          ,f6.3)') FCCred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, FCCred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &            IPArCOV, FCCred, INDexf, INDexb, name, rFCCred
             else
                 FCCred = val
                 WRITE (8,
@@ -4324,8 +4338,8 @@ C-----
      &     '('' Contin.cross section was scaled by factor ''
      &          ,f6.3)') FCOred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, FCOred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &             IPArCOV, FCOred, INDexf,INDexb,name,rFCORED
             else
                 FCOred = val
                 WRITE (8,
@@ -4356,8 +4370,8 @@ C-----
      &      '('' Fusion cross section was scaled by factor ''
      &          ,f6.3)') FUSred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, FUSred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &             IPArCOV, FUSred, INDexf, INDexb,name,rFUSred
             else
                 FUSred = val
                 WRITE (8,
@@ -4388,8 +4402,8 @@ C-----
      &          '('' Total cross section was scaled by factor ''
      &          ,f6.3)') TOTred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, TOTred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &            IPArCOV, TOTred, INDexf, INDexb, name,rTOTred
             else
                 TOTred = val
                 WRITE (8,
@@ -4420,8 +4434,8 @@ C-----
      &          '('' Shape elastic cross section was scaled by factor ''
      &          ,f6.3)') ELAred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, ELAred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &           IPArCOV, ELAred, INDexf, INDexb, name,rELAred
             else
                 ELAred = val
                 WRITE (8,
@@ -4474,8 +4488,8 @@ C
                 WRITE (8,'(''   (compensated by scaling the Compound Ela
      &stic cross section)'')')
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CINred(i1), INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &            IPArCOV,CINred(i1),INDexf,INDexb, name, rCINred(i1)
               else
                 CINred(i1) = val
                 WRITE (8,
@@ -4514,8 +4528,8 @@ C-----
      &      '('' Compound elastic cross section was scaled by factor ''
      &          ,f6.3)') CELred
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CELred, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &             IPArCOV, CELred, INDexf, INDexb, name, rCELred
             else
                 CELred = val
                 WRITE (8,
@@ -4545,8 +4559,8 @@ C-----
      &      '('' Compound elastic correction was scaled by factor ''
      &          ,f6.3)') CELcor
                 IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &             IPArCOV, CELcor, INDexf,INDexb
+                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
+     &             IPArCOV, CELcor, INDexf, INDexb, name, rCELcor
             else
                 CELcor = val
                 WRITE (8,
@@ -4847,8 +4861,8 @@ C
      &        '('' Real volume potential depth sampled norm.factor : '',
      &        f5.2)') FNvvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNvvomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNvvomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNvvomp(i3,nnuc) = abs(val)
@@ -4897,8 +4911,8 @@ C
      &        '('' Volume potential diffuseness sampled norm.factor : ''
      &        ,f5.2)') FNavomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNavomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNavomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNavomp(i3,nnuc) = abs(val)
@@ -4944,8 +4958,8 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '('' Imag. volume potential depth sampled norm.factor : ''
      &        ,f5.2)') FNwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNwvomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNwvomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNwvomp(i3,nnuc) = abs(val)
@@ -4992,8 +5006,8 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &      '('' Imag. surface potential depth sampled norm.factor : '',
      &        f5.2)') FNwsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNwsomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNwsomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNwsomp(i3,nnuc) = abs(val)
@@ -5039,8 +5053,8 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
      &        '('' Surface potential diffuseness sampled norm.factor :''
      &        ,f5.2)') FNasomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNasomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNasomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNasomp(i3,nnuc) = abs(val)
@@ -5086,8 +5100,8 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      &        '('' Surface potential radius sampled norm. factor :''
      &        ,f5.2)') FNrsomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNrsomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNrsomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNrsomp(i3,nnuc) = abs(val)
@@ -5133,8 +5147,8 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &        '('' Volume imaginary potential radius sampled factor :''
      &        ,f5.2)') FNrwvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNrwvomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNrwvomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNrwvomp(i3,nnuc) = abs(val)
@@ -5180,8 +5194,8 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
      &        '('' Volume real potential radius sampled factor :''
      &        ,f5.2)') FNrvomp(i3,nnuc)
                  IPArCOV = IPArCOV +1
-                 write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, FNrvomp(i3,nnuc), INDexf,INDexb
+                 write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, FNrvomp(i3,nnuc), INDexf, INDexb, name
             endif
             if(val.lt.0.) then
               FNrvomp(i3,nnuc) = abs(val)
@@ -5231,8 +5245,8 @@ C-----
      &        '('' GDR first hump energy sampled value : '',f5.2)')
      &        GDRpar(1,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(1,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(1,nnuc), INDexf, INDexb, name
             else
               GDRpar(1,nnuc) = val
               WRITE (8,
@@ -5281,8 +5295,8 @@ C-----
      &        '('' GDR first hump width sampled value : '',f5.2)')
      &        GDRpar(2,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(2,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(2,nnuc), INDexf, INDexb, name
             else
               GDRpar(2,nnuc) = val
               WRITE (8,
@@ -5331,8 +5345,8 @@ C-----
      &        '('' GDR first hump cross section sampled value : ''
      &        ,f7.2)') GDRpar(3,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(3,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(3,nnuc), INDexf, INDexb, name
             else
               GDRpar(3,nnuc) = val
               WRITE (8,
@@ -5381,8 +5395,8 @@ C-----
      &        '('' GDR second hump energy sampled value : '',f5.2)')
      &        GDRpar(4,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(4,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(4,nnuc), INDexf, INDexb, name
             else
               GDRpar(4,nnuc) = val
               WRITE (8,
@@ -5431,8 +5445,8 @@ C-----
      &        '('' GDR second hump width sampled value : '',f5.2)')
      &        GDRpar(5,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(5,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(5,nnuc), INDexf, INDexb, name
             else
               GDRpar(5,nnuc) = val
               WRITE (8,
@@ -5481,8 +5495,8 @@ C-----
      &        '('' GDR second hump cross section sampled value : ''
      &        ,f7.2)') GDRpar(6,nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GDRpar(6,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GDRpar(6,nnuc), INDexf, INDexb, name
             else
               GDRpar(6,nnuc) = val
               WRITE (8,
@@ -5972,8 +5986,8 @@ C-----
      &       '('' Shell correction in all nuclei multiplied by '',F6.2)'
      &       ) shelss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, shelss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, shelss,INDexf, INDexb, name
              else
               DO i = 0, NDNUC
                 SHLlnor(i) = val
@@ -6007,8 +6021,8 @@ C-----
      &        '('' Shell correction dw sampled value : '',f8.3)')
      &        SHLlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, SHLlnor(nnuc),INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, SHLlnor(nnuc), INDexf, INDexb, name
             else
               SHLlnor(nnuc) = val
               WRITE (8,
@@ -6039,8 +6053,8 @@ C-----
      &       '('' L.d. a-parameter in all nuclei multiplied by '',F6.2)'
      &       ) atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
              else
               DO i = 1, NDNUC
                 ATIlnor(i) = val
@@ -6073,8 +6087,8 @@ C-----
      &        '('' L.d. a-parameter sampled value : '',f8.3)')
      &        ATIlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, ATIlnor(nnuc),INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, ATIlnor(nnuc),INDexf,INDexb,name
             else
               ATIlnor(nnuc) = val
               WRITE (8,
@@ -6150,8 +6164,8 @@ C-----
      &        '('' Single particle l.d. parameter g sampled value : '',
      &        f8.3)') GTIlnor(nnuc)
                IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, GTIlnor(nnuc),INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, GTIlnor(nnuc),INDexf,INDexb, name
             else
               GTIlnor(nnuc) = val
               WRITE (8,
@@ -6286,8 +6300,8 @@ C--------Tuning factors
      &  '' multiplied by '',F6.3)') i1, NINT(A(1)), SYMb(1),
      & TUNEpe(i1)
               IPArCOV = IPArCOV +1
-              WRITE(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &           IPArCOV, TUNEpe(i1), INDexf,INDexb
+              WRITE(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &           IPArCOV, TUNEpe(i1), INDexf,INDexb,name
             else
               TUNEpe(i1) = val
               WRITE (8,
@@ -6379,8 +6393,8 @@ C
      &'('' Fission decay width of nucleus '',I3,A2,
      &  '' multiplied by '',F7.3)') i2, SYMb(nnuc), TUNefi(nnuc)
               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &       IPArCOV, TUNefi(nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &       IPArCOV, TUNefi(nnuc), INDexf,INDexb,name
  
             else
  
@@ -6437,8 +6451,8 @@ C
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb
+               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb,name
              else
               TUNe(i3,nnuc) = val
               WRITE (8,
@@ -6467,8 +6481,8 @@ C-----
               WRITE (8,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') DEFdyn
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &           IPArCOV, DEFdyn, INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &           IPArCOV, DEFdyn, INDexf,INDexb,name
             ELSE
               WRITE (8,
      &'('' DWBA dynamical deformations multiplied by'',F6.3)') val
@@ -6494,8 +6508,8 @@ C-----
               WRITE (8,
      &'('' CC static deformation multiplied by'',F6.3)') DEFSTA
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &           IPArCOV, DEFsta, INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &           IPArCOV, DEFsta, INDexf,INDexb,name
             ELSE
               WRITE (8,
      &'('' CC static deformation multiplied by'',F6.3)') val
@@ -6846,8 +6860,8 @@ C-----shift parameter used to adjust HFB LD
               WRITE (8,
      &'('' GS HFB L.D. shift in all nuclei set to '',F8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
              else
               DO nnuc = 1, NDNUC
                 ROHfbp(nnuc) = val
@@ -6879,8 +6893,8 @@ C-----shift parameter used to adjust HFB LD
      &        '('' GS HFB L.D. shift sampled value : '',f8.3)')
      &       ROHfbp(nnuc)
              IPArCOV = IPArCOV +1
-             write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb
+             write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb,name
             else
               ROHfbp(nnuc) = val
               WRITE (8,
@@ -6912,8 +6926,8 @@ C-----pseudo a-parameter used to adjust HFB LD
               WRITE (8,
      &'('' GS HFB L.D. norm in all nuclei set to '',F8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
              else
               DO nnuc = 1, NDNUC
                 ROHfba(nnuc) = val
@@ -6945,8 +6959,8 @@ C-----pseudo a-parameter used to adjust HFB LD
      &        '('' GS HFB L.D. norm sampled value : '',f8.3)')
      &       ROHfba(nnuc)
              IPArCOV = IPArCOV +1
-             write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb
+             write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb,name
             else
               ROHfba(nnuc) = val
               WRITE (8,
@@ -7403,8 +7417,8 @@ C-----
      &        '('' Fission Erel norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
  
             else
 
@@ -7434,8 +7448,8 @@ C-----
      &        '('' Fission TKE norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
  
             else
 
@@ -7464,8 +7478,8 @@ C-----
      &    '('' PFN R=TLight/THeavy norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
  
             else
 
@@ -7513,8 +7527,8 @@ C
      & '('' PFN alpha (Efrag ~ alpha*TKE) norm sampled value : '',
      & f8.3)') atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
  
             else
 
@@ -7550,8 +7564,8 @@ C-----
      &        '('' PFN NUBAR norm sampled value : '',f8.3)')
      &       atilss
               IPArCOV = IPArCOV +1
-              write(95,'(1x,i5,1x,d12.5,1x,2i13)')
-     &          IPArCOV, atilss,INDexf,INDexb
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+     &          IPArCOV, atilss,INDexf,INDexb,name
  
             else
 
@@ -7862,7 +7876,9 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'RANDOM') THEN
-            if(nint(val).eq.0) goto 100             
+            
+	    if(nint(val).eq.0) goto 100             
+	    
             if(nint(val).gt.0) then
               IOPran = 1
               WRITE (8,*)
@@ -7872,20 +7888,46 @@ C-----
               WRITE (8,*)
      &          'Uniform pdf assumed to calculate uncertainty'
             endif
+
             INQUIRE(file='R250SEED.DAT',exist=fexist)
             if(.not.fexist) then
 C             If the file R250SEED.DAT does not exist,
 C             then starting seed is read
               iseed = abs(nint(val))
-              if(iseed.le.1) iseed=1234567
-C             WRITE (8,*) 'Random seeds :', 1, 104
+              if(iseed.le.1) THEN
+                WRITE (8,*) 
+     &	         'Random seed number expected odd and > 1 !'
+	        iseed=123		 
+                WRITE (8,*) 
+     &           'Default seed used                       :', 
+     &           iseed	      		 
+	      else	 
+                WRITE (8,*) 
+     &           'Random seed number from input :', iseed
+              endif		 
+
               Call R250Init(iseed)
+              WRITE (8,*) 'RNG renitialized, starting seeds :', 
+     &                     indexf, indexb                		
+              OPEN(94,file='R250SEED-input.DAT')	
+              WRITE(94,*)  indexf, indexb
+              Do i = 1, 250
+                WRITE(94,*) buffer(i)
+              ENDDO
+              CLOSE(94)
+
             else
+
               OPEN(94,file='R250SEED.DAT',status='OLD')
               READ(94,*)  indexf, indexb
-              CLOSE(94)
+              Do i = 1, 250
+                READ(94,*) buffer(i)
+              ENDDO
+              CLOSE(94)	
+              WRITE (8,*) 'Using RNG seeds from *.rng file :', 
+     &                     indexf, indexb                		
+
             endif
-            WRITE (8,*) 'Random seeds :', indexf, indexb                
 C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
