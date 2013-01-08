@@ -264,9 +264,9 @@ def runE(proj):
         mv('OPTMAN.INP',proj+'-optman.inp',0)
     if not isEmpty('OPTMAN.OUT'):
         mv('OPTMAN.OUT',proj+'-optman.out',0)
-    if isEmpty(proj+'.-1st-seed.rng'):
-        cp('R250SEED.DAT',proj+'-1st-seed.rng')		
-        print('Saving the RNG seed after the first run in the current directory')
+    if isEmpty(proj+'.-default.rng'):
+        mv('R250SEED-default.DAT',proj+'-default.rng')		
+        print('Saving the default RNG seed')
     if not isEmpty('R250SEED.DAT'):
         mv('R250SEED.DAT',proj+'.rng')
     # fission chances and spectra for one energy run:

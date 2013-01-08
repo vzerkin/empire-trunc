@@ -39,6 +39,7 @@ fi
 
 sweep=$nstart
 
+
 while [ $sweep -le $ns ]
 do
 #
@@ -59,6 +60,9 @@ else
   exit
 fi
 echo Sequence $fnum
+
+# Saving the RNG seed
+cp $file.rng RNG$fnum  
 
 #
 $EMPIREDIR/scripts/runE $file
@@ -95,8 +99,6 @@ if [ $sweep -le 5]
 mv $file.lst  LST$fnum
 fi    
 mv $file.out  OUT$fnum
-# Saving the RNG seed
-mv $file.rng  RNG$fnum
 #mv $file.endf OUT$fnum.endf
 # Saving also sampled parameters
 mv $file-covar-par.dat  PAR$fnum
