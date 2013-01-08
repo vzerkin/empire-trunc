@@ -1,6 +1,6 @@
-cc   * $Rev: 3286 $
+cc   * $Rev: 3288 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-01-08 21:23:28 +0100 (Di, 08 Jän 2013) $
+Ccc   * $Date: 2013-01-08 21:29:15 +0100 (Di, 08 Jän 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -4229,19 +4229,8 @@ C
 C
 C        CLOSING FILES
 C
-         WRITE (12,*) ' '
-         WRITE (12,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
          CLOSE (5)
-         WRITE (*,*) '.'
-         WRITE (*,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
-         WRITE (8,*) ' '
-         WRITE (8,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
-         CALL THORA(8)
-         CLOSE (8)
          CLOSE (11)
-         CLOSE (12)
-
-
          CLOSE (13)
          IF (FILevel) CLOSE (14)
          CLOSE (15,STATUS = 'delete')
@@ -4316,8 +4305,8 @@ C----------Saving random seeds
          WRITE (8,*) ' '
          WRITE (8,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
 
-         CALL THORA(8)
-
+         CALL THORA (8)
+         CALL THORA(12)
          CLOSE (8)
          CLOSE (12)
 
