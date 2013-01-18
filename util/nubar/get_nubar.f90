@@ -66,7 +66,7 @@
         mf1 => mat%mf1
         do while (associated(mf1))
             if(mf1%mt == 456) then
-                if(nint(mf1%mt456%za) == iza) then
+                if(nint(mf1%za) == iza) then
                     mt456 => mf1%mt456
                     exit MTR
                 endif
