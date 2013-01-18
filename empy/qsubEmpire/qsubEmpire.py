@@ -187,7 +187,7 @@ def reconstruct(inputFile):
     out = open("%s/%s.out" % (path,proj), "w")
     
     out0 = open("%s/%s.out" % (name,proj), "r").readlines()
-    assert "CALCULATIONS COMPLETED SUCCESSFULLY" in out0[-1],\
+    assert "CALCULATIONS COMPLETED SUCCESSFULLY" in out0[-5],\
             "Empire crashed in %s"%name
     #print "%s/%s.out" % (name,proj)
     i = readPastOneEnergy(out0,0,end=True)   # line number for end
@@ -201,7 +201,7 @@ def reconstruct(inputFile):
         xsc.write(xscA[3])
         
         outA = open("%s/%s.out" % (name,proj), "r").readlines()
-        assert "CALCULATIONS COMPLETED SUCCESSFULLY" in outA[-1],\
+        assert "CALCULATIONS COMPLETED SUCCESSFULLY" in outA[-5],\
                 "Empire crashed in %s" % name
         # read past the initial incident energy to where this energy starts:
         i = readPastOneEnergy(outA,0)   # end of initial energy
