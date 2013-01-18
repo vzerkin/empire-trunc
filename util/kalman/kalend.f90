@@ -575,8 +575,8 @@ program kalend
     ! create our MF33 section
 
     nf33%mt  = mt1
-    nf33%za  = mat%mf1%mt451%za
-    nf33%awr = mat%mf1%mt451%awr
+    nf33%za  = mat%mf1%za
+    nf33%awr = mat%mf1%awr
     nf33%mtl = 0
     nf33%nl  = 1
     allocate(nf33%sct(1))
