@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3286 $
+Ccc   * $Rev: 3292 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-01-08 21:23:28 +0100 (Di, 08 Jän 2013) $
+Ccc   * $Date: 2013-02-04 12:44:07 +0100 (Mo, 04 Feb 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -44,12 +44,11 @@ C
       DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       REAL FLOAT
-      LOGICAL gexist, fexist, calc_fiss, fexist_nu
+      LOGICAL gexist, calc_fiss, fexist_nu
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
-      INTEGER INT, ISEED, NINT
       CHARACTER*2 SMAT
       character chra*5,chrz*5,nucmd*200
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
