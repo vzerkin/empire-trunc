@@ -1,5 +1,5 @@
-! $Rev: 3119 $                                                        
-! $Date: 2012-09-10 23:38:50 +0200 (Mo, 10 Sep 2012) $
+! $Rev: 3293 $                                                        
+! $Date: 2013-02-04 14:57:01 +0100 (Mo, 04 Feb 2013) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -27,6 +27,8 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.09   October 2012   A. Trkov
+!-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.08   September 2012   A. Koning
 !-V                        Cleanup unused variables.
 !-V         Version 8.07   May 2012, A. Trkov
@@ -1791,6 +1793,7 @@
 !              UNRESOLVED RESONANCE PARAMETERS
 !
                CASE (2)
+                  IF(NRO.GT.0)  CALL CANT1(C1,C2,L1,L2,N1,N2)
                   SELECT CASE (LRF)
 !
 !                  ONLY FISSION WIDTHS MAY BE ENERGY DEPENDENT
