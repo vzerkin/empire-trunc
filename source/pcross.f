@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3296 $
+Ccc   * $Rev: 3297 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 15:04:02 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-08 15:08:55 +0100 (Fr, 08 Feb 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -164,16 +164,11 @@ C     so it was reduced to 0.2 for the IAEA Th-232 evaluation.
 C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
-
 C
-
 C     TO BE CHECKED (WHY MAX = 5)
-
 C
       NHEq = MAX(5,MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1)
-
 C     NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
-
 C
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
@@ -258,7 +253,8 @@ C
       crossaftertrans = 0.d0
       crossafterbreak = 0.d0
 
-      IF(AEJc(0).LT.2 .or. (.not.ltransfer .and. .not.lbreakup)) GOTO 9  
+      IF(AEJc(0).LT.2 .or. ((.not.ltransfer) .and. (.not.lbreakup))) 
+     &  GOTO 9  
 C
       culbar = 0.8*ZEJc(0)*Z(0)*ELE2
      &         /(1.3d0*(AEJc(0)**0.3333334 + A(0)**0.3333334))
@@ -445,15 +441,15 @@ C     **Pre-equilibrium decay
 C
       IF((.not.ltransfer) .and. (.not.lbreakup)) THEN
          WRITE (8,99005)
+99005 FORMAT (/,5X,' Preequilibrium decay (PCROSS)')      
       ELSE         
          WRITE (8,89003)
+89003 FORMAT (/4X,'***** Preequilibrium decay (PCROSS) *****', /)
       ENDIF
 
-      WRITE (8,99010) MFPp
-89003 FORMAT (/4X,'***** Preequilibrium decay (PCROSS) *****', /)
-99005 FORMAT (/,5X,' Preequilibrium decay (PCROSS)')      
-99010 FORMAT (/,3X,'Mean free path parameter = ',F4.2,/)
-
+      WRITE (8,99010) MFPp, NHeq
+99010 FORMAT (/,3X,'Mean free path parameter   = ',F4.2,/
+     &          3X,'Equilibrium exciton number = ',I4/)  
       write(8,*)
       write(8,*) 'Input reaction for exciton model:',scompn
 C
@@ -465,7 +461,6 @@ C     No PE contribution to discrete for gammas
 C     Assuming PE calculates over discrete levels' region as well
 C     nexrt = MAX(INT(EXCn/DE + 1.0001),1)
       iemax(0) = nexrt
-
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS           
 C
