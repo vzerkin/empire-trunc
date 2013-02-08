@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3294 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-02-08 13:30:11 +0100 (Fr, 08 Feb 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -37,7 +37,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, 
+      DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ftmp, 
      &                 e1tmp, ecms, einlab, el, ener, p1, parcnj,
      &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
      &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, dtmp
@@ -107,9 +107,13 @@ C--------Here the old calculated files are read
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
-               READ (45,END = 50) stl(l + 1)
-               IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
+               READ (45,END = 50) ftmp
+               if(l+1.le.NDLW) THEN 
+                     stl(l + 1) = ftmp
+                 IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
+               endif
             ENDDO
+
             READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
@@ -119,11 +123,16 @@ C--------Here the old calculated files are read
             IF(L.EQ.123456) THEN
               IF (IOUt.EQ.5) WRITE (46,*) L
               DO l = 0, maxlw
-                READ (45,END = 300) sel(l + 1)
-                IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(sel(l + 1))
+                READ (45,END = 300) ftmp
+                if(l+1.le.NDLW) THEN 
+                      sel(l + 1) = ftmp
+                  IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(sel(l + 1))
+                endif
               ENDDO
             ENDIF
             CLOSE (45)
+      
+              maxlw = min(NDLW-1,maxlw)
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
