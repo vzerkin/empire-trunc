@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 3295 $
+Ccc   * $Rev: 3296 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-08 15:04:02 +0100 (Fr, 08 Feb 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -165,11 +164,16 @@ C     so it was reduced to 0.2 for the IAEA Th-232 evaluation.
 C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
+
 C
+
 C     TO BE CHECKED (WHY MAX = 5)
+
 C
       NHEq = MAX(5,MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1)
+
 C     NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
+
 C
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
@@ -1526,4 +1530,3 @@ C        SGAM = GAMMA ABSORPTION CROSS SECTION in mb
          SGAM = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
       ENDIF
       END
-
