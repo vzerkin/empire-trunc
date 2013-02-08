@@ -1,6 +1,7 @@
-Ccc   * $Rev: 3274 $
+$DEBUG
+Ccc   * $Rev: 3295 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-12-16 15:28:50 +0100 (So, 16 Dez 2012) $
+Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -38,7 +39,19 @@ C
       COMMON /VWELL / VV
 
       DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
-      COMMON /PEXS/ cross, spec
+
+      DOUBLE PRECISION crossNT(0:NDEJC),crossNTt,
+     &                 crossPE(0:NDEJC),crossPEt
+      COMMON /PEXS/ crossNT,crossNTt,crossPE,crossPEt
+
+      DOUBLE PRECISION specBU(0:NDEJC,NDEX),crossBU(0:NDEJC),crossBUt
+      COMMON /CBREAKUP/specBU,crossBU,crossBUt
+
+      LOGICAL lbreakup, ltransfer
+      COMMON /LPEXS/lbreakup, ltransfer 
+
+      DOUBLE PRECISION specNT(0:NDEJC,NDEX),te_e
+      DOUBLE PRECISION culbar
 
       REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
       COMMON /PFACT / FA, LFA
@@ -52,13 +65,15 @@ C
       DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
      &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
-     &       r(4,PMAX,NDEJC), sg, vvf, vsurf, wb, wda,
-     &       dstrip, dbreak, dpickup, step, ggg
+     &       r(4,PMAX,NDEJC), sg, vvf, vsurf, wb, wda, step, ggg
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
      &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
 
-      INTEGER*4 ac, ao, ap, ar, h1, hh, i, icon, icon3, ien, ienerg,
+      DOUBLE PRECISION crossaftertrans, crossafterbreak,
+     &     crossBUn,crossNTn
+
+      INTEGER*4 ac, ao, ap, ar, h1, hh, icon, icon3, ien, ienerg,
      &          ihmax, j, p, zc, zp, zr, zo, iang, nnn
 
       LOGICAL callpcross
@@ -78,6 +93,11 @@ C
 C     NPRoject - projectile nejc number
 C
 C     INITIALIZATION
+
+      crossBUn= 0.d0
+      crossNTn= 0.d0
+      specNT  = 0.d0
+      specBU  = 0.d0   
 
 C     Projectile mass and charge number
       ap = AEJc(NPRoject)
@@ -104,9 +124,7 @@ C
 
       fr = 0.D0
       totemis = 0.D0
-      DO i = 0, NDEJC
-         cross(i) = 0.
-      ENDDO
+      cross   = 0.D0
       DO hh = 1, PMAX
          em(hh) = 0.D0
       ENDDO
@@ -147,7 +165,15 @@ C     so it was reduced to 0.2 for the IAEA Th-232 evaluation.
 C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
+C
+C     TO BE CHECKED (WHY MAX = 5)
+C
       NHEq = MAX(5,MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1)
+C     NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
+C
+      IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
+      callpcross = .TRUE.  ! To avoid r factor recalculation at each call
+
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
          iemin(nejc) = 2
@@ -221,77 +247,213 @@ C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
 
       WRITE (8,99020)
 C
-C-----Direct reaction spectra for d,p and d,t 
+C-----Direct reaction spectra and cross sections 
 C
-      dbreak  = 0.d0
-      dstrip  = 0.d0 
-      dpickup = 0.d0
-      scompn  = Sigr
+      scompn  = Sigr   
 
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0 .and. DXSred.gt.0)THEN
-        write(8,99002)
-99002   FORMAT (/5X,
-     &' Deuteron Stripping and Pick-up Parameterization (C. Kalbach)',
-     &//)
-        call DTRANS(iemin,iemax)
-        scompn = Sigr - cross(2) -cross(5)
+      crossaftertrans = 0.d0
+      crossafterbreak = 0.d0
 
-        IF(scompn.le.0.d0) THEN
-          scompn  = 0.01d0
-          dstrip  = (Sigr-0.01d0)/(cross(2)+cross(5))*cross(2)
-          dpickup = (Sigr-0.01d0)/(cross(2)+cross(5))*cross(5)
-          cross(2)= dstrip
-          cross(5)= dpickup
-          DO ienerg = 1, NDEX
-            spec(2,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(5))
-     &                     *spec(2,ienerg)
-            spec(5,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(5))
-     &                     *spec(5,ienerg)
-          ENDDO
-          WRITE (8,59010)
-        ELSE   
-          dstrip =cross(2)
-          dpickup=cross(5)
-        ENDIF
-        write(8,'(7x,5F8.2)') Einl,sigr,scompn,cross(2),cross(5)
+      IF(AEJc(0).LT.2 .or. (.not.ltransfer .and. .not.lbreakup)) GOTO 9  
+C
+      culbar = 0.8*ZEJc(0)*Z(0)*ELE2
+     &         /(1.3d0*(AEJc(0)**0.3333334 + A(0)**0.3333334))
+      te_e = 1.d0/(1.d0+exp((culbar - EINl)/COMega))
+
+C     *************************************************
+C     ** break-up
+      BUNorm = 0.d0
+      DO nejc = 1, NEJcm
+         IF(BUReac(nejc).GT.0.01d0) 
+     >     BUNorm = max(BUReac(nejc),BUNorm)
+      ENDDO
+      IF(.not.lbreakup) THEN
+        write(8,'(/1X,'' Break-up reactions not considered'',/)')        
+        GOTO 8
       ENDIF
+      write(8,49002)
+49002 FORMAT (/3X,
+     &' *** Break-up Parameterization (C. Kalbach) ***',/)
+      WRITE(8,'(''  Reaction cross section before break-up'',F12.5,
+     &          '' mb'')') scompn
+
 C
-C-----Direct reaction spectra for He3,p and He3,a 
+C     This routine calculates the total break-up cross section
+C      which is substracted from the reaction cross section.
+C     No secondary PE emission is allowed after breakup reactions.
 C
-      IF(Zejc(0).eq.2.D0 .and. Aejc(0).eq.3.D0 .and. DXSred.gt.0)THEN
-        write(8,*)
-     &' He-3 Stripping and Pick-up Parameterization (C. Kalbach)'
-        write(8,*)
-        call DTRANS(iemin,iemax)
-        scompn = Sigr - cross(2) -cross(3)
+C     Total breakup includes both elastic and inelastic breakup.
 C
-        IF(scompn.le.0.d0) THEN
-          scompn  = 0.01d0
-          dstrip  = (Sigr-0.01d0)/(cross(2)+cross(3))*cross(2)
-          dpickup = (Sigr-0.01d0)/(cross(2)+cross(3))*cross(3)
-          cross(2)= dstrip
-          cross(3)= dpickup
-          DO ienerg = 1, NDEX
-            spec(2,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(3))
-     &                     *spec(2,ienerg)
-            spec(3,ienerg) = (Sigr-0.01d0)/(cross(2)+cross(3))
-     &                     *spec(3,ienerg)
-          ENDDO
-          WRITE (8,59010)
-59010     FORMAT (/,1X,
-     &      'Warning: Direct emission exhausted reaction cross section')
-        ELSE   
-          dstrip =cross(2)
-          dpickup=cross(3)
-        ENDIF
-        write(8,'(7x,5F8.2)') Einl,sigr,scompn,cross(2),cross(3)
+C      1)   Elastic breakup implies that the target nucleus is an spectator
+C           Breakup particles go directly to outgoing channels without
+C           populating residuals. Cross sections and spectra shoudl be added
+C         as production cross section of the residual equal to the target nucleus
+C
+C      2)   Inelastic breakup implies a difference treatment for detected and
+C         interacting breakup particles (resulting from breakup).
+C           - One particle goes directly to outgoing channels without
+C             populating residuals, only the production cross sections are updated
+C           (the same as elastic breakup)
+C         - Interacting particle is absorbed into the CN* (which coincides with one of residual nuclei)
+C           Residual nuclei are populated from the emitted particle spectra. 
+C         TO BE DONE LATER.
+C
+      CALL BREAKUP(iemin,iemax,crossBUt,crossBU,specBU,te_e)
+
+C     write(*,*) (ienerg,specBU(1,ienerg),ienerg=1,10)
+C     write(*,*)
+c           
+      crossafterbreak = Sigr - crossBUt
+      IF(crossafterbreak.gt.(1.D0-BUNorm) * Sigr )THEN
+         DO nejc = 1, NEJcm
+            IF(crossBU(nejc).LE.0.d0)  CYCLE
+C           cross(nejc) = cross(nejc) + crossBU(nejc)
+            write(8,'(4x,''Break-up cross section for ('',
+     &          a2,'','',a2,'')  '',f12.5,'' mb'')') 
+     &          symbe(nproject),symbe(nejc),crossBU(nejc)
+C           DO ienerg = iemin(nejc),iemax(nejc)
+C              spec(nejc,ienerg)   = spec(nejc,ienerg) +
+C    &                               specBU(nejc,ienerg)
+C           ENDDO
+         ENDDO
+      ELSE
+         WRITE(8,'(10x,''Total break-up cross section'',2x,F12.5,
+     &          '' mb'')')crossBUt
+         WRITE(8,49010)
+         WRITE(*,49010)
+49010    FORMAT (4X,'Break-up exhausted reaction cross section!!!',/)
+         WRITE(8,'(''    Break-up cross sections normalized to '',F5.3,
+     &             ''*reaction cross section'')')BUNorm
+         DO nejc = 1, NEJcm
+            IF(crossBU(nejc).LE.0.d0) CYCLE 
+            crossBU(nejc) = scompn * BUNorm * crossBU(nejc)/
+     &                      crossBUt
+C           cross(nejc) = cross(nejc) + crossBU(nejc)
+            write(8,'(4x,''Break-up cross section for ('',
+     &        a2,'','',a2,'')  '',f12.5,'' mb'')')
+     &        symbe(nproject),symbe(nejc),crossBU(nejc)  
+            DO ienerg = iemin(nejc),iemax(nejc)
+              specBU(nejc, ienerg) = specBU(nejc, ienerg) *
+     &                               scompn * BUNorm/crossBUt  
+C             spec(nejc,ienerg)   = spec(nejc,ienerg) +
+C    &                              specBU(nejc,ienerg)
+            ENDDO
+            crossBUn = crossBUn + crossBU(nejc)
+         ENDDO
+         crossBUt = crossBUn
+         WRITE(8,*)
       ENDIF
+      crossafterbreak =  scompn - crossBUt
+      WRITE(8,'(10x,''Total break-up cross section  '',F12.5,
+     &             '' mb'')')crossBUt
+      WRITE(8,'(''  Reaction cross section after break-up '',F12.5,
+     &          '' mb'')')crossafterbreak
+      WRITE(8,*)
+      scompn = crossafterbreak
+      IF(scompn.eq.0.d0) goto 70
 C
-      IF(scompn.eq.0.d0) goto 60
+c     ****************************************************** 
+C     ** transfer reactions: stripping and pick-up 
+      NTNorm = 0.d0
+ 8    DO nejc = 1, NEJcm
+         IF(NTReac(nejc).GT.0.01d0) 
+     >     NTNorm = max(NTReac(nejc),NTNorm)
+      ENDDO
+      IF(.not.ltransfer) THEN
+       write(8,'(/5X,'' Nucleon transfer reactions not considered'',/)')        
+       GOTO 9
+      ENDIF
 
-      WRITE (8,'(/,5X,'' Preequilibrium decay (PCROSS)'',/)')
-      WRITE (8,'(/,1X,'' Mean free path parameter = '',F5.2,/)') MFPp
+      CALL DTRANS(iemin,iemax,crossNT,specNT,te_e)
+      WRITE(8,89002)
+89002 FORMAT (/4X,
+     &'*** Stripping and Pick-up Parameterization (C. Kalbach) ***',
+     & /)
+      WRITE(8,'(''  Reaction cross section before transfer'',
+     &          F12.5, '' mb'')')scompn
 
+      DO nejc = 1, NEJcm
+         crossNTt = crossNTt + crossNT(nejc)
+      ENDDO   
+      crossaftertrans = scompn - crossNTt
+
+      IF(crossaftertrans.gt.(1.d0 - NTNorm) * scompn)THEN
+         DO nejc = 1, NEJcm
+            if(crossNT(nejc).le.0.d0) CYCLE
+            cross(nejc) = cross(nejc) + crossNT(nejc)
+            IF(AEJc(0).LT.AEJc(nejc))
+     &        WRITE(8,'(4x,''Pick-up   cross section for ('',
+     &        a2,'','',a2,'') '',f12.5,'' mb'')')
+     &        symbe(nproject),symbe(nejc),crossNT(nejc)     
+            IF(AEJc(0).GT.AEJc(nejc))
+     &        WRITE(8,'(4x,''Stripping cross section for ('',
+     &        a2,'','',a2,'') '',f12.5,'' mb'')')
+     &        symbe(nproject),symbe(nejc),crossNT(nejc)           
+            DO ienerg = iemin(nejc), iemax(nejc) 
+               spec(nejc, ienerg) = spec(nejc,ienerg) + 
+     &                              specNT(nejc,ienerg)
+            ENDDO
+         ENDDO
+      ELSE
+         WRITE(8,'(10x,''Total transfer cross section'',2x,F12.5,
+     &          '' mb'')')crossNTt
+         WRITE (8,49011)
+         WRITE (*,49011)
+49011    FORMAT (4X,
+     &        'Transfer reactions exhausted reaction cross section!!',/)
+         WRITE(8,'(''    Transfer cross sections normalized to '',F5.3,
+     & ''*reaction cross section before NT'')') NTNorm
+         DO nejc = 1, NEJcm
+            if(crossNT(nejc).le.0.d0) CYCLE
+            crossNT(nejc) = NTNorm * scompn * crossNT(nejc)/
+     &                      crossNTt
+            cross(nejc) = cross(nejc) + crossNT(nejc)
+            crossNTn = crossNTn + crossNT(nejc)
+c
+            IF(AEJc(0).LT.AEJc(nejc))
+     &           WRITE(8,'(4x,''Pick-up   cross section for ('',
+     &           a2,'','',a2,'') '',f12.5,'' mb'')')
+     &           symbe(nproject),symbe(nejc),crossNT(nejc)     
+            IF(AEJc(0).GT.AEJc(nejc))
+     &           WRITE(8,'(4x,''Stripping cross section for ('',
+     &           a2,'','',a2,'') '',f12.5,'' mb'')')
+     &           symbe(nproject),symbe(nejc),crossNT(nejc)    
+            DO ienerg = iemin(nejc), iemax(nejc)       
+               specNT(nejc, ienerg) =  NTNorm * scompn * 
+     &                            specNT(nejc,ienerg)/crossNTt        
+               spec(nejc, ienerg) = spec(nejc,ienerg) + 
+     &                            specNT(nejc,ienerg)
+            ENDDO     
+         ENDDO
+         crossNTt = crossNTn
+      ENDIF
+      crossaftertrans = scompn - crossNTt
+      scompn = crossaftertrans
+      WRITE(8,'(10x,''Total transfer cross section  '',
+     &          F12.5, '' mb'')')crossNTt
+      WRITE(8,'(''  Reaction cross section after transfer '',
+     &          F12.5, '' mb'')')crossaftertrans
+      WRITE(8,*)
+C
+ 9    IF(scompn.eq.0.d0) goto 60
+C
+C     **Pre-equilibrium decay
+C
+      IF((.not.ltransfer) .and. (.not.lbreakup)) THEN
+         WRITE (8,99005)
+      ELSE         
+         WRITE (8,89003)
+      ENDIF
+
+      WRITE (8,99010) MFPp
+89003 FORMAT (/4X,'***** Preequilibrium decay (PCROSS) *****', /)
+99005 FORMAT (/,5X,' Preequilibrium decay (PCROSS)')      
+99010 FORMAT (/,3X,'Mean free path parameter = ',F4.2,/)
+
+      write(8,*)
+      write(8,*) 'Input reaction for exciton model:',scompn
+C
+     
 C-----Maximum and minimum energy bin for gamma emission
       nnur = NREs(0)
 C     No PE contribution to discrete for gammas
@@ -300,10 +462,8 @@ C     Assuming PE calculates over discrete levels' region as well
 C     nexrt = MAX(INT(EXCn/DE + 1.0001),1)
       iemax(0) = nexrt
 
-      IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
-      callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 C
-C-----EMISSION RATES CALCULATIONS FOLLOWS		    
+C-----EMISSION RATES CALCULATIONS FOLLOWS           
 C
 C-----PRIMARY PARTICLE LOOP
 C
@@ -343,7 +503,6 @@ C        EMPIRE tuning factor is used (important to describe capture) RCN, june 
 C
 C--------PARTICLE-HOLE LOOP
 C
-
          DO h1 = 1, NHEq
             icon = 0
             hh = h1 - 1
@@ -473,8 +632,7 @@ C       14 He-3 . cont.  0     0     0      0      0      x
 C
 C-----PARTICLE LOOP FOR EMISSION SPECTRA CALCULATIONS
 C
-60    totemis = 0.D0
-      DO nejc = 0, NEJcm
+60    DO nejc = 0, NEJcm
 C        Skipping cross sections if MSD and MSC active
          IF(nejc.eq.0 .and. IDNa(5,6).EQ.0) CYCLE
          IF(nejc.eq.1 .and. IDNa(2,6).EQ.0) CYCLE
@@ -519,11 +677,33 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
             spec(nejc,ienerg) = spec(nejc,ienerg) + scompn*emis*step
 
          ENDDO
-         cross(nejc) = hlp1 + cross(nejc)  
-         totemis = totemis + cross(nejc)
-      ENDDO
 
-      IF (IOUt.GE.1) THEN
+         crossPE(nejc) = hlp1
+         crossPEt = crossPEt + crossPE(nejc) 
+
+         cross(nejc) = hlp1 + cross(nejc)  
+         totemis = totemis + crossBU(nejc)
+         IF(ltransfer .or. lbreakup)THEN
+                if(nejc.eq.0) then
+              write(8,'(4x,''PE emission cross section  ('',
+     &        a2,'','',a2,'')  '',f12.5,'' mb'')')
+     &        symbe(nproject),'g ',crossPE(nejc) 
+                  else
+              write(8,'(4x,''PE emission cross section  ('',
+     &        a2,'','',a2,'')  '',f12.5,'' mb'')')
+     &        symbe(nproject),symbe(nejc),crossPE(nejc) 
+                  endif
+         ENDIF
+      ENDDO
+      IF(ltransfer .or. lbreakup)THEN
+         WRITE(8,'(10x,''Total PE cross section        '',
+     &             F12.5, '' mb'')')crossPEt
+         WRITE(8,89004)
+      ENDIF
+89004 FORMAT (/4X,
+     &'*** BU + NT + PE cross sections calculated in PCROSS ***', /)
+
+ 70   IF (IOUt.GE.1) THEN
          DO nejc = 0, NEJcm
             IF (nejc.gt.0 .and. nejc.LE.3) THEN !nucleons and alpha
                IF (IDNa(2*nejc,6).EQ.0) THEN
@@ -562,28 +742,9 @@ C         ENDDO
 C         WRITE(8, *)'==========================='
          ENDDO
       ENDIF
-
-      fr = totemis/scompn
-      WRITE (8,99015) totemis, fr
-C
-C     write(*,*) 'Middle of PCROSS :',
-C    >            sngl(totemis),sngl(xsinl),sngl(scompn)
-C
-99015 FORMAT ( /1X,'PCROSS preequilibrium total cross section   =',F8.2,
-     &    ' mb'/1X,'PCROSS preequilibrium fraction              =',F8.2)
-
-      IF(Zejc(0).eq.1.D0 .and. Aejc(0).eq.2.D0. and. DXSred.gt.0) THEN
-            WRITE (8,99016)
-99016 FORMAT(/1x,'Kalbach parameterization for breakup, pick-up and ',
-     &             'stripping is used')
-            WRITE (8,99017) dbreak,dstrip,dpickup
-99017 FORMAT ( 1X,'PCROSS breakup   cross section =',F8.2,' mb',/,
-     &         1X,'PCROSS stripping cross section =',F8.2,' mb',/,
-     &         1X,'PCROSS pickup    cross section =',F8.2,' mb')
-      ENDIF
 C
 C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
-      totemis = 0.D0
+C     totemis = 0.D0
       DO nejc = 0, NEJcm  ! over ejectiles
          nnur = NREs(nejc)
          IF(nnur.LT.0 .or. cross(nejc).le.0.d0) cycle
@@ -615,7 +776,7 @@ C-----Transfer PCROSS results into EMPIRE. Call to ACCUMSD is needed later
             if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
             DO iang = 1, NDANG
-               ddxs(iang) = 0.d0
+              ddxs(iang) = 0.d0
             ENDDO
 C
 C           Kalbach systematic for PCROSS DDX calculations

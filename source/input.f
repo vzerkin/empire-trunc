@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3292 $
+Ccc   * $Rev: 3295 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-04 12:44:07 +0100 (Mo, 04 Feb 2013) $
+Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -108,14 +108,14 @@ C     ALPHA = 7.297 352 5698(24) × 10-3
 C     eps0  = 8.854 187 817... × 10-12 F/m
 C     ELE2 = 4*pi**alpha*HBARC*eps0
 C-----Neutron mass = 1.008 664 915 60(55) u
-C     AMUneu =  1.008665D0	      ! EMPIRE 3.1
-      AMUneu =  1.00866491600D0	    
+C     AMUneu =  1.008665D0          ! EMPIRE 3.1
+      AMUneu =  1.00866491600D0         
 C-----Nuclear proton mass = 1.007 276 466 88(13) u
-C     AMUpro =  1.007276466812D0 	  ! EMPIRE 3.1
+C     AMUpro =  1.007276466812D0      ! EMPIRE 3.1
       AMUpro =  1.007276466812D0 
 C-----Electron mass = 5.485 799 0945 x 10-4 u
-C     AMUele = 0.00054857990945D0	  ! EMPIRE 3.1
-      AMUele = 0.00054857990946D0	  
+C     AMUele = 0.00054857990945D0     ! EMPIRE 3.1
+      AMUele = 0.00054857990946D0     
 C-----Atomic proton mass = AMUpro + AMUele
 C
 C mn    neutron mass  1.008 664 915 78 amu 
@@ -137,7 +137,7 @@ C        READ(94,*)  indexf, indexb
 C        Do i = 1, 250
 C          READ(94,*) buffer(i)
 C        ENDDO
-C        CLOSE(94)	
+C        CLOSE(94)      
 C        WRITE (8,*) 'Using RNG seeds from *.rng file :', 
 C     &           indexf, indexb
 C      else
@@ -148,13 +148,13 @@ C        iseed = 1234567
 C        WRITE (8,*) 'Default iseed used :', iseed
 C        Call R250Init(iseed)
 C        WRITE (8,*) 'RNG renitialized, starting seeds :', 
-C     &              indexf, indexb	
-C        OPEN(94,file='R250SEED-default.DAT')	
+C     &              indexf, indexb 
+C        OPEN(94,file='R250SEED-default.DAT')   
 C        WRITE(94,*)  indexf, indexb
 C        Do i = 1, 250
 C          WRITE(94,*) buffer(i)
 C        ENDDO
-C	CLOSE(94)
+C     CLOSE(94)
 C
 C     endif
 
@@ -368,7 +368,7 @@ C        Scaling factor for direct processes consideration for complex projectil
          TISomer = 1.d0    ! 1 sec. default threshold for being isomer
 C        S-factor default to zero
          SFAct = 0
-       	 
+             
 C        IOPran = 1  ! Default gaussian 1 sigma error
          IOPran = 0  ! MC sampling off by default, 'RANDOM' turns it on
 C        IOPran = -1 ! Uniform 1 sigma error
@@ -490,8 +490,14 @@ C--------set options for PCROSS (exciton preequilibrium + cluster emission)
 C
 C        Breakup and pickup reactions 
 C
-         BUReac = 0
-         NTReac = 0
+         BUReac = 0.d0
+         NTReac = 0.d0
+         COMega = 1.6d0
+
+         IF(A(0).GE.2)THEN
+            BUReac = 0.7d0
+            NTReac = 0.9d0
+         ENDIF
 
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
@@ -1042,7 +1048,7 @@ C
 C        Finding target
          DO nnuc = 1, NNUct
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
-	   ENDDO
+         ENDDO
 
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
@@ -2558,8 +2564,8 @@ C---------levels for nucleus NNUC copied to file *.lev
             ENDIF
             IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
-                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum start  
-     &s at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
+                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
+     & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
      &           NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
                 WRITE (8,
      &'('' Number of discrete levels changed from RIPL default of '',
@@ -3578,7 +3584,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
      
             IF (ZEJc(0).GT.0 .or.  CNAngd.eq.0) CN_isotropic = .TRUE.
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
-	    
+          
             IF (.not.CN_isotropic) THEN          
               WRITE (8,
      &'('' CN angular distribution calculated by ECIS as anisotropic usi
@@ -3807,18 +3813,19 @@ C
             ENDIF
             IF(i1.EQ.0)THEN
                IF (val.LE.0) THEN
-	           val = 0
-			   WRITE (8,*) 'Break-up reactions not considered'    
+                   BUReac = 0.d0
+                       WRITE (8,*) 'Break-up reactions not considered'    
                ELSE
-			   WRITE (8,*)
-     & 'Break-up cross sections calculated with Kalbach 
+                       WRITE (8,*)
+     &                  'Break-up cross sections calculated with Kalbach 
      & parameterization (IAEA FENDL-3 CRP)'
-	           val = 1  
+                   BUReac = val
+                 WRITE (8,'('' Scaling for break-up cs exceeding '',
+     &               '' reaction cs '', F5.3)') val
                ENDIF 
-               BUReac = val
             ELSE ! i1 > 0
                IF (val.LE.0) THEN
-                 BUReac(i1) = 0
+                 BUReac(i1) = 0.d0
                  WRITE (8,
      &              '('' Break-up reaction ('',a2,'','',a2,'')'',
      &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
@@ -3826,7 +3833,7 @@ C
      &              '('' Break-up reaction ('',a2,'','',a2,'')'',
      &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
                ELSE
-                 BUReac(i1) = 1
+                 BUReac(i1) = val
                  WRITE (8,
      &              '('' Break-up ('',a2,'','',a2,'')'',
      &'' cross section calculated with Kalbach parameterization'')') 
@@ -3835,52 +3842,65 @@ C
      &              '('' Break-up ('',a2,'','',a2,'')'',
      &'' cross section calculated with Kalbach parameterization'')') 
      &              SYMbe(NPRoject), SYMbe(i1)              
+                 WRITE (8,'('' Scaling for break-up cs exceeding '',
+     &               '' reaction cs '', F5.3)') val
                ENDIF
             ENDIF
             GOTO 100
          ENDIF
-	
+
          IF (name.EQ.'NTREAC') THEN
             IF (i1.LT.0 .OR. i1.GT.NDEJC) THEN
                WRITE (8,
      &              '('' WARNING: EJECTILE IDENTIFICATION '',I2,
      &'' UNKNOWN'')') i1
-               WRITE (8,'('' WARNING: Nucleon transfer cross section '',
-     &''IGNORED'')')
+               WRITE (8,'('' WARNING: Transfer cross section option'', 
+     &'' IGNORED'')')
                GOTO 100
             ENDIF
             IF(i1.EQ.0)THEN
                IF (val.LE.0) THEN
-	           val = 0
-                 WRITE (8,*) 'Nucleon transfer reactions not considered'    
-               ELSE 
-	           val = 1
-                 WRITE (8,*)
-     & 'Nucleon transfer cross sections calculated with Kalbach ', 
-     & 'parameterization (IAEA FENDL-3 CRP)'
-               ENDIF
-               NTReac = val
-            ELSE ! i1>0
+                   NTReac = 0.d0
+                       WRITE (8,*) 'Transfer reactions not considered'    
+               ELSE
+                       WRITE (8,*)
+     &                  'Transfer cross sections calculated with Kalbach 
+     & parameterization (IAEA FENDL-3 CRP)'
+                   NTReac = val
+                 WRITE (8,'('' Scaling for transfer cs exceeding '',
+     &               '' reaction cs '', F5.3)') val
+               ENDIF 
+            ELSE ! i1 > 0
                IF (val.LE.0) THEN
-                 NTReac(i1) = 0
+                 NTReac(i1) = 0.d0
                  WRITE (8,
-     &             '('' Nucleon transfer reaction ('',a2,'','',a2,'')'',
+     &              '('' Transfer reaction ('',a2,'','',a2,'')'',
      &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
                  WRITE (12,
-     &             '('' Nucleon transfer reaction ('',a2,'','',a2,'')'',
+     &              '('' Transfer reaction ('',a2,'','',a2,'')'',
      &'' not considered'')') SYMbe(NPRoject), SYMbe(i1)  
                ELSE
-                 BUReac(i1) = 1
-                 WRITE (8,
-     &              '('' Nucleon transfer ('',a2,'','',a2,'')'',
+                 NTReac(i1) = val
+                         WRITE (8,
+     &              '('' Transfer ('',a2,'','',a2,'')'',
      &'' cross section calculated with Kalbach parameterization'')') 
-     &              SYMbe(NPRoject), SYMbe(i1)  
+     &              SYMbe(NPRoject), SYMbe(i1)              
                  WRITE (12,
-     &              '('' Nucleon transfer ('',a2,'','',a2,'')'',
-     &'' cross section calculated with Kalbach parameterization'')')
-     &              SYMbe(NPRoject), SYMbe(i1)                
+     &              '('' Transfer ('',a2,'','',a2,'')'',
+     &'' cross section calculated with Kalbach parameterization'')') 
+     &              SYMbe(NPRoject), SYMbe(i1)              
+                 WRITE (8,'('' Scaling for transfer cs exceeding '',
+     &               '' reaction cs '', F5.3)') val
                ENDIF
             ENDIF
+            GOTO 100
+         ENDIF
+C
+         IF (name.EQ.'COMEGA') THEN
+            IF(val.GT.0 .and. val.lt.10.d0) then
+                    COMega = val
+              WRITE (8,'('' Width of Coulomb barrier '', F5.3)') Comega 
+                  ENDIF
             GOTO 100
          ENDIF
 C
@@ -7876,8 +7896,8 @@ C-----
 C-----
          IF (name.EQ.'RANDOM') THEN
             
-	    if(nint(val).eq.0) goto 100             
-	    
+          if(nint(val).eq.0) goto 100             
+          
             if(nint(val).gt.0) then
               IOPran = 1
               WRITE (8,*)
@@ -7895,19 +7915,19 @@ C             then starting seed is read
               iseed = abs(nint(val))
               if(iseed.le.1) THEN
                 WRITE (8,*) 
-     &	         'Random seed number expected odd and > 1 !'
-	        iseed=123		 
+     &               'Random seed number expected odd and > 1 !'
+              iseed=123        
                 WRITE (8,*) 
      &           'Default seed used                       :', 
-     &           iseed	      		 
-	      else	 
+     &           iseed                     
+            else   
                 WRITE (8,*) 
      &           'RNG reinitialized, RNG seed from input :', iseed 
                 WRITE (12,*) 
      &           'RNG reinitialized, RNG seed from input :', iseed 
-              endif		 
+              endif            
               Call R250Init(iseed)
-              OPEN(94,file='R250SEED-default.DAT')	
+              OPEN(94,file='R250SEED-default.DAT')    
               WRITE(94,*)  indexf, indexb
               Do i = 1, 250
                 WRITE(94,*) buffer(i)
@@ -7921,16 +7941,16 @@ C             then starting seed is read
               Do i = 1, 250
                 READ(94,*) buffer(i)
               ENDDO
-              CLOSE(94)	
+              CLOSE(94) 
               WRITE (8 ,*) 'Using RNG seeds from *.rng file :' 
               WRITE (12,*) 'Using RNG seeds from *.rng file :' 
 
             endif
 
-            WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                		
+            WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                        
             WRITE (8 ,*) 'RNG buffer(1)    ', buffer(1)
             WRITE (8 ,*) 'RNG buffer(250)  ', buffer(250)
-            WRITE (12,*) 'RNG indexes     ', indexf, indexb                		
+            WRITE (12,*) 'RNG indexes     ', indexf, indexb                         
             WRITE (12,*) 'RNG buffer(1)   ', buffer(1)
             WRITE (12,*) 'RNG buffer(250) ', buffer(250)
 C--------------------------------------------------------------------------
