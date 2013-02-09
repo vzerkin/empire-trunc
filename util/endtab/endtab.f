@@ -19,6 +19,9 @@ C-V  11/11 Print more digits for energy to curves file.
 C-V  12/02 Fix upper energy cutoff
 C-V  12/03 Fix processing of nu-bar
 C-V  12/05 Increase precision of argument printout for 1E6<E<1e8
+C-V  12/11 Fix setting the error flag IER
+C-V  12/02 Implement retrieval of cross sections at fixed angle
+C-V        for incident neutrons
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -76,7 +79,9 @@ C-M          energy integrated angular distributions when MF 6 data
 C-M          are present. Conversely, requesting MF 6 the double
 C-M          differential data will be reconstruncted from MF 4/5
 C-M          data.
+C-M
 C-M  Input requests that follow depend on the selected MF number.
+C-M
 C-M  Case MF=3:
 C-M  - ELO Lower energy bound for the retrieved cross sections [eV],
 C-M    default is the lower bound on the file.
@@ -87,16 +92,18 @@ C-M    points for thinning the data on the output list, By
 C-M    default no thinning is performed.
 C-M      EPS=0, double points are suppressed.
 C-M      EPS<0, all points are retained.
-C-M  - MT/COM Required ENDF reaction MT number. If MT>40000, cross
-C-M    section at fixed outgoing angle is requested. The program
-C-M    cycles back to request additional MT numbers to be processed
-C-M    and added to the same output file. The list is terminated by
-C-M    zero. Valid entries are those that actually appear on
-C-M    the ENDF file. (Use FIXUP [1] of the PrePro codes to
-C-M    generate redundant cross sections and other quantities).
+C-M  - MT/COM Required ENDF reaction MT number and data header COM.
 C-M    COM is defined in columns 11-50. If blank, the default comment
-C-M    structure is used, otherwise it is overwritten with the string
-C-M    found in columns 11-50.
+C-M    structure is used. Special features:
+C-M      MT>40000  Cross section at fixed outgoing angle is requested.
+C-M                The outgoind particla ZA designation and the angle
+C-M                (in degrees) are requested from input.
+C-M    The program then cycles back to request additional MT numbers
+C-M    to be processed and added to the same output file. The list is
+C-M    terminated by zero. Valid entries are those that actually
+C-M    appear on the ENDF file. (Use FIXUP [1] of the PrePro codes to
+C-M    generate redundant cross sections and other quantities).
+C-M
 C-M  Case MF=4:
 C-M  - ZA Outgoing particle ZA designation.
 C-M    Note: at present the program is tested only for neutrons,
@@ -110,6 +117,7 @@ C-M    the ENDF file under MF=4 or 6. A special meaning is assigned
 C-M    to MT=5: cross sections for all partial reactions producing
 C-M    the selected outgoing particles are summed.
 C-M    COM - the same convention as described for MF=3 applies.
+C-M
 C-M  Case MF=5:
 C-M  - ZA Outgoing particle ZA designation.
 C-M    Note: at present the program is tested only for neutrons,
@@ -187,6 +195,7 @@ C* Default ENDF file and reaction type numbers
 C*
       DATA PI/3.1415966/
 C* Write banner
+      WRITE(LTT,91)
       WRITE(LTT,91) ' ENDTAB - Extract Data from ENDF files  '
       WRITE(LTT,91) ' -------------------------------------  '
       WRITE(LTT,91)
@@ -277,6 +286,7 @@ C* Select the reaction type number
       ELSE
         ICOM=0
       END IF
+      IER=0
 C* If zero and not first loop, finish
       IF(IDMY.EQ.0 .AND. MT0.NE.0) GO TO 90
       IF(IDMY.GT.0) MT0=IDMY
@@ -330,10 +340,9 @@ C* Read the cross sections from file MF 1, 3,10,23
         EIN=0
         PAR=FST
         EP6=0
-        IER=0
 c...
-        izp=nint(zap)
-        print *,'zap,mf,mt,kea,ein,par,elv',izp,mf,mt,kea,ein,par,elv
+C...    izp=nint(zap)
+C...    print *,'zap,mf,mt,kea,ein,par,elv',izp,mf,mt,kea,ein,par,elv
 c...
         NUC=0
         ZEL(1)=ZA0
@@ -342,18 +351,17 @@ c...
         CALL DXSELM(LIN,NUC,ZEL,FRC,ZAP,MF,MTE,KEA,EIN,PAR,EP6
      1             ,ES,SG,UG,RWO,NP,MPT,MXR,LTT,ELV)
 c...
-c...    CALL DXSEND(LIN,ZA0,ZAP,MF,MTE,KEA,EIN,PAR,EP6,ES,SG,UG
-c... 1             ,RWO,NP,MPT,MXR,LTT,ELV)
-c...
 c...    print *,'                   mte,np',mte,np
 c...
         MAT=NINT(ZA0)
+        MFX=MF
         IF(MT.LE.999) THEN
           MTX=MT
-          MFX=MF
-        ELSE
+        ELSE IF(MT.EQ.9000) THEN
           MTX= 5
           MFX=10
+        ELSE IF(MT/10000.EQ.4) THEN
+          MTX=MT-10000*(MT/10000)
         END IF
         IF(ICOM.EQ.0) THEN
           IF(MAT.LT.0) THEN
@@ -361,8 +369,10 @@ c...
           ELSE
             WRITE(COM,926)  MAT,MFX,MTX
           END IF
-          IF(MT.GT.999 .OR. FST.GT.0)
-     &           WRITE(COM(20:40),927) NINT(ZAP),NINT(FST)
+          IF(MT.EQ.9000 .OR. FST.GT.0)
+     &      WRITE(COM(20:40),927) NINT(ZAP),NINT(FST)
+          IF(MT/10000.EQ.4)
+     &      WRITE(COM(20:40),928) NINT(DEG)
         ELSE
           COM=COM1
         END IF
@@ -398,6 +408,9 @@ c...
         FRC(1)=1
         CALL DXSELM(LIN,NUC,ZEL,FRC,ZAP,MF,MTE,KEA,EIN,PAR,EP6
      1             ,ES,SG,UG,RWO,NP,MPT,MXR,LTT,ELV)
+c...
+        print *,'Number of points for MT',MTE,' is',NP
+c...
 c...
 c...    CALL DXSEND(LIN,ZA0,ZAP,MF,MTE,KEA,EIN,PAR,EP6,ES,SG,UG
 c... 1             ,RWO,NP,MPT,MXR,LTT,ELV)
@@ -544,6 +557,7 @@ C*
   925 FORMAT(' MAT',I4,' MF',I2,' MT',I3,:,20X,' EI',1P,E10.3)
   926 FORMAT(' M'  ,I6,' MF',I2,' MT',I3,:,20X,' EI',1P,E10.3)
   927 FORMAT(' ZA',I6,' LFS',I2)
+  928 FORMAT(' Ang',I5)
   961 FORMAT(40X,'Searching for MT',I5,'  MF',I2,'  Mat',F8.1)
       END
       SUBROUTINE CH11PK(CH,R)
