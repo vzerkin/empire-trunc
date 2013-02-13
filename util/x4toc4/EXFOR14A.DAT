@@ -161,7 +161,7 @@ NU-BAR                                                                         1
                                                                                1
 (N,F),NU                                            1  1 452  0
 (N,F)DL,NU                                          1  1 455  0
-(N,F)DL,NU,,MXW
+(N,F)DL,NU,,MXW                                                                1
 Various representations for nu-bar (13-Mar-2012, A. Trkov)                     1
 (N,F)PR,NU                                          1  1 456  0
 (N,F)PR,NU,,MXW                                     1  1 456  0
@@ -239,8 +239,8 @@ Change to "proton production" (A. Trkov, 06-Jun-06)                            1
 Add total scattering cross section, 24-Feb-2009, A. Trkov                      1
 (N,SCT),SIG                                         1  39000  0
 Add total scattering cross section, 22-Jul-2012, A. Trkov                      1
-(N,SCT),SIG,,AV
-... temporarily deactivated (A. Trkov)
+(N,SCT),SIG,,AV                                                                1
+... temporarily deactivated (A. Trkov)                                         1
 ((N,EL),SIG)+((N,INL)PAR,SIG)                       1  39000  0                1
                                                                                1
 Made inactive (what is TTY? A. Trkov, 06-Jun-06)                               1
@@ -496,7 +496,7 @@ Add discrete lvl ang.distrib. for charg.part.(A. Trkov, Dec-2006)              1
 (A,HE3)PAR,DA                                    2004  4 751  0
 (P,A)PAR,DA                                      1001  4 801  0
 (D,A)PAR,DA                                      1002  4 801  0
-Add processing of the spectrum-averaged data
+Add processing of the spectrum-averaged data                                   1
 (D,A)PAR,DA,,AV                                  1002  4 801  0
 (T,A)PAR,DA                                      1003  4 801  0
 (HE3,A)PAR,DA                                    2003  4 801  0
