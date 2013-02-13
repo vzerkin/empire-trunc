@@ -1,6 +1,6 @@
-cc   * $Rev: 3295 $
+cc   * $Rev: 3300 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-13 13:15:55 +0100 (Mi, 13 Feb 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2859,16 +2859,8 @@ C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.d0
                 IF (nejc.GT.0 .and. RECoil.GT.0) 
      &            recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
+                nspec= min(INT(recorp*EMAx(nnuc)/DE) + 1,NDECSE-1)
 
-C               CHECK - RCN FEB 2013 
-C               nspec= min(INT(recorp*EMAx(nnuc)/DE) + 1,NDECSE-1)
-C
-                if (nejc.gt.0) then
-                  nspec= min(INT(recorp*(EMAx(nnuc)- Q(nejc,1))/DE) + 1
-     &                 ,NDECSE-1)               
-                else
-                  nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)               
-                endif 				
 C---------------Exclusive DDX spectra (neutrons & protons)
                 IF (nejc.GE.1 .AND. nejc.LE.2) THEN
                    WRITE (12,
