@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3302 $
+Ccc   * $Author: dbrown $
+Ccc   * $Date: 2013-02-13 19:41:01 +0100 (Mi, 13 Feb 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -2260,6 +2260,7 @@ C-----Calculate sensitivity to the parameter
 C-----
       OPEN (UNIT = 34,FILE='XS-UP.DAT', STATUS='OLD') ! x-sections with parameter+val
       READ(34,'(A238)') outrecord
+      BACKSPACE 92
       WRITE(92,'(A238)') outrecord
       WRITE(92,'(''# Parameter: '',A6,2x,4I3,''  variation: +-''F5.3,
      &      ''     Sensitivity matrix'')') name,  i1p, i2p,
