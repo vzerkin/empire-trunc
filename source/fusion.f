@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3294 $
+Ccc   * $Rev: 3305 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 13:30:11 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -132,7 +132,7 @@ C--------Here the old calculated files are read
             ENDIF
             CLOSE (45)
       
-              maxlw = min(NDLW-1,maxlw)
+            maxlw = min(NDLW,maxlw)
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
@@ -396,8 +396,9 @@ C--------and calculate transmission coefficients
          WRITE (8,*) 'Maximum angular momentum :',maxlw
          WRITE (8,*) 'Fusion cros section      :',CSFus
          WRITE (8,*) 
-
+C
 C--------calculation of o.m. transmission coefficients for absorption
+C
       ELSEIF (KTRlom(Npro,Ntrg).GT.0) THEN
          einlab = -EINl
          IWArn = 0

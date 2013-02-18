@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3258 $
+Ccc   * $Rev: 3305 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-26 15:48:00 +0100 (Mo, 26 Nov 2012) $
+Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -991,6 +991,195 @@ C-----------Well... let it go down to the ground state
   100 ENDDO
       END
 
+      SUBROUTINE TL_GAMMA(Nnuc,Iec,Jc,Ipc)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:PPu*
+Ccc   *                         T L G A M M A                            *
+Ccc   *                                                                  *
+Ccc   * Calculates gamma decay of a continuum state in nucleus NNUC into *
+Ccc   * continuum and discrete states in the same nucleus NNUC for       *
+Ccc   * E1 transitions to be used in ECIS CN calculation                 *
+Ccc   *                                                                  *
+Ccc   * input:NNUC - decaying nucleus index                              *
+Ccc   *       IEC  - energy index of the decaying state                  *
+Ccc   *       JC   - spin index of the decaying state                    *
+Ccc   *       IPC  - parity of the decaying state                        *
+Ccc   *                                                                  *
+Ccc   * output:                                                          *
+Ccc   *       gamm_tr(nfiss_tr), nfiss_tr                                *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ipc, Jc, Nnuc
+C
+C Local variables
+C
+      DOUBLE PRECISION E1, E2, XM1
+      DOUBLE PRECISION eg, xjc
+      INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
+C
+      INTEGER Jr,lamb, lambmin, lambmax, Lhighest
+      DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
+     &                 scrtpos, scrtneg, hscrtl, etmp
+      DIMENSION xle(10),xlm(10)
+C
+C----MAXmult - maximal gamma-ray multipolarity
+C    maximal value (.LT.10) of gamma-ray multipolarity (L) in        
+C    calculations of gamma-transitions both between states in        
+C    continuum and from continuum states to discrete levels.         
+C    A default value of 'MAXmult' is set to 2 in 'input.f'                  
+C    but can be adjusted in the input.         
+C
+C   The radiative strength functions of higher multipole orders       
+C   (f_EL, f_ML) are calculated using the relationships between                 
+C   single-particle radiative strength functions in the Weisskopf form.      
+C                                                                            
+C     Electric transitions:                                                  
+C     f_E(L+1)/f_EL = eg^2*cee*[(3+L)/(5+L)]^2,                              
+C     cee=[R/(\hbar*c)]^2, R=r_0*A^(2/3), r_0=1.2 fm => cee=3.7D-5*A^(2/3)   
+C     xle(i) = f_Ei                                                          
+C                                                                            
+C     Magnetic transitions:                                                  
+C     f_M(L+1)/f_E(L+1) = cme,                                               
+C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)                         
+C     xlm(i) = f_Mi                                                          
+C                                                                            
+C 
+	xle = 0.d0
+	xlm = 0.d0
+      IF (MAXmult.GT.2) THEN
+         ha = A(Nnuc)**0.666666666666D0
+         cee = 3.7D-5*ha
+         cme = 0.307D0/ha
+      ENDIF
+C
+      jmin = 1
+Cp    jmin = MAX0(1, Jc - MAXmult)
+      jmax = MIN0(NLW, Jc + MAXmult)
+C
+      xjc = FLOAT(Jc) + HIS(Nnuc)
+C-----IPOS is a parity-index of final states reached by gamma
+C-----transitions which do not change parity (E2 and M1)
+C-----INEG is a parity-index of final states reached by gamma
+C-----transitions which do change parity (E1)
+      IF (Iec.LT.1) RETURN
+C
+      IF (Ipc.GT.0) THEN
+         ipos = 1
+         ineg = 2
+      ELSE
+         ipos = 2
+         ineg = 1
+      ENDIF
+C-----
+C-----decay to the continuum
+C-----
+C-----do loop over c.n. energies (loops over spins and parities expanded
+      DO ier = Iec - 1, 1, -1
+	   etmp = EX(ier,Nnuc)   
+         eg = EX(Iec,Nnuc) - etmp
+         xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),etmp)*
+     &            TUNe(0, Nnuc)
+         xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+         xle(2) = E2(eg)*TUNe(0, Nnuc)
+         IF(MAXmult.GT.2) THEN
+            xlm(2) = xle(2)*cme
+            DO i = 3, MAXmult
+             xle(i) = xle(i-1)*eg**2*cee
+     &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
+             xlm(i) = xle(i)*cme
+            ENDDO
+         ENDIF
+C
+         Lhighest = 0
+         DO Jr = 1, jmax
+            xjr = FLOAT(Jr) + HIS(Nnuc)
+            lambmin = MAX0(1,IABS(Jc-Jr))
+            lambmax = xjc + xjr + 0.001
+            lambmax = MIN0(lambmax,MAXmult)
+            IF(lambmin.LE.lambmax) THEN
+               ngamm_tr = max(lambmax,ngamm_tr)
+               scrtpos = 0.0
+               scrtneg = 0.0
+               DO lamb = lambmin, lambmax
+                 IF(lamb/2*2.EQ.lamb)THEN
+                   scrtpos = scrtpos + xle(lamb)
+                   scrtneg = scrtneg + xlm(lamb)
+                 ELSE
+                   scrtpos = scrtpos + xlm(lamb)
+                   scrtneg = scrtneg + xle(lamb)
+                 ENDIF
+               ENDDO
+	         gamm_tr(lamb) = gamm_tr(lamb) +
+     >                         scrtpos*RO(ier, Jr, ipos, Nnuc) +
+     >                         scrtneg*RO(ier, Jr, ineg, Nnuc)
+
+            ENDIF
+         ENDDO
+      ENDDO
+C-----do loop over c.n. energies ***done***
+C-----decay to the continuum ----** done***-----------------------
+C     write(*,*) ' CONTINUUM Lmax=',ngamm_tr
+C     do lamb=1,MAXMULT
+C       write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+C     enddo
+C-----
+C-----DECAY TO DISCRETE LEVELS
+C-----
+C-----do loop over discrete levels -----------------------------------
+      DO i = 1, NLV(Nnuc)
+         lmin = ABS(xjc - XJLv(i,Nnuc)) + 0.001
+         lmax = xjc + XJLv(i,Nnuc) + 0.001
+         lambmin = MAX0(1,lmin)
+         lambmax = MIN0(lmax,MAXmult)
+         IF(lambmin.LE.lambmax)THEN
+             ngamm_tr = max(lambmax,ngamm_tr)
+             eg = EX(Iec, Nnuc) - ELV(i, Nnuc)
+             ipar = (1 + LVP(i, Nnuc)*Ipc)/2
+             iodd = 1 - ipar
+             xle(1) = E1(Nnuc,eg, TNUc(1, Nnuc),Uexcit(1,Nnuc))*
+     &             TUNe(0, Nnuc)
+             xlm(1) = XM1(eg)*TUNe(0, Nnuc)
+             xle(2) = E2(eg)*TUNe(0, Nnuc)
+             IF(lambmax.GT.2) THEN
+              xlm(2) = xle(2)*cme
+              DO j = 3, lambmax
+               xle(j) = xle(j-1)*eg**2*cee
+     &                  *((3.0D0 + FLOAT(j))/(5.0D0 + FLOAT(j)))**2
+               xlm(j) = xle(j)*cme
+              ENDDO
+             ENDIF
+             hscrtl = 0.0D0
+             DO lamb = lambmin, lambmax
+              IF(lamb/2*2.EQ.lamb)THEN
+               hscrtl = hscrtl +
+     &                  xle(lamb)*ipar + xlm(lamb)*iodd
+               ELSE
+               hscrtl = hscrtl +
+     &                  xlm(lamb)*ipar + xle(lamb)*iodd
+              ENDIF
+              gamm_tr(lamb) = gamm_tr(lamb) + hscrtl
+             ENDDO
+         ENDIF
+      ENDDO
+C     write(*,*) ' DISCRETE  Lmax=',ngamm_tr,' Jcn=', jc,' pi=',ipc
+C     do lamb=1,MAXMULT
+C       write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+C     enddo
+
+C-----do loop over discrete levels --------- done --------------------
+      RETURN
+      END
 
       SUBROUTINE DECAYG(Nnuc,Iec,Jc,Ipc,Sum)
 Ccc

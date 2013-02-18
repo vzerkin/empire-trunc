@@ -1,6 +1,6 @@
-C $Rev: 3295 $
+C $Rev: 3305 $
 C $Author: rcapote $
-C $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
+C $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -58,7 +58,8 @@ C
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,
-     &                 PL_CN(0:ndangecis,ndcollev)
+     &                 PL_CN(0:ndangecis,ndcollev),
+     &                 gamm_tr(10), fiss_tr(NDLW,2)
 
       INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, CNAngd,
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,
@@ -79,7 +80,8 @@ C
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
-     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov
+     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov, 
+     &        ngamm_tr, nfiss_tr
        
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf,
@@ -235,7 +237,8 @@ C     COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf, POPcsea
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,
-     &                 BUNorm, NTNorm, COMega, BUReac, NTReac      
+     &                 BUNorm, NTNorm, COMega, BUReac, NTReac,
+     &                 gamm_tr, fiss_tr	 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -272,7 +275,8 @@ C
      &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
-     &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov      
+     &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
+     &                  ngamm_tr, nfiss_tr	 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,

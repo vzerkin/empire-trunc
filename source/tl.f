@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3305 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3155,7 +3155,7 @@ C
 
       INTEGER ikey, ip, iterm, j, ldwmax, nppaa,
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
-     &        ngamm_tr, nfiss_tr, nuncoupled, ncontinua 
+     &        nuncoupled, ncontinua 
 
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
@@ -3277,17 +3277,26 @@ C
 C       33- LO(83) NO ENGELBRETCH-WEIDENMULLER TRANSFORMATION IN CN       
         IF(INTerf.eq.1) ECIs2(33:33) = 'F'  ! E-W transformation used
         IF(INTerf.eq.0) ECIs2(33:33) = 'T'  ! E-W transformation NOT used
+C
 C       34- LO(84) UNCOUPLED LEVELS FOR COMPOUND NUCLEUS. IT IS SET       
 C                .FALSE. IF NONE ARE READ.                              
         ECIs2(34:34) = 'T'  ! THERE ARE ALWAYS UNCOUPLED LEVELS
+C
 C       35- LO(85) FISSION TRANSMISSION COEFFICIENTS (TO BE READ FROM   
 C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ.                                              
-        ECIs2(35:35) = 'F'  ! .TRUE. must be used for fissiles !!!!
-C                           ! Gf(J,pi) fission widths should be properly trasferred 
+C
+        ECIs2(35:35) = 'F'    ! default: no fission in HF
+                              ! Gf(J,pi) fission widths should be properly trasferred 
+        IF(nfiss_tr.gt.0)
+     &    ECIs2(35:35) = 'T'  ! .TRUE. must be used for fissiles !!!!
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
-        ECIs2(36:36) = 'F'  ! .TRUE. to consider gamma emission in HF
-C                           ! Gg(L) gamma width should be properly trasferred 
+
+        ECIs2(36:36) = 'F'    ! default: no gamma emission in HF
+                              ! Gg(L) gamma width should be properly trasferred 
+        IF(ngamm_tr.gt.0)     
+     &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
+
 C
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
 C
@@ -3384,8 +3393,6 @@ C     To obtain Legendre expansion a blank card calling for default values of th
       WRITE (1,*)
 
       nuncoupled = 0
-      nfiss_tr   = 0 
-      ngamm_tr   = 0
       ncontinua  = 0
 
       IF(.not.CN_isotropic) then
@@ -3414,12 +3421,6 @@ C       21-25   NCONT  NUMBER OF CONTINUA. THEY MUST BE THE LAST GIVEN,   ECIS-4
 C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-422
 C-------CARD 7
 C     
-C
-        nfiss_tr   = 0 ! for the time being, fission is neglected 
-        IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
-C
-        ngamm_tr   = 0 !  for the time being, capture is internally calculated
-        IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
 C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
@@ -3640,9 +3641,12 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-C           do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j),fiss_dof(j) !  fiss_tr(j),fiss_dof(j) should be defined
-C           enddo
+            do j = 1, nfiss_tr 
+C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+            enddo
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
@@ -3654,7 +3658,7 @@ C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.
 C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
 C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
           IF(ngamm_tr.gt.0) THEN
-C           WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
+            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
 C
 C            
 C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
@@ -3998,7 +4002,7 @@ C
       DOUBLE PRECISION DABS
       INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), nppaa,
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
-     &        ngamm_tr, nfiss_tr, nuncoupled, ncontinua
+     &        nuncoupled, ncontinua
 
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
@@ -4117,14 +4121,23 @@ C       33- LO(83) NO ENGELBRETCH-WEIDENMULLER TRANSFORMATION IN CN
 C       34- LO(84) UNCOUPLED LEVELS FOR COMPOUND NUCLEUS. IT IS SET       
 C                .FALSE. IF NONE ARE READ.                              
         ECIs2(34:34) = 'T'  ! THERE ARE ALWAYS UNCOUPLED LEVELS
+
+C
 C       35- LO(85) FISSION TRANSMISSION COEFFICIENTS (TO BE READ FROM   
 C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ.                                              
-        ECIs2(35:35) = 'F'  ! .TRUE. must be used for fissiles !!!!
+C
+        ECIs2(35:35) = 'F'    ! default: no fission in HF
+                              ! Gf(J,pi) fission widths should be properly trasferred 
+        IF(nfiss_tr.gt.0)
+     &    ECIs2(35:35) = 'T'  ! .TRUE. must be used for fissiles !!!!
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
-        ECIs2(36:36) = 'F'  ! .TRUE. to consider gamma emission in HF
-C                           ! G(L) gamma emission should be properly trasferred 
-C
+
+        ECIs2(36:36) = 'F'    ! default: no gamma emission in HF
+                              ! Gg(L) gamma width should be properly trasferred 
+        IF(ngamm_tr.gt.0)     
+     &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
+
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
 C
       ENDIF
@@ -4203,8 +4216,6 @@ C-----CARD 6
       WRITE(1, *)
 
       nuncoupled = 0
-      nfiss_tr   = 0 
-      ngamm_tr   = 0
       ncontinua  = 0
 
       IF(.not.CN_isotropic) then
@@ -4236,13 +4247,6 @@ C       21-25   NCONT  NUMBER OF CONTINUA. THEY MUST BE THE LAST GIVEN,   ECIS-4
 C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-422
 C-------CARD 7
 C     
-C
-        nfiss_tr   = 0 ! for the time being, fission is neglected 
-        IF(ECIs2(35:35).eq.'F') nfiss_tr = 0
-C
-        ngamm_tr   = 0 !  for the time being, capture is neglected
-        IF(ECIs2(36:36).eq.'F') ngamm_tr   = 0
-C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
 C
@@ -4467,9 +4471,12 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-C           do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j),fiss_dof(j) !  fiss_tr(j),fiss_dof(j) should be defined
-C           enddo
+            do j = 1, nfiss_tr 
+C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+            enddo
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
@@ -4481,7 +4488,7 @@ C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.
 C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
 C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
           IF(ngamm_tr.gt.0) THEN
-C           WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
+            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
 C
 C            
 C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               

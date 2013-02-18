@@ -1,6 +1,6 @@
-cc   * $Rev: 3300 $
+cc   * $Rev: 3305 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-13 13:15:55 +0100 (Mi, 13 Feb 2013) $
+Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -335,6 +335,64 @@ C-----
       CALL ULM(0) ! target
 C
       CALL ULM(1) ! CN
+
+
+C--------DO loop over c.n. excitation energy for the highest bin
+C              we neglect gamma cascade for the time being
+C     nnuc = 1
+C     ke   = NEX(nnuc)
+
+      ngamm_tr = 0
+      nfiss_tr = 0
+	gamm_tr  = 0.d0
+	fiss_tr  = 0.d0
+C
+C	RCN, FEB 2013
+C     For a proper consideration of fission and capture composition in the 
+C        ECIS CN calculation, further changes needed in tl.f (to be done later)
+C
+      IF(.FALSE.) THEN
+
+        OPEN (80,FILE = 'FISTMP.OUT')
+        IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) 
+     &    CALL READ_INPFIS(nnuc)
+
+        DO ipar = 1, 2 !over decaying CN parity
+         ip = INT(( - 1.0)**(ipar + 1))
+C
+C        ip=1 should correspond to the parity of the CN
+C
+         DO jcn = 1, NLW !over decaying CN spin
+           IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
+C------------gamma emision
+             CALL TL_GAMMA(nnuc,ke,jcn,ip)
+C------------Fission ()
+             IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
+     &         CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+	       fiss_tr(jcn,ip) = sumfis
+
+         ENDDO                !loop over decaying nucleus spin
+         write(*,*) ' Lmax=',ngamm_tr,' pi=',ip
+         do lamb=1,MAXMULT
+           write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+         enddo
+C 
+         write(*,*) ' FISSION, pi=',ip
+         do jcn = 1, NLW
+           write(*,*) 'J=',jcn,' fiss_tr=',fiss_tr(jcn,ip)
+	     if(fiss_tr(jcn,ip).lt.1.d-20) THEN
+		   nfiss_tr = MAX(nfiss_tr,JCN)
+	       EXIT
+	     endif
+         enddo
+        ENDDO                   !loop over decaying nucleus parity
+	  write(*,*) 'nfiss_tr =',nfiss_tr
+        CLOSE (80,STATUS='DELETE')
+
+        DENhf  = 0.d0
+	  sumfis = 0.d0
+
+	ENDIF
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -2435,7 +2493,7 @@ C----------CN contribution to elastic ddx
                WRITE (8,*) ' CN elastic cross section (ECIS) ',
      &           sngl(4.d0*pi*PL_CN(0,1)),' mb' 
                ftmp = 1.d0
-               if(PL_CN(0,ilevcol).gt.0.d0) ftmp = ELCncs/PL_CN(0,1)
+               if(PL_CN(0,1).gt.0.d0) ftmp = ELCncs/PL_CN(0,1)
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,F8.4,3x,11(F9.2,1x),A17)') 
      &           EINl, ftmp, 4.d0*pi*ELCncs,  
@@ -2860,7 +2918,6 @@ C---------------multiplies cross sections and divides outgoing energies
                 IF (nejc.GT.0 .and. RECoil.GT.0) 
      &            recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
                 nspec= min(INT(recorp*EMAx(nnuc)/DE) + 1,NDECSE-1)
-
 C---------------Exclusive DDX spectra (neutrons & protons)
                 IF (nejc.GE.1 .AND. nejc.LE.2) THEN
                    WRITE (12,
@@ -4727,6 +4784,10 @@ C
 C
       RETURN
       END
+
+
+
+
 
       SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Fisxse)
       INCLUDE 'dimension.h'
