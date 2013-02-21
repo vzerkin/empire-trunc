@@ -87,7 +87,7 @@ def copyFiles(proj,dir):
     bash.cp(proj+"-omp.ripl",dir,False)
 
 
-def runInput(inputFile, clean=False, jnm="emp_"):
+def runInput(inputFile, clean=False, mail=False, jnm="emp_"):
     """
     1) creates a set of new input files, each in its own directory. 
     Each file has the same header and options as original, plus a single energy
@@ -136,12 +136,13 @@ def runInput(inputFile, clean=False, jnm="emp_"):
         copyFiles(join(path,proj),dir)
         
         log = join( path,"empire_%s.log" % (name) )
+        cmdOpts = "-N %s%s -o %s -l ncpus=1 "
+        if mail: cmdOpts += "-m a "
+        else:    cmdOpts += "-m n "
         if clean:
-            cmd = "qsub -N %s%s -o %s -l ncpus=1 " +\
-                    "-v dir=%s,file=%s,energy=%s,clean=Y ~/bin/runEmpire.sh"
+            cmd = "qsub " + cmdOpts + "-v dir=%s,file=%s,energy=%s,clean=Y ~/bin/runEmpire.sh"
         else:
-            cmd = "qsub -N %s%s -o %s -l ncpus=1 " +\
-                    "-v dir=%s,file=%s,energy=%s ~/bin/runEmpire.sh"
+            cmd = "qsub " + cmdOpts + "-v dir=%s,file=%s,energy=%s ~/bin/runEmpire.sh"
 
         cmd = cmd % (jnm, energy.strip(), log, dir, proj, energy.strip())
         #print cmd
