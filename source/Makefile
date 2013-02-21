@@ -1,6 +1,6 @@
-#$Rev: 3221 $
-#$Author: apalumbo $
-#$Date: 2012-11-15 18:39:52 +0100 (Do, 15 Nov 2012) $
+#$Rev: 3310 $
+#$Author: dbrown $
+#$Date: 2013-02-21 20:55:33 +0100 (Do, 21 Feb 2013) $
 
 # set default fortran compiler:
 
@@ -61,9 +61,11 @@ else ifeq ($(FC),ifort)
   # Flags for OPTMAN
   OFLAGS = -O2 -x=host -parallel -par-report1
   #----flags for use on NNDC cluster
-  # FFLAGS = -O3
-  # EFLAGS = -O2
-  # OFLAGS = -O2
+  ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
+      FFLAGS = -O3
+      EFLAGS = -O2
+      OFLAGS = -O2
+  endif
 
 else ifeq ($(FC),af95)
  
