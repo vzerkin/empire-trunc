@@ -1,6 +1,7 @@
-cc   * $Rev: 3305 $
+$DEBUG
+cc   * $Rev: 3306 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
+Ccc   * $Date: 2013-02-21 14:22:48 +0100 (Do, 21 Feb 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -456,12 +457,12 @@ C-----max spin at which nucleus is still stable
             ftmp1 = 0.d0
             DO j = Jstab(1), min(NDLW,NLW)
               ftmp1 = ftmp1 + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
-              POP(NEX(1),j,1,1) = 0.0
-              POP(NEX(1),j,2,1) = 0.0
+              POP(NEX(1),j,1,1) = 0.d0
+              POP(NEX(1),j,2,1) = 0.d0
             ENDDO
             CSFus = CSFus - ftmp1
             WRITE (8,'(''  WARNING: Some fusion cross section lost : '',
-     & F9.3)') ftmp1, ' mb, due to the stability limit' 
+     & F9.3,'' mb, due to the stability limit'')') ftmp1  
           ELSE
             WRITE (8,
      &'(''  WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
@@ -3521,7 +3522,7 @@ C
 C     Elastic and Nonelastic modified for actinides
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states
 
-      IF (A(0).gt.220 .AND. ZEJc(NPRoject).EQ.0) then 
+      IF (A(0).gt.220 .AND. ZEJc(0).EQ.0) then 
 
 C        WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
 C    &      '  Total     ','  Elastic*  ','  Nonelast* ',
@@ -3548,7 +3549,7 @@ C                          Low-lying XS   and       CE         added to elastic
  
       ELSE
 
-        IF (ZEJc(NPRoject).EQ.0) then 
+        IF (ZEJc(0).EQ.0) then 
           WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')EINl,TOTcs*TOTred*totcorr,
      &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      ! CE added to elastic
      &    TOTcs*TOTred*totcorr - ELAcs*ELAred 

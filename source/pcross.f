@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3297 $
+Ccc   * $Rev: 3306 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 15:08:55 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-21 14:22:48 +0100 (Do, 21 Feb 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -89,8 +89,6 @@ C
 C
       DATA callpcross/.FALSE./
 C
-C     NPRoject - projectile nejc number
-C
 C     INITIALIZATION
 
       crossBUn= 0.d0
@@ -99,9 +97,9 @@ C     INITIALIZATION
       specBU  = 0.d0   
 
 C     Projectile mass and charge number
-      ap = AEJc(NPRoject)
-      if(NPRoject.eq.0) ap=0
-      zp = ZEJc(NPRoject)     
+      ap = AEJc(0)
+      zp = ZEJc(0)     
+
       cme = MFPp/1.4D21
 C-----Excitation energy (MeV)
       ec = EXCn
@@ -165,10 +163,7 @@ C     IF(CHMax . EQ. 0.d0) CHMax = 0.2d0 ! default value
 Cig   However it was increased by Ignatyuk to the standard value =ln2gt=.540Sqrt(gEc).
       IF(CHMax . EQ. 0.d0) CHMax = 0.540d0 ! default value
 C
-C     TO BE CHECKED (WHY MAX = 5)
-C
-      NHEq = MAX(5,MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1)
-C     NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
+      NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
 C
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
       callpcross = .TRUE.  ! To avoid r factor recalculation at each call
@@ -310,7 +305,7 @@ c
 C           cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &          a2,'','',a2,'')  '',f12.5,'' mb'')') 
-     &          symbe(nproject),symbe(nejc),crossBU(nejc)
+     &          symbe(0),symbe(nejc),crossBU(nejc)
 C           DO ienerg = iemin(nejc),iemax(nejc)
 C              spec(nejc,ienerg)   = spec(nejc,ienerg) +
 C    &                               specBU(nejc,ienerg)
@@ -331,7 +326,7 @@ C           ENDDO
 C           cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(nproject),symbe(nejc),crossBU(nejc)  
+     &        symbe(0),symbe(nejc),crossBU(nejc)  
             DO ienerg = iemin(nejc),iemax(nejc)
               specBU(nejc, ienerg) = specBU(nejc, ienerg) *
      &                               scompn * BUNorm/crossBUt  
@@ -384,11 +379,11 @@ C     ** transfer reactions: stripping and pick-up
             IF(AEJc(0).LT.AEJc(nejc))
      &        WRITE(8,'(4x,''Pick-up   cross section for ('',
      &        a2,'','',a2,'') '',f12.5,'' mb'')')
-     &        symbe(nproject),symbe(nejc),crossNT(nejc)     
+     &        symbe(0),symbe(nejc),crossNT(nejc)     
             IF(AEJc(0).GT.AEJc(nejc))
      &        WRITE(8,'(4x,''Stripping cross section for ('',
      &        a2,'','',a2,'') '',f12.5,'' mb'')')
-     &        symbe(nproject),symbe(nejc),crossNT(nejc)           
+     &        symbe(0),symbe(nejc),crossNT(nejc)           
             DO ienerg = iemin(nejc), iemax(nejc) 
                spec(nejc, ienerg) = spec(nejc,ienerg) + 
      &                              specNT(nejc,ienerg)
@@ -413,11 +408,11 @@ c
             IF(AEJc(0).LT.AEJc(nejc))
      &           WRITE(8,'(4x,''Pick-up   cross section for ('',
      &           a2,'','',a2,'') '',f12.5,'' mb'')')
-     &           symbe(nproject),symbe(nejc),crossNT(nejc)     
+     &           symbe(0),symbe(nejc),crossNT(nejc)     
             IF(AEJc(0).GT.AEJc(nejc))
      &           WRITE(8,'(4x,''Stripping cross section for ('',
      &           a2,'','',a2,'') '',f12.5,'' mb'')')
-     &           symbe(nproject),symbe(nejc),crossNT(nejc)    
+     &           symbe(0),symbe(nejc),crossNT(nejc)    
             DO ienerg = iemin(nejc), iemax(nejc)       
                specNT(nejc, ienerg) =  NTNorm * scompn * 
      &                            specNT(nejc,ienerg)/crossNTt        
@@ -686,11 +681,11 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
                 if(nejc.eq.0) then
               write(8,'(4x,''PE emission cross section  ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(nproject),'g ',crossPE(nejc) 
+     &        symbe(0),'g ',crossPE(nejc) 
                   else
               write(8,'(4x,''PE emission cross section  ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(nproject),symbe(nejc),crossPE(nejc) 
+     &        symbe(0),symbe(nejc),crossPE(nejc) 
                   endif
          ENDIF
       ENDDO
@@ -999,9 +994,9 @@ C
       ENDDO
       ac = A(1)
       zc = Z(1)
-      ap = AEJc(NPRoject)
+      ap = AEJc(0)
       at = ac - ap
-      zp = ZEJc(NPRoject)
+      zp = ZEJc(0)
       zt = zc - zp
       nt = at - zt
       np = ap - zp
@@ -1219,16 +1214,17 @@ C
 C--------------------------------------------------------------------
 C-----NEVER COME BACK ASSUMPTION(ONLY PE-CONTRIBUTION)
       DO hhh = NHEq, n
-         b(hhh) = 0.
+         b(hhh) = 0.d0
       ENDDO
 C--------------------------------------------------------------------
+      ih2 = NHEq 
       DO h1 = 1, n
          Em(h1) = b(h1)*Cme
-         IF (Em(h1).NE.0.) Ih2 = h1
+         IF (Em(h1).NE.0.d0) Ih2 = h1
       ENDDO
       Ih2 = MIN(Ih2,NHEq)
       IF (IOUt.GE.3) WRITE (8,99018)  2*(Ih2-1) + Ap, Ih2, CHMax
-99018 FORMAT (/3X,'Nmax',I3,' Hmax =',I3,' Coeff. CHMax =',F5.2/)
+99018 FORMAT (/3X,'Nmax =',I3,' Hmax =',I3,' Coeff. CHMax =',F5.2/)
       IF (IOUt.GE.3) WRITE (8,99020)
 99020 FORMAT (/3X,'TIME INTEGRALS OF TAU(N)'/3X,
      &        ' N   UP TO Nmax       ')

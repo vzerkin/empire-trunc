@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3295 $
+Ccc   * $Rev: 3306 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2013-02-21 14:22:48 +0100 (Do, 21 Feb 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1044,7 +1044,11 @@ C
                ENDIF
             ENDDO
          ENDDO
-
+C
+C	   Protection to avoid problems for HI reactions
+C    
+         IF(NPRoject.lt.0) NPRoject = 0
+         NTArget = 0
 C        Finding target
          DO nnuc = 1, NNUct
             IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
@@ -1882,6 +1886,14 @@ C-----------Defining ICOller(i)
             ENDIF
       ENDIF
       EXCn = EIN + Q(0,1) + ELV(LEVtarg,0)
+
+      if(EXCn.LT.0.d0) then
+        write(8,*) 'ERROR: NEGATIVE EXCITATION ENERGY OF THE CN'
+        write(8,*) 'ERROR: INCREASE THE INCIDENT ENERGY TO ',
+     >	 Q(0,1) + ELV(LEVtarg,0)
+        STOP 'ERROR: NEGATIVE EXCITATION ENERGY OF THE CN' 
+      endif
+
       EMAx(1) = EXCn
 C-----set Q-value for CN production
       QPRod(1) = Q(0,1)
@@ -2508,15 +2520,15 @@ C-------constructing input and filenames
       ELSE
         REWIND (13)
       ENDIF
-  100 READ (13,'(A5,6I5,2f12.6)',END = 300) chelem, iar, izr, nlvr,
-     &      ngamr, nmax, itmp2, qn
+  100 READ (13,'(A5,6I5,2f12.6)',END = 200,ERR=200) 
+     &  chelem, iar, izr, nlvr, ngamr, nmax, itmp2, qn
 C
 C     nlvr  is the total number of levels
 C     ngamr is the total number of gamma rays
 C
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
-          READ (13,'(A1)',END = 300) dum
+          READ (13,'(A1)',END = 200,ERR=200) dum
         ENDDO
         GOTO 100
       ELSE
