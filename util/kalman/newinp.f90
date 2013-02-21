@@ -2,7 +2,7 @@
 
     implicit none
 
-    ! This routine takes the output file of an kalman run and modifies
+    ! This routine takes the output file of a kalman run and modifies
     ! the empire input file to reflect the changes to the parameters.
     ! on the command line:
     ! Parameter 1 is the project name. this is used to form the
@@ -240,7 +240,7 @@
 
     integer*4 k,n
 
-    write(cln(7:16),'(F10.4)') val
+    write(cln(7:16),'(1PE10.4E1)') val
     cln(17:36) = ' '
     k = 4
     do while(k > 0)
@@ -284,7 +284,7 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 106
+    integer*4, parameter :: nrs = 107
     character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP','GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', &
         'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE', 'TUNEFI', &
@@ -295,7 +295,7 @@
         'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', &
         'EXPUSH', 'FCC', 'FCD', 'GAPN', 'GAPP', 'GCROA', 'GCROD', 'GCROE0', 'GCROT', 'GCROUX', 'GDIV', 'GDRESH', &
         'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1', 'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY', &
-        'TRUNC', 'WIDEX', 'DEFNUC'/)
+        'TRUNC', 'WIDEX', 'DEFNUC', 'PFNNIU'/)
 
     integer*4 i
 
