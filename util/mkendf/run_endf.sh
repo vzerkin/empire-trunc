@@ -37,14 +37,14 @@ else
    exit
 fi
 
-if [ -e ${proj}_orig.endf ]
+if [ -e ${proj}-orig.endf ]
 then
-   cp ${proj}_orig.endf %locdir
-elif [ -e ../${proj}_orig.endf ]
-   then cp ../${proj}_orig.endf $locdir
+   cp ${proj}-orig.endf %locdir
+elif [ -e ../${proj}-orig.endf ]
+   then cp ../${proj}-orig.endf $locdir
 else
    echo ' Donor ENDF file not found!'
-   echo ' Please create file '${proj}_orig.endf
+   echo ' Please create file '${proj}-orig.endf
    exit
 fi
 

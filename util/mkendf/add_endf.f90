@@ -1,58 +1,98 @@
 	program make_ENDF
 
-	! this routine takes as input 2 endf files.
-	! the 1st file is the output from EMPEND - the converted empire output file
-	! the 2nd file should contain the additional needed MF/MT sections to 
+	! this routine is passed on the command line the project name.
+	! from this, the EMPEND input file is formed as {proj}_2.endf
+	! the donor ENDF filename is formed as {proj}-orig.endf
+	! the donor file should contain the additional needed MF/MT sections to 
 	! make the EMPEND endf-file complete:
 	!  MF          MT
 	!  1     any of 452,455,456,458
 	!  4           18
 	!  5     18, any of 452,455,456,458
-	! these sections from file 2 will be added to file 1 if not present
-	! and then the new file will be written out as file1
-        ! with a "_1" added to the filename.
+	! these sections from the donor will be added to the EMPEND file if not present
+	! and then the new file will be written out with extension ".endfadd"
 	! It is additionally assumed that both files will contain
         ! only 1 material, and that MAT1 = MAT2.
+	! nubars are scaled by the value of the PFNNIU parameter in {proj}.inp
 
 	use endf_io
 
 	implicit none
 
-	integer*4 nch1,nch2,status
-	character*300 file1,file2
+	logical*4 qfis
+	integer*4 nch1,nch2,status,npr
+	real*8 er
+	character proj*40,donor*300
 
 	type (endf_file), target :: endf1,endf2
 	type (endf_mat), pointer :: mat1,mat2
+	type (mf_1), pointer :: mf1
+	type (mf_3), pointer :: mf3
+
+	! the first parameter will be the project name
+
+	call getarg(1,proj)
+	npr = len_trim(proj)
 
 	call load_files
 
-	! look for nubars (MF1) in donor and insert if not present
+	! at present (Jan 2013) EMPEND only writes out prompt nubars in the EMPEND
+	! file: MF1/MT456. We need to get total and delayed nubars (452,455) from
+	! the donor. At this time, we simply read in the donor nubars and scale
+	! them directly by the value on PFNNIU in the empire input file. If it's
+	! not there, no scaling is done. This routine does NOT check that 452 = 455+456,
+	! as it should be, this should be fixed at some point, but this will involve
+	! interpolating, etc since the energy grids for the Empire generated 456 will
+	! likely not follow that of the donor MF1. A quick test in Jan 2013 looked like
+	! MCNP did not use the prompt, only the total nubar, 452, so this may not be
+	! a problem if using the file for MCNP simulations.
+
+	call scale_nubar(endf2%mat%mf1)
+
+	! now look for nubars (MF1) in donor and insert if not present
 
 	call ins_mf1
 
-	! look for MF4/MT18 or MF6/MT18. If neither found, use donor MF4/MT18
+	if(qfis) then
 
-	call ins_mf4
+		! for fissionable materials look for MF4/MT18 or MF6/MT18. 
+		! If neither found, use donor MF4/MT18
 
-	! now look through File2 for any of the MF5, MF=18,452,455,456,458
-	! if we find one, insert it into MF5 if not already there
+		call ins_mf4
 
-	call ins_mf5(18)
-	call ins_mf5(452)
-	call ins_mf5(455)
-	call ins_mf5(456)
-	call ins_mf5(458)
+		! now look through donor for any of the MF5, MF=18,452,455,456,458
+		! if we find one, insert it into MF5 if not already there
 
-	! now trim mf6 so that the resulting
-	! ACE file doesn't make MCNP crash
+		call ins_mf5(18)
+		call ins_mf5(452)
+		call ins_mf5(455)
+		call ins_mf5(456)
+		call ins_mf5(458)
 
-	call trim_mf6
+	end if
 
-	write(6,*) ' Writing new ENDF file'
+	! make sure Q-value from MF1/458 = Q-values from MF3/MT18
 
-	status = write_endf_file(file1(1:nch1)//'add',endf1)
+	mf1 => find(mat1%mf1,458)
+	if(associated(mf1)) then
+		er = mf1%mt458%cmp(0)%er
+		mf3 => find(mat1%mf3,18)
+		if(.not.associated(mf3)) then
+			write(6,'(a)') ' MF1/458 without MF3/MT18'
+			stop 1
+		endif
+		mf3%qm = er
+		mf3%qi = er
+	endif
+
+	! don't trim the file
+	! call trim_mf6
+
+	write(6,'(a)') ' Writing new ENDF file'
+
+	status = write_endf_file(proj(1:npr)//'_2.endfadd',endf1)
 	if(status /= 0) then
-           write(6,*) ' Error writing output ENDF file'
+           write(6,'(a)') ' Error writing output ENDF file'
            stop 1
         endif
 
@@ -64,49 +104,66 @@
 
 	implicit none
 
-	integer*4 status
+	logical*4 qex
+	integer*4 status,m
 
 	! open the endf files and do basic sanity checks
 
-	call getarg(1,file1)
-	nch1 = len_trim(file1)
-        write(6,*)' Reading ',file1(1:nch1)
-	status = read_endf_file(file1(1:nch1),endf1)
+        write(6,'(2a)')' Reading ',proj(1:npr)//'_2.endf'
+	status = read_endf_file(proj(1:npr)//'_2.endf',endf1)
 	if(status /= 0) then
-            write(6,*) ' Error opening EMPEND ENDF file: ',file1(1:nch1)
+            write(6,'(2a)') ' Error opening EMPEND ENDF file: ',proj(1:npr)//'_2.endf'
             stop 1
         endif
 
 	mat1 => endf1%mat
 	if(.not.associated(mat1)) then
-            write(6,*) ' EMPEND endf file contains no materials!'
+            write(6,'(a)') ' EMPEND endf file contains no materials!'
             stop 1
         endif
 	if(.not.associated(mat1%mf1)) then
-            write(6,*) ' EMPEND endf file contains no MF1!'
+            write(6,'(a)') ' EMPEND endf file contains no MF1!'
             stop 1
         endif
 
-	call getarg(2,file2)
-	nch2 = len_trim(file2)
-        write(6,*)' Reading ',file2(1:nch2)
-	status = read_endf_file(file2(1:nch2),endf2)
+	! look for donor ENDF file in either this directory or 1 up
+	! it should have the name {proj}-orig.endf
+
+	donor = proj(1:npr)//'-orig.endf'
+	inquire(file=donor,exist=qex)
+	if(.not.qex) then
+		donor = '../'//proj(1:npr)//'-orig.endf'
+		inquire(file=donor,exist=qex)
+		if(.not.qex) then
+			write(6,'(3a)') ' Donor file ',proj(1:npr),'-orig.endf not found'
+			stop 1
+		endif
+	endif
+
+	m = len_trim(donor)
+
+        write(6,'(2a)')' Reading ',donor(1:m)
+	status = read_endf_file(donor(1:m),endf2)
 	if(status /= 0) then
-            write(6,*) ' Error opening original ENDF file: ',file2(1:nch2)
+            write(6,'(2a)') ' Error opening donor ENDF file: ',donor(1:m)
             stop 1
         endif
 
 	mat2 => endf2%mat
 	if(.not.associated(mat2)) then
-            write(6,*) ' Donor ENDF file contains no materials!'
+            write(6,'(3a)') ' Donor file ',donor(1:m),' contains no materials!'
             stop 1
         endif
 	if(mat1%mat /= mat2%mat) then
-            write(6,*) ' Donor ENDF file MAT number not same as that in EMPEND file'
+            write(6,'(a)') ' Donor ENDF file MAT number not same as that in EMPEND file'
             stop 1
         endif
 
-        write(6,*)' Files read in'
+	! take fission flag from donor file - EMPEND may not set this
+
+	qfis = mat2%mf1%mt451%lfi /= 0
+
+        write(6,'(a)')' ENDF files read in'
 
 	return
 	end subroutine load_files
@@ -120,36 +177,15 @@
 	! look for nubar sections in donor file and add to empire file.
 	! don't replace any nubar sections already in empire file
 
-	type (mf_1), pointer :: mf1,lm1,m2,nxt
+	type (mf_1), pointer :: m2,nxt
 
 	m2 => mat2%mf1
 	do while(associated(m2))
-
 		nxt => m2%next
-
-		if(m2%mt == 451) goto 10
-		if(m2%mt >= 460) exit
-
-		nullify(lm1)
-		mf1 => mat1%mf1
-		do while(associated(mf1))
-			! don't replace existing sections
-			if(mf1%mt == m2%mt) goto 10
-			if(mf1%mt > m2%mt) exit
-			lm1 => mf1
-			mf1 => mf1%next
-		end do
-
-		write(6,*) ' Inserting donor MF1 with MT=',m2%mt
-		m2%next => mf1
-		if(associated(lm1)) then
-			lm1%next => m2
-		else
-			mat1%mf1 => m2
+		if((m2%mt > 451) .and. (m2%mt < 460)) then
+			if(put(mat1%mf1,m2)) write(6,'(a,i3)') ' Donor MF1 inserted for MT = ',m2%mt
 		endif
-
-10		m2 => nxt
-
+		m2 => nxt
 	end do
 
 	return
@@ -161,55 +197,34 @@
 
 	implicit none
 
-	! look for a section with MF4/6 MT=18 in file1. If section does not
-	! exist in file1, then insert MF4/MT18 from file2 into file1.
+	! look for a section with MF4/6 MT=18 in EMPEND file. If section does
+	! not exist, then insert MF4/MT18 from donor into EMPEND file.
 
-	type (mf_4), pointer :: mf4,mf418,lm4
-	type (mf_6), pointer :: mf6
+	logical*4 qstat
+	type (mf_4), pointer :: mf4
 
-	mf6 => mat1%mf6
-	do while(associated(mf6))
-		if(mf6%mt == 18) then
-			write(6,*) ' EMPEND ENDF file contains a MF6/MT18'
-			return
-		else if(mf6%mt > 18) then
-			exit
-		endif
-		mf6 => mf6%next
-	end do
-
-	nullify(lm4)
-	mf4 => mat1%mf4
-	do while(associated(mf4))
-		if(mf4%mt == 18) then
-			write(6,*) ' EMPEND ENDF file contains a MF4/MT18'
-			return
-		else if(mf4%mt > 18) then
-			exit
-		endif
-		lm4 => mf4
-		mf4 => mf4%next
-	end do
-
-	mf418 => mat2%mf4
-	do while(associated(mf418))
-		if(mf418%mt == 18) exit
-		mf418 => mf418%next
-	end do
-	if(.not.associated(mf418)) then
-		write(6,*) ' Donor ENDF file contains no MF4/MT18!'
+	mf4 => pop(mat2%mf4,18)
+	if(.not.associated(mf4)) then
+		write(6,'(a)') ' Donor ENDF file contains no MF4/MT18!'
 		stop 1
         endif
 
-	write(6,*) ' Inserting donor MF4/MT18 into EMPEND ENDF file'
-	mf418%next => mf4
-	if(associated(lm4)) then
-		lm4%next => mf418
-	else
-		mat1%mf4 => mf418
+	if(associated(find(mat1%mf4,18))) then
+		write(6,'(a)') ' EMPEND ENDF file contains a MF4/MT18'
+		return
 	endif
 
-	write(6,*) ' MF4/MT18 moved'
+	if(associated(find(mat1%mf6,18))) then
+		write(6,'(a)') ' EMPEND ENDF file contains a MF6/MT18'
+		return
+	endif
+
+	qstat = put(mat1%mf4,mf4)
+	if(qstat) then
+		write(6,'(a)') ' Donor MF4/MT18 inserted into ENDF file'
+	else
+		write(6,'(a)') ' Error inserting donor MF4/MT18 into ENDF file'
+	endif
 
 	return
 	end subroutine ins_mf4
@@ -220,39 +235,35 @@
 
 	implicit none
 
-	! look for a section with MF5/6 MT=mt in file2. If mt section does not
-	! exist in file1, then remove mt from file2 and insert into file1.
+	! look for a section with MF5/6 MT=mt in donor. If mt section does not
+	! exist in EMPEND file, then remove mt from donor and insert.
 
 	integer*4, intent(in) :: mt
 
 	logical*4 qstat
-	type (mf_5), pointer :: mf51,mf52
-	type (mf_6), pointer :: mf6
+	type (mf_5), pointer :: mf
 
-	! first look for mt in mat1 for MF5 or MF6
-	! if found, no nothing.
-
-	mf51 => find(mat1%mf5,mt)
-	if(associated(mf51)) return
-
-	mf6 => find(mat1%mf6,mt)
-	if(associated(mf6)) return
-
-	! now try to get the mt from mat2
-
-	mf52 => pop(mat2%mf5,mt)
-	if(.not.associated(mf52)) then
+	mf => pop(mat2%mf5,mt)
+	if(.not.associated(mf)) then
 		if(mt /= 18) return
-		write(6,*) ' Donor ENDF file contains no MF5/MT18!'
+		write(6,'(a)') ' Donor ENDF file contains no MF5/MT18!'
 		stop 1
 	endif
 
+	! look for mt in mat1 for MF5 or MF6
+	! if found, no nothing.
+
+	if(associated(find(mat1%mf5,mt))) return
+	if(associated(find(mat1%mf6,mt))) return
+
 	! insert donor mt into mat1
 
-	qstat = put(mat1%mf5,mf52)
-	if(.not.qstat) write(6,*)' Error inserting section into mat1'
-
-	write(6,'(a,I3,a)') '  MF5/MT',mt,' moved'
+	qstat = put(mat1%mf5,mf)
+	if(qstat) then
+		write(6,'(a,i3)') ' Donor MF5 inserted for MT =',mt
+	else
+		write(6,'(a,i3)') ' Error inserting donor MF5 for MT =',mt
+	endif
 
 	return
 	end subroutine ins_mf5
@@ -293,7 +304,7 @@
 		case(16)
 			do i = 1,mf6%nk
 				if(mf6%prd(i)%law /= 1) then
-					write(6,*) ' MF6/MT16 not LAW 1'
+					write(6,'(a)') ' MF6/MT16 not LAW 1'
 					stop
 				endif
 				law1 => mf6%prd(i)%law1
@@ -312,11 +323,11 @@
 			end do
 		case(18)
 			if(mf6%nk /= 1) then
-				write(6,*) ' MF6/MT18 has more than one sub-section'
+				write(6,'(a)') ' MF6/MT18 has more than one sub-section'
 				stop
 			endif
 			if(mf6%prd(1)%law /= 1) then
-				write(6,*) ' MF6/MT18 not LAW 1'
+				write(6,'(a)') ' MF6/MT18 not LAW 1'
 				stop
 			endif
 			law1 => mf6%prd(1)%law1
@@ -335,7 +346,7 @@
 		case(91)
 			do i = 1,mf6%nk
 				if(mf6%prd(i)%law /= 1) then
-					write(6,*) ' MF6/MT91 not LAW 1'
+					write(6,'(a)') ' MF6/MT91 not LAW 1'
 					stop
 				endif
 				law1 => mf6%prd(i)%law1
@@ -355,11 +366,11 @@
 		case(102)
 			! 102 seems to have same energy structure as 18
 			if(mf6%nk /= 1) then
-				write(6,*) ' MF6/MT102 has more than one sub-section'
+				write(6,'(a)') ' MF6/MT102 has more than one sub-section'
 				stop
 			endif
 			if(mf6%prd(1)%law /= 1) then
-				write(6,*) ' MF6/MT102 not LAW 1'
+				write(6,'(a)') ' MF6/MT102 not LAW 1'
 				stop
 			endif
 			law1 => mf6%prd(1)%law1
@@ -379,9 +390,101 @@
 		mf6 => mf6%next
 	end do
 
-	write(6,*) ' MF6/MT18 trimmed'
+	write(6,'(a)') ' MF6/MT18 trimmed'
 
 	return
 	end subroutine trim_mf6
 
-	end
+	!---------------------------------------------------------------------
+
+	subroutine scale_nubar(mfl1)
+
+	implicit none
+
+	type (mf_1), intent(inout), target :: mfl1
+
+	integer*4 i
+	real*4 xf
+	type (mf_1), pointer :: mf1
+	type (tab1), pointer :: tb
+
+	call get_nubar_scale(xf)
+
+	write(6,'(a,f7.4)') ' Scaling nubars by ',xf
+
+	mf1 => mfl1
+	do while(associated(mf1))
+		if(mf1%mt == 452) then
+			if(mf1%mt452%lnu == 1) then
+				mf1%mt452%c = xf*mf1%mt452%c
+			else
+				tb => mf1%mt452%tb
+				do i = 1,tb%np
+					tb%dat(i)%y = xf*tb%dat(i)%y
+				end do
+			endif
+		else if(mf1%mt == 455) then
+                        if(mf1%mt455%lnu == 1) then
+                                mf1%mt455%c = xf*mf1%mt455%c
+                        else
+				tb => mf1%mt455%tb
+				do i = 1,tb%np
+					tb%dat(i)%y = xf*tb%dat(i)%y
+				end do
+                        endif
+!		don't scale 456 -it's inserted by EMPEND and presumably already scaled
+!		else if(mf1%mt == 456) then
+!			if(mf1%mt456%lnu == 1) then
+!			mf1%mt456%c = xf*mf1%mt456%c
+!			else
+!				tb => mf1%mt456%tb
+!				do i = 1,tb%np
+!					tb%dat(i)%y = xf*tb%dat(i)%y
+!				end do
+!			endif
+		endif
+		mf1 => mf1%next
+	end do
+
+	return
+	end subroutine scale_nubar
+
+	!---------------------------------------------------------------------
+
+	subroutine get_nubar_scale(xf)
+
+	implicit none
+
+	real*4, intent(out) :: xf
+
+	integer*4 i,ios
+	real*4 xx
+	character pnam*6,lin*300
+
+	xf = 1.0
+
+	open(22,file=proj(1:npr)//'.inp',status='old',readonly)
+
+	do i = 1,10
+		read(22,*)   ! header lines
+	end do
+
+	do
+		read(22,'(a)',iostat=ios) lin
+		if(ios < 0) exit
+		if(ios > 0) stop ' Error reading empire input file'
+		if(lin(1:1) == '*') cycle
+		if(lin(1:1) == '#') cycle
+		if(lin(1:1) == '!') cycle
+		read(lin,'(a6,G10.5)') pnam, xx
+		if(pnam /= 'PFNNIU') cycle
+		xf = xx
+		exit
+	end do
+
+	close(22)
+
+	return
+	end subroutine get_nubar_scale
+
+	end program make_ENDF

@@ -44,7 +44,7 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'TRUNC', 'WIDEX', 'DEFNUC')
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 # Defining list of prompt fission neutron spectra parameters
-pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
+pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU')
 
 # these global parameters don't need Z,A of isotope specified
 Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED')
@@ -320,7 +320,7 @@ def run(proj):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar or name=='PFNNIU'):
             continue
         
         nameP, nameM = genNames(line,proj)
@@ -336,7 +336,8 @@ def run(proj):
 
 def analyze(proj):
     """
-    create ENDF & ACE files run() finishes
+    reconstruct empire output files from the single-energy directories
+    then create ENDF files from the output files using mkendf.sh
     """
     import numpy
     
@@ -358,7 +359,7 @@ def analyze(proj):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar or name=='PFNNIU'):
             continue
         
         # reconstruct cross sections for val+sigma and val-sigma:
@@ -406,7 +407,7 @@ def kleen(proj):
     sens.close()
 
 
-def njoy(proj,scpt, apx):
+def njoy(proj,scpt,apx,wdir):
     """
     run NJOY jobs 
     """
@@ -430,6 +431,12 @@ def njoy(proj,scpt, apx):
         cmd = "qsub -N %s%s%s -q batch1 -l ncpus=1 -V -v %s %s" %(proj, nam, apx, vars, scpt)
         os.system(cmd)
     
+    # if user specified a directory, then only run there.
+    # otherwise, run the central values & all the varied params
+    if wdir != '':
+        sub_njoy(wdir,"_njoy")
+        return
+
     # start with original input:
     sub_njoy(proj+"_orig","_orig_")
 
@@ -452,7 +459,7 @@ def njoy(proj,scpt, apx):
     sens.close()
 
 
-def mcnp(proj):
+def mcnp(proj,wdir):
     """
     run MCNP jobs after ACE files created
     """
@@ -463,10 +470,16 @@ def mcnp(proj):
         vars = ("proj=%s,workdir=%s" % (proj, getDir(dir)))
         cmd = 'qsub -N %s%s -q  batch1  -l ncpus=1  -V -v %s %s/util/mkendf/mcnp.sh' % (proj, nam, vars, EMPIRE_DIR)
         os.system(cmd)
+
+    # if user specified a directory, then only run there.
+    # otherwise, run the central values & all the varied params
+    if wdir != '':
+        sub_mcnp(wdir,"_mcnp")
+        return
     
     # start with original input:
     sub_mcnp(proj+"_orig","_orig_MC")
-    
+
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
@@ -519,8 +532,13 @@ no options: setup and run all parameters"""
 def main():
     opts, args = process_args()
     inputFile = args[0]
+    wdir = ""
+    if len(args) > 1:
+        wdir = args[1]
     proj = inputFile.split('.')[0]
-    print " Project : "+proj
+    print " Project : " + proj
+    if wdir != '':
+        print " Directory : " + wdir
     
     if opts.clean:
         os.system('rm -r %s_*' % proj)
@@ -533,11 +551,11 @@ def main():
     elif opts.kleen:
         kleen(proj)
     elif opts.mcnp:
-        mcnp(proj)
+        mcnp(proj,wdir)
     elif opts.njoy:
-        njoy(proj,"njoy_33grp.sh","NJOY")
+        njoy(proj,"njoy_33grp.sh","NJOY",wdir)
     elif opts.acer:
-        njoy(proj,"ace_300k.sh","ACER")
+        njoy(proj,"ace_300k.sh","ACER",wdir)
     else: # if no options, setup and run the analysis
         init(proj)
         run(proj)

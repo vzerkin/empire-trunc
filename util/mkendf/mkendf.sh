@@ -31,14 +31,14 @@ else
    exit
 fi
 
-if [ -e ${fil}_orig.endf ]
+if [ -e ${fil}-orig.endf ]
 then
-   origfil=${fil}_orig.endf
-elif [ -e ../${fil}_orig.endf ]
-   then origfil=../${fil}_orig.endf
+   origfil=${fil}-orig.endf
+elif [ -e ../${fil}-orig.endf ]
+   then origfil=../${fil}-orig.endf
 else
    echo ' Donor ENDF file not found!'
-   echo ' Please create file '${fil}_orig.endf
+   echo ' Please create file '${fil}-orig.endf
    exit
 fi
 
@@ -97,7 +97,7 @@ cat > input <<EOF
 ${fil}_1.endf
 ${resfil}
 ${fil}_2.endf
-0
+1
 EOF
 
 $EMPIREDIR/util/endres/endres < input
@@ -112,12 +112,13 @@ rm input
 # (MF4,MT18) from donor file containing these MFs
 # only do this if it's a fissile material!
 
-if ! $EMPIREDIR/util/mkendf/add_endf ${fil}_2.endf ${origfil}
+if ! $EMPIREDIR/util/mkendf/add_endf ${fil}
 then
     echo 'Error adding sections to ENDF file'
     exit
 fi
 rm ${fil}_2.endf
+# if not adding, just move _2 -> _2.endfadd
 # mv ${fil}_2.endf ${fil}_2.endfadd
 
 # add 103-107 if data available and re-make elastic
@@ -127,6 +128,7 @@ cat > FIXUP.INP <<EOF
 10101111111001
 ${fil}_2.endfadd
 ${fil}_3.endf
+S  4=+( 51, 91)
 S103=+(600,649)
 S104=+(650,699)
 S105=+(700,749)

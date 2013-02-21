@@ -13,10 +13,13 @@ fi
 mkdir $locdir
 cd $locdir
 
-# copy over script & cross sections
-$EMPIREDIR/util/mkendf/mk_xsdir ${workdir%/*}/xsdir ${locdir}/xsec
-cp -r ${workdir%/*}/xsec ./
-$EMPIREDIR/util/mkendf/mk_ace ${workdir} ${locdir}/xsec
+# create the xsdir based on integral experiment and local xsdir file
+$EMPIREDIR/util/mkendf/mk_xsdir ${workdir}/${proj}
+
+# copy over ACE file
+cp ${workdir}/${proj}_300K.ace ./
+
+# copy over mcnp script
 cp ${workdir%/*}/mcnp.i ./
 
 /home/arcilla/bin/mcnp5 inp=mcnp.i xsdir=xsdir eol > out.dat

@@ -2,25 +2,38 @@
 
 	implicit none
 
-	integer*4 i,npr,nch,i1,i2,i3,i4
+	integer*4 i,npr,nch,i1,i2,i3,i4,istat
 	real*4 kef,def,kef1,def1,kef2,def2,xrel,sens,err,xlin
-	character proj*50,prm*6,dir*25,c12*12
+	character proj*50,prm*6,dir*25,c12*12,line*150,hdlin*150
 
         call getarg(1,proj)
         npr = len_trim(proj)
 
+	if(npr == 0) stop ' No project name entered on command line'
+
+	open(20,file='mcnp.i',status='old',readonly)
+	read(20,'(a)') hdlin
+	close(20)
+
         open(20,file=proj(1:npr)//'_mcnp.sum',status='NEW',action='WRITE',recl=500)
 
-	write(20,*) '     parameter            Keff         dKeff'
+	write(20,'(a)') trim(hdlin)
+	write(20,*) '     parameter                 Keff        dKeff'
 	call read_mcnp(proj(1:npr)//'_orig/'//proj(1:npr)//'_mcnp.out',kef,def)
-	write(20,200) 'Central            ',kef,def
+	write(20,200) '   Central values           ',kef,def
 	write(20,*)
 
 	open(1,file=proj(1:npr)//'-inp.sen',status='old',readonly)
 
 	do
 
-		read(1,'(a6,5x,e9.3,4(3x,i2))',end=100) prm,xrel,i1,i2,i3,i4
+		read(1,'(a)',iostat=istat) line
+		if(istat < 0) exit
+		if(istat > 0) stop ' Error reading sensitivity input file'
+
+		if(line(1:1) == '!') cycle
+
+		read(line,'(a6,1x,e9.3,4(3x,i2))') prm,xrel,i1,i2,i3,i4
 
 		c12 = '_xx_xx_xx_xx'
 
@@ -35,26 +48,38 @@
 		type *,prm,xrel,dir
 
 		call read_mcnp(proj(1:npr)//'_'//dir(1:nch)//'plus/'//proj(1:npr)//'_mcnp.out',kef1,def1)
-		write(20,200) dir(1:nch)//'plus',kef1,def1
+		dir(nch+1:) = 'plus'
+		write(20,200) dir,kef1,def1
 
 		call read_mcnp(proj(1:npr)//'_'//dir(1:nch)//'minus/'//proj(1:npr)//'_mcnp.out',kef2,def2)
-		write(20,200) dir(1:nch)//'minus',kef2,def2
+		dir(nch+1:) = 'minus'
+		write(20,200) dir,kef2,def2
 
 		sens = (kef1 - kef2)/(2.0*xrel)
-		err = 100.0*sqrt(def1*def1 + def2*def2)/abs(kef1 - kef2)
-		write(20,*) '   ',dir(1:nch),' sens ',sens,err
+		if(sens /= 0.0) then
+			err = 100.0*sqrt(def1*def1 + def2*def2)/abs(kef1 - kef2)
+		else
+			err = 0.0
+		endif
+		dir(nch+1:) = ' sens'
+		write(20,*) ' ',dir,sens,err
 
 		xlin = kef1 -2.0*kef + kef2
-		err = 100.0*sqrt(def1*def1 + 4.0*def*def + def2*def2)/abs(xlin)
-		write(20,*) '   ',dir(1:nch),' nonl ',xlin,err
+		dir(nch+1:) = ' nonl'
+		if(xlin /= 0.0) then
+			err = 100.0*sqrt(def1*def1 + 4.0*def*def + def2*def2)/abs(xlin)
+		else
+			err = 0.0
+		endif
+		write(20,*) ' ',dir,xlin,err
 
 		write(20,*)
 
 	end do
 
-100	close(20)
+	close(20)
 
-200	format(2x,a25,4x,F8.6,4x,F8.6)
+200	format(2x,a25,4x,F8.6,5x,F8.6)
 
 	end program read_mcnp_output
 

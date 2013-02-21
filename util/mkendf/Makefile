@@ -2,8 +2,8 @@
 #
 
 # set default compiler:
-FC     =  gfortran
-#FC     =  ifort
+#FC     =  gfortran
+FC     =  ifort
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
@@ -15,11 +15,12 @@ endif
 all:
 	$(MAKE) add_endf
 	$(MAKE) getmtn
-	$(MAKE) mk_ace
+	# $(MAKE) mk_ace
 	$(MAKE) mk_xsdir
 	$(MAKE) read_allnjoy
-	$(MAKE) read_kal
+	# $(MAKE) read_kal
 	$(MAKE) read_mcnp
+	$(MAKE) mk_nubar
 
 add_endf: add_endf.f90 ../IO/*.o
 	$(FC) $(FFLAGS) -I ../IO/ -o $@ add_endf.f90 ../IO/*.o
@@ -35,6 +36,9 @@ mk_xsdir: mk_xsdir.f90
 
 read_allnjoy: read_allnjoy.f90
 	$(FC) $(FFLAGS) -o $@ read_allnjoy.f90
+
+mk_nubar: mk_nubar.f90 ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO/ -o $@ mk_nubar.f90 ../IO/*.o
 
 # tailor read_kal for each material
 #read_kal: read_kal.f90
