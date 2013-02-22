@@ -132,8 +132,11 @@ def runE(proj):
         cp(proj+'-mat.sen','SENSITIVITY.MATRIX')
         print('File with sensitivity matrix exists: %s' % proj+'-mat.sen')
     if not isEmpty(proj+'.rng'):
-        cp(proj+'.rng','R250SEED.DAT')
         print('Using existing random number generator seed')
+    else:
+        print('Creating default random number generator seed')
+        open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
+    cp(proj+'.rng','R250SEED.DAT')
     if not isEmpty(proj+'-nubar.dat'):
         cp(proj+'-nubar.dat','NUBAR.DAT')
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')  
