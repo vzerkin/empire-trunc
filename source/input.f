@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3306 $
+Ccc   * $Rev: 3316 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-21 14:22:48 +0100 (Do, 21 Feb 2013) $
+Ccc   * $Date: 2013-02-23 17:05:45 +0100 (Sa, 23 Feb 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2416,8 +2416,7 @@ C
       CHARACTER*8 finp
       CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
-     &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp
-      INTEGER INT
+     &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp, nmk
       LOGICAL LREad, ADDnuc
 
       ADDnuc = .FALSE.
@@ -2502,7 +2501,7 @@ C
 C     Avoid overwriting the NLV(nnuc) assigned in READLDP 
 C       (coming from level-density-param.dat file)
 C
-      IF(NLV(Nnuc).le.0) NLV(Nnuc) = 1
+      IF(NLV(Nnuc)  .le.0) NLV(Nnuc)   = 1
       IF(NCOmp(Nnuc).le.0) NCOmp(Nnuc) = 1
 
       ELV(1,Nnuc) = 0.0
@@ -2528,7 +2527,7 @@ C     ngamr is the total number of gamma rays
 C
       IF (ia.NE.iar .OR. iz.NE.izr) THEN
         DO ilv = 1, nlvr + ngamr
-          READ (13,'(A1)',END = 200,ERR=200) dum
+          READ(13,'(A1)',END = 200,ERR=200) dum
         ENDDO
         GOTO 100
       ELSE
@@ -2546,12 +2545,13 @@ C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
           WRITE (14,'(A110)') ch_iuf
         ENDIF
         IF (nlvr.NE.0) THEN
-          IF (NLV(Nnuc).EQ.1 .AND. nmax.GT.1) NLV(Nnuc) = MIN(NDLV,nmax)
+
+          IF (nlvr.GT.1) NCOmp(Nnuc) = MIN(NDLV,nlvr)
+          IF (nmax.GT.1) NLV(Nnuc)   = MIN(NDLV,nmax)
+
 C---------limit to max. of 40 levels if ENDF active
           IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
-C
-          IF (NCOmp(Nnuc).EQ.1 .AND. nlvr.GT.1) NCOmp(Nnuc)
-     &          = MIN(NDLV,nlvr)
+
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
              DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
@@ -2563,29 +2563,23 @@ C
           ENDIF
 C---------levels for nucleus NNUC copied to file *.lev
           NSTored(nnuc) = izatmp
-          DO ilv = 1, NLV(Nnuc)
+
+          nmk = NLV(Nnuc) 
+          IF (ECOnt(Nnuc).GT.0.d0 .and. ECOnt(Nnuc).LT.qn) 
+     &     nmk = NCOmp(Nnuc)
+
+          DO ilv = 1, nmk
+
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
+
             IF(ilv.gt.1 .and. ELV(ilv,Nnuc).le.0.000005d0) then 
                WRITE(8,*) ' ERROR: Discrete level with Elv<0.000005 MeV' 
                WRITE(8,'(1x,A,I3,A4,I3)') 
      &         ' ERROR: Check your discrete levels for Z =',
      &         NINT(Z(Nnuc)), ' A =', NINT(A(Nnuc))
                STOP ' ERROR: See the long output for explanations'
-            ENDIF
-            IF (Econt(Nnuc).GT.0.d0 .and. Econt(Nnuc).LT.qn) THEN
-              IF (ELV(ilv,Nnuc).GT.Econt(Nnuc)) THEN
-                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
-     & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
-     &           NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
-                WRITE (8,
-     &'('' Number of discrete levels changed from RIPL default of '',
-     &I3,'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
-             NLV(Nnuc) = max(ilv - 1,1)
-                IF(ENDf(Nnuc).gt.0 .and. NLV(Nnuc).gt.40) NLV(Nnuc) = 40
-                GOTO 200
-              ENDIF
             ENDIF
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
@@ -2599,8 +2593,25 @@ C
      &MeV'')') ilv, qn
               WRITE (8,'(''  WARNING: Number of levels set to '',I3)'
      &                   ) NLV(Nnuc)
-              GOTO 200
+C             GOTO 200
             ENDIF
+
+C
+C		  if ECONT input keyword present, then it takes precedence 
+C
+            IF (ECOnt(Nnuc).GT.0.d0 .and. ECOnt(Nnuc).LT.qn) THEN
+              IF (ELV(ilv,Nnuc).GT.ECOnt(Nnuc)) THEN
+                WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
+     & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
+     &            NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
+                WRITE (8,
+     &'('' Number of discrete levels changed from RIPL default of '',
+     &I3,'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
+                NLV(Nnuc) = max(ilv - 1,1)
+                GOTO 200
+              ENDIF 
+            ENDIF
+
             IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
               WRITE (8,'(''  WARNING:'')')
               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
@@ -8358,14 +8369,8 @@ C               (2I4,1x,a2,f4.1,1x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
          CALL WHERE(izar,nnuc,iloc)
-         IF (iloc.EQ.0) THEN
-C
-C           Taking the default number of discrete levels from the EMPIRE file  
-C                              ../data/level-density-par.dat
 
-C           NLV(nnuc)   = MIN(NDLV,nlevc)
-C           NCOmp(nnuc) = MIN(NDLV,nlevc)
-C
+         IF (iloc.EQ.0) THEN
             DOBs(nnuc) = dob
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
             a23 = A(nnuc)**0.666667
