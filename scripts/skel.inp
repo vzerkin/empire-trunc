@@ -26,9 +26,9 @@ LEVDEN     0.                         EMPIRE NLD (EGSM RIPL-3) as default
 *LEVDEN     2.                        Refitted Gilbert & Cameron NLD (future option)  
 *LEVDEN     3.                        RIPL-3 HFB parity dependent NLD 
 *LEVDEN     4.                        EMPIRE 2.18 Gilbert & Cameron NLD  
-*ATILNO     1.05   Z0   A0            Level density parameter of nucleus(Z0,A0) increased by 5%            
+*ATILNO    1.05   Z0   A0              Level density parameter of nucleus(Z0,A0) increased by 5%            
 HRTW       3.                         Width fluctuations considered up to 3 MeV (for neutron induced)
-*TUNE      0.90    Z0   A0   0        Gamma width  of nucleus(Z0,A0) decreeased by 10%
+*TUNE      0.90   Z0    A0    0        Gamma width  of nucleus(Z0,A0) decreeased by 10%
 GSTRFN     1.                         Default gamma ray strength function (Plujko MLO RIPL-2)
 ***									 
 * OPTICAL MODEL INPUT				 
@@ -60,7 +60,7 @@ MSD        0.                         Quantum statistical Multi-Step-Direct mode
 MSC        0.                         Quantum statistical Multi-Step-Compound model
 PCROSS    1.5                         Exciton model with default 1.5 MFP parameter  
 HMS        0.                         Monte Carlo Hybrid (DDHMS)preequilibrium model 
-*GTILNO     1.1    Z0   A0   1        Single particle LD for neutron PE emission increased by 10%          
+*GTILNO    1.1    Z0    A0    1        Single particle LD for neutron PE emission increased by 10%          
 GO                                                  
 @ Running title may be given in any line starting with @ 
 0.002
