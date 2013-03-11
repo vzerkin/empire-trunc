@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3316 $
+Ccc   * $Rev: 3317 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-23 17:05:45 +0100 (Sa, 23 Feb 2013) $
+Ccc   * $Date: 2013-03-11 19:26:01 +0100 (Mo, 11 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2593,7 +2593,7 @@ C
      &MeV'')') ilv, qn
               WRITE (8,'(''  WARNING: Number of levels set to '',I3)'
      &                   ) NLV(Nnuc)
-C             GOTO 200
+              GOTO 200
             ENDIF
 
 C
