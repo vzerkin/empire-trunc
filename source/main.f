@@ -1,6 +1,6 @@
-cc   * $Rev: 3319 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
+cc   * $Rev: 3320 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-03-12 22:01:45 +0100 (Di, 12 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2325,11 +2325,12 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                  IF(NDEJC.EQ.7) totsp = totsp - ctotsp
                  nxsp = 0
                  IF(xtotsp.GT.0.0d0) THEN
-                   nxsp=INT(xtotsp/totsp+0.5d0)
                    IF(ttotsp.GT.0.0d0) THEN
+                     nxsp=INT((xtotsp-dtotdp)/totsp+0.5d0)
                      xnorm(1,INExc(nnuc)) =(nxsp*totsp+dtotsp)/xtotsp
                      xtotsp = nxsp*totsp + dtotsp
                    ELSE
+                     nxsp=INT(xtotsp/totsp+0.5d0)
                      xnorm(1,INExc(nnuc)) = nxsp*totsp/xtotsp
                      xtotsp = nxsp*totsp
                    ENDIF
@@ -2341,11 +2342,12 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                  ENDIF
                  npsp = 0
                  IF(ptotsp.GT.0.0d0) THEN
-                   npsp=INT(ptotsp/totsp+0.5d0)
                    IF(htotsp.GT.0.0d0) THEN
+                     npsp=INT((ptotsp-dtotsp)/totsp+0.5d0)
                      xnorm(2,INExc(nnuc)) =(npsp*totsp+dtotsp)/ptotsp
                      ptotsp = npsp*totsp + dtotsp
                    ELSE
+                     npsp=INT(ptotsp/totsp+0.5d0)
                      xnorm(2,INExc(nnuc)) = npsp*totsp/ptotsp
                      ptotsp = npsp*totsp
                    ENDIF
