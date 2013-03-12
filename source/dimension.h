@@ -4,7 +4,7 @@ C
      * NDNUC= 100
      *,NDEXCLUS = 14
      *,NDEX= 155
-     *,NDLW= 50
+     *,NDLW= 55
      *,LEVCC=30
      *,NDLV=40
      *,NDBR=40

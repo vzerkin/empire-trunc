@@ -324,7 +324,6 @@ def runE(proj):
     rm('C4SORT.TMP')        
     rm('INPUT')
     rm('INPUT.DAT')
-    rm('OMPAR.DIR')
     rm('OMPdata.dat')
     rm('mt_x4r.txt')
     rm('TAPE15', 'TAPE16', 'TAPE66')
@@ -343,8 +342,10 @@ def runE(proj):
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
     rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
-    rm('OPTFIT.CAL', 'OMPAR0.DIR', 'INPUT0.DAT')
-    rm('OMPAR.DIR', 'LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
+#   rm('OPTFIT.CAL')
+#    rm('OMPAR0.DIR', 'INPUT0.DAT')
+#    rm('OMPAR.DIR')
+    rm('LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
     
     if not isEmpty(proj+'.exf'):
