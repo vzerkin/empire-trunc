@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3318 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-12 21:40:12 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Rev: 3319 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -206,7 +206,6 @@ C
 C        Assuming PE calculates over discrete levels' region as well
          nexrt = MAX(INT(excnq/DE + 1.0001),1)
 
-C  ????????????? They look like to be excluded to me????? BVC 
 C        IDNa(1,6) = 0   ! discrete N is included even with ECIS active
 C        IDNa(3,6) = 0   ! discrete P is included even with ECIS active
 C        IDNa(11,6) = 0  ! discrete A is included even with ECIS active

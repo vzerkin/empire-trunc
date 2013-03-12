@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3318 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-12 21:40:12 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Rev: 3319 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3436,15 +3436,9 @@ C-----It is justified for vibrational model and DWBA calculations
 C-----so we are using zero spin and positive parity here
 C-----NOT TRUE for rotational model calculations (see ecis_CCvibrot)
 C     WRITE(1, '(f5.2,2i2,a1,5f10.5)')XJLV(1,NNUC),0,1, ch, elab,
-      IF(elab.LT.100.0d0) THEN
-        WRITE (1,'(f5.2,2i2,a1,f10.6,4F10.5)') zerosp, 0, 1, '+', elab,
-     &                                SEJc(Nejc), xmas_nejc, xmas_nnuc,
-     &                                Z(Nnuc)*ZEJc(Nejc)
-       ELSE
-        WRITE (1,'(f5.2,2i2,a1,f10.5,4F10.5)') zerosp, 0, 1, '+', elab,
-     &                                SEJc(Nejc), xmas_nejc, xmas_nnuc,
-     &                                Z(Nnuc)*ZEJc(Nejc)
-       ENDIF
+      WRITE (1,'(f5.2,2i2,a1,f10.6,4F10.5)') zerosp, 0, 1, '+', elab,
+     &                              SEJc(Nejc), xmas_nejc, xmas_nnuc,
+     &                              Z(Nnuc)*ZEJc(Nejc)
 C-----0 phonon involved
       WRITE (1,'( )')
       IF (Inlkey.NE.0) THEN
@@ -4262,15 +4256,9 @@ C-----Matching radius calculated within ECIS
 C     WRITE(1, *)
       ch = '-'
       IF (LVP(ilv,Nnuc).GT.0) ch = '+'
-      IF(elab.LT.100.0d0) THEN
-        WRITE (1,'(f5.2,2i2,a1,F10.6,4f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
-     &                                elab, SEJc(Nejc), xmas_nejc,
-     &                                xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
-       ELSE
-        WRITE (1,'(f5.2,2i2,a1,F10.5A,4f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
-     &                                elab, SEJc(Nejc), xmas_nejc,
-     &                                xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
-       ENDIF
+      WRITE (1,'(f5.2,2i2,a1,F10.6,4f10.5)') XJLv(ilv,Nnuc), 0, 1, ch,
+     &                              elab, SEJc(Nejc), xmas_nejc,
+     &                              xmas_nnuc, Z(Nnuc)*ZEJc(Nejc)
 C-----Discrete coupled levels
       npho = 0
       nwrite = 1

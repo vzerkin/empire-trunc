@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3318 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-12 21:40:12 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Rev: 3319 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -339,7 +339,7 @@ C
 C--------Mode of EXFOR retrieval
 C        IX4ret = 0 no EXFOR retrieval
 C        IX4ret = 1 copy C4 file
-         IX4ret = 0
+         IX4ret = 1
 
          NPRIm_g = 0       ! No primary gammas (default)
          NNG_xs  = 0       ! Gamma production cross section not printed

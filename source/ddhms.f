@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3318 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-12 21:40:12 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Rev: 3319 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,11 +10,11 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3318 $
+C CVS Version Management $Revision: 3319 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
-C  Computes preequilibrium spectra with hybrid Monte Carlo simulation (HMS)
+C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
 C
 C  Formalism implemented developed in collaboration with M. Blann,
 C  see phys rev c57, 233 (1998), and ang. mom. transfer model developed
@@ -40,7 +40,7 @@ C       which seems to work very well, and has the advantage that its
 C       "stride" feature means that each event starts with a new rn sequence.
 C       Thus if precision differences on 2 computers lead to occasional different
 C       events, the next event starts in sync again. Thus, differences in the
-C       history files on 2 different computers should be very small.
+C       history files on 2 differnt computers should be very small.
 C
 C----------------------------------------------------------------------------
 C checked against Blann's code as used in PRC paper for 25mev p+90Zr
@@ -397,7 +397,6 @@ C              !keep a sum of events where ucndump is negative
 C
          mrecbin = INT(EREclab/DEBinrec)
 C        !energy bin for recoil spectra
-c         write(*,*) EREclab,DEBinrec,mrecbin
          RECspec(mrecbin,nubin,jzx,jnx)
      &      = RECspec(mrecbin,nubin,jzx,jnx) + 1
 
@@ -634,7 +633,6 @@ C     ! the emission energy put in this array
       THEmiss(NEMiss) = TH(jstudy)
       PHEmiss(NEMiss) = PH(jstudy)
 
-c      write(*,*) th1p,ph1p
       TH1p = TH(Jstudy)
       PH1p = PH(Jstudy)
 C     now convert eem,th1p,ph1p to eplab,thplab,phplab
@@ -2470,7 +2468,7 @@ C     now double-differential spectra
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3318 $')
+99005 FORMAT ('  xddhms version: $Revision: 3319 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4069,9 +4067,7 @@ C     ! convert to cm
 C
 C     work out particle and recoil c.m. velocities
       vpcm = DSQRT(2.*eempcm/AMEjec)
-c      write(*,*) eempcm,vpcm
 C
-c      write(*,*) th1p,ph1p
       xvpcm = vpcm*DSIN(TH1p)*DCOS(PH1p)
       yvpcm = vpcm*DSIN(TH1p)*DSIN(PH1p)
       zvpcm = vpcm*DCOS(TH1p)
@@ -4086,12 +4082,10 @@ C     velocity (vadd)
       yvplab = yvpcm + YVAdd
       zvplab = zvpcm + ZVAdd
 C
-c      write(*,*) xvrecm,yvrecm,zvrecm
       XVAdd = xvreccm + XVAdd
 C     ! substitue new recoil vels into vadd
       YVAdd = yvreccm + YVAdd
       ZVAdd = zvreccm + ZVAdd
-C      write(*,*) XVAdd,YVAdd,ZVAdd
 C
 C     Now infer new lab particle energy and angles:
       vplab = DSQRT(xvplab*xvplab + yvplab*yvplab + zvplab*zvplab)
@@ -4104,7 +4098,6 @@ C
 C     now calculate new recoil energy, angle.
       vreclab = DSQRT(XVAdd*XVAdd + YVAdd*YVAdd + ZVAdd*ZVAdd)
       EREclab = 0.5*AMResid*vreclab*vreclab
-c      write(*,*) vreclab,AMResid,EREclab
       THReclab = DACOS(ZVAdd/vreclab)
       PHReclab = DATAN2(YVAdd,XVAdd)
       IF (PHReclab.LT.0.D0) PHReclab = PHReclab + (2.*PI_g)
@@ -6073,10 +6066,10 @@ c           chkpopda = 0.0d0
              CSEhmslab(ne,1,Inxr) = DXSnxlab(ne-1,jz,jn)
 c             chk=chk+DXSnxlab(ne-1,jz,jn)
             DO nu = 1, ndspc
-              pops = DXSnexlab(nu-1,ne-1,Inxr)*DE
-              POPcsedlab(0,1,ne,Inxr) = POPcsedlab(0,1,ne,Inxr) + pops 
-c              chkpopd = chkpopd + pops
-              CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) - pops 
+             pops = DXSnexlab(nu-1,ne-1,Inxr)*DE
+             POPcsedlab(0,1,ne,Inxr) = POPcsedlab(0,1,ne,Inxr) + pops 
+c             chkpopd = chkpopd + pops
+             CSEhmslab(ne,1,0) = CSEhmslab(ne,1,0) - pops 
               POPcsealab(NDAnghms,0,1,ne,Inxr) = 
      &                  POPcsealab(NDAnghms,0,1,ne,Inxr) + 
      &                             DDXsnexlab(NDAnghms1,nu-1,ne-1,Inxr)
@@ -6435,7 +6428,6 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
               ndspc = nspec-nspecc
               sumcon = 0.0D0
               DO nu = 1, nspecc
-               IF(nu+ndspc.GT.0) THEN
                 DO jsp = 1, JMAxujspec(jz,jn,nu+ndspc-1)+1
                   pops = 0.5*UJSpec(jz,jn,nu+ndspc-1,jsp-1)
                   if(nu.eq.1 .or. nu.eq. nspecc) pops=2*pops
@@ -6459,7 +6451,6 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
                   IF (nu.EQ.1 .OR. nu.EQ.nspecc) sumcon = sumcon -
      &                  pops
                  ENDDO
-                ENDIF
                ENDDO
 
                sumcon = sumcon*DE
