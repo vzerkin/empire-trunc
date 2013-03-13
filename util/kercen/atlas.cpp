@@ -4,7 +4,7 @@
  * Purpose : provides the basic functions for handling ATLAS file
  *
  * Written by Youngsik Cho
- * Modified by Samuel Hoblit
+ * Modified by Samuel Hoblit (Inspired by Said Mughabghab)
  *
  ***********************************************************************/
 
@@ -20,11 +20,15 @@
 
 using namespace std;
 
+struct RESDATA CAtlas::m_Res[2000];
+
 CAtlas::CAtlas()
 {
   m_nRes = 0;
   m_nZ = m_nA = -1;
   m_bReassignLJ = false;
+  m_bJReassigned = false;
+  m_bFissionable = false;
   m_nLS = 0;
   m_fSpin = -1;
   m_fAbundance = 1.0;
@@ -32,6 +36,7 @@ CAtlas::CAtlas()
   m_fR = m_fdR = -1;
   m_fScatteringXS = m_fdScatteringXS = -1;
   m_fCaptureXS = m_fdCaptureXS = -1;
+  m_fFissionXS = m_fdFissionXS = -1;
   m_fGg0 = m_fdGg0 = 0;
   m_fGg1 = m_fdGg1 = 0;
   m_fGg2 = m_fdGg2 = 0;
@@ -40,6 +45,7 @@ CAtlas::CAtlas()
   m_fS0 = m_fdS0 = 0;
   m_fS1 = m_fdS1 = 0;
   m_fIg = m_fdIg = 0;
+  m_fIf = m_fdIf = 0;
   m_szBaseDirectory[0] = 0;
 }
 
@@ -67,11 +73,14 @@ bool CAtlas::GetSpinProb(int l, double &basej, int &npr, double *pr)
 {
   // obtain pdf
   double sum = 0;
-  if (m_fSpin <= l) basej = fabs(m_fSpin - l + 0.5);
+  if (l >= m_fSpin) basej = fabs(l - m_fSpin - 0.5);
   else basej = fabs(m_fSpin - l - 0.5);
   npr = int(m_fSpin + l + 0.5 - basej + 1);
   for (int i=0;i<npr;i++) sum += (pr[i] = 2*(basej+i)+1);
   for (int i=0;i<npr;i++) pr[i] /= sum;
+//  for test
+//  for (int i=0;i<npr;i++) pr[i] = 0.0;
+//  pr[npr-1] = 1.0;
 }
 
 bool CAtlas::ReadProperties(int z, int a)
@@ -84,11 +93,12 @@ bool CAtlas::ReadProperties(int z, int a)
   int za = z*1000+a;
   m_nZ = z;
   m_nA = a;
-  puts("#############################################################");
-  puts("###############                                ##############");
-  puts("###############  READING RESONANCE PROPERTIES  ##############");
-  puts("###############                                ##############");
-  puts("#############################################################");
+  puts("");
+  puts("##############################################################");
+  puts("#############                                    #############");
+  puts("#############        RESONANCE PROPERTIES        #############");
+  puts("#############                                    #############");
+  puts("##############################################################");
   sprintf(fname, "%sres-properties/z%03d.dat", m_szBaseDirectory, z);
   if ((fp = fopen(fname, "r")) == NULL) return false;
   while (fgets(s, 1024, fp)) {
@@ -106,6 +116,9 @@ bool CAtlas::ReadProperties(int z, int a)
     } else if (!strcmp(v, "IG ") && m_fIg == 0)	{	// In case that measured and calculated values coexist, measure one (first one) is taken.
       m_fIg = ReadDouble(s, 34, 11);
       m_fdIg = ReadDouble(s, 46, 11);
+    } else if (!strcmp(v, "IF ") && m_fIf == 0)	{	// In case that measured and calculated values coexist, measure one (first one) is taken.
+      m_fIf = ReadDouble(s, 34, 11);
+      m_fdIf = ReadDouble(s, 46, 11);
     } else if (!strcmp(v, "GG0")) {
       m_fGg0 = ReadDouble(s, 34, 11);
       m_fdGg0 = ReadDouble(s, 46, 11);
@@ -139,6 +152,7 @@ bool CAtlas::ReadProperties(int z, int a)
   printf("Gg1 = %lf +- %lf\n", m_fGg1, m_fdGg1);
   printf("Gg2 = %lf +- %lf\n", m_fGg2, m_fdGg2);
   printf("Ig  = %lf +- %lf\n", m_fIg, m_fdIg);
+  if (m_fIf > 0) printf("If  = %lf +- %lf\n", m_fIf, m_fdIf);
 
   sprintf(fname, "%sthermal/z%03d.dat", m_szBaseDirectory, z);
   if ((fp = fopen(fname, "r")) == NULL) return false;
@@ -151,15 +165,31 @@ bool CAtlas::ReadProperties(int z, int a)
     } else if (!strcmp(v, "SS ")) {
       m_fScatteringXS = ReadDouble(s, 34, 11);
       m_fdScatteringXS = ReadDouble(s, 46, 11);
+      if (s[58] == 'T') {
+        m_fScatteringXS *= 0.001;
+        m_fdScatteringXS *= 0.001;
+      }
     } else if (!strcmp(v, "NG ")) {
       m_fCaptureXS = ReadDouble(s, 34, 11);
       m_fdCaptureXS = ReadDouble(s, 46, 11);
+      if (s[58] == 'T') {
+        m_fCaptureXS *= 0.001;
+        m_fdCaptureXS *= 0.001;
+      }
+    } else if (!strcmp(v, "NF ")) {
+      m_fFissionXS = ReadDouble(s, 34, 11);
+      m_fdFissionXS = ReadDouble(s, 46, 11);
+      if (s[58] == 'T') {
+        m_fFissionXS *= 0.001;
+        m_fdFissionXS *= 0.001;
+      }
     }
   }
   fclose(fp);
-  printf("R   = %lf += %lf\n", m_fR, m_fdR);
-  printf("Thermal scattering xs = %6.3lf += %lf\n", m_fScatteringXS, m_fdScatteringXS);
-  printf("Thermal capture xs    = %6.3lf += %lf\n", m_fCaptureXS, m_fdCaptureXS);
+  if (m_fR != -1) printf("R   = %lf += %lf\n", m_fR, m_fdR);
+  if (m_fScatteringXS != -1) printf("Thermal scattering xs = %6.3lf += %lf\n", m_fScatteringXS, m_fdScatteringXS);
+  if (m_fCaptureXS != -1) printf("Thermal capture xs    = %6.3lf += %lf\n", m_fCaptureXS, m_fdCaptureXS);
+  if (m_fFissionXS != -1) printf("Thermal fission xs    = %6.3lf += %lf\n", m_fFissionXS, m_fdFissionXS);
   return true;
 }
 
@@ -171,18 +201,19 @@ bool CAtlas::ReadParameters(int z, int a)
   char v[20];
   int za = z*1000+a;
   int nzerogn = 0, nzerogg = 0;
-  double gnavg[3]={.0}, gnavg2[3]={.0}, dgnavg[3]={.0}, fgnavg[3]={.0};
-  double ggavg[3]={.0}, ggavg2[3]={.0}, dggavg[3]={.0}, fggavg[3]={.0};
-  double gfavg[3]={.0}, gfavg2[3]={.0}, dgfavg[3]={.0}, fgfavg[3]={.0};
+  double gnsum[3]={.0}, gnsum2[3]={.0}, dgnsum[3]={.0}, fgnsum[3]={.0};
+  double ggsum[3]={.0}, ggsum2[3]={.0}, dggsum[3]={.0}, fggsum[3]={.0};
+  double gfsum[3]={.0}, gfsum2[3]={.0}, dgfsum[3]={.0}, fgfsum[3]={.0};
   int ngn[3]={0}, ndgn[3]={0}, ngg[3]={0}, ndgg[3]={0}, ngf[3]={0}, ndgf[3]={0};
  
   m_nZ = z;
   m_nA = a;
-  puts("#############################################################");
-  puts("###############                                ##############");
-  puts("###############  READING RESONANCE PARAMETERS  ##############");
-  puts("###############                                ##############");
-  puts("#############################################################");
+  puts("");
+  puts("##############################################################");
+  puts("#############                                    #############");
+  puts("#############        RESONANCE PARAMETERS        #############");
+  puts("#############                                    #############");
+  puts("##############################################################");
   sprintf(fname, "%sres-parameters/z%03d.dat", m_szBaseDirectory, z);
   if ((fp = fopen(fname, "r")) == NULL) return false;
   printf("%s... OK\n", fname);
@@ -236,26 +267,29 @@ bool CAtlas::ReadParameters(int z, int a)
       rp->nflag = ' ';
 
     if (rp->Gn == 0) {
+//      printf("Gn = 0.0 at E=%lg\n", rp->E);
       // if gGn is not specified. See if any reduced neutron widths around.
       // this is usually found in parameter 4
       int iof = (4-1)*25 + 55;
       ReadString(s, iof, 3, v);
-      if(v[1] == 'G') {
+//      printf("iof = %c\n", v[0]);
+      if(v[0] == 'G') {
         // G specifies s-wave reduced neutron width
         if (rp->l == 0) {
           double se = sqrt(fabs(rp->E));
           double Gnr  = ReadDouble(s, iof+6, 9);
           double dGnr = ReadDouble(s, iof+16, 8);
           double xfc = 0.0;
-          if(v[2] == ' ') {
+//          printf("se=%lg,Gnr=%lg,%dGnr=%lg,xfc=%lg\n", se, Gnr, dGnr, xfc);
+          if(v[1] == ' ') {
             if(rp->g > -1.0) xfc = se/(2.0*rp->g);
-          } else if(v[2] == 'A') {
+          } else if(v[1] == 'A') {
             if(rp->g > -1.0) xfc = se/rp->g;
-          } else if(v[2] == 'B') {
+          } else if(v[1] == 'B') {
             xfc = se;
-          } else if(v[2] == 'C') {
+          } else if(v[1] == 'C') {
             if(rp->g > -1.0) xfc = se/(2.0*m_fAbundance*rp->g);
-          } else if(v[2] == 'D') {
+          } else if(v[1] == 'D') {
             if(rp->g > -1.0) xfc = se/(m_fAbundance*rp->g);
           }
           rp->Gn  = xfc*Gnr;
@@ -356,33 +390,33 @@ bool CAtlas::ReadParameters(int z, int a)
     if (rp->Gn == 0) ++nzerogn;
     if (rp->Gg == 0) ++nzerogg;
     if (rp->E > 0 && rp->Gn != 0) {
-      gnavg[rp->l] += rp->Gn;
+      gnsum[rp->l] += rp->Gn;
       ++ngn[rp->l];
       if (rp->dGn != 0) {
-        gnavg2[rp->l] += rp->Gn;
-        dgnavg[rp->l] += rp->dGn;
-//        fgnavg[rp->l] += rp->dGn/rp->Gn;
+        gnsum2[rp->l] += rp->Gn;
+        dgnsum[rp->l] += rp->dGn;
+//        fgnsum[rp->l] += rp->dGn/rp->Gn;
         ++ndgn[rp->l];
       }
     }
 
     if (rp->E > 0 && rp->Gg != 0) {
-      ggavg[rp->l] += rp->Gg;
+      ggsum[rp->l] += rp->Gg;
       ++ngg[rp->l];
       if (rp->dGg != 0) {
-        ggavg2[rp->l] += rp->Gg;
-        dggavg[rp->l] += rp->dGg;
-//        fggavg[rp->l] += rp->dGg/rp->Gg;
+        ggsum2[rp->l] += rp->Gg;
+        dggsum[rp->l] += rp->dGg;
+//        fggsum[rp->l] += rp->dGg/rp->Gg;
         ++ndgg[rp->l];
       }
     }
     if (rp->E > 0 && rp->Gf != 0) {
-      gfavg[rp->l] += rp->Gf;
+      gfsum[rp->l] += rp->Gf;
       ++ngf[rp->l];
       if (rp->dGf != 0) {
-        gfavg2[rp->l] += rp->Gf;
-        dgfavg[rp->l] += rp->dGf;
-//        fgfavg[rp->l] += rp->dGf/rp->Gf;
+        gfsum2[rp->l] += rp->Gf;
+        dgfsum[rp->l] += rp->dGf;
+//        fgfsum[rp->l] += rp->dGf/rp->Gf;
         ++ndgf[rp->l];
       }
     }
@@ -392,30 +426,61 @@ bool CAtlas::ReadParameters(int z, int a)
 
   }
   fclose(fp);
-  printf("Number of resonances in the Atlas = %d\n", m_nRes);
-  printf("Number of resonances with zero Gn = %d\n", nzerogn);
-  printf("Number of resonances with zero Gg = %d\n", nzerogg);
 
-  if (ngn[0] > 0) printf("Simple avg. s-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[0]/ngn[0], (gnavg2[0]==0)?0:gnavg[0]/ngn[0]*dgnavg[0]/gnavg2[0]);
-  if (ngn[1] > 0) printf("Simple avg. p-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[1]/ngn[1], (gnavg2[1]==0)?0:gnavg[1]/ngn[1]*dgnavg[1]/gnavg2[1]);
-  if (ngn[2] > 0) printf("Simple avg. d-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[2]/ngn[2], (gnavg2[2]==0)?0:gnavg[2]/ngn[2]*dgnavg[2]/gnavg2[2]);
-  if (ngg[0] > 0) printf("Simple avg. s-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[0]/ngg[0], (ggavg2[0]==0)?0:ggavg[0]/ngg[0]*dggavg[0]/ggavg2[0]);
-  if (ngg[1] > 0) printf("Simple avg. p-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[1]/ngg[1], (ggavg2[1]==0)?0:ggavg[1]/ngg[1]*dggavg[1]/ggavg2[1]);
-  if (ngg[2] > 0) printf("Simple avg. d-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[2]/ngg[2], (ggavg2[2]==0)?0:ggavg[2]/ngg[2]*dggavg[2]/ggavg2[2]);
-  if (ngf[0] > 0) printf("Simple avg. s-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[0]/ngf[0], (gfavg2[0]==0)?0:gfavg[0]/ngf[0]*dgfavg[0]/gfavg2[0]);
-  if (ngf[1] > 0) printf("Simple avg. p-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[1]/ngf[1], (gfavg2[1]==0)?0:gfavg[1]/ngf[1]*dgfavg[1]/gfavg2[1]);
-  if (ngf[2] > 0) printf("Simple avg. d-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[2]/ngf[2], (gfavg2[2]==0)?0:gfavg[2]/ngf[2]*dgfavg[2]/gfavg2[2]);
+//  printf("Number of resonances in the Atlas = %d\n", m_nRes);
+//  printf("Number of resonances with zero Gn = %d\n", nzerogn);
+//  printf("Number of resonances with zero Gg = %d\n", nzerogg);
+
+  if (ngn[0] > 0) printf("Simple avg. s-wave neutron width    = %6.4lf +- %6.4lf\n", gnsum[0]/ngn[0], (gnsum2[0]==0)?0:gnsum[0]/ngn[0]*dgnsum[0]/gnsum2[0]);
+  if (ngn[1] > 0) printf("Simple avg. p-wave neutron width    = %6.4lf +- %6.4lf\n", gnsum[1]/ngn[1], (gnsum2[1]==0)?0:gnsum[1]/ngn[1]*dgnsum[1]/gnsum2[1]);
+  if (ngn[2] > 0) printf("Simple avg. d-wave neutron width    = %6.4lf +- %6.4lf\n", gnsum[2]/ngn[2], (gnsum2[2]==0)?0:gnsum[2]/ngn[2]*dgnsum[2]/gnsum2[2]);
+  if (ngg[0] > 0) printf("Simple avg. s-wave gamma width      = %6.4lf +- %6.4lf\n", ggsum[0]/ngg[0], (ggsum2[0]==0)?0:ggsum[0]/ngg[0]*dggsum[0]/ggsum2[0]);
+  if (ngg[1] > 0) printf("Simple avg. p-wave gamma width      = %6.4lf +- %6.4lf\n", ggsum[1]/ngg[1], (ggsum2[1]==0)?0:ggsum[1]/ngg[1]*dggsum[1]/ggsum2[1]);
+  if (ngg[2] > 0) printf("Simple avg. d-wave gamma width      = %6.4lf +- %6.4lf\n", ggsum[2]/ngg[2], (ggsum2[2]==0)?0:ggsum[2]/ngg[2]*dggsum[2]/ggsum2[2]);
+  if (ngf[0] > 0) printf("Simple avg. s-wave fission width    = %6.4lf +- %6.4lf\n", gfsum[0]/ngf[0], (gfsum2[0]==0)?0:gfsum[0]/ngf[0]*dgfsum[0]/gfsum2[0]);
+  if (ngf[1] > 0) printf("Simple avg. p-wave fission width    = %6.4lf +- %6.4lf\n", gfsum[1]/ngf[1], (gfsum2[1]==0)?0:gfsum[1]/ngf[1]*dgfsum[1]/gfsum2[1]);
+  if (ngf[2] > 0) printf("Simple avg. d-wave fission width    = %6.4lf +- %6.4lf\n", gfsum[2]/ngf[2], (gfsum2[2]==0)?0:gfsum[2]/ngf[2]*dgfsum[2]/gfsum2[2]);
 /*
   if (ngn[0] > 0) printf("Simple avg. s-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[0]/ngn[0], (ndgn[0]==0)?0:gnavg[0]/ngn[0]*fgnavg[0]/ndgn[0]);
   if (ngn[1] > 0) printf("Simple avg. p-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[1]/ngn[1], (ndgn[1]==0)?0:gnavg[1]/ngn[1]*fgnavg[1]/ndgn[1]);
   if (ngn[2] > 0) printf("Simple avg. d-wave neutron width    = %6.4lf +- %6.4lf\n", gnavg[2]/ngn[2], (ndgn[2]==0)?0:gnavg[2]/ngn[2]*fgnavg[2]/ndgn[2]);
-  if (ngg[0] > 0) printf("Simple avg. s-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[0]/ngg[0], (ndgg[0]==0)?0:ggavg[0]/ngg[0]*fggavg[0]/ndgg[0]);
-  if (ngg[1] > 0) printf("Simple avg. p-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[1]/ngg[1], (ndgg[1]==0)?0:ggavg[1]/ngg[1]*fggavg[1]/ndgg[1]);
-  if (ngg[2] > 0) printf("Simple avg. d-wave gamma width    = %6.4lf +- %6.4lf\n", ggavg[2]/ngg[2], (ndgg[2]==0)?0:ggavg[2]/ngg[2]*fggavg[2]/ndgg[2]);
-  if (ngf[0] > 0) printf("Simple avg. s-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[0]/ngf[0], (ndgf[0]==0)?0:gfavg[0]/ngf[0]*fgfavg[0]/ndgf[0]);
-  if (ngf[1] > 0) printf("Simple avg. p-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[1]/ngf[1], (ndgf[1]==0)?0:gfavg[1]/ngf[1]*fgfavg[1]/ndgf[1]);
-  if (ngf[2] > 0) printf("Simple avg. d-wave fission width  = %6.4lf +- %6.4lf\n", gfavg[2]/ngf[2], (ndgf[2]==0)?0:gfavg[2]/ngf[2]*fgfavg[2]/ndgf[2]);
+  if (ngg[0] > 0) printf("Simple avg. s-wave gamma width      = %6.4lf +- %6.4lf\n", ggavg[0]/ngg[0], (ndgg[0]==0)?0:ggavg[0]/ngg[0]*fggavg[0]/ndgg[0]);
+  if (ngg[1] > 0) printf("Simple avg. p-wave gamma width      = %6.4lf +- %6.4lf\n", ggavg[1]/ngg[1], (ndgg[1]==0)?0:ggavg[1]/ngg[1]*fggavg[1]/ndgg[1]);
+  if (ngg[2] > 0) printf("Simple avg. d-wave gamma width      = %6.4lf +- %6.4lf\n", ggavg[2]/ngg[2], (ndgg[2]==0)?0:ggavg[2]/ngg[2]*fggavg[2]/ndgg[2]);
+  if (ngf[0] > 0) printf("Simple avg. s-wave fission width    = %6.4lf +- %6.4lf\n", gfavg[0]/ngf[0], (ndgf[0]==0)?0:gfavg[0]/ngf[0]*fgfavg[0]/ndgf[0]);
+  if (ngf[1] > 0) printf("Simple avg. p-wave fission width    = %6.4lf +- %6.4lf\n", gfavg[1]/ngf[1], (ndgf[1]==0)?0:gfavg[1]/ngf[1]*fgfavg[1]/ndgf[1]);
+  if (ngf[2] > 0) printf("Simple avg. d-wave fission width    = %6.4lf +- %6.4lf\n", gfavg[2]/ngf[2], (ndgf[2]==0)?0:gfavg[2]/ngf[2]*fgfavg[2]/ndgf[2]);
 */
+
+/*
+  if (m_fGg0 == 0.0) {
+    m_fGg0 = ggsum[0]/ngg[0];
+    printf("Gg0 = 0. Simple avg. s-wave gamma width '%6.4lf' is used for Gg0.\n", m_fGg0);
+  }
+  if (m_fGg1 == 0.0) {
+    m_fGg1 = ggsum[1]/ngg[1];
+    printf("Gg1 = 0. Simple avg. p-wave gamma width '%6.4lf' is used for Gg1.\n", m_fGg1);
+  }
+  if (m_fGg2 == 0.0) {
+    m_fGg2 = ggsum[2]/ngg[2];
+    printf("Gg2 = 0. Simple avg. d-wave gamma width '%6.4lf' is used for Gg2.\n", m_fGg2);
+  }
+  if (m_fdGg0 == 0.0) {
+    m_fdGg0 = (ggsum2[0]==0)?0:ggsum[0]/ngg[0]*dggsum[0]/ggsum2[0];
+    printf("dGg0 = 0. Simple avg. s-wave gamma width uncertainty '%6.4lf' is used for dGg0.\n", m_fdGg0);
+  }
+  if (m_fdGg1 == 0.0) {
+    m_fdGg1 = (ggsum2[1]==0)?0:ggsum[1]/ngg[1]*dggsum[1]/ggsum2[1];
+    printf("dGg1 = 0. Simple avg. p-wave gamma width uncertainty '%6.4lf' is used for dGg1.\n", m_fdGg1);
+  }
+  if (m_fdGg2 == 0.0) {
+    m_fdGg2 = (ggsum2[2]==0)?0:ggsum[2]/ngg[2]*dggsum[2]/ggsum2[2];
+    printf("dGg2 = 0. Simple avg. d-wave gamma width uncertainty '%6.4lf' is used for dGg2.\n", m_fdGg2);
+  }
+*/
+
+  if (ngf[0]+ngf[1]+ngf[2] > 0) m_bFissionable = true;
+
   return true;
 }
 
@@ -426,7 +491,7 @@ bool CAtlas::Read(int z, int a)
   return true;
 }
 
-void CAtlas::AssignJ()
+void CAtlas::ReassignJ()
 {
 //  puts("########## ASSIGNING MISSING J VALUES   ##########");
   // assign missing J values
@@ -482,6 +547,14 @@ void CAtlas::AssignJ()
     for (cum=0,n=0;n<npr;n++) cum+=count[n];
 //    for (n=0;n<npr;n++) printf("count[%d] = %2d (%lf)\n", n, count[n], count[n]/cum);
   }
+  m_bJReassigned = true;
+}
+
+bool CAtlas::JIsReassigned()
+{
+  bool nResult = m_bJReassigned;
+  m_bJReassigned = false;
+  return nResult;
 }
 
 double CAtlas::GetSpin()
@@ -499,16 +572,38 @@ double CAtlas::GetdR()
   return m_fdR;
 }
 
-void CAtlas::GetScatteringXS(double &xs, double &dxs)
+void CAtlas::SetR(double R, double dR)
 {
-  xs = m_fScatteringXS;
-  dxs = m_fdScatteringXS;
+  m_fR = R;
+  m_fdR = dR;
 }
 
-void CAtlas::GetCaptureXS(double &xs, double &dxs)
+double CAtlas::GetScatteringXS()
 {
-  xs = m_fCaptureXS;
-  dxs = m_fdCaptureXS;
+  return m_fScatteringXS;
+}
+
+double CAtlas::GetScatteringUN()
+{
+  return m_fdScatteringXS;
+}
+
+double CAtlas::GetCaptureXS()
+{
+  return m_fCaptureXS;
+}
+double CAtlas::GetFissionXS()
+{
+  return m_fFissionXS;
+}
+
+double CAtlas::GetCaptureUN()
+{
+  return m_fdCaptureXS;
+}
+double CAtlas::GetFissionUN()
+{
+  return m_fdFissionXS;
 }
 
 int CAtlas::NoRes()
@@ -585,6 +680,12 @@ void CAtlas::GetIg(double &Ig, double &dIg)
 {
   Ig = m_fIg;
   dIg = m_fdIg;
+}
+
+void CAtlas::GetIf(double &If, double &dIf)
+{
+  If = m_fIf;
+  dIf = m_fdIf;
 }
 
 RESDATA *CAtlas::GetParameters(int &n)

@@ -1,13 +1,13 @@
 #----GNU C++ compiler
 CC     =  g++
 #----flags for production compilation with g++
-CFLAGS = -O
+CFLAGS = -g
 
 OBJA =	mkgroup.o util.o atlas.o endfio.o endf.o
 OBJB =	regroup.o
-OBJC =	kercen.o util.o link.o atlas.o resxs.o endfio.o endf.o
+OBJC =	util.o sort.o endfio.o endf.o atlas.o resxs.o kernel.o mlbw.o covres.o
 
-all:	mkgroup regroup kercen
+all:	mkgroup regroup covres
 
 mkgroup:   $(OBJA)
 	$(CC) $(CFLAGS) -o $@ $(OBJA)
@@ -15,7 +15,7 @@ mkgroup:   $(OBJA)
 regroup: $(OBJB)
 	$(CC) $(CFLAGS) -o $@ $(OBJB)
 
-kercen: $(OBJC)
+covres: $(OBJC)
 	$(CC) $(CFLAGS) -o $@ $(OBJC)
 
 clean:

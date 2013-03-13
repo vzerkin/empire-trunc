@@ -167,7 +167,7 @@ int main(int argc, char **argv)
 
   atlas.SetBaseDirectory(szAtlasDir);
   atlas.Read(nZ, nA);
-  atlas.AssignJ();
+  atlas.ReassignJ();
 
   int nGroup;
   double *pGroup = NULL;
