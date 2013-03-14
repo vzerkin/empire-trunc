@@ -11208,14 +11208,23 @@ of total cross section.
 
 \item [{CELRED}] The compound elastic cross section will be multiplied by VAL (default: 1.). \\
                  The relative uncertainty of the scaling factor in \% can be given by I1.\\
-This parameter may be used to simulate the CN resonances (obviously not included in the optical model). 
-Otherwise it could be used for a simple scaling of the CE cross section.
+This parameter may be used to simulate the CN resonances (obviously not included in the optical model), or  
+to simulate physical effects arising from the compound-direct processes interference
+(Engelbrecht-Weidenmuller transformation). The interference increases the compound inelastic cross sections,
+reducing others compound channels (incl. the compound elastic). It is recommended to avoid using CELRED and CINRED
+at the same energy as they affect the same quantities.
+
+\item [{CELCOR}] The compound elastic cross section will be multiplied by VAL (default: 1.). \\
+                 The relative uncertainty of the scaling factor in \% can be given by I1.\\
+This parameter may be used for a simple scaling of the CE cross section, without affecting compound
+inelastic cross sections.
 
 \item [{CINRED}] The compound inelastic cross section to discrete levels will be multiplied by VAL (default: 1.). \\
-                 The relative uncertainty of the scaling factor in \% can be given by I1.\\
+                 The discrete level number can be given by I1.\\
+                 The relative uncertainty of the scaling factor in \% can be given by I2.\\
 This parameter may be used to simulate physical effects arising from the compound-direct processes interference
 (Engelbrecht-Weidenmuller transformation). The interference increases the compound inelastic cross sections,
-reducing others compound channels (incl. the compound elastic). The reduction is automatically calculated.
+reducing others compound channels (incl. the compound elastic). 
 
 \item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron on the target
                  nucleus will be multiplied by VAL). 
