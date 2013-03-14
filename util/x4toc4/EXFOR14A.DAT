@@ -157,6 +157,15 @@ ALSO INCLUDED IN THE TRANSLATION PROGRAM.                                      1
 REACTION                                   PROJECTILE MF  MT OPERATION         1
 ======================================================================         1
                                                                                1
+Add astrophysics quantities to MT definitions (A. Trkov, march 2013)           1
+(trial) on request from A. Palumbo                                             1
+(P,G),SIG,,SFC                                   1001  31102  0
+(A,G),SIG,,SFC                                   2004  31102  0
+(P,N),SIG,,SFC                                   1001  31004  0
+(A,N),SIG,,SFC                                   2004  31004  0
+(P,A),SIG,,SFC                                   1001  31107  0
+(A,P),SIG,,SFC                                   2004  31103  0
+                                                                               1
 NU-BAR                                                                         1
                                                                                1
 (N,F),NU                                            1  1 452  0
