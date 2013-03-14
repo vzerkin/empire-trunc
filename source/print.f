@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3246 $
+Ccc   * $Rev: 3323 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-20 12:08:05 +0100 (Di, 20 Nov 2012) $
+Ccc   * $Date: 2013-03-14 15:39:13 +0100 (Do, 14 Mär 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -161,6 +161,9 @@ Ccc   * input:NNUC-decaying nucleus index                                *
 Ccc   *       NEJC-ejectile index                                        *
 Ccc   *       Iflag=1 for integral of inclusive spectra (special case)   *
 Ccc   *               Usually Iflag=0 for normal exclusive spectra       *
+Ccc   *       Iflag=0 trapezoidal integration                            *
+Ccc   *       Iflag=1 rectangular integration                            *
+Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   * calls:none                                                       *
@@ -265,6 +268,7 @@ C
          if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
+C	   if(i.eq.kmax) e = EMAx(Nnuc)
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
             l = MIN0(93,l)
@@ -373,12 +377,18 @@ C
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
 
       CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
-      DO i = 1, kmax
+C     DO i = 1, kmax - 1
+      DO i = 1, kmax 
       IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') 
      &     FLOAT(i - 1)*DE*1.D6/recorp, 
      &       CSE(i,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
       ENDDO
+C     IF(CSE(kmax,Nejc,Nnuc).GT.0.d0) then
+C        WRITE (36,'(1X,E12.6,3X,E12.6)') 
+C    &     EMAx(Nnuc)*1.D6/recorp, 
+C    &       CSE(kmax,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
+C     ENDIF
       CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
       CLOSE(36)
       RETURN

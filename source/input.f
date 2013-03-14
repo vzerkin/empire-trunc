@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3319 $
+Ccc   * $Rev: 3323 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Date: 2013-03-14 15:39:13 +0100 (Do, 14 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -9523,8 +9523,6 @@ C
       egrcoll(3,2)=115.*A(0)**(-1./3.)
       ggrcoll(3,2)=9.3-A(0)/48.
 
-      
-
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
       COLfile = fexist
@@ -9544,6 +9542,18 @@ C--------2nd line
          READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
+C
+         READ (comment,'(10x,I9)') itmp
+         if(itmp.ne.LEVcc) then
+C
+C           ERROR: Set LEVCC parameter in dimension.h to itmp
+C
+            write(8,*) 'ERROR: Set LEVCC parameter in dimension.h to', 
+     &        itmp
+            STOP 'ERROR: Change LEVCC parameter in dimension.h; check lo  
+     &ng listing'
+		 endif
+
 C--------82 208    nucleus is treated as spherical or
 C        92 238    nucleus is treated as dynamically deformed                                              '
 C        40  90    nucleus is treated as soft

@@ -1,6 +1,6 @@
-cc   * $Rev: 3320 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-12 22:01:45 +0100 (Di, 12 Mär 2013) $
+cc   * $Rev: 3323 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-14 15:39:13 +0100 (Do, 14 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1429,43 +1429,43 @@ C    &  '' DWBA inelastic contribution '')')
           WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
           IF(CSEmis(0,1).GT.0) THEN
-            CALL AUERST(1,0,1)
+            CALL AUERST(1,0,0)
             WRITE (8,
      &       '(2x,'' g PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(0,1)
           ENDIF
           IF(CSEmis(1,1).GT.0) THEN
-            CALL AUERST(1,1,1)
+            CALL AUERST(1,1,0)
             WRITE (8,
      &       '(2x,'' n PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(1,1)
           ENDIF
           IF(CSEmis(2,1).GT.0) THEN
-            CALL AUERST(1,2,1)
+            CALL AUERST(1,2,0)
             WRITE (8,
      &       '(2x,'' p PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(2,1)
           ENDIF
           IF(CSEmis(3,1).GT.0) THEN
-            CALL AUERST(1,3,1)
+            CALL AUERST(1,3,0)
             WRITE (8,
      &       '(2x,'' a PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(3,1)
           ENDIF
           IF(CSEmis(4,1).GT.0) THEN
-            CALL AUERST(1,4,1)
+            CALL AUERST(1,4,0)
             WRITE (8,
      &       '(2x,'' d PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(4,1)
           ENDIF
           IF(CSEmis(5,1).GT.0) THEN
-            CALL AUERST(1,5,1)
+            CALL AUERST(1,5,0)
             WRITE (8,
      &       '(2x,'' t PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(5,1)
           ENDIF
           IF(CSEmis(6,1).GT.0) THEN
-            CALL AUERST(1,6,1)
+            CALL AUERST(1,6,0)
             WRITE (8,
      &       '(2x,'' h PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(6,1)
@@ -2326,7 +2326,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                  nxsp = 0
                  IF(xtotsp.GT.0.0d0) THEN
                    IF(ttotsp.GT.0.0d0) THEN
-                     nxsp=INT((xtotsp-dtotdp)/totsp+0.5d0)
+                     nxsp=INT((xtotsp-dtotsp)/totsp+0.5d0)
                      xnorm(1,INExc(nnuc)) =(nxsp*totsp+dtotsp)/xtotsp
                      xtotsp = nxsp*totsp + dtotsp
                    ELSE
@@ -2668,7 +2668,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0) THEN
-           IF(IOUt.GT.2) CALL AUERST(nnuc,0,0)
+           IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
            IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
@@ -2910,6 +2910,9 @@ C----
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(NDEJC)
                 ENDIF
+C---------------Double the first bin x-sec to preserve integral in EMPEND
+C               POPcse(0, nejc, 1, INExc(nnuc)) =  
+C    &                  POPcse(0, nejc, 1, INExc(nnuc))*2
                 WRITE (12,*) ' '
                 WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
@@ -2919,7 +2922,10 @@ C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.d0
                 IF (nejc.GT.0 .and. RECoil.GT.0) 
      &            recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
-                nspec= min(INT(recorp*EMAx(nnuc)/DE) + 1,NDECSE-1)
+C
+C               Following BVC, recorp is omitted in calculating nspec
+                nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C
 C---------------Exclusive DDX spectra (neutrons & protons)
                 IF (nejc.GE.1 .AND. nejc.LE.2) THEN
                    WRITE (12,
@@ -2959,6 +2965,11 @@ C------------------(continuum part - same for all n and p)
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
                        ENDDO
                      ENDDO
+                     dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE 
+C                    DO nang = 1, NDANG
+C                       !double the first bin to preserve integral in EMPEND
+C                       cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                    ENDDO
                      DO ie = 1, nspec 
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3021,7 +3032,8 @@ c     &                  csetmp(ie)
                      ENDDO
 c                    write(12,'(a5,i5,3f15.4)')'sig0=',nnuc,
 c     &                                              (spechk(i)*DE,i=1,3)
-                     nspecrec=MIN(INT(recorp*nspec+1),NDECSE)
+c                    nspecrec=MIN(INT(recorp*nspec+1),NDECSE)
+                     nspecrec=MIN(nspec+1,NDECSE)
                      DO ie = nspec+1,nspecrec
                        csetmp(ie)=0.0d0
                      ENDDO 
@@ -3061,7 +3073,10 @@ c     &                          * POPcsedlab(0,nejc,ie,INExc(nnuc))
                      ENDDO
 c                    write(12,'(a5,i5,4f15.4)')'sig1=',nnuc,
 c     &                            (PI*spechk(i)*DE,i=1,3),spechk(4)*DE
-
+C                    DO nang = 1, NDANG
+C                       !double the first bin to preserve integral in EMPEND
+C                       cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                    ENDDO
                      DO ie = 1, nspec 
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3096,20 +3111,19 @@ C-----------------------printed (4*Pi*CSAlev(1,il,nejc)
      &                      *4.0*PI*recorp/DE
                      ENDDO
                    ENDIF
+
                    dtmp =0.d0           !alpha continuum and all other particles
-                   DO ie = 1, nspec     !  (continuum and levels together)
+                   DO ie = 1, nspec     !   (continuum and levels together)
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                      dtmp = dtmp + htmp*DE         
                    ENDDO
-C                  dtmp = dtmp + POPcse(0,nejc,nspec,INExc(nnuc))*DE 
-C                  WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
-C    &               max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))*recorp
+                   dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE 
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
+     &               max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc)))*recorp
                                               !exact endpoint
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
-
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -3296,7 +3310,7 @@ C------------------Accumulating total spectrum for neutrons
 C
 C                  CSEfis contains the n,xnf spectra, not being used for now
 C                  CSEfis is initialized inside HF-comp.f (EXCLUSIVE..)
-C                  csepfns(ie) = csepfns(ie) + CSEfis(ie,nejc,nnuc)
+                   csepfns(ie) = csepfns(ie) + CSEfis(ie,nejc,nnuc)
 C
               ENDDO
 
@@ -3799,7 +3813,8 @@ C--------Print inclusive spectra of ejectiles
 C--------neutrons
          recorp = 1.d0 
          IF (LHMS.GT.0.or.RECoil.GT.0) recorp=(1.d0+EJMass(1)/AMAss(1))
-         nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 1)
+C        nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 1)
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(1,1))/DE) + 1)
 
          IF(LHMS.GT.0) THEN
            DO ie = 1, nspec + 1
@@ -3873,7 +3888,7 @@ C---------------Inclusive DDX spectrum (neutrons)
 C--------protons
          recorp = 1.d0
          IF (LHMS.GT.0.or.RECoil.GT.0) recorp=(1.d0+EJMass(2)/AMAss(1))
-         nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(2,1))/DE) + 1)
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(2,1))/DE) + 1)
 
          IF(LHMS.GT.0) THEN
            DO ie = 1, nspec + 1
@@ -3946,7 +3961,7 @@ C---------------Inclusive DDX spectrum (protons)
 C--------alphas
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(3)/AMAss(1))
-         nspec = INT(recorp*(EMAx(1) - Q(3,1))/DE) + 1
+         nspec = INT((EMAx(1) - Q(3,1))/DE) + 1
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
@@ -3979,7 +3994,7 @@ C---------Exact endpoint
 C--------deuterons
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(4)/AMAss(1))
-         nspec = INT(recorp*(EMAx(1) - Q(4,1))/DE) + 1
+         nspec = INT((EMAx(1) - Q(4,1))/DE) + 1
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
@@ -4011,7 +4026,7 @@ C---------Exact endpoint
 C--------tritons
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(5)/AMAss(1))
-         nspec = INT(recorp*(EMAx(1) - Q(5,1))/DE) + 1
+         nspec = INT((EMAx(1) - Q(5,1))/DE) + 1
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
@@ -4043,7 +4058,7 @@ C---------Exact endpoint
 C--------helium-3
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(6)/AMAss(1))
-         nspec = INT(recorp*(EMAx(1) - Q(6,1))/DE) + 1
+         nspec = INT((EMAx(1) - Q(6,1))/DE) + 1
          IF(nspec.gt.1) then
           IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
           WRITE (12,*) ' '
@@ -4075,7 +4090,7 @@ C--------light ions
          IF (NDEJC.EQ.7) THEN
            recorp = 1.d0
            IF (RECoil.GT.0) recorp = (1. + EJMass(NDEJC)/AMAss(1))
-           nspec = INT(recorp*(EMAx(1) - Q(NDEJC,1))/DE) + 1
+           nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 1
            IF(nspec.gt.1) then
              IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
