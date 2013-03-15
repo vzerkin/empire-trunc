@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3327 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3118,7 +3118,7 @@ C-----
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
 C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
-      nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed) 
+      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE + 1.0001),0),ndecsed) 
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
@@ -3128,10 +3128,10 @@ C-----total number of bins
 C
 C     We need statements below as long as discrete data are calculated in MSD
 C
-      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
-     & nexrt = next
-      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
-     & nexrt = next
+C      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
+C     & nexrt = next
+C      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
+C     & nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
@@ -3222,13 +3222,19 @@ C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
+               POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
+     &            POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
 C              IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             - 0.5*CSEmsd(icsp,Nejc)
 
-C--------------DDX using portions
+C--------------DDX 
                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
+               DO na = 1,NDANG
+                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
+     &                                             CSEa(icsp,na,Nejc,1)
+                ENDDO
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
                POPbin(ie,Nnur) = pops
@@ -3304,7 +3310,7 @@ C
          nangle = NDANG
          dang = pi/FLOAT(nangle - 1)
          coef = 2*pi*dang/DERec
-         DO ie = nexrt, next
+         DO ie = nexrt+1, next
             echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
             DO na = 1, nangle
                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)

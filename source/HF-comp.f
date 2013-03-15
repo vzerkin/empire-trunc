@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3305 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
+Ccc   * $Rev: 3327 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -182,7 +182,7 @@ C    >             4.d0*PI*PL_CN(0,ilevcol)
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),ilevcol)
                     CSAlev(na,il,Nejc) = 
-     >              CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
+     >                      CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
 C                   if(na.le.2)
 C    >                write(*,'(1x,A4,F4.0,1x,3(A11,1p,d10.3,1x))') 
 C    >               'ANG=',ANGles(na),'ECIS dist.=',xs_cn,
@@ -314,7 +314,7 @@ C-----DE spectra
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -324,22 +324,28 @@ C-----DE spectra
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
                ENDIF
-               IF(ENDfa(Nnur).EQ.1 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
+              IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.2) THEN
                 IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 POPcsed(Ief,iejc,ie,INExc(Nnur))
-     &                = POPcsed(Ief,iejc,ie,INExc(Nnur))
+                  IF(ENDF(Nnur).EQ.2) THEN
+                    POPcsed(Ief,iejc,ie,0)
+     &               = POPcsed(Ief,iejc,ie,0)
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
-                ENDIF
-                IF (POPcsedlab(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 POPcsedlab(Ief,iejc,ie,INExc(Nnur))
-     &                = POPcsedlab(Ief,iejc,ie,INExc(Nnur))
-     &                + POPcsedlab(Iec,iejc,ie,INExc(Nnuc))*xnor
-                 DO nth = 1, NDAng
-                  POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
-     &                = POPcsealab(nth,Ief,iejc,ie,INExc(Nnur))
-     &                + POPcsealab(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
-                 ENDDO
-                ENDIF
+                    DO nth = 1, NDAng
+                      POPcsea(nth,Ief,iejc,ie,0)
+     &                 = POPcsea(nth,Ief,iejc,ie,0)
+     &                   + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
+                     ENDDO
+                   ELSE
+                    POPcsed(Ief,iejc,ie,INExc(Nnur))
+     &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
+     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+                    DO nth = 1, NDAng
+                      POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
+     &                 = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
+     &                   + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
+                     ENDDO
+                   ENDIF
+                 ENDIF
 C-----------DDX spectra using portions
                ELSE ! original loop to NDEJCD
                 IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
@@ -449,25 +455,31 @@ C     &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
 C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                  ENDIF
                 ENDIF
-               IF(ENDfa(Nnur).EQ.1 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
-                IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 POPcsed(0,iejc,iesp,INExc(Nnur))
-     &                = POPcsed(0,iejc,iesp,INExc(Nnur))
-     &                + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                ENDIF
-                IF (POPcsedlab(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 POPcsedlab(0,iejc,iesp,INExc(Nnur))
-     &                = POPcsedlab(0,iejc,iesp,INExc(Nnur))
-     &                + POPcsedlab(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                 DO nth = 1, NDAng
-                  POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
-     &                = POPcsealab(nth,0,iejc,iesp,INExc(Nnur))
-     &                + POPcsealab(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
-                 ENDDO
-                ENDIF
+               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.2) THEN
+                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                   IF(ENDf(Nnur).EQ.2) then
+                     POPcsed(0,iejc,iesp,0)
+     &                  = POPcsed(0,iejc,iesp,0)
+     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                     DO nth = 1, NDAng
+                       POPcsea(nth,0,iejc,iesp,0)
+     &                    = POPcsea(nth,0,iejc,iesp,0)
+     &                     + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
+                      ENDDO  
+                    ELSE
+                     POPcsed(0,iejc,iesp,INExc(Nnur))
+     &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
+     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                     DO nth = 1, NDAng
+                       POPcsea(nth,0,iejc,iesp,INExc(Nnur))
+     &                    = POPcsea(nth,0,iejc,iesp,INExc(Nnur))
+     &                     + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
+                      ENDDO  
+                    ENDIF
+                  ENDIF
 C-----------DDX spectra using portions
-               ELSE ! original loop to NDEJCD
-                IF (POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                ELSE ! original loop to NDEJCD
+                 IF (POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                    IF(ENDf(Nnur).EQ.2) THEN
                       POPcseaf(0,iejc,iesp,0)
      &                = POPcseaf(0,iejc,iesp,0)
@@ -477,8 +489,8 @@ C-----------DDX spectra using portions
      &                = POPcseaf(0,iejc,iesp,INExc(Nnur))
      &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
                    ENDIF
-                ENDIF 
-              ENDIF
+                 ENDIF 
+               ENDIF
              ENDDO
 C--------------DDX spectra using portions
             ENDDO
