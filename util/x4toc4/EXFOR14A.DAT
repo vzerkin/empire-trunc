@@ -163,7 +163,6 @@ Add astrophysics quantities to MT definitions (A. Trkov, march 2013)           1
 (A,G),SIG,,SFC                                   2004  31102  0
 (P,N),SIG,,SFC                                   1001  31004  0
 (A,N),SIG,,SFC                                   2004  31004  0
-(P,A),SIG,,SFC                                   1001  31107  0
 (A,P),SIG,,SFC                                   2004  31103  0
                                                                                1
 NU-BAR                                                                         1
