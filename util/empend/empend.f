@@ -1,7 +1,6 @@
 Ccc $Rev: 3160 $                                                          | 
 Ccc $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
 Ccc $Author: atrkov $                                                  
-Ccc $Id: empend.f,v 1.61 2010/09/08 23:29:00 trkov Exp $ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -108,8 +107,11 @@ C-V           interpolation range can be defined in ENDF)
 C-V        - Reduce emission spectra thinning criterion from 1 to 0.5 %.
 C-V  12/07 Fix Eout for discrete levels when no recoils are given.
 C-V        Add to log file the printout of reactions summed into MT 5.
-C-V  12/12 Read angle-integrated spectra to check and normalise double
-C-V        differential cross sections.
+C-V  12/12 - Read angle-integrated spectra to check and normalise
+C-V          double differential cross sections.
+C-V        - Increase precision when writing the ENDF file.
+C-V  13/03 Fix vertical segments at the upper end of emission spectra by
+C-V        delta-shifting the one-but-last point.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -2793,6 +2795,7 @@ C* Check for zero or negative distributions
       NEG=0
       NEP=0
       KZE=0
+      ELS=0
       DO J=1,NAN
         DDJ=DD(J)
         IF(DDJ.GT.0) THEN
@@ -2815,6 +2818,10 @@ C* Mark point with all-zero distributions (except if discrete level)
       ELSE
         NZZ=0
       END IF
+c...
+c...  print *,'NEG,NEP,KZE,NZZ,NEN,EOU',NEG,NEP,KZE,NZZ,NEN+1,EOU
+c...  print *,'   ',(rwo(ld-1+k),k=1,5)
+c...
       IF(NEG.GT. 0) THEN
 C* Force zero points to half of the average of neighbours until all >0
         IF(NAN.GT.2) THEN
@@ -2836,6 +2843,10 @@ C...    WRITE(LTT,906) MT,NINT(ZAP),EIN,EOU,NEG,NAN
 C...    WRITE(LER,906) MT,NINT(ZAP),EIN,EOU,NEG,NAN
       END IF
 C* Check for multiple zero distributions
+c...
+c...  print *,'NEG,NEP,KZE,NZZ,NEN,EOU',NEG,NEP,KZE,NZZ,NEN+1,EOU
+c...  print *,'   ',(rwo(ld-1+k),k=1,5)
+c...
       IF(NZZ.GT.2) THEN
         EOU=RWO(LD)
         RWO(LD-1-NAN)=EOU
@@ -2844,6 +2855,9 @@ C* Check for multiple zero distributions
         LD=LD+1+NAN
         NEN=NEN+1
       END IF
+c...
+c...  PRINT *,'NEN',NEN
+c...
       GO TO 40
 C*
 C* Check that the last point is a zero distribution
@@ -2873,6 +2887,9 @@ C* Remove points that can be reproduced by linear interpolation
       LD2=LD1+1+NAN
       LD3=LD2+1+NAN
       NDEL=0
+c...
+c...  print *,'nen',nen
+c...
       DO I=3,NEN
         E1=RWO(LD1)
         E2=RWO(LD2)
@@ -2889,7 +2906,7 @@ C*    --Check point 2 (excluding discrete levels)
             IF(ABS(F2-FI).GT.ETOL*ABS(F2)) ISTAY=1
           END DO
         END IF
-        IF(ISTAY.EQ.1) THEN
+        IF(ISTAY.EQ.1 .OR. I.GE.NEN) THEN
 C*      --Point 2 stays, move points 2 and 3 and redefine
           JD1=LD1+1+NAN
           JD2=JD1+1+NAN
@@ -2904,7 +2921,7 @@ C*      --Point 2 stays, move points 2 and 3 and redefine
         ELSE
 C*      --Point 2 to be removed, rename 3 to 2
 c...
-c...          print *,'remove mt,za,eo',mt,nint(zap),e2
+c...      print *,'remove mt,za,eo',mt,nint(zap),e2
 c...
           LD2=LD3
           E2 =E3
@@ -2913,16 +2930,21 @@ c...
 C*    --Process next point
         IF(I.LT.NEN) LD3=LD3+1+NAN
       END DO
-C*  --Move the last point
-      JD1=LD1+1+NAN
-      JD2=JD1+1+NAN
-      RWO(JD1)=E2
-      RWO(JD2)=E3
-      DO J=1,NAN
-        RWO(JD1+J)=RWO(LD2+J)
-        RWO(JD2+J)=RWO(LD3+J)
-      END DO
-      NEN=NEN-NDEL
+c...
+c...  print *,'ndel',ndel
+c...
+      IF(NDEL.GT.0) THEN
+C*      --Move the last point
+c...        JD1=LD1+1+NAN
+c...        JD2=JD1+1+NAN
+c...        RWO(JD1)=E2
+c...        RWO(JD2)=E3
+c...        DO J=1,NAN
+c...          RWO(JD1+J)=RWO(LD2+J)
+c...          RWO(JD2+J)=RWO(LD3+J)
+c...        END DO
+        NEN=NEN-NDEL
+      END IF
 C*
 C* All processing completed
 c...
@@ -4486,16 +4508,17 @@ C...
       READ (LIN,891)
       CALL RDANGF(LIN,NEP,NAN,RWO(L64),LMX,ANG,MXA,MT6,ZAP,LTT,LER)
 c...
-c...       print *,'  Done rdangf NEP',NEP
-c...       if(nint(zap).eq.2004) then
-c...          print *,rec
-c...          print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
-c...           do j=1,nep
-c...           do j=1,10
-c...             print *,(rwo((j-1)*(nan+1)+k+l64-1),k=1,5)
-c...           end do
-c...           stop
-c...       end if
+C...      print *,'  Done rdangf outgoing E_points NEP=',NEP,' at Ein',EE
+C...c...  if(nint(zap).eq.2004) then
+C...      if(nint(zap).eq.   1) then
+C...         print *,rec
+C...         print *,'nep,nan,mt6,ee',nep,nan,mt6,ee
+C...          do j=1,nep
+C...c...      do j=1,10
+C...            print *,(rwo(l64+(j-1)*(nan+1)+k-1),k=1,5)
+C...          end do
+C...          if(ee.ge.1.5e6) stop
+C...      end if
 c...
       LSC=L64+NEP*(NAN+1)
       LMX=MXR-LSC
@@ -4554,7 +4577,7 @@ C*      -- Renormalise the distribution to match angle-integrated spectrum
             SJ =RWO(LSP+2*J-1)/(4*PI)
             IF(NINT(EJ-EOU).EQ.0) THEN
 C...
-C...          print *,'Matching', EOU,EJ,PEU,SJ
+C...          print *,'Matching', EOU,EJ,PEU,SJ ,ee
 C...
               IF(PEU.GT.0) THEN
                 IF(ABS(SJ-PEU).GT.PEU*0.02) THEN
@@ -4574,6 +4597,7 @@ c...
                   PEU=SJ
                 END IF
               END IF
+              EXIT
             END IF
           END DO
         END IF
@@ -4581,9 +4605,11 @@ c...
         LI =LI+LHI+2
       END DO
 C...
+c...  IF(JSP.GT.0 .AND. MT6.GT.0 .and. ee.ge.1.5e6) stop
+C...
       IF(LNRM.NE.0) THEN
         WRITE(LTT,907) EE,EOU,100*(RNRM-1),LNRM
-        WRITE(LER,907) EE,EOU,100*(RNRM-1),LNRM
+c...    WRITE(LER,907) EE,EOU,100*(RNRM-1),LNRM
       END IF
 C...
 C* If the integral is zero, skip this energy point
@@ -4874,10 +4900,10 @@ C*
   821 FORMAT(4F11.0,2I11,F4.2)
   822 FORMAT(6I11,I4)
   891 FORMAT(A136)
-  907 FORMAT(' EMPEND WARNING - At EIN',1P,E9.2,' Eou',E9.2
-     1      ,' spectrum renorma. max',F10.1,' % at',I4,' points')
-  908 FORMAT(' EMPEND WARNING - At EIN',1P,E9.2,' Eou',E9.2
-     1      ,' spectrum renormalised',F10.1,' %')
+  907 FORMAT(' EMPEND WARNING - At Ein',1P,E9.2,' Eou',E9.2
+     1      ,' sp.rnrm.max',0P,F10.1,' % at',I3,' pnt')
+  908 FORMAT(' EMPEND WARNING - At Ein',1P,E9.2,' Eou',E9.2
+     1      ,' spectrum renormalised',0P,F10.1,' %')
   909 FORMAT(' EMPEND WARNING - MT',I3,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
   910 FORMAT(' EMPEND WARNING - Can not recognise spectrum for '
@@ -6553,7 +6579,7 @@ C* Loop for all argument&function pairs
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(*),INR(*)
+      DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -6563,8 +6589,8 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NR
       WRITE(REC(6),42) NZ
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
-      IF(NZ.LE.0) RETURN
 C* Write interpolation data
       N =0
    20 I =0
@@ -6577,6 +6603,7 @@ C* Write interpolation data
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NR) GO TO 20
       RETURN
@@ -6649,9 +6676,14 @@ C* Sign of the exponent
 C* Sign of the mantissa
       IF(FF.LT.0) FA=-FA
 C* Write character fiels
-      WRITE(CH,80) FA,SN,IA
+      IF(IA.GE.10) THEN
+        WRITE(CH,80) FA,SN,IA
+      ELSE
+        WRITE(CH,81) FA,SN,IA
+      END IF
       RETURN
    80 FORMAT(F8.5,A1,I2.2)
+   81 FORMAT(F9.6,A1,I1)
       END
       SUBROUTINE FINSP3(XI,YI,N,XO,YO,Y1,M,F1,F2,SC)
 C-Title  : FINSP3 Subroutine
