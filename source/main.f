@@ -1,6 +1,6 @@
-cc   * $Rev: 3327 $
+cc   * $Rev: 3328 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
+Ccc   * $Date: 2013-03-15 19:48:24 +0100 (Fr, 15 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2959,6 +2959,8 @@ C------------------(continuum part - same for all n and p)
                          cseaprnt(ie,nang) =
      &                       ftmp + CSEa(ie,nang,nejc,1)*
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
+                         IF(cseaprnt(ie,nang).lt.1.0d-6) 
+     &                                         cseaprnt(ie,nang) = 0.0d0
                        ENDDO
                      ENDDO
                      DO ie = 1, nspec 

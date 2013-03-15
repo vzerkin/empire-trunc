@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3327 $
+Ccc   * $Rev: 3328 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
+Ccc   * $Date: 2013-03-15 19:48:24 +0100 (Fr, 15 Mär 2013) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3222,8 +3222,9 @@ C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
-               POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
-     &            POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
+C only needed with POPcsea
+C               POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
+C     &            POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
 C              IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
@@ -3231,10 +3232,11 @@ C    &             - 0.5*CSEmsd(icsp,Nejc)
 
 C--------------DDX 
                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
-               DO na = 1,NDANG
-                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
-     &                                             CSEa(icsp,na,Nejc,1)
-                ENDDO
+C   equivalent to POPcseaf when only the 1st emission is anisotropic
+C               DO na = 1,NDANG
+C                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
+C     &                                             CSEa(icsp,na,Nejc,1)
+C                ENDDO
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
                POPbin(ie,Nnur) = pops
