@@ -1,6 +1,6 @@
-cc   * $Rev: 3328 $
+cc   * $Rev: 3330 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-15 19:48:24 +0100 (Fr, 15 Mär 2013) $
+Ccc   * $Date: 2013-03-15 19:53:29 +0100 (Fr, 15 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2327,7 +2327,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                  nxsp = 0
                  IF(xtotsp.GT.0.0d0) THEN
                    IF(ttotsp.GT.0.0d0) THEN
-                     nxsp=MAX(INT((xtotsp-dtotdp)/totsp+0.5d0),0)
+                     nxsp=MAX(INT((xtotsp-dtotsp)/totsp+0.5d0),0)
                      xnorm(1,INExc(nnuc)) =(nxsp*totsp+dtotsp)/xtotsp
                      xtotsp = nxsp*totsp + dtotsp
                    ELSE
@@ -2959,7 +2959,7 @@ C------------------(continuum part - same for all n and p)
                          cseaprnt(ie,nang) =
      &                       ftmp + CSEa(ie,nang,nejc,1)*
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
-                         IF(cseaprnt(ie,nang).lt.1.0d-6) 
+                         IF(cseaprnt(ie,nang).lt.1.0d-7) 
      &                                         cseaprnt(ie,nang) = 0.0d0
                        ENDDO
                      ENDDO
@@ -3015,7 +3015,7 @@ c                    spechk(3) = 0.0d0
                          cseaprnt(ie,nang) = recorp*(ftmp +
      &                          xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc)))
-                         IF(cseaprnt(ie,nang).lt.1.0d-6) 
+                         IF(cseaprnt(ie,nang).lt.1.0d-7) 
      &                                         cseaprnt(ie,nang) = 0.0d0
                         ENDDO
                       ENDDO

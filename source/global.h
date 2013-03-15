@@ -1,6 +1,6 @@
-C $Rev: 3327 $
+C $Rev: 3330 $
 C $Author: bcarlson $
-C $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
+C $Date: 2013-03-15 19:53:29 +0100 (Fr, 15 Mär 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -111,7 +111,7 @@ C
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
 c     &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
-     &                 POPcsea(ndangecis,0:ndex_d,4,ndecsed,
+     &                 POPcsea(ndangecis,0:ndex_d,2,ndecsed,
      &                  0:ndexclus),  
 C     &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
 C           DDXS arrays defined only for neutrons and protons  
