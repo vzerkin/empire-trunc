@@ -158,6 +158,7 @@ REACTION                                   PROJECTILE MF  MT OPERATION         1
 ======================================================================         1
                                                                                1
 Add astrophysics quantities to MT definitions (A. Trkov, march 2013)           1
+S-Factor (units of MeV b)                                                      1
 (trial) on request from A. Palumbo                                             1
 (P,G),SIG,,SFC                                   1001  31102  0
 (A,G),SIG,,SFC                                   2004  31102  0
