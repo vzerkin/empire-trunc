@@ -25,6 +25,7 @@ C-V  11/06 Take temperature from the source and not the resonance file.
 C-V  11/12 Add MT 19 to the list of adjusted reactions, if present.
 C-V  12/02 Fix NBT,INR array declarations for consistency (R. Capote)
 C-V  12/07 Allow filenames up to 80 characters long.
+C-V  13/03 Increase MXRW from 10 000 to 100 000 to process Fe-56 (JEFF)
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -48,7 +49,7 @@ C-External routines from DXSEND.F
 C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
 C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
-      PARAMETER    (MXRW=10000, MXNB=20, MXMT=100)
+      PARAMETER    (MXRW=100000, MXNB=20, MXMT=100)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
       CHARACTER*40  BLNK
@@ -244,15 +245,12 @@ C* Copy comments from scratch to output ENDF file
 C*
 C* Copy the rest of MF1
   110 CALL RDTEXT(LEM,MAT,MF,MT,CH66,IER)
-      IF(MT.EQ.0) NS=99998
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       IF(MF.NE.0) GO TO 110
 C* Check AWR consistency on the resonance file
       IF(ABS(AWR-AW).GT.AWR*1.E-4) THEN
-
-        WRITE(LTT,*) ' WARNING - Unmatched AWR',AWR,AW
-        WRITE(LLG,*) ' WARNING - Unmatched AWR',AWR,AW
-
+        WRITE(LTT,*) ' ENDRES WARNING - Unmatched AWR',AWR,AW
+        WRITE(LLG,*) ' ENDRES WARNING - Unmatched AWR',AWR,AW
       END IF
 C*
 C-F  Process the resonance data and define the energy range
@@ -398,9 +396,7 @@ C* Case: Unknown LRU - copy as is to output
       END IF
 C* Copy the rest of the resonance file to output
   126 CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
-      IF(MT.EQ.0) NS=99998
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      NS=0
       IF(MF.NE.0) GO TO 126
 C*
 C-F  Check if the file contains resonance covariance data
@@ -437,6 +433,10 @@ C* Read the cross sections
       NM2=NMX-3
       CALL RDTAB1(LEM,QM,QI,LL,LR,NR,NP,NBT,INR
      &           ,RWO(K1),RWO(K2),NM2,IER)
+      IF(IER.NE.0) THEN
+        WRITE(LTT,*) 'ENDRES ERROR - Reading MF/MT/IER 3 1',IER
+        STOP 'ENDRES ERROR - Reading MF/MT 3 1'
+      END IF
 C* First energy point for the present reaction
       E1 =RWO(K1)
 C*
@@ -1215,9 +1215,12 @@ C-Purpose: Read a text record to an ENDF file
 C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
       CHARACTER*66  REC
-      NS=NS+1
+   12 NS=NS+1
       IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) REC,MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
       RETURN
    40 FORMAT(A66,I4,I2,I3,I5)
       END
