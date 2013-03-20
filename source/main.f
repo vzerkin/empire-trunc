@@ -1,6 +1,6 @@
-cc   * $Rev: 3333 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-20 15:58:59 +0100 (Mi, 20 Mär 2013) $
+cc   * $Rev: 3334 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-20 16:31:17 +0100 (Mi, 20 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -78,6 +78,7 @@ C                      -----------------------------------------------
 C                      PFNS quantities  
 C                      Total prompt fission spectra only for neutrons
 C                             and assumed isotropic 
+     &                 emiss_en(NDEPFN),
      &                 tequiv, fmaxw, fnorm, eincid, eneutr, ftmp1, 
      &                 post_fisn(NDEPFN),csepfns(NDEPFN), deltae_pfns,
      &                 ratio2maxw(NDEPFN),enepfns(NDEPFN),fmed, 
@@ -650,7 +651,7 @@ C--------------Add direct transition to the spectrum
                   DO iang = 1, NANgela
                     READ (45,'(24x,D12.5)',END = 1400) ftmp
                     CSAlev(iang,ilv,nejcec) = 
-     >                         CSAlev(iang,ilv,nejcec) + ftmp
+     >              CSAlev(iang,ilv,nejcec) + ftmp
                   ENDDO
                 ENDIF
                ELSE
@@ -2286,7 +2287,7 @@ C--------------Add contributions to discrete levels for MT=91,649,849
 C--------------(merely for checking purpose)
              DO ii = 0, NDEjc
                xnorm(ii,INExc(nnuc)) = 1.0d0
-              END DO
+             END DO
              IF (nnuc.EQ.mt91) THEN
                nejc = 1
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
@@ -2911,7 +2912,9 @@ C----
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(NDEJC)
                 ENDIF
-
+C---------------Double the first bin x-sec to preserve integral in EMPEND
+C               POPcse(0, nejc, 1, INExc(nnuc)) =  
+C    &                  POPcse(0, nejc, 1, INExc(nnuc))*2
                 WRITE (12,*) ' '
                 WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
@@ -2921,7 +2924,10 @@ C---------------multiplies cross sections and divides outgoing energies
                 recorp = 1.d0
                 IF (nejc.GT.0 .and. RECoil.GT.0) 
      &            recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
+C
+C               Following BVC, recorp is omitted in calculating nspec
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C
 C---------------Exclusive DDX spectra (neutrons & protons)
                 IF (nejc.GE.1 .AND. nejc.LE.2) THEN
                    WRITE (12,
@@ -2954,15 +2960,18 @@ C------------------(continuum part - same for all n and p)
                        dtmp = dtmp + htmp*DE
                        ftmp =(htmp - CSEmsd(ie,nejc)*
      &                   POPcseaf(0,nejc,ie,INExc(nnuc)) )/4.D0/PI
-                       IF(ftmp.LT.0.0d0) CYCLE
+                       IF(ftmp.LT.0.0d0) ftmp = 0.d0
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                       ftmp + CSEa(ie,nang,nejc,1)*
      &                               POPcseaf(0,nejc,ie,INExc(nnuc))
-C                         IF(cseaprnt(ie,nang).lt.1.0d-7) 
-C     &                                         cseaprnt(ie,nang) = 0.0d0
                        ENDDO
                      ENDDO
+                     dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE 
+C                    DO nang = 1, NDANG
+C                       !double the first bin to preserve integral in EMPEND
+C                       cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                    ENDDO
                      DO ie = 1, nspec 
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3011,14 +3020,16 @@ c                    spechk(3) = 0.0d0
      &                         - xnorm(nejc,INExc(nnuc))
      &                          * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
                         IF(ftmp.LT.0.0d0) ftmp = 0.0d0
-                       DO nang = 1, NDANG
+                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = recorp*(ftmp +
      &                          xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc)))
-C                         IF(cseaprnt(ie,nang).lt.1.0d-7) 
-C     &                                         cseaprnt(ie,nang) = 0.0d0
                         ENDDO
-                      ENDDO
+                     ENDDO
+C                    DO nang = 1, NDANG
+C                       !double the first bin to preserve integral in EMPEND
+C                       cseaprnt(1,nang) = cseaprnt(1,nang)*2.0
+C                    ENDDO
                      DO ie = 1, nspec 
                                        ! print DDX spectrum
                         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3028,8 +3039,8 @@ C     &                                         cseaprnt(ie,nang) = 0.0d0
                                        ! exact DDX spectrum endpoint
                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                 EMAx(nnuc)/recorp,
-c     &                 (cseaprnt(nspec + 1,nang),nang = 1,NDANG)
-     &                 (0.0d0,nang = 1,NDANG)
+     &                 (cseaprnt(nspec + 1,nang),nang = 1,NDANG)
+C    &                 (0.0d0,nang = 1,NDANG)
                      WRITE (12,*) ' '    
                    ENDIF
 C
@@ -3054,20 +3065,19 @@ C-----------------------printed (4*Pi*CSAlev(1,il,nejc)
      &                      *4.0*PI*recorp/DE
                      ENDDO
                    ENDIF
+
                    dtmp =0.d0           !alpha continuum and all other particles
-                   DO ie = 1, nspec     !  (continuum and levels together)
+                   DO ie = 1, nspec     !   (continuum and levels together)
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                      dtmp = dtmp + htmp*DE         
                    ENDDO
-C                  dtmp = dtmp + POPcse(0,nejc,nspec,INExc(nnuc))*DE 
-C                  WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
-C    &               max(0.d0,POPcse(0,nejc,nspec,INExc(nnuc)))*recorp
+                   dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE 
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp, 
+     &               max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc)))*recorp
                                               !exact endpoint
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
-
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -3107,6 +3117,7 @@ C
             nejc = 1 ! neutron emission only
             post_fisn  = 0.d0
             ratio2maxw =  0.d0
+            emiss_en   = 0.d0
 
             IF(nfission.eq.0) THEN
 C
@@ -3158,6 +3169,8 @@ C
               csetmp(30) = 7.d-2
               csetmp(31) = enepfns(2)
 
+C             Below first chance, no emissive contributions to fission spectra
+C             Only fission neutrons emitted from fully accelerated fragments
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
 C
@@ -3757,15 +3770,16 @@ C--------Print inclusive spectra of ejectiles
 C--------neutrons
          recorp = 1.d0 
          IF (LHMS.GT.0.or.RECoil.GT.0) recorp=(1.d0+EJMass(1)/AMAss(1))
+C        nspec = MIN0(NDECSE-1,INT(recorp*(EMAx(1) - Q(1,1))/DE) + 1)
          nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(1,1))/DE) + 1)
 
          IF(LHMS.GT.0) THEN
            DO ie = 1, nspec + 1
 C             Subtract HMS contribution to CM emission spectrum 
              ftmp = (CSE(ie,1,0) - CSEhms(ie,1,0))/4.0/PI
+			 if(ftmp.lt.0.d0) ftmp = 0.d0
              DO nang = 1, NDANG
                cseaprnt(ie,nang) = recorp*(ftmp + CSEahms(ie,nang,1))
-               IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
               ENDDO
             ENDDO 
          ENDIF
@@ -3825,9 +3839,9 @@ C--------protons
            DO ie = 1, nspec + 1
 C             Subtract HMS contribution to CM emission spectrum 
              ftmp = (CSE(ie,2,0) - CSEhms(ie,2,0))/4.0/PI
+			 if(ftmp.lt.0.d0) ftmp = 0.d0
              DO nang = 1, NDANG
                cseaprnt(ie,nang) = recorp*(ftmp + CSEahms(ie,nang,2))
-               IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
               ENDDO
            ENDDO 
          ENDIF
@@ -4041,7 +4055,7 @@ C------------exact endpoint
            ENDIF
          ENDIF
          WRITE (12,*) ' '
-       ENDIF
+      ENDIF
 
 C  Summary of exclusive emission cross sections
       jnmx = 0
