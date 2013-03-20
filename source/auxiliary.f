@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3327 $
+Ccc   * $Rev: 3333 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
+Ccc   * $Date: 2013-03-20 15:58:59 +0100 (Mi, 20 Mär 2013) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -78,13 +78,13 @@ C
       POPlv    = 0.d0
       CSEmis   = 0.d0
       CSE      = 0.d0
-C     POPcsea  = 0.d0
+      POPcsea  = 0.d0
       POPcseaf = 0.d0
       POPcse   = 0.d0
       POPcsed  = 0.d0
-      POPcsedlab=0.d0
-      POPcsealab=0.d0
-      POPhmslab= 0.d0
+C      POPcsedlab=0.d0
+C      POPcsealab=0.d0
+C      POPhmslab= 0.d0
       SCRtem   = 0.d0
       SCRt     = 0.d0
       SCRtl    = 0.d0
