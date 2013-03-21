@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3327 $
+Ccc   * $Rev: 3336 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-15 19:18:25 +0100 (Fr, 15 Mär 2013) $
+Ccc   * $Date: 2013-03-21 21:30:16 +0100 (Do, 21 Mär 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -324,21 +324,32 @@ C-----DE spectra
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
                    ENDIF
                ENDIF
-              IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.2) THEN
-                IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                  IF(ENDF(Nnur).EQ.2) THEN
-                    POPcsed(Ief,iejc,ie,0)
+              IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                IF(ENDF(Nnur).EQ.2) THEN
+                  POPcsed(Ief,iejc,ie,0)
      &               = POPcsed(Ief,iejc,ie,0)
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+                 ELSE
+                  POPcsed(Ief,iejc,ie,INExc(Nnur))
+     &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
+     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+                 ENDIF
+               ENDIF
+              IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
+                IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                  IF(ENDF(Nnur).EQ.2) THEN
+c                    POPcsed(Ief,iejc,ie,0)
+c     &               = POPcsed(Ief,iejc,ie,0)
+c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                     DO nth = 1, NDAng
                       POPcsea(nth,Ief,iejc,ie,0)
      &                 = POPcsea(nth,Ief,iejc,ie,0)
      &                   + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
                      ENDDO
                    ELSE
-                    POPcsed(Ief,iejc,ie,INExc(Nnur))
-     &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
-     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+c                    POPcsed(Ief,iejc,ie,INExc(Nnur))
+c     &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
+c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                     DO nth = 1, NDAng
                       POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
      &                 = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
@@ -455,21 +466,33 @@ C     &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
 C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                  ENDIF
                 ENDIF
-               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.2) THEN
-                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                   IF(ENDf(Nnur).EQ.2) then
-                     POPcsed(0,iejc,iesp,0)
+
+               IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                 IF(ENDf(Nnur).EQ.2) then
+                   POPcsed(0,iejc,iesp,0)
      &                  = POPcsed(0,iejc,iesp,0)
      &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                  ELSE
+                   POPcsed(0,iejc,iesp,INExc(Nnur))
+     &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
+     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                  ENDIF
+                ENDIF
+               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
+                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                   IF(ENDf(Nnur).EQ.2) THEN
+c                     POPcsed(0,iejc,iesp,0)
+c     &                  = POPcsed(0,iejc,iesp,0)
+c     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
                      DO nth = 1, NDAng
                        POPcsea(nth,0,iejc,iesp,0)
      &                    = POPcsea(nth,0,iejc,iesp,0)
      &                     + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
                       ENDDO  
                     ELSE
-                     POPcsed(0,iejc,iesp,INExc(Nnur))
-     &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
-     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+c                     POPcsed(0,iejc,iesp,INExc(Nnur))
+c     &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
+c     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
                      DO nth = 1, NDAng
                        POPcsea(nth,0,iejc,iesp,INExc(Nnur))
      &                    = POPcsea(nth,0,iejc,iesp,INExc(Nnur))
