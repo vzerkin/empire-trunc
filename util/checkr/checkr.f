@@ -1,5 +1,5 @@
-! $Rev: 3160 $                                                          | 
-! $Date: 2012-10-24 18:27:22 +0200 (Mi, 24 Okt 2012) $                                                     
+! $Rev: 3339 $                                                          | 
+! $Date: 2013-03-22 11:44:26 +0100 (Fr, 22 Mär 2013) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,9 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V         Version 8.20   March 2013 A. Trkov
+!-V                        Enable checking of files with a large number
+!-V                        of angular distribution data
 !-V         Version 8.19   October 2012 A. Trkov
 !-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.18   May 2012 A. Trkov
@@ -258,7 +261,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.19'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.20'
 !
 !     Define variable precision
 !
@@ -3043,7 +3046,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !*****CHECK FOR NUMBER OF INCIDENT ENERGIES
       NE = NP2
       CALL TEST1(NE,1,NES4MAX,'NE',1)
-      IF(IERX.EQ.1)   GO TO 100
+!---Do not stop if the number of energy points is exceeded
+!     IF(IERX.EQ.1)   GO TO 100
 !
 !     LEGENDRE COEFFICIENTS
 !
@@ -3052,7 +3056,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             CALL RDLIST
 !***********TEST NUMBER OF COEFFICIENTS
             CALL TEST1(NPL,1,NLEGMAX,'NL',1)
-            IF(IERX.EQ.1) GO TO 100
+!---Do not stop if the number of coefficients is exceeded
+!           IF(IERX.EQ.1) GO TO 100
          END DO
          IF(LTT.EQ.1)  GO TO 100
 !
@@ -3063,7 +3068,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !********CHECK FOR NUMBER OF INCIDENT ENERGIES
          NE = NP2
          CALL TEST1(NE,1,NES4MAX,'NE',1)
-         IF(IERX.EQ.1)   GO TO 100
+!---Do not stop if the number of energy points is exceeded
+!        IF(IERX.EQ.1)   GO TO 100
       END IF
 !
 !     TABULAR
@@ -5772,7 +5778,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       CALL TEST1(NR2,1,NIRMAX,'NR2',2)
       CALL TEST1(NP2,1,NPTS2MAX,'NP2',1)
-      IF(IERX.EQ.1) GO TO 100
+!--- Do not skip the interpolation table even if limit exceeded
+!     IF(IERX.EQ.1) GO TO 100
 !
 !     PROCESS INTERPOLATION TABLE
 !
