@@ -1,6 +1,6 @@
-cc   * $Rev: 3338 $
+cc   * $Rev: 3340 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-22 09:02:54 +0100 (Fr, 22 Mär 2013) $
+Ccc   * $Date: 2013-03-22 15:10:56 +0100 (Fr, 22 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -71,6 +71,7 @@ C
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 totcorr,cseaprnt(ndecse,ndangecis),
+     &                 check_DE(ndecse),check_DL(NDLV),
      &                 cel_da(NDAngecis), totener_out, totener_in,
      &                 emedg, emedn, emedp, emeda, emedd, emedt, emedh, 
      &                 cmulg, cmuln, cmulp, cmula, cmuld, cmult, cmulh, 
@@ -2922,6 +2923,8 @@ C
 C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+                dang = PI/FLOAT(NDANG - 1) ! 180.d0/FLOAT(NDANG - 1)
+                coef = 2*PI*dang
                 IF (nejc.GT.0) THEN
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
@@ -2933,22 +2936,30 @@ C---------------multiplies cross sections and divides outgoing energies
                    WRITE (12,*) ' '
                    WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
-
+                   check_DL = 0.d0
 C------------------First emission reactions
 C------------------(discrete levels part)
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
+                     csum = 0.d0
                      DO il = 1, NLV(nnuc)  ! discrete levels
-                           espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
-                           IF (espec.GE.0) WRITE (12,
+                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
+                        IF (espec.GE.0) WRITE (12,
      &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
      &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
+                        csum = 0.d0
+                        DO nang = 1, NDANG  ! over angles
+                          csum = csum + 
+     &                           CSAlev(nang,il,nejc)*SANgler(nang)
+                        ENDDO
+                        check_DL(il) = csum*coef
                      ENDDO
                    ENDIF
 C------------------(continuum part - same for all particles)
                    cseaprnt = 0.d0 ! clean DDX matrix
+                   check_DE = 0.d0
                    dtmp = 0.d0
 C                  DO ie = 1, nspec     ! reconstruct continuum DDX spectrum
 C                  range extended to cover the last energy corresponding to the exact endpoint
@@ -2959,19 +2970,24 @@ C                  range extended to cover the last energy corresponding to the 
                      ftmp = (htmp - xnorm(nejc,INExc(nnuc))
      &                        * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
                      IF(ftmp.LT.0.0d0) ftmp = 0.0d0
+                     csum = 0.d0
                      IF(LHMs.GT.0 .AND. (nejc.EQ.1 .OR. nejc.EQ.2)) THEN
+C----------------------Check whether integral over angles agrees with DE spectra
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = 
      &                     ftmp + xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc))
-                        ENDDO
-                      ELSE
+                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+                       ENDDO
+                     ELSE
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
-     &                             POPcseaf(0,nejc,ie,INExc(nnuc))
-                        ENDDO
-                      ENDIF
+     &                            POPcseaf(0,nejc,ie,INExc(nnuc))
+                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+                       ENDDO
+                     ENDIF
+                     check_DE(ie) = csum*coef
                    ENDDO
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
@@ -2987,21 +3003,44 @@ C                  range extended to cover the last energy corresponding to the 
 C
 C                  Integrated spectrum
 C
-                   WRITE (12,'(10x,''Integrated Emission Spectra'')')
-                   WRITE (12,'(10x,''    Energy    mb/MeV'')')
-                   WRITE (12,*) ' '
+C                  IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
+C    &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
+C    &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
+C                    WRITE (12,'(15x,''Integrated Discrete Spectra'')')
+C                    WRITE (12,'(4x,''Lev'',3x,
+C    &             ''    Energy      mb/MeV        Int(DDX)        Diff
+C    &(should be negligible!)'')')
+C                    WRITE (12,*) ' '
+C                    DO il = 1, NLV(nnuc)  ! discrete levels
+C                      espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
+C                      IF (espec.LT.0) cycle 
+C                      WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,1x))') il, 
+C    &                 -espec,POPlv(il,nnuc)*recorp,check_DL(il)*recorp,
+C    &                 (POPlv(il,nnuc) - check_DL(il)) * recorp 
+C                    ENDDO
+C                    WRITE (12,*) ' '
+C                  ENDIF
 
+                   WRITE (12,'(15x,''Integrated Emission Spectra'')')
+                   WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV        Int(DDX)        Diff
+     &(should be negligible!)'')')
+                   WRITE (12,*) ' '
                    DO ie = 1, nspec 
                       htmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if(htmp.LE.0.d0) cycle
-                      WRITE (12,'(10x,F10.5,E14.5)') FLOAT(ie - 1)
-     &                *DE/recorp, htmp*recorp
+                      WRITE (12,'(10x,F10.5,3(E14.5,1x))') FLOAT(ie - 1)
+     &                *DE/recorp, htmp*recorp, 
+     &                check_DE(ie)*recorp,
+     &                (htmp - check_DE(ie)) * recorp 
                    ENDDO
                                         ! exact endpoint
-                   WRITE (12,'(10x,F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &               max(0.d0,POPcse(0,nejc,nspec+1,
-     &               INExc(nnuc)))*recorp
-
+                   WRITE (12,'(10x,F10.5,3(E14.5,1x))') 
+     &               EMAx(nnuc)/recorp,max(0.d0,POPcse(0,nejc,nspec+1,
+     &               INExc(nnuc)))*recorp,
+     &               check_DE(nspec+1)*recorp,
+     &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
+     &               	check_DE(nspec+1) )*recorp
                    WRITE(12,*) 
                    WRITE(12,'(10x,
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -4682,13 +4721,13 @@ C        WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, ilast
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DERec,
-     &                                RECcse(ie,0,Nnuc)
+            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec,
+     &                                 RECcse(ie,0,Nnuc)
          ENDDO
 C--------Print end point again with 0 xs for consistency with particle spectra
-C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
+C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
-C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,0.d0
+C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,0.d0
          IF (ABS(1.d0 - corr).GT.0.01D0 .AND. CSPrd(Nnuc).GT.0.001D0)
      &       THEN
             WRITE (8,*) 
@@ -4744,13 +4783,13 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, ilast
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/A(1),
+            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
      &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
          ENDDO
 C--------Print end point again with 0 xs for consistency with particle spectra
-C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
+C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
-C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
+C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
       END
 
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
