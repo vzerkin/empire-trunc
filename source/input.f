@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3323 $
+Ccc   * $Rev: 3341 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-14 15:39:13 +0100 (Do, 14 Mär 2013) $
+Ccc   * $Date: 2013-03-22 18:30:30 +0100 (Fr, 22 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -609,7 +609,8 @@ C--------set angles for inelastic calculations
          ENDDO
          DO na = 1, NDAng
            CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
-           SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+           SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.D0)
+C          SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
          READ (5,*) A(0), Z(0)

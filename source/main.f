@@ -1,6 +1,6 @@
-cc   * $Rev: 3340 $
+cc   * $Rev: 3341 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-22 15:10:56 +0100 (Fr, 22 Mär 2013) $
+Ccc   * $Date: 2013-03-22 18:30:30 +0100 (Fr, 22 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -672,7 +672,7 @@ C--------------Construct recoil spectra due to direct transitions
                   dang = PI/FLOAT(NDANG - 1)
                   coef = 2*PI*dang
 C-----------------Check whether integral over angles agrees with x-sec. read from ECIS
-                  csum = 0.0
+                  csum = 0.d0
                   DO iang = 1, NDANG
                      csum = csum + CSAlev(iang,ilv,nejcec)*SANgler(iang)
      &                      *coef
@@ -2925,6 +2925,13 @@ C---------------Exclusive DDX spectra (all particles but gammas)
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
                 dang = PI/FLOAT(NDANG - 1) ! 180.d0/FLOAT(NDANG - 1)
                 coef = 2*PI*dang
+C               if (nejc.eq.1) then 
+C                 csum = 0.d0 
+C                 DO nang = 1, NDANG
+C                   csum = csum + SANgler(nang)
+C                 ENDDO
+C                 write (*,*) 'Int(sin)=',csum*dang 
+C               endif
                 IF (nejc.GT.0) THEN
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
@@ -3024,23 +3031,24 @@ C                  ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra'')')
                    WRITE (12,'(10x,
      &             ''    Energy      mb/MeV        Int(DDX)        Diff
-     &(should be negligible!)'')')
+     &           Diff[%]    '')')
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
                       htmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if(htmp.LE.0.d0) cycle
-                      WRITE (12,'(10x,F10.5,3(E14.5,1x))') FLOAT(ie - 1)
+                      WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, htmp*recorp, 
      &                check_DE(ie)*recorp,
-     &                (htmp - check_DE(ie)) * recorp 
+     &                (htmp - check_DE(ie)) * recorp, 
+     &                (htmp - check_DE(ie)) / htmp * 100
                    ENDDO
                                         ! exact endpoint
-                   WRITE (12,'(10x,F10.5,3(E14.5,1x))') 
+                   WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
      &               EMAx(nnuc)/recorp,max(0.d0,POPcse(0,nejc,nspec+1,
      &               INExc(nnuc)))*recorp,
      &               check_DE(nspec+1)*recorp,
      &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
-     &               	check_DE(nspec+1) )*recorp
+     &               	check_DE(nspec+1) )*recorp, 0.d0
                    WRITE(12,*) 
                    WRITE(12,'(10x,
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
