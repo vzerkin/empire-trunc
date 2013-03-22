@@ -1,6 +1,6 @@
-cc   * $Rev: 3335 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-21 21:28:34 +0100 (Do, 21 Mär 2013) $
+cc   * $Rev: 3338 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-22 09:02:54 +0100 (Fr, 22 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2950,7 +2950,9 @@ C------------------(discrete levels part)
 C------------------(continuum part - same for all particles)
                    cseaprnt = 0.d0 ! clean DDX matrix
                    dtmp = 0.d0
-                   DO ie = 1, nspec ! reconstruct continuum DDX spectrum
+C                  DO ie = 1, nspec     ! reconstruct continuum DDX spectrum
+C                  range extended to cover the last energy corresponding to the exact endpoint
+                   DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))              
                      if(htmp.LE.0.d0) cycle
                      dtmp = dtmp + htmp*DE
@@ -2970,7 +2972,7 @@ C------------------(continuum part - same for all particles)
      &                             POPcseaf(0,nejc,ie,INExc(nnuc))
                         ENDDO
                       ENDIF
-                    ENDDO
+                   ENDDO
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
                       WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3010,7 +3012,7 @@ C
 
                 ELSE !  then (nejc.GT.0)
 C
-C------------------Exclusive DDX spectra (gammas, alphas, light ions (DE))
+C------------------Exclusive DE spectra (gammas and light ions)
 C------------------double the first bin x-sec to preserve integral in EMPEND
 C                  POPcse(0,nejc,1,INExc(nnuc)) =
 C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
@@ -3021,13 +3023,16 @@ C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
                    DO ie = 1, nspec    
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
+                     dtmp = dtmp + htmp*DE         
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
-                     dtmp = dtmp + htmp*DE         
                    ENDDO
+                   dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE         
                                               !exact endpoint
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
-
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
+     &               max(0.d0,POPcse(0,nejc,nspec+1,
+     &               INExc(nnuc)))*recorp
+C                  WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -4630,7 +4635,6 @@ C-----gamma decay to discrete levels (stored with icse=0)
       ENDDO                  !over levels
       END
 
-
       SUBROUTINE PRINT_RECOIL(Nnuc,React)
 C-----
 C-----Prints recoil spectrum of nnuc residue
@@ -4653,14 +4657,19 @@ C-------Normalize recoil spectra to remove eventual inaccuracy
 C-------due to numerical integration of angular distributions
 C-------and find last non-zero cross section for printing
          corr = 0.0
-         ilast = 0
          DO ie = 1, NDEREC
             corr = corr + RECcse(ie,0,Nnuc)
-            IF (RECcse(ie,0,Nnuc).GT.0) ilast = ie
-C           write(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
          ENDDO
          IF (corr.EQ.0) RETURN
-C        WRITE(8,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
+         ilast = 0
+         DO ie = NDEREC,1,-1
+            IF (RECcse(ie,0,Nnuc).GT.0) THEN
+		    ilast = ie
+              exit
+            ENDIF
+         ENDDO
+C        WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
+C        WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
          corr = CSPrd(Nnuc)/corr/DERec
          ilast = MIN(ilast + 1,NDEREC)
          DO ie = 1, ilast
@@ -4671,7 +4680,6 @@ C        WRITE(8,*)'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
      &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
          WRITE (12,*) ' '
          WRITE (12,'(''    Energy    mb/MeV'')')
-C        WRITE (12,'('' Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO ie = 1, ilast
             WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DERec,
@@ -4680,14 +4688,14 @@ C        WRITE (12,'('' Energy    mb/MeV'')')
 C--------Print end point again with 0 xs for consistency with particle spectra
 C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
-         WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,0.d0
-         IF (ABS(1.0 - corr).GT.0.01D0 .AND. CSPrd(Nnuc).GT.0.001D0)
+C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,0.d0
+         IF (ABS(1.d0 - corr).GT.0.01D0 .AND. CSPrd(Nnuc).GT.0.001D0)
      &       THEN
             WRITE (8,*) 
             WRITE (8,*) ' WARNING:  Ein = ', EIN, ' MeV ZAP = ',
      &                  IZA(Nnuc), ' from ', React
             WRITE (8,*) ' WARNING: x-section balance in recoils '
-            WRITE (8,*) ' WARNING: difference = ', (1.0 - corr)*100.0,
+            WRITE (8,*) ' WARNING: difference = ', (1.d0 - corr)*100.0,
      &                  '%'
             WRITE (8,*) ' WARNING: production cross section = ',
      &                  CSPrd(Nnuc)
@@ -4715,13 +4723,17 @@ C
 
        ipart = 1  !neutron
        IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
-       
+
 C-----Find last non-zero cross section for printing
       ilast = 0
-      DO ie = 1, NDEX
-         IF (POPcse(0,ipart,ie,INExc(Nnuc)). GT. 0) ilast = ie
+      DO ie = NDEX,1,-1
+         IF (POPcse(0,ipart,ie,INExc(Nnuc)). GT. 0) THEN
+           ilast = ie
+           exit
+         ENDIF
       ENDDO
       IF (ilast .EQ. 0) RETURN
+
       ilast = MIN(ilast + 1,NDEX)
 C-----correction factor multiplying cross sections and dividing DE is
 C-----simply A(1) since ejectile mass is here always 1 (neutron or proton) 
@@ -4738,7 +4750,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
 C--------Print end point again with 0 xs for consistency with particle spectra
 C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
-         WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
+C        WRITE (12,'(F9.4,E15.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
       END
 
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
