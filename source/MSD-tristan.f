@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3336 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-21 21:30:16 +0100 (Do, 21 Mär 2013) $
+Ccc   * $Rev: 3337 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-03-22 07:42:37 +0100 (Fr, 22 Mär 2013) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3262,7 +3262,7 @@ C
                      csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
      &                        *coef
                      RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
-     &                  + csmsdl*(1.0 - weight)
+     &                  + csmsdl*(1.d0 - weight)
                      RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
      &                  + csmsdl*weight
 C
@@ -3321,7 +3321,7 @@ C
                IF (irec + 1.GT.NDEREC) EXIT
                csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coef*DE
                RECcse(irec,0,Nnur) = RECcse(irec,0,Nnur)
-     &                               + csmsdl*(1.0 - weight)
+     &                               + csmsdl*(1.d0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
      &            + csmsdl*weight
             ENDDO
