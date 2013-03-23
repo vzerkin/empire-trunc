@@ -1,6 +1,6 @@
-cc   * $Rev: 3344 $
+cc   * $Rev: 3345 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-23 15:10:10 +0100 (Sa, 23 Mär 2013) $
+Ccc   * $Date: 2013-03-23 17:23:04 +0100 (Sa, 23 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2220,7 +2220,8 @@ C----------Integrating exclusive population spectra (ENDF)
 C          write(*,'(2x,F3.0,1x,F3.0,2x,A3,2x,F3.1)') 
 C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
            IF (ENDf(nnuc).EQ.1) THEN
-             DO ispec = 1, min(NEX(1) + 10,ndecsed)
+             nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+             DO ispec = 1, nspec
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
 C              Write(12,*) nnuc,ispec,'g: ',
 C     &           POPcse(0,0,ispec,INExc(nnuc)),CSE(ispec,0,nnuc) 
@@ -2388,7 +2389,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &             ''trit '',10x,''He-3 '')')
              WRITE (8,*)
      &           '-------------------------------------------------'
-             DO ispec = 1, min(NEX(1) + 10,ndecsed)
+             DO ispec = 1, nspec
                POPcse(0,1,ispec,INExc(nnuc)) = 
      &                xnorm(1,INExc(nnuc))*POPcse(0,1,ispec,INExc(nnuc))
                POPcse(0,2,ispec,INExc(nnuc)) = 
@@ -3778,8 +3779,7 @@ C--------Print spectra of residues
          ENDDO !over decaying nuclei in ENDF spectra printout
 C
 C--------Print inclusive gamma spectrum
-         nspec = INT(EMAx(1)/DE) + 1
-         IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+         nspec = min(INT(EMAx(1)/DE) + 1,NDECSE - 1)
 
          totspec = 0.d0
          DO ie = 1, nspec 
@@ -4461,9 +4461,8 @@ C--------light ions
          IF (NDEJC.EQ.7) THEN
            recorp = 1.d0
            IF (RECoil.GT.0) recorp = (1. + EJMass(NDEJC)/AMAss(1))
-           nspec = INT((EMAx(1) - Q(NDEJC,1))/DE) + 1
+           nspec = min(INT((EMAx(1) - Q(NDEJC,1))/DE) + 1,NDECSE - 1)
            IF(nspec.gt.1) then
-             IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
              WRITE (12,*) ' '
              WRITE (12,
      &'(''  Spectrum of  '',I1,''-'',A2,4X,A5,I7,''(LI,x)'')')
