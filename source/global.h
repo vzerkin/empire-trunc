@@ -1,6 +1,6 @@
-C $Rev: 3330 $
-C $Author: bcarlson $
-C $Date: 2013-03-15 19:53:29 +0100 (Fr, 15 Mär 2013) $
+C $Rev: 3342 $
+C $Author: rcapote $
+C $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -60,6 +60,7 @@ C
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,
      &                 PL_CN(0:ndangecis,ndcollev),
+
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
       INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, CNAngd,
@@ -110,8 +111,8 @@ C
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
-c     &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
-     &                 POPcsea(ndangecis,0:ndex_d,2,ndecsed,
+c     &                POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
+     &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
      &                  0:ndexclus),  
 C     &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
 C           DDXS arrays defined only for neutrons and protons  
@@ -240,6 +241,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,
      &                 BUNorm, NTNorm, COMega, BUReac, NTReac,
+
      &                 gamm_tr, fiss_tr	 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
@@ -278,6 +280,7 @@ C
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
+
      &                  ngamm_tr, nfiss_tr	 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,

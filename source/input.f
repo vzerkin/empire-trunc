@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3341 $
+Ccc   * $Rev: 3342 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-22 18:30:30 +0100 (Fr, 22 Mär 2013) $
+Ccc   * $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -608,8 +608,8 @@ C--------set angles for inelastic calculations
            CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
          ENDDO
          DO na = 1, NDAng
-           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
-           SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.D0)
+           CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.d0)
+           SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.d0)
 C          SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
@@ -1337,8 +1337,9 @@ C--------reset angles for inelastic calculations
               CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
             ENDDO
             DO na = 1, NDAng
-              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.D0)
-              SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+              CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.d0)
+              SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.d0)
+C             SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
 c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN

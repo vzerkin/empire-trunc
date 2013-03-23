@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3319 $
+Ccc   * $Rev: 3342 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -779,7 +779,7 @@ C
             fanisot = 1.d0
 C           fanisot set to 0.d0 means isotropic distribution
             Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
-     &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng)
+     &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng, PI)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
@@ -798,7 +798,7 @@ c     totemis=sigr*fr
       END
 
       SUBROUTINE KALBACH(Jcom,Jpin,Jninp,Jpout,Jnout,Elab,Esys,
-     &Bin, Eps, Total, Fmsd, Sigma, Xcos, NDang)
+     &Bin, Eps, Total, Fmsd, Sigma, Xcos, NDang, PI)
 C
 C     Converted to subroutine for EMPIRE by Roberto Capote (May 2005)
 C
@@ -917,7 +917,7 @@ C
         a = a + 1.9*y*y*y*y*xmb
       endif
 
-      xnorm = a*total / (12.5664*dsinh(a))
+      xnorm = a*total / (4*PI*dsinh(a))
 
       do i=1,NDAng
         arg=a*xcos(i)
@@ -933,9 +933,9 @@ Cmbc    photon projectile:
           if(facrefr.gt.4.)facrefr=4.
           aphnuc=a*facmom*facrefr
           gth=((2.*aphnuc)/(dexp(aphnuc)-dexp(-aphnuc)))
-          gth=gth*(1./(12.5664))*dexp(aphnuc*xcos(i))
+          gth=gth*(1./(4*PI))*dexp(aphnuc*xcos(i))
 Cmbc      Now put in MSC as isotropic, giving:
-          sigma(i)=((1.-fmsd)/(12.5664))+(fmsd*gth)
+          sigma(i)=((1.-fmsd)/(4*PI))+(fmsd*gth)
           sigma(i)=sigma(i)*total
           cycle
         endif

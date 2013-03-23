@@ -1,6 +1,6 @@
-cc   * $Rev: 3341 $
+cc   * $Rev: 3342 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-22 18:30:30 +0100 (Fr, 22 Mär 2013) $
+Ccc   * $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -667,18 +667,32 @@ C-----------------To use only those values corresponding to EMPIRE grid for inel
      &                                    + ftmp
                 ENDDO
                ENDIF
+C--------------Check whether integral over angles agrees with x-sec. read from ECIS
+               dang = PI/FLOAT(NANgela - 1)
+               coef = 2*PI*dang
+               csum = 0.d0
+               DO iang = 1, NANgela
+                 csum= csum + CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
+               ENDDO
+               if (csum.gt.0.d0) then
+C----------------Correct CSAlev() for eventual imprecision
+                 ftmp = POPlv(ilv,nnurec)/csum
+                 DO iang = 1, NANgela
+                   CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
+                 ENDDO
+C                csum = 0.d0
+C                DO iang = 1, NANgela
+C                  csum =csum+CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
+C                ENDDO
+C	            write(*,*) 'Lev=',ilv,' Int=',
+C    &				sngl(csum), sngl(POPlv(ilv,nnurec))
+	         endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
-                  dang = PI/FLOAT(NDANG - 1)
-                  coef = 2*PI*dang
-C-----------------Check whether integral over angles agrees with x-sec. read from ECIS
-                  csum = 0.d0
-                  DO iang = 1, NDANG
-                     csum = csum + CSAlev(iang,ilv,nejcec)*SANgler(iang)
-     &                      *coef
-                  ENDDO
 C-----------------Correct 'coef' for eventual imprecision and include recoil DE
-                  coef = coef*POPlv(ilv,nnurec)/csum/DERec
+C                 coef = coef*POPlv(ilv,nnurec)/csum/DERec
+                  coef = coef/DERec
+
                   echannel = echannel*EJMass(0)/AMAss(1)
                   DO iang = 1, NDANG
                      erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
@@ -689,7 +703,7 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                      IF (irec + 1.GT.NDEREC) GOTO 1350
                      csmsdl = CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
                      RECcse(irec,0,nnurec) = RECcse(irec,0,nnurec)
-     &                  + csmsdl*(1.0 - weight)
+     &                  + csmsdl*(1.d0 - weight)
                      RECcse(irec + 1,0,nnurec)
      &                  = RECcse(irec + 1,0,nnurec) + csmsdl*weight
                   ENDDO
@@ -793,7 +807,7 @@ C
                  if(dcor.gt.0.d0) then
                    do ie = max(icsl - 3*isigma,1) ,
      &                     min(icsl + 3*isigma,ncon)
-                     CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) +
+                       CSEmsd(ie,nejcec) = CSEmsd(ie,nejcec) +
      &                 popread/DE  *  
      &                 dexp(-dble(ie-icsl)**2/isigma2)/dcor
                    enddo
@@ -818,11 +832,12 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
                       do ie = max(icsl - 3*isigma,1) ,
      &                        min(icsl + 3*isigma,ncon)
                         CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1)
-     &                  + ftmp * dexp(-dble(ie-icsl)**2/isigma2)/dcor
+     &                  + ftmp * dexp(-dble(ie-icsl)**2/isigma2)/dcor  
+     &                  * 2 * pi                               ! added 2pi, BVC 
                       enddo
                     else
                       CSEa(icsl,iang,nejcec,1) =
-     &                CSEa(icsl,iang,nejcec,1) + ftmp
+     &                CSEa(icsl,iang,nejcec,1) + ftmp * 2 * pi ! added 2pi, BVC 
                     endif
                  ENDDO
                ENDIF
@@ -2923,7 +2938,7 @@ C
 C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-                dang = PI/FLOAT(NDANG - 1) ! 180.d0/FLOAT(NDANG - 1)
+                dang = PI/FLOAT(NDANG - 1)
                 coef = 2*PI*dang
 C               if (nejc.eq.1) then 
 C                 csum = 0.d0 
@@ -2961,9 +2976,10 @@ C------------------(discrete levels part)
                           csum = csum + 
      &                           CSAlev(nang,il,nejc)*SANgler(nang)
                         ENDDO
-                        check_DL(il) = csum*coef
+                        check_DL(il) = max(csum*coef,1.d-10)
                      ENDDO
                    ENDIF
+C
 C------------------(continuum part - same for all particles)
                    cseaprnt = 0.d0 ! clean DDX matrix
                    check_DE = 0.d0
@@ -2995,10 +3011,27 @@ C----------------------Check whether integral over angles agrees with DE spectra
                        ENDDO
                      ENDIF
                      check_DE(ie) = csum*coef
+C--------------------Correct 'cseaprnt()' for eventual imprecision
+                     if(check_DE(ie).GT.0.d0) then
+  	                 ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
+                       DO nang = 1, NDANG
+                         cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
+                       ENDDO
+C					 double check
+C                      csum = 0.d0
+C                      DO nang = 1, NDANG
+C                          csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+C                      ENDDO
+C                      check_DE(ie) = csum*coef
+                     endif
                    ENDDO
+
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
-                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+
+                     if(check_DE(ie).LE.0.d0) cycle ! skipping zeroes
+
+                     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp,
      &                     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                    ENDDO
@@ -3010,27 +3043,25 @@ C----------------------Check whether integral over angles agrees with DE spectra
 C
 C                  Integrated spectrum
 C
-C                  IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
-C    &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
-C    &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
-C                    WRITE (12,'(15x,''Integrated Discrete Spectra'')')
-C                    WRITE (12,'(4x,''Lev'',3x,
-C    &             ''    Energy      mb/MeV        Int(DDX)        Diff
-C    &(should be negligible!)'')')
-C                    WRITE (12,*) ' '
-C                    DO il = 1, NLV(nnuc)  ! discrete levels
-C                      espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
-C                      IF (espec.LT.0) cycle 
-C                      WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,1x))') il, 
-C    &                 -espec,POPlv(il,nnuc)*recorp,check_DL(il)*recorp,
-C    &                 (POPlv(il,nnuc) - check_DL(il)) * recorp 
-C                    ENDDO
-C                    WRITE (12,*) ' '
-C                  ENDIF
+                   IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
+     &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
+     &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
+                     WRITE (12,'(15x,''Integrated Discrete Spectra'')')
+                     WRITE (12,'(10x,''    Energy    Int-DDX[mb]'')')
+                     WRITE (12,*) ' '
+                     DO il = 1, NLV(nnuc)  ! discrete levels
+                       espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
+                       IF (espec.LT.0) cycle 
+                       WRITE (12,'(4x,I3,4x,F10.5,4(E14.5,1x))') il, 
+     &                   -espec, check_DL(il)*recorp
+                     ENDDO
+                     WRITE (12,*) ' '
+                   ENDIF
 
-                   WRITE (12,'(15x,''Integrated Emission Spectra'')')
+                   WRITE (12,'(15x,''Integrated Emission Spectra (printe
+     &d DDXS corrected) - consistency check'')')
                    WRITE (12,'(10x,
-     &             ''    Energy      mb/MeV        Int(DDX)        Diff
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
@@ -3735,6 +3766,9 @@ C-----
          WRITE (12,*) '********************************************'
          WRITE (12,*)    
 
+         dang = PI/FLOAT(NDANG - 1)
+         coef = 2*PI*dang
+
 C--------Print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -3776,371 +3810,555 @@ C--------neutrons
          nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(1,1))/DE) + 1)
 
          IF (nspec.gt.1) THEN
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-          DO ie = 1, nspec 
-            if(CSE(ie,1,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &            recorp*CSE(ie,1,0)
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(1,1))/recorp, 0.d0
 
-          totspec = 0.d0
-          DO ie = 1, nspec 
-           totspec  = totspec  + CSE(ie,1,0)
-          ENDDO
-          totspec = totspec*DE
-
-          WRITE (12,*) ' '    
-          WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
-
+          cseaprnt = 0.d0
           DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
+
+            if(CSE(ie,1,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
             ftmp = (CSE(ie,1,0) - POPcsed(0,1,ie,0))/4.0/PI
             IF(LHMs.GT.0) THEN
              DO nang = 1, NDANG
               cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,1,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
              ENDDO
             ELSE
              DO nang = 1, NDANG
               cseaprnt(ie,nang) = ftmp 
      &                           + CSEa(ie,nang,1,1)*POPcseaf(0,1,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
              ENDDO
             ENDIF
-           ENDDO 
+          ENDDO 
 
 C---------------Inclusive DDX spectrum (neutrons)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of neutrons (z,x)  ZAP=     1'
-           WRITE (12,
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
+          WRITE (12,
      &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+
+		  check_DE = 0.d0
+          totspec = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,1,0).le.0.d0) cycle
+
+            totspec  = totspec  + CSE(ie,1,0)
+ 
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
             ENDDO
+            check_DE(ie) = csum*coef
+
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,1,0).GT.0.d0) 
           ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &           (EMAx(1)-Q(1,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,1,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &                *DE/recorp, htmp*recorp, 
+     &                check_DE(ie)*recorp,
+     &                (htmp - check_DE(ie)) * recorp, 
+     &                (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(1,1))/recorp,CSE(nspec+1,1,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,1,0) - check_DE(nspec+1) )*recorp, 0.d0
+
+          WRITE (12,*) ' '    
+          WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
+     &          totspec*DE      
+          WRITE (12,*) ' '    
 
          ENDIF
 
 C--------protons
+
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(2)/AMAss(1))
          nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(2,1))/DE) + 1)
          IF (nspec.gt.1) THEN
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-          DO ie = 1, nspec 
-            if(CSE(ie,2,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &         recorp*CSE(ie,2,0)
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(2,1))/recorp, 0.d0
 
           totspec = 0.d0
-          DO ie = 1, nspec
+          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,2,0)
           ENDDO
           totspec = totspec*DE 
 
+		  if(totspec.le.0.d0) goto 987
+
+          cseaprnt = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,2,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
+            ftmp = (CSE(ie,2,0) - POPcsed(0,2,ie,0))/4.0/PI
+            IF(LHMs.GT.0) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,2,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
+     &                           + CSEa(ie,nang,2,1)*POPcseaf(0,2,ie,0)
+              ENDDO
+            ENDIF
+          ENDDO 
+C---------------Inclusive DDX spectrum (protons)
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
+          WRITE (12,
+     &           '(30X,''A     n     g     l     e     s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+		  check_DE = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,2,0).le.0.d0) cycle
+
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+            ENDDO
+            check_DE(ie) = csum*coef
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,2,0).GT.0.d0) 
+          ! exact DDX spectrum endpoint
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &           (EMAx(1)-Q(2,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,2,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &           (htmp - check_DE(ie)) * recorp, 
+     &           (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(2,1))/recorp,CSE(nspec+1,2,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,2,0) - check_DE(nspec+1) )*recorp, 0.d0
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
+     &          totspec*DE      
 
-          DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
-           ftmp = (CSE(ie,2,0) - POPcsed(0,2,ie,0))/4.0/PI
-           IF(LHMs.GT.0) THEN
-            DO nang = 1, NDANG
-             cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,2,ie,0)
-c             IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-            ELSE
-             DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,2,1)*POPcseaf(0,2,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-            ENDIF
-           ENDDO 
+ 987      WRITE (12,*) ' '    
 
-C---------------Inclusive DDX spectrum (protons)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of protons  (z,x)  ZAP=  1001'
-           WRITE (12,
-     &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-            ENDDO
-                                              ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          (EMAx(1)-Q(2,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
- 
          ENDIF
 
 C--------alphas
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(3)/AMAss(1))
-         nspec = INT((EMAx(1) - Q(3,1))/DE) + 1
-         IF(nspec.gt.1) then
-          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-
-          DO ie = 1, nspec 
-            if(CSE(ie,3,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &         max(0.d0,recorp*CSE(ie,3,0))
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(3,1))/recorp, 0.d0
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(3,1))/DE) + 1)
+         IF (nspec.gt.1) THEN
 
           totspec = 0.d0
-          DO ie = 1, nspec 
+          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,3,0)
           ENDDO
           totspec = totspec*DE 
 
+		  if(totspec.le.0.d0) goto 986
+
+          cseaprnt = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,3,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
+            ftmp = (CSE(ie,3,0) - POPcsed(0,3,ie,0))/4.0/PI
+            IF(LHMs.GT.0) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,3,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
+     &                           + CSEa(ie,nang,3,1)*POPcseaf(0,3,ie,0)
+              ENDDO
+            ENDIF
+          ENDDO 
+C---------------Inclusive DDX spectrum (alphas)
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
+          WRITE (12,
+     &           '(30X,''A     n     g     l     e     s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+		  check_DE = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,3,0).le.0.d0) cycle
+ 
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+            ENDDO
+            check_DE(ie) = csum*coef
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,3,0).GT.0.d0) 
+          ! exact DDX spectrum endpoint
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &           (EMAx(1)-Q(3,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,3,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &           (htmp - check_DE(ie)) * recorp, 
+     &           (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(3,1))/recorp,CSE(nspec+1,3,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,3,0) - check_DE(nspec+1) )*recorp, 0.d0
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
+     &          totspec*DE      
 
-          DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,3,0) - POPcsed(0,3,ie,0))/4.0/PI
-            DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,3,1)*POPcseaf(0,3,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-           ENDDO 
+ 986      WRITE (12,*) ' '    
 
-C---------------Inclusive DDX spectrum (alphas)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of alphas   (z,x)  ZAP=  2004'
-           WRITE (12,
-     &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-            ENDDO
-                                              ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          (EMAx(1)-Q(2,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
- 
          ENDIF
-         
+
 C--------deuterons
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(4)/AMAss(1))
-         nspec = INT((EMAx(1) - Q(4,1))/DE) + 1
-         IF(nspec.gt.1) then
-          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-          DO ie = 1, nspec
-            if(CSE(ie,4,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &         max(0.d0,recorp*CSE(ie,4,0))
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(4,1))/recorp, 0.d0
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(4,1))/DE) + 1)
+         IF (nspec.gt.1) THEN
 
           totspec = 0.d0
-          DO ie = 1, nspec 
+          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,4,0)
           ENDDO
           totspec = totspec*DE 
 
+		  if(totspec.le.0.d0) goto 985
+
+          cseaprnt = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,4,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
+            ftmp = (CSE(ie,4,0) - POPcsed(0,4,ie,0))/4.0/PI
+            IF(LHMs.GT.0) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,4,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
+     &                           + CSEa(ie,nang,4,1)*POPcseaf(0,4,ie,0)
+              ENDDO
+            ENDIF
+          ENDDO 
+C---------------Inclusive DDX spectrum (deuterons)
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
+          WRITE (12,
+     &           '(30X,''A     n     g     l     e     s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+		  check_DE = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,4,0).le.0.d0) cycle
+ 
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+            ENDDO
+            check_DE(ie) = csum*coef
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,4,0).GT.0.d0) 
+          ! exact DDX spectrum endpoint
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &           (EMAx(1)-Q(4,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,4,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &           (htmp - check_DE(ie)) * recorp, 
+     &           (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(4,1))/recorp,CSE(nspec+1,4,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,4,0) - check_DE(nspec+1) )*recorp, 0.d0
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
+     &          totspec*DE      
 
-          DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,4,0) - POPcsed(0,4,ie,0))/4.0/PI
-            DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,4,1)*POPcseaf(0,4,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-           ENDDO 
+ 985      WRITE (12,*) ' '    
 
-C---------------Inclusive DDX spectrum (deuterons)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of deuterons(z,x)  ZAP=  1002'
-           WRITE (12,
-     &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-            ENDDO
-                                              ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          (EMAx(1)-Q(2,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
- 
          ENDIF
 
 C--------tritons
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(5)/AMAss(1))
-         nspec = INT((EMAx(1) - Q(5,1))/DE) + 1
-         IF(nspec.gt.1) then
-          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-          DO ie = 1, nspec 
-            if(CSE(ie,5,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &         max(0.d0,recorp*CSE(ie,5,0))
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(5,1))/recorp, 0.d0
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(5,1))/DE) + 1)
+         IF (nspec.gt.1) THEN
 
           totspec = 0.d0
-          DO ie = 1, nspec 
+          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,5,0)
           ENDDO
           totspec = totspec*DE 
 
+		  if(totspec.le.0.d0) goto 984
+
+          cseaprnt = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,5,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
+            ftmp = (CSE(ie,5,0) - POPcsed(0,5,ie,0))/4.0/PI
+            IF(LHMs.GT.0) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,5,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
+     &                           + CSEa(ie,nang,5,1)*POPcseaf(0,5,ie,0)
+              ENDDO
+            ENDIF
+          ENDDO 
+C---------------Inclusive DDX spectrum (tritons)
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
+          WRITE (12,
+     &           '(30X,''A     n     g     l     e     s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+		  check_DE = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,5,0).le.0.d0) cycle
+ 
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+            ENDDO
+            check_DE(ie) = csum*coef
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,5,0).GT.0.d0) 
+          ! exact DDX spectrum endpoint
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &           (EMAx(1)-Q(5,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,5,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &           (htmp - check_DE(ie)) * recorp, 
+     &           (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(5,1))/recorp,CSE(nspec+1,5,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,5,0) - check_DE(nspec+1) )*recorp, 0.d0
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
- 
-          DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,5,0) - POPcsed(0,5,ie,0))/4.0/PI
-            DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,5,1)*POPcseaf(0,5,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-           ENDDO 
+     &          totspec*DE      
 
-C---------------Inclusive DDX spectrum (tritons)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of tritons  (z,x)  ZAP=  1003'
-           WRITE (12,
-     &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-            ENDDO
-                                              ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          (EMAx(1)-Q(2,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
- 
+ 984      WRITE (12,*) ' '    
+
          ENDIF
 
 C--------helium-3
          recorp = 1.d0
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(6)/AMAss(1))
-         nspec = INT((EMAx(1) - Q(6,1))/DE) + 1
-         IF(nspec.gt.1) then
-          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
-          WRITE (12,*) ' '
-          WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
-          WRITE (12,*) ' '
-          WRITE (12,'(''    Energy    mb/MeV'')')
-          WRITE (12,*) ' '
-          DO ie = 1, nspec 
-            if(CSE(ie,6,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE/recorp,
-     &         max(0.d0,recorp*CSE(ie,6,0))
-          ENDDO
-C---------Exact endpoint
-          WRITE (12,'(F9.4,E15.5)') (EMAx(1) - Q(6,1))/recorp, 0.d0
+         nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(6,1))/DE) + 1)
+         IF (nspec.gt.1) THEN
+
           totspec = 0.d0
-          DO ie = 1, nspec 
+          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,6,0)
           ENDDO
           totspec = totspec*DE 
 
+		  if(totspec.le.0.d0) goto 983
+
+          cseaprnt = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,6,0).le.0.d0) cycle
+
+C           Subtract direct contribution to CM emission spectrum 
+            ftmp = (CSE(ie,6,0) - POPcsed(0,6,ie,0))/4.0/PI
+            IF(LHMs.GT.0) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,6,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
+     &                           + CSEa(ie,nang,6,1)*POPcseaf(0,6,ie,0)
+              ENDDO
+            ENDIF
+          ENDDO 
+C---------------Inclusive DDX spectrum (helium-3)
+          WRITE (12,*) ' '
+          WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
+          WRITE (12,
+     &           '(30X,''A     n     g     l     e     s '')')
+          WRITE (12,*) ' '
+          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+		  check_DE = 0.d0
+          DO ie = 1, nspec + 1
+
+            if(CSE(ie,6,0).le.0.d0) cycle
+ 
+			csum = 0.d0
+            DO nang = 1, NDANG
+              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+            ENDDO
+            check_DE(ie) = csum*coef
+            if(ie.le.nspec)
+     &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &        FLOAT(ie - 1)*DE/recorp,
+     &                    (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+          ENDDO
+  
+          if(CSE(nspec + 1,6,0).GT.0.d0) 
+          ! exact DDX spectrum endpoint
+     &      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &           (EMAx(1)-Q(6,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+
+          WRITE (12,*) ' '
+          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
+     &rrected) - consistency check'')')
+          WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+          WRITE (12,*) ' '
+          DO ie = 1, nspec 
+            htmp = CSE(ie,6,0) 
+            if(htmp.LE.0.d0) cycle
+            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &           (htmp - check_DE(ie)) * recorp, 
+     &           (htmp - check_DE(ie)) / htmp * 100
+          ENDDO
+                                        ! exact endpoint
+          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &       (EMAx(1)-Q(6,1))/recorp,CSE(nspec+1,6,0)*recorp,
+     &        check_DE(nspec+1)*recorp,
+     &       ( CSE(nspec+1,6,0) - check_DE(nspec+1) )*recorp, 0.d0
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec      
-          WRITE (12,*) ' '    
+     &          totspec*DE      
 
-          DO ie = 1, nspec + 1
-C       Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,6,0) - POPcsed(0,6,ie,0))/4.0/PI
-            DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,6,1)*POPcseaf(0,6,ie,0)
-c              IF(cseaprnt(ie,nang).LT.1.0E-7) cseaprnt(ie,nang) = 0.0d0
-             ENDDO
-           ENDDO 
+ 983      WRITE (12,*) ' '    
 
-C---------------Inclusive DDX spectrum (helium-3)
-           WRITE (12,*) ' '
-           WRITE (12,*) ' DDXS of helium-3 (z,x)  ZAP=  2003'
-           WRITE (12,
-     &           '(30X,''A     n     g     l     e     s '')')
-           WRITE (12,*) ' '
-           WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
-     &                      (ANGles(nang),nang=1,NDANG)
-           DO ie = 1, nspec
-             WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          FLOAT(ie - 1)*DE/recorp,
-     &                        (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
-            ENDDO
-                                              ! exact DDX spectrum endpoint
-           WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &          (EMAx(1)-Q(2,1))/recorp,
-     &        (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
- 
          ENDIF
 
 C--------light ions
@@ -4504,8 +4722,9 @@ C-------Set angles for inelastic calculations
           CANgle(na)  = DCOS(ANGles(na)*PI/180.d0)
         ENDDO
         DO na = 1, NDAng
-          CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.)
-          SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
+          CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.d0)
+          SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.d0)
+C         SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
         ENDDO
       ENDIF
       IF(.not.BENchm) FIRst_ein = .FALSE.
