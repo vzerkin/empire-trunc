@@ -1,6 +1,6 @@
-cc   * $Rev: 3342 $
+cc   * $Rev: 3343 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
+Ccc   * $Date: 2013-03-23 12:55:45 +0100 (Sa, 23 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3105,12 +3105,13 @@ C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                    ENDDO
-                   dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE         
+                   if(htmp.GT.0.d0) then
+                     dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE         
                                               !exact endpoint
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &               max(0.d0,POPcse(0,nejc,nspec+1,
-     &               INExc(nnuc)))*recorp
-C                  WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,0.d0
+                     WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
+     &                 max(0.d0,POPcse(0,nejc,nspec+1,
+     &                 INExc(nnuc)))*recorp
+                   endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -3443,8 +3444,8 @@ C             outgoing energy grid enepfns(1) and enepfns(2)
           WRITE ( 8,'(E11.4,E14.5,2x,E14.5)')
      &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
         ENDDO
-        WRITE (12,'(E10.4,E14.5,2x,E14.5)')
-     &     enepfns(nepfns), 0.d0, 0.d0
+C       WRITE (12,'(E10.4,E14.5,2x,E14.5)')
+C    &     enepfns(nepfns), 0.d0, 0.d0
         WRITE(8,*) '...   PFNS Output supressed for Epfns > 7 MeV '
         WRITE (12,*)
       ENDIF
@@ -3779,6 +3780,16 @@ C
 C--------Print inclusive gamma spectrum
          nspec = INT(EMAx(1)/DE) + 1
          IF (nspec.GT.NDECSE - 1) nspec = NDECSE - 1
+
+         totspec = 0.d0
+         DO ie = 1, nspec + 1
+           totspec  = totspec  + CSE(ie,2,0)
+         ENDDO
+         totspec = totspec*DE 
+
+         if(totspec.le.0.d0) goto 989
+
+
          WRITE (12,*) ' '
          WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
          WRITE (12,*) ' '
@@ -3798,18 +3809,33 @@ C--------Exact endpoint
          ENDDO
          totspec = totspec*DE 
 
+		 csum = 0.d0
+         DO nnuc = 1, NNUcd
+		   csum = csum + CSEmis(0,nnuc)
+         ENDDO
+
          WRITE (12,*) ' '    
          WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec      
+         WRITE (12,'(1x,'' Tot. gamma emission   '',G12.5,'' mb'')')
+     &          csum      
          WRITE (12,*) ' '    
 
 C--------Print inclusive spectra of ejectiles
 C--------neutrons
-         recorp = 1.d0 
+  989    recorp = 1.d0 
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(1)/AMAss(1))
          nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(1,1))/DE) + 1)
 
          IF (nspec.gt.1) THEN
+
+          totspec = 0.d0
+          DO ie = 1, nspec + 1
+           totspec  = totspec  + CSE(ie,1,0)
+          ENDDO
+          totspec = totspec*DE 
+
+		  if(totspec.le.0.d0) goto 988
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -3840,13 +3866,11 @@ C---------------Inclusive DDX spectrum (neutrons)
      &                      (ANGles(nang),nang=1,NDANG)
 
 		  check_DE = 0.d0
-          totspec = 0.d0
+
           DO ie = 1, nspec + 1
 
             if(CSE(ie,1,0).le.0.d0) cycle
 
-            totspec  = totspec  + CSE(ie,1,0)
- 
 			csum = 0.d0
             DO nang = 1, NDANG
               csum = csum + cseaprnt(ie,nang)*SANgler(nang)
@@ -3888,12 +3912,20 @@ C---------------Inclusive DDX spectrum (neutrons)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,1,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(1,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot. neutron emission '',G12.5,'' mb'')')
+     &          csum      
           WRITE (12,*) ' '    
 
-         ENDIF
+  988    ENDIF
 
 C--------protons
 
@@ -3981,13 +4013,19 @@ C---------------Inclusive DDX spectrum (protons)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,2,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(2,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot. proton emission  '',G12.5,'' mb'')')
+     &          csum      
+          WRITE (12,*) ' '    
 
- 987      WRITE (12,*) ' '    
-
-         ENDIF
+ 987     ENDIF
 
 C--------alphas
          recorp = 1.d0
@@ -4074,13 +4112,19 @@ C---------------Inclusive DDX spectrum (alphas)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,3,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(3,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot. alpha emission   '',G12.5,'' mb'')')
+     &          csum      
+          WRITE (12,*) ' '    
 
- 986      WRITE (12,*) ' '    
-
-         ENDIF
+ 986     ENDIF
 
 C--------deuterons
          recorp = 1.d0
@@ -4167,13 +4211,20 @@ C---------------Inclusive DDX spectrum (deuterons)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,4,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(4,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot.deuteron emission '',G12.5,'' mb'')')
+     &          csum      
 
- 985      WRITE (12,*) ' '    
+          WRITE (12,*) ' '    
 
-         ENDIF
+ 985     ENDIF
 
 C--------tritons
          recorp = 1.d0
@@ -4260,13 +4311,19 @@ C---------------Inclusive DDX spectrum (tritons)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,5,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(5,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot. triton emission  '',G12.5,'' mb'')')
+     &          csum      
+          WRITE (12,*) ' '    
 
- 984      WRITE (12,*) ' '    
-
-         ENDIF
+ 984     ENDIF
 
 C--------helium-3
          recorp = 1.d0
@@ -4353,13 +4410,20 @@ C---------------Inclusive DDX spectrum (helium-3)
      &        check_DE(nspec+1)*recorp,
      &       ( CSE(nspec+1,6,0) - check_DE(nspec+1) )*recorp, 0.d0
 
+          csum = 0.d0
+          DO nnuc = 1, NNUcd
+		    csum = csum + CSEmis(6,nnuc)
+          ENDDO
+
           WRITE (12,*) ' '    
           WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
      &          totspec*DE      
+          WRITE (12,'(1x,'' Tot. helion emission  '',G12.5,'' mb'')')
+     &          csum      
 
- 983      WRITE (12,*) ' '    
+          WRITE (12,*) ' '    
 
-         ENDIF
+ 983     ENDIF
 
 C--------light ions
          IF (NDEJC.EQ.7) THEN
@@ -4412,7 +4476,6 @@ C  Summary of exclusive emission cross sections
           ENDIF
         ENDDO
       ENDDO
-C     IF(jnmx.gt.3 .AND. jzmx.gt.2) THEN
       IF(jnmx.gt.1 .AND. jzmx.gt.1) THEN
         iz = INT(Z(1))
         ia = INT(A(1))-iz
