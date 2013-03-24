@@ -3,7 +3,7 @@ C
       PARAMETER(
      * NDNUC= 100
      *,NDEXCLUS = 14
-     *,NDEX= 155
+     *,NDEX= 101
      *,NDLW= 50
      *,LEVCC=30
      *,NDLV=40

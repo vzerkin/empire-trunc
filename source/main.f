@@ -1,6 +1,6 @@
-cc   * $Rev: 3345 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-23 17:23:04 +0100 (Sa, 23 Mär 2013) $
+cc   * $Rev: 3346 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-03-24 01:33:29 +0100 (So, 24 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3826,7 +3826,7 @@ C--------neutrons
              totspec  = totspec  + CSE(ie,1,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 988
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -3924,8 +3924,8 @@ C         ftmp = ftmp + check_DE(nspec + 1)
           WRITE (12,'(1x,'' Tot. neutron emission '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
-  988    ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------protons
 
@@ -3939,7 +3939,7 @@ C--------protons
            totspec  = totspec  + CSE(ie,2,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 987
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -4031,8 +4031,8 @@ C---------------Inclusive DDX spectrum (protons)
           WRITE (12,'(1x,'' Tot. proton emission  '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
- 987     ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------alphas
          recorp = 1.d0
@@ -4045,7 +4045,7 @@ C--------alphas
            totspec  = totspec  + CSE(ie,3,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 986
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -4136,8 +4136,8 @@ C---------------Inclusive DDX spectrum (alphas)
           WRITE (12,'(1x,'' Tot. alpha emission   '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
- 986     ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------deuterons
          recorp = 1.d0
@@ -4150,7 +4150,7 @@ C--------deuterons
             totspec  = totspec  + CSE(ie,4,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 985
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -4242,8 +4242,8 @@ C---------------Inclusive DDX spectrum (deuterons)
           WRITE (12,'(1x,'' Tot.deuteron emission '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
- 985     ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------tritons
          recorp = 1.d0
@@ -4256,7 +4256,7 @@ C--------tritons
            totspec  = totspec  + CSE(ie,5,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 984
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -4348,8 +4348,8 @@ C---------------Inclusive DDX spectrum (tritons)
           WRITE (12,'(1x,'' Tot. triton  emission '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
- 984     ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------helium-3
          recorp = 1.d0
@@ -4362,7 +4362,7 @@ C--------helium-3
            totspec  = totspec  + CSE(ie,6,0)
           ENDDO
 
-          if(totspec.le.0.d0) goto 983
+          IF(totspec.GT.0.d0) THEN
 
           cseaprnt = 0.d0
           DO ie = 1, nspec + 1
@@ -4454,8 +4454,8 @@ C---------------Inclusive DDX spectrum (helium-3)
           WRITE (12,'(1x,'' Tot. He-3    emission '',G12.5,'' mb'')')
      &          csum      
           WRITE (12,*) ' '    
-
- 983     ENDIF
+          ENDIF !IF(totspec.GT.0.d0) THEN
+         ENDIF
 
 C--------light ions
          IF (NDEJC.EQ.7) THEN
