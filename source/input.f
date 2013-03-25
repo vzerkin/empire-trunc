@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3342 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
+Ccc   * $Rev: 3347 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-03-25 05:06:55 +0100 (Mo, 25 Mär 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************

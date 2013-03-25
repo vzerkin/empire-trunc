@@ -1,6 +1,6 @@
-cc   * $Rev: 3346 $
+cc   * $Rev: 3347 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-24 01:33:29 +0100 (So, 24 Mär 2013) $
+Ccc   * $Date: 2013-03-25 05:06:55 +0100 (Mo, 25 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1534,7 +1534,6 @@ C-----Start DO loop over decaying nuclei
       DO nnuc = 1, NNUcd
 
          IF(QPRod(nnuc).LT.-999.d0) CYCLE
-
          ROFisp = 0.d0  ! setting saddle point LD to zero (again as protection)
 
 C        if(nnuc.le.NNUcd)
@@ -2988,7 +2987,7 @@ C------------------(continuum part - same for all particles)
 C                  DO ie = 1, nspec     ! reconstruct continuum DDX spectrum
 C                  range extended to cover the last energy corresponding to the exact endpoint
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
-                     htmp = POPcse(0,nejc,ie,INExc(nnuc))              
+                     htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
                      dtmp = dtmp + htmp*DE
                      ftmp = (htmp - xnorm(nejc,INExc(nnuc))
@@ -3004,6 +3003,9 @@ C----------------------Check whether integral over angles agrees with DE spectra
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
                        ENDDO
                      ELSE
+c                      ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
+c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))
+
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
@@ -3768,8 +3770,8 @@ C-----
          WRITE (12,*) '********************************************'
          WRITE (12,*)    
 
-         dang = PI/FLOAT(NDANG - 1)
-         coef = 2*PI*dang
+c         dang = PI/FLOAT(NDANG - 1)
+c         coef = 2*PI*dang
 
 C--------Print spectra of residues
          reactionx = '(z,x)  '
@@ -3823,7 +3825,14 @@ C--------neutrons
 
           totspec = 0.d0
           DO ie = 1, nspec 
-             totspec  = totspec  + CSE(ie,1,0)
+            totspec  = totspec  + CSE(ie,1,0) 
+            IF(ENDF(1).EQ.0) THEN
+              IF(LHMs.GT.0) THEN
+                totspec = totspec + CSEhms(ie,1,1)
+               ELSE
+                totspec = totspec + CSEmsd(ie,1)
+               ENDIF
+             ENDIF
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -3834,16 +3843,31 @@ C--------neutrons
             if(CSE(ie,1,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,1,0) - POPcsed(0,1,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-             DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,1,ie,0)
-             ENDDO
-            ELSE
-             DO nang = 1, NDANG
-              cseaprnt(ie,nang) = ftmp 
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,1,0) - POPcsed(0,1,ie,0))/4.0/PI
+              IF(LHMs.GT.0) THEN
+               DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,1,ie,0)
+               ENDDO
+              ELSE
+               DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp 
      &                           + CSEa(ie,nang,1,1)*POPcseaf(0,1,ie,0)
-             ENDDO
+               ENDDO
+              ENDIF
+             ELSE
+              IF(LHMs.GT.0) THEN
+                ftmp = (CSE(ie,1,0) + CSEhms(ie,1,1)
+     &                              - CSEhms(ie,1,0))/4.0/PI
+                DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,1)
+               ENDDO
+               ELSE
+                ftmp = CSE(ie,1,0)/4.0/PI
+                DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,1,1)
+               ENDDO
+              ENDIF
             ENDIF
           ENDDO 
 
@@ -3862,11 +3886,12 @@ C---------------Inclusive DDX spectrum (neutrons)
 
             if(CSE(ie,1,0).le.0.d0) cycle
 
-	      csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
 
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3891,13 +3916,21 @@ C---------------Inclusive DDX spectrum (neutrons)
 
           ftmp = 0.d0
           DO ie = 1, nspec 
-            htmp = CSE(ie,1,0) 
+            htmp = CSE(ie,1,0)
+            IF(ENDF(1).EQ.0) THEN
+              IF(LHMs.GT.0) THEN
+                htmp = htmp + CSEhms(ie,1,1)
+               ELSE
+                htmp = htmp + CSEmsd(ie,1)
+               ENDIF
+             ENDIF
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, htmp*recorp, 
      &                check_DE(ie)*recorp,
      &                (htmp - check_DE(ie)) * recorp, 
      &                (htmp - check_DE(ie)) / htmp * 100
+
 	        ftmp = ftmp + check_DE(ie)
           ENDDO
 C         ftmp = ftmp + check_DE(nspec + 1)
@@ -3908,10 +3941,10 @@ C         ftmp = ftmp + check_DE(nspec + 1)
      &       ( CSE(nspec+1,1,0) - check_DE(nspec+1) )*recorp, 0.d0
 
           csum = 0.d0
-	    dtmp = 0.d0
+	  dtmp = 0.d0
           DO nnuc = 1, NNUcd
-		    csum = csum + CSEmis(1,nnuc)
-		    if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(1,nnuc)
+            csum = csum + CSEmis(1,nnuc)
+	    if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(1,nnuc)
           ENDDO
 
           WRITE (12,*) ' '    
@@ -3937,6 +3970,13 @@ C--------protons
           totspec = 0.d0
           DO ie = 1, nspec 
            totspec  = totspec  + CSE(ie,2,0)
+            IF(ENDF(1).EQ.0) THEN
+              IF(LHMs.GT.0) THEN
+                totspec = totspec + CSEhms(ie,2,1)
+               ELSE
+                totspec = totspec + CSEmsd(ie,2)
+               ENDIF
+             ENDIF
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -3947,16 +3987,31 @@ C--------protons
             if(CSE(ie,2,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,2,0) - POPcsed(0,2,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-              DO nang = 1, NDANG
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,2,0) - POPcsed(0,2,ie,0))/4.0/PI
+              IF(LHMs.GT.0) THEN
+               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,2,ie,0)
-              ENDDO
-            ELSE
-              DO nang = 1, NDANG
+               ENDDO
+              ELSE
+               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp 
      &                           + CSEa(ie,nang,2,1)*POPcseaf(0,2,ie,0)
-              ENDDO
+               ENDDO
+              ENDIF
+             ELSE
+              IF(LHMs.GT.0) THEN
+                ftmp = (CSE(ie,2,0) + CSEhms(ie,2,1)
+     &                              - CSEhms(ie,2,0))/4.0/PI
+                DO nang = 1, NDANG
+                  cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,2)
+                 ENDDO
+               ELSE
+                ftmp = CSE(ie,2,0)/4.0/PI
+                DO nang = 1, NDANG
+                 cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,2,1)
+                ENDDO
+              ENDIF
             ENDIF
           ENDDO 
 C---------------Inclusive DDX spectrum (protons)
@@ -3973,11 +4028,13 @@ C---------------Inclusive DDX spectrum (protons)
 
             if(CSE(ie,2,0).le.0.d0) cycle
 
-			csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
+
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &        FLOAT(ie - 1)*DE/recorp,
@@ -4000,12 +4057,20 @@ C---------------Inclusive DDX spectrum (protons)
           WRITE (12,*) ' '
           ftmp = 0.d0
           DO ie = 1, nspec 
-            htmp = CSE(ie,2,0) 
+            htmp = CSE(ie,2,0)
+            IF(ENDF(1).EQ.0) THEN
+              IF(LHMs.GT.0) THEN
+                htmp = htmp + CSEhms(ie,2,1)
+               ELSE
+                htmp = htmp + CSEmsd(ie,2)
+               ENDIF
+             ENDIF
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
      &           (htmp - check_DE(ie)) * recorp, 
      &           (htmp - check_DE(ie)) / htmp * 100
+
             ftmp = ftmp + check_DE(ie)
           ENDDO
                                         ! exact endpoint
@@ -4043,6 +4108,7 @@ C--------alphas
           totspec = 0.d0
           DO ie = 1, nspec 
            totspec  = totspec  + CSE(ie,3,0)
+            IF(ENDf(1).EQ.0) totspec = totspec + CSEmsd(ie,3)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -4053,15 +4119,16 @@ C--------alphas
             if(CSE(ie,3,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,3,0) - POPcsed(0,3,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-              DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,3,ie,0)
-              ENDDO
-            ELSE
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,3,0) - POPcsed(0,3,ie,0))/4.0/PI
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,3,1)*POPcseaf(0,3,ie,0)
+     &                        + CSEa(ie,nang,3,1)*POPcseaf(0,3,ie,0)
+               ENDDO
+             ELSE
+              ftmp = CSE(ie,3,0)/4.0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,3,1)
               ENDDO
             ENDIF
           ENDDO 
@@ -4079,11 +4146,13 @@ C---------------Inclusive DDX spectrum (alphas)
 
             if(CSE(ie,3,0).le.0.d0) cycle
  
-            csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
+
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &        FLOAT(ie - 1)*DE/recorp,
@@ -4106,11 +4175,13 @@ C---------------Inclusive DDX spectrum (alphas)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,3,0) 
+            IF(ENDF(1).EQ.0) htmp = htmp + CSEmsd(ie,3)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
      &           (htmp - check_DE(ie)) * recorp, 
      &           (htmp - check_DE(ie)) / htmp * 100
+
             ftmp = ftmp + check_DE(ie)
           ENDDO
                                         ! exact endpoint
@@ -4148,6 +4219,7 @@ C--------deuterons
           totspec = 0.d0
           DO ie = 1, nspec 
             totspec  = totspec  + CSE(ie,4,0)
+            IF(ENDf(1).EQ.0) totspec = totspec + CSEmsd(ie,4)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -4158,15 +4230,16 @@ C--------deuterons
             if(CSE(ie,4,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,4,0) - POPcsed(0,4,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-              DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,4,ie,0)
-              ENDDO
-            ELSE
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,4,0) - POPcsed(0,4,ie,0))/4.0/PI
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,4,1)*POPcseaf(0,4,ie,0)
+     &                        + CSEa(ie,nang,4,1)*POPcseaf(0,4,ie,0)
+               ENDDO
+             ELSE
+              ftmp = CSE(ie,4,0)/4.0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,4,1)
               ENDDO
             ENDIF
           ENDDO 
@@ -4184,11 +4257,13 @@ C---------------Inclusive DDX spectrum (deuterons)
 
             if(CSE(ie,4,0).le.0.d0) cycle
  
-            csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
+
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &        FLOAT(ie - 1)*DE/recorp,
@@ -4212,11 +4287,13 @@ C---------------Inclusive DDX spectrum (deuterons)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,4,0) 
+            IF(ENDF(1).EQ.0) htmp = htmp + CSEmsd(ie,4)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
      &           (htmp - check_DE(ie)) * recorp, 
      &           (htmp - check_DE(ie)) / htmp * 100
+
             ftmp = ftmp + check_DE(ie)
           ENDDO
                                         ! exact endpoint
@@ -4254,6 +4331,7 @@ C--------tritons
           totspec = 0.d0
           DO ie = 1, nspec 
            totspec  = totspec  + CSE(ie,5,0)
+            IF(ENDf(1).EQ.0) totspec = totspec + CSEmsd(ie,5)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -4264,15 +4342,16 @@ C--------tritons
             if(CSE(ie,5,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,5,0) - POPcsed(0,5,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-              DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,5,ie,0)
-              ENDDO
-            ELSE
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,5,0) - POPcsed(0,5,ie,0))/4.0/PI
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,5,1)*POPcseaf(0,5,ie,0)
+     &                        + CSEa(ie,nang,5,1)*POPcseaf(0,5,ie,0)
+               ENDDO
+             ELSE
+              ftmp = CSE(ie,5,0)/4.0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,5,1)
               ENDDO
             ENDIF
           ENDDO 
@@ -4290,11 +4369,13 @@ C---------------Inclusive DDX spectrum (tritons)
 
             if(CSE(ie,5,0).le.0.d0) cycle
  
-            csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
+
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &        FLOAT(ie - 1)*DE/recorp,
@@ -4318,6 +4399,7 @@ C---------------Inclusive DDX spectrum (tritons)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,5,0) 
+            IF(ENDF(1).EQ.0) htmp = htmp + CSEmsd(ie,5)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
@@ -4360,6 +4442,7 @@ C--------helium-3
           totspec = 0.d0
           DO ie = 1, nspec 
            totspec  = totspec  + CSE(ie,6,0)
+            IF(ENDf(1).EQ.0) totspec = totspec + CSEmsd(ie,6)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -4370,15 +4453,16 @@ C--------helium-3
             if(CSE(ie,6,0).le.0.d0) cycle
 
 C           Subtract direct contribution to CM emission spectrum 
-            ftmp = (CSE(ie,6,0) - POPcsed(0,6,ie,0))/4.0/PI
-            IF(LHMs.GT.0) THEN
-              DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,6,ie,0)
-              ENDDO
-            ELSE
+            IF(ENDF(1).GT.0) THEN
+              ftmp = (CSE(ie,6,0) - POPcsed(0,6,ie,0))/4.0/PI
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp 
-     &                           + CSEa(ie,nang,6,1)*POPcseaf(0,6,ie,0)
+     &                        + CSEa(ie,nang,6,1)*POPcseaf(0,6,ie,0)
+               ENDDO
+             ELSE
+              ftmp = CSE(ie,6,0)/4.0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,6,1)
               ENDDO
             ENDIF
           ENDDO 
@@ -4396,11 +4480,13 @@ C---------------Inclusive DDX spectrum (helium-3)
 
             if(CSE(ie,6,0).le.0.d0) cycle
  
-			csum = 0.d0
-            DO nang = 1, NDANG
-              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+	    csum = 0.d0
+            DO nang = 2, NDANG
+              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
             ENDDO
-            check_DE(ie) = csum*coef
+            check_DE(ie) = 2.0d0*PI*csum
+
             if(ie.le.nspec)
      &        WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &        FLOAT(ie - 1)*DE/recorp,
@@ -4424,6 +4510,7 @@ C---------------Inclusive DDX spectrum (helium-3)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,6,0) 
+            IF(ENDF(1).EQ.0) htmp = htmp + CSEmsd(ie,6)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
