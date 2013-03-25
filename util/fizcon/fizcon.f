@@ -1,6 +1,6 @@
-! $Rev: 3161 $                                                         |
-! $Date: 2012-10-24 18:28:28 +0200 (Mi, 24 Okt 2012) $                                                     
-! $Author: atrkov $                                                  
+! $Rev: 3348 $                                                         |
+! $Date: 2013-03-25 15:16:04 +0100 (Mo, 25 Mär 2013) $                                                     
+! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -10203,7 +10203,7 @@ C...        GO TO 10
                IF(LMFSN.NE.0.AND.LMFSN.EQ.M) THEN
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+                     WRITE(NOUT,'(/2X,A,I5,A,I3)')                      &       
      &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
 !                    Increment count for warnings
@@ -10231,7 +10231,7 @@ C...        GO TO 10
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+                     WRITE(NOUT,'(/2X,A,I5,A,I3)')                      &       
      &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
 !                    Increment count for warnings
@@ -10260,7 +10260,7 @@ C...        GO TO 10
                   MTR = MOD(ICON(N,1),1000)
                   NMISS = NMISS + 1
                   IF(MISFERR.NE.M) THEN
-                     WRITE(NOUT,'(/3X,A,I5,A,I3)')                      &       
+                     WRITE(NOUT,'(/2X,A,I5,A,I3)')                      &       
      &               'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',M
                      MISFERR = M
                   END IF
@@ -10326,7 +10326,7 @@ C...        GO TO 10
                   END IF
                END IF
                IF(MISFERR.NE.MF0) THEN
-                  WRITE(NOUT,'(/3X,A,I5,A,I3)')                         &       
+                  WRITE(NOUT,'(/2X,A,I5,A,I3)')                         &       
      &            'ERROR(S) - MISSING SECTIONS IN MAT',MAT,' MF',MF0
                   MISFERR = MF0
                END IF
