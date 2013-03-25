@@ -4,11 +4,12 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       integer maxr,maxen
       parameter(maxr=100,maxen=500)
       integer nreac,iz,ia,ncol,nch,ios,ich
-      integer i,j,nen,toplot(maxr)
-      character*2 symb
+      integer i,j,k,nen,toplot(maxr)
+      character*2 symb, dummy
       character*22 caz
-      character*12 creaction(maxr)
+      character*12 creaction(maxr),creactionsf(maxr)
       real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl
+      real*8 sf(maxen)
 
       do i=1,maxr
         toplot(i)=0     
@@ -103,11 +104,41 @@ C       Skipping plots
 
         CLOSE(20)
 
+!!!   Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
+
+
+!       creactionsf(j)='(S-factor)'
+       OPEN(20, file='S-FACTOR.DAT',STATUS='OLD',ERR=101)
+       READ(20,'(1x,A2)') dummy
+       READ(20,'(1x,A2)') dummy
+      DO I=1,maxen
+       READ(20,'(E10.4,20x,E12.6)',END=55) e(i), sf(i)
       ENDDO
+   55 CONTINUE
+      
+      CLOSE(20)
+         if(ios .eq. 0) close(20,status='DELETE')
+         open(20,file='S-FACTOR.zvd', iostat=ios)
+         if(ios .ne. 0) cycle
+         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
+     &    iz,symb,ia    
+
+       CALL OPEN_ZVV2(20,caz,' ')
+       DO i = 1, nen
+         WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i), sf(i)
+       ENDDO
+       CALL CLOSE_ZVV2(20,' ',' ')
+
+       CLOSE(20)
+   
+      ENDDO
+
       STOP 'ZVView cross-section plots created !'
  100  WRITE(*,*) 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING'
+ 101  WRITE(*,*) 'ERROR: S-FACTOR.DAT MISSING'
       STOP
       END
+
 
       SUBROUTINE OPEN_ZVV(iout,tfunct,title)
       character*(*) title, tfunct
@@ -128,8 +159,33 @@ C       Skipping plots
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
       if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
       if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
-      write(iout,'(A19)') 'x-scale: auto      '
-      write(iout,'(A17)') 'y-scale: auto      '
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/c  '
+      return
+      end   
+
+      SUBROUTINE OPEN_ZVV2(iout,tfunct,title)
+      character*(*) title, tfunct
+      integer iout
+      write(iout,'(A19)') '#begin LSTTAB.CUR/u'
+      if(title(1:1).ne.' ') write(iout,'(A30)') title      
+      write(iout,'(A12,A)') 'fun: ',tfunct
+      write(iout,'(A10)') 'thick: 2   '
+      write(iout,'(A10/2H//)') 'length:250'
+      return
+      end
+
+ 
+      SUBROUTINE CLOSE_ZVV2(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/u'
+      write(iout,'(A19)') '#begin LSTTAB.CUR/c'
+      if(titlex(1:1).ne.' ') write(iout,'(A32,A)') 'x: ',titlex
+      if(titley(1:1).ne.' ') write(iout,'(A32,A)') 'y: ',titley
+      write(iout,'(A39)') 'x-long: Center-of-mass-energy      '
+      write(iout,'(A17)') 'y: S-factor MeV      '
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/c  '
       return
