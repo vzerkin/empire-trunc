@@ -1,6 +1,6 @@
-cc   * $Rev: 3347 $
+cc   * $Rev: 3350 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-25 05:06:55 +0100 (Mo, 25 Mär 2013) $
+Ccc   * $Date: 2013-03-25 21:57:52 +0100 (Mo, 25 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2939,7 +2939,7 @@ C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
                 dang = PI/FLOAT(NDANG - 1)
-                coef = 2*PI*dang
+C                coef = 2*PI*dang
 C               if (nejc.eq.1) then 
 C                 csum = 0.d0 
 C                 DO nang = 1, NDANG
@@ -2964,7 +2964,7 @@ C------------------(discrete levels part)
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
-                     csum = 0.d0
+C                     csum = 0.d0
                      DO il = 1, NLV(nnuc)  ! discrete levels
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                         IF (espec.GE.0) WRITE (12,
@@ -2972,11 +2972,12 @@ C------------------(discrete levels part)
      &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
                         csum = 0.d0
-                        DO nang = 1, NDANG  ! over angles
-                          csum = csum + 
-     &                           CSAlev(nang,il,nejc)*SANgler(nang)
+                        DO nang = 2, NDANG  ! over angles
+                          csum = csum + (CSAlev(nang,il,nejc) 
+     &                                  + CSAlev(nang-1,il,nejc))
+     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
                         ENDDO
-                        check_DL(il) = max(csum*coef,1.d-10)
+                        check_DL(il) = max(2.0d0*PI*csum,1.d-10)
                      ENDDO
                    ENDIF
 C
@@ -3000,20 +3001,24 @@ C----------------------Check whether integral over angles agrees with DE spectra
                          cseaprnt(ie,nang) = 
      &                     ftmp + xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc))
-                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+                           IF(nang.GT.1) csum = csum 
+     &                         + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
                        ENDDO
                      ELSE
+c The following is equivalent the definition of ftmp above, when LHMs=0.
 c                      ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
-c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))
-
+c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
-                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+                           IF(nang.GT.1) csum = csum 
+     &                         + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
                        ENDDO
                      ENDIF
-                     check_DE(ie) = csum*coef
+                     check_DE(ie) = 2.0d0*PI*csum
 C--------------------Correct 'cseaprnt()' for eventual imprecision
                      if(check_DE(ie).GT.0.d0) then
   	                 ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
