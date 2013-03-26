@@ -1,6 +1,6 @@
-cc   * $Rev: 3350 $
+cc   * $Rev: 3351 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-25 21:57:52 +0100 (Mo, 25 Mär 2013) $
+Ccc   * $Date: 2013-03-26 17:50:01 +0100 (Di, 26 Mär 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3831,13 +3831,8 @@ C--------neutrons
           totspec = 0.d0
           DO ie = 1, nspec 
             totspec  = totspec  + CSE(ie,1,0) 
-            IF(ENDF(1).EQ.0) THEN
-              IF(LHMs.GT.0) THEN
-                totspec = totspec + CSEhms(ie,1,1)
-               ELSE
-                totspec = totspec + CSEmsd(ie,1)
-               ENDIF
-             ENDIF
+            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) THEN
+     &                      totspec = totspec + CSEmsd(ie,1)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -3862,8 +3857,7 @@ C           Subtract direct contribution to CM emission spectrum
               ENDIF
              ELSE
               IF(LHMs.GT.0) THEN
-                ftmp = (CSE(ie,1,0) + CSEhms(ie,1,1)
-     &                              - CSEhms(ie,1,0))/4.0/PI
+                ftmp = (CSE(ie,1,0) - CSEhms(ie,1,0))/4.0/PI
                 DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,1)
                ENDDO
@@ -3922,13 +3916,7 @@ C---------------Inclusive DDX spectrum (neutrons)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,1,0)
-            IF(ENDF(1).EQ.0) THEN
-              IF(LHMs.GT.0) THEN
-                htmp = htmp + CSEhms(ie,1,1)
-               ELSE
-                htmp = htmp + CSEmsd(ie,1)
-               ENDIF
-             ENDIF
+            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) htmp = htmp + CSEmsd(ie,1)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, htmp*recorp, 
@@ -3975,13 +3963,8 @@ C--------protons
           totspec = 0.d0
           DO ie = 1, nspec 
            totspec  = totspec  + CSE(ie,2,0)
-            IF(ENDF(1).EQ.0) THEN
-              IF(LHMs.GT.0) THEN
-                totspec = totspec + CSEhms(ie,2,1)
-               ELSE
-                totspec = totspec + CSEmsd(ie,2)
-               ENDIF
-             ENDIF
+            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0)
+     &                          totspec = totspec + CSEmsd(ie,2)
           ENDDO
 
           IF(totspec.GT.0.d0) THEN
@@ -4006,8 +3989,7 @@ C           Subtract direct contribution to CM emission spectrum
               ENDIF
              ELSE
               IF(LHMs.GT.0) THEN
-                ftmp = (CSE(ie,2,0) + CSEhms(ie,2,1)
-     &                              - CSEhms(ie,2,0))/4.0/PI
+                ftmp = (CSE(ie,2,0) - CSEhms(ie,2,0))/4.0d0/PI
                 DO nang = 1, NDANG
                   cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,2)
                  ENDDO
@@ -4063,13 +4045,7 @@ C---------------Inclusive DDX spectrum (protons)
           ftmp = 0.d0
           DO ie = 1, nspec 
             htmp = CSE(ie,2,0)
-            IF(ENDF(1).EQ.0) THEN
-              IF(LHMs.GT.0) THEN
-                htmp = htmp + CSEhms(ie,2,1)
-               ELSE
-                htmp = htmp + CSEmsd(ie,2)
-               ENDIF
-             ENDIF
+            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) htmp = htmp + CSEmsd(ie,2)
             if(htmp.LE.0.d0) cycle
             WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &           *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
