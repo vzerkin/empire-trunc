@@ -1,5 +1,5 @@
-! $Rev: 3293 $                                                        
-! $Date: 2013-02-04 14:57:01 +0100 (Mo, 04 Feb 2013) $
+! $Rev: 3353 $                                                        
+! $Date: 2013-03-29 21:00:57 +0100 (Fr, 29 Mär 2013) $
 ! $Author: atrkov $
 ! **********************************************************************
 ! *
@@ -185,9 +185,9 @@
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.09'
 !---MDC---
 !
 !     DEFINE VARIABLE PRECISION
