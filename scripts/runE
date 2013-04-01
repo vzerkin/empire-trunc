@@ -241,7 +241,7 @@ def runE(proj):
     if not isEmpty('COVAR-PAR.DAT'):
         mv('COVAR-PAR.DAT',proj+'-covar-par.dat',0)
     if not isEmpty('TOTCOR.DAT'):
-        mv('TOTCOR.DAT',proj+'-totcor.dat',0)
+        mv('TOTCOR.DAT',proj+'-totcor.out',0)
     # Commented to avoid overwriting the existing file (not an output file)   
     #if not isEmpty('EXFOR.DAT'):
     #    mv('EXFOR.DAT',proj+'.exf',0)
