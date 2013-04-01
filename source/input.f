@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3347 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-25 05:06:55 +0100 (Mo, 25 Mär 2013) $
+Ccc   * $Rev: 3354 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-02 01:13:53 +0200 (Di, 02 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -9545,7 +9545,7 @@ C--------2nd line
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
 C
-         READ (comment,'(10x,I9)') itmp
+         READ (comment,'(10x,I9)',ERR=9548) itmp
          if(itmp.ne.LEVcc) then
 C
 C           ERROR: Set LEVCC parameter in dimension.h to itmp
@@ -9554,13 +9554,13 @@ C
      &        itmp
             STOP 'ERROR: Change LEVCC parameter in dimension.h; check lo  
      &ng listing'
-		 endif
+	   endif
 
 C--------82 208    nucleus is treated as spherical or
 C        92 238    nucleus is treated as dynamically deformed                                              '
 C        40  90    nucleus is treated as soft
 C
-         READ (32,'(a80)') comment
+ 9548    READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
 
