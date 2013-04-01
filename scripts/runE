@@ -133,10 +133,11 @@ def runE(proj):
         print('File with sensitivity matrix exists: %s' % proj+'-mat.sen')
     if not isEmpty(proj+'.rng'):
         print('Using existing random number generator seed')
+        cp(proj+'.rng','R250SEED.DAT')
     else:
-        print('Creating default random number generator seed')
-        open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
-    cp(proj+'.rng','R250SEED.DAT')
+        print('Default random number generator seed will be used')
+    #    open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
+    #cp(proj+'.rng','R250SEED.DAT')
     if not isEmpty(proj+'-nubar.dat'):
         cp(proj+'-nubar.dat','NUBAR.DAT')
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')  
@@ -267,9 +268,9 @@ def runE(proj):
         mv('OPTMAN.INP',proj+'-optman.inp',0)
     if not isEmpty('OPTMAN.OUT'):
         mv('OPTMAN.OUT',proj+'-optman.out',0)
-    if isEmpty(proj+'.-default.rng'):
-        mv('R250SEED-default.DAT',proj+'-default.rng')		
-        print('Saving the default RNG seed')
+    #if isEmpty(proj+'.-default.rng'):
+    #    mv('R250SEED-default.DAT',proj+'-default.rng')		
+    #    print('Saving the default RNG seed')
     if not isEmpty('R250SEED.DAT'):
         mv('R250SEED.DAT',proj+'.rng')
     # fission chances and spectra for one energy run:
