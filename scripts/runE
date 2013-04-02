@@ -135,7 +135,7 @@ def runE(proj):
         print('Using existing random number generator seed')
         cp(proj+'.rng','R250SEED.DAT')
     else:
-        print('Default random number generator seed will be used')
+        print('Default random number generator seed will be created if needed')
     #    open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
     #cp(proj+'.rng','R250SEED.DAT')
     if not isEmpty(proj+'-nubar.dat'):
