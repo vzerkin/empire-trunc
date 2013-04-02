@@ -46,19 +46,27 @@ def runE(proj):
         time.sleep(2)
         os.environ['EMPIREDIR'] = PACKAGEDIR
     
-    # Preserve previous *.lst file for comparison
+    # Preserve previous *inp,*.lst,*.out,*-s.endf,*-CN-lev.xsc files for comparison
     if not isEmpty(proj+'.lst'):
-        cp(proj+'.lst', proj+'-prev.lst')
-        print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
         cp(proj+'.inp', proj+'-prev.inp')
         print ('Preserved existing *.inp file as: %s' % proj+'-prev.inp')
-    
+        cp(proj+'.lst', proj+'-prev.lst')
+        print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
+        cp(proj+'.out', proj+'-prev.out')
+        print ('Preserved existing *.out file as: %s' % proj+'-prev.out')
+    if not isEmpty(proj+'-s.endf'):
+        cp(proj+'-s.endf', proj+'-prev.endf')
+        print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
+    if not isEmpty(proj+'-CN-lev.xsc'):
+        cp(proj+'-CN-lev.xsc',proj+'-CN-lev-prev.xsc')
+        print ('Preserved existing *-CN-lev.xsc file as: %s' % proj+'-CN-lev-prev.xsc')
+  
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
     rm(proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
-    rm('OMP_A.DAT', 'EMPIRE.STA', 'PFNM.OUT', 'PFNS.OUT')
+    rm('OMP_A.DAT', 'EMPIRE.STA', 'PFNM.OUT', 'PFNS.OUT', 'CN-LEV-XS.DAT')
     rm('OUTPUT.DAT', 'LIST.DAT', 'OMPAR.RIPL', 'GAMMA.DAT', 'FUSION')
-    rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT')
+    rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT', 'TOTCOR.DAT')
     rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
@@ -78,20 +86,17 @@ def runE(proj):
     cp(proj+'.inp', 'INPUT.DAT')
     
     # check if the file exists and has size > 0, if so keep it
-    if not isEmpty(proj+'-s.endf'):
-        cp(proj+'-s.endf', proj+'-prev.endf')
-        print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
+
+    # make symlink to LEVELS file:
     if not isEmpty(proj+'.lev'):
         ln(proj+'.lev', 'LEVELS')     
-        #cp(proj+'.lev', 'LEVELS')
         print ('Using existing file with levels: %s' % proj+'.lev')
+    # make symlink to OMP files:
     if not isEmpty(proj+'-omp.ripl'):
         ln(proj+'-omp.ripl', 'OMPAR.RIPL')
-        #cp(proj+'-omp.ripl', 'OMPAR.RIPL')
         print('Using existing file with optical model par: %s' % 
                 proj+'-omp.ripl')
     if not isEmpty(proj+'-omp.dir'):
-        ln(proj+'-omp.dir','OMPAR.DIR')
         #cp(proj+'-omp.dir','OMPAR.DIR')
         print('Using existing file with optical model par (inel scatt): %s' % 
                 proj+'-omp.dir')
@@ -243,7 +248,7 @@ def runE(proj):
     if not isEmpty('TOTCOR.DAT'):
         mv('TOTCOR.DAT',proj+'-totcor.out',0)
     if not isEmpty('CN-LEV-XS.DAT'):
-        cp('CN-LEV-XS.DAT',proj+'-CN-lev.xsc',0)
+        mv('CN-LEV-XS.DAT',proj+'-CN-lev.xsc',0)
     # Commented to avoid overwriting the existing file (not an output file)   
     #if not isEmpty('EXFOR.DAT'):
     #    mv('EXFOR.DAT',proj+'.exf',0)
