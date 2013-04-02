@@ -347,7 +347,7 @@ def runE(proj):
     rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
 #   rm('OPTFIT.CAL')
 #    rm('OMPAR0.DIR', 'INPUT0.DAT')
-#    rm('OMPAR.DIR')
+    rm('OMPAR.DIR')
     rm('LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
     
