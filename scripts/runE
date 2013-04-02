@@ -242,6 +242,8 @@ def runE(proj):
         mv('COVAR-PAR.DAT',proj+'-covar-par.dat',0)
     if not isEmpty('TOTCOR.DAT'):
         mv('TOTCOR.DAT',proj+'-totcor.out',0)
+    if not isEmpty('CN-LEV-XS.DAT'):
+        cp('CN-LEV-XS.DAT',proj+'-CN-lev.xsc',0)
     # Commented to avoid overwriting the existing file (not an output file)   
     #if not isEmpty('EXFOR.DAT'):
     #    mv('EXFOR.DAT',proj+'.exf',0)
