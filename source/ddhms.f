@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3351 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-26 17:50:01 +0100 (Di, 26 Mär 2013) $
+Ccc   * $Rev: 3363 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-03 12:33:52 +0200 (Mi, 03 Apr 2013) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3351 $
+C CVS Version Management $Revision: 3363 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2468,7 +2468,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3351 $')
+99005 FORMAT ('  xddhms version: $Revision: 3363 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -5834,7 +5834,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION adum(5,7), csfit(NDAnghms), csx0(NDAnghms), qq(5)
-      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, csum,
+      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, ! csum,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
