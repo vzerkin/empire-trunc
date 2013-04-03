@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3305 $
+Ccc   * $Rev: 3365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-18 08:33:32 +0100 (Mo, 18 Feb 2013) $
+Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -52,7 +52,7 @@ C
      &  ilev3, ncoef3, numcc, jcc   
       INTEGER*4 iwin
       DOUBLE PRECISION PAR
-
+	LOGICAL logtmp, TMP_isotropic
       INTEGER*4 PIPE
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
@@ -65,6 +65,8 @@ C
 C-----No DWBA by default
 C
       ldbwacalc = .FALSE.
+            
+      TMP_isotropic = CN_isotropic
 C
 C-----Reduced mass corrected for proper mass values
       xmas_npro = EJMass(Npro) 
@@ -140,7 +142,7 @@ C--------Here the old calculated files are read
      &' Transmission coefficients for incident channel read from file: '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
             ENDIF
-
+            
             IF (.NOT.CN_isotropic) THEN
 C
 C-------------Legendre expansion (INCIDENT.LEG)
@@ -423,15 +425,29 @@ C--------------Saving KTRlom(0,0)
                KTRlom(0,0) = KTRompcc
                CCCalc = .TRUE.
             ENDIF
+            IF (CCCalc) THEN
+               WRITE (8,*) ' CC   calculation  for inelastic scattering'
+               WRITE (8,*) '    on   coupled coll. levels'
+            ENDIF
 C-----------DWBA calculation. All collective levels considered
             IF (DIRect.EQ.3) THEN
                WRITE (8,*) ' DWBA calculations for inelastic scattering'
             ELSE
                WRITE (8,*) ' DWBA calculations for inelastic scattering'
-               WRITE (8,*) '    to uncoupled coll. levels and continuum'
+               WRITE (8,*) '    on uncoupled coll. levels and continuum'
             ENDIF
-
+C           
+C           saving the input value of the key CN_isotropic
+            logtmp = CN_isotropic
+C
+C           neglecting CN calculation for uncoupled levels in DWBA
+C                     (except for OPTMAN use)
+ 	      IF ( (.not.SOFt) .or. (.not.DYNAM) ) TMP_isotropic = .TRUE.  
+                                                   !  
+	      CN_isotropic = TMP_isotropic
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
+C           restoring the input value of the key CN_isotropic
+            CN_isotropic = logtmp
 
             IF (DIRect.NE.3) THEN
                CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
@@ -451,10 +467,10 @@ C--------------Restoring KTRlom(0,0)
             ldbwacalc = .TRUE.
          ENDIF
 C
-C---------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly
-C---------the same array of transmission coefficients calculated
-C---------by CC OMP. The differences between DIRECT 1/2 options are in the
-C---------calculations of the outgoing channel (TRANSINP() routine)
+C---------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly the
+C---------same array of transmission coefficients for the incident channel
+C---------calculated by the CC OMP. The differences between DIRECT 1/2 options
+C---------are in the calculations of the outgoing channel (TRANSINP() routine).
 C---------DIRECT 2 option uses CC method to produce outgoing TLs
 C---------for the inelastic channel. DIRECT 1 option assumes SOMP
 C---------with only one level (the GS) to calculate the inelastic TLs.
@@ -554,9 +570,9 @@ C                   DWBA CN PLs
                     if(ncoef3.gt.0) then
                       IF (ilev3.NE.ilev2 ) THEN   
                         WRITE (8,*)
-     &             ' ERROR: DWBA DIR and CN level order do not coincide'
+     &           ' ERROR: DWBA DIR and CN level order do not coincide 1'
                         STOP
-     &             ' ERROR: DWBA DIR and CN level order do not coincide'
+     &           ' ERROR: DWBA DIR and CN level order do not coincide 1'
                       ENDIF
                       WRITE(47,'(i5,1x,i4,3x,A24)') 
      &                  ilev3, ncoef3, 'DWBA  CN. LEG. EXPANSION'
@@ -620,9 +636,7 @@ C                CLOSE(47,STATUS='DELETE')
 
               IF (DEFormed) THEN
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
-C
-C               Including CN calculation
-C
+C               including CN calculation
                 CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.)
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
@@ -630,7 +644,6 @@ C
                   CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
      >                                 Npro,Ntrg,maxlw,stl,sel,.FALSE.)
-
                   IF(.not.CN_isotropic) THEN
                     WRITE (8,*)
      &        ' WARNING: DWBA levels required if CN expansion is needed'
@@ -675,13 +688,13 @@ C--------------Restoring KTRlom(0,0)
                CCCalc = .FALSE.
             ENDIF
 C
-C           DYNAM=.TRUE. or SOFT=.TRUE means OPTMAN is used
+C           DYNAM=.TRUE. or SOFT=.TRUE. means OPTMAN is used
 C                       
             ltlj = .TRUE.
             IF (ldbwacalc) THEN
 C
-C-------------Joining DWBA and CCM files
-C-------------Total, elastic and reaction cross section is from CCM
+C--------------Joining DWBA and CCM files
+C--------------Total, elastic and reaction cross section is from CCM
 C
                IF (IOPsys.EQ.0) THEN
 C-----------------LINUX
@@ -690,7 +703,8 @@ C-----------------LINUX
                   ctmp = 'cp ccm.TLJ INCIDENT.TLJ'
                   iwin = PIPE(ctmp)
 C                 Only Legendre elastic expansion is needed
-                  IF(CN_isotropic) then
+C                 IF(CN_isotropic) then
+                  IF(TMP_isotropic) then
                     ctmp = 'cp ccm.LEG INCIDENT.LEG'
                     iwin = PIPE(ctmp)
                   ENDIF
@@ -701,7 +715,8 @@ C-----------------WINDOWS
                   ctmp = 'copy ccm.TLJ INCIDENT.TLJ >NUL'
                   iwin = PIPE(ctmp)
 C                 Only Legendre elastic expansion is needed
-                  IF(CN_isotropic) then
+C                 IF(CN_isotropic) then
+                  IF(TMP_isotropic) then
                     ctmp = 'copy ccm.LEG INCIDENT.LEG >NUL'
                     iwin = PIPE(ctmp)
                   ENDIF
@@ -710,7 +725,8 @@ C
 C              CN_isotropic = .FALSE. 
 C              Joining dwba.LEG and ccm.LEG
 C
-               IF(.not.CN_isotropic) then
+C              IF(.not.CN_isotropic) then
+               IF(.not.TMP_isotropic) then
 C
 C                PL_CN(..) contains the CN Legendre coefficients,
 C
@@ -722,13 +738,13 @@ C----------------Legendre expansion (INCIDENT.LEG)
                  READ (46,*,ERR = 174, END = 174) 
                  WRITE (47,'(A80)') rstring
 
-  174            DO i = 1, ND_nlv ! loop over collective levels
-
+  174            DO i = 1, ND_nlv ! loop over coupled levels
 C---------------------------------------------------------------------
 C                 Reading dwba.LEG (DWBA + CN calculations)
 C 
                   READ (45,'(i5,1x,i4)',END = 180,ERR = 180) 
      &                 ilev1, ncoef1
+
                   if(ncoef1.GT.0) THEN
                     if(ICOllev(i).GE.LEVcc) 
      &              WRITE (47,'(i5,1x,i4,3x,A24)') 
@@ -758,9 +774,9 @@ C-------------------checking the correspondence of the excited states
 C
                   IF (ilev1.NE.ilev2 ) THEN   
                     WRITE (8,*)
-     &            ' ERROR: DWBA DIR and CN level order do not coincide'
+     &           ' ERROR: DWBA DIR and CN level order do not coincide 2'
                     STOP
-     &            ' ERROR: DWBA DIR and CN level order do not coincide'
+     &           ' ERROR: DWBA DIR and CN level order do not coincide 2'
                   ENDIF
 C                 write(*,*) 'CN DWBA ilev=',ilev2,' #Ls=', ncoef2
 C

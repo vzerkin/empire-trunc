@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3319 $
+Ccc   * $Rev: 3365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-12 21:55:15 +0100 (Di, 12 Mär 2013) $
+Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -199,7 +199,7 @@ C
 C--------model = 'coupled-channels rigid rotor model'
 C
          coll_defined = .TRUE.
-         WRITE (8,*)
+C        WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
             WRITE (8,*)'ERROR: Rigid rotor CC potential selected but '
@@ -317,12 +317,12 @@ C-----------------swapping
 C--------Setting EMPIRE global variables
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+         WRITE (8,*) 
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
             D_Def(1,k) = DDEf(ncalc,k)
          ENDDO
-         WRITE (8,*) 
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
@@ -440,8 +440,8 @@ C        CLOSE (97,STATUS = 'DELETE')
 C
 C--------JOIN finished
 C
-         WRITE (8,*)
-         WRITE (8,*)
+C        WRITE (8,*)
+C        WRITE (8,*)
       ENDIF
 
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
@@ -449,7 +449,7 @@ C
 C--------model = 'coupled-channels vibrational model'
 C
          coll_defined = .TRUE.
-         WRITE (8,*)
+C        WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
             WRITE (8,*)'ERROR: Vibrat. CC potential selected but    '
             WRITE (8,*)'ERROR: no isotopes defined for this OMP     '
@@ -692,8 +692,8 @@ C        CLOSE (97,STATUS = 'DELETE')
 C
 C--------JOIN finished 
 C                                                                   
-         WRITE (8,*)
-         WRITE (8,*)
+C        WRITE (8,*)
+C        WRITE (8,*)
 
       ENDIF
 
@@ -702,7 +702,7 @@ C
 C--------model = 'coupled-channels soft rotor model'
 C
          coll_defined = .TRUE.
-         WRITE (8,*)
+C        WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
             WRITE (8,*)'ERROR: Soft rotor potential selected but      '
             WRITE (8,*)'ERROR: no isotopes defined for this OMP.      '
@@ -758,7 +758,7 @@ C
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
             WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
-         WRITE (8,*) 
+C        WRITE (8,*) 
 C
 C        soft rotor model
 C
@@ -1063,8 +1063,8 @@ C
 C
 C--------JOIN finished
 C
-         WRITE (8,*)
-         WRITE (8,*)
+C        WRITE (8,*)
+C        WRITE (8,*)
 
       ENDIF
 
@@ -1073,7 +1073,7 @@ C
 C--------model = 'coupled-channels rigid+soft rotor'
 C
          coll_defined = .TRUE.
-         WRITE (8,*)
+C        WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
             WRITE (8,*)'ERROR: Rigid+soft rotor CC potential selected'
@@ -1123,7 +1123,7 @@ C--------Setting EMPIRE global variables
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
             WRITE (8,*) 'WARNING: RIPL number of channels used'
          ENDIF
-         WRITE (8,*) 
+C        WRITE (8,*) 
 C
 C        Rigid-soft rotor model
 C
@@ -1232,12 +1232,12 @@ C-----------------swapping
 
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
+         WRITE (8,*) 
          LMAxcc = LMAx(ncalc)
          IDEfcc = IDEf(ncalc)
          DO k = 2, IDEfcc, 2
             D_Def(1,k) = DDEf(ncalc,k)
          ENDDO
-         WRITE (8,*) 
 C
 C--------Joining TARGET_COLL.DAT and TARGET_COLL_RIPL.DAT files
 C
@@ -1352,8 +1352,8 @@ C
 C
 C--------JOIN finished
 C
-         WRITE (8,*)
-         WRITE (8,*)
+C        WRITE (8,*)
+C        WRITE (8,*)
 
       ENDIF
 C
@@ -2106,7 +2106,6 @@ C
   200 Ieof = 1
       END
 
-
       SUBROUTINE TLEVAL(Nejc,Nnuc,Nonzero)
 CCC
 CCC   ********************************************************************
@@ -2146,10 +2145,11 @@ C
       IF (SEJc(Nejc).GT.1.0D0) THEN
          WRITE (8,
      &'('' SPIN OF EJECTILE A='',I3,'' AND Z='',I2,'' IS '',    F4.1,/,'
-     &' SUCH A LARGE VALUE IS NOT ALLOWED IN TRANSMISSION CEOFFICIENT CA
+     &' SUCH A LARGE VALUE IS NOT ALLOWED IN TRANSMISSION COEFFICIENT CA
      &LCULATIONS'',/,'' EXECUTION S T O P P E D '')') INT(AEJc(Nejc)),
      &INT(ZEJc(Nejc)), SEJc(Nejc)
-         STOP '13'
+         WRITE (8,*) 'ERROR: TOO LARGE SPIN OF EJECTILE'
+         STOP        'ERROR: TOO LARGE SPIN OF EJECTILE'
       ENDIF
 C
 C-----TL trans. coeff. at zero energy must be zero
@@ -2184,13 +2184,13 @@ C--------transfer of the calculated transmission coeff. onto TL matrix
       DO i = 2, NDETL
          LMAxtl(i,Nejc,Nnuc) = MIN0(MAXl(i) + 1,NDLW)
          DO l = 1, LMAxtl(i,Nejc,Nnuc)
-            IF (TTLl(i,l - 1).LT.1.D-10) GOTO 100
+            IF (TTLl(i,l - 1).LT.1.D-10) EXIT
             TL(i,l,Nejc,Nnuc) = TTLl(i,l - 1)
             Nonzero = .TRUE.
          ENDDO
-  100 ENDDO
+      ENDDO
+	RETURN
       END
-
 
       SUBROUTINE TLLOC(Nnuc,Nejc,Eout,Il,Frde)
 Ccc
@@ -2373,7 +2373,7 @@ C
      &      ' WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
       ENDIF
 C-----Coulomb barrier (somewhat decreased) setting lower energy limit
-C-----for transsmission coefficient calculations
+C-----for transmission coefficient calculations
   400 culbar = 0.8*ZEJc(Nejc)*Z(Nnuc)/(1 + A(Nnuc)**0.6666)
       ien_beg = -1
       DO i = 2, Nen
@@ -2384,11 +2384,11 @@ C-----for transsmission coefficient calculations
       ENDDO
   500 IF (ien_beg.NE. - 1) THEN
 C
-C--------Running ECIS
+C--------Running ECIS or OPTMAN
 C
          IF (IOUt.GT.1 .AND. FIRST_ein) THEN
-            WRITE (8,*)
             IF (A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN
+              WRITE (8,*)
               IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN 
                WRITE (8,*) ' CC transmission coefficients used for the',
      &                     ' inelastic outgoing channel'
@@ -2410,7 +2410,7 @@ C
 C        saving the input value of the key CN_isotropic
 C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
-         CN_isotropic = .FALSE.     
+         CN_isotropic = .TRUE.     
      
          DO i = ien_beg, Nen
 
@@ -2427,15 +2427,16 @@ C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
-C--------------CC rotational calculation 
+C--------------CC rotational calculation (ECIS)
                CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.)
             ELSE
-C--------------CC vibrational calculation 
+C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
 C----------------OPTMAN CC calc. (only coupled levels)
                  CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.) 
                ELSE
+C----------------ECIS   CC calc. (only coupled levels)
                  CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., -1,.TRUE.)
                ENDIF
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
@@ -3162,7 +3163,6 @@ C
       INTEGER INT, NINT
       LOGICAL inc_channel, logtmp
 
-
       inc_channel = .false.
 
       IF (AEJc(Nejc).EQ.1.D0 .AND. ZEJc(Nejc).EQ.0.D0) ip = 1
@@ -3197,17 +3197,18 @@ C-----Real SO potential deformed
 C-----Imaginary SO potential deformed
       ECIs1(14:14) = 'F'
 
-      convg=1.0d-8
+      convg=1.0d-10
+	IF(Ldwba) convg=1.0d-5
 C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for non-zero spins or energies below 10 MeV
-      if(XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) THEN
-        ECIs1(21:21) = 'T'
-        convg=1.0d-10
-      endif
+C     if( (XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) ) .and.
+C    >    .not.TL_calc ) THEN
+C       ECIs1(21:21) = 'T'
+C       convg=1.0d-10
+C     endif
 
-      ECIs1(21:21) = 'T'
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -3247,27 +3248,28 @@ C
 C     saving the input value of the key CN_isotropic
       logtmp = CN_isotropic
 
-      if (INLkey.EQ.0) CN_isotropic = .TRUE. 
-      if (DIRect.EQ.3) CN_isotropic = .TRUE. 
-
-C     INLkey = 0  DWBA calculation for the ground state = Spher.OMP
-C     INLkey > 0  Calculation for coupled and uncoupled states = DWBA or CC
-C     INLkey < 0  Calculation for coupled states only = CC
-
       IF (El.LT.0.D0) THEN
          inc_channel = .true.
          El = DABS( - El)
          elab = El
          ikey = -1
       ELSE
-         CN_isotropic = .TRUE.
+C        CN_isotropic = .TRUE.
          ecms = El
          ikey = +1
       ENDIF
 
-C     write(*,*)  'Vibrational Nnuc=',Nnuc,' Isotr? ',CN_isotropic
-C     write(*,*)  INLkey, '  DIRECT=',DIRECT, '  DWBA?',lDWBA
-C     write(*,*)  
+      IF (TL_calc .or. (.not.inc_channel)) CN_isotropic = .TRUE.
+      if (INLkey.EQ.0 .or. DIRect.EQ.3) CN_isotropic = .TRUE. 
+C
+C     INLkey = 0  DWBA calculation for the ground state = Spher.OMP
+C     INLkey > 0  Calculation for coupled and uncoupled states = DWBA or CC
+C     INLkey < 0  Calculation for coupled states only = CC
+C     if(.not.TL_calc) then
+C       write(*,*)'Vibrational Nnuc=',Nnuc,' Isotr ? ',CN_isotropic
+C       write(*,*)'INLkey=',INLkey,' DWBA ? ',lDWBA,' TL calc ? ',TL_calc
+C       write(*,*)  
+C	endif
 
       IF(.not.CN_isotropic) then
 C
@@ -3296,12 +3298,10 @@ C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.
                               ! Gg(L) gamma width should be properly trasferred 
         IF(ngamm_tr.gt.0)     
      &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
-
 C
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
-C
-      ENDIF
 
+      ENDIF
 C
 C-----Transformation of energies from laboratory to center-of-mass if needed
 C-----is done inside SETPOTS() -> OMPAR()
@@ -3321,7 +3321,7 @@ C      Preparing dispersive CC input for ECIS
 C-----Only for target, find open channels
 C-----At least ground state is always open
       nd_nlvop = 1
-      nd_cons = 1
+      nd_cons  = 1
       IF (Inlkey.NE.0) THEN
          DO j = 2, ND_nlv
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
@@ -3332,6 +3332,8 @@ C-----At least ground state is always open
          IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
      &       WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
+
+         IF (Ldwba) nd_cons = nd_nlvop ! Only open channels considered for DWBA
       ENDIF
 C
 C-----Considering only coupled levels if CC calculation
@@ -3406,7 +3408,6 @@ C---------If channel is closed then eee < 0
         ENDDO
 C       For DWBA calculations, no additional levels are considered
         IF (Ldwba) nuncoupled = 0
-
 C
 C       For CN calculation a card stating a total number of coupled and uncoupled levels + 1 continua
 C        1- 5   NSP(1) NUMBER OF UNCOUPLED STATES AND CONTINUA. IF IT IS  ECIS-413
@@ -3420,7 +3421,6 @@ C                      THESE COEFFICIENTS ARE COMPUTED.                   ECIS-4
 C       21-25   NCONT  NUMBER OF CONTINUA. THEY MUST BE THE LAST GIVEN,   ECIS-421
 C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-422
 C-------CARD 7
-C     
 C
         WRITE (1,'(5i5)') 
      >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
@@ -3454,8 +3454,11 @@ C-----------If channel is closed ground state potential is used for this level
             dtmp = D_Xjlv(j)
             ! making integer spin for odd nuclides CC levels in DWBA calculations
             if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
-            IF (eee.GE.0.0001) THEN
 
+            ! only open channels considered for DWBA
+            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+
+            IF (eee.GE.0.0001) THEN
                IF(IDRs.eq.0) then
                  nwrite = nwrite + 1
                  WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, nwrite,
@@ -3465,6 +3468,7 @@ C-----------If channel is closed ground state potential is used for this level
      &                D_Elv(j)
                ENDIF
             ELSE
+               ch = '+'
                WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, 1, ch,
      &                D_Elv(j)
             ENDIF
@@ -3485,6 +3489,12 @@ C
          DO j = 2, ND_nlv
 C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
+
+C-----------channel energy
+            eee = elab - D_Elv(j)/xratio
+            ! only open channels considered for DWBA
+            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
                WRITE (1,'(i5,5x,6f10.5)') INT(D_Xjlv(j)),ABS(D_Def(j,2))
@@ -3730,69 +3740,69 @@ C------2) discrete levels
          DO j = 2, ND_nlv
 C           All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
-            eee = elab - D_Elv(j)/xratio
-C-----------If channel is closed ground state potential is used for this level
-C           IF (eee.GE.0.0001) THEN
-              IF(IDRs.gt.0) then
-C---------------SETPOTS : subroutine for optical model parameters
-C---------------From  cms system to Lab
-C               ecms = eee
-C               ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-                elabe = eee   ! Changed on Aug. 2008
-                ikey  = -1   
-C
-C---------------Transformation of energies from laboratory to center-of-mass
-C---------------if needed is done inside SETPOTS() -> OMPAR()
-C
-                CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,
-     &                      ak2,ikey)
-                fv  = 0.d0
-                fs  = 0.d0
-                fvv = 0.d0
-                fvs = 0.d0
-                tv  = 0.d0
-                ts  = 0.d0
-                fso = 0.d0
-                tso = 0.d0
 
-                if(vvref.ne.0.d0) 
+C-----------channel energy
+            eee = elab - D_Elv(j)/xratio
+            ! only open channels considered for DWBA
+            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+
+C-----------If channel is closed ground state potential is used for this level
+            IF(IDRs.gt.0) then
+C-------------SETPOTS : subroutine for optical model parameters
+C-------------From  cms system to Lab
+C             ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
+              elabe = eee 
+              ikey  = -1   
+C
+C-------------Transformation of energies from laboratory to center-of-mass
+C-------------if needed is done inside SETPOTS() -> OMPAR()
+C
+              CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,
+     &                      ak2,ikey)
+              fv  = 0.d0
+              fs  = 0.d0
+              fvv = 0.d0
+              fvs = 0.d0
+              tv  = 0.d0
+              ts  = 0.d0
+              fso = 0.d0
+              tso = 0.d0
+
+              if(vvref.ne.0.d0) 
      >            fvv = (VOM(Nejc,Nnuc) - DWVcor - vvref)/vvref
-                if(wvref.ne.0.d0) then
+              if(wvref.ne.0.d0) then
                   fv  = DWVcor/wvref
                   tv  = (WOMv(Nejc,Nnuc) - wvref)/wvref
-                endif
-                if(wsref.ne.0.d0) then
+              endif
+              if(wsref.ne.0.d0) then
                   fs  = DWScor/wsref
                   ts  = (WOMs(Nejc,Nnuc) - wsref)/wsref
-                endif
-                if(wsoref.ne.0.d0) then
+              endif
+              if(wsoref.ne.0.d0) then
                   fso = DSOcor/wsoref
                   tso = (WSO(Nejc,Nnuc)  - wsoref )/wsoref
-                endif
+              endif
 
-                 if(vsoref.ne.0.d0) 
+              if(vsoref.ne.0.d0) 
      >            fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-                write (1,'(2(G10.4,F10.4,G10.4))')                                       
+              write (1,'(2(G10.4,F10.4,G10.4))')                                       
      >            tv, fv  , fvv, 
      >            ts, fs  , 0.d0
-                write (1,'(2(G10.4,F10.4,G10.4))') 
+              write (1,'(2(G10.4,F10.4,G10.4))') 
      >            tso, fso, fvs
 
-                CYCLE
-              ENDIF
-C           ENDIF
+              CYCLE
+            ENDIF
+
             IF (eee.GT.0.0001) THEN
 C---------------SETPOTS : subroutine for optical model parameters
 C---------------From  cms system to Lab
-C               ecms = eee
-C               ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
                 elabe = eee   ! Changed on Aug. 2008
-                ikey  = -1   
+                ikey  = -1    ! Level energies ARE IN THE LAB FRAME 
 C
 C---------------Transformation of energies from laboratory to center-of-mass
 C---------------if needed is done inside SETPOTS() -> OMPAR()
-C
                 CALL SETPOTS(Nejc,Nnuc,elabe,ecms,xmas_nejc,xmas_nnuc,
      &                      ak2,ikey)
 C
@@ -4103,13 +4113,15 @@ C-----From cms system to Lab (ECIS do inverse convertion)
          elab = El
          ikey = -1
       ELSE
-         CN_isotropic = .TRUE.
+C        CN_isotropic = .TRUE.
          ecms = El
          ikey = +1
       ENDIF
 
-C     write(*,*)  'Nnuc=',Nnuc,' Isotr? ',CN_isotropic
-
+      IF (TL_calc .or. (.not.inc_channel)) CN_isotropic = .TRUE.
+C     write(*,*)  'Rotational Nnuc=',Nnuc,' Isotr? ',CN_isotropic
+C     write(*,*)  ' TL calc?',TL_calc
+      
       IF(.not.CN_isotropic) then
 C
 C       COMPOUND NUCLEUS                                                  
@@ -4824,7 +4836,6 @@ C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
 C     |        calculation of transmission coefficients in        |
 C     |        the soft/rigid rotor model                         |
 C     |    R.Capote  05/2011 OPTMAN v10,v11                       |
-
 C     |    R.Capote  02/2012 OPTMAN v12                           |                                     |
 C     -------------------------------------------------------------
 C
@@ -4845,7 +4856,6 @@ C-----For dispersive optical model potentials
 C-----It is ripl2empireS.h because it must be compatible
 C-----with global.h declarations so some variables must be renamed
       INCLUDE 'ripl2empireS.h'
-
 C
 C COMMON variables
 C

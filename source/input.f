@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3354 $
+Ccc   * $Rev: 3365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-02 01:13:53 +0200 (Di, 02 Apr 2013) $
+Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -280,9 +280,8 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
-C        If CN_isotropic = .False. EMPIRE calculates non-isotropic CN angular distributions 
          CNAngd = 0
-         CN_isotropic = .True.     ! default
+         CN_isotropic = .TRUE.     
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0

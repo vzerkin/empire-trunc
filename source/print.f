@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3323 $
+Ccc   * $Rev: 3365 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-14 15:39:13 +0100 (Do, 14 Mär 2013) $
+Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -51,7 +51,7 @@ C
       ENDDO
 C
 C     Stringest test to avoid plotting problems.
-C     Cross sections smaller than 1.d-4 mb are not relevant at all.  
+C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
       IF (csemax.LE.1.d-5) return
 
@@ -62,8 +62,8 @@ C
       DO i = 1, kmax
         totspec  = totspec  + CSEt(i,Nejc)
       ENDDO
-      totspec = totspec - 
-     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+C     totspec = totspec - 
+C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE     
       IF (totspec.LE.1.d-4) RETURN
 
@@ -140,7 +140,7 @@ C
   150    WRITE (8,99040) e, CSEt(i,Nejc), symc
 99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
       ENDDO
-      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
@@ -159,8 +159,6 @@ Ccc   *   and prints  energy integrated cross section for this emission. *
 Ccc   *                                                                  *
 Ccc   * input:NNUC-decaying nucleus index                                *
 Ccc   *       NEJC-ejectile index                                        *
-Ccc   *       Iflag=1 for integral of inclusive spectra (special case)   *
-Ccc   *               Usually Iflag=0 for normal exclusive spectra       *
 Ccc   *       Iflag=0 trapezoidal integration                            *
 Ccc   *       Iflag=1 rectangular integration                            *
 Ccc   *                                                                  *
@@ -302,7 +300,7 @@ C	   if(i.eq.kmax) e = EMAx(Nnuc)
 99045 FORMAT (24X,93('-'))
       END
 
-      SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc)
+      SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc,Iflag)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -353,7 +351,8 @@ C
       DO i = 1, kmax
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      if(Iflag.eq.0) totspec = 
+     &  totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
       IF (totspec.LE.1.d-4) RETURN
 
@@ -377,18 +376,12 @@ C
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
 
       CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
-C     DO i = 1, kmax - 1
       DO i = 1, kmax 
-      IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
+         IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') 
      &     FLOAT(i - 1)*DE*1.D6/recorp, 
      &       CSE(i,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
       ENDDO
-C     IF(CSE(kmax,Nejc,Nnuc).GT.0.d0) then
-C        WRITE (36,'(1X,E12.6,3X,E12.6)') 
-C    &     EMAx(Nnuc)*1.D6/recorp, 
-C    &       CSE(kmax,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
-C     ENDIF
       CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
       CLOSE(36)
       RETURN

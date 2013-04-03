@@ -1,6 +1,6 @@
-cc   * $Rev: 3351 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-26 17:50:01 +0100 (Di, 26 Mär 2013) $
+cc   * $Rev: 3365 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1004,9 +1004,7 @@ C
              WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 31,
      &                      MIN(its,40))
            ENDIF
-           WRITE (8,*) ' '
-           WRITE (8,*) ' '
-           WRITE (8,*) ' '
+           WRITE (8,*) '++++++'
          ENDIF
       ENDIF
 
@@ -1030,7 +1028,7 @@ C           residual nuclei must be heavier than alpha
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
           
             IF (netl.GT.NDETL) cycle
-             
+            
             ICAlangs = ICAlangs-10
             itmp = NANgela
             NANgela = 2
@@ -1446,43 +1444,43 @@ C    &  '' DWBA inelastic contribution '')')
           WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
           IF(CSEmis(0,1).GT.0) THEN
-            CALL AUERST(1,0,0)
+            CALL AUERST(1,0,1)
             WRITE (8,
      &       '(2x,'' g PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(0,1)
           ENDIF
           IF(CSEmis(1,1).GT.0) THEN
-            CALL AUERST(1,1,0)
+            CALL AUERST(1,1,1)
             WRITE (8,
      &       '(2x,'' n PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(1,1)
           ENDIF
           IF(CSEmis(2,1).GT.0) THEN
-            CALL AUERST(1,2,0)
+            CALL AUERST(1,2,1)
             WRITE (8,
      &       '(2x,'' p PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(2,1)
           ENDIF
           IF(CSEmis(3,1).GT.0) THEN
-            CALL AUERST(1,3,0)
+            CALL AUERST(1,3,1)
             WRITE (8,
      &       '(2x,'' a PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(3,1)
           ENDIF
           IF(CSEmis(4,1).GT.0) THEN
-            CALL AUERST(1,4,0)
+            CALL AUERST(1,4,1)
             WRITE (8,
      &       '(2x,'' d PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(4,1)
           ENDIF
           IF(CSEmis(5,1).GT.0) THEN
-            CALL AUERST(1,5,0)
+            CALL AUERST(1,5,1)
             WRITE (8,
      &       '(2x,'' t PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(5,1)
           ENDIF
           IF(CSEmis(6,1).GT.0) THEN
-            CALL AUERST(1,6,0)
+            CALL AUERST(1,6,1)
             WRITE (8,
      &       '(2x,'' h PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(6,1)
@@ -2493,10 +2491,10 @@ C----------CN contribution to elastic ddx
              CN_isotropic = .TRUE.
              WRITE(8,*)
              WRITE(8,*) 
-     &       'CN angular distribution assumed isotropic above Einc = ',
+     &       'CN angular distribution assumed isotropic at Einc = ',
      &       sngl(EINl)
              WRITE(12,*)      
-     &       'CN angular distribution assumed isotropic above Einc = ',
+     &       'CN angular distribution assumed isotropic at Einc = ',
      &       sngl(EINl)
              WRITE(8,*)
            endif  
@@ -2686,7 +2684,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0) THEN
-           IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
+           IF(IOUt.GT.0) CALL AUERST(nnuc,0,1)
            IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
@@ -2729,8 +2727,8 @@ C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
-     &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
-             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0)
+     &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc,1)
+             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,1)
 C------------Print residual nucleus population
              poptot = 0.0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
@@ -5077,32 +5075,30 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION corr
-      REAL FLOAT
+      DOUBLE PRECISION csum, ftmp, corr
       INTEGER ie, ilast
-      IF (CSPrd(Nnuc).GT.0.0D0) THEN
-C-------Normalize recoil spectra to remove eventual inaccuracy
-C-------due to numerical integration of angular distributions
-C-------and find last non-zero cross section for printing
-         corr = 0.0
-         DO ie = 1, NDEREC
-            corr = corr + RECcse(ie,0,Nnuc)
-         ENDDO
-         IF (corr.EQ.0) RETURN
-         ilast = 0
-         DO ie = NDEREC,1,-1
-            IF (RECcse(ie,0,Nnuc).GT.0) THEN
-		    ilast = ie
-              exit
-            ENDIF
-         ENDDO
+
+      IF (CSPrd(Nnuc).LE.0.0D0) RETURN
+C-----Normalize recoil spectra to remove eventual inaccuracy
+C-----due to numerical integration of angular distributions
+C-----and find last non-zero cross section for printing
+      csum  = 0.0
+      ilast = 0
+      DO ie = 1, NDEREC
+        ftmp = RECcse(ie,0,Nnuc)
+        IF (ftmp.GT.0) then
+          csum = csum + ftmp
+          ilast = ie
+        ENDIF
+      ENDDO
+      IF (csum.EQ.0) RETURN
+C
 C        WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
 C        WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
-         corr = CSPrd(Nnuc)/corr/DERec
-         ilast = MIN(ilast + 1,NDEREC)
-         DO ie = 1, ilast
-            RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
-         ENDDO
+         corr = CSPrd(Nnuc)/(csum*DERec)
+C        DO ie = 1, ilast
+C           RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
+C        ENDDO
          WRITE (12,*) ' '
          WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
      &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
@@ -5117,19 +5113,20 @@ C--------Print end point again with 0 xs for consistency with particle spectra
 C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
 C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,0.d0
-         IF (ABS(1.d0 - corr).GT.0.01D0 .AND. CSPrd(Nnuc).GT.0.001D0)
-     &       THEN
+         IF (ABS(1.d0 - corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
+     &      THEN
             WRITE (8,*) 
-            WRITE (8,*) ' WARNING:  Ein = ', EIN, ' MeV ZAP = ',
-     &                  IZA(Nnuc), ' from ', React
-            WRITE (8,*) ' WARNING: x-section balance in recoils '
-            WRITE (8,*) ' WARNING: difference = ', (1.d0 - corr)*100.0,
-     &                  '%'
-            WRITE (8,*) ' WARNING: production cross section = ',
-     &                  CSPrd(Nnuc)
+            WRITE (8,*) ' ******' 
+            WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
+            WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
             WRITE (8,*) 
+     &         ' WARNING: x-section balance in recoils wrong'
+            WRITE (8,*) ' WARNING: recoil integral     = ',
+     &                  sngl(csum*DERec),' mb'
+            WRITE (8,*) ' WARNING: prod. cross section = ',
+     &                  sngl(CSPrd(Nnuc)),' mb'
          ENDIF
-      ENDIF
+      RETURN
       END
 
       SUBROUTINE PRINT_BIN_RECOIL(Nnuc,React)
@@ -5178,7 +5175,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
 C--------Print end point again with 0 xs for consistency with particle spectra
 C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
 C    &                             RECcse(ilast + 1,0,Nnuc)
-C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DE/A(1),0.d0
+         RETURN
       END
 
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
