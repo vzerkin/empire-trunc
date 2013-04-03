@@ -135,7 +135,8 @@ C       Skipping plots
 
       STOP 'ZVView cross-section plots created !'
  100  WRITE(*,*) 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING'
- 101  WRITE(*,*) 'ERROR: S-FACTOR.DAT MISSING'
+c 101  WRITE(*,*) 'ERROR: S-FACTOR.DAT MISSING'
+ 101  CONTINUE
       STOP
       END
 
