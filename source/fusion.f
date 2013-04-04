@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3365 $
+Ccc   * $Rev: 3367 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-04 10:08:07 +0200 (Do, 04 Apr 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -442,7 +442,8 @@ C           saving the input value of the key CN_isotropic
 C
 C           neglecting CN calculation for uncoupled levels in DWBA
 C                     (except for OPTMAN use)
- 	      IF ( (.not.SOFt) .or. (.not.DYNAM) ) TMP_isotropic = .TRUE.  
+C           not needed for a time being (TMP_isotropic is equivalent to CN_isotropic) 
+CXXXXX      IF ( (.not.SOFt) .or. (.not.DYNAM) ) TMP_isotropic = .TRUE.  
                                                    !  
 	      CN_isotropic = TMP_isotropic
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
