@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3365 $
+Ccc   * $Rev: 3369 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-04 19:57:21 +0200 (Do, 04 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1907,13 +1907,16 @@ C-----set Q-value for CN production
       ENDIF
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
+C        WRITE (8,*) ' '
+C        WRITE (8,'(61(''=''))')
+C        WRITE (8,
+C    &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+C    &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
+C        WRITE (8,'(61(''=''))') 
          WRITE (8,*) ' '
-         WRITE (8,'(60(''=''))')
-         WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
-         WRITE (8,'(60(''=''))')
-         WRITE (8,*) ' '
+         WRITE (8,'('' Reaction '',I3,A2,''+'',I3,A2)') 
+     &   iae, SYMbe(0), ia, SYMb(0)
+         WRITE (8,'('' Projectile energy '',F9.3,'' MeV (LAB)'')') EINl
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
      &          Q(0,1)
@@ -3543,7 +3546,7 @@ C
 
       name = '      '
       READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
-         IF (name.EQ.'GO    ') THEN
+            IF (name.EQ.'GO    ') THEN
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN
                ECUtcoll = 0.
@@ -3690,6 +3693,13 @@ C-----      print  maximum gamma-ray multipolarity  'MAXmult'
                KTRompcc = 0
             ENDIF
             WRITE (8,*) ' '
+            WRITE (8,'(61(''=''))')
+            WRITE (8,
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
+     &    INT(AEJc(0)), SYMb(0), EIN
+            WRITE (8,'(61(''=''))')
+
 C-----------Printout of some final input options   *** done ***
             RETURN
          ENDIF

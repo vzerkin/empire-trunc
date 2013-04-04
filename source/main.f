@@ -1,6 +1,6 @@
-cc   * $Rev: 3365 $
+cc   * $Rev: 3369 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-04 19:57:21 +0200 (Do, 04 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3761,8 +3761,8 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &                 (TOTred*TOTcs*totcorr),EINl
       ENDIF
       WRITE (8,*)
-      WRITE (8,*) '+++++'
-      WRITE (8,*)
+      WRITE (8,*) '+++ end of one energy +++'
+      WRITE (8,*) 
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
@@ -4723,6 +4723,14 @@ C
 
         BACKSPACE 5
         READ(5,*,ERR=11570,END=1200) EIN
+
+        WRITE (8,*) ' '
+        WRITE (8,'(61(''=''))')
+        WRITE (8,
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
+     &    INT(AEJc(0)), SYMb(0), EIN
+        WRITE (8,'(61(''='')//)')
 
       ELSE
         
