@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3365 $
+Ccc   * $Rev: 3368 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-04 19:16:03 +0200 (Do, 04 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3085,7 +3085,6 @@ C--------A>99
 CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
 
-
       SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc)
 C
 C     -------------------------------------------------------------
@@ -3202,13 +3201,12 @@ C-----Imaginary SO potential deformed
 C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
-C     for non-zero spins or energies below 10 MeV
-C     if( (XJLv(1,Nnuc).gt.0.d0 .OR. DABS( - El).LT.21.d0) ) .and.
-C    >    .not.TL_calc ) THEN
-C       ECIs1(21:21) = 'T'
-C       convg=1.0d-10
-C     endif
-
+C     for non-zero spins or energies below 5 MeV for CC calculations
+      if( ( XJLv(1,Nnuc).gt.0.d0 .or. DABS(-El).lt.5.d0 ) .and.
+     &    (.not.TL_calc) ) THEN
+        ECIs1(21:21) = 'T'
+        convg=1.0d-8
+      endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
 C-----Calculations at experimental angles
@@ -3352,7 +3350,7 @@ C
 C
       ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
-      njmax = MAX(2*ldwmax,20)
+      njmax = MAX(2*ldwmax,10)
 
       lodd = .false.
       IF( (mod(nint(Z(Nnuc)),2).ne.0 .or.
@@ -3443,7 +3441,8 @@ C-----0 phonon involved
       WRITE (1,'( )')
       IF (Inlkey.NE.0) THEN
 C--------discrete levels
-         nwrite = 1
+         nwrite  = 1
+         nphonon = 0
          DO j = 2, ND_nlv
 C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
@@ -3457,7 +3456,7 @@ C-----------If channel is closed ground state potential is used for this level
 
             ! only open channels considered for DWBA
             IF (eee.LT.0.0001 .and. Ldwba) CYCLE
-
+            
             IF (eee.GE.0.0001) THEN
                IF(IDRs.eq.0) then
                  nwrite = nwrite + 1
@@ -3474,9 +3473,13 @@ C-----------If channel is closed ground state potential is used for this level
             ENDIF
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
-               WRITE (1,'(3i5)') 1, j - 1, 0
-            ELSEIF (IPH(j).EQ.1) THEN
-               WRITE (1,'(3i5)') IPH(j), j - 1, 0
+               nphonon = nphonon + 1
+C              WRITE (1,'(3i5)') 1, j - 1, 0
+               WRITE (1,'(3i5)') 1, nphonon, 0
+            ELSEIF (IPH(j).EQ.1) THEN   ! one-phonon states
+               nphonon = nphonon + 1
+C              WRITE (1,'(3i5)') IPH(j), j - 1, 0
+               WRITE (1,'(3i5)') IPH(j), nphonon, 0
             ELSE
 C-----------two  phonon states if exist are formed from the quadrupole
 C-----------quadrupole phonon spin is equal to 2+ phonon
