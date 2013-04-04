@@ -5,11 +5,10 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       parameter(maxr=100,maxen=500)
       integer nreac,iz,ia,ncol,nch,ios,ich
       integer i,j,k,nen,toplot(maxr)
-      character*2 symb, dummy
+      character*2 symb
       character*22 caz
       character*12 creaction(maxr),creactionsf(maxr)
-      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl
-      real*8 sf(maxen)
+      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl,sf(maxen)
 
       do i=1,maxr
         toplot(i)=0     
@@ -101,43 +100,34 @@ C       Skipping plots
           WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),xsl*cs(i,j)
         ENDDO
         CALL CLOSE_ZVV(20,' ',' ')
-
         CLOSE(20)
-
-!!!   Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
-
-
-!       creactionsf(j)='(S-factor)'
-       OPEN(20, file='S-FACTOR.DAT',STATUS='OLD',ERR=101)
-       READ(20,'(1x,A2)') dummy
-       READ(20,'(1x,A2)') dummy
-      DO I=1,maxen
-       READ(20,'(E10.4,20x,E12.6)',END=55) e(i), sf(i)
+ 
       ENDDO
-   55 CONTINUE
-      
+
+C     Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
+
+      e  = 0.d0
+      sf = 0.d0
+      OPEN(20, file='S-FACTOR.DAT',STATUS='OLD',ERR=101)
+      READ(20,*) ! Skipping the header of the S-factor file
+      READ(20,*) 
+      DO i=1,maxen
+        READ(20,'(E10.4,20x,E12.6)',END=55,ERR=55) e(i), sf(i)
+      ENDDO
+  55  nen = i 
       CLOSE(20)
-         if(ios .eq. 0) close(20,status='DELETE')
-         open(20,file='S-FACTOR.zvd', iostat=ios)
-         if(ios .ne. 0) cycle
-         write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
-     &    iz,symb,ia    
 
-       CALL OPEN_ZVV2(20,caz,' ')
-       DO i = 1, nen
-         WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i), sf(i)
-       ENDDO
-       CALL CLOSE_ZVV2(20,' ',' ')
-
-       CLOSE(20)
-   
+      OPEN(20,file='S-FACTOR.zvd', ERR=101)
+      WRITE(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') iz,symb,ia,'  S-factor  '    
+      CALL OPEN_ZVV2(20,caz,' ')
+      DO i = 1, nen
+        WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i), sf(i)
       ENDDO
-
-      STOP 'ZVView cross-section plots created !'
- 100  WRITE(*,*) 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING'
-c 101  WRITE(*,*) 'ERROR: S-FACTOR.DAT MISSING'
- 101  CONTINUE
-      STOP
+      CALL CLOSE_ZVV2(20,' ',' ')
+      CLOSE(20)
+      STOP 'ZVView cross-section and S-factor plots created !'
+ 101  STOP 'ZVView cross-section plots created !             ' 
+ 100  STOP 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING  '
       END
 
 
