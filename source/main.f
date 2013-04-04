@@ -1,6 +1,6 @@
-cc   * $Rev: 3369 $
+cc   * $Rev: 3370 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 19:57:21 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-04 21:33:42 +0200 (Do, 04 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3052,20 +3052,29 @@ C
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
-                     WRITE (12,'(15x,''Integrated Discrete Spectra'')')
-                     WRITE (12,'(10x,''    Energy    Int-DDX[mb]'')')
+                     WRITE (12,
+     &              '(4x,''Lev #'',5x,''Integrated Discrete Spectra'')')
+                     WRITE (12,
+     &              '(10x,''    Energy    Int-DDX[mb]   Elev'')')
                      WRITE (12,*) ' '
-                     DO il = 1, NLV(nnuc)  ! discrete levels
+	               htmp = 0.d0
+                     DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE (12,'(4x,I3,4x,F10.5,4(E14.5,1x))') il, 
-     &                   -espec, check_DL(il)*recorp
+                       WRITE (12,'(4x,I3,4x,F10.5,E14.5,2x,F6.3)') il, 
+     &                   -espec, check_DL(il)*recorp,ELV(il,nnuc)
+	               	 htmp = htmp + check_DL(il)*recorp
                      ENDDO
+	               WRITE (12,*) ' '
+                     WRITE (12,'(7X,''Sum over disc. levels '',
+     &                G12.6,'' mb'')') htmp
+                     WRITE (12,'(7X,''Popul. before cascade '',
+     &                G12.6,'' mb'')') CSDirlev(1,nejc)
                      WRITE (12,*) ' '
                    ENDIF
-
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
-     &d DDXS corrected) - consistency check'')')
+     &d DDXS corrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc 
+     &= '',i1)') EINl, nejc
                    WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -3767,14 +3776,22 @@ C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
-         WRITE (12,*) 
-         WRITE (12,*) '********************************************'
-         WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
-         WRITE (12,*) '********************************************'
-         WRITE (12,*)    
 
-c         dang = PI/FLOAT(NDANG - 1)
-c         coef = 2*PI*dang
+         totspec = 0.d0
+         DO ie = 1, nspec 
+           totspec  = totspec  + CSE(ie,0,0)
+         ENDDO
+
+         if(totspec.gt.0.d0)  THEN
+           WRITE (12,*) 
+           WRITE (12,*) '********************************************'
+           WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+           WRITE (12,*) '********************************************'
+           WRITE (12,*)    
+         endif
+
+c        dang = PI/FLOAT(NDANG - 1)
+c        coef = 2*PI*dang
 
 C--------Print spectra of residues
          reactionx = '(z,x)  '
@@ -3883,7 +3900,7 @@ C---------------Inclusive DDX spectrum (neutrons)
 
             if(CSE(ie,1,0).le.0.d0) cycle
 
-	    csum = 0.d0
+	      csum = 0.d0
             DO nang = 2, NDANG
               csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
      &                       *0.5d0*(CAngler(nang)-CANgler(nang-1))
@@ -3905,7 +3922,8 @@ C---------------Inclusive DDX spectrum (neutrons)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,1 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4035,7 +4053,8 @@ C---------------Inclusive DDX spectrum (protons)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,2 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4146,7 +4165,8 @@ C---------------Inclusive DDX spectrum (alphas)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,3 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4258,7 +4278,8 @@ C---------------Inclusive DDX spectrum (deuterons)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,4 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4370,7 +4391,8 @@ C---------------Inclusive DDX spectrum (tritons)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,5 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4481,7 +4503,8 @@ C---------------Inclusive DDX spectrum (helium-3)
 
           WRITE (12,*) ' '
           WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS co
-     &rrected) - consistency check'')')
+     &rrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)') 
+     &EINl,6 
           WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
@@ -4724,14 +4747,15 @@ C
         BACKSPACE 5
         READ(5,*,ERR=11570,END=1200) EIN
 
-        WRITE (8,*) ' '
-        WRITE (8,'(61(''=''))')
-        WRITE (8,
+        IF (EIN.gt.0.d0) then
+          WRITE (8,*) ' '
+          WRITE (8,'(61(''=''))')
+          WRITE (8,
      &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
      &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
      &    INT(AEJc(0)), SYMb(0), EIN
-        WRITE (8,'(61(''='')//)')
-
+          WRITE (8,'(61(''='')//)')
+        ENDIF
       ELSE
         
  1158   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
@@ -5083,7 +5107,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csum, ftmp, corr
+      DOUBLE PRECISION csum, ftmp, corr, xsdisc
       INTEGER ie, ilast
 
       IF (CSPrd(Nnuc).LE.0.0D0) RETURN
@@ -5100,10 +5124,11 @@ C-----and find last non-zero cross section for printing
         ENDIF
       ENDDO
       IF (csum.EQ.0) RETURN
+      ilast = MIN(ilast + 1,NDEX)
 C
+C        corr = CSPrd(Nnuc)/(csum*DERec)
 C        WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
 C        WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
-         corr = CSPrd(Nnuc)/(csum*DERec)
 C        DO ie = 1, ilast
 C           RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
 C        ENDDO
@@ -5117,11 +5142,25 @@ C        ENDDO
             WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec,
      &                                 RECcse(ie,0,Nnuc)
          ENDDO
-C--------Print end point again with 0 xs for consistency with particle spectra
-C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
-C    &                             RECcse(ilast + 1,0,Nnuc)
-C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,0.d0
-         IF (ABS(1.d0 - corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
+         WRITE(12,
+     &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
+     &       csum*DERec
+         
+		 corr = CSPrd(Nnuc)/(csum*DERec)
+		 xsdisc = 0.d0
+         IF (nnuc.EQ.mt849) THEN
+			xsdisc = CSDirlev(1,3) 
+            WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+     &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,3)
+            WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+     &                G12.6,'' mb'')') CSDirlev(1,3)
+            corr = (CSPrd(Nnuc)- CSDirlev(1,3))/(csum*DERec)
+         ENDIF
+         WRITE(12,
+     &     '( 2x,''Production cross section      '',G12.6,'' mb'' )') 
+     &      CSPrd(Nnuc) 
+
+         IF (ABS(1.d0-corr).GT.0.02D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
      &      THEN
             WRITE (8,*) 
             WRITE (8,*) ' ******' 
@@ -5131,8 +5170,12 @@ C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,0.d0
      &         ' WARNING: x-section balance in recoils wrong'
             WRITE (8,*) ' WARNING: recoil integral     = ',
      &                  sngl(csum*DERec),' mb'
-            WRITE (8,*) ' WARNING: prod. cross section = ',
+            WRITE (8,*) ' WARNING: Cont. cross section = ',
+     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
+            WRITE (8,*) ' WARNING: Prod. cross section = ',
      &                  sngl(CSPrd(Nnuc)),' mb'
+            WRITE (8,*) ' WARNING: Discr.cross section = ',
+     &                  sngl(xsdisc),' mb'
          ENDIF
       RETURN
       END
@@ -5151,11 +5194,11 @@ C
 C
 C Local variables
 C
-      REAL FLOAT
       INTEGER ie, ilast, ipart
+      DOUBLE PRECISION csum, corr, xsdisc
 
-       ipart = 1  !neutron
-       IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
+      ipart = 1  !neutron
+      IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
 
 C-----Find last non-zero cross section for printing
       ilast = 0
@@ -5176,13 +5219,64 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
          WRITE (12,*) ' '
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
+		 csum = 0.d0
          DO ie = 1, ilast
+		    csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
             WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
      &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
          ENDDO
-C--------Print end point again with 0 xs for consistency with particle spectra
-C        WRITE (12,'(F10.5,E14.5)') FLOAT(ilast - 1)*DERec,
-C    &                             RECcse(ilast + 1,0,Nnuc)
+         WRITE(12,
+     &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
+     &     csum*DE
+
+		 corr = CSPrd(Nnuc)/(csum*DE)
+		 xsdisc = 0.d0
+         IF (nnuc.EQ.mt91) THEN
+			xsdisc = CSDirlev(1,1) 
+            WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+     &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,1)
+            WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+     &                G12.6,'' mb'')') CSDirlev(1,1)
+            corr = (CSPrd(Nnuc)- CSDirlev(1,1))/(csum*DE)
+         ENDIF
+         IF (nnuc.EQ.mt649) THEN
+			xsdisc = CSDirlev(1,2) 
+            WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+     &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,2)
+            WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+     &                G12.6,'' mb'')') CSDirlev(1,2)
+            corr = (CSPrd(Nnuc)- CSDirlev(1,2))/(csum*DE)
+         ENDIF
+         IF (nnuc.EQ.mt849) THEN
+			xsdisc = CSDirlev(1,3) 
+            WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+     &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,3)
+            WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+     &                G12.6,'' mb'')') CSDirlev(1,3)
+            corr = (CSPrd(Nnuc)- CSDirlev(1,3))/(csum*DE)
+         ENDIF
+         WRITE(12,
+     &      '(2x,''Production cross section      '',G12.6,'' mb'' )') 
+     &      CSPrd(Nnuc) 
+
+         IF (ABS(1.d0-corr).GT.0.02D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
+     &      THEN
+            WRITE (8,*) 
+            WRITE (8,*) ' ******' 
+            WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
+            WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
+            WRITE (8,*) 
+     &         ' WARNING: x-section balance in recoils wrong'
+            WRITE (8,*) ' WARNING: recoil integral     = ',
+     &                  sngl(csum*DE),' mb'
+            WRITE (8,*) ' WARNING: Cont. cross section = ',
+     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
+            WRITE (8,*) ' WARNING: Prod. cross section = ',
+     &                  sngl(CSPrd(Nnuc)),' mb'
+            WRITE (8,*) ' WARNING: Discr.cross section = ',
+     &                  sngl(xsdisc),' mb'
+         ENDIF
+
          RETURN
       END
 
