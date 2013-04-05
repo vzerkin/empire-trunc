@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3229 $
+Ccc   * $Rev: 3371 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-11-16 02:08:59 +0100 (Fr, 16 Nov 2012) $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -119,7 +119,7 @@ C              WRITE(8,*)'sum for ejectile=' , nejc, sum
 C-----------do loop over ejectiles       ***done***
 
 C-----------gamma emission is always a weak channel (one iteration)
-            sumg = 0.0
+            sumg = 0.d0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
@@ -127,7 +127,7 @@ C
 C-----------fission is always a weak channel (one iteration)
             sumfis = 0.d0
             IF (FISsil(nnuc)) THEN
-              IF (FISshi(nnuc).EQ.1.) THEN
+              IF (NINT(FISshi(nnuc)).EQ.1) THEN
                 CALL FISSION(nnuc,ke,jcn,sumfis)
               ELSE
                 CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
@@ -138,7 +138,7 @@ C-----------fission is always a weak channel (one iteration)
 
             IF (H_Sumtl.GT.0.0D0 .AND. H_Sumtl.GT.H_Sweak) THEN
                tlump = (H_Sumtl - H_Sweak)
-     &                 /(10.0*(1.0 + (H_Sweak)/(H_Sumtl-H_Sweak)))
+     &                 /(10.d0*(1.d0 + (H_Sweak)/(H_Sumtl-H_Sweak)))
 C              !define a good Tlump
             ELSE
                tlump = H_Sweak
@@ -211,6 +211,7 @@ C                 WRITE(8,*)'second entry with ejec ' , nejc
 C                 WRITE(8,*)'sum for ejec=' ,nejc, sum
                ENDDO
 C--------------do loop over ejectiles       ***done***
+C              sumg = 0.d0
 C              CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
                DENhf = DENhf + sumg + sumfis
 C              WRITE(8,*)'second entry DENhf=',denhf
@@ -1207,7 +1208,7 @@ C
       sv = Sweak
       sum = Sweak
       DO i = 1, Lch
-         e(i) = EEF(V(i,1),Tav,Sumtl) - 1.
+         e(i) = EEF(V(i,1),Tav,Sumtl) - 1.d0
          sum = sum + V(i,1)*V(i,2)
       ENDDO
       DO i = 1, Lch
@@ -1215,12 +1216,12 @@ C
          vp(i) = V(i,1)
       ENDDO
   100 DO i = 1, Lch
-         vp(i) = V(i,1)/(1.0 + vp(i)*e(i)/sum)
+         vp(i) = V(i,1)/(1.d0 + vp(i)*e(i)/sum)
          sv = sv + vp(i)*V(i,2)
       ENDDO
       icount = icount + 1
-      IF (icount.GT.1000) THEN
-         WRITE (8,*) ' Maximum iteration number reached in AUSTER'
+      IF (icount.GT.200) THEN
+         WRITE (8,*) ' Maximum iteration number (200) reached in AUSTER'
          WRITE (8,*) 
          RETURN
       ENDIF

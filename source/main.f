@@ -1,6 +1,6 @@
-cc   * $Rev: 3370 $
+cc   * $Rev: 3371 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 21:33:42 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -356,7 +356,7 @@ C
       IF(.FALSE.) THEN
 
         OPEN (80,FILE = 'FISTMP.OUT')
-        IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) 
+        IF (FISsil(nnuc) .AND. NINT(FISshi(Nnuc)).NE.1)
      &    CALL READ_INPFIS(nnuc)
 
         DO ipar = 1, 2 !over decaying CN parity
@@ -369,10 +369,9 @@ C
 C------------gamma emision
              CALL TL_GAMMA(nnuc,ke,jcn,ip)
 C------------Fission ()
-             IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
+             IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1 )        
      &         CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
 	       fiss_tr(jcn,ip) = sumfis
-
          ENDDO                !loop over decaying nucleus spin
          write(*,*) ' Lmax=',ngamm_tr,' pi=',ip
          do lamb=1,MAXMULT
@@ -1540,9 +1539,9 @@ C        if(nnuc.le.NNUcd)
      &      2H ( ,I3,1H-,A2,1H-,I3,1H) )') 
      &       nnuc,  NNUcd, INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))
 C
-         IF (FISsil(nnuc) .AND. FISshi(nnuc).NE.1.) THEN
+         IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1 ) THEN 
             CALL READ_INPFIS(nnuc)
-            IF (FISmod(nnuc).LT.0.1d0)THEN   ! Single mode fission 
+            IF (NINT(FISmod(nnuc)).EQ.0)THEN   ! Single mode fission 
                DO i = 1, NRHump
                   IF(FISden(Nnuc).EQ.0)then
                      CALL DAMI_ROFIS(nnuc,i,0,AFIs(i))
@@ -1554,9 +1553,9 @@ C
                   ENDIF
                ENDDO
             ELSE                             ! Multimodal (FISmod(nnuc)>0)
-               IF(FISden(Nnuc).EQ.0) then
+               IF(NINT(FISden(Nnuc)).EQ.0) then
                  CALL DAMI_ROFIS(nnuc,1,0,AFIs(1))
-                 DO m=1,int(FISmod(Nnuc))+1
+                 DO m=1,INT(FISmod(Nnuc))+1
                    CALL DAMI_ROFIS(nnuc,2,m,AFIsm(m))
                  ENDDO
                ELSE 
@@ -1569,7 +1568,7 @@ C    &    '('' WARNING: Only EGSM is allowed for multimodal fission'')')
 C                 FISden(Nnuc)=0
                ENDIF
             ENDIF
-            IF (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. FISmod(nnuc).EQ.0.)
+            IF (NRBar.EQ.3.AND.NRWel.EQ.1.AND.NINT(FISmod(Nnuc)).EQ.0)
      &          THEN
                TFIso = 2.86896*EXP(2.*PI*(EFB(2) - (EFB(3)+H(1,3)/2.))
      &                 /H(1,2))/(H(1,3)*10.**21)
@@ -1586,7 +1585,7 @@ C--------Reset variables for life-time calculations
          sgamc = 0.d0
          csemist = 0.d0
          CSFis = 0.d0
-         IF (FISmod(nnuc).GT.0.) THEN
+         IF (NINT(FISmod(Nnuc)).GT.0) THEN
             DO m = 1, INT(FISmod(nnuc)) + 1
                CSFism(m) = 0.d0
             ENDDO
@@ -1852,7 +1851,7 @@ C        ENDIF
 C--------Prepare gamma transition parameters
          CALL ULM(nnuc)
 C--------Calculate compound nucleus level density at saddle point
-         IF (FISshi(nnuc).EQ.1.) THEN
+         IF (NINT(FISshi(nnuc)).EQ.1) THEN
             IF (FISsil(nnuc)) THEN
                CALL ROEMP(nnuc,1.D0,0.0D0)
                IF(FIRst_ein) WRITE (8,*)
@@ -1890,15 +1889,15 @@ C                 before calling HRTW
             IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
      &        CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
             kemax = max(NEX(nnuc) - 1,1)
-            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0) THEN
-               IF (FISmod(nnuc).EQ.0.) WRITE (80,*) 'csfis=', CSFis,
-     &             ' mb'
-               IF (FISmod(nnuc).GT.0.) THEN
-                  WRITE (80,*) '  '
-                  DO m = 1, INT(FISmod(nnuc)) + 1
+            IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1 ) THEN
+               IF (NINT(FISmod(nnuc)).EQ.0) THEN
+                 WRITE (80,*) 'csfis=', CSFis,' mb'
+               ELSE
+                 WRITE (80,*) '  '
+                 DO m = 1, INT(FISmod(nnuc)) + 1
                      WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),
      &                            ' mb'
-                  ENDDO
+                 ENDDO
                ENDIF
             ENDIF
          ENDIF
@@ -1989,9 +1988,9 @@ C--------------------Look for the discrete level with the closest spin
                   ENDIF
 C-----------------
 C-----------------Fission ()
-                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).EQ.1.))
+                  IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).EQ.1)
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
-                  IF (FISsil(nnuc) .AND. (FISshi(nnuc).NE.1.))
+                  IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1)
      &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
 C-----------------
 C-----------------Normalization and accumulation
@@ -2017,9 +2016,9 @@ C-----------------
 C
             IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
-            IF (FISsil(nnuc) .and. FISshi(nnuc).ne.1.d0
+            IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1
      &         .and. fisxse.gt.0) THEN
-               IF (FISmod(nnuc).lt.0.1) THEN
+               IF (NINT(FISmod(nnuc)).EQ.0) THEN
                   WRITE (80,*) 'csfis=', CSFis,
      &              ' mb', '   fisxse=', fisxse, ' mb'
                ELSE
@@ -2451,12 +2450,13 @@ C
           
              DO m = 1, INT(FISmod(nnuc)) + 1
                WFIsm(m) = 0.d0
-               IF (CSFis.GT.0.) WFIsm(m) = CSFism(m)/CSFis
-               if(FISmod(nnuc).Gt.0 .and. FISShi(nnuc) .NE. 1)
+               IF (CSFis.GT.0.d0) WFIsm(m) = CSFism(m)/CSFis
+               IF( NINT(FISmod(nnuc)).GT.0 .and. 
+     >             NINT(FISshi(nnuc)).NE.1 )
      >           WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
              ENDDO
-             IF(FISShi(nnuc).ne.1.d0)
-     >       WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
+             IF(NINT(FISshi(nnuc)).NE.1)
+     >         WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
            ENDIF
            CSPfis(nnuc) = CSFis
            WRITE (8,
@@ -2844,7 +2844,7 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
           xnub = 0.D0
       endif
 
-      IF(TOTcsfis.gt.0.d0 .and. FISShi(nnuc).ne.1.d0)
+      IF(TOTcsfis.gt.0.d0 .and. NINT(FISshi(nnuc)).NE.1) 
      &  WRITE(98,'(1P,E10.4,1x,1P,(30E12.5))') EINl,
      &     TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,10,max_prn-1))
       CLOSE (80)
@@ -5303,11 +5303,11 @@ C
       INTEGER INT
       INTEGER k, kk, m
 
-      IF (FISmod(Nnuc).EQ.0.) THEN
+      IF (NINT(FISmod(Nnuc)).EQ.0) THEN
 
          CALL FISFIS(Nnuc,Ke,Ip,Jcn,Sumfis,0)
 
-      ELSE ! FISmod(Nnuc).GT.0 = Multimodal 
+      ELSE ! NINT(FISmod(Nnuc)).GT.0 = Multimodal 
 
          TFB = 0.d0
          DO m = 1, INT(FISmod(Nnuc)) + 1
@@ -5391,10 +5391,10 @@ C-----gammas
       POP(Ke,Jcn,Ipar,Nnuc) = 0.0
 
 C-----fission
-      IF (FISmod(Nnuc).LT.0.1) THEN
+      IF (NINT(FISmod(Nnuc)).EQ.0) THEN
          Fisxse = Sumfis*Xnor
          CSFis  = CSFis + Fisxse
-         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.GT.0.d0 .AND.
      &       POPbin(Ke,Nnuc).GT.0.d0)
      &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
 
@@ -5406,7 +5406,7 @@ C-----fission
             CSFism(M) = CSFism(M) + Sumfism(M)*Xnor
          ENDDO
          CSFis  = CSFis + Fisxse
-         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.NE.0.0D+0 .AND.
+         IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.GT.0.d0 .AND.
      &       POPbin(Ke,Nnuc).GT.0.d0)
      &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF

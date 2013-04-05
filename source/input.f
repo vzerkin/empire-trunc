@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3369 $
+Ccc   * $Rev: 3371 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 19:57:21 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -323,12 +323,12 @@ C
          EMPtitle(1:1)=' '
          FITomp = 0.d0
 
-         FISshi = 0
-         FISmod = 0
-         FISopt = 0
-         FISbar = 1
-         FISdis = 1
-         FISden = 0
+         FISshi = 0.d0
+         FISmod = 0.d0
+         FISopt = 0.d0
+         FISbar = 1.d0
+         FISdis = 1.d0
+         FISden = 0.d0
 C
          NUBarread = .FALSE.
 
@@ -382,23 +382,23 @@ C--------        Default value 0. i.e. none but those selected automatically
 C--------set fission defaults
          DO nnuc = 1, NDNUC
 
-           FISbar(nnuc) = 1  ! RIPL-3 empirical fission barriers 
-C          FISbar(nnuc) = 3  ! RIPL-3 HFB barriers
+           FISbar(nnuc) = 1.d0  ! RIPL-3 empirical fission barriers 
+C          FISbar(nnuc) = 3.d0  ! RIPL-3 HFB barriers
 C
-           FISden(nnuc) = 0  ! EGSM NLD at saddle points 
-C          FISden(nnuc) = 3  ! HFB NLD
+           FISden(nnuc) = 0.d0  ! EGSM NLD at saddle points 
+C          FISden(nnuc) = 3.d0  ! HFB NLD
 C
-           FISmod(nnuc) = 0  ! Single-modal fission
-           FISopt(nnuc) = 0  ! Independent fission barriers (full damping)
+           FISmod(nnuc) = 0.d0  ! Single-modal fission
+           FISopt(nnuc) = 0.d0  ! Independent fission barriers (full damping)
 
-C          FISDIS(nnuc) = 0  ! no discrete transition states except fundamental
-           FISDIS(nnuc) = 1  !    discrete transition states considered         
+C          FISDIS(nnuc) = 0.d0  ! no discrete transition states except fundamental
+           FISDIS(nnuc) = 1.d0  !    discrete transition states considered         
 
          ENDDO
 C
 C--------CCFUS parameters
-         DV = 10.
-         FCC = 1.
+         DV = 10.d0
+         FCC = 1.d0
          NACc = 0
 C        By default only target deformation is considered
 C        NSCc = 2
@@ -438,30 +438,30 @@ C
 C--------default input parameters for MSD
 C
          MSD = 0
-         EMInmsd = 2. !Emin for starting MSD calculations
+         EMInmsd = 2.d0 !Emin for starting MSD calculations
 C--------ICOmpff must be off for DOM potentials
-         ICOmpff = 0  !compressional form factor off
-C        ICOmpff = 1  !compressional form factor on
+         ICOmpff = 0    !compressional form factor off
+C        ICOmpff = 1    !compressional form factor on
 C
 C--------default input parameters for Heidelberg MSC
 C
          MSC = 0
 C--------STMro selects p-h densities: 0 for closed form, 1 for microscopic
-         STMro = 0.0
+         STMro = 0.d0
 C--------set single particle level density parameter default in PE models as A/13.
-         GDIv = 13.0
+         GDIv = 13.d0
 C--------NOUT controls output amount in MSC (valid range 0-4, higher the value
 C--------more printout)
          NOUt = 0
 C--------XNI initial exciton number (0 internal determination)
-         XNI = 0.
-         TORy = 4.
-         EX1 = 0.0
-         EX2 = 0.0
+         XNI = 0.d0
+         TORy = 4.d0
+         EX1 = 0.d0
+         EX2 = 0.d0
 C--------GST controls gamma emission in MSC (0 no gamma, 1 with gamma)
-         GST = 0.0
+         GST = 0.d0
 C--------D1FRA ratio of the spreading to total width of the GDR
-         D1Fra = 0.8
+         D1Fra = 0.8d0
 C--------GDR parameters
          GDRdyn = 0.d0
          EGDr1 = 0.d0
@@ -480,8 +480,8 @@ C--------GDR parameters
          GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
          PEQcont = 0.0d0
-         PEQc = 1.5   ! default PE
-         MFPp = 1.5
+         PEQc = 1.5d0 ! default PE
+         MFPp = 1.5d0
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
          NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
@@ -508,29 +508,29 @@ C
 C--------default input parameters    *** done ***
 C
 C--------ejectile neutron
-         AEJc(1) = 1.
-         ZEJc(1) = 0.
+         AEJc(1) = 1.d0
+         ZEJc(1) = 0.d0
          XNEjc(1) = AEJc(1) - ZEJc(1)
          IZAejc(1) = INT(1000.*ZEJc(1) + AEJc(1))
          iz = INT(ZEJc(1))
          SYMbe(1) = SMAT(iz)
-         SEJc(1) = 0.5
+         SEJc(1) = 0.5d0
 C--------ejectile proton
-         AEJc(2) = 1.
-         ZEJc(2) = 1.
+         AEJc(2) = 1.d0
+         ZEJc(2) = 1.d0
          XNEjc(2) = AEJc(2) - ZEJc(2)
          IZAejc(2) = INT(1000.*ZEJc(2) + AEJc(2))
          iz = INT(ZEJc(2))
          SYMbe(2) = SMAT(iz)
-         SEJc(2) = 0.5
+         SEJc(2) = 0.5d0
 C--------ejectile alpha
-         AEJc(3) = 4.
-         ZEJc(3) = 2.
+         AEJc(3) = 4.d0
+         ZEJc(3) = 2.d0
          XNEjc(3) = AEJc(3) - ZEJc(3)
          IZAejc(3) = INT(1000.*ZEJc(3) + AEJc(3))
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
-         SEJc(3) = 0.0
+         SEJc(3) = 0.d0
 
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
@@ -542,29 +542,29 @@ C--------ejectile alpha
          ENDIF
 
 C--------ejectile deuteron
-         AEJc(4) = 2.
-         ZEJc(4) = 1.
+         AEJc(4) = 2.d0
+         ZEJc(4) = 1.d0
          XNEjc(4) = AEJc(4) - ZEJc(4)
          IZAejc(4) = INT(1000.*ZEJc(4) + AEJc(4))
          iz = INT(ZEJc(4))
          SYMbe(4) = SMAT(iz)
-         SEJc(4) = 1.0
+         SEJc(4) = 1.d0
 C--------ejectile triton
-         AEJc(5) = 3.
-         ZEJc(5) = 1.
+         AEJc(5) = 3.d0
+         ZEJc(5) = 1.d0
          XNEjc(5) = AEJc(5) - ZEJc(5)
          IZAejc(5) = INT(1000.*ZEJc(5) + AEJc(5))
          iz = INT(ZEJc(5))
          SYMbe(5) = SMAT(iz)
-         SEJc(5) = 0.5
+         SEJc(5) = 0.5d0
 C--------ejectile he-3
-         AEJc(6) = 3.
-         ZEJc(6) = 2.
+         AEJc(6) = 3.d0
+         ZEJc(6) = 2.d0
          XNEjc(6) = AEJc(6) - ZEJc(6)
          IZAejc(6) = INT(1000.*ZEJc(6) + AEJc(6))
          iz = INT(ZEJc(6))
          SYMbe(6) = SMAT(iz)
-         SEJc(6) = 0.5
+         SEJc(6) = 0.5d0
 C
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
@@ -609,7 +609,6 @@ C--------set angles for inelastic calculations
          DO na = 1, NDAng
            CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.d0)
            SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.d0)
-C          SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
          ENDDO
 C--------target
          READ (5,*) A(0), Z(0)
@@ -640,7 +639,7 @@ C-----------GAMMA EMISSION
          iz = INT(Z(0))
          SYMb(0) = SMAT(iz)
          NLV(0) = 1
-         ELV(1,0) = 0.0
+         ELV(1,0) = 0.d0
          QCC(1) = -e2p
          QCC(2) = -e3m
 
@@ -1243,16 +1242,16 @@ C
 C
 C        Checking fission input consistency 
 C
-         IF( FISshi(1).eq.1 .and. FISden(1).ne.0 )  THEN        
+         IF( NINT(FISshi(nnuc)).EQ.1 .and. NINT(FISden(1)).ne.0) THEN        
             WRITE(8,*)  ' WARNING: ',
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
             WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
             DO i = 1, NDNUC
-            FISden(i) = 0
+              FISden(i) = 0.d0
             ENDDO
          ENDIF
 
-         IF( FISmod(1).GT.0 .and. FISden(1).ne.0 )  THEN        
+         IF( NINT(FISmod(1)).GT.0 .and. NINT(FISden(1)).ne.0 )  THEN        
             WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
             WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
@@ -2184,21 +2183,21 @@ C---- fission input is created if it does not exist and FISSHI=0
 C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
-         IF (FISshi(nnuc).EQ.0. .AND.
-     &       (Z(nnuc).LT.78. .OR. A(nnuc).LT.200.)) THEN
+         IF (NINT(FISshi(nnuc)).EQ.0 .AND.
+     &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
             FISsil(nnuc)= .FALSE.
          ENDIF
-         IF (FISshi(nnuc).EQ.1.) THEN
+         IF (NINT(FISshi(nnuc)).EQ.1) THEN
             xfis = 0.0205*Z(nnuc)**2/A(nnuc)
             IF (xfis.LT.0.3D0) FISsil(nnuc) = .FALSE.
          ENDIF
-         IF (FISshi(nnuc).EQ.2.) FISsil(nnuc) = .FALSE.
+         IF (NINT(FISshi(nnuc)).EQ.2) FISsil(nnuc) = .FALSE.
       ENDDO
       calc_fiss=.FALSE.
       DO nnuc = 1, NNUct
        IF (FISsil(nnuc)) then
          calc_fiss=.TRUE.
-         if(AEJc(0).Gt.4. .and. FISshi(nnuc).le.0.d0) FISshi(nnuc)=1.d0
+         if(AEJc(0).Gt.4 .and. NINT(FISshi(nnuc)).EQ.0)FISshi(nnuc)=1.d0
        ENDIF
       ENDDO
 
@@ -2206,7 +2205,8 @@ C
       IF (.NOT.gexist .and. calc_fiss) THEN
          OPEN (79,FILE = 'FISSION.INP',STATUS = 'NEW')
          DO nnuc = 1, NNUcd
-            IF (FISsil(nnuc) .AND. FISshi(nnuc).EQ.0) CALL INPFIS(nnuc)
+           IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).EQ.0) 
+     >        CALL INPFIS(nnuc)
          ENDDO
          CLOSE (79)
       ENDIF
@@ -3011,7 +3011,7 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
 
       ENDIF
 
-      IF (FISshi(1).NE.0) THEN
+      IF (NINT(FISshi(1)).GT.0) THEN
          WRITE (8,*)
          WRITE (8,99025)
 99025    FORMAT ('    Nucleus   ',6X,'Shell Corr.  Deform.',
@@ -7038,7 +7038,7 @@ C--------checking for fission data in the optional input
             ELSE
               WRITE (8,
      &          '('' ERROR: FISSHI must be 0,1,2; default 0 used '')')
-              FISSHI = 0
+              FISSHI = 0.d0
               GOTO 100
             ENDIF
             IF (izar.EQ.0) THEN
@@ -7125,10 +7125,10 @@ C-----
             GOTO 100
          ENDIF
 C-----
-C        FISopt(Nnuc).EQ.0. = '  Full damping model (Ind.Barr.)'
-C        FISopt(Nnuc).EQ.1. = '  Optical model for fission     '
-C        FISopt(Nnuc).EQ.2. = '  Complex fission potential, isomeric fission'
-C        FISopt(Nnuc).EQ.3. = '  Same as 2 but with phases calculated only  '
+C        FISopt(Nnuc).EQ.0 = '  Full damping model (Ind.Barr.)'
+C        FISopt(Nnuc).EQ.1 = '  Optical model for fission     '
+C        FISopt(Nnuc).EQ.2 = '  Complex fission potential, isomeric fission'
+C        FISopt(Nnuc).EQ.3 = '  Same as 2 but with phases calculated only  '
 C                                along the corresponding parabola                         
          IF (name.EQ.'FISOPT') THEN
             IF(val.lt.0 .or. val.gt.3) THEN

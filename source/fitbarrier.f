@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-10-17 18:44:25 +0200 (Mi, 17 Okt 2012) $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
@@ -60,7 +60,7 @@ c-----reasigning humps and wells
          Vwidth(kw) = h(1,NRHump+int(kw/2))
       ENDDO
      
-      IF(FISbar(Nnuc).EQ.3.)THEN
+      IF(NINT(FISbar(Nnuc)).EQ.3)THEN
          DO j = 1, nextr
             Vpos(j) = DEFfis(j)
          ENDDO
@@ -69,8 +69,9 @@ c-----reasigning humps and wells
       
 C---- Momentum integrals are calculated
       iphas_opt=0  ! phases calculated on decoupled parabolas
-      IF(FISbar(Nnuc).EQ.3 .or. FISopt(Nnuc).GT.0 ) iphas_opt=1
-      IF(FISbar(Nnuc).EQ.3)THEN
+      IF(NINT(FISbar(Nnuc)).EQ.3 .or. NINT(FISopt(Nnuc)).GT.0 ) 
+     &  iphas_opt=1
+      IF(NINT(FISbar(Nnuc)).EQ.3)THEN
          CALL PHASES(ee, phase, phase_h, nnuc, iphas_opt, discrete)
       ELSE
          CALL PHASES_Parab(ee, nnuc, phase, discrete)
@@ -81,7 +82,7 @@ C-----Calculating transmission from phases
      &                    (1.d0 + DEXP(2.d0 *  phase(ih)))
       ENDDO
 
-      IF(FISopt(Nnuc).EQ.0)RETURN  
+      IF(NINT(FISopt(Nnuc)).EQ.0) RETURN  
 
 C-------Imaginary potential strengths
       w = 0.d0
@@ -123,7 +124,7 @@ c-----Direct transmission coefficients
 C-----subwell excitation energy      
       IF(NRWel.EQ.1.AND.Ee.LT.Vheigth(2)) THEN
          tabsp(1,2)=0.d0
-         IF(FISbar(Nnuc).EQ.3)THEN
+         IF(NINT(FISbar(Nnuc)).EQ.3)THEN
             epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
             epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
          ELSE
@@ -148,7 +149,7 @@ C-----subwell excitation energy
          tdirp(2,1)=0.d0
          tdirp(2,3)=0.d0
          tdirp(3,2)=0.d0
-         IF(FISbar(Nnuc).EQ.3)THEN
+         IF(NINT(FISbar(Nnuc)).EQ.3)THEN
             epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
             epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
          ELSE
@@ -170,7 +171,7 @@ C-----subwell excitation energy
          tabsp(3,2)=0.d0
          tabsp(2,3)=0.d0
          tdirp(1,2)=0.d0
-         IF(FISbar(Nnuc).EQ.3)THEN
+         IF(NINT(FISbar(Nnuc)).EQ.3)THEN
             epsa = Vpos(3)- SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3))
             epsb = Vpos(5)+ SQRT(Vheigth(5)-Ee)/(SMIu*Vwidth(5)) 
          ELSE
@@ -202,7 +203,7 @@ C-----subwell excitation energy
          tabsp(3,2)=0.d0
          tabsp(2,3)=0.d0
          tdirp(2,3)=0.d0
-         IF(FISbar(Nnuc).EQ.3)THEN
+         IF(NINT(FISbar(Nnuc)).EQ.3)THEN
             epsa = Vpos(1)- SQRT(Vheigth(1)-Ee)/(SMIu*Vwidth(1))
             epsb = Vpos(3)+ SQRT(Vheigth(3)-Ee)/(SMIu*Vwidth(3)) 
          ELSE
@@ -415,14 +416,14 @@ C     Momentum integrals
       DO k = 1, NRBar
          phase(k) = 0.D0
          IF (einters(2*k).GE.0. .AND. einters(2*k - 1).GE.0.
-     &       .AND.FISOPT(Nnuc).LT.3)then
+     &       .AND. NINT(FISopt(Nnuc)).LT.3) then
             dmom = GaussLegendre41(FmomentParab,
      &             einters(2*k - 1),einters(2*k),abserr) 
          ELSE
             dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
          ENDIF
-         IF(FISOPT(Nnuc).EQ.3)
-     &    dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
+         IF(NINT(FISopt(Nnuc)).EQ.3)
+     &      dmom =(-1)**(k+1)* pi * (Vjj(k) - ee)/ho(k)
          phase(k)   = min(dmom,50.d0)  
       ENDDO              
 

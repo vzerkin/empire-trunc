@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-04-25 08:04:36 +0200 (Mi, 25 Apr 2012) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -78,9 +78,8 @@ C
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
       CALL PRERORITO(Nnuc)
       Nlwst=NLW     
-
-      IF(FISSHI(Nnuc).EQ.1.d0.OR.Aejc(0).GT.4)CALL PRERO(Nnuc)
-
+	IF( (FISshi(nnuc).GT.0.99d0 .and. FISshi(nnuc).LE.1.01d0)
+     &    .OR. Aejc(0).GT.4) CALL PRERO(Nnuc)
 C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
       CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
@@ -1140,11 +1139,11 @@ C-----check of the input data ---------------------------------------
 
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
 C-----check of the input data ---- done -----------------------------
-      IF(FISSHI(Nnuc).EQ.1.d0)THEN
+      IF(NINT(FISshi(nnuc)).EQ.1)THEN
 C-----check whether the nucleus is fissile
          FISsil(Nnuc) = .TRUE.
          xfis = 0.0205*Z(Nnuc)**2/A(Nnuc)
-         IF(xfis.LT.0.3D0)FISsil(Nnuc) = .FALSE.
+         IF(xfis.LT.0.3D0) FISsil(Nnuc) = .FALSE.
       ENDIF
 C-----determination of the yrast and saddle point energies
 C

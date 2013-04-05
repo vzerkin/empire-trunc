@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3347 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-25 05:06:55 +0100 (Mo, 25 Mär 2013) $
+Ccc   * $Rev: 3371 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1734,7 +1734,7 @@ CCC Discrete transition states contribution
      &               vbarex(Nrhump+2) = vbarex(3)- 0.02
                ENDDO
 c
-               IF(FISopt(Nnuc).EQ.0.)THEN
+               IF(NINT(FISopt(Nnuc)).EQ.0)THEN
 
 c-----------------complete damping
                   DO ibar = 1, Nrhump
@@ -1746,7 +1746,7 @@ c-----------------complete damping
                ELSE
 
 c-----------------partial damping
-c                 IF(FISbar(Nnuc).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
+c                 IF(NINT(FISbar(Nnuc)).EQ.3)CALL NUMBARR(Nnuc,Vbarex,HO)
                   CALL WKBFIS(Ee, nnuc, tfd, tdirp,tabsp)
 c-----------------forward absorption coefficients
                   DO iw = 1, nrwel
@@ -1838,7 +1838,7 @@ c-----adding weighted continuum direct
 c     if(nrbar.eq.5) tdirpp(2,3) = tdirpp(2,3) + tdircont(2) 
 c    &                       * (1.d0 - wdir(3))
 c 
-      IF (FISopt(Nnuc).EQ.0.) THEN
+      IF (NINT(FISopt(Nnuc)).EQ.0) THEN
 
 c--------COMPLETE DAMPING + surrogate OPT.MOD
          tfd(nrhump) = tf(nrhump)
@@ -1896,7 +1896,7 @@ c--------Sumfis
          tabs = tabspp(1,2)
          tdir = tdirpp(1,nrhump)
 
-         IF (FISopt(Nnuc).EQ.2.) THEN
+         IF (NINT(FISopt(Nnuc)).EQ.2) THEN
 C----------gamma transition in isomeric well, as asuggested by MS
            tg2 = .002
            if(tg2.lt.0)tg2=0.d0
@@ -1909,7 +1909,7 @@ C--------FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 
       ENDIF ! END OF COMPLETE OR PARTIAL DAMPING
 
- 890  IF(FISmod(nnuc).lt.0.1) DENhf = DENhf + Sumfis
+ 890  IF(NINT(FISmod(nnuc)).EQ.0) DENhf = DENhf + Sumfis
 
 c-----WRITING FISSION OUTPUT
 
@@ -1921,10 +1921,10 @@ C---------single-humped
          IF (NRBar.EQ.1) WRITE (80,'(17x,3(a2,9x))') 'Td', 'Tc', 'Tf'
 C---------double-humped
          IF (NRBar.EQ.2 .OR.
-     &       (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. FISopt(Nnuc).EQ.0.))
+     &      (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. NINT(FISopt(Nnuc)).EQ.0))
      &       WRITE (80,'(22x,5(a3,9x))') 'TAd', 'TBd', 'TAc', 'TBc',
      &              'Tf'
-         IF (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. FISopt(Nnuc).GE.1.)
+         IF (NRBar.EQ.3 .AND. NRWel.EQ.1 .AND. NINT(FISopt(Nnuc)).GE.1)
      &       WRITE (80,'(22x,7(a4,7x))') 'TAd', 'TBd', 'TAc', 'TBc',
      &              'Tf', 'Tdir', 'Tabs'
 C---------triple-humped
@@ -1941,7 +1941,7 @@ C-----single-humped
      &          tfdis(1), tfcon(1), Sumfis
 
 C-----double-humped
-      IF (Nrhump.EQ.2.) THEN
+      IF (Nrhump.EQ.2) THEN
          WRITE (80,'(1x,a5,i1,1x,a2,f4.1,1x,a3,I2,7g11.4)')
      &             'Mode=', Mmod, 'J=', snc, 'Pi=', Ip, tfdis(1),
      &              tfdis(2), tfcon(1), tfcon(2), Sumfis, TDIr, TABs
@@ -1986,13 +1986,13 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
          tfcon(Ibar) = 0.d0
          DO i = 1, NRBinfis(ibar)
             ux1 = XMInn(Ibar) + (i - 1)*DEStepp(Ibar)
-            IF(FISBAR(Nnuc).EQ.3) THEN
+            IF(NINT(FISBAR(Nnuc)).EQ.3) THEN
                uexcit1 = Ee - ux1
                CALL PHASES(uexcit1, phase,phase_h, nnuc,iphas_opt,
      &                     discrete)
                arg1 = 2.d0 * phase_h(ibar)   
             ELSE
-               arg1 = 2*PI*(ux1 + EFB(Ibar) - Ee)/Hcont(Ibar)
+               arg1 = 2.d0*PI*(ux1 + EFB(Ibar) - Ee)/Hcont(Ibar)
             ENDIF
             IF (arg1.GE.EXPmax) arg1 = EXPmax
             nn = 2
@@ -2052,13 +2052,13 @@ C
       ENDDO
       DO i = 1, NRBinfis(Ibar)               
          ux1 = XMInn(ibar) + (i - 1)*DEStepp(Ibar)
-         IF(FISBAR(Nnuc).EQ.3)THEN
+         IF(NINT(FISBAR(Nnuc)).EQ.3)THEN
             uexcit1 = Ee - ux1
             CALL PHASES(uexcit1, phase,phase_h, nnuc,iphas_opt,discrete)
          ENDIF
 
          DO ib = 1, NRHump
-            IF(FISBAR(Nnuc).EQ.3)THEN
+            IF(NINT(FISBAR(Nnuc)).EQ.3)THEN
                arg1 = 2.d0 * phase_h(ib)
             ELSE
                arg1 = 2.d0 * PI * (ux1 + EFB(ib) - Ee)/HCOnt(ib)
