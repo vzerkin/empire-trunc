@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3367 $
+Ccc   * $Rev: 3375 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 10:08:07 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-05 17:51:21 +0200 (Fr, 05 Apr 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -1293,16 +1293,12 @@ C     IF (ldbwacalc .AND. CSFus.GT.0 .AND.
       IF (                CSFus.GT.0 .AND. 
      &   (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
          IF (DIRect.EQ.3) THEN
-            WRITE (8,*)
-     &         ' SOMP TLs normalized to substract DWBA contribution'
-            WRITE (8,*)
-     &         '                               to collective levels'
+            WRITE (8,*) ' SOMP TLs normalized to substract DWBA contribu
+     &tion to collective levels'
          ELSE
 C-----------DIRECT=1 or DIRECT=2
-            WRITE (8,*)
-     &         ' CC OMP TLs normalized to substract DWBA contribution'
-            WRITE (8,*)
-     &         '                               to collective levels'
+            WRITE (8,*) ' CC OMP TLs normalized to substract DWBA contri
+     &bution to collective levels'
          ENDIF
       ENDIF
       IF (IOUt.EQ.5) THEN
