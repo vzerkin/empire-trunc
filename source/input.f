@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3371 $
+Ccc   * $Rev: 3374 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-05 17:46:16 +0200 (Fr, 05 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2607,11 +2607,14 @@ C
               IF (ELV(ilv,Nnuc).GT.ECOnt(Nnuc)) THEN
                 WRITE (8,'('' For '',I3,''-'',A2,'' the continuum starts  
      & at state '',I3,'' with excitation energy '',F6.3,'' MeV'')')
-     &            NINT(A(Nnuc)), SYMb(Nnuc), ilv-1, ELV(ilv-1,Nnuc)
-                WRITE (8,
+     &             NINT(A(Nnuc)), SYMb(Nnuc), max(ilv - 1,1), 
+     &             ELV(max(ilv - 1,1),Nnuc)
+                IF(NLV(Nnuc).NE.max(ilv - 1,1)) THEN
+                   WRITE (8,
      &'('' Number of discrete levels changed from RIPL default of '',
-     &I3,'' to '',I3)') NLV(Nnuc),max(ilv - 1,1)
-                NLV(Nnuc) = max(ilv - 1,1)
+     &I3,'' to '',I3)') NLV(Nnuc), max(ilv - 1,1)
+                   NLV(Nnuc) = max(ilv - 1,1)
+                ENDIF 
                 GOTO 200
               ENDIF 
             ENDIF
