@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3372 $
+Ccc   * $Rev: 3376 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:35:42 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-05 17:53:49 +0200 (Fr, 05 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3201,7 +3201,7 @@ C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
 C     for energies below 10 MeV and CC calculations
-      if( DABS(-El).lt.10.d0  .and. (.not.TL_calc) ) THEN
+      if( DABS(-El).lt.10.d0.and.(.not.TL_calc).and.(.not.Ldwba) ) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
       endif
@@ -3315,25 +3315,31 @@ C      Preparing dispersive CC input for ECIS
        ECIs1(20:20)='T'! ENERGY DEPENDENT POTENTIALS BY DISPERSION RELATIONS (EXC.LEV.)
       ENDIF
 C-----Only for target, find open channels
-C-----At least ground state is always open
+C-----At least ground state is always open and considered
       nd_nlvop = 1
       nd_cons  = 1
       IF (Inlkey.NE.0) THEN
          DO j = 2, ND_nlv
-            IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
-            nd_cons = nd_cons + 1
             eee = elab - D_Elv(j)/xratio
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
+            IF (.not.Ldwba) THEN
+              IF (ICOllev(j).GT.LEVcc) CYCLE
+              nd_cons = nd_cons + 1
+            ELSE
+	        ! skipping DWBA closed channels
+              IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
+              nd_cons = nd_cons + 1   
+            ENDIF
          ENDDO
          IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
      &       WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
 
-         IF (Ldwba) nd_cons = nd_nlvop ! Only open channels considered for DWBA
+C        IF (Ldwba) nd_cons = nd_nlvop ! Only open channels considered for DWBA
       ENDIF
 C
 C-----Considering only coupled levels if CC calculation
-      ncollx = nd_cons
+      ncollx = nd_cons 
 C
       iterm = 20
 C-----For DWBA only one iteration is used
@@ -3396,10 +3402,12 @@ C     To obtain Legendre expansion a blank card calling for default values of th
       IF(.not.CN_isotropic) then
         DO j = 2, ND_nlv
 C         skipping coupled levels
-          IF (.NOT.Ldwba .AND. ICOllev(j).LT.LEVcc) CYCLE
+          IF (.NOT.Ldwba .AND. ICOllev(j).LE.LEVcc) CYCLE
 C---------If channel is closed then eee < 0
           eee = elab - D_Elv(j)/xratio
-          IF (eee.LT.0.0001) EXIT
+C         IF (eee.LT.0.0001) EXIT
+          ! only open channels considered for DWBA (and closed CC channels)
+          IF (eee.LT.0.0001 .AND. ICOllev(j).GT.LEVcc) EXIT 
           nuncoupled = nuncoupled + 1
         ENDDO
 C       For DWBA calculations, no additional levels are considered
@@ -3452,9 +3460,10 @@ C-----------If channel is closed ground state potential is used for this level
             ! making integer spin for odd nuclides CC levels in DWBA calculations
             if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
 
-            ! only open channels considered for DWBA
-            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
-            
+            ! only open channels considered for DWBA (and closed CC channels)
+            IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc .and. Ldwba) 
+     >         CYCLE
+
             IF (eee.GE.0.0001) THEN
                IF(IDRs.eq.0) then
                  nwrite = nwrite + 1
@@ -3493,8 +3502,9 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
 
 C-----------channel energy
             eee = elab - D_Elv(j)/xratio
-            ! only open channels considered for DWBA
-            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+            ! only open channels considered for DWBA (and closed CC channels)
+            IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc .and. Ldwba) 
+     >         CYCLE
 
             IF (Ldwba .OR. DIRect.EQ.3) THEN
 C--------------If DWBA, all states are assumed to be one phonon
@@ -3516,7 +3526,10 @@ C           skipping coupled levels for CC calculation
             IF (D_Lvp(j).GT.0) ch = '+'
 C-----------skipping closed uncoupled levels
             eee = elab - D_Elv(j)/xratio
-            IF (eee.LT.0.0001) CYCLE
+C           IF (eee.LT.0.0001) CYCLE
+            ! only open channels considered for DWBA (and closed CC channels)
+            IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
+
             if(nppaa.gt.1) nwrite = nwrite + 1
             dtmp = D_Xjlv(j)
             ! making integer spin for odd nuclides CC levels in DWBA calculations
@@ -3744,8 +3757,11 @@ C           All levels with icollev(j)>LEVcc should be calculated by DWBA
 
 C-----------channel energy
             eee = elab - D_Elv(j)/xratio
-            ! only open channels considered for DWBA
-            IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+C           ! only open channels considered for DWBA
+C           IF (eee.LT.0.0001 .and. Ldwba) CYCLE
+            ! only open channels considered for DWBA (and closed CC channels)
+            IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc .and. Ldwba) 
+     >         CYCLE
 
 C-----------If channel is closed ground state potential is used for this level
             IF(IDRs.gt.0) then
