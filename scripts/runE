@@ -54,6 +54,8 @@ def runE(proj):
         print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
         cp(proj+'.out', proj+'-prev.out')
         print ('Preserved existing *.out file as: %s' % proj+'-prev.out')
+        cp(proj+'.xsc', proj+'-prev.xsc')
+        print ('Preserved existing *.xsc file as: %s' % proj+'-prev.xsc')
     if not isEmpty(proj+'-s.endf'):
         cp(proj+'-s.endf', proj+'-prev.endf')
         print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
