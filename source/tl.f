@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3368 $
+Ccc   * $Rev: 3372 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 19:16:03 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-05 13:35:42 +0200 (Fr, 05 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3155,11 +3155,10 @@ C
 
       INTEGER ikey, ip, iterm, j, ldwmax, nppaa,
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
-     &        nuncoupled, ncontinua 
+     &        nuncoupled, ncontinua, nphonon 
 
       CHARACTER*132 ctmp
       INTEGER*4 PIPE,iwin
-      INTEGER INT, NINT
       LOGICAL inc_channel, logtmp
 
       inc_channel = .false.
@@ -3201,11 +3200,10 @@ C-----Imaginary SO potential deformed
 C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
-C     for non-zero spins or energies below 5 MeV for CC calculations
-      if( ( XJLv(1,Nnuc).gt.0.d0 .or. DABS(-El).lt.5.d0 ) .and.
-     &    (.not.TL_calc) ) THEN
+C     for energies below 10 MeV and CC calculations
+      if( DABS(-El).lt.10.d0  .and. (.not.TL_calc) ) THEN
         ECIs1(21:21) = 'T'
-        convg=1.0d-8
+        convg=1.0d-10
       endif
 C-----Shift to coupled equations if convergence is not achieved
       ECIs1(23:23) = 'T'
@@ -3350,7 +3348,7 @@ C
 C
       ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
-      njmax = MAX(2*ldwmax,10)
+      njmax = MAX(2*ldwmax,20)
 
       lodd = .false.
       IF( (mod(nint(Z(Nnuc)),2).ne.0 .or.
