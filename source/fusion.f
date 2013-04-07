@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3375 $
+Ccc   * $Rev: 3378 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 17:51:21 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-07 20:55:45 +0200 (So, 07 Apr 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -82,8 +82,8 @@ C-----Reduced mass corrected for proper mass values
       ABScs = 0.D0
       SINl = 0.D0
       SINlcont = 0.D0
-      csmax = 0.0
-      CSFus = 0.0
+      csmax = 0.d0
+      CSFus = 0.d0
       maxlw = 0
       DO i = 1, NDLW
          stl(i) = 0.d0
@@ -998,7 +998,7 @@ C--------channel spin min and max
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
          mul = smax - smin + 1.0001
-         CSFus = 0.0
+         CSFus = 0.d0
          DO ip = 1, 2     ! over parity
           DO j = 1, NLW !over compound nucleus spin
             sum = 0.0
@@ -1264,7 +1264,7 @@ C-----channel spin min and max
       smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
       smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
       mul = smax - smin + 1.0001
-      CSFus = 0.0
+      CSFus = 0.d0
       DO ip = 1, 2      ! over parity
          DO j = 1, NLW  !over compound nucleus spin
 C        DO j = 1, NDLW !over compound nucleus spin
@@ -1301,8 +1301,9 @@ C-----------DIRECT=1 or DIRECT=2
      &bution to collective levels'
          ENDIF
       ENDIF
+
       IF (IOUt.EQ.5) THEN
-        WRITE (8,*)
+        WRITE (8,*) 
         WRITE (8,*) 
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
         WRITE (8,'(4x,3(4x,D15.8,4x))')
