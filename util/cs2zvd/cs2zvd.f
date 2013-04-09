@@ -57,7 +57,7 @@ C    &
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G11.5,1P,(100E12.5))',END=20) 
+        READ(20,'(G11.5,1P,(100E12.5))',END=20,err=120) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
             check_cs(j)=check_cs(j) + cs(i,j)
@@ -128,6 +128,7 @@ C     Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
       STOP 'ZVView cross-section and S-factor plots created !'
  101  STOP 'ZVView cross-section plots created !             ' 
  100  STOP 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING  '
+ 120  STOP 'cs2zvd stopped; unplottable file (benchmark calculation?).'
       END
 
 

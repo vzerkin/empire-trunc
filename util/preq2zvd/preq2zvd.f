@@ -57,7 +57,7 @@ C  Pre-equil    DWBA-disc  DWBA-cont      MSD          MSC       PCROSS       HM
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G11.5,1P,(100E12.5))',END=20) 
+        READ(20,'(G11.5,1P,(100E12.5))',END=20,err=250) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
             check_cs(j)=check_cs(j) + cs(i,j)
@@ -115,6 +115,8 @@ C       Skipping plots
  200  WRITE(*,*) 'ERROR: CREATING EL_INEL_PREQ ZVD FILES'
       close(20,status='DELETE')
       STOP 'ERROR: CREATING EL_INEL_PREQ ZVD FILES'
+ 250  STOP 'preq2zvd stopped; unplottable file
+     + (benchmark calculation?).'
       END
 
       SUBROUTINE OPEN_ZVV(iout,tfunct,title)
