@@ -10,7 +10,7 @@ C-M  In case that EMPIRE is to follow a detailed structure in the
 C-M  cross sections based on experimental data, the need may arise
 C-M  to introduce tuning parameters on a relatively dense energy
 C-M  mesh. It is assumed that the tuning factors FUSRED, ELARED
-C-M  and CELCOR are given in an external data file on a fixed
+C-M  and CELRED are given in an external data file on a fixed
 C-M  energy grid. The EMPIRE input file is scanned and the tuning
 C-M  factors are introduced on the given energy mesh, leaving the
 C-M  rest of the file unchanged.
@@ -25,7 +25,7 @@ C-M             * Energy (in eV !!! because they are usually
 C-M               calculated from cross sections tabulated in eV)
 C-M             * Tuning factor value
 C-M           The values are given in 11-column format.
-C-M           The tuning factors FUSRED, ELARED and CELCOR are
+C-M           The tuning factors FUSRED, ELARED and CELRED are
 C-M           given one after the other, separated by a blank
 C-M           record. They MUST be given on the same energy grid.
 C-M   - FLEI  Source EMPIRE input filename (to be modified)
@@ -36,7 +36,7 @@ C-
       CHARACTER*40  BLNK
       CHARACTER*80  FLNM,FLIN,FLEI,FLOU
       CHARACTER*120 REC
-     &             ,HTOTRED,HFUSRED,HFCCRED,HFCORED,HELARED,HCELCOR
+     &             ,HTOTRED,HFUSRED,HFCCRED,HFCORED,HELARED,HCELRED
 C*
       DIMENSION    ENC(MXEN),PRC(MXEN,3)
 C* Filenames and logical file units
@@ -82,13 +82,13 @@ C* Start reading the desired tuning factors
       HFCCRED=BLNK//BLNK//BLNK
       HFCORED=BLNK//BLNK//BLNK
       HELARED=BLNK//BLNK//BLNK
-      HCELCOR=BLNK//BLNK//BLNK
+      HCELRED=BLNK//BLNK//BLNK
   100 READ (LIN,901) FLNM
       IF     (FLNM(1:6).EQ.'FUSRED') THEN
         LC=1
       ELSE IF(FLNM(1:6).EQ.'ELARED') THEN
         LC=2
-      ELSE IF(FLNM(1:6).EQ.'CELCOR') THEN
+      ELSE IF(FLNM(1:6).EQ.'CELRED') THEN
         LC=3
       ELSE
         WRITE(LTT,*) 'ERROR - Invalid tuning parameter header ',FLNM
@@ -122,12 +122,12 @@ C* Tuning parametersfile processed - read EMPIRE input
       TOTRED0=1
       FUSRED0=1
       ELARED0=1
-      CELCOR0=1
+      CELRED0=1
       EN1    =0
       TOTRED1=1
       FUSRED1=1
       ELARED1=1
-      CELCOR1=1
+      CELRED1=1
       JEN    =1
 C* Start reading the main EMPIRE input block
   200 READ (LEI,902) REC
@@ -148,10 +148,10 @@ C*    -- Check for tuning factor definitions in the main block
         ELARED0=ELARED1
         READ (REC(7:120),*) ELARED1
         HELARED(1:20)='$ELARED'//REC(7:19)
-      ELSE IF(REC(1:6).EQ.'CELCOR') THEN
-        CELCOR0=CELCOR1
-        READ (REC(7:120),*) CELCOR1
-        HCELCOR(1:20)='$CELCOR'//REC(7:19)
+      ELSE IF(REC(1:6).EQ.'CELRED') THEN
+        CELRED0=CELRED1
+        READ (REC(7:120),*) CELRED1
+        HCELRED(1:20)='$CELRED'//REC(7:19)
 C*    -- Check for the start of the energy-dependent block
       ELSE IF(REC(1:6).EQ.'GO    ') THEN
         WRITE(LOU,902) REC
@@ -175,7 +175,7 @@ C*        -- Update the tuning factors from main input to current value
         TOTRED0=TOTRED1
         FUSRED0=FUSRED1
         ELARED0=ELARED1
-        CELCOR0=CELCOR1
+        CELRED0=CELRED1
 C...
 C...    print *,'read energy',ee,enc(1),enc(nen),fusred0
 C...
@@ -209,9 +209,9 @@ C*            -- ELARED
               REC(1:7)='$ELARED'
               WRITE(REC(8:17),910) PRC(JEN,2)*ELARED0*TOTRED0
               WRITE(LOU,902) REC
-C*            -- CELCOR
-              REC(1:7)='$CELCOR'
-              WRITE(REC(8:17),910) PRC(JEN,3)*CELCOR0
+C*            -- CELRED
+              REC(1:7)='$CELRED'
+              WRITE(REC(8:17),910) PRC(JEN,3)*CELRED0
               WRITE(LOU,902) REC
 C*            -- Incident energy
               REC=BLNK//BLNK//BLNK
@@ -227,13 +227,13 @@ C*          -- Check for the last-defined tuning factor in originl input
               IF(HFCCRED(1:40).EQ.BLNK) HFCCRED(1:12)='$FCCRED  1.0'
               IF(HFCORED(1:40).EQ.BLNK) HFCORED(1:12)='$FCORED  1.0'
               IF(HELARED(1:40).EQ.BLNK) HELARED(1:12)='$ELARED  1.0'
-              IF(HCELCOR(1:40).EQ.BLNK) HCELCOR(1:12)='$CELCOR  1.0'
+              IF(HCELRED(1:40).EQ.BLNK) HCELRED(1:12)='$CELRED  1.0'
               IF(HTOTRED(1:40).NE.BLNK) WRITE(LOU,902) HTOTRED
               WRITE(LOU,902) HFUSRED
               WRITE(LOU,902) HFCCRED
               WRITE(LOU,902) HFCORED
               WRITE(LOU,902) HELARED
-              WRITE(LOU,902) HCELCOR
+              WRITE(LOU,902) HCELRED
 C*            -- Incident energy
               REC=BLNK//BLNK//BLNK
               WRITE(REC(1:8),908) EE
@@ -260,10 +260,10 @@ C...
           HELARED=REC
           ELARED0=ELARED1
           READ (REC(8:120),*) ELARED1
-        ELSE IF(REC(1:7).EQ.'$CELCOR') THEN
-          HCELCOR=REC
-          CELCOR0=CELCOR1
-          READ (REC(8:120),*) CELCOR1
+        ELSE IF(REC(1:7).EQ.'$CELRED') THEN
+          HCELRED=REC
+          CELRED0=CELRED1
+          READ (REC(8:120),*) CELRED1
         END IF
 C*      -- Copy all commands outside the adjustment range
 C*         and commands other than the tuning parameters
@@ -271,7 +271,7 @@ C*         and commands other than the tuning parameters
      &     (REC(1:7).NE.'$TOTRED' .AND.
      &      REC(1:7).NE.'$FUSRED' .AND.
      &      REC(1:7).NE.'$ELARED' .AND.
-     &      REC(1:7).NE.'$CELCOR' .AND.
+     &      REC(1:7).NE.'$CELRED' .AND.
      &      REC(1:7).NE.'$FCCRED' .AND.
      &      REC(1:7).NE.'$FCORED')           ) THEN
           WRITE(LOU,902) REC
