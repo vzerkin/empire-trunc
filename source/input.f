@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3380 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-04-09 17:05:51 +0200 (Di, 09 Apr 2013) $
+Ccc   * $Rev: 3381 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-12 09:02:09 +0200 (Fr, 12 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -119,7 +119,7 @@ C     AMUele = 0.00054857990945D0     ! EMPIRE 3.1
 C-----Atomic proton mass = AMUpro + AMUele
 C
 C mn    neutron mass  1.008 664 915 78 amu 
-C me    electron mass 5.485 799 110 ï¿?10-4 amu 
+C me    electron mass 5.485 799 110 ï¿½10-4 amu 
 C mp    proton mass   1.007 276 466 88 amu 
 C md    deuteron mass 2.013 553 212 71 amu 1
 C mt    triton mass   3.015 500 713 amu 3
@@ -3703,6 +3703,14 @@ C-----      print  maximum gamma-ray multipolarity  'MAXmult'
      &    INT(AEJc(0)), SYMb(0), EIN
             WRITE (8,'(61(''=''))')
 
+            WRITE (12,*) ' '
+            WRITE (12,'(61(''=''))')
+            WRITE (12,
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
+     &    INT(AEJc(0)), SYMb(0), EIN
+            WRITE (12,'(61(''=''))')
+            WRITE (12,*) ' '
 C-----------Printout of some final input options   *** done ***
             RETURN
          ENDIF
@@ -8246,7 +8254,7 @@ C                md    deuteron mass 2.013 553 amu
 C                mt    triton mass   3.015 501 amu 
 C                m3He  3He mass      3.014 932 amu 
 
-C                me    electron mass 5.485 799ï¿?10-4 amu 
+C                me    electron mass 5.485 799ï¿½10-4 amu 
 C
 C                Setting projectile/ejectiles mass 
 C
@@ -8326,8 +8334,9 @@ C
 
       DOUBLE PRECISION FSHELL
       INTEGER iloc, ix, izamn, izamx, izar, nnuc, iz, nlevc
-      INTEGER INT
-      rewind(24)
+
+      REWIND(24)
+
       pi2 = PI**2
       izamx = 0
       izamn = 200000

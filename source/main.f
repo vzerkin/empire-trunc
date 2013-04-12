@@ -1,6 +1,6 @@
-cc   * $Rev: 3371 $
+cc   * $Rev: 3381 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-12 09:02:09 +0200 (Fr, 12 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -66,12 +66,12 @@ C
      &                 epre, ftmp, gang, grand, ! spechk(4),
      &                 gtotsp, htotsp, pope, poph, popl, popleft,
      &                 poplev, popread, poptot, ptotsp, q2, q3, qmax,
-     &                 qstep, sgamc, spdif, spdiff, stauc,
+     &                 qstep, sgamc, spdif, spdiff, stauc, totcorr,
      &                 step, sum, sumfis, sumfism(NFMOD), xnub,
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
-     &                 totcorr,cseaprnt(ndecse,ndangecis),
-     &                 check_DE(ndecse),check_DL(NDLV),
+     &                 cseaprnt(ndecse,ndangecis),check_DE(ndecse),
+     &                 check_DL(NDLV),disc_int(NDLV),pop_disc(0:ndejc),
      &                 cel_da(NDAngecis), totener_out, totener_in,
      &                 emedg, emedn, emedp, emeda, emedd, emedt, emedh, 
      &                 cmulg, cmuln, cmulp, cmula, cmuld, cmult, cmulh, 
@@ -498,6 +498,9 @@ C     TOTcs, ABScs, ELAcs are initialized within MARENG()
       xsinl     = 0.d0
       csinel    = 0.d0
       checkXS   = 0.d0
+      disc_int  = 0.d0
+      pop_disc  = 0.d0
+
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
       IF(WIDcoll.GT.0.d0)
@@ -565,8 +568,8 @@ C---------Get and add inelastic cross sections (including double-differential)
              CYCLE                
            ENDIF
 
-           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0) exit
-           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0) cycle
+           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0.d0) exit
+           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
 
@@ -669,29 +672,34 @@ C-----------------To use only those values corresponding to EMPIRE grid for inel
 C--------------Check whether integral over angles agrees with x-sec. read from ECIS
                dang = PI/FLOAT(NANgela - 1)
                coef = 2*PI*dang
+C              csum = 0.d0
+C              DO iang = 1, NANgela
+C                csum= csum + CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
+C              ENDDO
                csum = 0.d0
-               DO iang = 1, NANgela
-                 csum= csum + CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
+               DO iang = 2, NANgela  ! over angles
+                 csum = csum + (CSAlev(iang  ,ilv,nejcec) 
+     &                       +  CSAlev(iang-1,ilv,nejcec))
+     &                       * 0.5d0 * (CAngler(iang)-CANgler(iang-1))
                ENDDO
+               csum = 2.0d0*PI*csum 
+	         disc_int(ilv) = csum
+	         pop_disc(nejcec) = pop_disc(nejcec) + POPlv(ilv,nnurec)
+C	         write(*,*) 'Lev=',ilv,' Int=',sngl(csum), 
+C    &         sngl(POPlv(ilv,nnurec))
+C
                if (csum.gt.0.d0) then
 C----------------Correct CSAlev() for eventual imprecision
                  ftmp = POPlv(ilv,nnurec)/csum
                  DO iang = 1, NANgela
                    CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
                  ENDDO
-C                csum = 0.d0
-C                DO iang = 1, NANgela
-C                  csum =csum+CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
-C                ENDDO
-C	            write(*,*) 'Lev=',ilv,' Int=',
-C    &				sngl(csum), sngl(POPlv(ilv,nnurec))
 	         endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
 C-----------------Correct 'coef' for eventual imprecision and include recoil DE
 C                 coef = coef*POPlv(ilv,nnurec)/csum/DERec
-                  coef = coef/DERec
-
+                  coef = 2*PI*PI/FLOAT(NANgela - 1)/DERec
                   echannel = echannel*EJMass(0)/AMAss(1)
                   DO iang = 1, NDANG
                      erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
@@ -709,8 +717,6 @@ C--------------------Escape if we go beyond recoil spectrum dimension
                ENDIF
              ELSE
                READ (46,*,END = 1400) popread ! reading zero for a closed channel
-C                  Bug found on July 18, 2012 affects calculations with unordered coll.levels
-C              READ (45,'(A)',END = 1400) ctmp    ! Skipping level identifier line
              ENDIF
 C          
 C          Allowing states in the continuum even for MSD>0
@@ -1338,6 +1344,8 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
       IF (IOUt.GT.0) THEN
          WRITE (8,*) ' '
          WRITE (8,*) '*** Summary of PE and direct emission  '
+         ftmp = CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred
+     &        + crossBUt + crossNTt
          IF (DIRect.EQ.0) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &      'Non-elastic cross section      ',
@@ -1345,92 +1353,72 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             WRITE (8,*) ' '
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &     'Non-elastic cross section      ',
-     &     sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred),' mb'
+     &       'Non-elastic cross section      ', ftmp,' mb'
             WRITE (8,*) ' '
-  
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'CC inelastic to discrete levels',
-     &                        sngl(SINlcc*FCCred),' mb',
-     &                        sngl(SINlcc*FCCred/CSFus*100),' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'CC inelastic to discrete levels',
+     &        SINlcc*FCCred,' mb', SINlcc*FCCred/ftmp*100,' %'
 
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'DWBA inel to discrete levels   ',
-     &                        sngl(SINl*FCCred),' mb',
-     &                        sngl(SINl*FCCred/CSFus*100),' %'
-C           WRITE (8,
-C    &'(''   Spin distribution calculated using '',
-C    &  ''CC transmission coefficients'')')
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'DWBA to continuum              ',
-     &                        sngl(SINlcont*FCOred),' mb',
-     &                        sngl(SINlcont*FCOred/CSFus*100),' %'
-            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &      'Break-up                       ',
-     &                        sngl(crossBUt),' mb',
-     &                        sngl(crossBUt/CSFus*100),' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'DWBA inel to discrete levels   ',
+     &        SINl*FCCred,' mb', SINl*FCCred/ftmp*100,' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'DWBA to continuum              ',
+     &        SINlcont*FCOred,' mb', SINlcont*FCOred/ftmp*100,' %'
+            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'Break-up                       ',
+     &        crossBUt,' mb', crossBUt/ftmp*100,' %'
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &     'Non-elastic cross section      ',
-     &     sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred),' mb'
+     &       'Non-elastic cross section      ', ftmp,' mb'
             WRITE (8,*) ' '
-C           WRITE (8,
-C    &'(''   Spin distribution does NOT contain'',
-C    &  '' DWBA inelastic contribution '')')
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'DWBA inel to discrete levels   ',
-     &                        sngl(SINl*FCCred),' mb',
-     &                        sngl(SINl*FCCred/CSFus*100),' %'
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'DWBA to continuum              ',
-     &                        sngl(SINlcont*FCOred),' mb',
-     &                        sngl(SINlcont*FCOred/CSFus*100),' %'
-            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &      'Break-up                       ',
-     &                        sngl(crossBUt),' mb',
-     &                        sngl(crossBUt/CSFus*100),' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'DWBA inel to discrete levels   ',
+     &        SINl*FCCred,' mb', SINl*FCCred/ftmp*100,' %'
+            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'DWBA to continuum              ',
+     &        SINlcont*FCOred,' mb', SINlcont*FCOred/ftmp*100,' %'
+            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &       'Break-up                       ',
+     &       crossBUt,' mb', crossBUt/ftmp*100,' %'
          ENDIF
-         ftmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred 
+         dtmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred 
      >        + crossBUt + crossNTt
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'Total direct                   ',
-     &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
-         ftmp = xsinl + totemis + tothms + xsmsc  
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'Total pre-equilibrium          ',
-     &     sngl(ftmp),' mb',sngl(ftmp/CSFus*100),' %'
-
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &     '(Total direct)                 ',
+     &     dtmp,' mb',dtmp/ftmp*100,' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'MSD contribution               ',
-     &                               sngl(xsinl),' mb',
-     &                               sngl(xsinl/CSFus*100),' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &      xsinl,' mb', xsinl/ftmp*100,' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'MSC contribution               ',
-     &                     sngl(xsmsc),' mb',
-     &                     sngl(xsmsc/CSFus*100),' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &      xsmsc,' mb', xsmsc/ftmp*100,' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'PCROSS contribution            ',
-     &                               sngl(totemis),' mb',
-     &                               sngl(totemis/CSFus*100),' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
+     &      totemis,' mb', totemis/ftmp*100,' %'
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'HMS contribution               ',
-     &                               sngl(tothms),' mb',
-     &                               sngl(tothms/CSFus*100),' %'
+     &      tothms,' mb',tothms/ftmp*100,' %'
          if(lbreakup) 
-     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'Break-up contribution          ',
-     &                               sngl(crossBUt),' mb',
-     &                               sngl(crossBUt/CSFus*100),' %'
+     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'Break-up contribution          ',
+     &       crossBUt,' mb', crossBUt/ftmp*100,' %'
          if(ltransfer) 
-     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F6.2,A2,1h))') 
-     &     'Transfer contribution          ',
-     &                               sngl(crossNTt),' mb',
-     &                               sngl(crossNTt/CSFus*100),' %'
+     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'Transfer contribution          ',
+     &       crossNTt,' mb', crossNTt/ftmp*100,' %'
+
+         dtmp = tothms + totemis + xsmsc + xsinl + crossBUt + crossNTt
+
+         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &     '(Total pre-equilibrium)        ',
+     &     dtmp,' mb', dtmp/ftmp*100,' %'
+
          WRITE (8,'(2x,A44)')
      &     '----------------------------------------------'
          WRITE (8,'(2x,A32,F9.2,A3)') 
      &     'CN formation cross section     ',
-     &      sngl(CSFus*corrmsd - tothms - xsmsc),' mb'
+     &      CSFus*corrmsd - tothms - xsmsc,' mb'
          WRITE (8,*) ' '
       ENDIF
 
@@ -3061,15 +3049,16 @@ C
                      DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE (12,'(4x,I3,4x,F10.5,E14.5,2x,F6.3)') il, 
-     &                   -espec, check_DL(il)*recorp,ELV(il,nnuc)
+                       WRITE (12,'(4x,I3,4x,F10.5,2(E14.5,2x),F6.3)')  
+     &                   il, -espec, check_DL(il)*recorp,
+     &                           disc_int(il)*recorp,ELV(il,nnuc)
 	               	 htmp = htmp + check_DL(il)*recorp
                      ENDDO
 	               WRITE (12,*) ' '
-                     WRITE (12,'(7X,''Sum over disc. levels '',
+                     WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
-                     WRITE (12,'(7X,''Popul. before cascade '',
-     &                G12.6,'' mb'')') CSDirlev(1,nejc)
+                     WRITE (12,'(7X,''Population of discrete levels   '',
+     &                G12.6,'' mb'')') pop_disc(nejc)
                      WRITE (12,*) ' '
                    ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
@@ -4755,6 +4744,16 @@ C
      &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
      &    INT(AEJc(0)), SYMb(0), EIN
           WRITE (8,'(61(''='')//)')
+
+          WRITE (12,*) ' '
+          WRITE (12,'(61(''=''))')
+          WRITE (12,
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
+     &    INT(AEJc(0)), SYMb(0), EIN
+          WRITE (12,'(61(''='')//)')
+          WRITE (12,*) ' '
+
         ENDIF
       ELSE
         
