@@ -32,6 +32,7 @@ files="a-ni58-pcross
        u238-rot-CC-direct-2"
 
 
+suffix_list="xsc lst out"
 
 
 if [ "$option" = "run" ] ; then
@@ -43,7 +44,11 @@ if [ "$option" = "run" ] ; then
    for file in $files
    do
      $EMPIREDIR/scripts/runE $file
-     cp $file.inp $file-ref.* $file.xsc $file.lst $file.out TeMpOrArYdIr/
+     cp $file.inp $file-ref.* TeMpOrArYdIr/
+     for suffix in $suffix_list
+     do
+       cp $file.suffix TeMpOrArYdIr/
+     done
    done
 
    rm * >& /dev/null
@@ -70,8 +75,6 @@ elif [ "$option" = "clean" ] ; then
 elif [ "$option" = "diff" ] ; then
 # use diff -y  command to compare files .xsc, lst, and .out from benchmark runs and existing reference files
 #
-   suffix_list="xsc lst out"
-
    for file in $files
    do
      for suffix in $suffix_list
@@ -95,19 +98,21 @@ elif [ "$option" = "kompare" ] ; then
    echo "Running kompare..."
    for file in $files
    do
-     kompare $file.xsc $file-ref.xsc            
-     kompare $file.lst $file-ref.lst           
-     kompare $file.out $file-ref.out            
+     for suffix in $suffix_list
+     do
+       kompare $file.$suffix $file-ref.$suffix            
+     done
    done
 
 elif [ "$option" = "replace" ] ; then
 #  renames the files .xsc and .lst to -ref.xsc and -ref.lst to serve as reference
 #  using perl-based new version of linux 'rename' command
    echo 'Renaming cross-section and .lst files for reference'
-   rm *-ref.xsc *-ref.lst >& /dev/null
-   rename 's/\.xsc$/\-ref\.xsc/'  *.xsc
-   rename 's/\.lst$/\-ref\.lst/'  *.lst
-   rename 's/\.out$/\-ref\.out/'  *.out
+   for suffix in $suffix_list
+   do   
+     rm *-ref.$suffix  >& /dev/null
+     rename 's/\.$suffix$/\-ref\.$suffix/'  *.$suffix
+   done
 
 else
    echo
