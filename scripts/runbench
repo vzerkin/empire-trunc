@@ -79,9 +79,9 @@ elif [ "$option" = "diff" ] ; then
    do
      for suffix in $suffix_list
      do
-       string=$( wc -L $file.$suffix >& /dev/null )
+       string=$( wc -L $file.$suffix  )
        read length1 rubbish <<< "$string"
-       string=$( wc -L $file-ref.$suffix >& /dev/null )
+       string=$( wc -L $file-ref.$suffix  )
        read length2 rubbish <<< "$string"
        if [ $length1 -gt $length2 ]; then
          length=$(( ($length1 + 10)*2 ))
