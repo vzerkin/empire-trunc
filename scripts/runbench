@@ -47,7 +47,7 @@ if [ "$option" = "run" ] ; then
      cp $file.inp $file-ref.* TeMpOrArYdIr/
      for suffix in $suffix_list
      do
-       cp $file.suffix TeMpOrArYdIr/
+       cp $file.$suffix TeMpOrArYdIr/
      done
    done
 
