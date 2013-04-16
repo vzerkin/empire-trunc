@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3376 $
+Ccc   * $Rev: 3386 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 17:53:49 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-16 02:29:30 +0200 (Di, 16 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2507,14 +2507,15 @@ C
       INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
       LOGICAL relcal
       CHARACTER*1 parc
-      REAL SNGL
-      Maxlw = 0
+
+      Maxlw  = 0
       ncoll = 0
 
       DO l = 1, NDLW
        Stl(l) = 0.d0
        Sel(l) = 0.d0
       ENDDO
+	CSFus   = 0.D0
 
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
@@ -2541,13 +2542,14 @@ C       (nlev=1 corresponds to the ground state)
      &  ,END=90,ERR=90) nc1,nc2,nlev,l,jj,sreal,simag,stmp
 
         IF (nlev.eq.1 .and. nc1.eq.nc2
-     &  .and. stmp.GT.1.D-15 .AND. L.LT.NDLW)
+     &    .and. stmp.GT.1.D-15 .AND. L.LT.NDLW) then
 C-----------Averaging over particle and target spin, summing over channel spin jc
 C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
-     &      Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2)
+            Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2)
      &           /DBLE(2*L + 1)
      &           /DBLE(2*SEJc(Nejc) + 1)
      &           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+        ENDIF
         enddo
       enddo
       GOTO 80
@@ -2580,24 +2582,12 @@ C-----------Averaging over particle and target spin, summing over channel spin j
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
-            Maxlw = l
+C           Maxlw = l
+            Maxlw = l + 1
          ENDIF
       ENDDO
       GOTO 100
   200 CLOSE (45)
-
-C     xmas_nejc = EJMass(Nejc)
-C     xmas_nnuc = AMAss(Nnuc)
-C     elab = EINl
-C     relcal = .FALSE.
-C     IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
-C     CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
-C     sabs = 0.D0
-C     DO l = 0, Maxlw
-C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
-C     ENDDO
-C     sabs   = 10.d0*PI/ak2*sabs
-C     write(*,*) 'Calc. Sabs=',sabs,' Lmax',Maxlw
 
 C-----For vibrational the Tls must be multiplied by (2*XJLv(ilv,Nnuc) + 1)
 C     as the spin of the target nucleus is neglected for spherical and DWBA calcs
@@ -2659,8 +2649,8 @@ C-----Absorption and elastic cross sections in mb
       ENDDO
       sabs   = 10.d0*PI/ak2*sabs
       selast = 10.d0*PI/ak2*selast
-      
-      IF (sabs.LE.0.D0) RETURN
+
+      IF (sabs.le.0.d0) RETURN
 
       CSFus = ABScs
 
@@ -2680,14 +2670,12 @@ C          Discrete level scattering
 C             Coupled levels
               SINlcc = SINlcc + dtmp
            ELSE
-C             Uncoupled discrete levels included into inelastic
+C             Uncoupled discrete levels 
               SINl = SINl + dtmp
            ENDIF
          ELSE
 C          Scattering into continuum
            SINlcont = SINlcont + dtmp
-C          Not included into inelastic as it is renormalized in main.f
-C          SINl = SINl + dtmp
          ENDIF
       ENDDO
   400 CLOSE (45)
@@ -2700,88 +2688,102 @@ C          SINl = SINl + dtmp
      &     ' WARNING: Calc. sabs absorption cross section ',sabs
          WRITE (8,*) ' WARNING: sabs + SINlcc < ECIS ABS'
          WRITE (8,*) ' WARNING: You may need to increase NDLW !!!'
-         write(8,*) 'Calc. Sabs   =',sngl(sabs),' Lmax',Maxlw
-         write(8,*) 'Calc. SINlcc =',sngl(SINlcc)
-         write(8,*) 'ECIS  ABScs  =',sngl(ABScs)
+         write (8,*) ' Lmax',Maxlw
+         write (8,*) ' Calc. Sabs                  =',sngl(sabs)
+         write (8,*) ' ECIS  fusion (ABScs-SINlcc) = ',
+     &                   sngl(ABScs-SINlcc)
+         write (8,*) ' Calc. SINlcc =',sngl(SINlcc)
+         write (8,*) ' ECIS  ABScs  =',sngl(ABScs)
          WRITE (8,*)
       ENDIF
 
-C     IF (abs(sabs + SINlcc - ABScs).gt.1.D0) THEN ! 1 mb DIFFERENCE
-C        WRITE (8,*) 
-C        WRITE (8,*) 
-C    &    ' WARNING: Sabs=',sngl(sabs+SINlcc),' Sabs(ECIS)=',sngl(ABScs)
-C        WRITE (8,*)
-C    &     ' WARNING: Calculated Sabs as sum over Tls assumed as a true 
-C    &absoprtion'
-C        WRITE (8,*) 
-C        ABScs = sabs	   
-C     ENDIF
-
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
-
+C
+C     ECIS convergence check
+C
       IF (SINlcc.GT.ABScs) THEN
          WRITE (8,*)
          WRITE (8,*)
-     &     ' ERROR: Coupled channel calculation do not converge '
+     &     ' ERROR: Coupled channel calculation does not converge '
          WRITE (8,'(
-     &1x, '' ERROR: Inelastic cross section ='',F8.2,'' mb''/
-     &1x, '' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
+     &1x, '' ERROR: Coupled-channels cross section ='',F8.2,'' mb''/
+     &1x, '' ERROR: ECIS absorption cross section  ='',F8.2,'' mb''/)') 
      &   SINlcc, ABScs
          WRITE (8,*)
-     &    ' ERROR: Change the selected OMP or coupled levels !! '
-         STOP ' ERROR: Change the selected OMP or coupled levels !! '
+     &    ' ERROR: Change the selected OMP or coupled-level scheme !! '
+         WRITE (8,*)
+     &    ' ERROR: Please send your case to r.capotenoy@iaea.org      '
+         STOP 
+     &    ' ERROR: Change the selected OMP or coupled-level scheme !! '
       ENDIF
 
-      IF (SINl.GT.ABScs) THEN
+      IF (SINl+SINlcc.GT.ABScs) THEN
+
+	   ABScs = ABScs + SINl
+ 
+         WRITE (8,
+     &'(1x,'' WARNING: reaction cross section renormalized to account fo
+     &r DWBA calculated cross sections '', F8.5/
+     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb''/)')
+     &  ABScs, SINlcc, SINl
          WRITE (8,*)
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
          WRITE (8,*)
      &' ERROR: DWBA calculation produces too big cross sections '
          WRITE (8,'(
+     &1x,'' ERROR: Coupled-channel cross sections                  ='',
+     &  F8.2,'' mb''/
      &1x,'' ERROR: DWBA cross section to uncoupled discrete levels ='',
      &  F8.2,'' mb''/
-     &1x,'' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
-     &   SINl, ABScs
-         WRITE (8,*)
-     &' ERROR: EDIT the collective level file to decrease dynamical defo
-     &rmations of DWBA levels'
-         WRITE (8,*)
+     &1x,'' ERROR: CN formation cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, SINl, ABScs-SINlcc-SINl
+C        WRITE (8,*)
+C    &' ERROR: EDIT the collective level file to decrease dynamical defo
+C    &rmations of uncoupled DWBA levels'
+C        WRITE (8,*)
 C        STOP 
 C    &' ERROR: EDIT the collective level file to decrease dynamical defo
-C    &rmations of DWBA levels'
+C    &rmations of uncoupled DWBA levels'
       ENDIF
 
-      IF (SINl+SINlcont.GT.ABScs) THEN
+      IF (SINlcont+SINlcc.GT.ABScs) THEN
+         WRITE (8,
+     &'(1x,'' WARNING: reaction cross section renormalized to account fo
+     &r DWBA calculated cross sections '', F8.5/
+     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb''/)')
+     &  ABScs, SINlcc, SINl
+
          WRITE (8,*)
          WRITE (8,*) 
-     &' ERROR: Too big dynam. deformations of DWBA levels'
-         WRITE (8,*)
-     &' ERROR: DWBA calculation produces too big cross sections    '
+     &' ERROR: Too big dynam. deformations of DWBA levels in the continu
+     &um.'
          WRITE (8,'(
-     &1x,'' ERROR: DWBA cross section to uncoupled discrete levels ='',
-     &  F8.2,'' mb  !!''/
-     &1x,'' ERROR: DWBA cross section to levels in the continuum ='',
-     &  F8.2,'' mb  !!''/
-     &1x,'' ERROR: Reaction  cross section ='',F8.2,'' mb''/)') 
-     &   SINl, SINlcont, ABScs
-         WRITE (8,*)
-     &' ERROR: Reduce the dynamical deformations of your DWBA levels'
-         WRITE (8,*)
-     &' ERROR:     in the collective-level file (*-lev.col) '
+     &1x,'' ERROR: Coupled-channel cross sections                  ='',
+     &  F8.2,'' mb''/
+     &1x,'' ERROR: DWBA cross section to the continuum             ='',
+     &  F8.2,'' mb''/
+     &1x,'' ERROR: CN formation cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, SINlcont, ABScs-SINlcc
          WRITE (8,*)
      &' ERROR: EDIT the collective level file to decrease dynamical defo
-     &rmations of DWBA levels'
+     &rmations of DWBA levels in the continuum'
          WRITE (8,*)
-C        STOP 
-C    &' ERROR: EDIT the collective level file to decrease dynamical defo
-C    &rmations of DWBA levels'
+         STOP 
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of DWBA levels in the continuum'
       ENDIF
-
 C
-C     Absorption cross section includes inelastic scattering cross section to coupled levels
+C     Absorption cross section includes inelastic scattering cross section
+C     to coupled levels, but not DWBA to uncoupled levels (This is an ECIS double check)
 C
-      sreac = sabs + SINlcc
+      sreac = sabs + SINlcc   
       IF (IOUt.EQ.5 .AND. sreac.GT.0.D0) THEN
          WRITE (8,*)
          WRITE (8,*) ' INCIDENT CHANNEL:'
@@ -2808,8 +2810,6 @@ C    &               SNGL(selast), ' mb '
             WRITE (8,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (8,*)' Sreac - SINl - sinlcont (renormalized by DWBA) =',
-     &            SNGL(sreac - SINl - SINlcont), ' mb '
          WRITE (8,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
          WRITE (8,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
@@ -2822,52 +2822,28 @@ C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
 C     continuum also included
 C
 158   CONTINUE
-      IF(SINlcc+SINl+SINlcont.LE.sabs) THEN 
+
+      IF( sabs.gt.0.d0 .and. ABScs.GT.(SINlcc+SINl+SINlcont) .and.
+     >  dabs(ABScs - sreac) .GT. 1.d-7) THEN 
+        dtmp = 0.d0
         DO l = 0, Maxlw
           Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
+          dtmp   = dtmp + Stl(l + 1)*DBLE(2*l + 1)
         ENDDO
-        CSFus = ABScs - SINlcc - SINl - SINlcont
-      ELSE 
-         WRITE (8,*)
-         WRITE (8,
-     &'(1x,'' WARNING: CC cross section to coupled discrete levels ='',
-     &  F8.2,'' mb  !!''/
+        CSFus = 10.d0*PI/ak2*dtmp  ! = ABScs - SINlcc - SINl - SINlcont
+        WRITE (8,
+     &'(1x,'' WARNING: Transmission coefficients renormalized to account
+     & for DWBA calculated cross sections '', F8.5/
+     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     & ,F8.2,'' mb  !!''/
-     & 1x,'' WARNING: DWBA cross section to levels in the continuum =''
-     & ,F8.2,'' mb  !!''/
-     & 1x,'' WARNING: Reaction  cross section ='',F8.2,'' mb''/)') 
-     &   SINlcc, SINl, SINlcont, sreac
-        IF(SINlcont.gt.0) then
-          SINlcont = 0.d0
-          WRITE (8,*) 
-     &      ' WARNING: DWBA to the continuum neglected at Einc =',EINl
-        goto 158
-        ENDIF
-        IF(SINl.gt.0) then
-          SINl = 0.d0
-          WRITE (8,*) 
-     &      ' WARNING: DWBA to uncoupled levels neglected at Einc =',EINl
-        goto 158
-        ENDIF
-        WRITE (8,*) 
-     &' ERROR: Too big dynam. deformations of DWBA uncoupled levels'
-        WRITE (8,*) ' ERROR: or ECIS does not converge'
-        WRITE (8,*)
-     &  ' ERROR: You may change your collective level file to include'
-        WRITE (8,*)
-     &  ' ERROR:   fewer collective levels, or change your OMP'
-        WRITE (8,*)
-     &' ERROR: You may reduce the dynamical deformations of your DWBA'
-        WRITE (8,*)
-     &' ERROR:   levels in the collective-level file (*-lev.col) '
-        WRITE (8,*)
-     &' ERROR: EDIT the collective level file to decrease dynamical defo
-     &rmations of DWBA levels or reduce the number of collective levels'
-        STOP 
-     &' ERROR: EDIT the collective level file to decrease dynamical defo
-     &rmations of DWBA levels or reduce the number of collective levels'
-      ENDIF
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: Reaction  cross section                         =''
+     &,F8.2,'' mb''/)') 
+     &  (ABScs-SINlcc-SINl-SINlcont)/sabs, SINlcc, SINl, SINlcont, sreac
+      ENDIF 
 
       RETURN
       END
@@ -3143,7 +3119,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab, elabe, rmatch,
-     &                 xmas_nejc, xmas_nnuc, xratio, zerosp, convg
+     &                 xmas_nejc, xmas_nnuc, xratio, zerosp, convg,ecoul
 
       DOUBLE PRECISION vvref, wvref, wsref, vsoref, wsoref
       DOUBLE PRECISION fv, fs, fvv, fvs, tv, ts, fso, tso
@@ -3195,13 +3171,16 @@ C-----Real SO potential deformed
 C-----Imaginary SO potential deformed
       ECIs1(14:14) = 'F'
 
+      ecoul  = max(1.444*Z(Nnuc)/A(Nnuc)**0.33333333-1.13,0.d0)
+
       convg=1.0d-10
-	IF(Ldwba) convg=1.0d-5
+	IF(Ldwba .and. DABS(-El).GT.max(ecoul,5.d0)) convg=1.0d-5
 C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
-C     for energies below 10 MeV and CC calculations
-      if( DABS(-El).lt.10.d0.and.(.not.TL_calc).and.(.not.Ldwba) ) THEN
+C     for nucleon energies below 10 MeV and CC calculations
+      if( DABS(-El)-ecoul.lt.10.d0 .and. (.not.TL_calc) 
+     &                             .and. (.not.Ldwba) ) THEN
         ECIs1(21:21) = 'T'
         convg=1.0d-10
       endif
@@ -3352,6 +3331,10 @@ C-----If channel is closed ground state potential is used for this level
 C
       zerosp = 0.d0
 C
+      ecoul  = max(1.444*Z(Nnuc)/A(Nnuc)**0.33333333-1.13,0.d0)
+      ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*
+     &         SQRT(xmas_nejc*max(elab-ecoul,0.d0))
+
       ldwmax = 2.4*1.25*A(Nnuc)**0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin (increased to 100 for high energy scattering)
       njmax = MAX(2*ldwmax,20)
