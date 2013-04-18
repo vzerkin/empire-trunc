@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3302 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2013-02-13 19:41:01 +0100 (Mi, 13 Feb 2013) $
+Ccc   * $Rev: 3389 $
+Ccc   * $Author: apalumbo $
+Ccc   * $Date: 2013-04-18 22:56:47 +0200 (Do, 18 Apr 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -410,7 +410,7 @@ C--- Open the principal file for printing of fit output
       write(2,*)
 
 C-- Test for the existence of the C4 data file
-      INQUIRE (FILE = ('C4.dat'),EXIST = fexist)
+      INQUIRE (FILE = ('C4.DAT'),EXIST = fexist)
       if (.not.fexist) then
         write(2,*) ' A C4 data file, *.c4, is necessary for fitting.',
      &           ' STOP.'
@@ -805,7 +805,7 @@ C      (i3,1x,a2,1x,i3,2x,f3.1,2x,f6.3,2x,2(e8.2,2x),1x,2(f4.2,2x),2(f4.1,1x),2x
 C--- The C4 data file is used to obtain the rest of the experimental data.
 C--- Z and A are not checked so that natural data can be included with the
 C--- isotopic data.
-      OPEN(unit=26,file='C4.dat',status='old')
+      OPEN(unit=26,file='C4.DAT',status='old')
 
       ind=ind+1
       inda=1
