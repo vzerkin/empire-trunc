@@ -346,8 +346,8 @@ c...  IF(MT.EQ.9000) MTE=5
       EL1=ELV
       PA1=PAR
       ZEL(1)=ZA
-      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,ELM,PAR'
-     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,PA1,EL1
+      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,ELV,PAR'
+     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,EL1,PA1
       CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PA1,EP6
      1           ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
       IF(NP.LE.0) THEN
@@ -739,9 +739,18 @@ C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
 C* Test for Legendre coefficients of elastic scattering
-      IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
+c     IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
+      IF( MF.EQ.154 .AND. NINT(F5).EQ.1) THEN
         MF=3
-        MT=251
+        IF(MT.EQ.2) THEN
+          MT=251
+        ELSE IF(MT.EQ.9000) THEN
+          F7=0
+          MT=254
+c... Temporarily pick scattering mu-bar as elastic
+C...      MT=251
+c...
+        END IF
       END IF
       IC4=IC4+1
       IF(CM.EQ.'T' .OR. CM.EQ.'+') CM=' '
