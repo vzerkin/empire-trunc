@@ -23,11 +23,31 @@ C-M           header is the tuning factor name, followed by
 C-M           pairs of numbers:
 C-M             * Energy (in eV !!! because they are usually
 C-M               calculated from cross sections tabulated in eV)
-C-M             * Tuning factor value
+C-M             * Tuning factor value.
 C-M           The values are given in 11-column format.
 C-M           The tuning factors FUSRED, ELARED and CELRED are
 C-M           given one after the other, separated by a blank
 C-M           record. They MUST be given on the same energy grid.
+C-M           These are followed by the fusion cross section
+C-M           (identified by the header "Sig_f") and the 
+C-M           compound-elastic cross section (identified by 
+C-M           the header "Sig_CE") from the EMPIRE reference
+C-M           calculation. Definitions:
+C-M             FUSRED factors account for the change from the
+C-M                    reference EMPIRE calculation to the desired
+C-M                    fusion cross section value (name FUSRED2).
+C-M             ELARED factors definition is as for FUSRED,
+C-M                    referring to the shape-elastic cross sections.
+C-M                    (name ELARED2)
+C-M             CELRED factors determine the fraction of compound-
+C-M                    elastic cross setion in the desired value
+C-M                    of the fusion cross section (name CELDSH2).
+C-M             Sig_f  cross sections represent the EMPIRE nominal
+C-M                    calculation of the fusion cross section
+C-M                   (name SIGFUS1).
+C-M             Sig_CE cross sections represent the EMPIRE nominal
+C-M                    calculation of the compound-elastic cross
+C-M                    section (name SIGCEL1)
 C-M   - FLEI  Source EMPIRE input filename (to be modified)
 C-M   - FLOU  Updated EMPIRE input.
 C-M
@@ -241,8 +261,8 @@ C...
               SIGCEL1=PRC(JEN,5)
               CELDSH1=SIGCEL1/SIGFUS1
 C*
-              SIGFUS0=SIGFUS2/FUSRED
-              SIGCEL0=SIGDSH1*SIGFUS0/(CELRED1+CELDSH1-CELRED1*CELDSH1)
+              SIGFUS0=SIGFUS1/(FUSRED1*TOTRED1)
+              SIGCEL0=CELDSH1*SIGFUS0/(CELRED1+CELDSH1-CELRED1*CELDSH1)
               CELRED =(SIGFUS0/SIGCEL0-1)*CELDSH2/(1-CELDSH2)
               WRITE(REC(8:17),910) CELRED
               WRITE(LOU,902) REC
