@@ -19,8 +19,7 @@ C-V          outgoing particle energy/range (two-body reactions only)
 C-V  12/09 Fix trivial initialisation error.
 C-V  13/02 Implement retrieval of cross sections at fixed angle
 C-V        for incident neutrons.
-C-V  13/03 - Fix summation when No. of outgoing particles is undefined.
-C-V        - Fix retrieval of uncertainties fro MF40.
+C-V  13/03 Fix summation when No. of outgoing particles is undefined.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
