@@ -41,7 +41,6 @@ C-V        - Improve trapping of undefined cross sections.
 C-V        - Convert discrete gamma production to levels (GLTOEL)
 C-V  12/07 - Increase MXPR from 500 to 2000 in GLTOEL (Case U-238).
 C-V        - Update RDTAB1 routine for consistency with DXSEND.
-C-V  12/10 Define scattering mu-bar as MF3/MT254.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -689,7 +688,6 @@ C* Identify outgoing particle (if relevant)
       IF(ENTI(20:20).EQ.'3') ENTI(20:20)='O'
 C*    -- Special treatment for correct positioning of mu-bar
       IF(ENTI(12:19).EQ.' 154   2') ENTI(12:19)='   3 251'
-      IF(ENTI(12:19).EQ.' 1549000') ENTI(12:19)='   3 254'
 C* Save the label for sorting
       ENT(NEN)=ENTI
       REF =REC(98:132)
