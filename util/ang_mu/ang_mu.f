@@ -5,6 +5,7 @@ C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
 C-V  12/06 Fix bug on action when fitting is unsuccessful.
 C-V  12/09 Include sorting internally for better grouping of data
+c-v  12/10 Include scattering angular distributions (MT9000)
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -108,11 +109,10 @@ C*
 C* Begin processing the data - search for elastic angular distributions
   100 READ (LIN,932,END=800) REC
   110 READ (REC,902) IZIH,IZAH,ZAMH,MFH,MTH
-      IF(MFH.NE.4 .OR. MTH.NE.2) THEN
+      IF(MFH.NE.4 .OR. (MTH.NE.2 .AND. MTH.NE.9000)) THEN
         WRITE(LOU,932) REC
         GO TO 100
       END IF
-
 C*
 C* Re-sequence angular distribution data by angles/incident energies
       REF =REC(98:132)
