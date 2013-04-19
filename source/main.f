@@ -1,6 +1,6 @@
-cc   * $Rev: 3381 $
+cc   * $Rev: 3395 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-12 09:02:09 +0200 (Fr, 12 Apr 2013) $
+Ccc   * $Date: 2013-04-20 00:22:25 +0200 (Sa, 20 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1431,43 +1431,43 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*)
      &        ' Preequilibrium + Direct spectra (sum of all models):'
           IF(CSEmis(0,1).GT.0) THEN
-            CALL AUERST(1,0,1)
+            CALL AUERST(1,0,0)
             WRITE (8,
      &       '(2x,'' g PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(0,1)
           ENDIF
           IF(CSEmis(1,1).GT.0) THEN
-            CALL AUERST(1,1,1)
+            CALL AUERST(1,1,0)
             WRITE (8,
      &       '(2x,'' n PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(1,1)
           ENDIF
           IF(CSEmis(2,1).GT.0) THEN
-            CALL AUERST(1,2,1)
+            CALL AUERST(1,2,0)
             WRITE (8,
      &       '(2x,'' p PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(2,1)
           ENDIF
           IF(CSEmis(3,1).GT.0) THEN
-            CALL AUERST(1,3,1)
+            CALL AUERST(1,3,0)
             WRITE (8,
      &       '(2x,'' a PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(3,1)
           ENDIF
           IF(CSEmis(4,1).GT.0) THEN
-            CALL AUERST(1,4,1)
+            CALL AUERST(1,4,0)
             WRITE (8,
      &       '(2x,'' d PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(4,1)
           ENDIF
           IF(CSEmis(5,1).GT.0) THEN
-            CALL AUERST(1,5,1)
+            CALL AUERST(1,5,0)
             WRITE (8,
      &       '(2x,'' t PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(5,1)
           ENDIF
           IF(CSEmis(6,1).GT.0) THEN
-            CALL AUERST(1,6,1)
+            CALL AUERST(1,6,0)
             WRITE (8,
      &       '(2x,'' h PE emiss cross sect   '',G12.6,'' mb'')')
      &       CSEmis(6,1)
@@ -2672,7 +2672,8 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
          IF(CSEmis(0,nnuc).gt.0) THEN
-           IF(IOUt.GT.0) CALL AUERST(nnuc,0,1)
+C          Integral is calculated by trapezoidal rule being consistent with cross section
+           IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
            IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
@@ -2716,7 +2717,9 @@ C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc,1)
-             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,1)
+C
+C            Integral is calculated by trapezoidal rule being consistent with cross section
+             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0) 
 C------------Print residual nucleus population
              poptot = 0.0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
@@ -3493,8 +3496,10 @@ C     ENDDO
               ftmp   = ftmp + CSE(i,nejc,0)
             ENDDO
             if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
- 
-            CALL AUERST(0,nejc,1)
+
+C           Integral is calculated by trapezoidal rule being consistent with cross section 
+            CALL AUERST(0,nejc,0)
+
          ENDDO
 
          IF (FIRst_ein) THEN 
