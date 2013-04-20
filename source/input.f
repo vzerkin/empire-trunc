@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3381 $
+Ccc   * $Rev: 3396 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-12 09:02:09 +0200 (Fr, 12 Apr 2013) $
+Ccc   * $Date: 2013-04-20 03:38:13 +0200 (Sa, 20 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -295,7 +295,6 @@ C--------fusion parameters
          TOTred = 1.d0
          ELAred = 1.d0
          CELred = 1.d0
-         CELcor = 1.d0
          CINred = 1.d0
          TOTred0 = 1.d0 
          FUSred0 = 1.d0
@@ -308,7 +307,6 @@ C--------fusion parameters
          rTOTred = 1.d0
          rELAred = 1.d0
          rCELred = 1.d0
-         rCELcor = 1.d0
          rCINred = 1.d0
          LEVtarg = 1
 C
@@ -4602,37 +4600,6 @@ C-----
                 WRITE (12,
      &      '('' Compound elastic cross section was scaled by factor ''
      &          F6.3)') CELred
-            endif
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'CELCOR') THEN
-            if(i1.ne.0 .and. IOPran.ne.0) then
-                WRITE (8,
-     &          '('' Compound elastic correction uncertainty '',
-     &          '' is equal to '',i2,'' %'')') i1
-                sigma = val*i1*0.01
-                IF(IOPran.gt.0) then
-                   IF(rCELcor.eq.1.d0) rCELcor = grand()
-                   CELcor = val + rCELcor*sigma
-                ELSE
-                   IF(rCELcor.eq.1.d0) rCELcor = drand()
-                   CELcor = val + 1.732d0*(2*rCELcor-1.)*sigma
-                ENDIF
-                WRITE (8,
-     &      '('' Compound elastic correction was scaled by factor ''
-     &          ,f6.3)') CELcor
-                IPArCOV = IPArCOV +1
-                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6,d12.5)')
-     &             IPArCOV, CELcor, INDexf, INDexb, name, rCELcor
-            else
-                CELcor = val
-                WRITE (8,
-     &      '('' Compound elastic correction was scaled by factor ''
-     &          F6.3)') CELcor
-                WRITE (12,
-     &      '('' Compound elastic correction was scaled by factor ''
-     &          F6.3)') CELcor
             endif
             GOTO 100
          ENDIF

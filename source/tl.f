@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3386 $
+Ccc   * $Rev: 3396 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-16 02:29:30 +0200 (Di, 16 Apr 2013) $
+Ccc   * $Date: 2013-04-20 03:38:13 +0200 (Sa, 20 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2718,17 +2718,16 @@ C
       ENDIF
 
       IF (SINl+SINlcc.GT.ABScs) THEN
-
-	   ABScs = ABScs + SINl
- 
-         WRITE (8,
-     &'(1x,'' WARNING: reaction cross section renormalized to account fo
-     &r DWBA calculated cross sections '', F8.5/
-     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     &,F8.2,'' mb''/)')
-     &  ABScs, SINlcc, SINl
+C     IF (SINl.GT.ABScs) THEN
+C	   ABScs = ABScs + SINl
+C        WRITE (8,
+C    &'(1x,'' WARNING: reaction cross section renormalized to account fo
+C    &r DWBA calculated cross sections '', F8.5/
+C    &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+C    &,F8.2,'' mb''/)')
+C    &  ABScs, SINlcc, SINl
          WRITE (8,*)
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
