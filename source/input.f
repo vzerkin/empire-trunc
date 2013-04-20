@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3396 $
+Ccc   * $Rev: 3397 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-20 03:38:13 +0200 (Sa, 20 Apr 2013) $
+Ccc   * $Date: 2013-04-21 00:48:43 +0200 (So, 21 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -3633,9 +3633,9 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
               ENDIF
             ELSE
               WRITE (8,
-     &          '('' CN angular distribution assumed isotropic)'')')
+     &          '('' CN angular distribution assumed isotropic'')')
               WRITE (12,
-     &          '('' CN angular distribution assumed isotropic)'')')
+     &          '('' CN angular distribution assumed isotropic'')')
 
               IF (INTerf.EQ.1) INTerf=0
 
