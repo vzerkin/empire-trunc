@@ -40,7 +40,7 @@ if [ "$option" = "run" ] ; then
 
    mkdir TeMpOrArYdIr
 #  cp * > TeMpOrArYdIr
-   cp th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   cp u238-rigid-soft-omp-lev.col th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
    for file in $files
    do
      $EMPIREDIR/scripts/runE $file
@@ -61,6 +61,7 @@ elif [ "$option" = "clean" ] ; then
    mkdir TeMpOrArYdIr
    mv *-ref.* TeMpOrArYdIr/
    mv th232-rot-vib-lev.col TeMpOrArYdIr/
+   mv u238-rigid-soft-omp-lev.col TeMpOrArYdIr/
    mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
    cp *.inp TeMpOrArYdIr/ 
    for file in $files
