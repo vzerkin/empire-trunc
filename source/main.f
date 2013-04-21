@@ -1,6 +1,6 @@
-cc   * $Rev: 3398 $
+cc   * $Rev: 3402 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-21 02:29:48 +0200 (So, 21 Apr 2013) $
+Ccc   * $Date: 2013-04-21 21:06:36 +0200 (So, 21 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2539,7 +2539,7 @@ C----------CN contribution to elastic ddx
 C----------------Locate position of the projectile among ejectiles
                  CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-                 WRITE (8,*) ' '
+C                WRITE (8,*) ' '
                  its = ncoll
                  IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
                    WRITE(8,99029)
@@ -2560,7 +2560,7 @@ C
      &               ilv= 2,MIN(its,10))
 C
                    IF(its.gt.10) THEN
-                     WRITE(8,*) ' '
+C                    WRITE(8,*) ' '
                      WRITE(8,*) ' '
                      WRITE(8,99030)(ICOller(ilv),ilv = 11,MIN(its,20))
                      WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
@@ -2580,7 +2580,7 @@ C
                    ENDIF
 C
                    IF(its.gt.20) THEN
-                     WRITE(8,*) ' '
+C                    WRITE(8,*) ' '
                      WRITE(8,*) ' '
                      WRITE(8,99030)(ICOller(ilv),ilv = 21,MIN(its,30))
                      WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
@@ -2601,7 +2601,7 @@ C
 C                  Because of the ENDF format restrictions the maximum
 C                     number of discrete levels is limited to 40
                    IF(its.gt.30) THEN
-                     WRITE(8,*) ' '
+C                    WRITE(8,*) ' '
                      WRITE(8,*) ' '
                      WRITE(8,99030)(ICOller(ilv),ilv = 31,MIN(its,40))
                      WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
@@ -2620,13 +2620,13 @@ C                     number of discrete levels is limited to 40
      &                 ilv = 31,MIN(its,40))
                    ENDIF
                    WRITE (8,*) ' '
-                   WRITE (8,*) ' '
+C                  WRITE (8,*) ' '
                  ENDIF
                ENDIF
 
              ENDIF
            ENDIF
-           WRITE (8,*)
+C          WRITE (8,*)
          ENDIF
          IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
@@ -2657,9 +2657,9 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
      &    '    fission cross section',G12.6,'  mb') 
          IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
 
-         WRITE (12,*)
-         WRITE (8,*)
          IF(CSPrd(nnuc).gt.0.d0) then 
+           WRITE (12,*)
+           WRITE (8,*)
            WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
@@ -3521,7 +3521,8 @@ C           Integral is calculated by trapezoidal rule being consistent with cro
          ENDDO
 
          IF (FIRst_ein) THEN 
-
+	      WRITE (8,*)
+	      WRITE (8,*)
             WRITE (8,'(11X,''**********************'')')
             WRITE (8,'(11x,'' Total spectra (C.M.)'')')
             WRITE (8,'(11x,''**********************'')')
