@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3365 $
+Ccc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-04 01:18:38 +0200 (Do, 04 Apr 2013) $
+Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -62,43 +62,43 @@ C
       DO i = 1, kmax
         totspec  = totspec  + CSEt(i,Nejc)
       ENDDO
-C     totspec = totspec - 
-C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+      totspec = totspec - 
+     &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE     
       IF (totspec.LE.1.d-4) RETURN
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
          WRITE (8,99005)
-99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
+99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'))
       ELSE
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
-99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
+99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99020)
-99020 FORMAT (1X,/,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
+99020 FORMAT (1X,/,1X,54('*'),1X,'proton spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99025)
-99025 FORMAT (1X,/,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
+99025 FORMAT (1X,/,1X,54('*'),1X,'alpha spectrum   ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99026)
-99026 FORMAT (1X,/,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
+99026 FORMAT (1X,/,1X,54('*'),1X,'deuteron spectrum',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99027)
-99027 FORMAT (1X,/,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
+99027 FORMAT (1X,/,1X,54('*'),1X,'triton spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99028)
-99028 FORMAT (1X,/,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
+99028 FORMAT (1X,/,1X,54('*'),1X,'he-3 spectrum    ',54('*'))
          ENDIF
          IF ( AEJc(Nejc).GT.4.0D0) THEN
           WRITE (8,99010) ia, SYMbe(Nejc)
-99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
+99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
          ENDIF
       ENDIF
       
@@ -138,14 +138,129 @@ C    &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
             symc(ij) = haha
          ENDDO
   150    WRITE (8,99040) e, CSEt(i,Nejc), symc
-99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
+99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
-C     totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
+      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec 
 99045 FORMAT (24X,93('-'))
+      END
+
+      SUBROUTINE Print_Inclusive(Nejc)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:iou*
+Ccc   *                         A U E R S T                              *
+Ccc   *                                                                  *
+Ccc   *   Prints histogram of NEJC-inclusive spectrum                    *
+Ccc   *   and prints  energy integrated cross section for this emission. *
+Ccc   *                                                                  *
+Ccc   *   NEJC-ejectile index                                            *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   * author: M.Herman                                                 *
+Ccc   * date:    2.Feb.1994                                              *
+Ccc   * revision:#    by:name                     on:xx.mon.199x         *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nejc
+C
+C Local variables
+C
+      DOUBLE PRECISION csemax, totspec
+      INTEGER i, ia, kmax
+
+      csemax = 0.d0
+      kmax = 1
+      DO i = 1, NDECSE
+         IF (CSE(i,Nejc,0).GT.0.d0) kmax = i
+         csemax = DMAX1(CSE(i,Nejc,0),csemax)
+      ENDDO
+C
+C     Stringest test to avoid plotting problems.
+C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
+C
+      IF (csemax.LE.1.d-5) return
+
+      kmax = kmax + 1
+      kmax = MIN0(kmax,NDECSE)
+
+      totspec = 0.d0
+      DO i = 1, kmax
+        totspec  = totspec  + CSE(i,Nejc,0)
+      ENDDO
+      totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
+      totspec = totspec*DE     
+
+      IF (totspec.LE.1.d-4) RETURN
+
+      WRITE (12,*) ' '
+      ia = AEJc(Nejc)
+      IF (Nejc.EQ.0) THEN
+         WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
+        WRITE (12,*) ' '
+        WRITE (12,'(''    Energy    mb/MeV'')')
+        WRITE (12,*) ' '
+        DO i = 1, kmax - 1
+           if(CSE(i,Nejc,0).le.0.d0) cycle
+           WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE,
+     &         max(0.d0,CSE(i,Nejc,0))
+        ENDDO
+C-------Exact endpoint
+        WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(kmax,0,0))
+        WRITE (12,*) ' '    
+        WRITE (12,
+     & '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
+     &          totspec
+      ELSE
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) 
+     &     WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (12,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
+         IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) 
+     &     WRITE (12,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
+         IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (12,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (12,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) 
+     &     WRITE (12,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
+C        IF ( AEJc(Nejc).GT.4.0D0) THEN
+C         WRITE (12,99010) ia, SYMbe(Nejc)
+C99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
+C        ENDIF
+         WRITE (12,'(30X,''A     n     g     l     e     s '')')
+         WRITE (12,*) ' '
+         WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
+     &                      (ANGles(nang),nang=1,NDANG)
+
+      ENDIF
+
+      totspec = 0.d0
+      DO nnuc = 1, NNUcd
+        totspec = totspec + CSEmis(Nejc,nnuc)
+      ENDDO
+	IF(Nejc.ne.0) THEN
+        WRITE (12,
+     &           '(1x,'' Total '',A2,''   emission   '',G12.6,'' mb'')')
+     &          SYMbe(Nejc),totspec
+      ELSE
+        WRITE (12,
+     &          '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')')totspec
+      ENDIF
+	RETURN 
       END
 
       SUBROUTINE AUERST(Nnuc,Nejc,Iflag)
@@ -213,35 +328,35 @@ C
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
          WRITE (8,99005)
-99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'),//)
+99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'))
       ELSE
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
-99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'),//)
+99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99020)
-99020 FORMAT (1X,/,1X,54('*'),1X,'proton spectrum  ',54('*'),//)
+99020 FORMAT (1X,/,1X,54('*'),1X,'proton spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99025)
-99025 FORMAT (1X,/,1X,54('*'),1X,'alpha spectrum   ',54('*'),//)
+99025 FORMAT (1X,/,1X,54('*'),1X,'alpha spectrum   ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99026)
-99026 FORMAT (1X,/,1X,54('*'),1X,'deuteron spectrum',54('*'),//)
+99026 FORMAT (1X,/,1X,54('*'),1X,'deuteron spectrum',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) THEN
            WRITE (8,99027)
-99027 FORMAT (1X,/,1X,54('*'),1X,'triton spectrum  ',54('*'),//)
+99027 FORMAT (1X,/,1X,54('*'),1X,'triton spectrum  ',54('*'))
          ENDIF
          IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) THEN
            WRITE (8,99028)
-99028 FORMAT (1X,/,1X,54('*'),1X,'he-3 spectrum    ',54('*'),//)
+99028 FORMAT (1X,/,1X,54('*'),1X,'he-3 spectrum    ',54('*'))
          ENDIF
          IF ( AEJc(Nejc).GT.4.0D0) THEN
           WRITE (8,99010) ia, SYMbe(Nejc)
-99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'),//)
+99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
          ENDIF
       ENDIF
 
@@ -285,7 +400,7 @@ C	   if(i.eq.kmax) e = EMAx(Nnuc)
             symc(ij) = haha
          ENDDO
   150    WRITE (8,99040) e/recorp, CSE(i,Nejc,Nnuc)*recorp, symc
-99040    FORMAT (1X,F6.2,3X,E11.4,2X,'I ',93A1,'I ')
+99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
 
       if(Iflag.eq.0) totspec = totspec - 
@@ -295,9 +410,18 @@ C	   if(i.eq.kmax) e = EMAx(Nnuc)
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec  
+	IF(Nejc.ne.0) THEN
+        WRITE (8,'(2X,A2,'' emission cross section'',G12.6,''  mb'')')
+     &          SYMbe(nejc), CSEmis(nejc,nnuc)
+      ELSE
+
+        WRITE (8,'(2X,A2,'' emission cross section'',G12.6,''  mb'')')
+     &          ' g'       , CSEmis(nejc,nnuc)
+      ENDIF
+      WRITE (8,*) ' '
 
       RETURN
-99045 FORMAT (24X,93('-'))
+99045 FORMAT (25X,93('-'))
       END
 
       SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc,Iflag)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3397 $
+Ccc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-21 00:48:43 +0200 (So, 21 Apr 2013) $
+Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1602,6 +1602,7 @@ C
 C--------print IDNa matrix
  1256    continue
 
+         WRITE (8,*) ' '
          WRITE (8,*)
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)

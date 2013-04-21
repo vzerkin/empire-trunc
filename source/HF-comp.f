@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3371 $
+Ccc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -813,7 +813,7 @@ C
       ELSEIF (nnuc.EQ.mt849) THEN
          nejc = 3
       ENDIF
-      IF (IOUt.GT.2) WRITE (8,99005)
+      IF (IOUt.GT.2 .and. nejc.GT.0) WRITE (8,99005)
 99005 FORMAT (1X,/,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
      &        1X,27('*'))
       DO i = 1, NLV(Nnuc) - 1

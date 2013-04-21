@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3396 $
+Ccc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-20 03:38:13 +0200 (Sa, 20 Apr 2013) $
+Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2352,9 +2352,11 @@ C
       GOTO 100
   200 CLOSE (45)
       IF (IOUt.EQ.5) CLOSE (46)
-      IF (IOUt.GT.4) WRITE (8,*)
+      IF (IOUt.GT.4) THEN
+	  WRITE (8,*)
      & 'Transmission coefficients for outgoing channel read from file: '
-     & , (ctldir//ctmp23//'.BIN')
+	  WRITE (8,*) ctldir//ctmp23//'.BIN'
+	ENDIF
       RETURN
 
   300 CLOSE (45,STATUS = 'DELETE')

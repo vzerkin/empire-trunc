@@ -1,6 +1,6 @@
-cc   * $Rev: 3402 $
+cc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-21 21:06:36 +0200 (So, 21 Apr 2013) $
+Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1581,7 +1581,24 @@ C--------Reset variables for life-time calculations
          ENDIF
          sumfis = 0.d0
          IF (nnuc.eq.1) THEN
-            WRITE (12,*)
+            WRITE (8,*)
+            WRITE (8,*)
+     &' ---------------------------------------------------------------'
+            IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+              WRITE (8,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+            ELSE
+              WRITE (8,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+            ENDIF
+            WRITE (8,*)
+     &' ---------------------------------------------------------------'
+            WRITE (8,*)
+
             WRITE (12,*)
      &' ---------------------------------------------------------------'
             IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
@@ -1621,17 +1638,30 @@ C--------Reset variables for life-time calculations
                WRITE (12,*)
                WRITE (12,*)
      &' ---------------------------------------------------------------'
+               WRITE (8,*)
+               WRITE (8,*)
+     &' ---------------------------------------------------------------'
                IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
+                 WRITE (8,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
                  WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
                ELSE
+                 WRITE (8,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
                  WRITE (12,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
                ENDIF
+               WRITE (8,*)
+     &' ---------------------------------------------------------------'
                WRITE (12,*)
      &' ---------------------------------------------------------------'
                WRITE (12,
@@ -2039,8 +2069,14 @@ C--------Printout of results for the decay of NNUC nucleus
      &          .OR. nnuc.EQ.mt649.OR.nnuc.EQ.mt849))  THEN 
                   WRITE (12,*)
      &' ---------------------------------------------------------------'
+                  WRITE ( 8,*)
+     &' ---------------------------------------------------------------'
                   IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
                     WRITE (12,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+                    WRITE ( 8,
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.5)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
@@ -2049,10 +2085,17 @@ C--------Printout of results for the decay of NNUC nucleus
      &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
+                    WRITE ( 8,
+     &'(''  Decaying nucleus '',I3,''-'',A2,''-'',I3,     ''  mass='',F1
+     &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
+     &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
                   ENDIF
                   WRITE (12,*)
      &' ---------------------------------------------------------------'
+                  WRITE (8 ,*)
+     &' ---------------------------------------------------------------'
                   WRITE (12,*)
+                  WRITE (8 ,*)
              ELSE
              IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
@@ -2400,11 +2443,19 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                      POPcse(0,6,ispec,INExc(nnuc))
                ENDIF
              ENDDO
-             WRITE (8,*) '_________________________________________'
-             WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
-     &                 dtotsp,ttotsp,htotsp,ctotsp
-             WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
+             IF (NDEJC.EQ.7) THEN
+               WRITE (8,*) '_________________________________________'
+               WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
+     &                   dtotsp,ttotsp,htotsp,ctotsp
+               WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
+             ELSE  
+               WRITE (8,*) '_________________________________________'
+               WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
+     &                 dtotsp,ttotsp,htotsp    
+               WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
+     &                emeda, emedd, emedt, emedh 
+             ENDIF	      
 C
 C            Calculating Q-balance
 C
@@ -2423,12 +2474,13 @@ C
              totener_in=ABS(EIN+QPRod(nnuc)+ELV(LEVtarg,0))
              totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
      &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
-             WRITE (8,*) '---------------------------------------------'
-             WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,
-     &                  '' Balance ='',F7.2,''%'')')
-     &            totener_in , totener_out, 
-     &       (totener_in - totener_out)/totener_in*100.D0
-             WRITE (8,*) '*********************************************'
+             WRITE (8,*) 
+     &         '-------------------------------------------------'
+             WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,'' Balance ='',
+     &          F8.3,'' MeV  (no disc. levels considered)'')')
+     &          totener_in , totener_out, (totener_in - totener_out)
+             WRITE (8,*) 
+     &         '*************************************************'
              WRITE (8,*) ' '
            ENDIF
          ENDIF
@@ -2672,28 +2724,39 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
 
          checkprd = checkprd + CSFis
          xcross(NDEJC+1,jz,jn) = CSFis
-         IF(CSEmis(0,nnuc).gt.0) THEN
-C          Integral is calculated by trapezoidal rule being consistent with cross section
-           IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
-           IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
+         WRITE (8,*)
+C        Integral is calculated by trapezoidal rule being consistent with cross section
+         IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
+C        IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
+         IF(nnuc.eq.NTArget                      ) THEN
            WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
      &       CSDirlev(1,nejc)
            WRITE (12,'(10x,
      &                 '' g  disc.lev cross section'',G12.6,''  mb'')')
-     &       CSDirlev(1,nejc)
-           ENDIF 
-           WRITE (8,'(''  g  emission cross section'',G12.6,''  mb'')')
-     &       CSEmis(0,nnuc)
+     &      CSDirlev(1,nejc)
+         ENDIF 
+         IF(CSEmis(0,nnuc).gt.0) THEN
            WRITE (12,'(10x,
      &                 '' g  emission cross section'',G12.6,''  mb'')')
      &       CSEmis(0,nnuc)
-           if(nnuc.eq.1) then
-           WRITE (8,'(2x,
+           if(nnuc.eq.1) WRITE (12,'(2x,
      &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
-           WRITE (12,'(2x,
-     &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
-           endif
          ENDIF
+
+C        IF(CSPrd(nnuc).gt.0.d0) then 
+C          WRITE (8,*)
+C          WRITE (8,
+C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+C    &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+C    &                             REAction(nnuc)
+C          WRITE (8,*)
+C          WRITE (12,*)
+C          WRITE (12,
+C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
+C    &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
+C    &                             REAction(nnuc)
+C        ENDIF
+
          xcross(0,jz,jn) = CSEmis(0,nnuc)
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.d0) THEN
@@ -2717,7 +2780,7 @@ C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
      &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
-     &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc,1)
+     &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc,0)
 C
 C            Integral is calculated by trapezoidal rule being consistent with cross section
              IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0) 
@@ -2760,6 +2823,7 @@ C------------Print residual nucleus population
      &            '(13x,   '' total popul.disc.lev. '',G12.6,''  mb'')')
      &            poplev
 
+               WRITE (8,*) '    RESIDUAL = TARGET NUCLEUS'
                WRITE (8,
      &         '(1x,''    Total population      '',G12.6,''  mb'')')
      &          poplev + poptot
@@ -2769,12 +2833,8 @@ C------------Print residual nucleus population
                WRITE (8,
      &         '(1x,''    Total popul.disc.lev. '',G12.6,''  mb'')')
      &          poplev
+               WRITE (8,*)
              endif
-
-             WRITE (8,
-     &         '(2X,A2,'' emission cross section'',G12.6,''  mb'')')
-     &          SYMbe(nejc), CSEmis(nejc,nnuc)
-             WRITE (8,*) ' '
 
              IF (IOUt.EQ.4) THEN
                ia = INT(A(nnur))
@@ -3502,23 +3562,23 @@ C            ENDDO
 C         ENDDO
 C     ENDDO
       WRITE (8,*) ' '
-      WRITE (8,*)
+C     WRITE (8,*)
 
       IF (IOUt.GT.5 .AND. .NOT.EXClusiv ) THEN
 
-         DO nejc = 0, NEJcm
-            csemax = 0.d0
-            ftmp = 0.d0
-            DO i = 1, NDEX
-              csemax = DMAX1(CSE(i,nejc,0),csemax)
-              ftmp   = ftmp + CSE(i,nejc,0)
-            ENDDO
-            if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
+C        DO nejc = 0, NEJcm
+C           csemax = 0.d0
+C           ftmp = 0.d0
+C           DO i = 1, NDEX
+C             csemax = DMAX1(CSE(i,nejc,0),csemax)
+C             ftmp   = ftmp + CSE(i,nejc,0)
+C           ENDDO
+C           if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
 
 C           Integral is calculated by trapezoidal rule being consistent with cross section 
-            CALL AUERST(0,nejc,0)
+C           CALL AUERST(0,nejc,0)
 
-         ENDDO
+C        ENDDO
 
          IF (FIRst_ein) THEN 
 	      WRITE (8,*)
@@ -3537,6 +3597,20 @@ C           Integral is calculated by trapezoidal rule being consistent with cro
 
               CALL Print_Total(nejc)
               CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
+
+              csum = 0.d0
+              DO nnuc = 1, NNUcd
+		      csum = csum + CSEmis(nejc,nnuc)
+              ENDDO
+	        if(nejc.ne.0) then
+               WRITE (8,
+     &         '(2X,A2,'' emission cross section'',G12.6,''  mb '',A7)')
+     &         SYMbe(nejc), csum, '(TOTAL)'  
+              else
+               WRITE (8,
+     &         '(2X,A2,'' emission cross section'',G12.6,''  mb '',A7)')
+     &         ' g', csum, '(TOTAL)'  
+              endif
             ENDDO
 
          ENDIF  
@@ -3842,22 +3916,12 @@ C-----ENDF spectra printout (inclusive representation)
 C-----
       IF (.NOT.EXClusiv) THEN
 
-         totspec = 0.d0
-         DO ie = 1, nspec 
-           totspec  = totspec  + CSE(ie,0,0)
-         ENDDO
-
-         if(totspec.gt.0.d0)  THEN
-           WRITE (12,*) 
-           WRITE (12,*) '********************************************'
-           WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
-           WRITE (12,*) '********************************************'
-           WRITE (12,*)    
-         endif
-
-c        dang = PI/FLOAT(NDANG - 1)
-c        coef = 2*PI*dang
-
+         WRITE (12,*) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*)    
+ 
 C--------Print spectra of residues
          reactionx = '(z,x)  '
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -3866,41 +3930,12 @@ C--------Print spectra of residues
          ENDDO !over decaying nuclei in ENDF spectra printout
 C
 C--------Print inclusive gamma spectrum
-         nspec = min(INT(EMAx(1)/DE) + 1,NDECSE - 1)
-
-         totspec = 0.d0
-         DO ie = 1, nspec 
-           totspec  = totspec  + CSE(ie,0,0)
-         ENDDO
-
-         if(totspec.le.0.d0) goto 989
-
-         WRITE (12,*) ' '
-         WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
-         WRITE (12,*) ' '
-         WRITE (12,'(''    Energy    mb/MeV'')')
-         WRITE (12,*) ' '
-         DO ie = 1, nspec - 1
-            if(CSE(ie,0,0).le.0.d0) cycle
-            WRITE (12,'(F9.4,E15.5)') FLOAT(ie - 1)*DE,
-     &         max(0.d0,CSE(ie,0,0))
-         ENDDO
-C--------Exact endpoint
-         WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec,0,0))
-
-         csum = 0.d0
-         DO nnuc = 1, NNUcd
-		   csum = csum + CSEmis(0,nnuc)
-         ENDDO
-
+	   CALL Print_Inclusive(0)
          WRITE (12,*) ' '    
-         WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
-     &          totspec*DE      
-         WRITE (12,'(1x,'' Tot. gamma emission   '',G12.5,'' mb'')')
-     &          csum      
-         WRITE (12,*) ' '    
-
 C--------Print inclusive spectra of ejectiles
+C
+C        It should be be transferred to Print_Inclusive(Nejc) , RCN, 04/2013
+C
 C--------neutrons
   989    recorp = 1.d0 
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(1)/AMAss(1))
