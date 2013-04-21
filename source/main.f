@@ -1,6 +1,6 @@
-cc   * $Rev: 3396 $
+cc   * $Rev: 3398 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-20 03:38:13 +0200 (Sa, 20 Apr 2013) $
+Ccc   * $Date: 2013-04-21 02:29:48 +0200 (So, 21 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2468,7 +2468,7 @@ C          ENDIF
          TOTcsfis = TOTcsfis + CSFis
 C--------Add compound elastic to shape elastic before everything falls
 C--------down on the ground state
-9876     IF (nnuc.EQ.1 ! .AND. INT(AEJc(0)).NE.0
+9876     IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0
      &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
            WRITE (8,*)
            WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
@@ -2784,17 +2784,17 @@ C------------Print residual nucleus population
      &                SYMb(nnur)
                WRITE (8,'('' Positive parities population'',/)')
                do i = NEX(nnur),1,-1
-                 ftmp = 0.0
+                 ftmp = 0.d0
                  do j = 1,12
                    ftmp = ftmp + POP(i,j,1,nnur)
                  enddo
-                 if(ftmp.gt.0.0)
+                 if(ftmp.gt.0.d0)
      &             WRITE (8,99075) EX(i,nnur),(POP(i,j,1,nnur),j = 1,12)
                enddo
                WRITE (8,*) ' '
                WRITE (8,'('' Negative parities population'',/)')
                do i = NEX(nnur),1,-1
-                 ftmp = 0.0
+                 ftmp = 0.d0
                  do j = 1,12
                    ftmp = ftmp + POP(i,j,2,nnur)
                  enddo
@@ -2984,7 +2984,9 @@ C                  range extended to cover the last energy corresponding to the 
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
-                     dtmp = dtmp + htmp*DE
+	               ftmp = 1.d0
+	               if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
+                     dtmp = dtmp + htmp*DE*ftmp
                      ftmp = (htmp - xnorm(nejc,INExc(nnuc))
      &                        * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
                      IF(ftmp.LT.0.0d0) ftmp = 0.0d0
@@ -3030,7 +3032,6 @@ C                      check_DE(ie) = csum*coef
 
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
-
                      if(check_DE(ie).LE.0.d0) cycle ! skipping zeroes
 
                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
@@ -3053,16 +3054,16 @@ C
                      WRITE (12,
      &              '(10x,''    Energy    Int-DDX[mb]   Elev'')')
                      WRITE (12,*) ' '
-	               htmp = 0.d0
+	                 htmp = 0.d0
                      DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE (12,'(4x,I3,4x,F10.5,2(E14.5,2x),F6.3)')  
      &                   il, -espec, check_DL(il)*recorp,
      &                           disc_int(il)*recorp,ELV(il,nnuc)
-	               	 htmp = htmp + check_DL(il)*recorp
+	               	   htmp = htmp + check_DL(il)*recorp
                      ENDDO
-	               WRITE (12,*) ' '
+	                 WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
@@ -3077,7 +3078,7 @@ C
      &           Diff[%]    '')')
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
-                      htmp = POPcse(0,nejc,ie,INExc(nnuc))             
+				      htmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if(htmp.LE.0.d0) cycle
                       WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, htmp*recorp, 
@@ -3096,16 +3097,20 @@ C
                    WRITE(12,'(10x,
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(10x,
+     &                ''Emiss. cross section '',G12.6,'' mb'' )') 
+     &                  CSEmis(nejc,INExc(nnuc))
+                   WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
-     &                POPcs(nejc,INExc(nnuc))
+     &                  POPcs(nejc,INExc(nnuc))
+
                    WRITE(12,*) 
 
                 ELSE !  then (nejc.GT.0)
 C
 C------------------Exclusive DE spectra (gammas and light ions)
 C------------------double the first bin x-sec to preserve integral in EMPEND
-C                  POPcse(0,nejc,1,INExc(nnuc)) =
-C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
+                   POPcse(0,nejc,1,INExc(nnuc)) =
+     &                   POPcse(0,nejc,1,INExc(nnuc))*2
                    WRITE (12,*) ' '
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '
@@ -3113,12 +3118,16 @@ C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
                    DO ie = 1, nspec     
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
-                     dtmp = dtmp + htmp*DE         
+ 	                 if(ie.gt.1) then
+                       dtmp = dtmp + htmp*DE
+					 else
+                       dtmp = dtmp + htmp*DE*0.5d0
+                     endif
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                    ENDDO
                    if(htmp.GT.0.d0) then
-                     dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE         
+                     dtmp = dtmp + POPcse(0,nejc,nspec+1,INExc(nnuc))*DE*0.5d0         
                                               !exact endpoint
                      WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                 max(0.d0,POPcse(0,nejc,nspec+1,
@@ -3128,8 +3137,12 @@ C    &                   POPcse(0,nejc,1,INExc(nnuc))*2
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(2x,
+     &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
+     &                  CSEmis(nejc,INExc(nnuc))
+                   WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
+
                    WRITE(12,*) 
 
                 ENDIF !  (nejc.GT.0)
