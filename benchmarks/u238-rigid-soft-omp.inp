@@ -1,4 +1,4 @@
- 3.                  ;INCIDENT ENERGY (IN LAB)
+ 1.2                 ;INCIDENT ENERGY (IN LAB)
 238.   92.           ;TARGET  A , Z 
   1.    0.           ;PROJECTILE A, Z
 1                    ;NUMBER OF NEUTRONS  TO BE EMITTED
@@ -8,6 +8,7 @@
 0                    ;NUMBER OF TRITONS   TO BE EMITTED
 0                    ;NUMBER OF He-3      TO BE EMITTED
 0  0. 0.             ;NUMBER OF L.I. TO BE EMITTED AND ITS A AND Z
+@ RIPL 2412 OMP: PFNS, OMP includes CC + DWBA to discrete and continuum levels
 IOUT       3.                                               
 LEVDEN     0.                               ! EMPIRE (EGSM RIPL-3) NLD as default
 FITLEV     0.                               ! FITLEV is strongly recommended to compare vs NLD exp.data
@@ -25,6 +26,7 @@ PFNERE  0.995
 TMAXW    1.32
 DIRPOT  2412.  
 DIRECT     1.
-GO  
+GO 
+3.
 5.
 -1.
