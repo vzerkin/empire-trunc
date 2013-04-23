@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3337 $
+Ccc   * $Rev: 3404 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-03-22 07:42:37 +0100 (Fr, 22 Mär 2013) $
+Ccc   * $Date: 2013-04-23 03:45:51 +0200 (Di, 23 Apr 2013) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3197,7 +3197,7 @@ C          shifted by the target ground state target spin XJLV(1,0)
 C
 C              Population increased to preserve total flux
 C              as calculated by PCROSS 
-C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
 
                POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
                POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops

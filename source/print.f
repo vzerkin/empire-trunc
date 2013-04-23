@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3403 $
+Ccc   * $Rev: 3404 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
+Ccc   * $Date: 2013-04-23 03:45:51 +0200 (Di, 23 Apr 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -178,8 +178,9 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csemax, totspec
-      INTEGER i, ia, kmax
+      DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, dtmp, csum
+      DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
+	INTEGER i, ia, kmax, ie
 
       csemax = 0.d0
       kmax = 1
@@ -199,32 +200,43 @@ C
       totspec = 0.d0
       DO i = 1, kmax
         totspec  = totspec  + CSE(i,Nejc,0)
+C       Check !!!! RCN
+        IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+     &         totspec = totspec + CSEmsd(ie,nejc)
       ENDDO
       totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
-      totspec = totspec*DE     
 
       IF (totspec.LE.1.d-4) RETURN
 
       WRITE (12,*) ' '
       ia = AEJc(Nejc)
+
+C     nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(nejc,1))/DE) + 1)
+C     IF (nspec.LE.1) RETURN
+      nspec = kmax - 1
+	IF(nspec.LT.1) RETURN
+
       IF (Nejc.EQ.0) THEN
+C
          WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
-        WRITE (12,*) ' '
-        WRITE (12,'(''    Energy    mb/MeV'')')
-        WRITE (12,*) ' '
-        DO i = 1, kmax - 1
+         WRITE (12,*) ' '
+         WRITE (12,'(''    Energy    mb/MeV'')')
+         WRITE (12,*) ' '
+         DO i = 1, nspec
            if(CSE(i,Nejc,0).le.0.d0) cycle
            WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE,
      &         max(0.d0,CSE(i,Nejc,0))
-        ENDDO
-C-------Exact endpoint
-        WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(kmax,0,0))
-        WRITE (12,*) ' '    
-        WRITE (12,
-     & '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
-     &          totspec
+         ENDDO
+C--------Exact endpoint
+         WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+         WRITE (12,*) ' '    
+         WRITE (12,
+     &   '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
+     &        totspec*DE
+
       ELSE
+
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) 
      &     WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
@@ -245,21 +257,126 @@ C        ENDIF
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
+         recorp = 1.d0 
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(nejc)/AMAss(1))
+C
+C        already calculated
+C
+C        totspec = 0.d0
+C        DO ie = 1, nspec 
+C          totspec  = totspec  + CSE(ie,nejc,0) 
+C          IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+C    &       totspec = totspec + CSEmsd(ie,nejc)
+C        ENDDO
 
+         cseaprnt = 0.d0
+         DO ie = 1, nspec + 1
+	     if(CSE(ie,nejc,0).le.0.d0) cycle
+
+C          Subtract direct contribution to CM emission spectrum 
+           IF(ENDF(1).GT.0) THEN
+            ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI
+            IF(LHMs.GT.0 .and. nejc.le.2) THEN
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,nejc,ie,0)
+              ENDDO
+            ELSE
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp +
+     &                CSEa(ie,nang,nejc,1)*POPcseaf(0,nejc,ie,0)
+              ENDDO
+            ENDIF
+           ELSE
+            IF(LHMs.GT.0 .and. nejc.le.2) THEN
+              ftmp = (CSE(ie,nejc,0) - CSEhms(ie,nejc,0))/4.d0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,nejc)
+              ENDDO
+            ELSE
+              ftmp = CSE(ie,nejc,0)/4.d0/PI
+              DO nang = 1, NDANG
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc,1)
+              ENDDO
+            ENDIF
+           ENDIF
+         ENDDO 
+C--------Inclusive DDX spectrum 
+         check_DE = 0.d0
+         DO ie = 1, nspec + 1
+           if(CSE(ie,nejc,0).le.0.d0) cycle
+	     csum = 0.d0
+           DO nang = 2, NDANG
+             csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
+     &            *0.5d0*(CAngler(nang)-CANgler(nang-1))
+           ENDDO
+           check_DE(ie) = 2.0d0*PI*csum
+
+           if(ie.le.nspec)
+     &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &     FLOAT(ie - 1)*DE/recorp,
+     &     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+         ENDDO
+
+         if(CSE(nspec + 1,nejc,0).GT.0.d0) 
+         ! exact DDX spectrum endpoint
+     &   WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &      (EMAx(1)-Q(nejc,1))/recorp,
+     &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
+
+         WRITE (12,*) ' '
+         WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS cor
+     &rected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)')
+     &   EINl,nejc 
+         WRITE (12,'(10x,
+     &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
+     &           Diff[%]    '')')
+         WRITE (12,*) ' '
+
+         ftmp = 0.d0
+         DO ie = 1, nspec 
+           htmp = CSE(ie,nejc,0)
+           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+     &       htmp = htmp + CSEmsd(ie,nejc)
+           if(htmp.LE.0.d0) cycle
+           WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+     &       *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &       (htmp - check_DE(ie)) * recorp, 
+     &       (htmp - check_DE(ie)) / htmp * 100
+           ftmp = ftmp + check_DE(ie)
+         ENDDO
+C        ftmp = ftmp + check_DE(nspec + 1)
+         ! exact endpoint
+         WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+     &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
+     &     check_DE(nspec+1)*recorp,
+     &    ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
+
+         WRITE (12,*) ' '    
+         WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
+     &          totspec*DE      
+         WRITE (12,'(1x,'' Int. DDXS  spectrum   '',G12.5,'' mb'')')
+     &          ftmp*DE      
       ENDIF
-
-      totspec = 0.d0
+          
+      csum = 0.d0
+      dtmp = 0.d0
       DO nnuc = 1, NNUcd
-        totspec = totspec + CSEmis(Nejc,nnuc)
+          csum = csum + CSEmis(nejc,nnuc)
+        if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(nejc,nnuc)
       ENDDO
+
+      WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.5,'' mb'')')
+     &  dtmp      
 	IF(Nejc.ne.0) THEN
         WRITE (12,
      &           '(1x,'' Total '',A2,''   emission   '',G12.6,'' mb'')')
-     &          SYMbe(Nejc),totspec
+     &          SYMbe(Nejc),csum
       ELSE
         WRITE (12,
      &          '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')')totspec
       ENDIF
+      WRITE (12,*) ' '    
+
 	RETURN 
       END
 
@@ -302,7 +419,7 @@ C
       INTEGER IFIX, MIN0
       DATA hstar, haha/'*', ' '/
 
-      csemax = 0.
+      csemax = 0.d0
       kmax = 1
       DO i = 1, NDECSE
          IF (CSE(i,Nejc,Nnuc).GT.0.d0) kmax = i
@@ -320,16 +437,20 @@ C
       DO i = 1, kmax
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-      if(Iflag.eq.0) totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-      totspec = totspec*DE     
-      IF (totspec.LE.1.d-4) RETURN
+      IF (totspec*DE.LE.1.d-4) RETURN
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
+         if(Iflag.eq.0) totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+         totspec = totspec*DE     
          WRITE (8,99005)
 99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'))
       ELSE
+         if(Iflag.eq.0) totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+         if(Iflag.eq.2) totspec = totspec - 0.5d0*CSE(kmax,Nejc,Nnuc)
+         totspec = totspec*DE     
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
 99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'))
@@ -376,10 +497,10 @@ C
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (8,99045)
 
-      totspec = 0.0
+C     totspec = 0.0
       DO i = 1, kmax
          if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
-         totspec  = totspec  + CSE(i,Nejc,Nnuc)
+C        totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
 C	   if(i.eq.kmax) e = EMAx(Nnuc)
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
@@ -403,9 +524,9 @@ C	   if(i.eq.kmax) e = EMAx(Nnuc)
 99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
 
-      if(Iflag.eq.0) totspec = totspec - 
-     &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-      totspec = totspec*DE
+C     if(Iflag.eq.0) totspec = totspec - 
+C    &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+C     totspec = totspec*DE
 
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
@@ -477,6 +598,7 @@ C
       ENDDO
       if(Iflag.eq.0) totspec = 
      &  totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+
       totspec = totspec*DE
       IF (totspec.LE.1.d-4) RETURN
 
