@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3405 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-04-26 21:26:05 +0200 (Fr, 26 Apr 2013) $
+Ccc   * $Rev: 3406 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-04-27 00:49:11 +0200 (Sa, 27 Apr 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -180,7 +180,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, dtmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-	INTEGER i, ia, kmax, ie
+      INTEGER i, ia, kmax, ie, itmp
 
       csemax = 0.d0
       kmax = 1
@@ -200,7 +200,6 @@ C
       totspec = 0.d0
       DO i = 1, kmax
         totspec  = totspec  + CSE(i,Nejc,0)
-C       Check !!!! RCN
         IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
      &         totspec = totspec + CSEmsd(i,nejc)
       ENDDO
@@ -215,7 +214,7 @@ C       Check !!!! RCN
 C     nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(nejc,1))/DE) + 1)
 C     IF (nspec.LE.1) RETURN
       nspec = kmax - 1
-	IF(nspec.LT.1) RETURN
+      IF(nspec.LT.1) RETURN
 
       IF (Nejc.EQ.0) THEN
 C
@@ -259,19 +258,10 @@ C        ENDIF
      &                      (ANGles(nang),nang=1,NDANG)
          recorp = 1.d0 
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(nejc)/AMAss(1))
-C
-C        already calculated
-C
-C        totspec = 0.d0
-C        DO ie = 1, nspec 
-C          totspec  = totspec  + CSE(ie,nejc,0) 
-C          IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-C    &       totspec = totspec + CSEmsd(ie,nejc)
-C        ENDDO
 
          cseaprnt = 0.d0
          DO ie = 1, nspec + 1
-	     if(CSE(ie,nejc,0).le.0.d0) cycle
+         if(CSE(ie,nejc,0).le.0.d0) cycle
 
 C          Subtract direct contribution to CM emission spectrum 
            IF(ENDF(1).GT.0) THEN
@@ -300,21 +290,34 @@ C          Subtract direct contribution to CM emission spectrum
             ENDIF
            ENDIF
          ENDDO 
+C
+	   CSE(1,nejc,0) = 2*CSE(1,nejc,0)
+         totspec = 0.d0
+         DO ie = 1, nspec + 1
+           totspec  = totspec  + CSE(ie,nejc,0) 
+           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+     &       totspec = totspec + CSEmsd(ie,nejc)
+         ENDDO
+         totspec = totspec - 
+     &       0.5d0*(CSE(1,Nejc,0) + CSE(nspec+1,Nejc,0))
+C
 C--------Inclusive DDX spectrum 
          check_DE = 0.d0
          DO ie = 1, nspec + 1
            if(CSE(ie,nejc,0).le.0.d0) cycle
-	     csum = 0.d0
+           csum = 0.d0
            DO nang = 2, NDANG
              csum = csum + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
      &            *0.5d0*(CAngler(nang)-CANgler(nang-1))
            ENDDO
            check_DE(ie) = 2.0d0*PI*csum
 
+           itmp = 1
+           if(ie.eq.1) itmp = 2
            if(ie.le.nspec)
      &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
-     &     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+     &     (itmp*cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
 
          if(CSE(nspec + 1,nejc,0).GT.0.d0) 
@@ -352,9 +355,9 @@ C        ftmp = ftmp + check_DE(nspec + 1)
      &    ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
 
          WRITE (12,*) ' '    
-         WRITE (12,'(1x,'' Integrated spectrum   '',G12.5,'' mb'')')
+         WRITE (12,'(1x,'' Integrated spectrum   '',G12.6,'' mb'')')
      &          totspec*DE      
-         WRITE (12,'(1x,'' Int. DDXS  spectrum   '',G12.5,'' mb'')')
+         WRITE (12,'(1x,'' Int. DDXS  spectrum   '',G12.6,'' mb'')')
      &          ftmp*DE      
       ENDIF
           
@@ -365,19 +368,19 @@ C        ftmp = ftmp + check_DE(nspec + 1)
         if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(nejc,nnuc)
       ENDDO
 
-      WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.5,'' mb'')')
+      WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
      &  dtmp      
-	IF(Nejc.ne.0) THEN
+      IF(Nejc.ne.0) THEN
         WRITE (12,
-     &           '(1x,'' Total '',A2,''   emission   '',G12.6,'' mb'')')
+     &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),csum
       ELSE
         WRITE (12,
-     &          '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')')totspec
+     &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
       ENDIF
       WRITE (12,*) ' '    
 
-	RETURN 
+      RETURN 
       END
 
       SUBROUTINE AUERST(Nnuc,Nejc,Iflag)
@@ -481,7 +484,7 @@ C
          ENDIF
       ENDIF
 
-	recorp = 1.d0
+      recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
       
       n = IFIX(SNGL(LOG10(csemax*recorp) + 1.))
@@ -497,12 +500,9 @@ C
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (8,99045)
 
-C     totspec = 0.0
       DO i = 1, kmax
          if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
-C        totspec  = totspec  + CSE(i,Nejc,Nnuc)
          e = FLOAT(i - 1)*DE
-C	   if(i.eq.kmax) e = EMAx(Nnuc)
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
             l = MIN0(93,l)
