@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3404 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-23 03:45:51 +0200 (Di, 23 Apr 2013) $
+Ccc   * $Rev: 3405 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-04-26 21:26:05 +0200 (Fr, 26 Apr 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -202,7 +202,7 @@ C
         totspec  = totspec  + CSE(i,Nejc,0)
 C       Check !!!! RCN
         IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &         totspec = totspec + CSEmsd(ie,nejc)
+     &         totspec = totspec + CSEmsd(i,nejc)
       ENDDO
       totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
