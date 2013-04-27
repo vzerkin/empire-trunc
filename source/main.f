@@ -1,6 +1,6 @@
-cc   * $Rev: 3404 $
+cc   * $Rev: 3407 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-23 03:45:51 +0200 (Di, 23 Apr 2013) $
+Ccc   * $Date: 2013-04-27 02:13:34 +0200 (Sa, 27 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3085,7 +3085,7 @@ C
                      WRITE (12,
      &              '(10x,''    Energy    Int-DDX[mb]   Elev'')')
                      WRITE (12,*) ' '
-	                 htmp = 0.d0
+	               htmp = 0.d0
                      DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
@@ -3094,7 +3094,7 @@ C
      &                           disc_int(il)*recorp,ELV(il,nnuc)
 	               	   htmp = htmp + check_DL(il)*recorp
                      ENDDO
-	                 WRITE (12,*) ' '
+	               WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
@@ -3109,7 +3109,7 @@ C
      &           Diff[%]    '')')
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
-				      htmp = POPcse(0,nejc,ie,INExc(nnuc))             
+                      htmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if(htmp.LE.0.d0) cycle
                       WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, htmp*recorp, 
@@ -3149,22 +3149,22 @@ C------------------double the first bin x-sec to preserve integral in EMPEND
                    DO ie = 1, nspec     
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
- 	                 if(ie.gt.1) then
+                     if(ie.gt.1) then
                        dtmp = dtmp + htmp*DE
-					 else
+                     else
                        dtmp = dtmp + htmp*DE*0.5d0
                      endif
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                    ENDDO
-                   if(htmp.GT.0.d0) then
+C                  if(htmp.GT.0.d0) then
                      dtmp = dtmp + 
      &                    POPcse(0,nejc,nspec+1,INExc(nnuc))*DE*0.5d0         
                                               !exact endpoint
                      WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                 max(0.d0,POPcse(0,nejc,nspec+1,
      &                 INExc(nnuc)))*recorp
-                   endif
+C                  endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp

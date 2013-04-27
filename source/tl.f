@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3403 $
+Ccc   * $Rev: 3407 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
+Ccc   * $Date: 2013-04-27 02:13:34 +0200 (Sa, 27 Apr 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3329,6 +3329,7 @@ C     IF (ECIs2(42:42).EQ.'T') iterm = 1
 C-----Defining one potential for each collective level
 C-----If channel is closed ground state potential is used for this level
       npp = nd_nlvop
+      IF (.not.Ldwba) npp = min(nd_cons,nd_nlvop)
 C
       zerosp = 0.d0
 C
