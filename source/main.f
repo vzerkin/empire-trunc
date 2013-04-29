@@ -1,6 +1,6 @@
-cc   * $Rev: 3407 $
+cc   * $Rev: 3408 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-27 02:13:34 +0200 (Sa, 27 Apr 2013) $
+Ccc   * $Date: 2013-04-30 01:08:56 +0200 (Di, 30 Apr 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -934,7 +934,8 @@ C------------End of adding inelastic to continuum
 99033 FORMAT ('        ',9(4x,f4.1,'/',f5.4))
 99034 FORMAT ('        ',10(4x,f4.1,'/',f5.4))
 99035 FORMAT (1x,f5.1,3x,11(2x,E12.6))
-99040 FORMAT (6x,3x,11(2x,E12.6))
+99040 FORMAT (' DIR.INEL',I1,1x,11(E12.6,2x))
+99041 FORMAT (' TOT.INEL',I1,1x,11(E12.6,2x))
       WRITE (8,'(//)')
       IF (ncoll.GT.0) THEN
 C--------Locate position of the projectile among ejectiles
@@ -955,7 +956,8 @@ C
      &            (CSAlev(iang,ICOller(ilv),nejcec),ilv = 2,MIN(its,10))
            ENDDO
            WRITE(8,*) ' '
-           WRITE(8,99040)(POPlv(ICOller(ilv),nnurec),ilv= 2,MIN(its,10))
+           WRITE(8,99040)1,(POPlv(ICOller(ilv),nnurec),
+     &                            ilv= 2,MIN(its,10))
 C
            IF(its.gt.10) THEN
              WRITE(8,*) ' '
@@ -970,7 +972,7 @@ C
      &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 11,MIN(its,20))
              ENDDO
              WRITE (8,*) ' '
-             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 11,
+             WRITE (8,99040) 2,(POPlv(ICOller(ilv),nnurec),ilv = 11,
      &                        MIN(its,20))
            ENDIF
 
@@ -987,8 +989,8 @@ C
      &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 21,MIN(its,30))
              ENDDO
              WRITE (8,*) ' '
-             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 21,
-     &                        MIN(its,30))
+             WRITE (8,99040) 3,(POPlv(ICOller(ilv),nnurec),ilv = 21,
+     &                          MIN(its,30))
            ENDIF
 C
 C----------Because of the ENDF format restrictions the maximum
@@ -1007,7 +1009,7 @@ C
      &           (CSAlev(iang,ICOller(ilv),nejcec),ilv = 31,MIN(its,40))
              ENDDO
              WRITE (8,*) ' '
-             WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),ilv = 31,
+             WRITE (8,99040) 4,(POPlv(ICOller(ilv),nnurec),ilv = 31,
      &                      MIN(its,40))
            ENDIF
            WRITE (8,*) '++++++'
@@ -2547,18 +2549,21 @@ C----------CN contribution to elastic ddx
                  ENDDO
                ENDIF
 
-               gang = 180.d0/(NDAng - 1)
-               angstep = 180.d0/(NANgela - 1)
-               WRITE (8,99016)
-               WRITE (8,99020)
-               DO iang = 1, NANgela/4 + 1
-                 imint = 4*(iang - 1) + 1
-                 imaxt = MIN0(4*iang,NANgela)
-                 WRITE (8,99025) 
-     &           ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
-               ENDDO
+             ENDIF
+           ENDIF
 
-               IF (ncoll.GT.0) THEN
+           gang = 180.d0/(NDAng - 1)
+           angstep = 180.d0/(NANgela - 1)
+           WRITE (8,99016)
+           WRITE (8,99020)
+           DO iang = 1, NANgela/4 + 1
+             imint = 4*(iang - 1) + 1
+             imaxt = MIN0(4*iang,NANgela)
+             WRITE (8,99025) 
+     &           ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
+           ENDDO
+
+           IF (ncoll.GT.0) THEN
 C----------------Locate position of the projectile among ejectiles
                  CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
@@ -2579,7 +2584,7 @@ C                WRITE (8,*) ' '
      &               ilv = 2,MIN(its,10)) 
                    ENDDO
                    WRITE(8,*) ' '
-                   WRITE(8,99040)(POPlv(ICOller(ilv),nnurec),
+                   WRITE(8,99041) 1,(POPlv(ICOller(ilv),nnurec),
      &               ilv= 2,MIN(its,10))
 C
                    IF(its.gt.10) THEN
@@ -2598,7 +2603,7 @@ C                    WRITE(8,*) ' '
      &                 ilv = 11,MIN(its,20))
                      ENDDO
                      WRITE (8,*) ' '
-                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+                     WRITE (8,99041) 2,(POPlv(ICOller(ilv),nnurec),
      &                 ilv = 11,MIN(its,20))
                    ENDIF
 C
@@ -2618,7 +2623,7 @@ C                    WRITE(8,*) ' '
      &                 ilv=21,MIN(its,30))
                      ENDDO
                      WRITE (8,*) ' '
-                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+                     WRITE (8,99041) 3,(POPlv(ICOller(ilv),nnurec),
      &                 ilv=21,MIN(its,30))
                    ENDIF
 C                  Because of the ENDF format restrictions the maximum
@@ -2639,17 +2644,16 @@ C                    WRITE(8,*) ' '
      &                 ilv = 31,MIN(its,40))
                      ENDDO
                      WRITE (8,*) ' '
-                     WRITE (8,99040) (POPlv(ICOller(ilv),nnurec),
+                     WRITE (8,99041) 4,(POPlv(ICOller(ilv),nnurec),
      &                 ilv = 31,MIN(its,40))
                    ENDIF
                    WRITE (8,*) ' '
-C                  WRITE (8,*) ' '
                  ENDIF
-               ENDIF
+           ENDIF ! ncoll > 0 ?
 
-             ENDIF
-           ENDIF
-C          WRITE (8,*)
+C            ENDIF
+C          ENDIF
+
          ENDIF
          IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
