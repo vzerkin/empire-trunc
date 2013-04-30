@@ -4,7 +4,7 @@
 runE.py
 
 modified by David Brown on 2012-01-26.
-modified by Roberto Capote on 2010-10-01.
+modified by Roberto Capote on 2013-04-30.
 author Caleb Mattoon
 
 script to run EMPIRE (only X-sec calculations)
@@ -85,7 +85,8 @@ def runE(proj):
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
-    cp(proj+'.inp', 'INPUT.DAT')
+    ln(proj+'.inp', 'INPUT.DAT')
+    #cp(proj+'.inp', 'INPUT.DAT')
     
     # check if the file exists and has size > 0, if so keep it
 
@@ -96,9 +97,11 @@ def runE(proj):
     # make symlink to OMP files:
     if not isEmpty(proj+'-omp.ripl'):
         ln(proj+'-omp.ripl', 'OMPAR.RIPL')
+        #cp(proj+'-omp.ripl', 'OMPAR.RIPL')
         print('Using existing file with optical model par: %s' % 
                 proj+'-omp.ripl')
     if not isEmpty(proj+'-omp.dir'):
+        ln(proj+'-omp.dir','OMPAR.DIR')
         #cp(proj+'-omp.dir','OMPAR.DIR')
         print('Using existing file with optical model par (inel scatt): %s' % 
                 proj+'-omp.dir')
@@ -118,7 +121,8 @@ def runE(proj):
         print('Using existing file with collective levels: %s' % 
                 proj+'-lev.col')
     if not isEmpty(proj+'.fus'):
-        cp(proj+'.fus','FUSION')
+        ln(proj+'.fus','FUSION')
+        #cp(proj+'.fus','FUSION')
         print('Using existing file with fusion cross sections: %s' % 
                 proj+'.fus')
     if not isEmpty(proj+'-inp.fis'):
@@ -126,7 +130,8 @@ def runE(proj):
         #cp(proj+'-inp.fis','FISSION.INP')
         print('Using existing file with fission input: %s' % proj+'-inp.fis')
     if not isEmpty(proj+'.exf'):
-        cp(proj+'.exf','EXFOR.DAT')
+        ln(proj+'.exf','EXFOR.DAT')
+        #cp(proj+'.exf','EXFOR.DAT')
         print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
     if not isEmpty(proj+'.c4'):
         ln(proj+'.c4','C4.DAT')
@@ -146,11 +151,11 @@ def runE(proj):
     #    open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
     #cp(proj+'.rng','R250SEED.DAT')
     if not isEmpty(proj+'-nubar.dat'):
-        cp(proj+'-nubar.dat','NUBAR.DAT')
-        print('File with evaluated NUBAR exists: %s' % proj+'-nubar.endf')  
+        ln(proj+'-nubar.dat','NUBAR.DAT')
+        #cp(proj+'-nubar.dat','NUBAR.DAT')
+        print('File with evaluated NUBAR exists: %s' % proj+'-nubar.dat')  
     if not isEmpty(proj+'-cum.ps'):
         ln(proj+'-cum.ps','FITLEV.PS')
-
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -219,7 +224,8 @@ def runE(proj):
     if not isEmpty('CUMULPLOT.PS'):
         # no exception if ps2ps not found, just a message:
         # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
-        os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
+        # os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
+        mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present   
         if os.path.exists(proj+'-cum.ps'):
             # read preferences from .Xrunrc:
             prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
@@ -440,6 +446,7 @@ def splashscreen():
     ' ',\
     ' Sao Jose dos Campos, Brazil, May 2011 ',\
     ' Upton, New York, USA, January 2012 ',\
+    ' Vienna, Austria, April 2013 ',\
     ' ']
     return '\n'.join( [ x.center(60) for x in splash ] )
 
