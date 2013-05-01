@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3371 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Rev: 3412 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-05-01 21:36:07 +0200 (Mi, 01 Mai 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -146,7 +146,7 @@ C              !define a good Tlump
 C
             IF (H_Sumtl.GT.0.0D0) THEN
 C--------------check whether tfis is not too big compared to a good Tlump
-               NDIvf = INT(sumfis/tlump + 1.0)
+               NDIvf = INT(MIN(sumfis/tlump + 1.0,DFLOAT(huge(NDIvf))))
                TFIs = sumfis/FLOAT(NDIvf)
                H_Sumtls = H_Sumtls + NDIvf*TFIs**2
                H_Tav = H_Sumtls/H_Sumtl
