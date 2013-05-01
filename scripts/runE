@@ -85,24 +85,25 @@ def runE(proj):
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
-    ln(proj+'.inp', 'INPUT.DAT')
-    #cp(proj+'.inp', 'INPUT.DAT')
+    #ln(proj+'.inp', 'INPUT.DAT')
+    cp(proj+'.inp', 'INPUT.DAT')
     
     # check if the file exists and has size > 0, if so keep it
 
     # make symlink to LEVELS file:
     if not isEmpty(proj+'.lev'):
-        ln(proj+'.lev', 'LEVELS')     
+        #ln(proj+'.lev', 'LEVELS')     
+        cp(proj+'.lev', 'LEVELS')     
         print ('Using existing file with levels: %s' % proj+'.lev')
     # make symlink to OMP files:
     if not isEmpty(proj+'-omp.ripl'):
-        ln(proj+'-omp.ripl', 'OMPAR.RIPL')
-        #cp(proj+'-omp.ripl', 'OMPAR.RIPL')
+        #ln(proj+'-omp.ripl', 'OMPAR.RIPL')
+        cp(proj+'-omp.ripl', 'OMPAR.RIPL')
         print('Using existing file with optical model par: %s' % 
                 proj+'-omp.ripl')
     if not isEmpty(proj+'-omp.dir'):
-        ln(proj+'-omp.dir','OMPAR.DIR')
-        #cp(proj+'-omp.dir','OMPAR.DIR')
+        #ln(proj+'-omp.dir','OMPAR.DIR')
+        cp(proj+'-omp.dir','OMPAR.DIR')
         print('Using existing file with optical model par (inel scatt): %s' % 
                 proj+'-omp.dir')
     # make symlink to transmission coefficient directory:
@@ -116,26 +117,26 @@ def runE(proj):
             pass
         os.mkdir('TL')  
     if not isEmpty(proj+'-lev.col'):
-        ln(proj+'-lev.col','TARGET_COLL.DAT')
-        #cp(proj+'-lev.col','TARGET_COLL.DAT')
+        #ln(proj+'-lev.col','TARGET_COLL.DAT')
+        cp(proj+'-lev.col','TARGET_COLL.DAT')
         print('Using existing file with collective levels: %s' % 
                 proj+'-lev.col')
     if not isEmpty(proj+'.fus'):
-        ln(proj+'.fus','FUSION')
-        #cp(proj+'.fus','FUSION')
+        #ln(proj+'.fus','FUSION')
+        cp(proj+'.fus','FUSION')
         print('Using existing file with fusion cross sections: %s' % 
                 proj+'.fus')
     if not isEmpty(proj+'-inp.fis'):
-        ln(proj+'-inp.fis','FISSION.INP')
-        #cp(proj+'-inp.fis','FISSION.INP')
+        #ln(proj+'-inp.fis','FISSION.INP')
+        cp(proj+'-inp.fis','FISSION.INP')
         print('Using existing file with fission input: %s' % proj+'-inp.fis')
     if not isEmpty(proj+'.exf'):
-        ln(proj+'.exf','EXFOR.DAT')
-        #cp(proj+'.exf','EXFOR.DAT')
+        #ln(proj+'.exf','EXFOR.DAT')
+        cp(proj+'.exf','EXFOR.DAT')
         print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
     if not isEmpty(proj+'.c4'):
-        ln(proj+'.c4','C4.DAT')
-        #cp(proj+'.c4','C4.DAT')
+        #ln(proj+'.c4','C4.DAT')
+        cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (C4): %s' % proj+'.c4')
     if not isEmpty(proj+'-inp.sen'):
         cp(proj+'-inp.sen','SENSITIVITY.INP')
@@ -151,11 +152,11 @@ def runE(proj):
     #    open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
     #cp(proj+'.rng','R250SEED.DAT')
     if not isEmpty(proj+'-nubar.dat'):
-        ln(proj+'-nubar.dat','NUBAR.DAT')
-        #cp(proj+'-nubar.dat','NUBAR.DAT')
+        #ln(proj+'-nubar.dat','NUBAR.DAT')
+        cp(proj+'-nubar.dat','NUBAR.DAT')
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.dat')  
-    if not isEmpty(proj+'-cum.ps'):
-        ln(proj+'-cum.ps','FITLEV.PS')
+    #if not isEmpty(proj+'-cum.ps'):
+        #ln(proj+'-cum.ps','FITLEV.PS')
     
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -173,26 +174,26 @@ def runE(proj):
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
     # Commented to avoid overwriting the existing file (not an output file)   
-    # mv('LEVELS',proj+'.lev')
+    mv('LEVELS',proj+'.lev')
     if not isEmpty('GAMMA_INT.DAT'):
         mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
     mv('EL_INEL.DAT',proj+'-preq.xsc',0)          # no message if not present    
     mv('XSECTIONS.OUT',proj+'.xsc',0)             # no message if not present
     mv('FISS_XS.OUT',proj+'-fiss.xsc',0)          # no message if not present
     # Commented to avoid overwriting the existing file (not an output file)   
-    # mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
-    # mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present     
+    mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
+    mv('CUMULPLOT.PS',proj+'-cum.ps',0)           # no message if not present     
 
-    if not (os.path.isdir(proj+'-tl')):
-        mv('TL',proj+'-tl')
+    #if not (os.path.isdir(proj+'-tl')):
+    #mv('TL',proj+'-tl')
     if os.path.islink('TL'):
         os.unlink('TL')
 
     # avoid overwriting, not INPUT files    
-    #if not isEmpty('OMPAR.RIPL'):
-    #    cp('OMPAR.RIPL',proj+'-omp.ripl')
-    #if not isEmpty('OMPAR.DIR'):
-    #    cp('OMPAR.DIR',proj+'-omp.dir')
+    if not isEmpty('OMPAR.RIPL'):
+        cp('OMPAR.RIPL',proj+'-omp.ripl')
+    if not isEmpty('OMPAR.DIR'):
+        cp('OMPAR.DIR',proj+'-omp.dir')
         
     # FISSION.INP    
     #if not isEmpty(proj+'-inp.fis'):
@@ -335,6 +336,7 @@ def runE(proj):
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT','MU_BAR.LST','MU_BAR.TMP')
     rm( glob('TARGET-*.tl'), glob('ecis06.*'))
     rm('TARGET.LEV','OMP_A.DAT','angdis.p92','COVAR-PAR.DAT','ecis06_INC.LST')
+    rm('TOTCOR.DAT','CN-LEV-XS.DAT')    
     rm('C4SORTM.INP')    
     rm('c4sort.scr')        
     rm('C4SORT.TMP')        
