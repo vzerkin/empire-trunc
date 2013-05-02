@@ -135,8 +135,8 @@ def runE(proj):
         cp(proj+'.exf','EXFOR.DAT')
         print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
     if not isEmpty(proj+'.c4'):
-        #ln(proj+'.c4','C4.DAT')
-        cp(proj+'.c4','C4.DAT')
+        ln(proj+'.c4','C4.DAT')
+        #cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (C4): %s' % proj+'.c4')
     if not isEmpty(proj+'-inp.sen'):
         cp(proj+'-inp.sen','SENSITIVITY.INP')
@@ -264,6 +264,9 @@ def runE(proj):
     # Commented to avoid overwriting the existing file (not an output file)   
     #if not isEmpty('C4.DAT'):
     #    mv('C4.DAT',proj+'.c4',0)
+    if isEmpty(proj+'.c4'):
+        mv('C4.DAT',proj+'.c4',0)
+
     if not isEmpty('ECIS_SPH.inp'):
         mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
     if not isEmpty('ECIS_SPH.out'):
@@ -448,8 +451,8 @@ def splashscreen():
     ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
     ' ',\
     ' Sao Jose dos Campos, Brazil, May 2011 ',\
-    ' Upton, New York, USA, January 2012 ',\
-    ' Vienna, Austria, April 2013 ',\
+    ' Upton, New York, USA, May 2013 ',\
+    ' Vienna, Austria, May 2013 ',\
     ' ']
     return '\n'.join( [ x.center(60) for x in splash ] )
 
