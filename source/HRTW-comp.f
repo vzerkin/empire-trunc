@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3412 $
+Ccc   * $Rev: 3415 $
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-05-01 21:36:07 +0200 (Mi, 01 Mai 2013) $
+Ccc   * $Date: 2013-05-02 22:25:37 +0200 (Do, 02 Mai 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -26,8 +26,8 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav,H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -35,7 +35,7 @@ C Local variables
 C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
-     &              fisxse, sumtg
+     &              fisxse, sumtg, divf
 C     DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
@@ -146,15 +146,15 @@ C              !define a good Tlump
 C
             IF (H_Sumtl.GT.0.0D0) THEN
 C--------------check whether tfis is not too big compared to a good Tlump
-               NDIvf = INT(MIN(sumfis/tlump + 1.0,DFLOAT(huge(NDIvf))))
-               TFIs = sumfis/FLOAT(NDIvf)
-               H_Sumtls = H_Sumtls + NDIvf*TFIs**2
+               divf = sumfis/tlump + 1.0
+               TFIs = sumfis/divf
+               H_Sumtls = H_Sumtls + divf*TFIs**2
                H_Tav = H_Sumtls/H_Sumtl
                IF (H_Tav.LT.TFIs) THEN
-                  H_Sumtls = H_Sumtls - NDIvf*TFIs**2
-                  NDIvf = NDIvf*(TFIs/H_Tav + 1)
-                  TFIs = sumfis/FLOAT(NDIvf)
-                  H_Sumtls = H_Sumtls + NDIvf*TFIs**2
+                  H_Sumtls = H_Sumtls - divf*TFIs**2
+                  divf = divf*(TFIs/H_Tav + 1)
+                  TFIs = sumfis/divf
+                  H_Sumtls = H_Sumtls + divf*TFIs**2
                   H_Tav = H_Sumtls/H_Sumtl
                ENDIF
 C--------------redefine fission transmission coef. using single iteration
@@ -162,7 +162,7 @@ C              RCN & MS 03-2010
 C              redefinition avoided to keep the Cross section difference equal zero.
 C                (small difference observed if fission channel is open)
 C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
-               sumfis = FLOAT(NDIvf)*TFIs
+               sumfis = divf*TFIs
             ELSE
                H_Tav = 0.0
             ENDIF
@@ -384,9 +384,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -990,8 +990,8 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1022,8 +1022,8 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1279,9 +1279,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1375,9 +1375,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NDIvf, NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
