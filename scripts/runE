@@ -184,10 +184,10 @@ def runE(proj):
     mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
     mv('CUMULPLOT.PS',proj+'-cum.ps',0)           # no message if not present     
 
-    #if not (os.path.isdir(proj+'-tl')):
-    #mv('TL',proj+'-tl')
-    if os.path.islink('TL'):
-        os.unlink('TL')
+    if not (os.path.isdir(proj+'-tl')):
+       mv('TL',proj+'-tl')
+    #if os.path.islink('TL'):
+     #   os.unlink('TL')
 
     # avoid overwriting, not INPUT files    
     if not isEmpty('OMPAR.RIPL'):
@@ -357,6 +357,7 @@ def runE(proj):
     rm('ecSPH.inp')
     rm('ECIS_SPH.out')
     rm('FITIN.DAT')
+    rm('TL')
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
     rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
