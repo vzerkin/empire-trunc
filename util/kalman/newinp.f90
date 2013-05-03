@@ -111,19 +111,19 @@
 
     do i = 1,10
         n = len_trim(hdr(i))
-        write(12,'(a<n>)') hdr(i)(1:n)
+        write(12,'(a)') hdr(i)(1:n)
     end do
 
     do i = 1,npm
         n = len_trim(prm(i))
-        write(12,'(a<n>)') prm(i)(1:n)
+        write(12,'(a)') prm(i)(1:n)
     end do
 
     write(12,'(a2)') 'GO'
 
     do i = 1,ner
         n = len_trim(enr(i))
-        write(12,'(a<n>)') enr(i)(1:n)
+        write(12,'(a)') enr(i)(1:n)
     end do
 
     close(12)
@@ -196,7 +196,8 @@
           if(qft) then
             npm = npm + 1
             call date_and_time(tod,now,zone,tims)
-            prm(npm) = '##### Following parameters added by Kalman on '//tod(7:8)//'-'//mon(tims(2))//'-'//tod(1:4)//' at '//now(1:2)//':'//now(3:4)//'  ######'
+            prm(npm) = '##### Following parameters added by Kalman on '//tod(7:8)//'-'//mon(tims(2))//'-'// &
+                       tod(1:4)//' at '//now(1:2)//':'//now(3:4)//'  ######'
             qft = .false.
           endif
 
@@ -247,7 +248,7 @@
        if(ipr(k) /= 0) exit
        k = k - 1
     end do
-    if(k > 0) write(cln(17:36),'(<k>I5)') (ipr(n),n=1,k)
+    if(k > 0) write(cln(17:36),'(4I5)') (ipr(n),n=1,k)
 
     return
     end subroutine write_line
@@ -285,17 +286,17 @@
     character*6, intent(in) :: pnm
 
     integer*4, parameter :: nrs = 107
-    character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
-        'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP','GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', &
-        'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE', 'TUNEFI', &
+    character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS  ', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
+        'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP ', 'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP ', &
+        'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS  ', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE  ', 'TUNEFI', &
         'TUNEPE', 'UOMPAS', 'UOMPAV', 'UOMPRS', 'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF', &
         'FCCRED', 'ROHFBA', 'ROHFBP', 'ELARED', 'FISAT1', 'FISAT2', 'FISAT3', 'FISVE1', 'FISVE2', 'FISVE3', &
         'FISDL1', 'FISDL2', 'FISDL3', 'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3', 'PFNTKE', &
-        'PFNALP', 'PFNRAT', 'PFNERE', 'ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1', 'CSGDR2', &
-        'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', &
-        'EXPUSH', 'FCC', 'FCD', 'GAPN', 'GAPP', 'GCROA', 'GCROD', 'GCROE0', 'GCROT', 'GCROUX', 'GDIV', 'GDRESH', &
-        'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1', 'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY', &
-        'TRUNC', 'WIDEX', 'DEFNUC', 'PFNNIU'/)
+        'PFNALP', 'PFNRAT', 'PFNERE', 'ALS   ', 'BETAV ', 'BETCC ', 'BFUS  ', 'BNDG  ', 'CRL   ', 'CSGDR1', &
+        'CSGDR2', 'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ', 'DV    ', 'EFIT  ', 'EGDR1 ', &
+        'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 'GCROD ', &
+        'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', &
+        'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', 'PFNNIU'/)
 
     integer*4 i
 
@@ -304,7 +305,7 @@
        allowed = .true.
        return
     end do
-       
+
     allowed = .false.
 
     return
@@ -323,13 +324,13 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 47            
-    character*6, parameter :: rest(nrs) = (/'ALS', 'BETAV', 'BETCC', 'BFUS', &
-        'BNDG', 'CRL', 'CSGDR1', 'CSGDR2', 'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', &
-        'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', 'EXPUSH', 'FCC', 'FCD', 'GAPN', 'GAPP', &
-        'GCROA', 'GCROD', 'GCROE0', 'GCROT', 'GCROUX', 'GDIV', 'GDRESH', 'GDRSPL', 'GDRWA1', &
-        'GDRWA2', 'GGDR1', 'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY', &
-        'TRUNC', 'WIDEX', 'DEFNUC'/)
+    integer*4, parameter :: nrs = 47
+    character*6, parameter :: rest(nrs) = (/'ALS   ', 'BETAV ', 'BETCC ', 'BFUS  ', &
+        'BNDG  ', 'CRL   ', 'CSGDR1', 'CSGDR2', 'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ', &
+        'DV    ', 'EFIT  ', 'EGDR1 ', 'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', &
+        'GAPP  ', 'GCROA ', 'GCROD ', 'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', &
+        'GDRWA2', 'GGDR1 ', 'GGDR2 ', 'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', &
+        'TRUNC ', 'WIDEX ', 'DEFNUC'/)
 
     integer*4 i
 
@@ -338,7 +339,7 @@
        absolute = .true.
        return
     end do
-       
+
     absolute = .false.
 
     return
@@ -356,7 +357,7 @@
     character*6, intent(in) :: pnm
 
     integer*4, parameter :: nrs = 8
-    character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED'/)
+    character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV  ','RESNOR','FCCRED', 'ELARED'/)
 
     integer*4 i
 
@@ -365,7 +366,7 @@
        global = .true.
        return
     end do
-       
+
     global = .false.
 
     return
@@ -391,7 +392,7 @@
        pfns = .true.
        return
     end do
-       
+
     pfns = .false.
 
     return
@@ -434,11 +435,11 @@
     real*4, intent(out) :: finl(*)
     character*12, intent(out) :: parnam(*)
 
-    integer*4 i,n,nchr,nparm,npare
+    integer*4 i,n,nparm,npare
     real*4 xinit,unc
     character line*300
 
-    open(12,file=file,status='OLD',readonly)
+    open(12,file=file,status='OLD',action='read')
 
     read(12,*)
     read(12,'(30x,i2)') nparm
@@ -451,13 +452,13 @@
 
     npar = nparm
 
-    read(12,'(q,a<nchr>)') nchr,line(1:nchr)
-    do while(line(1:17) .ne. 'CHI-SQUARE TEST !')
-       read(12,'(q,a<nchr>)') nchr,line(1:nchr)
+    read(12,'(a)') line
+    do while(line(1:17) /= 'CHI-SQUARE TEST !')
+       read(12,'(a)') line
     end do
 
     do i = 1,4
-       read(12,'(q,a<nchr>)') nchr,line(1:nchr)
+       read(12,'(a)') line
     end do
 
     do i = 1,npar
