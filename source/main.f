@@ -1,6 +1,6 @@
-cc   * $Rev: 3408 $
+cc   * $Rev: 3419 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-30 01:08:56 +0200 (Di, 30 Apr 2013) $
+Ccc   * $Date: 2013-05-04 00:38:03 +0200 (Sa, 04 Mai 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -2703,13 +2703,15 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
 C        Integral is calculated by trapezoidal rule being consistent with cross section
          IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
 C        IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
-         IF(nnuc.eq.NTArget                      ) THEN
-           WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
-     &       CSDirlev(1,nejc)
-           WRITE (12,'(10x,
-     &                 '' g  disc.lev cross section'',G12.6,''  mb'')')
-     &      CSDirlev(1,nejc)
-         ENDIF 
+C        IF(nnuc.eq.NTArget                      ) THEN
+C----------Locate position of the projectile among ejectiles
+C          CALL WHEREJC(IZAejc(0),nejc,iloc)
+C          WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')
+C    &       CSDirlev(1,nejc)
+C          WRITE (12,'(10x,
+C    &                 '' g  disc.lev cross section'',G12.6,''  mb'')')
+C    &      CSDirlev(1,nejc)
+C        ENDIF 
          IF(CSEmis(0,nnuc).gt.0) THEN
            WRITE (12,'(10x,
      &                 '' g  emission cross section'',G12.6,''  mb'')')
@@ -4474,7 +4476,7 @@ C        ENDDO
 		 corr = CSPrd(Nnuc)/(csum*DERec)
 		 xsdisc = 0.d0
          IF (nnuc.EQ.mt849) THEN
-			xsdisc = CSDirlev(1,3) 
+		xsdisc = CSDirlev(1,3) 
             WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,3)
             WRITE (12,'(2X,''Disc. popul. before g-cascade '',
