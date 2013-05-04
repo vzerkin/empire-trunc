@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3403 $
+Ccc   * $Rev: 3420 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
+Ccc   * $Date: 2013-05-04 15:57:18 +0200 (Sa, 04 Mai 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -9554,9 +9554,8 @@ C
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
 
-         ldynamical = .false.
          if(comment(36:39).eq.'dyna') THEN
-            DYNam = .TRUE.
+           DYNam = .TRUE.
            SOFT  = .TRUE.
          endif
          if(comment(36:39).eq.'soft') SOFT  = .TRUE.
