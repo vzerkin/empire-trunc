@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3407 $
+Ccc   * $Rev: 3421 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-27 02:13:34 +0200 (Sa, 27 Apr 2013) $
+Ccc   * $Date: 2013-05-04 15:58:29 +0200 (Sa, 04 Mai 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3882,7 +3882,79 @@ C
         ELSE
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
+
+        IF(.not.CN_isotropic) then
+C
+C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
+C         ***************************                                             
+C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
+C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
+C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
+C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
+C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
+C
+C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
+C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
+C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
+C
+          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
+C
+C
+C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
+C
+C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
+C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
+C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
+C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
+C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
+C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
+          IF(nfiss_tr.gt.0) THEN
+            do j = 1, nfiss_tr 
+C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+            enddo
+          ENDIF 
+C
+C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
+C          1-10   GAM(1) FOR L=0.                               
+C         11-20   GAM(2) FOR L=1.                               
+C         .......................                               
+C         61-70   GAM(7) FOR L=6.                               
+C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
+C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
+C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
+          IF(ngamm_tr.gt.0) THEN
+            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
+C
+C            
+C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
+C
+C EXAMPLES OF LD:
+C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
+C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
+C
+C           IF ncontinua > 0
+C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
+C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
+C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
+C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
+C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
+C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
+C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
+C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
+C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
+C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
+C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
+C                           PAIRING GIVEN BY COOK)                      ECIS-953
+C           WRITE(1,'(7f10.5)') Z(1), ...
+C           WRITE(1,'(7f10.5)') Z(0),     ...
+          ENDIF
+        ENDIF
+
       ENDIF
+
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
 
@@ -4773,8 +4845,78 @@ C
         ELSE
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
-      ENDIF
 
+        IF(.not.CN_isotropic) then
+C
+C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
+C         ***************************                                             
+C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
+C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
+C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
+C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
+C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
+C
+C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
+C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
+C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
+C
+          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
+C
+C
+C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
+C
+C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
+C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
+C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
+C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
+C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
+C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
+          IF(nfiss_tr.gt.0) THEN
+            do j = 1, nfiss_tr 
+C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+            enddo
+          ENDIF 
+C
+C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
+C          1-10   GAM(1) FOR L=0.                               
+C         11-20   GAM(2) FOR L=1.                               
+C         .......................                               
+C         61-70   GAM(7) FOR L=6.                               
+C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
+C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
+C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
+          IF(ngamm_tr.gt.0) THEN
+            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
+C
+C            
+C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
+C
+C EXAMPLES OF LD:
+C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
+C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
+C
+C           IF ncontinua > 0
+C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
+C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
+C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
+C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
+C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
+C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
+C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
+C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
+C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
+C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
+C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
+C                           PAIRING GIVEN BY COOK)                      ECIS-953
+C           WRITE(1,'(7f10.5)') Z(1), ...
+C           WRITE(1,'(7f10.5)') Z(0),     ...
+          ENDIF
+        ENDIF
+
+      ENDIF
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
