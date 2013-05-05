@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3423 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-05-05 18:32:21 +0200 (So, 05 Mai 2013) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -4048,6 +4048,8 @@ C INPUT OF DEFORMED SPIN-ORBIT PARAMETERS.                              LECT-359
       GO TO 30                                                          LECT-400
    29 READ (MR,1001) (GAM(I),I=1,NRD)                                   LECT-401
       WRITE (MW,1028) (GAM(I),I=1,NRD)                                  LECT-402
+      FNUG = 20.d0                                                      RCN
+      WRITE (MW,10251) FNUG                                             RCN
    30 IF (NCONT.EQ.0) GO TO 32                                          LECT-403
       WRITE (MW,1029)                                                   LECT-404
       J1=1+NCONS-NCONT                                                  LECT-405
@@ -4120,6 +4122,7 @@ C INPUT OF DEFORMED SPIN-ORBIT PARAMETERS.                              LECT-359
  1023 FORMAT (/I5,' FISSION DATA:')                                     LECT-472
  1024 FORMAT (10X,1P,2D15.8)                                            LECT-473
  1025 FORMAT (/' GAMMA DATA:')                                          LECT-474
+10251 FORMAT (/' RADIATIVE DEGREES OF FREEDOM ASSUMED:',F5.1)           RCN
  1026 FORMAT (5X,'TG0:',1P,D13.6,6X,'BN:',D13.6,4X,'FNUG:',D13.6,5X,'EGDLECT-475
      1:',D13.6,5X,'GGD:',D13.6/' DENSITY OF STATES GIVEN BY')           LECT-476
  1027 FORMAT (' READ VALUES'/(1X,I3,'  SA:',1P,D13.6,6X,'UX:',D13.6,5X,'LECT-477
@@ -20065,7 +20068,7 @@ C TRANSFORMATION.                                                       SCHE-408
       BJ=.5D0*DFLOAT(IAJ)                                               SCHE-411
       JIJ=1+MOD(IJ+JI,2)                                                SCHE-412
       NC1=NC1*NC2                                                       SCHE-413
-      IF (LO(56)) WRITE (MW,1000) BJ,IP(JIJ)                            SCHE-414
+C     IF (LO(56)) WRITE (MW,1000) BJ,IP(JIJ)                            SCHE-414
       NPT=NPT+1                                                         SCHE-415
       IF (LO(60)) WRITE (94,1001) BJ,IP(JIJ),NC2,NC1                    SCHE-416
    49 NC1=0                                                             SCHE-417
@@ -20093,7 +20096,7 @@ C TRANSFORMATION.                                                       SCHE-408
       D2=DMOD(D1+C1+PI,2.D0*PI)-PI                                      SCHE-439
       LC=LCP-1                                                          SCHE-440
       BJ=0.5D0*DFLOAT(MC(ICP,JI,3))                                     SCHE-441
-      IF (LO(56)) WRITE (MW,1002) NC1,NC2,IV,LC,BJ,B1,B2,B3,D1,D2       SCHE-442
+C     IF (LO(56)) WRITE (MW,1002) NC1,NC2,IV,LC,BJ,B1,B2,B3,D1,D2       SCHE-442
       IF (LO(60)) WRITE (94,1003) NC1,NC2,IV,LC,BJ,B1,B2,B3             RCN
 C MULTIPLICATION BY THE COULOMB PHASE.                                  SCHE-444
    50 A1=DCOS(C1)                                                       SCHE-445

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3421 $
+Ccc   * $Rev: 3423 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-04 15:58:29 +0200 (Sa, 04 Mai 2013) $
+Ccc   * $Date: 2013-05-05 18:32:21 +0200 (So, 05 Mai 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -3275,7 +3275,7 @@ C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.
         IF(ngamm_tr.gt.0)     
      &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
 C
-        ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
+        ECIs2(37:37) = 'F'    ! Moldauer's width fluctuation correction
 
       ENDIF
 C
@@ -3412,7 +3412,8 @@ C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-4
 C-------CARD 7
 C
         WRITE (1,'(5i5)') 
-     >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
+     >      nuncoupled, nuncoupled, 2*nfiss_tr, ngamm_tr, ncontinua 
+C           Fission transmission multiplied by 2 to account for both parities
 C
       ENDIF
 
@@ -3650,12 +3651,19 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-            do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-            enddo
+C           write(*,*) 
+C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
+            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ELSE
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ENDIF 
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
@@ -3909,12 +3917,19 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-            do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-            enddo
+            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
+C             write(*,*) 
+C    >          'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ELSE
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ENDIF 
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
@@ -4334,7 +4349,8 @@ C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-4
 C-------CARD 7
 C     
         WRITE (1,'(5i5)') 
-     >      nuncoupled, nuncoupled, nfiss_tr, ngamm_tr, ncontinua 
+     >      nuncoupled, nuncoupled, 2*nfiss_tr, ngamm_tr, ncontinua 
+C           Fission transmission multiplied by 2 to account for both parities
 C
       ENDIF
 C
@@ -4557,12 +4573,19 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-            do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-            enddo
+C           write(*,*) 
+C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
+            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ELSE
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ENDIF 
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
@@ -4872,12 +4895,19 @@ C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. T
 C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
 C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
           IF(nfiss_tr.gt.0) THEN
-            do j = 1, nfiss_tr 
-C             WRITE (1,'(2f10.5)') fiss_tr(j,1),fiss_dof(j)  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-C             WRITE (1,'(2f10.5)') fiss_tr(j,2),fiss_dof(j)  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,1),0.  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-              WRITE (1,'(2f10.5)') fiss_tr(j,2),0.  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-            enddo
+C           write(*,*) 
+C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
+            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ELSE
+              do j = 1, nfiss_tr
+                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
+                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
+              enddo
+            ENDIF 
           ENDIF 
 C
 C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
