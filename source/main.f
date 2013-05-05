@@ -1,6 +1,6 @@
-cc   * $Rev: 3419 $
+cc   * $Rev: 3422 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-04 00:38:03 +0200 (Sa, 04 Mai 2013) $
+Ccc   * $Date: 2013-05-05 18:31:53 +0200 (So, 05 Mai 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -339,12 +339,6 @@ C-----
 C
       CALL ULM(1) ! CN
 
-
-C--------DO loop over c.n. excitation energy for the highest bin
-C              we neglect gamma cascade for the time being
-C     nnuc = 1
-C     ke   = NEX(nnuc)
-
       ngamm_tr = 0
       nfiss_tr = 0
 	gamm_tr  = 0.d0
@@ -354,41 +348,43 @@ C	RCN, FEB 2013
 C     For a proper consideration of fission and capture composition in the 
 C        ECIS CN calculation, further changes needed in tl.f (to be done later)
 C
+C     IF(.NOT.CN_isotropic) THEN
       IF(.FALSE.) THEN
 
+C-------DO loop over c.n. excitation energy for the highest bin
+C              we neglect gamma cascade for the time being
+        nnuc = 1
+        ke   = NEX(nnuc)
         OPEN (80,FILE = 'FISTMP.OUT')
         IF (FISsil(nnuc) .AND. NINT(FISshi(Nnuc)).NE.1)
      &    CALL READ_INPFIS(nnuc)
 
         DO ipar = 1, 2 !over decaying CN parity
-         ip = INT(( - 1.0)**(ipar + 1))
-C
-C        ip=1 should correspond to the parity of the CN
-C
-         DO jcn = 1, NLW !over decaying CN spin
-           IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
-C------------gamma emision
-             CALL TL_GAMMA(nnuc,ke,jcn,ip)
-C------------Fission ()
-             IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1 )        
-     &         CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-	       fiss_tr(jcn,ip) = sumfis
-         ENDDO                !loop over decaying nucleus spin
-         write(*,*) ' Lmax=',ngamm_tr,' pi=',ip
-         do lamb=1,MAXMULT
-           write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
-         enddo
-C 
-         write(*,*) ' FISSION, pi=',ip
-         do jcn = 1, NLW
-           write(*,*) 'J=',jcn,' fiss_tr=',fiss_tr(jcn,ip)
-	     if(fiss_tr(jcn,ip).lt.1.d-20) THEN
-		   nfiss_tr = MAX(nfiss_tr,JCN)
-	       EXIT
-	     endif
-         enddo
-        ENDDO                   !loop over decaying nucleus parity
-	  write(*,*) 'nfiss_tr =',nfiss_tr
+          ip = INT(( - 1.0)**(ipar + 1))
+C         The first parity should be the corresponding to the GS !! (+ for even-even)
+          DO jcn = 1, NLW !over decaying CN spin
+            IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
+C-----------gamma emision
+            CALL TL_GAMMA(nnuc,ke,jcn,ip)
+C-----------fission ()
+            IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1 )        
+     &        CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+            if(sumfis.lt.1.d-6) CYCLE
+            fiss_tr(jcn,ipar) =  sumfis
+            nfiss_tr = jcn
+          ENDDO !loop over decaying nucleus spin
+          write(*,*) '+++'
+          write(*,*) ' Nfis=',nfiss_tr,' Parity=',ip
+          do jcn = 1, nfiss_tr
+            write(*,*) 'J=',jcn,' fiss_tr=',fiss_tr(jcn,ipar)
+          enddo
+        ENDDO  !loop over decaying nucleus parity
+        write(*,*) ' Jmax =',nfiss_tr
+        write(*,*) ' Lmax =',ngamm_tr
+        do lamb=1,ngamm_tr
+          write(*,*) 'L',lamb,' tr=',gamm_tr(lamb)
+        enddo
+        write(*,*) '+++'
         CLOSE (80,STATUS='DELETE')
 
         DENhf  = 0.d0
