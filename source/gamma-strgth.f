@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3424 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-05-06 16:51:01 +0200 (Mo, 06 Mai 2013) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -171,7 +171,7 @@ C
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,99005) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
 99005    FORMAT (1X,' Gamma transitions parameters of ',
-     &   i2,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
+     &   i3,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
          WRITE (8,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
      &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
 99010    FORMAT (2X,'TE',7X,F4.2,2(9X,F4.2),/,2X,'CE ',4X,F7.3,
