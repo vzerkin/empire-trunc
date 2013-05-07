@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-05 13:34:36 +0200 (Fr, 05 Apr 2013) $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-05-07 21:00:08 +0200 (Di, 07 Mai 2013) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -62,6 +62,7 @@ C
       pi2 = PI*PI
       BF = 1.0
       IF (Cf.NE.0.0D0) BF = 0.0D0
+      dshift=0.0d0
       A23 = A(Nnuc)**0.666667d0
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
