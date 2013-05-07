@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3350 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-25 21:57:52 +0100 (Mo, 25 Mär 2013) $
+Ccc   * $Rev: 3425 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-05-07 11:43:13 +0200 (Di, 07 Mai 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -1120,7 +1120,7 @@ C
          a0p = FLOAT(p*(p - 1) + h*(h - 1))*.25
          uc0 = E - a0p/Gc
          IF (uc0.LE.0.D0) THEN
-            NMAx = h1 - 1
+            NMAx = max(h1 - 1,1)
             RETURN
          ENDIF
 C
