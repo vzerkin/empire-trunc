@@ -1,6 +1,6 @@
-# $Rev: 3169 $
-# $Author: rcapote $
-# $Date: 2012-10-26 21:51:13 +0200 (Fr, 26 Okt 2012) $
+# $Rev: 3427 $
+# $Author: shoblit $
+# $Date: 2013-05-08 16:10:14 +0200 (Mi, 08 Mai 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8504,6 +8504,9 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label {all MTs} 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/util/kalman/newinp $file &} \
+        -label "Propagate kalman output into Empire input"
     $site_3_0.menu93 add cascade \
         -menu "$site_3_0.menu93.men89" \
         -command {} -label {Plot Sensitivity Matrix for} 
