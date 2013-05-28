@@ -2113,11 +2113,12 @@ C* Save energy union grid and multiply cross section by the yield
           DXS(I)=DXS(I)*RWO(LXX-1+I)
         END DO
 C* Process cross section at fixed angle for charged particles
-        IF(LAW.EQ.5 .AND. MT0/10000.EQ.4) THEN
+        IF(MT0/10000.NE.4) GO TO 900
+        IF(LAW.EQ.5) THEN
           CALL RDTAB2(LEF,SPI,C2,LIDP,L2,NR,NE,NBT,INR,IER)
           MX=MRW-LXX
           IF(MX.LE.0) STOP 'DXSEND ERROR - Array capacity exceeded'
-C* Loop over incident particle energies
+C*        -- Loop over incident particle energies
 C...
 C...      open(unit=81,file='SIGMT.cur',status='unknown')
 C...      open(unit=82,file='SIGMA.cur',status='unknown')
@@ -2129,13 +2130,13 @@ C...      write(83,*) 'Endtab scattering'
           write(83,*) 'Endtab Coulomb'
 C...
           DO IE=1,NE
-C* Read the angular distribution
+C*          -- Read the angular distribution
             CALL RDLIST(LEF,C1,EE,LTP,L2,NW,NL,RWO(LXX),MX,IER)
             IF(IER.NE.0) THEN
               print *,'ERROR reading LIST record IER',IER
               STOP 'DXSEN1 ERROR - Reading Law 5 data in RDLIST'
             END IF
-C* Coulomb scattering contribution
+C*          -- Coulomb scattering contribution
 C*          -- Neutron mass, projectile mass, charge and target charge
             INTR=1
             CALL PROMAS(INTR ,AWN)
@@ -2198,7 +2199,7 @@ C*          -- More constatns
             RWO(LE-1+IE)=EE
             RWO(LX-1+IE)=SIGC
             IF     (LTP.EQ.1) THEN
-C* Case: Nuclear amplitude expansion
+C*            -- Case: Nuclear amplitude expansion
               IF(LIDP.EQ.0) THEN
 C*              -- Distinguishable particles (Eq.6.11 of ENDF-102 manual)
 C*              -- Nuclear interference term
@@ -2296,7 +2297,7 @@ C...
                 STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP/LIDP'
               END IF
             ELSE IF(LTP.GE.12 .AND. LTP.LE.15) THEN
-C* Case: Tabulated distribution of Pni
+C*            -- Case: Tabulated distribution of Pni
               NC=NL
               IF(NW+NC.GT.LD) STOP 'DXSEND ERROR - MRW limit exceeded'
               LX1=LXX+NW
@@ -2317,7 +2318,8 @@ C*            -- Linearise with EXS accuracy, if necessary
      &                     ,RWO(LXX),RWO(LX1),KX,EXS)
                 INC=2
               END IF
-C* Collect distributions at fixed angle for the current energy
+C*            -- Collect distributions at fixed angle for the
+C*               current energy
               INX=2
               RWO(LX-1+IE)=RWO(LX-1+IE)
      &                    +FINTXS(AIN,RWO(LXX),RWO(LX1),NC,INC,IER1)
@@ -2327,11 +2329,12 @@ C* Collect distributions at fixed angle for the current energy
               STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP'
             END IF
           END DO
-C* Define union grid of cross sections and angular cross sect. at LXE
+C*        -- Define union grid of cross sections and angular
+C*           cross sect. at LXE
           CALL UNIGRD(NEN,ENR,NE,RWO(LE),NE2,RWO(LXE),LD)
-C* Interpolate angular cross section to union grid at LXX
+C*        -- Interpolate angular cross section to union grid at LXX
           CALL FITGRD(NE,RWO(LE),RWO(LX),NE2,RWO(LXE),RWO(LXX))
-C* Save cross sections on energy union grid
+C*        -- Save cross sections on energy union grid
           NEN=NE2
           DO I=1,NEN
             ENR(I)=RWO(LXE-1+I)
@@ -2339,8 +2342,9 @@ C* Save cross sections on energy union grid
           END DO
 C*        -- Done cross sections at fixed angle for MF4
 C*
-        ELSE IF(LAW.EQ.7 .AND. MT0/10000.EQ.4) THEN
-C* Process cross section at fixed angle for other particles (LAW=7)
+        ELSE IF(LAW.EQ.7) THEN
+C*        -- Process cross section at fixed angle for other particles
+C*           (LAW=7)
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
           LXE=1
           LXX=LXE+NE
