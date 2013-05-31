@@ -109,7 +109,7 @@ for k in $MT; do
     fi
 
     echo  "Running genkal"
-    if ! $EMPIREDIR/util/kalman/genkal.exe <INPUT.D
+    if ! $EMPIREDIR/util/kalman/genkal <INPUT.D
     then
       echo " Error running genkal"
       exit
