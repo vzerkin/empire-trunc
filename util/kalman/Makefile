@@ -1,7 +1,7 @@
 # set default compiler
 
-#FC   =  gfortran
-FC  =  ifort
+FC   =  gfortran
+#FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
@@ -16,6 +16,7 @@ ifeq ($(FC),gfortran)
   FFLAGS = -std=legacy -O3
   #----flags for debuging
   #FFLAGS =  -g --bounds-check -std=legacy
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
 
 else ifeq ($(FC),ifort)
 
@@ -88,3 +89,7 @@ empsee: empire_sees.f90
 
 clean:
 	rm -f *.o *.mod
+# When making a debug image, don't compile ECIS /debug
+dbg:  
+	$(MAKE) "FFLAGS=$(DFLAGS)" all
+
