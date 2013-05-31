@@ -8,7 +8,7 @@
 
       character*12, intent(in) :: name         ! reaction name to find
 
-      integer*4, parameter :: nrmax = 48       ! max # of reactions tested
+      integer*4, parameter :: nrmax = 50       ! max # of reactions tested
 
       character*9, parameter :: LIST(nrmax) = (/ &
        'Total    ', 'Elastic  ', '(z,n)    ', '(z,2nd)  ', &
@@ -22,12 +22,14 @@
        '(z,He3)  ', '(z,a)    ', '(z,2a)   ', '(z,3a)   ', &
        '(z,2p)   ', '(z,pa)   ', '(z,t2a)  ', '(z,d2a)  ', &
        '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonelast ', &
-       '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    '/)
+       '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    ', &
+       'Elastic* ', 'Nonelast*'/)
 
       integer*4, parameter :: MT(nrmax) = (/ &
        1, 2, 4, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, &
        32, 33, 34, 35, 36, 37, 38, 41, 42, 44, 45, 102, 103, 104, 105, &
-       106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 117, 3, 999, 251, 456, 5/)
+       106, 107, 108, 109, 111, 112, 113, 114, 115, 116, 117, 3, 999, 251, 456, &
+       5, 902, 903/)
 
       integer*4 ln1,ln2,ll1,ll2,i
 
