@@ -22,6 +22,7 @@ C-V  12/05 Increase precision of argument printout for 1E6<E<1e8
 C-V  12/11 Fix setting the error flag IER
 C-V  12/02 Implement retrieval of cross sections at fixed angle
 C-V        for incident neutrons
+C-V  13/06 Trivial fix to retrieve MF3/MT5 as is
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -289,7 +290,10 @@ C* Select the reaction type number
       IER=0
 C* If zero and not first loop, finish
       IF(IDMY.EQ.0 .AND. MT0.NE.0) GO TO 90
-      IF(IDMY.GT.0) MT0=IDMY
+C... Special case for backward compatibility to force MT 5 explicitly
+      IF(IDMY.EQ.5) IDMY=-5
+C...
+      IF(IDMY.NE.0) MT0=IDMY
       ELV=0
       FST=0
 C* Particle emission spectra
@@ -355,11 +359,13 @@ c...    print *,'                   mte,np',mte,np
 c...
         MAT=NINT(ZA0)
         MFX=MF
-        IF(MT.LE.999) THEN
+        IF(MT.GT.0 .AND. MT.LE.999) THEN
           MTX=MT
         ELSE IF(MT.EQ.9000) THEN
           MTX= 5
           MFX=10
+        ELSE IF(MT.EQ.-5) THEN
+          MTX=5
         ELSE IF(MT/10000.EQ.4) THEN
           MTX=MT-10000*(MT/10000)
         END IF
