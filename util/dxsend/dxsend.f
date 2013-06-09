@@ -20,7 +20,9 @@ C-V  12/09 Fix trivial initialisation error.
 C-V  13/02 Implement retrieval of cross sections at fixed angle
 C-V        for incident neutrons.
 C-V  13/03 - Fix summation when No. of outgoing particles is undefined.
-C-V        - Fix retrieval of uncertainties fro MF40.
+C-V        - Fix retrieval of uncertainties from MF40.
+C-V  13/04 - Fix explicit printing of MT 5
+C-V        - Fix trivial error setting the error flag for gamma spectra
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -1060,7 +1062,7 @@ C* Prepare reaction list
         END IF
         CALL SKIPSC(LEF)
 C* Select contributiong reactions
-        IF( MT.EQ.9000                  .OR.
+        IF( MT.EQ.   5                  .OR.
      &     (MT.GE.  11 .AND. MT.LE.199) .OR.
      &     (MT.GT. 600 .AND. MT.LE.649) .OR.
      &     (MT.GT. 800 .AND. MT.LE.849)) THEN
@@ -1072,6 +1074,10 @@ c...
           IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
           IF(MT.GE.600 .AND. MT.LE.649) I600=1
           IF(MT.GE.800 .AND. MT.LE.849) I800=1
+c...
+c...    else
+c...      print *,'Skipping MT',MT,' for gammas'
+c...
         END IF
         GO TO 44
 C* Add reactions with wholy contained cross sections in MF13
@@ -1172,9 +1178,9 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
      1           ,RWO(LX),NE,MEN,KRW,IER)
 c...
-C...  M =NINT(ZA0)
-C...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
-C... &       ,m,mf0,mt,ne,ier
+c...  M =NINT(ZA0)
+c...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
+c... &       ,m,mf0,mt,ne,ier
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -1812,7 +1818,7 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-C...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+c...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -2435,7 +2441,7 @@ C* Case: Proceed with the retrieval of differential data
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-C...      print *,'     Cross section=',xs,ein,ier
+c...      print *,'     Cross section=',xs,ein,ier
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -2487,6 +2493,9 @@ C* Gamma production only from MF 6,12,13,14,15
           JF=MF
           JT=MT
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
+c...
+c...      print *,' After lbl 36 ier/mf,mt',ier,mf,mt
+c...
           IF(IER.NE.0) THEN
             IF(MF.EQ.12) THEN
               REWIND LEF
@@ -3222,6 +3231,9 @@ C* Changing LF between data sets is currently not accomodated
         END DO
         LX =MRW-LLI
         CALL RDLIST(LEF,ES,C2,LP,L2,NW,NT,RWO(LLI+1),LX,IER)
+c...
+c...    print *,'rdlist ier',ier,mat,mf,mt
+c...
         IF(NW.GT.LL) THEN
           IER=43
           PRINT *,'ERROR - in MT',MT0,' Used space',NW
@@ -3235,9 +3247,13 @@ C* Read the data for the next level
         MM =MT
         MT =0
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+c...
+c...    print *,'findmt mat,mf,mt,ier',mat,mf,mt,ier
+c...
         IF(IER.EQ.0 .AND.
      1     (MM+1.EQ.MT .AND. MT.LE.MT0) ) GO TO 122
         IWO(LV+1)=LLI
+        IER=0
 C*
 C* All levels up to the current one read - sum the yields
 c...
@@ -3261,6 +3277,11 @@ C* Process the gamma lines
             PRINT *,'WARNING Gamma Eou=',EOU,' for mt,jt',MT0,JT
             GO TO 128
           END IF
+          IF(LXB+NEN+NE1.GT.MRW) THEN
+            PRINT *,'DXSEN1 ERROR - Assembling discrete gamma spectra'
+            PRINT *,'               Array limit MRW exceeded',MRW
+            STOP 'DXSEN1 ERROR - Array limit MRW exceeded'
+          END IF
           CALL FNGAUS(EOU,NEN,RWO(LXE),RWO(LXB),EPS)
           LUE=LXE+NEN
           LUX=LXB+NEN
@@ -3277,7 +3298,7 @@ C* Interpolate saved distribution to the union grid
           CALL FITGRD(NEN,RWO(LXE),RWO(LXB),NE2,RWO(LUE),RWO(LUX))
 C* Assume isotropic photon distributions
           ANG=0.5
-C* Add the current to the saved distribution
+C* Add the current distribution to the saved one
           FRC=ANG*RWO(2+(JT-1)*(LG+1))
           IF(LG.EQ.2) FRC=FRC*RWO(3+(JT-1)*(LG+1))
           DO 126 I=1,NE1
