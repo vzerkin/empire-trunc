@@ -107,7 +107,7 @@
 
     write(6,*)' Writing ',empin
 
-    open(12,file=empin,status='new',action='WRITE')
+    open(12,file=empin,status='replace',action='WRITE')
 
     do i = 1,10
         n = len_trim(hdr(i))
