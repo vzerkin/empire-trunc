@@ -5553,7 +5553,7 @@ where $Z_p$ is the charge of the projectile  and
 $Z_t$ is the charge of the target.
 
 The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature $T$), the S-factor is constant (no energy dependence or very nearly a constant).  If $S(E) \neq S(E_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.  In most cases (for nonresonant reactions), a Taylor series expansion around zero energy (Maclaurin) is normally taken.  This now becomes an effective S-factor (S$_{eff}$(E$_{0}$)).
-The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).\par
+The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence or very nearly a constant) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).\par
 The above formalism holds with the exception that the approximation for $\eta$ is taken from \cite{iliadis:07}
 as  \begin{equation}
 2\pi\eta = 0.989534Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
@@ -5563,7 +5563,7 @@ The keyword input to allow for the calculation of the S-factor is SFACT.  SFACT 
 
 The S-factor can be plotted via the gui.  An S-FACTOR.zvd file is produced for the corresponding selected reaction.  This can be separately merged with the S-factor c4 data file.  A neutron in the outgoing channel is assigned an mt of 1004; a proton an mt of 1103 and a $\gamma$ an mt of 1102.  
 
-*** More nuclear astrophysics formalism forthcoming
+*** More nuclear astrophysics formalism forthcoming (reaction rate formalism)
 
 
 \part{STRUCTURE  OF  EMPIRE CODE\label{Chap:code}}
