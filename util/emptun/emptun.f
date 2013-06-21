@@ -52,15 +52,21 @@ C-M   - FLEI  Source EMPIRE input filename (to be modified)
 C-M   - FLOU  Updated EMPIRE input.
 C-M
 C-
-      PARAMETER    (MXEN=200)
+      PARAMETER    (MXEN=200,MXCOM=10)
+      CHARACTER*6   LABEL(5)
       CHARACTER*40  BLNK
       CHARACTER*80  FLNM,FLIN,FLEI,FLOU
-      CHARACTER*120 REC
+      CHARACTER*120 REC,RECM(MXCOM)
      &             ,HTOTRED,HFUSRED,HFCCRED,HFCORED,HELARED,HCELRED
 C*
       DIMENSION    ENC(MXEN),PRC(MXEN,5)
+C* Data set labels and flags
+      DIMENSION    KFLG(5)
+      DATA KFLG/ 0, 0, 0, 0, 0 /
+      DATA LABEL/'FUSRED','ELARED','CELRED','Sig_f ','Sig_CE' /
 C* Filenames and logical file units
-      DATA LIN,LEI,LOU,LKB,LTT / 1, 2, 3, 5, 6 /
+      DATA LIN,LEI,LOU,LKB,LTT
+     &    /  1,  2,  3,  5,  6 /
       DATA BLNK/'                                        '/
      1    ,FLIN/'inp.dat'/
      2    ,FLEI/'emp.inp'/
@@ -97,8 +103,9 @@ C*
       WRITE(LTT,901) ' '
 C*
 C* Start reading the desired tuning factors
-      KC=0
-      MC=0
+      KC =0
+      MC =0
+      NEN=0
       HTOTRED=BLNK//BLNK//BLNK
       HFUSRED=BLNK//BLNK//BLNK
       HFCCRED=BLNK//BLNK//BLNK
@@ -106,47 +113,55 @@ C* Start reading the desired tuning factors
       HELARED=BLNK//BLNK//BLNK
       HCELRED=BLNK//BLNK//BLNK
   100 READ (LIN,901,END=140) FLNM
-      IF     (FLNM(1:6).EQ.'FUSRED') THEN
-        LC=1
-        KC=KC+1
-      ELSE IF(FLNM(1:6).EQ.'ELARED') THEN
-        LC=2
-        KC=KC+1
-      ELSE IF(FLNM(1:6).EQ.'CELRED') THEN
-        LC=3
-        KC=KC+1
-      ELSE IF(FLNM(1:6).EQ.'Sig_f ') THEN
-        LC=4
-      ELSE IF(FLNM(1:6).EQ.'Sig_CE') THEN
-        LC=5
-      ELSE
+C* Check if all data types are present
+      LC=0
+      DO K=1,5
+        IF(FLNM(1:6).EQ.LABEL(K)) THEN
+          LC=K
+          KC=KC+1
+          KFLG(K)=1
+        END IF
+      END DO
+      IF(LC.EQ.0) THEN
         WRITE(LTT,*) 'ERROR - Invalid tuning parameter header ',FLNM
         GO TO 802
       END IF
+C*
       MC =MC+1
-      NEN=0
+      JEN=0
   120 READ (LIN,901) FLNM
       IF(FLNM(1:40).NE.BLNK) THEN
-        NEN=NEN+1
+        JEN=JEN+1
         READ (FLNM,*) EE,FF
         EE=EE/1000000
 C*      Check if the energy mesh is consistent
-        IF(MC.GT.1 .AND. ABS(EE-ENC(NEN)).GT.EPS*ENC(NEN)) THEN
-          WRITE(LTT,*) 'ERROR - Iconsistent E-mesh for MC=',MC
-     &                ,' Expected',ENC(NEN),' Found',EE
-          GO TO 802
+        IF(MC.GT.1) THEN
+          IF(JEN.GT.NEN) THEN
+            WRITE(LTT,*) 'WARNING - Excess E-mesh for ',LABEL(LC)
+     &                  ,' :  ',FLNM(1:40)
+            GO TO 120
+          END IF
+          IF(ABS(EE-ENC(JEN)).GT.EPS*ENC(JEN)) THEN
+            WRITE(LTT,*) 'ERROR - Iconsistent E-mesh for ',LABEL(LC)
+     &                  ,' Expected',ENC(JEN),' Found',EE
+            GO TO 802
+          END IF
         END IF
-        ENC(NEN)=EE
-        PRC(NEN,LC)=FF
+        ENC(JEN)=EE
+        PRC(JEN,LC)=FF
         GO TO 120
       END IF
+      IF(MC.EQ.1) NEN=JEN
       GO TO 100
 C*
 C* Tuning parameters read
-  140 IF(KC.NE.3) THEN
-        WRITE(LTT,'(A)') ' EMPTUN ERROR - Incomplete tuning par. file'
-        GO TO 802
-      END IF
+  140 DO K=1,5
+        IF(KFLG(K).NE.1) THEN
+          WRITE(LTT,'(A)') ' EMPTUN ERROR - Missing tuning parameter '
+     &                    ,LABEL(K)
+          GO TO 802
+        END IF
+      END DO
       WRITE(LTT,'(A,2F8.4,A,I4,A)')
      &           ' Tuning parameters between energies (MeV)'
      &            ,ENC(1),ENC(NEN),' at',NEN,' points'
@@ -164,6 +179,7 @@ C* Tuning parametersfile processed - read EMPIRE input
       ELAREDX=1
       CELREDX=1
       JEN    =1
+      ICOM   =0
 C* Start reading the main EMPIRE input block
   200 READ (LEI,902) REC
 C*    -- Check for tuning factor definitions in the main block
@@ -222,8 +238,19 @@ C*        -- Last energy flag - Copy the rest of the file to output
         ELSE
 C*        -- Check tuning factors for the current energy
 C...      IF(EE.LT.ENC(1) .OR. EE.GE.ENC(NEN)) THEN
-          IF(EE.LT.ENC(1) .OR. JEN.GT.NEN) THEN
-C*          -- Copy all energies outside the adjustment range
+C...      IF(EE.LT.ENC(1) .OR. JEN.GT.NEN) THEN
+  242     KEN=MIN(JEN,NEN)
+c...
+c...      if(jen.lt.nen) print *,'jen,icom,ee,enc',jen,icom,ee,enc(jen)
+c...
+          IF((EE.LT.ENC(1) .OR. JEN.GT.NEN) .OR.
+     &       (EE.LT.ENC(KEN)                ) ) THEN
+C... &       (EE.LT.ENC(KEN) .AND. ICOM.EQ.1) ) THEN
+C*          -- Copy any remaining command and energies outside
+C*             the adjustment range
+            DO I=1,ICOM
+              WRITE(LOU,902) RECM(I)
+            END DO
             WRITE(LOU,902) REC
           ELSE
 C*          -- Insert energies and tuning factors from the file
@@ -267,12 +294,24 @@ C*
               WRITE(REC(8:17),910) CELRED
               WRITE(LOU,902) REC
 C*
+C*            -- Copy any remaining commands
+              IF(ABS(ENC(JEN)-EE).LT.EPS*EE) THEN
+                DO I=1,ICOM
+                  WRITE(LOU,902) RECM(I)
+                END DO
+                ICOM=0
+              END IF
+C*
 C*            -- Incident energy
               REC=BLNK//BLNK//BLNK
               WRITE(REC(1:8),908) ENC(JEN)
               WRITE(LOU,902) REC
               JEN=JEN+1
               IF(JEN.GT.NEN) EXIT
+              IF(ENC(JEN).GT.EE .AND. ENC(JEN-1).LT.EE) THEN
+                WRITE(REC(1:8),908) EE
+                GO TO 242
+              END IF
             END DO
 C*          -- All additional tuning factors and energies entered
 C*          -- Check for the last-defined tuning factor in originl input
@@ -294,6 +333,7 @@ C*            -- Incident energy
               WRITE(LOU,902) REC
             END IF
           END IF
+          ICOM=0
           GO TO 220
         END IF
       ELSE
@@ -328,7 +368,10 @@ C*         and commands other than the tuning parameters
      &      REC(1:7).NE.'$CELRED' .AND.
      &      REC(1:7).NE.'$FCCRED' .AND.
      &      REC(1:7).NE.'$FCORED')           ) THEN
-          WRITE(LOU,902) REC
+C*        -- Save the additional command to print before energy
+          ICOM=ICOM+1
+          IF(ICOM.GT.MXCOM) STOP 'EMPTUN ERROR - MXCOM limit exceeded'
+          RECM(ICOM)=REC
           GO TO 220
         END IF
       END IF
