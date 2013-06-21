@@ -285,7 +285,7 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 107
+    integer*4, parameter :: nrs = 108
     character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS  ', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP ', 'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP ', &
         'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS  ', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE  ', 'TUNEFI', &
@@ -296,7 +296,8 @@
         'CSGDR2', 'CSREAD', 'D1FRA ', 'DEFGA ', 'DEFGP ', 'DEFGW ', 'DFUS  ', 'DV    ', 'EFIT  ', 'EGDR1 ', &
         'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 'GCROD ', &
         'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', &
-        'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', 'PFNNIU'/)
+        'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', &
+        'PFNNIU', 'CELRED'/)
 
     integer*4 i
 
@@ -356,8 +357,9 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 8
-    character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV  ','RESNOR','FCCRED', 'ELARED'/)
+    integer*4, parameter :: nrs = 9
+    character*6, parameter :: glob(nrs) = (/'FUSRED','PCROSS','TOTRED','TUNEPE','GDIV  ','RESNOR','FCCRED',&
+        'ELARED','CELRED'/)
 
     integer*4 i
 
