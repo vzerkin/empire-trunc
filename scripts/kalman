@@ -1,81 +1,99 @@
 #!/bin/bash
+
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
     exit
 fi
 
-file=$1
-MT=$2
-MAT=$3
-EXPDAT=$4
-PFNS=$5
-EINC=$6   # Incident energy for which to fit PFNS (in MeV)
-#CRCOV=$7
+file=$1         # Empire input file stem (no extension) - required.
+MT=$2           # MT for plotting. If not present or 0 -> plot all.
+MAT=$3          # MAT of material. If not present or 0 -> use MAT in ENDF file.
+EXPDAT=$4       # 1=fit only specifed MT; 2=fit all MTs; other=fit no exp data.
+PFNS=$5         # set non-zero (true) to fit PFNS data.
+EINC=$6         # Incident energy for which to fit PFNS (in MeV).
 
 if [ -z $file ]; then
-echo "INPUT FILE NOT SPECIFIED"
-exit
+  echo "INPUT FILE STEM NOT SPECIFIED!"
+  exit
 fi
-if [ ! -s $file.endf ]; then
-   echo "ENDF FILE NOT FOUND ($file.endf)"
-   exit 0
+
+if [ ! -s ${file}.endf ]; then
+   echo " ENDF FILE NOT FOUND! (${file}.endf)"
+   echo -n ' Hit carriage return to exit kalman script > '
+   read errkey
+   exit 1
 fi
+
 if [ -z $MT -o "$MT" = "0" ]; then
    MT="1 2 3 4 16 17 18 102 103 107"
 fi
+
 if [ -z $MAT -o "$MAT" = "0" ]; then
    # MAT="1111"
    MAT=$($EMPIREDIR/util/mkendf/getmtn ${file}.endf)
 fi
+
 if [ -z $EXPDAT ]; then
    EXPDAT="0"
 fi
+
 if [ -z $PFNS ]; then
    PFNS=0
 fi
+
 if [ -z $EINC ]; then
    EINC="NONE"
 fi
-#if [ -z $CRCOV ]; then
-#   CRCOV="0"
-#fi
-if [ ! -s $file-inp.sen ]; then
-   echo "PARAMETER FILE NOT FOUND ($file-inp.sen)"
+
+if [ ! -s ${file}-inp.sen ]; then
+   echo " PARAMETER FILE NOT FOUND! (${file}-inp.sen)"
+   echo -n ' Hit carriage return to exit kalman script > '
+   read errkey
    exit 1
 fi
 
 if [ $PFNS = 0 ]; then
-   echo "Fitting only cross sections from $file-mat.sen."
-   if [ ! -s $file.xsc ]; then
-     echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
+   echo "Fitting cross sections using ${file}-mat.sen."
+   if [ ! -s ${file}.xsc ]; then
+     echo " CROSS SECTIONS FILE NOT FOUND! (${file}.xsc)"
+     echo -n ' Hit carriage return to exit kalman script > '
+     read errkey
      exit 2
    fi
-   if [ ! -s $file-mat.sen ]; then
-     echo "SENSITIVITY FILE NOT FOUND ($file-mat.sen)"
+   if [ ! -s ${file}-mat.sen ]; then
+     echo " SENSITIVITY FILE NOT FOUND! (${file}-mat.sen)"
+     echo -n ' Hit carriage return to exit kalman script > '
+     read errkey
      exit 3
    fi
 elif [ $PFNS = 1 ]; then
-   echo "Fitting only prompt fission neutron spectra from $file-pfns-full-mat.sen."
-   if [ ! -s $file-pfns.out ]; then
-      echo "PROMPT NEUTRON FISSION SPECTRA FILE NOT FOUND ($file-pfns.out)"
+   echo "Fitting prompt fission neutron spectra using ${file}-pfns-full-mat.sen."
+   if [ ! -s ${file}-pfns.out ]; then
+      echo " PROMPT NEUTRON FISSION SPECTRA FILE NOT FOUND! (${file}-pfns.out)"
+      echo -n ' Hit carriage return to exit kalman script > '
+      read errkey
       exit 4
    fi
-   if [ ! -s $file-pfns-full-mat.sen ]; then
-     echo "SENSITIVITY FILE NOT FOUND ($file-pfns-full-mat.sen)"
-     echo "ALLOWING TO CONTINUE TO COMPARE INCIDENT ENERGIES, EVEN THOUGH pnt2kal WILL CRASH"
-#    exit 5
+   if [ ! -s ${file}-pfns-full-mat.sen ]; then
+     echo " PFNS SENSITIVITY FILE NOT FOUND! (${file}-pfns-full-mat.sen)"
+     echo " ALLOWING TO CONTINUE TO COMPARE INCIDENT ENERGIES, EVEN THOUGH pnt2kal WILL CRASH"
+     # exit 5
    fi
 else
    echo "Option PFNS = $PFNS has not been implemented yet."
+   echo -n ' Hit carriage return to exit kalman script > '
+   read errkey
    exit 6
 fi
 
+# clean up anything left around from a previous run
+
 rm -f fort.* $file*.gpd $file-{c4,par,*-err}.kal ENERGYANDINDEX.TMP
-#rm $file-*-c4.gpd 2>/dev/null
-#rm $file-{c4,par,*-err}.kal 2>/dev/null
-#rm ENERGYANDINDEX.TMP 2>/dev/null
-#rm $file-33-*.cov  2>/dev/null
+
+# now loop through the kalman fitting, repeating the fit for each plotted
+# MT. Note that all the data in the C4 and and XSC file are fitted for each
+# pass redundantly - only the MT plot changes for each pass through the loop.
 
 for k in $MT; do
 
@@ -85,18 +103,32 @@ for k in $MT; do
 
     if [ "$PFNS" -eq 0 ]
     then
+      # c4tokal reads the C4 file and writes data, unc & corr to
+      # fort.10, .11 & .12. Also creates new KALMAN.INP
       echo  "Running c4tokal"
       if ! $EMPIREDIR/util/kalman/c4tokal < INPUT.D
       then
          echo " Error running c4tokal"
-         exit
+         echo -n ' Hit carriage return to exit kalman script > '
+         read errkey
+         exit 6
       fi
     else
+      # pnt2kal perpares PFNS data for fitting with kalman
+      # data, unc, corr written to fort.10,11,12 & makes new KALMAN.INP
       echo  "Running pnt2kal"
-      $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
+      if ! $EMPIREDIR/util/kalman/pnt2kal < INPUT.D
+      then
+         echo " Error running pnt2kal"
+         echo -n ' Hit carriage return to exit kalman script > '
+         read errkey
+         exit 6
+      fi
       if [ ! -s ENERGYANDINDEX.TMP ]; then
-        echo "ERROR: pnt2kal ended abnormally! Aborting kalman script... "
-        exit
+         echo "ERROR: pnt2kal ended abnormally!"
+         echo -n ' Hit carriage return to exit kalman script > '
+         read errkey
+         exit
       fi
       read NE INDEX EINC < ENERGYANDINDEX.TMP
       i=1
@@ -109,26 +141,31 @@ for k in $MT; do
     fi
 
     echo  "Running genkal"
-    if ! $EMPIREDIR/util/kalman/genkal <INPUT.D
+    if ! $EMPIREDIR/util/kalman/genkal < INPUT.D
     then
       echo " Error running genkal"
-      exit
+      echo -n ' Hit carriage return to exit kalman script > '
+      read errkey
+      exit 7
     fi
 
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
 
     if [ "$EXPDAT" != 0 ]; then
        if [ -s $file-expxsc.kal ]; then
+          echo "Existing file ${file}-expxsc.kal replacing C4 cross sections"
 	  cp $file-expxsc.kal fort.10
        else
-	  cp fort.10 $file-expxsc.kal
+	  cp fort.10 ${file}-expxsc.kal
        fi
        if [ -s $file-expcorr.kal ]; then
+          echo "Existing file ${file}-expcorr.kal replacing C4 xsec correlations"
 	  cp $file-expcorr.kal fort.12
        else
-	  cp fort.12 $file-expcorr.kal
+	  cp fort.12 ${file}-expcorr.kal
        fi
     else
+       echo " Experimental data not used. Removing data, err, & corr files"
        rm fort.10
        rm fort.11
        rm fort.12
@@ -136,16 +173,16 @@ for k in $MT; do
 
     # CORRELATIONS AMONG MODEL PARAMETERS
 
-    if [ ! -s $file-parcorr.kal ]; then
-       cp fort.52 $file-parcorr.kal
+    if [ ! -s ${file}-parcorr.kal ]; then
+       cp fort.52 ${file}-parcorr.kal
     else
-       cp $file-parcorr.kal fort.52
+       cp ${file}-parcorr.kal fort.52
     fi
 
     if [ "$EXPDAT" != 0 ]; then
         kalinp=''
         if [ -s $file-inp.kal ]; then
-            echo "use existing Kalman input y/N?"
+            echo -n "Use existing Kalman input? (Y/N) > "
             read kalinp
         fi
         if [ -n "$kalinp" ] && ( [ ${kalinp:0:1} = "y" ] || [ ${kalinp:0:1} = "Y" ] ); then
@@ -157,7 +194,13 @@ for k in $MT; do
     fi
 
     echo  "Running kalman"
-    $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
+    if ! $EMPIREDIR/util/kalman/kalman3.exe < KALMAN.INP > $file-out.kal
+    then
+      echo " Error running kalman3"
+      echo -n ' Hit carriage return to exit kalman script > '
+      read errkey
+      exit 10
+    fi
 
     mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
     mv fort.14 $file-cov.kal
@@ -165,12 +208,18 @@ for k in $MT; do
     cat fort.16 fort.32 > fort.48
  
     echo  "Running kalend"
-    $EMPIREDIR/util/kalman/kalend <INPUT.D
+    if ! $EMPIREDIR/util/kalman/kalend < INPUT.D
+    then
+      echo " Error running kalend"
+      echo -n ' Hit carriage return to exit kalman script > '
+      read errkey
+      exit 12
+    fi
 
     if [ $PFNS -eq 0 ]; then
-      cp $file-${k}-c4.gpd expxscplot.d
+      cp ${file}-${k}-c4.gpd expxscplot.d
     else
-      cp $file-PFNS-${INDEX}-c4.gpd expxscplot.d
+      cp ${file}-PFNS-${INDEX}-c4.gpd expxscplot.d
     fi
 
     #PLOT DATA ONLY WITH EXPERIMENTAL DATA
@@ -184,22 +233,11 @@ for k in $MT; do
       fi
     fi
 
-    mv corrplot.d $file-${k}-cov.gpd # Should give a different name for this file in the pfns case, but which? 
-    mv xscplot.d  $file-${k}-xsc.gpd # Should give a different name for this file in the pfns case, but which? 
+    # Should consider a different name for these files in the pfns case, but which? 
+    mv corrplot.d $file-${k}-cov.gpd
+    mv xscplot.d  $file-${k}-xsc.gpd
 
     rm expxscplot.d
-
-# CROSS-REACTION CORRELATIONS TAKEN FROM KALMAN
-#    if [ "$CRCOV" != 0 ]; then
-#     rm $file-33-*.cov
-#     $EMPIREDIR/util/kalman/kalend3.exe <INPUT.D
-##     for j in "  1" "  2" "  3" "  4" " 16" " 18" "102" "103" "107"; do
-#     for j in "  1" "  2" "  3" "  4" " 16" " 17" " 18" "102"; do
-#      l=`echo ${j}`
-#      grep "^.\{70,75\}33$j" fort.112 >$file-33-$l.cov
-#      echo "                                                                 0${MAT}33  099999" >> $file-33-$l.cov
-#     done
-#    fi
 
     echo 'COMPLETE ...'
 
@@ -211,5 +249,3 @@ rm -f fort.{1*,50,52,75}
 rm ENERGYANDINDEX.TMP 2>/dev/null
 
 exit
-
-# l=`echo ${#k}` IT GIVES THE LENGTH OF THE STRING K
