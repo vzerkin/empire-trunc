@@ -19,8 +19,8 @@ module ENDF_COV_IO
         integer nei                           ! number of energies where standard was used (LTY>0)
         integer mats                          ! MAT of the standards cross section (LTY>0)
         integer mts                           ! MT of the stadards cross section (LTY>0)
-        real xmfs                             ! contains MF (MFS) of standards  (LTY>0)
-        real xlfss                            ! contains FLS of the stanards crs. ==0 unless MFS=10 (LTY>0)
+        integer mfs                           ! MF (MFS) of standards  (LTY>0)
+        integer lfss                          ! LFLS of the stanards crs. ==0 unless MFS=10 (LTY>0)
         type (real_pair), pointer :: pt(:)    ! pairs of data points
     end type
 
@@ -34,8 +34,7 @@ module ENDF_COV_IO
                                               ! = # row energies NER, LB=6.
         type (real_pair), pointer :: kl(:)    ! uncert, LB=-1:4,8,9
         type (real_pair), pointer :: ll(:)    ! LB=3,4
-        real, pointer :: e(:)                 ! LB=5,7
-        real, pointer :: er(:)                ! LB=6
+        real, pointer :: e(:)                 ! LB=5,7; LB=6 => ER
         real, pointer :: ec(:)                ! LB=6
         real, pointer :: cov(:,:)             ! LB=5,6,7
     end type
@@ -65,6 +64,7 @@ module ENDF_COV_IO
     type (nc_cov_sect), intent(out) :: ncs
 
     integer n,nt
+    real x
 
     call read_endf(n, ncs%lty, n, n)
 
@@ -95,8 +95,10 @@ module ENDF_COV_IO
 
         allocate(ncs%pt(ncs%nei),stat=n)
         if(n .ne. 0) call endf_badal
-        call read_endf(ncs%xmfs)
-        call get_endf(ncs%xlfss)
+        call read_endf(x)
+        ncs%mfs = x
+        call get_endf(x)
+        ncs%lfss = x
         call get_endf(ncs%pt, ncs%nei)
 
     case default
@@ -115,6 +117,8 @@ module ENDF_COV_IO
 
     implicit none
 
+    real x
+
     type (nc_cov_sect), intent(in) :: ncs
 
     call write_endf(0, ncs%lty, 0, 0)
@@ -125,8 +129,10 @@ module ENDF_COV_IO
         call write_endf(ncs%pt, ncs%nci)
     case(1:3)
         call write_endf(ncs%e1, ncs%e2, ncs%mats, ncs%mts, 2*(ncs%nei+1), ncs%nei)
-        call write_endf(ncs%xmfs)
-        call put_endf(ncs%xlfss)
+        x = ncs%mfs
+        call write_endf(x)
+        x = ncs%lfss
+        call put_endf(x)
         call put_endf(ncs%pt, ncs%nei)
     case default
         write(erlin,*) 'Undefined LTY found in NC-covariance matrix: ',ncs%lty
@@ -189,7 +195,7 @@ module ENDF_COV_IO
     call read_endf(nis%lt, nis%lb, nis%nt, nis%ne)
 
     nis%ls = 0
-    nullify(nis%kl, nis%ll, nis%e, nis%er, nis%ec, nis%cov)
+    nullify(nis%kl, nis%ll, nis%e, nis%ec, nis%cov)
 
     select case(nis%lb)
     case(-1:2,8,9)
@@ -251,16 +257,16 @@ module ENDF_COV_IO
 
         ner = nis%ne
         xec = real(nis%nt-1)/real(ner)
-        nec = int(xec)
+        nec = nint(xec)
 
         if(real(nec) .ne. xec) then
             write(erlin,*) 'Inconsistent LB=6 NI-covariance NEC, NER : ',nec,ner
             call endf_error(erlin)
         endif
 
-        allocate(nis%er(ner),nis%ec(nec), nis%cov(ner-1,nec-1),stat=n)
+        allocate(nis%e(ner),nis%ec(nec), nis%cov(ner-1,nec-1),stat=n)
         if(n .ne. 0) call endf_badal
-        call read_endf(nis%er,ner)
+        call read_endf(nis%e,ner)
         call get_endf(nis%ec,nec)
         call get_endf(nis%cov,ner-1,nec-1)
 
@@ -344,7 +350,7 @@ module ENDF_COV_IO
 
         ner = nis%ne
         xec = real(nis%nt-1)/real(ner)
-        nec = int(xec)
+        nec = nint(xec)
 
         if(real(nec) .ne. xec) then
             write(erlin,*) 'Inconsistent LB=6 NI-covariance NEC, NER : ',nec,ner
@@ -352,7 +358,7 @@ module ENDF_COV_IO
         endif
 
         call write_endf(0, nis%lb, nis%nt, nis%ne)
-        call write_endf(nis%er,ner)
+        call write_endf(nis%e,ner)
         call put_endf(nis%ec,nec)
         call put_endf(nis%cov,ner-1,nec-1)
 
@@ -378,7 +384,6 @@ module ENDF_COV_IO
     if(associated(nis%ll))  deallocate(nis%ll)
     if(associated(nis%cov)) deallocate(nis%cov)
     if(associated(nis%e))   deallocate(nis%e)
-    if(associated(nis%er))  deallocate(nis%er)
     if(associated(nis%ec))  deallocate(nis%ec)
 
     return

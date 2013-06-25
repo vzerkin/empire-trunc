@@ -13,8 +13,8 @@ module ENDF_MF33_IO
     public
 
     type MF33_sect
-        real xmf1                      ! mf of 2nd E-dep crs
-        real xlfs1                     ! final excited state of 2nd E-dep crs
+        integer mf1                    ! mf of 2nd E-dep crs
+        integer lfs1                   ! final excited state of 2nd E-dep crs
         integer mat1                   ! MAT for 2nd E-dep crs
         integer mt1                    ! MT for 2nd E-dep crs
         integer nc                     ! # of NC-type sub-sections
@@ -44,6 +44,7 @@ module ENDF_MF33_IO
     type (mf_33), intent(out), target :: mf33
 
     integer i,j,n
+    real x1,x2
     type (MF33_sect), pointer :: sc
 
     call get_endf(mf33%za, mf33%awr, n, mf33%mtl, n, mf33%nl)
@@ -60,7 +61,9 @@ module ENDF_MF33_IO
     do i = 1,mf33%nl
 
         sc => mf33%sct(i)
-        call read_endf(sc%xmf1, sc%xlfs1, sc%mat1, sc%mt1, sc%nc, sc%ni)
+        call read_endf(x1, x2, sc%mat1, sc%mt1, sc%nc, sc%ni)
+        sc%mf1  = nint(x1)
+        sc%lfs1 = nint(x2)
 
         allocate(sc%ncs(sc%nc),stat=n)
         if(n .ne. 0) call endf_badal
@@ -88,6 +91,7 @@ module ENDF_MF33_IO
     type (mf_33), intent(in), target :: mf33
 
     integer i,j
+    real x1,x2
     type (MF33_sect), pointer :: sc
 
     call set_mt(mf33%mt)
@@ -101,7 +105,9 @@ module ENDF_MF33_IO
 
     do i = 1,mf33%nl
         sc => mf33%sct(i)
-        call write_endf(sc%xmf1, sc%xlfs1, sc%mat1, sc%mt1, sc%nc, sc%ni)
+	x1 = sc%mf1
+        x2 = sc%lfs1
+        call write_endf(x1, x2, sc%mat1, sc%mt1, sc%nc, sc%ni)
         do j = 1,sc%nc
             call write_nc(sc%ncs(j))
         end do

@@ -19,12 +19,13 @@ module endf_lines
     integer*4, parameter :: idata = 3     ! state when within a MT section
 
     logical*4 :: verbose = .false.        ! type MAT, MF, MT whenever MT changes
-    logical*4 :: qmat = .false.           ! if true, chill when MAT changes unexpectedly
-    logical*4 :: qmf = .false.            ! if true, chill when MF  changes unexpectedly
-    logical*4 :: qmt = .false.            ! if true, chill when MT  changes unexpectedly
+    logical*4 :: qmat = .false.           ! if true, only issue warning if MAT changes unexpectedly
+    logical*4 :: qmf = .false.            ! if true, only issue warning if MF  changes unexpectedly
+    logical*4 :: qmt = .false.            ! if true, only issue warning if MT  changes unexpectedly
     logical*4 :: qlin = .false.           ! if true, put line numbers in (76:80) of output files
     logical*4 :: qfst = .true.            ! set true when file opened for first read of header line
 
+    integer*4 :: lbm(3)	= 0               ! contains last bad MAT, MF, MT encountered when qmat, qmf, or qmt set
     integer*4 :: errlim = 50              ! limit of errors in file before giving up.
 
     character*9 lmft                      ! MAT, MF, MT in cols 66-75 of last section read
@@ -95,6 +96,7 @@ module endf_lines
     lnum = -1
     istate = imend
     qfst = .true.
+    lbm = 0
     ipos = 0
     cmft = '   1 0  0'      ! default for header line
     lmft = cmft
@@ -166,7 +168,7 @@ module endf_lines
        ix = ix + 1
     end do
 
-    if(ier /=0) errcnt = errcnt + 1
+    if(ier < 0) errcnt = errcnt + 1
 
     select case(ier)
     case(1:)
@@ -411,37 +413,65 @@ module endf_lines
 
         if(endline(67:75) == cmft) return
 
-        ier = -50
-
         ! see what happened. read the value in the fields in
         ! case the user put leading zeros in the control fields
 
         read(cmft(7:9),'(i4)') k
         m = get_mt()
         if(k /= m) then
+            ier = -50
             if(k == 0) then
                 write(erlin,*) 'SEND record (MT=0) not found for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else if(m == 0) then
                 write(erlin,*) 'Section ended (MT=0) prematurely for MF=',lmft(5:6),',  MT=',lmft(7:9)
             else
-                if(qmt) ier = 50
-                write(erlin,*) 'MT  changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
+                if(qmt) then
+                    if(m == lbm(3)) then
+                        ier = 0
+                    else
+                        lbm(3) = m
+                        ier = 50
+                    endif
+                endif
+                if(ier /= 0) write(erlin,*) 'MT  changed unexpectedly from ',cmft(7:9),' to ',endline(73:75)
             endif
-            call endf_error(erlin,ier)
+            if(ier /= 0) call endf_error(erlin,ier)
         endif
 
         read(cmft(5:6),'(i4)') k
-        if(k /= get_mf()) then
-            if(qmf) ier = 50
-            write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
-            call endf_error(erlin,ier)
+        m = get_mf()
+        if(k /= m) then
+            ier = -50
+            if(qmf) then
+                if(m == lbm(2)) then
+                    ier = 0
+                else
+                    lbm(2) = m
+                    ier = 50
+                endif
+            endif
+            if(ier /= 0) then
+                write(erlin,*) 'MF  changed unexpectedly from ',cmft(5:6),' to ',endline(71:72)
+                call endf_error(erlin,ier)
+            endif
         endif
 
         read(cmft(1:4),'(i4)') k
-        if(k /= get_mat()) then
-            if(qmat) ier = 50
-            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
-            call endf_error(erlin,ier)
+        m = get_mat()
+        if(k /= m) then
+            ier = -50
+            if(qmat) then
+                if(m == lbm(1)) then
+                    ier = 0
+                else
+                    lbm(1) = m
+                    ier = 50
+                endif
+            endif
+            if(ier /= 0) then
+                write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+                call endf_error(erlin,ier)
+            endif
         endif
 
         ! all read as equal - allow this line in
@@ -451,15 +481,25 @@ module endf_lines
         ! last line read had MT=0
         ! see if next line has new MT or end of file with MF=0
 
-        ier = -55
-
         read(cmft(1:4),'(i4)') k
-        if(k /= get_mat()) then
-            if(qmat) ier = 55
-            write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
-            call endf_error(erlin,ier)
+        m = get_mat()
+        if(k /= m) then
+            ier = -55
+            if(qmat) then
+                if(m == lbm(1)) then
+                    ier = 0
+                else
+                    lbm(1) = m
+                    ier = 55
+                endif
+            endif
+            if(ier /= 0) then
+                write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+                call endf_error(erlin,ier)
+            endif
         endif
 
+        ier = -55
         read(cmft(5:6),'(i4)') k
         m = get_mf()
         if(k == m) then
@@ -481,7 +521,7 @@ module endf_lines
                 istate = ifend
                 return
             endif
-            write(erlin,*) 'FEND record (MF=0) encountered with non-zero MT:',endline(73:75)
+            erlin = 'FEND record (MF=0) encountered with non-zero MT:'//endline(73:75)
         else
             if(qmf) ier = 55
             ! assume a new file is starting w/o ending the last with a MF=0 FEND record
@@ -505,15 +545,20 @@ module endf_lines
             endif
             if(qmat) then
                 ! if we're ignoring MAT numbers, just report this and keep going
-                ier = 60
-                write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
+                if(m == lbm(1)) then
+                    ier = 0
+                else
+                    lbm(1) = m
+                    ier = 60
+                endif
+                if(ier /= 0) write(erlin,*) 'MAT changed unexpectedly from ',cmft(1:4),' to ',endline(67:70)
             else
                 ! assume a new material is starting w/o ending the last with a MAT=0 MEND record
                 ! report this error and quit processing
                 ier = -60
                 write(erlin,*) 'MEND (MAT=0) record not found for MAT=',lmft(1:4)
             endif
-            call endf_error(erlin,ier)
+            if(ier /= 0) call endf_error(erlin,ier)
         endif
 
         ! same MAT - must be starting new MF file

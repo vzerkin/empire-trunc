@@ -13,8 +13,8 @@ module ENDF_MF40_IO
     public
 
     type MF40_subsect
-        real xmf1                          ! mf of 2nd E-dep crs
-        real xlfs1                         ! final excited state of 2nd E-dep crs
+        integer mf1                        ! mf of 2nd E-dep crs
+        integer lfs1                       ! final excited state of 2nd E-dep crs
         integer mat1                       ! MAT for 2nd E-dep crs
         integer mt1                        ! MT for 2nd E-dep crs
         integer nc                         ! # of NC-type sub-sections
@@ -52,6 +52,7 @@ module ENDF_MF40_IO
     type (mf_40), intent(out), target :: mf40
 
     integer i,j,k,n
+    real x1,x2
     type (mf40_sect), pointer :: sc
     type (mf40_subsect), pointer :: ss
 
@@ -68,7 +69,9 @@ module ENDF_MF40_IO
 
         do j = 1, sc%nl
             ss => sc%sub(j)
-            call read_endf(ss%xmf1, ss%xlfs1, ss%mat1, ss%mt1, ss%nc, ss%ni)
+            call read_endf(x1, x2, ss%mat1, ss%mt1, ss%nc, ss%ni)
+            ss%mf1 = nint(x1)
+            ss%lfs1 = nint(x2)
             allocate(ss%ncs(ss%nc),stat=n)
             if(n /= 0) call endf_badal
             do k = 1,ss%nc
@@ -95,6 +98,7 @@ module ENDF_MF40_IO
     type (mf_40), intent(in), target :: mf40
 
     integer i,j,k
+    real x1,x2
     type (mf40_sect), pointer :: sc
     type (mf40_subsect), pointer :: ss
 
@@ -105,7 +109,9 @@ module ENDF_MF40_IO
         call write_endf(sc%qm, sc%qi, 0, sc%lfs, 0, sc%nl)
         do j = 1, sc%nl
             ss => sc%sub(j)
-            call write_endf(ss%xmf1, ss%xlfs1, ss%mat1, ss%mt1, ss%nc, ss%ni)
+            x1 = ss%mf1
+            x2 = ss%lfs1
+            call write_endf(x1, x2, ss%mat1, ss%mt1, ss%nc, ss%ni)
             do k = 1,ss%nc
                 call write_nc(ss%ncs(k))
             end do

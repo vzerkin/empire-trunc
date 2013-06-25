@@ -67,12 +67,15 @@ ifeq ($(IPO),TRUE)
   all : endf_io.o c4_io.o
 
   endf_io.o : endf_unx.o *.f90
-	ifort $(FFLAGS) -real-size 64 -ipo-c -o endf_io.o endf_blkunx.f90 endf_line.f90 endf_base.f90 endf_cov.f90 mf*.f90 endf_queue.f90 endf.f90
+	ifort $(FFLAGS) -real-size 64 -ipo-c -o endf_io.o endf_blkunx.f90\
+           endf_line.f90 endf_base.f90 endf_cov.f90 mf*.f90 endf_queue.f90 endf.f90
 else
 
   # use compiler FC with FFLAGS
 
-  OBJF = mf1.o mf2.o mf3.o mf4.o mf5.o mf6.o mf7.o mf8.o mf9.o mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
+  OBJF = mf1.o mf2.o mf3.o mf4.o mf5.o mf6.o mf7.o mf8.o mf9.o\
+       mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o\
+       mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
   all : $(OBJF) c4_io.o endf.o
   endf.o : $(OBJF) endf_base.o endf_cov.o endf_queue.o
