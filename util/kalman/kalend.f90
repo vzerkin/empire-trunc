@@ -562,6 +562,7 @@ program kalend
     real*8, intent(in) :: en(ne)             ! energies
     real*8, intent(in) :: cov(ne-1,ne-1)     ! relative covariances
 
+    logical*4 qins
     integer*4 status
 
     type (mf_33), target :: nf33
@@ -581,8 +582,8 @@ program kalend
     nf33%nl  = 1
     allocate(nf33%sct(1))
     sct => nf33%sct(1)
-    sct%xmf1  = 0.D0
-    sct%xlfs1 = 0.D0
+    sct%mf1  = 0
+    sct%lfs1 = 0
     sct%mat1  = mat1
     sct%mt1   = mt1
     sct%nc    = 0
@@ -594,38 +595,23 @@ program kalend
     ni%ne = ne
     ni%kl => null()
     ni%ll => null()
-    ni%er => null()
     ni%ec => null()
     allocate(ni%e(ne),ni%cov(ne,ne))
     ni%e = en*1.D+06
     ni%cov = cov
 
-    ! look in file to see what's already there
-    ! if a MT1 section found, replace it (not really correct)
+    ! look in file to see what's already there.
+    ! if a MT1 section found, remove it and replace it
+    ! with the section we just created. Of course, this
+    ! is not really the proper thing to do for an existing
+    ! ENDF evaluation, which may have an different energy
+    ! range from the one we're replacing. For now, just
+    ! stick in the MF33 for this MT in the ENDF file.
 
-    if(.not.associated(mat%mf33)) then
-       mat%mf33 => nf33
-       nf33%next => null()
-    else
-       if(mat%mf33%mt < mt1) then
-         mf33 => mat%mf33
-         do while(associated(mf33%next))
-            if(mf33%next%mt < mt1) then
-               mf33 => mf33%next
-               cycle
-            endif
-            if(mf33%next%mt == mt1) mf33%next => mf33%next%next
-            exit
-         end do
-         nf33%next => mf33%next
-         mf33%next => nf33
-       else if(mat%mf33%mt == mt1) then
-         nf33%next => mat%mf33%next
-         mat%mf33 => nf33
-       else
-         nf33%next => mat%mf33
-         mat%mf33 => nf33
-       endif
+    mf33 => pop(mat%mf33,mt1)
+    qins = put(mat%mf33,nf33)
+    if(.not.qins) then
+        write(6,*) ' Error inserting MF33, MT=',mt1
     endif
 
     call system('rm -r '//file(l1:l2)//'-kal.endf')

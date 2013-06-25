@@ -88,8 +88,10 @@ empsee: empire_sees.f90
 	$(FC) $(FFLAGS) -o $@ empire_sees.f90
 
 clean:
-	rm -f *.o *.mod
-# When making a debug image, don't compile ECIS /debug
+	rm -f *.o *.mod *.exe
+	rm -f empsee newinp kefkal pnt2kal genkal c4tokal kalend
+
+# When making a debug image
 dbg:  
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
