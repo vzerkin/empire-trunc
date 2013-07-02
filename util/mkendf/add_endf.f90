@@ -6,16 +6,17 @@
 	! the donor file should contain the additional needed MF/MT sections to 
 	! make the EMPEND endf-file complete:
 	!  MF          MT
-	!  1     any of 452,455,456,458
+	!  1         455,458
 	!  4           18
 	!  5     18, any of 452,455,456,458
 	! these sections from the donor will be added to the EMPEND file if not present
 	! and then the new file will be written out with extension ".endfadd"
 	! It is additionally assumed that both files will contain
         ! only 1 material, and that MAT1 = MAT2.
-	! nubars are scaled by the value of the PFNNIU parameter in {proj}.inp
+	! a new total nubar (MT452) will be created from sum of 456 and 455, if present.
 
 	use endf_io
+	use endf_util
 
 	implicit none
 
@@ -36,24 +37,11 @@
 
 	call load_files
 
-	! at present (Jan 2013) EMPEND only writes out prompt nubars in the EMPEND
-	! file: MF1/MT456. We need to get total and delayed nubars (452,455) from
-	! the donor. At this time, we simply read in the donor nubars and scale
-	! them directly by the value on PFNNIU in the empire input file. If it's
-	! not there, no scaling is done. This routine does NOT check that 452 = 455+456,
-	! as it should be, this should be fixed at some point, but this will involve
-	! interpolating, etc since the energy grids for the Empire generated 456 will
-	! likely not follow that of the donor MF1. A quick test in Jan 2013 looked like
-	! MCNP did not use the prompt, only the total nubar, 452, so this may not be
-	! a problem if using the file for MCNP simulations.
-
-	call scale_nubar(endf2%mat%mf1)
-
-	! now look for nubars (MF1) in donor and insert if not present
-
-	call ins_mf1
-
 	if(qfis) then
+
+		! see if donor has delayed nubars MF1/455. If so, add in.
+
+		call fix_nubars
 
 		! for fissionable materials look for MF4/MT18 or MF6/MT18. 
 		! If neither found, use donor MF4/MT18
@@ -69,24 +57,21 @@
 		call ins_mf5(456)
 		call ins_mf5(458)
 
-	end if
+		! make sure Q-value from MF1/458 = Q-values from MF3/MT18
 
-	! make sure Q-value from MF1/458 = Q-values from MF3/MT18
-
-	mf1 => find(mat1%mf1,458)
-	if(associated(mf1)) then
-		er = mf1%mt458%cmp(0)%er
-		mf3 => find(mat1%mf3,18)
-		if(.not.associated(mf3)) then
-			write(6,'(a)') ' MF1/458 without MF3/MT18'
-			stop 1
+		mf1 => find(mat1%mf1,458)
+		if(associated(mf1)) then
+			er = mf1%mt458%cmp(0)%er
+			mf3 => find(mat1%mf3,18)
+			if(.not.associated(mf3)) then
+				write(6,'(a)') ' MF1/458 without MF3/MT18'
+				stop 1
+			endif
+			mf3%qm = er
+			mf3%qi = er
 		endif
-		mf3%qm = er
-		mf3%qi = er
-	endif
 
-	! don't trim the file
-	! call trim_mf6
+	end if
 
 	write(6,'(a)') ' Writing new ENDF file'
 
@@ -170,26 +155,122 @@
 
 	!---------------------------------------------------------------------
 
-	subroutine ins_mf1
+	subroutine fix_nubars
 
 	implicit none
 
-	! look for nubar sections in donor file and add to empire file.
-	! don't replace any nubar sections already in empire file
+	! at present (July 2013) EMPEND only writes out prompt nubars in the EMPEND
+	! in file: MF1/MT456. Look for delayed nubars in the donor file and if found
+        ! then re-form the total by making sum 452 = 455 + 456.
 
-	type (mf_1), pointer :: m2,nxt
+	integer*4 i
+	real*8 c1,c2
 
-	m2 => mat2%mf1
-	do while(associated(m2))
-		nxt => m2%next
-		if((m2%mt > 451) .and. (m2%mt < 460)) then
-			if(put(mat1%mf1,m2)) write(6,'(a,i3)') ' Donor MF1 inserted for MT = ',m2%mt
+	type (tab1), pointer :: tb
+	type (mf_1) m1
+	type (mf_1), pointer :: m1_55,m1_56
+	type (mf1_452), pointer :: m52
+	type (mf1_455), pointer :: m55
+	type (mf1_452), pointer :: m56
+
+	m1%mt = 452
+	m1%za = mat1%mf1%za	! assume mt451 is always there
+	m1%awr = mat1%mf1%awr
+
+	m1_56 => find(mat1%mf1,456)
+	if(.not.associated(m1_56)) stop ' EMPEND output contains no prompt nubars (MF1/456)'
+	m56 => m1_56%mt456
+
+	m1_55 => find(mat2%mf1,455)
+	if(associated(m1_55)) then
+		! make a total nubar 452
+		allocate(m1%mt452)
+		m52 => m1%mt452
+		! donor has delayed nubars. Insert into file
+		if(put(mat1%mf1,m1_55)) write(6,'(a,i3)') ' Donor MF1 inserted for delayed nubars'
+		m55 => m1_55%mt455
+		if((m56%lnu == 1) .and. (m55%lnu == 1)) then
+			! both polynomial expansions - simply add
+			m52%lnu = 1
+			nullify(m52%tb)
+			m52%nc = max(m55%nc,m56%nc)
+			allocate(m52%c(m52%nc))
+			do i = 1,m52%nc
+				c1 = 0.D0
+				c2 = 0.D0
+				if(i <= m55%nc) c1 = m55%c(i)
+				if(i <= m56%nc) c2 = m56%c(i)
+				m52%c(i) = c1 + c2
+			end do
+		else if((m56%lnu == 2) .and. (m55%lnu == 1)) then
+			! one TAB1, other poly
+			m52%lnu = 2
+			m52%nc = 0
+			nullify(m52%c)
+			allocate(m52%tb)
+			tb => m52%tb
+			tb%nr = m56%tb%nr
+			tb%np = m56%tb%np
+			allocate(tb%itp(tb%nr),tb%dat(tb%np))
+			tb%itp = m56%tb%itp
+			do i = 1,tb%np
+				tb%dat(i)%x = m56%tb%dat(i)%x
+				tb%dat(i)%y = m56%tb%dat(i)%y + poly(m56%tb%dat(i)%x,m55%c,m55%nc)
+			end do
+		else if((m56%lnu == 1) .and. (m55%lnu == 2)) then
+			! one TAB1, other poly
+			m52%lnu = 2
+			m52%nc = 0
+			nullify(m52%c)
+			allocate(m52%tb)
+			tb => m52%tb
+			tb%nr = m55%tb%nr
+			tb%np = m55%tb%np
+			allocate(tb%itp(tb%nr),tb%dat(tb%np))
+			tb%itp = m55%tb%itp
+			do i = 1,tb%np
+				tb%dat(i)%x = m55%tb%dat(i)%x
+				tb%dat(i)%y = m55%tb%dat(i)%y + poly(m55%tb%dat(i)%x,m56%c,m56%nc)
+			end do
+		else if((m56%lnu == 1) .and. (m55%lnu == 2)) then
+			! both TAB1
+			m52%lnu = 2
+			m52%nc = 0
+			nullify(m52%c)
+			allocate(m52%tb)
+			m52%tb = m55%tb + m56%tb
+		else
+			stop ' ERROR: Undefined values for LNU in MF1 encountered'
 		endif
-		m2 => nxt
-	end do
+	else
+		m1%mt452 => m56		! just point to mt456 - they are identical
+	endif
+
+	if(put(mat1%mf1,m1)) write(6,'(a,i3)') ' New MF1 inserted for total nubar'
 
 	return
-	end subroutine ins_mf1
+	end subroutine fix_nubars
+
+	!---------------------------------------------------------------------
+
+	real*8 function poly(x,a,n)
+
+	real*8, intent(in) :: x		! value to evaluate polynomial
+	real*8, intent(in) :: a(*)	! poly coeffs
+	integer*4, intent(in) :: n	! rank of poly
+
+	integer*4 i
+	real*8 y
+
+	y = a(n)
+	do i = n-1,1
+		y = x*y + a(i)
+	end do
+
+	poly = y
+
+	return
+	end function poly
 
 	!---------------------------------------------------------------------
 
@@ -267,224 +348,5 @@
 
 	return
 	end subroutine ins_mf5
-
-	!---------------------------------------------------------------------
-
-	subroutine trim_mf6
-
-	implicit none
-
-	! trim the number of energies in MF6/MT18 to a reasonable number
-	! if left too big, MCNP will crash trying to read in the resulting ACE file
-
-	! these values were set looking at the primary energies from U235, Pu239
-	! the outgoing energies were not trimmed.
-
-!	integer*4, parameter :: ne_18 = 17
-!	integer*4, parameter :: ix_18(ne_18) = (/1,2,6,11,13,16,20,25,30,35,40,45,49,54,62,67,72/)
-!	integer*4, parameter :: ne_91 = 10
-!	integer*4, parameter :: ix_91(ne_91) = (/1,4,8,11,15,19,24,28,33,38/)
-
-	integer*4, parameter :: ne_16 = 5
-	integer*4, parameter :: ix_16(ne_16,2) = (/1,5,9,13,19,1,4,9,12,18/)
-	integer*4, parameter :: ne_18 = 5
-	integer*4, parameter :: ix_18(ne_18) = (/1,14,38,57,72/)
-	integer*4, parameter :: ne_91 = 5
-	integer*4, parameter :: ix_91(ne_91) = (/1,8,15,25,38/)
-
-	integer*4 i,j,me
-
-	type (mf_6), pointer :: mf6
-	type (mf6_law1), target :: n16(2),n18,n91(2),n102
-	type (mf6_law1), pointer :: law1,new
-
-	mf6 => mat1%mf6
-	do while(associated(mf6))
-		select case(mf6%mt)
-		case(16)
-			do i = 1,mf6%nk
-				if(mf6%prd(i)%law /= 1) then
-					write(6,'(a)') ' MF6/MT16 not LAW 1'
-					stop
-				endif
-				law1 => mf6%prd(i)%law1
-				new => n16(i)
-				new%lang = law1%lang
-				new%lep = law1%lep
-				new%nr = law1%nr
-				new%ne = ne_16
-				new%itp => law1%itp
-				new%itp(1)%x = ne_16
-				allocate(new%ll(ne_16))
-				do j = 1,ne_16
-					new%ll(j) = law1%ll(ix_16(j,i))
-				end do
-				mf6%prd(i)%law1 => n16(i)
-			end do
-		case(18)
-			if(mf6%nk /= 1) then
-				write(6,'(a)') ' MF6/MT18 has more than one sub-section'
-				stop
-			endif
-			if(mf6%prd(1)%law /= 1) then
-				write(6,'(a)') ' MF6/MT18 not LAW 1'
-				stop
-			endif
-			law1 => mf6%prd(1)%law1
-			new => n18
-			new%lang = law1%lang
-			new%lep = law1%lep
-			new%nr = law1%nr
-			new%ne = ne_18
-			new%itp => law1%itp
-			new%itp(1)%x = ne_18
-			allocate(new%ll(ne_18))
-			do j = 1,ne_18
-				new%ll(j) = law1%ll(ix_18(j))
-			end do
-			mf6%prd(1)%law1 => n18
-		case(91)
-			do i = 1,mf6%nk
-				if(mf6%prd(i)%law /= 1) then
-					write(6,'(a)') ' MF6/MT91 not LAW 1'
-					stop
-				endif
-				law1 => mf6%prd(i)%law1
-				new => n91(i)
-				new%lang = law1%lang
-				new%lep = law1%lep
-				new%nr = law1%nr
-				new%ne = ne_91
-				new%itp => law1%itp
-				new%itp(1)%x = ne_91
-				allocate(new%ll(ne_91))
-				do j = 1,ne_91
-					new%ll(j) = law1%ll(ix_91(j))
-				end do
-				mf6%prd(i)%law1 => n91(i)
-			end do
-		case(102)
-			! 102 seems to have same energy structure as 18
-			if(mf6%nk /= 1) then
-				write(6,'(a)') ' MF6/MT102 has more than one sub-section'
-				stop
-			endif
-			if(mf6%prd(1)%law /= 1) then
-				write(6,'(a)') ' MF6/MT102 not LAW 1'
-				stop
-			endif
-			law1 => mf6%prd(1)%law1
-			new => n102
-			new%lang = law1%lang
-			new%lep = law1%lep
-			new%nr = law1%nr
-			new%ne = ne_18
-			new%itp => law1%itp
-			new%itp(1)%x = ne_18
-			allocate(new%ll(ne_18))
-			do j = 1,ne_18
-				new%ll(j) = law1%ll(ix_18(j))
-			end do
-			mf6%prd(1)%law1 => n102
-		end select
-		mf6 => mf6%next
-	end do
-
-	write(6,'(a)') ' MF6/MT18 trimmed'
-
-	return
-	end subroutine trim_mf6
-
-	!---------------------------------------------------------------------
-
-	subroutine scale_nubar(mfl1)
-
-	implicit none
-
-	type (mf_1), intent(inout), target :: mfl1
-
-	integer*4 i
-	real*4 xf
-	type (mf_1), pointer :: mf1
-	type (tab1), pointer :: tb
-
-	call get_nubar_scale(xf)
-
-	write(6,'(a,f7.4)') ' Scaling nubars by ',xf
-
-	mf1 => mfl1
-	do while(associated(mf1))
-		if(mf1%mt == 452) then
-			if(mf1%mt452%lnu == 1) then
-				mf1%mt452%c = xf*mf1%mt452%c
-			else
-				tb => mf1%mt452%tb
-				do i = 1,tb%np
-					tb%dat(i)%y = xf*tb%dat(i)%y
-				end do
-			endif
-		else if(mf1%mt == 455) then
-                        if(mf1%mt455%lnu == 1) then
-                                mf1%mt455%c = xf*mf1%mt455%c
-                        else
-				tb => mf1%mt455%tb
-				do i = 1,tb%np
-					tb%dat(i)%y = xf*tb%dat(i)%y
-				end do
-                        endif
-!		don't scale 456 -it's inserted by EMPEND and presumably already scaled
-!		else if(mf1%mt == 456) then
-!			if(mf1%mt456%lnu == 1) then
-!			mf1%mt456%c = xf*mf1%mt456%c
-!			else
-!				tb => mf1%mt456%tb
-!				do i = 1,tb%np
-!					tb%dat(i)%y = xf*tb%dat(i)%y
-!				end do
-!			endif
-		endif
-		mf1 => mf1%next
-	end do
-
-	return
-	end subroutine scale_nubar
-
-	!---------------------------------------------------------------------
-
-	subroutine get_nubar_scale(xf)
-
-	implicit none
-
-	real*4, intent(out) :: xf
-
-	integer*4 i,ios
-	real*4 xx
-	character pnam*6,lin*300
-
-	xf = 1.0
-
-	open(22,file=proj(1:npr)//'.inp',status='old',readonly)
-
-	do i = 1,10
-		read(22,*)   ! header lines
-	end do
-
-	do
-		read(22,'(a)',iostat=ios) lin
-		if(ios < 0) exit
-		if(ios > 0) stop ' Error reading empire input file'
-		if(lin(1:1) == '*') cycle
-		if(lin(1:1) == '#') cycle
-		if(lin(1:1) == '!') cycle
-		read(lin,'(a6,G10.5)') pnam, xx
-		if(pnam /= 'PFNNIU') cycle
-		xf = xx
-		exit
-	end do
-
-	close(22)
-
-	return
-	end subroutine get_nubar_scale
 
 	end program make_ENDF
