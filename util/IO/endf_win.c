@@ -16,7 +16,7 @@ typedef struct _endf_iobuf {
    OVERLAPPED olp;
 } ENDF_IO_BUFFER;
 
-static icx=0;
+static int icx=0;
 static jmp_buf savctx[10];
 static ENDF_IO_BUFFER buf[2];
 static BOOL endf_open = FALSE;

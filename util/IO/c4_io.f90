@@ -169,6 +169,14 @@ module c4_io
         sc%ndat = sc%ndat + 1
         pt => sc%pt(sc%ndat)
         read(line(23:94),'(8F9.0)') pt%e, pt%de, pt%x, pt%dx, pt%cos, pt%dcos, pt%dat7, pt%dat8
+        ! read(line(23:31),'(F9.0)') pt%e
+        ! read(line(32:40),'(F9.0)') pt%de
+        ! read(line(41:49),'(F9.0)') pt%x
+        ! read(line(50:58),'(F9.0)') pt%dx
+        ! read(line(59:67),'(F9.0)') pt%cos
+        ! read(line(68:76),'(F9.0)') pt%dcos
+        ! read(line(77:85),'(F9.0)') pt%dat7
+        ! read(line(86:94),'(F9.0)') pt%dat8
     end do
 
     close(c4_unit)

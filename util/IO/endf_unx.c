@@ -18,7 +18,7 @@
 
 static struct stat file_stat;
 static jmp_buf savctx[10];
-static icx=0;
+static int icx=0;
 
 int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 {
