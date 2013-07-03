@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3363 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-03 12:33:52 +0200 (Mi, 03 Apr 2013) $
+Ccc   * $Rev: 3443 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-07-03 06:17:56 +0200 (Mi, 03 Jul 2013) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3363 $
+C CVS Version Management $Revision: 3443 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -755,8 +755,13 @@ C
         IF (IFErmi.GT.1) THEN
 
           IF (IFErmi.EQ.2) THEN
+c            write(*,*) ' entering pto2p1h' 
             CALL PTO2P1H(jstudy,
      1                 ek2,ak2,ct2,ph2,ek3,ak3,ct3,ph3,ek4,ak4,ct4,ph4)
+c            write(*,*) ek2,ak2,ct2,ph2
+c            write(*,*) ek3,ak3,ct3,ph3
+c            write(*,*) ek4,ak4,ct4,ph4
+c            write(*,*) ' leaving pto2p1h' 
            ELSE
             CALL PTO2P1HR(jstudy,
      1                 ek2,ak2,ct2,ph2,ek3,ak3,ct3,ph3,ek4,ak4,ct4,ph4)
@@ -2468,7 +2473,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3363 $')
+99005 FORMAT ('  xddhms version: $Revision: 3443 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4862,11 +4867,12 @@ c
       ct1=DCOS(TH(jstudy))
       ph1=PH(jstudy)
 
+
       akf1=zkf0(ind1)
       akf12=akf1**2
       akf2=zkf0(ind2)
       akf22=akf2**2
-
+c      write(*,*) akf1,akf2,ak1
       ak12=ak1**2
 
       akx22=akf12+akf22-ak12
@@ -4909,7 +4915,7 @@ c      gg=wk2/(ak1*hbarc**4)
         wk2=ak22-akx22
         ak32=akf12
         if(ak2.gt.akf1) then
-          dw=(akf22+2.0d0*akf1**3/ak2)-akf12
+          dw=(ak22+2.0d0*akf1**3/ak2)/3.0d0-akf12
           wk2=wk2-dw
           ak32=ak32+dw
          endif
@@ -4921,6 +4927,7 @@ c      gg=wk2/(ak1*hbarc**4)
        endif
 
       ak42=ak12+ak22-ak32
+c       write(*,*)' in ',jstudy,ak12,ak22,ak32,ak42
       ak3=dsqrt(ak32)
       ak4=dsqrt(ak42)       
 
@@ -4931,9 +4938,14 @@ c      gg=wk2/(ak1*hbarc**4)
         ct2=0.5d0*((ak1-ak2+2.0d0*ak2*RANG())**2-ak12-ak22)/(ak1*ak2)
         ct34=ak1*ak2*ct2/(ak3*ak4)
        else
-        ct34=0.5d0*((ak4-ak3+2.0d0*ak3*RANG())**2-ak32-ak42)/(ak3*ak4)
+        dk34=abs(ak3-ak4)
+        ak34mn=ak3+ak4-dk34
+        ct34=0.5d0*((dk34+ak34mn*RANG())**2-ak32-ak42)/(ak3*ak4)
         ct2=ak3*ak4*ct34/(ak1*ak2)
        endif
+c      write(*,*)' in ',jstudy,ak1*ak2,ak3*ak4,ct2,ct34
+c      ek1=0.5d0*ak12/ZMNuc - vdep(ind1)
+c      write(*,*) ek1,ak1,ct1,ph1
 
       cx12=(ak1+ak2*ct2)/dsqrt(ak12+ak22+2.0d0*ak1*ak2*ct2)
 
@@ -5834,7 +5846,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION adum(5,7), csfit(NDAnghms), csx0(NDAnghms), qq(5)
-      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, ! csum,
+      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
@@ -5919,17 +5931,13 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
       DO ne = 1, nspec
          CSEhms(ne,1,0) = DXSn(ne-1)
          CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
-c         csum = 0.0d0
          DO na = 1, NDAnghms
            CSEahms(ne,na,1) = DDXsn(ne-1,na)
            csfit(NDAnghms-na+1) = DDXsn(ne-1,na)
-c           if(na.GT.1) csum = csum + (DDXsn(ne-1,na)+DDXsn(ne-1,na-1))
-c     &                           * 0.5d0 * (CANgler(na)-CANgler(na-1))
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
             xnor = CSEhms(ne,1,0)/(4.0*PI_g*qq(1))
-c            xnor = CSEhms(ne,1,0)/(2.0*PI_g*csum)
             DO na = 1, NDAnghms
                CSEahms(ne,na,1) = CSEahms(ne,na,1)*xnor
              ENDDO
@@ -5948,7 +5956,7 @@ C-----integrated spectrum obtained above
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhmslab(ne,1,0)/(4.0d0*PI_g*qq(1))
+            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
             DO na = 1, NDAnghms
                CSEahmslab(ne,na,1) = CSEahmslab(ne,na,1)*xnor
              ENDDO
@@ -5967,17 +5975,13 @@ C      CSEmis(2,0) = CSEmis(2,0) + XSP0
       DO ne = 1, nspec
          CSEhms(ne,2,0) = DXSp(ne-1)
          CSE(ne,2,0) = CSE(ne,2,0) + DXSp(ne-1)
-c         csum = 0.0d0
          DO na = 1, NDAnghms
            CSEahms(ne,na,2) = DDXsp(ne-1,na)
            csfit(NDAnghms-na+1) = DDXsp(ne-1,na)
-c           if(na.GT.1) csum = csum + (DDXsp(ne-1,na)+DDXsp(ne-1,na-1))
-c     &                           * 0.5d0 * (CANgler(na)-CANgler(na-1))
          ENDDO
          CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
          IF (qq(1).NE.0.0D+0) THEN
             xnor = CSEhms(ne,2,0)/(4.0*PI_g*qq(1))
-c            xnor = CSEhms(ne,2,0)/(2.0*PI_g*csum)
             DO na = 1, NDAnghms
                CSEahms(ne,na,2) = CSEahms(ne,na,2)*xnor
              ENDDO
@@ -6086,7 +6090,7 @@ c                 chkpopd = chkpopd + pops
      &                        + DDXsnex(1,nu-1,ne-1,Inxr)
                 ENDDO
 
-               IF(jz.NE.0 .OR. jn.NE.0 .OR. ENDF(1).EQ.0) THEN
+               IF(jz.NE.0 .OR. jn.NE.0) THEN
                  POPcse(0,1,ne,Inxr) = pophmsx 
                  POPcsed(0,1,ne,Inxr) = pophmsx 
                 ENDIF
@@ -6105,7 +6109,7 @@ c                 chkpopd = chkpopd + pops
                    CSEahms(ne,nth,1) = CSEahms(ne,nth,1)
      &                              - POPcsea(nth,0,1,ne,Inxr)
 
-                  IF(jz.EQ.0 .AND. jn.EQ.0 .AND. ENDF(1).EQ.1) THEN
+                  IF(jz.EQ.0 .AND. jn.EQ.0) THEN
                     csx0(nth) = csx0(nth) + POPcsea(nth,0,1,ne,Inxr)
                     POPcsea(nth,0,1,ne,Inxr) = 0.0d0
                    ENDIF
@@ -6113,8 +6117,7 @@ c                 chkpopd = chkpopd + pops
                 ENDIF
 
                IF(ne.GT.nspecc) THEN
-                 IF(ENDF(1).NE.0) CSEhms(ne,1,0) = CSEhms(ne,1,0) 
-     &                                                        - pophmsx
+                 CSEhms(ne,1,0) = CSEhms(ne,1,0) - pophmsx
                ELSE               
 c                chk=chk + DXSnx(ne-1,jz,jn)
                 pops = DXSnx(ne-1,jz,jn)
@@ -6159,10 +6162,7 @@ c                 chkpop = chkpop + pops
                   ENDDO
                  ENDIF
                 ENDDO ! nu
-               IF(ENDF(1).NE.0) CSEhms(ne,1,0) = CSEhms(ne,1,0) 
-     &                                                        - pophmsx
-
-C                CSEhms(ne,1,0) = CSEhms(ne,1,0) - pophmsx
+                CSEhms(ne,1,0) = CSEhms(ne,1,0) - pophmsx
                ENDIF
               ENDDO
 
@@ -6282,7 +6282,7 @@ c          ENDDO
 c          write(8,'(a5,i8,6f12.6)') ' l-n:',nnur,chk*DE,XSNx(jz,jn),
 c     &            chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
 
-          IF(jz.EQ.0 .AND. jn.EQ.0 .AND. ENDF(1).EQ.1) THEN
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
             DO nth = 1, NDAnghms
               difcon = csx0(nth)*DE/NLV(nnur)
               DO il = 1, NLV(nnur)
@@ -6344,7 +6344,7 @@ c                chkpopd = chkpopd + pops
      &                        + DDXspex(1,nu-1,ne-1,Inxr)
               ENDDO
 
-              IF(jz.NE.0 .OR. jn.NE.0 .OR. ENDF(1).EQ.0) THEN
+              IF(jz.NE.0 .OR. jn.NE.0) THEN
                 POPcse(0,2,ne,Inxr) = pophmsx 
                 POPcsed(0,2,ne,Inxr) = pophmsx 
                ENDIF
@@ -6363,7 +6363,7 @@ c                chkpopd = chkpopd + pops
                    CSEahms(ne,nth,2) = CSEahms(ne,nth,2)
      &                              - POPcsea(nth,0,2,ne,Inxr)
 
-                  IF(jz.EQ.0 .AND. jn.EQ.0 .AND. ENDF(1).EQ.1) THEN
+                  IF(jz.EQ.0 .AND. jn.EQ.0) THEN
                     csx0(nth) = csx0(nth) + POPcsea(nth,0,2,ne,Inxr)
                     POPcsea(nth,0,2,ne,Inxr) = 0.0d0
                    ENDIF
@@ -6371,9 +6371,7 @@ c                chkpopd = chkpopd + pops
                 ENDIF
 
               IF(ne.GT.nspecc) THEN
-                 IF(ENDF(1).NE.0) CSEhms(ne,2,0) = CSEhms(ne,2,0) 
-     &                                                        - pophmsx
-C               CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
+               CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
               ELSE
 c               chk=chk+DXSpx(ne-1,jz,jn)
                pops = DXSpx(ne-1,jz,jn)
@@ -6417,9 +6415,7 @@ c                 chkpop = chkpop + pops
                   ENDDO
                  ENDIF
                 ENDDO ! nu
-               IF(ENDF(1).NE.0) CSEhms(ne,2,0) = CSEhms(ne,2,0) 
-     &                                                        - pophmsx
-C               CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
+               CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
               ENDIF
              ENDDO
 c             write(8,'(a5,i8,4f12.6)') '   p:',nnur,chk*DE,XSPx(jz,jn),
@@ -6541,7 +6537,7 @@ c           ENDDO
 c           write(8,'(a5,i8,6f12.6)') ' l-p:',nnur,chk*DE,XSPx(jz,jn),
 c     &           chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
 
-          IF(jz.EQ.0 .AND. jn.EQ.0 .AND. ENDF(1).EQ.1) THEN
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
             DO nth = 1, NDAnghms
               difcon = csx0(nth)*DE/NLV(nnur)
               DO il = 1, NLV(nnur)
