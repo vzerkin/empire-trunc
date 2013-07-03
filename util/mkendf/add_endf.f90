@@ -167,15 +167,15 @@
 	real*8 c1,c2
 
 	type (tab1), pointer :: tb
-	type (mf_1) m1
+	type (mf_1) m1_52
 	type (mf_1), pointer :: m1_55,m1_56
 	type (mf1_452), pointer :: m52
 	type (mf1_455), pointer :: m55
 	type (mf1_452), pointer :: m56
 
-	m1%mt = 452
-	m1%za = mat1%mf1%za	! assume mt451 is always there
-	m1%awr = mat1%mf1%awr
+	m1_52%mt = 452
+	m1_52%za = mat1%mf1%za	! assume mt451 is always there
+	m1_52%awr = mat1%mf1%awr
 
 	m1_56 => find(mat1%mf1,456)
 	if(.not.associated(m1_56)) stop ' EMPEND output contains no prompt nubars (MF1/456)'
@@ -184,8 +184,8 @@
 	m1_55 => find(mat2%mf1,455)
 	if(associated(m1_55)) then
 		! make a total nubar 452
-		allocate(m1%mt452)
-		m52 => m1%mt452
+		allocate(m1_52%mt452)
+		m52 => m1_52%mt452
 		! donor has delayed nubars. Insert into file
 		if(put(mat1%mf1,m1_55)) write(6,'(a,i3)') ' Donor MF1 inserted for delayed nubars'
 		m55 => m1_55%mt455
@@ -232,7 +232,7 @@
 				tb%dat(i)%x = m55%tb%dat(i)%x
 				tb%dat(i)%y = m55%tb%dat(i)%y + poly(m55%tb%dat(i)%x,m56%c,m56%nc)
 			end do
-		else if((m56%lnu == 1) .and. (m55%lnu == 2)) then
+		else if((m56%lnu == 2) .and. (m55%lnu == 2)) then
 			! both TAB1
 			m52%lnu = 2
 			m52%nc = 0
@@ -243,10 +243,10 @@
 			stop ' ERROR: Undefined values for LNU in MF1 encountered'
 		endif
 	else
-		m1%mt452 => m56		! just point to mt456 - they are identical
+		m1_52%mt452 => m56		! just point to mt456 - they are identical
 	endif
 
-	if(put(mat1%mf1,m1)) write(6,'(a,i3)') ' New MF1 inserted for total nubar'
+	if(put(mat1%mf1,m1_52)) write(6,'(a,i3)') ' New MF1 inserted for total nubar'
 
 	return
 	end subroutine fix_nubars
