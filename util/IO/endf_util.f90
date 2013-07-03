@@ -212,7 +212,7 @@ module endf_util
     implicit none
 
     ! Title  : Subroutine UNIGRID
-    !          based on original by Andej Trkov
+    !          based on original by Andrej Trkov
     !          
     ! Purpose: Generate union grid from two sets
     ! Description:
@@ -227,7 +227,7 @@ module endf_util
     integer*4, intent(out) :: neu       ! # points of union grid
     real*8, intent(out) :: EUN(lu)       ! union grid
 
-    logical*4 qdb,qsm
+    logical*4 qdb,qsm,qst,qd
     integer*4 j,na,nb
 
     ! form pointers to the 2 1-D arrays:
@@ -237,7 +237,7 @@ module endf_util
     ! back & forth between the 2 arrays en1 & en2.
 
     integer*4, target  :: j1, j2
-    integer*4, pointer :: ja, jb
+    integer*4, pointer, volatile :: ja, jb
     real*8, pointer    :: ea(:), eb(:)
 
     ! This routine assume both arrays are monotonically
@@ -257,12 +257,23 @@ module endf_util
 
     ! point array "a" to one with lowest energy
 
-    if(en1(1) > en2(1)) then
+    if(en1(1) <= en2(1)) then
+        qst = .true.	! point to 1
         na = l1
+        nb = l2
+        ja => j1
+        jb => j2
+        ea => en1
+        eb => en2
     else
+        qst = .false.	! point to 2
         na = l2
+        nb = l1
+        ja => j2
+        jb => j1
+        ea => en2
+        eb => en1
     endif
-    call swap
 
     qdb = .false.     ! true if written double values 
 
@@ -274,11 +285,7 @@ module endf_util
 
             if(jb <= nb) then
                 if(ea(ja) > eb(jb)) then
-                    call swap
-                    if(ea(ja) == eun(neu)) then
-                        ja = ja + 1   ! skip
-                        cycle
-                    endif
+                    if(swap()) cycle
                 endif
             endif
 
@@ -298,16 +305,18 @@ module endf_util
 
         end do
 
-        call swap
+        qd = swap()
         if(ja > na) return
 
     end do
 
     contains
 
-    subroutine swap
+    logical*4 function swap()
 
-    if(na == l1) then
+    logical*4 qt
+
+    if(qst) then
         na = l2
         nb = l1
         ja => j2
@@ -323,8 +332,13 @@ module endf_util
         eb => en2
     endif
 
+    qst = .not.qst
+    qt = ea(ja) == eun(neu)
+    if(qt) ja = ja + 1   ! skip
+    swap = qt
+
     return
-    end subroutine swap
+    end function swap
 
     end subroutine unigrd
 
