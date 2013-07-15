@@ -102,10 +102,10 @@
       I=1
       do
         READ(10,*,END=20) PN,PERTB(I),IA,IB,IC
-        IF (PN(1:1).EQ.'!') cycle
+        IF ((PN(1:1).EQ.'!').OR.(PN(1:1).EQ.'*')) cycle
         CALL STRLEN(PN,LN1,LN2)
 
-        IF (IA .NE. '!') THEN
+        IF ((IA .NE. '!').AND.(IA .NE. '*')) THEN
           CALL STRLEN(IA,LA1,LA2)
           CALL STRLEN(IB,LB1,LB2)
           PNAME(I)=PN(LN1:LN2)//IA(LA1:LA2)//IB(LB1:LB2)
