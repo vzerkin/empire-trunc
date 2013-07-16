@@ -333,6 +333,7 @@ program kalend
         end do
         write(25,*)
     end do
+
     close(25)
 
     return
@@ -613,7 +614,7 @@ program kalend
     ni%kl => null()
     ni%ll => null()
     ni%ec => null()
-    allocate(ni%e(ne),ni%cov(ne,ne))
+    allocate(ni%e(ne),ni%cov(ne-1,ne-1))
     ni%e = en*1.D+06
     ni%cov = cov
 
