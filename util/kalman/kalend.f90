@@ -298,24 +298,41 @@ program kalend
 
     open(25,file='corrplot.d',status='UNKNOWN',action='write')
 
+    ! this was adapted from a version that tried to "expand" the
+    ! correlation matrix for pretties plots, but to do that right
+    ! the matrix should somehow be interpolated between actual
+    ! data points. This isn't done, and this version also has 
+    ! bounds bugs - do not use as is.
+    !
+    !do i = ist,ken
+    !  dei = (x(i+1)-x(i))/nn
+    !  do ip = 0,nn-1
+    !    do j = ist,ken
+    !      dej = (x(j+1)-x(j))/nn
+    !      do jp = 0,nn-1
+    !        if((w(i,i) > 0.D0) .and. (w(j,j) > 0.D0)) then
+    !          xx = w(i,j)/dsqrt(w(i,i)*w(j,j))
+    !        else
+    !          xx = 0.D0
+    !        endif
+    !        write(25,20) x(i)+dble(ip)*dei, x(j)+dble(jp)*dej, xx
+    !      end do
+    !    end do
+    !    write(25,*)
+    !  end do
+    !end do
+
     do i = ist,ken
-      dei = (x(i+1)-x(i))/nn
-      do ip = 0,nn-1
         do j = ist,ken
-          dej = (x(j+1)-x(j))/nn
-          do jp = 0,nn-1
             if((w(i,i) > 0.D0) .and. (w(j,j) > 0.D0)) then
-              xx = w(i,j)/dsqrt(w(i,i)*w(j,j))
+               xx = w(i,j)/dsqrt(w(i,i)*w(j,j))
             else
-              xx = 0.D0
+               xx = 0.D0
             endif
-            write(25,20) x(i)+dble(ip)*dei, x(j)+dble(jp)*dej, xx
-          end do
+            write(25,20) x(i), x(j), xx
         end do
         write(25,*)
-      end do
     end do
-
     close(25)
 
     return
