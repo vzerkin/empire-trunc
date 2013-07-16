@@ -133,6 +133,8 @@ program c4tokal
         sc => gs(k)
         call dataout(sc)
 
+        ! find this MT in the Empire XSC file
+
         j2 = 0
         do i = 1,nnucd
             if(rcx(i)%mt == sc%mt) then
@@ -140,6 +142,12 @@ program c4tokal
                 exit
             endif
         end do
+
+        if(j2 == 0) then
+            ! MT from data not found in Empire XSC file!
+            write(0,'(a,i0)') ' MT not found in XSC file: ',sc%mt
+            stop 1
+        endif
 
         write(15,'(14I5)') J2,1
         if(((j1==j2) .and. (nex==1)) .or. (nex==2)) then
