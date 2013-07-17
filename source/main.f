@@ -1,6 +1,6 @@
-cc   * $Rev: 3422 $
+cc   * $Rev: 3451 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-05 18:31:53 +0200 (So, 05 Mai 2013) $
+Ccc   * $Date: 2013-07-18 01:58:17 +0200 (Do, 18 Jul 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1686,7 +1686,11 @@ C--------------Write elastic to tape 12 and to tape 68
      &              ELAcs*ELAred + 4.d0*PI*ELCncs
                   WRITE (12,*) ' '
                   WRITE (12,
-     &             '('' COMP. ELASTIC CROSS SECTION ='',1P,E12.5,
+     &             '('' SHAPE ELASTIC CROSS SECTION= '',1P,E12.5,
+     &              '' mb'')') ELAcs*ELAred 
+                  WRITE (12,*) ' '
+                  WRITE (12,
+     &             '('' COMP. ELASTIC CROSS SECTION= '',1P,E12.5,
      &               '' mb'')') 4.d0*PI*ELCncs
                   WRITE (12,*) ' '
                   WRITE (12,*) ' Elastic angular distribution '
@@ -4034,15 +4038,8 @@ C-----S-FACTOR call
       ENDIF
 C        
  1155 IF( FITomp.GE.0 ) THEN
+        lheader = .true.
  1156   READ (5,'(A36)',ERR=11570,END=1200) nextenergy
-        IF(nextenergy(1:1).EQ.'$') THEN
-           READ(nextenergy,'(1x,A6,F10.5,4I5)',ERR=11570,END=1200) 
-     &        keyname, val, ikey1, ikey2, ikey3, ikey4
-           CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
-           GO TO 1156
-        ENDIF
-        IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' 
-     &   .OR. nextenergy(1:1) .EQ.'!') GOTO 1156
 
         IF(nextenergy(1:1).eq.'@') THEN 
           BACKSPACE 5
@@ -4057,25 +4054,49 @@ C
           GOTO 1156  ! next line
         ENDIF
 
+        IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' 
+     &   .OR. nextenergy(1:1) .EQ.'!') GOTO 1156
+
+        IF(nextenergy(1:1).EQ.'$' .and. lheader) THEN
+	    lheader = .false.
+          WRITE (8,*) ' '
+          WRITE (8,'(1x,61(''=''))')
+          WRITE (8,
+     &'('' Reaction '',A2,'' + '',I3,A2,
+     &    '' :NEXT INCIDENT ENERGY STARTED'')') 
+     &     SYMbe(0), INT(A(0)), SYMb(0)      
+C         WRITE (8,'(1x,61(''=''))')
+C         WRITE (8,*) ' '
+
+          WRITE (12,*) ' '
+          WRITE (12,'(1x,61(''=''))')
+          WRITE (12,
+     &'('' Reaction '',A2,'' + '',I3,A2,
+     &    '' :NEXT INCIDENT ENERGY STARTED'')') 
+     &     SYMbe(0), INT(A(0)), SYMb(0)      
+C         WRITE (12,'(1x,61(''=''))')
+C         WRITE (12,*) ' '
+        ENDIF
+
+        IF(nextenergy(1:1).EQ.'$') THEN
+           READ(nextenergy,'(1x,A6,F10.5,4I5)',ERR=11570,END=1200) 
+     &        keyname, val, ikey1, ikey2, ikey3, ikey4
+           CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
+           GO TO 1156
+        ENDIF
+
         BACKSPACE 5
         READ(5,*,ERR=11570,END=1200) EIN
 
         IF (EIN.gt.0.d0) then
-          WRITE (8,*) ' '
-          WRITE (8,'(61(''=''))')
           WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
-     &    INT(AEJc(0)), SYMb(0), EIN
-          WRITE (8,'(61(''='')//)')
+     &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
+          WRITE (8,'(1x,61(''=''))')
+          WRITE (8,*)
 
-          WRITE (12,*) ' '
-          WRITE (12,'(61(''=''))')
           WRITE (12,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
-     &    INT(AEJc(0)), SYMb(0), EIN
-          WRITE (12,'(61(''='')//)')
+     &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
+          WRITE (12,'(1x,61(''=''))')
           WRITE (12,*) ' '
 
         ENDIF
