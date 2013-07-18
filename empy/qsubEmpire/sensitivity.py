@@ -29,7 +29,7 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF','FCCRED',
         'ROHFBA', 'ROHFBP', 'ELARED', 'FISAT1', 'FISAT2', 'FISAT3',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
-        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3')
+        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3', 'CELRED','CINRED')
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'CSGDR2', 'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 
         'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', 'EXPUSH', 'FCC', 
@@ -42,7 +42,7 @@ fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
 pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
 # these global parameters don't need Z,A of isotope specified
-Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED')
+Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED','CELRED','CINRED')
 # not a complete list yet!
 
 

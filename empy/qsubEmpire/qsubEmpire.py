@@ -245,6 +245,7 @@ def reconstructXsec(inputFile):
         xsc.write(xscA[3])
         
     xsc.close()
+    print "Processed ", name 
 
 
 def reconstructPFNS(inputFile):
