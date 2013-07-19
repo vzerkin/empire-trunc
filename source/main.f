@@ -1,6 +1,6 @@
-cc   * $Rev: 3451 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-07-18 01:58:17 +0200 (Do, 18 Jul 2013) $
+cc   * $Rev: 3454 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-07-19 18:11:23 +0200 (Fr, 19 Jul 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -47,7 +47,7 @@ C
       INTEGER nrnc
       COMMON /inp_sp5/ eenc,signcf,nrnc
 
-      LOGICAL lbreakup, ltransfer
+      LOGICAL lbreakup, ltransfer, lheader
       COMMON /LPEXS/lbreakup, ltransfer 
 
       DOUBLE PRECISION crossNT(0:NDEJC),crossNTt,
