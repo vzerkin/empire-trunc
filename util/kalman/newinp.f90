@@ -215,7 +215,7 @@
        do j = 1,ne
           if(enr(j)(1:1) /= '$') cycle
           if(nam /= enr(j)(2:7)) cycle
-          call get_orig(prm(j)(2:),xx,ip)
+          call get_orig(enr(j)(2:),xx,ip)
           if(.not.eqr(ip,is)) cycle
           call write_line(enr(j)(2:), xx*fnl(i), ip)
           write(6,*) ' Adjusted energy-dependent ',nam
@@ -235,7 +235,7 @@
 
     implicit none
 
-    character*300, intent(out) :: cln
+    character*(*), intent(out) :: cln
     real*4, intent(in) :: val            ! value
     integer*4, intent(in) :: ipr(4)      ! integer parameters
 
@@ -262,9 +262,13 @@
     ! read a line from the input file retrieving the value & 4 ints
     ! uses the same format as empire does in reading these files
 
-    character*300, intent(in) :: cln
+    character*(*), intent(in) :: cln
     real*4, intent(out) :: val            ! original value from input file
     integer*4, intent(out) :: ipn(4)      ! integer parameters
+
+    integer*4 ll
+
+    ll = len_trim(cln)
 
     read(cln(7:16),'(G10.5)') val
     read(cln(17:21),'(I5)') ipn(1)
