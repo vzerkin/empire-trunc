@@ -1,6 +1,6 @@
-C $Rev: 3342 $
+C $Rev: 3456 $
 C $Author: rcapote $
-C $Date: 2013-03-23 12:05:47 +0100 (Sa, 23 Mär 2013) $
+C $Date: 2013-07-24 13:19:22 +0200 (Mi, 24 Jul 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -27,10 +27,19 @@ C
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
-     &                 CSEahmslab(ndecse,ndangecis,2),
-     &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
-     &                 CSEhms(ndecse,2,0:ndnuc), 
-     &                 CSEahms(ndecse,ndangecis,2),
+C---------------------------------------------------------------------------
+C        All arrays below commented and changed to save memory (unless you need HMS !!!)
+C        For HMS the NDEX parameter in dimension.h should be less than ~ 150 !!
+C    &                 CSEahmslab(ndecse,ndangecis,2),
+C    &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
+C    &                 CSEhms(ndecse,2,0:ndnuc), 
+C    &                 CSEahms(ndecse,ndangecis,2),
+C    &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
+C    &                  0:ndexclus),  
+     &                 CSEahmslab(1,1,2),CSEhmslab(1,2,0:1),
+     &                 CSHms(2,0:1),CSEhms(1,2,0:1),CSEahms(1,1,2),
+     &                 POPcsea(1,0:1,0:1,1,0:1),  
+C---------------------------------------------------------------------------
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
      &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,
@@ -111,13 +120,11 @@ C
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
-c     &                POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
-     &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
-     &                  0:ndexclus),  
-C     &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
-C           DDXS arrays defined only for neutrons and protons  
-C     &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
-C     &                 0:ndexclus),
+
+C    &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
+C                      DDXS arrays defined only for neutrons and protons  
+C    &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
+C    &                 0:ndexclus),
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,
 C                      This array is only used in EXCLUSIVEL, commented 
 C    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),
@@ -129,6 +136,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,
      &                 CINred(ndlv), CELcor
+      
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*64 EMPiredir
       CHARACTER*72 EMPtitle
@@ -181,7 +189,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
      & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-        DOUBLE PRECISION BUReac(0:ndejc), NTReac(0:ndejc)
+      DOUBLE PRECISION BUReac(0:ndejc), NTReac(0:ndejc)
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
       DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),              ! ROHFBSADD
@@ -241,8 +249,8 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,
      &                 BUNorm, NTNorm, COMega, BUReac, NTReac,
-
      &                 gamm_tr, fiss_tr	 
+
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
@@ -280,7 +288,6 @@ C
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
-
      &                  ngamm_tr, nfiss_tr	 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
