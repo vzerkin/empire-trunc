@@ -49,8 +49,9 @@
 
     open(12,file=proj(1:npr)//'_mcnp.sum',status='old',action='READ')
     read(12,*) 
-    read(12,'(31x,F8.6,5x,F8.6)') xcen, dcen
     read(12,*) 
+    read(12,'(31x,F8.6,5x,F8.6)') xcen, dcen
+    read(12,*)
 
     i = 0
     do
@@ -62,7 +63,7 @@
           stop 1
        endif
        read(12,*)
-       read(12,'(a)') lin
+       read(12,'(a100)') lin
        read(lin(27:),*) xsen(i),dsen(i)
        m = 0
        k = 3
@@ -92,14 +93,12 @@
 
     w  = 0.D0
     sw = 1.D0
-    m = nparm - 5
+    m = nparm - 1
     call read_cov('../'//proj(1:npr)//'-out.kal',m,w(1:m,1:m),pname(1:m),pertb(1:m))
 
     ! next read the 4 PFNS parameters
 
-    m = nparm - 4
-    n = nparm - 1
-    call read_cov('../'//proj(1:npr)//'-out-kornilov.kal',4,w(m:n,m:n),pname(m:n),pertb(m:n))
+    call read_cov('../'//proj(1:npr)//'-LosAlamos-out.kal',4,w(1:4,1:4),pname(1:4),pertb(1:4))
 
     ! set covar of nubar by hand - it's unrelated to all other parameters
 
@@ -188,6 +187,8 @@
     allocate(icov(npar,npar))
     icov = 0
 
+    write(6,'(a)') file
+
     open(12,file=file,status='OLD',action='READ')
 
     read(12,*)
@@ -207,10 +208,10 @@
        stop 1
     endif
 
-    read(12,*) line
+    read(12,100) line
     nchr = len_trim(line)
-    do while(line(1:17) .ne. 'CHI-SQUARE TEST !')
-       read(12,*) line
+    do while(line(1:17) /= 'CHI-SQUARE TEST !')
+       read(12,100) line
        nchr = len_trim(line)
        write(6,'(a)') line(1:nchr)
     end do
@@ -235,7 +236,7 @@
        read(12,*)
        k = min(npar-iof,10)
        do i = iof+1,npar
-          read(12,*) line
+          read(12,100) line
           nchr = len_trim(line)
           write(6,'(a)') line(1:nchr)
           n = min(i,k)
@@ -260,4 +261,7 @@
     deallocate(icov)
 
     return
+
+100 FORMAT(A300)
+
     end
