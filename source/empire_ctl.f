@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3389 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2013-04-18 22:56:47 +0200 (Do, 18 Apr 2013) $
+Ccc   * $Rev: 3458 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2013-07-30 21:44:08 +0200 (Di, 30 Jul 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -366,7 +366,8 @@ C--- parameters and data for the fit.
 31          read(5,'(a35)',end=40) cmnd
             write(72,'(a35)') cmnd
             if(cmnd(1:1).eq.'$' .or. cmnd(1:1).eq.'*' .or. 
-     >         cmnd(1:1).eq.'#' .or. cmnd(1:1).eq.'!') goto 31
+     >         cmnd(1:1).eq.'#' .or. cmnd(1:1).eq.'!' .or. 
+     >         cmnd(1:1).eq.'@') goto 31
 C--- Read the energy mesh from the lines after GO, if it is not specified
 C--- by FITGRD.
             if(egrid(0).lt.0) then
