@@ -1,3 +1,3 @@
-#  6           92-U -235
-#  Einc       Total       Elastic     Reaction    Fission   (z,gamma)   (z,n)       
-8.0000     6.22954E+03 3.00379E+03 3.22575E+03 2.10832E+03 2.49100E-01 4.97230E+02
+#  8      n +  92-U -235      Elastic* and Nonelast* modified for A>220 (Cross sections of 2 CC added/substracted to Elastic/Nonelast respectively)
+#  Einc       Total       Elastic*    Nonelast*   Fission     Mu-bar      Nu-bar    (z,gamma)   (z,n)       
+8.0000E+00  6.22953E+03 3.00378E+03 3.22576E+03 2.10862E+03 8.49168E-01 3.35882E+00 2.35383E-01 4.97178E+02
