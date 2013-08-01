@@ -4428,10 +4428,13 @@ It has been shown that estimated uncertainties in the prompt fission neutron spe
 for critical assemblies as well as reactor sensitivity calculations \cite{Talou:2011b}.  The main difficulty
 with the modeling of prompt fission neutron spectra (PFNS) is that their shape is not well defined experimentally.
 In addition, it is also important to know the PFNS as a function of both the fissioning
-nucleus and its excitation energy.  Due to this sensitivity, PFNS has to be included in the adjustment to avoid unphysical modification of other quantities, e.g., fission cross sections, that might result from compensating deficiencies in the PFNS. In the current version of the EMPIRE code we have implemented PFNS calculations using Los Alamos and Kornilov models. We have decided to include both formulations since there is a controversy regarding the lower energy part of the spectra - the Los Alamos model tends to predict lower values versus the Kornilov model. So far integral testing was mixed and there is no clear evidence which of the two models is more adequate. 
-
-
-
+nucleus and its excitation energy.  Due to this sensitivity, PFNS has to be included in the adjustment 
+to avoid unphysical modification of other quantities, e.g., fission cross sections, that might result 
+from compensating deficiencies in the PFNS. In the current version of the EMPIRE code we have implemented 
+PFNS calculations using Los Alamos and Kornilov models. We have decided to include both formulations 
+to have some model variations and flexibility; since there is a controversy regarding the lower 
+energy part of the spectra - the Los Alamos model tends to predict lower values versus the Kornilov model. 
+Other shape differences are also significant.
 
 \subsubsection{Los Alamos model for prompt fission neutron spectra}
 
@@ -4567,14 +4570,13 @@ Here, $\left<\epsilon_j\right>$ it the mean kinetic energy of the neutron evapor
 \subsubsection{Kornilov model for prompt fission neutron spectra}
 \label{sec:korn}
 
-The Kornilov model \cite{Kornilov:99} is actually a systematics that allows to calculate PFNS
-with an accuracy comparable, and sometimes even better, that the more physical Los Alamos model
-described above. The essential argument for including the Kornilov model in the EMPIRE code in
-addition to the Los Alamos model is the fact the both models differ in shape of the PFNS. The
+The Kornilov model \cite{Kornilov:99} is actually a phnomenological systematics that allows to 
+reproduce measured PFNS. The essential argument for including the Kornilov model in the EMPIRE code in
+addition to the Los Alamos model is the fact the both models differ in predicted shape of the PFNS. The
 Kornilov model tends to provide results that are higher at low emission energies than the Los
-Alamos model. This difference has been shown to influence integral testing although not always
-in the right direction. Therefore, it has been considered important to use both models in the
-assimilation procedure, which eventually might help to decide which model performs better. 
+Alamos model. This difference has been shown to influence integral testing. Therefore, it has 
+been considered important to use both models in the assimilation procedure, which eventually 
+might help to decide which model performs better. 
 
 \newcommand{\tke}{T_{\rm KE}}
 The Kornilov model makes use of two Watt spectra to describe emission of neutrons with energy
@@ -4646,10 +4648,6 @@ $^{252}$Cf & 0.809 \\ \hline
 \end{center}
 \end{table*}
 
-
-
-
-
 \subsubsection{Implementation of the PFNS in EMPIRE code}
 \label{sec:empimp}
 
@@ -4676,9 +4674,9 @@ in the Empire code are used.
 
 The current implementation does not include neutrons emitted from the compound nucleus before
 the fission thus it is formally restricted to the first chance fission. This restriction
-makes the current implementation to be applicable at incident energies up to 3-4 MeV, the typical
-threshold for the (n,nf) reaction, which is generally sufficient for most reactor applications
-since fission spectrum practically disappears above 2 MeV.  
+makes the current implementation to be applicable at incident energies up to 4-5 MeV, the typical
+threshold for the (n,nf) reaction, which is generally sufficient for most reactor applications.
+The addition of pre-fission neutrons is foreseen.
 
 EMPIRE has been extended to automatically retrieve experimental PFNS data from
 the EXFOR library and translate them into a form useful for plotting. Comparison plots showing
@@ -4718,7 +4716,7 @@ validation of the system. The EMPIRE based evaluations in ENDF/B-VII.0
 can be divided into (i) fission products evaluated mostly at BNL in cooperation with KAERI, LANL, ORNL and LLNL,  (ii)
 iridium isotopes evaluated by the BNL-LANL collaboration and (iii) actinides
 ($^{232}$Th and $^{231,233}$Pa evaluated in the frame of the IAEA
-coordinated research project).  The list of fission products includes 19 
+coordinated research project.  The list of fission products includes 19 
 priority materials: $^{95}$Mo, $^{99}$Tc, $^{101}$Ru, $^{103}$Rh, $%
 ^{105}$Pd, $^{109}$Ag, $^{131}$Xe, $^{133}$Cs, $^{141}$Pr, $^{153}$Eu), $%
 ^{143,145}$Nd, $^{147,149,150,151,152}$Sm, and $^{155,157}$Gd. 
@@ -4727,9 +4725,14 @@ energy range from 10$^{-5}$~eV up to 20 MeV. However, the actinide
 evaluations extend up to 60 MeV proving that EMPIRE is not limited to the
 classical ENDF energy range.
 
-Recent developments focused on the covariances and resonance region. Need to produce a large number of covariances for the ENDF/B-VII.1  library was the major task that
-shaped development of the code over last 6 years. In parallel, there has been necessity that a wealth of information contained in the Atlas of Neutron Resonances makes its way to the new version of the evaluated library.  This motivated development of the resonance  module of EMPIRE, which also includes covariance capabilities.  These two aspects are leading subjects of this chapter, followed by the detailed description of the method used in EMPIRE for generating exclusive spectra, recoils, details of nuclear data formatting and fitting of the optical model potential.  
-
+Recent developments focused on the covariances and resonance region. Need to produce a large number
+of covariances for the ENDF/B-VII.1  library was the major task that shaped development of the code 
+over last 6 years. In parallel, there has been a necessity that a wealth of information contained in
+the Atlas of Neutron Resonances makes its way to the new version of the evaluated library. 
+This motivated development of the resonance  module of EMPIRE, which also includes covariance capabilities. 
+These two aspects are leading subjects of this chapter, followed by the detailed description of the method 
+used in EMPIRE for generating exclusive spectra, recoils, details of nuclear data formatting and fitting
+of the optical model potential.  
 
 \chapter{Resonance module}
 
@@ -10569,8 +10572,7 @@ using Eq.~\ref{Eq:direct_mubar} results in a value of $0.82 \pm 0.03$, an accept
 value, rather than the result from the high-order Legendre fit of $-0.815 \pm 0.0002$, which is clearly wrong.
 
 Of course, to successfully use Eq.~\ref{Eq:direct_mubar} the angular coverage of the differential
-cross section must be
-sufficient to perform the integral. If this is not the case then
+cross section must be sufficient to perform the integral. If this is not the case then
 there is little choice but to use a Legendre fit. In any case, care must be always taken when
 determining the value of \mub\ for a given elastic differential cross section. Each
 fit must be visually inspected and only those that result in a good fit without problems (e.g.,
@@ -10595,7 +10597,7 @@ with an EMPIRE calculation for \mub\ are shown in Fig.~\ref{Fig:empmu}.
 \end{figure}
 
 The addition of calculated \mub\ to the list of cross sections output by EMPIRE required a minor
-addition to the EMPIRE code. The differential cross sections are stored internal to EMPIRE
+addition to the EMPIRE code. The differential cross sections are stored internally in EMPIRE
 in the center-of-mass frame from $0^{\circ}$ to $180^{\circ}$, every $2^{\circ}$.
 As \mub\ is defined as the average cosine of the elastic
 scattered neutrons in the {\em Lab} frame, these differential cross sections are first boosted
@@ -10622,21 +10624,9 @@ the integral of the \nub\ spectrum used by EMPIRE to the integral of the \nub\ d
 fit.
 
 
-
-
-
-
-
-
-
-
-
-
-
-\chapter{Evaluation procedure}
-
-
-
+%%
+%%\chapter{Evaluation procedure}
+%% to be written :-)
 
 
 \chapter*{Acknowledgments}
@@ -11212,13 +11202,8 @@ of total cross section.
 This parameter may be used to simulate the CN resonances (obviously not included in the optical model), or  
 to simulate physical effects arising from the compound-direct processes interference
 (Engelbrecht-Weidenmuller transformation). The interference increases the compound inelastic cross sections,
-reducing others compound channels (incl. the compound elastic). It is recommended to avoid using CELRED and CINRED
-at the same energy as they affect the same quantities.
-
-\item [{CELCOR}] The compound elastic cross section will be multiplied by VAL (default: 1.). \\
-                 The relative uncertainty of the scaling factor in \% can be given by I1.\\
-This parameter may be used for a simple scaling of the CE cross section, without affecting compound
-inelastic cross sections.
+reducing others compound channels (incl. the compound elastic). If you use CELRED and CINRED at the same energy
+please note that some interference will result as they affect the same quantities.
 
 \item [{CINRED}] The compound inelastic cross section to discrete levels will be multiplied by VAL (default: 1.). \\
                  The discrete level number can be given by I1.\\
@@ -11227,8 +11212,8 @@ This parameter may be used to simulate physical effects arising from the compoun
 (Engelbrecht-Weidenmuller transformation). The interference increases the compound inelastic cross sections,
 reducing others compound channels (incl. the compound elastic). 
 
-\item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron on the target
-                 nucleus will be multiplied by VAL). 
+\item [{DXSRED}] The calculated deuteron pick-up/stripping cross section for incident deuteron
+				 on the target nucleus will be multiplied by VAL). 
                  It has no effect on other incident particles. 
                   
               \begin{description}[style=multiline,leftmargin=1cm]
