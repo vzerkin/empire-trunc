@@ -16,6 +16,7 @@ import shutil
 import time
 from empy import bash
 import qsubEmpire
+from subprocess import Popen
 
 # Define various lists of EMPIRE parameters that can vary:
 
@@ -291,11 +292,8 @@ def run(proj, mail=False):
 
     print "Starting original input"
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
-    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, mail=mail, jnm="cent_")
+    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), hold=True, mail=mail, jnm="cent_")
 
-    print " Central values queued. Let queue settle..."
-    time.sleep(10)
-    
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
@@ -314,7 +312,7 @@ def run(proj, mail=False):
         nameP, nameM = genNames(line,proj)
         jname = line.split()[0]
         tld = proj + "_orig/"
-
+        
         print "Starting", nameP
         if copyTLs(name):
             rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+", tldir=tld, jbid=orid)
@@ -326,7 +324,14 @@ def run(proj, mail=False):
             rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-", tldir=tld, jbid=orid)
         else:
             rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-")
-    
+
+    # release central jobs to run
+
+    for key in orid:
+        cmd = "qrls " + orid[key]
+        jp = Popen(cmd.split())
+        exstat = jp.wait()
+
 def analyze(proj):
     """
     generate sensitivity matrix after run() finishes

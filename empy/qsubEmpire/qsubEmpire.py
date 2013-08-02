@@ -105,7 +105,7 @@ def linkFiles(proj,src,dir):
     mklnk(proj+"-omp.dir")
     mklnk(proj+"-omp.ripl")
 
-def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
+def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="", jbid={}):
     """
     1) creates a set of new input files, each in its own directory. 
     Each file has the same header and options as original, plus a single energy
@@ -175,6 +175,7 @@ def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
         cmd = "qsub -N %s%s -o %s -l ncpus=1 -v dir=%s,file=%s,energy=%s"
         if clean: cmd += ",clean=Y"
         if len(jbid) != 0: cmd += " -W depend=afterok:" + jbid[ene]
+        if hold: cmd += " -h"
         if mail: cmd += " -m a "
         else:    cmd += " -m n "
         cmd = cmd % (jnm, ene, log, dir, proj, ene)
