@@ -17,10 +17,9 @@ import time
 from empy import bash
 import qsubEmpire
 
-# which parameters can be varied in the EMPIRE INPUT?
+# Define various lists of EMPIRE parameters that can vary:
+
 # allowed: can always be varied
-# restricted: variations only if defaults are provided
-# fisPars: vary the fission input file $proj-inp.fis
 allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP', 
         'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', 'GRANGN', 'GRANGP', 
@@ -30,6 +29,8 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'ROHFBA', 'ROHFBP', 'ELARED', 'FISAT1', 'FISAT2', 'FISAT3',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
         'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3', 'CELRED','CINRED')
+
+# restricted: variations allowed only when default value provided
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'CSGDR2', 'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 
         'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', 'EXPUSH', 'FCC', 
@@ -37,7 +38,11 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'GCROUX', 'GDIV', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1', 
         'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY',
         'TRUNC', 'WIDEX', 'DEFNUC')
+
+#fisPars: varied in the fission input file $proj-inp.fis
+#         varying fisPars is deprecated -- use relative parameters.
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
+
 # Defining list of prompt fission neutron spectra parameters
 pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
@@ -168,8 +173,10 @@ def init(proj):
         if name in fisPars:
             # these are a special case, require modifying the fission input
             # I've separated that code into another module
-            import parseFission
-            parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
+            # import parseFission
+            # parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
+            # Aug 2013 - don't allow varying these. Use relative fis pars
+            print "%s can't be varied - use relative parameters! Skipping" % name
             continue
         
         if not (name in allowed or name in restricted or name in pfnsPar):
@@ -271,46 +278,23 @@ def init(proj):
         minus.close()
 
 
-def copyTLs(proj):
-    """
-    after running original input, pass TLs to other parameters
-    should improve performance
-    """
-    sens = open(proj+"-inp.sen", "r")
-    for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*','@'):
-            continue
-        if line.startswith("UOM") or line.startswith("DEFNUC"):
-            # don't copy tls when we vary the optical model parameters
-            continue
-    
-        tmp = line.split('!')[0]
-        tmp = tmp.split()
-        while len(tmp) < 6:
-            tmp.append('0')
-        
-        name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
-            continue
-        
-        nameP, nameM = genNames(line,proj)
-        
-        # ... won't work as desired without changes to qsubEmpire:
-        # right now, each independant energy is only created when runInput()
-        # is called by qsubEmpire. Need to copy these TLs into those subdirs
-
-
 def run(proj, mail=False):
-    """
-    use init to set up the project, then run!
-    """
+
+    # use init to set up the project, then run!
+
+    def copyTLs(pnam):
+        # return True only for parameters that don't affect TLs.
+        if pnam.startswith("UOM") or pnam.startswith("DEFNUC"):
+            return False
+        else:
+            return True
+
     print "Starting original input"
     # 'clean=True': delete everything but .xsc and -pfns.out file after running
-    qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, mail=mail, jnm="cent_")
+    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, mail=mail, jnm="cent_")
 
-    # start watching queue, report when all jobs finish:
-    os.system('time ~/bin/monitorQueue 0 &')
+    print " Central values queued. Let queue settle..."
+    time.sleep(10)
     
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -325,19 +309,23 @@ def run(proj, mail=False):
             tmp.append('0')
         
         name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
-            continue
+        if not (name in allowed or name in restricted or name in pfnsPar): continue
         
         nameP, nameM = genNames(line,proj)
         jname = line.split()[0]
-        # pause between submitting each new file:
-        time.sleep(2)
+        tld = proj + "_orig/"
+
         print "Starting", nameP
-        qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+")
-        time.sleep(2)
+        if copyTLs(name):
+            rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+", tldir=tld, jbid=orid)
+        else:
+            rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"+")
+
         print "Starting", nameM
-        qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-")
+        if copyTLs(name):
+            rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-", tldir=tld, jbid=orid)
+        else:
+            rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=True, mail=mail, jnm=jname+"-")
     
 def analyze(proj):
     """
@@ -384,8 +372,7 @@ def analyze(proj):
             tmp.append('0')
         
         name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             print "Parameter %s shouldn't be varied."%name\
                     + " Will not include in sensitivity output."
             continue
@@ -399,17 +386,17 @@ def analyze(proj):
         
         # make a modified version of sens. matrix, KALMAN-specific
         smat = (xsplus[:,1:]-xsminus[:,1:]) / xs0[:,1:]
-#       schk = (abs(xsplus[:,1:]-xs0[:,1:])-abs(xsminus[:,1:]-xs0[:,1:])) / xs0[:,1:]
-#       schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(abs(xsplus[:,1:]-xsminus[:,1:]))
-#       schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])
+        #schk = (abs(xsplus[:,1:]-xs0[:,1:])-abs(xsminus[:,1:]-xs0[:,1:])) / xs0[:,1:]
+        #schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(abs(xsplus[:,1:]-xsminus[:,1:]))
+        #schk = (xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])
         schk = ((xsplus[:,1:]+xsminus[:,1:]-2*xs0[:,1:])/(2*xs0[:,1:])) * (smat / 2)
         # this produces 'nan' wherever xs0==0. Replace 'nan' with 0
         smat[xs0[:,1:]==0] = 0.0
         schk[xs0[:,1:]==0] = 0.0
-#       schk[(xsplus[:,1:]-xsminus[:,1:])==0] = 0.0
+        #schk[(xsplus[:,1:]-xsminus[:,1:])==0] = 0.0
         # also truncate sensitivities below 10**-5
         smat[abs(smat)<1e-5] = 0.0
-#       schk[abs(smat)<1e-5] = 0.0
+        #schk[abs(smat)<1e-5] = 0.0
         
         # 'sens' contains only sensitivities. Also create 'en' with energies:
         en = xs0[:,0]
@@ -500,8 +487,7 @@ def pfns(proj):
             tmp.append('0')
         
         name, val, i1, i2, i3, i4 = tmp[:]
-        if not (name in allowed or name in restricted
-                or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             print "Parameter %s shouldn't be varied."%name\
                     + " Will not include in sensitivity output."
             continue

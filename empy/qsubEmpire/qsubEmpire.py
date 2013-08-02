@@ -18,6 +18,9 @@ import os
 import sys
 import shutil
 from empy import bash
+from os.path import join
+from subprocess import Popen
+from subprocess import PIPE
 
 def parseInput(inputFile):
     """
@@ -87,7 +90,7 @@ def copyFiles(proj,dir):
     bash.cp(proj+"-omp.ripl",dir,False)
 
 
-def runInput(inputFile, clean=False, mail=False, jnm="emp_"):
+def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
     """
     1) creates a set of new input files, each in its own directory. 
     Each file has the same header and options as original, plus a single energy
@@ -96,31 +99,41 @@ def runInput(inputFile, clean=False, mail=False, jnm="emp_"):
     
     If clean==True we only save the .xsc file (reduces network traffic,
     best for sensitivity calculation)
+
+    If tldir contains a directory, then try to copy TL's from there for
+    each energy subdirectory. Default is empty -> don't copy TLs.
+
+    If jbid contains a dictionary, then sync each job to wait for specified jobs
     """
-    from os.path import join
 
     path = getPath(inputFile)
     proj = os.path.basename(inputFile).split('.')[0]
-    if jnm == "emp_":
-        jnm = proj+"_"
+    if jnm == "emp_": jnm = proj+"_"
+    joblst = {}
     
     header, options, energies = parseInput(inputFile)
     
-    firsterr = True # reduce warnings if directories already exist
+    firsterr = True # no multiple warnings if directories already exist
+    first_tl = True
+
     for (energy,energy_dep_opt) in energies[::-1]:
         """
         make a new directory with new input file, and execute empire
         starting with largest energies may help with speed
         """
-        name = proj+"-"+energy.strip()
-        try:
-            os.mkdir(join(path,name))
-        except OSError, e:
+
+        ene = energy.strip()
+        name = proj + "-" + ene
+        dir = join(path,name)
+
+        if os.path.exists(dir):
             if firsterr:
-                print ("Using existing TLs!")
+                print "Using existing energy directory"
                 firsterr = False
+        else: os.mkdir(dir)
+
+        # make new input file with single energy
         fnew = open(join(path,name,proj+".inp"), "w")
-        
         for l in header:
             fnew.write(l)
         for o in options:
@@ -132,22 +145,32 @@ def runInput(inputFile, clean=False, mail=False, jnm="emp_"):
         fnew.close()
         
         # copy other inputs as well, if available (no error message otherwise)
-        dir = join(path,name)
         copyFiles(join(path,proj),dir)
-        
-        log = join( path,"empire_%s.log" % (name) )
-        cmdOpts = "-N %s%s -o %s -l ncpus=1 "
-        if mail: cmdOpts += "-m a "
-        else:    cmdOpts += "-m n "
-        if clean:
-            cmd = "qsub " + cmdOpts + "-v dir=%s,file=%s,energy=%s,clean=Y ~/bin/runEmpire.sh"
-        else:
-            cmd = "qsub " + cmdOpts + "-v dir=%s,file=%s,energy=%s ~/bin/runEmpire.sh"
+        if tldir != "":
+            tln = fullName(join(tldir,name,proj+"-tl"))
+            ntl = fullName(join(dir,proj+"-tl"))
+            if os.path.exists(ntl):
+                if first_tl:
+                    print "Using existing TLs"
+                    first_tl = False
+            else: os.symlink(tln,ntl)
 
-        cmd = cmd % (jnm, energy.strip(), log, dir, proj, energy.strip())
-        #print cmd
-        os.system(cmd)
+        log = join(dir, "empire.log")
+        cmd = "qsub -N %s%s -o %s -l ncpus=1 -v dir=%s,file=%s,energy=%s"
+        if clean: cmd += ",clean=Y"
+        if len(jbid) != 0: cmd += " -W depend=afterok:" + jbid[ene]
+        if mail: cmd += " -m a "
+        else:    cmd += " -m n "
+        cmd = cmd % (jnm, ene, log, dir, proj, ene)
+        cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
+        jp = Popen(cmd.split(), stdout=PIPE)
+        job = jp.stdout.read()
+        job = job.strip()
+        jp.stdout.close()
+        print " Started job: ",job.split(".")[0],"  E = ",ene
+        joblst[ene] = job
 
+    return joblst
 
 def reconstruct(inputFile):
     """
@@ -177,7 +200,7 @@ def reconstruct(inputFile):
     # assume enlist is in order:
     enlist = [e[0].strip() for e in energies]
     
-    name = os.path.join(path,proj+"-"+enlist[0])
+    name = join(path,proj+"-"+enlist[0])
     #print "Initial energy:",enlist[0]
     # xsc is easy, just append each new energy to end of first file
     bash.cp("%s/%s.xsc" % (name,proj), path)
@@ -197,7 +220,7 @@ def reconstruct(inputFile):
     
     for e in enlist[1:]:
         #print "next energy:",e
-        name = os.path.join(path,proj+"-"+e)
+        name = join(path,proj+"-"+e)
         xscA = open("%s/%s.xsc" % (name,proj), "r").readlines()
         xsc.write(xscA[3])
         
@@ -232,7 +255,7 @@ def reconstructXsec(inputFile):
     # assume enlist is in order:
     enlist = [e[0].strip() for e in energies]
     
-    name = os.path.join(path,proj+"-"+enlist[0])
+    name = join(path,proj+"-"+enlist[0])
     #print "Initial energy:",enlist[0]
     # xsc is easy, just append each new energy to end of first file
     bash.cp("%s/%s.xsc" % (name,proj), path)
@@ -240,7 +263,7 @@ def reconstructXsec(inputFile):
     
     for e in enlist[1:]:
         #print "next energy:",e
-        name = os.path.join(path,proj+"-"+e)
+        name = join(path,proj+"-"+e)
         xscA = open("%s/%s.xsc" % (name,proj), "r").readlines()
         xsc.write(xscA[3])
         
@@ -260,7 +283,7 @@ def reconstructPFNS(inputFile):
     # assume enlist is in order:
     enlist = [e[0].strip() for e in energies]
     
-    name = os.path.join(path,proj+"-"+enlist[0])
+    name = join(path,proj+"-"+enlist[0])
     #print "Initial energy:",enlist[0]
     # -pfns.out is easy, just append each new energy to end of first file
     bash.cp("%s/%s-pfns.out" % (name,proj), path)
@@ -268,7 +291,7 @@ def reconstructPFNS(inputFile):
     
     for e in enlist[1:]:
         #print "next energy:",e
-        name = os.path.join(path,proj+"-"+e)
+        name = join(path,proj+"-"+e)
         pfnsA = open("%s/%s-pfns.out" % (name,proj), "r").readlines()
         n_lines = 0
         for line in pfnsA: n_lines += 1
@@ -293,8 +316,17 @@ def clean(inputFile):
             shutil.rmtree(name)
         except OSError, e:
             print e
-    for output in glob("*.log"):
-        os.remove(output)
+
+
+def fullName(inputFile):
+    """
+    this is a hack: os.abspath returns path that doesn't exist on compute nodes
+    must replace with real path
+    """
+    nam = os.path.abspath(inputFile)
+    nam = nam.replace('/drives/4','/home2')
+    nam = nam.replace('/drives/5','/home3')
+    return nam
 
 
 def getPath(inputFile):
@@ -352,5 +384,5 @@ if __name__ == '__main__':
     else:
         # run!
         runInput(args[0])
-        os.system('time ~/bin/monitorQueue 0 &')
+        #os.system('time ~/bin/monitorQueue 0 &')
 
