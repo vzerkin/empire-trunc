@@ -90,6 +90,22 @@ def copyFiles(proj,dir):
     bash.cp(proj+"-omp.ripl",dir,False)
 
 
+def linkFiles(proj,src,dir):
+    """
+    Link various project input files
+    from src <- dir.
+    """
+    def mklnk(fil):
+        ftg = fullName(join(src,fil))
+        fln = fullName(join(dir,fil))
+        if os.path.exists(ftg) and not os.path.exists(fln): os.symlink(ftg,fln)
+
+    mklnk(proj+"-inp.fis")
+    mklnk(proj+".lev")
+    mklnk(proj+"-lev.col")
+    mklnk(proj+"-omp.dir")
+    mklnk(proj+"-omp.ripl")
+
 def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
     """
     1) creates a set of new input files, each in its own directory. 
@@ -145,7 +161,8 @@ def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
         fnew.close()
         
         # copy other inputs as well, if available (no error message otherwise)
-        copyFiles(join(path,proj),dir)
+        #copyFiles(join(path,proj),dir)
+        linkFiles(proj,path,dir)
         if tldir != "":
             tln = fullName(join(tldir,name,proj+"-tl"))
             ntl = fullName(join(dir,proj+"-tl"))
