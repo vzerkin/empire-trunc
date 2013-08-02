@@ -19,8 +19,7 @@ import sys
 import shutil
 from empy import bash
 from os.path import join
-from subprocess import Popen
-from subprocess import PIPE
+from subprocess import Popen,PIPE
 
 def parseInput(inputFile):
     """
@@ -181,9 +180,9 @@ def runInput(inputFile, clean=False, mail=False, jnm="emp_", tldir="", jbid={}):
         cmd = cmd % (jnm, ene, log, dir, proj, ene)
         cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
         jp = Popen(cmd.split(), stdout=PIPE)
-        job = jp.stdout.read()
-        job = job.strip()
+        job = jp.stdout.read().strip()
         jp.stdout.close()
+        exstat = jp.wait()
         print " Started job: ",job.split(".")[0],"  E = ",ene
         joblst[ene] = job
 
