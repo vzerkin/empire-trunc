@@ -184,7 +184,7 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
         job = jp.stdout.read().strip()
         jp.stdout.close()
         exstat = jp.wait()
-        print " Started job: ",job.split(".")[0],"  E = ",ene
+        print " Queued job: ",job.split(".")[0]," E = ",ene
         joblst[ene] = job
 
     return joblst
