@@ -59,54 +59,61 @@
 
 \begin{document}
 \begin{titlepage}
-\title{{\Huge
- EMPIRE--3.1 Rivoli} \\
-modular system for nuclear reaction calculations and nuclear data evaluation\\[5mm]
-{\Huge User's Manual}}
+\title{
+\vspace {-50 mm}
+{\normalsize
+\hfill INDC(NDS)-0603\\
+\hfill BNL-xxx\\}
+\vspace {10 mm}
+{\Huge
+\hfill \textsf {\bf{\color{cyan} EMPIRE-3.1 Rivoli}}} \\
+\hfill \textsf {\color{cyan} modular system for nuclear reaction calculations} \\ 
+\hfill \textsf {\color{cyan} and nuclear data evaluation}\\[5mm]
+{\hfill \textsf {User's Manual}}}
 \author{
-\large 
 ~\\
-M.W.~Herman$^{1}$, 
-R.~Capote$^{2}$,
-M.~Sin$^{3}$,
-A.~Trkov$^{4}$,
-B.V.~Carlson$^{5}$,\\
-P.~Oblo\v zinsk\`y$^{6}$,
-C.M.~Mattoon$^{7}$,
-H.~Wienke$^{\dagger}$,
-S.~Hoblit$^{1}$,\\
-Young-Sik~Cho$^{8}$,
-G.P.A.~Nobre$^{1}$,
-V. Plujko$^{9}$,
-V. Zerkin$^{2}$.
+\textsf{M.~Herman$^{1}$,} 
+\textsf{R.~Capote$^{2}$,}
+\textsf{M.~Sin$^{3}$,}
+\textsf{A.~Trkov$^{4}$,}
+\textsf{B.V.~Carlson$^{5}$,}\\
+\textsf{P.~Oblo\v zinsk\`y$^{6}$,}
+\textsf{C.M.~Mattoon$^{7}$,}
+\textsf{H.~Wienke$^{\dagger}$,}
+\textsf{S.~Hoblit$^{1}$,}\\
+\textsf{Young-Sik~Cho$^{8}$,}
+\textsf{G.P.A.~Nobre$^{1}$,}
+\textsf{V. Plujko$^{9}$,}
+\textsf{V. Zerkin$^{2}$}
 \\[2mm]
-\textsf{\normalsize 1) NNDC, Brookhaven National Laboratory, Upton, USA}\\
-\textsf{\normalsize e-mail: mwherman@bnl.gov}\\
+\textsf{\small 1) NNDC, Brookhaven National Laboratory, Upton, USA}\\
+\textsf{\small e-mail: mwherman@bnl.gov}\\
 %
-\textsf{\normalsize 2) NAPC--Nuclear Data Section, International Atomic Energy Agency, Vienna, Austria}\\
-\textsf{\normalsize e-mail: r.capotenoy@iaea.org}\\
+\textsf{\small 2) NAPC--Nuclear Data Section, International Atomic Energy Agency, Vienna, Austria}\\
+\textsf{\small e-mail: r.capotenoy@iaea.org}\\
 %
-\textsf{\normalsize 3) University of Bucharest, Bucharest, Romania}\\
+\textsf{\small 3) University of Bucharest, Bucharest, Romania}\\
 %
-\textsf{\normalsize 4) Jo\v{z}ef Stefan Institute, Ljubljana, Slovenia}\\
+\textsf{\small 4) Jo\v{z}ef Stefan Institute, Ljubljana, Slovenia}\\
 %
-\textsf{\normalsize 5) ITA/Centro Tecnico Aeroespacial, Sao Jose dos Campos, Brazil }\\
+\textsf{\small 5) ITA/Centro Tecnico Aeroespacial, Sao Jose dos Campos, Brazil }\\
 %
-\textsf{\normalsize 6) Bratislava, Slovakia}\\
+\textsf{\small 6) Bratislava, Slovakia}\\
 %
-\textsf{\normalsize 7) Lawrence Livermore National Laboratory, Livermore, USA }\\
+\textsf{\small 7) Lawrence Livermore National Laboratory, Livermore, USA }\\
 %
-\textsf{\normalsize 8) Korea Atomic Energy Research Institute,  Daejeon, South Korea }\\
+\textsf{\small 8) Korea Atomic Energy Research Institute,  Daejeon, South Korea }\\
 %
-\textsf{\normalsize  9) Taras Schevchenko National University, Kiev, Ukraine}\\[5mm]
+\textsf{\small  9) Taras Schevchenko National University, Kiev, Ukraine}\\[5mm]
 %
-\textsf{\normalsize To Harm Wienke in memoriam}\\
+\textsf{\small \it{To Harm Wienke in memoriam}}\\
 }
 
 \maketitle
 \thispagestyle{empty}
 \end{titlepage}
 \setcounter{page}{2} 
+
 
 \begin{abstract}
 EMPIRE is a modular system of nuclear reaction codes, comprising various
@@ -4703,7 +4710,29 @@ normalized to the Maxwellian distribution with $T=1.32$ MeV.}
 \end{center}
 \end{figure}
 
+\section{Nuclear astrophysics S-factor\label{S-FACTOR}}
 
+Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only.  The S-factor removes the barrier penetrability (s-wave) and the 1/$E$ dependence of the cross section.  It is generally expressed as
+
+\begin{equation}
+S(E)=\sigma(E) E \exp[2\pi\eta]
+\end{equation}
+where $\sigma(E)$ is the cross section and $E$ is the center of mass energy,
+
+\begin{equation}
+2\pi\eta = 0.9895106848 Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
+\end{equation} 
+
+\begin{equation}
+\mu = M_pM_t/(M_p + M_t),
+\end{equation}
+
+where $Z_p$ and $Z_t$ are the charge of the projectile  and 
+target respectively,  $M_p$ and $M_t$ stand for projectile and target masses and universal constants entering the numerical factor are taken from NIST CODATA 2010.
+The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature), the S-factor is constant.  
+The current calculation of the S-factor in EMPIRE can treat $\gamma$'s, neutrons and protons in the exit channel with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel.
+
+The S-factor can be plotted via the EMPIRE GUI.  An S-FACTOR.zvd file is produced for the selected reaction and  can be  merged with the separate S-factor c4 data file.  To allow the comparison a neutron in the outgoing channel is assigned  MT=1004, a proton  MT=1103 and a $\gamma$ MT of 1102.    
 
 
 \part{NUCLEAR DATA EVALUATION\label{Chap:eval}}
@@ -5531,43 +5560,6 @@ added in the following cases:
 \end{itemize}
 Additional messages monitor the progress of the data                       
 formatting process.                                                        
-
-
-
-
-\chapter{Nuclear astrophysics\label{Chap:S-FACTOR}}
-
-Although EMPIRE is a model code used primarily for nuclear data evaluation, it has the inherent capabilities to be used as a nuclear reaction model code for nuclear astrophysics applications.  In that vein, the S-factor has been implemented into the EMPIRE code.  The formalism that follows is valid for nonresonant reactions only \cite{iliadis:07} \cite{RR}.
-
-The S-factor removes the barrier penetrability (s-wave transmission probablility) and the 1/$E$ dependence of the cross section.  It is generally expressed as:
-
-\begin{equation}
-S(E)=\sigma(E) E \exp[2\pi\eta]
-\end{equation}
-where $\sigma(E)$ is the cross section in b   
-and $E$ is the center of mass energy in keV,
-
-\begin{equation}
-2\pi\eta = 31.29Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
-\end{equation}
-\begin{equation}
-\mu = M_pM_t/(M_p + M_t),
-\end{equation}
-where $Z_p$ is the charge of the projectile  and 
-$Z_t$ is the charge of the target.
-
-The assumption is that within the Gamow window ($E = E_0 \pm \frac{\Delta}{2}$ which is the narrow burning regime where reactions take place at a given stellar temperature $T$), the S-factor is constant (no energy dependence or very nearly a constant).  If $S(E) \neq S(E_{0}$),  then there is an energy dependence (and provided it is a slowly varying function of energy), then for the above formalism approximation methods can be applied.  In most cases (for nonresonant reactions), a Taylor series expansion around zero energy (Maclaurin) is normally taken.  This now becomes an effective S-factor (S$_{eff}$(E$_{0}$)).
-The current calculation of the S-factor in EMPIRE follows the above formalism (no energy dependence or very nearly a constant) and can output gammas, neutrons or protons in the exit channel (with either an $\alpha$ or proton (only p,$\gamma$ and p,n for this case) in the incident channel).\par
-The above formalism holds with the exception that the approximation for $\eta$ is taken from \cite{iliadis:07}
-as  \begin{equation}
-2\pi\eta = 0.989534Z_{p}Z_{t}{\sqrt{\frac{\mu}{E}}} 
-\end{equation}
- and the E is ain MeV.  Iliadis (constant from 2$\pi$$\eta$  = (0.989534)*(formulation aabove)) changed to use EMPIRE constants traceable to NIST (CODATA 2010 set - 2$\pi$$\eta$ = (0.9895106848)*(formulation above)) . \par 
-The keyword input to allow for the calculation of the S-factor is SFACT.  SFACT = 1 will calculate (x,$\gamma$); SFACT = 2 will calculate (x,n); SFACT = 3 will calculate (x,p or $\alpha$,p).  The output file has three columns: the first one is the incident center-of-mass energy, the second column is the cross section in barns and the third column is the S-factor given in MeV b.  This formalism applies to a narrow range of reactions (alpha or proton capture on p-nuclei are normally calculated thusly).    
-
-The S-factor can be plotted via the gui.  An S-FACTOR.zvd file is produced for the corresponding selected reaction.  This can be separately merged with the S-factor c4 data file.  A neutron in the outgoing channel is assigned an mt of 1004; a proton an mt of 1103 and a $\gamma$ an mt of 1102.  
-
-*** More nuclear astrophysics formalism forthcoming (reaction rate formalism)
 
 
 \part{STRUCTURE  OF  EMPIRE CODE\label{Chap:code}}
@@ -7869,7 +7861,7 @@ The structure of the file follows the optional input in \emph{{*}.inp} - the sam
 \end{itemize}
 For example, the following line of input \\
 \begin{verbatim}
-UOMPVV     0.03    00  01   1      ! omp real vol. depth for Z N-1 nucl.
+UOMPVV     0.03    00  01   1      ! omp real vol. depth for Z-0 N-1 nucl.
 \end{verbatim}
 indicates that the real depth of the optical model for the neutron (4$^{th}$ parameter equal 1) on the residue nucleus after emitting one neutron from the  compound nucleus (3$^{rd}$ parameter equal 01) will be perturbed by 3\%. 
 %
@@ -8807,7 +8799,7 @@ code:
 %\item Microscopic p-h level densities\index{p-h level densities} (routine
 %  exists),
 %\item Moldauer method for widths fluctuation correction, 
-\item Width fluctuation correction for reactions on excited targets,
+%\item Width fluctuation correction for reactions on excited targets,
 \item Improved parametrization of the elastic enhancement factor,
 \item ENDF-formatting of primary gammas.
 \item Improved description of direct reactions (e.g. breakup, pickup, etc.)
@@ -9544,7 +9536,7 @@ on realistic schemes of single particle levels offer higher reliability.
 The physics involved in this approach is clearly superior to the treatment
 used in the two models discussed above, which makes HFB densities
 more suitable for extrapolation. In addition, the tabulated values
-provided by Goriely for RIPL\index{RIPL}-2 and available in EMPIRE
+provided by Goriely for RIPL\index{RIPL}-3 and available in EMPIRE
 were adjusted to the same experimental data as the other two phenomenological
 approaches. Therefore, results of the HFB model at low energies
 should not differ significantly from those provided by the GC or EMPIRE-specific
@@ -10654,19 +10646,20 @@ to the principal author of TALYS (Arjan Koning) for providing a never ending sou
 of inspiration to our continuous attempts to surpass performance and functionalities
 of their codes.
 
-%Said and Dave
+%Said and Dave & Annalia
 We also highly appreciate S. Mughabghab's 
 help in developing the resonance module linking his
 Atlas of Neutron Resonances to
-EMPIRE and D. Brown's  professional installation of  EMPIRE, which 
-brings the code closer to the users.   
+EMPIRE, D. Brown's  professional installation of  EMPIRE, which 
+brings the code closer to the users and A. Palumbo for incorporating the astrophysical 
+S-factor calculation. 
 
 %main users 
 First of all, we would like to acknowledge our colleagues whose work helped
 to prepare this paper H. I. Kim, G. P. A. Nobre, A. Palumbo, and M. Pigni  deserve  
 a special mention as the  major users of the code. Their 
 comments were of great value and enabled us to trace coding errors, improve
-stability and ease of use of the code. 
+stability and ease of use of the code.
 
 %IAEA
 We feel particularly fortunate to be able to build on two solid
@@ -11774,10 +11767,14 @@ primary transitions only).
 to VAL (default calculated internally from RIPL nuclear masses).\\
 Uncertainty of the binding energy in \% may be given by I4. \\
 \item [{SFACT}] The removal of the s-wave Coulomb barrier transmission probability and
-the 1/E dependence of the cross section. \par
-= 1 outputs the S-factor for (x,$\gamma$) \par
-= 2 outputs the S-factor for (x,n) \par
-= 3 outputs the S-factor for (x,p) - in this case ($\alpha$,p)
+the 1/E dependence of the cross section.
+
+= 1 outputs the S-factor for (x,$\gamma$)
+
+= 2 outputs the S-factor for (x,n)
+
+= 3 outputs the S-factor for (x,p) 
+
 \item [{SHELNO}] Shell correction read from RIPL database will be multiplied
 by VAL for the nucleus with Z=I1 and A=I2. \\Uncertainty of the shell correction 
 value in \% may be given by I4 (default  1.0).\\ 
@@ -11805,7 +11802,7 @@ installation, and most of them are single-energy calculations. About 15 benchmar
 included with the system.
 The test cases (subdirectory \emph{test-cases}) are intended to contain real
 physical show cases, a few of them are provided. This directory will ideally expand in the future
-to include the best cases of succesful applications of EMPIRE-3.1 submitted by users.
+to include the best cases of successful applications of EMPIRE-3.1 submitted by users.
 
 % Some typical examples of EMPIRE input files are presented below for
 % illustrative purpose only. No attempt was made to ensure that the
