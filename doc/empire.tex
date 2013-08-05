@@ -66,7 +66,7 @@
 \hfill BNL-xxx\\}
 \vspace {10 mm}
 {\Huge
-\hfill \textsf {\bf{\color{cyan} EMPIRE-3.1 Rivoli}}} \\
+\hfill \textsf {\bf{\color{cyan} EMPIRE-3.2 Malta}}} \\
 \hfill \textsf {\color{cyan} modular system for nuclear reaction calculations} \\ 
 \hfill \textsf {\color{cyan} and nuclear data evaluation}\\[5mm]
 {\hfill \textsf {User's Manual}}}
@@ -206,15 +206,16 @@ set of global COMMONS which are included in most of the subroutines.
 This assures access to all the resources throughout the code, and
 facilitates adding new features and mechanisms.
 
-The current version EMPIRE-3.1, named Rivoli after the ultimate battle of 
-the first Italian campaign, comes seven years after the previous Lodi release.   
-The major development directions were covariances  and treatment 
-of the resonance region.  In addition, fission calculations were considerably 
-improved, library of input parameters was upgraded by making use of RIPL-3,
-three light clusters (d, t, and $^3$H) were added to the list of ejectiles, and 
-capabilities of performing optical model potential fitting were developed. 
-Finally, the overall stability of the code was improved. 
-
+The current version EMPIRE-3.2, named Malta after the Napoleon's capture of the island 
+on the way to Egypt, follows the Rivoli version released in 2011. Although a minor release, 
+it features a number of significant improvements such as: (i) prompt fission neutron spectra (PFNS) including automatic adjustment to experimental data, (ii) plotting of PFNS, mu-bars, 
+and nu-bars, (iii) anisotropic angular distributions 
+for compound elastic and inelastics, (iv) simulation of the Engelbrecht-Weidenm\"uller 
+transformation, and (v) new IO subroutines for manipulating the ENDF-6 formatted files. 
+In addition, this manual contains an extended description of parameter fitting and 
+covariance generation using EMPIRE coupled with the KALMAN code. As usual, the stability of 
+the code has been further improved and a number of deficiencies were fixed.
+  
 EMPIRE makes use of several codes, written by different authors, which
  were converted into subroutines and adapted for the present use.
 In most cases, the modifications concerned input/output interface
@@ -4767,7 +4768,7 @@ of the optical model potential.
 
 \textbf{WARNING}: The module requires that electronic version of the Atlas be installed in the \emph{empire/Atlas}.  The copy rights for Atlas belong to the publisher (Elsevier), and until restrictions on its distribution are lifted most users will not be able to install  Atlas and therefore to use the resonance module of EMPIRE. 
 
-The 3.1 version of the EMPIRE code is equipped with the module that makes use the information contained in the Atlas of Neutron Resonances~\cite{Mughabghab:06} to produce resonance files and related covariances for  the ENDF-6 formatted files.  This module facilitates  practical application of the extensive compilation of the measurements in the resonance region performed since the discovery of the neutron. 
+Since the 3.1 version of the EMPIRE code is equipped with the module that makes use the information contained in the Atlas of Neutron Resonances~\cite{Mughabghab:06} to produce resonance files and related covariances for  the ENDF-6 formatted files.  This module facilitates  practical application of the extensive compilation of the measurements in the resonance region performed since the discovery of the neutron. 
  
 The resonance module\cite{Cho2007, Herman2008} automates most of the procedures involved in evaluation 
 of the resonance region. It is designed so that it can be executed within EMPIRE
@@ -5691,7 +5692,7 @@ The distribution of EMPIRE consists of five \emph{.tgz} files and
 the installation script \emph{setup-emp}. The \emph{.tgz} files contain
 
 \begin{itemize}
-\item \emph{empire-3.1.tgz -}  contains EMPIRE source, parameter library, \emph{work}
+\item \emph{empire-3.2.tgz -}  contains EMPIRE source, parameter library, \emph{work}
 sub-directory, PREPRO2000 and ENDVER packages, and format checking
 codes (mandatory).
 \item \emph{x4cd.tgz} - EXFOR library of experimental data 
@@ -5714,7 +5715,7 @@ option for level densities may choose not to install them.
 % \emph{x4cd}. Size of this file after decompression is about 580 Mb.
 % Users of \emph{x4cd} should ignore this file. 
 \end{itemize}
-Out of these files only \emph{empire-3.1.tgz} is required to run
+Out of these files only \emph{empire-3.2.tgz} is required to run
 calculations, \emph{x4cd.tgz}, \emph{HFBCS-lev-dens.tgz}, and \emph{fis-lev-den.tgz}
 are optional and \emph{X4-2-17.tgz} is redundant if \emph{x4cd.tgz}
 can be used.
@@ -5734,19 +5735,19 @@ compiles all of the package using the default gfortran compiler
 or any other compiler specified by the user (the compiler itself must
 already be installed on the system). 
 
-EMPIRE can also be installed manually. To this end the \emph{empire-3.1.tgz}
+EMPIRE can also be installed manually. To this end the \emph{empire-3.2.tgz}
 file has to be uncompressed and untarred with the following commands
 (on UNIX systems):
 
 \begin{quotation}
-\emph{gunzip} \emph{empire-3.1.tgz}
+\emph{gunzip} \emph{empire-3.2.tgz}
 
-\emph{tar xvf empire-3.1.tar}
+\emph{tar xvf empire-3.2.tar}
 \end{quotation}
 or with a single command 
 
 \begin{quotation}
-\emph{tar xvzf empire-3.1.tgz}
+\emph{tar xvzf empire-3.2.tgz}
 \end{quotation}
 on the systems which allow such an action (e.g., Linux). The same
 should be done with the \emph{X4-2-xx.tgz} and \emph{HFBCS-lev-dens.tgz}
@@ -6995,7 +6996,7 @@ of the user EMPIRE-3.1 comes with the ActiveTcl package, which is
 easy to install and seems to run on various flavors of Linux (version
 for Windows is also available from htpp://www.activestate.com/Products/ActiveTcl/). 
 
-Standard GUI of EMPIRE-3.1 is a Tcl script \emph{Xrun.tcl} that can
+Standard GUI of EMPIRE-3.2 is a Tcl script \emph{Xrun.tcl} that can
 be started in any 'working' directory
 by typing
 
@@ -9143,7 +9144,7 @@ text).}
 \begin{description}[style=multiline,leftmargin=3cm]
 \item [{standard}] Wilmore-Hodgson S-OMP for neutrons and Becchetti-Greenlees
 for protons, EMPIRE-specific level densities with internal systematics,
-and discrete levels up to N$_{max}=10$ (note that in EMPIRE-3.1
+and discrete levels up to N$_{max}=10$ (note that in EMPIRE-3.2
 Koning-DeLaroche potential is a standard),%
 
 \item [{Ko-Be}] Koning-DeLaroche S-OMP for neutrons and protons, discrete
@@ -11795,13 +11796,13 @@ $>0$ set to VAL.
 
 \chapter{Description of test cases}
 
-In EMPIRE-3.1 system there are two types of tests: benchmarks and test cases.
+In EMPIRE-3.2 system there are two types of tests: benchmarks and test cases.
 The benchmarks (subdirectory \emph{benchmarks}) are intended for the verification of the local
 installation, and most of them are single-energy calculations. About 15 benchmarks are currently 
 included with the system.
 The test cases (subdirectory \emph{test-cases}) are intended to contain real
 physical show cases, a few of them are provided. This directory will ideally expand in the future
-to include the best cases of successful applications of EMPIRE-3.1 submitted by users.
+to include the best cases of successful applications of EMPIRE-3.2 submitted by users.
 
 % Some typical examples of EMPIRE input files are presented below for
 % illustrative purpose only. No attempt was made to ensure that the
