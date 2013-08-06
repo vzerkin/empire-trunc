@@ -107,12 +107,14 @@ elif [ "$option" = "kompare" ] ; then
 
 elif [ "$option" = "replace" ] ; then
 #  renames the files .xsc and .lst to -ref.xsc and -ref.lst to serve as reference
-#  using perl-based new version of linux 'rename' command
+#  using linux 'mv' command
    echo 'Renaming cross-section and .lst files for reference'
-   for suffix in $suffix_list
-   do   
-     rm *-ref.$suffix  >& /dev/null
-     rename 's/\.$suffix$/\-ref\.$suffix/'  *.$suffix
+   for file in $files
+   do
+     for suffix in $suffix_list
+     do   
+       mv $file.$suffix $file-ref.$suffix
+     done
    done
 
 else
