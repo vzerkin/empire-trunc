@@ -7224,7 +7224,8 @@ The folders panel is a sort of simple file manger that allows edit and delete fi
 
 \vspace{2mm}
 \textbf{Multi-run panel} - (Fig. )
-'Multi-run' panel allows to perform massive calculations for many nuclei with a few  mouse clicks. The left hand side window allow to load the full set of stable isotopes ('Load all' button is not yet functional). Then one can select an arbitrary number of the isotopes to create a list of targets (the list can be given a name and stored for future use). Unstable isotopes can be added to the list from the input field under the second window from the left. The output files to be kept after calculations must be selected using 'Keep only' radio-buttons. At least one 'green light' is needed to run calculations. This is enforced  to protect user against running hours of calculations only to find out that all the files were deleted right after each calculation was completed. All calculations are performed in the same directory, selected in the input field in the upper-right corner of the GUI. If the input files do not exist they are created form the default skel.inp file by replacing 'xxx'  in the second line of the input by actual mass and atomic numbers. User has a full control of the input by adjusting skel.inp accordingly. Once the actual input files are created they are being reused in the subsequent run. In between the runs, user may introduce arbitrary modifications to the input files.  EMPIRE automatically generates 'root' names combining 'za' prefix with a typical ENDF Z*1000+A.  
+'Multi-run' panel allows to perform massive calculations for many nuclei with a few  mouse clicks. The left hand side window allow to load the full set of stable isotopes ('Load all' button is not yet functional). Then one can select an arbitrary number of the isotopes to create a list of targets (the list can be given a name and stored for future use). Unstable isotopes can be added to the list from the input field under the second window from the left. The output files to be kept after calculations must be selected using 'Keep only' radio-buttons. At least one 'green light' is needed to run calculations. This is enforced  to protect user against running hours of calculations only to find out that all the files were deleted right after each calculation was completed. All calculations are performed in the same directory, selected in the input field in the upper-right corner of the GUI. If the input files do not exist they are created form the default skel.inp file by replacing 'xxx'  in the second line of 
+the input by actual mass and atomic numbers. User has a full control of the input by adjusting skel.inp accordingly. Once the actual input files are created they are being reused in the subsequent run. In between the runs, user may introduce arbitrary modifications to the input files.  EMPIRE automatically generates 'root' names combining 'za' prefix with a typical ENDF Z*1000+A.  
 
 \vspace{2mm}
 \textbf{Source panel} - (Fig. )
@@ -9730,7 +9731,8 @@ The baseline values are in red. }
  \label{fig:Vv-variation}
 \end{figure}
 
-Our preliminary studies indicate that the Kalman filter  adjusts the uncertainty of the fictitious model parameter, $\Delta p_{\textrm{mod}}$,  to reproduce the smallest systematic uncertainty. Thus, if the whole energy range is adequately covered by the experimental data the final result is well-defined.  In the energy ranges without measurements the result, to some extent, depends on the initial (assumed) uncertainty of the new parameter, $\Delta p_{\textrm{mod}}$. Naturally, if no experimental data are available the discussed  contribution to the uncertainty is defined by $\Delta p_{\textrm{mod}}$. In such a case,  however,  the cross section uncertainties are determined primarily by the propagation of uncertainties of the genuine model parameters, which are  much larger than the intrinsic model uncertainties.  The latter can, therefore, be neglected especially since there should be no uncertainties small enough to raise any concern. The procedure is particularly useful to simulate intrinsic uncertainties in the optical model, \textit{i.e.}, it is meant to be applied to the total cross sections. These are often very well measured which, combined with the rigid shape of the optical model predictions, results in extremely low uncertainties. There is no need to invoke such a procedure for other nuclear reaction models, {\it e.g.}, compound nucleus and preequilibrium emission, since their formulations include parameters which, to a large extent,  provide for a scaling degree of freedom.
+Our preliminary studies indicate that the Kalman filter  adjusts the uncertainty of the fictitious model parameter, $\Delta p_{\textrm{mod}}$,  to reproduce the smallest systematic uncertainty. Thus, if the whole energy range is adequately covered by the experimental data the final result is well-defined.  In the energy ranges without measurements the result, to some extent, depends on the initial (assumed) uncertainty of the new parameter, $\Delta p_{\textrm{mod}}$. Naturally, if no experimental data are available the discussed  contribution to the uncertainty is defined by $\Delta p_{\textrm{mod}}$. In such a case,  however,  the cross section uncertainties are determined primarily by the propagation of uncertainties of the genuine model parameters, which are  much larger than the intrinsic model uncertainties.  The latter can, therefore, be neglected especially since there should be no uncertainties small enough to raise any concern. The procedure is particularly useful to simulate intrinsic uncertainties 
+in the optical model, \textit{i.e.}, it is meant to be applied to the total cross sections. These are often very well measured which, combined with the rigid shape of the optical model predictions, results in extremely low uncertainties. There is no need to invoke such a procedure for other nuclear reaction models, {\it e.g.}, compound nucleus and preequilibrium emission, since their formulations include parameters which, to a large extent,  provide for a scaling degree of freedom.
 
 % Practical application of the method is illustrated in Fig.~\ref{fig:fictitiousscale} for the case of  total cross section on $^{90}$Zr. At energies above 3 MeV the standard EMPIRE-KALMAN method results in uncertainties of the order of 2\%, which is smaller than the 2.8\% adopted as a systematic error of experimental data, see the upper panel.  Including the scaling degree of freedom increases predicted uncertainties in the whole energy range as shown in the lower  panel.  In particular,  at energies above 3 MeV,  the calculated uncertainties are always above the expected 2.8\%  limit, indicating that the rigidity of the model  is responsible for the suspiciously small uncertainties. Simulating intrinsic model uncertainty by introducing scaling degree of freedom is a simple and effective way of alleviating the problem. 
 
@@ -10844,8 +10846,8 @@ $>0$ HRTW width fluctuation correction up to the energy set by VAL.
 
 = 0 Compound nucleus (CN) angular distribution assumed isotropic (default)
 
-> 0 Compound nucleus (CN) angular distribution assumed anisotropic;
-    collective levels must be present and DIRECT>0.
+$> 0$ Compound nucleus (CN) angular distribution assumed anisotropic;
+    collective levels must be present and DIRECT $>0$.
 
 \item [{INTERF}] Controls calculation of interference effects between direct 
     and compound decay.
@@ -10854,7 +10856,7 @@ $>0$ HRTW width fluctuation correction up to the energy set by VAL.
 
 = 1 Compound nucleus (CN) and direct interference considered by Engelbrecht-
       Weidenmuller transformation (see Phys.Rev. C8(1973)859-862). Collective
-	  levels must be present and DIRECT>0.
+	  levels must be present and DIRECT $>0$.
 
 \item [{FISSPE}] Controls calculation of prompt fission neutron spectra (PFNS).
 
