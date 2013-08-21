@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3420 $
+Ccc   * $Rev: 3478 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-04 15:57:18 +0200 (Sa, 04 Mai 2013) $
+Ccc   * $Date: 2013-08-21 21:21:50 +0200 (Mi, 21 Aug 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -1364,20 +1364,22 @@ c         ENDIF
          IF (DIRect.GT.0 .AND. KTRompcc.EQ.0) THEN
             KTRompcc = KTRlom(0,0)
             DIRpot   = ABS(KTRompcc)
-            WRITE (8,*)
-     &'WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
-            WRITE (8,*)' WARNING: DIRPOT set to ',abs(KTRompcc)
-
-            if(ABS(KTRompcc).ne.9602) then
-              WRITE (8,
-     &'(''  Optical model parameters for direct inelastic scattering set
-     & to RIPL #'',I4)') KTRompcc
-            else
-              WRITE (8,
-     &'(''  Optical model parameters for direct inelastic scattering set
-     & to Kumar & Kailas 2007 values'')')
-            endif
-            WRITE (8,*) ' '
+            IF (KTRompcc.ne.0) then ! skipping Heavy Ion reactions
+              WRITE (8,*)
+     &' WARNING: DIRPOT keyword not specified, but DIRECT keyword > 0'
+              WRITE (8,*)' WARNING: DIRPOT set to ',abs(KTRompcc)
+              WRITE (8,*)
+              if(ABS(KTRompcc).ne.9602) then
+                WRITE (8,
+     &'('' Optical model parameters for direct inelastic scattering set
+     &to RIPL #'',I4)') KTRompcc
+              else
+                WRITE (8,
+     &'('' Optical model parameters for direct inelastic scattering set
+     &to Kumar & Kailas 2007 values'')')
+              endif
+              WRITE (8,*) ' '
+            ENDIF
          ENDIF
 
 C--------input consistency check  *** done ***
@@ -8073,11 +8075,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION beta2x(NMASSE), ebin, efermi, emicx(NMASSE),
+C     DOUBLE PRECISION beta2x(NMASSE), ebin, efermi, emicx(NMASSE),
+      DOUBLE PRECISION                 ebin, efermi, emicx(NMASSE), 
      &                 excess(NMASSE), xmassexp, xmassth, zmn, zmx, dtmp
       INTEGER ia, iapro, iatar, iflag, ii, iloc, in, iz, izaf(NMASSE),
      &        izpro, iztar, k, nixa, nixz, nnuc
-      
+      DOUBLE PRECISION ftmp, beta2  
 C
 C
 Ccc
@@ -8116,7 +8119,8 @@ C-----Skipping header lines
       DO k = 1, NMASSE
 C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          READ (27,'(2i4,4x,i1,3f10.3,f8.3)',END = 100) nixz, nixa,
-     &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
+C    &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
+     &         iflag, xmassexp, xmassth, emicx(k) ! beta2 replaced by Nobre syst
          izaf(k) = nixz*1000 + nixa
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
@@ -8183,7 +8187,9 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
-               DEF(1,nnuc) = beta2x(k)
+C              DEF(1,nnuc) = beta2x(k)
+               call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+               DEF(1,nnuc) = beta2
                XMAss(nnuc) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(nnuc) = A(nnuc) +  XMAss(nnuc)/AMUmev
@@ -8193,7 +8199,11 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-               IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)
+C              IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)
+               IF(DEF(1,0).EQ.0.d0) THEN
+                  call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+                  DEF(1,0)=beta2
+               ENDIF 
                XMAss(0) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(0) = A(0) + XMAss(0)/AMUmev
@@ -8208,7 +8218,12 @@ C
 C           Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
             DO ii = 0, NDEJC
                IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
-                 DEFprj = beta2x(k)
+C                DEFprj = beta2x(k)
+                 DEFprj = 0.d0
+                 IF( AEJc(ii) .gt. 4 ) THEN ! for Heavy Ions
+                   call defcal(NINT(ZEJc(ii)),NINT(AEJc(ii)),beta2,ftmp)
+                   DEFprj = beta2
+                 ENDIF
 C                Atomic mass excess 
                  XMAss_ej(ii) = EXCessmass(iz,ia)
 C
@@ -9285,7 +9300,7 @@ Ccc
 C
 C Local variables
 C
-      DOUBLE PRECISION beta2, beta3, betatmp, etmp, jtmp
+      DOUBLE PRECISION beta2, beta3, betatmp, etmp, jtmp, ftmp
       INTEGER i, ia, ierr, iptmp, iz, natmp, nztmp, iccfus
       CHARACTER*6 reftmp
 
@@ -9296,6 +9311,10 @@ C
 
       beta2 = 0.D0
       beta3 = 0.D0
+      WRITE (8,*)
+C       
+C     TARGET DEFORMATIONS
+C
       OPEN (84,FILE = trim(empiredir)//
      &      '/RIPL/optical/om-data/om-deformations.dat',
      &      STATUS = 'old',ERR = 200)
@@ -9312,7 +9331,7 @@ c            CCFUS deformations
              BETcc(iccfus) = beta2
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
+             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
      &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
@@ -9332,25 +9351,49 @@ c            CCFUS deformations
       ENDDO
  250  IF (beta2.EQ.0.D0) THEN
          ierr = 1
+	   WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15 (2+) used'
+         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+     &tions: Phys.Rev.C76(2007)024605' 
+C
+         call defcal(iz,ia,beta2,ftmp)
+         iccfus = iccfus + 1
+c        CCFUS deformations
+         BETcc(iccfus) = beta2
+         FLAm(iccfus) = 2
+         QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
+         WRITE (8,'(1x,A39,/,1x,A11,F7.3)')
+     &   'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &           'BETA (2+) =',beta2
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
+	   WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.05 (3-) used'
+         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+     &tions: Phys.Rev.C76(2007)024605' 
+C
+         call defcal(iz,ia,ftmp,beta3)
+         iccfus = iccfus + 1
+c        CCFUS deformations
+         BETcc(iccfus) = beta3
+         FLAm(iccfus) = 3
+         QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
+         WRITE (8,'(1x,A39/1x,A11,F7.3)')
+     &   'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &           'BETA (3-) =',beta3
       ENDIF
 
-      IF(ZEJc(0).GT.0 .and. beta3.gt.0.03) then
-        WRITE (8,*) ' WARNING: ',
-     &        '3- dynamical deformation reduced to 0.03'
-        beta3 = max(0.03d0,beta3)
-      ENDIF
+C     IF(ZEJc(0).GT.0 .and. beta3.gt.0.03) then
+C       WRITE (8,*) ' WARNING: ',
+C    &        '3- dynamical deformation reduced to 0.03'
+C       beta3 = max(0.03d0,beta3)
+C     ENDIF
+
       IF(AEJc(0).LE.4) GOTO 350
+
       ia = AEJc(0)
       iz = ZEJc(0)
       close(84)
@@ -9373,7 +9416,7 @@ c            CCFUS deformations
              FLAm(iccfus) = -2
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL):', 
+     &           'PROJ. EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
@@ -9385,29 +9428,49 @@ c            CCFUS deformations
              FLAm(iccfus) = -3
              QCC(iccfus) = -etmp
              WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ EXPERIMENTAL DEFORMATION (RIPL):', 
+     &           'PROJ. EXPERIMENTAL DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
  300  IF (beta2.EQ.0.D0) THEN
          ierr = 1
+         WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15 (2+) used'
+         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+     &tions: Phys.Rev.C76(2007)024605' 
+         call defcal(iz,ia,beta2,ftmp)
+         iccfus = iccfus + 1
+c        CCFUS deformations
+         BETcc(iccfus) = beta2
+         FLAm(iccfus) = -2
+         QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
+         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &   'PROJ. SYST. DEFORMATION (Nobre et al):', 
+     &           'BETA (2+) =',beta2
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
+         WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.05 (3-) used'
+         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+     &tions: Phys.Rev.C76(2007)024605' 
+         call defcal(iz,ia,ftmp,beta3)
+         iccfus = iccfus + 1
+c        CCFUS deformations
+         BETcc(iccfus) = beta3
+         FLAm(iccfus) = -3
+         QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
+         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &   'PROJ. SYST. DEFORMATION (Nobre et al):', 
+     &           'BETA (3-) =',beta3
       ENDIF
       GOTO 350
   200 WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL/optical/om-data/om-deformations.dat not found '
-      WRITE (8,*) ' WARNING: ',
-     &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+C     WRITE (8,*) ' WARNING: ',
+C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
       ierr = 2
       GOTO 400
 
@@ -9480,7 +9543,6 @@ C
       CHARACTER*80 ch_iuf
       CHARACTER*3 ctmp3
       CHARACTER*5 ctmp5
-      DOUBLE PRECISION DBLE
       LOGICAL fexist,odd
       CHARACTER*8 finp
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
@@ -10060,38 +10122,60 @@ C-----levels for target NNUC copied to file TARGET.lev
      &   '/RIPL/optical/om-data/om-deformations.dat not found '
 C     WRITE (8,*) ' WARNING: ',
 C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
+      WRITE (8,*) ' WARNING: Nobre et al systematics used for deformatio
+     &ns: Phys.Rev.C76(2007)024605' 
+      call defcal(iz,ia,beta2,beta3)
       GOTO 400
   300 CLOSE (84)
-      IF (beta2.NE.0.D0 .OR. beta3.NE.0.D0) THEN
-         WRITE (8,'(/1x,A34/1x,A11,F7.3,A13,F7.4)')
-     &           'EXPERIMENTAL DEFORMATION (RIPL):', 'BETA (2+) =',
-     &          beta2, '  BETA (3-) =', beta3
-
+      IF (beta2.EQ.0.D0) THEN
+         WRITE (8,*) 
+         WRITE (8,*) ' WARNING: ',
+     &    'E(2+) level not found in Raman 2001 database (RIPL)'
+         call defcal(iz,ia,beta2,ftmp)
+         IF(beta2.ne.DEF(1,0)) then
+            WRITE (8,*)
+     &      ' WARNING: Input deformation used (DEFNUC)'
+            beta2 = DEF(1,0)
+            WRITE (8,'(/1x,A26/1x,A11,F7.3)')
+     &      'TARGET INPUT DEFORMATION :', 
+     &      'BETA (2+) =',beta2
+	   ELSE
+            WRITE (8,*)
+     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
+            WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &      'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &      'BETA (2+) =',beta2
+	   ENDIF
+         IF (DEFormed) THEN
+            WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
+            WRITE (8,*)
+         ENDIF
+	ELSE
+         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
+     &      'BETA (2+) =',beta2
          IF (DEFormed) THEN
             WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
             WRITE (8,*)
          ENDIF
       ENDIF
-      IF (beta2.EQ.0.D0) THEN
-         WRITE (8,*) ' WARNING: ',
-     &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         IF(odd) then
-            WRITE (8,*) ' WARNING: Odd nucleus, ',
-     &            'FRDM deformation will be used for the gs band'
-            WRITE (8,*) ' BETA2 = ',DEF(1,0)
-            beta2 = DEF(1,0)
-         ELSE
-            WRITE (8,*) ' WARNING: FRDM deformation will be used'
-            WRITE (8,*) ' BETA2 = ',DEF(1,0)
-            beta2 = DEF(1,0)
-         ENDIF
-      ENDIF
       IF (beta3.EQ.0.D0) THEN
+         WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*) ' WARNING: ',
-     &        'Default dynamical deformations 0.005 (3-) will be used'
-         beta3 = 0.005
+         WRITE (8,*)
+     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
+C        WRITE (8,*) ' WARNING: ',
+C    &        'Default dynamical deformations 0.005 (3-) will be used'
+C        beta3 = 0.005
+         call defcal(iz,ia,ftmp,beta3)
+         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &      'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &      'BETA (3-) =',beta3
+	ELSE
+         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
+     &      'BETA (3-) =',beta3
       ENDIF
 
   400 DO ilv = 1, nlvs
