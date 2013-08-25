@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# script to remove left-over files from kalman
+# fitting of Empire cross sections of PFNS
+
+kln=''
+echo -n "Remove existing fort.*, *.kal, *.gpd, KALMAN.INP, INPUT.D files? (Y/N) > "
+read kln
+
+if [ -n "$kln" ] && ( [ ${kln:0:1} = "y" ] || [ ${kln:0:1} = "Y" ] ); then
+    echo -n " Removing old kalman files..."
+    rm -f KALMAN.INP INPUT.D ENERGYANDINDEX.TMP fort.* *.gpd *.kal
+    echo " Done."
+else
+    echo "No files removed"
+fi
+
+exit
