@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3415 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-05-02 22:25:37 +0200 (Do, 02 Mai 2013) $
+Ccc   * $Rev: 3479 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-08-25 23:11:40 +0200 (So, 25 Aug 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -284,7 +284,8 @@ C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
      &          'D0 = ', d0c,' keV (calculated)'
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')') d0c
          ENDIF
-
+         WRITE(8 ,*)
+         WRITE(12,*)
          if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
             WRITE(8,'(1x,''Normalization factor = '',F7.3)')
      &          tgexper/sumtg
@@ -293,6 +294,7 @@ C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
      &        ''Calculated Tgamma = 0'',
      &        '' or D_obs not available, no Normalization'')')
          endif
+         WRITE(8 ,*)
 C
 C        renormalization of the gamma-ray strength function only undertaken for the fir
 C
