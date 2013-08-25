@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3478 $
+Ccc   * $Rev: 3480 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-21 21:21:50 +0200 (Mi, 21 Aug 2013) $
+Ccc   * $Date: 2013-08-25 23:29:29 +0200 (So, 25 Aug 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -4537,7 +4537,7 @@ C
               if(i2.ne.0 .and. IOPran.ne.0) then
                 WRITE (8,
      &          '('' Compound inelastic cross section uncertainty '',
-     &          ''of discrete level # '',i2,''is equal to '',i2,
+     &          ''of discrete level # '',i2,'' is equal to '',i2,
      &          '' %'')') i1, i2
                 sigma = val*i2*0.01
                 IF(IOPran.gt.0) then
