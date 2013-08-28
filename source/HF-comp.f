@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3484 $
+Ccc   * $Rev: 3403 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-28 16:46:05 +0200 (Mi, 28 Aug 2013) $
+Ccc   * $Date: 2013-04-21 18:55:52 -0400 (Sun, 21 Apr 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -56,6 +56,7 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
+C      IF (Z(1).EQ.Z(Nnur)) nexrt = nexrt + 1 ! add a partial bin for neutron chain
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = (excnq - EX(ie,Nnur))/DE + 1.0001
          icse = MAX0(2,icse)
@@ -560,14 +561,13 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
+      DOUBLE PRECISION ELTl(NDLW)
+      COMMON /ELASTIC/ ELTl
 C
 C Dummy arguments
 C
       INTEGER Iec, Ipc, Jc, Nejc, Nnuc, Nnur
       DOUBLE PRECISION Sum
-C Commons
-      DOUBLE PRECISION ELTl(NDLW)
-      COMMON /ELASTIC/ ELTl
 C
 C Local variables
 C
@@ -576,6 +576,8 @@ C
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
 C
+!      write(8,*)'HF-DECAY entry: ejectile ',nejc
+!      write(8,*)'CN bin, spin, parity',Iec,Jc,Ipc
       Sum = 0.d0
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
@@ -594,18 +596,18 @@ C-----clear scratch matrices
 C-----
 C-----decay to the continuum
 C-----
-C-----do loop over r.n. spins
-         DO jr = 1, NLW
+         DO jr = 1, NLW            ! do loop over r.n. spins
             xjr = FLOAT(jr) + hisr
             smin = ABS(xjr - SEJc(Nejc))
             smax = xjr + SEJc(Nejc)
             mul = INT(smax - smin + 1.0001)
-C-----------do loop over channel spin
-            DO ichsp = 1, mul
+!            write(8,*) 'mul', mul
+            DO ichsp = 1, mul              ! do loop over channel spin
                s = smin + FLOAT(ichsp - 1)
                lmin = INT(ABS(xjc - s) + 1.01)
                lmaxf = INT(xjc + s + 1.01)
                lmaxf = MIN0(NLW,lmaxf)
+!               write(8,*) 'lmaxf, xjc, s ',lmaxf, xjc, s
                ipar = (1 + Ipc*( - 1)**(lmin - 1))/2
 C--------------parity index of r.n. state populated by emission with LMIN
                ip1 = 2 - ipar
@@ -636,6 +638,11 @@ C--------------decay to the highest but one bin (conditional see the next IF)
                IF (ZEJc(Nejc).EQ.0.0D0 .AND. Iec.EQ.NEX(Nnuc) - 1) THEN
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
+!                  write(8,*) 'lmaxf top bin, xjc, s ',lmaxf, xjc, s
+C-----------------CORR in the next lines accounts for the Tl interpolation
+C-----------------and integration over overlaping bins (2/3), it turned out it must
+C-----------------be energy step and also emission step dependent
+                  corr = 0.4444/(DE - XN(Nnur) + XN(1))*TUNe(Nejc,Nnuc)
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.0
@@ -647,21 +654,25 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                      sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
                   ENDDO
 C-----------------do loop over l   ***done***
-C-----------------CORR in the next lines accounts for the Tl interpolation
-C-----------------and integration over overlaping bins (2/3), it turned out it must
-C-----------------be energy step and also emission step dependent
-                  corr = 0.4444/(DE - XN(Nnur) + XN(1))*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
      &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &               + sumtl2*RO(iermax,jr,ip2,Nnur)*corr
+!                  write(8,*) 'Last but one bin', iermax
+!                  write(8,*) 'jr, corr, sumtl1,2', jr, corr, sumtl1,
+!     &            sumtl2
+!                   write(8,*) 'SCRt top',SCRt(iermax,jr,ip1,Nejc),
+!     &              SCRt(iermax,jr,ip2,Nejc)
                ENDIF
 C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
+!               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
+!               DO ier = iermax - 1, iermax-1, -1
                   ietl = Iec - ier - itlc
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
+!                  write(8,*) 'lmin, lmax', lmin, lmax
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.0
@@ -678,6 +689,16 @@ C
      &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
      &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
+                   IF (ier.eq.1 .AND. Z(1).EQ.Z(nnur)) THEN
+                      SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
+     &                DEPart(Nnur)
+                      SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
+     &                DEPart(Nnur)
+                   ENDIF
+!                   write(8,*) 'ietl, lmin, lmax', ietl, lmin, lmax
+!                   write(8,*) 'ier, sumtl1,2', ier, sumtl1, sumtl2
+!                   write(8,*) 'SCRt ',SCRt(ier,jr,ip1,Nejc),
+!     &              SCRt(ier,jr,ip2,Nejc)
                ENDDO
 C--------------do loop over r.n. energies ***done***
             ENDDO
@@ -692,23 +713,25 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
             ENDDO
             Sum = Sum - 0.5*(SCRt(1,j,1,Nejc) + SCRt(1,j,2,Nejc))
          ENDDO
-         Sum = Sum*DE        
+         Sum = Sum*DE
+!         write(8,*)'sum to continuum for ejectile ', Nejc, Sum
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
       ENDIF
 C-----
-C-----decay to discrete levels
+C-----decay to discrete levels (except elastic)
 C-----
       DO i = 1, NLV(Nejc)
          SCRtl(i,Nejc) = 0.d0
       ENDDO
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
 
+C-----do loop over inelastic levels ------------------------------------
       DO i = 1, NLV(Nnur)
-
 C        Elastic channels excluded, done after the loop
          if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
 
          eout = eoutc - ELV(i,Nnur)
+         cor  = CINRED(i)
          IF (eout.LT.0.0D0) EXIT
 
          sumdl = 0.d0
@@ -733,11 +756,12 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = sumdl * CINRED(i) 
          Sum = Sum + sumdl * CINRED(i) 
+!         write(8,*) 'Sum to level i=', i,sumdl*CINRED(i)
       ENDDO
-C-----do loop over discrete levels --------- done --------------------
-
-      if(IZA(Nnur).EQ.IZA(0)) THEN
-
+C-----do loop over inelastic levels --------- done --------------------
+C----
+C-----elastic channel
+      IF(IZA(Nnur).EQ.IZA(0)) THEN
          i = LEVtarg  
          eout = eoutc - ELV(i,Nnur)
          IF (eout.LT.0.0D0) GOTO 40
@@ -754,11 +778,14 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-           tld = ELTl(L)
-           IF (ipar.NE.0) sumdl = sumdl + tld
-C          IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
-C    &                          + frde*(TL(il + 1,l,Nejc,Nnur)
-C    &                          - TL(il,l,Nejc,Nnur))
+c           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+c     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+c     &                          - TL(il,l,Nejc,Nnur))
+c           write(8,*) 'Elastic L=',L,' Tl=',TL(il,l,Nejc,Nnur)
+c     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+c     &                          - TL(il,l,Nejc,Nnur))
+           IF (ipar.NE.0) sumdl = sumdl + ELTl(l)
+!           write(8,*) 'Elastic L=',L,' Tl=', ELTl(l)
          ENDDO
 C--------do loop over l --- done ----------------------------------------
          s = s + 1.
@@ -766,7 +793,9 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = sumdl*CELred
          Sum = Sum + sumdl*CELred
-      ENDIF
+!         write(8,*) 'Sum to elastic', sumdl*CELred
+      ENDIF !end of elastic
+!      write(8,*) 'Sum to levels', Sum
 C
    40 DENhf = DENhf + Sum
       SCRtem(Nejc) = Sum
@@ -1373,13 +1402,17 @@ C
                ENDDO
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, ipos, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg, Nnuc)
+               IF (ier.eq.1 .AND. Z(1).EQ.Z(Nnuc)) THEN
+                   SCRt(ier,Jr,ipos,0)=SCRt(ier,Jr,ipos,0)*DEPart(Nnuc)
+                   SCRt(ier,Jr,ineg,0)=SCRt(ier,Jr,ineg,0)*DEPart(Nnuc)
+               ENDIF
             ENDIF
            ENDDO
       ENDDO
 C-----do loop over c.n. energies ***done***
 C-----decay to the continuum ----** done***-----------------------
 C
-C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
+C-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID)
       DO j = jmin, jmax
          DO i = 1, Iec - 1
             Sum = Sum + SCRt(i,j,1,0) + SCRt(i,j,2,0)

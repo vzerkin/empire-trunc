@@ -1,6 +1,6 @@
-cc   * $Rev: 3484 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-28 16:46:05 +0200 (Mi, 28 Aug 2013) $
+cc   * $Rev: 3485 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -341,12 +341,12 @@ C
 
       ngamm_tr = 0
       nfiss_tr = 0
-	gamm_tr  = 0.d0
-	fiss_tr  = 0.d0
+      gamm_tr  = 0.d0
+      fiss_tr  = 0.d0
 C
-C	RCN, FEB 2013
+C	  RCN, FEB 2013
 C     For a proper consideration of fission and capture composition in the 
-C        ECIS CN calculation, further changes needed in tl.f (to be done later)
+C     ECIS CN calculation, further changes needed in tl.f (to be done later)
 C
 C     IF(.NOT.CN_isotropic) THEN
       IF(.FALSE.) THEN
@@ -1910,6 +1910,7 @@ C--------DO loop over c.n. excitation energy
             step = DE
             IF (ke.EQ.NEX(nnuc) .OR. ke.EQ.1) step = 0.5*DE
             IF (ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1) step = 1.0
+
             IF (ENDf(1).GT.0) THEN
 C--------------Clean auxiliary particle spectra for calculation of recoils
                REClev = 0.d0           
@@ -1925,6 +1926,10 @@ C--------------Calculate population in the energy bin ke
             DO ipar = 1, 2 !over decaying nucleus parity
                ip = INT(( - 1.0)**(ipar + 1))
                DO jcn = 1, NLW !over decaying nucleus spin
+                  if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                  write(8,*) ' '
+!                  write(8,*) 'DECAY STATE ke=',ke,' J=',jcn,' Pi=',ipar
+                  endif
                   IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
                   DENhf = 0.d0
                   IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
@@ -1940,10 +1945,16 @@ C--------------------Residual nuclei must be heavier than alpha
                      CALL WHERE(izares,nnur,iloc)
                      if(iloc.eq.1) CYCLE
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
+                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                     write(8,*) 'sum for ejectile=', nejc, sum
+                     endif
                   ENDDO
 C-----------------DO loop over ejectiles       ***done***
 C-----------------gamma emision
                   CALL DECAYG(nnuc,ke,jcn,ip,sum)
+                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                     write(8,*) 'sum for gamma', sum
+                     endif
 C-----------------Distribute yrast population over discrete levels
                   IF (DENhf.EQ.0.0D0) THEN
                      IF (ke.EQ.1) THEN
@@ -1992,11 +2003,23 @@ C-----------------Fission ()
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
                   IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1)
      &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                     write(8,*) 'sum for fission (sumfis) =   ', sumfis
+                     endif
 C-----------------
 C-----------------Normalization and accumulation
 C-----------------
                   xnor = POP(ke,jcn,ipar,nnuc)*step/DENhf
                   stauc = stauc + RO(ke,jcn,ipar,nnuc)*xnor
+!                  if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                  write(8,*) ' '
+!                  write(8,*) 'SUMMARY HF Jc =', Jc
+!                  write(8,*)'total sum from this state ' , DENhf
+!                  write(8,*)'sum gamma ' , sumg
+!                  write(8,*)'sum fission ' , sumfis
+!                  write(8,*)'first entry DENhf=',denhf
+!                  write(8,*) 'HF xnor, DENhf', xnor, DENhf
+!                  endif
                   IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
      &             DENhf*POP(ke,jcn,ipar,nnuc)*step/RO(ke,jcn,ipar,nnuc)
 C
@@ -2869,7 +2892,7 @@ cccccccccccccccccccc ccccccccccccccccccccccccccccc
 C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
 
       eps=1.d-8
-	csinel=CSPrd(2) ! for charged particles or photons
+      csinel=CSPrd(2) ! for charged particles or photons
 
       IF(INT(AEJc(0)).GT.0 .and. INT(ZEJc(0)).EQ.0) ! for neutrons
      >  csinel=CSPrd(2)-4.d0*PI*ELCncs

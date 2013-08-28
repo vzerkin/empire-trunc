@@ -1,22 +1,22 @@
-Ccc   * $Rev: 3483 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
+!cc   * $Rev: 3485 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
       SUBROUTINE INPUT
-Ccc
-Ccc   ********************************************************************
-Ccc   *                                                         class:iou*
-Ccc   *                         I N P U T                                *
-Ccc   *                                                                  *
-Ccc   *     Sets default values of input parameters, READs mandatory     *
-Ccc   *     input and calls READIN for optional input READing.           *
-Ccc   *                                                                  *
-Ccc   * input:none                                                       *
-Ccc   *                                                                  *
-Ccc   *                                                                  *
-Ccc   * output:none                                                      *
-Ccc   *                                                                  *
-Ccc   ********************************************************************
-Ccc
+!cc
+!cc   ********************************************************************
+!cc   *                                                         class:iou*
+!cc   *                         I N P U T                                *
+!cc   *                                                                  *
+!cc   *     Sets default values of input parameters, READs mandatory     *
+!cc   *     input and calls READIN for optional input READing.           *
+!cc   *                                                                  *
+!cc   * input:none                                                       *
+!cc   *                                                                  *
+!cc   *                                                                  *
+!cc   * output:none                                                      *
+!cc   *                                                                  *
+!cc   ********************************************************************
+!cc
       use nubar_reader
 
       INCLUDE 'dimension.h'
@@ -413,9 +413,10 @@ C        Default deformation values, they are changed in ifindcoll(),ifindcoll_C
 C--------temperature fade-out parameters of fission barrier
          TEMp0 = 1.65
          SHRt = 1.066
-C--------IOUT controls output amount on FILE6
+C--------IOUT controls output amount on FILE 8
          IOUt = 1
-C--------IOUt=0 no output except warnings
+C--------WARNING: description below is approximate
+C--------IOUt=0 some random output (useless)
 C--------IOUt=1 input data and essential results (all cross sections)
 C--------IOUt=2 as IOUt=1 plus fusion spin distribution, yrast state
 C--------       population, gamma-transition parameters, fusion barrier,
@@ -1006,6 +1007,7 @@ C--------Retrieve C4 experimental data  *** done ***
 
             ENDf(nnuc) = 1
             ENDfa(nnuc) = 1
+            DEPart(nnuc) = 1.0
 
             irepeated = 0
             do i=1,nnuc-1
@@ -1930,9 +1932,9 @@ C
          ECUt(1) = 0.0  
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
-         Do i = 0,NDNuc
+         DO i = 0,NDNuc
            ENDf(i) = 0
-         Enddo
+         ENDDO
       ENDIF
 C-----Energy step defined according to the CN excitation energy
       DE = (EMAx(1) - ECUt(1))/FLOAT(NEX(1) - 1)
@@ -2051,7 +2053,6 @@ C-----------determination of excitation energy matrix in res. nuclei
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
-
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -2085,17 +2086,22 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
-               DO i = 1, NEX(nnur)
-                  IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1) THEN
+               IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1 .AND.
+     &          NEX(Nnur).GT.1) THEN
+                  write(8,*) 'Z,A ',Z(nnur), A(nnur)
+                  DO i = 1, NEX(nnur)
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
-                  ELSE
+                  ENDDO
+C-----------------Width of the partial bin relative to DE
+                  DEPart(Nnur) = 1 + (EX(1,nnur)-ECUt(nnur))/DE
+                  write(8,*) 'Nnur, DEPart', nnur, DEPart(nnur)
+               ELSE
+                  DO i = 1, NEX(nnur)
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
-                  ENDIF
-               ENDDO
+                  ENDDO
+               ENDIF
             ENDIF
-            IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) ECUt(nnur)
-     &          = EX(1,nnur)
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
 
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE

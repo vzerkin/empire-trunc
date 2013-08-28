@@ -1,6 +1,6 @@
-C $Rev: 3483 $
-C $Author: rcapote $
-C $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
+C $Rev: 3485 $
+C $Author: mherman $
+C $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -30,21 +30,15 @@ C
 
 C---------------------------------------------------------------------------
 C        All arrays below commented and changed to save memory (unless you need HMS !!!)
-
 C        For HMS the NDEX parameter in dimension.h should be less than ~ 150 !!
-
 C    &                 CSEahmslab(ndecse,ndangecis,2),
-
 C    &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
-
 C    &                 CSEhms(ndecse,2,0:ndnuc), 
-
 C    &                 CSEahms(ndecse,ndangecis,2),
 
 C    &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
 C    &                  0:ndexclus),  
      &                 CSEahmslab(1,1,2),CSEhmslab(1,2,0:1),
-
      &                 CSHms(2,0:1),CSEhms(1,2,0:1),CSEahms(1,1,2),
 
      &                 POPcsea(1,0:1,0:1,1,0:1),  
@@ -53,7 +47,8 @@ C---------------------------------------------------------------------------
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
      &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),
-     &                 CSRead, D1Fra, DE, DEF(ndlw,0:ndnuc),
+     &                 CSRead, D1Fra, DE, DEPart(ndnuc),
+     &                 DEF(ndlw,0:ndnuc),
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,
      &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),
@@ -250,7 +245,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,PL_CN,
-     &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
+     &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0, DEPart
       COMMON /GLOBAL1/ EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3423 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-05 18:32:21 +0200 (So, 05 Mai 2013) $
+Ccc   * $Rev: 3485 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2517,7 +2517,7 @@ C
        Stl(l) = 0.d0
        Sel(l) = 0.d0
       ENDDO
-	CSFus   = 0.D0
+      CSFus   = 0.D0
 
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
