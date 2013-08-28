@@ -1,6 +1,6 @@
-cc   * $Rev: 3454 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-07-19 18:11:23 +0200 (Fr, 19 Jul 2013) $
+cc   * $Rev: 3484 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-08-28 16:46:05 +0200 (Mi, 28 Aug 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1867,15 +1867,23 @@ C--------in the first CN, it is preferred to use input parameter GCASC (0=OFF,1=
 C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
          IF (FITomp.NE.0) kemin = NEX(nnuc)
          kemax = NEX(nnuc)
+
+         IF (nnuc.EQ.1) THEN
+C
+C           Renormalizing elastic transmission coefficients to consider PE emission
+            DO i = 1, NDLW
+              ELTl(i) = ELTl(i) * corrmsd
+            ENDDO
+         ENDIF
 C--------Account for widths fluctuations (HRTW)
          IF (LHRtw.EQ.1 .AND. EINl.GT.EHRtw) LHRtw = 0
          IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN
 C
 C           Renormalizing transmission coefficients to consider PE emission
 C                 before calling HRTW
-            DO i = 1, NDLW
-              ELTl(i) = ELTl(i) * corrmsd
-            ENDDO
+C           DO i = 1, NDLW
+C             ELTl(i) = ELTl(i) * corrmsd
+C           ENDDO
             CALL HRTW
 
             IF (ENDf(1).GT.0 .AND. RECoil.GT.0)

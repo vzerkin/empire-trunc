@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3403 $
+Ccc   * $Rev: 3484 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-22 00:55:52 +0200 (Mo, 22 Apr 2013) $
+Ccc   * $Date: 2013-08-28 16:46:05 +0200 (Mi, 28 Aug 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -565,6 +565,9 @@ C Dummy arguments
 C
       INTEGER Iec, Ipc, Jc, Nejc, Nnuc, Nnur
       DOUBLE PRECISION Sum
+C Commons
+      DOUBLE PRECISION ELTl(NDLW)
+      COMMON /ELASTIC/ ELTl
 C
 C Local variables
 C
@@ -751,9 +754,11 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
-     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
-     &                          - TL(il,l,Nejc,Nnur))
+           tld = ELTl(L)
+           IF (ipar.NE.0) sumdl = sumdl + tld
+C          IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+C    &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+C    &                          - TL(il,l,Nejc,Nnur))
          ENDDO
 C--------do loop over l --- done ----------------------------------------
          s = s + 1.

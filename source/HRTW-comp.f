@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3483 $
+Ccc   * $Rev: 3484 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
+Ccc   * $Date: 2013-08-28 16:46:05 +0200 (Mi, 28 Aug 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -26,8 +26,11 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav,H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -35,8 +38,8 @@ C Local variables
 C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
-     &              fisxse, sumtg, divf
-C     DOUBLE PRECISION VT1
+     &              fisxse, sumtg !, divf
+      DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       CHARACTER*1 cpar(2)
@@ -45,7 +48,7 @@ C
 C
 C
 C-----threshold for considering channel as a 'strong' one
-      H_Tthr = 0.0001
+      H_Tthr = 0.0001d0
 C-----set CN nucleus
       nnuc = 1
 C-----reset variables
@@ -53,6 +56,9 @@ C-----reset variables
       CSFis = 0.d0
       sumfis = 0.d0
 C
+C-----assure that full gamma cascade in the first CN is
+C-----accounted for when width fluctuation (HRTW) is selected
+      GCAsc = 1.0
       ke = NEX(nnuc)
 C-----
 C-----start CN nucleus decay
@@ -146,23 +152,23 @@ C              !define a good Tlump
 C
             IF (H_Sumtl.GT.0.0D0) THEN
 C--------------check whether tfis is not too big compared to a good Tlump
-               divf = sumfis/tlump + 1.0
-               TFIs = sumfis/divf
-               H_Sumtls = H_Sumtls + divf*TFIs**2
+               NDIvf = INT(sumfis/tlump + 1.0)
+               TFIs = sumfis/FLOAT(NDIvf)
+               H_Sumtls = H_Sumtls + NDIvf*TFIs**2
                H_Tav = H_Sumtls/H_Sumtl
-               IF (H_Tav.LT.TFIs) THEN
-                  H_Sumtls = H_Sumtls - divf*TFIs**2
-                  divf = divf*(TFIs/H_Tav + 1)
-                  TFIs = sumfis/divf
-                  H_Sumtls = H_Sumtls + divf*TFIs**2
+               IF(H_Tav.LT.TFIs)THEN
+                  H_Sumtls = H_Sumtls - NDIvf*TFIs**2
+                  NDIvf = NDIvf*(TFIs/H_Tav + 1)
+                  TFIs = sumfis/FLOAT(NDIvf)
+                  H_Sumtls = H_Sumtls + NDIvf*TFIs**2
                   H_Tav = H_Sumtls/H_Sumtl
                ENDIF
 C--------------redefine fission transmission coef. using single iteration
 C              RCN & MS 03-2010
 C              redefinition avoided to keep the Cross section difference equal zero.
 C                (small difference observed if fission channel is open)
-C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
-               sumfis = divf*TFIs
+               TFIs = VT1(TFIs,H_Tav,H_Sumtl)
+               sumfis = FLOAT(NDIvf)*TFIs
             ELSE
                H_Tav = 0.0
             ENDIF
@@ -386,9 +392,11 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -763,7 +771,7 @@ C Local variables
 C
       DOUBLE PRECISION corr, eg, xjc
       DOUBLE PRECISION E1, E2, XM1
-C     DOUBLE PRECISION VT1
+      DOUBLE PRECISION VT1
       INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, lmax, lmin
       INTEGER Jr, lamb, lambmin, lambmax
       DOUBLE PRECISION ha, cee, cme, xle, xlm, xjr,
@@ -992,8 +1000,11 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1024,8 +1035,10 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1281,9 +1294,11 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1377,9 +1392,12 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-      COMMON /IHRTW / NSCh, MEMel, NH_lch
+C     COMMON /IHRTW / NSCh, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
