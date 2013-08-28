@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3479 $
+Ccc   * $Rev: 3483 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-25 23:11:40 +0200 (So, 25 Aug 2013) $
+Ccc   * $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -1459,7 +1459,8 @@ C-----channel spin min and max
                ENDIF
                IF (vl.NE.0.0D0) THEN
                   H_Abs(Ich,1) = vl*coef*(FLOAT(2*Jcn + 1) - 2*s1)
-     &                           *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
+     &                           *FUSred*REDmsc(Jcn,Ip)
+C    &                           *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
                   H_Abs(Ich,2) = k
                   H_Abs(Ich,3) = 2*chsp
                   Ich = Ich + 1

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3480 $
+Ccc   * $Rev: 3483 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-25 23:29:29 +0200 (So, 25 Aug 2013) $
+Ccc   * $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
       SUBROUTINE INPUT
 Ccc
 Ccc   ********************************************************************
@@ -2168,9 +2168,9 @@ C-----LEVEL DENSITY for residual nuclei
       ENDDO
       WRITE (8,*)
 
-      DO i = 1, NDLW
-         DRTl(i) = 1.d0
-      ENDDO
+C     DO i = 1, NDLW
+C        DRTl(i) = 1.d0
+C     ENDDO
       IF (FITlev.GT.0) THEN
 C--------remove potentially empty omp files
 C--------OMPAR.DIR

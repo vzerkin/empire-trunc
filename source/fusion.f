@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3378 $
+Ccc   * $Rev: 3483 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-07 20:55:45 +0200 (So, 07 Apr 2013) $
+Ccc   * $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -1012,7 +1012,6 @@ C--------channel spin min and max
                lmax = MIN0(maxlw,lmax)
                DO k = lmin, lmax
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
-     &                  *DRTl(k)
                ENDDO
             ENDDO
             POP(NEX(1),j,ip,1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
@@ -1279,7 +1278,6 @@ C        DO j = 1, NDLW !over compound nucleus spin
                lmax = MIN0(maxlw,lmax)
                DO k = lmin, lmax
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
-     &                  *DRTl(k)
                ENDDO
             ENDDO
             POP(NEX(1),j,ip,1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)

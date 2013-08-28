@@ -1,6 +1,6 @@
-C $Rev: 3456 $
+C $Rev: 3483 $
 C $Author: rcapote $
-C $Date: 2013-07-24 13:19:22 +0200 (Mi, 24 Jul 2013) $
+C $Date: 2013-08-28 12:32:37 +0200 (Mi, 28 Aug 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -27,17 +27,26 @@ C
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
+
 C---------------------------------------------------------------------------
 C        All arrays below commented and changed to save memory (unless you need HMS !!!)
+
 C        For HMS the NDEX parameter in dimension.h should be less than ~ 150 !!
+
 C    &                 CSEahmslab(ndecse,ndangecis,2),
+
 C    &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
+
 C    &                 CSEhms(ndecse,2,0:ndnuc), 
+
 C    &                 CSEahms(ndecse,ndangecis,2),
+
 C    &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
 C    &                  0:ndexclus),  
      &                 CSEahmslab(1,1,2),CSEhmslab(1,2,0:1),
+
      &                 CSHms(2,0:1),CSEhms(1,2,0:1),CSEahms(1,1,2),
+
      &                 POPcsea(1,0:1,0:1,1,0:1),  
 C---------------------------------------------------------------------------
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
@@ -49,7 +58,7 @@ C---------------------------------------------------------------------------
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,
      &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro,
-     &                 DRTl(ndlw), DV, D_Def(ndcollev,nddefcc),
+     &                 DV, D_Def(ndcollev,nddefcc),
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),
@@ -69,6 +78,7 @@ C---------------------------------------------------------------------------
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,
      &                 PL_CN(0:ndangecis,ndcollev),
+
 
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
@@ -120,6 +130,7 @@ C---------------------------------------------------------------------------
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
+
 
 C    &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
 C                      DDXS arrays defined only for neutrons and protons  
@@ -240,7 +251,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,
      &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,PL_CN,
      &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0 
-      COMMON /GLOBAL1/ DRTl, EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
+      COMMON /GLOBAL1/ EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,
@@ -249,6 +260,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,
      &                 BUNorm, NTNorm, COMega, BUReac, NTReac,
+
      &                 gamm_tr, fiss_tr	 
 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
@@ -288,6 +300,7 @@ C
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
+
      &                  ngamm_tr, nfiss_tr	 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
