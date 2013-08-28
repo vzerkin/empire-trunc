@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3333 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-03-20 15:58:59 +0100 (Mi, 20 Mär 2013) $
+Ccc   * $Rev: 3482 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-08-28 12:09:42 +0200 (Mi, 28 Aug 2013) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -1109,45 +1109,45 @@ C
 C-----Check ranges and steps
 C     IF(Emin.LT.Xo) THEN
       IF (Emin - Xo.LT. - 0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Inconsistent request               '
-         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (6,*) 'INTERMAT: is below the minimum:        ', Xo
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: is below the minimum:        ', Xo
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xo + (M-1)*So).GT.0.0001) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Inconsistent request               '
-         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: is above the maximum:        ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Inconsistent request               '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: is above the maximum:        ',
      &               Xo + (M - 1)*So
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Xi - Emin.GT.0.5*Si) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Lower limit point provided:  ', Xi
-         WRITE (6,*) 'INTERMAT: Lower limit point requested: ', Emin
-         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Lower limit point provided:  ', Xi
+         WRITE (8,*) 'INTERMAT: Lower limit point requested: ', Emin
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (Emax - (Xi + (N-1)*Si).GT.0.5*Si) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Upper limit point requested: ', Emax
-         WRITE (6,*) 'INTERMAT: Upper limit point  provided: ',
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Upper limit point requested: ', Emax
+         WRITE (8,*) 'INTERMAT: Upper limit point  provided: ',
      &               Xi + (N - 1)*Si
-         WRITE (6,*) 'INTERMAT: I am instructed not to extrapolate '
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) 'INTERMAT: I am instructed not to extrapolate '
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
       IF (So.LE.0 .OR. Si.LE.0) THEN
-         WRITE (6,*) ' '
-         WRITE (6,*) 'INTERMAT: Both X increments must be positive '
-         WRITE (6,*) 'INTERMAT: Provided input  increment: ', Si
-         WRITE (6,*) 'INTERMAT: Provided output increment: ', So
-         WRITE (6,*) 'INTERMAT: Execution terminated'
+         WRITE (8,*) ' '
+         WRITE (8,*) 'INTERMAT: Both X increments must be positive '
+         WRITE (8,*) 'INTERMAT: Provided input  increment: ', Si
+         WRITE (8,*) 'INTERMAT: Provided output increment: ', So
+         WRITE (8,*) 'INTERMAT: Execution terminated'
          STOP
       ENDIF
 C-----Start with the matrix

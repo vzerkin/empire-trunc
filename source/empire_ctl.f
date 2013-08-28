@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3458 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-07-30 21:44:08 +0200 (Di, 30 Jul 2013) $
+Ccc   * $Rev: 3482 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-08-28 12:09:42 +0200 (Mi, 28 Aug 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -57,7 +57,7 @@ C
 
       CLOSE(8)
 
-      STOP
+      STOP 'After calling EMPIRE'
       END
 C
 C-------------------------------------------------------------------
