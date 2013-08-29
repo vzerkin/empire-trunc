@@ -1,6 +1,6 @@
-!cc   * $Rev: 3485 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
+!cc   * $Rev: 3489 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2013-08-29 17:33:22 +0200 (Do, 29 Aug 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -237,6 +237,8 @@ C-----------set ENDFA flag to 0 (no exclusive angular distributions)
             ENDfa(nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
             NSTOred(nnuc) = -1
+C
+            DEPart(nnuc) = 1.d0
          ENDDO
          NSTOred(0) = -1
 C--------set gamma-strength parameters
@@ -1007,8 +1009,6 @@ C--------Retrieve C4 experimental data  *** done ***
 
             ENDf(nnuc) = 1
             ENDfa(nnuc) = 1
-            DEPart(nnuc) = 1.0
-
             irepeated = 0
             do i=1,nnuc-1
               IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
@@ -1929,7 +1929,7 @@ C
       ECUt(1) = ELV(NLV(1),1)
       NEX(1) = NEXreq
       IF (FITlev.GT.0) THEN
-         ECUt(1) = 0.0  
+         ECUt(1) = 0.d0  
 C--------If ENDF ne 0, then MAx(Ncut)=40 !!
 C--------set ENDF flag to 0 (no ENDF file for formatting) if FITlev > 0
          DO i = 0,NDNuc
@@ -1998,7 +1998,7 @@ C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
       irec = (EINl - EIN)/DERec + 1.001
 C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
-      RECcse(irec,NEX(1),1) = 1.0
+      RECcse(irec,NEX(1),1) = 1.d0
 C-----calculate compound nucleus level density 
       CALL INP_LD(nnuc)      
 C
@@ -2051,8 +2051,12 @@ C-----------determination of excitation energy matrix in res. nuclei
             IF (NEX(nnuc).GT.0) emaxr = EX(NEX(nnuc),nnuc)
      &                                  - Q(nejc,nnuc)
             EMAx(nnur) = DMAX1(emaxr,EMAx(nnur))
-            NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
-            NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
+C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
+C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
+            NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE),0) 
+            NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE),0) 
+            IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
+            IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -2088,14 +2092,21 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             IF (NEX(nnur).GT.0) THEN
                IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1 .AND.
      &          NEX(Nnur).GT.1) THEN
-                  write(8,*) 'Z,A ',Z(nnur), A(nnur)
+C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
                   DO i = 1, NEX(nnur)
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
                   ENDDO
 C-----------------Width of the partial bin relative to DE
-                  DEPart(Nnur) = 1 + (EX(1,nnur)-ECUt(nnur))/DE
-                  write(8,*) 'Nnur, DEPart', nnur, DEPart(nnur)
+                  DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+                  WRITE(8,
+     &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
+     &             'Continuum bin correction = ',DEPart(nnur),
+     &              NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
+                  WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
+     &                'Ecut   =',ECUt(nnur),
+     &                'Ex(1)  =',EX(1,nnur),
+     &                'Ecut+DE=',ECUt(nnur)+DE
                ELSE
                   DO i = 1, NEX(nnur)
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
