@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3490 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-08-29 23:36:21 +0200 (Do, 29 Aug 2013) $
+Ccc   * $Rev: 3491 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-03 01:55:35 +0200 (Di, 03 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -612,7 +612,7 @@ C--------decay to discrete levels
 C--------
       ENDIF
 
-      DO i = 1, NLV(Nejc)
+      DO i = 1, NLV(Nnur)
          SCRtl(i,Nejc) = 0.D0
       ENDDO
       IF (Nhrtw.EQ.0 .AND. IZA(Nnur).EQ.IZA(0)) THEN
