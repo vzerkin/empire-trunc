@@ -1,6 +1,6 @@
-cc   * $Rev: 3485 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
+cc   * $Rev: 3492 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-03 19:44:49 +0200 (Di, 03 Sep 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -227,12 +227,12 @@ C
 C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
-     &A118)') 
+     &A123)') 
      &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-     &2 CC added/substracted to Elastic/Nonelast respectively)'
+     &   ' Elastic* and Nonelast* modified for A>220 (CE & Cross section
+     &s of 2 CC added/substracted to Elastic/Nonelast respectively)'
          WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
-     &A118)') 
+     &A123)') 
      &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
      &   ' (Elastic cross section = Shape Elastic + Compound Elastic; fo  
      &r Elastic* and Nonelastic* see output *.xsc file)       '
@@ -241,7 +241,7 @@ C    &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of
 C    &2 CC added/substracted to Elastic/Nonelast respectively)'
 
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
-     &      '  Total     ','  Elastic*  ','  Nonelast* ',
+     &      '  Total     ','  Elastic*  ',' Nonel-Cel* ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
@@ -253,29 +253,31 @@ C    &      'DWBA-cont   ','   MSD      ','    MSC     ',
 C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
-     &      '  Total     ','  Elastic   ','   CN-el    ',
-     &      ' Shape-el   ',
-     &      ' Nonelast   ','  CN-form   ','  Direct    ',
+     &      '  Total     ','  Elastic   ','     Cel    ',
+     &      '   Sel      ',
+     &      ' Nonel-Cel  ','  CN-form   ','  Direct    ',
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
         ELSE
 
-         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+     &A123)') 
+     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &   ' Elastic* and Nonelast* modified for A>220 (CE added/substract
+     &ed to Elastic/Nonelast respectively)'
          WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
-
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
-     &      '  Total     ','  Elastic   ','  Nonelast  ',
+     &      '  Total     ','  Elastic   ',' Nonel-Cel  ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
-     &      '  Total     ','  Elastic   ','   CN-el    ',
-     &      ' Shape-el   ',
-     &      ' Nonelast   ','  CN-form   ','  Direct    ',
+     &      '  Total     ','  Elastic   ','     Cel    ',
+     &      '   Sel      ',
+     &      ' Nonel-Cel  ','  CN-form   ','  Direct    ',
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
@@ -626,7 +628,7 @@ C
 C              The change is avoided in sensitivity calculations as the 
 C              ENDF-6 formatted output ALWAYS contains the unmodified elastic.
 C                
-               IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. ilv.LT.3
+              IF( INT(ZEJc(0)).EQ.0 .and. A(0).gt.220 .and. ilv.LT.3
      &         .and. KALman.eq.0  .and. INT(AEJc(0)).GT.0) 
      &            xscclow = xscclow + popread
 C              To consider only open channels
@@ -1872,7 +1874,7 @@ C--------Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
 C
 C           Renormalizing elastic transmission coefficients to consider PE emission
             DO i = 1, NDLW
-              ELTl(i) = ELTl(i) * corrmsd
+              ELTl(i) = ELTl(i) * corrmsd 
             ENDDO
          ENDIF
 C--------Account for widths fluctuations (HRTW)
@@ -3646,10 +3648,12 @@ C                          Low-lying XS   and       CE         added to elastic
 
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
+     &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !elastic (SE + CN_el) 
      &                     4.d0*PI*ELCncs,                !CN_el
-     &    ELAcs*ELAred                   ,                !shape elastic 
-     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+     &    ELAcs*ELAred                   ,                !SE
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
+     &                             - 4.d0*PI*ELCncs,      !   CE substracted from nonelastic
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3668,7 +3672,9 @@ C                          Low-lying XS   and       CE         added to elastic
      &    ELAcs*ELAred,   !+4.d0*PI*ELCncs                !shape elastic
      &    4.d0*PI*ELCncs,                                 !CN_el
      &    ELAcs*ELAred,                                   !shape elastic 
-     &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
+C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
+     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3676,7 +3682,7 @@ C                          Low-lying XS   and       CE         added to elastic
 
         ENDIF
 
-      ELSE
+      ELSE ! non-actinides
 
         IF (ZEJc(0).EQ.0) then 
   
@@ -3684,18 +3690,20 @@ C                          Low-lying XS   and       CE         added to elastic
 
             WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')
      &      EINl,TOTcs*TOTred*totcorr,
-     &      ELAcs*ELAred             + 4.d0*PI*ELCncs,      ! CE added to elastic
+     &      ELAcs*ELAred           + 4.d0*PI*ELCncs,        ! CE added to elastic
      &      TOTcs*TOTred*totcorr - ELAcs*ELAred 
-     &                             - 4.d0*PI*ELCncs,      ! CE substracted from nonelastic
+     &                           - 4.d0*PI*ELCncs,          ! CE substracted from nonelastic
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &      CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &      ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
-     &                     4.d0*PI*ELCncs,                !CN_el
+     &                       4.d0*PI*ELCncs,                !CN_el
      &      ELAcs*ELAred                   ,                !shape elastic 
-     &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+     &      CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Total nonelastic
+     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3712,10 +3720,12 @@ C                          Low-lying XS   and       CE         added to elastic
 
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &      ELAcs*ELAred,                                   !elastic
+     &      ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
      &      4.d0*PI*ELCncs,                                 !CN_el
      &      ELAcs*ELAred,                                   !shape elastic 
-     &      TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
+C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+     &      CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
+     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
