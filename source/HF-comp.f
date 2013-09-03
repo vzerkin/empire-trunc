@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3491 $
+Ccc   * $Rev: 3493 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-03 01:55:35 +0200 (Di, 03 Sep 2013) $
+Ccc   * $Date: 2013-09-03 19:48:03 +0200 (Di, 03 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -731,10 +731,9 @@ C        Elastic channels excluded, done after the loop
          if(IZA(Nnur).EQ.IZA(0) .and. i.eq.LEVtarg) cycle  
 
          eout = eoutc - ELV(i,Nnur)
-         cor  = CINRED(i)
+         sumdl = 0.d0
          IF (eout.LT.0.0D0) EXIT
 
-         sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
          smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
@@ -764,9 +763,9 @@ C-----elastic channel
       IF(IZA(Nnur).EQ.IZA(0)) THEN
          i = LEVtarg  
          eout = eoutc - ELV(i,Nnur)
+         sumdl = 0.d0
          IF (eout.LT.0.0D0) GOTO 40
 
-         sumdl = 0.d0
          CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
          smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
@@ -778,9 +777,9 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-c           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
-c     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
-c     &                          - TL(il,l,Nejc,Nnur))
+c          IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+c    &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+c    &                          - TL(il,l,Nejc,Nnur))
 c           write(8,*) 'Elastic L=',L,' Tl=',TL(il,l,Nejc,Nnur)
 c     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
 c     &                          - TL(il,l,Nejc,Nnur))
@@ -1402,7 +1401,7 @@ C
                ENDDO
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, ipos, Nnuc)
                SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg, Nnuc)
-               IF (ier.eq.1 .AND. Z(1).EQ.Z(Nnuc)) THEN
+               IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnuc))) THEN
                    SCRt(ier,Jr,ipos,0)=SCRt(ier,Jr,ipos,0)*DEPart(Nnuc)
                    SCRt(ier,Jr,ineg,0)=SCRt(ier,Jr,ineg,0)*DEPart(Nnuc)
                ENDIF
