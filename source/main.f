@@ -1,6 +1,6 @@
-cc   * $Rev: 3492 $
+cc   * $Rev: 3494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-03 19:44:49 +0200 (Di, 03 Sep 2013) $
+Ccc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -88,7 +88,7 @@ C                      -----------------------------------------------
      &                 fisxse, eps, checkprd,ftmp_gs, recorp, htmp,
      &                 xcross(0:NDEJC+3,0:15,0:20), cspg, dcor,
      &                 xnorm(0:NDEJC,NDExclus),xsdirect, xspreequ, xsmsc
-
+C     DOUBLE PRECISION sumtll
 C     For lifetime calculation, now commented (RCN/MH Jan 2011)
 C     DOUBLE PRECISION taut,tauf,gamt,gamfis
 
@@ -170,8 +170,14 @@ C-----
 C-----Print input data
 C-----
       IF (IOUt.GT.0) CALL PRINPUT
-      WRITE (*,'(/''   C.M. incident energy '',G12.5,'' MeV'')') EIN
-      WRITE (8,'(/''   C.M. incident energy '',G12.5,'' MeV'')') EIN
+      WRITE (*,
+     &'(/''   C.M. incident energy '',G12.5,'' MeV ( LAB '',G12.5,
+     &''MeV )'')') 
+     & EIN, EINl
+      WRITE (8,
+     &'(/''   C.M. incident energy '',G12.5,'' MeV ( LAB '',G12.5,
+     &''MeV )'')') 
+     & EIN, EINl
 C-----
 C-----Print results of the systematics
 C-----
@@ -1934,6 +1940,7 @@ C--------------Calculate population in the energy bin ke
                   endif
                   IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
                   DENhf = 0.d0
+!                 sumtll = 0.d0
                   IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
                      popleft = popleft + POP(ke,jcn,ipar,nnuc)*DE
                      CYCLE
@@ -1947,15 +1954,22 @@ C--------------------Residual nuclei must be heavier than alpha
                      CALL WHERE(izares,nnur,iloc)
                      if(iloc.eq.1) CYCLE
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
-                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!                     write(8,*) 'sum for ejectile=', nejc, sum
-                     endif
+!                 if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.1) then
+!                    write(8,*) 'sum for ejectile=', nejc, sum
+!                    write(*,*) 'sum for ejectile=', nejc, sum
+!	               sumtll = sumtll + sum
+!                 endif 
                   ENDDO
+                  if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                    write(8,*) 'sum for particles at J=',jcn, sumtll
+C                    write(*,*) 'sum for particles at J=',jcn, sumtll
+                  endif
 C-----------------DO loop over ejectiles       ***done***
 C-----------------gamma emision
                   CALL DECAYG(nnuc,ke,jcn,ip,sum)
                      if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!                     write(8,*) 'sum for gamma', sum
+C                      write(*,*) 'sum for gammas at J=',jcn, sum
+!                      write(8,*) 'sum for gammas at J=',jcn, sum
                      endif
 C-----------------Distribute yrast population over discrete levels
                   IF (DENhf.EQ.0.0D0) THEN
@@ -2005,9 +2019,10 @@ C-----------------Fission ()
      &                CALL FISSION(nnuc,ke,jcn,sumfis)
                   IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1)
      &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!                     write(8,*) 'sum for fission (sumfis) =   ', sumfis
-                     endif
+!                     if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                       write(8,*) 'sum for fission at J= ',jcn, sumfis
+!                       write(*,*) 'sum for fission at J= ',jcn, sumfis
+!                     endif 
 C-----------------
 C-----------------Normalization and accumulation
 C-----------------

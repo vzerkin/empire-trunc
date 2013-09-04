@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3493 $
+Ccc   * $Rev: 3494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-03 19:48:03 +0200 (Di, 03 Sep 2013) $
+Ccc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -635,29 +635,29 @@ C-----------------do loop over l   ***done***
      &             + sumtl2*RO(iermax,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
                ENDIF
 C--------------decay to the highest but one bin (conditional see the next IF)
-               IF (ZEJc(Nejc).EQ.0.0D0 .AND. Iec.EQ.NEX(Nnuc) - 1) THEN
+               IF (NINT(ZEJc(Nejc)).EQ.0 .AND. Iec.EQ.NEX(Nnuc) - 1)THEN
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
 !                  write(8,*) 'lmaxf top bin, xjc, s ',lmaxf, xjc, s
 C-----------------CORR in the next lines accounts for the Tl interpolation
 C-----------------and integration over overlaping bins (2/3), it turned out it must
 C-----------------be energy step and also emission step dependent
-                  corr = 0.4444/(DE - XN(Nnur) + XN(1))*TUNe(Nejc,Nnuc)
+                  corr = 0.4444d0/(DE - XN(Nnur) + XN(1))
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
-                  sumtl1 = 0.0
+                  sumtl1 = 0.d0
                   DO l = lmin, lmax, 2
                      sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
                   ENDDO
-                  sumtl2 = 0.0
+                  sumtl2 = 0.d0
                   DO l = lmin + 1, lmax, 2
                      sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
                   ENDDO
 C-----------------do loop over l   ***done***
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
-     &               + sumtl1*RO(iermax,jr,ip1,Nnur)*corr
+     &              + sumtl1*RO(iermax,jr,ip1,Nnur)*corr*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
-     &               + sumtl2*RO(iermax,jr,ip2,Nnur)*corr
+     &              + sumtl2*RO(iermax,jr,ip2,Nnur)*corr*TUNe(Nejc,Nnuc)
 !                  write(8,*) 'Last but one bin', iermax
 !                  write(8,*) 'jr, corr, sumtl1,2', jr, corr, sumtl1,
 !     &            sumtl2
@@ -675,11 +675,11 @@ C--------------bin from the top excluded as already done)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
-                  sumtl1 = 0.0
+                  sumtl1 = 0.d0
                   DO l = lmin, lmax, 2
                      sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
                   ENDDO
-                  sumtl2 = 0.0
+                  sumtl2 = 0.d0
                   DO l = lmin + 1, lmax, 2
                      sumtl2 = sumtl2 + TL(ietl,l,Nejc,Nnur)
                   ENDDO
@@ -716,9 +716,14 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
          Sum = Sum*DE
 !         write(8,*)'sum to continuum for ejectile ', Nejc, Sum
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
+C
+C        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then 
+C	      write(*,*) 'HF  =',Iec,Jc,Ipc
+C	      write(*,*) '     ',0    ,sngl(Sum)
+C 	   endif
       ENDIF
 C-----
-C-----decay to discrete levels (except elastic)
+C-----decay to discrete levels 
 C-----
       DO i = 1, NLV(Nnur)
          SCRtl(i,Nejc) = 0.d0

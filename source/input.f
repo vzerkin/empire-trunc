@@ -1,6 +1,6 @@
-!cc   * $Rev: 3489 $
+!cc   * $Rev: 3494 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-08-29 17:33:22 +0200 (Do, 29 Aug 2013) $
+!cc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1954,15 +1954,23 @@ C-----check whether any residue excitation is higher than CN
             ichanmin = i
          ENDIF
       ENDDO
-      
+
       IF(qmin.lt.0.d0) THEN
-C       WRITE(8,'(1x,A19)')   'Exotermic reaction '
-        CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
+         WRITE(8,'(1x,A19)')   'Exotermic reaction '
+         CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
+C--------Coulomb barrier (20% decreased) setting lower energy limit
+         culbar = 0.d0
+         IF(ZEJc(ichanmin).GT.1)
+     &       culbar = 0.8*ZEJc(ichanmin)*Z(nucmin)*ELE2
+     &       /(1.3d0*(AEJc(ichanmin)**0.3333334 + A(nucmin)**0.3333334))
 C-------check whether population array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
+C       IF(EMAx(1)-qmin-ECUt(nucmin).gt.culbar) 
+C     &    CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
         CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 C-------check whether spectra array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
+C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 
@@ -1980,7 +1988,12 @@ C    & ' value is ', 2*NEXreq
       DO i = 1, NEX(1)
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
-
+C
+      write(*,*) 
+      write(*,*) '   Einl=',sngl(Einl),' @#$'
+      write(*,'(2x,I4,2x,3(F7.4,1x))') 
+     > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
+C
 C-----determination of excitation energy matrix in CN ***done***
 C
 C-----set energy bin for recoils (max. energy is increased by 5%)
@@ -2055,8 +2068,9 @@ C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
 C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE),0) 
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE),0) 
-            IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
-            IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+            IF(EMAx(nnur).gt.ECUt(nnur)+DE) NEX(nnur)=NEX(nnur)+1
+            IF(emaxr.gt.ECUt(nnur)+DE) NEXr(nejc,nnuc)=NEXr(nejc,nnuc)+1
+C
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -2090,8 +2104,8 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
-               IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1 .AND.
-     &          NEX(Nnur).GT.1) THEN
+               IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 .AND.
+     &            NEX(Nnur).GT.1) THEN
 C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
                   DO i = 1, NEX(nnur)
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
@@ -2113,6 +2127,15 @@ C-----------------Width of the partial bin relative to DE
                   ENDDO
                ENDIF
             ENDIF
+
+            IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
+     >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
+              write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
+     >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
+     >        EX(1,1),EX(2,1),EX(NEX(1),1),
+     >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
+            ENDIF
+
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
 
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE

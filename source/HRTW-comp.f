@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3493 $
+Ccc   * $Rev: 3494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-03 19:48:03 +0200 (Di, 03 Sep 2013) $
+Ccc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -39,7 +39,7 @@ C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
      &              fisxse, sumtg !, divf
-      DOUBLE PRECISION VT1
+C     DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
       CHARACTER*1 cpar(2)
@@ -123,12 +123,14 @@ C              emitted nuclei must be heavier than alpha
 !               write(8,*)'sum for ejectile=' , nejc, sum
                H_Sumtl = H_Sumtl + sum
             ENDDO
+            if (nnuc.eq.1 .and. ke.eq.nex(1)) then
 !            write(8,*) 'sum for particles at J=',jcn, H_Sumtl
+C            write(*,*) 'sum for particles at J=',jcn, H_Sumtl
+            endif  
 C-----------do loop over ejectiles       ***done***
 
 C-----------gamma emission is always a weak channel (one iteration)
             sumg = 0.d0
-
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
@@ -172,8 +174,8 @@ C--------------redefine fission transmission coef. using single iteration
 C              RCN & MS 03-2010
 C              redefinition avoided to keep the Cross section difference equal zero.
 C                (small difference observed if fission channel is open)
-               TFIs = VT1(TFIs,H_Tav,H_Sumtl)
-               sumfis = FLOAT(NDIvf)*TFIs
+C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
+C              sumfis = FLOAT(NDIvf)*TFIs
             ELSE
                H_Tav = 0.d0
             ENDIF
@@ -494,6 +496,12 @@ C                       WRITE(8,*)'B Tl= ' , TL(5,L,Nejc,Nnur)
      &               + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &               + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
+                  IF (iermax.eq.1 .AND. NINT(Z(0)).EQ.NINT(Z(Nnur)))THEN
+                     SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
                ENDIF
 C--------------decay to the highest but one bin (conditional see the next IF)
                IF (NINT(ZEJc(Nejc)).EQ.0 .AND. Iec.EQ.NEX(Nnuc) - 1)THEN
@@ -503,10 +511,7 @@ C--------------decay to the highest but one bin (conditional see the next IF)
 C-----------------CORR in the next lines accounts for the Tl interpolation
 C-----------------and integration over overlaping bins (2/3), it turned out it must
 C-----------------be energy step and also emission step dependent
-                  corr = 0.4444/(DE - XN(Nnur) + XN(1))
-C                 IF(NINT(Z(nnur)).EQ.NINT(Z(1)) .AND. iermax.EQ.1)
-                  IF(NINT(Z(nnur)).EQ.NINT(Z(0)) .AND. iermax.EQ.1)
-     &               corr=corr*DEPart(nnur)
+                  corr = 0.4444d0/(DE - XN(Nnur) + XN(1))
 C-----------------do loop over L (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   rho1 = RO(iermax,jr,ip1,Nnur)*corr*DE
@@ -542,32 +547,27 @@ C                       WRITE(8,*)'D Tl= ' , TL(6,L,Nejc,Nnur)
      &               +sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &               +sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
-!                   write(8,*) 'SCRt top',SCRt(iermax,jr,ip1,Nejc),
-!     &              SCRt(iermax,jr,ip2,Nejc)
+                  IF (iermax.eq.1 .AND. NINT(Z(0)).EQ.NINT(Z(Nnur)))THEN
+                     SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
+!                  write(8,*) 'SCRt top',SCRt(iermax,jr,ip1,Nejc),
+!     &             SCRt(iermax,jr,ip2,Nejc)
                ENDIF
 C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
 !               write(8,*) 'Remaining bins'
 !               DO ier = iermax - 1, iermax-1, -1
-               DO ier = iermax - 1, 1, -1
+                DO ier = iermax - 1, 1, -1
                   ietl = Iec - ier - itlc
                   lmax = lmaxf
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
-!                  write(8,*) 'lmin, lmax', lmin, lmax
-                  corr = 1.d0    
-C                 IF (ier.EQ.1 .and. NINT(Z(nnur)).EQ.NINT(Z(1))) 
-                  IF (ier.EQ.1 .and. NINT(Z(nnur)).EQ.NINT(Z(0))) 
-     &              corr=DEPart(nnur) 
-C                 IF (ier.EQ.1) THEN
-C                    corr = 0.5d0
-C                    IF(Z(nnur).EQ.Z(1)) corr=corr*DEPart(nnur)
-C                 ELSE
-C                    corr = 1.d0
-C                 ENDIF
 C-----------------do loop over L (odd and even L-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.d0
-                  rho1=RO(ier,jr,ip1,Nnur)*corr*DE
+                  rho1=RO(ier,jr,ip1,Nnur)*DE
                   DO L = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
@@ -580,7 +580,7 @@ C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   sumtl2 = 0.d0
-                  rho2=RO(ier,jr,ip2,Nnur)*corr*DE
+                  rho2=RO(ier,jr,ip2,Nnur)*DE
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
@@ -597,7 +597,14 @@ C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
      &               + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
+     &               + sumtl2*rho2/DE*TUNe(Nejc,Nnuc) 
+                  IF (ier.eq.1 .AND. NINT(Z(0)).EQ.NINT(Z(Nnur))) THEN
+                     SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
+
 !                   write(8,*) 'ietl, lmin, lmax', ietl, lmin, lmax
 !                   write(8,*) 'ier, sumtl1,2', ier, sumtl1, sumtl2
 !                   write(8,*) 'SCRt ',SCRt(ier,jr,ip1,Nejc),
@@ -617,6 +624,12 @@ C    &	  - 0.5*(SCRt(iermax-1,j,1,Nejc) + SCRt(iermax-1,j,2,Nejc))	! for neutron
          Sum = Sum*DE
 !         write(8,*)'sum to continuum for ejectile ', Nejc, Sum
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
+C
+C        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then 
+C	      write(*,*) 'HRTW=',Iec,Jc,Ipc
+C	      write(*,*) '     ',Nhrtw,sngl(Sum)
+C	   endif
+C
 C--------
 C--------decay to discrete levels
 C--------
