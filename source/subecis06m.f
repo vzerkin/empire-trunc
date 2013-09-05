@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3423 $
+Ccc   * $Rev: 3495 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-05 18:32:21 +0200 (So, 05 Mai 2013) $
+Ccc   * $Date: 2013-09-05 13:40:54 +0200 (Do, 05 Sep 2013) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -35,6 +35,14 @@ C     CM=931.494043 +/- 0.000080 MEV/C**2                               ECIS-021
 C     CHB=197.326968 +/- 0.000017 MEV FM                                ECIS-022
 C     CZ=137.03599911 +/- 0.00000046 WITHOUT DIMENSION                  ECIS-023
 C                                                                       ECIS-024
+C     CONSTANTS FROM CODATA 2010 updated 
+C     http://physics.nist.gov/cuu/Constants/Table/allascii.txt         
+C     atomic mass constant energy in MeV
+C     CM=931.494 061 +/- 0.000 021 MEV/C**2                            
+C     Planck constant over 2 pi times c in MeV fm                 
+C     CHB=197.326 9718 +/- 0.000 0044 MEV FM                      
+C     inverse fine-structure constant       
+C     CZ=137.035 999 074 +/- 0.000 000 044 WIHOUT DIMENSION                       
 C***********************************************************************ECIS-025
       IMPLICIT REAL*8 (A-H,O-Z)                                         ECIS-026
 C
