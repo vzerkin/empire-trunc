@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3494 $
+Ccc   * $Rev: 3496 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
+Ccc   * $Date: 2013-09-09 20:18:06 +0200 (Mo, 09 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -614,17 +614,19 @@ C--------------parity index of r.n. state populated by emission with LMIN
 C--------------parity index of r.n. state populated by emission with LMIN+1
                ip2 = 1
                IF (ip1.EQ.1) ip2 = 2
+C
 C--------------decay to the highest possible bin (non neutron only)
-               IF (ZEJc(Nejc).NE.0.0D0) THEN
-                  lmax = lmaxf
-                  lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
+C
+               IF (NINT(ZEJc(Nejc)).NE.0) THEN
+C                 lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmaxf)
+                  lmax = MIN0(LMAxtl(5,Nejc,Nnur),lmaxf)
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide to which parity each SUMTL  goes
-                  sumtl1 = 0.0
+                  sumtl1 = 0.d0
                   DO l = lmin, lmax, 2
                      sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
                   ENDDO
-                  sumtl2 = 0.0
+                  sumtl2 = 0.d0
                   DO l = lmin + 1, lmax, 2
                      sumtl2 = sumtl2 + TL(5,l,Nejc,Nnur)
                   ENDDO
@@ -633,16 +635,19 @@ C-----------------do loop over l   ***done***
      &             + sumtl1*RO(iermax,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &             + sumtl2*RO(iermax,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
+                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(nnur)))THEN
+                    SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)*
+     &                DEPart(Nnur)
+                    SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)*
+     &                DEPart(Nnur)
+                  ENDIF
                ENDIF
+C
 C--------------decay to the highest but one bin (conditional see the next IF)
+C
                IF (NINT(ZEJc(Nejc)).EQ.0 .AND. Iec.EQ.NEX(Nnuc) - 1)THEN
-                  lmax = lmaxf
-                  lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmax)
+                  lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmaxf top bin, xjc, s ',lmaxf, xjc, s
-C-----------------CORR in the next lines accounts for the Tl interpolation
-C-----------------and integration over overlaping bins (2/3), it turned out it must
-C-----------------be energy step and also emission step dependent
-                  corr = 0.4444d0/(DE - XN(Nnur) + XN(1))
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.d0
@@ -654,24 +659,36 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                      sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
                   ENDDO
 C-----------------do loop over l   ***done***
+C
+C-----------------corr in the next lines accounts for the Tl interpolation
+C-----------------and integration over overlaping bins (2/3), it turned out it must
+C-----------------be energy step and also emission step dependent
+                  corr = 0.4444d0/(DE - XN(Nnur) + XN(1))
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)
      &              + sumtl1*RO(iermax,jr,ip1,Nnur)*corr*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &              + sumtl2*RO(iermax,jr,ip2,Nnur)*corr*TUNe(Nejc,Nnuc)
+                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(nnur)))THEN
+                    SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)*
+     &                DEPart(Nnur)
+                    SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)*
+     &                DEPart(Nnur)
+                  ENDIF
 !                  write(8,*) 'Last but one bin', iermax
 !                  write(8,*) 'jr, corr, sumtl1,2', jr, corr, sumtl1,
 !     &            sumtl2
 !                   write(8,*) 'SCRt top',SCRt(iermax,jr,ip1,Nejc),
 !     &              SCRt(iermax,jr,ip2,Nejc)
                ENDIF
+C
 C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
+C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
 !               DO ier = iermax - 1, iermax-1, -1
                   ietl = Iec - ier - itlc
-                  lmax = lmaxf
-                  lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
+                  lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
 C-----------------do loop over l (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
@@ -689,12 +706,12 @@ C
      &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
      &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
-                   IF (ier.eq.1 .AND. Z(1).EQ.Z(nnur)) THEN
+                  IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(nnur))) THEN
                       SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
      &                DEPart(Nnur)
                       SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
      &                DEPart(Nnur)
-                   ENDIF
+                  ENDIF
 !                   write(8,*) 'ietl, lmin, lmax', ietl, lmin, lmax
 !                   write(8,*) 'ier, sumtl1,2', ier, sumtl1, sumtl2
 !                   write(8,*) 'SCRt ',SCRt(ier,jr,ip1,Nejc),
