@@ -1,6 +1,6 @@
-!cc   * $Rev: 3499 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-10 14:03:46 +0200 (Di, 10 Sep 2013) $
+!cc   * $Rev: 3500 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2013-09-10 18:10:23 +0200 (Di, 10 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2068,10 +2068,10 @@ C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
 C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE),0) 
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE),0) 
-            IF(EMAx(nnur).gt.ECUt(nnur)+DE) NEX(nnur) = NEX(nnur)+1
-            IF(emaxr.gt.ECUt(nnur)+DE) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
-C           IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
-C           IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+!            IF(EMAx(nnur).gt.ECUt(nnur)+DE) NEX(nnur) = NEX(nnur)+1
+!            IF(emaxr.gt.ECUt(nnur)+DE) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+             IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
+             IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
 !            IF (Nejc.eq.1 .and. nnur.eq.2)
 !     &      write(8,*) 'Ein, Nnur, Nejc, Ecut, EMAx, Emaxr, Nex, Nexr',
 !     &      Ein, Nnur, Nejc, ECUt(nnur), EMAx(nnur), emaxr, NEX(nnur),
