@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3499 $
+Ccc   * $Rev: 3501 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-10 14:03:46 +0200 (Di, 10 Sep 2013) $
+Ccc   * $Date: 2013-09-10 18:40:10 +0200 (Di, 10 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -655,11 +655,14 @@ C--------do loop over L ------------------------------------------------
             IF (tld.LE.0.0D0) cycle
             IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
-                 sumdl = sumdl + VT(tld)
+C                sumdl = sumdl + VT(tld)
+                 sumdl = sumdl + VT(tld)*CINRED(i)
             ELSE
 C----------------entry with nhrtw=0
-                 CALL TL2VL(tld,1.d0)
-                 sumdl = sumdl + tld
+C                CALL TL2VL(tld,1.d0)
+C                sumdl = sumdl + tld
+                 CALL TL2VL(tld,CINRED(i))
+                 sumdl = sumdl + tld*CINRED(i)
 C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
             ENDIF
          ENDDO
@@ -667,8 +670,8 @@ C--------do loop over L --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
-         SCRtl(i,Nejc) = sumdl*CINRED(i)
-         Sum = Sum + sumdl*CINRED(i)
+         SCRtl(i,Nejc) = sumdl ! *CINRED(i)
+         Sum = Sum + sumdl     ! *CINRED(i)
 !         if(nhrtw.eq.0) write(8,*) 'Sum to level i=', i,sumdl
 C        write(8,*)'sum to discrete for ejectile ', Nejc, Sumdl
 C        write(8,*)'sum for ejectile ', Nejc, Sum, 'iteration ',nhrtw
@@ -703,11 +706,14 @@ C    &            - TL(il,L,Nejc,Nnur))
 !           write(8,*) 'Elastic L=',L,' Tl=',tld
             IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
-                 sumdl = sumdl + VT(tld)
+                 sumdl = sumdl + VT(tld)*CELred
+C                sumdl = sumdl + VT(tld)
             ELSE
 C----------------entry with nhrtw=0
-                 CALL TL2VL(tld,1.d0)
-                 sumdl = sumdl + tld
+C                CALL TL2VL(tld,1.d0)
+C                sumdl = sumdl + tld
+                 CALL TL2VL(tld,CELred)
+                 sumdl = sumdl + tld*CELred
 C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
                  IF (tld.GT.H_Tthr) THEN
 C-------------------case of a strong elastic channel
@@ -727,8 +733,8 @@ C--------do loop over L --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
 C--------loop over channel spin ------ done ----------------------------
-         SCRtl(i,Nejc) = sumdl*CELred
-         Sum = Sum + sumdl*CELred
+         SCRtl(i,Nejc) = sumdl !*CELred
+         Sum = Sum + sumdl     !*CELred
 !        if(nhrtw.eq.0) then
 !            write(8,*) 'Sum to elastic', sumdl*CELRED
 !            write(8,*) 'Sum to levels', Sum*CELRED
