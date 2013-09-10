@@ -1,6 +1,6 @@
-!cc   * $Rev: 3497 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
+!cc   * $Rev: 3499 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2013-09-10 14:03:46 +0200 (Di, 10 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1989,10 +1989,10 @@ C    & ' value is ', 2*NEXreq
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
 C
-      write(*,*) 
-      write(*,*) '   Einl=',sngl(Einl),' @#$'
-      write(*,'(2x,I4,2x,3(F7.4,1x))') 
-     > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
+C     write(*,*) 
+C     write(*,*) '   Einl=',sngl(Einl),' @#$'
+C     write(*,'(2x,I4,2x,3(F7.4,1x))') 
+C    > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
 C
 C-----determination of excitation energy matrix in CN ***done***
 C
@@ -2068,8 +2068,10 @@ C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
 C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE),0) 
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE),0) 
-            IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
-            IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+            IF(EMAx(nnur).gt.ECUt(nnur)+DE) NEX(nnur) = NEX(nnur)+1
+            IF(emaxr.gt.ECUt(nnur)+DE) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+C           IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
+C           IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
 !            IF (Nejc.eq.1 .and. nnur.eq.2)
 !     &      write(8,*) 'Ein, Nnur, Nejc, Ecut, EMAx, Emaxr, Nex, Nexr',
 !     &      Ein, Nnur, Nejc, ECUt(nnur), EMAx(nnur), emaxr, NEX(nnur),
@@ -2134,13 +2136,13 @@ C-----------------Width of the partial bin relative to DE
                ENDIF
             ENDIF
 
-            IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
-     >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
-              write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
-     >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
-     >        EX(1,1),EX(2,1),EX(NEX(1),1),
-     >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
-            ENDIF
+C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
+C    >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
+C             write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
+C    >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
+C    >        EX(1,1),EX(2,1),EX(NEX(1),1),
+C    >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
+C           ENDIF
 
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
 

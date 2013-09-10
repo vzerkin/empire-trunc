@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3498 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-10 08:29:59 +0200 (Di, 10 Sep 2013) $
+Ccc   * $Rev: 3499 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-10 14:03:46 +0200 (Di, 10 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -26,22 +26,19 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav,H_Tl(NDHRTW1,2), H_Tthr, TFIs, sumGg
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
 C Local variables
 C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
-     &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
-     &              fisxse, sumtg, VT !, divf
-C     DOUBLE PRECISION VT1
+     &              sum, sumfis, sumfism(NFMOD), sumg, xnor, 
+     &              fisxse, sumtg
+      DOUBLE PRECISION VT
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
-      INTEGER INT
+      INTEGER ndivf
       CHARACTER*1 cpar(2)
       DATA cpar/'+','-'/ 
 C
@@ -140,9 +137,9 @@ C-----------fission (may be a weak or strong channel)
                ENDIF
                H_Sumtl = H_Sumtl + sumfis
 !--------------Dividing sumfis into channels with TFIs < 0.25 each
-               NDIvf = INT(sumfis/0.25) + 1
-               TFIs = sumfis/NDIvf
-               CALL TL2VL(TFIs,DFLOAT(NDIvf))
+               ndivf = INT(sumfis/0.25) + 1
+               TFIs = sumfis/DFLOAT(ndivf)
+               CALL TL2VL(TFIs,DFLOAT(ndivf))
             ENDIF
 C-----------gamma emission is always a weak channel (one iteration)
             sumg = 0.d0
@@ -194,8 +191,8 @@ C                 write(8,*)'DENhf after ejectile = ' ,nejc, sum
                ENDDO
 C--------------do loop over ejectiles       ***done***
 C--------------fission channel - the second HRTW entry
-               sumfis = NDIvf*VT(TFIs)
-C              write(8,*)'iteration sumfis = ',sumg
+               sumfis = ndivf*VT(TFIs)
+C              write(8,*)'iteration sumfis = ',sumfis
 C--------------gamma emission - the second HRTW entry
 C              sumg = 0.d0
 C              CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
@@ -371,11 +368,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -545,10 +540,15 @@ C
                 DO ier = iermax - 1, 1, -1
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
+                  IF (ier.EQ.1) THEN
+                     corr = 0.5d0
+                  ELSE
+                     corr = 1.d0
+                  ENDIF
 C-----------------do loop over L (odd and even L-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.d0
-                  rho1=RO(ier,jr,ip1,Nnur)*DE
+                  rho1=RO(ier,jr,ip1,Nnur)*DE*corr
                   DO L = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
@@ -561,7 +561,7 @@ C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   sumtl2 = 0.d0
-                  rho2=RO(ier,jr,ip2,Nnur)*DE
+                  rho2=RO(ier,jr,ip2,Nnur)*DE*corr
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
@@ -576,9 +576,9 @@ C                       WRITE(8,*)'F Tl= ' , TL(ietl,L,Nejc,Nnur)
 C-----------------do loop over L   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
+     &               + sumtl1*rho1/DE/corr*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*rho2/DE*TUNe(Nejc,Nnuc) 
+     &               + sumtl2*rho2/DE/corr*TUNe(Nejc,Nnuc) 
                   IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) THEN
                      SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
      &               DEPart(Nnur)
@@ -599,8 +599,6 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
                Sum = Sum + SCRt(i,j,1,Nejc) + SCRt(i,j,2,Nejc)
             ENDDO
             Sum = Sum - 0.5*(SCRt(1,j,1,Nejc) + SCRt(1,j,2,Nejc))
-C    &	  - 0.5*(SCRt(iermax,j,1,Nejc)   + SCRt(iermax,j,2,Nejc))   ! for charged
-C    &	  - 0.5*(SCRt(iermax-1,j,1,Nejc) + SCRt(iermax-1,j,2,Nejc))	! for neutron
          ENDDO
          Sum = Sum*DE
 !         write(8,*)'sum to continuum for ejectile ', Nejc, Sum
@@ -650,19 +648,19 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over L ------------------------------------------------
          DO L = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
+            if (ipar.eq.0) cycle
             tld = TL(il,L,Nejc,Nnur)
      &            + frde*(TL(il + 1,L,Nejc,Nnur)
      &            - TL(il,L,Nejc,Nnur))
-            IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
-              IF (Nhrtw.GT.0) THEN
+            IF (tld.LE.0.0D0) cycle
+            IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
                  sumdl = sumdl + VT(tld)
-              ELSE
+            ELSE
 C----------------entry with nhrtw=0
                  CALL TL2VL(tld,1.d0)
                  sumdl = sumdl + tld
 C                WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
-              ENDIF
             ENDIF
          ENDDO
 C--------do loop over L --- done ----------------------------------------
@@ -684,7 +682,7 @@ C-----elastic channel
          sumdl = 0.d0
          IF (eout.LT.0.0D0) GOTO 70
 
-         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+C        CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
          smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
          s = smin
@@ -695,16 +693,18 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over L ------------------------------------------------
          DO L = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(L - 1)
+            if (ipar.eq.0) cycle
 C           tld = TL(il,L,Nejc,Nnur)
 C    &            + frde*(TL(il + 1,L,Nejc,Nnur)
 C    &            - TL(il,L,Nejc,Nnur))
             tld = ELTl(L)
+            IF (tld.LE.0.0D0) cycle
+
 !           write(8,*) 'Elastic L=',L,' Tl=',tld
-            IF (ipar.NE.0 .AND. tld.GT.0.0D0) THEN
-              IF (Nhrtw.GT.0) THEN
+            IF (Nhrtw.GT.0) THEN
 C----------------entry with nhrtw>0
                  sumdl = sumdl + VT(tld)
-              ELSE
+            ELSE
 C----------------entry with nhrtw=0
                  CALL TL2VL(tld,1.d0)
                  sumdl = sumdl + tld
@@ -721,7 +721,6 @@ C    &              '  MEMk ',MEMel(iel,2),
 C    &              '  MEM2s ',MEMel(iel,3)
                     iel = iel + 1
                  ENDIF
-              ENDIF
             ENDIF
          ENDDO
 C--------do loop over L --- done ----------------------------------------
@@ -730,10 +729,10 @@ C--------do loop over L --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = sumdl*CELred
          Sum = Sum + sumdl*CELred
-         if(nhrtw.eq.0) then
+!        if(nhrtw.eq.0) then
 !            write(8,*) 'Sum to elastic', sumdl*CELRED
 !            write(8,*) 'Sum to levels', Sum*CELRED
-         endif
+!        endif
 C        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
       ENDIF !end of elastic
 
@@ -1034,11 +1033,8 @@ C COMMON variables
 C
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1087,8 +1083,8 @@ C
 
       DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
      &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs,VT1
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1299,11 +1295,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1314,9 +1308,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION EEF, VT1
-      DOUBLE PRECISION eout, eoutc, frde, popadd, s, smax, smin, tld, v,
-     &                 xjc
-      INTEGER i, iel, il, ipar, kel, l, lmax, lmin
+      DOUBLE PRECISION eout, eoutc, popadd, s, smax, smin, tld, v, xjc
+      INTEGER i, iel, ipar, kel, l, lmax, lmin
 C
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----
@@ -1330,7 +1323,7 @@ C--------only target state considered
 C--------level above the bin
             IF (eout.LT.0.0D0) RETURN
          ENDIF
-         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+C        CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
          smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
          s = smin
@@ -1341,9 +1334,11 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
+            if (ipar.EQ.0) cycle
             tld = ELTl(l)
+            if (tld.le.0.d0) cycle
             IF (l.EQ.INT(H_Abs(Nhrtw,2)) .AND. (2.0*s).EQ.H_Abs(Nhrtw,3)
-     &          .AND. ipar.NE.0) THEN
+     &                         ) THEN
 C--------------got a true elastic channel
                IF (tld.GT.H_Tthr .AND. NH_lch.LE.NDHRTW1) THEN
                   DO iel = 1, NDHRTW2
@@ -1356,7 +1351,7 @@ C--------------got a true elastic channel
                ELSE
                   v = VT1(tld,H_Tav,H_Sumtl)
                ENDIF
-               popadd = v*(EEF(tld,H_Tav,H_Sumtl) - 1.0) 
+               popadd = v*(EEF(tld,H_Tav,H_Sumtl) - 1.d0) 
                SCRtl(i,Nejc) = SCRtl(i,Nejc) + popadd
                SCRtem(Nejc) = SCRtem(Nejc) + popadd
 !               write(8,*) '    elastic increased by ',popadd
@@ -1398,12 +1393,9 @@ C COMMON variables
 C
       DOUBLE PRECISION ELTl(NDLW), H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls,
      &                 H_Sweak, H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
+      INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
       COMMON /ELASTIC/ ELTl
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-
+      COMMON /IHRTW / NSCh, MEMel, NH_lch
       COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
      &                H_Tthr, TFIs
 C
@@ -1415,10 +1407,8 @@ C Local variables
 C
       DOUBLE PRECISION ak2, chsp, coef, ecms, el, s1, smax, smin,
      &                 vl, xmas_npro, xmas_ntrg
-      REAL FLOAT
       LOGICAL relcal
       INTEGER ichsp, iel, k, kel, lmax, lmin, mul
-      INTEGER INT, MIN0
       DOUBLE PRECISION PAR
       DOUBLE PRECISION VT1
 C
