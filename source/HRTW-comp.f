@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3497 $
+Ccc   * $Rev: 3498 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
+Ccc   * $Date: 2013-09-10 08:29:59 +0200 (Di, 10 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -38,7 +38,7 @@ C Local variables
 C
       DOUBLE PRECISION cnspin, sgamc, tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, tlump, xnor, 
-     &              fisxse, sumtg !, divf
+     &              fisxse, sumtg, VT !, divf
 C     DOUBLE PRECISION VT1
       INTEGER i, ich, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur
       INTEGER INT
@@ -123,81 +123,52 @@ C              emitted nuclei must be heavier than alpha
 !               write(8,*)'sum for ejectile=' , nejc, sum
                H_Sumtl = H_Sumtl + sum
             ENDDO
-            if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!            if (nnuc.eq.1 .and. ke.eq.nex(1)) then
 !            write(8,*) 'sum for particles at J=',jcn, H_Sumtl
-C            write(*,*) 'sum for particles at J=',jcn, H_Sumtl
-            endif  
+!            write(*,*) 'sum for particles at J=',jcn, H_Sumtl
+!            endif
 C-----------do loop over ejectiles       ***done***
-
+C
+C-----------fission (may be a weak or strong channel)
+            sumfis = 0.d0
+            IF (FISsil(nnuc)) THEN
+               IF (NINT(FISshi(nnuc)).EQ.1) THEN
+                  CALL FISSION(nnuc,ke,jcn,sumfis)
+               ELSE
+                  CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+!                 write(8,*) 'sum for fission at J= ',jcn, sumfis
+               ENDIF
+               H_Sumtl = H_Sumtl + sumfis
+!--------------Dividing sumfis into channels with TFIs < 0.25 each
+               NDIvf = INT(sumfis/0.25) + 1
+               TFIs = sumfis/NDIvf
+               CALL TL2VL(TFIs,DFLOAT(NDIvf))
+            ENDIF
 C-----------gamma emission is always a weak channel (one iteration)
             sumg = 0.d0
             CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
             H_Sumtl = H_Sumtl + sumg
             H_Sweak = H_Sweak + sumg
-!            write(8,*) 'sum for gammas at J=',jcn, sumg
-C
-C-----------fission is always a weak channel (one iteration)
-            sumfis = 0.d0
-            IF (FISsil(nnuc)) THEN
-              IF (NINT(FISshi(nnuc)).EQ.1) THEN
-                CALL FISSION(nnuc,ke,jcn,sumfis)
-              ELSE
-                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-!                write(8,*) 'sum for fission at J= ',jcn, sumfis
-              ENDIF
-              H_Sumtl = H_Sumtl + sumfis
-              H_Sweak = H_Sweak + sumfis
-            ENDIF
 
-            IF (H_Sumtl.GT.0.0D0 .AND. H_Sumtl.GT.H_Sweak) THEN
-               tlump = (H_Sumtl - H_Sweak)
-     &                 /(10.d0*(1.d0 + (H_Sweak)/(H_Sumtl-H_Sweak)))
-C              !define a good Tlump
-            ELSE
-               tlump = H_Sweak
-            ENDIF
-C
-            IF (H_Sumtl.GT.0.0D0) THEN
-C--------------check whether tfis is not too big compared to a good Tlump
-               NDIvf = INT(sumfis/tlump + 1.d0)
-               TFIs = sumfis/FLOAT(NDIvf)
-               H_Sumtls = H_Sumtls + NDIvf*TFIs**2
-               H_Tav = H_Sumtls/H_Sumtl
-               IF(H_Tav.LT.TFIs)THEN
-                  H_Sumtls = H_Sumtls - NDIvf*TFIs**2
-                  NDIvf = NDIvf*(TFIs/H_Tav + 1)
-                  TFIs = sumfis/FLOAT(NDIvf)
-                  H_Sumtls = H_Sumtls + NDIvf*TFIs**2
-                  H_Tav = H_Sumtls/H_Sumtl
-               ENDIF
-C--------------redefine fission transmission coef. using single iteration
-C              RCN & MS 03-2010
-C              redefinition avoided to keep the Cross section difference equal zero.
-C                (small difference observed if fission channel is open)
-C              TFIs = VT1(TFIs,H_Tav,H_Sumtl)
-C              sumfis = FLOAT(NDIvf)*TFIs
-            ELSE
-               H_Tav = 0.d0
-            ENDIF
-!            write(8,*) ' '
-!            write(8,*) 'SUMMARY OF THE FIRST HRTW RUN'
-!            write(8,*)'total sum from this state ' , H_Sumtl
-!            write(8,*)'sum of strong Tls  ', H_Sumtl-H_Sweak
-!            write(8,*)'sum of weak for this state ' , H_Sweak
-!            write(8,*)'sum gamma ' , sumg
-!            write(8,*)'sum fission ' , sumfis
-!            write(8,*)'sum Tl**2 for this state ' , H_Sumtls
-!            write(8,*)'number of strong Tls for this state ' , NH_lch
-!            write(8,*)'average Tl for this state ' , H_Tav
-!            write(8,*)'first entry DENhf=',denhf
-!            write(8,*)'strong Tls from this state ' , H_Tl
+!            write(8,*)' '
+!            write(8,*)'SUMMARY OF THE FIRST HRTW RUN J=',jcn
+!            write(8,*)'total sum of  Tls ', H_Sumtl
+!            write(8,*)'sum of strong Tls ', H_Sumtl-H_Sweak
+!            write(8,*)'sum of weak   Tls ', H_Sweak
+!            write(8,*)'sum of gammas     ', sumg
+!            write(8,*)'sum fission       ', sumfis
+!            write(8,*)'sum Tl**2         ', H_Sumtls
+!            write(8,*)'# of strong Tls   ', NH_lch
+!            write(8,*)'average Tl        ', H_Tav
+!            write(8,*)'first entry DENhf=', denhf
+!            write(8,*)'all strong Tls    ', H_Tl
 C-----------
 C-----------the first HRTW run completed
 C-----------
 C-----------calculate V's for the strong channels (iteration)
             IF (NH_lch.LE.NDHRTW1)
      &          CALL AUSTER(H_Tl,H_Tav,H_Sumtl,H_Sweak,NH_lch,NDHRTW1)
-!            write(8,*)'strong Vs  from this state ' , H_Tl
+!           write(8,*)'all strong Vs     ', H_Tl
 C           write(8,*)'  '
 C-----------
 C-----------start the second HRTW run
@@ -209,7 +180,7 @@ C-----------split into contributions from individual partial waves
 C           write(8,*) 'called HRTW_MARENG ',ich,' channels'
             DO i = 1, ich
                NSCh = 0
-C--------------do loop over ejectiles (fission is not repeated)
+C--------------do loop over ejectiles
                nhrtw = i
                DENhf = 0.d0
                DO nejc = 1, NEJcm
@@ -222,6 +193,10 @@ C                 write(8,*)'   secondary entry with ejec ' , nejc
 C                 write(8,*)'DENhf after ejectile = ' ,nejc, sum
                ENDDO
 C--------------do loop over ejectiles       ***done***
+C--------------fission channel - the second HRTW entry
+               sumfis = NDIvf*VT(TFIs)
+C              write(8,*)'iteration sumfis = ',sumg
+C--------------gamma emission - the second HRTW entry
 C              sumg = 0.d0
 C              CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
                DENhf = DENhf + sumg + sumfis
@@ -567,7 +542,6 @@ C--------------do loop over r.n. energies (highest bin and eventually the second
 C--------------bin from the top excluded as already done)
 C
 !               write(8,*) 'Remaining bins'
-!               DO ier = iermax - 1, iermax-1, -1
                 DO ier = iermax - 1, 1, -1
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
@@ -1088,29 +1062,6 @@ C        !strong or weak
       END
 
       DOUBLE PRECISION FUNCTION VT(Tl)
-      INCLUDE 'dimension.h'
-C
-C
-C COMMON variables
-C
-      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
-     &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs
-      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
-      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
-C     INTEGER MEMel(NDHRTW2,3), NH_lch, NSCh
-C     COMMON /IHRTW / NSCh, MEMel, NH_lch
-      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
-     &                H_Tthr, TFIs
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Tl
-C
-C Local variables
-C
-      DOUBLE PRECISION VT1
-C
-C
 C
 Ccc   *********************************************************************
 CCc   *                                                          Class:PPu*
@@ -1132,7 +1083,18 @@ Ccc   *                                                                   *
 Ccc   *                                                                   *
 Ccc   *********************************************************************
 C
-C Local variables
+      INCLUDE 'dimension.h'
+
+      DOUBLE PRECISION H_Abs(NDHRTW2,3), H_Sumtl, H_Sumtls, H_Sweak,
+     &                 H_Tav, H_Tl(NDHRTW1,2), H_Tthr, TFIs,VT1
+      INTEGER MEMel(NDHRTW2, 3), NDIvf, NH_lch, NSCh
+      COMMON /IHRTW / NSCh, NDIvf, MEMel, NH_lch
+      COMMON /RHRTW / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav,
+     &                H_Tthr, TFIs
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Tl
 C
       IF (NH_lch.GT.NDHRTW1) THEN
          VT = VT1(Tl,H_Tav,H_Sumtl)
@@ -1146,14 +1108,6 @@ C
       END
 
       DOUBLE PRECISION FUNCTION VT1(Tl,Tav,Sumtl)
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Sumtl, Tav, Tl
-C
-C Local variables
-C
-      DOUBLE PRECISION EEF
 C
 Ccc   *****************************************************************
 Ccc   *                                                      Class:PPu*
@@ -1173,10 +1127,14 @@ Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
 Ccc   *                                                               *
 Ccc   *****************************************************************
+CC
+C Dummy arguments
 C
+      DOUBLE PRECISION Sumtl, Tav, Tl
 C
 C Local variables
 C
+      DOUBLE PRECISION EEF
       VT1 = 0.D0
       IF (Sumtl.EQ.0.0D0) RETURN
       VT1 = Tl/Sumtl
@@ -1186,17 +1144,6 @@ C
       END
 
       DOUBLE PRECISION FUNCTION EEF(Tl,Tav,Sumtl)
-C
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Sumtl, Tav, Tl
-C
-C Local variables
-C
-      DOUBLE PRECISION a, al
-C
-C
 C
 Ccc   *****************************************************************
 Ccc   *                                                      Class:PPu*
@@ -1213,7 +1160,17 @@ Ccc   *                                                               *
 Ccc   * Dummy arguments                                               *
 Ccc   *                                                               *
 Ccc   *                                                               *
-Ccc   *****************************************************************
+Ccc   *****************************************************************C
+C
+C Dummy arguments
+C
+      DOUBLE PRECISION Sumtl, Tav, Tl
+C
+C Local variables
+C
+      DOUBLE PRECISION a, al
+C
+
       IF (Tl.LT.1.0D-15) THEN
          EEF = 3.D0
          RETURN
@@ -1248,7 +1205,6 @@ Ccc   *                                                               *
 Ccc   *                                                               *
 Ccc   *****************************************************************
 C
-C
 C Dummy arguments
 C
       INTEGER Lch, Ndhrtw1
@@ -1260,8 +1216,6 @@ C
       DOUBLE PRECISION e(Ndhrtw1), sum, sv, vd(Ndhrtw1), vp(Ndhrtw1)
       DOUBLE PRECISION EEF
       INTEGER i, icount
-C
-C
 C
       IF (Lch.GT.Ndhrtw1) THEN
          WRITE (8,*)
@@ -1340,7 +1294,6 @@ Ccc   ********************************************************************
 Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
 C
 C COMMON variables
 C
