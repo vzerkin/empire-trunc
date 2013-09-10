@@ -1,6 +1,6 @@
-!cc   * $Rev: 3494 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
+!cc   * $Rev: 3497 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2068,9 +2068,12 @@ C           NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE + 1.0),0)
 C           NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE + 1.0),0)
             NEX(nnur) = MAX(INT((EMAx(nnur)-ECUt(nnur))/DE),0) 
             NEXr(nejc,nnuc) = MAX(INT((emaxr-ECUt(nnur))/DE),0) 
-            IF(EMAx(nnur).gt.ECUt(nnur)+DE) NEX(nnur)=NEX(nnur)+1
-            IF(emaxr.gt.ECUt(nnur)+DE) NEXr(nejc,nnuc)=NEXr(nejc,nnuc)+1
-C
+            IF(EMAx(nnur).gt.ECUt(nnur)) NEX(nnur) = NEX(nnur)+1
+            IF(emaxr.gt.ECUt(nnur)) NEXr(nejc,nnuc) = NEXr(nejc,nnuc)+1
+!            IF (Nejc.eq.1 .and. nnur.eq.2)
+!     &      write(8,*) 'Ein, Nnur, Nejc, Ecut, EMAx, Emaxr, Nex, Nexr',
+!     &      Ein, Nnur, Nejc, ECUt(nnur), EMAx(nnur), emaxr, NEX(nnur),
+!     &      NEXr(nejc,nnuc)
 C-----------Coulomb barrier (20% decreased) setting lower energy limit
             culbar = 0.d0
             IF(ZEJc(Nejc).GT.1) culbar = 0.8*ZEJc(Nejc)*Z(Nnur)*ELE2
@@ -2113,6 +2116,9 @@ C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
                   ENDDO
 C-----------------Width of the partial bin relative to DE
                   DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+!                  DEPart(nnur) = 1.d0
+!     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
+!                  DEPart(nnur) = DEPart(nnur)*0.9
                   WRITE(8,
      &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
      &             'Continuum bin correction = ',DEPart(nnur),

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3496 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-09 20:18:06 +0200 (Mo, 09 Sep 2013) $
+Ccc   * $Rev: 3497 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -799,13 +799,13 @@ C--------loop over channel spin ----------------------------------------
 C--------do loop over l ------------------------------------------------
          DO l = lmin, lmax
            ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
-c          IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
-c    &                          + frde*(TL(il + 1,l,Nejc,Nnur)
-c    &                          - TL(il,l,Nejc,Nnur))
+!           IF (ipar.NE.0) sumdl = sumdl + TL(il,l,Nejc,Nnur)
+!     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
+!     &                          - TL(il,l,Nejc,Nnur))
 c           write(8,*) 'Elastic L=',L,' Tl=',TL(il,l,Nejc,Nnur)
 c     &                          + frde*(TL(il + 1,l,Nejc,Nnur)
 c     &                          - TL(il,l,Nejc,Nnur))
-           IF (ipar.NE.0) sumdl = sumdl + ELTl(l)
+            IF (ipar.NE.0) sumdl = sumdl + ELTl(l)
 !           write(8,*) 'Elastic L=',L,' Tl=', ELTl(l)
          ENDDO
 C--------do loop over l --- done ----------------------------------------

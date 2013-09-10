@@ -1,6 +1,6 @@
-cc   * $Rev: 3494 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-04 17:35:57 +0200 (Mi, 04 Sep 2013) $
+cc   * $Rev: 3497 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3785,6 +3785,8 @@ C
       IF(ABScs.GT.0.) THEN
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
+        WRITE (8,'('' * SUMMA SUMMARUM '')')
+        WRITE (8,'('' *'')')
         WRITE (8,'('' * Incident energy (LAB): '',G12.5,
      &              '' MeV  '')') EINl
         IF (INT(ZEJc(0)).EQ.0) THEN
