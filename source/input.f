@@ -1,6 +1,6 @@
-!cc   * $Rev: 3503 $
+!cc   * $Rev: 3506 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-11 02:00:51 +0200 (Mi, 11 Sep 2013) $
+!cc   * $Date: 2013-09-11 18:51:57 +0200 (Mi, 11 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1956,7 +1956,6 @@ C-----check whether any residue excitation is higher than CN
       ENDDO
 
       IF(qmin.lt.0.d0) THEN
-         WRITE(8,'(1x,A19)')   'Exotermic reaction '
          CALL WHERE(IZA(1)-IZAejc(ichanmin),nucmin,iloc)
 C--------Coulomb barrier (20% decreased) setting lower energy limit
          culbar = 0.d0
@@ -1966,11 +1965,17 @@ C--------Coulomb barrier (20% decreased) setting lower energy limit
 C-------check whether population array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
 C       IF(EMAx(1)-qmin-ECUt(nucmin).gt.culbar) 
-C     &    CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
-        CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+C    &    CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
+C       CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 C-------check whether spectra array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
 C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C       IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
+          WRITE(8,'(1x,A33)')   'Exotermic reaction, adjusting DE'
+          WRITE(8,'(1x,A28,F6.1,A4)')
+     &       'Initial energy step         ',DE*1000.d0,' keV'
+C         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C       ENDIF
         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 
@@ -1989,10 +1994,10 @@ C    & ' value is ', 2*NEXreq
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
 C
-C     write(*,*) 
-C     write(*,*) '   Einl=',sngl(Einl),' @#$'
-C     write(*,'(2x,I4,2x,3(F7.4,1x))') 
-C    > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
+      write(*,*) 
+      write(*,*) '   Einl=',sngl(Einl),' @#$'
+      write(*,'(2x,I4,2x,3(F7.4,1x))') 
+     > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
 C
 C-----determination of excitation energy matrix in CN ***done***
 C
@@ -2092,10 +2097,10 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
                WRITE (8,*)
                WRITE (8,
      &         '(''  Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
-     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
+     &         ''  +  '',I2,A1,A2,'' NEGLECTED at E='',D12.6,'' MeV'')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
-     &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
+     &          NINT(AEJc(nejc)),'-',SYMbe(nejc),EINl
                WRITE (8,*)
      &          ' To include it, increase NDEX in dimension.h'
                WRITE (8,*)
@@ -2134,13 +2139,13 @@ C-----------------Width of the partial bin relative to DE
                ENDIF
             ENDIF
 
-C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
-C    >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
-C             write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
-C    >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
-C    >        EX(1,1),EX(2,1),EX(NEX(1),1),
-C    >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
-C           ENDIF
+            IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
+     >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
+              write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
+     >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
+     >        EX(1,1),EX(2,1),EX(NEX(1),1),
+     >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
+            ENDIF
 
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
 
