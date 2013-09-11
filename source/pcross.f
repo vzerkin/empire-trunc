@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3425 $
+Ccc   * $Rev: 3505 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-05-07 11:43:13 +0200 (Di, 07 Mai 2013) $
+Ccc   * $Date: 2013-09-11 13:58:29 +0200 (Mi, 11 Sep 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -166,7 +166,7 @@ C
       NHEq = MIN(PMAX - 1,NINT(CHMax*SQRT(gc*ec))) + 1
 C
       IF (.NOT.callpcross) CALL RQFACT(NHEq,r)
-      callpcross = .TRUE.  ! To avoid r factor recalculation at each call
+C     callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 
 C-----ZERO ARRAY INITIALIZATION
       DO nejc = 0, NDEJC
