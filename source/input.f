@@ -1,6 +1,6 @@
-!cc   * $Rev: 3508 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-11 19:01:56 +0200 (Mi, 11 Sep 2013) $
+!cc   * $Rev: 3509 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2013-09-12 01:29:10 +0200 (Do, 12 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1970,12 +1970,12 @@ C       CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 C-------check whether spectra array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
 C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-C       IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
+       IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
           WRITE(8,'(1x,A33)')   'Exotermic reaction, adjusting DE'
           WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Initial energy step         ',DE*1000.d0,' keV'
           CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-C       ENDIF
+       ENDIF
 C       CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 

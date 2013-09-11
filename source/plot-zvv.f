@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2872 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-06-06 18:57:15 +0200 (Mi, 06 Jun 2012) $
+Ccc   * $Rev: 3509 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-12 01:29:10 +0200 (Do, 12 Sep 2013) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -53,7 +53,7 @@ C
 
       OPEN (36, FILE=ctmp1, STATUS='unknown')
 
-      CALL OPEN_ZVV(36,'Exp RHO(U)=DN/DU of '//caz,' ')
+      CALL OPEN_ZVV(36,'Exp RHO(U)=DN/DU of '//caz,'  ')
       
       WRITE (36,*) '0.0 1.0'
       DO kk = 2, NLV(Nnuc)-1
@@ -73,7 +73,7 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
       WRITE (36,*) ELV(NLV(Nnuc),Nnuc)*1d6,frho2 
       CALL CLOSE_ZVV(36,' ',' ')
 
-      CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz//ldname,' ')
+      CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz//ldname,'  ')
 
       kminex = 1
       DO kk = 1, NEX(Nnuc)
@@ -136,7 +136,7 @@ C
 
       CALL CLOSE_ZVV(36,' ',' ')
 
-      CALL OPEN_ZVV(36,'RHO(U,+) at GS of '//caz//ldname,' ')
+      CALL OPEN_ZVV(36,'RHO(U,+) at GS of '//caz//ldname,'  ')
 
       DO kk = kminex, NEX(Nnuc)
 
@@ -222,7 +222,7 @@ C     CHARACTER*37 ctmp2
  
       OPEN (36, FILE=ctmp, STATUS='unknown')
       CALL OPEN_ZVV(36,
-     &   'RHO(U)   at saddle '//cbar//' of '//ctmp1//ldname,' ')
+     &   'RHO(U)   at saddle '//cbar//' of '//ctmp1//ldname,'  ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul1 = 0.d0
@@ -253,7 +253,7 @@ C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
 
       CALL CLOSE_ZVV(36,' ',' ')
 
-      CALL OPEN_ZVV(36,'RHO(U,+) at saddle of '//ctmp1,' ')
+      CALL OPEN_ZVV(36,'RHO(U,+) at saddle of '//ctmp1,'  ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul1 = 0.d0
@@ -266,7 +266,7 @@ C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
       
-      CALL OPEN_ZVV(36,'RHO(U,-) at saddle of '//ctmp1,' ')
+      CALL OPEN_ZVV(36,'RHO(U,-) at saddle of '//ctmp1,'  ')
       DO kk = 1,NRBinfis(Ib)
         u = UGRid(kk,Ib)
         rocumul2 = 0.d0
@@ -339,7 +339,7 @@ C
 
       OPEN (36, FILE=ctmp1, STATUS='unknown')
 
-      CALL OPEN_ZVV(36,'Exp Cumul Discrete Levels of '//caz,' ')
+      CALL OPEN_ZVV(36,'Exp Cumul Discrete Levels of '//caz,'  ')
       
       WRITE (36,*) '0.0 1.0'
       DO kk = 2, NLV(Nnuc)
@@ -348,7 +348,7 @@ C
       ENDDO
       CALL CLOSE_ZVV(36,' ',' ')
 
-      CALL OPEN_ZVV(36,'Integral [RHO(U)] of '//caz//ldname,' ')
+      CALL OPEN_ZVV(36,'Integral [RHO(U)] of '//caz//ldname,'  ')
 
       ncalc = 0 
       rocumul = 1.D0
