@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3504 $
+Ccc   * $Rev: 3507 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-11 02:02:33 +0200 (Mi, 11 Sep 2013) $
+Ccc   * $Date: 2013-09-11 18:53:07 +0200 (Mi, 11 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -381,7 +381,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION corrd, corr, eout, eoutc, frde, hisr, s, smax,
+      DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax, ! corrd, 
      &   smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr, rho1, rho2
       INTEGER i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2,
      &        ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
@@ -436,9 +436,9 @@ C
                IF (NINT(ZEJc(Nejc)).NE.0) THEN
 C                 lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmaxf)
                   lmax = MIN0(LMAxtl(5,Nejc,Nnur),lmaxf)
-                  corrd = 1.d0
-                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) 
-     &               corrd = DEPart(Nnur) 
+c                 corrd = 1.d0
+c                 IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) 
+c    &               corrd = DEPart(Nnur) 
 C-----------------odd and even L-values treated separately
 C-----------------ip1 and ip2 decide to which parity each SUMTL  goes
                   rho1 = RO(iermax,jr,ip1,Nnur)*DE
@@ -446,12 +446,15 @@ C-----------------ip1 and ip2 decide to which parity each SUMTL  goes
                   DO L = lmin, lmax, 2      ! do loop over L
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(5,L,Nejc,Nnur))*corrd
+c                       sumtl1 = sumtl1 + VT(TL(5,L,Nejc,Nnur))*corrd
+                        sumtl1 = sumtl1 + VT(TL(5,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'A Tl= ' , TL(5,L,Nejc,Nnur)
-                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho1*corrd)
-                        sumtl1 = sumtl1 + TL(5,L,Nejc,Nnur)*corrd
+C                       CALL TL2VL(TL(5,L,Nejc,Nnur),rho1*corrd)
+C                       sumtl1 = sumtl1 + TL(5,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho1)
+                        sumtl1 = sumtl1 + TL(5,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   rho2 = RO(iermax,jr,ip2,Nnur)*DE
@@ -459,12 +462,15 @@ C                       WRITE(8,*)'A Tl= ' , TL(5,L,Nejc,Nnur)
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(5,L,Nejc,Nnur))*corrd
+c                       sumtl2 = sumtl2 + VT(TL(5,L,Nejc,Nnur))*corrd
+                        sumtl2 = sumtl2 + VT(TL(5,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'B Tl= ' , TL(5,L,Nejc,Nnur)
-                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho2*corrd)
-                        sumtl2 = sumtl2 + TL(5,L,Nejc,Nnur)*corrd
+C                       CALL TL2VL(TL(5,L,Nejc,Nnur),rho2*corrd)
+C                       sumtl2 = sumtl2 + TL(5,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(5,L,Nejc,Nnur),rho2)
+                        sumtl2 = sumtl2 + TL(5,L,Nejc,Nnur)
                      ENDIF
                   ENDDO                     ! over L
 C-----------------do loop over l   ***done***
@@ -472,21 +478,21 @@ C-----------------do loop over l   ***done***
      &               + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &               + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
-C                 IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))THEN
-C                    SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
-C    &               DEPart(Nnur)
-C                    SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
-C    &               DEPart(Nnur)
-C                 ENDIF
+                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))THEN
+                     SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
                ENDIF
 C
 C--------------decay to the highest but one bin (conditional see the next IF)
 C
                IF (NINT(ZEJc(Nejc)).EQ.0 .AND. Iec.EQ.NEX(Nnuc) - 1)THEN
                   lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmaxf)
-                  corrd = 1.d0
-                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))
-     &               corrd = DEPart(Nnur)
+c                 corrd = 1.d0
+c                 IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))
+c    &               corrd = DEPart(Nnur)
 !                  write(8,*) 'lmaxf top bin, xjc, s ',lmaxf, xjc, s
 C-----------------do loop over L (odd and even l-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
@@ -495,12 +501,15 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   DO L = lmin, lmax, 2       ! do loop over L
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(6,L,Nejc,Nnur))*corrd
+c                       sumtl1 = sumtl1 + VT(TL(6,L,Nejc,Nnur))*corrd
+                        sumtl1 = sumtl1 + VT(TL(6,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'C Tl= ' , TL(6,L,Nejc,Nnur)
-                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho1*corrd)
-                        sumtl1 = sumtl1 + TL(6,L,Nejc,Nnur)*corrd
+c                       CALL TL2VL(TL(6,L,Nejc,Nnur),rho1*corrd)
+c                       sumtl1 = sumtl1 + TL(6,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho1)
+                        sumtl1 = sumtl1 + TL(6,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   rho2 = RO(iermax,jr,ip2,Nnur)*DE
@@ -508,12 +517,15 @@ C                       WRITE(8,*)'C Tl= ' , TL(6,L,Nejc,Nnur)
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(6,L,Nejc,Nnur))*corrd
+c                       sumtl2 = sumtl2 + VT(TL(6,L,Nejc,Nnur))*corrd
+                        sumtl2 = sumtl2 + VT(TL(6,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'D Tl= ' , TL(6,L,Nejc,Nnur)
-                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho2*corrd)
-                        sumtl2 = sumtl2 + TL(6,L,Nejc,Nnur)*corrd
+c                       CALL TL2VL(TL(6,L,Nejc,Nnur),rho2*corrd)
+c                       sumtl2 = sumtl2 + TL(6,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(6,L,Nejc,Nnur),rho2)
+                        sumtl2 = sumtl2 + TL(6,L,Nejc,Nnur)
                      ENDIF
                   ENDDO                      ! over L
 C-----------------do loop over l   ***done***
@@ -526,12 +538,12 @@ C-----------------be energy step and also emission step dependent
      &               +sumtl1*rho1/DE*TUNe(Nejc,Nnuc)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)
      &               +sumtl2*rho2/DE*TUNe(Nejc,Nnuc)*corr
-C                 IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))THEN
-C                    SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
-C    &               DEPart(Nnur)
-C                    SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
-C    &               DEPart(Nnur)
-C                 ENDIF
+                  IF (iermax.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur)))THEN
+                     SCRt(iermax,jr,ip1,Nejc)= SCRt(iermax,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(iermax,jr,ip2,Nejc)= SCRt(iermax,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
 !                  write(8,*) 'Last but one bin', iermax
 !                  write(8,*) 'jr, corr, sumtl1,2', jr, corr, sumtl1,
 !     &            sumtl2
@@ -546,9 +558,9 @@ C
                 DO ier = iermax - 1, 1, -1
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
-                  corrd = 1.d0
-                  IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) 
-     &               corrd = DEPart(Nnur) 				
+c                 corrd = 1.d0
+c                 IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) 
+c    &               corrd = DEPart(Nnur) 				
                   IF (ier.EQ.1) THEN
                      corr = 0.5d0
                   ELSE
@@ -561,12 +573,15 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   DO L = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl1 = sumtl1 + VT(TL(ietl,L,Nejc,Nnur))*corrd
+c                       sumtl1 = sumtl1 + VT(TL(ietl,L,Nejc,Nnur))*corrd
+                        sumtl1 = sumtl1 + VT(TL(ietl,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
-                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho1*corrd)
-                        sumtl1 = sumtl1 + TL(ietl,L,Nejc,Nnur)*corrd
+c                       CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho1*corrd)
+c                       sumtl1 = sumtl1 + TL(ietl,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho1)
+                        sumtl1 = sumtl1 + TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   sumtl2 = 0.d0
@@ -574,12 +589,15 @@ C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
-                        sumtl2 = sumtl2 + VT(TL(ietl,L,Nejc,Nnur))*corrd
+c                       sumtl2 = sumtl2 + VT(TL(ietl,L,Nejc,Nnur))*corrd
+                        sumtl2 = sumtl2 + VT(TL(ietl,L,Nejc,Nnur))
                      ELSE
 C-----------------------first entry with HRTW
 C                       WRITE(8,*)'F Tl= ' , TL(ietl,L,Nejc,Nnur)
-                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho2*corrd)
-                        sumtl2 = sumtl2 + TL(ietl,L,Nejc,Nnur)*corrd
+c                       CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho2*corrd)
+c                       sumtl2 = sumtl2 + TL(ietl,L,Nejc,Nnur)*corrd
+                        CALL TL2VL(TL(ietl,L,Nejc,Nnur),rho2)
+                        sumtl2 = sumtl2 + TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
 C-----------------do loop over L   ***done***
@@ -588,12 +606,12 @@ C
      &               + sumtl1*rho1/DE/corr*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
      &               + sumtl2*rho2/DE/corr*TUNe(Nejc,Nnuc) 
-C                 IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) THEN
-C                    SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
-C    &               DEPart(Nnur)
-C                    SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
-C    &               DEPart(Nnur)
-C                 ENDIF
+                  IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnur))) THEN
+                     SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
+     &               DEPart(Nnur)
+                     SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
+     &               DEPart(Nnur)
+                  ENDIF
 !                   write(8,*) 'ietl, lmin, lmax', ietl, lmin, lmax
 !                   write(8,*) 'ier, sumtl1,2', ier, sumtl1, sumtl2
 !                   write(8,*) 'SCRt ',SCRt(ier,jr,ip1,Nejc),
