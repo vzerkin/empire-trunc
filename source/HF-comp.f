@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3497 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-10 04:59:47 +0200 (Di, 10 Sep 2013) $
+Ccc   * $Rev: 3502 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-11 02:00:32 +0200 (Mi, 11 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -687,6 +687,11 @@ C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
 !               DO ier = iermax - 1, iermax-1, -1
+                  IF (ier.EQ.1) THEN
+                     corr = 0.5d0
+                  ELSE
+                     corr = 1.d0
+                  ENDIF
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
@@ -703,9 +708,9 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
 C-----------------do loop over l   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)
+     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)*corr
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)
+     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)*corr
                   IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(nnur))) THEN
                       SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
      &                DEPart(Nnur)
@@ -788,7 +793,7 @@ C-----elastic channel
          sumdl = 0.d0
          IF (eout.LT.0.0D0) GOTO 40
 
-         CALL TLLOC(Nnur,Nejc,eout,il,frde)
+C        CALL TLLOC(Nnur,Nejc,eout,il,frde)
          smin = ABS(XJLv(i,Nnur) - SEJc(Nejc))
          smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
          s = smin
