@@ -1,6 +1,6 @@
-!cc   * $Rev: 3506 $
+!cc   * $Rev: 3508 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-11 18:51:57 +0200 (Mi, 11 Sep 2013) $
+!cc   * $Date: 2013-09-11 19:01:56 +0200 (Mi, 11 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1974,9 +1974,9 @@ C       IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
           WRITE(8,'(1x,A33)')   'Exotermic reaction, adjusting DE'
           WRITE(8,'(1x,A28,F6.1,A4)')
      &       'Initial energy step         ',DE*1000.d0,' keV'
-C         CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+          CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
 C       ENDIF
-        CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C       CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 
       WRITE(8,'(1x,''Number of requested energy points ='',i3,
@@ -1994,10 +1994,10 @@ C    & ' value is ', 2*NEXreq
          EX(i,1) = ECUt(1) + FLOAT(i - 1)*DE
       ENDDO
 C
-      write(*,*) 
-      write(*,*) '   Einl=',sngl(Einl),' @#$'
-      write(*,'(2x,I4,2x,3(F7.4,1x))') 
-     > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
+C     write(*,*) 
+C     write(*,*) '   Einl=',sngl(Einl),' @#$'
+C     write(*,'(2x,I4,2x,3(F7.4,1x))') 
+C    > NEX(1),EX(1,1),EX(2,1),EX(NEX(1),1)
 C
 C-----determination of excitation energy matrix in CN ***done***
 C
@@ -2139,13 +2139,13 @@ C-----------------Width of the partial bin relative to DE
                ENDIF
             ENDIF
 
-            IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
-     >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
-              write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
-     >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
-     >        EX(1,1),EX(2,1),EX(NEX(1),1),
-     >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
-            ENDIF
+C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
+C    >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
+C             write(*,'(2x,2(I4,2x),6(F7.4,1x),A3)') 
+C    >        NEXr(nejc,nnuc),NEX(1)-NEXr(nejc,nnuc),
+C    >        EX(1,1),EX(2,1),EX(NEX(1),1),
+C    >        DEPart(nnur),EX(2,1)-EX(1,1),DE,'@#$'
+C           ENDIF
 
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
 
