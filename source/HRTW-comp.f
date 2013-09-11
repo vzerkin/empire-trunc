@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3507 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-11 18:53:07 +0200 (Mi, 11 Sep 2013) $
+Ccc   * $Rev: 3510 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
 C
 C
       SUBROUTINE HRTW

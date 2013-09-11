@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3489 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-29 17:33:22 +0200 (Do, 29 Aug 2013) $
+Ccc   * $Rev: 3510 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)

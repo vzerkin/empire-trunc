@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3495 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-05 13:40:54 +0200 (Do, 05 Sep 2013) $
+Ccc   * $Rev: 3510 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
