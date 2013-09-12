@@ -361,9 +361,9 @@ C* Define input parameters - Write banner to terminal
 C* Define the source file
    12 WRITE(LTT,991) ' Default source filename (EMPIRE out.): ',FLN1
       WRITE(LTT,991) '$          Enter new name to redefine : '
-      READ (LKB,990) FLNM
+      READ (LKB,'(A)') FLNM
       IF(FLNM(1:40).NE.BLNK) FLN1=FLNM
-	ILEN=LEN(FLN1)
+      ILEN=LEN(TRIM(FLN1))
       OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=123)
 C* Define the output file
       WRITE(LTT,991) ' Source filename                      : ',
@@ -848,7 +848,7 @@ C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
 123   WRITE(LTT,*) 'INPUT FILE NOT FOUND:'
-      WRITE(LTT,*) 'FILENAME:',FLN1(1:ILEN)
+      WRITE(LTT,*) 'FILENAME: ',FLN1(1:ILEN)
       STOP 'ERROR in EMPEND'
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
