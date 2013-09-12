@@ -1,6 +1,6 @@
-!cc   * $Rev: 3510 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+!cc   * $Rev: 3511 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2013-09-12 11:44:38 +0200 (Do, 12 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -129,34 +129,6 @@ C
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO = (HHBarc/AMPi)**2
       PI = 4.D0*DATAN(1.D0)
-
-C     INQUIRE(file='R250SEED.DAT',exist=fexist)
-C     if(fexist) then
-C        OPEN(94,file='R250SEED.DAT',status='OLD')
-C        READ(94,*)  indexf, indexb
-C        Do i = 1, 250
-C          READ(94,*) buffer(i)
-C        ENDDO
-C        CLOSE(94)      
-C        WRITE (8,*) 'Using RNG seeds from *.rng file :', 
-C     &           indexf, indexb
-C      else
-C      
-C       If the file R250SEED.DAT does not exist, then DEFAULT
-C       starting seed is used
-C        iseed = 1234567
-C        WRITE (8,*) 'Default iseed used :', iseed
-C        Call R250Init(iseed)
-C        WRITE (8,*) 'RNG renitialized, starting seeds :', 
-C     &              indexf, indexb 
-C        OPEN(94,file='R250SEED-default.DAT')   
-C        WRITE(94,*)  indexf, indexb
-C        Do i = 1, 250
-C          WRITE(94,*) buffer(i)
-C        ENDDO
-C     CLOSE(94)
-C
-C     endif
 
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
@@ -523,6 +495,7 @@ C--------ejectile proton
          IZAejc(2) = INT(1000.*ZEJc(2) + AEJc(2))
          iz = INT(ZEJc(2))
          SYMbe(2) = SMAT(iz)
+         SYMbe(2) = ' p'
          SEJc(2) = 0.5d0
 C--------ejectile alpha
          AEJc(3) = 4.d0
@@ -530,7 +503,8 @@ C--------ejectile alpha
          XNEjc(3) = AEJc(3) - ZEJc(3)
          IZAejc(3) = INT(1000.*ZEJc(3) + AEJc(3))
          iz = INT(ZEJc(3))
-         SYMbe(3) = SMAT(iz)
+C        SYMbe(3) = SMAT(iz)
+         SYMbe(3) = ' a'
          SEJc(3) = 0.d0
 
          IF (NDEjc.LT.6) THEN
@@ -1964,18 +1938,34 @@ C--------Coulomb barrier (20% decreased) setting lower energy limit
      &       /(1.3d0*(AEJc(ichanmin)**0.3333334 + A(nucmin)**0.3333334))
 C-------check whether population array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
+C
+C       The call below was commented as:
+C       1) ECUt(nucmin) has not been defined yet !
+C       2) For ECUt(nucmin) = 0, the call CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+C          will always produce smaller DE as NDECSE = NDEX + 30
 C       IF(EMAx(1)-qmin-ECUt(nucmin).gt.culbar) 
 C    &    CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
-C       CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
 C-------check whether spectra array can accommodate the reaction with the largest
 C-------continuum using current DE, if not adjust DE
 C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
        IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
-          WRITE(8,'(1x,A33)')   'Exotermic reaction, adjusting DE'
+          WRITE(8,'(A33)')   'Exotermic reaction, adjusting DE'
           WRITE(8,'(1x,A28,F6.1,A4)')
-     &       'Initial energy step         ',DE*1000.d0,' keV'
+     &      'Initial energy step         ',DE*1000.d0,' keV'
           CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-       ENDIF
+       ELSE
+	    if(ichanmin.eq.3) then
+            WRITE(8,'(A33,A5,A28,F7.2,A4)') 
+     &      'Exotermic reaction: Emission of ','alpha',
+     &      ' neglected for Einc (CMS) < ', 	         
+     &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
+          else
+            WRITE(8,'(A33,A2,A28,F7.2,A4)') 
+     &      'Exotermic reaction: Emission of ',SYMbe(ichanmin),
+     &      ' neglected for Einc (CMS) < ', 	         
+     &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
+          endif
+        ENDIF
 C       CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
       ENDIF
 
