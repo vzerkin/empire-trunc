@@ -85,7 +85,7 @@
 
       ! write the cross section file for kalman
 
-      open(50,status='replace',action='WRITE')
+      open(50,action='WRITE')
       write(50,'(i5)') nreac
       DO I=1,nreac
          WRITE(50,'(A12,31X,I5)') REACTION(I),IE
