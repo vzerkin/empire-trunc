@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3526 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-13 01:05:00 +0200 (Fr, 13 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -687,11 +687,11 @@ C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
 !               DO ier = iermax - 1, iermax-1, -1
-                  IF (ier.EQ.1) THEN
-                     corr = 0.5d0
-                  ELSE
+C                 IF (ier.EQ.1) THEN
+C                    corr = 0.5d0
+C                 ELSE
                      corr = 1.d0
-                  ENDIF
+C                 ENDIF
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
@@ -780,8 +780,13 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
-         SCRtl(i,Nejc) = sumdl * CINRED(i) 
-         Sum = Sum + sumdl * CINRED(i) 
+         if(IZA(Nnur).EQ.IZA(0)) THEN
+           SCRtl(i,Nejc) = sumdl * CINRED(i) 
+           Sum = Sum + sumdl * CINRED(i) 
+         else
+           SCRtl(i,Nejc) = sumdl  
+           Sum = Sum + sumdl 
+         endif		  
 !         write(8,*) 'Sum to level i=', i,sumdl*CINRED(i)
       ENDDO
 C-----do loop over inelastic levels --------- done --------------------
