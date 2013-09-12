@@ -372,7 +372,7 @@ C* Define the output file
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,990) FLNM
       IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
-	ILEN=LEN(FLN2)
+	ILEN=LEN(TRIM(FLN2))
       WRITE(LTT,991) ' Output filename                      : ',
      >     FLN2(1:ILEN)
       OPEN (UNIT=LOU,FILE=FLN2(1:ILEN),STATUS='UNKNOWN')
