@@ -1,6 +1,6 @@
-!cc   * $Rev: 3511 $
+!cc   * $Rev: 3525 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-12 11:44:38 +0200 (Do, 12 Sep 2013) $
+!cc   * $Date: 2013-09-13 01:04:22 +0200 (Fr, 13 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -503,8 +503,7 @@ C--------ejectile alpha
          XNEjc(3) = AEJc(3) - ZEJc(3)
          IZAejc(3) = INT(1000.*ZEJc(3) + AEJc(3))
          iz = INT(ZEJc(3))
-C        SYMbe(3) = SMAT(iz)
-         SYMbe(3) = ' a'
+         SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.d0
 
          IF (NDEjc.LT.6) THEN
