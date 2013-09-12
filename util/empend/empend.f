@@ -1,5 +1,5 @@
-Ccc $Rev: 3160 $                                                          | 
-Ccc $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
+KLB $Rev: 3160 $                                                          | 
+LBK $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
 Ccc $Author: atrkov $                                                  
 
       PROGRAM EMPEND
@@ -112,7 +112,8 @@ C-V          double differential cross sections.
 C-V        - Increase precision when writing the ENDF file.
 C-V  13/03 Fix vertical segments at the upper end of emission spectra by
 C-V        delta-shifting the one-but-last point.
-C-V  12/09 Open units 5,6 to avoid problems with ifort compiler
+C-V  12/09 Changed the way of reading strings to make the code more robust
+C          (for some compiler in linux it was failing) 
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -370,9 +371,9 @@ C* Define the output file
      >     FLN1(1:ILEN)
    14 WRITE(LTT,991) ' Default output filename              : ',FLN2
       WRITE(LTT,991) '$          Enter new name to redefine : '
-      READ (LKB,990) FLNM
+      READ (LKB,'(A)') FLNM
       IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
-	ILEN=LEN(TRIM(FLN2))
+      ILEN=LEN(TRIM(FLN2))
       WRITE(LTT,991) ' Output filename                      : ',
      >     FLN2(1:ILEN)
       OPEN (UNIT=LOU,FILE=FLN2(1:ILEN),STATUS='UNKNOWN')
@@ -844,11 +845,15 @@ C*
   995 FORMAT(A40,4I5)
   996 FORMAT(A40,F10.4)
   997 FORMAT(5A11)
+
 C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
+
 123   WRITE(LTT,*) 'INPUT FILE NOT FOUND:'
+
       WRITE(LTT,*) 'FILENAME: ',FLN1(1:ILEN)
+
       STOP 'ERROR in EMPEND'
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
@@ -944,6 +949,7 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=0
       END IF
       RETURN
+
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT,MEQ)
 C-Title  : Subroutine EMTIZA
