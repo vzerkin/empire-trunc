@@ -194,14 +194,16 @@ for k in $MT; do
     fi
 
     echo  "Running kalman"
-    if ! $EMPIREDIR/util/kalman/kalman3.exe < KALMAN.INP > $file-out.kal
+    # if ! $EMPIREDIR/util/kalman/kalman3.exe < KALMAN.INP > $file-out.kal
+    if ! $EMPIREDIR/util/kalman/kalman
     then
-      echo " Error running kalman3"
+      echo " Error running kalman"
       echo -n ' Hit carriage return to exit kalman script > '
       read errkey
       exit 10
     fi
 
+    mv KALMAN.OUT $file-out.kal
     mv fort.13 $file-xsc.kal  # Should give a different name for this file in the pfns case, but which? '-pfns.kal' is taken.
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
