@@ -45,9 +45,9 @@
         real*8 x                                 ! value
         real*8 dx                                ! uncertainty
     end type
-    type (parameter), pointer :: pri(:)          ! (nptot) all prior parameters
-    type (parameter), pointer :: pr0(:)          ! (nparm) fitted prior params
-    type (parameter), pointer :: pr1(:)          ! (nparm) fitted posterior params
+    type (parameter), allocatable :: pri(:)      ! (nptot) all prior parameters
+    type (parameter), allocatable :: pr0(:)      ! (nparm) fitted prior params
+    type (parameter), allocatable :: pr1(:)      ! (nparm) fitted posterior params
     real*8, allocatable :: pric(:)               ! all prior parameter covariances. packed 1-D
     real*8, allocatable :: prc(:)                ! fitted parameter covariances. packed 1-D
     integer*4 :: nptot = 0                       ! # of parameters in prior file
@@ -62,23 +62,23 @@
 
     integer*4 :: nreac = 0                       ! # of data reactions to fit
     integer*4 :: ndata = 0                       ! number of experimental data points in measurement
-    real*8, pointer :: xdat(:)                   ! experimental energies
-    real*8, pointer :: ydat(:)                   ! experimental cross sections
-    real*8, pointer :: vdat(:)                   ! experimental data covariances, packed in 1-D mode
+    real*8, allocatable :: xdat(:)               ! experimental energies
+    real*8, allocatable :: ydat(:)               ! experimental cross sections
+    real*8, allocatable :: vdat(:)               ! experimental data covariances, packed in 1-D mode
 
     ! reactions
 
     type reaction
         integer*4 nen                            ! # energies
         character*43 nam                         ! reaction name
-        real*8, pointer :: ene(:)                ! (nen) energies
-        real*8, pointer :: crs(:)                ! (nen) cross sections
-        real*8, pointer :: err(:)                ! (nen) cross sections error (from fit)
-        real*8, pointer :: sen(:,:)              ! (nen,nptot) sensitivity at each energy to each parameter
+        real*8, allocatable :: ene(:)            ! (nen) energies
+        real*8, allocatable :: crs(:)            ! (nen) cross sections
+        real*8, allocatable :: err(:)            ! (nen) cross sections error (from fit)
+        real*8, allocatable :: sen(:,:)          ! (nen,nptot) sensitivity at each energy to each parameter
     end type
-    type (reaction), pointer :: rxn(:)           ! all reactions
-    type (reaction) crx                          ! reaction being fit
-    integer*4 :: nrtot = 0                       ! total # of calculated reactions in file
+    type (reaction), allocatable, target :: rxn(:)  ! all reactions
+    type (reaction) crx                             ! reaction being fit
+    integer*4 :: nrtot = 0                          ! total # of calculated reactions in file
 
     integer*4 i
 
@@ -156,7 +156,8 @@
             stop 1
         endif
 
-        write(6,*) ' Fitting reaction',trim(rxn(iexp)%nam)
+        write(6,*)
+        write(6,'(a)') ' Fitting reaction: '//trim(rxn(iexp)%nam)
 
         emn = set_reaction(iexp)
 
@@ -166,7 +167,9 @@
         do imsur = 1,nmsur
 
             call exdata(emin,emax,ew(imsur))
+            write(6,'(a,i0,a,i0)') '   measurement ',imsur,'   # data pts = ',ndata
             chisq = prcalc()
+            write(6,'(a,1PE11.4)') '     partial chi2 = ',chisq
 
             chitot = chitot + chisq
             ntotal = ntotal + ndata
@@ -175,7 +178,6 @@
             write(2,280) crx%nam
             write(2,290) iseqno,imsur,ndata,ntotal
             write(2,300) chisq,chitot
-            write(6,'(a,i0,a,1PE11.4)') '   meas # ',imsur,' partial chi2 = ',chisq
             call log_params
 
         end do
@@ -199,7 +201,7 @@
 
     !******************************************************************************************
 
-    real*8 function prcalc
+    real*8 function prcalc()
 
     ! main calculation
 
@@ -545,7 +547,7 @@
     real*8, allocatable :: pw(:)
 
     if(kunit == 0) return
-    open(kunit,status='replace',action='write')
+    open(kunit,action='write')
 
     write(kunit,100)(pri(i)%x,i=1,nptot)
     write(kunit,100)(pri(i)%dx/pri(i)%x,i=1,nptot)
@@ -615,10 +617,10 @@
     integer*4 i,j,l,k
     real*8 xx
 
-    if(associated(crx%ene)) deallocate(crx%ene)
-    if(associated(crx%crs)) deallocate(crx%crs)
-    if(associated(crx%err)) deallocate(crx%err)
-    if(associated(crx%sen)) deallocate(crx%sen)
+    if(allocated(crx%ene)) deallocate(crx%ene)
+    if(allocated(crx%crs)) deallocate(crx%crs)
+    if(allocated(crx%err)) deallocate(crx%err)
+    if(allocated(crx%sen)) deallocate(crx%sen)
 
     allocate(crx%ene(rxn(kn)%nen))
     allocate(crx%crs(rxn(kn)%nen))
@@ -689,9 +691,9 @@
     real*8, allocatable :: z(:)
     character*43 dum
 
-    if(associated(xdat)) deallocate(xdat)
-    if(associated(ydat)) deallocate(ydat)
-    if(associated(vdat)) deallocate(vdat)
+    if(allocated(xdat)) deallocate(xdat)
+    if(allocated(ydat)) deallocate(ydat)
+    if(allocated(vdat)) deallocate(vdat)
 
     ! read data from 10,11,12
 
@@ -1065,7 +1067,7 @@
 
     ! crs <= sen * (p1 - p0)
 
-    open(13,status='replace',action='write')
+    open(13,action='write')
 
     do ix = 1,nrtot
         rx => rxn(ix)
@@ -1101,9 +1103,9 @@
     real*8, allocatable :: vg(:,:)
     type (reaction), pointer :: rx1,rx2
 
-    open(14,status='replace',action='write')
-    open(16,status='replace',action='write')
-    open(32,status='replace',action='write')
+    open(14,action='write')
+    open(16,action='write')
+    open(32,action='write')
 
     ! same reactions
 
@@ -1302,7 +1304,7 @@
 
     integer*4 i,j
 
-    open(15,status='replace',action='write')
+    open(15,action='write')
 
     do i = 1,nparm
         write(15,10) i,pr1(i)%nam,nplog

@@ -4,7 +4,7 @@ program c4tokal
 
     implicit none
 
-    integer*4, parameter :: ngmt = 12      ! list of allowed MT's for Kalman fitting
+    integer*4, parameter :: ngmt = 12      ! list of allowed MTs for Kalman fitting
     integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,251,456/)
 
     integer*4, parameter :: kctl1 = 0      ! set nonzero to read priors
@@ -17,36 +17,81 @@ program c4tokal
     character*4, parameter :: xsc = '.xsc'
     character*8, parameter :: inpsen = '-inp.sen'
 
-    logical*4 qex
-    integer*4 i,j,k,l1,l2,ios,nsec,mt1,mat
-    integer*4 status,nex,nnucd,j1,j2,nparam,ms
-    character pname*6,line*130,file*25,last*8
+    integer*4 nsec     ! # of sections in C4 file
+    integer*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT. 
+    integer*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
+    integer*4 nrx      ! # of reactions in EMPIRE XSC file
+    integer*4 mat      ! MAT of material. not used here
+    integer*4 nprm     ! # EMPIRE parameters in sensitivity input file
 
-    type reaction
+    logical*4 qex,qmt
+    integer*4 i,j,k,m,ix,l1,l2,ios,status
+    character pname*6,line*130,file*25
+
+    type empire_reaction
         integer*4 mt
         character*12 name
     end type
-    type (reaction), pointer :: rcx(:)
+    type (empire_reaction), allocatable :: rcx(:)
+
+    type fitted_reaction
+        integer*4 mt                               ! MT value
+        integer*4 ix                               ! index in empire reaction
+        integer*4 num                              ! # of C4 data sets for this MT
+        integer*4, allocatable :: ic(:)            ! C4 index of each data set
+        real*8, allocatable :: wt(:)               ! weights for each data set
+    end type
+    integer*4 :: nmt                               ! # MTs that will be fit
+    integer*4, allocatable :: kx(:)                ! section incidices
+    type (fitted_reaction), target  :: fmt(ngmt)   ! the MTs being fit
+    type (fitted_reaction), pointer :: fx
 
     type (c4_file) c4
     type (c4_section), pointer :: sc
-    type (c4_section), pointer :: gs(:)
 
     integer*4, external :: rctn
 
+    ! get project name, plotting MT, MAT and fitting flag nex
+
     read(5,*) FILE,MT1,MAT,NEX
     call strlen(file,l1,l2)
+
+    i = 1
+    do while (i <= ngmt)
+        if(mt1 == goodmt(i)) exit
+        i = i + 1
+    end do
+
+    ! make sure flags are consistent
+
+    select case(nex)
+    case(1)
+        qmt = .true.
+        if(i > ngmt) then
+            write(0,'(a,i0)') ' Plotted & fitted MT unknown: ',mt1
+            stop 1
+        endif
+    case(2)
+        qmt = .false.
+        if((mt1 /= 0) .and. (i > ngmt)) then
+            write(0,'(a,i0)') ' Plotted MT unknown: ',mt1
+            stop 1
+        endif
+    case default
+        write(0,'(a,i0)') ' Undefined value for NEX specified : ',nex
+        stop 1
+    end select
 
     ! get number of empire parameters from empire sensitivity input file
 
     inquire(file=file(l1:l2)//inpsen,exist=qex)
     if(.not.qex) then
-        write(0,*) 'PARAMETER FILE NOT FOUND: ',file(l1:l2)//inpsen
+        write(0,'(a)') 'EMPIRE sensitivity input file not found: '//file(l1:l2)//inpsen
         stop 1
     endif
 
     open(13,file=file(l1:l2)//inpsen,status='old')
-    nparam = 0
+    nprm = 0
     do
         read(13,*,iostat=ios) pname
         if(ios > 0) then
@@ -56,7 +101,7 @@ program c4tokal
             exit
         endif
         if(pname(1:1) == '!') cycle
-        nparam = nparam + 1
+        nprm = nprm + 1
     end do
     close(13)
 
@@ -64,20 +109,20 @@ program c4tokal
 
     inquire(file=file(l1:l2)//xsc,exist=qex)
     if(.not.qex) then
-        write(0,*) 'CROSS SECTION DATA FILE NOT FOUND: ',file(l1:l2)//xsc
+        write(0,'(a)') 'EMPIRE CROSS SECTION FILE NOT FOUND: '//file(l1:l2)//xsc
         stop 1
     endif
 
     open(13,file=file(l1:l2)//xsc,status='old',action='read')
-    read(13,'(1X,I3)') nnucd
-    allocate(rcx(nnucd))
-    read(13,'(12X,90A12)') (rcx(i)%name,i=1,nnucd)
+    read(13,'(1X,I3)') nrx
+    allocate(rcx(nrx))
+    read(13,'(12X,90A12)') (rcx(i)%name,i=1,nrx)
     close(13)
 
-    j1 = 0
-    do i = 1,nnucd
+    ! convert reaction name to MT value
+
+    do i = 1,nrx
        rcx(i)%mt = rctn(rcx(i)%name)
-       if(rcx(i)%mt == mt1) j1 = i
     end do
 
     ! open C4 data file and get data
@@ -102,60 +147,109 @@ program c4tokal
        stop 1
     endif
 
-    ! find the good data in C4 file
+    ! scan C4 sections looking for good MTs
+    ! count the number of sections found for each
 
-    nsec = 0
-    allocate(gs(c4%nsec))
-
+    nmt = 0
     do k = 1,c4%nsec
+
         sc => c4%sec(k)
-        if(sc%mf /= 3) cycle    ! we only want MF3
+        if(sc%mf /= 3)               cycle    ! we only fit MF3
+        if(qmt .and. (sc%mt /= mt1)) cycle    ! not fitting this MT
+
         i = 1
         do while (i <= ngmt)
            if(sc%mt == goodmt(i)) exit
            i = i + 1
         end do
-        if(i > ngmt) cycle      ! only allowed MTs
-        nsec = nsec + 1
-        gs(nsec) = sc
-    end do
+        if(i > ngmt) cycle                    ! only fit allowed MTs
 
-    call delete_c4(c4)
+        ix = 1
+        do while(ix <= nrx)
+           if(rcx(ix)%mt == sc%mt) exit
+           ix = ix + 1
+        end do
+        if(ix > nrx) cycle                    ! reaction not in XSC file
 
-    open(15,file='KALMAN.INP',status='NEW',recl=120,action='WRITE')
-
-    write(15,*) 'INPUT'
-    write(15,'(5I5,5X,3E10.3)') nsec,nparam,kctl1,kctl2,kcovex,scale,emin,emax
-    write(15,'(14I5)') (I,I=1,NPARAM)
-
-    do k = 1,nsec
-
-        sc => gs(k)
-        call dataout(sc)
-
-        ! find this MT in the Empire XSC file
-
-        j2 = 0
-        do i = 1,nnucd
-            if(rcx(i)%mt == sc%mt) then
-                j2 = i
-                exit
-            endif
+        m = 1
+        do while(m <= nmt)
+           if(fmt(m)%mt == sc%mt) exit
+           m = m + 1
         end do
 
-        if(j2 == 0) then
-            ! MT from data not found in Empire XSC file!
-            write(0,'(a,i0)') ' MT not found in XSC file: ',sc%mt
-            stop 1
-        endif
-
-        write(15,'(14I5)') J2,1
-        if(((j1==j2) .and. (nex==1)) .or. (nex==2)) then
-           write(15,'(1PE10.3,5X,A25)') 1.0, sc%ref
+        if(m > nmt) then
+           nmt = m                            ! new reaction
+           fmt(m)%mt = sc%mt
+           fmt(m)%ix = ix
+           fmt(m)%num = 1
         else
-           write(15,'(1PE10.3)') 0.0
+           fmt(m)%num = fmt(m)%num + 1
         endif
 
+    end do
+
+    if(nmt == 0) then
+        write(0,'(a)') ' No data from C4 found in EMPRIRE XSC file!'
+        stop 1
+    endif
+
+    ! allocate space for each MT
+
+    do m = 1,nmt
+        fx => fmt(m)
+        allocate(fx%ic(fx%num),fx%wt(fx%num))
+    end do
+
+    ! allocate & initialize counters
+
+    allocate(kx(nmt))
+    kx = 0
+
+    ! re-scan C4 sections, setting index of C4 section
+
+    do k = 1,c4%nsec
+
+        sc => c4%sec(k)
+        if(sc%mf /= 3)               cycle    ! we only want MF3
+        if(qmt .and. (sc%mt /= mt1)) cycle    ! not fitting this MT
+
+        m = 1
+        do while(m <= nmt)
+           if(fmt(m)%mt == sc%mt) exit
+           m = m + 1
+        end do
+        if(m > nmt) cycle                     ! not fitting MT
+
+        fx => fmt(m)
+        kx(m) = kx(m) + 1
+        fx%ic(kx(m)) = k
+        fx%wt(kx(m)) = 1.D0
+
+    end do
+
+    ! make final consistency check
+
+    do m = 1,nmt
+        if(fmt(m)%num /= kx(m)) then
+             write(0,'(a)') ' Internal inconsistency counting reactions'
+             stop 1
+        endif
+    end do
+
+    ! ok, now write input & data files
+
+    open(15,file='KALMAN.INP',status='NEW',recl=120,action='WRITE')
+    write(15,*) 'INPUT'
+    write(15,'(5I5,5X,3E10.3)') nmt,nprm,kctl1,kctl2,kcovex,scale,emin,emax
+    write(15,'(14I5)') (i,i=1,nprm)   ! fitting all parameters in sens file
+
+    do m = 1,nmt
+        fx => fmt(m)
+        write(15,'(2I5)') fx%ix,fx%num
+        write(15,'(7E10.3)') (fx%wt(i),i=1,fx%num)
+        do i = 1,fx%num
+            call dataout(c4%sec(fx%ic(i)))
+        end do
     end do
 
     close(15)
@@ -181,6 +275,8 @@ program c4tokal
     real*8 xf
     real*8, allocatable :: z(:)
     character chr3*3
+
+    ! data written to unit 75 is for plots
 
     qwt = .false.
     if((mt1 == 0) .or. (sc%mt == mt1)) then
@@ -209,6 +305,8 @@ program c4tokal
     else
         xf = 1.D0            ! don't convert mubar, nubar
     endif
+
+    ! data to 10,11,12 are used for fitting
 
     write(10,100) sc%ref, sc%ent, sc%sub, sc%ndat
     write(10,200) (1.D-06*sc%pt(i)%e,xf*sc%pt(i)%x, i=1,sc%ndat)
