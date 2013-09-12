@@ -85,12 +85,13 @@
 
       ! write the cross section file for kalman
 
+      open(50,status='replace',action='WRITE')
+      write(50,'(i5)') nreac
       DO I=1,nreac
          WRITE(50,'(A12,31X,I5)') REACTION(I),IE
          WRITE(50,'(6(1PE11.4))') (E(J),CSEC(J,I),J=1,IE)
       end do
       CLOSE(50)
-
 
       ! GENERATE SENSITIVITY FILE - UNIT 52
 
@@ -124,14 +125,12 @@
         endif
       end do
 20    CLOSE(10)
-      NPARM=I-1
+      NPARM = I-1
 
+      w = 0.D0
       DO I=1,NPARM
-         DO J=1,NPARM
-            W(I,J)=0.0
-         end do
-         W(I,I) = 1.0
-         SW(I)  = 1.0
+         W(I,I) = 1.D0
+         SW(I)  = 1.D0
       end do
 
       WRITE(52,'(25X,I5)') NPARM
@@ -168,7 +167,7 @@
       DO K=1,nreac
          WRITE(52,'(A12,13X,I5)') REACTION(K),IE
          DO J=1,IE
-            WRITE(52,100)(SENS(I,J,K)*CSEC(J,K)/PERTB(I)/2.,I=1,NPARM)
+            WRITE(52,100)(SENS(I,J,K)*CSEC(J,K)/(2.D0*PERTB(I)),I=1,NPARM)
          end do
       end do
 

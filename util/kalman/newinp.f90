@@ -459,7 +459,7 @@
     npar = nparm
 
     read(12,'(a)') line
-    do while(line(1:17) /= 'CHI-SQUARE TEST !')
+    do while(line(1:17) /= 'Chi-square test !')
        read(12,'(a)') line
     end do
 

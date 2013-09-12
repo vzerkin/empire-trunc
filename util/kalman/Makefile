@@ -1,7 +1,7 @@
 # set default compiler
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
@@ -53,10 +53,10 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-all: kalman3.exe kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
+all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
 
-kalman3.exe : kalman3.1.f
-	$(FC) $(FFLAGS) -o $@ kalman3.1.f
+kalman : kalman.f90
+	$(FC) $(FFLAGS) -o $@ kalman.f90
 
 OBJG =	kalend.f90 rctn.o strlen.o
 kalend :   $(OBJG)
@@ -89,7 +89,7 @@ empsee: empire_sees.f90
 
 clean:
 	rm -f *.o *.mod *.exe
-	rm -f empsee newinp kefkal pnt2kal genkal c4tokal kalend
+	rm -f kalman empsee newinp kefkal pnt2kal genkal c4tokal kalend
 
 # When making a debug image
 dbg:  
