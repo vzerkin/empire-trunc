@@ -112,6 +112,7 @@ C-V          double differential cross sections.
 C-V        - Increase precision when writing the ENDF file.
 C-V  13/03 Fix vertical segments at the upper end of emission spectra by
 C-V        delta-shifting the one-but-last point.
+C-V  12/09 Open units 5,6 to avoid problems with ifort compiler
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -362,13 +363,19 @@ C* Define the source file
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,990) FLNM
       IF(FLNM(1:40).NE.BLNK) FLN1=FLNM
-      OPEN(UNIT=LIN,FILE=FLN1,STATUS='OLD',ERR=12)
+	ILEN=LEN(FLN1)
+      OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=123)
 C* Define the output file
+      WRITE(LTT,991) ' Source filename                      : ',
+     >     FLN1(1:ILEN)
    14 WRITE(LTT,991) ' Default output filename              : ',FLN2
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,990) FLNM
       IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
-      OPEN (UNIT=LOU,FILE=FLN2,STATUS='UNKNOWN')
+	ILEN=LEN(FLN2)
+      WRITE(LTT,991) ' Output filename                      : ',
+     >     FLN2(1:ILEN)
+      OPEN (UNIT=LOU,FILE=FLN2(1:ILEN),STATUS='UNKNOWN')
 C* Define the number of points for cross sections fine mesh
       WRITE(LTT,991) ' Number of x-s fine mesh subintervals   '
       WRITE(LTT,991) '$    Enter blank to use original mesh : '
@@ -836,9 +843,13 @@ C*
   994 FORMAT(BN,F10.0)
   995 FORMAT(A40,4I5)
   996 FORMAT(A40,F10.4)
-  997 FORMAT(6A11)
+  997 FORMAT(5A11)
+C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
+123   WRITE(LTT,*) 'INPUT FILE NOT FOUND:'
+      WRITE(LTT,*) 'FILENAME:',FLN1(1:ILEN)
+      STOP 'ERROR in EMPEND'
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
