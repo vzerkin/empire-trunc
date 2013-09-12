@@ -1,3 +1,0 @@
-#! /bin/sh -
-#script to install EMPIRE-3 package from the repository
-svn checkout https://ndclx4.bnl.gov/svn/empire/trunk empire-repos
