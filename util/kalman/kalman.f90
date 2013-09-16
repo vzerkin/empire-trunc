@@ -18,11 +18,6 @@
     !*    unit(15) : write variation of parameters                       *
     !*    unit(50) : read ene,crs                                        *
     !*    unit(52) : read p0,x0,a                                        *
-    !*               symmetrical matrices stored in one-dim. mode        *
-    !*               v(1)                                                *
-    !*               v(2) v(3)                                           *
-    !*               v(4) v(5) v(6)                                      *
-    !*                                                                   *
     !*********************************************************************
 
     implicit none
@@ -35,21 +30,21 @@
     integer*4 :: ntotal = 0                      ! total # data points processed
     integer*4 :: iseqno = 0                      ! total # measurements processed
     real*8 :: chitot = 0.D0                      ! total accumulated chi2
-    real*8 :: emin0,emax0                        ! global energy limits on data
+    real*8 emin0,emax0                           ! global energy limits on data
     character*80 title                           ! fit title
 
     ! parameters
 
     type parameter
-        character*12 :: nam                      ! parameter name
+        character*12 nam                         ! parameter name
         real*8 x                                 ! value
         real*8 dx                                ! uncertainty
     end type
     type (parameter), allocatable :: pri(:)      ! (nptot) all prior parameters
     type (parameter), allocatable :: pr0(:)      ! (nparm) fitted prior params
     type (parameter), allocatable :: pr1(:)      ! (nparm) fitted posterior params
-    real*8, allocatable :: pric(:)               ! all prior parameter covariances. packed 1-D
-    real*8, allocatable :: prc(:)                ! fitted parameter covariances. packed 1-D
+    real*8, allocatable :: pric(:,:)             ! all prior parameter covariances.
+    real*8, allocatable :: prc(:,:)              ! fitted parameter covariances.
     integer*4 :: nptot = 0                       ! # of parameters in prior file
     integer*4 :: nparm = 0                       ! # of parameters to be fit
     integer*4, allocatable :: iparm(:)           ! index of parameters being fit
@@ -64,7 +59,7 @@
     integer*4 :: ndata = 0                       ! number of experimental data points in measurement
     real*8, allocatable :: xdat(:)               ! experimental energies
     real*8, allocatable :: ydat(:)               ! experimental cross sections
-    real*8, allocatable :: vdat(:)               ! experimental data covariances, packed in 1-D mode
+    real*8, allocatable :: vdat(:,:)             ! experimental data covariances
 
     ! reactions
 
@@ -74,7 +69,7 @@
         real*8, allocatable :: ene(:)            ! (nen) energies
         real*8, allocatable :: crs(:)            ! (nen) cross sections
         real*8, allocatable :: err(:)            ! (nen) cross sections error (from fit)
-        real*8, allocatable :: sen(:,:)          ! (nen,nptot) sensitivity at each energy to each parameter
+        real*8, allocatable :: sen(:,:)          ! (nptot,nen) sensitivity at each energy to each parameter
     end type
     type (reaction), allocatable, target :: rxn(:)  ! all reactions
     type (reaction) crx                             ! reaction being fit
@@ -110,7 +105,7 @@
     call cvrspl                      ! write covariance of splines
     call cvrprm(0)                   ! write covariance of parameters
     call pwrite(kctl2)               ! write posterior params
-    call prsort                      ! write parameter variations
+    call write_psteps                ! write parameter variations
     close(2)
 
 10  format(a80)
@@ -166,7 +161,7 @@
 
         do imsur = 1,nmsur
 
-            call exdata(emin,emax,ew(imsur))
+            call get_data(emin,emax,ew(imsur))
             write(6,'(a,i0,a,i0)') '   measurement ',imsur,'   # data pts = ',ndata
             chisq = prcalc()
             write(6,'(a,1PE11.4)') '     partial chi2 = ',chisq
@@ -209,8 +204,7 @@
 
     integer*4, parameter :: nord = 1         ! order of polynomial interpolation
 
-    integer*4 i,j,k,ik,ij,istart,kstart,l,kl,ii
-
+    integer*4 i,j,k,l
     real*8 x1,x2,x3,x4
     real*8, allocatable :: d(:,:), w(:,:), f(:,:), dp(:)
 
@@ -220,13 +214,13 @@
         return
     endif
 
-    allocate(d(ndata,crx%nen),w(nparm,ndata),f(ndata,nparm))
+    allocate(d(crx%nen,ndata),w(ndata,nparm),f(nparm,ndata))
 
     ! make interpolation matrix d
 
     do i = 1,ndata
         do j = 1,crx%nen
-            d(i,j) = polynm(xdat(i),j,nord,crx%nen)
+            d(j,i) = polynm(xdat(i),j,nord,crx%nen)
         end do
     end do
 
@@ -235,9 +229,8 @@
     do i = 1,ndata
         x1 = 0.D0
         do k = 1,crx%nen
-            x1 = x1 + d(i,k)*crx%crs(k)
+            x1 = x1 + d(k,i)*crx%crs(k)
         end do
-        ! type '(a,f6.3,2x,f9.3,2x,f9.3)', ' data: ',xdat(i),ydat(i),x1
         ydat(i) = ydat(i) - x1
     end do
 
@@ -245,10 +238,11 @@
 
     do i = 1,ndata
         do j = 1,nparm
-            f(i,j) = 0.D0
+            x1 = 0.D0
             do k = 1,crx%nen
-                f(i,j) = f(i,j) + d(i,k)*crx%sen(k,iparm(j))
+                x1 = x1 + d(k,i)*crx%sen(iparm(j),k)
             end do
+            f(j,i) = x1
         end do
     end do
 
@@ -256,38 +250,29 @@
 
     ! w <= f * prc
 
-    do j = 1,ndata
-        istart=0
-        do i = 1,nparm
+    do i = 1,nparm
+        do j = 1,ndata
             x1 = 0.D0
-            do k = 1,i
-                ik = istart + k
-                x1 = x1 + prc(ik)*f(j,k)
+            do k = 1,nparm
+                x1 = x1 + prc(k,i)*f(k,j)
             end do
-            istart = istart + i
-            ik = istart
-            do k = i+1,nparm
-                ik = ik+k-1
-                x1 = x1+prc(ik)*f(j,k)
-            end do
-            w(i,j) = x1
+            w(j,i) = x1
         end do
     end do
 
     ! vdat <= ( f * prc * f**t + vdat )**(-1)
 
-    istart=0
     do i = 1,ndata
-         do j=1,i
+         do j = 1,ndata
             x1 = 0.D0
-            ij = istart + j
-            do k=1,nparm
-               x1 = x1 + w(k,j)*f(i,k)
+            do k = 1,nparm
+               x1 = x1 + w(j,k)*f(k,i)
             end do
-            vdat(ij) = vdat(ij) + x1
+            vdat(j,i) = vdat(j,i) + x1
          end do
-         istart=istart+i
     end do
+
+    deallocate(f)
 
     call invmtx(ndata,vdat)
 
@@ -295,64 +280,45 @@
 
     allocate(dp(nparm))      ! change in each fitted parameter
 
-    istart=0
     do i = 1,nparm
-        do j = 1,i-1
-            x1=0.D0
-            kstart=0
-            do k=1,ndata
-                x3=0.D0
-                do l = 1,k
-                    kl = kstart+l
-                    x3 = x3 + vdat(kl)*w(j,l)
-                end do
-                kstart = kstart+k
-                kl = kstart
-                do l = k+1,ndata
-                    kl = kl+l-1
-                    x3 = x3 + vdat(kl)*w(j,l)
-                end do
-                x1 = x1 + w(i,k)*x3
-            end do
-            ij = istart + j
-            prc(ij) = prc(ij) - x1
-        end do
 
-        istart = istart + i
+        do j = 1,i-1
+            x1 = 0.D0
+            do k = 1,ndata
+                x3 = 0.D0
+                do l = 1,ndata
+                    x3 = x3 + vdat(l,k)*w(l,j)
+                end do
+                x1 = x1 + w(k,i)*x3
+            end do
+            prc(i,j) = prc(i,j) - x1
+            prc(j,i) = prc(i,j)
+        end do
 
         x1 = 0.D0
         x2 = 0.D0
-        kstart=0
         do k = 1,ndata
             x3 = 0.D0
             x4 = 0.D0
-            do l = 1,k
-                kl = kstart + l
-                x3 = x3 + vdat(kl)*w(i,l)
-                x4 = x4 + vdat(kl)*ydat(l)
+            do l = 1,ndata
+                x3 = x3 + vdat(l,k)*w(l,i)
+                x4 = x4 + vdat(l,k)*ydat(l)
             end do
-            kstart = kstart+k
-            kl = kstart
-            do l = k+1,ndata
-                kl = kl+l-1
-                x3 = x3 + vdat(kl)*w(i,l)
-                x4 = x4 + vdat(kl)*ydat(l)
-            end do
-            x1 = x1 + w(i,k)*x3
-            x2 = x2 + w(i,k)*x4
+            x1 = x1 + w(k,i)*x3
+            x2 = x2 + w(k,i)*x4
         end do
-        ij = istart
-        prc(ij) = prc(ij) - x1
+        prc(i,i) = prc(i,i) - x1
         dp(i) = x2
         pr1(i)%x = pr1(i)%x + x2
+
     end do
 
-    deallocate(w,f)
+    deallocate(w)
 
     do i = 1,crx%nen
         x1 = 0.D0
         do j = 1,nparm
-            x1 = x1 + crx%sen(i,iparm(j))*dp(j)
+            x1 = x1 + crx%sen(iparm(j),i)*dp(j)
         end do
         crx%crs(i) = crx%crs(i) + x1
     end do
@@ -375,25 +341,14 @@
 
     ! chi square test
 
-    istart=0
-    x2=0.0
+    x1 = 0.D0
     do i = 1,ndata
-        x1 = 0.D0
-        do j = 1,i-1
-            ij = istart+j
-            x1 = x1 + vdat(ij)*ydat(j)
+        do j = 1,ndata
+            x1 = x1 + vdat(j,i)*ydat(j)*ydat(i)
         end do
-        istart = istart + i
-        x2 = x2 + ydat(i)*x1
-    end do
-    x1=0.0
-    do i = 1,ndata
-        ii = i*(i+1)/2
-        x1 = x1 + vdat(ii)*ydat(i)*ydat(i)
-        ! type '(a,f6.3,2x,f9.3,2x,f9.3)', ' data: ',xdat(i),ydat(i),sqrt(vdat(ii))
     end do
 
-    prcalc = 2.D0*x2 + x1
+    prcalc = x1
 
     return
     end function prcalc
@@ -443,7 +398,7 @@
 
     read(52,'(25x,i5)') nptot
     allocate(pri(nptot),pr0(nparm),pr1(nparm))
-    allocate(pric(nptot*(nptot+1)/2),prc(nparm*(nparm+1)/2))
+    allocate(pric(nptot,nptot),prc(nparm,nparm))
     read(52,'(11a12)')  (pri(i)%nam,i=1,nptot)
 
     call pread(52,pr0)
@@ -473,8 +428,7 @@
     type (parameter), intent(out) :: par(*)    ! parameters
 
     logical*4 qop
-    integer*4 i,j,ij,ki,kj,kij,istart
-    real*8, allocatable :: pw(:)
+    integer*4 i,j,ki,kj
 
     inquire(kunit,opened=qop)
     if(.not.qop) open(kunit,status='old',action='read')
@@ -486,45 +440,33 @@
     read(kunit,100)(pri(i)%x,i=1,nptot)        ! prior parameter values
     read(kunit,100)(pri(i)%dx,i=1,nptot)       ! prior relative errors
 
-    allocate(pw(nptot))
     do i = 1,nptot
         pri(i)%dx = pri(i)%x*pri(i)%dx         ! convert to absolute errors
-        read(kunit,200)(pw(j),j=1,nptot)       ! parameter correlation matrix
-        istart = i*(i-1)/2
-        do j=1,i
-            pric(istart+j) = pw(j)             ! store in 1-d array
-        end do
+        read(kunit,200)(pric(j,i),j=1,nptot)   ! parameter correlation matrix
     end do
-    deallocate(pw)
+
+    if(.not.qop) close(kunit)
 
     ! convert pc from correlation to covariance matrix
 
     do i = 1,nptot
-        istart=i*(i-1)/2
-        do j = 1,i
-            ij = istart+j
-            pric(ij) = pric(ij)*pri(i)%dx*pri(j)%dx
+        do j = 1,nptot
+            pric(j,i) = pric(j,i)*pri(i)%dx*pri(j)%dx
         end do
     end do
 
     ! extract the parameters being fitted
 
     do i = 1,nparm
-        par(i) = pri(iparm(i))                 ! value of fitted parameters
-        ki=iparm(i)
-        istart=i*(i-1)/2
-        do j=1,i
-            kj=iparm(j)
-            if(kj.le.ki) then
-               kij=ki*(ki-1)/2+kj
-            else 
-               kij=kj*(kj-1)/2+ki
-            endif
-            prc(istart+j) = pric(kij)          ! covariance of fitted parameters
+        ki = iparm(i)
+        par(i) = pri(ki)                      ! value of fitted parameters
+        do j = 1,i-1
+            kj = iparm(j)
+            prc(i,j) = pric(ki,kj)          ! covariance of fitted parameters
+            prc(j,i) = pric(kj,ki)
         end do
+        prc(i,i) = pric(ki,ki)
     end do
-
-    if(.not.qop) close(kunit)
 
     return
 
@@ -543,29 +485,16 @@
 
     integer*4, intent(in) :: kunit           ! logical unit to write parameters
 
-    integer*4 i,j,ij
-    real*8, allocatable :: pw(:)
+    integer*4 i,j
 
     if(kunit == 0) return
     open(kunit,action='write')
 
     write(kunit,100)(pri(i)%x,i=1,nptot)
     write(kunit,100)(pri(i)%dx/pri(i)%x,i=1,nptot)
-
-    allocate(pw(nptot))
     do i=1,nptot
-        do j=1,nptot
-            if(j.le.i) then
-               ij=i*(i-1)/2+j
-            else
-               ij=j*(j-1)/2+i
-            endif
-            pw(j)=pric(ij)/(pri(i)%dx*pri(j)%dx)
-        end do
-        write(kunit,200)(pw(j),j=1,nptot)
+        write(kunit,200)(pric(j,i)/(pri(i)%dx*pri(j)%dx),j=1,nptot)
     end do
-    deallocate(pw)
-
     close(kunit)
 
     return
@@ -593,11 +522,11 @@
         if(n /= rx%nen) then
             write(6,'(a25,i5)') targ,n
             write(6,*) 'sensitivity, spline, energy points different'
-            stop
+            stop 1
         endif
-        allocate(rx%sen(n,nptot))
+        allocate(rx%sen(nptot,n))
         do k = 1,n
-            read(52,'(11e12.5)')(rxn(i)%sen(k,l),l=1,nptot)
+            read(52,'(11e12.5)')(rxn(i)%sen(l,k),l=1,nptot)
         end do
     end do
 
@@ -614,8 +543,9 @@
 
     integer*4, intent(in) :: kn         ! reaction index
 
-    integer*4 i,j,l,k
+    integer*4 i,j,l
     real*8 xx
+    real*8, allocatable :: wk(:)
 
     if(allocated(crx%ene)) deallocate(crx%ene)
     if(allocated(crx%crs)) deallocate(crx%crs)
@@ -625,7 +555,7 @@
     allocate(crx%ene(rxn(kn)%nen))
     allocate(crx%crs(rxn(kn)%nen))
     allocate(crx%err(rxn(kn)%nen))
-    allocate(crx%sen(rxn(kn)%nen,nptot))
+    allocate(crx%sen(nptot,rxn(kn)%nen),wk(nptot))
 
     crx%nen = rxn(kn)%nen
     crx%nam = rxn(kn)%nam
@@ -644,19 +574,20 @@
         if(l == j) cycle
         call swap(crx%ene(j),crx%ene(l))
         call swap(crx%crs(j),crx%crs(l))
-        do k = 1,nptot
-            call swap(crx%sen(j,k),crx%sen(l,k))
-        end do
+        wk = crx%sen(1:nptot,l)
+        crx%sen(1:nptot,l) = crx%sen(1:nptot,j)
+        crx%sen(1:nptot,j) = wk
     end do
+
+    deallocate(wk)
 
     ! update calculated cross sections to current parameter values p1
 
     do i = 1,crx%nen
         xx = 0.D0
         do j = 1,nparm
-            xx = xx + crx%sen(i,iparm(j))*(pr1(j)%x - pr0(j)%x)
+            xx = xx + crx%sen(iparm(j),i)*(pr1(j)%x - pr0(j)%x)
         end do
-        ! type '(a,F10.5,f13.5,f13.5)',' original e, crs, dcrs = ',crx%ene(i),crx%crs(i),xx
         crx%crs(i) = crx%crs(i) + xx
     end do
 
@@ -675,7 +606,7 @@
 
     !******************************************************************************************
 
-    subroutine exdata(emin,emax,ewt)
+    subroutine get_data(emin,emax,ewt)
 
     ! read experimental data from input file
 
@@ -686,20 +617,16 @@
     real*8, intent(in) :: ewt          ! weight of data set
 
     logical*4 qfill
-    integer*4 i,j,l,m,ij,istart,nc,ne,nd,is1,is2
+    integer*4 i,j,l,nc,ne,nd
     real*8 xmin,xmax,xx
-    real*8, allocatable :: z(:)
+    real*8, allocatable :: z(:),xd(:),yd(:),vd(:,:)
     character*43 dum
-
-    if(allocated(xdat)) deallocate(xdat)
-    if(allocated(ydat)) deallocate(ydat)
-    if(allocated(vdat)) deallocate(vdat)
 
     ! read data from 10,11,12
 
     read(10,10) dum,nd
-    allocate(xdat(nd),ydat(nd),z(nd),vdat(nd*(nd+1)/2))
-    read(10,20)(xdat(i),ydat(i),i=1,nd)
+    allocate(xd(nd),yd(nd),z(nd),vd(nd,nd))
+    read(10,20)(xd(i),yd(i),i=1,nd)
     write(2,10) dum,nd
     read(11,10) dum,ne
     if(ne /= nd) then
@@ -719,8 +646,10 @@
             endif
             if(nc > 0) then
                 do i=1,nc
-                    istart = i*(i-1)/2
-                    read(12,30)(vdat(istart+j),j=1,i)
+                    read(12,30)(vd(i,j),j=1,i)
+                    do j = 1,i-1
+                        vd(j,i) = vd(i,j)
+                    end do
                 end do
                 qfill = .false.
             else
@@ -734,34 +663,34 @@
     endif
 
     if(qfill) then
-        vdat = xx
+        vd = xx
         do i = 1,nd
-            ij = i*(i-1)/2 + i
-            vdat(ij) = 1.D0
+            vd(i,i) = 1.D0
         end do
     end if
 
     if(ewt == 0.D0) then
         ndata = 0
-        deallocate(z)
-        write(6,'(a)') '*** exp. data set with weight = 0.0 (ignored) ********'
+        deallocate(xd,yd,vd,z)
+        write(6,'(a)') ' *** exp. data set with weight = 0.0 (ignored) ********'
+        write(6,'(a)') '   data set skipped in fit'
         return
     endif
 
     ! check range
 
-    xmin = xdat(1)
-    xmax = xdat(1)
+    xmin = xd(1)
+    xmax = xd(1)
     do i = 2,nd
-        if(xmin > xdat(i)) xmin = xdat(i)
-        if(xmax < xdat(i)) xmax = xdat(i)
+        if(xmin > xd(i)) xmin = xd(i)
+        if(xmax < xd(i)) xmax = xd(i)
     end do
 
     if((xmin > emax) .or. (xmax < emin)) then
         ndata = 0
-        deallocate(z)
-        write(6,'(a)') '*** all exp. data out of range ***'
-        write(6,*) '   data set skipped in fit'
+        deallocate(xd,yd,vd,z)
+        write(6,'(a)') ' *** all exp. data out of range ***'
+        write(6,'(a)') '   data set skipped in fit'
         return
     endif
 
@@ -772,26 +701,68 @@
         if(z(i) < 0.D0) then
             z(i) = ewt*dabs(z(i))
         else if(z(i) > 0.D0) then
-            z(i) = ewt*ydat(i)*z(i)
+            z(i) = ewt*yd(i)*z(i)
         else
             ndata = 0
-            deallocate(z)
+            deallocate(xd,yd,vd,z)
             write(6,'(a,i0)') '*** datum with err = 0 encountered, index=',i
-            write(6,*) '   data set skipped in fit'
+            write(6,'(a)') '   data set skipped in fit'
             return
         endif
 
-        istart = i*(i-1)/2
-        do j = 1,i
-            ij = istart + j
-            vdat(ij) = vdat(ij)*z(i)*z(j)
+    end do
+
+    do i = 1,nd
+        do j = 1,nd
+            vd(j,i) = vd(j,i)*z(i)*z(j)
         end do
+    end do
+
+    ! eliminate out-of-range data
+
+    do i = nd,1,-1
+
+        if(xd(i) < emin) then
+            nd = nd - i
+            exit
+        endif
+
+        if(xd(i) <= emax) cycle
+
+        do l = i+1,nd
+            xd(l-1) = xd(l)
+            yd(l-1) = yd(l)
+            vd(l-1,1:nd) = vd(l,1:nd)
+            vd(1:nd,l-1) = vd(1:nd,l)
+        end do
+
+        nd = nd - 1
 
     end do
 
-    deallocate(z)
+    ! is anything left?
 
-    ! sort data to monotonically decreasing energies
+    if(nd < 1) then
+        ndata = 0
+        deallocate(xd,yd,vd,z)
+        return
+    endif
+
+    ! store data into final arrays
+
+    if(allocated(xdat)) deallocate(xdat)
+    if(allocated(ydat)) deallocate(ydat)
+    if(allocated(vdat)) deallocate(vdat)
+
+    allocate(xdat(nd),ydat(nd),vdat(nd,nd))
+
+    xdat = xd(1:nd)
+    ydat = yd(1:nd)
+    vdat = vd(1:nd,1:nd)
+
+    deallocate(xd,yd,vd)
+
+    ! sort to monotonically decreasing energies
 
     do j = 1,nd
         l = j
@@ -801,43 +772,17 @@
         if(l == j) cycle
         call swap(xdat(j),xdat(l))
         call swap(ydat(j),ydat(l))
-        call swcl(vdat,nd,j,l)
+        z(1:nd) = vdat(l,1:nd)
+        vdat(l,1:nd) = vdat(j,1:nd)
+        vdat(j,1:nd) = z(1:nd)
+        z(1:nd) = vdat(1:nd,l)
+        vdat(1:nd,l) = vdat(1:nd,j)
+        vdat(1:nd,j) = z(1:nd)
     end do
 
-    ! eliminate out-of-range data
+    deallocate(z)
 
-    m = nd
-    do i = nd,1,-1
-
-        if(xdat(i) < emin) then
-            m = m - i
-            exit
-        endif
-
-        if(xdat(i) <= emax) cycle
-
-        do l = i+1,nd
-            xdat(l-1) = xdat(l)
-            ydat(l-1) = ydat(l)
-            istart = l*(l-1)/2
-            do j = i+1,l
-                vdat(istart+j-1) = vdat(istart+j)
-            end do
-        end do
-
-        do l = i+1,nd
-            is1 = (l-2)*(l-1)/2
-            is2 = l*(l-1)/2
-            do j = 1,l-1
-                vdat(is1+j) = vdat(is2+j)
-            end do
-        end do
-
-        m = m - 1
-
-    end do
-
-    ndata = m
+    ndata = nd
 
     return
 
@@ -845,7 +790,7 @@
 20  format(6e11.4)
 30  format(12f6.3)
 
-    end subroutine exdata
+    end subroutine get_data
 
     !******************************************************************************************
 
@@ -865,68 +810,6 @@
 
     return
     end subroutine swap
-
-    !******************************************************************************************
-
-    subroutine swcl(v,n,i1,i2)
-
-    implicit none
-
-    ! swap columns of packed covariance: i1 <> i2
-
-    integer*4, intent(in) :: n       ! # data points
-    integer*4 i1,i2                  ! cols to swap
-    real*8, intent(inout) :: v(*)    ! packed matrix
-
-    integer*4 i,j,istart,ij
-    real*8, allocatable :: a(:),b(:),c(:)
-
-    allocate(a(n),b(n),c(n))
-
-    do j = 1,n
-        if(j .le. i1) then
-             a(j) = v(i1*(i1-1)/2+j )
-        else
-             a(j) = v(j *(j -1)/2+i1)
-        endif
-        if(j .le. i2) then
-             b(j) = v(i2*(i2-1)/2+j )
-        else
-             b(j) = v(j *(j -1)/2+i2)
-        endif
-    end do
-
-    call swap(a(i1),a(i2))
-    call swap(b(i1),b(i2))
-
-    do i = 1,n
-        if(i.ne.i1 .and. i.ne.i2) then
-            do j = 1,n
-               if(j .le. i) then
-                  c(j) = v(i*(i-1)/2+j)
-               else
-                  c(j) = v(j*(j-1)/2+i)
-               endif
-            end do
-            call swap(c(i1),c(i2))
-        endif
-        istart=i*(i-1)/2
-        do j = 1,i
-            ij=istart+j
-            if(i .eq. i1) then
-               v(ij) = b(j)
-            else if(i .eq. i2) then
-               v(ij) = a(j)
-            else
-               v(ij) = c(j)
-            endif
-        end do
-    end do
-
-    deallocate(a,b,c)
-
-    return
-    end subroutine swcl
 
     !******************************************************************************************
 
@@ -976,7 +859,7 @@
 
     implicit none
 
-    integer*4 i,j,k,ki,kj,ij,kij
+    integer*4 i,j,k,ki,kj
     real*8 ratio,xx,yy
 
     if(ntotal == 0) then
@@ -993,7 +876,7 @@
         write(2,320)
         write(21,'(11a12)')(pr1(i)%nam,i=1,nparm)
         do i = 1,nparm
-            pr1(i)%dx = dsqrt(prc(i*(i+1)/2))
+            pr1(i)%dx = dsqrt(prc(i,i))
             xx = pr1(i)%x
             if(xx == 0.D0) then
                 write(2,330) i,pr1(i)%nam,pr0(i)%x,pr1(i)%x,pr1(i)%dx
@@ -1007,7 +890,7 @@
         write(2,350)
         write(21,'(11a12)')(pr1(i)%nam,i=1,nparm)
         do i = 1,nparm
-            pr1(i)%dx = dsqrt(prc(i*(i+1)/2))
+            pr1(i)%dx = dsqrt(prc(i,i))
             xx = pr1(i)%x
             k=iparm(i)
             if(xx == 0.D0) then
@@ -1029,16 +912,12 @@
     do i = 1,nparm
         ki = iparm(i)
         pri(ki) = pr1(i)
-        do j = 1,i
+        do j = 1,i-1
             kj = iparm(j)
-            ij = i*(i-1)/2+j
-            if(kj.le.ki) then
-                kij=ki*(ki-1)/2+kj
-            else 
-                kij=kj*(kj-1)/2+ki
-            endif
-            pric(kij) = prc(ij)*scale
+            pric(ki,kj) = prc(i,j)*scale
+            pric(kj,ki) = prc(j,i)*scale
         end do
+        pric(ki,ki) = prc(i,i)*scale
     end do
 
     return
@@ -1074,7 +953,7 @@
         do i = 1,rx%nen
             xx = 0.D0
             do j = 1,nparm
-                xx = xx + rx%sen(i,iparm(j))*(pr1(j)%x - pr0(j)%x)
+                xx = xx + rx%sen(iparm(j),i)*(pr1(j)%x - pr0(j)%x)
             end do
             rx%crs(i) = rx%crs(i) + xx
         end do
@@ -1235,9 +1114,9 @@
     integer*4, intent(in) :: jr         ! 2nd reaction index
     real*8, intent(out) :: vg(:,:)      ! reaction covariance
 
-    ! vg <= a * pric * a**t
+    ! vg <= sen * pric * sen**t
 
-    integer*4 i,j,k,ik,ip,istart
+    integer*4 i,j,k
     real*8 xx
     real*8, allocatable :: w(:)
 
@@ -1245,26 +1124,18 @@
 
     do i = 1,rxn(ir)%nen
 
-        istart = 0
-        do ip = 1,nptot
+        do j = 1,nptot
             xx = 0.D0
-            do k = 1,ip
-                ik = istart + k
-                xx = xx + pric(ik)*rxn(ir)%sen(i,k)
+            do k = 1,nptot
+                xx = xx + pric(k,j)*rxn(ir)%sen(k,i)
             end do
-            istart=istart+ip
-            ik=istart
-            do k = ip+1,nptot
-                ik = ik + k - 1
-                xx = xx + pric(ik)*rxn(ir)%sen(i,k)
-            end do
-            w(ip) = xx
+            w(j) = xx
         end do
 
         do j = 1,rxn(jr)%nen
             xx = 0.D0
             do k = 1,nptot
-                xx = xx + w(k)*rxn(jr)%sen(j,k)
+                xx = xx + w(k)*rxn(jr)%sen(k,j)
             end do
             vg(i,j) = xx
         end do
@@ -1296,9 +1167,9 @@
 
     !******************************************************************************************
 
-    subroutine prsort
+    subroutine write_psteps
 
-    ! prsort : write parameter steps on unit 15
+    ! write_psteps : write parameter steps on unit 15
 
     implicit none
 
@@ -1318,7 +1189,7 @@
 20  format(6(1pe11.4))
 10  format(i4,a12,27x,i5)
 
-    end subroutine prsort
+    end subroutine write_psteps
 
     !******************************************************************************************
 
@@ -1330,15 +1201,11 @@
 
     integer*4, intent(in) :: k
 
-    integer*4 ix(40),iblk,nblock,lo,j1,j2,j12,jm,i,j,istart
-    real*8, allocatable :: w(:,:)
-
-    allocate(w(nparm,nparm))
+    integer*4 i,j,ix(40),iblk,nblock,lo,j1,j2,j12,jm
 
     if(k /= 0) then
         do i = 1,nparm
-            istart = (i*(i-1))/2
-            write(2,200) (prc(istart+j),j=1,i)
+            write(2,200) (prc(i,j),j=1,i)
         end do
         return
     endif
@@ -1348,22 +1215,21 @@
     if(lo == 0) nblock = nblock - 1
 
     do iblk = 1,nblock
-        j1 = 10*iblk-9
+        j1 = 10*iblk - 9
         j2 = 10*iblk
         if((iblk == nblock) .and. (lo /= 0)) j2 = j1+lo-1
-        jm = j2-j1+1
+        jm = j2 - j1 + 1 
         do j = 1,jm
-            ix(j) = j1+j-1
+            ix(j) = j1 + j - 1
         end do
         write(2,300) (ix(j),j=1,jm)
         do i = j1,nparm
-            istart = (i*(i-1))/2
-            j12   = min(i,j2)
+            j12 = min(i,j2)
             do j = j1,j12
                 if(i == j) then
                     ix(j-j1+1) = 1000
                 else
-                    ix(j-j1+1) = nint(1000.D0*prc(istart+j)/(pr1(i)%dx*pr1(j)%dx))
+                    ix(j-j1+1) = nint(1000.D0*prc(i,j)/(pr1(i)%dx*pr1(j)%dx))
                 end if
             end do
             write(2,100) i,pr1(i)%nam,pr1(i)%x,(ix(j),j=1,j12-j1+1)
@@ -1372,21 +1238,10 @@
 
     ! c for covariance matrix of parameter (input format)
 
-    do i=1,nparm
-        istart=(i*(i-1))/2
-        do j=1,i
-            w(i,j) = prc(istart+j)/(pr1(i)%dx*pr1(j)%dx)
-        end do
-    end do
-
     do i = 1,nparm
-        do j = i+1,nparm
-            w(i,j) = w(j,i)
-        end do
-        write(21,'(20(f6.3))') (w(i,j),j=1,nparm)
+        write(21,'(20(f6.3))') (prc(i,j)/(pr1(i)%dx*pr1(j)%dx),j=1,nparm)
     end do
 
-    deallocate(w)
     return
 
 100 format(i5,a12,1pe9.2,10i5)
@@ -1406,34 +1261,57 @@
     implicit none
 
     integer*4, intent(in) :: n          ! # elements in 1-D matrix
-    real*8, intent(inout) :: v(*)       ! 1-D packed symmetric matrix to invert
+    real*8, intent(inout) :: v(n,n)     ! symmetric matrix to invert
 
-    integer*4 icond
+    real*8, allocatable :: vv(:)         ! storage for packed 1-D matrix
+
+    integer*4 i,j,k,icond
 
     icond = 0
 
     if(n < 1) then
         write(6,'(a,i0)') ' inverse of matrix with dimension < 1 :',n
         stop 1
+    else if(n == 1) then 
+        if(v(1,1) /= 0.D0) v(1,1) = 1.D0/v(1,1)
+        return
     endif
 
-    if(n == 1) then 
-        if(v(1) /= 0.D0) v(1) = 1.D0/v(1)
-    else
-        call cholsk(n,v,icond)
-        if(icond == -1) then
-            write(6,*) ' matrix not positive'
-            stop 1
-        else if(icond == -2) then 
-            write(6,*) ' pivot zero'
-            stop 1
-        endif
-        call invers(n,v,icond)
-        if(icond.eq.-1) then
-            write(6,*) ' matrix singular'
-            stop 1
-        endif
+    allocate(vv(n*(n+1)/2))
+
+    k = 1
+    do i = 1,n
+        do j = 1,i
+            vv(k) = v(j,i)
+            k = k + 1
+        end do
+    end do
+
+    call cholsk(n,vv,icond)
+    if(icond == -1) then
+        write(6,*) ' matrix not positive'
+        stop 1
+    else if(icond == -2) then 
+        write(6,*) ' pivot zero'
+        stop 1
     endif
+
+    call invers(n,vv,icond)
+    if(icond.eq.-1) then
+        write(6,*) ' matrix singular'
+        stop 1
+    endif
+
+    k = 1
+    do i = 1,n
+        do j = 1,i
+            v(i,j) = vv(k)
+            v(j,i) = vv(k)
+            k = k + 1
+        end do
+    end do
+
+    deallocate(vv)
 
     return
     end subroutine invmtx
