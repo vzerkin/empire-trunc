@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3529 $
+Ccc   * $Rev: 3534 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-24 13:08:05 +0200 (Di, 24 Sep 2013) $
+Ccc   * $Date: 2013-09-24 19:47:48 +0200 (Di, 24 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -687,11 +687,11 @@ C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
 !               DO ier = iermax - 1, iermax-1, -1
-                  IF (ier.EQ.1) THEN
-                     corr = 0.5d0
-                  ELSE
-                     corr = 1.d0
-                  ENDIF
+C                 IF (ier.EQ.1) THEN
+C                    corr = 0.5d0
+C                 ELSE
+C                    corr = 1.d0
+C                 ENDIF
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
@@ -708,9 +708,9 @@ C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
 C-----------------do loop over l   ***done***
 C
                   SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)
-     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc)*corr
+     &               + sumtl1*RO(ier,jr,ip1,Nnur)*TUNe(Nejc,Nnuc) !*corr
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)
-     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc)*corr
+     &               + sumtl2*RO(ier,jr,ip2,Nnur)*TUNe(Nejc,Nnuc) !*corr
                   IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(nnur))) THEN
                       SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*
      &                DEPart(Nnur)

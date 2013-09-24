@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3530 $
+Ccc   * $Rev: 3534 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-24 13:10:49 +0200 (Di, 24 Sep 2013) $
+Ccc   * $Date: 2013-09-24 19:47:48 +0200 (Di, 24 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -540,15 +540,15 @@ C
                 DO ier = iermax - 1, 1, -1
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
-                  IF (ier.EQ.1) THEN
-                     corr = 0.5d0
-                  ELSE
-                     corr = 1.d0
-                  ENDIF
+C                 IF (ier.EQ.1) THEN
+C                    corr = 0.5d0
+C                 ELSE
+C                    corr = 1.d0
+C                 ENDIF
 C-----------------do loop over L (odd and even L-values treated separately)
 C-----------------IP1 and IP2 decide which parity each SUMTL  goes to
                   sumtl1 = 0.d0
-                  rho1=RO(ier,jr,ip1,Nnur)*DE*corr
+                  rho1=RO(ier,jr,ip1,Nnur)*DE !*corr
                   DO L = lmin, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
@@ -561,7 +561,7 @@ C                       WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
                      ENDIF
                   ENDDO
                   sumtl2 = 0.d0
-                  rho2=RO(ier,jr,ip2,Nnur)*DE*corr
+                  rho2=RO(ier,jr,ip2,Nnur)*DE !*corr
                   DO L = lmin + 1, lmax, 2
                      IF (Nhrtw.GT.0) THEN
 C-----------------------replace Tl with V in the second HRTW entry
