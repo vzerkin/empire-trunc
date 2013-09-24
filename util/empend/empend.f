@@ -1,6 +1,6 @@
-Ccc   * $Author: mherman $
+Ccc   * $Author: atrkov $
 Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Thu, 12 Sep 2013) $
-Ccc   * $Id: empend.f,v 1.7 2009/06/15 21:52:21 Capote Exp $ 
+Ccc   * $Id: empend.f$ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -112,7 +112,7 @@ C-V          double differential cross sections.
 C-V        - Increase precision when writing the ENDF file.
 C-V  13/03 Fix vertical segments at the upper end of emission spectra by
 C-V        delta-shifting the one-but-last point.
-C-V  12/09 Changed the way of reading strings to make the code more robust
+C-V  13/09 Changed the way of reading strings to make the code more robust
 C          (for some compiler in linux it was failing) 
 C-M  
 C-M  Manual for Program EMPEND
@@ -368,26 +368,14 @@ C* Define the source file
       OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=123)
 C* Define the output file
       WRITE(LTT,991) ' Source filename                      : ',
-
-
      >     FLN1(1:ILEN)
-
-
    14 WRITE(LTT,991) ' Default output filename              : ',FLN2
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,'(A)') FLNM
       IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
-
-
       ILEN=LEN(TRIM(FLN2))
-
-
       WRITE(LTT,991) ' Output filename                      : ',
-
-
      >     FLN2(1:ILEN)
-
-
       OPEN (UNIT=LOU,FILE=FLN2(1:ILEN),STATUS='UNKNOWN')
 C* Define the number of points for cross sections fine mesh
       WRITE(LTT,991) ' Number of x-s fine mesh subintervals   '
@@ -860,9 +848,11 @@ C*
 
 
 
+
 C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
+
 
 
 
@@ -870,7 +860,9 @@ C 997 FORMAT(6A11)
 
 
 
+
       WRITE(LTT,*) 'FILENAME: ',FLN1(1:ILEN)
+
 
 
 
@@ -969,6 +961,7 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=0
       END IF
       RETURN
+
 
 
 
