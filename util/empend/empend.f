@@ -1,5 +1,5 @@
-KLB $Rev: 3160 $                                                          | 
-LBK $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
+Ccc $Rev: 3160 $                                                          | 
+Ccc $Date: 2012-10-24 12:27:22 -0400 (sre, 24 okt 2012) $                                                     
 Ccc $Author: atrkov $                                                  
 
       PROGRAM EMPEND
@@ -368,14 +368,20 @@ C* Define the source file
       OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=123)
 C* Define the output file
       WRITE(LTT,991) ' Source filename                      : ',
+
      >     FLN1(1:ILEN)
+
    14 WRITE(LTT,991) ' Default output filename              : ',FLN2
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,'(A)') FLNM
       IF(FLNM(1:40).NE.BLNK) FLN2=FLNM
+
       ILEN=LEN(TRIM(FLN2))
+
       WRITE(LTT,991) ' Output filename                      : ',
+
      >     FLN2(1:ILEN)
+
       OPEN (UNIT=LOU,FILE=FLN2(1:ILEN),STATUS='UNKNOWN')
 C* Define the number of points for cross sections fine mesh
       WRITE(LTT,991) ' Number of x-s fine mesh subintervals   '
@@ -846,13 +852,17 @@ C*
   996 FORMAT(A40,F10.4)
   997 FORMAT(5A11)
 
+
 C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
 
+
 123   WRITE(LTT,*) 'INPUT FILE NOT FOUND:'
 
+
       WRITE(LTT,*) 'FILENAME: ',FLN1(1:ILEN)
+
 
       STOP 'ERROR in EMPEND'
       END
@@ -949,6 +959,7 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=0
       END IF
       RETURN
+
 
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT,MEQ)
