@@ -29,6 +29,8 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.09   September 2013   D. Brown
+!-V                        Fix value test of LNU when no fission data given
 !-V         Version 8.08   October2012       A. Trkov
 !-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.07   September 2012    A. Koning
@@ -3197,7 +3199,7 @@
 !     CALCULATE TOTAL ENERGY AND TEST AGAINST AVAILABLE ENERGY
 !
    30 IF(NSUB.EQ.4)  GO TO 100
-      IF(LNU.LE.0) THEN
+      IF(LNU.LT.0) THEN
         WRITE(NOUT,34)
         GO TO 40
       END IF
