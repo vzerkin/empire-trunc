@@ -1,6 +1,6 @@
-!cc   * $Rev: 3525 $
+!cc   * $Rev: 3528 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-13 01:04:22 +0200 (Fr, 13 Sep 2013) $
+!cc   * $Date: 2013-09-24 13:06:21 +0200 (Di, 24 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -5812,7 +5812,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-             IF(i1.eq.0 .AND. i2.eq.0) THEN
+            IF(i1.eq.0 .AND. i2.eq.0) THEN
 C              Setting ENDF for all emission loops
                NENdf = INT(val)
                IF(NENdf.GT.0) THEN
@@ -5831,13 +5831,13 @@ C              Setting ENDF for all emission loops
                  WRITE (12,'('' ENDF formatting disabled'')')
                  GOTO 100
                ENDIF
-             ENDIF
-             IF(val.LT.0) THEN
+            ENDIF
+            IF(val.LT.0) THEN
                WRITE (8,'('' WRONG ENDF value in input'',I3)')
      &                i2
                WRITE (8,'('' SETTING IGNORED'')')
                GOTO 100
-             ENDIF
+            ENDIF
 C           Setting ENDF for a single nucleus
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
@@ -5846,6 +5846,12 @@ C           Setting ENDF for a single nucleus
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,'('' ENDF SETTING IGNORED'')')
                GOTO 100
+            ENDIF
+C
+            if(INT(val).gt.0 .and. NENdf.EQ.0) THEN
+               NENdf = INT(val)
+               WRITE (8,'('' ENDF formatting enabled'')')
+               WRITE (12,'('' ENDF formatting enabled'')')
             ENDIF
             ENDf(nnuc) = INT(val)
             IF (ENDf(nnuc).EQ.1) THEN
@@ -5903,6 +5909,12 @@ C           Setting ENDFA for a single nucleus
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,'('' ENDFA SETTING IGNORED'')')
                GOTO 100
+            ENDIF
+C
+            if(INT(val).gt.0 .and. NENdfa.EQ.0) THEN
+               NENdfa = INT(val)
+               WRITE (8,'('' ENDF formatting enabled'')')
+               WRITE (12,'('' ENDF formatting enabled'')')
             ENDIF
             ENDfa(nnuc) = INT(val)
             IF (ENDfa(nnuc).EQ.1) THEN
