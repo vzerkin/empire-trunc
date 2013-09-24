@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3526 $
+Ccc   * $Rev: 3529 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-13 01:05:00 +0200 (Fr, 13 Sep 2013) $
+Ccc   * $Date: 2013-09-24 13:08:05 +0200 (Di, 24 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -687,11 +687,11 @@ C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
 !               DO ier = iermax - 1, iermax-1, -1
-C                 IF (ier.EQ.1) THEN
-C                    corr = 0.5d0
-C                 ELSE
+                  IF (ier.EQ.1) THEN
+                     corr = 0.5d0
+                  ELSE
                      corr = 1.d0
-C                 ENDIF
+                  ENDIF
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
