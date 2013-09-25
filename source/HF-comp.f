@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3534 $
+Ccc   * $Rev: 3536 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-24 19:47:48 +0200 (Di, 24 Sep 2013) $
+Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -72,6 +72,8 @@ C-----
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
      &          POPmax(Nnur) = POP(ie,j,1,Nnur)
+            IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,2,Nnur))
+     &          POPmax(Nnur) = POP(ie,j,2,Nnur)
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
@@ -583,8 +585,8 @@ C
       xjc = FLOAT(Jc) + HIS(Nnuc)
 C-----clear scratch matrices
       SCRtem(Nejc) = 0.d0
-      DO j = 1, NLW
-         DO i = 1, NEX(Nnur) + 1
+      DO j = 1, NDLW    ! NLW
+         DO i = 1, NDEX ! NEX(Nnur) + 1
             SCRt(i,j,1,Nejc) = 0.d0
             SCRt(i,j,2,Nejc) = 0.d0
          ENDDO
@@ -686,12 +688,6 @@ C--------------bin from the top excluded as already done)
 C
 !               write(8,*) 'Remaining bins'
                DO ier = iermax - 1, 1, -1
-!               DO ier = iermax - 1, iermax-1, -1
-C                 IF (ier.EQ.1) THEN
-C                    corr = 0.5d0
-C                 ELSE
-C                    corr = 1.d0
-C                 ENDIF
                   ietl = Iec - ier - itlc
                   lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmaxf)
 !                  write(8,*) 'lmin, lmax', lmin, lmax
@@ -747,7 +743,7 @@ C 	   endif
 C-----
 C-----decay to discrete levels 
 C-----
-      DO i = 1, NLV(Nnur)
+      DO i = 1, NDLV ! NLV(Nnur)
          SCRtl(i,Nejc) = 0.d0
       ENDDO
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
@@ -1186,14 +1182,14 @@ C-----decay to the continuum
 C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
-	   etmp = EX(ier,Nnuc)   
+	     etmp = EX(ier,Nnuc)   
          eg = EX(Iec,Nnuc) - etmp
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),etmp)*
      &            TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
          xle(2) = E2(eg)*TUNe(0, Nnuc)
+         xlm(2) = xle(2)*cme
          IF(MAXmult.GT.2) THEN
-            xlm(2) = xle(2)*cme
             DO i = 3, MAXmult
              xle(i) = xle(i-1)*eg**2*cee
      &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2

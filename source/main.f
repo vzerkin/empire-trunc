@@ -1,6 +1,6 @@
-cc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+cc   * $Rev: 3536 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -1439,7 +1439,8 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*)
      &                ' Preequilibrium + Direct spectra (tot)'
           IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,0)
-          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,2)
+          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,0)
+C         IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,2)
           IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,0)
           IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,0)
           IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,0)
@@ -1954,16 +1955,16 @@ C--------------------Residual nuclei must be heavier than alpha
                      CALL WHERE(izares,nnur,iloc)
                      if(iloc.eq.1) CYCLE
                      CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
-!                 if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.1) then
-!                    write(8,*) 'sum for ejectile=', nejc, sum
-!                    write(*,*) 'sum for ejectile=', nejc, sum
-!	               sumtll = sumtll + sum
-!                 endif 
+!                    if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.1) then
+!                      write(8,*) 'sum for ejectile=', nejc, sum
+!                      write(*,*) 'sum for ejectile=', nejc, sum
+!	                sumtll = sumtll + sum
+!                    endif 
                   ENDDO
-                  if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!                 if (nnuc.eq.1 .and. ke.eq.nex(1)) then
 !                    write(8,*) 'sum for particles at J=',jcn, sumtll
-C                    write(*,*) 'sum for particles at J=',jcn, sumtll
-                  endif
+!                    write(*,*) 'sum for particles at J=',jcn, sumtll
+!                 endif
 C-----------------DO loop over ejectiles       ***done***
 C-----------------gamma emision
                   CALL DECAYG(nnuc,ke,jcn,ip,sum)
@@ -2750,8 +2751,8 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(l,Nnuc)
          WRITE (8,*)
 C        Integral is calculated by trapezoidal rule being consistent with cross section
          IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
-C        IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
 C        IF(nnuc.eq.NTArget                      ) THEN
+C        IF(nnuc.eq.NTArget .and. ENDf(nnuc).GT.0) THEN
 C----------Locate position of the projectile among ejectiles
 C          CALL WHEREJC(IZAejc(0),nejc,iloc)
 C          WRITE (8,'(''  g  disc.lev cross section'',G12.6,''  mb'')')

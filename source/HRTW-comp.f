@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3534 $
+Ccc   * $Rev: 3536 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-24 19:47:48 +0200 (Di, 24 Sep 2013) $
+Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
 C
 C
       SUBROUTINE HRTW
@@ -396,8 +396,8 @@ C
 C-----clear scratch matrices
 C     NSCh = 0
       SCRtem(Nejc) = 0.D0
-      DO j = 1, NLW
-         DO i = 1, NEX(Nnur) + 1
+      DO j = 1, NDLW    !NLW
+         DO i = 1, NDEX !NEX(Nnur) + 1
             SCRt(i,j,1,Nejc) = 0.D0
             SCRt(i,j,2,Nejc) = 0.D0
          ENDDO
@@ -615,7 +615,7 @@ C--------decay to discrete levels
 C--------
       ENDIF
 
-      DO i = 1, NLV(Nnur)
+      DO i = 1, NDLV !NLV(Nnur)
          SCRtl(i,Nejc) = 0.D0
       ENDDO
       IF (Nhrtw.EQ.0 .AND. IZA(Nnur).EQ.IZA(0)) THEN
@@ -860,14 +860,14 @@ Cp    jmin = MAX0(1, Jc - MAXmult)
       xjc = FLOAT(Jc) + HIS(Nnuc)
 
 C-----clear scratch matrix (continuum)
-      DO j = 1, NLW
-         DO i = 1, NEX(Nnuc)
+      DO j = 1, NDLW    ! NLW
+         DO i = 1, NDEX !NEX(Nnuc)
             SCRt(i,j,1,0) = 0.D0
             SCRt(i,j,2,0) = 0.D0
          ENDDO
       ENDDO
-C-----clear scratch matrix (dNH_lchrete levels)
-      DO i = 1, NLV(Nnuc)
+C-----clear scratch matrix (discrete levels)
+      DO i = 1, NDLV ! NLV(Nnuc)
          SCRtl(i,0) = 0.D0
       ENDDO
 C-----IPOS is a parity-index of final states reached by gamma
@@ -887,18 +887,13 @@ C-----decay to the continuum
 C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded)
       DO ier = Iec - 1, 1, -1
-C        IF (ier.EQ.1) THEN
-C           corr = 0.5D0
-C        ELSE
-C           corr = 1.0D0
-C        ENDIF
          eg = EX(Iec,Nnuc) - EX(ier,Nnuc)
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),Uexcit(ier,Nnuc))
      &      *TUNe(0, Nnuc)
          xlm(1) = XM1(eg)*TUNe(0, Nnuc)
          xle(2) = E2(eg)*TUNe(0, Nnuc)
+         xlm(2) = xle(2)*cme
          IF(MAXmult.GT.2) THEN
-            xlm(2) = xle(2)*cme
             DO i = 3, MAXmult
              xle(i) = xle(i-1)*eg**2*cee
      &                *((3.0D0 + FLOAT(i))/(5.0D0 + FLOAT(i)))**2
@@ -931,15 +926,14 @@ C                  !first HRTW entry done
                  ENDIF
                ENDDO
                SCRt(ier, Jr, ipos, 0) = scrtpos*RO(ier, Jr, ipos, Nnuc)
-               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg,Nnuc)
-C              IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnuc))) THEN
-C                  SCRt(ier,Jr,ipos,0)=SCRt(ier,Jr,ipos,0)*DEPart(Nnuc)
-C                  SCRt(ier,Jr,ineg,0)=SCRt(ier,Jr,ineg,0)*DEPart(Nnuc)
-C              ENDIF
+               SCRt(ier, Jr, ineg, 0) = scrtneg*RO(ier, Jr, ineg, Nnuc)
+               IF (ier.eq.1 .AND. NINT(Z(1)).EQ.NINT(Z(Nnuc))) THEN
+                   SCRt(ier,Jr,ipos,0)=SCRt(ier,Jr,ipos,0)*DEPart(Nnuc)
+                   SCRt(ier,Jr,ineg,0)=SCRt(ier,Jr,ineg,0)*DEPart(Nnuc)
+               ENDIF
 C
 C              Check, it could be we need to split hsumtls depending on parity !!!!
 C
-C              H_Sumtls = H_Sumtls + hsumtls*corr
                H_Sumtls = H_Sumtls + hsumtls
             ENDIF
          ENDDO
@@ -1261,7 +1255,7 @@ C--------relative accuracy of V is set below and may be altered
 C--------to any resonable value.  
 C
 C        IF (ABS(vd(i)-vp(i)).GT.1.D-7*vp(i)) GOTO 200
-         IF (ABS(vd(i)-vp(i)).GT.1.D-3*vp(i)) GOTO 200
+         IF (ABS(vd(i)-vp(i)).GT.1.D-5*vp(i)) GOTO 200
 
       ENDDO
       DO i = 1, Lch
