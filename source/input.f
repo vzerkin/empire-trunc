@@ -1,6 +1,6 @@
-!cc   * $Rev: 3528 $
+!cc   * $Rev: 3537 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-24 13:06:21 +0200 (Di, 24 Sep 2013) $
+!cc   * $Date: 2013-09-27 17:29:10 +0200 (Fr, 27 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2101,13 +2101,22 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
-               IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 .AND.
-     &            NEX(Nnur).GT.1) THEN
-C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
-                  DO i = 1, NEX(nnur)
+               DO i = 1, NEX(nnur)
+                  IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
+     &            .and. NEX(Nnur).GT.1) THEN
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
-                  ENDDO
+                  ELSE
+                     EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
+                  ENDIF
+               ENDDO
+C
+               IF ( (LHRtw.eq.0 .or. EINl.GT.EHRtw) .and. 
+     &               NINT(Z(1)).EQ.NINT(Z(nnur)) ) ECUt(nnur)=EX(1,nnur)
+
+               IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1
+     &            ) THEN               
+C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
 C-----------------Width of the partial bin relative to DE
                   DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
 !                 DEPart(nnur) = 1.d0
@@ -2121,11 +2130,8 @@ C-----------------Width of the partial bin relative to DE
      &                'Ecut   =',ECUt(nnur),
      &                'Ex(1)  =',EX(1,nnur),
      &                'Ecut+DE=',ECUt(nnur)+DE
-               ELSE
-                  DO i = 1, NEX(nnur)
-                     EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
-                  ENDDO
                ENDIF
+C
             ENDIF
 
 C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
