@@ -1,6 +1,6 @@
-!cc   * $Rev: 3537 $
+!cc   * $Rev: 3539 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-27 17:29:10 +0200 (Fr, 27 Sep 2013) $
+!cc   * $Date: 2013-09-30 18:51:39 +0200 (Mo, 30 Sep 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -301,6 +301,7 @@ C
          FISbar = 1.d0
          FISdis = 1.d0
          FISden = 0.d0
+         FIStga = 0.d0
 C
          NUBarread = .FALSE.
 
@@ -2103,35 +2104,52 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             IF (NEX(nnur).GT.0) THEN
                DO i = 1, NEX(nnur)
                   IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
-     &            .and. NEX(Nnur).GT.1) THEN
+     &               .and. NEX(Nnur).GT.1) THEN
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
+C                    write(8,*) 'Z,A ',Z(nnur), A(nnur)
+C--------------------Width of the partial bin relative to DE
+                     DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+!                    DEPart(nnur) = 1.d0
+!     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
+!                    DEPart(nnur) = DEPart(nnur)*0.9
+                     WRITE(8,
+     &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
+     &                'Continuum bin correction = ',DEPart(nnur),
+     &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
+                     WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
+     &                'Ecut   =',ECUt(nnur),
+     &                'Ex(1)  =',EX(1,nnur),
+     &                'Ecut+DE=',ECUt(nnur)+DE
                   ELSE
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
                   ENDIF
                ENDDO
 C
-               IF ( (LHRtw.eq.0 .or. EINl.GT.EHRtw) .and. 
-     &               NINT(Z(1)).EQ.NINT(Z(nnur)) ) ECUt(nnur)=EX(1,nnur)
-
-               IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1
-     &            ) THEN               
-C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
-C-----------------Width of the partial bin relative to DE
-                  DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
-!                 DEPart(nnur) = 1.d0
-!     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
-!                  DEPart(nnur) = DEPart(nnur)*0.9
-                  WRITE(8,
-     &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
-     &             'Continuum bin correction = ',DEPart(nnur),
-     &              NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
-                  WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
-     &                'Ecut   =',ECUt(nnur),
-     &                'Ex(1)  =',EX(1,nnur),
-     &                'Ecut+DE=',ECUt(nnur)+DE
-               ENDIF
+C              The following line solves the problem of fluctuations
+C              in PCROSS at higher than 7-8 MeV 
+C              However, a better long-term solution is needed
+C              as this is in contradiction with DEPart<>1
 C
+               IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
+C
+            ENDIF
+
+
+
+           IF (NEX(nnur).GT.0) THEN
+               DO i = 1, NEX(nnur)
+                  IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1) THEN
+                     EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
+     &                    - FLOAT(i - 1)*DE
+                     DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+                  ELSE
+                     EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
+                  ENDIF   
+               ENDDO
+            ENDIF
+            IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) then
+               ECUt(nnur) = EX(1,nnur)
             ENDIF
 
 C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
@@ -7340,6 +7358,35 @@ C
      &          '('' RIPL HFB numerical fission barriers used for '',
      &             I3,A2,'' (FISBAR=3)'')') i2, SYMb(nnuc)
             ENDIF
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'FISTGA') THEN
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+               DO nnuc = 1, NDNUC
+                  FIStga(nnuc) = val
+               ENDDO
+               WRITE (8,*) 'Gamma transmission coefficient in ',
+     &                     'isomeric well for all nuclei ', val
+               WRITE (12,*)'Gamma transmission coefficient in ',
+     &                     'isomeric well for all nuclei ', val
+               GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,'(''  WARNING: FISTGA SETTING IGNORED'')')
+               GOTO 100
+            ENDIF
+            FIStga(nnuc) = val
+            WRITE (8 ,
+     &  '('' Gamma transmission coefficient in isomeric well for '',
+     &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
+               WRITE (12,
+     &  '('' Gamma transmission coefficient in isomeric well for '',
+     &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val          
             GOTO 100
          ENDIF
 C--------
