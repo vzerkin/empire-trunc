@@ -1,6 +1,6 @@
-C $Rev: 3485 $
-C $Author: mherman $
-C $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
+C $Rev: 3538 $
+C $Author: rcapote $
+C $Date: 2013-09-30 18:45:49 +0200 (Mo, 30 Sep 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -73,8 +73,6 @@ C---------------------------------------------------------------------------
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,
      &                 PL_CN(0:ndangecis,ndcollev),
-
-
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
       INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, CNAngd,
@@ -106,7 +104,7 @@ C---------------------------------------------------------------------------
 
       DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),
-     &                 EWSr2, EX(ndex + 1,ndnuc), EX1,EX2,
+     &                 EWSr2, EX(ndex + 1,ndnuc),EX1,EX2,FIStga(ndnuc),
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,
      &                 EXPush, FCC, FCD(ndcc), FISb(ndlw,ndnuc),
      &                 FISbar(ndnuc), FISden(ndnuc), EWSr1,EMInmsd,
@@ -125,8 +123,6 @@ C---------------------------------------------------------------------------
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
-
-
 C    &                 POPcsedlab(0:ndex_d,2,ndecsed,0:ndexclus),
 C                      DDXS arrays defined only for neutrons and protons  
 C    &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,
@@ -213,7 +209,8 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
      &                    HCOnt, ECFis
 
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
-      COMMON /COMFIS_OPT/ FISbar, FISden, FISdis, FISopt, FISshi, FISmod
+      COMMON /COMFIS_OPT/FISbar, FISden, FISdis, FISopt, FISshi, FISmod,
+     &                    FIStga
       COMMON /COMFIS_R/ EFB, H, HJ, DEFfis, EFDis, SFDis, WIMag
       COMMON /COMFIS_PAR/FISv_n, FISh_n, FISa_n, FISd_n, FISn_n
 
@@ -295,7 +292,6 @@ C
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
-
      &                  ngamm_tr, nfiss_tr	 
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,

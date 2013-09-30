@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3536 $
+Ccc   * $Rev: 3538 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
+Ccc   * $Date: 2013-09-30 18:45:49 +0200 (Mo, 30 Sep 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -1961,14 +1961,15 @@ c--------Sumfis
          tabs = tabspp(1,2)
          tdir = tdirpp(1,nrhump)
 
-         IF (NINT(FISopt(Nnuc)).EQ.2) THEN
-C----------gamma transition in isomeric well, as asuggested by MS
-           tg2 = .002
-           if(tg2.lt.0)tg2=0.d0
+         IF (NINT(FISopt(Nnuc)).GT.0 .AND. nrhump.EQ.2) THEN
+C----------gamma transition in isomeric well, as suggested by MS
+           tg2 = FIStga(nnuc) !.002
+           if(tg2.lt.0.d0) tg2=0.d0
            Sumfis = tdir + tabs*(tf(2)+rfiso*tg2)/(tf(1)+tf(2)+tg2)
          ELSE
            tg2 = 0.d0
          ENDIF
+
 C--------FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
          IF (Sumfis.LT.1.D-25) Sumfis = 0.d0
 
