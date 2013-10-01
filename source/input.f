@@ -1,6 +1,6 @@
-!cc   * $Rev: 3539 $
+!cc   * $Rev: 3540 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-09-30 18:51:39 +0200 (Mo, 30 Sep 2013) $
+!cc   * $Date: 2013-10-02 01:17:27 +0200 (Mi, 02 Okt 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2107,25 +2107,27 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
      &               .and. NEX(Nnur).GT.1) THEN
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
      &                  - FLOAT(i - 1)*DE
-C                    write(8,*) 'Z,A ',Z(nnur), A(nnur)
-C--------------------Width of the partial bin relative to DE
-                     DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
-!                    DEPart(nnur) = 1.d0
-!     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
-!                    DEPart(nnur) = DEPart(nnur)*0.9
-                     WRITE(8,
-     &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
-     &                'Continuum bin correction = ',DEPart(nnur),
-     &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
-                     WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
-     &                'Ecut   =',ECUt(nnur),
-     &                'Ex(1)  =',EX(1,nnur),
-     &                'Ecut+DE=',ECUt(nnur)+DE
                   ELSE
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
                   ENDIF
                ENDDO
-C
+               IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
+     &            .and. NEX(Nnur).GT.1) THEN
+C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
+C-----------------Width of the partial bin relative to DE
+                  DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+!                 DEPart(nnur) = 1.d0
+!     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
+!                 DEPart(nnur) = DEPart(nnur)*0.9
+                  WRITE(8,
+     &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
+     &                'Continuum bin correction = ',DEPart(nnur),
+     &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
+                  WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
+     &                'Ecut   =',ECUt(nnur),
+     &                'Ex(1)  =',EX(1,nnur),
+     &                'Ecut+DE=',ECUt(nnur)+DE
+               ENDIF
 C              The following line solves the problem of fluctuations
 C              in PCROSS at higher than 7-8 MeV 
 C              However, a better long-term solution is needed
@@ -2133,23 +2135,6 @@ C              as this is in contradiction with DEPart<>1
 C
                IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
 C
-            ENDIF
-
-
-
-           IF (NEX(nnur).GT.0) THEN
-               DO i = 1, NEX(nnur)
-                  IF (Z(1).EQ.Z(nnur) .AND. FITlev.le.0.1) THEN
-                     EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
-     &                    - FLOAT(i - 1)*DE
-                     DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
-                  ELSE
-                     EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
-                  ENDIF   
-               ENDDO
-            ENDIF
-            IF (Z(1).EQ.Z(nnur) .AND. NEX(nnur).GT.0) then
-               ECUt(nnur) = EX(1,nnur)
             ENDIF
 
 C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
