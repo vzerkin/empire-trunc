@@ -34,6 +34,10 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
+!-V         Version 8.07   October 2013     A. Trkov
+!-V                        Improve numerical stability of Maxwellian
+!-V                        average cross sections at high spectrum
+!-V                        temperatures (e.g. Gd-157 at kT=0.1 MeV)
 !-V         Version 8.06   March 2013       A. Trkov
 !-V                        Make reading MAT range more robust.
 !-V         Version 8.05   September 2012   A. Koning
@@ -146,9 +150,9 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.06'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
 !---MDC---
 !
 !     Define variable precision
@@ -532,7 +536,12 @@ C...
          ELSE
             Z1 = ELO(1,2)/INTER_DATA%EZERO
             Z2 = EHI(1,2)/INTER_DATA%EZERO
-            PNORMX = (Z1+1.D0)*EXP(-Z1) - (Z2+1.D0)*EXP(-Z2)
+!           Use Taylor series expansion for small arguments
+            IF(Z1.LT.1.D-6 .AND. Z2.LT.1.D-6) THEN
+              PNORMX = (Z2-Z1)*(Z2+Z1)/2
+            ELSE
+              PNORMX = (Z1+1.D0)*EXP(-Z1) - (Z2+1.D0)*EXP(-Z2)
+           END IF
          END IF
 !
 !        CALCULATE AVERAGE CROSS SECTION FOR EZERO
@@ -1008,7 +1017,12 @@ c...        END IF
       IF(INTER_DATA%ITHER.NE.0) THEN
          Z1 = INTER_DATA%ELT/INTER_DATA%EZERO
          Z2 = INTER_DATA%EHT/INTER_DATA%EZERO
-         PNORM1 = (Z1+1.D0)*EXP(-Z1)-(Z2+1.D0)*EXP(-Z2)
+!        Use Taylor series expansion for small arguments
+         IF(Z1.LT.1.D-6 .AND. Z2.LT.1.D-6) THEN
+           PNORM1 = (Z2-Z1)*(Z2+Z1)/2
+         ELSE
+           PNORM1 = (Z1+1.D0)*EXP(-Z1)-(Z2+1.D0)*EXP(-Z2)
+         END IF
       END IF
 !
 !     CALCULATE INTEGRAL OF SECOND WT FUNCTION (1/E)
@@ -1577,7 +1591,7 @@ c...        END IF
       INTEGER(KIND=I4) :: JM8
       INTEGER(KIND=I4) :: J
       REAL(KIND=R8) :: Z,FACLOG
-      REAL(KIND=R8) :: Z1,Z2,STEMP,EX1,EX2,A,B,C,D,T1,T2,T3
+      REAL(KIND=R8) :: Z1,Z2,STEMP,EX1,EX2,A,B,C,D,T1,T2,T3,T12
       REAL(KIND=R8) :: RPI2,SQRZ1,SQRZ2,DSQZ,ER21
 !
       REAL(KIND=R8), DIMENSION(8) :: AM
@@ -1615,7 +1629,12 @@ c...        END IF
 !
                CASE (1)
                   A = Y1
-                  AAINT = A*(EX1*(Z1+1)-EX2*(Z2+1))
+!                 Use taylor series expansion for small arguments
+                  IF(Z1.LT.1.D-6 .AND. Z2.LT.1.D-6) THEN
+                    AAINT = A*(Z2-Z1)*(Z2+Z1)/2
+                  ELSE
+                    AAINT = A*(EX1*(Z1+1)-EX2*(Z2+1))
+                  END IF
 !
 !             (Y) IS LINEAR IN (X)
 !
@@ -1624,10 +1643,20 @@ c...        END IF
                    A = DBLE(Y2)-B*DBLE(X2)
                    C = B*STEMP
                    D = 2*C+A
-                   T1 = EX1-EX2
-                   T2 = Z1*EX1 - Z2*EX2
-                   T3 = Z1*Z1*EX1 - Z2*Z2*EX2
-                   AAINT = C*T3 + D*T2 + D*T1
+!                  Use Taylor series expansion for small arguments
+                   IF(Z1.LT.1.D-6 .AND. Z2.LT.1.D-6) THEN
+                     T1 = (Z2-Z1)*(1-(Z2+Z1)/2)
+                     T2 =-(Z2-Z1)*(1-(Z2+Z1))
+                     T12= (Z2-Z1)*(Z2+Z1)/2
+                     T3 =-(Z2-Z1)*(Z2+Z1)
+                   ELSE
+!                    T1 = EX1-EX2
+!                    T2 = Z1*EX1 - Z2*EX2
+                     T12= (1+Z1)*EX1 - (1+Z2)*EX2
+                     T3 =  Z1*Z1*EX1 -  Z2*Z2*EX2
+                   END IF
+!                  AAINT = C*T3 + D*T2 + D*T1
+                   AAINT = C*T3 + D*T12
           END SELECT
 !
 !         1/E INTEGRATION
