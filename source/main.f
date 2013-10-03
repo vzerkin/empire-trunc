@@ -1,6 +1,6 @@
-cc   * $Rev: 3536 $
+cc   * $Rev: 3542 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
+Ccc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -234,15 +234,15 @@ C        elastic and nonelastic modified for actinides
 C        to include/exclude low-lying coupled states
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
-     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (CE & Cross section
      &s of 2 CC added/substracted to Elastic/Nonelast respectively)'
          WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
-     &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+     &      15    ,SYMbe(NPROject), int(Z(0)), SYMb(0), int(A(0)),
      &   ' (Elastic cross section = Shape Elastic + Compound Elastic; fo  
      &r Elastic* and Nonelastic* see output *.xsc file)       '
-C    &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
+C    &      15    ,SYMbe(NPROject), int(Z(0)), SYMb(0), int(A(0)),
 C    &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
 C    &2 CC added/substracted to Elastic/Nonelast respectively)'
 
@@ -270,11 +270,9 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
-     &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0)),
-     &   ' Elastic* and Nonelast* modified for A>220 (CE added/substract
-     &ed to Elastic/Nonelast respectively)'
+     &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
          WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &      15         ,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+     &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ',' Nonel-Cel  ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
@@ -291,7 +289,7 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
-     &     10, SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
+     &     10, SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
         WRITE(98,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Fiss-tot  ','  Fiss-1st  ','  Fiss-2nd  ',
      &      '  Fiss-3rd  ','  Fiss-4rd  ','  Fiss-5th  ',
@@ -312,13 +310,15 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
           WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
           WRITE(112,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total NT ',
-     &      symbe(0),symbe(0),symbe(0),symbe(0),symbe(0),symbe(0)   
+     &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject),
+     &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject)   
         ENDIF
         IF (lbreakup) then                     
           WRITE(113,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
           WRITE(113,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total BU ',
-     &      symbe(0),symbe(0),symbe(0),symbe(0),symbe(0),symbe(0) 
+     &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject),
+     &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject)   
         ENDIF
         IF (lbreakup .or. ltransfer) then                     
           WRITE(114,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
@@ -4123,7 +4123,7 @@ C
           WRITE (8,
      &'('' Reaction '',A2,'' + '',I3,A2,
      &    '' :NEXT INCIDENT ENERGY STARTED'')') 
-     &     SYMbe(0), INT(A(0)), SYMb(0)      
+     &     SYMbe(NPROject), INT(A(0)), SYMb(0)      
 C         WRITE (8,'(1x,61(''=''))')
 C         WRITE (8,*) ' '
 
@@ -4132,7 +4132,7 @@ C         WRITE (8,*) ' '
           WRITE (12,
      &'('' Reaction '',A2,'' + '',I3,A2,
      &    '' :NEXT INCIDENT ENERGY STARTED'')') 
-     &     SYMbe(0), INT(A(0)), SYMb(0)      
+     &     SYMbe(NPROject), INT(A(0)), SYMb(0)      
 C         WRITE (12,'(1x,61(''=''))')
 C         WRITE (12,*) ' '
         ENDIF

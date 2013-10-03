@@ -1,6 +1,6 @@
-!cc   * $Rev: 3540 $
+!cc   * $Rev: 3542 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-10-02 01:17:27 +0200 (Mi, 02 Okt 2013) $
+!cc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -495,8 +495,8 @@ C--------ejectile proton
          XNEjc(2) = AEJc(2) - ZEJc(2)
          IZAejc(2) = INT(1000.*ZEJc(2) + AEJc(2))
          iz = INT(ZEJc(2))
-         SYMbe(2) = SMAT(iz)
-         SYMbe(2) = ' p'
+C        SYMbe(2) = SMAT(iz)
+         SYMbe(2) = 'p '
          SEJc(2) = 0.5d0
 C--------ejectile alpha
          AEJc(3) = 4.d0
@@ -506,7 +506,6 @@ C--------ejectile alpha
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.d0
-
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
            WRITE (8,*)
@@ -1891,7 +1890,7 @@ C    &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
 C        WRITE (8,'(61(''=''))') 
          WRITE (8,*) ' '
          WRITE (8,'('' Reaction '',I3,A2,''+'',I3,A2)') 
-     &   iae, SYMbe(0), ia, SYMb(0)
+     &   iae, SYMbe(NPRoject), ia, SYMb(0)
          WRITE (8,'('' Projectile energy '',F9.3,'' MeV (LAB)'')') EINl
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
@@ -3149,12 +3148,14 @@ C-----WRITE heading on FILE12
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
      &I3,''m INCIDENT ENERGY''                             ,1P,D10.3,''
-     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+     &MeV'')') INT(ZEJc(0)), SYMbe(NPROject), iae, 
+     &INT(Z(0)), SYMb(0), ia, EINl
       ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
      &I3,'' INCIDENT ENERGY ''                             ,1P,D10.3,''
-     &MeV'')') INT(ZEJc(0)), SYMbe(0), iae, INT(Z(0)), SYMb(0), ia, EINl
+     &MeV'')') INT(ZEJc(0)), SYMbe(NPROject), iae,
+     & INT(Z(0)), SYMb(0), ia, EINl
       ENDIF
       WRITE (12,'('' COMPOUND NUCLEUS ENERGY '',F9.3,'' MeV'')') EXCn
       WRITE (12,*)

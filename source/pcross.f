@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3542 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -305,7 +305,7 @@ c
 C           cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &          a2,'','',a2,'')  '',f12.5,'' mb'')') 
-     &          symbe(0),symbe(nejc),crossBU(nejc)
+     &          SYMbe(NPROject),symbe(nejc),crossBU(nejc)
 C           DO ienerg = iemin(nejc),iemax(nejc)
 C              spec(nejc,ienerg)   = spec(nejc,ienerg) +
 C    &                               specBU(nejc,ienerg)
@@ -326,7 +326,7 @@ C           ENDDO
 C           cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(0),symbe(nejc),crossBU(nejc)  
+     &        SYMbe(NPROject),symbe(nejc),crossBU(nejc)  
             DO ienerg = iemin(nejc),iemax(nejc)
               specBU(nejc, ienerg) = specBU(nejc, ienerg) *
      &                               scompn * BUNorm/crossBUt  
@@ -379,11 +379,11 @@ C     ** transfer reactions: stripping and pick-up
             IF(AEJc(0).LT.AEJc(nejc))
      &        WRITE(8,'(4x,''Pick-up   cross section for ('',
      &        a2,'','',a2,'') '',f12.5,'' mb'')')
-     &        symbe(0),symbe(nejc),crossNT(nejc)     
+     &        SYMbe(NPROject),symbe(nejc),crossNT(nejc)     
             IF(AEJc(0).GT.AEJc(nejc))
      &        WRITE(8,'(4x,''Stripping cross section for ('',
      &        a2,'','',a2,'') '',f12.5,'' mb'')')
-     &        symbe(0),symbe(nejc),crossNT(nejc)           
+     &        SYMbe(NPROject),symbe(nejc),crossNT(nejc)           
             DO ienerg = iemin(nejc), iemax(nejc) 
                spec(nejc, ienerg) = spec(nejc,ienerg) + 
      &                              specNT(nejc,ienerg)
@@ -408,11 +408,11 @@ c
             IF(AEJc(0).LT.AEJc(nejc))
      &           WRITE(8,'(4x,''Pick-up   cross section for ('',
      &           a2,'','',a2,'') '',f12.5,'' mb'')')
-     &           symbe(0),symbe(nejc),crossNT(nejc)     
+     &           SYMbe(NPROject),symbe(nejc),crossNT(nejc)     
             IF(AEJc(0).GT.AEJc(nejc))
      &           WRITE(8,'(4x,''Stripping cross section for ('',
      &           a2,'','',a2,'') '',f12.5,'' mb'')')
-     &           symbe(0),symbe(nejc),crossNT(nejc)    
+     &           SYMbe(NPROject),symbe(nejc),crossNT(nejc)    
             DO ienerg = iemin(nejc), iemax(nejc)       
                specNT(nejc, ienerg) =  NTNorm * scompn * 
      &                            specNT(nejc,ienerg)/crossNTt        
@@ -678,15 +678,15 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
          cross(nejc) = hlp1 + cross(nejc)  
          totemis = totemis + crossBU(nejc)
          IF(ltransfer .or. lbreakup)THEN
-                if(nejc.eq.0) then
+            if(nejc.eq.0) then
               write(8,'(4x,''PE emission cross section  ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(0),'g ',crossPE(nejc) 
-                  else
+     &        SYMbe(NPROject),'g ',crossPE(nejc) 
+            else
               write(8,'(4x,''PE emission cross section  ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
-     &        symbe(0),symbe(nejc),crossPE(nejc) 
-                  endif
+     &        SYMbe(NPROject),symbe(nejc),crossPE(nejc) 
+            endif
          ENDIF
       ENDDO
       IF(ltransfer .or. lbreakup)THEN
