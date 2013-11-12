@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3482 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-28 12:09:42 +0200 (Mi, 28 Aug 2013) $
+Ccc   * $Rev: 3546 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -46,11 +46,12 @@ C
       CSE    = 0.d0
       CSEt   = 0.d0
       CSEmsd = 0.d0
-      CSEhms = 0.d0
-      CSEhmslab = 0.d0
+C      CSEhms = 0.d0
+C      CSEhmslab = 0.d0
       AUSpec = 0.d0
       CSEa   = 0.d0
-      CSEahmslab = 0.d0
+C      CSEahms = 0.0d0
+C      CSEahmslab = 0.d0
 
       REClev   = 0.d0
       CSDirlev = 0.d0
@@ -78,7 +79,7 @@ C
       POPlv    = 0.d0
       CSEmis   = 0.d0
       CSE      = 0.d0
-      POPcsea  = 0.d0
+C      POPcsea  = 0.d0
       POPcseaf = 0.d0
       POPcse   = 0.d0
       POPcsed  = 0.d0

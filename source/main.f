@@ -1,6 +1,6 @@
-cc   * $Rev: 3542 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
+cc   * $Rev: 3546 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -14,7 +14,7 @@ Ccc   *
 Ccc   ********************************************************************
 
       use nubar_reader
-
+      USE empcess
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 C
@@ -164,6 +164,9 @@ C-----
 C-----Read and prepare input data
 C-----
  1300 CALL INPUT
+C
+      CALL EMPAXS(LHMs, ndangecis, ndecse, ndnuc, 
+     1                        ndex_d, ndejcd, ndecsed, ndexclus)
 C
       IF (FITomp.LT.0) OPEN (40,FILE = 'OPTFIT.CAL',STATUS='UNKNOWN')
 C-----
@@ -4341,6 +4344,8 @@ C       depending on odd/even properties and mass number
           WRITE(8,*)
         endif  
       endif
+C
+      CALL EMPDAXS
 C
       GOTO 1300
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3546 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -169,6 +169,7 @@ Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      USE empcess
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C

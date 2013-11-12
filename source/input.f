@@ -1,6 +1,6 @@
-!cc   * $Rev: 3542 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
+!cc   * $Rev: 3546 $
+!cc   * $Author: bcarlson $
+!cc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -3750,16 +3750,16 @@ C-----      print  maximum gamma-ray multipolarity  'MAXmult'
             WRITE (8,'(61(''=''))')
             WRITE (8,
      &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
-     &    INT(AEJc(0)), SYMb(0), EIN
+     &    1P,D10.3, '' MeV (LAB)'')') INT(AEJc(0)), SYMbe(0), 
+     &    INT(A(0)), SYMb(0), EIN
             WRITE (8,'(61(''=''))')
 
             WRITE (12,*) ' '
             WRITE (12,'(61(''=''))')
             WRITE (12,
      &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') INT(A(0)), SYMbe(0), 
-     &    INT(AEJc(0)), SYMb(0), EIN
+     &    1P,D10.3, '' MeV (LAB)'')') INT(AEJc(0)), SYMbe(0), 
+     &    INT(A(0)), SYMb(0), EIN
             WRITE (12,'(61(''=''))')
             WRITE (12,*) ' '
 C-----------Printout of some final input options   *** done ***

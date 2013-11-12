@@ -1,6 +1,6 @@
-C $Rev: 3538 $
-C $Author: rcapote $
-C $Date: 2013-09-30 18:45:49 +0200 (Mo, 30 Sep 2013) $
+C $Rev: 3546 $
+C $Author: bcarlson $
+C $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -26,22 +26,23 @@ C
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
-     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),     
+     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),
+     &                 CSHms(2,0:ndnuc),
 
 C---------------------------------------------------------------------------
 C        All arrays below commented and changed to save memory (unless you need HMS !!!)
 C        For HMS the NDEX parameter in dimension.h should be less than ~ 150 !!
-C    &                 CSEahmslab(ndecse,ndangecis,2),
-C    &                 CSEhmslab(ndecse,2,0:ndnuc),CSHms(2,0:ndnuc),
+C    &                 CSEahmslab(ndecse,ndangecis,2),    not used at present
+C    &                 CSEhmslab(ndecse,2,0:ndnuc),       not used at present
+
 C    &                 CSEhms(ndecse,2,0:ndnuc), 
 C    &                 CSEahms(ndecse,ndangecis,2),
-
 C    &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
 C    &                  0:ndexclus),  
-     &                 CSEahmslab(1,1,2),CSEhmslab(1,2,0:1),
-     &                 CSHms(2,0:1),CSEhms(1,2,0:1),CSEahms(1,1,2),
 
-     &                 POPcsea(1,0:1,0:1,1,0:1),  
+C     &                 CSEhms(1,2,0:1),
+C     &                 CSEahms(1,ndangecis,2),
+C     &                 POPcsea(ndangecis,0:1,0:2,1,0:1),  
 C---------------------------------------------------------------------------
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
@@ -219,7 +220,8 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
 C     COMMON /DEPTH / POTe
-      COMMON /ENDFEA/ POPcsed, POPcsea, POPcseaf
+C      COMMON /ENDFEA/ POPcsed, POPcsea, POPcseaf
+      COMMON /ENDFEA/ POPcsed, POPcseaf
 
 C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
       COMMON /ENDFEMIS/ POPcs
@@ -258,8 +260,9 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,
-     &                 CSEhms, CSEhmslab, CSEfis, CSE, CSEa, CSEt, 
-     &                 CSEahms, CSEahmslab, RECcse, POPcon, POPdis, 
+     &                 CSEfis, CSE, CSEa, CSEt, 
+C     &                CSEhms, CSEahms, CSEhmslab, CSEahmslab, 
+     &                 RECcse, POPcon, POPdis, 
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,

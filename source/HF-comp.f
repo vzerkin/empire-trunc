@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3538 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-30 18:45:49 +0200 (Mo, 30 Sep 2013) $
+Ccc   * $Rev: 3546 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -219,8 +219,12 @@ C
 
 
       SUBROUTINE EXCLUSIVEC(Iec,Ief,Nejc,Nnuc,Nnur,Popt)
+
+      USE empcess, ONLY: POPcsea
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+
+
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -417,6 +421,7 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      USE empcess, ONLY: POPcsea
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C

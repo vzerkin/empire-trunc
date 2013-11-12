@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3443 $
+Ccc   * $Rev: 3546 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-07-03 06:17:56 +0200 (Mi, 03 Jul 2013) $
+Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3443 $
+C CVS Version Management $Revision: 3546 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2473,7 +2473,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3443 $')
+99005 FORMAT ('  xddhms version: $Revision: 3546 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -5835,6 +5835,8 @@ C sampling area not length!
 C
 C
       SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax)
+
+      USE empcess
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       INCLUDE 'ddhms.cmb'
@@ -5947,21 +5949,21 @@ C-----transfer inclusive neutron lab spectrum
 C-----transfer inclusive neutron lab double-differential cross sections
 C-----integrate ddx over angle and normalize ddx to the angle
 C-----integrated spectrum obtained above 
-      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
-      DO ne = 1, nspec
-         CSEhmslab(ne,1,0) = DXSnlab(ne-1)
-         DO na = 1, NDAnghms
-           CSEahmslab(ne,na,1) = DDXsnlab(ne-1,na)
-           csfit(NDAnghms-na+1) = DDXsnlab(ne-1,na)
-         ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
-            DO na = 1, NDAnghms
-               CSEahmslab(ne,na,1) = CSEahmslab(ne,na,1)*xnor
-             ENDDO
-          ENDIF
-       ENDDO
+C      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
+C      DO ne = 1, nspec
+C         CSEhmslab(ne,1,0) = DXSnlab(ne-1)
+C         DO na = 1, NDAnghms
+C           CSEahmslab(ne,na,1) = DDXsnlab(ne-1,na)
+C           csfit(NDAnghms-na+1) = DDXsnlab(ne-1,na)
+C         ENDDO
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+C         IF (qq(1).NE.0.0D+0) THEN
+C            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
+C            DO na = 1, NDAnghms
+C               CSEahmslab(ne,na,1) = CSEahmslab(ne,na,1)*xnor
+C             ENDDO
+C          ENDIF
+C       ENDDO
 C
 C-----transfer inclusive proton CM spectrum
 C-----transfer inclusive proton CM double-differential cross sections
@@ -5992,21 +5994,21 @@ C-----transfer inclusive proton lab spectrum
 C-----transfer inclusive proton lab double-differential cross sections
 C-----integrate ddx over angle and normalize ddx to the angle
 C-----integrated spectrum obtained above 
-      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
-      DO ne = 1, nspec
-         CSEhmslab(ne,2,0) = DXSplab(ne-1)
-         DO na = 1, NDAnghms
-           CSEahmslab(ne,na,2) = DDXsplab(ne-1,na)
-           csfit(NDAnghms-na+1) = DDXsplab(ne-1,na)
-         ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhmslab(ne,2,0)/(4.0*PI_g*qq(1))
-            DO na = 1, NDAnghms
-               CSEahmslab(ne,na,2) = CSEahmslab(ne,na,2)*xnor
-             ENDDO
-          ENDIF
-       ENDDO
+C      nspec = min(INT(elf*EMAx(nnur)/DE)+1,NDECSE)
+C      DO ne = 1, nspec
+C         CSEhmslab(ne,2,0) = DXSplab(ne-1)
+C         DO na = 1, NDAnghms
+C           CSEahmslab(ne,na,2) = DDXsplab(ne-1,na)
+C           csfit(NDAnghms-na+1) = DDXsplab(ne-1,na)
+C         ENDDO
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+C         IF (qq(1).NE.0.0D+0) THEN
+C            xnor = CSEhmslab(ne,2,0)/(4.0*PI_g*qq(1))
+C            DO na = 1, NDAnghms
+C               CSEahmslab(ne,na,2) = CSEahmslab(ne,na,2)*xnor
+C             ENDDO
+C          ENDIF
+C       ENDDO
 C
 C-----transfer exclusive spectra e DDX's
 C

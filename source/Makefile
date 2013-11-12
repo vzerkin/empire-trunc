@@ -1,6 +1,6 @@
-#$Rev: 3482 $
-#$Author: rcapote $
-#$Date: 2013-08-28 12:09:42 +0200 (Mi, 28 Aug 2013) $
+#$Rev: 3546 $
+#$Author: bcarlson $
+#$Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
 
 # set default fortran compiler:
 
@@ -118,7 +118,7 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o
+OBJF = empcess.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o
 
 all: 
 	$(MAKE) empire
