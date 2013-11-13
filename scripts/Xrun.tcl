@@ -1,6 +1,6 @@
-# $Rev: 3547 $
+# $Rev: 3548 $
 # $Author: bcarlson $
-# $Date: 2013-11-14 00:05:45 +0100 (Do, 14 Nov 2013) $
+# $Date: 2013-11-14 00:08:29 +0100 (Do, 14 Nov 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8324,7 +8324,7 @@ exit} \
     $site_4_0.menu97 add radiobutton \
         -value gvim -variable editor -command {} -label gvim 
     $site_4_0.menu97 add radiobutton \
-        -value aquamacs -variable editor -command {} -label emacs 
+        -value emacs -variable editor -command {} -label emacs 
     $site_4_0.menu97 add radiobutton \
         -value xemacs -variable editor -command {} -label xemacs 
     $site_4_0.menu97 add radiobutton \
