@@ -1,6 +1,6 @@
-cc   * $Rev: 3546 $
+cc   * $Rev: 3547 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+Ccc   * $Date: 2013-11-14 00:05:45 +0100 (Do, 14 Nov 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -165,8 +165,8 @@ C-----Read and prepare input data
 C-----
  1300 CALL INPUT
 C
-      CALL EMPAXS(LHMs, ndangecis, ndecse, ndnuc, 
-     1                        ndex_d, ndejcd, ndecsed, ndexclus)
+      CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, 
+     1                        NDEX_D, NDEJCD, NDECSED, NEXclusive)
 C
       IF (FITomp.LT.0) OPEN (40,FILE = 'OPTFIT.CAL',STATUS='UNKNOWN')
 C-----
