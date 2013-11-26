@@ -1,5 +1,5 @@
 #! /bin/sh -
-#script to format EMPIRE II output
+#script to reconstruct inelastic, (n,p) and (n,alpha) reactions
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."

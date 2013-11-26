@@ -1,5 +1,5 @@
 #! /bin/sh -
-#script to process ENDF file (originating from EMPIRE) 
+#script to process ENDF file  
 #through PREPRO in preparation for plotting
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
