@@ -44,7 +44,7 @@ instructions below for either the non-graphical or manual installations of
 ActiveTcl.
 
 To run EMPIRE you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI 
+[e.g. ~/empire-3.2-malta/Fe56new], change to it and launch the EMPIRE GUI 
 (Xrun.tcl):
 
     $ mkdir Fe56new
@@ -80,7 +80,7 @@ Non-graphical Installation
         $ cd ~/empire-tmp/
 
 To run empire you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI 
+[e.g. ~/empire-3.2-malta/Fe56new], change to it and launch the EMPIRE GUI 
 (Xrun.tcl):
 
     $ mkdir Fe56new

@@ -20,14 +20,14 @@ module, ENDF-6 file verification and graphical comparison with experimental data
 
 Major new features in 3.2
 -------------------------
-* PFNS implemented, Los Alamos and Kornilov (1st chance fission) 
+*  PFNS implemented, Los Alamos and Kornilov (1st chance fission) 
 *  Angular distributions for compound elastic and inelastics
 *  Plotting of PFNS, mu-bars, and nu-bars
 *  Covariances for PFNS, mu-bars, and nu-bars
 *  Simulation of the Engelbrecht-Weidenmuller transformation. Change in inelastic compensated by changing the compound elastic
 *  Including gamma and fission transmission coefficients calculated by EMPIRE into ECIS compound calculation
 *  Kalbach parameterizations for breakup and transfer reactions of complex projectiles
-*  Nobre’s deformation systematics
+*  Nobre's deformation systematics
 *  Astrophysical S-factor (A. Palumbo)
 *  All physics constants updated to CODATA 2010 set
 *  Fixing fluctuations due to the gap between the last level and the continuum
