@@ -1,6 +1,6 @@
-!cc   * $Rev: 3546 $
-!cc   * $Author: bcarlson $
-!cc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+!cc   * $Rev: 3558 $
+!cc   * $Author: dbrown $
+!cc   * $Date: 2013-11-26 23:17:14 +0100 (Di, 26 Nov 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -301,6 +301,7 @@ C
          FISbar = 1.d0
          FISdis = 1.d0
          FISden = 0.d0
+
          FIStga = 0.d0
 C
          NUBarread = .FALSE.
@@ -2101,40 +2102,76 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
+
                DO i = 1, NEX(nnur)
+
                   IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
+
      &               .and. NEX(Nnur).GT.1) THEN
+
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
+
      &                  - FLOAT(i - 1)*DE
+
                   ELSE
+
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
+
                   ENDIF
+
                ENDDO
+
                IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
+
      &            .and. NEX(Nnur).GT.1) THEN
+
 C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
+
 C-----------------Width of the partial bin relative to DE
+
                   DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
+
 !                 DEPart(nnur) = 1.d0
+
 !     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
+
 !                 DEPart(nnur) = DEPart(nnur)*0.9
+
                   WRITE(8,
+
      &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
+
      &                'Continuum bin correction = ',DEPart(nnur),
+
      &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
+
                   WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
+
      &                'Ecut   =',ECUt(nnur),
+
      &                'Ex(1)  =',EX(1,nnur),
+
      &                'Ecut+DE=',ECUt(nnur)+DE
+
                ENDIF
+
 C              The following line solves the problem of fluctuations
+
 C              in PCROSS at higher than 7-8 MeV 
+
 C              However, a better long-term solution is needed
+
 C              as this is in contradiction with DEPart<>1
+
 C
+
                IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
+
 C
+
             ENDIF
+
+
 
 C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
 C    >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
@@ -3149,12 +3186,14 @@ C-----WRITE heading on FILE12
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
      &I3,''m INCIDENT ENERGY''                             ,1P,D10.3,''
      &MeV'')') INT(ZEJc(0)), SYMbe(NPROject), iae, 
+
      &INT(Z(0)), SYMb(0), ia, EINl
       ELSE
       WRITE (12,
      &'('' REACTION '',I3,''-'',A2,''-'',I3,'' + '',I3,''-'',  A2,''-'',
      &I3,'' INCIDENT ENERGY ''                             ,1P,D10.3,''
      &MeV'')') INT(ZEJc(0)), SYMbe(NPROject), iae,
+
      & INT(Z(0)), SYMb(0), ia, EINl
       ENDIF
       WRITE (12,'('' COMPOUND NUCLEUS ENERGY '',F9.3,'' MeV'')') EXCn
@@ -3478,11 +3517,11 @@ C     VERSIONNAME   = RIVOLI
      > '                       |                          |'
       GOTO 754
   753 WRITE (8,*)
-     > '                       |    E M P I R E  - 3.1    |'
+     > '                       |    E M P I R E  - 3.2    |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,*)
-     > '                       |          Rivoli          |'
+     > '                       |          Malta           |'
 C
   754 open(23,file=trim(empiredir)//"/source/.svn/entries",
      &status='OLD',ERR=755)
@@ -3498,10 +3537,6 @@ C
       WRITE (8,*)'                       |       Not under SVN      |'
 C
   756 WRITE (8,*)'                       |                          |'
-      WRITE (8,*)'                       |    Sao Jose dos Campos   |'
-      WRITE (8,*)'                       |     Brazil, May 2011     |'
-      WRITE (8,*)'                       |    Upton, New York       |'
-      WRITE (8,*)'                       |      USA, Jan 2012       |'
       WRITE (8,*)'                       |__________________________|'
 
       if(EMPtitle(1:5).ne.'     ') then
@@ -7347,33 +7382,62 @@ C
             GOTO 100
          ENDIF
 
+
+
          IF (name.EQ.'FISTGA') THEN
+
             izar = i1*1000 + i2
+
             IF (izar.EQ.0) THEN
+
                DO nnuc = 1, NDNUC
+
                   FIStga(nnuc) = val
+
                ENDDO
+
                WRITE (8,*) 'Gamma transmission coefficient in ',
+
      &                     'isomeric well for all nuclei ', val
+
                WRITE (12,*)'Gamma transmission coefficient in ',
+
      &                     'isomeric well for all nuclei ', val
+
                GOTO 100
+
             ENDIF
+
             CALL WHERE(izar,nnuc,iloc)
+
             IF (iloc.EQ.1) THEN
+
                WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+
      &                '' NOT NEEDED'')') i2,i1
+
                WRITE (8,'(''  WARNING: FISTGA SETTING IGNORED'')')
+
                GOTO 100
+
             ENDIF
+
             FIStga(nnuc) = val
+
             WRITE (8 ,
+
      &  '('' Gamma transmission coefficient in isomeric well for '',
+
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
+
                WRITE (12,
+
      &  '('' Gamma transmission coefficient in isomeric well for '',
+
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val          
+
             GOTO 100
+
          ENDIF
 C--------
 C--------FISDEN(Nnuc)= 0 EMPIRE

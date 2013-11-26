@@ -1,4 +1,4 @@
-EMPIRE 3.1 (Rivoli)  Copyright (C) 2012 
+EMPIRE 3.2 (Malta)  Copyright (C) 2012 
 
 M. Herman, R. Capote, M. Sin, A. Trkov, B.V. Carlson,
 P. Oblozinsky, C.M. Mattoon, H. Wienke, S Hoblit, Young-Sik Cho,

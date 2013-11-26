@@ -58,7 +58,7 @@ release-tarball:
 txt-installer: installer/install.sh.template release-tarball
 	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
 
-IZPACK = $(HOME)/Projects/Current/IzPack
+IZPACK = installer/IzPack
 
 gui-installer-base: txt-installer installer/install-base.xml
 	$(IZPACK)/bin/compile installer/install-base.xml -o installer/EMPIRE-base-installer.jar
