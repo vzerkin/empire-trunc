@@ -1,24 +1,23 @@
-                 E M P I R E  3.1 (Rivoli)
-               Sao Jose dos Campos, Brazil   
-                       June 2011
-                    Upton, NY, USA   
-                      January 2012
+                 E M P I R E  3.2 (Malta)
+                  
+                      October 2013
 
 
-EMPIRE 3.1 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X
-(10.5 and higher).  It can also be run on Windows with either the MinGW and
-Cygwin environments.  EMPIRE is provided as source code that must be compiled to 
-function.
+EMPIRE 3.2 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X
+(Mountain Lion).  It can also be run on Windows with either the MinGW or
+Cygwin environments.  EMPIRE is distributed as a source code that MUST(!) be 
+compiled before using.
 
 Required:
-    Fortran90 compiler: gfortran (recommended version 4.6 or higher) or ifort (Intel)
-    C/C++ compiler
-    Python, Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
+    Fortran90 compiler - gfortran (recommended version 4.6 or higher) or ifort (Intel)
+    C/C++ compiler,
+    Python, 
+    Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
 
 Recommended:
     Tcl/Tk version 8.4 (or higher) and the [incr Tcl] extension to Tcl/Tk, 
-    both are included in the ActiveTcl distributions on the empire download 
-    page. On Mac OSX 10.6 and higher, Tcl/Tk with [incr Tcl] is preinstalled.
+    are both included in the ActiveTcl distributions available from the EMPIRE 
+    download page. On Mac OSX 10.6 and higher, Tcl/Tk with [incr Tcl] is preinstalled.
 
 
 Graphical Installation 
@@ -38,14 +37,15 @@ Then execute the jar file:
     $ java -jar EMPIRE-base-installer.jar
 
 On MacOSX systems, you can do this by simply clicking on the jar
-file from a file manager.  This installer has been tested on Linux and MacOSX.
+file from a file manager. This installer has been tested on Linux and MacOSX.
 
 If you are on a Linux machine and need to install ActiveTcl, see the 
 instructions below for either the non-graphical or manual installations of
 ActiveTcl.
 
-To run empire you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI (Xrun.tcl):
+To run EMPIRE you may create a working subdirectory of your empire root 
+[e.g. ~/empire-3.1-rivoli/Fe56new], change to it and launch the EMPIRE GUI 
+(Xrun.tcl):
 
     $ mkdir Fe56new
     $ cd Fe56new
@@ -60,7 +60,7 @@ Non-graphical Installation
     them in the same temporary directory (e.g. ~/empire-tmp/):
 
         setup.sh
-        EMPIRE-3.1-RIVOLI.tgz
+        EMPIRE-3.2-MALTA.tgz
         level-densities-hfb.tgz [Optional]
         C4-latest.tgz [Optional]
         ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz [Optional - for Linux]
@@ -96,15 +96,15 @@ Manual Installation
     assume that you put all of the downloaded files in the directory 
     ~/empire-tmp/ and are working from this directory.
 
-2)  Unpack EMPIRE-3.1-RIVOLI.tgz
+2)  Unpack EMPIRE-3.2-MALTA.tgz
 
-        $ tar xzf EMPIRE-3.1-RIVOLI.tgz
+        $ tar xzf EMPIRE-3.2-MALTA.tgz
 
-    This will unpack to a directory called EMPIRE-3.1-RIVOLI/.
+    This will unpack to a directory called EMPIRE-3.2-MALTA/.
 
 3)  Build the package
 
-        $ cd EMPIRE-3.1-RIVOLI/
+        $ cd EMPIRE-3.2-MALTA/
         $ make
         $ cd ~/empire-tmp/
 
@@ -128,7 +128,7 @@ Manual Installation
     RIPL/densities/total/level-densities-hfb (if you plan to use 
     RIPL HFB level densities):
 
-        $ cd EMPIRE-3.1-RIVOLI/RIPL/densities/total/
+        $ cd EMPIRE-3.2-MALTA/RIPL/densities/total/
         $ tar xzf ~/empire-tmp/level-densities-hfb.tgz
         $ cd ~/empire-tmp/
 
@@ -136,14 +136,14 @@ Manual Installation
     subdirectory (EXFOR/) to get the automatic retrieval and plotting of EXFOR 
     experimental data:
 
-        $ cd EMPIRE-3.1-RIVOLI/
+        $ cd EMPIRE-3.2-MALTA/
         $ tar xzf ~/empire-tmp/C4-latest.tgz
         $ cd ~/empire-tmp/
 
     You may also update the EXFOR files yourself using the latest version     
     available from the IAEA at http://www-nds.iaea.org/x4toc4-master/.   The C4 
     formatted source files have names like C4-Dec-11-2012.zip.  Unzip it, in the 
-    EMPIRE-3.1-RIVOLI/EXFOR/ directory and run the parseC4.py script:
+    EMPIRE-3.2-MALTA/EXFOR/ directory and run the parseC4.py script:
 
         $ python parseC4.py C4-Dec-11-2012.x4c4
 
