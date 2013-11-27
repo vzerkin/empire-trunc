@@ -1,9 +1,9 @@
 012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789  <-  Column indicator
 0111111111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000                                                                                                                                                                
 Each column correspond to one reaction. 
-For the zvd file to be produced the second column should contain 1.
+For the zvd file to be produced the second line should contain 1.
 
-Check the cross section out put file XSECTIONS.OUT (or $proj.xsc) to see reactions
+Check the cross section output file XSECTIONS.OUT (or $proj.xsc) to see reactions
 The first seven columns are fixed:
  1.- Total
  2.- Elastic
