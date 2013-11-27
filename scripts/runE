@@ -22,7 +22,7 @@ PACKAGEDIR = os.sep.join( os.path.dirname( os.path.abspath( __file__ ) ).split( 
 
 def get_version( ):
     if (not os.path.exists(PACKAGEDIR + os.sep + 'version')):
-        VERSIONNUMBER = '3.1'  # setting default for the case that the version file is not found 
+        VERSIONNUMBER = '3.2'  # setting default for the case that the version file is not found 
         VERSIONNAME = 'MALTA' # setting default for the case that the version file is not found 
         return ( VERSIONNAME, VERSIONNUMBER )
 
@@ -450,9 +450,8 @@ def splashscreen():
     ' ',\
     ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
     ' ',\
-    ' Sao Jose dos Campos, Brazil, May 2011 ',\
-    ' Upton, New York, USA, May 2013 ',\
-    ' Vienna, Austria, May 2013 ',\
+    ' Upton, New York, USA, November 2013 ',\
+    ' Vienna, Austria, November 2013      ',\
     ' ']
     return '\n'.join( [ x.center(60) for x in splash ] )
 
