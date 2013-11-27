@@ -21,7 +21,7 @@
        '(z,gamma)', '(z,p)    ', '(z,d)    ', '(z,t)    ', &
        '(z,He3)  ', '(z,a)    ', '(z,2a)   ', '(z,3a)   ', &
        '(z,2p)   ', '(z,pa)   ', '(z,t2a)  ', '(z,d2a)  ', &
-       '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonelast ', &
+       '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonel-Cel', &
        '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    ', &
        'Elastic* ', 'Nonelast*', '(z,4np)  '/)
 
