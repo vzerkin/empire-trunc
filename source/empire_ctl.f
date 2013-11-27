@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3488 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-08-29 16:19:40 +0200 (Do, 29 Aug 2013) $
+Ccc   * $Rev: 3562 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2013-11-27 21:52:55 +0100 (Mi, 27 Nov 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -2261,7 +2261,7 @@ C-----Calculate sensitivity to the parameter
 C-----
       OPEN (UNIT = 34,FILE='XS-UP.DAT', STATUS='OLD') ! x-sections with parameter+val
       READ(34,'(A238)') outrecord
-      BACKSPACE 92
+      ! BACKSPACE 92
       WRITE(92,'(A238)') outrecord
       WRITE(92,'(''# Parameter: '',A6,2x,4I3,''  variation: +-''F5.3,
      &      ''     Sensitivity matrix'')') name,  i1p, i2p,
@@ -2310,7 +2310,8 @@ C-----------Relative sensitivity (per variation interval)
       CLOSE(34)
       CLOSE(35)
       CLOSE(36)
-      WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
+      ! WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
+      write(92,*)
       GOTO 100 !Parameter done, return and get another parameter to vary
   200 WRITE (8,
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,

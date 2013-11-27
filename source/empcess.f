@@ -25,6 +25,8 @@
         mydexclus = ndexclus
        ENDIF
 
+      if(allocated(csehms)) deallocate(csehms)
+
       ALLOCATE(CSEhms(mydecse,2,0:mydnuc),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*) 'Insufficient memory for CSEhms!'
@@ -33,6 +35,8 @@
        ENDIF
       CSEhms = 0.0d0
 
+      if(allocated(cseahms)) deallocate(cseahms)
+
       ALLOCATE(CSEahms(mydecse,ndangecis,2),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*) 'Insufficient memory for CSEahms!'
@@ -40,6 +44,8 @@
         STOP
        ENDIF
       CSEahms = 0.0d0
+
+      if(allocated(POPcsea)) deallocate(POPcsea)
 
       ALLOCATE(POPcsea(ndangecis,0:mydex_d,0:mydejcd,mydecsed,
      &                                    0:mydexclus),STAT=myalloc)
