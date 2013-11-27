@@ -1,6 +1,6 @@
-# $Rev: 3561 $
-# $Author: rcapote $
-# $Date: 2013-11-27 18:38:38 +0100 (Mi, 27 Nov 2013) $
+# $Rev: 3564 $
+# $Author: gnobre $
+# $Date: 2013-11-27 22:47:54 +0100 (Mi, 27 Nov 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8504,6 +8504,12 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label {all MTs} 
+    $site_3_0.menu93 add command \
+        -command { editFile $file-parcorr.kal } \
+        -label "Edit parameter uncertainties (*-parcorr.kal)"
+    $site_3_0.menu93 add command \
+        -command { editFile $file-expcorr.kal } \
+        -label "Edit experimental data correlations (*-expcorr.kal)"
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/util/kalman/newinp $file &} \
         -label "Propagate Kalman output into Empire input (*.new)"
