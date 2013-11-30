@@ -1,0 +1,8 @@
+#! /bin/sh -
+#script to create a release tag of EMPIRE package inside the repository
+#PLEASE do not use any tricks - this is the right way to do it in subversion!
+#To make tag with release name change in the line below 'empire-3.2-MALTA' to a new tag-name 
+#and update commit messagew at the end.
+
+svn copy https://ndclx4.bnl.gov/svn/empire/trunk https://ndclx4.bnl.gov/svn/empire/tags/empire-3.2-MALTA -m "Tagging 3.2-MALTA for the Vienna2013 workshop"
+
