@@ -31,7 +31,7 @@ UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Ca
 all:
 	cd scripts; chmod +x preq2zvd c5-nng2zvd
 	cd ..  
-	cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;
+	#cd util/IO/ ; $(MAKE) FC=$(FC) $(FLG) ;
 	cd util/dxsend/ ; $(MAKE) FC=$(FC) $(FLG) ;
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source ; $(MAKE) FC=$(FC) $(FLG) ;

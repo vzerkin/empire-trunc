@@ -33,7 +33,7 @@ if __name__ == "__main__":
     # Make any adjustments to the run-time environment & make sure X11 is running
     if os.uname()[0] in [ "Darwin", "Linux" ]:
         if not X_is_running(): raise RuntimeError( "X11 is not running, please turn it on" ) 
-        if os.uname()[0] == 'Darwin': zvviewEnv.update( {'DISPLAY':':0.0'} )
+        if os.uname()[0] == 'Darwin': zvviewEnv.update( {'DISPLAY':':0'} )
     
     # Compute the command used to invoke ZVView
     if args.pflag != None: commandList = [ zvviewExe, '-p'+args.pflag ] + args.zvd
