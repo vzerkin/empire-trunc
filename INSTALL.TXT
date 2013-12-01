@@ -123,16 +123,7 @@ Manual Installation
         example, to compile debug using ifort the "make FC=ifort debug" command
         would be used. The default compiler is gfortran.
 
-4)  [Optional] Untar the HFB level-density distribution file 
-    level-densities-hfb.tgz to the corresponding subdirectory 
-    RIPL/densities/total/level-densities-hfb (if you plan to use 
-    RIPL HFB level densities):
-
-        $ cd EMPIRE-3.2-MALTA/RIPL/densities/total/
-        $ tar xzf ~/empire-tmp/level-densities-hfb.tgz
-        $ cd ~/empire-tmp/
-
-5)  [Optional] Unzip the distribution file C4-latest.zip to the corresponding
+4)  [Optional] Unzip the distribution file C4-latest.zip to the corresponding
     subdirectory (EXFOR/) to get the automatic retrieval and plotting of EXFOR 
     experimental data:
 
@@ -147,9 +138,9 @@ Manual Installation
 
         $ python parseC4.py C4-Dec-11-2012.x4c4
 
-6)  [Optional] Install ActiveTcl8.4 on Linux systems:
-        $ tar xzf ~/empire-tmp/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
-        $ cd ActiveTcl8.4.7.0-linux-ix86/
+5)  [Optional] Install ActiveTcl8.4 suitable for your operating system, e.g.,:
+        $ tar xzf ~/empire-tmp/ActiveTcl8.4.19.6.295590-linux-ix86.tar.gz
+        $ cd ActiveTcl8.4.19.6.295590-linux-ix86
         $ sh install.sh
         $ cd ~/empire-tmp/
 
