@@ -33,7 +33,7 @@ Major new features in 3.2
 *  Fixing fluctuations due to the gap between the last level and the continuum
 *  Improving x-sec and energy balance
 *  Minor problems in DWBA calculation with closed channels corrected
-*  New zvview-1.017
+*  New zvview2-1.020
 *  Upgrade to plot cross sections at fixed angles for neutrons
 *  DDHMS multiple emission spectra and DDX's in CM
 *  Inclusive DDX's implemented for ENDF=0
