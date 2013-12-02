@@ -59,7 +59,7 @@ Non-graphical Installation
 1)  Download the following files from http://www.nndc.bnl.gov/empire/ and place 
     them in the same temporary directory (e.g. ~/empire-tmp/):
 
-        setup.sh
+        install.sh
         EMPIRE-3.2-MALTA.tgz
         level-densities-hfb.tgz [Optional]
         C4-latest.tgz [Optional]
