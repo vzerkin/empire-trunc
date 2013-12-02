@@ -25,7 +25,8 @@ else
    cp $file.c4 $file-raw.c4
 fi
 echo ' '
-ln  -sf $file.c4 C4.DAT
+cp $file.c4 C4.DAT
+#ln  -sf $file.c4 C4.DAT
 # SORT C4 FILE
 ln -sf $EMPIREDIR/util/c4sort/iaea-std.dat iaea-std.dat
 ln -sf $EMPIREDIR/util/c4sort/C4SORT.INP C4SORT.INP
