@@ -25,9 +25,9 @@ else
    cp $file.c4 $file-raw.c4
 fi
 echo ' '
-cp $file.c4 C4.DAT
-#ln  -sf $file.c4 C4.DAT
+ln -sf $file.c4 C4.DAT
 # SORT C4 FILE
+rm -f RIPL_LEVELS C4SORT.INP iaea-std.dat
 ln -sf $EMPIREDIR/util/c4sort/iaea-std.dat iaea-std.dat
 ln -sf $EMPIREDIR/util/c4sort/C4SORT.INP C4SORT.INP
 ln -sf $EMPIREDIR/RIPL/levels/ RIPL_LEVELS
@@ -46,11 +46,14 @@ EOF
 # RUN ang_mu
 $EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
 echo ' '
+# removing link (C4.DAT) before copying  
+rm C4.DAT  
 mv C4.TMP C4.DAT
 
 # RUN c4sort the second time TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
-
+# removing link (C4.DAT) before copying  
+rm C4.DAT
 mv C4.SRT $file.c4
 echo ' '
 if [ -s $file.c4 ]; then
