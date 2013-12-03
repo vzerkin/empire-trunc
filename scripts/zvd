@@ -83,5 +83,5 @@ fi
 if [ -f ps01.zvd ]; then
    mv ps01.zvd $work/$file-$MT.zvd
 fi
-rm c4.zvd end.zvd end*.zvd tmp.dat 2>/dev/null
+rm c4 Present c4.zvd end.zvd end*.zvd tmp.dat 2>/dev/null
 exit
