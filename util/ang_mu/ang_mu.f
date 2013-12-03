@@ -5,7 +5,8 @@ C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
 C-V  12/06 Fix bug on action when fitting is unsuccessful.
 C-V  12/09 Include sorting internally for better grouping of data
-c-v  12/10 Include scattering angular distributions (MT9000)
+C-V  12/10 Include scattering angular distributions (MT9000)
+C-V  13/12 Skip comments if processing a C5 file
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -108,6 +109,9 @@ C*
 C*
 C* Begin processing the data - search for elastic angular distributions
   100 READ (LIN,932,END=800) REC
+C* Skip the comments if processing C5 file
+      IF(REC(1:1).EQ.'#') GO TO 100
+C* Interpret a C4 data entry
   110 READ (REC,902) IZIH,IZAH,ZAMH,MFH,MTH
       IF(MFH.NE.4 .OR. (MTH.NE.2 .AND. MTH.NE.9000)) THEN
         WRITE(LOU,932) REC
@@ -138,7 +142,9 @@ C* Save record to output and to RC6 field and sorting string to ELL
       ELL(IR)=POU//ELW//'  '
 C* Read the next record
       IEN=1
-      READ (LIN,932,END=114) REC
+  113 READ (LIN,932,END=114) REC
+C* Skip the comments if processing C5 file
+      IF(REC(1:1).EQ.'#') GO TO 113
       IEN=0
 c...
 C...  print *,'ir',ir,'"',rec(12:50),'"',REC(98:128)
