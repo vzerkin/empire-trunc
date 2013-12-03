@@ -1,6 +1,6 @@
-# $Rev: 3564 $
-# $Author: gnobre $
-# $Date: 2013-11-27 22:47:54 +0100 (Mi, 27 Nov 2013) $
+# $Rev: 3601 $
+# $Author: rcapote $
+# $Date: 2013-12-03 12:02:16 +0100 (Di, 03 Dez 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6545,7 +6545,6 @@ adjourn .top75} \
     button $site_10_0.cpd81 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #d9d9d9 \
-        -state disabled \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/EXFOR-web &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
