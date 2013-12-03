@@ -19,8 +19,8 @@ ifeq ($(FC),gfortran)
 else ifeq ($(FC),ifort)
 
   #----INTEL f95 compiler
-  #FFLAGS =  -O3 -x=host -ipo -c -o 
-  FFLAGS =  -O0 -c -o
+  #FFLAGS =  -O3 -x=host -ipo -c
+  FFLAGS =  -O0 -c
   #----flags for debuging using ifort compiler
   #FFLAGS =  -C -ftrapuv -g -debug all -c
 
