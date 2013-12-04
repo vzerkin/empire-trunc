@@ -2,8 +2,8 @@
 #
 
 # set default compiler:
-#FC     =  gfortran
-FC     =  ifort
+FC     =  gfortran
+#FC     =  ifort
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
@@ -21,8 +21,14 @@ endif
 stan: stan.f90 ../IO/*.o
 	$(FC) $(FFLAGS) -I ../IO/ -o stan stan.f90 ../IO/*.o
 
+../IO/*.o :
+	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+
 chkr: chkr.f90 ../IO/*.o
 	$(FC) $(FFLAGS) -I ../IO/ -o chkr chkr.f90 ../IO/*.o
 
 clean:
-	rm -f stan chkr
+	rm -f stan chkr ../IO/*.o ../IO/*.mod
+
+cleanall:
+	rm -f stan chkr ../IO/*.o ../IO/*.mod

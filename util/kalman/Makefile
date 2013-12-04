@@ -23,7 +23,8 @@ else ifeq ($(FC),ifort)
   #---------------------------
   #----INTEL f95 compiler
   #---------------------------
-  FFLAGS =  -O3 -x=host -ipo
+  #FFLAGS =  -O3 -x=host -ipo
+  FFLAGS =  -O3 -x=host 
   #----flags for debuging
   #FFLAGS =  -C -ftrapuv -g -debug all
   #----flags for automatic parallelization
@@ -60,11 +61,11 @@ kalman : kalman.f90
 
 OBJG =	kalend.f90 rctn.o strlen.o
 kalend :   $(OBJG)
-	$(FC) $(FFLAGS) -I ../IO -o $@ $(OBJG) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJG) ../IO/*.o
 
 OBJH =	c4tokal.f90 rctn.o strlen.o 
 c4tokal:   $(OBJH)
-	$(FC) $(FFLAGS) -I ../IO -o $@ $(OBJH) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJH) ../IO/*.o
 
 OBJI =	genkal.f90 rctn.o strlen.o 
 genkal:   $(OBJI)
@@ -87,11 +88,17 @@ newinp: newinp.f90
 empsee: empire_sees.f90
 	$(FC) $(FFLAGS) -o $@ empire_sees.f90
 
+../IO/*.o :
+	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+
 clean:
-	rm -f *.o *.mod *.exe
+	rm -f *.o *.mod *.exe ../IO/*.o ../IO/*.mod
+	rm -f kalman empsee newinp kefkal pnt2kal genkal c4tokal kalend
+
+cleanall:
+	rm -f *.o *.mod *.exe ../IO/*.o ../IO/*.mod
 	rm -f kalman empsee newinp kefkal pnt2kal genkal c4tokal kalend
 
 # When making a debug image
 dbg:  
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
-

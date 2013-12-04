@@ -21,5 +21,11 @@ endif
 get_nubar: get_nubar.f90 ../IO/*.o
 	$(FC) $(FFLAGS) -I ../IO/ -o get_nubar get_nubar.f90 ../IO/*.o
 
+../IO/*.o :
+	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+
 clean:
-	rm -f get_nubar
+	rm -f get_nubar ../IO/*.o ../IO/*.mod
+
+cleanall:
+	rm -f get_nubar ../IO/*.o ../IO/*.mod

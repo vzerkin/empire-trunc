@@ -19,7 +19,6 @@ else
    LINIO = endf_lr.o
 endif
 
-IPO = FALSE
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
   # flags for default real size: 4, 8 or 16 bytes:
@@ -29,8 +28,7 @@ ifeq ($(FC),ifort)
   FFLAGS = -O3 -x=host
   # flags for debug
   # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
-  # set IPO TRUE for full cross-file optimization
-  IPO = TRUE
+
 else ifeq ($(FC),gfortran)
   # flags for default real size: 4, 8 or 16 bytes:
   defR4  =
@@ -57,39 +55,19 @@ endif
 
 # build library
 
-all: *.o
+# use compiler FC with FFLAGS
 
-ifeq ($(IPO),TRUE)
-
-  # use ifort with block-mode I/O and cross-file optimization.
-  # this generally provides the fastest executable on unix/linux
-
-  all : endf_io.o c4_io.o endf_util.o
-
-  endf_io.o : endf_unx.o *.f90
-	ifort $(FFLAGS) -real-size 64 -ipo-c -o endf_io.o endf_blkunx.f90\
-           endf_line.f90 endf_base.f90 endf_cov.f90 mf*.f90 endf_queue.f90 endf.f90
-
-  endf_util.o : endf_io.o
-
-else
-
-  # use compiler FC with FFLAGS
-
-  OBJF = mf1.o mf2.o mf3.o mf4.o mf5.o mf6.o mf7.o mf8.o mf9.o\
+OBJF = mf1.o mf2.o mf3.o mf4.o mf5.o mf6.o mf7.o mf8.o mf9.o\
        mf10.o mf12.o mf13.o mf14.o mf15.o mf23.o mf26.o mf27.o\
        mf28.o  mf31.o mf32.o mf33.o mf34.o mf35.o mf40.o
 
-  all : $(OBJF) c4_io.o endf.o endf_util.o
-  endf.o : $(OBJF) endf_base.o endf_cov.o endf_queue.o
-  endf_util.o : endf.o
-  endf_queue.o : $(OBJF)
-  endf_line.o : endf_unx.o $(LINIO)
-  endf_base.o : endf_line.o
-  endf_cov.o : endf_base.o
-  $(OBJF) : endf_base.o endf_cov.o
-
-endif
+all : $(OBJF) c4_io.o endf.o
+endf.o : $(OBJF) endf_base.o endf_cov.o endf_queue.o
+endf_queue.o : $(OBJF)
+endf_line.o : endf_unx.o $(LINIO)
+endf_base.o : endf_line.o
+endf_cov.o : endf_base.o
+$(OBJF) : endf_base.o endf_cov.o
 
 clean:
 	rm -f *.mod *.o
