@@ -1,6 +1,6 @@
-#$Rev: 3546 $
-#$Author: bcarlson $
-#$Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+#$Rev: 3605 $
+#$Author: rcapote $
+#$Date: 2013-12-04 11:16:32 +0100 (Mi, 04 Dez 2013) $
 
 # set default fortran compiler:
 
@@ -139,13 +139,16 @@ dbg:
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h
-main.o  : nubar_reader.o
+main.o  : nubar_reader.o empcess.o
 input.o : nubar_reader.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
+print.o : empcess.o
+ddhms.o : empcess.o
+HF-comp.o : empcess.o
 
 clean:
-	rm -f *.o *.mod
+	rm -f *.o *.mod empire optmand
 
 cleanall:
 	rm -f *.o *.mod empire optmand
