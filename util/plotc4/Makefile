@@ -43,11 +43,11 @@ else ifeq ($(FC),lf90)
 
 endif
 
-../dxsend/dxsend.o :
-	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)
-
 plotc4: plotc4.f starplot.f ../dxsend/dxsend.o
 	$(FC) $(FFLAGS) -o $@ plotc4.f starplot.f ../dxsend/dxsend.o
+
+../dxsend/dxsend.o :
+	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
 	rm -f plotc4 *.o ../dxsend/dxsend.o

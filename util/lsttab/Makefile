@@ -43,11 +43,11 @@ else ifeq ($(FC),lf90)
 
 endif
 
-../dxsend/dxsend.o :
-	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)
-
 lsttab: lsttab.f ../dxsend/dxsend.o
 	$(FC) $(FFLAGS) -o $@ lsttab.f ../dxsend/dxsend.o
+
+../dxsend/dxsend.o :
+	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
 	rm -f lsttab ../dxsend/dxsend.o
