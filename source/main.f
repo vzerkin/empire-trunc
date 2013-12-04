@@ -1,6 +1,6 @@
-cc   * $Rev: 3547 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-14 00:05:45 +0100 (Do, 14 Nov 2013) $
+cc   * $Rev: 3604 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-04 11:15:57 +0100 (Mi, 04 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -355,7 +355,7 @@ C
       gamm_tr  = 0.d0
       fiss_tr  = 0.d0
 C
-C	  RCN, FEB 2013
+C       RCN, FEB 2013
 C     For a proper consideration of fission and capture composition in the 
 C     ECIS CN calculation, further changes needed in tl.f (to be done later)
 C
@@ -399,9 +399,9 @@ C-----------fission ()
         CLOSE (80,STATUS='DELETE')
 
         DENhf  = 0.d0
-	  sumfis = 0.d0
+        sumfis = 0.d0
 
-	ENDIF
+      ENDIF
 C-----
 C-----Calculate reaction cross section and its spin distribution
 C-----
@@ -691,9 +691,9 @@ C              ENDDO
      &                       * 0.5d0 * (CAngler(iang)-CANgler(iang-1))
                ENDDO
                csum = 2.0d0*PI*csum 
-	         disc_int(ilv) = csum
-	         pop_disc(nejcec) = pop_disc(nejcec) + POPlv(ilv,nnurec)
-C	         write(*,*) 'Lev=',ilv,' Int=',sngl(csum), 
+               disc_int(ilv) = csum
+               pop_disc(nejcec) = pop_disc(nejcec) + POPlv(ilv,nnurec)
+C              write(*,*) 'Lev=',ilv,' Int=',sngl(csum), 
 C    &         sngl(POPlv(ilv,nnurec))
 C
                if (csum.gt.0.d0) then
@@ -702,7 +702,7 @@ C----------------Correct CSAlev() for eventual imprecision
                  DO iang = 1, NANgela
                    CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
                  ENDDO
-	         endif
+               endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
 C-----------------Correct 'coef' for eventual imprecision and include recoil DE
@@ -1961,7 +1961,7 @@ C--------------------Residual nuclei must be heavier than alpha
 !                    if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.1) then
 !                      write(8,*) 'sum for ejectile=', nejc, sum
 !                      write(*,*) 'sum for ejectile=', nejc, sum
-!	                sumtll = sumtll + sum
+!                     sumtll = sumtll + sum
 !                    endif 
                   ENDDO
 !                 if (nnuc.eq.1 .and. ke.eq.nex(1)) then
@@ -2480,7 +2480,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                 dtotsp,ttotsp,htotsp    
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh 
-             ENDIF	      
+             ENDIF            
 C
 C            Calculating Q-balance
 C
@@ -3073,8 +3073,8 @@ C                  range extended to cover the last energy corresponding to the 
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
-	               ftmp = 1.d0
-	               if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
+                     ftmp = 1.d0
+                     if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
                      dtmp = dtmp + htmp*DE*ftmp
                      ftmp = (htmp - xnorm(nejc,INExc(nnuc))
      &                        * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
@@ -3106,11 +3106,11 @@ c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
                      check_DE(ie) = 2.0d0*PI*csum
 C--------------------Correct 'cseaprnt()' for eventual imprecision
                      if(check_DE(ie).GT.0.d0) then
-  	                 ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
+                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
                        ENDDO
-C					 double check
+C                              double check
 C                      csum = 0.d0
 C                      DO nang = 1, NDANG
 C                          csum = csum + cseaprnt(ie,nang)*SANgler(nang)
@@ -3143,16 +3143,16 @@ C
                      WRITE (12,
      &              '(10x,''    Energy    Int-DDX[mb]   Elev'')')
                      WRITE (12,*) ' '
-	               htmp = 0.d0
+                     htmp = 0.d0
                      DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE (12,'(4x,I3,4x,F10.5,2(E14.5,2x),F6.3)')  
      &                   il, -espec, check_DL(il)*recorp,
      &                           disc_int(il)*recorp,ELV(il,nnuc)
-	               	   htmp = htmp + check_DL(il)*recorp
+                           htmp = htmp + check_DL(il)*recorp
                      ENDDO
-	               WRITE (12,*) ' '
+                     WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
@@ -3181,7 +3181,7 @@ C
      &               INExc(nnuc)))*recorp,
      &               check_DE(nspec+1)*recorp,
      &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
-     &               	check_DE(nspec+1) )*recorp, 0.d0
+     &                  check_DE(nspec+1) )*recorp, 0.d0
                    WRITE(12,*) 
                    WRITE(12,'(10x,
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
@@ -3597,8 +3597,8 @@ C     WRITE (8,*)
       IF (IOUt.GT.5 .AND. .NOT.EXClusiv ) THEN
 
          IF (FIRst_ein) THEN 
-	      WRITE (8,*)
-	      WRITE (8,*)
+            WRITE (8,*)
+            WRITE (8,*)
             WRITE (8,'(11X,''**********************'')')
             WRITE (8,'(11x,'' Total spectra (C.M.)'')')
             WRITE (8,'(11x,''**********************'')')
@@ -3616,9 +3616,9 @@ C     WRITE (8,*)
 
               csum = 0.d0
               DO nnuc = 1, NNUcd
-		      csum = csum + CSEmis(nejc,nnuc)
+                  csum = csum + CSEmis(nejc,nnuc)
               ENDDO
-	        if(nejc.ne.0) then
+              if(nejc.ne.0) then
                WRITE (8,
      &         '(2X,A2,'' emission cross section'',G12.6,''  mb '',A7)')
      &         SYMbe(nejc), csum, '(TOTAL)'  
@@ -3957,10 +3957,10 @@ C
          WRITE (12,*) ' '    
 C--------Print inclusive spectra of gamma and ejectiles
          DO nejc = 0, NEJcm
-	     CALL Print_Inclusive(nejc)
-	   ENDDO
+           CALL Print_Inclusive(nejc)
+         ENDDO
          WRITE (12,*) ' '    
-	ENDIF
+      ENDIF
 
 C  Summary of exclusive emission cross sections
       jnmx = 0
@@ -4120,7 +4120,7 @@ C
      &   .OR. nextenergy(1:1) .EQ.'!') GOTO 1156
 
         IF(nextenergy(1:1).EQ.'$' .and. lheader) THEN
-	    lheader = .false.
+          lheader = .false.
           WRITE (8,*) ' '
           WRITE (8,'(1x,61(''=''))')
           WRITE (8,
@@ -4554,10 +4554,10 @@ C        ENDDO
      &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &       csum*DERec
          
-		 corr = CSPrd(Nnuc)/(csum*DERec)
-		 xsdisc = 0.d0
+             corr = CSPrd(Nnuc)/(csum*DERec)
+             xsdisc = 0.d0
          IF (nnuc.EQ.mt849) THEN
-		xsdisc = CSDirlev(1,3) 
+            xsdisc = CSDirlev(1,3) 
             WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,3)
             WRITE (12,'(2X,''Disc. popul. before g-cascade '',
@@ -4627,9 +4627,9 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
          WRITE (12,*) ' '
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
-		 csum = 0.d0
+             csum = 0.d0
          DO ie = 1, ilast
-		    csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
+                csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
             WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
      &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
          ENDDO
@@ -4637,10 +4637,10 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
      &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &     csum*DE
 
-		 corr = CSPrd(Nnuc)/(csum*DE)
-		 xsdisc = 0.d0
+             corr = CSPrd(Nnuc)/(csum*DE)
+             xsdisc = 0.d0
          IF (nnuc.EQ.mt91) THEN
-			xsdisc = CSDirlev(1,1) 
+                  xsdisc = CSDirlev(1,1) 
             WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,1)
             WRITE (12,'(2X,''Disc. popul. before g-cascade '',
@@ -4648,7 +4648,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
             corr = (CSPrd(Nnuc)- CSDirlev(1,1))/(csum*DE)
          ENDIF
          IF (nnuc.EQ.mt649) THEN
-			xsdisc = CSDirlev(1,2) 
+                  xsdisc = CSDirlev(1,2) 
             WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,2)
             WRITE (12,'(2X,''Disc. popul. before g-cascade '',
@@ -4656,7 +4656,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
             corr = (CSPrd(Nnuc)- CSDirlev(1,2))/(csum*DE)
          ENDIF
          IF (nnuc.EQ.mt849) THEN
-			xsdisc = CSDirlev(1,3) 
+                  xsdisc = CSDirlev(1,3) 
             WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - CSDirlev(1,3)
             WRITE (12,'(2X,''Disc. popul. before g-cascade '',
