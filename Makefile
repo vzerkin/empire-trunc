@@ -32,11 +32,7 @@ UTILS = util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort util/c
        util/fis2zvd util/c5-nng2zvd util/preq2zvd util/inter util/gam-sort-2zvd
 
 all:
-	cd scripts; chmod +x preq2zvd c5-nng2zvd
-	cd ..  
 	# dependencies in the local Makefiles (kalman,stan,nubar)
-	# cd util/IO/ ; $(MAKE) FC=$(FC) CC=$(CC) $(FLG) ;
-	# cd util/dxsend/ ; $(MAKE) FC=$(FC) $(FLG) ;
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source; $(MAKE) FC=$(FC) $(FLG) 
 
