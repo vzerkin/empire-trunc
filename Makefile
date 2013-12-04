@@ -25,7 +25,7 @@ else
 endif
 
 # utilities:
-UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
+UTILS = util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
        util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/nubar \
        util/endtab util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar \
@@ -34,16 +34,21 @@ UTILS = util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Ca
 all:
 	cd scripts; chmod +x preq2zvd c5-nng2zvd
 	cd ..  
-	cd util/IO/ ; $(MAKE) FC=$(FC) CC=$(CC) $(FLG) ;
-	cd util/dxsend/ ; $(MAKE) FC=$(FC) $(FLG) ;
+	# dependencies in the local Makefiles (kalman,stan,nubar)
+	# cd util/IO/ ; $(MAKE) FC=$(FC) CC=$(CC) $(FLG) ;
+	# cd util/dxsend/ ; $(MAKE) FC=$(FC) $(FLG) ;
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
-	cd source ; $(MAKE) FC=$(FC) $(FLG) ;
+	cd source; $(MAKE) FC=$(FC) $(FLG) 
 
 clean:
+	cd source; $(MAKE) clean; $(MAKE) cleanall
+	cd ..
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
-	cd util/dxsend/ ; $(MAKE) clean ;
-	cd util/IO/ ; $(MAKE) clean ;
-	cd source   ; $(MAKE) clean ;
+
+cleanall:
+	cd source; $(MAKE) clean; $(MAKE) cleanall
+	cd ..
+	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean; $(MAKE) cleanall); done
 
 up:
 	svn up
