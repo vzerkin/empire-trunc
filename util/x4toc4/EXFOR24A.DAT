@@ -137,7 +137,8 @@ E-LVL-MAX     1  999    8    0  DE2
                       Interpret E-RES as uncertainty (A. Trkov, 7 Mar 2012)    1
 E-RSL         1  999    8    0  DE2
 Interpret Q-VAL as (-ve) outgoing particle energy E2 (A.Trkov, 07/02           1
-Q-VAL         1  999    7   11   E2
+Redefine as QVL in field 7 and redefine on post-processing (A. Trkov 2012/07)  1
+Q-VAL         1  999    7    0  QVL
                                                                                1
 YIELD (USUALLY FISSION). OUTPUT ELEMENT IN FIELD 5, MASS IN FIELD 6.           1
                                                                                1
