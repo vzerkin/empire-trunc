@@ -1305,8 +1305,9 @@ C-
       CHARACTER*132 REC
       DOUBLE PRECISION ELV
 C*
-      PARAMETER (MXLV=500,MXPR=2000)
-      DIMENSION ELV(MXLV),DLV(MXLV),ETH(MXLV)
+C* Note: MXLVL parameter should be set also in MCHLVL routine
+      PARAMETER (MXLVL=500,MXPR=2000)
+      DIMENSION ELV(MXLVL),DLV(MXLVL),ETH(MXLVL)
       DIMENSION EN(MXPR),DE(MXPR),CS(MXPR),DC(MXPR),EL(MXPR)
 C*
 C* Criterion for discriminating level energies (eV)
@@ -1330,7 +1331,7 @@ C...
 C...  PRINT *,IZ0,IA0,IZA0,IZ,IA,IZA
 C...
 C-F Read the "levels" file to identify the discrete level energies
-      CALL read_levels_RIPL(IA,IZ,ELV,NLV,MXLV,DPATH,LPATH,IER)
+      CALL read_levels_RIPL(IA,IZ,ELV,NLV,MXLVL,DPATH,LPATH,IER)
       IF(IER.NE.0) THEN
         PRINT *,'GLTOEL ERROR - Retrieving levels for ZA',IZA
         RETURN
@@ -1414,7 +1415,7 @@ C...
       DX = 0
       DX = 0
       IX = 0
-      NX = MXLV+1
+      NX = MXLVL+1
 C* Scan all data to pick contributions at the current energy EI
       DO I=1,NPR
         IF(NINT(EN(I)).NE.NINT(EI)) CYCLE
@@ -2318,7 +2319,7 @@ C-D INPUT:  IZA   integer ZA designation (1000*Z+A)
 C-D         FLVL  initial level energy (to be matched)
 C-D OUTPUT: FLVL  most closely matching level energy
 C-
-      PARAMETER       (MXLVL=400)
+      PARAMETER       (MXLVL=500)
       DOUBLE PRECISION ELVL
       CHARACTER*80     DPATH
       DIMENSION        ELVL(MXLVL)
