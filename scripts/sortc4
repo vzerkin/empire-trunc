@@ -20,6 +20,8 @@ fi
 echo ' '
 if [ -f $file-raw.c4 ]; then
    echo 'Original C4 file stored as :'  $file-raw.c4
+#  Make a local copy of the original C4 file to $file-raw.c4
+   cp $file-raw.c4 $file.c4
 else
    echo 'Backup of the original C4 file:'  $file-raw.c4
    cp $file.c4 $file-raw.c4
@@ -46,7 +48,7 @@ EOF
 # RUN ang_mu
 $EMPIREDIR/util/ang_mu/ang_mu < ANG_MU.INP
 echo ' '
-mv C4.TMP C4.DAT
+mv -f C4.TMP C4.DAT
 
 # RUN c4sort the second time TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
