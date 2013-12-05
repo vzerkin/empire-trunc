@@ -42,7 +42,8 @@ C-V        - Convert discrete gamma production to levels (GLTOEL)
 C-V  12/07 - Increase MXPR from 500 to 2000 in GLTOEL (Case U-238).
 C-V        - Update RDTAB1 routine for consistency with DXSEND.
 C-V  12/10 Define scattering mu-bar as MF3/MT254.
-C-V  13/12 Cosmetic change
+C-V  13/12 - Cosmetic changes for compiler compatibility
+C-V        - Increase max. number of levels from 400 to 500
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -1304,7 +1305,7 @@ C-
       CHARACTER*132 REC
       DOUBLE PRECISION ELV
 C*
-      PARAMETER (MXLV=400,MXPR=2000)
+      PARAMETER (MXLV=500,MXPR=2000)
       DIMENSION ELV(MXLV),DLV(MXLV),ETH(MXLV)
       DIMENSION EN(MXPR),DE(MXPR),CS(MXPR),DC(MXPR),EL(MXPR)
 C*
@@ -1607,7 +1608,7 @@ C-Purpose: Get cross section and its absolute uncertainty
       PARAMETER (MXNB=40)
       CHARACTER*66 C66
       DIMENSION  EN(MXNP),XS(MXNP),DX(MXNP),RWO(MXRW)
-      DIMENSION  NBT(MXNB),INT(MXNB)
+      DIMENSION  NBT(MXNB),INR(MXNB)
 C*
       REWIND LES
       DO I=1,MXNP
@@ -1633,12 +1634,12 @@ C*      Requested metastable state higher than available in MF10
         RETURN
       END IF
       DO J=1,JST
-        CALL RDTAB1(LES,QM,QI,L1,L2,N1,NP,NBT,INT,EN,XS,MXNP,IER)
+        CALL RDTAB1(LES,QM,QI,L1,L2,N1,NP,NBT,INR,EN,XS,MXNP,IER)
         IF(IER.EQ. 9 ) STOP 'GETSTD ERROR - MXNP Limit exceeded'
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
       END DO
-      IF(N1.NE.1 .OR. INT(1).NE.2) THEN
-        PRINT *,'WARNING - used lin-lin interpolation instead of',INT(1)
+      IF(N1.NE.1 .OR. INR(1).NE.2) THEN
+        PRINT *,'WARNING - used lin-lin interpolation instead of',INR(1)
       END IF
 c...
 c...      print *,'done mf/mt',mf,mt
@@ -1700,7 +1701,7 @@ C*          Sort array to separate out energy and variance vector
               RWO(LE-1+K)=RWO(LL+2*K-2)
               RWO(LD-1+K)=RWO(LL+2*K-1)
             END DO
-            INR=1
+            IN1=1
 C*          Approximately convert variances to lin-lin form
 c...            ZR=0
 c...            DD=MAX(ZR, RWO(LD)-(RWO(LD+1)-RWO(LD))/2 )
@@ -1712,12 +1713,11 @@ c...              RWO(LD-2+K)=(D1+D2)/2
 c...            END DO
 c...            RWO(LD)=DD
 c...            RWO(LD-1+NE)=D2+(D2-D1)/2
-c...            INR=2
+c...            IN1=2
 C*          Interpolate variance to cross section grid
-            INR=1
             DO K=1,NP
               EIN=EN(K)
-              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,IN1,IER)
               DX(K)=DX(K)+DD
 c...
 c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
@@ -1741,7 +1741,7 @@ C*            Increment index to next diagonal (asymmetric/symmetric)
                 LL=LL+NE+1-K
               END IF
             END DO
-            INR=1
+            IN1=1
 C*          Approximately convert variances to lin-lin form
 C...            ZR=0
 C...            DD=MAX(ZR, RWO(LD)-(RWO(LD+1)-RWO(LD))/2 )
@@ -1753,11 +1753,11 @@ C...              RWO(LD-2+K)=(D1+D2)/2
 C...            END DO
 C...            RWO(LD)=DD
 C...            RWO(LD-1+NE)=D2+(D2-D1)/2
-C...            INR=2
+C...            IN1=2
 C*          Interpolate variance to cross section grid
             DO K=1,NP
               EIN=EN(K)
-              DD=FINTXS(EIN,RWO,RWO(LD),NE,INR,IER)
+              DD=FINTXS(EIN,RWO,RWO(LD),NE,IN1,IER)
               DX(K)=DX(K)+DD
 c...
 c...              print *,'  i,e,x,d',k,ein,xs(k),dx(k)
@@ -1794,7 +1794,7 @@ C* Convert variance to absolute uncertainty
       END IF
 C* All processing completed
       RETURN
-      END      
+      END
       SUBROUTINE FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
 C-Title  : Subroutine FINDMT
 C-Purpose: Find specified reaction in an ENDF file
@@ -2022,7 +2022,7 @@ C-D IER     Error flag with the following meaning:
 C-D     -1  Maximum array size exceeded
 C-
       DOUBLE PRECISION RUFL,RR(6)
-      DIMENSION    VK(1)
+      DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
