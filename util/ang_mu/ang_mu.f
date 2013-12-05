@@ -6,7 +6,8 @@ C-Version: 2012
 C-V  12/06 Fix bug on action when fitting is unsuccessful.
 C-V  12/09 Include sorting internally for better grouping of data
 C-V  12/10 Include scattering angular distributions (MT9000)
-C-V  13/12 Skip comments if processing a C5 file
+C-V  13/12 - Skip comments if processing a C5 file
+C-V        - Improve the logic to fix -ve distributions
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -58,6 +59,8 @@ C*
 C*
       DIMENSION    CSN(MXNP),XSR(MXNP),XSU(MXNP),PLN(MXLG),RWO(MXRW)
      &            ,ELX(MXNP),ELU(MXNP),ID3(MXIR),ID4(MXIR)
+C*
+      EQUIVALENCE (ELL(1),EL1(1,1))
 C* Character to mark the modification in the string
       DATA CH/'+'/
       DATA PI/3.1415926/
@@ -158,12 +161,13 @@ C*
 C* Block for one data type/author read - Sort by angle/energy
   114 CONTINUE
 c...
-c...          print *,'Begin sorting DDX, IR',IR
-c...          do j=1,ir
-c...            print *,j,'"',ELL(j),'"'
-c...          end do
+c...  print *,'Begin sorting DDX, IR',IR
+c...  do j=1,ir
+c...    print *,j,'"',ELL(j),'"'
+c...  end do
+c...  print *,'ir,mel1',ir,mel1
 c...
-      CALL SRTTCH(IR,MEL1,ID3,ID4,EL1)
+      CALL SRTTCH(IR,MEL1,ID3,ID4,ELL)
 c...
 c...          print *,'Sorting completed'
 c...
@@ -635,7 +639,7 @@ C* and for negative distributions
       YNM=YP(1)
       KNP=0
       KNM=0
-      JNP=0
+      JNP=1
       JNM=0
       JRE=0
       DO IP=1,NNP
@@ -651,7 +655,7 @@ C       RER=ABS((YCI-YYI)/QQ(1))
           JRE=IP
         END IF
 C* Test minimum value of distribution at mesh point
-        IF(YCI.LT.YNP) THEN
+        IF(YCI.LT.YNP .AND. IP.GT.1) THEN
           IF(YCI.LT.0) KNP=KNP+1
           JNP=IP-1
           YNP=YCI
@@ -841,6 +845,9 @@ c...
       IF((KNM.GT.0 .OR. KNP.GT.0) .AND.
      &    MNS.EQ.0 .AND. NNP.LT.MXP) THEN
 C*      --Force extra point if distribution negative at midpoint
+C...
+C...    print *,'YNP,YNM,JNP,JNM,NNP,LXP',YNP,YNM,JNP,JNM,NNP,LXP
+C...
         IF(YNP.LT.YNM) THEN
           IP=JNP
         ELSE
@@ -1093,6 +1100,8 @@ C*    --Solve by backward substitution
       SUBROUTINE SRTTCH(N,K,L,M,X)
 C-Title  : SRTTCH subroutine
 C-Purpose: Perform a sort in ascending order by Tree sort method
+C-Version
+C-V  13/12 Guard for the case of a list of length 1
 C-Description:
 C-D Sort in ascending order the vector of N characters strings of
 C-D length K stored in array X. The actual entries in X remain
@@ -1119,6 +1128,7 @@ C-g77 DIMENSION L(1),M(1),X(K,1)
 C...
       L(1)= 0
       M(1)= 0
+      IF(N.LT.2) RETURN
       DO 20 I=2,N
       L(I)= 0
       M(I)= 0
