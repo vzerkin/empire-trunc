@@ -42,6 +42,7 @@ C-V        - Convert discrete gamma production to levels (GLTOEL)
 C-V  12/07 - Increase MXPR from 500 to 2000 in GLTOEL (Case U-238).
 C-V        - Update RDTAB1 routine for consistency with DXSEND.
 C-V  12/10 Define scattering mu-bar as MF3/MT254.
+C-V  13/12 Cosmetic change
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
