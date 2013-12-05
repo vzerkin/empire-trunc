@@ -26,6 +26,7 @@ C-V  11/12 Add MT 19 to the list of adjusted reactions, if present.
 C-V  12/02 Fix NBT,INR array declarations for consistency (R. Capote)
 C-V  12/07 Allow filenames up to 80 characters long.
 C-V  13/03 Increase MXRW from 10 000 to 100 000 to process Fe-56 (JEFF)
+C-V  13/09 Increase tolerance for matching AWR from 1E-4(rel) to 1(abs)
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -248,7 +249,7 @@ C* Copy the rest of MF1
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       IF(MF.NE.0) GO TO 110
 C* Check AWR consistency on the resonance file
-      IF(ABS(AWR-AW).GT.AWR*1.E-4) THEN
+      IF(ABS(AWR-AW).GT.1.0) THEN
         WRITE(LTT,*) ' ENDRES WARNING - Unmatched AWR',AWR,AW
         WRITE(LLG,*) ' ENDRES WARNING - Unmatched AWR',AWR,AW
       END IF
@@ -872,7 +873,7 @@ C* Case: Threshold candidate for adjustment
             K2 =L2+1
             NM2=NMX-2
             CALL RDTAB1(LEM,QM,QI,LL,LR,NR,NP,NBT,INR
-     &                 ,RWO(K1),RWO(K2),NMX,IER)
+     &                 ,RWO(K1),RWO(K2),NM2,IER)
             IF(QI.GE.0) THEN
               WRITE(LTT,*) 'Change MF/MT/ZA',MF,MT,LL
      &                    ,' lower energy to',EAD
