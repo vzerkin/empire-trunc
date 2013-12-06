@@ -361,9 +361,9 @@ C* Define input parameters - Write banner to terminal
       WRITE(LTT,991)
       GO TO 12
 C* Error trap for invalid input file
-   11 WRITE(LTT,911) BLNK
+   11 WRITE(LTT,991) BLNK
       WRITE(LTT,991) ' EMPEND ERROR - Opening input - Redo    '
-      WRITE(LTT,991) BLNK'
+      WRITE(LTT,991) BLNK
 C* Define the source file
    12 WRITE(LTT,991) ' Default source filename (EMPIRE out.): ',FLN1
       WRITE(LTT,991) '$          Enter new name to redefine : '
@@ -3544,6 +3544,8 @@ c...
       END IF
 C* Next entry should be population or production cross section
       IF(REC(13:36).EQ.'population cross section'    ) GO TO 216
+      IF(REC(13:36).EQ.'ground state population '    ) GO TO 220
+      IF(REC(13:36).EQ.'isomer state population '    ) GO TO 224
       IF(REC(13:36).NE.'production cross section'    ) GO TO 310
 C* Read the cross section
   311 READ (REC,803) XS
