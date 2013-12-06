@@ -1,6 +1,6 @@
-#$Rev: 3605 $
+#$Rev: 3625 $
 #$Author: rcapote $
-#$Date: 2013-12-04 11:16:32 +0100 (Mi, 04 Dez 2013) $
+#$Date: 2013-12-06 07:07:28 +0100 (Fr, 06 Dez 2013) $
 
 # set default fortran compiler:
 
@@ -55,16 +55,19 @@ else ifeq ($(FC),ifort)
   # flags for automatic & openMP directives
   # LIBS = -openmp-lib compat
   #----flags for automatic parallelization
-  FFLAGS = -O3 -x=host -parallel -par-report1
+  #FFLAGS = -O3 -x=host -parallel -par-report1
+  #----flags for automatic parallelization (no report)
+  #    -diag-disable id8290,8291,8293
+  FFLAGS = -O3 -x=host -parallel -diag-disable warn
   # Flags for ECIS
-  EFLAGS = -O2 -x=host
+  EFLAGS = -O2 -x=host 
   # Flags for OPTMAN
-  OFLAGS = -O2 -x=host -parallel -par-report1
+  OFLAGS = -O2 -x=host -parallel -diag-disable warn
   #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
-      FFLAGS = -O3
-      EFLAGS = -O2
-      OFLAGS = -O2
+      FFLAGS = -O3 -diag-disable warn
+      EFLAGS = -O2 -diag-disable warn
+      OFLAGS = -O2 -diag-disable warn
   endif
 
 else ifeq ($(FC),af95)
