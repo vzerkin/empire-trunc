@@ -1624,6 +1624,7 @@ c...
       double precision  sre,sim,are,aim,aa
      &                  arem,arep,aimm,aimp,xre,yre,xim,yim
 c...
+      CHARACTER*66 C66
       PARAMETER   (MIW=100, MXLEG=100, MXIN=100)
       DIMENSION    IWO(MIW)
       DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN)
@@ -1999,7 +2000,7 @@ C*                -- Suppress error message for energies near threshold
               END IF
               RWO(LXE-1+IE)=EI2
               RWO(LXX-1+IE)=FINTXS(ACS,RWO(LAA),RWO(LAF)
-     &                            ,NEP1,INR,IER1)
+     &                            ,NEP1,INR(NM),IER1)
             END DO
 C*          --Define union grid of cross sections and yields at LAA
             CALL UNIGRD(NEN,ENR,NE,RWO(LXE),NP,RWO(LAA),KX)
