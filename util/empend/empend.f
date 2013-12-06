@@ -448,11 +448,11 @@ c...
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
 c...
 c...
-      WRITE(LTT, * ) ' '
-      WRITE(LTT,'(A)') '        MT       QM          QI'
-      DO J=1,NXS
-        WRITE(LTT,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
-      END DO
+c...  WRITE(LTT, * ) ' '
+c...  WRITE(LTT,'(A)') '        MT       QM          QI'
+c...  DO J=1,NXS
+c...    WRITE(LTT,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
+c...  END DO
 c...
 C*
 C* Redefine lower energy limit to first point, if not a neutron file
@@ -841,6 +841,9 @@ C* Write the ENDF material MEND and tape TEND records
 C*
   880 NS=0
       CALL WRCONT(LOU, -1, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      WRITE(LER,991) ' '
+      WRITE(LER,991) ' EMPEND Processing Completed'
+      WRITE(LER,991) ' '
       STOP 'EMPEND Completed'
 C*
   990 FORMAT(A80)
@@ -2148,6 +2151,7 @@ C-Version: Oct 2009
       DIMENSION MCH(MXMCH),IZRSD(MXMCH),XZRSD(MXMCH)
       DATA PI/3.1415926D0/
 C*
+      IZR =0
       NRSD=0
       NMCH=0
       IEN =0
@@ -3415,13 +3419,14 @@ C* All other cross sections are processed in the same way
       GO TO 310
 C*
 C* Check if "Decaying nucleus" section was processed
-  212 IF(IDCY.NE.0) GO TO 311
+  212 CONTINUE
 C*    -- Product nucleus without "Decaying nucleus" section
       READ (REC(2:11),802) JZ,CH,JA
       JZA=JZ*1000+JA
 C* Assign MT number from residual ZA
-      CALL EMTIZA(IZI,IZA,JZA,MT,0)
+      CALL EMTIZA(IZI,IZA,JZA,MT,IZR)
       IF(MT.EQ.0) MT=10*JZA+5
+      IF(IDCY.NE.0) GO TO 311
 C*    -- no "decaying nucleus" --> no discrete levels
       IF(MT.EQ. 50) MT=  4
       IF(MT.EQ.600) MT=103
