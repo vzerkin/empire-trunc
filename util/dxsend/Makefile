@@ -46,7 +46,7 @@ else ifeq ($(FC),lf90)
 
 endif
 
-dxsend.o: dxsend.f
+dxsend.o: 
 	$(FC) $(FFLAGS) dxsend.f
 
 clean:
