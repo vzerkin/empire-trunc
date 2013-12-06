@@ -13,7 +13,7 @@ ifeq ($(FC),gfortran)
   #----GNU FORTRAN compiler
   #---------------------------
   #----flags for production compilation 
-  FFLAGS = -std=legacy -O3
+  FFLAGS = -O3
   #----flags for debuging
   #FFLAGS =  -g --bounds-check -std=legacy
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
@@ -23,7 +23,6 @@ else ifeq ($(FC),ifort)
   #---------------------------
   #----INTEL f95 compiler
   #---------------------------
-  #FFLAGS =  -O3 -x=host -ipo
   FFLAGS =  -O3 -x=host 
   #----flags for debuging
   #FFLAGS =  -C -ftrapuv -g -debug all
@@ -59,13 +58,13 @@ all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
 kalman : kalman.f90
 	$(FC) $(FFLAGS) -o $@ kalman.f90
 
-OBJG =	kalend.f90 rctn.o strlen.o
+OBJG =	kalend.f90 rctn.o strlen.o ../IO/*.o
 kalend :   $(OBJG)
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJG) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJG)
 
-OBJH =	c4tokal.f90 rctn.o strlen.o 
+OBJH =	c4tokal.f90 rctn.o strlen.o ../IO/*.o
 c4tokal:   $(OBJH)
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJH) ../IO/*.o
+	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJH)
 
 OBJI =	genkal.f90 rctn.o strlen.o 
 genkal:   $(OBJI)

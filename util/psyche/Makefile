@@ -22,7 +22,7 @@ else ifeq ($(FC),ifort)
   #-----------------------
   #----INTEL f95 compiler
   #-----------------------
-  FFLAGS =  -O3 -x=host -ipo
+  FFLAGS =  -O3 -x=host
   #----flags for debuging using ifort compiler
   #FFLAGS =  -C -ftrapuv -g -debug all
   #----flags for automatic parallelization
