@@ -339,7 +339,7 @@ C* Default ENDF specifications
       NLIB= 8
 c...  NMOD= 0
       NMOD= 1
-      ALAB='EMPIRE     '
+      ALAB ='EMPIRE     '
       EDATE='           '
       AUTHOR(1)='           '
       AUTHOR(2)='           '
@@ -359,13 +359,18 @@ C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
       WRITE(LTT,991) ' ====================================== '
       WRITE(LTT,991)
+      GO TO 12
+C* Error trap for invalid input file
+   11 WRITE(LTT,911) BLNK
+      WRITE(LTT,991) ' EMPEND ERROR - Opening input - Redo    '
+      WRITE(LTT,991) BLNK'
 C* Define the source file
    12 WRITE(LTT,991) ' Default source filename (EMPIRE out.): ',FLN1
       WRITE(LTT,991) '$          Enter new name to redefine : '
       READ (LKB,'(A)') FLNM
       IF(FLNM(1:40).NE.BLNK) FLN1=FLNM
       ILEN=LEN(TRIM(FLN1))
-      OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=123)
+      OPEN(UNIT=LIN,FILE=FLN1(1:ILEN),STATUS='OLD',ERR=11)
 C* Define the output file
       WRITE(LTT,991) ' Source filename                      : ',
      >     FLN1(1:ILEN)
@@ -845,28 +850,8 @@ C*
   995 FORMAT(A40,4I5)
   996 FORMAT(A40,F10.4)
   997 FORMAT(5A11)
-
-
-
-
-C 997 FORMAT(6A11)
   998 FORMAT(10I5)
   999 FORMAT(10I8)
-
-
-
-
-123   WRITE(LTT,*) 'INPUT FILE NOT FOUND:'
-
-
-
-
-      WRITE(LTT,*) 'FILENAME: ',FLN1(1:ILEN)
-
-
-
-
-      STOP 'ERROR in EMPEND'
       END
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
@@ -961,10 +946,6 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=0
       END IF
       RETURN
-
-
-
-
       END
       SUBROUTINE EMTIZA(IZI,IZA,JZA,MT,MEQ)
 C-Title  : Subroutine EMTIZA
