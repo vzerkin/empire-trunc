@@ -5285,7 +5285,9 @@ C-D  Processed reactions are flagged by adding 1000 to MT
 C-
       CHARACTER*8  PTST
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
-     1            ,RWO(MXR),NBT(1),INT(1)
+     1            ,RWO(MXR)
+C* Only one interpolation range is allowed, hence array length is one.
+      DIMENSION NBT(1),INR(1)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
       DATA XSMALL,ZRO/ 1.0E-34, 0./
       DATA PTST/'        '/
@@ -5482,10 +5484,10 @@ C* Write HEAD record
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,N1,N2)
 C* Write TAB1 record
       NR    =1
-      INT(1)=2
+      INR(1)=2
       NBT(1)=NEO
       CALL WRTAB1(LOU,MAT,MF,MT,NS,QQM(IT),QQI(IT), 0, 0
-     1           ,NR,NEO,NBT,INT,RWO(LX),RWO(LY))
+     1           ,NR,NEO,NBT,INR,RWO(LX),RWO(LY))
 C* Write CONT record - end of data set
       NS=99998
       CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
@@ -5522,7 +5524,7 @@ C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=202)
       CHARACTER*8  PTST
-      DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INT(1)
+      DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INR(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
       DATA DLVL/1.E2/
@@ -5575,7 +5577,7 @@ C*      -- No data given, assume purely isotropic
       LL =LL+12+2*NP
       J2 =0
       JTH=0
-      INT(1)= 2
+      INR(1)= 2
       ETH=(-QQI(IT))*(AWR+AWI)/AWR
 C* Scan the data-set to check if any tabular data exist
       LL0=LL
@@ -5655,7 +5657,7 @@ C*          Set the threshold data and flag JTH to add extra point
         CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,LVT,LTTE, 0, 0)
         CALL WRCONT(LOU,MAT,MF,MT,NS, 0.,AWR,LI, LCT , 0,NM)
         CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
-     1             ,NR,JE,NBT,INT)
+     1             ,NR,JE,NBT,INR)
 C* Print isotropic threshold distribution (if necessary)
         IF(JTH.EQ.1) THEN
           CALL WRLIST(LOU,MAT,MF,MT,NS,TT,ETH,LT, 0,NL, 0,QQ)
@@ -5770,9 +5772,9 @@ C* Tabular representation
       IF(IE.EQ.NE1+1) THEN
 C*      -- Write the TAB2 record for the tabular data
         NBT(1)=NE2
-        INT(1)=2
+        INR(1)=2
         CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
-     1             ,NR,NE2,NBT,INT)
+     1             ,NR,NE2,NBT,INR)
       END IF
       NP  =IABS(NA)
       NBT(1)=NP
@@ -5791,7 +5793,7 @@ C* Normalise the distribution
         QQ(I+NP)=QQ(I+NP)/SS
       END DO
       CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
-     1           ,NR,NP,NBT,INT,QQ(1),QQ(1+NP))
+     1           ,NR,NP,NBT,INR,QQ(1),QQ(1+NP))
 C* One energy point processed
    38 LL  =LL+NW
       J2  =J2+1
