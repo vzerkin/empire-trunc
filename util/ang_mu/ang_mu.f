@@ -169,7 +169,7 @@ c...  print *,'ir,mel1',ir,mel1
 c...
       CALL SRTTCH(IR,MEL1,ID3,ID4,ELL)
 c...
-c...          print *,'Sorting completed'
+c...  print *,'Sorting completed'
 c...
 C* Write the sorted set from saved record sequence in RC6
 c...
@@ -1128,7 +1128,6 @@ C-g77 DIMENSION L(1),M(1),X(K,1)
 C...
       L(1)= 0
       M(1)= 0
-      IF(N.LT.2) RETURN
       DO 20 I=2,N
       L(I)= 0
       M(I)= 0
