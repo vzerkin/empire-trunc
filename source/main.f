@@ -1,6 +1,6 @@
-cc   * $Rev: 3636 $
+cc   * $Rev: 3638 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-10 09:30:28 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Date: 2013-12-10 09:41:27 +0100 (Di, 10 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3188,8 +3188,7 @@ C
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(10x,
      &                ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,nnuc)
-C     &                  CSEmis(nejc,INExc(nnuc))
+     &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
@@ -3230,8 +3229,7 @@ C                  endif
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(2x,
      &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,nnuc)
-C     &                  CSEmis(nejc,INExc(nnuc))
+     &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
