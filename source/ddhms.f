@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3546 $
+Ccc   * $Rev: 3636 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+Ccc   * $Date: 2013-12-10 09:30:28 +0100 (Di, 10 Dez 2013) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3546 $
+C CVS Version Management $Revision: 3636 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2473,7 +2473,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3546 $')
+99005 FORMAT ('  xddhms version: $Revision: 3636 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4322,7 +4322,7 @@ C  100 xran = RANG()*(Rnucleus + 3*Adiffuse)
 C      yran = RANG()*probmax
 C      prob = xran/(1 + EXP((xran-Rnucleus)/Adiffuse))
 C sampling area not length!
-  100 xran = SQRT(RANG())*(Rnucleus + 1.1*Adiffuse)
+  100 xran = SQRT(RANG())*(Rnucleus + 3.*Adiffuse)
       yran = RANG()
       prob = 1.0/(1.0 + EXP((xran-Rnucleus)/Adiffuse))
       IF (yran.GT.prob) GOTO 100
@@ -5883,8 +5883,8 @@ C------convert HMS angular histograms to point data
          dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
          DDXsn(ne,NDAnghms) = DDXsn(ne,NDAnghms1)
          DDXsp(ne,NDAnghms) = DDXsp(ne,NDAnghms1)
-         DDXsnlab(ne,NDAnghms) = DDXsnlab(ne,NDAnghms1)
-         DDXsplab(ne,NDAnghms) = DDXsplab(ne,NDAnghms1)
+c         DDXsnlab(ne,NDAnghms) = DDXsnlab(ne,NDAnghms1)
+c         DDXsplab(ne,NDAnghms) = DDXsplab(ne,NDAnghms1)
 c         DO jn = 0,Jnmax
 c           DO jz = 0,Jzmax
 c             DDXsnxlab(ne,NDAnghms1+1,jz,jn) = 
@@ -5901,10 +5901,10 @@ c          ENDDO
      &                                              (dxhi+dxlo)
            DDXsp(ne,nth) = (dxhi*DDXsp(ne,nth)+dxlo*DDXsp(ne,nth-1))/
      &                                              (dxhi+dxlo)
-           DDXsnlab(ne,nth) = (dxhi*DDXsnlab(ne,nth)
-     &                          +dxlo*DDXsnlab(ne,nth-1))/(dxhi+dxlo)
-           DDXsplab(ne,nth) = (dxhi*DDXsplab(ne,nth)
-     &                          +dxlo*DDXsplab(ne,nth-1))/(dxhi+dxlo)
+c           DDXsnlab(ne,nth) = (dxhi*DDXsnlab(ne,nth)
+c     &                          +dxlo*DDXsnlab(ne,nth-1))/(dxhi+dxlo)
+c           DDXsplab(ne,nth) = (dxhi*DDXsplab(ne,nth)
+c     &                          +dxlo*DDXsplab(ne,nth-1))/(dxhi+dxlo)
 c           DO jn = 0,Jnmax
 c             DO jz = 0,Jzmax
 c               DDXsnxlab(ne,nth,jz,jn) = (dxhi*DDXsnxlab(ne,nth,jz,jn)
@@ -6062,7 +6062,13 @@ C           write(8,*) ' endf 1 ',jz,jn,nnur,endf(nnur),endfa(nnur)
 c             chk = 0.0d0
 c             chkpop = 0.0d0
 c             chkpopd = 0.0d0
+c             Inxr = matex(jz,jn+1)
              Inxr=INExc(nnur)
+             IF(Inxr.EQ.0) CYCLE
+c             If(Inxr.EQ.0) then
+c               write(*,*) 'n: ',jz,jn,nnur,nspec,nspecc
+c               stop
+c              endif
 
              DO ne = 1,nspec
                pophmsx = 0.0d0
@@ -6317,6 +6323,7 @@ c             chk = 0.0d0
 c             chkpop = 0.0d0
 c             chkpopd = 0.0d0
              Inxr=INExc(nnur)
+             IF(Inxr.EQ.0) CYCLE
 
              DO ne = 1,nspec
               pophmsx = 0.0d0
@@ -6567,8 +6574,8 @@ C
               IF (JMAxujspec(0,0,nucn - 1).GT.0) nucnlo = nucn - 1
               nucnhi = nucn
               IF (JMAxujspec(0,0,nucn + 1).GT.0) nucnhi = nucn + 1
-              IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn) .AND.
-     &             (JMAxujspec(0,0,nucn).EQ.0)) THEN
+              IF (JMAxujspec(0,0,nucn).EQ.0) THEN
+               IF ((nucnlo.EQ.nucn) .AND. (nucnhi.EQ.nucn)) THEN
                 WRITE (8,*) ' '
                 WRITE (8,*) 'Funny!? The population of '
                 WRITE (8,*) 'the 1-st CN seems to be 0.'
@@ -6578,24 +6585,26 @@ C
                 WRITE (8,*) 'Check ddhms.out!'
                 WRITE (8,*) ' '
                 RETURN
+               ELSE IF(nucnlo.LT.nucn) THEN
+                nucn=nucnlo
+               ELSE
+                nucn=nucnhi
+               ENDIF 
               ENDIF
              DO jsp = 1, NDLW
                POP(NEX(1),jsp,1,1)=0.0d0
                POP(NEX(1),jsp,2,1)=0.0d0
                ENDDO
              sumcon = 0.0
-C             write(8,'(a5,i8,f12.6,3i6)') 'emax:',IZA(1),EX(NeX(1),1),
-C     1                     JMAxujspec(0,0,nucn)
              DO jsp = 0, JMAxujspec(0,0,nucn)
                sumcon = sumcon + UJSpec(0,0,nucn,jsp)
                POP(NEX(1),jsp+1,1,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
                POP(NEX(1),jsp+1,2,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
-              ENDDO
+             ENDDO
               sumcon = DEBin*sumcon
               POPcon(1) = sumcon
               POPdis(1) = 0.0d0
 C              WRITE(8,*)' continuum pop = ', sumcon, ' mb'
-C              WRITE(8,*)' specall       = ',sumcon,' mb'
               GO TO 50
             ENDIF
 

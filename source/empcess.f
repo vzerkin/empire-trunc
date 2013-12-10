@@ -20,7 +20,7 @@
         mydecse = ndecse
         mydnuc = ndnuc
         mydex_d = ndex_d
-        mydejcd = ndecjcd
+        mydejcd = ndejcd
         mydecsed = ndecsed
         mydexclus = ndexclus
        ENDIF

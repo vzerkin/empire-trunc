@@ -1,6 +1,6 @@
-cc   * $Rev: 3604 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-04 11:15:57 +0100 (Mi, 04 Dez 2013) $
+cc   * $Rev: 3636 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-12-10 09:30:28 +0100 (Di, 10 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -164,6 +164,7 @@ C-----
 C-----Read and prepare input data
 C-----
  1300 CALL INPUT
+
 C
       CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, 
      1                        NDEX_D, NDEJCD, NDECSED, NEXclusive)
@@ -3187,7 +3188,8 @@ C
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(10x,
      &                ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,INExc(nnuc))
+     &                  CSEmis(nejc,nnuc)
+C     &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
@@ -3228,7 +3230,8 @@ C                  endif
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(2x,
      &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,INExc(nnuc))
+     &                  CSEmis(nejc,nnuc)
+C     &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
