@@ -1,6 +1,6 @@
-!cc   * $Rev: 3558 $
-!cc   * $Author: dbrown $
-!cc   * $Date: 2013-11-26 23:17:14 +0100 (Di, 26 Nov 2013) $
+!cc   * $Rev: 3639 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -1018,7 +1018,7 @@ C
             ENDDO
          ENDDO
 C
-C	   Protection to avoid problems for HI reactions
+C        Protection to avoid problems for HI reactions
 C    
          IF(NPRoject.lt.0) NPRoject = 0
          NTArget = 0
@@ -1867,7 +1867,7 @@ C-----------Defining ICOller(i)
       if(EXCn.LT.0.d0) then
         write(8,*) 'ERROR: NEGATIVE EXCITATION ENERGY OF THE CN'
         write(8,*) 'ERROR: INCREASE THE INCIDENT ENERGY TO ',
-     >	 Q(0,1) + ELV(LEVtarg,0)
+     >       Q(0,1) + ELV(LEVtarg,0)
         STOP 'ERROR: NEGATIVE EXCITATION ENERGY OF THE CN' 
       endif
 
@@ -1954,15 +1954,15 @@ C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
      &      'Initial energy step         ',DE*1000.d0,' keV'
           CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
        ELSE
-	    if(ichanmin.eq.3) then
+          if(ichanmin.eq.3) then
             WRITE(8,'(A33,A5,A28,F7.2,A4)') 
      &      'Exotermic reaction: Emission of ','alpha',
-     &      ' neglected for Einc (CMS) < ', 	         
+     &      ' neglected for Einc (CMS) < ',              
      &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
           else
             WRITE(8,'(A33,A2,A28,F7.2,A4)') 
      &      'Exotermic reaction: Emission of ',SYMbe(ichanmin),
-     &      ' neglected for Einc (CMS) < ', 	         
+     &      ' neglected for Einc (CMS) < ',              
      &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
           endif
         ENDIF
@@ -2687,7 +2687,7 @@ C
             ENDIF
 
 C
-C		  if ECONT input keyword present, then it takes precedence 
+C             if ECONT input keyword present, then it takes precedence 
 C
             IF (ECOnt(Nnuc).GT.0.d0 .and. ECOnt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.ECOnt(Nnuc)) THEN
@@ -9336,7 +9336,7 @@ C
       CHARACTER*64 filename
       INTEGER*4 pipe
       INTEGER*4 iwin
-      CHARACTER*132 ctmp
+      CHARACTER*132 ctmp, ccomm
       LOGICAL fexist
 
 C     write(6,*)trim(empiredir)//trim(filename)
@@ -9353,70 +9353,104 @@ C
      &   int(Z(0)),'_',SYMb(0)(1:2),'_', int(A(0)),'.c4'
       endif
       
-C-----concatenate file name with the projectile path
-      IF(IZAejc(0) .EQ. 1) THEN
-        filename = '/EXFOR/neutrons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 1001) THEN
-        filename = '/EXFOR/protons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 1002) THEN
-        filename = '/EXFOR/deuterons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 2004) THEN
-        filename = '/EXFOR/alphas/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 2003) THEN
-        filename = '/EXFOR/helions/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 0) THEN
-        filename = '/EXFOR/gammas/'//trim(caz)
-      ELSE
-        WRITE (8,
-     & '(''  WARNING: No EXFOR retrievals for these projectiles'')')
-        WRITE (8,*)     
-        RETURN
-      ENDIF
-C     write(6,*)trim(empiredir)//trim(filename)
-      INQUIRE (FILE = trim(empiredir)//trim(filename), EXIST = fexist)
+      IF(IOPsys .EQ. 0) then  !Linux, Mac
+C-------concatenate file name with the projectile path
+        IF(IZAejc(0) .EQ. 1) THEN
+          filename = '/EXFOR/neutrons/'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 1001) THEN
+          filename = '/EXFOR/protons/'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 1002) THEN
+          filename = '/EXFOR/deuterons/'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 2004) THEN
+          filename = '/EXFOR/alphas/'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 2003) THEN
+          filename = '/EXFOR/helions/'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 0) THEN
+          filename = '/EXFOR/gammas/'//trim(caz)
+        ELSE
+          WRITE (8,
+     &    '(''  WARNING: No EXFOR retrievals for these projectiles'')')
+          WRITE (8,*)     
+          RETURN
+        ENDIF
+      ELSE                    !Windows
+C-------concatenate file name with the projectile path
+        IF(IZAejc(0) .EQ. 1) THEN
+          filename = '\EXFOR\neutrons\'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 1001) THEN
+          filename = '\EXFOR\protons\'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 1002) THEN
+          filename = '\EXFOR\deuterons\'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 2004) THEN
+          filename = '\EXFOR\alphas\'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 2003) THEN
+          filename = '\EXFOR\helions\'//trim(caz)
+        ELSEIF(IZAejc(0) .EQ. 0) THEN
+          filename = '\EXFOR\gammas\'//trim(caz)
+        ELSE
+          WRITE (8,
+     &   '(''  WARNING: No EXFOR retrievals for these projectiles'')')
+          WRITE (8,*)     
+          RETURN
+        ENDIF
+      ENDIF 
+
+      ccomm = trim(empiredir)//trim(filename)
+      ilen  = len(trim(ccomm))
+      INQUIRE (FILE = ccomm(1:ilen), EXIST = fexist)
+C     write(6,*) ccomm(1:ilen),ilen,fexist
       IF (.NOT. fexist) THEN
         WRITE (*,
      & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
-        write (*,*)' ',trim(empiredir)//trim(filename)
+        write (*,*)' ',ccomm(1:ilen)
         WRITE (*,*)
         WRITE (8,
-     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
-        write (8,*)' ',trim(empiredir)//trim(filename)
+     & '(''WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
+        write (8,*)' ',ccomm(1:ilen)
         WRITE (8,*)
         RETURN 
       ENDIF
 
 C-----Create full command string
       IF(IOPsys .EQ. 0) then  !Linux, Mac
-        ctmp = 'cp '//trim(empiredir)//trim(filename)//' TMP.c4'
+        ctmp = 'cp '//ccomm(1:ilen)//' TMP.c4'
       ELSE                    !Windows
-         ctmp = 'copy '//trim(empiredir)//trim(filename)//' TMP.c4'
+         ctmp = 'copy '//ccomm(1:ilen)//' TMP.c4>NUL:'
       ENDIF 
 C-----copy EXFOR file to the working directory
-      write (8,*) ctmp
       iwin = pipe(ctmp) 
-
-      write(*,*) ' '
       WRITE (8,*) 
-     &  '  Retrieving and sorting EXFOR(C4) file: ',trim(filename)
+     &  'Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
+      write(8,*) ' '
       WRITE (*,*) 
-     &  '  Retrieving and sorting EXFOR(C4) file: ',trim(filename)
+     &  '  Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
       write(*,*) ' '
-
       IF(IOPsys .EQ. 0) then  !Linux, Mac
         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
+        INQUIRE (FILE = trim(empiredir)//'/scripts/sortc4', 
+     >     EXIST = fexist)
       ELSE                    !Windows
-        ctmp = trim(empiredir)//'/scripts/sortc4.bat TMP'
+        ctmp = trim(empiredir)//'\scripts\sortc4.bat TMP'
+        INQUIRE (FILE = trim(empiredir)//'\scripts\sortc4.bat', 
+     >     EXIST = fexist)
       ENDIF 
-      iwin = pipe(ctmp) 
+C     write(6,*) trim(empiredir)//'\scripts\sortc4.bat ',fexist
       
-      IF(IOPsys .EQ. 0) then  !Linux, Mac
-        ctmp = 'mv TMP.c4 C4.DAT'
-      ELSE                    !Windows
-        ctmp = 'move TMP.c4 C4.DAT'
-      ENDIF 
-      iwin = pipe(ctmp) 
-
+      IF(fexist) THEN
+        WRITE (8,*) 
+     &    'Sorting EXFOR(C4) file: ',ccomm(1:ilen)
+        WRITE (*,*) 
+     &    '  Sorting EXFOR(C4) file: ',ccomm(1:ilen)
+        write(*,*) ' '
+        iwin = pipe(ctmp) 
+      ELSE
+        IF(IOPsys .EQ. 0) then  !Linux, Mac
+          ctmp = 'mv TMP.c4 C4.DAT'
+        ELSE                    !Windows
+          ctmp = 'move TMP.c4 C4.DAT>NUL:'
+        ENDIF 
+        iwin = pipe(ctmp) 
+      ENDIF
       RETURN
       END
 C
@@ -9506,7 +9540,7 @@ c            CCFUS deformations
       ENDDO
  250  IF (beta2.EQ.0.D0) THEN
          ierr = 1
-	   WRITE (8,*) 
+         WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
          WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
@@ -9524,7 +9558,7 @@ c        CCFUS deformations
       ENDIF
       IF (beta3.EQ.0.D0) THEN
          ierr = 1
-	   WRITE (8,*) 
+         WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
          WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
@@ -9761,7 +9795,7 @@ C
      &        itmp
             STOP 'ERROR: Change LEVCC parameter in dimension.h; check lo  
      &ng listing'
-	   endif
+         endif
 
 C--------82 208    nucleus is treated as spherical or
 C        92 238    nucleus is treated as dynamically deformed                                              '
@@ -10294,18 +10328,18 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
             WRITE (8,'(/1x,A26/1x,A11,F7.3)')
      &      'TARGET INPUT DEFORMATION :', 
      &      'BETA (2+) =',beta2
-	   ELSE
+         ELSE
             WRITE (8,*)
      &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
      &      'TARGET SYST. DEFORMATION (Nobre et al):', 
      &      'BETA (2+) =',beta2
-	   ENDIF
+         ENDIF
          IF (DEFormed) THEN
             WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
             WRITE (8,*)
          ENDIF
-	ELSE
+      ELSE
          WRITE (8,'(/1x,A39/1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (2+) =',beta2
@@ -10327,7 +10361,7 @@ C        beta3 = 0.005
          WRITE (8,'(/1x,A39/1x,A11,F7.3)')
      &      'TARGET SYST. DEFORMATION (Nobre et al):', 
      &      'BETA (3-) =',beta3
-	ELSE
+      ELSE
          WRITE (8,'(/1x,A39/1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (3-) =',beta3
@@ -11107,7 +11141,7 @@ C
       INTEGER KAA, KEYload, KEY_gdrgfl, KEY_shape, KZZ,
      &        NANa(9000), NANz(9000), NARam(700), NG, NNA(300), NNG(300)
      &        , NNZ(300), NUMram, NZRam(700)
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
       COMMON /GSA   / KEY_shape, KEY_gdrgfl

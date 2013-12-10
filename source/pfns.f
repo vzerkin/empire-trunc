@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2909 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-07-05 22:59:44 +0200 (Do, 05 Jul 2012) $
+Ccc   * $Rev: 3639 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -800,7 +800,7 @@ c=========================================
       COMMON /inp_sp5/ eenc,signcf,nrnc
       COMMON /siglh/ nrll,nrhh,eell,sigll,eehh,sighh
 
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
    

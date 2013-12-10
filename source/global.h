@@ -1,6 +1,6 @@
-C $Rev: 3546 $
-C $Author: bcarlson $
-C $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+C $Rev: 3639 $
+C $Author: rcapote $
+C $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -141,7 +141,7 @@ C23456789012345678901234567890123456789012345678901234567890123456789012
      &                 CINred(ndlv), CELcor
       
       CHARACTER*21 REAction(ndnuc)
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       DOUBLE PRECISION RO(ndex,ndlw,2,ndnuc), ROF(ndex,ndlw,ndnuc),
      &                 ROPaa(ndnuc),ROFisp(nfisenmax,ndlw,2,nfhump),
@@ -255,7 +255,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,
      &                 BUNorm, NTNorm, COMega, BUReac, NTReac,
 
-     &                 gamm_tr, fiss_tr	 
+     &                 gamm_tr, fiss_tr    
 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,
@@ -295,7 +295,7 @@ C
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,
-     &                  ngamm_tr, nfiss_tr	 
+     &                  ngamm_tr, nfiss_tr       
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam, 
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc,
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,

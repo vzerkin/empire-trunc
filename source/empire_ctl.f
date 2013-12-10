@@ -1,6 +1,7 @@
-Ccc   * $Rev: 3563 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-11-27 22:46:32 +0100 (Mi, 27 Nov 2013) $
+$DEBUG
+Ccc   * $Rev: 3639 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -21,7 +22,7 @@ C--- The logical variable autofit is true when fitting, false for a normal run.
 C--- The logical variable sensit is true for sensitivity calc., false for a normal run.
 C
       parameter(mxfit=20)
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       logical autofit, sensit
       dimension pars(mxfit),dparmx(mxfit)
@@ -29,12 +30,13 @@ C
 
       CALL GETENV ('EMPIREDIR', empiredir)
 
-	EMPtitle='   '
+      EMPtitle='   '
 C
 C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
-      if(empiredir(1:1).eq.' ') empiredir(1:3)='..'
+C     if(empiredir(1:1).eq.' ') empiredir(1:3)='..'
+      if(empiredir(1:1).eq.' ') empiredir(1:2)='..'
 
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
 
@@ -740,7 +742,7 @@ C
       dimension sixa(mxinda),dsixa(mxinda),thex(mxinda),dthex(mxinda)
       dimension ipe(mxind),ipt(mxinda),istat(15,3)
       dimension angtmp(mxind),idtmp(mxind),loca(mxind)
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
@@ -1870,7 +1872,7 @@ Ccc
 
       IMPLICIT NONE
 
-      CHARACTER*64 EMPiredir
+      CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
