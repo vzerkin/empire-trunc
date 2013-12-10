@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3640 $
+Ccc   * $Rev: 3642 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-10 15:14:42 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Date: 2013-12-10 16:06:29 +0100 (Di, 10 Dez 2013) $
 C/*                                                    */
 C/* Subroutine to execute command line by FORTRAN code */
 C/* FORTRAN declaration:                               */
@@ -22,8 +22,6 @@ C
       RETURN
       END
 
-
-
 	integer*4 function ipipeCopyFile(fromfile,tofile)
 	character*(*) fromfile,tofile
 	character*512 ctmp
@@ -43,11 +41,14 @@ C
 	integer*4 function iCopyTxtFile(fromfile,tofile)
 	character*(*) fromfile,tofile
 	character*512 str
+	integer*4 ilen1,ilen2
 	iCopyTxtFile=0
 	ninp=555
 	nout=777
-	open(ninp,file=trim(fromfile),status='old',err=111)
-	open(nout,file=trim(tofile),status='unknown',err=112)
+	ilen1=len(trim(fromfile)) 
+	ilen2=len(trim(tofile)) 
+	open(ninp,file=fromfile(1:ilen1),status='old',err=111)
+	open(nout,file=tofile(1:ilen2),status='unknown',err=112)
 1	read (ninp,'(a512)',end=200) str
 c	write (*,'(a)') trim(str)
 	write (nout,'(a)') trim(str)
