@@ -1,6 +1,6 @@
-#$Rev: 3636 $
+#$Rev: 3637 $
 #$Author: bcarlson $
-#$Date: 2013-12-10 09:30:28 +0100 (Di, 10 Dez 2013) $
+#$Date: 2013-12-10 09:33:16 +0100 (Di, 10 Dez 2013) $
 
 # set default fortran compiler:
 
@@ -31,7 +31,7 @@ ifeq ($(FC),gfortran)
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -ffpe-trap=zero -std=legacy -ftrapv 
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
   #----flags for ECIS
   EFLAGS = -O2 -std=legacy -ffast-math
