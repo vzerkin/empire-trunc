@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3546 $
+Ccc   * $Rev: 3641 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+Ccc   * $Date: 2013-12-10 15:51:18 +0100 (Di, 10 Dez 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -89,12 +89,14 @@ C-----
 C-----
 C-----Discrete levels
 C-----
+      nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)  
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
+C         write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
 C--------Add contribution to recoils auxiliary matrix for discrete levels
          REClev(il,Nejc) = REClev(il,Nejc) + pop1
 C--------Add contribution of discrete levels to emission spectra
@@ -104,7 +106,7 @@ C--------distance of the actual energy to the bin energy
 C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
     
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
-     &       Nejc.EQ.0) THEN
+     &       Nejc.EQ.0 .OR. Nejc.GT.3) THEN
 
             IF(NPRIm_g.GT.0) THEN  ! Primary gammas stored 
               IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
@@ -126,20 +128,25 @@ C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
             xcse = eemi/DE + 1.0001
             icsl = min(INT(xcse),NDECSE-1)
             icsh = icsl + 1
-            popl = pop1*(FLOAT(icsh) - xcse)/DE
+            IF(icsl.LT.nspec) THEN
+              popl = pop1*(FLOAT(icsh) - xcse)/DE
+              poph = pop1*(xcse - FLOAT(icsl))/DE
+             ELSE
+              popl = pop1/DE
+              poph = 0.0d0
+             ENDIF
             popll = popl            !we also need popl not multiplied by 2
             IF (icsl.EQ.1) popl = 2.0*popl
 C
 C           Addition of discrete gamma to spectra 
 C
-            poph = pop1*(xcse - FLOAT(icsl))/DE
             CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
 C
             CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
    
-            IF (popll.NE.0.0D+0) THEN
+            IF (popll.GT.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
@@ -147,7 +154,7 @@ C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                ENDIF
             ENDIF
-            IF (poph.NE.0.0D+0) THEN
+            IF (poph.GT.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
