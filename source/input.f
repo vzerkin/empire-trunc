@@ -1,6 +1,6 @@
-!cc   * $Rev: 3639 $
+!cc   * $Rev: 3643 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
+!cc   * $Date: 2013-12-10 16:07:13 +0100 (Di, 10 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -9411,20 +9411,19 @@ C     write(6,*) ccomm(1:ilen),ilen,fexist
         RETURN 
       ENDIF
 
-C-----Create full command string
-      IF(IOPsys .EQ. 0) then  !Linux, Mac
-        ctmp = 'cp '//ccomm(1:ilen)//' TMP.c4'
-      ELSE                    !Windows
-         ctmp = 'copy '//ccomm(1:ilen)//' TMP.c4>NUL:'
-      ENDIF 
 C-----copy EXFOR file to the working directory
-      iwin = pipe(ctmp) 
       WRITE (8,*) 
      &  'Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
       write(8,*) ' '
       WRITE (*,*) 
      &  '  Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
       write(*,*) ' '
+
+      iwin=iCopyTxtFile(ccomm(1:ilen),'TMP.c4')
+C     iwin=ipipeCopyFile(ccomm(1:ilen),'TMP.c4')
+C-----------------------------------------------------------
+C     Calling sortc4 should be moved to runE script (python)
+C
       IF(IOPsys .EQ. 0) then  !Linux, Mac
         ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
         INQUIRE (FILE = trim(empiredir)//'/scripts/sortc4', 
@@ -9434,6 +9433,7 @@ C-----copy EXFOR file to the working directory
         INQUIRE (FILE = trim(empiredir)//'\scripts\sortc4.bat', 
      >     EXIST = fexist)
       ENDIF 
+C-----------------------------------------------------------
 C     write(6,*) trim(empiredir)//'\scripts\sortc4.bat ',fexist
       
       IF(fexist) THEN
