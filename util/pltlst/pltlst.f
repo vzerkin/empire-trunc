@@ -22,6 +22,8 @@ C-V  2012/03 - Guard cosines>1 in C4 - interpret as degrees
 C-V          - Add mu-bar to the list of reactions (MF3/MT251),
 C-V  2012/07 - Improve the checking against illegal cosines.
 C-V          - Add to list some MT9000 entries that got missed.
+C-V  2013/12 Suppress adding total cross sections for incident
+C-V          charged particles and duplicate entries. (A. Trkov)
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -155,7 +157,6 @@ C* Read flags until blank or EOF
         NDDXN=1
         WRITE(LTT,903) ' Force double-differen. x.s. to the list'
       END IF
-c... Temporarily inactive until tested!!!
       IF(FLNM(1:7).EQ.'xsmajor') THEN
         NXSMJR=1
         WRITE(LTT,903) ' Force major cross sections to the list '
@@ -177,6 +178,12 @@ C* Read the first C4 record
       IF(REC(1:40).EQ.BLNK) GO TO 80
       READ (REC,902) IZI0,IZA0,MS0,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
      &              ,PRA0,PRB0,PRC0,PRD0,CHC0,REF0,NEN0,NSU0
+      IF(NXSMJR.GT.0) THEN
+        IF(IZI0.GT.1) MJRXS(1)=-IABS(MJRXS(1))
+        DO I=1,MXXS
+          IF(MJRXS(I).EQ.MT0) MJRXS(I)=-IABS(MJRXS(I))
+        END DO
+      END IF
       NAN=0
       MAN=0
       IZP0=1
@@ -232,6 +239,12 @@ C* Process all C4 records and check for changes
       IF(REC(1:40).EQ.BLNK) GO TO 40
       READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
+      IF(NXSMJR.GT.0) THEN
+        IF(IZI1.GT.1) MJRXS(1)=-IABS(MJRXS(1))
+        DO I=1,MXXS
+          IF(MJRXS(I).EQ.MT1) MJRXS(I)=-IABS(MJRXS(I))
+        END DO
+      END IF
       IEF =0
       IZP1=1
       LVL1=0
@@ -482,13 +495,20 @@ C*      -- Set output record
    43   IF(NXSMJR.GT.MXXS) GO TO 44
         MTX   =MJRXS(NXSMJR)
         NXSMJR=NXSMJR+1
+C*      -- Suppress fission for nuclides with Z>90
         IF(MTX.EQ.18 .AND.IZX.LT.90) GO TO 48
+C*      -- Suppress total for incident charged particles
+C...
+C...    print *,'mtx,izi0,nxsmjr,mjr'
+C... &          ,mtx,izi0,nxsmjr-1,mjrxs(nxsmjr-1)
+C...
+        IF(MTX.LT.0) GO TO 48
         MFX   =3
         IZIX  =IZI0
         IF     (MTX.EQ.  1) THEN
           IZPX  =0
         ELSE IF(MTX.EQ.  4) THEN
-          IZPX  =IZIX
+          IZPX  =1
         ELSE IF(MTX.EQ. 16) THEN
           IZPX  =1
         ELSE IF(MTX.EQ.102) THEN
