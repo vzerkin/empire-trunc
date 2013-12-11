@@ -1,6 +1,6 @@
-!cc   * $Rev: 3645 $
+!cc   * $Rev: 3648 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-11 01:51:43 +0100 (Mi, 11 Dez 2013) $
+!cc   * $Date: 2013-12-11 12:40:10 +0100 (Mi, 11 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -653,7 +653,7 @@ C--------NEMC  number of clusters emitted
 
          IF (NEMc.GT.0 .OR.  NDEjc.EQ.7) THEN
            WRITE (8,*)
-     >' WARNING: Emission of clusters is disabled in EMPIRE-3 version'
+     >' WARNING: Emission of clusters is disabled in EMPIRE-3 version  '
            WRITE (8,*)
      >' WARNING: Contact authors if interested to calculate them at:   '
            WRITE (8,*)
@@ -9336,7 +9336,8 @@ C
       CHARACTER*64 filename
       INTEGER*4 pipe
       INTEGER*4 iwin
-      CHARACTER*132 ctmp, ccomm
+      CHARACTER*132 ctmp
+      CHARACTER*255 ccomm
       LOGICAL fexist
 
 C     write(6,*)trim(empiredir)//trim(filename)
@@ -9353,47 +9354,24 @@ C
      &   int(Z(0)),'_',SYMb(0)(1:2),'_', int(A(0)),'.c4'
       endif
       
-      IF(IOPsys .EQ. 0) then  !Linux, Mac
-C-------concatenate file name with the projectile path
-        IF(IZAejc(0) .EQ. 1) THEN
-          filename = '/EXFOR/neutrons/'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 1001) THEN
-          filename = '/EXFOR/protons/'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 1002) THEN
-          filename = '/EXFOR/deuterons/'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 2004) THEN
-          filename = '/EXFOR/alphas/'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 2003) THEN
-          filename = '/EXFOR/helions/'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 0) THEN
-          filename = '/EXFOR/gammas/'//trim(caz)
-        ELSE
-          WRITE (8,
+      IF(IZAejc(0) .EQ. 1) THEN
+        filename = '/EXFOR/neutrons/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 1001) THEN
+        filename = '/EXFOR/protons/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 1002) THEN
+        filename = '/EXFOR/deuterons/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 2004) THEN
+        filename = '/EXFOR/alphas/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 2003) THEN
+        filename = '/EXFOR/helions/'//trim(caz)
+      ELSEIF(IZAejc(0) .EQ. 0) THEN
+        filename = '/EXFOR/gammas/'//trim(caz)
+      ELSE
+        WRITE (8,
      &    '(''  WARNING: No EXFOR retrievals for these projectiles'')')
-          WRITE (8,*)     
-          RETURN
-        ENDIF
-      ELSE                    !Windows
-C-------concatenate file name with the projectile path
-        IF(IZAejc(0) .EQ. 1) THEN
-          filename = '\EXFOR\neutrons\'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 1001) THEN
-          filename = '\EXFOR\protons\'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 1002) THEN
-          filename = '\EXFOR\deuterons\'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 2004) THEN
-          filename = '\EXFOR\alphas\'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 2003) THEN
-          filename = '\EXFOR\helions\'//trim(caz)
-        ELSEIF(IZAejc(0) .EQ. 0) THEN
-          filename = '\EXFOR\gammas\'//trim(caz)
-        ELSE
-          WRITE (8,
-     &   '(''  WARNING: No EXFOR retrievals for these projectiles'')')
-          WRITE (8,*)     
-          RETURN
-        ENDIF
-      ENDIF 
+        WRITE (8,*)     
+        RETURN
+      ENDIF
 
       ccomm = trim(empiredir)//trim(filename)
       ilen  = len(trim(ccomm))
@@ -9421,36 +9399,9 @@ C-----copy EXFOR file to the working directory
 
       iwin=iCopyTxtFile(ccomm(1:ilen),'TMP.c4')
 C     iwin=ipipeCopyFile(ccomm(1:ilen),'TMP.c4')
-C-----------------------------------------------------------
-C     Calling sortc4 should be moved to runE script (python)
 C
-      IF(IOPsys .EQ. 0) then  !Linux, Mac
-        ctmp = trim(empiredir)//'/scripts/sortc4 TMP'
-        INQUIRE (FILE = trim(empiredir)//'/scripts/sortc4', 
-     >     EXIST = fexist)
-      ELSE                    !Windows
-        ctmp = trim(empiredir)//'\scripts\sortc4.bat TMP'
-        INQUIRE (FILE = trim(empiredir)//'\scripts\sortc4.bat', 
-     >     EXIST = fexist)
-      ENDIF 
-C-----------------------------------------------------------
-C     write(6,*) trim(empiredir)//'\scripts\sortc4.bat ',fexist
-      
-      IF(fexist) THEN
-        WRITE (8,*) 
-     &    'Sorting EXFOR(C4) file: ',ccomm(1:ilen)
-        WRITE (*,*) 
-     &    '  Sorting EXFOR(C4) file: ',ccomm(1:ilen)
-        write(*,*) ' '
-        iwin = pipe(ctmp) 
-      ELSE
-        IF(IOPsys .EQ. 0) then  !Linux, Mac
-          ctmp = 'mv TMP.c4 C4.DAT'
-        ELSE                    !Windows
-          ctmp = 'move TMP.c4 C4.DAT>NUL:'
-        ENDIF 
-        iwin = pipe(ctmp) 
-      ENDIF
+C     Call to sortc4 moved to runE script
+C      
       RETURN
       END
 C
