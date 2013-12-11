@@ -1,6 +1,6 @@
-!cc   * $Rev: 3648 $
+!cc   * $Rev: 3649 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-11 12:40:10 +0100 (Mi, 11 Dez 2013) $
+!cc   * $Date: 2013-12-11 13:00:13 +0100 (Mi, 11 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -9334,9 +9334,7 @@ C Local variables
 C
       CHARACTER*13 caz
       CHARACTER*64 filename
-      INTEGER*4 pipe
       INTEGER*4 iwin
-      CHARACTER*132 ctmp
       CHARACTER*255 ccomm
       LOGICAL fexist
 
