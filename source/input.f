@@ -1,6 +1,6 @@
-!cc   * $Rev: 3643 $
+!cc   * $Rev: 3645 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-10 16:07:13 +0100 (Di, 10 Dez 2013) $
+!cc   * $Date: 2013-12-11 01:51:43 +0100 (Mi, 11 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -653,7 +653,7 @@ C--------NEMC  number of clusters emitted
 
          IF (NEMc.GT.0 .OR.  NDEjc.EQ.7) THEN
            WRITE (8,*)
-     >' WARNING: Emission of clusters is disabled in EMPIRE-3.1 version'
+     >' WARNING: Emission of clusters is disabled in EMPIRE-3 version'
            WRITE (8,*)
      >' WARNING: Contact authors if interested to calculate them at:   '
            WRITE (8,*)
@@ -3499,14 +3499,14 @@ C      IPArCOV = 0
       WRITE (8,*)'                       |                          |'
       open(23,file=trim(empiredir)//"/version",status='OLD',
      >    ERR=753)
-C     VERSIONNUMBER = 3.1
-C     VERSIONNAME   = RIVOLI
+C     VERSIONNUMBER = 3.2
+C     VERSIONNAME   = MALTA
       read(23,'(16x,A5)',ERR=753,END=7531) emp_ver
       read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
       close(23)
       goto 7541
- 7531 emp_ver='3.1.1 '
-      emp_nam='Rivoli'
+ 7531 emp_ver='3.2   '
+      emp_nam='MALTA '
  7541 WRITE(8,'(A44,A6,A2)') 
      > '                        |    E M P I R E  - ',emp_ver,' |'
       WRITE (8,*)
