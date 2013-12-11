@@ -1,6 +1,6 @@
-cc   * $Rev: 3646 $
+cc   * $Rev: 3650 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-11 01:53:39 +0100 (Mi, 11 Dez 2013) $
+Ccc   * $Date: 2013-12-11 13:24:34 +0100 (Mi, 11 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3142,7 +3142,7 @@ C
                      WRITE (12,
      &              '(4x,''Lev #'',5x,''Integrated Discrete Spectra'')')
                      WRITE (12,
-     &              '(10x,''    Energy    Int-DDX[mb]   Elev'')')
+     &    '(10x,''    Energy    Int-DDX[mb]      Disc.Lev.XS   Elev'')')
                      WRITE (12,*) ' '
                      htmp = 0.d0
                      DO il = 2, NLV(nnuc)  ! discrete levels
@@ -3186,9 +3186,9 @@ C
                    WRITE(12,*) 
                    WRITE(12,'(10x,
      &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
-                   WRITE(12,'(10x,
-     &                ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,INExc(nnuc))
+C                  WRITE(12,'(10x,
+C    &                ''Emiss. cross section '',G12.6,'' mb'' )') 
+C    &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
@@ -3227,9 +3227,9 @@ C                  endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
-                   WRITE(12,'(2x,
-     &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
-     &                  CSEmis(nejc,INExc(nnuc))
+C                  WRITE(12,'(2x,
+C    &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
+C    &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
