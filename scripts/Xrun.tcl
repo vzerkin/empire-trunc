@@ -1,6 +1,6 @@
-# $Rev: 3601 $
+# $Rev: 3652 $
 # $Author: rcapote $
-# $Date: 2013-12-03 12:02:16 +0100 (Di, 03 Dez 2013) $
+# $Date: 2013-12-11 20:04:52 +0100 (Mi, 11 Dez 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5495,7 +5495,8 @@ global widget file
       if [regexp ==== $line] {break}
    set num [string range $line 73 75]
    set pej [string range $line 80 83]
-   set ej  [string range $line 13 16]
+#  set ej  [string range $line 13 16]
+   set ej  [string range $line 12 16]
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
    set ein [string range $line 45 53]
@@ -5511,14 +5512,14 @@ global widget file
    } elseif {$pej == "1003"} {set pejc "t"
    } else {set pejc "?"
    }
-   if { $ej == "   0" } {set ejc "g"
-   } elseif {$ej == "   1"} {set ejc "n"
-   } elseif {$ej == "1001"} {set ejc "p"
-   } elseif {$ej == "2004"} {set ejc "a"
-   } elseif {$ej == "1002"} {set ejc "d"
-   } elseif {$ej == "2003"} {set ejc "h"
-   } elseif {$ej == "1003"} {set ejc "t"
-   } else {set ejc "?"
+   if { $ej == "    0" } {set ejc "g"
+   } elseif {$ej == "    1"} {set ejc "n"
+   } elseif {$ej == " 1001"} {set ejc "p"
+   } elseif {$ej == " 2004"} {set ejc "a"
+   } elseif {$ej == " 1002"} {set ejc "d"
+   } elseif {$ej == " 2003"} {set ejc "h"
+   } elseif {$ej == " 1003"} {set ejc "t"
+   } else {set ejc "$ej"
    }
    if { $mtt == "   1" } {set mt "total"
    } elseif {$mtt == "   2"} {set mt "elast."
@@ -5564,7 +5565,16 @@ global widget file
    } elseif {$mtt == "  34"} {set mt "nh   "
    } elseif {$mtt == " 251"} {set mt "mu-el."
    } elseif {$mtt == "  51"} {set mt "inel."
-   } elseif {$mtt >= 9000} {set mt "X$ejc  "
+   } elseif {$mtt >= 9000} {
+     if {$ejc == "g"} {set mt "Xg"
+     } elseif {$ejc == "n"} {set mt "Xn"
+     } elseif {$ejc == "p"} {set mt "Xp"
+     } elseif {$ejc == "a"} {set mt "Xa"
+     } elseif {$ejc == "d"} {set mt "Xd"
+     } elseif {$ejc == "h"} {set mt "Xh"
+     } elseif {$ejc == "t"} {set mt "Xt"
+     } else {set mt "$ejc"
+     }
    } else {set mt $mtt
    }
    if { $mff == "  1" } { set mf INFO
