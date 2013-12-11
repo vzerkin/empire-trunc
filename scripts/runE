@@ -172,8 +172,8 @@ def runE(proj):
 	#Sorting the newly created C4 file
     if (not os.path.exists(proj+'.c4')):
         mv('TMP.c4',proj+'.c4')	
-	    cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-	    os.system('"%s" %s' % (cmd, proj) )
+        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+        os.system('"%s" %s' % (cmd, proj) )
 		
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
