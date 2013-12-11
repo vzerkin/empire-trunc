@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3546 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+Ccc   * $Rev: 3646 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-11 01:53:39 +0100 (Mi, 11 Dez 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -36,14 +36,12 @@ C
 C Local variables
 C
       DOUBLE PRECISION csemax, e, s0, s1, s2, s3, totspec
-      DOUBLE PRECISION DMAX1
-      REAL FLOAT, SNGL
+      DOUBLE PRECISION recorp
       CHARACTER haha, hstar, symc(93)
       INTEGER i, ia, ij, kmax, l, n
-      INTEGER IFIX, MIN0
       DATA hstar, haha/'*', ' '/
 
-      csemax = 0.
+      csemax = 0.d0
       kmax = 1
       DO i = 1, NDECSE
          IF (CSEt(i,Nejc).GT.0.d0) kmax = i
@@ -101,8 +99,13 @@ C
 99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
          ENDIF
       ENDIF
-      
-      n = IFIX(SNGL(LOG10(csemax) + 1.))
+C
+C     The CMS-LAB assumes only the emission dominated by the 1st CNA
+C
+      recorp = 1.d0
+      if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
+
+      n = IFIX(SNGL(LOG10(csemax*recorp) + 1.))
       s3 = 10.**n
       s2 = s3*0.1
       s1 = s2*0.1
@@ -137,7 +140,7 @@ C
          DO ij = 1, 93
             symc(ij) = haha
          ENDDO
-  150    WRITE (8,99040) e, CSEt(i,Nejc), symc
+  150    WRITE (8,99040) e/recorp, CSEt(i,Nejc)*recorp, symc
 99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
       totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
@@ -181,6 +184,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, dtmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
+
       INTEGER i, ia, kmax, ie, itmp
 
       csemax = 0.d0
@@ -216,6 +220,11 @@ C     nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(nejc,1))/DE) + 1)
 C     IF (nspec.LE.1) RETURN
       nspec = kmax - 1
       IF(nspec.LT.1) RETURN
+C
+C     The CMS-LAB assumes only the emission dominated by the 1st CN
+C
+      recorp = 1.d0
+      if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
       IF (Nejc.EQ.0) THEN
 C
@@ -292,7 +301,7 @@ C          Subtract direct contribution to CM emission spectrum
            ENDIF
          ENDDO 
 C
-	   CSE(1,nejc,0) = 2*CSE(1,nejc,0)
+C        CSE(1,nejc,0) = 2*CSE(1,nejc,0)
          totspec = 0.d0
          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,nejc,0) 
@@ -342,11 +351,13 @@ C--------Inclusive DDX spectrum
            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc)
            if(htmp.LE.0.d0) cycle
+           itmp = 1
+           if(ie.eq.1) itmp = 2
            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
-     &       *DE/recorp, htmp*recorp, check_DE(ie)*recorp,
+     &       *DE/recorp, htmp*recorp*itmp, check_DE(ie)*recorp*itmp,
      &       (htmp - check_DE(ie)) * recorp, 
      &       (htmp - check_DE(ie)) / htmp * 100
-           ftmp = ftmp + check_DE(ie)
+           ftmp = ftmp + check_DE(ie)*itmp
          ENDDO
 C        ftmp = ftmp + check_DE(nspec + 1)
          ! exact endpoint
@@ -365,12 +376,14 @@ C        ftmp = ftmp + check_DE(nspec + 1)
       csum = 0.d0
       dtmp = 0.d0
       DO nnuc = 1, NNUcd
-          csum = csum + CSEmis(nejc,nnuc)
-        if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(nejc,nnuc)
-      ENDDO
 
-      WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-     &  dtmp      
+C        write(12,*) nnuc,CSEmis(nejc,nnuc)
+         csum = csum + CSEmis(nejc,nnuc)
+         if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(nejc,nnuc)
+      ENDDO
+      if (ENDf(nnuc).eq.2) 
+     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+     &   dtmp      
       IF(Nejc.ne.0) THEN
         WRITE (12,
      &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')
@@ -420,7 +433,6 @@ C
       DOUBLE PRECISION csemax, e, s0, s1, s2, s3, totspec, recorp
       CHARACTER haha, hstar, symc(93)
       INTEGER i, ia, ij, kmax, l, n
-      INTEGER IFIX, MIN0
       DATA hstar, haha/'*', ' '/
 
       csemax = 0.d0
@@ -532,7 +544,7 @@ C     totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec  
-	IF(Nejc.ne.0) THEN
+      IF(Nejc.ne.0) THEN
         WRITE (8,'(2X,A2,'' emission cross section'',G12.6,''  mb'')')
      &          SYMbe(nejc), CSEmis(nejc,nnuc)
       ELSE
@@ -619,7 +631,7 @@ C
      & '(a5, i2,1h-,A2,1h-,I3,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
 
-	recorp = 1.d0
+      recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
 
       CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
@@ -662,7 +674,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csemax, totspec
+      DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
       CHARACTER*8 caz 
       CHARACTER*31 title
@@ -694,16 +706,26 @@ C
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: Total Emission Spectra ',part(Nejc),totspec
 
+
+C
+
+C     The CMS-LAB assumes only the emission dominated by the 1st CNA
+C
+      recorp = 1.d0
+
+      if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
+
+
+
       CALL OPEN_ZVV(36,'sp_'//part(Nejc),title)
       DO i = 1, kmax
       IF(CSEt(i,Nejc).LE.0.d0) CYCLE
-         WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6, 
-     &       CSEt(i,Nejc)*1.d-3 ! Energy, Spectra in b/MeV
+         WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6/recorp, 
+     &       CSEt(i,Nejc)*1.d-3*recorp ! Energy, Spectra in b/MeV
       ENDDO
       CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
       CLOSE(36)
       RETURN
       END
-
 
 

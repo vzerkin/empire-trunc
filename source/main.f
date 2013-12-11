@@ -1,6 +1,6 @@
-cc   * $Rev: 3638 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-10 09:41:27 +0100 (Di, 10 Dez 2013) $
+cc   * $Rev: 3646 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-11 01:53:39 +0100 (Mi, 11 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3595,13 +3595,13 @@ C     ENDDO
       WRITE (8,*) ' '
 C     WRITE (8,*)
 
-      IF (IOUt.GT.5 .AND. .NOT.EXClusiv ) THEN
+      IF (IOUt.GT.3 .AND. .NOT.EXClusiv ) THEN
 
          IF (FIRst_ein) THEN 
             WRITE (8,*)
             WRITE (8,*)
             WRITE (8,'(11X,''**********************'')')
-            WRITE (8,'(11x,'' Total spectra (C.M.)'')')
+            WRITE (8,'(11x,'' Total spectra (~LAB) '')')
             WRITE (8,'(11x,''**********************'')')
             DO nejc = 0, NEJcm
               csemax = 0.d0
