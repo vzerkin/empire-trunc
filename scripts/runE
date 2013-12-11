@@ -169,7 +169,12 @@ def runE(proj):
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
     
-    
+	#Sorting the newly created C4 file
+    if (not os.path.exists(proj+'.c4')):
+        mv('TMP.c4',proj+'.c4')	
+	    cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+	    os.system('"%s" %s' % (cmd, proj) )
+		
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
@@ -264,8 +269,8 @@ def runE(proj):
     # Commented to avoid overwriting the existing file (not an output file)   
     #if not isEmpty('C4.DAT'):
     #    mv('C4.DAT',proj+'.c4',0)
-    if isEmpty(proj+'.c4'):
-        mv('C4.DAT',proj+'.c4',0)
+    #if isEmpty(proj+'.c4'):
+    #    mv('C4.DAT',proj+'.c4',0)
 
     if not isEmpty('ECIS_SPH.inp'):
         mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
