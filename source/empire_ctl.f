@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 3639 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Rev: 3654 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-12-12 11:16:15 +0100 (Do, 12 Dez 2013) $
 
       PROGRAM EMPIRE_CTL
 C

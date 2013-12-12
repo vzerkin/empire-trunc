@@ -1,6 +1,6 @@
-cc   * $Rev: 3650 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-11 13:24:34 +0100 (Mi, 11 Dez 2013) $
+cc   * $Rev: 3654 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2013-12-12 11:16:15 +0100 (Do, 12 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -563,6 +563,7 @@ C-----
           ggmr = 3.d0
           ggqr =85.d0*A(0)**(-2./3.)
           ggor =5.d0
+          nspec= min(INT(EMAx(nnurec)/DE) + 1,NDECSE-1)
           OPEN (46,FILE = (ctldir//ctmp23//'.ICS'),STATUS = 'OLD',
      &         ERR = 1400)
           READ (46,*,END = 1400) ctmp ! To skip first line <INE.C.S.> ..
@@ -648,9 +649,14 @@ C
                CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
                CSEmis(nejcec,1) = CSEmis(nejcec,1) + popread
 C--------------Add direct transition to the spectrum
-               popl = popread*(FLOAT(icsh) - xcse)/DE
+               IF(icsl.LT.nspec) THEN
+                 popl = pop1*(FLOAT(icsh) - xcse)/DE
+                 poph = pop1*(xcse - FLOAT(icsl))/DE
+                ELSE
+                 popl = pop1/DE
+                 poph = 0.0d0
+                ENDIF
                IF (icsl.EQ.1) popl = 2.0*popl
-               poph = popread*(xcse - FLOAT(icsl))/DE
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
 
@@ -1616,7 +1622,7 @@ C--------Reset variables for life-time calculations
                DO il = 1, NLV(nnuc)
                  dtmp = dtmp + CSDirlev(il,nejc)
                ENDDO
-               IF(dtmp.LE.0.0 .and. POPlv(1,nnuc).eq.0.d0) GOTO 1460
+               IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
                WRITE (12,*)
                WRITE (12,*)
      &' ---------------------------------------------------------------'
@@ -3157,7 +3163,8 @@ C
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
-     &                G12.6,'' mb'')') pop_disc(nejc)
+     &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
+c     &                G12.6,'' mb'')') pop_disc(nejc)
                      WRITE (12,*) ' '
                    ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
