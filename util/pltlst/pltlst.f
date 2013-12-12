@@ -49,7 +49,7 @@ C-M  exist, the program tries to read the entries from the default
 C-M  input. If an end-of-file is encountered on the input file, the
 C-M  remaining entries assume their default values.
 C-
-      PARAMETER   (MXAN=200,MXDDE=7,MXDDA=2,MXXS=5)
+      PARAMETER   (MXAN=200,MXDDE=7,MXDDA=2,MXXS=6)
       LOGICAL      EXST
       CHARACTER*1  CHA0,CHA1,CHB0,CHB1,MS0,MS1,MSX
       CHARACTER*2  CH(100)
@@ -89,7 +89,7 @@ C*      cross sections at fixed angles.
       DATA BL10/'          '/
       DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
       DATA ADDX/ 20., 160./
-      DATA MJRXS/ 1, 4, 16, 18, 102 /
+      DATA MJRXS/ 1, 3, 4, 16, 18, 102 /
       NO4000=0
       NXSMJR=0
       NDDXN =0
