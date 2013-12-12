@@ -1,6 +1,6 @@
-# $Rev: 3652 $
+# $Rev: 3655 $
 # $Author: rcapote $
-# $Date: 2013-12-11 20:04:52 +0100 (Mi, 11 Dez 2013) $
+# $Date: 2013-12-12 11:39:46 +0100 (Do, 12 Dez 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5524,7 +5524,7 @@ global widget file
    if { $mtt == "   1" } {set mt "total"
    } elseif {$mtt == "   2"} {set mt "elast."
    } elseif {$mtt == "   3"} {set mt "nonel."
-   } elseif {$mtt == "   4"} {set mt "inel-tot"
+   } elseif {$mtt == "   4"} {set mt "1n    "
    } elseif {$mtt == " 452"} {set mt "nu-tot"
    } elseif {$mtt == " 455"} {set mt "nu-del"
    } elseif {$mtt == " 456"} {set mt "nu-pr "
@@ -5532,6 +5532,14 @@ global widget file
    } elseif {$mtt == "  17"} {set mt "3n   "
    } elseif {$mtt == "  18"} {set mt "fiss."
    } elseif {$mtt == "  37"} {set mt "4n   "
+   } elseif {$mtt == " 152"} {set mt "5n   "
+   } elseif {$mtt == " 153"} {set mt "6n   "
+   } elseif {$mtt == " 154"} {set mt "2nt  "
+   } elseif {$mtt == " 155"} {set mt "ta   "
+   } elseif {$mtt == " 156"} {set mt "4np  "
+   } elseif {$mtt == " 157"} {set mt "3nd  "
+   } elseif {$mtt == " 160"} {set mt "7n   "
+   } elseif {$mtt == " 161"} {set mt "8n   "
    } elseif {$mtt == " 102"} {set mt "capt."
    } elseif {$mtt == " 103"} {set mt "p    "
    } elseif {$mtt == " 104"} {set mt "d    "
@@ -5546,6 +5554,13 @@ global widget file
    } elseif {$mtt == " 115"} {set mt "pd   "
    } elseif {$mtt == " 116"} {set mt "pt   "
    } elseif {$mtt == " 117"} {set mt "da   "
+   } elseif {$mtt == " 201"} {set mt "tot-n"
+   } elseif {$mtt == " 202"} {set mt "tot-g"
+   } elseif {$mtt == " 203"} {set mt "tot-p"
+   } elseif {$mtt == " 204"} {set mt "tot-d"
+   } elseif {$mtt == " 205"} {set mt "tot-t"
+   } elseif {$mtt == " 206"} {set mt "tot-h"
+   } elseif {$mtt == " 207"} {set mt "tot-a"
    } elseif {$mtt == "  19"} {set mt "nf-1c"
    } elseif {$mtt == "  20"} {set mt "nf-2c"
    } elseif {$mtt == "  21"} {set mt "nf-3c"
@@ -5580,6 +5595,7 @@ global widget file
    if { $mff == "  1" } { set mf INFO
    } elseif {$mff == "  2"} {set mf RES
    } elseif {$mff == "  3"} {set mf XS
+   } elseif {$mff == " 10"} {set mf XSD
    } elseif {$mff == "  4"} {set mf DA
    } elseif {$mff == "  5"} {set mf DE
      if {$mtt == "  18"} {set mt "PFNS"}
