@@ -1,6 +1,6 @@
-cc   * $Rev: 3654 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-12 11:16:15 +0100 (Do, 12 Dez 2013) $
+cc   * $Rev: 3657 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-13 13:18:20 +0100 (Fr, 13 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -231,38 +231,47 @@ C-----
         ENDDO
         nuc_print = i
 
-        IF (A(0).gt.220 .AND. 
-     &   ZEJc(NPRoject).EQ.0 .AND. AEJc(NPRoject).GT.0) then 
-C
-C        elastic and nonelastic modified for actinides
-C        to include/exclude low-lying coupled states
-         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+        IF (AEJc(NPRoject).EQ.0) then  ! incident photons
+
+          WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
+     &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+          WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+     &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+          WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+     &      '  Total     ','            ',' Nonel=Abs  ',
+     &      '  Fission   ','            ','  Nu-bar    ',
+     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+
+          WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
+     &      '  Total     ','            ','            ',
+     &      '            ',
+     &      ' Nonel=Abs  ','  CN-form   ','  Direct    ',
+     &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
+     &      'DWBA-cont   ','   MSD      ','    MSC     ',
+     &      '  PCROSS    ','   HMS      '
+        ELSE ! incident particles
+          IF (A(0).gt.220 .AND. ZEJc(NPRoject).EQ.0 ) then 
+C
+C           elastic and nonelastic modified for actinides
+C           to include/exclude low-lying coupled states
+            WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+     &        A123)') 
      &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (CE & Cross section
      &s of 2 CC added/substracted to Elastic/Nonelast respectively)'
-         WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+            WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
      &      15    ,SYMbe(NPROject), int(Z(0)), SYMb(0), int(A(0)),
      &   ' (Elastic cross section = Shape Elastic + Compound Elastic; fo  
      &r Elastic* and Nonelastic* see output *.xsc file)       '
-C    &      15    ,SYMbe(NPROject), int(Z(0)), SYMb(0), int(A(0)),
-C    &   ' Elastic* and Nonelast* modified for A>220 (Cross sections of 
-C    &2 CC added/substracted to Elastic/Nonelast respectively)'
 
-         WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+            WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic*  ',' Nonel-Cel* ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
-C        WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
-C    &      '  Total     ','  Elastic*  ','   CN-el    ',
-C    &      ' Nonelast*  ','  CN-form   ','  Direct    ',
-C    &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
-C    &      'DWBA-cont   ','   MSD      ','    MSC     ',
-C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
-
-         WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
+            WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','     Cel    ',
      &      '   Sel      ',
      &      ' Nonel-Cel  ','  CN-form   ','  Direct    ',
@@ -270,26 +279,29 @@ C    &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
-        ELSE
+          ELSE
 
-         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+            WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
      &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
-         WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+            WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
-         WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+            WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ',' Nonel-Cel  ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
-         WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
+            WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','     Cel    ',
      &      '   Sel      ',
      &      ' Nonel-Cel  ','  CN-form   ','  Direct    ',
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
-        ENDIF
+
+          ENDIF
+
+	  ENDIF
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
@@ -650,10 +662,10 @@ C
                CSEmis(nejcec,1) = CSEmis(nejcec,1) + popread
 C--------------Add direct transition to the spectrum
                IF(icsl.LT.nspec) THEN
-                 popl = pop1*(FLOAT(icsh) - xcse)/DE
-                 poph = pop1*(xcse - FLOAT(icsl))/DE
+                 popl = popread*(FLOAT(icsh) - xcse)/DE
+                 poph = popread*(xcse - FLOAT(icsl))/DE
                 ELSE
-                 popl = pop1/DE
+                 popl = popread/DE
                  poph = 0.0d0
                 ENDIF
                IF (icsl.EQ.1) popl = 2.0*popl
@@ -3163,8 +3175,8 @@ C
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
-     &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
-c     &                G12.6,'' mb'')') pop_disc(nejc)
+C    &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
+     &                G12.6,'' mb'')') pop_disc(nejc)
                      WRITE (12,*) ' '
                    ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
@@ -3689,19 +3701,19 @@ C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
         ELSE ! photon-induced
 
           WRITE(41,'(1P,E10.4,1x,1P,95E12.5)') 
-     &    EINl, TOTcs*TOTred*totcorr,
-     &    ELAcs*ELAred , TOTcs*TOTred*totcorr - ELAcs*ELAred, TOTcsfis, 
+     &    EINl, TOTcs*TOTred*totcorr, ELAcs*ELAred , 
+     &    TOTcs*TOTred*totcorr - ELAcs*ELAred - CSPrd(1), TOTcsfis, 
      &    mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred,   !+4.d0*PI*ELCncs                !shape elastic
+     &    ELAcs*ELAred,   
      &    4.d0*PI*ELCncs,                                 !CN_el
      &    ELAcs*ELAred,                                   !shape elastic 
 C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
-     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
+     &          - 4.d0*PI*ELCncs - CSPrd(1),              !CE substracted from nonelastic
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3741,7 +3753,7 @@ C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
             WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')
      &      EINl,TOTcs*TOTred*totcorr,
      &      ELAcs*ELAred,                   
-     &      TOTcs*TOTred*totcorr - ELAcs*ELAred,
+     &      TOTcs*TOTred*totcorr - ELAcs*ELAred - CSPrd(1),
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &      CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
@@ -3752,7 +3764,7 @@ C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &      ELAcs*ELAred,                                   !shape elastic 
 C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &      CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
-     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
+     &            - CSPrd(1) - 4.d0*PI*ELCncs,              !   CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
