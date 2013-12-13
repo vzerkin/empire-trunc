@@ -1,6 +1,6 @@
-cc   * $Rev: 3657 $
+cc   * $Rev: 3658 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-13 13:18:20 +0100 (Fr, 13 Dez 2013) $
+Ccc   * $Date: 2013-12-13 15:18:03 +0100 (Fr, 13 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3702,8 +3702,8 @@ C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
 
           WRITE(41,'(1P,E10.4,1x,1P,95E12.5)') 
      &    EINl, TOTcs*TOTred*totcorr, ELAcs*ELAred , 
-     &    TOTcs*TOTred*totcorr - ELAcs*ELAred - CSPrd(1), TOTcsfis, 
-     &    mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
+     &    max(TOTcs*TOTred*totcorr - ELAcs*ELAred - CSPrd(1),0.d0), 
+     &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
@@ -3712,9 +3712,9 @@ C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
      &    4.d0*PI*ELCncs,                                 !CN_el
      &    ELAcs*ELAred,                                   !shape elastic 
 C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
-     &          - 4.d0*PI*ELCncs - CSPrd(1),              !CE substracted from nonelastic
-     &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
+     &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Nonelastic
+     &      FCOred - 4.d0*PI*ELCncs - CSPrd(1),0.d0),     !CE substracted from nonelastic
+     &    max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
@@ -3730,8 +3730,8 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
             WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')
      &      EINl,TOTcs*TOTred*totcorr,
      &      ELAcs*ELAred           + 4.d0*PI*ELCncs,        ! CE added to elastic
-     &      TOTcs*TOTred*totcorr - ELAcs*ELAred 
-     &                           - 4.d0*PI*ELCncs,          ! CE substracted from nonelastic
+     &      max(TOTcs*TOTred*totcorr - ELAcs*ELAred 
+     &                           - 4.d0*PI*ELCncs,0.d0),    ! CE substracted from nonelastic
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &      CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
@@ -3741,8 +3741,8 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &                       4.d0*PI*ELCncs,                !CN_el
      &      ELAcs*ELAred                   ,                !shape elastic 
 C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
-     &      CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Total nonelastic
-     &                             - 4.d0*PI*ELCncs,        !   CE substracted from nonelastic
+     &      max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Total nonelastic
+     &         FCOred - 4.d0*PI*ELCncs,0.d0),               !   CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -3763,9 +3763,9 @@ C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
      &      4.d0*PI*ELCncs,                                 !CN_el
      &      ELAcs*ELAred,                                   !shape elastic 
 C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
-     &      CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
-     &            - CSPrd(1) - 4.d0*PI*ELCncs,              !   CE substracted from nonelastic
-     &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
+     &      max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Nonelastic
+     &         FCOred - CSPrd(1) - 4.d0*PI*ELCncs,0.d0),    !   CE substracted from nonelastic
+     &      max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &      xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
@@ -3780,8 +3780,8 @@ C
 C         Total is 0 for charged particles, no correction
 C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 C
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs, ! CE substracted from nonelastic
+     &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &                             - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
 C
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
@@ -3795,10 +3795,10 @@ C
 C         Total is 0 for charged particles, no correction
 C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 C
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs,      ! CE substracted from nonelastic
+     &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &                             - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
 C
-     &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
+     &    max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
      &    xsinl,xsmsc,totemis, tothms, xscclow            !MSD,MSC,PCROSS,HMS,xscclow(2 CC levels)
@@ -3825,7 +3825,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &              '' mb  '')') ELAred*ELAcs + 
      &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
      &        (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-          WRITE (8,
+         IF (INT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Shape Elastic cross section (ELAcs)            '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
         ENDIF
@@ -3903,7 +3903,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
 
-          WRITE (*,
+         IF (INT(AEJc(0)).GT.0) WRITE (*,
      &  '(''   Shape Elastic cross section (ELAcs)            '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
         ENDIF

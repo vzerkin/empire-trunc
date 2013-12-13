@@ -1,6 +1,6 @@
-!cc   * $Rev: 3649 $
+!cc   * $Rev: 3658 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-11 13:00:13 +0100 (Mi, 11 Dez 2013) $
+!cc   * $Date: 2013-12-13 15:18:03 +0100 (Fr, 13 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -333,7 +333,7 @@ C
          EXClusiv = .TRUE.! Default: All exclusive calculation
          WIDcoll = 0.05d0  ! Default = 50 keV resolution  
 C        Scaling factor for direct processes consideration for complex projectiles
-         DXSred = 0.d0     ! Default: supressed 
+         DXSred = 1.d0     ! Default: supressed 
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
@@ -468,7 +468,7 @@ C
          NTReac = 0.d0
          COMega = 1.6d0
 
-         IF(A(0).GE.2)THEN
+         IF(NINT(AEJc(0)).GE.2)THEN
             BUReac = 0.7d0
             NTReac = 0.9d0
          ENDIF
