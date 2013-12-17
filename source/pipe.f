@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3642 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-10 16:06:29 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Rev: 3659 $
+Ccc   * $Author: zerkinv $
+Ccc   * $Date: 2013-12-17 13:42:37 +0100 (Di, 17 Dez 2013) $
 C/*                                                    */
 C/* Subroutine to execute command line by FORTRAN code */
 C/* FORTRAN declaration:                               */
@@ -14,7 +14,7 @@ C/* The calling FORTRAN program must declare           */
 C/* PIPE as INTEGER*4 funtion to avoid memory problems */
 C/* Do not use default declaration please, they are    */
 C/* compiler and system dependent !!!!                 */
-C
+C 
       INTEGER*4 FUNCTION PIPE(Stringp)
       CHARACTER*(*) STRINGP
       pipe=0
