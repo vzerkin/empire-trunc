@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3254 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2012-11-21 08:54:15 +0100 (Mi, 21 Nov 2012) $
+Ccc   * $Rev: 3661 $
+Ccc   * $Author: zerkinv $
+Ccc   * $Date: 2013-12-18 12:23:59 +0100 (Mi, 18 Dez 2013) $
 C
 C
       SUBROUTINE BARFIT(Iz,Ia,Il,Bfis,Segs,Selmax)
@@ -296,7 +296,7 @@ C
                      z = el/Selmax
                      a1 = 4.*z**5 - 5.*z**4 + 1.
                      a2 = qa*(2.*z + 1.)
-                     Bfis = Bfis*(a1 + (z - 1.)*(a2 + qb*z)*z*z*(z - 1.)
+                     Bfis=Bfis*(a1 + (z - 1.)*(a2 + qb*z)*z**2*(z - 1.)
      &                      )
                   ENDIF
                   IF (Bfis.LE.0.0D0 .OR. el.GT.Selmax) Bfis = 0.0
