@@ -1,6 +1,6 @@
-cc   * $Rev: 3662 $
+cc   * $Rev: 3663 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-19 01:18:07 +0100 (Do, 19 Dez 2013) $
+Ccc   * $Date: 2013-12-19 01:46:32 +0100 (Do, 19 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -3168,12 +3168,6 @@ C--------------------Correct 'cseaprnt()' for eventual imprecision
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
                        ENDDO
-C                              double check
-C                      csum = 0.d0
-C                      DO nang = 1, NDANG
-C                          csum = csum + cseaprnt(ie,nang)*SANgler(nang)
-C                      ENDDO
-C                      check_DE(ie) = csum*coef
                      endif
                    ENDDO
 
@@ -3203,7 +3197,7 @@ C
      &nce     Elev'')')
                      WRITE (12,*) ' '
                      htmp = 0.d0
-                     DO il = 2, NLV(nnuc)  ! discrete levels
+                     DO il = 1, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,2x),F7.4)')  
@@ -3217,7 +3211,7 @@ C
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
-     &               ,G12.6,'' mb'')') CSDirlev(1,nejc)-pop_disc(1)
+     &               ,G12.6,'' mb'')') CSDirlev(1,nejc) ! - pop_disc(1)
                      WRITE (12,*) ' '
                    ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
@@ -3245,31 +3239,25 @@ C
      &                  check_DE(nspec+1) )*recorp, 0.d0
                    WRITE(12,*) 
                    WRITE(12,'(10x,
-     &                ''Integ. cont.spectrum '',G12.6,'' mb'' )') dtmp
+     &              ''Integral '',A1,'' cont.spec.'',G12.6,'' mb'' )') 
+     &             SYMbe(Nejc),dtmp
+
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
-C                  WRITE (12,'(10X,
-C    &                  ''Sum of disc. levels  '',G12.6,'' mb'')') htmp
                    WRITE(12,'(10x,
      &                  ''Total Integral       '',G12.6,'' mb'' )') 
-     &                  dtmp + htmp
+     &                  dtmp + htmp ! + pop_disc(1) 
+
                    WRITE(12,'(10x,
      &                  ''Total Population     '',G12.6,'' mb'' )') 
-     &                  CSDirlev(1,nejc) - pop_disc(1) +
-     &                  POPcs(nejc,INExc(nnuc))
-C                  WRITE(12,'(10x,
-C    &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
-C    &                  CSEmis(nejc,INExc(nnuc))
+     &                  CSDirlev(1,nejc) + POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
 
-                ELSE !  then (nejc.GT.0)
+                ELSE !  (nejc=0) GAMMAS
 C
 C------------------Exclusive DE spectra (gammas and light ions)
-C------------------double the first bin x-sec to preserve integral in EMPEND
-                   POPcse(0,nejc,1,INExc(nnuc)) =
-     &                   POPcse(0,nejc,1,INExc(nnuc))*2
                    WRITE (12,*) ' '
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '
@@ -3285,24 +3273,19 @@ C------------------double the first bin x-sec to preserve integral in EMPEND
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                    ENDDO
-C                  if(htmp.GT.0.d0) then
-                     dtmp = dtmp + 
+                   dtmp = dtmp + 
      &                    POPcse(0,nejc,nspec+1,INExc(nnuc))*DE*0.5d0         
                                               !exact endpoint
-                     WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                 max(0.d0,POPcse(0,nejc,nspec+1,
      &                 INExc(nnuc)))*recorp
-C                  endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
-     &                  ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
-C                  WRITE(12,'(2x,
-C    &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
-C    &                  CSEmis(nejc,INExc(nnuc))
+     &                  ''Total Integr.(gammas)'',G12.6,'' mb'' )') 
+     &                  dtmp 
                    WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
-
                    WRITE(12,*) 
 
                 ENDIF !  (nejc.GT.0)

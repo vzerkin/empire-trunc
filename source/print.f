@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3662 $
+Ccc   * $Rev: 3663 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-19 01:18:07 +0100 (Do, 19 Dez 2013) $
+Ccc   * $Date: 2013-12-19 01:46:32 +0100 (Do, 19 Dez 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -100,15 +100,10 @@ C
          ENDIF
       ENDIF
 C
-
 C     The CMS-LAB assumes only the emission dominated by the 1st CNA
-
 C
-
       recorp = 1.d0
-
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
-
 
       n = IFIX(SNGL(LOG10(csemax*recorp) + 1.))
       s3 = 10.**n
@@ -545,10 +540,6 @@ C
   150    WRITE (8,99040) e/recorp, CSE(i,Nejc,Nnuc)*recorp, symc
 99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
-
-C     if(Iflag.eq.0) totspec = totspec - 
-C    &               0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-C     totspec = totspec*DE
 
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
