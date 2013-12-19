@@ -1,6 +1,6 @@
-cc   * $Rev: 3658 $
+cc   * $Rev: 3662 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-13 15:18:03 +0100 (Fr, 13 Dez 2013) $
+Ccc   * $Date: 2013-12-19 01:18:07 +0100 (Do, 19 Dez 2013) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -54,7 +54,7 @@ C
      &                 crossPE(0:NDEJC),crossPEt
       COMMON /PEXS/ crossNT,crossNTt,crossPE,crossPEt
 
-      DOUBLE PRECISION specBU(0:NDEJC,NDEX),crossBU(0:NDEJC),crossBUt
+      DOUBLE PRECISION specBU(0:NDEJC,ndecse),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
 C
 C Local variables
@@ -71,7 +71,8 @@ C
      &                 totemis, weight, xcse, xizat, xnl, xnor, tothms,
      &                 xtotsp, xsinlcont, xsinl, zres, angstep, checkXS,
      &                 cseaprnt(ndecse,ndangecis),check_DE(ndecse),
-     &                 check_DL(NDLV),disc_int(NDLV),pop_disc(0:ndejc),
+     &                 check_DL(NDLV),disc_int(NDLV,0:ndejc),
+     &                 pop_disc(0:ndejc),      
      &                 cel_da(NDAngecis), totener_out, totener_in,
      &                 emedg, emedn, emedp, emeda, emedd, emedt, emedh, 
      &                 cmulg, cmuln, cmulp, cmula, cmuld, cmult, cmulh, 
@@ -233,24 +234,44 @@ C-----
 
         IF (AEJc(NPRoject).EQ.0) then  ! incident photons
 
+
+
           WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+
      &A123)') 
+
      &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+
           WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
+
      &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+
           WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+
      &      '  Total     ','            ',' Nonel=Abs  ',
+
      &      '  Fission   ','            ','  Nu-bar    ',
+
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
 
+
+
           WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
+
      &      '  Total     ','            ','            ',
+
      &      '            ',
+
      &      ' Nonel=Abs  ','  CN-form   ','  Direct    ',
+
      &      'Pre-equil   ','Coup-Chan   ',' DWBA-disc  ',
+
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
+
      &      '  PCROSS    ','   HMS      '
+
         ELSE ! incident particles
+
           IF (A(0).gt.220 .AND. ZEJc(NPRoject).EQ.0 ) then 
 C
 C           elastic and nonelastic modified for actinides
@@ -299,9 +320,12 @@ C           to include/exclude low-lying coupled states
      &      'DWBA-cont   ','   MSD      ','    MSC     ',
      &      '  PCROSS    ','   HMS      ','  CC(2 lev) '
 
+
           ENDIF
 
-	  ENDIF
+
+        ENDIF
+
 
         OPEN (98, FILE='FISS_XS.OUT', STATUS='unknown')
         WRITE(98,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
@@ -664,17 +688,29 @@ C--------------Add direct transition to the spectrum
                IF(icsl.LT.nspec) THEN
                  popl = popread*(FLOAT(icsh) - xcse)/DE
                  poph = popread*(xcse - FLOAT(icsl))/DE
-                ELSE
+               ELSE
                  popl = popread/DE
                  poph = 0.0d0
-                ENDIF
+               ENDIF
                IF (icsl.EQ.1) popl = 2.0*popl
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
+
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
+
 
                CSEt(icsl,nejcec) = CSEt(icsl,nejcec) + popl
                CSEt(icsh,nejcec) = CSEt(icsh,nejcec) + poph
 
+
+               IF (ENDf(nnurec).NE.1) THEN
+
+                 CSE(icsl,nejcec,0) = CSE(icsl,nejcec,0) + popl
+
+                 CSE(icsh,nejcec,0) = CSE(icsh,nejcec,0) + poph
+
+               ENDIF
+
+                    
                IF (ICAlangs.GT.0) THEN
                 IF (i.LE.ICAlangs) THEN
                   READ (45,'(A)',END = 1400) ctmp  ! Skipping level identifier line
@@ -710,8 +746,8 @@ C              ENDDO
      &                       * 0.5d0 * (CAngler(iang)-CANgler(iang-1))
                ENDDO
                csum = 2.0d0*PI*csum 
-               disc_int(ilv) = csum
-               pop_disc(nejcec) = pop_disc(nejcec) + POPlv(ilv,nnurec)
+C              disc_int(ilv) = csum
+C              pop_disc(nejcec) = pop_disc(nejcec) + POPlv(ilv,nnurec)
 C              write(*,*) 'Lev=',ilv,' Int=',sngl(csum), 
 C    &         sngl(POPlv(ilv,nnurec))
 C
@@ -724,6 +760,7 @@ C----------------Correct CSAlev() for eventual imprecision
                endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
+
 C-----------------Correct 'coef' for eventual imprecision and include recoil DE
 C                 coef = coef*POPlv(ilv,nnurec)/csum/DERec
                   coef = 2*PI*PI/FLOAT(NANgela - 1)/DERec
@@ -1631,8 +1668,10 @@ C--------Reset variables for life-time calculations
                   GOTO 1460
                ENDIF
                dtmp = 0.d0
+               pop_disc(nejc) = CSDirlev(1,nejc)                
                DO il = 1, NLV(nnuc)
                  dtmp = dtmp + CSDirlev(il,nejc)
+                 disc_int(il,nejc) = CSDirlev(il,nejc)                  
                ENDDO
                IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
                WRITE (12,*)
@@ -3160,23 +3199,25 @@ C
                      WRITE (12,
      &              '(4x,''Lev #'',5x,''Integrated Discrete Spectra'')')
                      WRITE (12,
-     &    '(10x,''    Energy    Int-DDX[mb]      Disc.Lev.XS   Elev'')')
+     &    '(10x,''    Energy    Int-DDX[mb]      Disc.Lev.XS     Differe
+     &nce     Elev'')')
                      WRITE (12,*) ' '
                      htmp = 0.d0
                      DO il = 2, NLV(nnuc)  ! discrete levels
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE (12,'(4x,I3,4x,F10.5,2(E14.5,2x),F6.3)')  
+                       WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,2x),F7.4)')  
      &                   il, -espec, check_DL(il)*recorp,
-     &                           disc_int(il)*recorp,ELV(il,nnuc)
+     &                        disc_int(il,nejc)*recorp,
+     &                        (check_DL(il)-disc_int(il,nejc))*recorp,
+     &                        ELV(il,nnuc)        
                            htmp = htmp + check_DL(il)*recorp
                      ENDDO
                      WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
      &                G12.6,'' mb'')') htmp
                      WRITE (12,'(7X,''Population of discrete levels   '',
-C    &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
-     &                G12.6,'' mb'')') pop_disc(nejc)
+     &               ,G12.6,'' mb'')') CSDirlev(1,nejc)-pop_disc(1)
                      WRITE (12,*) ' '
                    ENDIF
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
@@ -3187,13 +3228,13 @@ C    &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
      &           Diff[%]    '')')
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
-                      htmp = POPcse(0,nejc,ie,INExc(nnuc))             
+                      ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if(htmp.LE.0.d0) cycle
                       WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
-     &                *DE/recorp, htmp*recorp, 
+     &                *DE/recorp, ftmp*recorp, 
      &                check_DE(ie)*recorp,
-     &                (htmp - check_DE(ie)) * recorp, 
-     &                (htmp - check_DE(ie)) / htmp * 100
+     &                (ftmp - check_DE(ie)) * recorp, 
+     &                (ftmp - check_DE(ie)) / htmp * 100
                    ENDDO
                                         ! exact endpoint
                    WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
@@ -3204,14 +3245,23 @@ C    &                G12.6,'' mb'')') CSDirlev(1,nejc) - 4.0d0*PI*ELCns
      &                  check_DE(nspec+1) )*recorp, 0.d0
                    WRITE(12,*) 
                    WRITE(12,'(10x,
-     &                ''Integral of spectrum '',G12.6,'' mb'' )') dtmp
-C                  WRITE(12,'(10x,
-C    &                ''Emiss. cross section '',G12.6,'' mb'' )') 
-C    &                  CSEmis(nejc,INExc(nnuc))
+     &                ''Integ. cont.spectrum '',G12.6,'' mb'' )') dtmp
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
-
+                   WRITE(12,*) 
+C                  WRITE (12,'(10X,
+C    &                  ''Sum of disc. levels  '',G12.6,'' mb'')') htmp
+                   WRITE(12,'(10x,
+     &                  ''Total Integral       '',G12.6,'' mb'' )') 
+     &                  dtmp + htmp
+                   WRITE(12,'(10x,
+     &                  ''Total Population     '',G12.6,'' mb'' )') 
+     &                  CSDirlev(1,nejc) - pop_disc(1) +
+     &                  POPcs(nejc,INExc(nnuc))
+C                  WRITE(12,'(10x,
+C    &                  ''Emiss. cross section '',G12.6,'' mb'' )') 
+C    &                  CSEmis(nejc,INExc(nnuc))
                    WRITE(12,*) 
 
                 ELSE !  then (nejc.GT.0)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3646 $
+Ccc   * $Rev: 3662 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-11 01:53:39 +0100 (Mi, 11 Dez 2013) $
+Ccc   * $Date: 2013-12-19 01:18:07 +0100 (Do, 19 Dez 2013) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -100,10 +100,15 @@ C
          ENDIF
       ENDIF
 C
+
 C     The CMS-LAB assumes only the emission dominated by the 1st CNA
+
 C
+
       recorp = 1.d0
+
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
+
 
       n = IFIX(SNGL(LOG10(csemax*recorp) + 1.))
       s3 = 10.**n
@@ -185,6 +190,7 @@ C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, dtmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
 
+
       INTEGER i, ia, kmax, ie, itmp
 
       csemax = 0.d0
@@ -201,6 +207,8 @@ C
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
+
+      CSE(1,nejc,0) = 2*CSE(1,nejc,0)
 
       totspec = 0.d0
       DO i = 1, kmax
@@ -352,7 +360,9 @@ C--------Inclusive DDX spectrum
      &       htmp = htmp + CSEmsd(ie,nejc)
            if(htmp.LE.0.d0) cycle
            itmp = 1
+
            if(ie.eq.1) itmp = 2
+
            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &       *DE/recorp, htmp*recorp*itmp, check_DE(ie)*recorp*itmp,
      &       (htmp - check_DE(ie)) * recorp, 
@@ -376,12 +386,11 @@ C        ftmp = ftmp + check_DE(nspec + 1)
       csum = 0.d0
       dtmp = 0.d0
       DO nnuc = 1, NNUcd
-
 C        write(12,*) nnuc,CSEmis(nejc,nnuc)
          csum = csum + CSEmis(nejc,nnuc)
-         if (ENDf(nnuc).eq.2) dtmp = dtmp + CSEmis(nejc,nnuc)
+         if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
       ENDDO
-      if (ENDf(nnuc).eq.2) 
+      if (ENDf(nnuc).NE.1) 
      &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
      &   dtmp      
       IF(Nejc.ne.0) THEN
@@ -705,17 +714,11 @@ C
       OPEN(36,file=caz,status='unknown')
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: Total Emission Spectra ',part(Nejc),totspec
-
-
 C
-
 C     The CMS-LAB assumes only the emission dominated by the 1st CNA
 C
       recorp = 1.d0
-
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
-
-
 
       CALL OPEN_ZVV(36,'sp_'//part(Nejc),title)
       DO i = 1, kmax
@@ -727,5 +730,4 @@ C
       CLOSE(36)
       RETURN
       END
-
 
