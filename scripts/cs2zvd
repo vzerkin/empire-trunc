@@ -5,7 +5,6 @@ if [ -z $EMPIREDIR ]; then
     echo "See Empire v3 documentation for more information."
     exit
 fi
-
 file=$1
 work=`pwd`
 if [ "$1" = "" ]
@@ -17,7 +16,6 @@ echo ' '
 echo -n 'Choose one of the above (without .xsc extention!): '
 read file
 fi                          
-
 # Deleting previous plots
 if [ -f "$file-ztot.zvd" ]; then
  rm "$file-ztot.zvd" 
@@ -64,8 +62,26 @@ fi
 if [ -f "$file-Nu-bar.zvd" ]; then
  rm "$file-Nu-bar.zvd" 
 fi
+if [ -f "$file-break-up.zvd" ]; then
+ rm "$file-break-up.zvd" 
+fi
+if [ -f "$file-transfer.zvd" ]; then
+ rm "$file-transfer.zvd" 
+fi
+if [ -f "$file-reac-mech.zvd" ]; then
+ rm "$file-reac-mech.zvd" 
+fi
 #run cs2zvd to produce ZVView plots
 cp $file.xsc XSECTIONS.OUT
+if [ -f "$file-reac-mech.xsc" ]; then
+ cp "$file-reac-mech.xsc" REAC-MECH.DAT 
+fi
+if [ -f "$file-transfer.xsc" ]; then
+ cp "$file-tranfer.xsc" TRANSFER-XS.DAT 
+fi
+if [ -f "$file-break-up.xsc" ]; then
+ cp "$file-break-up.xsc" BREAK-UP-XS.DAT 
+fi
 rm -f CS2ZVD.INP
 ln -sf $EMPIREDIR/util/cs2zvd/CS2ZVD.INP CS2ZVD.INP
 #vi CS2ZVD.INP	
@@ -115,6 +131,26 @@ fi
 if [ -f "XS_Nu-bar.zvd" ]; then
 mv "XS_Nu-bar.zvd" $file-Nu-bar.zvd
 fi
-rm XSECTIONS.OUT
+if [ -f "XS_BREAK-UP.zvd" ]; then
+mv "XS_BREAK-UP.zvd" $file-break-up.zvd
+fi
+if [ -f "XS_TRANSFER.zvd" ]; then
+mv "XS_TRANSFER.zvd" $file-transfer.zvd
+fi
+if [ -f "XS_REAC-MECH.zvd" ]; then
+mv "XS_REAC-MECH.zvd" $file-reac-mech.zvd
+fi
+if [ -f "$file-reac-mech.xsc" ]; then
+ rm REAC-MECH.DAT 
+fi
+if [ -f "$file-transfer.xsc" ]; then
+ rm TRANSFER-XS.DAT 
+fi
+if [ -f "$file-break-up.xsc" ]; then
+ rm BREAK-UP-XS.DAT 
+fi
+if [ -f "$file.xsc" ]; then
+ rm XSECTIONS.OUT 
+fi
 rm CS2ZVD.INP
 exit
