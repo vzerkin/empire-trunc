@@ -1,8 +1,10 @@
-#$Rev: 3637 $
-#$Author: bcarlson $
-#$Date: 2013-12-10 09:33:16 +0100 (Di, 10 Dez 2013) $
+#$Rev: 3667 $
+#$Author: zerkinv $
+#$Date: 2013-12-20 17:54:57 +0100 (Fr, 20 Dez 2013) $
 
 # set default fortran compiler:
+
+CC     =  gcc
 
 FC   =  gfortran
 #FC  =  ifort
@@ -121,7 +123,8 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = empcess.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o
+OBJF = empcess.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
+       pipec.o
 
 all: 
 	$(MAKE) empire
