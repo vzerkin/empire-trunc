@@ -3,17 +3,15 @@ C     SELECTIVELY CONVERT OUTPUT CROSS SECTION FILE TO ZVD FILE
       implicit none
       integer maxr,maxen
       parameter(maxr=100,maxen=500)
-      integer nreac,iz,ia,ncol,nch,ios,ich
-      integer i,j,k,nen,toplot(maxr)
+      integer nreac,iz,ia,nch,ios,ich
+      integer i,j,nen,toplot(maxr)
       character*2 symb
       character*22 caz
-      character*12 creaction(maxr),creactionsf(maxr)
-      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl,sf(maxen)
+      character*12 creaction(maxr)
+      real*8 e(maxen),cs(maxen,maxr),check_cs(maxr),xsl,sf(maxen), ftmp
 
-      do i=1,maxr
-        toplot(i)=0     
-        check_cs(i)=0.d0
-      enddo
+      check_cs = 0.d0
+      toplot  = 0
 
       toplot(3) = 1  ! nonelast
       toplot(4) = 1  ! fission
@@ -29,10 +27,9 @@ C
       READ(10,'(1x,100I1)') toplot
       CLOSE(10)
 
-C     WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
+C********************************************************************* 
 10    OPEN(20,file='XSECTIONS.OUT',STATUS='OLD',ERR=100)
       READ(20,'(1x,I3,10X,i3,1x,A2,1X,I3)') nreac,iz,symb,ia
-
       nreac = min(nreac,maxr)
 C
 C     Only 20 columns plotted for actinides
@@ -41,7 +38,7 @@ C     Only 20 columns plotted for actinides
 C     WRITE(41,'(''#'',A10,1X,(95A12))') '  Einc    ','  Total     ',
 C    &       '  Elastic   ','  Reaction  ','  Fission   ',
 C    &         
-      READ(20,'(12x,(100A12))') (creaction(j),j=1,nreac)
+      READ(20,'(12x,(100A12))',END=20,ERR=20) (creaction(j),j=1,nreac)
       creaction(1)='(z,tot)' 
       creaction(2)='(z,nel)'
       creaction(3)='(z,nonel)'
@@ -57,7 +54,7 @@ C    &
 
       nen = 0
       do i=1,maxen
-        READ(20,'(G11.5,1P,(100E12.5))',END=20,err=120) 
+        READ(20,'(G11.5,1P,(100E12.5))',END=20,ERR=20) 
      &  e(i),(cs(i,j),j=1,nreac)
         do j=1,nreac
             check_cs(j)=check_cs(j) + cs(i,j)
@@ -104,8 +101,161 @@ C       Skipping plots
  
       ENDDO
 
-C     Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
+C********************************************************************* 
+C     Allow for plotting of BREAK-UP cross sections
 
+      check_cs = 0.d0
+      toplot  = 0
+
+      toplot(1) = 1  ! totBU  
+      toplot(2) = 1  ! n
+      toplot(3) = 1  ! p
+      toplot(4) = 1  ! a
+      toplot(5) = 1  ! d
+      toplot(6) = 1  ! t
+      toplot(7) = 1  ! He
+
+      creaction(1) ='(z,totBU)' 
+      creaction(2) ='(z,n)    '
+      creaction(3) ='(z,p)    '
+      creaction(4) ='(z,a)    '
+      creaction(5) ='(z,d)    '
+      creaction(6) ='(z,t)    '
+      creaction(7) ='(z,He)   '
+
+      nreac = 7
+
+      OPEN(20,file='BREAK-UP-XS.DAT',STATUS='OLD',ERR=50)
+      READ(20,*)
+      READ(20,*)
+      do i=1,maxen 
+        READ(20,'(E11.4,1x,7E13.5)',END=40,ERR=40)
+     &  ftmp,(cs(i,j),j=1,nreac)
+   
+        do j=1,nreac
+            check_cs(j)=check_cs(j) + cs(i,j)
+        enddo
+      enddo
+ 40   CLOSE(20)
+
+      do i=1,nreac
+        if(check_cs(i).le.1.d-12) toplot(i)=0
+      enddo
+
+      open(20,file='XS_BREAK-UP.zvd',ERR=50)
+      do j=1,nreac 
+        if(toplot(j).eq.0) cycle 
+        write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
+     &    iz,symb,ia,trim(creaction(j))       
+        CALL OPEN_ZVV(20,caz,' ')
+        DO i = 1, nen
+           WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
+        ENDDO
+        CALL CLOSE_ZVV(20,' ',' ')
+      ENDDO
+ 50   CLOSE(20)
+C********************************************************************* 
+C     Allow for plotting of TRANSFER cross sections
+      check_cs = 0.d0
+      toplot  = 0
+
+      toplot(1) = 1  ! totNT  
+      toplot(2) = 1  ! n
+      toplot(3) = 1  ! p
+      toplot(4) = 1  ! a
+      toplot(5) = 1  ! d
+      toplot(6) = 1  ! t
+      toplot(7) = 1  ! He
+C       
+      creaction(1) ='(z,totNT)' 
+      creaction(2) ='(z,n)    '
+      creaction(3) ='(z,p)    '
+      creaction(4) ='(z,a)    '
+      creaction(5) ='(z,d)    '
+      creaction(6) ='(z,t)    '
+      creaction(7) ='(z,He)   '
+      
+      nreac = 7
+
+      OPEN(20,file='TRANSFER-XS.DAT',STATUS='OLD',ERR=80)
+      READ(20,*)
+      READ(20,*)
+     
+      do i=1,maxen 
+        READ(20,'(E11.4,1x,7E13.5)',END=70,ERR=70)
+     &    ftmp,(cs(i,j),j=1,nreac)
+  
+        do j=1,nreac
+            check_cs(j)=check_cs(j) + cs(i,j)
+        enddo
+      enddo
+ 70   CLOSE(20)
+
+      do i=1,nreac
+        if(check_cs(i).le.1.d-12) toplot(i)=0
+      enddo
+ 
+      open(20,file='XS_TRANSFER.zvd',ERR=80)
+      do j=1,nreac 
+        if(toplot(j).eq.0) cycle 
+        write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
+     &    iz,symb,ia,trim(creaction(j))       
+        CALL OPEN_ZVV(20,caz,' ')
+        DO i = 1, nen
+           WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
+        ENDDO
+        CALL CLOSE_ZVV(20,' ',' ')
+      ENDDO
+ 80   CLOSE(20)
+C********************************************************************* 
+      check_cs = 0
+      toplot = 0
+
+      toplot(1) = 1  !   
+      toplot(2) = 1  ! 
+      toplot(3) = 1  ! 
+      toplot(4) = 1  ! 
+      toplot(5) = 1  !  
+C       
+      creaction(1) ='(z,Reac) ' 
+      creaction(2) ='(z,BU)   '
+      creaction(3) ='(z,NT)   '
+      creaction(4) ='(z,PE)   '
+      creaction(5) ='(z,CN)   '
+     
+      nreac = 5
+
+      OPEN(20,file='REAC-MECH.DAT',STATUS='OLD',ERR=98)
+      READ(20,*)
+      READ(20,*)
+           
+      do i=1,maxen 
+        READ(20,'(E11.4,1x,7E13.5)',END=85,ERR=85)
+     &    ftmp,(cs(i,j),j=1,nreac)
+        do j=1,nreac
+            check_cs(j)=check_cs(j) + cs(i,j)
+        enddo
+      enddo
+ 85   CLOSE(20)
+
+      do i=1,nreac
+        if(check_cs(i).le.1.d-12) toplot(i)=0
+      enddo
+ 
+      open(20,file='XS_REAC-MECH.zvd',ERR=98)
+      do j=1,nreac 
+        if(toplot(j).eq.0) cycle 
+        write(caz,'(I3.3,1h-,A2,1h-,I3.3,A12)') 
+     &    iz,symb,ia,trim(creaction(j))       
+        CALL OPEN_ZVV(20,caz,' ')
+        DO i = 1, nen
+           WRITE (20,'(G12.5,2X,E12.5)') 1d6*e(i),1.d-3*cs(i,j)
+        ENDDO
+        CALL CLOSE_ZVV(20,' ',' ')
+      ENDDO
+  98  CLOSE(20)
+C********************************************************************* 
+C     Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
       e  = 0.d0
       sf = 0.d0
       OPEN(20, file='S-FACTOR.DAT',STATUS='OLD',ERR=101)
@@ -125,7 +275,9 @@ C     Allow for plotting of S-factor from S-FACTOR.DAT (x,g; x,n; x,p)
       ENDDO
       CALL CLOSE_ZVV2(20,' ',' ')
       CLOSE(20)
+
       STOP 'ZVView cross-section and S-factor plots created !'
+
  101  STOP 'ZVView cross-section plots created !             ' 
  100  STOP 'ERROR: CROSS SECTION FILE XSECTIONS.OUT MISSING  '
  120  STOP 'cs2zvd stopped; unplottable file (benchmark calculation?).'
