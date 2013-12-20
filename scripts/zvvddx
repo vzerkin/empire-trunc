@@ -28,8 +28,12 @@ rm LSTTAB.INP 2>/dev/null
 ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit        
 $EMPIREDIR/util/c4zvd/pntzvdl LSTTAB.PNT LSTTAB.CUR DDXPLOT.zvd \
     || { echo; echo 'zvview closed'; }
-mv DDXPLOT.zvd $work/$file-$2.zvd
-
+if [ "$2" = "" ]
+  then
+  mv DDXPLOT.zvd $work/$file-last.zvd
+else
+  mv DDXPLOT.zvd $work/$file-$2.zvd
+fi
 rm COMPARE.DAT angdis.p92 ps01.tit C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
 exit
 
