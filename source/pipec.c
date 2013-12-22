@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <fcntl.h>
-#include <unistd.h>
+
+#if (defined WIN32) || (defined WIN64)
+  // do nothing
+#else
+  #include <unistd.h>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -17,6 +23,7 @@ int idelete_file_(char *file)
     return iret;
 }
 
+
 int irename_file_(char *name1,char *name2)
 {
     int    ierr,iret;
@@ -32,7 +39,7 @@ static  char    buf[LBUF];
 int icopy_file_(char *name1,char *name2)
 {
     FILE   *in, *out;
-    int    itmp,ierr,iret=0;
+    int    ierr,iret=0;
     size_t lfile, lread, lwrite, n0read, lbuf;
     struct stat    fs;
 
@@ -45,30 +52,30 @@ int icopy_file_(char *name1,char *name2)
     if (in==NULL) return -1;
     out=fopen(name2,"wb");
     if (out==NULL) {
-	fclose(in);
-	return -2;
+      fclose(in);
+      return -2;
     }
     //if (debug!=0) printf("in=%p feof(in)=%d\n",in,feof(in));
 
     lbuf=LBUF;
     for (n0read=0; n0read<lfile; n0read+=LBUF) {
         if (n0read+LBUF>lfile) lbuf=lfile-n0read;
-	lread=fread(buf,lbuf,1,in);
-	//printf ("lread=%d\n",lread);
-	if (ferror(in)!=0) {
-	    iret=-2;
-	    break;
-	}
-	if (lread<0) {
-	    iret=-2;
-	    break;
-	}
-	if (lread==0) break;
-	lwrite=fwrite(buf,lbuf,1,out);
-	//printf ("lwrite=%d\n",lwrite);
-//	if (lread!=lwrite) {
+      lread=fread(buf,lbuf,1,in);
+      //printf ("lread=%d\n",lread);
+      if (ferror(in)!=0) {
+          iret=-2;
+          break;
+      }
+      if (lread<0) {
+          iret=-2;
+          break;
+      }
+      if (lread==0) break;
+      lwrite=fwrite(buf,lbuf,1,out);
+      //printf ("lwrite=%d\n",lwrite);
+//    if (lread!=lwrite) {
         if (lwrite!=1) {
-	    iret=-3;
+          iret=-3;
             break;
         }
     }
@@ -80,16 +87,16 @@ int icopy_file_(char *name1,char *name2)
 
 int icopy_file2_(char *str)
 {
-    int i,ii,iret;
+    int i,iret;
     char *ss,*ss2;
     for (i=0; str[i]!='\0'; i++) if ((str[i]!='\040')&&(str[i]!='\t')) break;
     strcpy(buf,&str[i]);
-    ss=strchr(buf,'>');	if (ss!=NULL) *ss='\0';
+    ss=strchr(buf,'>'); if (ss!=NULL) *ss='\0';
     if (debug!=0) printf("...icopy_file2=[%s]\n",buf);
     ss=strchr(buf,' ');
     if (ss!=NULL) {
-	*ss='\0';
-	ss2=strchr(ss+1,' '); if (ss2!=NULL) *ss2='\0';
+      *ss='\0';
+      ss2=strchr(ss+1,' '); if (ss2!=NULL) *ss2='\0';
         iret=icopy_file_(buf,ss+1);
         return iret;
     }
@@ -98,16 +105,16 @@ int icopy_file2_(char *str)
 
 int irename_file2_(char *str)
 {
-    int i,ii,iret=-1;
+    int i,iret=-1;
     char *ss,*ss2;
     for (i=0; str[i]!='\0'; i++) if ((str[i]!='\040')&&(str[i]!='\t')) break;
     strcpy(buf,&str[i]);
-    ss=strchr(buf,'>');	if (ss!=NULL) *ss='\0';
+    ss=strchr(buf,'>'); if (ss!=NULL) *ss='\0';
     if (debug!=0) printf("...irename_file2=[%s]\n",buf);
     ss=strchr(buf,' ');
     if (ss!=NULL) {
-	*ss='\0';
-	ss2=strchr(ss+1,' '); if (ss2!=NULL) *ss2='\0';
+      *ss='\0';
+      ss2=strchr(ss+1,' '); if (ss2!=NULL) *ss2='\0';
         iret=irename_file_(buf,ss+1);
         return iret;
     }
@@ -116,19 +123,19 @@ int irename_file2_(char *str)
 
 int idelete_file2_(char *str)
 {
-    int i,ii,iret=-1;
+    int i,iret=-1;
     char *ss;
     for (i=0; str[i]!='\0'; i++) if ((str[i]!='\040')&&(str[i]!='\t')) break;
     strcpy(buf,&str[i]);
-    ss=strchr(buf,'>');	if (ss!=NULL) *ss='\0';
+    ss=strchr(buf,'>'); if (ss!=NULL) *ss='\0';
     if (debug!=0) printf("...delete_file2=[%s]\n",buf);
     for (;;) {
-	if (buf[0]=='\0') break;
-	ss=strchr(buf,' ');
-	if (ss!=NULL) *ss='\0';
+      if (buf[0]=='\0') break;
+      ss=strchr(buf,' ');
+      if (ss!=NULL) *ss='\0';
         iret=idelete_file_(buf);
-	if (ss==NULL) break;
-	strcpy(buf,ss+1);
+      if (ss==NULL) break;
+      strcpy(buf,ss+1);
     }
     return iret;
 }
@@ -136,8 +143,8 @@ int idelete_file2_(char *str)
 /*
 main ()
 {
-	int ii;
-	ii=icopy_file_("pipec.o","pipec2.ox");
-	printf ("ii=%d\n",ii);
+      int ii;
+      ii=icopy_file_("pipec.o","pipec2.ox");
+      printf ("ii=%d\n",ii);
 }
 */
