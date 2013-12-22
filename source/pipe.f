@@ -1,27 +1,18 @@
-Ccc   * $Rev: 3667 $
-Ccc   * $Author: zerkinv $
-Ccc   * $Date: 2013-12-20 17:54:57 +0100 (Fr, 20 Dez 2013) $
-C/*                                                    */
-C/* Subroutine to execute command line by FORTRAN code */
-C/* FORTRAN declaration:                               */
-C/* INTEGER*4 PIPE,IWIN                                */
-C/* FORTRAN USE:                                       */
-C/* IWIN=PIPE("command")                               */
-C/* command = VALID SYSTEM COMMAND LINE with less than */
-C/*             75 characters                          */
-C/*                                                    */
-C/* The calling FORTRAN program must declare           */
-C/* PIPE as INTEGER*4 funtion to avoid memory problems */
-C/* Do not use default declaration please, they are    */
-C/* compiler and system dependent !!!!                 */
-C 
+Ccc   * $Rev: 3670 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-22 23:46:39 +0100 (So, 22 Dez 2013) $
+C/*                                                           */
+C/* The calling FORTRAN program must declare all              */
+C/* subrutines as INTEGER*4 funtions to avoid memory problems */
+C/* Do not use default declaration please, they are           */
+C/* compiler and system dependent !!!!                        */
+C
+C     Should be linked with pipec.c !!!
+C
       INTEGER*4 FUNCTION PIPE(Stringp)
       CHARACTER*(*) STRINGP
       pipe=0
-c     CALL SYSTEM(STRINGP)
       ilen=len(trim(STRINGP))
-c      write (*,*) '...pipe:',trim(STRINGP)
-c      IF (0.eq.0) THEN
       IF (INDEX(STRINGP,'*').gt.0) THEN
          write (*,*) '...pipe:',trim(STRINGP),' i=',INDEX(STRINGP,'*')
          CALL SYSTEM(STRINGP)
@@ -58,84 +49,25 @@ c      IF (0.eq.0) THEN
       write (*,*) '---pipe:',trim(STRINGP)
       CALL SYSTEM(STRINGP)
       RETURN
-      RETURN
       END
 
-	integer*4 function igetopsys()
-	character*512 ctmp
-	igetopsys=0 !   linux - default
-	call getenv('OS',ctmp)
-	if(ctmp(1:3).eq.'Win') igetopsys=1 ! Windows
+C     To be defined 
+C	integer*4 function ipipe_rmdir(dirname)        ! deleting empty/full directories
+C	integer*4 function ipipe_mkdir(dirname)        ! making directory
+
+C     To be modified
+C	integer*4 function ipipe_delete(filenames)     ! deleting multiple files
+	integer*4 function ipipe_delete(filename)
+	character*(*) filename
+	ipipe_delete=idelete_file(trim(filename)//char(0))
 	return
 	end
 
-	integer*4 function ipipeCopyFile(fromfile,tofile)
+C     integer*4 function ipipe_move(fromfile,tofile) ! moving file
+	integer*4 function ipipe_move(fromfile,tofile)
 	character*(*) fromfile,tofile
-	character*512 ctmp
-	ipipeCopyFile=0
-	iopsys = igetopsys() ! linux:0
-	if (iopsys.eq.0) then
-	    ctmp='cp '//trim(fromfile)//' '//trim(tofile)
-	else
-	    ctmp='copy '//trim(fromfile)//' '//trim(tofile)//' >NUL'
-	endif
-	call system(ctmp)
-	return
-	end
-
-	integer*4 function iCopyTxtFile(fromfile,tofile)
-	character*(*) fromfile,tofile
-	character*512 str
-	integer*4 ilen1,ilen2
-	iCopyTxtFile=0
-	ninp=555
-	nout=777
-	ilen1=len(trim(fromfile)) 
-	ilen2=len(trim(tofile)) 
-	open(ninp,file=fromfile(1:ilen1),status='old',err=111)
-	open(nout,file=tofile(1:ilen2),status='unknown',err=112)
-1	read (ninp,'(a512)',end=200) str
-c	write (*,'(a)') trim(str)
-	write (nout,'(a)') trim(str)
-	goto 1
-200	continue
-	close(ninp)
-	close(nout)
-	return
-111	iCopyTxtFile=-2
-	return
-112	iCopyTxtFile=-2
-	close(ninp)
-	return
-	end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	integer*4 function ipipe_copy00(fromfile,tofile)
-	character*(*) fromfile,tofile
-	character*512 ctmp
-	ipipe_copy00=0
-	iopsys = igetopsys() ! linux:0
-	if (iopsys.eq.0) then
-	    ctmp='cp '//trim(fromfile)//' '//trim(tofile)
-	else
-	    ctmp='copy '//trim(fromfile)//' '//trim(tofile)//' >NUL'
-	endif
-	call system(ctmp)
+	ipipe_move=irename_file(trim(fromfile)//char(0)
+     1  ,trim(tofile)//char(0))
 	return
 	end
 
@@ -146,57 +78,39 @@ c	write (*,'(a)') trim(str)
 	return
 	end
 
-
-
-
-
-
-
-	integer*4 function ipipe_delete00(filename)
-	character*(*) filename
+	integer*4 function igetopsys()
+      implicit none
 	character*512 ctmp
-	ipipe_delete00=0
-	iopsys = igetopsys() ! linux:0
-	if (iopsys.eq.0) then
-	    ctmp='rm '//trim(filename)
-	else
-	    ctmp='del '//trim(filename)//' >NUL'
-	endif
-	call system(ctmp)
+	igetopsys=0 !   linux - default
+	call getenv('OS',ctmp)
+	if(ctmp(1:3).eq.'Win') igetopsys=1 ! Windows
 	return
 	end
 
-	integer*4 function ipipe_delete(filename)
-	character*(*) filename
-	ipipe_delete=idelete_file(trim(filename)//char(0))
-	return
-	end
-
-
-
-
-	integer*4 function ipipe_move00(iopsys,fromfile,tofile)
+	integer*4 function iCopyTxtFile(fromfile,tofile)
+      implicit none
 	character*(*) fromfile,tofile
-	character*512 ctmp
-	ipipe_move00=0
-	iopsys = igetopsys() ! linux:0
-	if (iopsys.eq.0) then
-	    ctmp='mv '//trim(fromfile)//' '//trim(tofile)
-	else
-	    ctmp='move '//trim(fromfile)//' '//trim(tofile)//' >NUL'
-	endif
-	call system(ctmp)
+	character*512 str
+	integer*4 ilen1,ilen2
+	integer ninp,nout
+	iCopyTxtFile=0
+	ninp=555
+	nout=777
+	ilen1=len(trim(fromfile)) 
+	ilen2=len(trim(tofile)) 
+	open(ninp,file=fromfile(1:ilen1),status='old',err=111)
+	open(nout,file=tofile(1:ilen2),status='unknown',err=112)
+1	read (ninp,'(a512)',end=200,err=200) str
+c	write (*,'(a)') trim(str)
+	write (nout,'(a)') trim(str)
+	goto 1
+200	close(ninp)
+	close(nout)
+	return
+111	iCopyTxtFile=-2
+	return
+112	iCopyTxtFile=-2
+	close(ninp)
 	return
 	end
 
-c	integer*4 function ipipe_move(fromfile,tofile)
-c	character*(*) fromfile,tofile
-c	ipipe_move=RENAME(fromfile,tofile)
-c	return
-c	end
-	integer*4 function ipipe_move(fromfile,tofile)
-	character*(*) fromfile,tofile
-	ipipe_move=irename_file(trim(fromfile)//char(0)
-     1  ,trim(tofile)//char(0))
-	return
-	end
