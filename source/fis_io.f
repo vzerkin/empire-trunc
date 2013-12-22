@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3668 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-22 23:32:43 +0100 (So, 22 Dez 2013) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -85,15 +85,17 @@ C-----FISBAR(Nnuc)= 0 Empire internal library
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 350
          CLOSE (81)
          GOTO 300
-  400    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
-     &    ' A=',INT(A(Nnuc)),
+  400    WRITE (8,'(A33,I3,A3,I3,A53)') 
+     &    ' ERROR: No fission barrier for Z=', INT(Z(Nnuc)),' A=',
+     &    INT(A(Nnuc)),
      &    ' in internal EMPIRE library (/data/EMPIRE-fisbar.dat)'
-         WRITE (8,*) 
+         WRITE (8,'(A60)') 
      &    ' ERROR: or the file ../data/EMPIRE-fisbar.dat may be missing'
-         WRITE (8,*)
-     &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of loca
-     &l fission barriers (FISBAR 0) in your input file'
-         STOP ' FATAL: Internal fission barriers can not be retrieved'
+         WRITE (8,'(A108)')
+     &    ' ERROR: You may use RIPL barriers (FISBAR 1) instead of local
+     & fission barriers (FISBAR 0) in your input file'
+         STOP 
+     &    ' ERROR: EMPIRE local fission barriers can not be retrieved'
       ENDIF
 C
 C-----FISBAR(Nnuc)= 1 RIPL "empirical" values for humps' heights and widths
@@ -121,15 +123,17 @@ c     &     dd,EFB(2),H(1,2)
             NRWel = 0
          ENDIF
          GOTO 300
-  200    WRITE (8,*) ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
+  200    WRITE (8,'(A33,I3,A3,I3,A34)')   
+     &    ' ERROR: NO fission barrier for Z=', INT(Z(Nnuc)),
      &    ' A=',INT(A(Nnuc)),' in RIPL empirical fission library'
-         WRITE (8,*) 
+         WRITE (8,'(A73)') 
      &    ' ERROR: or the file ../RIPL/fission/empirical-barriers.dat ma
      &y be missing'
-         WRITE (8,*)
-     &     ' ERROR: You may use local barriers (FISBAR 0) instead of RIP
+         WRITE (8,'(A100)')
+     &    ' ERROR: You may use local barriers (FISBAR 0) instead of RIP
      &L barriers (FISBAR 1) in your input file'
-         STOP ' FATAL: Fission barriers can not be retrieved'
+          STOP 
+     &    ' ERROR: RIPL empirical fission barriers can not be retrieved'
       ENDIF  
 C
 C-----adding default parameters of the isomeric well for double-humped barrier if missing
@@ -157,13 +161,14 @@ c-----                ../data/HFB-fisbar.dat (default)
          IF (kz.NE.INT(Z(Nnuc)) .OR. ka.NE.INT(A(Nnuc))) GOTO 351
          CLOSE (81)
          GOTO 402
-  401    WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
-     &     iz, ' A=', ia,' in file ../data/HFB-parab-fisbar.dat'
-         WRITE (8,*)
+  401    WRITE (8,'(A33,I3,A3,I3,A37)') 
+     &     ' ERROR: No fission barrier FOR Z=',INT(Z(Nnuc)),		  
+     &     ' A=', INT(A(Nnuc)),' in file ../data/HFB-parab-fisbar.dat'
+         WRITE (8,'(A125)')
      &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of para 
      &bolic approximation of HFB barriers (FISBAR 2) in your input file'
          STOP 
-     &     ' FATAL: No fission barriers in ../data/HFB-parab-fisbar.dat'
+     &     ' ERROR: No fission barriers in ../data/HFB-parab-fisbar.dat'
       ENDIF
 
  402  NRHump = NRBar - NRWel
@@ -192,23 +197,26 @@ C
             GOTO 410
          ENDIF
          IF(ia.LT.iarr) THEN
-            WRITE (8,*) 'WARNING: NO RIPL HFB fission barriers FOR Z=',
-     &                   iz, ' A=', ia,' in ../RIPL/fission/HFB2007 '
-            WRITE (8,*) 'WARNING: Using HFB numerical barrier FOR Z=', 
-     &                   iz, ' A=', iarr
+           WRITE (8,'(A45,I3,A3,I3,A37)')
+     &      ' WARNING: NO RIPL HFB fission barrier FOR Z=',INT(Z(Nnuc)), 
+     &      ' A=', INT(A(Nnuc)),' in ../RIPL/fission/HFB2007 directory'
+           WRITE (8,'(A45,I3,A3,I3)')
+     &      ' WARNING: Using HFB numerical barrier FOR Z=',INT(Z(Nnuc)),
+     &      ' A=', iarr
          ENDIF    
          DO ii=1,npoints
            READ (52,*,END = 480) bb2, bb3, bb4, vdef_1d(ii)
            eps_1d(ii) = bb2
         ENDDO
         GOTO 480
- 460    WRITE (8,*)
-     &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of HFB 
-     &BARRIERS (FISBAR 3) in your input file'
-        WRITE (8,*) ' ERROR: NO fission barriers FOR Z=', 
-     &              iz, ' A=', ia,' in ../RIPL/fission/HFB2007 '
+ 460    WRITE (8,'(A42,I3,A3,I3,A37)')
+     &     'ERROR: NO RIPL HFB fission barrier FOR Z=',INT(Z(Nnuc)), 
+     &     ' A=', INT(A(Nnuc)),' in ../RIPL/fission/HFB2007 directory'
+        WRITE (8,'(A98)')
+     &     'ERROR: You may use RIPL barriers (FISBAR 1) instead of HFB B
+     &ARRIERS (FISBAR 3) in your input file'
         STOP 
-     &     ' FATAL: HFB numerical fission barriers can not be retrieved'
+     &     ' ERROR: HFB numerical fission barriers can not be retrieved'
  480    CLOSE (52)
 
         nextr = Find_Extrem(Nnuc)
