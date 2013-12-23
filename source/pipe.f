@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3675 $
+Ccc   * $Rev: 3679 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 13:38:13 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 14:00:29 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -102,12 +102,20 @@ C
 	if(ctmp(1:3).eq.'Win') igetopsys=1 ! Windows
 	return
 	end
+
+      INTEGER FUNCTION PIPE(Stringp)
+      implicit none
+      CHARACTER*(*) STRINGP
+      pipe=0
+      CALL SYSTEM(STRINGP)
+      RETURN
+      END
 C
 C     This code is expected not to be used
 C
-      INTEGER FUNCTION PIPE(Stringp)
+      INTEGER FUNCTION PIPE00(Stringp)
       CHARACTER*(*) STRINGP
-      pipe=0
+      pipe00=0
       ilen=len(trim(STRINGP))
       IF (INDEX(STRINGP,'*').gt.0) THEN
          write (*,*) '...pipe:',trim(STRINGP),' i=',INDEX(STRINGP,'*')
@@ -146,6 +154,3 @@ C
       CALL SYSTEM(STRINGP)
       RETURN
       END
-
-
-
