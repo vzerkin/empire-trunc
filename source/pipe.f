@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3679 $
+Ccc   * $Rev: 3680 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 14:00:29 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 14:18:16 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -34,7 +34,7 @@ C
 	ipipe_rmdir=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
-        ctmp='rm -f '//trim(dirname)//'/* |'//'rmdir '//trim(dirname)
+        ctmp='rm -rf '//trim(dirname)
 	else
 	  ctmp='rmdir /S /Q '//trim(dirname)//' >NUL'
 	endif

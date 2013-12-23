@@ -32,7 +32,7 @@ C
 	ipipe_rmdir=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
-        ctmp='rm -f '//trim(dirname)//'/* |'//'rmdir '//trim(dirname)
+        ctmp='rm -rf '//trim(dirname)
 	else
 	  ctmp='rmdir /S /Q '//trim(dirname)//' >NUL'
 	endif
