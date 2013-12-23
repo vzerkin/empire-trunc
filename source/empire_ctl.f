@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3654 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-12 11:16:15 +0100 (Do, 12 Dez 2013) $
+Ccc   * $Rev: 3684 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-23 14:55:47 +0100 (Mo, 23 Dez 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -34,7 +34,6 @@ C
 C     The following line defines the proper default for WINDOWS work
 C     even if EMPIREDIR is not defined
 C
-C     if(empiredir(1:1).eq.' ') empiredir(1:3)='..'
       if(empiredir(1:1).eq.' ') empiredir(1:2)='..'
 
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
@@ -84,11 +83,9 @@ C
 
       logical autofit, sensit
       logical fexist
-      logical LINUX
       character cmnd*35,cmndp*35,cmndt*35
-      character ctmp*132
       character pot1(6)*2,pot2(3)*1
-      integer*4 PIPE,itmp
+      integer itmp, ipipe_move
       dimension wtx(30),idw(2,30)
       dimension valx(mxfit),xvalx(mxfit),axx(mxfit)
       dimension pars(mxfit),dparmx(mxfit)
@@ -108,7 +105,7 @@ C
 
       autofit = .FALSE.
       sensit = .FALSE.
-      LINUX = .TRUE.
+
       wt0=1.0
       xitr=3.05
 
@@ -595,25 +592,10 @@ C--- A check for initial displacements of fit parameters is made.
 C--- If initial displacements are found, the OMPAR.DIR and TARGET_COLL.DAT
 C--- files are modified accordingly. The original files are first moved.
       if(ichng0.eq.1) then
-        if(idv(1,1).lt.7) then
-          if(LINUX) then
-            ctmp='mv OMPAR.DIR OMPAR0.DIR'
-            itmp=PIPE(ctmp)
-           else
-            ctmp='ren OMPAR.DIR OMPAR0.DIR'
-            itmp=PIPE(ctmp)
-           endif
-         endif
-        if(idv(1,nfit).eq.7) then
-          if(LINUX) then
-            ctmp='mv TARGET_COLL.DAT TARGET_COLL0.DAT'
-            itmp=PIPE(ctmp)
-           else
-            ctmp='ren TARGET_COLL.DAT TARGET_COLL0.DAT'
-            itmp=PIPE(ctmp)
-           endif
-         endif
-
+        if(idv(1,1).lt.7) 
+     >    itmp=ipipe_move('OMPAR.DIR','OMPAR0.DIR')
+        if(idv(1,nfit).eq.7)
+     >    itmp=ipipe_move('TARGET_COLL.DAT','TARGET_COLL0.DAT')
 C--- The maximum fit displacements are modified so as to not constrain the
 C--- initial displacements.
         do n=1,nfit
@@ -648,25 +630,10 @@ C--- If all are zero, nfit is set to zero.
 C--- The potential and deformation parameter files are now moved to
 C--- the appropriate location to serve as a basis for variations during
 C--- the fitting.
-      if(idv(1,1).lt.7) then
-        if(LINUX) then
-          ctmp='mv OMPAR.DIR OMPAR0.DIR'
-          itmp=PIPE(ctmp)
-         else
-          ctmp='ren OMPAR.DIR OMPAR0.DIR'
-          itmp=PIPE(ctmp)
-         endif
-       endif
-      if(idv(1,nfit).eq.7) then
-        if(LINUX) then
-          ctmp='mv TARGET_COLL.DAT TARGET_COLL0.DAT'
-          itmp=PIPE(ctmp)
-         else
-          ctmp='ren TARGET_COLL.DAT TARGET_COLL0.DAT'
-          itmp=PIPE(ctmp)
-         endif
-       endif
-
+      if(idv(1,1).lt.7) 
+     >    itmp=ipipe_move('OMPAR.DIR','OMPAR0.DIR')
+        if(idv(1,nfit).eq.7)
+     >    itmp=ipipe_move('TARGET_COLL.DAT','TARGET_COLL0.DAT')
       return
  100  WRITE(8,*)
      > 'ERROR: EOF in the MANDATORY SECTION OF THE INPUT FILE.'
@@ -680,9 +647,7 @@ C
 C--- Writes the parameters to be adjusted in a reasonably readable manner
 C
       parameter(mxfit=20)
-
       character pot1(6)*13,pot2(3)*9
-
       common /fitpars/vals(mxfit),xvals(mxfit),idv(3,mxfit),nfit
 
       data pot1/'Real volume  ','Imag volume  ','Real surface ',
@@ -1055,16 +1020,13 @@ C
       parameter(mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
-      logical LINUX
-      integer*4 PIPE,itmp
-      character*132 ctmp
+      integer itmp,ipipe_move
       REAL*8 emin
 
       common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
      &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idnt(mxind),idang(mxind),nnde
-      LINUX = .TRUE.
 
       tmp=emin  ! dummy statement
 
@@ -1162,18 +1124,8 @@ C--- Finalizes the energy grid, as required by EMPIRE
 C--- The file FITIN.DAT is now moved to INPUT.DAT to perform the
 C--- the EMPIRE calculations used in CHISQRD. The original input file
 C--- is first moved to INPUT0.DAT
-      if(LINUX) then
-        ctmp='mv INPUT.DAT INPUT0.DAT'
-        itmp=PIPE(ctmp)
-        ctmp='mv FITIN.DAT INPUT.DAT'
-        itmp=PIPE(ctmp)
-       else
-        ctmp='ren INPUT.DAT INPUT0.DAT'
-        itmp=PIPE(ctmp)
-        ctmp='ren FITIN.DAT INPUT.DAT'
-        itmp=PIPE(ctmp)
-       endif
-
+	itmp=ipipe_move('INPUT.DAT','INPUT0.DAT')
+	itmp=ipipe_move('FITIN.DAT','INPUT.DAT')
       return
       end
 C
@@ -1812,16 +1764,13 @@ C--- of EMPIRE after the fitting is done.
 C
       parameter(mxind=5000,mxinda=5000)
 
-      logical LINUX
-      integer*4 PIPE,itmp
-      character*132 ctmp
+      integer itmp, ipipe_move
 
       common /exptldat/en(0:mxind),sig(mxind),dsig(mxind),angs(mxinda),
      &                  siga(mxinda),dsiga(mxinda),egrid(0:mxind),
      &                  wt0,ths0,nints(mxind),nangd(mxind),nangs(mxind),
      &                  icala(mxind),idnt(mxind),idang(mxind),nnde
 
-      LINUX = .TRUE.
       if(sig(1).gt.1.0e-3) then
         write(2,*)
         write(2,*) ' Neutron s-wave strength function:'
@@ -1842,13 +1791,7 @@ C
       CALL THORA(2)
       close(2)
 
-      IF(LINUX) THEN
-        ctmp='mv INPUT1.DAT INPUT.DAT'
-        itmp=PIPE(ctmp)
-       else
-        ctmp='ren INPUT1.DAT INPUT.DAT'
-        itmp=PIPE(ctmp)
-       endif
+      itmp=ipipe_move('INPUT1.DAT','INPUT.DAT')
 
       return
       end
@@ -1876,12 +1819,12 @@ Ccc
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
       logical fexist
-      logical LINUX
+
       CHARACTER*6 name, namee, namelst
       CHARACTER*80 inprecord
       CHARACTER*238 outrecord
       CHARACTER*1080 title
-      character*132 ctmp
+  
       character*1 namecat, category, dum
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, ndkeys, j
@@ -1892,8 +1835,7 @@ C     integer nreac
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
      &          sensmat(ndreac)
-      integer*4 itmp
-      INTEGER*4 PIPE
+      integer itmp, ipipe_move, ipipe_mkdir, ipipe_rmdir
 C
       real*8 atarget,ztarget,aprojec,Zprojec
       integer*4 i1p,i2p
@@ -1962,7 +1904,7 @@ C-----T - variation of the parameter allowed; the parameters
 C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
 C-----    TOTRED, FUSRED, ELARED ...
 ccc
-      LINUX = .TRUE.
+
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
@@ -1977,13 +1919,7 @@ ccc
      & AND START SENSITIVITY CALCULATIONS. THANKS.'
       ENDIF
 C-----Move original (reference) input out of the way
-      IF(LINUX) THEN
-         ctmp='mv INPUT.DAT INPUTREF.DAT'
-         itmp=PIPE(ctmp)
-      ELSE
-         ctmp='ren INPUT.DAT INPUTREF.DAT'
-         itmp=PIPE(ctmp)
-      ENDIF
+      itmp=ipipe_move('INPUT.DAT','INPUTREF.DAT')
 C-----
 C-----Run calculations with original input
 C-----
@@ -2051,21 +1987,9 @@ C-----
       CLOSE(44)
       CALL EMPIRE !calculations with original input
 C-----Move original (reference) outputs out of the way
-      IF(LINUX) THEN
-         ctmp='mv LIST.DAT LISTREF.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='mv OUTPUT.DAT OUTPUTREF.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='mv XSECTIONS.OUT XSECTIONSREF.OUT'
-         itmp=PIPE(ctmp)
-      ELSE
-         ctmp='ren LIST.DAT LISTREF.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='ren OUTPUT.DAT OUTPUTREF.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='ren XSECTIONS.OUT XSECTIONSREF.OUT'
-         itmp=PIPE(ctmp)
-      ENDIF
+      itmp=ipipe_move('LIST.DAT','LISTREF.DAT')
+      itmp=ipipe_move('OUTPUT.DAT','OUTPUTREF.DAT')
+      itmp=ipipe_move('XSECTIONS.OUT','XSECTIONSREF.OUT')
 C-----
 C-----Run sensitivity calculations
 C-----
@@ -2095,24 +2019,14 @@ C-----Check category of the parameter to be varied
       IF(category.EQ.'F') GOTO 100
       valmem = val
       IF(val.GE.1) THEN
-c       WRITE(8,*) 'PARAMETER ',name,' VARIATION ',val,
-c    &             ' IS BIGGER THAN 1'
-      STOP 'PARAMETER VARIATION LARGER THAN 100%'
+      WRITE(8,*) 'ERROR:PARAMETER VARIATION LARGER THAN 100%'
+      STOP       'ERROR:PARAMETER VARIATION LARGER THAN 100%'
       ENDIF
 C-----Check whether omp is being varied - if so then move Tl directory out of the way
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
-         IF(LINUX) THEN
-            ctmp='mv TL TLREF'
-            itmp=PIPE(ctmp)
-            ctmp='mkdir TL'
-            itmp=PIPE(ctmp)
-         ELSE
-            ctmp='ren TL TLREF'
-            itmp=PIPE(ctmp)
-            ctmp='mkdir TL'
-            itmp=PIPE(ctmp)
-         ENDIF
+         itmp = ipipe_move('TL','TLREF')
+         itmp = ipipe_mkdir('TL')
       ENDIF
       ifound = 0
       DO k = 1, 2 ! 1 for parameter+val, 2 for parameter-val
@@ -2120,17 +2034,8 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
          IF(k.EQ.2) val = -val !normally we only invert the sign
          IF(name(1:4).EQ.'UOMP'  .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA'.AND. k.EQ.2 ) THEN
-            IF(LINUX) THEN
-               ctmp='rm -r TL'
-               itmp=PIPE(ctmp)
-               ctmp='mkdir TL'
-               itmp=PIPE(ctmp)
-            ELSE
-               ctmp='del TL'
-               itmp=PIPE(ctmp)
-               ctmp='mkdir TL'
-               itmp=PIPE(ctmp)
-            ENDIF
+            itmp = ipipe_rmdir('TL')
+            itmp = ipipe_mkdir('TL')
          ENDIF
 c     WRITE(8,'(''Varying parameter '',A6,''x''F10.3,4I5)')
 c    &      name, 1.0+val, i1,i2, i3, i4
@@ -2219,43 +2124,24 @@ C--------Write modified input with increased value of the parameter if name matc
   300 CLOSE(7)
       CLOSE(44)
       CLOSE(5)
+      
       CALL EMPIRE
 
 C-----Delete modified input that has been used and move XSECTIONS.OUT file
-      IF(LINUX) THEN
-         ctmp='rm INPUT.DAT'
-         itmp=PIPE(ctmp)
-         IF(k.EQ.1) THEN
-            ctmp = 'mv XSECTIONS.OUT XS-UP.DAT'
-         ELSE
-            ctmp = 'mv XSECTIONS.OUT XS-DOWN.DAT'
-         ENDIF
-         itmp=PIPE(ctmp)
-       ELSE
-         ctmp='del INPUT.DAT'
-         itmp=PIPE(ctmp)
-         IF(k.EQ.1) THEN
-            ctmp = 'ren XSECTIONS.OUT XS-UP.DAT'
-         ELSE
-            ctmp = 'ren XSECTIONS.OUT XS-DOWN.DAT'
-         ENDIF
-         itmp=PIPE(ctmp)
+      OPEN(5,FILE=('INPUT.DAT'),STATUS='OLD',ERR=305)
+      CLOSE(5,STATUS='DELETE')
+  305 IF(k.EQ.1) THEN
+        itmp = ipipe_move('XSECTIONS.OUT','XS-UP.DAT')
+      ELSE
+        itmp = ipipe_move('XSECTIONS.OUT','XS-DOWN.DAT')
       ENDIF
+
       ENDDO !loop over parameter+val and parameter-val
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
-         IF(LINUX) THEN
-            ctmp='rm -rf TL'
-            itmp=PIPE(ctmp)
-            ctmp='mv TLREF TL'
-            itmp=PIPE(ctmp)
-         ELSE
-            ctmp='del TL'
-            itmp=PIPE(ctmp)
-            ctmp='ren TLREF TL'
-            itmp=PIPE(ctmp)
-         ENDIF
+        itmp = ipipe_rmdir('TL')
+        itmp = ipipe_move('TLREF','TL')
       ENDIF
 C-----
 C-----Calculate sensitivity to the parameter
@@ -2319,28 +2205,12 @@ C-----------Relative sensitivity (per variation interval)
      &'('' ERROR: INVALID FORMAT in KEY: '',A6,
      &  '', EMPIRE STOPPED, check INPUT file'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
-C-----Restore standard input
-  350 IF(LINUX) THEN
-         ctmp='mv INPUTREF.DAT INPUT.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='mv LISTREF.DAT LIST.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='mv OUTPUTREF.DAT OUTPUT.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='mv XSECTIONSREF.OUT XSECTIONS.OUT'
-         itmp=PIPE(ctmp)
-      ELSE
-         ctmp='ren INPUTREF.DAT INPUT.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='ren LISTREF.DAT LIST.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='ren OUTPUTREF.DAT OUTPUT.DAT'
-         itmp=PIPE(ctmp)
-         ctmp='ren XSECTIONSREF.OUT XSECTIONS.OUT'
-         itmp=PIPE(ctmp)
-      ENDIF
+C-----Restore standard input/output
+  350 itmp=ipipe_move('INPUTREF.DAT','INPUT.DAT')
+      itmp=ipipe_move('LISTREF.DAT','LIST.DAT')
+      itmp=ipipe_move('OUTPUTREF.DAT','OUTPUT.DAT')
+      itmp=ipipe_move('XSECTIONSREF.OUT','XSECTIONS.OUT')
       return
-
       end
 
 
