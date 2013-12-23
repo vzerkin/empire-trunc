@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3682 $
+Ccc   * $Rev: 3685 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 14:54:29 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 15:24:29 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -56,7 +56,7 @@ C
 C     delete multiple files
 C 
 	character*(*) filename
-	ipipe_delete=idelete_file2(trim(filename)//char(0))
+	ipipe_delete2=idelete_file2(trim(filename)//char(0))
 	return
 	end
 
@@ -78,8 +78,8 @@ C
       implicit none
 	character*(*) fromfile1,fromfile2,tofile
 	character*512 ctmp
-	integer iopsys,igetopsys,iwin,ipipe_delete
-	ipipe_move=0
+	integer iopsys,igetopsys,iwin,idelete_file
+	ipipe_cat=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
 	  ctmp= 'cat '//trim(fromfile1)//' '//trim(fromfile2)//
@@ -106,7 +106,7 @@ C
       integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
-      pipe=0
+      ipipe=0
       CALL SYSTEM(STRINGP)
       RETURN
       END

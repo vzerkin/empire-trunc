@@ -77,7 +77,7 @@ C
 	character*(*) filename
 	character*512 ctmp
 	integer iopsys,igetopsys
-	ipipe_delete=0
+	ipipe_delete2=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
         ctmp='rm -f '//trim(filename)
@@ -110,7 +110,7 @@ C
 	character*(*) fromfile1,fromfile2,tofile
 	character*512 ctmp
 	integer iopsys,igetopsys,iwin,ipipe_delete
-	ipipe_move=0
+	ipipe_cat=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
 	  ctmp= 'cat '//trim(fromfile1)//' '//trim(fromfile2)//
@@ -125,7 +125,6 @@ C
 	return
 	end
 
-
 	integer function igetopsys()
       implicit none
 	character*512 ctmp
@@ -138,7 +137,7 @@ C
       integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
-      pipe=0
+      ipipe=0
       CALL SYSTEM(STRINGP)
       RETURN
       END
