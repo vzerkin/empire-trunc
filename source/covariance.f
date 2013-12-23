@@ -1,10 +1,9 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 3678 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2013-12-23 13:57:40 +0100 (Mo, 23 Dez 2013) $
 
       PROGRAM COVARIANCE
-      integer*4 PIPE,itmp,i1,i2
-      character*80 command
+      integer*4 i1,i2
       character*4 crun
 C     write(*,*) 'Number of sampling runs?'
       OPEN(10,file='RUNS.INP')
@@ -15,6 +14,7 @@ C     write(*,*) 'Number of sampling runs?'
          write(crun,'(I4.4)') i
          CALL system('mv OUTPUT.DAT OUT'//crun)
          CALL system('mv LIST.DAT LST'//crun)
+         CALL system('mv XSECTIONS.OUT LST'//crun)		 
          open(10,file='R250SEED.DAT',status='OLD')
          read(10,*) i1,i2
          write(*,'(1x,A6,i12,1x,i12/)') 'SEEDS:',i1,i2
