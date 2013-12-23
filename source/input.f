@@ -1,6 +1,6 @@
-!cc   * $Rev: 3658 $
+!cc   * $Rev: 3676 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-13 15:18:03 +0100 (Fr, 13 Dez 2013) $
+!cc   * $Date: 2013-12-23 13:52:47 +0100 (Mo, 23 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2495,8 +2495,7 @@ C
 C Local variables
 C
       CHARACTER*132 ctmp
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
+      INTEGER iwin, ipipe_move, ipipe_cat
 
       CHARACTER*5 chelem
       CHARACTER*110 ch_iuf
@@ -2787,18 +2786,8 @@ C--------------------only gamma decay is considered up to now
       ELSE
         CLOSE(13)
         CLOSE(14)
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'cat LEVELS LEVELS.ADD>LEVELS.TMP'
-          iwin = PIPE(ctmp)
-          ctmp = 'mv LEVELS.TMP LEVELS'
-          iwin = PIPE(ctmp)
-          ctmp = 'rm LEVELS.ADD'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('copy LEVELS+LEVELS.ADD LEVELS.TMP>nul')
-          iwin = PIPE('move LEVELS.TMP LEVELS>nul')
-          iwin = PIPE('del LEVELS.ADD>nul')
-        ENDIF
+	  iwin = ipipe_cat('LEVELS','LEVELS.ADD','LEVELS.TMP')
+	  iwin = ipipe_move('LEVELS.TMP','LEVELS')
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
         FILevel = .TRUE.
       ENDIF
@@ -9318,12 +9307,8 @@ Ccc   *                                                                *
 Ccc   * input: none                                                    *
 Ccc   * output: none                                                   *
 Ccc   *                                                                *
-Ccc   * calls: pipe                                                    *
+Ccc   * calls: ipipe_copy                                              *
 Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   * author: M.Herman                                               *
-Ccc   * date:   09.Apr.2011                                            *
-Ccc   * revision:     by:                         on:                  *
 Ccc   *                                                                *
 Ccc   ******************************************************************
 Ccc
@@ -9334,7 +9319,7 @@ C Local variables
 C
       CHARACTER*13 caz
       CHARACTER*64 filename
-      INTEGER*4 iwin
+      INTEGER iwin, ipipe_copy
       CHARACTER*255 ccomm
       LOGICAL fexist
 
@@ -9395,8 +9380,7 @@ C-----copy EXFOR file to the working directory
      &  '  Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
       write(*,*) ' '
 
-      iwin=iCopyTxtFile(ccomm(1:ilen),'TMP.c4')
-C     iwin=ipipeCopyFile(ccomm(1:ilen),'TMP.c4')
+      iwin=ipipe_copy(ccomm(1:ilen),'TMP.c4')
 C
 C     Call to sortc4 moved to runE script
 C      
