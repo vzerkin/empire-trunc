@@ -1,15 +1,91 @@
-Ccc   * $Rev: 3670 $
+Ccc   * $Rev: 3671 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-22 23:46:39 +0100 (So, 22 Dez 2013) $
+Ccc   * $Date: 2013-12-23 12:00:30 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
-C/* The calling FORTRAN program must declare all              */
-C/* subrutines as INTEGER*4 funtions to avoid memory problems */
-C/* Do not use default declaration please, they are           */
-C/* compiler and system dependent !!!!                        */
+C       Should be linked with pipec.c !!!
 C
-C     Should be linked with pipec.c !!!
+	integer function ipipe_mkdir(dirname)
 C
-      INTEGER*4 FUNCTION PIPE(Stringp)
+C     creating a directory
+C
+      implicit none
+	character*(*) dirname
+	character*512 ctmp
+	integer*4 iopsys,igetopsys
+	ipipe_mkdir=0
+	iopsys = igetopsys() ! linux:0
+	if (iopsys.eq.0) then
+	  ctmp='mkdir '//trim(dirname)
+	else
+	  ctmp='mkdir '//trim(dirname)//' >NUL'
+	endif
+	call system(ctmp)
+	return
+	end
+
+	integer function ipipe_rmdir(dirname)
+C
+C     deleting empty/full directories
+C
+      implicit none
+	character*(*) dirname
+	character*512 ctmp
+	integer*4 iopsys,igetopsys
+	ipipe_rmdir=0
+	iopsys = igetopsys() ! linux:0
+	if (iopsys.eq.0) then
+        ctmp='rm -f '//trim(dirname)//'/* |'//'rmdir '//trim(dirname)
+	else
+	  ctmp='rmdir /S /Q '//trim(dirname)//' >NUL'
+	endif
+	call system(ctmp)
+	return
+	end
+
+	integer function ipipe_delete(filename)
+C    
+C     delete one file
+C 
+	character*(*) filename
+	ipipe_delete=idelete_file(trim(filename)//char(0))
+	return
+	end
+
+	integer function ipipe_delete2(filename)
+C    
+C     delete multiple files
+C 
+	character*(*) filename
+	ipipe_delete=idelete_file2(trim(filename)//char(0))
+	return
+	end
+
+	integer function ipipe_move(fromfile,tofile)
+	character*(*) fromfile,tofile
+	ipipe_move=irename_file(trim(fromfile)//char(0)
+     1  ,trim(tofile)//char(0))
+	return
+	end
+
+	integer function ipipe_copy(fromfile,tofile)
+	character*(*) fromfile,tofile
+	ipipe_copy=icopy_file(trim(fromfile)//char(0)
+     1  ,trim(tofile)//char(0))
+	return
+	end
+
+	integer function igetopsys()
+      implicit none
+	character*512 ctmp
+	igetopsys=0 !   linux - default
+	call getenv('OS',ctmp)
+	if(ctmp(1:3).eq.'Win') igetopsys=1 ! Windows
+	return
+	end
+C
+C     This code is expected not to be used
+C
+      INTEGER FUNCTION PIPE(Stringp)
       CHARACTER*(*) STRINGP
       pipe=0
       ilen=len(trim(STRINGP))
@@ -51,66 +127,5 @@ C
       RETURN
       END
 
-C     To be defined 
-C	integer*4 function ipipe_rmdir(dirname)        ! deleting empty/full directories
-C	integer*4 function ipipe_mkdir(dirname)        ! making directory
 
-C     To be modified
-C	integer*4 function ipipe_delete(filenames)     ! deleting multiple files
-	integer*4 function ipipe_delete(filename)
-	character*(*) filename
-	ipipe_delete=idelete_file(trim(filename)//char(0))
-	return
-	end
-
-C     integer*4 function ipipe_move(fromfile,tofile) ! moving file
-	integer*4 function ipipe_move(fromfile,tofile)
-	character*(*) fromfile,tofile
-	ipipe_move=irename_file(trim(fromfile)//char(0)
-     1  ,trim(tofile)//char(0))
-	return
-	end
-
-	integer*4 function ipipe_copy(fromfile,tofile)
-	character*(*) fromfile,tofile
-	ipipe_copy=icopy_file(trim(fromfile)//char(0)
-     1  ,trim(tofile)//char(0))
-	return
-	end
-
-	integer*4 function igetopsys()
-      implicit none
-	character*512 ctmp
-	igetopsys=0 !   linux - default
-	call getenv('OS',ctmp)
-	if(ctmp(1:3).eq.'Win') igetopsys=1 ! Windows
-	return
-	end
-
-	integer*4 function iCopyTxtFile(fromfile,tofile)
-      implicit none
-	character*(*) fromfile,tofile
-	character*512 str
-	integer*4 ilen1,ilen2
-	integer ninp,nout
-	iCopyTxtFile=0
-	ninp=555
-	nout=777
-	ilen1=len(trim(fromfile)) 
-	ilen2=len(trim(tofile)) 
-	open(ninp,file=fromfile(1:ilen1),status='old',err=111)
-	open(nout,file=tofile(1:ilen2),status='unknown',err=112)
-1	read (ninp,'(a512)',end=200,err=200) str
-c	write (*,'(a)') trim(str)
-	write (nout,'(a)') trim(str)
-	goto 1
-200	close(ninp)
-	close(nout)
-	return
-111	iCopyTxtFile=-2
-	return
-112	iCopyTxtFile=-2
-	close(ninp)
-	return
-	end
 
