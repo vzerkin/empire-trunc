@@ -1,6 +1,6 @@
-!cc   * $Rev: 3687 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+!cc   * $Rev: 3688 $
+!cc   * $Author: zerkinv $
+!cc   * $Date: 2013-12-23 17:48:47 +0100 (Mo, 23 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -10960,9 +10960,42 @@ C-----setting DIRect to zero
       IFINDCOLL = ierr
       RETURN
       END
-C
-C
+
+!-zv-2013
       SUBROUTINE FINDPOT(Ki,Ieof,Ipoten)
+c      INCLUDE "global.h"
+      CHARACTER*10 aaa
+      CHARACTER*1024 fileOutName
+      INTEGER Ieof, Ipoten, Ki
+      CHARACTER*200 EMPiredir
+      CHARACTER*72 EMPtitle
+      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
+      LOGICAL OMPAR_USEFILES
+      COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
+	if (.not.OMPAR_USEFILES) then
+	    call FINDPOT00(Ki,Ieof,Ipoten)
+	    return
+	endif
+	close(Ki,err=1000)
+1000	Ieof=0
+	write (aaa,'(i6)') Ipoten
+	aaa=adjustl(aaa)
+	fileOutName=trim(empiredir)
+     1		//'/RIPL/optical/om-data'
+     1		//'/om-parameter-dir'
+     1		//'/omp-'
+     1		//trim(aaa)
+     1		//'.dat'
+!-debug	write (*,'(a)') trim(fileOutName)
+	close(Ki,err=100)
+100	open(Ki,file=trim(fileOutName),status='old',err=111)
+	return
+111	Ieof=1
+	return
+      END
+C
+C
+      SUBROUTINE FINDPOT00(Ki,Ieof,Ipoten)
 C
 C-----routine to find IPOTEN entry in the RIPL optical model database
 C

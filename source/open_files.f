@@ -12,6 +12,7 @@ Ccc   * $Id$
 
       integer*4 ios
 
+
 c     NOTE UNITS OPENED IN MODULES
 c
 c     Unit#  Module
@@ -110,6 +111,9 @@ c     99     ecis
 c    100     empire_ctl
 c    102     Non-RIPL potential
 
+      LOGICAL OMPAR_USEFILES
+      COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
+
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
 
       ! unit 8 now controlled by empire_ctl.f
@@ -165,6 +169,15 @@ c    102     Non-RIPL potential
           endif
       endif
       if(.not.OMPAR_RIPLF) OPEN (29, FILE='OMPAR.RIPL', STATUS='NEW')
+
+      OPEN (261,STATUS='OLD',iostat=ios
+     + ,FILE=trim(empiredir)//'/RIPL/optical/om-data'
+     +		//'/om-parameter-dir/omp-1.dat')
+      OMPAR_USEFILES = .false.
+      if(ios .eq. 0) OMPAR_USEFILES=.true.
+c	write (*,*) '...OMPAR_USEFILES=',OMPAR_USEFILES
+      CLOSE(261,ERR=2610)
+2610  continue
 
       return
       end subroutine open_files
