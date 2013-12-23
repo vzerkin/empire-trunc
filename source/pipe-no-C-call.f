@@ -135,7 +135,7 @@ C
 	return
 	end
 
-      INTEGER FUNCTION PIPE(Stringp)
+      integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
       pipe=0

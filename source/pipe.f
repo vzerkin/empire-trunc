@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3680 $
+Ccc   * $Rev: 3682 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 14:18:16 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 14:54:29 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -103,7 +103,7 @@ C
 	return
 	end
 
-      INTEGER FUNCTION PIPE(Stringp)
+      integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
       pipe=0
