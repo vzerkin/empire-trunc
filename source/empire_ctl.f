@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3684 $
+Ccc   * $Rev: 3687 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 14:55:47 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1124,8 +1124,8 @@ C--- Finalizes the energy grid, as required by EMPIRE
 C--- The file FITIN.DAT is now moved to INPUT.DAT to perform the
 C--- the EMPIRE calculations used in CHISQRD. The original input file
 C--- is first moved to INPUT0.DAT
-	itmp=ipipe_move('INPUT.DAT','INPUT0.DAT')
-	itmp=ipipe_move('FITIN.DAT','INPUT.DAT')
+      itmp=ipipe_move('INPUT.DAT','INPUT0.DAT')
+      itmp=ipipe_move('FITIN.DAT','INPUT.DAT')
       return
       end
 C

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3668 $
+Ccc   * $Rev: 3687 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-22 23:32:43 +0100 (So, 22 Dez 2013) $
+Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -162,7 +162,7 @@ c-----                ../data/HFB-fisbar.dat (default)
          CLOSE (81)
          GOTO 402
   401    WRITE (8,'(A33,I3,A3,I3,A37)') 
-     &     ' ERROR: No fission barrier FOR Z=',INT(Z(Nnuc)),		  
+     &     ' ERROR: No fission barrier FOR Z=',INT(Z(Nnuc)),              
      &     ' A=', INT(A(Nnuc)),' in file ../data/HFB-parab-fisbar.dat'
          WRITE (8,'(A125)')
      &     ' ERROR: You may use RIPL barriers (FISBAR 1) instead of para 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3641 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-10 15:51:18 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Rev: 3687 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -748,9 +748,9 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
 C
 C        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then 
-C	      write(*,*) 'HF  =',Iec,Jc,Ipc
-C	      write(*,*) '     ',0    ,sngl(Sum)
-C 	   endif
+C           write(*,*) 'HF  =',Iec,Jc,Ipc
+C           write(*,*) '     ',0    ,sngl(Sum)
+C        endif
       ENDIF
 C-----
 C-----decay to discrete levels 
@@ -794,7 +794,7 @@ C--------loop over channel spin ------ done ----------------------------
          else
            SCRtl(i,Nejc) = sumdl  
            Sum = Sum + sumdl 
-         endif		  
+         endif            
 !         write(8,*) 'Sum to level i=', i,sumdl*CINRED(i)
       ENDDO
 C-----do loop over inelastic levels --------- done --------------------
@@ -1163,8 +1163,8 @@ C     cme= 10[\hbar/(m*c*R]^2 => cme = 0.307/A^(2/3)
 C     xlm(i) = f_Mi                                                          
 C                                                                            
 C 
-	xle = 0.d0
-	xlm = 0.d0
+      xle = 0.d0
+      xlm = 0.d0
       IF (MAXmult.GT.2) THEN
          ha = A(Nnuc)**0.666666666666D0
          cee = 3.7D-5*ha
@@ -1194,7 +1194,7 @@ C-----decay to the continuum
 C-----
 C-----do loop over c.n. energies (loops over spins and parities expanded
       DO ier = Iec - 1, 1, -1
-	     etmp = EX(ier,Nnuc)   
+           etmp = EX(ier,Nnuc)   
          eg = EX(Iec,Nnuc) - etmp
          xle(1) = E1(Nnuc,eg, TNUc(ier, Nnuc),etmp)*
      &            TUNe(0, Nnuc)
@@ -1228,7 +1228,7 @@ C
                    scrtneg = scrtneg + xle(lamb)
                  ENDIF
                ENDDO
-	         gamm_tr(lamb) = gamm_tr(lamb) +
+               gamm_tr(lamb) = gamm_tr(lamb) +
      >                         scrtpos*RO(ier, Jr, ipos, Nnuc) +
      >                         scrtneg*RO(ier, Jr, ineg, Nnuc)
 

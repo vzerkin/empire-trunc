@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3485 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-08-28 23:16:44 +0200 (Mi, 28 Aug 2013) $
+Ccc   * $Rev: 3687 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -152,10 +152,8 @@ C
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
-      CHARACTER*132 ctmp
       INTEGER iainp, izinp, k, n, ncalc, nld_cc, j
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
+      INTEGER iwin, ipipe_move
 C
 C-----Sets CC optical model parameters according to RIPL
 C
@@ -429,19 +427,10 @@ C-----------rotational model so we are setting it to 0.01
   100    CLOSE (32)
          CLOSE (96)
          CLOSE (97)
-C        CLOSE (97,STATUS = 'DELETE')
-
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
-         ENDIF
+         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
-C        WRITE (8,*)
-C        WRITE (8,*)
       ENDIF
 
       IF (IMOdel.EQ.2 .AND. (.NOT.coll_defined)) THEN
@@ -681,20 +670,10 @@ C        first energy with default TARGET_COLL.DAT
   200    CLOSE (32)
          CLOSE (96)
          CLOSE (97)
-C        CLOSE (97,STATUS = 'DELETE')
-
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
-         ENDIF
+         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished 
 C                                                                   
-C        WRITE (8,*)
-C        WRITE (8,*)
-
       ENDIF
 
       IF (IMOdel.EQ.3 .AND. (.NOT.coll_defined)) THEN
@@ -1053,19 +1032,10 @@ C
   290    CLOSE(32)
          CLOSE (96)
          CLOSE (97)
-
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
-         ENDIF
+         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
-C        WRITE (8,*)
-C        WRITE (8,*)
-
       ENDIF
 
       IF (IMOdel.EQ.4 .AND. (.NOT.coll_defined)) THEN
@@ -1340,21 +1310,11 @@ C           first run with default TARGET_COLL.DAT
          ENDIF
  1001    CLOSE (96)
          CLOSE (32)
-C        CLOSE (97,STATUS = 'DELETE')
          CLOSE (97)
-C
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv COLL.DAT TARGET_COLL.DAT'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move COLL.DAT TARGET_COLL.DAT>nul:')
-         ENDIF
+         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
-C        WRITE (8,*)
-C        WRITE (8,*)
-
       ENDIF
 C
 C-----END OF SETTING COLLECTIVE LEVELS for DIRECT CALCULATIONS
@@ -2189,7 +2149,7 @@ C--------transfer of the calculated transmission coeff. onto TL matrix
             Nonzero = .TRUE.
          ENDDO
       ENDDO
-	RETURN
+      RETURN
       END
 
       SUBROUTINE TLLOC(Nnuc,Nejc,Eout,Il,Frde)
@@ -2353,10 +2313,10 @@ C
   200 CLOSE (45)
       IF (IOUt.EQ.5) CLOSE (46)
       IF (IOUt.GT.4) THEN
-	  WRITE (8,*)
+        WRITE (8,*)
      & 'Transmission coefficients for outgoing channel read from file: '
-	  WRITE (8,*) ctldir//ctmp23//'.BIN'
-	ENDIF
+        WRITE (8,*) ctldir//ctmp23//'.BIN'
+      ENDIF
       RETURN
 
   300 CLOSE (45,STATUS = 'DELETE')
@@ -2577,8 +2537,8 @@ C--------Selecting only ground state
      &     ' ERROR: Set NDLW in dimension.h to ',l
            WRITE (*,*)
      &     ' ERROR: Set NDLW in dimension.h to ',l
-	     STOP ' ERROR: ECIS angular momentum bigger than NDLW '
-	   ENDIF
+           STOP ' ERROR: ECIS angular momentum bigger than NDLW '
+         ENDIF
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
@@ -2721,7 +2681,7 @@ C
 
       IF (SINl+SINlcc.GT.ABScs) THEN
 C     IF (SINl.GT.ABScs) THEN
-C	   ABScs = ABScs + SINl
+C        ABScs = ABScs + SINl
 C        WRITE (8,
 C    &'(1x,'' WARNING: reaction cross section renormalized to account fo
 C    &r DWBA calculated cross sections '', F8.5/
@@ -2888,11 +2848,10 @@ C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
      &                 xmas_nejc, xmas_nnuc
-      DOUBLE PRECISION DBLE
       LOGICAL relcal
       INTEGER l, lmax, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
-      REAL SNGL
+
       lmax = 0
       ncoll = 0
       ecms = ETL(J,Nejc,Nnuc)
@@ -3126,7 +3085,7 @@ C
       DOUBLE PRECISION fv, fs, fvv, fvs, tv, ts, fso, tso
 
       CHARACTER*1 ch
-      DOUBLE PRECISION DABS
+
       INTEGER ncollx 
       LOGICAL lodd
 
@@ -3134,8 +3093,7 @@ C
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
      &        nuncoupled, ncontinua, nphonon 
 
-      CHARACTER*132 ctmp
-      INTEGER*4 PIPE,iwin
+      INTEGER iwin, ipipe_move
       LOGICAL inc_channel, logtmp
 
       inc_channel = .false.
@@ -3175,7 +3133,7 @@ C-----Imaginary SO potential deformed
       ecoul  = max(1.444*Z(Nnuc)/A(Nnuc)**0.33333333-1.13,0.d0)
 
       convg=1.0d-10
-	IF(Ldwba .and. DABS(-El).GT.max(ecoul,5.d0)) convg=1.0d-5
+      IF(Ldwba .and. DABS(-El).GT.max(ecoul,5.d0)) convg=1.0d-5
 C-----ECIS iteration scheme is used.
       ECIs1(21:21) = 'F'
 C-----Usual coupled equations instead of ECIS scheme is used
@@ -3245,7 +3203,7 @@ C     if(.not.TL_calc) then
 C       write(*,*)'Vibrational Nnuc=',Nnuc,' Isotr ? ',CN_isotropic
 C       write(*,*)'INLkey=',INLkey,' DWBA ? ',lDWBA,' TL calc ? ',TL_calc
 C       write(*,*)  
-C	endif
+C     endif
 
       IF(.not.CN_isotropic) then
 C
@@ -3273,7 +3231,7 @@ C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.
         ECIs2(36:36) = 'F'    ! default: no gamma emission in HF
                               ! Gg(L) gamma width should be properly trasferred 
         IF(ngamm_tr.gt.0)     
-     &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
+     &    ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
 C
         ECIs2(37:37) = 'F'    ! Moldauer's width fluctuation correction
 
@@ -3306,7 +3264,7 @@ C-----At least ground state is always open and considered
               IF (ICOllev(j).GT.LEVcc) CYCLE
               nd_cons = nd_cons + 1
             ELSE
-	        ! skipping DWBA closed channels
+              ! skipping DWBA closed channels
               IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
               nd_cons = nd_cons + 1   
             ENDIF
@@ -3972,21 +3930,10 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-
       IF (Inlkey.EQ.0) THEN
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'mv ecSPH.inp ecis06.inp'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('move ecSPH.inp ecis06.inp >NUL')
-        ENDIF
+         iwin = ipipe_move('ecSPH.inp','ecis06.inp')
       ELSE
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'mv ecVIB.inp ecis06.inp'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('move ecVIB.inp ecis06.inp >NUL')
-        ENDIF
+         iwin = ipipe_move('ecVIB.inp','ecis06.inp')
       ENDIF
 C
 C-----Running ECIS06
@@ -4002,37 +3949,16 @@ C
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
-      IF(TL_calc) then
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'rm ecis06.inp ecis06.out'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('del ecis06.inp ecis06.out >NUL')
-         ENDIF
-	   RETURN
-	ENDIF
+      IF(TL_calc) RETURN
 
       IF (Inlkey.EQ.0) THEN
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_SPH.out'
-            iwin = PIPE(ctmp)
-            ctmp = 'mv ecis06.inp ECIS_SPH.inp'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_SPH.out >NUL')
-            iwin = PIPE('move ecis06.inp ECIS_SPH.inp >NUL')
-         ENDIF
+         iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
+         iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
       ELSE
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_VIB.out'
-            iwin = PIPE(ctmp)
-            ctmp = 'mv ecis06.inp ECIS_VIB.inp'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_VIB.out >NUL')
-            iwin = PIPE('move ecis06.inp ECIS_VIB.inp >NUL')
-         ENDIF
+         iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
+         iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
       ENDIF
+
       RETURN 
       END
 
@@ -4098,14 +4024,12 @@ C
       DOUBLE PRECISION fv, fs, fvv, fvs, tv, ts, fso, tso
 
       CHARACTER*1 ch
-      DOUBLE PRECISION DABS
+
       INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), nppaa,
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
      &        nuncoupled, ncontinua
 
-      CHARACTER*132 ctmp
-      INTEGER*4 PIPE,iwin
-      INTEGER INT, NINT
+      INTEGER iwin, ipipe_move
 
       LOGICAL inc_channel, logtmp
 
@@ -4237,7 +4161,7 @@ C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.
         ECIs2(36:36) = 'F'    ! default: no gamma emission in HF
                               ! Gg(L) gamma width should be properly trasferred 
         IF(ngamm_tr.gt.0)     
-     &    ECIs2(36:36) = 'T'	! .TRUE. to consider gamma emission in HF
+     &    ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
 
         ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
 C
@@ -4950,13 +4874,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-
-      IF (IOPsys.EQ.0) THEN
-        ctmp = 'mv ecVIBROT.inp ecis06.inp'
-        iwin = PIPE(ctmp)
-      ELSE
-        iwin = PIPE('move ecVIBROT.inp ecis06.inp >NUL')
-      ENDIF
+      iwin = ipipe_move('ecVIBROT.inp','ecis06.inp')
 
 C-----Running ECIS
 
@@ -4966,36 +4884,14 @@ C-----Running ECIS
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
-      IF(TL_calc) then
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'rm ecis06.inp ecis06.out'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('del ecis06.inp ecis06.out')
-         ENDIF
-         RETURN
-	ENDIF
+      IF(TL_calc) RETURN
 
       IF (npho.GT.0) THEN
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_VIBROT.out'
-            iwin = PIPE(ctmp)
-            ctmp = 'mv ecis06.inp ECIS_VIBROT.inp'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_VIBROT.out >NUL')
-            iwin = PIPE('move ecis06.inp ECIS_VIBROT.inp >NUL')
-         ENDIF
+         iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
+         iwin = ipipe_move('ecis06.inp','ECIS_VIBROT.inp')
       ELSE
-         IF (IOPsys.EQ.0) THEN
-            ctmp = 'mv ecis06.out ECIS_ROT.out'
-            iwin = PIPE(ctmp)
-            ctmp = 'mv ecis06.inp ECIS_ROT.inp'
-            iwin = PIPE(ctmp)
-         ELSE
-            iwin = PIPE('move ecis06.out ECIS_ROT.out >NUL')
-            iwin = PIPE('move ecis06.inp ECIS_ROT.inp >NUL')
-         ENDIF
+         iwin = ipipe_move('ecis06.out','ECIS_ROT.out')
+         iwin = ipipe_move('ecis06.inp','ECIS_ROT.inp')
       ENDIF
 
       RETURN
@@ -5051,13 +4947,11 @@ C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab,
      &                 xmas_nejc, xmas_nnuc, xratio
 
-      DOUBLE PRECISION DABS
-
       INTEGER ikey, ip,  j, nd_cons, nd_nlvop
 
       CHARACTER*132 ctmp
-      INTEGER*4 PIPE,iwin
-      INTEGER NINT
+      INTEGER iwin, ipipe_move, ipipe
+
       LOGICAL inc_channel
 
       inc_channel = .false.
@@ -5430,31 +5324,13 @@ C-----Running OPTMAN
 C
       IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
 
-      IF (IOPsys.EQ.0) THEN
-        ctmp = trim(empiredir)//'/source/optmand'
-        iwin = PIPE(ctmp)
-      ELSE
-        iwin = PIPE(' optmand')
-      ENDIF
+      ctmp = trim(empiredir)//'/source/optmand'
+      iwin = ipipe(ctmp)
  
-      IF(TL_calc) THEN
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'rm OPTMAN.INP OPTMAN.OUT'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('del OPTMAN.INP OPTMAN.OUT')
-        ENDIF
-	ELSE
-        IF (IOPsys.EQ.0) THEN
-          ctmp = 'mv OPTMAN.INP OPTMAN-INC.inp'
-          iwin = PIPE(ctmp)
-          ctmp = 'mv OPTMAN.OUT OPTMAN-INC.out'
-          iwin = PIPE(ctmp)
-        ELSE
-          iwin = PIPE('move OPTMAN.INP OPTMAN-INC.inp')
-          iwin = PIPE('move OPTMAN.OUT OPTMAN-INC.out')
-        ENDIF
-      ENDIF 
+      IF(TL_calc) RETURN
+
+      iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')
+      iwin = ipipe_move('OPTMAN.OUT','OPTMAN-INC.out')
 
       RETURN
       END

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3687 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
 
 C
       SUBROUTINE MARENG(Npro,Ntrg)
@@ -50,10 +50,9 @@ C
       INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
      &  ilev3, ncoef3, numcc, jcc   
-      INTEGER*4 iwin
       DOUBLE PRECISION PAR
-	LOGICAL logtmp, TMP_isotropic
-      INTEGER*4 PIPE
+      LOGICAL logtmp, TMP_isotropic
+      INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
       PAR(i,ipa,l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
@@ -445,15 +444,15 @@ C                     (except for OPTMAN use)
 C           not needed for a time being (TMP_isotropic is equivalent to CN_isotropic) 
 CXXXXX      IF ( (.not.SOFt) .or. (.not.DYNAM) ) TMP_isotropic = .TRUE.  
                                                    !  
-	      CN_isotropic = TMP_isotropic
+            CN_isotropic = TMP_isotropic
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
             IF (DIRect.NE.3) THEN
-               CALL PROCESS_ECIS(IOPsys,'dwba',4,4,ICAlangs)
+               CALL PROCESS_ECIS('dwba',4,4,ICAlangs)
             ELSE
-               CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+               CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
@@ -496,7 +495,7 @@ C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
 
               IF (ldbwacalc) THEN
 
-                CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
 
                 IF(.not.CN_isotropic) then                
 C
@@ -586,19 +585,10 @@ C                   DWBA CN PLs
                                       
                  ENDDO ! over collective levels
                  
-                 CLOSE(45)
+                 CLOSE(45,STATUS='DELETE') 
                  CLOSE(46,STATUS='DELETE') 
                  CLOSE(47)               
-
-                 IF (IOPsys.EQ.0) THEN
-C------------------LINUX
-                   ctmp = 'mv tmp.LEG ccm.LEG'
-                   iwin = PIPE(ctmp)
-                 ELSE
-C------------------WINDOWS
-                   ctmp = 'move tmp.LEG ccm.LEG >NUL'
-                   iwin = PIPE(ctmp)
-                 ENDIF
+                 iwin = ipipe_move('tmp.LEG','ccm.LEG')
                  GOTO 162
                  
 160              CLOSE(45)
@@ -628,7 +618,7 @@ C                CLOSE(47,STATUS='DELETE')
                   WRITE (*,*)
      &        ' WARNING: Add DWBA levels to collective levels          '
                 ENDIF 
-                CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                 CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
 
               ENDIF
@@ -640,9 +630,9 @@ C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
 C               including CN calculation
                 CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.)
                 IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                  CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                  CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
      >                                 Npro,Ntrg,maxlw,stl,sel,.FALSE.)
                   IF(.not.CN_isotropic) THEN
@@ -661,9 +651,9 @@ C               including CN calculation
 C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                 CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., -1,.FALSE.)
                 IF (ldbwacalc) THEN
-                  CALL PROCESS_ECIS(IOPsys,'ccm',3,4,ICAlangs)
+                  CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
-                  CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,4,ICAlangs)
+                  CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
      >                                  Npro,Ntrg,maxlw,stl,sel,.TRUE.)
 
@@ -697,31 +687,10 @@ C
 C--------------Joining DWBA and CCM files
 C--------------Total, elastic and reaction cross section is from CCM
 C
-               IF (IOPsys.EQ.0) THEN
-C-----------------LINUX
-                  ctmp = 'cp ccm.CS INCIDENT.CS'
-                  iwin = PIPE(ctmp)
-                  ctmp = 'cp ccm.TLJ INCIDENT.TLJ'
-                  iwin = PIPE(ctmp)
-C                 Only Legendre elastic expansion is needed
-C                 IF(CN_isotropic) then
-                  IF(TMP_isotropic) then
-                    ctmp = 'cp ccm.LEG INCIDENT.LEG'
-                    iwin = PIPE(ctmp)
-                  ENDIF
-               ELSE
-C-----------------WINDOWS
-                  ctmp = 'copy ccm.CS INCIDENT.CS >NUL'
-                  iwin = PIPE(ctmp)
-                  ctmp = 'copy ccm.TLJ INCIDENT.TLJ >NUL'
-                  iwin = PIPE(ctmp)
-C                 Only Legendre elastic expansion is needed
-C                 IF(CN_isotropic) then
-                  IF(TMP_isotropic) then
-                    ctmp = 'copy ccm.LEG INCIDENT.LEG >NUL'
-                    iwin = PIPE(ctmp)
-                  ENDIF
-               ENDIF
+               iwin=ipipe_move('ccm.CS','INCIDENT.CS')
+               iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
+               IF(TMP_isotropic) 
+     >           iwin=ipipe_move('ccm.LEG','INCIDENT.LEG')
 C
 C              CN_isotropic = .FALSE. 
 C              Joining dwba.LEG and ccm.LEG
@@ -850,8 +819,8 @@ C                 write(*,*) 'CN CC ilev=',ilev2,' #Ls=', ncoef2
                     
   177            ENDDO ! end of the loop over collective levels
 
-  180            CLOSE (45) !,STATUS = 'DELETE')
-                 CLOSE (46) !,STATUS = 'DELETE')
+  180            CLOSE (45, STATUS = 'DELETE')
+                 CLOSE (46, STATUS = 'DELETE')
                  CLOSE (47) 
 
                ENDIF
@@ -905,8 +874,8 @@ C-----------------checking the correspondence of the excited states for even-eve
   236                WRITE (47,'(A80)') rstring
                   ENDDO
                ENDDO
-  240          CLOSE (45) ! ,STATUS = 'DELETE')
-               CLOSE (46) ! ,STATUS = 'DELETE')
+  240          CLOSE (45, STATUS = 'DELETE')
+               CLOSE (46, STATUS = 'DELETE')
                CLOSE (47)
 C--------------Experimental angular distribution (incident.ang)
                IF( ICAlangs.GT.0) THEN   ! To be updated for ecis06 
@@ -936,8 +905,8 @@ C-----------------checking the correspondence of the excited states
                   ENDDO
                  ENDDO
                 ENDIF
-  260          CLOSE (45) !,STATUS = 'DELETE')
-               CLOSE (46) !,STATUS = 'DELETE')
+  260          CLOSE (45, STATUS = 'DELETE')
+               CLOSE (46, STATUS = 'DELETE')
                CLOSE (47)
                IF (DEFormed) THEN
                 CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.FALSE.)
@@ -951,7 +920,7 @@ C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
-            CALL PROCESS_ECIS(IOPsys,'INCIDENT',8,3,ICAlangs)
+            CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs)
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
@@ -1029,43 +998,22 @@ C
 C-----Moving incident channel results to TL/ directory
 C
       IF (KTRlom(Npro,Ntrg).GT.0) THEN
-        IF (IOPsys.EQ.0) THEN
-C--------LINUX
-         ctmp = 'mv INCIDENT.CS '//ctldir//ctmp23//'.CS'
-         iwin = PIPE(ctmp)
+         ctmp = ctldir//ctmp23//'.CS'
+         iwin = ipipe_move('INCIDENT.CS',ctmp)
          IF (DIRect.GT.0) THEN
-           ctmp = 'mv INCIDENT.ICS '//ctldir//ctmp23//'.ICS'
-           iwin = PIPE(ctmp)
+           ctmp = ctldir//ctmp23//'.ICS'
+           iwin = ipipe_move('INCIDENT.ICS',ctmp)
          ENDIF
          IF (ICAlangs.GT.0) THEN
-           ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP'
-           iwin = PIPE(ctmp)
+           ctmp = ctldir//ctmp23//'.EXP'
+           iwin = ipipe_move('INCIDENT.EXP',ctmp)
          ENDIF
-         ctmp = 'mv INCIDENT.ANG '//ctldir//ctmp23//'.ANG'
-         iwin = PIPE(ctmp)
-         ctmp = 'mv INCIDENT.LEG '//ctldir//ctmp23//'.LEG'
-         iwin = PIPE(ctmp)
-         ctmp = 'mv INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ'
-         iwin = PIPE(ctmp)
-        ELSE
-C--------WINDOWS
-         ctmp = 'move INCIDENT.CS '//ctldir//ctmp23//'.CS >NUL'
-         iwin = PIPE(ctmp)
-         IF (DIRect.GT.0) THEN
-           ctmp = 'move INCIDENT.ICS '//ctldir//ctmp23//'.ICS >NUL'
-           iwin = PIPE(ctmp)
-         ENDIF
-         IF (ICAlangs.GT.0) THEN
-           ctmp = 'mv INCIDENT.EXP '//ctldir//ctmp23//'.EXP >NUL'
-           iwin = PIPE(ctmp)
-         ENDIF
-         ctmp = 'move INCIDENT.ANG '//ctldir//ctmp23//'.ANG >NUL'
-         iwin = PIPE(ctmp)
-         ctmp = 'move INCIDENT.LEG '//ctldir//ctmp23//'.LEG >NUL'
-         iwin = PIPE(ctmp)
-         ctmp = 'move INCIDENT.TLJ '//ctldir//ctmp23//'.TLJ >NUL'
-         iwin = PIPE(ctmp)
-        ENDIF
+         ctmp = ctldir//ctmp23//'.ANG'
+         iwin = ipipe_move('INCIDENT.ANG',ctmp)
+         ctmp = ctldir//ctmp23//'.LEG'
+         iwin = ipipe_move('INCIDENT.LEG',ctmp)
+         ctmp = ctldir//ctmp23//'.TLJ'
+         iwin = ipipe_move('INCIDENT.TLJ',ctmp)
       ENDIF
 C
 C-----Save TLs, SINl
@@ -1648,57 +1596,38 @@ C
      &                           /(1 + EXP((-2.*pi*(E-X-EROt)/htom)))
       END
 
-      SUBROUTINE PROCESS_ECIS(Iopsys,Outname,Length,Iret,ICAlangs)
+      SUBROUTINE PROCESS_ECIS(Outname,Length,Iret,ICAlangs)
 C
 C Dummy arguments
 C
-      INTEGER Iopsys, Iret, Length
+      INTEGER Iret, Length
       CHARACTER*(*) Outname
 C
 C Local variables
 C
       CHARACTER*132 ctmp
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
-      IF (Iopsys.EQ.0) THEN
-C--------LINUX
-         ctmp = 'cp ecis06.cs  '//Outname(1:Length)//'.CS '
-         iwin = PIPE(ctmp)
-         IF(ICAlangs.GT.0) THEN
-           ctmp = 'cp ecis06.exp  '//Outname(1:Length)//'.EXP '
-           iwin = PIPE(ctmp)
-          ENDIF
-         IF (Iret.EQ.1) RETURN
-         ctmp = 'cp ecis06.tlj '//Outname(1:Length)//'.TLJ'
-         iwin = PIPE(ctmp)
-         IF (Iret.EQ.2) RETURN
-         ctmp = 'cp ecis06.ang '//Outname(1:Length)//'.ANG'
-         iwin = PIPE(ctmp)
-         ctmp = 'cp ecis06.leg '//Outname(1:Length)//'.LEG'
-         iwin = PIPE(ctmp)
-         IF (Iret.EQ.3) RETURN
-         ctmp = 'cp ecis06.ics '//Outname(1:Length)//'.ICS'
-         iwin = PIPE(ctmp)
-      ELSE
-C--------WINDOWS
-         ctmp = 'copy ecis06.cs  '//Outname(1:Length)//'.CS  >NUL'
-         iwin = PIPE(ctmp)
-         IF(ICAlangs.GT.0) THEN
-           ctmp = 'cp ecis06.exp  '//Outname(1:Length)//'.EXP  >NUL'
-           iwin = PIPE(ctmp)
-          ENDIF
-         IF (Iret.EQ.1) RETURN
-         ctmp = 'copy ecis06.tlj '//Outname(1:Length)//'.TLJ >NUL'
-         iwin = PIPE(ctmp)
-         IF (Iret.EQ.2) RETURN
-         ctmp = 'copy ecis06.ang '//Outname(1:Length)//'.ANG >NUL'
-         iwin = PIPE(ctmp)
-         ctmp = 'copy ecis06.leg '//Outname(1:Length)//'.LEG >NUL'
-         iwin = PIPE(ctmp)
-         IF (Iret.EQ.3) RETURN
-         ctmp = 'copy ecis06.ics '//Outname(1:Length)//'.ICS >NUL'
-         iwin = PIPE(ctmp)
+      INTEGER iwin, ipipe_move ! to be checked if ipipe_move() can replace ipipe_copy()
+C     INTEGER iwin, ipipe_copy
+
+      ctmp = Outname(1:Length)//'.CS'
+      iwin = ipipe_move('ecis06.cs',ctmp)
+      IF(ICAlangs.GT.0) THEN
+        ctmp = Outname(1:Length)//'.EXP'
+        iwin = ipipe_move('ecis06.exp',ctmp)
       ENDIF
+      IF (Iret.EQ.1) RETURN
+      ctmp = Outname(1:Length)//'.TLJ'
+      iwin = ipipe_move('ecis06.tlj',ctmp)
+      IF (Iret.EQ.2) RETURN
+      ctmp = Outname(1:Length)//'.ANG'
+      iwin = ipipe_move('ecis06.ang',ctmp)
+      ctmp = Outname(1:Length)//'.LEG'
+      iwin = ipipe_move('ecis06.leg',ctmp)
+      IF (Iret.EQ.3) RETURN
+      ctmp = Outname(1:Length)//'.ICS'
+      iwin = ipipe_move('ecis06.ics',ctmp)
+
+      RETURN
       END
 
 

@@ -1,6 +1,6 @@
-!cc   * $Rev: 3676 $
+!cc   * $Rev: 3687 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-23 13:52:47 +0100 (Mo, 23 Dez 2013) $
+!cc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -2494,7 +2494,6 @@ C
 C
 C Local variables
 C
-      CHARACTER*132 ctmp
       INTEGER iwin, ipipe_move, ipipe_cat
 
       CHARACTER*5 chelem
@@ -2786,8 +2785,8 @@ C--------------------only gamma decay is considered up to now
       ELSE
         CLOSE(13)
         CLOSE(14)
-	  iwin = ipipe_cat('LEVELS','LEVELS.ADD','LEVELS.TMP')
-	  iwin = ipipe_move('LEVELS.TMP','LEVELS')
+        iwin = ipipe_cat('LEVELS','LEVELS.ADD','LEVELS.TMP')
+        iwin = ipipe_move('LEVELS.TMP','LEVELS')
         OPEN (UNIT = 13,FILE='LEVELS', STATUS='OLD')
         FILevel = .TRUE.
       ENDIF
