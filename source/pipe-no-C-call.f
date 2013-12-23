@@ -9,7 +9,7 @@ C
       implicit none
 	character*(*) dirname
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_mkdir=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -28,7 +28,7 @@ C
       implicit none
 	character*(*) dirname
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_rmdir=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -44,7 +44,7 @@ C
       implicit none
 	character*(*) fromfile,tofile
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_copy=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -60,7 +60,7 @@ C
       implicit none
 	character*(*) filename
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_delete=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -76,7 +76,7 @@ C
       implicit none
 	character*(*) filename
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_delete=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -92,7 +92,7 @@ C
       implicit none
 	character*(*) fromfile,tofile
 	character*512 ctmp
-	integer*4 iopsys,igetopsys
+	integer iopsys,igetopsys
 	ipipe_move=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
@@ -104,7 +104,7 @@ C
 	return
 	end
 
-	integer*4 function igetopsys()
+	integer function igetopsys()
       implicit none
 	character*512 ctmp
 	igetopsys=0 !   linux - default
