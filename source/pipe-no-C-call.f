@@ -92,9 +92,10 @@ C
       implicit none
 	character*(*) fromfile,tofile
 	character*512 ctmp
-	integer iopsys,igetopsys
+	integer iwin,iopsys,igetopsys,ipipe_delete
 	ipipe_move=0
 	iopsys = igetopsys() ! linux:0
+      iwin=ipipe_delete(tofile)
 	if (iopsys.eq.0) then
 	  ctmp='mv '//trim(fromfile)//' '//trim(tofile)
 	else
