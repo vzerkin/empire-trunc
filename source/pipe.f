@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3671 $
+Ccc   * $Rev: 3675 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 12:00:30 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2013-12-23 13:38:13 +0100 (Mo, 23 Dez 2013) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -71,6 +71,26 @@ C
 	character*(*) fromfile,tofile
 	ipipe_copy=icopy_file(trim(fromfile)//char(0)
      1  ,trim(tofile)//char(0))
+	return
+	end
+
+	integer function ipipe_cat(fromfile1,fromfile2,tofile)
+      implicit none
+	character*(*) fromfile1,fromfile2,tofile
+	character*512 ctmp
+	integer iopsys,igetopsys,iwin,ipipe_delete
+	ipipe_move=0
+	iopsys = igetopsys() ! linux:0
+	if (iopsys.eq.0) then
+	  ctmp= 'cat '//trim(fromfile1)//' '//trim(fromfile2)//
+     &     '>'//trim(tofile)
+	else
+	  ctmp='copy '//trim(fromfile1)//'+'//trim(fromfile2)//
+     &     ' '//trim(tofile)//'>NUL'
+	endif
+	iwin = idelete_file(trim(fromfile1)//char(0))
+	iwin = idelete_file(trim(fromfile2)//char(0))
+	call system(ctmp)
 	return
 	end
 

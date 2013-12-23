@@ -104,6 +104,27 @@ C
 	return
 	end
 
+	integer function ipipe_cat(fromfile1,fromfile2,tofile)
+      implicit none
+	character*(*) fromfile1,fromfile2,tofile
+	character*512 ctmp
+	integer iopsys,igetopsys,iwin,ipipe_delete
+	ipipe_move=0
+	iopsys = igetopsys() ! linux:0
+	if (iopsys.eq.0) then
+	  ctmp= 'cat '//trim(fromfile1)//' '//trim(fromfile2)//
+     &     '>'//trim(tofile)
+	else
+	  ctmp='copy '//trim(fromfile1)//'+'//trim(fromfile2)//
+     &     ' '//trim(tofile)//'>NUL'
+	endif
+	iwin = ipipe_delete(fromfile1)
+	iwin = ipipe_delete(fromfile2)
+	call system(ctmp)
+	return
+	end
+
+
 	integer function igetopsys()
       implicit none
 	character*512 ctmp
