@@ -72,17 +72,17 @@ C
 	return
 	end
 
-	integer function ipipe_delete2(filename)
+	integer function ipipe_delete2(filename1,filename2)
       implicit none
-	character*(*) filename
+	character*(*) filename1,filename2
 	character*512 ctmp
 	integer iopsys,igetopsys
 	ipipe_delete2=0
 	iopsys = igetopsys() ! linux:0
 	if (iopsys.eq.0) then
-        ctmp='rm -f '//trim(filename)
+        ctmp= 'rm -f '//trim(filename1)//' '//trim(filename2)
 	else
-        ctmp='del /q '//trim(filename)//' >NUL'
+        ctmp='del /q '//trim(filename1)//' '//trim(filename2)//'>NUL'
 	endif
 	call system(ctmp)
 	return
