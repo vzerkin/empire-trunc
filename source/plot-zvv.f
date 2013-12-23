@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3509 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:29:10 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3677 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2013-12-23 13:55:26 +0100 (Mo, 23 Dez 2013) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -309,10 +309,7 @@ C
       CHARACTER*6 ldname
       CHARACTER*24 ctmp1
       CHARACTER*36 ctmp2
-
-      REAL FLOAT
       INTEGER ij, kk, nplot
-      INTEGER INT
 
       if(NLV(Nnuc).le.3) return
 
@@ -530,9 +527,7 @@ C
 C Local variables
 C
       INTEGER ij, il, kk, ncalc, nplot
-      INTEGER INT
-      INTEGER*4 iwin
-      INTEGER*4 PIPE
+      INTEGER iwin, PIPE
       REAL*8 defit
  
       OPEN (35,FILE = 'fort.35')
@@ -647,7 +642,7 @@ C       IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
         close(36)
       endif
 
-      IF (IOPsys.EQ.0) iwin = PIPE('gnuplot fort.35')
+      iwin = PIPE('gnuplot fort.35')
 
       RETURN
       END
