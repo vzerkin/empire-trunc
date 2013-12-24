@@ -1,0 +1,17 @@
+#! /bin/sh -
+#script to split RIPL optical model database
+if [ -z $EMPIREDIR ]; then
+    echo "Please set the 'EMPIREDIR' environment variable."
+    echo "See Empire v3 documentation for more information."
+    exit
+fi
+
+work=`pwd`
+cd $EMPIREDIR/RIPL/optical/om-data
+
+#run gam2zvd to produce ZVView plots
+if [ -f "om-parameter-u.dat" ]; then
+  $EMPIREDIR/util/rw1omp2fast.exe
+fi
+cd $work
+exit
