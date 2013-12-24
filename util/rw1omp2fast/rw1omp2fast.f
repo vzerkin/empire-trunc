@@ -1,46 +1,32 @@
-c gfortran rw1omp2fast.f -o rw1omp2fast.exe
-c set EMPIREDIR=%CD%\..
-c mkdir %EMPIREDIR%\RIPL\optical\om-data\om-parameter-dir
-c rw1omp2fast.exe
+C
+c To be called by rw1omp2fast script
 c
       PROGRAM rw1omp2fast
 c
-C     V.Zerkin@iaea.org, 2013-10-08
+c     V.Zerkin@iaea.org, 2013-10-08
+c     RCN 12/2013
 c
       CHARACTER*6 aaa
       CHARACTER*1024 fileOutName
       CHARACTER*264 EMPiredir
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
-      CALL GETENV ('EMPIREDIR', empiredir)
-
-      if(empiredir(1:1).eq.' ') empiredir(1:5)='../..'
-
-      OPEN (26,FILE=trim(empiredir)//'/RIPL/optical/om-data'
-     * //'/om-parameter-u.dat',STATUS='OLD')
-
-	do IIX=1,20000
+      OPEN (26,FILE='om-parameter-u.dat',STATUS='OLD')
+      call system('mkdir om-parameter-dir') 
+      do IIX=1,20000
 	    READ (26,'(i5)',err=333) iref
 	    BACKSPACE (26)
 	    if (iref.gt.0) then
 		Ipoten=iref
 		write (aaa,'(i6.6)') Ipoten
-C		write (aaa,'(i6)') Ipoten
-C		aaa=adjustl(aaa)
-		fileOutName=trim(empiredir)
-     1		//'/RIPL/optical/om-data'
-     1		//'/om-parameter-dir'
-     1		//'/omp-'
-     1		//aaa
-C    1		//trim(aaa)
-     1		//'.dat'
+		fileOutName='om-parameter-dir'//'/omp-'//aaa//'.dat'
 	    ilen=len(fileOutName)
-		write (*,'(a)') fileOutName(1:ilen)
-		open(29,file=fileOutName(1:ilen),status='unknown',err=111)
+C		write (*,'(a)') fileOutName(1:ilen)
+		open(29,file=fileOutName(1:ilen),status='new',err=111)
 		call writePOT(26,29)
 		close(29)
 		goto 222
-111		write (*,*) '...error-writing... ',iref
+111		write (*,*) '...error-writing... ',fileOutName(1:ilen)
 222		continue
 	    endif
 	enddo
