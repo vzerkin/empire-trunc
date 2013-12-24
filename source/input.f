@@ -1,6 +1,6 @@
-!cc   * $Rev: 3693 $
+!cc   * $Rev: 3696 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-24 00:51:42 +0100 (Di, 24 Dez 2013) $
+!cc   * $Date: 2013-12-24 02:35:33 +0100 (Di, 24 Dez 2013) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -3445,6 +3445,8 @@ C
       COMMON /R250COM/ INDexf,INDexb,BUFfer
       COMMON /TRINP / WIDexin, GAPin, HOMin, ALSin, EFItin, CNOrin,
      &                BET2in, GRIn
+      LOGICAL OMPAR_USEFILES
+      COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
 C
 C Local variables
 C
@@ -3726,6 +3728,7 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
                WRITE (8,*) 'Existing, case specific, o.m.p. files: '
                WRITE (8,*) '-------------------------------------'
             ENDIF
+            IF (OMPAR_USEFILES) WRITE (8,*) 'Using RIPL split files'
             IF (OMPar_riplf) WRITE (8,
      &'('' Input file OMPAR.RIPL with RIPL optical model'',
      &'' parameters '')')

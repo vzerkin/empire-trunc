@@ -172,10 +172,10 @@ c    102     Non-RIPL potential
 
       OPEN (261,STATUS='OLD',iostat=ios
      + ,FILE=trim(empiredir)//'/RIPL/optical/om-data'
-     +		//'/om-parameter-dir/omp-1.dat')
+     +		//'/om-parameter-dir/omp-000001.dat')
       OMPAR_USEFILES = .false.
       if(ios .eq. 0) OMPAR_USEFILES=.true.
-c	write (*,*) '...OMPAR_USEFILES=',OMPAR_USEFILES
+c       write (*,*) '...OMPAR_USEFILES=',OMPAR_USEFILES
       CLOSE(261,ERR=2610)
 2610  continue
 
