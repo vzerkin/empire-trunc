@@ -113,7 +113,8 @@ C-V        - Increase precision when writing the ENDF file.
 C-V  13/03 Fix vertical segments at the upper end of emission spectra by
 C-V        delta-shifting the one-but-last point.
 C-V  13/09 Changed the way of reading strings to make the code more robust
-C          (for some compiler in linux it was failing) 
+C-V        (for some compiler on linux it was failing) 
+C-V  13/12 Allow for isomer production without blank line delimiter.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3493,6 +3494,9 @@ c...
 C* Check for more population cross sections up to a blank line
   218 READ (LIN,891,END=700) REC
       IF(REC(13:36).EQ.'population cross section'    ) GO TO 217
+C*    -- Allow for isomer production without blank line delimiter
+      IF(REC(13:35).EQ.'ground state population'     ) GO TO 220
+      IF(REC(13:35).EQ.'isomer state population'     ) GO TO 224
       IF(REC(13:36).NE.'                        '    ) GO TO 218
       IF(MT0.EQ.50 .OR. MT0.EQ.600 .OR. MT0.EQ.800) GO TO 351
       GO TO 310
