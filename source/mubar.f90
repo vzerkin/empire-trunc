@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3705 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
+!cc   * $Rev: 3705 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
     REAL*8 FUNCTION mu_bar(awr, npt, scl, cmp, crs)
 
