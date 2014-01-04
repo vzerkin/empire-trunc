@@ -1,3 +1,7 @@
+Ccc   * $Rev: 3706 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-04 22:20:16 +0100 (Sa, 04 Jän 2014) $
+
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 C
       PARAMETER(

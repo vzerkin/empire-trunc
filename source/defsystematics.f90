@@ -1,3 +1,7 @@
+Ccc   * $Rev: 3705 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
+
       subroutine defcal(z,a,beta2,beta3)
 
 !     Subroutine that calculates the quadrupole and octupole deformation

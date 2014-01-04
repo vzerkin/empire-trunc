@@ -1,7 +1,6 @@
-$DEBUG
-cc   * $Rev: 3701 $
+cc   * $Rev: 3706 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-04 22:20:16 +0100 (Sa, 04 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -14,7 +13,6 @@ Ccc   *
 Ccc   *                                                 
 Ccc   ********************************************************************
       USE empcess
-
       Implicit none
 
       INCLUDE "dimension.h"
@@ -43,7 +41,6 @@ C-----
 
         CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, !NNuct ??, 
      1                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
-
         call open_xs_files()
 C-----
 C-----  Calculate reaction cross section and its spin distribution
@@ -66,7 +63,6 @@ C-------Start DO loop over decaying nuclei
         DO nnuc = 1, NNUcd
 
           IF(QPRod(nnuc).LT.-999.d0) CYCLE
-
  	    CALL calc_fission(nnuc)
 
           CALL HF_decay(ncoll,nnuc,nnurec,nejcec,iret,totcorr)
@@ -88,7 +84,6 @@ C
         ELSE
 	    CALL OMPFIT_read()
         ENDIF
-
 	  CALL new_energy_calc(epre)
 C
         CALL EMPDAXS
@@ -97,7 +92,6 @@ C
 
 	RETURN
       END
-
       subroutine initial
       implicit none
       INCLUDE "dimension.h"
