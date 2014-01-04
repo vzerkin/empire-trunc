@@ -1,9 +1,8 @@
-Ccc   * $Rev: 3687 $
+Ccc   * $Rev: 3701 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 
-C
-      SUBROUTINE MARENG(Npro,Ntrg)
+      SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*
@@ -13,8 +12,10 @@ Ccc   * Calculates initial compound nucleus population after projectile  *
 Ccc   * absorption  using transmission coefficients obtained from        *
 Ccc   * the optical or the distributed barrier  model.                   *
 Ccc   *                                                                  *
-Ccc   * input:NPRO - projectile index (normally 0)                       *
-Ccc   *       NTRG - target index (normally 0)                           *
+Ccc   * input:NPRO    - projectile index (normally 0)                    *
+Ccc   *       NTRG    - target index (normally 0)                        *
+Ccc   *       Nnurec  - target index among residual nuclei               *
+Ccc   *       Nejcec  - projectile index among ejectiles				   *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
@@ -33,7 +34,7 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Npro, Ntrg
+      INTEGER Npro, Ntrg, Nnurec, Nejcec
 C
 C Local variables
 C
@@ -64,6 +65,24 @@ C
 C-----No DWBA by default
 C
       ldbwacalc = .FALSE.
+
+      CALL ULM(0) ! target
+C
+      CALL ULM(1) ! CN
+C
+C-----Locate position of the target among residues
+      CALL WHERE(IZA(1) - IZAejc(0),Nnurec,iloc)
+C									  
+C-----Locate position of the projectile among ejectiles
+      CALL WHEREJC(IZAejc(0),Nejcec,iloc)
+C
+C-----Prepare Giant Resonance parameters - systematics
+C-----
+      if(iloc.eq.0 .and. Nnurec.ne.0) then
+        do i=1,10
+          GDRpar(i,Nnurec) = GDRpar(i,0)
+        enddo		 
+      endif
             
       TMP_isotropic = CN_isotropic
 C
@@ -84,10 +103,9 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-      DO i = 1, NDLW
-         stl(i) = 0.d0
-         sel(i) = 0.d0
-      ENDDO
+	stl = 0.d0
+	sel = 0.d0
+
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
      &       INT(A(Ntrg)), INT(EINl*1000000)
@@ -350,16 +368,23 @@ C-----------end of E2
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
  
-            ABScs=CSFus
-            SINlcc=0.d0
-            SINl  =0.d0
+            ABScs    =CSFus
+            SINlcc   =0.d0
+            SINl     =0.d0
             SINlcont =0.d0
   
          ENDIF
          NLW = NDLW
 C--------END of calculation of fusion cross section
 C--------for photon induced reactions
-  100    RETURN
+C
+C        Total cross section is set to absorption cross section
+C        for photon induced reactions (to process them in EMPEND)
+C
+         TOTcs = CSFus
+         ELAcs = 0.d0
+C
+  100    GOTO 999
       ENDIF
       IF (FUSread) THEN
 C--------if FUSREAD true read l distribution of fusion cross section
@@ -1278,8 +1303,124 @@ C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
 C-----Plujko_new-2005
   400 NLW = min(NLW + 1 + MAXmult,NDLW)
+
+C     NORMAL RETURN
+  999	CONTINUE
+C
+C-----check whether NLW is not larger than 
+C-----max spin at which nucleus is still stable 
+C
+      IF (NLW.GT.JSTab(1) .and. JSTab(1).GT.0) THEN
+          WRITE (8,
+     & '(''  WARNING: Maximum spin to preserve stability is'',I4)')
+     &             JSTab(1)
+          WRITE (8,
+     & '(''  WARNING: Calculations will be truncated at this limit'')')
+          WRITE (8,
+     & '(''  WARNING: Maximum stable spin (rot. limit) Jstab < '',I3)') 
+     & Jstab(1) + 1
+          IF(Jstab(1).LE.NDLW) then
+            ftmp1 = 0.d0
+            DO j = Jstab(1), min(NDLW,NLW)
+              ftmp1 = ftmp1 + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
+              POP(NEX(1),j,1,1) = 0.d0
+              POP(NEX(1),j,2,1) = 0.d0
+            ENDDO
+            CSFus = CSFus - ftmp1
+            WRITE (8,'(''  WARNING: Some fusion cross section lost : '',
+     & F9.3,'' mb, due to the stability limit'')') ftmp1  
+          ELSE
+            WRITE (8,
+     &'(''  WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
+     & )')
+          ENDIF
+          NLW = min(JSTab(1),NDLW)
+      ENDIF
+
+      csmax = 0.d0
+      DO ip = 1, 2
+        DO j = 1, NDLW
+          csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+        ENDDO
+      ENDDO
+
+      IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
+     &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
+         WRITE (8,*) 'POP1=', POP(NEX(1),NLW,1,1), 'POP2=',
+     &               POP(NEX(1),NLW,2,1), 'NLW=', NLW
+         WRITE (8,
+     &'('' NUMBER OF PARTIAL WAVES FOR WHICH CODE IS DIMENSIONE'',
+     &''D IS INSUFFICIENT'',/,'' INCREASE NDLW IN THE dimensio'',
+     &''n.h FILE AND RECOMPILE  '',/,'' EXECUTION  S T O P P E '',
+     &''D '')')
+         STOP 'ERROR: Insufficient dimension NDLW for partial waves'
+      ENDIF
+
+      call get_TLs()
+
       RETURN
       END
+
+      subroutine get_TLs()
+      implicit none
+      INCLUDE "dimension.h"
+      INCLUDE "global.h"
+
+C     local variables
+      INTEGER nejc,nnuc,nnur,iloc,netl,izares,i,j    
+      DOUBLE PRECISION ares,zres 
+	LOGICAL nonzero  
+C
+C
+C-----calculate transmission coefficients in outgoing channels
+C
+      DO nnuc = 1, NNUcd
+         DO nejc = 1, NEJcm
+            ares = A(nnuc) - AEJc(nejc)
+            zres = Z(nnuc) - ZEJc(nejc)
+C           residual nuclei must be heavier than alpha
+            if(ares.le.4 . or. zres.le.2) cycle
+
+            izares = INT(1000*zres + ares)
+            CALL WHERE(izares,nnur,iloc)
+            IF (iloc.EQ.1) cycle
+
+            netl = 6
+            IF (NEX(nnuc).GT.0) netl =
+     &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
+          
+            IF (netl.GT.NDETL) cycle
+            
+            ICAlangs = ICAlangs-10
+            i = NANgela
+            NANgela = 2
+            CALL TLEVAL(nejc,nnur,nonzero)
+            ICAlangs = ICAlangs+10
+            NANgela = i
+C-----------print transmission coefficients
+            IF (nonzero .AND. IOUt.EQ.5) THEN
+              WRITE (8,*)
+              WRITE (8,*) ' Transmission coefficients for '
+              WRITE (8,'(1x,A15,I3,A3,I3,A3,F4.1)')
+     &                    ' Projectile: A=', INT(AEJc(nejc)), ' Z=',
+     &                   INT(ZEJc(nejc)), ' S=', SEJc(nejc)
+              WRITE (8,'(1x,A11,I3,A3,I3,A3,F4.1,A3,I2)')
+     &                    ' TARGET: A=', INT(A(nnur)), ' Z=',
+     &                   INT(Z(nnur)), ' S=', SNGL(XJLv(1,nnur)),
+     &                   ' P=', INT(LVP(1,nnur))
+              DO i = 1, netl
+                IF (TL(i,1,nejc,nnur).GT.0.0) 
+     &             WRITE (8,'(1X,14(1P,E10.4,1x))')
+     &             ETL(i,nejc,nnur), (TL(i,j,nejc,nnur),j = 1,12)
+              ENDDO
+              WRITE (8,'(1X,/)')
+            ENDIF
+         ENDDO     !over ejectiles (nejc)
+      ENDDO     !over nuclei (nnuc)
+C
+C-----determination of transmission coeff.--done
+      RETURN
+	END
 
       SUBROUTINE BASS(Ein,Zp,Ap,Zt,At,Bfus,E1,Crl,Csfus)
 Ccc

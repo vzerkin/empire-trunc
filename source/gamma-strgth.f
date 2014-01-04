@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3424 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-05-06 16:51:01 +0200 (Mo, 06 Mai 2013) $
+Ccc   * $Rev: 3701 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 
 C
       SUBROUTINE ULM(Nnuc)
@@ -62,6 +62,15 @@ C
       TE2 = GQRpar(7,Nnuc)
       TM1 = GMRpar(7,Nnuc)
 
+      IF (TE1.EQ.0.0D0) TE1 = 1.d0
+      IF (TE2.EQ.0.0D0) TE2 = 1.d0
+      IF (TM1.EQ.0.0D0) TM1 = 1.d0
+C
+C     Weiskopf scaling factors taking by default
+C       as 0.01,0.1 and 0.1 for E1,E2,and M1 (see below)
+C
+C         GDRxxx(8,Nnnuc) are always zero !!
+C
       CE1 = GDRpar(8,Nnuc)
       CE2 = GQRpar(8,Nnuc)
       CM1 = GMRpar(8,Nnuc)
@@ -85,6 +94,7 @@ C-----GDR parameters according to Messina sytematics
          s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
          s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
         ELSE
+          
          IF (EWSr1.NE.EWSr2) THEN
             esys1 = esys2*EXP(( - SIGN(1.,0.065)*0.946*0.065))
             g(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
@@ -100,9 +110,9 @@ C-----GDR parameters according to Messina sytematics
          e(1) = esys1 + GDResh
          g(1) = esys1*0.3 + GDRwa1
          s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
-         e(2) = 0.
-         s(2) = 0.
-         g(2) = 1.
+         e(2) = 0.d0
+         s(2) = 0.d0
+         g(2) = 1.d0
          NG = 1
         ENDIF
         IF (ABS(DEF(1,Nnuc)).GT.0.064D0) THEN
@@ -168,6 +178,7 @@ C
 C-----printout of gamma transition parameters
 C
       IF (IOUt.GT.1) THEN
+         WRITE (8,*) 
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,99005) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
 99005    FORMAT (1X,' Gamma transitions parameters of ',
@@ -187,14 +198,17 @@ C
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,*) 
       ENDIF
-      W1  = GDRpar(2,Nnuc)**2
-      W2L = GDRpar(5,Nnuc)**2
-      WE2 = GQRpar(2,Nnuc)**2
-      WM1 = GMRpar(2,Nnuc)**2
+C
       ED1 = GDRpar(1,Nnuc)**2
+      W1  = GDRpar(2,Nnuc)**2
       ED2 = GDRpar(4,Nnuc)**2
+      W2L = GDRpar(5,Nnuc)**2
+C
       EE2 = GQRpar(1,Nnuc)**2
+      WE2 = GQRpar(2,Nnuc)**2
+C
       EM1 = GMRpar(1,Nnuc)**2
+      WM1 = GMRpar(2,Nnuc)**2
 
       RETURN
       END

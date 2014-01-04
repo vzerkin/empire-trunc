@@ -114,6 +114,8 @@ c    102     Non-RIPL potential
       LOGICAL OMPAR_USEFILES
       COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
 
+      CALL THORA(8)
+
       OPEN (5,FILE='INPUT.DAT', STATUS='OLD')
 
       ! unit 8 now controlled by empire_ctl.f

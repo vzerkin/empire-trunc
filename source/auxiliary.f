@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3546 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-11-12 22:25:37 +0100 (Di, 12 Nov 2013) $
+Ccc   * $Rev: 3701 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -36,7 +36,7 @@ C
 
       CSEmis = 0.d0
       CSMsd  = 0.d0
-      CSHms  = 0.d0
+C     CSHms  = 0.d0
       CSEfis = 0.d0
       CSMsc  = 0.d0
 
@@ -75,9 +75,9 @@ C      CSEahmslab = 0.d0
       ROFisp   = 0.d0
 
       POP      = 0.d0
+      POPcs    = 0.d0
       RECcse   = 0.d0
       POPlv    = 0.d0
-      CSEmis   = 0.d0
       CSE      = 0.d0
 C      POPcsea  = 0.d0
       POPcseaf = 0.d0

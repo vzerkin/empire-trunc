@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3542 $
+Ccc   * $Rev: 3701 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-10-04 01:42:38 +0200 (Fr, 04 Okt 2013) $
+Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -67,7 +67,9 @@ C
      &       r(4,PMAX,NDEJC), sg, vvf, vsurf, wb, wda, step, ggg
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
-     &                 we(0:NDEJC,PMAX,NDEX), ddxs(NDAngecis)
+     &                 we(0:NDEJC,PMAX,NDEX) !, ddxs(NDAngecis)
+
+      DOUBLE PRECISION, ALLOCATABLE :: ddxs(:)
 
       DOUBLE PRECISION crossaftertrans, crossafterbreak,
      &     crossBUn,crossNTn
@@ -76,11 +78,9 @@ C
      &          ihmax, j, p, zc, zp, zr, zo, iang, nnn
 
       LOGICAL callpcross
-      DOUBLE PRECISION DBLE, DENSW
-      REAL FLOAT
-      INTEGER ie, nejc, nexrt, nnur
+      DOUBLE PRECISION DENSW
+      INTEGER ie, nejc, nexrt, nnur, myalloc
       INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
-      INTEGER INT, NINT
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
 C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls   
@@ -91,10 +91,25 @@ C
 C
 C     INITIALIZATION
 
+C     Kalbach systematic for PCROSS DDX calculations
+C     fanisot is assumed 1, i.e. pure PE emission
+C
+      fanisot = 1.d0
+C     fanisot set to 0.d0 means isotropic distribution
+
       crossBUn= 0.d0
       crossNTn= 0.d0
       specNT  = 0.d0
-      specBU  = 0.d0   
+      specBU  = 0.d0
+	
+      if(allocated(ddxs)) deallocate(ddxs)
+
+      ALLOCATE(ddxs(NDAngecis),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(8,*)  'ERROR: Insufficient memory for ddxs: PCROSS!'
+        WRITE(12,*) 'ERROR: Insufficient memory for ddxs: PCROSS!'
+        STOP 'ERROR: Insufficient memory for ddxs: PCROSS!'
+      ENDIF     
 
 C     Projectile mass and charge number
       ap = AEJc(0)
@@ -769,28 +784,22 @@ C     totemis = 0.D0
             ftmp = spec(nejc,ie)
             if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
-            DO iang = 1, NDANG
-              ddxs(iang) = 0.d0
-            ENDDO
-C
-C           Kalbach systematic for PCROSS DDX calculations
-C           fanisot is assumed 1, i.e. pure PE emission
-C
-            fanisot = 1.d0
-C           fanisot set to 0.d0 means isotropic distribution
+
+	      ddxs = 0.d0
+
             Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
      &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng, PI)
             DO iang = 1, NDANG
               CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
             ENDDO
          ENDDO
-       ENDDO
+      ENDDO
+
+      if(allocated(ddxs)) deallocate(ddxs)
 C
 C      write(8,*) 'End of PCROSS    :',sngl(totemis),sngl(Xsinl)
 C      write(*,*) 'End of PCROSS    :',sngl(totemis),sngl(Xsinl)
 C
-cig ***  totemis includes the preequilibrium contribution only !  ******
-c     totemis=sigr*fr
       write(8,*) 
       WRITE (8,99020)
 99020 FORMAT (/' ',125('*')/)

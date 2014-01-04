@@ -1,6 +1,6 @@
-!cc   * $Rev: 3696 $
+!cc   * $Rev: 3701 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2013-12-24 02:35:33 +0100 (Di, 24 Dez 2013) $
+!cc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -135,6 +135,7 @@ C
 C--------default input parameters (skipped in non-first-energy calculation)
 C
          FIRst_ein = .TRUE.
+
 C--------select Myers-Swiatecki shell corrections
          SHNix = 0.0
 C--------neutralize tuning factors and OMP normalization factors
@@ -213,24 +214,19 @@ C
             DEPart(nnuc) = 1.d0
          ENDDO
          NSTOred(0) = -1
-C--------set gamma-strength parameters
+C--------set default gamma-strength parameters to zero
          GDRpar = 0.d0
          GQRpar = 0.d0
          GMRpar = 0.d0
-         do nnuc = 0,NNUcd
-           GDRpar(7,nnuc) = 1.0
-           GQRpar(7,nnuc) = 1.0
-           GMRpar(7,nnuc) = 1.0
-         enddo
 C
 C--------set fission normalization factors
          DO nnuc = 1, NDNUC
             DO hh=1,NFHump
-               FISv_n(hh,nnuc)=1.0
-               FISh_n(hh,nnuc)=1.0
-               FISa_n(hh,nnuc)=1.0
-               FISd_n(hh,nnuc)=1.0
-               FISn_n(hh,nnuc)=1.0
+               FISv_n(hh,nnuc)=1.d0
+               FISh_n(hh,nnuc)=1.d0
+               FISa_n(hh,nnuc)=1.d0
+               FISd_n(hh,nnuc)=1.d0
+               FISn_n(hh,nnuc)=1.d0
             ENDDO           
          ENDDO
 C
@@ -247,9 +243,9 @@ C
          FITlev = 0.d0
 C--------Full gamma cascade becomes the default setting  (Jan 2011)
 C--------Use GCASC input parameter to turn it off
-         GCAsc =  1.0
+         GCAsc =  1.d0
 C--------fission barrier multiplier, viscosity, and spin fade-out
-         QFIs = 1.0
+         QFIs = 1.d0
          BETav = 4.d0          ! viscosity parameter
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
@@ -331,14 +327,14 @@ C
          IOMwritecc = 0
          MODelecis = 0
          EXClusiv = .TRUE.! Default: All exclusive calculation
-         WIDcoll = 0.05d0  ! Default = 50 keV resolution  
+         WIDcoll = 0.05d0 ! Default = 50 keV resolution  
 C        Scaling factor for direct processes consideration for complex projectiles
-         DXSred = 1.d0     ! Default: supressed 
+         DXSred = 1.d0    ! Default: supressed 
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
-         RECoil = 1.d0     ! Default 
-         TISomer = 1.d0    ! 1 sec. default threshold for being isomer
+         RECoil = 1.d0    ! Default 
+         TISomer = 1.d0   ! 1 sec. default threshold for being isomer
 C        S-factor default to zero
          SFAct = 0
              
@@ -1681,8 +1677,8 @@ C Set number of angles to minimum for first energy of automatic search
         IF (FITomp.LT.0) THEN
           NDAng = 2
           NANgela = 2
-          ANGles(1) = 0.0
-          ANGles(2) = 180.
+          ANGles(1) = 0.d0
+          ANGles(2) = 180.d0
          ENDIF
 C--------READ nuclear deformations and masses
          CALL READNIX
@@ -1883,15 +1879,10 @@ C-----set Q-value for CN production
       ENDIF
 C-----WRITE heading on FILE6
       IF (IOUt.GT.0) THEN
-C        WRITE (8,*) ' '
-C        WRITE (8,'(61(''=''))')
-C        WRITE (8,
-C    &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-C    &    1P,D10.3, '' MeV (LAB)'')') iae, SYMbe(0), ia, SYMb(0), EINl
-C        WRITE (8,'(61(''=''))') 
          WRITE (8,*) ' '
-         WRITE (8,'('' Reaction '',I3,A2,''+'',I3,A2)') 
-     &   iae, SYMbe(NPRoject), ia, SYMb(0)
+         WRITE (8,'(1x,17(''-''))') 
+         WRITE (8,'('' Reaction '',A2,''+ '',I3,A2)') 
+     &        SYMbe(NPRoject), ia, SYMb(0)
          WRITE (8,'('' Projectile energy '',F9.3,'' MeV (LAB)'')') EINl
          WRITE (8,'('' Compound nucleus energy '',F9.3,'' MeV'')') EXCn
          WRITE (8,'('' Projectile separation energy'',F8.3,'' MeV'')')
@@ -1915,8 +1906,8 @@ C-----Energy step defined according to the CN excitation energy
 C     The line below introduces dependence on the NDEX in dimension.h
 C     However it supress any dependence on input NEXreq
 C-----check whether spectrum array can accommodate capture with this DE
-      CALL CHECK_DE(EMAx(1),NDECSE)
-C     CALL CHECK_DE(EMAx(1),NEXreq)
+      CALL CHECK_DE_grid(EMAx(1),NDECSE)
+C     CALL CHECK_DE_grid(EMAx(1),NEXreq)
 
 C-----check whether any residue excitation is higher than CN
       qmin = 1000.0d0
@@ -1936,37 +1927,24 @@ C--------Coulomb barrier (20% decreased) setting lower energy limit
          IF(ZEJc(ichanmin).GT.1)
      &       culbar = 0.8*ZEJc(ichanmin)*Z(nucmin)*ELE2
      &       /(1.3d0*(AEJc(ichanmin)**0.3333334 + A(nucmin)**0.3333334))
-C-------check whether population array can accommodate the reaction with the largest
-C-------continuum using current DE, if not adjust DE
-C
-C       The call below was commented as:
-C       1) ECUt(nucmin) has not been defined yet !
-C       2) For ECUt(nucmin) = 0, the call CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-C          will always produce smaller DE as NDECSE = NDEX + 30
-C       IF(EMAx(1)-qmin-ECUt(nucmin).gt.culbar) 
-C    &    CALL CHECK_DE(EMAx(1)-qmin-ECUt(nucmin),NDEX)
-C-------check whether spectra array can accommodate the reaction with the largest
-C-------continuum using current DE, if not adjust DE
-C       IF(EMAx(1)-qmin.gt.culbar) CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-       IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
-          WRITE(8,'(A33)')   'Exotermic reaction, adjusting DE'
-          WRITE(8,'(1x,A28,F6.1,A4)')
+         IF(EMAx(1)-qmin.gt.0.7d0*culbar) THEN
+           WRITE(8,'(A33)')   'Exotermic reaction, adjusting DE'
+           WRITE(8,'(1x,A28,F6.1,A4)')
      &      'Initial energy step         ',DE*1000.d0,' keV'
-          CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
-       ELSE
-          if(ichanmin.eq.3) then
-            WRITE(8,'(A33,A5,A28,F7.2,A4)') 
-     &      'Exotermic reaction: Emission of ','alpha',
-     &      ' neglected for Einc (CMS) < ',              
-     &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
-          else
-            WRITE(8,'(A33,A2,A28,F7.2,A4)') 
-     &      'Exotermic reaction: Emission of ',SYMbe(ichanmin),
-     &      ' neglected for Einc (CMS) < ',              
-     &     0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
-          endif
-        ENDIF
-C       CALL CHECK_DE(EMAx(1)-qmin,NDECSE)
+           CALL CHECK_DE_grid(EMAx(1)-qmin,NDECSE)
+         ELSE
+           if(ichanmin.eq.3) then
+             WRITE(8,'(A33,A5,A28,F7.2,A4)') 
+     &       'Exotermic reaction: Emission of ','alpha',
+     &       ' neglected for Einc (CMS) < ',              
+     &       0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
+           else
+             WRITE(8,'(A33,A2,A28,F7.2,A4)') 
+     &       'Exotermic reaction: Emission of ',SYMbe(ichanmin),
+     &       ' neglected for Einc (CMS) < ',              
+     &       0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
+           endif
+         ENDIF
       ENDIF
 
       WRITE(8,'(1x,''Number of requested energy points ='',i3,
@@ -2087,10 +2065,10 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
                WRITE (8,*)
                WRITE (8,
      &         '(''  Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
-     &         ''  +  '',I2,A1,A2,'' NEGLECTED at E='',D12.6,'' MeV'')')
+     &         ''  +  '',A2,'' NEGLECTED at E='',D12.6,'' MeV'')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
      &          NINT(ares),   '-',SYMb(nnur),
-     &          NINT(AEJc(nejc)),'-',SYMbe(nejc),EINl
+     &          SYMbe(nejc),EINl
                WRITE (8,*)
      &          ' To include it, increase NDEX in dimension.h'
                WRITE (8,*)
@@ -2102,76 +2080,41 @@ C-----------Coulomb barrier (20% decreased) setting lower energy limit
             ENDIF
 
             IF (NEX(nnur).GT.0) THEN
-
                DO i = 1, NEX(nnur)
-
                   IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
-
      &               .and. NEX(Nnur).GT.1) THEN
-
                      EX(NEX(nnur) - i + 1,nnur) = EMAx(nnur)
-
      &                  - FLOAT(i - 1)*DE
-
                   ELSE
-
                      EX(i,nnur) = ECUt(nnur) + FLOAT(i - 1)*DE
-
                   ENDIF
-
                ENDDO
 
                IF (NINT(Z(1)).EQ.NINT(Z(nnur)) .AND. FITlev.le.0.1 
-
      &            .and. NEX(Nnur).GT.1) THEN
-
 C                 write(8,*) 'Z,A ',Z(nnur), A(nnur)
-
 C-----------------Width of the partial bin relative to DE
-
                   DEPart(nnur) = 1.d0 + (EX(1,nnur)-ECUt(nnur))/DE 
-
 !                 DEPart(nnur) = 1.d0
-
 !     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
-
 !                 DEPart(nnur) = DEPart(nnur)*0.9
-
                   WRITE(8,
-
      &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
-
      &                'Continuum bin correction = ',DEPart(nnur),
-
      &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
-
                   WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
-
      &                'Ecut   =',ECUt(nnur),
-
      &                'Ex(1)  =',EX(1,nnur),
-
      &                'Ecut+DE=',ECUt(nnur)+DE
-
                ENDIF
-
 C              The following line solves the problem of fluctuations
-
 C              in PCROSS at higher than 7-8 MeV 
-
 C              However, a better long-term solution is needed
-
 C              as this is in contradiction with DEPart<>1
-
 C
-
                IF (NINT(Z(1)).EQ.NINT(Z(nnur))) ECUt(nnur) = EX(1,nnur)
-
 C
-
             ENDIF
-
-
 
 C           IF( NINT(Z(nnur)).eq.NINT(Z(0)) .and. 
 C    >         NINT(A(nnur)).eq.NINT(A(0)) ) THEN
@@ -2200,10 +2143,9 @@ C-----------determination of etl matrix
      &             ' WARNING: netl = ',netl,' > NDETL = ',NDETL
                WRITE (8,
      &         '(''          Reaction '',I3,A1,A2,'' -> '',I3,A1,A2,
-     &           ''  +  '',I2,A1,A2,'' NEGLECTED '')')
+     &           ''  +  '',A2,'' NEGLECTED '')')
      &          NINT(A(nnuc)),'-',SYMb(nnuc),
-     &          NINT(ares),   '-',SYMb(nnur),
-     &          NINT(AEJc(nejc)),'-',SYMbe(nejc)
+     &          NINT(ares),   '-',SYMb(nnur), SYMbe(nejc)
                 EMAx(nnur) = 0.d0
                 NEX(nnur) = 0
                 NEXr(nejc,nnuc) = 0
@@ -2253,9 +2195,6 @@ C-----LEVEL DENSITY for residual nuclei
       ENDDO
       WRITE (8,*)
 
-C     DO i = 1, NDLW
-C        DRTl(i) = 1.d0
-C     ENDDO
       IF (FITlev.GT.0) THEN
 C--------remove potentially empty omp files
 C--------OMPAR.DIR
@@ -2296,6 +2235,10 @@ C
          ENDDO
          CLOSE (79)
       ENDIF
+
+	CALL PRINPUT
+	RETURN
+
 99010 FORMAT (1X,14(G10.4,1x))
       END
 
@@ -2358,7 +2301,7 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
 
          ELSE
 
-           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return
+           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return 
 
            WRITE (8,'(1X,/,''  HFB LEVEL DENSITY DEPENDENCE FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
@@ -2751,9 +2694,9 @@ C
               ENDIF
 C-------------clean BR matrix
               DO nbr = 1, NDBR
-                BR(ilv,nbr,1,Nnuc) = 0.
-                BR(ilv,nbr,2,Nnuc) = 0.
-                BR(ilv,nbr,3,Nnuc) = 0.
+                BR(ilv,nbr,1,Nnuc) = 0.d0
+                BR(ilv,nbr,2,Nnuc) = 0.d0
+                BR(ilv,nbr,3,Nnuc) = 0.d0
               ENDDO
               ndb = MIN(ndbrlin,NDBR)
               sum = 0.d0
@@ -2855,6 +2798,20 @@ C Local variables
 C
       INTEGER i, j, ia, iae, iexclus, izares, nejc, nnur
       REAL*8 zres, ares
+
+      WRITE (*,
+     &'(/''   C.M. incident energy '',G12.5,'' MeV ( LAB '',G12.5,
+     &''MeV )'')') 
+     & EIN, EINl
+      WRITE (8,
+     &'(/''   C.M. incident energy '',G12.5,'' MeV ( LAB '',G12.5,
+     &''MeV )'')') 
+     & EIN, EINl
+C-----
+C-----Print results of the systematics
+C-----
+      IF (FIRst_ein .AND. AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) 
+     >    CALL SYSTEMATICS(SNGL(A(0)),SNGL(Z(0)),1)
 
       IF (FIRst_ein) THEN
         WRITE (12,*) ' '
@@ -3775,9 +3732,8 @@ C-----      print  maximum gamma-ray multipolarity  'MAXmult'
             WRITE (8,*) ' '
             WRITE (8,'(61(''=''))')
             WRITE (8,
-     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
-     &    1P,D10.3, '' MeV (LAB)'')') INT(AEJc(0)), SYMbe(0), 
-     &    INT(A(0)), SYMb(0), EIN
+     &'('' Reaction '',A2,''+ '',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') SYMbe(0),INT(A(0)), SYMb(0), EIN
             WRITE (8,'(61(''=''))')
 
             WRITE (12,*) ' '
@@ -5616,6 +5572,120 @@ C-----
      &      '('' GDR second hump cross section in '',I3,A2,'' set to ''
      &      ,F7.2)') i2, SYMb(nnuc), val
              endif
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'MIXGDR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' ERROR: E1 mixing coeff. Weiskopf & GDR out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(7,i) = val
+              ENDDO
+              WRITE (8,
+     &      '('' E1 mixing coeff. Weiskopf & GDR in all nuclei set to ''
+     &        ,F7.2)') val
+              WRITE (12,
+     &      '('' E1 mixing coeff. Weiskopf & GDR in all nuclei set to ''
+     &        ,F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &        '('' WARNING: E1 mixing coeff. Weiskopf & GDR IGNORED'')')
+              GOTO 100
+            ENDIF
+            GDRpar(7,nnuc) = val
+            WRITE (8,
+     &     '('' E1 mixing coeff. Weiskopf & GDR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' E1 mixing coeff. Weiskopf & GDR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'MIXGMR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' ERROR: M1 mixing coeff. Weiskopf & GMR out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GMRpar(7,i) = val
+              ENDDO
+              WRITE (8,
+     &      '('' M1 mixing coeff. Weiskopf & GMR in all nuclei set to ''
+     &        ,F7.2)') val
+              WRITE (12,
+     &      '('' M1 mixing coeff. Weiskopf & GMR in all nuclei set to ''
+     &        ,F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &          '('' INPUT M1 mixing coeff. Weiskopf & GMR IGNORED'')')
+              GOTO 100
+            ENDIF
+            GMRpar(7,nnuc) = val
+            WRITE (8,
+     &     '('' M1 mixing coeff. Weiskopf & GMR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' M1 mixing coeff. Weiskopf & GMR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'MIXGQR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' ERROR: E1 mixing coeff. Weiskopf & GQR out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GQRpar(7,i) = val
+              ENDDO
+              WRITE (8,
+     &      '('' E2 mixing coeff. Weiskopf & GQR in all nuclei set to ''
+     &        ,F7.2)') val
+              WRITE (12,
+     &      '('' E2 mixing coeff. Weiskopf & GQR in all nuclei set to ''
+     &        ,F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &        '('' WARNING: E2 mixing coeff. Weiskopf & GQR IGNORED'')')
+              GOTO 100
+            ENDIF
+            GQRpar(7,nnuc) = val
+            WRITE (8,
+     &     '('' E2 mixing coeff. Weiskopf & GQR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' E2 mixing coeff. Weiskopf & GQR in '',I3,A2,'' set to ''
+     &      ,F7.2)') i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
@@ -11580,7 +11650,7 @@ C     if(ABS(v).gt.3.d0*ABS(u)) goto 10
       RETURN
       END FUNCTION grand
 
-      SUBROUTINE CHECK_DE(Energy,Limit)
+      SUBROUTINE CHECK_DE_grid(Energy,Limit)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:ppu*

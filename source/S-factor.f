@@ -25,6 +25,7 @@ CC  RC: Iliadis constant changed to use EMPIRE constants traceable to NIST (CODA
 CC	Iliadis 0.989534 -> CETa * 2 * pi = 0.9895106848
 CC    Snew = S(Iliadis)*0.99997668 ! 1/1000 % accuracy
 CC
+      Implicit none
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'

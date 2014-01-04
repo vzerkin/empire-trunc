@@ -1,6 +1,6 @@
-C $Rev: 3639 $
+C $Rev: 3701 $
 C $Author: rcapote $
-C $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
+C $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -27,23 +27,6 @@ C
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc), 
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),
-     &                 CSHms(2,0:ndnuc),
-
-C---------------------------------------------------------------------------
-C        All arrays below commented and changed to save memory (unless you need HMS !!!)
-C        For HMS the NDEX parameter in dimension.h should be less than ~ 150 !!
-C    &                 CSEahmslab(ndecse,ndangecis,2),    not used at present
-C    &                 CSEhmslab(ndecse,2,0:ndnuc),       not used at present
-
-C    &                 CSEhms(ndecse,2,0:ndnuc), 
-C    &                 CSEahms(ndecse,ndangecis,2),
-C    &                 POPcsea(ndangecis,0:ndex_d,0:ndejcd,ndecsed,
-C    &                  0:ndexclus),  
-
-C     &                 CSEhms(1,2,0:1),
-C     &                 CSEahms(1,ndangecis,2),
-C     &                 POPcsea(ndangecis,0:1,0:2,1,0:1),  
-C---------------------------------------------------------------------------
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc),
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc),
      &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,
@@ -120,7 +103,7 @@ C---------------------------------------------------------------------------
      &                 MFPp, MOMortcrt, MOMparcrt,HCOnt(nfparab),
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),
      &                 PEQc, PEQcont, PI, POP(ndex,ndlw,2,ndnuc),
-     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndnucd),
+     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndexclus), ! POPcs(0:ndejc,0:ndnucd),
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),
@@ -236,7 +219,7 @@ C      COMMON /ENDFEA/ POPcsed, POPcsedlab, POPcsealab, POPcseaf
      &                 FITlev,DV,FCC, STMro, DEGa, FCOred, rFCOred,
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc,
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,
-     &                 CSMsd, QPRod, CSHms, A, Z, ECUt, HIS, ATIlnor,
+     &                 CSMsd, QPRod, A, Z, ECUt, HIS, ATIlnor,
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,

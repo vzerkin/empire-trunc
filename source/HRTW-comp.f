@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3536 $
+Ccc   * $Rev: 3701 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-09-25 19:30:48 +0200 (Mi, 25 Sep 2013) $
+Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
 C
 C
       SUBROUTINE HRTW
@@ -33,7 +33,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION cnspin, sgamc, tgexper,
+C     DOUBLE PRECISION cnspin, sgamc, tgexper,
+      DOUBLE PRECISION cnspin,        tgexper,
      &              sum, sumfis, sumfism(NFMOD), sumg, xnor, 
      &              fisxse, sumtg
       DOUBLE PRECISION VT
@@ -49,7 +50,7 @@ C-----threshold for considering channel as a 'strong' one
 C-----set CN nucleus
       nnuc = 1
 C-----reset variables
-      sgamc = 0.d0
+C     sgamc = 0.d0
       CSFis = 0.d0
       sumfis = 0.d0
 C
@@ -213,8 +214,8 @@ C--------------
 C--------------normalization and accumulation
 C--------------
                xnor = H_Abs(i,1)/DENhf
-               IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
-     &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
+C              IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc +
+C    &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)
             ENDDO    !loop over partial wave contributions to CN state
 C
