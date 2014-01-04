@@ -9701,6 +9701,11 @@ the calculated values can be introduced in place of the explicit values
 of the parameters. These shifts are coded in the input file under
 keywords: GDRWA1, GDRWA2, GDRESH, GDRSPL, GDRST1, and GDRST1.
 
+Additionally, the mixing of Weiskopf model and Giant Resonance Model 
+are defined by MIXGDR (E1), MIXGQR (E2) and MIXGMR (M1) parameters for 
+multipolarities quoted in parentheses. Default values of these parameters 
+are 1, meaning that a pure GR model is assumed (Weiskopf contribution is zero).
+
 Drastic changes of the default GDR parameters are likely to be unphysical.
 Thus, the product of the peak cross section and GDR width is constrained
 by the sum rule, and users should ensure that the inputted values
@@ -11725,6 +11730,16 @@ as in  2.18  and earlier
 
 = 1 GDR shape dependence accounts for the rotation induced deformation
 (spin dependent, Eq. \ref{totdefor}).
+
+\item [{MIXGDR}] E1 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
+pure GRM).
+\item [{MIXGQR}] E2 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
+pure GRM).
+\item [{MIXGMR}] M1 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
+pure GRM).
 \item [{EGDR1}] GDR energy of first peak set to VAL (default calculated
 internally from systematics).
 \item [{GGDR1}] GDR width of first peak set to VAL (default calculated
