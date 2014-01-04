@@ -38,7 +38,7 @@ C
       INTEGER ilevcol,jz,jn,imint,imaxt,neles
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
-      DOUBLE PRECISION ares,zres,ded,csemist,sum
+      DOUBLE PRECISION ares,zres,ded,sum !,csemist
       DOUBLE PRECISION poplev,poptot,popleft,pope,xnor,fisxse,ftmp
       DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_cn,xs_norm 
       DOUBLE PRECISION totener_in,totener_out
@@ -582,10 +582,10 @@ C
 C
 C-----------------Calculate total emission
 C
-                  DO nejc = 0, NEJcm
-                     csemist = csemist + CSEmis(nejc,nnuc)
-                  ENDDO
-                  csemist = csemist + CSFis
+C                 DO nejc = 0, NEJcm
+C                    csemist = csemist + CSEmis(nejc,nnuc)
+C                 ENDDO
+C                 csemist = csemist + CSFis
 C-----------------
 
                ENDDO                !loop over decaying nucleus spin
