@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3683 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 14:55:02 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Rev: 3704 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-01-04 08:34:23 +0100 (Sa, 04 Jän 2014) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -71,7 +71,7 @@ C        f(a+h) - f(a) = Nlev(kk+1) - Nlev(kk) = 1
      >     0.5d0 * (frho1 + frho2) ! average of forward/backward difference
       ENDDO
       WRITE (36,*) ELV(NLV(Nnuc),Nnuc)*1d6,frho2 
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
       CALL OPEN_ZVV(36,'RHO(U)   at GS of '//caz//ldname,'  ')
 
@@ -134,7 +134,7 @@ C
         RETURN 
       ENDIF
 
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
       CALL OPEN_ZVV(36,'RHO(U,+) at GS of '//caz//ldname,'  ')
 
@@ -151,7 +151,7 @@ C
      &    WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,rolowint1
       ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
       CALL OPEN_ZVV(36,'RHO(U,-) at GS of '//caz//ldname,' ')
 
@@ -236,7 +236,7 @@ C     CHARACTER*37 ctmp2
      &        1e6*u,max(0.1d0,rocumul2+rocumul1)
       ENDDO
 
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
 
       IF(FISden(Nnuc).NE.3) THEN 
@@ -251,7 +251,7 @@ C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
 
       ENDIF
 
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
       CALL OPEN_ZVV(36,'RHO(U,+) at saddle of '//ctmp1,'  ')
       DO kk = 1,NRBinfis(Ib)
@@ -264,7 +264,7 @@ C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
           WRITE (36,'(G10.3,2X,1P,(90E12.5))')
      &          1e6*u,max(rocumul1,0.1d0)
       ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
       
       CALL OPEN_ZVV(36,'RHO(U,-) at saddle of '//ctmp1,'  ')
       DO kk = 1,NRBinfis(Ib)
@@ -343,7 +343,7 @@ C
          WRITE (36,*) ELV(kk,Nnuc)*1d6,FLOAT(kk - 1)
          WRITE (36,*) ELV(kk,Nnuc)*1d6,FLOAT(kk)
       ENDDO
-      CALL CLOSE_ZVV(36,' ',' ')
+      CALL CLOSE_ZVV(36,'  ','  ')
 
       CALL OPEN_ZVV(36,'Integral [RHO(U)] of '//caz//ldname,'  ')
 
