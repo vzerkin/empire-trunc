@@ -13,7 +13,7 @@ C     local variables
 C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
-      DOUBLE PRECISION recorp,dang,espec,csum
+      DOUBLE PRECISION recorp,espec,csum
       DOUBLE PRECISION dtmp,htmp,ftmp   
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
@@ -116,15 +116,7 @@ C
 C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-                dang = PI/FLOAT(NDANG - 1)
-C                coef = 2*PI*dang
-C               if (nejc.eq.1) then 
-C                 csum = 0.d0 
-C                 DO nang = 1, NDANG
-C                   csum = csum + SANgler(nang)
-C                 ENDDO
-C                 write (*,*) 'Int(sin)=',csum*dang 
-C               endif
+C               dang = PI/FLOAT(NDANG - 1)
                 IF (nejc.GT.0) THEN
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
@@ -142,7 +134,6 @@ C------------------(discrete levels part)
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
-C                     csum = 0.d0
                      DO il = 1, NLV(nnuc)  ! discrete levels
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                         IF (espec.GE.0) WRITE (12,
@@ -163,17 +154,14 @@ C------------------(continuum part - same for all particles)
                    cseaprnt = 0.d0 ! clean DDX matrix
                    check_DE = 0.d0
                    dtmp = 0.d0
-C                  DO ie = 1, nspec     ! reconstruct continuum DDX spectrum
-C                  range extended to cover the last energy corresponding to the exact endpoint
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
                      ftmp = 1.d0
                      if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
                      dtmp = dtmp + htmp*DE*ftmp
-                     ftmp = (htmp - xnorm(nejc,INExc(nnuc))
-     &                        * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI
-                     IF(ftmp.LT.0.0d0) ftmp = 0.0d0
+                     ftmp = max((htmp - xnorm(nejc,INExc(nnuc))
+     &                    * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI,0.d0)
                      csum = 0.d0
                      IF(LHMs.GT.0 .AND. (nejc.EQ.1 .OR. nejc.EQ.2)) THEN
 C----------------------Check whether integral over angles agrees with DE spectra
@@ -200,12 +188,12 @@ c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
                      ENDIF
                      check_DE(ie) = 2.0d0*PI*csum
 C--------------------Correct 'cseaprnt()' for eventual imprecision
-                     if(check_DE(ie).GT.0.d0) then
-                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
-                       DO nang = 1, NDANG
-                         cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
-                       ENDDO
-                     endif
+C                    if(check_DE(ie).GT.0.d0) then
+C                      ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
+C                      DO nang = 1, NDANG
+C                        cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
+C                      ENDDO
+C                    endif
                    ENDDO
 
                    DO ie = 1, nspec 
@@ -246,7 +234,7 @@ C
                      ENDDO
                      WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
-     &                G12.6,'' mb'')') htmp
+     &                G12.6,'' mb ('',A2,'')'')') htmp, SYMbe(nejc)
                      WRITE (12,'(7X,''Population of discrete levels   '',
      &               ,G12.6,'' mb'')') CSDirlev(1,nejc) 
                      WRITE (12,*) ' '
@@ -260,12 +248,12 @@ C
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
-                      if(htmp.LE.0.d0) cycle
+                      if(ftmp.LE.0.d0) cycle
                       WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
      &                *DE/recorp, ftmp*recorp, 
      &                check_DE(ie)*recorp,
      &                (ftmp - check_DE(ie)) * recorp, 
-     &                (ftmp - check_DE(ie)) / htmp * 100
+     &                (ftmp - check_DE(ie)) / ftmp * 100
                    ENDDO
                                         ! exact endpoint
                    WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
@@ -283,18 +271,17 @@ C
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
-                   WRITE(12,'(10x,
-     &                  ''Total Integral       '',G12.6,'' mb'' )') 
-     &                  dtmp + htmp  
-
-                   WRITE(12,'(10x,
-     &                  ''Total Population     '',G12.6,'' mb'' )') 
-     &                  CSDirlev(1,nejc) + POPcs(nejc,INExc(nnuc))
-                   WRITE(12,*) 
+C                  WRITE(12,'(10x,
+C     &                  ''Total Integral       '',G12.6,'' mb'' )') 
+C    &                  dtmp + htmp  
+C                  WRITE(12,'(10x,
+C    &                  ''Total Population     '',G12.6,'' mb'' )') 
+C    &                  CSDirlev(1,nejc) + POPcs(nejc,INExc(nnuc))
+C                  WRITE(12,*) 
 
                 ELSE !  (nejc=0) GAMMAS
 C
-C------------------Exclusive DE spectra (gammas and light ions)
+C------------------Exclusive DE spectra (gammas)
                    WRITE (12,*) ' '
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '

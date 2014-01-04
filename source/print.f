@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3701 $
+Ccc   * $Rev: 3705 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sa, 04 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -332,10 +332,8 @@ C--------Inclusive DDX spectrum
      &     FLOAT(ie - 1)*DE/recorp,
      &     (itmp*cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
-
-         if(CSE(nspec + 1,nejc,0).GT.0.d0) 
          ! exact DDX spectrum endpoint
-     &   WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &      (EMAx(1)-Q(nejc,1))/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
 
@@ -351,20 +349,17 @@ C--------Inclusive DDX spectrum
          ftmp = 0.d0
          DO ie = 1, nspec 
            htmp = CSE(ie,nejc,0)
+           if(htmp.LE.0.d0) cycle
            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc)
-           if(htmp.LE.0.d0) cycle
            itmp = 1
-
            if(ie.eq.1) itmp = 2
-
            WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
-     &       *DE/recorp, htmp*recorp*itmp, check_DE(ie)*recorp*itmp,
-     &       (htmp - check_DE(ie)) * recorp, 
+     &       *DE/recorp, htmp*recorp/itmp, check_DE(ie)*recorp/itmp,
+     &       (htmp - check_DE(ie)) * recorp /itmp , 
      &       (htmp - check_DE(ie)) / htmp * 100
-           ftmp = ftmp + check_DE(ie)*itmp
+           ftmp = ftmp + check_DE(ie)/itmp 
          ENDDO
-C        ftmp = ftmp + check_DE(nspec + 1)
          ! exact endpoint
          WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
      &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
@@ -381,17 +376,24 @@ C        ftmp = ftmp + check_DE(nspec + 1)
       csum = 0.d0
       dtmp = 0.d0
       DO nnuc = 1, NNUcd
-C        write(12,*) nnuc,CSEmis(nejc,nnuc)
          csum = csum + CSEmis(nejc,nnuc)
          if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
       ENDDO
-      if (ENDf(nnuc).NE.1) 
-     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-     &   dtmp      
+C     if (ENDf(nnuc).NE.1) 
+C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+C    &   dtmp      
+C     IF(Nejc.ne.0) THEN
+C       WRITE (12,
+C    &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')
+C    &          SYMbe(Nejc),csum
+C     ELSE
+C       WRITE (12,
+C    &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
+C     ENDIF
       IF(Nejc.ne.0) THEN
         WRITE (12,
-     &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')
-     &          SYMbe(Nejc),csum
+     &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
+     &          SYMbe(Nejc),totspec*DE
       ELSE
         WRITE (12,
      &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
