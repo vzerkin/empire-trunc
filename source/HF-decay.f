@@ -373,38 +373,9 @@ C
            WRITE (8,*) ' -------------------------------------'
            WRITE (8,*) ' '
 C----------Prepare gamma transition parameters
-           if(nnuc.ne.nnurec) CALL ULM(nnuc)
+C          if(nnuc.ne.nnurec) CALL ULM(nnuc)
          endif
-
-c        WRITE (8,*) 
-c        WRITE (8,*) ' **-----------------------------------------'
-c        TE1xx = GDRpar(7,Nnuc)
-c        TE2xx = GQRpar(7,Nnuc)
-c        TM1xx = GMRpar(7,Nnuc)
-c        IF (TE1xx.EQ.0.0D0) TE1xx = 1.d0
-c        IF (TE2xx.EQ.0.0D0) TE2xx = 1.d0
-c        IF (TM1xx.EQ.0.0D0) TM1xx = 1.d0
-c        CE1xx = GDRpar(8,Nnuc)
-c        CE2xx = GQRpar(8,Nnuc)
-c        CM1xx = GMRpar(8,Nnuc)
-
-c        IF (CE1xx.EQ.0.0D0) CE1xx = 0.01d0
-c        IF (CE2xx.EQ.0.0D0) CE2xx = 0.1d0
-c        IF (CM1xx.EQ.0.0D0) CM1xx = 0.1d0
-
-c        WRITE (8,99005) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
-c99005    FORMAT (1X,' Gamma transitions parameters of ',
-c    &   i3,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
-c        WRITE (8,99010) TE1xx, TE2xx, TM1xx, CE1xx, CE2xx, CM1xx,  
-c    &                   GDRpar(1,Nnuc), GQRpar(1,Nnuc), GMRpar(1,Nnuc)
-c        WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
-c    &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
-c        WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
-c        WRITE (8,*) 
-
-C--------Prepare gamma transition parameters
-C        if(nnuc.ne.Nnurec) CALL ULM(nnuc)
-C        CALL ULM(nnuc)
+C        IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
 
 C--------Calculate compound nucleus level density at saddle point
          IF (NINT(FISshi(nnuc)).EQ.1) THEN

@@ -1,6 +1,6 @@
-C $Rev: 3701 $
+C $Rev: 3708 $
 C $Author: rcapote $
-C $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+C $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
 C
 C     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 C     If global.h is not included, then add the variable definition and the common
@@ -65,7 +65,7 @@ C
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,
-     &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc),ENDfa(0:ndnuc),
+     &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc),
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,
@@ -75,7 +75,7 @@ C
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,
      &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab), NRWel,
-     &        NSCc, NTArget, NSTored(0:ndnuc), NENdf,NENdfa, NEXclusive,
+     &        NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),
      &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov, 
@@ -273,8 +273,8 @@ C
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH, 
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,
-     &                  NENdf, NENdfa, NEMn, NEMp, NEMa, NEXclusive,
-     &                  INExc, ENDf, ENDfa, NANgela, NDAng, ISProd, 
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,
+     &                  INExc, ENDf, NANgela, NDAng, ISProd, 
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs, 
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,

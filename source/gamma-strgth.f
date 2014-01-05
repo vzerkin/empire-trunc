@@ -1,9 +1,12 @@
-Ccc   * $Rev: 3701 $
+Ccc   * $Rev: 3708 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
 
 C
-      SUBROUTINE ULM(Nnuc)
+      SUBROUTINE ULM(Nnuc,Numram)
+
+      implicit none
+
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:PPU*
@@ -32,187 +35,189 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
-C
-      DOUBLE PRECISION TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
-     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-
-      COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
-     &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
-      
-      DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
-      DOUBLE PRECISION BETagfl2, S2Plusgfl
-      INTEGER NG
-
-      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
-
-C
 C Dummy arguments
 C
-      INTEGER Nnuc
+      INTEGER Nnuc,Numram
 C
 C Local variables
 C
-      DOUBLE PRECISION e(2), esys1, esys2, ewsrs, g(2), s(2)
-      A2 = A(Nnuc)**0.666667
-      A4 = A(Nnuc)**1.333333
+      DOUBLE PRECISION BETagfl2, S2Plusgfl
+      DOUBLE PRECISION E(2), esys1, esys2, ewsrs, G(2), S(2)
+	INTEGER ka, kz
+	
+     	ka = NINT(A(Nnuc))
+	kz = NINT(Z(Nnuc))
 
-      TE1 = GDRpar(7,Nnuc)
-      TE2 = GQRpar(7,Nnuc)
-      TM1 = GMRpar(7,Nnuc)
-
-      IF (TE1.EQ.0.0D0) TE1 = 1.d0
-      IF (TE2.EQ.0.0D0) TE2 = 1.d0
-      IF (TM1.EQ.0.0D0) TM1 = 1.d0
+      IF (GDRpar(7,Nnuc).EQ.0.0D0) GDRpar(7,Nnuc) = 1.d0
+      IF (GQRpar(7,Nnuc).EQ.0.0D0) GQRpar(7,Nnuc) = 1.d0
+      IF (GMRpar(7,Nnuc).EQ.0.0D0) GMRpar(7,Nnuc) = 1.d0
 C
 C     Weiskopf scaling factors taking by default
 C       as 0.01,0.1 and 0.1 for E1,E2,and M1 (see below)
 C
 C         GDRxxx(8,Nnnuc) are always zero !!
 C
-      CE1 = GDRpar(8,Nnuc)
-      CE2 = GQRpar(8,Nnuc)
-      CM1 = GMRpar(8,Nnuc)
-
-      IF (CE1.EQ.0.0D0) CE1 = 0.01d0
-      IF (CE2.EQ.0.0D0) CE2 = 0.1d0
-      IF (CM1.EQ.0.0D0) CM1 = 0.1d0
+      IF (GDRpar(8,Nnuc).EQ.0.0D0) GDRpar(8,Nnuc) = .01d0
+      IF (GQRpar(8,Nnuc).EQ.0.0D0) GQRpar(8,Nnuc) = 0.1d0
+      IF (GMRpar(8,Nnuc).EQ.0.0D0) GMRpar(8,Nnuc) = 0.1d0
 
 C-----Plujko-2005      
       IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
 C-----GDR parameters according to Messina sytematics
         esys2 = 50.0*A(Nnuc)**( - 0.232)
-        NG = 2
+C       NG = 2
         IF (ABS(DEF(1,Nnuc)).GE.0.064D0) THEN
          esys1 = esys2*EXP(( - SIGN(1.D0,DEF(1,Nnuc))*0.946*DEF(1,Nnuc))
      &           )
-         e(1) = esys1 + GDResh
-         e(2) = esys2 + GDResh
-         g(1) = esys1*(0.283 - 0.263*DEF(1,Nnuc)) + GDRwa1
-         g(2) = esys2*(0.35 - 0.14*DEF(1,Nnuc)) + GDRwa2
-         s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
-         s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
+         E(1) = esys1 + GDResh
+         E(2) = esys2 + GDResh
+         G(1) = esys1*(0.283 - 0.263*DEF(1,Nnuc)) + GDRwa1
+         G(2) = esys2*(0.35 - 0.14*DEF(1,Nnuc)) + GDRwa2
+         S(1) = 3.48*A(Nnuc)*EWSr1/G(1)
+         S(2) = 1.46388*A(Nnuc)**1.33*EWSr2/G(2)
         ELSE
           
          IF (EWSr1.NE.EWSr2) THEN
             esys1 = esys2*EXP(( - SIGN(1.,0.065)*0.946*0.065))
-            g(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
-            g(2) = esys2*(0.35 - 0.14*0.065) + GDRwa2
-            s(1) = 3.48*A(Nnuc)*EWSr1/g(1)
-            s(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
-            ewsrs = (EWSr1*s(1)*g(1) + EWSr2*s(2)*g(2))
-     &              /(s(1)*g(1) + s(2)*g(2))
+            G(1) = esys1*(0.283 - 0.263*0.065) + GDRwa1
+            G(2) = esys2*(0.35 - 0.14*0.065) + GDRwa2
+            S(1) = 3.48*A(Nnuc)*EWSr1/g(1)
+            S(2) = 1.46388*A(Nnuc)**1.33*EWSr2/g(2)
+            ewsrs = (EWSr1*S(1)*G(1) + EWSr2*S(2)*G(2))
+     &              /(S(1)*G(1) + S(2)*G(2))
          ELSE
             ewsrs = EWSr1
          ENDIF
          esys1 = (49.336 + 7.34*DEF(1,Nnuc))*A(Nnuc)**( - 0.2409)
-         e(1) = esys1 + GDResh
-         g(1) = esys1*0.3 + GDRwa1
-         s(1) = 10.6*A(Nnuc)*ewsrs/g(1)
-         e(2) = 0.d0
-         s(2) = 0.d0
-         g(2) = 1.d0
-         NG = 1
+         E(1) = esys1 + GDResh
+         G(1) = esys1*0.3 + GDRwa1
+         S(1) = 10.6*A(Nnuc)*ewsrs/G(1)
+         E(2) = 0.d0
+         S(2) = 0.d0
+         G(2) = 1.d0
+C        NG = 1
         ENDIF
         IF (ABS(DEF(1,Nnuc)).GT.0.064D0) THEN
-         IF (e(1) - e(2).LT.GDRspl) THEN
-            e(1) = e(1) - GDRspl
+         IF (E(1) - E(2).LT.GDRspl) THEN
+            E(1) = E(1) - GDRspl
          ELSE
-            e(2) = e(1)
+            E(2) = E(1)
          ENDIF
         ENDIF
-        IF (GDRpar(1,Nnuc).EQ.0.0D0) GDRpar(1,Nnuc) = e(1)
-        IF (GDRpar(2,Nnuc).EQ.0.0D0) GDRpar(2,Nnuc) = g(1)
-        IF (GDRpar(3,Nnuc).EQ.0.0D0) GDRpar(3,Nnuc) = s(1)
-        IF (GDRpar(4,Nnuc).EQ.0.0D0) GDRpar(4,Nnuc) = e(2)
-        IF (GDRpar(5,Nnuc).EQ.0.0D0) GDRpar(5,Nnuc) = g(2)
-        IF (GDRpar(6,Nnuc).EQ.0.0D0) GDRpar(6,Nnuc) = s(2)
-        EG1 = GDRpar(1, Nnuc)
-        GW1 = GDRpar(2, Nnuc)
-        CS1 = GDRpar(3, Nnuc)
-        EG2 = GDRpar(4, Nnuc)
-        GW2 = GDRpar(5, Nnuc)
-        CS2 = GDRpar(6, Nnuc)
 
       ELSE
 
 C-------GDR parameters according to RIPL
-        CALL GDRGFLDATA(Z(Nnuc), A(Nnuc))
-C       Transferring to EMPIRE arrays 
-        IF(GDRpar(1, Nnuc).EQ.0.0D0)GDRpar(1, Nnuc) = EG1
-        IF(GDRpar(2, Nnuc).EQ.0.0D0)GDRpar(2, Nnuc) = GW1
-        IF(GDRpar(3, Nnuc).EQ.0.0D0)GDRpar(3, Nnuc) = CS1
-        IF(GDRpar(4, Nnuc).EQ.0.0D0)GDRpar(4, Nnuc) = EG2
-        IF(GDRpar(5, Nnuc).EQ.0.0D0)GDRpar(5, Nnuc) = GW2
-        IF(GDRpar(6, Nnuc).EQ.0.0D0)GDRpar(6, Nnuc) = CS2
+C       CALL GDRGFLDATA(Z(Nnuc),A(Nnuc),E,G,S,BETagfl2,S2Plusgfl)
+        CALL assign_GDRGFLDATA(Numram,kz,ka,E,G,S,BETagfl2,S2Plusgfl)  
 
-        GDRpar(9 , Nnuc) = BETagfl2
-        GDRpar(10, Nnuc) = S2Plusgfl 
+        IF (GDRpar(9 ,Nnuc).EQ.0.0D0) GDRpar(9 ,Nnuc) = BETagfl2
+        IF (GDRpar(10,Nnuc).EQ.0.0D0) GDRpar(10,Nnuc) = S2Plusgfl
 
       ENDIF
-C
-      D1 = 5.46E-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
-      D2 = 5.46E-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
+
+C     Transferring to EMPIRE arrays  
+      IF (GDRpar(1,Nnuc).EQ.0.0D0) GDRpar(1,Nnuc) = E(1)
+      IF (GDRpar(2,Nnuc).EQ.0.0D0) GDRpar(2,Nnuc) = G(1)
+      IF (GDRpar(3,Nnuc).EQ.0.0D0) GDRpar(3,Nnuc) = S(1)
+      IF (GDRpar(4,Nnuc).EQ.0.0D0) GDRpar(4,Nnuc) = E(2)
+      IF (GDRpar(5,Nnuc).EQ.0.0D0) GDRpar(5,Nnuc) = G(2)
+      IF (GDRpar(6,Nnuc).EQ.0.0D0) GDRpar(6,Nnuc) = S(2)
 C
 C-----GQR parameters due to: Z.Phys.A 315(1984)103 (width and peak c.s)
 C                            Rep. Prog. Phys. 44(1981)719 (energy)
-C
       IF (GQRpar(1,Nnuc).EQ.0.0D0) THEN
-         GQRpar(1,Nnuc) = 63.0/A(Nnuc)**0.3333
-         GQRpar(2,Nnuc) = 6.11 - 0.012*A(Nnuc)
-         GQRpar(3,Nnuc) = 1.5E-4*Z(Nnuc)**2*GQRpar(1,Nnuc)**2/A(Nnuc)
+         GQRpar(1,Nnuc) = 63.D0/A(Nnuc)**0.3333
+         GQRpar(2,Nnuc) = 6.11D0 - 0.012D0*A(Nnuc)
+         GQRpar(3,Nnuc) = 1.5D-4*Z(Nnuc)**2*GQRpar(1,Nnuc)**2/A(Nnuc)
      &                    **0.33333/GQRpar(2,Nnuc)
       ENDIF
-      DE2 = 3.276E-7*GQRpar(3,Nnuc)*GQRpar(2,Nnuc)**2
 C
 C-----giant M1 resonance parameters due to: Bohr and Mottelson
 C
       IF (GMRpar(1,Nnuc).EQ.0.0D0) THEN
-         GMRpar(1,Nnuc) = 41.0/A(Nnuc)**0.3333
-         GMRpar(2,Nnuc) = 4.0
-         GMRpar(3,Nnuc) = 1.0
+         GMRpar(1,Nnuc) = 41.D0/A(Nnuc)**0.3333
+         GMRpar(2,Nnuc) = 4.D0
+         GMRpar(3,Nnuc) = 1.D0
       ENDIF
-      DM1 = 5.46E-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
+
+	CALL INIT_GDR_COMMONS(Nnuc)
+
+      RETURN
+      END
+ 
+
+      SUBROUTINE ULM_print(Nnuc)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:PPU*
+Ccc   *                          U L M                                   *
+Ccc   *                                                                  *
+Ccc   * Print Giant Resonance parameters (for GDR, GQR and GMR)          *
+Ccc   * to be used in the calculation of transmission coefficients       *
+Ccc   *                                                                  *
+Ccc   * input:NNUC- nucleus index                                        *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
 C
 C-----printout of gamma transition parameters
 C
-      IF (IOUt.GT.1) THEN
-         WRITE (8,*) 
+      IF(Key_GDRGFL.EQ.0.AND.Key_shape.EQ.0) THEN      
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,99005) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
 99005    FORMAT (1X,' Gamma transitions parameters of ',
      &   i3,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
-         WRITE (8,99010) TE1, TE2, TM1, CE1, CE2, CM1, GDRpar(1,Nnuc), 
-     &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
+         WRITE (8,99010)  
+     &     GDRpar(7,Nnuc), GQRpar(7,Nnuc), GMRpar(7,Nnuc),
+     &     GDRpar(8,Nnuc), GQRpar(8,Nnuc), GMRpar(8,Nnuc),
+     &     GDRpar(1,Nnuc), GQRpar(1,Nnuc), GMRpar(1,Nnuc)
 99010    FORMAT (2X,'TE',7X,F4.2,2(9X,F4.2),/,2X,'CE ',4X,F7.3,
      &           2(6X,F7.3),/,2X,'E1 ',4X,F6.2,2(7X,F6.2))
+         WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
+     &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
+         WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
+         WRITE (8,99025)
+99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR')
+C        WRITE (8,*) ' -----------------------------------------'
+      ELSE	    
+         WRITE (8,*) ' -----------------------------------------'
+         WRITE (8,99006) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
+99006    FORMAT (1X,' Gamma transitions parameters of ',
+     &   i3,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
+         WRITE (8,99010)  
+     &     GDRpar(7,Nnuc), GQRpar(7,Nnuc), GMRpar(7,Nnuc),
+     &     GDRpar(8,Nnuc), GQRpar(8,Nnuc), GMRpar(8,Nnuc),
+     &     GDRpar(1,Nnuc), GQRpar(1,Nnuc), GMRpar(1,Nnuc)
+C        WRITE (8,99011) GDRpar(1,Nnuc), 
+C    &                   GQRpar(1,Nnuc), GMRpar(1,Nnuc)
+C99011    FORMAT (2X,'E1 ',4X,F6.2,2(7X,F6.2))
          WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
      &                   GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
 99015    FORMAT (2X,'W1 ',4X,F6.2,2(7X,F6.2),/,2X,'D1',1X,F10.2,
      &           2(3X,F10.2))
          WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
 99020    FORMAT (2X,'E2 ',4X,F6.2,/,2X,'W2 ',4X,F6.2,/,2X,'D2 ',F10.2)
-         WRITE (8,99025)
-99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR')
-         WRITE (8,*) ' -----------------------------------------'
-         WRITE (8,*) 
+         IF(Key_shape.EQ.5) 
+     &     WRITE (8,99021) GDRpar(9,Nnuc), GDRpar(10,Nnuc)
+99021    FORMAT (2X,'beta',3X,F6.3,/,2X,'S2+',4X,F6.3)
+C        WRITE (8,*) ' -----------------------------------------'
       ENDIF
-C
-      ED1 = GDRpar(1,Nnuc)**2
-      W1  = GDRpar(2,Nnuc)**2
-      ED2 = GDRpar(4,Nnuc)**2
-      W2L = GDRpar(5,Nnuc)**2
-C
-      EE2 = GQRpar(1,Nnuc)**2
-      WE2 = GQRpar(2,Nnuc)**2
-C
-      EM1 = GMRpar(1,Nnuc)**2
-      WM1 = GMRpar(2,Nnuc)**2
+      WRITE (8,*)
 
       RETURN
       END
- 
+
  
       SUBROUTINE ULMDYN(Nnuc,Jcn,Exc)
 Ccc
@@ -444,7 +449,7 @@ C
       DOUBLE PRECISION ed, gdr, gred
       DOUBLE PRECISION GAMMA_STRENGTH
 
-      CALL INIT_GDR_COMMONS(Nnuc)
+C     CALL INIT_GDR_COMMONS(Nnuc)
 C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
@@ -458,8 +463,11 @@ C     GRED = 1.
       gdr = 0.d0
  
       IF (KEY_shape.NE.0) THEN
-         E1 = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
+         gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
      &        Eg,KEY_shape)
+C        default TE1 = 1
+C        Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
+         E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
          RETURN
       ENDIF
 

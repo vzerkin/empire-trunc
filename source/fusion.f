@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3701 $
+Ccc   * $Rev: 3708 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -65,25 +65,13 @@ C
 C-----No DWBA by default
 C
       ldbwacalc = .FALSE.
-
-      CALL ULM(0) ! target
-C
-      CALL ULM(1) ! CN
 C
 C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),Nnurec,iloc)
 C									  
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),Nejcec,iloc)
-C
-C-----Prepare Giant Resonance parameters - systematics
-C-----
-      if(iloc.eq.0 .and. Nnurec.ne.0) then
-        do i=1,10
-          GDRpar(i,Nnurec) = GDRpar(i,0)
-        enddo		 
-      endif
-            
+C          
       TMP_isotropic = CN_isotropic
 C
 C-----Reduced mass corrected for proper mass values

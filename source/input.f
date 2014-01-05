@@ -1,6 +1,6 @@
-!cc   * $Rev: 3701 $
+!cc   * $Rev: 3708 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+!cc   * $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
       SUBROUTINE INPUT
 !cc
 !cc   ********************************************************************
@@ -18,20 +18,22 @@
 !cc   ********************************************************************
 !cc
       use nubar_reader
+	use empgdr
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C     COMMON variables
 C
-      INTEGER KAA, KAA1, KEYinput, KEYload, KZZ, KZZ1
 
       CHARACTER*120 nubar_filename
       INTEGER*4 len_nubar_filename
       CHARACTER*24 EMPireos
-      INTEGER*4 INDexf, INDexb, BUFfer(250)
+
+      INTEGER KEYinput, KZZ1, KAA1 
       COMMON /MLOCOM1/ KEYinput, KZZ1, KAA1
-      COMMON /MLOCOM2/ KEYload, KZZ, KAA
+
+      INTEGER*4 INDexf, INDexb, BUFfer(250)
       COMMON /R250COM/ INDexf,INDexb,BUFfer
 C
 C     Local variables
@@ -206,8 +208,6 @@ C
             dshift_ig(nnuc)= 0.d0           
 C-----------set ENDF flag to 0 (no ENDF formatting)
             ENDf(nnuc) = 0
-C-----------set ENDFA flag to 0 (no exclusive angular distributions)
-            ENDfa(nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
             NSTOred(nnuc) = -1
 C
@@ -474,7 +474,6 @@ C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          EHRtw = 0.d0
 C--------ENDF global setting initialized to zero (no formatting)
          NENdf = 0
-         NENdfa = 0
 C
 C--------default input parameters    *** done ***
 C
@@ -544,9 +543,6 @@ C        shape of E1 strength function and GDR parameters
          KEYinput = 0
          KZZ1 = 0
          KAA1 = 0
-         KEYload = 0
-         KZZ = 0
-         KAA = 0
          IGE1 = 1
          LQDfac = 1.0D0
          IGM1 = 0
@@ -613,7 +609,6 @@ C-----------GAMMA EMISSION
          ELV(1,0) = 0.d0
          QCC(1) = -e2p
          QCC(2) = -e3m
-
 C--------product of target and projectile parities
 C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
 C        RCN, We assume is only the target parity !!!
@@ -828,10 +823,9 @@ C                 AMAss(nnuc) = atmp
                   HIS(nnuc) = -1.
                   IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                HIS(nnuc) = -0.5
-                  IF(NENdf.gt.0 .and. mulem.eq.in .and. in.le.4) THEN 
-                   ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
-                   ENDFa(nnuc) = 1
-                  ENDIF
+C
+                  IF(NENdf.gt.0 .and. mulem.eq.in .and. in.le.4)  
+     &                ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -978,7 +972,6 @@ C--------Retrieve C4 experimental data  *** done ***
          DO nnuc = 1, NNUcd
 
             ENDf(nnuc) = 1
-            ENDfa(nnuc) = 1
             irepeated = 0
             do i=1,nnuc-1
               IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
@@ -1008,11 +1001,9 @@ C              residual nuclei must be heavier than alpha
                   NNUct = NNUct + 1
 C                 These nuclei are always considered inclusive
                   ENDf(nnur) = 2
-                  ENDfa(nnur) = 2
-C
                ENDIF
-            ENDDO
-         ENDDO
+            ENDDO	! end of nejc loop
+         ENDDO    ! end of nnuc loop 
 C
 C        Protection to avoid problems for HI reactions
 C    
@@ -1055,7 +1046,7 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C-----------(McFadden global potential 9100 could be used)
          ENDIF
 
-         DO i = 1, NDNUC
+         DO i = 1, NNUct ! NDNUC
             KTRlom(1,i) = 2405
             KTRlom(2,i) = 5405
             KTRlom(3,i) = 9600
@@ -1075,7 +1066,6 @@ C--------New energy header
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
-
 
          IF( KTRlom(0,0).eq.2408 .and. DIRECT. LT. -0.1) then
             DIRECT = 1
@@ -1111,14 +1101,9 @@ C
          IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
          IF(ENDf(0).EQ.10) ENDf(0)=1 ! for compound
 
-         IF(ENDfa(NTArget).EQ.10) ENDfa(NTArget)=1
-         IF(ENDfa(1).EQ.10) ENDfa(1)=1 ! for compound
-         IF(ENDfa(0).EQ.10) ENDfa(0)=1 ! for compound
-
          IF(NENdf.EQ.0) THEN
 
            ENDf = 0
-           ENDfa = 0
            NEXclusive = 0
            EXClusiv = .FALSE.
 
@@ -1163,11 +1148,6 @@ C             residues must be heavier than alpha
 C             This nucleus requested as exclusive in the optional input
               IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  
 
-              IF(mulem.GT.NENdfa .AND. ENDfa(nnuc).NE.10) THEN
-                ENDfa(nnuc) = 2
-              ENDIF
-C             This nucleus requested as exclusive in the optional input
-              IF(ENDfa(nnuc).EQ.10) ENDfa(nnuc) = 1  
             ENDDO
             ENDDO
             ENDDO
@@ -1187,14 +1167,13 @@ C
               CALL WHERE(izatmp,nnuc,iloc)
               
               IF(ENDf(nnuc).EQ.1) THEN 
-                IF(LHMs.EQ.0. OR. NENdfa.EQ.0) ENDfa(nnuc) = 2 
                 itmp = itmp + 1
                 INExc(nnuc) = itmp 
               ELSE
-               ENDfa(nnuc) = 2
+               ENDf(nnuc)  = 2 
               ENDIF
 C               write(*,'(7i5)') i,INT(a(i)),INT(z(i)),nnuc,INExc(nnuc),
-C     &                                            ENDf(nnuc),ENDfa(nnuc) 
+C     &                                            ENDf(nnuc) 
             ENDDO
             NEXclusive = itmp
 C           write(*,'(a3,i5)') '***',NEXclusive
@@ -1210,24 +1189,44 @@ C
             STOP ' INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 C
-C        Checking fission input consistency 
-C
-         IF( NINT(FISshi(nnuc)).EQ.1 .and. NINT(FISden(1)).ne.0) THEN        
-            WRITE(8,*)  ' WARNING: ',
-     >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
-            DO i = 1, NDNUC
-              FISden(i) = 0.d0
-            ENDDO
-         ENDIF
+C        Assigning the target gamma parameters from the input
+C 
+         do i=1,10
+           GDRpar(i,0) = GDRpar(i,NTArget)
+         enddo		 
+C	   Prepare gamma transmission parameters
+         IF(FIRST_ein) THEN
+	     CALL EMPAgdr() ! allocating memory for temporal gdr arrays
+           CALL read_GDRGFLDATA(Numram)
 
-         IF( NINT(FISmod(1)).GT.0 .and. NINT(FISden(1)).ne.0 )  THEN        
-            WRITE(8,*)  ' WARNING: ',
+	     CALL ULM(0,Numram)
+           WRITE (8,*) ' -----------------------------------------'
+           WRITE(8,*) ' TARGET GDR DATA:'
+           CALL ULM_print(0)
+           DO i = 1, NNUcd ! or should be NNUct 
+             CALL ULM(i,Numram) ! target
+             IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
+C
+C            Checking fission input consistency 
+C
+             IF(NINT(FISshi(i)).EQ.1 .and. NINT(FISden(i)).ne.0) THEN        
+               WRITE(8,*)  ' WARNING: ',
+     >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
+               WRITE(8,*)  ' WARNING: Changing the LD model at saddles 
+     >for nucleus ',A(i),SYMb(i)
+               FISden(i) = 0.d0
+             ENDIF
+             IF(NINT(FISmod(i)).GT.0 .and. NINT(FISden(i)).ne.0 )  THEN        
+               WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
-            WRITE(8,*)  ' WARNING: Changing the LD model at saddles'
-            DO i = 1, NDNUC
-               FISden(i) = 0
-            ENDDO
+               WRITE(8,*)  ' WARNING: Changing the LD model at saddles 
+     >for nucleus ',A(i),SYMb(i)
+               FISden(i) = 0.d0
+             ENDIF
+
+           ENDDO
+	     CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+           WRITE (8,*) ' -----------------------------------------'
          ENDIF
 
          WRITE (8,*)
@@ -5970,69 +5969,6 @@ C
      &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
             ENDIF
             IF (ENDf(nnuc).EQ.2) THEN
-              WRITE (8,
-     &       '('' Emission spectra from nucleus '',I3,A2,
-     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
-              WRITE (12,
-     &       '('' Emission spectra from nucleus '',I3,A2,
-     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
-            ENDIF
-            GOTO 100
-         ENDIF
-C-----
-         IF (name.EQ.'ENDFA  ') THEN
-             IF(i1.eq.0 .AND. i2.eq.0) THEN
-C              Setting ENDF for all emission loops
-               NENdfa = INT(val)
-               IF(NENdfa.GT.0) THEN
-                 WRITE (8,'('' ENDF formatting enabled'')')
-                 WRITE (8,'(
-     &            '' Exclusive DDXSs available up to'',
-     &            '' emission loop # '',I2)') NENdfa
-                 WRITE (12,'('' ENDF formatting enabled'')')
-                 WRITE (12,'(
-     &            '' Exclusive DDXSs available up to'',
-     &            '' emission loop # '',I2)') NENdfa
-                     GOTO 100
-               ENDIF
-               IF(NENdfa.EQ.0) THEN
-                 WRITE ( 8,'('' Exclusive DDXSs disabled'')')
-                 WRITE (12,'('' Exclusive DDXSs disabled'')')
-                 GOTO 100
-               ENDIF
-             ENDIF
-             IF(val.LT.0) THEN
-               WRITE (8,'('' WRONG ENDFA value in input'',I3)')
-     &                i2
-               WRITE (8,'('' SETTING IGNORED'')')
-               GOTO 100
-             ENDIF
-C           Setting ENDFA for a single nucleus
-            izar = i1*1000 + i2
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' ENDFA SETTING IGNORED'')')
-               GOTO 100
-            ENDIF
-C
-            if(INT(val).gt.0 .and. NENdfa.EQ.0) THEN
-               NENdfa = INT(val)
-               WRITE (8,'('' ENDF formatting enabled'')')
-               WRITE (12,'('' ENDF formatting enabled'')')
-            ENDIF
-            ENDfa(nnuc) = INT(val)
-            IF (ENDfa(nnuc).EQ.1) THEN
-              ENDfa(nnuc) = 10  ! using as a flag 
-              WRITE (8,
-     &       '('' Exclusive DDXS will be available for emission'',
-     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
-              WRITE (12,
-     &       '('' Exclusive DDXS will be available for emission'',
-     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
-            ENDIF
-            IF (ENDfa(nnuc).EQ.2) THEN
               WRITE (8,
      &       '('' Emission spectra from nucleus '',I3,A2,
      &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
@@ -11096,34 +11032,14 @@ C
   200 Ieof = 1
       END
 C
-      SUBROUTINE GDRGFLDATA(Znucleus,Anucleus)
+      SUBROUTINE read_GDRGFLDATA(Numram)
+
+	use empgdr
 C
 Ccc  ********************************************************************
 Ccc  * Assignment of GGexp and D0exp for gamma-strength normalization   *
 Ccc  * Assignment of the GDR and GFL model parameters                   *
 Ccc  * to nucleus with atomic number 'Znucleus'and mass number'Anucleus'*
-Ccc  *                                                                  *
-Ccc  *  The parameters are put in the following COMMON's:               *
-Ccc  *   -----------------------------------------------                *
-Ccc  *                                                                  *
-Ccc  *  COMMON /PARGDR/  EG1, GW1, CS1, EG2, GW2, CS2, NG               *
-Ccc  *  COMMON /GFLPARAM/ BETagfl2, S2Plusgfl                           *
-Ccc  *                                                                  *
-Ccc  *   -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --                *
-Ccc  *                                                                  *
-Ccc  * 'COMMON/PARGDR/EG1,GW1,CS1,EG2,GW2,CS2,NG'  contains             *
-Ccc  *  input for GDR parameters (all deformed nuclei are               *
-Ccc  *  considered as  axially symmetric spheroids):                    *
-Ccc  *                                                                  *
-Ccc  *  EG1= peak energy of the first peak,                             *
-Ccc  *  GW1= full width of the first peak at half-maximum,              *
-Ccc  *  CS1= peak cross section of the first peak,                      *
-Ccc  *  EG2= peak energy of the second peak,                            *
-Ccc  *  CS2= peak cross section of the second peak,                     *
-Ccc  *  GW2= full width of the second peak at half-maximum              *
-Ccc  *  CS2= peak cross section of the second peak,                     *
-Ccc  *  NG : for NG=1, single peak(spherical nucleus),                  *
-Ccc  *       for NG=2, double peaks(deformed nucleus);                  *
 Ccc  *                                                                  *
 Ccc  * 'COMMON /GFLPARAM/ BETagfl2, S2Plusgfl'  contains                *
 Ccc  *  the parameters of the GFL model:                                *
@@ -11164,137 +11080,157 @@ Ccc  ********************************************************************
 C
       IMPLICIT NONE
 C
-C PARAMETER definitions
-C
-      INTEGER MAXGDR
-      PARAMETER (MAXGDR = 5986)
-C
-C COMMON variables
-C
-      DOUBLE PRECISION BETagfl2, CS1, CS2, EG1, EG2, GW1, GW2,
-     &                 HALpha2(9000), HBEtagfl(700), HCS1(300),
-     &                 HCS2(300), HE1(300), HE2(300), HENergygfl(700),
-     &                 HGW1(300), HGW2(300), S2Plusgfl
-      INTEGER KAA, KEYload, KEY_gdrgfl, KEY_shape, KZZ,
-     &        NANa(9000), NANz(9000), NARam(700), NG, NNA(300), NNG(300)
-     &        , NNZ(300), NUMram, NZRam(700)
-      CHARACTER*200 EMPiredir
-      CHARACTER*72 EMPtitle
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
-      COMMON /GSA   / KEY_shape, KEY_gdrgfl
-      COMMON /MLOCOM2/ KEYload, KZZ, KAA
-      COMMON /MLOCOM3/ NNZ, NNA, NNG, HE1, HCS1, HGW1, HE2, HCS2, HGW2,
-     &                 NANz, NANa, HALpha2, HBEtagfl, HENergygfl, NZRam,
-     &                 NARam, NUMram
-      COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
-      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
-C
 C Dummy arguments
 C
-      DOUBLE PRECISION Anucleus, Znucleus
+      INTEGER Numram 
+C
+C PARAMETER definitions
+C
+      INTEGER MAXGDR,MEXPPAR,MEXP,MDEF
+      PARAMETER (MAXGDR=5986,MEXPPAR=270,MEXP=9000,MDEF=700)
+C
+C COMMON variables (from global.h)
+C
+C
+      INTEGER KEY_shape, KEY_gdrgfl
+      COMMON /GSA/ KEY_shape, KEY_gdrgfl
+C
+      CHARACTER*200 EMPiredir
+      CHARACTER*72 EMPtitle
+      COMMON /GLOBAL_E/ EMPiredir, EMPtitle
 C
 C Local variables
 C
-      DOUBLE PRECISION a0, a3, aann, alambda, alpha2, b0, betagfl, btmp,
-     &                 cs0, csaa, csb, ea, eb, eg0, energygfl, etaeps,
-     &                 etat(MAXGDR), etmp, fjtmp, gw0, he1t(MAXGDR),
-     &                 he2t(MAXGDR), hgw1t(MAXGDR), hgw2t(MAXGDR), pi,
-     &                 zz
-      INTEGER i, ka, kz, n, natmp, nnat(MAXGDR), nngt(MAXGDR),
-     &        nntmp, nnzt(MAXGDR)
-      DATA pi/3.141592654D0/
-      kz = Znucleus + 0.001
-      ka = Anucleus + 0.001
-      IF (kz.EQ.KZZ .AND. ka.EQ.KAA) RETURN
-      KZZ = kz
-      KAA = ka
-      IF (KEYload.NE.1) THEN
-         KEYload = 1
-         OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
+C     INTEGER NG
+      DOUBLE PRECISION btmp, etmp, fjtmp
+      INTEGER i, natmp, nntmp 
+
+      OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
      &      //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
-         READ (81,'(///)') ! Skipping first 4 title lines
-         DO i = 1, 270
-            READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
-     &            NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
-     &            HE2(i), HCS2(i), HGW2(i)
-         ENDDO
-   50    CLOSE (81)
-  100    OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma/'
+      READ (81,'(///)') ! Skipping first 4 title lines
+      DO i = 1, MEXPPAR ! 270
+        READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
+     &       NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
+     &       HE2(i), HCS2(i), HGW2(i)
+      ENDDO
+   50 CLOSE (81)
+  100 OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma/'
      &      //'gdr-parameters-theor.dat',STATUS = 'old',ERR = 500)
-         READ (81,'(///)') ! Skipping first 4 title lines
-         DO i = 1, MAXGDR
-            READ (81,'(2I4, 1x,2x, f7.3, 4F7.2)',END = 150,ERR = 150)
-     &            nnzt(i), nnat(i), etat(i), he1t(i), hgw1t(i), he2t(i),
-     &            hgw2t(i)
-            nngt(i) = 2
-            IF (he1t(i).EQ.he2t(i)) nngt(i) = 1
-         ENDDO
-  150    CLOSE (81)
-  200    OPEN (82,FILE = trim(empiredir)//'/data/deflib.dat'
+      READ (81,'(///)') ! Skipping first 4 title lines
+      DO i = 1, MAXGDR
+        READ (81,'(2I4, 1x,2x, f7.3, 4F7.2)',END = 150,ERR = 150)
+     &       nnzt(i), nnat(i), etat(i), he1t(i), hgw1t(i), he2t(i),
+     &       hgw2t(i)
+        nngt(i) = 2
+        IF (he1t(i).EQ.he2t(i)) nngt(i) = 1
+      ENDDO
+  150 CLOSE (81)
+  200 OPEN (82,FILE = trim(empiredir)//'/data/deflib.dat'
      &      ,STATUS = 'old',ERR = 550)
-         READ (82,'(////)') ! Skipping first 5 title lines
-         DO i = 1, 9000
-            READ (82,'((2I4, f7.3))',END = 250,ERR = 250) NANz(i),
-     &            NANa(i), HALpha2(i)
-         ENDDO
-  250    CLOSE (82)
-  300    OPEN (84,FILE = trim(empiredir)//'/RIPL/optical/om-data'
+      READ (82,'(////)') ! Skipping first 5 title lines
+      DO i = 1, MEXP ! 9000
+        READ (82,'((2I4, f7.3))',END = 250,ERR = 250) NANz(i),
+     &       NANa(i), HALpha2(i)
+      ENDDO
+  250 CLOSE (82)
+  300 OPEN (84,FILE = trim(empiredir)//'/RIPL/optical/om-data'
      &      //'/om-deformations.dat',STATUS = 'old',ERR = 600)
-         READ (84,'(///)') ! Skipping first 4 title lines
-         NUMram = 0
-         DO i = 1, 700
-            READ (84,'(2I4,4x,f10.6,1x,f4.1,6x,f10.6)',END = 400,
-     &            ERR = 400) nntmp, natmp, etmp, fjtmp, btmp
-C-----------Selecting only 2+ states
-            IF (ABS(fjtmp - 2.D0).GT.0.0001) GOTO 350
-            NUMram = NUMram + 1
-            NZRam(NUMram) = nntmp
-            NARam(NUMram) = natmp
-            HENergygfl(NUMram) = etmp
-            HBEtagfl(NUMram) = btmp
-  350    ENDDO
-         WRITE (8,*) 
-         WRITE (8,*) ' RIPL GDR parameters used'
-         GOTO 700
-  400    CLOSE (84)
-  450    WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
-     &                      'empire/RIPL/gamma/gdr-parameters-exp.dat'
-     &                          ,
-     &                     ' not found, theoretical RIPL will be used'
-         GOTO 100
-  500    WRITE (8,'(1x,A14,A43,A42)') ' WARNING: File ',
-     &                    'empire/RIPL/gamma/gdr-parameters-theor.dat'
-     &                        ,
-     &                     ' not found, default GDR values will be used'
-         GOTO 200
-  550    WRITE (8,'(1x,A14,A18,A43)')
-     &                           ' WARNING: File empire/data/deflib.dat'
-     &                               ,
-     &             ' not found, default deformation values will be used'
-         GOTO 300
-  600    WRITE (8,*) ' WARNING: ',trim(empiredir)//
+      READ (84,'(///)') ! Skipping first 4 title lines
+      NUMram = 0
+      DO i = 1, MDEF ! 700
+        READ (84,'(2I4,4x,f10.6,1x,f4.1,6x,f10.6)',END = 400,
+     &       ERR = 400) nntmp, natmp, etmp, fjtmp, btmp
+C-------Selecting only 2+ states
+        IF (ABS(fjtmp - 2.D0).GT.0.0001) GOTO 350
+        NUMram = NUMram + 1
+        NZRam(NUMram) = nntmp
+        NARam(NUMram) = natmp
+        HENergygfl(NUMram) = etmp
+        HBEtagfl(NUMram) = btmp
+  350 ENDDO
+      WRITE (8,*) 
+      WRITE (8,*)  ' RIPL GDR parameters used'
+      WRITE (12,*) 
+      WRITE (12,*) ' RIPL GDR parameters used'
+      RETURN
+  400 CLOSE (84)
+  450 WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
+     &   'empire/RIPL/gamma/gdr-parameters-exp.dat',
+     &   ' not found, theoretical RIPL will be used'
+      GOTO 100
+  500 WRITE (8,'(1x,A14,A43,A42)') ' WARNING: File ',
+     &   'empire/RIPL/gamma/gdr-parameters-theor.dat',
+     &   ' not found, default GDR values will be used'
+      GOTO 200
+  550 WRITE (8,'(1x,A14,A18,A43)')
+     &   ' WARNING: File empire/data/deflib.dat',
+     &   ' not found, default deformation values will be used'
+      GOTO 300
+  600 WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL/optical/om-data/om-deformations.dat',
      &   ' not found, default dynamical deformation values used'
-      ENDIF
-  700 n = ka - kz
-      zz = kz
+      RETURN
+      END
+
+
+      SUBROUTINE assign_GDRGFLDATA
+     &     (Numram,Kz,Ka,E,G,S,BETagfl2,S2Plusgfl)
+
+      use empgdr 	 
+C
+C
+      IMPLICIT NONE
+C
+C Dummy arguments
+C
+      INTEGER NUMram, Kz, Ka  
+      DOUBLE PRECISION E(2), G(2), S(2), BETagfl2, S2Plusgfl
+C
+C PARAMETER definitions
+C
+      INTEGER MAXGDR,MEXPPAR,MEXP
+      PARAMETER (MAXGDR=5986,MEXPPAR=270,MEXP=9000)
+C
+C COMMON variables (from global.h)
+C
+      INTEGER KEY_shape, KEY_gdrgfl
+      COMMON /GSA/ KEY_shape, KEY_gdrgfl
+C
+C Local variables
+C
+      DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
+C     INTEGER NG
+
+      DOUBLE PRECISION a0, a3, aann, alambda, alpha2, b0, betagfl, 
+     &                 cs0, csaa, csb, ea, eb, eg0, gw0, pi, zz
+      INTEGER i, n 
+      DATA pi/3.141592654D0/
+      
+      WRITE (8,*) 
+      WRITE (8,*)  ' RIPL GDR parameters used'
+      WRITE (12,*) 
+      WRITE (12,*) ' RIPL GDR parameters used'
+C
+      n    = ka - kz
+      zz   = kz
       aann = ka
-      a3 = aann**0.3333333
+      a3  = aann**0.3333333
       eg0 = 31.2/a3 + 20.6/SQRT(a3)
       gw0 = 0.026*eg0**1.91
       cs0 = 1.2*120.*n*zz/(aann*pi*gw0)
+
       IF (KEY_gdrgfl.NE.0) THEN
-         DO i = 1, 270
+         DO i = 1, MEXPPAR ! 270
             IF (kz.EQ.NNZ(i) .AND. ka.EQ.NNA(i)) THEN
-               NG = NNG(i)
-               EG1 = HE1(i)
-               CS1 = HCS1(i)
-               GW1 = HGW1(i)
-               EG2 = HE2(i)
-               CS2 = HCS2(i)
-               GW2 = HGW2(i)
+C              NG = NNG(i)
+               E(1) = HE1(i)
+               G(1) = HGW1(i)
+               S(1) = HCS1(i)	 
+               E(2) = HE2(i)
+               G(2) = HGW2(i)
+               S(2) = HCS2(i)	 
 C--------------Plujko_new-2005
-               IF(Key_shape.NE.5) RETURN
+               IF(Key_shape.NE.5) RETURN 
                GOTO 900
             ENDIF
          ENDDO
@@ -11309,39 +11245,41 @@ C     ELONGATED!?
       IF (Key_GDRGFL.EQ.2)THEN
          DO i = 1, MAXGDR
             IF (kz.EQ.nnzt(i) .AND. ka.EQ.nnat(i)) THEN
-               NG = nngt(i)
-               EG1 = he1t(i)
-               CS1 = cs0
-               GW1 = hgw1t(i)
-               EG2 = he2t(i)
-               CS2 = 0.D0
-               GW2 = hgw2t(i)
-               etaeps = etat(i)
-               IF (ABS(etaeps - 1.D0).GT.0.0001) THEN
+C              NG = nngt(i)
+               E(1) = he1t(i)
+               G(1) = hgw1t(i)
+               E(2) = he2t(i)
+               G(2) = hgw2t(i)
+               IF (ABS(etat(i) - 1.D0).GT.0.0001) THEN
 C--------------Global GDR parameterization for deformed nuclei
 C--------------(classical sum rule with correction)
-                  CS1 = cs0/3.
-                  CS2 = cs0*2./3.
+                 CS1 = cs0/3.
+                 CS2 = cs0*2./3.
+               ELSE
+                 CS1 = cs0
+                 CS2 = 0.d0
                ENDIF
+               S(1) = CS1	 
+               S(2) = CS2	 
 C--------------Plujko_new-2005
-               IF(Key_shape.NE.5)RETURN
+               IF(Key_shape.NE.5) RETURN
                GOTO 900
             ENDIF
          ENDDO
       ENDIF
 C-----Setting the deformation parameter from "deflib.dat" file
 C-----for calculation of the GDR energies and widths
-      DO i = 1, 9000
+      alpha2 = 0.d0
+      DO i = 1, MEXP ! 9000
          IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
             alpha2 = HALpha2(i)
-            GOTO 800
+            EXIT
          ENDIF
       ENDDO
-      alpha2 = 0.
-  800 IF (ABS(alpha2).GT.0.001) THEN
+      IF (ABS(alpha2).GT.0.001) THEN
 C--------Global GDR parameterization for deformed nuclei
 C--------( classical sum rule with correction)
-         NG = 2
+C        NG = 2
          alambda = (1. + 0.6*alpha2**2 + 2.*alpha2**3/35.)**0.3333333
          a0 = (1. + alpha2)/alambda
          b0 = (1. - 0.5*alpha2)/alambda
@@ -11364,14 +11302,20 @@ C--------( classical sum rule with correction)
       ELSE
 C--------Global GDR parameterization for spherical targets
 C--------( classical sum rule with correction)
-         NG = 1
+C        NG = 1
          EG1 = eg0
          GW1 = gw0
          CS1 = cs0
-         EG2 = 0.
-         GW2 = 0.
-         CS2 = 0.
+         EG2 = 0.d0
+         GW2 = 0.d0
+         CS2 = 0.d0
       ENDIF
+      E(1) = EG1
+      G(1) = GW1
+      S(1) = CS1	 
+      E(2) = EG2
+      G(2) = GW2
+      S(2) = CS2	 
 C-----Plujko_new-2005
       IF(Key_shape.NE.5)RETURN
 C-----Setting the GFL parameters '|beta|' from "defeff.dat"
@@ -11383,10 +11327,7 @@ C-----and 'S2Plus=(E2+)*beta**2'
 C--------------'BETagfl2=beta**2' and  'S2Plus=(E2+)*beta**2'  -------
 C--------------parameters of the GFL model[BETagfl2=beta; ENErgygfl=E2+(MeV)]
                BETagfl2 = betagfl**2
-C--------------energygfl = henergygfl(i)*0.001
-               energygfl = HENergygfl(i)
-C--------------RIPL energies in MeV, RCN 06/2004
-               S2Plusgfl = BETagfl2*energygfl
+               S2Plusgfl = BETagfl2*HENergygfl(i)
 C--------------Plujko_new-2005
                RETURN
             ENDIF
@@ -11397,16 +11338,18 @@ C-----and setting the '|beta2|' from "deflib.dat" file
 C-----as 'beta' of the GFL model.
 C-----Setting the deformation parameter from "deflib.dat" file
 C-----for  calculation  of  the  GFL model parameter
-      DO i = 1, 9000
+      alpha2 = 0.d0      
+	DO i = 1, 9000
          IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
             alpha2 = HALpha2(i)
-            GOTO 1000
+            EXIT
          ENDIF
       ENDDO
-      alpha2 = 0.
- 1000 betagfl = 1.5853*ABS(alpha2)
+      betagfl = 1.5853*ABS(alpha2)
       BETagfl2 = betagfl**2
       S2Plusgfl = 217.156/aann**2
+      RETURN
+
       END
 
       SUBROUTINE INIT_GDR_COMMONS(Nnuc)
@@ -11419,53 +11362,63 @@ C
 
       DOUBLE PRECISION A2, A4, CE1, CE2, CM1, D1, D2, DE2, DM1, ED1, 
      &                 ED2, EE2, EM1, TE1, TE2, TM1, W1, W2L, WE2, WM1
-
       COMMON /GAMOWY/ TE1, TE2, TM1, CE1, CE2, CM1, ED1, ED2, W1, W2L, 
      &                D1, D2, EE2, WE2, DE2, EM1, WM1, DM1, A2, A4
 
       DOUBLE PRECISION CS1, CS2, EG1, EG2, GW1, GW2
-      DOUBLE PRECISION BETagfl2, S2Plusgfl
       INTEGER NG
-
-      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
       COMMON /PARGDR/ EG1, GW1, CS1, EG2, GW2, CS2, NG
+
+      DOUBLE PRECISION BETagfl2, S2Plusgfl
+      COMMON /GFLPARAM/ BETagfl2, S2Plusgfl
 C
 C Dummy arguments
 C
       INTEGER Nnuc
-C
-C Local variables
-C
+
+      A2 = A(Nnuc)**0.666667
+      A4 = A(Nnuc)**1.333333
+
       EG1 = GDRpar(1, Nnuc)
       GW1 = GDRpar(2, Nnuc)
       CS1 = GDRpar(3, Nnuc)
       EG2 = GDRpar(4, Nnuc)
       GW2 = GDRpar(5, Nnuc)
       CS2 = GDRpar(6, Nnuc)
-      NG  = 2
 
+      TE1 = GDRpar(7,Nnuc) 
+      TE2 = GQRpar(7,Nnuc) 
+      TM1 = GMRpar(7,Nnuc) 
+
+      CE1 = GDRpar(8,Nnuc)
+      CE2 = GQRpar(8,Nnuc)
+      CM1 = GMRpar(8,Nnuc)
+
+      NG  = 2
       IF (EG1.EQ.EG2) NG = 1
       IF (EG2.LE.0) NG = 1
 
       ED1 = GDRpar(1,Nnuc)**2
-      D1  = 5.46E-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
+      D1  = 5.46D-7*GDRpar(3,Nnuc)*GDRpar(2,Nnuc)**2
       W1  = GDRpar(2,Nnuc)**2
 
       ED2 = GDRpar(4,Nnuc)**2
-      D2  = 5.46E-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
+      D2  = 5.46D-7*GDRpar(6,Nnuc)*GDRpar(5,Nnuc)**2
       W2L = GDRpar(5,Nnuc)**2
 
+      BETagfl2  = 0.d0
+      S2Plusgfl = 0.d0
       IF(Key_shape.EQ.5) THEN
         BETagfl2  = GDRpar(9 , Nnuc)
         S2Plusgfl = GDRpar(10, Nnuc)
       ENDIF
 
       EE2 = GQRpar(1,Nnuc)**2
-      DE2 = 3.276E-7*GQRpar(3,Nnuc)*GQRpar(2,Nnuc)**2
+      DE2 = 3.276D-7*GQRpar(3,Nnuc)*GQRpar(2,Nnuc)**2
       WE2 = GQRpar(2,Nnuc)**2
 
       EM1 = GMRpar(1,Nnuc)**2
-      DM1 = 5.46E-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
+      DM1 = 5.46D-7*GMRpar(3,Nnuc)*GMRpar(2,Nnuc)**2
       WM1 = GMRpar(2,Nnuc)**2
 
       RETURN
