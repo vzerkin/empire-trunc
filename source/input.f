@@ -1,6 +1,6 @@
-!cc   * $Rev: 3709 $
+!cc   * $Rev: 3710 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-05 23:52:12 +0100 (So, 05 Jän 2014) $
+!cc   * $Date: 2014-01-05 23:57:25 +0100 (So, 05 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -11207,11 +11207,6 @@ C     INTEGER NG
       INTEGER i, n 
       DATA pi/3.141592654D0/
       
-      WRITE (8,*) 
-      WRITE (8,*)  ' RIPL GDR parameters used'
-      WRITE (12,*) 
-      WRITE (12,*) ' RIPL GDR parameters used'
-C
       n    = ka - kz
       zz   = kz
       aann = ka
