@@ -372,10 +372,7 @@ C
      &             ia, SYMb(nnuc)
            WRITE (8,*) ' -------------------------------------'
            WRITE (8,*) ' '
-C----------Prepare gamma transition parameters
-C          if(nnuc.ne.nnurec) CALL ULM(nnuc)
          endif
-C        IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
 
 C--------Calculate compound nucleus level density at saddle point
          IF (NINT(FISshi(nnuc)).EQ.1) THEN

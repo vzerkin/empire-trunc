@@ -1,3 +1,7 @@
+!cc   * $Rev: 3701 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-01-04 03:44:48 +0100 (Sat, 04 Jan 2014) $
+
       MODULE empgdr
 
 C     HCS1(270),HCS2(270),HE1(270),HE2(270),HGW1(270),HGW2(270)
