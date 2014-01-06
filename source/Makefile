@@ -1,11 +1,10 @@
-#$Rev: 3667 $
-#$Author: zerkinv $
-#$Date: 2013-12-20 17:54:57 +0100 (Fr, 20 Dez 2013) $
+#$Rev: 3712 $
+#$Author: rcapote $
+#$Date: 2014-01-06 17:10:10 +0100 (Mo, 06 Jän 2014) $
 
-# set default fortran compiler:
+# set default compilers:
 
 CC     =  gcc
-
 FC   =  gfortran
 #FC  =  ifort
 #FC  =  af95
@@ -123,8 +122,8 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = empcess.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
-       pipec.o
+OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
+       pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o write_ENDF.o pfns_calc.o
 
 all: 
 	$(MAKE) empire
@@ -144,9 +143,9 @@ dbg:
 	$(MAKE) subecis06m.o
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
-$(OBJF) : global.h dimension.h
+$(OBJF) : global.h dimension.h main_common.h
 main.o  : nubar_reader.o empcess.o
-input.o : nubar_reader.o
+input.o : nubar_reader.o empgdr.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 print.o : empcess.o
