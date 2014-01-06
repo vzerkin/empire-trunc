@@ -1,6 +1,6 @@
-#  8      n +  92-U -238      Elastic* and Nonelast* modified for A>220 (Cross sections of 2 CC added/substracted to Elastic/Nonelast respectively)
-#  Einc       Total       Elastic*    Nonelast*   Fission     Mu-bar      Nu-bar    (z,gamma)   (z,n)       
-5.0000E-01  8.74508E+03 6.69625E+03 2.04883E+03 7.40146E-05 3.69667E-01 2.48374E+00 1.53113E+02 2.16409E+03
-1.0000E+00  7.20873E+03 4.52800E+03 2.68072E+03 3.06246E-02 5.02527E-01 2.51938E+00 1.14073E+02 2.91495E+03
-5.0000E+00  7.58020E+03 4.44543E+03 3.13477E+03 8.10805E+01 8.73292E-01 3.05538E+00 2.07759E+00 3.40389E+03
-8.0000E+00  6.27504E+03 3.19709E+03 3.07795E+03 4.31950E+02 8.73395E-01 3.51070E+00 2.68020E-01 1.44533E+03
+#  8      n +  92-U -238      Elastic* and Nonelast* modified for A>220 (CE & Cross sections of 2 CC added/substracted to Elastic/Nonelast respectively)
+#  Einc       Total       Elastic*   Nonel-Cel*   Fission     Mu-bar      Nu-bar    (z,gamma)   (z,n)       
+5.0000E-01  8.74508E+03 6.87536E+03 1.86972E+03 5.08287E-05 3.59724E-01 2.48374E+00 1.12023E+02 2.02608E+03
+1.0000E+00  7.20873E+03 4.61679E+03 2.59194E+03 2.88226E-02 4.92137E-01 2.51938E+00 1.08849E+02 2.83139E+03
+5.0000E+00  7.58020E+03 4.44664E+03 3.13356E+03 8.10317E+01 8.73035E-01 3.05538E+00 1.80619E+00 3.40300E+03
+8.0000E+00  6.27504E+03 3.19719E+03 3.07784E+03 4.26570E+02 8.73363E-01 3.51070E+00 2.29821E-01 1.44490E+03
