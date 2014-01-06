@@ -1,7 +1,6 @@
-Ccc   * $Rev: 3705 $
+/* Ccc* $Rev: 3705 $
 Ccc   * $Author: vzerkin $
-Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
-
+Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $*/
 #include <stdio.h>
 #include <fcntl.h>
 
