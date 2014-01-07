@@ -3268,58 +3268,60 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
 
-       open(unit=92,file=TRIM(fname)//'.tlj')
-
-C      WRITE(92,'(10H<TLJ     >,F10.2,F10.5,F10.2,2I5)') 
-       WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
+C      open(unit=91,file=TRIM(fname)//'.tlj')
+       open(unit=92,file=TRIM(fname)//'.tlj',form='unformatted')        zv-2013
+C      WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
        DO L=1,ltlmax
         LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.-1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
-C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1-0.5,'+',1
-C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
-          WRITE(92,1007)         L-1-0.5,'+',1
-          WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+C         WRITE(92,1007)         L-1-0.5,'+',1
+C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92)              L-1-0.5,'+',1
+          WRITE(92)      1, L-1, L-1-0.5, TRLJ(L,1)
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
-C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1+0.5,'+',1
-C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
-          WRITE(92,1007)         L-1+0.5,'+',1
-          WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+C         WRITE(92,1007)         L-1+0.5,'+',1
+C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92)              L-1+0.5,'+',1
+          WRITE(92)      1, L-1, L-1+0.5, TRLJ(L,2)
         ENDIF
        ENDDO
        DO L=1,ltlmax
         LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.+1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
-C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1-0.5,'-',1
-C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
-          WRITE(92,1007)         L-1-0.5,'-',1
-          WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+C         WRITE(92,1007)         L-1-0.5,'-',1
+C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92)              L-1-0.5,'-',1
+          WRITE(92)      1, L-1, L-1-0.5, TRLJ(L,1)
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
-C         WRITE(92,'(1X,F4.1,1X,A1,1X,I4)') L-1+0.5,'-',1
-C         WRITE(92,'(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X)')
-          WRITE(92,1007)         L-1+0.5,'-',1
-          WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+C         WRITE(92,1007)         L-1+0.5,'-',1
+C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92)              L-1+0.5,'-',1
+          WRITE(92)      1, L-1, L-1+0.5, TRLJ(L,2)
         ENDIF
        ENDDO
        CLOSE(92)
 
        Stl = 0.d0
 
-       OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
-
-       READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
+C      OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
+       OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200,
+     &          form='unformatted')
+C      READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
 C------JC,ParC is the channel spin and parity
 C------nceq is the number of coupled equations
- 1100  READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200) jc, parc, nceq  ! ecis06
+C1100  READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200) jc, parc, nceq  ! ecis06
+ 1100  READ (45,                        END = 1200) jc, parc, nceq  ! ecis06
 C------Loop over the number of coupled equations
        DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-         READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
+C        READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
+         READ (45,  END = 1200,ERR = 1200) nlev, l, jj, dtmp
 C--------Selecting only ground state
          IF (dtmp.GT.1.D-15 .AND. l.LT.LLLMAX) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3510 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Rev: 3714 $
+Ccc   * $Author: zerkinv $
+Ccc   * $Date: 2014-01-07 20:42:16 +0100 (Di, 07 Jän 2014) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -58,6 +58,11 @@ C
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
+
+C     data iFlagSpeed99/1/
+C	data iFlagSpeed94/1/
+C	data iFlagSpeed63/1/
+C	data iFlagSpeedOpen/1/
 C     CM=931.494043D0    ! EMPIRE 3.1                                   ECIS-034
       CM=931.494061D0    
 C     CHB=197.326968D0   ! EMPIRE 3.1                                   ECIS-035
@@ -77,24 +82,26 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       OPEN (60,FILE = TRIM(fname)//'.smat')
       OPEN (61,FILE = 'file61')
       OPEN (62,FILE = 'file62')
-      OPEN (63,FILE = TRIM(fname)//'.tlj')
+C     OPEN (63,FILE = TRIM(fname)//'.tlj')
+      OPEN (63,FILE = TRIM(fname)//'.tlj',form='unformatted')           zv-2013
       OPEN (64,FILE = TRIM(fname)//'.exp')
       OPEN (65,FILE = TRIM(fname)//'.leg')
       OPEN (66,FILE = TRIM(fname)//'.ang')
 
-      OPEN (85,FILE = 'file85')
-      OPEN (86,FILE = 'file86')
-      OPEN (87,FILE = 'file87')
-      OPEN (88,FILE = 'file88')
-      OPEN (89,FILE = 'file89')
-      OPEN (90,FILE = 'file90')
-      OPEN (91,FILE = 'file91')
-      OPEN (93,FILE = 'file93')
-      OPEN (94,FILE = 'file94')
-
+C     OPEN (85,FILE = 'file85')
+C     OPEN (86,FILE = 'file86')
+C     OPEN (87,FILE = 'file87')
+C     OPEN (88,FILE = 'file88')
+C     OPEN (89,FILE = 'file89')
+C     OPEN (90,FILE = 'file90')
+C     OPEN (91,FILE = 'file91')
+C     OPEN (93,FILE = 'file93')
+C	OPEN (94,FILE = 'file94')
+	OPEN (94,FILE = 'file94',form='unformatted')                      zv-2013
       OPEN (MW,FILE = TRIM(fname)//'.out')
       OPEN (MS,FILE = 'file97')
-      OPEN (99,FILE = 'file99')
+C     OPEN (99,FILE = 'file99')
+      OPEN (99,FILE = 'file99',form='unformatted')                      zv-2013
       OPEN (MR,FILE = TRIM(fname)//'.inp')
 
       CALL THORA(MW)      
@@ -110,14 +117,14 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       CLOSE (64)
       CLOSE (65)
       CLOSE (66)
-      CLOSE (85,STATUS = 'delete')
-      CLOSE (86,STATUS = 'delete')
-      CLOSE (87,STATUS = 'delete')
-      CLOSE (88,STATUS = 'delete')
-      CLOSE (89,STATUS = 'delete')
-      CLOSE (90,STATUS = 'delete')
-      CLOSE (91,STATUS = 'delete')
-      CLOSE (93,STATUS = 'delete')
+C     CLOSE (85,STATUS = 'delete')
+C     CLOSE (86,STATUS = 'delete')
+C     CLOSE (87,STATUS = 'delete')
+C     CLOSE (88,STATUS = 'delete')
+C     CLOSE (89,STATUS = 'delete')
+C     CLOSE (90,STATUS = 'delete')
+C     CLOSE (91,STATUS = 'delete')
+C     CLOSE (93,STATUS = 'delete')
       CLOSE (94,STATUS = 'delete')
       CLOSE (MW)
       CLOSE (MS,STATUS = 'delete')
@@ -11194,14 +11201,21 @@ C CHANGE OF PARITY.                                                     CAL1-371
    19 IPM=MAX0(IPX,IPY)                                                 CAL1-379
       IPK=MAX0(IPK,IPZ)                                                 CAL1-380
       IF (.NOT.LO(63)) GO TO 22                                         CAL1-381
-      WRITE (63,1006) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT          CAL1-382
+C     WRITE (63,1006) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT          CAL1-382
+C     RCN commented, add. information not needed if binary file
+C     WRITE (63) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT               !zv-2013
       REWIND 99                                                         CAL1-383
       DO 21 I=1,NPT                                                     CAL1-384
-      READ (99,1007) U1,JP,K3                                           CAL1-385
-      WRITE (63,1007) U1,JP,K3                                          CAL1-386
-      DO 20 K=1,K3                                                      CAL1-387
-      READ (99,1008) K1,K2,U1,U2                                        CAL1-388
-   20 WRITE (63,1008) K1,K2,U1,U2                                       CAL1-389
+C       READ (99,1007)  U1,JP,K3                                        CAL1-385
+        READ (99)       U1,JP,K3                                        !zv-2013
+C       WRITE (63,1007) U1,JP,K3                                        CAL1-386
+        WRITE (63)      U1,JP,K3                                        !zv-2013
+        DO 20 K=1,K3                                                    CAL1-387
+C         READ (99,1008)  K1,K2,U1,U2                                   CAL1-388
+          READ (99)       K1,K2,U1,U2                                   !zv-2013
+C         WRITE (63,1008) K1,K2,U1,U2                                   CAL1-389
+          WRITE (63)      K1,K2,U1,U2                                   !zv-2013
+   20   CONTINUE
    21 CONTINUE                                                          CAL1-390
 C     CLOSE (99)                                                        CAL1-391
    22 KCB=MAX0(NCT(5),NCT(6))                                           CAL1-392
@@ -19101,7 +19115,8 @@ C PRINT OUT OF THE AMPLITUDES.                                          SCAM-180
 C OUTPUT OF TRANSMISSION COEFFICIENTS FOR COUPLED CHANNELS.             SCAM-195
       IF (LO(55)) WRITE (MW,1004) AJ,IP(JPI+1)                          SCAM-196
       IC=1+(JC-1)/4                                                     SCAM-197
-      IF (LO(63)) WRITE (99,1005) AJ,IP(JPI+1),JC                       SCAM-198
+C     IF (LO(63)) WRITE (99,1005) AJ,IP(JPI+1),JC                       SCAM-198
+      IF (LO(63)) WRITE (99)      AJ,IP(JPI+1),JC                       !zv-2013
       DO 7 I=1,IC                                                       SCAM-199
       J1=4*(I-1)                                                        SCAM-200
       J2=MIN0(JC-J1,4)                                                  SCAM-201
@@ -19111,8 +19126,13 @@ C OUTPUT OF TRANSMISSION COEFFICIENTS FOR COUPLED CHANNELS.             SCAM-195
       VCX(J,2)=V(3,J+J1)                                                SCAM-205
       MCX(J,2)=MOD(N,65536)                                             SCAM-206
     6 MCX(J,1)=N/65536                                                  SCAM-207
-      IF (LO(63)) WRITE (99,1006) (MCX(J,1),MCX(J,2),VCX(J,1),VCX(J,2),JSCAM-208
-     1=1,J2)                                                            SCAM-209
+C     IF (LO(63)) WRITE (99,1006) (MCX(J,1),MCX(J,2),VCX(J,1),VCX(J,2),JSCAM-208
+C    1=1,J2)                                                            SCAM-209
+      IF (LO(63)) then
+        do j=1,j2                                                       !zv-2013
+          WRITE (99) MCX(J,1),MCX(J,2),VCX(J,1),VCX(J,2)                !zv-2013
+        enddo                                                           !zv-2013
+      endif
       IF (LO(55)) WRITE (MW,1007) (MCX(J,1),MCX(J,2),VCX(J,1),VCX(J,2),JSCAM-210
      1=1,J2)                                                            SCAM-211
     7 CONTINUE                                                          SCAM-212
@@ -20078,7 +20098,8 @@ C TRANSFORMATION.                                                       SCHE-408
       NC1=NC1*NC2                                                       SCHE-413
 C     IF (LO(56)) WRITE (MW,1000) BJ,IP(JIJ)                            SCHE-414
       NPT=NPT+1                                                         SCHE-415
-      IF (LO(60)) WRITE (94,1001) BJ,IP(JIJ),NC2,NC1                    SCHE-416
+C     IF (LO(60)) WRITE (94,1001) BJ,IP(JIJ),NC2,NC1                    SCHE-416
+      IF (LO(60)) WRITE (94)      BJ,IP(JIJ),NC2,NC1                    !zv-2013
    49 NC1=0                                                             SCHE-417
       DO 53 IC=1,NCIN                                                   SCHE-418
       IF (MC(IC,1,4).LT.0) GO TO 53                                     SCHE-419
@@ -20105,7 +20126,8 @@ C     IF (LO(56)) WRITE (MW,1000) BJ,IP(JIJ)                            SCHE-414
       LC=LCP-1                                                          SCHE-440
       BJ=0.5D0*DFLOAT(MC(ICP,JI,3))                                     SCHE-441
 C     IF (LO(56)) WRITE (MW,1002) NC1,NC2,IV,LC,BJ,B1,B2,B3,D1,D2       SCHE-442
-      IF (LO(60)) WRITE (94,1003) NC1,NC2,IV,LC,BJ,B1,B2,B3             RCN
+C     IF (LO(60)) WRITE (94,1003) NC1,NC2,IV,LC,BJ,B1,B2,B3             RCN
+      IF (LO(60)) WRITE (94)      NC1,NC2,IV,LC,BJ,B1,B2,B3             !zv-2013
 C MULTIPLICATION BY THE COULOMB PHASE.                                  SCHE-444
    50 A1=DCOS(C1)                                                       SCHE-445
       A2=DSIN(C1)                                                       SCHE-446
@@ -20135,11 +20157,13 @@ C  HELICITY SCATTERING COEFFICIENTS.                                    SCHE-451
       WRITE (60,1004) WV(1,1),WV(13,1),WV(2,1),IPI(4,1),NPT             SCHE-470
       REWIND 94                                                         SCHE-471
       DO 59 I=1,NPT                                                     SCHE-472
-      READ (94,1001) U1,IPP,K1,K2                                       SCHE-473
-      WRITE (60,1001) U1,IPP,K1,K2                                      SCHE-474
-      DO 58 K=1,K2                                                      SCHE-475
-      READ (94,1003) K1,K2,K3,K4,BJ,B1,B2,B3                            RCN
-   58 WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                           SCHE-477
+C       READ (94,1001)  U1,IPP,K1,K2                                    SCHE-473
+        READ (94)       U1,IPP,K1,K2                                    !zv-2013
+        WRITE (60,1001) U1,IPP,K1,K2                                    SCHE-474
+        DO 58 K=1,K2                                                    SCHE-475
+C         READ (94,1003)  K1,K2,K3,K4,BJ,B1,B2,B3                       RCN
+          READ (94)       K1,K2,K3,K4,BJ,B1,B2,B3                       !zv-2013
+   58     WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                       SCHE-477
    59 CONTINUE                                                          SCHE-478
 C     CLOSE (94)                                                        RCN
    60 IF (.NOT.LO(65)) GO TO 61                                         SCHE-480
