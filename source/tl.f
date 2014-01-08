@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3714 $
-Ccc   * $Author: zerkinv $
-Ccc   * $Date: 2014-01-07 20:42:16 +0100 (Di, 07 Jän 2014) $
+Ccc   * $Rev: 3719 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-08 18:16:01 +0100 (Mi, 08 Jän 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2374,7 +2374,7 @@ C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
          CN_isotropic = .TRUE.     
      
-         DO i = ien_beg, Nen
+         DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) CYCLE
@@ -3272,18 +3272,33 @@ C-----At least ground state is always open and considered
       nd_nlvop = 1
       nd_cons  = 1
       IF (Inlkey.NE.0) THEN
-         DO j = 2, ND_nlv
-            eee = elab - D_Elv(j)/xratio
-            IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
-            IF (.not.Ldwba) THEN
-              IF (ICOllev(j).GT.LEVcc) CYCLE
-              nd_cons = nd_cons + 1
-            ELSE
-              ! skipping DWBA closed channels
-              IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
-              nd_cons = nd_cons + 1   
-            ENDIF
-         ENDDO
+         IF (ND_nlv.GT.1) THEN
+           DO j = 2, ND_nlv
+             eee = elab - D_Elv(j)/xratio
+             IF (.not.Ldwba) THEN
+               IF (ICOllev(j).GT.LEVcc) CYCLE
+               nd_cons = nd_cons + 1
+               IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
+             ELSE
+               IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
+               ! skipping DWBA closed channels
+               IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
+               nd_cons = nd_cons + 1   
+             ENDIF
+           ENDDO
+         ENDIF
+C        DO j = 2, ND_nlv
+C           eee = elab - D_Elv(j)/xratio
+C           IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
+C           IF (.not.Ldwba) THEN
+C             IF (ICOllev(j).GT.LEVcc) CYCLE
+C             nd_cons = nd_cons + 1
+C           ELSE
+C             ! skipping DWBA closed channels
+C              IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
+C             nd_cons = nd_cons + 1   
+C           ENDIF
+C        ENDDO
          IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
      &       WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
@@ -3303,6 +3318,9 @@ C-----Defining one potential for each collective level
 C-----If channel is closed ground state potential is used for this level
       npp = nd_nlvop
       IF (.not.Ldwba) npp = min(nd_cons,nd_nlvop)
+
+C     WRITE (*,*) 'Nopen=',nd_nlvop,' nd_cons=',nd_cons,' Npp=',npp
+C     WRITE (*,*) 'Nejc=',nejc,' Elab=',elab,'  Ldwba=',Ldwba
 C
       zerosp = 0.d0
 C
@@ -3346,6 +3364,8 @@ C     only one potential for a full dispersive calculation
       nppaa = npp
       if (IDRs.gt.0) nppaa = 1
 
+C     WRITE (*,*) 'Ncoll=',ncollx,' Npot=',nppaa
+
       WRITE (1,'(4i5)') ncollx, njmax, iterm, nppaa
 C-----Matching radius
 C-----CARD 5
@@ -3363,7 +3383,6 @@ C         skipping coupled levels
           IF (.NOT.Ldwba .AND. ICOllev(j).LE.LEVcc) CYCLE
 C---------If channel is closed then eee < 0
           eee = elab - D_Elv(j)/xratio
-C         IF (eee.LT.0.0001) EXIT
           ! only open channels considered for DWBA (and closed CC channels)
           IF (eee.LT.0.0001 .AND. ICOllev(j).GT.LEVcc) EXIT 
           nuncoupled = nuncoupled + 1

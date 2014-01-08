@@ -1,6 +1,6 @@
-!cc   * $Rev: 3710 $
+!cc   * $Rev: 3719 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-05 23:57:25 +0100 (So, 05 Jän 2014) $
+!cc   * $Date: 2014-01-08 18:16:01 +0100 (Mi, 08 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -8228,8 +8228,8 @@ C
 C
 C Local variables
 C
-C     DOUBLE PRECISION beta2x(NMASSE), ebin, efermi, emicx(NMASSE),
-      DOUBLE PRECISION                 ebin, efermi, emicx(NMASSE), 
+      DOUBLE PRECISION beta2x(NMASSE), ebin, efermi, emicx(NMASSE),
+C     DOUBLE PRECISION                 ebin, efermi, emicx(NMASSE), 
      &                 excess(NMASSE), xmassexp, xmassth, zmn, zmx, dtmp
       INTEGER ia, iapro, iatar, iflag, ii, iloc, in, iz, izaf(NMASSE),
      &        izpro, iztar, k, nixa, nixz, nnuc
@@ -8272,8 +8272,8 @@ C-----Skipping header lines
       DO k = 1, NMASSE
 C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          READ (27,'(2i4,4x,i1,3f10.3,f8.3)',END = 100) nixz, nixa,
-C    &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
-     &         iflag, xmassexp, xmassth, emicx(k) ! beta2 replaced by Nobre syst
+     &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
+C    &         iflag, xmassexp, xmassth, emicx(k) ! beta2 replaced by Nobre syst
          izaf(k) = nixz*1000 + nixa
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
@@ -8352,11 +8352,19 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-C              IF(DEF(1,0).EQ.0.d0) DEF(1,0) = beta2x(k)
                IF(DEF(1,0).EQ.0.d0) THEN
-                  call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
-                  DEF(1,0)=beta2
-               ENDIF 
+			   DEF(1,0) = beta2x(k)
+                 WRITE (8,
+     &'('' Deformation of the target nucleus set to'',F6.3,1x,
+     &  ''(FRDM)'')') beta2x(k)
+                 call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+                 WRITE (8,
+     &'('' Nobre parameterization deformation is   '',F6.3)') beta2
+               ENDIF
+C              IF(DEF(1,0).EQ.0.d0) THEN
+C                 call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+C                 DEF(1,0)=beta2
+C              ENDIF 
                XMAss(0) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(0) = A(0) + XMAss(0)/AMUmev
@@ -9936,6 +9944,8 @@ C
            DYNam    = .FALSE.
            IF (ABS(DEF(1,0)).GT.0.1D0 .or. 
      &            comment(36:39).eq.'defo') DEFormed = .TRUE.
+           IF (ABS(DEF(1,0)).LE.0.1D0 .or. 
+     &            comment(36:39).eq.'sphe') DEFormed = .FALSE.
 C
 C----------empty line
            READ (32,'(a80)') comment
@@ -9948,8 +9958,33 @@ C----------Ncoll Lmax  IDef (Def(1,j),j=2,IDef,2)
 C
 C          If odd nucleus, then rotational model is always used
 C          It could be a bad approximation for a quasispherical nucleus
-           IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0)
-     &       DEFormed = .TRUE.
+C          IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0)
+C    &       DEFormed = .TRUE.
+ 
+           IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0) THEN
+C            If odd nucleus, then rotational model is always used
+C            It could be a bad approximation for a quasispherical nucleus
+             IF(.not.DEFORMED) THEN
+	         WRITE (8,
+     &'('' WARNING: Odd nucleus is assumed deformed               '')') 
+C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')') 
+	         WRITE (8,
+     &'('' WARNING: Could be a bad approxim. for near-magic'')') 
+               DEFormed = .TRUE.
+C              DEF(1,0) = 0.1d0
+             ELSE
+	         WRITE (8,
+     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+             ENDIF
+           ELSE
+             IF(DEFORMED) THEN
+	         WRITE (8,
+     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+             ELSE
+	         WRITE (8,
+     &'('' Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
+             ENDIF
+           ENDIF
 
            IF (DEFormed) THEN
 C-----------Number of collective levels
@@ -10155,11 +10190,31 @@ C
       IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0) THEN
 C       If odd nucleus, then rotational model is always used
 C       It could be a bad approximation for a quasispherical nucleus
-        DEFormed = .TRUE.
-        odd   = .TRUE.
-        SOFt  = .FALSE.
-        DYNam = .FALSE.
+        IF(.not.DEFORMED) THEN
+	    WRITE (8,
+     &'('' WARNING: Odd nucleus is assumed deformed               '')') 
+C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')') 
+	    WRITE (8,
+     &'('' WARNING: Could be a bad approxim. for near-magic'')') 
+          DEFormed = .TRUE.
+C         DEF(1,0) = 0.1d0
+        ELSE
+	    WRITE (8,
+     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+        ENDIF
+        odd      = .TRUE.
+        SOFt     = .FALSE.
+        DYNam    = .FALSE.
+      ELSE
+        IF(DEFORMED) THEN
+	    WRITE (8,
+     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+        ELSE
+	    WRITE (8,
+     &'('' Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
+        ENDIF
       ENDIF
+
       i20p = 0
       i21p = 0
       i0p = 0
