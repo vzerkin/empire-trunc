@@ -14,7 +14,7 @@ c
       OPEN (26,FILE='om-parameter-u.dat',STATUS='OLD')
       call system('mkdir om-parameter-dir') 
       do IIX=1,20000
-	    READ (26,'(i5)',err=333) iref
+	    READ (26,'(i5)',err=333,end=333) iref
 	    BACKSPACE (26)
 	    if (iref.gt.0) then
 		Ipoten=iref
