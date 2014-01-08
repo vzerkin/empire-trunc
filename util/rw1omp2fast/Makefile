@@ -48,9 +48,9 @@ else ifeq ($(FC),lf90)
 
 endif
 
-OBJF =	rw1omp2fass.o
+OBJF =	rw1omp2fast.o
 
-rw1omp2fass.exe:   $(OBJF)
+rw1omp2fast.exe:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
 clean:
