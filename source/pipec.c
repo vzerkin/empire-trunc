@@ -1,13 +1,15 @@
-/* Ccc* $Rev: 3705 $
-Ccc   * $Author: vzerkin $
-Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $*/
+/*
+ * Filename: pipec.c
+ * Purpose : replace Fortran call system() dealing with files:
+ *           delete, rename, copy by subroutines on C
+ * Written by V.Zerkin@iaea.org, 2013-10-04
+ */
+
 #include <stdio.h>
 #include <fcntl.h>
 
-#if (defined WIN32) || (defined WIN64)
-  // do nothing
-#else
-  #include <unistd.h>
+#if (defined __GNUC__)
+#include <unistd.h>
 #endif
 
 #include <stdlib.h>
@@ -148,6 +150,7 @@ main ()
 {
       int ii;
       ii=icopy_file_("pipec.o","pipec2.ox");
+      ii=icopy_file_("pipec.obj","pipec2.ox");
       printf ("ii=%d\n",ii);
 }
 */
