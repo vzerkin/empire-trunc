@@ -110,9 +110,6 @@ C----
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(NDEJC)
                 ENDIF
-C---------------Double the first bin x-sec to preserve integral in EMPEND
-                POPcse(0, nejc, 1, INExc(nnuc)) =  
-     &                  POPcse(0, nejc, 1, INExc(nnuc))*2
                 WRITE (12,*) ' '
                 WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
@@ -120,7 +117,6 @@ C
 C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-C               dang = PI/FLOAT(NDANG - 1)
                 IF (nejc.GT.0) THEN
 C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C---------------multiplies cross sections and divides outgoing energies
@@ -139,10 +135,15 @@ C------------------(discrete levels part)
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
                      DO il = 1, NLV(nnuc)  ! discrete levels
+C                       espec is the outgoing energy corresponding to the level "il"
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                         IF (espec.GE.0) WRITE (12,
      &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
-     &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
+c                     Discrete level cros section CSAlev contains angular distribution, NOT DDXS
+c                     recoil correction is not needed as we do not integrate over energy 
+c                       We only sum over discrete levels ! 
+     &                     (max(CSAlev(nang,il,nejc), 
+c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
                         csum = 0.d0
                         DO nang = 2, NDANG  ! over angles
@@ -191,13 +192,6 @@ c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
                        ENDDO
                      ENDIF
                      check_DE(ie) = 2.0d0*PI*csum
-C--------------------Correct 'cseaprnt()' for eventual imprecision
-C                    if(check_DE(ie).GT.0.d0) then
-C                      ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
-C                      DO nang = 1, NDANG
-C                        cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
-C                      ENDDO
-C                    endif
                    ENDDO
 
                    DO ie = 1, nspec 
@@ -227,14 +221,14 @@ C
                      WRITE (12,*) ' '
                      htmp = 0.d0
                      DO il = 1, NLV(nnuc)  ! discrete levels
+C                      espec is the outgoing energy corresponding to the level "il"
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,2x),F7.4)')  
-     &                   il, -espec, check_DL(il)*recorp,
-     &                        disc_int(il,nejc)*recorp,
-     &                        (check_DL(il)-disc_int(il,nejc))*recorp,
+     &                   il, -espec, check_DL(il), disc_int(il,nejc),
+     &                        (check_DL(il)-disc_int(il,nejc)),
      &                        ELV(il,nnuc)        
-                           htmp = htmp + check_DL(il)*recorp
+                           htmp = htmp + check_DL(il) 
                      ENDDO
                      WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
@@ -293,17 +287,14 @@ C------------------Exclusive DE spectra (gammas)
                    DO ie = 1, nspec     
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
-                     if(ie.gt.1) then
-                       dtmp = dtmp + htmp*DE
-                     else
+                     if(ie.eq.1 .or. ie.eq.nspec) then
                        dtmp = dtmp + htmp*DE*0.5d0
+                     else
+                       dtmp = dtmp + htmp*DE
                      endif
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
      &                  htmp*recorp
                    ENDDO
-                   dtmp = dtmp + 
-     &                    POPcse(0,nejc,nspec+1,INExc(nnuc))*DE*0.5d0         
-                                              !exact endpoint
                    WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
      &                 max(0.d0,POPcse(0,nejc,nspec+1,
      &                 INExc(nnuc)))*recorp

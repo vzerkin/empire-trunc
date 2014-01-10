@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3687 $
+Ccc   * $Rev: 3723 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2014-01-10 14:26:57 +0100 (Fr, 10 Jän 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       INCLUDE 'dimension.h'
@@ -43,8 +43,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &                 popll, pops, popt, xcse
-      REAL FLOAT
+     &                 popll, pops, popt, xcse, ftmp
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
       INTEGER ilevcol, ilev
       DOUBLE PRECISION GET_DDXS
@@ -59,15 +58,18 @@ C-----
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          icse = (excnq - EX(ie,Nnur))/DE + 1.0001
-         icse = MAX0(2,icse)
+         icse = MAX0(2,icse)  ! check this statement
          icse = MIN0(ndecse,icse)
-         popt = 0.0
+         popt = 0.d0
+         ftmp = 1.d0
+         IF (ie.EQ.1 .or. ie.EQ.nexrt) ftmp = 0.5d0
          DO j = 1, NLW  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
             pop2 = Xnor*SCRt(ie,j,2,Nejc)
             pops = pop1 + pop2
-            IF (ie.EQ.1) pops = pops*0.5
-            popt = popt + pops !sum over spin/pi at a given energy bin
+C           IF (ie.EQ.1) pops = pops*0.5
+            popt = popt + pops*ftmp !sum over spin/pi at a given energy bin
+C           popt = popt + pops      !sum over spin/pi at a given energy bin
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
             POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pop2
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,1,Nnur))
@@ -131,12 +133,12 @@ C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
             IF(icsl.LT.nspec) THEN
               popl = pop1*(FLOAT(icsh) - xcse)/DE
               poph = pop1*(xcse - FLOAT(icsl))/DE
-             ELSE
+            ELSE
               popl = pop1/DE
               poph = 0.0d0
-             ENDIF
+            ENDIF
             popll = popl            !we also need popl not multiplied by 2
-            IF (icsl.EQ.1) popl = 2.0*popl
+C           IF (icsl.EQ.1) popl = 2.0*popl
 C
 C           Addition of discrete gamma to spectra 
 C

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3705 $
+Ccc   * $Rev: 3723 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-10 14:26:57 +0100 (Fr, 10 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -118,10 +118,8 @@ C
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (8,99045)
 
-      totspec = 0.0
       DO i = 1, kmax
          if(CSEt(i,Nejc).le.0.d0) cycle
-         totspec  = totspec  + CSEt(i,Nejc)
          e = FLOAT(i - 1)*DE
          IF (CSEt(i,Nejc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSEt(i,Nejc)) - n + 3)*31. + 0.5)
@@ -143,8 +141,6 @@ C
   150    WRITE (8,99040) e/recorp, CSEt(i,Nejc)*recorp, symc
 99040    FORMAT (1X,F6.2,3X,E12.5,2X,'I ',93A1,'I ')
       ENDDO
-      totspec = totspec - 0.5*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
-      totspec = totspec*DE
       WRITE (8,99045)
       WRITE (8,'(1x,''    Integrated spectrum   '',G12.6,''  mb'')')
      &          totspec 
@@ -203,7 +199,7 @@ C
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 
-      CSE(1,nejc,0) = 2*CSE(1,nejc,0)
+C     CSE(1,nejc,0) = 2*CSE(1,nejc,0)
 
       totspec = 0.d0
       DO i = 1, kmax
@@ -213,6 +209,10 @@ C
       ENDDO
       totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
+
+      IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+     &         totspec = totspec -
+     &          0.5d0*(CSEmsd(1,Nejc) + CSEmsd(kmax,Nejc))
 
       IF (totspec.LE.1.d-4) RETURN
 
@@ -304,7 +304,6 @@ C          Subtract direct contribution to CM emission spectrum
            ENDIF
          ENDDO 
 C
-C        CSE(1,nejc,0) = 2*CSE(1,nejc,0)
          totspec = 0.d0
          DO ie = 1, nspec + 1
            totspec  = totspec  + CSE(ie,nejc,0) 
@@ -403,7 +402,7 @@ C     ENDIF
       RETURN 
       END
 
-      SUBROUTINE AUERST(Nnuc,Nejc,Iflag)
+      SUBROUTINE AUERST(Nnuc,Nejc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -432,7 +431,7 @@ Ccc
 C
 C Dummy arguments
 C
-      INTEGER Nejc, Nnuc, Iflag
+      INTEGER Nejc, Nnuc
 C
 C Local variables
 C
@@ -460,19 +459,15 @@ C
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
       IF (totspec*DE.LE.1.d-4) RETURN
+      totspec = totspec - 
+     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
+      totspec = totspec*DE     
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
-         if(Iflag.eq.0) totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-         totspec = totspec*DE     
          WRITE (8,99005)
 99005    FORMAT (1X,/,1X,54('*'),1X,'gamma spectrum  ',54('*'))
       ELSE
-         if(Iflag.eq.0) totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-         if(Iflag.eq.2) totspec = totspec - 0.5d0*CSE(kmax,Nejc,Nnuc)
-         totspec = totspec*DE     
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) THEN
            WRITE (8,99015)
 99015 FORMAT (1X,/,1X,54('*'),1X,'neutron spectrum  ',54('*'))
@@ -560,7 +555,7 @@ C
 99045 FORMAT (25X,93('-'))
       END
 
-      SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc,Iflag)
+      SUBROUTINE PLOT_EMIS_SPECTRA(Nnuc,Nejc)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -607,14 +602,13 @@ C
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 
-      totspec = 0.0
+      totspec = 0.d0
       DO i = 1, kmax
          totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-      if(Iflag.eq.0) totspec = 
-     &  totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
-
+      totspec = totspec - 0.5*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE
+
       IF (totspec.LE.1.d-4) RETURN
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
