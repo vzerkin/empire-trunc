@@ -11,8 +11,7 @@ Ccc   * $Id$
       INCLUDE "global.h"
 
       integer*4 ios
-
-
+c
 c     NOTE UNITS OPENED IN MODULES
 c
 c     Unit#  Module
@@ -55,7 +54,6 @@ c     38     lev-dens
 c     39     tl
 c     40     main,chi2 
 c     41     main (table of x-sections)
-c     42     (degas)
 c     43     open_files
 c     44     empire_ctl (standard input)
 c     45     tl,fusion,main
@@ -76,7 +74,7 @@ c     62     ecis,main
 c     63     ecis
 c     64     ecis
 c     65     ecis
-c     66     ecis, MSD-Tristan
+c     66     ecis
 c     68     main
 c     70     fileprep (empire_ctl fit)
 c     71     fileprep (empire_ctl fit)
@@ -122,7 +120,7 @@ c    102     Non-RIPL potential
       ! OPEN (8,FILE='LIST.DAT' , STATUS='UNKNOWN')
 
       OPEN (12,FILE='OUTPUT.DAT')
-      OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
+C     OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
       OPEN (24,FILE=trim(empiredir)//'/data'
      &   //'/level-densities-par.dat',STATUS='OLD')
       OPEN (26,FILE=trim(empiredir)//'/RIPL/optical/om-data'

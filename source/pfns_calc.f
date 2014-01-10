@@ -247,11 +247,11 @@ C
         tequiv = TMAxw  ! Maxwellian temperature used to scale plots defined in input
 C                       ! Default value 1.32 MeV
 
-        WRITE(74,'(1X,g12.5,1x,g12.5,2(4x,f7.3))')
+        WRITE(115,'(1X,g12.5,1x,g12.5,2(4x,f7.3))')
      &        EINl, eneutr, fnubar, tequiv 
 
         WRITE
-     & (73,'(/''  Total PFNS from '',I3,''-'',A2,''-'',I3,'': Elab='',
+     & (114,'(/''  Total PFNS from '',I3,''-'',A2,''-'',I3,'': Elab='',
      &  G12.5,'' MeV, <Epfns>='',G12.5,'' MeV, Tmaxw='',f8.4,
      & '' MeV, Norm='',F10.8)') INT(Z(1)), SYMb(1), INT(A(1)), 
      & EINl,eneutr,tequiv,ftmp
@@ -304,7 +304,7 @@ C                       ! Default value 1.32 MeV
         WRITE (12,'(''    Energy    mb/MeV       Ratio to Maxw'')')
         WRITE (12,*) ' '
 
-        WRITE (73,'(/,''    Energy    mb/MeV       Ratio to Maxw'')')
+        WRITE (114,'(/,''    Energy    mb/MeV       Ratio to Maxw'')')
 
 C----------
 C       calculating the ratio for the 1st point for interpolation of the outgoing grid
@@ -327,7 +327,7 @@ C             outgoing energy grid enepfns(1) and enepfns(2)
 
           WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &      csetmp(ie), ftmp/deltae_pfns, ftmp1
-          WRITE (73,'(E11.4,E14.5,4(2x,E14.5))')
+          WRITE (114,'(E11.4,E14.5,4(2x,E14.5))')
      &      csetmp(ie), ftmp/deltae_pfns, ftmp1
           WRITE ( 8,'(E11.4,E14.5,2x,E14.5)')
      &      csetmp(ie), ftmp/deltae_pfns, ftmp1
@@ -340,7 +340,7 @@ C             outgoing energy grid enepfns(1) and enepfns(2)
 
           WRITE (12,'(E10.4,E14.5,2x,E14.5)')
      &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
-          WRITE (73,'(E11.4,E14.5,4(2x,E14.5))')
+          WRITE (114,'(E11.4,E14.5,4(2x,E14.5))')
      &      enepfns(ie), csepfns(ie)/deltae_pfns, ftmp1
           IF(enepfns(ie).GT.7.d0) cycle
           WRITE ( 8,'(E11.4,E14.5,2x,E14.5)')

@@ -1,6 +1,6 @@
-cc   * $Rev: 3706 $
+cc   * $Rev: 3721 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 22:20:16 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -200,7 +200,7 @@ C-----
         OPEN (41, FILE='XSECTIONS.OUT' , STATUS='unknown')
 
         IF (SFACT.gt.0) then
-          OPEN (unit = 781, file = "S-FACTOR.DAT")
+          OPEN (unit = 781, file = 'S-FACTOR.DAT')
           WRITE(781,*) '#Ecm(MeV)  Cross Section(b)  S-factor(MeV b)'
           WRITE(781,*) '#                                           '
         ENDIF
@@ -308,9 +308,9 @@ C           to include/exclude low-lying coupled states
      &      '  Fiss-6th  ','  Fiss-7th  ','  Fiss-8th  ',
      &      '  Fiss-9th  ','  Fiss-10th '
         IF (FISspe.GT.0) THEN
-          OPEN (73, FILE='PFNS.OUT', STATUS='unknown')
-          OPEN (74, FILE='PFNM.OUT', STATUS='unknown')
-          WRITE(74,
+          OPEN (114, FILE='PFNS.OUT', STATUS='unknown')
+          OPEN (115, FILE='PFNM.OUT', STATUS='unknown')
+          WRITE(115,
      &   '(''   Elab        <Epfns>      nubar(EVAL)  Tmaxw(equiv) '')')
         ENDIF
         IF (ltransfer) then                     
@@ -360,41 +360,45 @@ C
 C
 C     CLOSING FILES
 C
-      CLOSE (5)
-      CLOSE (11)
-      CLOSE (13)
-      IF (FILevel) CLOSE (14)
-      CLOSE (15,STATUS = 'delete')
-      CLOSE (16,STATUS = 'delete')
-      CLOSE (23)
-      CLOSE (24)
+      CLOSE (5)  ! INPUT.DAT
+      IF(FUSREAD) CLOSE (11)  ! FUSION
+C     CLOSE (13)              ! RIPL levels
+      IF (FILevel) CLOSE (14) ! LEVELS
+C     CLOSE (15,STATUS = 'delete')
+C     CLOSE (16,STATUS = 'delete')
+C     CLOSE (23)   ! not used 
+      CLOSE (24)   ! empire/data
+
       CLOSE (29)
       CLOSE (33)
-      CLOSE (40)
-      CLOSE (41)
-      IF(NNG_xs.gt.0) CLOSE (104)
-      CLOSE (107)
-      CLOSE (108)
-      CLOSE (110)
+      IF (FITomp.LT.0) CLOSE (40) ! OPTFIT.CAL
+      CLOSE (41)   ! XSECTIONS.OUT
+      IF(NNG_xs.gt.0) CLOSE (104) ! 'GAMMA_INT.DAT'
+      CLOSE (107)  ! 'EL_INEL.DAT'
+      CLOSE (108)  ! 'TOTCOR.DAT'
+      CLOSE (110)  ! 'CN-LEV-XS.DAT'
 
-      IF (ltransfer) CLOSE (112)
-      IF (lbreakup)  CLOSE (113)
-      IF (ltransfer .or. lbreakup)  CLOSE (114)
+      IF (ltransfer) CLOSE (112)  ! 'TRANSFER-XS.DAT'
+      IF (lbreakup)  CLOSE (113)  ! 'BREAK-UP-XS.DAT'
+      IF (ltransfer .or. lbreakup)  CLOSE (114) ! 'REAC-MECH.DAT'
 
-      IF(DEGa.GT.0) THEN
-        CLOSE (42)
-      ELSE
-        CLOSE (42,STATUS = 'delete')
-      ENDIF
+C     IF(DEGa.GT.0) THEN
+C       CLOSE (42)
+C     ELSE
+C       CLOSE (42,STATUS = 'delete')
+C     ENDIF
 
-      CLOSE(53)
-      CLOSE(58)
-      CLOSE (66,STATUS = 'delete')
+      CLOSE(53)   ! LOW-ENERGY.DAT
+C     CLOSE(58)
+
+C     CLOSE (66,STATUS = 'delete')  ! MSD-orion
+
       IF(FISspe.GT.0) THEN
-        CLOSE (73)
-        CLOSE (74)
+        CLOSE (114) ! PFNS.OUT
+        CLOSE (115) ! PFNM.OUT
       ENDIF
-      CLOSE (98)
+      CLOSE (98)    ! FISS_XS.OUT
+
       IF (IOPran.NE.0) then
 C----------Saving random seeds
            ftmp = grand()
@@ -404,6 +408,7 @@ C----------Saving random seeds
              write(94,*) buffer(i)
            ENDDO
            CLOSE(94)
+C
            WRITE (8,*)
            WRITE (12,*)
 
@@ -429,9 +434,13 @@ C----------Saving random seeds
      &     '# RNG buffer(250)    ', buffer(250)                         
       ENDIF
 
-      CLOSE(95)  ! FROM INPUT.F
-      CLOSE(102)
-      IF (SFACT.GT.0) CLOSE(781)
+      CLOSE(95)  ! COVAR-PAR.DAT
+C     CLOSE(102)
+
+      IF (SFACT.GT.0) CLOSE(781)  ! 'S-FACTOR.DAT'
+
+      CALL EMPDAXS
+
 
       WRITE (12,*) ' '
       WRITE (12,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
@@ -442,10 +451,9 @@ C----------Saving random seeds
 
       CALL THORA (8)
       CALL THORA(12)
+
       CLOSE (8)
       CLOSE (12)
-
-      CALL EMPDAXS
 
       STOP ' ' 
 
@@ -567,7 +575,7 @@ C
       BACKSPACE 5
       READ (5,*,ERR=11570,END=1200) EIN, NDAng, ICAlangs
 
-      IF (EIN.LT.0.0D0) CALL end_of_calc()
+      IF (EIN.LT.0.0D0) GOTO 1200
 
       IF(NDAng.lt.2) THEN
         NDAng=2

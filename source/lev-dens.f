@@ -1,5 +1,5 @@
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2013-05-07 21:00:08 +0200 (Di, 07 Mai 2013) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1575,15 +1575,14 @@ C
       CHARACTER*2 dum
 
 C-----Reading MS shell corrections and deformation energies
-      OPEN(11,FILE=trim(empiredir)//'/RIPL/densities/shellcor-ms.dat',
+      OPEN(211,FILE=trim(empiredir)//'/RIPL/densities/shellcor-ms.dat',
      &    STATUS='old')
 C-----Skipping header lines
-      READ(11,*)
-      READ(11,*)
-      READ(11,*)
-      READ(11,*)
-  40  READ(11,98,END=50,ERR=60)
-     &    nz, na, dum, shelMSr, defcorr
+      READ(211,*)
+      READ(211,*)
+      READ(211,*)
+      READ(211,*)
+  40  READ(211,98,END=50,ERR=60) nz, na, dum, shelMSr, defcorr
   98  FORMAT(2(i4),1x,a2,2x,f7.3,1x,f8.3)
       CALL WHERE(nz*1000+na,nnuc,iloc)
       IF (iloc.EQ.0) THEN
@@ -1598,7 +1597,7 @@ C-----projectile
       GO TO 40
   60  WRITE(8,*) ' ERROR: Error reading shell correction file'
       STOP ' ERROR: Error reading shell correction file'
-  50  CLOSE(11)
+  50  CLOSE(211)
       RETURN
       END
 C

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 3721 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
 
       SUBROUTINE KUMAR_OMP(AMASS,AZ,EX,ELAB,RCC,Vlib,Rlib,Alib)
       IMPLICIT REAL*8 (A-H,O-Z)
@@ -149,9 +149,11 @@ C         ASSUME THE DISPERSION CORRECTION TO VANISH AT EREF.
         VOR = AJRE / CONST / RR**3. / (1 + (CONST1 / RR)**2.)
  2543   CONTINUE
         VOI = AJIE / CONST / RI**3. / ( 1. + (CONST2 / RI)**2.)
-
-        WRITE (102,75) ELAB, VOR, ROR, AR, VOI, ROI, AI, AJRE, AJIE,
-     1               AZ, AMASS, EX
+C
+C       writing on file 102 (commented)
+C       WRITE (102,75) ELAB, VOR, ROR, AR, VOI, ROI, AI, AJRE, AJIE,
+C    1               AZ, AMASS, EX
+C
 C       OUTPUTS: VOR, ROR, AR, VOI, ROI, AI
 C       
         vlib(1) = VOR

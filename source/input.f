@@ -1,6 +1,6 @@
-!cc   * $Rev: 3719 $
+!cc   * $Rev: 3721 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-08 18:16:01 +0100 (Mi, 08 Jän 2014) $
+!cc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -11090,7 +11090,7 @@ C
 C
       SUBROUTINE read_GDRGFLDATA(Numram)
 
-	use empgdr
+      use empgdr
 C
 Ccc  ********************************************************************
 Ccc  * Assignment of GGexp and D0exp for gamma-strength normalization   *
@@ -11139,11 +11139,6 @@ C
 C Dummy arguments
 C
       INTEGER Numram 
-C
-C PARAMETER definitions
-C
-      INTEGER MAXGDR,MEXPPAR,MEXP,MDEF
-      PARAMETER (MAXGDR=5986,MEXPPAR=270,MEXP=9000,MDEF=700)
 C
 C COMMON variables (from global.h)
 C
@@ -11241,11 +11236,6 @@ C Dummy arguments
 C
       INTEGER NUMram, Kz, Ka  
       DOUBLE PRECISION E(2), G(2), S(2), BETagfl2, S2Plusgfl
-C
-C PARAMETER definitions
-C
-      INTEGER MAXGDR,MEXPPAR,MEXP
-      PARAMETER (MAXGDR=5986,MEXPPAR=270,MEXP=9000)
 C
 C COMMON variables (from global.h)
 C

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3404 $
+Ccc   * $Rev: 3721 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-04-23 03:45:51 +0200 (Di, 23 Apr 2013) $
+Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -93,7 +93,7 @@ C
       QMAx = Qm
       QSTep = Qs
       OPEN (16,FILE = 'TAPE16',STATUS = 'UNKNOWN',FORM = 'UNFORMATTED')
-      IF (IOUt.GT.3) OPEN (66,FILE = 'TAPE66',STATUS = 'UNKNOWN')
+C     IF (IOUt.GT.3) OPEN (66,FILE = 'TAPE66',STATUS = 'UNKNOWN')
 C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       FAClog(1) = 0.0D0
       FAClog(2) = 0.0D0
@@ -2953,7 +2953,7 @@ C
      &                 2(3F7.3,3X)//' ',2X,'EOUT',3X,'1-STEP',10X,
      &                 '2-STEP',11X,'TOTAL',32X,'1-STEP',10X,'2-STEP',
      &                 11X,'TOTAL')
-               WRITE (66,99015) ANGle(na), Nbinx
+C              WRITE (66,99015) ANGle(na), Nbinx
 99015          FORMAT (' THETA= ',F5.1,I5)
             ENDIF
             eout = EOUtmx + ESTep
@@ -2992,7 +2992,7 @@ C
                   IF (IOUt.GT.3) THEN
                      WRITE (8,99020) eout, s1, s2, s3, sigm, f11, a1,
      &                               a2, a3, ay, f21
-                     WRITE (66,99020) eout, s1, s2, sigm
+C                    WRITE (66,99020) eout, s1, s2, sigm
                   ENDIF                                      
 C                 necs = Nbinx - ne + 2
 C-----------------recover from the more dense energy grid in MSD
@@ -3017,7 +3017,7 @@ C    &                    necs.GT.(NEX(nnur)+1)) THEN
             ENDDO
    50    ENDDO
       ENDDO
-      IF(IOUT.GT.3) CLOSE(66)
+C     IF(IOUT.GT.3) CLOSE(66)
       REWIND (14)
       k1 = kcpmx
 C-----integrate angular distributions over angle (and energy)

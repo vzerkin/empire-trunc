@@ -382,14 +382,13 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*) ' *******************************************'
           WRITE (8,*)
      &                ' Preequilibrium + Direct spectra (tot)'
-          IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,0)
-          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,0)
-C         IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,2)
-          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,0)
-          IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,0)
-          IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,0)
-          IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,0)
-          IF(CSEmis(6,1).GT.0) CALL AUERST(1,6,0)
+          IF(CSEmis(0,1).GT.0) CALL AUERST(1,0)
+          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
+          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
+          IF(CSEmis(3,1).GT.0) CALL AUERST(1,3)
+          IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
+          IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
+          IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
           WRITE (8,*)
      &                ' End of Preequilibrium + Direct spectra (tot)'
           WRITE (8,*) ' ********************************************'

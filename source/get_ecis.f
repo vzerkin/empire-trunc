@@ -227,13 +227,13 @@ C--------------Check whether integral over angles agrees with x-sec. read from E
      &                       * 0.5d0 * (CAngler(iang)-CANgler(iang-1))
                ENDDO
                csum = 2.0d0*PI*csum 
-               if (csum.gt.0.d0) then
+C              if (csum.gt.0.d0) then
 C----------------Correct CSAlev() for eventual imprecision
-                 ftmp = POPlv(ilv,nnurec)/csum
-                 DO iang = 1, NANgela
-                   CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
-                 ENDDO
-               endif
+C                ftmp = POPlv(ilv,nnurec)/csum
+C                DO iang = 1, NANgela
+C                  CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
+C                ENDDO
+C              endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
 C-----------------Correct 'coef' for eventual imprecision and include recoil DE
