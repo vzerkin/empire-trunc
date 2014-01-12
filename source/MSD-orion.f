@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3716 $
-Ccc   * $Author: zerkinv $
-Ccc   * $Date: 2014-01-08 16:02:03 +0100 (Mi, 08 Jän 2014) $
+Ccc   * $Rev: 3724 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-12 02:43:49 +0100 (So, 12 Jän 2014) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -3375,7 +3375,6 @@ c	    WRITE (49) (CLEbmm(n),n = 1,n2)
 
 	subroutine ibuf_orion_read(CLEbmm,n2)
 	double precision CLEbmm(250)
-	double precision CLEbmm00(250)
 c	double precision buf(1000,250)
 	double precision buf(250000)
 	common /zv_orion_flag/ izv_orion_flag
