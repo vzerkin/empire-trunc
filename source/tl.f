@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3719 $
+Ccc   * $Rev: 3726 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-08 18:16:01 +0100 (Mi, 08 Jän 2014) $
+Ccc   * $Date: 2014-01-12 18:38:24 +0100 (So, 12 Jän 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2467,9 +2467,9 @@ C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
      &                 xmas_nejc, xmas_nnuc, selast
       INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
-      LOGICAL relcal
+      LOGICAL relcal, unformat
       CHARACTER*1 parc
-C	real*8 DWNWVxx,DWNWV12xx,DWNWV1xx !-zvv-2013
+      DATA unformat/.TRUE./ 
 
       Maxlw  = 0
       ncoll = 0
@@ -2518,24 +2518,31 @@ C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
       GOTO 80
    90 CLOSE(45)
 
-C     OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200)
-C     READ (45,*,END = 200)   ! To skip first line <TLJs.> ..
-      OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200,
-     1                               form='unformatted') !-zvv-2013
-C     Commented, RCN, not needed
-C     read (45) DWNWVxx,DWNWV12xx,DWNWV1xx,NW22xx,NPTxx ! Skipping one line
+      if(unformat) then
+        OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200,
+     1                                 form='unformatted') !-zvv-2013
+      else
+        OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200)
+        READ (45,*,END = 200)   ! To skip first line <TLJs.> ..
+      endif
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
   100 continue
-C     READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
-      READ (45,                        END = 200) jc, parc, nceq  ! ecis06
+      if(unformat) then
+        READ (45,                        END = 200) jc, parc, nceq  ! ecis06
+      else
+        READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
+      endif    
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-C        READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
-         READ (45,  END = 200,ERR = 200) nlev, l, jj, dtmp
+         if(unformat) then
+           READ (45,  END = 200,ERR = 200) nlev, l, jj, dtmp
+         else
+           READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
+         endif
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.GE.NDLW) then
@@ -2856,34 +2863,41 @@ C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
      &                 xmas_nejc, xmas_nnuc
-      LOGICAL relcal
+      LOGICAL relcal, unformat
       INTEGER l, lmax, nc, nceq, ncoll, nlev
       CHARACTER*1 parc
-C     real*8 DWNWVxx,DWNWV12xx,DWNWV1xx !-zvv-2013
+      data unformat/.TRUE./
       lmax = 0
       ncoll = 0
       ecms = ETL(J,Nejc,Nnuc)
 C-----
 C----- Input of transmission coefficients
 C-----
-C     OPEN (UNIT = 45,STATUS = 'old',FILE = 'ecis06.tlj')
-C     READ (45,*,END = 200)  ! Skipping one line
-      OPEN (UNIT=45,STATUS='old',FILE='ecis06.tlj',form='unformatted',
-     &      ERR=200) !-zvv-2013
-C     RCN commented, add. information not needed if binary file
-C     read (45) DWNWVxx,DWNWV12xx,DWNWV1xx,NW22xx,NPTxx ! Skipping one line
+      IF(unformat) then
+        OPEN (UNIT=45,STATUS='old',FILE='ecis06.tlj',form='unformatted',
+     &        ERR=200) !-zvv-2013
+      ELSE
+        OPEN (UNIT = 45,STATUS = 'old',FILE = 'ecis06.tlj')
+        READ (45,*,END = 200)  ! Skipping one line
+      ENDIF     
 C-----JC,ParC is the channel spin and parity
 C-----nceq is the number of coupled equations
   100 continue
-C     READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
-      READ (45,END = 200) jc, parc, nceq  ! ecis06
+      IF(unformat) then
+        READ (45,                        END = 200) jc, parc, nceq  ! ecis06
+      ELSE
+        READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
+      ENDIF  
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-C        READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
-         READ (45,END = 200,ERR = 200) nlev, l, jj, dtmp
+         IF(unformat) then
+           READ (45,  END = 200,ERR = 200) nlev, l, jj, dtmp
+         ELSE
+           READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp     
+         ENDIF  
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only ground state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LE.NDLW) THEN
