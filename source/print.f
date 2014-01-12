@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3723 $
+Ccc   * $Rev: 3725 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 14:26:57 +0100 (Fr, 10 Jän 2014) $
+Ccc   * $Date: 2014-01-12 02:45:24 +0100 (So, 12 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -210,10 +210,6 @@ C     CSE(1,nejc,0) = 2*CSE(1,nejc,0)
       totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
 
-      IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &         totspec = totspec -
-     &          0.5d0*(CSEmsd(1,Nejc) + CSEmsd(kmax,Nejc))
-
       IF (totspec.LE.1.d-4) RETURN
 
       WRITE (12,*) ' '
@@ -303,15 +299,6 @@ C          Subtract direct contribution to CM emission spectrum
             ENDIF
            ENDIF
          ENDDO 
-C
-         totspec = 0.d0
-         DO ie = 1, nspec + 1
-           totspec  = totspec  + CSE(ie,nejc,0) 
-           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &       totspec = totspec + CSEmsd(ie,nejc)
-         ENDDO
-         totspec = totspec - 
-     &       0.5d0*(CSE(1,Nejc,0) + CSE(nspec+1,Nejc,0))
 C
 C--------Inclusive DDX spectrum 
          check_DE = 0.d0
@@ -426,6 +413,8 @@ Ccc   * revision:#    by:name                     on:xx.mon.199x         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -575,6 +564,8 @@ Ccc   * revision:#    by:name                     on:xx.mon.2009         *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none 
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -599,6 +590,7 @@ C
       ENDDO
 
       IF (csemax.LE.1.d-5) return
+
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 

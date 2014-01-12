@@ -186,7 +186,8 @@ C--------------Add direct transition to the spectrum
                  popl = popread/DE
                  poph = 0.0d0
                ENDIF
-               IF (icsl.EQ.1) popl = 2.0*popl
+C              it is not clear whether this is needed or not
+C              IF (icsl.EQ.1) popl = 2.0*popl
                CSE(icsl,nejcec,1) = CSE(icsl,nejcec,1) + popl
                CSE(icsh,nejcec,1) = CSE(icsh,nejcec,1) + poph
 
