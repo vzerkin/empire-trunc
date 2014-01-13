@@ -1,6 +1,6 @@
-!cc   * $Rev: 3721 $
+!cc   * $Rev: 3730 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+!cc   * $Date: 2014-01-13 19:21:02 +0100 (Mo, 13 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -2620,13 +2620,12 @@ C
      &                   chelem, izr
               WRITE (8,
      &'(''  WARNING: Excited state '',I3,                             ''
-     &is above neutron binding energy '',F6.3,                       ''
-     &MeV'')') ilv, qn
+     & is above neutron binding energy '',F6.3,                       ''
+     & MeV'')') ilv, qn
               WRITE (8,'(''  WARNING: Number of levels set to '',I3)'
      &                   ) NLV(Nnuc)
               GOTO 200
             ENDIF
-
 C
 C             if ECONT input keyword present, then it takes precedence 
 C
