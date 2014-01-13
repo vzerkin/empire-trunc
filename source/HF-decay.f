@@ -1039,13 +1039,13 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ENDIF
              ENDDO
              IF (NDEJC.EQ.7) THEN
-               WRITE (8,*) '_________________________________________'
+               WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                   dtotsp,ttotsp,htotsp,ctotsp
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
              ELSE  
-               WRITE (8,*) '_________________________________________'
+               WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                 dtotsp,ttotsp,htotsp    
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
@@ -1069,31 +1069,29 @@ C
              totener_in=ABS(EIN+QPRod(nnuc)+ELV(LEVtarg,0))
              totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
      &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
-             WRITE (8,*) 
-     &         '-------------------------------------------------'
+             WRITE (8,'(116(1H_))') 
 	       if(nnuc.eq.mt91 .or. nnuc.eq.mt649 .or. nnuc.eq.mt849) then
 
-              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,'' Balance ='',
-     &        F8.3,'' MeV ('',F6.1,''%) no disc. levels considered)'')')
-     &          totener_in , totener_out, (totener_in - totener_out),
+              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
+     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%) no disc. levels  '')') 
+     &       EINl, totener_in , totener_out, (totener_in - totener_out),
      &          (totener_in - totener_out)/totener_in*100                           
 C
               totener_out = cmulg*emedg + cmuln*emednD + cmulp*emedpD
      &          + cmula*emedaD + cmuld*emedd + cmult*emedt + cmulh*emedh
 
-              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,'' Balance ='',
-     &        F8.3,'' MeV ('',F6.1,''%) including discrete levels )'')')
-     &          totener_in , totener_out, (totener_in - totener_out),
+              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
+     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%) with disc. levels'')')
+     &       EINl, totener_in , totener_out, (totener_in - totener_out),
      &          (totener_in - totener_out)/totener_in*100         
                        
              else
-              WRITE (8,'('' Qin ='',F8.3,'' Qout='',F8.3,'' Balance ='',
-     &        F8.3,'' MeV ('',F6.1,''%)'')')
-     &          totener_in , totener_out, (totener_in - totener_out),
-     &          (totener_in - totener_out)/totener_in*100         
+              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
+     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%)                  '')') 
+     &       EINl, totener_in , totener_out, (totener_in - totener_out),
+     &          (totener_in - totener_out)/totener_in*100                           
              endif
-             WRITE (8,*) 
-     &         '*************************************************'
+             WRITE (8,'(116(1H*))') 
              WRITE (8,*) ' '
            ENDIF
          ENDIF
@@ -1648,66 +1646,75 @@ C-----and find last non-zero cross section for printing
       IF (csum.EQ.0) RETURN
       ilast = MIN(ilast + 1,NDEX)
 C
-C        corr = CSPrd(Nnuc)/(csum*DERec)
-C        WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
-C        WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
-C        DO ie = 1, ilast
-C           RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
-C        ENDDO
-         WRITE (12,*) ' '
-         WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
-     &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
-         WRITE (12,*) ' '
-         WRITE (12,'(''    Energy    mb/MeV'')')
-         WRITE (12,*) ' '
-         DO ie = 1, ilast
-            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec,
+C     corr = CSPrd(Nnuc)/(csum*DERec)
+C     WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
+C     WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
+C     DO ie = 1, ilast
+C       RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
+C     ENDDO
+      WRITE (12,*) ' '
+      IF(ENDf(nnuc).EQ.2) then
+        WRITE (12,'(A23,A7,A4,I6,A6,F12.5,1x,6H(incl))') 
+     &       '  Spectrum of recoils  ',
+     &       React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
+      ELSE
+        WRITE (12,'(A23,A7,A4,I6,A6,F12.5            )') 
+     &       '  Spectrum of recoils  ',
+     &       React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
+      ENDIF
+      WRITE (12,*) ' '
+      WRITE (12,'(''    Energy    mb/MeV'')')
+      WRITE (12,*) ' '
+      DO ie = 1, ilast
+        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec,
      &                                 RECcse(ie,0,Nnuc)
-         ENDDO
-	   if (ilast.gt.1)  csum  = csum - 
+      ENDDO
+      if (ilast.gt.1)  csum  = csum - 
      &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
-         WRITE(12,
+      WRITE(12,
      &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &       csum*DERec
-         
-         xsdisc = 0.d0	   
-         IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
-         if(xsdisc.gt.0.d0) then
-           WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+        
+      xsdisc = 0.d0	   
+      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+      if(xsdisc.gt.0.d0  .and. ENDf(nnuc).eq.1) then
+        WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - xsdisc
-           WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+        WRITE (12,'(2X,''Disc. popul. before g-cascade '',
      &                G12.6,'' mb'')') xsdisc
-           WRITE(12,
+      endif 
+
+      IF(ENDf(nnuc).EQ.1) then      
+        corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+	ELSE
+        corr = CSPrd(Nnuc)/(csum*DERec)
+	ENDIF
+
+      WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
-     &      CSPrd(Nnuc) 
-           corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
-         else
-           WRITE(12,
-     &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
-     &      CSPrd(Nnuc) 
-           corr = CSPrd(Nnuc)/(csum*DERec)
-         endif 
-         WRITE(12,
+     &      CSPrd(Nnuc)
+      WRITE(12,
      &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb''//)') 
      &      corr 
 
-         IF (ABS(1.d0-corr).GT.0.02D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
-     &      THEN
-            WRITE (8,*) 
-            WRITE (8,*) ' ******' 
-            WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
-            WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
-            WRITE (8,*) 
-     &         ' WARNING: x-section balance in recoils wrong'
-            WRITE (8,*) ' WARNING: recoil integral     = ',
+      IF (ABS(1.d0-corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
+        WRITE (8,*) 
+        WRITE (8,*) ' ******' 
+        WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
+        WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
+        WRITE (8,*) 
+     &       ' WARNING: x-section balance in recoils >5%, ratio=',corr
+        WRITE (8,*) ' WARNING: recoil integral     = ',
      &                  sngl(csum*DERec),' mb'
-            WRITE (8,*) ' WARNING: Cont. cross section = ',
-     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
-            WRITE (8,*) ' WARNING: Prod. cross section = ',
+        WRITE (8,*) ' WARNING: Prod. cross section = ',
      &                  sngl(CSPrd(Nnuc)),' mb'
-            WRITE (8,*) ' WARNING: Discr.cross section = ',
+        IF(ENDf(nnuc).EQ.1) then      
+          WRITE (8,*) ' WARNING: Cont. cross section = ',
+     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
+          WRITE (8,*) ' WARNING: Discr.cross section = ',
      &                  sngl(xsdisc),' mb'
-         ENDIF
+        ENDIF
+      ENDIF
       RETURN
       END
 
@@ -1744,66 +1751,76 @@ C-----Find last non-zero cross section for printing
       ilast = MIN(ilast + 1,NDEX)
 C-----correction factor multiplying cross sections and dividing DE is
 C-----simply A(1) since ejectile mass is here always 1 (neutron or proton) 
-         WRITE (12,*) ' '
-         WRITE (12,'(A23,A7,A4,I6,A6,F12.5)') '  Spectrum of recoils  ',
-     &          React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
-         WRITE (12,*) ' '
-         WRITE (12,'(''    Energy    mb/MeV'')')
-         WRITE (12,*) ' '
-             csum = 0.d0
-         DO ie = 1, ilast
-                csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
-            WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
+      WRITE (12,*) ' '
+
+      IF(ENDf(nnuc).EQ.2) then
+        WRITE (12,'(A23,A7,A4,I6,A6,F12.5,1x,6H(incl))') 
+     &       '  Spectrum of recoils  ',
+     &       React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
+      ELSE
+        WRITE (12,'(A23,A7,A4,I6,A6,F12.5            )') 
+     &       '  Spectrum of recoils  ',
+     &       React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
+      ENDIF
+      WRITE (12,*) ' '
+      WRITE (12,'(''    Energy    mb/MeV'')')
+      WRITE (12,*) ' '
+      csum = 0.d0
+      DO ie = 1, ilast
+        csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
+        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
      &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
-         ENDDO
-         if (ilast.gt.1) csum  = csum - 0.5d0*
+      ENDDO
+      if (ilast.gt.1) csum  = csum - 0.5d0*
      &   (POPcse(0,ipart,1,INExc(Nnuc))+
      &    POPcse(0,ipart,ilast,INExc(Nnuc)))
 
-         WRITE(12,
+      WRITE(12,
      &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &     csum*DE
 
-         xsdisc = 0.d0
-         IF (nnuc.EQ.mt91) xsdisc = CSDirlev(1,1) 
-         IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2) 
+      xsdisc = 0.d0
+      IF (nnuc.EQ.mt91) xsdisc = CSDirlev(1,1) 
+      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2) 
 
-         if(xsdisc.gt.0.d0) then
-           WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+      if(xsdisc.gt.0.d0 .and. ENDf(nnuc).eq.1) then
+        WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - xsdisc
-           WRITE (12,'(2X,''Disc. popul. before g-cascade '',
+        WRITE (12,'(2X,''Disc. popul. before g-cascade '',
      &                G12.6,'' mb'')') xsdisc
-           WRITE(12,
+      endif
+
+      IF(ENDf(nnuc).EQ.1) then      
+        corr = (CSPrd(Nnuc)-xsdisc)/(csum*DE)
+	ELSE
+        corr = CSPrd(Nnuc)/(csum*DE)
+	ENDIF
+      WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc) 
-           corr = (CSPrd(Nnuc)- xsdisc)/(csum*DE)
-         else
-           WRITE(12,
-     &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
-     &      CSPrd(Nnuc) 
-           corr = CSPrd(Nnuc)/(csum*DE)
-         endif
-         WRITE(12,
+      WRITE(12,
      &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb''//)') 
      &      corr 
 
-         IF (ABS(1.d0-corr).GT.0.02D0 .AND. CSPrd(Nnuc).GT.0.001D0) 
-     &      THEN
-            WRITE (8,*) 
-            WRITE (8,*) ' ******' 
-            WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
-            WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
-            WRITE (8,*) 
-     &         ' WARNING: x-section balance in recoils wrong'
-            WRITE (8,*) ' WARNING: recoil integral     = ',
+      IF (ABS(1.d0-corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
+        WRITE (8,*) 
+        WRITE (8,*) ' ******' 
+        WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
+        WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
+        WRITE (8,*) 
+     &       ' WARNING: x-section balance in recoils >5%, ratio=',corr
+        WRITE (8,*) ' WARNING: recoil integral     = ',
      &                  sngl(csum*DE),' mb'
-            WRITE (8,*) ' WARNING: Cont. cross section = ',
-     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
-            WRITE (8,*) ' WARNING: Prod. cross section = ',
+        WRITE (8,*) ' WARNING: Prod. cross section = ',
      &                  sngl(CSPrd(Nnuc)),' mb'
-            WRITE (8,*) ' WARNING: Discr.cross section = ',
+        IF(ENDf(nnuc).EQ.1) then      
+          WRITE (8,*) ' WARNING: Cont. cross section = ',
+     &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
+          WRITE (8,*) ' WARNING: Discr.cross section = ',
      &                  sngl(xsdisc),' mb'
-         ENDIF
+        ENDIF
+
+      ENDIF
 
       RETURN
       END
