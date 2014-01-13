@@ -3277,14 +3277,14 @@ C      WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
 C         WRITE(92,1007)         L-1-0.5,'+',1
 C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
-          WRITE(92)              L-1-0.5,'+',1
-          WRITE(92)      1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92)              DBLE(L-1-0.5),'+',1
+          WRITE(92)      1, L-1, DBLE(L-1-0.5), TRLJ(L,1)
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
 C         WRITE(92,1007)         L-1+0.5,'+',1
 C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
-          WRITE(92)              L-1+0.5,'+',1
-          WRITE(92)      1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92)              DBLE(L-1+0.5),'+',1
+          WRITE(92)      1, L-1, DBLE(L-1+0.5), TRLJ(L,2)
         ENDIF
        ENDDO
        DO L=1,ltlmax
@@ -3293,14 +3293,14 @@ C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
 C         WRITE(92,1007)         L-1-0.5,'-',1
 C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
-          WRITE(92)              L-1-0.5,'-',1
-          WRITE(92)      1, L-1, L-1-0.5, TRLJ(L,1)
+          WRITE(92)              DBLE(L-1-0.5),'-',1
+          WRITE(92)      1, L-1, DBLE(L-1-0.5), TRLJ(L,1)
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
 C         WRITE(92,1007)         L-1+0.5,'-',1
 C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
-          WRITE(92)              L-1+0.5,'-',1
-          WRITE(92)      1, L-1, L-1+0.5, TRLJ(L,2)
+          WRITE(92)              DBLE(L-1+0.5),'-',1
+          WRITE(92)      1, L-1, DBLE(L-1+0.5), TRLJ(L,2)
         ENDIF
        ENDDO
        CLOSE(92)
