@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3725 $
+Ccc   * $Rev: 3728 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-12 02:45:24 +0100 (So, 12 Jän 2014) $
+Ccc   * $Date: 2014-01-13 01:38:59 +0100 (Mo, 13 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -199,7 +199,7 @@ C
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
 
-C     CSE(1,nejc,0) = 2*CSE(1,nejc,0)
+      CSE(1,nejc,0) = 2*CSE(1,nejc,0)
 
       totspec = 0.d0
       DO i = 1, kmax
