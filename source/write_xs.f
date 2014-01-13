@@ -74,7 +74,7 @@ C----
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
 			  
-			  DO nejc = 0, NDEJC         !loop over ejectiles
+             DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
                 IF(nejc.GT.0) THEN
@@ -297,23 +297,15 @@ C------------------Exclusive DE spectra (gammas)
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '
                    dtmp =0.d0          
-                   DO ie = 1, nspec     
+                   DO ie = 1, nspec + 1     
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
-                     if(ie.gt.1) then
-                       dtmp = dtmp + htmp*DE
-                     else
-                       dtmp = dtmp + htmp*DE*0.5d0
-                     endif
-                     WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorp,
-     &                  htmp*recorp
+                     ftmp = 1.d0
+                     if(ie.eq.1 .or. ie.eq.nspec+1) ftmp = 0.5d0
+                     dtmp = dtmp + htmp*DE*ftmp
+                     WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE, htmp
                    ENDDO
-                   dtmp = dtmp + 
-     &                    POPcse(0,nejc,nspec+1,INExc(nnuc))*DE*0.5d0         
-                                              !exact endpoint
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc)/recorp,
-     &                 max(0.d0,POPcse(0,nejc,nspec+1,
-     &                 INExc(nnuc)))*recorp
+                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc),  0.d0
                    WRITE(12,*) 
                    WRITE(12,'(2x,
      &                  ''Total Integr.(gammas)'',G12.6,'' mb'' )') 
