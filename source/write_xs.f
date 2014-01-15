@@ -17,7 +17,7 @@ C     local variables
 C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
-      DOUBLE PRECISION recorp,espec,csum
+      DOUBLE PRECISION recorp,espec,csum,esum,qin,qout,cmul,xsdisc
       DOUBLE PRECISION dtmp,htmp,ftmp   
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
@@ -73,7 +73,7 @@ C----
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
-			  
+             qout = 0.d0			  
              DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -163,6 +163,7 @@ C------------------(continuum part - same for all particles)
                    cseaprnt = 0.d0 ! clean DDX matrix
                    check_DE = 0.d0
                    dtmp = 0.d0
+                   esum = 0.d0
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
@@ -170,6 +171,7 @@ C------------------(continuum part - same for all particles)
 C                    if(ie.eq.1 .or. ie.eq.nspec) ftmp=0.5d0
                      if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
                      dtmp = dtmp + htmp*DE*ftmp
+                     esum = esum + htmp*DE*ftmp*FLOAT(ie - 1)*DE/recorp
                      ftmp = max((htmp - xnorm(nejc,INExc(nnuc))
      &                    * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI,0.d0)
                      csum = 0.d0
@@ -196,14 +198,11 @@ c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
      &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
                        ENDDO
                      ENDIF
-                     check_DE(ie) = 2.0d0*PI*csum
-C--------------------Correct 'cseaprnt()' for eventual imprecision
-C                    if(check_DE(ie).GT.0.d0) then
-C                      ftmp = POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)
-C                      DO nang = 1, NDANG
-C                        cseaprnt(ie,nang) = cseaprnt(ie,nang)*ftmp
-C                      ENDDO
-C                    endif
+                     if(ie.ne.1) then
+                       check_DE(ie) = 2.0d0*PI*csum
+	               else
+                       check_DE(ie) =       PI*csum
+                     endif
                    ENDDO
 
                    DO ie = 1, nspec 
@@ -259,36 +258,52 @@ C                      espec is the outgoing energy corresponding to the level "
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
+	                if (ie.eq.1) ftmp = ftmp*0.5d0
                       if(ftmp.LE.0.d0) cycle
-                      WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
-     &                *DE/recorp, ftmp*recorp, 
+                      WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
+     &                FLOAT(ie - 1)*DE/recorp, ftmp*recorp, 
      &                check_DE(ie)*recorp,
      &                (ftmp - check_DE(ie)) * recorp, 
      &                (ftmp - check_DE(ie)) / ftmp * 100
                    ENDDO
                                         ! exact endpoint
-                   WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+                   WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
      &               EMAx(nnuc)/recorp,max(0.d0,POPcse(0,nejc,nspec+1,
      &               INExc(nnuc)))*recorp,
      &               check_DE(nspec+1)*recorp,
      &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
      &                  check_DE(nspec+1) )*recorp, 0.d0
+
+                   WRITE(12,*) 
+                   if(dtmp.gt.0) then
+                     WRITE(12,'(10x,
+     &            ''Ave. <E> '',A1,'' cont.spec '',G12.6,'' MeV  for '',
+     &            I3,''-'',A2,''-'',I3,A21)') SYMbe(Nejc),esum/dtmp,
+     &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
+
+	               xsdisc = 0.d0
+                     IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
+                     IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
+                     IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+
+                     cmul = dtmp/(CSPrd(nnuc)-xsdisc)
+                     qout = qout + esum/(CSPrd(nnuc)-xsdisc)
+
+                     WRITE(12,'(10x,
+     &                ''Ave. <Q> '',A1,'' cont.spec '',G12.6,'' MeV'')') 
+     &                 SYMbe(Nejc),esum/(CSPrd(nnuc)-xsdisc)
+                     WRITE(12,'(10x,A1,
+     &                '' multiplicity       '',G12.6)') SYMbe(Nejc),cmul
+                   endif
                    WRITE(12,*) 
                    WRITE(12,'(10x,
-     &              ''Integral '',A1,'' cont.spec.'',G12.6,'' mb'' )') 
+     &              ''Integral '',A1,'' cont.spec '',G12.6,'' mb''  )') 
      &             SYMbe(Nejc),dtmp
 
                    WRITE(12,'(10x,
      &                ''Popul. cross section '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
-C                  WRITE(12,'(10x,
-C     &                  ''Total Integral       '',G12.6,'' mb'' )') 
-C    &                  dtmp + htmp  
-C                  WRITE(12,'(10x,
-C    &                  ''Total Population     '',G12.6,'' mb'' )') 
-C    &                  CSDirlev(1,nejc) + POPcs(nejc,INExc(nnuc))
-C                  WRITE(12,*) 
 
                 ELSE !  (nejc=0) GAMMAS
 C
@@ -297,18 +312,43 @@ C------------------Exclusive DE spectra (gammas)
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '
                    dtmp =0.d0          
+                   esum =0.d0          
                    DO ie = 1, nspec + 1     
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                      if(htmp.LE.0.d0) cycle
                      ftmp = 1.d0
                      if(ie.eq.1 .or. ie.eq.nspec+1) ftmp = 0.5d0
                      dtmp = dtmp + htmp*DE*ftmp
+                     esum = esum + htmp*DE*ftmp*FLOAT(ie - 1)*DE
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE, htmp
                    ENDDO
                    WRITE (12,'(F10.5,E14.5)') EMAx(nnuc),  0.d0
+                   if(dtmp.gt.0) then
+                     WRITE(12,*) 
+                     WRITE(12,'(2x,
+     &                 ''Ave. <E> g cont.spec '',G12.6,'' MeV  for '',
+     &                 I3,''-'',A2,''-'',I3,A21)') esum/dtmp,
+     &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc) 
+
+                     xsdisc = 0.d0
+                     IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
+                     IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
+                     IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+                     WRITE(12,'(2x,''g discr.levels       '',G12.6)') 
+     &                 xsdisc
+
+                     cmul = dtmp/(CSPrd(nnuc)-xsdisc)
+                     qout = qout + cmul*esum/dtmp
+                     WRITE(12,'(2x,
+     &                 ''Ave. <Q> g cont.spec '',G12.6,'' MeV'')') 
+     &                 cmul*esum/dtmp  
+                     WRITE(12,'(2x,''g multiplicity       '',G12.6)') 
+     &                 cmul
+ 
+                   endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
-     &                  ''Total Integr.(gammas)'',G12.6,'' mb'' )') 
+     &                  ''Total Integr.(gamma) '',G12.6,'' mb'' )') 
      &                  dtmp 
                    WRITE(12,'(2x,
      &                  ''Popul. cross section '',G12.6,'' mb'' )') 
@@ -319,10 +359,23 @@ C------------------Exclusive DE spectra (gammas)
  1530         ENDDO   ! over ejectiles
 
               IF ((A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
-                 CALL PRINT_RECOIL(nnuc,REAction(nnuc))
+                 CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
               ELSEIF((A(1)-A(nnuc)).EQ.1  .AND. RECoil.GT.0) THEN
-                 CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc))
+                 CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
+
+	        qin = EIN+QPRod(nnuc)+ELV(LEVtarg,0) 
+              WRITE(12,'( 2x,
+     &            '' Total <Q> cont.spec '',G12.6,'' MeV  for '',
+     &         I3,''-'',A2,''-'',I3,'' decay'')') qout,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)) 
+              WRITE(12,'( 2x,
+     &         '' Qin                 '',G12.6,'' MeV'')') qin
+              WRITE(12,'( 2x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',F6.2,''%)'')')
+     &           qin - qout, (qin - qout)/qin*100
+			 
+	        WRITE(12,*) 
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 

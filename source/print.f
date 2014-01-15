@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3728 $
+Ccc   * $Rev: 3732 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-13 01:38:59 +0100 (Mo, 13 Jän 2014) $
+Ccc   * $Date: 2014-01-15 18:43:54 +0100 (Mi, 15 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -147,7 +147,7 @@ C
 99045 FORMAT (24X,93('-'))
       END
 
-      SUBROUTINE Print_Inclusive(Nejc)
+      SUBROUTINE Print_Inclusive(Nejc,qout)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -175,12 +175,13 @@ C
 C Dummy arguments
 C
       INTEGER Nejc
+      DOUBLE PRECISION qout
 C
 C Local variables
 C
-      DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, dtmp, csum
+      DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-
+      DOUBLE PRECISION esum
 
       INTEGER i, ia, kmax, ie, itmp
 
@@ -200,16 +201,24 @@ C
       kmax = MIN0(kmax,NDECSE)
 
       CSE(1,nejc,0) = 2*CSE(1,nejc,0)
+C
+C     The CMS-LAB assumes only the emission dominated by the 1st CN
+C
+      recorp = 1.d0
+      if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
       totspec = 0.d0
+	esum    = 0.d0
       DO i = 1, kmax
-        totspec  = totspec  + CSE(i,Nejc,0)
+	  ftmp =  CSE(i,Nejc,0)
+        if(ftmp.le.0.d0) cycle
+        itmp = 1
+        if(i.eq.1 .or. i.eq.kmax) itmp = 2
         IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &         totspec = totspec + CSEmsd(i,nejc)
+     &         totspec = totspec + CSEmsd(i,nejc)/itmp
+        totspec  = totspec  + ftmp/itmp 
+        esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
-      totspec = totspec - 
-     &          0.5d0*(CSE(1,Nejc,0) + CSE(kmax,Nejc,0))
-
       IF (totspec.LE.1.d-4) RETURN
 
       WRITE (12,*) ' '
@@ -219,11 +228,6 @@ C     nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(nejc,1))/DE) + 1)
 C     IF (nspec.LE.1) RETURN
       nspec = kmax - 1
       IF(nspec.LT.1) RETURN
-C
-C     The CMS-LAB assumes only the emission dominated by the 1st CN
-C
-      recorp = 1.d0
-      if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
       IF (Nejc.EQ.0) THEN
 C
@@ -232,12 +236,16 @@ C
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO i = 1, nspec
-           if(CSE(i,Nejc,0).le.0.d0) cycle
-           WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE,
-     &         max(0.d0,CSE(i,Nejc,0))
+	     ftmp = CSE(i,Nejc,0) 
+           if(ftmp.le.0.d0) cycle
+           WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
          WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+         WRITE(12,*) 
+         WRITE(12,'(10x,
+     &   ''Ave. <E> g cont.spec '',G12.6,'' MeV (incl)'')') esum/totspec
+         qout = qout + esum/totspec
          WRITE (12,*) ' '    
          WRITE (12,
      &   '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
@@ -310,9 +318,6 @@ C--------Inclusive DDX spectrum
      &            *0.5d0*(CAngler(nang)-CANgler(nang-1))
            ENDDO
            check_DE(ie) = 2.0d0*PI*csum
-
-           itmp = 1
-           if(ie.eq.1) itmp = 2
            if(ie.le.nspec)
      &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
@@ -340,17 +345,24 @@ C--------Inclusive DDX spectrum
      &       htmp = htmp + CSEmsd(ie,nejc)
            itmp = 1
            if(ie.eq.1) itmp = 2
-           WRITE (12,'(10x,F10.5,4(E14.5,1x))') FLOAT(ie - 1)
+           WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
      &       *DE/recorp, htmp*recorp/itmp, check_DE(ie)*recorp/itmp,
      &       (htmp - check_DE(ie)) * recorp /itmp , 
      &       (htmp - check_DE(ie)) / htmp * 100
            ftmp = ftmp + check_DE(ie)/itmp 
          ENDDO
          ! exact endpoint
-         WRITE (12,'(10x,F10.5,4(E14.5,1x))') 
+         WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
      &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
      &     check_DE(nspec+1)*recorp,
      &    ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
+
+         WRITE(12,*) 
+         WRITE(12,'(10x,
+     &        ''Ave. <E> '',A1,'' cont.spec '',G12.6,'' MeV (incl)'' )') 
+     &         SYMbe(Nejc),esum/totspec
+
+         qout = qout + esum/totspec
 
          WRITE (12,*) ' '    
          WRITE (12,'(1x,'' Integrated spectrum   '',G12.6,'' mb'')')
@@ -360,14 +372,14 @@ C--------Inclusive DDX spectrum
       ENDIF
           
       csum = 0.d0
-      dtmp = 0.d0
+C     dtmp = 0.d0
       DO nnuc = 1, NNUcd
-         csum = csum + CSEmis(nejc,nnuc)
-         if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
+        csum = csum + CSEmis(nejc,nnuc)
+        if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
       ENDDO
-C     if (ENDf(nnuc).NE.1) 
-C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-C    &   dtmp      
+      if (csum.gt.0) 
+     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+     &   dtmp      
 C     IF(Nejc.ne.0) THEN
 C       WRITE (12,
 C    &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')

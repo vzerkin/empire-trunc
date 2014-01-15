@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3721 $
+Ccc   * $Rev: 3732 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+Ccc   * $Date: 2014-01-15 18:43:54 +0100 (Mi, 15 Jän 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3086,6 +3086,8 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none  
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3095,11 +3097,11 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION coef, csmsdl, dang, echannel, ecm, eemi, erecoil,
+      DOUBLE PRECISION coef, csmsdl, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
-     &                 wght(NDLV), xj, xnor, ddxs(NDAngecis)
+     &                 wght(NDLV), xj, xnor, ddxs(NDAngecis), recorr
       DOUBLE PRECISION csmtot,csm1,eee
-      INTEGER icsp, ie, il, irec, j, na, nangle, nexrt, next
+      INTEGER icsp, ie, il, irec, j, na, nexrt, next, istart
 
       IF (NEX(Nnuc).LT.1) THEN
          WRITE (8,*) ' HM !! THERE MUST BE SOMETHING WRONG !!!'
@@ -3246,30 +3248,29 @@ C--------storing continuum recoils
 C
 C           No recoils from gamma emission for the time being
 C
-            nangle = NDANG
-            dang = pi/FLOAT(nangle - 1)
-            coef = 2*pi*dang/DERec
+            coef = 2*pi*pi/FLOAT(NDANG - 1)/DERec
             ecm = EINl - EIN
-            IF(Nejc.NE.0) THEN
-               DO ie = 1, nexrt
-                  echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
-                  DO na = 1, nangle
-                     erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
+C-----------recorr is a recoil correction factor that
+C-----------divides outgoing energies
+            recorr = EJMass(Nejc)/AMAss(1)
+            DO ie = 1, nexrt
+              echannel = (ie - 1)*DE*recorr
+              DO na = 1, NDANG
+                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
      &                         *CANgler(na)
-                     irec = erecoil/DERec + 1.001
-                     weight = (erecoil - (irec - 1)*DERec)/DERec
-                     IF (irec + 1.GT.NDEREC) GOTO 20
-                     csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
+                irec = erecoil/DERec + 1.001
+                weight = (erecoil - (irec - 1)*DERec)/DERec
+C               IF (irec + 1.GT.NDEREC) GOTO 20
+                IF (irec + 1.GT.NDEREC) EXIT
+                csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
      &                        *coef
-                     RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
+                RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
      &                  + csmsdl*(1.d0 - weight)
-                     RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
+                RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
      &                  + csmsdl*weight
 C
-                  ENDDO
-   20          ENDDO
-            ENDIF
-
+              ENDDO
+   20       ENDDO
          ENDIF
       ENDIF
 C-----
@@ -3308,12 +3309,11 @@ C     IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
 C
 C        No recoils from gamma emission for the time being
 C
-         nangle = NDANG
-         dang = pi/FLOAT(nangle - 1)
-         coef = 2*pi*dang/DERec
+         coef = 2*pi*pi/FLOAT(NDANG - 1)/DERec
+         recorr = EJMass(Nejc)/AMAss(1)
          DO ie = nexrt+1, next
-            echannel = (ie - 1)*DE*AEJc(Nejc)/A(1)
-            DO na = 1, nangle
+            echannel = (ie - 1)*DE*recorr
+            DO na = 1, NDANG
                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
      &                   *CANgler(na)
                irec = erecoil/DERec + 1.001
@@ -3321,7 +3321,7 @@ C
                IF (irec + 1.GT.NDEREC) EXIT
                csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coef*DE
                RECcse(irec,0,Nnur) = RECcse(irec,0,Nnur)
-     &                               + csmsdl*(1.d0 - weight)
+     &            + csmsdl*(1.d0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
      &            + csmsdl*weight
             ENDDO
@@ -3347,7 +3347,7 @@ C------noninteger spin nuclei) using arbitrary weights (most to 2+ and very
 C------little to 4+). Angular distributions for these levels are those
 C------provided by TRISTAN or PCROSS at the closest bin.
 C
-       csmsdl = 0.0
+       csmsdl = 0.d0
        DO ie = istart, next
          csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
 C        Setting it to zero to delete discrete spectra before redistributing 
@@ -3367,7 +3367,7 @@ C
 C      Inelastic channel
 C
        csmtot = 0.d0
-       swght = 0.0
+       swght = 0.d0
        DO il = 2, NLV(Nnur)
          wght(il) = 0.0
          eemi = excnq - ELV(il,Nnur)

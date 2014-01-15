@@ -1498,12 +1498,12 @@ C
 C Local variables
 C
       DOUBLE PRECISION coef, dang, erecejc, erecod, erecoil, erecpar,
-     &                 exqcut, recorr, sumnor, weight, ares, zres
+     &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl
       INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
 C
 C
 C-----Normalize recoil spectrum of the parent
-      sumnor = 0.0
+      sumnor = 0.d0
       DO ire = 1, NDEREC
          sumnor = sumnor + RECcse(ire,Ke,Nnuc)
       ENDDO
@@ -1525,7 +1525,7 @@ C--------Residual nuclei must be heavier than alpha
 C--------Decay to continuum
 C--------recorr is a recoil correction factor that
 C--------divides outgoing energies
-         recorr = AMAss(Nnuc)/EJMass(nejc)
+         recorr = DBLE(ares)/AEJc(nejc)
          exqcut = EX(Ke,Nnuc) - Q(nejc,Nnuc) - ECUt(nnur)
          DO ie = 1, NDECSE !over ejec. energy (daughter excitation)
             icse = (exqcut - (ie - 1)*DE)/DE + 1.001
@@ -1535,20 +1535,19 @@ C-----------Daughter bin
             DO ire = 1, NDEREC          !over recoil spectrum
                erecpar = (ire - 1)*DERec
                DO na = 1, NDANG
-                  erecoil = erecejc + erecpar
-                  erecoil = erecoil + 2.0*SQRT(erecejc*erecpar)
+                 erecoil = erecejc + erecpar + 2.0*SQRT(erecejc*erecpar)
      &                      *CANgler(na)
-                  irec = erecoil/DERec + 1.001
-                  weight = (erecoil - (irec - 1)*DERec)/DERec
-                  IF (irec + 1.GT.NDEREC) GOTO 20
-                  RECcse(irec,icse,nnur) = RECcse(irec,icse,nnur)
-     &               + RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)
-     &               *(1.0 - weight)*SANgler(na)*coef
-                  RECcse(irec + 1,icse,nnur)
-     &               = RECcse(irec + 1,icse,nnur) + RECcse(ire,Ke,Nnuc)
-     &               *AUSpec(ie,nejc)*weight*SANgler(na)*coef
+                 irec = erecoil/DERec + 1.001
+                 weight = (erecoil - (irec - 1)*DERec)/DERec
+                 IF (irec + 1.GT.NDEREC) EXIT
+                 csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
+     &                    SANgler(na)*coef*recorr
+                 RECcse(irec,icse,nnur) = RECcse(irec,icse,nnur)
+     &               + csmsdl*(1.0 - weight)
+                 RECcse(irec + 1,icse,nnur) = RECcse(irec + 1,icse,nnur)  
+     &               + csmsdl*weight
                ENDDO                  !over angles
-   20       ENDDO                  !over recoil spectrum
+            ENDDO                  !over recoil spectrum
          ENDDO                  !over  daugther excitation
 C--------Decay to discrete levels (stored with icse=0)
    50    exqcut = exqcut + ECUt(nnur)
@@ -1613,10 +1612,11 @@ C-----gamma decay to discrete levels (stored with icse=0)
       ENDDO                  !over levels
       END
 
-      SUBROUTINE PRINT_RECOIL(Nnuc,React)
+      SUBROUTINE PRINT_RECOIL(Nnuc,React,qout)
 C-----
 C-----Prints recoil spectrum of nnuc residue
 C-----
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1624,34 +1624,41 @@ C Dummy arguments
 C
       INTEGER Nnuc
       CHARACTER*21 React
+      DOUBLE PRECISION qout
 C
 C Local variables
 C
-      DOUBLE PRECISION csum, ftmp, corr, xsdisc
+      DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul
       INTEGER ie, ilast
 
-      IF (CSPrd(Nnuc).LE.0.0D0) RETURN
+      IF (CSPrd(Nnuc).LE.0.0D0 .or. NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
 C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
-      csum  = 0.0
+      recorr = A(Nnuc)/(A(1)-A(Nnuc))
+      csum  = 0.d0
+      esum  = 0.d0
       ilast = 0
       DO ie = 1, NDEREC
         ftmp = RECcse(ie,0,Nnuc)
         IF (ftmp.GT.0) then
           csum = csum + ftmp
+          esum = esum + ftmp*FLOAT(ie - 1)*DERec/recorr
           ilast = ie
         ENDIF
       ENDDO
       IF (csum.EQ.0) RETURN
       ilast = MIN(ilast + 1,NDEX)
+
+      if (ilast.gt.1)  then
+        csum  = csum - 
+     &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
+        esum  = esum - RECcse(ilast,0,Nnuc)*
+     &          0.5d0*FLOAT(ilast - 1)*DERec/recorr
+      endif
 C
-C     corr = CSPrd(Nnuc)/(csum*DERec)
-C     WRITE(8,*) 'ie, RECcse ,ilast', ie, RECcse(ie,0,Nnuc), ilast
-C     WRITE(8,*) 'nnuc, rec, cs',nnuc,corr*DERec,CSPrd(nnuc)
-C     DO ie = 1, ilast
-C       RECcse(ie,0,Nnuc) = RECcse(ie,0,Nnuc)*corr
-C     ENDDO
+C     recoil correction added by RCN, 01/2014
+C
       WRITE (12,*) ' '
       IF(ENDf(nnuc).EQ.2) then
         WRITE (12,'(A23,A7,A4,I6,A6,F12.5,1x,6H(incl))') 
@@ -1662,21 +1669,35 @@ C     ENDDO
      &       '  Spectrum of recoils  ',
      &       React, 'ZAP=', IZA(Nnuc), ' mass=', AMAss(Nnuc)
       ENDIF
+
       WRITE (12,*) ' '
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
       DO ie = 1, ilast
-        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec,
-     &                                 RECcse(ie,0,Nnuc)
+        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec/recorr,
+     &                               RECcse(ie,0,Nnuc)*recorr
       ENDDO
-      if (ilast.gt.1)  csum  = csum - 
-     &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
       WRITE(12,
-     &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
-     &       csum*DERec
-        
+     &  '(/2x,''Ave. <E> of recoil spectrum   '',G12.6,'' MeV  for '',
+     &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
+     &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
+
       xsdisc = 0.d0	   
       IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+
+      cmul = csum*DERec/(CSPrd(nnuc)-xsdisc)  ! multiplicity
+      qout = qout + cmul*esum/csum            ! multiplicity x <E>
+
+      WRITE(12,
+     &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
+     &     cmul*esum/csum
+      WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
+      WRITE(12,*)
+
+      WRITE(12,
+     &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
+     &       csum*DERec
+        
       if(xsdisc.gt.0.d0  .and. ENDf(nnuc).eq.1) then
         WRITE (12,'(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - xsdisc
@@ -1718,10 +1739,11 @@ C     ENDDO
       RETURN
       END
 
-      SUBROUTINE PRINT_BIN_RECOIL(Nnuc,React)
+      SUBROUTINE PRINT_BIN_RECOIL(Nnuc,React,qout)
 C-----
 C-----Prints recoil spectrum of (n,n) or (n,p) residue
 C-----
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1729,26 +1751,39 @@ C Dummy arguments
 C
       INTEGER Nnuc
       CHARACTER*21 React
+      DOUBLE PRECISION qout
 C
 C Local variables
 C
       INTEGER ie, ilast, ipart
-      DOUBLE PRECISION csum, corr, xsdisc
+      DOUBLE PRECISION csum, corr, xsdisc, ftmp, esum, recorr, cmul
 
       ipart = 1  !neutron
       IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
 
 C-----Find last non-zero cross section for printing
+      csum  = 0.d0
+      esum  = 0.d0
       ilast = 0
-      DO ie = NDEX,1,-1
-         IF (POPcse(0,ipart,ie,INExc(Nnuc)). GT. 0) THEN
-           ilast = ie
-           exit
-         ENDIF
+      recorr = A(Nnuc)/(A(1)-A(Nnuc))
+      DO ie = 1, NDEX
+        ftmp = POPcse(0,ipart,ie,INExc(Nnuc))
+        IF (ftmp.GT.0) then
+          csum = csum + ftmp
+          esum = esum + ftmp*FLOAT(ie - 1)*DE/recorr
+          ilast = ie
+        ENDIF
       ENDDO
-      IF (ilast .EQ. 0) RETURN
-
+      IF (csum.EQ.0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       ilast = MIN(ilast + 1,NDEX)
+
+      if (ilast.gt.1) then
+        csum  = csum - 0.5d0*
+     &   (POPcse(0,ipart,1,INExc(Nnuc))+
+     &    POPcse(0,ipart,ilast,INExc(Nnuc)))
+        esum  = esum - POPcse(0,ipart,ilast,INExc(Nnuc))*
+     &          0.5d0*FLOAT(ilast - 1)*DE/recorr
+      endif
 C-----correction factor multiplying cross sections and dividing DE is
 C-----simply A(1) since ejectile mass is here always 1 (neutron or proton) 
       WRITE (12,*) ' '
@@ -1765,23 +1800,31 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       WRITE (12,*) ' '
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
-      csum = 0.d0
+
       DO ie = 1, ilast
-        csum = csum + POPcse(0,ipart,ie,INExc(Nnuc)) 
-        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/A(1),
-     &      POPcse(0,ipart,ie,INExc(Nnuc))*A(1)     
+        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorr,
+     &      POPcse(0,ipart,ie,INExc(Nnuc))*recorr     
       ENDDO
-      if (ilast.gt.1) csum  = csum - 0.5d0*
-     &   (POPcse(0,ipart,1,INExc(Nnuc))+
-     &    POPcse(0,ipart,ilast,INExc(Nnuc)))
 
       WRITE(12,
-     &     '(/2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
-     &     csum*DE
+     &  '(/2x,''Ave. <E> of recoil spectrum   '',G12.6,'' MeV  for '',
+     &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
+     &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
       xsdisc = 0.d0
-      IF (nnuc.EQ.mt91) xsdisc = CSDirlev(1,1) 
-      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2) 
+      IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
+      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
+ 
+      cmul = csum*DE/(CSPrd(nnuc)-xsdisc)     ! multiplicity
+      qout = qout + cmul*esum/csum            ! multiplicity x <E>
+      WRITE(12,
+     &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
+     &     cmul*esum/csum
+      WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
+      WRITE(12,*)
+      WRITE(12,
+     &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
+     &     csum*DE
 
       if(xsdisc.gt.0.d0 .and. ENDf(nnuc).eq.1) then
         WRITE (12,'(2X,''Cont. popul. before g-cascade '',

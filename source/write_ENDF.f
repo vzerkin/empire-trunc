@@ -44,7 +44,7 @@ C
       CHARACTER*21 reactionx
       INTEGER nejc,i,nnuc,jn,jz,iz,ia,nuc_print,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
-      DOUBLE PRECISION eps,xnub,csinel,s_factor
+      DOUBLE PRECISION eps,xnub,csinel,s_factor,qout
       DATA eps/1.d-8/
 
       DOUBLE PRECISION, external :: mu_bar, SFACTOR
@@ -426,15 +426,16 @@ C-----
  
 C--------Print spectra of residues
          reactionx = '(z,x)  '
+	   qout = 0.d0
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
             IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
-     &        CALL PRINT_RECOIL(nnuc,reactionx)
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
          ENDDO !over decaying nuclei in ENDF spectra printout
 C
          WRITE (12,*) ' '    
 C--------Print inclusive spectra of gamma and ejectiles
          DO nejc = 0, NEJcm
-           CALL Print_Inclusive(nejc)
+           CALL Print_Inclusive(nejc,qout)
          ENDDO
          WRITE (12,*) ' '    
       ENDIF
