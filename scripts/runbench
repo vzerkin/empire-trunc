@@ -66,9 +66,14 @@ if [ "$option" = "run" ] ; then
    mkdir TeMpOrArYdIr
 #  cp * > TeMpOrArYdIr
    cp u238-rigid-soft-omp-lev.col th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   error=0
    for file in $files
    do
      $EMPIREDIR/scripts/runE $file
+     grep -q 'CALCULATIONS COMPLETED SUCCESSFULLY' $file.lst
+     if [ "$?" = 1 ] ; then
+       error=1
+     fi
      cp $file.inp $file-ref.* TeMpOrArYdIr/
      for suffix in $suffix_list
      do
@@ -80,6 +85,11 @@ if [ "$option" = "run" ] ; then
    rm -r *-tl  >& /dev/null
    mv TeMpOrArYdIr/* ./
    rm -r TeMpOrArYdIr >& /dev/null
+
+   if [ "$error" = 1 ] ; then
+     echo "ERROR!! At least one of the benchmarks failed to run successfully!"
+     exit 1
+   fi
 
 elif [ "$option" = "clean" ] ; then
 # cleans the benchmarks directory, keeping only original files
