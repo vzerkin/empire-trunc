@@ -29,7 +29,9 @@
 !-P Perform physics tests on data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
-!-V         Version 8.09   September 2013   D. Brown
+!-V         Version 8.10   January 2014      A. Trkov
+!-V                        Correct recoil energy in energy balance for LCT=3
+!-V         Version 8.09   September 2013    D. Brown
 !-V                        Fix value test of LNU when no fission data given
 !-V         Version 8.08   October2012       A. Trkov
 !-V                        Allow E-dependent scattering radius in URR
@@ -168,7 +170,7 @@
 !
 !     PSYCHE VERSION NUMBER
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.10'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -191,6 +193,10 @@
 !     ENDF DISK FILE INPUT AND CHECKING OUTPUT FORTRAN UNITS
 !
       INTEGER(KIND=I4), PARAMETER :: JIN=20,JOUT=21
+!
+!     INCIDENT PARTICLE ZA DESIGNATION
+!
+      INTEGER(KIND=I4) :: IZAIN
 !
 !     FINAL FORTRAN OUTPUT UNIT
 !
@@ -2680,7 +2686,7 @@
       INTEGER(KIND=I4), INTRINSIC :: MOD
       REAL(KIND=R4), INTRINSIC :: ABS
 !
-      INTEGER(KIND=I4) :: IPART,IZAIN,IZA,IZARES
+      INTEGER(KIND=I4) :: IPART,IZA,IZARES
       INTEGER(KIND=I4) :: MTLIB,MTALL,MTPROD
       INTEGER(KIND=I4) :: I,N,INIS
       INTEGER(KIND=I4) :: IDIV
@@ -3324,7 +3330,7 @@
 !
       INTEGER(KIND=I4) :: LCT,LANG,LAW,LTP
       INTEGER(KIND=I4) :: NK,NREGS,NPTS
-      INTEGER(KIND=I4) :: IZAP
+      INTEGER(KIND=I4) :: IZAP,IZ,IA
       INTEGER(KIND=I4) :: NW,ND
       INTEGER(KIND=I4) :: LL,NOG,NOC,MM,NU
       INTEGER(KIND=I4) :: INT1,INT2,NE,IFP,NCYC,L,IST,IDISCR,IBZ,NMU
@@ -3334,6 +3340,7 @@
       REAL(KIND=R4) :: Q,QI,QK
       REAL(KIND=R4) :: PK,XY,YN,X3,Y3,X4,Y4,EBAR,GEBAR,FNORM
       REAL(KIND=R4) :: TEST,YIBZ,SSUM,ANS,EAVAIL,PERR
+      REAL(KIND=R4) :: AWRS,AWIN
 !
       INTEGER(KIND=I4), PARAMETER :: NPOUTMAX=400
       INTEGER(KIND=I4), PARAMETER :: NMUMAX=201
@@ -3390,6 +3397,9 @@
 !
 !        LAW 1 -- TABULATED ENERGY-ANGLE DISTRIBUTION
 !
+
+         print *,'LAW=',law
+
          IF(LAW.EQ.1) THEN
             CALL RDTAB2
             IF(IZAP.EQ.0) NOG = 0
@@ -3410,11 +3420,17 @@
             NCOEF = L2L
             NP = N2L
             NW = NPL
+
+            print *,'ND,NP,NW',nd,np,nw
+
             CALL TERPR(E,EINT,PKINT,NPTS,NTERP,INTERP,NREGS,IFP,PK)
             XY = 0.
             YN = 0.
             NCYC = NW/NP
             IF(ND.GT.0) THEN
+!
+!              Discrete lines
+!
                DO I=1,ND
                   L = NCYC*(I-1) + 1
                   XY = XY + Y(L)*Y(L+1)
@@ -3422,6 +3438,9 @@
                END DO
             END IF
             IF(ND.NE.NP) THEN
+!
+!              Spectrum
+!
                IST = 2 + ND
                DO I=IST,NP
                   L = NCYC*(I-2) + 1
@@ -3632,6 +3651,10 @@
       X(NU) = ENEXT
       ENOW = ENEXT
       IF(ENEXT.LT.EMAX) GO TO 35
+
+      print *,'NK',NK
+      print *,'Union grid',(x(i),i=1,nu)
+
 !
 !     CHECK FOR ENERGY BALANCE ON UNION GRID
 !
@@ -3670,6 +3693,25 @@
                GO TO 45
    50          CALL TERP1(EGRID(L-1),AEBAR(L-1),EGRID(L),AEBAR(L),      &       
      &              E,ANS,INT1)
+               READ(HL(IK),'(I8)') IZAP
+               IF(LCT.EQ.3 .AND. IZAP.GT.2004) THEN
+!
+!                Remove CM energy for recoils if LCT=3 to convert to CM
+!                Assume: - masses approximated by mass numbers
+!                        - ejectiles are emitted in all directions so
+!                          that the recoil travels approximately in CM
+!
+                 IZ  =IZAP/1000
+                 IA  =IZAP-1000*IZ
+                 IF(IA.LE.0) THEN
+                   AWRS=IZ
+                   IF(IZ.GT.1) AWRS=AWRS*2.1
+                 ELSE
+                   AWRS=IA
+                 END IF
+                 AWIN=IZAIN-1000*(IZAIN/1000)
+                 ANS=ANS*(1-AWRS/(AWRS+AWIN))
+               END IF
                VAL(IK) = ANS
                SSUM = SSUM + ANS
             END IF
