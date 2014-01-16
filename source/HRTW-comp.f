@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3701 $
+Ccc   * $Rev: 3746 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-17 00:33:53 +0100 (Fr, 17 Jän 2014) $
 C
 C
       SUBROUTINE HRTW
@@ -846,11 +846,14 @@ C
          xle(i) = 0.0D0
          xlm(i) = 0.0D0
       ENDDO
-      IF (MAXmult.GT.2) THEN
-         ha = A(Nnuc)**0.666666666666D0
-         cee = 3.7D-5*ha
-         cme = 0.307D0/ha
-      ENDIF
+      ha = A(Nnuc)**0.666666666666D0
+      cee = 3.7D-5*ha
+      cme = 0.307D0/ha
+C     IF (MAXmult.GT.2) THEN
+C       ha = A(Nnuc)**0.666666666666D0
+C       cee = 3.7D-5*ha
+C       cme = 0.307D0/ha
+C     ENDIF
 C
       jmin = 1
 Cp    jmin = MAX0(1, Jc - MAXmult)
