@@ -15,10 +15,11 @@ C     COMMON variables
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
 
       DOUBLE PRECISION elada(NDAngecis), elleg(NDAngecis) 
-	COMMON /angula/elada,elleg
+      INTEGER neles 
+      COMMON /angula/elada,elleg,neles
 
 C     Local variables
-      INTEGER isigma0, irec, iang, iang1, neles, nspec,  
+      INTEGER isigma0, irec, iang, iang1, nspec,  
      & i, ilv, itmp, icsl, icsh, ncon, isigma, isigma2, ie,
      & imint, imaxt, j, its, iloc      
 	DOUBLE PRECISION ecm, angstep, gang, ftmp, ggmr, ggqr, ggor,

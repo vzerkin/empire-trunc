@@ -33,7 +33,8 @@ C
       COMMON /emp_main/cel_da,checkXS   
 
       DOUBLE PRECISION elada(NDAngecis), elleg(NDAngecis) 
-      COMMON /angula/elada,elleg
+      INTEGER neles 
+      COMMON /angula/elada,elleg,neles
 
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)

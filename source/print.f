@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3732 $
+Ccc   * $Rev: 3739 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-15 18:43:54 +0100 (Mi, 15 Jän 2014) $
+Ccc   * $Date: 2014-01-16 18:33:12 +0100 (Do, 16 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -371,15 +371,15 @@ C--------Inclusive DDX spectrum
      &          ftmp*DE      
       ENDIF
           
-      csum = 0.d0
+C     csum = 0.d0
 C     dtmp = 0.d0
-      DO nnuc = 1, NNUcd
-        csum = csum + CSEmis(nejc,nnuc)
-        if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
-      ENDDO
-      if (csum.gt.0) 
-     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-     &   dtmp      
+C     DO nnuc = 1, NNUcd
+C       csum = csum + CSEmis(nejc,nnuc)
+C       if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
+C     ENDDO
+C     if (csum.gt.0) 
+C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+C    &   dtmp      
 C     IF(Nejc.ne.0) THEN
 C       WRITE (12,
 C    &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')

@@ -31,7 +31,8 @@ C     common variables
       COMMON /HFloop/xnorm
 	 
       DOUBLE PRECISION elada(NDAngecis), elleg(NDAngecis) 
-      COMMON /angula/elada,elleg
+      INTEGER neles 
+      COMMON /angula/elada,elleg,neles
 C
 C     local variables
 C
@@ -39,21 +40,16 @@ C
 
       INTEGER i,ia,nejc,il,nbr,ib,iang,its,ilv,j,m,ke,iz,nxsp,npsp
       INTEGER kemin,kemax,jcn,ipar,ip,izares,iloc,nnur,nspec,ispec
-      INTEGER ilevcol,jz,jn,imint,imaxt,neles
+      INTEGER ilevcol,jz,jn,imint,imaxt
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
       DOUBLE PRECISION poplev,poptot,popleft,pope,xnor,fisxse,ftmp
       DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_cn,xs_norm 
-      DOUBLE PRECISION totener_in,totener_out
       		     
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
-      DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
-      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs
-      DOUBLE PRECISION emednD,emedpD,emedaD,esum,csumnD,csumpD,csumaD
-
-C     DOUBLE PRECISION sumtll
+      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
 
       DOUBLE PRECISION, external :: GET_DDXS
 
@@ -258,27 +254,9 @@ C    >                     '  HF CN ang. distr.=',cel_da(iang)
                     
                     WRITE (12,'(9X,8E15.5)') 
      &                ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
-
-                    WRITE (12,*)' '
-                    WRITE (12,*)' '
-                    WRITE (12,*)' DIR Legendre coefficients expansion'
-                    WRITE (12,*)' '
-                    WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-                    WRITE (12,*)' '
-                    WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
-     &                (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                     WRITE (12,*)' '
 
                     IF(PL_CN(0,1).gt.0.d0) then
-                      WRITE (12,*)
-     &                          ' CE Legendre coefficients expansion'
-                      WRITE (12,*)' '
-                      WRITE (12,'(1x,A7,I5)') 
-     &                          ' Lmax =',min(NDAng,PL_lmax(1))
-                      WRITE (12,*) ' '
-                      WRITE (12,'(9X,8D15.8)') ELCncs, 
-     &                  (PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
-     &                   iang = 2,min(NDAng,PL_lmax(1)))
 
                       WRITE (12,*)' '
                       WRITE (12,*)' Legendre coefficients expansion'
@@ -289,7 +267,24 @@ C    >                     '  HF CN ang. distr.=',cel_da(iang)
      &                  (ELAred*elleg(iang) +
      &                 PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
      &                 iang = 2,min(NDAng,neles))
+
                       WRITE (12,*)' '
+                      WRITE (12,*)' DIR Legendre coefficients expansion'
+                      WRITE (12,*)' '
+                      WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+                      WRITE (12,*)' '
+                      WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
+     &                  (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+
+                      WRITE (12,*)' '
+                      WRITE (12,*)' CE Legendre coefficients expansion'
+                      WRITE (12,*)' '
+                      WRITE (12,'(1x,A7,I5)') 
+     &                          ' Lmax =',min(NDAng,PL_lmax(1))
+                      WRITE (12,*) ' '
+                      WRITE (12,'(9X,8D15.8)') ELCncs, 
+     &                  (PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
+     &                   iang = 2,min(NDAng,PL_lmax(1)))
 
                     ELSE
 
@@ -719,12 +714,6 @@ C
 C     Primary gammas -------- done ---------------
       ENDIF
 
-	emednD= 0.d0 
-	emedpD= 0.d0 
-	emedaD= 0.d0 
-	csumnD= 0.d0 
-	csumpD= 0.d0 
-	csumaD= 0.d0 
       IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
         WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -750,16 +739,6 @@ C---------Check for the number of branching ratios
 99065 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
      &                 (53X,7(I4,E11.4)))
         ENDDO
-        if(nnuc.eq.mt91  .and. ftmp.gt.0.d0)  then
-	    emednD = esum 
-          csumnD = ftmp 
-        elseif(nnuc.eq.mt649 .and. ftmp.gt.0.d0) then
-          emedpD = esum 
-          csumpD = ftmp 
-        elseif(nnuc.eq.mt849 .and. ftmp.gt.0.d0)  then
-          emedaD = esum 
-          csumaD = ftmp 
-        endif		 
         WRITE (12,'(1X,/,10X,40(1H-),/)')
       ENDIF
 C
@@ -912,9 +891,6 @@ C    &                       POPcse(0,NDEJC,nspec,INExc(nnuc))
      &           ' population cross section',G12.6,'  mb   : ',A9) 
              ENDDO
              WRITE (8,*)
-             if(nnuc.eq.mt91 ) emednD = (emedn+emednD)/(xtotsp+csumnD)
-             if(nnuc.eq.mt649) emedpD = (emedp+emedpD)/(ptotsp+csumpD)
-             if(nnuc.eq.mt849) emedaD = (emeda+emedaD)/(atotsp+csumaD)
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
              IF (xtotsp.NE.0) emedn = emedn/xtotsp 
              IF (ptotsp.NE.0) emedp = emedp/ptotsp 
@@ -1051,48 +1027,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh 
              ENDIF            
-C
-C            Calculating Q-balance
-C
-C            EIN - QPRod(nnuc) + ELV(LEVtarg,0)
-C
-             cmulg = gtotsp/CSPrd(nnuc)
-             cmuln = xtotsp/CSPrd(nnuc)
-             cmulp = ptotsp/CSPrd(nnuc)
-             cmula = atotsp/CSPrd(nnuc)
-             cmuld = dtotsp/CSPrd(nnuc)
-             cmult = ttotsp/CSPrd(nnuc)
-             cmulh = htotsp/CSPrd(nnuc)
-             WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
-     &                cmula, cmuld, cmult, cmulh
-
-             totener_in=ABS(EIN+QPRod(nnuc)+ELV(LEVtarg,0))
-             totener_out = cmulg*emedg + cmuln*emedn + cmulp*emedp +
-     &       cmula*emeda + cmuld*emedd + cmult*emedt + cmulh*emedh
-             WRITE (8,'(116(1H_))') 
-	       if(nnuc.eq.mt91 .or. nnuc.eq.mt649 .or. nnuc.eq.mt849) then
-
-              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
-     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%) no disc. levels  '')') 
-     &       EINl, totener_in , totener_out, (totener_in - totener_out),
-     &          (totener_in - totener_out)/totener_in*100                           
-C
-              totener_out = cmulg*emedg + cmuln*emednD + cmulp*emedpD
-     &          + cmula*emedaD + cmuld*emedd + cmult*emedt + cmulh*emedh
-
-              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
-     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%) with disc. levels'')')
-     &       EINl, totener_in , totener_out, (totener_in - totener_out),
-     &          (totener_in - totener_out)/totener_in*100         
-                       
-             else
-              WRITE (8,'('' Ein ='',F9.5,'' Qin ='',F8.3,'' Qout='',F8.3
-     &  ,'' Balance ='',F8.3,'' MeV ('',F6.1,''%)                  '')') 
-     &       EINl, totener_in , totener_out, (totener_in - totener_out),
-     &          (totener_in - totener_out)/totener_in*100                           
-             endif
-             WRITE (8,'(116(1H*))') 
-             WRITE (8,*) ' '
+             WRITE (8,'(116(1H_)/)') 
            ENDIF
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
@@ -1636,6 +1571,9 @@ C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
       recorr = A(Nnuc)/(A(1)-A(Nnuc))
+
+      RECcse(1,0,Nnuc) = RECcse(ie,0,Nnuc)*2.d0
+
       csum  = 0.d0
       esum  = 0.d0
       ilast = 0

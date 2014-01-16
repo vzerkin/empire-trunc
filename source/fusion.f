@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3708 $
+Ccc   * $Rev: 3739 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
+Ccc   * $Date: 2014-01-16 18:33:12 +0100 (Do, 16 Jän 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -91,8 +91,8 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-	stl = 0.d0
-	sel = 0.d0
+      stl = 0.d0
+      sel = 0.d0
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -117,23 +117,23 @@ C--------Here the old calculated files are read
                READ (45,END = 50) ftmp
                if(l+1.le.NDLW) THEN 
                      stl(l + 1) = ftmp
-                 IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(stl(l + 1))
+                 IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(ftmp)
                endif
             ENDDO
 
             READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
-            IF (IOUt.EQ.5) WRITE (46,'(1x,A21,6(e12.6,1x))')
+            IF (IOUt.EQ.5) WRITE (46,'(A21,6(e12.6,1x))')
      &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
      &                    ABScs, SINl, SINlcc, CSFus
-            READ (45,END = 300) l
+            READ (45,END = 300) L
             IF(L.EQ.123456) THEN
-              IF (IOUt.EQ.5) WRITE (46,*) L
+              IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw
               DO l = 0, maxlw
                 READ (45,END = 300) ftmp
                 if(l+1.le.NDLW) THEN 
                       sel(l + 1) = ftmp
-                  IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(sel(l + 1))
+                  IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(ftmp)
                 endif
               ENDDO
             ENDIF
@@ -143,6 +143,7 @@ C--------Here the old calculated files are read
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
+              WRITE (8,*)
               WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
@@ -163,6 +164,7 @@ C
               
                if (ncoef1.eq.0) CYCLE  ! skipping closed channels
 
+C              write(*,*) 'DIR ilev=',ilev1, ' #Ls=', ncoef1
 C              DIR PLs
                DO j= 1 , ncoef1 ! skipping DIR expansion
                  READ (45,*,END = 45,ERR = 45)  
@@ -180,7 +182,7 @@ C              CN PLs
                    PL_CN(itmp2,i) = dtmp  
                  endif
                ENDDO
-C              write(*,*) 'CN ilev=',ilev2,
+C              write(*,*) 'CN  ilev=',ilev2,
 C    &           ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
               ENDDO
   45          CLOSE (45)

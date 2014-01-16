@@ -364,7 +364,8 @@ C------------------Exclusive DE spectra (gammas)
                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
 
-	        qin = EIN+QPRod(nnuc)+ELV(LEVtarg,0) 
+ 	        qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
+
               WRITE(12,'( 2x,
      &            '' Total <Q> cont.spec '',G12.6,'' MeV  for '',
      &         I3,''-'',A2,''-'',I3,'' decay'')') qout,
