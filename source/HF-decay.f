@@ -1572,7 +1572,10 @@ C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
       recorr = A(Nnuc)/(A(1)-A(Nnuc))
 
-      RECcse(1,0,Nnuc) = RECcse(ie,0,Nnuc)*2.d0
+C
+C     To get consistent integral value
+C
+      RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
 
       csum  = 0.d0
       esum  = 0.d0
