@@ -3,33 +3,58 @@
 # keeping only the original files and the .lst and .xsc files
 #
 option=$1
+targetfile=$2
+
+filelist="a-ni58-pcross       
+          d-au197             
+          fe54-blind          
+          fe54-vib-CC-direct-2
+          HI-pcross-ccfus     
+          n_eu153-dir-msc-msd 
+          ni62-th-EGSM        
+          n-na23-prim-gam     
+          n-zr92-soft--dccomp 
+          p-th232             
+          p-tl205             
+          test-HRTW-fis       
+          test-LD-mo100       
+          test-PE-models      
+          th232-rot-vib       
+          u235-blind          
+          u235-pfns-nubar     
+          u238-blind          
+          u238-gf             
+          u238-HFB-num-fis    
+          u238-HFB-num-fis-tun
+          u238-HFB-par-fis    
+          u238-rigid-soft-omp 
+          u238-rot-CC-direct-2"
+
+
 
 cd $EMPIREDIR/benchmarks
 
-files="a-ni58-pcross       
-       d-au197             
-       fe54-blind          
-       fe54-vib-CC-direct-2
-       HI-pcross-ccfus     
-       n_eu153-dir-msc-msd 
-       ni62-th-EGSM        
-       n-na23-prim-gam     
-       n-zr92-soft--dccomp 
-       p-th232             
-       p-tl205             
-       test-HRTW-fis       
-       test-LD-mo100       
-       test-PE-models      
-       th232-rot-vib       
-       u235-blind          
-       u235-pfns-nubar     
-       u238-blind          
-       u238-gf             
-       u238-HFB-num-fis    
-       u238-HFB-num-fis-tun
-       u238-HFB-par-fis    
-       u238-rigid-soft-omp 
-       u238-rot-CC-direct-2"
+if [ "$targetfile" = "all" ] ; then
+   files=$filelist
+elif [ -z $targetfile ] ; then
+   echo "Please type in the desired benchmark or 'all' to work on all of them"
+   exit
+else
+   match=0
+   for file in $filelist
+   do
+     if [ "$targetfile" = "$file" ] ; then
+        match=1
+     fi
+  #  test "$targetfile" = "$file"
+   done
+   if [ "$match" = "1" ] ; then   
+      files="$targetfile"
+   else
+      echo "$targetfile.inp is not in the list of benchmark files!"
+      exit
+   fi
+fi
 
 
 suffix_list="xsc lst out"
