@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3739 $
+Ccc   * $Rev: 3745 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-16 18:33:12 +0100 (Do, 16 Jän 2014) $
+Ccc   * $Date: 2014-01-16 23:44:03 +0100 (Do, 16 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -181,7 +181,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-      DOUBLE PRECISION esum
+      DOUBLE PRECISION esum, dtot, dincl
 
       INTEGER i, ia, kmax, ie, itmp
 
@@ -224,10 +224,15 @@ C
       WRITE (12,*) ' '
       ia = AEJc(Nejc)
 
-C     nspec = MIN0(NDECSE-1,INT((EMAx(1) - Q(nejc,1))/DE) + 1)
-C     IF (nspec.LE.1) RETURN
       nspec = kmax - 1
       IF(nspec.LT.1) RETURN
+
+      dtot  = 0.d0
+      dincl = 0.d0
+      DO nnuc = 1, NNUcd
+        dtot = dtot + CSEmis(nejc,nnuc)
+        if (ENDf(nnuc).NE.1) dincl = dincl + CSEmis(nejc,nnuc)
+      ENDDO
 
       IF (Nejc.EQ.0) THEN
 C
@@ -243,8 +248,9 @@ C
 C--------Exact endpoint
          WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
          WRITE(12,*) 
-         WRITE(12,'(10x,
-     &   ''Ave. <E> g cont.spec '',G12.6,'' MeV (incl)'')') esum/totspec
+         WRITE(12,'(2x,
+     &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
+     &     esum/totspec
          qout = qout + esum/totspec
          WRITE (12,*) ' '    
          WRITE (12,
@@ -355,39 +361,29 @@ C--------Inclusive DDX spectrum
          WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
      &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
      &     check_DE(nspec+1)*recorp,
-     &    ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
+     &     ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
 
          WRITE(12,*) 
-         WRITE(12,'(10x,
-     &        ''Ave. <E> '',A1,'' cont.spec '',G12.6,'' MeV (incl)'' )') 
-     &         SYMbe(Nejc),esum/totspec
+         WRITE(12,'(2x,
+     &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
+     &     '' MeV  (inclusive)'' )') SYMbe(Nejc),esum/totspec
 
-         qout = qout + esum/totspec
+         qout = qout + esum/totspec         ! multiplicity x <E>
+
+C        WRITE(12,'(2x,
+C    &     ''Ave. <Q> '',A2,'' cont.spec '',G12.6,
+C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
 
          WRITE (12,*) ' '    
-         WRITE (12,'(1x,'' Integrated spectrum   '',G12.6,'' mb'')')
-     &          totspec*DE      
+         WRITE (12,'(1x,'' Integrated spectrum   '',G12.6,
+     &     '' mb   (inclusive)'')') totspec*DE      
          WRITE (12,'(1x,'' Int. DDXS  spectrum   '',G12.6,'' mb'')')
-     &          ftmp*DE      
+     &     ftmp*DE      
       ENDIF
           
-C     csum = 0.d0
-C     dtmp = 0.d0
-C     DO nnuc = 1, NNUcd
-C       csum = csum + CSEmis(nejc,nnuc)
-C       if (ENDf(nnuc).NE.1) dtmp = dtmp + CSEmis(nejc,nnuc)
-C     ENDDO
-C     if (csum.gt.0) 
-C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-C    &   dtmp      
-C     IF(Nejc.ne.0) THEN
-C       WRITE (12,
-C    &      '(1x,    '' Total '',A2,''   emission   '',G12.6,'' mb'')')
-C    &          SYMbe(Nejc),csum
-C     ELSE
-C       WRITE (12,
-C    &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
-C     ENDIF
+      if (dincl.gt.0) 
+     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+     &   dincl      
       IF(Nejc.ne.0) THEN
         WRITE (12,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')

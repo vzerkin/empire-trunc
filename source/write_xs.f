@@ -277,7 +277,7 @@ C                      espec is the outgoing energy corresponding to the level "
                    WRITE(12,*) 
                    if(dtmp.gt.0) then
                      WRITE(12,'(10x,
-     &            ''Ave. <E> '',A1,'' cont.spec '',G12.6,'' MeV  for '',
+     &            ''Ave. <E> '',A2,'' cont.spec '',G12.6,'' MeV  for '',
      &            I3,''-'',A2,''-'',I3,A21)') SYMbe(Nejc),esum/dtmp,
      &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
@@ -290,7 +290,7 @@ C                      espec is the outgoing energy corresponding to the level "
                      qout = qout + esum/(CSPrd(nnuc)-xsdisc)
 
                      WRITE(12,'(10x,
-     &                ''Ave. <Q> '',A1,'' cont.spec '',G12.6,'' MeV'')') 
+     &                ''Ave. <Q> '',A2,'' cont.spec '',G12.6,'' MeV'')') 
      &                 SYMbe(Nejc),esum/(CSPrd(nnuc)-xsdisc)
                      WRITE(12,'(10x,A1,
      &                '' multiplicity       '',G12.6)') SYMbe(Nejc),cmul
@@ -326,7 +326,7 @@ C------------------Exclusive DE spectra (gammas)
                    if(dtmp.gt.0) then
                      WRITE(12,*) 
                      WRITE(12,'(2x,
-     &                 ''Ave. <E> g cont.spec '',G12.6,'' MeV  for '',
+     &                 ''Ave. <E>  g cont.spec '',G12.6,'' MeV  for '',
      &                 I3,''-'',A2,''-'',I3,A21)') esum/dtmp,
      &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc) 
 

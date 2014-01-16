@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3739 $
+Ccc   * $Rev: 3745 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-16 18:33:12 +0100 (Do, 16 Jän 2014) $
+Ccc   * $Date: 2014-01-16 23:44:03 +0100 (Do, 16 Jän 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -21,16 +21,17 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C     COMMON variables
 C
       DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW)
-      DOUBLE PRECISION S1, SINl, TOTcs, SINlcc, SINlcont
+      DOUBLE PRECISION SINl, TOTcs, SINlcc, SINlcont
       COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
       COMMON /ELASTIC/ ELTl
-      COMMON /WAN   / S1
+C     COMMON /WAN/ S1
 C
 C Dummy arguments
 C
@@ -39,18 +40,18 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ftmp, 
-     &                 e1tmp, ecms, einlab, el, ener, p1, parcnj,
-     &                 qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW),
-     &                 sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, dtmp
+     &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,
+     &    qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW), selast,
+     &    sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, dtmp, S1
 
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
       LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal, lodd
       DOUBLE PRECISION E1, E2, SIGQD, XM1
-      INTEGER i, ichsp, ip, itmp1, j, k, l, lmax, lmin, maxlw, mul,
+      INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
-     &  ilev3, ncoef3, numcc, jcc   
+     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l   
       DOUBLE PRECISION PAR
       LOGICAL logtmp, TMP_isotropic
       INTEGER iwin, ipipe_move
@@ -80,9 +81,9 @@ C-----Reduced mass corrected for proper mass values
 
       el = EINl
       ecms = EIN
-      S1 = 0.5
+      S1 = 0.5d0
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
-     &    - SEJc(Npro).EQ.0.0D0) S1 = 1.0
+     &    - SEJc(Npro).EQ.0.0D0) S1 = 1.d0
       ELAcs = 0.D0
       TOTcs = 0.D0
       ABScs = 0.D0
@@ -91,13 +92,13 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-      stl = 0.d0
-      sel = 0.d0
+	stl = 0.d0
+	sel = 0.d0
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
      &       INT(A(Ntrg)), INT(EINl*1000000)
-
+C
 C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
@@ -108,31 +109,33 @@ C--------Here the old calculated files are read
          OPEN (45,FILE = (ctldir//ctmp23//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
-         READ (45,END = 50) lmax, ener, IRElat(Npro,Ntrg)
+         READ (45,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
-               READ (45,END = 50) ftmp
+               READ (45,END = 50,ERR=50) ftmp
                if(l+1.le.NDLW) THEN 
-                     stl(l + 1) = ftmp
+                 stl(l + 1) = ftmp
                  IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(ftmp)
                endif
             ENDDO
-
-            READ (45,END = 50) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+            READ (45,END = 50,ERR=50) 
+     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
-            IF (IOUt.EQ.5) WRITE (46,'(A21,6(e12.6,1x))')
-     &                  'EL,TOT,ABS,INEL,CC;CSFus XSs:', ELAcs, TOTcs,
-     &                    ABScs, SINl, SINlcc, CSFus
-            READ (45,END = 300) L
+            IF (IOUt.EQ.5) THEN
+              WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus'
+              WRITE (46,'(1x,6(e12.6,1x))')
+     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+            ENDIF
+            READ (45,END = 300, ERR=300) L
             IF(L.EQ.123456) THEN
-              IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw
+              IF (IOUt.EQ.5) WRITE (46,*) L
               DO l = 0, maxlw
-                READ (45,END = 300) ftmp
+                READ (45,END = 300, ERR=300) ftmp
                 if(l+1.le.NDLW) THEN 
-                      sel(l + 1) = ftmp
+                  sel(l + 1) = ftmp
                   IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(ftmp)
                 endif
               ENDDO
@@ -143,7 +146,6 @@ C--------Here the old calculated files are read
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
-              WRITE (8,*)
               WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
@@ -164,7 +166,6 @@ C
               
                if (ncoef1.eq.0) CYCLE  ! skipping closed channels
 
-C              write(*,*) 'DIR ilev=',ilev1, ' #Ls=', ncoef1
 C              DIR PLs
                DO j= 1 , ncoef1 ! skipping DIR expansion
                  READ (45,*,END = 45,ERR = 45)  
@@ -182,7 +183,7 @@ C              CN PLs
                    PL_CN(itmp2,i) = dtmp  
                  endif
                ENDDO
-C              write(*,*) 'CN  ilev=',ilev2,
+C              write(*,*) 'CN ilev=',ilev2,
 C    &           ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
               ENDDO
   45          CLOSE (45)
@@ -233,7 +234,7 @@ C
 
       ENDIF
 C-----Calculation of fusion cross section for photon induced reactions
-   52 IF (INT(AEJc(Npro)).EQ.0) THEN
+   52 IF (NINT(AEJc(Npro)).EQ.0) THEN
          IF (SDRead) THEN
 C-----------Reading of spin distribution from file SDFILE
 C           If you have file "SDFILE" -> it is possible to use
@@ -257,13 +258,17 @@ C           Reading no more than 2*NDLW rows
             DO i = 1, 2*NDLW
                READ (43,*,END = 60) cnj, parcnj, csvalue
 C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
-               IF (2*cnj - DINT(2*cnj).NE.0.00)
-     &              STOP 'cnJ!=n*1/2, n=0,+-1...  in SDREAD file'
+               IF (2*cnj - DINT(2*cnj).NE.0.d0) THEN
+                WRITE(8,*)'ERROR: cnJ!=n*1/2, n=0,+-1... in SDREAD file'
+                STOP 'ERROR: cnJ!=n*1/2, n=0,+-1... in SDREAD file'
+               ENDIF
                j = IDNINT(cnj + S1)
-               IF (parcnj.EQ.1.) ip = 1
-               IF (parcnj.EQ. - 1.) ip = 2
-               IF (parcnj.NE.1 .AND. parcnj.NE. - 1)
-     &              STOP 'ParcnJ!=+-1 in SDREAD file'
+               IF (NINT(parcnj).EQ.1) ip = 1
+               IF (NINT(parcnj).EQ. -1) ip = 2
+               IF (NINT(parcnj).NE.1 .AND. NINT(parcnj).NE. -1) THEN
+                 WRITE(8,*) 'ERROR: ParcnJ != +-1 in SDREAD file'
+                 STOP 'ERROR: ParcnJ != +-1 in SDREAD file'
+               ENDIF
                POP(NEX(1),j,ip,1) = csvalue
                CSFus = CSFus + POP(NEX(1),j,ip,1)
                csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
@@ -639,7 +644,6 @@ C                CLOSE(47,STATUS='DELETE')
               ENDIF
 
             ELSE
-
               IF (DEFormed) THEN
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
 C               including CN calculation
@@ -1040,9 +1044,10 @@ C-----Storing transmission coefficients for the incident channel
          DO l = 0, maxlw
             WRITE (46,*) l, SNGL(stl(l + 1))
          ENDDO
-         WRITE (46,'(1x,A30,6(e12.6,1x))') 'EL,TOT,REAC,INEL,CC,CSFus:',
-     &          ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
-         WRITE (46,'(1x,I6)') 123456 
+         WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus'
+	   WRITE (46,'(1x,6(E12.6,1x))') 
+     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
+         WRITE (46,'(1x,I6)') 123456
          DO l = 0, maxlw
             WRITE (46,*) l, SNGL(sel(l + 1))
          ENDDO
@@ -1057,8 +1062,8 @@ C-----Storing transmission coefficients for the incident channel
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
-      l = 123456
-      WRITE (45) l 
+      L = 123456
+      WRITE (45) L 
       DO l = 0, maxlw
          WRITE (45) sel(l + 1)
       ENDDO
@@ -1310,15 +1315,15 @@ C
      & '(''  WARNING: Maximum stable spin (rot. limit) Jstab < '',I3)') 
      & Jstab(1) + 1
           IF(Jstab(1).LE.NDLW) then
-            ftmp1 = 0.d0
+            ftmp = 0.d0
             DO j = Jstab(1), min(NDLW,NLW)
-              ftmp1 = ftmp1 + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
+              ftmp = ftmp + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
               POP(NEX(1),j,1,1) = 0.d0
               POP(NEX(1),j,2,1) = 0.d0
             ENDDO
-            CSFus = CSFus - ftmp1
+            CSFus = CSFus - ftmp
             WRITE (8,'(''  WARNING: Some fusion cross section lost : '',
-     & F9.3,'' mb, due to the stability limit'')') ftmp1  
+     & F9.3,'' mb, due to the stability limit'')') ftmp  
           ELSE
             WRITE (8,
      &'(''  WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
