@@ -116,6 +116,7 @@ C-V  13/09 Changed the way of reading strings to make the code more robust
 C-V        (for some compiler on linux it was failing) 
 C-V  13/12 Allow for isomer production without blank line delimiter.
 C-V  14/01 Check the order of Legendre expansion for elastic ang.distr.
+C-V        Try to fit tabulated distribution.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -4325,8 +4326,8 @@ C* Check if Legendre coefficients are given explicitly
         IF(LHI.GE.LMX) STOP 'REAMF6 - LMX array capacity exceeded'
         IF(LHI.LE. 1 ) THEN
           PRINT *,'WARNING - Invalid expansion order'
-     &           ,' - switch to tabular data'
-          GO TO 440
+     &           ,' - try to fit tabular data'
+          GO TO 432
         END IF
         READ (LIN,891) REC
 C* 
@@ -4342,7 +4343,7 @@ C...    IF(LHI.LE.LOMX+1) THEN
         END IF
       END IF
 C*
-      PRINT *,'WARNING - Elastic angular distributions'
+  432 PRINT *,'WARNING - Elastic angular distributions'
      &       ,' reconstructed from tabular data'
 C*
 C* Convert tabulated distribution to Legendre polynomial expansion
