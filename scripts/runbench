@@ -2,6 +2,12 @@
 # Script to run Empire for all the input files in benchmarks directory, 
 # keeping only the original files and the .lst and .xsc files
 #
+echo par1=$0
+echo par2=$1
+echo par3=$2
+echo par3=$3
+echo EMPIREDIR=$EMPIREDIR
+
 option=$1
 targetfile=$2
 
@@ -30,7 +36,8 @@ filelist="a-ni58-pcross
           u238-rigid-soft-omp 
           u238-rot-CC-direct-2"
 
-
+echo option    =$option
+echo targetfile=$targetfile
 
 cd $EMPIREDIR/benchmarks
 
@@ -69,6 +76,8 @@ if [ "$option" = "run" ] ; then
    error=0
    for file in $files
    do
+     echo "" 1>&2
+     echo ".......Running benchmark on [$file]......." 1>&2
      $EMPIREDIR/scripts/runE $file
      grep -q 'CALCULATIONS COMPLETED SUCCESSFULLY' $file.lst
      if [ "$?" = 1 ] ; then
