@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3751 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3750 $
+C CVS Version Management $Revision: 3751 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -390,9 +390,9 @@ C              !keep a sum of events where ucndump is negative
      &                                'ejectile energy + c.n. energy=',
      &                               etotemiss + UCNdump,test
          IF (test.GE.0.001D0) THEN
-            WRITE (*,*) 'etotemiss,ucndump,convmass,ecmproj:',
+            WRITE (*,*) 'ERROR: etotemiss,ucndump,convmass,ecmproj:',
      &                   etotemiss, UCNdump, CONvmass, ECMproj
-            STOP ' no energy balance'
+            STOP ' ERROR: no energy balance in HMS'
          ENDIF
          nubin = MIN(MAX(INT(UCNdump/DEBin),0),NDIM_EBINS)
 C
@@ -2474,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3750 $')
+99005 FORMAT ('  xddhms version: $Revision: 3751 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C

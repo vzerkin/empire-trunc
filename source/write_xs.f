@@ -366,17 +366,30 @@ C------------------Exclusive DE spectra (gammas)
 
               qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
 
-              WRITE(12,'( 2x,
-     &            '' Total <Q> cont.spec '',G12.6,'' MeV  for '',
-     &         I3,''-'',A2,''-'',I3,'' decay'')') qout,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)) 
-              WRITE(12,'( 2x,
-     &         '' Qin                 '',G12.6,'' MeV'')') qin
-              WRITE(12,'( 2x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',F6.2,''%)'')')
-     &           qin - qout, (qin - qout)/qin*100
-                   
-              WRITE(12,*) 
+              WRITE(12,*)
+              WRITE(12,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',
+     &                /, 1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
+     &        qin, qout
+
+              WRITE(12,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
+     &           qin - qout, (qin - qout)/qin*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+              WRITE(8,*)
+              WRITE(8,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
+     &                   1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
+     &        qin, qout
+
+              WRITE(8,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
+     &           qin - qout, (qin - qout)/qin*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+                      
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3751 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3303,7 +3303,6 @@ C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
 C     IF (nexrt.LE.0) nexrt = 1  ! changed to try getting better balance, Nov 2012
-C     IF (ENDf(1).GT.0 .and. RECOIL.GT.0) THEN
       IF (ENDf(1).GT.0 .and. RECOIL.GT.0 
      &   .and. nexrt.GT.0 .and. Nejc.gt.0) THEN
 C

@@ -1,6 +1,6 @@
-!cc   * $Rev: 3750 $
+!cc   * $Rev: 3751 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+!cc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3447,14 +3447,14 @@ C      IPArCOV = 0
      >    ERR=753)
 C     VERSIONNUMBER = 3.2
 C     VERSIONNAME   = MALTA
-      read(23,'(16x,A5)',ERR=753,END=7531) emp_ver
+      read(23,'(16x,A6)',ERR=753,END=7531) emp_ver
       read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
       close(23)
       goto 7541
- 7531 emp_ver='3.2   '
+ 7531 emp_ver='3.2.2 '
       emp_nam='MALTA '
  7541 WRITE(8,'(A44,A6,A2)') 
-     > '                        |    E M P I R E  - ',emp_ver,' |'
+     > '                        |    E M P I R E  - ',emp_ver,'|'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,'(A33,A6,A13)')
@@ -3463,7 +3463,7 @@ C     VERSIONNAME   = MALTA
      > '                       |                          |'
       GOTO 754
   753 WRITE (8,*)
-     > '                       |    E M P I R E  - 3.2    |'
+     > '                       |    E M P I R E  - 3.2.2  |'
       WRITE (8,*)
      > '                       |                          |'
       WRITE (8,*)
