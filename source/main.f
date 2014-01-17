@@ -1,6 +1,6 @@
-cc   * $Rev: 3721 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+cc   * $Rev: 3748 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-01-17 09:26:57 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -18,20 +18,20 @@ Ccc   ********************************************************************
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 C
-	INCLUDE "main_common.h"
+      INCLUDE "main_common.h"
 C
 C Local variables
 C
       DOUBLE PRECISION xscclow,totcorr 
-      DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd	
+      DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd
       DOUBLE PRECISION epre  
 
-      INTEGER	nnuc,nnurec,nejcec,ncoll,iret
+      INTEGER nnuc,nnurec,nejcec,ncoll,iret
 
       EIN  = 0.0d0
       epre = EIN
 
-	call initial()
+      call initial()
 C-----
 C-----Read and prepare input data
 C-----
@@ -52,29 +52,29 @@ C       For a proper consideration of fission and capture competition in the
 C       ECIS CN calculation, further changes needed in tl.f (to be done later)
         call fission_width()
 C
-	  call get_ecis_inelastic(nejcec,nnurec,ncoll,xscclow,totcorr)
+        call get_ecis_inelastic(nejcec,nnurec,ncoll,xscclow,totcorr)
 C
 C       Preequilibrium 
 C
-	  CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,totcorr)
+        CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,totcorr)
 
         POPmax(1) = CSFus*1.0E-25
 C-------Start DO loop over decaying nuclei
         DO nnuc = 1, NNUcd
 
           IF(QPRod(nnuc).LT.-999.d0) CYCLE
- 	    CALL calc_fission(nnuc)
+        CALL calc_fission(nnuc)
 
           CALL HF_decay(ncoll,nnuc,nnurec,nejcec,iret,totcorr)
-	    
-		IF(iret.gt.0) GOTO 10 ! GOTO 1155 
+                              
+        IF(iret.gt.0) GOTO 10 ! GOTO 1155 
         
-	  ENDDO
+        ENDDO
 C-------END of DO loop over decaying nuclei
 C
         CALL write_xs()
 
-	  CALL write_ENDF_spectra(totcorr,corrmsd,
+        CALL write_ENDF_spectra(totcorr,corrmsd,
      &    xscclow,xsinl,xsmsc,tothms,totemis)
 C        
 C       end_of_calc is called in this if-block
@@ -82,15 +82,15 @@ C
    10   IF( FITomp.GE.0 ) THEN
           CALL normal_read()   
         ELSE
-	    CALL OMPFIT_read()
+         CALL OMPFIT_read()
         ENDIF
-	  CALL new_energy_calc(epre)
+        CALL new_energy_calc(epre)
 C
         CALL EMPDAXS
 C
       ENDDO
 
-	RETURN
+      RETURN
       END
       subroutine initial
       implicit none
@@ -156,14 +156,14 @@ C
 C     
 C     local variables
       integer nejc,i,nnuc,nuc_print,iloc,izares,nnur   
-  	  DOUBLE PRECISION ares, zres
+      DOUBLE PRECISION ares, zres
 C-----
 C     Initialization of energy dependent quantities 
 C
       ELCncs  = 0.0D+0 ! Clear CN elastic cross section (1/4*pi) 
       cel_da  = 0.0D+0     
       checkXS = 0.0D+0   
-	
+        
       nfission= 0
       nepfns  = 0             
       enepfns = 0.d0
@@ -522,7 +522,7 @@ C
 
       IF (EIN.LT.0.0D0) THEN
           CALL end_of_calc()
-	  ELSE
+          ELSE
           WRITE (8,
      &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
           WRITE (8,'(1x,61(''=''))')
@@ -611,7 +611,7 @@ C
 C     local variables
 C
       DOUBLE PRECISION da
-      INTEGER iang	    
+      INTEGER iang    
 
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN
          WRITE(8,*) EIN,epre
