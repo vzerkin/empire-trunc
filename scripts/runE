@@ -175,7 +175,7 @@ def runE(proj):
         # Sorting the newly created C4 file
         if (not os.path.exists(proj+'-raw.c4')):
             if not isEmpty('TMP.c4'): 
-			    cp('TMP.c4',proj+'-raw.c4')	
+                cp('TMP.c4',proj+'-raw.c4')	
                 mv('TMP.c4',proj+'.c4')	
                 cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
                 os.system('"%s" %s' % (cmd, proj) )
