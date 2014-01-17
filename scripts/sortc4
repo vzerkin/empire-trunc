@@ -17,7 +17,14 @@ if [ "$1" = "" ]
     echo -n 'Choose one of the above (without .c4 extention!): '
     read file
 fi
-#echo ' '
+if [ -f $file.c4 ]; then
+   echo 'Sorting C4 file stored as :'  $file.c4
+else
+   echo 'C4 file missing:'  $file.c4
+   exit
+fi
+
+echo ' '
 #if [ -f $file-raw.c4 ]; then
 #   echo 'Original C4 file stored as :'  $file-raw.c4
 #  Make a local copy of the original C4 file to $file-raw.c4
