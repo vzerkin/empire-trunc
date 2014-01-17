@@ -292,16 +292,16 @@ C                      espec is the outgoing energy corresponding to the level "
                      WRITE(12,'(10x,
      &                ''Ave. <Q> '',A2,'' cont.spec '',G12.6,'' MeV'')') 
      &                 SYMbe(Nejc),esum/(CSPrd(nnuc)-xsdisc)
-                     WRITE(12,'(10x,A1,
+                     WRITE(12,'(10x,A2,
      &                '' multiplicity       '',G12.6)') SYMbe(Nejc),cmul
                    endif
                    WRITE(12,*) 
                    WRITE(12,'(10x,
-     &              ''Integral '',A1,'' cont.spec '',G12.6,'' mb''  )') 
+     &              ''Integral '',A2,'' cont.spec '',G12.6,'' mb''  )') 
      &             SYMbe(Nejc),dtmp
 
                    WRITE(12,'(10x,
-     &                ''Popul. cross section '',G12.6,'' mb'' )') 
+     &                ''Popul. cross section  '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
 
@@ -334,24 +334,24 @@ C------------------Exclusive DE spectra (gammas)
                      IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
                      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
                      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
-                     WRITE(12,'(2x,''g discr.levels       '',G12.6)') 
+                     WRITE(12,'(2x,'' g discr.levels       '',G12.6)') 
      &                 xsdisc
 
                      cmul = dtmp/(CSPrd(nnuc)-xsdisc)
                      qout = qout + cmul*esum/dtmp
                      WRITE(12,'(2x,
-     &                 ''Ave. <Q> g cont.spec '',G12.6,'' MeV'')') 
+     &                 ''Ave. <Q>  g cont.spec '',G12.6,'' MeV'')') 
      &                 cmul*esum/dtmp  
-                     WRITE(12,'(2x,''g multiplicity       '',G12.6)') 
+                     WRITE(12,'(2x,'' g multiplicity       '',G12.6)') 
      &                 cmul
  
                    endif
                    WRITE(12,*) 
                    WRITE(12,'(2x,
-     &                  ''Total Integr.(gamma) '',G12.6,'' mb'' )') 
+     &                  ''Total Integr.(gamma)  '',G12.6,'' mb'' )') 
      &                  dtmp 
                    WRITE(12,'(2x,
-     &                  ''Popul. cross section '',G12.6,'' mb'' )') 
+     &                  ''Popul. cross section  '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))
                    WRITE(12,*) 
 
@@ -364,12 +364,13 @@ C------------------Exclusive DE spectra (gammas)
                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
 
+	 
               qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
 
               WRITE(12,*)
               WRITE(12,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',
      &                /, 1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &        qin, qout
+     &        qout, qin
 
               WRITE(12,'( 1x,
      &         '' Energy balance      '',G12.6,'' MeV ('',
@@ -381,7 +382,7 @@ C------------------Exclusive DE spectra (gammas)
               WRITE(8,*)
               WRITE(8,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
      &                   1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &        qin, qout
+     &        qout, qin
 
               WRITE(8,'( 1x,
      &         '' Energy balance      '',G12.6,'' MeV ('',
