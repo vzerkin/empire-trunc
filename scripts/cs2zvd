@@ -1,4 +1,4 @@
-#! /bin/sh -
+#!/bin/sh -
 #script to produce ZVView plots from the *.xsc files
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
@@ -17,57 +17,58 @@ echo -n 'Choose one of the above (without .xsc extention!): '
 read file
 fi                          
 # Deleting previous plots
-if [ -f "$file-ztot.zvd"      ] rm "$file-ztot.zvd"     
-if [ -f "$file-zel.zvd"       ] rm "$file-zel.zvd"      
-if [ -f "$file-znon.zvd"      ] rm "$file-znon.zvd"     
-if [ -f "$file-zg.zvd"        ] rm "$file-zg.zvd"       
-if [ -f "$file-zf.zvd"        ] rm "$file-zf.zvd"       
-if [ -f "$file-zn.zvd"        ] rm "$file-zn.zvd"       
-if [ -f "$file-zp.zvd"        ] rm "$file-zp.zvd"       
-if [ -f "$file-zd.zvd"        ] rm "$file-zd.zvd"       
-if [ -f "$file-zt.zvd"        ] rm "$file-zt.zvd"       
-if [ -f "$file-zh.zvd"        ] rm "$file-zh.zvd"       
-if [ -f "$file-za.zvd"        ] rm "$file-za.zvd"       
-if [ -f "$file-z2n.zvd"       ] rm "$file-z2n.zvd"      
-if [ -f "$file-z3n.zvd"       ] rm "$file-z3n.zvd"      
-if [ -f "$file-Mu-bar.zvd"    ] rm "$file-Mu-bar.zvd"   
-if [ -f "$file-Nu-bar.zvd"    ] rm "$file-Nu-bar.zvd"   
-if [ -f "$file-break-up.zvd"  ] rm "$file-break-up.zvd" 
-if [ -f "$file-transfer.zvd"  ] rm "$file-transfer.zvd" 
-if [ -f "$file-reac-mech.zvd" ] rm "$file-reac-mech.zvd"
-
+if [ -f "$file-ztot.zvd"      ]; then rm "$file-ztot.zvd"; fi
+if [ -f "$file-zel.zvd"       ]; then  rm "$file-zel.zvd"; fi
+if [ -f "$file-znon.zvd"      ]; then  rm "$file-znon.zvd"; fi
+if [ -f "$file-zg.zvd"        ]; then  rm "$file-zg.zvd"; fi       
+if [ -f "$file-zf.zvd"        ]; then  rm "$file-zf.zvd"; fi       
+if [ -f "$file-zn.zvd"        ]; then  rm "$file-zn.zvd"; fi       
+if [ -f "$file-zp.zvd"        ]; then  rm "$file-zp.zvd"; fi       
+if [ -f "$file-zd.zvd"        ]; then  rm "$file-zd.zvd"; fi       
+if [ -f "$file-zt.zvd"        ]; then  rm "$file-zt.zvd"; fi       
+if [ -f "$file-zh.zvd"        ]; then  rm "$file-zh.zvd"; fi       
+if [ -f "$file-za.zvd"        ]; then  rm "$file-za.zvd"; fi       
+if [ -f "$file-z2n.zvd"       ]; then  rm "$file-z2n.zvd"; fi      
+if [ -f "$file-z3n.zvd"       ]; then  rm "$file-z3n.zvd"; fi      
+if [ -f "$file-Mu-bar.zvd"    ]; then  rm "$file-Mu-bar.zvd"; fi   
+if [ -f "$file-Nu-bar.zvd"    ]; then  rm "$file-Nu-bar.zvd"; fi   
+if [ -f "$file-break-up.zvd"  ]; then  rm "$file-break-up.zvd"; fi 
+if [ -f "$file-transfer.zvd"  ]; then  rm "$file-transfer.zvd"; fi 
+if [ -f "$file-reac-mech.zvd" ]; then  rm "$file-reac-mech.zvd"; fi
+															   
 #run cs2zvd to produce ZVView plots
 cp $file.xsc XSECTIONS.OUT
-if [ -f "$file-reac-mech.xsc" ] cp "$file-reac-mech.xsc" REAC-MECH.DAT  
-if [ -f "$file-transfer.xsc"  ] cp "$file-tranfer.xsc"   TRANSFER-XS.DAT
-if [ -f "$file-break-up.xsc"  ] cp "$file-break-up.xsc"  BREAK-UP-XS.DAT
+if [ -f "$file-reac-mech.xsc" ]; then  cp "$file-reac-mech.xsc" REAC-MECH.DAT; fi  
+if [ -f "$file-transfer.xsc"  ]; then  cp "$file-tranfer.xsc"   TRANSFER-XS.DAT; fi
+if [ -f "$file-break-up.xsc"  ]; then  cp "$file-break-up.xsc"  BREAK-UP-XS.DAT; fi
 rm -f CS2ZVD.INP
 ln -sf $EMPIREDIR/util/cs2zvd/CS2ZVD.INP CS2ZVD.INP
 #vi CS2ZVD.INP	
 $EMPIREDIR/util/cs2zvd/cs2zvd.exe 
-if [ -f "XS_(z,tot).zvd"   ] mv "XS_(z,tot).zvd"   $file-ztot.zvd     
-if [ -f "XS_(z,nel).zvd"   ] mv "XS_(z,nel).zvd"   $file-zel.zvd      
-if [ -f "XS_(z,nonel).zvd" ] mv "XS_(z,nonel).zvd" $file-znon.zvd     
-if [ -f "XS_(z,gamma).zvd" ] mv "XS_(z,gamma).zvd" $file-zg.zvd       
-if [ -f "XS_(z,f).zvd"     ] mv "XS_(z,f).zvd"     $file-zf.zvd       
-if [ -f "XS_(z,n).zvd"     ] mv "XS_(z,n).zvd"     $file-zn.zvd       
-if [ -f "XS_(z,p).zvd"     ] mv "XS_(z,p).zvd"     $file-zp.zvd       
-if [ -f "XS_(z,d).zvd"     ] mv "XS_(z,d).zvd"     $file-zd.zvd       
-if [ -f "XS_(z,t).zvd"     ] mv "XS_(z,t).zvd"     $file-zt.zvd       
-if [ -f "XS_(z,h).zvd"     ] mv "XS_(z,h).zvd"     $file-zh.zvd       
-if [ -f "XS_(z,a).zvd"     ] mv "XS_(z,a).zvd"     $file-za.zvd       
-if [ -f "XS_(z,2n).zvd"    ] mv "XS_(z,2n).zvd"    $file-z2n.zvd      
-if [ -f "XS_(z,3n).zvd"    ] mv "XS_(z,3n).zvd"    $file-z3n.zvd      
-if [ -f "XS_Mu-bar.zvd"    ] mv "XS_Mu-bar.zvd"    $file-Mu-bar.zvd   
-if [ -f "XS_Nu-bar.zvd"    ] mv "XS_Nu-bar.zvd"    $file-Nu-bar.zvd   
-if [ -f "XS_BREAK-UP.zvd"  ] mv "XS_BREAK-UP.zvd"  $file-break-up.zvd 
-if [ -f "XS_TRANSFER.zvd"  ] mv "XS_TRANSFER.zvd"  $file-transfer.zvd 
-if [ -f "XS_REAC-MECH.zvd" ] mv "XS_REAC-MECH.zvd" $file-reac-mech.zvd
-
-if [ -f "$file-reac-mech.xsc" ] rm REAC-MECH.DAT  
-if [ -f "$file-transfer.xsc"  ] rm TRANSFER-XS.DAT
-if [ -f "$file-break-up.xsc"  ] rm BREAK-UP-XS.DAT
-
-if [ -f "$file.xsc" ] rm XSECTIONS.OUT 
-rm CS2ZVD.INP
+if [ -f "XS_(z,tot).zvd"   ]; then  mv "XS_(z,tot).zvd"   $file-ztot.zvd; fi     
+if [ -f "XS_(z,nel).zvd"   ]; then  mv "XS_(z,nel).zvd"   $file-zel.zvd; fi     
+if [ -f "XS_(z,nonel).zvd" ]; then  mv "XS_(z,nonel).zvd" $file-znon.zvd; fi     
+if [ -f "XS_(z,gamma).zvd" ]; then  mv "XS_(z,gamma).zvd" $file-zg.zvd; fi     
+if [ -f "XS_(z,f).zvd"     ]; then  mv "XS_(z,f).zvd"     $file-zf.zvd; fi       
+if [ -f "XS_(z,n).zvd"     ]; then  mv "XS_(z,n).zvd"     $file-zn.zvd; fi       
+if [ -f "XS_(z,p).zvd"     ]; then  mv "XS_(z,p).zvd"     $file-zp.zvd; fi       
+if [ -f "XS_(z,d).zvd"     ]; then  mv "XS_(z,d).zvd"     $file-zd.zvd; fi       
+if [ -f "XS_(z,t).zvd"     ]; then  mv "XS_(z,t).zvd"     $file-zt.zvd; fi       
+if [ -f "XS_(z,h).zvd"     ]; then  mv "XS_(z,h).zvd"     $file-zh.zvd; fi       
+if [ -f "XS_(z,a).zvd"     ]; then  mv "XS_(z,a).zvd"     $file-za.zvd; fi       
+if [ -f "XS_(z,2n).zvd"    ]; then  mv "XS_(z,2n).zvd"    $file-z2n.zvd; fi      
+if [ -f "XS_(z,3n).zvd"    ]; then  mv "XS_(z,3n).zvd"    $file-z3n.zvd; fi      
+if [ -f "XS_Mu-bar.zvd"    ]; then  mv "XS_Mu-bar.zvd"    $file-Mu-bar.zvd; fi   
+if [ -f "XS_Nu-bar.zvd"    ]; then  mv "XS_Nu-bar.zvd"    $file-Nu-bar.zvd; fi   
+if [ -f "XS_BREAK-UP.zvd"  ]; then  mv "XS_BREAK-UP.zvd"  $file-break-up.zvd; fi 
+if [ -f "XS_TRANSFER.zvd"  ]; then  mv "XS_TRANSFER.zvd"  $file-transfer.zvd; fi 
+if [ -f "XS_REAC-MECH.zvd" ]; then  mv "XS_REAC-MECH.zvd" $file-reac-mech.zvd; fi
+																			
+if [ -f "$file-reac-mech.xsc" ]; then  rm REAC-MECH.DAT; fi
+if [ -f "$file-transfer.xsc"  ]; then  rm TRANSFER-XS.DAT; fi
+if [ -f "$file-break-up.xsc"  ]; then  rm BREAK-UP-XS.DAT; fi
+														 
+if [ -f "$file.xsc" ]; then  rm XSECTIONS.OUT; fi 
+rm CS2ZVD.INP								 
 exit
+
