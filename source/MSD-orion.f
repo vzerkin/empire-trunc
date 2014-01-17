@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3724 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-12 02:43:49 +0100 (So, 12 Jän 2014) $
+Ccc   * $Rev: 3747 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-01-17 09:10:30 +0100 (Fr, 17 Jän 2014) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -187,7 +187,7 @@ C
       EQUIVALENCE (KTRl(1),KTRl1)
       DATA holamu, holpmu/'AMU', 'PMU'/
 !-zvv-2013      OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
-	call ibuf_orion_open
+      call ibuf_orion_open
       QVAlue(2) = Q2
       QVAlue(3) = Q3
       KTRl(3) = Ktrl3
@@ -572,7 +572,7 @@ C-----write results to TAPE15
          WRITE (15,*) (xwr2(n,nlr),n = 1,n2mx)
   100 ENDDO
 !-zvv-2013      CLOSE(49)
-	call ibuf_orion_close
+      call ibuf_orion_close
 
 99070 FORMAT (21X,'VSX,DVX,WSX,WSF,VSO,WSO',18X,'=',6F8.3/21X,
      &        'DFN,DFNW,DFNS,DFNSP',14X,'=',4F8.3/21X,
@@ -2155,7 +2155,7 @@ C
 CB    CALCULATION OF CLEBSCH-GORDAN-COEFF. AND WRITING TO TAPE 49
 C
 !-zvv-2013      REWIND (49)
-	call ibuf_orion_rewind
+      call ibuf_orion_rewind
       kaspar = 2 - MOD(KASe,2)
       njl1mx = 1 + (ISTw1 - ISTw2)
       njl2mx = 1 + (ISTw2 - ISTw3)
@@ -2197,7 +2197,7 @@ C
                      ENDDO
                   ENDDO
 !-zvv-2013                  WRITE (49) (CLEbmm(n),n = 1,n2)
-	call ibuf_orion_write(CLEbmm,n2)
+                  call ibuf_orion_write(CLEbmm,n2)
                   IF (n2.NE.jlmttl) WRITE (8,99005) jla, jlb, n2, jlmttl
 99005             FORMAT (//////'   XSEC-63.  JA,JB,N2,JLMTTL=',4I5)
                ENDIF
@@ -2445,7 +2445,7 @@ C
       hatj2 = SQRT(FLOAT(J2Tw + 1))
       kaspar = 2 - MOD(KASe,2)
 !-zvv-2013      REWIND (49)
-	call ibuf_orion_rewind
+      call ibuf_orion_rewind
       jbmx = LDWmxb + 1
       jamx8 = LDWmxa + 1
       jamit8 = ISTw1
@@ -2478,7 +2478,7 @@ C
                IF (nlb.NE.0) THEN
                   DO ja = jamx, jami, -JAS
 !-zvv-2013                     BACKSPACE (49)
-	call ibuf_orion_BACKSPACE()
+                     call ibuf_orion_BACKSPACE()
                   ENDDO
                ELSEIF (jami.NE.1) THEN
                   jadpmx = jami - JAS
@@ -2976,7 +2976,7 @@ C
       IF (ji.LE.jx) THEN
          Jtl = ((jx + ji + 6 - 2*Kasem2)*(jx - ji + 2))/4
 !-zvv-2013         READ (49) (CLEbmm(n),n = 1,Jtl)
-	call ibuf_orion_read(CLEbmm,Jtl)
+         call ibuf_orion_read(CLEbmm,Jtl)
       ENDIF
       END
 C
@@ -3256,161 +3256,161 @@ c+	end
 c+
 
 C
-	subroutine ibuf_orion_open
+      subroutine ibuf_orion_open
 C	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
-	common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
-	DATA izv_yy,izv_yymax,izv_xx,izv_xxmax/0,0,0,0/
-	DATA izv_orion_flag/1/
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+      DATA izv_yy,izv_yymax,izv_xx,izv_xxmax/0,0,0,0/
+      DATA izv_orion_flag/1/
 c	DATA izv_orion_flag/0/
-	if (izv_orion_flag.ne.1) then
-	    OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
-	    return
-	endif
-	izv_yy=0
-	izv_xx=0
-	iibuf=0
-	return
-	end
+      if (izv_orion_flag.ne.1) then
+      OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
+      return
+      endif
+      izv_yy=0
+      izv_xx=0
+      iibuf=0
+      return
+      end
 
-	subroutine ibuf_orion_close
+      subroutine ibuf_orion_close
 C	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
 c-debug	write(*,*) '----MSD-orion:',izv_yy,izv_yymax,izv_xx,izv_xxmax
-	if (izv_orion_flag.ne.1) then
-	    CLOSE(49)
-	    return
-	endif
-	iibuf=0
-	return
-	end
+      if (izv_orion_flag.ne.1) then
+      CLOSE(49)
+      return
+      endif
+      iibuf=0
+      return
+      end
 
-	subroutine ibuf_orion_rewind
+      subroutine ibuf_orion_rewind
 C	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
-	common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
-	iibuf=0
-	izv_yy=0
-	if (izv_orion_flag.ne.1) then
-	    REWIND (49)
-	    return
-	endif
-	return
-	end
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+      iibuf=0
+      izv_yy=0
+      if (izv_orion_flag.ne.1) then
+      REWIND (49)
+      return
+      endif
+      return
+      end
 
-	subroutine ibuf_orion_write(CLEbmm,n2)
-	double precision CLEbmm(250)
-c	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
-	common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
-	iibuf1=iibuf*250+1
-	iibuf=iibuf+1
-	izv_yy=izv_yy+1
-	izv_xx=n2
-	if (izv_yy>izv_yymax) izv_yymax=izv_yy
-	if (izv_xx>izv_xxmax) izv_xxmax=izv_xx
+      subroutine ibuf_orion_write(CLEbmm,n2)
+      double precision CLEbmm(250)
+c     double precision buf(1000,250)
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+      iibuf1=iibuf*250+1
+      iibuf=iibuf+1
+      izv_yy=izv_yy+1
+      izv_xx=n2
+      if (izv_yy>izv_yymax) izv_yymax=izv_yy
+      if (izv_xx>izv_xxmax) izv_xxmax=izv_xx
 
-	if (izv_orion_flag.eq.1) then
-	    if (iibuf.ge.1000) then
+      if (izv_orion_flag.eq.1) then
+         if (iibuf.ge.1000) then
 c-debug	    if (iibuf.ge.10) then
 c		write (*,*) '----MSD-orion: structure error (iiput>max).'
 c		stop
-	write (*,*) '----MSD-orion: switch from array to scratch file'
-		call ibuf_orion_expand()
-	    endif
-	endif
+          write (*,*) '----MSD-orion: switch from array to scratch file'
+          call ibuf_orion_expand()
+         endif
+      endif
 
-	if (izv_orion_flag.ne.1) then
-	    WRITE (49) (CLEbmm(n),n = 1,n2)
-	    return
-	endif
-c	do ii=1,n2
+      if (izv_orion_flag.ne.1) then
+      WRITE (49) (CLEbmm(n),n = 1,n2)
+      return
+      endif
+c	  do ii=1,n2
 c	    buf(iibuf,ii)=CLEbmm(ii)
-c	enddo
-	buf(iibuf1)=n2
-	do ii=1,n2
-	    buf(iibuf1+ii)=CLEbmm(ii)
-	enddo
-	return
-	end
+c	  enddo
+          buf(iibuf1)=n2
+          do ii=1,n2
+             buf(iibuf1+ii)=CLEbmm(ii)
+          enddo
+          return
+          end
 
-	subroutine ibuf_orion_expand()
-c	double precision CLEbmm(250)
-c	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
-	common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
-	OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
-c	WRITE (*,*) '...ibuf_orion_expand(): iibuf=',iibuf
-	do iib=0,iibuf-2
-	    iib1=iib*250+1
-	    n2=buf(iib1)
-c	    WRITE (*,*) '---n2=',n2,(buf(iib1+n),n=1,n2)
-c	    WRITE (*,*) '---n2=',n2,(buf(iib1+n),n=1,3)
-c	    WRITE (49) (CLEbmm(n),n = 1,n2)
-	    WRITE (49) (buf(iib1+n),n=1,n2)
-	enddo
-	izv_orion_flag=0
-	return
-	end
+      subroutine ibuf_orion_expand()
+c     double precision CLEbmm(250)
+c     double precision buf(1000,250)
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+      OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
+c     WRITE (*,*) '...ibuf_orion_expand(): iibuf=',iibuf
+      do iib=0,iibuf-2
+        iib1=iib*250+1
+        n2=buf(iib1)
+c       WRITE (*,*) '---n2=',n2,(buf(iib1+n),n=1,n2)
+c       WRITE (*,*) '---n2=',n2,(buf(iib1+n),n=1,3)
+c       WRITE (49) (CLEbmm(n),n = 1,n2)
+        WRITE (49) (buf(iib1+n),n=1,n2)
+      enddo
+      izv_orion_flag=0
+      return
+      end
 
-	subroutine ibuf_orion_read(CLEbmm,n2)
-	double precision CLEbmm(250)
-c	double precision buf(1000,250)
-	double precision buf(250000)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	if (izv_orion_flag.ne.1) then
-	    READ (49) (CLEbmm(n),n = 1,n2)
-	    return
-	endif
-	iibuf1=iibuf*250+1
-	iibuf=iibuf+1
-	if (iibuf.gt.1000) then
-	    write (8,*) 
-     &    'ERROR: increase dimension of buff array in MSD-orion.f'
-	    stop
-     &    'ERROR: increase dimension of buff array in MSD-orion.f'
-	endif
-c	do ii=1,n2
-c	    CLEbmm(ii)=buf(iibuf,ii)
-c	enddo
-	do ii=1,n2
-	    CLEbmm(ii)=buf(iibuf1+ii)
-	enddo
-	return
-	end
+      subroutine ibuf_orion_read(CLEbmm,n2)
+      double precision CLEbmm(250)
+c     double precision buf(1000,250)
+      double precision buf(250000)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      if (izv_orion_flag.ne.1) then
+        READ (49) (CLEbmm(n),n = 1,n2)
+        return
+      endif
+      iibuf1=iibuf*250+1
+      iibuf=iibuf+1
+      if (iibuf.gt.1000) then
+         write (8,*) 
+     &   'ERROR: increase dimension of buff array in MSD-orion.f'
+         stop
+     &   'ERROR: increase dimension of buff array in MSD-orion.f'
+      endif
+c     do ii=1,n2
+c        CLEbmm(ii)=buf(iibuf,ii)
+c     enddo
+      do ii=1,n2
+         CLEbmm(ii)=buf(iibuf1+ii)
+      enddo
+      return
+      end
 
-	subroutine ibuf_orion_BACKSPACE()
-	double precision buf(1000,250)
-	common /zv_orion_flag/ izv_orion_flag
-	common /zv_iibuf_orion/ iibuf
-	common /zv_ibuf_orion/ buf
-	if (izv_orion_flag.ne.1) then
-	    BACKSPACE (49)
-	    return
-	endif
-	iibuf=iibuf-1
-	if (iibuf.lt.0) iibuf=0
-	return
-	end
+      subroutine ibuf_orion_BACKSPACE()
+      double precision buf(1000,250)
+      common /zv_orion_flag/ izv_orion_flag
+      common /zv_iibuf_orion/ iibuf
+      common /zv_ibuf_orion/ buf
+      if (izv_orion_flag.ne.1) then
+         BACKSPACE (49)
+         return
+      endif
+      iibuf=iibuf-1
+      if (iibuf.lt.0) iibuf=0
+      return
+      end
