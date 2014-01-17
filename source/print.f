@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3745 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-16 23:44:03 +0100 (Do, 16 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -208,9 +208,9 @@ C
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
       totspec = 0.d0
-	esum    = 0.d0
+      esum    = 0.d0
       DO i = 1, kmax
-	  ftmp =  CSE(i,Nejc,0)
+        ftmp =  CSE(i,Nejc,0)
         if(ftmp.le.0.d0) cycle
         itmp = 1
         if(i.eq.1 .or. i.eq.kmax) itmp = 2
@@ -241,7 +241,7 @@ C
          WRITE (12,'(''    Energy    mb/MeV'')')
          WRITE (12,*) ' '
          DO i = 1, nspec
-	     ftmp = CSE(i,Nejc,0) 
+           ftmp = CSE(i,Nejc,0) 
            if(ftmp.le.0.d0) cycle
            WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO

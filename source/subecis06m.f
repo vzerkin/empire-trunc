@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3714 $
-Ccc   * $Author: zerkinv $
-Ccc   * $Date: 2014-01-07 20:42:16 +0100 (Di, 07 Jän 2014) $
+Ccc   * $Rev: 3750 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -96,8 +96,8 @@ C     OPEN (89,FILE = 'file89')
 C     OPEN (90,FILE = 'file90')
 C     OPEN (91,FILE = 'file91')
 C     OPEN (93,FILE = 'file93')
-C	OPEN (94,FILE = 'file94')
-	OPEN (94,FILE = 'file94',form='unformatted')                      zv-2013
+C     OPEN (94,FILE = 'file94')
+      OPEN (94,FILE = 'file94',form='unformatted')                      zv-2013
       OPEN (MW,FILE = TRIM(fname)//'.out')
       OPEN (MS,FILE = 'file97')
 C     OPEN (99,FILE = 'file99')

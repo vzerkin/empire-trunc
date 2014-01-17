@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3636 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2013-12-10 09:30:28 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Rev: 3750 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3636 $
+C CVS Version Management $Revision: 3750 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -256,7 +256,8 @@ C        write(iuo,20)rijk
 C        20 format(25h starting random number =,2x,f16.0,tl1,1h )
 C        every 100000 events, print out a statement to screen:
          event = NEV
-         IF (DMOD(event,100000.D0).EQ.0.D0) WRITE (6,*) 'events=', NEV
+         IF (DMOD(event,100000.D0).EQ.0.D0) 
+     &     WRITE (*,*) ' Monte Carlo events (HMS) =', NEV
 
          CALL ZEROARRAYS
 
@@ -2473,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3636 $')
+99005 FORMAT ('  xddhms version: $Revision: 3750 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C

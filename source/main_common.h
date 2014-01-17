@@ -26,18 +26,19 @@ C
 
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
-      COMMON /init_empire/icalled,xcross
+      COMMON /init_empire/xcross,icalled
 
       CHARACTER*21 preaction(ndnuc)
-      COMMON /xsfiles/preaction
+      integer nuc_print
+      common /xsfiles/preaction,nuc_print
 
-      INTEGER	nepfns, nfission
+      INTEGER     nepfns, nfission
       DOUBLE PRECISION fnubar,enepfns(NDEPFN),csepfns(NDEPFN)
       COMMON /pfns_quant/nfission, nepfns, fnubar, enepfns, csepfns
 
       DOUBLE PRECISION xnorm(0:NDEJC,NDExclus)
       COMMON /HFloop/xnorm
-	 
+       
       DOUBLE PRECISION cel_da(NDAngecis), checkXS
       COMMON /emp_main/cel_da,checkXS   
 

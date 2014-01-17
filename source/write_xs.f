@@ -27,11 +27,11 @@ C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       ALLOCATE(cseaprnt(ndecse,ndangecis),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*)  
-     &		'ERROR: Insufficient memory for cseaprnt: write_xs()!'
+     &            'ERROR: Insufficient memory for cseaprnt: write_xs()!'
         WRITE(12,*) 
-     &		'ERROR: Insufficient memory for cseaprnt: write_xs()!'
+     &            'ERROR: Insufficient memory for cseaprnt: write_xs()!'
         STOP
-     &		'ERROR: Insufficient memory for cseaprnt: write_xs()!'
+     &            'ERROR: Insufficient memory for cseaprnt: write_xs()!'
       ENDIF
 
       if(allocated(check_DE)) deallocate(check_DE)
@@ -39,11 +39,11 @@ C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       ALLOCATE(check_DE(ndecse),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*)  
-     &		'ERROR: Insufficient memory for check_DE: write_xs()!'
+     &            'ERROR: Insufficient memory for check_DE: write_xs()!'
         WRITE(12,*) 
-     &		'ERROR: Insufficient memory for check_DE: write_xs()!'
+     &            'ERROR: Insufficient memory for check_DE: write_xs()!'
         STOP
-     &		'ERROR: Insufficient memory for check_DE: write_xs()!'
+     &            'ERROR: Insufficient memory for check_DE: write_xs()!'
       ENDIF
 C
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
@@ -73,7 +73,7 @@ C----
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
-             qout = 0.d0			  
+             qout = 0.d0                    
              DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -200,7 +200,7 @@ c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
                      ENDIF
                      if(ie.ne.1) then
                        check_DE(ie) = 2.0d0*PI*csum
-	               else
+                     else
                        check_DE(ie) =       PI*csum
                      endif
                    ENDDO
@@ -258,7 +258,7 @@ C                      espec is the outgoing energy corresponding to the level "
                    WRITE (12,*) ' '
                    DO ie = 1, nspec 
                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
-	                if (ie.eq.1) ftmp = ftmp*0.5d0
+                      if (ie.eq.1) ftmp = ftmp*0.5d0
                       if(ftmp.LE.0.d0) cycle
                       WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
      &                FLOAT(ie - 1)*DE/recorp, ftmp*recorp, 
@@ -281,7 +281,7 @@ C                      espec is the outgoing energy corresponding to the level "
      &            I3,''-'',A2,''-'',I3,A21)') SYMbe(Nejc),esum/dtmp,
      &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
-	               xsdisc = 0.d0
+                     xsdisc = 0.d0
                      IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
                      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
                      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
@@ -364,7 +364,7 @@ C------------------Exclusive DE spectra (gammas)
                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
 
- 	        qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
+              qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
 
               WRITE(12,'( 2x,
      &            '' Total <Q> cont.spec '',G12.6,'' MeV  for '',
@@ -375,8 +375,8 @@ C------------------Exclusive DE spectra (gammas)
               WRITE(12,'( 2x,
      &         '' Energy balance      '',G12.6,'' MeV ('',F6.2,''%)'')')
      &           qin - qout, (qin - qout)/qin*100
-			 
-	        WRITE(12,*) 
+                   
+              WRITE(12,*) 
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 

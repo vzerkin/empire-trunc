@@ -1,6 +1,6 @@
-!cc   * $Rev: 3730 $
+!cc   * $Rev: 3750 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-13 19:21:02 +0100 (Mo, 13 Jän 2014) $
+!cc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -19,7 +19,7 @@
 !cc   ********************************************************************
 !cc
       use nubar_reader
-	use empgdr
+      use empgdr
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -1003,7 +1003,7 @@ C              residual nuclei must be heavier than alpha
 C                 These nuclei are always considered inclusive
                   ENDf(nnur) = 2
                ENDIF
-            ENDDO	! end of nejc loop
+            ENDDO ! end of nejc loop
          ENDDO    ! end of nnuc loop 
 C
 C        Protection to avoid problems for HI reactions
@@ -1194,13 +1194,13 @@ C        Assigning the target gamma parameters from the input
 C 
          do i=1,10
            GDRpar(i,0) = GDRpar(i,NTArget)
-         enddo		 
-C	   Prepare gamma transmission parameters
+         enddo           
+C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
-	     CALL EMPAgdr() ! allocating memory for temporal gdr arrays
+           CALL EMPAgdr() ! allocating memory for temporal gdr arrays
            CALL read_GDRGFLDATA(Numram)
 
-	     CALL ULM(0,Numram)
+           CALL ULM(0,Numram)
            WRITE (8,*) ' -----------------------------------------'
            WRITE(8,*) ' TARGET GDR DATA:'
            CALL ULM_print(0)
@@ -1226,7 +1226,7 @@ C
              ENDIF
 
            ENDDO
-	     CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+           CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
            WRITE (8,*) ' -----------------------------------------'
          ENDIF
 
@@ -2236,8 +2236,8 @@ C
          CLOSE (79)
       ENDIF
 
-	CALL PRINPUT
-	RETURN
+      CALL PRINPUT
+      RETURN
 
 99010 FORMAT (1X,14(G10.4,1x))
       END
@@ -8352,7 +8352,7 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
                IF(DEF(1,0).EQ.0.d0) THEN
-			   DEF(1,0) = beta2x(k)
+                     DEF(1,0) = beta2x(k)
                  WRITE (8,
      &'('' Deformation of the target nucleus set to'',F6.3,1x,
      &  ''(FRDM)'')') beta2x(k)
@@ -9964,23 +9964,23 @@ C    &       DEFormed = .TRUE.
 C            If odd nucleus, then rotational model is always used
 C            It could be a bad approximation for a quasispherical nucleus
              IF(.not.DEFORMED) THEN
-	         WRITE (8,
+               WRITE (8,
      &'('' WARNING: Odd nucleus is assumed deformed               '')') 
 C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')') 
-	         WRITE (8,
+               WRITE (8,
      &'('' WARNING: Could be a bad approxim. for near-magic'')') 
                DEFormed = .TRUE.
 C              DEF(1,0) = 0.1d0
              ELSE
-	         WRITE (8,
+               WRITE (8,
      &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
              ENDIF
            ELSE
              IF(DEFORMED) THEN
-	         WRITE (8,
+               WRITE (8,
      &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
              ELSE
-	         WRITE (8,
+               WRITE (8,
      &'('' Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
              ENDIF
            ENDIF
@@ -10190,15 +10190,15 @@ C
 C       If odd nucleus, then rotational model is always used
 C       It could be a bad approximation for a quasispherical nucleus
         IF(.not.DEFORMED) THEN
-	    WRITE (8,
+          WRITE (8,
      &'('' WARNING: Odd nucleus is assumed deformed               '')') 
 C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')') 
-	    WRITE (8,
+          WRITE (8,
      &'('' WARNING: Could be a bad approxim. for near-magic'')') 
           DEFormed = .TRUE.
 C         DEF(1,0) = 0.1d0
         ELSE
-	    WRITE (8,
+          WRITE (8,
      &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
         ENDIF
         odd      = .TRUE.
@@ -10206,10 +10206,10 @@ C         DEF(1,0) = 0.1d0
         DYNam    = .FALSE.
       ELSE
         IF(DEFORMED) THEN
-	    WRITE (8,
+          WRITE (8,
      &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
         ELSE
-	    WRITE (8,
+          WRITE (8,
      &'('' Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
         ENDIF
       ENDIF
@@ -11033,28 +11033,28 @@ c     INCLUDE "global.h"
       INTEGER Ieof, Ipoten, Ki
       CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
-	INTEGER ilen
+      INTEGER ilen
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
       LOGICAL OMPAR_USEFILES
       COMMON /COMPAR_USEFILES/ OMPAR_USEFILES
-	if (.not.OMPAR_USEFILES) then
-	    call FINDPOT00(Ki,Ieof,Ipoten)
-	    return
-	endif
-	Ieof=0
-	write (aaa,'(i6.6)') Ipoten
-C	aaa=adjustl(aaa)
-	fileOutName=trim(empiredir)
-     1		//'/RIPL/optical/om-data'
-     1		//'/om-parameter-dir'
-     1		//'/omp-'//aaa//'.dat'
-!-debug	write (*,'(a)') trim(fileOutName)
-	close(Ki)
-	ilen=len(fileOutName)
+      if (.not.OMPAR_USEFILES) then
+          call FINDPOT00(Ki,Ieof,Ipoten)
+          return
+      endif
+      Ieof=0
+      write (aaa,'(i6.6)') Ipoten
+C     aaa=adjustl(aaa)
+      fileOutName=trim(empiredir)
+     1            //'/RIPL/optical/om-data'
+     1            //'/om-parameter-dir'
+     1            //'/omp-'//aaa//'.dat'
+!-debug     write (*,'(a)') trim(fileOutName)
+      close(Ki)
+      ilen=len(fileOutName)
       open(Ki,file=fileOutName(1:ilen),status='old',err=111)
-	return
-111	Ieof=1
-	return
+      return
+111   Ieof=1
+      return
       END
 C
 C
@@ -11226,7 +11226,7 @@ C-------Selecting only 2+ states
       SUBROUTINE assign_GDRGFLDATA
      &     (Numram,Kz,Ka,E,G,S,BETagfl2,S2Plusgfl)
 
-      use empgdr 	 
+      use empgdr   
 C
 C
       IMPLICIT NONE
@@ -11265,10 +11265,10 @@ C     INTEGER NG
 C              NG = NNG(i)
                E(1) = HE1(i)
                G(1) = HGW1(i)
-               S(1) = HCS1(i)	 
+               S(1) = HCS1(i)  
                E(2) = HE2(i)
                G(2) = HGW2(i)
-               S(2) = HCS2(i)	 
+               S(2) = HCS2(i)  
 C--------------Plujko_new-2005
                IF(Key_shape.NE.5) RETURN 
                GOTO 900
@@ -11299,8 +11299,8 @@ C--------------(classical sum rule with correction)
                  CS1 = cs0
                  CS2 = 0.d0
                ENDIF
-               S(1) = CS1	 
-               S(2) = CS2	 
+               S(1) = CS1      
+               S(2) = CS2      
 C--------------Plujko_new-2005
                IF(Key_shape.NE.5) RETURN
                GOTO 900
@@ -11352,10 +11352,10 @@ C        NG = 1
       ENDIF
       E(1) = EG1
       G(1) = GW1
-      S(1) = CS1	 
+      S(1) = CS1   
       E(2) = EG2
       G(2) = GW2
-      S(2) = CS2	 
+      S(2) = CS2   
 C-----Plujko_new-2005
       IF(Key_shape.NE.5)RETURN
 C-----Setting the GFL parameters '|beta|' from "defeff.dat"
@@ -11379,7 +11379,7 @@ C-----as 'beta' of the GFL model.
 C-----Setting the deformation parameter from "deflib.dat" file
 C-----for  calculation  of  the  GFL model parameter
       alpha2 = 0.d0      
-	DO i = 1, 9000
+      DO i = 1, 9000
          IF (kz.EQ.NANz(i) .AND. ka.EQ.NANa(i)) THEN
             alpha2 = HALpha2(i)
             EXIT

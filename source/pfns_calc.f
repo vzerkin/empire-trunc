@@ -2,7 +2,7 @@ Ccc   * $Rev: 3705 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
-	SUBROUTINE PFNS_calc(nnuc)
+      SUBROUTINE PFNS_calc(nnuc)
 
       use nubar_reader
 
@@ -10,7 +10,7 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 
-	INTEGER nnuc
+      INTEGER nnuc
 
 C     PFNS quantities  
 C     Total prompt fission spectra only for neutrons and assumed isotropic 
@@ -18,14 +18,14 @@ C     Total prompt fission spectra only for neutrons and assumed isotropic
      & tequiv, fmaxw, fnorm, eincid, eneutr, ftmp, 
      & post_fisn(NDEPFN), ratio2maxw(NDEPFN), fniueval
 
-	INTEGER iaf, izf, nejc, ie 
+      INTEGER iaf, izf, nejc, ie 
 
       DOUBLE PRECISION deltae_pfns
-	COMMON /pfns_res/deltae_pfns
+      COMMON /pfns_res/deltae_pfns
 
-      INTEGER	nepfns, nfission
+      INTEGER     nepfns, nfission
       DOUBLE PRECISION fnubar,enepfns(NDEPFN),csepfns(NDEPFN)
-	COMMON /pfns_quant/nfission, nepfns, fnubar, enepfns, csepfns
+      COMMON /pfns_quant/nfission, nepfns, fnubar, enepfns, csepfns
 
       fniueval = 1.d0
 C     Only PFNS of the neutron chain are considered
@@ -186,9 +186,9 @@ C
 C     end of PFNS calculations 
 C     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       RETURN
-	END
+      END
 
-	SUBROUTINE print_PFNS()
+      SUBROUTINE print_PFNS()
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -200,29 +200,29 @@ C     PFNS quantities
 C     Total prompt fission spectra only for neutrons and assumed isotropic 
       DOUBLE PRECISION tequiv, fmaxw, eneutr, ftmp
 
-	INTEGER ie
+      INTEGER ie
 
       DOUBLE PRECISION deltae_pfns
-	COMMON /pfns_res/deltae_pfns
+      COMMON /pfns_res/deltae_pfns
 
-      INTEGER	nepfns, nfission
+      INTEGER     nepfns, nfission
       DOUBLE PRECISION fnubar,enepfns(NDEPFN),csepfns(NDEPFN)
-	COMMON /pfns_quant/nfission, nepfns, fnubar, enepfns, csepfns
+      COMMON /pfns_quant/nfission, nepfns, fnubar, enepfns, csepfns
 
-	save csetmp
+      save csetmp
 C
 C     Special grid for printing, ONLY VALID for deltae_pfns = 0.1d0 
 C
-      data csetmp(2)/4.d-11/,	csetmp(3)/7.d-11/, csetmp(4)/1.d-10/, 
-     &     csetmp(5)/4.d-10/,	csetmp(6)/7.d-10/, csetmp(7)/1.d-9/ ,
+      data csetmp(2)/4.d-11/, csetmp(3)/7.d-11/, csetmp(4)/1.d-10/, 
+     &     csetmp(5)/4.d-10/, csetmp(6)/7.d-10/, csetmp(7)/1.d-9/ ,
      &     csetmp(8)/4.d-9/ , csetmp(9)/7.d-9/ , csetmp(10)/1.d-8/, 
-     &     csetmp(11)/4.d-8/,	csetmp(12)/7.d-8/, csetmp(13)/1.d-7/,
-     &     csetmp(14)/4.d-7/,	csetmp(15)/7.d-7/, csetmp(16)/1.d-6/,
-     &     csetmp(17)/4.d-6/,	csetmp(18)/7.d-6/, csetmp(19)/1.d-5/,
-     &     csetmp(20)/4.d-5/,	csetmp(21)/7.d-5/, csetmp(22)/1.d-4/,
-     &     csetmp(23)/4.d-4/,	csetmp(24)/7.d-4/, csetmp(25)/1.d-3/,
-     &     csetmp(26)/4.d-3/,	csetmp(27)/7.d-3/, csetmp(28)/1.d-2/,
-     &     csetmp(29)/4.d-2/,	csetmp(30)/7.d-2/
+     &     csetmp(11)/4.d-8/, csetmp(12)/7.d-8/, csetmp(13)/1.d-7/,
+     &     csetmp(14)/4.d-7/, csetmp(15)/7.d-7/, csetmp(16)/1.d-6/,
+     &     csetmp(17)/4.d-6/, csetmp(18)/7.d-6/, csetmp(19)/1.d-5/,
+     &     csetmp(20)/4.d-5/, csetmp(21)/7.d-5/, csetmp(22)/1.d-4/,
+     &     csetmp(23)/4.d-4/, csetmp(24)/7.d-4/, csetmp(25)/1.d-3/,
+     &     csetmp(26)/4.d-3/, csetmp(27)/7.d-3/, csetmp(28)/1.d-2/,
+     &     csetmp(29)/4.d-2/, csetmp(30)/7.d-2/
 
       csetmp(1) = enepfns(1)
       csetmp(31)= enepfns(2)
@@ -355,4 +355,4 @@ C
 C     end of PFNS calculations 
 C     ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
       RETURN
-	END
+      END

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3708 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-05 23:48:13 +0100 (So, 05 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -43,10 +43,10 @@ C Local variables
 C
       DOUBLE PRECISION BETagfl2, S2Plusgfl
       DOUBLE PRECISION E(2), esys1, esys2, ewsrs, G(2), S(2)
-	INTEGER ka, kz
-	
-     	ka = NINT(A(Nnuc))
-	kz = NINT(Z(Nnuc))
+      INTEGER ka, kz
+      
+      ka = NINT(A(Nnuc))
+      kz = NINT(Z(Nnuc))
 
       IF (GDRpar(7,Nnuc).EQ.0.0D0) GDRpar(7,Nnuc) = 1.d0
       IF (GQRpar(7,Nnuc).EQ.0.0D0) GQRpar(7,Nnuc) = 1.d0
@@ -141,7 +141,7 @@ C
          GMRpar(3,Nnuc) = 1.D0
       ENDIF
 
-	CALL INIT_GDR_COMMONS(Nnuc)
+      CALL INIT_GDR_COMMONS(Nnuc)
 
       RETURN
       END
@@ -190,7 +190,7 @@ C
          WRITE (8,99025)
 99025    FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR')
 C        WRITE (8,*) ' -----------------------------------------'
-      ELSE	    
+      ELSE      
          WRITE (8,*) ' -----------------------------------------'
          WRITE (8,99006) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
 99006    FORMAT (1X,' Gamma transitions parameters of ',

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3732 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-15 18:43:54 +0100 (Mi, 15 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC

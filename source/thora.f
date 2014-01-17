@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2942 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-07-17 10:01:11 +0200 (Di, 17 Jul 2012) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE THORA(IOUT)
 C
@@ -35,17 +35,17 @@ C
         ENDDAY=DT(3)
         ENDTIM = ENDTIM +  (ENDDAY-BEGDAY)*86400.
         DIFTIM=(ENDTIM-BEGTIM)/60.
-	DIFHOUR=0.d0
-	IF(DIFTIM.GT.60.d0) DIFHOUR=DIFTIM/60.D0
+      DIFHOUR=0.d0
+      IF(DIFTIM.GT.60.d0) DIFHOUR=DIFTIM/60.D0
         DIFTI1=(DIFTIM-INT(DIFTIM))*60.d0
-	DIFTI2=(DIFHOUR-INT(DIFHOUR))*60.
+      DIFTI2=(DIFHOUR-INT(DIFHOUR))*60.
         WRITE(IOUT,1003) time(1:2),time(3:4),time(5:6),
      >                   DATE(7:8),DATE(5:6),DATE(1:4)
-	IF(DIFTIM.LT.60.d0) THEN      
+      IF(DIFTIM.LT.60.d0) THEN      
           WRITE(IOUT,1002) INT(DIFTIM),NINT(DIFTI1)
-	ELSE
-          WRITE(IOUT,1004) INT(DIFHOUR),NINT(DIFTI2),NINT(DIFTI1)	
-	ENDIF  
+      ELSE
+          WRITE(IOUT,1004) INT(DIFHOUR),NINT(DIFTI2),NINT(DIFTI1) 
+      ENDIF  
       ENDIF
 
       RETURN

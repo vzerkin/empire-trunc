@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3747 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-01-17 09:10:30 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Rev: 3750 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -3222,42 +3222,42 @@ C
       END
 
 C
-C	Introduced by VZ, 2013
+C     Introduced by VZ, 2013
 C
-c+	subroutine ibuf_orion_open
-c+	OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
-c+	return
-c+	end
+c+    subroutine ibuf_orion_open
+c+    OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
+c+    return
+c+    end
 c+
-c+	subroutine ibuf_orion_close
-c+	CLOSE(49)
-c+	return
-c+	end
+c+    subroutine ibuf_orion_close
+c+    CLOSE(49)
+c+    return
+c+    end
 c+
-c+	subroutine ibuf_orion_rewind
-c+	REWIND (49)
-c+	return
-c+	end
+c+    subroutine ibuf_orion_rewind
+c+    REWIND (49)
+c+    return
+c+    end
 c+
-c+	subroutine ibuf_orion_write(CLEbmm,n2)
-c+	WRITE (49) (CLEbmm(n),n = 1,n2)
-c+	return
-c+	end
+c+    subroutine ibuf_orion_write(CLEbmm,n2)
+c+    WRITE (49) (CLEbmm(n),n = 1,n2)
+c+    return
+c+    end
 c+
-c+	subroutine ibuf_orion_read(CLEbmm,n2)
-c+	READ (49) (CLEbmm(n),n = 1,n2)
-c+	return
-c+	end
+c+    subroutine ibuf_orion_read(CLEbmm,n2)
+c+    READ (49) (CLEbmm(n),n = 1,n2)
+c+    return
+c+    end
 c+
-c+	subroutine ibuf_orion_BACKSPACE()
-c+	BACKSPACE (49)
-c+	return
-c+	end
+c+    subroutine ibuf_orion_BACKSPACE()
+c+    BACKSPACE (49)
+c+    return
+c+    end
 c+
 
 C
       subroutine ibuf_orion_open
-C	double precision buf(1000,250)
+C     double precision buf(1000,250)
       double precision buf(250000)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
@@ -3266,7 +3266,7 @@ C	double precision buf(1000,250)
       common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
       DATA izv_yy,izv_yymax,izv_xx,izv_xxmax/0,0,0,0/
       DATA izv_orion_flag/1/
-c	DATA izv_orion_flag/0/
+c     DATA izv_orion_flag/0/
       if (izv_orion_flag.ne.1) then
       OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
       return
@@ -3278,13 +3278,13 @@ c	DATA izv_orion_flag/0/
       end
 
       subroutine ibuf_orion_close
-C	double precision buf(1000,250)
+C     double precision buf(1000,250)
       double precision buf(250000)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
       common /zv_ibuf_orion/ buf
       common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
-c-debug	write(*,*) '----MSD-orion:',izv_yy,izv_yymax,izv_xx,izv_xxmax
+c-debug     write(*,*) '----MSD-orion:',izv_yy,izv_yymax,izv_xx,izv_xxmax
       if (izv_orion_flag.ne.1) then
       CLOSE(49)
       return
@@ -3294,7 +3294,7 @@ c-debug	write(*,*) '----MSD-orion:',izv_yy,izv_yymax,izv_xx,izv_xxmax
       end
 
       subroutine ibuf_orion_rewind
-C	double precision buf(1000,250)
+C     double precision buf(1000,250)
       double precision buf(250000)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
@@ -3328,9 +3328,9 @@ c     double precision buf(1000,250)
 
       if (izv_orion_flag.eq.1) then
          if (iibuf.ge.1000) then
-c-debug	    if (iibuf.ge.10) then
-c		write (*,*) '----MSD-orion: structure error (iiput>max).'
-c		stop
+c-debug         if (iibuf.ge.10) then
+c           write (*,*) '----MSD-orion: structure error (iiput>max).'
+c           stop
           write (*,*) '----MSD-orion: switch from array to scratch file'
           call ibuf_orion_expand()
          endif
@@ -3340,9 +3340,9 @@ c		stop
       WRITE (49) (CLEbmm(n),n = 1,n2)
       return
       endif
-c	  do ii=1,n2
-c	    buf(iibuf,ii)=CLEbmm(ii)
-c	  enddo
+c       do ii=1,n2
+c         buf(iibuf,ii)=CLEbmm(ii)
+c       enddo
           buf(iibuf1)=n2
           do ii=1,n2
              buf(iibuf1+ii)=CLEbmm(ii)

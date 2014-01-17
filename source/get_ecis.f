@@ -7,7 +7,7 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       
-	INTEGER nejcec,nnurec,ncoll 
+      INTEGER nejcec,nnurec,ncoll 
       DOUBLE PRECISION xsinlcont,xscclow,totcorr
 
 C     COMMON variables
@@ -22,7 +22,7 @@ C     Local variables
       INTEGER isigma0, irec, iang, iang1, nspec,  
      & i, ilv, itmp, icsl, icsh, ncon, isigma, isigma2, ie,
      & imint, imaxt, j, its, iloc      
-	DOUBLE PRECISION ecm, angstep, gang, ftmp, ggmr, ggqr, ggor,
+      DOUBLE PRECISION ecm, angstep, gang, ftmp, ggmr, ggqr, ggor,
      & xcse, popread, popl, poph, csum, echannel,  
      & coef, erecoil, weight, csmsdl, dcor
 
@@ -35,8 +35,8 @@ C     Local variables
       xsinlcont = 0.d0
       xscclow   = 0.d0
       totcorr   = 1.d0
-	elleg     = 0.d0
-	elleg(1)  = 1.d0 
+      elleg     = 0.d0
+      elleg(1)  = 1.d0 
 C
 C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0

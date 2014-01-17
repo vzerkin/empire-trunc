@@ -87,7 +87,7 @@ C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
         STOP 
      &    'ERROR: Insufficient memory for disc_int'
       ENDIF     
-	disc_int = 0.d0
+      disc_int = 0.d0
 
       if(allocated(check_DL)) deallocate(check_DL)
       ALLOCATE(check_DL(ndlv),STAT=myalloc)

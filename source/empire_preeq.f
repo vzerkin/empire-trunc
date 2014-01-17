@@ -10,22 +10,18 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
-      
-	DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd,totcorr
+
+      INCLUDE "main_common.h"
+C
+      DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd,totcorr
 
       LOGICAL nvwful, fexist
       CHARACTER*23 ctmp23
 
       DOUBLE PRECISION qmax,qstep,q2,q3,ftmp,echannel,dtmp 
-      INTEGER	ltrmax, i, nejc, nnur, itimes, its, iad, iam, ia, iang, ie 
-      INTEGER icalled
+      INTEGER ltrmax, i, nejc, nnur, itimes, its, iad, iam, ia, iang, ie 
 
 C     COMMON variables
-      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont       
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
-
-      LOGICAL lbreakup, ltransfer
-      COMMON /LPEXS/lbreakup, ltransfer 
 
       DOUBLE PRECISION crossNT(0:NDEJC),crossNTt,
      &                 crossPE(0:NDEJC),crossPEt
@@ -34,17 +30,14 @@ C     COMMON variables
       DOUBLE PRECISION specBU(0:NDEJC,ndecse),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
 
-      DOUBLE PRECISION ELTl(NDLW)    
-      COMMON /ELASTIC/ ELTl
-
       CHARACTER*3 ctldir
       DATA ctldir/'TL/'/
 
 C     initialization
       xsinl   = 0.d0
       xsmsc   = 0.d0
-     	tothms  = 0.d0
-	totemis = 0.d0  
+      tothms  = 0.d0
+      totemis = 0.d0  
       corrmsd = 1.d0
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),

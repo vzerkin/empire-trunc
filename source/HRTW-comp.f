@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3746 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 00:33:53 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 C
 C
       SUBROUTINE HRTW
@@ -129,6 +129,8 @@ C-----------do loop over ejectiles       ***done***
 C
 C-----------fission (may be a weak or strong channel)
             sumfis = 0.d0
+            TFIs   = 0.d0
+            ndivf = 1
             IF (FISsil(nnuc)) THEN
                IF (NINT(FISshi(nnuc)).EQ.1) THEN
                   CALL FISSION(nnuc,ke,jcn,sumfis)
@@ -192,7 +194,7 @@ C                 write(8,*)'DENhf after ejectile = ' ,nejc, sum
                ENDDO
 C--------------do loop over ejectiles       ***done***
 C--------------fission channel - the second HRTW entry
-               sumfis = ndivf*VT(TFIs)
+               IF(sumfis.gt.0.d0) sumfis = ndivf*VT(TFIs)
 C              write(8,*)'iteration sumfis = ',sumfis
 C--------------gamma emission - the second HRTW entry
 C              sumg = 0.d0
@@ -607,9 +609,9 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
 C
 C        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then 
-C	      write(*,*) 'HRTW=',Iec,Jc,Ipc
-C	      write(*,*) '     ',Nhrtw,sngl(Sum)
-C	   endif
+C           write(*,*) 'HRTW=',Iec,Jc,Ipc
+C           write(*,*) '     ',Nhrtw,sngl(Sum)
+C        endif
 C
 C--------
 C--------decay to discrete levels

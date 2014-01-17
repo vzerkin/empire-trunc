@@ -172,7 +172,7 @@ C     OPEN (102,FILE='OMP_A.DAT', STATUS = 'UNKNOWN')
 
       OPEN (261,STATUS='OLD',iostat=ios
      + ,FILE=trim(empiredir)//'/RIPL/optical/om-data'
-     +		//'/om-parameter-dir/omp-000001.dat')
+     +            //'/om-parameter-dir/omp-000001.dat')
       OMPAR_USEFILES = .false.
       if(ios .eq. 0) OMPAR_USEFILES=.true.
 c       write (*,*) '...OMPAR_USEFILES=',OMPAR_USEFILES

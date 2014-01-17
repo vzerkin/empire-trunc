@@ -11,16 +11,13 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 
+      INCLUDE "main_common.h"
+
       DOUBLE PRECISION totcorr,corrmsd 
-      DOUBLE PRECISION xscclow,xsinl,xsmsc,tothms,totemis	
+      DOUBLE PRECISION xscclow,xsinl,xsmsc,tothms,totemis   
 C
 C     common variables
 C
-      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont       ! ECISXS
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
-
-      LOGICAL lbreakup, ltransfer
-      COMMON /LPEXS/lbreakup, ltransfer 
 
       DOUBLE PRECISION crossNT(0:NDEJC),crossNTt,
      &                 crossPE(0:NDEJC),crossPEt
@@ -28,22 +25,11 @@ C
 
       DOUBLE PRECISION specBU(0:NDEJC,ndecse),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
-
-      DOUBLE PRECISION cel_da(NDAngecis), checkXS
-      COMMON /emp_main/cel_da,checkXS   
-
-      DOUBLE PRECISION elada(NDAngecis), elleg(NDAngecis) 
-      INTEGER neles 
-      COMMON /angula/elada,elleg,neles
-
-      integer icalled
-      DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
-      COMMON /init_empire/icalled,xcross
 C
 C     local variables
 C
       CHARACTER*21 reactionx
-      INTEGER nejc,i,nnuc,jn,jz,iz,ia,nuc_print,jfiss,jnmx,jzmx
+      INTEGER nejc,i,nnuc,jn,jz,iz,ia,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
       DOUBLE PRECISION eps,xnub,csinel,s_factor,qout
       DATA eps/1.d-8/
@@ -427,7 +413,7 @@ C-----
  
 C--------Print spectra of residues
          reactionx = '(z,x)  '
-	   qout = 0.d0
+         qout = 0.d0
          DO nnuc = 1, NNUcd    !loop over decaying nuclei
             IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
      &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
@@ -576,6 +562,6 @@ C-----S-FACTOR call
         IF(SFAct.EQ.2) s_factor = SFACTOR(csinel)      
         IF(SFAct.EQ.3) s_factor = SFACTOR(CSPrd(3))    
       ENDIF
-	   
+         
       RETURN
       END

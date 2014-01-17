@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3701 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -101,7 +101,7 @@ C     fanisot set to 0.d0 means isotropic distribution
       crossNTn= 0.d0
       specNT  = 0.d0
       specBU  = 0.d0
-	
+      
       if(allocated(ddxs)) deallocate(ddxs)
 
       ALLOCATE(ddxs(NDAngecis),STAT=myalloc)
@@ -785,7 +785,7 @@ C     totemis = 0.D0
             if(ftmp.le.0.d0) cycle
             CSEmsd(ie,nejc) = CSEmsd(ie,nejc) + ftmp
 
-	      ddxs = 0.d0
+            ddxs = 0.d0
 
             Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
      &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng, PI)

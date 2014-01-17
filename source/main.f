@@ -1,6 +1,6 @@
-cc   * $Rev: 3748 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-01-17 09:26:57 +0100 (Fr, 17 Jän 2014) $
+cc   * $Rev: 3750 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -63,7 +63,7 @@ C-------Start DO loop over decaying nuclei
         DO nnuc = 1, NNUcd
 
           IF(QPRod(nnuc).LT.-999.d0) CYCLE
-        CALL calc_fission(nnuc)
+          CALL calc_fission(nnuc)
 
           CALL HF_decay(ncoll,nnuc,nnurec,nejcec,iret,totcorr)
                               
@@ -82,7 +82,7 @@ C
    10   IF( FITomp.GE.0 ) THEN
           CALL normal_read()   
         ELSE
-         CALL OMPFIT_read()
+          CALL OMPFIT_read()
         ENDIF
         CALL new_energy_calc(epre)
 C
@@ -99,7 +99,7 @@ C
 C
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
-      COMMON /init_empire/icalled,xcross
+      COMMON /init_empire/xcross,icalled
 C
 C     Local variables
 C
@@ -152,10 +152,11 @@ C
       COMMON /LPEXS/lbreakup, ltransfer 
 C
       CHARACTER*21 preaction(ndnuc)
-      common /xsfiles/preaction
+      integer nuc_print
+      common /xsfiles/preaction,nuc_print
 C     
 C     local variables
-      integer nejc,i,nnuc,nuc_print,iloc,izares,nnur   
+      integer nejc,i,nnuc,iloc,izares,nnur   
       DOUBLE PRECISION ares, zres
 C-----
 C     Initialization of energy dependent quantities 

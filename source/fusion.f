@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3745 $
+Ccc   * $Rev: 3750 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-16 23:44:03 +0100 (Do, 16 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -15,7 +15,7 @@ Ccc   *                                                                  *
 Ccc   * input:NPRO    - projectile index (normally 0)                    *
 Ccc   *       NTRG    - target index (normally 0)                        *
 Ccc   *       Nnurec  - target index among residual nuclei               *
-Ccc   *       Nejcec  - projectile index among ejectiles				   *
+Ccc   *       Nejcec  - projectile index among ejectiles                         *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
@@ -69,7 +69,7 @@ C
 C
 C-----Locate position of the target among residues
       CALL WHERE(IZA(1) - IZAejc(0),Nnurec,iloc)
-C									  
+C                                                       
 C-----Locate position of the projectile among ejectiles
       CALL WHEREJC(IZAejc(0),Nejcec,iloc)
 C          
@@ -92,8 +92,8 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-	stl = 0.d0
-	sel = 0.d0
+      stl = 0.d0
+      sel = 0.d0
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -1045,7 +1045,7 @@ C-----Storing transmission coefficients for the incident channel
             WRITE (46,*) l, SNGL(stl(l + 1))
          ENDDO
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus'
-	   WRITE (46,'(1x,6(E12.6,1x))') 
+         WRITE (46,'(1x,6(E12.6,1x))') 
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus
          WRITE (46,'(1x,I6)') 123456
          DO l = 0, maxlw
@@ -1300,7 +1300,7 @@ C-----Plujko_new-2005
   400 NLW = min(NLW + 1 + MAXmult,NDLW)
 
 C     NORMAL RETURN
-  999	CONTINUE
+  999 CONTINUE
 C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
@@ -1364,7 +1364,7 @@ C
 C     local variables
       INTEGER nejc,nnuc,nnur,iloc,netl,izares,i,j    
       DOUBLE PRECISION ares,zres 
-	LOGICAL nonzero  
+      LOGICAL nonzero  
 C
 C
 C-----calculate transmission coefficients in outgoing channels
@@ -1415,7 +1415,7 @@ C-----------print transmission coefficients
 C
 C-----determination of transmission coeff.--done
       RETURN
-	END
+      END
 
       SUBROUTINE BASS(Ein,Zp,Ap,Zt,At,Bfus,E1,Crl,Csfus)
 Ccc

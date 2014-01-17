@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -79,7 +79,7 @@ C
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
       CALL PRERORITO(Nnuc)
       Nlwst=NLW     
-	IF( (FISshi(nnuc).GT.0.99d0 .and. FISshi(nnuc).LE.1.01d0)
+      IF( (FISshi(nnuc).GT.0.99d0 .and. FISshi(nnuc).LE.1.01d0)
      &    .OR. Aejc(0).GT.4) CALL PRERO(Nnuc)
 C-----set level density parameter systematics
 C-----EMPIRE-3.0-dependence
@@ -837,7 +837,7 @@ C Local variables
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
-C	 
+C      
 C       In a normal calculation, Ecut(NNuc)>0 and therefore the
 C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
@@ -1511,7 +1511,7 @@ C--------EXL /fermi gas formula/
 C
          DO i = ig, NEX(Nnuc)
             u = EX(i,Nnuc) - DEL
-	      if(u.lt.0.d0) cycle
+            if(u.lt.0.d0) cycle
             IF (igna.EQ.1) am = atil*FSHELL(u,SHC(Nnuc),-GAMma)
             UEXcit(i,Nnuc) = u
             TNUc(i,Nnuc) = SQRT(u/am)
@@ -1832,7 +1832,7 @@ C
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
-C	 
+C      
 C       In a normal calculation, Ecut(NNuc)>0 and therefore the
 C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
@@ -2588,7 +2588,7 @@ c
 
       IF (Mmod.EQ.0) THEN
       
-	  ACRtf(Ib) = ACRt
+        ACRtf(Ib) = ACRt
         UCRtf(Ib) = UCRt
         ECOndf(Ib) = ECOnd
         DETcrtf(Ib) = DETcrt
@@ -2601,7 +2601,7 @@ c
 
       ELSE ! Mmod.GT.0
         
-	  ACRtf(Mmod) = ACRt
+        ACRtf(Mmod) = ACRt
         UCRtf(Mmod) = UCRt
         ECOndf(Mmod) = ECOnd
         DETcrtf(Mmod) = DETcrt
