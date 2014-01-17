@@ -82,6 +82,9 @@ if [ "$option" = "run" ] ; then
      grep -q 'CALCULATIONS COMPLETED SUCCESSFULLY' $file.lst
      if [ "$?" = 1 ] ; then
        error=1
+       echo "#######Calculations Failed#######" 1>&2
+     else
+       echo ".......Calculations Completed Successfully......." 1>&2
      fi
      cp $file.inp $file-ref.* TeMpOrArYdIr/
      for suffix in $suffix_list
