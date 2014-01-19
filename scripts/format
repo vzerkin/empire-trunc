@@ -38,7 +38,7 @@ LABLABLABL EVAL-`date "+%b%y"` AUTHORAUTHORAUTHORAUTHORAUTHORAUT
 EOF
 $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
-#rm EMPEND.INP empmf1.tmp
+rm EMPEND.INP empmf1.tmp
 
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
 # moved to a new script "rec-ch-part" called from a GUI(Execute)
