@@ -22,5 +22,6 @@ HMS        1.
 FISSHI     2.
 DIRECT     0.
 GSTRFN     1.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1.

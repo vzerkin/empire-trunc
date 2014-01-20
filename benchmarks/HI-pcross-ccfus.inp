@@ -17,6 +17,7 @@ MSC        0.
 ENDF       0. 
 PCROSS    1.5 
 CSREAD    -1.                                        
+BENCHM     1.                               ! Benchmark calculations
 GO 
 @ CSFUS (  coupled barriers - default)
 $CSREAD    -2.                                        

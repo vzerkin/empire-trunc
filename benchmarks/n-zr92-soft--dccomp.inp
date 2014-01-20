@@ -16,6 +16,9 @@ MSC        0.
 ENDF       0. 
 DIRECT     1.
 DIRPOT   609.
+BENCHM     1.                               ! Benchmark calculations
 GO
+1.
+5.
 5.
 -1

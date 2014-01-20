@@ -23,5 +23,6 @@ DIRECT     0.
 @ Primary gammas stored -> ENDF =1, PRGAMM =1
 ENDF       1.                     
 PRGAMM     1.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1.

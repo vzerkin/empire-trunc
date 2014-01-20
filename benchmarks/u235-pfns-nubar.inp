@@ -22,5 +22,6 @@ PFNNIU     0.95
 PFNRAT     0.85
 PFNALP     0.9
 PFNTKE     1.05
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1

@@ -36,6 +36,7 @@ FISDEN     3.
 FISDIS     1.
 FISOPT     0.
 FISSHI     0.                     
+BENCHM     1.                               ! Benchmark calculations
 GO
 1.
 5.

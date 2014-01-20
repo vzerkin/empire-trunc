@@ -19,5 +19,6 @@ HMS        0.
 DIRECT     3.
 RECOIL     0.
 ENDF       0.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1

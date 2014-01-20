@@ -30,7 +30,7 @@ FISMOD     0.                               !
 FISOPT     1.                               !
 GSTRFN     1.                               ! Default gamma ray strength function (PLujko MLO RIPL-2)
 RECOIL     0.                               ! No recoils are calculated. Sizeable speed-up if no ENDF file is required
-BENCHM     1. 
+BENCHM     1.                               ! Benchmark calculations
 GO      
 @ HRTW =3, FISOPT=0
 $FISOPT    0.                               

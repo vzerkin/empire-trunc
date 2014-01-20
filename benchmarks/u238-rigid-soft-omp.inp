@@ -26,6 +26,7 @@ PFNERE  0.995
 TMAXW    1.32
 DIRPOT  2412.  
 DIRECT     1.
+BENCHM     1.                               ! Benchmark calculations
 GO 
 3.
 5.

@@ -27,6 +27,7 @@ RESOLF     0.07
 DIRECT     1.
 DIRPOT -5408.
 OMPOT  -2408.     1
+BENCHM     1.                               ! Benchmark calculations
 GO
 10.
 -1

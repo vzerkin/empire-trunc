@@ -21,6 +21,7 @@ HRTW       0.
 RECOIL     0.
 FISBAR     3.
 FISDEN     3.
+BENCHM     1.                               ! Benchmark calculations
 GO
 1.
 5.

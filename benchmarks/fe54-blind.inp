@@ -17,5 +17,6 @@ MSC        0.
 ENDF       0.                     
 HRTW       0.
 RECOIL     0.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1

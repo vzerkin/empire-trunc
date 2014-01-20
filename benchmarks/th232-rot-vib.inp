@@ -20,5 +20,6 @@ DIRPOT  -608.
 OMPOT   -608.       1
 OMPOT  -4608.       2
 ENDF       0.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1

@@ -32,6 +32,7 @@ DIRPOT -2408.
 OMPOT  -2408.     1
 OMPOT  -5408.     2
 FISOPT     1.                                
+BENCHM     1.                               ! Benchmark calculations
 GO
 8.
 12.

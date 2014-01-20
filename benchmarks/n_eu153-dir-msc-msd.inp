@@ -17,5 +17,6 @@ DEGAS      0.
 OMPOT   -221.       1
 DIRPOT -2004.        
 DIRECT     1.
+BENCHM     1.                               ! Benchmark calculations
 GO
 -1
