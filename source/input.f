@@ -1,6 +1,6 @@
-!cc   * $Rev: 3751 $
+!cc   * $Rev: 3764 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
+!cc   * $Date: 2014-01-20 12:23:11 +0100 (Mo, 20 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -962,7 +962,7 @@ C                    From n,3n2p   to   n,na
          ENDDO
 C
 C--------Retrieve C4 experimental data 
-         IF (IX4ret.EQ.1) CALL RETRIEVE
+         IF (IX4ret.EQ.1 .and. (.not.BENchm)) CALL RETRIEVE
 C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
          NNUct = nnuc
