@@ -58,7 +58,27 @@ def parseC4( filename ):
         isomer = line[11]
         return proj, targ, isomer
     
-    c4 = open(filename,"r").readlines()
+    print "\n...Reading file: %s" % filename
+#    c4 = open(filename,"r").readlines()
+#2014-Zerkin: user-friendly reading showing process and Entries
+    c4 = []
+    f = open(filename,"r")
+    i = 0
+    for line in f:
+#        print line
+        if line.startswith("#ENTRY "):
+            print "...reading %-5d %s\r" % (i,line.strip()),
+            if (i%1000==0):
+                print ""
+            i = i + 1
+        c4.append(line)
+    f.close()
+    print "\n...Reading file finished: %s" % filename
+    print "...Total Entries: %d" % i
+    time.sleep(5)
+    print ""
+
+
     
     entry = []
     ENTRY = False
@@ -75,12 +95,17 @@ def parseC4( filename ):
     
     print "sorting by target and projectile:"
     
+    iEntry = 0
     for i in range(len(c4)):
         line = c4[i]
         # first check some special lines:
         if line.startswith("#ENTRY "):
             ENTRY = True
             entry = []
+            print "...sorting %-5d %s\r" % (iEntry,line.strip()),
+            if (iEntry%1000==0):
+                print ""
+            iEntry=iEntry+1
         if line.startswith("#DATASET "):
             if DATA:
                 print "DATASET not closed properly, line %i" % i
@@ -158,6 +183,7 @@ def sortC4file( filename ):
     meant for use after sorting into projectile and target:
     sort the file by MF,MT,initial energy, and entry # (in that order)
     """
+#    print "...sortC4file:[%s]" % filename
     def readC4( line ):
         # within the 'other' dir, still need to sort by projectile and target:
         proj = line[:5].strip()
@@ -169,7 +195,8 @@ def sortC4file( filename ):
         subent = line[127:].strip()
         
         if energy and energy[0] == '-':
-            name = filename.split('/')[1].split('.')[0]
+#2013-Zerkin2win            name = filename.split('/')[1].split('.')[0]
+            name = filename.split(os.sep)[1].split('.')[0]
             print "energy<0! %s, entry %s, subent %s" % (name,entry,subent)
         
         try:
@@ -219,8 +246,13 @@ def sortC4():
         files += glob(dir+"/*.c4")
     
     print "now sorting C4 files"
+    iFile=0
     for f in files:
+        print "...sortC4file %-7d %s\r" % (iFile,f),
         sortC4file(f)
+        if (iFile%20==0):
+            print ""
+        iFile=iFile+1
 
 
 if __name__ == '__main__':
@@ -243,5 +275,5 @@ if __name__ == '__main__':
     sortC4()
 
     stop = time.clock()
-    print "elapsed time:",stop-start
+    print "\n\nElapsed time (sec):",stop-start
 
