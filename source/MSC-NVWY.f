@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3721 $
+Ccc   * $Rev: 3771 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+Ccc   * $Date: 2014-01-23 13:49:11 +0100 (Do, 23 Jän 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -288,9 +288,14 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
+C Dummy arguments
+C
+      LOGICAL Nvwful
 C
 C PARAMETER definitions
 C
@@ -311,10 +316,6 @@ C
       COMMON /MSC   / SCRm, WP, YP, ZP, ZSUm, OMJd, PIM, PREp, IE
       COMMON /PRSI  / SIGnx
 C
-C Dummy arguments
-C
-      LOGICAL Nvwful
-C
 C Local variables
 C
       DOUBLE PRECISION accn, apig(NG,NG), apim(NDMSCS,NDMSCS), atil,
@@ -333,8 +334,8 @@ C
      &                 xga, xxxx, y, yd, ygdr, ggg
       DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
 
-      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, iloc, inc,
-     &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, izares,
+      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, inc,
+     &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, 
      &        izpcon, j, jr, jx, k, k1, k2, k3, kc, kc1, kcn, ke,
      &        kg, kgin, ki, ks, m, m1, m2, mpigx(NG), mpigy(NG)
      &        , nc1, ncm, ncont, nejc, nnur, npigzero, nresn, nresp
@@ -362,12 +363,8 @@ C-----input parameters
       SIGnx = 0.26*A(1)**0.66666667
       BMSc = Q(1,1)
 C-----input parameters              ***** done *******
-      DO i = 1, NDEX
-         sdsp(i) = 0.0
-         DO j = 1, NDMSCS
-            gspmsc(j,i) = 0.0
-         ENDDO
-      ENDDO
+      sdsp   = 0.d0
+      gspmsc = 0.d0       
 C-----determination of the initial exciton configuration for H.I.
       IF (AEJc(0).GT.4.0D0 .AND. XNI.EQ.0.D0) THEN
          coulb = 1.44*Z(0)*ZEJc(0)/(A(0)**0.66667*1.22)
@@ -391,38 +388,20 @@ C-----determination of the initial exciton configuration **** done ****
       IF (NLW.GT.NDLW - 1) NLW = NDLW - 1
       WRITE (8,*) 'Maximum momentum allowed NLW = ',NLW
 C-----calculation of factorial
-      FACt(1) = 1.
+      FACt(1) = 1.d0
       DO i = 1, 99
          FACt(i + 1) = FACt(i)*FLOAT(i)
       ENDDO
 C-----calculation of factorial      ***** done *******
-      CSMsc(0) = 0.0
-      CSMsc(1) = 0.0
-      CSMsc(2) = 0.0
-      izares = 1000.0*Z(1) + A(1) - 1.
-      CALL WHERE(izares,nresn,iloc)
-      IF (iloc.EQ.1) THEN
-         WRITE (8,*)
-     &'RESIDUAL NUCLEUS AFTER NEUTRON EMISSION FROM CN HAS NOT BEEN DETE
-     &RMINED BEFORE CALL OF HMSC'
-         WRITE (8,*) 'OPEN NEUTRON EMISSION'
-         WRITE (8,*) 'EXECUTION STOPPED'
-         STOP
-      ENDIF
-      izares = 1000.0*(Z(1) - 1.0) + A(1) - 1.
-      CALL WHERE(izares,nresp,iloc)
-      IF (iloc.EQ.1) THEN
-         WRITE (8,*)
-     &'RESIDUAL NUCLEUS AFTER PROTON  EMISSION FROM CN HAS NOT BEEN DETE
-     &RMINED BEFORE CALL OF HMSC'
-         WRITE (8,*) 'OPEN PROTON  EMISSION'
-         WRITE (8,*) 'EXECUTION STOPPED'
-         STOP
-      ENDIF
+      CSMsc = 0.d0
+      nresn = NREs(1)
+      nresp = NREs(2)
+
 C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       ggg = GDIv
       if(GDIV.LE.0) ggg=13.d0
       G = A(1)/ggg
+
       IF (STMro.EQ.1.0D0) THEN
          WRITE (8,
      &'(     '' Microscopic p-h state densities will be calculated with
@@ -434,7 +413,7 @@ C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       ENDIF
       Nvwful = .FALSE.
       IF (NOUt.GT.0) WRITE (8,99005)
-99005 FORMAT (1X,//,1X,'Heidelberg M.S.C. (ausiliary output)',//)
+99005 FORMAT (1X,//,1X,'Heidelberg M.S.C. (auxiliary output)',//)
       IF (SQRT(1.5D0*G*EXCn) + 6D0.LT.2.0D0*NDMSCS + 1.D0)
      &    Nvwful = .TRUE.
       IF (Nvwful) WRITE (8,99010)
