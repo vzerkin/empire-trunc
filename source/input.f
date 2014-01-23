@@ -1,6 +1,6 @@
-!cc   * $Rev: 3770 $
+!cc   * $Rev: 3773 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-23 13:47:42 +0100 (Do, 23 Jän 2014) $
+!cc   * $Date: 2014-01-23 14:09:06 +0100 (Do, 23 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3515,6 +3515,13 @@ C
         WRITE (12,*)
      >             '(not under SVN) by M. Herman et al [EMP].          '
       endif
+      WRITE (12,*) 
+      WRITE (12,*) 'EMPIRE dimensions (dimension.h):'
+      WRITE (12,'(2x,A6,I4,2x,A9,I3,2x,A5,I4,2x,A5,I4/
+     >            2x,A6,I3,2x,A5,I3,2x,A5,I3,2x,A7,I2)') 
+     >  'NDNUC=',NDNUC,'NDEXCLUS=',NDEXCLUS,'NDEX=',NDEX,
+     >  'NDLW=',NDLW,'LEVCC=',LEVCC,'NDLV=',NDLV,
+     >  'NDBR=',NDBR,'NDMSCS=',NDMSCS
       WRITE (12,*) ''
       WRITE (12,*) 'CROSS-SECTION EVALUATION PROCEDURE                 '
       WRITE (12,*) ''
