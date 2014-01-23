@@ -2,12 +2,13 @@ Ccc   * $Rev: 3705 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
-      subroutine get_ecis_inelastic(nejcec,nnurec,ncoll,xscclow,totcorr)
+      subroutine get_ecis_inelastic
+     >  (nejcec,nnurec,ncollx,xscclow,totcorr)
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       
-      INTEGER nejcec,nnurec,ncoll 
+      INTEGER nejcec,nnurec,ncollx 
       DOUBLE PRECISION xsinlcont,xscclow,totcorr
 
 C     COMMON variables
@@ -42,7 +43,7 @@ C     For resolution function (Spreading levels in the continuum)
       isigma0 = 0
       IF(WIDcoll.GT.0.d0)
      &   isigma0 = INT((0.02d0  + sqrt(EINl)*WIDcoll)/DE + 1.0001)
-      ncoll = 0
+      ncollx = 0
       ecm = EINl - EIN
 
       angstep = 180.d0/(NANgela-1)
@@ -174,7 +175,7 @@ C
      &         .and. KALman.eq.0  .and. INT(AEJc(0)).GT.0) 
      &            xscclow = xscclow + popread
 C              To consider only open channels
-               ncoll = i
+               ncollx = i
 C 
                POPlv(ilv,nnurec) = POPlv(ilv,nnurec) + popread
                CSDirlev(ilv,nejcec) = CSDirlev(ilv,nejcec) + popread
@@ -441,13 +442,13 @@ C     totcorr = 1.d0
        ENDIF
 
        WRITE (8,'(//)')
-       IF (ncoll.GT.0) THEN
+       IF (ncollx.GT.0) THEN
 C--------Locate position of the projectile among ejectiles
          CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
          WRITE (8,*) ' '
          gang = 180.d0/(NDANG - 1)
-         its = ncoll
+         its = ncollx
          IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
            WRITE(8,99028)
            WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))

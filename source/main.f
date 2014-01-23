@@ -1,6 +1,6 @@
-cc   * $Rev: 3750 $
+cc   * $Rev: 3772 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-01-23 13:50:44 +0100 (Do, 23 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -26,7 +26,7 @@ C
       DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd
       DOUBLE PRECISION epre  
 
-      INTEGER nnuc,nnurec,nejcec,ncoll,iret
+      INTEGER nnuc,nnurec,nejcec,ncollx,iret
 
       EIN  = 0.0d0
       epre = EIN
@@ -52,7 +52,7 @@ C       For a proper consideration of fission and capture competition in the
 C       ECIS CN calculation, further changes needed in tl.f (to be done later)
         call fission_width()
 C
-        call get_ecis_inelastic(nejcec,nnurec,ncoll,xscclow,totcorr)
+        call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
 C
 C       Preequilibrium 
 C
@@ -65,7 +65,7 @@ C-------Start DO loop over decaying nuclei
           IF(QPRod(nnuc).LT.-999.d0) CYCLE
           CALL calc_fission(nnuc)
 
-          CALL HF_decay(ncoll,nnuc,nnurec,nejcec,iret,totcorr)
+          CALL HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
                               
         IF(iret.gt.0) GOTO 10 ! GOTO 1155 
         
@@ -92,6 +92,7 @@ C
 
       RETURN
       END
+
       subroutine initial
       implicit none
       INCLUDE "dimension.h"
@@ -234,6 +235,9 @@ C-----
         ENDDO
 
         nuc_print = i
+	  
+C       write(*,*) 'nuc_print=',nuc_print,' First energy?',FIRst_ein
+
         IF (AEJc(NPRoject).EQ.0) then  ! incident photons
           WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 

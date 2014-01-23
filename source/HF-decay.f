@@ -2,7 +2,7 @@ Ccc   * $Rev: 3705 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
-      SUBROUTINE HF_decay(ncoll,nnuc,nnurec,nejcec,iret,totcorr)
+      SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
       USE empcess, ONLY: disc_int, CSHms
 
@@ -12,7 +12,7 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
       INCLUDE "main_common.h"
 C
-      INTEGER ncoll,nnuc,nnurec,nejcec,iret
+      INTEGER ncollx,nnuc,nnurec,nejcec,iret
       DOUBLE PRECISION totcorr
 C
 C     local variables
@@ -294,10 +294,10 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
             IF (FITomp.LT.0) THEN
               WRITE(40,'(F12.4,3D12.5)') 
      &          EINl,TOTcs*TOTred*totcorr,ABScs*FUSred
-              IF (ncoll.GT.0) THEN
+              IF (ncollx.GT.0) THEN
 C---------------locate position of the projectile among ejectiles
                 CALL WHEREJC(IZAejc(0),nejcec,iloc)
-                its = ncoll
+                its = ncollx
                 WRITE (40,'(12x,11D12.5)') 
      &            ELAred*ELAcs + 4.d0*PI*ELCncs,
      &            (CSDirlev(ICOller(ilv),nejcec),ilv = 2,MIN(its,10))
@@ -1106,11 +1106,11 @@ C----------CN contribution to elastic ddx
            ENDIF
 
 
-           IF (ncoll.GT.0) THEN
+           IF (ncollx.GT.0) THEN
 C----------------Locate position of the projectile among ejectiles
                  CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-                 its = ncoll
+                 its = ncollx
                  IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
                    WRITE(8,99029)
                    WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))
@@ -1188,7 +1188,7 @@ C                     number of discrete levels is limited to 40
                    ENDIF
                    WRITE (8,*) ' '
                  ENDIF
-           ENDIF ! ncoll > 0 ?
+           ENDIF ! ncollx > 0 ?
 
          ENDIF
          IF(CSPrd(nnuc).GT.0.d0) THEN
