@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3769 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-01-23 13:38:36 +0100 (Do, 23 Jän 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -146,6 +146,7 @@ C--------Here the old calculated files are read
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
+              WRITE (8,*)
               WRITE (8,*)
      &' Transmission coefficients for incident channel read from file: '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
@@ -496,6 +497,7 @@ C---------for the inelastic channel. DIRECT 1 option assumes SOMP
 C---------with only one level (the GS) to calculate the inelastic TLs.
 C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
+	      WRITE (8,*) 
             WRITE (8,*) ' CC transmission coefficients used for ',
      &                  'fusion determination'
 
