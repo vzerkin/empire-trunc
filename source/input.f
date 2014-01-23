@@ -1,6 +1,6 @@
-!cc   * $Rev: 3764 $
+!cc   * $Rev: 3770 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-20 12:23:11 +0100 (Mo, 20 Jän 2014) $
+!cc   * $Date: 2014-01-23 13:47:42 +0100 (Do, 23 Jän 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -53,7 +53,7 @@ C
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
-      character chra*5,chrz*5,nucmd*200
+      character chra*5,chrz*5,nucmd*250
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -705,7 +705,7 @@ C
 
 C          retrieving NUBAR if available
 
-           IF(IOPsys .EQ. 0) then  !Linux, Mac
+C          IF(IOPsys .EQ. 0) then  !Linux, Mac
 C
 C            CHECKING for the presence of the file 'NUBAR-EVAL.ENDF'
 C            in the local directory
@@ -716,7 +716,7 @@ C
 
              IF(fexist_nu) then
 
-              NUBarread = .TRUE.
+               NUBarread = .TRUE.
 
              else              
 C
@@ -725,8 +725,10 @@ C
               nubar_filename = trim(empiredir)//'/data/nubar.endf'
               len_nubar_filename = len_trim(nubar_filename) 
               INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
-     &               EXIST=NUBarread)
-C
+     &          EXIST=NUBarread)
+              WRITE(8,*) 
+     &          'WARNING: ',nubar_filename(1:len_nubar_filename),
+     &          ' file does not exist !!'
              endif
 
 C            READING OF THE ENDF MF=1, MT=456 prompt nubar
@@ -740,8 +742,8 @@ C
                  ! if found, it writes to NUBAR.DAT, which we then read in.
                  ! if endfile, Z, A not found, NUBAR.DAT will not be there.
 
-                 write(chra,'(i5)') nint(a(0))
-                 write(chrz,'(i5)') nint(z(0))
+                 write(chra,'(1H ,i3,1H )') nint(a(0))
+                 write(chrz,'(1H ,i3,1H )') nint(z(0))
                  nucmd = trim(empiredir)//'/util/nubar/get_nubar '//
      &              nubar_filename(1:len_nubar_filename)//chra//chrz
                  ! type *,trim(nucmd)
@@ -750,19 +752,19 @@ C
                  ! now read the NUBAR.DAT file
                  call read_nubar_unix(ierr)
                  if(ierr.gt.0) NUBarread = .FALSE.
-
+    
              ENDIF  
 
-           ELSE                    !Windows
-
+C          ELSE                    !Windows
+C
 C             On windows, just set the nubar spectrum to that
 C             of Th-232 (0-60 MeV) for testing purposes.
 C             No files are read.
-
-              call read_nubar_windows()
-              NUBarread = .TRUE.
- 
-           ENDIF
+C 
+C             call read_nubar_windows()
+C             NUBarread = .TRUE.
+C
+C          ENDIF
 
          ENDIF
 C
@@ -961,9 +963,6 @@ C                    From n,3n2p   to   n,na
          ENDDO
          ENDDO
 C
-C--------Retrieve C4 experimental data 
-         IF (IX4ret.EQ.1 .and. (.not.BENchm)) CALL RETRIEVE
-C--------Retrieve C4 experimental data  *** done ***
          NNUcd = nnuc
          NNUct = nnuc
 
@@ -1067,6 +1066,10 @@ C--------New energy header
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
+
+C--------Retrieve C4 experimental data 
+         IF (IX4ret.EQ.1 .and. (.NOT.BENchm)) CALL RETRIEVE
+C--------Retrieve C4 experimental data  *** done ***
 
          IF( KTRlom(0,0).eq.2408 .and. DIRECT. LT. -0.1) then
             DIRECT = 1
