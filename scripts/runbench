@@ -140,6 +140,17 @@ elif [ "$option" = "diff" ] ; then
      done
    done
    
+elif [ "$option" = "diffpy" ] ; then
+# use diff -y  command to compare files .xsc, lst, and .out from benchmark runs and existing reference files
+#
+   for file in $files
+   do
+     for suffix in $suffix_list
+     do
+       diff.py -m -o diff.$file.$suffix.html $file.$suffix $file-ref.$suffix
+     done
+   done
+   
 elif [ "$option" = "kompare" ] ; then
 # use kompare to compare files .lst and .xsc from benchmark runs and existing reference files
 #
