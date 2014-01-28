@@ -1,6 +1,6 @@
-cc   * $Rev: 3772 $
+cc   * $Rev: 3776 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-23 13:50:44 +0100 (Do, 23 Jän 2014) $
+Ccc   * $Date: 2014-01-28 13:33:11 +0100 (Di, 28 Jän 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -154,7 +154,8 @@ C
 C
       CHARACTER*21 preaction(ndnuc)
       integer nuc_print
-      common /xsfiles/preaction,nuc_print
+      common /xsfiles0/preaction
+      common /xsfiles1/nuc_print
 C     
 C     local variables
       integer nejc,i,nnuc,iloc,izares,nnur   

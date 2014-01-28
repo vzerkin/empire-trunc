@@ -30,7 +30,8 @@ C
 
       CHARACTER*21 preaction(ndnuc)
       integer nuc_print
-      common /xsfiles/preaction,nuc_print
+      common /xsfiles0/preaction
+      common /xsfiles1/nuc_print
 
       INTEGER     nepfns, nfission
       DOUBLE PRECISION fnubar,enepfns(NDEPFN),csepfns(NDEPFN)
