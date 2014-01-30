@@ -147,7 +147,8 @@ elif [ "$option" = "diffpy" ] ; then
    do
      for suffix in $suffix_list
      do
-       diff.py -m -o diff.$file.$suffix.html $file.$suffix $file-ref.$suffix
+        echo diff.py -m -o diff.$file.$suffix.html $file.$suffix $file-ref.$suffix
+        diff.py -m -o diff.$file.$suffix.html $file.$suffix $file-ref.$suffix
      done
    done
    
