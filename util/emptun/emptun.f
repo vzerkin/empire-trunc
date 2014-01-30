@@ -1,14 +1,20 @@
       PROGRAM EMPTUN
 C-Title  : EMPTUN Program
-C-Purpose: Set energy grid and tuning parameters in EMPIRE input
+C-Purpose: Set energy grid and tuning factors in EMPIRE input
 C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
+C-A        Current address: Nuclear Data Section
+C-A                         International Atomic Energy Agency
+C-A                         Vienna, Austria
+C-A                         mailto:A.Trkov@iaea.org
 C-Version: April 2013
-C-V 2014/01  Major revision to include the calculation of tuning 
-C-V          factors directly from the data (previously done with
-C-V          the FLUCTU code).
+C-V 2014/01 - Major revision to include the calculation of tuning 
+C-V           factors directly from the data (previously done with
+C-V           the FLUCTU code).
 C-M  
 C-M  Manual for Program EMPTUN
 C-M  =========================
+C-M
+C-M  Overview:
 C-M  In case that EMPIRE is to follow a detailed structure in the
 C-M  cross sections based on experimental data, the need may arise
 C-M  to introduce tuning parameters on a relatively dense energy
@@ -35,59 +41,160 @@ C-M     scattering. The remainder if the difference from the
 C-M     smoothed total cross section is absorbed by the non-elastic 
 C-M     cross section.
 C-M
-C-M  The tuning factors are calculated as described in the paper
-C-M  presented at the ND2013 conference in New York.
+C-M  The tuning parameters for the reaction cross section Sig_r and the
+C-M  shape-elastic cross section Sig_se are calculated as described
+C-M  in the paper presented at the ND2013 conference in New York, 
+C-M  except for the tuning factor for the compound-elastic cross
+C-M  section Sig_ce, where the definition needs to be tailored to
+C-M  the usage within EMPIRE. The tuning factors are calculated in
+C-M  two stages. In the first stage the factors written to the
+C-M  scratch file are defined as follows:
 C-M
-C-M  The EMPIRE input file is scanned and the tuning
-C-M  factors are introduced on the given energy mesh, leaving the
-C-M  rest of the file unchanged.
+C-M          Sig_r(m)          Sig_se(m)          Sig_ce(m)
+C-M    f_r = -------- ; f_se = --------- ; f_ce = ---------
+C-M          Sig_r(c)          Sig_se(c)          Sig_r(m)
+C-M
+C-M  because internally in EMPIRE compound-elstic cross section is
+C-M  treated as a fraction of the total reaction cross section;
+C-M  the f_ce factor defines precisely the desired value of this
+C-M  fraction. The additional subscripts (m) and (c) refer to the
+C-M  measured (or "best estimate") and the calculated value (by the
+C-M  model directly), respectively.
+C-M
+C-M  One of the tuning options (see below) allows the tuning factors
+C-M  to be defined externally. The required definitions of the tuning
+C-M  parameters are as stated above.
+C-M
+C-M  Tuning options differ in the way the above parameters are defined.
+C-M
+C-M  In the second stage the tuning factors FUSRED, ELARED and
+C-M  CELRED are calculated and introduced into a given EMPIRE
+C-M  starter input file. The definition of the first two is simple:
+C-M
+C-M    FUSRED = f_r
+C-M
+C-M    ELARED = f_se
+C-M
+C-M  In order to preserve consistency in the total cross section, two
+C-M  additional parameters are defined:
+C-M
+C-M    FCCRED = FUSRED
+C-M
+C-M    FCORED = FUSRED
+C-M
+C-M  The definition of the compound-elastic tuning factor is slightly
+C-M  more elaborate because
+C-M
+C-M                          CELRED * Sig_ce(c)
+C-M    Sig_ce(m) = Sig_r(m)* -----------------------------
+C-M                          CELRED * Sig_ce(c) + Sig_x(c)
+C-M
+C-M  where Sig_x is the "remainder" reaction cross section:
+C-M
+C-M    Sig_x = Sig_r - Sig_ce
+C-M
+C-M  Note that Sig_r(m) = f_r * Sig_r(c).
+C-M
+C-M             ( Sig_f(c)      )       f_ce
+C-M    CELRED = ( --------- - 1 ) * ------------
+C-M             ( Sig_ce(c)     )   ( 1 - f_ce )
+C-M
+C-M
+C-M  Procedure:
+C-M  The filenames containing the required data and the selected
+C-M  tuning option are specified from input interactively. The
+C-M  starter EMPIRE input file is scanned and the tuning factors are
+C-M  introduced on the given energy mesh, leaving the rest of the
+C-M  file unchanged. If any of the tuning factors at any energy are
+C-M  already present on input, the code will calculate an appropriate
+C-M  value so as not to double-count the correction.
+C-M
 C-M  
-C-M  Instructions (SORRY, THE INSTRUCTIONS NEED UPDATING!!!)
+C-M  Instructions:
 C-M  The following input parameters are entered from input:
-C-M   - FLIN  The tuning factor filename; this can be an input
-C-M           file in which the tuning factors are given in the
+C-M   - FLIN  The tuning parameter filename; this can be an input
+C-M           file in which the tuning parameters are given in the
 C-M           format described below. Alternatively, the tuning
-C-M           factors are calculated from the cross sections
+C-M           parameters are calculated from the cross sections
 C-M           internally, in which case FLIN is the output file
-C-M           containing the tuning factors inserted into the
-C-M           EMPIRE input file.
-C-M             If the tuning factors are given on input, they
+C-M           containing the tuning parameters to define the tuning
+C-M           factors inserted into the EMPIRE input file.
+C-M             If the tuning parameters are given on input, they
 C-M           are tabulated in PLOTTAB "curves" format. The
 C-M           header is the tuning factor name, followed by
 C-M           pairs of numbers:
 C-M             * Energy (in eV !!! because they are usually
 C-M               calculated from cross sections tabulated in eV)
-C-M             * Tuning factor value.
+C-M             * Tuning parameter value.
 C-M           The values are given in 11-column format.
-C-M           The tuning factors FUSRED, ELARED and CELRED are
-C-M           given one after the other, separated by a blank
-C-M           record. They MUST be given on the same energy grid.
-C-M           These are followed by the reaction cross section
-C-M           (identified by the header "Sig_r") and the 
-C-M           compound-elastic cross section (identified by 
+C-M           The tuning parameters to define FUSRED, ELARED and
+C-M           CELRED are given one after the other, separated by
+C-M           a blank record. They MUST be given on the same energy
+C-M           grid. The parameters are followed by the reaction
+C-M           cross section (identified by the header "Sig_r") and
+C-M           the compound-elastic cross section (identified by 
 C-M           the header "Sig_CE") from the EMPIRE reference
-C-M           calculation. Definitions:
-C-M             FUSRED factors account for the change from the
-C-M                    reference EMPIRE calculation to the desired
-C-M                    reaction cross section value (name FUSRED2).
-C-M             ELARED factors definition is as for FUSRED,
-C-M                    referring to the shape-elastic cross sections.
-C-M                    (name ELARED2)
-C-M             CELRED factors determine the fraction of compound-
-C-M                    elastic cross setion in the desired value
-C-M                    of the reaction cross section (name CELDSH2).
-C-M             Sig_r  cross sections represent the EMPIRE nominal
-C-M                    calculation of the reaction cross section
-C-M                   (name SIGFUS1).
-C-M             Sig_CE cross sections represent the EMPIRE nominal
-C-M                    calculation of the compound-elastic cross
-C-M                    section (name SIGCEL1)
-C-M   - FLEI  Source EMPIRE input filename (to be modified).
-C-M   - FLOU  Updated EMPIRE input.
-C-M   - ... cross section files...
-C-M   - ITUN  Tuning option
+C-M           calculation. The definitions of the parameters f_r,
+C-M           f_se and f_ce are given above.
+C-M   - FLEI  Source EMPIRE input filename (file to be modified).
+C-M   - FLOU  Updated EMPIRE input. If this input definition is
+C-M           followed by an end-of-file mark, the tuning factors
+C-M           are assumed to be present on the FLIN file.
+C-M   - FLXT  Best estimate total cross section on a coarse energy
+C-M           grid in PLOTTAB format.
+C-M   - FLXE  Best estimate elastic cross section on a coarse energy
+C-M           grid in PLOTTAB format.
+C-M   - FLXM  Best estimate elastic cross section on a coarse energy
+C-M           grid in PLOTTAB format.
+C-M   - FLEG  Desired energy grid for the tuning factors in PLOTTAB
+C-M           format, but the second parameter on any row is ignored.
+C-M   - FLCX  File containing the tabulated cross sections in
+C-M           PLOTTAB format giving the nominal cross sections as
+C-M           calculated by the starter EMPIRE input file.
+C-M   - ITUN  Tuning option; allowed values are
+C-M           BLANK - terminate processing
+C-M              -1 - tuning parameters given on FLIN
+C-M               0 - Scale all cross sections proportionally by
+C-M                   defining the TOTRED tuning factor
+C-M                   WARNING: not yet implemented!
+C-M               1 - Match the total and preserve mu-bar and the
+C-M                   Sig_x from the calculation.
+C-M               2 - Match the total, elastic and mu-bar with the
+C-M                   data on input files.
 C-M   - ELO   Lower energy bound for tuning [MeV]
 C-M   - EHI   Upper energy bound for tuning [MeV]
+C-M
+C-M  The input sequence from ITUN can be repeated more than once,
+C-M  but care must be taken to specify the energy regions in
+C-M  ascending order without overlap. It is best to specify energy
+C-M  boundaries, which do not coincide with the input energy grid,
+C-M  nor the grid in the EMPIRE starter input file.
+C-M
+C-M  The PLOTTAB format (referred to above) is a simple data structure
+C-M  starting with a header record, a set of data in two-column format,
+C-M  each column 11-characters wide and terminated by a blank record.
+C-M  Several data sets may be present on the same file.
+C-M
+C-M  The data headers are arbitrary, except for FLCX, where the
+C-M  header structure is as follows:
+C-M    "MATmmmm MF 3 MTnnn"
+C-M  The MAT string is not checked, but MF and MT strings must be
+C-M  present in precise positions as stated above. The "nnn" string
+C-M  identifies the reactions, which must be at least the following:
+C-M      1  total cross section,
+C-M      2  elastic cross section (tuning option ITUN=2 only),
+C-M     50  compound-elastic cross section,
+C-M    251  average cosine of scattering (tuning option ITUN=2 only).
+C-M  
+C-M  The EMPTUN code writes a log to the file 'emptun.lst'. In addition
+C-M  the file 'emptun.cur' contains intermediate cross section curves
+C-M  for checking purposes (incomplete and undocumented at present).
+C-M  A scratch file 'emptun.tmp' is also used. The filenames are
+C-M  and should not be used for input data. Repeat: the reserved
+C-M  filenames are:
+C-M    emptun.lst
+C-M    emptun.tmp
+C-M    emptun.cur
 C-M
 C-M  NOTE:
 C-M  The present code is an extension of the previous version, which
@@ -98,7 +205,7 @@ C-
       CHARACTER*6   LABEL(5)
       CHARACTER*10  TSTR,CALSTR(MXSTR)
       CHARACTER*40  BLNK,HEDR,HOPT(MXTUN)
-      CHARACTER*80  FLNM,FLIN,FLEI,FLOU,FLLS
+      CHARACTER*80  FLNM,FLIN,FLEI,FLOU,FLLS,FLTM
      &             ,FLXT,FLXE,FLXM,FLEG,FLCX,FLCU
       CHARACTER*120 REC,RECM(MXCOM)
      &             ,HTOTRED,HFUSRED,HFCCRED,HFCORED,HELARED,HCELRED
@@ -118,14 +225,15 @@ C* Data set labels and flags
       DATA KFLG/ 0, 0, 0, 0, 0 /
       DATA LABEL/'FUSRED','ELARED','CELRED','Sig_r ','Sig_CE' /
 C* Filenames and logical file units
-      DATA LIN,LEI,LOU,LLS,LKB,LTT,LCU,LEG,LXT,LXE,LXM,LCX
-     &     / 1,  2,  3,  4,  5,  6,  7, 11, 12, 22, 32, 52 /
+      DATA LIN,LEI,LOU,LLS,LKB,LTT,LCU,LTM,LEG,LXT,LXE,LXM,LCX
+     &     / 1,  2,  3,  4,  5,  6,  7,  8, 11, 12, 22, 32, 52 /
       DATA BLNK/'                                        '/
      1    ,FLIN/'inp.dat'/
      2    ,FLEI/'emp.inp'/
      3    ,FLOU/'emp.out'/
      4    ,FLLS/'emptun.lst'/
      7    ,FLCU/'emptun.cur'/
+     8    ,FLTM/'emptun.tmp'/
      1    ,FLXT/'total_lo_mod.cur'/
      2    ,FLXE/'smolin_el_mod.cur'/
      3    ,FLXM/'smolin_mu_mod.cur'/
@@ -161,8 +269,15 @@ C* Initialise
       NCX =0
       INR =2
 C*
-      KTUN=-1
+C* Internal tuning flags:
+C* ITUN - input flag defining the tuning option
+C* JTUN - Flag (>0 indicates data within previous ENDTUN loop)
+C* KTUN - Saves original input value of ITUN
+C* NTUN - Counts the number of tuning loops
       ITUN= 1
+      JTUN= 0
+      KTUN=-1
+      NTUN= 0
       ELO = 1.0E-5
       EHI =20.0E+6
 C*
@@ -171,6 +286,11 @@ C* Define the tuning factor file
       WRITE(LTT,901) '$          Enter new name to redefine : '
       READ (LKB,900) FLNM
       IF(FLNM(1:40).NE.BLNK) FLIN=FLNM
+C*    -- Prevent usage of reserved filename
+      IF(TRIM(FLIN).EQ.TRIM(FLTM)) THEN
+        WRITE(LTT,*) 'ERROR - Illegal use of reserved filename: ',FLTM
+        STOP 'EMPTUN ERROR - Illegal use of reserved filename'
+      END IF
       OPEN(UNIT=LIN,FILE=FLIN,STATUS='UNKNOWN')
 C* Define the source and tuned EMPIRE inputs
    20 WRITE(LTT,901) ' Default source EMPIRE input filename : ',FLEI
@@ -178,6 +298,16 @@ C* Define the source and tuned EMPIRE inputs
       READ (LKB,900) FLNM
       IF(FLNM(1:40).NE.BLNK) FLEI=FLNM
       OPEN(UNIT=LEI,FILE=FLEI,STATUS='OLD',ERR=20)
+C*    -- Copy the original input to scratch and redefine the file unit
+      OPEN(UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
+   22 READ (LEI,902,END=24) REC
+      WRITE(LTM,902)        REC
+      GO TO 22
+C*    -- Original input copied to scratch
+C*       Close the file and redefine the unit number
+   24 CLOSE(UNIT=LEI)
+      LEI=LTM
+      REWIND LEI
 C* Define the output file
       WRITE(LTT,901) ' Default updated EMPIRE input         : ',FLOU
       WRITE(LTT,901) '$          Enter new name to redefine : '
@@ -375,7 +505,8 @@ C* Select the tuning options for different energy ranges
         WRITE(LTT,914) I-1,HOPT(I)
       END DO
       READ (LKB,900) FLNM
-      IF(FLNM(1:40) .NE. BLNK) READ (FLNM,*,ERR=80) KTUN
+      IF(FLNM(1:40) .EQ. BLNK) GO TO 800
+      READ (FLNM,*,ERR=80) KTUN
       ITUN=KTUN
    82 WRITE(LTT,901) '  Enter lower energy for tuning [MeV] : '
       READ (LKB,900) FLNM
@@ -390,6 +521,7 @@ C* Select the tuning options for different energy ranges
         EHI=EHI*1000000
       END IF
       IF(ITUN.EQ.-1) ITUN=1
+      NTUN=NTUN+1
       GO TO 90
 C*
 C* Backward compatibility option - tuning parameters given on input
@@ -403,6 +535,7 @@ C* Backward compatibility option - tuning parameters given on input
       FLEG(1:1)='-'
       FLCX=BLNK//BLNK
       FLCX(1:1)='-'
+      NTUN=1
 C*
    90 WRITE(LTT,901) ' '
       WRITE(LTT,901) ' SUMMARY of selected input options:     '
@@ -481,26 +614,16 @@ C*      -- Check that the measured total cross section is available
             XTOTM=FINTXS(EE,EXT,XXT,NXT,INR,IER)
 C*
             XNONC  = XTT(I)- XEL(I)
-            XSELC  = XEL(I)- XCE(I)
+            XCELC  = XCE(I)
+            XSELC  = XEL(I)- XCELC
             XFUSC  = XTT(I)- XSELC
 C*
-            XCELM  =(XTOTM - XNONC)*XCE(I)/XEL(I)
-            XSELM  = XCELM * XSELC /XCE(I)
+            XCELM  =(XTOTM - XNONC)*XCELC/XEL(I)
+            XSELM  = XCELM * XSELC /XCELC
             XFUSM  = XTOTM - XSELM
 C*
-            FUSR(I)= XFUSM/XFUSC
-            ELAR(I)= XSELM/XSELC
-            FCE    = XCELM/XCE(I)
-C*          -- Correction for FUSRRED
-            FCE    = FCE/FUSR(I)
-C*          -- Take into account the internal EMPIRE definition
-C...
-C... What I think it should be (definition is unclear)
-C...        FCE    = FCE*(XFUSC-XCE(I))/(XFUSC-FCE*XCE(I))
-C... What is programmed in FLUCTU ???
-            FCE    = XCELM/XFUSM
-C...
-            CELR(I)= FCE
+            CALL TUNFAC(LTT,EE,FUSR(I),ELAR(I),CELR(I)
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
             IF(I1.EQ.0) I1=I
             I2=I
           END IF
@@ -533,7 +656,7 @@ C*
         WRITE(LIN,901) ' '
         WRITE(LIN,901) 'Sig_CE'//BLNK
         DO I=I1,I2
-          WRITE(LIN,912) EEG(i),XSE(I)
+          WRITE(LIN,912) EEG(i),XCE(I)
         END DO
         WRITE(LIN,901) ' '
         REWIND LIN
@@ -573,7 +696,8 @@ C*      -- Check that the measured total cross section is available
             XELSM=FINTXS(EE,EXE,XXE,NXE,INR,IER)
             XMUBM=FINTXS(EE,EXM,XXM,NXM,INR,IER)
 C*
-            XSELC  = XEL(I)- XCE(I)
+            XCELC  = XCE(I)
+            XSELC  = XEL(I)- XCELC
             XFUSC  = XTT(I)- XSELC
             XMSEC  = XMU(I)* XEL(I)/XSELC
 C*
@@ -588,29 +712,8 @@ C...        print *, xtt(i),xel(i),xmu(i),xce(i),xselc,xfusc
 C...        stop
 C...
 C*
-            FUSR(I)= XFUSM/XFUSC
-            ELAR(I)= XSELM/XSELC
-            FCE    = XCELM/XCE(I)
-C*          -- Correction for FUSRRED
-            FCE    = FCE/FUSR(I)
-C*          -- Take into account the internal EMPIRE definition
-C...
-C... What I think it should be (definition is unclear)
-C...        FCE    = FCE*(XFUSC-XCE(I))/(XFUSC-FCE*XCE(I))
-C... What is programmed in FLUCTU ???
-            FCE    = XCELM/XFUSM
-C...
-            CELR(I)= FCE
-C*          -- Check for unreasonable values
-            IF(FUSR(I).LT.0 .OR. ELAR(I).LT.0 .OR. CELR(I).LT.0) THEN
-              WRITE(LTT, * ) ' WARNING - Unreasonable tuning factors at'
-     &                      ,' Energy [eV]',EE
-              WRITE(LTT,924) ' FUSRED',FUSR(I),' ELARED',ELAR(I)
-     &                      ,' CELRED',CELR(I)
-              FUSR(I)=MAX(FUSR(I),0.)
-              ELAR(I)=MAX(ELAR(I),0.)
-              CELR(I)=MAX(CELR(I),0.)
-            END IF
+            CALL TUNFAC(LTT,EE,FUSR(I),ELAR(I),CELR(I)
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
             IF(I1.EQ.0) I1=I
             I2=I
           END IF
@@ -653,7 +756,7 @@ C* CASE: Illegal entry
         WRITE(LTT,*) 'EMPTUN ERROR - Invalid tuning factor'
       END IF
 C*
-C* START READING THE DESIRED TUNING FACTORS
+C* START READING THE DESIRED TUNING FACTORS LIST
 C*
    98 KC =0
       MC =0
@@ -665,6 +768,8 @@ C*
       HELARED=BLNK//BLNK//BLNK
       HCELRED=BLNK//BLNK//BLNK
   100 READ (LIN,901,END=140) FLNM
+C* Test label for backward compatibility
+      IF(FLNM(1:6).EQ.'Sig_f ') FLNM(1:6)='Sig_r '
 C* Check if all data types are present
       LC=0
       DO K=1,5
@@ -706,7 +811,7 @@ C*      Check if the energy mesh is consistent
       IF(MC.EQ.1) NEN=JEN
       GO TO 100
 C*
-C* Tuning parameters read
+C* Tuning factors read - check if any are missing
   140 DO K=1,5
         IF(KFLG(K).NE.1) THEN
           WRITE(LTT,'(A)') ' EMPTUN ERROR - Missing tuning parameter '
@@ -719,8 +824,9 @@ C* Tuning parameters read
      &            ,ENC(1),ENC(NEN),' at',NEN,' points'
       WRITE(LTT,901) ' '
 C*
-C* Tuning parametersfile processed - read EMPIRE input
-      EN0    =0
+C* BEGIN PROCESSING THE EMPIRE INPUT
+C*
+      EE     =0
       TOTRED1=1
       FUSRED1=1
       ELARED1=1
@@ -734,7 +840,7 @@ C* Tuning parametersfile processed - read EMPIRE input
       ICOM   =0
 C* Start reading the main EMPIRE input block
   200 READ (LEI,902) REC
-C*    -- Check for tuning factor definitions in the main block
+C*    -- Check for tuning factor assignment in the main block
       IF     (REC(1:6).EQ.'TOTRED') THEN
         TOTRED1=TOTREDX
         READ (REC(7:120),*) TOTREDX
@@ -766,152 +872,38 @@ C*    -- Copy all records in the main block
 C*
 C* Begin processing the energy-dependent block
   220 READ (LEI,902) REC
+C*    -- Check if within previous EMPTUN loop
+      IF(REC(1:20).EQ.'* Begin EMPTUN loop ') READ(REC(21:24),*) JTUN
+      IF(REC(1:20).EQ.'* End   EMPTUN loop ') JTUN=0
       IF(REC(1:1).EQ.'*') THEN
 C*      --Copy comments
         WRITE(LOU,902) REC
         GO TO 220
       END IF
-      IF(REC(1:1).NE.'$') THEN
-C*      -- Process the energy
-        READ (REC,*) EE
-C*        -- Update the tuning factors from main input to current value
-        TOTRED1=TOTREDX
-        FUSRED1=FUSREDX
-        ELARED1=ELAREDX
-        CELRED1=CELREDX
-C...
-C...    print *,'read energy',ee,enc(1),enc(nen),fusRED1
-C...
-        IF(EE.LT.0) THEN
-C*        -- Last energy flag - Copy the rest of the file to output
-  240     WRITE(LOU,902) REC
-          READ (LEI,902,END=800) REC
-          GO TO 240
-        ELSE
-C*        -- Check tuning factors for the current energy
-C...      IF(EE.LT.ENC(1) .OR. EE.GE.ENC(NEN)) THEN
-C...      IF(EE.LT.ENC(1) .OR. JEN.GT.NEN) THEN
-  242     KEN=MIN(JEN,NEN)
-c...
-c...      if(jen.lt.nen) print *,'jen,icom,ee,enc',jen,icom,ee,enc(jen)
-c...
-          IF((EE.LT.ENC(1) .OR. JEN.GT.NEN) .OR.
-     &       (EE.LT.ENC(KEN)                ) ) THEN
-C... &       (EE.LT.ENC(KEN) .AND. ICOM.EQ.1) ) THEN
-C*          -- Copy any remaining command and energies outside
-C*             the adjustment range
-            DO I=1,ICOM
-              WRITE(LOU,902) RECM(I)
-            END DO
-            WRITE(LOU,902) REC
-          ELSE
-C*          -- Insert energies and tuning factors from the file
-            DO WHILE(ENC(JEN).LE.EE)
-              REC=BLNK//BLNK//BLNK
-C...
-C...          PRINT *,ENC(JEN),EE,FUSRED1,PRC(JEN,1),PRC(JEN,1)*FUSRED1
-C...
+      IF(REC(1:1).EQ.'$') THEN
 C*
-C*            -- FUSRED=FCCRED=FCORED for consistency with TOTRED
-              REC(1:7)='$FUSRED'
-              FUSRED2=PRC(JEN,1)
-              FUSRED =FUSRED2*FUSRED1*TOTRED1
-              WRITE(REC(8:17),910) FUSRED
-              WRITE(LOU,902) REC
-              REC(1:7)='$FCCRED'
-              WRITE(LOU,902) REC
-              REC(1:7)='$FCORED'
-              WRITE(LOU,902) REC
-C*
-C*            -- ELARED
-              REC(1:7)='$ELARED'
-              ELARED2=PRC(JEN,2)
-              ELARED =ELARED2*ELARED1*TOTRED1
-              WRITE(REC(8:17),910) ELARED
-              WRITE(LOU,902) REC
-C*
-C*            -- CELRED
-              REC(1:7)='$CELRED'
-C... This is wrong!!!
-C...          CELRED=PRC(JEN,3)*CELRED1
-C...
-              CELDSH2=PRC(JEN,3)
-              SIGFUS1=PRC(JEN,4)
-              SIGCEL1=PRC(JEN,5)
-              CELDSH1=SIGCEL1/SIGFUS1
-C*
-              SIGFUS0=SIGFUS1/(FUSRED1*TOTRED1)
-              SIGCEL0=CELDSH1*SIGFUS0/(CELRED1+CELDSH1-CELRED1*CELDSH1)
-              CELRED =(SIGFUS0/SIGCEL0-1)*CELDSH2/(1-CELDSH2)
-              WRITE(REC(8:17),910) CELRED
-              WRITE(LOU,902) REC
-C*
-C*            -- Copy any remaining commands
-              IF(ABS(ENC(JEN)-EE).LT.EPS*EE) THEN
-                DO I=1,ICOM
-                  WRITE(LOU,902) RECM(I)
-                END DO
-                ICOM=0
-              END IF
-C*
-C*            -- Incident energy
-              REC=BLNK//BLNK//BLNK
-              WRITE(REC(1:8),908) ENC(JEN)
-              WRITE(LOU,902) REC
-              JEN=JEN+1
-              IF(JEN.GT.NEN) EXIT
-              IF(ENC(JEN).GT.EE .AND. ENC(JEN-1).LT.EE) THEN
-                WRITE(REC(1:8),908) EE
-                GO TO 242
-              END IF
-            END DO
-C*          -- All additional tuning factors and energies entered
-C*          -- Check for the last-defined tuning factor in originl input
-            IF(EE.GT.ENC(NEN)) THEN
-              IF(HFUSRED(1:40).EQ.BLNK) HFUSRED(1:12)='$FUSRED  1.0'
-              IF(HFCCRED(1:40).EQ.BLNK) HFCCRED(1:12)='$FCCRED  1.0'
-              IF(HFCORED(1:40).EQ.BLNK) HFCORED(1:12)='$FCORED  1.0'
-              IF(HELARED(1:40).EQ.BLNK) HELARED(1:12)='$ELARED  1.0'
-              IF(HCELRED(1:40).EQ.BLNK) HCELRED(1:12)='$CELRED  1.0'
-              IF(HTOTRED(1:40).NE.BLNK) WRITE(LOU,902) HTOTRED
-              WRITE(LOU,902) HFUSRED
-              WRITE(LOU,902) HFCCRED
-              WRITE(LOU,902) HFCORED
-              WRITE(LOU,902) HELARED
-              WRITE(LOU,902) HCELRED
-C*            -- Incident energy
-              REC=BLNK//BLNK//BLNK
-              WRITE(REC(1:8),908) EE
-              WRITE(LOU,902) REC
-            END IF
-          END IF
-          ICOM=0
-          GO TO 220
-        END IF
-      ELSE
-C*
-C* Process an energy-dependent command
+C* Process the energy-dependent commands
         IF     (REC(1:7).EQ.'$TOTRED') THEN
           HTOTRED=REC
           TOTRED1=TOTREDX
-          READ (REC(8:120),*) TOTREDX
+          IF(JTUN.EQ.0) READ (REC(8:120),*) TOTREDX
         ELSE IF(REC(1:7).EQ.'$FUSRED') THEN
           HFUSRED=REC
           FUSRED1=FUSREDX
-          READ (REC(8:120),*) FUSREDX
+          IF(JTUN.EQ.0) READ (REC(8:120),*) FUSREDX
 C...
 C...      PRINT *,'Redefine FUSRED',fusREDX
 C...
         ELSE IF(REC(1:7).EQ.'$ELARED') THEN
           HELARED=REC
           ELARED1=ELAREDX
-          READ (REC(8:120),*) ELAREDX
+          IF(JTUN.EQ.0) READ (REC(8:120),*) ELAREDX
         ELSE IF(REC(1:7).EQ.'$CELRED') THEN
           HCELRED=REC
           CELRED1=CELREDX
-          READ (REC(8:120),*) CELREDX
+          IF(JTUN.EQ.0) READ (REC(8:120),*) CELREDX
         END IF
-C*      -- Copy all commands outside the adjustment range
+C*      -- Save all commands outside the adjustment range
 C*         and commands other than the tuning parameters
         IF((EE.LT.ENC(1) .OR. EE.GT.ENC(NEN)) .OR.
      &     (REC(1:7).NE.'$TOTRED' .AND.
@@ -920,14 +912,215 @@ C*         and commands other than the tuning parameters
      &      REC(1:7).NE.'$CELRED' .AND.
      &      REC(1:7).NE.'$FCCRED' .AND.
      &      REC(1:7).NE.'$FCORED')           ) THEN
-C*        -- Save the additional command to print before energy
           ICOM=ICOM+1
           IF(ICOM.GT.MXCOM) STOP 'EMPTUN ERROR - MXCOM limit exceeded'
           RECM(ICOM)=REC
+        END IF
+      ELSE
+C*
+C*      -- Read the energy on the original EMPIRE input
+        EE0=EE
+        READ (REC,*) EE
+C*        -- Update the tuning factors from main input to current value
+        TOTRED1=TOTREDX
+        FUSRED1=FUSREDX
+        ELARED1=ELAREDX
+        CELRED1=CELREDX
+C...
+C...    print *,'read energy',ee,enc(1),ee0,enc(nen),fusRED1,icom
+C...
+  222   IF(EE.LT.0) THEN
+C*        -- Last energy flag - Copy the rest of the file to output
+          DO I=1,ICOM
+            WRITE(LOU,902) RECM(I)
+          END DO
+          ICOM=0
+          GO TO 240
+        ELSE IF(EE.LE.ENC( 1 )) THEN
+C*        -- Copy commands below the first energy on the list
+          DO I=1,ICOM
+            WRITE(LOU,902) RECM(I)
+          END DO
+          ICOM=0
+          WRITE(LOU,902) REC
           GO TO 220
+        ELSE IF(EE.LE.ENC(NEN) .OR. EE0.LT.ENC(NEN)) THEN
+C*        -- Insert energies and tuning factors from the file up to EE
+          ENCJ=ENC(JEN)
+          DO WHILE(ENCJ.LE.EE)
+C*          -- Mark the beginning of an EMPTUN loop
+            IF(JEN.EQ.1) THEN
+              IF(JTUN.NE.0) THEN
+                WRITE(LTT,926) ' EMPTUN WARNING - Loop',NTUN
+     &                     ,' starts before loop',JTUN,' is completed'
+                WRITE(LTT,902) ' '
+                WRITE(LLS,926) ' EMPTUN WARNING - Loop',NTUN
+     &                     ,' starts before loop',JTUN,' is completed'
+                WRITE(LLS,902) ' '
+              END IF
+              WRITE(LOU,924) '* Begin EMPTUN loop ',NTUN
+            END IF
+            REC=BLNK//BLNK//BLNK
+C...
+C...        PRINT *,ENCJ,EE,FUSRED1,PRC(JEN,1),PRC(JEN,1)*FUSRED1
+C...
+C*
+C*          -- FUSRED=FCCRED=FCORED for consistency with TOTRED
+            REC(1:7)='$FUSRED'
+            FUSRED2=PRC(JEN,1)
+            FUSRED =FUSRED2*FUSRED1*TOTRED1
+            WRITE(REC(8:17),910) FUSRED
+            WRITE(LOU,902) REC
+            REC(1:7)='$FCCRED'
+            WRITE(LOU,902) REC
+            REC(1:7)='$FCORED'
+            WRITE(LOU,902) REC
+C*
+C*          -- ELARED
+            REC(1:7)='$ELARED'
+            ELARED2=PRC(JEN,2)
+            ELARED =ELARED2*ELARED1*TOTRED1
+            WRITE(REC(8:17),910) ELARED
+            WRITE(LOU,902) REC
+C*
+C*          -- CELRED
+            REC(1:7)='$CELRED'
+C...        .... This is wrong!!!
+C...        CELRED=PRC(JEN,3)*CELRED1
+C...
+            CELDSH2=PRC(JEN,3)
+            SIGFUS1=PRC(JEN,4)
+            SIGCEL1=PRC(JEN,5)
+            CELDSH1=SIGCEL1/SIGFUS1
+C*
+            SIGFUS0=SIGFUS1/(FUSRED1*TOTRED1)
+            SIGCEL0=CELDSH1*SIGFUS0/(CELRED1+CELDSH1-CELRED1*CELDSH1)
+            CELRED =(SIGFUS0/SIGCEL0-1)*CELDSH2/(1-CELDSH2)
+            WRITE(REC(8:17),910) CELRED
+            WRITE(LOU,902) REC
+C*          -- Check if EE is very close to the added point on the list
+            IF(ABS(ENCJ-EE).LT.EPS*EE) THEN
+C*            -- The point is close
+C*               Copy commands associated with EE from the orig. input
+              DO I=1,ICOM
+                REC=RECM(I)
+                IF(REC(1:7).NE.'$FUSRED' .AND.
+     &             REC(1:7).NE.'$FCCRED' .AND.
+     &             REC(1:7).NE.'$FCORED' .AND.
+     &             REC(1:7).NE.'$ELARED' .AND.
+     &             REC(1:7).NE.'$CELRED') THEN
+                  WRITE(LOU,902) REC
+                END IF
+              END DO
+              ICOM=0
+            END IF
+C*          -- Print the next energy
+            REC=BLNK//BLNK//BLNK
+            WRITE(REC(1:8),908) ENCJ
+            WRITE(LOU,902) REC
+C*          -- Proceed to the next energy
+            JEN=JEN+1
+            IF(JEN.GT.NEN) EXIT
+            ENCJ=ENC(JEN)
+          END DO
+C*        -- Additional points from the list up to EE processed
+          IF(JEN.LE.NEN) THEN
+C*          -- Copy commands associated with EE from the orig. input
+C*             unless already copied
+            IF(ICOM.GT.0) THEN
+              DO I=1,ICOM
+                REC=RECM(I)
+                IF(REC(1:7).NE.'$FUSRED' .AND.
+     &             REC(1:7).NE.'$FCCRED' .AND.
+     &             REC(1:7).NE.'$FCORED' .AND.
+     &             REC(1:7).NE.'$ELARED' .AND.
+     &             REC(1:7).NE.'$CELRED') THEN
+                  WRITE(LOU,902) REC
+                END IF
+              END DO
+              ICOM=0
+C*            -- Copy also the energy, if not close to ENCJ
+              IF(ABS(ENCJ-EE).GT.EPS*EE) THEN
+                REC=BLNK//BLNK//BLNK
+                WRITE(REC(1:8),908) EE
+                WRITE(LOU,902) REC
+              END IF
+            END IF
+          ELSE
+C*          -- Last point processed
+C*             Mark the end of a EMPTUN loop
+            WRITE(LOU,924) '* End   EMPTUN loop ',NTUN
+C*          -- Check the last-defined tuning factor in originl input
+            DO I=1,ICOM
+              REC=RECM(I)
+              IF(REC(1:7).NE.'$FUSRED' .AND.
+     &           REC(1:7).NE.'$FCCRED' .AND.
+     &           REC(1:7).NE.'$FCORED' .AND.
+     &           REC(1:7).NE.'$ELARED' .AND.
+     &           REC(1:7).NE.'$CELRED') THEN
+                WRITE(LOU,902) REC
+              END IF
+            END DO
+            ICOM=0
+C*          -- Reset tuning parameters to original values
+            IF(HFUSRED(1:40).EQ.BLNK) HFUSRED(1:12)='$FUSRED   1.0'
+            IF(HFCCRED(1:40).EQ.BLNK) HFCCRED(1:12)='$FCCRED   1.0'
+            IF(HFCORED(1:40).EQ.BLNK) HFCORED(1:12)='$FCORED   1.0'
+            IF(HELARED(1:40).EQ.BLNK) HELARED(1:12)='$ELARED   1.0'
+            IF(HCELRED(1:40).EQ.BLNK) HCELRED(1:12)='$CELRED   1.0'
+            IF(HTOTRED(1:40).NE.BLNK) WRITE(LOU,902) HTOTRED
+            WRITE(LOU,902) HFUSRED
+            WRITE(LOU,902) HFCCRED
+            WRITE(LOU,902) HFCORED
+            WRITE(LOU,902) HELARED
+            WRITE(LOU,902) HCELRED
+C*          -- Write the incident energy
+            REC=BLNK//BLNK//BLNK
+            WRITE(REC(1:8),908) EE
+            
+                                write(rec(40:60),*) '! ',enc(nen)
+
+          END IF
+C*        -- Proceed to reading the next energy
+          GO TO 220
+        ELSE
+C*        -- Process energies above the tuning range
+          IF(ICOM.GT.0) THEN
+            DO I=1,ICOM
+              REC=RECM(I)
+              IF(REC(1:7).NE.'$FUSRED' .AND.
+     &           REC(1:7).NE.'$FCCRED' .AND.
+     &           REC(1:7).NE.'$FCORED' .AND.
+     &           REC(1:7).NE.'$ELARED' .AND.
+     &           REC(1:7).NE.'$CELRED') THEN
+                WRITE(LOU,902) REC
+              END IF
+            END DO
+            ICOM=0
+            REC=BLNK//BLNK//BLNK
+            WRITE(REC(1:8),908) EE
+          END IF
+C*        -- Copy the remaining part of the input file
+          GO TO 240
         END IF
       END IF
       GO TO 220
+C*
+C* Copy the rest of the file to output
+  240 WRITE(LOU,902) REC
+      READ (LEI,902,END=250) REC
+      GO TO 240
+C* One EMPIRE input editing loop completed - check for more
+  250 REWIND LEI
+      REWIND LOU
+C*    -- Copy the newly updated input to scratch
+  252 READ (LOU,902,END=254) REC
+      WRITE(LEI,902) REC
+      GO TO 252
+  254 REWIND LEI
+      REWIND LOU
+      REWIND LIN
+      IF(KTUN.NE.-1) GO TO 80
 C* End of file processing
   800 STOP 'EMPTUN Completed'
 C*
@@ -943,6 +1136,37 @@ C*
   912 FORMAT(1P,2E11.5E1)
   914 FORMAT(I6,A40)
   922 FORMAT(A,1P,2E10.3,A,I6)
+  924 FORMAT(A,I4)
+  926 FORMAT(A,I4,A,I4,A)
+      END
+      SUBROUTINE TUNFAC(LTT,EE,FUSR,ELAR,CELR
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
+C-Title  : SUBROUTINE TUNFAC
+C-Purpose: Define tuning factors according to EMPIRE internal definitions
+      FUSR= XFUSM/XFUSC
+      ELAR= XSELM/XSELC
+      FCE = XCELM/XCELC
+C*    -- Correction for CELRRED
+      FCE = FCE/FUSR
+C*    -- Take into account the internal EMPIRE definition
+C...
+C... What I think it should be (definition is unclear)
+C...  FCE = FCE*(XFUSC-XCELC)/(XFUSC-FCE*XCELC)
+C... What is programmed in FLUCTU ???
+      FCE = XCELM/XFUSM
+C...
+      CELR= FCE
+C*    -- Check for unreasonable values
+      IF(FUSR.LT.0 .OR. ELAR.LT.0 .OR. CELR.LT.0) THEN
+        WRITE(LTT, * ) ' WARNING - Unreasonable tuning factors at'
+     &                ,' Energy [eV]',EE
+        WRITE(LTT,924) ' FUSRED',FUSR,' ELARED',ELAR
+     &                ,' CELRED',CELR
+        FUSR=MAX(FUSR,0.)
+        ELAR=MAX(ELAR,0.)
+        CELR=MAX(CELR,0.)
+      END IF
+      RETURN
   924 FORMAT(6X,3(A,1P,E9.2E1))
       END
       SUBROUTINE SMODAT(NXC,XSC,NXF,XSF,SCL,BVL,RWO,MXR)
