@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3701 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-04 03:44:48 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Rev: 3781 $
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2014-02-04 23:24:18 +0100 (Di, 04 Feb 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -293,8 +293,9 @@ C
 C
 C Local variables
 C
-      INTEGER l, n1
-      DOUBLE PRECISION pl(64), ss
+      INTEGER l, n1, mxord
+      PARAMETER (mxord=64)
+      DOUBLE PRECISION pl(mxord+1), ss
 C
 C
 C
@@ -306,7 +307,7 @@ C
 C
 C
 C     DIMENSION QL(1),PL(20)
-      IF (Nl.GE.64) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
+      IF (Nl.GE.mxord) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL PLNLEG(Uu,pl,Nl)
       n1 = Nl + 1
       ss = 0.
