@@ -23,6 +23,7 @@ C-V  12/11 Fix setting the error flag IER
 C-V  12/02 Implement retrieval of cross sections at fixed angle
 C-V        for incident neutrons
 C-V  13/06 Trivial fix to retrieve MF3/MT5 as is
+C-V  14/02 Re-design to accurately print values at interval boundaries
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -506,26 +507,63 @@ C* Section processed
 C* Write the data to the PLOTTAB file
       WRITE(LOU,91) COM
       IF(NP.LT.1) GO TO 84
-      K1=1
-   81 EE=ES(K1)
-      IF(KEA.EQ.1) EE=ACOS(EE)*180/PI
-      K1=K1+1
-      IF(EE.LT.EA) GO TO 81
-      IF(EB.LE. 0) EB=ES(NP)
-      ED=DBLE(EE)
-      CALL CH11PK(E11,ED)
-      WRITE(LOU,194) E11,SG(K1-1),UG(K1-1)
-      DO I=K1,NP
-        EE=ES(I)
-        ED=DBLE(EE)
-        IF(KEA.EQ.1) ED=DBLE(ACOS(EE)*180/PI)
+      IF(EB.LE.0) EB=ES(NP)
+      KK =1
+      EE2=ES(KK)
+      SG2=SG(KK)
+      UG2=UG(KK)
+   81 KK =KK+1
+      EE1=EE2
+      SG1=SG2
+      UG1=UG2
+      EE2=ES(KK)
+      SG2=SG(KK)
+      UG2=UG(KK)
+      IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
+      IF(EE2.LE.EA) GO TO 81
+C*    -- First point
+      IF(EE1.LE.EA .OR. KK.LE.2) THEN
+        ED=DBLE(EE1)
+        IF(IN2.EQ.1) THEN
+          ED=DBLE(EA)
+        ELSE IF(IN2.EQ.2) THEN
+          IF(EE1.LE.EA) THEN
+            IF(EE1.LT.EE2) SG1=SG1+(EA-EE1)*(SG2-SG1)/(EE2-EE1)
+            ED=DBLE(EA)
+          END IF
+        ELSE
+          STOP 'ENDTAB ERROR - Invalid interpolation law'
+        END IF
         IF(ABS(ED).LE.1.D-9) ED=0
         CALL CH11PK(E11,ED)
-        IF(IN2.EQ.1) WRITE(LOU,194) E11,SG(I-1),UG(I-1)
-        IF(IN2.NE.1 .OR. ES(I).LT.EB) WRITE(LOU,194) E11,SG(I),UG(I)
-        IF(EE.GE.EB) GO TO 84
-      END DO
+        WRITE(LOU,194) E11,SG1,UG1
+      END IF
+      IF(EE2.GE.EB) THEN
+C*      -- Last point
+        IF(IN2.EQ.1) THEN
+          ED=DBLE(EB)
+        ELSE IF(IN2.EQ.2) THEN
+          IF(EE1.LT.EE2 .AND. EE2.GE.EB) THEN
+            SG2=SG1+(EB-EE1)*(SG2-SG1)/(EE2-EE1)
+            ED=DBLE(EB)
+          ELSE
+            ED=DBLE(EE2)
+          END IF
+        END IF
+        CALL CH11PK(E11,ED)
+        IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
+        WRITE(LOU,194) E11,SG2,UG2
+      ELSE
+C*      -- Intermediate points
+        ED=DBLE(EE2)
+        CALL CH11PK(E11,ED)
+        IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
+        WRITE(LOU,194) E11,SG2,UG2
+        GO TO 81
+      END IF
+C*    -- End of data set - write blank delimiter
    84 WRITE(LOU,94)
+c*
       IF((ZA0.EQ. 0 .OR. MT0.EQ.0) .AND.
      1  (( MF.LT.4 .AND.  MF.GT.6) .OR. MF.EQ.26)) GO TO 40
 C*
