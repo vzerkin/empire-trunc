@@ -44,6 +44,8 @@ C-V        - Update RDTAB1 routine for consistency with DXSEND.
 C-V  12/10 Define scattering mu-bar as MF3/MT254.
 C-V  13/12 - Cosmetic changes for compiler compatibility
 C-V        - Increase max. number of levels from 400 to 500
+C-V  14/01 Add RIPL level filename to the error message.
+C-V  14/02 Fix undefined variable in a warning message.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -219,6 +221,7 @@ C-
       CHARACTER*14     ALIA(4,MXAL)
       CHARACTER*(LCH)  ENT(MXEN),ENTI
       CHARACTER*9      AOU,POU,ELV,ELW,HRSD,HEJC,HEXF
+      CHARACTER*8      FRLV
       CHARACTER*3      LB3
       CHARACTER*1      EN1(LCH,MXEN),EL1(MEL1,MXIR),CHAR1,CHAR2,CH
       LOGICAL          EXST
@@ -774,9 +777,13 @@ c... &           ,'"',DPATH(1:LPATH),'"'
 c...
         CALL MCHLVL(IZX,FLV,DPATH,LPATH,IER)
         IF(IER.NE.0) THEN
+          IZ=IZA/1000
+          WRITE (FRLV,'(''z'',I3.3,''.dat'')') IZ
           PRINT *,'ERROR Reading RIPL energy level file for ZA',IZA
+     &           ,' from ',FRLV
 c...
-          print *,'   "',rec(1:20),'" iza,flv0,flv,ier',iza,flv0,flv,ier
+          print *,'   "',rec(1:20),'" iza,flv0,flv,ier'
+     &                               ,iza,flv0,flv,ier
 c...
         END IF
         IF(FLV.LT.1.E8) THEN
