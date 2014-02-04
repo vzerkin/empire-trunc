@@ -117,6 +117,7 @@ C-V        (for some compiler on linux it was failing)
 C-V  13/12 Allow for isomer production without blank line delimiter.
 C-V  14/01 Check the order of Legendre expansion for elastic ang.distr.
 C-V        Try to fit tabulated distribution.
+C-V  14/02 Include compound elastic MF3/MT50 (MF4 still pending).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -2633,6 +2634,11 @@ C* Test for elastic angular distributions of neutral particles
         MT=2
         GO TO 120
       END IF
+C* Test for compound-elastic Legendre coefficients
+      IF(IZI.LT.1000 .AND. REC(1:20).EQ.'  CE Legendre coeffi'    ) THEN
+        MT=50
+        GO TO 120
+      END IF
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C* Identify the reaction and assign the MT number
       CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
@@ -3683,7 +3689,8 @@ C* Special case when no discrete levels are given
       JL1=0
 C* Next could be elastic, discrete level or continuum cross section
   351 READ (LIN,891,END=710) REC
-      IF(REC( 1:10).EQ.' ELASTIC C') GO TO 370
+      IF(REC( 1:23).EQ.' ELASTIC CROSS SECTION='     ) GO TO 370
+      IF(REC( 1:23).EQ.' COMP. ELASTIC CROSS SE'     ) GO TO 374
       IF(REC(13:36).EQ.'population cross section'    ) GO TO 216
       IF(REC(13:36).EQ.'production cross section'    ) GO TO 390
       IF(REC(11:34).NE.'Discrete level populatio'    ) GO TO 351
@@ -3781,6 +3788,24 @@ C* Read the elastic cross section but exclude incident charged particles
 c...C* Read the level energy in the case of a metastable target
 c...      READ (REC(52:61),994) QQ
 c...      QQ=QQ*1.0E6
+      DO I=1,NXS
+        IXS=I
+        MTI=ABS(MTH(I))
+        IF(MTI.EQ.MT) GO TO 372
+      END DO
+      NXS=NXS+1
+      IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
+      IXS=NXS
+      MTH(IXS)=MT
+C* Q value for elastic scattering may be non-zero for metastable targets
+      QQM(IXS)=QQ
+      QQI(IXS)=QQ
+  372 XSC(NEN,IXS)=XE*1.E-3
+      GO TO 351
+C* Read the compound elastic cross section (no inc. charged particles)
+  374 IF(IZI.GE.1000) GO TO 351
+      MT=50
+      READ (REC,807) XE
       DO I=1,NXS
         IXS=I
         MTI=ABS(MTH(I))
@@ -3905,6 +3930,7 @@ C*
   804 FORMAT(1X,I3,1X,A2,1X,I3,4X,6F10.0)
   805 FORMAT(I12,F10.0,I5,F8.0,3X,F12.0,I3)
   806 FORMAT(BN,8X,8F15.0)
+  807 FORMAT(30X,F12.0)
   808 FORMAT(24X,F12.0)
 c.809 FORMAT(26X,F12.0)
   809 FORMAT(30X,F10.0)
@@ -6973,6 +6999,7 @@ C-
       LM1=LM0+1
       LST=0
       MNS=0
+      YNM=0
 C*    -- Max. number of adjustment cycles on -ve distributions
 c*       (does not work very well)
       MNSMX=0
