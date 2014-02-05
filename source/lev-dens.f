@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:48:25 +0100 (Mi, 05 Feb 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -34,6 +34,7 @@ CCC   *       DAMIRO                                                  *
 CCC   *                                                               *
 CCC   *****************************************************************
 CCC
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -95,11 +96,11 @@ C-----fit of cumulative low-lying discrete levels
       
       IF(BF.NE.0.d0) Call LEVFIT(Nnuc,Nplot,Dshif,Dshift,Defit)
 
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3)  
-     &  Call PLOT_ZVV_NumCumul(Nnuc)
+      IF ((FITlev.GT.0 .or. IOUt.eq.6) .AND. NLV(Nnuc).GT.3
+     &  .AND. ENDf(Nnuc).LE.1 ) Call PLOT_ZVV_NumCumul(Nnuc)
 
-      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) 
-     &   Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
+C     IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) 
+C    &   Call PLOT_GNU_NumCumul(Nnuc,Dshift,DEL)
 
       IF (Q(1,Nnuc).EQ.0.0D0) THEN
          REWIND (25)
@@ -149,7 +150,9 @@ C     Ecrt = UCRt - DEL - dshift
          ENDIF
       ENDDO
 
-      IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
+C     IF(IOUt.eq.6 .and.NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
+      IF((FITlev.gt.0 .or. IOUt.eq.6) .and. NLV(Nnuc).GT.3 
+     >  .and. ENDf(Nnuc).LE.1) Call PLOT_ZVV_GSLD(Nnuc)     
 
 C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       ROPar(1,Nnuc) = ACR
@@ -831,9 +834,12 @@ C Local variables
      &                  cga,gamma,shcn)                    
  110  ENDDO 
 
-      IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
-
-      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) then
+C     IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
+      IF((FITlev.gt.0 .or. IOUt.eq.6) .and. NLV(Nnuc).GT.3 
+     >  .and. ENDf(Nnuc).LE.1) then
+        Call PLOT_ZVV_GSLD(Nnuc)     
+C
+C     IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) then
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
@@ -841,7 +847,7 @@ C
 C       In a normal calculation, Ecut(NNuc)>0 and therefore the
 C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
-        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
+C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
       ENDIF
 
@@ -1533,10 +1539,9 @@ C-----------Dilg's recommendations
          ENDDO
       ENDIF
 
-      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) 
-     >  Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
-
-      IF (IOUt.GE.6. .AND. NLV(Nnuc).GT.3) then
+      IF((FITlev.gt.0 .or. IOUt.eq.6) .and. NLV(Nnuc).GT.3 
+     >  .and. ENDf(Nnuc).LE.1) then     
+C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
         CALL PLOT_ZVV_GSLD(Nnuc)     
       ENDIF
@@ -1826,9 +1831,9 @@ C
          TNUc(kk,Nnuc) = c1*tgrid(klo) + c2*tgrid(khi)
       ENDDO
 
-      IF (IOUt.GE.6 .AND. NLV(Nnuc).GT.3) Call PLOT_ZVV_GSLD(Nnuc)     
-
-      IF (FITlev.GT.0 .AND. NLV(Nnuc).GT.3) then
+      IF((FITlev.gt.0 .or. IOUt.GE.6) .and. ENDf(Nnuc).LE.1      
+     >   .and. NLV(Nnuc).GT.3) then 
+        Call PLOT_ZVV_GSLD(Nnuc) 
 C
 C       Cumulative levels must be calculated for FITLEV>0
 C       as Ecut(Nnuc) is set to zero
@@ -1836,7 +1841,7 @@ C
 C       In a normal calculation, Ecut(NNuc)>0 and therefore the
 C       cumulative integral is wrongly calculated !!!
 C       RCN, April 2012
-        Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
+C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         Call PLOT_ZVV_NumCumul(Nnuc)
       ENDIF
 
@@ -2079,6 +2084,7 @@ c-----------EGSM - J>>K (egsm=0) and EGSM (egsm=1)
 
 c=======================================================================
       SUBROUTINE DAMI_RO_HFB_FIS(Nnuc,Ib,Rafis)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2111,11 +2117,9 @@ C
 C Local variables
 C
       REAL*8 aaj, excn1, rotemp, xmax, mompar, temp
-      REAL*8 bbb, ggg, rrry, rrr1, rrr2, def2
-      REAL FLOAT
-      INTEGER ia, iff, in, iz, jj, kk, nr
-      INTEGER INT
+      REAL*8 bbb, ggg, rrry, rrr1, rrr2, def2, rbmsph
 
+      INTEGER ia, iff, in, iz, jj, kk, nr, ipp
      
       iz = INT(Z(Nnuc))
       ia = INT(A(Nnuc))
