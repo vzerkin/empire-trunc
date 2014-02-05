@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3787 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:56:22 +0100 (Mi, 05 Feb 2014) $
 C
 C
       SUBROUTINE HRTW
@@ -64,16 +64,16 @@ C-----Initialize variables and print heading for normalizing g-strength function
       sumtg = 0.d0
       tgexper=0.d0
       IF(FIRst_ein .or. BENchm) THEN          
-        IF(EINl.LE.0.005d0) THEN
+        IF(EINl.LE.1.d0) THEN
           WRITE(8,
      &    '(1x,''Renormalization of gamma-ray strength function'')')
       ELSE
           WRITE(8,'(1x,
-     &  '' WARNING: First incident energy Einc must be < 5keV for Do an
-     &d Gg calculations'')')
+     &  '' WARNING: First incident energy Einc must be < 1MeV for Do and
+     & Gg calculations and'')')
           WRITE(8,'(1x,
-     &  '' WARNING: for the renormalization of gamma-ray strength funct
-     &ion'')')
+     &  '' WARNING: for the renormalization of gamma-ray strength functi
+     &on'')')
       ENDIF
         WRITE(8,'(1x,
      &    ''------------------------------------------------------------
@@ -223,7 +223,7 @@ C    &             DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
 C
 C           Gamma width calculation
 C
-            IF((FIRst_ein  .or. BENchm) .AND. EINl.LE.0.002d0) THEN
+            IF((FIRst_ein  .or. BENchm) .AND. EINl.LE.1.d0) THEN
               cnspin = jcn - 0.5
               if(mod(XJLv(LEVtarg,0)*2.,2.D+0).eq.1) cnspin = jcn-1
               if( ip.eq.LVP(LEVtarg,0) .AND.
@@ -242,7 +242,7 @@ C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
       ENDDO          !loop over decaying nucleus parity
       IF(d0c.gt.0.d0) d0c = 1000.0/d0c
       IF(D0_obs.EQ.0.0D0) D0_obs = d0c !use calculated D0 (in keV) if not measured
-      IF(EINl.LE.0.002d0 .AND. (FIRst_ein .or. BENchm)) THEN
+      IF(EINl.LE.1.d0 .AND. (FIRst_ein .or. BENchm)) THEN
          IF(D0_obs.GT.0.d0) THEN
             tgexper = 2*pi*Gg_obs/D0_obs/1.E6
             WRITE(8,'(1x,
