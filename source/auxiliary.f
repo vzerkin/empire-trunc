@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3781 $
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2014-02-04 23:24:18 +0100 (Di, 04 Feb 2014) $
+Ccc   * $Rev: 3784 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-02-05 06:44:40 +0100 (Mi, 05 Feb 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -109,13 +109,11 @@ CCCC *****************************************************************
 CCCC * Calculates an integral                                        *
 CCCC *****************************************************************
 C
+C     Dummy arguments
 C
-C Dummy arguments
+      DOUBLE PRECISION A, B, Y, Dintg
 C
-      DOUBLE PRECISION A, B, Dintg
-      DOUBLE PRECISION Y
-C
-C Local variables
+C     Local variables
 C
       DOUBLE PRECISION d, dintg1, prec, sum, x
       INTEGER i, n
@@ -136,185 +134,65 @@ C
       IF (ABS(Dintg - dintg1) - prec*ABS(Dintg).GT.0.D0) THEN
          IF (n.GT.200) THEN
             WRITE (8,'('' STEPS IN INTGRS >200, PRECISION LOST'')')
-            GOTO 99999
+            RETURN
          ENDIF
          n = n + n
          dintg1 = Dintg
          GOTO 100
       ENDIF
-99999 END
-
-
-      SUBROUTINE LSQLGV(Xp,Yp,Np,Qq,Lmi,Lmx,Emm,Err,Rwo,Mxr)
-C-Title  : LSQLGV Subroutine
-C-Purpose: Least-squares fitting by variable order Legendre polynomials
-C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia (1997)
-C-Description:
-C-D  The Least-squares method is used with a progressively increasing
-C-D  Legendre polynomial order to fit a set of NP data points YP(i)
-C-D  given at argument values XP(i), which must be in monotonic order
-C-D  and in the range X:[-1,1].
-C-D    The search for an adequate polynomial order starts at LMI and
-C-D  proceeds up to LMX or NP-2, whichever is smaller. If LMX is
-C-D  smaller or equal to LMI, the second condition prevails. The
-C-D  procedure is terminated earlier if the maximum relative difference
-C-D  between an input and a calculated point value is smaller than EMM.
-C-D  On exit, ERR contains the actual max.relative difference between
-C-D  the input and the fitted data.
-C-D    A scratch array RWO of length MXR is needed, where the value of
-C-D  MXR does not exceed (LMX+3)*(LMX+1) .
-C-D    On output, the Legendre coefficients are stored in QQ. The actual
-C-D  order of Legendre polynomials used is contained in LMX.
-C-External: LSQLEG, MTXGUP, PLNLEG, POLLG1
-C-
-C
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Emm, Err
-      INTEGER Lmi, Lmx, Mxr, Np
-      DOUBLE PRECISION Qq(Lmx), Rwo(Mxr), Xp(Np), Yp(Np)
-C
-C Local variables
-C
-      DOUBLE PRECISION d1, rer, sy, yci
-      DOUBLE PRECISION DMAX1
-      INTEGER i, ip, jer, l, l1, n1, nlg
-      DOUBLE PRECISION POLLG1
-      nlg = 0
-      Lmx = MIN(Lmx,Np - 1)
-C*    Check if zero-order
-      Qq(1) = Yp(1)
-      IF (Np.GE.2) THEN
-         sy = 0.
-         DO i = 2, Np
-            sy = sy + 0.5*(Yp(i) + Yp(i - 1))*(Xp(i) - Xp(i - 1))
-         ENDDO
-         Qq(1) = sy/(Xp(Np) - Xp(1))
-         IF (Lmx.GE.1) THEN
-C*          Clear the coefficients field
-            DO l = 1, Lmx
-               Qq(l + 1) = 0.d0
-            ENDDO
-C*
-C*          Loop to find the appropriate Legendre order
-            l1 = MAX(1,Lmi)
-            DO l = l1, Lmx
-               IF ((nlg + 1)*(nlg + 3).GT.Mxr) GOTO 100
-               nlg = l
-               n1 = nlg + 1
-               CALL LSQLEG(Xp,Yp,Np,Qq,n1,Rwo,jer)
-               IF (jer.NE.0) THEN
-                  nlg = nlg - 1
-                  GOTO 100
-               ENDIF
-C*             Check the difference between input and calculated points
-               Err = 0.d0
-               DO ip = 1, Np
-                  d1 = POLLG1(Xp(ip),Qq(1),nlg)
-                  yci = d1
-                  IF (yci.NE.0.0D0) rer = ABS((yci - Yp(ip))/yci)
-                  Err = DMAX1(rer,Err)
-               ENDDO
-               IF (Err.LE.Emm) GOTO 100
-            ENDDO
-C*
-         ENDIF
-      ENDIF
-  100 Lmx = nlg
+      RETURN
       END
 
-
       SUBROUTINE LSQLEG(Xp,Yp,Np,Qq,N1,Aa,Ier)
+      implicit none
 C-Title  : LSQLEG Subroutine
 C-Purpose: Fit Legendre coefficients to a set of data
-C-Description:
-C-D
-C
 C
 C Dummy arguments
 C
       INTEGER Ier, N1, Np
-      DOUBLE PRECISION Aa(N1,N1 + 2), Qq(N1), Xp(Np), Yp(Np)
+C     DOUBLE PRECISION Aa(N1,N1 + 2), Qq(N1), Xp(Np), Yp(Np)
+      DOUBLE PRECISION Aa(N1,N1), Qq(N1), Xp(Np), Yp(Np)
 C
 C Local variables
 C
-      DOUBLE PRECISION det, pi, pj
+      DOUBLE PRECISION det, fp(N1), fy(N1)
       INTEGER i, j, ldig, lf, lp, m, nlg
 C*    Perform linear transformation of the coordinate system
       Ier = 0
       lf = N1 + 1
       lp = lf + 1
 C*    Clear the matrix
-      DO i = 1, N1
-         Aa(i,lf) = 0.
-         DO j = 1, N1
-            Aa(j,i) = 0.
-         ENDDO
-      ENDDO
+      Aa = 0.d0
 C*    Set up the matrix
       nlg = N1 - 1
+      fy = 0.d0
       DO m = 1, Np
 C*       Calculate Legendre polynomials
-         CALL PLNLEG(Xp(m),Aa(1,lp),nlg)
+         CALL PLNLEG(Xp(m),fp,nlg)
          DO i = 1, N1
-            pi = Aa(i,lp)
-            Aa(i,lf) = Aa(i,lf) + Yp(m)*pi
+            if(fp(i).eq.0.d0) cycle 
+            fy(i) = fy(i) + Yp(m)*fp(i)
             DO j = i, N1
-               pj = Aa(j,lp)
-               Aa(j,i) = Aa(j,i) + pi*pj
-               Aa(i,j) = Aa(j,i)
+               Aa(j,i) = Aa(j,i) + fp(i)*fp(j)
+               if (j.gt.i) Aa(i,j) = Aa(j,i)
             ENDDO
          ENDDO
+C
+C        There are small differences in YP(m) in optimized gfortran 
+C           compared to ifort and MSFortran. To be solved, RCN 02/14
+C
+C        write(8,*) '====='
+C        do i=1,N1
+C          write(8,'(2x,4(g15.5,1x),2x,i3)') fp(i),fy(i),xp(m),yp(m),m
+C        enddo 
+C        write(8,*) '====='
       ENDDO
 C*    Solve the system of equations
-      CALL MTXGUP(Aa,Aa(1,lf),Qq,N1,ldig,det)
+      CALL MTXGUP(Aa,fy,Qq,N1,ldig,det)
       IF (det.NE.0.0D0) RETURN
       Ier = 1
-      END
-
-
-      DOUBLE PRECISION FUNCTION POLLG1(Uu,Ql,Nl)
-C-Title  : POLLG1 Function
-C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
-C-Description:
-C-D  Evaluate Legendre polynomial expansion of order NL with
-C-D  coefficients QL at argument value UU in the interval [-1,1]
-C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
-C-
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
-C
-C
-C Dummy arguments
-C
-      INTEGER Nl
-      DOUBLE PRECISION Uu
-      DOUBLE PRECISION Ql(Nl + 1)
-C
-C Local variables
-C
-      INTEGER l, n1, mxord
-      PARAMETER (mxord=64)
-      DOUBLE PRECISION pl(mxord+1), ss
-C
-C
-C
-C Dummy arguments
-C
-C
-C Local variables
-C
-C
-C
-C     DIMENSION QL(1),PL(20)
-      IF (Nl.GE.mxord) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
-      CALL PLNLEG(Uu,pl,Nl)
-      n1 = Nl + 1
-      ss = 0.
-      DO l = 1, n1
-         ss = ss + Ql(l)*pl(l)
-      ENDDO
-      POLLG1 = ss
+      RETURN
       END
 
 
@@ -331,20 +209,21 @@ C Dummy arguments
 C
       INTEGER Nl
       DOUBLE PRECISION Uu
-      DOUBLE PRECISION Pl(Nl + 1)
+      DOUBLE PRECISION Pl(Nl+1)
 C
 C Local variables
 C
-      REAL FLOAT
       INTEGER l
+      Pl = 0.d0
       Pl(1) = 1.d0
       IF (Nl.LT.1) RETURN
       Pl(2) = Uu
       IF (Nl.LT.2) RETURN
       DO l = 2, Nl
-         Pl(l + 1) = (Pl(l)*Uu*FLOAT(2*l - 1) - Pl(l - 1)*FLOAT(l - 1))
-     &               /FLOAT(l)
+         Pl(l + 1) = (Pl(l)*Uu*DBLE(2*l - 1) - Pl(l - 1)*DBLE(l - 1))
+     &               /DBLE(l)
       ENDDO
+      RETURN
       END
 
       DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEVCOL)
@@ -408,6 +287,7 @@ C-D elimination technique with partial pivoting by rows.
 C-Author : A.Trkov , Institute J.Stefan Ljubljana, 1984
 C-Version: 93/3 - improved zero-determinant trapping
 C
+      implicit none
 C
 C Dummy arguments
 C
@@ -420,20 +300,21 @@ C
       DOUBLE PRECISION a1, a2, er
       INTEGER i, i1, j, j1, k, k1
 C
-      Det = 1.
-      er = 1.
+      x = 0.d0
+      Det = 1.d0
+      er = 1.d0
       DO i = 2, N
          i1 = i - 1
 C*       Find the pivot
-         a1 = 0.
+         a1 = 0.d0
          DO k = i1, N
             IF (ABS(A(k,i1)).GE.a1) THEN
                a1 = ABS(A(k,i1))
                k1 = k
             ENDIF
          ENDDO
-         IF (ABS(a1/Det).LE.1.D-6 .AND. i1.GE.2) THEN
-            Det = 0.
+         IF (ABS(a1).LE.1.D-6*Det .AND. i1.GE.2) THEN
+            Det = 0.d0
             RETURN
          ENDIF
          Det = Det*a1
@@ -447,7 +328,7 @@ C*       Find the pivot
          ENDIF
          DO j = i, N
             X(j) = A(j,i1)/A(i1,i1)
-            A(j,i1) = 0.
+            A(j,i1) = 0.d0
             F(j) = F(j) - F(i1)*X(j)
          ENDDO
          DO j = i, N
@@ -465,7 +346,7 @@ C*       Find the pivot
          ENDDO
       ENDDO
 C*    Estimate number of digits lost due to subtraction
-      Ldig = ( - LOG10(er + 1.E-33)) + 1.
+      Ldig = NINT((-LOG10(er + 1.D-33)) + 1.)
 C*    Solve by backward substitution
       DO i = 2, N
          i1 = N - i + 2
@@ -476,269 +357,7 @@ C*    Solve by backward substitution
          ENDDO
       ENDDO
       X(1) = F(1)/A(1,1)
-      END
-
-
-      SUBROUTINE MATIN(As,Bs,N,M,Determ)
-      INCLUDE 'dimension.h'
-C
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Determ
-      INTEGER M, N
-      DOUBLE PRECISION As(NDMSCS,NDMSCS), Bs(NDMSCS)
-C
-C Local variables
-C
-      DOUBLE PRECISION a(NDMSCS,NDMSCS), amax, b(NDMSCS), pivot(NDMSCS),
-     &                 sog, swap, t
-      INTEGER i, icolum, indeks(NDMSCS,2), ipivot(NDMSCS), irow, j,
-     &        jcolum, jrow, k, l, l1, nnn
-C
-C     matrix inversion with accompanying solution of liner equations
-C
-      EQUIVALENCE (irow,jrow)
-      EQUIVALENCE (icolum,jcolum)
-      EQUIVALENCE (amax,t,swap)
-      DO j = 1, N
-         b(j) = Bs(j)
-         DO i = 1, N
-            a(i,j) = As(i,j)
-         ENDDO
-      ENDDO
-      DO j = 1, N
-         indeks(j,1) = 0
-         indeks(j,2) = 0
-      ENDDO
-      sog = 0.0
-C     initialization
-      Determ = 1.0
-      DO j = 1, N
-         pivot(j) = 0.0
-         ipivot(j) = 0
-      ENDDO
-      DO i = 1, N
-C
-C        search for pivot element
-C
-         amax = pivot(1)*sog
-         nnn = 0
-         DO j = 1, N
-            IF (ipivot(j).NE.1) THEN
-               DO k = 1, N
-                  IF (ipivot(k).GT.1) GOTO 100
-                  IF (ipivot(k).NE.1) THEN
-                     IF (ABS(amax) - ABS(a(j,k)).LT.0.D0) THEN
-                        irow = j
-                        icolum = k
-                        amax = a(j,k)
-                        nnn = nnn + 1
-                     ENDIF
-                  ENDIF
-               ENDDO
-            ENDIF
-         ENDDO
-         IF (nnn.LE.0) GOTO 100
-         ipivot(icolum) = ipivot(icolum) + 1
-C
-C        interchange rows to put pivot element on diagonal
-C
-         IF (irow.NE.icolum) THEN
-            Determ = -Determ
-            DO l = 1, N
-               swap = a(irow,l)
-               a(irow,l) = a(icolum,l)
-               a(icolum,l) = swap
-            ENDDO
-            IF (M.GT.0) THEN
-               swap = b(irow)
-               b(irow) = b(icolum)
-               b(icolum) = swap
-            ENDIF
-         ENDIF
-         indeks(i,1) = irow
-         indeks(i,2) = icolum
-         pivot(i) = a(icolum,icolum)
-         a(icolum,icolum) = 1.0
-         DO l = 1, N
-            a(icolum,l) = a(icolum,l)/pivot(i)
-         ENDDO
-C
-C        reduce non-pivot rows
-C
-         IF (M.GT.0) b(icolum) = b(icolum)/pivot(i)
-         DO l1 = 1, N
-            IF (l1.NE.icolum) THEN
-               t = a(l1,icolum)
-               a(l1,icolum) = 0.0
-               DO l = 1, N
-                  a(l1,l) = a(l1,l) - a(icolum,l)*t
-               ENDDO
-               IF (M.GT.0) b(l1) = b(l1) - b(icolum)*t
-            ENDIF
-         ENDDO
-      ENDDO
-C
-C     interchange columns
-C
-      DO i = 1, N
-         l = N + 1 - i
-         IF (indeks(l,1).NE.indeks(l,2)) THEN
-            jrow = indeks(l,1)
-            jcolum = indeks(l,2)
-            DO k = 1, N
-               swap = a(k,jrow)
-               a(k,jrow) = a(k,jcolum)
-               a(k,jcolum) = swap
-            ENDDO
-         ENDIF
-      ENDDO
-  100 DO j = 1, N
-         b(j) = b(j)*ipivot(j)
-         DO k = 1, N
-            a(j,k) = a(j,k)*ipivot(j)*ipivot(k)
-         ENDDO
-      ENDDO
-      DO j = 1, N
-         DO i = 1, N
-            As(i,j) = a(i,j)
-         ENDDO
-      ENDDO
-      END
-
-
-
-      SUBROUTINE MATIN1(As,Bs,N,M,Determ)
-      INCLUDE 'dimension.h'
-C
-C
-C PARAMETER definitions
-C
-      INTEGER ISD, NG
-      PARAMETER (ISD = 0,NG = 4*NDMSCS - 3*ISD)
-C
-C Dummy arguments
-C
-      DOUBLE PRECISION Determ
-      INTEGER M, N
-      DOUBLE PRECISION As(NG,NG), Bs(NG)
-C
-C Local variables
-C
-      DOUBLE PRECISION a(NG,NG), amax, b(NG), pivot(NG), sog, swap, t
-      INTEGER i, icolum, indeks(NG,2), ipivot(NG), irow, j, jcolum,
-     &        jrow, k, l, l1, nnn
-C
-C     matrix inversion with accompanying solution of liner equations
-C
-      EQUIVALENCE (irow,jrow)
-      EQUIVALENCE (icolum,jcolum)
-      EQUIVALENCE (amax,t,swap)
-      DO j = 1, N
-         b(j) = Bs(j)
-         DO i = 1, N
-            a(i,j) = As(i,j)
-         ENDDO
-      ENDDO
-      DO j = 1, N
-         indeks(j,1) = 0
-         indeks(j,2) = 0
-      ENDDO
-      sog = 0.0
-C     initialization
-      Determ = 1.0
-      DO j = 1, N
-         pivot(j) = 0.0
-         ipivot(j) = 0
-      ENDDO
-      DO i = 1, N
-C
-C        search for pivot element
-C
-         amax = pivot(1)*sog
-         nnn = 0
-         DO j = 1, N
-            IF (ipivot(j).NE.1) THEN
-               DO k = 1, N
-                  IF (ipivot(k).GT.1) GOTO 100
-                  IF (ipivot(k).NE.1) THEN
-                     IF (ABS(amax) - ABS(a(j,k)).LT.0.D0) THEN
-                        irow = j
-                        icolum = k
-                        amax = a(j,k)
-                        nnn = nnn + 1
-                     ENDIF
-                  ENDIF
-               ENDDO
-            ENDIF
-         ENDDO
-         IF (nnn.LE.0) GOTO 100
-         ipivot(icolum) = ipivot(icolum) + 1
-C
-C        interchange rows to put pivot element on diagonal
-C
-         IF (irow.NE.icolum) THEN
-            Determ = -Determ
-            DO l = 1, N
-               swap = a(irow,l)
-               a(irow,l) = a(icolum,l)
-               a(icolum,l) = swap
-            ENDDO
-            IF (M.GT.0) THEN
-               swap = b(irow)
-               b(irow) = b(icolum)
-               b(icolum) = swap
-            ENDIF
-         ENDIF
-         indeks(i,1) = irow
-         indeks(i,2) = icolum
-         pivot(i) = a(icolum,icolum)
-         a(icolum,icolum) = 1.0
-         DO l = 1, N
-            a(icolum,l) = a(icolum,l)/pivot(i)
-         ENDDO
-C
-C        reduce non-pivot rows
-C
-         IF (M.GT.0) b(icolum) = b(icolum)/pivot(i)
-         DO l1 = 1, N
-            IF (l1.NE.icolum) THEN
-               t = a(l1,icolum)
-               a(l1,icolum) = 0.0
-               DO l = 1, N
-                  a(l1,l) = a(l1,l) - a(icolum,l)*t
-               ENDDO
-               IF (M.GT.0) b(l1) = b(l1) - b(icolum)*t
-            ENDIF
-         ENDDO
-      ENDDO
-C
-C     interchange columns
-C
-      DO i = 1, N
-         l = N + 1 - i
-         IF (indeks(l,1).NE.indeks(l,2)) THEN
-            jrow = indeks(l,1)
-            jcolum = indeks(l,2)
-            DO k = 1, N
-               swap = a(k,jrow)
-               a(k,jrow) = a(k,jcolum)
-               a(k,jcolum) = swap
-            ENDDO
-         ENDIF
-      ENDDO
-  100 DO j = 1, N
-         b(j) = b(j)*ipivot(j)
-         DO k = 1, N
-            a(j,k) = a(j,k)*ipivot(j)*ipivot(k)
-         ENDDO
-      ENDDO
-      DO j = 1, N
-         DO i = 1, N
-            As(i,j) = a(i,j)
-         ENDDO
-      ENDDO
+      RETURN
       END
 C
       FUNCTION SMAT(Iz)
@@ -756,16 +375,6 @@ C
 C Local variables
 C
       CHARACTER*2 mat(0:NDZmax)
-C
-C
-C
-C
-C Dummy arguments
-C
-C
-C Local variables
-C
-C
 C
       DATA mat/'n ', 'p ', 'He', 'Li', 'Be', 'B ', 'C ', 'N ', 'O ',
      &     'F ', 'Ne', 'Na', 'Mg', 'Al', 'Si', 'P ', 'S ', 'Cl', 'Ar',
@@ -992,6 +601,7 @@ C*    Matrix ordering
          ENDIF
       ENDDO
       Irflag = 0
+      RETURN
       END
 
 
