@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3687 $
+Ccc   * $Rev: 3788 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -1067,13 +1067,12 @@ C
       DOUBLE PRECISION vdef_1d(NFISBARPNT),eps_1d(NFISBARPNT)             ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                         ! NUMBAR
 
-      DOUBLE PRECISION  TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
-
       COMMON /CRITFIS/ ACRtf, UCRtf, TCRtf, DETcrtf, SCRtf, MORtcrt,
      &                 MPArcrt, ECOndf
 
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
 
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
 C

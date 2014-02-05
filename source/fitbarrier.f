@@ -1,11 +1,17 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Do, 12 Sep 2013) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
-      SUBROUTINE WKBFIS(Ee, nnuc, tfdd, tdirp, tabsp)
+      SUBROUTINE WKBFIS(Ee, Nnuc, tfdd, tdirp, tabsp)
 C
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
+
+C     DUMMY arguments
+      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB),
+     &                 Ee, tfdd(NFPARAB)
+      INTEGER Nnuc
 
       DOUBLE PRECISION vdef_1d(NFISBARPNT), eps_1d(NFISBARPNT)
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr
@@ -14,27 +20,24 @@ C
       COMMON /NUMBAR1/Vheigth,Vwidth,Vpos
       COMMON /VARGS/ Uexc, Smiu, K
 
-
-      COMMON /VBAR  / vbarex, ho,faza2
-      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
+      DOUBLE PRECISION VBArex(NFPARAB), HO(NFPARAB), FAZa2 
+      COMMON /VBAR  / VBArex, HO, FAZa2
 
       COMMON/INTER/  einters
       REAL*8 Einters(2*NFPARAB)
 
       DOUBLE PRECISION Vheigth(NFPARAB),Vwidth(NFPARAB),Vpos(NFPARAB+1)
-      DOUBLE PRECISION ee,uexc
+      DOUBLE PRECISION uexc
       DOUBLE PRECISION phase(2*NFPARAB),phase_h(NFPARAB)
 
       DOUBLE PRECISION dmom,dnum, rmiu, Smiu, W
 
       DOUBLE PRECISION exp2del(NFPARAB), exm2del(NFPARAB)
-      DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
-      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),deltt(NFPARAB),
-     &                 tfdd(NFPARAB), tdr
+      DOUBLE PRECISION phasep(NFPARAB),delt(NFPARAB),deltt(NFPARAB)
 
-      INTEGER j,k,kh,kw,iphas_opt
+      INTEGER j,k,kh,kw,iphas_opt,ih,iw,ih1,iw1
  
-      REAL*8  abserr, epsa, epsb, phase_sub, faza2
+      REAL*8  abserr, epsa, epsb, phase_sub, tdr
       LOGICAL discrete
 
 C     FUNCTIONS
@@ -309,31 +312,32 @@ c------backward
 c================================================================
       SUBROUTINE PHASES_Parab(ee, nnuc, phase, discrete)
 C================================================================
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
+      REAL*8 ee, phase(NFPARAB)
+      INTEGER Nnuc
+      LOGICAL discrete
 
-      COMMON /VBAR  / vbarex, ho,faza2
-      COMMON/PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
+      DOUBLE PRECISION VBArex(NFPARAB), HO(NFPARAB), FAZa2 
+      COMMON /VBAR  / VBArex, HO, FAZa2
+      COMMON /PARAB/  smiu,EPSil, EJOin, VJJ,ho_p
       COMMON /VARGS/ Uexc, Smiu_p, Kbarr
-       COMMON/INTER/  einters
+      COMMON /INTER/  einters                    
 
-      REAL*8 VBArex(NFPARAB),HO(NFPARAB) 
       REAL*8 smiu,EJOin(2*NFPARAB), EPSil(NFPARAB), VJJ(NFPARAB),
      &       HO_p(NFPARAB)
- 
 
       REAL*8 uexc,smiu_p
       REAL*8 rmiu
       REAL*8 Einters(2*NFPARAB)
-      REAL*8 phase(NFPARAB)
 
-      LOGICAL discrete
-      REAL*8 ftmp, es, ee, dmom, faza2, abserr
+      REAL*8 ftmp, es, dmom, abserr
       REAL*8  FmomentParab, GaussLegendre41
       EXTERNAL FmomentParab
 
-      INTEGER kbarr
+      INTEGER kbarr,k,j
 C     INTEGER iphas_opt
 
       rmiu = 0.054d0*A(Nnuc)**(5.d0/3.d0)        !mu in the formula
@@ -392,7 +396,7 @@ C     EJOin(i) are the corresponding deformation at which parabolas join
          IF (ftmp.GE.0.D0) THEN
             IF (Ee.EQ.VJJ(j)) THEN
                einters(2*j - 1) = epsil(j)!Ee
-               einters(2*j) = epsil(j)!Ee
+               einters(2*j) = epsil(j)    !Ee
                cycle
             ENDIF
             es = SQRT(ftmp)/(SMIu*HO(j))

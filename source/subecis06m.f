@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3788 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -60,9 +60,9 @@ C
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
 
 C     data iFlagSpeed99/1/
-C	data iFlagSpeed94/1/
-C	data iFlagSpeed63/1/
-C	data iFlagSpeedOpen/1/
+C     data iFlagSpeed94/1/
+C     data iFlagSpeed63/1/
+C     data iFlagSpeedOpen/1/
 C     CM=931.494043D0    ! EMPIRE 3.1                                   ECIS-034
       CM=931.494061D0    
 C     CHB=197.326968D0   ! EMPIRE 3.1                                   ECIS-035

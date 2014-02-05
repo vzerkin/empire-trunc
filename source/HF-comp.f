@@ -1,8 +1,9 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3788 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 Ccc
@@ -43,9 +44,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &                 popll, pops, popt, xcse
-      REAL FLOAT
-      INTEGER icse, icsh, icsl, ie, il, j, na, nexrt
+     &  popll, pops, popt, xcse, xscalc, xs_norm, xs_cn
+
+      INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
       INTEGER ilevcol, ilev
       DOUBLE PRECISION GET_DDXS
 C-----
@@ -227,6 +228,7 @@ C
       SUBROUTINE EXCLUSIVEC(Iec,Ief,Nejc,Nnuc,Nnur,Popt)
 
       USE empcess, ONLY: POPcsea
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
@@ -273,8 +275,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION excnq, xnor
-      INTEGER icsp, ie, iejc
-      INTEGER INT
+      INTEGER icsp, ie, iejc, nth
 C     data jsigma/0/,jsigma2/36/
 C
 C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
@@ -428,6 +429,7 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
       USE empcess, ONLY: POPcsea
+      implicit none  
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -439,7 +441,7 @@ C
 C
 C Local variables
 C
-      INTEGER iejc, iesp
+      INTEGER iejc, iesp, nth
       DOUBLE PRECISION xnor
 C
 C
@@ -874,7 +876,7 @@ C Local variables
 C
       DOUBLE PRECISION egd, gacs, popl, gacs_noicc
       INTEGER i, icse, j, j1, l
-      INTEGER INT, NINT
+      INTEGER nejc
 C
 C
       nejc = -1
@@ -1039,13 +1041,14 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C Dummy arguments
 C
-      INTEGER Nnuc
+      INTEGER Nnuc, Nejc
 C
 C Local variables
 C
@@ -1686,42 +1689,43 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION HO(NFPARAB), TABs, TDIr,
-     &                 TF(NFPARAB),
-     &                 TFD(NFPARAB),TG2, VBArex(NFPARAB)
-      DOUBLE PRECISION tabs1
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
+      COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
+      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                      
+      COMMON /IMAG  / TF, TDIr, TABs, TG2
+
+      DOUBLE PRECISION VBArex(NFPARAB), HO(NFPARAB), FAZa2 
+      COMMON /VBAR  / VBArex, HO, FAZa2
+C
+C Dummy arguments
+C
+      INTEGER Iec, Ip, Jc, Mmod, Nnuc
+      DOUBLE PRECISION Sumfis
+C
+C Local variables
+C
+      INTEGER JCC
+      DOUBLE PRECISION ee, tdircont(NfHump), arg1,
+     &                 exfis, sfmin, snc, exfis1, 
+     &                 tfcon(NfHump), tfdis(NfPARAB),
+     &                 vbarmax(NFPARAB),enh_asym(NFPARAB),enh
+
+      DOUBLE PRECISION tabs1, TFD(NFPARAB)
       DOUBLE PRECISION rap,rap0,barmin
 
       DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
       DOUBLE PRECISION tdirpp(NFPARAB,NFPARAB), tabspp(NFPARAB,NFPARAB)
       DOUBLE PRECISION sumtp(NFPARAB), wdir(NFPARAB), tindp,vsh,vbar
 
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
-      COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
-
-      INTEGER JCC
-      COMMON /IMAG  / TF, TDIr, TABs, TG2
-      COMMON /VBAR  / vbarex, ho,faza2
-C
-C Dummy arguments
-C
-      INTEGER Iec, Ip, Jc, Mmod, Nnuc,ih
-      DOUBLE PRECISION Sumfis
-C
-C Local variables
-C
-      DOUBLE PRECISION ee, tdircont(NfHump),
-     &                 exfis, sfmin, snc, exfis1, 
-     &                 tfcon(NfHump), tfdis(NfPARAB),
-     &                 vbarmax(NFPARAB),faza2,enh_asym(NFPARAB),enh
-      REAL FLOAT
-      INTEGER ibar, ist, jnc, nr, ipa
+      INTEGER ibar, ist, jnc, nr, ipa, ih, ih1, iw, iw1, ib, k
 C
       ee = EX(Iec,Nnuc)
 
@@ -2086,28 +2090,23 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
 c=======================================================================
       SUBROUTINE SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
 C-----Simpson integration for direct transmission
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
-C
-      INTEGER JCC
-      DOUBLE PRECISION  vbarmax(nfhump)
-C
 C Dummy arguments
 C
-      DOUBLE PRECISION Ee
-      INTEGER Ibar, Nnuc,ipa
-      LOGICAL discrete
+      DOUBLE PRECISION Ee, tdircont(NFHump), vbarmax(NFHump)
+      INTEGER Nnuc, JCC, Ipa  
 C
 C Local variables
 C
+      LOGICAL discrete
       DOUBLE PRECISION arg1,ux1,uexcit1
       DOUBLE PRECISION dmom,tdirc(NfHump, Nfhump),
-     &                 tdircont(NfHump),romin, phase(2*NFPARAB),
+     &                 romin, phase(2*NFPARAB),
      &                 phase_h(NFPARAB)
-      INTEGER i,ii, iphas_opt, nn, INT
-     
+      INTEGER i,ii, iphas_opt, nn, ih, ih1, ib, ibar   
 C
       discrete = .FALSE.
       iphas_opt = 1

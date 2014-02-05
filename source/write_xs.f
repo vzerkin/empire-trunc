@@ -364,7 +364,7 @@ C------------------Exclusive DE spectra (gammas)
                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
 
-	 
+       
               qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
 
               WRITE(12,*)

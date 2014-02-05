@@ -3,15 +3,17 @@ Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
       SUBROUTINE FISCROSS(Nnuc,Ke,Ip,Jcn,Sumfis,Sumfism)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
-      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                  
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
+      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       
       COMMON /IMAG  / TF, TDIr, TABs, TG2
 C
 C Dummy arguments
@@ -22,7 +24,6 @@ C
 C
 C Local variables
 C
-      INTEGER INT
       INTEGER k, kk, m
 
       IF (NINT(FISmod(Nnuc)).EQ.0) THEN
@@ -143,7 +144,7 @@ C
       INTEGER nnuc
 C     common variables
 
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                 
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
 C     local variables

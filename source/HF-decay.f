@@ -417,6 +417,7 @@ C-----------Calculate population in the energy bin ke
             POPbin(ke,nnuc) = pope*step
           ENDIF
 
+          fisxse = 0.d0
           DO ipar = 1, 2 !over decaying nucleus parity
             ip = INT(( - 1.0)**(ipar + 1))
             DO jcn = 1, NLW !over decaying nucleus spin
@@ -1235,7 +1236,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
 
          WRITE (8,*)
 C        Integral is calculated by trapezoidal rule being consistent with cross section
-         IF(IOUt.GT.0) CALL AUERST(nnuc,0)
+         IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
          IF(CSEmis(0,nnuc).gt.0) THEN
            WRITE (12,'(10x,
      &                 '' g  emission cross section'',G12.6,''  mb'')')
@@ -1270,7 +1271,7 @@ C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
 C
 C            Integral is calculated by trapezoidal rule being consistent with cross section
-             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc) 
+             IF (IOUt.GT.0) CALL AUERST(nnuc,nejc,0) 
 C------------Print residual nucleus population
              poptot = 0.d0
              IF (NEX(nnur).GT.0) THEN !avoid summing non-existent continuum
@@ -1788,15 +1789,17 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       END
  
       SUBROUTINE XSECT(Nnuc,M,Xnor,Sumfis,Sumfism,Ke,Ipar,Jcn,Fisxse)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                   ! FIS_ISO
-      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       ! IMAG
+      DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
+
+      DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2                       
       COMMON /IMAG  / TF, TDIr, TABs, TG2
 C
 C Dummy arguments
@@ -1807,9 +1810,10 @@ C
 C
 C Local variables
 C
-      INTEGER INT
       INTEGER nejc, nnur, izares, iloc
       DOUBLE PRECISION ares, zres
+
+      Fisxse = 0.d0
 C
 C-----particles
       DO nejc = 1, NEJcm
@@ -1837,8 +1841,6 @@ C-----fission
      &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
 
       ELSE ! Multimodal
-
-         Fisxse = 0.d0
          DO M = 1, INT(FISmod(Nnuc)) + 1
             Fisxse = Fisxse + Sumfism(M)*Xnor
             CSFism(M) = CSFism(M) + Sumfism(M)*Xnor

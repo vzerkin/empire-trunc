@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3788 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -397,7 +397,7 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
       RETURN 
       END
 
-      SUBROUTINE AUERST(Nnuc,Nejc)
+      SUBROUTINE AUERST(Nnuc,Nejc,Iflag)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -428,7 +428,7 @@ Ccc
 C
 C Dummy arguments
 C
-      INTEGER Nejc, Nnuc
+      INTEGER Nejc, Nnuc, Iflag
 C
 C Local variables
 C
@@ -456,7 +456,7 @@ C
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
       IF (totspec*DE.LE.1.d-4) RETURN
-      totspec = totspec - 
+      if(Iflag.ne.1) totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE     
 

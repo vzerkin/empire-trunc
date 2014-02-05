@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3721 $
+Ccc   * $Rev: 3788 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-10 13:29:26 +0100 (Fr, 10 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
 
       SUBROUTINE KUMAR_OMP(AMASS,AZ,EX,ELAB,RCC,Vlib,Rlib,Alib)
       IMPLICIT REAL*8 (A-H,O-Z)
