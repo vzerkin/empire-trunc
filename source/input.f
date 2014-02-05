@@ -1,6 +1,6 @@
-!cc   * $Rev: 3773 $
+!cc   * $Rev: 3786 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-01-23 14:09:06 +0100 (Do, 23 Jän 2014) $
+!cc   * $Date: 2014-02-05 06:53:03 +0100 (Mi, 05 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -26,9 +26,6 @@
 C
 C     COMMON variables
 C
-
-      CHARACTER*120 nubar_filename
-      INTEGER*4 len_nubar_filename
       CHARACTER*24 EMPireos
 
       INTEGER KEYinput, KZZ1, KAA1 
@@ -44,16 +41,14 @@ C
      &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
      &         qatom,qnucl
       CHARACTER*1 cnejec
-      DOUBLE PRECISION DATAN, DMAX1, DSQRT
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
-      REAL FLOAT
-      LOGICAL gexist, calc_fiss, fexist_nu
+
+      LOGICAL gexist, calc_fiss
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
-      character chra*5,chrz*5,nucmd*250
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -78,9 +73,9 @@ C
      &     0.43, 0., 0.50, 0., 0.39/
       DATA deut, trit, gamma, he3/'d ', 't ', 'g ','h '/
 C-----maximum argument of EXP function supported by the computer (for real*8)
-      EXPmax = 700.
+      EXPmax = 700.d0
 C-----maximum exponent of 10 supported by the computer (for real*8)
-      EXPdec = 300.
+      EXPdec = 300.d0
       CALL CLEAR
       iccerr = 0
 C
@@ -701,71 +696,29 @@ C--------compound nucleus 1
 C--------set reaction string
          REAction(nnuc) = '(z,gamma)'
 C
-         IF(iz. ge. 90 .and. iz. le. 98) then ! only from Th to Cf
-
-C          retrieving NUBAR if available
-
-C          IF(IOPsys .EQ. 0) then  !Linux, Mac
+         IF(iz. ge. 90 .and. iz. le. 98) then 
 C
-C            CHECKING for the presence of the file 'NUBAR-EVAL.ENDF'
-C            in the local directory
+C          retrieving NUBAR if available for actinides (Th to Cf)
 C
-             nubar_filename = 'NUBAR-EVAL.ENDF'
-             len_nubar_filename = len_trim(nubar_filename) 
-             INQUIRE(FILE=nubar_filename,EXIST=fexist_nu)
-
-             IF(fexist_nu) then
-
-               NUBarread = .TRUE.
-
-             else              
+           call read_nubar_unix(ierr)
+           NUBarread = .TRUE.
+           if(ierr.gt.0) NUBarread = .FALSE.
 C
-C              CHECKING and READING the file data/nubar.endf
+C            For testing the Th-232 nubar was parameterized
+C          call read_nubar_windows()
+C          NUBarread = .TRUE.
+
+           IF(.not.NUBarread) then
+C              preparing the file ot get nubar after EMPIRE finish
+C            get_nubar will be called from runE script: 
+C            /util/nubar/get_nubar A0 Z0
 C
-              nubar_filename = trim(empiredir)//'/data/nubar.endf'
-              len_nubar_filename = len_trim(nubar_filename) 
-              INQUIRE(FILE=nubar_filename(1:len_nubar_filename),
-     &          EXIST=NUBarread)
-              WRITE(8,*) 
-     &          'WARNING: ',nubar_filename(1:len_nubar_filename),
-     &          ' file does not exist !!'
-             endif
-
-C            READING OF THE ENDF MF=1, MT=456 prompt nubar
-C
-             IF(NUBarread) THEN 
-
-                 !! CALL READ_NUBAR(trim(nubar_filename),len_nubar_filename,
-                 !! A(0), Z(0), ierr)
-
-                 ! ask get_nubar to read ENDF file and look for our A & Z.
-                 ! if found, it writes to NUBAR.DAT, which we then read in.
-                 ! if endfile, Z, A not found, NUBAR.DAT will not be there.
-
-                 write(chra,'(1H ,i3,1H )') nint(a(0))
-                 write(chrz,'(1H ,i3,1H )') nint(z(0))
-                 nucmd = trim(empiredir)//'/util/nubar/get_nubar '//
-     &              nubar_filename(1:len_nubar_filename)//chra//chrz
-                 ! type *,trim(nucmd)
-                 call system(nucmd)
-
-                 ! now read the NUBAR.DAT file
-                 call read_nubar_unix(ierr)
-                 if(ierr.gt.0) NUBarread = .FALSE.
-    
-             ENDIF  
-
-C          ELSE                    !Windows
-C
-C             On windows, just set the nubar spectrum to that
-C             of Th-232 (0-60 MeV) for testing purposes.
-C             No files are read.
-C 
-C             call read_nubar_windows()
-C             NUBarread = .TRUE.
-C
-C          ENDIF
-
+             OPEN(959,file='NUBAR.GET')
+             write (959,'(1x,I3,1x,I3)') NINT(A(0)),NINT(Z(0))
+               CLOSE(959)  
+             WRITE(8,*) 
+     &        ' WARNING: NUBAR.DAT will be retrieved in the next run'
+           ENDIF
          ENDIF
 C
 C--------other decaying nuclei
@@ -1068,8 +1021,11 @@ C
          CALL READIN(Irun)   !optional part of the input
 
 C--------Retrieve C4 experimental data 
-         IF (IX4ret.EQ.1 .and. (.NOT.BENchm)) CALL RETRIEVE
+         IF (IX4ret.EQ.1 .and. (.NOT.BENchm) ) CALL RETRIEVE
 C--------Retrieve C4 experimental data  *** done ***
+
+C        Changing the incident input energy to plot LDs
+         IF (FITlev.GT.0) EIN = 20.d0  
 
          IF( KTRlom(0,0).eq.2408 .and. DIRECT. LT. -0.1) then
             DIRECT = 1
@@ -3409,12 +3365,12 @@ C
 C
 C Local variables
 C
+      INTEGER iseed
       DOUBLE PRECISION GRAND,DRAND
       CHARACTER*72 rtitle
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
 C     INTEGER IPArCOV
-      INTEGER INT
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver
       CHARACTER*35 char
@@ -8481,12 +8437,12 @@ C
 C Local variables
 C
       DOUBLE PRECISION a23, acrt, ap1, ap2, ar, aroc, arogc, asys, atil,
-     &                 del, delp, dob, econd, gamma,
+     &                 del, delp, dob, econd, gamma, ftmp, atiln,
      &                 pi2, qn, tcrt, uexc, xr, ddob, esh, dap, dam
       DOUBLE PRECISION om2_gsm,delp_gsm,asys_gsm,asyserr_gsm,dshift_gsm
 
       DOUBLE PRECISION FSHELL
-      INTEGER iloc, ix, izamn, izamx, izar, nnuc, iz, nlevc
+      INTEGER iloc, ix, izamn, izamx, izar, nnuc, iz, nlevc, nixa, nixz
 
       REWIND(24)
 
@@ -8632,7 +8588,7 @@ C-------------of no collective enhancements) normalized to existing exp. data
                 asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
                 atiln =  arogc/asys
               ELSE
-                atiln = 1.0   
+                atiln = 1.d0   
               ENDIF                  
             ENDIF 
                  
@@ -9251,7 +9207,7 @@ C
 C
 C Local variables
 C
-      INTEGER iiar, iizr, iiac, iizc
+      INTEGER iiar, iizr, iiac, iizc, iiap, iizp
 
       iizc = Z(Nnuc)
       iiac = A(Nnuc)
@@ -9293,7 +9249,7 @@ C
 C
 C Local variables
 C
-      INTEGER iiar, iizr, iiat, iizt, iiao, iizo
+      INTEGER iiar, iizr, iiat, iizt, iiao, iizo, iiap, iizp, iloc
 
 C-----Target corresponds to nnurec = 0
       CALL WHERE(IZA(Nnuc) - IZAejc(Nejc),nnur,iloc)
@@ -9345,7 +9301,7 @@ C Local variables
 C
       CHARACTER*13 caz
       CHARACTER*64 filename
-      INTEGER iwin, ipipe_copy
+      INTEGER iwin, ipipe_copy, ilen
       CHARACTER*255 ccomm
       LOGICAL fexist
 
@@ -9684,7 +9640,7 @@ C
      &                 etmp, ftmp, gspar, gspin, jtmp, qn, t12, xjlvr,
      &                 egrcoll(0:3,3),ggrcoll(0:3,3),
      &                 betahegor, betalegor, betagmr, betagqr,
-     &                 sgmr, sgqr, sgor
+     &                 sgmr, sgqr, sgor, edis1, betasq, sheor, sleor
       CHARACTER*1 dum
       CHARACTER*5 chelem
       CHARACTER*80 comment
@@ -9696,8 +9652,8 @@ C
       INTEGER i, i0p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, i3m,
      &        i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, ilv, iptmp,
      &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
-     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, ncont
-      INTEGER NINT
+     &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, ncont, mintsp
+      INTEGER icoupled, isgor, isgqr, isgmr, jdis1, igreson 
       CHARACTER*6 reftmp
 
       ND_nlv = 0
@@ -9976,22 +9932,11 @@ C            It could be a bad approximation for a quasispherical nucleus
              IF(.not.DEFORMED) THEN
                WRITE (8,
      &'('' WARNING: Odd nucleus is assumed deformed               '')') 
-C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')') 
+C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.2)'')') 
                WRITE (8,
      &'('' WARNING: Could be a bad approxim. for near-magic'')') 
                DEFormed = .TRUE.
-C              DEF(1,0) = 0.1d0
-             ELSE
-               WRITE (8,
-     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
-             ENDIF
-           ELSE
-             IF(DEFORMED) THEN
-               WRITE (8,
-     &'('' Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
-             ELSE
-               WRITE (8,
-     &'('' Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
+C              DEF(1,0) = 0.2d0
              ENDIF
            ENDIF
 
@@ -10101,6 +10046,7 @@ C
             ENDIF
 
            ENDDO
+
          ENDIF
          WRITE(12,*) ' '
          CLOSE (32)
@@ -10124,6 +10070,20 @@ C
              write(8,*) '  Rigid-soft rotor model assumed' 
            ELSE
              write(8,*) '  Soft rotor model assumed' 
+           ENDIF
+         ENDIF
+         IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0) THEN
+C          If odd nucleus, then rotational model is always used
+C          It could be a bad approximation for a quasispherical nucleus
+           WRITE (8,
+     &'(''   Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+         ELSE
+           IF(DEFORMED) THEN
+             WRITE (8,
+     &'(''   Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+           ELSE
+             WRITE (8,
+     &'(''   Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
            ENDIF
          ENDIF
 
@@ -11498,7 +11458,7 @@ C Forth Dimensions, Vol. XVI, Numbers 1,2 May/June, July/August
 C
 C ===================================================================
 C
-      Function lcmrand(ix)
+      Integer*4 function lcmrand(ix)
 C     The minimal standard PRNG for 31 bit unsigned integers
 C     designed with automatic overflow protection
 C     uses ix as the seed value if it is greater than zero
@@ -11535,17 +11495,19 @@ C
 C ===================================================================
 
       Subroutine R250Init(iseed)
+      Integer iseed
       Integer*4 k, mask, msb
       Integer*4 indexf, indexb, buffer(250)
       Common/R250COM/indexf,indexb,buffer
-      Integer ms_bit, all_bits, half_range, step
+      Integer ms_bit, all_bits, half_range, step, i
 
       DATA ms_bit/Z'40000000'/
       DATA half_range/Z'20000000'/
       DATA all_bits/Z'7FFFFFFF'/
 
       Parameter ( step = 7 )
-C
+      Integer*4 lcmrand
+
       indexf = 1
       indexb = 104
       k = iseed
@@ -11623,10 +11585,10 @@ C     Generator of normally distributed random numbers based on R250
 
       FUNCTION grand() RESULT(fn_val)
       REAL*8 fn_val
-      !     Local variables
+C     Local variables
       REAL   :: s = 0.449871, t = -0.386595, a = 0.19600, b = 0.25472,
      &          r1 = 0.27597, r2 = 0.27846, u, v, x, y, q, half = 0.5
-      !     Generate P = (u,v) uniform in rectangle enclosing acceptance region
+C     Generate P= (u,v) uniform in rectangle enclosing acceptance region
       Integer*4 indexf, indexb, buffer(250)
       REAL*8 drand
       Common/R250COM/indexf,indexb,buffer
