@@ -55,11 +55,13 @@ C--------If it does not, the program start new calculations
          WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
      &       INT(A(0)), INT(EINl*1000000)
-         INQUIRE (FILE = (ctldir//ctmp23//'.MSD'),EXIST = fexist)
+         OPEN (16,FILE = 'TAPE16',STATUS = 'UNKNOWN',FORM='UNFORMATTED')
+
+         INQUIRE (FILE = (ctldir//ctmp23//'.fMSD'),EXIST = fexist)
          IF (.NOT.fexist) THEN
-           OPEN (15,FILE = (ctldir//ctmp23//'.MSD'),STATUS='NEW')
+           OPEN (15,FILE = (ctldir//ctmp23//'.fMSD'),STATUS='NEW')
          ELSE
-           OPEN (15,FILE = (ctldir//ctmp23//'.MSD'),STATUS='OLD')
+           OPEN (15,FILE = (ctldir//ctmp23//'.fMSD'),STATUS='OLD')
            WRITE (8,*) ' '
            WRITE (8,*)
      &       ' Using precalculated ORION results for E=',EINl,' MeV'
@@ -68,7 +70,7 @@ C--------If it does not, the program start new calculations
          ENDIF
          WRITE (8,*) ' '
          qmax = 0.99*EIN
-         qstep = qmax/3.0
+         qstep = qmax/3.d0
 C        Proposed by H. Wienke
          ltrmax = 6
          IF (NLW.LE.15) ltrmax = 5
@@ -76,7 +78,7 @@ C        Proposed by H. Wienke
          IF (NLW.LE.10) ltrmax = 3
          IF (NLW.LE.8)  ltrmax = 2
          IF (NLW.LE.6)  ltrmax = 1
-         WRITE(15,*) qmax,qstep,ltrmax
+         WRITE(15,'(2(D22.15,1x),I4)') qmax,qstep,ltrmax
          q2 = qmax
          q3 = qmax
  1420    CALL ORION(q2,q3,1,EIN,NLW,1,ltrmax,A(0),Z(0),AEJc(0),
@@ -89,12 +91,12 @@ C        Proposed by H. Wienke
             IF (q3.LT.( - 0.0001D0)) GOTO 1450
             q2 = q3
          ENDIF
-C--------Set to Q's to 0 if negative due to rounding error
+C--------Set Q's to 0 if negative due to rounding error
          IF (q2.LT.0.0D0) q2 = 0.0
          IF (q3.LT.0.0D0) q3 = 0.0
          GOTO 1420
  1450    REWIND (15)
-         READ(15,*) qmax,qstep,ltrmax
+         READ(15,'(2(D22.15,1x),I4)') qmax,qstep,ltrmax
          WRITE (8,*) ' '
          WRITE (8,*) ' '
          CALL TRISTAN(0,0,ltrmax,qmax,qstep,xsinl)
@@ -375,13 +377,13 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*) ' *******************************************'
           WRITE (8,*)
      &                ' Preequilibrium + Direct spectra (tot)'
-          IF(CSEmis(0,1).GT.0) CALL AUERST(1,0)
-          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1)
-          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2)
-          IF(CSEmis(3,1).GT.0) CALL AUERST(1,3)
-          IF(CSEmis(4,1).GT.0) CALL AUERST(1,4)
-          IF(CSEmis(5,1).GT.0) CALL AUERST(1,5)
-          IF(CSEmis(6,1).GT.0) CALL AUERST(1,6)
+          IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,1)
+          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,1)
+          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,1)
+          IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,1)
+          IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,1)
+          IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,1)
+          IF(CSEmis(6,1).GT.0) CALL AUERST(1,6,1)
           WRITE (8,*)
      &                ' End of Preequilibrium + Direct spectra (tot)'
           WRITE (8,*) ' ********************************************'

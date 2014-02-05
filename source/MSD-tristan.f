@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3751 $
+Ccc   * $Rev: 3783 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -24,10 +24,11 @@ CCC   *                                                                *
 CCC   *                                                                *
 CCC   * output:none                                                    *
 CCC   *                                                                *
-CCC   * author: H.Lenske, H. Wienke                                    *
+CCC   * author: H.Lenske, H. Wienke (Geel 09/2005)                     *
 CCC   *                                                                *
 CCC   ******************************************************************
 CCC
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -59,8 +60,8 @@ C
       COMMON /CRAC  / FAClog, RAC, U9, IA, IB, ICC, ID, IE, IG, L9
       COMMON /INELA / WIDex, ROPt, CLRn, ETMin, ETMax, RHOb, QS1, QS2,
      &                Q0, FACb, FFTot, NRMax
-      COMMON /TRINP / WIDexin, GAPin, HOMin,ALSin,EFItin,CNOrin,BET2in,  ! nilsson
-     &                GRin                                               ! nilsson
+      COMMON /TRINP / WIDexin, GAPin, HOMin,ALSin,EFItin,CNOrin,BET2in,  
+     &                GRin                                               
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr,
      &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
      &                FFAc3d
@@ -75,20 +76,17 @@ C Local variables
 C
       DOUBLE PRECISION a3, ap, at, crose(2*NDEX,NDANGecis,NDANGecis),
      &                 eccm, elab, fn, q1, q2, ri0, rr0
-      REAL FLOAT
+
       INTEGER i1, i2, ic, ic1, ic12, ic1xr, ic2, ic2xr, icp, icpx,
      &        iout2, ka, kb, kread, l1, l12x, l1maxr, l2, l2maxm,
      &        l2maxr, mtb, n, n1, n12, n1x, n2, na, nangle, nb, ne, nlr,
      &        nnb, np, npb, nq, nq12x, nwr1, nwr2, nzb
-      INTEGER INT
 
       XSinl = 0.d0
 C
 C-----L1MAXM - maximum l transfer
 C-----QM - maximum energy loss
 C-----QS - step in energy loss triangle
-C
-C
 C
       QMAx = Qm
       QSTep = Qs
@@ -107,6 +105,7 @@ C     OPEN(15, FILE='TAPE15', STATUS='OLD')
       NFAc12 = 1
       NAVerg = 1
       nangle = NDANG
+C     nangle = NDANGecis
       NZ = INT(Z(0))
       NN = INT(XN(0))
       np = INT(AEJc(0))
@@ -164,15 +163,15 @@ C-----experimental energy resolution
       IF (THEta2.LE.0.D0) THEta2 = ANGle(nangle - 1)
       KRTmax = MIN(KRType,2)
       DO n = 1, NFAc12
-         FFAc1d(n) = 1.
-         FFAc2d(n) = 1.
-         FFAc3d(n) = 1.
+         FFAc1d(n) = 1.d0
+         FFAc2d(n) = 1.d0
+         FFAc3d(n) = 1.d0
       ENDDO
 C
 C     parameters of optical potential (entrance channel)
 C
-      rr0 = 1.25
-      ri0 = 1.37
+      rr0 = 1.25d0
+      ri0 = 1.37d0
       at = NN + NZ
       a3 = at**(1./3.)
       ap = np
@@ -230,9 +229,8 @@ CCCCC       NLR=1,2 refers to cross sections, analyzing powers resp.
 CCCCCC
             DO nlr = 1, icpx
                IF (kread.NE.1) THEN
-                  READ (15,*) (WR1(n),n = 1,nwr1)
-C                 modiffication to run formated orion output
-C                 READ(15,3434)(WR1(N),N=1,NWR1)
+                  READ(15,3434)(WR1(n),n = 1,nwr1)
+ 3434             FORMAT(3(d23.17,1x)) 
                   IF (ne.LE.NQ1x) THEN
                      n1 = 0
                      DO ic = 1, IC1x
@@ -245,10 +243,7 @@ C                 READ(15,3434)(WR1(N),N=1,NWR1)
                   ENDIF
                ENDIF
                IF (NCHanl.NE.2) THEN
-                  IF (kread.EQ.0) READ (15,*) (WR2(n),n = 1,nwr2)
-C                 modiffication to run formated orion output
-C                 IF(KREAD.EQ.0)READ(15,3434)(WR2(N),N=1,NWR2)
-C                 IF(kread.EQ.1)READ(16)(WR2(n), n = 1, nwr2)
+                  IF (kread.EQ.0) READ (15,3434) (WR2(n),n = 1,nwr2)
                   n2 = 0
                   DO ic1 = 1, ic1xr
                      IF (ic1.GT.IC1x) GOTO 60
@@ -352,7 +347,8 @@ C
          ENDIF
       ENDIF
       CALL RESPNS
-      IF (KTRl(3).EQ.0) CALL SPECTR(nangle,2,nangle,nq12x,NEBinx,l12x,
+C     IF (KTRl(3).EQ.0) CALL SPECTR(nangle,2,nangle,nq12x,NEBinx,l12x,
+      IF (KTRl(3).EQ.0) CALL SPECTR(       2,nangle,nq12x,NEBinx,l12x,
      &                              CROs2,crose,Nejc,XSInl)
       CLOSE (16)
 99065 FORMAT ('1')
@@ -362,28 +358,28 @@ C
       SUBROUTINE INELAS(Est,Nn,Nz,Nebins)
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
 C
-C COMMON variables
+C     COMMON variables
 C
       DOUBLE PRECISION ALSin, ANGle(NDANGecis), AU, AW,
-     &                 BETa(3*(NDEx+25),8,8),BET2in,GRin(2),             ! nilsson
-     &                 BST(3), BST1(2), CLRn(8,8), CNOrin(8,8), DTHeta,  ! nilsson_newest
-     &                 EBCs(500,2), ECEntr(5), EFItin(8,8), EOUtmi,      ! nilsson_newest
+     &                 BETa(3*(NDEx+25),8,8),BET2in,GRin(2),             
+     &                 BST(3), BST1(2), CLRn(8,8), CNOrin(8,8), DTHeta,  
+     &                 EBCs(500,2), ECEntr(5), EFItin(8,8), EOUtmi,      
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin, FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
      &                 FFTot(10), GAP(2), GAPin(2), GSDm(50), HOMega,
      &                 HOMin, Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2,
-     &                 QSTep, RAC, RHO(3*(NDEx+25),8,8),                 ! nilsson_newest
+     &                 QSTep, RAC, RHO(3*(NDEx+25),8,8),                 
      &                 RHOb(3*(NDEx+25),11,2),RI,
      &                 RMS(3), ROPt, RR, SREw(21), SREwl(21), SRNew(21),
      &                 U0, U9, UAMp(500,2), VAMp(500,2), VLS(2), W0,
-     &                 WIDex, WIDexin,ASP(500,14,2)                      ! nilsson
+     &                 WIDex, WIDexin,ASP(500,14,2)                      
       INTEGER IA, IB, IC, IC12x, IC1max, IC1x, IC2max, IC2x, ICMax, ID,
-     &        IE,IG,L9(10),KSP(500,2),NHOle(2),                          ! nilsson
+     &        IE,IG,L9(10),KSP(500,2),NHOle(2),                          
      &        NQ1x, NQ2x, NRMax(10), NSP(500,2),NTOtal(2)
-      COMMON  RHO, SRNew, SREw, SREwl, GSDm, BETa
+      COMMON /TRIST / RHO, SRNew, SREw, SREwl
+C     COMMON /TRIST1/ GSDm, BETa
+
       COMMON /CCLQ  / IC1max, IC2max, IC1x, IC2x, IC12x, ICMax, NQ1x,
      &                NQ2x
       COMMON /CRAC  / FAClog, RAC, U9, IA, IB, IC, ID, IE, IG, L9
@@ -391,9 +387,9 @@ C
       COMMON /INELA / WIDex, ROPt, CLRn, ETMin, ETMax, RHOb, QS1, QS2,
      &                Q0, FACb, FFTot, NRMax
       COMMON /SPPA  / HOMega, VLS, RMS, BST, GAP, NHOle, NTOtal
-      COMMON /SPQN  / ESP, KSP, NSP                                      ! nilsson
-      COMMON /SPQN2 / ASP                                                ! nilsson
-      COMMON /TRINP / WIDexin, GAPin,HOMin, ALSin, EFItin,CNOrin,BET2in, ! nilsson
+      COMMON /SPQN  / ESP, KSP, NSP                                      
+      COMMON /SPQN2 / ASP                                                
+      COMMON /TRINP / WIDexin, GAPin,HOMin, ALSin, EFItin,CNOrin,BET2in, 
      &                GRin
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr,
      &                QSTep, QMIna, QMInb, QMAx, QGRand, FFAc1d, FFAc2d,
@@ -408,43 +404,43 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a3, ad, aew, anp(2,2), anz, api, bosc,
-     &                 cci(8,8), ccm(8,8), ccp(8,8), ccpm(2),            ! nilsson_newest
-     &                 ccr(8,8),                                         ! nilsson_newest
-     &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    ! nilsson_newest
-     &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      ! nilsson_newest
+     &                 cci(8,8), ccm(8,8), ccp(8,8), ccpm(2),            
+     &                 ccr(8,8),                                         
+     &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    
+     &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      
      &                 ddr(2), dtmp, 
-c    &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  ! nilsson
-     &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  ! nilsson
-     &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    ! nilsson_newest
-c    &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), ! nilsson
-     &                 epl, eplsq, eqq,               eqqx,ess(0:10000), ! nilsson
+c    &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  
+     &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  
+     &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    
+c    &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), 
+     &                 epl, eplsq, eqq,               eqqx,ess(0:10000), 
 
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,
      &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm,
      &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt,
      &                 rdsq, re1, re2, re3, resid,
-     &                 ah(14),ap(14)                                     ! nilsson
+     &                 ah(14),ap(14)                                     
       REAL d1, hhh
       DOUBLE PRECISION DWIDTH
-      DOUBLE PRECISION VCC                                               ! nilsson
-      REAL FLOAT
-      INTEGER i,jtw1(14),jtw2(14),k, kcx, kh, kmax, kp, kqq, krt,        ! nilsson
-     &        krtx,l1,l2, lm, lmax, lst, lt, lth(14), ltmax, ltmaxr,     ! nilsson
-     &        ltmin,ltp(14),ltp1, ltr, lttw, n, nconf(21), ne, nebinx,   ! nilsson
+      DOUBLE PRECISION VCC                                               
+
+      INTEGER i,jtw1(14),jtw2(14),k, kcx, kh, kmax, kp, kqq, krt,        
+     &        krtx,l1,l2, lm, lmax, lst, lt, lth(14), ltmax, ltmaxr,     
+     &        ltmin,ltp(14),ltp1, ltr, lttw, n, nconf(21), ne, nebinx,   
      &        nesx, nh, nlhm, nlpm, nos1, nos2, np, nr, nxmax,
-     &        kt, ktp1,                                                  ! nilsson_newest
-     &        kth, ktp, iminh,iminp,nrad1,nrad2,n1,n2                    ! nilsson
-      INTEGER IABS, INT
+     &        kt, ktp1, j, kc, nexnew, l,                                               
+     &        kth, ktp, iminh,iminp,nrad1,nrad2,n1,n2                    
+     
       DOUBLE PRECISION rfqqr(0:3*(NDEx+25),8,8),
-     &                 rfqqx(0:3*(NDEx+25),8,8),                         ! nilsson_newest
-     &                 rfqqy(0:3*(NDEx+25),8,8),                         ! nilsson_newest
+     &                 rfqqx(0:3*(NDEx+25),8,8),                         
+     &                 rfqqy(0:3*(NDEx+25),8,8),                         
      &                 rh0, rho1, rl, rmax, rmosc, rmsgs, rnorm,
      &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2,
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
-c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   ! nilsson
-     &                               wqrex, xea(8,8), xir, xneg,         ! nilsson
-     &                 xpos, yea(8,8), sum                               ! nilsson
+c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   
+     &                               wqrex, xea(8,8), xir, xneg,         
+     &                 xpos, yea(8,8), sum                               
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
      &     0.8931D0/
@@ -459,146 +455,146 @@ C     WRITE(17,*)NEBINX,ICMAX
       fpi = 4.*PI
       fourpi = 1.0/fpi
 C-----selfconsistent strength taken for the l=0 transfer field
-      efit(1,1) = 0.d0                                                   ! nilsson_newest
-      IF (EFItin(1,1).GT.0.0D0) efit(1,1) = EFItin(1,1)                  ! nilsson_newest
-      IF (EFItin(1,1).LT.0.0D0) efit(1,1) = 0.d0                         ! nilsson_newest
+      efit(1,1) = 0.d0                                                   
+      IF (EFItin(1,1).GT.0.0D0) efit(1,1) = EFItin(1,1)                  
+      IF (EFItin(1,1).LT.0.0D0) efit(1,1) = 0.d0                         
       efit(2,1) = 0.d0
       dtmp = GDRpar(2,1)*GDRpar(3,1) + GDRpar(5,1)*GDRpar(6,1)
       IF(dtmp.gt.0.d0) 
-     &efit(2,1) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
-     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           ! nilsson_newest
-      IF (EFItin(2,1).GT.0.0D0) efit(2,1) = EFItin(2,1)                  ! nilsson_newest
-      IF (EFItin(2,1).LT.0.0D0) efit(2,1) = 0.0                          ! nilsson_newest
+     &efit(2,1) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     
+     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           
+      IF (EFItin(2,1).GT.0.0D0) efit(2,1) = EFItin(2,1)                  
+      IF (EFItin(2,1).LT.0.0D0) efit(2,1) = 0.0                          
       efit(2,2) = 0.d0
       IF(dtmp.gt.0.d0) 
-     &efit(2,2) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     ! nilsson_newest
-     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           ! nilsson_newest
-      IF (EFItin(2,2).GT.0.0D0) efit(2,2) = EFItin(2,2)                  ! nilsson_newest
-      IF (EFItin(2,2).LT.0.0D0) efit(2,2) = 0.0                          ! nilsson_newest
-      efit(3,1) = -QCC(1)                                                ! nilsson_newest
-      IF (EFItin(3,1).GT.0.0D0) efit(3,1) = EFItin(3,1)                  ! nilsson_newest
-      IF (EFItin(3,1).LT.0.0D0) efit(3,1) = 0.0                          ! nilsson_newest
-      efit(3,2) = -QCC(1)                                                ! nilsson_newest
-      IF (EFItin(3,2).GT.0.0D0) efit(3,2) = EFItin(3,2)                  ! nilsson_newest
-      IF (EFItin(3,2).LT.0.0D0) efit(3,2) = 0.0                          ! nilsson_newest
-      IF ((EFItin(3,2).lt.0.001).and.(EFItin(3,2).gt.-.001))             ! nilsson_newest
-     &   efit(3,2)=efit(3,1)                                             ! nilsson_newest
-      efit(3,3) = -QCC(1)                                                ! nilsson_newest
-      IF (EFItin(3,3).GT.0.0D0) efit(3,3) = EFItin(3,3)                  ! nilsson_newest
-      IF (EFItin(3,3).LT.0.0D0) efit(3,3) = 0.0                          ! nilsson_newest
-      IF ((EFItin(3,3).lt.0.001).and.(EFItin(3,3).gt.-.001))             ! nilsson_newest
-     &   efit(3,3)=efit(3,1)                                             ! nilsson_newest
-      efit(4,1) = -QCC(2)                                                ! nilsson_newest
-      IF (EFItin(4,1).GT.0.0D0) efit(4,1) = EFItin(4,1)                  ! nilsson_newest
-      IF (EFItin(4,1).LT.0.0D0) efit(4,1) = 0.0                          ! nilsson_newest
-      efit(4,2) = -QCC(2)                                                ! nilsson_newest
-      IF (EFItin(4,2).GT.0.0D0) efit(4,2) = EFItin(4,2)                  ! nilsson_newest
-      IF (EFItin(4,2).LT.0.0D0) efit(4,2) = 0.0                          ! nilsson_newest
-      IF ((EFItin(4,2).lt.0.001).and.(EFItin(4,2).gt.-.001))             ! nilsson_newest
-     &   efit(4,2)=efit(4,1)                                             ! nilsson_newest
-      efit(4,3) = -QCC(2)                                                ! nilsson_newest
-      IF (EFItin(4,3).GT.0.0D0) efit(4,3) = EFItin(4,3)                  ! nilsson_newest
-      IF (EFItin(4,3).LT.0.0D0) efit(4,3) = 0.0                          ! nilsson_newest
-      IF ((EFItin(4,3).lt.0.001).and.(EFItin(4,3).gt.-.001))             ! nilsson_newest
-     &   efit(4,3)=efit(4,1)                                             ! nilsson_newest
-      efit(4,4) = -QCC(2)                                                ! nilsson_newest
-      IF (EFItin(4,4).GT.0.0D0) efit(4,4) = EFItin(4,4)                  ! nilsson_newest
-      IF (EFItin(4,4).LT.0.0D0) efit(4,4) = 0.0                          ! nilsson_newest
-      IF ((EFItin(4,4).lt.0.001).and.(EFItin(4,4).gt.-.001))             ! nilsson_newest
-     &   efit(4,4)=efit(4,1)                                             ! nilsson_newest
-      efit(5,1) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(5,1).GT.0.0D0) efit(5,1) = EFItin(5,1)                  ! nilsson_newest
-      IF (EFItin(5,1).LT.0.0D0) efit(5,1) = 0.0                          ! nilsson_newest
-      efit(5,2) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(5,2).GT.0.0D0) efit(5,2) = EFItin(5,2)                  ! nilsson_newest
-      IF (EFItin(5,2).LT.0.0D0) efit(5,2) = 0.0                          ! nilsson_newest
-      IF ((EFItin(5,2).lt.0.001).and.(EFItin(5,2).gt.-.001))             ! nilsson_newest
-     &   efit(5,2)=efit(5,1)                                             ! nilsson_newest
-      efit(5,3) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(5,3).GT.0.0D0) efit(5,3) = EFItin(5,3)                  ! nilsson_newest
-      IF (EFItin(5,3).LT.0.0D0) efit(5,3) = 0.0                          ! nilsson_newest
-      IF ((EFItin(5,3).lt.0.001).and.(EFItin(5,3).gt.-.001))             ! nilsson_newest
-     &   efit(5,3)=efit(5,1)                                             ! nilsson_newest
-      efit(5,4) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(5,4).GT.0.0D0) efit(5,4) = EFItin(5,4)                  ! nilsson_newest
-      IF (EFItin(5,4).LT.0.0D0) efit(5,4) = 0.0                          ! nilsson_newest
-      IF ((EFItin(5,4).lt.0.001).and.(EFItin(5,4).gt.-.001))             ! nilsson_newest
-     &   efit(5,4)=efit(5,1)                                             ! nilsson_newest
-      efit(5,5) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(5,5).GT.0.0D0) efit(5,5) = EFItin(5,5)                  ! nilsson_newest
-      IF (EFItin(5,5).LT.0.0D0) efit(5,5) = 0.0                          ! nilsson_newest
-      IF ((EFItin(5,5).lt.0.001).and.(EFItin(5,5).gt.-.001))             ! nilsson_newest
-     &   efit(5,5)=efit(5,1)                                             ! nilsson_newest
-      efit(6,1) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,1).GT.0.0D0) efit(6,1) = EFItin(6,1)                  ! nilsson_newest
-      IF (EFItin(6,1).LT.0.0D0) efit(6,1) = 0.0                          ! nilsson_newest
-      efit(6,2) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,2).GT.0.0D0) efit(6,2) = EFItin(6,2)                  ! nilsson_newest
-      IF (EFItin(6,2).LT.0.0D0) efit(6,2) = 0.0                          ! nilsson_newest
-      IF ((EFItin(6,2).lt.0.001).and.(EFItin(6,2).gt.-.001))             ! nilsson_newest
-     &   efit(6,2)=efit(6,1)                                             ! nilsson_newest
-      efit(6,3) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,3).GT.0.0D0) efit(6,3) = EFItin(6,3)                  ! nilsson_newest
-      IF (EFItin(6,3).LT.0.0D0) efit(6,3) = 0.0                          ! nilsson_newest
-      IF ((EFItin(6,3).lt.0.001).and.(EFItin(6,3).gt.-.001))             ! nilsson_newest
-     &   efit(6,3)=efit(6,1)                                             ! nilsson_newest
-      efit(6,4) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,4).GT.0.0D0) efit(6,4) = EFItin(6,4)                  ! nilsson_newest
-      IF (EFItin(6,4).LT.0.0D0) efit(6,4) = 0.0                          ! nilsson_newest
-      IF ((EFItin(6,4).lt.0.001).and.(EFItin(6,4).gt.-.001))             ! nilsson_newest
-     &   efit(6,4)=efit(6,1)                                             ! nilsson_newest
-      efit(6,5) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,5).GT.0.0D0) efit(6,5) = EFItin(6,5)                  ! nilsson_newest
-      IF (EFItin(6,5).LT.0.0D0) efit(6,5) = 0.0                          ! nilsson_newest
-      IF ((EFItin(6,5).lt.0.001).and.(EFItin(6,5).gt.-.001))             ! nilsson_newest
-     &   efit(6,5)=efit(6,1)                                             ! nilsson_newest
-      efit(6,6) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(6,6).GT.0.0D0) efit(6,6) = EFItin(6,6)                  ! nilsson_newest
-      IF (EFItin(6,6).LT.0.0D0) efit(6,6) = 0.0                          ! nilsson_newest
-      IF ((EFItin(6,6).lt.0.001).and.(EFItin(6,6).gt.-.001))             ! nilsson_newest
-     &   efit(6,6)=efit(6,1)                                             ! nilsson_newest
-      efit(7,1) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,1).GT.0.0D0) efit(7,1) = EFItin(7,1)                  ! nilsson_newest
-      IF (EFItin(7,1).LT.0.0D0) efit(7,1) = 0.0                          ! nilsson_newest
-      efit(7,2) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,2).GT.0.0D0) efit(7,2) = EFItin(7,2)                  ! nilsson_newest
-      IF (EFItin(7,2).LT.0.0D0) efit(7,2) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,2).lt.0.001).and.(EFItin(7,2).gt.-.001))             ! nilsson_newest
-     &   efit(7,2)=efit(7,1)                                             ! nilsson_newest
-      efit(7,3) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,3).GT.0.0D0) efit(7,3) = EFItin(7,3)                  ! nilsson_newest
-      IF (EFItin(7,3).LT.0.0D0) efit(7,3) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,3).lt.0.001).and.(EFItin(7,3).gt.-.001))             ! nilsson_newest
-     &   efit(7,3)=efit(7,1)                                             ! nilsson_newest
-      efit(7,4) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,4).GT.0.0D0) efit(7,4) = EFItin(7,4)                  ! nilsson_newest
-      IF (EFItin(7,4).LT.0.0D0) efit(7,4) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,4).lt.0.001).and.(EFItin(7,4).gt.-.001))             ! nilsson_newest
-     &   efit(7,4)=efit(7,1)                                             ! nilsson_newest
-      efit(7,5) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,5).GT.0.0D0) efit(7,5) = EFItin(7,5)                  ! nilsson_newest
-      IF (EFItin(7,5).LT.0.0D0) efit(7,5) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,5).lt.0.001).and.(EFItin(7,5).gt.-.001))             ! nilsson_newest
-     &   efit(7,5)=efit(7,1)                                             ! nilsson_newest
-      efit(7,6) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,6).GT.0.0D0) efit(7,6) = EFItin(7,6)                  ! nilsson_newest
-      IF (EFItin(7,6).LT.0.0D0) efit(7,6) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,6).lt.0.001).and.(EFItin(7,6).gt.-.001))             ! nilsson_newest
-     &   efit(7,6)=efit(7,1)                                             ! nilsson_newest
-      efit(7,7) = 0.0                                                    ! nilsson_newest
-      IF (EFItin(7,7).GT.0.0D0) efit(7,7) = EFItin(7,7)                  ! nilsson_newest
-      IF (EFItin(7,7).LT.0.0D0) efit(7,7) = 0.0                          ! nilsson_newest
-      IF ((EFItin(7,7).lt.0.001).and.(EFItin(7,7).gt.-.001))             ! nilsson_newest
-     &   efit(7,7)=efit(7,1)                                             ! nilsson_newest
+     &efit(2,2) = (GDRpar(1,1)*GDRpar(2,1)*GDRpar(3,1) + GDRpar(4,1)     
+     &          *GDRpar(5,1)*GDRpar(6,1))/dtmp                           
+      IF (EFItin(2,2).GT.0.0D0) efit(2,2) = EFItin(2,2)                  
+      IF (EFItin(2,2).LT.0.0D0) efit(2,2) = 0.0                          
+      efit(3,1) = -QCC(1)                                                
+      IF (EFItin(3,1).GT.0.0D0) efit(3,1) = EFItin(3,1)                  
+      IF (EFItin(3,1).LT.0.0D0) efit(3,1) = 0.0                          
+      efit(3,2) = -QCC(1)                                                
+      IF (EFItin(3,2).GT.0.0D0) efit(3,2) = EFItin(3,2)                  
+      IF (EFItin(3,2).LT.0.0D0) efit(3,2) = 0.0                          
+      IF ((EFItin(3,2).lt.0.001).and.(EFItin(3,2).gt.-.001))             
+     &   efit(3,2)=efit(3,1)                                             
+      efit(3,3) = -QCC(1)                                                
+      IF (EFItin(3,3).GT.0.0D0) efit(3,3) = EFItin(3,3)                  
+      IF (EFItin(3,3).LT.0.0D0) efit(3,3) = 0.0                          
+      IF ((EFItin(3,3).lt.0.001).and.(EFItin(3,3).gt.-.001))             
+     &   efit(3,3)=efit(3,1)                                             
+      efit(4,1) = -QCC(2)                                                
+      IF (EFItin(4,1).GT.0.0D0) efit(4,1) = EFItin(4,1)                  
+      IF (EFItin(4,1).LT.0.0D0) efit(4,1) = 0.0                          
+      efit(4,2) = -QCC(2)                                                
+      IF (EFItin(4,2).GT.0.0D0) efit(4,2) = EFItin(4,2)                  
+      IF (EFItin(4,2).LT.0.0D0) efit(4,2) = 0.0                          
+      IF ((EFItin(4,2).lt.0.001).and.(EFItin(4,2).gt.-.001))             
+     &   efit(4,2)=efit(4,1)                                             
+      efit(4,3) = -QCC(2)                                                
+      IF (EFItin(4,3).GT.0.0D0) efit(4,3) = EFItin(4,3)                  
+      IF (EFItin(4,3).LT.0.0D0) efit(4,3) = 0.0                          
+      IF ((EFItin(4,3).lt.0.001).and.(EFItin(4,3).gt.-.001))             
+     &   efit(4,3)=efit(4,1)                                             
+      efit(4,4) = -QCC(2)                                                
+      IF (EFItin(4,4).GT.0.0D0) efit(4,4) = EFItin(4,4)                  
+      IF (EFItin(4,4).LT.0.0D0) efit(4,4) = 0.0                          
+      IF ((EFItin(4,4).lt.0.001).and.(EFItin(4,4).gt.-.001))             
+     &   efit(4,4)=efit(4,1)                                             
+      efit(5,1) = 0.0                                                    
+      IF (EFItin(5,1).GT.0.0D0) efit(5,1) = EFItin(5,1)                  
+      IF (EFItin(5,1).LT.0.0D0) efit(5,1) = 0.0                          
+      efit(5,2) = 0.0                                                    
+      IF (EFItin(5,2).GT.0.0D0) efit(5,2) = EFItin(5,2)                  
+      IF (EFItin(5,2).LT.0.0D0) efit(5,2) = 0.0                          
+      IF ((EFItin(5,2).lt.0.001).and.(EFItin(5,2).gt.-.001))             
+     &   efit(5,2)=efit(5,1)                                             
+      efit(5,3) = 0.0                                                    
+      IF (EFItin(5,3).GT.0.0D0) efit(5,3) = EFItin(5,3)                  
+      IF (EFItin(5,3).LT.0.0D0) efit(5,3) = 0.0                          
+      IF ((EFItin(5,3).lt.0.001).and.(EFItin(5,3).gt.-.001))             
+     &   efit(5,3)=efit(5,1)                                             
+      efit(5,4) = 0.0                                                    
+      IF (EFItin(5,4).GT.0.0D0) efit(5,4) = EFItin(5,4)                  
+      IF (EFItin(5,4).LT.0.0D0) efit(5,4) = 0.0                          
+      IF ((EFItin(5,4).lt.0.001).and.(EFItin(5,4).gt.-.001))             
+     &   efit(5,4)=efit(5,1)                                             
+      efit(5,5) = 0.0                                                    
+      IF (EFItin(5,5).GT.0.0D0) efit(5,5) = EFItin(5,5)                  
+      IF (EFItin(5,5).LT.0.0D0) efit(5,5) = 0.0                          
+      IF ((EFItin(5,5).lt.0.001).and.(EFItin(5,5).gt.-.001))             
+     &   efit(5,5)=efit(5,1)                                             
+      efit(6,1) = 0.0                                                    
+      IF (EFItin(6,1).GT.0.0D0) efit(6,1) = EFItin(6,1)                  
+      IF (EFItin(6,1).LT.0.0D0) efit(6,1) = 0.0                          
+      efit(6,2) = 0.0                                                    
+      IF (EFItin(6,2).GT.0.0D0) efit(6,2) = EFItin(6,2)                  
+      IF (EFItin(6,2).LT.0.0D0) efit(6,2) = 0.0                          
+      IF ((EFItin(6,2).lt.0.001).and.(EFItin(6,2).gt.-.001))             
+     &   efit(6,2)=efit(6,1)                                             
+      efit(6,3) = 0.0                                                    
+      IF (EFItin(6,3).GT.0.0D0) efit(6,3) = EFItin(6,3)                  
+      IF (EFItin(6,3).LT.0.0D0) efit(6,3) = 0.0                          
+      IF ((EFItin(6,3).lt.0.001).and.(EFItin(6,3).gt.-.001))             
+     &   efit(6,3)=efit(6,1)                                             
+      efit(6,4) = 0.0                                                    
+      IF (EFItin(6,4).GT.0.0D0) efit(6,4) = EFItin(6,4)                  
+      IF (EFItin(6,4).LT.0.0D0) efit(6,4) = 0.0                          
+      IF ((EFItin(6,4).lt.0.001).and.(EFItin(6,4).gt.-.001))             
+     &   efit(6,4)=efit(6,1)                                             
+      efit(6,5) = 0.0                                                    
+      IF (EFItin(6,5).GT.0.0D0) efit(6,5) = EFItin(6,5)                  
+      IF (EFItin(6,5).LT.0.0D0) efit(6,5) = 0.0                          
+      IF ((EFItin(6,5).lt.0.001).and.(EFItin(6,5).gt.-.001))             
+     &   efit(6,5)=efit(6,1)                                             
+      efit(6,6) = 0.0                                                    
+      IF (EFItin(6,6).GT.0.0D0) efit(6,6) = EFItin(6,6)                  
+      IF (EFItin(6,6).LT.0.0D0) efit(6,6) = 0.0                          
+      IF ((EFItin(6,6).lt.0.001).and.(EFItin(6,6).gt.-.001))             
+     &   efit(6,6)=efit(6,1)                                             
+      efit(7,1) = 0.0                                                    
+      IF (EFItin(7,1).GT.0.0D0) efit(7,1) = EFItin(7,1)                  
+      IF (EFItin(7,1).LT.0.0D0) efit(7,1) = 0.0                          
+      efit(7,2) = 0.0                                                    
+      IF (EFItin(7,2).GT.0.0D0) efit(7,2) = EFItin(7,2)                  
+      IF (EFItin(7,2).LT.0.0D0) efit(7,2) = 0.0                          
+      IF ((EFItin(7,2).lt.0.001).and.(EFItin(7,2).gt.-.001))             
+     &   efit(7,2)=efit(7,1)                                             
+      efit(7,3) = 0.0                                                    
+      IF (EFItin(7,3).GT.0.0D0) efit(7,3) = EFItin(7,3)                  
+      IF (EFItin(7,3).LT.0.0D0) efit(7,3) = 0.0                          
+      IF ((EFItin(7,3).lt.0.001).and.(EFItin(7,3).gt.-.001))             
+     &   efit(7,3)=efit(7,1)                                             
+      efit(7,4) = 0.0                                                    
+      IF (EFItin(7,4).GT.0.0D0) efit(7,4) = EFItin(7,4)                  
+      IF (EFItin(7,4).LT.0.0D0) efit(7,4) = 0.0                          
+      IF ((EFItin(7,4).lt.0.001).and.(EFItin(7,4).gt.-.001))             
+     &   efit(7,4)=efit(7,1)                                             
+      efit(7,5) = 0.0                                                    
+      IF (EFItin(7,5).GT.0.0D0) efit(7,5) = EFItin(7,5)                  
+      IF (EFItin(7,5).LT.0.0D0) efit(7,5) = 0.0                          
+      IF ((EFItin(7,5).lt.0.001).and.(EFItin(7,5).gt.-.001))             
+     &   efit(7,5)=efit(7,1)                                             
+      efit(7,6) = 0.0                                                    
+      IF (EFItin(7,6).GT.0.0D0) efit(7,6) = EFItin(7,6)                  
+      IF (EFItin(7,6).LT.0.0D0) efit(7,6) = 0.0                          
+      IF ((EFItin(7,6).lt.0.001).and.(EFItin(7,6).gt.-.001))             
+     &   efit(7,6)=efit(7,1)                                             
+      efit(7,7) = 0.0                                                    
+      IF (EFItin(7,7).GT.0.0D0) efit(7,7) = EFItin(7,7)                  
+      IF (EFItin(7,7).LT.0.0D0) efit(7,7) = 0.0                          
+      IF ((EFItin(7,7).lt.0.001).and.(EFItin(7,7).gt.-.001))             
+     &   efit(7,7)=efit(7,1)                                             
 C
 C-----check that energy interval is compatible with range of
 C-----experimental ex used to determine coupl. const.
 C
       efitx = -10.
       DO l = 1, ICMax
-         do k=1,l                                                        ! nilsson_newest
-            efitx = MAX(efit(l,k),efitx)                                 ! nilsson_newest
-         enddo                                                           ! nilsson_newest
+         do k=1,l                                                        
+            efitx = MAX(efit(l,k),efitx)                                 
+         enddo                                                           
       ENDDO
       nebinx = MAX(INT((efitx+5.*WIDex)/ESTep + 1.),Nebins)
       IF(NEBinx.GE.3*(NDEx+25)) THEN
@@ -632,10 +628,10 @@ C
 C-----set xea and yea to 0 to avoid undefined if efit's are 0
 
       DO lt = 1, ltmaxr
-         do kt = 1, ltmaxr                                               ! nilsson_newest
-            xea(lt,kt) = 0.D0                                            ! nilsson_newest
-            yea(lt,kt) = 0.D0                                            ! nilsson_newest
-         enddo                                                           ! nilsson_newest
+         do kt = 1, ltmaxr                                               
+            xea(lt,kt) = 0.D0                                            
+            yea(lt,kt) = 0.D0                                            
+         enddo                                                           
       ENDDO
       DO i = 1, 2
          rd = rd + anz*(a3*rnp(1,i) + rnp(2,i) + rnp(3,i)*dnz)
@@ -687,8 +683,8 @@ C
          e = e + ESTep
          Est(ne) = e
       ENDDO
-C-----6 lines below make a substantial difference for the response function
-C-----with L=0. these were absent in the previous version of the code.
+C-----6 lines below make a substantial difference for the response 
+C-----function with L=0. these were absent in the previous version
       e = -ESTep
       nesx = MIN(10000.D0,2.D0*eqqx/ESTep)
       DO ne = 0, nesx
@@ -709,9 +705,10 @@ C
       rmax = rp + ad*(lmax - 1.)*LOG(rp/rd)
       nxmax = rmax/dr
       nxmax = 2*(nxmax/2)
-      DO l = 2, lmax
-         GSDm(l) = 0.0
-      ENDDO
+      GSDm = 0.d0
+C     DO l = 2, lmax
+C        GSDm(l) = 0.d0
+C     ENDDO
 C
 C------->> the factor 4*pi/A is excluded - see definition of
 C------->> selfconsistent RPA-coupling constants
@@ -779,37 +776,34 @@ C
       DO krt = 1, krtx
          DO ne = 0, nebinx + 1
             DO lt = 1, ICMax
-               do kt = 1, ICMax                                          ! nilsson_newest
-                  IF (ne.GE.1) RHO(ne,lt,kt) = 0.0                       ! nilsson_newest
-                  rfqqr(ne,lt,kt) = 0.0                                  ! nilsson_newest
-                  rfqqx(ne,lt,kt) = 0.0                                  ! nilsson_newest
-                  rfqqy(ne,lt,kt) = 0.0                                  ! nilsson_newest
-               enddo                                                     ! nilsson_newest
+               do kt = 1, ICMax                                          
+                  IF (ne.GE.1) RHO(ne,lt,kt) = 0.d0                      
+                  rfqqr(ne,lt,kt) = 0.0                                  
+                  rfqqx(ne,lt,kt) = 0.0                                  
+                  rfqqy(ne,lt,kt) = 0.0                                  
+               enddo                                                     
                IF (krt.EQ.1 .AND. ne.GE.1) THEN
-                  RHOb(ne,lt,1) = 0.0
-                  RHOb(ne,lt,2) = 0.0
+                  RHOb(ne,lt,1) = 0.d0
+                  RHOb(ne,lt,2) = 0.d0
                ENDIF
             ENDDO
          ENDDO
 C
-         DO lt = 1, ICMax
-            do kt = 1, ICMax                                             ! nilsson_newest
-               clsc(lt,kt) = 0.                                          ! nilsson_newest
-               clex(lt,kt) = 0.                                          ! nilsson_newest
-               ccr(lt,kt) = 0.D0                                         ! nilsson_newest
-               cci(lt,kt) = 0.D0                                         ! nilsson_newest
-               dcr(lt,kt) = 0.D0                                         ! nilsson_newest
-               dci(lt,kt) = 0.D0                                         ! nilsson_newest
-               cr1(lt,kt) = 0.D0                                         ! nilsson_newest
-               cr3(lt,kt) = 0.D0                                         ! nilsson_newest
-               ccm(lt,kt) = 0.D0                                         ! nilsson_newest
-               ccp(lt,kt) = 0.D0                                         ! nilsson_newest
-            enddo                                                        ! nilsson_newest
-            nconf(lt) = 0.0                                              ! nilsson_newest
-            SREw(lt) = 0.0                                         ! nilsson_newest
-            SRNew(lt) = 0.0                                        ! nilsson_newest
-            SREwl(lt) = 0.0                                        ! nilsson_newest
-         ENDDO
+         clsc = 0.D0  
+         clex = 0.D0  
+         ccr = 0.d0 
+         cci = 0.D0 
+         dcr = 0.D0 
+         dci = 0.D0 
+         cr1 = 0.D0 
+         cr3 = 0.D0 
+         ccm = 0.D0 
+         ccp = 0.D0 
+         nconf = 0      
+         SREw  = 0.D0       
+         SRNew = 0.D0      
+         SREwl = 0.D0      
+
          IF (krt.EQ.1) kmax = 2
          IF (krt.EQ.2) kmax = 1
 C
@@ -830,60 +824,60 @@ C
             ENDIF
             kc = 0
             DO nh = 1, nlhm
-               do i=1,14                                                 ! nilsson
-                  lth(i)= 0                                              ! nilsson
-                  jtw1(i) = 0                                            ! nilsson
-                  ah(i) = 0.0                                            ! nilsson
-               enddo                                                     ! nilsson
+               do i=1,14                                                 
+                  lth(i)= 0                                              
+                  jtw1(i) = 0                                            
+                  ah(i) = 0.0                                            
+               enddo                                                     
                nos1 = NSP(nh,kh)
                kth  = KSP(nh,kh)
-               iminh = (kth -1)/2                                        ! nilsson
-C fill up the arrays lth[], ah[] and jtw1[]                              ! nilsson
-               l = nos1                                                  ! nilsson
-               i = nos1 + 1 -iminh                                       ! nilsson
-               do while ((l.ge.0).and.(i.gt.0))                          ! nilsson
-                  lth(i) = l                                             ! nilsson
-                  jtw1(i) = 2*l+1                                        ! nilsson
-                  ah(i) = asp(nh,i,kh)                                   ! nilsson
-                  if(i.gt.1) then                                        ! nilsson
-                     i = i-1                                             ! nilsson
-                     lth(i) = l                                          ! nilsson
-                     jtw1(i) = 2*l-1                                     ! nilsson
-                     ah(i) = asp(nh,i,kh)                                ! nilsson
-                  endif                                                  ! nilsson
-                  i = i-1                                                ! nilsson
-                  l = l-2                                                ! nilsson
-               enddo                                                     ! nilsson
+               iminh = (kth -1)/2                                        
+C fill up the arrays lth[], ah[] and jtw1[]                              
+               l = nos1                                                  
+               i = nos1 + 1 -iminh                                       
+               do while ((l.ge.0).and.(i.gt.0))                          
+                  lth(i) = l                                             
+                  jtw1(i) = 2*l+1                                        
+                  ah(i) = asp(nh,i,kh)                                   
+                  if(i.gt.1) then                                        
+                     i = i-1                                             
+                     lth(i) = l                                          
+                     jtw1(i) = 2*l-1                                     
+                     ah(i) = asp(nh,i,kh)                                
+                  endif                                                  
+                  i = i-1                                                
+                  l = l-2                                                
+               enddo                                                     
                IF (VAMp(nh,kh).GE.0.01D0) THEN
                   DO np = 1, nlpm
-                     do i=1,14                                           ! nilsson
-                        ltp(i)= 0                                        ! nilsson
-                        jtw2(i) = 0                                      ! nilsson
-                        ap(i) = 0.0                                      ! nilsson
-                     enddo                                               ! nilsson
+                     do i=1,14                                           
+                        ltp(i)= 0                                        
+                        jtw2(i) = 0                                      
+                        ap(i) = 0.0                                      
+                     enddo                                               
                      IF (UAMp(np,kp).GE.0.01D0) THEN
                         wbcs = VAMp(nh,kh)*UAMp(np,kp) + UAMp(nh,kh)
      &                         *VAMp(np,kp)
                         IF (wbcs.GE.0.01D0) THEN
-                           nos2 = NSP(np,kp)                             ! nilsson
-                           ktp = KSP(np,kp)                              ! nilsson
-                           iminp = (ktp - 1)/2                           ! nilsson
-C fill up the arrays ltp[], ap[] and jtw2[]                              ! nilsson
-                           l = nos2                                      ! nilsson
-                           i = nos2 + 1 -iminp                           ! nilsson
-                           do while ((l.ge.0).and.(i.gt.0))              ! nilsson
-                              ltp(i) = l                                 ! nilsson
-                              jtw2(i) = 2*l+1                            ! nilsson
-                              ap(i) = asp(np,i,kp)                       ! nilsson
-                              if(i.gt.1) then                            ! nilsson
-                                 i = i-1                                 ! nilsson
-                                 ltp(i) = l                              ! nilsson
-                                 jtw2(i) = 2*l-1                         ! nilsson
-                                 ap(i) = asp(np,i,kp)                    ! nilsson
-                              endif                                      ! nilsson
-                              i = i-1                                    ! nilsson
-                              l = l-2                                    ! nilsson
-                           enddo                                         ! nilsson
+                           nos2 = NSP(np,kp)                             
+                           ktp = KSP(np,kp)                              
+                           iminp = (ktp - 1)/2                           
+C fill up the arrays ltp[], ap[] and jtw2[]                              
+                           l = nos2                                      
+                           i = nos2 + 1 -iminp                           
+                           do while ((l.ge.0).and.(i.gt.0))              
+                              ltp(i) = l                                 
+                              jtw2(i) = 2*l+1                            
+                              ap(i) = asp(np,i,kp)                       
+                              if(i.gt.1) then                            
+                                 i = i-1                                 
+                                 ltp(i) = l                              
+                                 jtw2(i) = 2*l-1                         
+                                 ap(i) = asp(np,i,kp)                    
+                              endif                                      
+                              i = i-1                                    
+                              l = l-2                                    
+                           enddo                                         
 C
                            eqq = EBCs(nh,kh) + EBCs(np,kp)
                            IF (eqq.LE.eqqx) THEN
@@ -918,39 +912,39 @@ c                              eqqst(kc) = eqq
 C
 C-----------------------------end of energy shift
 C
-                              do i = 1, nos1+1 - iminh                   ! nilsson
-                                 do j = 1, nos2+1 - iminp                ! nilsson
-                                    l1 = IABS(ltp(j)-lth(i))             ! nilsson
-                                    l2 = IABS(jtw2(j)-jtw1(i))/2         ! nilsson
-                                    if ((i.eq.1).and.(j.eq.1)) then      ! nilsson
-                                       ltmin = MAX(l1,l2)                ! nilsson
-                                    else                                 ! nilsson
-                                       if (MAX(l1,l2).ge.ltmin) then     ! nilsson
-                                       else                              ! nilsson
-                                          ltmin = MAX(l1,l2)             ! nilsson
-                                       endif                             ! nilsson
-                                    endif                                ! nilsson
+                              do i = 1, nos1+1 - iminh                   
+                                 do j = 1, nos2+1 - iminp                
+                                    l1 = IABS(ltp(j)-lth(i))             
+                                    l2 = IABS(jtw2(j)-jtw1(i))/2         
+                                    if ((i.eq.1).and.(j.eq.1)) then      
+                                       ltmin = MAX(l1,l2)                
+                                    else                                 
+                                       if (MAX(l1,l2).ge.ltmin) then     
+                                       else                              
+                                          ltmin = MAX(l1,l2)             
+                                       endif                             
+                                    endif                                
                                     IF (MOD(ltmin-l1,2).EQ.1)
      &                                 ltmin = ltmin + 1
-                                    if ((i.eq.1).and.(j.eq.1)) then      ! nilsson
-                                        ltmax = MIN(ltp(j)+lth(i),       ! nilsson
-     &                                 (jtw1(i)+jtw2(j))/2)+1            ! nilsson
+                                    if ((i.eq.1).and.(j.eq.1)) then      
+                                        ltmax = MIN(ltp(j)+lth(i),       
+     &                                 (jtw1(i)+jtw2(j))/2)+1            
                                     else
-                                       if ((MIN(ltp(j)+lth(i),(jtw1(i)+  ! nilsson
-     &                                 jtw2(j))/2)+1).le.ltmax) then     ! nilsson
-                                       else                              ! nilsson
-                                       ltmax = MIN(ltp(j)+lth(i),        ! nilsson
-     &                                    (jtw1(i)+jtw2(j))/2)+1         ! nilsson
-                                       endif                             ! nilsson
-                                    endif                                ! nilsson
-                                 enddo                                   ! nilsson
-                              enddo                                      ! nilsson
+                                       if ((MIN(ltp(j)+lth(i),(jtw1(i)+  
+     &                                 jtw2(j))/2)+1).le.ltmax) then     
+                                       else                              
+                                       ltmax = MIN(ltp(j)+lth(i),        
+     &                                    (jtw1(i)+jtw2(j))/2)+1         
+                                       endif                             
+                                    endif                                
+                                 enddo                                   
+                              enddo                                      
                               ltmin = ltmin + 1
                               ltmax = MIN(ltmax,ltmaxr)
-                              do n1= 1,2,1                               ! nilsson_newest
-                              kth = iabs(kth)                            ! nilsson_newest
-                              do n2=1,2,1                                ! nilsson_newest
-                              ktp1 = (iabs(ktp - kth))/2  +1             ! nilsson_newest
+                              do n1= 1,2,1                               
+                              kth = iabs(kth)                            
+                              do n2=1,2,1                                
+                              ktp1 = (iabs(ktp - kth))/2  +1             
                               IF (ltmin.LE.ltmax) THEN
                                  DO ltp1 = ltmin, ltmax, 2
                                     lttw = 2*(ltp1 - 1)
@@ -959,45 +953,45 @@ C-----------------------------------calculate the 2-qp matrix elements
 C-----------------------------------REDUQQ = reduced matrix element (squared)
 C-----------------------------------PHTRM = radial  matrix element
 C-----------------------------------UMATQQ = full    matrix element (squared)
-                                    sum = 0.0D0                          ! nilsson
-                                    do i=1,nos1+1- iminh                 ! nilsson
-                                       do j=1,nos2+1- iminp              ! nilsson
+                                    sum = 0.0D0                          
+                                    do i=1,nos1+1- iminh                 
+                                       do j=1,nos2+1- iminp              
                                     if (ABS(ah(i)*ap(j)).lt.0.00001D0)
-     &                              then                                 ! nilsson
-                                    else                                 ! nilsson
-                                       IA = jtw1(i)                      ! nilsson
-                                       IB = jtw2(j)                      ! nilsson
+     &                              then                                 
+                                    else                                 
+                                       IA = jtw1(i)                      
+                                       IB = jtw2(j)                      
                                        IC = lttw
                                        ID = 1
                                        IE = -1
                                        IG = 0
                                        CALL CLEBTRI
                                        r1 = RAC
-                                       r1 =(VCC(IB,IA,IC,ktp,-kth)*      ! nilsson_new
-     &                                 (-1)**((IA-kth)/2))*r1            ! nilsson_new
-                                       r1 = sqrt(float(IA+1)*            ! nilsson_new
-     &                                      float(IB+1))*r1              ! nilsson_new
-                                       r1 = r1/sqrt(float(IC+1))         ! nilsson_new
-                                       r1 = ah(i)*ap(j)*r1               ! nilsson
-                                       if (abs(r1).gt.1.D-10) then       ! nilsson
-                                          ltr = lttw/2                   ! nilsson
-                                          nrad1=(nos1-lth(i))/2          ! nilsson
-                                          nrad2=(nos2-ltp(j))/2          ! nilsson
+                                       r1 =(VCC(IB,IA,IC,ktp,-kth)*      
+     &                                 (-1)**((IA-kth)/2))*r1            
+                                       r1 = sqrt(float(IA+1)*            
+     &                                      float(IB+1))*r1              
+                                       r1 = r1/sqrt(float(IC+1))         
+                                       r1 = ah(i)*ap(j)*r1               
+                                       if (abs(r1).gt.1.D-10) then       
+                                          ltr = lttw/2                   
+                                          nrad1=(nos1-lth(i))/2          
+                                          nrad2=(nos2-ltp(j))/2          
                                     CALL RADIAL(bosc,phtrm,nrad1,lth(i),
      &                                 nrad2,ltp(j),ltr)
-                                          sum = sum + r1*phtrm           ! nilsson
-                                       endif                             ! nilsson
-                                    endif                                ! nilsson
-                                       enddo                             ! nilsson
-                                    enddo                                ! nilsson
+                                          sum = sum + r1*phtrm           
+                                       endif                             
+                                    endif                                
+                                       enddo                             
+                                    enddo                                
                                     IF (ltr.GT.0)
-     &                                  sum = sum*vnorm/rws**ltr         ! nilsson
+     &                                  sum = sum*vnorm/rws**ltr         
                                     IF (ltr.EQ.0)
-     &                              sum = sum*vnorm/rws**2               ! nilsson
-                                    umatqq = (sum*wbcs)**2               ! nilsson_newest
-                                    hat = 1.D0                           ! nilsson
-                                    umatqq = umatqq*hat*fourpi/          ! nilsson
-     &                                   FLOAT(lttw + 1)                 ! nilsson
+     &                              sum = sum*vnorm/rws**2               
+                                    umatqq = (sum*wbcs)**2               
+                                    hat = 1.D0                           
+                                    umatqq = umatqq*hat*fourpi/          
+     &                                   FLOAT(lttw + 1)                 
 
                                     IF (umatqq.GE.1.D-08) THEN
 C
@@ -1030,14 +1024,14 @@ C----------------------------------------Green functions
 C
 C                                         real and imaginary parts of the 2-qp
 C                                         response functions
-                                         rfqqr(ne,ltp1,ktp1) =           ! nilsson_newest
-     &                                   rfqqr(ne,ltp1,ktp1)             ! nilsson_newest
+                                         rfqqr(ne,ltp1,ktp1) =           
+     &                                   rfqqr(ne,ltp1,ktp1)             
      &                                      + greenr
-                                         rfqqx(ne,ltp1,ktp1) =           ! nilsson_newest
-     &                                   rfqqx(ne,ltp1,ktp1)             ! nilsson_newest
+                                         rfqqx(ne,ltp1,ktp1) =           
+     &                                   rfqqx(ne,ltp1,ktp1)             
      &                                      + greenx
-                                         rfqqy(ne,ltp1,ktp1) =           ! nilsson_newest
-     &                                   rfqqy(ne,ltp1,ktp1)             ! nilsson_newest
+                                         rfqqy(ne,ltp1,ktp1) =           
+     &                                   rfqqy(ne,ltp1,ktp1)             
      &                                      + greeny
                                        ENDDO
 C
@@ -1067,36 +1061,36 @@ C
 C----------------------------------------real and imaginary parts of the 2-qp
 C----------------------------------------response function
                                          IF (i.EQ.1) THEN
-                                         cr1(ltp1,ktp1) =                ! nilsson_newest
-     &                                   cr1(ltp1,ktp1) + greenr         ! nilsson_newest
-                                         ccm(ltp1,ktp1) = ccm(ltp1,ktp1) ! nilsson_newest
+                                         cr1(ltp1,ktp1) =                
+     &                                   cr1(ltp1,ktp1) + greenr         
+                                         ccm(ltp1,ktp1) = ccm(ltp1,ktp1) 
      &                                      + greenx +
      &                                      0.5D0*WIDex*greeny
                                          ELSEIF (i.EQ.2) THEN
-                                         ccr(ltp1,ktp1) = ccr(ltp1,ktp1) ! nilsson_newest
-     &                                   + greenr                        ! nilsson_newest
-                                         xea(ltp1,ktp1) = xea(ltp1,ktp1) ! nilsson_newest
-     &                                   + greenx                        ! nilsson_newest
-                                         yea(ltp1,ktp1) = yea(ltp1,ktp1) ! nilsson_newest
-     &                                   + greeny                        ! nilsson_newest
-                                         cci(ltp1,ktp1) = cci(ltp1,ktp1) ! nilsson_newest
+                                         ccr(ltp1,ktp1) = ccr(ltp1,ktp1) 
+     &                                   + greenr                        
+                                         xea(ltp1,ktp1) = xea(ltp1,ktp1) 
+     &                                   + greenx                        
+                                         yea(ltp1,ktp1) = yea(ltp1,ktp1) 
+     &                                   + greeny                        
+                                         cci(ltp1,ktp1) = cci(ltp1,ktp1) 
      &                                      + greenx +
      &                                      0.5D0*WIDex*greeny
 C
 C calculate the 1'st derivative of the 2qp response function at the fitting energy
 C
-                                         dcr(ltp1,ktp1) = dcr(ltp1,ktp1) ! nilsson_newest
+                                         dcr(ltp1,ktp1) = dcr(ltp1,ktp1) 
      &                                      + ((emisq - dwsx)*pxmd**2 -
      &                                      (eplsq - dwsx)*pymd**2)
      &                                      *umatqq
-                                         dci(ltp1,ktp1) = dci(ltp1,ktp1) ! nilsson_newest
+                                         dci(ltp1,ktp1) = dci(ltp1,ktp1) 
      &                                      + ((2.D0*wqq + WIDex)
      &                                      *(emi*pxmd**2 + epl*pymd**2)
      &                                      )*umatqq
                                          ELSEIF (i.EQ.3) THEN
-                                         cr3(ltp1,ktp1) = cr3(ltp1,ktp1) ! nilsson_newest
+                                         cr3(ltp1,ktp1) = cr3(ltp1,ktp1) 
      &                                   + greenr
-                                         ccp(ltp1,ktp1) = ccp(ltp1,ktp1) ! nilsson_newest
+                                         ccp(ltp1,ktp1) = ccp(ltp1,ktp1) 
      &                                      + greenx +
      &                                      0.5D0*WIDex*greeny
                                          ENDIF
@@ -1107,10 +1101,10 @@ C
                                     ENDIF
                                  ENDDO
                               ENDIF
-                              kth = - kth                                ! nilsson_newest
-                              ENDDO                                      ! nilsson_newest
-                              ktp = - ktp                                ! nilsson_newest
-                              ENDDO                                      ! nilsson_newest
+                              kth = - kth                                
+                              ENDDO                                      
+                              ktp = - ktp                                
+                              ENDDO                                      
                            ENDIF
                         ENDIF
                      ENDIF
@@ -1126,7 +1120,7 @@ C--------U(l;r) = (r/rd)**l * homega
 C--------rd     = half-density radius of the g.s. density rhogs(r)
 C--------homega = oscillator energy
 C--------0
-C--------the Tassie model is taken for the transition densities:              0
+C--------the Tassie model is taken for the transition densities:              
 C--------rhotr(l;r) = (r/rd)**(l-1)*rd*d rhogs(r) /dr
 C--------rd         = half-density radius of rhogs(r)
 C--------self-consistent    coupling constants CLSC(L)
@@ -1139,68 +1133,68 @@ C
 C--------units for CLSC and CLEX :   [MeV]
 C
          DO lt = 1, ltmaxr
-            do kt = 1, lt                                                ! nilsson_newest
+            do kt = 1, lt                                                
 C
 C           INVERSE COUPLING CONSTANTS (FROM FIT TO EXP. ENERGIES)
 C
-            IF (efit(lt,kt).NE.0.0D0) THEN                               ! nilsson_newest
-               IF (dcr(lt,kt).NE.0.0D0) THEN                             ! nilsson_newest
-                  xir = dci(lt,kt)/dcr(lt,kt)                            ! nilsson_newest
-                  xpos = cci(lt,kt)*xir/(1.D0 + SQRT(1.D0 + xir**2))     ! nilsson_newest
-                  xneg = -cci(lt,kt)**2/xpos                             ! nilsson_newest
-                  cpos = ccr(lt,kt) + xpos                               ! nilsson_newest
-                  cneg = ccr(lt,kt) + xneg                               ! nilsson_newest
+            IF (efit(lt,kt).NE.0.0D0) THEN                               
+               IF (dcr(lt,kt).NE.0.0D0) THEN                             
+                  xir = dci(lt,kt)/dcr(lt,kt)                            
+                  xpos = cci(lt,kt)*xir/(1.D0 + SQRT(1.D0 + xir**2))     
+                  xneg = -cci(lt,kt)**2/xpos                             
+                  cpos = ccr(lt,kt) + xpos                               
+                  cneg = ccr(lt,kt) + xneg                               
                   ccpm(1) = cpos
                   ccpm(2) = cneg
 C
 C-----------------check   for maximum
 C
 C                 cr1 = rfqqr(nea - 1, lt)
-                  cr2 = ccr(lt,kt)                                       ! nilsson_newest
+                  cr2 = ccr(lt,kt)                                       
 C                 cr3 = rfqqr(nea + 1, lt)
-                  clex(lt,kt) = 0.D0                                     ! nilsson_newest
+                  clex(lt,kt) = 0.D0                                     
                   DO j = 1, 2
-                     re1 = ccm(lt,kt)/((ccpm(j) - cr1(lt,kt))**2 +       ! nilsson_newest
-     &                   ccm(lt,kt)**2)                                  ! nilsson_newest
-                     re2 = cci(lt,kt)/((ccpm(j) - cr2)**2 +              ! nilsson_newest
-     &                   cci(lt,kt)**2)                                  ! nilsson_newest
-                     re3 = ccp(lt,kt)/((ccpm(j) - cr3(lt,kt))**2 +       ! nilsson_newest
-     &                   ccp(lt,kt)**2)                                  ! nilsson_newest
+                     re1 = ccm(lt,kt)/((ccpm(j) - cr1(lt,kt))**2 +       
+     &                   ccm(lt,kt)**2)                                  
+                     re2 = cci(lt,kt)/((ccpm(j) - cr2)**2 +              
+     &                   cci(lt,kt)**2)                                  
+                     re3 = ccp(lt,kt)/((ccpm(j) - cr3(lt,kt))**2 +       
+     &                   ccp(lt,kt)**2)                                  
                      ddr(j) = (re3 + re1 - 2.D0*re2)/ESTep**2
                      rrr(j) = re2
                   ENDDO
-                  IF (ddr(1).LT.0.D0 .AND. ddr(2).GT.0.D0) clex(lt,kt)   ! nilsson_newest
+                  IF (ddr(1).LT.0.D0 .AND. ddr(2).GT.0.D0) clex(lt,kt)   
      &                = ccpm(1)
-                  IF (ddr(2).LT.0.D0 .AND. ddr(1).GT.0.D0) clex(lt,kt)   ! nilsson_newest
+                  IF (ddr(2).LT.0.D0 .AND. ddr(1).GT.0.D0) clex(lt,kt)   
      &                = ccpm(2)
                   IF (ddr(1).LT.0.D0 .AND. ddr(2).LT.0.D0) THEN
-                     IF (rrr(1).GT.rrr(2)) clex(lt,kt) = ccpm(1)         ! nilsson_newest
-                     IF (rrr(2).GT.rrr(1)) clex(lt,kt) = ccpm(2)         ! nilsson_newest
+                     IF (rrr(1).GT.rrr(2)) clex(lt,kt) = ccpm(1)         
+                     IF (rrr(2).GT.rrr(1)) clex(lt,kt) = ccpm(2)         
                   ENDIF
 C                 cr1 = rfqqr(nea - 1, lt)
-                  cr2 = ccr(lt,kt)                                       ! nilsson_newest
+                  cr2 = ccr(lt,kt)                                       
 C                 cr3 = rfqqr(nea + 1, lt)
-                  re1 = ccm(lt,kt)/((clex(lt,kt) - cr1(lt,kt))**2 +      ! nilsson_newest
-     &                ccm(lt,kt)**2)                                     ! nilsson_newest
-                  re2 = cci(lt,kt)/((clex(lt,kt) - cr2)**2 +             ! nilsson_newest
-     &                cci(lt,kt)**2)                                     ! nilsson_newest
-                  re3 = ccp(lt,kt)/((clex(lt,kt) - cr3(lt,kt))**2 +      ! nilsson_newest
-     &                ccp(lt,kt)**2)                                     ! nilsson_newest
+                  re1 = ccm(lt,kt)/((clex(lt,kt) - cr1(lt,kt))**2 +      
+     &                ccm(lt,kt)**2)                                     
+                  re2 = cci(lt,kt)/((clex(lt,kt) - cr2)**2 +             
+     &                cci(lt,kt)**2)                                     
+                  re3 = ccp(lt,kt)/((clex(lt,kt) - cr3(lt,kt))**2 +      
+     &                ccp(lt,kt)**2)                                     
                ELSE
-                  clex(lt,kt) = 0.0                                      ! nilsson_newest
+                  clex(lt,kt) = 0.0                                      
                ENDIF
-               IF (clex(lt,kt).EQ.0.D0) THEN                             ! nilsson_newest
-                  WRITE (8,99065) lt - 1,kt-1, efit(lt,kt), ddr          ! nilsson_newest
+               IF (clex(lt,kt).EQ.0.D0) THEN                             
+                  WRITE (8,99065) lt - 1,kt-1, efit(lt,kt), ddr          
 99065             FORMAT (/'WARNING: From TRISTAN:'/
-     &                 'WARNING: - No fit of response function for J/K=' ! nilsson_newest
-     &                  ,I3,I3/'WARNING: E(EXP.):',F8.2,'  2nd deriv.:', ! nilsson_newest
-     &                   2E13.5/
+     &             'WARNING: - No fit of response function for J/K=',
+     &             I3,I3/'WARNING: E(EXP.):',F8.2,'  2nd deriv.:', 
+     &             2E13.5/
      &             'WARNING: Energy is inconsistent with 2-qp spectrum!'
-     &             /'WARNING: Self-consistent response is used!')
-                  efit(lt,kt) = 0.D0                                     ! nilsson_newest
-                  clex(lt,kt) = 0.D0                                     ! nilsson_newest
-                  xea(lt,kt) = 0.D0                                      ! nilsson_newest
-                  yea(lt,kt) = 0.D0                                      ! nilsson_newest
+     &            /'WARNING: Self-consistent response is used!')
+                  efit(lt,kt) = 0.D0                                     
+                  clex(lt,kt) = 0.D0                                     
+                  xea(lt,kt) = 0.D0                                      
+                  yea(lt,kt) = 0.D0                                      
 C                 xea(lt) = rfqqx(nea, lt)
 C                 yea(lt) = rfqqy(nea, lt)
                ENDIF
@@ -1209,15 +1203,15 @@ C
             l = lt - 1
             fltwp1 = 2*l + 1
             lm = MAX(2*l - 1,1)
-            IF (l.EQ.1 .OR. efit(lt,kt).GT.homeb) THEN                   ! nilsson_newest
-               IF (l.GT.1) clsc(lt,kt) = vnorm*GSDm(lm)*SQRT(fltwp1)     ! nilsson_newest
+            IF (l.EQ.1 .OR. efit(lt,kt).GT.homeb) THEN                   
+               IF (l.GT.1) clsc(lt,kt) = vnorm*GSDm(lm)*SQRT(fltwp1)     
      &                                *rdsq/(rd*rws)**l
-C--------------isovector strength is chosen as 1/2 of the isoscalar strength
-               IF (l.EQ.1) clsc(lt,kt) = -0.5D0*vnorm*GSDm(2)            ! nilsson_newest
+C-----------isovector strength is chosen as 1/2 of the isoscalar strength
+               IF (l.EQ.1) clsc(lt,kt) = -0.5D0*vnorm*GSDm(2)            
      &                                *4.D0/(rws*SQRT(fltwp1))
             ELSE
 C-----------vibrational model  (good for low-energy states)
-               clsc(lt,kt) = vnorm*GSDm(l + 1)*(l + 3)                   ! nilsson_newest
+               clsc(lt,kt) = vnorm*GSDm(l + 1)*(l + 3)                   
      &                    /(SQRT(fltwp1)*rws**l)
             ENDIF
 C
@@ -1225,58 +1219,58 @@ C-----------monopole case (0+) - compressional mode
 C-----------factor pi**2/6 comes from series expansion of
 C-----------the   0+ transition potential
 C
-            IF (l.EQ.0) clsc(lt,kt) = 2.*(vnorm/rwsq)*                   ! nilsson_newest
-     &          GSDm(3)*36.D0/PI**4                                      ! nilsson_newest
-            IF (efit(lt,kt).LE.0.0D0) THEN                               ! nilsson_newest
-               clex(lt,kt) = clsc(lt,kt)/float(2*(lt-1)+1)               ! nilsson_newest
-               if (kt.gt.1)clex(lt,kt)=clex(lt,kt)*2.0D0                 ! nilsson_newest
+            IF (l.EQ.0) clsc(lt,kt) = 2.*(vnorm/rwsq)*                   
+     &          GSDm(3)*36.D0/PI**4                                      
+            IF (efit(lt,kt).LE.0.0D0) THEN                               
+               clex(lt,kt) = clsc(lt,kt)/float(2*(lt-1)+1)               
+               if (kt.gt.1)clex(lt,kt)=clex(lt,kt)*2.0D0                 
             ELSE
             ENDIF
-            CLRn(lt,kt) = clsc(lt,kt)/clex(lt,kt)                        ! nilsson_newest
+            CLRn(lt,kt) = clsc(lt,kt)/clex(lt,kt)                        
 C
 C-----------effective coupling constant is used in the response functions
 C           ( if EFIT is .NE. 0 )
 C
-            ceff = 1./clex(lt,kt)                                        ! nilsson_newest
+            ceff = 1./clex(lt,kt)                                        
             cnorm = ceff*ceff
-            rnorm = cnorm/CLRn(lt,kt)**2                                 ! nilsson_newest
-C-----------normalization of the response function with the factor given in input
-            rnorm = rnorm*CNOrin(lt,kt)                                  ! nilsson_newest
+            rnorm = cnorm/CLRn(lt,kt)**2                                 
+C-----------normalization of the response function with the factor given 
+            rnorm = rnorm*CNOrin(lt,kt)                                  
 C
-C-----------calculate the QRPA response function                    (rho )
-C-----------calculate the QRPA deformation parameters               (beta)
+C-----------calculate the QRPA response function                   (rho )
+C-----------calculate the QRPA deformation parameters              (beta)
 C
             DO ne = 1, nebinx
-               qqr = rfqqr(ne,lt,kt)*cnorm                               ! nilsson_newest
-               qqx = rfqqx(ne,lt,kt)*cnorm                               ! nilsson_newest
-               qqy = rfqqy(ne,lt,kt)*cnorm                               ! nilsson_newest
+               qqr = rfqqr(ne,lt,kt)*cnorm                               
+               qqx = rfqqx(ne,lt,kt)*cnorm                               
+               qqy = rfqqy(ne,lt,kt)*cnorm                               
                qqy = MAX(1.D-06,qqy)
                wqa = qqx/qqy
                wqrex = 0.5*WIDex + wqa
                qqi = wqrex*qqy
                rqr = ceff - qqr
                rho1 = rnorm*qqi/(rqr**2 + qqi**2)
-               RHO(ne,lt,kt) = rho1/PI                                   ! nilsson_newest
+               RHO(ne,lt,kt) = rho1/PI                                   
             ENDDO
 C
 C-----------calculate RPA-deformation parameters beta
 C-----------(integrated over an energy interval of 2*ESTEP )
 C-----------(except for the first and last mesh points   )
 C
-            BETa(1,lt,kt) = 0.5*ESTep*(RHO(1,lt,kt) + RHO(2,lt,kt))     ! nilsson_newest
-            BETa(nebinx,lt,kt) = 0.5*ESTep*(RHO(nebinx,lt,kt) +         ! nilsson_newest
-     &      RHO(nebinx - 1,lt,kt))                                      ! nilsson_newest
+            BETa(1,lt,kt) = 0.5*ESTep*(RHO(1,lt,kt) + RHO(2,lt,kt))     
+            BETa(nebinx,lt,kt) = 0.5*ESTep*(RHO(nebinx,lt,kt) +         
+     &      RHO(nebinx - 1,lt,kt))                                      
             DO ne = 2, nebinx - 1
-               BETa(ne,lt,kt) = est3*(RHO(ne - 1,lt,kt) +               ! nilsson_newest
-     &         4.*RHO(ne,lt,kt) + RHO(ne + 1,lt,kt))                    ! nilsson_newest
+               BETa(ne,lt,kt) = est3*(RHO(ne - 1,lt,kt) +               
+     &         4.*RHO(ne,lt,kt) + RHO(ne + 1,lt,kt))                    
             ENDDO
             DO ne = 1, nebinx
-              if(BETa(ne,lt,kt).ge.0.0D0) then                          ! nilsson_newest
-                  BETa(ne,lt,kt) = SQRT(BETa(ne,lt,kt))                 ! nilsson_newest
-              else                                                      ! nilsson
-              endif                                                     ! nilsson
+              if(BETa(ne,lt,kt).ge.0.0D0) then                          
+                  BETa(ne,lt,kt) = SQRT(BETa(ne,lt,kt))                 
+              else                                                      
+              endif                                                     
             ENDDO
-            enddo                                                       ! nilsson_newest (kt)
+            enddo                                                       
          ENDDO
 
 C
@@ -1297,21 +1291,21 @@ C
      &           'EA  ',3X,'SELF-CON',3X,'EMPIRICAL',6X,'RATIO',4X,
      &           'RESIDUE',6X,'WIDTH',' CONFIG.')
          DO l = 1, ICMax
-            do k = 1,l                                                   ! nilsson_newest
-            clsc(l,k) = 1./clsc(l,k)                                     ! nilsson_newest
-            clex(l,k) = 1./clex(l,k)                                     ! nilsson_newest
-            IF (yea(l,k).NE.0.0D0) THEN                                  ! nilsson_newest
-               resid = 1./yea(l,k)                                       ! nilsson_newest
-               widea = 2.0*xea(l,k)/yea(l,k)                             ! nilsson_newest
+            do k = 1,l                                                   
+            clsc(l,k) = 1./clsc(l,k)                                     
+            clex(l,k) = 1./clex(l,k)                                     
+            IF (yea(l,k).NE.0.0D0) THEN                                  
+               resid = 1./yea(l,k)                                       
+               widea = 2.0*xea(l,k)/yea(l,k)                             
             ELSE
                resid = 0.0
                widea = 0.0
             ENDIF
-            veff = vnorm*CLRn(l,k)                                       ! nilsson_newest
-            WRITE (8,99090)l-1,k-1, efit(l,k), clsc(l,k), clex(l,k),     ! nilsson_newest
-     &            CLRn(l,k),veff, resid, widea, nconf(l)                 ! nilsson_newest
-99090       FORMAT (I2,I2,F8.3,2E11.4,2F11.4,E11.4,F11.4,I7)             ! nilsson_newest
-            enddo                                                        ! nilsson_newest
+            veff = vnorm*CLRn(l,k)                                       
+            WRITE (8,99090)l-1,k-1, efit(l,k), clsc(l,k), clex(l,k),     
+     &            CLRn(l,k),veff, resid, widea, nconf(l)                 
+99090       FORMAT (I2,I2,F8.3,2E11.4,2F11.4,E11.4,F11.4,I7)             
+            enddo                                                        
          ENDDO
          WRITE (8,99095) eqqx
 99095    FORMAT (8X,'CONFIGURATION SPACE IS EQQX:',F9.3,' (MEV)')
@@ -1324,13 +1318,13 @@ C
                hhh = ESTep
                IF (ne.EQ.1 .OR. ne.EQ.nebinx) hhh = 0.5*hhh
                eqq = Est(ne)
-               do ktp1=1,ltp1                                            ! nilsson_newest
-                  t2 = hhh*RHO(ne,ltp1,ktp1)                             ! nilsson_newest
-                  SRNew(ltp1) = SRNew(ltp1) + t2                         ! nilsson_newest
-                  SREw(ltp1) = SREw(ltp1) + t2*eqq                       ! nilsson_newest
-                  IF (eqq.LE.ETMax) SREwl(ltp1) =                        ! nilsson_newest
-     &            SREwl(ltp1) + t2*eqq                                   ! nilsson_newest
-               enddo                                                     ! nilsson_newest
+               do ktp1=1,ltp1                                            
+                  t2 = hhh*RHO(ne,ltp1,ktp1)                             
+                  SRNew(ltp1) = SRNew(ltp1) + t2                         
+                  SREw(ltp1) = SREw(ltp1) + t2*eqq                       
+                  IF (eqq.LE.ETMax) SREwl(ltp1) =                        
+     &            SREwl(ltp1) + t2*eqq                                   
+               enddo                                                     
             ENDDO
          ENDDO
 C        WRITE(8,607)RD,(LT-1,LT=1,LTMAXR)
@@ -1562,15 +1556,15 @@ C COMMON variables
 C
 
       DOUBLE PRECISION EBCs(500,2), ESP(500,2), GSD(201, 3),
-     &                 GSP(201, 2), RST(201), UAMp(500,2), VAMp(500,2)   ! nilsson
+     &                 GSP(201, 2), RST(201), UAMp(500,2), VAMp(500,2)   
      &                 , WFR(201,100)
-      INTEGER IBLk(2), NSP(500,2), KSP(500,2), BLKSP(500,2),             ! nilsson
-     &        NRX                                                        ! nilsson
-      COMMON /BLOCK / IBLk, BLKSP                                        ! nilsson
+      INTEGER IBLk(2), NSP(500,2), KSP(500,2), BLKSP(500,2),             
+     &        NRX                                                        
+      COMMON /BLOCK / IBLk, BLKSP                                        
       COMMON /DENS  / GSD, GSP
       COMMON /EVBCS / EBCs, VAMp, UAMp
       COMMON /RADI  / RST, NRX
-      COMMON /SPQN  / ESP, KSP, NSP                                      ! nilsson
+      COMMON /SPQN  / ESP, KSP, NSP                                      
       COMMON /WAVF  / WFR
 
 C
@@ -1660,30 +1654,30 @@ C--------------'indeks undefined' message. (n is not used anyway)
                ELSE
                   ESP(i,I3) = ep
                ENDIF
-               WRITE(8, 99020)i, KSP(i, I3), NSP(i, I3),                 ! nilsson
-     &         e,    VAMp(i, I3), vsq, eh, ep                            ! nilsson
-99020          FORMAT(I5, 2I4, '/2', F9.4, 2F8.5, 2X, 2F8.3)             ! nilsson
+               WRITE(8, 99020)i, KSP(i, I3), NSP(i, I3),                 
+     &         e,    VAMp(i, I3), vsq, eh, ep                            
+99020          FORMAT(I5, 2I4, '/2', F9.4, 2F8.5, 2X, 2F8.3)             
 
 C
 C--------------TEMPORARY
 C--------------(SKIP CALCULATION OF MICROSC. G.S. DENSITIES)
 C
-               gjj = 0.0D0                                               ! nilsson
-               pjj = 0.0D0                                               ! nilsson
+               gjj = 0.0D0                                               
+               pjj = 0.0D0                                               
                IF (vsq.LT.0.0D0) THEN
-                  IF(IBLk(I3).EQ.0)THEN                                  ! nilsson
-                     gjj = 2.D0*vsq/fpi                                  ! nilsson
-                  ELSE                                                   ! nilsson
-                     IF(BLKSP(i, I3).EQ.1)                               ! nilsson
-     &               gjj = (2.d0*vsq + (usq - vsq))/fpi                  ! nilsson
-                  ENDIF                                                  ! nilsson
-                  pjj = 2.d0*SQRT(usq*vsq)/fpi                           ! nilsson
+                  IF(IBLk(I3).EQ.0)THEN                                  
+                     gjj = 2.D0*vsq/fpi                                  
+                  ELSE                                                   
+                     IF(BLKSP(i, I3).EQ.1)                               
+     &               gjj = (2.d0*vsq + (usq - vsq))/fpi                  
+                  ENDIF                                                  
+                  pjj = 2.d0*SQRT(usq*vsq)/fpi                           
                   DO k = 1, NRX
                      fsq = WFR(k,n)**2
                      GSD(k,I3) = GSD(k,I3) + gjj*fsq
                      GSP(k,I3) = GSP(k,I3) + pjj*fsq
                   ENDDO
-               ENDIF                                                     ! nilsson
+               ENDIF                                                     
             ENDDO
             IF (NRX.GE.0) RETURN
             WRITE (8,99025)
@@ -1711,16 +1705,13 @@ C
       END
 C
       SUBROUTINE NUMBER(Ndim,I3,Gsq,A,Xnum,Chem,D)
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
-
 C
 C COMMON variables
 C
       DOUBLE PRECISION ESP(500,2)
-      INTEGER KSP(500, 2), NSP(500, 2),IBLK(2),BLKSP(500,2)              ! nilsson
-      COMMON /BLOCK / IBLk, BLKSP                                        ! nilsson
-      COMMON /SPQN  / ESP,KSP, NSP                                       ! nilsson
+      INTEGER KSP(500, 2), NSP(500, 2),IBLK(2),BLKSP(500,2)              
+      COMMON /BLOCK / IBLk, BLKSP                                        
+      COMMON /SPQN  / ESP,KSP, NSP                                       
 
 C
 C Dummy arguments
@@ -1739,9 +1730,9 @@ C
          eta = ESP(n,I3) - Chem
          e = SQRT(eta*eta + Gsq)
          vsq = 0.5*(1.0 - eta/e)
-         fjj = 2.0                                                      ! nilsson
+         fjj = 2.0                                                      
          IF (IBLk(I3).NE.0) THEN
-            IF(BLKSP(n, I3).ne.0)                                       ! nilsson
+            IF(BLKSP(n, I3).ne.0)                                       
      &         fjj = fjj + (1.0 - 2.0*vsq)/vsq
          ENDIF
          Xnum = Xnum + fjj*vsq
@@ -1752,18 +1743,15 @@ C
       END
 C
       SUBROUTINE ESORT(Ndim,I3)
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
-
 C
 C COMMON variables
 C
-      DOUBLE PRECISION EBCs(500, 2), ESP(500, 2), UAMp(500, 2),          ! nilsson
-     &                 VAMp(500, 2), ASP(500,14,2)                       ! nilsson
-      INTEGER KK(500, 2), NN(500, 2)                                     ! nilsson
+      DOUBLE PRECISION EBCs(500, 2), ESP(500, 2), UAMp(500, 2),          
+     &                 VAMp(500, 2), ASP(500,14,2)                       
+      INTEGER KK(500, 2), NN(500, 2)                                     
       COMMON /EVBCS / EBCs, VAMp, UAMp
-      COMMON /SPQN  / ESP, KK, NN                                        ! nilsson
-      COMMON /SPQN2 / ASP                                                ! nilsson
+      COMMON /SPQN  / ESP, KK, NN                                        
+      COMMON /SPQN2 / ASP                                                
 C
 C Dummy arguments
 C
@@ -1771,9 +1759,8 @@ C
 C
 C Local variables
 C
-      INTEGER i, ip, k, kp, n, np, np1
-      DOUBLE PRECISION q, qp, u, up, v, vp, x, xp
-      DIMENSION a(14),ap(14)                                             ! nilsson
+      INTEGER i, ip, k, kp, n, np, np1, lp
+      DOUBLE PRECISION q, qp, u, up, v, vp, x, xp, a(14), ap(14)    
 C
 C     ORDER ENERGIES
 C
@@ -1785,23 +1772,23 @@ C
          x = ESP(n,I3)
          q = EBCs(n,I3)
          i = NN(n,I3)
-         k = KK(n,I3)                                                    ! nilsson
+         k = KK(n,I3)                                                    
          u = UAMp(n,I3)
          v = VAMp(n,I3)
-         do l = 1,14                                                     ! nilsson
-            a(l)=ASP(n,l,I3)                                             ! nilsson
-         enddo                                                           ! nilsson
+         do lp = 1,14                                                     
+            a(lp)=ASP(n,lp,I3)                                             
+         enddo                                                           
 C--------L=INDEKS(N)
          DO np = np1, Ndim
             xp = ESP(np,I3)
             qp = EBCs(np,I3)
             ip = NN(np,I3)
-            kp = KK(np,I3)                                               ! nilsson
+            kp = KK(np,I3)                                               
             up = UAMp(n,I3)
             vp = VAMp(n,I3)
-            do lp = 1,14                                                 ! nilsson
-               ap(lp)=ASP(np,lp,I3)                                      ! nilsson
-            enddo                                                        ! nilsson
+            do lp = 1,14                                                 
+               ap(lp)=ASP(np,lp,I3)                                      
+            enddo                                                        
 C-----------LP=INDEKS(NP)
             IF (x.GT.xp) THEN
                ESP(np,I3) = x
@@ -1809,20 +1796,20 @@ C-----------LP=INDEKS(NP)
                UAMp(np,I3) = u
                VAMp(np,I3) = v
                NN(np,I3) = i
-               KK(np,I3) = k                                             ! nilsson
-               do l = 1,14                                               ! nilsson
-                  ASP(np,l,I3)=a(l)                                      ! nilsson
-               enddo                                                     ! nilsson
+               KK(np,I3) = k                                             
+               do lp = 1,14                                               
+                  ASP(np,lp,I3)=a(lp)                                      
+               enddo                                                     
 C--------------INDEKS(NP)=L
                ESP(n,I3) = xp
                EBCs(n,I3) = qp
                UAMp(n,I3) = up
                VAMp(n,I3) = vp
                NN(n,I3) = ip
-               KK(n,I3) = kp                                             ! nilsson
-               do l = 1,14                                               ! nilsson
-                  ASP(n,l,I3)=ap(l)                                      ! nilsson
-               enddo                                                     ! nilsson
+               KK(n,I3) = kp                                             
+               do lp = 1,14                                               
+                  ASP(n,lp,I3)=ap(lp)                                      
+               enddo                                                     
 C--------------INDEKS(N)=LP
                x = xp
                q = qp
@@ -1830,9 +1817,9 @@ C--------------INDEKS(N)=LP
                v = vp
                i = ip
                k = kp
-               do l = 1,14                                               ! nilsson
-                  a(l)=ap(l)                                             ! nilsson
-               enddo                                                     ! nilsson
+               do lp = 1,14                                               
+                  a(lp)=ap(lp)                                             
+               enddo                                                     
 C--------------L=LP
             ENDIF
          ENDDO
@@ -1875,25 +1862,24 @@ C
 C
 C
       SUBROUTINE SPLVL(I3,Amassi,Nz,Iout)
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
+C     
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALSin, BET2in,BST(3), CNOrin(8,8), EBCs(500, 2),  ! nilsson
-     &                 EFItin(8,8),ESP(500, 2),GAP(2), GAPin(2),GRin(2), ! nilsson
-     &                 HOMega, HOMin, RMS(3), RST(201), UAMp(500, 2),    ! nilsson
-     &                 VAMp(500, 2), VLS(2), WIDexin, ASP(500,14,2)      ! nilsson
-      INTEGER KSP(500,2), NSP(500,2), NHOle(2), NRX, NTOtal(2),IBLK(2)   ! nilsson
-      INTEGER BLKSP(500,2)                                               ! nilsson
-      COMMON /BLOCK / IBLK, BLKSP                                        ! nilsson
+      DOUBLE PRECISION ALSin, BET2in,BST(3), CNOrin(8,8), EBCs(500, 2),  
+     &                 EFItin(8,8),ESP(500, 2),GAP(2), GAPin(2),GRin(2), 
+     &                 HOMega, HOMin, RMS(3), RST(201), UAMp(500, 2),    
+     &                 VAMp(500, 2), VLS(2), WIDexin, ASP(500,14,2)      
+      INTEGER KSP(500,2), NSP(500,2), NHOle(2), NRX, NTOtal(2),IBLK(2)   
+      INTEGER BLKSP(500,2)                                               
+      COMMON /BLOCK / IBLK, BLKSP                                        
       COMMON /EVBCS / EBCs, VAMp, UAMp
       COMMON /RADI  / RST, NRX
       COMMON /SPPA  / HOMega, VLS, RMS, BST, GAP, NHOle, NTOtal
-      COMMON /SPQN  / ESP, KSP, NSP                                      ! nilsson
-      COMMON /SPQN2 / ASP                                                ! nilsson
-      COMMON /TRINP / WIDexin,GAPin,HOMin,ALSin, EFItin, CNOrin,BET2in,  ! nilsson
-     &                GRin                                               ! nilsson
+      COMMON /SPQN  / ESP, KSP, NSP                                      
+      COMMON /SPQN2 / ASP                                                
+      COMMON /TRINP / WIDexin,GAPin,HOMin,ALSin, EFItin, CNOrin,BET2in,  
+     &                GRin                                               
 
 
 C
@@ -1908,13 +1894,12 @@ C
      &                 dnz, e0, espx, hhh, hom, pi, pqn, r, rd, rde,
      &                 rmsd, rnp(3,2), rw0, rws, uscal, uvec, vll(16,2),
      &                 w, xnp, d,v
-      REAL FLOAT
-      INTEGER i, ifermi, ipr, k,                                         ! nilsson
+      INTEGER i, ifermi, ipr, k, jprev, j, m, iminh, nmax, imax,                                            
      &        n, n1, n2, ndim, nhx, nl, nnucl, nq, nqx, numnuc
-      INTEGER INT, kh, lsp, jsp, teller, imin                            ! nilsson
-      logical break                                                      ! nilsson
+      INTEGER INT, kh, lsp, jsp, teller, imin                            
+      logical break                                                      
       CHARACTER*10 text(2)
-      DIMENSION v(30,30), d(30)                                          ! nilsson
+      DIMENSION v(30,30), d(30)                                          
 
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
      &     0.8931D0/
@@ -1965,10 +1950,10 @@ C
          xnp = Amassi - Nz
       ENDIF
       rmsd = 4.*pi*rde*rmsd/Amassi
-C                                                                       ! nilsson
-C     DO n = 1, 2000                                                    ! nilsson
-C        iocc(n) = 0                                                    ! nilsson
-C     ENDDO                                                             ! nilsson
+C                                                                       
+C     DO n = 1, 2000                                                    
+C        iocc(n) = 0                                                    
+C     ENDDO                                                             
       DO n = 1, 500
          EBCs(n,I3) = 0.
          ESP(n,I3) = 0.0
@@ -1976,11 +1961,11 @@ C     ENDDO                                                             ! nilsso
          UAMp(n,I3) = 0.0
          BLKSP(n,I3) = 0
       ENDDO
-      Do n=1,14                                                         ! nilsson
-         do m=1,500                                                     ! nilsson
-            asp(m,n,I3)= 0.0D0                                          ! nilsson
-         enddo                                                          ! nilsson
-      enddo                                                             ! nilsson
+      Do n=1,14                                                         
+         do m=1,500                                                     
+            asp(m,n,I3)= 0.0D0                                          
+         enddo                                                          
+      enddo                                                             
 C
 C-----input Nilsson parameters for protons (I3=1) and neutrons (I3=2)
 C-----first  card:
@@ -2007,7 +1992,7 @@ C
       GAP(I3) = GAPin(I3)
       IF (GAP(I3).LE.0.0D0) GAP(I3) = 12.0/SQRT(Amassi)
 C     ESPX=100.+ABS(E0)
-      espx = 70.                                                         ! nilsson
+      espx = 70.d0                                                         
       nqx = MIN(espx/HOMega,13.D0)
       IF (nqx*HOMega.LT.espx) nqx = nqx + 1
       text(1) = 'PROTONS '
@@ -2042,126 +2027,123 @@ C
       ELSE IF(I3.EQ.2)THEN
          nnucl = INT(Amassi) - Nz
       ENDIF
-C-----find out the Fermi level                                           ! nilsson
-      numnuc = 0                                                         ! nilsson
-      DO n = 1, 500                                                      ! nilsson
-         numnuc = numnuc + 2                                             ! nilsson
-         IF(numnuc.GE.nnucl)GOTO 300                                     ! nilsson
-      ENDDO                                                              ! nilsson
-  300 ifermi = n                                                         ! nilsson
-C-------fill up arrays                                                   ! nilsson
-      n = 0                                                              ! nilsson
-      DO nq = 0, nqx                                                     ! nilsson
-         all = vll(nq+1,I3)                                              ! nilsson
-         do k=1, 2*nq+1,2                                                ! nilsson
-            imin = (k-1)/2                                               ! nilsson
-            imax = nq+1                                                  ! nilsson
-            Call Nilsson(d, e0,als,HOMega, nq, k, v, BET2in, all)        ! nilsson
-            Do i = 1, imax -imin                                         ! nilsson
-               ESP(n+i,I3) = d(i+imin)                                   ! nilsson
-               NSP(n+i,I3) = nq                                          ! nilsson
-               KSP(n+i,I3) = k                                           ! nilsson
-               do j= 1, imax - imin                                      ! nilsson
-                  ASP(n+i,j,I3)= v(j+imin,i+imin)                        ! nilsson
-               enddo                                                     ! nilsson
-            enddo                                                        ! nilsson
-            n = n+imax - imin                                            ! nilsson
-         enddo                                                           ! nilsson
-      enddo                                                              ! nilsson
-      nmax = n                                                           ! nilsson
-      CALL ESORT(nmax,I3)                                                ! nilsson
-C-----determination of nhx                                               ! nilsson
-      if (BET2in.lt.0.001D0) then                                        ! nilsson
-         n = ifermi                                                      ! nilsson
-         teller = 1                                                      ! nilsson
-         do while (teller.le.3)                                          ! nilsson
-            nq  = NSP(n,I3)                                              ! nilsson
-            kh  = KSP(n,I3)                                              ! nilsson
-            iminh = (kh-1)/2                                             ! nilsson
-            lsp = nq                                                     ! nilsson
-            i = nq + 1 - iminh                                           ! nilsson
-            break = .false.                                              ! nilsson
-            do while ((lsp.ge.0).and.(i.gt.0).and.(.not.break))          ! nilsson
-               jsp = 2*lsp+1                                             ! nilsson
-               if (asp(n,i,I3).gt.0.5) then                              ! nilsson
+C-----find out the Fermi level                                           
+      numnuc = 0                                                         
+      DO n = 1, 500                                                      
+         numnuc = numnuc + 2                                             
+         IF(numnuc.GE.nnucl)GOTO 300                                     
+      ENDDO                                                              
+  300 ifermi = n                                                         
+C-------fill up arrays                                                   
+      n = 0                                                              
+      DO nq = 0, nqx                                                     
+         all = vll(nq+1,I3)                                              
+         do k=1, 2*nq+1,2                                                
+            imin = (k-1)/2                                               
+            imax = nq+1                                                  
+            Call Nilsson(d, e0,als,HOMega, nq, k, v, BET2in, all)        
+            Do i = 1, imax -imin                                         
+               ESP(n+i,I3) = d(i+imin)                                   
+               NSP(n+i,I3) = nq                                          
+               KSP(n+i,I3) = k                                           
+               do j= 1, imax - imin                                      
+                  ASP(n+i,j,I3)= v(j+imin,i+imin)                        
+               enddo                                                     
+            enddo                                                        
+            n = n+imax - imin                                            
+         enddo                                                           
+      enddo                                                              
+      nmax = n                                                           
+      CALL ESORT(nmax,I3)                                                
+C-----determination of nhx                                               
+      if (BET2in.lt.0.001D0) then                                        
+         n = ifermi                                                      
+         teller = 1                                                      
+         do while (teller.le.3)                                          
+            nq  = NSP(n,I3)                                              
+            kh  = KSP(n,I3)                                              
+            iminh = (kh-1)/2                                             
+            lsp = nq                                                     
+            i = nq + 1 - iminh                                           
+            break = .false.                                              
+            do while ((lsp.ge.0).and.(i.gt.0).and.(.not.break))          
+               jsp = 2*lsp+1                                             
+               if (asp(n,i,I3).gt.0.5) then                              
 C
-C j-value subshell determined                                            ! nilsson
+C j-value subshell determined                                            
 C
-                  break = .true.                                         ! nilsson
-               else                                                      ! nilsson
-                  if (i.gt.1) then                                       ! nilsson
-                     i = i-1                                             ! nilsson
-                     jsp = 2*lsp -1                                      ! nilsson
-                     if (asp(n,i,I3).gt.0.5) then                        ! nilsson
+                  break = .true.                                         
+               else                                                      
+                  if (i.gt.1) then                                       
+                     i = i-1                                             
+                     jsp = 2*lsp -1                                      
+                     if (asp(n,i,I3).gt.0.5) then                        
 C
-C j-value subshell determined                                            ! nilsson
+C j-value subshell determined                                            
 C
-                        break = .true.                                   ! nilsson
-                     else                                                ! nilsson
-                     endif                                               ! nilsson
-                  else                                                   ! nilsson
-                  endif                                                  ! nilsson
-               endif                                                     ! nilsson
-               i = i-1                                                   ! nilsson
-               lsp = lsp -2                                              ! nilsson
-            enddo                                                        ! nilsson
-            if (n.eq.ifermi) then                                        ! nilsson
-               jprev = jsp                                               ! nilsson
-            else                                                         ! nilsson
-               if (jsp.ne.jprev) then ! subshell is filled               ! nilsson
-                  jprev = jsp                                            ! nilsson
-                  teller = teller + 1                                    ! nilsson
-               else                                                      ! nilsson
-               endif                                                     ! nilsson
-            endif                                                        ! nilsson
-            n = n+1                                                      ! nilsson
-         enddo                                                           ! nilsson
-         nhx = n-2                                                       ! nilsson
-         GRin(i3)= esp(nhx,i3) - esp( ifermi,i3) + 0.1                   ! nilsson
-         if (i3.eq.1) then                                               ! nilsson
-            WRITE (8,                                                    ! nilsson
-     &'('' Range for constant gap. protons (MSD)'',   F6.3,''            ! nilsson
-     &MeV'')') GRin(i3)                                                  ! nilsson
-            WRITE (12,                                                   ! nilsson
-     &'('' Range for constant gap. protons (MSD)'',   F6.3,''            ! nilsson
-     &MeV'')') GRin(i3)                                                  ! nilsson
-         else if(i3.eq.2) then                                           ! nilsson
-            WRITE (8,                                                    ! nilsson
-     &'('' Range for constant gap. neutrons (MSD)'',   F6.3,''           ! nilsson
-     &MeV'')') GRin(i3)                                                  ! nilsson
-            WRITE (12,                                                   ! nilsson
-     &'('' Range for constant gap. neutrons (MSD)'',   F6.3,''           ! nilsson
-     &MeV'')') GRin(i3)                                                  ! nilsson
-         else                                                            ! nilsson
-         endif                                                           ! nilsson
-      else                                                               ! nilsson
-         do n = 1, nmax                                                  ! nilsson
-         if (esp(n,I3).gt. (esp(ifermi,I3)+GRin(i3))) goto 290           ! nilsson
-         enddo                                                           ! nilsson
-  290    nhx = n -1                                                      ! nilsson
-      endif                                                              ! nilsson
+                        break = .true.                                   
+                     endif                                               
+                  endif                                                  
+               endif                                                     
+               i = i-1                                                   
+               lsp = lsp -2                                              
+            enddo                                                        
+            if (n.eq.ifermi) then                                        
+               jprev = jsp                                               
+            else                                                         
+               if (jsp.ne.jprev) then ! subshell is filled
+                 jprev = jsp                                            
+                 teller = teller + 1                                    
+               endif                                                     
+            endif                                                        
+            n = n+1                                                      
+         enddo                                                           
+         nhx = n-2                                                       
+         GRin(i3)= esp(nhx,i3) - esp( ifermi,i3) + 0.1                   
+         if (i3.eq.1) then                                               
+            WRITE (8,                                                    
+     &'('' Range for constant gap. protons (MSD)'',   F6.3,            
+     &'' MeV'')') GRin(i3)                                                  
+            WRITE (12,                                                   
+     &'('' Range for constant gap. protons (MSD)'',   F6.3,            
+     &'' MeV'')') GRin(i3)                                                  
+         else if(i3.eq.2) then                                           
+            WRITE (8,                                                    
+     &'('' Range for constant gap. neutrons (MSD)'',  F6.3,           
+     &'' MeV'')') GRin(i3)                                                  
+            WRITE (12,                                                   
+     &'('' Range for constant gap. neutrons (MSD)'',  F6.3,           
+     &'' MeV'')') GRin(i3)                                                  
+         else                                                            
+         endif                                                           
+      else                                                               
+         do n = 1, nmax                                                  
+         if (esp(n,I3).gt. (esp(ifermi,I3)+GRin(i3))) goto 290           
+         enddo                                                           
+  290    nhx = n -1                                                      
+      endif                                                              
       IF (nhx.LT.ifermi + 1) nhx = ifermi + 1
       NHOLe(I3) = nhx
-C-----set BCS blocking                                                   ! nilsson
-      IF (MOD(nnucl,2).NE.0) THEN                                        ! nilsson
-         IBLk(I3) = ifermi                                               ! nilsson
-         BLKSP(ifermi,I3)= 1                                             ! nilsson
-      ENDIF                                                              ! nilsson
+C-----set BCS blocking                                                   
+      IF (MOD(nnucl,2).NE.0) THEN                                        
+         IBLk(I3) = ifermi                                               
+         BLKSP(ifermi,I3)= 1                                             
+      ENDIF                                                              
       CALL BCS(xnp,GAP(I3),I3,nhx,chemic)
-      do n=nhx+1,nmax                                                    ! nilsson
-         EBCS(n,I3) = ESP(n,I3) - chemic                                 ! nilsson
-         UAMp(n,I3) = 1.0                                                ! nilsson
-         VAMp(n,I3) = 0.0                                                ! nilsson
+      do n=nhx+1,nmax                                                    
+         EBCS(n,I3) = ESP(n,I3) - chemic                                 
+         UAMp(n,I3) = 1.0                                                
+         VAMp(n,I3) = 0.0                                                
       enddo
-      NTOtal(I3) = nmax                                                  ! nilsson
-      ndim = nmax                                                        ! nilsson
+      NTOtal(I3) = nmax                                                  
+      ndim = nmax                                                        
 C
 C-----<R**2> is calculated
 C
       RMS(I3) = 0.0
       DO nl = 1, nhx
-         pqn = NSP(nl, I3) + 1.5                                         ! nilsson
-         RMS(I3) = RMS(I3) + pqn*2.0D0*VAMp(nl,I3)**2                    ! nilsson
+         pqn = NSP(nl, I3) + 1.5                                         
+         RMS(I3) = RMS(I3) + pqn*2.0D0*VAMp(nl,I3)**2                    
       ENDDO
       RMS(I3) = RMS(I3)*BST(I3)**2
       CALL ESORT(ndim,I3)
@@ -2169,33 +2151,33 @@ C
 C
 C
       SUBROUTINE RESPNS
-C     All lines labeled with "! nilsson" fall under copyright of H.Wienke,
-C     Geel 09/2005
-
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ALPha(11,6), AN(6), ANGle(NDANGecis),
-     &                 CLRn(8,8), DTHeta,DUMmy(1041),ECEntr(5),EOUtmi,
+      DOUBLE PRECISION ANGle(NDANGecis),
+     &                 CLRn(8,8), DTHeta,ECEntr(5),EOUtmi,
      &                 EOUtmx, ESP(500,2), ESTep, ETMax, ETMin,
      &                 EXTcom(10), FACb, FAClog(500), FFAc1d(2),
-     &                 FFAc2d(2), FFAc3d(2), FFTot(10), FNOrm(6),
-     &                 FNQ(6,6), FQ(6), GAP(2), HOMega, Q0, QGRand,
+     &                 FFAc2d(2), FFAc3d(2), FFTot(10), 
+     &                 GAP(2), HOMega, Q0, QGRand,
      &                 QMAx, QMIna, QMInb, QS1, QS2, QSTep, RAC,
-     &                 RHO(3*(NDEx+25),8,8), RHOb(3*(NDEx+25),11,2),     ! nilsson_newest
+     &                 RHO(3*(NDEx+25),8,8), RHOb(3*(NDEx+25),11,2),     
      &                 RMS(3), ROPt,
      &                 SREw(21), SREwl(21), SRNew(21), THEta1, THEta2,
      &                 U9, VLS(2), WIDex, BST(3)
       INTEGER IA, IB, IC12x, IC1max, IC1mxr, IC1x, IC2max, IC2mxr,IC2x,
-     &        ICC, ICMax, ID, IE, IG,NSP(500, 2),KSP(500, 2),KDEnvi,     ! nilsson
+     &        ICC, ICMax, ID, IE, IG,NSP(500, 2),KSP(500, 2),KDEnvi,     
      &        KEX3,
-     &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), ! nilsson
+     &        KEXcom(10), KRTmax, KRType, KTRl(10), L9(10), 
      &        NAVerg, NCHanl, NEBinx, NFAc12, NHOle(2),
-     &        NN, NQ1x, NQ2x, NRMax(10), NTHeta, NTOtal(2),! nilsson
+     &        NN, NQ1x, NQ2x, NRMax(10), NTHeta, NTOtal(2),
      &        NZ
-      COMMON  RHO, SRNew, SREw, SREwl, AN, FNQ, FQ, FNOrm, ALPha, DUMmy
+
+      COMMON /TRIST / RHO, SRNew, SREw, SREwl
+C     SAVE AN, FNQ, FQ, FNOrm, ALPha
+
       COMMON /CC    / THEta1, THEta2, NCHanl, NN, NZ, IC1mxr, IC2mxr,
      &                KRType, KRTmax, KDEnvi, NTHeta, NEBinx, NAVerg,
      &                NFAc12, KEX3
@@ -2206,7 +2188,7 @@ C
       COMMON /INELA / WIDex, ROPt, CLRn, ETMin, ETMax, RHOb, QS1, QS2,
      &                Q0, FACb, FFTot, NRMax
       COMMON /SPPA  / HOMega, VLS, RMS, BST, GAP, NHOle, NTOtal
-      COMMON /SPQN  / ESP, KSP, NSP                                      ! nilsson
+      COMMON /SPQN  / ESP, KSP, NSP                                      
       COMMON /TRINTP/ DTHeta, ANGle, ESTep, EOUtmi, EOUtmx, ECEntr,
      &                QSTep, QMIna,QMInb,QMAx,QGRand,FFAc1d,FFAc2d,
      &                FFAc3d
@@ -2214,9 +2196,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, basq, e0, e1, e2, eex, est(0:3*(NDEx+25)),hhh
-      REAL FLOAT
       INTEGER i, ic, iout4, ipr, k, krt, krtx, lp1, lt, ltmaxr, ne, neb,
-     &        nlmax,kp1,kt                                               ! nilsson_newest
+     &        nlmax,kp1,kt                                               
 C
 C-----in RHO, RHOB etc the increased argument NEB corresponds to
 C-----increased excitation energy.
@@ -2252,17 +2233,17 @@ C
             DO i = 1, 2
                RHOb(ne,lt,i) = 0.0
             ENDDO
-            do kt = 1,lt                                                 ! nilsson_newest
-               RHO(ne,lt,kt) = 0.0                                       ! nilsson_newest
-            enddo                                                        ! nilsson_newest
+            do kt = 1,lt                                                 
+               RHO(ne,lt,kt) = 0.0                                       
+            enddo                                                        
          ENDDO
       ENDDO
       CALL INELAS(est,NN,NZ,NEBinx)
       DO lp1 = 1, ltmaxr
          DO ne = 1, NEBinx
-            do kp1=1,lp1                                                 ! nilsson_newest
-               RHOb(ne,lp1,1) = RHOb(ne,lp1,1) +RHO(ne,lp1,kp1)          ! nilsson_newest
-            enddo                                                        ! nilsson_newest
+            do kp1=1,lp1                                                 
+               RHOb(ne,lp1,1) = RHOb(ne,lp1,1) +RHO(ne,lp1,kp1)          
+            enddo                                                        
          ENDDO
       ENDDO
       IF (KRType.GE.4) THEN
@@ -2272,11 +2253,11 @@ C
             STOP
          ENDIF
          DO lp1 = 1, ICMax
-            do kp1 = 1,lp1                                               ! nilsson_newest
+            do kp1 = 1,lp1                                               
                DO ne = 1, NEBinx
-                  RHOb(ne,lp1,2) = RHOb(ne,lp1,2)+RHO(ne,lp1,kp1)        ! nilsson_newest
+                  RHOb(ne,lp1,2) = RHOb(ne,lp1,2)+RHO(ne,lp1,kp1)        
                ENDDO
-            enddo                                                        ! nilsson_newest
+            enddo                                                        
          ENDDO
       ENDIF
   100 IF (iout4.NE.0) THEN
@@ -2403,8 +2384,8 @@ C
       DOUBLE PRECISION flog(30), x
       INTEGER j, k, ntw
 
-      flog(1) = 0.
-      flog(2) = 0.
+      flog(1) = 0.d0
+      flog(2) = 0.d0
       ntw = 2*N
       DO k = 3, ntw
          flog(k) = flog(k - 1) + LOG(FLOAT(k - 1))
@@ -2534,19 +2515,20 @@ C
       ENDDO
 99999 END
 C
-      SUBROUTINE SPECTR(Idimm,Kdim,Ngle,Nq12x,Nbinx,Lc12x,Cros,Crose,
+      SUBROUTINE SPECTR(Kdim,Ngle,Nq12x,Nbinx,Lc12x,Cros,Crose,
      &                  Nejc, Xsinl)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION ANGle(NDANGecis), CLRn(8,8), DTHeta, ECEntr(5),   ! nilsson_newest
+      DOUBLE PRECISION ANGle(NDANGecis), CLRn(8,8), DTHeta, ECEntr(5),   
      &                 EOUtmi, EOUtmx, ESTep, ETMax, ETMin, EXTcom(10),
      &                 FAC1d(2), FAC2d(2), FAC3d(2), FACb, FFTot(10),
      &                 Q0, QGRand, QMAx, QMIna, QMInb, QS1, QS2, QSTep,
-     &                 RHOb(3*(NDEx+25),11,2), ROPt, THEta1, THEta2,     ! nilsson_newest
+     &                 RHOb(3*(NDEx+25),11,2), ROPt, THEta1, THEta2,     
      &                 WIDex, Xsinl
       INTEGER IC12x, IC1mx, IC1mxr, IC2mx, IC2mxr, ICMax, KDEnvi, KEX3,
      &        KEXcom(10), KRTmax, KRType, KTRl(10), LC1mx, LC2mx,
@@ -2566,7 +2548,7 @@ C
 C
 C Dummy arguments
 C
-      INTEGER Idimm, Kdim, Lc12x, Nbinx, Nejc, Ngle, Nq12x
+      INTEGER Kdim, Lc12x, Nbinx, Nejc, Ngle, Nq12x
 c     DOUBLE PRECISION Cros(Nq12x,Lc12x,Kdim), Crose(Nbinx,Ngle,Idimm)
       DOUBLE PRECISION Cros(Nq12x,Lc12x,Kdim)
       DOUBLE PRECISION Crose(2*NDEX,NDANGecis,NDANGecis)
@@ -2580,8 +2562,7 @@ C
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2,
      &                 qq(5), rb12, s1, s2, s3, sg(3*(NDEx+25)), sigm,
      &                 sn, sum, sumpx(3*(NDEx+25),2), x, x2, xl, xq, yl,
-     &                 zz(15), f1(15)
-      REAL FLOAT
+     &                 zz(15), f1(15), ftmp, dtmp
       REAL hhh
       INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1,
@@ -2661,13 +2642,15 @@ C
          CALL PNORM(7,IC1mx,fnl1,fl1)
          CALL PNORM(7,IC2mx,fnl2,fl2)
       ENDIF
-      DO k = 1, Idimm
-         DO j = 1, nangle
-            DO i = 1, Nbinx
-               Crose(i,j,k) = 0.
-            ENDDO
-         ENDDO
-      ENDDO
+C     DO k = 1, Idimm
+C        DO j = 1, nangle
+C           DO i = 1, Nbinx
+C              Crose(i,j,k) = 0.
+C           ENDDO
+C        ENDDO
+C     ENDDO
+      Crose = 0.d0
+
       REWIND (16)
       DO kr = 1, krtx
          DO na = 1, nangle
@@ -2691,7 +2674,9 @@ C
                            j = 0
                            DO lc = 1, LC1mx, KEX3
                               j = j + 1
-                              pxsec = LOG(Cros(n1,lc,icp))
+                              dtmp = Cros(n1,lc,icp)
+                              if(dtmp.le.0.d0) CYCLE
+                              pxsec = LOG(dtmp)
                               sum = sum + pxsec*fl1(j,ic)
                            ENDDO
                            al1l2(ic,1) = sum/fnl1(ic)
@@ -2717,7 +2702,9 @@ C
                         sum = 0.
                         DO k = 1, NQ1x
                            kq = NQ1x - k + 1
-                           pxsec = LOG(Cros(kq,l1p1,icp))
+                           dtmp = Cros(kq,l1p1,icp)
+                           if(dtmp.le.0.d0) CYCLE
+                           pxsec = LOG(dtmp)
                            sum = sum + pxsec*fq1(k,n)
                         ENDDO
                         al1l2(n,icp) = sum/fnq1(n)
@@ -2763,7 +2750,9 @@ C
                               DO l = 1, LC2mx, KEX3
                                  lc = (l - 1)/KEX3 + 1
                                  nc = (k - 1)*IC2mx + l
-                                 pxsec = LOG(Cros(nq,nc,icp))
+                                 dtmp = Cros(nq,nc,icp)
+                                 if(dtmp.le.0.d0) CYCLE
+                                 pxsec = LOG(dtmp)
                                  sum = sum + pxsec*fl1(kc,i)*fl2(lc,j)
                               ENDDO
                            ENDDO
@@ -2812,7 +2801,9 @@ C
                               DO l = ln, NQ1x
                                  ky = ky + 1
                                  kc = nqx - (l*(l - 1))/2 - kx + 1
-                                 pxsec = LOG(Cros(kc,lc,icp))
+                                 dtmp = Cros(kc,lc,icp)
+                                 if(dtmp.le.0.d0) CYCLE
+                                 pxsec = LOG(dtmp)
                                  zz(nq) = zz(nq) + pxsec*fq1(kx,nx)
      &                              *fq2(ky,ny)
                               ENDDO
@@ -3039,16 +3030,22 @@ C
       WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
      &   nmax
       DO ne = 1, nmax
+         ftmp = 0.d0
          DO na = 1, nangle
+            ftmp = ftmp +     CSEa(ne,nangle - na + 1,nej,1)
             csfit(na) = CSEa(ne,nangle - na + 1,nej,1)
          ENDDO
+         if(ftmp.le.0.d0) cycle
+C        csfit(NDANGecis)
          CALL LSQLEG(CANgler,csfit,nangle,qq,5,adum,ier)
-         piece = 4.0*pi*qq(1)
+         piece = 4.d0*pi*qq(1)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
          Xsinl = Xsinl + piece*DE
-         WRITE(8,'(1x,''Nexc='',I5,1x,5(D12.5,1x))') 
-     &       ne,(qq(na),na=1,5)
+         WRITE(8,'(1x,''Nexc='',I5,1x,5(D12.5,1x),4H CS=,d12.5,3H mb)') 
+     &       ne,(qq(na),na=1,5), piece*DE
+         WRITE(8,'('' Partial MSD emission '', d12.5,'' mb'')') 
+     >         CSMsd(nej)
       ENDDO
       WRITE(8,*) ' '
       WRITE(8,'('' Integrated MSD emission at Elab '', G15.3,'' is ''
@@ -3407,8 +3404,9 @@ C
          csmtot = csmtot + csmsdl*wght(il)
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*wght(il)
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*wght(il)
-C--------Store ang. distr. for discrete levels. For each level shape of the closest CSEa
-C--------bin is taken and normalized with level population  csmsdl*wght(il)
+C--------Store ang. distr. for discrete levels. For each level shape of
+C--------the closest CSEa bin is taken and normalized with level 
+C--------population  csmsdl*wght(il)
 C--------Find the closest bin
          ie = eemi/DE + 1.5
          ie = MIN(ie,next)
@@ -3448,8 +3446,8 @@ C
 
          xnor = CSEmsd(istart,Nejc)*DE
 C
-C        Assigning angular distribution of the first continuum bin "istart"
-C        to the angular distribution of the discrete level "il"
+C        Assigning angular distribution of the first continuum bin 
+C        "istart" to the angular distribution of the discrete level "il"
 C                                                    
          do na=1,NDAng 
            ddxs(na) = CSEa(istart,na,Nejc,1)
@@ -3527,10 +3525,7 @@ CCC   * *) see also R.D. Lawson, Theory of the Nuclear Shell Model     *
 CCC   *  (Clarendon, Oxford, 1980)                                     *
 CCC   ******************************************************************
 CCC
-C     copyright H.Wienke, Geel 08/2005
-C
-C
-C
+      implicit none
       DOUBLE PRECISION BETa2, HOMega,d,v, als, e0
       INTEGER n,k
 C
@@ -3539,8 +3534,7 @@ C
       DOUBLE PRECISION a, all, delta, ebar
       DOUBLE PRECISION EHO, VCC
 
-      REAL FLOAT
-      INTEGER i1, i2, j1, j2, l1, l2,  nl
+      INTEGER i1, i2, j1, j2, l1, l2,  nl, nrot, j, i
 C
       DIMENSION a(30,30),v(30,30),d(30)
 
@@ -3617,29 +3611,48 @@ C           off-diagonal terms (l1 = l2 +- 2)
          i2 = i2-2
       enddo
       Call Jacobi(a,n+1,30,d,v,nrot)
+
+      return
       end
 C
       DOUBLE PRECISION FUNCTION VCC(JX1,JX2,JX3,MX1,MX2)
 CCC
-CCC************************************************************************
-CCC                                                                       *
-CCC   Clebsch-Gordan Coefficient Routine                                  *
-CCC                                                                       *
-CCC   Input : JXi   - 2*spin Ji                                           *
-CCC           MXi   - 2*magnetic quantumnumber Mi                         *
-CCC                                                                       *
-CCC   Output: VCC   - <J1,J2,M1,M2|J3,M1+M2>                              *
-CCC   Calls : YXFCT                                                       *
-CCC           PHASEF                                                      *
-CCC   Author: P.D. Kunz, University of Colorado, Boulder, Colorado, US    *
-CCC   (from CULIB8 library of routines used in DWUCK4 and CHUCK3)         *                                                                     *
-CCC************************************************************************
+CCC*********************************************************************
+CCC                                                                    *
+CCC   Clebsch-Gordan Coefficient Routine                               *
+CCC                                                                    *
+CCC   Input : JXi   - 2*spin Ji                                        *
+CCC           MXi   - 2*magnetic quantumnumber Mi                      *
+CCC                                                                    *
+CCC   Output: VCC   - <J1,J2,M1,M2|J3,M1+M2>                           *
+CCC   Calls : YXFCT                                                    *
+CCC           PHASEF                                                   *
+CCC   Author: P.D. Kunz, University of Colorado, Boulder, Colorado, US *
+CCC   (from CULIB8 library of routines used in DWUCK4 and CHUCK3)      *                                                                     *
+CCC*********************************************************************
 CCC
-      IMPLICIT REAL*8(A-H,O-Z)
-c      EXTERNAL FACTOR
-      COMMON/FACTRL/FACT(0:32)
+      implicit none 
+
+      INTEGER JX1,JX2,JX3,MX1,MX2   
+
+C     IMPLICIT REAL*8(A-H,O-Z)
+
+      INTEGER     NU,NUMIN,NUMAX,J1,J2,J3,J4,J5,M1,M2,ICNTR,IT
+
+      INTEGER JT1,JT2,JT3,JT4,JT5,JZ1,JZ2,JZ3
+
+      DOUBLE PRECISION PHAS, FCTOR
+
+      DOUBLE PRECISION FACT(0:32)
+
+      COMMON/FACTRL/FACT
+
+      DOUBLE PRECISION PHASEF,YXFCT
+
+
+
 C
-      VCC=0.0
+      VCC=0.d0
       J1=JX1
       J2=JX2
       J3=JX3
@@ -3675,10 +3688,10 @@ C
       IF(J3-IABS(M1+M2).LT.0) GO TO 150
       JT1=(J1-J3+M2)/2
       JT2=(J2-J3-M1)/2
-      NUMIN=MAX0 (JT1,JT2,0)
+      NUMIN=MAX (JT1,JT2,0)
       JT3=(J1-M1)/2
       JT4=(J2+M2)/2
-      NUMAX=MIN0 (JT3,JT4,JZ1)
+      NUMAX=MIN (JT3,JT4,JZ1)
       JT5=(J2-M2)/2
       IF(NUMAX.LT.NUMIN) GO TO 150
       J4=J1/2
@@ -3703,8 +3716,15 @@ C
 c
 c     Factorial table
 c
-      IMPLICIT REAL*8(A-H,O-Z)
-      COMMON/FACTRL/FACT(0:32)
+
+      implicit none 
+
+C     IMPLICIT REAL*8(A-H,O-Z)
+
+      DOUBLE PRECISION FACT(0:32)
+
+      COMMON/FACTRL/FACT
+
 C
       DATA FACT/ 1.0000000000E+00, 1.0000000000E+00, 2.0000000000E+00
      1         , 6.0000000000E+00, 2.4000000000E+01, 1.2000000000E+02
@@ -3728,42 +3748,51 @@ C    $         , 1.5511187533D+66/
 
       DOUBLE PRECISION FUNCTION PHASEF(N)
 CCC
-CCC************************************************************************
-CCC                                                                       *
-CCC   Author: P. D. Kunz, University of Colorado, Boulder, Colorado, US   *
-CCC                                                                       *
-CCC************************************************************************
+CCC*********************************************************************
+CCC                                                                    *
+CCC   Author: P. D. Kunz, University of Colorado, Boulder, Colorado, US*
+CCC                                                                    *
+CCC*********************************************************************
 CCC
-      IMPLICIT REAL*8(A-H,O-Z)
+C     IMPLICIT REAL*8(A-H,O-Z)
+
+      INTEGER N
       PHASEF=DBLE(1-2*IABS(N-2*(N/2)))
       RETURN
       END
-      FUNCTION YXFCT(M,N)                                               YXFCT000
+      FUNCTION YXFCT(M,N)                                               
 CCC
-CCC************************************************************************
-CCC                                                                       *
-CCC   Author: P. D. Kunz, University of Colorado, Boulder, Colorado, US   *
-CCC                                                                       *
-CCC************************************************************************
+CCC*********************************************************************
+CCC                                                                    *
+CCC   Author: P. D. Kunz, University of Colorado, Boulder, Colorado, US*
+CCC                                                                    *
+CCC*********************************************************************
 CCC
-      IMPLICIT REAL*8(A-H,O-Z)                                          YXFCT002
-C     COMPUTES NFACT/MFACT                                              YXFCT003
-      YXFCT=1.0                                                         YXFCT004
-      NUMAX=M-N                                                         YXFCT005
-      IF(NUMAX)30,100,20                                                YXFCT006
-   20 ICTRL=0                                                           YXFCT007
-      FCTOR=N                                                           YXFCT008
-      GO TO 40                                                          YXFCT009
-   30 ICTRL=1                                                           YXFCT010
-      NUMAX=-NUMAX                                                      YXFCT011
-      FCTOR=M                                                           YXFCT012
-   40 CONTINUE                                                          YXFCT013
-      DO 50 NU=1,NUMAX                                                  YXFCT014
-      FCTOR=FCTOR+1.0                                                   YXFCT015
-      YXFCT=YXFCT*FCTOR                                                 YXFCT016
-   50 CONTINUE                                                          YXFCT017
-      IF(ICTRL.EQ.0) YXFCT=1.0/YXFCT                                    YXFCT018
-  100 RETURN                                                            YXFCT019
+
+      implicit none
+
+      DOUBLE PRECISION YXFCT, FCTOR
+
+      INTEGER M,N,NUMAX,ICTRL,NU
+
+C     IMPLICIT REAL*8(A-H,O-Z)                                          
+C     COMPUTES NFACT/MFACT                                              
+      YXFCT=1.d0                                                        
+      NUMAX=M-N                                                         
+      IF(NUMAX)30,100,20                                                
+   20 ICTRL=0                                                           
+      FCTOR=N                                                           
+      GO TO 40                                                          
+   30 ICTRL=1                                                           
+      NUMAX=-NUMAX                                                      
+      FCTOR=M                                                           
+   40 CONTINUE                                                          
+      DO 50 NU=1,NUMAX                                                  
+      FCTOR=FCTOR+1.d0                                                  
+      YXFCT=YXFCT*FCTOR                                                 
+   50 CONTINUE                                                          
+      IF(ICTRL.EQ.0) YXFCT=1.d0/YXFCT                                   
+  100 RETURN                                                            
       END
 
       SUBROUTINE JACOBI(A,N,NP,D,V,NROT)
@@ -3785,16 +3814,21 @@ CCC   S.A.Teucholsky,W.T.Vetterling,Cambridge University Press, 1988.  *
 CCC                                                                    *
 CCC*********************************************************************
 CCC
+
+      implicit none
       DOUBLE PRECISION A, D, V
       INTEGER N, NP, NROT
+      DIMENSION A(NP,NP),D(NP),V(NP,NP)
+
 C
 C  Local variables
 C
+
+      INTEGER NMAX
       PARAMETER (NMAX=100)
-      DOUBLE PRECISION  B, Z, SM, THRESH,
-     +G,H,TAU,S,T,C
-      INTEGER IP, IQ
-      DIMENSION A(NP,NP),D(NP),V(NP,NP),B(NMAX),Z(NMAX)
+      DOUBLE PRECISION  SM, THRESH, B(NMAX), Z(NMAX)
+      DOUBLE PRECISION G,H,TAU,S,T,C, THETA
+      INTEGER IP, IQ, J, I
       DO 12 IP=1,N
         DO 11 IQ=1,N
           V(IP,IQ)=0.
@@ -3804,11 +3838,11 @@ C
       DO 13 IP=1,N
         B(IP)=A(IP,IP)
         D(IP)=B(IP)
-        Z(IP)=0.
+        Z(IP)=0.d0
 13    CONTINUE
       NROT=0
       DO 24 I=1,50
-        SM=0.
+        SM=0.d0
         DO 15 IP=1,N-1
           DO 14 IQ=IP+1,N
             SM=SM+ABS(A(IP,IQ))
@@ -3881,5 +3915,4 @@ C
       WRITE(8,*) 'WARNING: 50 iterations should never happen'
       RETURN
       END
-
 

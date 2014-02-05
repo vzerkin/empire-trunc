@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3783 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -90,7 +90,8 @@ CCCCCC
 CCCCCC      DZERO(N)=D-ZERO (ABOUT 100.) FOR TRANSFER REACTION
 CCCCCC      DZERO(N)=BETA-VAL (ABOUT 0.02) FOR INELASTIC SCATTERING.
 CCCCCC
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+      implicit none
+C     IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
 C PARAMETER definitions
@@ -563,14 +564,15 @@ C--------transfer cross sections onto XWR* matrices
          ENDDO
       ENDIF   !on removing compressional form factor for dl=0
 C-----write results to TAPE15
+ 3434 FORMAT(3(d23.17,1x)) 
       kase = 0
       DO nlr = 1, 2
          IF (kase.NE.2) THEN
-            WRITE (15,*) (xwr1(n,nlr),n = 1,n1wx)
-            IF (NCHanl.EQ.2) GOTO 100
+            WRITE (15,3434) (xwr1(n,nlr),n = 1,n1wx)
+            IF (NCHanl.EQ.2) CYCLE
          ENDIF
-         WRITE (15,*) (xwr2(n,nlr),n = 1,n2mx)
-  100 ENDDO
+         WRITE (15,3434) (xwr2(n,nlr),n = 1,n2mx)
+      ENDDO
 !-zvv-2013      CLOSE(49)
       call ibuf_orion_close
 
@@ -582,6 +584,7 @@ C-----write results to TAPE15
 
       SUBROUTINE OPMPARN(Atar,Ztar,Nejc,E,V,Dvs,W,Wd,Vs,Vi,Av,Aw,Ad,As,
      &                   Ai,Rv,Rw,Rd,Rs,Ri,Rc,Mi,Mt)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -595,8 +598,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, eicms
-      INTEGER iloc, izaf, komp, nnuc
-      INTEGER INT
+      INTEGER iloc, izaf, komp, nnuc, itmp1
 C-----calculate o.m. parameters for ejectile NEJC on target NNUC at energy ENER
       izaf = Ztar*1000 + Atar
       CALL WHERE(izaf,nnuc,iloc)
@@ -2091,7 +2093,8 @@ C     REWIND 7
 C
 C
       SUBROUTINE XSC12(Iout)
-      IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
+      implicit none 
+C     IMPLICIT DOUBLE PRECISION(A - H), DOUBLE PRECISION(O - Z)
 C
 C
 C PARAMETER definitions
@@ -2139,12 +2142,14 @@ C Local variables
 C
       DOUBLE PRECISION fms, ph, t1, xconst, xsig1(0:10,100),
      &                 xsig2(0:10,0:10,100)
-      INTEGER IABS, MIN0
+
       INTEGER ii, iimax, iimin, is3ke3, ji, jl, jla, jlamx, jlb, jlbmi,
      &        jlbmx, jlmod, jlmttl, jlr, jlrg, jltohf, jx, kaspar, ke3,
      &        l1, l1p1, l1p1mx, l2, l2p1, l2p1mx, lap1mx, lbp1mx, m, mm,
-     &        mmmax, mrg, ms, n, n1, n1mx, n2, na, namp, nampmi, nampmx,
+     &        mmmax, mrg, ms, n, n1, n1mx, na, namp, nampmi, nampmx,
      &        njl1, njl1mx, njl2, njl2mx, nlr, nrun, nrun0
+      INTEGER*4 n2
+
       DOUBLE COMPLEX phlr, xss1, xss2
 
       lap1mx = LDWmxa + 1
@@ -3211,7 +3216,6 @@ C
 C
 C Local variables
 C
-      REAL FLOAT
       DOUBLE PRECISION fn
       INTEGER kase
       kase = (1 - IC + IA) + (3 - IE)/2
@@ -3259,17 +3263,18 @@ C
       subroutine ibuf_orion_open
 C     double precision buf(1000,250)
       double precision buf(250000)
+      INTEGER*4 izv_orion_flag, iibuf
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
       common /zv_ibuf_orion/ buf
-      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      INTEGER*4 izv_yy,izv_yymax,izv_xx,izv_xxmax
       common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
       DATA izv_yy,izv_yymax,izv_xx,izv_xxmax/0,0,0,0/
       DATA izv_orion_flag/1/
 c     DATA izv_orion_flag/0/
       if (izv_orion_flag.ne.1) then
-      OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
-      return
+        OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
+        return
       endif
       izv_yy=0
       izv_xx=0
@@ -3278,46 +3283,48 @@ c     DATA izv_orion_flag/0/
       end
 
       subroutine ibuf_orion_close
-C     double precision buf(1000,250)
-      double precision buf(250000)
+      INTEGER*4 izv_orion_flag, iibuf
+C          double precision buf(1000,250)
+C     double precision buf(250000)
+C     INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
-      common /zv_ibuf_orion/ buf
-      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+C     common /zv_ibuf_orion/ buf
+c     common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
 c-debug     write(*,*) '----MSD-orion:',izv_yy,izv_yymax,izv_xx,izv_xxmax
       if (izv_orion_flag.ne.1) then
-      CLOSE(49)
-      return
+        CLOSE(49)
+        return
       endif
       iibuf=0
       return
       end
 
       subroutine ibuf_orion_rewind
-C     double precision buf(1000,250)
-      double precision buf(250000)
+      INTEGER*4 izv_orion_flag, iibuf
+C          double precision buf(1000,250)
+C     double precision buf(250000)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
-      common /zv_ibuf_orion/ buf
-      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+C     common /zv_ibuf_orion/ buf
+      INTEGER*4 izv_yy,izv_yymax,izv_xx,izv_xxmax
       common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
       iibuf=0
       izv_yy=0
-      if (izv_orion_flag.ne.1) then
-      REWIND (49)
-      return
-      endif
+      if (izv_orion_flag.ne.1) REWIND (49)
       return
       end
 
       subroutine ibuf_orion_write(CLEbmm,n2)
+      integer*4 n2
       double precision CLEbmm(250)
 c     double precision buf(1000,250)
       double precision buf(250000)
+      INTEGER*4 izv_orion_flag, iibuf, n, ii, iibuf1
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
       common /zv_ibuf_orion/ buf
-      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
+      INTEGER*4 izv_yy,izv_yymax,izv_xx,izv_xxmax
       common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
       iibuf1=iibuf*250+1
       iibuf=iibuf+1
@@ -3337,28 +3344,29 @@ c           stop
       endif
 
       if (izv_orion_flag.ne.1) then
-      WRITE (49) (CLEbmm(n),n = 1,n2)
-      return
+        WRITE (49) (CLEbmm(n),n = 1,n2)
+        return
       endif
 c       do ii=1,n2
 c         buf(iibuf,ii)=CLEbmm(ii)
 c       enddo
-          buf(iibuf1)=n2
-          do ii=1,n2
-             buf(iibuf1+ii)=CLEbmm(ii)
-          enddo
-          return
-          end
+      buf(iibuf1)=n2
+      do ii=1,n2
+        buf(iibuf1+ii)=CLEbmm(ii)
+      enddo
+      return
+      end
 
       subroutine ibuf_orion_expand()
+      INTEGER*4 izv_orion_flag, iibuf, iib, iib1, n, n2
 c     double precision CLEbmm(250)
 c     double precision buf(1000,250)
       double precision buf(250000)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf
       common /zv_ibuf_orion/ buf
-      INTEGER izv_yy,izv_yymax,izv_xx,izv_xxmax
-      common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
+C     INTEGER*4 izv_yy,izv_yymax,izv_xx,izv_xxmax
+C     common /zv_orion_/ izv_yy,izv_yymax,izv_xx,izv_xxmax
       OPEN (49,FORM = 'unformatted',STATUS = 'scratch')
 c     WRITE (*,*) '...ibuf_orion_expand(): iibuf=',iibuf
       do iib=0,iibuf-2
@@ -3374,6 +3382,7 @@ c       WRITE (49) (CLEbmm(n),n = 1,n2)
       end
 
       subroutine ibuf_orion_read(CLEbmm,n2)
+      INTEGER*4 izv_orion_flag, iibuf, iibuf1, n, n2, ii
       double precision CLEbmm(250)
 c     double precision buf(1000,250)
       double precision buf(250000)
@@ -3402,6 +3411,7 @@ c     enddo
       end
 
       subroutine ibuf_orion_BACKSPACE()
+      INTEGER*4 izv_orion_flag, iibuf
       double precision buf(1000,250)
       common /zv_orion_flag/ izv_orion_flag
       common /zv_iibuf_orion/ iibuf

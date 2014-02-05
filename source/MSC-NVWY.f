@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3771 $
+Ccc   * $Rev: 3783 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-23 13:49:11 +0100 (Do, 23 Jän 2014) $
+Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -55,10 +55,8 @@ C Local variables
 C
       DOUBLE PRECISION corr, hisr, ps1, ps2, s, smax, smin, tl1, tl2,
      &                 tl3, tlj, xjc, xjr
-      REAL FLOAT
       INTEGER i, ichsp, ier, iermax, ietl, iexc, ip1, ip2, ipar, itlc,
      &        j, jr, l, lmax, lmaxf, lmin, mul, n
-      INTEGER MIN0
 C
 C
 C
@@ -259,8 +257,7 @@ C--------decay to the continuum ------ done -----------------------------
          DO j = 1, NLW
             DO n = 1, NDMSCS
                PIM(n,n) = PIM(n,n)
-     &                    - 0.5*(SCRm(1,j,1,Nejc,n) + SCRm(1,j,2,Nejc,n)
-     &                    )
+     &                  - 0.5*(SCRm(1,j,1,Nejc,n) + SCRm(1,j,2,Nejc,n))
             ENDDO
          ENDDO
       ENDIF
@@ -320,11 +317,11 @@ C Local variables
 C
       DOUBLE PRECISION accn, apig(NG,NG), apim(NDMSCS,NDMSCS), atil,
      &                 aw(NDMSCS), awj(NDMSCS,NDLW), awm(NDMSCS),
-     &                 bbb(NDMSCS), ccre, cgd, coulb, det, ecc, ecor,
+     &                 ccre, cgd, coulb, ecc, ecor, step,
      &                 ecor1, ecor2, ecor3, efc, eg, egdr, egdrr, emis,
      &                 en, entl, eps, eptl, ew, gamma, gdrw,
      &                 gspmsc(NDMSCS,NDEX), omn, omp, pig(NG,NG),
-     &                 pigx(NG), pigy(NG), pimem(NDMSCS), pop1, pop2,
+     &                 pimem(NDMSCS), pop1, pop2,
      &                 popars, popart(NDMSCS), popt, prop, propt, rbu,
      &                 rog, rop, roph(NC2,4), roph3(NC2), rophc(NC2),
      &                 ropht(NC2), sdabs, sdsp(NDEX), sp, spg(NDMSCS),
@@ -334,11 +331,13 @@ C
      &                 xga, xxxx, y, yd, ygdr, ggg
       DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
 
-      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, inc,
+      INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, 
      &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, 
      &        izpcon, j, jr, jx, k, k1, k2, k3, kc, kc1, kcn, ke,
-     &        kg, kgin, ki, ks, m, m1, m2, mpigx(NG), mpigy(NG)
-     &        , nc1, ncm, ncont, nejc, nnur, npigzero, nresn, nresp
+     &        kg, kgin, ki, ks, m, m1, m2, 
+     &        nc1, ncm, ncont, nejc, nnur, npigzero, nresn, nresp
+      INTEGER mpigx(NG),mpigy(NG),mpimx(NDMSCS),mpimy(NDMSCS)
+      DOUBLE PRECISION pigx(NG),pigy(NG),pimx(NDMSCS),pimy(NDMSCS)
       DOUBLE PRECISION yre, ysp
       EQUIVALENCE (PIM(1,1),PIM1)
 C
@@ -390,7 +389,7 @@ C-----determination of the initial exciton configuration **** done ****
 C-----calculation of factorial
       FACt(1) = 1.d0
       DO i = 1, 99
-         FACt(i + 1) = FACt(i)*FLOAT(i)
+         FACt(i + 1) = FACt(i)*DBLE(i)
       ENDDO
 C-----calculation of factorial      ***** done *******
       CSMsc = 0.d0
@@ -783,20 +782,19 @@ C-----
          ie1 = 2
          IF (i.EQ.2) ie1 = 1
          DO j = 1, NLW
-            emis = 0.0
+            emis = 0.d0
             IF (POP(NEX(1),j,i,1).NE.0.0D0) THEN
-               DO ix = 1, NDMSCS
-                  DO jx = 1, NDMSCS
-                     PIM(ix,jx) = 0.0
-                  ENDDO
-               ENDDO
+C--------------erasing PIM matrix
+               PIM = 0.d0
+C              DO ix = 1, NDMSCS
+C                 DO jx = 1, NDMSCS
+C                    PIM(ix,jx) = 0.0
+C                 ENDDO
+C              ENDDO
 C
-C********************** neutron emission *******************************
-C
+C************* neutron emission *******************************
                CALL DECHMS(j,ipii,nresn,1)
-C
-C***************** proton emission *************************************
-C
+C************* proton emission *************************************
                CALL DECHMS(j,ipii,nresp,2)
 C--------------memorize emission to be used in gamma part
                DO k1 = 1, NDMSCS
@@ -875,18 +873,23 @@ C--------------printout of the pi matrix
                   WRITE (8,99110)
                ENDIF
 C--------------memorize PI matrix
-               DO k1 = 1, NDMSCS
-                  DO k2 = 1, NDMSCS
-                     apim(k1,k2) = PIM(k1,k2)
-                  ENDDO
-               ENDDO
+               apim = PIM
+C              DO k1 = 1, NDMSCS
+C                 DO k2 = 1, NDMSCS
+C                    apim(k1,k2) = PIM(k1,k2)
+C                 ENDDO
+C              ENDDO
 C--------------
-C--------------invertion of the PIM matrix
+C--------------inversion of the PIM matrix
 C--------------
-               DO inc = 1, NDMSCS
-                  bbb(inc) = 0.0
-               ENDDO
-               CALL MATIN(PIM,bbb,NDMSCS,1,det)
+               eps = 1.0D-8
+               CALL MTXINV(PIM,pimx,pimy,mpimx,mpimy,NDMSCS,eps,irflag)
+               IF (irflag.NE.0) THEN
+                  WRITE (8,*) 'C.N. state J=', j*ipii,
+     &             ' PIM-matrix in MSC particle emission singular'
+                  GOTO 54321  ! goto gamma emission
+               ENDIF
+
                IF (NOUt.GT.2) THEN
                   WRITE (8,99040) j, i
 99040             FORMAT (1X,'Inverse PIM matrix   J=',I2,' I=',I2)
@@ -939,40 +942,39 @@ C--------------neutron emission (if accepted, note IF on IDNA)
                   nnur = nresn
                   DO ke = 1, NEX(nnur)
                      icse = NEX(nnur) - ke + 1
+                     step = 1.d0
+                     if(ke.eq.1 .or. ke.eq.NEX(nnur)) step=0.5d0
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
                            DO jr = 1, NLW
                               pop1 = 
-     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)*step
                               pop2 = 
-     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)*step
                               popt = pop1 + pop2
-                              IF (icse.GT.1) THEN
+C                             IF (icse.GT.1) THEN
+                              IF (icse.GT.0) THEN
                                  CSE(icse,nejc,1) = CSE(icse,nejc,1)
-     &                              + popt
+     &                              + popt*step
                                  AUSpec(icse,nejc) = AUSpec(icse,nejc)
-     &                              + popt
+     &                              + popt*step
                                  POPcse(ke,nejc,icse,INExc(nnur))
      &                              = POPcse(ke,nejc,icse,INExc(nnur))
-     &                              + popt
+     &                              + popt*step
 
                               ENDIF
                               POP(ke,jr,1,nnur) = POP(ke,jr,1,nnur)
-     &                           + pop1
+     &                           + pop1*step
                               POP(ke,jr,2,nnur) = POP(ke,jr,2,nnur)
-     &                           + pop2
-                              emis = emis + popt*DE
-                              CSMsc(nejc) = CSMsc(nejc) + popt*DE
-                              spg(kg) = spg(kg) + popt*DE
+     &                           + pop2*step
+                              emis = emis + popt*DE*step
+                              CSMsc(nejc) = CSMsc(nejc) + popt*DE*step
+                              spg(kg) = spg(kg) + popt*DE*step
                            ENDDO
                         ENDDO
                      ENDDO
                   ENDDO
-                  IF (nejc.EQ.1) THEN
-                     nnur = nresn
-                  ELSE
-                     nnur = nresp
-                  ENDIF
+                  IF(NEX(nresn).GT.0) POPmax(nresn)=CSMsc(1)/NEX(nresn)
                ENDIF
 C--------------proton emission (if accepted, note IF on IDNA)
                IF (IDNa(4,3).GT.0) THEN
@@ -980,38 +982,42 @@ C--------------proton emission (if accepted, note IF on IDNA)
                   nnur = nresp
                   DO ke = 1, NEX(nnur)
                      icse = NEX(nnur) - ke + 1
+                     step = 1.d0
+                     if(ke.eq.1 .or. ke.eq.NEX(nnur)) step = 0.5d0
                      DO kg = 1, NDMSCS
                         DO ki = 1, NDMSCS
                            DO jr = 1, NLW
                               pop1 = 
-     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+     &           SCRm(ke,jr,1,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)*step
                               pop2 = 
-     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)
+     &           SCRm(ke,jr,2,nejc,kg)*PIM(kg,ki)/DE*TUNEPE(nejc)*step
                               popt = pop1 + pop2
-                              IF (icse.GT.1) THEN
+C                             IF (icse.GT.1) THEN
+                              IF (icse.GT.0) THEN
                                  CSE(icse,nejc,1) = CSE(icse,nejc,1)
-     &                              + popt
+     &                              + popt*step
                                  AUSpec(icse,nejc) = AUSpec(icse,nejc)
-     &                              + popt
+     &                              + popt*step
                                  POPcse(ke,nejc,icse,INExc(nnur))
      &                              = POPcse(ke,nejc,icse,INExc(nnur)) 
-     &                              + popt
+     &                              + popt*step
                               ENDIF
                               POP(ke,jr,1,nnur) = POP(ke,jr,1,nnur)
-     &                           + pop1
+     &                           + pop1*step
                               POP(ke,jr,2,nnur) = POP(ke,jr,2,nnur)
-     &                           + pop2
-                              emis = emis + popt*DE
-                              CSMsc(nejc) = CSMsc(nejc) + popt*DE
-                              spg(kg) = spg(kg) + popt*DE
+     &                           + pop2*step
+                              emis = emis + popt*DE*step
+C                                 
+                              CSMsc(nejc) = CSMsc(nejc) + popt*DE*step
+                              spg(kg) = spg(kg) + popt*DE*step
                            ENDDO
                         ENDDO
                      ENDDO
                   ENDDO
+                  IF(NEX(nresp).GT.0) POPmax(nresp)=CSMsc(2)/NEX(nresp)
                ENDIF
-               IF (NEX(nresn).GT.0) POPmax(nresn) = CSMsc(1)/NEX(nresn)
-               IF (NEX(nresp).GT.0) POPmax(nresp) = CSMsc(2)/NEX(nresp)
-               IF (NOUt.GT.0) WRITE (8,99060) j, i, spg
+               
+54321          IF(NOUt.GT.0) WRITE (8,99060) j, i, spg
 99060          FORMAT (1X,'J=',I2,' I=',I1,
      &                 '  emission from subsequent stages:',/,
      &                 (1X,12E11.4),//)
@@ -1021,12 +1027,13 @@ C************* Gamma emission  ******************************************
 C
                IF (GST.NE.0D0 .AND. IDNa(5,3).GT.0) THEN
                   IF (egdrr.GT.0.0D0) THEN
-C-----------------ereasing PIG matrix
-                     DO ix = 1, NG
-                        DO jx = 1, NG
-                           pig(ix,jx) = 0.0
-                        ENDDO
-                     ENDDO
+C--------------------erasing PIG matrix
+C                    DO ix = 1, NG
+C                       DO jx = 1, NG
+C                          pig(ix,jx) = 0.0
+C                       ENDDO
+C                    ENDDO
+                     pig = 0.d0
 C--------------------calculate nuclear temperature for the generalized Lorenzian to be
 C--------------------used for E1 strength function determination. NOTE: this temperature
 C--------------------is not consistent with the actual level densities.
@@ -1311,12 +1318,8 @@ C-----------------------printout of the PIG matrix
                            WRITE (8,99110)
                         ENDIF
 C-----------------------
-C-----------------------invertion of the PIG matrix
+C-----------------------inversion of the PIG matrix
 C-----------------------
-C                       DO inc = 1, NG
-C                       ggg(inc) = 0.0
-C                       ENDDO
-C                       CALL MATIN1(pig,ggg,NG,1,det)
                         eps = 1.0D-8
                         CALL MTXINV(pig,pigx,pigy,mpigx,mpigy,NG,eps,
      &                              irflag)
@@ -1336,7 +1339,7 @@ C-----------------------printout of the inverted PIG matrix
                            WRITE (8,99110)
                         ENDIF
 C-----------------------
-C-----------------------check of the invertion and printout
+C-----------------------check of the inversion and printout
 C-----------------------
                         IF (NOUt.GT.2) THEN
                            DO k1 = 1, NG
@@ -1399,11 +1402,14 @@ C-----------------------
 C-----------------------
 C-----------------------do loop over c.n. excitation energy (after gamma emission)
 C-----------------------
-                        sumtlg = 0.0
+                        sumtlg = 0.d0
                         DO kcn = 1, NEX(1) - 1
                            ew = EX(kcn,1)
                            eg = EXCn - ew
                            ks = NEX(1) - kcn + 1
+                           step = 1.d0
+                           if(ks.eq.1 .or. ks.eq.NEX(1)-1) step = 0.5d0
+
 C--------------------------gamma transmission coefficient
 C--------------------------Plujko_new
 C--------------------------not tested (only changing E1 (6 parameters now))
@@ -1436,7 +1442,7 @@ C-----------------------------GAMMA GAMMA / ((2 PI G)*(1+X)**2) *G
                               xga = (2.0 - tg - 2.0*SQRT(1.0 - tg))/tg
                               tlg = tg/(1 + xga)**2/(6.28*OMJd(1,j))
 C                             TLG = TG/4./ROPH3(1)
-                              tl1 = 0.0
+                              tl1 = 0.d0
                               IF (j.GT.1) tl1 = OMJd(1,j - 1)
                               tl2 = OMJd(1,j)
                               tl3 = OMJd(1,j + 1)
@@ -1475,10 +1481,11 @@ C--------------------------------state density for gamma emission
      &                                 *OMJd(IE(kg) - 2,j + 1)
                                  DO k1 = 1, NG
                                     ix = (kg - kgin)*4 + 1 + ISD
-                                    sp = pig(k1,ix)*tg1/DE
+                                    sp = pig(k1,ix)*tg1/DE*step
                                     spr(ix) = spr(ix) + sp
-                                    IF (ks.GT.1) THEN
-                                       CSE(ks,0,1) = CSE(ks,0,1) + sp
+C                                   IF (ks.GT.1) THEN
+                                    IF (ks.GT.0) THEN
+                                       CSE(ks,0,1) = CSE(ks,0,1)+sp
                                        AUSpec(ks,0) = AUSpec(ks,0) + sp
                                        POPcse(kcn,0,ks,INExc(1))
      &                                    = POPcse(kcn,0,ks,INExc(1)) 
@@ -1489,7 +1496,7 @@ C--------------------------------state density for gamma emission
      &                                  = POP(kcn,j - 1,ie1,1) + sp
                                     emis = emis + sp*DE
                                     ix = ix + 1
-                                    sp = pig(k1,ix)*tg2/DE
+                                    sp = pig(k1,ix)*tg2/DE*step
                                     spr(ix) = spr(ix) + sp
                                     IF (ks.GT.1) THEN
                                        CSE(ks,0,1) = CSE(ks,0,1) + sp
@@ -1503,7 +1510,7 @@ C--------------------------------state density for gamma emission
      &                                 + sp
                                     emis = emis + sp*DE
                                     ix = ix + 1
-                                    sp = pig(k1,ix)*tg3/DE
+                                    sp = pig(k1,ix)*tg3/DE*step
                                     spr(ix) = spr(ix) + sp
                                     IF (ks.GT.1) THEN
                                        CSE(ks,0,1) = CSE(ks,0,1) + sp
@@ -1576,6 +1583,7 @@ C     IF(IOUT.GT.0) CALL AUERST(1, 2)
 99105 FORMAT (1X,12E11.4)
 99110 FORMAT (1X,/)
 99115 FORMAT (1X,12E11.4)
+      RETURN
       END
 
 
