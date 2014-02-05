@@ -188,7 +188,7 @@ def runE(proj):
             for line in listfile:
                 cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
                 arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-                os.system('"%s" %s' % (cmd, arg1, line) )
+                os.system('"%s" "%s" %s' % (cmd, arg1, line) )
             if not isEmpty('NUBAR.DAT'):
                 mv('NUBAR.DAT',proj+'-nubar.dat',)
                 print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
