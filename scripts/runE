@@ -186,8 +186,9 @@ def runE(proj):
             # Extract A Z the NUBAR.GET file:
             listfile = open('NUBAR.GET','r').readlines()
             for line in listfile:
-                cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar')
-                os.system('"%s" %s' % (cmd, line) )
+                cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
+                arg1= os.environ['EMPIREDIR'],'data','nubar.endf ')                
+                os.system('"%s" %s' % (cmd, arg1, line) )
             if not isEmpty('NUBAR.DAT'):
                 mv('NUBAR.DAT',proj+'-nubar.dat',)
                 print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
