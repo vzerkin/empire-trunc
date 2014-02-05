@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3784 $
+Ccc   * $Rev: 3792 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:44:40 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-06 00:48:15 +0100 (Do, 06 Feb 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -156,8 +156,16 @@ C     DOUBLE PRECISION Aa(N1,N1 + 2), Qq(N1), Xp(Np), Yp(Np)
 C
 C Local variables
 C
-      DOUBLE PRECISION det, fp(N1), fy(N1)
-      INTEGER i, j, ldig, lf, lp, m, nlg
+      DOUBLE PRECISION det
+      INTEGER i, j, ldig, lf, lp, m, nlg, myalloc
+      DOUBLE PRECISION, ALLOCATABLE :: fp(:), fy(:)
+
+      ALLOCATE(fp(N1),fy(N1),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(8 ,*) 'Insufficient memory for dynam. vars. in LSQLEG!'
+        WRITE(12,*) 'Insufficient memory for dynam. vars. in LSQLEG!'
+        STOP        'Insufficient memory for dynam. vars. in LSQLEG!'
+      ENDIF
 C*    Perform linear transformation of the coordinate system
       Ier = 0
       lf = N1 + 1
@@ -178,18 +186,13 @@ C*       Calculate Legendre polynomials
                if (j.gt.i) Aa(i,j) = Aa(j,i)
             ENDDO
          ENDDO
-C
-C        There are small differences in YP(m) in optimized gfortran 
-C           compared to ifort and MSFortran. To be solved, RCN 02/14
-C
-C        write(8,*) '====='
-C        do i=1,N1
-C          write(8,'(2x,4(g15.5,1x),2x,i3)') fp(i),fy(i),xp(m),yp(m),m
-C        enddo 
-C        write(8,*) '====='
       ENDDO
+
 C*    Solve the system of equations
       CALL MTXGUP(Aa,fy,Qq,N1,ldig,det)
+
+      deallocate(fp,fy)
+
       IF (det.NE.0.0D0) RETURN
       Ier = 1
       RETURN
