@@ -73,9 +73,9 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')	
-    rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
-    rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc') 	
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
+    rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT','NUBAR.GET')
+    rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
 
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
         glob('*.LEG') + glob('TARGET-*.tl') )
@@ -175,11 +175,23 @@ def runE(proj):
         # Sorting the newly created C4 file
         if (not os.path.exists(proj+'-raw.c4')):
             if not isEmpty('TMP.c4'): 
-                cp('TMP.c4',proj+'-raw.c4')	
-                mv('TMP.c4',proj+'.c4')	
+                cp('TMP.c4',proj+'-raw.c4')     
+                mv('TMP.c4',proj+'.c4')   
                 cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
                 os.system('"%s" %s' % (cmd, proj) )
-	
+
+    if isEmpty(proj+'-nubar.dat'):    
+        # Retrieving the nubar from ENDF evaluations
+        if not isEmpty('NUBAR.GET'):    
+            # Extract A Z the NUBAR.GET file:
+            listfile = open('NUBAR.GET','r').readlines()
+            for line in listfile:
+                cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar')
+                os.system('"%s" %s' % (cmd, line) )
+            if not isEmpty('NUBAR.DAT'):
+                mv('NUBAR.DAT',proj+'-nubar.dat',)
+                print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
+      
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
@@ -298,7 +310,7 @@ def runE(proj):
     if not isEmpty('OPTMAN.OUT'):
         mv('OPTMAN.OUT',proj+'-optman.out',0)
     #if isEmpty(proj+'.-default.rng'):
-    #    mv('R250SEED-default.DAT',proj+'-default.rng')		
+    #    mv('R250SEED-default.DAT',proj+'-default.rng')           
     #    print('Saving the default RNG seed')
     if not isEmpty('R250SEED.DAT'):
         mv('R250SEED.DAT',proj+'.rng')
@@ -344,7 +356,7 @@ def runE(proj):
     # Delete Temporary files
     rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
     rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
-    rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')	
+    rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')   
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ddhms.out')
     rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT','MU_BAR.LST','MU_BAR.TMP')
     rm( glob('TARGET-*.tl'), glob('ecis06.*'))
@@ -421,18 +433,18 @@ def runE(proj):
     if not isEmpty('BREAK-UP-XS.DAT'):
         mv('BREAK-UP-XS.DAT',proj+'-break-up.xsc',0)  # no message if not present
     if not isEmpty('TRANSFER-XS.DAT'):
-	mv('TRANSFER-XS.DAT',proj+'-transfer.xsc',0)  # no message if not present
+      mv('TRANSFER-XS.DAT',proj+'-transfer.xsc',0)  # no message if not present
     if not isEmpty('REAC-MECH.DAT'):
-	mv('REAC-MECH.DAT',proj+'-reac-mech.xsc',0) # no message if not present	
+      mv('REAC-MECH.DAT',proj+'-reac-mech.xsc',0) # no message if not present 
 
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')	
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
 
     if isEmpty(proj+'-break-up.zvd'):
         rm(proj+'-break-up.zvd')  
     if isEmpty(proj+'-transfer.zvd'):
-	rm(proj+'-transfer.zvd') 
+      rm(proj+'-transfer.zvd') 
     if isEmpty(proj+'-reac-mech.zvd'):
-	rm(proj+'-reac-mech.zvd') 	
+      rm(proj+'-reac-mech.zvd')     
 
     # Produce ZVD files from fission cross-section tables:
     if not isEmpty(proj+'-fiss.xsc'):
