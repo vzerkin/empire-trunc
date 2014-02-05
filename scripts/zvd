@@ -54,11 +54,17 @@ c4zvd_dir=$EMPIREDIR/util/c4zvd
 c4zvd33_dir=$EMPIREDIR/util/endf33zvd
 
 ln -sf $work/$file-s.endf Present
-ln -sf $work/$file.c4 c4
+#ln -sf $work/$file.c4 c4
+cp $work/$file.c4 c4
+head c4
 #$c4zvd_dir/c4zvv $MT $file 
 rm tmp.dat c4.zvd end.zvd $file-$MT.zvd  zv*.ps zv*.eps 2>/dev/null
 $c4zvd_dir/c4dat4l.exe c4 tmp.dat MF=3 MT=$MT
+echo 'top of tmp.dat'
+head tmp.dat
 $c4zvd_dir/datzvdl.exe tmp.dat c4.zvd
+echo 'top of c4.zvd'
+head c4.zvd
 $c4zvd_dir/endzvdl.exe A $MT Present end.zvd
 $c4zvd33_dir/endf33zvd_l.exe -mt:$MT -c:$file-$MT-cov.zvd -u:$file-$MT-unc.zvd Present
 echo '#!zvview.exe' >$file-$MT.zvd
@@ -80,6 +86,8 @@ fi
 if [ -f zv00.zvd ]; then
    mv zv00.zvd $work/$file-$MT.zvd
 fi
+rm c4.zvd end.zvd tmp.dat 2>/dev/null
+=======
 if [ -f ps01.zvd ]; then
    mv ps01.zvd $work/$file-$MT.zvd
 fi
