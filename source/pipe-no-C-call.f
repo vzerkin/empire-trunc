@@ -140,6 +140,13 @@ C
       implicit none
       CHARACTER*(*) STRINGP
       ipipe=0
-      CALL SYSTEM(STRINGP)
+C
+C     Special processing for running optman in MS fortran
+C
+	if(trim(Stringp).eq.'../source/optmand') then
+        CALL SYSTEM('optmand.exe')
+	else
+        CALL SYSTEM(STRINGP)
+	endif
       RETURN
       END
