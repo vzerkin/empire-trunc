@@ -417,6 +417,9 @@ C-----------Calculate population in the energy bin ke
             POPbin(ke,nnuc) = pope*step
           ENDIF
 
+C
+C		posible parallelization over parity and spin of Nnuc
+C
           fisxse = 0.d0
           DO ipar = 1, 2 !over decaying nucleus parity
             ip = INT(( - 1.0)**(ipar + 1))
