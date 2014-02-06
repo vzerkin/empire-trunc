@@ -73,7 +73,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT','TMP.c4')     
     rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT','NUBAR.GET')
     rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
 
@@ -173,12 +173,13 @@ def runE(proj):
 
     if isEmpty(proj+'.c4'):    
         # Sorting the newly created C4 file
-        if (not os.path.exists(proj+'-raw.c4')):
-            if not isEmpty('TMP.c4'): 
-                cp('TMP.c4',proj+'-raw.c4')     
-                mv('TMP.c4',proj+'.c4')   
-                cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-                os.system('%s %s' % (cmd, proj) )
+        if not isEmpty('TMP.c4'): 
+            cp('TMP.c4',proj+'-raw.c4')     
+            print('Retrieved unsorted C4 file saved as %s' % proj+'-raw.c4')  
+            mv('TMP.c4',proj+'.c4')   
+            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+            os.system('%s %s' % (cmd, proj) )
+            print('C4 file sorted and stored as %s' % proj+'.c4')  
 
     if isEmpty(proj+'-nubar.dat'):    
         # Retrieving the nubar from ENDF evaluations
