@@ -74,7 +74,7 @@ def runE(proj):
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
     rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT','TMP.c4')     
-    rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT','NUBAR.GET')
+    rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
     rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
 
     rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
@@ -162,8 +162,11 @@ def runE(proj):
         Z, A = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
         cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
         arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-        print( 'Retrieving nubar command: %s %s %i  %i' % (cmd, arg1, Z, A) )  
+        #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, Z, A) )  
         os.system('%s %s %i  %i' % (cmd, arg1, Z, A) )
+        if not isEmpty('NUBAR.DAT'):
+            cp('NUBAR.DAT',proj+'-nubar.dat')
+            print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
 
     #if not isEmpty(proj+'-cum.ps'):
         #ln(proj+'-cum.ps','FITLEV.PS')
