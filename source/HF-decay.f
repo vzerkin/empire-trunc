@@ -1605,13 +1605,14 @@ C
       xsdisc = 0.d0        
       IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
 
-      cmul = csum*DERec/(CSPrd(nnuc)-xsdisc)  ! multiplicity
-      qout = qout + cmul*esum/csum            ! multiplicity x <E>
-
-      WRITE(12,
+      IF (ENDf(nnuc).LE.1) THEN
+        cmul = csum*DERec/(CSPrd(nnuc)-xsdisc)  ! multiplicity
+        qout = qout + cmul*esum/csum            ! multiplicity x <E>
+        WRITE(12,
      &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
      &     cmul*esum/csum
-      WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
+        WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
+      ENDIF 
       WRITE(12,*)
 
       WRITE(12,
@@ -1740,7 +1741,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       WRITE(12,
      &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
      &     cmul*esum/csum
-      WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
+      WRITE(12,'(2x,''Recoil multiplicity (binary) '',G12.6)') cmul
       WRITE(12,*)
       WRITE(12,
      &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
