@@ -157,6 +157,14 @@ def runE(proj):
         #ln(proj+'-nubar.dat','NUBAR.DAT')
         cp(proj+'-nubar.dat','NUBAR.DAT')
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.dat')  
+    else:    
+        # Retrieving the nubar from ENDF evaluations
+        Z, A = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
+        cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
+        arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
+        print( 'Retrieving nubar command: %s %s %i  %i' % (cmd, arg1, Z, A) )  
+        os.system('%s %s %i  %i' % (cmd, arg1, Z, A) )
+
     #if not isEmpty(proj+'-cum.ps'):
         #ln(proj+'-cum.ps','FITLEV.PS')
     
@@ -181,20 +189,25 @@ def runE(proj):
             os.system('%s %s' % (cmd, proj) )
             print('C4 file sorted and stored as %s' % proj+'.c4')  
 
-    if isEmpty(proj+'-nubar.dat'):    
-        # Retrieving the nubar from ENDF evaluations
-        if not isEmpty('NUBAR.GET'):    
-            # Extract A Z the NUBAR.GET file:
-            listfile = open('NUBAR.GET','r').readlines()
-            for line in listfile:
-                cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
-                arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-                #print('Retrieving nubar command: %s %s %s' % (cmd, arg1, line))  
-                os.system('%s %s %s' % (cmd, arg1, line) )
-            if not isEmpty('NUBAR.DAT'):
-                mv('NUBAR.DAT',proj+'-nubar.dat')
-                rm('NUBAR.GET') 
-                print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
+#        import subprocess
+#        try:
+#            subprocess.check_call( [cmd, arg1, Z, A] )
+#        except subprocess.CalledProcessError:
+#            do something here
+
+#    if isEmpty(proj+'-nubar.dat'):    
+#         if not isEmpty('NUBAR.GET'):    
+#             # Extract A Z the NUBAR.GET file:
+#             listfile = open('NUBAR.GET','r').readlines()
+#             for line in listfile:
+#                 cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
+#                 arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
+#                 #print('Retrieving nubar command: %s %s %s' % (cmd, arg1, line))  
+#                 os.system('%s %s %s' % (cmd, arg1, line) )
+#             if not isEmpty('NUBAR.DAT'):
+#                 mv('NUBAR.DAT',proj+'-nubar.dat')
+#                 rm('NUBAR.GET') 
+#                 print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
       
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
