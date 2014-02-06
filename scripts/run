@@ -18,7 +18,11 @@ can be used to ignore errors, this is meant for running batch jobs
 
 import sys
 import os
-#from subprocess import Popen, PIPE # some users don't have subprocess
+try:
+    import subprocess
+    HAVESUBPROCESS = True
+except ImportError: # some users don't have subprocess
+    HAVESUBPROCESS = False 
 
 # get rm and isEmpty functions:
 #from empy.bash import *
@@ -82,7 +86,11 @@ def main():
         print (l)
     """
     cmd = os.path.join(empire,'scripts','format')
-    i,o,e = os.popen3( '"%s" %s %s' %(cmd, project, mat) )
+    if HAVESUBPROCESS:
+        p = subprocess.Popen((cmd, project, mat), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        i,o,e == (p.stdin, p.stdout, p.stderr)
+    else: 
+        i,o,e = os.popen3( '"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -98,7 +106,11 @@ def main():
     # run ENDF-6 checking codes
     
     cmd = os.path.join(empire,'scripts','verify')
-    i,o,e = os.popen3('"%s" %s %s' %(cmd, project, mat) )
+    if HAVESUBPROCESS:
+        p = subprocess.Popen((cmd, project, mat), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        i,o,e == (p.stdin, p.stdout, p.stderr)
+    else: 
+        i,o,e = os.popen3( '"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
@@ -110,7 +122,11 @@ def main():
     # run preprocessing codes in preparation for plotting
     
     cmd = os.path.join(empire,'scripts','process')
-    i,o,e = os.popen3('"%s" %s %s' %(cmd, project, mat) )
+    if HAVESUBPROCESS:
+        p = subprocess.Popen((cmd, project, mat), shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        i,o,e == (p.stdin, p.stdout, p.stderr)
+    else: 
+        i,o,e = os.popen3( '"%s" %s %s' %(cmd, project, mat) )
     for l in o.readlines():
         print (l.strip())
     
