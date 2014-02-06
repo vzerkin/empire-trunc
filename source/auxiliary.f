@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3799 $
+Ccc   * $Rev: 3806 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 04:50:40 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-06 16:39:07 +0100 (Do, 06 Feb 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -143,36 +143,40 @@ C
       RETURN
       END
 
-      SUBROUTINE LSQLEG(Xp,Yp,Np,Qq,N1,Aa,Ier)
+      SUBROUTINE LSQLEG(Xp,Yp,Np,Qq,N1,Ier)
       implicit none
 C-Title  : LSQLEG Subroutine
-C-Purpose: Fit Legendre coefficients to a set of data
-C
+C-Purpose: Fit Legendre coefficients to a set of data X(Np),Y(Np)
+C          Legendre coefficients stored in Qq(N1)
+C          IER = 0 (normal return)  
+C              = 1 (matrix determinant = 0)
 C Dummy arguments
 C
       INTEGER Ier, N1, Np
-C     DOUBLE PRECISION Aa(N1,N1 + 2), Qq(N1), Xp(Np), Yp(Np)
-      DOUBLE PRECISION Aa(N1,N1), Qq(N1), Xp(Np), Yp(Np)
+      DOUBLE PRECISION Qq(N1), Xp(Np), Yp(Np)
 C
 C Local variables
 C
       DOUBLE PRECISION det
       INTEGER i, j, ldig, m, nlg, myalloc
-      DOUBLE PRECISION, ALLOCATABLE :: fp(:), fy(:)
+      DOUBLE PRECISION, ALLOCATABLE :: fp(:), fy(:), Aa(:,:)
 
-      ALLOCATE(fp(N1),fy(N1),STAT=myalloc)
+      ALLOCATE(fp(N1),fy(N1),Aa(N1,N1),STAT=myalloc)
       IF(myalloc.NE.0) THEN
-        WRITE(8 ,*) 'Insufficient memory for dynam. vars. in LSQLEG!'
-        WRITE(12,*) 'Insufficient memory for dynam. vars. in LSQLEG!'
-        STOP        'Insufficient memory for dynam. vars. in LSQLEG!'
+        WRITE(8 ,*) 
+     >     'ERROR: Insufficient memory for dynam. vars. in LSQLEG!'
+        WRITE(12,*)
+     >     'ERROR: Insufficient memory for dynam. vars. in LSQLEG!'
+        STOP
+     >     'ERROR: Insufficient memory for dynam. vars. in LSQLEG!'
       ENDIF
 C*    Perform linear transformation of the coordinate system
       Ier = 0
-C*    Clear the matrix
+C*    Clear working amtrix and array
       Aa = 0.d0
+      fy = 0.d0
 C*    Set up the matrix
       nlg = N1 - 1
-      fy = 0.d0
       DO m = 1, Np
 C*       Calculate Legendre polynomials
          CALL PLNLEG(Xp(m),fp,nlg)
@@ -189,7 +193,7 @@ C*       Calculate Legendre polynomials
 C*    Solve the system of equations
       CALL MTXGUP(Aa,fy,Qq,N1,ldig,det)
 
-      deallocate(fp,fy)
+      deallocate(fp,fy,Aa)
 
       IF (det.NE.0.0D0) RETURN
       Ier = 1
