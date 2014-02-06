@@ -160,13 +160,16 @@ def runE(proj):
     else:    
         # Retrieving the nubar from ENDF evaluations
         Z, A = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
-        cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
-        arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-        #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, Z, A) )  
-        os.system('%s %s %i  %i' % (cmd, arg1, Z, A) )
-        if not isEmpty('NUBAR.DAT'):
-            cp('NUBAR.DAT',proj+'-nubar.dat')
-            print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
+        if Z >= 90: 
+            cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
+            arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
+            #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, Z, A) )  
+            os.system('%s %s %i  %i' % (cmd, arg1, Z, A) )
+            if not isEmpty('NUBAR.DAT'):
+                cp('NUBAR.DAT',proj+'-nubar.dat')
+                print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
+        else:
+            print( "no evaluated data for Z=", Z, "in ENDF libraries" )
 
     #if not isEmpty(proj+'-cum.ps'):
         #ln(proj+'-cum.ps','FITLEV.PS')
@@ -182,36 +185,66 @@ def runE(proj):
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
 
-    if isEmpty(proj+'.c4'):    
-        # Sorting the newly created C4 file
-        if not isEmpty('TMP.c4'): 
-            cp('TMP.c4',proj+'-raw.c4')     
+#     if isEmpty(proj+'.c4'):    
+#         # Sorting the newly created C4 file
+#         if not isEmpty('TMP.c4'): 
+#             cp('TMP.c4',proj+'-raw.c4')     
+#             print('Retrieved unsorted C4 file saved as %s' % proj+'-raw.c4')  
+#             mv('TMP.c4',proj+'.c4')   
+#             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+#             os.system('%s %s' % (cmd, proj) )
+#             print('C4 file sorted and stored as %s' % proj+'.c4')  
+
+    if isEmpty(proj+'.c4'):
+ 
+        # From parseC4.py, these are the ZA <-> directory name mappings  
+        projectiles = {
+            0:'gammas',
+            1:'neutrons',
+            1001:'protons',
+            1000:'deuterons',	
+            2003:'helions',			
+            2004:'alphas',		
+            'other':'other'
+        }
+
+        # Get the stuff we need to construct the correct name of the c4 file
+        projectileZ, projectileA = map( int, open( proj+'.inp', 'r' ).readlines()[3].split()[:2] )
+        targetZ, targetA         = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
+        SKIPC4 = False
+        targetState = None
+        for line in open( proj+'.inp', 'r' ).readlines():
+            if 'benchm' in line.lower():
+                if line.split()[1]=='1': SKIPC4 = True
+            if 'trglev' in line.lower(): targetIsomer = int(line.split()[1])
+
+        if not SKIPC4:
+            # Construct the c4 file names
+            filePatternWithoutSuffixOrA = os.path.join( os.environ['EMPIREDIR'], 'EXFOR', projectiles.get( projectileZ*1000+projectileA, 'other' ), str(Z).zfill(3)+"_*_" )
+            natC4FilePattern = filePatternWithoutSuffixOrA+'000.c4'
+            sumC4FilePattern = fileWithoutSuffix+str(A).zfill(3)+'.c4'
+            gsC4FilePattern = fileWithoutSuffix+str(A).zfill(3)+'_G.c4'
+            isoC4FilePattern = fileWithoutSuffix+str(A).zfill(3)+'_M.c4'
+
+            # Read in all the relavent c4 files and concatenate them
+            if targetState > 1: fList = [ natC4FilePattern, sumC4FilePattern, isoC4FilePattern ]
+            else :              fList = [ natC4FilePattern, sumC4FilePattern, gsC4FilePattern ]
+            allTheC4FilesMerged = []
+            for fPattern in fList: # loop through all the file patterns we just defined
+                for c4Filename in glob( fPattern ): # glob returns a list of filenames matching fPattern
+                    allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
+            
+            # save the concatenated files together in the two files we need later
+            open( proj+'-raw.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
+            cp(proj+'-raw.c4',proj+'.c4')
+            
+            # Sorting the newly created C4 file
             print('Retrieved unsorted C4 file saved as %s' % proj+'-raw.c4')  
-            mv('TMP.c4',proj+'.c4')   
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
             os.system('%s %s' % (cmd, proj) )
             print('C4 file sorted and stored as %s' % proj+'.c4')  
 
-#        import subprocess
-#        try:
-#            subprocess.check_call( [cmd, arg1, Z, A] )
-#        except subprocess.CalledProcessError:
-#            do something here
 
-#    if isEmpty(proj+'-nubar.dat'):    
-#         if not isEmpty('NUBAR.GET'):    
-#             # Extract A Z the NUBAR.GET file:
-#             listfile = open('NUBAR.GET','r').readlines()
-#             for line in listfile:
-#                 cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
-#                 arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-#                 #print('Retrieving nubar command: %s %s %s' % (cmd, arg1, line))  
-#                 os.system('%s %s %s' % (cmd, arg1, line) )
-#             if not isEmpty('NUBAR.DAT'):
-#                 mv('NUBAR.DAT',proj+'-nubar.dat')
-#                 rm('NUBAR.GET') 
-#                 print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
-      
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
