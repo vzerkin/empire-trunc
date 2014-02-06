@@ -19,7 +19,8 @@ filelist="a-ni58-pcross
           n_eu153-dir-msc-msd 
           ni62-th-EGSM        
           n-na23-prim-gam     
-          n-zr92-soft--dccomp 
+          n-zr92-soft-dccomp 
+          n-zr92-soft-dccomp-dir2           
           p-th232             
           p-tl205             
           test-HRTW-fis       
@@ -180,10 +181,10 @@ else
    echo
    echo "Current options are:"
    echo
-   echo " 'run' to run benchmarks"
-   echo " 'clean' to remove temporary files and keep only original ones"
-   echo " 'diff' to compare benchmarks output with existing reference files (using diff command)"
-   echo " 'kompare' to compare benchmarks output with existing reference files (using kompare)"
-   echo " 'replace' to replace existing reference files with benchmarks outputs (using perl-based 'rename' command)"
+   echo " 'runbench run' to run benchmarks"
+   echo " 'runbench clean' to remove temporary files and keep only original ones"
+   echo " 'runbench diff' to compare benchmarks output with existing reference files (using diff command)"
+   echo " 'runbench kompare' to compare benchmarks output with existing reference files (using kompare)"
+   echo " 'runbench replace' to replace existing reference files with benchmarks outputs (using perl-based 'rename' command)"
    echo
 fi   
