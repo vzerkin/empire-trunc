@@ -358,9 +358,9 @@ C------------------Exclusive DE spectra (gammas)
                 ENDIF !  (nejc.GT.0)
  1530         ENDDO   ! over ejectiles
 
-              IF ((A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
+              IF (NINT(A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
                  CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
-              ELSEIF((A(1)-A(nnuc)).EQ.1  .AND. RECoil.GT.0) THEN
+              ELSEIF(NINT(A(1)-A(nnuc)).EQ.1  .AND. RECoil.GT.0) THEN
                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
               ENDIF
 
