@@ -1,6 +1,6 @@
-cc   * $Rev: 3776 $
+cc   * $Rev: 3804 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-28 13:33:11 +0100 (Di, 28 Jän 2014) $
+Ccc   * $Date: 2014-02-06 04:58:36 +0100 (Do, 06 Feb 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -166,6 +166,9 @@ C
       ELCncs  = 0.0D+0 ! Clear CN elastic cross section (1/4*pi) 
       cel_da  = 0.0D+0     
       checkXS = 0.0D+0   
+
+C---- Initialization of PFNS calculations
+      IF (FISspe.eq.1) CALL INPUT_SPEC
         
       nfission= 0
       nepfns  = 0             

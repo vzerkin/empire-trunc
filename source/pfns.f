@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3639 $
+Ccc   * $Rev: 3804 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-10 13:16:41 +0100 (Di, 10 Dez 2013) $
+Ccc   * $Date: 2014-02-06 04:58:36 +0100 (Do, 06 Feb 2014) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -145,6 +145,8 @@ C     Local variables
 
       real*8 eplus, emin 
       COMMON /eparam/eplus,emin
+      integer iopt
+      COMMON /fragment/iopt
 
 C     real*8 fpost, fnscn, tscn, wscn
       real*8 fmed, abserr
@@ -206,11 +208,13 @@ C     LA model (eq.11 CPC)
 
         eplus = (DSQRT(e) + DSQRT(EniuL))**2
         emin  = (DSQRT(e) - DSQRT(EniuL))**2
+        iopt = 1
         ftmp1=
      >  GAUSS_INT2(SLAB,0.d0,Tlf,abserr)/(2*Tlf*Tlf*DSQRT(EniuL))
 
         eplus = (DSQRT(e) + DSQRT(EniuH))**2
         emin  = (DSQRT(e) - DSQRT(EniuH))**2
+        iopt = 2
         ftmp2=
      >  GAUSS_INT2(SLAB,0.d0,Thf,abserr)/(2*Thf*Thf*DSQRT(EniuH))
 
@@ -684,6 +688,9 @@ C
       REAL*8 T, TT, eplus, emin
       COMMON /tparam/TT      ! to pass T to FKLT,SKLT
       COMMON /eparam/eplus,emin
+      integer iopt
+      COMMON /fragment/iopt
+
       REAL*8 ftmp1, ftmp2, abserr
       REAL*8 SKT, FKT, GAUSS_LAGUERRE_INT, GAUSS_INT1
       EXTERNAL SKT, FKT
@@ -705,8 +712,10 @@ C
       IMPLICIT NONE
       REAL*8 xx, x, sigc, TT
       COMMON /tparam/TT
+      integer iopt
+      COMMON /fragment/iopt
       xx = TT*x
-      CALL INTERPOL1(1,xx,sigc)
+      CALL INTERPOL1(iopt,xx,sigc)
       FKT = sigc*x*TT*TT
       RETURN
       END
@@ -715,10 +724,13 @@ C
       IMPLICIT NONE
       REAL*8 xx, x, sigc, TT
       COMMON /tparam/TT
+      integer iopt
+      COMMON /fragment/iopt
+
       SKT = 0.d0
       xx = x/TT
       if(xx.GT.30.d0) return
-      CALL INTERPOL1(1,x,sigc)
+      CALL INTERPOL1(iopt,x,sigc)
       SKT = DEXP(-xx)*sigc*DSQRT(x)
       RETURN
       END
@@ -726,6 +738,7 @@ C
 c====================================================================
       SUBROUTINE INTERPOL1(iopt,x,sigc)
 c=========================================
+      implicit none
       INTEGER iopt
       DOUBLE PRECISION x,sigc
 
@@ -739,6 +752,8 @@ c=========================================
 
       DOUBLE PRECISION ee(500),ss(500)
       INTEGER nrc
+      DOUBLE PRECISION aa, b
+      INTEGER i,j
 c
       if(iopt.eq.1) then
          nrc=nrl
@@ -792,6 +807,7 @@ c
 c=========================================
       SUBROUTINE INPUT_SPEC
 c=========================================
+      implicit none 
       DOUBLE PRECISION eell(500),sigll(500)
       DOUBLE PRECISION eehh(500),sighh(500)  
       DOUBLE PRECISION eenc(500),signcf(500)      
@@ -803,14 +819,17 @@ c=========================================
       CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
-   
+
+      write(8,*)   
       open(unit=23,file=trim(EMPiredir)//'/data/CNxs.dat',
      >  status='old',ERR=100)
            read(23,*) nrnc
            do i=1,nrnc
               read(23,*)eenc(i),signcf(i)
-c              write(*,*)eenc(i),signcf(i)
+c             write(*,*)eenc(i),signcf(i)
            enddo
+           write(8,*)           'Inverse cross sections for CN read from 
+     & $EMPIREDIR/data/CNxs.data for LA model PFNS calculations'
       close (23)
 
       open(unit=23,file=trim(EMPiredir)//'/data/LFxs.dat',
@@ -820,6 +839,8 @@ c              write(*,*)eenc(i),signcf(i)
               read(23,*)eell(i),sigll(i)
 c              write(*,*)eell(i),sigll(i)
            enddo
+           write(8,*)           'Inverse cross sections for LF read from 
+     & $EMPIREDIR/data/LFxs.data for LA model PFNS calculations'
       close (23)
       open(unit=23,file=trim(EMPiredir)//'/data/HFxs.dat',
      >  status='old',ERR=300)
@@ -828,7 +849,10 @@ c              write(*,*)eell(i),sigll(i)
               read(23,*)eehh(i),sighh(i)
 c              write(*,*)eehh(i),sighh(i)
            enddo
+           write(8,*)           'Inverse cross sections for HF read from 
+     & $EMPIREDIR/data/HFxs.data for LA model PFNS calculations'
       close (23)
+      write(8,*)
       return
  100  write(8,*) 'ERROR: ../data/CNxs.data not found !'
       STOP 'ERROR: ../data/CNxs.data not found !'

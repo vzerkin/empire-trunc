@@ -20,10 +20,6 @@ C
       DOUBLE PRECISION ELTl(NDLW)    
       COMMON /ELASTIC/ ELTl
 
-      DOUBLE PRECISION eenc(500),signcf(500)
-      INTEGER nrnc
-      COMMON /inp_sp5/ eenc,signcf,nrnc
-
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
       COMMON /init_empire/xcross,icalled
@@ -46,3 +42,11 @@ C
       DOUBLE PRECISION elada(NDAngecis), elleg(NDAngecis) 
       INTEGER neles 
       COMMON /angula/elada,elleg,neles
+
+      DOUBLE PRECISION eell(500),sigll(500)
+      DOUBLE PRECISION eehh(500),sighh(500)  
+      DOUBLE PRECISION eenc(500),signcf(500)      
+      INTEGER nrll,nrhh,nrnc
+
+      COMMON /inp_sp5/ eenc,signcf,nrnc
+      COMMON /siglh/ nrll,nrhh,eell,sigll,eehh,sighh
