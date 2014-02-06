@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3751 $
+Ccc   * $Rev: 3807 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 14:20:44 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-06 16:41:03 +0100 (Do, 06 Feb 2014) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3751 $
+C CVS Version Management $Revision: 3807 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2474,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3751 $')
+99005 FORMAT ('  xddhms version: $Revision: 3807 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -5848,7 +5848,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION adum(5,7), csfit(NDAnghms), csx0(NDAnghms), qq(5)
+      DOUBLE PRECISION csfit(NDAnghms), csx0(NDAnghms), qq(5)
       DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
@@ -5938,7 +5938,7 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
            CSEahms(ne,na,1) = DDXsn(ne-1,na)
            csfit(NDAnghms-na+1) = DDXsn(ne-1,na)
          ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
          IF (qq(1).NE.0.0D+0) THEN
             xnor = CSEhms(ne,1,0)/(4.0*PI_g*qq(1))
             DO na = 1, NDAnghms
@@ -5957,7 +5957,7 @@ C         DO na = 1, NDAnghms
 C           CSEahmslab(ne,na,1) = DDXsnlab(ne-1,na)
 C           csfit(NDAnghms-na+1) = DDXsnlab(ne-1,na)
 C         ENDDO
-C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 C         IF (qq(1).NE.0.0D+0) THEN
 C            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
 C            DO na = 1, NDAnghms
@@ -5982,7 +5982,7 @@ C      CSEmis(2,0) = CSEmis(2,0) + XSP0
            CSEahms(ne,na,2) = DDXsp(ne-1,na)
            csfit(NDAnghms-na+1) = DDXsp(ne-1,na)
          ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
          IF (qq(1).NE.0.0D+0) THEN
             xnor = CSEhms(ne,2,0)/(4.0*PI_g*qq(1))
             DO na = 1, NDAnghms
@@ -6002,7 +6002,7 @@ C         DO na = 1, NDAnghms
 C           CSEahmslab(ne,na,2) = DDXsplab(ne-1,na)
 C           csfit(NDAnghms-na+1) = DDXsplab(ne-1,na)
 C         ENDDO
-C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 C         IF (qq(1).NE.0.0D+0) THEN
 C            xnor = CSEhmslab(ne,2,0)/(4.0*PI_g*qq(1))
 C            DO na = 1, NDAnghms
@@ -6109,7 +6109,7 @@ c                 chkpopd = chkpopd + pops
                  csfit(NDAnghms-nth+1) = POPcsea(nth,0,1,ne,Inxr) 
                 ENDDO
                csfit(NDAnghms) =  POPcsea(1,0,1,ne,Inxr)
-               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
                IF (qq(1).NE.0.0D+0) THEN
                  xnor = pophmsx/(4.0*PI_g*qq(1))
                  DO nth = 1, NDAnghms
@@ -6160,7 +6160,7 @@ c                 chkpop = chkpop + pops
                  ENDDO
                  POPcsea(1,nu,1,ne,Inxr) = DDXsnex(1,nux,ne-1,Inxr)
                  csfit(NDAnghms) =  POPcsea(1,nu,1,ne,Inxr)
-                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
                  IF (qq(1).NE.0.0D+0) THEN
                   xnor = POPcsed(nu,1,ne,Inxr)/(4.0*PI_g*qq(1))
                   DO nth = 1, NDAnghms
@@ -6223,7 +6223,7 @@ c              DO nth = NDAnghms1, 2, -1
 c               csfit(NDAnghms-nth+1) = POPcsealab(nth,0,1,ne,Inxr) 
 c              ENDDO
 c              csfit(NDAnghms) =  POPcsealab(1,0,1,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(0,1,ne,Inxr)/(4.0*PI_g*qq(1))
 c               IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,1,ne,Inxr) = 0.0d0
@@ -6270,7 +6270,7 @@ c               dxhi = dxlo
 c              ENDDO
 c              POPcsealab(1,nux,1,ne,Inxr) = DDXsnexlab(1,nu-1,ne-1,Inxr)
 c              csfit(NDAnghms) =  POPcsealab(1,nux,1,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(nux,1,ne,Inxr)/(4.0*PI_g*qq(1))
 c               DO nth = 1, NDAnghms
@@ -6364,7 +6364,7 @@ c                chkpopd = chkpopd + pops
                  csfit(NDAnghms-nth+1) = POPcsea(nth,0,2,ne,Inxr) 
                 ENDDO
                csfit(NDAnghms) =  POPcsea(1,0,2,ne,Inxr)
-               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
                IF (qq(1).NE.0.0D+0) THEN
                  xnor = pophmsx/(4.0*PI_g*qq(1))
                  DO nth = 1, NDAnghms
@@ -6414,7 +6414,7 @@ c                 chkpop = chkpop + pops
                  ENDDO
                  POPcsea(1,nu,2,ne,Inxr) = DDXspex(1,nux,ne-1,Inxr)
                  csfit(NDAnghms) =  POPcsea(1,nu,2,ne,Inxr)
-                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
                  IF (qq(1).NE.0.0D+0) THEN
                   xnor = POPcsed(nu,2,ne,Inxr)/(4.0*PI_g*qq(1))
                   DO nth = 1, NDAnghms
@@ -6479,7 +6479,7 @@ c            DO nth = NDAnghms1, 2, -1
 c              csfit(NDAnghms-nth+1) = POPcsealab(nth,0,2,ne,Inxr) 
 c             ENDDO
 c             csfit(NDAnghms) =  POPcsealab(1,0,2,ne,Inxr)
-c             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+c             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c             IF (qq(1).NE.0.0D+0) THEN
 c              xnor = POPcsedlab(0,2,ne,Inxr)/(4.0*PI_g*qq(1))
 c              IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,2,ne,Inxr) = 0.0d0
@@ -6526,7 +6526,7 @@ c               dxhi = dxlo
 c              ENDDO
 c              POPcsealab(1,nux,2,ne,Inxr) = DDXspexlab(1,nu-1,ne-1,Inxr)
 c              csfit(NDAnghms) =  POPcsealab(1,nux,2,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,adum,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(nux,2,ne,Inxr)/(4.0*PI_g*qq(1))
 c               DO nth = 1, NDAnghms

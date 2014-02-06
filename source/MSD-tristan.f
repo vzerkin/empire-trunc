@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3783 $
+Ccc   * $Rev: 3807 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-06 16:41:03 +0100 (Do, 06 Feb 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2555,7 +2555,7 @@ c     DOUBLE PRECISION Cros(Nq12x,Lc12x,Kdim), Crose(Nbinx,Ngle,Idimm)
 C
 C Local variables
 C
-      DOUBLE PRECISION a1, a2, a3, adum(5,7), al1l2(7,7), amat(15,15),
+      DOUBLE PRECISION a1, a2, a3, al1l2(7,7), amat(15,15),
      &                 an, ay, aynorm, csfit(NDANGecis), delta, eout,
      &                 f11(2), f2(15), f21(2), fh, fl1(7,7), fl2(7,7),
      &                 fnl1(7), fnl2(7), fnq1(7), fnq2(7), fq1(6,6),
@@ -2570,7 +2570,6 @@ C
      &        na, nad, nangle, nc, ncm1, ndim, ne, neb, necs, nej,
      &        nemnt, nemx, nep, nepp, nmax, nnur, np, npx, nq, nqx, nx,
      &        ny
-      INTEGER MAX0, MIN0
       EQUIVALENCE (f2(1),f21)
       EQUIVALENCE (f1(1),f11)
       nej = 1
@@ -2620,11 +2619,11 @@ C
                DO m2 = m2n, NQ1x
                   my = my + 1
                   j = j + 1
-                  gmat(i,j) = 0.
+                  gmat(i,j) = 0.d0
                   DO kx = 1, NQ1x
                      k2n = MAX0(n0,kx)
                      ky = MAX0(0,k2n - n0)
-                     sum = 0.
+                     sum = 0.d0
                      DO k2 = k2n, NQ1x
                         ky = ky + 1
                         sum = sum + fq2(ky,ny)*fq2(ky,my)
@@ -2642,13 +2641,6 @@ C
          CALL PNORM(7,IC1mx,fnl1,fl1)
          CALL PNORM(7,IC2mx,fnl2,fl2)
       ENDIF
-C     DO k = 1, Idimm
-C        DO j = 1, nangle
-C           DO i = 1, Nbinx
-C              Crose(i,j,k) = 0.
-C           ENDDO
-C        ENDDO
-C     ENDDO
       Crose = 0.d0
 
       REWIND (16)
@@ -2670,7 +2662,7 @@ C
 C-----------------------interpolation for L1
 C
                         DO ic = 1, IC1mx
-                           sum = 0.
+                           sum = 0.d0
                            j = 0
                            DO lc = 1, LC1mx, KEX3
                               j = j + 1
@@ -2684,7 +2676,7 @@ C
                         DO lcp1 = 2, LC1mx, KEX3
                            x = FLOAT(lcp1 - 1)/2.
                            CALL POLYNM(IC1mx,x,f1)
-                           sum = 0.
+                           sum = 0.d0
                            DO i = 1, IC1mx
                               sum = sum + f1(i)*al1l2(i,1)
                            ENDDO
@@ -2699,7 +2691,7 @@ C
                DO l1p1 = 1, LC1mx
                   DO icp = 1, icpx
                      DO n = 1, NQ1x
-                        sum = 0.
+                        sum = 0.d0
                         DO k = 1, NQ1x
                            kq = NQ1x - k + 1
                            dtmp = Cros(kq,l1p1,icp)
@@ -2718,7 +2710,7 @@ C
                      CALL POLYNM(NQ1x,x,f1)
                      DO icp = 1, icpx
                         kcp = kcpmx*icp - icpmx
-                        sum = 0.
+                        sum = 0.d0
                         DO n1 = 1, NQ1x
                            sum = sum + al1l2(n1,icp)*f1(n1)
                         ENDDO
@@ -2744,7 +2736,7 @@ C--------------------interpolation for (L1,L2)-dependence
 C
                      DO i = 1, IC1mx
                         DO j = 1, IC2mx
-                           sum = 0.
+                           sum = 0.d0
                            DO k = 1, LC1mx, KEX3
                               kc = (k - 1)/KEX3 + 1
                               DO l = 1, LC2mx, KEX3
@@ -2767,7 +2759,7 @@ C
                            yl = FLOAT(l2p1 - 1)/2.
                            CALL POLYNM(IC2mx,yl,f2)
                            lc = lc + 1
-                           sum = 0.
+                           sum = 0.d0
                            DO k = 1, IC1mx
                               DO l = 1, IC2mx
                                  sum = sum + al1l2(k,l)*f1(k)*f2(l)
@@ -2948,12 +2940,12 @@ C              WRITE (66,99015) ANGle(na), Nbinx
 99015          FORMAT (' THETA= ',F5.1,I5)
             ENDIF
             eout = EOUtmx + ESTep
-            DO n = 1, 2
-               f1(n) = 0.
-               f2(n) = 0.
-            ENDDO
-            s3 = 0.
-            a3 = 0.
+            f1 = 0.d0
+
+            f2 = 0.d0
+
+            s3 = 0.d0
+            a3 = 0.d0
             k1 = kcpmx
             k2 = 2*k1
             DO ne = 1, Nbinx
@@ -3037,7 +3029,7 @@ C
          ENDDO
          if(ftmp.le.0.d0) cycle
 C        csfit(NDANGecis)
-         CALL LSQLEG(CANgler,csfit,nangle,qq,5,adum,ier)
+         CALL LSQLEG(CANgler,csfit,nangle,qq,5,ier)
          piece = 4.d0*pi*qq(1)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
@@ -3915,4 +3907,3 @@ C
       WRITE(8,*) 'WARNING: 50 iterations should never happen'
       RETURN
       END
-
