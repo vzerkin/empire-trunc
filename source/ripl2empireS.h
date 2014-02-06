@@ -1,13 +1,13 @@
-Ccc   * $Rev: 2334 $ 
+Ccc   * $Rev: 3802 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2012-01-27 08:31:08 +0100 (Fr, 27 Jän 2012) $
+Ccc   * $Date: 2014-02-06 04:54:42 +0100 (Do, 06 Feb 2014) $
 Ccc   * $Id$            
 
 C-----It is ripl2empireS.h because it must be compatible
 C-----with global.h declarations so some variables of the original
 C-----ripl2empire.h must be renamed
 C
-      INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7
+      INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7, NDIM8
 C
 C-----Common blocks and declarations from omretrieve.f (RIPL)
 C

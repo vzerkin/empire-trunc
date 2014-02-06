@@ -1,10 +1,10 @@
-Ccc   * $Rev: 3165 $ 
-Ccc   * $Author: apalumbo $ 
-Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 3802 $ 
+Ccc   * $Author: rcapote $ 
+Ccc   * $Date: 2014-02-06 04:54:42 +0100 (Do, 06 Feb 2014) $
 Ccc   * $Id$
             
 
-      INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7
+      INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7, NDIM8
 C
 C-----Common blocks and declarations from omretrieve.f (RIPL)
 C
@@ -46,7 +46,7 @@ C
 C
       COMMON /LIBDBL/ EMIn, EMAx, EPOt(6, NDIM1), RCO(6, NDIM1, NDIM2),
      &                ACO(6, NDIM1, NDIM2), POT(6, NDIM1, NDIM3),
-     &                BANdk(NDIM4),	DEF(NDIM4, NDIM5), 
+     &                BANdk(NDIM4), DEF(NDIM4, NDIM5), 
      &                EXV(NDIM7, NDIM4),  DEFv(NDIM7, NDIM4),
      &                THEtm(NDIM7, NDIM4), EX(NDIM6, NDIM4), 
      &                SPIn(NDIM6, NDIM4), SPInv(NDIM7, NDIM4),  
@@ -54,14 +54,14 @@ C
      &                RCOul2(NDIM1), RCOul3(NDIM1),
      &                ACOul(NDIM1), ECOul(NDIM1), BETa(NDIM1)
 
-	  COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,
+        COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,
      &                SR_bet4, SR_bb42, SR_gamg, SR_delg, SR_bet3,
      &                SR_et0, SR_amu0, SR_hw0, SR_bb32, SR_gamde,
      &                SR_dpar, SR_gshape
 
       COMMON /LIBCHA/AUThor(80), REFer(80), SUMmary(320)
 
-	  COMMON /LIBINT/IREf,IZMin, IZMax, IAMin, IAMax, IMOdel, 
+        COMMON /LIBINT/IREf,IZMin, IZMax, IAMin, IAMax, IMOdel, 
      &               JRAnge(6),NCOll(NDIM4), NVIb(NDIM4), NISotop,
      &               IZ(NDIM4), IA(NDIM4), LMAx(NDIM4), IDEf(NDIM4),
      &               IZProj, IAProj, IREl, IDR, IPArv(NDIM7, NDIM4),
@@ -69,4 +69,4 @@ C
      &               SR_ntu, SR_nnb, SR_nng, SR_nno
 
 
-	 
+       
