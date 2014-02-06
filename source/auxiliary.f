@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3792 $
+Ccc   * $Rev: 3799 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 00:48:15 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-06 04:50:40 +0100 (Do, 06 Feb 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -157,7 +157,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION det
-      INTEGER i, j, ldig, lf, lp, m, nlg, myalloc
+      INTEGER i, j, ldig, m, nlg, myalloc
       DOUBLE PRECISION, ALLOCATABLE :: fp(:), fy(:)
 
       ALLOCATE(fp(N1),fy(N1),STAT=myalloc)
@@ -168,8 +168,6 @@ C
       ENDIF
 C*    Perform linear transformation of the coordinate system
       Ier = 0
-      lf = N1 + 1
-      lp = lf + 1
 C*    Clear the matrix
       Aa = 0.d0
 C*    Set up the matrix
