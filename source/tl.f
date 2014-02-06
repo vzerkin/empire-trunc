@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3800 $
+Ccc   * $Rev: 3812 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 04:51:45 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-06 21:08:38 +0100 (Do, 06 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -331,6 +331,7 @@ C
          READ (97,*)                    ! FIRST LINE
 
          WRITE (8,*)
+         WRITE (8,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
          WRITE (32,*)
      &       'Collective levels from RIPL CC OMP, symm.rotational model'
@@ -582,6 +583,7 @@ C
          OPEN (97,FILE = 'TARGET_COLL.DAT',ERR=300)
          OPEN (96,FILE = 'COLL.DAT')
          READ (97,'(A80)') ch_iuf   ! FIRST LINE
+         WRITE (8,*)
          WRITE (8,*)
      &           'Collective levels from RIPL CC OMP, vibrational model'
          WRITE (32,*)
@@ -847,6 +849,7 @@ C
          OPEN (97,FILE = 'TARGET_COLL.DAT',ERR=300)      
          OPEN (96,FILE = 'COLL.DAT')
 
+         WRITE (8,*)
          WRITE (8,*)
      &    'Collective levels from RIPL CC OMP, soft rotator model'
          WRITE (32,*)
@@ -1217,6 +1220,7 @@ C
          OPEN (96,FILE = 'COLL.DAT')
          READ (97,*)                    ! FIRST LINE
 
+         WRITE (8,*)
          WRITE (8,*)
      &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
          WRITE (32,*)

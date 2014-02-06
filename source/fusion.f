@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3788 $
+Ccc   * $Rev: 3812 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-06 21:08:38 +0100 (Do, 06 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -445,6 +445,7 @@ C--------------Saving KTRlom(0,0)
                KTRlom(0,0) = KTRompcc
                CCCalc = .TRUE.
             ENDIF
+            WRITE (8,*) 
             IF (CCCalc) THEN
                WRITE (8,*) ' CC   calculation  for inelastic scattering'
                WRITE (8,*) '    on   coupled coll. levels'
@@ -456,6 +457,7 @@ C-----------DWBA calculation. All collective levels considered
                WRITE (8,*) ' DWBA calculations for inelastic scattering'
                WRITE (8,*) '    on uncoupled coll. levels and continuum'
             ENDIF
+            WRITE (8,*) 
 C           
 C           saving the input value of the key CN_isotropic
             logtmp = CN_isotropic
@@ -477,6 +479,7 @@ C           restoring the input value of the key CN_isotropic
                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
+               WRITE (8,*) 
                WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                     'fusion determination'
             ENDIF
@@ -942,6 +945,7 @@ C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
             CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs)
+            WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
