@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3800 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-06 04:51:45 +0100 (Do, 06 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -106,13 +106,13 @@ C--------prepare starting values for searching critical l
             IF (clf.LT.0.D0) clf = 10.
          ELSE
             CSFus = CSRead
-            clf = 1.0
+            clf = 1.d0
          ENDIF
-         xfum = 0.0
+         xfum = 0.d0
    50    xfu = XFUS(EIN,AEJc(0),A(0),DFUs,clf)
          IF (xfu.LT.CSFus) THEN
             xfum = xfu
-            clf = clf + 1.
+            clf = clf + 1.d0
             GOTO 50
          ELSE
             CRL = clf - 1 + (CSFus - xfum)/(xfu - xfum)
@@ -123,8 +123,9 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       DO i = 1, NDLW
          arg = (CRL - i + 1)/DFUs
          arg = MIN(70.0D0,arg)
-         Stl(i) = 1.0/(1.0 + EXP((-arg)))
+         Stl(i) = 1.d0/(1.d0 + EXP((-arg)))
       ENDDO
+	RETURN
       END
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
@@ -2448,6 +2449,7 @@ C             Sel(L) contains the shape elastic cross section for a given orbita
 C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L
 C
 C
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2465,8 +2467,9 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
-     &                 xmas_nejc, xmas_nnuc, selast
+     &                 xmas_nejc, xmas_nnuc, selast, sreal, simag, stmp
       INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
+      INTEGER nctot, ncsol, ncint
       LOGICAL relcal, unformat
       CHARACTER*1 parc
       DATA unformat/.TRUE./ 
