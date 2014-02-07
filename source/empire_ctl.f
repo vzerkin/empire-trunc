@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3820 $
+Ccc   * $Rev: 3823 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-02-07 06:27:54 +0100 (Fr, 07 Feb 2014) $
+Ccc   * $Date: 2014-02-07 06:53:22 +0100 (Fr, 07 Feb 2014) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1830,7 +1830,7 @@ Ccc
      &        ndreac, ndkeys, j
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=134)
+      parameter (ndreac=90, ndkeys=141)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
