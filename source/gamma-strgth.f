@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3818 $
+Ccc   * $Rev: 3827 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-07 06:25:45 +0100 (Fr, 07 Feb 2014) $
+Ccc   * $Date: 2014-02-07 23:27:02 +0100 (Fr, 07 Feb 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -197,9 +197,11 @@ C
      &  WRITE (8,99021) GDRpar(9,Nnuc), GDRpar(10,Nnuc)
 99021 FORMAT (2X,'beta',3X,F6.3,/,2X,'S2+',4X,F6.3)
       WRITE (8,99025)
-99025 FORMAT (1X,/,7X,'(1-TE)*Weiss. + TE*GMR',
-     &   1X,/,7X,'TE: mixing coeff. of s.p. Weiskopf & GQR (E1,M1,E2)',
-     &   1X,/,7X,'CE: s.p. Weiskopf scaling coefficient    (E1,M1,E2)')
+99025 FORMAT(1X,/,2X,'(1-TE)*Weiss. + TE*GiR (i=D,Q,M) D=E1; Q=E2; M=M1'
+     &  ,1X,/,2X,
+     &'TE - mixing coeff. of s.p. Weisskopf & GiR, TE=1 pure resonance'
+     &,1X,/,2X,
+     &'CE - s.p. Weisskopf scaling coefficient (default: 0.01,0.1,0.1)')
       WRITE (8,*)
 
       RETURN
