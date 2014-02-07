@@ -1,6 +1,6 @@
-!cc   * $Rev: 3826 $
+!cc   * $Rev: 3828 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-07 23:25:55 +0100 (Fr, 07 Feb 2014) $
+!cc   * $Date: 2014-02-08 00:48:27 +0100 (Sa, 08 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1138,11 +1138,16 @@ C
 C
 C        Assigning the target gamma parameters from the input
 C 
-         do i=1,10
-           if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
+         do i=1,NDGDRPM
+	     if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
+         enddo
+         do i=1,NDGQRPM
            if(GQRpar(i,NTArget).ne.-1.d0) GQRpar(i,0)=GQRpar(i,NTArget)
+         enddo
+         do i=1,NDGMRPM
            if(GMRpar(i,NTArget).ne.-1.d0) GMRpar(i,0)=GMRpar(i,NTArget)
-         enddo           
+         enddo
+C
 C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
            CALL EMPAgdr() ! allocating memory for temporal gdr arrays
