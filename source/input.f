@@ -1,6 +1,6 @@
-!cc   * $Rev: 3821 $
+!cc   * $Rev: 3826 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-07 06:28:28 +0100 (Fr, 07 Feb 2014) $
+!cc   * $Date: 2014-02-07 23:25:55 +0100 (Fr, 07 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -301,10 +301,6 @@ C
          IOPSYS = 0 !   LINUX - Default
          CALL GETENV ('OS', empireos)
          if(empireos(1:3). eq. 'Win') IOPsys = 1 ! Windows
-C--------Mode of EXFOR retrieval
-C        IX4ret = 0 no EXFOR retrieval
-C        IX4ret = 1 copy C4 file
-         IX4ret = 1
 
          NPRIm_g = 0       ! No primary gammas (default)
          NNG_xs  = 0       ! Gamma production cross section not printed
@@ -1015,12 +1011,6 @@ C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
 C
-
-C        Moved to runE script
-C--------Retrieve C4 experimental data 
-C        IF (IX4ret.EQ.1 .and. (.NOT.BENchm) ) CALL RETRIEVE
-C--------Retrieve C4 experimental data  *** done ***
-
 C        Changing the incident input energy to plot LDs
          IF (FITlev.GT.0) EIN = 20.d0  
 
@@ -1149,7 +1139,9 @@ C
 C        Assigning the target gamma parameters from the input
 C 
          do i=1,10
-           GDRpar(i,0) = GDRpar(i,NTArget)
+           if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
+           if(GQRpar(i,NTArget).ne.-1.d0) GQRpar(i,0)=GQRpar(i,NTArget)
+           if(GMRpar(i,NTArget).ne.-1.d0) GMRpar(i,0)=GMRpar(i,NTArget)
          enddo           
 C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
@@ -1160,8 +1152,8 @@ C        Prepare gamma transmission parameters
            WRITE (8,*) ' -----------------------------------------'
            WRITE(8,*) ' TARGET GDR DATA:'
            CALL ULM_print(0)
-           DO i = 1, NNUcd ! or should be NNUct 
-             CALL ULM(i,Numram) ! target
+           DO i = 1, NNUcd 
+             CALL ULM(i,Numram) 
              IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
 C
 C            Checking fission input consistency 
@@ -5708,231 +5700,118 @@ C-----
 C-----
 
          IF (name.EQ.'WEDNOR') THEN
-
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
-
               WRITE (8,
-
      &     '('' WARNING: E1 s.p. Weiskopf scaling out of range'',
-
      &      f5.2)') val
-
               GOTO 100
-
             ENDIF
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
               DO i = 1, NDNUC
-
                 GDRpar(8,i) = val
-
               ENDDO
-
               WRITE (8,
-
      &        '('' E1 s.p. Weiskopf scaling (default: 0.01) in all nucle
-
      &i set to '',F7.2)') val
-
               WRITE (12,
-
      &        '('' E1 s.p. Weiskopf scaling (default: 0.01) in all nucle
-
      &i set to '',F7.2)') val
-
               GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
               WRITE (8,
-
      &        '('' WARNING: E1 s.p. Weiskopf scaling IGNORED'')')
-
               GOTO 100
-
             ENDIF
-
             GDRpar(8,nnuc) = val
-
             WRITE (8,
-
      &     '('' E1 s.p. Weiskopf scaling (default: 0.01)  in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             WRITE (12,
-
      &     '('' E1 s.p. Weiskopf scaling (default: 0.01)  in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'WEMNOR') THEN
-
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
-
               WRITE (8,
-
      &     '('' WARNING: M1 s.p. Weiskopf scaling out of range'',
-
      &      f5.2)') val
-
               GOTO 100
-
             ENDIF
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
               DO i = 1, NDNUC
-
                 GMRpar(8,i) = val
-
               ENDDO
-
               WRITE (8,
-
      &        '('' M1 s.p. Weiskopf scaling (default: 0.1) in all nuclei
-
      & set to '',F7.2)') val
-
               WRITE (12,
-
      &        '('' M1 s.p. Weiskopf scaling (default: 0.1) in all nuclei
-
      & set to '',F7.2)') val
-
               GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
               WRITE (8,
-
      &        '('' WARNING: M1 s.p. Weiskopf scaling IGNORED'')')
-
               GOTO 100
-
             ENDIF
-
             GMRpar(8,nnuc) = val
-
             WRITE (8,
-
      &     '('' M1 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             WRITE (12,
-
      &     '('' M1 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             GOTO 100
-
          ENDIF
-
 C-----
-
          IF (name.EQ.'WEQNOR') THEN
-
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
-
               WRITE (8,
-
      &     '('' WARNING: E2 s.p. Weiskopf scaling out of range'',
-
      &      f5.2)') val
-
               GOTO 100
-
             ENDIF
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
               DO i = 1, NDNUC
-
                 GQRpar(8,i) = val
-
               ENDDO
-
               WRITE (8,
-
      &        '('' E2 s.p. Weiskopf scaling (default: 0.1) in all nuclei
-
      & set to '',F7.2)') val
-
               WRITE (12,
-
      &        '('' E2 s.p. Weiskopf scaling (default: 0.1) in all nuclei
-
      & set to '',F7.2)') val
-
               GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
-
      &                '' NOT NEEDED'')') i2,i1
-
               WRITE (8,
-
      &        '('' WARNING: E2 s.p. Weiskopf scaling IGNORED'')')
-
               GOTO 100
-
             ENDIF
-
             GQRpar(8,nnuc) = val
-
             WRITE (8,
-
      &     '('' E2 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             WRITE (12,
-
      &     '('' E2 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
-
      &       '' set to '',F7.2)') i2, SYMb(nnuc), val
-
             GOTO 100
-
          ENDIF
-
 C-----
          IF (name.EQ.'MSD   ') THEN
             MSD = val
@@ -9554,102 +9433,7 @@ C
 
       return
       END
-C
-C
-C
-      SUBROUTINE RETRIEVE
-Ccc   ******************************************************************
-Ccc   *                                                       class:iou*
-Ccc   *                     R E T R I E V E                            *
-Ccc   *                                                                *
-Ccc   *          Retrieves EXFOR entries relevant to EMPIRE run        *
-Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   * input: none                                                    *
-Ccc   * output: none                                                   *
-Ccc   *                                                                *
-Ccc   * calls: ipipe_copy                                              *
-Ccc   *                                                                *
-Ccc   *                                                                *
-Ccc   ******************************************************************
-Ccc
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
-C
-C Local variables
-C
-      CHARACTER*13 caz
-      CHARACTER*64 filename
-      INTEGER iwin, ipipe_copy, ilen
-      CHARACTER*255 ccomm
-      LOGICAL fexist
 
-C     write(6,*)trim(empiredir)//trim(filename)
-      INQUIRE (FILE = 'C4.DAT', EXIST = fexist)
-      IF (fexist) RETURN  ! SKIPPING EXP. DATA RETRIEVAL AND SORTING IF C4.DAT EXISTS
-C
-C-----define target file name
-C
-      if(SYMb(0)(2:2).eq.' ') then
-        write(caz,'(I3.3,3A1,I3.3,A3)')
-     &   int(Z(0)),'_',SYMb(0)(1:1),'_', int(A(0)),'.c4'
-      else
-        write(caz,'(I3.3,A1,A2,A1,I3.3,A3)')
-     &   int(Z(0)),'_',SYMb(0)(1:2),'_', int(A(0)),'.c4'
-      endif
-      
-      IF(IZAejc(0) .EQ. 1) THEN
-        filename = '/EXFOR/neutrons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 1001) THEN
-        filename = '/EXFOR/protons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 1002) THEN
-        filename = '/EXFOR/deuterons/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 2004) THEN
-        filename = '/EXFOR/alphas/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 2003) THEN
-        filename = '/EXFOR/helions/'//trim(caz)
-      ELSEIF(IZAejc(0) .EQ. 0) THEN
-        filename = '/EXFOR/gammas/'//trim(caz)
-      ELSE
-        WRITE (8,
-     &    '(''  WARNING: No EXFOR retrievals for these projectiles'')')
-        WRITE (8,*)     
-        RETURN
-      ENDIF
-
-      ccomm = trim(empiredir)//trim(filename)
-      ilen  = len(trim(ccomm))
-      INQUIRE (FILE = ccomm(1:ilen), EXIST = fexist)
-C     write(6,*) ccomm(1:ilen),ilen,fexist
-      IF (.NOT. fexist) THEN
-        WRITE (*,
-     & '(''  WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
-        write (*,*)' ',ccomm(1:ilen)
-        WRITE (*,*)
-        WRITE (8,
-     & '(''WARNING: No experimental data in IAEA EXFOR-C4 file:'')')
-        write (8,*)' ',ccomm(1:ilen)
-        WRITE (8,*)
-        RETURN 
-      ENDIF
-
-C-----copy EXFOR file to the working directory
-      WRITE (8,*) 
-     &  'Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
-      write(8,*) ' '
-      WRITE (*,*) 
-     &  '  Retrieving EXFOR(C4) file: ',ccomm(1:ilen)
-      write(*,*) ' '
-
-      iwin=ipipe_copy(ccomm(1:ilen),'TMP.c4')
-C
-C     Call to sortc4 moved to runE script
-C      
-      RETURN
-      END
-C
-C
-C
       INTEGER FUNCTION IFindColl_CCFUS()
 Ccc
 Ccc   ********************************************************************
