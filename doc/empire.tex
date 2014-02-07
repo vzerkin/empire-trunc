@@ -11714,7 +11714,22 @@ as in  2.18  and earlier
 = 5 GFL (Mughabghab) 
 
 = 6 SLO standard Lorentzian 
+
+\item [{WEDNOR}] Weisskopf single particle estimates for E1 $\gamma$ transitions will be multiplied by VAL for 
+the nucleus with Z=I1 and A=I2 (ATTENTION default: 0.01). In the table of GDR parameters in *.lst file this
+quantity is referred to as CE1.
+
+\item [{WEQNOR}] Weisskopf single particle estimates for E2 $\gamma$ transitions will be multiplied by VAL for 
+the nucleus with Z=I1 and A=I2 (ATTENTION default: 0.1). In the table of GDR parameters in *.lst file this
+quantity is referred to as CE2.
+
+\item [{WEMNOR}] Weisskopf single particle estimates for M1 $\gamma$ transitions will be multiplied by VAL for 
+the nucleus with Z=I1 and A=I2 (ATTENTION default: 0.1). In the table of GDR parameters in *.lst file this
+quantity is referred to as CM1.
+
 \end{description}
+
+
 
 \section*{GDR parameters}
 
@@ -11731,13 +11746,13 @@ as in  2.18  and earlier
 = 1 GDR shape dependence accounts for the rotation induced deformation
 (spin dependent, Eq. \ref{totdefor}).
 
-\item [{MIXGDR}] E1 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+\item [{MIXGDR}] E1 mixing coefficient of Weisskopf and Giant Dipole Resonance Model (GRM) 
 gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
 pure GRM).
-\item [{MIXGQR}] E2 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+\item [{MIXGQR}] E2 mixing coefficient of Weisskopf and Giant Quadrupol Resonance Model (GRM) 
 gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
 pure GRM).
-\item [{MIXGMR}] M1 mixing coefficient of Weiskopf and Giant Resonance Model (GRM) 
+\item [{MIXGMR}] M1 mixing coefficient of Weisskopf and Giant Magnetic Resonance Model (GRM) 
 gamma-ray strength funtion set to VAL (allowed from 0 to 1. default = 1 means
 pure GRM).
 \item [{EGDR1}] GDR energy of first peak set to VAL (default calculated
