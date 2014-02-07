@@ -95,6 +95,10 @@ def runE(proj):
         print("Input file : %s does not exist" % proj+'.inp')
         sys.exit(1)
     
+    # Get the Z,A of the target and projectile
+    projectileA, projectileZ = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[2].split()[:2] )
+    A, Z = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
+
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
@@ -166,7 +170,6 @@ def runE(proj):
         print('File with evaluated NUBAR exists: %s' % proj+'-nubar.dat')  
     else:    
         # Retrieving the nubar from ENDF evaluations
-        A, Z = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
         if Z >= 90: 
             cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
             arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
@@ -195,9 +198,6 @@ def runE(proj):
         }
 
         # Get the stuff we need to construct the correct name of the c4 file
-        projectileA, projectileZ = map( int, open( proj+'.inp', 'r' ).readlines()[2].split()[:2] )
-        A, Z = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
-        # Z, A = map( int, open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
         print('\nRetrieval of experimental data for the following reaction:')
         print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
 
@@ -205,8 +205,8 @@ def runE(proj):
         targetState = None
         for line in open( proj+'.inp', 'r' ).readlines():
             if 'benchm' in line.lower():
-                if line.split()[1]=='1': SKIPC4 = True
-            if 'trglev' in line.lower(): targetIsomer = int(line.split()[1])
+                if int(float(line.split()[1]))==1: SKIPC4 = True
+            if 'trglev' in line.lower(): targetIsomer = int(float((line.split()[1]))
 
         if not SKIPC4:
             # Construct the c4 file names
@@ -222,14 +222,12 @@ def runE(proj):
             if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground state of %s-%i :\n %s' % (el,A,gsC4File) )
             if not isEmpty(isoC4File): print('Experimental data found for reactions on excited states   of %s-%i :\n %s' % (el,A,isoC4File) )
             
-	    # Read in all the relevant c4 files and concatenate them
+	        # Read in all the relevant c4 files and concatenate them
             if targetState > 1: fList = [ natC4File, sumC4File, isoC4File ]
             else :              fList = [ natC4File, sumC4File, gsC4File ]
             allTheC4FilesMerged = []
-            for fPattern in fList: # loop through all the file patterns we just defined
-                #print('C4 filenames %s ' % (fPattern) )
-                for c4Filename in glob( fPattern ): # glob returns a list of filenames matching fPattern
-                    allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
+            for c4Filename in fList: # loop through all the file patterns we just defined
+                allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
             
             # save the concatenated files together in the two files we need later
             open( proj+'-raw.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
