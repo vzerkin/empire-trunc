@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3687 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Rev: 3820 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-02-07 06:27:54 +0100 (Fr, 07 Feb 2014) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1864,7 +1864,8 @@ C
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'PFNNIU',
      &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT',
-     &  'PFNERE', 'SFACT'  /
+     &  'PFNERE', 'SFACT' , 'MIXGDR', 'MIXGQR', 'MIXDMR', 'WEDNOR',
+     &  'WEQNOR', 'WEMNOR', 'FISTGA'/
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1891,7 +1892,8 @@ C
      &  'F'     , 'F'     , 'F'     , 'A'     , 'A'     , 'A'     ,
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
-     &  'A'     , 'F'      /
+     &  'A'     , 'F'     , 'R'     , 'R'     , 'R'     , 'R'     ,
+     &  'R'     , 'R'     , 'R'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction

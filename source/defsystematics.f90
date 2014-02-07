@@ -68,4 +68,4 @@
       beta3=delta3/r0c
 
       return
-      end
+      end subroutine defcal
