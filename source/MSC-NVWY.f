@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3783 $
+Ccc   * $Rev: 3819 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-07 06:26:49 +0100 (Fr, 07 Feb 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -429,8 +429,8 @@ C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
 C-----n o t e  an approximation to calculate a single width for the
 C-----cammel-like GDR shapes (here 1/2 of the distance between two
 C-----peaks is added to the average; this being absolutely arbitrary)
-      IF (GDRpar(6,1).NE.0.0D0) gdrw = (GDRpar(2,1)*GDRpar(3,1) + GDRpar
-     &                                 (5,1)*GDRpar(6,1))
+      IF (GDRpar(6,1).NE.-1.0D0) gdrw = (GDRpar(2,1)*GDRpar(3,1) + 
+     &                                   GDRpar(5,1)*GDRpar(6,1))
      &                                 /(GDRpar(3,1) + GDRpar(6,1))
      &                                 + 0.5*(GDRpar(4,1) - GDRpar(1,1))
       WRITE (8,'('' Spreading/total GDR width ='',G12.5)') D1Fra

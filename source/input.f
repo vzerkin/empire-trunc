@@ -1,6 +1,6 @@
-!cc   * $Rev: 3786 $
+!cc   * $Rev: 3819 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-05 06:53:03 +0100 (Mi, 05 Feb 2014) $
+!cc   * $Date: 2014-02-07 06:26:49 +0100 (Fr, 07 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -210,10 +210,10 @@ C
             DEPart(nnuc) = 1.d0
          ENDDO
          NSTOred(0) = -1
-C--------set default gamma-strength parameters to zero
-         GDRpar = 0.d0
-         GQRpar = 0.d0
-         GMRpar = 0.d0
+C--------set default gamma-strength parameters to -1
+         GDRpar = -1.d0
+         GQRpar = -1.d0
+         GMRpar = -1.d0
 C
 C--------set fission normalization factors
          DO nnuc = 1, NDNUC
@@ -700,25 +700,17 @@ C
 C
 C          retrieving NUBAR if available for actinides (Th to Cf)
 C
+C          the NUBAR.DAT file is expected to be created by runE script
+C          before calling EMPIRE
+C
            call read_nubar_unix(ierr)
            NUBarread = .TRUE.
            if(ierr.gt.0) NUBarread = .FALSE.
 C
-C            For testing the Th-232 nubar was parameterized
+C          For testing the Th-232 nubar was parameterized
 C          call read_nubar_windows()
 C          NUBarread = .TRUE.
 
-           IF(.not.NUBarread) then
-C              preparing the file ot get nubar after EMPIRE finish
-C            get_nubar will be called from runE script: 
-C            /util/nubar/get_nubar A0 Z0
-C
-             OPEN(959,file='NUBAR.GET')
-             write (959,'(1x,I3,1x,I3)') NINT(A(0)),NINT(Z(0))
-               CLOSE(959)  
-             WRITE(8,*) 
-     &        ' WARNING: NUBAR.DAT will be retrieved in the next run'
-           ENDIF
          ENDIF
 C
 C--------other decaying nuclei
@@ -1019,9 +1011,10 @@ C--------New energy header
 C
          Irun = 0
          CALL READIN(Irun)   !optional part of the input
-
+C
+C        Moved to runE script
 C--------Retrieve C4 experimental data 
-         IF (IX4ret.EQ.1 .and. (.NOT.BENchm) ) CALL RETRIEVE
+C        IF (IX4ret.EQ.1 .and. (.NOT.BENchm) ) CALL RETRIEVE
 C--------Retrieve C4 experimental data  *** done ***
 
 C        Changing the incident input energy to plot LDs
@@ -4180,7 +4173,6 @@ C-----
             GOTO 100
          ENDIF
 C--------CCFUS input  ** done ***
-
 C-----
          IF (name.EQ.'GDRGFL') THEN
             Key_GDRGFL = val + 0.001
@@ -4276,10 +4268,11 @@ C-----
 C
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &    '('' ECONT - energy at which the continuum starts ignored'')')
+     &           '('' WARNING: ECONT - energy at which the continuum sta
+     &rts ignored'')')
                GOTO 100
             ENDIF
             if(val.ge.0.) then
@@ -4293,7 +4286,7 @@ C
      &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
             else       
               WRITE (8,
-     &        '('' Energy continuum for nucleus '',I3,A2,
+     &        '('' WARNING: Energy continuum for nucleus '',I3,A2,
      &        '' is negative, ignored '',f6.2)') i2, SYMb(nnuc), val
             endif
             GOTO 100
@@ -4866,16 +4859,17 @@ C
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &'('' Real volume potential depth uncertainty ignored'')')
+     &'('' WARNING: Real volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPVV '',I2)') i3
                WRITE (8,
-     &'('' Real volume potential depth uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPVV '',I2)') i3
+               WRITE (8,
+     &'('' WARNING: Real volume potential depth uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -4916,16 +4910,19 @@ C
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &        '('' Volume potential diffuseness uncertainty ignored'')')
+     &           '('' WARNING: Volume potential diffuseness uncertainty 
+     &ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPAV '',I2)') i3
                WRITE (8,
-     &        '('' Volume potential diffuseness uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPAV '',I2)') i3
+               WRITE (8,
+     &           '('' WARNING: Volume potential diffuseness uncertainty 
+     &ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -4962,16 +4959,19 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &        '('' Imag. volume potential depth uncertainty ignored'')')
+     &           '('' WARNING: Imag. volume potential depth uncertainty 
+     &ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPWV '',I2)') i3
                WRITE (8,
-     &        '('' Imag. volume potential depth uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPWV '',I2)') i3
+               WRITE (8,
+     &           '('' WARNING: Imag. volume potential depth uncertainty 
+     &ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5010,16 +5010,19 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &      '('' Imag. surface potential depth uncertainty ignored'')')
+     &           '('' WARNING: Imag. surface potential depth uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPWS '',I2)') i3
                WRITE (8,
-     &      '('' Imag. surface potential depth uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPWS '',I2)') i3
+               WRITE (8,
+     &           '('' WARNING: Imag. surface potential depth uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5058,16 +5061,19 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     & '('' Surface potential diffuseness uncertainty ignored'')')
+     &           '('' WARNING: Surface potential diffuseness uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPAS '',I2)') i3
                WRITE (8,
-     & '('' Surface potential diffuseness uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPAS '',I2)') i3
+               WRITE (8,
+     &           '('' WARNING: Surface potential diffuseness uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5105,16 +5111,17 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     & '('' Surface potential radius uncertainty ignored'')')
+     & '('' WARNING: Surface potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPRS'',I2)') i3
                WRITE (8,
-     & '('' Surface potential radius uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPRS'',I2)') i3
+               WRITE (8,
+     & '('' WARNING: Surface potential radius uncertainty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5152,16 +5159,18 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     & '('' Volume imaginary potential radius uncertainty ignored'')')
+     &           '('' WARNING: Volume imaginary potential radius uncerta
+     &inty ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPRW'',I2)') i3
+               WRITE (8,'('' WARNING: UNKNOWN EJECTILE in UOMPRW'',I2)') i3
                WRITE (8,
-     & '('' Volume imaginary potential radius uncertainty ignored'')')
+     &           '('' WARNING: Volume imaginary potential radius uncerta
+     &inty ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5199,16 +5208,19 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     & '('' Volume real potential radius uncertainty ignored'')')
+     &           '('' WARNING: Volume real potential radius uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in UOMPRV'',I2)') i3
                WRITE (8,
-     & '('' Volume real potential radius uncertainty ignored'')')
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPRV'',I2)') i3
+               WRITE (8,
+     &           '('' WARNING: Volume real potential radius uncertainty
+     &ignored'')')
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5256,10 +5268,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &          '('' NORMALIZATION OF GDR first hump energy IGNORED'')')
+     & '('' WARNING: NORMALIZATION OF GDR first hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5306,10 +5318,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &          '('' NORMALIZATION OF GDR first hump width IGNORED'')')
+     &  '('' WARNING: NORMALIZATION OF GDR first hump width IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5356,10 +5368,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &          '('' NORMALIZATION OF GDR first hump XS IGNORED'')')
+     &     '('' WARNING: NORMALIZATION OF GDR first hump XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5406,10 +5418,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &         '('' NORMALIZATION OF GDR second hump energy IGNORED'')')
+     &'('' WARNING: NORMALIZATION OF GDR second hump energy IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5456,10 +5468,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &          '('' NORMALIZATION OF GDR FIRST HUMP WIDTH IGNORED'')')
+     &  '('' WARNING: NORMALIZATION OF GDR FIRST HUMP WIDTH IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5506,10 +5518,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-     &          '('' NORMALIZATION OF GDR FIRST HUMP XS IGNORED'')')
+     &     '('' WARNING: NORMALIZATION OF GDR FIRST HUMP XS IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -5543,7 +5555,7 @@ C-----
          IF (name.EQ.'MIXGDR') THEN
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
               WRITE (8,
-     &     '('' ERROR: E1 mixing coeff. Weiskopf & GDR out of range'',
+     &     '('' WARNING: E1 mixing coeff. Weiskopf & GDR out of range'',
      &      f5.2)') val
               GOTO 100
             ENDIF
@@ -5581,7 +5593,7 @@ C-----
          IF (name.EQ.'MIXGMR') THEN
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
               WRITE (8,
-     &     '('' ERROR: M1 mixing coeff. Weiskopf & GMR out of range'',
+     &     '('' WARNING: M1 mixing coeff. Weiskopf & GMR out of range'',
      &      f5.2)') val
               GOTO 100
             ENDIF
@@ -5600,10 +5612,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-              WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
               WRITE (8,
-     &          '('' INPUT M1 mixing coeff. Weiskopf & GMR IGNORED'')')
+     &  '('' WARNING: INPUT M1 mixing coeff. Weiskopf & GMR IGNORED'')')
               GOTO 100
             ENDIF
             GMRpar(7,nnuc) = val
@@ -5619,7 +5631,7 @@ C-----
          IF (name.EQ.'MIXGQR') THEN
             IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
               WRITE (8,
-     &     '('' ERROR: E1 mixing coeff. Weiskopf & GQR out of range'',
+     &     '('' WARNING: E1 mixing coeff. Weiskopf & GQR out of range'',
      &      f5.2)') val
               GOTO 100
             ENDIF
@@ -5651,6 +5663,120 @@ C-----
             WRITE (12,
      &     '('' E2 mixing coeff. Weiskopf & GQR in '',I3,A2,'' set to ''
      &      ,F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'WEDNOR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' WARNING: E1 s.p. Weiskopf scaling out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GDRpar(8,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' E1 s.p. Weiskopf scaling (default: 0.01) in all nucle
+     &i set to '',F7.2)') val
+              WRITE (12,
+     &        '('' E1 s.p. Weiskopf scaling (default: 0.01) in all nucle
+     &i set to '',F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &        '('' WARNING: E1 s.p. Weiskopf scaling IGNORED'')')
+              GOTO 100
+            ENDIF
+            GDRpar(8,nnuc) = val
+            WRITE (8,
+     &     '('' E1 s.p. Weiskopf scaling (default: 0.01)  in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' E1 s.p. Weiskopf scaling (default: 0.01)  in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'WEMNOR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' WARNING: M1 s.p. Weiskopf scaling out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GMRpar(8,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' M1 s.p. Weiskopf scaling (default: 0.1) in all nuclei
+     & set to '',F7.2)') val
+              WRITE (12,
+     &        '('' M1 s.p. Weiskopf scaling (default: 0.1) in all nuclei
+     & set to '',F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &        '('' WARNING: M1 s.p. Weiskopf scaling IGNORED'')')
+              GOTO 100
+            ENDIF
+            GMRpar(8,nnuc) = val
+            WRITE (8,
+     &     '('' M1 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' M1 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'WEQNOR') THEN
+            IF (val.lt.0.d0 .or. val.gt.1.d0) THEN
+              WRITE (8,
+     &     '('' WARNING: E2 s.p. Weiskopf scaling out of range'',
+     &      f5.2)') val
+              GOTO 100
+            ENDIF
+            izar = i1*1000 + i2
+            IF (izar.EQ.0) THEN
+              DO i = 1, NDNUC
+                GQRpar(8,i) = val
+              ENDDO
+              WRITE (8,
+     &        '('' E2 s.p. Weiskopf scaling (default: 0.1) in all nuclei
+     & set to '',F7.2)') val
+              WRITE (12,
+     &        '('' E2 s.p. Weiskopf scaling (default: 0.1) in all nuclei
+     & set to '',F7.2)') val
+              GOTO 100
+            ENDIF
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+              WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+     &                '' NOT NEEDED'')') i2,i1
+              WRITE (8,
+     &        '('' WARNING: E2 s.p. Weiskopf scaling IGNORED'')')
+              GOTO 100
+            ENDIF
+            GQRpar(8,nnuc) = val
+            WRITE (8,
+     &     '('' E2 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
+            WRITE (12,
+     &     '('' E2 s.p. Weiskopf scaling (default: 0.1) in '',I3,A2,
+     &       '' set to '',F7.2)') i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----
@@ -5904,18 +6030,18 @@ C              Setting ENDF for all emission loops
                ENDIF
             ENDIF
             IF(val.LT.0) THEN
-               WRITE (8,'('' WRONG ENDF value in input'',I3)')
+               WRITE (8,'('' WARNING: WRONG ENDF value in input'',I3)')
      &                i2
-               WRITE (8,'('' SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: SETTING IGNORED'')')
                GOTO 100
             ENDIF
 C           Setting ENDF for a single nucleus
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' ENDF SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: ENDF SETTING IGNORED'')')
                GOTO 100
             ENDIF
 C
@@ -5948,17 +6074,19 @@ C-----
          IF (name.EQ.'BNDG  ') THEN
             IF (i3.LE.0 .OR. i3.GT.NDEJC) THEN
                WRITE (8,
-     &                '('' EJECTILE IDENTIFICATION '',I2,'' UNKNOWN'')')
+     &      '('' WARNING: EJECTILE IDENTIFICATION '',I2,'' UNKNOWN'')')
      &                i3
-               WRITE (8,'('' BINDING ENERGY SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: BINDING ENERGY SETTING IGNORED'')')
                GOTO 100
             ENDIF
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' BINDING ENERGY SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: BINDING ENERGY SETTING IGNORED'')')
                GOTO 100
             ENDIF
             if(i4.ne.0 .and. IOPran.ne.0) then
@@ -5999,9 +6127,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' SETTING STABILITY LIMIT IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: SETTING STABILITY LIMIT IGNORED'')')
                GOTO 100
             ENDIF
             JSTab(nnuc) = val
@@ -6045,9 +6174,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' L.D. a-PARAMETER SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: L.D. a-PARAMETER SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPaa(nnuc) = val
@@ -6094,10 +6224,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' NORMALIZATION OF 
-     &                dw shell correction IGNORED'')')
+               WRITE (8,'('' WARNING: NORMALIZATION OF dw shell correcti
+     &on IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6161,9 +6291,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' NORMALIZATION OF a-tilde IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: NORMALIZATION OF a-tilde IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6207,9 +6338,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISBAR SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
             LDShif(nnuc) = val - 1.0
@@ -6238,9 +6369,10 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' NORMALIZATION OF G-tilde IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: NORMALIZATION OF G-tilde IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -6273,9 +6405,10 @@ C-----
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' L.D. PARAMETER Ux SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: L.D. PARAMETER Ux SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPar(2,nnuc) = val
@@ -6292,9 +6425,9 @@ C-----
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' PAIRING SHIFT SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: PAIRING SHIFT SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPar(3,nnuc) = val
@@ -6311,9 +6444,10 @@ C-----
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' L.D. PARAMETER E0 SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: L.D. PARAMETER E0 SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPar(4,nnuc) = val
@@ -6330,9 +6464,10 @@ C-----
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' L.D. PARAMETER T  SETTING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: L.D. PARAMETER T  SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPar(5,nnuc) = val
@@ -6465,9 +6600,10 @@ C
             izar = i1*1000 + i2
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISSION DECAY WIDTH TUNING IGNORED'')')
+               WRITE (8,
+     &           '('' WARNING: FISSION DECAY WIDTH TUNING IGNORED'')')
                GOTO 100
             ENDIF
             if(i3.gt.0. .and. IOPran.ne.0) then
@@ -6518,13 +6654,14 @@ C
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' TUNING IGNORED'')')
+               WRITE (8,'('' WARNING: TUNING IGNORED'')')
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
-               WRITE (8,'('' UNKNOWN EJECTILE in TUNE '',I2)') i3
+               WRITE (8,
+     &           '(''  WARNING: UNKNOWN EJECTILE in TUNE '',I2)') i3
                GOTO 100
             ENDIF
             if(i4.gt.0. .and. IOPran.ne.0) then
@@ -6968,9 +7105,10 @@ C-----shift parameter used to adjust HFB LD
 
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-             WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+             WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-             WRITE (8,'(''  GS HFB L.D. SHIFT SETTING IGNORED'')')
+             WRITE (8,
+     &         '('' WARNING: GS HFB L.D. SHIFT SETTING IGNORED'')')
              GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -7034,9 +7172,10 @@ C-----pseudo a-parameter used to adjust HFB LD
 
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-             WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+             WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-             WRITE (8,'(''  GS HFB L.D. norm SETTING IGNORED'')')
+             WRITE (8,
+     &         '('' WARNING: GS HFB L.D. norm SETTING IGNORED'')')
              GOTO 100
             ENDIF
             if(i3.ne.0 .and. IOPran.ne.0) then
@@ -7071,14 +7210,14 @@ C--------checking for fission data in the optional input
          IF (name.EQ.'FISSHI') THEN
             izar = i1*1000 + i2
             IF (val.EQ.0) THEN
-               fstring = 'fission induced by light part.  '
+               fstring = 'fission induced by light particles'
             ELSEIF (val.EQ.1) THEN
                fstring = 'HI-fission over 1-humped barrier'
             ELSEIF (val.EQ.2) THEN
                fstring = 'fission ignored'
             ELSE
               WRITE (8,
-     &          '('' ERROR: FISSHI must be 0,1,2; default 0 used '')')
+     &          '('' WARNING: FISSHI must be 0,1,2; default 0 used '')')
               FISSHI = 0.d0
               GOTO 100
             ENDIF
@@ -7086,15 +7225,15 @@ C--------checking for fission data in the optional input
                DO nnuc = 1, NDNUC
                   FISshi(nnuc) = val
                ENDDO
-               WRITE (8,*) 'For all nuclei: ', fstring
-               WRITE (12,*) 'For all nuclei: ', fstring
+               WRITE (8,*)  'For all nuclei: ', trim(fstring)
+               WRITE (12,*) 'For all nuclei: ', trim(fstring)
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' FISSHI SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISSHI SETTING IGNORED'')')
                GOTO 100
             ENDIF
             FISshi(nnuc) = val
@@ -7137,9 +7276,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'(''  WARNING: FISMOD SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISMOD SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -7205,9 +7344,9 @@ C                                along the corresponding parabola
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'(''  WARNING: FISOPT SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISOPT SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -7296,9 +7435,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'(''  WARNING: FISBAR SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISBAR SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -7344,63 +7483,34 @@ C
             ENDIF
             GOTO 100
          ENDIF
-
-
-
+ 
          IF (name.EQ.'FISTGA') THEN
-
             izar = i1*1000 + i2
-
             IF (izar.EQ.0) THEN
-
                DO nnuc = 1, NDNUC
-
                   FIStga(nnuc) = val
-
                ENDDO
-
                WRITE (8,*) 'Gamma transmission coefficient in ',
-
      &                     'isomeric well for all nuclei ', val
-
                WRITE (12,*)'Gamma transmission coefficient in ',
-
      &                     'isomeric well for all nuclei ', val
-
                GOTO 100
-
             ENDIF
-
             CALL WHERE(izar,nnuc,iloc)
-
             IF (iloc.EQ.1) THEN
-
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
-
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-
-               WRITE (8,'(''  WARNING: FISTGA SETTING IGNORED'')')
-
+               WRITE (8,'('' WARNING: FISTGA SETTING IGNORED'')')
                GOTO 100
-
             ENDIF
-
             FIStga(nnuc) = val
-
             WRITE (8 ,
-
      &  '('' Gamma transmission coefficient in isomeric well for '',
-
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
-
-               WRITE (12,
-
+            WRITE (12,
      &  '('' Gamma transmission coefficient in isomeric well for '',
-
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val          
-
             GOTO 100
-
          ENDIF
 C--------
 C--------FISDEN(Nnuc)= 0 EMPIRE
@@ -7410,7 +7520,7 @@ C
             IF(nint(val).ne.0 .and. nint(val).ne.3) THEN
               WRITE (8,'(''  ERROR: FISDEN ='',I1)') NINT(val)
               WRITE (8,
-     &          '(''  ERROR: FISDEN must be 0 or 3; default 0 used '')')
+     & '(''  WARNING: ERROR: FISDEN must be 0 or 3; default 0 used '')') 
               GOTO 100
             ENDIF
             izar = i1*1000 + i2
@@ -7432,9 +7542,9 @@ C
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'(''  WARNING: FISDEN SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISDEN SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -7484,9 +7594,9 @@ C-----
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
             IF (iloc.EQ.1) THEN
-               WRITE (8,'(''  WARNING: NUCLEUS A,Z ='',I3,'','',I3,
+               WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'(''  WARNING: FISDIS SETTING IGNORED'')')
+               WRITE (8,'('' WARNING: FISDIS SETTING IGNORED'')')
                GOTO 100
             ENDIF
 
@@ -8124,8 +8234,8 @@ C--------------------------------------------------------------------------
          IF (name(1:3).EQ.'FIT') GOTO 100
 C-----
 C-----
-         WRITE (8,'('' INVALID KEY: '',A6,'', DISPOSITION IGNORED'')')
-     &          name
+         WRITE (8,
+     &'('' WARNING: INVALID KEY: '',A6,'', DISPOSITION IGNORED'')') name
       GOTO 100
 C
   150 WRITE (*,*) ' WARNING: END OF INPUT FILE REACHED !' 
@@ -8160,10 +8270,10 @@ C
 
       CALL WHERE(izar,nnuc,iloc)
       IF (iloc.EQ.1) THEN
-         WRITE (8,'('' NUCLEUS A,Z ='',I3,'','',I3,
+         WRITE (8,'('' WARNING: NUCLEUS A,Z ='',I3,'','',I3,
      &                '' NOT NEEDED'')') i2,i1
          WRITE (8,
-     &         '('' NORMALIZATION OF'',a12,''IGNORED'')')char1
+     &         '('' WARNING: NORMALIZATION OF'',a12,''IGNORED'')') char1
          return
       ENDIF
 
@@ -9274,7 +9384,6 @@ C
 
       return
       END
-
 C
 C
 C
