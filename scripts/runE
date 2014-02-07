@@ -84,7 +84,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT','TMP.c4')     
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
     rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
     rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
 
@@ -191,9 +191,9 @@ def runE(proj):
             0:'gammas',
             1:'neutrons',
             1001:'protons',
-            1002:'deuterons',	
-            2003:'helions',			
-            2004:'alphas',		
+            1002:'deuterons', 
+            2003:'helions',               
+            2004:'alphas',          
             'other':'other'
         }
 
@@ -222,23 +222,23 @@ def runE(proj):
             if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground state of %s-%i :\n %s' % (el,A,gsC4File) )
             if not isEmpty(isoC4File): print('Experimental data found for reactions on excited states   of %s-%i :\n %s' % (el,A,isoC4File) )
             
-	        # Read in all the relevant c4 files and concatenate them
+              # Read in all the relevant c4 files and concatenate them
             if targetState > 1: fList = [ natC4File, sumC4File, isoC4File ]
             else :              fList = [ natC4File, sumC4File, gsC4File ]
             allTheC4FilesMerged = []
-            for c4Filename in fList: # loop through all the file patterns we just defined
+            for c4Filename in fList: # loop through all the files we just defined
                 allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
             
             # save the concatenated files together in the two files we need later
-            open( proj+'-raw.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
-            cp(proj+'-raw.c4',proj+'.c4')
-            
+            open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
+            cp(proj+'-unsorted.c4',proj+'.c4')
+            print('Retrieved unsorted experimental data (C4) file saved as %s' % proj+'-unsorted.c4')              
+
             # Sorting the newly created C4 file
-            print('Retrieved unsorted experimental data (C4) file saved as %s' % proj+'-raw.c4')  
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
             os.system('%s %s' % (cmd, proj) )
             #print('C4 file sorted and stored as %s' % proj+'.c4') 
- 
+
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
     sys.stdout.flush() # print in correct order under 'qsub'
@@ -249,16 +249,6 @@ def runE(proj):
         os.system('"%s"' % cmd)
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
-
-#     if isEmpty(proj+'.c4'):    
-#         # Sorting the newly created C4 file
-#         if not isEmpty('TMP.c4'): 
-#             cp('TMP.c4',proj+'-raw.c4')     
-#             print('Retrieved unsorted C4 file saved as %s' % proj+'-raw.c4')  
-#             mv('TMP.c4',proj+'.c4')   
-#             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-#             os.system('%s %s' % (cmd, proj) )
-#             print('C4 file sorted and stored as %s' % proj+'.c4')  
 
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
@@ -466,12 +456,14 @@ def runE(proj):
             
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
             os.system('"%s" %s' % (cmd,proj) )
-            
-            # RUN c4sort TO SORT C4 DATA
-            
+            cp(proj+'.c4',proj+'-unsorted.c4')
+            print('Retrieved unsorted experimental data file (%s) saved as %s' % (proj+'.exf',proj+'-unsorted.c4'))              
+
+            # Sorting the newly created C4 file
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-            os.system('"%s" %s' % (cmd,proj) )
-    
+            os.system('%s %s' % (cmd, proj) )
+            #print('C4 file sorted and stored as %s' % proj+'.c4') 
+
     # REMOVE EMPTY FILES:
     
     if isEmpty(proj+'-omp.dir'):

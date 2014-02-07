@@ -25,14 +25,6 @@ else
 fi
 
 echo ' '
-#if [ -f $file-raw.c4 ]; then
-#   echo 'Original C4 file stored as :'  $file-raw.c4
-#  Make a local copy of the original C4 file to $file-raw.c4
-#   cp $file-raw.c4 $file.c4
-#else
-#   echo 'Backup of the original C4 file:'  $file-raw.c4
-#   cp $file.c4 $file-raw.c4
-#fi
 echo ' '
 mv $file.c4 C4.DAT
 # SORT C4 FILE
