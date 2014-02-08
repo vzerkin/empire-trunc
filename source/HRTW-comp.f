@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3787 $
+Ccc   * $Rev: 3829 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:56:22 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-08 01:40:11 +0100 (Sa, 08 Feb 2014) $
 C
 C
       SUBROUTINE HRTW
@@ -277,38 +277,47 @@ C        write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
      &          tgexper/sumtg
          else
             WRITE(8,'(1x,
-     &        ''Calculated Tgamma = 0'',
-     &        '' or D_obs not available, no Normalization'')')
+     &        '' WARNING: Calculated Tgamma = 0'',
+     &        '' or D_obs not available, no Gg Normalization'')')
          endif
 C
-C        renormalization of the gamma-ray strength function only undertaken for the fir
+C        renormalization of the gamma-ray strength function only 
+C        undertaken for the first energy
 C
          IF(ABS(TUNe(0, Nnuc)-0.999D+0).LT.0.0001D+0) THEN
             IF(FIRst_ein .or. BENchm) then
               if(sumtg.gt.0.d0 .and. tgexper.gt.0.d0) then
                 TUNe(0, Nnuc) = tgexper/sumtg
                 WRITE(8 ,
-     &         '(1x,''Gamma emission width normalized ''/
-     &           1x,''internally by a factor '',F7.3)')
-     &         TUNe(0, Nnuc)
+     &            '(1x,'' WARNING: Gamma emission width normalized''/
+     &              1x,''internally by a factor '',F7.3)')
+     &            TUNe(0, Nnuc)
+                WRITE(8 ,
+     &            '(1x,'' WARNING: The normalization is not applied''/
+     &              1x,''to the first incident energy'')')
+     &            TUNe(0, Nnuc)
                 WRITE(8,*)
               ELSE
                 WRITE(8 ,
-     &       '(1x,''Gamma emission width is not normalized to Do'')')
+     &'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
               ENDIF
             ELSE
                 WRITE(8 ,
-     &         '(1x,''Gamma emission width normalized ''/
-     &           1x,''internally by a factor '',F7.3)')
-     &         TUNe(0, Nnuc)
+     &            '(1x,'' WARNING: Gamma emission width normalized''/
+     &              1x,''internally by a factor '',F7.3)')
+     &            TUNe(0, Nnuc)
+                WRITE(8 ,
+     &            '(1x,'' WARNING: The normalization is not applied''/
+     &              1x,''to the first incident energy'')')
+     &            TUNe(0, Nnuc)
             ENDIF
          ELSE
             IF(ABS(TUNe(0, Nnuc)-1.d0).LT.0.00001D+0) THEN
               WRITE(8 ,
-     &       '(1x,''Gamma emission width is not normalized to Do'')')
+     &'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
             ELSE
               WRITE(8,
-     &         '(1x,''Gamma emission width normalized ''/
+     &         '(1x,'' WARNING: Gamma emission width normalized ''/
      &           1x,''by setting TUNE in input to '',F7.3)')
      &         TUNe(0, Nnuc)
             ENDIF
