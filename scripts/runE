@@ -95,16 +95,16 @@ def runE(proj):
         print("Input file : %s does not exist" % proj+'.inp')
         sys.exit(1)
     
-    # Get the Z,A of the target and projectile
-    projectileA, projectileZ = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[2].split()[:2] )
-    A, Z = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
-
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
     #ln(proj+'.inp', 'INPUT.DAT')
     cp(proj+'.inp', 'INPUT.DAT')
     
+    # Get the Z,A of the target and projectile
+    projectileA, projectileZ = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[2].split()[:2] )
+    A, Z = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
+
     # check if the file exists and has size > 0, if so keep it
 
     # make symlink to LEVELS file:
@@ -173,13 +173,13 @@ def runE(proj):
         if Z >= 90: 
             cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
             arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-            #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, Z, A) )  
+            #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, A, Z) )  
             os.system('%s %s %i  %i' % (cmd, arg1, A, Z) )
             if not isEmpty('NUBAR.DAT'):
                 cp('NUBAR.DAT',proj+'-nubar.dat')
                 print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
-        else:
-            print( 'No evaluated nubar data for Z= %i in ENDF libraries' % Z )
+        #else:
+        #    print( 'No evaluated nubar data for Z= %i in ENDF libraries' % Z )
 
     if not isEmpty(proj+'.c4'):
         ln(proj+'.c4','C4.DAT')
@@ -191,26 +191,29 @@ def runE(proj):
             0:'gammas',
             1:'neutrons',
             1001:'protons',
-            1002:'deuterons', 
-            2003:'helions',               
-            2004:'alphas',          
+            1002:'deuterons',	
+            2003:'helions',			
+            2004:'alphas',		
             'other':'other'
         }
 
         # Get the stuff we need to construct the correct name of the c4 file
+        el = getSymbol( Z )
+        incid = projectiles.get(projectileZ*1000+projectileA,'other') 
         print('\nRetrieval of experimental data for the following reaction:')
-        print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
+        #print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
+        print('   %s  +  %s\n' % (incid, str(Z)+"-"+el+"-"+str(A)) )
 
         SKIPC4 = False
         targetState = None
+ 
         for line in open( proj+'.inp', 'r' ).readlines():
             if 'benchm' in line.lower():
-                if int(float(line.split()[1]))==1: SKIPC4 = True
-            if 'trglev' in line.lower(): targetIsomer = int(float((line.split()[1]))
+                if int(float(line.split()[1]))=='1': SKIPC4 = True
+            if 'trglev' in line.lower(): targetIsomer = int(float(line.split()[1]))
 
         if not SKIPC4:
             # Construct the c4 file names
-            el = getSymbol( Z )
             filePatternWithoutSuffixOrA = os.path.join( os.environ['EMPIREDIR'], 'EXFOR', projectiles.get( projectileZ*1000+projectileA, 'other' ), str(Z).zfill(3)+"_"+el+"_" )
             natC4File = filePatternWithoutSuffixOrA+'000.c4'
             sumC4File = filePatternWithoutSuffixOrA+str(A).zfill(3)+'.c4'
@@ -222,23 +225,24 @@ def runE(proj):
             if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground state of %s-%i :\n %s' % (el,A,gsC4File) )
             if not isEmpty(isoC4File): print('Experimental data found for reactions on excited states   of %s-%i :\n %s' % (el,A,isoC4File) )
             
-              # Read in all the relevant c4 files and concatenate them
+	    # Read in all the relevant c4 files and concatenate them
             if targetState > 1: fList = [ natC4File, sumC4File, isoC4File ]
             else :              fList = [ natC4File, sumC4File, gsC4File ]
             allTheC4FilesMerged = []
-            for c4Filename in fList: # loop through all the files we just defined
-                allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
+ 
+            for fPattern in fList: # loop through all the file patterns we just defined
+                for c4Filename in glob( fPattern ): # glob returns a list of filenames matching fPattern
+                    allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
             
             # save the concatenated files together in the two files we need later
             open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
             cp(proj+'-unsorted.c4',proj+'.c4')
-            print('Retrieved unsorted experimental data (C4) file saved as %s' % proj+'-unsorted.c4')              
-
+            print('Retrieved unsorted experimental data (C4) file saved as %s\n' % (proj+'-unsorted.c4'))  
+            
             # Sorting the newly created C4 file
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
             os.system('%s %s' % (cmd, proj) )
-            #print('C4 file sorted and stored as %s' % proj+'.c4') 
-
+ 
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
     sys.stdout.flush() # print in correct order under 'qsub'
@@ -302,27 +306,27 @@ def runE(proj):
                 mv('TARGET_COLL_RIPL.DAT',proj+'-lev.col')
     
     # beware, these commands make assumptions about the system:
-    if not isEmpty('CUMULPLOT.PS'):
+    #if not isEmpty('CUMULPLOT.PS'):
         # no exception if ps2ps not found, just a message:
         # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
         # os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
-        mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present   
-        if os.path.exists(proj+'-cum.ps'):
+    #    mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present   
+    #    if os.path.exists(proj+'-cum.ps'):
             # read preferences from .Xrunrc:
-            prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
-                    ,'r').readlines()
-            psviewer = prefs[3].strip()
+    #        prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
+    #                ,'r').readlines()
+    #        psviewer = prefs[3].strip()
             # open ps file properly:
-            if sys.platform == 'darwin':
-                if '.app' in psviewer:
-                    os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
-                else:
-                    os.system('%s %s' % (psviewer,proj+'-cum.ps'))
-            elif 'linux' in sys.platform:
-                os.system('%s %s' % (psviewer,proj+'-cum.ps'))
-            else:
-                # probably windows...
-                print ('Unknown system trying to open ps file')
+    #        if sys.platform == 'darwin':
+    #            if '.app' in psviewer:
+    #                os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
+    #            else:
+    #                os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+    #        elif 'linux' in sys.platform:
+    #            os.system('%s %s' % (psviewer,proj+'-cum.ps'))
+    #        else:
+    #            # probably windows...
+    #            print ('Unknown system trying to open ps file')
     
     if not isEmpty('SYSTEMATICS.TXT'):
         mv('SYSTEMATICS.TXT',proj+'.sys')
@@ -338,14 +342,6 @@ def runE(proj):
         mv('TOTCOR.DAT',proj+'-totcor.out',0)
     if not isEmpty('CN-LEV-XS.DAT'):
         mv('CN-LEV-XS.DAT',proj+'-CN-lev.xsc',0)
-    # Commented to avoid overwriting the existing file (not an output file)   
-    #if not isEmpty('EXFOR.DAT'):
-    #    mv('EXFOR.DAT',proj+'.exf',0)
-    # Commented to avoid overwriting the existing file (not an output file)   
-    #if not isEmpty('C4.DAT'):
-    #    mv('C4.DAT',proj+'.c4',0)
-    #if isEmpty(proj+'.c4'):
-    #    mv('C4.DAT',proj+'.c4',0)
 
     if not isEmpty('ECIS_SPH.inp'):
         mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
@@ -385,9 +381,6 @@ def runE(proj):
         mv('PFNM.OUT',proj+'-pfnm.out',0)
     if not isEmpty('ddhms.out'):
         mv('ddhms.out',proj+'-hms.lst',0)
-    # Commented to avoid overwriting the existing file (not an output file)   
-    #if not isEmpty('NUBAR.DAT'):
-    #    mv('NUBAR.DAT',proj+'-nubar.dat',0)
 
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
@@ -456,14 +449,12 @@ def runE(proj):
             
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
             os.system('"%s" %s' % (cmd,proj) )
-            cp(proj+'.c4',proj+'-unsorted.c4')
-            print('Retrieved unsorted experimental data file (%s) saved as %s' % (proj+'.exf',proj+'-unsorted.c4'))              
-
-            # Sorting the newly created C4 file
+            
+            # RUN c4sort TO SORT C4 DATA
+            
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-            os.system('%s %s' % (cmd, proj) )
-            #print('C4 file sorted and stored as %s' % proj+'.c4') 
-
+            os.system('"%s" %s' % (cmd,proj) )
+    
     # REMOVE EMPTY FILES:
     
     if isEmpty(proj+'-omp.dir'):
