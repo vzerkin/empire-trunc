@@ -185,6 +185,8 @@ def runE(proj):
         ln(proj+'.c4','C4.DAT')
         #cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (sorted C4): %s' % proj+'.c4')
+        if not isEmpty(proj+'-natural.c4'):
+    	    print('Experimental data for natural element exist %s' % proj+'-natural.c4')
     else:
         # From parseC4.py, these are the ZA <-> directory name mappings  
         projectiles = {
@@ -197,22 +199,27 @@ def runE(proj):
             'other':'other'
         }
 
-        # Get the stuff we need to construct the correct name of the c4 file
-        el = getSymbol( Z )
-        incid = projectiles.get(projectileZ*1000+projectileA,'other') 
-        print('\nRetrieval of experimental data for the following reaction:')
-        #print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
-        print('   %s  +  %s\n' % (incid, str(Z)+"-"+el+"-"+str(A)) )
-
         SKIPC4 = False
         targetState = None
  
         for line in open( proj+'.inp', 'r' ).readlines():
-            if 'benchm' in line.lower():
-                if int(float(line.split()[1]))=='1': SKIPC4 = True
-            if 'trglev' in line.lower(): targetIsomer = int(float(line.split()[1]))
+            #print('line: %s' % line)
+            if 'BENCHM' in line:
+                if (int(float(line.split()[1]))) == 1: 
+		    SKIPC4 = True
+                    print('Benchmark calculation: experimental data not retrieved')
+            if 'TRGLEV' in line: 
+                targetIsomer = int(float(line.split()[1]))
+                if targetIsomer > 1 : print('Reaction on excited target level %i' % targetIsomer)
 
         if not SKIPC4:
+	    # Get the stuff we need to construct the correct name of the c4 file
+            el = getSymbol( Z )
+            incid = projectiles.get(projectileZ*1000+projectileA,'other') 
+            print('\nRetrieval of experimental data for the following reaction:')
+            #print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
+            print('   %s  +  %s\n' % (incid, str(Z)+"-"+el+"-"+str(A)) )
+
             # Construct the c4 file names
             filePatternWithoutSuffixOrA = os.path.join( os.environ['EMPIREDIR'], 'EXFOR', projectiles.get( projectileZ*1000+projectileA, 'other' ), str(Z).zfill(3)+"_"+el+"_" )
             natC4File = filePatternWithoutSuffixOrA+'000.c4'
@@ -220,11 +227,14 @@ def runE(proj):
             gsC4File  = filePatternWithoutSuffixOrA+str(A).zfill(3)+'_G.c4'
             isoC4File = filePatternWithoutSuffixOrA+str(A).zfill(3)+'_M.c4'
 
-            if not isEmpty(natC4File): print('Experimental data found for reactions on the natural element %s :\n %s' % (el,natC4File) )
-            if not isEmpty(natC4File): print('Experimental data found for reactions on the isotope %s-%i :\n %s' % (el,A,sumC4File) )
-            if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground state of %s-%i :\n %s' % (el,A,gsC4File) )
-            if not isEmpty(isoC4File): print('Experimental data found for reactions on excited states   of %s-%i :\n %s' % (el,A,isoC4File) )
-            
+            if not isEmpty(natC4File): 
+		print('Experimental data found for reactions on the natural element %s :\n   %s' % (el,natC4File) )
+	        cp(natC4File,proj+'-natural.c4')
+            if not isEmpty(sumC4File): print('Experimental data found for reactions on the isotope %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)),sumC4File) )
+            if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground  state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"g"),gsC4File) )
+            if not isEmpty(isoC4File): print('Experimental data found for reactions on the excited state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"*"),isoC4File) )
+            print('\n')            
+
 	    # Read in all the relevant c4 files and concatenate them
             if targetState > 1: fList = [ natC4File, sumC4File, isoC4File ]
             else :              fList = [ natC4File, sumC4File, gsC4File ]
@@ -237,11 +247,15 @@ def runE(proj):
             # save the concatenated files together in the two files we need later
             open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
             cp(proj+'-unsorted.c4',proj+'.c4')
-            print('Retrieved unsorted experimental data (C4) file saved as %s\n' % (proj+'-unsorted.c4'))  
             
+            return 0 
+
             # Sorting the newly created C4 file
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
             os.system('%s %s' % (cmd, proj) )
+
+            print('Original C4 experimental data saved as: \n   %s' % (proj+'-unsorted.c4'))  
+            if not isEmpty(natC4File): print('Original C4 experimental data on the natural element saved as:\n   %s' % (proj+'-natural.c4'))  
  
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
