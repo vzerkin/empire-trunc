@@ -247,8 +247,6 @@ def runE(proj):
             # save the concatenated files together in the two files we need later
             open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
             cp(proj+'-unsorted.c4',proj+'.c4')
-            
-            return 0 
 
             # Sorting the newly created C4 file
             cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
