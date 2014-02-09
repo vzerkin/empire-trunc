@@ -34,7 +34,7 @@
 !
 ! Local variables
 !
-      REAL*8 :: cnspin, fisxse, sum, sumfis, sumg, sumtg, tgexper, xnor
+      REAL*8 :: cnspin, fisxse, Summa, sumfis, sumg, sumtg, tgexper, xnor
       CHARACTER(1), DIMENSION(2) :: cpar
       REAL :: d0c
       INTEGER :: i, ich, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur
@@ -60,8 +60,8 @@
       d0c = 0.D0
       sumtg = 0.D0
       tgexper = 0.D0
-      IF(FIRst_ein .OR. BENchm)THEN
-         IF(EINl<=1.D0)THEN
+      IF(FIRst_ein .OR. BENchm) THEN
+         IF(EINl<=1.D0) THEN
             WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
          ELSE
             WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
@@ -106,10 +106,10 @@
 !              emitted nuclei must be heavier than alpha
                IF(NREs(nejc)<0)CYCLE
                nnur = NREs(nejc)
-               sum = 0.D0
-               CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
+               Summa = 0.D0
+               CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,Summa,nhrtw)
 !              write(8,*)'sum for ejectile=' , nejc, sum
-               H_Sumtl = H_Sumtl + sum
+               H_Sumtl = H_Sumtl + Summa
             ENDDO
 !           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
 !           write(8,*) 'sum for particles at J=',jcn, H_Sumtl
@@ -121,8 +121,8 @@
             sumfis = 0.D0
             TFIs = 0.D0
             ndivf = 1
-            IF(FISsil(nnuc))THEN
-               IF(nint(FISshi(nnuc))==1)THEN
+            IF(FISsil(nnuc)) THEN
+               IF(nint(FISshi(nnuc))==1) THEN
                   CALL FISSION(nnuc,ke,jcn,sumfis)
                ELSE
                   CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
@@ -178,8 +178,8 @@
                   nnur = NREs(nejc)
 !                 WRITE(8,*)'  '
 !                 write(8,*)'   secondary entry with ejec ' , nejc
-                  CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum,nhrtw)
-!                 write(8,*)'DENhf after ejectile = ' ,nejc, sum
+                  CALL HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc,Summa,nhrtw)
+!                 write(8,*)'DENhf after ejectile = ' ,nejc, Summa
                ENDDO
 !--------------do loop over ejectiles       ***done***
 !--------------fission channel - the second HRTW entry
@@ -211,10 +211,10 @@
 !
 !           Gamma width calculation
 !
-            IF((FIRst_ein .OR. BENchm) .AND. EINl<=1.D0)THEN
+            IF((FIRst_ein .OR. BENchm) .AND. EINl<=1.D0) THEN
                cnspin = jcn - 0.5
                IF(mod(XJLv(LEVtarg,0)*2.,2.D+0)==1)cnspin = jcn - 1
-               IF(ip==LVP(LEVtarg,0) .AND. ((cnspin==XJLv(LEVtarg,0)+0.5) .OR. (cnspin==XJLv(LEVtarg,0)-0.5)))THEN
+               IF(ip==LVP(LEVtarg,0) .AND. ((cnspin==XJLv(LEVtarg,0)+0.5) .OR. (cnspin==XJLv(LEVtarg,0)-0.5))) THEN
                   d0c = d0c + RO(ke,jcn,ipar,nnuc)
 !                 write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
                   WRITE(8,'(A12,f4.1,A6,A1,A6,F7.3,A4,/,A37,d12.6)')'CN state J=', cnspin, ', Par:', cpar(ipar), ' at U=',&
@@ -226,20 +226,20 @@
       ENDDO          !loop over decaying nucleus parity
       IF(d0c>0.D0)d0c = 1000.0/d0c
       IF(D0_obs==0.0D0)D0_obs = d0c    !use calculated D0 (in keV) if not measured
-      IF(EINl<=1.D0 .AND. (FIRst_ein .OR. BENchm))THEN
-         IF(D0_obs>0.D0)THEN
+      IF(EINl<=1.D0 .AND. (FIRst_ein .OR. BENchm)) THEN
+         IF(D0_obs>0.D0) THEN
             tgexper = 2*PI*GG_obs/D0_obs/1.E6
             WRITE(8,'(1x,''Experimental information from capture channel'')')
             WRITE(8,'(1x,A13,D12.6)')'2*pi*Gg/D0 = ', tgexper
          ENDIF
-         IF(GG_unc>0.0D0)THEN
+         IF(GG_unc>0.0D0) THEN
             WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', GG_obs, ' +/- ', GG_unc, ' meV'
          ELSE
             WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', GG_obs, ' meV (systematics)'
          ENDIF
          WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', GG_obs, ' +/- ', GG_unc, ' meV'
  
-         IF(D0_obs>0.0D0)THEN
+         IF(D0_obs>0.0D0) THEN
             WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', D0_obs, ' +/- ', D0_unc, ' keV'
             WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
             WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')')D0_obs
@@ -249,7 +249,7 @@
          ENDIF
  
          WRITE(12,*)
-         IF(sumtg>0.D0 .AND. tgexper>0.D0)THEN
+         IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
             WRITE(8,'(1x,''Normalization factor = '',F7.3)')tgexper/sumtg
          ELSE
             WRITE(8,'(1x,'' WARNING: Calculated Tgamma = 0 or D_obs not available, no Gg Normalization'')')
@@ -258,11 +258,11 @@
 !        renormalization of the gamma-ray strength function only
 !        undertaken for the first energy
 !
-         IF(abs(TUNe(0,nnuc) - 0.999D+0)<0.0001D+0)THEN
-            IF(.NOT.(FIRst_ein .OR. BENchm))THEN
+         IF(abs(TUNe(0,nnuc) - 0.999D+0)<0.0001D+0) THEN
+            IF(.NOT.(FIRst_ein .OR. BENchm)) THEN
                WRITE(8,'(1x,'' WARNING: Gamma emission width normalized internally by a factor '',F7.3)') TUNe(0,nnuc)
                WRITE(8,'(1x,'' WARNING: The normalization is not applied to the first incident energy'')') TUNe(0,nnuc)
-            ELSEIF(sumtg>0.D0 .AND. tgexper>0.D0)THEN
+            ELSEIF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
                TUNe(0,nnuc) = tgexper/sumtg
                WRITE(8,'(1x,'' WARNING: Gamma emission width normalized internally by a factor '',F7.3)') TUNe(0,nnuc)
                WRITE(8,'(1x,'' WARNING: The normalization is not applied to the first incident energy'')') TUNe(0,nnuc)
@@ -270,7 +270,7 @@
             ELSE
                WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
             ENDIF
-         ELSEIF(abs(TUNe(0,nnuc) - 1.D0)<0.00001D+0)THEN
+         ELSEIF(abs(TUNe(0,nnuc) - 1.D0)<0.00001D+0) THEN
             WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
          ELSE
             WRITE(8,'(1x,'' WARNING: Gamma emission width normalized by setting TUNE in input to '',F7.3)') TUNe(0,nnuc)
@@ -280,7 +280,7 @@
       RETURN
       END SUBROUTINE HRTW
 
-      SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Sum,Nhrtw)
+      SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
 !cc
 !cc   ********************************************************************
 !cc   *                                                         class:PPu*
@@ -302,7 +302,7 @@
 !cc   *       Nhrtw- 0 first HRTW entry (calculate Tl's summs)           *
 !cc   *             >0 final HRTW entry (calculate emission widths)      *
 !cc   *                                                                  *
-!cc   * output:SUM - SUM of transmission coefficients over all outgoing  *
+!cc   * output:Summa - SUM of transmission coefficients over all outgoing  *
 !cc   *              channels for the requested decay                    *
 !cc   *              Apart of this standard feature it comunicates       *
 !cc   *              quantities needed for the HRTW theory through       *
@@ -345,7 +345,7 @@
 ! Dummy arguments
 !
       INTEGER :: Iec, Ipc, Jc, Nejc, Nhrtw, Nnuc, Nnur
-      REAL*8 :: Sum
+      REAL*8 :: Summa
 !
 ! Local variables
 !
@@ -356,7 +356,7 @@
       REAL*8 :: vt
 !     write(8,*)'HRTW-DECAY entry: ejectile ,nhrtw ',nejc,nhrtw
 !     write(8,*)'CN bin, spin, parity',Iec,Jc,Ipc
-      Sum = 0.D0                                               ! corrd,
+      Summa = 0.D0                                               ! corrd,
       hisr = HIS(Nnur)
       xjc = float(Jc) + HIS(Nnuc)
 !-----clear scratch matrices
@@ -371,7 +371,7 @@
       iexc = NEX(Nnuc) - NEXr(Nejc,Nnuc)
       itlc = iexc - 5
       iermax = Iec - iexc
-      IF(iermax>=1)THEN
+      IF(iermax>=1) THEN
 !--------
 !--------decay to the continuum
 !--------
@@ -399,7 +399,7 @@
 !
 !--------------decay to the highest possible bin (non neutron only)
 !
-               IF(nint(ZEJc(Nejc))/=0)THEN
+               IF(nint(ZEJc(Nejc))/=0) THEN
 !                 lmax = MIN0(LMAxtl(6,Nejc,Nnur),lmaxf)
                   lmax = min0(LMAxtl(5,Nejc,Nnur),lmaxf)
 !-----------------odd and even L-values treated separately
@@ -407,7 +407,7 @@
                   rho1 = RO(iermax,jr,ip1,Nnur)*DE
                   sumtl1 = 0.D0
                   DO l = lmin, lmax, 2      ! do loop over L
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + vt(TL(5,l,Nejc,Nnur))
                      ELSE
@@ -420,7 +420,7 @@
                   rho2 = RO(iermax,jr,ip2,Nnur)*DE
                   sumtl2 = 0.D0
                   DO l = lmin + 1, lmax, 2
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + vt(TL(5,l,Nejc,Nnur))
                      ELSE
@@ -433,7 +433,7 @@
 !-----------------do loop over l   ***done***
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc) + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc) + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
-                  IF(iermax==1 .AND. nint(Z(1))==nint(Z(Nnur)))THEN
+                  IF(iermax==1 .AND. nint(Z(1))==nint(Z(Nnur))) THEN
                      SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)*DEPart(Nnur)
                      SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)*DEPart(Nnur)
                   ENDIF
@@ -441,7 +441,7 @@
 !
 !--------------decay to the highest but one bin (conditional see the next IF)
 !
-               IF(nint(ZEJc(Nejc))==0 .AND. Iec==NEX(Nnuc) - 1)THEN
+               IF(nint(ZEJc(Nejc))==0 .AND. Iec==NEX(Nnuc) - 1) THEN
                   lmax = min0(LMAxtl(6,Nejc,Nnur),lmaxf)
 !                 write(8,*) 'lmaxf top bin, xjc, s ',lmaxf, xjc, s
 !-----------------do loop over L (odd and even l-values treated separately)
@@ -449,7 +449,7 @@
                   rho1 = RO(iermax,jr,ip1,Nnur)*DE
                   sumtl1 = 0.D0
                   DO l = lmin, lmax, 2       ! do loop over L
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + vt(TL(6,l,Nejc,Nnur))
                      ELSE
@@ -462,7 +462,7 @@
                   rho2 = RO(iermax,jr,ip2,Nnur)*DE
                   sumtl2 = 0.D0
                   DO l = lmin + 1, lmax, 2
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + vt(TL(6,l,Nejc,Nnur))
                      ELSE
@@ -480,7 +480,7 @@
                   corr = 0.4444D0/(DE - XN(Nnur) + XN(1))
                   SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc) + sumtl1*rho1/DE*TUNe(Nejc,Nnuc)*corr
                   SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc) + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)*corr
-                  IF(iermax==1 .AND. nint(Z(1))==nint(Z(Nnur)))THEN
+                  IF(iermax==1 .AND. nint(Z(1))==nint(Z(Nnur))) THEN
                      SCRt(iermax,jr,ip1,Nejc) = SCRt(iermax,jr,ip1,Nejc)*DEPart(Nnur)
                      SCRt(iermax,jr,ip2,Nejc) = SCRt(iermax,jr,ip2,Nejc)*DEPart(Nnur)
                   ENDIF
@@ -509,7 +509,7 @@
                   rho1 = RO(ier,jr,ip1,Nnur)*DE
                                               !*corr
                   DO l = lmin, lmax, 2
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl1 = sumtl1 + vt(TL(ietl,l,Nejc,Nnur))
                      ELSE
@@ -523,7 +523,7 @@
                   rho2 = RO(ier,jr,ip2,Nnur)*DE
                                               !*corr
                   DO l = lmin + 1, lmax, 2
-                     IF(Nhrtw>0)THEN
+                     IF(Nhrtw>0) THEN
 !-----------------------replace Tl with V in the second HRTW entry
                         sumtl2 = sumtl2 + vt(TL(ietl,l,Nejc,Nnur))
                      ELSE
@@ -539,7 +539,7 @@
 !                 &               + sumtl1*rho1/DE/corr*TUNe(Nejc,Nnuc)
                   SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc) + sumtl2*rho2/DE*TUNe(Nejc,Nnuc)
 !                 &               + sumtl2*rho2/DE/corr*TUNe(Nejc,Nnuc)
-                  IF(ier==1 .AND. nint(Z(1))==nint(Z(Nnur)))THEN
+                  IF(ier==1 .AND. nint(Z(1))==nint(Z(Nnur))) THEN
                      SCRt(ier,jr,ip1,Nejc) = SCRt(ier,jr,ip1,Nejc)*DEPart(Nnur)
                      SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*DEPart(Nnur)
                   ENDIF
@@ -553,17 +553,17 @@
 !--------trapezoidal integration of ro*tl in continuum for ejectile nejc
          DO j = 1, NLW
             DO i = 1, iermax
-               Sum = Sum + SCRt(i,j,1,Nejc) + SCRt(i,j,2,Nejc)
+               Summa = Summa + SCRt(i,j,1,Nejc) + SCRt(i,j,2,Nejc)
             ENDDO
-            Sum = Sum - 0.5*(SCRt(1,j,1,Nejc) + SCRt(1,j,2,Nejc))
+            Summa = Summa - 0.5*(SCRt(1,j,1,Nejc) + SCRt(1,j,2,Nejc))
          ENDDO
-         Sum = Sum*DE
-!        write(8,*)'sum to continuum for ejectile ', Nejc, Sum
+         Summa = Summa*DE
+!        write(8,*)'Summa to continuum for ejectile ', Nejc, Summa
 !--------integration of ro*tl in continuum for ejectile nejc -- done ----
 !
-!        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then
+!        if(nnuc.eq.1 .and. Nnur.eq.2 .and. Summa.gt.0.d0) then
 !        write(*,*) 'HRTW=',Iec,Jc,Ipc
-!        write(*,*) '     ',Nhrtw,sngl(Sum)
+!        write(*,*) '     ',Nhrtw,sngl(Summa)
 !        endif
 !
 !--------
@@ -574,7 +574,7 @@
       DO i = 1, ndlv !NLV(Nnur)
          SCRtl(i,Nejc) = 0.D0
       ENDDO
-      IF(Nhrtw==0 .AND. IZA(Nnur)==IZA(0))THEN
+      IF(Nhrtw==0 .AND. IZA(Nnur)==IZA(0)) THEN
 !-----clear memorized elastic channels when entering new J-pi CN state
          iel = 1
          DO i = 1, ndhrtw2
@@ -609,15 +609,15 @@
                IF(ipar==0)CYCLE
                tld = TL(il,l,Nejc,Nnur) + frde*(TL(il + 1,l,Nejc,Nnur) - TL(il,l,Nejc,Nnur))
                IF(tld<=0.0D0)CYCLE
-               IF(Nhrtw>0)THEN
+               IF(Nhrtw>0) THEN
 !--------------entry with nhrtw>0
-                  IF(IZA(Nnur)==IZA(0))THEN
+                  IF(IZA(Nnur)==IZA(0)) THEN
                      sumdl = sumdl + vt(tld)*CINred(i)
                   ELSE
                      sumdl = sumdl + vt(tld)
                   ENDIF
 !--------------entry with nhrtw=0
-               ELSEIF(IZA(Nnur)==IZA(0))THEN
+               ELSEIF(IZA(Nnur)==IZA(0)) THEN
                   CALL TL2VL(tld,CINred(i))
                   sumdl = sumdl + tld*CINred(i)
                ELSE
@@ -632,17 +632,17 @@
 !--------loop over channel spin ------ done ----------------------------
             SCRtl(i,Nejc) = sumdl
                                ! *CINRED(i)
-            Sum = Sum + sumdl  ! *CINRED(i)
+            Summa = Summa + sumdl  ! *CINRED(i)
             EXIT
          ENDDO
 !        if(nhrtw.eq.0) write(8,*) 'Sum to level i=', i,sumdl
 !        write(8,*)'sum to discrete for ejectile ', Nejc, Sumdl
-!        write(8,*)'sum for ejectile ', Nejc, Sum, 'iteration ',nhrtw
+!        write(8,*)'sum for ejectile ', Nejc, Summa, 'iteration ',nhrtw
       ENDDO
 !-----do loop over inelastic levels --------- done --------------------
 !----
 !-----elastic channel
-      IF(IZA(Nnur)==IZA(0))THEN
+      IF(IZA(Nnur)==IZA(0)) THEN
          i = LEVtarg
          eout = eoutc - ELV(i,Nnur)
          sumdl = 0.D0
@@ -668,7 +668,7 @@
                IF(tld<=0.0D0)CYCLE
  
 !              write(8,*) 'Elastic L=',L,' Tl=',tld
-               IF(Nhrtw>0)THEN
+               IF(Nhrtw>0) THEN
 !----------------entry with nhrtw>0
                   sumdl = sumdl + vt(tld)*CELred
 !                 sumdl = sumdl + VT(tld)
@@ -679,7 +679,7 @@
                   CALL TL2VL(tld,CELred)
                   sumdl = sumdl + tld*CELred
 !                 WRITE(8,*)'sumdl,tld,cor ',sumdl,tld,cor
-                  IF(tld>H_Tthr)THEN
+                  IF(tld>H_Tthr) THEN
 !-------------------case of a strong elastic channel
 !-------------------record position of Tl, l and channel spin
                      MEMel(iel,1) = NH_lch
@@ -699,25 +699,25 @@
 !--------loop over channel spin ------ done ----------------------------
             SCRtl(i,Nejc) = sumdl
                                !*CELred
-            Sum = Sum + sumdl  !*CELred
+            Summa = Summa + sumdl  !*CELred
             EXIT
          ENDDO
 !        if(nhrtw.eq.0) then
 !        write(8,*) 'Sum to elastic', sumdl !*CELRED
-!        write(8,*) 'Sum to levels', Sum    !*CELRED
+!        write(8,*) 'Sum to levels', Summa    !*CELRED
 !        endif
 !        WRITE(8,*)'i,sumdl,nejc,nhrtw ', i,sumdl,nejc,nhrtw
       ENDIF !end of elastic
  
 !-----do loop over discrete levels --------- done --------------------
-   10 DENhf = DENhf + Sum
-      SCRtem(Nejc) = Sum
-!     write(8,*) 'DENhf after particle ',Nejc, SUM
+   10 DENhf = DENhf + Summa
+      SCRtem(Nejc) = Summa
+!     write(8,*) 'DENhf after particle ',Nejc, Summa
 !-----decay to the continuum and discrete levels ------ done -----------------------------
       RETURN
       END SUBROUTINE HRTW_DECAY
 
-      SUBROUTINE HRTW_DECAYG(Nnuc,Iec,Jc,Ipc,Sum,Nhrtw)
+      SUBROUTINE HRTW_DECAYG(Nnuc,Iec,Jc,Ipc,Summa,Nhrtw)
 !cc
 !cc   ********************************************************************
 !cc   *                                                         class:PPu*
@@ -736,7 +736,7 @@
 !cc   *             >0 final HRTW entries (actually not used)            *
 !cc   *                                                                  *
 !cc   *                                                                  *
-!cc   * output:SUM - SUM of transmission coefficients over all gamma     *
+!cc   * output:Summa - Sum of transmission coefficients over all gamma     *
 !cc   *              channels.                                           *
 !cc   *              Apart of this standard feature it comunicates       *
 !cc   *              quantities needed for the HRTW theory through       *
@@ -764,7 +764,7 @@
 ! Dummy arguments
 !
       INTEGER :: Iec, Ipc, Jc, Nhrtw, Nnuc
-      REAL*8 :: Sum
+      REAL*8 :: Summa
 !
 ! Local variables
 !
@@ -813,7 +813,7 @@
       jmin = 1
       jmax = min0(NLW,Jc + MAXmult)
  
-      Sum = 0.D0
+      Summa = 0.D0
       SCRtem(0) = 0.D0
       xjc = float(Jc) + HIS(Nnuc)
  
@@ -833,7 +833,7 @@
 !-----INEG is a parity-index of final states reached by gamma
 !-----transitions which do change parity (E1)
       IF(Iec<1)RETURN
-      IF(Ipc>0)THEN
+      IF(Ipc>0) THEN
          ipos = 1
          ineg = 2
       ELSE
@@ -850,7 +850,7 @@
          xlm(1) = xm1(eg)*TUNe(0,Nnuc)
          xle(2) = e2(eg)*TUNe(0,Nnuc)
          xlm(2) = xle(2)*cme
-         IF(MAXmult>2)THEN
+         IF(MAXmult>2) THEN
             DO i = 3, MAXmult
                xle(i) = xle(i - 1)*eg**2*cee*((3.0D0 + float(i))/(5.0D0 + float(i)))**2
                xlm(i) = xle(i)*cme
@@ -861,12 +861,12 @@
             lambmin = max0(1,abs(Jc - jr))
             lambmax = xjc + xjr + 0.001
             lambmax = min0(lambmax,MAXmult)
-            IF(lambmin<=lambmax)THEN
+            IF(lambmin<=lambmax) THEN
                scrtpos = 0.0D0
                scrtneg = 0.0D0
                hsumtls = 0.0D0
                DO lamb = lambmin, lambmax
-                  IF(lamb/2*2==lamb)THEN
+                  IF(lamb/2*2==lamb) THEN
                      scrtpos = scrtpos + xle(lamb)
                      scrtneg = scrtneg + xlm(lamb)
                      IF(Nhrtw==0)hsumtls = hsumtls + xle(lamb)**2*RO(ier,jr,ipos,Nnuc) + xlm(lamb)**2*RO(ier,jr,ineg,Nnuc)
@@ -879,7 +879,7 @@
                ENDDO
                SCRt(ier,jr,ipos,0) = scrtpos*RO(ier,jr,ipos,Nnuc)
                SCRt(ier,jr,ineg,0) = scrtneg*RO(ier,jr,ineg,Nnuc)
-               IF(ier==1 .AND. nint(Z(1))==nint(Z(Nnuc)))THEN
+               IF(ier==1 .AND. nint(Z(1))==nint(Z(Nnuc))) THEN
                   SCRt(ier,jr,ipos,0) = SCRt(ier,jr,ipos,0)*DEPart(Nnuc)
                   SCRt(ier,jr,ineg,0) = SCRt(ier,jr,ineg,0)*DEPart(Nnuc)
                ENDIF
@@ -895,11 +895,11 @@
 !-----integration of ro*gtl in continuum for ejectile 0 (TRAPEZOID
       DO j = jmin, jmax
          DO i = 1, Iec - 1
-            Sum = Sum + SCRt(i,j,1,0) + SCRt(i,j,2,0)
+            Summa = Summa + SCRt(i,j,1,0) + SCRt(i,j,2,0)
          ENDDO
-         Sum = Sum - 0.5*(SCRt(1,j,1,0) + SCRt(1,j,2,0))
+         Summa = Summa - 0.5*(SCRt(1,j,1,0) + SCRt(1,j,2,0))
       ENDDO
-      Sum = Sum*DE
+      Summa = Summa*DE
 !-----integration of ro*gtl in continuum for ejectile 0 -- done ----
 !-----
 !-----DECAY TO DISCRETE LEVELS
@@ -910,14 +910,14 @@
          lmax = xjc + XJLv(i,Nnuc) + 0.001
          lambmin = max0(1,lmin)
          lambmax = min0(lmax,MAXmult)
-         IF(lambmin<=lambmax)THEN
+         IF(lambmin<=lambmax) THEN
             eg = EX(Iec,Nnuc) - ELV(i,Nnuc)
             ipar = (1 + LVP(i,Nnuc)*Ipc)/2
             iodd = 1 - ipar
             xle(1) = e1(Nnuc,eg,TNUc(1,Nnuc),UEXcit(1,Nnuc))*TUNe(0,Nnuc)
             xlm(1) = xm1(eg)*TUNe(0,Nnuc)
             xle(2) = e2(eg)*TUNe(0,Nnuc)
-            IF(lambmax>2)THEN
+            IF(lambmax>2) THEN
                xlm(2) = xle(2)*cme
                DO j = 3, lambmax
                   xle(j) = xle(j - 1)*eg**2*cee*((3.0D0 + float(j))/(5.0D0 + float(j)))**2
@@ -927,7 +927,7 @@
             hscrtl = 0.0D0
             hsumtls = 0.0D0
             DO lamb = lambmin, lambmax
-               IF(lamb/2*2==lamb)THEN
+               IF(lamb/2*2==lamb) THEN
                   hscrtl = hscrtl + xle(lamb)*ipar + xlm(lamb)*iodd
                   IF(Nhrtw==0)hsumtls = hsumtls + xle(lamb)**2*ipar + xlm(lamb)**2*iodd
                ELSE
@@ -937,12 +937,12 @@
             ENDDO
             IF(Nhrtw==0)H_Sumtls = H_Sumtls + hsumtls
             SCRtl(i,0) = hscrtl
-            Sum = Sum + hscrtl
+            Summa = Summa + hscrtl
          ENDIF
       ENDDO
 !-----do loop over discrete levels --------- done --------------------
-      SCRtem(0) = Sum
-      DENhf = DENhf + Sum
+      SCRtem(0) = Summa
+      DENhf = DENhf + Summa
       END SUBROUTINE HRTW_DECAYG
 
       SUBROUTINE TL2VL(T,Rho)
@@ -995,10 +995,10 @@
 !
       REAL*8 :: Rho, T
       H_Sumtls = H_Sumtls + T**2*Rho
-      IF(T>H_Tthr)THEN
+      IF(T>H_Tthr) THEN
 !        !strong or weak
          NH_lch = NH_lch + 1
-         IF(NH_lch<=ndhrtw1)THEN
+         IF(NH_lch<=ndhrtw1) THEN
             H_Tl(NH_lch,1) = T      !record strong Tl's
             H_Tl(NH_lch,2) = Rho
          ENDIF
@@ -1049,9 +1049,9 @@
 ! Local variables
 !
       REAL*8 :: vt1
-      IF(NH_lch>ndhrtw1)THEN
+      IF(NH_lch>ndhrtw1) THEN
          vt = vt1(Tl,H_Tav,H_Sumtl)
-      ELSEIF(Tl<H_Tthr)THEN
+      ELSEIF(Tl<H_Tthr) THEN
          vt = vt1(Tl,H_Tav,H_Sumtl)
       ELSE
          NSCh = NSCh + 1
@@ -1125,7 +1125,7 @@
 ! Local variables
 !
       REAL*8 :: a, al
-      IF(Tl<1.0D-15)THEN
+      IF(Tl<1.0D-15) THEN
          eef = 3.D0
          RETURN
       ENDIF
@@ -1171,34 +1171,34 @@
       REAL*8, DIMENSION(Ndhrtw1) :: e, vd, vp
       REAL*8 :: eef
       INTEGER :: i, icount
-      REAL*8 :: sum, sv
-      IF(Lch>Ndhrtw1)THEN
+      REAL*8 :: Summa, sv
+      IF(Lch>Ndhrtw1) THEN
          WRITE(8,*)'ERROR in AUSTER: Lch bigger than allowed by NDHRTW1'
          WRITE(8,*)'If you see this printed it means a BUG!'
          STOP
       ENDIF
       icount = 0
       sv = Sweak
-      sum = Sweak
+      Summa = Sweak
       DO i = 1, Lch
          e(i) = eef(V(i,1),Tav,Sumtl) - 1.D0
-         sum = sum + V(i,1)*V(i,2)
+         Summa = Summa + V(i,1)*V(i,2)
       ENDDO
       DO i = 1, Lch
          vd(i) = V(i,1)
          vp(i) = V(i,1)
       ENDDO
    10 DO i = 1, Lch
-         vp(i) = V(i,1)/(1.D0 + vp(i)*e(i)/sum)
+         vp(i) = V(i,1)/(1.D0 + vp(i)*e(i)/Summa)
          sv = sv + vp(i)*V(i,2)
       ENDDO
       icount = icount + 1
-      IF(icount>200)THEN
+      IF(icount>200) THEN
          WRITE(8,*)' Maximum iteration number (200) reached in AUSTER'
          WRITE(8,*)
          RETURN
       ENDIF
-      sum = sv
+      Summa = sv
       sv = Sweak
       DO i = 1, Lch
 !
@@ -1282,7 +1282,7 @@
 !--------only target state considered
       i = LEVtarg
       eout = eoutc - ELV(i,Nnur)
-      IF(eout<DE)THEN
+      IF(eout<DE) THEN
 !--------level above the bin
          IF(eout<0.0D0)RETURN
       ENDIF
@@ -1301,11 +1301,11 @@
             IF(ipar==0)CYCLE
             tld = ELTl(l)
             IF(tld<=0.D0)CYCLE
-            IF(l==int(H_Abs(Nhrtw,2)) .AND. (2.0*s)==H_Abs(Nhrtw,3))THEN
+            IF(l==int(H_Abs(Nhrtw,2)) .AND. (2.0*s)==H_Abs(Nhrtw,3)) THEN
 !--------------got a true elastic channel
-               IF(tld>H_Tthr .AND. NH_lch<=ndhrtw1)THEN
+               IF(tld>H_Tthr .AND. NH_lch<=ndhrtw1) THEN
                   DO iel = 1, ndhrtw2
-                     IF(MEMel(iel,3)==int(2.0*s + 0.001) .AND. MEMel(iel,2)==l)THEN
+                     IF(MEMel(iel,3)==int(2.0*s + 0.001) .AND. MEMel(iel,2)==l) THEN
                         kel = MEMel(iel,1)
                         v = H_Tl(kel,1)
                      ENDIF
@@ -1404,24 +1404,24 @@
          lmax = lmax + 1
          lmax = min0(ndlw,lmax)
          DO k = lmin, lmax
-            IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)/=0.0D0)THEN
-               IF(Ich>ndhrtw2)THEN
+            IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)/=0.0D0) THEN
+               IF(Ich>ndhrtw2) THEN
                   WRITE(8,*)' '
                   WRITE(8,*)'E R R O R !'
                   WRITE(8,*)'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
                   WRITE(8,*)'INCREASE NDHRTW2 IN THE dimension.h', ' AND RECOMPILE.'
                   STOP 'INSUFFICIENT DIMENSION: NDHRTW2'
                ENDIF
-               IF(NH_lch>ndhrtw1)THEN
+               IF(NH_lch>ndhrtw1) THEN
                   vl = vt1(ELTl(k),H_Tav,H_Sumtl)
-               ELSEIF(ELTl(k)<H_Tthr)THEN
+               ELSEIF(ELTl(k)<H_Tthr) THEN
                   vl = vt1(ELTl(k),H_Tav,H_Sumtl)
                ELSE
                   kel = 0
                   DO iel = 1, ndhrtw2
                      IF(MEMel(iel,3)==int(2.0*chsp + 0.001) .AND. MEMel(iel,2)==k)kel = MEMel(iel,1)
                   ENDDO
-                  IF(kel==0)THEN
+                  IF(kel==0) THEN
                      WRITE(8,*)' '
                      WRITE(8,*)' MISMATCH OF ELASTIC CHANNEL IN HRTW'
                      WRITE(8,*)' REPORT THIS ERROR ALONG WITH RELATED'
@@ -1430,7 +1430,7 @@
                   ENDIF
                   vl = H_Tl(kel,1)
                ENDIF
-               IF(vl/=0.0D0)THEN
+               IF(vl/=0.0D0) THEN
                   H_Abs(Ich,1) = vl*coef*(float(2*Jcn + 1) - 2*s1)*FUSred*REDmsc(Jcn,Ip)
 !                 &                           *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
                   H_Abs(Ich,2) = k
