@@ -1,24 +1,24 @@
-Ccc   * $Rev: 3788 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
+!cc   * $Rev: 3837 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2014-02-09 02:31:11 +0100 (So, 09 Feb 2014) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
-C
-      PARAMETER(
-     * NDNUC= 100
-     *,NDEXCLUS = 14
-     *,NDEX= 101
-     *,NDLW= 50
-     *,LEVCC=30
-     *,NDLV=40
-     *,NDBR=40
-     *,NDMSCS=4)
-C
-C    DO NOT CHANGE parameters below 
-C    unless you REALLY know what you are doing.
-C    You may render the code unusable.
-C
-C
+!
+      PARAMETER(                                                        &
+     & NDNUC= 100                                                       &
+     &,NDEXCLUS = 14                                                    &
+     &,NDEX= 101                                                        &
+     &,NDLW= 50                                                         &
+     &,LEVCC=30                                                         &
+     &,NDLV=40                                                          &
+     &,NDBR=40                                                          &
+     &,NDMSCS=4)
+!
+!    DO NOT CHANGE parameters below 
+!    unless you REALLY know what you are doing.
+!    You may render the code unusable.
+!
+!
       INTEGER MAX_PRN,NDEJC,NDZMAX,NDECSE,NDEPFN,NDANGecis,NDAnghmx
       INTEGER NDNUCD,NDECSED,NDANGD,NDEX_D,NDEJCD
       INTEGER NDVOM,NDWOM,NDVSO,NDRVOM,NDRWOM,NDRVSO
@@ -26,34 +26,34 @@ C
       INTEGER NDGDRPM,NDGQRPM,NDGMRPM
       INTEGER NDKNTR,NMAsse,NDREGIONS,NDMODELS,NDDEFCC,NDCOLLEV
       INTEGER NFtrans,NFMOD,NFisbarpnt,NFPARAB,NFHUMP,NFISENMAX
-C
-      PARAMETER(MAX_PRN=30,
-     * NDEJC=6
-     *,NDZMAX=110
-     *,NDECSE=NDEX+30
-     *,NDEPFN=251     
-     *,NDANGecis=91
-     *,NDAnghmx=37   ! Must be equal to NDAnghms in ddhms.cmb
-     *,NDNUCD=NDNUC
-     *,NDECSED=NDECSE
-     *,NDANGD=NDANGecis
-     *,NDEX_D=NDEX
-     *,NDEJCD=NDEJC
-     *,NDVOM=7
-     *,NDWOM=7
-     *,NDVSO=7
-     *,NDRVOM=3
-     *,NDRWOM=3
-     *,NDRVSO=3
-     *,NDHRTW1=300
-     *,NDHRTW2=20
-     *,NDETL=NDEX+6
-     *,NDEREC=NDECSE
-     *,NDERO=NDEX
-     *,NDCC=10
-     *,NDROPM=7
-     *,NDGDRPM=10,NDGQRPM=8,NDGMRPM=8
-     *,NDKNTR=3,NMAsse=9066
-     *,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80
-     *,NFtrans=30,NFMOD=3,NFisbarpnt=300
-     *,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
+!
+      PARAMETER(MAX_PRN=30,                                             &
+     & NDEJC=6                                                          &
+     &,NDZMAX=110                                                       &
+     &,NDECSE=NDEX+30                                                   &
+     &,NDEPFN=251                                                       &
+     &,NDANGecis=91                                                     &
+     &,NDAnghmx=37                                                      &! Must be equal to NDAnghms in ddhms.cmb
+     &,NDNUCD=NDNUC                                                     &
+     &,NDECSED=NDECSE                                                   &
+     &,NDANGD=NDANGecis                                                 &
+     &,NDEX_D=NDEX                                                      &
+     &,NDEJCD=NDEJC                                                     &
+     &,NDVOM=7                                                          &
+     &,NDWOM=7                                                          &
+     &,NDVSO=7                                                          &
+     &,NDRVOM=3                                                         &
+     &,NDRWOM=3                                                         &
+     &,NDRVSO=3                                                         &
+     &,NDHRTW1=300                                                      &
+     &,NDHRTW2=20                                                       &
+     &,NDETL=NDEX+6                                                     &
+     &,NDEREC=NDECSE                                                    &
+     &,NDERO=NDEX                                                       &
+     &,NDCC=10                                                          &
+     &,NDROPM=7                                                         &
+     &,NDGDRPM=10,NDGQRPM=8,NDGMRPM=8                                   &
+     &,NDKNTR=3,NMAsse=9066                                             &
+     &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
+     &,NFtrans=30,NFMOD=3,NFisbarpnt=300                                &
+     &,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
