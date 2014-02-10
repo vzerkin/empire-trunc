@@ -1,6 +1,6 @@
-cc   * $Rev: 3804 $
+cc   * $Rev: 3842 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 04:58:36 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-10 06:30:25 +0100 (Mo, 10 Feb 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -19,6 +19,10 @@ Ccc   ********************************************************************
       INCLUDE "global.h"
 C
       INCLUDE "main_common.h"
+
+C     to share /factorial/ calculation of log(fact)
+      DOUBLE PRECISION FFFact(6*NDLW)
+      COMMON /factorial/FFFact
 C
 C Local variables
 C
@@ -101,6 +105,10 @@ C
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
       COMMON /init_empire/xcross,icalled
+
+C     to share /factorial/ calculation of log(fact)
+      DOUBLE PRECISION FFFact(6*NDLW)
+      COMMON /factorial/FFFact
 C
 C     Local variables
 C
@@ -110,6 +118,12 @@ C
       ICAlangs = 0
       xcross   = 0.d0
       icalled  = 0
+
+c***********************************************************************
+c  Calculate factorial logarithms from 0! ( =1.) up to (idim-1)!       *
+c                  k! = fact(k+1)                                      *
+c***********************************************************************
+      call FCT()
 
       call open_files
 C-----
@@ -134,6 +148,28 @@ C-----Read line of optional input
 
       RETURN
       END
+
+      subroutine FCT()
+c***********************************************************************
+c  Calculate factorial logarithms from 0! ( =1.) up to (idim-1)!       *
+c                  k! = fact(k+1)                                      *
+c***********************************************************************
+c
+      implicit none
+      include 'dimension.h' 
+      integer          k
+      double precision zero
+      data             zero /0.0d+00/
+	double precision FFFact(6*NDLW)
+      common /factorial/FFFact
+c=======================================================================
+      FFFact(1) = zero
+      FFFact(2) = zero
+      do k=3,6*NDLW
+        FFFact(k) = FFFact(k-1) + DLOG(DBLE(k-1))
+      end do
+      return
+      end
 
       subroutine open_xs_files()
       implicit none
