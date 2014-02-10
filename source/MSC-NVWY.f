@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3819 $
+Ccc   * $Rev: 3841 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-07 06:26:49 +0100 (Fr, 07 Feb 2014) $
+Ccc   * $Date: 2014-02-10 06:02:11 +0100 (Mo, 10 Feb 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -54,7 +54,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, hisr, ps1, ps2, s, smax, smin, tl1, tl2,
-     &                 tl3, tlj, xjc, xjr
+     &                 tl3, tljx, xjc, xjr
       INTEGER i, ichsp, ier, iermax, ietl, iexc, ip1, ip2, ipar, itlc,
      &        j, jr, l, lmax, lmaxf, lmin, mul, n
 C
@@ -109,18 +109,18 @@ C-----------------decay to the highest possible bin (non neutron only)
                      lmax = MIN0(LMAxtl(ietl + 1,Nejc,Nnur),lmax)
 C--------------------do loop over l (odd and even l-values treated separately)
 C--------------------IP1 and IP2 decide to which parity each SUMTL  goes
-                     ps1 = 0.0
+                     ps1 = 0.d0
                      DO l = lmin, lmax, 2
 C-----------------------Calculation of stage dependent transmission coefficients
 C-----------------------using matrix element determined from the incident channel
 C-----------------------factor of 4 missing (it will be applied when PS is calculated)
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(iermax,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n,Nejc))**2
-                        tl2 = tlj*ZP(iermax,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(iermax,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(iermax,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n,Nejc))**2
+                        tl2 = tljx*ZP(iermax,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(iermax,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 2,Nejc))**2
                         ps1 = ps1 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
@@ -128,15 +128,15 @@ C-----------------------factor of 4 missing (it will be applied when PS is calcu
      &                        + tl3*YP(iermax,n,3,Nejc)
      &                        *OMJd(IE(n) + 1,jr))*PREp(n,Nejc)*4.
                      ENDDO
-                     ps2 = 0.0
+                     ps2 = 0.d0
                      DO l = lmin + 1, lmax, 2
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(iermax,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n,Nejc))**2
-                        tl2 = tlj*ZP(iermax,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(iermax,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(iermax,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n,Nejc))**2
+                        tl2 = tljx*ZP(iermax,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(iermax,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 2,Nejc))**2
                         ps2 = ps2 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
@@ -159,15 +159,15 @@ C-----------------decay to the highest but one bin (conditional see the next IF)
                      lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
 C--------------------do loop over l (odd and even l-values treated separately)
 C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
-                     ps1 = 0.0
+                     ps1 = 0.d0
                      DO l = lmin, lmax, 2
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(iermax,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n,Nejc))**2
-                        tl2 = tlj*ZP(iermax,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(iermax,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(iermax,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n,Nejc))**2
+                        tl2 = tljx*ZP(iermax,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(iermax,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 2,Nejc))**2
                         ps1 = ps1 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
@@ -175,15 +175,15 @@ C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
      &                        + tl3*YP(iermax,n,3,Nejc)
      &                        *OMJd(IE(n) + 1,jr))*PREp(n,Nejc)*4.
                      ENDDO
-                     ps2 = 0.0
+                     ps2 = 0.d0
                      DO l = lmin + 1, lmax, 2
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(iermax,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n,Nejc))**2
-                        tl2 = tlj*ZP(iermax,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(iermax,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(iermax,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(iermax,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n,Nejc))**2
+                        tl2 = tljx*ZP(iermax,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(iermax,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(iermax,n + 2,Nejc))**2
                         ps2 = ps2 +
      &                        (tl1*YP(iermax,n,1,Nejc)*OMJd(IE(n) - 3,
      &                        jr) + tl2*YP(iermax,n,2,Nejc)
@@ -210,30 +210,30 @@ C-----------------bin from the top excluded as already done)
                      lmax = MIN0(LMAxtl(ietl,Nejc,Nnur),lmax)
 C--------------------do loop over l (odd and even l-values treated separately)
 C--------------------IP1 and IP2 decide which parity each SUMTL  goes to
-                     ps1 = 0.0
+                     ps1 = 0.d0
                      DO l = lmin, lmax, 2
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(ier,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n,Nejc))**2
-                        tl2 = tlj*ZP(ier,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(ier,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(ier,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n,Nejc))**2
+                        tl2 = tljx*ZP(ier,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(ier,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n + 2,Nejc))**2
                         ps1 = ps1 +
      &                        (tl1*YP(ier,n,1,Nejc)*OMJd(IE(n) - 3,jr)
      &                        + tl2*YP(ier,n,2,Nejc)*OMJd(IE(n) - 1,jr)
      &                        + tl3*YP(ier,n,3,Nejc)*OMJd(IE(n) + 1,jr))
      &                        *PREp(n,Nejc)*4.
                      ENDDO
-                     ps2 = 0.0
+                     ps2 = 0.d0
                      DO l = lmin + 1, lmax, 2
-                        tlj = WP(ietl,l,Nejc)
-                        tl1 = tlj*ZP(ier,n,1,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n,Nejc))**2
-                        tl2 = tlj*ZP(ier,n,2,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n + 1,Nejc))**2
-                        tl3 = tlj*ZP(ier,n,3,Nejc)
-     &                        /(1. + tlj*ZSUm(ier,n + 2,Nejc))**2
+                        tljx = WP(ietl,l,Nejc)
+                        tl1 = tljx*ZP(ier,n,1,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n,Nejc))**2
+                        tl2 = tljx*ZP(ier,n,2,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n + 1,Nejc))**2
+                        tl3 = tljx*ZP(ier,n,3,Nejc)
+     &                        /(1. + tljx*ZSUm(ier,n + 2,Nejc))**2
                         ps2 = ps2 +
      &                        (tl1*YP(ier,n,1,Nejc)*OMJd(IE(n) - 3,jr)
      &                        + tl2*YP(ier,n,2,Nejc)*OMJd(IE(n) - 1,jr)
@@ -444,7 +444,7 @@ C-----
          ENDDO
       ENDDO
 C-----
-C-----calculation of average matrix element w from tlj
+C-----calculation of average matrix element w from tljx
 C-----
       DO i = 1, NEX(1)
 C-----next 4 l. - calculation of accessible state density for absorption
