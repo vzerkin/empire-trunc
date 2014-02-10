@@ -1,6 +1,6 @@
-!cc   * $Rev: 3828 $
+!cc   * $Rev: 3840 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-08 00:48:27 +0100 (Sa, 08 Feb 2014) $
+!cc   * $Date: 2014-02-10 05:56:58 +0100 (Mo, 10 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -11065,7 +11065,6 @@ C-----setting DIRect to zero
 
 !-zv-2013
       SUBROUTINE FINDPOT(Ki,Ieof,Ipoten)
-c     INCLUDE "global.h"
       CHARACTER*6 aaa
       CHARACTER*1024 fileOutName
       INTEGER Ieof, Ipoten, Ki
@@ -11081,7 +11080,6 @@ c     INCLUDE "global.h"
       endif
       Ieof=0
       write (aaa,'(i6.6)') Ipoten
-C     aaa=adjustl(aaa)
       fileOutName=trim(empiredir)
      1            //'/RIPL/optical/om-data'
      1            //'/om-parameter-dir'
