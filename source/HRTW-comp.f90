@@ -1,4 +1,3 @@
-$DEBUG
 !cc   * $Rev: 3829 $
 !cc   * $Author: rcapote $
 !cc   * $Date: 2014-02-07 19:40:11 -0500 (Fri, 07 Feb 2014) $
@@ -226,7 +225,6 @@ SUBROUTINE HRTW
    ENDDO          !loop over decaying nucleus parity
    IF(d0c>0.D0)d0c = 1000.0/d0c
    IF(D0_obs==0.0D0)D0_obs = d0c    !use calculated D0 (in keV) if not measured
-
    itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 ) 
    if(itmp.eq.1) WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized as requested (see TUNE 1.000)'')')
    if(BENCHM) WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
