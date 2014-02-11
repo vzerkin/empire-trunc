@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3807 $
+Ccc   * $Rev: 3855 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 16:41:03 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-11 21:45:35 +0100 (Di, 11 Feb 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3132,7 +3132,7 @@ C
 C
 C          distribution of the continuum neutron or proton MSD contribution -
 C          proportional to the 1p-1h (n=2) spin distribution shifted by the target
-C          ground state target spin XJLV(1,0), it is assumed the basic dependence
+C          target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
 C          SIG = n*0.26*A**(2.d0/3.d0) with n=2
            SIG = 2*0.26*A(Nnur)**0.66666667
            somj = 0.0
@@ -3164,7 +3164,7 @@ C              as calculated by PCROSS or MSD+MSC
 
 C          distribution of the PCROSS continuum particle or photon emissions
 C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
-C          shifted by the target ground state target spin XJLV(1,0)
+C          shifted by the target ground state target spin XJLv(LEVtarg,0)
            DO ie = 1, nexrt
 
              SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
