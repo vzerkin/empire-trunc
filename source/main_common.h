@@ -11,14 +11,14 @@ C
       DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso                  ! FIS_ISO
       COMMON /FIS_ISO/ TFIso, TGIso, TISo, RFIso, PFIso
 
-      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont       ! ECISXS
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+      COMMON /ECISXS/  ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+
+      DOUBLE PRECISION ELTl(NDLW),ELTlj(NDLW,3)
+      COMMON /ELASTIC/ ELTl,ELTlj
 
       LOGICAL lbreakup, ltransfer
       COMMON /LPEXS/lbreakup, ltransfer 
-
-      DOUBLE PRECISION ELTl(NDLW)    
-      COMMON /ELASTIC/ ELTl
 
       integer icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)

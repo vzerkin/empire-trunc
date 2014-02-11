@@ -1,6 +1,6 @@
-!cc   * $Rev: 3850 $
+!cc   * $Rev: 3856 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-11 05:48:45 +0100 (Di, 11 Feb 2014) $
+!cc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -696,20 +696,16 @@ C
 C
 C          retrieving NUBAR if available for actinides (Th to Cf)
 C
-
 C          the NUBAR.DAT file is expected to be created by runE script
-
 C          before calling EMPIRE
-
 C
            call read_nubar_unix(ierr)
            NUBarread = .TRUE.
            if(ierr.gt.0) NUBarread = .FALSE.
 C
-C          For testing the Th-232 nubar was parameterized
+C          For testing the Th-232, nubar was parameterized
 C          call read_nubar_windows()
 C          NUBarread = .TRUE.
-
          ENDIF
 C
 C--------other decaying nuclei
@@ -759,8 +755,6 @@ C            residues must be heavier than alpha !! (RCN)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
                   A(nnuc) = atmp
-C  Temporary assignment of AMAss(nnuc) - permanent for nuclei not in mass table!
-C                 AMAss(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
                   IZA(nnuc) = izatmp
@@ -2497,10 +2491,10 @@ C
       IF(NLV(Nnuc)  .le.0) NLV(Nnuc)   = 1
       IF(NCOmp(Nnuc).le.0) NCOmp(Nnuc) = 1
 
-      ELV(1,Nnuc) = 0.0
+      ELV(1,Nnuc) = 0.d0
       LVP(1,Nnuc) = 1
-      XJLv(1,Nnuc) = 0.0
-      IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5
+      XJLv(1,Nnuc) = 0.d0
+      IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0) XJLv(1,Nnuc) = 0.5d0
       ISIsom(1,Nnuc) = 0
 C-----set ground state *** done ***
       IF(.NOT.FILevel) THEN
@@ -2623,9 +2617,9 @@ C
      &'(''  WARNING: ground-state has no assigned spin/parity '')')
               WRITE (8, '(''  WARNING: assuming a default '')')
               LVP(1,Nnuc) = 1
-              XJLv(1,Nnuc) = 0.0
+              XJLv(1,Nnuc) = 0.d0
               IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
-     >           XJLv(1,Nnuc) = 0.5
+     >           XJLv(1,Nnuc) = 0.d5
               ISIsom(1,Nnuc) = 0
             ENDIF
 
@@ -10094,17 +10088,12 @@ C----------Reading ground state information (to avoid overwriting deformation)
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), 0.005
 C
-C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
            igreson = 0
            DO i = 2, ND_nlv
             READ (32,
      &     '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,3x,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), ftmp, ctmp5
-
-C           For odd nuclides, collective states in continuum have
-C           different spin than the ground state
-C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
 
             if (D_Elv(i) .gt. ELV( NLV(0),0)) then
                 ctmp5 = ' cont'

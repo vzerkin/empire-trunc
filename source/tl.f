@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3812 $
+Ccc   * $Rev: 3856 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 21:08:38 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -19,6 +19,7 @@ Ccc   * output:STL-matrix of transmission coefficients (1s=1)    *
 Ccc   *                                                          *
 Ccc   ************************************************************
 Ccc
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -129,6 +130,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       END
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C-----For dispersive optical model potentials
@@ -150,10 +152,12 @@ C Local variables
 C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
+      DOUBLE PRECISION elvr, xjlvr, t12
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp	 
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
-      INTEGER iainp, izinp, k, n, ncalc, nld_cc, j
+      INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc 
       INTEGER iwin, ipipe_move
 C
 C-----Sets CC optical model parameters according to RIPL
@@ -245,7 +249,6 @@ C
             elevcc = EEX(n,ncalc)
             REWIND(32)
             READ (32,'(A80)',END=1056,ERR=1056) ch_iuf
-            elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
               READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
      &              ,END=1056,ERR=1056) 
@@ -496,7 +499,6 @@ C
           elevcc = EXV(n,ncalc)
           REWIND(32)
             READ (32,'(A80)',END=1057,ERR=1057) ch_iuf
-            elvr0 = 0.d0
             DO ilv = 1, NLV(nnuc)
               READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
      &              ,END=1057,ERR=1057) 
@@ -1414,6 +1416,7 @@ C-----****
       END
 
       SUBROUTINE OMPAR(Nejc,Nnuc,Eilab,Eicms,Mi,Mt,Ak2,Komp,Ikey)
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -1582,6 +1585,7 @@ C-----O.M. potential parameters written
 
       SUBROUTINE CREATE_OMPAR(Ki,Komp,Ieof,Nnucr,Nejcr,Ianucr,Symbnucr,
      &                        Iaejcr,Symbejcr)
+      implicit none 
       INCLUDE 'ripl2empire.h'
 C
 C
@@ -1688,6 +1692,7 @@ C
       END
 
       SUBROUTINE READ_OMPAR_RIPL(Ko,Ierr,Irelout)
+      implicit none 
       INCLUDE 'ripl2empire.h'
 C
 C
@@ -1860,6 +1865,7 @@ C
 
 
       SUBROUTINE OMIN(Ki,Ieof,Irelout)
+      implicit none 
 C
 C     routine to read optical model parameters
 C
@@ -1965,6 +1971,7 @@ C
 C
 C     print summary information from RIPL formatted library
 C
+      implicit none 
       INCLUDE 'ripl2empire.h'
 C
 C
@@ -2043,6 +2050,7 @@ C
 
 
       SUBROUTINE FINDPOT_OMPAR_RIPL(Ki,Ieof,Ipoten,Nnuc,Nejc)
+      implicit none 
 C
 C-----Find IPOTEN entry in the RIPL optical model database
 C
@@ -2088,14 +2096,9 @@ CCC   * OUTPUT:Nonzero true if non-zero Tl's are returned                *
 CCC   *                                                                  *
 CCC   ********************************************************************
 CCC
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-C
-C COMMON variables
-C
-      INTEGER MAXl(NDETL)
-      DOUBLE PRECISION TTLl(NDETL,0:NDLW)
-      COMMON /TRANSM/ TTLl, MAXl
 C
 C Dummy arguments
 C
@@ -2104,8 +2107,11 @@ C
 C
 C Local variables
 C
-      INTEGER i, l
-      INTEGER INT, MIN0
+      INTEGER i, l, k, myalloc
+      DOUBLE PRECISION, ALLOCATABLE :: ttll(:,:),ttllj(:,:,:)
+      INTEGER, ALLOCATABLE :: maxl(:)
+      DOUBLE PRECISION ftmp
+
       Nonzero = .FALSE.
       IF (SEJc(Nejc).GT.1.0D0) THEN
          WRITE (8,
@@ -2116,6 +2122,18 @@ C
          WRITE (8,*) 'ERROR: TOO LARGE SPIN OF EJECTILE'
          STOP        'ERROR: TOO LARGE SPIN OF EJECTILE'
       ENDIF
+
+C     allocate MAXl(), TTLl(), TTLlj() 
+      ALLOCATE(maxl(NDETL),ttll(NDETL,0:NDLW),ttllj(NDETL,0:NDLW,3),
+     &   STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(8,* ) ' ERROR: Insufficient memory for TLEVAL (tl.f)'
+        WRITE(12,*) ' ERROR: Insufficient memory for TLEVAL (tl.f)'
+        STOP        ' ERROR: Insufficient memory for TLEVAL (tl.f)'
+      ENDIF
+C     maxl  = 0
+C     ttll  = 0.d0
+C     ttllj = 0.d0
 C
 C-----TL trans. coeff. at zero energy must be zero
 C
@@ -2123,6 +2141,11 @@ C
          LMAxtl(i,Nejc,Nnuc) = 0
          DO l = 1, NDLW
             TL(i,l,Nejc,Nnuc) = 0.D0
+            IF(nnuc.eq.1) then      
+              DO k=1,3
+                TLJ(i,l,k,Nejc) = 0.D0
+              ENDDO 
+            ENDIF
          ENDDO
       ENDDO
 C-----TARGET NUCLEUS (ELASTIC CHANNEL), incident neutron or proton
@@ -2132,7 +2155,7 @@ C-----KTRlom(Nejc,Nnuc)=KTRompCC
       IWArn = 0
 C-----Preparing INPUT and RUNNING ECIS
 C-----(or reading already calculated file)
-      CALL TRANSINP(Nejc,Nnuc,NDETL)
+      CALL TRANSINP(Nejc,Nnuc,NDETL,maxl,ttll,ttllj)
 C-----IWARN=0 - 'NO Warnings'
 C-----IWARN=1 - 'A out of the recommended range '
 C-----IWARN=2 - 'Z out of the recommended range '
@@ -2145,15 +2168,31 @@ C-----IWARN=4 - 'Energy requested higher than recommended for this potential'
       IF (IWArn.EQ.4 .AND. IOUt.GE.5) WRITE (8,*)
      &     ' WARNING: OMP not recommended for high energies in Tl calc'
       IWArn = 0
-C--------transfer of the calculated transmission coeff. onto TL matrix
+
+C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
       DO i = 2, NDETL
-         LMAxtl(i,Nejc,Nnuc) = MIN0(MAXl(i) + 1,NDLW)
+         LMAxtl(i,Nejc,Nnuc) = MIN(maxl(i) + 1,NDLW)
          DO l = 1, LMAxtl(i,Nejc,Nnuc)
-            IF (TTLl(i,l - 1).LT.1.D-10) EXIT
-            TL(i,l,Nejc,Nnuc) = TTLl(i,l - 1)
+            ftmp = ttll(i,l - 1)
+            IF (ftmp.LT.1.D-10) cycle
+            TL(i,l,Nejc,Nnuc) = ftmp
             Nonzero = .TRUE.
          ENDDO
+         IF(Nnuc.eq.1) then      
+           DO l = 1, LMAxtl(i,Nejc,Nnuc)
+              DO k=1,3
+                ftmp = ttllj(i,l - 1,3)
+                IF (ftmp.LT.1.D-10) cycle
+                TLJ(i,l,k,Nejc) = ftmp
+                Nonzero = .TRUE.
+              ENDDO 
+           ENDDO
+         ENDIF
       ENDDO
+C     deallocate ttll,ttllj,maxl
+      if(allocated(maxl))  deallocate(maxl)
+      if(allocated(ttll))  deallocate(ttll)
+      if(allocated(ttllj)) deallocate(ttllj)
       RETURN
       END
 
@@ -2181,6 +2220,7 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2229,19 +2269,16 @@ C                   NEN  - Max.Emiss. energy Index
 C
 C
 C
-      SUBROUTINE TRANSINP(Nejc,Nnuc,Nen)
+      SUBROUTINE TRANSINP(Nejc,Nnuc,Nen,Maxl,Ttll,Ttllj)
+      implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
-C
-C COMMON variables
-C
-      INTEGER MAXl(NDETL)
-      DOUBLE PRECISION TTLl(NDETL,0:NDLW)
-      COMMON /TRANSM/ TTLl, MAXl
 C
 C Dummy arguments
 C
       INTEGER Nejc, Nen, Nnuc
+      INTEGER Maxl(NDETL)
+      DOUBLE PRECISION Ttll(NDETL,0:NDLW),Ttllj(NDETL,0:NDLW,3)
 C
 C Local variables
 C
@@ -2250,8 +2287,6 @@ C
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp
       INTEGER i, ilv, ien, ien_beg, l, lmax
-      INTEGER INT
-      REAL SNGL
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
@@ -2260,13 +2295,10 @@ C     --------------------------------------------------------------------
 
 C-----data initialization
       CALL INIT(Nejc,Nnuc)
-C-----Cleaning transmission coefficient matrix
-      DO i = 1, NDETL
-         MAXl(i) = 0
-         DO l = 0, NDLW
-            TTLl(i,l) = 0.D0
-         ENDDO
-      ENDDO
+C-----Cleaning transmission coefficient matrices
+      Maxl  = 0
+      Ttll  = 0.d0
+      Ttllj = 0.d0
 
       culbar = 0.8*ZEJc(Nejc)*Z(Nnuc)/(1 + A(Nnuc)**0.6666)
       DO i = 2, Nen
@@ -2308,10 +2340,10 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      MAXl(ien) = lmax
+      Maxl(ien) = lmax
       DO l = 0, lmax
-         READ (45,END = 300) TTLl(ien,l)
-         IF (IOUt.EQ.5) WRITE (46,*) l, TTLl(ien,l)
+         READ (45,END = 300) Ttll(ien,l)
+         IF (IOUt.EQ.5) WRITE (46,*) l, Ttll(ien,l)
       ENDDO
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
@@ -2326,12 +2358,9 @@ C
 
   300 CLOSE (45,STATUS = 'DELETE')
       IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
-      DO i = 1, NDETL
-         MAXl(i) = 0
-         DO l = 0, NDLW
-            TTLl(i,l) = 0.D0
-         ENDDO
-      ENDDO
+      Maxl  = 0
+      Ttll  = 0.d0
+      Ttllj = 0.d0
       WRITE (8,*) ' WARNING: ERROR WHEN READING TLs in ', ctmp23
       IF (IOUt.GT.1) THEN
          WRITE (8,*)
@@ -2389,14 +2418,14 @@ C
 C--------------Spherical optical model is assumed, only one level (gs)
 C
                CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.)
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
 C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
 C--------------CC rotational calculation (ECIS)
                CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj)
             ELSE
 C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
@@ -2406,7 +2435,7 @@ C----------------OPTMAN CC calc. (only coupled levels)
 C----------------ECIS   CC calc. (only coupled levels)
                  CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., -1,.TRUE.)
                ENDIF
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
             ENDIF
 
          ENDDO
@@ -2435,7 +2464,8 @@ C        restoring the input value of the key CN_isotropic
       RETURN
       END
 
-      SUBROUTINE ECIS2EMPIRE_TL_TRG(Nejc,Nnuc,Maxlw,Stl,Sel,Lvibrat)
+      SUBROUTINE ECIS2EMPIRE_TL_TRG(
+     &  Nejc,Nnuc,Maxlw,Stl,Stlj,Sel,Lvibrat)
 C
 C     Process ECIS output to obtain Stl matrix for the incident channel
 C     Reads from unit 45 and writes to unit 6
@@ -2451,6 +2481,8 @@ C             SINl is the total inelastic cross section
 C             Selast is the shape elastic cross section
 C             Sel(L) contains the shape elastic cross section for a given orbital momentum L
 C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L
+C             Stlj(L,j) contains the transmission coefficient Tlj(L,s) for a given orbital momentum L and spin S
+C             J = L + s (vectorial sum) 
 C
 C
       implicit none
@@ -2466,25 +2498,23 @@ C Dummy arguments
 C
       LOGICAL Lvibrat
       INTEGER Maxlw, Nejc, Nnuc
-      DOUBLE PRECISION Stl(NDLW),Sel(NDLW)
+      DOUBLE PRECISION Stl(NDLW),Stlj(NDLW,3),Sel(NDLW)
 C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
      &                 xmas_nejc, xmas_nnuc, selast, sreal, simag, stmp
       INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
-      INTEGER nctot, ncsol, ncint
+      INTEGER nctot, ncsol, ncint, jindex
       LOGICAL relcal, unformat
       CHARACTER*1 parc
       DATA unformat/.TRUE./ 
 
       Maxlw  = 0
       ncoll = 0
-
-      DO l = 1, NDLW
-       Stl(l) = 0.d0
-       Sel(l) = 0.d0
-      ENDDO
+      Stl  = 0.d0
+      Sel  = 0.d0
+      Stlj = 0.d0
       CSFus   = 0.D0
 
       ilv = 1
@@ -2511,7 +2541,7 @@ C       (nlev=1 corresponds to the ground state)
      &  '(1X,3(I3,1X),I3,1X,F5.1,1X,2(D15.7,1X),1x,4X,F11.8)'
      &  ,END=90,ERR=90) nc1,nc2,nlev,l,jj,sreal,simag,stmp
 
-        IF (nlev.eq.1 .and. nc1.eq.nc2
+        IF (nlev.eq.LEVtarg .and. nc1.eq.nc2
      &    .and. stmp.GT.1.D-15 .AND. L.LT.NDLW) then
 C-----------Averaging over particle and target spin, summing over channel spin jc
 C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
@@ -2544,15 +2574,15 @@ C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
-C--------(nlev=1 corresponds to the ground state)
+C--------(nlev=LEVtarg corresponds to the target state)
          if(unformat) then
            READ (45,  END = 200,ERR = 200) nlev, l, jj, dtmp
          else
            READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          endif
          ncoll = MAX(nlev,ncoll)
-C--------Selecting only ground state
-         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.GE.NDLW) then
+C--------Selecting only target state LEVtarg
+         IF (nlev.eq.LEVtarg .AND. dtmp.GT.1.D-15 .AND. l.GE.NDLW) then
            WRITE (8,*)
      &     ' ERROR: ECIS angular momentum bigger than NDLW '
            WRITE (8,*)
@@ -2561,13 +2591,34 @@ C--------Selecting only ground state
      &     ' ERROR: Set NDLW in dimension.h to ',l
            STOP ' ERROR: ECIS angular momentum bigger than NDLW '
          ENDIF
-         IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) THEN
+         IF (nlev.eq.ilv .AND. dtmp.GT.1.D-15 .AND. l.LT.NDLW) then
 C-----------Averaging over particle and target spin, summing over channel spin jc
-            Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
+            Stl(l + 1) = Stl(l + 1) + 
+     &                   (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
 C           Maxlw = l
             Maxlw = l + 1
+
+            write(*,*) 'Starget=',sngl(XJLv(ilv,0)),
+     &        '   Sproj=',sngl(SEJc(Nejc)),' TARGET'
+C
+            jindex = 1 ! default, good for alphas
+            if(NINT(2*SEJc(Nejc)) .eq. 1 ) then	 ! n,p,h,t
+              if(jj.gt.l) jindex = 2
+            elseif(NINT(2*SEJc(Nejc)) .eq. 2) then ! d
+              if(jj.eq.l) jindex = 2
+              if(jj.gt.l) jindex = 3
+            endif
+C
+            write(*,'(1x,''Channel spin/par='',
+     &        f5.1,A1,5x,2HJ=,f5.1,2x,2HL=,I3,2x,7Hjindex=,I1)')  
+     &        jc, parc, jj, l, jindex
+C
+            Stlj(l + 1,jindex) = Stlj(l + 1,jindex) + 
+     &                   (2*jc + 1)*dtmp !/DBLE(2*l + 1)
+     &                   /DBLE(2*SEJc(Nejc) + 1)
+     &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
          ENDIF
       ENDDO
       GOTO 100
@@ -2832,14 +2883,15 @@ C
       END
 
 
-      SUBROUTINE ECIS2EMPIRE_TR(Nejc,Nnuc,J,Lvibrat)
+      SUBROUTINE ECIS2EMPIRE_TR(Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj)
 C
-C     Process ECIS output to obtain TTLl,MaxL matrix for EMPIRE energy grid
+C     Process ECIS output to obtain TTLl,Maxl matrix for EMPIRE energy grid
 C     Reads from units 45, 46 and writes to unit 6
 C
 C     INPUT:  Nejc  ejectile nucleus index
 C             Nnuc  residual nucleus index
-C             J     energy index
+C             Ien   energy index
+C
 C     OUTPUT: TTLl(NDETL,0:NDLW),MaxL(NDETL) for all energies from 1 to NDETL
 C
 C==========================================================================
@@ -2851,32 +2903,29 @@ C     to obtain usual T(L)
 C     Sigma_abs = pi/k**2 * suma [(2*L+1) T(L)]
 C     Sigma_reacc = Sigma_abs(c=gs) + Sigma_inl(c = other coupled channels)
 C
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-C COMMON variables
-C
-      INTEGER MAXl(NDETL)
-      DOUBLE PRECISION TTLl(NDETL,0:NDLW)
-      COMMON /TRANSM/ TTLl, MAXl
-C
 C Dummy arguments
 C
-      INTEGER J, Nejc, Nnuc
+      INTEGER Ien, Nejc, Nnuc
       LOGICAL Lvibrat
+      INTEGER Maxl(NDETL)
+      DOUBLE PRECISION Ttll(NDETL,0:NDLW),Ttllj(NDETL,0:NDLW,3)
 C
 C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
-     &                 xmas_nejc, xmas_nnuc
+     &                 xmas_nejc, xmas_nnuc, stmp
       LOGICAL relcal, unformat
-      INTEGER l, lmax, nc, nceq, ncoll, nlev
+      INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex
       CHARACTER*1 parc
       data unformat/.TRUE./
       lmax = 0
       ncoll = 0
-      ecms = ETL(J,Nejc,Nnuc)
+      ecms = ETL(Ien,Nejc,Nnuc)
 C-----
 C----- Input of transmission coefficients
 C-----
@@ -2906,13 +2955,33 @@ C--------(nlev=1 corresponds to the ground state)
            READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp     
          ENDIF  
          ncoll = MAX(nlev,ncoll)
-C--------Selecting only ground state
+C--------Selecting only the target state
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LE.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin JC
-            TTLl(J,l) = TTLl(J,l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
+            TTLl(Ien,l) = TTLl(Ien,l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*SEJc(Nejc) + 1)
      &                  /DBLE(2*XJLv(1,Nnuc) + 1)
             lmax = MAX(lmax,l)
+
+            write(*,*) 'Snuc (inv) =',sngl(XJLv(1,Nnuc)),
+     &        '   Sejectile=',sngl(SEJc(Nejc)),' INVERSE XS'
+C
+            jindex = 1 ! default, good for alphas
+            if(NINT(2*SEJc(Nejc)) .eq. 1 ) then	 ! n,p,h,t
+              if(jj.gt.l) jindex = 2
+            elseif(NINT(2*SEJc(Nejc)) .eq. 2) then ! d
+              if(jj.eq.l) jindex = 2
+              if(jj.gt.l) jindex = 3
+            endif
+C
+            write(*,'(1x,''Channel spin/par='',
+     &        f5.1,A1,5x,2HJ=,f5.1,2x,2HL=,I3,2x,7Hjindex=,I1)')  
+     &        jc, parc, jj, l, jindex
+
+            Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex) + 
+     &                  (2*jc + 1)*dtmp/DBLE(2*l + 1)
+     &                  /DBLE(2*SEJc(Nejc) + 1)
+     &                  /DBLE(2*XJLv(1,Nnuc) + 1)
          ENDIF
       ENDDO
       GOTO 100
@@ -2920,7 +2989,7 @@ C-----------Averaging over particle and target spin, summing over channel spin J
 C-----For vibrational the Tls must be multiplied by
       IF (Lvibrat) THEN
          DO l = 0, lmax
-            TTLl(J,l) = TTLl(J,l)*DBLE(2*XJLv(1,Nnuc) + 1)
+            Ttll(Ien,l) = Ttll(Ien,l)*DBLE(2*XJLv(1,Nnuc) + 1)
          ENDDO
       ENDIF
       stotecis = 0.D0
@@ -2933,7 +3002,7 @@ C-----For vibrational the Tls must be multiplied by
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) selecis
   300 CLOSE (45)
       sinlss = 0.D0
-      SIGabs(J,Nejc,Nnuc) = 0.D0
+      SIGabs(Ien,Nejc,Nnuc) = 0.D0
       IF (sreacecis.LE.0.D0) RETURN
       IF (IOUt.EQ.5) THEN
          xmas_nnuc = AMAss(Nnuc)
@@ -2945,7 +3014,7 @@ C--------Reaction cross section in mb
          sabs = 0.D0
          if(elab.lt.0.3d0) write(8,*)
          DO l = 0, lmax
-            stmp = TTLl(J,l)*DBLE(2*l + 1)
+            stmp = Ttll(Ien,l)*DBLE(2*l + 1)
             if(elab.lt.0.3d0) write(8,303) l,stmp*10.*PI/ak2
   303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
             sabs = sabs + stmp
@@ -2965,7 +3034,7 @@ C--------Reaction cross section in mb
             WRITE (8,*)
             WRITE (8,'(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)') '  LMAX:',
      &             lmax, ' E=', ecms, ' MeV (CMS)', elab,
-     &             ' MeV (LAB); Energy index =', J
+     &             ' MeV (LAB); Energy index =', Ien
             WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
      &                  SNGL(sabs), ' mb '
             WRITE (8,*) ' Reaction XS =', SNGL(sreacecis),
@@ -2979,13 +3048,13 @@ C--------Reaction cross section in mb
          ENDIF
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
-      WRITE (46) lmax, J, ecms, IRElat(Nejc,Nnuc)
+      WRITE (46) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
-         WRITE (46) TTLl(J,l)
+         WRITE (46) Ttll(Ien,l)
       ENDDO
       WRITE (46) sreacecis
-      MAXl(J) = lmax
-      SIGabs(J,Nejc,Nnuc) = sreacecis
+      Maxl(Ien) = lmax
+      SIGabs(Ien,Nejc,Nnuc) = sreacecis
       END
 C
 C

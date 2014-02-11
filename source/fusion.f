@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3847 $
+Ccc   * $Rev: 3856 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-11 05:40:16 +0100 (Di, 11 Feb 2014) $
+Ccc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -27,11 +27,11 @@ Ccc
 C
 C     COMMON variables
 C
-      DOUBLE PRECISION ABScs, ELAcs, ELTl(NDLW)
-      DOUBLE PRECISION SINl, TOTcs, SINlcc, SINlcont
-      COMMON /ECISXS/ ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
-      COMMON /ELASTIC/ ELTl
-C     COMMON /WAN/ S1
+      DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+      COMMON /ECISXS/  ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
+
+      DOUBLE PRECISION ELTl(NDLW),ELTlj(NDLW,3)
+      COMMON /ELASTIC/ ELTl,ELTlj
 C
 C Dummy arguments
 C
@@ -41,8 +41,11 @@ C Local variables
 C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ftmp, 
      &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,
-     &    qdtmp, r2, rp, s0, s1a, smax, smin, stl(NDLW), selast,
-     &    sum, wparg, xmas_npro, sel(NDLW), xmas_ntrg, dtmp, S1
+     &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,
+     &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1
+
+C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
+      DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
 
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
@@ -51,7 +54,7 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
-     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l   
+     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc   
       DOUBLE PRECISION PAR
       LOGICAL logtmp, TMP_isotropic
       INTEGER iwin, ipipe_move
@@ -92,8 +95,17 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-      stl = 0.d0
-      sel = 0.d0
+
+C     allocate stl(), stlj(), sel() 
+      ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(8,* ) ' ERROR: Insufficient memory for MARENG (fusion.f)'
+        WRITE(12,*) ' ERROR: Insufficient memory for MARENG (fusion.f)'
+        STOP        ' ERROR: Insufficient memory for MARENG (fusion.f)'
+      ENDIF
+      stlj = 0.d0
+      stl  = 0.d0
+      sel  = 0.d0
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -475,7 +487,8 @@ C           restoring the input value of the key CN_isotropic
                CALL PROCESS_ECIS('dwba',4,4,ICAlangs)
             ELSE
                CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
-               CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
+               CALL ECIS2EMPIRE_TL_TRG(
+     &           Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
                ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
                WRITE (8,*) 
@@ -643,7 +656,8 @@ C                CLOSE(47,STATUS='DELETE')
      &        ' WARNING: Add DWBA levels to collective levels          '
                 ENDIF 
                 CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
-                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
+                CALL ECIS2EMPIRE_TL_TRG(
+     &            Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
 
               ENDIF
 
@@ -657,7 +671,7 @@ C               including CN calculation
                 ELSE
                   CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
-     >                                 Npro,Ntrg,maxlw,stl,sel,.FALSE.)
+     >              Npro,Ntrg,maxlw,stl,stlj,sel,.FALSE.)
                   IF(.not.CN_isotropic) THEN
                     WRITE (8,*)
      &        ' WARNING: DWBA levels required if CN expansion is needed'
@@ -678,8 +692,7 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                 ELSE
                   CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
-     >                                  Npro,Ntrg,maxlw,stl,sel,.TRUE.)
-
+     &              Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
                   IF(.not.CN_isotropic) THEN
                     WRITE (8,*)
      &        ' WARNING: DWBA levels required if CN expansion is needed'
@@ -931,10 +944,12 @@ C-----------------checking the correspondence of the excited states
   260          CLOSE (45, STATUS = 'DELETE')
                CLOSE (46, STATUS = 'DELETE')
                CLOSE (47)
-               IF (DEFormed) THEN
-                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.FALSE.)
+               IF (DEFormed) THEN                                                                          
+                 CALL ECIS2EMPIRE_TL_TRG(
+     &             Npro,Ntrg,maxlw,stl,stlj,sel,.FALSE.)
                ELSE
-                CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
+                 CALL ECIS2EMPIRE_TL_TRG(
+     &             Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
                ENDIF
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
          ENDIF  ! END of DIRECT=1/2 block
@@ -947,7 +962,8 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
             WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
-            CALL ECIS2EMPIRE_TL_TRG(Npro,Ntrg,maxlw,stl,sel,.TRUE.)
+            CALL ECIS2EMPIRE_TL_TRG(
+     &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
          ENDIF
          IF (maxlw.GT.NDLW) THEN
             WRITE (8,*)
@@ -1290,6 +1306,9 @@ C-----direct contribution !!!
 C
       DO i = 1, NDLW
          ELTl(i) = stl(i)
+         DO j = 1, 3
+           ELTlj(i,j) = stlj(i,j)
+         ENDDO
       ENDDO
       DO j = NDLW, 1, -1
          NLW = j 
@@ -1353,6 +1372,11 @@ C
      &''D '')')
          STOP 'ERROR: Insufficient dimension NDLW for partial waves'
       ENDIF
+
+C     deallocate stl(), stlj(), sel() 
+      if(allocated(stl )) deallocate(stl)
+      if(allocated(sel) ) deallocate(sel)
+      if(allocated(stlj)) deallocate(stlj)
 
       call get_TLs()
 
@@ -1745,8 +1769,7 @@ C
 C Local variables
 C
       CHARACTER*132 ctmp
-      INTEGER iwin, ipipe_move ! to be checked if ipipe_move() can replace ipipe_copy()
-C     INTEGER iwin, ipipe_copy
+      INTEGER iwin, ipipe_move 
 
       ctmp = Outname(1:Length)//'.CS'
       iwin = ipipe_move('ecis06.cs',ctmp)

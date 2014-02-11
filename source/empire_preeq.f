@@ -19,7 +19,7 @@ C
       CHARACTER*23 ctmp23
 
       DOUBLE PRECISION qmax,qstep,q2,q3,ftmp,echannel,dtmp 
-      INTEGER ltrmax, i, nejc, nnur, itimes, its, iad, iam, ia, iang, ie 
+      INTEGER ltrmax,i,nejc,nnur,itimes,its,iad,iam,ia,iang,ie,j 
 
 C     COMMON variables
 
@@ -394,6 +394,9 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
 C     Renormalizing elastic transmission coefficients to consider PE emission
       DO i = 1, NDLW
           ELTl(i) = ELTl(i) * corrmsd 
+          DO j = 1, 3
+            ELTlj(i,j) = ELTlj(i,j) * corrmsd 
+          ENDDO
       ENDDO
 
       WRITE (12,*) ' '
