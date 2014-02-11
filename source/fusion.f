@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3812 $
+Ccc   * $Rev: 3847 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 21:08:38 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-02-11 05:40:16 +0100 (Di, 11 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -201,7 +201,6 @@ C    &           ' #Ls=', ncoef2,' lmax=',PL_lmax(i)
             WRITE(8,*) ' Maximum CN spin is ', maxlw
             WRITE(8,*) ' Spin dimension  is ', NDLW
             NLW = NDLW
-            WRITE(8,*) 
 
             GOTO 300
 
@@ -962,7 +961,6 @@ C-----------SCAT2 like calculation (one state, usually gs, alone)
          WRITE(8,*) ' Maximum CN spin is ', maxlw
          WRITE(8,*) ' Spin dimension  is ', NDLW
          NLW = NDLW
-         WRITE(8,*) 
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
@@ -983,7 +981,6 @@ C--------calculation of h.i. transmission coefficients for fusion
          WRITE(8,*) ' Maximum CN spin is ', maxlw + 1
          WRITE(8,*) ' Spin dimension  is ', NDLW
          NLW = NDLW
-         WRITE(8,*) 
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
