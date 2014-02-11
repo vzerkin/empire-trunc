@@ -1,6 +1,6 @@
 #! /bin/sh -
 # Script to run Empire for all the input files in benchmarks directory, 
-# keeping only the original files and the .lst and .xsc files
+# keeping only the original files and the .lst, .out and .xsc files
 #
 echo par1=$0
 echo par2=$1
@@ -74,6 +74,7 @@ if [ "$option" = "run" ] ; then
    mkdir TeMpOrArYdIr
 #  cp * > TeMpOrArYdIr
    cp u238-rigid-soft-omp-lev.col th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   cp *.inp *ref* TeMpOrArYdIr/ >& /dev/null
    error=0
    for file in $files
    do
@@ -87,7 +88,7 @@ if [ "$option" = "run" ] ; then
      else
        echo ".......Calculations Completed Successfully......." 1>&2
      fi
-     cp $file.inp $file-ref.* TeMpOrArYdIr/
+     cp $file.inp $file-ref.* TeMpOrArYdIr/ >& /dev/null
      for suffix in $suffix_list
      do
        cp $file.$suffix TeMpOrArYdIr/
@@ -105,7 +106,7 @@ if [ "$option" = "run" ] ; then
    fi
 
 elif [ "$option" = "clean" ] ; then
-# cleans the benchmarks directory, keeping only original files
+# cleans the benchmarks directory, keeping only original files corresponding to specific input (or all)
    mkdir TeMpOrArYdIr
    mv *-ref.* TeMpOrArYdIr/
    mv th232-rot-vib-lev.col TeMpOrArYdIr/
