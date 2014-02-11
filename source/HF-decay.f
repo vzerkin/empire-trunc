@@ -1237,7 +1237,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
            xcross(NDEJC+1,jz,jn) = CSFis
          ENDIF
 
-         WRITE (8,*)
+C        WRITE (8,*)
 C        Integral is calculated by trapezoidal rule being consistent with cross section
          IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
          IF(CSEmis(0,nnuc).gt.0) THEN
