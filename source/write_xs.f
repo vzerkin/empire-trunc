@@ -53,9 +53,15 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
      &  EINl, TOTcsfis, (CSPfis(nnuc),nnuc=1,min(NNUcd,10,max_prn-1))
       CLOSE (80)
       CLOSE (79)
-      WRITE (12,*) 
-      WRITE (12,'('' Tot. fission cross section '',G12.4,'' mb'')')
+
+      IF(FISsil(1)) THEN
+        WRITE (12,*) 
+        WRITE (12,'('' Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
+        WRITE (8,*) 
+        WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
+     &       TOTcsfis
+	ENDIF
 
       IF(ENDf(1).GT.0) THEN 
         WRITE (12,*) 
@@ -64,9 +70,6 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
         WRITE (12,*) '*******************************************'
         WRITE (12,*) 
       ENDIF 
-      WRITE (8,*) 
-      WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
-     &       TOTcsfis
 C
 C---- ENDF spectra printout (exclusive representation)
 C----
