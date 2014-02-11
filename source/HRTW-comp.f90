@@ -1,3 +1,4 @@
+$DEBUG
 !cc   * $Rev: 3829 $
 !cc   * $Author: rcapote $
 !cc   * $Date: 2014-02-07 19:40:11 -0500 (Fri, 07 Feb 2014) $
@@ -38,7 +39,6 @@ SUBROUTINE HRTW
    CHARACTER(1), DIMENSION(2) :: cpar
    REAL :: d0c
    INTEGER :: i, ich, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp
-   INTEGER :: int, nint
    REAL*8, DIMENSION(nfmod) :: sumfism
    REAL*8 :: vt
    DATA cpar/'+', '-'/
@@ -60,14 +60,13 @@ SUBROUTINE HRTW
    d0c = 0.D0
    sumtg = 0.D0
    tgexper = 0.D0
-   IF(FIRst_ein .OR. BENchm) THEN
-      IF(EINl<=1.D0) THEN
-         WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
-      ELSE
-         WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
-         WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
-      ENDIF
-      WRITE(8,'(1x,''-------------------------------------------------------------'')')
+   IF(.not. BENchm) THEN
+     WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
+     WRITE(8,'(1x,''-------------------------------------------------------------'')')
+   ENDIF
+   IF(FIRst_ein .AND. (EINl>1.D0) ) THEN
+     WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
+     WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
    ENDIF
    ! 
    ! start CN nucleus decay
@@ -225,14 +224,24 @@ SUBROUTINE HRTW
    ENDDO          !loop over decaying nucleus parity
    IF(d0c>0.D0)d0c = 1000.0/d0c
    IF(D0_obs==0.0D0)D0_obs = d0c    !use calculated D0 (in keV) if not measured
-   itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 ) 
-   if(itmp.eq.1) WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized as requested (see TUNE 1.000)'')')
-   if(BENCHM) WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
-   if(itmp.gt.1) THEN
-      WRITE(8,'(1x,'' WARNING: Gamma emission width normalized by a factor '',F7.3)') TUNe(0,nnuc)
-      WRITE(12,'(1x,'' Gamma emission width normalization: '',F7.3)') TUNe(0,nnuc)
+
+   if(BENchm) THEN
+     WRITE(8,*)
+     WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
+     WRITE(8,*)
    endif
 
+   itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 ) 
+   if(itmp.eq.1 .and. (.not.BENCHM)) THEN
+     WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
+     WRITE(8,*)
+   endif 
+   if(itmp.gt.1 .and. (.not.BENCHM)) THEN
+     WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+     WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+     WRITE(8,*)
+   endif
+!  IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
    IF(EINl<=1.D0 .AND. FIRst_ein) THEN
       IF(D0_obs>0.D0) THEN
          tgexper = 2*PI*GG_obs/D0_obs/1.E6
@@ -254,18 +263,18 @@ SUBROUTINE HRTW
          WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
          WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
       ENDIF
+      WRITE(8,*)
       WRITE(12,*)
 
       if(itmp==0 .and. (.not.BENCHM)) then 
         IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
-          WRITE(8,*)
           !
           ! renormalization of the gamma-ray strength function only
           ! undertaken for the first energy
           !
           TUNe(0,nnuc) = tgexper/sumtg
-          WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is '',F7.3)') TUNe(0,nnuc)
-          IF (FIRst_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to the first incident energy'')') 
+          WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
+          IF (FIRst_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')') 
         ELSE 
           WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
         ENDIF

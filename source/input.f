@@ -1,6 +1,6 @@
-!cc   * $Rev: 3840 $
+!cc   * $Rev: 3850 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-10 05:56:58 +0100 (Mo, 10 Feb 2014) $
+!cc   * $Date: 2014-02-11 05:48:45 +0100 (Di, 11 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1611,7 +1611,8 @@ C
 C------PE model matrix initialization done
 C************************************************************************
 
-      IF (FIRst_ein) THEN   ! EIN IF BLOCK (II)
+C     IF (FIRst_ein .or. BENchm) THEN   ! EIN IF BLOCK (II)
+      IF (FIRst_ein            ) THEN   ! EIN IF BLOCK (II)
 
 C--------reset some options if OMP fitting option selected
          IF (FITomp.NE.0) THEN
@@ -1938,6 +1939,7 @@ C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
 C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.d0
+
 C-----calculate compound nucleus level density 
       CALL INP_LD(nnuc)      
 C
@@ -2133,11 +2135,16 @@ Cpr         END DO
       ENDDO     !over nuclei (nnuc)
       WRITE (8,*) ' '
       WRITE (8,*) 'Total number of nuclei considered :', NNUct
+      WRITE (12,*) ' '
+      WRITE (12,*) 'Total number of nuclei considered :', NNUct
 
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
         WRITE(8,*) 'Nuclei marked with < in the table below produce only
      & inclusive emission spectra'
+        WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
+        WRITE(12,*) 'Nuclei marked with < in the table below produces in
+     &clusive spectra'
       ENDIF
 
       WRITE (8,*) ' '
@@ -2146,6 +2153,8 @@ C-----LEVEL DENSITY for residual nuclei
          IF (NEX(nnur).LE.0) cycle
          CALL INP_LD(nnur)
       ENDDO
+
+	ATIlnor(0) = ATIlnor(Ntarget)
       WRITE (8,*)
 
       IF (FITlev.GT.0) THEN
@@ -2815,22 +2824,28 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*)
         WRITE (12,99060)
         WRITE (12,*)
-        WRITE (12,99007) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+        WRITE (12,99008) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
         WRITE (12,*)
-        WRITE (12,99012) (EJMass(j),j = 1,NEJcm)
+        WRITE (12,99013) (EJMass(j),j = 1,NEJcm)
         WRITE (12,*)
         WRITE (12,99050)
         WRITE (12,*)
-        WRITE (12,99005) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
+        WRITE (12,99006) (IFIX(SNGL(AEJc(i))),SYMbe(i),i = 1,NEJcm)
         WRITE (12,*)
 
       ENDIF
 
-99005 FORMAT ('    Nucleus   ',12(6X,I2,A2))
-99007 FORMAT ('              ',12(6X,I2,A2))
-99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F10.3)
-99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F10.3)
-99012 FORMAT (1X,10x,4X,12(F10.6,1x))      
+99005 FORMAT ('    Nucleus   ',12(4X,I2,A2))
+99006 FORMAT ('    Nucleus   ',12(4X,I2,A2))
+99007 FORMAT (' ',12(4X,I2,A2,3x))
+99008 FORMAT (' ',12(4X,I2,A2,3x))
+99010 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F8.3)
+99011 FORMAT (1X,I3,'-',A2,'-',I3,4X,12F8.3)
+99015 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F8.3)
+99016 FORMAT (1X,I3,'-',A2,'-',I3,2X,'<',1x,12F8.3)
+C99012 FORMAT (1X,10x,4X,12(F10.6,1x))      
+99012 FORMAT (1X,12(F10.6,1x))      
+99013 FORMAT (1X,12(F10.6,1x))      
 
 99045 FORMAT(1X,I3,'-',A2,'-',I3,4X,10F12.3)
 99050 FORMAT(10x,'S e p a r a t i o n   e n e r g i e s [MeV]')
@@ -2875,13 +2890,13 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         DO i = 1, NNUcd
           IF(ENDf(i).GT.0) THEN
             IF (ENDf(i).EQ.1)
-     &        WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),
+     &        WRITE (12,99011) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
             IF (ENDf(i).EQ.2)
      &        WRITE (12,99015) IFIX(SNGL(Z(i))),SYMb(i),
      &                   IFIX(SNGL(A(i))), (Q(j,i),j = 1,NEJcm)
           ELSE
-            WRITE (12,99010) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
+            WRITE (12,99011) IFIX(SNGL(Z(i))),SYMb(i),IFIX(SNGL(A(i))),
      &                   (Q(j,i),j = 1,NEJcm)
           ENDIF
         ENDDO
@@ -2958,12 +2973,14 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
         WRITE (12,*) '[EMP-man]                                       '
         WRITE (12,*) '  M.Herman, R.Capote, A.Trkov, M.Sin, B.Carlson,'
         WRITE (12,*) '  P.Oblozinsky, C.Mattoon, H.Wienke, S. Hoblit, '
-        WRITE (12,*) '  Young-Sik Cho, V. Plujko and V.Zerkin         '
+        WRITE (12,*) '  Young-Sik Cho, G.P.A. Nobre, V.A. Plujko and  '
+        WRITE (12,*) '  V.Zerkin                                      '
         WRITE (12,*) '                                                '
-        WRITE (12,*) ' "EMPIRE: Modular system for nuclear reaction   '
-        WRITE (12,*) '     calculations and nuclear data evaluation", '
-        WRITE (12,*) ' Users'' manual, to be published as IAEA(Vienna)'
-        WRITE (12,*) '  and BNL(Upton,NY) technical reports, 2012     ' 
+        WRITE (12,*) ' "EMPIRE-3.2 Malta: Modular system for nuclear  '
+        WRITE (12,*) '  reaction calculations and data evaluation",   '
+        WRITE (12,*) '  EMPIRE users'' manual, report INDC(NDS)-0603  '
+        WRITE (12,*) '  (IAEA, Vienna, 2013) and BNL-101378-2013      ' 
+        WRITE (12,*) '  (BNL, Upton, NY, USA, 2013)                   '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[RIPL]                                          '
         WRITE (12,*) '  R.Capote, M.Herman, P.Oblozinsky, P.G.Young,  '
@@ -3608,10 +3625,10 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
           
             IF (.not.CN_isotropic) THEN          
-              WRITE (8,
-     &'('' CN angular distribution calculated by ECIS as anisotropic usi
-     &ng Blatt-Biedenharn coefficients.'')')
               WRITE (12,
+     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.'')
+     &')
+              WRITE (8,
      &'('' CN angular distribution calculated by ECIS as anisotropic usi
      &ng Blatt-Biedenharn coefficients.'')')
               IF (INTerf.EQ.0 .or. SOFt) THEN
@@ -3622,8 +3639,9 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
               ELSE
                 WRITE (8,'('' CN-direct interference by Engelbrecht - We
      &idenmuller transformation Phys.Rev. C8(1973)859-862 '')')
-                WRITE(12,'('' CN-direct interference by Engelbrecht - We
-     &idenmuller transformation Phys.Rev. C8(1973)859-862 '')')
+                WRITE(12,
+     &'('' CN-direct interference considered (Engelbrecht - Weidenmuller
+     & transf.)'')')
               ENDIF
             ELSE
               WRITE (8,
@@ -6732,11 +6750,18 @@ C
               WRITE (8,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
-              IPArCOV = IPArCOV +1
+               IPArCOV = IPArCOV +1
                write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
-     &       IPArCOV, TUNe(i3,nnuc), INDexf,INDexb,name
-             else
+     &        IPArCOV, TUNe(i3,nnuc), INDexf,INDexb,name
+            else
               TUNe(i3,nnuc) = val
+              if (i3.eq.0) then
+                if(iabs( NINT(1000*TUNe(0,nnuc)) - 999 ).eq.1) WRITE(8 ,
+     &            '('' Gamma emission width is not normalized'')')
+                if(iabs( NINT(1000*TUNe(0,nnuc)) - 999 ).eq.1) WRITE(12,
+     &            '('' Gamma emission width is not normalized'')')
+                GOTO 100
+              endif 
               WRITE (8,
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &         '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), val
@@ -8619,7 +8644,7 @@ C
       ENDDO
 C-----Set EGSM normalization factors for each Z
       DO iz = 1,NDZmax
-         ATIlnoz(iz) = 1.0 !default
+         ATIlnoz(iz) = 1.d0 !default
       ENDDO
       IF (ADIv.EQ.0.0D0) THEN
          OPEN(31, FILE= trim(empiredir)//
@@ -8755,12 +8780,24 @@ C-------------of no collective enhancements) normalized to existing exp. data
                 atiln = 1.d0   
               ENDIF                  
             ENDIF 
-                 
+
+C           The internal normalization is stored into ATIlnor() at the first incident energy  
+            if (BENchm .or. (.not.FIRst_ein)) THEN
+              atiln = 1.d0           
+              asys  = 1.d0           
+            endif
+
             IF(ATIlnor(nnuc).EQ.0) THEN
               ATIlnor(nnuc) = atiln
             ELSE
               ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
             ENDIF
+
+C           if(nnuc.eq.4 .or. nnuc.eq. 10 ) then 
+C           write(*,*) 'Is the first energy? ',FIRst_ein
+C           WRITE(*,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
+C    &INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),ATIlnor(nnuc),ROPar(1,nnuc)
+C           endif
 
 C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for all models but HFB)
             ROPar(1,nnuc) = asys*ATIlnor(nnuc)  ! small-a
