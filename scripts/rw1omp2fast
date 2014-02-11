@@ -11,7 +11,7 @@ cd $EMPIREDIR/RIPL/optical/om-data
 
 #run gam2zvd to produce ZVView plots
 if [ -f "om-parameter-u.dat" ]; then
-  $EMPIREDIR/util/rw1omp2fast.exe
+  $EMPIREDIR/util/rw1omp2fast/rw1omp2fast.exe
 fi
 cd $work
 exit
