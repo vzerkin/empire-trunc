@@ -1,4 +1,3 @@
-$DEBUG
 !cc   * $Rev: 3829 $
 !cc   * $Author: rcapote $
 !cc   * $Date: 2014-02-07 19:40:11 -0500 (Fri, 07 Feb 2014) $
