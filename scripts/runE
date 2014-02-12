@@ -204,11 +204,11 @@ def runE(proj):
  
         for line in open( proj+'.inp', 'r' ).readlines():
             #print('line: %s' % line)
-            if 'BENCHM' in line.upper():
+            if  line.strip().upper().startswith('BENCHM'):
                 if (int(float(line.split()[1]))) == 1: 
 		    SKIPC4 = True
                     print('Benchmark calculation: experimental data not retrieved')
-            if 'TRGLEV' in line.upper(): 
+            if  line.strip().upper().startswith('TRGLEV'): 
                 targetIsomer = int(float(line.split()[1]))
                 if targetIsomer > 1 : print('Reaction on excited target level %i' % targetIsomer)
 
