@@ -45,7 +45,8 @@ C-V           discrete inelastic levels) or output particle energy
 C-V           range (for particle production from discrete level
 C-V           reactions).
 C-V         - Improve retrieval from C4
-C-V  14/02  Standardize dimension statement.
+C-V  14/02  Standardize dimension statement
+C-V         Dimensions of ZEL and FRC should be 24.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -84,7 +85,7 @@ C-M   FLTM LTM=11 Temporary file for storing pointwise data.
 C-M
 C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
-      PARAMETER   (MPT=5000,MXP=800000,MXR=4000000,MXEN=10,MXIS=10)
+      PARAMETER   (MPT=5000,MXP=800000,MXR=4000000,MXEN=10,MXIS=24)
       CHARACTER*1  CM
       CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG,FLTM
      1            ,FLEF(MXEN),COM(MXEN)
