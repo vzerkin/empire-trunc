@@ -45,6 +45,7 @@ C-V           discrete inelastic levels) or output particle energy
 C-V           range (for particle production from discrete level
 C-V           reactions).
 C-V         - Improve retrieval from C4
+C-V  14/02  Standardize dimension statement.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -557,7 +558,7 @@ C
       SUBROUTINE RDC4LS(LLS,NID,MXID,RFX)
 C-Title  : Subroutine RDC4LS
 C-Purpose: Read the PLOTC4 list file
-      CHARACTER*84 C84,RFX(1)
+      CHARACTER*84 C84,RFX(*)
       CHARACTER*1  CM
 C*
       NID=0
