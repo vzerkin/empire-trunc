@@ -5,6 +5,7 @@ C-Author : A. Trkov, Jožef Stefan Institute, Ljubljana, Slovenia
 C-Version: March 2012 (original code)
 C-V  2012/09  Skip transformation matrix (for backward compatibility
 C-V           with old files, e.g. ENDF/B-VI.8)
+C-V  2014/02  Unify ENDF IO routines with EMPEND
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -392,7 +393,7 @@ C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
       PARAMETER (MXPL=80)
-      DIMENSION QL(1),PL(MXPL)
+      DIMENSION QL(*),PL(MXPL)
       IF(NL.GE.MXPL) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL  PLNLEG(UU,PL,NL)
       N1=NL+1
@@ -412,7 +413,7 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
-      DIMENSION PL(1)
+      DIMENSION PL(*)
       PL(1)=1.
       IF(NL.LT.1) RETURN
       L2=2
@@ -544,7 +545,7 @@ C*
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
       DOUBLE PRECISION RUFL,RR(6)
-      DIMENSION    VK(1)
+      DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
@@ -670,7 +671,7 @@ C* Loop for all argument&function pairs
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(*),INR(*)
+      DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -680,8 +681,8 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NR
       WRITE(REC(6),42) NZ
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
-      IF(NZ.LE.0) RETURN
 C* Write interpolation data
       N =0
    20 I =0
@@ -694,6 +695,7 @@ C* Write interpolation data
    24 I =I +2
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NR) GO TO 20
       RETURN
@@ -714,6 +716,7 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NPL
       WRITE(REC(6),42) N2
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(NPL.EQ.0) RETURN
 C* Write data
@@ -766,7 +769,12 @@ C* Sign of the exponent
 C* Sign of the mantissa
       IF(FF.LT.0) FA=-FA
 C* Write character fiels
-      WRITE(CH,80) FA,SN,IA
+      IF(IA.GE.10) THEN
+        WRITE(CH,80) FA,SN,IA
+      ELSE
+        WRITE(CH,81) FA,SN,IA
+      END IF
       RETURN
    80 FORMAT(F8.5,A1,I2.2)
+   81 FORMAT(F9.6,A1,I1)
       END
