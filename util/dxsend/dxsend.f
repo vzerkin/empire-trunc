@@ -23,6 +23,7 @@ C-V  13/03 - Fix summation when No. of outgoing particles is undefined.
 C-V        - Fix retrieval of uncertainties from MF40.
 C-V  13/04 - Fix explicit printing of MT 5
 C-V        - Fix trivial error setting the error flag for gamma spectra
+C-V  14/02 Standardize some dimension statements.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -47,6 +48,9 @@ C-D         their ZA identification number. If ZA>0 it is given in
 C-D         terms of Z*1000+A+LIS0/10 where Z is the atomic number,
 C-D         A the mass number and LIS0 the metastable state number.
 C-D         When ZA<0 it implies the ENDF material MAT number.
+C-D         NOTE: When ZEL is specified for a natural element, the
+C-D               abundances are determined from the in-built data
+C-D               table. The DIMENSION of ZEL must be at least 24.
 C-D  FRC    Fractional abundance of nuclides from the list.
 C-D  ZAP  - Outgoing particle ZA designation (ZAP=1 for neutrons).
 C-D  MF0  - Requested file number (ENDF conventions).
@@ -112,7 +116,8 @@ C-D                between CM and Lab coordinate system is ignored.
 C-D
 C-Extern.: DXSEND,DXSEN1
 C*
-      DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN),ZEL(1),FRC(1)
+      PARAMETER    (MXIZ=24)
+      DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN),ZEL(MXIZ),FRC(MXIZ)
 C*
 C... Temporary aliasing of MT0=5 with MT0=9000 for backward compatibility
       IF(MT0.EQ. 5) MT0=9000
@@ -266,7 +271,7 @@ C-Version:
 C-V 04/11 Add data A>60
       PARAMETER  (MXIZ=24,MXEL=100)
 C* Main array containing the abundances
-      DIMENSION ZAB(MXIZ,MXEL),ZEL(1),FRC(1)
+      DIMENSION ZAB(MXIZ,MXEL),ZEL(MXIZ),FRC(MXIZ)
 C* Equivalenced fields for the data statement
       DIMENSION Z00(MXIZ,  4 )
       DIMENSION Z05(MXIZ,  3 )
@@ -3828,7 +3833,7 @@ C-D  NG  Final number of gamma lines packed into the output array GAM.
 C-D  LW  Length of the packed output vector.
 C-D  GAM Output array of packed gamma energies and yields.
 C-
-      DIMENSION  ID(1),RWO(1),GAM(1)
+      DIMENSION  ID(*),RWO(*),GAM(*)
       RETURN
       END
       SUBROUTINE SUMYLD(LV,LG,ID,RWO,GTO,NG,LW)
@@ -3850,7 +3855,7 @@ C-D      checking purposes. It should be close to 1.
 C-D  NG  Final number of gamma lines packed into the output array.
 C-D  LW  Length of the packed output vector.
 C-
-      DIMENSION  ID(1),RWO(1)
+      DIMENSION  ID(*),RWO(*)
 C* Make sure that the decaying levels form a complete set.
 C* Fill missing levels
       DO 40 I=1,LV
@@ -4143,6 +4148,8 @@ C-Purpose: Read a text record to an ENDF file
       SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
 C-Title  : Subroutine RDHEAD
 C-Purpose: Read an ENDF HEAD record
+C-Version:
+C-V  2014/02 Implement the setting of the error flag
 C-Description:
 C-D  The HEAD record of an ENDF file is read. The following error
 C-D  conditions are trapped by setting the IER flag:
@@ -4150,7 +4157,14 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
-      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      IER=0
+      READ (LEF,92,END=81,ERR=82) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      RETURN
+C* Trap aN E.O.F error
+   81 IER=1
+      RETURN
+C* Trap a read-error
+   82 IER=2
       RETURN
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
@@ -4230,7 +4244,7 @@ C*
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
       DOUBLE PRECISION RUFL,RR(6)
-      DIMENSION    VK(1)
+      DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
@@ -4419,7 +4433,7 @@ C* Write interpolation data
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     BN(1)
+      DIMENSION     BN(*)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -4516,7 +4530,7 @@ C-D  The size of EN1, XS1 and EN2, XS2 arreys are assumed to be
 C-D  at least 2*NEP1 and 2*NEP2, respectively. Array elements above
 C-D  NEP1 and NEP2 are used as scratch area.
 C-D
-      DIMENSION  EN1(1),XS1(1), EN2(MEP2),XS2(MEP2)
+      DIMENSION  EN1(*),XS1(*), EN2(MEP2),XS2(MEP2)
 C*
       IF(INE.GT.2) STOP 'Log interpolation in MF 6'
 C* Convert second set of points to linearly interpolable form
@@ -4928,7 +4942,7 @@ C-Author : A.Trkov, J.Stefan Institute,Ljubljana,Slovenia, 1985
       FUNCTION POLYNX(X,C,NC)
 C-Title  : POLINX function
 C-Purpose: Polynomial Pn(x) of order NC with NC+1 coefficients C(i)
-      DIMENSION C(1)
+      DIMENSION C(*)
       NC1=NC+1
       F  =C(NC1)
       IF(NC.LT.1) GO TO 20
@@ -5036,7 +5050,7 @@ C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
       DOUBLE PRECISION P1,P2,P3,WW
-      DIMENSION PL(1)
+      DIMENSION PL(*)
       WW=DBLE(UU)
       P1=1
       PL(1)=P1
