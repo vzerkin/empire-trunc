@@ -177,7 +177,7 @@ C-M  representing the reaction MT number, the incident particle
 C-M  energy and the scattered particle angle.
 C-M
 C-
-      PARAMETER   (MPT=1200000,MXR=6000000,MXIS=10)
+      PARAMETER   (MPT=1200000,MXR=6000000,MXIS=24)
       CHARACTER*1  UN,UO
       CHARACTER*11 E11
       CHARACTER*40 BLNK,COM,COM1
