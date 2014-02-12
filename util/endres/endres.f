@@ -27,6 +27,7 @@ C-V  12/02 Fix NBT,INR array declarations for consistency (R. Capote)
 C-V  12/07 Allow filenames up to 80 characters long.
 C-V  13/03 Increase MXRW from 10 000 to 100 000 to process Fe-56 (JEFF)
 C-V  13/09 Increase tolerance for matching AWR from 1E-4(rel) to 1(abs)
+C-V  14/02 Unify common routines with EMPEND.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -1405,7 +1406,7 @@ C*
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
       DOUBLE PRECISION RUFL,RR(6)
-      DIMENSION    VK(1)
+      DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
@@ -1440,7 +1441,7 @@ C*
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INR(1),X(1),Y(1)
+      DIMENSION     NBT(NR),INR(NR),X(NP),Y(NP)
       DATA BLN/'           '/
 C* First line of the TAB1 record
       CALL CHENDF(C1,REC(1))
@@ -1491,7 +1492,7 @@ C* Loop for all argument&function pairs
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     NBT(1),INR(1)
+      DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -1526,7 +1527,7 @@ C* Write interpolation data
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
       CHARACTER*11  BLN,REC(6)
-      DIMENSION     BN(1)
+      DIMENSION     BN(*)
       DATA BLN/'           '/
 C* First line of the TAB2 record
       CALL CHENDF(C1,REC(1))
@@ -1549,7 +1550,6 @@ C* Write data
    24 I =I +1
       IF(I.LT.6) GO TO 22
       NS=NS+1
-      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NPL) GO TO 20
       RETURN
@@ -1559,38 +1559,43 @@ C* Write data
       SUBROUTINE CHENDF(FF,CH)
 C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
-C-Version:
-C-V  05/02 Double precision internal arithmetic to avoid roundoff error
-      DOUBLE PRECISION FA
       CHARACTER*1  SN
       CHARACTER*11 CH
-      CH=' 0.000000+0'
-      FA=DBLE(ABS(FF))
+      CH=' 0.00000+00'
+      FA=ABS(FF)
       IA=0
-   20 IF(FA.LT.   1.0D-30) RETURN
-      IF(FA.LT.9.999950D0) GO TO 40
+C* Trap unreasonably large values, print as "9.99999+99"
+      IF(FA.GT.1E30) THEN
+        CH=' 9.99999+99'
+        RETURN
+      END IF
+C* Check for small values, print as zero
+   20 IF(FA.LT.1.0E-30 ) RETURN
+C* Condition mantissa of small numnbers
+      IF(FA.LT.9.999950) GO TO 40
       FA=FA/10
       IA=IA+1
       GO TO 20
-   40 IF(FA.GE.0.999995D0) GO TO 50
+C* Condition mantissa of large numnbers
+   40 IF(FA.GE.0.999995) GO TO 50
       FA=FA*10
       IA=IA-1
       GO TO 40
+C* Sign of the exponent
    50 SN='+'
       IF(IA.LT.0) THEN
         SN='-'
         IA=-IA
       END IF
+C* Sign of the mantissa
       IF(FF.LT.0) FA=-FA
-      IF(IA.LE.9) THEN
-        WRITE(CH,81) FA,SN,IA
-      ELSE IF(IA.GT.9 .AND. IA.LE.99) THEN
-        WRITE(CH,82) FA,SN,IA
+C* Write character fiels
+      IF(IA.GE.10) THEN
+        WRITE(CH,80) FA,SN,IA
       ELSE
-        WRITE(CH,83) FA,SN,IA
+        WRITE(CH,81) FA,SN,IA
       END IF
       RETURN
+   80 FORMAT(F8.5,A1,I2.2)
    81 FORMAT(F9.6,A1,I1)
-   82 FORMAT(F8.5,A1,I2.2)
-   83 FORMAT(F7.4,A1,I3.3)
       END
