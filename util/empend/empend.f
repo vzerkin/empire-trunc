@@ -117,7 +117,8 @@ C-V        (for some compiler on linux it was failing)
 C-V  13/12 Allow for isomer production without blank line delimiter.
 C-V  14/01 Check the order of Legendre expansion for elastic ang.distr.
 C-V        Try to fit tabulated distribution.
-C-V  14/02 Include compound elastic MF3/MT50 (MF4 still pending).
+C-V  14/02 - Include compound elastic MF3/MT50 (MF4 still pending).
+C-V        - Allow narrow printout of separation energies.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3305,12 +3306,17 @@ C...
 C* Read the binding energies of the last nucleon, if given
 C* (Omission allowed in new files where Q values are specified explicitly)
         READ (LIN,891)
-        READ (LIN,891)
+        READ (LIN,891) REC
         READ (LIN,891)
         IMT=0
   118   IMT=IMT+1
         IF(IMT.GT.MXM) STOP 'EMPEND ERROR - MXM limit exceeded'
-        READ (LIN,804) JZ,CH,JA,(BEN(J,IMT),J=1,6)
+        IF(REC(20:24).EQ.'  1N') THEN
+C*        -- old wide format
+          READ (LIN,804) JZ,CH,JA,(BEN(J,IMT),J=1,6)
+        ELSE
+          READ (LIN,814) JZ,CH,JA,(BEN(J,IMT),J=1,6)
+        END IF
         JZA=JZ*1000+JA
         IZB(IMT)=JZA
         IF(JZA.NE.0) GO TO 118
@@ -3934,6 +3940,7 @@ C*
   808 FORMAT(24X,F12.0)
 c.809 FORMAT(26X,F12.0)
   809 FORMAT(30X,F10.0)
+  814 FORMAT(1X,I3,1X,A2,1X,I3,4X,6F8.0)
   891 FORMAT(A80)
   902 FORMAT(A40,1P,2E10.3)
   904 FORMAT(A40,I10)
@@ -6689,6 +6696,7 @@ C* First line of the TAB2 record
       WRITE(REC(5),42) NPL
       WRITE(REC(6),42) N2
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(NPL.EQ.0) RETURN
 C* Write data
