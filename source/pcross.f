@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3750 $
+Ccc   * $Rev: 3866 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-01-17 13:12:55 +0100 (Fr, 17 Jän 2014) $
+Ccc   * $Date: 2014-02-13 23:02:46 +0100 (Do, 13 Feb 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -954,6 +954,7 @@ Cmbc      Now put in MSC as isotropic, giving:
       end
 
       SUBROUTINE RQFACT(Heq,R)
+      implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -974,9 +975,8 @@ C
 C
 C Local variables
 C
-      INTEGER*4 ab, ac, ap, at, h1, hhh, i, j, j1, l, m, maxj, minj, nb,
-     &          np, nt, p, zb, zc, zp, zt
-      REAL ALOG, FLOAT
+      INTEGER*4 ab, ac, ap, at, h1, hhh, i, j, j1, l, m, maxjx, minjx,
+     &          nb, np, nt, p, zb, zc, zp, zt
       REAL*8 f1, f2, f21, f22, f23, f24, s1, s2, ta, tn, tz, uuu, zzz
       INTEGER nejc
 C
@@ -984,23 +984,18 @@ C     INDC(CPR)-014 and references there in
 C
 C     FACTORIAL CALCULATION
 C
-      LFA(1) = 0.
-      LFA(2) = 0.
-      LFA(3) = 0.
-      FA(1) = 1.
-      FA(2) = 1.
-      FA(3) = 1.
+      LFA(1) = 0.d0
+      LFA(2) = 0.d0
+      LFA(3) = 0.d0
+      FA(1) = 1.d0
+      FA(2) = 1.d0
+      FA(3) = 1.d0
       DO i = 4, 2*PMAX + 3
          LFA(i) = ALOG(FLOAT(i - 3)) + LFA(i - 1)
          FA(i) = (i - 3)*FA(i - 1)
       ENDDO
-      DO nejc = 1, NEJcm
-         DO h1 = 1, PMAX
-            DO l = 1, 4
-               R(l,h1,nejc) = 1.D0
-            ENDDO
-         ENDDO
-      ENDDO
+
+      R = 1.d0 
       ac = A(1)
       zc = Z(1)
       ap = AEJc(0)
@@ -1027,15 +1022,15 @@ C
                p = hhh + ap
                IF (p.GE.l) THEN
                   m = ab - l
-                  minj = MAX(0,l - nb)
-                  maxj = MIN(l,zb)
+                  minjx = MAX(0,l - nb)
+                  maxjx = MIN(l,zb)
                   s1 = 0.D0
                   DO i = 0, hhh
                      f1 = zzz**i*uuu**(hhh - i)
      &                    *EXP(LFA(hhh + 3) - LFA(hhh - i + 3)
      &                    - LFA(i + 3))
                      s2 = 0.D0
-                     DO j = minj, maxj
+                     DO j = minjx, maxjx
                         f21 = 1.D0
                         IF (j.GE.1) THEN
                            DO j1 = 0, j - 1
