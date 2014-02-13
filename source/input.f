@@ -1,6 +1,6 @@
-!cc   * $Rev: 3856 $
+!cc   * $Rev: 3869 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
+!cc   * $Date: 2014-02-13 23:09:28 +0100 (Do, 13 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -477,6 +477,7 @@ C--------ejectile neutron
          iz = INT(ZEJc(1))
          SYMbe(1) = SMAT(iz)
          SEJc(1) = 0.5d0
+         MAXj(1) = 2
 C--------ejectile proton
          AEJc(2) = 1.d0
          ZEJc(2) = 1.d0
@@ -486,6 +487,7 @@ C--------ejectile proton
 C        SYMbe(2) = SMAT(iz)
          SYMbe(2) = 'p '
          SEJc(2) = 0.5d0
+         MAXj(2) = 2
 C--------ejectile alpha
          AEJc(3) = 4.d0
          ZEJc(3) = 2.d0
@@ -494,6 +496,7 @@ C--------ejectile alpha
          iz = INT(ZEJc(3))
          SYMbe(3) = SMAT(iz)
          SEJc(3) = 0.d0
+         MAXj(3) = 1
          IF (NDEjc.LT.6) THEN
            WRITE (8,*) ' '
            WRITE (8,*)
@@ -511,6 +514,7 @@ C--------ejectile deuteron
          iz = INT(ZEJc(4))
          SYMbe(4) = SMAT(iz)
          SEJc(4) = 1.d0
+         MAXj(4) = 3
 C--------ejectile triton
          AEJc(5) = 3.d0
          ZEJc(5) = 1.d0
@@ -519,6 +523,7 @@ C--------ejectile triton
          iz = INT(ZEJc(5))
          SYMbe(5) = SMAT(iz)
          SEJc(5) = 0.5d0
+         MAXj(5) = 2
 C--------ejectile he-3
          AEJc(6) = 3.d0
          ZEJc(6) = 2.d0
@@ -527,6 +532,7 @@ C--------ejectile he-3
          iz = INT(ZEJc(6))
          SYMbe(6) = SMAT(iz)
          SEJc(6) = 0.5d0
+         MAXj(6) = 2
 C
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
@@ -580,11 +586,15 @@ C--------projectile
          IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
 C-----------GAMMA EMISSION
             SEJc(0) = 1
+            MAXj(0) = 3
             lpar = -1
             e2pej = 0.d0
             e3mej = 0.d0
          ELSE
             CALL PTLEVSET(AEJc(0),ZEJc(0),SEJc(0),lpar,e2pej,e3mej)
+            MAXj(0) = 1                            ! a 
+            if(NINT(2*SEJc(0)) .eq. 1) MAXj(0) = 2 ! n,p,h,t
+            if(NINT(2*SEJc(0)) .eq. 2) MAXj(0) = 3 ! d
          ENDIF
 
          CALL PTLEVSET(A(0),Z(0),XJLv(LEVtarg,0),LVP(LEVtarg,0),e2p,e3m)
@@ -3391,17 +3401,10 @@ C-----initialization of TRISTAN input parameters
       BET2in = 0.d0
       GRIn(1) = 5.d0
       GRIn(2) = 5.d0
-      DO i = 1, 8                                                        ! nilsson_newest
-         do j = 1,8                                                      ! nilsson_newest
-            CNOrin(i,j) = 1.d0                                           ! nilsson_newest
-            EFItin(i,j) = 0.0D0                                          ! nilsson_newest
-         enddo                                                           ! nilsson_newest
-      ENDDO
+
+	CNOrin = 0.d0
+	EFItin = 0.d0
 C-----initialization of TRISTAN input parameters  *** done ***
-C
-C      By default, no covariance calculation is done
-C
-C      IPArCOV = 0
 
    11 CONTINUE
 
@@ -4992,13 +4995,10 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPWV '',I2)') i3
                WRITE (8,
      &           '('' WARNING: Imag. volume potential depth uncertainty 
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5028,7 +5028,7 @@ C        WOMv(Nejc,Nnuc) = vlib(2)*FNwvomp(Nejc,Nnuc)
      &        '('' Imag. volume potential depth in '',I3,A2,
      &        '' scaled by '',f5.2)') i2, SYMb(nnuc), abs(val)
             endif
-            GOTO 100
+             GOTO 100
          ENDIF
 
 C--------Surface imaginary potential depth:
@@ -5041,21 +5041,16 @@ C        WOMs(Nejc,Nnuc) = vlib(4)*FNwsomp(Nejc,Nnuc)
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      &           '('' WARNING: Imag. surface potential depth uncertainty
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPWS '',I2)') i3
                WRITE (8,
      &           '('' WARNING: Imag. surface potential depth uncertainty
-
      &ignored'')')
-
-               GOTO 100
+                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
               WRITE (8,
@@ -5097,20 +5092,15 @@ C        AWOm(Nejc,Nnuc) = alib(4)*FNasomp(Nejc,Nnuc)
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      &           '('' WARNING: Surface potential diffuseness uncertainty
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPAS '',I2)') i3
                WRITE (8,
      &           '('' WARNING: Surface potential diffuseness uncertainty
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5152,16 +5142,13 @@ C        RWOm(Nejc,Nnuc) = rlib(4)*FNrsomp(Nejc,Nnuc)
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      & '('' WARNING: Surface potential radius uncertainty ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPRS'',I2)') i3
                WRITE (8,
      & '('' WARNING: Surface potential radius uncertainty ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5203,9 +5190,7 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      &           '('' WARNING: Volume imaginary potential radius uncerta
-
      &inty ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
@@ -5214,7 +5199,6 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
      &           '('' WARNING: Volume imaginary potential radius uncerta
 
      &inty ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5256,9 +5240,7 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      &           '('' WARNING: Volume real potential radius uncertainty
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
@@ -5267,9 +5249,7 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPRV'',I2)') i3
                WRITE (8,
      &           '('' WARNING: Volume real potential radius uncertainty
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5386,18 +5366,18 @@ C-----
               WRITE (8,
      &        '('' GDR first hump width sampled value : '',f5.2)')
      &        GDRpar(2,nnuc)
-               IPArCOV = IPArCOV +1
-               write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
+              IPArCOV = IPArCOV +1
+              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
      &              IPArCOV, GDRpar(2,nnuc), INDexf, INDexb, name
             else
               GDRpar(2,nnuc) = val
               WRITE (8,
-     &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
+     &        '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
               WRITE (12,
-     &      '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
+     &        '('' GDR first hump width in '',I3,A2,'' set to '',F5.2)'
      &        ) i2, SYMb(nnuc), val
-             endif
+            endif
             GOTO 100
          ENDIF
 C-----
@@ -5865,20 +5845,18 @@ C-----
               GOTO 100
            ENDIF
             IF (MSC.NE.0) WRITE (8,
-     &                '('' Heidelberg MSC calculations were selected'')'
-     &                )
+     &        '('' Heidelberg MSC calculations were selected'')')
             IF (MSC.NE.0) WRITE (12,
-     &                '('' Heidelberg MSC calculations were used'')')
+     &        '('' Heidelberg MSC calculations were used'')')
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'HMS   ') THEN
             LHMs = val
             IF (LHMs.NE.0) WRITE (8,
-     &            '('' HMS preequilibrium calculations were selected'')'
-     &            )
+     &        '('' HMS preequilibrium calculations were selected'')')
             IF (LHMs.NE.0) WRITE (12,
-     &            '('' HMS preequilibrium calculations were used'')')
+     &        '('' HMS preequilibrium calculations were used'')')
             GOTO 100
          ENDIF
 C-----
