@@ -1368,7 +1368,7 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
    LOGICAL :: relcal
    REAL*8 :: vt1
 
-   par(i,ipa,l) = 0.5*(1.0 - ( - 1.0)**i*ipa*( - 1.0)**l)
+   par(i,ipa,l) = (1 - ( - 1)**i*ipa*(-1)**l)/2
  
    xmas_npro = EJMass(Npro)
    xmas_ntrg = AMAss(Ntrg)
@@ -1395,7 +1395,7 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
       lmax = lmax + 1
       lmax = min0(ndlw,lmax)
       DO k = lmin, lmax ! do loop over l
-         IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)/=0.0D0) THEN
+         IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)/=0) THEN
             IF(Ich>ndhrtw2) THEN
                WRITE(8,*)' '
                WRITE(8,*)'E R R O R !'
