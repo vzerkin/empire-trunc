@@ -1,6 +1,6 @@
-! $Rev: 3856 $
+! $Rev: 3868 $
 ! $Author: rcapote $
-! $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
+! $Date: 2014-02-13 23:07:42 +0100 (Do, 13 Feb 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -78,7 +78,7 @@
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,       &
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,  &
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
-     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov,                &
+     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov, MAXj(0:ndejc), &
      &        ngamm_tr, nfiss_tr
        
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
@@ -103,7 +103,7 @@
      &                 MFPp, MOMortcrt, MOMparcrt,HCOnt(nfparab),       &
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),&
      &                 PEQc, PEQcont, PI, POP(ndex,ndlw,2,ndnuc),       &
-     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndexclus),   &       ! POPcs(0:ndejc,0:ndnucd),
+     &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndexclus),   &       
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),     &
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),    &
      &                 POPcseaf(0:ndex_d,0:ndejcd,ndecsed,0:ndexclus),  &
@@ -274,7 +274,7 @@
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH,  &
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,     &
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,            &
-     &                  INExc, ENDf, NANgela, NDAng, ISProd,            &
+     &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,        &
