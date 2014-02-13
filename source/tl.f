@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3856 $
+Ccc   * $Rev: 3870 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
+Ccc   * $Date: 2014-02-13 23:12:08 +0100 (Do, 13 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2142,7 +2142,7 @@ C
          DO l = 1, NDLW
             TL(i,l,Nejc,Nnuc) = 0.D0
             IF(nnuc.eq.1) then      
-              DO k=1,3
+              DO k=1,MAXj(Nejc)
                 TLJ(i,l,k,Nejc) = 0.D0
               ENDDO 
             ENDIF
@@ -2173,18 +2173,17 @@ C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
       DO i = 2, NDETL
          LMAxtl(i,Nejc,Nnuc) = MIN(maxl(i) + 1,NDLW)
          DO l = 1, LMAxtl(i,Nejc,Nnuc)
-            ftmp = ttll(i,l - 1)
+            ftmp = ttll(i,l)
             IF (ftmp.LT.1.D-10) cycle
             TL(i,l,Nejc,Nnuc) = ftmp
             Nonzero = .TRUE.
          ENDDO
          IF(Nnuc.eq.1) then      
            DO l = 1, LMAxtl(i,Nejc,Nnuc)
-              DO k=1,3
-                ftmp = ttllj(i,l - 1,3)
+              DO k=1,MAXj(Nejc)
+                ftmp = ttllj(i,l,k)
                 IF (ftmp.LT.1.D-10) cycle
                 TLJ(i,l,k,Nejc) = ftmp
-                Nonzero = .TRUE.
               ENDDO 
            ENDDO
          ENDIF
@@ -2502,10 +2501,10 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sreac,
-     &                 xmas_nejc, xmas_nnuc, selast, sreal, simag, stmp
-      INTEGER ilv, l, nc, nceq, ncoll, nlev, mintsp, nc1, nc2
-      INTEGER nctot, ncsol, ncint, jindex
+      DOUBLE PRECISION ak2,dtmp,ecms,elab,jc,jj,sabs,sabsj,sreac,
+     &  xmas_nejc,xmas_nnuc,selast,sreal,simag,stmp,snorm,ftmp,xsabsj
+      INTEGER ilv, l, nc, nceq, ncoll, nlev, nc1, nc2
+      INTEGER nctot, ncsol, ncint, jindex, lrun
       LOGICAL relcal, unformat
       CHARACTER*1 parc
       DATA unformat/.TRUE./ 
@@ -2547,8 +2546,8 @@ C-----------Averaging over particle and target spin, summing over channel spin j
 C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
             Sel(l+1) = Sel(l+1) + (2*jc + 1)*((1 - sreal)**2 + simag**2)
      &           /DBLE(2*L + 1)
+     &           /DBLE(2*XJLv(1,Nnuc) + 1)
      &           /DBLE(2*SEJc(Nejc) + 1)
-     &           /DBLE(2*XJLv(ilv,Nnuc) + 1)
         ENDIF
         enddo
       enddo
@@ -2571,6 +2570,7 @@ C-----nceq is the number of coupled equations
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       endif    
 C-----Loop over the number of coupled equations
+	lrun = -1
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
@@ -2595,52 +2595,76 @@ C--------Selecting only target state LEVtarg
 C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + 
      &                   (2*jc + 1)*dtmp/DBLE(2*l + 1)
-     &                   /DBLE(2*SEJc(Nejc) + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
-C           Maxlw = l
+     &                   /DBLE(2*SEJc(Nejc) + 1)
             Maxlw = l + 1
-
-            write(*,*) 'Starget=',sngl(XJLv(ilv,0)),
-     &        '   Sproj=',sngl(SEJc(Nejc)),' TARGET'
+C           write(*,*) 'Starget=',sngl(XJLv(ilv,0)),
+C    &        ' TargPar=',LVP(LEVtarg,0),'   Sproj=',sngl(SEJc(Nejc)),
+C    &        ' TARGET'
 C
             jindex = 1 ! default, good for alphas
-            if(NINT(2*SEJc(Nejc)) .eq. 1 ) then	 ! n,p,h,t
+            if    (MAXj(Nejc) .eq. 2) then ! n,p,h,t
               if(jj.gt.l) jindex = 2
-            elseif(NINT(2*SEJc(Nejc)) .eq. 2) then ! d
+            elseif(MAXj(Nejc) .eq. 3) then ! d
               if(jj.eq.l) jindex = 2
               if(jj.gt.l) jindex = 3
             endif
 C
-            write(*,'(1x,''Channel spin/par='',
-     &        f5.1,A1,5x,2HJ=,f5.1,2x,2HL=,I3,2x,7Hjindex=,I1)')  
-     &        jc, parc, jj, l, jindex
-C
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex) + 
-     &                   (2*jc + 1)*dtmp !/DBLE(2*l + 1)
-     &                   /DBLE(2*SEJc(Nejc) + 1)
-     &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                   (2*jc + 1)*dtmp/DBLE(2*l + 1) 
+     &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)           
+C           we are removing the (2s+1) dependence, it should be considered     
+C           explicitly in any further calculation with Tljs
+C    &                   /DBLE(2*SEJc(Nejc) + 1)
+
+            IF (IOUT.EQ.5 .and. FIRST_ein) THEN
+              if(l.ne.lrun) then
+                lrun = l
+                ftmp = 0.d0
+	          write(8,*)
+                write(8,*) 'Starting a new L block ...'
+              endif 
+              ftmp = ftmp + Stlj(l + 1,jindex)
+
+              write(8,'(1x,''Channel spin/par='',f5.1,A1,5x,2HJ=,f5.1,
+     &          2x,2HL=,I3,2x,7Hjindex=,I1,4H nc=,I5,6H Nejc=,I2)')  
+     &          jc, parc, jj, l, jindex, nc, Nejc
+C
+              write(8,'(1x,''Stl(l)='',d12.6,3x,''Stlj(l,j)='',d12.6,
+     &			      1x,''Sum_j Stlj(l,j)='',d12.6 )')  
+     &        Stl(l + 1), 
+     &        Stlj(l + 1,jindex)/DBLE(2*SEJc(Nejc) + 1),
+     &        ftmp/DBLE(2*SEJc(Nejc) + 1)
+
+            ENDIF
+
          ENDIF
       ENDDO
       GOTO 100
   200 CLOSE (45)
-
+C
 C-----For vibrational the Tls must be multiplied by (2*XJLv(ilv,Nnuc) + 1)
 C     as the spin of the target nucleus is neglected for spherical and DWBA calcs
       IF (Lvibrat) THEN
          DO l = 0, Maxlw
             Stl(l + 1) = Stl(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
             Sel(l + 1) = Sel(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
+            DO jindex = 1,MAXj(Nejc)
+              Stlj(l + 1,jindex) = Stlj(l + 1,jindex)
+     &                             *DBLE(2*XJLv(ilv,Nnuc) + 1)
+            ENDDO
          ENDDO
       ENDIF
 
       TOTcs = 0.D0
       ABScs = 0.D0
       ELAcs = 0.D0
-      SINl = 0.D0
+      SINl  = 0.D0
       SINlcc = 0.D0
       SINlcont = 0.D0
-      sabs = 0.D0
-      selast = 0.D0
+      sabs  = 0.D0
+      sabsj = 0.D0
+      selast= 0.D0
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
@@ -2649,7 +2673,8 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
 
       dtmp = 0.d0
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) 
-     >  READ (45,*,END=300) dtmp ! reading total compound from ECIS (or ELAcs from OPTMAN)
+C       reading total compound from ECIS (or ELAcs from OPTMAN)
+     >  READ (45,*,END=300) dtmp 
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
 
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) then
@@ -2681,15 +2706,19 @@ C-----Absorption and elastic cross sections in mb
       DO l = 0, Maxlw
         sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         selast = selast + Sel(l + 1)*DBLE(2*l + 1)
+        DO jindex = 1, MAXj(Nejc) 
+          sabsj = sabsj + Stlj(l + 1,jindex)*DBLE(2*l + 1)
+        ENDDO 
       ENDDO
       sabs   = 10.d0*PI/ak2*sabs
+      xsabsj = 10.d0*PI/ak2*sabsj/DBLE(2*SEJc(Nejc) + 1)
       selast = 10.d0*PI/ak2*selast
 
       IF (sabs.le.0.d0) RETURN
 
       CSFus = ABScs
 
-      mintsp = mod(NINT(2*D_Xjlv(1)),2)
+C     mintsp = mod(NINT(2*D_Xjlv(1)),2)
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
@@ -2833,8 +2862,10 @@ C    &               SNGL(selast), ' mb '
      &               ' mb (read from ECIS)'
          WRITE (8,*) ' ECIS/EMPIRE ratio of reaction cross section =',
      &               ABScs/sreac
-         WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
+         WRITE (8,*) ' XS calculated using averaged Tls :  Sabs =',
      &               SNGL(sabs), ' mb '
+         WRITE (8,*) ' XS calculated using averaged Tljs:  SabsJ=',
+     &               SNGL(xsabsj), ' mb '
          WRITE (8,*)
      &      ' Inelastic XS to uncoupled discrete levels (DWBA) =',
      &               SNGL(SINl), ' mb '
@@ -2860,9 +2891,15 @@ C
       IF( sabs.gt.0.d0 .and. ABScs.GT.(SINlcc+SINl+SINlcont) .and.
      >  dabs(ABScs - sreac) .GT. 1.d-7) THEN 
         dtmp = 0.d0
+        ftmp = 0.d0
         DO l = 0, Maxlw
-          Stl(l + 1) = Stl(l + 1)*(ABScs - SINlcc - SINl -SINlcont)/sabs
-          dtmp   = dtmp + Stl(l + 1)*DBLE(2*l + 1)
+	    snorm = (ABScs - SINlcc - SINl -SINlcont)
+          Stl(l + 1) = Stl(l + 1)*snorm/sabs
+          DO jindex = 1, MAXj(Nejc) 
+            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm/xsabsj
+            ftmp   = ftmp + DBLE(2*l + 1)*Stlj(l + 1,jindex)
+          ENDDO 
+          dtmp   = dtmp + DBLE(2*l + 1)*Stl(l + 1)
         ENDDO
         CSFus = 10.d0*PI/ak2*dtmp  ! = ABScs - SINlcc - SINl - SINlcont
         WRITE (8,
@@ -2874,9 +2911,14 @@ C
      &,F8.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
      &,F8.2,'' mb''/
+     &1x,'' WARNING: CN formation cross section (Sum over Stlj)      =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: CN formation cross section (Sum over Stl )      =''
+     &,F8.2,'' mb''/ 
      &1x,'' WARNING: Reaction  cross section                         =''
      &,F8.2,'' mb''/)') 
-     &  (ABScs-SINlcc-SINl-SINlcont)/sabs, SINlcc, SINl, SINlcont, sreac
+     &  (ABScs-SINlcc-SINl-SINlcont)/sabs, SINlcc, SINl, SINlcont, 
+     &   CSFus, 10.d0*PI/ak2*ftmp/DBLE(2*SEJc(Nejc) + 1), sreac
       ENDIF 
 
       RETURN
@@ -2916,7 +2958,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs,
+      DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sabsj,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
      &                 xmas_nejc, xmas_nnuc, stmp
       LOGICAL relcal, unformat
@@ -2955,41 +2997,51 @@ C--------(nlev=1 corresponds to the ground state)
            READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp     
          ENDIF  
          ncoll = MAX(nlev,ncoll)
-C--------Selecting only the target state
+C--------Selecting only the ground state, note that inverse reaction XSs are 
+C        calculated assuming that the target is always in the GS 
          IF (nlev.EQ.1 .AND. dtmp.GT.1.D-15 .AND. l.LE.NDLW) THEN
 C-----------Averaging over particle and target spin, summing over channel spin JC
-            TTLl(Ien,l) = TTLl(Ien,l) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
-     &                  /DBLE(2*SEJc(Nejc) + 1)
+            TTLl(Ien,l) = TTLl(Ien,l) + 
+     &                  (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*XJLv(1,Nnuc) + 1)
+     &                  /DBLE(2*SEJc(Nejc) + 1)
             lmax = MAX(lmax,l)
 
-            write(*,*) 'Snuc (inv) =',sngl(XJLv(1,Nnuc)),
-     &        '   Sejectile=',sngl(SEJc(Nejc)),' INVERSE XS'
+C           write(*,*) 'Snuc (inv) =',sngl(XJLv(1,Nnuc)),
+C    &        '   Sejectile=',sngl(SEJc(Nejc)),' INVERSE XS'
 C
             jindex = 1 ! default, good for alphas
-            if(NINT(2*SEJc(Nejc)) .eq. 1 ) then	 ! n,p,h,t
+            if    (MAXj(Nejc) .eq. 2) then ! n,p,h,t
               if(jj.gt.l) jindex = 2
-            elseif(NINT(2*SEJc(Nejc)) .eq. 2) then ! d
+            elseif(MAXj(Nejc) .eq. 3) then ! d
               if(jj.eq.l) jindex = 2
               if(jj.gt.l) jindex = 3
             endif
 C
-            write(*,'(1x,''Channel spin/par='',
-     &        f5.1,A1,5x,2HJ=,f5.1,2x,2HL=,I3,2x,7Hjindex=,I1)')  
-     &        jc, parc, jj, l, jindex
+C           write(*,'(1x,''Eout='',F9.5,'' Channel spin/par='',
+C    &        f5.1,A1,5x,2HJ=,f5.1,2x,2HL=,I3,2x,7Hjindex=,I1)')  
+C    &        ecms, jc, parc, jj, l, jindex
 
-            Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex) + 
+            Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex) +
      &                  (2*jc + 1)*dtmp/DBLE(2*l + 1)
-     &                  /DBLE(2*SEJc(Nejc) + 1)
      &                  /DBLE(2*XJLv(1,Nnuc) + 1)
+     &                  /DBLE(2*SEJc(Nejc) + 1)
+C           we are removing the (2s+1) dependence, it should be considered     
+C           explicitly in any further calculation with Tljs
+C    &                   /DBLE(2*SEJc(Nejc) + 1)
          ENDIF
       ENDDO
+C     write(*,*)
       GOTO 100
   200 CLOSE (45)
-C-----For vibrational the Tls must be multiplied by
+C-----For vibrational the Tls must be multiplied by 
       IF (Lvibrat) THEN
          DO l = 0, lmax
             Ttll(Ien,l) = Ttll(Ien,l)*DBLE(2*XJLv(1,Nnuc) + 1)
+            DO jindex = 1,MAXj(Nejc)
+              Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex)
+     &                               *DBLE(2*XJLv(1,Nnuc) + 1)
+            ENDDO
          ENDDO
       ENDIF
       stotecis = 0.D0
@@ -3011,16 +3063,21 @@ C-----For vibrational the Tls must be multiplied by
          IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
          CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,2,relcal)
 C--------Reaction cross section in mb
-         sabs = 0.D0
+         sabs  = 0.D0
+         sabsj = 0.D0
          if(elab.lt.0.3d0) write(8,*)
          DO l = 0, lmax
             stmp = Ttll(Ien,l)*DBLE(2*l + 1)
+            DO jindex = 1, MAXj(Nejc) 
+             sabsj = sabsj + Ttllj(Ien,l,jindex)*DBLE(2*l + 1)
+            ENDDO 
             if(elab.lt.0.3d0) write(8,303) l,stmp*10.*PI/ak2
   303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
             sabs = sabs + stmp
          ENDDO
          if(elab.lt.0.3d0) write(8,*)
-         sabs = 10.*PI/ak2*sabs
+         sabs  = 10.*PI/ak2*sabs
+         sabsj = 10.*PI/ak2*sabsj !/DBLE(2*SEJc(Nejc) + 1)
          OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinlss = 0.D0
@@ -3035,8 +3092,10 @@ C--------Reaction cross section in mb
             WRITE (8,'(A7,I3,A3,E12.6,A10,E12.6,A26,1x,I4)') '  LMAX:',
      &             lmax, ' E=', ecms, ' MeV (CMS)', elab,
      &             ' MeV (LAB); Energy index =', Ien
-            WRITE (8,*) ' XS calculated using averaged Tls:   Sabs =',
+            WRITE (8,*) ' XS calculated using averaged Tls :   Sabs =',
      &                  SNGL(sabs), ' mb '
+            WRITE (8,*) ' XS calculated using averaged Tljs:   SabsJ=',
+     &               SNGL(sabsj), ' mb '
             WRITE (8,*) ' Reaction XS =', SNGL(sreacecis),
      &                  ' mb (read from ECIS)'
             WRITE (8,*) ' ECIS/EMPIRE ratio of reaction XS =',
