@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3870 $
+Ccc   * $Rev: 3872 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-13 23:12:08 +0100 (Do, 13 Feb 2014) $
+Ccc   * $Date: 2014-02-14 02:10:26 +0100 (Fr, 14 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2285,7 +2285,7 @@ C
       CHARACTER*23 ctmp23
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp
-      INTEGER i, ilv, ien, ien_beg, l, lmax
+      INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
@@ -2320,8 +2320,7 @@ C-----Here the previously calculated files should be read
       OPEN (45,FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
       IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
   100 READ (45,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
-      IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:', lmax, ien,
-     &                      ener
+      IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:',lmax,ien,ener
 C
 C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
@@ -2339,10 +2338,16 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      Maxl(ien) = lmax
+      Maxl(ien) = lmax					   
       DO l = 0, lmax
-         READ (45,END = 300) Ttll(ien,l)
-         IF (IOUt.EQ.5) WRITE (46,*) l, Ttll(ien,l)
+         READ (45,END= 300,ERR=300) Ttll(ien,l)
+         READ (45,END= 300,ERR=300)
+     &        (Ttllj(ien,l,jindex), jindex=1,MAXj(Nejc))
+         IF (IOUt.EQ.5) then
+            WRITE (46,'(2x,I3,3(3x,D15.8))') l, Ttll(ien,l)
+            WRITE (46,'(2x,3x,3(3x,D15.8))') 
+     &        (Ttllj(ien,l,jindex), jindex=1,MAXj(Nejc))
+         ENDIF
       ENDDO
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
@@ -2875,7 +2880,8 @@ C    &               SNGL(selast), ' mb '
             WRITE (8,*) ' Sinl =', SNGL(ABScs), ' mb (read from ECIS)'
             WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + SINlcc)'
          ENDIF
-         WRITE (8,*) ' Total XS =', SNGL(TOTcs), ' mb (read from ECIS)'
+         WRITE (8,*) ' Total XS =', SNGL(TOTcs), 
+     &               ' mb (read from ECIS)'
          WRITE (8,*) ' Shape Elastic XS =', SNGL(ELAcs),
      &               ' mb (read from ECIS)'
          WRITE (8,*)
@@ -2888,7 +2894,8 @@ C     continuum also included
 C
 158   CONTINUE
 
-      IF( sabs.gt.0.d0 .and. ABScs.GT.(SINlcc+SINl+SINlcont) .and.
+      IF( sabs.gt.0.d0 .and. xsabsj.gt.0.d0 .and. 
+     >  ABScs.GT.(SINlcc+SINl+SINlcont) .and. 
      >  dabs(ABScs - sreac) .GT. 1.d-7) THEN 
         dtmp = 0.d0
         ftmp = 0.d0
@@ -2960,7 +2967,7 @@ C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sabsj,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
-     &                 xmas_nejc, xmas_nnuc, stmp
+     &                 xmas_nejc, xmas_nnuc, stmp, xsabsj
       LOGICAL relcal, unformat
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex
       CHARACTER*1 parc
@@ -3025,10 +3032,9 @@ C    &        ecms, jc, parc, jj, l, jindex
             Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex) +
      &                  (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*XJLv(1,Nnuc) + 1)
-     &                  /DBLE(2*SEJc(Nejc) + 1)
 C           we are removing the (2s+1) dependence, it should be considered     
 C           explicitly in any further calculation with Tljs
-C    &                   /DBLE(2*SEJc(Nejc) + 1)
+C    &                  /DBLE(2*SEJc(Nejc) + 1)
          ENDIF
       ENDDO
 C     write(*,*)
@@ -3077,7 +3083,7 @@ C--------Reaction cross section in mb
          ENDDO
          if(elab.lt.0.3d0) write(8,*)
          sabs  = 10.*PI/ak2*sabs
-         sabsj = 10.*PI/ak2*sabsj !/DBLE(2*SEJc(Nejc) + 1)
+         xsabsj = 10.*PI/ak2*sabsj/DBLE(2*SEJc(Nejc) + 1)
          OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinlss = 0.D0
@@ -3095,21 +3101,25 @@ C--------Reaction cross section in mb
             WRITE (8,*) ' XS calculated using averaged Tls :   Sabs =',
      &                  SNGL(sabs), ' mb '
             WRITE (8,*) ' XS calculated using averaged Tljs:   SabsJ=',
-     &               SNGL(sabsj), ' mb '
+     &               SNGL(xsabsj), ' mb '
             WRITE (8,*) ' Reaction XS =', SNGL(sreacecis),
      &                  ' mb (read from ECIS)'
             WRITE (8,*) ' ECIS/EMPIRE ratio of reaction XS =',
      &                    SNGL(sreacecis/sreac)
             IF (sinlss.GT.0.D0) THEN
              WRITE (8,*) ' Sinl =', SNGL(sinlss), ' mb (read from ECIS)'
-             WRITE (8,*) ' Sreac=', SNGL(sreac), ' mb (Sabs + Sinl)'
+             WRITE (8,*) ' Sreac=', 
+     &                       SNGL(sreac),         ' mb (Sabs  + Sinl)'
+             WRITE (8,*) ' Sreac=', 
+     &                       SNGL(xsabsj+sinlss), ' mb (Sabsj + Sinl)'
             ENDIF
          ENDIF
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
-         WRITE (46) Ttll(Ien,l)
+         WRITE (46)  Ttll(Ien,l)
+         WRITE (46) (Ttllj(Ien,l,jindex), jindex=1,MAXj(Nejc))
       ENDDO
       WRITE (46) sreacecis
       Maxl(Ien) = lmax
