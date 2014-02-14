@@ -116,8 +116,8 @@ C-D                between CM and Lab coordinate system is ignored.
 C-D
 C-Extern.: DXSEND,DXSEN1
 C*
-      PARAMETER    (MXIZ=24)
-      DIMENSION    RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN),ZEL(MXIZ),FRC(MXIZ)
+      PARAMETER  (MXIZ=24)
+      DIMENSION  RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN),ZEL(MXIZ),FRC(MXIZ)
 C*
 C... Temporary aliasing of MT0=5 with MT0=9000 for backward compatibility
       IF(MT0.EQ. 5) MT0=9000
