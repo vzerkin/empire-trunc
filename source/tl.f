@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3874 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-02-14 08:19:35 +0100 (Fr, 14 Feb 2014) $
+Ccc   * $Rev: 3877 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-02-15 00:01:39 +0100 (Sa, 15 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -126,7 +126,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          arg = MIN(70.0D0,arg)
          Stl(i) = 1.d0/(1.d0 + EXP((-arg)))
       ENDDO
-      RETURN
+	RETURN
       END
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
@@ -153,7 +153,7 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       DOUBLE PRECISION elvr, xjlvr, t12
-      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp 
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp	 
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
@@ -2342,7 +2342,7 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      Maxl(ien) = lmax   
+      Maxl(ien) = lmax					   
       DO l = 0, lmax
          READ (45 ,END= 300,ERR=300) Ttll(ien,l)
          if(fexistj) READ (451,END= 300,ERR=300)
@@ -2460,9 +2460,9 @@ C        restoring the input value of the key CN_isotropic
          CLOSE (46 )
          CLOSE (461)
          IF (IOUT.GT.4) THEN
-         WRITE (8,*) ' Transm. coeff. Tl  written to file:',
+	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-         WRITE (8,*) ' Transm. coeff. Tlj written to file:',
+	     WRITE (8,*) ' Transm. coeff. Tlj written to file:',
      &                              (ctldir//ctmp23//'J.BIN')
          ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
@@ -2590,7 +2590,11 @@ C-----nceq is the number of coupled equations
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       endif    
 C-----Loop over the number of coupled equations
-      lrun = -1
+	lrun = -1
+      IF (IOUT.EQ.5 .and. FIRST_ein) write(8,*) 
+     &   'Starget=',sngl(XJLv(ilv,0)),' TargPar=',
+     &   LVP(LEVtarg,0),'   Sproj=',sngl(SEJc(Nejc)),'  TARGET'
+
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
@@ -2617,10 +2621,8 @@ C-----------Averaging over particle and target spin, summing over channel spin j
      &                   (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)
      &                   /DBLE(2*SEJc(Nejc) + 1)
+
             Maxlw = l + 1
-C           write(*,*) 'Starget=',sngl(XJLv(ilv,0)),
-C    &        ' TargPar=',LVP(LEVtarg,0),'   Sproj=',sngl(SEJc(Nejc)),
-C    &        ' TARGET'
 C
             jindex = 1 ! default, good for alphas
             if    (MAXj(Nejc) .eq. 2) then ! n,p,h,t
@@ -2631,32 +2633,29 @@ C
             endif
 C
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex) + 
-     &                   (2*jc + 1)*dtmp/DBLE(2*l + 1) 
-     &                   /DBLE(2*XJLv(ilv,Nnuc) + 1)           
-C           we are removing the (2s+1) dependence, it should be considered     
-C           explicitly in any further calculation with Tljs
-C    &                   /DBLE(2*SEJc(Nejc) + 1)
+     &              (2*jc + 1)*dtmp/DBLE(2*l + 1) 
+     &              /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &              /DBLE(2*SEJc(Nejc) + 1)
 
             IF (IOUT.EQ.5 .and. FIRST_ein) THEN
               if(l.ne.lrun) then
                 lrun = l
                 ftmp = 0.d0
-                write(8,*)
+	          write(8,*)
                 write(8,*) 'Starting a new L block ...'
               endif 
-              ftmp = ftmp + Stlj(l + 1,jindex)
+              ftmp = ftmp + Stlj(l + 1,jindex) 
 
               write(8,'(1x,''Channel spin/par='',f5.1,A1,5x,2HJ=,f5.1,
-     &          2x,2HL=,I3,2x,7Hjindex=,I1,4H nc=,I5,6H Nejc=,I2)')  
-     &          jc, parc, jj, l, jindex, nc, Nejc
+     &          2x,2HL=,I3,2x,7Hjindex=,I1,4H nc=,I5,6H Nejc=,I2,2x,
+     &          10HECIS Tljs= ,D12.6)')  
+     &          jc, parc, jj, l, jindex, nc, Nejc, dtmp
 C
               write(8,'(1x,''Stl(l)='',d12.6,3x,''Stlj(l,j)='',d12.6,
      &			      1x,''Sum_j Stlj(l,j)='',d12.6 )')  
-     &        Stl(l + 1), 
-     &        Stlj(l + 1,jindex)/DBLE(2*SEJc(Nejc) + 1),
-     &        ftmp/DBLE(2*SEJc(Nejc) + 1)
-            ENDIF
+     &          Stl(l + 1), Stlj(l + 1,jindex), ftmp
 
+            ENDIF
          ENDIF
       ENDDO
       GOTO 100
@@ -2730,24 +2729,18 @@ C-----Absorption and elastic cross sections in mb
         ENDDO 
       ENDDO
       sabs   = 10.d0*PI/ak2*sabs
-      xsabsj = 10.d0*PI/ak2*sabsj/DBLE(2*SEJc(Nejc) + 1)
+      xsabsj = 10.d0*PI/ak2*sabsj  !/DBLE(2*SEJc(Nejc) + 1)
       selast = 10.d0*PI/ak2*selast
 
       IF (sabs.le.0.d0) RETURN
 
       CSFus = ABScs
 
-C     mintsp = mod(NINT(2*D_Xjlv(1)),2)
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
       DO l = 1, NDCOLLEV     ! number of inelastic level
          READ (45,*,END = 400) dtmp
-C        RCN 2010 
          IF ( ICOller(l+1).LE.NLV(nnuc) ) THEN 
-C        IF ( (ICOller(l+1).LE.NLV(nnuc)) .AND.
-C            For odd nuclides, collective states in continuum have
-C            different spin than the ground state
-C    &        (mod(NINT(2*D_Xjlv(l+1)),2).eq.mintsp) )THEN
 C          Discrete level scattering
            IF (ICOllev(l+1).LT.LEVcc) THEN
 C             Coupled levels
@@ -2801,16 +2794,6 @@ C
       ENDIF
 
       IF (SINl+SINlcc.GT.ABScs) THEN
-C     IF (SINl.GT.ABScs) THEN
-C        ABScs = ABScs + SINl
-C        WRITE (8,
-C    &'(1x,'' WARNING: reaction cross section renormalized to account fo
-C    &r DWBA calculated cross sections '', F8.5/
-C    &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-C    &,F8.2,'' mb''/
-C    &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-C    &,F8.2,'' mb''/)')
-C    &  ABScs, SINlcc, SINl
          WRITE (8,*)
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
@@ -2914,7 +2897,7 @@ C
         dtmp = 0.d0
         ftmp = 0.d0
         DO l = 0, Maxlw
-          snorm = (ABScs - SINlcc - SINl -SINlcont)
+	    snorm = (ABScs - SINlcc - SINl -SINlcont)
           Stl(l + 1) = Stl(l + 1)*snorm/sabs
           DO jindex = 1, MAXj(Nejc) 
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm/xsabsj
@@ -2939,7 +2922,8 @@ C
      &1x,'' WARNING: Reaction  cross section                         =''
      &,F8.2,'' mb''/)') 
      &  (ABScs-SINlcc-SINl-SINlcont)/sabs, SINlcc, SINl, SINlcont, 
-     &   CSFus, 10.d0*PI/ak2*ftmp/DBLE(2*SEJc(Nejc) + 1), sreac
+     &   CSFus, 10.d0*PI/ak2*ftmp                       , sreac
+c    &   CSFus, 10.d0*PI/ak2*ftmp/DBLE(2*SEJc(Nejc) + 1), sreac
       ENDIF 
 
       RETURN
@@ -3045,9 +3029,7 @@ C    &        ecms, jc, parc, jj, l, jindex
             Ttllj(Ien,l,jindex) = Ttllj(Ien,l,jindex) +
      &                  (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                  /DBLE(2*XJLv(1,Nnuc) + 1)
-C           we are removing the (2s+1) dependence, it should be considered     
-C           explicitly in any further calculation with Tljs
-C    &                  /DBLE(2*SEJc(Nejc) + 1)
+     &                  /DBLE(2*SEJc(Nejc) + 1)
          ENDIF
       ENDDO
 C     write(*,*)
@@ -3095,8 +3077,8 @@ C--------Reaction cross section in mb
             sabs = sabs + stmp
          ENDDO
          if(elab.lt.0.3d0) write(8,*)
-         sabs  = 10.*PI/ak2*sabs
-         xsabsj = 10.*PI/ak2*sabsj/DBLE(2*SEJc(Nejc) + 1)
+         sabs   = 10.*PI/ak2*sabs
+         xsabsj = 10.*PI/ak2*sabsj 
          OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinlss = 0.D0
@@ -3899,7 +3881,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
         if(vsoref.ne.0.d0) 
      >    fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-        write (1,'(2(G10.4,F10.4,G10.4))')                              
+        write (1,'(2(G10.4,F10.4,G10.4))')                                      
      >        tv ,  fv, fvv, ts, fs  , 0.d0
         write (1,'(2(G10.4,F10.4,G10.4))') 
      >        tso, fso, fvs
@@ -3962,7 +3944,7 @@ C
               if(vsoref.ne.0.d0) 
      >            fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-              write (1,'(2(G10.4,F10.4,G10.4))')                        
+              write (1,'(2(G10.4,F10.4,G10.4))')                                       
      >            tv, fv  , fvv, 
      >            ts, fs  , 0.d0
               write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -4787,7 +4769,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
         if(vsoref.ne.0.d0) 
      >    fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-          write (1,'(2(G10.4,F10.4,G10.4))')                            
+          write (1,'(2(G10.4,F10.4,G10.4))')                                      
      >        tv ,  fv, fvv, ts, fs  , 0.d0
           write (1,'(2(G10.4,F10.4,G10.4))') 
      >        tso, fso, fvs
@@ -4844,7 +4826,7 @@ C
            if(vsoref.ne.0.d0) 
      >       fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-           write (1,'(2(G10.4,F10.4,G10.4))')                           
+           write (1,'(2(G10.4,F10.4,G10.4))')                                       
      >          tv, fv  , fvv, 
      >          ts, fs  , 0.d0
            write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -4902,7 +4884,7 @@ C
               if(vsoref.ne.0.d0) 
      >          fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-              write (1,'(2(G10.4,F10.4,G10.4))')                        
+              write (1,'(2(G10.4,F10.4,G10.4))')                                       
      >          tv, fv  , fvv, 
      >          ts, fs  , 0.d0
               write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -5484,7 +5466,7 @@ C            Bs          Cs
 
       write(1,'(6g12.5)')  0.d0, 0.d0, 0.d0, 
 C             Av=b(2,j,6)                  Bv=b(2,j,7)
-     +    pot(2,1,1)+pot(2,1,2)*iatar, pot(2,1,3)+pot(2,1,4)*iatar, 0.d0
+     +    pot(2,1,1)+pot(2,1,2)*iatar, pot(2,1,3)+pot(2,1,4)*iatar, 0.d0    
 
       write(1,'(6g12.5)')
 C               Vso                        Lso                   
@@ -5496,16 +5478,16 @@ C                                                   nv
       write(1,'(6g12.5)')  RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
      &                           pot(2,1,13), AVOm (Nejc,Nnuc), 0.d0    
       write(1,'(6g12.5)') RWOm(Nejc,Nnuc) ,   AWOm (Nejc,Nnuc), 0.d0,
-     &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0   
+     &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0          
       write(1,'(6g12.5)')1.d0, 1.d0, 0.d0 , 
-     &                    RVSo(Nejc,Nnuc) ,   AVSo (Nejc,Nnuc), 0.d0    
+     &                    RVSo(Nejc,Nnuc) ,   AVSo (Nejc,Nnuc), 0.d0                
 
         Ccoul = 0.d0
         if(izproj.gt.0 .and. rc.gt.0.d0 .and. mecul.eq.0) 
      +        Ccoul =  pot(1,1,9)*1.73/rc
         if(izproj.gt.0 .and. mecul.eq.3) Ccoul =  pot(1,1,25)
 
-      write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0              
+      write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0                      
       write(1,'(6g12.5)')
 C                 Cviso          Cwiso                      Ea
      +    abs(pot(1,1,20)),abs(pot(4,1,8)), 0.d0, pot(2,1,21)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3873 $
+Ccc   * $Rev: 3877 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-14 06:35:11 +0100 (Fr, 14 Feb 2014) $
+Ccc   * $Date: 2014-02-15 00:01:39 +0100 (Sa, 15 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -175,7 +175,7 @@ C-----------Absorption and elastic cross sections in mb
 			ENDIF   
             ENDDO
             ssabs  = 10.d0*PI/ak2*ssabs
-            ssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro) + 1)
+            ssabsj = 10.d0*PI/ak2*ssabsj 
 
             IF (fexistj) READ (451,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
@@ -1148,7 +1148,7 @@ C--------Absorption and elastic cross sections in mb
            ENDDO 
          ENDDO
          ssabs  = 10.d0*PI/ak2*ssabs
-         ssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro) + 1)
+         ssabsj = 10.d0*PI/ak2*ssabsj
 
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D12.6,1x))') 
