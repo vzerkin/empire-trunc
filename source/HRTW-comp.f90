@@ -19,8 +19,8 @@ SUBROUTINE HRTW
    !cc   ********************************************************************
    !cc
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    !
    ! COMMON variables
    !
@@ -330,37 +330,36 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
    !cc   ********************************************************************
    !cc
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    !
    ! COMMON variables
    !
-   REAL*8, DIMENSION(ndlw) :: ELTl
+   REAL*8, DIMENSION(ndlw,3) :: ELTLJ
    REAL*8, DIMENSION(ndhrtw2,3) :: H_Abs
    REAL*8 :: H_Sumtl, H_Sumtls, H_Sweak, H_Tav, H_Tthr, TFIs
    REAL*8, DIMENSION(ndhrtw1,2) :: H_Tl
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
-   COMMON /elastic/ ELTl
+   COMMON /elastic/ ELTLJ
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
    ! Dummy arguments
    !
-   INTEGER :: Iec, Ipc, Jc, Nejc, Nhrtw, Nnuc, Nnur
+   INTEGER :: Ipc, Jc, Nejc, Nhrtw, Nnuc, Nnur
    REAL*8 :: Summa
    !
    ! Local variables
    !
-   REAL*8 :: corr, eout, eoutc, frde, hisr, rho1, rho2, s, smax, smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
+   REAL*8 :: corr, eout, eoutc, frde, rho1, rho2, s, smax, smin, sumdl, sumtl1, sumtl2, tld, xjc, xjr
    REAL :: float
-   INTEGER :: i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2, ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul
+   INTEGER :: i, ichsp, iel, ier, iermax, ietl, iexc, il, ip1, ip2, ipar, itlc, j, jr, l, lmax, lmaxf, lmin, mul, iec, mulichsp
    INTEGER :: int, min0, nint
    REAL*8 :: vt
    ! write(8,*)'HRTW-DECAY entry: ejectile ,nhrtw ',nejc,nhrtw
    ! write(8,*)'CN bin, spin, parity',Iec,Jc,Ipc
    Summa = 0.D0                                               ! corrd,
-   hisr = HIS(Nnur)
    xjc = float(Jc) + HIS(Nnuc)
    ! clear scratch matrices
    ! NSCh = 0
@@ -378,11 +377,8 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
       ! 
       ! decay to the continuum
       ! 
-      ! 
-      ! decay to the continuum
-      ! 
       DO jr = 1, NLW            ! do loop over r.n. spins
-         xjr = float(jr) + hisr
+         xjr = float(jr) + HIS(Nnur)
          smin = abs(xjr - SEJc(Nejc))
          smax = xjr + SEJc(Nejc)
          mul = int(smax - smin + 1.0001)
@@ -412,12 +408,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin, lmax, 2      ! do loop over L
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl1 = sumtl1 + vt(TL(5,l,Nejc,Nnur))
+                     sumtl1 = sumtl1 + vt(TLJ(5,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'A Tl= ' , TL(5,L,Nejc,Nnur)
-                     CALL TL2VL(TL(5,l,Nejc,Nnur),rho1)
-                     sumtl1 = sumtl1 + TL(5,l,Nejc,Nnur)
+                     ! WRITE(8,*)'A Tl= ' , TLJ(5,l,J,Nejc)
+                     CALL TL2VL(TLJ(5,l,J,Nejc),rho1)
+                     sumtl1 = sumtl1 + TLJ(5,l,J,Nejc)
                   ENDIF
                ENDDO
                rho2 = RO(iermax,jr,ip2,Nnur)*DE
@@ -425,12 +421,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin + 1, lmax, 2
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl2 = sumtl2 + vt(TL(5,l,Nejc,Nnur))
+                     sumtl2 = sumtl2 + vt(TLJ(5,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'B Tl= ' , TL(5,L,Nejc,Nnur)
-                     CALL TL2VL(TL(5,l,Nejc,Nnur),rho2)
-                     sumtl2 = sumtl2 + TL(5,l,Nejc,Nnur)
+                     ! WRITE(8,*)'B Tl= ' , TLJ(5,l,J,Nejc)
+                     CALL TL2VL(TLJ(5,l,J,Nejc),rho2)
+                     sumtl2 = sumtl2 + TLJ(5,l,J,Nejc)
                   ENDIF
                ENDDO                     ! over L
                ! do loop over l   ***done***
@@ -454,12 +450,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin, lmax, 2       ! do loop over L
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl1 = sumtl1 + vt(TL(6,l,Nejc,Nnur))
+                     sumtl1 = sumtl1 + vt(TLJ(6,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'C Tl= ' , TL(6,L,Nejc,Nnur)
-                     CALL TL2VL(TL(6,l,Nejc,Nnur),rho1)
-                     sumtl1 = sumtl1 + TL(6,l,Nejc,Nnur)
+                     ! WRITE(8,*)'C Tl= ' , TLJ(6,l,J,Nejc)
+                     CALL TL2VL(TLJ(6,l,J,Nejc),rho1)
+                     sumtl1 = sumtl1 + TLJ(6,l,J,Nejc)
                   ENDIF
                ENDDO
                rho2 = RO(iermax,jr,ip2,Nnur)*DE
@@ -467,12 +463,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin + 1, lmax, 2
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl2 = sumtl2 + vt(TL(6,l,Nejc,Nnur))
+                     sumtl2 = sumtl2 + vt(TLJ(6,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'D Tl= ' , TL(6,L,Nejc,Nnur)
-                     CALL TL2VL(TL(6,l,Nejc,Nnur),rho2)
-                     sumtl2 = sumtl2 + TL(6,l,Nejc,Nnur)
+                     ! WRITE(8,*)'D Tl= ' , TLJ(6,l,J,Nejc)
+                     CALL TL2VL(TLJ(6,l,J,Nejc),rho2)
+                     sumtl2 = sumtl2 + TLJ(6,l,J,Nejc)
                   ENDIF
                ENDDO                      ! over L
                ! do loop over l   ***done***
@@ -512,12 +508,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin, lmax, 2
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl1 = sumtl1 + vt(TL(ietl,l,Nejc,Nnur))
+                     sumtl1 = sumtl1 + vt(TLJ(ietl,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'E Tl= ' , TL(ietl,L,Nejc,Nnur)
-                     CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho1)
-                     sumtl1 = sumtl1 + TL(ietl,l,Nejc,Nnur)
+                     ! WRITE(8,*)'E Tl= ' , TLJ(ietl,l,J,Nejc)
+                     CALL TL2VL(TLJ(ietl,l,J,Nejc),rho1)
+                     sumtl1 = sumtl1 + TLJ(ietl,l,J,Nejc)
                   ENDIF
                ENDDO
                sumtl2 = 0.D0
@@ -526,12 +522,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
                DO l = lmin + 1, lmax, 2
                   IF(Nhrtw>0) THEN
                      ! replace Tl with V in the second HRTW entry
-                     sumtl2 = sumtl2 + vt(TL(ietl,l,Nejc,Nnur))
+                     sumtl2 = sumtl2 + vt(TLJ(ietl,l,J,Nejc))
                   ELSE
                      ! first entry with HRTW
-                     ! WRITE(8,*)'F Tl= ' , TL(ietl,L,Nejc,Nnur)
-                     CALL TL2VL(TL(ietl,l,Nejc,Nnur),rho2)
-                     sumtl2 = sumtl2 + TL(ietl,l,Nejc,Nnur)
+                     ! WRITE(8,*)'F Tl= ' , TLJ(ietl,l,J,Nejc)
+                     CALL TL2VL(TLJ(ietl,l,J,Nejc),rho2)
+                     sumtl2 = sumtl2 + TLJ(ietl,l,J,Nejc)
                   ENDIF
                ENDDO
                ! do loop over L   ***done***
@@ -607,7 +603,7 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
          DO l = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
             IF(ipar==0)CYCLE
-            tld = TL(il,l,Nejc,Nnur) + frde*(TL(il + 1,l,Nejc,Nnur) - TL(il,l,Nejc,Nnur))
+            tld = TLJ(il,l,J,Nejc) + frde*(TLJ(il + 1,l,J,Nejc) - TLJ(il,l,J,Nejc))
             IF(tld<=0.0D0)CYCLE
             IF(Nhrtw>0) THEN
                ! entry with nhrtw>0
@@ -661,8 +657,8 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
          DO l = lmin, lmax
             ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
             IF(ipar==0)CYCLE
-            ! tld = TL(il,L,Nejc,Nnur) + frde*(TL(il + 1,L,Nejc,Nnur) - TL(il,L,Nejc,Nnur))
-            tld = ELTl(l)
+            ! tld = TLJ(il,l,J,Nejc) + frde*(TLJ(il + 1,l,J,Nejc) - TLJ(il,l,J,Nejc))
+            tld = ELTLJ(l,j)
             IF(tld<=0.0D0)CYCLE
  
             ! write(8,*) 'Elastic L=',L,' Tl=',tld
@@ -746,8 +742,8 @@ SUBROUTINE HRTW_DECAYG(Nnuc,Iec,Jc,Ipc,Summa,Nhrtw)
    !cc   *                                                                  *
    !cc   ********************************************************************
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    !
    ! COMMON variables
    !
@@ -974,7 +970,7 @@ SUBROUTINE TL2VL(T,Rho)
    !cc   ********************************************************************
    !cc
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
+   INCLUDE 'dimension.h'
    !
    ! COMMON variables
    !
@@ -1024,7 +1020,7 @@ FUNCTION VT(Tl)
    !cc   *                                                                   *
    !cc   *********************************************************************
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
+   INCLUDE 'dimension.h'
    !
    ! COMMON variables
    !
@@ -1243,18 +1239,18 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
    !cc   ********************************************************************
    !cc
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    !
    ! COMMON variables
    !
-   REAL*8, DIMENSION(ndlw) :: ELTl
+   REAL*8, DIMENSION(ndlw,3) :: ELTLJ
    REAL*8, DIMENSION(ndhrtw2,3) :: H_Abs
    REAL*8 :: H_Sumtl, H_Sumtls, H_Sweak, H_Tav, H_Tthr, TFIs
    REAL*8, DIMENSION(ndhrtw1,2) :: H_Tl
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
-   COMMON /elastic/ ELTl
+   COMMON /elastic/ ELTLJ
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
@@ -1265,9 +1261,9 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
    ! Local variables
    !
    REAL*8 :: eef, vt1
-   REAL*8 :: eout, eoutc, popadd, s, smax, smin, tld, v, xjc
+   REAL*8 :: eout, eoutc, popadd, s, smax, jmin, tld, v, xjc
    REAL :: float
-   INTEGER :: i, iel, ipar, kel, l, lmax, lmin
+   INTEGER :: i, j, iel, ipar, kel, l, lmax, lmin
    INTEGER :: int, min0
    xjc = float(Jc) + HIS(Nnuc)
    ! 
@@ -1282,9 +1278,9 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
       IF(eout<0.0D0)RETURN
    ENDIF
    ! CALL TLLOC(Nnur,Nejc,eout,il,frde)
-   smin = abs(XJLv(i,Nnur) - SEJc(Nejc))
+   jmin = abs(XJLv(i,Nnur) - SEJc(Nejc))
    smax = XJLv(i,Nnur) + SEJc(Nejc) + 0.01
-   s = smin
+   s = jmin
    DO ! loop over channel spin ----------------------------------------
       lmin = int(abs(xjc - s) + 1.01)
       lmax = int(xjc + s + 1.01)
@@ -1292,7 +1288,7 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
       DO l = lmin, lmax ! do loop over l ------------------------------------------------
          ipar = 1 + LVP(i,Nnur)*Ipc*( - 1)**(l - 1)
          IF(ipar==0)CYCLE
-         tld = ELTl(l)
+         tld = ELTLJ(l,j)
          IF(tld<=0.D0)CYCLE
          IF(l==int(H_Abs(Nhrtw,2)) .AND. (2.0*s)==H_Abs(Nhrtw,3)) THEN
             ! got a true elastic channel
@@ -1339,18 +1335,18 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
    !cc   ********************************************************************
    !cc
    IMPLICIT NONE
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    !
    ! COMMON variables
    !
-   REAL*8, DIMENSION(ndlw) :: ELTl
+   REAL*8, DIMENSION(ndlw,3) :: ELTLJ
    REAL*8, DIMENSION(ndhrtw2,3) :: H_Abs
    REAL*8 :: H_Sumtl, H_Sumtls, H_Sweak, H_Tav, H_Tthr, TFIs
    REAL*8, DIMENSION(ndhrtw1,2) :: H_Tl
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
-   COMMON /elastic/ ELTl
+   COMMON /elastic/ ELTLJ
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
@@ -1360,77 +1356,86 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
    !
    ! Local variables
    !
-   REAL*8 :: ak2, chsp, coef, ecms, el, s1, smax, smin, vl, xmas_npro, xmas_ntrg
+   REAL*8 :: ak2, chsp, coef, ecms, el, s1, jmax, jmin, vl, xmas_npro, xmas_ntrg
    REAL :: float
-   INTEGER :: i, ichsp, iel, ipa, k, kel, l, lmax, lmin, mul
-   INTEGER :: int, min0
-   REAL*8 :: par
+   INTEGER :: i, j, ichsp, iel, ipa, k, kel, l, lmax, lmin, mul, kmin, kmax, m
+   INTEGER :: int, min0, mmax, jndex
+   INTEGER :: par
    LOGICAL :: relcal
    REAL*8 :: vt1
 
-   par(i,ipa,l) = (1 - ( - 1)**i*ipa*(-1)**l)/2
+   par(i,ipa,l) = (1 - ( - 1)**i*ipa*( - 1)**l)/2
  
    xmas_npro = EJMass(Npro)
    xmas_ntrg = AMAss(Ntrg)
  
-   el = EINl
+   el = EIN
    relcal = .FALSE.
    IF(IRElat(Npro,Ntrg)>0 .OR. RELkin)relcal = .TRUE.
    CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-   coef = 10.D0*PI/ak2/(2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+   coef = 10.D0*PI/ak2/(2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0) ! Likely needs to be corrected
    s1 = 0.5
    IF(aint(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg) - SEJc(Npro)==0.0D0)s1 = 1.0
  
-   ! channel spin min and max
-   smin = abs(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-   smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
-   mul = smax - smin + 1.0001
- 
-   Ich = 1
-   DO ichsp = 1, mul ! do loop over channel spin
-      chsp = smin + float(ichsp - 1)
-      lmin = abs(Jcn - chsp - s1) + 0.0001
-      lmax = Jcn + chsp - s1 + 0.0001
-      lmin = lmin + 1
-      lmax = lmax + 1
-      lmax = min0(ndlw,lmax)
-      DO k = lmin, lmax ! do loop over l
-         IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)/=0) THEN
-            IF(Ich>ndhrtw2) THEN
-               WRITE(8,*)' '
-               WRITE(8,*)'E R R O R !'
-               WRITE(8,*)'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
-               WRITE(8,*)'INCREASE NDHRTW2 IN THE dimension.h', ' AND RECOMPILE.'
-               STOP 'INSUFFICIENT DIMENSION: NDHRTW2'
-            ENDIF
-            IF(NH_lch>ndhrtw1) THEN
-               vl = vt1(ELTl(k),H_Tav,H_Sumtl)
-            ELSEIF(ELTl(k)<H_Tthr) THEN
-               vl = vt1(ELTl(k),H_Tav,H_Sumtl)
-            ELSE
-               kel = 0
-               DO iel = 1, ndhrtw2
-                  IF(MEMel(iel,3)==int(2.0*chsp + 0.001) .AND. MEMel(iel,2)==k)kel = MEMel(iel,1)
-               ENDDO
-               IF(kel==0) THEN
-                  WRITE(8,*)' '
-                  WRITE(8,*)' MISMATCH OF ELASTIC CHANNEL IN HRTW'
-                  WRITE(8,*)' REPORT THIS ERROR ALONG WITH RELATED'
-                  WRITE(8,*)' INPUT FILE TO: mwherman@bnl.gov'
-                  STOP ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
-               ENDIF
-               vl = H_Tl(kel,1)
-            ENDIF
-            IF(vl/=0.0D0) THEN
-               H_Abs(Ich,1) = vl*coef*(float(2*Jcn + 1) - 2*s1)*FUSred*REDmsc(Jcn,Ip)
-               ! & *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
-               H_Abs(Ich,2) = k
-               H_Abs(Ich,3) = 2*chsp
-               Ich = Ich + 1
-            ENDIF
+   ! Relations between  ELTLJ(k,j) and physical transmission coefficients labeled l, s, and J
+   ! l = k-1 (ELTLJ matrix starts with index 1 for l=0)
+   ! m = 2s+1 (m maximum matrix row for a given spin s of the ejectile)
+   ! for s=0 (the first raw only, i.e., m=1)
+   ! J = k-1 (m=1) i.e., J = k - 1 + (m-1) - s    thus J = k+m-(2+s)
+   ! for s=1/2 (two rows)
+   ! J = k-1-0.5 (m=1) i.e., J = k - 1 - 0.5 + (m-1) = k-2-0.5+m
+   ! J = k-1+0.5 (m=2) i.e., J = k - 1 - 0.5 + (m-1) = k-2-0.5+m   thus J = k+m-2.5 = k+m-(2+s)
+   ! for s=1 (three rows)
+   ! J = k-1-1 (m=1) i.e., J = k - 1 - 1 + (m-1)
+   ! J = k-1   (m=2) i.e., J = k - 1 - 1 + (m-1)
+   ! J = k-1+1 (m=3) i.e., J = k - 1 - 1 + (m-1)   thus J = k+m-3 = k+m-(2+s)
+   ! minimum spin occures for m=1 and max for the bottom row m=2s+1.
+   mmax = 2*SEJc(Npro) + 1
+   jmin = abs(Jcn - XJLv(LEVtarg,Ntrg))
+   jmax = Jcn + XJLv(LEVtarg,Ntrg)
+   kmin = jmin - 1 + (2.0 + SEJc(Npro))  !minimum l-1
+   kmax = jmax - m + (2.0 + SEJc(Npro))  !maximum l-1
+   kmax = min0(NDLw, kmax)   !ensure we are within dimensions
+   Ich = 1 !number of physical channels contributing to Jcn
+   DO k = kmin, kmax  !do loop over l in Tlj
+      IF(par(Ip,LVP(LEVtarg,Ntrg),k - 1)==0) CYCLE  !check parity
+      DO jndex = 1, mmax  !do loop over j-index in Tlj
+         j = k + jndex - (2.0 + SEJc(Npro))
+         IF(j<jmin .or. j>jmax) CYCLE
+         IF(Ich>ndhrtw2) THEN
+            WRITE(8,*)' '
+            WRITE(8,*)'E R R O R !'
+            WRITE(8,*)'INSUFFICIENT DIMENSION FOR HRTW CALCULATIONS'
+            WRITE(8,*)'INCREASE NDHRTW2 IN THE dimension.h', ' AND RECOMPILE.'
+            STOP 'INSUFFICIENT DIMENSION: NDHRTW2'
          ENDIF
-      ENDDO  ! do loop over l
-   ENDDO  ! do loop over channel spin
+         IF(NH_lch>ndhrtw1) THEN
+            vl = vt1(ELTLJ(k,j),H_Tav,H_Sumtl)
+         ELSEIF(ELTLJ(k,j)<H_Tthr) THEN
+            vl = vt1(ELTLJ(k,j),H_Tav,H_Sumtl)
+         ELSE
+            kel = 0
+            DO iel = 1, ndhrtw2
+               IF(MEMel(iel,3)==int(2.0*j + 0.001) .AND. MEMel(iel,2)==k)kel = MEMel(iel,1)
+            ENDDO
+            IF(kel==0) THEN
+               WRITE(8,*)' '
+               WRITE(8,*)' MISMATCH OF ELASTIC CHANNEL IN HRTW'
+               WRITE(8,*)' REPORT THIS ERROR ALONG WITH RELATED'
+               WRITE(8,*)' INPUT FILE TO: mwherman@bnl.gov'
+               STOP ' MISMATCH OF ELASTIC CHANNEL IN HRTW'
+            ENDIF
+            vl = H_Tl(kel,1)
+         ENDIF
+         IF(vl/=0.0D0) THEN
+            H_Abs(Ich,1) = vl*coef*(float(2*Jcn + 1) - 2*s1)*FUSred*REDmsc(Jcn,Ip)
+            ! & *FUSred*REDmsc(Jcn,Ip)*DRTl(k)
+            H_Abs(Ich,2) = k
+            H_Abs(Ich,3) = 2*j
+            Ich = Ich + 1
+         ENDIF
+      ENDDO  ! do loop over j-index
+   ENDDO  ! do loop over l in Tlj
    Ich = Ich - 1
    RETURN
 END SUBROUTINE HRTW_MARENG

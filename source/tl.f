@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3873 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-14 06:35:11 +0100 (Fr, 14 Feb 2014) $
+Ccc   * $Rev: 3874 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-02-14 08:19:35 +0100 (Fr, 14 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -126,7 +126,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          arg = MIN(70.0D0,arg)
          Stl(i) = 1.d0/(1.d0 + EXP((-arg)))
       ENDDO
-	RETURN
+      RETURN
       END
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
@@ -153,7 +153,7 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       DOUBLE PRECISION elvr, xjlvr, t12
-      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp	 
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp 
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
@@ -2342,7 +2342,7 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      Maxl(ien) = lmax					   
+      Maxl(ien) = lmax   
       DO l = 0, lmax
          READ (45 ,END= 300,ERR=300) Ttll(ien,l)
          if(fexistj) READ (451,END= 300,ERR=300)
@@ -2460,9 +2460,9 @@ C        restoring the input value of the key CN_isotropic
          CLOSE (46 )
          CLOSE (461)
          IF (IOUT.GT.4) THEN
-	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
+         WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-	     WRITE (8,*) ' Transm. coeff. Tlj written to file:',
+         WRITE (8,*) ' Transm. coeff. Tlj written to file:',
      &                              (ctldir//ctmp23//'J.BIN')
          ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
@@ -2590,7 +2590,7 @@ C-----nceq is the number of coupled equations
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       endif    
 C-----Loop over the number of coupled equations
-	lrun = -1
+      lrun = -1
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
@@ -2641,7 +2641,7 @@ C    &                   /DBLE(2*SEJc(Nejc) + 1)
               if(l.ne.lrun) then
                 lrun = l
                 ftmp = 0.d0
-	          write(8,*)
+                write(8,*)
                 write(8,*) 'Starting a new L block ...'
               endif 
               ftmp = ftmp + Stlj(l + 1,jindex)
@@ -2655,7 +2655,6 @@ C
      &        Stl(l + 1), 
      &        Stlj(l + 1,jindex)/DBLE(2*SEJc(Nejc) + 1),
      &        ftmp/DBLE(2*SEJc(Nejc) + 1)
-
             ENDIF
 
          ENDIF
@@ -2915,7 +2914,7 @@ C
         dtmp = 0.d0
         ftmp = 0.d0
         DO l = 0, Maxlw
-	    snorm = (ABScs - SINlcc - SINl -SINlcont)
+          snorm = (ABScs - SINlcc - SINl -SINlcont)
           Stl(l + 1) = Stl(l + 1)*snorm/sabs
           DO jindex = 1, MAXj(Nejc) 
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm/xsabsj
@@ -3900,7 +3899,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
         if(vsoref.ne.0.d0) 
      >    fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-        write (1,'(2(G10.4,F10.4,G10.4))')                                      
+        write (1,'(2(G10.4,F10.4,G10.4))')                              
      >        tv ,  fv, fvv, ts, fs  , 0.d0
         write (1,'(2(G10.4,F10.4,G10.4))') 
      >        tso, fso, fvs
@@ -3963,7 +3962,7 @@ C
               if(vsoref.ne.0.d0) 
      >            fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-              write (1,'(2(G10.4,F10.4,G10.4))')                                       
+              write (1,'(2(G10.4,F10.4,G10.4))')                        
      >            tv, fv  , fvv, 
      >            ts, fs  , 0.d0
               write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -4788,7 +4787,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
         if(vsoref.ne.0.d0) 
      >    fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-          write (1,'(2(G10.4,F10.4,G10.4))')                                      
+          write (1,'(2(G10.4,F10.4,G10.4))')                            
      >        tv ,  fv, fvv, ts, fs  , 0.d0
           write (1,'(2(G10.4,F10.4,G10.4))') 
      >        tso, fso, fvs
@@ -4845,7 +4844,7 @@ C
            if(vsoref.ne.0.d0) 
      >       fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-           write (1,'(2(G10.4,F10.4,G10.4))')                                       
+           write (1,'(2(G10.4,F10.4,G10.4))')                           
      >          tv, fv  , fvv, 
      >          ts, fs  , 0.d0
            write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -4903,7 +4902,7 @@ C
               if(vsoref.ne.0.d0) 
      >          fvs = (VSO(Nejc,Nnuc) - DSOcor - vsoref)/vsoref
 
-              write (1,'(2(G10.4,F10.4,G10.4))')                                       
+              write (1,'(2(G10.4,F10.4,G10.4))')                        
      >          tv, fv  , fvv, 
      >          ts, fs  , 0.d0
               write (1,'(2(G10.4,F10.4,G10.4))') 
@@ -5485,7 +5484,7 @@ C            Bs          Cs
 
       write(1,'(6g12.5)')  0.d0, 0.d0, 0.d0, 
 C             Av=b(2,j,6)                  Bv=b(2,j,7)
-     +    pot(2,1,1)+pot(2,1,2)*iatar, pot(2,1,3)+pot(2,1,4)*iatar, 0.d0    
+     +    pot(2,1,1)+pot(2,1,2)*iatar, pot(2,1,3)+pot(2,1,4)*iatar, 0.d0
 
       write(1,'(6g12.5)')
 C               Vso                        Lso                   
@@ -5497,16 +5496,16 @@ C                                                   nv
       write(1,'(6g12.5)')  RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
      &                           pot(2,1,13), AVOm (Nejc,Nnuc), 0.d0    
       write(1,'(6g12.5)') RWOm(Nejc,Nnuc) ,   AWOm (Nejc,Nnuc), 0.d0,
-     &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0          
+     &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0   
       write(1,'(6g12.5)')1.d0, 1.d0, 0.d0 , 
-     &                    RVSo(Nejc,Nnuc) ,   AVSo (Nejc,Nnuc), 0.d0                
+     &                    RVSo(Nejc,Nnuc) ,   AVSo (Nejc,Nnuc), 0.d0    
 
         Ccoul = 0.d0
         if(izproj.gt.0 .and. rc.gt.0.d0 .and. mecul.eq.0) 
      +        Ccoul =  pot(1,1,9)*1.73/rc
         if(izproj.gt.0 .and. mecul.eq.3) Ccoul =  pot(1,1,25)
 
-      write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0                      
+      write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0              
       write(1,'(6g12.5)')
 C                 Cviso          Cwiso                      Ea
      +    abs(pot(1,1,20)),abs(pot(4,1,8)), 0.d0, pot(2,1,21)
