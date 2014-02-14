@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3870 $
+Ccc   * $Rev: 3873 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-13 23:12:08 +0100 (Do, 13 Feb 2014) $
+Ccc   * $Date: 2014-02-14 06:35:11 +0100 (Fr, 14 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -50,7 +50,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
-      LOGICAL dodwba, fexist, ldbwacalc, ltlj, relcal, lodd
+      LOGICAL dodwba, fexist, fexistj, ldbwacalc, ltlj, relcal, lodd
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
@@ -115,13 +115,18 @@ C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
+      INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
 C  
       IF (fexist .and. .not.CALctl) THEN
 C--------Here the old calculated files are read
-         OPEN (45,FILE = (ctldir//ctmp23//'.INC'),
+         OPEN (45 ,FILE = (ctldir//ctmp23//'.INC'),
+     &         FORM = 'UNFORMATTED',ERR = 50)
+         IF (fexistj) OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
-         READ (45,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+         IF (fexistj) 
+     &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+         READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
          IF (IOUt.EQ.5 .and. FIRST_ein) THEN
            WRITE(8,*) 
@@ -132,26 +137,27 @@ C--------Here the old calculated files are read
             DO l = 0, maxlw
 	         fftmp = 0.d0
                READ (45,END = 50,ERR=50) ftmp
-               READ (45,END = 50,ERR=50) 
+               IF (fexistj) READ (451,END = 50,ERR=50) 
      &           (fftmp(jindex), jindex=1,MAXj(Npro))
                if(l+1.le.NDLW) THEN 
                  stl(l + 1) = ftmp
-                 DO jindex = 1, MAXj(Npro)
-                   stlj(l + 1,jindex) = fftmp(jindex) 
-                 ENDDO
+                 IF (fexistj) then
+                   DO jindex = 1, MAXj(Npro)
+                     stlj(l + 1,jindex) = fftmp(jindex) 
+                   ENDDO
+                 ENDIF
                  IF (IOUt.EQ.5) THEN
 			     WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-                   WRITE (46,'(2x,3x,3(3x,D15.8))') 
+                   IF (fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
                    IF(FIRST_ein) then
                      WRITE (8,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-                     WRITE (8,'(2x,3x,3(3x,D15.8))') 
+                     IF (fexistj) WRITE (8,'(2x,3x,3(3x,D15.8))') 
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
                    ENDIF 
                  ENDIF
                endif
             ENDDO
-
 
             el = EINl
             relcal = .FALSE.
@@ -162,14 +168,18 @@ C-----------Absorption and elastic cross sections in mb
             ssabsj = 0.d0 
             DO l = 0, maxlw
               ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-              DO jindex = 1, MAXj(Npro) 
-                ssabsj = ssabsj + Stlj(l + 1,jindex)*DBLE(2*l + 1)
-              ENDDO 
+              IF (fexistj) then
+                DO jindex = 1, MAXj(Npro) 
+                  ssabsj = ssabsj + Stlj(l + 1,jindex)*DBLE(2*l + 1)
+                ENDDO
+			ENDIF   
             ENDDO
             ssabs  = 10.d0*PI/ak2*ssabs
             ssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro) + 1)
 
-            READ (45,END = 50,ERR=50) 
+            IF (fexistj) READ (451,END = 50,ERR=50) 
+     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+            READ (45 ,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) THEN
@@ -196,7 +206,8 @@ C-----------Absorption and elastic cross sections in mb
                 endif
               ENDDO
             ENDIF
-            CLOSE (45)
+            CLOSE (45 )
+            IF (fexistj) CLOSE (451)
       
             maxlw = min(NDLW,maxlw)
 
@@ -204,8 +215,11 @@ C-----------Absorption and elastic cross sections in mb
             IF (IOUt.GT.1) THEN
               WRITE (8,*)
               WRITE (8,*)
-     &' Transmission coefficients for incident channel read from file: '
+     &' Transmission coefficients Tl for incident channel read from : '
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
+              IF (fexistj) WRITE (8,*)
+     &' Transmission coefficients Tlj for incident channel read from: '
+              IF (fexistj) WRITE (8,*) ' ', ctldir//ctmp23//'J.INC'
             ENDIF
             
             IF (.NOT.CN_isotropic) THEN
@@ -1152,13 +1166,16 @@ C--------Absorption and elastic cross sections in mb
          ENDDO
          CLOSE (46)
       ENDIF
+      OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
+      WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
-         WRITE (45)  stl(l + 1)
-         WRITE (45) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
+         WRITE (45 )  stl(l + 1)
+         WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
       ENDDO
-      WRITE (45) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+      WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+      WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
@@ -1167,7 +1184,8 @@ C
       DO l = 0, maxlw
          WRITE (45) sel(l + 1)
       ENDDO
-      CLOSE (45)
+      CLOSE (45 )
+      CLOSE (451)
 
   300 CONTINUE
 

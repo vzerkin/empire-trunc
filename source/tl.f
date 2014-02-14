@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3872 $
+Ccc   * $Rev: 3873 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-14 02:10:26 +0100 (Fr, 14 Feb 2014) $
+Ccc   * $Date: 2014-02-14 06:35:11 +0100 (Fr, 14 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2284,7 +2284,7 @@ C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
       DOUBLE PRECISION culbar, ener
-      LOGICAL fexist, ltmp, logtmp
+      LOGICAL fexist, ltmp, logtmp, fexistj
       INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
@@ -2313,54 +2313,62 @@ C-----If it does not, the program calculates new transmission coeff.
  250  WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Nejc)), INT(AEJc(Nejc)), INT(Z(Nnuc)),
      &       INT(A(Nnuc)), INT(EINl*1000000)
-
       INQUIRE (FILE = (ctldir//ctmp23//'.BIN'),EXIST = fexist)
+      INQUIRE (FILE = (ctldir//ctmp23//'J.BIN'),EXIST = fexistj)
       IF (.NOT.fexist) GOTO 400
 C-----Here the previously calculated files should be read
-      OPEN (45,FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+      OPEN (45 ,FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+      if(fexistj) 
+     &  OPEN (451,FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
       IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
-  100 READ (45,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
+  100 READ (45 ,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
+      if(fexistj)READ (451,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:',lmax,ien,ener
 C
 C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
       IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
-         CLOSE (45,STATUS = 'DELETE')
+         CLOSE (45 ,STATUS = 'DELETE')
+         if(fexistj) CLOSE (451,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          IF (IOUt.EQ.5) THEN
            WRITE (8,*)
      &       ' WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
      &       ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=', SNGL(ener)
            WRITE (8,*)
-     &       ' WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+     &       ' WARNING: FILES WITH TRANSM. COEFF. HAVE BEEN DELETED'
          ENDIF
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
       Maxl(ien) = lmax					   
       DO l = 0, lmax
-         READ (45,END= 300,ERR=300) Ttll(ien,l)
-         READ (45,END= 300,ERR=300)
+         READ (45 ,END= 300,ERR=300) Ttll(ien,l)
+         if(fexistj) READ (451,END= 300,ERR=300)
      &        (Ttllj(ien,l,jindex), jindex=1,MAXj(Nejc))
          IF (IOUt.EQ.5) then
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, Ttll(ien,l)
-            WRITE (46,'(2x,3x,3(3x,D15.8))') 
+            if(fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
      &        (Ttllj(ien,l,jindex), jindex=1,MAXj(Nejc))
          ENDIF
       ENDDO
       READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
-  200 CLOSE (45)
+  200 CLOSE (45 )
+      CLOSE (451) 
       IF (IOUt.EQ.5) CLOSE (46)
       IF (IOUt.GT.4) THEN
         WRITE (8,*)
-     & 'Transmission coefficients for outgoing channel read from file: '
+     & 'Transmission coefficients Tl and Tljs for outgoing channel read 
+     &from files: '
         WRITE (8,*) ctldir//ctmp23//'.BIN'
+        if(fexistj) WRITE (8,*) ctldir//ctmp23//'J.BIN'
       ENDIF
       RETURN
 
-  300 CLOSE (45,STATUS = 'DELETE')
+  300 CLOSE (45 ,STATUS = 'DELETE')
+      if(fexistj) CLOSE (451,STATUS = 'DELETE')
       IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
       Maxl  = 0
       Ttll  = 0.d0
@@ -2368,9 +2376,9 @@ C
       WRITE (8,*) ' WARNING: ERROR WHEN READING TLs in ', ctmp23
       IF (IOUt.GT.1) THEN
          WRITE (8,*)
-     &      ' WARNING: FILE WITH TRANSM. COEFF. HAS BEEN DELETED'
+     &      ' WARNING: FILES WITH TRANSM. COEFFS. HAVE BEEN DELETED'
          WRITE (8,*)
-     &      ' WARNING: TRANSM. COEFF. WILL BE CALCULATED AND STORED'
+     &      ' WARNING: TRANSM. COEFFS. WILL BE CALCULATED AND STORED'
       ENDIF
 C-----Coulomb barrier (somewhat decreased) setting lower energy limit
 C-----for transmission coefficient calculations
@@ -2399,8 +2407,10 @@ C
             ENDIF
          ENDIF
 C--------OPEN Unit=46 for Tl output
-         OPEN (UNIT = 46,STATUS = 'unknown',
+         OPEN (UNIT = 46 ,STATUS = 'unknown',
      &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+         OPEN (UNIT = 461,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
@@ -2447,9 +2457,14 @@ C----------------ECIS   CC calc. (only coupled levels)
 C        restoring the input value of the key CN_isotropic
          CN_isotropic = logtmp
 
-         CLOSE (46)
-         IF (IOUT.GT.4) WRITE (8,*) ' Transm. coeff. written to file:',
+         CLOSE (46 )
+         CLOSE (461)
+         IF (IOUT.GT.4) THEN
+	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
+	     WRITE (8,*) ' Transm. coeff. Tlj written to file:',
+     &                              (ctldir//ctmp23//'J.BIN')
+         ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
          WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
      &          INT(AEJc(Nejc)), ' Z=', INT(ZEJc(Nejc)), ' S=',
@@ -2931,7 +2946,6 @@ C
       RETURN
       END
 
-
       SUBROUTINE ECIS2EMPIRE_TR(Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj)
 C
 C     Process ECIS output to obtain TTLl,Maxl matrix for EMPIRE energy grid
@@ -3116,14 +3130,16 @@ C--------Reaction cross section in mb
          ENDIF
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
-      WRITE (46) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
+      WRITE (46 ) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
+      WRITE (461) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
       DO l = 0, lmax
-         WRITE (46)  Ttll(Ien,l)
-         WRITE (46) (Ttllj(Ien,l,jindex), jindex=1,MAXj(Nejc))
+         WRITE (46 )  Ttll(Ien,l)
+         WRITE (461) (Ttllj(Ien,l,jindex), jindex=1,MAXj(Nejc))
       ENDDO
       WRITE (46) sreacecis
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
+      RETURN
       END
 C
 C
