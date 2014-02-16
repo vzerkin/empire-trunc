@@ -1,6 +1,6 @@
-!cc   * $Rev: 3869 $
+!cc   * $Rev: 3878 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-13 23:09:28 +0100 (Do, 13 Feb 2014) $
+!cc   * $Date: 2014-02-16 04:26:39 +0100 (So, 16 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -2629,7 +2629,7 @@ C
               LVP(1,Nnuc) = 1
               XJLv(1,Nnuc) = 0.d0
               IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
-     >           XJLv(1,Nnuc) = 0.d5
+     >           XJLv(1,Nnuc) = 0.5d0
               ISIsom(1,Nnuc) = 0
             ENDIF
 
