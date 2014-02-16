@@ -1,6 +1,7 @@
-Ccc   * $Rev: 3877 $
+$DEBUG
+Ccc   * $Rev: 3879 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-15 00:01:39 +0100 (Sa, 15 Feb 2014) $
+Ccc   * $Date: 2014-02-16 04:31:48 +0100 (So, 16 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -40,10 +41,11 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, chsp, cnj, coef, csmax, csvalue, ftmp, 
-     &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,
+     &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,	jsp,
      &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,	ssabs, ssabsj,
-     &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1, fftmp(3)
-
+     &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1, stmp,
+     &    xssabs, xssabsj
+C     fftmp(3) 
 C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
 
@@ -55,11 +57,13 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
      &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc, jindex   
-      INTEGER PAR
       LOGICAL logtmp, TMP_isotropic
       INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
+      DOUBLE PRECISION sjf
+	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      INTEGER PAR
       PAR(i,ipa,l) = (1 - ( - 1)**i*ipa*(-1)**l)/2
 C
 C-----Zero qd fraction of photabsorption before it can do any damage
@@ -128,35 +132,17 @@ C--------Here the old calculated files are read
      &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
-         IF (IOUt.EQ.5 .and. FIRST_ein) THEN
-           WRITE(8,*) 
-           WRITE (8,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
-         ENDIF
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
-	         fftmp = 0.d0
-               READ (45,END = 50,ERR=50) ftmp
-               IF (fexistj) READ (451,END = 50,ERR=50) 
-     &           (fftmp(jindex), jindex=1,MAXj(Npro))
-               if(l+1.le.NDLW) THEN 
-                 stl(l + 1) = ftmp
-                 IF (fexistj) then
-                   DO jindex = 1, MAXj(Npro)
-                     stlj(l + 1,jindex) = fftmp(jindex) 
-                   ENDDO
-                 ENDIF
-                 IF (IOUt.EQ.5) THEN
-			     WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-                   IF (fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
-     &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-                   IF(FIRST_ein) then
-                     WRITE (8,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-                     IF (fexistj) WRITE (8,'(2x,3x,3(3x,D15.8))') 
-     &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-                   ENDIF 
-                 ENDIF
-               endif
+              READ (45,END = 50,ERR=50) stl(l+1)
+              IF(fexistj) READ (451,END = 50,ERR=50) 
+     &          (stlj(l+1,jindex), jindex=1,MAXj(Npro))
+              IF (IOUt.EQ.5) THEN
+                WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l+1)
+                IF(fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
+     &            (stlj(l+1,jindex), jindex=1,MAXj(Npro))
+              ENDIF
             ENDDO
 
             el = EINl
@@ -170,12 +156,13 @@ C-----------Absorption and elastic cross sections in mb
               ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
               IF (fexistj) then
                 DO jindex = 1, MAXj(Npro) 
-                  ssabsj = ssabsj + Stlj(l + 1,jindex)*DBLE(2*l + 1)
-                ENDDO
+                  jsp = sjf(l,jindex,SEJc(Npro)) 
+                  ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+                ENDDO 
 			ENDIF   
             ENDDO
-            ssabs  = 10.d0*PI/ak2*ssabs
-            ssabsj = 10.d0*PI/ak2*ssabsj 
+            xssabs  = 10.d0*PI/ak2*ssabs
+            xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
             IF (fexistj) READ (451,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
@@ -185,12 +172,12 @@ C-----------Absorption and elastic cross sections in mb
             IF (IOUt.EQ.5) THEN
               WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
               WRITE (46,'(1x,8(D12.6,1x))')
-     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, ssabs, ssabsj
+     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
               IF(FIRST_ein) then
 	          WRITE(8,*)
                 WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
                 WRITE (8,'(1x,8(D12.6,1x))')
-     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, ssabs, ssabsj
+     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
 	          WRITE(8,*)
               ENDIF 
 
@@ -1118,20 +1105,10 @@ C-----Storing transmission coefficients for the incident channel
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-         
-         IF(FIRST_ein) then
-           WRITE (8 ,*) 
-           WRITE ( 8,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-         ENDIF
          DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
             WRITE (46,'(2x,3x,3(3x,D15.8))') 
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-            IF(FIRST_ein) then
-              WRITE ( 8,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-              WRITE ( 8,'(2x,3x,3(3x,D15.8))') 
-     &          (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-            ENDIF 
          ENDDO
 
          el = EINl
@@ -1144,20 +1121,21 @@ C--------Absorption and elastic cross sections in mb
          DO l = 0, maxlw
            ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
            DO jindex = 1, MAXj(Npro) 
-             ssabsj = ssabsj + Stlj(l + 1,jindex)*DBLE(2*l + 1)
+             jsp = sjf(l,jindex,SEJc(Npro)) 
+             ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
            ENDDO 
          ENDDO
-         ssabs  = 10.d0*PI/ak2*ssabs
-         ssabsj = 10.d0*PI/ak2*ssabsj
+         xssabs  = 10.d0*PI/ak2*ssabs
+         xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D12.6,1x))') 
-     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, ssabs, ssabsj
+     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
          IF(FIRST_ein) then
            WRITE (8,*)
            WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
            WRITE (8,'(1x,8(D12.6,1x))') 
-     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, ssabs, ssabsj
+     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
            WRITE (8,*)
          ENDIF 
          WRITE (46,'(1x,I6)') 123456

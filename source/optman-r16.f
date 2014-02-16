@@ -3324,7 +3324,7 @@ C--------Selecting only ground state
 C-----------Averaging over particle and target spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*0.5d0 + 1)
-     &                   /DBLE(JO(1) + 1)
+C    &                   /DBLE(JO(1) + 1)
          ENDIF
        ENDDO
        GOTO 1100
@@ -3363,17 +3363,13 @@ C       for EMPIRE
 C
         OPEN (46,FILE = trim(fname)//'_INC.LST')
         WRITE (46,'(A5,I6,1X,D12.6)') 'LMAX:', ltlmax, EN
-        DO l = 1, ltlmax
-          WRITE (46,*) l-1, stl(l)
+        DO l = 0, ltlmax
+          WRITE (46,*) l, stl(l+1)
         ENDDO
         WRITE (46,'(1x,A27,2x,6(D12.6,1x))') 
      &     'EL,TOT,REAC,INEL,CC,CSFus:',
      &   1000.d0*CSN(1), 1000.d0*CST, 1000.d0*CSR, 0.d0, 
      &   1000.d0*SINLcc, 1000.d0*(CSR-SINLcc)
-C       WRITE (46,'(1x,I6)') 123456 
-C       DO l = 1, ltlmax
-C         WRITE (46,*) l-1, SNGL(sel(l))
-C       ENDDO
         CLOSE (46)
 
         OPEN (45,FILE = trim(fname)//'.INC',FORM = 'UNFORMATTED')
@@ -3384,8 +3380,8 @@ C       ENDDO
           itmp = 1 
           WRITE (45) ltlmax, EN, itmp
         ENDIF
-        DO l = 1, ltlmax
-           WRITE (45) stl(l)
+        DO l = 0, ltlmax
+           WRITE (45) stl(l+1)
         ENDDO
         WRITE (45) 
      &   1000.d0*CSN(1), 1000.d0*CST, 1000.d0*CSR, 0.d0, 
