@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 3879 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-16 04:31:48 +0100 (So, 16 Feb 2014) $
+Ccc   * $Rev: 3880 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-02-17 19:11:35 +0100 (Mo, 17 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -127,7 +126,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          arg = MIN(70.0D0,arg)
          Stl(i) = 1.d0/(1.d0 + EXP((-arg)))
       ENDDO
-	RETURN
+      RETURN
       END
 
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
@@ -154,7 +153,7 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       DOUBLE PRECISION elvr, xjlvr, t12
-      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp	 
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp      
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
@@ -2343,7 +2342,7 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      Maxl(ien) = lmax					   
+      Maxl(ien) = lmax                             
       DO l = 0, lmax
          READ (45 ,END= 300,ERR=300) Ttll(ien,l+1)
          if(fexistj) READ (451,END= 300,ERR=300)
@@ -2464,9 +2463,9 @@ C        restoring the input value of the key CN_isotropic
          CLOSE (46 )
          CLOSE (461)
          IF (IOUT.GT.4) THEN
-	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
+           WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-	     WRITE (8,*) ' Transm. coeff. Tlj written to file:',
+           WRITE (8,*) ' Transm. coeff. Tlj written to file:',
      &                              (ctldir//ctmp23//'J.BIN')
          ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
@@ -2533,7 +2532,7 @@ C
       LOGICAL relcal, unformat
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
-	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      sjf(l,jindex,stmp)= l - 1 + jindex - stmp
 
       DATA unformat/.TRUE./ 
 
@@ -2648,9 +2647,9 @@ C
 C
               if(jindex.eq.2) then
                 gtmp = 0.d0 
-			  do jjj=1,MAXj(Nejc)
-	            jsp = (l + 1) + jjj - (2.d0 + SEJc(Nejc))
-	            write(8,'(1x,A15,i3,1x,f4.1,1x,f5.1,1x,i2)') 
+                    do jjj=1,MAXj(Nejc)
+                  jsp = (l + 1) + jjj - (2.d0 + SEJc(Nejc))
+                  write(8,'(1x,A15,i3,1x,f4.1,1x,f5.1,1x,i2)') 
      >             'l,s,jsp,jindex=',l,SEJc(Nejc),jsp,jjj
                   gtmp = gtmp + 
      *              DBLE(2*jsp+1)*Stlj(l + 1,jjj)/DBLE(2*SEJc(Nejc)+1)
@@ -2659,7 +2658,7 @@ C
      &                    /DBLE(2*SEJc(Nejc) + 1)/DBLE(2*l+1)
 
                 write(8,'(1x,''Stl(l)='',d12.6,3x,''Stlj(l,j)='',d12.6,
-     &	       1x,''1/(2l+1) Sum_j (2j+1)/(2s+1) Stlj(l,j)='',d12.6)')   
+     &          1x,''1/(2l+1) Sum_j (2j+1)/(2s+1) Stlj(l,j)='',d12.6)')   
      &           Stl(l + 1), Stlj(l + 1,jindex),ftmp
                 write(8,'(1x,'' (2l+1) T(l)                   ='',d12.6,
      &                     ''  Sum_j (2j+1)/(2s+1) Stlj(l,j)='',d12.6)')   
@@ -2913,7 +2912,7 @@ C
         dtmp = 0.d0
         ftmp = 0.d0
         DO l = 0, Maxlw
-	    snorm = (ABScs - SINlcc - SINl -SINlcont)
+          snorm = (ABScs - SINlcc - SINl -SINlcont)
           Stl(l + 1) = Stl(l + 1)*snorm/xsabs
           DO jindex = 1, MAXj(Nejc) 
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm/xsabsj
@@ -2985,7 +2984,7 @@ C
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
-	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       LOGICAL unformat
       data unformat/.TRUE./
 
