@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3788 $
+Ccc   * $Rev: 3881 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-02-17 23:02:32 +0100 (Mo, 17 Feb 2014) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -58,6 +58,8 @@ C
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
+      LOGICAL unformat 
+      COMMON /CTRL1/ unformat
 
 C     data iFlagSpeed99/1/
 C     data iFlagSpeed94/1/
@@ -75,6 +77,7 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       MR=111                                                            
       MW=96                                                             ECIS-038
       MS=97
+      unformat = .TRUE.
 
       OPEN (58,FILE = TRIM(fname)//'.cs')
       OPEN (55,FILE = TRIM(fname)//'.dat')
@@ -82,8 +85,11 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       OPEN (60,FILE = TRIM(fname)//'.smat')
       OPEN (61,FILE = 'file61')
       OPEN (62,FILE = 'file62')
-C     OPEN (63,FILE = TRIM(fname)//'.tlj')
-      OPEN (63,FILE = TRIM(fname)//'.tlj',form='unformatted')           zv-2013
+      if(unformat) then 
+        OPEN (63,FILE = TRIM(fname)//'.tlj',form='unformatted')           zv-2013
+      else
+        OPEN (63,FILE = TRIM(fname)//'.tlj')
+      endif
       OPEN (64,FILE = TRIM(fname)//'.exp')
       OPEN (65,FILE = TRIM(fname)//'.leg')
       OPEN (66,FILE = TRIM(fname)//'.ang')
@@ -11027,6 +11033,8 @@ C***********************************************************************CAL1-187
       COMMON /NCOMP/ NSP(5),NCONT,NCOJ(3),NCOLX,NDP,NDQ,ACN(20)         CAL1-205
       COMMON /NOEQU/ NCXN,NIC,NCI,NC,NCIN,NIN,JPI,IPJ,R1(2),NAJ         CAL1-206
       COMMON /POTE2/ ITY(12),INVT,INTV,INSL,NPX                         CAL1-207
+      LOGICAL unformat 
+      COMMON /CTRL1/ unformat
       LMD=2                                                             CAL1-208
       IF (LO(100).OR.LO(133)) LMD=3                                     CAL1-209
       JMIN=MOD(NW(2,1)+NW(1,2),2)                                       CAL1-210
@@ -11201,20 +11209,27 @@ C CHANGE OF PARITY.                                                     CAL1-371
    19 IPM=MAX0(IPX,IPY)                                                 CAL1-379
       IPK=MAX0(IPK,IPZ)                                                 CAL1-380
       IF (.NOT.LO(63)) GO TO 22                                         CAL1-381
-C     WRITE (63,1006) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT          CAL1-382
+      if(.not.unformat)
+     &  WRITE (63,1006) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT        CAL1-382
 C     RCN commented, add. information not needed if binary file
 C     WRITE (63) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT               !zv-2013
       REWIND 99                                                         CAL1-383
       DO 21 I=1,NPT                                                     CAL1-384
 C       READ (99,1007)  U1,JP,K3                                        CAL1-385
         READ (99)       U1,JP,K3                                        !zv-2013
-C       WRITE (63,1007) U1,JP,K3                                        CAL1-386
-        WRITE (63)      U1,JP,K3                                        !zv-2013
+        if(unformat) then
+          WRITE (63)      U1,JP,K3                                      !zv-2013
+        else
+          WRITE (63,1007) U1,JP,K3                                      CAL1-386
+        endif
         DO 20 K=1,K3                                                    CAL1-387
 C         READ (99,1008)  K1,K2,U1,U2                                   CAL1-388
           READ (99)       K1,K2,U1,U2                                   !zv-2013
-C         WRITE (63,1008) K1,K2,U1,U2                                   CAL1-389
-          WRITE (63)      K1,K2,U1,U2                                   !zv-2013
+          if(unformat) then
+            WRITE (63)      K1,K2,U1,U2                                 !zv-2013
+          else
+            WRITE (63,1008) K1,K2,U1,U2                                 CAL1-389
+          endif
    20   CONTINUE
    21 CONTINUE                                                          CAL1-390
 C     CLOSE (99)                                                        CAL1-391

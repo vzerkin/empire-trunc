@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 3879 $
+Ccc   * $Rev: 3881 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-16 04:31:48 +0100 (So, 16 Feb 2014) $
+Ccc   * $Date: 2014-02-17 23:02:32 +0100 (Mo, 17 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -63,8 +62,8 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DATA ctldir/'TL/'/
       DOUBLE PRECISION sjf
 	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
-      INTEGER PAR
-      PAR(i,ipa,l) = (1 - ( - 1)**i*ipa*(-1)**l)/2
+      real*8 PAR
+      PAR(i,ipa,l) = (1.d0 - (-1.d0)**i*ipa*(-1)**l)/2.d0
 C
 C-----Zero qd fraction of photabsorption before it can do any damage
 C
@@ -1339,7 +1338,7 @@ C        DO j = 1, NDLW !over compound nucleus spin
                lmin = lmin + 1
                lmax = lmax + 1
                lmax = MIN0(NDLW,lmax)
-               lmax = MIN0(maxlw,lmax)
+               lmax = MIN0(maxlw+1,lmax)
                DO k = lmin, lmax
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
                ENDDO
@@ -1366,10 +1365,11 @@ C-----------DIRECT=1 or DIRECT=2
 
       IF (IOUt.EQ.5) THEN
         WRITE (8,*) 
+	  IF(FUSred.ne.1.d0) WRITE (8,*) '        FUSred is considered'
         WRITE (8,*) 
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
         WRITE (8,'(4x,3(4x,D15.8,4x))')
-     &   CSFus, CSFus + SINl + SINlcc + SINlcont, ABScs
+     &   CSFus/Fusred, CSFus/Fusred + SINl + SINlcc + SINlcont, ABScs
         WRITE (8,*)
       ENDIF
 
