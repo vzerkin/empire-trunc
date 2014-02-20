@@ -280,7 +280,7 @@ C                      espec is the outgoing energy corresponding to the level "
                    WRITE(12,*) 
                    if(dtmp.gt.0) then
                      WRITE(12,'(10x,
-     &            ''Ave. <E> '',A2,'' cont.spec '',G12.6,'' MeV  for '',
+     &            ''Ave.  E  '',A2,'' cont.spec '',G12.6,'' MeV  for '',
      &            I3,''-'',A2,''-'',I3,A21)') SYMbe(Nejc),esum/dtmp,
      &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
@@ -329,7 +329,7 @@ C------------------Exclusive DE spectra (gammas)
                    if(dtmp.gt.0) then
                      WRITE(12,*) 
                      WRITE(12,'(2x,
-     &                 ''Ave. <E>  g cont.spec '',G12.6,'' MeV  for '',
+     &                 ''Ave.  E   g cont.spec '',G12.6,'' MeV  for '',
      &                 I3,''-'',A2,''-'',I3,A21)') esum/dtmp,
      &               INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc) 
 
@@ -343,7 +343,7 @@ C------------------Exclusive DE spectra (gammas)
                      cmul = dtmp/(CSPrd(nnuc)-xsdisc)
                      qout = qout + cmul*esum/dtmp
                      WRITE(12,'(2x,
-     &                 ''Ave. <Q>  g cont.spec '',G12.6,'' MeV'')') 
+     &                 ''Ave.  Q   g cont.spec '',G12.6,'' MeV'')') 
      &                 cmul*esum/dtmp  
                      WRITE(12,'(2x,'' g multiplicity       '',G12.6)') 
      &                 cmul
@@ -383,7 +383,7 @@ C------------------Exclusive DE spectra (gammas)
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
               WRITE(8,*)
-              WRITE(8,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
+              WRITE(8,'( 1x, '' Total  Q  cont.spec '',G12.6,'' MeV'',/,
      &                   1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
      &        qout, qin
 

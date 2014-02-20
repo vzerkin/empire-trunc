@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3881 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-17 23:02:32 +0100 (Mo, 17 Feb 2014) $
+Ccc   * $Rev: 3883 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-02-20 06:24:25 +0100 (Do, 20 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -61,7 +61,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
       DOUBLE PRECISION sjf
-	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       real*8 PAR
       PAR(i,ipa,l) = (1.d0 - (-1.d0)**i*ipa*(-1)**l)/2.d0
 C

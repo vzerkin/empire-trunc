@@ -169,7 +169,7 @@ C
               ENDDO
 
               WRITE ( 8,
-     &       '(''  Postfission <En> '', G12.5,'' MeV'')') eneutr
+     &       '(''  Postfission  En  '', G12.5,'' MeV'')') eneutr
               WRITE ( 8,
      &       '(''  Equivalent Tmaxwell '',G12.5,'' MeV'')') tequiv
               WRITE (8,*) ' '
@@ -252,7 +252,7 @@ C                       ! Default value 1.32 MeV
 
         WRITE
      & (114,'(/''  Total PFNS from '',I3,''-'',A2,''-'',I3,'': Elab='',
-     &  G12.5,'' MeV, <Epfns>='',G12.5,'' MeV, Tmaxw='',f8.4,
+     &  G12.5,'' MeV,  Epfns ='',G12.5,'' MeV, Tmaxw='',f8.4,
      & '' MeV, Norm='',F10.8)') INT(Z(1)), SYMb(1), INT(A(1)), 
      & EINl,eneutr,tequiv,ftmp
 

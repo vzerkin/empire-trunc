@@ -1601,7 +1601,7 @@ C
      &                               RECcse(ie,0,Nnuc)*recorr
       ENDDO
       WRITE(12,
-     &  '(/2x,''Ave. <E> of recoil spectrum   '',G12.6,'' MeV  for '',
+     &  '(/2x,''Ave.  E  of recoil spectrum   '',G12.6,'' MeV  for '',
      &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
      &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
@@ -1731,7 +1731,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       ENDDO
 
       WRITE(12,
-     &  '(/2x,''Ave. <E> of recoil spectrum   '',G12.6,'' MeV  for '',
+     &  '(/2x,''Ave.  E  of recoil spectrum   '',G12.6,'' MeV  for '',
      &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
      &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 

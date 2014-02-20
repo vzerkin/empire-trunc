@@ -1,6 +1,6 @@
-cc   * $Rev: 3842 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-10 06:30:25 +0100 (Mo, 10 Feb 2014) $
+cc   * $Rev: 3883 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-02-20 06:24:25 +0100 (Do, 20 Feb 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -356,7 +356,7 @@ C           to include/exclude low-lying coupled states
           OPEN (114, FILE='PFNS.OUT', STATUS='unknown')
           OPEN (115, FILE='PFNM.OUT', STATUS='unknown')
           WRITE(115,
-     &   '(''   Elab        <Epfns>      nubar(EVAL)  Tmaxw(equiv) '')')
+     &   '(''   Elab         Epfns       nubar(EVAL)  Tmaxw(equiv) '')')
         ENDIF
         IF (ltransfer) then                     
           WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
