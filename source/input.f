@@ -1,6 +1,6 @@
-!cc   * $Rev: 3878 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-16 04:26:39 +0100 (So, 16 Feb 2014) $
+!cc   * $Rev: 3884 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2014-02-21 16:08:59 +0100 (Fr, 21 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3472,8 +3472,9 @@ C
      > trim(emp_ver), ' ',emp_nam
 
       if(emp_rev.ne.'     ') then
-        WRITE (12,35) emp_rev
-   35 FORMAT(1X,'(SVN revision ',A5,') by M. Herman et al [EMP].',5X,' '
+        WRITE (12,35) emp_rev, source_rev
+   35 FORMAT(1X,'(SVN rev. ',A5,'; source rev. ',A5,') by M. Herman ',
+     >'et al [EMP].',5X,' '
      >      )
       else
         WRITE (12,*)
