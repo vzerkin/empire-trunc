@@ -1,6 +1,6 @@
-!cc   * $Rev: 3884 $
+!cc   * $Rev: 3888 $
 !cc   * $Author: gnobre $
-!cc   * $Date: 2014-02-21 16:08:59 +0100 (Fr, 21 Feb 2014) $
+!cc   * $Date: 2014-02-25 20:27:16 +0100 (Di, 25 Feb 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3436,14 +3436,14 @@ C     VERSIONNAME   = MALTA
       WRITE (8,*)
      > '                       |          Malta           |'
 C
-  754 open(23,file=trim(empiredir)//"/source/.svn/entries",
+  754 open(23,file=trim(empiredir)//"/source/.versionnumbers",
      &status='OLD',ERR=755)
-      read(23,'(3/,A5,7/,A5)',ERR=755,END=755) emp_rev,source_rev
+      read(23,'(9X,A5,1/,17X,A5)',ERR=755,END=755) emp_rev,source_rev
       close(23)
       WRITE(8,20) emp_rev
-   20 FORMAT(24X,'| SVN empire     rev. ',A5,'|')
+   20 FORMAT(24X,'| SVN empire    rev. ',A5,' |')
       WRITE(8,30) source_rev
-   30 FORMAT(24X,'| empire/source  rev. ',A5,'|')
+   30 FORMAT(24X,'| empire/source rev. ',A5,' |')
       GOTO 756
   755 emp_rev    = '     '
       source_rev = '     '

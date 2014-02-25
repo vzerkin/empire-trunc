@@ -1,6 +1,6 @@
-#$Rev: 3712 $
-#$Author: rcapote $
-#$Date: 2014-01-06 17:10:10 +0100 (Mo, 06 Jän 2014) $
+#$Rev: 3888 $
+#$Author: gnobre $
+#$Date: 2014-02-25 20:27:16 +0100 (Di, 25 Feb 2014) $
 
 # set default compilers:
 
@@ -128,6 +128,9 @@ OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxilia
 all: 
 	$(MAKE) empire
 	$(MAKE) optmand
+	@ svn info $(EMPIREDIR)/source | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+
+
 
 empire: $(OBJF) subecis06m.o
 	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
