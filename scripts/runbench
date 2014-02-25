@@ -73,7 +73,7 @@ if [ "$option" = "run" ] ; then
 
    mkdir TeMpOrArYdIr
 #  cp * > TeMpOrArYdIr
-   cp u238-rigid-soft-omp-lev.col th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   cp *-lev.col *.lev u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
    cp *.inp *ref* TeMpOrArYdIr/ >& /dev/null
    error=0
    for file in $files
@@ -108,11 +108,11 @@ if [ "$option" = "run" ] ; then
 elif [ "$option" = "clean" ] ; then
 # cleans the benchmarks directory, keeping only original files corresponding to specific input (or all)
    mkdir TeMpOrArYdIr
-   mv *-ref.* TeMpOrArYdIr/
-   mv th232-rot-vib-lev.col TeMpOrArYdIr/
-   mv u238-rigid-soft-omp-lev.col TeMpOrArYdIr/
+   mv *-ref.*   TeMpOrArYdIr/
+   mv *-lev.col TeMpOrArYdIr/
+   mv *.lev     TeMpOrArYdIr/
    mv u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
-   cp *.inp TeMpOrArYdIr/ 
+   cp *.inp     TeMpOrArYdIr/ 
    for file in $files
    do
      $EMPIREDIR/scripts/clean $file
