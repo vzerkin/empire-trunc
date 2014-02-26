@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3883 $
+Ccc   * $Rev: 3889 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-02-20 06:24:25 +0100 (Do, 20 Feb 2014) $
+Ccc   * $Date: 2014-02-26 16:52:41 +0100 (Mi, 26 Feb 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -55,12 +55,14 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
-     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc, jindex   
+     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc, jindex,
+     &  kmin, kmax
       LOGICAL logtmp, TMP_isotropic
       INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
-      DOUBLE PRECISION sjf
+      DOUBLE PRECISION xj, xjc, jmin, jmax
+      REAL*4 sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       real*8 PAR
       PAR(i,ipa,l) = (1.d0 - (-1.d0)**i*ipa*(-1)**l)/2.d0
@@ -1322,28 +1324,45 @@ C--------Corrected scattering radius
       IF (INT(AEJc(0)).GT.0)
      &        coef = 10.d0*PI/ak2/
      &           (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
-C-----channel spin min and max
-      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-      smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
-      mul = smax - smin + 1.0001
       CSFus = 0.d0
+C-----absorption spin distribution using Tl's
+!      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
+!      smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
+!      mul = smax - smin + 1.0001
+!      DO ip = 1, 2      ! over parity
+!         DO j = 1, NLW  !over compound nucleus spin
+!            sum = 0.d0
+!            DO ichsp = 1, mul
+!               chsp = smin + FLOAT(ichsp - 1)
+!               lmin = ABS(j - chsp - S1) + 0.0001
+!               lmax = j + chsp - S1 + 0.0001
+!               lmin = lmin + 1
+!               lmax = lmax + 1
+!               lmax = MIN0(NDLW,lmax)
+!               lmax = MIN0(maxlw+1,lmax)
+!               DO k = lmin, lmax
+!                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
+!               ENDDO
+!            ENDDO
+!     absorption spin distribution using Tlj's
       DO ip = 1, 2      ! over parity
-         DO j = 1, NLW  !over compound nucleus spin
-C        DO j = 1, NDLW !over compound nucleus spin
+         DO j = 1, NLW      !over compound nucleus spin
             sum = 0.d0
-            DO ichsp = 1, mul
-               chsp = smin + FLOAT(ichsp - 1)
-               lmin = ABS(j - chsp - S1) + 0.0001
-               lmax = j + chsp - S1 + 0.0001
-               lmin = lmin + 1
-               lmax = lmax + 1
-               lmax = MIN0(NDLW,lmax)
-               lmax = MIN0(maxlw+1,lmax)
-               DO k = lmin, lmax
-                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
+            xjc = float(j) + HIS(1)
+            jmin = abs(xjc - XJLv(LEVtarg,Ntrg))
+            jmax = xjc + XJLv(LEVtarg,Ntrg)
+            kmin = jmin - MAXj(Npro) + (2.0 + SEJc(Npro))  !minimum k=l+1
+            kmax = jmax - 1 + (2.0 + SEJc(Npro))           !maximum k=l+1
+            kmax = MIN(NDLw, kmax)                         !ensure we are within dimensions
+            DO k = kmin, kmax                              !do loop over l in Tlj
+               DO jindex = 1, MAXj(Npro)                   !do loop over j-index in Tlj
+                  xj = k + jindex - (2.0 + SEJc(Npro))
+                  IF(xj<jmin .or. xj>jmax) CYCLE
+                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
+     &                stlj(k,jindex)
                ENDDO
             ENDDO
-            POP(NEX(1),j,ip,1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
+            POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)
      &                           *FUSred
             CSFus = CSFus + POP(NEX(1),j,ip,1)
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
@@ -1378,7 +1397,7 @@ C     CSFus contains only the reaction cross section to be distributed
 C
 C-----calculation/reading of transmission coefficients for input channel done ------
 C
-C-----Passing stl() to HRTW routine, please note that stl() never contain
+C-----Passing ELTL() and ELTLJ () to HRTW routine, note that they never contain
 C-----direct contribution !!!
 C
       DO i = 1, NDLW
