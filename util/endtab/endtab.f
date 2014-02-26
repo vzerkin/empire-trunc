@@ -23,7 +23,8 @@ C-V  12/11 Fix setting the error flag IER
 C-V  12/02 Implement retrieval of cross sections at fixed angle
 C-V        for incident neutrons
 C-V  13/06 Trivial fix to retrieve MF3/MT5 as is
-C-V  14/02 Re-design to accurately print values at interval boundaries
+C-V  14/02 Re-design to accurately print values at interval boundaries.
+C-V  14/03 Guard against upper boundary outside data range.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -520,7 +521,7 @@ C* Write the data to the PLOTTAB file
       SG2=SG(KK)
       UG2=UG(KK)
       IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
-      IF(EE2.LE.EA) GO TO 81
+      IF(EE2.LE.EA .AND KK.LT.NP) GO TO 81
 C*    -- First point
       IF(EE1.LE.EA .OR. KK.LE.2) THEN
         ED=DBLE(EE1)
@@ -538,7 +539,7 @@ C*    -- First point
         CALL CH11PK(E11,ED)
         WRITE(LOU,194) E11,SG1,UG1
       END IF
-      IF(EE2.GE.EB) THEN
+      IF(EE2.GE.EB .OR. KK.GE.NG) THEN
 C*      -- Last point
         IF(IN2.EQ.1) THEN
           ED=DBLE(EB)
