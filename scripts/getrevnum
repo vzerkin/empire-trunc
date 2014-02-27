@@ -1,0 +1,3 @@
+#!/bin/bash
+
+svn info $EMPIREDIR/source | grep -e 'Revision:' -e 'Last Changed Rev:' > ../source/.versionnumbers

@@ -1,6 +1,6 @@
-#$Rev: 3888 $
+#$Rev: 3892 $
 #$Author: gnobre $
-#$Date: 2014-02-25 20:27:16 +0100 (Di, 25 Feb 2014) $
+#$Date: 2014-02-27 15:19:14 +0100 (Do, 27 Feb 2014) $
 
 # set default compilers:
 
@@ -128,8 +128,7 @@ OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxilia
 all: 
 	$(MAKE) empire
 	$(MAKE) optmand
-	@ svn info $(EMPIREDIR)/source | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
-
+	@../scripts/getrevnum
 
 
 empire: $(OBJF) subecis06m.o
