@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3881 $
+Ccc   * $Rev: 3894 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-17 23:02:32 +0100 (Mo, 17 Feb 2014) $
+Ccc   * $Date: 2014-02-28 22:03:46 +0100 (Fr, 28 Feb 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2141,7 +2141,7 @@ C
          LMAxtl(i,Nejc,Nnuc) = 0
          DO l = 1, NDLW
             TL(i,l,Nejc,Nnuc) = 0.D0
-            IF(nnuc.eq.1) then      
+            IF(Nnuc.eq.NREs(Nejc)) then      
               DO k=1,MAXj(Nejc)
                 TLJ(i,l,k,Nejc) = 0.D0
               ENDDO 
@@ -2178,7 +2178,7 @@ C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
             TL(i,l+1,Nejc,Nnuc) = ftmp
             Nonzero = .TRUE.
          ENDDO
-         IF(Nnuc.eq.1) then      
+         IF(Nnuc.eq.NREs(nejc)) then      
            DO l = 0, LMAxtl(i,Nejc,Nnuc)
               DO k=1,MAXj(Nejc)
                 ftmp = ttllj(i,l+1,k)
