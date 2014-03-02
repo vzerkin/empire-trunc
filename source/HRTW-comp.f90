@@ -1,8 +1,3 @@
-!cc   * $Rev: 3829 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-02-07 19:40:11 -0500 (Fri, 07 Feb 2014) $
-!
-!
 SUBROUTINE HRTW
    !cc
    !cc   ********************************************************************
@@ -60,12 +55,16 @@ SUBROUTINE HRTW
    sumtg = 0.D0
    tgexper = 0.D0
 
+
    IF(.not. BENchm) THEN
      WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
 
+
      WRITE(8,'(1x,''-------------------------------------------------------------'')')
 
+
    ENDIF
+
 
    IF(FIRst_ein .AND. (EINl>1.D0) ) THEN
      WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
@@ -92,6 +91,7 @@ SUBROUTINE HRTW
          H_Sumtl = 0.D0
          H_Tav = 0.D0
          H_Sweak = 0.D0
+
 
              H_Tl = 0.d0   
          ! prepare gamma-strength (GMR) parameters (if spin
@@ -227,39 +227,57 @@ SUBROUTINE HRTW
    IF(D0_obs==0.0D0)D0_obs = d0c    !use calculated D0 (in keV) if not measured
 
 
+
    if(BENchm) THEN
 
+
      WRITE(8,*)
+
 
      WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
 
+
      WRITE(8,*)
 
+
    endif
+
+
 
 
 
    itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 ) 
 
+
    if(itmp.eq.1 .and. (.not.BENCHM)) THEN
+
 
      WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
 
+
      WRITE(8,*)
+
 
    endif 
 
+
    if(itmp.gt.1 .and. (.not.BENCHM)) THEN
+
 
      WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
 
+
      WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+
 
      WRITE(8,*)
 
+
    endif
 
+
 !  IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
+
 
    IF(EINl<=1.D0 .AND. FIRst_ein) THEN
       IF(D0_obs>0.D0) THEN
@@ -283,38 +301,55 @@ SUBROUTINE HRTW
          WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
       ENDIF
 
+
       WRITE(8,*)
 
+
       WRITE(12,*)
+
+
 
 
 
       if(itmp.eq.0 .and. (.not.BENCHM)) then 
         IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
 
+
           !
+
 
           ! renormalization of the gamma-ray strength function only
 
+
           ! undertaken for the first energy
+
 
           !
 
+
           TUNe(0,nnuc) = tgexper/sumtg
+
 
           WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
 
+
           IF (FIRst_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')') 
+
 
         ELSE 
 
+
           WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
+
 
         ENDIF
 
+
         WRITE(8,*)
 
+
       endif
+
 
    ENDIF
    RETURN
@@ -379,9 +414,12 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
 
+
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
 
+
    COMMON /ELASTIC/ ELTl,ELTlj
+
 
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
@@ -616,6 +654,7 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
    IF(Nhrtw==0 .AND. IZA(Nnur)==IZA(0)) THEN
       ! clear memorized elastic channels when entering new J-pi CN state
       iel = 1
+
 
         MEMel = 0
    ENDIF
@@ -1289,9 +1328,12 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
 
+
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
 
+
    COMMON /ELASTIC/ ELTl,ELTlj
+
 
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
@@ -1387,9 +1429,12 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
 
+
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
 
+
    COMMON /ELASTIC/ ELTl,ELTlj
+
 
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
