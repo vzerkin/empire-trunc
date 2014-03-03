@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3897 $
+Ccc   * $Rev: 3902 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-02 12:02:41 +0100 (So, 02 Mär 2014) $
+Ccc   * $Date: 2014-03-03 08:29:09 +0100 (Mo, 03 Mär 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -709,7 +709,7 @@ C
                   endif
 C                 
 C---------------------------------------------------------------------
-C                 Reading cc.LEG (DWBA + CN calculations)
+C                 Reading ccm.LEG (DWBA + CN calculations)
 C 
                   READ  (46,'(i5,1x,i4)',END = 160,ERR = 160) 
      &               ilev1, ncoef1
@@ -762,8 +762,9 @@ C                   DWBA CN PLs
                   endif 
                                       
                  ENDDO ! over collective levels
-                 
-                 CLOSE(45,STATUS='DELETE') 
+
+                 CLOSE(45)  ! should exist for dwba processing               
+C                CLOSE(45,STATUS='DELETE') 
                  CLOSE(46,STATUS='DELETE') 
                  CLOSE(47)               
                  iwin = ipipe_move('tmp.LEG','ccm.LEG')
@@ -798,11 +799,8 @@ C                CLOSE(47,STATUS='DELETE')
                 ENDIF 
 
                 CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
-
                 CALL ECIS2EMPIRE_TL_TRG(
-
      &            Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
-
 
               ENDIF
 
