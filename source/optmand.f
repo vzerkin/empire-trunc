@@ -11,7 +11,7 @@ C      To allow automatic extension to quadruple precision (REAL*16, COMPLEX*32)
 C
 C      AUTHORS:
 C
-C      EFREM SOUKHOVITSKI - NON-AXIAL SOFT-ROTATOR NUCLEAR MODEL THEORY, MAIN
+C      EFREM SOUKHOVITSKII- NON-AXIAL SOFT-ROTATOR NUCLEAR MODEL THEORY, MAIN
 C                           CC COMPUTATIONAL ALGORITHMS AND CODING, LANE 
 C                           CONSISTENNCY AND(P,N) CS
 C                           E-MAIL: esukhov@sosny.bas-net.by
@@ -36,10 +36,10 @@ C                            JAERI-DATA/CODE 2005-002, JAPAN ATOMIC ENERGY
 C                            INSTITUTE, 2005.
 C                         3. E.SH. SOUKHOVITSKII, R. CAPOTE, J.M. QUESADA,
 C                            S. CHIBA, PHYS. REV. C72, 024604 (2005).
-C                         4. J.M. QUESADA, R. CAPOTE, E.Sh. SOUKHOVITSKI and
+C                         4. J.M. QUESADA, R. CAPOTE, E.Sh. SOUKHOVITSKII and
 C                            S. CHIBA, PHYS. REV. C76, 057602 (2007).
 C                         5. MORE DETAILS, MANUAL,CODE'S SOURCE FILES AND INPUTS
-C                            WITH VERIOUS CC OPTICAL POTENTIALS CAN BE FOUND ON: 
+C                            WITH VARIOUS CC OPTICAL POTENTIALS CAN BE FOUND ON: 
 C                            http://www-nds.iaea.org/RIPL-3/
 C
 C
@@ -118,7 +118,7 @@ C       Output filename fixed to OPTMAN.OUT for EMPIRE
         WRITE(21,'(5x,A)')
      *  '*---------------------------------------------*'
         WRITE(21,'(5x,A)')
-     *  '*   COMPATIBLE WITH THE EMPIRE-3.1 SYSTEM     *'
+     *  '*   COMPATIBLE WITH THE EMPIRE-3 SYSTEM       *'
         WRITE(21,'(5x,A)')
      *  '***********************************************'
 
@@ -2860,9 +2860,10 @@ C     *******************************************************
       DOUBLE PRECISION jc,jj
       INTEGER ltlmax, itmp, LLLMAX
       CHARACTER*1 parc
+      LOGICAL*1 unformat/.TRUE./ 
+C     LOGICAL*1 unformat/.FALSE./ 
 
       PARAMETER (LLLMAX=230)
-
       CHARACTER*20 fname
       COMMON/INOUT/fname
 
@@ -3251,6 +3252,7 @@ C
 C      EMPIRE (ecis06 formatted output)
 C
        numbtl = 0
+
        DO L=1,ltlmax
         IF(NPO(1)*(-1)**(L-1).EQ.+1) THEN 
           IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) numbtl = numbtl + 1
@@ -3268,69 +3270,147 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
 
-C      open(unit=91,file=TRIM(fname)//'.tlj')
-       open(unit=92,file=TRIM(fname)//'.tlj',form='unformatted')        zv-2013
-C      WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
+       IF(unformat) then 
+
+         open(unit=92,file=TRIM(fname)//'.tlj',form='unformatted')      zv-2013
+       ELSE
+
+         open(unit=92,file=TRIM(fname)//'.tlj')
+
+         WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
+
+       ENDIF
+
+       parc = '+'
+
+       numbtl = 0
+
        DO L=1,ltlmax
         LL = L-1 
+
         IF(NPO(1)*(-1)**LL.EQ.-1) CYCLE
-        IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
-C         WRITE(92,1007)         L-1-0.5,'+',1
-C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
-          WRITE(92)              DBLE(L-1-0.5),'+',1
-          WRITE(92)      1, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+
+        IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
+          numbtl = numbtl + 1
+
+          IF(unformat) then 
+
+            WRITE(92)                   DBLE(L-1-0.5),parc,1
+
+            WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+
+          ELSE
+
+            WRITE(92,1007)              DBLE(L-1-0.5),parc,1
+            WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+          ENDIF
+
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
-C         WRITE(92,1007)         L-1+0.5,'+',1
-C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
-          WRITE(92)              DBLE(L-1+0.5),'+',1
-          WRITE(92)      1, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+
+          numbtl = numbtl + 1
+
+          IF(unformat) then 
+
+            WRITE(92)                   DBLE(L-1+0.5),parc,1
+
+            WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+
+          ELSE
+
+            WRITE(92,1007)              DBLE(L-1+0.5),parc,1
+            WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+          ENDIF 
+
         ENDIF
        ENDDO
+       parc='-'
+
        DO L=1,ltlmax
         LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.+1) CYCLE
-        IF(L.NE.1 .AND. TRLJ(L,1).GT.0.) THEN
-C         WRITE(92,1007)         L-1-0.5,'-',1
-C         WRITE(92,1008) 1, L-1, L-1-0.5, TRLJ(L,1)
-          WRITE(92)              DBLE(L-1-0.5),'-',1
-          WRITE(92)      1, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+        IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
+          numbtl = numbtl + 1
+
+          IF(unformat) then 
+
+            WRITE(92)                   DBLE(L-1-0.5),parc,1
+
+            WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+
+          ELSE 
+
+            WRITE(92,1007)              DBLE(L-1-0.5),parc,1
+            WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+          ENDIF
+
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
-C         WRITE(92,1007)         L-1+0.5,'-',1
-C         WRITE(92,1008) 1, L-1, L-1+0.5, TRLJ(L,2)
-          WRITE(92)              DBLE(L-1+0.5),'-',1
-          WRITE(92)      1, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+          numbtl = numbtl + 1
+
+          IF(unformat) then 
+
+            WRITE(92)                   DBLE(L-1+0.5),parc,1
+
+            WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+
+          ELSE
+
+            WRITE(92,1007)              DBLE(L-1+0.5),parc,1
+            WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+          ENDIF
+
         ENDIF
        ENDDO
        CLOSE(92)
 
        Stl = 0.d0
 
-C      OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
-       OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200,
+       IF(unformat) then 
+
+         OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200,
      &          form='unformatted')
-C      READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
+       ELSE
+
+         OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
+
+         READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
+
+       ENDIF 
+
 C------JC,ParC is the channel spin and parity
 C------nceq is the number of coupled equations
-C1100  READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200) jc, parc, nceq  ! ecis06
- 1100  READ (45,                        END = 1200) jc, parc, nceq  ! ecis06
 C------Loop over the number of coupled equations
        DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
-C        READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
-         READ (45,  END = 1200,ERR = 1200) nlev, l, jj, dtmp
+         IF(unformat) then 
+
+           READ (45,                        END = 1200,ERR = 1200) 
+
+     >                                       jc, parc, nceq  ! ecis06
+
+           READ (45,  END = 1200,ERR = 1200) nlev, l, jj, dtmp
+
+         ELSE
+
+           READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200,ERR = 1200) 
+
+     >                                       jc, parc, nceq  ! ecis06
+
+           READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
+
+         ENDIF      
+
 C--------Selecting only ground state
-         IF (dtmp.GT.1.D-15 .AND. l.LE.LLLMAX) THEN
+         IF (dtmp.GT.1.D-15 .AND. l.LT.LLLMAX) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
-            Stl(l + 1) = Stl(l + 1) + (2*jj + 1)*dtmp/DBLE(2*l + 1)
+            Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
      &                   /DBLE(2*0.5d0 + 1)
-C    &                   /DBLE(JO(1) + 1)
+     &                   /DBLE(JO(1) + 1)
          ENDIF
        ENDDO
-       GOTO 1100
  1200  CLOSE (45)
 C
       ELSE
@@ -3366,13 +3446,17 @@ C       for EMPIRE
 C
         OPEN (46,FILE = trim(fname)//'_INC.LST')
         WRITE (46,'(A5,I6,1X,D12.6)') 'LMAX:', ltlmax, EN
-        DO l = 0, ltlmax
-          WRITE (46,*) l, stl(l+1)
+        DO l = 1, ltlmax
+          WRITE (46,*) l-1, stl(l)
         ENDDO
         WRITE (46,'(1x,A27,2x,6(D12.6,1x))') 
      &     'EL,TOT,REAC,INEL,CC,CSFus:',
      &   1000.d0*CSN(1), 1000.d0*CST, 1000.d0*CSR, 0.d0, 
      &   1000.d0*SINLcc, 1000.d0*(CSR-SINLcc)
+C       WRITE (46,'(1x,I6)') 123456 
+C       DO l = 1, ltlmax
+C         WRITE (46,*) l-1, SNGL(sel(l))
+C       ENDDO
         CLOSE (46)
 
         OPEN (45,FILE = trim(fname)//'.INC',FORM = 'UNFORMATTED')
@@ -3383,8 +3467,8 @@ C
           itmp = 1 
           WRITE (45) ltlmax, EN, itmp
         ENDIF
-        DO l = 0, ltlmax
-           WRITE (45) stl(l+1)
+        DO l = 1, ltlmax
+           WRITE (45) stl(l)
         ENDDO
         WRITE (45) 
      &   1000.d0*CSN(1), 1000.d0*CST, 1000.d0*CSR, 0.d0, 
@@ -12473,4 +12557,3 @@ C
 C     *******************************************************
 C     END of dispersive
 C     *******************************************************
-
