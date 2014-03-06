@@ -231,59 +231,25 @@ SUBROUTINE HRTW
    IF(d0c>0.D0)d0c = 1000.0/d0c
    IF(D0_obs==0.0D0)D0_obs = d0c    !use calculated D0 (in keV) if not measured
 
-
-
    if(BENchm) THEN
-
-
      WRITE(8,*)
-
-
      WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
-
-
      WRITE(8,*)
-
-
    endif
-
-
-
-
 
    itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 ) 
-
-
    if(itmp.eq.1 .and. (.not.BENCHM)) THEN
-
-
      WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
-
-
      WRITE(8,*)
-
-
    endif 
 
-
    if(itmp.gt.1 .and. (.not.BENCHM)) THEN
-
-
      WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
-
-
      WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
-
-
      WRITE(8,*)
-
-
    endif
 
-
 !  IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
-
-
    IF(EINl<=1.D0 .AND. FIRst_ein) THEN
       IF(D0_obs>0.D0) THEN
          tgexper = 2*PI*GG_obs/D0_obs/1.E6
@@ -308,53 +274,21 @@ SUBROUTINE HRTW
 
 
       WRITE(8,*)
-
-
       WRITE(12,*)
-
-
-
-
-
       if(itmp.eq.0 .and. (.not.BENCHM)) then 
         IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
-
-
           !
-
-
           ! renormalization of the gamma-ray strength function only
-
-
           ! undertaken for the first energy
-
-
           !
-
-
           TUNe(0,nnuc) = tgexper/sumtg
-
-
           WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
-
-
           IF (FIRst_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')') 
-
-
         ELSE 
-
-
           WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
-
-
         ENDIF
-
-
         WRITE(8,*)
-
-
       endif
-
 
    ENDIF
    RETURN
