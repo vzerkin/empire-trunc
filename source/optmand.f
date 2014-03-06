@@ -2858,7 +2858,7 @@ C     *******************************************************
 
       DIMENSION STL(250)
       DOUBLE PRECISION jc,jj
-      INTEGER ltlmax, itmp, LLLMAX
+      INTEGER ltlmax, itmp, LLLMAX, numbtl
       CHARACTER*1 parc
       LOGICAL*1 unformat/.TRUE./ 
 C     LOGICAL*1 unformat/.FALSE./ 
@@ -3271,95 +3271,61 @@ C      from ecis06
 C----------------
 
        IF(unformat) then 
-
          open(unit=92,file=TRIM(fname)//'.tlj',form='unformatted')      zv-2013
        ELSE
-
          open(unit=92,file=TRIM(fname)//'.tlj')
-
          WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
-
        ENDIF
-
        parc = '+'
-
        numbtl = 0
-
+       itmp = 1 
        DO L=1,ltlmax
         LL = L-1 
-
         IF(NPO(1)*(-1)**LL.EQ.-1) CYCLE
-
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
           numbtl = numbtl + 1
-
           IF(unformat) then 
-
-            WRITE(92)                   DBLE(L-1-0.5),parc,1
-
+            WRITE(92)                   DBLE(L-1-0.5),parc,itmp
             WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
-
           ELSE
-
-            WRITE(92,1007)              DBLE(L-1-0.5),parc,1
+            WRITE(92,1007)              DBLE(L-1-0.5),parc,itmp
             WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
           ENDIF
-
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
-
           numbtl = numbtl + 1
-
           IF(unformat) then 
-
-            WRITE(92)                   DBLE(L-1+0.5),parc,1
-
+            WRITE(92)                   DBLE(L-1+0.5),parc,itmp
             WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
-
           ELSE
-
-            WRITE(92,1007)              DBLE(L-1+0.5),parc,1
+            WRITE(92,1007)              DBLE(L-1+0.5),parc,itmp
             WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
           ENDIF 
-
         ENDIF
        ENDDO
        parc='-'
-
        DO L=1,ltlmax
         LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.+1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
           numbtl = numbtl + 1
-
           IF(unformat) then 
-
-            WRITE(92)                   DBLE(L-1-0.5),parc,1
-
+            WRITE(92)                   DBLE(L-1-0.5),parc,itmp
             WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
-
           ELSE 
-
-            WRITE(92,1007)              DBLE(L-1-0.5),parc,1
+            WRITE(92,1007)              DBLE(L-1-0.5),parc,itmp
             WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
           ENDIF
-
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
           numbtl = numbtl + 1
-
           IF(unformat) then 
-
-            WRITE(92)                   DBLE(L-1+0.5),parc,1
-
+            WRITE(92)                   DBLE(L-1+0.5),parc,itmp
             WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
-
           ELSE
-
-            WRITE(92,1007)              DBLE(L-1+0.5),parc,1
+            WRITE(92,1007)              DBLE(L-1+0.5),parc,itmp
             WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
           ENDIF
-
         ENDIF
        ENDDO
        CLOSE(92)
@@ -3367,15 +3333,11 @@ C----------------
        Stl = 0.d0
 
        IF(unformat) then 
-
          OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200,
      &          form='unformatted')
        ELSE
-
          OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
-
          READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
-
        ENDIF 
 
 C------JC,ParC is the channel spin and parity
@@ -3386,23 +3348,14 @@ C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
          IF(unformat) then 
-
            READ (45,                        END = 1200,ERR = 1200) 
-
      >                                       jc, parc, nceq  ! ecis06
-
            READ (45,  END = 1200,ERR = 1200) nlev, l, jj, dtmp
-
          ELSE
-
            READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200,ERR = 1200) 
-
      >                                       jc, parc, nceq  ! ecis06
-
            READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
-
          ENDIF      
-
 C--------Selecting only ground state
          IF (dtmp.GT.1.D-15 .AND. l.LT.LLLMAX) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
