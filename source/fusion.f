@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3902 $
+Ccc   * $Rev: 3904 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-03 08:29:09 +0100 (Mo, 03 Mär 2014) $
+Ccc   * $Date: 2014-03-06 21:09:14 +0100 (Do, 06 Mär 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -150,116 +150,63 @@ C
       IF (fexist .and. .not.CALctl) THEN
 C--------Here the old calculated files are read
          OPEN (45 ,FILE = (ctldir//ctmp23//'.INC'),
-
      &         FORM = 'UNFORMATTED',ERR = 50)
-
          IF (fexistj) OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),
-
      &         FORM = 'UNFORMATTED',ERR = 50)
-
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          IF (fexistj) 
-
      &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
-
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
-
               READ (45,END = 50,ERR=50) stl(l+1)
-
               IF(fexistj) READ (451,END = 50,ERR=50) 
-
      &          (stlj(l+1,jindex), jindex=1,MAXj(Npro))
-
               IF (IOUt.EQ.5) THEN
-
                 WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l+1)
-
                 IF(fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
-
      &            (stlj(l+1,jindex), jindex=1,MAXj(Npro))
-
               ENDIF
-
             ENDDO
 
-
-
             el = EINl
-
             relcal = .FALSE.
-
             IF (IRElat(Npro,Ntrg).GT.0 .OR. RELkin) relcal = .TRUE.
-
             CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-
 C-----------Absorption and elastic cross sections in mb
-
             ssabs  = 0.d0 
-
             ssabsj = 0.d0 
-
             DO l = 0, maxlw
-
               ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-
               IF (fexistj) then
-
                 DO jindex = 1, MAXj(Npro) 
-
                   jsp = sjf(l,jindex,SEJc(Npro)) 
-
                   ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-
                 ENDDO 
-
-                  ENDIF   
-
+              ENDIF   
             ENDDO
 
             xssabs  = 10.d0*PI/ak2*ssabs
-
             xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
-
-
             IF (fexistj) READ (451,END = 50,ERR=50) 
-
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-
             READ (45 ,END = 50,ERR=50) 
-
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-
             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) THEN
               WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-
               WRITE (46,'(1x,8(D12.6,1x))')
-
      &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
-
               IF(FIRST_ein) then
-
                 WRITE(8,*)
-
                 WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-
                 WRITE (8,'(1x,8(D12.6,1x))')
-
      &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
-
                 WRITE(8,*)
-
               ENDIF 
-
-
-
             ENDIF
             READ (45,END = 300, ERR=300) L
             IF(L.EQ.123456) THEN
@@ -275,7 +222,6 @@ C-----------Absorption and elastic cross sections in mb
             CLOSE (45 )
 
             IF (fexistj) CLOSE (451)
-
       
             maxlw = min(NDLW,maxlw)
 
@@ -283,17 +229,11 @@ C-----------Absorption and elastic cross sections in mb
             IF (IOUt.GT.1) THEN
               WRITE (8,*)
               WRITE (8,*)
-
      &' Transmission coefficients Tl for incident channel read from : '
-
               WRITE (8,*) ' ', ctldir//ctmp23//'.INC'
-
               IF (fexistj) WRITE (8,*)
-
      &' Transmission coefficients Tlj for incident channel read from: '
-
               IF (fexistj) WRITE (8,*) ' ', ctldir//ctmp23//'J.INC'
-
             ENDIF
             
             IF (.NOT.CN_isotropic) THEN
@@ -1217,72 +1157,41 @@ C
 C-----Storing transmission coefficients for the incident channel
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
-
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-
          DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-
             WRITE (46,'(2x,3x,3(3x,D15.8))') 
-
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-
          ENDDO
 
-
-
          el = EINl
-
          relcal = .FALSE.
-
          IF (IRElat(Npro,Ntrg).GT.0 .OR. RELkin) relcal = .TRUE.
-
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-
 C--------Absorption and elastic cross sections in mb
 
          ssabs  = 0.d0 
-
          ssabsj = 0.d0 
-
          DO l = 0, maxlw
-
            ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-
            DO jindex = 1, MAXj(Npro) 
-
              jsp = sjf(l,jindex,SEJc(Npro)) 
-
              ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-
            ENDDO 
-
          ENDDO
-
          xssabs  = 10.d0*PI/ak2*ssabs
-
          xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
-
-
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-
          WRITE (46,'(1x,8(D12.6,1x))') 
-
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
 
          IF(FIRST_ein) then
-
            WRITE (8,*)
-
            WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-
            WRITE (8,'(1x,8(D12.6,1x))') 
-
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
-
            WRITE (8,*)
-
          ENDIF 
 
          WRITE (46,'(1x,I6)') 123456
@@ -1293,23 +1202,15 @@ C--------Absorption and elastic cross sections in mb
          CLOSE (46)
       ENDIF
       OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
-
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
-
       WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
-
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
-
       DO l = 0, maxlw
          WRITE (45 )  stl(l + 1)
-
          WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
-
       ENDDO
       WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-
       WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
@@ -1319,7 +1220,6 @@ C
          WRITE (45) sel(l + 1)
       ENDDO
       CLOSE (45 )
-
       CLOSE (451)
 
 
