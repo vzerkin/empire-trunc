@@ -30,7 +30,9 @@ C
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
-      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
+      DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh 
+
+      DOUBLE PRECISION ctotsp,emedc,cmulc,totsp,ftmp_gs,esum
 
       DOUBLE PRECISION, external :: GET_DDXS
 
@@ -997,20 +999,36 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                      POPcse(0,6,ispec,INExc(nnuc))
                ENDIF
              ENDDO
+C
+C            Calculating Multiplicities
+C
+             cmulg = gtotsp/CSPrd(nnuc)
+             cmuln = xtotsp/CSPrd(nnuc)
+             cmulp = ptotsp/CSPrd(nnuc)
+             cmula = atotsp/CSPrd(nnuc)
+             cmuld = dtotsp/CSPrd(nnuc)
+             cmult = ttotsp/CSPrd(nnuc)
+             cmulh = htotsp/CSPrd(nnuc)
+             cmulc = ctotsp/CSPrd(nnuc)
+
              IF (NDEJC.EQ.7) THEN
                WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                   dtotsp,ttotsp,htotsp,ctotsp
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
+               WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
+     &                cmula, cmuld, cmult, cmulh, cmulc
              ELSE  
                WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                 dtotsp,ttotsp,htotsp    
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh 
+               WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
+     &                cmula, cmuld, cmult, cmulh
              ENDIF            
-             WRITE (8,'(116(1H_)/)') 
+             WRITE (8,'(116(1H_)/)')
            ENDIF
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
