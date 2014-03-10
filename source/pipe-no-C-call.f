@@ -139,14 +139,20 @@ C
       integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
+	integer nlen,i
+      ipipe=-1
+
+C     Striping the directory path for MSF Windows
+      nlen = len(trim(stringp))
+	if (nlen.le.0) RETURN
+	do i=nlen,1,-1
+	  if(stringp(i:i).eq.'/') exit
+	enddo     
+C     write(*,*) trim(STRINGP(i+1:nlen))
+C     pause 'Calling system ...'
       ipipe=0
-C
-C     Special processing for running optman in MS fortran
-C
-	if(trim(Stringp).eq.'../source/optmand') then
-        CALL SYSTEM('optmand.exe')
-	else
-        CALL SYSTEM(STRINGP)
-	endif
+      CALL SYSTEM(STRINGP(i+1:nlen))
+C     pause 'after call'
+
       RETURN
       END
