@@ -47,6 +47,12 @@ C  ****************************************************************
       PROGRAM OPTMAN12
 C     SUBROUTINE OPTMAN12(fname)
 C  *************************************************************
+C
+C     Valid only for MSFortran
+C
+C     USE MSFLIB
+C     INTEGER*2 narg
+
       LOGICAL EMPIRE
 
       CHARACTER*20 fname 
@@ -57,7 +63,6 @@ C  *************************************************************
       REAL*16 LFA(400),dtmp  
       DOUBLE PRECISION A
       COMMON/LOFAC/A(800)
-
 C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C     FACTORIAL CALCULATION AVOIDING A LONG DATA STATEMENT (common /LOFAC/A)
@@ -95,12 +100,16 @@ C
 
       IF (EMPIRE) THEN 
 C--------------------- EMPIRE related i/o changes ----------------------
-C       Input filename fixed to OPTMAN.INP for EMPIRE
-        open(unit=20,file='OPTMAN.INP',STATUS='OLD')
+
+        narg = 1
+        CALL getarg(narg,fname)
+	  if(fname(1:1).eq.' ') fname = 'ecis06' 
 C       Output root filename fixed to ecis06 for EMPIRE
-        fname='ecis06'  
+C       fname='ecis06'  
+C       Input filename fixed to OPTMAN.INP for EMPIRE
+        open(unit=20,file=TRIM(fname)//'.INP',STATUS='OLD')
 C       Output filename fixed to OPTMAN.OUT for EMPIRE
-        open(unit=21,file='OPTMAN.OUT')
+        open(unit=21,file=TRIM(fname)//'.OUT')
         WRITE(21,'(5x,A)')
      *  '***********************************************'
         WRITE(21,'(5x,A)')
