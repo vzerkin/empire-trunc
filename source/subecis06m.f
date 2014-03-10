@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3881 $
+Ccc   * $Rev: 3910 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-17 23:02:32 +0100 (Mo, 17 Feb 2014) $
+Ccc   * $Date: 2014-03-10 11:35:06 +0100 (Mo, 10 Mär 2014) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -20173,14 +20173,14 @@ C  HELICITY SCATTERING COEFFICIENTS.                                    SCHE-451
       REWIND 94                                                         SCHE-471
       DO 59 I=1,NPT                                                     SCHE-472
 C       READ (94,1001)  U1,IPP,K1,K2                                    SCHE-473
-        READ (94)       U1,IPP,K1,K2                                    !zv-2013
+        READ (94,END=60,ERR=60) U1,IPP,K1,K2                            !zv-2013
         WRITE (60,1001) U1,IPP,K1,K2                                    SCHE-474
         DO 58 K=1,K2                                                    SCHE-475
 C         READ (94,1003)  K1,K2,K3,K4,BJ,B1,B2,B3                       RCN
-          READ (94)       K1,K2,K3,K4,BJ,B1,B2,B3                       !zv-2013
+          READ (94,END=60,ERR=60) K1,K2,K3,K4,BJ,B1,B2,B3               !zv-2013
    58     WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                       SCHE-477
    59 CONTINUE                                                          SCHE-478
-C     CLOSE (94)                                                        RCN
+C     CLOSE (94,STATUS = 'delete')                                      RCN
    60 IF (.NOT.LO(65)) GO TO 61                                         SCHE-480
       NSA=7*(NLT+2*IPJ+1)+1                                             SCHE-481
       IF (NSA.GT.ID1) CALL MEMO('SCHE',ID1,NSA)                         SCHE-482
