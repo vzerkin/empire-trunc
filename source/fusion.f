@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3904 $
+Ccc   * $Rev: 3915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-06 21:09:14 +0100 (Do, 06 Mär 2014) $
+Ccc   * $Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -28,15 +28,9 @@ C
 C     COMMON variables
 C
       DOUBLE PRECISION ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
-
       COMMON /ECISXS/  ELAcs, TOTcs, ABScs, SINl, SINlcc, SINlcont
-
-
-
       DOUBLE PRECISION ELTl(NDLW),ELTlj(NDLW,3)
-
       COMMON /ELASTIC/ ELTl,ELTlj
-
 C
 C Dummy arguments
 C
@@ -48,15 +42,9 @@ C
      &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,     jsp,
      &    qdtmp, r2, rp, s0, s1a, smax, smin, selast, ssabs, ssabsj,
      &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1, stmp,
-
      &    xssabs, xssabsj
 
-C     fftmp(3) 
-
-C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
-
       DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
-
 
       CHARACTER*3 ctldir
       CHARACTER*132 ctmp
@@ -73,9 +61,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DATA ctldir/'TL/'/
       DOUBLE PRECISION xj, xjc, jmin, jmax, sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
-
       INTEGER PAR
-
       PAR(i,ipa,l) = (1 - (-1)**i*ipa*(-1)**l)/2
 
 C
@@ -115,26 +101,16 @@ C-----Reduced mass corrected for proper mass values
 
 
 C     allocate stl(), stlj(), sel() 
-
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
-
       IF(myalloc.NE.0) THEN
-
         WRITE(8,* ) ' ERROR: Insufficient memory for MARENG (fusion.f)'
-
         WRITE(12,*) ' ERROR: Insufficient memory for MARENG (fusion.f)'
-
         STOP        ' ERROR: Insufficient memory for MARENG (fusion.f)'
-
       ENDIF
 
       stlj = 0.d0
-
       stl  = 0.d0
-
       sel  = 0.d0
-
-
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
      &       INT(A(Ntrg)), INT(EINl*1000000)
@@ -143,9 +119,7 @@ C-----This part prompts for the name of a data file. The INQUIRE
 C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
-
       INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
-
 C  
       IF (fexist .and. .not.CALctl) THEN
 C--------Here the old calculated files are read
@@ -190,7 +164,6 @@ C-----------Absorption and elastic cross sections in mb
 
             xssabs  = 10.d0*PI/ak2*ssabs
             xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
-
             IF (fexistj) READ (451,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             READ (45 ,END = 50,ERR=50) 
@@ -553,8 +526,11 @@ C                     (except for OPTMAN use)
 C           not needed for a time being (TMP_isotropic is equivalent to CN_isotropic) 
 CXXXXX      IF ( (.not.SOFt) .or. (.not.DYNAM) ) TMP_isotropic = .TRUE.  
                                                    !  
+
+C           pause 'fusion'
+
             CN_isotropic = TMP_isotropic
-            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
+            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.,'')
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
@@ -562,17 +538,11 @@ C           restoring the input value of the key CN_isotropic
                CALL PROCESS_ECIS('dwba',4,4,ICAlangs)
             ELSE
                CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
-
                CALL ECIS2EMPIRE_TL_TRG(
-
      &           Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
-
                ltlj = .TRUE.
-
                             ! TLs are obtained here for DIRECT=3
-
                WRITE (8,*) 
-
                WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                     'fusion determination'
             ENDIF
@@ -609,10 +579,9 @@ C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
-              CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab,.FALSE.) 
+              CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab,.FALSE.,'') 
 
               IF (ldbwacalc) THEN
-
                 CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
 
                 IF(.not.CN_isotropic) then                
@@ -748,7 +717,7 @@ C                CLOSE(47,STATUS='DELETE')
               IF (DEFormed) THEN
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
 C               including CN calculation
-                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.)
+                CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.,'')
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
@@ -771,7 +740,7 @@ C               including CN calculation
                 ENDIF
               ELSE
 C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
-                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., -1,.FALSE.)
+                CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., -1,.FALSE.,'')
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
@@ -1031,37 +1000,27 @@ C-----------------checking the correspondence of the excited states
   260          CLOSE (45, STATUS = 'DELETE')
                CLOSE (46, STATUS = 'DELETE')
                CLOSE (47)
-
                IF (DEFormed) THEN                                                                          
-
                  CALL ECIS2EMPIRE_TL_TRG(
-
      &             Npro,Ntrg,maxlw,stl,stlj,sel,.FALSE.)
-
                ELSE
-
                  CALL ECIS2EMPIRE_TL_TRG(
-
      &             Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
-
                ENDIF
-
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
          ENDIF  ! END of DIRECT=1/2 block
          IF (.NOT.ltlj) THEN
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
-            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
+            CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.,'')
             CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs)
 
             WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(
-
      &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
-
          ENDIF
          IF (maxlw.GT.NDLW) THEN
             WRITE (8,*)

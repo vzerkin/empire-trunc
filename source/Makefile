@@ -1,6 +1,6 @@
-#$Rev: 3892 $
-#$Author: gnobre $
-#$Date: 2014-02-27 15:19:14 +0100 (Do, 27 Feb 2014) $
+#$Rev: 3915 $
+#$Author: rcapote $
+#$Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
 
 # set default compilers:
 
@@ -29,7 +29,7 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -fopenmp
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
@@ -52,14 +52,14 @@ else ifeq ($(FC),ifort)
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
   #------------------------------------------------------------------------------------------------
-  # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  #FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
-  # LIBS = -openmp-lib compat
+  LIBS = -openmp-lib compat
   #----flags for automatic parallelization
   #FFLAGS = -O3 -x=host -parallel -par-report1
   #----flags for automatic parallelization (no report)
   #    -diag-disable id8290,8291,8293
-  FFLAGS = -O3 -x=host -parallel -diag-disable warn
+  FFLAGS = -O3 -x=host -diag-disable warn -parallel -openmp 
   # Flags for ECIS
   EFLAGS = -O2 -x=host 
   # Flags for OPTMAN
@@ -127,22 +127,22 @@ OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxilia
 
 all: 
 	$(MAKE) empire
+	$(MAKE) ecis06
 	$(MAKE) optmand
 	@../scripts/getrevnum
 
 
-empire: $(OBJF) subecis06m.o
-	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
+empire: $(OBJF) 
+	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)
 
-subecis06m.o : subecis06m.f
-	$(FC) $(EFLAGS) -c subecis06m.f
+ecis06: ecis06.f thora.f
+	$(FC) $(EFLAGS) -o ecis06 ecis06.f thora.f $(LIBS)
 
 optmand: optmand.f
 	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f
 
 # When making a debug image, don't compile ECIS /debug
 dbg:  
-	$(MAKE) subecis06m.o
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h main_common.h
@@ -155,7 +155,7 @@ ddhms.o : empcess.o
 HF-comp.o : empcess.o
 
 clean:
-	rm -f *.o *.mod empire optmand
+	rm -f *.o *.mod empire ecis06 optmand *.exe
 
 cleanall:
-	rm -f *.o *.mod empire optmand
+	rm -f *.o *.mod empire ecis06 optmand *.exe

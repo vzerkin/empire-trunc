@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3894 $
+Ccc   * $Rev: 3915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-28 22:03:46 +0100 (Fr, 28 Feb 2014) $
+Ccc   * $Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2283,9 +2283,15 @@ C Local variables
 C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
+      CHARACTER*28 ctmp28
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp, fexistj
       INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
+      CHARACTER*132 ctmp
+      INTEGER iwin, ipipe
+
+C     INTEGER NTHREADS, TID, OMP_GET_NUM_THREADS,
+C    +  OMP_GET_THREAD_NUM
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
@@ -2406,11 +2412,6 @@ C
               ENDIF 
             ENDIF
          ENDIF
-C--------OPEN Unit=46 for Tl output
-         OPEN (UNIT = 46 ,STATUS = 'unknown',
-     &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
-         OPEN (UNIT = 461,STATUS = 'unknown',
-     &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
@@ -2421,35 +2422,116 @@ C        saving the input value of the key CN_isotropic
 C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
          CN_isotropic = .TRUE.     
-     
+
+C        pause 'TLs'  
+
+C    	   Preparing input for optical model codes
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) CYCLE
+            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
 
             IF (.NOT.(ltmp)) THEN
 C
 C--------------Spherical optical model is assumed, only one level (gs)
 C
-               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.)
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
+               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.,ctmp28)
 C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
 C--------------CC rotational calculation (ECIS)
-               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj)
+               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.,ctmp28)
             ELSE
 C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
 C----------------OPTMAN CC calc. (only coupled levels)
-                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.) 
+                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.,ctmp28) 
                ELSE
 C----------------ECIS   CC calc. (only coupled levels)
-                 CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., -1,.TRUE.)
+                 CALL ECIS_CCVIB(
+     &             Nejc,Nnuc,ener,.FALSE.,-1,.TRUE.,ctmp28)
                ENDIF
-               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
+            ENDIF
+
+         ENDDO
+    
+!$OMP PARALLEL PRIVATE(i,tid)
+C        NTHREADS = OMP_GET_NUM_THREADS()
+C        IF (NTHREADS.GT.1) THEN
+C          WRITE(8,*)
+C          WRITE(8,*) 'Number of threads (parallel exec) =', NTHREADS
+C          WRITE(*,*) 'Number of threads (parallel exec) =', NTHREADS
+C          WRITE(8,*)
+C        END IF
+C    	   Running optical model codes
+         DO i = Nen ,ien_beg, -1
+
+            ener = ETL(i,Nejc,Nnuc)
+            IF (ener.LE.0.1D-6) CYCLE
+
+            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
+            IF (.NOT.(ltmp)) THEN
+C
+C--------------Spherical optical model is assumed, only one level (gs)
+               ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C              ctmp = 'ecis06.exe '//ctmp28
+               iwin = ipipe(ctmp)
+C-----------Transmission coefficient matrix for incident channel
+C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
+C-----------Only coupled levels are considered
+            ELSEIF (DEFormed) THEN
+C--------------CC rotational calculation (ECIS)
+               ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C              ctmp = 'ecis06.exe '//ctmp28
+               iwin = ipipe(ctmp)
+            ELSE
+C--------------CC vibrational calculation (OPTMAN or ECIS) 
+               IF (SOFt) THEN
+C----------------OPTMAN CC calc. (only coupled levels)
+                 ctmp = trim(empiredir)//'/source/optmand '//ctmp28
+C                ctmp = 'optmand.exe '//ctmp28
+                 iwin = ipipe(ctmp)
+               ELSE
+C----------------ECIS   CC calc. (only coupled levels)
+                 ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C                ctmp = 'ecis06.exe '//ctmp28
+                 iwin = ipipe(ctmp)
+               ENDIF
+            ENDIF
+
+         ENDDO
+!$OMP END PARALLEL
+
+C    	   Processing outputs
+C--------OPEN Unit=46 for Tl output
+         OPEN (UNIT = 46 ,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+         OPEN (UNIT = 461,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
+
+         DO i = Nen ,ien_beg, -1
+
+            ener = ETL(i,Nejc,Nnuc)
+            IF (ener.LE.0.1D-6) CYCLE
+
+            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
+
+            IF (.NOT.(ltmp)) THEN
+C
+C--------------Spherical optical model is assumed, only one level (gs)
+               CALL ECIS2EMPIRE_TR(
+     &           Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj,ctmp28)
+C--------------Only coupled levels are considered
+            ELSEIF (DEFormed) THEN
+C--------------CC rotational calculation (ECIS)
+               CALL ECIS2EMPIRE_TR(
+     &           Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj,ctmp28)
+            ELSE
+C--------------CC vibrational calculation (OPTMAN or ECIS) 
+               CALL ECIS2EMPIRE_TR(
+     &           Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj,ctmp28)
             ENDIF
 
          ENDDO
@@ -2459,6 +2541,7 @@ C        restoring the input value of the key CN_isotropic
 
          CLOSE (46 )
          CLOSE (461)
+
          IF (IOUT.GT.4) THEN
 	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
@@ -2925,7 +3008,8 @@ C
       RETURN
       END
 
-      SUBROUTINE ECIS2EMPIRE_TR(Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj)
+      SUBROUTINE ECIS2EMPIRE_TR(
+     &  Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj,ctmp28)
 C
 C     Process ECIS output to obtain TTLl,Maxl matrix for EMPIRE energy grid
 C     Reads from units 45, 46 and writes to unit 6
@@ -2955,6 +3039,7 @@ C
       LOGICAL Lvibrat
       INTEGER Maxl(NDETL)
       DOUBLE PRECISION Ttll(NDETL,NDLW),Ttllj(NDETL,NDLW,3)
+      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -2963,6 +3048,7 @@ C
      &                 xmas_nejc, xmas_nnuc, stmp, xsabsj, xsabs, jsp
       LOGICAL relcal
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex, ilv
+      INTEGER iwin, ipipe_delete
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
 	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
@@ -2976,10 +3062,10 @@ C-----
 C----- Input of transmission coefficients
 C-----
       IF(unformat) then
-        OPEN (UNIT=45,STATUS='old',FILE='ecis06.tlj',form='unformatted',
-     &        ERR=200) !-zvv-2013
+        OPEN (UNIT=45,STATUS='old',FILE= (ctmp28//'.tlj'),
+     &        form='unformatted',ERR=200) !-zvv-2013
       ELSE
-        OPEN (UNIT = 45,STATUS = 'old',FILE = 'ecis06.tlj')
+        OPEN (UNIT = 45,STATUS = 'old',FILE = (ctmp28//'.tlj'))
         READ (45,*,END = 200)  ! Skipping one line
       ENDIF     
 C-----JC,ParC is the channel spin and parity
@@ -3039,7 +3125,7 @@ C
          ENDIF
       ENDDO
       GOTO 100
-  200 CLOSE (45)
+  200 CLOSE (45,STATUS='DELETE')
 C-----For vibrational the Tls must be multiplied by 
       IF (Lvibrat) THEN
          DO l = 0, lmax
@@ -3053,15 +3139,28 @@ C-----For vibrational the Tls must be multiplied by
       stotecis = 0.D0
       selecis = 0.D0
       sreacecis = 0.D0
-      OPEN (UNIT = 45,FILE = 'ecis06.cs',STATUS = 'old',ERR = 300)
+
+	iwin = ipipe_delete((ctmp28//'.dat')) 
+	iwin = ipipe_delete((ctmp28//'.exp')) 
+	iwin = ipipe_delete((ctmp28//'.out')) 
+	iwin = ipipe_delete((ctmp28//'.ang')) 
+	iwin = ipipe_delete((ctmp28//'.leg')) 
+	iwin = ipipe_delete((ctmp28//'.inp')) 
+	iwin = ipipe_delete((ctmp28//'.smat')) 
+
+      OPEN (UNIT = 45,FILE = (ctmp28//'.cs'),
+     &  STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping one line
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) stotecis
       READ (45,*,END = 300) sreacecis
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) selecis
-  300 CLOSE (45)
+  300 CLOSE (45,STATUS='DELETE')
       sinlss = 0.D0
       SIGabs(Ien,Nejc,Nnuc) = 0.D0
-      IF (sreacecis.LE.0.D0) RETURN
+      IF (sreacecis.LE.0.D0) THEN
+	  iwin = ipipe_delete((ctmp28//'.ics')) 
+        RETURN
+      ENDIF
       IF (IOUt.EQ.5) THEN
          xmas_nnuc = AMAss(Nnuc)
          xmas_nejc = EJMass(Nejc)
@@ -3085,14 +3184,15 @@ C 303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
 C        if(elab.lt.0.3d0) write(8,*)
          xsabs  = 10.d0*PI/ak2*sabs
          xsabsj = 10.d0*PI/ak2*sabsj/DBLE(2*SEJc(Nejc)+1) 
-         OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
+         OPEN (UNIT = 45,FILE = (ctmp28//'.ics'),
+     &     STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinlss = 0.D0
          DO l = 1, ncoll - 1
             READ (45,*,END = 350) dtmp
             sinlss = sinlss + dtmp
          ENDDO
-  350    CLOSE (45)
+  350    CLOSE (45,STATUS='DELETE')
          sreac = xsabs + sinlss
          IF (xsabs.GT.0.D0) THEN
             WRITE (8,*)
@@ -3115,6 +3215,8 @@ C        if(elab.lt.0.3d0) write(8,*)
      &                       SNGL(xsabsj+sinlss), ' mb (Sabsj + Sinl)'
             ENDIF
          ENDIF
+	ELSE
+         iwin = ipipe_delete((ctmp28//'.ics')) 
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46 ) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
@@ -3126,6 +3228,7 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) sreacecis
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
+
       RETURN
       END
 C
@@ -3198,7 +3301,7 @@ C--------A>99
 CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
 
-      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc)
+      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc,ctmp28)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -3252,6 +3355,7 @@ C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
       LOGICAL Ldwba,TL_calc
+      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -3270,7 +3374,8 @@ C
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
      &        nuncoupled, ncontinua, nphonon 
 
-      INTEGER iwin, ipipe_move
+      CHARACTER*132 ctmp
+      INTEGER iwin, ipipe_move, ipipe
       LOGICAL inc_channel, logtmp
 
       inc_channel = .false.
@@ -3499,20 +3604,38 @@ C-----Maximum number of channel spin (increased to 100 for high energy scatterin
      >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
      >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.
 
-      IF (Inlkey.EQ.0) THEN
-C-------writing input
-         OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
-C-------CARD 1 : Title
-         WRITE (1,
+      IF(TL_calc) then
+        IF (Inlkey.EQ.0) THEN
+C---------writing input
+          OPEN (UNIT = 1,STATUS = 'unknown',FILE= (ctmp28//'ecSPH.inp'))
+C---------CARD 1 : Title
+          WRITE (1,
      &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
      &          ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
-      ELSE
-C-------writing input
-         OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIB.inp')
-C-------CARD 1 : Title
-         WRITE (1,
+        ELSE
+C---------writing input
+          OPEN (UNIT = 1,STATUS = 'unknown',FILE= (ctmp28//'ecVIB.inp'))
+C---------CARD 1 : Title
+          WRITE (1,
      &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
      &      ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
+        ENDIF
+      ELSE
+        IF (Inlkey.EQ.0) THEN
+C---------writing input
+          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
+C---------CARD 1 : Title
+          WRITE (1,
+     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
+     &          ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
+        ELSE
+C---------writing input
+          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIB.inp')
+C---------CARD 1 : Title
+          WRITE (1,
+     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
+     &      ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
+        ENDIF
       ENDIF
 C-----CARD 2
       WRITE (1,'(a50)') ECIs1
@@ -4126,26 +4249,42 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-      IF (Inlkey.EQ.0) THEN
-         iwin = ipipe_move('ecSPH.inp','ecis06.inp')
+      IF(TL_calc) then
+        IF (Inlkey.EQ.0) THEN
+          iwin= ipipe_move((ctmp28//'ecSPH.inp'),(ctmp28//'.inp'))
+        ELSE
+          iwin= ipipe_move((ctmp28//'ecVIB.inp'),(ctmp28//'.inp'))
+        ENDIF
       ELSE
-         iwin = ipipe_move('ecVIB.inp','ecis06.inp')
-      ENDIF
+        IF (Inlkey.EQ.0) THEN
+          iwin = ipipe_move('ecSPH.inp','ecis06.inp')
+        ELSE
+          iwin = ipipe_move('ecVIB.inp','ecis06.inp')
+        ENDIF
+	ENDIF
+
+C     restoring the input value of the key CN_isotropic
+      CN_isotropic = logtmp
 C
 C-----Running ECIS06
 C
-      IF(inc_channel .and. Inlkey.NE.0) 
-     >  write (*,*) '  Running ECIS (vibr) ...'
+
+C     for TL calcs ECIS is run outside
+      IF(TL_calc) RETURN
+
+      IF ( Ldwba .and. (inc_channel .and. Inlkey.NE.0) ) 
+     >    write (*,*) '  Running ECIS (DWBA) ...'
+      IF ( .not.Ldwba .and. (inc_channel .and. Inlkey.NE.0) ) 
+     >    write (*,*) '  Running ECIS (vibr.CC) ...'
 
       IF(inc_channel .and. Inlkey.EQ.0) 
      >  write (*,*) '  Running ECIS (sphe) ...'
 
-      CALL ECIS('ecis06 ')
+C     CALL ECIS('ecis06 ')
+      ctmp = trim(empiredir)//'/source/ecis06 ecis06'
+C     ctmp = 'ecis06.exe ecis06'
+      iwin = ipipe(ctmp)
 
-C     restoring the input value of the key CN_isotropic
-      CN_isotropic = logtmp
-
-      IF(TL_calc) RETURN
 
       IF (Inlkey.EQ.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
@@ -4158,7 +4297,7 @@ C     restoring the input value of the key CN_isotropic
       RETURN 
       END
 
-      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc)
+      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc,ctmp28)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -4210,6 +4349,7 @@ C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
       LOGICAL TL_calc
+      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -4225,7 +4365,8 @@ C
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
      &        nuncoupled, ncontinua
 
-      INTEGER iwin, ipipe_move
+      CHARACTER*132 ctmp
+      INTEGER iwin, ipipe_move, ipipe
 
       LOGICAL inc_channel, logtmp
 
@@ -4409,8 +4550,14 @@ C
      &         **0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin
       njmax = MAX(2*ldwmax,20)
+
 C-----Writing input
-      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
+      IF(TL_calc) THEN
+        OPEN(UNIT= 1,STATUS = 'unknown',FILE = (ctmp28//'ecVIBROT.inp'))
+      ELSE
+        OPEN(UNIT= 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
+      ENDIF
+
 C-----CARD 1 : Title
       WRITE (1,
      &'(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBR-ROTATIONAL CC'')'
@@ -5070,17 +5217,26 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-      iwin = ipipe_move('ecVIBROT.inp','ecis06.inp')
-
-C-----Running ECIS
-
-      IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
-      CALL ECIS('ecis06 ')
 
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
+      IF(TL_calc) then
+        iwin=ipipe_move((ctmp28//'ecVIBROT.inp'),(ctmp28//'.inp'))
+      ELSE
+        iwin=ipipe_move('ecVIBROT.inp','ecis06.inp')
+      ENDIF
+
+C     for TL calcs ECIS is run outside
       IF(TL_calc) RETURN
+
+C-----Running ECIS
+      IF(inc_channel) write (*,*) '  Running ECIS (rot. CC) ...'
+
+C     CALL ECIS('ecis06 ')
+      ctmp = trim(empiredir)//'/source/ecis06 ecis06'
+C     ctmp = 'ecis06.exe ecis06'
+      iwin = ipipe(ctmp)
 
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
@@ -5095,7 +5251,7 @@ C     restoring the input value of the key CN_isotropic
 c----
 c     CCSOFTROTOR
 c----
-      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El,TL_calc)
+      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El,TL_calc,ctmp28)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
@@ -5114,6 +5270,7 @@ C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
       LOGICAL TL_calc
+      CHARACTER*28 ctmp28
 C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -5315,8 +5472,14 @@ C    &         **0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin
 C     njmax = MAX(2*ldwmax,20)
 C
+
 C-----Writing OPTMAN input
-      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
+	IF(TL_calc) THEN
+        OPEN (UNIT=1,STATUS = 'unknown',FILE = (ctmp28//'.INP'))
+      ELSE
+        OPEN (UNIT=1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
+	ENDIF
+
 C-----CARD 1 : Title
       IF(imodel.ne.4) then
         WRITE (1,'(f10.5,'' MeV '',
@@ -5518,13 +5681,16 @@ C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
-      IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
+C     for TL calcs OPTMAN is run outside
 
-      ctmp = trim(empiredir)//'/source/optmand'
-      iwin = ipipe(ctmp)
- 
       IF(TL_calc) RETURN
 
+      IF(inc_channel) write (*,*) '  Running OPTMAN (CC) ...'
+
+      ctmp = trim(empiredir)//'/source/optmand OPTMAN.INP'
+C     ctmp = 'optmand.exe OPTMAN.INP'
+      iwin = ipipe(ctmp)
+ 
       iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')
       iwin = ipipe_move('OPTMAN.OUT','OPTMAN-INC.out')
 
