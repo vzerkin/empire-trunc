@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3687 $
+Ccc   * $Rev: 3914 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-12-23 16:55:19 +0100 (Mo, 23 Dez 2013) $
+Ccc   * $Date: 2014-03-10 16:53:01 +0100 (Mo, 10 Mär 2014) $
 C/*                                                           */
 C       Should be linked with pipec.c !!!
 C
@@ -105,8 +105,11 @@ C
 
       integer function ipipe(Stringp)
       implicit none
+C     INTEGER TID,OMP_GET_THREAD_NUM
       CHARACTER*(*) STRINGP
       ipipe=0
+C     TID = OMP_GET_THREAD_NUM()
+C     PRINT *, 'Thread number =', TID
       CALL SYSTEM(STRINGP)
       RETURN
       END
