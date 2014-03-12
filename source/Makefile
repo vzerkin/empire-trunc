@@ -1,6 +1,6 @@
-#$Rev: 3915 $
+#$Rev: 3920 $
 #$Author: rcapote $
-#$Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
+#$Date: 2014-03-12 22:15:46 +0100 (Mi, 12 Mär 2014) $
 
 # set default compilers:
 
@@ -29,7 +29,7 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -fopenmp
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
@@ -51,19 +51,19 @@ else ifeq ($(FC),ifort)
   # ***  Please note that ifort v11.1 does not work properly with -ipo !!!!!  
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
-  #------------------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------
   #FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
-  LIBS = -openmp-lib compat
+  # LIBS = -openmp-lib compat
   #----flags for automatic parallelization
   #FFLAGS = -O3 -x=host -parallel -par-report1
   #----flags for automatic parallelization (no report)
   #    -diag-disable id8290,8291,8293
-  FFLAGS = -O3 -x=host -diag-disable warn -parallel -openmp 
+  FFLAGS = -O3 -x=host -diag-disable warn 
   # Flags for ECIS
-  EFLAGS = -O2 -x=host 
+  EFLAGS = -O3 -x=host -diag-disable warn 
   # Flags for OPTMAN
-  OFLAGS = -O2 -x=host -parallel -diag-disable warn
+  OFLAGS = -O2 -x=host -diag-disable warn
   #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
       FFLAGS = -O3 -diag-disable warn
@@ -122,21 +122,28 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
+OBJF = HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
        pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o write_ENDF.o pfns_calc.o
 
 all: 
+	$(MAKE) secis06.mod
+	$(MAKE) empgdr.mod
+	$(MAKE) empcess.mod
 	$(MAKE) empire
-	$(MAKE) ecis06
 	$(MAKE) optmand
 	@../scripts/getrevnum
 
+secis06.mod: secis06.f 
+	$(FC) $(FFLAGS) -c secis06.f 
+
+empgdr.mod: empgdr.f 
+	$(FC) $(FFLAGS) -c empgdr.f 
+
+empcess.mod: empcess.f 
+	$(FC) $(FFLAGS) -c empcess.f 
 
 empire: $(OBJF) 
-	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)
-
-ecis06: ecis06.f thora.f
-	$(FC) $(EFLAGS) -o ecis06 ecis06.f thora.f $(LIBS)
+	$(FC) $(FFLAGS) -o empire $(OBJF) secis06.o empcess.o empgdr.o $(LIBS)
 
 optmand: optmand.f
 	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f
@@ -149,13 +156,13 @@ $(OBJF) : global.h dimension.h main_common.h
 main.o  : nubar_reader.o empcess.o
 input.o : nubar_reader.o empgdr.o
 ddhms.o : ddhms.cmb
-tl.o    : pre_ecis.h
+tl.o    : pre_ecis.h secis06.o
 print.o : empcess.o
 ddhms.o : empcess.o
 HF-comp.o : empcess.o
 
 clean:
-	rm -f *.o *.mod empire ecis06 optmand *.exe
+	rm -f *.o *.mod empire optmand *.exe
 
 cleanall:
-	rm -f *.o *.mod empire ecis06 optmand *.exe
+	rm -f *.o *.mod empire optmand *.exe
