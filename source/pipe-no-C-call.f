@@ -156,3 +156,11 @@ C     pause 'after call'
 
       RETURN
       END
+
+      integer function OMP_GET_NUM_THREADS()
+C
+C     Dummy function for MSFortran
+C
+      OMP_GET_NUM_THREADS = 1
+      RETURN
+      END
