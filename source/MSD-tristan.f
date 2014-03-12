@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3855 $
+Ccc   * $Rev: 3916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-11 21:45:35 +0100 (Di, 11 Feb 2014) $
+Ccc   * $Date: 2014-03-12 13:49:56 +0100 (Mi, 12 Mär 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2952,6 +2952,7 @@ C              WRITE (66,99015) ANGle(na), Nbinx
                eout = eout - ESTep
                IF (ne.NE.1) THEN
                   sigm = 0.5*(Crose(ne,na,k1) + Crose(ne,na,k2))
+                  IF (sigm.le.0) CYCLE
                   ay = 50.*(Crose(ne,na,k1) - Crose(ne,na,k2))/sigm
                   s1 = 0.5*(Crose(ne,na,1) + Crose(ne,na,k1 + 1))
                   s2 = 0.5*(Crose(ne,na,2) + Crose(ne,na,k1 + 2))
