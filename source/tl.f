@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3915 $
+Ccc   * $Rev: 3918 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
+Ccc   * $Date: 2014-03-12 22:12:33 +0100 (Mi, 12 Mär 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2269,6 +2269,9 @@ C
 C
 C
       SUBROUTINE TRANSINP(Nejc,Nnuc,Nen,Maxl,Ttll,Ttllj)
+
+      USE secis06
+
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -2284,14 +2287,16 @@ C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
       CHARACTER*28 ctmp28
+      CHARACTER*80 cline
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp, fexistj
-      INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
+      INTEGER i, ilv, ien, ien_beg, l, lmax, jindex, iounit
+      INTEGER iwin
       CHARACTER*132 ctmp
-      INTEGER iwin, ipipe
-
-C     INTEGER NTHREADS, TID, OMP_GET_NUM_THREADS,
-C    +  OMP_GET_THREAD_NUM
+      INTEGER ipipe
+      INTEGER N91,N96,N97
+      INTEGER N55,N58,N59,N60,N61,N62,N63,N64,N65,N66,N94,N99 
+C     INTEGER NTHREADS, TID, OMP_GET_NUM_THREADS
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
@@ -2423,8 +2428,6 @@ C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
          CN_isotropic = .TRUE.     
 
-C        pause 'TLs'  
-
 C    	   Preparing input for optical model codes
          DO i = Nen ,ien_beg, -1
 
@@ -2455,56 +2458,54 @@ C----------------ECIS   CC calc. (only coupled levels)
                ENDIF
             ENDIF
 
+C           Discarding empty input files             
+C
+            OPEN(UNIT = 1,FILE=(ctmp28//'.inp'))
+            READ(1,*,END=600,ERR=600) cline
+            CLOSE(1)
+            CYCLE
+  600	      CLOSE(1,STATUS='DELETE')
+
          ENDDO
-    
-!$OMP PARALLEL PRIVATE(i,tid)
-C        NTHREADS = OMP_GET_NUM_THREADS()
-C        IF (NTHREADS.GT.1) THEN
-C          WRITE(8,*)
-C          WRITE(8,*) 'Number of threads (parallel exec) =', NTHREADS
-C          WRITE(*,*) 'Number of threads (parallel exec) =', NTHREADS
-C          WRITE(8,*)
-C        END IF
-C    	   Running optical model codes
+   
+C        Running optical model codes
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) CYCLE
-
+            
             write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
             IF (.NOT.(ltmp)) THEN
 C
 C--------------Spherical optical model is assumed, only one level (gs)
-               ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C              ctmp = 'ecis06.exe '//ctmp28
-               iwin = ipipe(ctmp)
+C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C              iwin = ipipe(ctmp)
+               CALL ECIS_int(ctmp28)
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C-----------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
 C--------------CC rotational calculation (ECIS)
-               ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C              ctmp = 'ecis06.exe '//ctmp28
-               iwin = ipipe(ctmp)
+C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C              iwin = ipipe(ctmp)
+               CALL ECIS_int(ctmp28)
             ELSE
 C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
 C----------------OPTMAN CC calc. (only coupled levels)
                  ctmp = trim(empiredir)//'/source/optmand '//ctmp28
-C                ctmp = 'optmand.exe '//ctmp28
                  iwin = ipipe(ctmp)
                ELSE
 C----------------ECIS   CC calc. (only coupled levels)
-                 ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
+C                ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
 C                ctmp = 'ecis06.exe '//ctmp28
-                 iwin = ipipe(ctmp)
+C                iwin = ipipe(ctmp)
+                 CALL ECIS_int(ctmp28)
                ENDIF
             ENDIF
 
          ENDDO
-!$OMP END PARALLEL
-
-C    	   Processing outputs
+C        Processing outputs
 C--------OPEN Unit=46 for Tl output
          OPEN (UNIT = 46 ,STATUS = 'unknown',
      &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
@@ -3328,6 +3329,8 @@ C     5 HELIUM-3
 C     6 ALPHA
 C     >6 HEAVY ION
 C
+      USE secis06
+
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -3374,8 +3377,9 @@ C
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
      &        nuncoupled, ncontinua, nphonon 
 
-      CHARACTER*132 ctmp
-      INTEGER iwin, ipipe_move, ipipe
+C     CHARACTER*132 ctmp
+C     INTEGER ipipe
+      INTEGER iwin, ipipe_move
       LOGICAL inc_channel, logtmp
 
       inc_channel = .false.
@@ -4280,12 +4284,9 @@ C     for TL calcs ECIS is run outside
       IF(inc_channel .and. Inlkey.EQ.0) 
      >  write (*,*) '  Running ECIS (sphe) ...'
 
-C     CALL ECIS('ecis06 ')
-      ctmp = trim(empiredir)//'/source/ecis06 ecis06'
-C     ctmp = 'ecis06.exe ecis06'
-      iwin = ipipe(ctmp)
-
-
+C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
+C     iwin = ipipe(ctmp)
+      CALL ECIS_int('ecis06')       
       IF (Inlkey.EQ.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
          iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
@@ -4319,8 +4320,8 @@ C     5 HELIUM-3
 C     6 ALPHA
 C     >6 HEAVY ION
 C
-C     INTEGER NINT
-C
+      USE secis06
+
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -4365,8 +4366,9 @@ C
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
      &        nuncoupled, ncontinua
 
-      CHARACTER*132 ctmp
-      INTEGER iwin, ipipe_move, ipipe
+C     CHARACTER*132 ctmp
+C     INTEGER ipipe
+      INTEGER iwin, ipipe_move
 
       LOGICAL inc_channel, logtmp
 
@@ -5233,11 +5235,9 @@ C     for TL calcs ECIS is run outside
 C-----Running ECIS
       IF(inc_channel) write (*,*) '  Running ECIS (rot. CC) ...'
 
-C     CALL ECIS('ecis06 ')
-      ctmp = trim(empiredir)//'/source/ecis06 ecis06'
-C     ctmp = 'ecis06.exe ecis06'
-      iwin = ipipe(ctmp)
-
+C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
+C     iwin = ipipe(ctmp)
+      CALL ECIS_int('ecis06')       
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
          iwin = ipipe_move('ecis06.inp','ECIS_VIBROT.inp')
