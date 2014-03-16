@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3918 $
+Ccc   * $Rev: 3922 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-12 22:12:33 +0100 (Mi, 12 Mär 2014) $
+Ccc   * $Date: 2014-03-17 00:30:13 +0100 (Mo, 17 Mär 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2290,12 +2290,11 @@ C
       CHARACTER*80 cline
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp, fexistj
-      INTEGER i, ilv, ien, ien_beg, l, lmax, jindex, iounit
+      INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
       INTEGER iwin
       CHARACTER*132 ctmp
       INTEGER ipipe
-      INTEGER N91,N96,N97
-      INTEGER N55,N58,N59,N60,N61,N62,N63,N64,N65,N66,N94,N99 
+
 C     INTEGER NTHREADS, TID, OMP_GET_NUM_THREADS
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
@@ -2428,7 +2427,7 @@ C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
          CN_isotropic = .TRUE.     
 
-C    	   Preparing input for optical model codes
+C        Preparing input for optical model codes
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
@@ -2457,30 +2456,43 @@ C----------------ECIS   CC calc. (only coupled levels)
      &             Nejc,Nnuc,ener,.FALSE.,-1,.TRUE.,ctmp28)
                ENDIF
             ENDIF
-
-C           Discarding empty input files             
-C
-            OPEN(UNIT = 1,FILE=(ctmp28//'.inp'))
-            READ(1,*,END=600,ERR=600) cline
-            CLOSE(1)
-            CYCLE
-  600	      CLOSE(1,STATUS='DELETE')
-
+             
+C           open(1,fle=ctp28//'.inp')
+C           read(1,'(A80)',END=600,ERR=600) cline
+C           close(1)
+C           cycle
+C600         close(1,status='delete')    
          ENDDO
+C        pause 'TLs'  
    
+CC!$OMP PARALLEL PRIVATE(i,tid)
+C        NTHREADS = OMP_GET_NUM_THREADS()
+C        IF (NTHREADS.GT.1) THEN
+C          WRITE(8,*)
+C          WRITE(8,'(1x,A32,I2,4x,I2,3H + ,A6,I3,1X,A6,I3)') 
+C    >      'Number of threads (paral exec)=', NTHREADS, 'Nejc=',
+C    >      Nejc,' Ares=',Nint(A(Nnuc)),' Zres=',Nint(Z(Nnuc))
+C          WRITE(*,'(1x,A32,I2,4x,I2,3H + ,A6,I3,1X,A6,I3)') 
+C    >      'Number of threads (paral exec)=', NTHREADS, 'Nejc=',
+C    >      Nejc,' Ares=',Nint(A(Nnuc)),' Zres=',Nint(Z(Nnuc))
+C          WRITE(8,*)
+C        END IF
+C
+C
 C        Running optical model codes
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) CYCLE
-            
+
             write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
+C
             IF (.NOT.(ltmp)) THEN
 C
 C--------------Spherical optical model is assumed, only one level (gs)
 C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
 C              iwin = ipipe(ctmp)
-               CALL ECIS_int(ctmp28)
+               CALL ECIS_int(ctmp28) 
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C-----------Only coupled levels are considered
@@ -2488,7 +2500,7 @@ C-----------Only coupled levels are considered
 C--------------CC rotational calculation (ECIS)
 C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
 C              iwin = ipipe(ctmp)
-               CALL ECIS_int(ctmp28)
+               CALL ECIS_int(ctmp28) 
             ELSE
 C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
@@ -2498,13 +2510,14 @@ C----------------OPTMAN CC calc. (only coupled levels)
                ELSE
 C----------------ECIS   CC calc. (only coupled levels)
 C                ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C                ctmp = 'ecis06.exe '//ctmp28
 C                iwin = ipipe(ctmp)
-                 CALL ECIS_int(ctmp28)
+                 CALL ECIS_int(ctmp28) 
                ENDIF
             ENDIF
-
+           
          ENDDO
+CC!$OMP END PARALLEL
+
 C        Processing outputs
 C--------OPEN Unit=46 for Tl output
          OPEN (UNIT = 46 ,STATUS = 'unknown',
@@ -2518,7 +2531,7 @@ C--------OPEN Unit=46 for Tl output
             IF (ener.LE.0.1D-6) CYCLE
 
             write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
-
+ 
             IF (.NOT.(ltmp)) THEN
 C
 C--------------Spherical optical model is assumed, only one level (gs)
@@ -2535,6 +2548,8 @@ C--------------CC vibrational calculation (OPTMAN or ECIS)
      &           Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj,ctmp28)
             ENDIF
 
+            CYCLE
+ 650        CLOSE(1,STATUS='DELETE') 
          ENDDO
 
 C        restoring the input value of the key CN_isotropic
@@ -4286,7 +4301,8 @@ C     for TL calcs ECIS is run outside
 
 C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
 C     iwin = ipipe(ctmp)
-      CALL ECIS_int('ecis06')       
+      CALL ECIS_int('ecis06') 
+
       IF (Inlkey.EQ.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
          iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
@@ -5237,7 +5253,8 @@ C-----Running ECIS
 
 C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
 C     iwin = ipipe(ctmp)
-      CALL ECIS_int('ecis06')       
+      CALL ECIS_int('ecis06') 
+
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
          iwin = ipipe_move('ecis06.inp','ECIS_VIBROT.inp')
@@ -5474,11 +5491,11 @@ C     njmax = MAX(2*ldwmax,20)
 C
 
 C-----Writing OPTMAN input
-	IF(TL_calc) THEN
-        OPEN (UNIT=1,STATUS = 'unknown',FILE = (ctmp28//'.INP'))
+      IF(TL_calc) THEN
+        OPEN (UNIT=1,STATUS = 'unknown',FILE = (ctmp28//'.inp'))
       ELSE
-        OPEN (UNIT=1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
-	ENDIF
+        OPEN (UNIT=1,STATUS = 'unknown',FILE = 'ecis06.inp')
+      ENDIF
 
 C-----CARD 1 : Title
       IF(imodel.ne.4) then
@@ -5687,12 +5704,11 @@ C     for TL calcs OPTMAN is run outside
 
       IF(inc_channel) write (*,*) '  Running OPTMAN (CC) ...'
 
-      ctmp = trim(empiredir)//'/source/optmand OPTMAN.INP'
-C     ctmp = 'optmand.exe OPTMAN.INP'
+      ctmp = trim(empiredir)//'/source/optmand ecis06'
       iwin = ipipe(ctmp)
  
-      iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')
-      iwin = ipipe_move('OPTMAN.OUT','OPTMAN-INC.out')
+      iwin = ipipe_move('ecis06.inp','OPTMAN.INP')
+      iwin = ipipe_move('ecis06.out','OPTMAN.OUT')
 
       RETURN
       END

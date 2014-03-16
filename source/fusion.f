@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3915 $
+Ccc   * $Rev: 3922 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-10 16:57:27 +0100 (Mo, 10 Mär 2014) $
+Ccc   * $Date: 2014-03-17 00:30:13 +0100 (Mo, 17 Mär 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1342,45 +1342,43 @@ C--------Corrected scattering radius
      &           (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
       CSFus = 0.d0
 C-----absorption spin distribution using Tl's
-!      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-!      smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
-!      mul = smax - smin + 1.0001
-!      DO ip = 1, 2      ! over parity
-!         DO j = 1, NLW  !over compound nucleus spin
-!            sum = 0.d0
-!            DO ichsp = 1, mul
-!               chsp = smin + FLOAT(ichsp - 1)
-!               lmin = ABS(j - chsp - S1) + 0.0001
-!               lmax = j + chsp - S1 + 0.0001
-!               lmin = lmin + 1
-!               lmax = lmax + 1
-!               lmax = MIN0(NDLW,lmax)
-!               lmax = MIN0(maxlw+1,lmax)
-!               DO k = lmin, lmax
-!                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
-!               ENDDO
-!            ENDDO
-!     absorption spin distribution using Tlj's
+      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
+      smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
+      mul = smax - smin + 1.0001
       DO ip = 1, 2      ! over parity
          DO j = 1, NLW  !over compound nucleus spin
             sum = 0.d0
-            xjc = float(j) + HIS(1)
-            jmin = abs(xjc - XJLv(LEVtarg,Ntrg))
-            jmax = xjc + XJLv(LEVtarg,Ntrg)
-            kmin = jmin - MAXj(Npro) + (2.0 + SEJc(Npro))  !minimum k=l+1      
-
-            kmax = jmax - 1 + (2.0 + SEJc(Npro))           !maximum k=l+1
-            kmax = MIN(NDLw, kmax)                         !ensure we are within dimensions
-            DO k = kmin, kmax                              !do loop over l in Tlj
-               DO jindex = 1, MAXj(Npro)                   !do loop over j-index in Tlj
-                  xj = k + jindex - (2.0 + SEJc(Npro))
-                  IF(xj<jmin .or. xj>jmax) CYCLE
-                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
-
-     &                stlj(k,jindex)
-
+            DO ichsp = 1, mul
+               chsp = smin + FLOAT(ichsp - 1)
+               lmin = ABS(j - chsp - S1) + 0.0001
+               lmax = j + chsp - S1 + 0.0001
+               lmin = lmin + 1
+               lmax = lmax + 1
+               lmax = MIN0(NDLW,lmax)
+               lmax = MIN0(maxlw+1,lmax)
+               DO k = lmin, lmax
+                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
                ENDDO
             ENDDO
+!     absorption spin distribution using Tlj's
+!      DO ip = 1, 2      ! over parity
+!         DO j = 1, NLW  !over compound nucleus spin
+!            sum = 0.d0
+!            xjc = float(j) + HIS(1)
+!            jmin = abs(xjc - XJLv(LEVtarg,Ntrg))
+!            jmax = xjc + XJLv(LEVtarg,Ntrg)
+!            kmin = jmin - MAXj(Npro) + (2.0 + SEJc(Npro))  !minimum k=l+1      
+!            kmax = jmax - 1 + (2.0 + SEJc(Npro))           !maximum k=l+1
+!            kmax = MIN(NDLw, kmax)                         !ensure we are within dimensions
+!            DO k = kmin, kmax                              !do loop over l in Tlj
+!               DO jindex = 1, MAXj(Npro)                   !do loop over j-index in Tlj
+!                  xj = k + jindex - (2.0 + SEJc(Npro))
+!                  IF(xj<jmin .or. xj>jmax) CYCLE
+!                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
+!     &                stlj(k,jindex)
+!               ENDDO
+!            ENDDO
+!
             POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)
      &                           *FUSred
             CSFus = CSFus + POP(NEX(1),j,ip,1)
@@ -1411,7 +1409,6 @@ C-----------DIRECT=1 or DIRECT=2
      &   CSFus/Fusred, CSFus/Fusred + SINl + SINlcc + SINlcont, ABScs
         WRITE (8,*)
       ENDIF
-
 C
 C     CSFus contains only the reaction cross section to be distributed
 C
@@ -1422,13 +1419,9 @@ C-----direct contribution !!!
 C
       DO i = 1, NDLW
          ELTl(i) = stl(i)
-
          DO j = 1, MAXj(Npro)
-
            ELTlj(i,j) = stlj(i,j)
-
          ENDDO
-
       ENDDO
       DO j = NDLW, 1, -1
          NLW = j 
@@ -1493,15 +1486,10 @@ C
          STOP 'ERROR: Insufficient dimension NDLW for partial waves'
       ENDIF
 
-
 C     deallocate stl(), stlj(), sel() 
-
       if(allocated(stl )) deallocate(stl)
-
       if(allocated(sel) ) deallocate(sel)
-
       if(allocated(stlj)) deallocate(stlj)
-
 
       call get_TLs()
 

@@ -1,6 +1,6 @@
-#$Rev: 3920 $
+#$Rev: 3922 $
 #$Author: rcapote $
-#$Date: 2014-03-12 22:15:46 +0100 (Mi, 12 Mär 2014) $
+#$Date: 2014-03-17 00:30:13 +0100 (Mo, 17 Mär 2014) $
 
 # set default compilers:
 
@@ -29,15 +29,15 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  EFLAGS = -O2 -std=legacy -ffast-math
+  EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
   #----flags for OPTMAN
-  OFLAGS = -O2 -std=legacy -ffast-math
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -51,19 +51,20 @@ else ifeq ($(FC),ifort)
   # ***  Please note that ifort v11.1 does not work properly with -ipo !!!!!  
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
-#------------------------------------------------------------------------------------------------
+  #------------------------------------------------------------------------------------------------
   #FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
   # LIBS = -openmp-lib compat
   #----flags for automatic parallelization
   #FFLAGS = -O3 -x=host -parallel -par-report1
   #----flags for automatic parallelization (no report)
+  FFLAGS = -O3 -x=host -diag-disable warn -parallel
   #    -diag-disable id8290,8291,8293
-  FFLAGS = -O3 -x=host -diag-disable warn 
+  # FFLAGS = -O3 -x=host -diag-disable warn 
   # Flags for ECIS
-  EFLAGS = -O3 -x=host -diag-disable warn 
+  EFLAGS = -O3 -x=host -diag-disable warn -parallel
   # Flags for OPTMAN
-  OFLAGS = -O2 -x=host -diag-disable warn
+  OFLAGS = -O3 -x=host -diag-disable warn -parallel 
   #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
       FFLAGS = -O3 -diag-disable warn

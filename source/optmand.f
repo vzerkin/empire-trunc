@@ -1,4 +1,4 @@
-cc   * $Rev: 2766 $
+Ccc   * $Rev: 2766 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2012-04-05 11:49:34 +0200 (Thu, 05 Apr 2012) $
 C
@@ -56,6 +56,7 @@ C     INTEGER*2 narg
       LOGICAL EMPIRE
 
       CHARACTER*20 fname 
+      CHARACTER*80 cline 
       COMMON/INOUT/fname
       COMMON/MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
      *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
@@ -103,13 +104,13 @@ C--------------------- EMPIRE related i/o changes ----------------------
 
         narg = 1
         CALL getarg(narg,fname)
-	  if(fname(1:1).eq.' ') fname = 'ecis06' 
-C       Output root filename fixed to ecis06 for EMPIRE
-C       fname='ecis06'  
-C       Input filename fixed to OPTMAN.INP for EMPIRE
-        open(unit=20,file=TRIM(fname)//'.INP',STATUS='OLD')
-C       Output filename fixed to OPTMAN.OUT for EMPIRE
-        open(unit=21,file=TRIM(fname)//'.OUT')
+
+C       write(*,*) 'Calc OPTMAN with ', trim(fname)//'.inp'
+        open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+        read(20,*,END=100,ERR=100) cline
+        rewind 20
+
+        open(unit=21,file=TRIM(fname)//'.out')
         WRITE(21,'(5x,A)')
      *  '***********************************************'
         WRITE(21,'(5x,A)')
@@ -268,6 +269,8 @@ C
 C
 C     RETURN
 C
+      STOP
+100   CLOSE(20,STATUS='DELETE') 
       END
 C     *******************************************************
       SUBROUTINE ABCT

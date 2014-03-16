@@ -86,11 +86,12 @@ C***********************************************************************ECIS-025
       PARAMETER (IDMX=35000000)                                         ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
       DIMENSION NW(2,IDMX),DW(IDMX)                                     ECIS-029
+C     EQUIVALENCE (DW,NW,CW,W)                                          ECIS-030
       EQUIVALENCE (DW,NW,CW)                                            ECIS-030
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
-      LOGICAL unformat 
+      LOGICAL unformat
       COMMON /CTRL1/ unformat
       CHARACTER*(*) fname
       CHARACTER*80 cline
@@ -108,13 +109,12 @@ C     HHBarc = 197.3269718D0  ! CODATA 2010
 C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       CZ=137.035999074D0 ! CODATA 2010  (1/ALPHA)
 
-      MR=91                                                            
-      MW=96                                                             
+      MR=111                                                            
+      MW=96                                                             ECIS-038
       MS=97
 
-      unformat = .TRUE.
+      unformat = .TRUE.  
 
-      if(fname(1:1).eq.' ') fname = 'ecis06' 
 C     write(*,*) 'ECIS calculating ',fname
 C     write(*,*) 
 
@@ -136,21 +136,22 @@ C     write(*,*)
       OPEN (64,FILE = TRIM(fname)//'.exp')
       OPEN (65,FILE = TRIM(fname)//'.leg')
       OPEN (66,FILE = TRIM(fname)//'.ang')
-
 C     OPEN (85,FILE = 'file85')
 C     OPEN (86,FILE = 'file86')
 C     OPEN (87,FILE = 'file87')
 C     OPEN (88,FILE = 'file88')
 C     OPEN (89,FILE = 'file89')
 C     OPEN (90,FILE = 'file90')
+C     OPEN (91,FILE = 'file91')
 C     OPEN (93,FILE = 'file93')
       if(unformat) then 
         OPEN (94,FILE = TRIM(fname)//'_94',form='unformatted')          !zv-2013
         OPEN (99,FILE = TRIM(fname)//'_99',form='unformatted')          !zv-2013
       else
-        OPEN (94,FILE = TRIM(fname)//'_94')                             !zv-2013
+        OPEN (94,FILE = TRIM(fname)//'_94')				!zv-2013
         OPEN (99,FILE = TRIM(fname)//'_99')                             !zv-2013
       endif
+
       OPEN (MW,FILE = TRIM(fname)//'.out')
       OPEN (MS,FILE = TRIM(fname)//'_97',form='unformatted')
 
@@ -173,6 +174,7 @@ C     CLOSE (87,STATUS = 'delete')
 C     CLOSE (88,STATUS = 'delete')
 C     CLOSE (89,STATUS = 'delete')
 C     CLOSE (90,STATUS = 'delete')
+C     CLOSE (91,STATUS = 'delete')
 C     CLOSE (93,STATUS = 'delete')
       CLOSE (94,STATUS = 'delete')
       CLOSE (MW)
@@ -23693,7 +23695,7 @@ C ERROR RENORMALISATION FACTOR                                          FITE-365
       IZ(4)=MF-1                                                        FITE-375
    64 IF (KE.EQ.1) IZ(3)=IZ(3)+1                                        FITE-376
       RETURN                                                            FITE-377
-      END SUBROUTINE                                                         FITE-378
+      END SUBROUTINE                                                    FITE-378
 C 08/04/06                                                      ECIS06  FIT1-000
       SUBROUTINE FIT1(KE,I,W)                                           FIT1-001
 C MINIMISATION OF A FUNCTION F(X) OF ONE VARIABLE X.                    FIT1-002
@@ -23820,7 +23822,7 @@ C TEST OF CONVERGENCE.                                                  FIT1-112
    14 KE=KE+1                                                           FIT1-123
    15 KE=KE+1                                                           FIT1-124
       GO TO 13                                                          FIT1-125
-      END SUBROUTINE                                                         FIT1-126
+      END SUBROUTINE                                                    FIT1-126
 C 07/03/07                                                      ECIS06  FIT2-000
       SUBROUTINE FIT2(M,N,A,D,IP,IR,LLO)                                FIT2-001
 C IF LLO=.TRUE. EX SUBROUTINE LILESQ WRITTEN BY SCHWEIMER..             FIT2-002
@@ -24004,7 +24006,7 @@ C COMPUTATION OF D.                                                     FIT2-167
 C ERROR CODE.                                                           FIT2-180
    29 IR=-1                                                             FIT2-181
    30 RETURN                                                            FIT2-182
-      END SUBROUTINE FIT2                                               FIT2-183
+      END SUBROUTINE                                                    FIT2-183
 
       END MODULE secis06
 
