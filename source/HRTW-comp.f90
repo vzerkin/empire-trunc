@@ -96,9 +96,8 @@ SUBROUTINE HRTW
          H_Sumtl = 0.D0
          H_Tav = 0.D0
          H_Sweak = 0.D0
+         H_Tl = 0.d0   
 
-
-             H_Tl = 0.d0   
          ! prepare gamma-strength (GMR) parameters (if spin
          ! dependent GDR selected)
          IF(NINT(GDRdyn)==1) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
@@ -137,6 +136,7 @@ SUBROUTINE HRTW
             ! Dividing sumfis into channels with TFIs < 0.25 each
             ndivf = int(sumfis/0.25) + 1
             TFIs = sumfis/dfloat(ndivf)
+            H_Sumtls = H_Sumtls + ndivf*TFIs**2
             CALL TL2VL(TFIs,dfloat(ndivf))
          ENDIF
          ! gamma emission is always a weak channel (one iteration)
@@ -144,7 +144,8 @@ SUBROUTINE HRTW
          CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
          H_Sumtl = H_Sumtl + sumg
          H_Sweak = H_Sweak + sumg
-
+		 H_Tav = 0.d0
+         IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl
          ! write(8,*)' '
          ! write(8,*)'SUMMARY OF THE FIRST HRTW RUN J=',jcn
          ! write(8,*)'total sum of  Tls ', H_Sumtl
