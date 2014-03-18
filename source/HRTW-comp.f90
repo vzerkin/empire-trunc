@@ -47,7 +47,7 @@ SUBROUTINE HRTW
    ! set CN nucleus
    nnuc = 1
    ! reset variables
-   !     sgamc = 0.d0
+   sgamc = 0.d0
    CSFis = 0.D0
    sumfis = 0.D0
    !
@@ -60,16 +60,10 @@ SUBROUTINE HRTW
    sumtg = 0.D0
    tgexper = 0.D0
 
-
    IF(.not. BENchm) THEN
      WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
-
-
      WRITE(8,'(1x,''-------------------------------------------------------------'')')
-
-
    ENDIF
-
 
    IF(FIRst_ein .AND. (EINl>1.D0) ) THEN
      WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
@@ -136,7 +130,6 @@ SUBROUTINE HRTW
             ! Dividing sumfis into channels with TFIs < 0.25 each
             ndivf = int(sumfis/0.25) + 1
             TFIs = sumfis/dfloat(ndivf)
-            H_Sumtls = H_Sumtls + ndivf*TFIs**2
             CALL TL2VL(TFIs,dfloat(ndivf))
          ENDIF
          ! gamma emission is always a weak channel (one iteration)
