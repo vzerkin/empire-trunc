@@ -47,7 +47,7 @@ SUBROUTINE HRTW
    ! set CN nucleus
    nnuc = 1
    ! reset variables
-   sgamc = 0.d0
+   ! sgamc = 0.d0
    CSFis = 0.D0
    sumfis = 0.D0
    !
