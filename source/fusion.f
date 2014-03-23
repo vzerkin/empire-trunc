@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3922 $
+Ccc   * $Rev: 3928 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-17 00:30:13 +0100 (Mo, 17 Mär 2014) $
+Ccc   * $Date: 2014-03-23 16:59:52 +0100 (So, 23 Mär 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -53,13 +53,14 @@ C
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, ncoef2, istat1, istat2, ilev1, ilev2,
-     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc, jindex,
-     &  kmin, kmax
+     &  ilev3, ncoef3, numcc, jcc, ipa, il, iloc, l, myalloc, jindex
+   !  INTEGER kmin, kmax
       LOGICAL logtmp, TMP_isotropic
       INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
-      DOUBLE PRECISION xj, xjc, jmin, jmax, sjf
+   !  DOUBLE PRECISION xj, xjc, jmin, jmax
+      DOUBLE PRECISION sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       INTEGER PAR
       PAR(i,ipa,l) = (1 - (-1)**i*ipa*(-1)**l)/2
@@ -1360,6 +1361,8 @@ C-----absorption spin distribution using Tl's
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
                ENDDO
             ENDDO
+            POP(NEX(1),j,ip,1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
+     &                           *FUSred
 !     absorption spin distribution using Tlj's
 !      DO ip = 1, 2      ! over parity
 !         DO j = 1, NLW  !over compound nucleus spin
@@ -1379,8 +1382,8 @@ C-----absorption spin distribution using Tl's
 !               ENDDO
 !            ENDDO
 !
-            POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)
-     &                           *FUSred
+!            POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)
+!    &                           *FUSred
             CSFus = CSFus + POP(NEX(1),j,ip,1)
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
          ENDDO
