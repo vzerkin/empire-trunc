@@ -34,7 +34,7 @@ SUBROUTINE HRTW
    !
    ! Local variables
    !
-   REAL*8 :: cnspin, fisxse, Summa, sumfis, sumg, sumtg, tgexper, xnor
+   REAL*8 :: cnspin, fisxse, Summa, sumfis, sumg, sumtg, tgexper, xnor, sgamc, sumGg
    CHARACTER(1), DIMENSION(2) :: cpar
    REAL :: d0c
    INTEGER :: i, ich, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp
@@ -47,7 +47,7 @@ SUBROUTINE HRTW
    ! set CN nucleus
    nnuc = 1
    ! reset variables
-   ! sgamc = 0.d0
+   sgamc = 0.d0
    CSFis = 0.D0
    sumfis = 0.D0
    !
@@ -57,15 +57,16 @@ SUBROUTINE HRTW
    ke = NEX(nnuc)
    ! Initialize variables and print heading for normalizing g-strength function
    d0c = 0.D0
+   sumGg = 0.d0
    sumtg = 0.D0
    tgexper = 0.D0
 
-   IF(.not. BENchm) THEN
+   IF (FIRst_ein .AND. (.not. BENchm) ) THEN
      WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
      WRITE(8,'(1x,''-------------------------------------------------------------'')')
    ENDIF
 
-   IF(FIRst_ein .AND. (EINl>1.D0) ) THEN
+   IF( (FIRst_ein .AND. (EINl>1.D0)) .and.  (.not. BENchm) ) THEN
      WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
      WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
    ENDIF
@@ -115,6 +116,13 @@ SUBROUTINE HRTW
          ! endif
          ! do loop over ejectiles       ***done***
          !
+
+         ! gamma emission is always a weak channel (one iteration)
+         sumg = 0.D0
+         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
+         H_Sumtl = H_Sumtl + sumg
+         H_Sweak = H_Sweak + sumg
+
          ! fission (may be a weak or strong channel)
          sumfis = 0.D0
          TFIs = 0.D0
@@ -131,14 +139,8 @@ SUBROUTINE HRTW
             ndivf = int(sumfis/0.25) + 1
             TFIs = sumfis/dfloat(ndivf)
             CALL TL2VL(TFIs,dfloat(ndivf))
+            IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl
          ENDIF
-         ! gamma emission is always a weak channel (one iteration)
-         sumg = 0.D0
-         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg,nhrtw)
-         H_Sumtl = H_Sumtl + sumg
-         H_Sweak = H_Sweak + sumg
-		 H_Tav = 0.d0
-         IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl
          ! write(8,*)' '
          ! write(8,*)'SUMMARY OF THE FIRST HRTW RUN J=',jcn
          ! write(8,*)'total sum of  Tls ', H_Sumtl
@@ -203,7 +205,7 @@ SUBROUTINE HRTW
             ! normalization and accumulation
             ! 
             xnor = H_Abs(i,1)/DENhf
-            ! IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc + DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
+            IF (RO(ke,jcn,ipar,nnuc).NE.0.0D0) sgamc = sgamc + DENhf*H_Abs(i,1)/RO(ke,jcn,ipar,nnuc)
             CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)
          ENDDO    !loop over partial wave contributions to CN state
          !
@@ -346,14 +348,8 @@ SUBROUTINE HRTW_DECAY(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Summa,Nhrtw)
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
-
-
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
-
-
    COMMON /ELASTIC/ ELTl,ELTlj
-
-
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
@@ -1260,14 +1256,8 @@ SUBROUTINE ELCORR(Nnuc,Iec,Jc,Ipc,Nnur,Nejc,Nhrtw)
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
-
-
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
-
-
    COMMON /ELASTIC/ ELTl,ELTlj
-
-
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
@@ -1361,14 +1351,8 @@ SUBROUTINE HRTW_MARENG(Npro,Ntrg,Jcn,Ip,Ich)
    INTEGER, DIMENSION(ndhrtw2,3) :: MEMel
    INTEGER :: NH_lch, NSCh
    REAL*8, DIMENSION(ndlw) :: ELTl
-
-
    REAL*8, DIMENSION(ndlw,3) :: ELTlj
-
-
    COMMON /ELASTIC/ ELTl,ELTlj
-
-
    COMMON /ihrtw / NSCh, MEMel, NH_lch
    COMMON /rhrtw / H_Tl, H_Sumtl, H_Sumtls, H_Sweak, H_Abs, H_Tav, H_Tthr, TFIs
    !
