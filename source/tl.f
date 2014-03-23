@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3922 $
+Ccc   * $Rev: 3926 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-17 00:30:13 +0100 (Mo, 17 Mär 2014) $
+Ccc   * $Date: 2014-03-23 16:57:54 +0100 (So, 23 Mär 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2287,7 +2287,6 @@ C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
       CHARACTER*28 ctmp28
-      CHARACTER*80 cline
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp, fexistj
       INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
@@ -2456,12 +2455,6 @@ C----------------ECIS   CC calc. (only coupled levels)
      &             Nejc,Nnuc,ener,.FALSE.,-1,.TRUE.,ctmp28)
                ENDIF
             ENDIF
-             
-C           open(1,fle=ctp28//'.inp')
-C           read(1,'(A80)',END=600,ERR=600) cline
-C           close(1)
-C           cycle
-C600         close(1,status='delete')    
          ENDDO
 C        pause 'TLs'  
    
