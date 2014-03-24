@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3807 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 16:41:03 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Rev: 3930 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2014-03-24 20:28:05 +0100 (Mo, 24 Mär 2014) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3807 $
+C CVS Version Management $Revision: 3930 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2474,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3807 $')
+99005 FORMAT ('  xddhms version: $Revision: 3930 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4623,12 +4623,19 @@ c      gg=wk2/(3.0d0*ak1*hbarc**4)
  10   ct2=0.5d0*((ak1-ak2+2.0d0*ak2*RANG())**2-ak12-ak22)/(ak1*ak2)
       ct34=(ak1*ak2*ct2+0.5d0*(ak12+ak22-ak32-ak42))/(ak3*ak4)
       if(abs(ct34).gt.1.0d0) GO TO 10
+      ct2=sign(min(1.0d0,abs(ct2)),ct2)
+      ct34=sign(min(1.0d0,abs(ct34)),ct34)
+
 
       cx12=(ak1+ak2*ct2)/sqrt(ak12+ak22+2.0d0*ak1*ak2*ct2)
+      cx12=sign(min(1.0d0,abs(cx12)),cx12)
 
       ak342=sqrt(ak32+ak42+2.0d0*ak3*ak4*ct34)
       ct3=(ak3+ak4*ct34)/ak342
       ct4=(ak4+ak3*ct34)/ak342
+      ct3=sign(min(1.0d0,abs(ct3)),ct3)
+      ct4=sign(min(1.0d0,abs(ct4)),ct4)
+
 
       ph2=twopi*RANG()
 
@@ -4944,17 +4951,23 @@ c       write(*,*)' in ',jstudy,ak12,ak22,ak32,ak42
         ct34=0.5d0*((dk34+ak34mn*RANG())**2-ak32-ak42)/(ak3*ak4)
         ct2=ak3*ak4*ct34/(ak1*ak2)
        endif
+      ct2=sign(min(1.0d0,abs(ct2)),ct2)
+      ct34=sign(min(1.0d0,abs(ct34)),ct34)
+
 c      write(*,*)' in ',jstudy,ak1*ak2,ak3*ak4,ct2,ct34
 c      ek1=0.5d0*ak12/ZMNuc - vdep(ind1)
 c      write(*,*) ek1,ak1,ct1,ph1
 
       cx12=(ak1+ak2*ct2)/dsqrt(ak12+ak22+2.0d0*ak1*ak2*ct2)
+      cx12=sign(min(1.0d0,abs(cx12)),cx12)
 
       ph2=twopi*RANG()
 
       ak342=dsqrt(ak32+ak42+2.0d0*ak3*ak4*ct34)
       ct3=(ak3+ak4*ct34)/ak342
       ct4=(ak4+ak3*ct34)/ak342
+      ct3=sign(min(1.0d0,abs(ct3)),ct3)
+      ct4=sign(min(1.0d0,abs(ct4)),ct4)
 
       ph4=twopi*RANG()
       ph3=ph4+0.5d0*twopi
@@ -5105,16 +5118,16 @@ c
 
       twopi = 2.0d0*PI_g       !just to use PI_g
 
-      sinth1=dsqrt(max(1.0d0-costh1**2,0.0d0))
-      sinth2=dsqrt(max(1.0d0-costh2**2,0.0d0))
+      sinth1=sqrt(max(1.0d0-costh1**2,0.0d0))
+      sinth2=sqrt(max(1.0d0-costh2**2,0.0d0))
 
-      cosph2=dcos(phi2)
-      sinph2=dsin(phi2)
+      cosph2=cos(phi2)
+      sinph2=sin(phi2)
 
-      phi2=phi1+datan2(sinph2*sinth2,cosph2*costh1*sinth2+sinth1*costh2)
+      phi2=phi1+atan2(sinph2*sinth2,cosph2*costh1*sinth2+sinth1*costh2)
       costh2=costh1*costh2-cosph2*sinth1*sinth2
 
-      if(dabs(dabs(costh2)-1.0d0).lt.1.0d-8) phi2=0.0d0
+      if(abs(abs(costh2)-1.0d0).lt.1.0d-8) phi2=0.0d0
       if(phi2.ge.twopi) phi2=phi2-twopi
       if(phi2.lt.0.0d0) phi2=phi2+twopi
 
@@ -6632,9 +6645,8 @@ C              WRITE(8,*)' continuum pop = ', sumcon, ' mb'
             IF (iloc.NE.1) THEN   !ignore population of not considered nuclei
 
 C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
- 
               nspec = min(INT(ecn/DE) + 1,NDECSE)
-              nspecc = min(INT((ecn-ECUT(Nnur))/DE+1.0) + 1,NEX(nnur))
+              nspecc = min(INT((ecn-ECUT(Nnur))/DE) + 1,NEX(nnur))
               ndspc = nspec-nspecc
               sumcon = 0.0D0
               DO nu = 1, nspecc
