@@ -1,0 +1,35 @@
+ Collective levels: RIPL CC OMP + default, rigid model
+  N <          30  for coupled levels in CC calculation                         
+  63 153      nucleus is treated as deformed
+
+    Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)
+       4    8    4   2.5  0.300E+00  0.000E+00
+
+  N   E[MeV]  J   pi Nph L  K   Dyn.Def.
+  1  0.0000  2.5  1.  0  0  0  0.300E+00
+  2  0.0834  3.5  1.  0  0  0  0.500E-02
+  7  0.1931  4.5  1.  0  0  0  0.500E-02
+ 11  0.3251  5.5  1.  0  0  0  0.500E-02
+
+
+
+-------------------------------------------------------------- 
+NOTE: this line and those below will not be used by EMPIRE. 
+      The collective levels and ground state band deformation 
+      printed below are retrieved from RIPL optical model data 
+      and provided as a reference. 
+-------------------------------------------------------------- 
+
+
+ Collective levels from RIPL CC OMP, symm.rotational model
+  N <          30  for coupled levels in CC calculation                         
+  63 153      nucleus is treated as deformed
+
+    Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)
+       3    8    4   2.5  0.300E+00  0.000E+00
+
+  N   E[MeV]  J   pi Nph L  K   Dyn.Def.
+  1  0.0000  2.5  1.  0  0  0  0.300E+00
+  2  0.0834  3.5  1.  0  0  0  0.500E-02
+  7  0.1931  4.5  1.  0  0  0  0.500E-02
+ 11  0.3251  5.5  1.  0  0  0  0.500E-02
