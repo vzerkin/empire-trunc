@@ -73,7 +73,7 @@ if [ "$option" = "run" ] ; then
 
    mkdir TeMpOrArYdIr
 #  cp * > TeMpOrArYdIr
-   cp *-lev.col *.lev u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
+   cp *-lev.col *.lev u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/ >& /dev/null
    cp *.inp *ref* TeMpOrArYdIr/ >& /dev/null
    error=0
    for file in $files
