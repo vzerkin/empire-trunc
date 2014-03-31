@@ -521,7 +521,7 @@ C* Write the data to the PLOTTAB file
       SG2=SG(KK)
       UG2=UG(KK)
       IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
-      IF(EE2.LE.EA .AND KK.LT.NP) GO TO 81
+      IF(EE2.LE.EA .AND. KK.LT.NP) GO TO 81
 C*    -- First point
       IF(EE1.LE.EA .OR. KK.LE.2) THEN
         ED=DBLE(EE1)
