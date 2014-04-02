@@ -72,8 +72,9 @@ if [ "$option" = "run" ] ; then
    echo "Running benchmarks..."
 
    mkdir TeMpOrArYdIr
-#  cp * > TeMpOrArYdIr
-   cp *-lev.col *.lev u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/ >& /dev/null
+#  Storing auxiliary files that have to be kept
+   cp u238-rigid-soft-omp-lev.col th232-rot-vib-lev.col u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/ >& /dev/null
+#  Storing input and reference files
    cp *.inp *ref* TeMpOrArYdIr/ >& /dev/null
    error=0
    for file in $files
@@ -178,45 +179,6 @@ elif [ "$option" = "replace" ] ; then
      done
    done
 
-elif [ "$option" = "replaceaux" ] ; then
-#  regenerates auxiliary *.lev *-lev.col files by running benchmarks without them and keeping them afterwards.
-   echo 'Deleting auxiliary *.lev *-lev.col files'
-   rm *.lev *-lev.col
-   echo
-   echo "Running benchmarks..."
-   echo
-   mkdir TeMpOrArYdIr
-   cp u238-HFB-num-fis-tun-inp.fis TeMpOrArYdIr/
-   cp *.inp *ref* TeMpOrArYdIr/ >& /dev/null
-   error=0
-   for file in $filelist
-   do
-     echo "" 1>&2
-     echo ".......Running benchmark on [$file]......." 1>&2
-     $EMPIREDIR/scripts/runE $file
-     grep -q 'CALCULATIONS COMPLETED SUCCESSFULLY' $file.lst
-     if [ "$?" = 1 ] ; then
-       error=1
-       echo "#######Calculations Failed#######" 1>&2
-     else
-       echo ".......Calculations Completed Successfully......." 1>&2
-     fi
-     cp $file.inp $file-ref.* TeMpOrArYdIr/ >& /dev/null
-     for suffix in $suffix_list
-     do
-       cp $file.$suffix TeMpOrArYdIr/
-     done
-   done
-   cp *lev *-lev.col TeMpOrArYdIr/
-   rm * >& /dev/null
-   rm -r *-tl  >& /dev/null
-   mv TeMpOrArYdIr/* ./
-   rm -r TeMpOrArYdIr >& /dev/null
-
-   if [ "$error" = 1 ] ; then
-     echo "ERROR!! At least one of the benchmarks failed to run successfully!"
-     exit 1
-   fi
 
 
 else
@@ -228,6 +190,5 @@ else
    echo " 'runbench diff' to compare benchmarks output with existing reference files (using diff command)"
    echo " 'runbench kompare' to compare benchmarks output with existing reference files (using kompare)"
    echo " 'runbench replace' to replace existing reference files with benchmarks outputs"
-   echo " 'runbench replaceaux' to regenerate and replace existing auxiliary files *.lev and *-lev.col (by running Empire)"
    echo
 fi   
