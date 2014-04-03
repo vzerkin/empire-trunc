@@ -1,6 +1,6 @@
-!cc   * $Rev: 3888 $
+!cc   * $Rev: 3943 $
 !cc   * $Author: gnobre $
-!cc   * $Date: 2014-02-25 20:27:16 +0100 (Di, 25 Feb 2014) $
+!cc   * $Date: 2014-04-03 18:00:56 +0200 (Do, 03 Apr 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3401,9 +3401,12 @@ C-----initialization of TRISTAN input parameters
       BET2in = 0.d0
       GRIn(1) = 5.d0
       GRIn(2) = 5.d0
-
-	CNOrin = 0.d0
-	EFItin = 0.d0
+      DO i = 1, 8                                                        ! nilsson_newest
+         do j = 1,8                                                      ! nilsson_newest
+            CNOrin(i,j) = 1.d0                                           ! nilsson_newest
+            EFItin(i,j) = 0.0D0                                          ! nilsson_newest
+         enddo                                                           ! nilsson_newest
+      ENDDO
 C-----initialization of TRISTAN input parameters  *** done ***
 
    11 CONTINUE
