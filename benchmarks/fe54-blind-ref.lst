@@ -1,16 +1,13 @@
 
-                      Start time: 15:01.44 (06-01-2014)
+                      Start time: 21:55.59 (01-04-2014)
 
- Retrieving EXFOR(C4) file: /home/gnobre/empire/EXFOR/neutrons/026_Fe_054.c4
-  
                          __________________________
                         |                          |
-                        |    E M P I R E  - 3.2    |
+                        |    E M P I R E  - 3.2.2  |
                         |                          |
                         |        MALTA             |
                         |                          |
-                        | SVN empire     rev. 3699 |
-                        | empire/source  rev. 3696 |
+                        |       Not under SVN      |
                         |                          |
                         |__________________________|
   
@@ -22,6 +19,7 @@
  EMPIRE-specific level densities (J>>K aprox.) selected 
  ENDF formatting disabled
  Recoils are not calculated
+ Benchmark calculations: Input energies in any order
  Collective levels up to   4.2 MeV used in DWBA
  Maximum spin of retrieved collective levels J <5
  E1 strength function set to RIPL MLO1
@@ -29,10 +27,54 @@
  CN angular distribution assumed isotropic
  CN and Direct cross section added incoherently
   
+ Using RIPL split files
   
 =============================================================
- Reaction   1n + 54Fe at incident energy  3.000D+00 MeV (LAB)
+ Reaction n +  54Fe at incident energy  3.000D+00 MeV (LAB)
 =============================================================
+
+  RIPL GDR parameters used
+  -----------------------------------------
+  TARGET GDR DATA:
+  -----------------------------------------
+  GDR parameters from RIPL database
+  -----------------------------------------
+  Gamma transitions parameters of  26-Fe- 54
+
+          E1            E2            M1 
+  TE       1.00         1.00         1.00
+  CE       0.010        0.100        0.100
+  E1      18.85        16.67        10.85
+  W1       7.09         5.46         4.00
+  D1      87.12         1.36         1.00
+  E2       0.00
+  W2       0.00
+  D2       0.00
+
+  (1-TE)*Weiss. + TE*GiR (i=D,Q,M) D=E1; Q=E2; M=M1
+  TE - mixing coeff. of s.p. Weisskopf & GiR, TE=1 pure resonance
+  CE - s.p. Weisskopf scaling coefficient (default: 0.01,0.1,0.1)
+
+  -----------------------------------------
+  GDR parameters from RIPL database
+  -----------------------------------------
+  Gamma transitions parameters of  26-Fe- 55
+
+          E1            E2            M1 
+  TE       1.00         1.00         1.00
+  CE       0.010        0.100        0.100
+  E1      18.77        16.57        10.78
+  W1       7.03         5.45         4.00
+  D1      89.34         1.34         1.00
+  E2       0.00
+  W2       0.00
+  D2       0.00
+
+  (1-TE)*Weiss. + TE*GiR (i=D,Q,M) D=E1; Q=E2; M=M1
+  TE - mixing coeff. of s.p. Weisskopf & GiR, TE=1 pure resonance
+  CE - s.p. Weisskopf scaling coefficient (default: 0.01,0.1,0.1)
+
+  -----------------------------------------
 
 
  Primary gammas not stored: ENDF formatting is turned off
@@ -58,6 +100,8 @@
  trit. disc.       0      0      0      0      0
  He-3  disc.       0      0      0      0      0
   
+ Deformation of the target nucleus set to 0.000 (FRDM)
+ Nobre parameterization deformation is    0.221
 
 
     L e v e l  d e n s i t y  p a r a m e t e r s  a(Qn)
@@ -65,15 +109,15 @@
 
    Nucleus    a_exp     a_sys.   int. nor.  ext. nor. a_final
 
- 24-Cr- 51   4.16500   3.86645   1.07722   1.00000   4.16500
- 26-Fe- 55   3.76750   3.61608   1.04187   1.00000   3.76750
+ 24-Cr- 51   4.16500   1.00000   1.00000   1.00000   1.00000
+ 26-Fe- 55   3.76750   1.00000   1.00000   1.00000   1.00000
 
    Nucleus                   final  norm.
 
- 26-Fe- 55                       1.04187
+ 26-Fe- 55                       1.00000
  26-Fe- 54                       1.04700
  25-Mn- 54                       1.06520
- 24-Cr- 51                       1.07722
+ 24-Cr- 51                       1.00000
  25-Mn- 53                       1.06520
  25-Mn- 52                       1.06520
  24-Cr- 52                       1.02310
@@ -99,7 +143,8 @@
   *****************************************************
 
   
- Reaction   1n + 54Fe
+ -----------------
+ Reaction n +  54Fe
  Projectile energy     3.000 MeV (LAB)
  Compound nucleus energy    12.243 MeV
  Projectile separation energy   9.298 MeV
@@ -110,19 +155,21 @@
   
 
 
+   C.M. incident energy   2.9449     MeV ( LAB   3.0000    MeV )
+
           E j e c t i l e    m a s s e s   [amu]
 
-                     1n        1p        4He       2d        3t        3h 
+      1n         1p         4He        2d         3t         3h 
 
-                 1.008665   1.007825   4.002602   2.014101   3.016049   3.016028
+   1.008665   1.007825   4.002602   2.014101   3.016049   3.016028
 
 
           S e p a r a t i o n   e n e r g i e s [MeV]
 
-    Nucleus          1n        1p        4He       2d        3t        3h 
+    Nucleus        1n      1p      4He     2d      3t      3h 
 
-  26-Fe- 55         9.298     9.213     8.455    15.927    21.724    16.993
-  26-Fe- 54        13.378     8.853     8.419    18.683    22.961    19.734
+  26-Fe- 55       9.298   9.213   8.455  15.927  21.724  16.993
+  26-Fe- 54      13.378   8.853   8.419  18.683  22.961  19.734
 
 
     Nucleus         Shell Corr.  Deform.
@@ -140,49 +187,15 @@
  Triton    o. m. parameters: RIPL catalog number         7100
  He-3      o. m. parameters: RIPL catalog number         8100
 
-   C.M. incident energy   2.9449     MeV ( LAB   3.0000    MeV )
-
-  RIPL GDR parameters used
-  -----------------------------------------
-  Gamma transitions parameters of  26-Fe- 54
-
-          E1            E2            M1 
-  TE       0.00         1.00         1.00
-  CE       0.010        0.100        0.100
-  E1      18.85        16.67        10.85
-  W1       7.09         5.46         4.00
-  D1      87.12         1.36         1.00
-  E2       0.00
-  W2       0.00
-  D2       0.00
-
-       (1-TE)*Weiss. + TE*GMR
-  -----------------------------------------
-
-  -----------------------------------------
-  Gamma transitions parameters of  26-Fe- 55
-
-          E1            E2            M1 
-  TE       0.00         0.00         0.00
-  CE       0.010        0.100        0.100
-  E1      18.77        16.57        10.78
-  W1       7.03         5.45         4.00
-  D1      89.34         1.34         1.00
-  E2       0.00
-  W2       0.00
-  D2       0.00
-
-       (1-TE)*Weiss. + TE*GMR
-  -----------------------------------------
-
   SOMP transmission coefficients used for fusion determination
 
-  Maximum CN spin is           14
-  Spin dimension  is           50
-
+  Maximum CN spin is           13
+  Spin dimension  is           55
   
   
   Results provided by Spherical Optical Model calculations
+
+  Spherical OM transmission coefficients used for the inelastic outgoing channel
 
   Total cross section         : 0.3587988E+04 mb  ( Scaled by  1.000 to  0.3587996E+04 mb )
   Absorption cross section    : 0.1717081E+04 mb  ( Scaled by  1.000 to  0.1717081E+04 mb )
@@ -223,8 +236,6 @@
 
 
 
-  Spherical OM transmission coefficients used for the inelastic outgoing channel
-
  *****************************************************************************************************************************
 
 
@@ -234,17 +245,17 @@
    Equilibrium exciton number =    5
 
 
- Input reaction for exciton model:   1717.0811591291970     
+ Input reaction for exciton model:   1717.0811595802566     
 
   N     T r a n s i t i o n   r a t e s           E  m  i  s  s  i  o  n     r  a  t  e  s
 
         plus     minus     TOTAL              TOTAL     gammas   neutrons   protons   alphas   deuteron   triton     He-3
 
-  1 0.429E+22 0.000E+00 0.429E+22           0.935E+16 0.935E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
-  3 0.424E+22 0.645E+12 0.424E+22           0.219E+16 0.219E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
-  5 0.412E+22 0.120E+14 0.412E+22           0.103E+16 0.103E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
-  7 0.391E+22 0.630E+14 0.391E+22           0.681E+15 0.681E+15 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
-  9 0.362E+22 0.212E+15 0.362E+22           0.921E+15 0.921E+15 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+  1 0.429E+22 0.000E+00 0.429E+22           0.905E+16 0.905E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+  3 0.424E+22 0.645E+12 0.424E+22           0.212E+16 0.212E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+  5 0.412E+22 0.120E+14 0.412E+22           0.100E+16 0.100E+16 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+  7 0.391E+22 0.630E+14 0.391E+22           0.662E+15 0.662E+15 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
+  9 0.362E+22 0.212E+15 0.362E+22           0.899E+15 0.899E+15 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00 0.000E+00
 
    Nmax =  7 Hmax =  4 Coeff. CHMax = 0.54
 
@@ -256,7 +267,7 @@
     5     0.243E-21
     7     0.256E-21
 
- g  PCROSS emission cross section 0.34452E-02 mb  (accepted)
+ g  PCROSS emission cross section 0.33411E-02 mb  (accepted)
  n  PCROSS emission cross section  0.0000     mb  (accepted)
  p  PCROSS emission cross section  0.0000     mb  (accepted)
  He PCROSS emission cross section  0.0000     mb  (accepted)
@@ -289,64 +300,69 @@
  Ener.      Spectr.     .1E-03                         .1E-02                         .1E-01                         .1E+00
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   0.18    0.85615E-07  I                                                                                              I 
-   0.36    0.61248E-06  I                                                                                              I 
-   0.54    0.18932E-05  I                                                                                              I 
-   0.73    0.41621E-05  I                                                                                              I 
-   0.91    0.75968E-05  I                                                                                              I 
-   1.09    0.12328E-04  I                                                                                              I 
-   1.27    0.18445E-04  I                                                                                              I 
-   1.45    0.26002E-04  I                                                                                              I 
-   1.63    0.35019E-04  I                                                                                              I 
-   1.81    0.45487E-04  I                                                                                              I 
-   1.99    0.57372E-04  I                                                                                              I 
-   2.18    0.70617E-04  I                                                                                              I 
-   2.36    0.85143E-04  I                                                                                              I 
-   2.54    0.10086E-03  I                                                                                              I 
-   2.72    0.11766E-03  I **                                                                                           I 
-   2.90    0.13543E-03  I ****                                                                                         I 
-   3.08    0.15405E-03  I ******                                                                                       I 
-   3.26    0.17339E-03  I *******                                                                                      I 
-   3.44    0.19333E-03  I *********                                                                                    I 
-   3.63    0.21376E-03  I **********                                                                                   I 
-   3.81    0.23457E-03  I ***********                                                                                  I 
-   3.99    0.25565E-03  I *************                                                                                I 
-   4.17    0.27693E-03  I **************                                                                               I 
-   4.35    0.29834E-03  I ***************                                                                              I 
-   4.53    0.31983E-03  I ****************                                                                             I 
-   4.71    0.34140E-03  I *****************                                                                            I 
-   4.89    0.36303E-03  I *****************                                                                            I 
-   5.08    0.38477E-03  I ******************                                                                           I 
-   5.26    0.40667E-03  I *******************                                                                          I 
-   5.44    0.42883E-03  I ********************                                                                         I 
-   5.62    0.45137E-03  I ********************                                                                         I 
-   5.80    0.47443E-03  I *********************                                                                        I 
-   5.98    0.49821E-03  I **********************                                                                       I 
-   6.16    0.52290E-03  I **********************                                                                       I 
-   6.34    0.54874E-03  I ***********************                                                                      I 
-   6.53    0.57598E-03  I ************************                                                                     I 
-   6.71    0.60490E-03  I ************************                                                                     I 
-   6.89    0.63580E-03  I *************************                                                                    I 
-   7.07    0.66898E-03  I **************************                                                                   I 
-   7.25    0.70477E-03  I **************************                                                                   I 
-   7.43    0.74348E-03  I ***************************                                                                  I 
-   7.61    0.78547E-03  I ****************************                                                                 I 
-   7.79    0.83108E-03  I *****************************                                                                I 
-   7.98    0.88069E-03  I *****************************                                                                I 
-   8.16    0.93468E-03  I ******************************                                                               I 
-   8.34    0.99349E-03  I *******************************                                                              I 
-   8.52    0.10576E-02  I ********************************                                                             I 
-   8.70    0.11276E-02  I *********************************                                                            I 
-   8.88    0.12042E-02  I **********************************                                                           I 
+   0.18    0.85176E-07  I                                                                                              I 
+   0.36    0.60793E-06  I                                                                                              I 
+   0.54    0.18752E-05  I                                                                                              I 
+   0.73    0.41150E-05  I                                                                                              I 
+   0.91    0.74983E-05  I                                                                                              I 
+   1.09    0.12150E-04  I                                                                                              I 
+   1.27    0.18155E-04  I                                                                                              I 
+   1.45    0.25561E-04  I                                                                                              I 
+   1.63    0.34388E-04  I                                                                                              I 
+   1.81    0.44622E-04  I                                                                                              I 
+   1.99    0.56230E-04  I                                                                                              I 
+   2.18    0.69152E-04  I                                                                                              I 
+   2.36    0.83314E-04  I                                                                                              I 
+   2.54    0.98622E-04  I                                                                                              I 
+   2.72    0.11497E-03  I **                                                                                           I 
+   2.90    0.13226E-03  I ****                                                                                         I 
+   3.08    0.15036E-03  I *****                                                                                        I 
+   3.26    0.16915E-03  I *******                                                                                      I 
+   3.44    0.18851E-03  I *********                                                                                    I 
+   3.63    0.20833E-03  I **********                                                                                   I 
+   3.81    0.22851E-03  I ***********                                                                                  I 
+   3.99    0.24895E-03  I ************                                                                                 I 
+   4.17    0.26957E-03  I *************                                                                                I 
+   4.35    0.29031E-03  I **************                                                                               I 
+   4.53    0.31112E-03  I ***************                                                                              I 
+   4.71    0.33199E-03  I ****************                                                                             I 
+   4.89    0.35291E-03  I *****************                                                                            I 
+   5.08    0.37393E-03  I ******************                                                                           I 
+   5.26    0.39510E-03  I ******************                                                                           I 
+   5.44    0.41651E-03  I *******************                                                                          I 
+   5.62    0.43828E-03  I ********************                                                                         I 
+   5.80    0.46056E-03  I *********************                                                                        I 
+   5.98    0.48351E-03  I *********************                                                                        I 
+   6.16    0.50734E-03  I **********************                                                                       I 
+   6.34    0.53228E-03  I ***********************                                                                      I 
+   6.53    0.55856E-03  I ***********************                                                                      I 
+   6.71    0.58647E-03  I ************************                                                                     I 
+   6.89    0.61627E-03  I ************************                                                                     I 
+   7.07    0.64827E-03  I *************************                                                                    I 
+   7.25    0.68278E-03  I **************************                                                                   I 
+   7.43    0.72011E-03  I ***************************                                                                  I 
+   7.61    0.76059E-03  I ***************************                                                                  I 
+   7.79    0.80456E-03  I ****************************                                                                 I 
+   7.98    0.85236E-03  I *****************************                                                                I 
+   8.16    0.90439E-03  I ******************************                                                               I 
+   8.34    0.96104E-03  I ******************************                                                               I 
+   8.52    0.10228E-02  I *******************************                                                              I 
+   8.70    0.10902E-02  I ********************************                                                             I 
+   8.88    0.11639E-02  I *********************************                                                            I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum   0.344517E-02  mb
-   g emission cross section0.344517E-02  mb
+     Integrated spectrum   0.334105E-02  mb
+   g emission cross section0.334105E-02  mb
   
   End of Preequilibrium + Direct spectra (tot)
   ********************************************
   ********************************************
 
  *** Summary of Hauser-Feshbach equilibrium decay
+
+  ---------------------------------------------------------------
+  Decaying nucleus  26-Fe- 55  mass= 54.938298 Q-value=  9.298430
+  ---------------------------------------------------------------
+
 
   Compound nucleus  55-Fe spin distribution
   -----------------------------------------
@@ -361,28 +377,7 @@
    15/2 0.77991E-04      -15/2 0.19620E-02
    17/2 0.87740E-04      -17/2 0.35246E-05
   
-
-  ---------------------------------------------------------------
-  Decaying nucleus  26-Fe- 55  mass= 54.938298 Q-value=  9.298430
-  ---------------------------------------------------------------
-
-  -----------------------------------------
-  Gamma transitions parameters of  26-Fe- 55
-
-          E1            E2            M1 
-  TE       0.00         0.00         0.00
-  CE       0.010        0.100        0.100
-  E1      18.77        16.57        10.78
-  W1       7.03         5.45         4.00
-  D1      89.34         1.34         1.00
-  E2       0.00
-  W2       0.00
-  D2       0.00
-
-       (1-TE)*Weiss. + TE*GMR
-  -----------------------------------------
-
- Yrast state at bin   1 spin=  8.0 pop= 0.66533E-04
+ Yrast state at bin   1 spin=  8.0 pop= 0.25594E-04
           100% of this was assumed to populate level # 18
 
  Population neglected because too small   0.0000    
@@ -392,344 +387,313 @@
 
           ----------------------------------------
 
-           1   0.00000   -1     1.5    1.24309    
-           2   0.41142   -1     0.5   0.450106    
-           3   0.93129   -1     2.5   0.644474    
-           4   1.31654   -1     3.5   0.392012    
-           5   1.40845   -1     3.5   0.351340    
-           6   1.91830   -1     0.5   0.112089    
-           7   2.01500   -1     0.5   0.102328    
+           1   0.00000   -1     1.5    1.17463    
+           2   0.41142   -1     0.5   0.416468    
+           3   0.93129   -1     2.5   0.568437    
+           4   1.31654   -1     3.5   0.342132    
+           5   1.40845   -1     3.5   0.305025    
+           6   1.91830   -1     0.5   0.100574    
+           7   2.01500   -1     0.5   0.919369E-01
   WARNING: Branching ratios for level            7  in           55 -Fe are missing
-           8   2.05170   -1     1.5   0.181447    
-           9   2.14400   -1     2.5   0.176270    
-          10   2.21187   -1     4.5   0.736075E-01
-          11   2.25550   -1     4.5   0.687475E-01
-          12   2.30106   -1     4.5   0.640090E-01
-          13   2.47020   -1     1.5   0.121377    
-          14   2.49000   -1     3.5   0.948522E-01
+           8   2.05170   -1     1.5   0.158592    
+           9   2.14400   -1     2.5   0.150105    
+          10   2.21187   -1     4.5   0.606632E-01
+          11   2.25550   -1     4.5   0.566128E-01
+          12   2.30106   -1     4.5   0.526766E-01
+          13   2.47020   -1     1.5   0.106859    
+          14   2.49000   -1     3.5   0.799544E-01
   WARNING: Branching ratios for level           14  in           55 -Fe are missing
-          15   2.53911   -1     5.5   0.248874E-01
-          16   2.57770   -1     2.5   0.110774    
-          17   2.60000    1     3.5   0.101627    
+          15   2.53911   -1     5.5   0.202901E-01
+          16   2.57770   -1     2.5   0.952192E-01
+          17   2.60000    1     3.5   0.910309E-01
   WARNING: Branching ratios for level           17  in           55 -Fe are missing
-          18   2.81380   -1     6.5   0.683243E-02
-          19   2.87230   -1     2.5   0.815042E-01
-          20   2.93890   -1     3.5   0.562954E-01
-          21   2.98210   -1     5.5   0.108061E-01
-          22   2.98440   -1     4.5   0.223344E-01
+          18   2.81380   -1     6.5   0.483888E-02
+          19   2.87230   -1     2.5   0.709340E-01
+          20   2.93890   -1     3.5   0.481733E-01
+          21   2.98210   -1     5.5   0.892042E-02
+          22   2.98440   -1     4.5   0.187198E-01
   WARNING: Branching ratios for level           22  in           55 -Fe are missing
-          23   3.02850   -1     1.5   0.720248E-01
-          24   3.07200   -1     5.5   0.925258E-02
-          25   3.07600   -1     4.5   0.195447E-01
-          26   3.10870   -1     3.5   0.466643E-01
-          27   3.28500    1     2.5   0.661039E-01
+          23   3.02850   -1     1.5   0.645753E-01
+          24   3.07200   -1     5.5   0.767829E-02
+          25   3.07600   -1     4.5   0.164752E-01
+          26   3.10870   -1     3.5   0.402711E-01
+          27   3.28500    1     2.5   0.640877E-01
   WARNING: Branching ratios for level           27  in           55 -Fe are missing
-          28   3.31100   -1     2.5   0.527652E-01
+          28   3.31100   -1     2.5   0.468741E-01
   WARNING: Branching ratios for level           28  in           55 -Fe are missing
-          29   3.36200   -1     0.5   0.298751E-01
+          29   3.36200   -1     0.5   0.276361E-01
   WARNING: Branching ratios for level           29  in           55 -Fe are missing
 
           ----------------------------------------
 
 
 
-     Level of energy    3.3620 MeV and spin   -0.5 with population   0.29875E-01 mb is not depopulated (g.s. transition assumed)
+     Level of energy    3.3620 MeV and spin   -0.5 with population   0.27636E-01 mb is not depopulated (g.s. transition assumed)
 
-     Level of energy    3.3110 MeV and spin   -2.5 with population   0.52765E-01 mb is not depopulated (g.s. transition assumed)
+     Level of energy    3.3110 MeV and spin   -2.5 with population   0.46874E-01 mb is not depopulated (g.s. transition assumed)
 
-     Level of energy    3.2850 MeV and spin    2.5 with population   0.66104E-01 mb is not depopulated (g.s. transition assumed)
+     Level of energy    3.2850 MeV and spin    2.5 with population   0.64088E-01 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   3.1087 MeV   -3.5 level with final population   0.46664E-01 mb
+     Decay of   3.1087 MeV   -3.5 level with final population   0.40271E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      1.7922       0.10079E-01 mb
-      0.9313   -2.5      2.1774       0.35930E-01 mb
-      0.0000   -1.5      3.1087       0.65329E-03 mb
+      1.3165   -3.5      1.7922       0.86981E-02 mb
+      0.9313   -2.5      2.1774       0.31008E-01 mb
+      0.0000   -1.5      3.1087       0.56378E-03 mb
 
-     Decay of   3.0760 MeV   -4.5 level with final population   0.19545E-01 mb
+     Decay of   3.0760 MeV   -4.5 level with final population   0.16475E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4084   -3.5      1.6676       0.19544E-01 mb
+      1.4084   -3.5      1.6676       0.16474E-01 mb
 
-     Decay of   3.0720 MeV   -5.5 level with final population   0.92526E-02 mb
+     Decay of   3.0720 MeV   -5.5 level with final population   0.76783E-02 mb
      Level populated      Egamma    Intensity (cross sect.)
-      2.8138   -6.5      0.2582       0.15625E-02 mb
-      2.5391   -5.5      0.5329       0.76807E-02 mb
+      2.8138   -6.5      0.2582       0.12967E-02 mb
+      2.5391   -5.5      0.5329       0.63739E-02 mb
 
-     Decay of   3.0285 MeV   -1.5 level with final population   0.72025E-01 mb
+     Decay of   3.0285 MeV   -1.5 level with final population   0.64575E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.4114   -0.5      2.6171       0.25460E-01 mb
-      0.0000   -1.5      3.0285       0.46563E-01 mb
+      0.4114   -0.5      2.6171       0.22827E-01 mb
+      0.0000   -1.5      3.0285       0.41747E-01 mb
 
-     Level of energy    2.9844 MeV and spin   -4.5 with population   0.22334E-01 mb is not depopulated (g.s. transition assumed)
+     Level of energy    2.9844 MeV and spin   -4.5 with population   0.18720E-01 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   2.9821 MeV   -5.5 level with final population   0.10806E-01 mb
+     Decay of   2.9821 MeV   -5.5 level with final population   0.89204E-02 mb
      Level populated      Egamma    Intensity (cross sect.)
-      2.2119   -4.5      0.7702       0.10803E-01 mb
+      2.2119   -4.5      0.7702       0.89181E-02 mb
 
-     Decay of   2.9389 MeV   -3.5 level with final population   0.56295E-01 mb
+     Decay of   2.9389 MeV   -3.5 level with final population   0.48173E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      1.6224       0.25331E-01 mb
-      0.0000   -1.5      2.9389       0.30962E-01 mb
+      1.3165   -3.5      1.6224       0.21677E-01 mb
+      0.0000   -1.5      2.9389       0.26495E-01 mb
 
-     Decay of   2.8723 MeV   -2.5 level with final population   0.81504E-01 mb
+     Decay of   2.8723 MeV   -2.5 level with final population   0.70934E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      1.5558       0.21190E-01 mb
-      0.9313   -2.5      1.9410       0.65200E-02 mb
-      0.0000   -1.5      2.8723       0.53792E-01 mb
+      1.3165   -3.5      1.5558       0.18442E-01 mb
+      0.9313   -2.5      1.9410       0.56745E-02 mb
+      0.0000   -1.5      2.8723       0.46815E-01 mb
 
-     Decay of   2.8138 MeV   -6.5 level with final population   0.83998E-02 mb
+     Decay of   2.8138 MeV   -6.5 level with final population   0.61396E-02 mb
      Level populated      Egamma    Intensity (cross sect.)
-      2.5391   -5.5      0.2747       0.83773E-02 mb
+      2.5391   -5.5      0.2747       0.61231E-02 mb
 
-     Level of energy    2.6000 MeV and spin    3.5 with population   0.10163     mb is not depopulated (g.s. transition assumed)
+     Level of energy    2.6000 MeV and spin    3.5 with population   0.91031E-01 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   2.5777 MeV   -2.5 level with final population   0.11077     mb
+     Decay of   2.5777 MeV   -2.5 level with final population   0.95219E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      1.2612       0.33229E-02 mb
-      0.9313   -2.5      1.6464       0.66461E-02 mb
-      0.4114   -0.5      2.1663       0.77539E-02 mb
-      0.0000   -1.5      2.5777       0.93048E-01 mb
+      1.3165   -3.5      1.2612       0.28563E-02 mb
+      0.9313   -2.5      1.6464       0.57128E-02 mb
+      0.4114   -0.5      2.1663       0.66651E-02 mb
+      0.0000   -1.5      2.5777       0.79982E-01 mb
 
-     Decay of   2.5391 MeV   -5.5 level with final population   0.40972E-01 mb
+     Decay of   2.5391 MeV   -5.5 level with final population   0.32807E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      2.3011   -4.5      0.2380       0.20478E-02 mb
-      2.2119   -4.5      0.3272       0.40942E-03 mb
-      1.3165   -3.5      1.2226       0.38502E-01 mb
+      2.3011   -4.5      0.2380       0.16397E-02 mb
+      2.2119   -4.5      0.3272       0.32783E-03 mb
+      1.3165   -3.5      1.2226       0.30829E-01 mb
 
-     Level of energy    2.4900 MeV and spin   -3.5 with population   0.94852E-01 mb is not depopulated (g.s. transition assumed)
+     Level of energy    2.4900 MeV and spin   -3.5 with population   0.79954E-01 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   2.4702 MeV   -1.5 level with final population   0.12138     mb
+     Decay of   2.4702 MeV   -1.5 level with final population   0.10686     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.4114   -0.5      2.0588       0.41267E-01 mb
-      0.0000   -1.5      2.4702       0.80106E-01 mb
+      0.4114   -0.5      2.0588       0.36331E-01 mb
+      0.0000   -1.5      2.4702       0.70525E-01 mb
 
-     Decay of   2.3011 MeV   -4.5 level with final population   0.66065E-01 mb
+     Decay of   2.3011 MeV   -4.5 level with final population   0.54323E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      0.9845       0.52843E-02 mb
-      0.9313   -2.5      1.3698       0.60774E-01 mb
+      1.3165   -3.5      0.9845       0.43451E-02 mb
+      0.9313   -2.5      1.3698       0.49972E-01 mb
 
-     Decay of   2.2555 MeV   -4.5 level with final population   0.68748E-01 mb
+     Decay of   2.2555 MeV   -4.5 level with final population   0.56613E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4084   -3.5      0.8471       0.68733E-01 mb
+      1.4084   -3.5      0.8471       0.56600E-01 mb
 
-     Decay of   2.2119 MeV   -4.5 level with final population   0.84824E-01 mb
+     Decay of   2.2119 MeV   -4.5 level with final population   0.69912E-01 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4084   -3.5      0.8034       0.83107E-01 mb
-      1.3165   -3.5      0.8953       0.16961E-02 mb
+      1.4084   -3.5      0.8034       0.68497E-01 mb
+      1.3165   -3.5      0.8953       0.13980E-02 mb
 
-     Decay of   2.1440 MeV   -2.5 level with final population   0.17627     mb
+     Decay of   2.1440 MeV   -2.5 level with final population   0.15011     mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      0.8275       0.63443E-01 mb
-      0.9313   -2.5      1.2127       0.75788E-01 mb
-      0.4114   -0.5      1.7326       0.52878E-02 mb
-      0.0000   -1.5      2.1440       0.31727E-01 mb
+      1.3165   -3.5      0.8275       0.54026E-01 mb
+      0.9313   -2.5      1.2127       0.64538E-01 mb
+      0.4114   -0.5      1.7326       0.45029E-02 mb
+      0.0000   -1.5      2.1440       0.27018E-01 mb
 
-     Decay of   2.0517 MeV   -1.5 level with final population   0.18145     mb
+     Decay of   2.0517 MeV   -1.5 level with final population   0.15859     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.4114   -0.5      1.6403       0.13971     mb
-      0.0000   -1.5      2.0517       0.41731E-01 mb
+      0.4114   -0.5      1.6403       0.12211     mb
+      0.0000   -1.5      2.0517       0.36475E-01 mb
 
-     Level of energy    2.0150 MeV and spin   -0.5 with population   0.10233     mb is not depopulated (g.s. transition assumed)
+     Level of energy    2.0150 MeV and spin   -0.5 with population   0.91937E-01 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   1.9183 MeV   -0.5 level with final population   0.11209     mb
+     Decay of   1.9183 MeV   -0.5 level with final population   0.10057     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.4114   -0.5      1.5069       0.35866E-01 mb
-      0.0000   -1.5      1.9183       0.76217E-01 mb
+      0.4114   -0.5      1.5069       0.32181E-01 mb
+      0.0000   -1.5      1.9183       0.68387E-01 mb
 
-     Decay of   1.4084 MeV   -3.5 level with final population   0.52276     mb
+     Decay of   1.4084 MeV   -3.5 level with final population   0.44663     mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3165   -3.5      0.0919       0.15503E-01 mb
-      0.9313   -2.5      0.4772       0.27288     mb
-      0.0000   -1.5      1.4084       0.22842     mb
+      1.3165   -3.5      0.0919       0.13245E-01 mb
+      0.9313   -2.5      0.4772       0.23314     mb
+      0.0000   -1.5      1.4084       0.19515     mb
 
-     Decay of   1.3165 MeV   -3.5 level with final population   0.58212     mb
+     Decay of   1.3165 MeV   -3.5 level with final population   0.50257     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.9313   -2.5      0.3853       0.41323E-01 mb
-      0.0000   -1.5      1.3165       0.54069     mb
+      0.9313   -2.5      0.3853       0.35675E-01 mb
+      0.0000   -1.5      1.3165       0.46680     mb
 
-     Decay of   0.9313 MeV   -2.5 level with final population    1.1446     mb
+     Decay of   0.9313 MeV   -2.5 level with final population   0.99439     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.4114   -0.5      0.5199       0.22887E-01 mb
-      0.0000   -1.5      0.9313        1.1215     mb
+      0.4114   -0.5      0.5199       0.19884E-01 mb
+      0.0000   -1.5      0.9313       0.97430     mb
 
-     Decay of   0.4114 MeV   -0.5 level with final population   0.72837     mb
+     Decay of   0.4114 MeV   -0.5 level with final population   0.66100     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.0000   -1.5      0.4114       0.72762     mb
+      0.0000   -1.5      0.4114       0.66032     mb
 
   Incident energy (CMS)         2.9449301217167543       MeV
   Shape elastic cross section   1870.9145900000001       mb
-  CN elastic cross section      448.01947      mb
-  Isotropic Compound Elastic=   35.652256      mb/str
+  CN elastic cross section      448.07980      mb
+     Elastic=   35.657059      mb/str
 
-                                               COMP. ELASTIC DIFFERENTIAL CROSS-SECTION
-                                               ****************************************
-                                                   CENTER-OF-MASS SYSTEM
-
-          TETA   D.SIGMA/D.OMEGA          TETA   D.SIGMA/D.OMEGA          TETA   D.SIGMA/D.OMEGA          TETA   D.SIGMA/D.OMEGA
-
-       0.00000E+00   0.00000E+00       2.00000E+00   0.00000E+00       4.00000E+00   0.00000E+00       6.00000E+00   0.00000E+00
-       8.00000E+00   0.00000E+00       1.00000E+01   0.00000E+00       1.20000E+01   0.00000E+00       1.40000E+01   0.00000E+00
-       1.60000E+01   0.00000E+00       1.80000E+01   0.00000E+00       2.00000E+01   0.00000E+00       2.20000E+01   0.00000E+00
-       2.40000E+01   0.00000E+00       2.60000E+01   0.00000E+00       2.80000E+01   0.00000E+00       3.00000E+01   0.00000E+00
-       3.20000E+01   0.00000E+00       3.40000E+01   0.00000E+00       3.60000E+01   0.00000E+00       3.80000E+01   0.00000E+00
-       4.00000E+01   0.00000E+00       4.20000E+01   0.00000E+00       4.40000E+01   0.00000E+00       4.60000E+01   0.00000E+00
-       4.80000E+01   0.00000E+00       5.00000E+01   0.00000E+00       5.20000E+01   0.00000E+00       5.40000E+01   0.00000E+00
-       5.60000E+01   0.00000E+00       5.80000E+01   0.00000E+00       6.00000E+01   0.00000E+00       6.20000E+01   0.00000E+00
-       6.40000E+01   0.00000E+00       6.60000E+01   0.00000E+00       6.80000E+01   0.00000E+00       7.00000E+01   0.00000E+00
-       7.20000E+01   0.00000E+00       7.40000E+01   0.00000E+00       7.60000E+01   0.00000E+00       7.80000E+01   0.00000E+00
-       8.00000E+01   0.00000E+00       8.20000E+01   0.00000E+00       8.40000E+01   0.00000E+00       8.60000E+01   0.00000E+00
-       8.80000E+01   0.00000E+00       9.00000E+01   0.00000E+00       9.20000E+01   0.00000E+00       9.40000E+01   0.00000E+00
-       9.60000E+01   0.00000E+00       9.80000E+01   0.00000E+00       1.00000E+02   0.00000E+00       1.02000E+02   0.00000E+00
-       1.04000E+02   0.00000E+00       1.06000E+02   0.00000E+00       1.08000E+02   0.00000E+00       1.10000E+02   0.00000E+00
-       1.12000E+02   0.00000E+00       1.14000E+02   0.00000E+00       1.16000E+02   0.00000E+00       1.18000E+02   0.00000E+00
-       1.20000E+02   0.00000E+00       1.22000E+02   0.00000E+00       1.24000E+02   0.00000E+00       1.26000E+02   0.00000E+00
-       1.28000E+02   0.00000E+00       1.30000E+02   0.00000E+00       1.32000E+02   0.00000E+00       1.34000E+02   0.00000E+00
-       1.36000E+02   0.00000E+00       1.38000E+02   0.00000E+00       1.40000E+02   0.00000E+00       1.42000E+02   0.00000E+00
-       1.44000E+02   0.00000E+00       1.46000E+02   0.00000E+00       1.48000E+02   0.00000E+00       1.50000E+02   0.00000E+00
-       1.52000E+02   0.00000E+00       1.54000E+02   0.00000E+00       1.56000E+02   0.00000E+00       1.58000E+02   0.00000E+00
-       1.60000E+02   0.00000E+00       1.62000E+02   0.00000E+00       1.64000E+02   0.00000E+00       1.66000E+02   0.00000E+00
-       1.68000E+02   0.00000E+00       1.70000E+02   0.00000E+00       1.72000E+02   0.00000E+00       1.74000E+02   0.00000E+00
-       1.76000E+02   0.00000E+00       1.78000E+02   0.00000E+00       1.80000E+02   0.00000E+00
-
-  26-Fe- 55 production cross section  4.78704     mb        reac: (z,gamma)            
-
+  26-Fe- 55 production cross section  4.29040     mb        reac: (z,gamma)            
 
  ****************************************************** gamma spectrum  ******************************************************
  Ener.      Spectr.     .1E-01                         .1E+00                         .1E+01                         .1E+02
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   0.00    0.61087E-05  I                                                                                              I 
-   0.18    0.88597E-01  I *****************************                                                                I 
-   0.36    0.83396E-01  I *****************************                                                                I 
-   0.54    0.59578E+01  I **************************************************************************************       I 
-   0.73    0.81203E-01  I ****************************                                                                 I 
-   0.91    0.13947E+01  I ******************************************************************                           I 
-   1.09    0.64375E+01  I ***************************************************************************************      I 
-   1.27    0.96151E+00  I *************************************************************                                I 
-   1.45    0.49608E+01  I ************************************************************************************         I 
-   1.63    0.87931E+00  I ************************************************************                                 I 
-   1.81    0.14702E+01  I *******************************************************************                          I 
-   1.99    0.10980E+01  I ***************************************************************                              I 
-   2.18    0.20319E+01  I ************************************************************************                     I 
-   2.36    0.10905E+01  I ***************************************************************                              I 
-   2.54    0.19744E+01  I ***********************************************************************                      I 
-   2.72    0.22399E+01  I *************************************************************************                    I 
-   2.90    0.13429E+01  I ******************************************************************                           I 
-   3.08    0.16355E+01  I *********************************************************************                        I 
-   3.26    0.12047E+01  I *****************************************************************                            I 
-   3.44    0.22567E+01  I *************************************************************************                    I 
-   3.63    0.14985E+01  I *******************************************************************                          I 
-   3.81    0.14017E+01  I *******************************************************************                          I 
-   3.99    0.13160E+01  I ******************************************************************                           I 
-   4.17    0.12402E+01  I *****************************************************************                            I 
-   4.35    0.11733E+01  I ****************************************************************                             I 
-   4.53    0.11144E+01  I ***************************************************************                              I 
-   4.71    0.10627E+01  I ***************************************************************                              I 
-   4.89    0.10175E+01  I **************************************************************                               I 
-   5.08    0.97811E+00  I **************************************************************                               I 
-   5.26    0.94405E+00  I *************************************************************                                I 
-   5.44    0.91484E+00  I *************************************************************                                I 
-   5.62    0.89012E+00  I ************************************************************                                 I 
-   5.80    0.86957E+00  I ************************************************************                                 I 
-   5.98    0.85426E+00  I ************************************************************                                 I 
-   6.16    0.84686E+00  I ************************************************************                                 I 
-   6.34    0.84098E+00  I ************************************************************                                 I 
-   6.53    0.84080E+00  I ************************************************************                                 I 
-   6.71    0.84146E+00  I ************************************************************                                 I 
-   6.89    0.84450E+00  I ************************************************************                                 I 
-   7.07    0.85222E+00  I ************************************************************                                 I 
-   7.25    0.86092E+00  I ************************************************************                                 I 
-   7.43    0.87555E+00  I ************************************************************                                 I 
-   7.61    0.89602E+00  I *************************************************************                                I 
-   7.79    0.91817E+00  I *************************************************************                                I 
-   7.98    0.93823E+00  I *************************************************************                                I 
-   8.16    0.96548E+00  I **************************************************************                               I 
-   8.34    0.99178E+00  I **************************************************************                               I 
-   8.52    0.10202E+01  I **************************************************************                               I 
-   8.70    0.10509E+01  I ***************************************************************                              I 
-   8.88    0.93482E+00  I *************************************************************                                I 
-   9.06    0.30619E+00  I **********************************************                                               I 
-   9.24    0.50697E+00  I *****************************************************                                        I 
-   9.43    0.22409E+00  I ******************************************                                                   I 
-   9.61    0.45023E+00  I ***************************************************                                          I 
-   9.79    0.65582E+00  I ********************************************************                                     I 
-   9.97    0.20324E+00  I *****************************************                                                    I 
-  10.15    0.82195E+00  I ***********************************************************                                  I 
-  10.33    0.49925E+00  I *****************************************************                                        I 
-  10.51    0.72538E-05  I                                                                                              I 
-  10.69    0.85066E-01  I *****************************                                                                I 
-  10.88    0.58802E+00  I *******************************************************                                      I 
-  11.06    0.11559E+00  I *********************************                                                            I 
-  11.24    0.46399E+00  I ****************************************************                                         I 
-  11.42    0.32343E+00  I ***********************************************                                              I 
-  11.60    0.27696E-06  I                                                                                              I 
-  11.78    0.50209E+00  I *****************************************************                                        I 
-  11.96    0.19425E+00  I ****************************************                                                     I 
-  12.14    0.16349E+01  I *********************************************************************                        I 
+   0.00    0.11722E-06  I                                                                                              I 
+   0.18    0.73387E-01  I ***************************                                                                  I 
+   0.36    0.53693E-01  I ***********************                                                                      I 
+   0.54    0.52792E+01  I ************************************************************************************         I 
+   0.73    0.20299E-01  I **********                                                                                   I 
+   0.91    0.10869E+01  I ***************************************************************                              I 
+   1.09    0.54812E+01  I *************************************************************************************        I 
+   1.27    0.67426E+00  I *********************************************************                                    I 
+   1.45    0.41022E+01  I *********************************************************************************            I 
+   1.63    0.60335E+00  I *******************************************************                                      I 
+   1.81    0.11095E+01  I ***************************************************************                              I 
+   1.99    0.78001E+00  I ***********************************************************                                  I 
+   2.18    0.15851E+01  I ********************************************************************                         I 
+   2.36    0.74599E+00  I **********************************************************                                   I 
+   2.54    0.15034E+01  I *******************************************************************                          I 
+   2.72    0.17627E+01  I **********************************************************************                       I 
+   2.90    0.98027E+00  I **************************************************************                               I 
+   3.08    0.12444E+01  I *****************************************************************                            I 
+   3.26    0.88553E+00  I ************************************************************                                 I 
+   3.44    0.18745E+01  I **********************************************************************                       I 
+   3.63    0.11747E+01  I ****************************************************************                             I 
+   3.81    0.10921E+01  I ***************************************************************                              I 
+   3.99    0.10202E+01  I **************************************************************                               I 
+   4.17    0.95771E+00  I *************************************************************                                I 
+   4.35    0.90364E+00  I *************************************************************                                I 
+   4.53    0.85697E+00  I ************************************************************                                 I 
+   4.71    0.81690E+00  I ***********************************************************                                  I 
+   4.89    0.78272E+00  I ***********************************************************                                  I 
+   5.08    0.75386E+00  I **********************************************************                                   I 
+   5.26    0.72985E+00  I **********************************************************                                   I 
+   5.44    0.71030E+00  I *********************************************************                                    I 
+   5.62    0.69486E+00  I *********************************************************                                    I 
+   5.80    0.68326E+00  I *********************************************************                                    I 
+   5.98    0.67573E+00  I *********************************************************                                    I 
+   6.16    0.67345E+00  I *********************************************************                                    I 
+   6.34    0.67323E+00  I *********************************************************                                    I 
+   6.53    0.67761E+00  I *********************************************************                                    I 
+   6.71    0.68372E+00  I *********************************************************                                    I 
+   6.89    0.69237E+00  I *********************************************************                                    I 
+   7.07    0.70478E+00  I *********************************************************                                    I 
+   7.25    0.71933E+00  I **********************************************************                                   I 
+   7.43    0.73881E+00  I **********************************************************                                   I 
+   7.61    0.76316E+00  I **********************************************************                                   I 
+   7.79    0.79007E+00  I ***********************************************************                                  I 
+   7.98    0.81721E+00  I ***********************************************************                                  I 
+   8.16    0.85121E+00  I ************************************************************                                 I 
+   8.34    0.88676E+00  I ************************************************************                                 I 
+   8.52    0.92606E+00  I *************************************************************                                I 
+   8.70    0.96905E+00  I **************************************************************                               I 
+   8.88    0.93886E+00  I *************************************************************                                I 
+   9.06    0.33728E+00  I ***********************************************                                              I 
+   9.24    0.58822E+00  I *******************************************************                                      I 
+   9.43    0.26063E+00  I ********************************************                                                 I 
+   9.61    0.51293E+00  I *****************************************************                                        I 
+   9.79    0.75575E+00  I **********************************************************                                   I 
+   9.97    0.29568E+00  I **********************************************                                               I 
+  10.15    0.97209E+00  I **************************************************************                               I 
+  10.33    0.59277E+00  I *******************************************************                                      I 
+  10.51    0.30181E-05  I                                                                                              I 
+  10.69    0.97972E-01  I *******************************                                                              I 
+  10.88    0.67528E+00  I *********************************************************                                    I 
+  11.06    0.13234E+00  I ***********************************                                                          I 
+  11.24    0.51881E+00  I *****************************************************                                        I 
+  11.42    0.36165E+00  I ************************************************                                             I 
+  11.60    0.44675E-07  I                                                                                              I 
+  11.78    0.53794E+00  I ******************************************************                                       I 
+  11.96    0.20812E+00  I *****************************************                                                    I 
+  12.14    0.16721E+01  I *********************************************************************                        I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum    13.5139      mb
-   g emission cross section 13.5139      mb
+     Integrated spectrum    11.3688      mb
+   g emission cross section 11.3688      mb
   
 
  ****************************************************** neutron spectrum  ******************************************************
  Ener.      Spectr.     .1E+02                         .1E+03                         .1E+04                         .1E+05
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   0.00    0.21002E+00  I                                                                                              I 
-   0.18    0.12786E+00  I                                                                                              I 
-   0.36    0.86732E+03  I ************************************************************                                 I 
-   0.53    0.18544E+03  I ***************************************                                                      I 
-   0.71    0.75352E-01  I                                                                                              I 
-   0.89    0.60171E-01  I                                                                                              I 
-   1.07    0.46974E-01  I                                                                                              I 
-   1.25    0.35728E-01  I                                                                                              I 
-   1.42    0.27426E+04  I ***************************************************************************                  I 
-   1.60    0.25165E+04  I **************************************************************************                   I 
-   1.78    0.65892E-02  I                                                                                              I 
-   1.96    0.34572E-02  I                                                                                              I 
-   2.14    0.16927E-02  I                                                                                              I 
-   2.31    0.72368E-03  I                                                                                              I 
-   2.49    0.24026E-03  I                                                                                              I 
-   2.67    0.48753E-04  I                                                                                              I 
-   2.85    0.25165E+04  I **************************************************************************                   I 
+   0.00    0.99155E-01  I                                                                                              I 
+   0.18    0.57524E-01  I                                                                                              I 
+   0.36    0.86758E+03  I ************************************************************                                 I 
+   0.53    0.18547E+03  I ***************************************                                                      I 
+   0.71    0.28102E-01  I                                                                                              I 
+   0.89    0.20905E-01  I                                                                                              I 
+   1.07    0.15122E-01  I                                                                                              I 
+   1.25    0.10556E-01  I                                                                                              I 
+   1.42    0.27435E+04  I ***************************************************************************                  I 
+   1.60    0.25174E+04  I **************************************************************************                   I 
+   1.78    0.13363E-02  I                                                                                              I 
+   1.96    0.59030E-03  I                                                                                              I 
+   2.14    0.23642E-03  I                                                                                              I 
+   2.31    0.79159E-04  I                                                                                              I 
+   2.49    0.19356E-04  I                                                                                              I 
+   2.67    0.26991E-05  I                                                                                              I 
+   2.85    0.25173E+04  I **************************************************************************                   I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum    1571.41      mb
-  n  emission cross section 1571.41      mb
+     Integrated spectrum    1571.85      mb
+  n  emission cross section 1571.85      mb
   
 
  ****************************************************** proton spectrum  ******************************************************
  Ener.      Spectr.     .1E+01                         .1E+02                         .1E+03                         .1E+04
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.07    0.86517E-02  I                                                                                              I 
-   1.25    0.42501E+00  I                                                                                              I 
-   1.42    0.32368E+01  I ****************                                                                             I 
-   1.60    0.88507E+01  I *****************************                                                                I 
-   1.78    0.16471E+01  I ******                                                                                       I 
-   1.96    0.12375E+02  I **********************************                                                           I 
-   2.14    0.11676E+02  I *********************************                                                            I 
-   2.31    0.96271E+00  I                                                                                              I 
-   2.49    0.57446E+02  I ******************************************************                                       I 
-   2.67    0.70005E+02  I *********************************************************                                    I 
-   2.85    0.62485E+03  I **************************************************************************************       I 
+   1.07    0.86524E-02  I                                                                                              I 
+   1.25    0.42507E+00  I                                                                                              I 
+   1.42    0.32376E+01  I ****************                                                                             I 
+   1.60    0.88536E+01  I *****************************                                                                I 
+   1.78    0.16478E+01  I ******                                                                                       I 
+   1.96    0.12380E+02  I **********************************                                                           I 
+   2.14    0.11683E+02  I *********************************                                                            I 
+   2.31    0.96314E+00  I                                                                                              I 
+   2.49    0.57472E+02  I ******************************************************                                       I 
+   2.67    0.70041E+02  I *********************************************************                                    I 
+   2.85    0.62510E+03  I **************************************************************************************       I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum    140.874      mb
-  p  emission cross section 140.874      mb
+     Integrated spectrum    140.931      mb
+  p  emission cross section 140.931      mb
   
 
  ****************************************************** alpha spectrum   ******************************************************
  Ener.      Spectr.     .1E-02                         .1E-01                         .1E+00                         .1E+01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   2.37    0.25509E-05  I                                                                                              I 
-   2.53    0.23212E-05  I                                                                                              I 
-   2.70    0.35447E-03  I                                                                                              I 
-   2.87    0.91065E-03  I                                                                                              I 
-   3.04    0.36063E-08  I                                                                                              I 
-   3.21    0.21609E-08  I                                                                                              I 
-   3.38    0.72340E-01  I *********************************************************                                    I 
+   2.37    0.25563E-05  I                                                                                              I 
+   2.53    0.23250E-05  I                                                                                              I 
+   2.70    0.35458E-03  I                                                                                              I 
+   2.87    0.91094E-03  I                                                                                              I 
+   3.04    0.29289E-09  I                                                                                              I 
+   3.21    0.12063E-09  I                                                                                              I 
+   3.38    0.72379E-01  I *********************************************************                                    I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum   0.124359E-01  mb
-  He emission cross section0.124359E-01  mb
+     Integrated spectrum   0.124426E-01  mb
+  He emission cross section0.124426E-01  mb
   
 
   ---------------------------------------------------------------
@@ -740,10 +704,10 @@
 
           ----------------------------------------
 
-           1   0.00000    1     0.0    448.019    
-           2   1.40820    1     2.0    936.049    
-           3   2.53820    1     4.0    87.3740    
-           4   2.56130    1     0.0    99.9657    
+           1   0.00000    1     0.0    448.080    
+           2   1.40820    1     2.0    936.357    
+           3   2.53820    1     4.0    87.4234    
+           4   2.56130    1     0.0    99.9871    
            5   2.94930    1     6.0    0.00000    
            6   2.95900    1     2.0    0.00000    
            7   3.16600    1     2.0    0.00000    
@@ -774,33 +738,30 @@
  Discrete gamma transitions 
  ***************************
 
-     Decay of   2.5613 MeV    0.0 level with final population    99.966     mb
+     Decay of   2.5613 MeV    0.0 level with final population    99.987     mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4082    2.0      1.1531        99.952     mb
+      1.4082    2.0      1.1531        99.973     mb
 
-     Decay of   2.5382 MeV    4.0 level with final population    87.374     mb
+     Decay of   2.5382 MeV    4.0 level with final population    87.423     mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4082    2.0      1.1300        87.361     mb
+      1.4082    2.0      1.1300        87.411     mb
 
-     Decay of   1.4082 MeV    2.0 level with final population    1123.4     mb
+     Decay of   1.4082 MeV    2.0 level with final population    1123.8     mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.0000    0.0      1.4082        1123.3     mb
+      0.0000    0.0      1.4082        1123.7     mb
 
-  26-Fe- 54 production cross section  1571.41     mb        reac: (z,n)                
-
+  26-Fe- 54 production cross section  1571.85     mb        reac: (z,n)                
 
  ****************************************************** gamma spectrum  ******************************************************
  Ener.      Spectr.     .1E+02                         .1E+03                         .1E+04                         .1E+05
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.27    0.10334E+04  I **************************************************************                               I 
-   1.45    0.61974E+04  I ***************************************************************************************      I 
+   1.27    0.10338E+04  I **************************************************************                               I 
+   1.45    0.61995E+04  I ***************************************************************************************      I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum    1310.60      mb
-   g emission cross section 1310.60      mb
+     Integrated spectrum    1311.05      mb
+   g emission cross section 1311.05      mb
   
-
-  Tot. fission cross section    0.000     mb
   
 
 
@@ -813,20 +774,20 @@
  * Shape Elastic cross section (ELAcs)              1870.91     mb  
  * OM nonelastic cross section (ABScs)              1717.07     mb  
  * Nonelastic cross section                         1717.08     mb  
- * Production cross section (incl.fission)          1576.19     mb
- * Difference:  140.89 mb (  8.20) %
- * Compound elastic cross section (CE)              448.019     mb  
+ * Production cross section (incl.fission)          1576.14     mb
+ * Difference:  140.94 mb (  8.21) %
+ * Compound elastic cross section (CE)              448.080     mb  
  *******************************************************************
 
   WARNING: Sum of production XS (incl.fission)
   WARNING: is not equal reaction cross section
-  WARNING:     difference:   8.20 % at E =   3.0000     MeV
+  WARNING:     difference:   8.21 % at E =   3.0000     MeV
 
  +++ end of one energy +++
 
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 15:01.45 (06-01-2014)
+  End time: 21:55.59 (01-04-2014)
 
-  Calculation time:     0 min  1 s
+  Calculation time:     0 min  0 s
