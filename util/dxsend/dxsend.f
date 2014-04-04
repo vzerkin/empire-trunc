@@ -1133,7 +1133,7 @@ c...
 C* Add reaction as contributor to MT0
       LOOP=LOOP+1
 c...
-c...      print *,'Adding',MT,' loop',loop,' at 3'
+C...  print *,'Adding',MT,' loop',loop,' at 3'
 c...
       IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
       LST(LOOP)=MT
@@ -1183,9 +1183,9 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
      1           ,RWO(LX),NE,MEN,KRW,IER)
 c...
-c...  M =NINT(ZA0)
-c...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
-c... &       ,m,mf0,mt,ne,ier
+C...  M =NINT(ZA0)
+C...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
+C... &       ,m,mf0,mt,ne,ier
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -1824,7 +1824,7 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-c...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+C...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -1879,8 +1879,8 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-c...    print *,' Done mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
-c...    print *,' nen,ier',nen,ier
+C...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
+C...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C* Find particle yields when these are not implicit in MT
@@ -2050,30 +2050,42 @@ C* Process data when given in MF 6 representation
         JNK=0
 C* Split the work array RWO to operate on function and argument
 C* LE  - First argument
+C* LX0 - Original cross section
 C* LX  - First function
 C* LXE - Second argument
 C* LXX - Second function
-        KX =MRW/2
+C* IPRC- Counter of successfully processed sections
+        KX =MRW/3
         LE =1
-        LX =KX+1
+        LX0=LE+KX
+        LX =LX0+KX
         LD =KX/2
         LXE=LE+LD
         LXX=LX+LD
+        IPRC=0
+        DO I=1,NEN
+          RWO(LX0-1+I)=DXS(I)
+          DXS(I)=0
+        END DO
 C* Loop over particles
    32   JNK=JNK+1
 C* Retrieve the particle yield
         CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
      &             ,RWO(LE),RWO(LX),KX,IER)
 C* Check for matching particle - else skip section
-        IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
+   33   IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
 c...
-c...        print *,'Skipping particle/mf/mt/law',nint(zap),mf,mt,law
+C...      print *,'Skipping particle/mf/mt/lip/law'
+C... &           ,nint(zap),mf,mt,lip,law
+C...      print *,'jnk',jnk
 c...
           IF(JNK.GE.NK) THEN
-C* Particle not found - yield assumed zero
-            NEN=0
-            IER=1
-            PRINT *,'WARNING - Zero yield for MT',MT0, ' particle',IZAP0
+            IF(IPRC.EQ.0) THEN
+C*            --Particle not found - yield assumed zero
+              NEN=0
+              IER=1
+              PRINT *,'WARNING - Zero yield for MT',MT0, ' particle',IZAP0
+            END IF
             GO TO 900
           END IF
 C* Skip the subsection for this particle
@@ -2112,20 +2124,34 @@ C*          Set IER to flag error and terminate
           END IF
           GO TO 32
         END IF
+C* Found the required particle
+        IPRC=IPRC+1
 C* Define union grid of cross sections and yields at LXE
         CALL UNIGRD(NEN,ENR,NP,RWO(LE),NE2,RWO(LXE),LD)
 C* Interpolate cross sections on union grid to LXX
-        CALL FITGRD(NEN,ENR,DXS,NE2,RWO(LXE),RWO(LXX))
-C* Interpolate yields to union grid into DXS
-        CALL FITGRD(NP,RWO(LE),RWO(LX),NE2,RWO(LXE),DXS)
+        CALL FITGRD(NEN,ENR,RWO(LX0),NE2,RWO(LXE),RWO(LXX))
+C* Interpolate yields to union grid into ENR (temporarily)
+        CALL FITGRD(NP,RWO(LE),RWO(LX),NE2,RWO(LXE),ENR)
 C* Save energy union grid and multiply cross section by the yield
         NEN=NE2
         DO I=1,NEN
+C*        -- Add the product xs*yield into DXS
+          DXS(I)=DXS(I)+ENR(I)*RWO(LXX-1+I)
+C*        -- Save the union-grid energy
           ENR(I)=RWO(LXE-1+I)
-          DXS(I)=DXS(I)*RWO(LXX-1+I)
+C*        -- Save the cross section on new grid at LX0
+          RWO(LX0-1+I)=RWO(LXX-1+I)
         END DO
+C...
+C...    PRINT *,' Added contribution of ZAP,LIP',NINT(ZAP0),LIP
+C...
+C* Check if there are more LIP states present for this particle
+        IF(MT0/10000.NE.4) THEN
+C*        -- Reset ZAP to skip the remainder of the section
+          ZAP=-1
+          GO TO 33
+        END IF
 C* Process cross section at fixed angle for charged particles
-        IF(MT0/10000.NE.4) GO TO 900
         IF(LAW.EQ.5) THEN
           CALL RDTAB2(LEF,SPI,C2,LIDP,L2,NR,NE,NBT,INR,IER)
           MX=MRW-LXX
@@ -2252,7 +2278,7 @@ C...
 C...            write(81,'(f11.2,1p,e11.4)') EE/1000,RWO(LX-1+IE)*1000
 C...            write(82,'(f11.2,1p,e11.4)') EE/1000,-AAI*1000
 C...            write(83,'(f11.2,1p,e11.4)') EE/1000,AAS*1000
-                write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
+C...            write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
 C...            PRINT *,EE/1000,RWO(LX-1+IE),AA,ARE,SRE,AIM,SIM
 C...            
               ELSE IF(LIDP.EQ.1) THEN
@@ -3523,12 +3549,11 @@ C*
 C* Search the ENDF file for section MT in file MF3
       CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
+C...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*      
 C* Reaction found - read cross sections from the TAB1 record
-
 C* If MF10, search over metastable state
       JST=1
       IF(MF1.EQ.10) JST=N1
@@ -3546,7 +3571,7 @@ C* If MF10, search over metastable state
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
         IF(MF .NE. 10) GO TO 12
 c...
-        PRINT *,'mf,mt,lfs,mst',mf,mt,lfs,mst
+C...    PRINT *,'mf,mt,lfs,mst',mf,mt,lfs,mst
 c...
         IF(LFS.EQ.MST) GO TO 12
       END DO
