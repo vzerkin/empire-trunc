@@ -1,5 +1,5 @@
 
-                      Start time: 21:55.59 (01-04-2014)
+                      Start time: 14:55.09 (04-04-2014)
 
                          __________________________
                         |                          |
@@ -7,7 +7,8 @@
                         |                          |
                         |        MALTA             |
                         |                          |
-                        |       Not under SVN      |
+                        | SVN empire    rev.  3944 |
+                        | empire/source rev.  3943 |
                         |                          |
                         |__________________________|
   
@@ -762,8 +763,8 @@
 
   Incident energy (CMS)         2.9449301217167543       MeV
   Shape elastic cross section   1473.8402400000000       mb
-  CN elastic cross section      431.31406      mb
-     Elastic=   34.322884      mb/str
+  CN elastic cross section      431.314056      mb
+     Elastic=   34.3228836      mb/str
 
                                                INELASTIC DIFFERENTIAL CROSS-SECTION
                                                    (including compound + direct)
@@ -1103,6 +1104,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 21:56.03 (01-04-2014)
+  End time: 14:55.16 (04-04-2014)
 
-  Calculation time:     0 min  4 s
+  Calculation time:     0 min  8 s

@@ -1,5 +1,5 @@
 
-                      Start time: 21:55.57 (01-04-2014)
+                      Start time: 14:54.42 (04-04-2014)
 
                          __________________________
                         |                          |
@@ -7,7 +7,8 @@
                         |                          |
                         |        MALTA             |
                         |                          |
-                        |       Not under SVN      |
+                        | SVN empire    rev.  3944 |
+                        | empire/source rev.  3943 |
                         |                          |
                         |__________________________|
   
@@ -469,8 +470,8 @@
   8 0.736E+22 0.448E+13 0.736E+22           0.303E+20 0.132E+17 0.303E+20 0.343E+16 0.304E+15 0.404E+12 0.112E+10 0.183E+01
  10 0.726E+22 0.124E+14 0.726E+22           0.929E+19 0.537E+16 0.928E+19 0.122E+15 0.182E+14 0.118E+10 0.137E+07 0.214E-03
  12 0.715E+22 0.282E+14 0.715E+22           0.252E+19 0.243E+16 0.251E+19 0.324E+13 0.117E+13 0.158E+07 0.497E+03 0.156E-08
- 14 0.701E+22 0.558E+14 0.701E+22           0.570E+18 0.117E+16 0.569E+18 0.553E+11 0.758E+11 0.597E+03 0.268E-01 0.541E-15
- 16 0.685E+22 0.101E+15 0.685E+22           0.993E+17 0.579E+15 0.988E+17 0.482E+09 0.453E+10 0.222E-01 0.115E-06 0.937E-35
+ 14 0.701E+22 0.558E+14 0.701E+22           0.570E+18 0.117E+16 0.569E+18 0.553E+11 0.758E+11 0.597E+03 0.268E-01 0.546E-15
+ 16 0.685E+22 0.101E+15 0.685E+22           0.993E+17 0.579E+15 0.988E+17 0.482E+09 0.453E+10 0.222E-01 0.115E-06 0.946E-35
  18 0.667E+22 0.171E+15 0.667E+22           0.118E+17 0.284E+15 0.116E+17 0.152E+07 0.230E+09 0.418E-08 0.132E-14 0.000E+00
  20 0.646E+22 0.274E+15 0.646E+22           0.868E+15 0.136E+15 0.732E+15 0.954E+03 0.916E+07 0.149E-20 0.000E+00 0.000E+00
  22 0.624E+22 0.423E+15 0.624E+22           0.781E+14 0.617E+14 0.165E+14 0.376E-01 0.283E+06 0.000E+00 0.000E+00 0.000E+00
@@ -497,7 +498,7 @@
  He PCROSS emission cross section 0.24894     mb  (accepted)
  d  PCROSS emission cross section 0.46002E-01 mb  (accepted)
  t  PCROSS emission cross section 0.35831E-03 mb  (accepted)
- h  PCROSS emission cross section 0.22829E-10 mb  (accepted)
+ h  PCROSS emission cross section 0.22828E-10 mb  (accepted)
 
 
  *****************************************************************************************************************************
@@ -619,7 +620,7 @@
  Ener.      Spectr.     .1E-01                         .1E+00                         .1E+01                         .1E+02
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   3.77    0.31409E-11  I                                                                                              I 
+   3.77    0.31408E-11  I                                                                                              I 
    4.19    0.65980E-09  I                                                                                              I 
    4.60    0.18428E-07  I                                                                                              I 
    5.02    0.28437E-06  I                                                                                              I 
@@ -652,11 +653,10 @@
  Ener.      Spectr.     .1E-02                         .1E-01                         .1E+00                         .1E+01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   5.77    0.12589E-18  I                                                                                              I 
-   6.19    0.13220E-14  I                                                                                              I 
-   6.60    0.27727E-13  I                                                                                              I 
+   6.19    0.11240E-14  I                                                                                              I 
+   6.60    0.27421E-13  I                                                                                              I 
    7.01    0.14029E-12  I                                                                                              I 
-   7.42    0.64117E-12  I                                                                                              I 
+   7.42    0.64110E-12  I                                                                                              I 
    7.84    0.76210E-12  I                                                                                              I 
    8.25    0.15877E-11  I                                                                                              I 
    8.66    0.47891E-11  I                                                                                              I 
@@ -698,7 +698,7 @@
  Ener.      Spectr.     .1E-02                         .1E-01                         .1E+00                         .1E+01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   3.33    0.85987E-13  I                                                                                              I 
+   3.33    0.85998E-13  I                                                                                              I 
    3.75    0.23086E-10  I                                                                                              I 
    4.17    0.80573E-08  I                                                                                              I 
    4.58    0.24356E-06  I                                                                                              I 
@@ -719,10 +719,10 @@
  Ener.      Spectr.     .1E-04                         .1E-03                         .1E-02                         .1E-01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   3.32    0.82107E-17  I                                                                                              I 
-   3.73    0.98349E-13  I                                                                                              I 
+   3.32    0.82593E-17  I                                                                                              I 
+   3.73    0.98383E-13  I                                                                                              I 
    4.14    0.22147E-10  I                                                                                              I 
-   4.56    0.14179E-08  I                                                                                              I 
+   4.56    0.14178E-08  I                                                                                              I 
    4.97    0.38326E-07  I                                                                                              I 
    5.39    0.55792E-06  I                                                                                              I 
    5.80    0.51351E-05  I                                                                                              I 
@@ -918,8 +918,8 @@
 
   Incident energy (CMS)         9.8987790377653599       MeV
   Shape elastic cross section   0.0000000000000000       mb
-  CN elastic cross section     2.75776074E-05  mb
-     Elastic=  2.19455615E-06  mb/str
+  CN elastic cross section      2.75776074E-05  mb
+     Elastic=   2.19455615E-06  mb/str
 
   80-Hg-199 production cross section 0.266220E-01 mb        reac: (z,gamma)            
 
@@ -1032,9 +1032,9 @@
  Ener.      Spectr.     .1E-01                         .1E+00                         .1E+01                         .1E+02
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.67    0.33644E-14  I                                                                                              I 
-   2.09    0.46327E-10  I                                                                                              I 
-   2.51    0.12779E-07  I                                                                                              I 
+   1.67    0.33643E-14  I                                                                                              I 
+   2.09    0.46326E-10  I                                                                                              I 
+   2.51    0.12780E-07  I                                                                                              I 
    2.93    0.26824E-06  I                                                                                              I 
    3.35    0.34192E-05  I                                                                                              I 
    3.77    0.23756E-04  I                                                                                              I 
@@ -1071,10 +1071,10 @@
  Ener.      Spectr.     .1E-02                         .1E-01                         .1E+00                         .1E+01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   4.54    0.90999E-14  I                                                                                              I 
-   4.95    0.13833E-09  I                                                                                              I 
+   4.54    0.90570E-14  I                                                                                              I 
+   4.95    0.13757E-09  I                                                                                              I 
    5.36    0.59504E-09  I                                                                                              I 
-   5.77    0.22891E-08  I                                                                                              I 
+   5.77    0.22890E-08  I                                                                                              I 
    6.19    0.23989E-08  I                                                                                              I 
    6.60    0.39148E-08  I                                                                                              I 
    7.01    0.12545E-07  I                                                                                              I 
@@ -1155,8 +1155,8 @@
  Ener.      Spectr.     .1E-04                         .1E-03                         .1E-02                         .1E-01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.66    0.76077E-21  I                                                                                              I 
-   2.07    0.43803E-13  I                                                                                              I 
+   1.66    0.76103E-21  I                                                                                              I 
+   2.07    0.43818E-13  I                                                                                              I 
    2.49    0.62565E-11  I                                                                                              I 
    2.90    0.24624E-09  I                                                                                              I 
    3.32    0.39693E-08  I                                                                                              I 
@@ -1563,11 +1563,11 @@
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
    4.12    0.90383E-11  I                                                                                              I 
-   4.54    0.11775E-08  I                                                                                              I 
-   4.95    0.81156E-08  I                                                                                              I 
-   5.36    0.49638E-07  I                                                                                              I 
-   5.77    0.85176E-07  I                                                                                              I 
-   6.19    0.88807E-07  I                                                                                              I 
+   4.54    0.11731E-08  I                                                                                              I 
+   4.95    0.75280E-08  I                                                                                              I 
+   5.36    0.49421E-07  I                                                                                              I 
+   5.77    0.84875E-07  I                                                                                              I 
+   6.19    0.88794E-07  I                                                                                              I 
    6.60    0.84217E-07  I                                                                                              I 
    7.01    0.17677E-06  I                                                                                              I 
    7.42    0.61699E-06  I                                                                                              I 
@@ -1592,8 +1592,8 @@
   15.26    0.11586E-04  I **                                                                                           I 
   15.67    0.18076E-05  I                                                                                              I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum   0.523030E-03  mb
-  He emission cross section0.523030E-03  mb
+     Integrated spectrum   0.523029E-03  mb
+  He emission cross section0.523029E-03  mb
   
   
   -------------------------------------
@@ -2718,83 +2718,83 @@
   8  Decaying nucleus 196-Pt
   -------------------------------------
   
- Yrast state at bin   1 spin= 11.5 pop= 0.72446E-13
+ Yrast state at bin   1 spin= 11.5 pop= 0.72442E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 12.5 pop= 0.48334E-13
+ Yrast state at bin   1 spin= 12.5 pop= 0.48331E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 13.5 pop= 0.26149E-13
+ Yrast state at bin   1 spin= 13.5 pop= 0.26147E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 14.5 pop= 0.11622E-13
+ Yrast state at bin   1 spin= 14.5 pop= 0.11621E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 15.5 pop= 0.48463E-14
+ Yrast state at bin   1 spin= 15.5 pop= 0.48460E-14
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 16.5 pop= 0.18748E-14
+ Yrast state at bin   1 spin= 16.5 pop= 0.18747E-14
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 17.5 pop= 0.67031E-15
+ Yrast state at bin   1 spin= 17.5 pop= 0.67027E-15
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin= 18.5 pop= 0.18979E-15
+ Yrast state at bin   1 spin= 18.5 pop= 0.18978E-15
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-12.5 pop= 0.49138E-13
+ Yrast state at bin   1 spin=-12.5 pop= 0.49135E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-13.5 pop= 0.25392E-13
+ Yrast state at bin   1 spin=-13.5 pop= 0.25391E-13
           100% of this was assumed to populate level # 23
  Yrast state at bin   1 spin=-14.5 pop= 0.11629E-13
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-15.5 pop= 0.48431E-14
+ Yrast state at bin   1 spin=-15.5 pop= 0.48428E-14
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-16.5 pop= 0.18760E-14
+ Yrast state at bin   1 spin=-16.5 pop= 0.18759E-14
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-17.5 pop= 0.66983E-15
+ Yrast state at bin   1 spin=-17.5 pop= 0.66980E-15
           100% of this was assumed to populate level # 23
- Yrast state at bin   1 spin=-18.5 pop= 0.18995E-15
+ Yrast state at bin   1 spin=-18.5 pop= 0.18994E-15
           100% of this was assumed to populate level # 23
 
- Population neglected because too small  0.11879E-14
+ Population neglected because too small  0.11878E-14
 
   ---------------------------------------------------------------
   Decaying nucleus  78-Pt-196  mass=195.964935 Q-value= -0.289480
   ---------------------------------------------------------------
 
-           1   0.00000    1     0.0   0.107294E-10
-           2   0.35568    1     2.0   0.199385E-10
-           3   0.68869    1     2.0   0.930027E-11
-           4   0.87687    1     4.0   0.764804E-11
-           5   1.01504    1     3.0   0.474421E-11
-           6   1.13531    1     0.0   0.611488E-12
-           7   1.27021   -1     5.0   0.282410E-11
-           8   1.29331    1     4.0   0.212307E-11
-           9   1.36158    1     2.0   0.133751E-11
-          10   1.37360   -1     7.0   0.311239E-11
-          11   1.40273    1     0.0   0.278419E-12
-          12   1.42974   -1     5.0   0.167197E-11
-          13   1.44704   -1     3.0   0.126623E-11
-          14   1.52580    1     6.0   0.136742E-11
-          15   1.53580    1     4.0   0.951610E-12
-          16   1.60449    1     2.0   0.541014E-12
-          17   1.60974    1     5.0   0.780704E-12
-          18   1.67726    1     2.0   0.419223E-12
-          19   1.67981   -1     6.0   0.660700E-12
-          20   1.75466    1     4.0   0.413620E-12
-          21   1.79509    1     2.0   0.301440E-12
-          22   1.80230    1     1.0   0.846894E-12
-          23   1.82069   -1     9.0   0.122591E-11
-          24   1.82323    1     0.0   0.664808E-13
-          25   1.82571    1     2.0   0.273620E-12
-          26   1.84735    1     2.0   0.254529E-12
-          27   1.85366    1     2.0   0.249045E-12
-          28   1.88300    1     4.0   0.265186E-12
-          29   1.88814    1     2.0   0.219694E-12
-          30   1.90170   -1     8.0   0.335762E-12
-          31   1.91854    1     0.0   0.473041E-13
-          32   1.93201    1     1.0   0.371069E-12
-          33   1.96891    1     1.0   0.285758E-12
-          34   1.98493    1     1.0   0.253704E-12
-          35   1.98822    1     2.0   0.139428E-12
-          36   1.99896    1     2.0   0.131172E-12
-          37   2.00600    1     4.0   0.146605E-12
-          38   2.00740    1     6.0   0.137671E-12
-          39   2.01388    1     2.0   0.119798E-12
-          40   2.04699    1     2.0   0.949202E-13
+           1   0.00000    1     0.0   0.107293E-10
+           2   0.35568    1     2.0   0.199382E-10
+           3   0.68869    1     2.0   0.930013E-11
+           4   0.87687    1     4.0   0.764788E-11
+           5   1.01504    1     3.0   0.474414E-11
+           6   1.13531    1     0.0   0.611481E-12
+           7   1.27021   -1     5.0   0.282402E-11
+           8   1.29331    1     4.0   0.212303E-11
+           9   1.36158    1     2.0   0.133749E-11
+          10   1.37360   -1     7.0   0.311227E-11
+          11   1.40273    1     0.0   0.278416E-12
+          12   1.42974   -1     5.0   0.167193E-11
+          13   1.44704   -1     3.0   0.126621E-11
+          14   1.52580    1     6.0   0.136738E-11
+          15   1.53580    1     4.0   0.951595E-12
+          16   1.60449    1     2.0   0.541007E-12
+          17   1.60974    1     5.0   0.780685E-12
+          18   1.67726    1     2.0   0.419219E-12
+          19   1.67981   -1     6.0   0.660681E-12
+          20   1.75466    1     4.0   0.413615E-12
+          21   1.79509    1     2.0   0.301437E-12
+          22   1.80230    1     1.0   0.846854E-12
+          23   1.82069   -1     9.0   0.122585E-11
+          24   1.82323    1     0.0   0.664805E-13
+          25   1.82571    1     2.0   0.273618E-12
+          26   1.84735    1     2.0   0.254528E-12
+          27   1.85366    1     2.0   0.249044E-12
+          28   1.88300    1     4.0   0.265184E-12
+          29   1.88814    1     2.0   0.219693E-12
+          30   1.90170   -1     8.0   0.335749E-12
+          31   1.91854    1     0.0   0.473039E-13
+          32   1.93201    1     1.0   0.371054E-12
+          33   1.96891    1     1.0   0.285747E-12
+          34   1.98493    1     1.0   0.253694E-12
+          35   1.98822    1     2.0   0.139427E-12
+          36   1.99896    1     2.0   0.131171E-12
+          37   2.00600    1     4.0   0.146604E-12
+          38   2.00740    1     6.0   0.137669E-12
+          39   2.01388    1     2.0   0.119797E-12
+          40   2.04699    1     2.0   0.949198E-13
 
      Decay of   2.0470 MeV    2.0 level with final population   0.94920E-13 mb
      Level populated      Egamma    Intensity (cross sect.)
@@ -2805,11 +2805,11 @@
      Decay of   2.0139 MeV    2.0 level with final population   0.11980E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
       1.4470   -3.0      0.5668       0.43281E-13 mb
-      0.8769    4.0      1.1370       0.75940E-13 mb
+      0.8769    4.0      1.1370       0.75939E-13 mb
 
      Decay of   2.0074 MeV    6.0 level with final population   0.13767E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.5258    6.0      0.4816       0.10493E-13 mb
+      1.5258    6.0      0.4816       0.10492E-13 mb
       1.2933    4.0      0.7141       0.11406E-12 mb
       0.8769    4.0      1.1305       0.11178E-13 mb
 
@@ -2818,7 +2818,7 @@
      Decay of   1.9990 MeV    2.0 level with final population   0.13117E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
       1.2933    4.0      0.7057       0.10991E-13 mb
-      0.3557    2.0      1.6433       0.84550E-13 mb
+      0.3557    2.0      1.6433       0.84549E-13 mb
       0.0000    0.0      1.9990       0.35507E-13 mb
 
      Decay of   1.9882 MeV    2.0 level with final population   0.13943E-12 mb
@@ -2827,31 +2827,31 @@
       1.3616    2.0      0.6266       0.13063E-13 mb
       0.3557    2.0      1.6325       0.93306E-13 mb
 
-     Decay of   1.9849 MeV    1.0 level with final population   0.25370E-12 mb
+     Decay of   1.9849 MeV    1.0 level with final population   0.25369E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3616    2.0      0.6234       0.11055E-12 mb
-      1.1353    0.0      0.8496       0.64111E-13 mb
-      1.0150    3.0      0.9699       0.74048E-13 mb
+      1.3616    2.0      0.6234       0.11054E-12 mb
+      1.1353    0.0      0.8496       0.64108E-13 mb
+      1.0150    3.0      0.9699       0.74045E-13 mb
 
-     Decay of   1.9689 MeV    1.0 level with final population   0.28576E-12 mb
+     Decay of   1.9689 MeV    1.0 level with final population   0.28575E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.4027    0.0      0.5662       0.38667E-13 mb
-      1.1353    0.0      0.8336       0.52126E-13 mb
-      0.3557    2.0      1.6132       0.23541E-13 mb
+      1.4027    0.0      0.5662       0.38665E-13 mb
+      1.1353    0.0      0.8336       0.52124E-13 mb
+      0.3557    2.0      1.6132       0.23540E-13 mb
       0.0000    0.0      1.9689       0.16817E-12 mb
 
-     Decay of   1.9320 MeV    1.0 level with final population   0.37107E-12 mb
+     Decay of   1.9320 MeV    1.0 level with final population   0.37105E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.3557    2.0      1.5763       0.37036E-12 mb
+      0.3557    2.0      1.5763       0.37035E-12 mb
 
      Decay of   1.9185 MeV    0.0 level with final population   0.47304E-13 mb
      Level populated      Egamma    Intensity (cross sect.)
       0.6887    2.0      1.2298       0.71979E-14 mb
       0.3557    2.0      1.5629       0.40003E-13 mb
 
-     Decay of   1.9017 MeV   -8.0 level with final population   0.33576E-12 mb
+     Decay of   1.9017 MeV   -8.0 level with final population   0.33575E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3736   -7.0      0.5281       0.32100E-12 mb
+      1.3736   -7.0      0.5281       0.32098E-12 mb
 
      Decay of   1.8881 MeV    2.0 level with final population   0.21969E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
@@ -2859,11 +2859,11 @@
       1.1353    0.0      0.7528       0.11233E-13 mb
       0.6887    2.0      1.1994       0.57040E-13 mb
       0.3557    2.0      1.5325       0.62223E-13 mb
-      0.0000    0.0      1.8881       0.86405E-13 mb
+      0.0000    0.0      1.8881       0.86404E-13 mb
 
-     Level of energy    1.8830 MeV and spin    4.0 with population   0.26519E-12 mb is not depopulated (g.s. transition assumed)
+     Level of energy    1.8830 MeV and spin    4.0 with population   0.26518E-12 mb is not depopulated (g.s. transition assumed)
 
-     Decay of   1.8537 MeV    2.0 level with final population   0.24905E-12 mb
+     Decay of   1.8537 MeV    2.0 level with final population   0.24904E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
       1.2933    4.0      0.5604       0.18386E-13 mb
       0.3557    2.0      1.4980       0.19154E-12 mb
@@ -2879,12 +2879,12 @@
      Level populated      Egamma    Intensity (cross sect.)
       1.4470   -3.0      0.3787       0.32472E-13 mb
       1.4027    0.0      0.4230       0.13286E-13 mb
-      1.3616    2.0      0.4641       0.61997E-14 mb
+      1.3616    2.0      0.4641       0.61996E-14 mb
       1.1353    0.0      0.6904       0.25097E-13 mb
-      0.6887    2.0      1.1370       0.47249E-13 mb
+      0.6887    2.0      1.1370       0.47248E-13 mb
       0.0000    0.0      1.8257       0.14763E-12 mb
 
-     Decay of   1.8232 MeV    0.0 level with final population   0.66481E-13 mb
+     Decay of   1.8232 MeV    0.0 level with final population   0.66480E-13 mb
      Level populated      Egamma    Intensity (cross sect.)
       0.3557    2.0      1.4675       0.66313E-13 mb
 
@@ -2892,43 +2892,43 @@
      Level populated      Egamma    Intensity (cross sect.)
       1.3736   -7.0      0.4471       0.11867E-11 mb
 
-     Decay of   1.8023 MeV    1.0 level with final population   0.84689E-12 mb
+     Decay of   1.8023 MeV    1.0 level with final population   0.84685E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3616    2.0      0.4407       0.18624E-13 mb
-      1.1353    0.0      0.6670       0.12417E-13 mb
-      0.6887    2.0      1.1136       0.11791E-12 mb
-      0.3557    2.0      1.4466       0.74477E-13 mb
-      0.0000    0.0      1.8023       0.62069E-12 mb
+      1.3616    2.0      0.4407       0.18623E-13 mb
+      1.1353    0.0      0.6670       0.12416E-13 mb
+      0.6887    2.0      1.1136       0.11790E-12 mb
+      0.3557    2.0      1.4466       0.74473E-13 mb
+      0.0000    0.0      1.8023       0.62066E-12 mb
 
      Decay of   1.7951 MeV    2.0 level with final population   0.30144E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.6887    2.0      1.1064       0.72875E-13 mb
+      0.6887    2.0      1.1064       0.72874E-13 mb
       0.3557    2.0      1.4394       0.18222E-12 mb
-      0.0000    0.0      1.7951       0.45548E-13 mb
+      0.0000    0.0      1.7951       0.45547E-13 mb
 
-     Decay of   1.7547 MeV    4.0 level with final population   0.41362E-12 mb
+     Decay of   1.7547 MeV    4.0 level with final population   0.41361E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
       1.4470   -3.0      0.3076       0.10744E-12 mb
-      1.2702   -5.0      0.4845       0.14719E-12 mb
+      1.2702   -5.0      0.4845       0.14718E-12 mb
       0.8769    4.0      0.8778       0.12659E-12 mb
 
-     Decay of   1.6798 MeV   -6.0 level with final population   0.66070E-12 mb
+     Decay of   1.6798 MeV   -6.0 level with final population   0.66068E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.2702   -5.0      0.4096       0.60615E-12 mb
+      1.2702   -5.0      0.4096       0.60613E-12 mb
 
      Decay of   1.6773 MeV    2.0 level with final population   0.41922E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.3616    2.0      0.3157       0.60366E-14 mb
+      1.3616    2.0      0.3157       0.60365E-14 mb
       1.1353    0.0      0.5419       0.10064E-13 mb
-      1.0150    3.0      0.6622       0.26165E-13 mb
+      1.0150    3.0      0.6622       0.26164E-13 mb
       0.8769    4.0      0.8004       0.10063E-13 mb
       0.6887    2.0      0.9886       0.42243E-13 mb
       0.3557    2.0      1.3216       0.12075E-12 mb
       0.0000    0.0      1.6773       0.20124E-12 mb
 
-     Decay of   1.6097 MeV    5.0 level with final population   0.78070E-12 mb
+     Decay of   1.6097 MeV    5.0 level with final population   0.78069E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.0150    3.0      0.5947       0.76796E-12 mb
+      1.0150    3.0      0.5947       0.76794E-12 mb
 
      Decay of   1.6045 MeV    2.0 level with final population   0.54463E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
@@ -2936,12 +2936,12 @@
       1.0150    3.0      0.5895       0.10140E-13 mb
       0.8769    4.0      0.7276       0.11155E-12 mb
       0.6887    2.0      0.9158       0.10139E-12 mb
-      0.3557    2.0      1.2488       0.25352E-12 mb
+      0.3557    2.0      1.2488       0.25351E-12 mb
       0.0000    0.0      1.6045       0.50697E-13 mb
 
-     Decay of   1.5358 MeV    4.0 level with final population   0.95161E-12 mb
+     Decay of   1.5358 MeV    4.0 level with final population   0.95159E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.0150    3.0      0.5208       0.90284E-12 mb
+      1.0150    3.0      0.5208       0.90282E-12 mb
       0.6887    2.0      0.8471       0.16248E-14 mb
       0.3557    2.0      1.1801       0.19860E-14 mb
 
@@ -2949,26 +2949,26 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.8769    4.0      0.6489       0.13600E-11 mb
 
-     Decay of   1.4470 MeV   -3.0 level with final population   0.15035E-11 mb
+     Decay of   1.4470 MeV   -3.0 level with final population   0.15034E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.2702   -5.0      0.1768       0.79615E-13 mb
-      1.0150    3.0      0.4320       0.79610E-13 mb
+      1.2702   -5.0      0.1768       0.79614E-13 mb
+      1.0150    3.0      0.4320       0.79609E-13 mb
       0.8769    4.0      0.5702       0.43003E-13 mb
       0.6887    2.0      0.7583       0.18295E-12 mb
-      0.3557    2.0      1.0914       0.91510E-12 mb
-      0.0000    0.0      1.4470       0.13727E-12 mb
+      0.3557    2.0      1.0914       0.91508E-12 mb
+      0.0000    0.0      1.4470       0.13726E-12 mb
 
-     Decay of   1.4297 MeV   -5.0 level with final population   0.16720E-11 mb
+     Decay of   1.4297 MeV   -5.0 level with final population   0.16719E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
       0.8769    4.0      0.5529       0.16398E-11 mb
 
-     Decay of   1.4027 MeV    0.0 level with final population   0.34677E-12 mb
+     Decay of   1.4027 MeV    0.0 level with final population   0.34676E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.3557    2.0      1.0470       0.34511E-12 mb
+      0.3557    2.0      1.0470       0.34510E-12 mb
 
-     Decay of   1.3736 MeV   -7.0 level with final population   0.46741E-11 mb
+     Decay of   1.3736 MeV   -7.0 level with final population   0.46739E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
-      1.2702   -5.0      0.1034       0.87366E-12 mb
+      1.2702   -5.0      0.1034       0.87362E-12 mb
 
      Decay of   1.3616 MeV    2.0 level with final population   0.15004E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
@@ -2976,32 +2976,32 @@
       1.0150    3.0      0.3465       0.13879E-12 mb
       0.8769    4.0      0.4847       0.29645E-13 mb
       0.6887    2.0      0.6729       0.63089E-12 mb
-      0.3557    2.0      1.0059       0.50466E-12 mb
+      0.3557    2.0      1.0059       0.50465E-12 mb
       0.0000    0.0      1.3616       0.11355E-12 mb
 
      Decay of   1.2933 MeV    4.0 level with final population   0.22682E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.8769    4.0      0.4164       0.28273E-12 mb
+      0.8769    4.0      0.4164       0.28272E-12 mb
       0.6887    2.0      0.6046       0.16632E-11 mb
-      0.3557    2.0      0.9376       0.28275E-12 mb
+      0.3557    2.0      0.9376       0.28274E-12 mb
 
-     Decay of   1.2702 MeV   -5.0 level with final population   0.84389E-11 mb
+     Decay of   1.2702 MeV   -5.0 level with final population   0.84386E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.8769    4.0      0.3933       0.82975E-11 mb
-      0.3557    2.0      0.9145       0.24896E-13 mb
+      0.8769    4.0      0.3933       0.82972E-11 mb
+      0.3557    2.0      0.9145       0.24895E-13 mb
 
-     Decay of   1.1353 MeV    0.0 level with final population   0.82359E-12 mb
+     Decay of   1.1353 MeV    0.0 level with final population   0.82358E-12 mb
      Level populated      Egamma    Intensity (cross sect.)
       0.6887    2.0      0.4466       0.22752E-12 mb
-      0.3557    2.0      0.7796       0.58347E-12 mb
+      0.3557    2.0      0.7796       0.58346E-12 mb
 
-     Decay of   1.0150 MeV    3.0 level with final population   0.68588E-11 mb
+     Decay of   1.0150 MeV    3.0 level with final population   0.68587E-11 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.8769    4.0      0.1382       0.76070E-13 mb
-      0.6887    2.0      0.3263       0.58514E-11 mb
+      0.8769    4.0      0.1382       0.76069E-13 mb
+      0.6887    2.0      0.3263       0.58513E-11 mb
       0.3557    2.0      0.6594       0.25746E-12 mb
 
-     Decay of   0.8769 MeV    4.0 level with final population   0.20108E-10 mb
+     Decay of   0.8769 MeV    4.0 level with final population   0.20107E-10 mb
      Level populated      Egamma    Intensity (cross sect.)
       0.3557    2.0      0.5212       0.19663E-10 mb
 
@@ -3009,11 +3009,11 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.3557    2.0      0.3330       0.17500E-10 mb
 
-     Decay of   0.3557 MeV    2.0 level with final population   0.63699E-10 mb
+     Decay of   0.3557 MeV    2.0 level with final population   0.63697E-10 mb
      Level populated      Egamma    Intensity (cross sect.)
-      0.0000    0.0      0.3557       0.60042E-10 mb
+      0.0000    0.0      0.3557       0.60041E-10 mb
 
-  78-Pt-196 production cross section 0.764860E-10 mb        reac: (z,pd)               
+  78-Pt-196 production cross section 0.764846E-10 mb        reac: (z,pd)               
 
   ---------------------------------------------------------------
   Decaying nucleus  78-Pt-195  mass=194.964775 Q-value= 12.365910
@@ -3442,7 +3442,7 @@
  Yrast state at bin   1 spin=-14.5 pop= 0.28450E-05
            50% of this was assumed to populate level # 13
            50% of this was assumed to populate level # 40
- Yrast state at bin   1 spin=-15.5 pop= 0.98631E-06
+ Yrast state at bin   1 spin=-15.5 pop= 0.98630E-06
            50% of this was assumed to populate level # 13
            50% of this was assumed to populate level # 40
  Yrast state at bin   1 spin=-16.5 pop= 0.26502E-06
@@ -3455,7 +3455,7 @@
            50% of this was assumed to populate level # 13
            50% of this was assumed to populate level # 40
 
- Population neglected because too small  0.12033E-06
+ Population neglected because too small  0.12029E-06
 
   ---------------------------------------------------------------
   Decaying nucleus  78-Pt-194  mass=193.962663 Q-value=  6.261480
@@ -3717,11 +3717,11 @@
    2.95    0.15052E-03  I                                                                                              I 
    3.37    0.63247E-04  I                                                                                              I 
    3.79    0.24670E-04  I                                                                                              I 
-   4.21    0.88205E-05  I                                                                                              I 
+   4.21    0.88204E-05  I                                                                                              I 
    4.63    0.28589E-05  I                                                                                              I 
    5.05    0.82924E-06  I                                                                                              I 
    5.47    0.22511E-06  I                                                                                              I 
-   5.89    0.63706E-07  I                                                                                              I 
+   5.89    0.63705E-07  I                                                                                              I 
    6.31    0.16217E-07  I                                                                                              I 
    6.73    0.28562E-08  I                                                                                              I 
    7.15    0.18695E-10  I                                                                                              I 
@@ -3748,6 +3748,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 21:55.59 (01-04-2014)
+  End time: 14:55.06 (04-04-2014)
 
-  Calculation time:     0 min  2 s
+  Calculation time:     0 min 24 s

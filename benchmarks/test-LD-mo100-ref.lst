@@ -1,5 +1,5 @@
 
-                      Start time: 21:56.39 (01-04-2014)
+                      Start time: 14:58.37 (04-04-2014)
 
                          __________________________
                         |                          |
@@ -7,7 +7,8 @@
                         |                          |
                         |        MALTA             |
                         |                          |
-                        |       Not under SVN      |
+                        | SVN empire    rev.  3944 |
+                        | empire/source rev.  3943 |
                         |                          |
                         |__________________________|
   
@@ -683,10 +684,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        22.084     mb
 
-  Incident energy (CMS)        9.90004918842534885E-004  MeV
+  Incident energy (CMS)         9.9000491884253488E-004  MeV
   Shape elastic cross section   5069.1695700000000       mb
-  CN elastic cross section      6897.5269      mb
-     Elastic=   548.88776      mb/str
+  CN elastic cross section      6897.52686      mb
+     Elastic=   548.887756      mb/str
 
   42-Mo-101 production cross section  425.427     mb        reac: (z,gamma)            
 
@@ -1322,10 +1323,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        4.9051     mb
 
-  Incident energy (CMS)        9.90004918842534928E-003  MeV
+  Incident energy (CMS)         9.9000491884253493E-003  MeV
   Shape elastic cross section   4989.2326300000004       mb
-  CN elastic cross section      4038.2241      mb
-     Elastic=   321.35165      mb/str
+  CN elastic cross section      4038.22412      mb
+     Elastic=   321.351654      mb/str
 
   42-Mo-101 production cross section  93.0044     mb        reac: (z,gamma)            
 
@@ -1941,8 +1942,8 @@
 
   Incident energy (CMS)        0.99000491884253483       MeV
   Shape elastic cross section   4625.3438599999999       mb
-  CN elastic cross section      1205.8986      mb
-     Elastic=   95.962357      mb/str
+  CN elastic cross section      1205.89856      mb
+     Elastic=   95.9623566      mb/str
 
   42-Mo-101 production cross section  4.69653     mb        reac: (z,gamma)            
 
@@ -2650,8 +2651,8 @@
 
   Incident energy (CMS)         19.800098376850698       MeV
   Shape elastic cross section   1790.9440199999999       mb
-  CN elastic cross section     7.77697237E-03  mb
-     Elastic=  6.18871767E-04  mb/str
+  CN elastic cross section      7.77697237E-03  mb
+     Elastic=   6.18871767E-04  mb/str
 
   42-Mo-101 production cross section 0.757101E-03 mb        reac: (z,gamma)            
 
@@ -2803,10 +2804,10 @@
  Ener.      Spectr.     .1E-01                         .1E+00                         .1E+01                         .1E+02
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   2.38    0.18992E-15  I                                                                                              I 
-   2.86    0.13348E-10  I                                                                                              I 
-   3.34    0.18670E-09  I                                                                                              I 
-   3.81    0.74012E-08  I                                                                                              I 
+   2.38    0.17799E-15  I                                                                                              I 
+   2.86    0.12738E-10  I                                                                                              I 
+   3.34    0.18676E-09  I                                                                                              I 
+   3.81    0.74016E-08  I                                                                                              I 
    4.29    0.16937E-06  I                                                                                              I 
    4.77    0.22183E-05  I                                                                                              I 
    5.24    0.19081E-04  I                                                                                              I 
@@ -3569,10 +3570,10 @@
  Ener.      Spectr.     .1E-04                         .1E-03                         .1E-02                         .1E-01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.91    0.18121E-25  I                                                                                              I 
-   2.38    0.16643E-07  I                                                                                              I 
-   2.86    0.95150E-07  I                                                                                              I 
-   3.33    0.79877E-06  I                                                                                              I 
+   1.91    0.17851E-25  I                                                                                              I 
+   2.38    0.15806E-07  I                                                                                              I 
+   2.86    0.94124E-07  I                                                                                              I 
+   3.33    0.79866E-06  I                                                                                              I 
    3.81    0.62147E-05  I                                                                                              I 
    4.29    0.30057E-04  I **************                                                                               I 
    4.76    0.98685E-04  I ******************************                                                               I 
@@ -3584,8 +3585,8 @@
    7.62    0.15332E-03  I ************************************                                                         I 
    8.10    0.49850E-04  I *********************                                                                        I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum   0.699659E-03  mb
-  He emission cross section0.699659E-03  mb
+     Integrated spectrum   0.699658E-03  mb
+  He emission cross section0.699658E-03  mb
   
   
   -------------------------------------
@@ -4354,7 +4355,7 @@
  Yrast state at bin   1 spin=-11.0 pop= 0.37755E-15
            50% of this was assumed to populate level #  1
            50% of this was assumed to populate level #  4
- Yrast state at bin   1 spin=-12.0 pop= 0.53794E-16
+ Yrast state at bin   1 spin=-12.0 pop= 0.53795E-16
            50% of this was assumed to populate level #  1
            50% of this was assumed to populate level #  4
 
@@ -4958,10 +4959,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        30.868     mb
 
-  Incident energy (CMS)        9.90004918842534885E-004  MeV
+  Incident energy (CMS)         9.9000491884253488E-004  MeV
   Shape elastic cross section   5069.1695700000000       mb
-  CN elastic cross section      6723.0029      mb
-     Elastic=   534.99957      mb/str
+  CN elastic cross section      6723.00293      mb
+     Elastic=   534.999573      mb/str
 
   42-Mo-101 production cross section  599.951     mb        reac: (z,gamma)            
 
@@ -5583,10 +5584,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        6.7820     mb
 
-  Incident energy (CMS)        9.90004918842534928E-003  MeV
+  Incident energy (CMS)         9.9000491884253493E-003  MeV
   Shape elastic cross section   4989.2326300000004       mb
-  CN elastic cross section      4001.5342      mb
-     Elastic=   318.43198      mb/str
+  CN elastic cross section      4001.53418      mb
+     Elastic=   318.431976      mb/str
 
   42-Mo-101 production cross section  129.694     mb        reac: (z,gamma)            
 
@@ -5724,7 +5725,7 @@
  * OM nonelastic cross section (ABScs)              4131.21     mb  
  * Nonelastic cross section                         4131.23     mb  
  * Production cross section (incl.fission)          4131.23     mb
- * Difference:   -0.00 mb (  0.00) %
+ * Difference:    0.00 mb (  0.00) %
  * Compound elastic cross section (CE)              4001.53     mb  
  *******************************************************************
 
@@ -6188,8 +6189,8 @@
 
   Incident energy (CMS)        0.99000491884253483       MeV
   Shape elastic cross section   4625.3438599999999       mb
-  CN elastic cross section      782.40369      mb
-     Elastic=   62.261707      mb/str
+  CN elastic cross section      782.403687      mb
+     Elastic=   62.2617073      mb/str
 
   42-Mo-101 production cross section  4.62439     mb        reac: (z,gamma)            
 
@@ -6980,8 +6981,8 @@
 
   Incident energy (CMS)         19.800098376850698       MeV
   Shape elastic cross section   1790.9440199999999       mb
-  CN elastic cross section     3.97117663E-04  mb
-     Elastic=  3.16016194E-05  mb/str
+  CN elastic cross section      3.97117663E-04  mb
+     Elastic=   3.16016194E-05  mb/str
 
   42-Mo-101 production cross section 0.543117E-04 mb        reac: (z,gamma)            
 
@@ -7133,10 +7134,10 @@
  Ener.      Spectr.     .1E-02                         .1E-01                         .1E+00                         .1E+01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   2.38    0.93471E-17  I                                                                                              I 
-   2.86    0.11390E-09  I                                                                                              I 
-   3.34    0.13873E-08  I                                                                                              I 
-   3.81    0.47766E-07  I                                                                                              I 
+   2.38    0.87853E-17  I                                                                                              I 
+   2.86    0.10869E-09  I                                                                                              I 
+   3.34    0.13877E-08  I                                                                                              I 
+   3.81    0.47768E-07  I                                                                                              I 
    4.29    0.94657E-06  I                                                                                              I 
    4.77    0.10700E-04  I                                                                                              I 
    5.24    0.79145E-04  I                                                                                              I 
@@ -7868,10 +7869,10 @@
  Ener.      Spectr.     .1E-04                         .1E-03                         .1E-02                         .1E-01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.91    0.21340E-25  I                                                                                              I 
-   2.38    0.15925E-07  I                                                                                              I 
-   2.86    0.99919E-07  I                                                                                              I 
-   3.33    0.70301E-06  I                                                                                              I 
+   1.91    0.21023E-25  I                                                                                              I 
+   2.38    0.15303E-07  I                                                                                              I 
+   2.86    0.98984E-07  I                                                                                              I 
+   3.33    0.70291E-06  I                                                                                              I 
    3.81    0.60143E-05  I                                                                                              I 
    4.29    0.32534E-04  I ***************                                                                              I 
    4.76    0.12059E-03  I *********************************                                                            I 
@@ -9120,10 +9121,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        36.540     mb
 
-  Incident energy (CMS)        9.90004918842534885E-004  MeV
+  Incident energy (CMS)         9.9000491884253488E-004  MeV
   Shape elastic cross section   5069.1695700000000       mb
-  CN elastic cross section      6616.5674      mb
-     Elastic=   526.52972      mb/str
+  CN elastic cross section      6616.56738      mb
+     Elastic=   526.529724      mb/str
 
   42-Mo-101 production cross section  706.386     mb        reac: (z,gamma)            
 
@@ -9707,10 +9708,10 @@
      Level populated      Egamma    Intensity (cross sect.)
       0.0000    0.5      0.0135        9.9734     mb
 
-  Incident energy (CMS)        9.90004918842534928E-003  MeV
+  Incident energy (CMS)         9.9000491884253493E-003  MeV
   Shape elastic cross section   4989.2326300000004       mb
-  CN elastic cross section      3941.6833      mb
-     Elastic=   313.66919      mb/str
+  CN elastic cross section      3941.68335      mb
+     Elastic=   313.669189      mb/str
 
   42-Mo-101 production cross section  189.545     mb        reac: (z,gamma)            
 
@@ -10274,8 +10275,8 @@
 
   Incident energy (CMS)        0.99000491884253483       MeV
   Shape elastic cross section   4625.3438599999999       mb
-  CN elastic cross section      781.50415      mb
-     Elastic=   62.190125      mb/str
+  CN elastic cross section      781.504150      mb
+     Elastic=   62.1901245      mb/str
 
   42-Mo-101 production cross section  9.02007     mb        reac: (z,gamma)            
 
@@ -10933,8 +10934,8 @@
 
   Incident energy (CMS)         19.800098376850698       MeV
   Shape elastic cross section   1790.9440199999999       mb
-  CN elastic cross section     4.49810596E-03  mb
-     Elastic=  3.57947923E-04  mb/str
+  CN elastic cross section      4.49810596E-03  mb
+     Elastic=   3.57947923E-04  mb/str
 
   42-Mo-101 production cross section 0.868112E-03 mb        reac: (z,gamma)            
 
@@ -11086,10 +11087,10 @@
  Ener.      Spectr.     .1E-01                         .1E+00                         .1E+01                         .1E+02
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   2.38    0.87720E-16  I                                                                                              I 
-   2.86    0.71018E-10  I                                                                                              I 
-   3.34    0.99050E-09  I                                                                                              I 
-   3.81    0.39375E-07  I                                                                                              I 
+   2.38    0.82379E-16  I                                                                                              I 
+   2.86    0.67770E-10  I                                                                                              I 
+   3.34    0.99079E-09  I                                                                                              I 
+   3.81    0.39377E-07  I                                                                                              I 
    4.29    0.90114E-06  I                                                                                              I 
    4.77    0.11797E-04  I                                                                                              I 
    5.24    0.10042E-03  I                                                                                              I 
@@ -11814,10 +11815,10 @@
  Ener.      Spectr.     .1E-04                         .1E-03                         .1E-02                         .1E-01
   MeV       mb/MeV      I                              I                              I                              I 
                          ---------------------------------------------------------------------------------------------
-   1.91    0.93204E-26  I                                                                                              I 
-   2.38    0.78081E-08  I                                                                                              I 
-   2.86    0.50035E-07  I                                                                                              I 
-   3.33    0.44406E-06  I                                                                                              I 
+   1.91    0.91470E-26  I                                                                                              I 
+   2.38    0.74279E-08  I                                                                                              I 
+   2.86    0.49476E-07  I                                                                                              I 
+   3.33    0.44400E-06  I                                                                                              I 
    3.81    0.37258E-05  I                                                                                              I 
    4.29    0.19417E-04  I ********                                                                                     I 
    4.76    0.67752E-04  I *************************                                                                    I 
@@ -11829,8 +11830,8 @@
    7.62    0.28411E-03  I *********************************************                                                I 
    8.10    0.10402E-03  I *******************************                                                              I 
                          ---------------------------------------------------------------------------------------------
-     Integrated spectrum   0.875363E-03  mb
-  He emission cross section0.875363E-03  mb
+     Integrated spectrum   0.875362E-03  mb
+  He emission cross section0.875362E-03  mb
   
   
   -------------------------------------
@@ -12444,7 +12445,7 @@
  Yrast state at bin   1 spin=  8.0 pop= 0.61973E-13
            50% of this was assumed to populate level #  1
            50% of this was assumed to populate level #  4
- Yrast state at bin   1 spin=  9.0 pop= 0.55409E-14
+ Yrast state at bin   1 spin=  9.0 pop= 0.55410E-14
            50% of this was assumed to populate level #  1
            50% of this was assumed to populate level #  4
  Yrast state at bin   1 spin= 10.0 pop= 0.16772E-14
@@ -12577,6 +12578,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 21:56.42 (01-04-2014)
+  End time: 14:58.54 (04-04-2014)
 
-  Calculation time:     0 min  2 s
+  Calculation time:     0 min 17 s

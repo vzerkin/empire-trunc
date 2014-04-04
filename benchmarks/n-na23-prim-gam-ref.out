@@ -5,10 +5,10 @@
  ___________________________________________________
  
  Nuclear reaction model code EMPIRE-3.2.2 MALTA 
- (not under SVN) by M. Herman et al [EMP].          
+ (SVN rev.  3944; source rev.  3943) by M. Herman et al [EMP].      
 
  EMPIRE dimensions (dimension.h):
-  NDNUC= 100  NDEXCLUS= 20  NDEX= 101  NDLW=  55
+  NDNUC= 100  NDEXCLUS= 14  NDEX= 101  NDLW=  55
   LEVCC= 30  NDLV= 40  NDBR= 40  NDMSCS= 4
  
  CROSS-SECTION EVALUATION PROCEDURE                 
@@ -561,7 +561,7 @@
   11-Na- 23 production cross section 2028.32      mb       reac: (z,n)                
 
  *******************************************
- * EMISSION SPECTRA at Einc =  5.29999994E-02
+ * EMISSION SPECTRA at Einc =   5.29999994E-02
  *******************************************
 
   
@@ -718,6 +718,6 @@
   
   CALCULATIONS COMPLETED SUCCESSFULLY
 
-  End time: 21:56.12 (01-04-2014)
+  End time: 14:55.44 (04-04-2014)
 
-  Calculation time:     0 min  0 s
+  Calculation time:     0 min  1 s
