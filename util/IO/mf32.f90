@@ -132,13 +132,15 @@ module ENDF_MF32_IO
         real, pointer :: v(:,:)                    ! symmetric covariance matrix of parameter covars
     end type
 
-    type MF32_RM_general                           ! Breit-Wigner parameters, LRF=1,2
+    type MF32_RM_general                           ! Reich-Moore parameters, LRF=3
         real awri                                  ! mass in neutron masses
         integer nsrs                               ! # of resonance sub-section blocks
         integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_RM_block), pointer :: blk(:)    ! resonance blocks (NRS)
-        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances
+        type (MF32_RM_block), pointer :: blk(:)    ! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
     end type
+
+    !.......................................................................................
 
     type MF32_RM_cmpct_unc                         ! Compact resonance data & unc (LCOMP=2)
         sequence
@@ -164,7 +166,9 @@ module ENDF_MF32_IO
         type (compact_cov_sect) cpv                ! compact covars
     end type
 
-    type MF32_RM_subsection                        ! Breit-Wigner section, LRF=1,2
+    !.......................................................................................
+
+    type MF32_RM_subsection                        ! Reich-Moore section, LRF=3
         real spi                                   ! spin of target
         real ap                                    ! scat radius
         real, pointer :: dap(:)                    ! scat rad unc
@@ -206,7 +210,8 @@ module ENDF_MF32_IO
         real awri                                  ! mass in neutron masses
         integer nsrs                               ! # of resonance sub-section blocks
         integer nlrs                               ! # of long-range parameter sub-sections
-        type (MF32_AA_block), pointer :: blk(:)    ! resonance blocks (NRS)
+        type (MF32_AA_block), pointer :: blk(:)    ! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
     end type
 
     type MF32_AA_subsection                        ! Adler-Adler section, LRF=4
@@ -218,6 +223,31 @@ module ENDF_MF32_IO
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~ R-Matrix Limited ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    type MF32_ML_gen_spin_grp                      ! general spin group for LCOMP=1
+        integer nch                                ! # channels
+        integer nrb                                ! # resonances
+        integer nx                                 ! # lines
+        real, pointer :: er(:)                     ! resonance energy (nrb)
+        real, pointer :: gam(:,:)                  ! resonance params (nch,nrb)
+    end type
+
+    type MF32_ML_block
+        integer njsx                               ! # of J-pi values
+        integer nparb                              ! # parameters in cov array
+        type (mf32_ml_gen_spin_grp), pointer :: sp(:)    ! Spin groups (njsx)
+        real, pointer :: v(:,:)                    ! covariance para array (nparb,nparb)
+    end type
+
+    type MF32_ML_general                           ! R-Matrix parameters
+        real awri                                  ! mass in neutron masses
+        integer nsrs                               ! # of resonance sub-section blocks
+        integer nlrs                               ! # of long-range parameter sub-sections
+        type (MF32_ML_block), pointer :: blk(:)    ! resonance blocks (nsrs)
+        type (ni_cov_sect), pointer :: lrc(:)      ! long-term covariances (nlrs)
+    end type
+
+    !.......................................................................................
 
     type MF32_ML_chn                               ! channel
         sequence
@@ -258,21 +288,6 @@ module ENDF_MF32_IO
         real pb
     end type
 
-    type MF32_ML_gen_spin_grp                      ! general spin group for LCOMP=1
-        integer nch                                ! # channels
-        integer nrb                                ! # resonances
-        integer nx                                 ! # lines
-        real, pointer :: er(:)                     ! resonance energy (nrb)
-        real, pointer :: gam(:,:)                  ! resonance params (nch,nrb)
-    end type
-
-    type MF32_ML_general
-        integer njsx                               ! # of J-pi values
-        integer nparb                              ! # parameters in cov array
-        type (mf32_ml_gen_spin_grp), pointer :: sp(:)    ! Spin groups (njsx)
-        real, pointer :: v(:,:)                    ! covariance para array (nparb,nparb)
-    end type
-
     type MF32_ML_compact
         integer npp                                ! # of particle-pairs
         integer njsx                               ! use in compact unknown
@@ -280,6 +295,8 @@ module ENDF_MF32_IO
         type (mf32_ml_cmp_spin_grp), pointer :: sg(:)   ! spin groups (njs)
         type (compact_cov_sect) cpv                ! compact covars
     end type
+
+    !.......................................................................................
 
     type MF32_ML_subsection                        ! R-Matrix Limited section, LRF=7
         integer ifg                                ! units flag
@@ -331,7 +348,7 @@ module ENDF_MF32_IO
         integer naps                               ! flag for channel radius
         real el                                    ! lower limit E
         real eh                                    ! upper limit E
-        integer ni                                 ! # NI-type sections for E-dep covar for AP (only if NRO .ne. 0)
+        integer ni                                 ! # NI-type sections for E-dep covar for AP (only if NRO /= 0)
         type (ni_cov_sect), pointer :: nis(:)      ! NI sections to E-dep covar of scattering radius AP
         type (MF32_BW_subsection), pointer :: bw   ! Briet-Wigner      (LRF = 1,2)
         type (MF32_RM_subsection), pointer :: rm   ! Reich-Moore       (LRF = 3)
@@ -383,14 +400,14 @@ module ENDF_MF32_IO
 
     call get_endf(mf32%za, mf32%awr, n, n, mf32%nis, n)
     allocate(mf32%iso(mf32%nis),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     do i = 1, mf32%nis
 
         iso => mf32%iso(i)
         call read_endf(iso%zai, iso%abn, n, iso%lfw, iso%ner, n)
         allocate(iso%rng(iso%ner),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
 
         do j = 1,iso%ner
 
@@ -404,7 +421,7 @@ module ENDF_MF32_IO
             case(1)
                 call read_endf(n, n, n, rng%ni)
                 allocate(rng%nis(rng%ni),stat=n)
-                if(n .ne. 0) call endf_badal
+                if(n /= 0) call endf_badal
                 do n = 1,rng%ni
                     call read_ni(rng%nis(n),33)    ! these are MF33-style covars
                 end do
@@ -469,7 +486,7 @@ module ENDF_MF32_IO
     type (MF32_BW_block), pointer :: blk
 
     call read_endf(bw%spi, bw%ap, n, bw%lcomp, bw%nls, bw%isr)
-    if(bw%isr .gt. 0) call read_endf(xx, bw%dap, n, n, n, n)
+    if(bw%isr > 0) call read_endf(xx, bw%dap, n, n, n, n)
 
     nullify(bw%old, bw%gen, bw%cmp)
 
@@ -479,16 +496,16 @@ module ENDF_MF32_IO
         ! old compatibility mode - only for BW parameters
 
         allocate(bw%old(bw%nls),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         do i = 1, bw%nls
             cp => bw%old(i)
             call read_endf(cp%awri, xx, cp%l, n, m, cp%nrs)
-            if(m .ne. 18*cp%nrs) then
+            if(m /= 18*cp%nrs) then
                 write(erlin,*) 'Incompatible LCOMP=0 total items, # parameters in MF32:',m,cp%nrs
                 call endf_error(erlin)
             end if
             allocate(cp%res(cp%nrs),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             do j = 1,cp%nrs
                 call read_reals(cp%res(j)%er,17)
                 cp%res(j)%nul = zero
@@ -502,14 +519,14 @@ module ENDF_MF32_IO
         allocate(bw%gen)
         call read_endf(bw%gen%awri, xx, n, n, bw%gen%nsrs, bw%gen%nlrs)
         allocate(bw%gen%blk(bw%gen%nsrs),bw%gen%lrc(bw%gen%nlrs),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
 
         do i = 1, bw%gen%nsrs
             blk => bw%gen%blk(i)
             call read_endf(blk%mpar, n, m, blk%nrb)
             mp = blk%nrb*blk%mpar
             allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             call read_reals(blk%res(1)%er,6*blk%nrb)
             call read_endf(blk%v,mp)
         end do
@@ -533,12 +550,12 @@ module ENDF_MF32_IO
 
         allocate(bw%cmp)
         call read_endf(bw%cmp%awri, bw%cmp%qx, n, bw%cmp%lrx, m, bw%cmp%nrsa)
-        if(m .ne. 12*bw%cmp%nrsa) then
+        if(m /= 12*bw%cmp%nrsa) then
             write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,bw%cmp%nrsa
             call endf_error(erlin)
         end if
         allocate(bw%cmp%res(bw%cmp%nrsa),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_reals(bw%cmp%res(1)%er,m)
         call read_cmpt(bw%cmp%cpv)
 
@@ -568,17 +585,17 @@ module ENDF_MF32_IO
     nullify(rm%gen, rm%cmp, rm%dap)
 
     call read_endf(rm%spi, rm%ap, rm%lad, rm%lcomp, rm%nls, rm%isr)
-    if(rm%isr .gt. 0) then
+    if(rm%isr > 0) then
         call read_endf(n, n, rm%mls, n)
-        if(rm%mls .lt. 1) then
+        if(rm%mls < 1) then
             write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
             call endf_error(erlin)
-        else if(rm%mls .eq. 1) then
+        else if(rm%mls == 1) then
             allocate(rm%dap(0:0))
             call read_endf(rm%dap(0))
-        else if(rm%mls .le. rm%nls+1) then
+        else if(rm%mls <= rm%nls+1) then
             allocate(rm%dap(0:rm%mls),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             call read_endf(rm%dap,rm%mls+1)
         else
             write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
@@ -594,14 +611,14 @@ module ENDF_MF32_IO
         allocate(rm%gen)
         call read_endf(rm%gen%awri, xx, n, n, rm%gen%nsrs, rm%gen%nlrs)
         allocate(rm%gen%blk(rm%gen%nsrs),rm%gen%lrc(rm%gen%nlrs),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
 
         do i = 1, rm%gen%nsrs
             blk => rm%gen%blk(i)
             call read_endf(blk%mpar, n, m, blk%nrb)
             mp = blk%nrb*blk%mpar
             allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             call read_reals(blk%res(1)%er,6*blk%nrb)
             call read_endf(blk%v,mp)
         end do
@@ -625,12 +642,12 @@ module ENDF_MF32_IO
 
         allocate(rm%cmp)
         call read_endf(rm%cmp%awri, rm%cmp%apl, n, n, m, rm%cmp%nrsa)
-        if(m .ne. 12*rm%cmp%nrsa) then
+        if(m /= 12*rm%cmp%nrsa) then
             write(erlin,*) 'Incompatible LCOMP=2 total items, # parameters in MF32:',m,rm%cmp%nrsa
             call endf_error(erlin)
         end if
         allocate(rm%cmp%res(rm%cmp%nrsa),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_reals(rm%cmp%res(1)%er,m)
         call read_cmpt(rm%cmp%cpv)
 
@@ -666,13 +683,13 @@ module ENDF_MF32_IO
     call read_endf(aa%spi, aa%ap, n, aa%lcomp, aa%nls, n)
     call read_endf(aa%gen%awri, xx, n, n, aa%gen%nsrs, n)
     allocate(aa%gen%blk(aa%gen%nsrs),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
     do i = 1, aa%gen%nsrs
         blk => aa%gen%blk(i)
         call read_endf(blk%mpar, n, m, blk%nrb)
         mp = blk%nrb*blk%mpar
         allocate(blk%res(blk%nrb),blk%v(mp,mp),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_reals(blk%res(1)%det,6*blk%nrb)
         call read_endf(blk%v,mp)
     end do
@@ -689,16 +706,18 @@ module ENDF_MF32_IO
     type (MF32_ml_subsection), intent(out) :: ml
 
     integer i,j,l,k,n,snj
+    real xx
 
     type (mf32_ml_gen_spin_grp), pointer :: sp
     type (mf32_ml_cmp_spin_grp), pointer :: sg
     type (mf32_ml_chn), pointer :: chn
+    type (mf32_ml_block), pointer :: blk
 
     call read_endf(ml%ifg, ml%lcomp, ml%njs, ml%isr)
-    if(ml%isr .gt. 0) then
+    if(ml%isr > 0) then
         call read_endf(n, n, ml%njch, n)
         allocate(ml%dap(ml%njs,ml%njch),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_endf(ml%dap,ml%njs,ml%njch)
     end if
 
@@ -710,35 +729,57 @@ module ENDF_MF32_IO
         ! read general non-compact parameter covariances
 
         allocate(ml%gen)
+        call read_endf(ml%gen%awri, xx, n, n, ml%gen%nsrs, ml%gen%nlrs)
+        allocate(ml%gen%blk(ml%gen%nsrs),ml%gen%lrc(ml%gen%nlrs),stat=n)
+        if(n /= 0) call endf_badal
 
-        snj = 0
-        call read_endf(ml%gen%njsx, n, n, n)
-        allocate(ml%gen%sp(ml%gen%njsx),stat=n)
-        if(n .ne. 0) call endf_badal
-        do i = 1,ml%gen%njsx
-            sp => ml%gen%sp(i)
-            call read_endf(sp%nch, sp%nrb, n, sp%nx)
-            allocate(sp%er(sp%nrb),sp%gam(sp%nch,sp%nrb),stat=n)
-            if(n .ne. 0) call endf_badal
-            do j = 1,sp%nrb
-                call read_endf(sp%er(j))
-                do n = 1,sp%nch
-                    call get_endf(sp%gam(n,j))
+        do k = 1, ml%gen%nsrs
+
+            blk => ml%gen%blk(k)
+
+            snj = 0
+            call read_endf(blk%njsx, n, n, n)
+            allocate(blk%sp(blk%njsx),stat=n)
+            if(n /= 0) call endf_badal
+            do i = 1,blk%njsx
+                sp => blk%sp(i)
+                call read_endf(sp%nch, sp%nrb, n, sp%nx)
+                allocate(sp%er(sp%nrb),sp%gam(sp%nch,sp%nrb),stat=n)
+                if(n /= 0) call endf_badal
+                do j = 1,sp%nrb
+                    call read_endf(sp%er(j))
+                    do n = 1,sp%nch
+                        call get_endf(sp%gam(n,j))
+                    end do
                 end do
+                snj = snj + sp%nrb*(sp%nch+1)
             end do
-            snj = snj + sp%nrb*(sp%nch+1)
+
+            ! read in the general covariances
+
+            call read_endf(n, n, n, blk%nparb)
+            if(blk%nparb /= snj) then
+                write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',blk%nparb
+                call endf_error(erlin)
+            endif
+            allocate(blk%v(blk%nparb,blk%nparb),stat=n)
+            if(n /= 0) call endf_badal
+            call read_endf(blk%v,blk%nparb)
+
         end do
 
-        ! read in the general covariances
+        ! read in the long-range covars (nlrs)
 
-        call read_endf(n, n, n, ml%gen%nparb)
-        if(ml%gen%nparb .ne. snj) then
-            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
-            call endf_error(erlin)
-        endif
-        allocate(ml%gen%v(ml%gen%nparb,ml%gen%nparb),stat=n)
-        if(n .ne. 0) call endf_badal
-        call read_endf(ml%gen%v,ml%gen%nparb)
+        do i = 1, ml%gen%nlrs
+            call read_ni(ml%gen%lrc(i),32)
+            select case(ml%gen%lrc(i)%lb)
+            case(-1,0,1,2,5)
+                ! allowed
+            case default
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',ml%gen%lrc(i)%lb
+                call endf_error(erlin)
+            end select
+        end do
 
     case(2)
 
@@ -747,7 +788,7 @@ module ENDF_MF32_IO
         allocate(ml%cmp)
         call read_endf(ml%cmp%npp, ml%cmp%njsx, n, n)
         allocate(ml%cmp%pp(ml%cmp%npp),ml%cmp%sg(ml%njs),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         do n = 1,ml%cmp%npp
             call read_reals(ml%cmp%pp(n)%ma,12)
         end do
@@ -761,18 +802,18 @@ module ENDF_MF32_IO
 
             call read_endf(sg%aj, sg%pj, n, n, n, sg%nch)
             allocate(sg%chn(sg%nch),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             do n = 1,sg%nch
                 call read_reals(sg%chn(n)%ppi,6)
             end do
 
             call read_endf(n, sg%nrsa, n, sg%nx)
             allocate(sg%er(sg%nrsa),sg%der(sg%nrsa),stat=n)
-            if(n .ne. 0) call endf_badal
+            if(n /= 0) call endf_badal
             do n = 1,sg%nch
                 chn => sg%chn(n)
                 allocate(chn%gam(sg%nrsa),chn%dgam(sg%nrsa),stat=k)
-                if(k .ne. 0) call endf_badal
+                if(k /= 0) call endf_badal
             end do
 
             do j = 1,sg%nrsa
@@ -792,7 +833,7 @@ module ENDF_MF32_IO
 
         call read_cmpt(ml%cmp%cpv)
 
-        if(ml%cmp%cpv%nnn .ne. snj) then
+        if(ml%cmp%cpv%nnn /= snj) then
             write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
             call endf_error(erlin)
         endif
@@ -822,34 +863,34 @@ module ENDF_MF32_IO
 
     call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
     allocate(ur%lpm(ur%nls),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     snj = 0
     do l = 1,ur%nls
         pm => ur%lpm(l)
         call read_endf(pm%awri, xx, pm%l, n, m, pm%njs)
-        if(m .ne. 6*pm%njs) then
+        if(m /= 6*pm%njs) then
             write(erlin,*) 'Inconsistent item count, NJS in unresolved MF32:',m,pm%njs
             call endf_error(erlin,20)
         endif
         snj = snj + pm%njs
         allocate(pm%jpm(pm%njs),stat=n)
-        if(n .ne. 0) call endf_badal
+        if(n /= 0) call endf_badal
         call read_reals(pm%jpm(1)%d,6*pm%njs)
     end do
 
     call read_endf(ur%mpar, n, m, ur%npar)
-    if(ur%npar .ne. ur%mpar*snj) then
+    if(ur%npar /= ur%mpar*snj) then
         write(erlin,*) 'Incorrect size of covariance matrix in unresolved MF32:',ur%npar
         call endf_error(erlin)
     endif
 
-    if(m .ne. ur%npar*(ur%npar+1)/2) then
+    if(m /= ur%npar*(ur%npar+1)/2) then
          write(erlin,*) 'Inconsistent item count,NPAR in unresolved MF32:',m,ur%npar
          call endf_error(erlin,20)
     endif
     allocate(ur%rv(ur%npar,ur%npar),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
     call read_endf(ur%rv,ur%npar)
 
     return
@@ -972,7 +1013,7 @@ module ENDF_MF32_IO
             call write_endf(blk%v,mp)
         end do
 
-        ! write in the long-range covars (nlrs)
+        ! write long-range covars (nlrs)
 
         do i = 1, bw%gen%nlrs
             select case(bw%gen%lrc(i)%lb)
@@ -1014,14 +1055,14 @@ module ENDF_MF32_IO
     type (MF32_RM_block), pointer :: blk
 
     call write_endf(rm%spi, rm%ap, rm%lad, rm%lcomp, rm%nls, rm%isr)
-    if(rm%isr .gt. 0) then
+    if(rm%isr > 0) then
         call write_endf(0, 0, rm%mls, 0)
-        if(rm%mls .lt. 1) then
+        if(rm%mls < 1) then
             write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
             call endf_error(erlin)
-        else if(rm%mls .eq. 1) then
+        else if(rm%mls == 1) then
             call write_endf(rm%dap(0))
-        else if(rm%mls .le. rm%nls+1) then
+        else if(rm%mls <= rm%nls+1) then
             call write_endf(rm%dap,rm%mls+1)
         else
             write(erlin,*) 'Undefined value of MLS in MF32:',rm%mls
@@ -1044,7 +1085,7 @@ module ENDF_MF32_IO
             call write_endf(blk%v,mp)
         end do
 
-        ! write in the long-range covars (nlrs)
+        ! write long-range covars (nlrs)
 
         do i = 1, rm%gen%nlrs
             select case(rm%gen%lrc(i)%lb)
@@ -1113,13 +1154,14 @@ module ENDF_MF32_IO
 
     type (MF32_ml_subsection), intent(in) :: ml
 
-    integer i,j,l,n,snj,nx
+    integer i,j,k,l,n,snj,nx
 
+    type (mf32_ml_block), pointer :: blk
     type (mf32_ml_gen_spin_grp), pointer :: sp
     type (mf32_ml_cmp_spin_grp), pointer :: sg
 
     call write_endf(ml%ifg, ml%lcomp, ml%njs, ml%isr)
-    if(ml%isr .gt. 0) then
+    if(ml%isr > 0) then
         call write_endf(0, 0, ml%njch, 0)
         call write_endf(ml%dap,ml%njs,ml%njch)
     end if
@@ -1129,34 +1171,54 @@ module ENDF_MF32_IO
 
         ! write general non-compact parameter covariances
 
-        snj = 0
-        call write_endf(ml%gen%njsx, 0, 0, 0)
-        do i = 1,ml%gen%njsx
-            sp => ml%gen%sp(i)
-            nx  = sp%nch/6 + 1    ! # lines/res
-            n = sp%nrb*nx        ! tot # lines
-            call write_endf(sp%nch, sp%nrb, 6*n, n)
-            do j = 1,sp%nrb
-                call write_endf(sp%er(j))
-                do n = 1,sp%nch
-                    call put_endf(sp%gam(n,j))
+        call write_endf(ml%gen%awri, zero, 0, 0, ml%gen%nsrs, ml%gen%nlrs)
+
+        do k = 1, ml%gen%nsrs
+
+            blk => ml%gen%blk(k)
+
+            snj = 0
+            call write_endf(blk%njsx, 0, 0, 0)
+            do i = 1,blk%njsx
+                sp => blk%sp(i)
+                nx  = sp%nch/6 + 1    ! # lines/res
+                n = sp%nrb*nx         ! tot # lines
+                call write_endf(sp%nch, sp%nrb, 6*n, n)
+                do j = 1,sp%nrb
+                    call write_endf(sp%er(j))
+                    do n = 1,sp%nch
+                        call put_endf(sp%gam(n,j))
+                    end do
+                    do n = sp%nch+2,6*nx
+                        call put_endf(zero)
+                    end do
                 end do
-                do n = sp%nch+2,6*nx
-                    call put_endf(zero)
-                end do
+                snj = snj + sp%nrb*(sp%nch+1)
             end do
-            snj = snj + sp%nrb*(sp%nch+1)
+
+            if(blk%nparb /= snj) then
+                write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',blk%nparb
+                call endf_error(erlin)
+            endif
+
+            ! write the general covariances
+
+            call write_endf(0, 0, blk%nparb*(blk%nparb+1)/2, blk%nparb)
+            call write_endf(blk%v,blk%nparb)
+
+	end do
+
+        ! write the long-range covars (nlrs)
+
+        do i = 1, ml%gen%nlrs
+            select case(ml%gen%lrc(i)%lb)
+            case(-1,0,1,2,5)
+                call write_ni(ml%gen%lrc(i),32)
+            case default
+                write(erlin,*) 'Undefined MF32 long-range covar LB encountered:',ml%gen%lrc(i)%lb
+                call endf_error(erlin)
+            end select
         end do
-
-        if(ml%gen%nparb .ne. snj) then
-            write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%gen%nparb
-            call endf_error(erlin)
-        endif
-
-        ! write the general covariances
-
-        call write_endf(0, 0, ml%gen%nparb*(ml%gen%nparb+1)/2, ml%gen%nparb)
-        call write_endf(ml%gen%v,ml%gen%nparb)
 
     case(2)
 
@@ -1202,7 +1264,7 @@ module ENDF_MF32_IO
 
         end do
 
-        if(ml%cmp%cpv%nnn .ne. snj) then
+        if(ml%cmp%cpv%nnn /= snj) then
             write(erlin,*) 'Incorrect size of covariance matrix specified in R-Matrix MF32:',ml%cmp%cpv%nnn,snj
             call endf_error(erlin)
         endif
@@ -1241,7 +1303,7 @@ module ENDF_MF32_IO
         snj = snj + pm%njs
     end do
 
-    if(ur%npar .ne. ur%mpar*snj) then
+    if(ur%npar /= ur%mpar*snj) then
         write(erlin,*) 'Incorrect size of covariance matrix in unresolved MF32:',ur%npar
         call endf_error(erlin)
     endif
@@ -1329,10 +1391,16 @@ module ENDF_MF32_IO
 
                 if(associated(rng%ml%dap)) deallocate(rng%ml%dap,stat=m)
                 if(associated(rng%ml%gen)) then
-                    do n = 1,rng%ml%gen%njsx
-                        deallocate(rng%ml%gen%sp(n)%er,rng%ml%gen%sp(n)%gam,stat=m)
+                    do l = 1, rng%ml%gen%nsrs
+	                    do n = 1,rng%ml%gen%blk(l)%njsx
+	                        deallocate(rng%ml%gen%blk(l)%sp(n)%er,rng%ml%gen%blk(l)%sp(n)%gam,stat=m)
+	                    end do
+	                    deallocate(rng%ml%gen%blk(l)%sp,rng%ml%gen%blk(l)%v,stat=m)
                     end do
-                    deallocate(rng%ml%gen%sp,rng%ml%gen%v,stat=m)
+                    do n = 1, rng%ml%gen%nlrs
+                        call del_ni(rng%ml%gen%lrc(n))
+                    end do
+                    deallocate(rng%ml%gen%blk, rng%ml%gen%lrc,stat=m)
                     deallocate(rng%ml%gen,stat=m)
                 else if(associated(rng%ml%cmp)) then
                     do l = 1,rng%ml%njs
@@ -1380,6 +1448,7 @@ module ENDF_MF32_IO
     type (MF32_BW_block), pointer :: bb
     type (MF32_RM_block), pointer :: bk
     type (MF32_AA_block), pointer :: ba
+    type (mf32_ML_block), pointer :: blk
     type (mf32_ml_gen_spin_grp), pointer :: sp
     type (mf32_ml_cmp_spin_grp), pointer :: sg
 
@@ -1414,7 +1483,7 @@ module ENDF_MF32_IO
                 case(1,2)
                     ! Breit-Wigner
                     l = l + 1
-                    if(rng%bw%isr .gt. 0) l = l + 1
+                    if(rng%bw%isr > 0) l = l + 1
                     select case(rng%bw%lcomp)
                     case(0)
                         ! old compatibility mode - only for BW parameters
@@ -1443,14 +1512,14 @@ module ENDF_MF32_IO
                 case(3)
                     ! Riech-Moore
                     l = l + 1
-                    if(rng%rm%isr .gt. 0) then
+                    if(rng%rm%isr > 0) then
                         l = l + 1
-                        if(rng%rm%mls .lt. 1) then
+                        if(rng%rm%mls < 1) then
                             write(erlin,*) 'Undefined value of MLS in MF32:',rng%rm%mls
                             call endf_error(erlin)
-                        else if(rng%rm%mls .eq. 1) then
+                        else if(rng%rm%mls == 1) then
                             l = l + 1
-                        else if(rng%rm%mls .le. rng%rm%nls+1) then
+                        else if(rng%rm%mls <= rng%rm%nls+1) then
                             l = l + rng%rm%mls/6 + 1
                         else
                             write(erlin,*) 'Undefined value of MLS in MF32:',rng%rm%mls
@@ -1488,18 +1557,25 @@ module ENDF_MF32_IO
                 case(7)
                     ! R-Matrix limited
                     l = l + 1
-                    if(rng%ml%isr .gt. 0) l = l + (rng%ml%njs*rng%ml%njch+5)/6 + 1
+                    if(rng%ml%isr > 0) l = l + (rng%ml%njs*rng%ml%njch+5)/6 + 1
                     select case(rng%ml%lcomp)
                     case(1)
                         ! general non-compact parameter covariances
                         l = l + 1
-                        do k = 1,rng%ml%gen%njsx
-                            sp => rng%ml%gen%sp(k)
-                            l = l + sp%nrb*(sp%nch/6 + 1) + 1
+                        do k = 1,rng%ml%gen%nsrs
+                            blk => rng%ml%gen%blk(k)
+                            l = l + 1
+                            do n = 1,blk%njsx
+                                sp => blk%sp(n)
+                                l = l + sp%nrb*(sp%nch/6 + 1) + 1
+                            end do
+                            ! general covariances
+                            l = l + ((blk%nparb*(blk%nparb+1))/2+5)/6 + 1
                         end do
-                        ! general covariances
-                        k = rng%ml%gen%nparb
-                        l = l + ((k*(k+1))/2+5)/6 + 1
+                        ! long-range covars (nlrs)
+                        do k = 1, rng%ml%gen%nlrs
+                            l = l + lc_ni(rng%ml%gen%lrc(k),32)
+                        end do
                     case(2)
                         ! compact parameter covariances
                         l = l + 2*rng%ml%cmp%npp + 1
