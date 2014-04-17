@@ -1,5 +1,5 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:48:25 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2014-04-17 22:55:08 +0200 (Do, 17 Apr 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1655,6 +1655,8 @@ C
       CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
 
+      logical fexist
+
       ia = A(Nnuc)
       iz = Z(Nnuc)
 C-----next call prepares for lev. dens. calculations
@@ -1717,6 +1719,14 @@ C     SKIPPING 4 TITLE LINES
       WRITE (8,*) ' ERROR: USE OTHER LEVEL DENSITIES. '
       STOP ' ERROR: RIPL HFB ground state lev density missing'
   400 CLOSE (34)
+
+!     Checking if file with scaling factors for HFB LD is present
+      filename='LEVDEN_SCALE.DAT'
+      inquire (file=trim(filename),exist=fexist)
+!     If it exists, call function to re-scale LD's
+      if(fexist) call scale_ld(filename,iz,ia,uugrid,rhoogrid,
+     +rhotgrid,rhogrid,NLDGRID, JMAX,jmaxl)
+
 C
 C     Using correction files given by A. Koning on March 2008.
 C     Corrections are defined exactly as ROHfba() and ROHfbp() parameters
@@ -1847,6 +1857,85 @@ C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
 
       RETURN
       END
+
+
+      subroutine scale_ld(filename,iz,ia,uugrid,rhoogrid,
+     +rhotgrid,rhogrid,NLDGRID, JMAX,jmaxl)
+
+      integer iz, ia, ios, izread,iaread,i,npar,ipar,j,jmaxl
+
+      real*8 uugrid(0:NLDGRID),rhoogrid(0:NLDGRID,2),
+     & rhotgrid(0:NLDGRID,2),rhogrid(0:NLDGRID,JMAX,2),x,y
+
+      character (len=2) :: char2
+      character (len=8) :: par
+      character (len=50) :: filename
+
+      open(34,file=trim(filename),status='old',iostat=ios)
+      if(ios.NE.0) then
+        write(*,*) 'ERROR: File ''',trim(filename),''' expected to be ',
+     +'present but was not found!'
+        stop
+      endif
+
+
+      do npar=1,2  ! Parity loop, we have to find the scaling for both parities.
+5       do      ! Nuclide loop, looking for (Z,A) match 
+          read(34,10,err=5,end=100) char2,izread,iaread,par
+10        format(23x,a2,i3,3x,i3,2x,a8)
+          if(char2.EQ.'Z='.and.izread.EQ.iz.AND.iaread.EQ.ia) exit ! Nuclide match!
+        enddo   ! End of nuclide loop
+
+!       Assigning interger value for parity from character variable
+        if(par.EQ.'Positive') then
+          ipar=1
+        elseif(par.EQ.'Negative') then
+          ipar=2
+        else
+          write(*,15) trim(filename),par
+15        format('ERROR: Wrong parity in file ''',A,'''!!',1/,'ERROR: ',
+     +'It should be ''Positive'' or ''Negative'' but read ''',A,
+     +''' instead!!')
+          stop
+        endif
+
+        write(*,17) iz,ia,par,trim(filename)
+        write(8,17) iz,ia,par,trim(filename)
+        write(12,17) iz,ia,par,trim(filename)
+17      format(1/,'HFB level densities for nucleus (Z,A)=(',I3,', ',I3,
+     +'), ',A,' parity,',1/,'rescaled according to file ''',A,'''.',1/)
+
+!       Skipping two lines        
+        read(34,*)
+        read(34,*)
+!       Energy loop to read the scaling factors
+        do i=1,NLDGRID
+          read(34,*,end=80,err=80) x,y
+!         Checking if value of energy just read matches the one stored in uugrid(i)
+          if(DABS(x-uugrid(i)).GT.1.d-6) then
+            write(*,20) uugrid(i),x,trim(filename)
+20          format('ERROR: Mismatch of energy grid values for HFB ', 
+     +'level-density scaling!!',1/,'ERROR: Expected ',F6.2,' from ',
+     +'RIPL but instead read ',F6.2,' from file ''',A,'''!!')
+            stop
+          endif
+!         Rescaling level densities
+          rhoogrid(i,ipar)=rhoogrid(i,ipar)*y
+          rhotgrid(i,ipar)=rhotgrid(i,ipar)*y
+          do j=1,jmaxl
+            rhogrid(i,j,ipar)=rhogrid(i,j,ipar)*y
+          enddo
+
+        enddo ! End of energy loop
+80      continue
+      enddo     ! End of parity loop
+
+
+
+100   close(34)
+
+      return
+      end
 
 
       SUBROUTINE LEVFIT(Nnuc,Nplot,Dshif,Dshift,Defit)
