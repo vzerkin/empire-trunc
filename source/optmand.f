@@ -3305,10 +3305,10 @@ C----------------
           xz = dble(ll) - haf
           IF(unformat) then 
             WRITE(92)                  xz, parc,1
-            WRITE(92)      numbtl, ll, xz, TRLJ(L,1)
+            WRITE(92)      1, ll, xz, TRLJ(L,1)
           ELSE
             WRITE(92,1007)             xz, parc,1
-            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,1)
+            WRITE(92,1008) 1, ll, xz, TRLJ(L,1)
           ENDIF
         ENDIF
 
@@ -3317,10 +3317,10 @@ C----------------
           xz = dble(ll) + haf
           IF(unformat) then 
             WRITE(92)                  xz, parc,1
-            WRITE(92)      numbtl, ll, xz, TRLJ(L,2)
+            WRITE(92)      1, ll, xz, TRLJ(L,2)
           ELSE
             WRITE(92,1007)             xz, parc,1
-            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,2)
+            WRITE(92,1008) 1, ll, xz, TRLJ(L,2)
           ENDIF 
         ENDIF
 
@@ -3335,10 +3335,10 @@ C----------------
           xz = dble(ll) - haf
           IF(unformat) then 
             WRITE(92)                  xz, parc,1
-            WRITE(92)      numbtl, ll, xz, TRLJ(L,1)
+            WRITE(92)      1, ll, xz, TRLJ(L,1)
           ELSE 
             WRITE(92,1007)             xz, parc,1
-            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,1)
+            WRITE(92,1008) 1, ll, xz, TRLJ(L,1)
           ENDIF
 
         ENDIF
@@ -3347,10 +3347,10 @@ C----------------
           xz = dble(ll) + haf
           IF(unformat) then 
             WRITE(92)                  xz, parc,1
-            WRITE(92)      numbtl, ll, xz, TRLJ(L,2)
+            WRITE(92)      1, ll, xz, TRLJ(L,2)
           ELSE
             WRITE(92,1007)             xz, parc,1
-            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,2)
+            WRITE(92,1008) 1, ll, xz, TRLJ(L,2)
           ENDIF
 
         ENDIF
