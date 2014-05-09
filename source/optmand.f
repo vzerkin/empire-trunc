@@ -1,4 +1,4 @@
-Ccc   * $Rev: 2766 $
+cc   * $Rev: 2766 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2012-04-05 11:49:34 +0200 (Thu, 05 Apr 2012) $
 C
@@ -47,16 +47,15 @@ C  ****************************************************************
       PROGRAM OPTMAN12
 C     SUBROUTINE OPTMAN12(fname)
 C  *************************************************************
-C
+
 C     Valid only for MSFortran
 C
 C     USE MSFLIB
-C     INTEGER*2 narg
 
       LOGICAL EMPIRE
 
       CHARACTER*20 fname 
-      CHARACTER*80 cline 
+      CHARACTER*80 cline
       COMMON/INOUT/fname
       COMMON/MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
      *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
@@ -64,15 +63,14 @@ C     INTEGER*2 narg
       REAL*16 LFA(400),dtmp  
       DOUBLE PRECISION A
       COMMON/LOFAC/A(800)
+
 C----------------------------------------------------------------------------
 C----------------------------------------------------------------------------
 C     FACTORIAL CALCULATION AVOIDING A LONG DATA STATEMENT (common /LOFAC/A)
 C            but keeping the same precision
 C   (a long data statement was producing errors/warnings with some compilers)
 C
-      DO i = 1, 800
-        A(i) = 0.d0
-      ENDDO
+      a = 0.D0
       LFA(1) = 0.d0
       DO i = 2, 400
         dtmp = i 
@@ -101,10 +99,7 @@ C
 
       IF (EMPIRE) THEN 
 C--------------------- EMPIRE related i/o changes ----------------------
-
-        narg = 1
-        CALL getarg(narg,fname)
-
+        CALL getarg(1,fname)
 C       write(*,*) 'Calc OPTMAN with ', trim(fname)//'.inp'
         open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
         read(20,*,END=100,ERR=100) cline
@@ -270,7 +265,8 @@ C
 C     RETURN
 C
       STOP
-100   CLOSE(20,STATUS='DELETE') 
+100   CLOSE(20,STATUS='DELETE')
+
       END
 C     *******************************************************
       SUBROUTINE ABCT
@@ -2869,11 +2865,13 @@ C     *******************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
 
       DIMENSION STL(250)
-      DOUBLE PRECISION jc,jj
+      real*8 jj,jc
       INTEGER ltlmax, itmp, LLLMAX, numbtl
       CHARACTER*1 parc
       LOGICAL*1 unformat/.TRUE./ 
-C     LOGICAL*1 unformat/.FALSE./ 
+C     LOGICAL*1 unformat/.FALSE./
+
+      real*8, parameter :: haf = 0.5D0
 
       PARAMETER (LLLMAX=230)
       CHARACTER*20 fname
@@ -2902,6 +2900,9 @@ C     LOGICAL*1 unformat/.FALSE./
      */TROUT/TRL(100),TRLJ(100,2)
      */RESONI/ERN(10),GNN(10),GREN(10),LON(10),JMN(10),JCON(10),NEL(10)
      *,NRESN
+
+      real*8 :: anorm = 0.D0
+
       AMI=939.56536
        IF(MECHA.EQ.1) AMI=938.272029D0
 C     NSPI=IDINT(ASP*2+0.001)
@@ -3282,62 +3283,76 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
 
-       IF(unformat) then 
+       IF(unformat) then
          open(unit=92,file=TRIM(fname)//'.tlj',form='unformatted')      zv-2013
        ELSE
          open(unit=92,file=TRIM(fname)//'.tlj')
-         WRITE(92,1006) ANEU,EN,AT,NINT(0.5*JO(1)),numbtl
+         WRITE(92,1006) ANEU,EN,AT,NINT(haf*JO(1)),numbtl
        ENDIF
+
        parc = '+'
+
        numbtl = 0
-       itmp = 1 
+
        DO L=1,ltlmax
+
         LL = L-1 
+
         IF(NPO(1)*(-1)**LL.EQ.-1) CYCLE
-        IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
+
+        IF(L.NE.1 .AND. TRLJ(L,1).GT.0.0) THEN
           numbtl = numbtl + 1
+          xz = dble(ll) - haf
           IF(unformat) then 
-            WRITE(92)                   DBLE(L-1-0.5),parc,itmp
-            WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+            WRITE(92)                  xz, parc,1
+            WRITE(92)      numbtl, ll, xz, TRLJ(L,1)
           ELSE
-            WRITE(92,1007)              DBLE(L-1-0.5),parc,itmp
-            WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+            WRITE(92,1007)             xz, parc,1
+            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,1)
           ENDIF
         ENDIF
+
         IF(TRLJ(L,2).GT.0.) THEN
           numbtl = numbtl + 1
+          xz = dble(ll) + haf
           IF(unformat) then 
-            WRITE(92)                   DBLE(L-1+0.5),parc,itmp
-            WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+            WRITE(92)                  xz, parc,1
+            WRITE(92)      numbtl, ll, xz, TRLJ(L,2)
           ELSE
-            WRITE(92,1007)              DBLE(L-1+0.5),parc,itmp
-            WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+            WRITE(92,1007)             xz, parc,1
+            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,2)
           ENDIF 
         ENDIF
+
        ENDDO
        parc='-'
+
        DO L=1,ltlmax
         LL = L-1 
         IF(NPO(1)*(-1)**LL.EQ.+1) CYCLE
         IF(L.NE.1 .AND. TRLJ(L,1).GT.0) THEN
           numbtl = numbtl + 1
+          xz = dble(ll) - haf
           IF(unformat) then 
-            WRITE(92)                   DBLE(L-1-0.5),parc,itmp
-            WRITE(92)      numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+            WRITE(92)                  xz, parc,1
+            WRITE(92)      numbtl, ll, xz, TRLJ(L,1)
           ELSE 
-            WRITE(92,1007)              DBLE(L-1-0.5),parc,itmp
-            WRITE(92,1008) numbtl, L-1, DBLE(L-1-0.5), TRLJ(L,1)
+            WRITE(92,1007)             xz, parc,1
+            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,1)
           ENDIF
+
         ENDIF
         IF(TRLJ(L,2).GT.0.) THEN
           numbtl = numbtl + 1
+          xz = dble(ll) + haf
           IF(unformat) then 
-            WRITE(92)                   DBLE(L-1+0.5),parc,itmp
-            WRITE(92)      numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+            WRITE(92)                  xz, parc,1
+            WRITE(92)      numbtl, ll, xz, TRLJ(L,2)
           ELSE
-            WRITE(92,1007)              DBLE(L-1+0.5),parc,itmp
-            WRITE(92,1008) numbtl, L-1, DBLE(L-1+0.5), TRLJ(L,2)
+            WRITE(92,1007)             xz, parc,1
+            WRITE(92,1008) numbtl, ll, xz, TRLJ(L,2)
           ENDIF
+
         ENDIF
        ENDDO
        CLOSE(92)
@@ -3345,37 +3360,40 @@ C----------------
        Stl = 0.d0
 
        IF(unformat) then 
-         OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200,
-     &          form='unformatted')
+         OPEN(45,STATUS='old',FILE=TRIM(fname)//'.tlj',
+     &         ERR=1200,form='unformatted')
        ELSE
-         OPEN (45,STATUS = 'old',FILE = TRIM(fname)//'.tlj', ERR=1200)
-         READ (45,*,END = 1200)   ! To skip first line <TLJs.> ..
+         OPEN(45,STATUS='old',FILE=TRIM(fname)//'.tlj', ERR=1200)
+         READ(45,*,END=1200)    ! To skip first line <TLJs.> ..
        ENDIF 
 
 C------JC,ParC is the channel spin and parity
 C------nceq is the number of coupled equations
+1100   IF(unformat) then 
+           READ(45,END = 1200)      jc, parc, nceq  ! ecis06
+         ELSE
+           READ(45,1007,END = 1200) jc, parc, nceq  ! ecis06
+         ENDIF      
 C------Loop over the number of coupled equations
        DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
 C--------angular momentum j and Transmission coefficient Tlj,c(JC)
 C--------(nlev=1 corresponds to the ground state)
+
          IF(unformat) then 
-           READ (45,                        END = 1200,ERR = 1200) 
-     >                                       jc, parc, nceq  ! ecis06
-           READ (45,  END = 1200,ERR = 1200) nlev, l, jj, dtmp
+           READ(45)   nlev, l, jj, dtmp
          ELSE
-           READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 1200,ERR = 1200) 
-     >                                       jc, parc, nceq  ! ecis06
-           READ (45,*,END = 1200,ERR = 1200) nlev, l, jj, dtmp
-         ENDIF      
+           READ(45,*) nlev, l, jj, dtmp
+         ENDIF
+
 C--------Selecting only ground state
          IF (dtmp.GT.1.D-15 .AND. l.LT.LLLMAX) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
-            Stl(l + 1) = Stl(l + 1) + (2*jc + 1)*dtmp/DBLE(2*l + 1)
-     &                   /DBLE(2*0.5d0 + 1)
-     &                   /DBLE(JO(1) + 1)
+            dtmp = dtmp*(2.D0*jj + 1.D0)/(2.D0*haf + 1.D0)
+            Stl(l+1) = Stl(l+1) + dtmp/DBLE(2*l + 1)/DBLE(JO(1) + 1)
          ENDIF
        ENDDO
+       goto 1100
  1200  CLOSE (45)
 C
       ELSE
@@ -3411,8 +3429,8 @@ C       for EMPIRE
 C
         OPEN (46,FILE = trim(fname)//'_INC.LST')
         WRITE (46,'(A5,I6,1X,D12.6)') 'LMAX:', ltlmax, EN
-        DO l = 1, ltlmax
-          WRITE (46,*) l-1, stl(l)
+        DO l = 0, ltlmax
+          WRITE (46,*) l, stl(l+1)
         ENDDO
         WRITE (46,'(1x,A27,2x,6(D12.6,1x))') 
      &     'EL,TOT,REAC,INEL,CC,CSFus:',
@@ -3432,8 +3450,8 @@ C       ENDDO
           itmp = 1 
           WRITE (45) ltlmax, EN, itmp
         ENDIF
-        DO l = 1, ltlmax
-           WRITE (45) stl(l)
+        DO l = 0, ltlmax
+           WRITE (45) stl(l+1)
         ENDDO
         WRITE (45) 
      &   1000.d0*CSN(1), 1000.d0*CST, 1000.d0*CSR, 0.d0, 
@@ -3495,7 +3513,7 @@ C---------Relativistic kinematics
           Ak2 = p2/(HHBarc*HHBarc)
         ENDIF
 C       10 factor converts to mbarns
-        dtmp = 10.D0*4.d0*atan(1.d0)/Ak2   
+        dtmp = 10.D0*4.d0*datan(1.d0)/Ak2   
         sabs  =0.d0
         DO l = 0, ltlmax
           sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
@@ -5656,21 +5674,20 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
       COMMON/RIP/ST,NH,NAN1,NAN2
       COMMON/DISPE2/VRD,WDSHI,WDWID2,ALFNEW
 
-      DO 97 I=1,600000
-      IF(I.GT.120000) GO TO 78
-      PVV(I)=0.D0
-      PWW(I)=0.D0
-      PRR(I)=0.D0
-      PII(I)=0.D0
-      PSL(I)=0.D0
-      WPSL(I)=0.D0
-      VSL(I)=0.D0
-      WSL(I)=0.D0
-   78 PV(I)=0.D0
-      PW(I)=0.D0
-      PR(I)=0.D0
-      PI(I)=0.D0
-   97 CONTINUE
+      integer*4 :: lalasr = 0       ! SDH, May 2014
+
+      PVV  = 0.D0
+      PWW  = 0.D0
+      PRR  = 0.D0
+      PII  = 0.D0
+      PSL  = 0.D0
+      WPSL = 0.D0
+      VSL  = 0.D0 
+      WSL  = 0.D0
+      PV   = 0.D0
+      PW   = 0.D0
+      PR   = 0.D0
+      PI   = 0.D0
 
       CCDE=0.0
       CCCOUL=CCOUL
@@ -10782,10 +10799,20 @@ C     *******************************************************
      */INRM/AMO,BMO,CMO,BB42,GAMG,DELG
       DIMENSION NLA(5)
       DATA NLA/0,1,3,6,10/
-      SQ2=SQRT(2.D0)
+
+c     Following variables were being used in an uninitialized state
+c     SDH, May 2014
+      real*8 :: ak3 = 0.D0
+      real*8 :: ak4 = 0.D0
+      real*8 :: bk3 = 0.D0
+      real*8 :: bk5 = 0.D0
+      real*8 :: bk8 = 0.D0
+
+      real*8, parameter :: SQ2 = DSQRT(2.D0)
+      real*8, parameter :: SQ32 = 2.D0*sq2
+
       C1=SQ2      
 C     SQ32=2.828427D0
-      SQ32=SQ2**3
       C95=1.8D0
       CQ95=1.34164D0
       C75=7.D0/5.D0
@@ -11490,9 +11517,11 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
      */ABCOUL/PVC(5400),PRC(5400),CVNC(720000)
       DIMENSION NLA(5)
       DATA NLA/0,1,3,6,10/
-      SQ2=SQRT(2.D0)
+
+      real*8, parameter :: SQ2 = DSQRT(2.D0)
+      real*8, parameter :: SQ32 = 2.D0*sq2
+
 C     SQ32=2.828427D0
-      SQ32=SQ2**3
       C95=1.8D0
       CQ95=1.34164D0
       IILL=NCLL*NCLL*2*9
