@@ -565,8 +565,8 @@ C*      -- Intermediate points
         CALL CH11PK(E11,ED)
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
-        GO TO 81
         IF(KK.LT.NP) GO TO 81
+      END IF
 C*    -- End of data set - write blank delimiter
    84 WRITE(LOU,94)
 c*
