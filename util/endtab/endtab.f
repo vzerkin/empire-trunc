@@ -25,6 +25,7 @@ C-V        for incident neutrons
 C-V  13/06 Trivial fix to retrieve MF3/MT5 as is
 C-V  14/02 Re-design to accurately print values at interval boundaries.
 C-V  14/03 Guard against upper boundary outside data range.
+C-V  14/05 Fix typo (applicable when Ehi > last point on file)
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -513,7 +514,11 @@ C* Write the data to the PLOTTAB file
       EE2=ES(KK)
       SG2=SG(KK)
       UG2=UG(KK)
-   81 KK =KK+1
+   81 IF(KK.GT.MPT) THEN
+        PRINT *,' ENDTAB ERROR - MPT limit',MPT,KK
+        STOP 'ENDTAB ERROR - MPT Limit exceeded'
+      END IF
+      KK =KK+1
       EE1=EE2
       SG1=SG2
       UG1=UG2
@@ -539,7 +544,7 @@ C*    -- First point
         CALL CH11PK(E11,ED)
         WRITE(LOU,194) E11,SG1,UG1
       END IF
-      IF(EE2.GE.EB .OR. KK.GE.NG) THEN
+      IF(EE2.GE.EB .OR. KK.GE.NP) THEN
 C*      -- Last point
         IF(IN2.EQ.1) THEN
           ED=DBLE(EB)
@@ -561,7 +566,7 @@ C*      -- Intermediate points
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
         GO TO 81
-      END IF
+        IF(KK.LT.NP) GO TO 81
 C*    -- End of data set - write blank delimiter
    84 WRITE(LOU,94)
 c*
