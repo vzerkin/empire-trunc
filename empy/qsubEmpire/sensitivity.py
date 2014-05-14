@@ -25,11 +25,11 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP', 
         'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', 'GRANGN', 'GRANGP', 
         'GTILNO', 'PCROSS', 'QFIS', 'RESNOR', 'SHELNO', 'TOTRED', 
-        'TUNE', 'TUNEFI', 'TUNEPE', 'UOMPAS', 'UOMPAV', 'UOMPRS', 
-        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF','FCCRED',
-        'ROHFBA', 'ROHFBP', 'ELARED', 'FISAT1', 'FISAT2', 'FISAT3',
+        'TUNEFI', 'TUNEPE', 'UOMPAS', 'UOMPAV', 'UOMPRS', 'FCCRED',
+        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF',
+        'ELARED', 'FISAT1', 'FISAT2', 'FISAT3', 'CELRED','CINRED',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
-        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3', 'CELRED','CINRED')
+        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3')
 
 # restricted: variations allowed only when default value provided
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
@@ -38,7 +38,7 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'FCD', 'GAPN', 'GAPP', 'GCROA', 'GCROD', 'GCROE0', 'GCROT', 
         'GCROUX', 'GDIV', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1', 
         'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY',
-        'TRUNC', 'WIDEX', 'DEFNUC')
+        'TRUNC', 'WIDEX', 'DEFNUC', 'ROHFBA', 'ROHFBP','TUNE')
 
 #fisPars: varied in the fission input file $proj-inp.fis
 #         varying fisPars is deprecated -- use relative parameters.
