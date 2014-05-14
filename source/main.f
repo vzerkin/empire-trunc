@@ -1,6 +1,6 @@
-cc   * $Rev: 3883 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-02-20 06:24:25 +0100 (Do, 20 Feb 2014) $
+cc   * $Rev: 3964 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-05-14 19:00:28 +0200 (Mi, 14 Mai 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -41,7 +41,7 @@ C-----Read and prepare input data
 C-----
       DO WHILE(.TRUE.)
  
-        CALL INPUT
+        CALL INPUT()
 
         CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, !NNuct ??, 
      1                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
@@ -50,11 +50,6 @@ C-----
 C-----  Calculate reaction cross section and its spin distribution
 C-----
         CALL MARENG(0,0,nnurec,nejcec)
-C
-C       RCN, FEB 2013
-C       For a proper consideration of fission and capture competition in the 
-C       ECIS CN calculation, further changes needed in tl.f (to be done later)
-        call fission_width()
 C
         call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
 C
