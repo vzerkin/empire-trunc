@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3926 $
+Ccc   * $Rev: 3965 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-23 16:57:54 +0100 (So, 23 Mär 2014) $
+Ccc   * $Date: 2014-05-14 19:01:34 +0200 (Mi, 14 Mai 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -256,9 +256,9 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-elevcc).le.0.01  .and.          ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then    ! parity
+              if( abs(elvr-elevcc)       .le.0.002 .and.    ! energy
+     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.    ! spin
+     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then ! parity
                   EEX(n,ncalc) = elvr
                   EXIT
               endif 
@@ -269,9 +269,9 @@ C
 C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
          nld_cc = 1
-         DO ilv=2,ND_nlv
-           DO n=2,NCOll(ncalc)
-              if( abs(D_Elv(ilv)-EEX(n,ncalc)).le.0.01     .and. 
+         DO n=2,NCOll(ncalc)
+           DO ilv=2,ND_nlv
+              if( abs(D_Elv(ilv)-EEX(n,ncalc)) .le.0.002 .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
                   nld_cc = nld_cc + 1
@@ -506,9 +506,9 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01  .and. ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then  ! parity
+              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and.    ! energy
+     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.    ! spin
+     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then ! parity
                   EXV(n,ncalc) = elvr
                   EXIT
               endif 
@@ -519,10 +519,9 @@ C
 C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
          nld_cc = 1
-         DO ilv=2,ND_nlv
-             DO n=2,NVIb(ncalc)
-
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+         DO n=2,NVIb(ncalc)
+           DO ilv=2,ND_nlv
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)) .le.0.002 .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
 
@@ -759,7 +758,7 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1058,ERR=1058) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
+              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and. 
      &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then
                   EXV(n,ncalc) = elvr
@@ -777,10 +776,10 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO ilv=2,ND_nlv
-           DO n=2,NCOll(ncalc)
+         DO n=2,NCOll(ncalc)
+           DO ilv=2,ND_nlv
 
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)) .le.0.002 .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
@@ -1003,16 +1002,37 @@ C        WRITE (96,'(A80)') ch_iuf
 C
 C          first run with default TARGET_COLL.DAT
 C      
+C		 WRITING COUPLED LEVELS
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=290,ERR=290) ch_iuf        
 
-             IF (ICOllev(k).LT.LEVcc) D_Def(k,2) = 0.005
+	       IF (ICOllev(k).GE.LEVcc) CYCLE
 
-             IF (ICOllev(k).LT.LEVcc) WRITE (32,
+             WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
+
+             WRITE (8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
+
+             WRITE (96,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
+
+           ENDDO
+           CLOSE(32)
+
+C		 WRITING UNCOUPLED LEVELS
+           DO k = 1, ND_nlv
+
+             IF (ICOllev(k).LT.LEVcc) CYCLE
+
+             IF (D_Def(k,2).le.0.d0) D_Def(k,2) = 0.005
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
@@ -1035,8 +1055,7 @@ C
            ENDDO
 
          ENDIF
-  290    CLOSE(32)
-         CLOSE (96)
+  290    CLOSE (96)
          CLOSE (97)
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
@@ -1116,7 +1135,7 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1061,ERR=1061) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
+              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and. 
      &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
                   EXV(n,ncalc) = elvr
@@ -1135,11 +1154,11 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO ilv=2,ND_nlv
-           DO n=2,NCOll(ncalc)
+         DO n=2,NCOll(ncalc)
+           DO ilv=2,ND_nlv
 
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
-     &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+              if( abs(D_Elv(ilv) -EXV(n,ncalc))  .le.0.002 .and. 
+     &            abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
                   nld_cc = nld_cc + 1
@@ -1161,50 +1180,6 @@ C
             ENDDO
          ENDDO
        
-C
-C--------Putting Coupled levels first
-         DO i = 2, ND_nlv
-            DO j = i + 1, ND_nlv
-               IF (ICOllev(j).LT.ICOllev(i)) THEN
-C-----------------swapping
-                  itmp = ICOllev(i)
-                  ICOllev(i) = ICOllev(j)
-                  ICOllev(j) = itmp
-
-                  dtmp = D_Elv(i)
-                  D_Elv(i) = D_Elv(j)
-                  D_Elv(j) = dtmp
-
-                  dtmp = D_Lvp(i)
-                  D_Lvp(i) = D_Lvp(j)
-                  D_Lvp(j) = dtmp
-
-                  dtmp = D_Xjlv(i)
-                  D_Xjlv(i) = D_Xjlv(j)
-                  D_Xjlv(j) = dtmp
-
-                  dtmp = D_Def(i,2)
-                  D_Def(i,2) = D_Def(j,2)
-                  D_Def(j,2) = dtmp
-
-                  itmp = IPH(i)
-                  IPH(i) = IPH(j)
-                  IPH(j) = itmp
-
-                  dtmp = D_Klv(i)
-                  D_Klv(i) = D_Klv(j)
-                  D_Klv(j) = dtmp
-
-                  dtmp = D_Llv(i)
-                  D_Llv(i) = D_Llv(j)
-                  D_Llv(j) = dtmp
-
-                  dtmp = D_nno(i)
-                  D_nno(i) = D_nno(j)
-                  D_nno(j) = dtmp
-               ENDIF
-            ENDDO
-         ENDDO
 
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
@@ -1282,17 +1257,37 @@ C           first run with default TARGET_COLL.DAT
            WRITE (32,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
            WRITE (96,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
 
+C		 WRITING COUPLED LEVELS
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=1001,ERR=1001) ch_iuf        
 
-             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
-     &          D_Def(k,2) = 0.005
+	       IF (ICOllev(k).GE.LEVcc) CYCLE
 
-             IF (ICOllev(k).LT.LEVcc) WRITE (32,
+             WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+
+             WRITE (8,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+
+             WRITE (96,
+     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+
+           ENDDO
+           CLOSE(32)
+
+C		 WRITING UNCOUPLED LEVELS
+           DO k = 1, ND_nlv
+
+             IF (ICOllev(k).LT.LEVcc) CYCLE
+
+             IF (D_Def(k,2).le.0.d0) D_Def(k,2) = 0.005
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
@@ -1316,7 +1311,6 @@ C           first run with default TARGET_COLL.DAT
 
          ENDIF
  1001    CLOSE (96)
-         CLOSE (32)
          CLOSE (97)
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C

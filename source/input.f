@@ -1,6 +1,6 @@
-!cc   * $Rev: 3943 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2014-04-03 18:00:56 +0200 (Do, 03 Apr 2014) $
+!cc   * $Rev: 3965 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-05-14 19:01:34 +0200 (Mi, 14 Mai 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -10597,7 +10597,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
 C-----------Additional levels are added for DWBA calculations
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll) THEN
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + LEVcc
+               ICOllev(ND_nlv) = min(ilv + LEVcc,99)
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -10607,14 +10607,15 @@ C-----------Additional levels are added for DWBA calculations
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
             ENDIF
-            IF (i20p.NE.0 .AND. i3m.NE.0 .AND. i20p.NE.0 .AND.
-     &          i21p.NE.0 .AND. i4p.NE.0 .AND. i3m.NE.0 .AND.
-     &          i0p.NE.0 ) THEN
-               ierr = 0
-               GOTO 600
-            ENDIF
-C-----------Deformed nuclei follow (beta2 = DEF(1, 0))
+C           IF(i20p.NE.0 .AND.i21p.NE.0.AND.i4p.NE.0.AND.i0p.NE.0) THEN
+C              ierr = 0
+C              GOTO 600
+C           ENDIF
+C
+C--------Deformed nuclei follow (beta2 = DEF(1, 0))
+C
          ELSEIF (ilv.NE.1) THEN
+C
             IF (i20p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
      &          lvpr.EQ.gspar) THEN
                i20p = ilv
@@ -10689,18 +10690,18 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
-c           IF (i12p.EQ.0 .AND. xjlvr.EQ.(gspin + 6*delta_k) .AND.
-c    &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
-c              i12p = ilv
-c              ND_nlv = ND_nlv + 1
-c              ICOllev(ND_nlv) = ilv + LEVcc
-c              D_Elv(ND_nlv) = elvr
-c              D_Lvp(ND_nlv) = lvpr
-c              D_Xjlv(ND_nlv) = xjlvr
-c              IPH(ND_nlv) = 0
-c              D_Def(ND_nlv,2) = 0.01
-c              GOTO 500
-c            ENDIF
+            IF (i12p.EQ.0 .AND. xjlvr.EQ.(gspin + 6*delta_k) .AND.
+     &          lvpr.EQ.gspar  .AND. .NOT.odd) THEN
+               i12p = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv + LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 0
+               D_Def(ND_nlv,2) = 0.01
+               GOTO 500
+            ENDIF
             IF (i0p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1
      &          .AND. .NOT.odd) THEN
                i0p = ilv
@@ -10773,13 +10774,15 @@ c            ENDIF
                D_Def(ND_nlv,2) = 0.005
                GOTO 500
             ENDIF
-C--------------Additional levels are added for DWBA calculations
+C
+C-----------Additional levels are added for DWBA calculations
+C
             IF (ECUtcoll.GT.0. .AND. elvr.GT.ECUtcoll) GOTO 600
 
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll .AND.
      &                               .NOT.odd) THEN
                ND_nlv = ND_nlv + 1
-               ICOllev(ND_nlv) = ilv + LEVcc
+               ICOllev(ND_nlv) = min(ilv + LEVcc,99)
                D_Elv(ND_nlv) = elvr
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
@@ -10789,16 +10792,20 @@ C--------------Additional levels are added for DWBA calculations
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
             ENDIF
+
             IF (ECUtcoll.GT.0. .AND. xjlvr.GT.JCUtcoll) cycle
-            IF (i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
-     &          i8p.NE.0 .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
-     &          i3m.NE.0 .AND. i5m.NE.0 .AND. i21p.NE.0 .AND.
-     &          i22p.NE.0 ) THEN
+
+C           IF (i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
+C    &          i8p.NE.0 .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
+C    &          i3m.NE.0 .AND. i5m.NE.0 .AND. i21p.NE.0 .AND.
+C    &          i22p.NE.0 ) THEN
 C    &          i22p.NE.0 .AND. i10p.NE.0 .AND. i12p.NE.0) THEN
-               ierr = 0
-               GOTO 600
-            ENDIF
+C              ierr = 0
+C              GOTO 600
+C           ENDIF
+
          ENDIF
+
   500 ENDDO
   600 IFINDCOLL = ierr
       CLOSE (32)
@@ -10928,7 +10935,8 @@ C              different spin than the ground state
      &           D_Llv(i), D_Klv(i), ftmp
             ELSE
               ncont = ncont + 1
-              IF(ncont.GT.99) GOTO 653
+C             IF(ncont.GT.99) GOTO 653
+              IF(ncont.GT.99) ncont = 99
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,a5)')
      &           ncont, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
@@ -11030,16 +11038,19 @@ C             different spin than the ground state
               WRITE (32,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           0, 0, ftmp
+     &           D_Llv(i), D_Klv(i), ftmp
+C    &           0, 0, ftmp
               WRITE (8,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           0, 0, ftmp
-              WRITE (12,
+     &           D_Llv(i), D_Klv(i), ftmp
+C    &           0, 0, ftmp
+               WRITE (12,
      &           '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &           itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           0, 0, ftmp
-            ELSE
+     &           D_Llv(i), D_Klv(i), ftmp
+C    &           0, 0, ftmp
+             ELSE
               ncont = ncont + 1
               IF(ncont.GT.99) GOTO 99004
               WRITE (32,
