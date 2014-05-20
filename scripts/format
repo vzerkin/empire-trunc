@@ -9,6 +9,9 @@ fi
 file=$1
 MATid=$2
 work=`pwd`
+if [ "$2" = "" ]; then
+  MATid='1111'
+fi
 if [ "$1" = "" ]
    then
 echo 'Inputs ready to run'
@@ -40,8 +43,6 @@ $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
 
-# RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
-# moved to a new script "rec-ch-part" called from a GUI(Execute)
 
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
@@ -79,5 +80,9 @@ $EMPIREDIR/util/stanef/stanef <INPUT
 rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
 rm angdis.pnt 2>/dev/null
+
+# RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
+# moved to a new script "rec-ch-part" called from a GUI(Execute)
+$EMPIREDIR/scripts/rec-ch-part $file $MATid
 
 exit

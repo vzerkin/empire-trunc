@@ -25,7 +25,7 @@ rm $file-full.endf 2>/dev/null
 cat >FIXUP.INP <<EOF
 12101011111001
 $file.endf
-$work/$file-tmp.endf
+$file-tmp.endf
 S  4=+( 50, 91)
 S103=+(600,649)
 S104=+(650,699)
