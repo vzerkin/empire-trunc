@@ -1,6 +1,6 @@
-!cc   * $Rev: 3965 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-05-14 19:01:34 +0200 (Mi, 14 Mai 2014) $
+!cc   * $Rev: 3967 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -102,8 +102,8 @@ C     ELE2 = 1.4399652D+00  ! change from CODATA 1998 to CODATA 2010
 C                           ! in alpha*hbarc = 1.00000006
       ELE2 = 1.43996529D+00 ! CODATA 2010
 C     1/ALPHA = 137.035 999 074
-C     ALPHA = 7.297 352 5698(24) × 10-3
-C     eps0  = 8.854 187 817... × 10-12 F/m
+C     ALPHA = 7.297 352 5698(24) ï¿½ 10-3
+C     eps0  = 8.854 187 817... ï¿½ 10-12 F/m
 C     ELE2 = 4*pi**alpha*HBARC*eps0
 C-----Neutron mass = 1.008 664 915 60(55) u
 C     AMUneu =  1.008665D0          ! EMPIRE 3.1
@@ -193,8 +193,10 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.d0
             ATIlnor(nnuc) = 0.d0
             LDShif(Nnuc) = 0.d0
-            ROHfba(nnuc)  = -20.d0  ! default to allow for zero value
-            ROHfbp(nnuc)  = -20.d0  ! default to allow for zero value
+            ROHfba(nnuc)  = 0.d0  
+            ROHfbp(nnuc)  = 0.d0  
+            ROHfba_off(nnuc)  = 0.d0  
+            ROHfbp_off(nnuc)  = 0.d0  
             GTIlnor(nnuc) = 1.d0
             LVP(1,nnuc) = 1
 C
@@ -7126,6 +7128,7 @@ C-----
 C-----shift parameter used to adjust HFB LD
          IF (name.EQ.'ROHFBP') THEN
             izar = i1*1000 + i2
+            val = val - 1.d0
             IF (izar.EQ.0) THEN
              if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
@@ -7138,7 +7141,7 @@ C-----shift parameter used to adjust HFB LD
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               DO nnuc = 1, NDNUC
-                ROHfbp(nnuc) = atilss
+                ROHfbp_off(nnuc) = atilss
               ENDDO
               WRITE (8,
      &'('' GS HFB L.D. shift in all nuclei set to '',F8.3)') atilss
@@ -7147,7 +7150,7 @@ C-----shift parameter used to adjust HFB LD
      &          IPArCOV, atilss,INDexf,INDexb,name
              else
               DO nnuc = 1, NDNUC
-                ROHfbp(nnuc) = val
+                ROHfbp_off(nnuc) = val
               ENDDO
               WRITE (8,'('' GS HFB L.D. shift in all nuclei set to '',
      & F8.3)') val
@@ -7170,23 +7173,23 @@ C-----shift parameter used to adjust HFB LD
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
              sigma = val*i3*0.01
              IF(IOPran.gt.0) then
-               ROHfbp(nnuc) = val + grand()*sigma
+               ROHfbp_off(nnuc) = val + grand()*sigma
              ELSE
-               ROHfbp(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
+               ROHfbp_off(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
              ENDIF
              WRITE (8,
      &        '('' GS HFB L.D. shift sampled value : '',f8.3)')
-     &       ROHfbp(nnuc)
+     &       ROHfbp_off(nnuc)
              IPArCOV = IPArCOV +1
              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
-     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb,name
+     &              IPArCOV, ROHfbp_off(nnuc),INDexf,INDexb,name
             else
-              ROHfbp(nnuc) = val
+              ROHfbp_off(nnuc) = val
               WRITE (8,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &      '('' GS HFB L.D. shift in '',I3,A2,'' offset by '',F8.3)'
      &        ) i2, SYMb(nnuc), val
               WRITE (12,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &      '('' GS HFB L.D. shift in '',I3,A2,'' offset by '',F8.3)'
      &        ) i2, SYMb(nnuc), val
             endif
             GOTO 100
@@ -7194,6 +7197,7 @@ C-----shift parameter used to adjust HFB LD
 C-----pseudo a-parameter used to adjust HFB LD
          IF (name.EQ.'ROHFBA') THEN
             izar = i1*1000 + i2
+            val = val - 1.d0
             IF (izar.EQ.0) THEN
              if(i3.ne.0 .and. IOPran.ne.0) then
               WRITE (8,
@@ -7206,7 +7210,7 @@ C-----pseudo a-parameter used to adjust HFB LD
                 atilss = val + 1.732d0*(2*drand()-1.)*sigma
               ENDIF
               DO nnuc = 1, NDNUC
-                ROHfba(nnuc) = atilss
+                ROHfba_off(nnuc) = atilss
               ENDDO
               WRITE (8,
      &'('' GS HFB L.D. norm in all nuclei set to '',F8.3)') atilss
@@ -7215,7 +7219,7 @@ C-----pseudo a-parameter used to adjust HFB LD
      &          IPArCOV, atilss,INDexf,INDexb,name
              else
               DO nnuc = 1, NDNUC
-                ROHfba(nnuc) = val
+                ROHfba_off(nnuc) = val
               ENDDO
               WRITE (8,'('' GS HFB L.D. norm in all nuclei set to '',
      & F8.3)') val
@@ -7238,23 +7242,23 @@ C-----pseudo a-parameter used to adjust HFB LD
      &        '' is equal to '',i2,''%'')') i2, SYMb(nnuc), i3
              sigma = val*i3*0.01
              IF(IOPran.gt.0) then
-               ROHfba(nnuc) = val + grand()*sigma
+               ROHfba_off(nnuc) = val + grand()*sigma
              ELSE
-               ROHfba(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
+               ROHfba_off(nnuc) = val + 1.732d0*(2*drand()-1.)*sigma
              ENDIF
              WRITE (8,
      &        '('' GS HFB L.D. norm sampled value : '',f8.3)')
-     &       ROHfba(nnuc)
+     &       ROHfba_off(nnuc)
              IPArCOV = IPArCOV +1
              write(95,'(1x,i5,1x,d12.5,1x,2i13,3x,A6)')
-     &              IPArCOV, ROHfbp(nnuc),INDexf,INDexb,name
+     &              IPArCOV, ROHfba_off(nnuc),INDexf,INDexb,name
             else
-              ROHfba(nnuc) = val
+              ROHfba_off(nnuc) = val
               WRITE (8,
-     &      '('' GS HFB L.D. norm in '',I3,A2,'' set to '',F8.3)'
+     &      '('' GS HFB L.D. norm in '',I3,A2,'' offset by '',F8.3)'
      &        ) i2, SYMb(nnuc), val
               WRITE (12,
-     &      '('' GS HFB L.D. norm in '',I3,A2,'' set to '',F8.3)'
+     &      '('' GS HFB L.D. norm in '',I3,A2,'' offset by '',F8.3)'
      &        ) i2, SYMb(nnuc), val
             endif
             GOTO 100

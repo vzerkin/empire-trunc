@@ -1,5 +1,5 @@
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2014-04-17 22:55:08 +0200 (Do, 17 Apr 2014) $
+Ccc   * $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1732,50 +1732,42 @@ C     Using correction files given by A. Koning on March 2008.
 C     Corrections are defined exactly as ROHfba() and ROHfbp() parameters
 C     by fitting available discrete levels' and D0s' information
 C
-      IF(ROHfba(Nnuc).lt.-10.d0 .or. ROHfbp(Nnuc).lt.-10.d0) then
-C       Corrections are read only if they are not given in the input,
-C       otherwise input values are taken
-C
-        WRITE (filename,99007) iz
-99007   FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
+      WRITE (filename,99007) iz
+99007 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
-        OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR=440)
-        pcorr = 0.d0
-        acorr = 0.d0
-  110   READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
-99008   FORMAT (1x,i3,1x,i3,10x,f11.5,1x,f11.5)
-        IF (iar.NE.ia .OR. izr.NE.iz) GOTO 110
+      OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR=440)
+      pcorr = 0.d0
+      acorr = 0.d0
+  110 READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
+99008 FORMAT (1x,i3,1x,i3,10x,f11.5,1x,f11.5)
+      IF (iar.NE.ia .OR. izr.NE.iz) GOTO 110
 
-        IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc) = pcorr
-        IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc) = acorr
+      ROHfbp(Nnuc) = ROHfbp_off(Nnuc) + pcorr
+      ROHfba(Nnuc) = ROHfba_off(Nnuc) + acorr
 
-C-------printing microscopic lev. dens. corrections from the RIPL-3 file
+C-----printing microscopic lev. dens. corrections from the RIPL-3 file
 
-        IF(ROHfba(Nnuc).ne.0.d0) then
-            WRITE (8,
-     &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
-            WRITE (12,
-     &      '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfba(Nnuc)
-        ENDIF
-        IF(ROHfbp(Nnuc).ne.0.d0) then
-            WRITE (8,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
-            WRITE (12,
-     &      '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
-     &        ) ia, SYMb(nnuc), ROHfbp(Nnuc)
-        ENDIF
-  440   CLOSE(34)
-        IF(ROHfba(Nnuc).lt.-10.d0) ROHfba(Nnuc)=0.d0
-        IF(ROHfbp(Nnuc).lt.-10.d0) ROHfbp(Nnuc)=0.d0
-        goto 445
-  310   WRITE (8,*) ' ERROR: reading microsc. LD corrections FOR Z=', 
-     &              iz,' A=', ia, ' IN HFB'
-  445   CLOSE (34)
-cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+      IF(ROHfba(Nnuc).ne.0.d0) then
+          WRITE (8,
+     &    '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
+     &      ) ia, SYMb(nnuc), ROHfba(Nnuc)
+          WRITE (12,
+     &    '('' GS HFB L.D. norm  in '',I3,A2,'' set to '',F8.3)'
+     &      ) ia, SYMb(nnuc), ROHfba(Nnuc)
       ENDIF
+      IF(ROHfbp(Nnuc).ne.0.d0) then
+          WRITE (8,
+     &    '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &      ) ia, SYMb(nnuc), ROHfbp(Nnuc)
+          WRITE (12,
+     &    '('' GS HFB L.D. shift in '',I3,A2,'' set to '',F8.3)'
+     &      ) ia, SYMb(nnuc), ROHfbp(Nnuc)
+      ENDIF
+  440 CLOSE(34)
+      goto 445
+  310 WRITE (8,*) ' ERROR: reading microsc. LD corrections FOR Z=', 
+     &            iz,' A=', ia, ' IN HFB'
+  445 CLOSE (34)
       iugrid = i - 1
 
       DO kk = 1, NEX(Nnuc)

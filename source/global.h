@@ -1,6 +1,6 @@
-! $Rev: 3868 $
-! $Author: rcapote $
-! $Date: 2014-02-13 23:07:42 +0100 (Do, 13 Feb 2014) $
+! $Rev: 3967 $
+! $Author: gnobre $
+! $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -135,6 +135,7 @@
      &                 RWOmv(0:ndejc,0:ndnuc),                          &
      &                 RWSo(0:ndejc,0:ndnuc),                           &
      &                 ROHfbp(ndnuc), ROHfba(ndnuc),                    &
+     &                 ROHfbp_off(ndnuc), ROHfba_off(ndnuc),            &
      &                 SANgler(ndangecis),                              &
      &                 SCRt(ndex,ndlw,2,0:ndejc), SCRtem(0:ndejc),      &
      &                 SCRtl(ndlv,0:ndejc), SEJc(0:ndejc),              &
@@ -233,7 +234,8 @@
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,      &
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,    &
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,&
-     &                 rTOTred, ROHfbp, ROHfba, CSEpg, ENPg, ELAred,    &
+     &                 rTOTred, ROHfbp, ROHfba, ROHfbp_off, ROHfba_off, &
+     &                 CSEpg, ENPg, ELAred,                             &
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,  &
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,  &
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,&
