@@ -10808,8 +10808,8 @@ c     SDH, May 2014
       real*8 :: bk5 = 0.D0
       real*8 :: bk8 = 0.D0
 
-      real*8, parameter :: SQ2 = DSQRT(2.D0)
-      real*8, parameter :: SQ32 = 2.D0*sq2
+      real*8, parameter :: SQ2 = 1.414213562373095D0
+      real*8, parameter :: SQ32 = 2.D0*1.414213562373095D0
 
       C1=SQ2      
 C     SQ32=2.828427D0
@@ -11518,7 +11518,8 @@ C     BELOW CARD IS NO NECESSARY IF MEMORY IS MORE THAN 32Mb
       DIMENSION NLA(5)
       DATA NLA/0,1,3,6,10/
 
-      real*8, parameter :: SQ2 = DSQRT(2.D0)
+
+      real*8, parameter :: SQ2 = 1.414213562373095D0
       real*8, parameter :: SQ32 = 2.D0*sq2
 
 C     SQ32=2.828427D0
