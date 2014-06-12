@@ -1,5 +1,5 @@
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-06-13 00:14:15 +0200 (Fr, 13 Jun 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1654,6 +1654,7 @@ C
       CHARACTER*2 car2
       CHARACTER*50 filename
       INTEGER i, ipp,ia, iar, iugrid, iz, izr, j, jmaxl, k, khi, kk, klo
+      INTEGER lenst
 
       logical fexist
 
@@ -1680,7 +1681,9 @@ C
       WRITE (filename,99005) iz
 99005 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.tab')
-      OPEN (UNIT = 34,FILE = trim(empiredir)//filename, ERR = 300)
+      lenst = len(trim(filename))
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename(1:lenst), 
+     &      ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2
 99010 FORMAT (23x,a2,i3,3x,i3)  !,2x,a8)
       IF (car2.NE.'Z=') GOTO 100
@@ -1722,9 +1725,10 @@ C     SKIPPING 4 TITLE LINES
 
 !     Checking if file with scaling factors for HFB LD is present
       filename='LEVDEN_SCALE.DAT'
-      inquire (file=trim(filename),exist=fexist)
+      lenst = len(trim(filename))
+      inquire (file=filename(1:lenst),exist=fexist)
 !     If it exists, call function to re-scale LD's
-      if(fexist) call scale_ld(filename,iz,ia,uugrid,rhoogrid,
+      if(fexist) call scale_ld(filename(1:lenst),iz,ia,uugrid,rhoogrid,
      +rhotgrid,rhogrid,NLDGRID, JMAX,jmaxl)
 
 C
@@ -1735,7 +1739,8 @@ C
       WRITE (filename,99007) iz
 99007 FORMAT ('/RIPL/densities/total/level-densities-hfb/z',i3.3,
      &'.cor')
-      OPEN (UNIT = 34, FILE = trim(empiredir)//filename,ERR=440)
+      lenst = len(trim(filename))
+      OPEN (UNIT=34, FILE = trim(empiredir)//filename(1:lenst),ERR=440)
       pcorr = 0.d0
       acorr = 0.d0
   110 READ (34,99008,ERR=440,END = 440) izr, iar, acorr, pcorr
@@ -1861,11 +1866,11 @@ C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
 
       character (len=2) :: char2
       character (len=8) :: par
-      character (len=50) :: filename
+      character*(*) :: filename
 
-      open(34,file=trim(filename),status='old',iostat=ios)
+      open(34,file=filename,status='old',iostat=ios)
       if(ios.NE.0) then
-        write(*,*) 'ERROR: File ''',trim(filename),''' expected to be ',
+        write(*,*) 'ERROR: File ''',filename,''' expected to be ',
      +'present but was not found!'
         stop
       endif
@@ -1884,7 +1889,7 @@ C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
         elseif(par.EQ.'Negative') then
           ipar=2
         else
-          write(*,15) trim(filename),par
+          write(*,15) filename,par
 15        format('ERROR: Wrong parity in file ''',A,'''!!',1/,'ERROR: ',
      +'It should be ''Positive'' or ''Negative'' but read ''',A,
      +''' instead!!')
