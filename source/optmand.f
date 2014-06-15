@@ -70,7 +70,7 @@ C     FACTORIAL CALCULATION AVOIDING A LONG DATA STATEMENT (common /LOFAC/A)
 C            but keeping the same precision
 C   (a long data statement was producing errors/warnings with some compilers)
 C
-      a = 0.D0
+      A = 0.D0
       LFA(1) = 0.d0
       DO i = 2, 400
         dtmp = i 
@@ -2901,10 +2901,8 @@ C     LOGICAL*1 unformat/.FALSE./
      */RESONI/ERN(10),GNN(10),GREN(10),LON(10),JMN(10),JCON(10),NEL(10)
      *,NRESN
 
-      real*8 :: anorm = 0.D0
-
-      AMI=939.56536
-       IF(MECHA.EQ.1) AMI=938.272029D0
+      AMI=939.56536D0
+      IF(MECHA.EQ.1) AMI=938.272029D0
 C     NSPI=IDINT(ASP*2+0.001)
       NSPI=INT(ASP*2+0.001)
       NDEL=1
@@ -3086,6 +3084,8 @@ C     IF(CSS.LT.1.E-4) NJ=NJ+1
       CSRER=0.D0 
       TDR1=0.D0 
 
+      ANORM = 0.D0
+
       IF(NRESN.EQ.0) GO TO 201     
      
       EBOUND=6.D0
@@ -3098,6 +3098,7 @@ c     IF(MEPRI.LT.99) PRINT 919, EN,ANORM,ANORMM,EBOUND,CRO,CROE,CONG
 c     PAUSE 777
       ANORMM=1.D0
       ANORM=1.D0
+      ANORM2=ANORM**2
          
       DO 202 I=1,NRESN
            
@@ -3389,7 +3390,7 @@ C--------(nlev=1 corresponds to the ground state)
 C--------Selecting only ground state
          IF (dtmp.GT.1.D-15 .AND. l.LT.LLLMAX) THEN
 C-----------Averaging over particle and target spin, summing over channel spin jc
-            dtmp = dtmp*(2.D0*jj + 1.D0)/(2.D0*haf + 1.D0)
+            dtmp = dtmp*(2.D0*jc + 1.D0)/(2.D0*haf + 1.D0)
             Stl(l+1) = Stl(l+1) + dtmp/DBLE(2*l + 1)/DBLE(JO(1) + 1)
          ENDIF
        ENDDO
