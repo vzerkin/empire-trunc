@@ -139,28 +139,19 @@ C
       integer function ipipe(Stringp)
       implicit none
       CHARACTER*(*) STRINGP
-	integer nlen,i
+      integer nlen,i
       ipipe=-1
 
 C     Striping the directory path for MSF Windows
       nlen = len(trim(stringp))
-	if (nlen.le.0) RETURN
-	do i=nlen,1,-1
-	  if(stringp(i:i).eq.'/') exit
-	enddo     
+      if (nlen.le.0) RETURN
+      do i=nlen,1,-1
+        if(stringp(i:i).eq.'/') exit
+      enddo     
 C     write(*,*) trim(STRINGP(i+1:nlen))
 C     pause 'Calling system ...'
       ipipe=0
       CALL SYSTEM(STRINGP(i+1:nlen))
 C     pause 'after call'
-
-      RETURN
-      END
-
-      integer function OMP_GET_NUM_THREADS()
-C
-C     Dummy function for MSFortran
-C
-      OMP_GET_NUM_THREADS = 1
       RETURN
       END

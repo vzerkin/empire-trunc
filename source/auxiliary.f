@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3806 $
+Ccc   * $Rev: 3976 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 16:39:07 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-06-15 16:28:46 +0200 (So, 15 Jun 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -231,14 +231,14 @@ C
       RETURN
       END
 
-      DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEVCOL)
+      DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEV)
 C
 C-Title  : GET_DDXS Subroutine
 C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS
 C
-C          NL = PL_lmax(ILEVCOL)
+C          NL = PL_lmax(ILEV)
 C
-C          DDXS = SUM_{n=0 to NL} { (2L+1)( PL_CN(n,ILEVCOL)*Pn(n,X) }
+C          DDXS = SUM_{n=0 to NL} { (2L+1)( PL_CN(n,ILEV)*Pn(n,X) }
 C          X= cos(theta) 
 C
 C-Author : R.Capote, Nuclear Data Section, IAEA, 2012
@@ -259,7 +259,7 @@ C
 C
 C Dummy arguments
 C
-      INTEGER ILEVCOL
+      INTEGER ILEV
       DOUBLE PRECISION X
 C
 C Local variables
@@ -267,17 +267,17 @@ C
       INTEGER NL,L
       DOUBLE PRECISION PL(0:NDANGecis)
 
-      NL = PL_lmax(ILEVCOL)
+      NL = PL_lmax(ILEV)
       PL(0) = 1.d0
 C     GET_DDXS = COEFF(0)
-      GET_DDXS = PL_CN(0,ILEVCOL) ! *PL(0), PL(0) is equal 1 anyhow
+      GET_DDXS = PL_CN(0,ILEV) ! *PL(0), PL(0) is equal 1 anyhow
       IF (NL.LT.1) RETURN
       PL(1) = X
-      GET_DDXS = GET_DDXS + 3*PL_CN(1,ILEVCOL)*PL(1)
+      GET_DDXS = GET_DDXS + 3*PL_CN(1,ILEV)*PL(1)
       IF (NL.LT.2) RETURN
       DO L = 1, NL - 1
          PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
-         GET_DDXS = GET_DDXS + ( 2*(L+1)+1 )*PL_CN(L+1,ILEVCOL)*PL(L+1)
+         GET_DDXS = GET_DDXS + ( 2*(L+1)+1 )*PL_CN(L+1,ILEV)*PL(L+1)
       ENDDO
       RETURN
       END
