@@ -20,7 +20,7 @@ c
       implicit none
       include 'dimension.h' 
 
-	double precision g(6*NDLW)
+	   double precision g(6*NDLW)
       common /factorial/g
 c
       double precision a,b,c,d,e,f
@@ -42,7 +42,7 @@ c
 c
       double precision zero,eps,one,two
       data             zero /0.0d+00/
-      data             eps  /1.0d-03/
+      data             eps  /1.0d-10/
       data             one  /1.0d+00/
       data             two  /2.0d+00/
 c=======================================================================
@@ -153,7 +153,7 @@ c
       implicit none
 
       include 'dimension.h' 
-	double precision g(6*NDLW)
+	   double precision g(6*NDLW)
       common /factorial/g
 c
       double precision aj1,aj2,aj3,am1,am2,am3
@@ -170,7 +170,7 @@ c
 c
       double precision zero,eps,one,two
       data             zero /0.0d+00/
-      data             eps  /1.0d-03/
+      data             eps  /1.0d-10/
       data             one  /1.0d+00/
       data             two  /2.0d+00/
 c=======================================================================
@@ -199,7 +199,7 @@ c
         WRITE(8,9010) i(10),6*NDLW,aj1,aj2,aj3,am1,am2,am3
  9010   format(' ERROR: MEMORY OVERFLOW IN CLEBG ',2i5,6f5.1,
      *         ' INCREASE NDLW in dimension.h' )
-	  STOP ' ERROR: MEMORY OVERFLOW IN CLEBG, INCREASE NDLW'
+	   STOP ' ERROR: MEMORY OVERFLOW IN CLEBG, INCREASE NDLW'
       endif
 c
       i(1) = j1 + j2 - j3
