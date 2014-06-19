@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3982 $
+Ccc   * $Rev: 3985 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+Ccc   * $Date: 2014-06-20 00:48:46 +0200 (Fr, 20 Jun 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -94,7 +94,7 @@ C-----
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)
-         if(il.eq.levtarg) write(8,*)'Elastic pop1=',pop1
+C        if(il.eq.levtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
 C         write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
