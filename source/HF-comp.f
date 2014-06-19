@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3856 $
+Ccc   * $Rev: 3982 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-11 21:49:16 +0100 (Di, 11 Feb 2014) $
+Ccc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -44,10 +44,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &  popll, pops, popt, xcse, xscalc, xs_norm, xs_cn
+     &  popll, pops, popt, xcse, xscalc, xs_cn
 
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
-      INTEGER ilevcol, ilev
+!      INTEGER ilevcol, ilev
       DOUBLE PRECISION GET_DDXS
 C-----
 C-----Continuum
@@ -93,7 +93,8 @@ C-----
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
-         pop1 = Xnor*SCRtl(il,Nejc)  
+         pop1 = Xnor*SCRtl(il,Nejc)
+         if(il.eq.levtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
 C         write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
@@ -164,54 +165,31 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
             ENDIF
          ENDIF
 
-C--------Add isotropic CN contribution to direct ang. distributions
+C--------Add CN contribution to direct ang. distributions
          IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. 
      >       Nejc.NE.0 .AND. pop1.gt.0.d0 ) THEN
 
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
-            xscalc = pop1/(4.d0*PI)  ! default isotropic
                        
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
-C
-C             Check if the level is collective
-              ilevcol = 0 
-              do ilev=1,ND_nlv 
-                if(ICOller(ilev).eq.il)  then
-                  ilevcol   = ilev
-                  exit
-                endif                    
-              enddo
-
-              if(ilevcol.gt.0) then 
-C               Collective level, calculating CN DA from Legendre expansion  
+C 
+C               Calculating CN DA from Legendre expansion
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
-C               write(*,*) 'Coll.lev=',ilevcol,' CN xs(4pi*A0)=',
-C    >             4.d0*PI*PL_CN(0,ilevcol)
-                xs_norm = PL_CN(0,ilevcol)
-                if(xs_norm.gt.0.d0) then
+C               write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
+C    >             4.d0*PI*PL_CN(0,il)
+                if(PL_CN(0,il).gt.0.d0) then
+      if(il.eq.levtarg) write(8,*) '4piPL=',4.d0*pi*PL_CN(0,il)
                   DO na = 1, NDANG
-                    xs_cn = GET_DDXS(CANGLE(na),ilevcol)
-                    CSAlev(na,il,Nejc) = 
-     >                      CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-C                   if(na.le.2)
-C    >                write(*,'(1x,A4,F4.0,1x,3(A11,1p,d10.3,1x))') 
-C    >               'ANG=',ANGles(na),'ECIS dist.=',xs_cn,
-C    >                           'HF   dist.=',xs_cn*(xscalc/xs_norm),
-C    >                           'Isot dist.=',xscalc
+                    xs_cn = GET_DDXS(CANGLE(na),il)
+                    CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
                   ENDDO
                 endif
-
-              else
-C               Not collective level   
-                DO na = 1, NDANG
-                  CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
-                ENDDO
-              endif
 
             ELSE
 
 C             Not the inelastic channel OR isotropic CN DA
 C
+              xscalc = pop1/(4.d0*PI)  ! default isotropic
               DO na = 1, NDANG
                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
               ENDDO
@@ -219,7 +197,7 @@ C
             ENDIF
 
          ENDIF
-      ENDDO
+      ENDDO   !loop over levels
 
       RETURN
       END

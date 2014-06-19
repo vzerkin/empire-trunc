@@ -26,13 +26,11 @@ C
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
       DOUBLE PRECISION poplev,poptot,popleft,pope,xnor,fisxse,ftmp
-      DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_cn,xs_norm 
+      DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_cn
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
-      DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh 
-
-      DOUBLE PRECISION ctotsp,emedc,cmulc,totsp,ftmp_gs,esum
+      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
 
       DOUBLE PRECISION, external :: GET_DDXS
 
@@ -218,16 +216,13 @@ C---------Write elastic to tape 12 and to tape 68
             ENDDO
 
             IF(.not.CN_isotropic) then
-              xs_norm = PL_CN(0,1)
-              IF (xs_norm.gt.0.d0) then
-                DO iang = 1, NDANG
-                  xs_cn = GET_DDXS(CANGLE(iang),1)
-                  cel_da(iang) = xs_cn*(ELCncs/xs_norm)
+              DO iang = 1, NDANG
+                xs_cn = GET_DDXS(CANGLE(iang),1)
+                cel_da(iang) = xs_cn
 C                 write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
 C    >              'ANG=',ANGles(iang),' ECIS CN ang. dist.=',xs_cn,
 C    >              '  HF CN ang. distr.=',cel_da(iang)
-                ENDDO
-              ENDIF
+              ENDDO
                     
               WRITE (12,'(9X,8E15.5)') 
      &          ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
@@ -378,7 +373,7 @@ C-----Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
 C-----Account for widths fluctuations (HRTW)
       IF (LHRtw.EQ.1 .AND. EINl.GT.EHRtw) LHRtw = 0
 
-      IF (nnuc.EQ.1 .AND. LHRtw.GT.0) THEN   
+      IF (nnuc.EQ.1 .AND. EINl.LT.EMAx_tlj) THEN
 C
 C       only for CN decay 
 C
@@ -446,11 +441,12 @@ C---------------Residual nuclei must be heavier than alpha
                 CALL WHERE(izares,nnur,iloc)
                 if(iloc.eq.1) CYCLE
                 CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
-!               if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.1) then
+!               if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.3) then
+!                 write(*,*) 'J=',jcn
 !                 write(8,*) 'sum for ejectile=', nejc, sum
 !                 write(*,*) 'sum for ejectile=', nejc, sum
 !                 sumtll = sumtll + sum
-!               endif 
+!               endif
               ENDDO
 C-------------DO loop over ejectiles       ***done***
 !             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
@@ -999,36 +995,20 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                      POPcse(0,6,ispec,INExc(nnuc))
                ENDIF
              ENDDO
-C
-C            Calculating Multiplicities
-C
-             cmulg = gtotsp/CSPrd(nnuc)
-             cmuln = xtotsp/CSPrd(nnuc)
-             cmulp = ptotsp/CSPrd(nnuc)
-             cmula = atotsp/CSPrd(nnuc)
-             cmuld = dtotsp/CSPrd(nnuc)
-             cmult = ttotsp/CSPrd(nnuc)
-             cmulh = htotsp/CSPrd(nnuc)
-             cmulc = ctotsp/CSPrd(nnuc)
-
              IF (NDEJC.EQ.7) THEN
                WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                   dtotsp,ttotsp,htotsp,ctotsp
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
-               WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
-     &                cmula, cmuld, cmult, cmulh, cmulc
              ELSE  
                WRITE (8,'(116(1H_))') 
                WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
      &                 dtotsp,ttotsp,htotsp    
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh 
-               WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
-     &                cmula, cmuld, cmult, cmulh
              ENDIF            
-             WRITE (8,'(116(1H_)/)')
+             WRITE (8,'(116(1H_)/)') 
            ENDIF
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
@@ -1083,8 +1063,8 @@ C----------CN contribution to elastic ddx
                WRITE (8,*)
      &          '    Elastic=', sngl(ELCncs), ' mb/str'
              ELSE
-               WRITE (8,*) ' CN elastic cross section (ECIS) ',
-     &           sngl(4.d0*pi*PL_CN(0,1)),' mb' 
+               WRITE (8,*) ' CN elas. cross section (BB)',
+     &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
                ftmp = 1.d0
                if(PL_CN(0,1).gt.0.d0) ftmp = ELCncs/PL_CN(0,1)
                IF(INTerf.eq.1) then
@@ -1102,11 +1082,9 @@ C----------CN contribution to elastic ddx
      &cluding the Compound Elastic'
                WRITE (8,*) 
 
-               xs_norm = PL_CN(0,1)
-               IF(xs_norm.gt.0.d0) then
+               IF(PL_CN(0,1).gt.0.d0) then
                  DO iang = 1, NDANG
-                   xs_cn = GET_DDXS(CANGLE(iang),1)
-                   cel_da(iang) = xs_cn*(ELCncs/xs_norm)
+                   cel_da(iang) = GET_DDXS(CANGLE(iang),1)
                  ENDDO
                ENDIF
 
@@ -1432,7 +1410,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION coef, dang, erecejc, erecod, erecoil, erecpar,
+      DOUBLE PRECISION coeff, dang, erecejc, erecod, erecoil, erecpar,
      &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl
       INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
 C
@@ -1448,7 +1426,7 @@ C-----Normalize recoil spectrum of the parent
          ENDDO
       ENDIF
       dang = PI/FLOAT(NDANG - 1)
-      coef = dang/DERec/2.0
+      coeff = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
          ares = A(nnuc) - AEJc(nejc)
          zres = Z(nnuc) - ZEJc(nejc)
@@ -1476,7 +1454,7 @@ C-----------Daughter bin
                  weight = (erecoil - (irec - 1)*DERec)/DERec
                  IF (irec + 1.GT.NDEREC) EXIT
                  csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
-     &                    SANgler(na)*coef*recorr
+     &                    SANgler(na)*coeff*recorr
                  RECcse(irec,icse,nnur) = RECcse(irec,icse,nnur)
      &               + csmsdl*(1.0 - weight)
                  RECcse(irec + 1,icse,nnur) = RECcse(irec + 1,icse,nnur)  
@@ -1501,7 +1479,7 @@ C--------Decay to discrete levels (stored with icse=0)
                   RECcse(irec,0,nnur) = RECcse(irec,0,nnur)
      &                                  + RECcse(ire,Ke,Nnuc)
      &                                  *REClev(il,nejc)*(1.0 - weight)
-     &                                  *SANgler(na)*coef
+     &                                  *SANgler(na)*coeff
 c------------------------
 !                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
 !     &               .AND.na.EQ.10) THEN
@@ -1516,7 +1494,7 @@ c------------------------
                   IF (irec + 1.GT.NDEREC) GOTO 60
                   RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
      &               + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
-     &               *weight*SANgler(na)*coef
+     &               *weight*SANgler(na)*coeff
                ENDDO                  !over angles
    60       ENDDO                  !over recoil spectrum
          ENDDO                  !over levels

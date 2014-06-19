@@ -1,6 +1,6 @@
-! $Rev: 3967 $
-! $Author: gnobre $
-! $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
+! $Rev: 3982 $
+! $Author: rcapote $
+! $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -56,7 +56,8 @@
      &                 FISa_n(NFHUMP,ndnuc), FISd_n(NFHUMP,ndnuc),      &
      &                 FISn_n(NFHUMP,ndnuc), XNAver(0:NDEJC,NDEtl),     &
      &                 PFNtke,PFNalp,PFNrat,PFNniu,PFNere,TMAxw,        &
-     &                 PL_CN(0:ndangecis,ndcollev),                     &
+     &                 PL_CN(0:(2*NDLW),NDLV),                          &
+     &                 PL_CNcont(0:(2*NDLW), NDEX),                     &
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
       INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, CNAngd,          &
@@ -78,8 +79,8 @@
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,       &
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,  &
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
-     &        PL_lmax(ndcollev), SFAct, INTerf, IPArcov, MAXj(0:ndejc), &
-     &        ngamm_tr, nfiss_tr
+     &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
+     &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX)
        
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
@@ -121,7 +122,7 @@
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,   &
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),  &
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,    &
-     &                 CINred(ndlv), CELcor
+     &                 CINred(ndlv), CELcor, Emax_tlj
       
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*200 EMPiredir
@@ -144,7 +145,9 @@
      &                 SHNix, SHRd, SHRj, SHRt, SIG,                    &
      &                 SIGabs(ndetl,ndejc,ndnuc), STMro, TEMp0,         &
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),    &
+
      &                 TLJ(ndetl,ndlw,3,ndejc),                         &
+
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
      &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
@@ -225,11 +228,12 @@
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,   &
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,  &
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,      &
-     &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,         &
+     &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,Emax_tlj,&
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,&
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,&
-     &                 EMInmsd,ATIlnoz,DXSred,SHLlnor,PEQcont,PL_CN,    &
-     &                 FCCred0,FUSred0,ELAred0,FCOred0,TOTred0, DEPart
+     &                 EMInmsd, ATIlnoz, DXSred, SHLlnor, PEQcont,PL_CN,&
+     &                 PL_CNcont, FCCred0, FUSred0, ELAred0, FCOred0,   &
+     &                 TOTred0, DEPart
       COMMON /GLOBAL1/ EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,        &
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,      &
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,    &
@@ -280,7 +284,7 @@
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,        &
-     &                  ngamm_tr, nfiss_tr       
+     &                  ngamm_tr, nfiss_tr, PLcont_lmax
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc, &
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,  &

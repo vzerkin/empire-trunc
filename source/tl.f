@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3965 $
+Ccc   * $Rev: 3982 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-05-14 19:01:34 +0200 (Mi, 14 Mai 2014) $
+Ccc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -256,9 +256,9 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-elevcc)       .le.0.002 .and.    ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.    ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then ! parity
+              if( abs(elvr-elevcc).le.0.01  .and.          ! energy
+     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then    ! parity
                   EEX(n,ncalc) = elvr
                   EXIT
               endif 
@@ -269,9 +269,9 @@ C
 C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
          nld_cc = 1
-         DO n=2,NCOll(ncalc)
-           DO ilv=2,ND_nlv
-              if( abs(D_Elv(ilv)-EEX(n,ncalc)) .le.0.002 .and. 
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
+              if( abs(D_Elv(ilv)-EEX(n,ncalc)).le.0.01     .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
                   nld_cc = nld_cc + 1
@@ -506,9 +506,9 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and.    ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.    ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then ! parity
+              if( abs(elvr-EXV(n,ncalc)).le.0.01  .and. ! energy
+     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then  ! parity
                   EXV(n,ncalc) = elvr
                   EXIT
               endif 
@@ -519,9 +519,10 @@ C
 C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
 C
          nld_cc = 1
-         DO n=2,NVIb(ncalc)
-           DO ilv=2,ND_nlv
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)) .le.0.002 .and. 
+         DO ilv=2,ND_nlv
+             DO n=2,NVIb(ncalc)
+
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
 
@@ -758,7 +759,7 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1058,ERR=1058) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and. 
+              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
      &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then
                   EXV(n,ncalc) = elvr
@@ -776,10 +777,10 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO n=2,NCOll(ncalc)
-           DO ilv=2,ND_nlv
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
 
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)) .le.0.002 .and. 
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
@@ -1002,37 +1003,16 @@ C        WRITE (96,'(A80)') ch_iuf
 C
 C          first run with default TARGET_COLL.DAT
 C      
-C		 WRITING COUPLED LEVELS
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=290,ERR=290) ch_iuf        
 
-	       IF (ICOllev(k).GE.LEVcc) CYCLE
+             IF (ICOllev(k).LT.LEVcc) D_Def(k,2) = 0.005
 
-             WRITE (32,
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
-
-             WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
-
-             WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
-     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
-
-           ENDDO
-           CLOSE(32)
-
-C		 WRITING UNCOUPLED LEVELS
-           DO k = 1, ND_nlv
-
-             IF (ICOllev(k).LT.LEVcc) CYCLE
-
-             IF (D_Def(k,2).le.0.d0) D_Def(k,2) = 0.005
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
@@ -1055,7 +1035,8 @@ C		 WRITING UNCOUPLED LEVELS
            ENDDO
 
          ENDIF
-  290    CLOSE (96)
+  290    CLOSE(32)
+         CLOSE (96)
          CLOSE (97)
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
@@ -1135,7 +1116,7 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1061,ERR=1061) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)) .le.0.002 .and. 
+              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
      &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
      &                iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
                   EXV(n,ncalc) = elvr
@@ -1154,11 +1135,11 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO n=2,NCOll(ncalc)
-           DO ilv=2,ND_nlv
+         DO ilv=2,ND_nlv
+           DO n=2,NCOll(ncalc)
 
-              if( abs(D_Elv(ilv) -EXV(n,ncalc))  .le.0.002 .and. 
-     &            abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+     &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
                   nld_cc = nld_cc + 1
@@ -1180,6 +1161,50 @@ C
             ENDDO
          ENDDO
        
+C
+C--------Putting Coupled levels first
+         DO i = 2, ND_nlv
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).LT.ICOllev(i)) THEN
+C-----------------swapping
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+                  itmp = IPH(i)
+                  IPH(i) = IPH(j)
+                  IPH(j) = itmp
+
+                  dtmp = D_Klv(i)
+                  D_Klv(i) = D_Klv(j)
+                  D_Klv(j) = dtmp
+
+                  dtmp = D_Llv(i)
+                  D_Llv(i) = D_Llv(j)
+                  D_Llv(j) = dtmp
+
+                  dtmp = D_nno(i)
+                  D_nno(i) = D_nno(j)
+                  D_nno(j) = dtmp
+               ENDIF
+            ENDDO
+         ENDDO
 
          WRITE (8,*) 
          WRITE (8,*) 'Deformation of the gsb adopted from CC RIPL OMP'
@@ -1257,37 +1282,17 @@ C           first run with default TARGET_COLL.DAT
            WRITE (32,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
            WRITE (96,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
 
-C		 WRITING COUPLED LEVELS
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=1001,ERR=1001) ch_iuf        
 
-	       IF (ICOllev(k).GE.LEVcc) CYCLE
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+     &          D_Def(k,2) = 0.005
 
-             WRITE (32,
+             IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
-
-             WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
-
-             WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
-     &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
-
-           ENDDO
-           CLOSE(32)
-
-C		 WRITING UNCOUPLED LEVELS
-           DO k = 1, ND_nlv
-
-             IF (ICOllev(k).LT.LEVcc) CYCLE
-
-             IF (D_Def(k,2).le.0.d0) D_Def(k,2) = 0.005
 
              WRITE (8,
      &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
@@ -1311,6 +1316,7 @@ C		 WRITING UNCOUPLED LEVELS
 
          ENDIF
  1001    CLOSE (96)
+         CLOSE (32)
          CLOSE (97)
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
@@ -2263,9 +2269,6 @@ C
 C
 C
       SUBROUTINE TRANSINP(Nejc,Nnuc,Nen,Maxl,Ttll,Ttllj)
-
-      USE secis06
-
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -2280,15 +2283,9 @@ C Local variables
 C
       CHARACTER*3 ctldir
       CHARACTER*23 ctmp23
-      CHARACTER*28 ctmp28
       DOUBLE PRECISION culbar, ener
       LOGICAL fexist, ltmp, logtmp, fexistj
       INTEGER i, ilv, ien, ien_beg, l, lmax, jindex
-      INTEGER iwin
-      CHARACTER*132 ctmp
-      INTEGER ipipe
-
-C     INTEGER NTHREADS, TID, OMP_GET_NUM_THREADS
 C     --------------------------------------------------------------------
 C     | Calculation of transmission coefficients using ECIS              |
 C     |                for EMPIRE energy grid                            |
@@ -2409,6 +2406,11 @@ C
               ENDIF 
             ENDIF
          ENDIF
+C--------OPEN Unit=46 for Tl output
+         OPEN (UNIT = 46 ,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
+         OPEN (UNIT = 461,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
 C
 C--------do loop over energy
 C
@@ -2419,124 +2421,37 @@ C        saving the input value of the key CN_isotropic
 C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
          CN_isotropic = .TRUE.     
-
-C        Preparing input for optical model codes
+     
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
             IF (ener.LE.0.1D-6) CYCLE
-            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
 
             IF (.NOT.(ltmp)) THEN
 C
 C--------------Spherical optical model is assumed, only one level (gs)
 C
-               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.,ctmp28)
+               CALL ECIS_CCVIB(Nejc,Nnuc,ener,.TRUE.,0,.TRUE.)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
 C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
             ELSEIF (DEFormed) THEN
 C--------------CC rotational calculation (ECIS)
-               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.,ctmp28)
+               CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj)
             ELSE
 C--------------CC vibrational calculation (OPTMAN or ECIS) 
                IF (SOFt) THEN
 C----------------OPTMAN CC calc. (only coupled levels)
-                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.,ctmp28) 
+                 CALL OPTMAN_CCSOFTROT(Nejc,Nnuc,ener,.TRUE.) 
                ELSE
 C----------------ECIS   CC calc. (only coupled levels)
-                 CALL ECIS_CCVIB(
-     &             Nejc,Nnuc,ener,.FALSE.,-1,.TRUE.,ctmp28)
+                 CALL ECIS_CCVIB(Nejc,Nnuc,ener,.FALSE., -1,.TRUE.)
                ENDIF
-            ENDIF
-         ENDDO
-C        pause 'TLs'  
-   
-CC!$OMP PARALLEL PRIVATE(i,tid)
-C        NTHREADS = OMP_GET_NUM_THREADS()
-C        IF (NTHREADS.GT.1) THEN
-C          WRITE(8,*)
-C          WRITE(8,'(1x,A32,I2,4x,I2,3H + ,A6,I3,1X,A6,I3)') 
-C    >      'Number of threads (paral exec)=', NTHREADS, 'Nejc=',
-C    >      Nejc,' Ares=',Nint(A(Nnuc)),' Zres=',Nint(Z(Nnuc))
-C          WRITE(*,'(1x,A32,I2,4x,I2,3H + ,A6,I3,1X,A6,I3)') 
-C    >      'Number of threads (paral exec)=', NTHREADS, 'Nejc=',
-C    >      Nejc,' Ares=',Nint(A(Nnuc)),' Zres=',Nint(Z(Nnuc))
-C          WRITE(8,*)
-C        END IF
-C
-C
-C        Running optical model codes
-         DO i = Nen ,ien_beg, -1
-
-            ener = ETL(i,Nejc,Nnuc)
-            IF (ener.LE.0.1D-6) CYCLE
-
-            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
-C
-            IF (.NOT.(ltmp)) THEN
-C
-C--------------Spherical optical model is assumed, only one level (gs)
-C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C              iwin = ipipe(ctmp)
-               CALL ECIS_int(ctmp28) 
-C-----------Transmission coefficient matrix for incident channel
-C-----------is calculated (DIRECT = 2 (CCM)) using ECIS code.
-C-----------Only coupled levels are considered
-            ELSEIF (DEFormed) THEN
-C--------------CC rotational calculation (ECIS)
-C              ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C              iwin = ipipe(ctmp)
-               CALL ECIS_int(ctmp28) 
-            ELSE
-C--------------CC vibrational calculation (OPTMAN or ECIS) 
-               IF (SOFt) THEN
-C----------------OPTMAN CC calc. (only coupled levels)
-                 ctmp = trim(empiredir)//'/source/optmand '//ctmp28
-                 iwin = ipipe(ctmp)
-               ELSE
-C----------------ECIS   CC calc. (only coupled levels)
-C                ctmp = trim(empiredir)//'/source/ecis06 '//ctmp28
-C                iwin = ipipe(ctmp)
-                 CALL ECIS_int(ctmp28) 
-               ENDIF
-            ENDIF
-           
-         ENDDO
-CC!$OMP END PARALLEL
-
-C        Processing outputs
-C--------OPEN Unit=46 for Tl output
-         OPEN (UNIT = 46 ,STATUS = 'unknown',
-     &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
-         OPEN (UNIT = 461,STATUS = 'unknown',
-     &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
-
-         DO i = Nen ,ien_beg, -1
-
-            ener = ETL(i,Nejc,Nnuc)
-            IF (ener.LE.0.1D-6) CYCLE
-
-            write(ctmp28,'(A23,1H_,I4.4)') ctmp23,i
- 
-            IF (.NOT.(ltmp)) THEN
-C
-C--------------Spherical optical model is assumed, only one level (gs)
-               CALL ECIS2EMPIRE_TR(
-     &           Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj,ctmp28)
-C--------------Only coupled levels are considered
-            ELSEIF (DEFormed) THEN
-C--------------CC rotational calculation (ECIS)
-               CALL ECIS2EMPIRE_TR(
-     &           Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj,ctmp28)
-            ELSE
-C--------------CC vibrational calculation (OPTMAN or ECIS) 
-               CALL ECIS2EMPIRE_TR(
-     &           Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj,ctmp28)
+               CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.TRUE.,Maxl,Ttll,Ttllj)
             ENDIF
 
-            CYCLE
- 650        CLOSE(1,STATUS='DELETE') 
          ENDDO
 
 C        restoring the input value of the key CN_isotropic
@@ -2544,7 +2459,6 @@ C        restoring the input value of the key CN_isotropic
 
          CLOSE (46 )
          CLOSE (461)
-
          IF (IOUT.GT.4) THEN
 	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
@@ -3011,8 +2925,7 @@ C
       RETURN
       END
 
-      SUBROUTINE ECIS2EMPIRE_TR(
-     &  Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj,ctmp28)
+      SUBROUTINE ECIS2EMPIRE_TR(Nejc,Nnuc,Ien,Lvibrat,Maxl,Ttll,Ttllj)
 C
 C     Process ECIS output to obtain TTLl,Maxl matrix for EMPIRE energy grid
 C     Reads from units 45, 46 and writes to unit 6
@@ -3042,7 +2955,6 @@ C
       LOGICAL Lvibrat
       INTEGER Maxl(NDETL)
       DOUBLE PRECISION Ttll(NDETL,NDLW),Ttllj(NDETL,NDLW,3)
-      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -3051,7 +2963,6 @@ C
      &                 xmas_nejc, xmas_nnuc, stmp, xsabsj, xsabs, jsp
       LOGICAL relcal
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex, ilv
-      INTEGER iwin, ipipe_delete
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
 	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
@@ -3065,10 +2976,10 @@ C-----
 C----- Input of transmission coefficients
 C-----
       IF(unformat) then
-        OPEN (UNIT=45,STATUS='old',FILE= (ctmp28//'.tlj'),
-     &        form='unformatted',ERR=200) !-zvv-2013
+        OPEN (UNIT=45,STATUS='old',FILE='ecis06.tlj',form='unformatted',
+     &        ERR=200) !-zvv-2013
       ELSE
-        OPEN (UNIT = 45,STATUS = 'old',FILE = (ctmp28//'.tlj'))
+        OPEN (UNIT = 45,STATUS = 'old',FILE = 'ecis06.tlj')
         READ (45,*,END = 200)  ! Skipping one line
       ENDIF     
 C-----JC,ParC is the channel spin and parity
@@ -3128,7 +3039,7 @@ C
          ENDIF
       ENDDO
       GOTO 100
-  200 CLOSE (45,STATUS='DELETE')
+  200 CLOSE (45)
 C-----For vibrational the Tls must be multiplied by 
       IF (Lvibrat) THEN
          DO l = 0, lmax
@@ -3142,28 +3053,15 @@ C-----For vibrational the Tls must be multiplied by
       stotecis = 0.D0
       selecis = 0.D0
       sreacecis = 0.D0
-
-	iwin = ipipe_delete((ctmp28//'.dat')) 
-	iwin = ipipe_delete((ctmp28//'.exp')) 
-	iwin = ipipe_delete((ctmp28//'.out')) 
-	iwin = ipipe_delete((ctmp28//'.ang')) 
-	iwin = ipipe_delete((ctmp28//'.leg')) 
-	iwin = ipipe_delete((ctmp28//'.inp')) 
-	iwin = ipipe_delete((ctmp28//'.smat')) 
-
-      OPEN (UNIT = 45,FILE = (ctmp28//'.cs'),
-     &  STATUS = 'old',ERR = 300)
+      OPEN (UNIT = 45,FILE = 'ecis06.cs',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping one line
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) stotecis
       READ (45,*,END = 300) sreacecis
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END = 300) selecis
-  300 CLOSE (45,STATUS='DELETE')
+  300 CLOSE (45)
       sinlss = 0.D0
       SIGabs(Ien,Nejc,Nnuc) = 0.D0
-      IF (sreacecis.LE.0.D0) THEN
-	  iwin = ipipe_delete((ctmp28//'.ics')) 
-        RETURN
-      ENDIF
+      IF (sreacecis.LE.0.D0) RETURN
       IF (IOUt.EQ.5) THEN
          xmas_nnuc = AMAss(Nnuc)
          xmas_nejc = EJMass(Nejc)
@@ -3187,15 +3085,14 @@ C 303       format(3x,' L =',I3,' Sabs(L) =',d12.6)
 C        if(elab.lt.0.3d0) write(8,*)
          xsabs  = 10.d0*PI/ak2*sabs
          xsabsj = 10.d0*PI/ak2*sabsj/DBLE(2*SEJc(Nejc)+1) 
-         OPEN (UNIT = 45,FILE = (ctmp28//'.ics'),
-     &     STATUS = 'old',ERR = 350)
+         OPEN (UNIT = 45,FILE = 'ecis06.ics',STATUS = 'old',ERR = 350)
          READ (45,*,END = 350) ! Skipping one line
          sinlss = 0.D0
          DO l = 1, ncoll - 1
             READ (45,*,END = 350) dtmp
             sinlss = sinlss + dtmp
          ENDDO
-  350    CLOSE (45,STATUS='DELETE')
+  350    CLOSE (45)
          sreac = xsabs + sinlss
          IF (xsabs.GT.0.D0) THEN
             WRITE (8,*)
@@ -3218,8 +3115,6 @@ C        if(elab.lt.0.3d0) write(8,*)
      &                       SNGL(xsabsj+sinlss), ' mb (Sabsj + Sinl)'
             ENDIF
          ENDIF
-	ELSE
-         iwin = ipipe_delete((ctmp28//'.ics')) 
       ENDIF
 C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46 ) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
@@ -3231,7 +3126,6 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) sreacecis
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
-
       RETURN
       END
 C
@@ -3304,7 +3198,7 @@ C--------A>99
 CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
       END
 
-      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc,ctmp28)
+      SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -3331,8 +3225,6 @@ C     5 HELIUM-3
 C     6 ALPHA
 C     >6 HEAVY ION
 C
-      USE secis06
-
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -3360,7 +3252,6 @@ C
       DOUBLE PRECISION El
       INTEGER Inlkey, Nejc, Nnuc
       LOGICAL Ldwba,TL_calc
-      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -3379,8 +3270,6 @@ C
      &        nd_cons, nd_nlvop, njmax, npp, nwrite,
      &        nuncoupled, ncontinua, nphonon 
 
-C     CHARACTER*132 ctmp
-C     INTEGER ipipe
       INTEGER iwin, ipipe_move
       LOGICAL inc_channel, logtmp
 
@@ -3610,38 +3499,20 @@ C-----Maximum number of channel spin (increased to 100 for high energy scatterin
      >     mod(nint(A(Nnuc)-Z(Nnuc)),2).ne.0) .and.
      >     mod(nint(A(Nnuc)),2).ne.0 ) lodd = .true.
 
-      IF(TL_calc) then
-        IF (Inlkey.EQ.0) THEN
-C---------writing input
-          OPEN (UNIT = 1,STATUS = 'unknown',FILE= (ctmp28//'ecSPH.inp'))
-C---------CARD 1 : Title
-          WRITE (1,
+      IF (Inlkey.EQ.0) THEN
+C-------writing input
+         OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
+C-------CARD 1 : Title
+         WRITE (1,
      &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
      &          ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
-        ELSE
-C---------writing input
-          OPEN (UNIT = 1,STATUS = 'unknown',FILE= (ctmp28//'ecVIB.inp'))
-C---------CARD 1 : Title
-          WRITE (1,
-     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
-     &      ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
-        ENDIF
       ELSE
-        IF (Inlkey.EQ.0) THEN
-C---------writing input
-          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecSPH.inp')
-C---------CARD 1 : Title
-          WRITE (1,
-     &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': SPHERICAL OMP'')'
-     &          ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
-        ELSE
-C---------writing input
-          OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIB.inp')
-C---------CARD 1 : Title
-          WRITE (1,
+C-------writing input
+         OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIB.inp')
+C-------CARD 1 : Title
+         WRITE (1,
      &     '(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBRATIONAL MODEL'')'
      &      ) El, PARname(ip), NINT(A(Nnuc)), NUC(NINT(Z(Nnuc)))
-        ENDIF
       ENDIF
 C-----CARD 2
       WRITE (1,'(a50)') ECIs1
@@ -4255,40 +4126,26 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
-      IF(TL_calc) then
-        IF (Inlkey.EQ.0) THEN
-          iwin= ipipe_move((ctmp28//'ecSPH.inp'),(ctmp28//'.inp'))
-        ELSE
-          iwin= ipipe_move((ctmp28//'ecVIB.inp'),(ctmp28//'.inp'))
-        ENDIF
+      IF (Inlkey.EQ.0) THEN
+         iwin = ipipe_move('ecSPH.inp','ecis06.inp')
       ELSE
-        IF (Inlkey.EQ.0) THEN
-          iwin = ipipe_move('ecSPH.inp','ecis06.inp')
-        ELSE
-          iwin = ipipe_move('ecVIB.inp','ecis06.inp')
-        ENDIF
-	ENDIF
-
-C     restoring the input value of the key CN_isotropic
-      CN_isotropic = logtmp
+         iwin = ipipe_move('ecVIB.inp','ecis06.inp')
+      ENDIF
 C
 C-----Running ECIS06
 C
-
-C     for TL calcs ECIS is run outside
-      IF(TL_calc) RETURN
-
-      IF ( Ldwba .and. (inc_channel .and. Inlkey.NE.0) ) 
-     >    write (*,*) '  Running ECIS (DWBA) ...'
-      IF ( .not.Ldwba .and. (inc_channel .and. Inlkey.NE.0) ) 
-     >    write (*,*) '  Running ECIS (vibr.CC) ...'
+      IF(inc_channel .and. Inlkey.NE.0) 
+     >  write (*,*) '  Running ECIS (vibr) ...'
 
       IF(inc_channel .and. Inlkey.EQ.0) 
      >  write (*,*) '  Running ECIS (sphe) ...'
 
-C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
-C     iwin = ipipe(ctmp)
-      CALL ECIS_int('ecis06') 
+      CALL ECIS('ecis06 ')
+
+C     restoring the input value of the key CN_isotropic
+      CN_isotropic = logtmp
+
+      IF(TL_calc) RETURN
 
       IF (Inlkey.EQ.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
@@ -4301,7 +4158,7 @@ C     iwin = ipipe(ctmp)
       RETURN 
       END
 
-      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc,ctmp28)
+      SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
@@ -4323,8 +4180,8 @@ C     5 HELIUM-3
 C     6 ALPHA
 C     >6 HEAVY ION
 C
-      USE secis06
-
+C     INTEGER NINT
+C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -4353,7 +4210,6 @@ C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
       LOGICAL TL_calc
-      CHARACTER*28 ctmp28
 C
 C Local variables
 C
@@ -4369,8 +4225,6 @@ C
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
      &        nuncoupled, ncontinua
 
-C     CHARACTER*132 ctmp
-C     INTEGER ipipe
       INTEGER iwin, ipipe_move
 
       LOGICAL inc_channel, logtmp
@@ -4555,14 +4409,8 @@ C
      &         **0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin
       njmax = MAX(2*ldwmax,20)
-
 C-----Writing input
-      IF(TL_calc) THEN
-        OPEN(UNIT= 1,STATUS = 'unknown',FILE = (ctmp28//'ecVIBROT.inp'))
-      ELSE
-        OPEN(UNIT= 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
-      ENDIF
-
+      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'ecVIBROT.inp')
 C-----CARD 1 : Title
       WRITE (1,
      &'(f10.5,'' MeV '',a8,'' on '',i3,a2,'': VIBR-ROTATIONAL CC'')'
@@ -5222,25 +5070,17 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 
       WRITE (1,'(4hFIN )')
       CLOSE (UNIT = 1)
+      iwin = ipipe_move('ecVIBROT.inp','ecis06.inp')
+
+C-----Running ECIS
+
+      IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
+      CALL ECIS('ecis06 ')
 
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
-      IF(TL_calc) then
-        iwin=ipipe_move((ctmp28//'ecVIBROT.inp'),(ctmp28//'.inp'))
-      ELSE
-        iwin=ipipe_move('ecVIBROT.inp','ecis06.inp')
-      ENDIF
-
-C     for TL calcs ECIS is run outside
       IF(TL_calc) RETURN
-
-C-----Running ECIS
-      IF(inc_channel) write (*,*) '  Running ECIS (rot. CC) ...'
-
-C     ctmp = trim(empiredir)//'/source/ecis06 ecis06'
-C     iwin = ipipe(ctmp)
-      CALL ECIS_int('ecis06') 
 
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
@@ -5255,7 +5095,7 @@ C     iwin = ipipe(ctmp)
 c----
 c     CCSOFTROTOR
 c----
-      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El,TL_calc,ctmp28)
+      SUBROUTINE OPTMAN_CCSOFTROT(Nejc,Nnuc,El,TL_calc)
 C
 C     -------------------------------------------------------------
 C     |    Create input files for OPTMAN for COUPLED CHANNELS     |
@@ -5274,7 +5114,6 @@ C
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
       LOGICAL TL_calc
-      CHARACTER*28 ctmp28
 C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -5476,14 +5315,8 @@ C    &         **0.33333333*0.22*SQRT(xmas_nejc*elab)
 C-----Maximum number of channel spin
 C     njmax = MAX(2*ldwmax,20)
 C
-
 C-----Writing OPTMAN input
-      IF(TL_calc) THEN
-        OPEN (UNIT=1,STATUS = 'unknown',FILE = (ctmp28//'.inp'))
-      ELSE
-        OPEN (UNIT=1,STATUS = 'unknown',FILE = 'ecis06.inp')
-      ENDIF
-
+      OPEN (UNIT = 1,STATUS = 'unknown',FILE = 'OPTMAN.INP')
 C-----CARD 1 : Title
       IF(imodel.ne.4) then
         WRITE (1,'(f10.5,'' MeV '',
@@ -5685,17 +5518,15 @@ C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
-C     for TL calcs OPTMAN is run outside
+      IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
 
-      IF(TL_calc) RETURN
-
-      IF(inc_channel) write (*,*) '  Running OPTMAN (CC) ...'
-
-      ctmp = trim(empiredir)//'/source/optmand ecis06'
+      ctmp = trim(empiredir)//'/source/optmand'
       iwin = ipipe(ctmp)
  
-      iwin = ipipe_move('ecis06.inp','OPTMAN.INP')
-      iwin = ipipe_move('ecis06.out','OPTMAN.OUT')
+      IF(TL_calc) RETURN
+
+      iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')
+      iwin = ipipe_move('OPTMAN.OUT','OPTMAN-INC.out')
 
       RETURN
       END

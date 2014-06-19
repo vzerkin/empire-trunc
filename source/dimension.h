@@ -1,13 +1,13 @@
-!cc   * $Rev: 3936 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2014-03-31 18:24:30 +0200 (Mo, 31 Mär 2014) $
+!cc   * $Rev: 3982 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
      & NDNUC= 100                                                       &
-     &,NDEXCLUS = 14                                                    &
-     &,NDEX= 101                                                        &
+     &,NDEXCLUS = 20                                                    &
+     &,NDEX= 151                                                        &
      &,NDLW= 55                                                         &
      &,LEVCC=30                                                         &
      &,NDLV=40                                                          &
@@ -22,7 +22,7 @@
       INTEGER MAX_PRN,NDEJC,NDZMAX,NDECSE,NDEPFN,NDANGecis,NDAnghmx
       INTEGER NDNUCD,NDECSED,NDANGD,NDEX_D,NDEJCD
       INTEGER NDVOM,NDWOM,NDVSO,NDRVOM,NDRWOM,NDRVSO
-      INTEGER NDHRTW1,NDHRTW2,NDETL,NDEREC,NDERO,NDCC,NDROPM
+      INTEGER NDETL,NDEREC,NDERO,NDCC,NDROPM
       INTEGER NDGDRPM,NDGQRPM,NDGMRPM
       INTEGER NDKNTR,NMAsse,NDREGIONS,NDMODELS,NDDEFCC,NDCOLLEV
       INTEGER NFtrans,NFMOD,NFisbarpnt,NFPARAB,NFHUMP,NFISENMAX
@@ -45,8 +45,6 @@
      &,NDRVOM=3                                                         &
      &,NDRWOM=3                                                         &
      &,NDRVSO=3                                                         &
-     &,NDHRTW1=300                                                      &
-     &,NDHRTW2=20                                                       &
      &,NDETL=NDEX+6                                                     &
      &,NDEREC=NDECSE                                                    &
      &,NDERO=NDEX                                                       &

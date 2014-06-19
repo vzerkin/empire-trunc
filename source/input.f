@@ -1,6 +1,6 @@
-!cc   * $Rev: 3967 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2014-05-23 17:31:06 +0200 (Fr, 23 Mai 2014) $
+!cc   * $Rev: 3982 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -466,6 +466,8 @@ C
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
          EHRtw = 0.d0
+C--------EMAx_tlj sets incident energy limit for using Tlj
+         EMAx_tlj = 0.d0
 C--------ENDF global setting initialized to zero (no formatting)
          NENdf = 0
 C
@@ -1249,6 +1251,7 @@ C
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
             WRITE (8,*) ' '
          ENDIF
+         IF (EMAx_tlj.LT.EHRtw) EMAx_tlj = EHRtw
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
@@ -3401,14 +3404,10 @@ C-----initialization of TRISTAN input parameters
       HOMin = 0.d0
       ALSin = 1.5d0
       BET2in = 0.d0
-      GRIn(1) = 5.d0
-      GRIn(2) = 5.d0
-      DO i = 1, 8                                                        ! nilsson_newest
-         do j = 1,8                                                      ! nilsson_newest
-            CNOrin(i,j) = 1.d0                                           ! nilsson_newest
-            EFItin(i,j) = 0.0D0                                          ! nilsson_newest
-         enddo                                                           ! nilsson_newest
-      ENDDO
+      GRIn(1)= 5.d0
+      GRIn(2)= 5.d0
+      CNOrin = 1.d0
+      EFItin =1.d0
 C-----initialization of TRISTAN input parameters  *** done ***
 
    11 CONTINUE
@@ -5931,6 +5930,19 @@ C-----
             ELSE
                LHRtw = 0
                EHRtw = 0.d0
+            ENDIF
+            GOTO 100
+         ENDIF
+C-----
+         IF (name.EQ.'ETLJ  ') THEN
+            IF (val.GT.0) THEN
+              EMAx_tlj = val
+              WRITE (8,'('' Tlj coupling for the top CN bin'',
+     &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
+              WRITE (12,'('' Tlj coupling for the top CN bin '',
+     &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
+            ELSE
+               EMAx_tlj = EHRtw
             ENDIF
             GOTO 100
          ENDIF
