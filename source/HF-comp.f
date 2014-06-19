@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3985 $
+Ccc   * $Rev: 3986 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-20 00:48:46 +0200 (Fr, 20 Jun 2014) $
+Ccc   * $Date: 2014-06-20 00:49:45 +0200 (Fr, 20 Jun 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -178,7 +178,7 @@ C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
 C    >             4.d0*PI*PL_CN(0,il)
                 if(PL_CN(0,il).gt.0.d0) then
-      if(il.eq.levtarg) write(8,*) '4piPL=',4.d0*pi*PL_CN(0,il)
+C     if(il.eq.levtarg) write(8,*) '4piPL=',4.d0*pi*PL_CN(0,il)
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)
                     CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
