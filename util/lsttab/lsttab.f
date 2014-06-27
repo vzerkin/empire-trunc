@@ -47,6 +47,9 @@ C-V           reactions).
 C-V         - Improve retrieval from C4
 C-V  14/02  Standardize dimension statement
 C-V         Dimensions of ZEL and FRC should be 24.
+C-V  14/06  Improve the normalisation of the fission spectra by
+C-V         interpolating the ratio to Maxwellian to a fine grid,
+C-V         restoring function values and then integrating.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -449,7 +452,8 @@ C* Check if fission spectra are to be processed
       ELSE
         PRINT *,'DXSEXF No.of points',NPP
         IF(LLL.EQ.LTM) THEN
-C*      -- Special processing of the fission spectra:
+C*      -- Special processing of the fission spectra written to
+C*         the scratch unit LTM:
 C*         Renormalise each set of points to the average of the
 C*         last curve, if present
           REWIND LLL
@@ -469,8 +473,6 @@ C*        -- Integrate the function in the range of experimental data
             EA=EP(1)
             EB=EP(KP)
             SC=YTGPNT(NP,ES,SG,EA,EB)
-C*        -- Integrate the experimental data
-            SP=YTGPNT(KP,EP,FP,EA,EB)
 C...
 C...        print *,'POINTS,ea,eb,sc,sp,np,kp',ea,eb,sc,sp,np,kp
 C...        ss=0
@@ -487,17 +489,39 @@ C...          print *,i,ee,fp(i),fp(i)*(sc/sp)/ff,fi,ss
 C...        end do
 C...        print *,np,es(np),sg(np)
 C...
-C*        -- Normalise and print the experimental data
-            FF=1
+            IF(EKTNRM.GT.0) THEN
+C*            -- Calculate the ratio to Maxwellian, if EKTNRM is defined
+              DO I=1,KP
+                EE=EP(I)
+                FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+                FP(I)=FP(I)/FF
+                FA(I)=FA(I)/FF
+                FB(I)=FB(I)/FF
+              END DO
+C*            -- Interpolate the ratio to the function grid
+              CALL FITGRD(KP,EP,FP,NP,ES,RWO)
+C*            -- Restore the function values
+              DO I=1,NP
+                EE=ES(I)
+                FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+                RWO(I)=RWO(I)*FF
+              END DO
+C*            -- Integrate the function in the range of experim. data
+              SP=YTGPNT(NP,ES,RWO,EA,EB)
+            ELSE
+C*            -- Integrate the experimental data directly
+              SP=YTGPNT(KP,EP,FP,EA,EB)
+            END IF
+
+C*          -- Normalise and print the experimental data
             DO I=1,KP
               EE=EP(I)
-              IF(EKTNRM.GT.0)
-     &        FF=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
-              FP(I)=FP(I)*SC/SP /FF
-              FA(I)=FA(I)*SC/SP /FF
-              FB(I)=FB(I)*SC/SP /FF
+              FP(I)=FP(I)*SC/SP
+              FA(I)=FA(I)*SC/SP
+              FB(I)=FB(I)*SC/SP
               WRITE(LPN,94) EP(I),DA(I),DB(I),FP(I),FA(I),FB(I)
             END DO
+
           END IF
           WRITE(LPN,91) BLNK
           GO TO 82
