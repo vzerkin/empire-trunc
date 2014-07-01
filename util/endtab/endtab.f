@@ -25,7 +25,8 @@ C-V        for incident neutrons
 C-V  13/06 Trivial fix to retrieve MF3/MT5 as is
 C-V  14/02 Re-design to accurately print values at interval boundaries.
 C-V  14/03 Guard against upper boundary outside data range.
-C-V  14/05 Fix typo (applicable when Ehi > last point on file)
+C-V  14/05 Fix typo (applicable when Ehi > last point on file).
+C-V  14/06 Implement ratios of fission spectra to Maxwellian.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -102,6 +103,9 @@ C-M    structure is used. Special features:
 C-M      MT>40000  Cross section at fixed outgoing angle is requested.
 C-M                The outgoind particla ZA designation and the angle
 C-M                (in degrees) are requested from input.
+C-M      MT=261    The temperature of the Maxwellian fission spectrum
+C-M                is requested if ratio to Maxwellian is to be
+C-M                printed to output.
 C-M    The program then cycles back to request additional MT numbers
 C-M    to be processed and added to the same output file. The list is
 C-M    terminated by zero. Valid entries are those that actually
@@ -135,6 +139,10 @@ C-M    the ENDF file under MF=4 or 6. A special meaning is assigned
 C-M    to MT=5: cross sections for all partial reactions producing
 C-M    the selected outgoing particles are summed.
 C-M    COM - the same convention as described for MF=3 applies.
+C-M    Special case:
+C-M      MT=18     The temperature of the Maxwellian fission spectrum
+C-M                is requested if ratio to Maxwellian is to be
+C-M                printed to output.
 C-M  Case MF=6:
 C-M  - ZA Outgoing particle ZA designation.
 C-M    Note: at present the program is tested only for neutrons,
@@ -293,6 +301,15 @@ C* Select the reaction type number
       IER=0
 C* If zero and not first loop, finish
       IF(IDMY.EQ.0 .AND. MT0.NE.0) GO TO 90
+C* Check if ratio to Maxwellian is to be printed
+      TMXW=0
+      IF((IDMY.EQ.261 .AND. MF0.EQ.3) .OR.
+     &   (IDMY.EQ. 18 .AND. MF0.EQ.5)) THEN
+        WRITE(LTT,91) '$Enter the Temperature of Maxwellian    '
+        WRITE(LTT,91) ' (zero or blank to print absolute)    : '
+        READ (LKB,99) FLNM
+        IF(FLNM(1:40).NE.BLNK) READ(FLNM,98) TMXW
+      END IF
 C... Special case for backward compatibility to force MT 5 explicitly
       IF(IDMY.EQ.5) IDMY=-5
 C...
@@ -514,6 +531,16 @@ C* Write the data to the PLOTTAB file
       EE2=ES(KK)
       SG2=SG(KK)
       UG2=UG(KK)
+      IF(TMXW.GT.0) THEN
+        EEA=ES(1)
+        EEB=ES(NP)
+        SC=YTGPNT(NP,ES,SG,EEA,EEB)
+        PWR=0.5
+        FF=0
+        IF(EE2.GT.0) FF=THRMXW(EE2,TMXW,PWR)
+        SG2=SG2/FF/SC
+        UG2=UG2/FF/SC
+      END IF
    81 IF(KK.GT.MPT) THEN
         PRINT *,' ENDTAB ERROR - MPT limit',MPT,KK
         STOP 'ENDTAB ERROR - MPT Limit exceeded'
@@ -525,6 +552,13 @@ C* Write the data to the PLOTTAB file
       EE2=ES(KK)
       SG2=SG(KK)
       UG2=UG(KK)
+      IF(TMXW.GT.0) THEN
+        PWR=0.5
+        FF=0
+        IF(EE2.GT.0) FF=THRMXW(EE2,TMXW,PWR)
+        SG2=SG2/FF/SC
+        UG2=UG2/FF/SC
+      END IF
       IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
       IF(EE2.LE.EA .AND. KK.LT.NP) GO TO 81
 C*    -- First point
@@ -609,6 +643,48 @@ C*
   927 FORMAT(' ZA',I6,' LFS',I2)
   928 FORMAT(' Ang',I5)
   961 FORMAT(40X,'Searching for MT',I5,'  MF',I2,'  Mat',F8.1)
+      END
+      FUNCTION YTGPNT(NP,XX,YY,XA,XB)
+C-Title  : Function YTGPNT
+C-Purpose: Integrate a tabulated function
+C-Description:
+C-D  Given a function tabulated at NP points XX(i) with values YY(i),
+C-D  integrate the function in the interval [XA:XB] using trapezoidal
+C-D  rule (linear interpolation). The argument of the function in XX
+C-D  must be monotonic ascending.
+C-
+      DIMENSION XX(NP),YY(NP)
+C
+      YTGPNT=0
+      X2=XX(1)
+      Y2=YY(1)
+      DO I=2,NP
+        X1=X2
+        Y1=Y2
+        X2=XX(I)
+        Y2=YY(I)
+        IF(X2.LE.XA) CYCLE
+        IF(X1.LT.XA) THEN
+          IF(X2.NE.X1) Y1=Y1+(XA-X1)*(Y2-Y1)/(X2-X1)
+          X1=XA
+        END IF
+        IF(X2.LE.XB) THEN
+          YTGPNT=YTGPNT+(X2-X1)*(Y2+Y1)/2
+        ELSE
+          IF(X2.NE.X1) Y2=Y1+(XB-X1)*(Y2-Y1)/(X2-X1)
+          X2=XB
+          YTGPNT=YTGPNT+(X2-X1)*(Y2+Y1)/2
+          EXIT
+        END IF
+      END DO
+      RETURN
+      END
+      FUNCTION THRMXW(EE,TMXW,PWR)
+C-Title  : Function THRMXW
+C-Purpose: Thermal Maxwellian spectrum distribution
+      P1 =PWR+1
+      THRMXW=(TMXW**(-P1)/GAMMA(P1))*(EE**PWR)*EXP(-EE/TMXW)
+      RETURN
       END
       SUBROUTINE CH11PK(CH,R)
 C-Title  : CH11PCK subroutine
