@@ -49,14 +49,14 @@ module ENDF_MF31_IO
 
     call get_endf(mf31%za, mf31%awr, n, mf31%mtl, n, mf31%nl)
 
-    if((mf31%mtl .ne. 0) .and. (mf31%nl .ne. 0)) then
-        ! MTL .ne. 0 indicates lumped covars and NL == 0
+    if((mf31%mtl /= 0) .and. (mf31%nl /= 0)) then
+        ! MTL /= 0 indicates lumped covars and NL == 0
         write(erlin,*) 'Non-zero NL found with non-zero MTL in MF31:',mf31%nl
         call endf_error(erlin)
     end if
 
     allocate(mf31%sct(mf31%nl),stat=n)
-    if(n .ne. 0) call endf_badal
+    if(n /= 0) call endf_badal
 
     do i = 1,mf31%nl
 
@@ -75,7 +75,7 @@ module ENDF_MF31_IO
         if(n /= 0) call endf_badal
         do j = 1,sc%ni
             call read_ni(sc%nis(j),31)
-            if((sc%nis(j)%ne .eq. 0) .and. ((sc%nis(j)%lb .ne. 0) .and. (sc%nis(j)%lb .ne. 1))) then
+            if((sc%nis(j)%ne == 0) .and. ((sc%nis(j)%lb /= 0) .and. (sc%nis(j)%lb /= 1))) then
                 write(erlin,*) 'Undefined LB encountered for spontaneous fission cov in MF31:',sc%nis(j)%lb
                 call endf_error(erlin)
             endif
@@ -101,8 +101,8 @@ module ENDF_MF31_IO
     call set_mt(mf31%mt)
     call write_endf(mf31%za, mf31%awr, 0, mf31%mtl, 0, mf31%nl)
 
-    if((mf31%mtl .ne. 0) .and. (mf31%nl .ne. 0)) then
-        ! MTL .ne. 0 indicates lumped covars and NL == 0
+    if((mf31%mtl /= 0) .and. (mf31%nl /= 0)) then
+        ! MTL /= 0 indicates lumped covars and NL == 0
         write(erlin,*) 'Non-zero NL found with non-zero MTL in MF31:',mf31%nl
         call endf_error(erlin)
     end if
@@ -116,7 +116,7 @@ module ENDF_MF31_IO
             call write_nc(sc%ncs(j))
         end do
         do j = 1,sc%ni
-            if((sc%nis(j)%ne .eq. 0) .and. ((sc%nis(j)%lb .ne. 0) .and. (sc%nis(j)%lb .ne. 1))) then
+            if((sc%nis(j)%ne == 0) .and. ((sc%nis(j)%lb /= 0) .and. (sc%nis(j)%lb /= 1))) then
                 write(erlin,*) 'Undefined LB encountered for spontaneous fission cov in MF31:',sc%nis(j)%lb
                 call endf_error(erlin)
             endif
@@ -166,8 +166,8 @@ module ENDF_MF31_IO
 
     l = 1
 
-    if((mf31%mtl .ne. 0) .and. (mf31%nl .ne. 0)) then
-        ! MTL .ne. 0 indicates lumped covars and NL == 0
+    if((mf31%mtl /= 0) .and. (mf31%nl /= 0)) then
+        ! MTL /= 0 indicates lumped covars and NL == 0
         write(erlin,*) 'Non-zero NL found with non-zero MTL in MF31:',mf31%nl
         call endf_error(erlin)
     end if
@@ -179,7 +179,7 @@ module ENDF_MF31_IO
             l = l + lc_nc(sc%ncs(j))
         end do
         do j = 1,sc%ni
-            if((sc%nis(j)%ne .eq. 0) .and. ((sc%nis(j)%lb .ne. 0) .and. (sc%nis(j)%lb .ne. 1))) then
+            if((sc%nis(j)%ne == 0) .and. ((sc%nis(j)%lb /= 0) .and. (sc%nis(j)%lb /= 1))) then
                 write(erlin,*) 'Undefined LB encountered for spontaneous fission cov in MF31:',sc%nis(j)%lb
                 call endf_error(erlin)
             endif

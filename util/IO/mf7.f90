@@ -11,15 +11,20 @@ module ENDF_MF7_IO
 
     public
 
+    type mf7_str_fact
+        integer np                              ! # Bragg-edges
+        integer li                              ! temp interp mode between this & previous temp bin
+        real t                                  ! temp (K)
+        real, pointer :: s(:)                   ! Bragg edges (np)
+    end type
+
     type mf7_coh_elas
         integer nr                              ! # NR E-interpolation ranges
         type (int_pair),  pointer :: ine(:)     ! E-interp tables (nr)
         integer np                              ! # Bragg-edge energies
         real, pointer :: e(:)                   ! Bragg energies (np)
         integer lt                              ! # temps
-        integer, pointer :: li(:)               ! temp interpolation (lt) btw i & (i-1) bins
-        real, pointer :: t(:)                   ! temps (K) (lt)
-        real, pointer :: s(:,:)                 ! Bragg edges (np,lt)
+	type (mf7_str_fact), pointer :: st(:)	! structure factors (lt)
     end type
 
     type mf7_incoh_elas
@@ -81,18 +86,18 @@ module ENDF_MF7_IO
 
     nullify(mf7%cel, mf7%iel, mf7%iin)
 
-    if(mf7%mt .eq. 2) then
-        if(mf7%lthr .eq. 1) then
+    if(mf7%mt == 2) then
+        if(mf7%lthr == 1) then
             allocate(mf7%cel)
             call read_coh_elas(mf7%cel)
-        else if(mf7%lthr .eq. 2) then
+        else if(mf7%lthr == 2) then
             allocate(mf7%iel)
             call read_incoh_elas(mf7%iel)
         else
             write(erlin,*) 'Unrecognized LTHR MF7/MT2:',mf7%lthr
             call endf_error(erlin)
         end if
-    else if(mf7%mt .eq. 4) then
+    else if(mf7%mt == 4) then
         allocate(mf7%iin)
         mf7%iin%lat = n1
         mf7%iin%lasym = n2
@@ -116,30 +121,36 @@ module ENDF_MF7_IO
     integer i,np,n
     real xx,xt
     real, allocatable :: xp(:)
+    type (mf7_str_fact), pointer :: st
 
     call read_endf(xt, xx, r7%lt, n, r7%nr, r7%np)
-    allocate(r7%ine(r7%nr), r7%e(r7%np), r7%li(r7%lt), r7%t(0:r7%lt), r7%s(r7%np,0:r7%lt), stat=n)
+    allocate(r7%ine(r7%nr), r7%e(r7%np), r7%st(0:r7%lt), stat=n)
     if(n /= 0) call endf_badal
     call read_endf(r7%ine, r7%nr)
-    r7%t(0) = xt
+    st => r7%st(0)
+    st%t = xt
+    st%li = 0
+    st%np = r7%np
 
     ! first t is a tab1, which contains the E & 0th S
 
-    allocate(xp(2*r7%np),stat=n)
+    allocate(xp(2*r7%np),st%s(r7%np),stat=n)
     if(n /= 0) call endf_badal
     call read_endf(xp,2*r7%np)
     do i = 1,r7%np
-        r7%e(i)   = xp(2*i-1)
-        r7%s(i,0) = xp(2*i)
+        r7%e(i) = xp(2*i-1)
+        st%s(i) = xp(2*i)
     end do
     deallocate(xp)
 
     ! read in the rest of the S as lists
 
     do i = 1,r7%lt
-        call read_endf(r7%t(i), xx, r7%li(i), n, np, n)
-        if(np /= r7%np) call endf_error('Inconsistent values for NP encounted in coherent MF7/MT2')
-        call read_endf(r7%s(1:r7%np,i),r7%np)
+        st => r7%st(i)
+        call read_endf(st%t, xx, st%li, n, st%np, n)
+        allocate(st%s(st%np),stat=n)
+        if(n /= 0) call endf_badal
+        call read_endf(st%s,st%np)
     end do
 
     return
@@ -193,7 +204,7 @@ module ENDF_MF7_IO
 
         call read_endf(xt, ic%beta(i), lt, n, nra, np)
 
-        if(i .eq. 1) then
+        if(i == 1) then
             allocate(ic%temp(0:lt),ic%li(lt),ic%ina(nra),xp(2*np),ic%alpha(np),ic%s(np,ic%nb,0:lt),stat=n)
             if(n /= 0) call endf_badal
             ic%lt = lt
@@ -226,7 +237,7 @@ module ENDF_MF7_IO
             call read_endf(xt,beta,ic%li(j), n, np, n)
             if(np /= ic%np) call endf_error('Inconsistent values for NP encountered in MF7/MT4')
             if(beta /= ic%beta(i)) call endf_error('Inconsistent values for beta encountered in MF7/MT4')
-            if(i .eq. 1) then
+            if(i == 1) then
                 ic%temp(j) = xt
             else
                 if(xt /= ic%temp(j)) then
@@ -270,17 +281,17 @@ module ENDF_MF7_IO
 
     call set_mt(mf7%mt)
 
-    if(mf7%mt .eq. 2) then
+    if(mf7%mt == 2) then
         call write_endf(mf7%za, mf7%awr, mf7%lthr, 0, 0, 0)
-        if(mf7%lthr .eq. 1) then
+        if(mf7%lthr == 1) then
             call write_coh_elas(mf7%cel)
-        else if(mf7%lthr .eq. 2) then
+        else if(mf7%lthr == 2) then
             call write_incoh_elas(mf7%iel)
         else
             write(erlin,*) 'Undefined LTHR MF7/MT2:',mf7%lthr
             call endf_error(erlin)
         end if
-    else if(mf7%mt .eq. 4) then
+    else if(mf7%mt == 4) then
         call write_endf(mf7%za, mf7%awr, mf7%lthr, mf7%iin%lat, mf7%iin%lasym, 0)
         call write_incoh_inelas(mf7%iin)
     else
@@ -303,8 +314,9 @@ module ENDF_MF7_IO
 
     integer i,n
     real, allocatable :: xp(:)
+    type (mf7_str_fact), pointer :: st
 
-    call write_endf(r7%t(0), zero, r7%lt, 0, r7%nr, r7%np)
+    call write_endf(r7%st(0)%t, zero, r7%lt, 0, r7%nr, r7%np)
     call write_endf(r7%ine, r7%nr)
 
     ! first t is a tab1, which contains the E & 0th S
@@ -313,7 +325,7 @@ module ENDF_MF7_IO
     if(n /= 0) call endf_badal
     do i = 1,r7%np
         xp(2*i-1) = r7%e(i)
-        xp(2*i) = r7%s(i,0)
+        xp(2*i) = r7%st(0)%s(i)
     end do
     call write_endf(xp,2*r7%np)
     deallocate(xp)
@@ -321,8 +333,9 @@ module ENDF_MF7_IO
     ! write in the rest of the S as lists
 
     do i = 1,r7%lt
-        call write_endf(r7%t(i), zero, r7%li(i), 0, r7%np, 0)
-        call write_endf(r7%s(1:r7%np,i),r7%np)
+        st => r7%st(i)
+        call write_endf(st%t, zero, st%li, 0, st%np, 0)
+        call write_endf(st%s,st%np)
     end do
 
     return
@@ -416,7 +429,10 @@ module ENDF_MF7_IO
     integer i,n
 
     if(associated(mf7%cel)) then
-        deallocate(mf7%cel%ine, mf7%cel%e, mf7%cel%li, mf7%cel%t, mf7%cel%s,stat=n)
+        do i = 0,mf7%cel%lt
+            deallocate(mf7%cel%st(i)%s,stat=n)
+        end do
+        deallocate(mf7%cel%ine, mf7%cel%e, mf7%cel%st,stat=n)
         deallocate(mf7%cel,stat=n)
     else if(associated(mf7%iel)) then
         call del_tab1(mf7%iel%w)
@@ -444,18 +460,20 @@ module ENDF_MF7_IO
 
     integer i,j,l
 
-    if(mf7%mt .eq. 2) then
+    if(mf7%mt == 2) then
         l = 1
-        if(mf7%lthr .eq. 1) then
+        if(mf7%lthr == 1) then
             l = l + (2*mf7%cel%nr+5)/6 + (2*mf7%cel%np+5)/6 + 1
-            l = l + mf7%cel%lt*((mf7%cel%np+5)/6 + 1)
-        else if(mf7%lthr .eq. 2) then
+            do i = 1,mf7%cel%lt
+                l = l + (mf7%cel%st(i)%np+5)/6 + 1
+            end do
+        else if(mf7%lthr == 2) then
             l = l + lc_tab1(mf7%iel%w) + 1
         else
-            write(erlin,*) 'Undefined LTHR MF7/MT2:',mf7%lthr
+            write(erlin,*) 'Undefined MF7/MT2 LTHR :',mf7%lthr
             call endf_error(erlin)
         end if
-    else if(mf7%mt .eq. 4) then
+    else if(mf7%mt == 4) then
         if(mf7%iin%ni /= 6*(mf7%iin%ns+1)) then
             write(erlin,*) 'Inconsistent values for NI, NS encountered in MF7/MT4:',mf7%iin%ni,mf7%iin%ns
             call endf_error(erlin)
