@@ -1,6 +1,6 @@
-! $Rev: 3339 $                                                          | 
-! $Date: 2013-03-22 11:44:26 +0100 (Fr, 22 Mär 2013) $                                                     
-! $Author: atrkov $                                                  
+! $Rev: 3992 $                                                          | 
+! $Date: 2014-07-18 16:51:29 +0200 (Fr, 18 Jul 2014) $                                                     
+! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -1828,6 +1828,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
          CASE (4,5,6)
             CALL TEST2F(EMAX,0.,'EMAX')
+         CASE (12)
+            CALL TEST1F(EMAX,0.,5.,'EMAX')
          CASE DEFAULT
             CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
       END SELECT
