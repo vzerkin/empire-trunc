@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3982 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+Ccc   * $Rev: 3993 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-07-25 08:12:49 +0200 (Fr, 25 Jul 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -43,7 +43,7 @@ C
      &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,	jsp,
      &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,	ssabs, ssabsj,
      &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1, stmp,
-     &    xssabs, xssabsj, coef
+     &    xssabs, xssabsj
 C     fftmp(3) 
 C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
@@ -100,7 +100,6 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-
 C     allocate stl(), stlj(), sel() 
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
       IF(myalloc.NE.0) THEN
@@ -108,6 +107,7 @@ C     allocate stl(), stlj(), sel()
         WRITE(12,*) ' ERROR: Insufficient memory for MARENG (fusion.f)'
         STOP        ' ERROR: Insufficient memory for MARENG (fusion.f)'
       ENDIF
+
       stlj = 0.d0
       stl  = 0.d0
       sel  = 0.d0
@@ -131,7 +131,14 @@ C--------Here the old calculated files are read
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          IF (fexistj) 
      &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+         write (*,*) 'lmaxj=',lmax
+
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+
+
+
+         write (*,*) 'lmax =',lmax
+
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
