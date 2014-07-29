@@ -100,8 +100,11 @@ C
       IF (EMPIRE) THEN 
 C--------------------- EMPIRE related i/o changes ----------------------
 C       CALL getarg(1,fname)
+c       if(fname(1:1).eq.'') fname='ecis06'
 C       write(*,*) 'Calc OPTMAN with ', trim(fname)//'.inp'
 C       open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+
+	  fname='ecis06'
         open(unit=20,file='OPTMAN.INP',STATUS='OLD',ERR=100)
         read(20,*,END=100,ERR=100) cline
         rewind 20
