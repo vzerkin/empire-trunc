@@ -25,7 +25,7 @@ C     Local variables
      & imint, imaxt, j, its, iloc      
       DOUBLE PRECISION ecm, angstep, gang, ftmp, ggmr, ggqr, ggor,
      & xcse, popread, popl, poph, csum, echannel,  
-     & coef, erecoil, weight, csmsdl, dcor
+     & coeff, erecoil, weight, csmsdl, dcor
 
       CHARACTER*23 ctmp23
       CHARACTER*3 ctldir
@@ -239,9 +239,9 @@ C                ENDDO
 C              endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
-C-----------------Correct 'coef' for eventual imprecision and include recoil DE
-C                 coef = coef*POPlv(ilv,nnurec)/csum/DERec
-                  coef = 2*PI*PI/FLOAT(NANgela - 1)/DERec
+C-----------------Correct 'coeff' for eventual imprecision and include recoil DE
+C                 coeff = coeff*POPlv(ilv,nnurec)/csum/DERec
+                  coeff = 2*PI*PI/FLOAT(NANgela - 1)/DERec
                   echannel = echannel*EJMass(0)/AMAss(1)
                   DO iang = 1, NDANG
                      erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
@@ -250,7 +250,7 @@ C                 coef = coef*POPlv(ilv,nnurec)/csum/DERec
                      weight = (erecoil - (irec - 1)*DERec)/DERec
 C--------------------Escape if we go beyond recoil spectrum dimension
                      IF (irec + 1.GT.NDEREC) GOTO 1350
-                     csmsdl = CSAlev(iang,ilv,nejcec)*SANgler(iang)*coef
+                     csmsdl =CSAlev(iang,ilv,nejcec)*SANgler(iang)*coeff
                      RECcse(irec,0,nnurec) = RECcse(irec,0,nnurec)
      &                  + csmsdl*(1.d0 - weight)
                      RECcse(irec + 1,0,nnurec)
