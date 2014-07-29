@@ -1,6 +1,6 @@
-! $Rev: 3982 $
-! $Author: rcapote $
-! $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+! $Rev: 4000 $
+! $Author: mherman $
+! $Date: 2014-07-29 21:21:43 +0200 (Di, 29 Jul 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -29,7 +29,7 @@
      &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),              &
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc), &
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc), &
-     &                 CSFis, CSFus, CSGdr1, CSGdr2, ELCncs,            &
+     &                 CSFis, CSFus, CSGdr1, CSGdr2, COEf, ELCncs,      &
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),   &
      &                 CSRead, D1Fra, DE, DEPart(ndnuc),                &
      &                 DEF(ndlw,0:ndnuc),                               &
@@ -145,9 +145,7 @@
      &                 SHNix, SHRd, SHRj, SHRt, SIG,                    &
      &                 SIGabs(ndetl,ndejc,ndnuc), STMro, TEMp0,         &
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),    &
-
      &                 TLJ(ndetl,ndlw,3,ndejc),                         &
-
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
      &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
@@ -224,7 +222,7 @@
      &                 FITlev,DV,FCC, STMro, DEGa, FCOred, rFCOred,     &
      &                 TORy, EX1, EX2, GST, XNI, TOTcsfis, CSFis, PEQc, &
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,    &
-     &                 CSMsd, QPRod, A, Z, ECUt, HIS, ATIlnor,          &
+     &                 CSMsd, QPRod, A, Z, ECUt, HIS, ATIlnor, COEf,    &
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,   &
      &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,  &
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,      &
