@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3993 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-07-25 08:12:49 +0200 (Fr, 25 Jul 2014) $
+Ccc   * $Rev: 3997 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-07-29 19:22:14 +0200 (Di, 29 Jul 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -43,7 +43,7 @@ C
      &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,	jsp,
      &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,	ssabs, ssabsj,
      &    sum, wparg, xmas_npro, xmas_ntrg, dtmp, S1, stmp,
-     &    xssabs, xssabsj
+     &    xssabs, xssabsj, coef
 C     fftmp(3) 
 C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
