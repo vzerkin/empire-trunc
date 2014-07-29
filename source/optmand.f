@@ -99,13 +99,15 @@ C
 
       IF (EMPIRE) THEN 
 C--------------------- EMPIRE related i/o changes ----------------------
-        CALL getarg(1,fname)
+C       CALL getarg(1,fname)
 C       write(*,*) 'Calc OPTMAN with ', trim(fname)//'.inp'
-        open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+C       open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+        open(unit=20,file='OPTMAN.INP',STATUS='OLD',ERR=100)
         read(20,*,END=100,ERR=100) cline
         rewind 20
 
-        open(unit=21,file=TRIM(fname)//'.out')
+C       open(unit=21,file=TRIM(fname)//'.out')
+        open(unit=21,file='OPTMAN.OUT')
         WRITE(21,'(5x,A)')
      *  '***********************************************'
         WRITE(21,'(5x,A)')
