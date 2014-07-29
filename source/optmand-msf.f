@@ -50,8 +50,8 @@ C  *************************************************************
 C
 C     Valid only for MSFortran
 C
-      USE MSFLIB
-      INTEGER*2 narg
+C     USE MSFLIB
+C     INTEGER*2 narg
 
       LOGICAL EMPIRE
 
@@ -103,15 +103,18 @@ C
       IF (EMPIRE) THEN 
 C--------------------- EMPIRE related i/o changes ----------------------
 
-        narg = 1
-        CALL getarg(narg,fname)
+C       narg = 1
+C       CALL getarg(narg,fname)
 
 C       write(*,*) 'Calc OPTMAN with ', trim(fname)//'.inp'
-        open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+C       open(unit=20,file=TRIM(fname)//'.inp',STATUS='OLD',ERR=100)
+        fname(1:6)='ecis06'
+        open(unit=20,file='OPTMAN.INP',STATUS='OLD',ERR=100)
         read(20,*,END=100,ERR=100) cline
         rewind 20
 
-        open(unit=21,file=TRIM(fname)//'.out')
+C       open(unit=21,file=TRIM(fname)//'.out')
+        open(unit=21,file='OPTMAN.OUT')
         WRITE(21,'(5x,A)')
      *  '***********************************************'
         WRITE(21,'(5x,A)')
