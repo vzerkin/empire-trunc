@@ -30,7 +30,7 @@ SUBROUTINE HRTW
    !
    REAL*8 :: cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
    REAL*8 :: j, Ia, xjr, ja, jb, la, lb, xleg, tmp
-   REAL*8 :: xmas_npro, xmas_ntrg, el, ecms, ak2, coef 
+   REAL*8 :: xmas_npro, xmas_ntrg, el, ecms, ak2
    REAL*8 :: d0c
    REAL*8 :: sumfism(nfmod), cel_da(NDAngecis), GET_DDXS
    INTEGER :: i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, iel, lleg
