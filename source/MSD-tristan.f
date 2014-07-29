@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-12 13:49:56 +0100 (Mi, 12 Mär 2014) $
+Ccc   * $Rev: 3999 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-07-29 21:19:12 +0200 (Di, 29 Jul 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3087,7 +3087,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION coef, csmsdl, echannel, ecm, eemi, erecoil,
+      DOUBLE PRECISION coeff, csmsdl, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis), recorr
       DOUBLE PRECISION csmtot,csm1,eee
@@ -3238,7 +3238,7 @@ C--------storing continuum recoils
 C
 C           No recoils from gamma emission for the time being
 C
-            coef = 2*pi*pi/FLOAT(NDANG - 1)/DERec
+            coeff = 2*pi*pi/FLOAT(NDANG - 1)/DERec
             ecm = EINl - EIN
 C-----------recorr is a recoil correction factor that
 C-----------divides outgoing energies
@@ -3253,7 +3253,7 @@ C-----------divides outgoing energies
 C               IF (irec + 1.GT.NDEREC) GOTO 20
                 IF (irec + 1.GT.NDEREC) EXIT
                 csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
-     &                        *coef
+     &                        *coeff
                 RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
      &                  + csmsdl*(1.d0 - weight)
                 RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
@@ -3298,7 +3298,7 @@ C     IF (nexrt.LE.0) nexrt = 1  ! changed to try getting better balance, Nov 20
 C
 C        No recoils from gamma emission for the time being
 C
-         coef = 2*pi*pi/FLOAT(NDANG - 1)/DERec
+         coeff = 2*pi*pi/FLOAT(NDANG - 1)/DERec
          recorr = EJMass(Nejc)/AMAss(1)
          DO ie = nexrt+1, next
             echannel = (ie - 1)*DE*recorr
@@ -3308,7 +3308,7 @@ C
                irec = erecoil/DERec + 1.001
                weight = (erecoil - (irec - 1)*DERec)/DERec
                IF (irec + 1.GT.NDEREC) EXIT
-               csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coef*DE
+               csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coeff*DE
                RECcse(irec,0,Nnur) = RECcse(irec,0,Nnur)
      &            + csmsdl*(1.d0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
