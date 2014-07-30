@@ -1,6 +1,6 @@
-!cc   * $Rev: 3982 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+!cc   * $Rev: 4006 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2014-07-30 22:39:20 +0200 (Mi, 30 Jul 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3407,7 +3407,7 @@ C-----initialization of TRISTAN input parameters
       GRIn(1)= 5.d0
       GRIn(2)= 5.d0
       CNOrin = 1.d0
-      EFItin =1.d0
+      EFItin =0.d0
 C-----initialization of TRISTAN input parameters  *** done ***
 
    11 CONTINUE
