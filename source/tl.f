@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3982 $
+Ccc   * $Rev: 4004 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+Ccc   * $Date: 2014-07-30 08:43:00 +0200 (Mi, 30 Jul 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2418,8 +2418,8 @@ C
      &          DIRect.EQ.2 .AND. AEJc(Nejc).LE.1
 
 C        saving the input value of the key CN_isotropic
-C        all Tls calculations calculate only the direct component (no CN)
          logtmp = CN_isotropic  
+C        all OMP calculations calculate only the direct component (no CN)
          CN_isotropic = .TRUE.     
      
          DO i = Nen ,ien_beg, -1

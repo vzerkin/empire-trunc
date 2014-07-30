@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4002 $
+Ccc   * $Rev: 4004 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-07-29 22:04:28 +0200 (Di, 29 Jul 2014) $
+Ccc   * $Date: 2014-07-30 08:43:00 +0200 (Mi, 30 Jul 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -43,7 +43,7 @@ C
      &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,	jsp,
      &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,	ssabs, ssabsj,
      &    sum, wparg, xmas_npro, xmas_ntrg, S1, stmp,
-     &    xssabs, xssabsj, coef
+     &    xssabs, xssabsj
 C     fftmp(3) 
 C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       DOUBLE PRECISION, ALLOCATABLE :: stl(:),stlj(:,:),sel(:)
@@ -460,6 +460,8 @@ C-----------DWBA calculation. All collective levels considered
 C           
 C           saving the input value of the key CN_isotropic
             logtmp = CN_isotropic
+C           all OMP calculations calculate only the direct component (no CN)
+            CN_isotropic = .TRUE.     
                                                    !  
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
 
@@ -510,6 +512,11 @@ C--------------Saving KTRlom(0,0)
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
 
+C           saving the input value of the key CN_isotropic
+            logtmp = CN_isotropic
+C           all OMP calculations calculate only the direct component (no CN)
+            CN_isotropic = .TRUE.     
+
             IF (SOFt) THEN
 
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
@@ -555,6 +562,9 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
               ENDIF
 
             ENDIF
+
+C           restoring the input value of the key CN_isotropic
+            CN_isotropic = logtmp
 
             IF (DIRect.EQ.1) THEN
 C--------------Restoring KTRlom(0,0)
@@ -737,7 +747,17 @@ C-----------------checking the correspondence of the excited states
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
 C-----------SCAT2 like calculation (one state, usually gs, alone)
+
+C           saving the input value of the key CN_isotropic
+            logtmp = CN_isotropic
+C           all OMP calculations calculate only the direct component (no CN)
+            CN_isotropic = .TRUE.     
+
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
+
+C           restoring the input value of the key CN_isotropic
+            CN_isotropic = logtmp
+
             CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs)
             WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
