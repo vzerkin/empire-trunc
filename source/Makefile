@@ -1,6 +1,6 @@
-#$Rev: 3983 $
-#$Author: rcapote $
-#$Date: 2014-06-20 00:45:37 +0200 (Fr, 20 Jun 2014) $
+#$Rev: 4005 $
+#$Author: mherman $
+#$Date: 2014-07-30 16:24:54 +0200 (Mi, 30 Jul 2014) $
 
 # set default compilers:
 
@@ -29,15 +29,15 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  EFLAGS = -O2 -std=legacy -ffast-math
+  EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
   #----flags for OPTMAN
-  OFLAGS = -O2 -std=legacy -ffast-math
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -52,18 +52,19 @@ else ifeq ($(FC),ifort)
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
   #------------------------------------------------------------------------------------------------
-  # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  #FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
   # flags for automatic & openMP directives
   # LIBS = -openmp-lib compat
   #----flags for automatic parallelization
   #FFLAGS = -O3 -x=host -parallel -par-report1
   #----flags for automatic parallelization (no report)
+  FFLAGS = -O3 -x=host -diag-disable warn -parallel
   #    -diag-disable id8290,8291,8293
-  FFLAGS = -O3 -x=host -parallel -diag-disable id8290,8291,8293
+  # FFLAGS = -O3 -x=host -diag-disable warn 
   # Flags for ECIS
-  EFLAGS = -O3 -x=host -parallel -diag-disable id8290,8291,8293
+  EFLAGS = -O3 -x=host -diag-disable warn -parallel
   # Flags for OPTMAN
-  OFLAGS = -O3 -x=host -parallel -diag-disable id8290,8291,8293
+  OFLAGS = -O3 -x=host -diag-disable warn -parallel 
   #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
       FFLAGS = -O3 -diag-disable warn
@@ -123,7 +124,7 @@ endif
 	$(FC) $(FFLAGS) -c $<
 
 OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
-       pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o write_ENDF.o pfns_calc.o HRTW-mod.o ang_mom.o
+       pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o write_ENDF.o pfns_calc.o HRTW-mod.o ang_mom.o subecis06m.o
 
 all: 
 	$(MAKE) empgdr.mod
@@ -132,18 +133,17 @@ all:
 	$(MAKE) optmand
 	@../scripts/getrevnum
 
-
-empire: $(OBJF) subecis06m.o
-	$(FC) $(FFLAGS) -o empire $(OBJF) subecis06m.o $(LIBS)
-
-subecis06m.o : subecis06m.f
-	$(FC) $(EFLAGS) -c subecis06m.f
-
 empgdr.mod: empgdr.f 
 	$(FC) $(FFLAGS) -c empgdr.f 
 
-empcess.mod: empcess.f 
+empcess.mod: empcess.f
 	$(FC) $(FFLAGS) -c empcess.f 
+
+subecis06m.o: subecis06m.f
+	$(FC) $(EFLAGS) -c subecis06m.f	
+
+empire: $(OBJF) 
+	$(FC) $(FFLAGS) -o empire $(OBJF)   $(LIBS)
 
 optmand: optmand.f
 	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f
