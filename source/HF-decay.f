@@ -31,6 +31,7 @@ C
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
       DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
+      DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
       DOUBLE PRECISION, external :: GET_DDXS
 
@@ -792,7 +793,7 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &                    *DE*(ispec - 1)*DE
                ENDIF
              ENDDO
-             IF (nspec.gt.1) THEN
+C            IF (nspec.gt.1) THEN
 C              gtotsp = gtotsp - 0.5d0*DE*
 C    &                             (POPcse(0,0,1,INExc(nnuc))+
 C    &                              POPcse(0,0,nspec,INExc(nnuc)))
@@ -828,14 +829,14 @@ C              emedt = emedt - 0.5d0*DE*(nspec-1)*DE*
 C    &                       POPcse(0,5,nspec,INExc(nnuc))
 C              emedh = emedh - 0.5d0*DE*(nspec-1)*DE*
 C    &                       POPcse(0,6,nspec,INExc(nnuc))
-               IF (NDEJC.EQ.7) then
-                 ctotsp = ctotsp - 0.5d0*DE*
-     &                          (POPcse(0,NDEJC,1,INExc(nnuc))+
-     &                           POPcse(0,NDEJC,nspec,INExc(nnuc)))
+C              IF (NDEJC.EQ.7) then
+C                ctotsp = ctotsp - 0.5d0*DE*
+C    &                          (POPcse(0,NDEJC,1,INExc(nnuc))+
+C    &                           POPcse(0,NDEJC,nspec,INExc(nnuc)))
 C                emedc = emedc - 0.5d0*DE*(nspec-1)*DE*
 C    &                       POPcse(0,NDEJC,nspec,INExc(nnuc))
-               ENDIF
-             ENDIF
+C              ENDIF
+C            ENDIF
              POPcs(0,INExc(nnuc)) = gtotsp
              POPcs(1,INExc(nnuc)) = xtotsp
              POPcs(2,INExc(nnuc)) = ptotsp
@@ -896,6 +897,8 @@ C    &                G12.6,''  mb  '')') xtotsp
 C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
+               WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') xtotsp
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
@@ -907,6 +910,8 @@ C    &                G12.6,''  mb  '')') ptotsp
 C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
+               WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') ptotsp
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
@@ -918,6 +923,8 @@ C    &                G12.6,''  mb  '')') atotsp
 C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)
+               WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') atotsp
              ELSE
                IF (LHMs.GT.0 .and. atotsp.LT.1.0d-8) THEN
                  totsp = CSprd(nnuc) - dtotsp - htotsp - ttotsp
@@ -959,16 +966,15 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ENDIF
              ENDIF
              WRITE (8,*) 
-             WRITE (8,*)
-     &           '-------------------------------------------------'
+             WRITE (8,'(116(1H_))') 
              WRITE (8,*) 
      &        'Population of residual nuclei (exclusive spectra - CMS)'
              WRITE (8,
      &           '('' Energy'',14x,''gamma'',9x,''neutron'',8x,
      &             ''proton'',10x,''alpha'',10x,''deut '',10x,
      &             ''trit '',10x,''He-3 '')')
-             WRITE (8,*)
-     &           '-------------------------------------------------'
+             WRITE (8,'(116(1H-))') 
+
              DO ispec = 1, nspec
                POPcse(0,1,ispec,INExc(nnuc)) = 
      &                xnorm(1,INExc(nnuc))*POPcse(0,1,ispec,INExc(nnuc))
@@ -996,19 +1002,30 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ENDIF
              ENDDO
              IF (NDEJC.EQ.7) THEN
-               WRITE (8,'(116(1H_))') 
-               WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
-     &                   dtotsp,ttotsp,htotsp,ctotsp
+               WRITE (8,'(116(1H-))') 
+               WRITE (8,'(''Tot.popul.'',5X,8g15.6)')gtotsp, xtotsp, 
+     &                   ptotsp, atotsp,dtotsp,ttotsp,htotsp,ctotsp
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh, emedc
              ELSE  
-               WRITE (8,'(116(1H_))') 
-               WRITE (8,'(15X,8g15.6)')gtotsp, xtotsp, ptotsp, atotsp,
-     &                 dtotsp,ttotsp,htotsp    
+               WRITE (8,'(116(1H-))') 
+               WRITE (8,'(''Tot.popul.'',5X,8g15.6)')gtotsp, xtotsp,
+     &                   ptotsp, atotsp,dtotsp,ttotsp,htotsp    
                WRITE (8,'(''E-aver.'',8X,8g15.6)')emedg, emedn, emedp,
      &                emeda, emedd, emedt, emedh 
              ENDIF            
-             WRITE (8,'(116(1H_)/)') 
+
+             cmulg = gtotsp/CSPrd(nnuc)
+             cmuln = xtotsp/CSPrd(nnuc)
+             cmulp = ptotsp/CSPrd(nnuc)
+             cmula = atotsp/CSPrd(nnuc)
+             cmuld = dtotsp/CSPrd(nnuc)
+             cmult = ttotsp/CSPrd(nnuc)
+             cmulh = htotsp/CSPrd(nnuc)
+             WRITE (8,'(''Multip.'',8X,8g15.6)')cmulg, cmuln, cmulp,
+     &                cmula, cmuld, cmult, cmulh
+
+             WRITE (8,'(116(1H-)/)') 
            ENDIF
          ENDIF
          IF (CSFis.NE.0.0D0) THEN
