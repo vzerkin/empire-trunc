@@ -309,7 +309,7 @@ SUBROUTINE HRTW
       WRITE(8,*)
       WRITE(12,*)
 
-      if(itmp==0 .and. (.not.benchm)) then 
+      if(itmp.eq.0 .AND. (.not.benchm)) then 
          IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
             tune(0,nnuc) = tgexper/sumtg
             WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
@@ -317,6 +317,11 @@ SUBROUTINE HRTW
          ELSE
             WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
          ENDIF
+         WRITE(8,*)
+      endif
+
+      if(itmp.eq.1 .AND. (.not.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) then
+         WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
          WRITE(8,*)
       endif
    ENDIF
