@@ -20,7 +20,7 @@ c
       implicit none
       include 'dimension.h' 
 
-	   double precision g(6*NDLW)
+      double precision g(6*NDLW)
       common /factorial/g
 c
       double precision a,b,c,d,e,f
@@ -153,7 +153,7 @@ c
       implicit none
 
       include 'dimension.h' 
-	   double precision g(6*NDLW)
+      double precision g(6*NDLW)
       common /factorial/g
 c
       double precision aj1,aj2,aj3,am1,am2,am3
