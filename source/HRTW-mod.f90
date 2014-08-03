@@ -130,7 +130,7 @@ contains
       if(allocated(inchnl)) deallocate(inchnl)
    end subroutine DelHRTW
 
-    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
+   real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
       implicit none
       real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
       real*8, intent(in) :: J           !CN spin
@@ -149,12 +149,28 @@ contains
 !      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
 !              CLEBG(lb,lb,L,0.d0,0.d0,0.d0)*RACAH(J,jb,J,jb,L,Ib)*RACAH(jb,jb,lb,lb,L,sb)* &
 !              (-1)**INT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
+      Blatt = 0.d0
+      
       cb1 = CLEBG(la,la,L,0.d0,0.d0,0.d0)
-      rc1 = RACAH(J,ja,J,ja,Ia,L)
-      rc2 = RACAH(ja,ja,la,la,L,sa)
+      if(cb1 .eq. 0) RETURN
+
       cb2 = CLEBG(lb,lb,L,0.d0,0.d0,0.d0)
+      if(cb1 .eq. 0) RETURN
+
+      rc1 = RACAH(J,ja,J,ja,Ia,L)
+!     rc1 = RACAH(J,ja,J,ja,L,Ia)
+      if(rc1 .eq. 0) RETURN
+
       rc3 = RACAH(J,jb,J,jb,Ib,L)
+!     rc3 = RACAH(J,jb,J,jb,L,Ib)
+      if(rc3 .eq. 0) RETURN
+
+      rc2 = RACAH(ja,ja,la,la,L,sa)
+      if(rc2 .eq. 0) RETURN
+
       rc4 = RACAH(jb,jb,lb,lb,L,sb)
+      if(rc4 .eq. 0) RETURN
+
       Blatt = cb1*rc1*rc2*cb2*rc3*rc4*(-1)**NINT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
 
     end function Blatt
