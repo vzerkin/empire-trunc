@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3976 $
+Ccc   * $Rev: 4011 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-15 16:28:46 +0200 (So, 15 Jun 2014) $
+Ccc   * $Date: 2014-08-04 05:44:40 +0200 (Mo, 04 Aug 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -98,7 +98,10 @@ C      POPhmslab= 0.d0
       ECUt  = 0.d0
 
       PL_CN = 0.d0
-      PL_lmax = 0.d0
+      PL_lmax = -1
+
+      PL_CNcont = 0.d0
+      PLcont_lmax = -1
 
       return
       END
@@ -220,6 +223,7 @@ C Local variables
 C
       INTEGER l
       Pl = 0.d0
+      IF (Nl.LT.0) RETURN
       Pl(1) = 1.d0
       IF (Nl.LT.1) RETURN
       Pl(2) = Uu
@@ -232,6 +236,8 @@ C
       END
 
       DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEV)
+
+	implicit none
 C
 C-Title  : GET_DDXS Subroutine
 C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS
@@ -267,7 +273,9 @@ C
       INTEGER NL,L
       DOUBLE PRECISION PL(0:NDANGecis)
 
+	GET_DDXS = 0.d0
       NL = PL_lmax(ILEV)
+      IF (NL.LT.0) RETURN
       PL(0) = 1.d0
 C     GET_DDXS = COEFF(0)
       GET_DDXS = PL_CN(0,ILEV) ! *PL(0), PL(0) is equal 1 anyhow
@@ -278,6 +286,62 @@ C     GET_DDXS = COEFF(0)
       DO L = 1, NL - 1
          PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
          GET_DDXS = GET_DDXS + ( 2*(L+1)+1 )*PL_CN(L+1,ILEV)*PL(L+1)
+      ENDDO
+      RETURN
+      END
+
+      DOUBLE PRECISION FUNCTION GET_DDXScont(X,IE)
+
+	implicit none
+C
+C-Title  : GET_DDXScont Subroutine
+C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS in the continuum
+C
+C          NL = PLcont_lmax(IE)
+C
+C          DDXS = SUM_{n=0 to NL} { (2L+1)( PL_CNcont(n,ILEV)*Pn(n,X) }
+C          X= cos(theta) 
+C
+C-Author : R.Capote, Nuclear Data Section, IAEA, 2012
+C          Use recursive relations for Pn(x): Abramowitz & Stegun Table 22.7 (p.782) 
+C
+C-Description:
+C-D  Given the argument value X in the interval [-1,1], the
+C-D  polynomials up to order NL are calculated by a recurrence
+C-D  relation and stored in PL.
+C    PL(0) = 1 
+C    PL(1) = X
+C    PL(2) = (3*X*X - 1)/2 ...
+C
+C    PL_lmax(ndcollev), PL_CN(0:ndangecis,ndcollev)
+C
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER IE
+      DOUBLE PRECISION X
+C
+C Local variables
+C
+      INTEGER NL,L
+      DOUBLE PRECISION PL(0:NDANGecis)
+
+	GET_DDXScont = 0.d0
+      NL = PLcont_lmax(IE)
+      IF (NL.LT.0) RETURN
+      PL(0) = 1.d0
+C     GET_DDXScont = COEFF(0)
+      GET_DDXScont = PL_CNcont(0,IE) ! *PL(0), PL(0) is equal 1 anyhow
+      IF (NL.LT.1) RETURN
+      PL(1) = X
+      GET_DDXScont = GET_DDXScont + 3*PL_CNcont(1,IE)*PL(1)
+      IF (NL.LT.2) RETURN
+      DO L = 1, NL - 1
+         PL(L + 1) = ( (2*L + 1)*PL(L)*X - L*PL(L - 1) )/DBLE(L+1)
+         GET_DDXScont = GET_DDXScont + 
+     &                  ( 2*(L+1)+1 )*PL_CNcont(L+1,IE)*PL(L+1)
       ENDDO
       RETURN
       END

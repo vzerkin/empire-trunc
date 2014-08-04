@@ -1100,6 +1100,7 @@ C----------CN contribution to elastic ddx
                WRITE (8,*) 
 
                IF(PL_CN(0,1).gt.0.d0) then
+C	           write(*,*) 'HF-decay ',PL_CN(0,1)
                  DO iang = 1, NDANG
                    cel_da(iang) = GET_DDXS(CANGLE(iang),1)
                  ENDDO

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3986 $
+Ccc   * $Rev: 4011 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-06-20 00:49:45 +0200 (Fr, 20 Jun 2014) $
+Ccc   * $Date: 2014-08-04 05:44:40 +0200 (Mo, 04 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -48,7 +48,7 @@ C
 
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
 !      INTEGER ilevcol, ilev
-      DOUBLE PRECISION GET_DDXS
+      DOUBLE PRECISION GET_DDXS, GET_DDXScont
 C-----
 C-----Continuum
 C-----
@@ -78,12 +78,27 @@ C-----
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
-            CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt
+            CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt             
             IF (ENDf(Nnuc).EQ.1) THEN
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt
             ENDIF
+C
+C           CN emission angular distribution to the continuum
+C           shold be considered
+C 
+C           IF (Nnuc.eq.1 .and. Nejc.EQ.1) THEN
+C             Calculating CN DA to the cont from Legendre expansion
+C             if(PLcont_lmax(icse).ge.0.d0) then
+C                 DO na = 1, NDANG
+C                   xs_cn = GET_DDXScont(CANGLE(na),icse)
+C                   write(*,*) na,xs_cn
+C                   CSEa(icse,nang,1,1) = CSEa(icse,nang,1,1) + xs_cn                     
+C                 ENDDO
+C             endif
+C           ENDIF
+
          ENDIF
       ENDDO !over residual energies in continuum
 C-----
@@ -172,12 +187,25 @@ C--------Add CN contribution to direct ang. distributions
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
                        
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
+
+C               DO j = 0, 5  !do loop over discrete neutron levels
+C                 write
+C    >            (*,'(2x,A8, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 
+C    >             'HF-comp ',j, PL_lmax(j)
+C               ENDDO
+
+C               DO j = 1, 5  !do loop over continuum neutron levels
+C                 write 
+C    >            (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont )') 
+C    >             'HF-comp ',j, PLcont_lmax(j)
+C               ENDDO
+
 C 
 C               Calculating CN DA from Legendre expansion
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
 C    >             4.d0*PI*PL_CN(0,il)
-                if(PL_CN(0,il).gt.0.d0) then
+                if(PL_lmax(il).ge.0.d0) then
 C     if(il.eq.levtarg) write(8,*) '4piPL=',4.d0*pi*PL_CN(0,il)
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)

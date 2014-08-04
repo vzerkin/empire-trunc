@@ -32,9 +32,9 @@ SUBROUTINE HRTW
    REAL*8 :: j, Ia, xjr, ja, jb, la, lb, xleg, tmp
    REAL*8 :: xmas_npro, xmas_ntrg, el, ecms, ak2
    REAL*8 :: d0c
-   REAL*8 :: sumfism(nfmod), cel_da(NDAngecis), GET_DDXS
+   REAL*8 :: sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
    INTEGER :: i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, iel, lleg
-   INTEGER :: iang
+   ! INTEGER :: iang
    CHARACTER(1) :: cpar(2)
    LOGICAL*1 relcal
    DATA cpar/'+', '-'/
@@ -198,6 +198,7 @@ SUBROUTINE HRTW
             !
             ! CN angular distributions (neutron (in)elastic scattering ONLY!)
             !
+
             IF(.not.CN_isotropic) THEN
                ! accumulate Legendre coefficients
                nejc = 1
@@ -213,42 +214,58 @@ SUBROUTINE HRTW
                   DO lleg = 0, 2*inchnl(iel)%l, 2       !do loop over Legendre L
                      xleg = dble(lleg)
                      tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)
+                     if(tmp.eq.0) cycle
                      tmp = tmp*xnor*outchnl(j)%t*outchnl(j)%rho
                      !write(*,*) ' tmp,<=xjc,Ia,la,ja,SEJc,xjr,lb,jb,l',tmp,xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,l
+
+                     if(dabs(tmp).lt.1.d-14) cycle
+
                      IF(outchnl(j)%kres > 0) THEN
                         PL_CNcont(lleg,outchnl(j)%kres) = PL_CNcont(lleg,outchnl(j)%kres) + tmp
+                        PLcont_lmax(outchnl(j)%kres) = lleg
                      ELSEIF(outchnl(j)%kres < 0) THEN
                         PL_CN(lleg,-outchnl(j)%kres) = PL_CN(lleg,-outchnl(j)%kres) + tmp
+                        PL_lmax(-outchnl(j)%kres) = lleg
                      ENDIF
+
                   ENDDO
+!                 IF(outchnl(j)%kres > 0) THEN
+!                    write (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',outchnl(j)%kres, PLcont_lmax(outchnl(j)%kres)
+!                 ELSEIF(outchnl(j)%kres < 0) THEN
+!                    write (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',outchnl(j)%kres, PL_lmax(-outchnl(j)%kres)
+!                 ENDIF
                ENDDO
             ENDIF    !end of Legendre coeficients accumualtion
+            
             CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+            
             IF(LHRtw==1) THEN
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) - elcor    !restore SCRtl before new elastic is calculated
                DENhf = DENhf - elcor                                      !restore DENhf
             ENDIF
          ENDDO    !end do loop over incident channels
+
          !        Set range of Legendre coefficients
-         IF(.not.CN_isotropic) THEN
-            DO i = 1, NLV(nnur)             !do loop over discrete levels
-               PL_lmax(i) = 0
-               DO lleg = 0, 2*NDLW, 2       !do loop over l-values
-                  if(ABS(PL_CN(lleg,i))<1.d-8) exit
-                  PL_lmax(i) = lleg
-               ENDDO
-            ENDDO
-            ELCncs = PL_CN(0,1)
-            IF (ELCncs > 0.d0) then
-               DO iang = 1, NDANG
-                  cel_da(iang) = GET_DDXS(CANGLE(iang),1)
-               ENDDO
-            ENDIF
+!        IF(.not.CN_isotropic) THEN
+!           DO i = 1, NLV(nnur)             !do loop over discrete levels
+!              PL_lmax(i) = 0
+!              DO lleg = 0, 2*NDLW, 2       !do loop over l-values
+!                 if(ABS(PL_CN(lleg,i))<1.d-8) exit
+!                 PL_lmax(i) = lleg
+!              ENDDO
+!           ENDDO
+!           ELCncs = PL_CN(0,1)
+!           IF (ELCncs > 0.d0) then
+!           write (*,*) 'HRTW-comp ',PL_CN(0,1)
+!              DO iang = 1, NDANG
+!                 cel_da(iang) = GET_DDXS(CANGLE(iang),1)
+!              ENDDO
+!           ENDIF
 
 !           WRITE (12,'(9X,8E15.5)') ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
 !           WRITE (12,*)' '
 
-         ENDIF
+!        ENDIF
          !
          ! Gamma width calculation
          !
