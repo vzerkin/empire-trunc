@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4011 $
+Ccc   * $Rev: 4012 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-04 05:44:40 +0200 (Mo, 04 Aug 2014) $
+Ccc   * $Date: 2014-08-05 05:48:53 +0200 (Di, 05 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -187,26 +187,12 @@ C--------Add CN contribution to direct ang. distributions
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
                        
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
-
-C               DO j = 0, 5  !do loop over discrete neutron levels
-C                 write
-C    >            (*,'(2x,A8, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 
-C    >             'HF-comp ',j, PL_lmax(j)
-C               ENDDO
-
-C               DO j = 1, 5  !do loop over continuum neutron levels
-C                 write 
-C    >            (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont )') 
-C    >             'HF-comp ',j, PLcont_lmax(j)
-C               ENDDO
-
 C 
 C               Calculating CN DA from Legendre expansion
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
 C               write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
 C    >             4.d0*PI*PL_CN(0,il)
                 if(PL_lmax(il).ge.0.d0) then
-C     if(il.eq.levtarg) write(8,*) '4piPL=',4.d0*pi*PL_CN(0,il)
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)
                     CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     

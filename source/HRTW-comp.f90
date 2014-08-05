@@ -245,7 +245,7 @@ SUBROUTINE HRTW
             ENDIF
          ENDDO    !end do loop over incident channels
 
-         !        Set range of Legendre coefficients
+!        Set range of Legendre coefficients
 !        IF(.not.CN_isotropic) THEN
 !           DO i = 1, NLV(nnur)             !do loop over discrete levels
 !              PL_lmax(i) = 0
@@ -254,11 +254,11 @@ SUBROUTINE HRTW
 !                 PL_lmax(i) = lleg
 !              ENDDO
 !           ENDDO
-!           ELCncs = PL_CN(0,1)
+!           ELCncs = PL_CN(0,LEVtarg)
 !           IF (ELCncs > 0.d0) then
-!           write (*,*) 'HRTW-comp ',PL_CN(0,1)
+!           write (*,*) 'HRTW-comp ',PL_CN(0,LEVtarg)
 !              DO iang = 1, NDANG
-!                 cel_da(iang) = GET_DDXS(CANGLE(iang),1)
+!                 cel_da(iang) = GET_DDXS(CANGLE(iang),LEVtarg)
 !              ENDDO
 !           ENDIF
 

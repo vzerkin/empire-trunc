@@ -218,7 +218,7 @@ C---------Write elastic to tape 12 and to tape 68
 
             IF(.not.CN_isotropic) then
               DO iang = 1, NDANG
-                xs_cn = GET_DDXS(CANGLE(iang),1)
+                xs_cn = GET_DDXS(CANGLE(iang),LEVtarg)
                 cel_da(iang) = xs_cn
 C                 write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
 C    >              'ANG=',ANGles(iang),' ECIS CN ang. dist.=',xs_cn,
@@ -229,17 +229,17 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
      &          ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
               WRITE (12,*)' '
 
-              IF (PL_CN(0,1).gt.0.d0) then
+              IF(PL_CN(0,LEVtarg).gt.0) then
 
                 WRITE (12,*)' '
                 WRITE (12,*)' Legendre coefficients expansion'
                 WRITE (12,*)' '
                 WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                 WRITE (12,*)' '
-                WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs,
-     &            (ELAred*elleg(iang) +
-     &            PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
-     &            iang = 2,min(NDAng,neles))
+                WRITE (12,'(9X,8D15.8)') 
+     &             ELAred*elleg(1)+PL_CN(0,LEVtarg),
+     &            (ELAred*elleg(iang) + PL_CN(iang-1,LEVtarg),
+     &                              iang = 2,min(NDAng,neles))
 
                 WRITE (12,*)' '
                 WRITE (12,*)' DIR Legendre coefficients expansion'
@@ -252,11 +252,11 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
                 WRITE (12,*)' '
                 WRITE (12,*)' CE Legendre coefficients expansion'
                 WRITE (12,*)' '
-                WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,PL_lmax(1))
+                WRITE (12,'(1x,A7,I5)') 
+     &            ' Lmax =',min(NDAng,PL_lmax(LEVtarg))
                 WRITE (12,*) ' '
-                WRITE (12,'(9X,8D15.8)') ELCncs, 
-     &            (PL_CN(iang-1,1)*ELCncs/PL_CN(0,1),
-     &             iang = 2,min(NDAng,PL_lmax(1)))
+                WRITE (12,'(9X,8D15.8)') PL_CN(0,LEVtarg), 
+     &            (PL_CN(iang-1,1),iang = 2,min(NDAng,PL_lmax(LEVtarg)))
 
               ELSE
 
@@ -267,10 +267,9 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
                 WRITE (12,*)' '
                 WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs, 
      &            (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
-                WRITE (12,*)' '
 
               ENDIF
-                           
+
             ELSE ! isotropic
                     
               WRITE (12,'(9X,8E15.5)') 
@@ -1057,8 +1056,10 @@ C--------down on the ground state
            WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
            WRITE (8,*) ' Shape elastic cross section',
      &                     ELAred*ELAcs, ' mb'
+
 C----------CN contribution to elastic ddx
            ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
+
            if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
              CN_isotropic = .TRUE.
              WRITE(8,*)
@@ -1071,6 +1072,11 @@ C----------CN contribution to elastic ddx
              WRITE(8,*)
            endif  
 
+           WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+           WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+
+           if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)    
+
            IF (ELCncs.EQ.0) then
              WRITE (8,*) ' WARNING: CN elastic is 0'
            ELSE
@@ -1082,16 +1088,14 @@ C----------CN contribution to elastic ddx
              ELSE
                WRITE (8,*) ' CN elas. cross section (BB)',
      &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
-               ftmp = 1.d0
-               if(PL_CN(0,1).gt.0.d0) ftmp = ELCncs/PL_CN(0,1)
                IF(INTerf.eq.1) then
-                 WRITE (110,'(1x,E12.5,3x,F8.4,3x,11(F9.2,1x),A17)') 
-     &           EINl, ftmp, 4.d0*pi*ELCncs,  
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
+     &           EINl, 4.d0*pi*ELCncs,  
      &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
      &           'ENG-WEID. TRANSF.'  
                ELSE
-                 WRITE (110,'(1x,E12.5,3x,F8.4,3x,11(F9.2,1x),A17)') 
-     &           EINl, ftmp, 4.d0*pi*ELCncs,  
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
+     &           EINl, 4.d0*pi*ELCncs,  
      &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
                WRITE (8,*) 
@@ -1099,10 +1103,10 @@ C----------CN contribution to elastic ddx
      &cluding the Compound Elastic'
                WRITE (8,*) 
 
-               IF(PL_CN(0,1).gt.0.d0) then
-C	           write(*,*) 'HF-decay ',PL_CN(0,1)
+               IF(PL_CN(0,LEVtarg).gt.0.d0) then
+C	           write(*,*) 'HF-decay ',PL_CN(0,LEVtarg)
                  DO iang = 1, NDANG
-                   cel_da(iang) = GET_DDXS(CANGLE(iang),1)
+                   cel_da(iang) = GET_DDXS(CANGLE(iang),LEVtarg)
                  ENDDO
                ENDIF
 
