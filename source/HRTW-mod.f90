@@ -130,6 +130,33 @@ contains
       if(allocated(inchnl)) deallocate(inchnl)
    end subroutine DelHRTW
 
+   function ZCoefficient( l1, j1, l2, j2, s, ll ) result (retval)
+      !
+      ! Blatt & Biedenharn's definition in Rev. Mod. Phys. 24, 258 (1952)
+      !
+      real*8, intent(in) :: l1, j1, l2, j2, s, ll
+      real*8 :: retval
+      real*8, external :: CLEBG, RACAH
+      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * ( 2.0d0 * l2 + 1.0d0 ) * ( 2.0d0 * j1 + 1.0d0 ) * ( 2.0d0 * j2 + 1.0d0 ) ) * CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * RACAH( l1, j1, l2, j2, s, ll )
+      if ( mod( ll - l1 + l2, 4d0 ) .gt. 0.1d0 ) retval = -retval
+   end function ZCoefficient
+
+   function ZBarCoefficient( l1, j1, l2, j2, s, ll ) result (retval)
+      !
+      ! Lane & Thomas's Zbar-coefficient coefficient
+      !   = Zbar(l1  j1  l2  j2 | S L )
+      !   = (-i)^( -l1 + l2 + ll ) * Z(l1  j1  l2  j2 | S L )
+      !
+      ! Lane & Thomas Rev. Mod. Phys. 30, 257-353 (1958).
+      ! Note, Lane & Thomas define this because they did not like the different phase convention in Blatt & Biedenharn's Z coefficient.  They changed it to get better time-reversal behavior.
+      ! Froehner uses Lane & Thomas convention as does T. Kawano.
+      !
+      real*8, intent(in) :: l1, j1, l2, j2, s, ll
+      real*8 :: retval
+      real*8, external :: CLEBG, RACAH
+      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * ( 2.0d0 * l2 + 1.0d0 ) * ( 2.0d0 * j1 + 1.0d0 ) * ( 2.0d0 * j2 + 1.0d0 ) ) * CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * RACAH( l1, j1, l2, j2, s, ll )
+   end function ZBarCoefficient
+
    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
       implicit none
       real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
