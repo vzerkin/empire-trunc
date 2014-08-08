@@ -168,20 +168,28 @@ contains
    end function ZBarCoefficient
 
    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
+      !
+      ! Blatt-Biedenharn formula for Compound Nuclei (as written by Froebrich & Lipperheide "Theory of Nuclear Reactions", Oxford Science (1996) p. 328)
+      ! has an
+      !
       implicit none
       real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
       real*8, intent(in) :: J           !CN spin
-      real*8, intent(in) :: Ia          !traget spin
+      real*8, intent(in) :: Ia          !target spin
       real*8, intent(in) :: la          !projectile l
       real*8, intent(in) :: ja          !total projectile angular momentum l+s
       real*8, intent(in) :: sa          !projectile spin
-      real*8, intent(in) :: Ib          !resuidual nucleus spin
+      real*8, intent(in) :: Ib          !residual nucleus spin
       real*8, intent(in) :: lb          !ejectile l
       real*8, intent(in) :: jb          !total ejectile angular momentum l+s
       real*8, intent(in) :: sb          !ejectile spin
       real*8, intent(in) :: L           !Legendre polynomial order (P_L)
       real*8, parameter :: pi4=12.5663706144d0   !4*pi
       real*8, external :: CLEBG, RACAH
+
+      Blatt = ZBarCoefficient( la, J, la, J, sa, L ) * ZBarCoefficient( lb, J, lb, J, sb, L )/pi4
+      if ( MOD(sb-sa,2.0d0) .gt. 0.1 )  Blatt = -Blatt
+      RETURN
 
 !      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
 !              CLEBG(lb,lb,L,0.d0,0.d0,0.d0)*RACAH(J,jb,J,jb,L,Ib)*RACAH(jb,jb,lb,lb,L,sb)* &
