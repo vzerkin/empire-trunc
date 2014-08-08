@@ -137,7 +137,12 @@ contains
       real*8, intent(in) :: l1, j1, l2, j2, s, ll
       real*8 :: retval
       real*8, external :: CLEBG, RACAH
-      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * ( 2.0d0 * l2 + 1.0d0 ) * ( 2.0d0 * j1 + 1.0d0 ) * ( 2.0d0 * j2 + 1.0d0 ) ) * CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * RACAH( l1, j1, l2, j2, s, ll )
+      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * &
+        ( 2.0d0 * l2 + 1.0d0 ) * &
+        ( 2.0d0 * j1 + 1.0d0 ) * &
+        ( 2.0d0 * j2 + 1.0d0 ) ) * &
+        CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * &
+        RACAH( l1, j1, l2, j2, s, ll )
       if ( mod( ll - l1 + l2, 4d0 ) .gt. 0.1d0 ) retval = -retval
    end function ZCoefficient
 
@@ -154,7 +159,12 @@ contains
       real*8, intent(in) :: l1, j1, l2, j2, s, ll
       real*8 :: retval
       real*8, external :: CLEBG, RACAH
-      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * ( 2.0d0 * l2 + 1.0d0 ) * ( 2.0d0 * j1 + 1.0d0 ) * ( 2.0d0 * j2 + 1.0d0 ) ) * CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * RACAH( l1, j1, l2, j2, s, ll )
+      retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * &
+        ( 2.0d0 * l2 + 1.0d0 ) * &
+        ( 2.0d0 * j1 + 1.0d0 ) * &
+        ( 2.0d0 * j2 + 1.0d0 ) ) * &
+        CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * &
+        RACAH( l1, j1, l2, j2, s, ll )
    end function ZBarCoefficient
 
    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
