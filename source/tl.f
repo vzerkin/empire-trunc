@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4004 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-07-30 08:43:00 +0200 (Mi, 30 Jul 2014) $
+Ccc   * $Rev: 4016 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-08-10 09:02:49 +0200 (So, 10 Aug 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2684,7 +2684,7 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) TOTcs
-      READ (45,*,END=300) ABScs
+      READ (45,*,END=300)
 
       dtmp = 0.d0
       IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) 
