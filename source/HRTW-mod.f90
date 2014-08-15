@@ -169,11 +169,11 @@ contains
 
    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
       !
-      ! Blatt-Biedenharn formula for Compound Nuclei (as written by Froebrich & Lipperheide "Theory of Nuclear Reactions", Oxford Science (1996) p. 328)
-      ! has an
+      ! Blatt-Biedenharn formula for Compound Nuclei (as written by Froebrich & Lipperheide "Theory of Nuclear Reactions", Oxford Science (1996) p. 328),
+      ! but substantially revised because of the different angular momentum coupling scheme in EMPIRE
       !
       implicit none
-      real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
+!      real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
       real*8, intent(in) :: J           !CN spin
       real*8, intent(in) :: Ia          !target spin
       real*8, intent(in) :: la          !projectile l
@@ -185,38 +185,41 @@ contains
       real*8, intent(in) :: sb          !ejectile spin
       real*8, intent(in) :: L           !Legendre polynomial order (P_L)
       real*8, parameter :: pi4=12.5663706144d0   !4*pi
-      real*8, external :: CLEBG, RACAH
-
-      Blatt = ZBarCoefficient( la, J, la, J, sa, L ) * ZBarCoefficient( lb, J, lb, J, sb, L )/pi4
-      if ( MOD(sb-sa,2.0d0) .gt. 0.1 )  Blatt = -Blatt
+      real*8, external :: RACAH
+      Blatt = ( (2.0d0 * J + 1.d0 )**2.d0 ) &
+                * ZBarCoefficient( la, ja, la, ja, sa, L ) &
+                * ZBarCoefficient( lb, jb, lb, jb, sb, L ) &
+                * RACAH( ja, J, ja, J, Ia, L ) &
+                * RACAH( jb, J, jb, J, Ib, L ) / pi4
+      if ( MOD( Ia + sa + Ib + sb + 2.d0*( ja + jb ), 2.0d0 ) .gt. 0.1 )  Blatt = -Blatt
       RETURN
 
-!      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
-!              CLEBG(lb,lb,L,0.d0,0.d0,0.d0)*RACAH(J,jb,J,jb,L,Ib)*RACAH(jb,jb,lb,lb,L,sb)* &
-!              (-1)**INT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
-      Blatt = 0.d0
-      
-      cb1 = CLEBG(la,la,L,0.d0,0.d0,0.d0)
-      if(cb1 .eq. 0) RETURN
-
-      cb2 = CLEBG(lb,lb,L,0.d0,0.d0,0.d0)
-      if(cb1 .eq. 0) RETURN
-
-      rc1 = RACAH(J,ja,J,ja,Ia,L)
-!     rc1 = RACAH(J,ja,J,ja,L,Ia)
-      if(rc1 .eq. 0) RETURN
-
-      rc3 = RACAH(J,jb,J,jb,Ib,L)
-!     rc3 = RACAH(J,jb,J,jb,L,Ib)
-      if(rc3 .eq. 0) RETURN
-
-      rc2 = RACAH(ja,ja,la,la,L,sa)
-      if(rc2 .eq. 0) RETURN
-
-      rc4 = RACAH(jb,jb,lb,lb,L,sb)
-      if(rc4 .eq. 0) RETURN
-
-      Blatt = cb1*rc1*rc2*cb2*rc3*rc4*(-1)**NINT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
+!!      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
+!!              CLEBG(lb,lb,L,0.d0,0.d0,0.d0)*RACAH(J,jb,J,jb,L,Ib)*RACAH(jb,jb,lb,lb,L,sb)* &
+!!              (-1)**INT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
+!      Blatt = 0.d0
+!
+!      cb1 = CLEBG(la,la,L,0.d0,0.d0,0.d0)
+!      if(cb1 .eq. 0) RETURN
+!
+!      cb2 = CLEBG(lb,lb,L,0.d0,0.d0,0.d0)
+!      if(cb1 .eq. 0) RETURN
+!
+!      rc1 = RACAH(J,ja,J,ja,Ia,L)
+!!     rc1 = RACAH(J,ja,J,ja,L,Ia)
+!      if(rc1 .eq. 0) RETURN
+!
+!      rc3 = RACAH(J,jb,J,jb,Ib,L)
+!!     rc3 = RACAH(J,jb,J,jb,L,Ib)
+!      if(rc3 .eq. 0) RETURN
+!
+!      rc2 = RACAH(ja,ja,la,la,L,sa)
+!      if(rc2 .eq. 0) RETURN
+!
+!      rc4 = RACAH(jb,jb,lb,lb,L,sb)
+!      if(rc4 .eq. 0) RETURN
+!
+!      Blatt = cb1*rc1*rc2*cb2*rc3*rc4*(-1)**NINT(Ib-sb-Ia+sa)*(2*J+1)*(2*ja+1)*(2*la+1)*(2*jb+1)*(2*lb+1)/pi4
 
     end function Blatt
     
