@@ -189,9 +189,9 @@ contains
       Blatt = ( (2.0d0 * J + 1.d0 )**2.d0 ) &
                 * ZBarCoefficient( la, ja, la, ja, sa, L ) &
                 * ZBarCoefficient( lb, jb, lb, jb, sb, L ) &
-                * RACAH( ja, J, Ia, J, ja, L ) &
-                * RACAH( jb, J, Ib, J, jb, L ) / pi4
-      Blatt = Blatt * (-1.d0)**NINT( Ia + sa + Ib + sb + 2.d0*( ja + jb ) )
+                * RACAH( ja, J, ja, J, Ia, L ) &
+                * RACAH( jb, J, jb, J, Ib, L ) / pi4
+      Blatt = Blatt * (-1.d0)**INT( Ia + sa + Ib + sb - 2.d0*( ja + jb ) )
       RETURN
 
 !!      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
