@@ -1,10 +1,10 @@
-# $Rev: 3808 $
-# $Author: rcapote $
-# $Date: 2014-02-06 17:01:55 +0100 (Do, 06 Feb 2014) $
+# $Rev: 4021 $
+# $Author: mherman $
+# $Date: 2014-08-16 08:37:50 +0200 (Sa, 16 Aug 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
-exec wish "$0" "$@" 
+exec wish8.4 "$0" "$@" 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -5493,16 +5493,14 @@ global widget file
    gets $plotc4log line
    while {[gets $plotc4log line] >= 0} {
       if [regexp ==== $line] {break}
-   set num [string range $line 73 75]
+   set num [string range $line 72 75]
    set pej [string range $line 80 83]
-#  set ej  [string range $line 13 16]
    set ej  [string range $line 12 16]
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
    set ein [string range $line 45 53]
-   #set ang [string range $line 56 58]
    set ang [string range $line 55 62]
-   set elv [string range $line 63 72]
+   set elv [string range $line 63 71]
    if { $pej == "   0" } {set pejc "g"
    } elseif {$pej == "   1"} {set pejc "n"
    } elseif {$pej == "1001"} {set pejc "p"
@@ -6885,7 +6883,7 @@ lappend dd} \
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
         -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
-        -resizable 1 -visible 1 -width 5 
+        -resizable 1 -visible 1 -width 6 
     $site_9_0.mcl78 column add col2 \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
         -labelrelief flat -resizable 1 -visible 1 -width 5 
