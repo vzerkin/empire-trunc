@@ -186,12 +186,13 @@ contains
       real*8, intent(in) :: L           !Legendre polynomial order (P_L)
       real*8, parameter :: pi4=12.5663706144d0   !4*pi
       real*8, external :: RACAH
-      Blatt = ( (2.0d0 * J + 1.d0 )**2.d0 ) &
+      Blatt =  (2.0d0 * J + 1.d0 ) &
                 * ZBarCoefficient( la, ja, la, ja, sa, L ) &
                 * ZBarCoefficient( lb, jb, lb, jb, sb, L ) &
                 * RACAH( ja, J, ja, J, Ia, L ) &
                 * RACAH( jb, J, jb, J, Ib, L ) / pi4
-      Blatt = Blatt * (-1.d0)**INT( Ia + sa + Ib + sb - 2.d0*( ja + jb ) )
+
+      Blatt = Blatt * (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) )
       RETURN
 
 !!      Blatt = CLEBG(la,la,L,0.d0,0.d0,0.d0)*RACAH(J,ja,J,ja,L,Ia)*RACAH(ja,ja,la,la,L,sa)* &
