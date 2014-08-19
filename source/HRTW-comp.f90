@@ -172,7 +172,7 @@ SUBROUTINE HRTW
          !
          !construct scratch matrix for decay of the Jcn state
          !
-         DO i = 1, num%part                       !scan strong particle channels (note: weak channels are already in SCRt)
+         DO i = 1, num%part                          !scan strong particle channels (note: weak channels are already in SCRt)
             IF(outchnl(i)%kres>0) THEN               !continuum channels
                SCRt(outchnl(i)%kres,outchnl(i)%jres,outchnl(i)%pres,outchnl(i)%nejc) = &
                   SCRt(outchnl(i)%kres,outchnl(i)%jres,outchnl(i)%pres,outchnl(i)%nejc) + outchnl(i)%t*outchnl(i)%rho/de
@@ -193,7 +193,7 @@ SUBROUTINE HRTW
                DENhf = DENhf + elcor
             ENDIF
             inchnl(iel)%sig = coef*inchnl(iel)%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  !absorption for iel channel
-            xnor = inchnl(iel)%sig/DENhf                               !normalization factor
+            xnor = inchnl(iel)%sig/DENhf                      !normalization factor
 
             !
             ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -203,32 +203,39 @@ SUBROUTINE HRTW
                ! accumulate Legendre coefficients
                nejc = 1
                nnur = 2
-               Ia = XJLv(LEVtarg,0)                     !target spin
-               la = inchnl(iel)%l                       !incident neutron l
-               ja = inchnl(iel)%j                       !incident neutron j
+               Ia = XJLv(LEVtarg,0)                  !target spin
+               la = inchnl(iel)%l                    !incident neutron l
+               ja = inchnl(iel)%j                    !incident neutron j
                !write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
-               DO j = 1, num%neut                       !do loop over neutron channels only
-                  xjr = outchnl(j)%xjrs                 !residual nucleus J
-                  lb = outchnl(j)%l                     !outgoing neutron l
-                  jb = outchnl(j)%j                     !outgoing neutron j
-                  DO lleg = 0, 2*inchnl(iel)%l, 2       !do loop over Legendre L
+               DO j = 1, num%neut                    !do loop over neutron channels only
+!                  write(8,*) 'Elastic channel #',j, ' abs = ',inchnl(iel)%sig, ' xnor = ', xnor
+!                  write(8,*) '                                  leg      BB               Jcn   &
+!                  &               l_inc           j_inc                 J_res              l_out              J_out'
+                  xjr = outchnl(j)%xjrs              !residual nucleus J
+                  lb = outchnl(j)%l                  !outgoing neutron l
+                  jb = outchnl(j)%j                  !outgoing neutron j
+                  IF(outchnl(j)%kres > 0) THEN
+                     PLcont_lmax(outchnl(j)%kres) = 2*inchnl(iel)%l
+                  ELSEIF(outchnl(j)%kres < 0) THEN
+                     PL_lmax(-outchnl(j)%kres) = 2*inchnl(iel)%l
+                  ENDIF
+                  DO lleg = 0, 2*inchnl(iel)%l, 2    !do loop over Legendre L
                      xleg = dble(lleg)
-                     tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)
+                     tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
+!                     write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(j)%kres
                      if(tmp.eq.0) cycle
                      tmp = tmp*xnor*outchnl(j)%t*outchnl(j)%rho
-                     !write(*,*) ' tmp,<=xjc,Ia,la,ja,SEJc,xjr,lb,jb,l',tmp,xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,l
 
-                     if(dabs(tmp).lt.1.d-14) cycle
+!                     if(dabs(tmp).lt.1.d-14) cycle
 
                      IF(outchnl(j)%kres > 0) THEN
                         PL_CNcont(lleg,outchnl(j)%kres) = PL_CNcont(lleg,outchnl(j)%kres) + tmp
-                        PLcont_lmax(outchnl(j)%kres) = lleg
                      ELSEIF(outchnl(j)%kres < 0) THEN
                         PL_CN(lleg,-outchnl(j)%kres) = PL_CN(lleg,-outchnl(j)%kres) + tmp
-                        PL_lmax(-outchnl(j)%kres) = lleg
                      ENDIF
 
                   ENDDO
+!                  write(8,*) 'PL_CN(lleg,1) = ', PL_CN(0,1), PL_CN(2,1), PL_CN(4,1), PL_CN(6,1)
 !                 IF(outchnl(j)%kres > 0) THEN
 !                    write (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',outchnl(j)%kres, PLcont_lmax(outchnl(j)%kres)
 !                 ELSEIF(outchnl(j)%kres < 0) THEN

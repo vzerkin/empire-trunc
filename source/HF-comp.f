@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4012 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-05 05:48:53 +0200 (Di, 05 Aug 2014) $
+Ccc   * $Rev: 4023 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-08-19 07:25:52 +0200 (Di, 19 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -86,18 +86,20 @@ C-----
             ENDIF
 C
 C           CN emission angular distribution to the continuum
-C           shold be considered
+C           should be considered
 C 
-C           IF (Nnuc.eq.1 .and. Nejc.EQ.1) THEN
+            IF (Nnuc.eq.1 .and. Nejc.EQ.1) THEN
 C             Calculating CN DA to the cont from Legendre expansion
-C             if(PLcont_lmax(icse).ge.0.d0) then
-C                 DO na = 1, NDANG
-C                   xs_cn = GET_DDXScont(CANGLE(na),icse)
-C                   write(*,*) na,xs_cn
-C                   CSEa(icse,nang,1,1) = CSEa(icse,nang,1,1) + xs_cn                     
-C                 ENDDO
-C             endif
-C           ENDIF
+C             write(*,*) 'icse, PLcont_lmax ', icse, PLcont_lmax(icse)
+              PLcont_lmax(icse) = 6.0d0  !JUST FOR TESTING
+              if(PLcont_lmax(icse).ge.0.d0) then
+                  DO na = 1, NDANG
+                    xs_cn = GET_DDXScont(CANGLE(na),icse)
+C                    write(*,*) na,xs_cn
+                    CSEa(icse,na,1,1) = CSEa(icse,na,1,1) + xs_cn
+                  ENDDO
+              endif
+            ENDIF
 
          ENDIF
       ENDDO !over residual energies in continuum
