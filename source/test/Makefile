@@ -1,10 +1,10 @@
 FC=gfortran
-FRUIT=..
+FRUIT=$(EMPIREDIR)/util/fruit
 
-LIBS=-L $(FRUIT)/lib -lfruit
-INCLS=-I $(FRUIT)/include
+LIBS=-L $(FRUIT) -lfruit
+INCLS=-I $(FRUIT)
 FCFLAGS=-O3 -Wall -ffree-line-length-none
-PYTHONPATH=$(FRUIT)
+
 
 EXE=test_driver
 SOURCES=$(EMPIREDIR)/source/HRTW-mod.f90 $(EMPIREDIR)/source/ang_mom.f
@@ -26,9 +26,6 @@ factorial.o:factorial.f dimension.h
 
 HRTW-mod.o:$(EMPIREDIR)/source/HRTW-mod.f90 dimension.h
 	$(FC) -c $(FCFLAGS) $(EMPIREDIR)/source/HRTW-mod.f90 $(INCLS) -o $@ 
-
-test_py:
-	python fruit_driver.py 
 
 test: $(OBJECTS)
 	$(FC) -c $(FCFLAGS) fruit_driver.f90 $(INCLS) -o fruit_driver.o
