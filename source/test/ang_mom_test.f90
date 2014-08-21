@@ -138,7 +138,7 @@ contains
 
     subroutine test_racah_nontrivial_values_from_6j_tests
         call assert_close(  0.11167656571008167d0,  RACAH( 4.D0, 2.D0,  2.D0, 2.D0,  2.D0,  4.D0 ),  1d-6, 1d-6, 'RACAH' ) !  (1/21)*sqrt(11/2)
-        call assert_close(  0.22360679774997896d0,  RACAH( 2.D0, 1.d0,  1.d0, 1.d0,  1.d0,  2.d0 ),  1d-6, 1d-6, 'RACAH' ) ! –(1/2) *sqrt(1/5)
+        call assert_close(  0.22360679774997896d0,  RACAH( 2.D0, 1.d0,  1.d0, 1.d0,  1.d0,  2.d0 ),  1d-6, 1d-6, 'RACAH' ) ! -(1/2) *sqrt(1/5)
         call assert_close(  0.07453559924999298d0,  RACAH( 2.D0, 2.d0,  1.d0, 1.d0,  1.d0,  2.d0 ),  1d-6, 1d-6, 'RACAH' ) !  (1/6) *sqrt(1/5)
     end subroutine test_racah_nontrivial_values_from_6j_tests
         
