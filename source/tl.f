@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4016 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-10 09:02:49 +0200 (So, 10 Aug 2014) $
+Ccc   * $Rev: 4028 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-08-21 22:57:27 +0200 (Do, 21 Aug 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2684,27 +2684,9 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       OPEN (UNIT = 45,FILE = 'INCIDENT.CS',STATUS = 'old',ERR = 300)
       READ (45,*,END = 300)  ! Skipping first line
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) TOTcs
-      READ (45,*,END=300)
-
-      dtmp = 0.d0
-      IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) 
-C       reading total compound from ECIS (or ELAcs from OPTMAN)
-     >  READ (45,*,END=300) dtmp 
+      READ (45,*,END=300) ABScs 
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
-
-      IF (.NOT.CN_isotropic .and. ZEJc(Nejc).EQ.0) then
-C       write(*,*) 'ECIS abs:',ABScs,' el=',ELAcs
-        if (ELAcs.EQ.0.d0) then
-          ELAcs = dtmp
-        else
-          dtmp  = ABScs + ELAcs - TOTcs ! dtmp = Compound Elastic
-          ELAcs = ELAcs - dtmp ! substracting CE from ELAcs (total elastic)
-        endif
-C       write(*,*) 'CE:',dtmp,' new el=',ELAcs
-      ENDIF
-
   300 CLOSE (45)
-      IF (ZEJc(Nejc).EQ.0 .and. ELAcs.EQ.0.d0) ELAcs = dtmp 
 
       IF (ABScs.LE.0.D0) RETURN
 
