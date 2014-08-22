@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4023 $
+Ccc   * $Rev: 4029 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-19 07:25:52 +0200 (Di, 19 Aug 2014) $
+Ccc   * $Date: 2014-08-22 16:36:21 +0200 (Fr, 22 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -191,9 +191,12 @@ C--------Add CN contribution to direct ang. distributions
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C 
 C               Calculating CN DA from Legendre expansion
-C               write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
-C               write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
-C    >             4.d0*PI*PL_CN(0,il)
+C            IF(il.eq.1 .and. nejc.eq.1) THEN
+C                write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
+C                write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
+C     >             4.d0*PI*PL_CN(0,il)
+C                pause
+C            ENDIF
                 if(PL_lmax(il).ge.0.d0) then
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)

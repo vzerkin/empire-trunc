@@ -1,6 +1,6 @@
-!cc   * $Rev: 3982 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-06-20 00:45:00 +0200 (Fr, 20 Jun 2014) $
+!cc   * $Rev: 4029 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2014-08-22 16:36:21 +0200 (Fr, 22 Aug 2014) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -9,7 +9,7 @@
      &,NDEXCLUS = 20                                                    &
      &,NDEX= 151                                                        &
      &,NDLW= 55                                                         &
-     &,LEVCC=30                                                         &
+     &,LEVCC=40                                                         &
      &,NDLV=40                                                          &
      &,NDBR=40                                                          &
      &,NDMSCS=4)

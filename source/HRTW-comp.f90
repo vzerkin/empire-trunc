@@ -120,6 +120,13 @@ SUBROUTINE HRTW
          ENDDO                                         !do loop over ejectiles  ***done***
          num%part = nch                                !store number of particle channel entries
          !
+
+         ! gamma emission is always a weak channel (one iteration)
+!         sumg = 0.D0
+!         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg)
+!         H_Sumtl = H_Sumtl + sumg
+!         H_Sweak = H_Sweak + sumg
+
          ! fission (may be a weak or strong channel)
          !
          sumfis = 0.D0
@@ -145,6 +152,7 @@ SUBROUTINE HRTW
                outchnl(nch)%rho = dfloat(ndivf)
                outchnl(nch)%nejc = 100                    !nejc=100 convention identifies fission
             ENDIF
+            IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl
          ENDIF
          !
          ! gamma decay
@@ -166,9 +174,10 @@ SUBROUTINE HRTW
          !
          ! collecting outgoing channels completed
          ! 
+!         write(*,*)'pre  AUSTER DENhf=', DENhf
          IF(LHRtw==1) CALL AUSTER            !calculate V's for the strong channels (iteration)
          DENhf = H_Sumtl                     !reset DENhf using V's instead of T's
-         !write(*,*)'post AUSTER DENhf=', DENhf
+!         write(*,*)'post AUSTER DENhf=', DENhf
          !
          !construct scratch matrix for decay of the Jcn state
          !
@@ -180,20 +189,22 @@ SUBROUTINE HRTW
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + outchnl(i)%t*outchnl(i)%rho
             ENDIF
          ENDDO
-         !         DENhf = 0.0d0                               !test that SCRt+SCRtl sum to the same DENhf
-         !         DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-         !         DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
-         !         write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf    !should be the same as after AUSTER
+!                  DENhf = 0.0d0                               !test that SCRt+SCRtl sum to the same DENhf
+!                  DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
+!                  DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
+!                  write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf    !should be the same as after AUSTER
 
          DO i = num%elal, num%elah                   !do loop over elastic channels
             iel = i - num%elal + 1                   !elastic channels for each Jcn are numbered 1,2,3,...
-            IF(LHRtw==1) THEN
-               elcor = outchnl(i)%t*(outchnl(i)%eef - 1.D0)   !elastic channel correction to SCRtl and DENhf (elcor=0 for HF)
-               SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + elcor
-               DENhf = DENhf + elcor
-            ENDIF
+            inchnl(iel)%t = outchnl(i)%t
             inchnl(iel)%sig = coef*inchnl(iel)%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  !absorption for iel channel
             xnor = inchnl(iel)%sig/DENhf                      !normalization factor
+!            write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, inchnl(iel)%t, outchnl(i)%t, coef, inchnl(iel)%sig
+            IF(LHRtw==1) THEN
+               elcor = outchnl(i)%t*(outchnl(i)%eef - 1.D0)   !elastic channel correction to SCRtl  (elcor=0 for HF)
+!               write(*,*) 'Elcor =', elcor, '  EEF =', outchnl(i)%eef
+               SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + elcor
+            ENDIF
 
             !
             ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -223,10 +234,10 @@ SUBROUTINE HRTW
                      xleg = dble(lleg)
                      tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
 !                     write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(j)%kres
-                     if(tmp.eq.0) cycle
+!                     if(tmp.eq.0) cycle
+                     if(dabs(tmp).lt.1.d-14) cycle
                      tmp = tmp*xnor*outchnl(j)%t*outchnl(j)%rho
-
-!                     if(dabs(tmp).lt.1.d-14) cycle
+                     IF(i==j) tmp = tmp*outchnl(i)%eef
 
                      IF(outchnl(j)%kres > 0) THEN
                         PL_CNcont(lleg,outchnl(j)%kres) = PL_CNcont(lleg,outchnl(j)%kres) + tmp
@@ -248,7 +259,6 @@ SUBROUTINE HRTW
             
             IF(LHRtw==1) THEN
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) - elcor    !restore SCRtl before new elastic is calculated
-               DENhf = DENhf - elcor                                      !restore DENhf
             ENDIF
          ENDDO    !end do loop over incident channels
 
@@ -333,7 +343,7 @@ SUBROUTINE HRTW
       WRITE(8,*)
       WRITE(12,*)
 
-      if(itmp.eq.0 .AND. (.not.benchm)) then 
+      if(itmp==0 .and. (.not.benchm)) then 
          IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
             tune(0,nnuc) = tgexper/sumtg
             WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
@@ -344,7 +354,7 @@ SUBROUTINE HRTW
          WRITE(8,*)
       endif
 
-      if(itmp.eq.1 .AND. (.not.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) then
+      if(itmp==1 .and. (.not.benchm) .and. (sumtg>0.D0 .and. tgexper>0.D0) ) then
          WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
          WRITE(8,*)
       endif
