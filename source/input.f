@@ -1,6 +1,6 @@
-!cc   * $Rev: 4006 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2014-07-30 22:39:20 +0200 (Mi, 30 Jul 2014) $
+!cc   * $Rev: 4034 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-08-23 20:55:51 +0200 (Sa, 23 Aug 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -4169,7 +4169,7 @@ C-----
          IF (name.EQ.'DEFNUC') THEN
             DEF(1,0) = val
             WRITE (8,
-     &'('' Deformation of the target nucleus set to'',F6.3)') val
+     &'('' Static deformation of the target nucleus set to'',F6.3)') val
             GOTO 100
          ENDIF
 
@@ -8501,16 +8501,12 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
                IF(DEF(1,0).EQ.0.d0) THEN
                      DEF(1,0) = beta2x(k)
                  WRITE (8,
-     &'('' Deformation of the target nucleus set to'',F6.3,1x,
+     &'('' Static deformation of the target nucleus set to'',F6.3,1x,
      &  ''(FRDM)'')') beta2x(k)
                  call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
                  WRITE (8,
      &'('' Nobre parameterization deformation is   '',F6.3)') beta2
                ENDIF
-C              IF(DEF(1,0).EQ.0.d0) THEN
-C                 call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
-C                 DEF(1,0)=beta2
-C              ENDIF 
                XMAss(0) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(0) = A(0) + XMAss(0)/AMUmev
@@ -10380,12 +10376,19 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
          call defcal(iz,ia,beta2,ftmp)
          IF(beta2.ne.DEF(1,0)) then
+           IF(ABS(DEF(1,0)).GT.1.d-3) then
+             WRITE (8,*) ' WARNING: Input deformation used (DEFNUC)'
+             beta2 = DEF(1,0)
+             WRITE (8,'(/1x,A26/1x,A11,F7.3)')
+     &         'TARGET INPUT DEFORMATION :', 
+     &         'BETA (2+) =',beta2
+           ELSE
             WRITE (8,*)
-     &      ' WARNING: Input deformation used (DEFNUC)'
-            beta2 = DEF(1,0)
-            WRITE (8,'(/1x,A26/1x,A11,F7.3)')
-     &      'TARGET INPUT DEFORMATION :', 
-     &      'BETA (2+) =',beta2
+     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
+            WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+     &        'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &        'BETA (2+) =',beta2
+	     ENDIF
          ELSE
             WRITE (8,*)
      &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
