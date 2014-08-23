@@ -159,12 +159,19 @@ contains
       real*8, intent(in) :: l1, j1, l2, j2, s, ll
       real*8 :: retval
       real*8, external :: CLEBG, RACAH
+      real*8 :: rc, cc
+      retval = 0.d0
+
+      cc = CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 )
+      if(cc.eq.0.d0) return
+      rc = RACAH( l1, j1, l2, j2, s, ll )
+      if(rc.eq.0.d0) return
+
       retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * &
         ( 2.0d0 * l2 + 1.0d0 ) * &
         ( 2.0d0 * j1 + 1.0d0 ) * &
-        ( 2.0d0 * j2 + 1.0d0 ) ) * &
-        CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * &
-        RACAH( l1, j1, l2, j2, s, ll )
+        ( 2.0d0 * j2 + 1.0d0 ) ) * cc * rc
+        
    end function ZBarCoefficient
 
    real*8 function Blatt(J,Ia,la,ja,sa,Ib,lb,jb,sb,L)
@@ -173,7 +180,7 @@ contains
       ! but substantially revised because of the different angular momentum coupling scheme in EMPIRE
       !
       implicit none
-!      real*8 :: cb1, cb2, rc1, rc2, rc3, rc4
+      real*8 :: zb1, zb2, rc1, rc2
       real*8, intent(in) :: J           !CN spin
       real*8, intent(in) :: Ia          !target spin
       real*8, intent(in) :: la          !projectile l
@@ -186,13 +193,29 @@ contains
       real*8, intent(in) :: L           !Legendre polynomial order (P_L)
       real*8, parameter :: pi4=12.5663706144d0   !4*pi
       real*8, external :: RACAH
-      Blatt =  (2.0d0 * J + 1.d0 ) &
-                * ZBarCoefficient( la, ja, la, ja, sa, L ) &
-                * ZBarCoefficient( lb, jb, lb, jb, sb, L ) &
-                * RACAH( ja, J, ja, J, Ia, L ) &
-                * RACAH( jb, J, jb, J, Ib, L ) / pi4
+      Blatt = 0.d0
 
-      Blatt = Blatt * (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) )
+      rc1   = RACAH( ja, J, ja, J, Ia, L )
+      if (rc1.eq.0.d0) return
+
+      rc2   = RACAH( jb, J, jb, J, Ib, L )
+      if (rc2.eq.0.d0) return
+
+      zb1   = ZBarCoefficient( la, ja, la, ja, sa, L )
+      if (zb1.eq.0.d0) return
+
+      zb2   = ZBarCoefficient( lb, jb, lb, jb, sb, L )
+      if (zb2.eq.0.d0) return
+
+      Blatt =  (2.0d0 * J + 1.d0 )* zb1*zb2*rc1*rc2/pi4 * (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) )
+
+!     Blatt =  (2.0d0 * J + 1.d0 ) &
+!               * ZBarCoefficient( la, ja, la, ja, sa, L ) &
+!               * ZBarCoefficient( lb, jb, lb, jb, sb, L ) &
+!               * RACAH( ja, J, ja, J, Ia, L ) &
+!               * RACAH( jb, J, jb, J, Ib, L ) / pi4
+
+!     Blatt = Blatt* (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) ) 
       return
     end function Blatt
     
