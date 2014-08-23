@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4004 $
+Ccc   * $Rev: 4032 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-07-30 08:43:00 +0200 (Mi, 30 Jul 2014) $
+Ccc   * $Date: 2014-08-23 04:33:09 +0200 (Sa, 23 Aug 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -128,10 +128,10 @@ C--------Here the old calculated files are read
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          IF (fexistj) 
      &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-         write (*,*) 'lmaxj=',lmax
+C        write (*,*) 'lmaxj=',lmax
 
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-         write (*,*) 'lmax =',lmax
+C        write (*,*) 'lmax =',lmax
 
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
