@@ -26,7 +26,7 @@ C
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
       DOUBLE PRECISION poplev,poptot,popleft,pope,xnor,fisxse,ftmp
-      DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_cn
+      DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_norm
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
@@ -211,25 +211,83 @@ C---------Write elastic to tape 12 and to tape 68
                WRITE (12,'(10X,8G15.5)') 
      &                (FLOAT(iang - 1)*delang,iang = 1,NANgela)
             ENDIF
-                
-            DO iang = 1, NDANG
-              cel_da(iang) = ELCncs ! isotropic
-            ENDDO
 
-            IF(.not.CN_isotropic) then
-              DO iang = 1, NDANG
-                xs_cn = GET_DDXS(CANGLE(iang),LEVtarg)
-                cel_da(iang) = xs_cn
-C                 write(*,'(1x,A4,F4.0,A15,d13.6,3x,A7,d13.6)') 
-C    >              'ANG=',ANGles(iang),' ECIS CN ang. dist.=',xs_cn,
-C    >              '  HF CN ang. distr.=',cel_da(iang)
-              ENDDO
-                    
-              WRITE (12,'(9X,8E15.5)') 
-     &          ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
-              WRITE (12,*)' '
+            if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
+              CN_isotropic = .TRUE.
+              WRITE(8,*)
+              WRITE(8,*) 
+     &        'CN angular distribution assumed isotropic at Einc = ',
+     &        sngl(EINl)
+              WRITE(12,*)      
+     &        'CN angular distribution assumed isotropic at Einc = ',
+     &        sngl(EINl)
+              WRITE(8,*)
+            endif  
 
-              IF(PL_CN(0,LEVtarg).gt.0) then
+            IF (ELCncs.EQ.0) then
+
+              WRITE (8,*) ' WARNING: CN elastic is 0'
+
+            ELSE
+
+             IF(CN_isotropic) then   
+
+C              WRITE (8,*)
+C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
+
+               DO iang = 1, NDANG
+                 cel_da(iang) = ELCncs ! isotropic
+               ENDDO
+   
+               WRITE (12,'(9X,8E15.5)') 
+     &           ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
+
+               WRITE (12,*) ' '
+               WRITE (12,*) ' '
+               WRITE (12,*) ' Legendre coefficients expansion '
+               WRITE (12,*) ' '
+               WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+               WRITE (12,*) ' '
+               WRITE (12,'(9X,8D15.8)')
+     &          (ELAred*elleg(1) + ELCncs),
+     &          (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
+               WRITE (12,*) ' '
+
+             ELSE
+
+C              WRITE (8,*) ' CN elastic cross section   ',
+C    &                sngl(4.d0*pi*ELCncs),' mb'
+
+C              WRITE (8,*) ' CN elas. cross section (BB)',
+C    &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
+
+               IF(INTerf.eq.1) then
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
+     &           EINl, 4.d0*pi*ELCncs,  
+     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
+     &           'ENG-WEID. TRANSF.'  
+               ELSE
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
+     &           EINl, 4.d0*pi*ELCncs,  
+     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
+               ENDIF                
+
+C              WRITE (8,*) 
+C              WRITE (8,*) ' Nonisotropic Compound to discrete levels in
+C    &cluding the Compound Elastic'
+C              WRITE (8,*) 
+
+               xs_norm=1.d0
+ 	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
+                xs_norm = ELCncs/PL_CN(0,LEVtarg)
+C	          write(*,*) 'NORM=',xs_norm
+                DO iang = 1, NDANG
+                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
+                ENDDO
+
+                WRITE (12,'(9X,8E15.5)') 
+     &            ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
+                WRITE (12,*)' '
 
                 WRITE (12,*)' '
                 WRITE (12,*)' Legendre coefficients expansion'
@@ -237,8 +295,8 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
                 WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
                 WRITE (12,*)' '
                 WRITE (12,'(9X,8D15.8)') 
-     &             ELAred*elleg(1)+PL_CN(0,LEVtarg),
-     &            (ELAred*elleg(iang) + PL_CN(iang-1,LEVtarg),
+     &             ELAred*elleg(1)+xs_norm*PL_CN(0,LEVtarg),
+     &            (ELAred*elleg(iang) + xs_norm*PL_CN(iang-1,LEVtarg),
      &                              iang = 2,min(NDAng,neles))
 
                 WRITE (12,*)' '
@@ -255,10 +313,11 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
                 WRITE (12,'(1x,A7,I5)') 
      &            ' Lmax =',min(NDAng,PL_lmax(LEVtarg))
                 WRITE (12,*) ' '
-                WRITE (12,'(9X,8D15.8)') PL_CN(0,LEVtarg), 
-     &            (PL_CN(iang-1,1),iang = 2,min(NDAng,PL_lmax(LEVtarg)))
+                WRITE (12,'(9X,8D15.8)') xs_norm*PL_CN(0,LEVtarg), 
+     &            (xs_norm*PL_CN(iang-1,1),iang = 2,
+     &                       min(NDAng,PL_lmax(LEVtarg)))
 
-              ELSE
+               ELSE
 
                 WRITE (12,*)' '
                 WRITE (12,*)' Legendre coefficients expansion'
@@ -268,24 +327,10 @@ C    >              '  HF CN ang. distr.=',cel_da(iang)
                 WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs, 
      &            (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
 
-              ENDIF
+               ENDIF
 
-            ELSE ! isotropic
-                    
-              WRITE (12,'(9X,8E15.5)') 
-     &          ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
 
-              WRITE (12,*) ' '
-              WRITE (12,*) ' '
-              WRITE (12,*) ' Legendre coefficients expansion '
-              WRITE (12,*) ' '
-              WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-              WRITE (12,*) ' '
-              WRITE (12,'(9X,8D15.8)')
-     &          (ELAred*elleg(1) + ELCncs),
-     &          (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
-              WRITE (12,*) ' '
-
+             ENDIF
             ENDIF
 
             IF (FITomp.LT.0) THEN
@@ -1069,25 +1114,32 @@ C----------CN contribution to elastic ddx
              WRITE(12,*)      
      &       'CN angular distribution assumed isotropic at Einc = ',
      &       sngl(EINl)
+
              WRITE(8,*)
            endif  
 
-           WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-           WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-
-C          if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)    
-
            IF (ELCncs.EQ.0) then
+
              WRITE (8,*) ' WARNING: CN elastic is 0'
+
            ELSE
+
              WRITE (8,*) ' CN elastic cross section   ',
      &                sngl(POPlv(LEVtarg,mt2)),' mb'
+
              IF(CN_isotropic) then   
+
                WRITE (8,*)
      &          '    Elastic=', sngl(ELCncs), ' mb/str'
+               DO iang = 1, NDANG
+                 cel_da(iang) = ELCncs ! isotropic
+               ENDDO
+
              ELSE
+
                WRITE (8,*) ' CN elas. cross section (BB)',
      &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
+
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
      &           EINl, 4.d0*pi*ELCncs,  
@@ -1098,17 +1150,33 @@ C          if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)
      &           EINl, 4.d0*pi*ELCncs,  
      &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
+
                WRITE (8,*) 
                WRITE (8,*) ' Nonisotropic Compound to discrete levels in
      &cluding the Compound Elastic'
                WRITE (8,*) 
 
-               IF(PL_CN(0,LEVtarg).gt.0.d0) then
-                 DO iang = 1, NDANG
-                   cel_da(iang) = ELCncs/PL_CN(0,LEVtarg)*
-     &                            GET_DDXS(CANGLE(iang),LEVtarg)
-                 ENDDO
+               xs_norm=1.d0
+ 	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
+                xs_norm = ELCncs/PL_CN(0,LEVtarg)
+C	          write(*,*) 'NORM=',xs_norm
+                DO iang = 1, NDANG
+                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
+                ENDDO
+
+                IF(DABS(xs_norm-1.d0).gt.1.d-4) then
+                 WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+                 WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+                 WRITE(8,*)' ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+                 WRITE(8,*)' PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+                 WRITE(8,*) 
+     &       ' Renormalizing CN Ang.Dist. by ELCncs/PL_CN(0,LEVtarg)=',
+     &       sngl(xs_norm)
+                 WRITE(8,*) 
+                ENDIF
+
                ENDIF
+
 
              ENDIF
            ENDIF
@@ -1126,7 +1194,6 @@ C          if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)
      &           ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
              ENDDO
            ENDIF
-
 
            IF (ncollx.GT.0) THEN
 C----------------Locate position of the projectile among ejectiles

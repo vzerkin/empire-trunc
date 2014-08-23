@@ -262,27 +262,6 @@ SUBROUTINE HRTW
             ENDIF
          ENDDO    !end do loop over incident channels
 
-!        Set range of Legendre coefficients
-!        IF(.not.CN_isotropic) THEN
-!           DO i = 1, NLV(nnur)             !do loop over discrete levels
-!              PL_lmax(i) = 0
-!              DO lleg = 0, 2*NDLW, 2       !do loop over l-values
-!                 if(ABS(PL_CN(lleg,i))<1.d-8) exit
-!                 PL_lmax(i) = lleg
-!              ENDDO
-!           ENDDO
-!           ELCncs = PL_CN(0,LEVtarg)
-!           IF (ELCncs > 0.d0) then
-!           write (*,*) 'HRTW-comp ',PL_CN(0,LEVtarg)
-!              DO iang = 1, NDANG
-!                 cel_da(iang) = GET_DDXS(CANGLE(iang),LEVtarg)
-!              ENDDO
-!           ENDIF
-
-!           WRITE (12,'(9X,8E15.5)') ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
-!           WRITE (12,*)' '
-
-!        ENDIF
          !
          ! Gamma width calculation
          !

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4030 $
+Ccc   * $Rev: 4033 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-23 02:55:10 +0200 (Sa, 23 Aug 2014) $
+Ccc   * $Date: 2014-08-23 04:33:51 +0200 (Sa, 23 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -201,16 +201,19 @@ C                 PAUSE
 C               ENDIF
 
                 xs_norm = PL_CN(0,il)
-                if(xs_norm.gt.0.d0 .and. PL_lmax(il).ge.0) then
+                if(xs_norm.gt.0.d0) then
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)
 C
 C                   Normalizing calculated integrated XS ( from PL_CN() )
 C                   to the discrete level population (used for the isotropic calculation)
-C
                     CSAlev(na,il,Nejc) = 
      >                      CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-C                   CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
+	            ENDDO
+                else
+                  DO na = 1, NDANG
+                    xs_cn = GET_DDXS(CANGLE(na),il)
+                    CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
 	            ENDDO
                 endif
 			   
