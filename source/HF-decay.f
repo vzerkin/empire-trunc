@@ -1075,7 +1075,7 @@ C----------CN contribution to elastic ddx
            WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
            WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
 
-           if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)    
+C          if(.not.CN_isotropic) ELCncs = PL_CN(0,LEVtarg)    
 
            IF (ELCncs.EQ.0) then
              WRITE (8,*) ' WARNING: CN elastic is 0'
@@ -1104,9 +1104,9 @@ C----------CN contribution to elastic ddx
                WRITE (8,*) 
 
                IF(PL_CN(0,LEVtarg).gt.0.d0) then
-C	           write(*,*) 'HF-decay ',PL_CN(0,LEVtarg)
                  DO iang = 1, NDANG
-                   cel_da(iang) = GET_DDXS(CANGLE(iang),LEVtarg)
+                   cel_da(iang) = ELCncs/PL_CN(0,LEVtarg)*
+     &                            GET_DDXS(CANGLE(iang),LEVtarg)
                  ENDDO
                ENDIF
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4029 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-22 16:36:21 +0200 (Fr, 22 Aug 2014) $
+Ccc   * $Rev: 4030 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-08-23 02:55:10 +0200 (Sa, 23 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -44,7 +44,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &  popll, pops, popt, xcse, xscalc, xs_cn
+     &  popll, pops, popt, xcse, xscalc, xs_cn, xs_norm
 
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
 !      INTEGER ilevcol, ilev
@@ -91,8 +91,8 @@ C
             IF (Nnuc.eq.1 .and. Nejc.EQ.1) THEN
 C             Calculating CN DA to the cont from Legendre expansion
 C             write(*,*) 'icse, PLcont_lmax ', icse, PLcont_lmax(icse)
-              PLcont_lmax(icse) = 6.0d0  !JUST FOR TESTING
-              if(PLcont_lmax(icse).ge.0.d0) then
+C             PLcont_lmax(icse) = 6.0d0  !JUST FOR TESTING
+              if(PLcont_lmax(icse).ge.0) then
                   DO na = 1, NDANG
                     xs_cn = GET_DDXScont(CANGLE(na),icse)
 C                    write(*,*) na,xs_cn
@@ -187,28 +187,37 @@ C--------Add CN contribution to direct ang. distributions
      >       Nejc.NE.0 .AND. pop1.gt.0.d0 ) THEN
 
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
+            xscalc = pop1/(4.d0*PI)  ! default isotropic
                        
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C 
 C               Calculating CN DA from Legendre expansion
-C            IF(il.eq.1 .and. nejc.eq.1) THEN
-C                write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
-C                write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
-C     >             4.d0*PI*PL_CN(0,il)
-C                pause
-C            ENDIF
-                if(PL_lmax(il).ge.0.d0) then
+C               IF(IL.EQ.1 .AND. NEJC.EQ.1) THEN 
+C                 write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
+C                 write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
+C    >             4.d0*PI*PL_CN(0,il)
+C                 WRITE(*,*) 'LMAX=',PL_lmax(il),' NEJC=',NEJC
+C                 PAUSE
+C               ENDIF
+
+                xs_norm = PL_CN(0,il)
+                if(xs_norm.gt.0.d0 .and. PL_lmax(il).ge.0) then
                   DO na = 1, NDANG
                     xs_cn = GET_DDXS(CANGLE(na),il)
-                    CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
-                  ENDDO
+C
+C                   Normalizing calculated integrated XS ( from PL_CN() )
+C                   to the discrete level population (used for the isotropic calculation)
+C
+                    CSAlev(na,il,Nejc) = 
+     >                      CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
+C                   CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
+	            ENDDO
                 endif
-
+			   
             ELSE
 
 C             Not the inelastic channel OR isotropic CN DA
 C
-              xscalc = pop1/(4.d0*PI)  ! default isotropic
               DO na = 1, NDANG
                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
               ENDDO
