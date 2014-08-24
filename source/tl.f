@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4028 $
+Ccc   * $Rev: 4037 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-21 22:57:27 +0200 (Do, 21 Aug 2014) $
+Ccc   * $Date: 2014-08-24 17:58:30 +0200 (So, 24 Aug 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -152,13 +152,13 @@ C Local variables
 C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
-      DOUBLE PRECISION elvr, xjlvr, t12
-      INTEGER ilv, itmp, lvpr, ndbrlin, nbr, dtmp	 
+      DOUBLE PRECISION elvr, xjlvr, t12, dtmp
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr	 
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
       INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc 
-      INTEGER iwin, ipipe_move
+      INTEGER iwin, ipipe_move, ipipe_copy
 C
 C-----Sets CC optical model parameters according to RIPL
 C
@@ -222,7 +222,8 @@ C        WRITE (8,*)
             GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)'ERROR: RIPL CC rigid rotor NCOll(target) = 0 '
+            WRITE (8,*)'ERROR: RIPL CC rigid rotor OMP NCOll(target)= 0'
+            WRITE (8,*)'ERROR: Error in RIPL database.                 '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
@@ -237,12 +238,12 @@ C        WRITE (8,*)
      &  'WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'   
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
+            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
          ENDIF
 C
 C        rigid rotor model
 C
-C        Correcting energies of the OMP collective levels EXV 
+C        Correcting CC energies of the OMP collective levels EEX 
 C
          OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1056)
          DO n=2,NCOll(ncalc)
@@ -256,30 +257,30 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-elevcc).le.0.01  .and.          ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then    ! parity
-                  EEX(n,ncalc) = elvr
-                  EXIT
+              if( abs(elvr-elevcc).le.0.001          .and. ! energy
+     &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &           iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then     ! parity
+                    EEX(n,ncalc) = elvr
+                    EXIT
               endif 
             ENDDO
          ENDDO
  1056    CLOSE(32)  
 C
-C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C        Correcting Default Collective Levels using 
+C           corrected CC energies from the RIPL OMP
 C
          nld_cc = 1
          DO ilv=2,ND_nlv
            DO n=2,NCOll(ncalc)
-              if( abs(D_Elv(ilv)-EEX(n,ncalc)).le.0.01     .and. 
-     &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
-     &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
+             if( abs(D_Elv(ilv)-EEX(n,ncalc)).le.0.001    .and. 
+     &           abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
                   nld_cc = nld_cc + 1
                   IF (ICOllev(ilv).GT.LEVcc) 
      &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
                   D_Elv(ilv) = EEX(n,ncalc) 
              endif
-
            ENDDO
          ENDDO
 
@@ -387,11 +388,12 @@ C
          WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
 
          if(FIRst_ein) then
-C           First energy with default TARGET_COLL.DAT
 C
-C-----------The deformation for excited levels is not used in the pure
-C-----------symm.rotational model but could be used for vibrational
-C-----------rotational model so we are setting it to 0.01
+C          First energy with default TARGET_COLL.DAT
+C
+C----------The deformation for excited levels is not used in the pure
+C----------symm.rotational model but could be used for vibrational
+C----------rotational model so we are setting it to 0.005
 
            DO k = 1, ND_nlv
 
@@ -432,7 +434,8 @@ C-----------rotational model so we are setting it to 0.01
   100    CLOSE (32)
          CLOSE (96)
          CLOSE (97)
-         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
+         iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
+C        iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
@@ -487,17 +490,17 @@ C        WRITE (8,*)
      &  'WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
      &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
+            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
          ENDIF
 C        
 C        vibrational model
 C
-C        Correcting energies of the OMP collective levels EXV 
+C        Correcting CC energies of the OMP collective levels EXV 
 C
          OPEN (32,FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1057)
          DO n=2,NVIb(ncalc)
-          elevcc = EXV(n,ncalc)
-          REWIND(32)
+            elevcc = EXV(n,ncalc)
+            REWIND(32)
             READ (32,'(A80)',END=1057,ERR=1057) ch_iuf
             DO ilv = 1, NLV(nnuc)
               READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
@@ -506,9 +509,9 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)') dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01  .and. ! energy
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then  ! parity
+              if( abs(elvr-elevcc).le.0.001          .and. ! energy
+     &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and. ! spin
+     &           iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then     ! parity
                   EXV(n,ncalc) = elvr
                   EXIT
               endif 
@@ -516,15 +519,16 @@ C
          ENDDO
  1057    CLOSE(32)  
 C
-C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C        Correcting Default Collective Levels using 
+C           corrected CC energies from the RIPL OMP
 C
          nld_cc = 1
          DO ilv=2,ND_nlv
-             DO n=2,NVIb(ncalc)
+           DO n=2,NVIb(ncalc)
 
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
-     &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
-     &                iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
+             if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01      .and. 
+     &            abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+     &           iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).eq.0 ) then
 
                   nld_cc = nld_cc + 1
 
@@ -540,6 +544,38 @@ C    &                IPArv(k,n), NPH(k,n), DEFv(k,n), THEtm(k,n)
              endif
 
            ENDDO
+         ENDDO
+C
+C--------Putting Coupled levels first
+         DO i = 2, ND_nlv
+            DO j = i + 1, ND_nlv
+               IF (ICOllev(j).LT.ICOllev(i)) THEN
+C-----------------swapping
+                  itmp = ICOllev(i)
+                  ICOllev(i) = ICOllev(j)
+                  ICOllev(j) = itmp
+
+                  dtmp = D_Elv(i)
+                  D_Elv(i) = D_Elv(j)
+                  D_Elv(j) = dtmp
+
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
+
+                  dtmp = D_Xjlv(i)
+                  D_Xjlv(i) = D_Xjlv(j)
+                  D_Xjlv(j) = dtmp
+
+                  dtmp = D_Def(i,2)
+                  D_Def(i,2) = D_Def(j,2)
+                  D_Def(j,2) = dtmp
+
+                  itmp = IPH(i)
+                  IPH(i) = IPH(j)
+                  IPH(j) = itmp
+               ENDIF
+            ENDDO
          ENDDO
 C
 C--------Putting one phonon coupled states first for spherical
@@ -599,22 +635,21 @@ C
          WRITE (96,'(A80)') ch_iuf
 C
          READ (97,'(A80)') ch_iuf       ! 3ER LINE
-
          WRITE (8, '(1x,i3,1x,i3,1x,a35)') izinp, iainp, ! 3ER LINE
      &                                ' nucleus is treated as spherical'
          WRITE (32,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
          WRITE (96,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
      &                                ' nucleus is treated as spherical'
-C
-         SOFt     = .FALSE.
-         DYNam    = .FALSE.
-         DEFormed = .FALSE.
 
          READ (97,'(A80)') ch_iuf       ! EMPTY LINE
          WRITE (96,*) 
          WRITE (8,*)
          WRITE (32,*)
+
+         SOFt     = .FALSE.
+         DYNam    = .FALSE.
+         DEFormed = .FALSE.
 
          READ (97,'(A80)') ch_iuf
          WRITE (8 ,*) '   Ncoll'
@@ -637,7 +672,7 @@ C
          WRITE (96,*)' N   E[MeV]  J   pi Nph L  K   Dyn.Def.'
 
          if(FIRst_ein) then
-C        first energy with default TARGET_COLL.DAT
+C          first energy with default TARGET_COLL.DAT
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=200,ERR=200) ch_iuf        
@@ -675,6 +710,10 @@ C        first energy with default TARGET_COLL.DAT
   200    CLOSE (32)
          CLOSE (96)
          CLOSE (97)
+
+C        PAUSE 'Joining of vibrational COLL finished'
+
+C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished 
@@ -717,6 +756,7 @@ C        WRITE (8,*)
             WRITE (8,*)'ERROR: EMPIRE stops !'
             STOP       'ERROR: See long listing *.lst, EMPIRE stops'
          ENDIF
+
          IF (ND_nlv .LT. NCOll(ncalc)) THEN
             WRITE (8,*)
      &       'ERROR: Number of collective levels < OMP RIPL # CC    '
@@ -726,7 +766,6 @@ C        WRITE (8,*)
      &       'ERROR: level file *-lev.col, and rerun'
             STOP 'ERROR: see the long output (*.lst)'
          ENDIF
-
 C
 C--------Setting EMPIRE global variables
 C
@@ -734,19 +773,17 @@ C
          DO k = 2, ND_nlv
             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
-
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
      &  'WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
+            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
          ENDIF
-C        WRITE (8,*) 
 C
 C        soft rotor model
 C
-C        Correcting energies of the OMP collective levels EXV 
+C        Correcting CC energies of the OMP collective levels EXV 
 C
          OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1058)
          DO n=2,NCOll(ncalc)
@@ -759,17 +796,18 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1058,ERR=1058) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
-     &                iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then
-                  EXV(n,ncalc) = elvr
-                  exit 
+              if( abs(elvr-EXV(n,ncalc)).le.0.001    .and. 
+     &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
+     &           iabs(lvpr-IPArv(n,ncalc)).eq.0 ) then
+                    EXV(n,ncalc) = elvr
+                    exit 
               endif 
             ENDDO
          ENDDO
  1058    CLOSE(32)  
 C
-C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C        Correcting Default Collective Levels using 
+C           corrected CC energies from the RIPL OMP
 C
          IPH(1)   = SR_ntu(1,ncalc)
          D_Klv(1) = SR_nnb(1,ncalc)
@@ -777,11 +815,10 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO ilv=2,ND_nlv
-           DO n=2,NCOll(ncalc)
-
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
-     &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
+         DO n=2,NCOll(ncalc)
+           DO ilv=2,ND_nlv
+             if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.001    .and. 
+     &           abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
                   nld_cc = nld_cc + 1
@@ -797,9 +834,14 @@ C
                   D_nno(ilv) = SR_nno(n,ncalc)
 
                   exit 
-              endif 
-            ENDDO
+             endif 
+           ENDDO
          ENDDO
+
+C        do k=1,NCOll(n)
+C          read(ko,99049) EXV(k,n),SPInv(k,n),IPArv(k,n),
+C    +               SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n)
+C        enddo
 C
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
@@ -813,18 +855,14 @@ C-----------------swapping
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
-
-                  dtmp = D_Lvp(i)
-                  D_Lvp(i) = D_Lvp(j)
-                  D_Lvp(j) = dtmp
-
+                  
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
-                  dtmp = D_Def(i,2)
-                  D_Def(i,2) = D_Def(j,2)
-                  D_Def(j,2) = dtmp
+                  dtmp = D_Lvp(i)
+                  D_Lvp(i) = D_Lvp(j)
+                  D_Lvp(j) = dtmp
 
                   itmp = IPH(i)
                   IPH(i) = IPH(j)
@@ -920,7 +958,7 @@ C           first run with default TARGET_COLL.DAT
      &                    SR_dpar(ncalc),SR_gshape(ncalc)
 
 C           Initializing Soft Rotator Hamiltonian  
-            SR_Ham_hw       = SR_hw(ncalc)       
+            SR_Ham_hw     = SR_hw(ncalc)       
             SR_Ham_amb0   = SR_amb0(ncalc)       
             SR_Ham_amg0   = SR_amg0(ncalc)       
             SR_Ham_gam0   = SR_gam0(ncalc)       
@@ -1038,10 +1076,15 @@ C
   290    CLOSE(32)
          CLOSE (96)
          CLOSE (97)
+
+C        PAUSE 'Joining of soft-rotor COLL finished'
+
+C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
+
       ENDIF
 
       IF (IMOdel.EQ.4 .AND. (.NOT.coll_defined)) THEN
@@ -1071,6 +1114,7 @@ C        WRITE (8,*)
          IF (NCOll(ncalc).EQ.0) THEN
             WRITE (8,*)
      &            'ERROR: RIPL CC rigid+soft rotor NCOll(target) = 0 '
+            WRITE (8,*)'ERROR: Error in RIPL database.                '
             WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
             WRITE (8,*)'WARNING: Default collective levels will be used'
             GOTO 300
@@ -1097,13 +1141,13 @@ C--------Setting EMPIRE global variables
      &  'WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
      &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) 'WARNING: RIPL number of channels used'
+            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
          ENDIF
 C        WRITE (8,*) 
 C
 C        Rigid-soft rotor model
 C
-C        Correcting energies of the OMP collective levels EXV 
+C        Correcting CC energies of the OMP collective levels EXV 
 C
          OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1061)
          DO n=2,NCOll(ncalc)
@@ -1116,18 +1160,18 @@ C
               DO nbr = 1, ndbrlin
                 READ (32,'(A1)',END=1061,ERR=1061) dum
               ENDDO
-              if( abs(elvr-EXV(n,ncalc)).le.0.01    .and. 
-     &          abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
-     &                iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
-                  EXV(n,ncalc) = elvr
-                  exit 
+              if( abs(elvr-EXV(n,ncalc)).le.0.001    .and. 
+     &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
+     &           iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
+                   EXV(n,ncalc) = elvr
+                   exit 
               endif 
             ENDDO
          ENDDO
  1061    CLOSE(32)  
-
 C
-C        Correcting Default Collective Levels using coupled channels from the RIPL OMP
+C        Correcting Default Collective Levels using 
+C           corrected CC energies from the RIPL OMP
 C
          IPH(1)   = SR_ntu(1,ncalc)
          D_Klv(1) = SR_nnb(1,ncalc)
@@ -1135,10 +1179,9 @@ C
          D_nno(1) = SR_nno(1,ncalc)
 
          nld_cc = 1
-         DO ilv=2,ND_nlv
-           DO n=2,NCOll(ncalc)
-
-              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.01     .and. 
+         DO n=2,NCOll(ncalc)
+           DO ilv=2,ND_nlv
+              if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.001  .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
@@ -1161,6 +1204,11 @@ C
             ENDDO
          ENDDO
        
+C        do k=1,NCOll(n)
+C           read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
+C    +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
+C        enddo
+
 C
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
@@ -1318,6 +1366,9 @@ C           first run with default TARGET_COLL.DAT
  1001    CLOSE (96)
          CLOSE (32)
          CLOSE (97)
+C        PAUSE 'Joining of soft-rigid rotor COLL finished'
+
+C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
@@ -3574,6 +3625,7 @@ C--------discrete levels
          DO j = 2, ND_nlv
 C--------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (.NOT.Ldwba .AND. ICOllev(j).GT.LEVcc) CYCLE
+
             ch = '-'
             IF (D_Lvp(j).GT.0) ch = '+'
 C-----------If channel is closed ground state potential is used for this level
@@ -3596,7 +3648,9 @@ C-----------If channel is closed ground state potential is used for this level
      &                D_Elv(j)
                ENDIF
             ELSE
-               ch = '+'
+C              This channel is closed, so there is no calculation, 
+C              but the change of parity for negative parity level is misleading. 
+C              ch = '+'
                WRITE (1,'(f5.2,2i2,a1,5f10.5)') dtmp, 0, 1, ch,
      &                D_Elv(j)
             ENDIF
@@ -5310,9 +5364,9 @@ C-----CARD 1 : Title
      &   elab, PARname(ip), NINT(A(Nnuc)), Symb(Nnuc), iref
       ENDIF
 
-      write(1,'(16i2.2)') 
+      write(1,'(20i2.2)') 
      +mejob,mepot,meham,mepri,mesol,mesha,mesho,mehao,
-     +meapp,mevol,merel,mecul,merzz,merrr,medis,merip
+     +meapp,mevol,merel,mecul,merzz,merrr,medis,merip,0,0,0,0
 C
 C     Soft rotor hamiltonian
 C
