@@ -1,6 +1,6 @@
-!cc   * $Rev: 4034 $
+!cc   * $Rev: 4035 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-08-23 20:55:51 +0200 (Sa, 23 Aug 2014) $
+!cc   * $Date: 2014-08-24 17:52:55 +0200 (So, 24 Aug 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3569,9 +3569,9 @@ C-----------Print some final input options
                ecutof = 3.0d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
                  IF(A(0).ge.40)
-     &              ecutof = 2.0d0*30./A(0)**0.6666666d0
+     &              ecutof = 2.50d0*30./A(0)**0.6666666d0
                  IF(A(0).gt.220 .or. (A(0).ge.150 .and. A(0).le.190))
-     &              ecutof = 1.5d0*30./A(0)**0.6666666d0 ! deformed
+     &              ecutof = 2.0d0*30./A(0)**0.6666666d0 ! deformed
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
@@ -10434,6 +10434,10 @@ C        beta3 = 0.005
 C
 C--------Skipping levels with unknown spin in the discrete level region
          IF (xjlvr.LT.0. .AND. ilv.LE.NLV(nnurec)) CYCLE
+
+C--------Skipping octupole levels with zero T1/2 (not collective) in the discrete level region
+         IF (NINT(xjlvr).eq.3 .AND. lvpr.eq.-1 .AND.   
+     &      t12.LE.0.d0 .AND. ilv.LE.NLV(nnurec)) CYCLE
 
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
