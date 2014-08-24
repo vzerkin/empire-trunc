@@ -255,27 +255,16 @@ C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
 
              ELSE
 
-C              WRITE (8,*) ' CN elastic cross section   ',
-C    &                sngl(4.d0*pi*ELCncs),' mb'
-
-C              WRITE (8,*) ' CN elas. cross section (BB)',
-C    &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
-
-               IF(INTerf.eq.1) then
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
-     &           'ENG-WEID. TRANSF.'  
-               ELSE
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
-               ENDIF                
-
-C              WRITE (8,*) 
-C              WRITE (8,*) ' Nonisotropic Compound to discrete levels in
-C    &cluding the Compound Elastic'
-C              WRITE (8,*) 
+C              IF(INTerf.eq.1) then
+C                WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
+C    &           EINl, 4.d0*pi*ELCncs,  
+C    &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
+C    &           'ENG-WEID. TRANSF.'  
+C              ELSE
+C                WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
+C    &           EINl, 4.d0*pi*ELCncs,  
+C    &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
+C              ENDIF                
 
                xs_norm=1.d0
  	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
