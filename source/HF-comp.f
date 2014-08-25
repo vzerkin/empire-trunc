@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4038 $
+Ccc   * $Rev: 4039 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-26 01:37:46 +0200 (Di, 26 Aug 2014) $
+Ccc   * $Date: 2014-08-26 01:40:17 +0200 (Di, 26 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
