@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4033 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-23 04:33:51 +0200 (Sa, 23 Aug 2014) $
+Ccc   * $Rev: 4038 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2014-08-26 01:37:46 +0200 (Di, 26 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -100,7 +100,6 @@ C                    write(*,*) na,xs_cn
                   ENDDO
               endif
             ENDIF
-
          ENDIF
       ENDDO !over residual energies in continuum
 C-----
@@ -191,43 +190,40 @@ C--------Add CN contribution to direct ang. distributions
                        
             IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C 
-C               Calculating CN DA from Legendre expansion
-C               IF(IL.EQ.1 .AND. NEJC.EQ.1) THEN 
-C                 write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
-C                 write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
-C    >             4.d0*PI*PL_CN(0,il)
-C                 WRITE(*,*) 'LMAX=',PL_lmax(il),' NEJC=',NEJC
-C                 PAUSE
-C               ENDIF
+C              Calculating CN DA from Legendre expansion
+C              IF(IL.EQ.1 .AND. NEJC.EQ.1) THEN 
+C                write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
+C                write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
+C    >            4.d0*PI*PL_CN(0,il)
+C                write(*,*) 'LMAX=',PL_lmax(il),' NEJC=',NEJC
+C                PAUSE
+C              ENDIF
 
-                xs_norm = PL_CN(0,il)
-                if(xs_norm.gt.0.d0) then
-                  DO na = 1, NDANG
-                    xs_cn = GET_DDXS(CANGLE(na),il)
+               xs_norm = PL_CN(0,il)
+               IF(xs_norm.gt.0.d0) then
+                 DO na = 1, NDANG
+                   xs_cn = GET_DDXS(CANGLE(na),il)
 C
-C                   Normalizing calculated integrated XS ( from PL_CN() )
-C                   to the discrete level population (used for the isotropic calculation)
-                    CSAlev(na,il,Nejc) = 
-     >                      CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-	            ENDDO
-                else
-                  DO na = 1, NDANG
-                    xs_cn = GET_DDXS(CANGLE(na),il)
-                    CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
-	            ENDDO
-                endif
-			   
+C                  Normalizing calculated integrated XS ( from PL_CN() )
+C                  to the discrete level population (used for the isotropic calculation)
+                   CSAlev(na,il,Nejc) = 
+     >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
+                 ENDDO
+               ELSE
+                 DO na = 1, NDANG
+                   xs_cn = GET_DDXS(CANGLE(na),il)
+                   CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
+                 ENDDO
+               ENDIF
             ELSE
 
-C             Not the inelastic channel OR isotropic CN DA
-C
-              DO na = 1, NDANG
-                CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
-              ENDDO
-
-            ENDIF
-
-         ENDIF
+C              Not the inelastic channel OR isotropic CN DA
+C              
+               DO na = 1, NDANG
+                  CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
+               ENDDO ! loop over angles
+            ENDIF ! on inelastics and non-isotropic
+         ENDIF ! on top  CN state, non-gamma with non-zero population 
       ENDDO   !loop over levels
 
       RETURN
@@ -337,61 +333,61 @@ C-----DE spectra
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
-              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                   IF(ENDf(Nnur).EQ.2) THEN
+               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                  IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
-     &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
-                   ELSE
+     &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
+                  ELSE
                      POPcse(Ief,iejc,ie,INExc(Nnur)) =
      &                 POPcse(Ief,iejc,ie,INExc(Nnur))
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
-                   ENDIF
+                  ENDIF
                ENDIF
               IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                IF(ENDF(Nnur).EQ.2) THEN
-                  POPcsed(Ief,iejc,ie,0)
-     &               = POPcsed(Ief,iejc,ie,0)
+                 IF(ENDF(Nnur).EQ.2) THEN
+                    POPcsed(Ief,iejc,ie,0)
+     &                = POPcsed(Ief,iejc,ie,0)
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                  ELSE
-                  POPcsed(Ief,iejc,ie,INExc(Nnur))
+                     POPcsed(Ief,iejc,ie,INExc(Nnur))
      &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
-     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+     &               + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                  ENDIF
-               ENDIF
+              ENDIF
               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
-                IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                  IF(ENDF(Nnur).EQ.2) THEN
-c                    POPcsed(Ief,iejc,ie,0)
-c     &               = POPcsed(Ief,iejc,ie,0)
+                 IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                    IF(ENDF(Nnur).EQ.2) THEN
+c                      POPcsed(Ief,iejc,ie,0)
+c     &                = POPcsed(Ief,iejc,ie,0)
 c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
-                    DO nth = 1, NDAng
-                      POPcsea(nth,Ief,iejc,ie,0)
-     &                 = POPcsea(nth,Ief,iejc,ie,0)
-     &                   + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
-                     ENDDO
-                   ELSE
-c                    POPcsed(Ief,iejc,ie,INExc(Nnur))
-c     &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
+                       DO nth = 1, NDAng
+                          POPcsea(nth,Ief,iejc,ie,0)
+     &                    = POPcsea(nth,Ief,iejc,ie,0)
+     &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
+                       ENDDO
+                    ELSE
+c                      POPcsed(Ief,iejc,ie,INExc(Nnur))
+c     &                = POPcsed(Ief,iejc,ie,INExc(Nnur))
 c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
-                    DO nth = 1, NDAng
-                      POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
-     &                 = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
-     &                   + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
-                     ENDDO
-                   ENDIF
+                       DO nth = 1, NDAng
+                          POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
+     &                    = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
+     &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
+                       ENDDO
+                    ENDIF
                  ENDIF
 C-----------DDX spectra using portions
-               ELSE ! original loop to NDEJCD
-                IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                   IF(ENDf(Nnur).EQ.2) THEN
-                      POPcseaf(Ief,iejc,ie,0)
-     &                = POPcseaf(Ief,iejc,ie,0)
-     &                + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
-                   ELSE
-                      POPcseaf(Ief,iejc,ie,INExc(Nnur))
-     &                = POPcseaf(Ief,iejc,ie,INExc(Nnur))
-     &                + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
-                   ENDIF
+              ELSE ! original loop to NDEJCD
+                 IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                    IF(ENDf(Nnur).EQ.2) THEN
+                       POPcseaf(Ief,iejc,ie,0)
+     &                 = POPcseaf(Ief,iejc,ie,0)
+     &                 + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
+                    ELSE
+                       POPcseaf(Ief,iejc,ie,INExc(Nnur))
+     &                 = POPcseaf(Ief,iejc,ie,INExc(Nnur))
+     &                 + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
+                    ENDIF
                  ENDIF 
               ENDIF
             ENDDO
