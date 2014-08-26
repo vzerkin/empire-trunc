@@ -114,7 +114,7 @@ contains
       inchnl%sig = 0.d0
 
 
-      if(myalloc.ne.0) then
+      if(myalloc/=0) then
          write(8,*)  'ERROR: Insufficient memory for HRTW'
          write(12,*) 'ERROR: Insufficient memory for HRTW'
          stop 'ERROR: Insufficient memory for HRTW'
@@ -143,7 +143,7 @@ contains
         ( 2.0d0 * j2 + 1.0d0 ) ) * &
         CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 ) * &
         RACAH( l1, j1, l2, j2, s, ll )
-      if ( mod( ll - l1 + l2, 4d0 ) .gt. 0.1d0 ) retval = -retval
+      if ( mod( ll - l1 + l2, 4d0 ) > 0.1d0 ) retval = -retval
    end function ZCoefficient
 
    function ZBarCoefficient( l1, j1, l2, j2, s, ll ) result (retval)
@@ -163,9 +163,9 @@ contains
       retval = 0.d0
 
       cc = CLEBG( l1, l2, ll, 0d0, 0d0, 0d0 )
-      if(cc.eq.0.d0) return
+      if(cc==0.d0) return
       rc = RACAH( l1, j1, l2, j2, s, ll )
-      if(rc.eq.0.d0) return
+      if(rc==0.d0) return
 
       retval = sqrt( ( 2.0d0 * l1 + 1.0d0 ) * &
         ( 2.0d0 * l2 + 1.0d0 ) * &
@@ -196,16 +196,16 @@ contains
       Blatt = 0.d0
 
       rc1   = RACAH( ja, J, ja, J, Ia, L )
-      if (rc1.eq.0.d0) return
+      if (rc1==0.d0) return
 
       rc2   = RACAH( jb, J, jb, J, Ib, L )
-      if (rc2.eq.0.d0) return
+      if (rc2==0.d0) return
 
       zb1   = ZBarCoefficient( la, ja, la, ja, sa, L )
-      if (zb1.eq.0.d0) return
+      if (zb1==0.d0) return
 
       zb2   = ZBarCoefficient( lb, jb, lb, jb, sb, L )
-      if (zb2.eq.0.d0) return
+      if (zb2==0.d0) return
 
       Blatt =  (2.0d0 * J + 1.d0 )* zb1*zb2*rc1*rc2/pi4 * (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) )
 
