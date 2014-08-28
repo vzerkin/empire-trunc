@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4039 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-26 01:40:17 +0200 (Di, 26 Aug 2014) $
+Ccc   * $Rev: 4041 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -58,6 +58,8 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
+	if(nexrt.le.0) goto 123
+
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          popt = 0.D0
          DO j = 1, NLW  !loop over residual spins
@@ -88,24 +90,24 @@ C
 C           CN emission angular distribution to the continuum
 C           should be considered
 C 
-            IF (Nnuc.eq.1 .and. Nejc.EQ.1) THEN
-C             Calculating CN DA to the cont from Legendre expansion
-C             write(*,*) 'icse, PLcont_lmax ', icse, PLcont_lmax(icse)
-C             PLcont_lmax(icse) = 6.0d0  !JUST FOR TESTING
-              if(PLcont_lmax(icse).ge.0) then
-                  DO na = 1, NDANG
-                    xs_cn = GET_DDXScont(CANGLE(na),icse)
-C                    write(*,*) na,xs_cn
-                    CSEa(icse,na,1,1) = CSEa(icse,na,1,1) + xs_cn
-                  ENDDO
-              endif
+            IF (Nnuc.eq.1 .and. Nejc.EQ.1 .and. Iec.EQ.NEX(1) .and.
+     >          PLcont_lmax(icse).ge.0) THEN
+C              xs_norm = PL_CNcont(0,icse)
+C              IF(xs_norm.gt.0.d0) write(*,*) 'Cont. bin=',icse,
+C    >     	 ' PLcont(2)/PLcont(0)=',PL_CNcont(2,icse)/xs_norm
+	         xs_cn  =GET_DDXScont(CANGLE(1),icse)
+	         xs_norm=GET_DDXScont(CANGLE(45),icse)
+	         if( dabs(xs_cn-xs_norm).gt.0.1d0) 
+     >           write(151,'(2x,I5,A7,d12.6,A8,d12.6,A7,d12.6)') icse,
+     >               ' XS(0)=',xs_cn,' XS(90)=',sngl(xs_norm),
+     >               '  Diff=',dabs(xs_cn-xs_norm)
             ENDIF
          ENDIF
       ENDDO !over residual energies in continuum
 C-----
 C-----Discrete levels
 C-----
-      nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
+123   nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
       DO il = 1, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN

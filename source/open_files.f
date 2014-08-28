@@ -179,5 +179,7 @@ c       write (*,*) '...OMPAR_USEFILES=',OMPAR_USEFILES
       CLOSE(261,ERR=2610)
 2610  continue
 
+      OPEN(151,FILE='Cont-ANIS-check.DAT')
+
       return
       end subroutine open_files

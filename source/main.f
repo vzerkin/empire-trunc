@@ -1,6 +1,6 @@
-cc   * $Rev: 3964 $
+cc   * $Rev: 4041 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-05-14 19:00:28 +0200 (Mi, 14 Mai 2014) $
+Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -56,6 +56,8 @@ C
 C       Preequilibrium 
 C
         CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,totcorr)
+
+        WRITE(151,*) 'Einc=',EINl
 
         POPmax(1) = CSFus*1.0E-25
 C-------Start DO loop over decaying nuclei
@@ -430,6 +432,8 @@ C     ENDIF
 
       CLOSE(53)   ! LOW-ENERGY.DAT
 C     CLOSE(58)
+
+      CLOSE(151)  ! Cont-ANIS-check.dat
 
 C     CLOSE (66,STATUS = 'delete')  ! MSD-orion
 

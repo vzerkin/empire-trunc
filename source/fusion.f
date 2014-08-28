@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4032 $
+Ccc   * $Rev: 4041 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-23 04:33:09 +0200 (Sa, 23 Aug 2014) $
+Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1076,8 +1076,11 @@ C--------Corrected scattering radius
           ENDIF
       ENDIF
 
-      el = EINl
-      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
+C     el = EINl
+C     relcal = .FALSE.
+C     IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
+C     CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+
 	coef = 1.d0
       IF (INT(AEJc(0)).GT.0)
      &        coef = 10.d0*PI/ak2/
@@ -1148,7 +1151,10 @@ C-----------DIRECT=1 or DIRECT=2
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
         WRITE (8,'(4x,3(4x,D15.8,4x))')
      &   CSFus/Fusred, CSFus/Fusred + SINl + SINlcc + SINlcont, ABScs
-        WRITE (8,*)
+        WRITE (8,*) 
+     &'           SINl                  SINlcc                SINlcont'
+        WRITE (8,'(4x,3(4x,D15.8,4x))') SINl, SINlcc, SINlcont
+        WRITE (8,*) 
       ENDIF
 
 C

@@ -249,7 +249,7 @@ C
         ENDIF 
 
       ENDIF
-      write(*,*) 'Got here with ABScs =', ABScs
+C     write(*,*) 'Got here with ABScs =', ABScs
       IF(ABScs.GT.0.) THEN
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
