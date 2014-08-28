@@ -1154,8 +1154,8 @@ C	          write(*,*) 'NORM=',xs_norm
                 ENDDO
 
                 IF(DABS(xs_norm-1.d0).gt.1.d-4) then
-                 WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-                 WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+C                WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+C                WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
                  WRITE(8,*)' ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
                  WRITE(8,*)' PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
                  WRITE(8,*) 

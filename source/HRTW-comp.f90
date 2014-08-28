@@ -59,14 +59,20 @@ SUBROUTINE HRTW
       WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
    ENDIF
 
-   xmas_npro = EJMass(NPRoject)
+   ! xmas_npro = EJMass(NPRoject)
+   xmas_npro = EJMass(0)
    xmas_ntrg = AMAss(0)
  
    el = EINl
    relcal = .FALSE.
-   IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
+   !IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
+   IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
+
    CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-   coef = 10.D0*PI/ak2/(2*XJLv(LEVtarg,0) + 1.d0)/(2*SEJc(NPRoject) + 1.d0)
+
+   ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
+
+   coef = 10.D0*PI/ak2/(2*XJLv(LEVtarg,0) + 1.d0)/(2*SEJc(0) + 1.d0)
    ! 
    ! start CN nucleus decay
    !

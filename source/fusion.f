@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4041 $
+Ccc   * $Rev: 4042 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
+Ccc   * $Date: 2014-08-28 23:24:54 +0200 (Do, 28 Aug 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1076,15 +1076,18 @@ C--------Corrected scattering radius
           ENDIF
       ENDIF
 
-C     el = EINl
-C     relcal = .FALSE.
-C     IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
-C     CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+      el = EINl
+      relcal = .FALSE.
+      IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
+      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
 	coef = 1.d0
       IF (INT(AEJc(0)).GT.0)
      &        coef = 10.d0*PI/ak2/
      &           (2*XJLv(LEVtarg,Ntrg) + 1.d0)/(2*SEJc(Npro) + 1.d0)
+
+C     write(*,*) 'FUSI=',10.d0*PI/ak2,el,IRElat(NPRo,Ntrg),
+C    &           RELKIN,relcal
 
       CSFus = 0.d0
 C-----absorption spin distribution using Tl's
