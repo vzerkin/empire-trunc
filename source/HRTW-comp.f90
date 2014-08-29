@@ -128,8 +128,8 @@ SUBROUTINE HRTW
          !
 
          ! gamma emission is always a weak channel (one iteration)
-!         sumg = 0.D0
-!         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg)
+         sumg = 0.D0
+         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg)
 !         H_Sumtl = H_Sumtl + sumg
 !         H_Sweak = H_Sweak + sumg
 
@@ -150,7 +150,7 @@ SUBROUTINE HRTW
             ! dividing sumfis into channels with TFIs < 0.25 each
             ndivf = int(sumfis/0.25) + 1
             tfis = sumfis/dfloat(ndivf)
-            H_Sumtls = H_Sumtls + tfis**2*outchnl(nch)%rho
+            H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
             IF(tfis>=H_Tthr) THEN                      !fission treated as a strong channel
                nch = nch + 1                           !otherwise 'sumfis' it is left untouched
                num%fiss = nch                          !store position of fission (only one entry with 'ndivf')
@@ -158,13 +158,12 @@ SUBROUTINE HRTW
                outchnl(nch)%rho = dfloat(ndivf)
                outchnl(nch)%nejc = 100                    !nejc=100 convention identifies fission
             ENDIF
-            IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl
          ENDIF
+         IF(H_Sumtl.GT.0.0D0) H_Tav = H_Sumtls/H_Sumtl  !average transmission coefficient (Sum(T**2)/Sum(T))
          !
          ! gamma decay
          !
-         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg)          !gamma emission is always a weak channel (V=T)
-         H_Tav = H_Sumtls/H_Sumtl                       !average transmission coefficient (Sum(T**2)/Sum(T))
+!         CALL HRTW_DECAYG(nnuc,ke,jcn,ip,sumg)          !gamma emission is always a weak channel (V=T)
          !         write(*,*)' '
          !         write(*,*)'SUMMARY OF DECAY FOR J=',xjc
          !         write(*,*)'total sum of  Tls ', H_Sumtl
@@ -183,7 +182,6 @@ SUBROUTINE HRTW
 !         write(*,*)'pre  AUSTER DENhf=', DENhf
          IF(LHRtw==1) CALL AUSTER            !calculate V's for the strong channels (iteration)
          DENhf = H_Sumtl                     !reset DENhf using V's instead of T's
-!         write(*,*)'post AUSTER DENhf=', DENhf
          !
          !construct scratch matrix for decay of the Jcn state
          !
@@ -195,6 +193,7 @@ SUBROUTINE HRTW
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + outchnl(i)%t*outchnl(i)%rho
             ENDIF
          ENDDO
+         sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redifining sumfis to account for the HRTW T=>V transition
 !                  DENhf = 0.0d0                               !test that SCRt+SCRtl sum to the same DENhf
 !                  DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
 !                  DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
@@ -211,6 +210,7 @@ SUBROUTINE HRTW
 !               write(*,*) 'Elcor =', elcor, '  EEF =', outchnl(i)%eef
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + elcor
             ENDIF
+!         write(*,*)'post AUSTER DENhf=', DENhf + elcor
 
             !
             ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -252,12 +252,13 @@ SUBROUTINE HRTW
                      ENDIF
 
                   ENDDO
-!                  write(8,*) 'PL_CN(lleg,1) = ', PL_CN(0,1), PL_CN(2,1), PL_CN(4,1), PL_CN(6,1)
-!                 IF(outchnl(j)%kres > 0) THEN
-!                    write (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',outchnl(j)%kres, PLcont_lmax(outchnl(j)%kres)
-!                 ELSEIF(outchnl(j)%kres < 0) THEN
-!                    write (*,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',outchnl(j)%kres, PL_lmax(-outchnl(j)%kres)
-!                 ENDIF
+                  IF(outchnl(j)%kres > 0) THEN
+!                    write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',outchnl(j)%kres, &
+!                    PLcont_lmax(outchnl(j)%kres)
+                  ELSEIF(outchnl(j)%kres < 0) THEN
+!                    write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',outchnl(j)%kres, PL_lmax(-outchnl(j)%kres)
+                  ENDIF
+!                  write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
                ENDDO
             ENDIF    !end of Legendre coeficients accumualtion
             
