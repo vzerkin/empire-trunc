@@ -1,13 +1,13 @@
-#$Rev: 4005 $
-#$Author: mherman $
-#$Date: 2014-07-30 16:24:54 +0200 (Mi, 30 Jul 2014) $
+#$Rev: 4045 $
+#$Author: shoblit $
+#$Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
 
 # set default compilers:
 
 CC     =  gcc
-#FC   =  gfortran
+FC   =  gfortran
 #FC  =  ifort
-FC  =  af95
+#FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
 
@@ -123,8 +123,13 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o   fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o defsystematics.o \
-       pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o write_ENDF.o pfns_calc.o HRTW-mod.o ang_mom.o subecis06m.o
+OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o \
+       bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o \
+       ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o \
+       gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o \
+       fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o \
+       defsystematics.o pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o \
+       write_ENDF.o pfns_calc.o HRTW-mod.o ang_mom.o subecis06m.o parse_line.o
 
 all: 
 	$(MAKE) empgdr.mod

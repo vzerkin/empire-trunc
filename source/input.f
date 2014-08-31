@@ -1,6 +1,6 @@
-!cc   * $Rev: 4035 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-08-24 17:52:55 +0200 (So, 24 Aug 2014) $
+!cc   * $Rev: 4045 $
+!cc   * $Author: shoblit $
+!cc   * $Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3387,9 +3387,9 @@ C Local variables
 C
       INTEGER iseed
       DOUBLE PRECISION GRAND,DRAND
-      CHARACTER*72 rtitle
+      CHARACTER*120 inline
       CHARACTER*40 fstring
-      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc,irun
+      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc, irun, ios
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver
@@ -3397,6 +3397,9 @@ C     INTEGER IPArCOV
       CHARACTER*13 char1
       LOGICAL fexist
       DOUBLE PRECISION val,vale,sigma,shelss,quant,ecutof
+
+      integer*4, external :: parse_line
+
 C-----initialization of TRISTAN input parameters
       WIDexin = 0.2d0
       GAPin(1) = 0.d0
@@ -3404,10 +3407,9 @@ C-----initialization of TRISTAN input parameters
       HOMin = 0.d0
       ALSin = 1.5d0
       BET2in = 0.d0
-      GRIn(1)= 5.d0
-      GRIn(2)= 5.d0
+      GRIn   = 5.d0
       CNOrin = 1.d0
-      EFItin =0.d0
+      EFItin = 0.d0
 C-----initialization of TRISTAN input parameters  *** done ***
 
    11 CONTINUE
@@ -3542,24 +3544,22 @@ C
       WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
       irun = 0
   100 IF(irun.EQ.1) RETURN
-      READ (5,'(A1)',END=150,ERR=160) name(1:1)
-      IF (name(1:1).EQ.'*' .OR. name(1:1).EQ.'#' .OR. name(1:1)
-     &    .EQ.'!') GOTO 100
+      READ (5,'(A)',END=150,ERR=160) inline
+      IF (inline(1:1).EQ.'*' .OR. inline(1:1).EQ.'#' .OR.
+     &    inline(1:1).EQ.'!') GOTO 100
 
-      BACKSPACE (5)
-      IF(name(1:1).eq.'@') THEN 
-        READ(5,'(A72)') rtitle ! read running title
-        rtitle(1:1)=' '
+      IF(inline(1:1).eq.'@') THEN 
         if(EMPtitle(1:5).ne.'     ' .and. FIRst_ein) GOTO 100
-        write(*,*) '***',trim(rtitle)
+        write(*,*) '*** ',trim(inline(2:))
         WRITE( 8,*)'***************************************************'
-        write( 8,*)'***',trim(rtitle)
+        write( 8,*)'*** ',trim(inline(2:))
         WRITE( 8,*)'***************************************************'
         GOTO 100  ! next line
       ENDIF
 
-      name = '      '
-      READ (5,'(A6,G10.5,4I5)',END=150,ERR=160) name,val,i1,i2,i3,i4
+      ios = parse_line(trim(inline),name,val,i1,i2,i3,i4)
+      if(ios /= 0) goto 160
+
             IF (name.EQ.'GO    ') THEN
 C-----------Print some final input options
             IF (DIRect.EQ.0) THEN

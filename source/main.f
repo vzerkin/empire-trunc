@@ -1,6 +1,6 @@
-cc   * $Rev: 4044 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-31 19:20:51 +0200 (So, 31 Aug 2014) $
+cc   * $Rev: 4045 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -516,24 +516,22 @@ C
 C     local variables
 C
       LOGICAL lheader
-      INTEGER ikey1, ikey2, ikey3, ikey4
+      INTEGER ikey1, ikey2, ikey3, ikey4, ios
       DOUBLE PRECISION val
 
       CHARACTER*6 keyname
-      CHARACTER*36 nextenergy
-      CHARACTER*72 rtitle
+      CHARACTER*72 nextenergy
+
+      integer*4, external :: parse_line
 
       lheader = .true.
- 1156 READ (5,'(A36)',ERR=11570,END=1200) nextenergy
+ 1156 READ (5,'(A)',ERR=11570,END=1200) nextenergy
 
       IF(nextenergy(1:1).eq.'@') THEN 
-        BACKSPACE 5
-        READ (5,'(A72)',ERR=11570,END=1200) rtitle
-        rtitle(1:1)=' '
-        write(*,*) '***',trim(rtitle)
+        write(*,*) '*** ',trim(nextenergy(2:))
         WRITE( 8,*)
      &      '***************************************************'
-        write( 8,*) '***',trim(rtitle)
+        write( 8,*) '*** ',trim(nextenergy(2:))
         WRITE( 8,*)
      &      '***************************************************'
         GOTO 1156  ! next line
@@ -560,18 +558,18 @@ C
       ENDIF
 
       IF(nextenergy(1:1).EQ.'$') THEN
-        READ(nextenergy,'(1x,A6,F10.5,4I5)',ERR=11570,END=1200) 
-     &        keyname, val, ikey1, ikey2, ikey3, ikey4
+        ios = parse_line(trim(nextenergy(2:)),keyname,
+     &                   val,ikey1,ikey2,ikey3,ikey4)
+        if(ios /= 0) goto 11570
         CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
         GO TO 1156
       ENDIF
 
-      BACKSPACE 5
-      READ(5,*,ERR=11570,END=1200) EIN
+      READ(nextenergy,*,ERR=11570) EIN
 
       IF (EIN.LT.0.0D0) THEN
           CALL end_of_calc()
-          ELSE
+      ELSE
           WRITE (8,
      &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
           WRITE (8,'(1x,61(''=''))')
@@ -600,29 +598,24 @@ C
 C     
 C     local variables
 C
-      CHARACTER*36 nextenergy
-      CHARACTER*72 rtitle
+      CHARACTER*72 nextenergy
       INTEGER iang
 
- 1158 READ (5,'(A36)',ERR=11570,END=1200) nextenergy
+ 1158 READ (5,'(A)',ERR=11570,END=1200) nextenergy
       IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &     nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158
 
       IF(nextenergy(1:1).eq.'@') THEN 
-        BACKSPACE 5
-        READ (5,'(A72)',ERR=11570,END=1200) rtitle
-        rtitle(1:1)=' '
-        write(*,*) '***',trim(rtitle)
+        write(*,*) '*** ',trim(nextenergy(2:))
         WRITE( 8,*)
      &      '***************************************************'
-        write( 8,*)'***',trim(rtitle)
+        write( 8,*)'*** ',trim(nextenergy(2:))
         WRITE( 8,*)
      &      '***************************************************'
         GOTO 1158  ! next line
       ENDIF
 
-      BACKSPACE 5
-      READ (5,*,ERR=11570,END=1200) EIN, NDAng, ICAlangs
+      READ(nextenergy,*,ERR=11570) EIN, NDAng, ICAlangs
 
       IF (EIN.LT.0.0D0) GOTO 1200
 
