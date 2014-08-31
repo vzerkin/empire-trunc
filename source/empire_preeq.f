@@ -3,7 +3,7 @@ Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
       SUBROUTINE EMPIRE_PREEQ
-     &     (xsinl,xsmsc,tothms,totemis,corrmsd,totcorr)
+     &     (xsinl,xsmsc,tothms,totemis,corrmsd,totcorr,nvwful)
 
       use empcess, ONLY: CSHms
 
@@ -39,6 +39,7 @@ C     initialization
       tothms  = 0.d0
       totemis = 0.d0  
       corrmsd = 1.d0
+	nvwful = .FALSE.
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
@@ -283,7 +284,6 @@ C--------
          CSEmis(1,1) = CSEmis(1,1) + CSMsc(1)
          CSEmis(2,1) = CSEmis(2,1) + CSMsc(2)
          xsmsc = xsmsc + CSMsc(0) + CSMsc(1) + CSMsc(2)
-C        if(nvwful) goto 1500
 C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
       ENDIF
 

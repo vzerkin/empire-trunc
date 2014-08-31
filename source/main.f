@@ -1,6 +1,6 @@
-cc   * $Rev: 4041 $
+cc   * $Rev: 4044 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
+Ccc   * $Date: 2014-08-31 19:20:51 +0200 (So, 31 Aug 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -32,6 +32,8 @@ C
 
       INTEGER nnuc,nnurec,nejcec,ncollx,iret
 
+	LOGICAL nvwful
+
       EIN  = 0.0d0
       epre = EIN
 
@@ -55,7 +57,10 @@ C
 C
 C       Preequilibrium 
 C
-        CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,totcorr)
+        CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,
+     >    totcorr,nvwful)
+
+        IF (nvwful) CYCLE ! Skipping HF 
 
         WRITE(151,*) 'Einc=',EINl
 
