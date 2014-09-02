@@ -1,6 +1,6 @@
-!cc   * $Rev: 4045 $
-!cc   * $Author: shoblit $
-!cc   * $Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
+!cc   * $Rev: 4046 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-09-02 14:24:13 +0200 (Di, 02 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3389,7 +3389,8 @@ C
       DOUBLE PRECISION GRAND,DRAND
       CHARACTER*120 inline
       CHARACTER*40 fstring
-      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc, irun, ios
+      INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc, 
+     &  irun, ios
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver
