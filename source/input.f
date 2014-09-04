@@ -1,6 +1,6 @@
-!cc   * $Rev: 4046 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-02 14:24:13 +0200 (Di, 02 Sep 2014) $
+!cc   * $Rev: 4047 $
+!cc   * $Author: shoblit $
+!cc   * $Date: 2014-09-04 17:27:49 +0200 (Do, 04 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -257,6 +257,7 @@ C--------fusion parameters
          EXPush = 0.d0
          CRL = 0.d0
          DFUs = 1.d0
+         TUNETL = 1.d0
          FUSred = 1.d0
          FCCred = 1.d0
          FCOred = 1.d0
@@ -6760,6 +6761,21 @@ C
      &'('' Emission width of ejectile '',I1,'' from '',I3,A2,
      &  '' multiplied by '',F7.3)') i3, i2, SYMb(nnuc), TUNe(i3,nnuc)
             endif
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'TUNETL') THEN
+            IF (i1.LT.0 .OR. i1.GT.NDLW) THEN
+               WRITE (8,
+     &                '('' WARNING: ORBITAL ANGULAR MOMENTUM '',I2,
+     &                  '' UNKNOWN'')') i1
+               WRITE (8,'('' WARNING: Orbital angular momentum
+     &                  tuning on TLs IGNORED'')')
+               GOTO 100
+            ENDIF
+            tunetl(i1+1) = val
+            write(8,'(a,i0,a,f8.4)') ' TL, TLJ for l = ',i1,
+     &              ' multiplied by ',val
             GOTO 100
          ENDIF
 C-----

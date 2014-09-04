@@ -1,6 +1,6 @@
-! $Rev: 4000 $
-! $Author: mherman $
-! $Date: 2014-07-29 21:21:43 +0200 (Di, 29 Jul 2014) $
+! $Rev: 4047 $
+! $Author: shoblit $
+! $Date: 2014-09-04 17:27:49 +0200 (Do, 04 Sep 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -145,7 +145,7 @@
      &                 SHNix, SHRd, SHRj, SHRt, SIG,                    &
      &                 SIGabs(ndetl,ndejc,ndnuc), STMro, TEMp0,         &
      &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),    &
-     &                 TLJ(ndetl,ndlw,3,ndejc),                         &
+     &                 TLJ(ndetl,ndlw,3,ndejc), TUNETL(ndlw),           &
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
      &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
@@ -291,6 +291,6 @@
       COMMON /MLO   / F_Print
       COMMON /MOMENT/ MOMparcrt, MOMortcrt
       COMMON /NUMHLP_R/ EXPmax, EXPdec
-      COMMON /TLCOEF/ TL, TLJ
+      COMMON /TLCOEF/ TL, TLJ, TUNETL
       COMMON /UCOM  / UEXcit
       COMMON /XMASS / EXCessmass, RESmas
