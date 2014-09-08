@@ -36,6 +36,3 @@ endif
 
 clean:
 	rm *.o
-
-zvview.exe:
-	python pickZVView.py
