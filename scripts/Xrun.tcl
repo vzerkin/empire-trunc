@@ -1,6 +1,6 @@
-# $Rev: 4021 $
-# $Author: mherman $
-# $Date: 2014-08-16 08:37:50 +0200 (Sa, 16 Aug 2014) $
+# $Rev: 4048 $
+# $Author: zerkinv $
+# $Date: 2014-09-08 17:10:55 +0200 (Mo, 08 Sep 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6148,8 +6148,8 @@ adjourn .top75}} \
         -command {} -label {Main 2} -width 0 
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
-    $top.tab88 add \
-        -command {} -label {} -width 0 
+#2013-zerkin    $top.tab88 add \
+#2013-zerkin        -command {} -label {} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -8266,8 +8266,8 @@ cd $workdir} \
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
         -pady 27 -side left 
-    pack $site_8_8.fra84 \
-        -in $site_8_8 -anchor center -expand 1 -fill both -side top 
+#2013-zerkin    pack $site_8_8.fra84 \
+#2013-zerkin        -in $site_8_8 -anchor center -expand 1 -fill both -side top 
     $top.tab88 select 0
     menu $top.m88 \
         -activebackground #dcdcdc -activeforeground #000000 \
