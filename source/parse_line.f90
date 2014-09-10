@@ -11,7 +11,7 @@
 
     integer*4 i,m,n,ios,is(5),ie(5)
 
-    ios = 0
+    parse_line = 0
     prm = ' '
     val = 0.D0
     i1 = 0
@@ -28,7 +28,7 @@
         i = i + 1
     end do
     m = len_trim(inline(1:i-1))
-    if(m == 0) goto 100
+    if(m == 0) return
 
     ! now get parameter name. length max = 6 chars
 
@@ -44,19 +44,26 @@
 
     ! if prm = 'GO' or rest of line blank, don't parse
 
-    if(prm == 'GO    ') goto 100
-    if(n >= m)          goto 100
+    if(prm == 'GO    ') return
+    if(n >= m)          return
+
+    ! parse string for parameters
 
     call parse_string
-    read(inline(is(1):ie(1)),*,iostat=ios,err=100,end=100) val
-    if(is(2) <= m) read(inline(is(2):ie(2)),*,iostat=ios,err=100,end=100) i1
-    if(is(3) <= m) read(inline(is(3):ie(3)),*,iostat=ios,err=100,end=100) i2
-    if(is(4) <= m) read(inline(is(4):ie(4)),*,iostat=ios,err=100,end=100) i3
-    if(is(5) <= m) read(inline(is(5):ie(5)),*,iostat=ios) i4
 
-100 parse_line = ios
+    read(inline(is(1):ie(1)),*,iostat=ios) val
+    i1 = intl(is(2),ie(2))
+    i2 = intl(is(3),ie(3))
+    i3 = intl(is(4),ie(4))
+    i4 = intl(is(5),ie(5))
+
+    parse_line = ios   ! return final status
+
+    return
 
     contains
+
+    !---------------------------------------------------------------------
 
     subroutine parse_string
 
@@ -66,13 +73,17 @@
 
     integer*4 i,ix
 
-    ! strip any leading seps
+    ! parse string for location of value & optional integer parameters
+
+    ! first strip off any leading seps
 
     ix = n + 1
     do while(ix <= m)
         if(inline(ix:ix) /= sep) exit
         ix = ix + 1
     end do
+
+    ! look for sub-strings containing value & optional integer parameters
 
     do i = 1,5
         do while(ix <= m)
@@ -89,5 +100,48 @@
 
     return
     end subroutine parse_string
+
+    !---------------------------------------------------------------------
+
+    integer*4 function intl(i1,i2)
+
+    implicit none
+
+    integer*4, intent(in) :: i1    ! starting character
+    integer*4, intent(in) :: i2    ! ending character
+
+    ! try to convert sub-string bounded by i1:i2 to integer
+
+    integer*4 k,l
+    character*4 :: fmt = '(Ix)'
+
+    intl = 0
+    if(ios /= 0) return     ! don't continue after errors
+
+    ! try to read the sub-string
+
+    k = i2 - i1 + 1     ! length of sub-string
+
+    select case(k)
+    case(:0)
+        return
+    case(1:9)
+        write(fmt(3:3),'(I1)') k
+        read(inline(i1:i2),fmt,iostat=ios) l
+    case default
+        read(inline(i1:i2),*,iostat=ios) l
+    end select
+
+    if(ios /= 0) then
+        ! on error, warn user of the problem
+        write(6,'(a)')' Error parsing following line from input:'
+        write(6,'(a)') inline(1:m)
+        l = 0
+    endif
+
+    intl = l
+
+    return
+    end function intl
 
     end function parse_line
