@@ -24,7 +24,7 @@ program c4tokal
     integer*4 mat      ! MAT of material. not used here
     integer*4 nprm     ! # EMPIRE parameters in sensitivity input file
 
-    logical*4 qex,qmt
+    logical*4 qex,qmt,hmt(999)
     integer*4 i,j,k,m,ix,l1,l2,ios,status
     character pname*6,line*130,file*25
 
@@ -48,6 +48,7 @@ program c4tokal
 
     type (c4_file) c4
     type (c4_section), pointer :: sc
+    type (c4_data_point), pointer :: pt
 
     integer*4, external :: rctn
 
@@ -152,40 +153,47 @@ program c4tokal
 
     nmt = 0
     do k = 1,c4%nsec
-
         sc => c4%sec(k)
-        if(sc%mf /= 3)               cycle    ! we only fit MF3
-        if(qmt .and. (sc%mt /= mt1)) cycle    ! not fitting this MT
+        hmt = .false.
+        do j = 1,sc%ndat
+            pt => sc%pt(j)
 
-        i = 1
-        do while (i <= ngmt)
-           if(sc%mt == goodmt(i)) exit
-           i = i + 1
+            if(pt%mf /= 3)               cycle    ! we only fit MF3
+            if(qmt .and. (pt%mt /= mt1)) cycle    ! not fitting this MT
+            if(hmt(pt%mt)) cycle                  ! already found this MT
+
+            i = 1
+            do while (i <= ngmt)
+               if(pt%mt == goodmt(i)) exit
+               i = i + 1
+            end do
+            if(i > ngmt) cycle                    ! only fit allowed MTs
+
+            ix = 1
+            do while(ix <= nrx)
+               if(rcx(ix)%mt == pt%mt) exit
+               ix = ix + 1
+            end do
+            if(ix > nrx) cycle                    ! reaction not in XSC file
+
+            m = 1
+            do while(m <= nmt)
+               if(fmt(m)%mt == pt%mt) exit
+               m = m + 1
+            end do
+
+            if(m > nmt) then
+               nmt = m                            ! new reaction
+               fmt(m)%mt = pt%mt
+               fmt(m)%ix = ix
+               fmt(m)%num = 1
+            else
+               fmt(m)%num = fmt(m)%num + 1
+            endif
+
+            hmt(pt%mt) = .true.
+
         end do
-        if(i > ngmt) cycle                    ! only fit allowed MTs
-
-        ix = 1
-        do while(ix <= nrx)
-           if(rcx(ix)%mt == sc%mt) exit
-           ix = ix + 1
-        end do
-        if(ix > nrx) cycle                    ! reaction not in XSC file
-
-        m = 1
-        do while(m <= nmt)
-           if(fmt(m)%mt == sc%mt) exit
-           m = m + 1
-        end do
-
-        if(m > nmt) then
-           nmt = m                            ! new reaction
-           fmt(m)%mt = sc%mt
-           fmt(m)%ix = ix
-           fmt(m)%num = 1
-        else
-           fmt(m)%num = fmt(m)%num + 1
-        endif
-
     end do
 
     if(nmt == 0) then
@@ -208,23 +216,30 @@ program c4tokal
     ! re-scan C4 sections, setting index of C4 section
 
     do k = 1,c4%nsec
-
         sc => c4%sec(k)
-        if(sc%mf /= 3)               cycle    ! we only want MF3
-        if(qmt .and. (sc%mt /= mt1)) cycle    ! not fitting this MT
+        hmt = .false.
+        do j = 1,sc%ndat
+            pt => sc%pt(j)
 
-        m = 1
-        do while(m <= nmt)
-           if(fmt(m)%mt == sc%mt) exit
-           m = m + 1
+            if(pt%mf /= 3)               cycle    ! we only fit MF3
+            if(qmt .and. (pt%mt /= mt1)) cycle    ! not fitting this MT
+            if(hmt(pt%mt)) cycle                  ! already found this MT
+
+            m = 1
+            do while(m <= nmt)
+               if(fmt(m)%mt == pt%mt) exit
+               m = m + 1
+            end do
+            if(m > nmt) cycle                     ! not fitting MT
+
+            hmt(pt%mt) = .true.
+
+            fx => fmt(m)
+            kx(m) = kx(m) + 1
+            fx%ic(kx(m)) = k
+            fx%wt(kx(m)) = 1.D0
+
         end do
-        if(m > nmt) cycle                     ! not fitting MT
-
-        fx => fmt(m)
-        kx(m) = kx(m) + 1
-        fx%ic(kx(m)) = k
-        fx%wt(kx(m)) = 1.D0
-
     end do
 
     ! make final consistency check
@@ -248,7 +263,7 @@ program c4tokal
         write(15,'(2I5)') fx%ix,fx%num
         write(15,'(7E10.3)') (fx%wt(i),i=1,fx%num)
         do i = 1,fx%num
-            call dataout(c4%sec(fx%ic(i)))
+            call dataout(c4%sec(fx%ic(i)),fx%mt)
         end do
     end do
 
@@ -258,7 +273,7 @@ program c4tokal
 
     !------------------------------------------------------------------------
 
-    subroutine dataout(sc)
+    subroutine dataout(sc,mt)
 
     implicit none
 
@@ -266,58 +281,82 @@ program c4tokal
     ! write energies in MeV, cross sections in mb.
     ! also to unit 75 in MeV, barns for plotting.
 
-    type (c4_section), intent(in) :: sc
+    type (c4_section), intent(in) :: sc       ! C4 section to scan
+    integer*4, intent(in) :: mt               ! MT to extract
 
     real*8, parameter :: cor = 0.2D0
 
     logical*4 qwt
-    integer*4 i,l,m
+    integer*4 i,l,m,npt
     real*8 xf
-    real*8, allocatable :: z(:)
     character chr3*3
+
+    type mtpt
+        real*8 e
+        real*8 x
+        real*8 z
+    end type
+    type (mtpt), allocatable, target :: gpts(:)
+    type (mtpt), pointer :: gp
+
+    type (c4_data_point), pointer :: pt
 
     ! data written to unit 75 is for plots
 
     qwt = .false.
-    if((mt1 == 0) .or. (sc%mt == mt1)) then
-       write(chr3,'(I3)') sc%mt
+    if((mt1 == 0) .or. (mt == mt1)) then
+       write(chr3,'(I3)') mt
        call strlen(chr3,l,m)
        open(75,file=file(l1:l2)//'-'//chr3(l:m)//'-c4.gpd',status='UNKNOWN',action='WRITE',access='APPEND')
        qwt = .true.
     endif
 
-    allocate(z(sc%ndat))
-
-    do i = 1,sc%ndat
-       if(sc%pt(i)%x == 0.D0) then
-           z(i) = 0.D0
-       else
-           z(i) = sc%pt(i)%dx/sc%pt(i)%x
-       endif
-       if(.not.qwt) cycle
-       if(sc%pt(i)%dx > 0.D0) write(75,999) 1.D-06*sc%pt(i)%e,sc%pt(i)%x,sc%pt(i)%dx,sc%mt
-    end do
-
-    if(qwt) close(75)
-
-    if(sc%mt < 200) then
+    if(mt < 200) then
         xf = 1000.D0         ! convert regular cross sections to mb
     else
         xf = 1.D0            ! don't convert mubar, nubar
     endif
 
-    ! data to 10,11,12 are used for fitting
+    allocate(gpts(sc%ndat))
 
-    write(10,100) sc%ref, sc%ent, sc%sub, sc%ndat
-    write(10,200) (1.D-06*sc%pt(i)%e,xf*sc%pt(i)%x, i=1,sc%ndat)
-    write(11,100) sc%ref, sc%ent, sc%sub, sc%ndat
-    write(11,200) (1.D-06*sc%pt(i)%e,z(i),i=1,sc%ndat)
-    if(kcovex /= 0) then
-      write(12,100) sc%ref, sc%ent, sc%sub,-sc%ndat
-      write(12,300) cor
+    npt = 0
+    do i = 1,sc%ndat
+       pt => sc%pt(i)
+       if(pt%mt /= mt) cycle
+       npt = npt + 1
+       gp => gpts(npt)
+       gp%e = 1.0D-06*pt%e
+       gp%x = xf*pt%x
+       if(pt%x == 0.D0) then
+           gp%z = 0.D0
+       else
+           gp%z = pt%dx/pt%x
+       endif
+       if(.not.qwt) cycle
+       if(pt%dx > 0.D0) write(75,999) gp%e,pt%x,pt%dx,mt
+    end do
+
+    if(qwt) close(75)
+
+    if(npt < 1) then
+        ! no points for MT should not happen
+        ! print error message and abort
+        write(0,'(a,i0)') ' Internal inconsistency processing MT = ',mt
+        stop 1
     endif
 
-    deallocate(z)
+    ! data to 10,11,12 are used for fitting
+
+    write(10,100) sc%ref, sc%ent, sc%sub, npt
+    write(10,200) (gpts(i)%e,gpts(i)%x, i=1,npt)
+    write(11,100) sc%ref, sc%ent, sc%sub, npt
+    write(11,200) (gpts(i)%e,gpts(i)%z,i=1,npt)
+    if(kcovex /= 0) then
+        write(12,100) sc%ref, sc%ent, sc%sub,-npt
+        write(12,300) cor
+    endif
+
+    deallocate(gpts)
 
     return
 

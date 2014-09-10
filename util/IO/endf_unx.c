@@ -16,13 +16,19 @@
   These routines appear to work ok on both linux and mac OSX.
 */
 
+typedef struct err_frame
+{
+   struct err_frame *prv;
+   jmp_buf ctx;
+} frame;
+
+static frame *cur = NULL;
 static struct stat file_stat;
-static jmp_buf savctx[10];
-static int icx=0;
 
 int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 {
    int fhn, flags;
+   int mode = 0400|0200|0040|0020|0004; // S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH
    char lfil[len+1];
    char *s, *t;
 
@@ -44,8 +50,7 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
          flags = O_WRONLY|O_CREAT;
       else
          flags = O_WRONLY|O_CREAT|O_EXCL;
-      fhn = open(lfil, flags);
-      if(fhn>=0) fchmod(fhn, 436);
+      fhn = open(lfil, flags, mode);
       }
    else
       fhn = open(lfil, O_RDONLY);
@@ -89,17 +94,20 @@ void endf_quit_(int *status)
 int endf_try_(void (*rtn)(), void *arg)
 {
    int stat;
-   stat = setjmp(savctx[icx++]);
-   if(!stat) {
-      (*rtn)(arg);
-      icx--;
-   }
+   frame *pr1 = (frame *) malloc (sizeof(frame));
+   pr1->prv = cur;
+   cur = pr1;
+   stat = setjmp(cur->ctx);
+   if(!stat) (*rtn)(arg);
+   pr1 = cur->prv;
+   free(cur);
+   cur = pr1;
    return stat;
 }
 
 int endf_unwind_(int *val)
 {
-   longjmp(savctx[--icx], *val);
+   if(cur == NULL) return -1;
+   longjmp(cur->ctx, *val);
    return 0;
 }
-

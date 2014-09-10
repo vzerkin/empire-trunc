@@ -41,7 +41,7 @@ module endf_lines
 
     public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, set_output_line_numbers
     public open_endfile, get_endline, put_endline, close_endfile, endf_error, find_mat, skip_sect, set_error_limit
-    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat
+    public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_badal, chk_siz, skip_mat, skip_mf
 
 !------------------------------------------------------------------------------
     contains
@@ -305,7 +305,7 @@ module endf_lines
 
     implicit none
 
-    integer*4 status,ios
+    integer*4 status
 
     if(.not.q_open) call endf_error('Attempt to skip ENDF material with no file open',-250)
     if(q_write) call endf_error('Attempt to skip ENDF material on output file',-500)
@@ -331,11 +331,48 @@ module endf_lines
 
 !------------------------------------------------------------------------------
 
+    integer*4 function skip_mf()
+
+    ! use this routine to skip over an MF file.
+    ! Just keep reading lines until we hit MF=0, which
+    ! indicates the end of a file. The next record 
+    ! should be the start of next section.
+
+    implicit none
+
+    integer*4 status
+
+    if(.not.q_open) call endf_error('Attempt to skip an MF file with no ENDF file open',-250)
+    if(q_write) call endf_error('Attempt to skip an MF file in output file',-250)
+
+    do while(get_mf() /= 0)
+        status = get_endf_line()
+        if(status < 0) then
+            if(status == -1) then
+                write(erlin,*) 'Hit end-of-file while skipping MF file'
+                call endf_error(erlin,-510)
+            else
+                write(erlin,*) 'Read returned error code :',status
+                call endf_error(erlin,-1000-abs(status))
+            endif
+        endif
+    end do
+
+    cmft(5:9) = ' 0  0'
+    istate = ifend
+    call get_endline
+    skip_mf = get_mf()
+
+    return
+    end function skip_mf
+
+!------------------------------------------------------------------------------
+
     integer*4 function skip_sect()
 
     ! use this routine to skip to the end of the current
     ! section ==> skip ahead till MT=0. When done, leave
-    ! current line pointing to the nearest SEND line with MT=0.
+    ! current line pointing to the next section after MT=0.
 
     implicit none
 
@@ -686,6 +723,11 @@ module endf_lines
     if(q_write) call endf_error('Attempt to read MF from output file',-1)
 
     read(endline(71:72),'(i2)',err=10) i
+    if((i<0) .or. (i>40)) then
+        write(erlin,'(a,i0)') 'Undefined MF encountered in file :',i
+        call endf_error(erlin,-400)
+    endif
+
     get_mf = i
 
     return

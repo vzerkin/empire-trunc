@@ -18,6 +18,7 @@ import shutil
 import time
 from empy import bash
 import qsubEmpire
+from subprocess import Popen
 
 try: EMPIRE_DIR = os.environ["EMPIREDIR"]
 except KeyError: raise KeyError("EMPIREDIR environment variable not defined!")
@@ -31,10 +32,11 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP', 'GRANGN', 'GRANGP', 
         'GTILNO', 'PCROSS', 'QFIS', 'RESNOR', 'SHELNO', 'TOTRED', 
         'TUNE', 'TUNEFI', 'TUNEPE', 'UOMPAS', 'UOMPAV', 'UOMPRS', 
-        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF','FCCRED',
+        'UOMPRV', 'UOMPRW', 'UOMPVV', 'UOMPWS', 'UOMPWV', 'LDSHIF',
         'ROHFBA', 'ROHFBP', 'ELARED', 'FISAT1', 'FISAT2', 'FISAT3',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
-        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3')
+        'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3',
+        'FCCRED','CELRED','CINRED','ROHFBA', 'ROHFBP', 'TUNETL')
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'CSGDR2', 'CSREAD', 'D1FRA', 'DEFGA', 'DEFGP', 'DEFGW', 'DFUS', 
         'DV', 'EFIT', 'EGDR1', 'EGDR2', 'EX1', 'EX2', 'EXPUSH', 'FCC', 
@@ -43,11 +45,12 @@ restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
         'GGDR2', 'HOMEGA', 'SHRD', 'SHRJ', 'SHRT', 'SIG', 'TEMP0', 'TORY',
         'TRUNC', 'WIDEX', 'DEFNUC')
 fisPars = ('VA','VB','VI','HA','HB','HI','DELTAF','GAMMA','ATLATF','VIBENH')
-# Defining list of prompt fission neutron spectra parameters
+# prompt fission neutron spectra parameters
 pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU')
 
-# these global parameters don't need Z,A of isotope specified
-Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED')
+# global parameters do not specify Z,A of isotope
+Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED','TUNETL',
+           'ELARED','CELRED','CINRED','PFNTKE','PFNALP','PFNRAT','PFNERE','PFNNIU')
 # not a complete list yet!
 
 
@@ -156,7 +159,7 @@ def init(proj):
     optvals = []
     for opt in options:
         optvals.append( readOption(opt) )
-    #print optvals
+    # print optvals
     
     # Checking value of FISSPE option in input file and storing it in pfnsval
     pfnsval = 0.0
@@ -166,11 +169,10 @@ def init(proj):
     
     # create dir for original input.
     # Also copy -inp.fis, .lev and -lev.col if available
-    os.mkdir(proj+"_orig")
-    shutil.copy(proj+".inp",proj+"_orig/")
-    bash.cp(proj+"-inp.fis",proj+"_orig/",False)
-    bash.cp(proj+".lev",proj+"_orig/",False)
-    bash.cp(proj+"-lev.col",proj+"_orig/",False)
+    dir = proj + "_orig"
+    os.mkdir(dir)
+    shutil.copy(proj+".inp",dir)
+    qsubEmpire.copyFiles(proj,dir)
 
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -195,8 +197,10 @@ def init(proj):
         if name in fisPars:
             # these are a special case, require modifying the fission input
             # I've separated that code into another module
-            import parseFission
-            parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
+            ##import parseFission
+            ##parseFission.parseFission(proj, line, (name,val,i1,i2,i3,i4))
+            # Aug 2013 - don't allow varying these. Use relative fis pars
+            print "%s can't be varied - use relative parameters! Skipping" % name
             continue
         
         if not (name in allowed or name in restricted or name in pfnsPar):
@@ -234,7 +238,8 @@ def init(proj):
         nameP, nameM = genNames(line,proj)
         
         if not foundOpt and name in restricted:
-            print "no default values for %s. Please supply in input"%name
+            print "No default found for: %s %i %i %i %i" %(name,i1,i2,i3,i4)
+            print "Please supply value in input file"
             continue    # go to next line of sensitivity input
         else:
             os.mkdir( nameP )
@@ -243,11 +248,7 @@ def init(proj):
             # copy files to newly-created dir if available
             # suppress error messages if not:
             for dir in (nameP,nameM):
-                bash.cp(proj+"-inp.fis",dir,False)
-                bash.cp(proj+".lev",dir,False)
-                bash.cp(proj+"-lev.col",dir,False)
-                bash.cp(proj+"-omp.dir",dir,False)
-                bash.cp(proj+"-omp.ripl",dir,False)
+                qsubEmpire.copyFiles(proj,dir)
             
             plus = open( nameP+"/%s.inp" % proj, "w")
             minus = open( nameM+"/%s.inp" % proj, "w")
@@ -302,16 +303,20 @@ def init(proj):
 
 
 def run(proj):
-    """
-    use init to set up the project, then run!
-    """
-    print "Starting original input"
-    # 'clean=True': delete everything but .xsc and -pfns.out file after running
-    qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), clean=False, jnm="cent_")
 
-    # start watching queue, report when all jobs finish:
-    # os.system('time ~/bin/monitorQueue 0 &')
-    
+    # use init to set up the project, then run!
+
+    def copyTLs(pnam):
+        # return True only for parameters that don't affect TLs.
+        if pnam.startswith("UOM") or pnam.startswith("DEFNUC"):
+            return False
+        else:
+            return True
+
+    print "Starting original input"
+    #orid = {}
+    orid = qsubEmpire.runInput("%s_orig/%s.inp" % (proj,proj), hold=True, jnm="cent_")
+
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
@@ -320,19 +325,32 @@ def run(proj):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar or name=='PFNNIU'):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             continue
         
         nameP, nameM = genNames(line,proj)
         jname = line.split()[0]
-        # pause between submitting each new file:
-        time.sleep(0.25)
-        print "Starting", nameP
-        qsubEmpire.runInput(nameP+"/%s.inp" % proj, clean=False, jnm=jname+"+")
-        time.sleep(0.25)
-        print "Starting", nameM
-        qsubEmpire.runInput(nameM+"/%s.inp" % proj, clean=False, jnm=jname+"-")
-    
+        tld = proj + "_orig/"
+
+        print "Starting ", nameP
+        if copyTLs(name):
+            rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, jnm=jname+"+", tldir=tld, jbid=orid)
+        else:
+            rl = qsubEmpire.runInput(nameP+"/%s.inp" % proj, jnm=jname+"+")
+
+        print "Starting ", nameM
+        if copyTLs(name):
+            rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, jnm=jname+"-", tldir=tld, jbid=orid)
+        else:
+            rl = qsubEmpire.runInput(nameM+"/%s.inp" % proj, jnm=jname+"-")
+
+    # release central jobs
+    # dum = raw_input(" Release jobs:")
+
+    for key in orid:
+        cmd = "qrls " + orid[key]
+        jp = Popen(cmd.split())
+        exstat = jp.wait()
 
 def analyze(proj):
     """
@@ -346,8 +364,13 @@ def analyze(proj):
         vars = ("proj=%s,workdir=%s" % (proj, getDir(dir)))
         cmd = 'qsub -N %s -q  batch1  -l ncpus=1  -V -v %s %s/util/mkendf/run_endf.sh' % (nam, vars, EMPIRE_DIR)
         os.system(cmd)
+#    def sub_ENDF(dir,nam):
+#        # sometimes (often) the cluster is sick - run on mother node.
+#        cmd = 'cd %s; %s/util/mkendf/mkendf.sh %s' % (getDir(dir), EMPIRE_DIR, proj)
+#        os.system(cmd)
 
     # start with original input:
+    print " Reconstructing central values"
     qsubEmpire.reconstruct("%s_orig/%s.inp" % (proj,proj))
     sub_ENDF(proj+"_orig","ENDF_orig")
 
@@ -359,13 +382,15 @@ def analyze(proj):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar or name=='PFNNIU'):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             continue
         
         # reconstruct cross sections for val+sigma and val-sigma:
         nameP, nameM = genNames(line,proj)
+        print " Reconstructing ",nameP
         qsubEmpire.reconstruct(nameP+"/%s.inp" % proj)
         sub_ENDF(nameP,"ENDF+"+name)
+        print " Reconstructing ",nameM
         qsubEmpire.reconstruct(nameM+"/%s.inp" % proj)
         sub_ENDF(nameM,"ENDF-"+name)
         
@@ -381,7 +406,6 @@ def kleen(proj):
     # start with original input:
     print " Kleening : Central values"
     qsubEmpire.clean("%s_orig/%s.inp" % (proj,proj))
-    os.system('rm -r %s_orig/empire*.log' % proj)
 
     # open sensitivity input:
     sens = open(proj+"-inp.sen", "r") # sensitivity input
@@ -391,7 +415,7 @@ def kleen(proj):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             continue
         
         # clean directories for val+sigma and val-sigma:
@@ -399,10 +423,8 @@ def kleen(proj):
         nameP, nameM = genNames(line,proj)
         print " Kleening : ",nameP
         qsubEmpire.clean(nameP+"/%s.inp" % proj)
-        os.system('rm -r %s/empire*.log' % nameP)
-        print " Kleening : ",nameP
+        print " Kleening : ",nameM
         qsubEmpire.clean(nameM+"/%s.inp" % proj)
-        os.system('rm -r %s/empire*.log' % nameM)
         
     sens.close()
 
@@ -448,7 +470,7 @@ def njoy(proj,scpt,apx,wdir):
             continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
+        if not (name in allowed or name in restricted or name in pfnsPar):
             continue
         
         # run jobs for val+sigma and val-sigma:
@@ -459,7 +481,7 @@ def njoy(proj,scpt,apx,wdir):
     sens.close()
 
 
-def mcnp(proj,wdir):
+def mcnp(proj,scpt,wdir):
     """
     run MCNP jobs after ACE files created
     """
@@ -467,7 +489,7 @@ def mcnp(proj,wdir):
     
     def sub_mcnp(dir,nam):
         # helper function: submit MCNP job in specified directory & name
-        vars = ("proj=%s,workdir=%s" % (proj, getDir(dir)))
+        vars = ("proj=%s,workdir=%s,script=%s" % (proj, getDir(dir), getDir(scpt)))
         cmd = 'qsub -N %s%s -q  batch1  -l ncpus=1  -V -v %s %s/util/mkendf/mcnp.sh' % (proj, nam, vars, EMPIRE_DIR)
         os.system(cmd)
 
@@ -484,17 +506,15 @@ def mcnp(proj,wdir):
     sens = open(proj+"-inp.sen", "r") # sensitivity input
     
     for line in sens:
-        if line.strip()=='' or line[0] in ('!','#','*','@'):
-            continue
+        if line.strip()=='' or line[0] in ('!','#','*','@'): continue
         
         name = line.split()[0]
-        if not (name in allowed or name in restricted or name in fisPars or name in pfnsPar):
-            continue
+        if not (name in allowed or name in restricted or name in pfnsPar): continue
         
         nameP, nameM = genNames(line,proj)
         sub_mcnp(nameP,'_' + name + '+MC')
         sub_mcnp(nameM,'_' + name + '-MC')
-        
+
     sens.close()
 
 
@@ -530,32 +550,49 @@ no options: setup and run all parameters"""
 
 
 def main():
+
+    def sdir(inx=0):
+        # set working directory, if supplied
+        if inx < len(args):
+            wdir = args[inx]
+            print " Directory : " + wdir
+        else:
+            wdir = ""
+        return wdir
+
     opts, args = process_args()
     inputFile = args[0]
-    wdir = ""
-    if len(args) > 1:
-        wdir = args[1]
     proj = inputFile.split('.')[0]
     print " Project : " + proj
-    if wdir != '':
-        print " Directory : " + wdir
     
     if opts.clean:
+        print " Removing subdirectories"
         os.system('rm -r %s_*' % proj)
     elif opts.init:
+        print " Creating subdirectories"
         init(proj)
     elif opts.run:
+        print " Running Empire jobs"
         run(proj)
     elif opts.analyze:
+        print " Analyzing Empire jobs"
         analyze(proj)
     elif opts.kleen:
+        print " Kleening subdirectories"
         kleen(proj)
     elif opts.mcnp:
-        mcnp(proj,wdir)
+        if len(args) < 2:
+            print " No MCNP script on command line!"
+            sys.exit(1)
+        print " Running MCNP"
+        scpt = args[1]
+        mcnp(proj,scpt,sdir(2))
     elif opts.njoy:
-        njoy(proj,"njoy_33grp.sh","NJOY",wdir)
+        print " Running NJOY"
+        njoy(proj,"njoy_33grp.sh","NJOY",sdir(1))
     elif opts.acer:
-        njoy(proj,"ace_300k.sh","ACER",wdir)
+        print " Running ACER"
+        njoy(proj,"ace_300k.sh","ACER",sdir(1))
     else: # if no options, setup and run the analysis
         init(proj)
         run(proj)

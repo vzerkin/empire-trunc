@@ -43,6 +43,12 @@ else ifeq ($(FC),lf90)
 
 endif
 
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
+
 sixtab: sixtab.f ../dxsend/dxsend.o
 	$(FC) $(FFLAGS) -o $@ sixtab.f ../dxsend/dxsend.o
 

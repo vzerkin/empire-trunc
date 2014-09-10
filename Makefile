@@ -15,7 +15,6 @@ FC=gfortran
 CC=gcc
 #CC=cc
 
-
 # check for FFLAGS specified on command line
 
 ifdef FFLAGS
@@ -24,27 +23,29 @@ else
   FLG =
 endif
 
-# utilities:
-UTILS = util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
+# list of directories that contain Makefiles that should be used to make or clean 
+# various libraries or utilities.  Libraries are managed by the Makefile in lib/ and
+# should be the first in this list as other utilities may use the libraries created.
+# to add libraries modify the Makefile in lib/.  To add utilities, append the directory
+# to this UTILS list.
+
+UTILS = lib util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/legend util/linear util/plotc4 \
        util/pltlst util/psyche util/recent util/sigma1 util/sixtab util/stanef util/stan util/nubar \
        util/endtab util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar \
        util/fis2zvd util/c5-nng2zvd util/preq2zvd util/inter util/gam-sort-2zvd util/rw1omp2fast
 
 all:
-	# dependencies in the local Makefiles (kalman,stan,nubar)
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source; $(MAKE) FC=$(FC) $(FLG) 
 
 clean:
-	cd source; $(MAKE) clean; $(MAKE) cleanall
-	cd ..
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
+	cd source; $(MAKE) clean; $(MAKE) cleanall
 
 cleanall:
-	cd source; $(MAKE) clean; $(MAKE) cleanall
-	cd ..
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean; $(MAKE) cleanall); done
+	cd source; $(MAKE) clean; $(MAKE) cleanall
 
 up:
 	svn up

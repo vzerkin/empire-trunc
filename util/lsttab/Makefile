@@ -43,6 +43,12 @@ else ifeq ($(FC),lf90)
 
 endif
 
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
+
 lsttab: lsttab.f ../dxsend/dxsend.o
 	$(FC) $(FFLAGS) -o $@ lsttab.f ../dxsend/dxsend.o
 

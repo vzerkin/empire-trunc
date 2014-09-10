@@ -43,6 +43,12 @@ else ifeq ($(FC),lf90)
 
 endif
 
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
+
 plotc4: plotc4.f starplot.f ../dxsend/dxsend.o
 	$(FC) $(FFLAGS) -o $@ plotc4.f starplot.f ../dxsend/dxsend.o
 

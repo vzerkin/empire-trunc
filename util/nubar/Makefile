@@ -2,8 +2,8 @@
 #
 
 # set default compiler:
-FC     =  gfortran
-#FC     =  ifort
+#FC     =  gfortran
+FC     =  ifort
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
@@ -18,14 +18,22 @@ else ifeq ($(FC),lf90)
   FFLAGS = -O3
 endif
 
-get_nubar: get_nubar.f90 ../IO/*.o
-	$(FC) $(FFLAGS) -I ../IO/ -o get_nubar get_nubar.f90 ../IO/*.o
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
 
-../IO/*.o :
-	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+libdir = $(EMPIREDIR)/lib
+
+get_nubar: get_nubar.f90 $(libdir)/libendfio.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o get_nubar get_nubar.f90 -lendfio
+
+$(libdir)/libendfio.a:
+        cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
-	rm -f get_nubar ../IO/*.o ../IO/*.mod
+	rm -f get_nubar
 
 cleanall:
-	rm -f get_nubar ../IO/*.o ../IO/*.mod
+	rm -f get_nubar

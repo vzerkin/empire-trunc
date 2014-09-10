@@ -48,7 +48,7 @@
     integer*4 :: nptot = 0                       ! # of parameters in prior file
     integer*4 :: nparm = 0                       ! # of parameters to be fit
     integer*4, allocatable :: iparm(:)           ! index of parameters being fit
-    real*8 :: scale = 1.D0                       ! scale factor to multiply all parameter covariances. if == 0.0, set to 1.D0.
+    real*8 :: scale = 1.D0                       ! scale factor to multiply all output parameter covariances. if == 0.0, set to 1.D0.
     integer*4 :: nplog = 0                       ! # parameter log entries
     integer*4, parameter :: max_steps = 500      ! max # parameters steps to save
     real*8, allocatable :: par_steps(:,:)        ! saved parameters from each fit
@@ -101,7 +101,7 @@
     close(1)
 
     call write_posterior             ! write posterior parameters
-    call outspl                      ! write spline functions
+    call write_reactions             ! write final fitted cross sections
     call cvrspl                      ! write covariance of splines
     call cvrprm(0)                   ! write covariance of parameters
     call pwrite(kctl2)               ! write posterior params
@@ -291,6 +291,7 @@
                 end do
                 x1 = x1 + w(k,i)*x3
             end do
+            
             prc(i,j) = prc(i,j) - x1
             prc(j,i) = prc(i,j)
         end do
@@ -314,6 +315,8 @@
     end do
 
     deallocate(w)
+
+    ! update cross sections using parameter modifications
 
     do i = 1,crx%nen
         x1 = 0.D0
@@ -381,6 +384,43 @@
 
     return
     end subroutine read_reactions
+
+    !******************************************************************************************
+
+    subroutine write_reactions
+
+    ! write final cross sections on unit 13
+
+    implicit none
+
+    integer*4 ix,i,j
+    real*8 xx
+    type (reaction), pointer :: rx
+
+    ! crs <= crs + sen*(p1 - p0)
+
+    open(13,action='write')
+
+    do ix = 1,nrtot
+        rx => rxn(ix)
+        do i = 1,rx%nen
+            xx = 0.D0
+            do j = 1,nparm
+                xx = xx + rx%sen(iparm(j),i)*(pr1(j)%x - pr0(j)%x)
+            end do
+            rx%crs(i) = rx%crs(i) + xx
+        end do
+        write(13,10) rx%nam,rx%nen
+        write(13,20)(rx%ene(i),rx%crs(i),i=1,rx%nen)
+    end do
+
+    close(13)
+
+10  format(a43,i5)
+20  format(6(1pe11.4))
+
+    return
+    end subroutine write_reactions
 
     !******************************************************************************************
 
@@ -581,7 +621,7 @@
 
     deallocate(wk)
 
-    ! update calculated cross sections to current parameter values p1
+    ! update calculated cross sections to current parameter values pr1
 
     do i = 1,crx%nen
         xx = 0.D0
@@ -934,43 +974,6 @@
 
     !******************************************************************************************
 
-    subroutine outspl
-
-    ! write splines on unit 13
-
-    implicit none
-
-    integer*4 ix,i,j
-    real*8 xx
-    type (reaction), pointer :: rx
-
-    ! crs <= sen * (p1 - p0)
-
-    open(13,action='write')
-
-    do ix = 1,nrtot
-        rx => rxn(ix)
-        do i = 1,rx%nen
-            xx = 0.D0
-            do j = 1,nparm
-                xx = xx + rx%sen(iparm(j),i)*(pr1(j)%x - pr0(j)%x)
-            end do
-            rx%crs(i) = rx%crs(i) + xx
-        end do
-        write(13,100) rx%nam,rx%nen
-        write(13,200)(rx%ene(i),rx%crs(i),i=1,rx%nen)
-    end do
-
-    close(13)
-
-100 format(a43,i5)
-200 format(6(1pe11.4))
-
-    return
-    end subroutine outspl
-
-    !******************************************************************************************
-
     subroutine cvrspl
 
     ! write covariance matrix of splines on unit 14
@@ -983,8 +986,7 @@
     type (reaction), pointer :: rx1,rx2
 
     open(14,action='write')
-    open(16,action='write')
-    open(32,action='write')
+    open(48,action='write')
 
     ! same reactions
 
@@ -1004,11 +1006,11 @@
 
         ! generate endf-like numbers
 
-        write(16,102) rx1%nen,rx1%nam,rx1%nam
-        write(16,500) (rx1%ene(i),i=1,rx1%nen)
-        write(16,500) (rx1%crs(i),i=1,rx1%nen)
+        write(48,102) rx1%nen,rx1%nam,rx1%nam   !16
+        write(48,500) (rx1%ene(i),i=1,rx1%nen)   !16
+        write(48,500) (rx1%crs(i),i=1,rx1%nen)   !16
         do i=1,rx1%nen
-            write(16,500) (vg(i,j),j=1,rx1%nen)
+            write(48,500) (vg(i,j),j=1,rx1%nen)   !16
         end do
 
         do i = 1,rx1%nen
@@ -1053,11 +1055,11 @@
 
             ! generate endf-like numbers
 
-            write(32,102) rx1%nen,rx1%nam,rx2%nam
-            write(32,500) (rx1%ene(i),i=1,rx1%nen)
-            write(32,500) (rx1%crs(i),i=1,rx1%nen)
+            write(48,102) rx1%nen,rx1%nam,rx2%nam
+            write(48,500) (rx1%ene(i),i=1,rx1%nen)
+            write(48,500) (rx1%crs(i),i=1,rx1%nen)
             do i=1,rx1%nen
-                write(32,500) (vg(i,j),j=1,rx2%nen)
+                write(48,500) (vg(i,j),j=1,rx2%nen)
             end do
 
             do i = 1,rx1%nen
@@ -1087,8 +1089,7 @@
     end do
 
     close(14)
-    close(16)
-    close(32)
+    close(48)
 
 100 format(i5,2(1pe10.2),50i5)
 101 format(i5,43x,a12)

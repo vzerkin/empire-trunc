@@ -100,7 +100,8 @@ ${fil}_2.endf
 1
 EOF
 
-$EMPIREDIR/util/endres/endres < input
+#$EMPIREDIR/util/endres/endres < input
+cp ${fil}_1.endf ${fil}_2.endf
 
 rm ${fil}_1.endf
 rm empmf1.tmp
@@ -112,14 +113,14 @@ rm input
 # (MF4,MT18) from donor file containing these MFs
 # only do this if it's a fissile material!
 
-if ! $EMPIREDIR/util/mkendf/add_endf ${fil}
-then
-    echo 'Error adding sections to ENDF file'
-    exit
-fi
-rm ${fil}_2.endf
+#if ! $EMPIREDIR/util/mkendf/add_endf ${fil}
+#then
+#    echo 'Error adding sections to ENDF file'
+#    exit
+#fi
+#rm ${fil}_2.endf
 # if not adding, just move _2 -> _2.endfadd
-# mv ${fil}_2.endf ${fil}_2.endfadd
+mv ${fil}_2.endf ${fil}_2.endfadd
 
 # add 103-107 if data available and re-make elastic
 # FIXUP reads from local file, NOT input stream
@@ -137,9 +138,9 @@ S107=+(800,849)
 S  3=+(  4,  5)+( 11, 18)+( 22, 26)+( 28, 37)+( 41, 45)+( 102, 117)
 S  2=+(  1,  1)-(  3,  3)
 
- 0.00000+00 0.00000+00          0          09237103
+ 0.00000+00 0.00000+00          0          02631103
 
- 0.00000+00 0.00000+00          0          09237107
+ 0.00000+00 0.00000+00          0          02631107
 
 
 

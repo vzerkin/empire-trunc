@@ -324,6 +324,17 @@
        nout = i+3
     endif
 
+    if(.not.qovr) then
+        inquire(file=outfile(1:nout),exist=qx)
+        if(qx) then
+            write(6,*)
+            write(6,*) ' #####     ERROR     #####'
+            write(6,*) ' Output file: ',outfile(1:nout),' already exists.'
+            write(6,*) ' Use "-f" option to overwrite an existing output file.'
+            call abort_stan
+        endif
+    endif
+
     return
 
 10  format(a)

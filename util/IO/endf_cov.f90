@@ -1,6 +1,6 @@
 module ENDF_COV_IO
 
-    use base_endf_io
+    use endf_iolib
 
     implicit none
 

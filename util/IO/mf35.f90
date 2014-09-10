@@ -1,6 +1,6 @@
 module ENDF_MF35_IO
 
-    use base_endf_io
+    use endf_iolib
 
     ! author: Sam Hoblit, NNDC, BNL
     ! provide I/O functions for MF35

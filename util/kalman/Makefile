@@ -1,7 +1,7 @@
 # set default compiler
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
@@ -49,6 +49,14 @@ else ifeq ($(FC),lf90)
 
 endif
 
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
+
+libdir = $(EMPIREDIR)/lib
+
 # make sure MAKE knows f90 extension
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
@@ -58,23 +66,23 @@ all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
 kalman : kalman.f90
 	$(FC) $(FFLAGS) -o $@ kalman.f90
 
-OBJG =	kalend.f90 rctn.o strlen.o ../IO/*.o
-kalend :   $(OBJG)
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJG)
+OBJG = kalend.f90 rctn.o strlen.o 
+kalend :   $(OBJG) $(libdir)/libendfio.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJG) -lendfio
 
-OBJH =	c4tokal.f90 rctn.o strlen.o ../IO/*.o
-c4tokal:   $(OBJH)
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ $(OBJH)
+OBJH = c4tokal.f90 rctn.o strlen.o 
+c4tokal:  $(OBJH) $(libdir)/libc4io.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJH) -lc4io
 
-OBJI =	genkal.f90 rctn.o strlen.o 
+OBJI = genkal.f90 rctn.o strlen.o 
 genkal:   $(OBJI)
 	$(FC) $(FFLAGS) -o $@ $(OBJI)
 
-OBJM =	pnt2kal.o aux_routines.o 
+OBJM = pnt2kal.o aux_routines.o 
 pnt2kal:   $(OBJM)
 	$(FC) $(FFLAGS) -o $@ $(OBJM)
 
-OBJN =	refmt-pfns.o aux_routines.o
+OBJN = refmt-pfns.o aux_routines.o
 refmt-pfns :   $(OBJN)
 	$(FC) $(FFLAGS) -o $@ $(OBJN)
 
@@ -87,15 +95,15 @@ newinp: newinp.f90
 empsee: empire_sees.f90
 	$(FC) $(FFLAGS) -o $@ empire_sees.f90
 
-../IO/*.o :
-	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+$(libdir)/libendfio.a:
+        cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
-	rm -f *.o *.mod *.exe ../IO/*.o ../IO/*.mod
+	rm -f *.o *.mod *.exe
 	rm -f kalman empsee newinp kefkal pnt2kal genkal c4tokal kalend
 
 cleanall:
-	rm -f *.o *.mod *.exe ../IO/*.o ../IO/*.mod
+	rm -f *.o *.mod *.exe
 	rm -f kalman empsee newinp kefkal pnt2kal genkal c4tokal kalend
 
 # When making a debug image

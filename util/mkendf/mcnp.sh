@@ -1,11 +1,13 @@
 #PBS -m a
 #PBS -S /bin/bash
 #PBS -j oe
-#PBS -o ${workdir##/*/}/${proj}_mcnp.log
-echo 'Running MCNP'
+#PBS -o ${workdir##*/}/${script##*/}.log
+
+echo "Running MCNP on node "$HOSTNAME
 
 # setup working directory on local scratch disk
-locdir=/dev/shm/${PBS_JOBID%%.*}
+#locdir=/dev/shm/${PBS_JOBID%%.*}
+locdir=/state/partition1/${PBS_JOBID%%.*}
 if [ -e $locdir ]
 then
 	rm -r $locdir
@@ -13,20 +15,26 @@ fi
 mkdir $locdir
 cd $locdir
 
-# create the xsdir based on integral experiment and local xsdir file
-$EMPIREDIR/util/mkendf/mk_xsdir ${workdir}/${proj}
+# create local xsdir file. Start with VII.1 file and
+# replace the current media being modeled
+$EMPIREDIR/util/mkendf/mk_xsdir ${workdir}/ ${proj}
 
-# copy over ACE file
+# copy over local ACE file
 cp ${workdir}/${proj}_300K.ace ./
 
 # copy over mcnp script
-cp ${workdir%/*}/mcnp.i ./
+cp ${script} ./mcnp.i
 
+# run MCNP job
 /home/arcilla/bin/mcnp5 inp=mcnp.i xsdir=xsdir eol > out.dat
 
-# move output to original directory & clean up
-mv out.dat ${workdir}/${proj}_mcnp.out
-mv outp ${workdir}/${proj}_mcnp.outp
+# move output to original directory
+scp=${script##/*/}
+scp=${scp%.*}
+mv out.dat ${workdir}/${scp}.out
+mv outp ${workdir}/${scp}.outp
+
+# cleanup
 rm -r $locdir
 
 exit

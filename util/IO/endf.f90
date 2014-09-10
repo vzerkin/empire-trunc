@@ -34,7 +34,7 @@ module ENDF_IO
     ! 100000*MAT + 1000*MF + MT. If the file was not open or other errors
     ! occurred, then the return value can be -1.
 
-    use base_endf_io
+    use endf_iolib
     use endf_cov_io
     use endf_mf1_io
     use endf_mf2_io
@@ -217,6 +217,7 @@ module ENDF_IO
     integer*4, private :: ihdr = 0                 ! controls disposition of 'header' or TPID line
     integer*4, private :: nfil                     ! # characters in endfil string
     character*500, private :: endfil               ! ENDF file to read/write
+    logical*4, private :: reqmf(40)                ! flags of requested MF files to read in
     type (endf_file), pointer, private :: endf     ! pointer to user's ENDF data type
 
     ! hide these routines from end user
@@ -244,13 +245,14 @@ module ENDF_IO
     contains
 !------------------------------------------------------------------------------
 
-    integer*4 function read_endf_file(filename,usend,mat)
+    integer*4 function read_endf_file(filename,usend,mat,rkmf)
 
     implicit none
 
     character*(*), intent(in), target :: filename      ! ENDF file to read
     type (endf_file), intent(out), target :: usend     ! endf output structure
     integer*4, intent(in), optional :: mat             ! mat # to read in
+    logical*4, intent(in), optional :: rkmf(40)        ! MF's to read in, .true. => read
 
     integer*4 stat,inmat
 
@@ -266,6 +268,12 @@ module ENDF_IO
         inmat = mat           ! read ONLY this mat
     else
         inmat = 0             ! read in whole file (default)
+    endif
+
+    if(present(rkmf)) then
+        reqmf = rkmf          ! only read these MF's
+    else
+        reqmf = .true.        ! read all MF files
     endif
 
     errcnt = 0
@@ -469,11 +477,14 @@ module ENDF_IO
     do
 
         mf = get_mf()
+        if(mf == 0) return
+
+        do while(.not.reqmf(mf))
+            mf = skip_mf()
+            if(mf == 0) return
+        end do
+
         select case(mf)
-
-        case(0)
-
-            return
 
         case(1)
 

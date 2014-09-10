@@ -1,6 +1,6 @@
 module ENDF_MF33_IO
 
-    use base_endf_io
+    use endf_iolib
     use endf_cov_io
 
     ! author: Sam Hoblit, NNDC, BNL

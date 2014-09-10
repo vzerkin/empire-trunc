@@ -2,10 +2,18 @@
 #PBS -S /bin/bash
 #PBS -j oe
 #PBS -o ${workdir##/*/}/${proj}_endf.log
-echo 'Create local working directory'
 
+echo " Running on node "$HOSTNAME
+
+echo 'Create local working directory'
 # setup working directory on local scratch disk
-locdir=/dev/shm/${PBS_JOBID%%.*}
+# locdir=/dev/shm/${PBS_JOBID%%.*}
+# fixup uses too much space for ramdisk. Ugh.
+# Use local hard drive & reset fortran TMPDIR
+locdir=/state/partition1/${PBS_JOBID%%.*}
+export FORT_TMPDIR=$locdir
+export GFORTRAN_TMPDIR=$locdir
+
 if [ -e $locdir ]
 then
 	rm -r $locdir
@@ -39,7 +47,7 @@ fi
 
 if [ -e ${proj}-orig.endf ]
 then
-   cp ${proj}-orig.endf %locdir
+   cp ${proj}-orig.endf $locdir
 elif [ -e ../${proj}-orig.endf ]
    then cp ../${proj}-orig.endf $locdir
 else

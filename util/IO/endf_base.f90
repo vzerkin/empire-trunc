@@ -1,4 +1,4 @@
-module BASE_ENDF_IO
+module ENDF_IOLIB
 
     ! author: Sam Hoblit, NNDC, BNL
     ! Provide basic I/O to/from ENDF file data fields
@@ -94,7 +94,7 @@ module BASE_ENDF_IO
     public write_endf, put_endf, read_endf, get_endf, write_send, write_fend, errcnt, set_error_limit
     public open_endfile, get_endline, put_endline, close_endfile, del_tab1, remove_tab1, skip_mat
     public get_mat, get_mf, get_mt, set_mat, set_mf, set_mt, next_mt, endf_error, endf_badal, chk_siz
-    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat, skip_sect
+    public set_ignore_badmat, set_ignore_badmf, set_ignore_badmt, set_io_verbose, find_mat, skip_sect, skip_mf
 
 !------------------------------------------------------------------------------
     contains
@@ -1061,7 +1061,7 @@ module BASE_ENDF_IO
     return
     end subroutine write_fend
 
-end module BASE_ENDF_IO
+end module ENDF_IOLIB
 
     !***********************************************************************************
     ! these are jacket routines to allow a sequence of contiguous reals to be
@@ -1076,7 +1076,7 @@ end module BASE_ENDF_IO
 
     subroutine read_reals(x,n)
 
-    use BASE_ENDF_IO
+    use ENDF_IOLIB
 
     implicit none
 
@@ -1092,7 +1092,7 @@ end module BASE_ENDF_IO
 
     subroutine write_reals(x,n)
 
-    use BASE_ENDF_IO
+    use ENDF_IOLIB
 
     implicit none
 

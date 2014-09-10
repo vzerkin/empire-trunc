@@ -263,7 +263,7 @@
 	real*8 y
 
 	y = a(n)
-	do i = n-1,1
+	do i = n-1,1,-1
 		y = x*y + a(i)
 	end do
 

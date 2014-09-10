@@ -12,6 +12,8 @@ else ifeq ($(FC),gfortran)
   FFLAGS = -O3
 endif
 
+libdir = $(EMPIREDIR)/lib
+
 all:
 	$(MAKE) add_endf
 	$(MAKE) getmtn
@@ -22,8 +24,8 @@ all:
 	$(MAKE) read_mcnp
 	$(MAKE) mk_nubar
 
-add_endf: add_endf.f90 ../IO/*.o
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ add_endf.f90 ../IO/*.o
+add_endf: add_endf.f90 $(libdir)/libendfio.a ../crs/libcrs.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -I ../crs -o $@ add_endf.f90 -lendfio ../crs/libcrs.a
 
 getmtn: getmtn.f90
 	$(FC) $(FFLAGS) -o $@ getmtn.f90
@@ -37,8 +39,8 @@ mk_xsdir: mk_xsdir.f90
 read_allnjoy: read_allnjoy.f90
 	$(FC) $(FFLAGS) -o $@ read_allnjoy.f90
 
-mk_nubar: mk_nubar.f90 ../IO/*.o
-	$(FC) $(FFLAGS) -I ../IO/ -o $@ mk_nubar.f90 ../IO/*.o
+mk_nubar: mk_nubar.f90 $(libdir)/libendfio.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ mk_nubar.f90 -lendfio
 
 # tailor read_kal for each material
 #read_kal: read_kal.f90

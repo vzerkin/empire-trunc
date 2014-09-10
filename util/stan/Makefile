@@ -2,8 +2,8 @@
 #
 
 # set default compiler:
-FC     =  gfortran
-#FC     =  ifort
+#FC     =  gfortran
+FC     =  ifort
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
@@ -18,17 +18,25 @@ else ifeq ($(FC),lf90)
   FFLAGS = -O3
 endif
 
-stan: stan.f90 ../IO/*.o
-	$(FC) $(FFLAGS) -I ../IO/ -o stan stan.f90 ../IO/*.o
+ifdef FFLAGS
+  FLG = "FFLAGS=$(FFLAGS)"
+else
+  FLG =
+endif
 
-../IO/*.o :
-	cd ../IO/ ; $(MAKE) FC=$(FC) $(FLG)
+libdir = $(EMPIREDIR)/lib
 
-chkr: chkr.f90 ../IO/*.o
-	$(FC) $(FFLAGS) -I ../IO/ -o chkr chkr.f90 ../IO/*.o
+stan: stan.f90 $(libdir)/libendfio.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o stan stan.f90 -lendfio
+
+chkr: chkr.f90 $(libdir)/libendfio.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o chkr chkr.f90 -lendfio
+
+$(libdir)/libendfio.a:
+	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
-	rm -f stan chkr ../IO/*.o ../IO/*.mod
+	rm -f stan chkr
 
 cleanall:
-	rm -f stan chkr ../IO/*.o ../IO/*.mod
+	rm -f stan chkr

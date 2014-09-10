@@ -3,56 +3,65 @@
 	implicit none
 
 	! on command line:
-	! prm1 = working directory with file stem, "workdir/stem"
-	! prm2 = xsdir file for integral experiment
-	! prm3 = working directory on local disk of cluster
+	! prm1 = working directory on mother node: "workdir/"
+	! prm2 = project file stem (name)
 
-	! we need to set datapath to 
+	! This routine assumes that the current default directory
+	! is set to the local temporary directory where the MCNP
+	! job will run. On the cluster this is the job-specific
+	! temporary directory on local node.
 
-	integer*4 l1,l2,l3
-	character*200 line,cmd1,cmd2,cmd3
+	! location of our ENDF/B-VII.1 xsdir file
+	character*66, parameter :: xsdir = '/home/arcilla/endf71/final/benchmarks/Cross_Section_Library/xsdir'
+
+	logical*4 qfr
+	integer*4 n,l,ld,ls
+	character*200 line,wrkdir,stem
 
 	logical*4 qpt
 	integer*4 k,nf,m,itype, irec1, len2, lrec, nern, irt
 	real*4 aw0, tz
 	character zac*10,rfm*5,fmt*100
 
-	call getarg(1,cmd1)
-	l1 = len_trim(cmd1)
+	! get the "working" directory/stem from the command line
+	! the working directory is where the files are kept on the
+	! mother node. Not the local directory on the cluster node.
 
-	call getarg(2,cmd2)
-	l2 = len_trim(cmd2)
+	call getarg(1,wrkdir)
+	ld = len_trim(wrkdir)
+	if(ld < 1) stop ' Working directory not supplied to mk_xsdir'
 
-	call getarg(3,cmd3)
-	l3 = len_trim(cmd3)
+	call getarg(2,stem)
+	ls = len_trim(stem)
+	if(ls < 1) stop ' Project name not supplied to mk_xsdir'
+
+	! read the local xsdir created from Empire -> ENDF -> ACE
 
 	call read_xsdir
 
-	open(10,file=cmd2(1:l2),status='old',readonly)
+	! Open the main MCNP xsdir file and make a local copy,
+	! replacing the current material being varied.
+
+	open(10,file=xsdir,status='old',readonly)
 	open(11,file='xsdir',status='new',recl=200)
 
-	read(10,'(a200)',end=100) line
-	write(11,'(a<l2+9>)') 'datapath '//cmd3(1:l3)
+	! copy over everything, only changing out the local ACE file
 
 	do
 		read(10,'(a200)',end=100) line
-		l1 = len_trim(line)
-		write(11,'(a<l1>)') line(1:l1)
+		l = len_trim(line)
+		write(11,'(a<l>)') line(1:l)
 		if(line(1:9) == 'directory') exit
 	end do
 
 	do
 
 		read(10,'(a200)',end=100) line
-		l1 = len_trim(line)
+		l = len_trim(line)
 
 		if(line(1:5) /= zac(1:5)) then
-			write(11,'(a<l1>)') line(1:l1)
+			write(11,'(a<l>)') line(1:l)
 		else
-			k = l1
-			do while(cmd1(k:k) /= '/')
-				k = k - 1
-			end do
 			m = len_trim(zac)
 			if(aw0 < 10.0) then
 				rfm = 'F8.6'
@@ -65,11 +74,11 @@
 				nf = 5
 			endif
 			if(qpt) then
-				fmt = '(a,'//rfm(1:nf)//',a,''_300K.ace'',5(1x,i0),1pE10.3,'' ptable'')'
+				fmt = '(a,1x,'//rfm(1:nf)//',1x,a,''_300K.ace'',6(1x,i0),1pE10.3,'' ptable'')'
 			else
-				fmt = '(a,'//rfm(1:nf)//',a,''_300K.ace'',5(1x,i0),1pE10.3)'
+				fmt = '(a,1x,'//rfm(1:nf)//',1x,a,''_300K.ace'',6(1x,i0),1pE10.3)'
 			endif
-			write(11,fmt) zac(1:m),aw0,cmd1(k:l1),irt,itype,irec1,len2,lrec,nern,tz
+			write(11,fmt) zac(1:m),aw0,stem(1:ls),irt,itype,irec1,len2,lrec,nern,tz
 		endif
 	end do
 
@@ -85,7 +94,9 @@
 	integer*4 i,n
 	character line*150
 
-	open(10,file=cmd1(1:l1)//'_300K.xsdir',status='old',readonly)
+	! look for xsdir file in the mother node working directory
+
+	open(10,file=wrkdir(1:ld)//stem(1:ls)//'_300K.xsdir',status='old',readonly)
 	read(10,'(a)') line
 	close(10)
 	n = len_trim(line)
