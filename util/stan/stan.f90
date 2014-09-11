@@ -349,27 +349,31 @@
         call abort_stan
     endif
 
-    if(nout == 0) then
-       i = nin
-       do while(i >= 1)
-           if(infile(i:i) == '.') exit
-           i = i - 1
-       end do
-       if(i == 0) i = nin+1
-       outfile(1:i-1) = infile(1:i-1)
-       outfile(i:i+3) = '.STN'
-       nout = i+3
-    endif
+    if(.not.qnout) then
 
-    if(.not.qovr) then
-        inquire(file=outfile(1:nout),exist=qx)
-        if(qx) then
-            write(6,*)
-            write(6,*) ' #####     ERROR     #####'
-            write(6,*) ' Output file: ',outfile(1:nout),' already exists.'
-            write(6,*) ' Use "-f" option to overwrite an existing output file.'
-            call abort_stan
+        if(nout == 0) then
+           i = nin
+           do while(i >= 1)
+               if(infile(i:i) == '.') exit
+               i = i - 1
+           end do
+           if(i == 0) i = nin+1
+           outfile(1:i-1) = infile(1:i-1)
+           outfile(i:i+3) = '.STN'
+           nout = i+3
         endif
+
+        if(.not.qovr) then
+            inquire(file=outfile(1:nout),exist=qx)
+            if(qx) then
+                write(6,*)
+                write(6,*) ' #####     ERROR     #####'
+                write(6,*) ' Output file: ',outfile(1:nout),' already exists.'
+                write(6,*) ' Use "-f" option to overwrite an existing output file.'
+                call abort_stan
+            endif
+        endif
+
     endif
 
     if(quiet) return
@@ -377,7 +381,9 @@
     if(qfg(1)) write(6,10) '  Ignoring MAT numbers that change while processing materials'
     if(qfg(2)) write(6,10) '  Ignoring MF numbers that change while processing materials'
     if(qfg(3)) write(6,10) '  Ignoring MT numbers that change while processing materials'
+
     if(qnout) return
+
     if(qfg(4)) write(6,10) '  Previously existing output file may be overwritten'
     if(qfg(5)) write(6,10) '  Output file will contain line numbers'
 
