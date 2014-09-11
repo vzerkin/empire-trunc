@@ -134,8 +134,9 @@
 
     if(ios /= 0) then
         ! on error, warn user of the problem
-        write(6,'(a)')' Error parsing following line from input:'
-        write(6,'(a)') inline(1:m)
+        write(*,'(a)')' Error parsing following line from input:'
+        write(*,'(a)') inline(1:m)
+        write(8,'(a)')' ERROR: Parsing following line from input:', inline(1:m)
         l = 0
     endif
 

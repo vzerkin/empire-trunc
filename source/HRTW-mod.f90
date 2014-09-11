@@ -207,7 +207,7 @@ contains
       zb2   = ZBarCoefficient( lb, jb, lb, jb, sb, L )
       if (zb2==0.d0) return
 
-      Blatt =  (2.0d0 * J + 1.d0 )* zb1*zb2*rc1*rc2/pi4 * (-1.d0)**INT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) )
+      Blatt =  (2.0d0 * J + 1.d0 )* zb1*zb2*rc1*rc2/pi4 * NINT((-1.d0)**NINT(-Ia - sa + Ib + sb + 2.d0*( ja + jb ) ))
 
 !     Blatt =  (2.0d0 * J + 1.d0 ) &
 !               * ZBarCoefficient( la, ja, la, ja, sa, L ) &
