@@ -274,6 +274,7 @@ C-------Printing bare OM results
      &  '('' * OM CN formation cross section (ABScs)          '',G13.6,
      &              '' mb  '')') ABScs
 
+        WRITE (8,'('' *'')')
 C-------Printing scaling factors
         IF (INT(ZEJc(0)).EQ.0) THEN
           IF(TOTred.ne.1)
@@ -282,10 +283,10 @@ C-------Printing scaling factors
            IF(totcorr.gt.0) THEN
             IF( abs(1.d0/totcorr - TOTred0).gt.0.001d0) THEN
               WRITE (108,'(2x,G12.5,3x,F10.6)') EINl, 1.d0/totcorr
-C             WRITE (8,'('' *   set TOTRED '' , F13.6,
-C    &         '' to keep unchanged total'')') 1.d0/totcorr
               WRITE (8,'('' * Total         cross section scaled by '',
      &     G13.6)') TOTred*totcorr
+              WRITE (8,'('' *   set TOTRED '' , F13.6,
+     &         '' to keep unchanged total'')') 1.d0/totcorr
             ENDIF
           ENDIF
         ENDIF

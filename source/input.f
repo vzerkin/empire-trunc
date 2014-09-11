@@ -1,6 +1,6 @@
-!cc   * $Rev: 4057 $
+!cc   * $Rev: 4059 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
+!cc   * $Date: 2014-09-11 22:16:39 +0200 (Do, 11 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1336,6 +1336,7 @@ C------------statement then determines whether or not the TL file exists.
      &lculated'
                WRITE (8,*)
      &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
+               WRITE (8,*)
              ENDIF
              EXIT	    
            endif 
