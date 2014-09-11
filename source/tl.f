@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4037 $
+Ccc   * $Rev: 4057 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-24 17:58:30 +0200 (So, 24 Aug 2014) $
+Ccc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2744,7 +2744,14 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       sabs  = 0.D0
       sabsj = 0.D0
       selast= 0.D0
-C-----Absorption and elastic cross sections in mb
+C-----Absorption and elastic cross sections in mb using TUNetl() if needed
+      DO l = 0, Maxlw
+         Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)
+         DO jindex = 1,MAXj(Nejc)
+           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)
+         ENDDO
+      ENDDO
+
       DO l = 0, Maxlw
         sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         selast = selast + Sel(l + 1)*DBLE(2*l + 1)
@@ -2780,6 +2787,8 @@ C          Scattering into continuum
          ENDIF
       ENDDO
   400 CLOSE (45)
+
+C     write(*,*) sngl(ABScs),sngl(xsabs + SINlcc)
 
       IF (abs(xsabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
          WRITE (8,*)

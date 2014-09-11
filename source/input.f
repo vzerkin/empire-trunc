@@ -1,6 +1,6 @@
-!cc   * $Rev: 4047 $
-!cc   * $Author: shoblit $
-!cc   * $Date: 2014-09-04 17:27:49 +0200 (Do, 04 Sep 2014) $
+!cc   * $Rev: 4057 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -42,13 +42,18 @@ C
      &         qatom,qnucl
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
+      CHARACTER*23 ctmp23
 
-      LOGICAL gexist, calc_fiss
+      LOGICAL gexist, calc_fiss, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
+
+      CHARACTER*3 ctldir
+      DATA ctldir/'TL/'/
+
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
@@ -257,7 +262,7 @@ C--------fusion parameters
          EXPush = 0.d0
          CRL = 0.d0
          DFUs = 1.d0
-         TUNETL = 1.d0
+         TUNetl = 1.d0
          FUSred = 1.d0
          FCCred = 1.d0
          FCOred = 1.d0
@@ -1313,10 +1318,28 @@ c         ENDIF
      &'('' Optical model parameters for direct inelastic scattering set
      &to Kumar & Kailas 2007 values'')')
               endif
-              WRITE (8,*) ' '
+              WRITE (8,*) 
             ENDIF
          ENDIF
 
+         do l=1,ndlw
+           if(dabs(TUNetl(l)-1.d0).gt.1.d-5) then
+             WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
+     &         INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
+     &         INT(A(0)), INT(EIN*1000000)
+C------------This part prompts for the name of a data file. The INQUIRE
+C------------statement then determines whether or not the TL file exists.
+             INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
+             IF (fexist) THEN
+               WRITE (8,*)
+     &' WARNING: TUNetl parameters are not applied as TL were already ca
+     &lculated'
+               WRITE (8,*)
+     &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
+             ENDIF
+             EXIT	    
+           endif 
+         enddo
 C--------input consistency check  *** done ***
          IF (NENdf.eq.0) THEN          
             NPRIm_g = 0
@@ -6772,10 +6795,11 @@ C
                WRITE (8,'('' WARNING: Orbital angular momentum
      &                  tuning on TLs IGNORED'')')
                GOTO 100
-            ENDIF
-            tunetl(i1+1) = val
-            write(8,'(a,i0,a,f8.4)') ' TL, TLJ for l = ',i1,
-     &              ' multiplied by ',val
+            ELSE
+              TUNetl(i1+1) = val
+              write(8,'(a,i3,a,f8.4)') 
+     &          ' TL, TLJ for l = ',i1,' multiplied by ',val
+            ENDIF 
             GOTO 100
          ENDIF
 C-----

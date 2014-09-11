@@ -30,7 +30,7 @@ SUBROUTINE HRTW
    !
    REAL*8 :: cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
    REAL*8 :: j, Ia, xjr, ja, jb, la, lb, xleg, tmp
-   REAL*8 :: xmas_npro, xmas_ntrg, el, ecms, ak2, tlx
+   REAL*8 :: xmas_npro, xmas_ntrg, el, ecms, ak2
    REAL*8 :: d0c
    REAL*8 :: sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
    INTEGER :: i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, iel, lleg
@@ -77,7 +77,7 @@ SUBROUTINE HRTW
    ! start CN nucleus decay
    !
    DO ipar = 1, 2                                      !do loop over decaying nucleus parity
-      ip = nint((-1.0)**(ipar + 1))                    !actual parity of the state (+1 or -1)
+      ip = nint(( - 1.d0)**(ipar + 1))                  !actual parity of the state (+1 or -1)
       DO jcn = 1, nlw                                  !do loop over decaying nucleus spin
          xjc = float(jcn) + HIS(nnuc)
          IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE      !skip if absorption cross section negligible
@@ -201,12 +201,7 @@ SUBROUTINE HRTW
 
          DO i = num%elal, num%elah                   !do loop over elastic channels
             iel = i - num%elal + 1                   !elastic channels for each Jcn are numbered 1,2,3,...
-            if(einl > 4.D0) then
-                tlx = 1.D0
-            else
-                tlx = (1.D0 - tunetl(inchnl(iel)%l+1))*einl/4.D0 + tunetl(inchnl(iel)%l+1)
-            endif
-            inchnl(iel)%t = tlx*outchnl(i)%t
+            inchnl(iel)%t = outchnl(i)%t
             inchnl(iel)%sig = coef*inchnl(iel)%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  !absorption for iel channel
             xnor = inchnl(iel)%sig/DENhf                      !normalization factor
 !            write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, inchnl(iel)%t, outchnl(i)%t, coef, inchnl(iel)%sig

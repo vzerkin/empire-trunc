@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4047 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-04 17:27:49 +0200 (Do, 04 Sep 2014) $
+Ccc   * $Rev: 4057 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -52,7 +52,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       CHARACTER*132 ctmp
       CHARACTER*23 ctmp23
       LOGICAL dodwba, fexist, fexistj, ldbwacalc, ltlj, relcal, lodd
-      DOUBLE PRECISION E1, E2, SIGQD, XM1, tlx
+      DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, istat1, istat2, ilev1, mxj,
      &  ipa, il, iloc, l, myalloc, jindex, kmin, kmax
@@ -140,16 +140,9 @@ C        write (*,*) 'lmax =',lmax
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
             DO l = 0, maxlw
-              if(einl > 4.D0) then
-                  tlx = 1.D0
-              else
-                  tlx = (1.D0 - tunetl(l+1))*einl/4.D0 + tunetl(l+1)
-              endif
               READ (45,END = 50,ERR=50) stl(l+1)
-              stl(l+1) = tlx*stl(l+1)
               IF(fexistj) READ (451,END = 50,ERR=50) 
      &          (stlj(l+1,jindex), jindex=1,mxj)
-              stlj(l+1,1:mxj) = tlx*stlj(l+1,1:mxj)
               IF (IOUt.EQ.5) THEN
                 WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l+1)
                 IF(fexistj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
@@ -167,7 +160,7 @@ C-----------Absorption and elastic cross sections in mb
             DO l = 0, maxlw
               ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
               IF (fexistj) then
-                DO jindex = 1, MAXj(Npro)
+                DO jindex = 1, mxj
                   jsp = sjf(l,jindex,SEJc(Npro)) 
                   ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
                 ENDDO 
