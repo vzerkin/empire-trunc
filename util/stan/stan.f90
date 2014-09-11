@@ -7,15 +7,15 @@
     ! author: Sam Hoblit, NNDC, BNL
     ! routine to check format of ENDF-6 files
 
-    logical*4 qover
+    logical*4 qover,quiet,qnout
     integer*4 nout,nin,status
     character*200 outfile, infile
 
     type (endf_file) endf
 
-    call parse_cmd_line(outfile,nout,qover,infile,nin)
+    call parse_cmd_line(outfile,nout,infile,nin,qover,quiet,qnout)
 
-    write(6,*) ' Reading '//infile(1:nin)
+    if(.not.quiet) write(6,*) ' Reading '//infile(1:nin)
     status = read_endf_file(infile(1:nin),endf)
     if(status /= 0) then
         write(6,*)
@@ -24,15 +24,23 @@
         call abort_stan
     endif
 
-    call reset_mf1
+    if(qnout) then
 
-    write(6,*) ' Writing '//outfile(1:nout)
-    status = write_endf_file(outfile(1:nout),endf,qover)
-    if(status /= 0) then
-        write(6,*)
-        write(6,*) ' Error writing '//outfile(1:nout)
-        write(6,*) ' Output file may be incomplete'
-        call abort_stan
+        if(.not.quiet) write(6,*) ' No output file written'
+
+    else
+
+        call reset_mf1
+
+        if(.not.quiet) write(6,*) ' Writing '//outfile(1:nout)
+        status = write_endf_file(outfile(1:nout),endf,qover)
+        if(status /= 0) then
+            write(6,*)
+            write(6,*) ' Error writing '//outfile(1:nout)
+            write(6,*) ' Output file may be incomplete'
+            call abort_stan
+        endif
+
     endif
 
     contains
@@ -54,11 +62,11 @@
         r1 => mf1%mt451
         if(.not.associated(r1)) cycle
         if(r1%mat /= mat%mat) then
-            write(6,'(a,i4)') '  Comment: resetting MF1 HSUB MAT field to ',mat%mat
+            if(.not.quiet) write(6,'(a,i4)') '  Comment: resetting MF1 HSUB MAT field to ',mat%mat
             r1%mat = mat%mat
         endif
         if(r1%mfor /= r1%nfor) then
-            write(6,'(a,i4)') '  Comment: resetting MF1 HSUB format # to ',r1%nfor
+            if(.not.quiet) write(6,'(a,i4)') '  Comment: resetting MF1 HSUB format # to ',r1%nfor
             r1%mfor = r1%nfor
         endif
         mat => mat%next
@@ -71,25 +79,28 @@
 
 !-----------------------------------------------------
 
-    subroutine parse_cmd_line(outfile,nout,qovr,infile,nin)
+    subroutine parse_cmd_line(outfile,nout,infile,nin,qovr,quiet,qnout)
 
     use endf_io
 
     implicit none
 
-    logical*4, intent(out) :: qovr
+    logical*4, intent(out) :: qovr,quiet,qnout
     integer, intent(out) :: nout, nin
     character*(*), intent(out) :: outfile, infile
 
     integer*4 i,len,m,n,stat
-    logical*4 qx
+    logical*4 qx,qfg(10)
     character cmd*200,dum*20
 
     nin = 0
     nout = 0
     infile = ' '
     outfile = ' '
-    qovr = .false.
+    qovr  = .false.
+    quiet = .false.
+    qnout = .false.
+    qfg = .false.
 
     i = 1
     call getarg(i,cmd)
@@ -98,6 +109,13 @@
     do while(len > 0)
 
        if(cmd(1:len) == '-o') then
+
+           if(qnout) then
+               write(6,*)
+               write(6,*) ' #####     ERROR     #####'
+               write(6,*) ' Qualifiers -o and -nout are incompatible'
+               call abort_stan
+           endif
 
            i = i + 1
            call getarg(i,outfile)
@@ -111,32 +129,47 @@
 
        else if(cmd(1:len) == '-cm') then
 
-           write(6,10) '  Ignoring MAT numbers that change while processing materials'
+           qfg(1) = .true.
            call set_ignore_badmat(.true.)
 
        else if(cmd(1:len) == '-cf') then
 
-           write(6,10) '  Ignoring MF numbers that change while processing materials'
+           qfg(2) = .true.
            call set_ignore_badmf(.true.)
+
+       else if(cmd(1:len) == '-ct') then
+
+           qfg(3) = .true.
+           call set_ignore_badmt(.true.)
 
        else if(cmd(1:len) == '-f') then
 
-           write(6,10) '  Previously existing output file may be overwritten'
+           qfg(4) = .true.
            qovr = .true.
 
        else if(cmd(1:len) == '-l') then
 
-           write(6,10) '  Output file will contain line numbers'
+           qfg(5) = .true.
            call set_output_line_numbers(.true.)
 
-       else if(cmd(1:len) == '-ct') then
+       else if((cmd(1:len) == '-q') .or. (cmd(1:len) == '--quiet')) then
 
-           write(6,10) '  Ignoring MT numbers that change while processing materials'
-           call set_ignore_badmt(.true.)
+           quiet = .true.
 
-       else if(cmd(1:len) == '-v') then
+       else if((cmd(1:len) == '-v') .or. (cmd(1:len) == '--verbose')) then
 
            call set_io_verbose(.true.)
+
+       else if(cmd(1:len) == '-nout') then
+
+           if(nout > 0) then
+               write(6,*)
+               write(6,*) ' #####     ERROR     #####'
+               write(6,*) ' Qualifiers -o and -nout are incompatible'
+               call abort_stan
+           endif
+
+           qnout = .true.
 
        else if(cmd(1:2) == '-x') then
 
@@ -225,31 +258,35 @@
 
            call set_error_limit(m)
 
-       else if(cmd(1:len) == '-h') then
+       else if((cmd(1:len) == '-h') .or. (cmd(1:len) == '--help')) then
 
            write(6,10)
            write(6,10) ' stan   version 1.0'
            write(6,10)
            write(6,10) ' usage: stan [-h,im,if,it,v,l,x=n] [-o outfile] endf_file'
            write(6,10)
-           write(6,10) ' -h   : prints this help message'
+           write(6,10) ' -h   : also --help. prints this help message'
            write(6,10) ' -cm  : continue if the MAT number changes while processing a material.'
            write(6,10) '        The MAT number for the material will be left as first encountered,'
            write(6,10) '        usually from MF1/451. A message will be printed to the screen when'
            write(6,10) '        different MAT numbers are encountered. Normally, MAT numbers changing'
            write(6,10) '        unexpectely during processing is considered fatal.'
-           write(6,10) ' -cf  : continue if the MF number changes while processing a material.'
+           write(6,10) ' -cf  : continue if the MF number changes while processing an ENDF "file".'
            write(6,10) '        The MF number for the file will not change. A message will be printed'
            write(6,10) '        to the screen if a different MF is encountered. Normally, MF numbers'
            write(6,10) '        changing unexpectely during processing is considered fatal.'
-           write(6,10) ' -ct  : continue if the MT number changes while processing a section.'
+           write(6,10) ' -ct  : continue if the MT number changes while processing an ENDF section.'
            write(6,10) '        The MT number for the section will not change. A message will be printed'
            write(6,10) '        to the screen if a different MT is encountered. Normally, MT numbers'
            write(6,10) '        changing unexpectely during processing is considered fatal.'
-           write(6,10) ' -v   : verbose mode. This modifier will cause stan to print out the MAT,'
-           write(6,10) '        MF and MT for each section encountered.'
-           write(6,10) ' -o   : output filename. If not specified, the output filename is just'
-           write(6,10) '        the input filename with extension ".STN"'
+           write(6,10) ' -v   : also --verbose. verbose mode. This modifier will cause stan to print out'
+           write(6,10) '        the MAT, MF and MT for each section encountered.'
+           write(6,10) ' -q   : also --quiet. quiet mode. This modifier will cause stan to print no'
+           write(6,10) '        output messages to the terminal. Error messages are still printed.'
+           write(6,10) ' -o   : output filename. If not specified, the output filename is just the'
+           write(6,10) '        input filename with extension ".STN". Incompatible with -nout qualifier.'
+           write(6,10) ' -nout: no output. If specified, no output file will be produced.'
+           write(6,10) '        Incompatible with -o qualifier.'
            write(6,10) ' -f   : allows an existing file to be overwritten on output'
            write(6,10) '        the default is for the write to fail if output file already exists'
            write(6,10) ' -l   : put ENDF line numbers in columns 76:80 of output file'
@@ -334,6 +371,15 @@
             call abort_stan
         endif
     endif
+
+    if(quiet) return
+
+    if(qfg(1)) write(6,10) '  Ignoring MAT numbers that change while processing materials'
+    if(qfg(2)) write(6,10) '  Ignoring MF numbers that change while processing materials'
+    if(qfg(3)) write(6,10) '  Ignoring MT numbers that change while processing materials'
+    if(qnout) return
+    if(qfg(4)) write(6,10) '  Previously existing output file may be overwritten'
+    if(qfg(5)) write(6,10) '  Output file will contain line numbers'
 
     return
 

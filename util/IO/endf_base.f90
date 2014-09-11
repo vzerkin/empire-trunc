@@ -116,7 +116,7 @@ module ENDF_IOLIB
     endif
 
     if(tb%np <= 0) then
-        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%nr
+        write(erlin,*) 'TAB1 record with NP .LE. 0 : ',tb%np
         call endf_error(erlin)
     endif
 

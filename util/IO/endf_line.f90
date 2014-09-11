@@ -606,6 +606,7 @@ module endf_lines
             istate = idata
             cmft(5:9) = endline(71:75)
             lmft = cmft
+            if(verbose) write(6,*) '  READING MAT=',cmft(1:4),'   MF=',cmft(5:6),'   MT=',cmft(7:9)
             return
         endif
 
