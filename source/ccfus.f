@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
+Ccc   * $Rev: 4055 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Date: 2014-09-11 21:51:39 +0200 (Do, 11 Sep 2014) $
 C
       SUBROUTINE CCFUS(Stl,Rkey)
 C
@@ -33,7 +33,6 @@ C
      &                 s0, s1, s2, sq, su0, su1, su2,
      &                 sum, ur, vb, vbl, vbw, vbwl, r00, sumunc
       DOUBLE PRECISION ecrit1, bfu, critl, sigl0(NDLW), sigl1(NDLW) 
-      REAL FLOAT
       INTEGER i1, ic1, ick, il, ilim, k, n, n1(NDCC), n1t, nd, nmax,
      &        np(NDCC), ns1
 C
@@ -42,9 +41,7 @@ C
       sigl0 = 0.d0 
       sigl1 = 0.d0
 
-      DO k = 1, NDLW
-         Stl(k) = 0.d0
-      ENDDO
+      Stl = 0.d0
       
       nmax = NSCc + NACc
       ns1 = NSCc + 1
@@ -236,16 +233,6 @@ C
         if(sigl0(il).le.1.d-10) exit
       ENDDO
       NLW = min(NDLW,il)
-C
-C     Example of the format to create FUSION file
-C
-C     OPEN(111,file='FUSION')
-C     DO il = 1, NDLW
-C     if(Stl(il).le.1.d-16) exit
-C       write(111,*) sigl0(il)
-C     ENDDO
-C     NLW = min(NDLW,il)
-C     CLOSE(111)
 
       WRITE (8,34) EIN,sum,sumunc
 
