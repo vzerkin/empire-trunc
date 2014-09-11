@@ -279,11 +279,13 @@ C-------Printing scaling factors
           IF(TOTred.ne.1)
      &    WRITE (8,'('' * Total         cross section scaled by '',
      &     G13.6)') TOTred
-          IF(totcorr.gt.0) THEN
+           IF(totcorr.gt.0) THEN
             IF( abs(1.d0/totcorr - TOTred0).gt.0.001d0) THEN
               WRITE (108,'(2x,G12.5,3x,F10.6)') EINl, 1.d0/totcorr
-              WRITE (8,'('' *   set TOTRED '' , F13.6,
-     &         '' to keep unchanged total'')') 1.d0/totcorr
+C             WRITE (8,'('' *   set TOTRED '' , F13.6,
+C    &         '' to keep unchanged total'')') 1.d0/totcorr
+              WRITE (8,'('' * Total         cross section scaled by '',
+     &     G13.6)') TOTred*totcorr
             ENDIF
           ENDIF
         ENDIF
@@ -319,16 +321,17 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') TOTcs*TOTred*totcorr
          IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
      &  '('' * Shape elastic + CN absorption + direct         '',G13.6,
-     &              '' mb  '')') ELAred*ELAcs + 
+     &              '' mb  '')') (ELAred*ELAcs + 
      &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
-     &        (SINl+SINlcc)*FCCred + SINlcont*FCOred 
+     &        (SINl+SINlcc)*FCCred + SINlcont*FCOred)*totcorr
          IF (INT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Shape elastic cross section                    '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
          IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
      &  '('' * CN formation corrected for direct              '',G13.6,
      &              '' mb  '')')
-     &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred
+C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred
+     &   CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
          IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
      &  '('' * Direct inelastic cross section                 '',G13.6,
      &              '' mb  '')')
