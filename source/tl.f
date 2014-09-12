@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4060 $
+Ccc   * $Rev: 4064 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-12 20:55:27 +0200 (Fr, 12 Sep 2014) $
+Ccc   * $Date: 2014-09-12 23:06:58 +0200 (Fr, 12 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2740,6 +2740,8 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
   300 CLOSE (45)
 
       IF (ABScs.LE.0.D0) RETURN
+      
+      CSFus = ABScs
 
       sabs  = 0.D0
       sabsj = 0.D0
@@ -2766,10 +2768,6 @@ C-----Absorption and elastic cross sections in mb using TUNetl() if needed
 
       IF (xsabs.le.0.d0) RETURN
 
-C     write(*,*) sngl(ABScs),sngl(xsabs + SINlcc)
-C     Redefining ABScs for consistency 
-      ABScs = xsabs + SINlcc
-      CSFus = ABScs
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
@@ -2790,8 +2788,6 @@ C          Scattering into continuum
          ENDIF
       ENDDO
   400 CLOSE (45)
-
-C     write(*,*) sngl(ABScs),sngl(xsabs + SINlcc)
 
       IF (abs(xsabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
          WRITE (8,*)
