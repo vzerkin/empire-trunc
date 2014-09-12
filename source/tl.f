@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4064 $
+Ccc   * $Rev: 4065 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-12 23:06:58 +0200 (Fr, 12 Sep 2014) $
+Ccc   * $Date: 2014-09-12 23:34:39 +0200 (Fr, 12 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2738,7 +2738,6 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       READ (45,*,END=300) ABScs 
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
   300 CLOSE (45)
-
       IF (ABScs.LE.0.D0) RETURN
       
       CSFus = ABScs
@@ -2767,7 +2766,6 @@ C-----Absorption and elastic cross sections in mb using TUNetl() if needed
       selast = coeff*selast
 
       IF (xsabs.le.0.d0) RETURN
-
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
       READ (45,*,END = 400)  ! Skipping first line
@@ -2805,6 +2803,15 @@ C          Scattering into continuum
          write (8,*) ' ECIS  ABScs  =',sngl(ABScs)
          WRITE (8,*)
       ENDIF
+
+C     RENORMALIZING TLs and TLJs      
+	ftmp = ABScs/(xsabs+SINlcc)
+      DO l = 0, Maxlw
+         Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)*ftmp
+         DO jindex = 1,MAXj(Nejc)
+           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)*ftmp
+         ENDDO
+      ENDDO
 
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C
