@@ -1,6 +1,6 @@
-!cc   * $Rev: 4059 $
+!cc   * $Rev: 4060 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-11 22:16:39 +0200 (Do, 11 Sep 2014) $
+!cc   * $Date: 2014-09-12 20:55:27 +0200 (Fr, 12 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3597,7 +3597,9 @@ C-----------Print some final input options
                  IF(A(0).ge.40)
      &              ecutof = 2.50d0*30./A(0)**0.6666666d0
                  IF(A(0).gt.220 .or. (A(0).ge.150 .and. A(0).le.190))
-     &              ecutof = 2.0d0*30./A(0)**0.6666666d0 ! deformed
+C    &              ecutof = 2.0d0*30./A(0)**0.6666666d0 ! deformed
+C                   going back to 3987 release to limit the number of DWBA states for actinides
+     &              ecutof = 1.5d0*30./A(0)**0.6666666d0 ! deformed
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
@@ -10659,6 +10661,16 @@ C--------------ground state deformation for spherical nucleus is 0.0
                GOTO 500
             ENDIF
             IF (ECUtcoll.GT.0. .AND. elvr.GE.ECUtcoll) GOTO 600
+C
+C           Skipping 0- states in the continuum
+            if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.0) GOTO 500
+            IF(ilv.GT.NLV(0)) THEN
+C             Skipping 2- states in the continuum
+              if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.4) GOTO 500
+C             Skipping 1+/1- states in the continuum
+              if(                 NINT(2*xjlvr).eq.2) GOTO 500
+            ENDIF
+
 C-----------Additional levels are added for DWBA calculations
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll) THEN
                ND_nlv = ND_nlv + 1
@@ -10672,10 +10684,6 @@ C-----------Additional levels are added for DWBA calculations
                IF (ND_nlv.NE.NDCOLLEV) GOTO 500
                GOTO 600
             ENDIF
-C           IF(i20p.NE.0 .AND.i21p.NE.0.AND.i4p.NE.0.AND.i0p.NE.0) THEN
-C              ierr = 0
-C              GOTO 600
-C           ENDIF
 C
 C--------Deformed nuclei follow (beta2 = DEF(1, 0))
 C
@@ -10844,6 +10852,15 @@ C-----------Additional levels are added for DWBA calculations
 C
             IF (ECUtcoll.GT.0. .AND. elvr.GT.ECUtcoll) GOTO 600
 
+C           Skipping 0- states in the continuum
+            if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.0) GOTO 500
+            IF(ilv.GT.NLV(0)) THEN
+C             Skipping 2- states in the continuum
+              if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.4) GOTO 500
+C             Skipping 1+/1- states in the continuum
+              if(                 NINT(2*xjlvr).eq.2) GOTO 500
+            ENDIF
+
             IF (ECUtcoll.GT.0. .AND. xjlvr.LE.JCUtcoll .AND.
      &                               .NOT.odd) THEN
                ND_nlv = ND_nlv + 1
@@ -10859,15 +10876,6 @@ C
             ENDIF
 
             IF (ECUtcoll.GT.0. .AND. xjlvr.GT.JCUtcoll) cycle
-
-C           IF (i20p.NE.0 .AND. i4p.NE.0 .AND. i6p.NE.0 .AND.
-C    &          i8p.NE.0 .AND. i0p.NE.0 .AND. i1m.NE.0 .AND.
-C    &          i3m.NE.0 .AND. i5m.NE.0 .AND. i21p.NE.0 .AND.
-C    &          i22p.NE.0 ) THEN
-C    &          i22p.NE.0 .AND. i10p.NE.0 .AND. i12p.NE.0) THEN
-C              ierr = 0
-C              GOTO 600
-C           ENDIF
 
          ENDIF
 

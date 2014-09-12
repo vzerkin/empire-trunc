@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4057 $
+Ccc   * $Rev: 4060 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
+Ccc   * $Date: 2014-09-12 20:55:27 +0200 (Fr, 12 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2766,6 +2766,9 @@ C-----Absorption and elastic cross sections in mb using TUNetl() if needed
 
       IF (xsabs.le.0.d0) RETURN
 
+C     write(*,*) sngl(ABScs),sngl(xsabs + SINlcc)
+C     Redefining ABScs for consistency 
+      ABScs = xsabs + SINlcc
       CSFus = ABScs
 
       OPEN (UNIT = 45,FILE = 'INCIDENT.ICS',STATUS = 'old',ERR = 400)
