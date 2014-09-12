@@ -1,6 +1,6 @@
-!cc   * $Rev: 4060 $
+!cc   * $Rev: 4063 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-12 20:55:27 +0200 (Fr, 12 Sep 2014) $
+!cc   * $Date: 2014-09-12 23:05:46 +0200 (Fr, 12 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3595,7 +3595,8 @@ C-----------Print some final input options
                ecutof = 3.0d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
                  IF(A(0).ge.40)
-     &              ecutof = 2.50d0*30./A(0)**0.6666666d0
+     &              ecutof = 2.00d0*30./A(0)**0.6666666d0
+C    &              ecutof = 2.50d0*30./A(0)**0.6666666d0
                  IF(A(0).gt.220 .or. (A(0).ge.150 .and. A(0).le.190))
 C    &              ecutof = 2.0d0*30./A(0)**0.6666666d0 ! deformed
 C                   going back to 3987 release to limit the number of DWBA states for actinides
@@ -10479,9 +10480,11 @@ C
 C--------Skipping levels with unknown spin in the discrete level region
          IF (xjlvr.LT.0. .AND. ilv.LE.NLV(nnurec)) CYCLE
 
-C--------Skipping octupole levels with zero T1/2 (not collective) in the discrete level region
-         IF (NINT(xjlvr).eq.3 .AND. lvpr.eq.-1 .AND.   
-     &      t12.LE.0.d0 .AND. ilv.LE.NLV(nnurec)) CYCLE
+C--------Skipping octupole levels with zero T1/2 (not collective) in the 
+C        discrete level region for vibrational nuclei
+         IF ( NINT(xjlvr).eq.3 .AND. lvpr.eq.-1 .AND.   
+     &      t12.LE.0.d0 .AND. ilv.LE.NLV(nnurec) .AND. 
+     &      (.NOT.(DEFormed)) ) CYCLE
 
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
@@ -10664,7 +10667,7 @@ C--------------ground state deformation for spherical nucleus is 0.0
 C
 C           Skipping 0- states in the continuum
             if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.0) GOTO 500
-            IF(ilv.GT.NLV(0)) THEN
+            IF(ilv.GT.min(NLV(0),12)) THEN
 C             Skipping 2- states in the continuum
               if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.4) GOTO 500
 C             Skipping 1+/1- states in the continuum
@@ -10854,7 +10857,8 @@ C
 
 C           Skipping 0- states in the continuum
             if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.0) GOTO 500
-            IF(ilv.GT.NLV(0)) THEN
+
+            IF(ilv.GT.min(NLV(0),12)) THEN
 C             Skipping 2- states in the continuum
               if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.4) GOTO 500
 C             Skipping 1+/1- states in the continuum
