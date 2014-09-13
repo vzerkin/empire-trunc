@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4065 $
+Ccc   * $Rev: 4069 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-12 23:34:39 +0200 (Fr, 12 Sep 2014) $
+Ccc   * $Date: 2014-09-14 01:02:54 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -55,10 +55,13 @@ C--------CCFUS calculations (uncoupled barriers)
          ENDIF
 
 C--------CCFUS calculations  *** done ****
+C
 C--------check for distribution barrier
          IF (CSRead.EQ.( - 1.D0)) distrb = .TRUE.
 C--------calculate projectile+target binding energy if not done already
          IF (Q(0,1).EQ.0.D0) CALL BNDG(0,1,Q(0,1))
+
+
          IF (distrb) THEN
             CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,
      &          ecrit1,critl,csfus)
@@ -95,7 +98,6 @@ C           IF distributed barrier, then BASS barriers are used
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
      &                NLW,NDLW)
 
-            RETURN
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model
 C        *** done ***
@@ -128,7 +130,6 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       ENDDO
 	RETURN
       END
-
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
       implicit none 
       INCLUDE 'dimension.h'
@@ -158,7 +159,8 @@ C
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
       INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc 
-      INTEGER iwin, ipipe_move, ipipe_copy
+      INTEGER iwin, ipipe_move
+C     INTEGER iwin, ipipe_move, ipipe_copy
 C
 C-----Sets CC optical model parameters according to RIPL
 C
@@ -205,28 +207,28 @@ C
 C        WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'ERROR: Rigid rotor CC potential selected but '
-            WRITE (8,*)'ERROR: no isotopes defined for this OMP     '
-            WRITE (8,*)'ERROR: Error in RIPL database.                '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' ERROR: Rigid rotor CC potential selected but '
+           WRITE (8,*)' ERROR: no isotopes defined for this OMP     '
+           WRITE (8,*)' ERROR: Error in RIPL database.                '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          ncalc = 0
          DO n = 1, NISotop
-            IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
+           IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (8,*)'WARNING: Target nucleus not listed in RIPL OMP'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' WARNING: Target nucleus not listed in RIPL OMP'
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)'ERROR: RIPL CC rigid rotor OMP NCOll(target)= 0'
-            WRITE (8,*)'ERROR: Error in RIPL database.                 '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' ERROR: RIPL CC rigid rotor OMP NCOll(target)= 0'
+           WRITE (8,*)' ERROR: Error in RIPL database.                 '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
 
          nld_cc = 0
@@ -235,10 +237,10 @@ C        WRITE (8,*)
          ENDDO
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
+     &  ' WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
-     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'   
-            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
+     &  ' WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'   
+            WRITE (8,*) ' WARNING: RIPL number of coupled channels used'
          ENDIF
 C
 C        rigid rotor model
@@ -434,8 +436,8 @@ C----------rotational model so we are setting it to 0.005
   100    CLOSE (32)
          CLOSE (96)
          CLOSE (97)
-         iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
-C        iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
+C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
+         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
@@ -448,49 +450,49 @@ C
          coll_defined = .TRUE.
 C        WRITE (8,*)
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'ERROR: Vibrat. CC potential selected but    '
-            WRITE (8,*)'ERROR: no isotopes defined for this OMP     '
-            WRITE (8,*)'ERROR: Error in RIPL database.                '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' ERROR: Vibrat. CC potential selected but       '
+           WRITE (8,*)' ERROR: no isotopes defined for this OMP        '
+           WRITE (8,*)' ERROR: Error in RIPL database.                 '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          ncalc = 0
          DO n = 1, NISotop
-            IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
+           IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (8,*)'WARNING: Target nucleus not listed in RIPL OMP'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' WARNING: Target nucleus not listed in RIPL OMP '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          IF (NVIb(ncalc).EQ.0) THEN
-            WRITE (8,*)'ERROR: RIPL CC vibr. OMP NVIb(target) = 0    '
-            WRITE (8,*)'ERROR: Error in RIPL database.                 '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' ERROR: RIPL CC vibr. OMP NVIb(target) = 0      '
+           WRITE (8,*)' ERROR: Error in RIPL database.                 '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          DO k = 2, NVIb(ncalc)
-            IF (NPH(k,ncalc).GT.2) THEN
+           IF (NPH(k,ncalc).GT.2) THEN
               IWArn = 6
-              WRITE (8,*) 'WARNING: NPH(k,i)=3 !!! in RIPL OMP'
+              WRITE (8,*) ' WARNING: NPH(k,i)=3 !!! in RIPL OMP'
               WRITE (8,*)
-     &          'WARNING: Default collective levels will be used'
+     &          ' WARNING: Default collective levels will be used'
               GOTO 300
-            ENDIF
+           ENDIF
          ENDDO
 
          nld_cc = 0
          DO k = 1, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+           IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
          ENDDO
          IF (nld_cc.NE.NVIb(ncalc)) THEN
-            WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
-            WRITE (8,*) 
-     &  'WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
-            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
+           WRITE (8,*) 
+     &  ' WARNING: Default number of coupled levels ', nld_cc
+           WRITE (8,*) 
+     &  ' WARNING: is not equal ', NVIb(ncalc),' defined in RIPL OMP'   
+           WRITE (8,*) ' WARNING: RIPL number of coupled channels used'
          ENDIF
 C        
 C        vibrational model
@@ -775,10 +777,10 @@ C
          ENDDO
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
+     &  ' WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
-     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
+     &  ' WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) ' WARNING: RIPL number of coupled channels used'
          ENDIF
 C
 C        soft rotor model
@@ -1095,39 +1097,39 @@ C
 C        WRITE (8,*)
 
          IF (NISotop.EQ.0 .AND. FIRst_ein) THEN
-            WRITE (8,*)'ERROR: Rigid+soft rotor CC potential selected'
-            WRITE (8,*)'ERROR: but no isotopes defined for this OMP '
-            WRITE (8,*)'ERROR: Error in RIPL database.                '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' ERROR: Rigid+soft rotor CC potential selected  '
+           WRITE (8,*)' ERROR: but no isotopes defined for this OMP    '
+           WRITE (8,*)' ERROR: Error in RIPL database.                 '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          ncalc = 0
          DO n = 1, NISotop
-            IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
+           IF (iainp.EQ.IA(n) .AND. izinp.EQ.IZ(n)) ncalc = n
          ENDDO
          IF (ncalc.EQ.0) THEN
-            WRITE (8,*)'WARNING: Target nucleus not listed in RIPL OMP'
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)' WARNING: Target nucleus not listed in RIPL OMP '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
          IF (NCOll(ncalc).EQ.0) THEN
-            WRITE (8,*)
-     &            'ERROR: RIPL CC rigid+soft rotor NCOll(target) = 0 '
-            WRITE (8,*)'ERROR: Error in RIPL database.                '
-            WRITE (8,*)'ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
-            WRITE (8,*)'WARNING: Default collective levels will be used'
-            GOTO 300
+           WRITE (8,*)
+     &            ' ERROR: RIPL CC rigid+soft rotor NCOll(target) = 0  '
+           WRITE (8,*)' ERROR: Error in RIPL database.                 '
+           WRITE (8,*)' ERROR: Report RIPL OMP to r.capotenoy@iaea.org '
+           WRITE (8,*)' WARNING: Default collective levels will be used'
+           GOTO 300
          ENDIF
 
          IF (ND_nlv .LT. NCOll(ncalc)) THEN
-             WRITE (8,*)
-     &       'ERROR: Number of collective levels < RIPL CC '
-            WRITE (8,*)
-     &       'ERROR: Delete ECDWBA from input and the collective'
-            WRITE (8,*)
-     &       'ERROR: level file *-lev.col, and rerun'
-            STOP 'ERROR: see the long output (*.lst)'
+           WRITE (8,*)
+     &       ' ERROR: Number of collective levels < RIPL CC '
+           WRITE (8,*)
+     &       ' ERROR: Delete ECDWBA from input and the collective'
+           WRITE (8,*)
+     &       ' ERROR: level file *-lev.col, and rerun'
+           STOP 'ERROR: see the long output (*.lst)'
          ENDIF
 
 C--------Setting EMPIRE global variables
@@ -1138,10 +1140,10 @@ C--------Setting EMPIRE global variables
 
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
-     &  'WARNING: Default number of coupled levels ', nld_cc
+     &  ' WARNING: Default number of coupled levels ', nld_cc
             WRITE (8,*) 
-     &  'WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) 'WARNING: RIPL number of coupled channels used'
+     &  ' WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) ' WARNING: RIPL number of coupled channels used'
          ENDIF
 C        WRITE (8,*) 
 C
