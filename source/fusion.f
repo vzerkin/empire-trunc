@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4057 $
+Ccc   * $Rev: 4072 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-11 22:03:57 +0200 (Do, 11 Sep 2014) $
+Ccc   * $Date: 2014-09-14 01:30:02 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -65,6 +65,8 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       INTEGER PAR
       PAR(i,ipa,l) = (1 - (-1)**i*ipa*(-1)**l)/2
+
+      ltlj = .FALSE.
 C
 C-----Zero qd fraction of photabsorption before it can do any damage
 C
@@ -89,6 +91,7 @@ C-----Reduced mass corrected for proper mass values
       S1 = 0.5d0
       IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
      &    - SEJc(Npro).EQ.0.0D0) S1 = 1.d0
+
       ELAcs = 0.D0
       TOTcs = 0.D0
       ABScs = 0.D0
@@ -97,6 +100,7 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
+
 C     allocate stl(), stlj(), sel() 
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
       IF(myalloc.NE.0) THEN
@@ -130,10 +134,7 @@ C--------Here the old calculated files are read
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          IF (fexistj) 
      &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-C        write (*,*) 'lmaxj=',lmax
-
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
-C        write (*,*) 'lmax =',lmax
 
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
 
@@ -187,18 +188,18 @@ C-----------Absorption and elastic cross sections in mb
               ENDIF 
 
             ENDIF
-            READ (45,END = 300, ERR=300) L
+            READ (45,END = 40, ERR=40) L
             IF(L.EQ.123456) THEN
               IF (IOUt.EQ.5) WRITE (46,*) L
               DO l = 0, maxlw
-                READ (45,END = 300, ERR=300) ftmp
+                READ (45,END = 40, ERR=40) ftmp
                 if(l+1.le.NDLW) THEN 
                   sel(l + 1) = ftmp
                   IF (IOUt.EQ.5) WRITE (46,*) l, SNGL(ftmp)
                 endif
               ENDDO
             ENDIF
-            CLOSE (45 )
+   40       CLOSE (45 )
             IF (fexistj) CLOSE (451)
       
             maxlw = min(NDLW,maxlw)
@@ -235,10 +236,13 @@ C
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
       ENDIF
+
 C-----Calculation of fusion cross section for photon induced reactions
       IF (NINT(AEJc(Npro)).EQ.0) THEN
+
          IF (SDRead) THEN
 C-----------Reading of spin distribution from file SDFILE
+C
 C           If you have file "SDFILE" -> it is possible to use
 C           input spin distribution
 C           Format of the file:
@@ -258,7 +262,7 @@ C           Reading no more than 2*NDLW rows
             WRITE (8,*)
      &          ' (all previous instructions concerning fusion ignored)'
             DO i = 1, 2*NDLW
-               READ (43,*,END = 60) cnj, parcnj, csvalue
+               READ (43,*,END = 60,ERR = 60) cnj, parcnj, csvalue
 C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                IF (2*cnj - DINT(2*cnj).NE.0.d0) THEN
                 WRITE(8,*)'ERROR: cnJ!=n*1/2, n=0,+-1... in SDREAD file'
@@ -276,14 +280,12 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
             ENDDO
    60       ABScs=CSFus
-            SINlcc=0.d0
-            SINl  =0.d0
-            SINlcont =0.d0
-            NLW = i - 1 ! RCN Aug 2008
-C--------END of spin distribution from file SDFILE
+            NLW = max(NDLW,j) 
+C-----------END of spin distribution from file SDFILE
+
          ELSE
-            JSTab(1) = NDLW
-                          !stability limit not a problem for photoreactions
+
+            JSTab(1) = NDLW !stability limit not a problem for photoreactions
             IF (EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
                WRITE (8,*) ' WARNING: '
                WRITE (8,*) ' WARNING: ECN=', EIN, ' Elev=',
@@ -366,12 +368,9 @@ C-----------end of E2
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
  
             ABScs    =CSFus
-            SINlcc   =0.d0
-            SINl     =0.d0
-            SINlcont =0.d0
+            NLW = NDLW
   
          ENDIF
-         NLW = NDLW
 C--------END of calculation of fusion cross section
 C--------for photon induced reactions
 C
@@ -379,10 +378,10 @@ C        Total cross section is set to absorption cross section
 C        for photon induced reactions (to process them in EMPEND)
 C
          TOTcs = CSFus
-         ELAcs = 0.d0
 C
   100    GOTO 999
       ENDIF
+
       IF (FUSread) THEN
 C--------if FUSREAD true read l distribution of fusion cross section
 C--------and calculate transmission coefficients
@@ -429,16 +428,19 @@ C
 
          CCCalc = .FALSE.
          ltlj = .FALSE.
+
          lodd = .false.
          IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
      >        mod(nint(A(Ntrg)-Z(Ntrg)),2).ne.0) .and.
      >        mod(nint(A(Ntrg)),2).ne.0 ) lodd = .true.  
+
          dodwba = .FALSE.
          DO l = 1, NDCOLLEV
             IF (ICOllev(l).LT.LEVcc) CYCLE ! Skipping coupled levels
             dodwba = .TRUE.
          ENDDO
          IF (DIRect.EQ.3) dodwba = .TRUE.
+
          IF (dodwba .AND. DIRect.GT.0 ) THEN
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
 C--------------Saving KTRlom(0,0)
@@ -490,13 +492,13 @@ C--------------Restoring KTRlom(0,0)
             ldbwacalc = .TRUE.
          ENDIF
 C
-C---------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly the
-C---------same array of transmission coefficients for the incident channel
-C---------calculated by the CC OMP. The differences between DIRECT 1/2 options
-C---------are in the calculations of the outgoing channel (TRANSINP() routine).
-C---------DIRECT 2 option uses CC method to produce outgoing TLs
-C---------for the inelastic channel. DIRECT 1 option assumes SOMP
-C---------with only one level (the GS) to calculate the inelastic TLs.
+C--------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly the
+C--------same array of transmission coefficients for the incident channel
+C--------calculated by the CC OMP. The differences between DIRECT 1/2 options
+C--------are in the calculations of the outgoing channel (TRANSINP() routine).
+C--------DIRECT 2 option uses CC method to produce outgoing TLs
+C--------for the inelastic channel. DIRECT 1 option assumes SOMP
+C--------with only one level (the GS) to calculate the inelastic TLs.
 C
          IF ((DIRect.EQ.1 .OR. DIRect.EQ.2) .AND. AEJc(Npro).LE.1) THEN
             WRITE (8,*) 
@@ -559,6 +561,7 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                   CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
      &              Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
+                  ltlj = .TRUE.
                 ENDIF
 
               ENDIF
@@ -577,6 +580,7 @@ C
 C           DYNAM=.TRUE. or SOFT=.TRUE. means OPTMAN is used
 C                       
             ltlj = .TRUE.
+
             IF (ldbwacalc) THEN
 C
 C--------------Joining DWBA and CCM files
@@ -743,8 +747,11 @@ C-----------------checking the correspondence of the excited states
                  CALL ECIS2EMPIRE_TL_TRG(
      &             Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
                ENDIF
+
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
+
          ENDIF  ! END of DIRECT=1/2 block
+
          IF (.NOT.ltlj) THEN
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
@@ -767,6 +774,7 @@ C           restoring the input value of the key CN_isotropic
             CALL ECIS2EMPIRE_TL_TRG(
      &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
          ENDIF
+
          IF (maxlw.GT.NDLW) THEN
             WRITE (8,*)
      &            ' ERROR: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
@@ -792,8 +800,12 @@ C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
          IWArn = 0
       ELSEIF (KTRlom(Npro,Ntrg).EQ.0) THEN
 C--------calculation of h.i. transmission coefficients for fusion
+
+         ltlj = .FALSE.
          maxlw = NDLW-1
+
          CALL HITL(stl)
+	   
          if(NLW.GT.0) maxlw = min(NDLW-1,maxlw)
          WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', maxlw + 1
@@ -805,13 +817,14 @@ C--------channel spin min and max
          coef = 1.d0
          IF (INT(AEJc(0)).GT.0) coef = 10.d0*PI/ak2/
      &      (2*XJLv(LEVtarg,Ntrg) + 1.d0)/(2*SEJc(Npro) + 1.d0)
+	                   
          smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
          smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
          mul = smax - smin + 1.0001
          CSFus = 0.d0
          DO ip = 1, 2     ! over parity
           DO j = 1, NLW !over compound nucleus spin
-            sum = 0.0
+            sum = 0.d0
             DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
                lmin = ABS(j - chsp - S1) + 0.0001
@@ -830,10 +843,9 @@ C--------channel spin min and max
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
           ENDDO
          ENDDO
+
          ABScs = CSFus
-         SINlcc = 0.d0
-         SINl = 0.d0
-         SINlcont =0.d0
+
       ENDIF ! END of FUSREAD block
 C
 C-----Moving incident channel results to TL/ directory
@@ -865,7 +877,7 @@ C-----Storing transmission coefficients for the incident channel
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
          DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-            WRITE (46,'(2x,3x,3(3x,D15.8))') 
+            IF(ltlj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
          ENDDO
 
@@ -878,13 +890,16 @@ C--------Absorption and elastic cross sections in mb
          ssabsj = 0.d0 
          DO l = 0, maxlw
            ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-           DO jindex = 1, MAXj(Npro) 
-             jsp = sjf(l,jindex,SEJc(Npro)) 
-             ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-           ENDDO 
+	     IF (ltlj) THEN 
+             DO jindex = 1, MAXj(Npro) 
+               jsp = sjf(l,jindex,SEJc(Npro)) 
+               ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+             ENDDO 
+           ENDIF
          ENDDO
          xssabs  = 10.d0*PI/ak2*ssabs
-         xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
+	   xssabsj = 0.d0
+         IF (ltlj) xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D12.6,1x))') 
@@ -896,33 +911,39 @@ C--------Absorption and elastic cross sections in mb
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
            WRITE (8,*)
          ENDIF 
-         WRITE (46,'(1x,I6)') 123456
-         DO l = 0, maxlw
-            WRITE (46,'(2x,I3,3x,D15.8)') l, sel(l + 1)
-         ENDDO
+
+	   IF (ELAcs.gt.0) THEN 
+           WRITE (46,'(1x,I6)') 123456
+           DO l = 0, maxlw
+             WRITE (46,'(2x,I3,3x,D15.8)') l, sel(l + 1)
+           ENDDO
+         ENDIF
          CLOSE (46)
       ENDIF
-      OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
+
+      IF (ltlj) 
+     &  OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
-      WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
+      IF (ltlj) WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
          WRITE (45 )  stl(l + 1)
-         WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
+         IF (ltlj) WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
       ENDDO
       WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-      WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+      IF (ltlj) WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
-      L = 123456
-      WRITE (45) L 
-      DO l = 0, maxlw
-         WRITE (45) sel(l + 1)
-      ENDDO
+      IF (ELAcs.gt.0) THEN
+        L = 123456
+        WRITE (45) L 
+        DO l = 0, maxlw
+          WRITE (45) sel(l + 1)
+        ENDDO
+	ENDIF
       CLOSE (45 )
-      CLOSE (451)
-
+      IF (ltlj) CLOSE (451)
   300 CONTINUE
 
 C-----Print elastic and direct cross sections from ECIS
@@ -1092,28 +1113,10 @@ C     write(*,*) 'FUSI=',10.d0*PI/ak2,el,IRElat(NPRo,Ntrg),
 C    &           RELKIN,relcal
 
       CSFus = 0.d0
-C-----absorption spin distribution using Tl's
-!      smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-!      smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
-!      mul = smax - smin + 1.0001
-!      DO ip = 1, 2      ! over parity
-!         DO j = 1, NLW  !over compound nucleus spin
-!            sum = 0.d0
-!            DO ichsp = 1, mul
-!               chsp = smin + FLOAT(ichsp - 1)
-!               lmin = ABS(j - chsp - S1) + 0.0001
-!               lmax = j + chsp - S1 + 0.0001
-!               lmin = lmin + 1
-!               lmax = lmax + 1
-!               lmax = MIN0(NDLW,lmax)
-!               lmax = MIN0(maxlw+1,lmax)
-!               DO k = lmin, lmax
-!                  sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
-!               ENDDO
-!            ENDDO
-!     absorption spin distribution using Tlj's
-      DO ip = 1, 2      ! over parity
-         DO j = 1, NLW      !over compound nucleus spin
+	IF (ltlj) THEN
+C-------absorption spin distribution using Tlj's
+        DO ip = 1, 2      ! over parity
+          DO j = 1, NLW   !over compound nucleus spin
             sum = 0.d0
             xjc = float(j) + HIS(1)
             jmin = abs(xjc - XJLv(LEVtarg,Ntrg))
@@ -1130,12 +1133,44 @@ C-----absorption spin distribution using Tl's
      &                stlj(k,jindex)
                ENDDO
             ENDDO
-            POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)
+            POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)*FUSred
+            CSFus = CSFus + POP(NEX(1),j,ip,1)
+            csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+          ENDDO
+        ENDDO
+        ABScs = CSFus
+
+	ELSE
+
+C-------absorption spin distribution using Tl's
+         smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
+         smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
+         mul = smax - smin + 1.0001
+         DO ip = 1, 2     ! over parity
+          DO j = 1, NLW   !over compound nucleus spin
+            sum = 0.d0
+            DO ichsp = 1, mul
+               chsp = smin + FLOAT(ichsp - 1)
+               lmin = ABS(j - chsp - S1) + 0.0001
+               lmax = j + chsp - S1 + 0.0001
+               lmin = lmin + 1
+               lmax = lmax + 1
+               lmax = MIN0(NDLW,lmax)
+               lmax = MIN0(maxlw,lmax)
+               DO k = lmin, lmax
+                 sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*stl(k)
+               ENDDO
+            ENDDO
+            POP(NEX(1),j,ip,1) = coef*sum*(FLOAT(2*j + 1) - 2.0*S1)
      &                           *FUSred
             CSFus = CSFus + POP(NEX(1),j,ip,1)
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+          ENDDO
          ENDDO
-      ENDDO
+         ABScs = CSFus
+
+	ENDIF
+
 C     IF (ldbwacalc .AND. CSFus.GT.0 .AND. 
       IF (                CSFus.GT.0 .AND. 
      &   (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
@@ -1172,9 +1207,11 @@ C-----direct contribution !!!
 C
       DO i = 1, NDLW
          ELTl(i) = stl(i)
-         DO j = 1, MAXj(Npro)
-           ELTlj(i,j) = stlj(i,j)
-         ENDDO
+         if (ltlj) then
+           DO j = 1, MAXj(Npro)
+             ELTlj(i,j) = stlj(i,j)
+           ENDDO
+         endif
       ENDDO
       DO j = NDLW, 1, -1
          NLW = j 
