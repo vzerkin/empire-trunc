@@ -260,53 +260,54 @@ C     write(*,*) 'Got here with ABScs =', ABScs
 
 C-------Printing bare OM results
         WRITE (8,'('' * Original OM results: '')')
-        IF (INT(ZEJc(0)).EQ.0)   WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0)   WRITE (8,
      &  '('' * OM total cross section (TOTcs)                 '',G13.6,
      &              '' mb  '')') TOTcs
-         IF (INT(AEJc(0)).GT.0) WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
      &  '('' * OM shape elastic cross section (ELAcs)         '',G13.6,
      &              '' mb  '')') ELAcs
-         IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
+        IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
      &  '('' * OM direct inelastic cross section              '',G13.6,
      &              '' mb  '')')
      &        (SINl+SINlcc) + SINlcont
-         IF (INT(AEJc(0)).GT.0) WRITE (8,
+                                WRITE (8,
      &  '('' * OM CN formation cross section (ABScs)          '',G13.6,
      &              '' mb  '')') ABScs
 
         WRITE (8,'('' *'')')
 C-------Printing scaling factors
-        IF (INT(ZEJc(0)).EQ.0) THEN
-          IF(TOTred.ne.1)
-     &    WRITE (8,'('' * Total         cross section scaled by '',
+        IF (NINT(ZEJc(0)).EQ.0 .AND. TOTred.ne.1) THEN
+           WRITE (8,'('' * Total         cross section scaled by '',
      &     G13.6)') TOTred
            IF(totcorr.gt.0) THEN
-            IF( abs(1.d0/totcorr - TOTred0).gt.0.001d0) THEN
-              WRITE (108,'(2x,G12.5,3x,F10.6)') EINl, 1.d0/totcorr
-              WRITE (8,'('' * Total         cross section scaled by '',
-     &     G13.6)') TOTred*totcorr
-              WRITE (8,'('' *   set TOTRED '' , F13.6,
-     &         '' to keep unchanged total'')') 1.d0/totcorr
-            ENDIF
-          ENDIF
+             IF( abs(1.d0/totcorr - TOTred0).gt.0.001d0) THEN
+               WRITE (108,'(2x,G12.5,3x,F10.6)') EINl, 1.d0/totcorr
+               WRITE (8,'('' * Total         cross section scaled by '',
+     &           G13.6)') TOTred*totcorr
+               WRITE (8,'('' *   set TOTRED '' , F13.6,
+     &           '' to keep unchanged total'')') 1.d0/totcorr
+             ENDIF
+           ENDIF
         ENDIF
+        
         IF(FUSred.ne.1)
      &    WRITE (8,'('' * CN formation  cross section scaled by '',
      &     G13.6)') FUSred
-        IF (INT(ZEJc(0)).EQ.0 .AND. ELAred.ne.1)
+        IF (NINT(ZEJc(0)).EQ.0 .AND. ELAred.ne.1)
      &    WRITE (8,'('' * Shape elastic cross section scaled by '',
      &     G13.6)') ELAred
-        IF (INT(ZEJc(0)).EQ.0 .AND. CELred.ne.1)
+        IF (NINT(ZEJc(0)).EQ.0 .AND. CELred.ne.1)
      &    WRITE (8,'('' * Comp. elastic cross section scaled by '',
      &     G13.6)') CELred
-        if(FCCred.ne.1)
+        IF (NINT(AEJc(0)).NE.0 .AND. FCCred.ne.1)
      &    WRITE (8,'('' * Disc.lev. DIR cross section scaled by '',
      &     G13.6)') FCCred
-        if(FCOred.ne.1)
+        IF (NINT(AEJc(0)).NE.0 .AND. FCOred.ne.1)
      &    WRITE (8,'('' * Cont.lev. DIR cross section scaled by '',
      &      G13.6)') FCOred
 
-        if (INT(ZEJc(0)).EQ.0) then
+
+        if (NINT(ZEJc(0)).EQ.0) then
             DO i=1,NLV(0) ! loop over target discrete levels
             IF(CINred(i).NE.1) WRITE (8,
      >       '('' * Comp. inelastic cross section for target level # '',
@@ -317,28 +318,28 @@ C-------Printing scaling factors
 C-------Printing final results after including all scaling factors
         WRITE (8,'('' *'')')
         WRITE (8,'('' * Actual results including scaling factors: '')')
-        IF (INT(ZEJc(0)).EQ.0)   WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0)   WRITE (8,
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
-         IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
      &  '('' * Shape elastic + CN absorption + direct         '',G13.6,
      &              '' mb  '')') (ELAred*ELAcs + 
      &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
      &        (SINl+SINlcc)*FCCred + SINlcont*FCOred)*totcorr
-         IF (INT(AEJc(0)).GT.0) WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
      &  '('' * Shape elastic cross section                    '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
-         IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
+                                 WRITE (8,
      &  '('' * CN formation corrected for direct              '',G13.6,
      &              '' mb  '')')
 C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred
      &   CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
-         IF (INT(ZEJc(0)).EQ.0)  WRITE (8,
+         IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
      &  '('' * Direct inelastic cross section                 '',G13.6,
      &              '' mb  '')')
      &        (SINl+SINlcc)*FCCred + SINlcont*FCOred
 
-        IF (INT(ZEJc(0)).EQ.0 .and. INT(AEJc(0)).GT.0) WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Compound elastic cross section (CE)            '',G13.6,
      &              '' mb  '')') 4.d0*PI*ELCncs
         IF(FISsil(1)) WRITE (8,
@@ -363,14 +364,14 @@ C-------Printing final cross section balance
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
-        IF (INT(ZEJc(0)).EQ.0) THEN
+        IF (NINT(ZEJc(0)).EQ.0) THEN
           WRITE (*,
      &  '(''   Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
 C    &              '' mb  '')') CSFus + (SINl+SINlcc)*FCCred +
 C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
 
-         IF (INT(AEJc(0)).GT.0) WRITE (*,
+          WRITE (*,
      &  '(''   Shape Elastic cross section (ELAcs)            '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
         ENDIF
@@ -389,7 +390,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    100.d0*abs(
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
      &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
-        IF (INT(ZEJc(0)).EQ.0 .and. INT(AEJc(0)).GT.0 .and. 
+        IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0 .and. 
      &      ELCncs.gt.0.1d0) THEN
           WRITE (*,
      &  '(''   Compound elastic cross section (CE)            '',G13.6,
