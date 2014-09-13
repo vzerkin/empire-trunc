@@ -1,6 +1,6 @@
-cc   * $Rev: 4045 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
+cc   * $Rev: 4067 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-09-14 00:59:47 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -53,7 +53,16 @@ C-----  Calculate reaction cross section and its spin distribution
 C-----
         CALL MARENG(0,0,nnurec,nejcec)
 C
-        call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
+        IF(CSFus.LE.0) THEN
+		write(*,*) 
+		write(*,*) ' CSFus=',CSFus
+          WRITE(8,*) ' ERROR; Absorption cross section equal zero !'
+          STOP       ' ERROR; Absorption cross section equal zero !'
+        ENDIF
+C	   
+C       Inelastic cross swctions read only for particles (not photons or HI) 
+        IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
+     >    call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
 C
 C       Preequilibrium 
 C
@@ -516,7 +525,7 @@ C
 C     local variables
 C
       LOGICAL lheader
-      INTEGER ikey1, ikey2, ikey3, ikey4, ios
+      INTEGER ikey1, ikey2, ikey3, ikey4, ios, itmp
       DOUBLE PRECISION val
 
       CHARACTER*6 keyname
@@ -525,13 +534,14 @@ C
       integer*4, external :: parse_line
 
       lheader = .true.
- 1156 READ (5,'(A)',ERR=11570,END=1200) nextenergy
+ 1156 READ (5,'(A72)',ERR=11570,END=1200) nextenergy
+	itmp = len_trim(nextenergy)
 
-      IF(nextenergy(1:1).eq.'@') THEN 
-        write(*,*) '*** ',trim(nextenergy(2:))
+      IF(nextenergy(1:1).eq.'@' .and. itmp.gt.1) THEN 
+        write( *,*) '*** ',nextenergy(2:itmp)
         WRITE( 8,*)
      &      '***************************************************'
-        write( 8,*) '*** ',trim(nextenergy(2:))
+        write( 8,*) '*** ',nextenergy(2:itmp)
         WRITE( 8,*)
      &      '***************************************************'
         GOTO 1156  ! next line
@@ -558,7 +568,7 @@ C
       ENDIF
 
       IF(nextenergy(1:1).EQ.'$') THEN
-        ios = parse_line(trim(nextenergy(2:)),keyname,
+        ios = parse_line(nextenergy(2:itmp),keyname,
      &                   val,ikey1,ikey2,ikey3,ikey4)
         if(ios /= 0) goto 11570
         CALL OPTIONS(keyname, val, ikey1, ikey2, ikey3, ikey4, 1)
@@ -599,17 +609,19 @@ C
 C     local variables
 C
       CHARACTER*72 nextenergy
-      INTEGER iang
+      INTEGER iang, itmp
 
- 1158 READ (5,'(A)',ERR=11570,END=1200) nextenergy
+ 1158 READ (5,'(A72)',ERR=11570,END=1200) nextenergy
+	itmp = len_trim(nextenergy)
+
       IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &     nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158
 
       IF(nextenergy(1:1).eq.'@') THEN 
-        write(*,*) '*** ',trim(nextenergy(2:))
+        write(*,*) '*** ',nextenergy(2:itmp)
         WRITE( 8,*)
      &      '***************************************************'
-        write( 8,*)'*** ',trim(nextenergy(2:))
+        write( 8,*)'*** ',nextenergy(2:itmp)
         WRITE( 8,*)
      &      '***************************************************'
         GOTO 1158  ! next line
