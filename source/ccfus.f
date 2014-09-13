@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4055 $
+Ccc   * $Rev: 4070 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-11 21:51:39 +0200 (Do, 11 Sep 2014) $
+Ccc   * $Date: 2014-09-14 01:03:44 +0200 (So, 14 Sep 2014) $
 C
       SUBROUTINE CCFUS(Stl,Rkey)
 C
@@ -31,7 +31,7 @@ C
      &                 flamem(NDCC), flo, fpi, gl, h2m, homega, p,
      &                 pa(NDCC,2), ra, rb, rbar, rcal, rcald, rr, rred,
      &                 s0, s1, s2, sq, su0, su1, su2,
-     &                 sum, ur, vb, vbl, vbw, vbwl, r00, sumunc
+     &                 suma, ur, vb, vbl, vbw, vbwl, r00, sumunc
       DOUBLE PRECISION ecrit1, bfu, critl, sigl0(NDLW), sigl1(NDLW) 
       INTEGER i1, ic1, ick, il, ilim, k, n, n1(NDCC), n1t, nd, nmax,
      &        np(NDCC), ns1
@@ -87,7 +87,8 @@ Ccc   * output:BFUS-fusion barrier
 Ccc   *        E1   -see above
 Ccc   *        CRL  -critical angular momentum
 Ccc   *        CSFUS-fusion x-section
-      CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,ecrit1,critl,csfus)
+      CALL BASS(EIN,ZEJc(0),AEJc(0),Z(0),A(0),Bfu,ecrit1,critl,CSFus)
+
       WRITE (8,*) ' =================================================='
 c -- generate printout
       WRITE (8,*) ' '
@@ -102,25 +103,16 @@ c -- generate printout
       WRITE (8,*) 
      > 'DV = 20 corresponds to the Christensen-Winther potential'
       WRITE (8,*) 
-      WRITE (8,*) 
      > 'P.R.Christensen and A.Winther, Phys. Lett. B65 (1976) 19'
       WRITE (8,*) 
      > ' (& R.A.Broglia and A.Winther, Heavy Ion Reactions, Benjamin, NY
      >, 1981)'
       WRITE (8,*) 
       WRITE (8,*) 'DV =',sngl(DV),' (Barrier scaling parameter)' 
-      WRITE (8,*) 
       WRITE (8,*) 'VB =',sngl(vb) ,' (Unperturbed CCFUS barr)' 
-      WRITE (8,*) 
       WRITE (8,*) 'RB =',sngl(rbar),' (CCFUS barrier position)' 
-      WRITE (8,*) 
       WRITE (8,*) 'hw =',sngl(homega),' (CCFUS barrier thickness)' 
       WRITE (8,*) 
-
-C      WRITE (8,99005) DV, vb, rbar, homega
-C99005 FORMAT (/,'  Parameters for DV=',F6.2,//,'      VB=',F6.1,
-C     &        '       RB=',F6.2,'       H-OMEGA=',F5.2,/)
-
 
       IF (NSCc.NE.0) THEN
          WRITE (8,99010)
@@ -214,7 +206,7 @@ C           READ (5,*) FCD(N),QCC(N)
      &         .5*dfl2*delta**2
          rcald = rcal + delta
          facwd = 31.415926d0 *rcald**2*eps
-         sum    = sum    + facwd*p*LOG(1. + EXP((EIN-vbw)/eps))/EIN
+         suma  = suma + facwd*p*LOG(1. + EXP((EIN-vbw)/eps))/EIN
 C
 C        momentum decomposition
 C
@@ -234,7 +226,7 @@ C
       ENDDO
       NLW = min(NDLW,il)
 
-      WRITE (8,34) EIN,sum,sumunc
+      WRITE (8,34) EIN,suma,sumunc
 
       s0 = 0.d0
       s1 = 0.d0
@@ -264,7 +256,6 @@ C
      >'  COUPLED   - <L>=',F6.1,' <L2>=',F7.0/
      >'  UNCOUPLED - <L>=',F6.1,' <L2>=',F7.0/)
 
-
       if(rkey.lt.-2.5) then
         write(8,*) ' CCFUS uncoupled fusion barrier  used !'
         DO k = 1, NLW
@@ -276,7 +267,7 @@ C
         DO k = 1, NLW
          Stl(k) = sigl1(k)
         ENDDO
-        SIG = sum
+        SIG = suma
       endif
       WRITE (8,*) ' CCFUS XS =',sngl(SIG),' mb, Lmax=',NLW
       WRITE (8,*) ' =================================================='
