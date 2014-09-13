@@ -1,13 +1,13 @@
-!cc   * $Rev: 4062 $
+!cc   * $Rev: 4066 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-12 23:04:56 +0200 (Fr, 12 Sep 2014) $
+!cc   * $Date: 2014-09-14 00:56:05 +0200 (So, 14 Sep 2014) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
      & NDNUC= 100                                                       &
-     &,NDEXCLUS = 20                                                    &
-     &,NDEX= 151                                                        &
+     &,NDEXCLUS= 20                                                     &
+     &,NDEX= 101                                                        &
      &,NDLW= 55                                                         &
      &,LEVCC=30                                                         &
      &,NDLV=40                                                          &
