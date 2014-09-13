@@ -1,6 +1,6 @@
-!cc   * $Rev: 4063 $
+!cc   * $Rev: 4071 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-12 23:05:46 +0200 (Fr, 12 Sep 2014) $
+!cc   * $Date: 2014-09-14 01:05:46 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -39,7 +39,7 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
-     &         qatom,qnucl
+     &         qatom,qnucl,FTMP
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       CHARACTER*23 ctmp23
@@ -1261,7 +1261,7 @@ C
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
-            WRITE (8,*) 'WARNING: NDAng reset to ',NDAnghmx, 
+            WRITE (8,*) ' WARNING: NDAng reset to ',NDAnghmx, 
      &                             ' for compatibility with HMS'
             WRITE (8,*)
             NANgela = NDAnghmx
@@ -1705,7 +1705,10 @@ C-----------fix-up deformations and discrete levels for CCFUS (for all HI reacti
                ENDIF
                IF (BETcc(j).EQ.0.0D0) THEN
                   IF (FLAm(j).LT.0.0D0) BETcc(j) = DEFprj
-                  IF (FLAm(j).GE.0.0D0) BETcc(j) = DEF(1,0)
+                  IF (FLAm(j).GE.0.0D0) THEN
+C                   BETcc(j) = DEF(1,0)                  
+                    call defcal(NINT(Z(0)),NINT(A(0)),BETcc(j),ftmp)
+                  ENDIF                   
                ENDIF
             ENDDO
 
@@ -3124,6 +3127,8 @@ C            Special case, 9602 RIPL OMP number is used for Kumar & Kailas OMP
      &       KTRlom(NDEJC,nnur)
         ENDDO
       ENDIF  
+      WRITE (8,*) 
+      WRITE (8,*) 
       WRITE (12,*) ' '
       WRITE (12,*) ' '
 C-----WRITE heading on FILE12
@@ -4667,9 +4672,9 @@ C-----
               WRITE (8,
      &  '('' OMP (TLs) calculations will be undertaken (instead of readi 
      &ng stored TLs)'')') 
-              WRITE (8,
-     &  '('' WARNING: CALCTL option slows down the execution by 3-5 time
-     &s (for the 2nd and subsequent runs)'')') 
+              WRITE (8,*)
+     &  ' WARNING: CALCTL option slows down the execution by 3-5 times 
+     &(for the 2nd and subsequent runs)' 
             endif
               GOTO 100
          ENDIF
@@ -8451,7 +8456,7 @@ Ccc
 C
 C     This corresponds to RIPL-2 file. There is a new RIPL-3 file containing mass uncertainties
 C     and additional one for the HFB-14 model. With a minor change we could use those mases as well.
-C     or the time being we use FRDM theoretical masses if Audi masses are not availableC
+C     For the time being we use FRDM theoretical masses if Audi masses are not availableC
       OPEN (UNIT = 27,STATUS = 'OLD',
      &      FILE = trim(empiredir)//'/RIPL/masses/mass-frdm95.dat'
      &      ,ERR = 300)
@@ -8464,7 +8469,6 @@ C-----Skipping header lines
 C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          READ (27,'(2i4,4x,i1,3f10.3,f8.3)',END = 100) nixz, nixa,
      &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
-C    &         iflag, xmassexp, xmassth, emicx(k) ! beta2 replaced by Nobre syst
          izaf(k) = nixz*1000 + nixa
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
@@ -8506,7 +8510,7 @@ C     Usually these masses are not used in calculations
 C-------------------------------------------------------------------------  
 C-----mbc1 a quick/temp? solution to weird light undefined masses: define
 C-----resmas=A for all nuclei so far undefined
-C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
+C-----previously I had a problem for be6 => be5 +n since mass be5 undefined
       DO iz = 1, 130
          DO ia = 1, 400
             IF (RESmas(iz,ia).NE.0) cycle
@@ -8514,6 +8518,7 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             EXCessmass(iz,ia) = 0
          ENDDO
       ENDDO
+
       zmx = 0.
       zmn = 200.
       DO nnuc = 0, NNUct
@@ -8531,9 +8536,11 @@ C-----previously i had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
-C              DEF(1,nnuc) = beta2x(k)
-               call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
-               DEF(1,nnuc) = beta2
+C              Static deformation used 
+               DEF(1,nnuc) = beta2x(k)
+C              Nobre param. is for dynamical deformations
+C              call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+C              DEF(1,nnuc) = beta2
                XMAss(nnuc) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(nnuc) = A(nnuc) +  XMAss(nnuc)/AMUmev
@@ -8544,11 +8551,11 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
                IF(DEF(1,0).EQ.0.d0) THEN
-                     DEF(1,0) = beta2x(k)
+                 DEF(1,0) = beta2x(k)
                  WRITE (8,
      &'('' Static deformation of the target nucleus set to'',F6.3,1x,
      &  ''(FRDM)'')') beta2x(k)
-                 call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
+                 call defcal(NINT(Z(0)),NINT(A(0)),beta2,ftmp)
                  WRITE (8,
      &'('' Nobre parameterization deformation is   '',F6.3)') beta2
                ENDIF
