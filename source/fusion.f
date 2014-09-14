@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4073 $
+Ccc   * $Rev: 4074 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 02:03:13 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-14 02:07:32 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -124,7 +124,7 @@ C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
       INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
-	write(*,*) fexist, fexistj
+C	write(*,*) fexist, fexistj
 C  
       IF (fexist .and. .not.CALctl) THEN
 C--------Here the old calculated files are read
