@@ -323,9 +323,9 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') TOTcs*TOTred*totcorr
         IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
      &  '('' * Shape elastic + CN absorption + direct         '',G13.6,
-     &              '' mb  '')') (ELAred*ELAcs + 
-     &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
-     &        (SINl+SINlcc)*FCCred + SINlcont*FCOred)*totcorr
+     &              '' mb  '')') ELAred*ELAcs + 
+C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
         IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
      &  '('' * Shape elastic cross section                    '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
