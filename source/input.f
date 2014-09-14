@@ -1,6 +1,6 @@
-!cc   * $Rev: 4077 $
+!cc   * $Rev: 4081 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-14 14:55:16 +0200 (So, 14 Sep 2014) $
+!cc   * $Date: 2014-09-14 15:54:21 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -9633,7 +9633,7 @@ c        CCFUS deformations
          FLAm(iccfus) = 2
          QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
          WRITE (8,'(1x,A39,/,1x,A11,F7.3)')
-     &   'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (2+) =',beta2
       ENDIF
       IF (beta3.EQ.0.D0) THEN
@@ -9651,7 +9651,7 @@ c        CCFUS deformations
          FLAm(iccfus) = 3
          QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
          WRITE (8,'(1x,A39/1x,A11,F7.3)')
-     &   'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (3-) =',beta3
       ENDIF
 
@@ -10458,14 +10458,14 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
             WRITE (8,*)
      &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &        'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &        'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &        'BETA (2+) =',beta2
 	     ENDIF
          ELSE
             WRITE (8,*)
      &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &      'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (2+) =',beta2
          ENDIF
          IF (DEFormed) THEN
@@ -10492,7 +10492,7 @@ C    &        'Default dynamical deformations 0.005 (3-) will be used'
 C        beta3 = 0.005
          call defcal(iz,ia,ftmp,beta3)
          WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &      'TARGET SYST. DEFORMATION (Nobre et al):', 
+     &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (3-) =',beta3
       ELSE
          WRITE (8,'(/1x,A39/1x,A11,F7.3)')
@@ -10509,9 +10509,9 @@ C--------Skipping levels with unknown spin in the discrete level region
 
 C--------Skipping octupole levels with zero T1/2 (not collective) in the 
 C        discrete level region for vibrational nuclei
-         IF ( NINT(xjlvr).eq.3 .AND. lvpr.eq.-1 .AND.   
-     &      t12.LE.0.d0 .AND. ilv.LE.NLV(nnurec) .AND. 
-     &      (.NOT.(DEFormed)) ) CYCLE
+C        IF ( NINT(xjlvr).eq.3 .AND. lvpr.eq.-1 .AND.   
+C    &      t12.LE.0.d0 .AND. ilv.LE.NLV(nnurec) .AND. 
+C    &      (.NOT.(DEFormed)) ) CYCLE
 
          IF(ilv + LEVcc.gt.99) THEN
            WRITE (8,*)
