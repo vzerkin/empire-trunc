@@ -1,6 +1,6 @@
-!cc   * $Rev: 4071 $
+!cc   * $Rev: 4077 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-14 01:05:46 +0200 (So, 14 Sep 2014) $
+!cc   * $Date: 2014-09-14 14:55:16 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3399,6 +3399,8 @@ Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none
+	 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3420,14 +3422,14 @@ C
       CHARACTER*120 inline
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc, 
-     &  irun, ios
+     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
-      CHARACTER*6 name, namee, emp_nam, emp_ver
+      CHARACTER*6 name, namee, emp_nam, emp_ver, emp_def
       CHARACTER*35 char
       CHARACTER*13 char1
       LOGICAL fexist
-      DOUBLE PRECISION val,vale,sigma,shelss,quant,ecutof
+      DOUBLE PRECISION val,vale,sigma,shelss,quant,ecutof,atilss
 
       integer*4, external :: parse_line
 
@@ -3450,23 +3452,28 @@ C-----initialization of TRISTAN input parameters  *** done ***
       open(23,file=trim(empiredir)//"/version",status='OLD',
      >    ERR=753)
 C     VERSIONNUMBER = 3.2
-C     VERSIONNAME   = MALTA
+C     VERSIONNAME   = Malta
+C     SVN REVISION  = 4075
       read(23,'(16x,A6)',ERR=753,END=7531) emp_ver
       read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
+      read(23,'(16x,A6)',ERR=753,END=7531) emp_def
       close(23)
       goto 7541
- 7531 emp_ver='3.2.2 '
-      emp_nam='MALTA '
+ 7531 close(23)
+      emp_ver='3.2.2 '
+      emp_nam='Malta '
+      emp_def='4075  '
  7541 WRITE(8,'(A44,A6,A2)') 
      > '                        |    E M P I R E  - ',emp_ver,'|'
       WRITE (8,*)
-     > '                       |                          |'
+     >  '                       |                          |'
       WRITE (8,'(A33,A6,A13)')
      > '                        |          ',emp_nam,'            |'
       WRITE (8,*)
-     > '                       |                          |'
+     >  '                       |                          |'
       GOTO 754
-  753 WRITE (8,*)
+  753 close(23)
+      WRITE (8,*)
      > '                       |    E M P I R E  - 3.2.2  |'
       WRITE (8,*)
      > '                       |                          |'
@@ -3482,18 +3489,22 @@ C
       WRITE(8,30) source_rev
    30 FORMAT(24X,'| empire/source rev. ',A5,' |')
       GOTO 756
-  755 emp_rev    = '     '
+  755 close(23)
+      emp_rev    = '     '
       source_rev = '     '
-      WRITE (8,*)'                       |       Not under SVN      |'
+      WRITE(8,201) emp_def
+  201 FORMAT(24X,'| SVN empire    rev. ',A5,' |')
+C     WRITE (8,*)'                       |       Not under SVN      |'
 C
   756 WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |__________________________|'
 
-      if(EMPtitle(1:5).ne.'     ') then
-        WRITE (8,*) ' '
-        WRITE (8,*) trim(EMPtitle)
-        WRITE (*,*) ' '
-        WRITE (*,*) trim(EMPtitle)
+      itmp = len_trim(EMPtitle)
+      if(itmp.gt.0) then
+        WRITE (8,*) 
+        WRITE (8,*) EMPtitle(2:itmp)
+        WRITE (*,*) 
+        WRITE (*,*) EMPtitle(2:itmp)
       endif
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
@@ -3502,20 +3513,24 @@ C
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) ''
-      WRITE (12,'(A71)') EMPtitle(2:72)
+      WRITE (12,*) EMPtitle(2:itmp)
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
      > trim(emp_ver), ' ',emp_nam
 
-      if(emp_rev.ne.'     ') then
+      itmp=len_trim(emp_rev)
+      if(itmp.gt.0) then
         WRITE (12,35) emp_rev, source_rev
    35 FORMAT(1X,'(SVN rev. ',A5,'; source rev. ',A5,') by M. Herman ',
-     >'et al [EMP].',5X,' '
+     >'et al [EMP,EMP-man].',5X,' '
      >      )
       else
-        WRITE (12,*)
-     >             '(not under SVN) by M. Herman et al [EMP].          '
+        WRITE (12,351) emp_def
+  351 FORMAT(1X,'(SVN rev. ',A5,') by M. Herman et al [EMP,EMP-man].',
+     >5X,' ')
+C       WRITE (12,*)
+C    >             '(not under SVN) by M. Herman et al [EMP].          '
       endif
       WRITE (12,*) 
       WRITE (12,*) 'EMPIRE dimensions (dimension.h):'
@@ -3576,19 +3591,21 @@ C
       irun = 0
   100 IF(irun.EQ.1) RETURN
       READ (5,'(A)',END=150,ERR=160) inline
+      itmp = len_trim(inline)
+
       IF (inline(1:1).EQ.'*' .OR. inline(1:1).EQ.'#' .OR.
-     &    inline(1:1).EQ.'!') GOTO 100
+     &    inline(1:1).EQ.'!' .OR. inline(1:1).EQ.'$') GOTO 100
 
       IF(inline(1:1).eq.'@') THEN 
         if(EMPtitle(1:5).ne.'     ' .and. FIRst_ein) GOTO 100
-        write(*,*) '*** ',trim(inline(2:))
+        write(*,*) '*** ',inline(2:itmp)
         WRITE( 8,*)'***************************************************'
-        write( 8,*)'*** ',trim(inline(2:))
+        write( 8,*)'*** ',inline(2:itmp)
         WRITE( 8,*)'***************************************************'
         GOTO 100  ! next line
       ENDIF
 
-      ios = parse_line(trim(inline),name,val,i1,i2,i3,i4)
+      ios = parse_line(inline(1:itmp),name,val,i1,i2,i3,i4)
       if(ios /= 0) goto 160
 
             IF (name.EQ.'GO    ') THEN
@@ -8469,6 +8486,8 @@ C-----Skipping header lines
 C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          READ (27,'(2i4,4x,i1,3f10.3,f8.3)',END = 100) nixz, nixa,
      &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
+C	   if(nixz.eq.92 .and. nixa.lt.239 .and. nixa.gt.234) 
+C    >      write(*,*) nixz,nixa,beta2x(k)
          izaf(k) = nixz*1000 + nixa
          IF (iflag.GE.1) THEN
             excess(k) = xmassexp
@@ -8536,7 +8555,8 @@ C-----previously I had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
-C              Static deformation used 
+C              Static deformation used
+C              write(*,*) NINT(Z(nnuc)),NINT(A(nnuc)),beta2x(k)  
                DEF(1,nnuc) = beta2x(k)
 C              Nobre param. is for dynamical deformations
 C              call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
@@ -10712,7 +10732,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
-               GOTO 500
+               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.(gspin + 2*delta_k) .AND.
      &          lvpr.EQ.gspar) THEN
@@ -10727,6 +10747,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
+               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                GOTO 500
             ENDIF
             IF (i6p.EQ.0 .AND. xjlvr.EQ.(gspin + 3*delta_k) .AND.
@@ -10742,6 +10763,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
+               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                IF(odd) goto 600
                GOTO 500
             ENDIF
@@ -10759,6 +10781,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
+               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
