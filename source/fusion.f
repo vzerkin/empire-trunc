@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4072 $
+Ccc   * $Rev: 4073 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 01:30:02 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-14 02:03:13 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -124,6 +124,7 @@ C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
       INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
+	write(*,*) fexist, fexistj
 C  
       IF (fexist .and. .not.CALctl) THEN
 C--------Here the old calculated files are read
@@ -408,9 +409,6 @@ C--------and calculate transmission coefficients
   150    NLW = il - 1
          maxlw = min(NLW,NDLW-1)
          ABScs = CSFus
-         SINlcc=0.d0
-         SINl=0.d0
-         SINlcont =0.d0
          WRITE (8,*)
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (8,*)
@@ -478,8 +476,8 @@ C           restoring the input value of the key CN_isotropic
                CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                CALL ECIS2EMPIRE_TL_TRG(
      &           Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
-               ltlj = .TRUE.
                             ! TLs are obtained here for DIRECT=3
+               ltlj = .TRUE.
                WRITE (8,*) 
                WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                     'fusion determination'
@@ -532,6 +530,8 @@ C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
                 CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                 CALL ECIS2EMPIRE_TL_TRG(
      &            Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
+
+                ltlj = .TRUE.
               ENDIF
 
             ELSE
@@ -548,6 +548,7 @@ C               including CN calculation
                   CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
                   CALL ECIS2EMPIRE_TL_TRG(
      >              Npro,Ntrg,maxlw,stl,stlj,sel,.FALSE.)
+                  ltlj = .TRUE.
                 ENDIF
 
               ELSE
@@ -579,9 +580,8 @@ C--------------Restoring KTRlom(0,0)
 C
 C           DYNAM=.TRUE. or SOFT=.TRUE. means OPTMAN is used
 C                       
-            ltlj = .TRUE.
-
             IF (ldbwacalc) THEN
+               ltlj = .TRUE.
 C
 C--------------Joining DWBA and CCM files
 C--------------Total, elastic and reaction cross section is from CCM
@@ -773,6 +773,7 @@ C           restoring the input value of the key CN_isotropic
      &                  'fusion determination'
             CALL ECIS2EMPIRE_TL_TRG(
      &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
+            ltlj = .TRUE.
          ENDIF
 
          IF (maxlw.GT.NDLW) THEN
@@ -877,7 +878,7 @@ C-----Storing transmission coefficients for the incident channel
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
          DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-            IF(ltlj) WRITE (46,'(2x,3x,3(3x,D15.8))') 
+            WRITE (46,'(2x,3x,3(3x,D15.8))') 
      &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
          ENDDO
 
@@ -890,16 +891,13 @@ C--------Absorption and elastic cross sections in mb
          ssabsj = 0.d0 
          DO l = 0, maxlw
            ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-	     IF (ltlj) THEN 
-             DO jindex = 1, MAXj(Npro) 
-               jsp = sjf(l,jindex,SEJc(Npro)) 
-               ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-             ENDDO 
-           ENDIF
+           DO jindex = 1, MAXj(Npro) 
+             jsp = sjf(l,jindex,SEJc(Npro)) 
+             ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+           ENDDO 
          ENDDO
          xssabs  = 10.d0*PI/ak2*ssabs
-	   xssabsj = 0.d0
-         IF (ltlj) xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
+         xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
 
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D12.6,1x))') 
@@ -921,17 +919,16 @@ C--------Absorption and elastic cross sections in mb
          CLOSE (46)
       ENDIF
 
-      IF (ltlj) 
-     &  OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
+      OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
-      IF (ltlj) WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
+      WRITE (451) maxlw, EINl, IRElat(Npro,Ntrg)
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
          WRITE (45 )  stl(l + 1)
-         IF (ltlj) WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
+         WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
       ENDDO
       WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-      IF (ltlj) WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+      WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
@@ -943,7 +940,7 @@ C
         ENDDO
 	ENDIF
       CLOSE (45 )
-      IF (ltlj) CLOSE (451)
+      CLOSE (451)
   300 CONTINUE
 
 C-----Print elastic and direct cross sections from ECIS
@@ -1207,11 +1204,9 @@ C-----direct contribution !!!
 C
       DO i = 1, NDLW
          ELTl(i) = stl(i)
-         if (ltlj) then
-           DO j = 1, MAXj(Npro)
-             ELTlj(i,j) = stlj(i,j)
-           ENDDO
-         endif
+         DO j = 1, MAXj(Npro)
+           ELTlj(i,j) = stlj(i,j)
+         ENDDO
       ENDDO
       DO j = NDLW, 1, -1
          NLW = j 
