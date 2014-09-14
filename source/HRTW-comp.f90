@@ -193,8 +193,8 @@ SUBROUTINE HRTW
                SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) = SCRtl(-outchnl(i)%kres,outchnl(i)%nejc) + outchnl(i)%t*outchnl(i)%rho
             ENDIF
          ENDDO
-         sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redifining sumfis to account for the HRTW T=>V transition
-!                  DENhf = 0.0d0                               !test that SCRt+SCRtl sum to the same DENhf
+         IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
+!                  DENhf = 0.0d0                             !test that SCRt+SCRtl sum to the same DENhf
 !                  DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
 !                  DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
 !                  write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf    !should be the same as after AUSTER
@@ -652,9 +652,7 @@ SUBROUTINE HRTW_DECAYG(nnuc,iec,jc,ipc,summa)
    !
    REAL*8 :: cee, cme, eg, ha, hscrtl, hsumtls, scrtneg, scrtpos, xjc, xjr
    REAL*8 :: e1, e2, xm1
-   REAL :: float
    INTEGER :: i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, jr, lamb, lambmax, lambmin, kmax, kmin
-   INTEGER :: max0
    REAL*8, DIMENSION(10) :: xle, xlm
  
    ! MAXmult - maximal gamma-ray multipolarity
@@ -819,11 +817,11 @@ SUBROUTINE HRTW_DECAYG(nnuc,iec,jc,ipc,summa)
 END SUBROUTINE HRTW_DECAYG
 
 SUBROUTINE HRTW_error()
-   write(8,*) 'Insufficiet space allocaed for HRTW'
+   write(8,*) 'Insufficient space allocated for HRTW'
    write(8,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
-   write(*,*) 'Insufficiet space allocaed for HRTW'
+   write(*,*) 'Insufficient space allocated for HRTW'
    write(*,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
-   STOP 'Insufficiet space allocaed for HRTW'
+   STOP 'Insufficient space allocated for HRTW'
 END SUBROUTINE HRTW_error
  
 FUNCTION EEF(tl,tav,sumtl)
