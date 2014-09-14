@@ -260,10 +260,10 @@ C     write(*,*) 'Got here with ABScs =', ABScs
 
 C-------Printing bare OM results
         WRITE (8,'('' * Original OM results: '')')
-        IF (NINT(ZEJc(0)).EQ.0)   WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0)   WRITE (8,
      &  '('' * OM total cross section (TOTcs)                 '',G13.6,
      &              '' mb  '')') TOTcs
-        IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * OM shape elastic cross section (ELAcs)         '',G13.6,
      &              '' mb  '')') ELAcs
         IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
@@ -318,7 +318,7 @@ C-------Printing scaling factors
 C-------Printing final results after including all scaling factors
         WRITE (8,'('' *'')')
         WRITE (8,'('' * Actual results including scaling factors: '')')
-        IF (NINT(ZEJc(0)).EQ.0)   WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0)   WRITE (8,
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
         IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
@@ -326,7 +326,7 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') ELAred*ELAcs + 
 C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
-        IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
+        IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Shape elastic cross section                    '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
                                  WRITE (8,
@@ -364,7 +364,7 @@ C-------Printing final cross section balance
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
-        IF (NINT(ZEJc(0)).EQ.0) THEN
+        IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0) THEN
           WRITE (*,
      &  '(''   Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
