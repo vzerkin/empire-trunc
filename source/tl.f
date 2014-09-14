@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4069 $
+Ccc   * $Rev: 4082 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 01:02:54 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-14 15:54:47 +0200 (So, 14 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -98,6 +98,7 @@ C           IF distributed barrier, then BASS barriers are used
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
      &                NLW,NDLW)
 
+	      RETURN
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model
 C        *** done ***
@@ -123,6 +124,7 @@ C--------prepare starting values for searching critical l
          NLW = max(CRL + MAX(5.D0,5.0D0*DFUs),DBLE(NDLW-2))
 C-----setting transmission coefficients for fusion if not distr. barr.
       ENDIF
+
       DO i = 1, NDLW
          arg = (CRL - i + 1)/DFUs
          arg = MIN(70.0D0,arg)
@@ -1080,7 +1082,7 @@ C
          CLOSE (97)
 
 C        PAUSE 'Joining of soft-rotor COLL finished'
-
+C
 C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
          iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
