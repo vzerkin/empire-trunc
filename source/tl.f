@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4087 $
+Ccc   * $Rev: 4089 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 02:17:05 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2014-09-15 11:16:20 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2816,6 +2816,7 @@ C     RENORMALIZING TLs and TLJs and TUNING Tl(L)
           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)*ftmp
         ENDDO
       ENDDO
+
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C
 C     ECIS convergence check
@@ -2836,10 +2837,10 @@ C
      &    ' ERROR: Change the selected OMP or coupled-level scheme !! '
       ENDIF
 
-      IF (SINl+SINlcc.GT.ABScs) THEN
+      IF (SINl.GT.ABScs) THEN
          WRITE (8,*)
          WRITE (8,
-     &'(1x,'' ERROR: CC+DWBA calculation does not converged'')')     
+     &'(1x,'' ERROR: CC+DWBA calculation does not converge'')')     
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
          WRITE (8,'(
@@ -2858,10 +2859,10 @@ C
      &rmations of uncoupled DWBA levels'
       ENDIF
 
-      IF (SINlcont+SINlcc.GT.ABScs) THEN
+      IF (SINlcont.GT.ABScs) THEN
          WRITE (8,*)
          WRITE (8,
-     &'(1x,'' ERROR: CC+DWBA calculation does not converged'')')     
+     &'(1x,'' ERROR: CC+DWBA calculation does not converge'')')     
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of DWBA levels in the continu
      &um.'
