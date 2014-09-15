@@ -240,7 +240,7 @@ module endf_lines
     endif
 
     if(n < j) then
-        write(erlin,'(5a,i5)') ' Upper index of ',chrs,' invalid: ',chrv,' = ',n
+        write(erlin,'(5a,i0)') ' Upper index of ',chrs,' invalid: ',chrv,' = ',n
         call endf_error(erlin)
     endif
 
