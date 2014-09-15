@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4082 $
+$DEBUG
+Ccc   * $Rev: 4086 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 15:54:47 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-15 02:15:34 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -353,11 +354,11 @@ C
 C
          READ (97,*)                    ! model type , ! 3ER LINE
          WRITE (8, '(1x,i3,1x,i3,1x,a35)') izinp, iainp, 
-     &                                 ' nucleus is treated as deformed'
+     &                                ' nucleus is treated as deformed '
          WRITE (32,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
-     &                                 ' nucleus is treated as deformed'
+     &                                ' nucleus is treated as deformed '
          WRITE (96,'(1x,i3,1x,i3,1x,a35)') izinp, iainp,
-     &                                 ' nucleus is treated as deformed'
+     &                                ' nucleus is treated as deformed '
 
          READ (97,*)                    ! EMPTY LINE
          WRITE (8,*) 
@@ -2808,15 +2809,14 @@ C          Scattering into continuum
          WRITE (8,*)
       ENDIF
 
-C     RENORMALIZING TLs and TLJs      
+C     RENORMALIZING TLs and TLJs and TUNING Tl(L)      
 	ftmp = ABScs/(xsabs+SINlcc)
       DO l = 0, Maxlw
-         Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)*ftmp
-         DO jindex = 1,MAXj(Nejc)
-           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)*ftmp
-         ENDDO
+        Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)*ftmp
+        DO jindex = 1,MAXj(Nejc)
+          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)*ftmp
+        ENDDO
       ENDDO
-
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C
 C     ECIS convergence check
@@ -2839,10 +2839,10 @@ C
 
       IF (SINl+SINlcc.GT.ABScs) THEN
          WRITE (8,*)
+         WRITE (8,
+     &'(1x,'' ERROR: CC+DWBA calculation does not converged'')')     
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of uncoupled discrete levels'
-         WRITE (8,*)
-     &' ERROR: DWBA calculation produces too big cross sections '
          WRITE (8,'(
      &1x,'' ERROR: Coupled-channel cross sections                  ='',
      &  F8.2,'' mb''/
@@ -2850,26 +2850,19 @@ C
      &  F8.2,'' mb''/
      &1x,'' ERROR: CN formation cross section ='',F8.2,'' mb''/)') 
      &   SINlcc, SINl, ABScs-SINlcc-SINl
-C        WRITE (8,*)
-C    &' ERROR: EDIT the collective level file to decrease dynamical defo
-C    &rmations of uncoupled DWBA levels'
-C        WRITE (8,*)
-C        STOP 
-C    &' ERROR: EDIT the collective level file to decrease dynamical defo
-C    &rmations of uncoupled DWBA levels'
+         WRITE (8,*)
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of uncoupled DWBA levels'
+         WRITE (8,*)
+         STOP 
+     &' ERROR: EDIT the collective level file to decrease dynamical defo
+     &rmations of uncoupled DWBA levels'
       ENDIF
 
       IF (SINlcont+SINlcc.GT.ABScs) THEN
-         WRITE (8,
-     &'(1x,'' WARNING: reaction cross section renormalized to account fo
-     &r DWBA calculated cross sections '', F8.5/
-     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     &,F8.2,'' mb''/)')
-     &  ABScs, SINlcc, SINl
-
          WRITE (8,*)
+         WRITE (8,
+     &'(1x,'' ERROR: CC+DWBA calculation does not converged'')')     
          WRITE (8,*) 
      &' ERROR: Too big dynam. deformations of DWBA levels in the continu
      &um.'
@@ -2894,7 +2887,7 @@ C     to coupled levels, but not DWBA to uncoupled levels (This is an ECIS doubl
 C
       sreac = xsabs  + SINlcc   
 
-      IF (IOUt.EQ.5 .AND. sreac.GT.0.D0) THEN
+      IF (IOUt.EQ.5) THEN
          WRITE (8,*)
          WRITE (8,*) ' INCIDENT CHANNEL:'
          WRITE (8,'(A7,I6,A5,F10.3,A10,F10.3,A10)') '  LMAX:', Maxlw,
@@ -2935,26 +2928,27 @@ C    &               SNGL(selast), ' mb '
 C
 C-----Renormalizing TLs 
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
-C     continuum also included
+C     continuum included
 C
-158   CONTINUE
-
-      IF( xsabs.gt.0.d0 .and. xsabsj.gt.0.d0 .and. 
-     >  ABScs.GT.(SINlcc+SINl+SINlcont) .and. 
-     >  dabs(ABScs - sreac) .GT. 1.d-7) THEN 
+      IF( xsabs.gt.0.d0 .and. xsabs.GT.(SINl+SINlcont) ) THEN 
         dtmp = 0.d0
         ftmp = 0.d0
+        snorm = (xsabs - SINl -SINlcont)/xsabs
         DO l = 0, Maxlw
-	    snorm = (ABScs - SINlcc - SINl -SINlcont)
-          Stl(l + 1) = Stl(l + 1)*snorm/xsabs
+          Stl(l + 1) = Stl(l + 1)*snorm
           dtmp   = dtmp + DBLE(2*l + 1)*Stl(l + 1)
           DO jindex = 1, MAXj(Nejc) 
-            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm/xsabsj
+            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm
             jsp = sjf(l,jindex,SEJc(Nejc)) 
             ftmp   = ftmp + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
           ENDDO 
         ENDDO
-        CSFus = coeff*dtmp  ! = ABScs - SINlcc - SINl - SINlcont       
+
+        dtmp = coeff*dtmp
+        ftmp = coeff*ftmp/DBLE(2*SEJc(Nejc) + 1)
+
+        CSFus = dtmp         
+
         WRITE (8,
      &'(1x,'' WARNING: Transmission coefficients renormalized to account
      & for DWBA calculated cross sections '', F8.5/
@@ -2968,12 +2962,17 @@ C
      &,F8.2,'' mb''/ 
      &1x,'' WARNING: CN formation cross section (Sum over Stl )      =''
      &,F8.2,'' mb''/ 
-     &1x,'' WARNING: Reaction  cross section                         =''
+     &1x,'' WARNING: CN formation + Direct                           =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: Reaction cross section corrected by direct      =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
      &,F8.2,'' mb''/)') 
-     &  (ABScs-SINlcc-SINl-SINlcont)/xsabs, SINlcc, SINl, SINlcont, 
-     &   CSFus, coeff*ftmp/DBLE(2*SEJc(Nejc) + 1), sreac
-      ENDIF 
+     &    snorm, SINlcc, SINl, SINlcont, 
+     &    ftmp, dtmp, ftmp+SINlcc+SINl+SINlcont, xsabs + SINlcc, ABScs 
 
+      ENDIF 
+    
       RETURN
       END
 
