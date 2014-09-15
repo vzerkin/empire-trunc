@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3823 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-02-07 06:53:22 +0100 (Fr, 07 Feb 2014) $
+Ccc   * $Rev: 4084 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-09-15 02:10:34 +0200 (Mo, 15 Sep 2014) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -456,6 +456,10 @@ C--- for posterior consistency of parameters to be varied
         idef=0
         if(cmnd(28:35).eq.'deformed') idef=1
         if(cmnd(28:35).eq.'dynamica') then
+          WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
+          STOP 'ERROR: OPTMAN OMP fit is not implemented' 
+        endif 
+        if(cmnd(28:35).eq.'soft    ') then
           WRITE(8,*) 'ERROR: OPTMAN OMP fit is not implemented' 
           STOP 'ERROR: OPTMAN OMP fit is not implemented' 
         endif 
