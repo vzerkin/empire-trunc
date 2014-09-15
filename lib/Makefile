@@ -20,6 +20,8 @@ LIBS = util/IO util/fruit util/crs
 
 all:
 	@for dir in $(LIBS) ; do (echo $$dir ; cd $(EMPIREDIR)/$$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
+
+.PHONY: clean
 clean:
 	rm -f *.a *.mod
 	@for dir in $(LIBS) ; do (echo $$dir ; cd $(EMPIREDIR)/$$dir ; $(MAKE) clean); done
