@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4091 $
+Ccc   * $Rev: 4092 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 11:20:10 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2014-09-15 11:23:34 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
