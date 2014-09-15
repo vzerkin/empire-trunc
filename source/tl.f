@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4086 $
+Ccc   * $Rev: 4087 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 02:15:34 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2014-09-15 02:17:05 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
