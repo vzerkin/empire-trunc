@@ -1,6 +1,6 @@
-!cc   * $Rev: 4083 $
+!cc   * $Rev: 4090 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-15 02:09:23 +0200 (Mo, 15 Sep 2014) $
+!cc   * $Date: 2014-09-15 11:17:00 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -9865,6 +9865,9 @@ C
       egrcoll(3,2)=115.*A(0)**(-1./3.)
       ggrcoll(3,2)=9.3-A(0)/48.
 
+      DEFormed = .FALSE.
+      IF (ABS(DEF(1,0)).GT.0.1) DEFormed = .TRUE.
+
       INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
 
       COLfile = fexist
@@ -9903,15 +9906,15 @@ C
  9548    READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
+
          write(*,*)
 	   write(*,*)'  Nucl.Deform:',sngl(DEF(1,0)),'   DEF:',DEFORMED,
-     &             '   OMP Deform:',comment(36:39)
+     &             '   OMP Deform:',comment(36:39),' Coll.file exists'
 
          IF (ABS(DEF(1,0)).LE.0.1D0 .and. 
      &            comment(36:39).eq.'defo') THEN
            COLfile = .FALSE.
 	     fexist = .FALSE.
-           DEFormed = .FALSE.
 	     WRITE(8,*) 
 	     WRITE(8,*) 
      &' WARNING: Spher.nucl. but deformed COLL file DISMISSED' 
@@ -9925,7 +9928,6 @@ C
      &            comment(36:39).eq.'dyna') THEN
            COLfile = .FALSE.
 	     fexist = .FALSE.
-           DEFormed = .FALSE.
 	     WRITE(8,*) 
 	     WRITE(8,*) 
      &' WARNING: Spher.nucl. but dynam. deformed COLL file DISMISSED' 
@@ -9939,7 +9941,6 @@ C
      &       comment(36:39).eq.'sphe') THEN
            COLfile = .FALSE.
 	     fexist = .FALSE.
-           DEFormed = .TRUE.
 	     WRITE(8,*) 
 	     WRITE(8,*) 
      &' WARNING: Deformed nucl. but spherical COLL file DISMISSED' 
@@ -9953,7 +9954,6 @@ C
      &       comment(36:39).eq.'soft') THEN
            COLfile = .FALSE.
 	     fexist = .FALSE.
-           DEFormed = .TRUE.
 	     WRITE(8,*) 
 	     WRITE(8,*) 
      &' WARNING: Deformed nucl. but soft rotator COLL file DISMISSED' 
@@ -9962,7 +9962,6 @@ C
 	     WRITE(8,*) 
            goto 123
          ENDIF
-
 
          if(comment(36:39).eq.'dyna') THEN
            DYNam = .TRUE.
@@ -10393,8 +10392,9 @@ C    >======='
 
  123  ia = A(0)
       iz = Z(0)
-      DEFormed = .FALSE.
-      IF (ABS(DEF(1,0)).GT.0.1) DEFormed = .TRUE.
+      write(*,*)
+      write(*,*)'  Nucl.Deform:',sngl(DEF(1,0)),'   DEF:',DEFORMED,
+     &          '                  ',' Coll.file created'
 C
       odd = .FALSE.
       IF(MOD(NINT(A(0)),2).NE.0 .OR. MOD(NINT(Z(0)),2).NE.0) THEN
