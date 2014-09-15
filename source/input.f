@@ -1,6 +1,6 @@
-!cc   * $Rev: 4081 $
+!cc   * $Rev: 4083 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-14 15:54:21 +0200 (So, 14 Sep 2014) $
+!cc   * $Date: 2014-09-15 02:09:23 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -333,6 +333,7 @@ C        Scaling factor for direct processes consideration for complex projectil
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
+         DEFormed = .FALSE.  
          RECoil = 1.d0    ! Default 
          TISomer = 1.d0   ! 1 sec. default threshold for being isomer
 C        S-factor default to zero
@@ -4221,6 +4222,11 @@ C-----
             DEF(1,0) = val
             WRITE (8,
      &'('' Static deformation of the target nucleus set to'',F6.3)') val
+            IF(ABS(DEF(1,0)).GT.0.1) THEN
+              DEFORMED=.TRUE. 
+            ELSE
+              DEFORMED=.FALSE. 
+            ENDIF		  		           
             GOTO 100
          ENDIF
 
@@ -8555,12 +8561,13 @@ C-----previously I had a problem for be6 => be5 +n since mass be5 undefined
             IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
+C
 C              Static deformation used
-C              write(*,*) NINT(Z(nnuc)),NINT(A(nnuc)),beta2x(k)  
                DEF(1,nnuc) = beta2x(k)
-C              Nobre param. is for dynamical deformations
+C              Nobre param. is for dynamical deformations (not for static)
 C              call defcal(NINT(Z(nnuc)),NINT(A(nnuc)),beta2,ftmp)
 C              DEF(1,nnuc) = beta2
+C
                XMAss(nnuc) = EXCessmass(iz,ia)
 C              Atomic masses
                AMAss(nnuc) = A(nnuc) +  XMAss(nnuc)/AMUmev
@@ -8570,14 +8577,23 @@ C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev
             IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
-               IF(DEF(1,0).EQ.0.d0) THEN
+               IF(ABS(DEF(1,0)).LT.1.d-3) then
                  DEF(1,0) = beta2x(k)
                  WRITE (8,
-     &'('' Static deformation of the target nucleus set to'',F6.3,1x,
+     &'('' Static deformation of the target nucleus set to  '',F6.3,1x,
      &  ''(FRDM)'')') beta2x(k)
                  call defcal(NINT(Z(0)),NINT(A(0)),beta2,ftmp)
                  WRITE (8,
-     &'('' Nobre parameterization deformation is   '',F6.3)') beta2
+     &'('' Nobre param. (PRC76(2007)024605) dyn. deform. is '',F6.3)') 
+     &beta2
+               ELSE
+                 WRITE (8,
+     &'('' Static deformat. DEFNUC of the target nucleus is '',F6.3)') 
+     & DEF(1,0)
+                 call defcal(NINT(Z(0)),NINT(A(0)),beta2,ftmp)
+                 WRITE (8,
+     &'('' Nobre param. (PRC76(2007)024605) dyn. deform. is '',F6.3)') 
+     &beta2
                ENDIF
                XMAss(0) = EXCessmass(iz,ia)
 C              Atomic masses
@@ -9596,26 +9612,26 @@ C
      &       iptmp.EQ. + 1 .AND. reftmp.EQ.'Raman2') THEN
              iccfus = iccfus + 1
              beta2 = betatmp
-c            CCFUS deformations
+C            CCFUS deformations
              BETcc(iccfus) = beta2
              FLAm(iccfus) = 2
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
+             WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &           'TARGET EXP. DYNAMIC. DEFORMATION (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
              beta3 = betatmp
-c            CCFUS deformations
+C            CCFUS deformations
              BETcc(iccfus) = beta3
              FLAm(iccfus) = 3
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A41/1x,A11,F7.3)')
-     &           'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
+             WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &           'TARGET EXP. DYNAMIC. DEFORMATION (RIPL):', 
      &           'BETA (3-) =',beta3
-          IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
+C            IF(ZEJc(0).GT.0 .and. beta3.gt.0.02) beta3=0.02
          ENDIF
       ENDDO
  250  IF (beta2.EQ.0.D0) THEN
@@ -9623,16 +9639,16 @@ c            CCFUS deformations
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+         WRITE (8,*) ' WARNING: Nobre et al syst. used for dynam.deforma
      &tions: Phys.Rev.C76(2007)024605' 
 C
          call defcal(iz,ia,beta2,ftmp)
          iccfus = iccfus + 1
-c        CCFUS deformations
+C        CCFUS deformations
          BETcc(iccfus) = beta2
          FLAm(iccfus) = 2
          QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(1x,A39,/,1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (2+) =',beta2
       ENDIF
@@ -9641,16 +9657,16 @@ c        CCFUS deformations
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+         WRITE (8,*) ' WARNING: Nobre et al syst. used for dynam.deforma
      &tions: Phys.Rev.C76(2007)024605' 
 C
          call defcal(iz,ia,ftmp,beta3)
          iccfus = iccfus + 1
-c        CCFUS deformations
+C        CCFUS deformations
          BETcc(iccfus) = beta3
          FLAm(iccfus) = 3
          QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(1x,A39/1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (3-) =',beta3
       ENDIF
@@ -9661,6 +9677,9 @@ C    &        '3- dynamical deformation reduced to 0.03'
 C       beta3 = max(0.03d0,beta3)
 C     ENDIF
 
+C       
+C     PROJECTILE DEFORMATIONS
+C
       IF(AEJc(0).LE.4) GOTO 350
 
       ia = AEJc(0)
@@ -9684,20 +9703,20 @@ c            CCFUS deformations
              BETcc(iccfus) = beta2
              FLAm(iccfus) = -2
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ. EXPERIMENTAL DEFORMATION (RIPL):', 
+             WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &           'PROJ. EXP. DYNAMIC. DEFORMATION  (RIPL):', 
      &           'BETA (2+) =',beta2
          ENDIF
          IF (nztmp.EQ.iz .AND. natmp.EQ.ia .AND. jtmp.EQ.3.D0 .AND.
      &       iptmp.EQ. - 1 .AND. reftmp.EQ.'Kibedi') THEN
              iccfus = iccfus + 1
              beta3 = betatmp
-c            CCFUS deformations
+C            CCFUS deformations
              BETcc(iccfus) = beta3
              FLAm(iccfus) = -3
              QCC(iccfus) = -etmp
-             WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &           'PROJ. EXPERIMENTAL DEFORMATION (RIPL):', 
+             WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &           'PROJ. EXP. DYNAMIC. DEFORMATION  (RIPL):', 
      &           'BETA (3-) =',beta3
          ENDIF
       ENDDO
@@ -9706,16 +9725,16 @@ c            CCFUS deformations
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
-         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+         WRITE (8,*) ' WARNING: Nobre et al syst. used for dynam.deforma
      &tions: Phys.Rev.C76(2007)024605' 
          call defcal(iz,ia,beta2,ftmp)
          iccfus = iccfus + 1
-c        CCFUS deformations
+C        CCFUS deformations
          BETcc(iccfus) = beta2
          FLAm(iccfus) = -2
          QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &   'PROJ. SYST. DEFORMATION (Nobre et al):', 
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &   'PROJ. DYNAMIC. DEFORMATION(Nobre et al):', 
      &           'BETA (2+) =',beta2
       ENDIF
       IF (beta3.EQ.0.D0) THEN
@@ -9723,16 +9742,16 @@ c        CCFUS deformations
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*) ' WARNING: Nobre et al systematics used for deforma
+         WRITE (8,*) ' WARNING: Nobre et al syst. used for dynam.deforma
      &tions: Phys.Rev.C76(2007)024605' 
          call defcal(iz,ia,ftmp,beta3)
          iccfus = iccfus + 1
-c        CCFUS deformations
+C        CCFUS deformations
          BETcc(iccfus) = beta3
          FLAm(iccfus) = -3
          QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &   'PROJ. SYST. DEFORMATION (Nobre et al):', 
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+     &   'PROJ. DYNAMIC. DEFORMATION(Nobre et al):', 
      &           'BETA (3-) =',beta3
       ENDIF
       GOTO 350
@@ -9884,6 +9903,66 @@ C
  9548    READ (32,'(a80)') comment
          WRITE (8,'(a80)') comment
          WRITE (12,'(a80)') comment
+         write(*,*)
+	   write(*,*)'  Nucl.Deform:',sngl(DEF(1,0)),'   DEF:',DEFORMED,
+     &             '   OMP Deform:',comment(36:39)
+
+         IF (ABS(DEF(1,0)).LE.0.1D0 .and. 
+     &            comment(36:39).eq.'defo') THEN
+           COLfile = .FALSE.
+	     fexist = .FALSE.
+           DEFormed = .FALSE.
+	     WRITE(8,*) 
+	     WRITE(8,*) 
+     &' WARNING: Spher.nucl. but deformed COLL file DISMISSED' 
+	     WRITE(8,*) 
+     &' WARNING: Delete TARGET transmission coefficients and rerun' 
+	     WRITE(8,*) 
+           goto 123
+         ENDIF
+
+         IF (ABS(DEF(1,0)).LE.0.1D0 .and. 
+     &            comment(36:39).eq.'dyna') THEN
+           COLfile = .FALSE.
+	     fexist = .FALSE.
+           DEFormed = .FALSE.
+	     WRITE(8,*) 
+	     WRITE(8,*) 
+     &' WARNING: Spher.nucl. but dynam. deformed COLL file DISMISSED' 
+	     WRITE(8,*) 
+     &' WARNING: Delete TARGET transmission coefficients and rerun' 
+	     WRITE(8,*) 
+           goto 123
+         ENDIF
+
+         IF (ABS(DEF(1,0)).GT.0.1D0 .and. 
+     &       comment(36:39).eq.'sphe') THEN
+           COLfile = .FALSE.
+	     fexist = .FALSE.
+           DEFormed = .TRUE.
+	     WRITE(8,*) 
+	     WRITE(8,*) 
+     &' WARNING: Deformed nucl. but spherical COLL file DISMISSED' 
+	     WRITE(8,*) 
+     &' WARNING: Delete TARGET transmission coefficients and rerun' 
+	     WRITE(8,*) 
+           goto 123
+         ENDIF
+
+         IF (ABS(DEF(1,0)).GT.0.1D0 .and. 
+     &       comment(36:39).eq.'soft') THEN
+           COLfile = .FALSE.
+	     fexist = .FALSE.
+           DEFormed = .TRUE.
+	     WRITE(8,*) 
+	     WRITE(8,*) 
+     &' WARNING: Deformed nucl. but soft rotator COLL file DISMISSED' 
+	     WRITE(8,*) 
+     &' WARNING: Delete TARGET transmission coefficients and rerun' 
+	     WRITE(8,*) 
+           goto 123
+         ENDIF
+
 
          if(comment(36:39).eq.'dyna') THEN
            DYNam = .TRUE.
@@ -10101,7 +10180,6 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.2)'')')
                WRITE (8,
      &'('' WARNING: Could be a bad approxim. for near-magic'')') 
                DEFormed = .TRUE.
-C              DEF(1,0) = 0.2d0
              ENDIF
            ENDIF
 
@@ -10236,14 +10314,17 @@ C
 C          If odd nucleus, then rotational model is always used
 C          It could be a bad approximation for a quasispherical nucleus
            WRITE (8,
-     &'(''   Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+     &'(''   Nucleus is deformed  (static beta2 ='',F6.3,'') assumed'' 
+     &)')  DEF(1,0)
          ELSE
            IF(DEFORMED) THEN
              WRITE (8,
-     &'(''   Nucleus is deformed  (beta2 ='',F6.3,'')'')') DEF(1,0)
+     &'(''   Nucleus is deformed  (static beta2 ='',F6.3,'')'')') 
+     &       DEF(1,0)
            ELSE
              WRITE (8,
-     &'(''   Nucleus is spherical (beta2 ='',F6.3,'')'')') DEF(1,0)
+     &'(''   Nucleus is spherical (static beta2 ='',F6.3,'')'')')
+     &       DEF(1,0)
            ENDIF
          ENDIF
 
@@ -10310,7 +10391,7 @@ C    >======='
          RETURN
       ENDIF
 
-      ia = A(0)
+ 123  ia = A(0)
       iz = Z(0)
       DEFormed = .FALSE.
       IF (ABS(DEF(1,0)).GT.0.1) DEFormed = .TRUE.
@@ -10437,8 +10518,8 @@ C-----levels for target NNUC copied to file TARGET.lev
      &   '/RIPL/optical/om-data/om-deformations.dat not found '
 C     WRITE (8,*) ' WARNING: ',
 C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
-      WRITE (8,*) ' WARNING: Nobre et al systematics used for deformatio
-     &ns: Phys.Rev.C76(2007)024605' 
+      WRITE (8,'(A)') '  WARNING: Nobre et al systematics used for dynam 
+     &ical deformations: Phys.Rev.C76(2007)024605' 
       call defcal(iz,ia,beta2,beta3)
       GOTO 400
   300 CLOSE (84)
@@ -10447,55 +10528,29 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
          call defcal(iz,ia,beta2,ftmp)
-         IF(beta2.ne.DEF(1,0)) then
-           IF(ABS(DEF(1,0)).GT.1.d-3) then
-             WRITE (8,*) ' WARNING: Input deformation used (DEFNUC)'
-             beta2 = DEF(1,0)
-             WRITE (8,'(/1x,A26/1x,A11,F7.3)')
-     &         'TARGET INPUT DEFORMATION :', 
-     &         'BETA (2+) =',beta2
-           ELSE
-            WRITE (8,*)
-     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
-            WRITE (8,'(/1x,A39/1x,A11,F7.3)')
-     &        'TARGET DYNAM. DEFORMATION (Nobre et al):', 
-     &        'BETA (2+) =',beta2
-	     ENDIF
-         ELSE
-            WRITE (8,*)
-     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
-            WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (2+) =',beta2
-         ENDIF
-         IF (DEFormed) THEN
-            WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
-            WRITE (8,*)
-         ENDIF
+         WRITE (8,'(A)') '  Nobre et al systematics used for dynamical d 
+     &eformations: Phys.Rev.C76(2007)024605' 
       ELSE
-         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (2+) =',beta2
-         IF (DEFormed) THEN
-            WRITE (8,*) 'BETA2 ASSUMED AS GS BAND DEFORMATION'
-            WRITE (8,*)
-         ENDIF
       ENDIF
+
       IF (beta3.EQ.0.D0) THEN
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,*)
-     &' WARNING: Nobre syst. deformation used: Phys.Rev.C76(2007)024605'
-C        WRITE (8,*) ' WARNING: ',
-C    &        'Default dynamical deformations 0.005 (3-) will be used'
-C        beta3 = 0.005
+         WRITE (8,'(A)') '  Nobre et al systematics used for dynamical d 
+     &eformations: Phys.Rev.C76(2007)024605' 
          call defcal(iz,ia,ftmp,beta3)
-         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (3-) =',beta3
       ELSE
-         WRITE (8,'(/1x,A39/1x,A11,F7.3)')
+         WRITE (8,'(1x,A41,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (3-) =',beta3
       ENDIF
@@ -10547,8 +10602,23 @@ C           RCN 0811
 C
             D_Llv(ND_nlv) = 0
             D_Klv(ND_nlv) = 0
-            D_Def(ND_nlv,2) = 0.005
-            IF (beta2.GT.0.D0 .AND. DEFormed) D_Def(ND_nlv,2) = beta2
+            D_Def(ND_nlv,2) = 0.01
+            IF (DEF(1,0).le.1.d-3) THEN
+			  IF(beta2.GT.0.D0) THEN
+                WRITE (8,*) 
+                WRITE (8,*) ' BETA (2+) ASSUMED AS GS BAND DEFORMATION'
+                WRITE (8,*)
+			    D_Def(ND_nlv,2) = beta2
+			  ELSE
+			    D_Def(ND_nlv,2) = 0.01d0
+              ENDIF
+			ELSE
+			  D_Def(ND_nlv,2) = DEF(1,0)
+              WRITE (8,*) 
+              WRITE (8,*) 
+     &            ' INPUT (DEFNUC) ASSUMED AS GS BAND DEFORMATION'
+              WRITE (8,*)
+			ENDIF
             gspin = xjlvr
             gspar = DBLE(lvpr)
          ENDIF
@@ -10732,7 +10802,8 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
-               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
+C              IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
+               GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.(gspin + 2*delta_k) .AND.
      &          lvpr.EQ.gspar) THEN
@@ -10747,7 +10818,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
-               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
+C              IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                GOTO 500
             ENDIF
             IF (i6p.EQ.0 .AND. xjlvr.EQ.(gspin + 3*delta_k) .AND.
@@ -10763,7 +10834,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
-               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
+C              IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                IF(odd) goto 600
                GOTO 500
             ENDIF
@@ -10781,7 +10852,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
-               IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
+C              IF (beta2.GT.0.D0) D_Def(ND_nlv,2) = beta2               
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
@@ -10817,7 +10888,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = 0.01
                GOTO 500
             ENDIF
             IF (i1m.EQ.0 .AND. xjlvr.EQ.(gspin + NINT(delta_k)/2) .AND.
@@ -10841,7 +10912,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = beta3
+               D_Def(ND_nlv,2) = beta3*0.1
                GOTO 500
             ENDIF
             IF (i5m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
@@ -10865,7 +10936,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = beta2*0.1
                GOTO 500
             ENDIF
             IF (i22p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.
@@ -10877,7 +10948,7 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                D_Lvp(ND_nlv) = lvpr
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 0
-               D_Def(ND_nlv,2) = 0.005
+               D_Def(ND_nlv,2) = beta2*0.1
                GOTO 500
             ENDIF
 C
@@ -10888,10 +10959,10 @@ C
 C           Skipping 0- states in the continuum
             if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.0) GOTO 500
 
-            IF(ilv.GT.min(NLV(0),12)) THEN
-C             Skipping 2- states in the continuum
+            IF(ilv.GT.min(NLV(0),15)) THEN
+C             Skipping 2- states for levels higher than #15 (or in the continuum)
               if(lvpr.eq.-1 .AND. NINT(2*xjlvr).eq.4) GOTO 500
-C             Skipping 1+/1- states in the continuum
+C             Skipping 1+/1- states  for levels higher than #15 (or in the continuum)
               if(                 NINT(2*xjlvr).eq.2) GOTO 500
             ENDIF
 
@@ -10924,14 +10995,14 @@ C             Skipping 1+/1- states in the continuum
      &rat. model)'
          WRITE (8,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
-         WRITE (8,'(1x,i3,1x,i3,a35)') iz, ia,
+         WRITE (8,'(1x,i3,1x,i3,1x,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
          WRITE (32,'(A76)')
      &' Collective levels selected automatically from target levels (vib
      &rat. model)'
          WRITE (32,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
-         WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
+         WRITE (32,'(1x,i3,1x,i3,1x,a35)') iz, ia,
      &                                ' nucleus is treated as spherical'
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
@@ -11066,15 +11137,15 @@ C             IF(ncont.GT.99) GOTO 653
      &id rotor) '
          WRITE (8,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
-         WRITE (8,'(1x,i3,1x,i3,a35)') iz, ia,
-     &                                 ' nucleus is treated as deformed'
+         WRITE (8,'(1x,i3,1x,i3,1x,a35)') iz, ia,
+     &                                ' nucleus is treated as deformed '
          WRITE (32,'(A75)')
      &' Collective levels selected automatically from target levels (rig
      &id rotor) '
          WRITE (32,*)
      &          ' N <',LEVcc,' for coupled levels in CC calculation'
-         WRITE (32,'(1x,i3,1x,i3,a35)') iz, ia,
-     &                                 ' nucleus is treated as deformed'
+         WRITE (32,'(1x,i3,1x,i3,1x,a35)') iz, ia,
+     &                                ' nucleus is treated as deformed '
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
             DO j = i + 1, ND_nlv
