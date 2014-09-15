@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4087 $
+$DEBUG
+Ccc   * $Rev: 4091 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 02:17:05 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2014-09-15 11:20:10 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -60,7 +61,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
 	INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
-      DOUBLE PRECISION xj, xjc, jmin, jmax
+      DOUBLE PRECISION xj, xjc, jmin, jmax, sxj, trgsp
       DOUBLE PRECISION sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       INTEGER PAR
@@ -88,9 +89,14 @@ C-----Reduced mass corrected for proper mass values
 
       el = EINl
       ecms = EIN
+
+      mxj   = MAXj(Npro)
+      sxj   = SEJc(Npro)
+	trgsp = XJLv(LEVtarg,Ntrg)
+
       S1 = 0.5d0
-      IF (AINT(XJLv(LEVtarg,Ntrg) + SEJc(Npro)) - XJLv(LEVtarg,Ntrg)
-     &    - SEJc(Npro).EQ.0.0D0) S1 = 1.d0
+      IF (AINT(trgsp + sxj) - trgsp - sxj
+     &   .EQ.0.0D0) S1 = 1.d0
 
       ELAcs = 0.D0
       TOTcs = 0.D0
@@ -112,8 +118,6 @@ C     allocate stl(), stlj(), sel()
       stlj = 0.d0
       stl  = 0.d0
       sel  = 0.d0
-
-      mxj = MAXj(Npro)
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
      &       INT(ZEJc(Npro)), INT(AEJc(Npro)), INT(Z(Ntrg)),
@@ -165,13 +169,13 @@ C-----------Absorption and elastic cross sections in mb
               ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
               IF (fexistj) then
                 DO jindex = 1, mxj
-                  jsp = sjf(l,jindex,SEJc(Npro)) 
+                  jsp = sjf(l,jindex,sxj) 
                   ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
                 ENDDO 
 			ENDIF   
             ENDDO
             xssabs  = 10.d0*PI/ak2*ssabs
-            xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
+            xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*sxj+1)
 
             IF (fexistj) READ (451,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
@@ -305,7 +309,7 @@ C-----------factor 10 near HHBarc from fm**2-->mb
                e1tmp = 10*HHBarc**2*PI*E1(Ntrg,EINl,0.D0,0.D0)
      &                 /(2*EINl**2)
                qdtmp = SIGQD(Z(Ntrg),A(Ntrg),EINl,LQDfac)
-               e1tmp = (e1tmp + qdtmp/3.0D0)/(2*XJLv(LEVtarg,Ntrg) + 1)
+               e1tmp = (e1tmp + qdtmp/3.0D0)/(2*trgsp + 1.d0)
 C--------------do loop over parity
                DO ip = 1, 2
 C-----------------Quasideuteron contribution QDTmp by Carlson
@@ -313,8 +317,8 @@ C-----------------Quasideuteron contribution QDTmp by Carlson
 C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C--------------------Spin of c.n. J=j-S1
-                     IF (ABS(j - S1 - XJLv(LEVtarg,Ntrg)).LE.1.0 .AND.
-     &                   (j - S1 + XJLv(LEVtarg,Ntrg)).GE.1.0)
+                     IF (ABS(j - S1 - trgsp).LE.1.d0 .AND.
+     &                   (j - S1 + trgsp).GE.1.0)
      &                   POP(NEX(1),j,ip,1) = POP(NEX(1),j,ip,1)
      &                   + (FLOAT(2*j + 1) - 2.0*S1)*wparg
                   ENDDO
@@ -326,15 +330,15 @@ C-----------M1
             IF (IGM1.NE.0) THEN
 C--------------factor 10 near HHBarc from fm**2-->mb
                e1tmp = 10*HHBarc**2*PI*XM1(EINl)/(2*EINl**2)
-     &                 /(2*XJLv(LEVtarg,Ntrg) + 1)
+     &                 /(2*trgsp + 1.d0)
 C--------------do loop over parity
                DO ip = 1, 2
                   wparg = PAR(ip,LVP(LEVtarg,Ntrg),2)*e1tmp
 C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C--------------------Spin of c.n. J=j-S1
-                     IF (ABS(j - S1 - XJLv(LEVtarg,Ntrg)).LE.1.0 .AND.
-     &                   (j - S1 + XJLv(LEVtarg,Ntrg)).GE.1.0)
+                     IF (ABS(j - S1 - trgsp).LE.1.0 .AND.
+     &                   (j - S1 + trgsp).GE.1.0)
      &                   POP(NEX(1),j,ip,1) = POP(NEX(1),j,ip,1)
      &                   + (FLOAT(2*j + 1) - 2.0*S1)*wparg
                   ENDDO
@@ -346,7 +350,7 @@ C-----------E2
             IF (IGE2.NE.0) THEN
 C-----------factor 10 near HHBarc from fm**2-->mb
                e1tmp = 10*HHBarc**2*PI*E2(EINl)/(2*EINl**2)
-     &                 /(2*XJLv(LEVtarg,Ntrg) + 1)
+     &                 /(2*trgsp + 1.d0)
 C--------------do loop over parity
                DO ip = 1, 2
                   wparg = PAR(ip,LVP(LEVtarg,Ntrg),2)*e1tmp
@@ -354,8 +358,8 @@ C-----------------do loop over compound nucleus spin
                   DO j = 1, NDLW
 C-----------------Spin of c.n. J=j-S1
 C-----------------factor 10 near HHBarc from fm**2-->mb
-                     IF (ABS(j - S1 - XJLv(LEVtarg,Ntrg)).LE.2.0 .AND.
-     &                   (j - S1 + XJLv(LEVtarg,Ntrg)).GE.2.0)
+                     IF (ABS(j - S1 - trgsp).LE.2.0 .AND.
+     &                   (j - S1 + trgsp).GE.2.0)
      &                   POP(NEX(1),j,ip,1) = POP(NEX(1),j,ip,1)
      &                   + (FLOAT(2*j + 1) - 2.0*S1)*wparg
                   ENDDO
@@ -392,7 +396,7 @@ C--------and calculate transmission coefficients
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
          coef=1.d0
          IF (INT(AEJc(0)).GT.0) coef = 10.*PI/ak2/
-     &      (2*XJLv(LEVtarg,Ntrg) + 1.0)/(2*SEJc(Npro) + 1.0)
+     &      (2*trgsp + 1.d0)/(2*sxj + 1.d0)
 
          CSFus = 0.d0
          DO il = 1, NDLW
@@ -822,10 +826,10 @@ C--------channel spin min and max
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
          coef = 1.d0
          IF (INT(AEJc(0)).GT.0) coef = 10.d0*PI/ak2/
-     &      (2*XJLv(LEVtarg,Ntrg) + 1.d0)/(2*SEJc(Npro) + 1.d0)
+     &      (2*trgsp + 1.d0)/(2*sxj + 1.d0)
 	                   
-         smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-         smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
+         smin = ABS(sxj - trgsp)
+         smax = sxj + trgsp
          mul = smax - smin + 1.0001
          CSFus = 0.d0
          DO ip = 1, 2     ! over parity
@@ -884,7 +888,7 @@ C-----Storing transmission coefficients for the incident channel
          DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
             WRITE (46,'(2x,3x,3(3x,D15.8))') 
-     &        (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
+     &        (stlj(l + 1,jindex), jindex=1,mxj)
          ENDDO
 
          el = EINl
@@ -896,13 +900,13 @@ C--------Absorption and elastic cross sections in mb
          ssabsj = 0.d0 
          DO l = 0, maxlw
            ssabs   = ssabs   + Stl(l + 1)*DBLE(2*l + 1)
-           DO jindex = 1, MAXj(Npro) 
-             jsp = sjf(l,jindex,SEJc(Npro)) 
+           DO jindex = 1, mxj 
+             jsp = sjf(l,jindex,sxj) 
              ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
            ENDDO 
          ENDDO
          xssabs  = 10.d0*PI/ak2*ssabs
-         xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*SEJc(Npro)+1)
+         xssabsj = 10.d0*PI/ak2*ssabsj/(2*sxj+1.d0)
 
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D12.6,1x))') 
@@ -932,7 +936,7 @@ C     write(*,*) maxlw,stl(1),stl(2),'stor'
       WRITE (45) maxlw, EINl, IRElat(Npro,Ntrg)
       DO l = 0, maxlw
          WRITE (45 )  stl(l + 1)
-         WRITE (451) (stlj(l + 1,jindex), jindex=1,MAXj(Npro))
+         WRITE (451) (stlj(l + 1,jindex), jindex=1,mxj)
       ENDDO
       WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
       WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
@@ -1103,15 +1107,15 @@ C--------Corrected scattering radius
           ENDIF
       ENDIF
 
-      el = EINl
-      relcal = .FALSE.
-      IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
-      CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+C     el = EINl
+C     relcal = .FALSE.
+C     IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
+C     CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
 	coef = 1.d0
       IF (INT(AEJc(0)).GT.0)
      &        coef = 10.d0*PI/ak2/
-     &           (2*XJLv(LEVtarg,Ntrg) + 1.d0)/(2*SEJc(Npro) + 1.d0)
+     &           (2*trgsp + 1.d0)/(2*sxj + 1.d0)
 
 C     write(*,*) 'FUSI=',10.d0*PI/ak2,el,IRElat(NPRo,Ntrg),
 C    &           RELKIN,relcal
@@ -1123,14 +1127,14 @@ C-------absorption spin distribution using Tlj's
           DO j = 1, NLW   !over compound nucleus spin
             sum = 0.d0
             xjc = float(j) + HIS(1)
-            jmin = abs(xjc - XJLv(LEVtarg,Ntrg))
-            jmax = xjc + XJLv(LEVtarg,Ntrg)
-            kmin = jmin - MAXj(Npro) + (2.0 + SEJc(Npro))  !minimum k=l+1
-            kmax = jmax - 1 + (2.0 + SEJc(Npro))           !maximum k=l+1
-            kmax = MIN(NDLw, kmax)                         !ensure we are within dimensions
-            DO k = kmin, kmax                              !do loop over l in Tlj
-               DO jindex = 1, MAXj(Npro)                   !do loop over j-index in Tlj
-                  xj = k + jindex - (2.0 + SEJc(Npro))
+            jmin = abs(xjc - trgsp)
+            jmax = xjc + trgsp
+C           ensure we are within dimensions for the min=1, and the max=NDLW 
+            kmin = max(1   ,NINT(jmin - mxj + (2.d0 + sxj))) !minimum k=l+1
+            kmax = min(NDLW,NINT(jmax - 1   + (2.d0 + sxj))) !maximum k=l+1
+            DO k = kmin, kmax                       !do loop over l in Tlj
+               DO jindex = 1, mxj                   !do loop over j-index in Tlj
+                  xj = k + jindex - (2.d0 + sxj)
                   IF(xj<jmin .or. xj>jmax) CYCLE
                   IF(stlj(k,jindex)<=1.0d-15) CYCLE
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
@@ -1147,8 +1151,8 @@ C-------absorption spin distribution using Tlj's
 	ELSE
 
 C-------absorption spin distribution using Tl's
-         smin = ABS(SEJc(Npro) - XJLv(LEVtarg,Ntrg))
-         smax = SEJc(Npro) + XJLv(LEVtarg,Ntrg)
+         smin = ABS(sxj - trgsp)
+         smax = sxj + trgsp
          mul = smax - smin + 1.0001
          DO ip = 1, 2     ! over parity
           DO j = 1, NLW   !over compound nucleus spin
@@ -1211,10 +1215,11 @@ C-----direct contribution !!!
 C
       DO i = 1, NDLW
          ELTl(i) = stl(i)
-         DO j = 1, MAXj(Npro)
+         DO j = 1, mxj
            ELTlj(i,j) = stlj(i,j)
          ENDDO
       ENDDO
+C
       DO j = NDLW, 1, -1
          NLW = j 
          IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
@@ -1259,12 +1264,12 @@ C
           NLW = min(JSTab(1),NDLW)
       ENDIF
 
-      csmax = 0.d0
-      DO ip = 1, 2
-        DO j = 1, NDLW
-          csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
-        ENDDO
-      ENDDO
+C     csmax = 0.d0
+C     DO ip = 1, 2
+C       DO j = 1, NDLW
+C         csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+C       ENDDO
+C     ENDDO
 
       IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
      &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
