@@ -16,7 +16,7 @@ endif
 # individual Makefiles are responsible for moving the libraries they create into this
 # directory. See the Makefile in the util/IO/ directory as an example.
 
-LIBS = util/IO util/fruit
+LIBS = util/IO util/fruit util/crs
 
 all:
 	@for dir in $(LIBS) ; do (echo $$dir ; cd $(EMPIREDIR)/$$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
