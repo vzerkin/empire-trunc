@@ -1,6 +1,6 @@
-cc   * $Rev: 4067 $
+cc   * $Rev: 4088 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 00:59:47 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-15 11:15:34 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -45,7 +45,8 @@ C-----
  
         CALL INPUT()
 
-        CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, !NNuct ??, 
+C       CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, !NNuct ??, 
+        CALL EMPAXS(LHMs, NDAng, NDECSE, NNuct, 
      1                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
         call open_xs_files()
 C-----
