@@ -1,14 +1,15 @@
 FC=gfortran
-FRUIT=.
-LIBS=-L$(FRUIT)/lib 
-INCLS=-I$(FRUIT)/include 
+FRUIT=$(EMPIREDIR)
+LIBDIR=$(FRUIT)/lib 
+LIBS=-L$(LIBDIR)
+INCLS=-I$(LIBDIR) 
 FCFLAGS=-O3 -Wall -ffree-line-length-none
 
 all:libfruit.a
-install: all
-#	cp fruit_util.mod $(FRUIT)/include
-#	cp fruit.mod $(FRUIT)/include
-#	cp libfruit.a $(FRUIT)/lib
+	install -d $(LIBDIR)
+	cp fruit_util.mod $(LIBDIR)
+	cp fruit.mod $(LIBDIR)
+	install libfruit.a $(LIBDIR)
 
 fruit_util.mod: fruit_util.f90
 	$(FC) -c fruit_util.f90 

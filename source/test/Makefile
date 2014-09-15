@@ -1,5 +1,5 @@
 FC=gfortran
-FRUIT=$(EMPIREDIR)/util/fruit
+FRUIT=$(EMPIREDIR)/lib
 
 LIBS=-L $(FRUIT) -lfruit
 INCLS=-I $(FRUIT)
