@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4074 $
+$DEBUG
+Ccc   * $Rev: 4085 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-14 02:07:32 +0200 (So, 14 Sep 2014) $
+Ccc   * $Date: 2014-09-15 02:13:51 +0200 (Mo, 15 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -152,10 +153,12 @@ C--------Here the old calculated files are read
               ENDIF
             ENDDO
 
+C           write(*,*) maxlw,stl(1),stl(2),'1st'
+
             el = EINl
             relcal = .FALSE.
             IF (IRElat(Npro,Ntrg).GT.0 .OR. RELkin) relcal = .TRUE.
-            CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+            CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)           
 C-----------Absorption and elastic cross sections in mb
             ssabs  = 0.d0 
             ssabsj = 0.d0 
@@ -175,19 +178,19 @@ C-----------Absorption and elastic cross sections in mb
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
             READ (45 ,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-            SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
+             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
             IF (IOUt.EQ.5) THEN
               WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
               WRITE (46,'(1x,8(D12.6,1x))')
      &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
               IF(FIRST_ein) then
 	          WRITE(8,*)
-                WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-                WRITE (8,'(1x,8(D12.6,1x))')
-     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
+                WRITE (8,*) 
+     &            'EL,TOT,ABS,INEL,CC,INELcont,CSFus,SumTl,SumTlj'
+                WRITE (8,'(1x,9(D12.6,1x))') ELAcs, TOTcs, ABScs, 
+     &            SINl, SINlcc, SINlcont,CSFus, xssabs,xssabsj
 	          WRITE(8,*)
               ENDIF 
-
             ENDIF
             READ (45,END = 40, ERR=40) L
             IF(L.EQ.123456) THEN
@@ -489,6 +492,7 @@ C--------------Restoring KTRlom(0,0)
             ENDIF
             ldbwacalc = .TRUE.
          ENDIF
+
 C
 C--------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly the
 C--------same array of transmission coefficients for the incident channel
@@ -752,6 +756,8 @@ C-----------------checking the correspondence of the excited states
 
          ENDIF  ! END of DIRECT=1/2 block
 
+C        write(*,*) maxlw,stl(1),stl(2),ltlj
+
          IF (.NOT.ltlj) THEN
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated like in SOMP i.e.
@@ -918,6 +924,8 @@ C--------Absorption and elastic cross sections in mb
          ENDIF
          CLOSE (46)
       ENDIF
+
+C     write(*,*) maxlw,stl(1),stl(2),'stor'
 
       OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),FORM = 'UNFORMATTED')
       OPEN (45,FILE = (ctldir//ctmp23//'.INC'),FORM = 'UNFORMATTED')
