@@ -551,8 +551,8 @@ def splashscreen():
     ' ',\
     ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
     ' ',\
-    ' Upton, New York, USA, January 2014 ',\
-    ' Vienna, Austria, January 2014      ',\
+    ' Upton, New York, USA, September 2014 ',\
+    ' Vienna, Austria, September 2014      ',\
     ' ']
     return '\n'.join( [ x.center(60) for x in splash ] )
 
