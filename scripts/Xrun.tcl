@@ -1,6 +1,6 @@
-# $Rev: 4048 $
-# $Author: zerkinv $
-# $Date: 2014-09-08 17:10:55 +0200 (Mo, 08 Sep 2014) $
+# $Rev: 4099 $
+# $Author: rcapote $
+# $Date: 2014-09-16 23:55:41 +0200 (Di, 16 Sep 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5907,7 +5907,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.2 (Malta), November 2013, Graphical User Interface (GUI) "
+    wm title $top "EMPIRE-3.2.3 (Malta), September 2014, Graphical User Interface (GUI) "
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
