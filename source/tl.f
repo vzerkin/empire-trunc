@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4089 $
+Ccc   * $Rev: 4102 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 11:16:20 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2014-09-20 00:55:56 +0200 (Sa, 20 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -121,7 +121,7 @@ C--------prepare starting values for searching critical l
          ELSE
             CRL = clf - 1 + (CSFus - xfum)/(xfu - xfum)
          ENDIF
-         NLW = max(CRL + MAX(5.D0,5.0D0*DFUs),DBLE(NDLW-2))
+         NLW = max(CRL + MAX(5.D0,5.0D0*DFUs),DBLE(NDLW-1))
 C-----setting transmission coefficients for fusion if not distr. barr.
       ENDIF
 
@@ -2768,6 +2768,8 @@ C-----Absorption and elastic cross sections in mb using TUNetl() if needed
       xsabs  = coeff*sabs
       xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
       selast = coeff*selast
+
+      NLW=min(NDLW,maxlw+1)
 
       IF (xsabs.le.0.d0) RETURN
 
