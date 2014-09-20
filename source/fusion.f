@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4102 $
+$DEBUG
+Ccc   * $Rev: 4105 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-20 00:55:56 +0200 (Sa, 20 Sep 2014) $
+Ccc   * $Date: 2014-09-20 13:41:47 +0200 (Sa, 20 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -369,16 +370,21 @@ C-----------------factor 10 near HHBarc from fm**2-->mb
                ENDDO
             ENDIF
 C-----------end of E2
+            csmax = 0.d0
+            maxlw = 0
             DO ip = 1, 2
                DO j = 1, NDLW
-                  CSFus = CSFus + POP(NEX(1),j,ip,1)
-                  csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
+	            e1tmp = POP(NEX(1),j,ip,1)
+                  if (e1tmp.lt.1.d-15) cycle 
+                  CSFus = CSFus + e1tmp
+                  csmax = DMAX1(e1tmp,csmax)
+	            maxlw = max(maxlw,j)
                ENDDO
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
  
-            ABScs    =CSFus
-            NLW = NDLW
+            ABScs = CSFus
+            NLW   = maxlw
   
          ENDIF
 C--------END of calculation of fusion cross section
@@ -797,8 +803,6 @@ C           restoring the input value of the key CN_isotropic
 
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
 
-            NLW = min(NDLW,maxlw+1)
-
          ENDIF
 
          IF (maxlw.GT.NDLW) THEN
@@ -811,7 +815,6 @@ C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
          ENDIF
          WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', NLW 
-	   WRITE(8,*) ' Spin dimension  is ', NDLW
          WRITE(8,*) ' Spin dimension  is ', NDLW
 C        NLW = NDLW
 C--------IWARN=0 - 'NO Warnings'

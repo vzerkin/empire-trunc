@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4103 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-20 02:53:19 +0200 (Sa, 20 Sep 2014) $
+$DEBUG
+Ccc   * $Rev: 4105 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-09-20 13:41:47 +0200 (Sa, 20 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2690,7 +2691,7 @@ C-----------Averaging over target and particle spin, summing over channel spin j
      &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
 
 C           It always contain the TRUE maximum L to be used in loops over L from 0 to Maxlw
-            Maxlw = max(maxlw,l)
+            Maxlw = max(l,Maxlw)
 C
             jindex = 1 ! default, good for alphas
             if    (MAXj(Nejc) .eq. 2) then ! n,p,h,t
@@ -3068,7 +3069,7 @@ C-----------Averaging over particle and target spin, summing over channel spin J
      &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
 
 C           It always contain the TRUE maximum L to be used in loops over L from 0 to Maxlw
-            lmax = l
+            lmax = max(lmax,l)
 C
             jindex = 1 ! default, good for alphas
             if    (MAXj(Nejc) .eq. 2) then ! n,p,h,t
