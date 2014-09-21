@@ -1,6 +1,6 @@
-!cc   * $Rev: 4090 $
+!cc   * $Rev: 4107 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-15 11:17:00 +0200 (Mo, 15 Sep 2014) $
+!cc   * $Date: 2014-09-21 15:38:11 +0200 (So, 21 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -464,11 +464,6 @@ C
          BUReac = 0.d0
          NTReac = 0.d0
          COMega = 1.6d0
-
-         IF(NINT(AEJc(0)).GE.2)THEN
-            BUReac = 0.7d0
-            NTReac = 0.9d0
-         ENDIF
 
 C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
          LHRtw = 0
@@ -1165,6 +1160,12 @@ C
 C
 C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
+
+           IF(NINT(AEJc(0)).GE.2)THEN
+             BUReac = 0.7d0
+             NTReac = 0.9d0
+           ENDIF
+
            CALL EMPAgdr() ! allocating memory for temporal gdr arrays
            CALL read_GDRGFLDATA(Numram)
 
@@ -1175,9 +1176,14 @@ C        Prepare gamma transmission parameters
            DO i = 1, NNUcd 
              CALL ULM(i,Numram) 
              IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
-C
+           ENDDO
+           CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+           WRITE (8,*) ' -----------------------------------------'
+
+           DO i = 1, NNUcd 
+C          
 C            Checking fission input consistency 
-C
+C          
              IF(NINT(FISshi(i)).EQ.1 .and. NINT(FISden(i)).ne.0) THEN        
                WRITE(8,*)  ' WARNING: ',
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
@@ -1185,6 +1191,7 @@ C
      >for nucleus ',A(i),SYMb(i)
                FISden(i) = 0.d0
              ENDIF
+
              IF(NINT(FISmod(i)).GT.0 .and. NINT(FISden(i)).ne.0 )  THEN        
                WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
@@ -1192,25 +1199,24 @@ C
      >for nucleus ',A(i),SYMb(i)
                FISden(i) = 0.d0
              ENDIF
-
-           ENDDO
-           CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+           ENDDO            
            WRITE (8,*) ' -----------------------------------------'
+
+           WRITE (8,*)
+           IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
+             WRITE (8,*)
+     &' WARNING: For HI induced reactions Lmax~100-150 may be needed'
+             WRITE (8,*)         
+           ENDIF
+           IF(IOPran.gt.0)  ! Gaussian 1 sigma error
+     &       WRITE (8,*)
+     &'Uncertainty samp.-gaussian pdf. Interval: [-3*sig,3*sig]'
+           IF(IOPran.lt.0)  ! Uniform error
+     &       WRITE (8,*)
+     &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
+             WRITE (8,*)
          ENDIF
 
-         WRITE (8,*)
-         IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
-            WRITE (8,*)
-     &' WARNING: For HI induced reactions Lmax~100-150 may be needed'
-            WRITE (8,*)         
-         ENDIF
-         IF(IOPran.gt.0)  ! Gaussian 1 sigma error
-     &      WRITE (8,*)
-     &'Uncertainty samp.-gaussian pdf. Interval: [-3*sig,3*sig]'
-         IF(IOPran.lt.0)  ! Uniform error
-     &      WRITE (8,*)
-     &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
-            WRITE (8,*)
 C
          IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
             GCAsc = 1.
@@ -3450,11 +3456,10 @@ C-----initialization of TRISTAN input parameters  *** done ***
 
       WRITE (8,*)'                        __________________________'
       WRITE (8,*)'                       |                          |'
-      open(23,file=trim(empiredir)//"/version",status='OLD',
-     >    ERR=753)
+      open(23,file=trim(empiredir)//"/version",status='OLD',ERR=753)
 C     VERSIONNUMBER = 3.2
 C     VERSIONNAME   = Malta
-C     SVN REVISION  = 4075
+C     SVN REVISION  = 4101
       read(23,'(16x,A6)',ERR=753,END=7531) emp_ver
       read(23,'(16x,A6)',ERR=753,END=7531) emp_nam
       read(23,'(16x,A6)',ERR=753,END=7531) emp_def
@@ -3463,7 +3468,7 @@ C     SVN REVISION  = 4075
  7531 close(23)
       emp_ver='3.2.2 '
       emp_nam='Malta '
-      emp_def='4075  '
+      emp_def='4101  '
  7541 WRITE(8,'(A44,A6,A2)') 
      > '                        |    E M P I R E  - ',emp_ver,'|'
       WRITE (8,*)
@@ -3483,7 +3488,7 @@ C     SVN REVISION  = 4075
 C
   754 open(23,file=trim(empiredir)//"/source/.versionnumbers",
      &status='OLD',ERR=755)
-      read(23,'(9X,A5,1/,17X,A5)',ERR=755,END=755) emp_rev,source_rev
+      read(23,'(9X,A5,/,17X,A5)',ERR=755,END=755) emp_rev,source_rev
       close(23)
       WRITE(8,20) emp_rev
    20 FORMAT(24X,'| SVN empire    rev. ',A5,' |')
@@ -3495,8 +3500,6 @@ C
       source_rev = '     '
       WRITE(8,201) emp_def
   201 FORMAT(24X,'| SVN empire    rev. ',A5,' |')
-C     WRITE (8,*)'                       |       Not under SVN      |'
-C
   756 WRITE (8,*)'                       |                          |'
       WRITE (8,*)'                       |__________________________|'
 
@@ -3523,15 +3526,12 @@ C
       itmp=len_trim(emp_rev)
       if(itmp.gt.0) then
         WRITE (12,35) emp_rev, source_rev
-   35 FORMAT(1X,'(SVN rev. ',A5,'; source rev. ',A5,') by M. Herman ',
-     >'et al [EMP,EMP-man].',5X,' '
-     >      )
+   35 FORMAT(1X,'(SVN rev. ',A5,'; source rev. ',A5,')',/,
+     >       1X,'by M.W.Herman et al [EMP,EMP-man].')
       else
         WRITE (12,351) emp_def
-  351 FORMAT(1X,'(SVN rev. ',A5,') by M. Herman et al [EMP,EMP-man].',
-     >5X,' ')
-C       WRITE (12,*)
-C    >             '(not under SVN) by M. Herman et al [EMP].          '
+  351 FORMAT(1X,'(SVN rev. ',A5,')',/,
+     >       1X,'by M.W.Herman et al [EMP,EMP-man].')
       endif
       WRITE (12,*) 
       WRITE (12,*) 'EMPIRE dimensions (dimension.h):'

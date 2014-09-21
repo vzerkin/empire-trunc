@@ -161,7 +161,7 @@ C-----------Check for the number of branching ratios
             IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
      &        (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &         nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0)
-     &        WRITE (8,*) ' WARNING: Branching ratios for level ', il,
+     &      WRITE (8,*) ' WARNING: Branching ratios for level ', il,
      &                     ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                     ' are missing'
             WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
