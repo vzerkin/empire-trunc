@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4105 $
+Ccc   * $Rev: 4108 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-20 13:41:47 +0200 (Sa, 20 Sep 2014) $
+Ccc   * $Date: 2014-09-22 01:21:33 +0200 (Mo, 22 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2606,7 +2605,6 @@ C
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
-
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
 C------------------------------------------
@@ -2793,7 +2791,6 @@ C          Scattering into continuum
          ENDIF
       ENDDO
   400 CLOSE (45)
-
       IF (abs(xsabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
          WRITE (8,*)
          WRITE (8,*)
@@ -2946,7 +2943,6 @@ C
             ftmp   = ftmp + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
           ENDDO 
         ENDDO
-
         dtmp = coeff*dtmp
         ftmp = coeff*ftmp/DBLE(2*SEJc(Nejc) + 1)
 

@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4105 $
+Ccc   * $Rev: 4108 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-20 13:41:47 +0200 (Sa, 20 Sep 2014) $
+Ccc   * $Date: 2014-09-22 01:21:33 +0200 (Mo, 22 Sep 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -91,7 +90,6 @@ C-----Reduced mass corrected for proper mass values
 
       el = EINl
       ecms = EIN
-
       mxj   = MAXj(Npro)
       sxj   = SEJc(Npro)
 	trgsp = XJLv(LEVtarg,Ntrg)
@@ -99,7 +97,6 @@ C-----Reduced mass corrected for proper mass values
       S1 = 0.5d0
       IF (AINT(trgsp + sxj) - trgsp - sxj
      &   .EQ.0.0D0) S1 = 1.d0
-
       ELAcs = 0.D0
       TOTcs = 0.D0
       ABScs = 0.D0
@@ -108,7 +105,6 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
       maxlw = 0
-
 C     allocate stl(), stlj(), sel() 
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
       IF(myalloc.NE.0) THEN
@@ -146,7 +142,6 @@ C--------Here the old calculated files are read
           
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
             maxlw = lmax
-
             DO l = 0, maxlw
               READ (45,END = 50,ERR=50) stl(l+1)
               IF(fexistj) READ (451,END = 50,ERR=50) 
@@ -157,7 +152,6 @@ C--------Here the old calculated files are read
      &            (stlj(l+1,jindex), jindex=1,mxj)
               ENDIF
             ENDDO
-
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' read'
 
             el = EINl
@@ -224,14 +218,11 @@ C-----------Absorption and elastic cross sections in mb
      &' Transmission coefficients Tlj for incident channel read from: '
               IF (fexistj) WRITE (8,*) ' ', ctldir//ctmp23//'J.INC'
             ENDIF
-
             WRITE(8,*)
             WRITE(8,*) ' Maximum CN spin is ', NLW
             WRITE(8,*) ' Spin dimension  is ', NDLW
 C           NLW = NDLW
-
             GOTO 300
-
          ENDIF
 C
 C--------If (energy read from file do not coincide
@@ -247,10 +238,8 @@ C
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
       ENDIF
-
 C-----Calculation of fusion cross section for photon induced reactions
       IF (NINT(AEJc(Npro)).EQ.0) THEN
-
          IF (SDRead) THEN
 C-----------Reading of spin distribution from file SDFILE
 C
@@ -293,9 +282,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
    60       ABScs=CSFus
             NLW = max(NDLW,j) 
 C-----------END of spin distribution from file SDFILE
-
          ELSE
-
             JSTab(1) = NDLW !stability limit not a problem for photoreactions
             IF (EIN.LE.ELV(NLV(Ntrg),Ntrg)) THEN
                WRITE (8,*) ' WARNING: '
@@ -397,7 +384,6 @@ C
 C
   100    GOTO 999
       ENDIF
-
       IF (FUSread) THEN
 C--------if FUSREAD true read l distribution of fusion cross section
 C--------and calculate transmission coefficients
@@ -435,25 +421,21 @@ C
 C--------calculation of o.m. transmission coefficients for absorption
 C
       ELSEIF (KTRlom(Npro,Ntrg).GT.0) THEN
-
          einlab = -EINl
          IWArn = 0
          ldbwacalc = .FALSE.
 
          CCCalc = .FALSE.
-
          lodd = .false.
          IF( (mod(nint(Z(Ntrg)),2).ne.0 .or. 
      >        mod(nint(A(Ntrg)-Z(Ntrg)),2).ne.0) .and.
      >        mod(nint(A(Ntrg)),2).ne.0 ) lodd = .true.  
-
          dodwba = .FALSE.
          DO l = 1, NDCOLLEV
             IF (ICOllev(l).LT.LEVcc) CYCLE ! Skipping coupled levels
             dodwba = .TRUE.
          ENDDO
          IF (DIRect.EQ.3) dodwba = .TRUE.
-
          IF (dodwba .AND. DIRect.GT.0 ) THEN
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
 C--------------Saving KTRlom(0,0)
@@ -481,7 +463,6 @@ C           all OMP calculations calculate only the direct component (no CN)
             CN_isotropic = .TRUE.     
                                                    !  
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,1,.FALSE.)
-
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
@@ -531,17 +512,14 @@ C--------------Saving KTRlom(0,0)
 
 C-----------Transmission coefficient matrix for incident channel
 C-----------is calculated by CC method.
-
 C           saving the input value of the key CN_isotropic
             logtmp = CN_isotropic
 C           all OMP calculations calculate only the direct component (no CN)
             CN_isotropic = .TRUE.     
 
             IF (SOFt) THEN
-
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
               CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab,.FALSE.) 
-
               IF (ldbwacalc) THEN
                 CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
               ELSE
@@ -553,13 +531,10 @@ C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
               ENDIF
 
             ELSE
-
               IF (DEFormed) THEN
-
 C---------------EXACT ROTATIONAL MODEL CC calc. (only coupled levels)
 C               including CN calculation
                 CALL ECIS_CCVIBROT(Npro,Ntrg,einlab,.FALSE.)
-
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
@@ -569,12 +544,9 @@ C               including CN calculation
                   ltlj = .TRUE.
                   tljcalc = .TRUE. 
                 ENDIF
-
               ELSE
-
 C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                 CALL ECIS_CCVIB(Npro,Ntrg,einlab,.FALSE., -1,.FALSE.)
-
                 IF (ldbwacalc) THEN
                   CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
                 ELSE
@@ -584,11 +556,9 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                   ltlj = .TRUE.
                   tljcalc = .TRUE. 
                 ENDIF
-
               ENDIF
 
             ENDIF
-
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
@@ -608,7 +578,6 @@ C--------------Total, elastic and reaction cross section is from CCM
 C
                iwin=ipipe_move('ccm.CS','INCIDENT.CS')
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
-
 C
 C              Joining dwba.LEG and ccm.LEG
 C
@@ -771,11 +740,9 @@ C-----------------checking the correspondence of the excited states
                tljcalc = .TRUE. 
 
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
-
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' def calc'
   
          ENDIF  ! END of DIRECT=1/2 block
-
 
          IF (.NOT.ltlj) THEN
 C-----------Transmission coefficient matrix for incident channel
@@ -788,7 +755,6 @@ C           all OMP calculations calculate only the direct component (no CN)
             CN_isotropic = .TRUE.     
 
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
-
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
@@ -830,15 +796,12 @@ C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
          IWArn = 0
       ELSEIF (KTRlom(Npro,Ntrg).EQ.0) THEN
 C--------calculation of h.i. transmission coefficients for fusion
-
          maxlw = NDLW-1
-
          CALL HITL(stl)
 	   
          ltlj    = .TRUE.
          tljcalc = .FALSE.
          if(NLW.GT.0) maxlw = min(NDLW-1,NLW)
-
          WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', NLW 
 	   WRITE(8,*) ' Spin dimension  is ', NDLW
@@ -877,7 +840,6 @@ C--------channel spin min and max
          ENDDO
 
          ABScs = CSFus
-
       ENDIF ! END of FUSREAD block
 C
 C-----Moving incident channel results to TL/ directory
@@ -932,7 +894,6 @@ C--------Absorption and elastic cross sections in mb
          ENDDO
          xssabs  = 10.d0*PI/ak2*ssabs
          xssabsj = 10.d0*PI/ak2*ssabsj/(2*sxj+1.d0)
-
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D15.9,1x))') 
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
@@ -998,7 +959,6 @@ C-----Print elastic and direct cross sections from ECIS
      &     ' Inelastic scattering results provided by DWBA calculations'
         ENDIF
       ENDIF
-
 C     write(*,*) 'CSFus=',CSFus,NLW 
 
       IF(TOTred.NE.1) then
@@ -1143,7 +1103,6 @@ C--------Corrected scattering radius
       IF (INT(AEJc(0)).GT.0)
      &        coef = 10.d0*PI/ak2/
      &           (2*trgsp + 1.d0)/(2*sxj + 1.d0)
-
 C     write(*,*) 'FUSI=',10.d0*PI/ak2,el,IRElat(NPRo,Ntrg),
 C    &           RELKIN,relcal
 
