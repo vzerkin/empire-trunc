@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3802 $ 
+Ccc   * $Rev: 4106 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2014-02-06 04:54:42 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2014-09-21 04:08:51 +0200 (So, 21 Sep 2014) $
 Ccc   * $Id$
             
 
@@ -15,9 +15,12 @@ C     RCN, 08/2004, to handle new extension to the OMP RIPL format
 C     PARAMETER(NDIM1 = 10, NDIM2 = 13, NDIM3 = 24, NDIM4 = 30,
 C    &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120)
 C     RCN, 08/2008, to handle new extension to the OMP RIPL-3 format
-C
+C     PARAMETER(NDIM1 = 10, NDIM2 = 13, NDIM3 = 25, NDIM4 = 40,
+C    &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120, NDIM8 = 50)
+C     RCN, 09/2014, to increase NDIM6 for rigid-rotor potentials
+C                   (multi-level coupling)
       PARAMETER(NDIM1 = 10, NDIM2 = 13, NDIM3 = 25, NDIM4 = 40,
-     &          NDIM5 = 10, NDIM6 = 10, NDIM7 = 120, NDIM8 = 50)
+     &          NDIM5 = 10, NDIM6 = 30, NDIM7 = 120, NDIM8 = 50)
 
       CHARACTER*1 AUThor, REFer, SUMmary
       INTEGER IREf, IZMin, IZMax, IAMin, IAMax, IMOdel, JRAnge, NCOll,
