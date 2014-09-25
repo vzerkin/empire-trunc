@@ -1,6 +1,6 @@
-# $Rev: 4099 $
-# $Author: rcapote $
-# $Date: 2014-09-16 23:55:41 +0200 (Di, 16 Sep 2014) $
+# $Rev: 4111 $
+# $Author: shoblit $
+# $Date: 2014-09-25 21:47:01 +0200 (Do, 25 Sep 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5817,7 +5817,7 @@ set maxwelltemp 1.382E+6
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list Makefile main.f auxiliary.f bar_mom.f calc-fiss.f ccfus.f ddhms.cmb ddhms.f defsystematics.f90 dimension.h dtrans.f empcess.f empgdr.f empire_ctl.f empire_preeq.f fis_io.f fitbarrier.f fusion.f gamma-strength-analytic.f gamma-strgth.f get_ecis.f global.h HF-comp.f HF-decay.f HRTW-comp.f input.f kailas07emp.f lev-dens.f main_common.h MSC-NVWY.f MSD-orion.f MSD-tristan.f mubar.f90 nubar_reader.f90 open_files.f optmand.f pcross.f pfns_calc.f pfns.f ph-lev-dens.f pipec.c pipe.f plot-zvv.f pre_ecis.h print.f ripl2empire.h ripl2empireS.h S-factor.f subecis06m.f systematics.f thora.f tl.f write_ENDF.f write_xs.f]
+set modules [list Makefile ddhms.f empire_preeq.f gamma-strgth.f kailas07emp.f MSD-orion.f optman-r16.f pipe.f S-factor.f tl.f auxiliary.f dtrans.f fis_io.f  get_ecis.f kunieda.f  MSD-tristan.f pcross.f pipe-no-C-call.f subecis06m.f write_ENDF.f bar_mom.f empcess.f  fitbarrier.f  HF-comp.f  lev-dens.f  open_files.f  pfns_calc.f plot-zvv.f  subecis13.f write_xs.f calc-fiss.f empgdr.f fusion.f  HF-decay.f main.f  optmand.f  pfns.f  print.f  systematics.f ccfus.f  empire_ctl.f gamma-strength-analytic.f input.f   MSC-NVWY.f  optmand-msf.f  ph-lev-dens.f  secis06.f thora.f ang_mom.f90 defsystematics.f90 HRTW.f90 ltm.f90  mubar.f90  nubar_reader.f90 parse_line.f90 dimension.h global.h main_common.h pre_ecis.h ripl2empire.h ripl2empireS.h
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
