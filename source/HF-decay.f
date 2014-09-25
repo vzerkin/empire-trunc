@@ -161,7 +161,7 @@ C-----------Check for the number of branching ratios
             IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
      &        (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &         nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0)
-     &      WRITE (8,*) ' WARNING: Branching ratios for level ', il,
+     &        WRITE (8,*) ' WARNING: Branching ratios for level ', il,
      &                     ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                     ' are missing'
             WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
@@ -230,8 +230,8 @@ C---------Write elastic to tape 12 and to tape 68
 
             ELSE
 
-             IF(CN_isotropic) then   
-
+             IF(CN_isotropic .or. PL_CN(0,LEVtarg).le.0.d0) then   
+C
 C              WRITE (8,*)
 C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
 
@@ -255,71 +255,46 @@ C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
 
              ELSE
 
-C              IF(INTerf.eq.1) then
-C                WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
-C    &           EINl, 4.d0*pi*ELCncs,  
-C    &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
-C    &           'ENG-WEID. TRANSF.'  
-C              ELSE
-C                WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
-C    &           EINl, 4.d0*pi*ELCncs,  
-C    &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
-C              ENDIF                
+               xs_norm = ELCncs/PL_CN(0,LEVtarg)
+C	         write(*,*) 'NORM=',xs_norm
+               DO iang = 1, NDANG
+                 cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
+               ENDDO
 
-               xs_norm=1.d0
- 	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
-                xs_norm = ELCncs/PL_CN(0,LEVtarg)
-C	          write(*,*) 'NORM=',xs_norm
-                DO iang = 1, NDANG
-                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
-                ENDDO
-
-                WRITE (12,'(9X,8E15.5)') 
+               WRITE (12,'(9X,8E15.5)') 
      &            ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
-                WRITE (12,*)' '
+               WRITE (12,*)' '
 
-                WRITE (12,*)' '
-                WRITE (12,*)' Legendre coefficients expansion'
-                WRITE (12,*)' '
-                WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-                WRITE (12,*)' '
-                WRITE (12,'(9X,8D15.8)') 
-     &             ELAred*elleg(1)+xs_norm*PL_CN(0,LEVtarg),
-     &            (ELAred*elleg(iang) + xs_norm*PL_CN(iang-1,LEVtarg),
-     &                              iang = 2,min(NDAng,neles))
-
-                WRITE (12,*)' '
-                WRITE (12,*)' DIR Legendre coefficients expansion'
-                WRITE (12,*)' '
-                WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-                WRITE (12,*)' '
-                WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
+               WRITE (12,*)' '
+               WRITE (12,*)' Legendre coefficients expansion'
+               WRITE (12,*)' '
+               WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+               WRITE (12,*)' '
+               WRITE (12,'(9X,8D15.8)') 
+     &            ELAred*elleg(1)+xs_norm*PL_CN(0,LEVtarg),
+     &           (ELAred*elleg(iang) + xs_norm*PL_CN(iang-1,LEVtarg),
+     &                                 iang = 2,min(NDAng,neles))
+	    
+               WRITE (12,*)' '
+               WRITE (12,*)' DIR Legendre coefficients expansion'
+               WRITE (12,*)' '
+               WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
+               WRITE (12,*)' '
+               WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
      &            (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
 
-                WRITE (12,*)' '
-                WRITE (12,*)' CE Legendre coefficients expansion'
-                WRITE (12,*)' '
-                WRITE (12,'(1x,A7,I5)') 
+               WRITE (12,*)' '
+               WRITE (12,*)' CE Legendre coefficients expansion'
+               WRITE (12,*)' '
+               WRITE (12,'(1x,A7,I5)') 
      &            ' Lmax =',min(NDAng,PL_lmax(LEVtarg))
-                WRITE (12,*) ' '
-                WRITE (12,'(9X,8D15.8)') xs_norm*PL_CN(0,LEVtarg), 
+               WRITE (12,*) ' '
+               WRITE (12,'(9X,8D15.8)') xs_norm*PL_CN(0,LEVtarg), 
      &            (xs_norm*PL_CN(iang-1,1),iang = 2,
      &                       min(NDAng,PL_lmax(LEVtarg)))
 
-               ELSE
-
-                WRITE (12,*)' '
-                WRITE (12,*)' Legendre coefficients expansion'
-                WRITE (12,*)' '
-                WRITE (12,'(1x,A7,I5)') ' Lmax =',min(NDAng,neles)
-                WRITE (12,*)' '
-                WRITE (12,'(9X,8D15.8)') ELAred*elleg(1)+ELCncs, 
-     &            (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
-
-               ENDIF
-
-
              ENDIF
+
             ENDIF
 
             IF (FITomp.LT.0) THEN
