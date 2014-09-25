@@ -1,6 +1,6 @@
-!cc   * $Rev: 4107 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-21 15:38:11 +0200 (So, 21 Sep 2014) $
+!cc   * $Rev: 4110 $
+!cc   * $Author: shoblit $
+!cc   * $Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -20,6 +20,7 @@
 !cc
       use nubar_reader
       use empgdr
+      use hrtw
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -465,9 +466,6 @@ C
          NTReac = 0.d0
          COMega = 1.6d0
 
-C--------HRTW control (0 no HRTW, 1 HRTW up to EHRtw MeV incident)
-         LHRtw = 0
-         EHRtw = 0.d0
 C--------EMAx_tlj sets incident energy limit for using Tlj
          EMAx_tlj = 0.d0
 C--------ENDF global setting initialized to zero (no formatting)
@@ -3406,6 +3404,8 @@ Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      use hrtw
+
       implicit none
 	 
       INCLUDE 'dimension.h'

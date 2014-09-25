@@ -1,9 +1,9 @@
 program fruit_driver
   use fruit
   use ang_mom_test
-  use HRTW_mod_test
+  use hrtw_mod_test
 
-  call FCT ! initialize the factorial COMMON block used in ang_mom.f 
+  call init_factorial ! initialize the factorial COMMON block used in ang_mom.f 
     
   call init_fruit                 
   call test_clebsch_gordan_all_zeroes

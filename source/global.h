@@ -1,6 +1,6 @@
-! $Rev: 4055 $
-! $Author: rcapote $
-! $Date: 2014-09-11 21:51:39 +0200 (Do, 11 Sep 2014) $
+! $Rev: 4110 $
+! $Author: shoblit $
+! $Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -70,7 +70,7 @@
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
-     &        LHMs, LHRtw, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc),           &
+     &        LHMs, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc),                  &
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,    &
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,    &
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,   &
@@ -87,7 +87,7 @@
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&
      &        DYNam, COLfile, CN_isotropic
 
-      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc), EHRtw,     &
+      DOUBLE PRECISION ELE2, ELV(ndlv,0:ndnuc), EMAx(ndnuc),            &
      &                 ENH_ld(3,nfhump),ETL(ndetl,ndejc,ndnuc),         &
      &                 EWSr2, EX(ndex + 1,ndnuc),EX1,EX2,FIStga(ndnuc), &
      &                 EXCessmass(0:130,0:400), EXCn, EXPdec, EXPmax,   &
@@ -224,7 +224,7 @@
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,    &
      &                 CSMsd, QPRod, A, Z, ECUt, HIS, ATIlnor, COEf,    &
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,   &
-     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, EHRtw,  &
+     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor,         &
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,      &
      &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,Emax_tlj,&
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,&
@@ -270,7 +270,7 @@
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, &
      &                  FHMs, LHMs, NHMs, NEXreq, FISspe, NRSmooth,     &
-     &                  ISIsom, IFLuc, LHRtw, NEMc, NOUt, IOUt, NEX,    &
+     &                  ISIsom, IFLuc, NEMc, NOUt, IOUt, NEX,           &
      &                  IX4ret, JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, &
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, &
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,     &

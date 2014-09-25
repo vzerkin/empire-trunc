@@ -5,6 +5,7 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
       USE empcess, ONLY: disc_int, CSHms
+      use hrtw
 
       implicit none
       INCLUDE "dimension.h"
@@ -386,7 +387,7 @@ C-----Account for widths fluctuations (HRTW)
 C
 C       only for CN decay 
 C
-        CALL HRTW ! width fluctuation
+        CALL calc_HRTW   ! width fluctuation
 
         IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
      &    CALL GET_RECOIL(kemax,nnuc) !recoil spectrum

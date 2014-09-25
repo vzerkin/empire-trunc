@@ -1,12 +1,12 @@
-#$Rev: 4045 $
+#$Rev: 4110 $
 #$Author: shoblit $
-#$Date: 2014-08-31 23:20:47 +0200 (So, 31 Aug 2014) $
+#$Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
 
 # set default compilers:
 
 CC     =  gcc
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
@@ -68,7 +68,8 @@ else ifeq ($(FC),ifort)
   #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
       FFLAGS = -O3 -diag-disable warn
-      EFLAGS = -O2 -diag-disable warn
+      # EFLAGS = -O2 -diag-disable warn -trace
+      EFLAGS = -O1 -diag-disable warn
       OFLAGS = -O2 -diag-disable warn
   endif
 
@@ -125,30 +126,22 @@ endif
 
 OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o \
        bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o \
-       ph-lev-dens.o pipe.o print.o tl.o HRTW-comp.o ddhms.o pcross.o nubar_reader.o \
+       ph-lev-dens.o pipe.o print.o tl.o HRTW.o ddhms.o pcross.o nubar_reader.o \
        gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o \
        fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o \
        defsystematics.o pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o \
-       write_ENDF.o pfns_calc.o HRTW-mod.o ang_mom.o subecis06m.o parse_line.o
+       write_ENDF.o pfns_calc.o ang_mom.o subecis06m.o parse_line.o
 
 all: 
-	$(MAKE) empgdr.mod
-	$(MAKE) empcess.mod
 	$(MAKE) empire
 	$(MAKE) optmand
 	@../scripts/getrevnum
-
-empgdr.mod: empgdr.f 
-	$(FC) $(FFLAGS) -c empgdr.f 
-
-empcess.mod: empcess.f
-	$(FC) $(FFLAGS) -c empcess.f 
 
 subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f	
 
 empire: $(OBJF) 
-	$(FC) $(FFLAGS) -o empire $(OBJF)   $(LIBS)
+	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)
 
 optmand: optmand.f
 	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f
@@ -159,14 +152,15 @@ dbg:
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h main_common.h
-main.o  : nubar_reader.o empcess.o
-input.o : nubar_reader.o empgdr.o
+main.o  : nubar_reader.o empcess.o ang_mom.o
+input.o : nubar_reader.o empgdr.o HRTW.o
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 print.o : empcess.o
 ddhms.o : empcess.o
 HF-comp.o : empcess.o
-HRTW-comp.o : HRTW-mod.o
+HF-decay.o : HRTW.o
+HRTW.o  : ang_mom.o
 
 clean:
 	rm -f *.o *.mod empire optmand *.exe

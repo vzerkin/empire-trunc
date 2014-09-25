@@ -1,8 +1,10 @@
 module ang_mom_test
+
     use fruit
     use fruit_util
+    use angular_momentum
+
     implicit none
-    real*8,external:: CLEBG, RACAH
     
 contains
 
@@ -108,9 +110,9 @@ contains
         call assert_close(   0.8944271909999159d0,  CLEBG(   2d0, 0.5d0, 1.5d0,   2d0, -0.5d0,  1.5d0 ), 1d-6, 1d-6, 'CG 1/2 spin' ) 
         call assert_close(   0.7745966692414834d0,  CLEBG(   2d0, 0.5d0, 2.5d0,   0d0,  0.5d0,  0.5d0 ), 1d-6, 1d-6, 'CG 1/2 spin' ) 
         call assert_close(   0.4472135954999579d0,  CLEBG(   2d0,   2d0,   0d0,   0d0,    0d0,    0d0 ), 1d-6, 1d-6, 'CG all m=0'  )
-        call assert_equals(  1.0d0,                 CLEBG(   2d0,   0d0,   2d0,   0d0,    0d0,    0d0 ),             'CG all m=0'  ) 
+        call assert_close(   1.0d0,                 CLEBG(   2d0,   0d0,   2d0,   0d0,    0d0,    0d0 ), 1d-6, 1d-6, 'CG all m=0'  ) 
         call assert_close(   0.33333333333333333d0, CLEBG(   4d0,   4d0,   0d0,   0d0,    0d0,    0d0 ), 1d-6, 1d-6, 'CG all m=0'  )
-        call assert_equals(  1.0d0,                 CLEBG(   4d0,   0d0,   4d0,   0d0,    0d0,    0d0 ),             'CG all m=0'  ) 
+        call assert_close(   1.0d0,                 CLEBG(   4d0,   0d0,   4d0,   0d0,    0d0,    0d0 ), 1d-6, 1d-6, 'CG all m=0'  ) 
         call assert_close(   0.33333333333333333d0, CLEBG(   4d0,   4d0,   0d0,   2d0,   -2d0,    0d0 ), 1d-6, 1d-6, 'CG'          )
         call assert_close(  -0.33333333333333333d0, CLEBG(   4d0,   4d0,   0d0,   3d0,   -3d0,    0d0 ), 1d-6, 1d-6, 'CG'          )
         call assert_close(   0.6324555320336759d0,  CLEBG( 1.5d0,   1d0, 2.5d0, 1.5d0,    0d0,  1.5d0 ), 1d-6, 1d-6, 'CG 1/2 spin' ) 

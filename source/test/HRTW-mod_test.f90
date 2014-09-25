@@ -1,7 +1,7 @@
 module HRTW_mod_test
   use fruit
   use fruit_util
-  use HRTW_mod, only: Blatt, ZCoefficient, ZBarCoefficient
+  use angular_momentum
   implicit none
 
 contains 
