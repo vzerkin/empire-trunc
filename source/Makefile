@@ -1,12 +1,12 @@
-#$Rev: 4110 $
+#$Rev: 4112 $
 #$Author: shoblit $
-#$Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
+#$Date: 2014-09-25 21:50:07 +0200 (Do, 25 Sep 2014) $
 
 # set default compilers:
 
 CC     =  gcc
-#FC   =  gfortran
-FC  =  ifort
+FC   =  gfortran
+#FC  =  ifort
 #FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
