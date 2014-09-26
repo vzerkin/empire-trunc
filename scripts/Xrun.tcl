@@ -1,6 +1,6 @@
-# $Rev: 4111 $
-# $Author: shoblit $
-# $Date: 2014-09-25 21:47:01 +0200 (Do, 25 Sep 2014) $
+# $Rev: 4113 $
+# $Author: zerkinv $
+# $Date: 2014-09-26 19:48:26 +0200 (Fr, 26 Sep 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5817,7 +5817,7 @@ set maxwelltemp 1.382E+6
 if {$mat == ""} {set mat 1111}
 if {$editor == ""} {set editor "specify editor"}
 if {$profilter == ""} {set profilter *.inp}
-set modules [list Makefile ddhms.f empire_preeq.f gamma-strgth.f kailas07emp.f MSD-orion.f optman-r16.f pipe.f S-factor.f tl.f auxiliary.f dtrans.f fis_io.f  get_ecis.f kunieda.f  MSD-tristan.f pcross.f pipe-no-C-call.f subecis06m.f write_ENDF.f bar_mom.f empcess.f  fitbarrier.f  HF-comp.f  lev-dens.f  open_files.f  pfns_calc.f plot-zvv.f  subecis13.f write_xs.f calc-fiss.f empgdr.f fusion.f  HF-decay.f main.f  optmand.f  pfns.f  print.f  systematics.f ccfus.f  empire_ctl.f gamma-strength-analytic.f input.f   MSC-NVWY.f  optmand-msf.f  ph-lev-dens.f  secis06.f thora.f ang_mom.f90 defsystematics.f90 HRTW.f90 ltm.f90  mubar.f90  nubar_reader.f90 parse_line.f90 dimension.h global.h main_common.h pre_ecis.h ripl2empire.h ripl2empireS.h
+set modules [list Makefile ddhms.f empire_preeq.f gamma-strgth.f kailas07emp.f MSD-orion.f optman-r16.f pipe.f S-factor.f tl.f auxiliary.f dtrans.f fis_io.f  get_ecis.f kunieda.f  MSD-tristan.f pcross.f pipe-no-C-call.f subecis06m.f write_ENDF.f bar_mom.f empcess.f  fitbarrier.f  HF-comp.f  lev-dens.f  open_files.f  pfns_calc.f plot-zvv.f  subecis13.f write_xs.f calc-fiss.f empgdr.f fusion.f  HF-decay.f main.f  optmand.f  pfns.f  print.f  systematics.f ccfus.f  empire_ctl.f gamma-strength-analytic.f input.f   MSC-NVWY.f  optmand-msf.f  ph-lev-dens.f  secis06.f thora.f ang_mom.f90 defsystematics.f90 HRTW.f90 ltm.f90  mubar.f90  nubar_reader.f90 parse_line.f90 dimension.h global.h main_common.h pre_ecis.h ripl2empire.h ripl2empireS.h]
 set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
