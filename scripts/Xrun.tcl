@@ -1,6 +1,6 @@
-# $Rev: 4113 $
+# $Rev: 4114 $
 # $Author: zerkinv $
-# $Date: 2014-09-26 19:48:26 +0200 (Fr, 26 Sep 2014) $
+# $Date: 2014-09-26 22:54:36 +0200 (Fr, 26 Sep 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6148,8 +6148,8 @@ adjourn .top75}} \
         -command {} -label {Main 2} -width 0 
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
-#2013-zerkin    $top.tab88 add \
-#2013-zerkin        -command {} -label {} -width 0 
+#2013-zerkin???
+    $top.tab88 add -command {} -label {Reserved} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -8266,8 +8266,9 @@ cd $workdir} \
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
         -pady 27 -side left 
-#2013-zerkin    pack $site_8_8.fra84 \
-#2013-zerkin        -in $site_8_8 -anchor center -expand 1 -fill both -side top 
+#2013-zerkin???
+    pack $site_8_8.fra84 \
+        -in $site_8_8 -anchor center -expand 1 -fill both -side top 
     $top.tab88 select 0
     menu $top.m88 \
         -activebackground #dcdcdc -activeforeground #000000 \
@@ -8865,6 +8866,9 @@ cd $workdir} \
         -in $top -anchor center -expand 0 -fill x -side top 
     pack $top.tab88 \
         -in $top -anchor center -expand 1 -fill both -side top 
+
+#---2013.11.21, V.Zerkin@iaea.org--- delete 'Reserved' Tab
+    $top.tab88 delete 3
 
     vTcl:FireEvent $base <<Ready>>
 }
