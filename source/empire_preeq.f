@@ -121,7 +121,7 @@ C-----
       IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis)
-         IF(ltransfer)WRITE(112,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossNTt,
+         IF(ltransfer)WRITE(117,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossNTt,
      &     (crossNT(i),i=1,NDEJC)
          IF(lbreakup) WRITE(113,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossBUt,
      &     (crossBU(i),i=1,NDEJC)
@@ -162,7 +162,6 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
               WRITE (8,*) ' '
             ENDDO
          ENDIF
-
          corrmsd = (CSFus - (xsinl + totemis))/CSFus
          IF (corrmsd.LT.0.0D0) THEN
             write(8,*) ' CSFus=',sngl(CSFus),

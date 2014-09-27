@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3866 $
+Ccc   * $Rev: 4116 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-13 23:02:46 +0100 (Do, 13 Feb 2014) $
+Ccc   * $Date: 2014-09-27 23:12:24 +0200 (Sa, 27 Sep 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -317,14 +317,14 @@ c
       IF(crossafterbreak.gt.(1.D0-BUNorm) * Sigr )THEN
          DO nejc = 1, NEJcm
             IF(crossBU(nejc).LE.0.d0)  CYCLE
-C           cross(nejc) = cross(nejc) + crossBU(nejc)
+            cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &          a2,'','',a2,'')  '',f12.5,'' mb'')') 
      &          SYMbe(NPROject),symbe(nejc),crossBU(nejc)
-C           DO ienerg = iemin(nejc),iemax(nejc)
-C              spec(nejc,ienerg)   = spec(nejc,ienerg) +
-C    &                               specBU(nejc,ienerg)
-C           ENDDO
+            DO ienerg = iemin(nejc),iemax(nejc)
+               spec(nejc,ienerg)   = spec(nejc,ienerg) +
+     &                               specBU(nejc,ienerg)
+            ENDDO
          ENDDO
       ELSE
          WRITE(8,'(10x,''Total break-up cross section'',2x,F12.5,
@@ -338,15 +338,15 @@ C           ENDDO
             IF(crossBU(nejc).LE.0.d0) CYCLE 
             crossBU(nejc) = scompn * BUNorm * crossBU(nejc)/
      &                      crossBUt
-C           cross(nejc) = cross(nejc) + crossBU(nejc)
+            cross(nejc) = cross(nejc) + crossBU(nejc)
             write(8,'(4x,''Break-up cross section for ('',
      &        a2,'','',a2,'')  '',f12.5,'' mb'')')
      &        SYMbe(NPROject),symbe(nejc),crossBU(nejc)  
             DO ienerg = iemin(nejc),iemax(nejc)
               specBU(nejc, ienerg) = specBU(nejc, ienerg) *
      &                               scompn * BUNorm/crossBUt  
-C             spec(nejc,ienerg)   = spec(nejc,ienerg) +
-C    &                              specBU(nejc,ienerg)
+              spec(nejc,ienerg)   = spec(nejc,ienerg) +
+     &                              specBU(nejc,ienerg)
             ENDDO
             crossBUn = crossBUn + crossBU(nejc)
          ENDDO
@@ -691,7 +691,7 @@ C    >         ienerg.eq.iemax(nejc) ) step=0.5d0
          crossPEt = crossPEt + crossPE(nejc) 
 
          cross(nejc) = hlp1 + cross(nejc)  
-         totemis = totemis + crossBU(nejc)
+C        totemis = totemis + crossBU(nejc)
          IF(ltransfer .or. lbreakup)THEN
             if(nejc.eq.0) then
               write(8,'(4x,''PE emission cross section  ('',

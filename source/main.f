@@ -1,6 +1,6 @@
-cc   * $Rev: 4110 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
+cc   * $Rev: 4116 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-09-27 23:12:24 +0200 (Sa, 27 Sep 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -244,7 +244,7 @@ C-----
           IF(BUReac(nejc).GT.0.01d0) lbreakup  = .true.
         ENDDO
 
-        IF(ltransfer) OPEN (112, FILE='TRANSFER-XS.DAT')
+        IF(ltransfer) OPEN (117, FILE='TRANSFER-XS.DAT')
         IF(lbreakup ) OPEN (113, FILE='BREAK-UP-XS.DAT')
 
         IF(ltransfer .or. lbreakup) OPEN (114, FILE='REAC-MECH.DAT')
@@ -342,8 +342,8 @@ C           to include/exclude low-lying coupled states
      &   '(''   Elab         Epfns       nubar(EVAL)  Tmaxw(equiv) '')')
         ENDIF
         IF (ltransfer) then                     
-          WRITE(112,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
-          WRITE(112,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
+          WRITE(117,'(10X,i3,1x,A2,1X,I3)')int(Z(0)), SYMb(0), int(A(0))
+          WRITE(117,'(2a12,a10,'',n'',a10,'',p'',a10,'',a'',a10,'',d'',
      &      a10,'',t'',a10,'',He'')')'   Einc   ',' Total NT ',
      &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject),
      &      SYMbe(NPRoject),SYMbe(NPRoject),SYMbe(NPRoject)   
@@ -406,7 +406,7 @@ C     CLOSE (23)   ! not used
       CLOSE (108)  ! 'TOTCOR.DAT'
       CLOSE (110)  ! 'CN-LEV-XS.DAT'
 
-      IF (ltransfer) CLOSE (112)  ! 'TRANSFER-XS.DAT'
+      IF (ltransfer) CLOSE (117)  ! 'TRANSFER-XS.DAT'
       IF (lbreakup)  CLOSE (113)  ! 'BREAK-UP-XS.DAT'
       IF (ltransfer .or. lbreakup)  CLOSE (114) ! 'REAC-MECH.DAT'
 
