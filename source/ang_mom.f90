@@ -7,7 +7,7 @@
     real*8, parameter :: zero = 0.D0
     real*8, parameter :: one  = 1.D0
     real*8, parameter :: two  = 2.D0
-    real*8, parameter :: pi = 3.14159265358979
+    real*8, parameter :: pi = 3.14159265358979d0
     real*8, parameter :: pi4 = 4.D0*pi
 
     real*8 fact(mfac)
@@ -414,7 +414,7 @@
 
     !---------------------------------------------------------------------------------
 
-    pure integer*4 function parity(l)
+    integer*4 function parity(l)
 
     implicit none
 
