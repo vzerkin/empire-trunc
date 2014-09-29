@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4108 $
+Ccc   * $Rev: 4118 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-22 01:21:33 +0200 (Mo, 22 Sep 2014) $
+Ccc   * $Date: 2014-09-29 02:25:37 +0200 (Mo, 29 Sep 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2450,7 +2450,8 @@ C
 C--------Running ECIS or OPTMAN
 C
          IF (IOUt.GT.1 .AND. FIRST_ein) THEN
-            IF (A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0)) THEN
+            IF (A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0) .AND.
+     &          AEJc(Nejc).EQ.AEJc(0) ) THEN
               WRITE (8,*)
               IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN 
                WRITE (8,*) ' CC transmission coefficients used for the',
@@ -2605,8 +2606,14 @@ C
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
+C
+C     write(*,*) elab,sngl(xmas_nejc),sngl(xmas_nnuc)
+C     
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
+C
+C	write(*,*) 'ilv=',ilv
+C
 C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
@@ -2657,7 +2664,10 @@ C-----nceq is the number of coupled equations
         READ (45,                        END = 200) jc, parc, nceq  ! ecis06
       else
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
-      endif    
+      endif  
+      
+C     write(*,*) jc,parc,nceq  
+C
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
@@ -2668,7 +2678,8 @@ C--------(nlev=ilv corresponds to the target state)
          else
            READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          endif
-         if(dtmp.lt.1.d-20) cycle
+C        write(*,*) nlev, l, jj, dtmp  
+         if(dtmp.lt.1.d-15) cycle
 
          ncoll = MAX(nlev,ncoll)
 C--------Selecting only target state LEVtarg
@@ -2727,7 +2738,9 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
            ENDDO
         ENDDO
       ENDIF
-
+C
+C     write(*,*) nejc,'Maxlw=',maxlw
+C
       TOTcs = 0.D0
       ABScs = 0.D0
       ELAcs = 0.D0
@@ -2767,7 +2780,9 @@ C-----Absorption and elastic cross sections in mb using TUNetl() if needed
       xsabs  = coeff*sabs
       xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
       selast = coeff*selast
-
+C
+C	write(*,*) sngl(xsabs),sngl(xsabsj)
+C
       NLW=min(NDLW,maxlw+1)
 
       IF (xsabs.le.0.d0) RETURN
@@ -2791,6 +2806,7 @@ C          Scattering into continuum
          ENDIF
       ENDDO
   400 CLOSE (45)
+
       IF (abs(xsabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
          WRITE (8,*)
          WRITE (8,*)
@@ -2809,14 +2825,23 @@ C          Scattering into continuum
       ENDIF
 
 C     RENORMALIZING TLs and TLJs and TUNING Tl(L)      
+C     sabs  = 0.D0
+C     sabsj = 0.D0
 	ftmp = ABScs/(xsabs+SINlcc)
       DO l = 0, Maxlw
-        Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)*ftmp
+        Stl(l + 1) = Stl(l + 1)*ftmp ! *TUNetl(l + 1)
+C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         DO jindex = 1,MAXj(Nejc)
-          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)*ftmp
+          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*ftmp ! *TUNetl(l + 1)
+C         jsp = sjf(l,jindex,SEJc(Nejc)) 
+C         sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
         ENDDO
       ENDDO
-
+C     xsabs  = coeff*sabs
+C     xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
+C
+C     write(*,*) sngl(xsabs),sngl(xsabsj),sngl(ABScs)
+C
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C
 C     ECIS convergence check
@@ -4201,8 +4226,13 @@ C     restoring the input value of the key CN_isotropic
       IF(TL_calc) RETURN
 
       IF (Inlkey.EQ.0) THEN
-         iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
-         iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
+        IF(inc_channel) THEN 
+          iwin = ipipe_move('ecis06.out','ECIS_SPH_INC.out')
+          iwin = ipipe_move('ecis06.inp','ECIS_SPH_INC.inp')
+        ELSE
+          iwin = ipipe_move('ecis06.out','ECIS_SPH.out')
+          iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
+        ENDIF
       ELSE
          iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
          iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
