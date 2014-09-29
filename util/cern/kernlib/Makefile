@@ -9,7 +9,7 @@ FC     =  gfortran
 
 # set compiler options based on compiler
 ifeq ($(FC),ifort)
-  FFLAGS = -fpp -x=host -O3  -ipo-c -o cern.o
+  FFLAGS = -x=host -O3  -ipo-c -o cern.o
   # flags for debug
   # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
   # set IPO TRUE for full cross-file optimization
@@ -21,8 +21,8 @@ libdir = $(EMPIREDIR)/lib
 
 # build library
 
-$(libdir)/libkern.a: *.f
-	$(FC) $(FFLAGS) *.f
+$(libdir)/libkern.a: *.F
+	$(FC) $(FFLAGS) *.F
 	ld -r -o krn.o *.o
 	ar -cr libkern.a krn.o
 	ranlib libkern.a
