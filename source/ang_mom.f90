@@ -12,7 +12,7 @@
 
     real*8 fact(mfac)
 
-    public init_factorial,racah,clebg,ZCoefficient,ZBarCoefficient,Blatt
+    public init_factorial,racah,clebg,ZCoefficient,ZBarCoefficient,Blatt,parity
 
     contains
 
