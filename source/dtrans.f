@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3295 $
+Ccc   * $Rev: 4119 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2013-02-08 14:31:36 +0100 (Fr, 08 Feb 2013) $
+Ccc   * $Date: 2014-09-29 03:18:01 +0200 (Mo, 29 Sep 2014) $
 
 c===========================================================
       SUBROUTINE DTRANS(iemin,iemax,crossNT,specNT,te_e)
@@ -318,6 +318,8 @@ c     Coulomb barriers
       zc = int(Z(1))
 
       fac1 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))
+
+C	write(*,*) 'Nproject=',Nproject
      
       DO iejc=1,NDEJC  ! over particles only
 
@@ -340,8 +342,11 @@ c        ** peak energy
 c
          bnd = BN_EJ_PROJ(iejc,NPRoject) 
         
-         fac2 = 1.d0 - A(0)/(155.*Bnd*Bnd)
+         fac2 = 1.d0 - A(0)/(155.*bnd*bnd)
          gamma = fac1 * fac2
+
+	   if(iejc.eq.2) gamma = max(1.5d0,gamma) ! RCN
+
          IF(AEJc(0)-AEJC(iejc).GT.1.5 .and. gamma.gt.3.1) 
      &     gamma = gamma - 3.d0
 
@@ -350,6 +355,11 @@ c
          cb = 1.44 * ZEJc(iejc)  * zares/dd0
 
          e0 = AEJc(iejc)/AEJc(0) * (EINl - ca) + cb
+
+C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) iejc,bnd
+C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) fac1,fac2,gamma
+C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) 
+C    >           e0,iemin(iejc), iemax(iejc)
 
          dcor = 0.d0
          fac1 = 1.d0/(sqrt(2.d0 * gamma)*pi)
@@ -402,13 +412,18 @@ C
 
       iizc = ZEJc(Npro)
       iiac = AEJc(Npro)
+C     write(*,*) 'proj',iizc,iiac,sngl(RESmas(iizc,iiac))
       iizp = ZEJc(Nejc)
       iiap = AEJc(Nejc)
+C     write(*,*) 'ejec',iizp,iiap,sngl(RESmas(iizp,iiap))
       iizr = iizc - iizp
       iiar = iiac - iiap
+C     write(*,*) 'res ',iizr,iiar,sngl(RESmas(iizr,iiar)) 
 
       BN_EJ_PROJ = (RESmas(iizr,iiar) + RESmas(iizp,iiap) 
      &     - RESmas(iizc,iiac))*AMUmev
 
       RETURN
       END
+
+
