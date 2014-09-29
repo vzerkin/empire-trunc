@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4116 $
+Ccc   * $Rev: 4117 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-27 23:12:24 +0200 (Sa, 27 Sep 2014) $
+Ccc   * $Date: 2014-09-29 02:24:34 +0200 (Mo, 29 Sep 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -330,8 +330,9 @@ c
          WRITE(8,'(10x,''Total break-up cross section'',2x,F12.5,
      &          '' mb'')')crossBUt
          WRITE(8,49010)
-         WRITE(*,49010)
-49010    FORMAT (4X,'Break-up exhausted reaction cross section!!!',/)
+C        WRITE(*,49010)
+49010    FORMAT (4X,
+     & 'WARNING: Break-up exhausted reaction cross section!!!')
          WRITE(8,'(''    Break-up cross sections normalized to '',F5.3,
      &             ''*reaction cross section'')')BUNorm
          DO nejc = 1, NEJcm
@@ -408,9 +409,9 @@ C     ** transfer reactions: stripping and pick-up
          WRITE(8,'(10x,''Total transfer cross section'',2x,F12.5,
      &          '' mb'')')crossNTt
          WRITE (8,49011)
-         WRITE (*,49011)
+C        WRITE (*,49011)
 49011    FORMAT (4X,
-     &        'Transfer reactions exhausted reaction cross section!!',/)
+     &'WARNING: Transfer reactions exhausted reaction cross section!!')
          WRITE(8,'(''    Transfer cross sections normalized to '',F5.3,
      & ''*reaction cross section before NT'')') NTNorm
          DO nejc = 1, NEJcm
