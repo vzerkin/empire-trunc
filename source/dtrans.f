@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4119 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-29 03:18:01 +0200 (Mo, 29 Sep 2014) $
+Ccc   * $Rev: 4123 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
 
 c===========================================================
       SUBROUTINE DTRANS(iemin,iemax,crossNT,specNT,te_e)
@@ -186,20 +186,22 @@ C
 c============================================================
       REAL*8 FUNCTION OMEGA(nppi,nhpi,npnu,nhnu,gpi,gnu,pair,ex)
 c============================================================
+
+      use angular_momentum
+
       implicit none 
       REAL*8 gpi,gnu,ex,pair
       INTEGER nppi,npnu,nhnu,nhpi,nh,np,n,npi,nnu,i
 
       REAL*8 aph, aphnu, aphpi
-      REAL*8 v,fact,cmb,wf1,vf,om1,om2,vi
+      REAL*8 v,cmb,wf1,vf,om1,om2,vi
 C
 C COMMON variables
 C
       INTEGER*4 PMAX
       PARAMETER (PMAX = 50)
 
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3), VV
-      COMMON /PFACT / FA, LFA
+      REAL*8 VV
       COMMON /VWELL / VV
 
       OMEGA = 0.d0
@@ -242,29 +244,6 @@ c     ** finite well
       IF(om2.gt.0.d0)OMEGA = om1 * om2 * (vf + 1.d0)
       return
       END
-
-
-c===============================================
-      REAL*8 function fact(x)
-c===============================================
-c     Calculates factorials using Sterling's Approximation with a
-c     correction factor for better accuracy at low x
-c
-c     Corr'n factor changed (Feb 2007) from (12*x-1) to 12*x in denom.
-c     This does slightly better at low x.
-c
-c     taken from PRECO
-c
-      implicit none
-      REAL*8 pi, e
-      INTEGER x
-      pi = 3.14159265
-      e  = 2.71828183
-      fact = 1.
-      if (x.le.1.) go to 10
-      fact =(x/e)**x*sqrt(2.*pi*x)*(1. + 1./(12*x))
-10    return
-      end
 
 c===========================================================
       SUBROUTINE BREAKUP(iemin,iemax,sigBU,crossBU,specBU,te_e)
@@ -425,5 +404,3 @@ C     write(*,*) 'res ',iizr,iiar,sngl(RESmas(iizr,iiar))
 
       RETURN
       END
-
-

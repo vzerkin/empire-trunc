@@ -2,7 +2,8 @@
 
     private
 
-    integer*4, parameter :: mfac = 500     ! # of stored factorials
+    integer*4, parameter :: mfac = 400     ! # of stored log-factorials
+    integer*4, parameter :: nfac = 160     ! # of stored factorials
 
     real*8, parameter :: zero = 0.D0
     real*8, parameter :: one  = 1.D0
@@ -10,9 +11,10 @@
     real*8, parameter :: pi = 3.14159265358979d0
     real*8, parameter :: pi4 = 4.D0*pi
 
-    real*8 fact(mfac)
+    real*8 log_fact(mfac), lin_fact(0:nfac)
 
-    public init_factorial,racah,clebg,ZCoefficient,ZBarCoefficient,Blatt,parity
+    public init_factorial,racah,clebg,ZCoefficient,ZBarCoefficient,Blatt
+    public parity,paritx,lfct,fact
 
     contains
 
@@ -96,12 +98,11 @@
     j6 = i(15) + i(5) - il
     j7 = i(16) + i(6) - il
 
-    h = fct(i(1)) + fct(i(2)) + fct(i(3)) - fct(i(13)+2) + fct(i(4)) + fct(i(5)) + fct(i(6)) - fct(i(14)+2)
-    h = h + fct(i(7)) + fct(i(8)) + fct(i(9)) - fct(i(15)+2) + fct(i(10)) + fct(i(11)) + fct(i(12)) - fct(i(16)+2)
-    h = h/two + fct(il+2) - fct(j1) - fct(j2) - fct(j3) - fct(j4) - fct(j5) - fct(j6) - fct(j7)
-    h = -dexp(h)
+    h = lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(13)+2) + lfct(i(4)) + lfct(i(5)) + lfct(i(6)) - lfct(i(14)+2)
+    h = h + lfct(i(7)) + lfct(i(8)) + lfct(i(9)) - lfct(i(15)+2) + lfct(i(10)) + lfct(i(11)) + lfct(i(12)) - lfct(i(16)+2)
+    h = h/two + lfct(il+2) - lfct(j1) - lfct(j2) - lfct(j3) - lfct(j4) - lfct(j5) - lfct(j6) - lfct(j7)
+    h = -paritx(j5)*dexp(h)
 
-    if(mod(j5,2) /= 0) h = -h
     if(n < 0) return
 
     if(n == 0) then
@@ -118,9 +119,9 @@
         y = j6 - 1
         z = j7 - 1
         do j = 1,n
-          t = (p+q)/(r+q)*(x-q)/(o+q)*(y-q)/(v+q)*(z-q)/(w+q)
-          s = one - s*t
-          q = q - one
+           t = (p+q)/(r+q)*(x-q)/(o+q)*(y-q)/(v+q)*(z-q)/(w+q)
+           s = one - s*t
+           q = q - one
         end do
         racah = h*s
     endif
@@ -189,7 +190,7 @@
     do j=1,9
         k = i(j)/2
         if(i(j) /= 2*k) return
-        if(k < 0) return
+        if(k < 0)       return
         n = min(n,k)
         i(j) = k + 1
     end do
@@ -209,21 +210,17 @@
         m2 = il - la + 1
         m3 = il - lb + 1
 
-        c  = fct(i(11)) - fct(i(11)-1) + fct(i(1)) + fct(i(2)) + fct(i(3)) - fct(i(10))
-        c = c + fct(i(4)) + fct(i(5)) + fct(i(6)) + fct(i(7)) + fct(i(8)) + fct(i(9))
-        c = c/two
-        c  = c - fct(j1) - fct(j2) - fct(j3) - fct(m1) - fct(m2) - fct(m3)
-        c  = dexp(c)
-        if((il - 2*(il/2)) /= 0) c = -c
+        c  = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10))
+        c = c + lfct(i(4)) + lfct(i(5)) + lfct(i(6)) + lfct(i(7)) + lfct(i(8)) + lfct(i(9))
+        c = c/two - lfct(j1) - lfct(j2) - lfct(j3) - lfct(m1) - lfct(m2) - lfct(m3)
+        c  = paritx(il)*dexp(c)
 
         if(n < 0) return
 
         if(n == 0) then
             clebg = c
         else
-
             ! Form sum
-
             a = j1 - 1
             b = j2 - 1
             h = j3 - 1
@@ -261,12 +258,9 @@
         j1 = (i(1) + 1 - k    )/2
         j2 = (i(2) + 1 + k - l)/2
         j3 = (i(3) + 1 + k - l)/2
-        c = fct(i(11)) - fct(i(11)-1) + fct(i(1)) + fct(i(2)) + fct(i(3)) - fct(i(10))
-        c = c/two
-        c = c + fct(m1) - fct(j1) - fct(j2) - fct(j3) + x*(fct(3) - (fct(m2) - fct(m2-1) + fct(m3) - fct(m3-1))/two)
-        c = dexp(c)
-        if((mod(m,2)) /= 0) c = -c
-        clebg = c
+        c = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10))
+        c = c/two + lfct(m1) - lfct(j1) - lfct(j2) - lfct(j3) + x*(lfct(3) - (lfct(m2) - lfct(m2-1) + lfct(m3) - lfct(m3-1))/two)
+        clebg = paritx(m)*dexp(c)
 
     endif
 
@@ -277,18 +271,27 @@
 
     subroutine init_factorial
 
-    !  Calculate factorial logarithms from 0! ( =1.) up to (mfac)!
-    !                 log(k!) = fact(k+1)
-
     implicit none
 
     integer*4 k
 
-    fact(1) = zero
-    fact(2) = zero
+    !  Calculate factorial logarithms from 0! ( =1.) up to (mfac)!
+    !  log(k!) = log_fact(k+1)
+
+    log_fact(1) = zero
+    log_fact(2) = zero
 
     do k = 3,mfac
-        fact(k) = fact(k-1) + dlog(dble(k-1))
+        log_fact(k) = log_fact(k-1) + dlog(dble(k-1))
+    end do
+
+    !  Calculate factorial from 0! ( =1.) up to (nfac)!
+    !  k! = lin_fact(k)
+
+    lin_fact(0) = one
+    lin_fact(1) = one
+    do k = 2,nfac
+        lin_fact(k) = dble(k)*lin_fact(k-1)
     end do
 
     return
@@ -296,24 +299,60 @@
 
     !---------------------------------------------------------------------------------
 
-    real*8 function fct(i)
+    real*8 function lfct(i)
 
     implicit none
 
     integer*4, intent(in) :: i
 
-    ! retreive log factorial function after checking bound
+    logical*4, save :: warn = .true.
+    real*8 x
 
-    if(i <= mfac) then
-        fct = fact(i)
-        return
+    ! return log factorial of i-1 = ln((i-1)!)
+
+    if(i < 1) then
+        write(8,'(a,i0)') ' ERROR: LOG-FACTORIAL function LFCT for negative value = ',i-1
+        STOP ' LOG-FACTORIAL OF NEGATIVE VALUE'
+    else if(i <= mfac) then
+        ! use saved value
+        lfct = log_fact(i)
+    else
+        ! use Stirling's formula
+        x = dble(i-1)
+        lfct = x*log(x) - x + log(2.D0*pi*x)/two + one/(12.D0*x) - one/(360.D0*x*x*x)
+        if(warn) then
+            write(8,'(a,i0)') ' WARNING: LOG-FACTORIAL function LFCT overflowed stored value = ',i
+            write(8,'(a)') ' Increase parameter MFAC in ANGULAR_DISTRIBUTIONS module.'
+            warn = .false.
+        endif
     endif
 
-    write(8,'(a,i0)') ' ERROR: LOG-FACTORIAL function FCT overflow for value = ',i
-    write(8,'(a)') ' Increase parameter MFAC in ANGULAR_DISTRIBUTIONS module.'
-    stop ' ERROR: MEMORY OVERFLOW IN FCT, INCREASE MFAC in ANGULAR_DISTRIBUTIONS'
+    return
+    end function lfct
 
-    end function fct
+    !---------------------------------------------------------------------------------
+
+    real*8 function fact(i)
+
+    implicit none
+
+    ! return the factorial of i = i!
+
+    integer*4, intent(in) :: i
+    real*8 x
+
+    if(i < 0) then
+        write(8,'(a,i0)') ' ERROR: FACTORIAL function FACT for negative value = ',i
+        STOP ' FACTORIAL OF NEGATIVE VALUE'
+    else if(i <= nfac) then
+        fact = lin_fact(i)
+        return
+    else
+        write(8,'(a,i0)') ' ERROR: FACTORIAL function FACT overflow for  = ',i
+        STOP ' FACTORIAL OVERFLOW'
+    endif
+
+    end function fact
 
     !---------------------------------------------------------------------------------
 
@@ -388,7 +427,7 @@
     real*8, intent(in) :: L           ! Legendre polynomial order (P_L)
 
     integer*4 m
-    real*8 zb1, zb2, rc1, rc2, x
+    real*8 zb1, zb2, rc1, rc2
 
     Blatt = zero
 
@@ -405,9 +444,8 @@
     if(zb2==zero) return
 
     m = nint(Ib -Ia + sb - sa + two*(ja + jb))
-    x = dble(parity(m))
 
-    Blatt = x*(two*j + one)*zb1*zb2*rc1*rc2/pi4
+    Blatt = paritx(m)*(two*j + one)*zb1*zb2*rc1*rc2/pi4
 
     return
     end function Blatt
@@ -418,7 +456,7 @@
 
     implicit none
 
-    ! return the parity (+1 or -1) of ang mom l
+    ! return the int*4 parity (+1 or -1) of ang mom l
 
     integer*4, intent(in) :: l     ! ang mom
 
@@ -426,5 +464,20 @@
 
     return
     end function parity
+
+    !---------------------------------------------------------------------------------
+
+    real*8 function paritx(l)
+
+    implicit none
+
+    ! return the real*8 parity (+1 or -1) of ang mom l
+
+    integer*4, intent(in) :: l     ! ang mom
+
+    paritx = dble(1 - 2*abs(mod(l,2)))
+
+    return
+    end function paritx
 
     end module angular_momentum

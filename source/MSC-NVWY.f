@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3841 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-10 06:02:11 +0100 (Mo, 10 Feb 2014) $
+Ccc   * $Rev: 4123 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -301,7 +301,7 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION BMSc, EXTr, FACt(100), G, GSP(1),
+      DOUBLE PRECISION BMSc, EXTr, G, GSP(1),
      &                 OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS),
      &                 PIM1(NDMSCS), PREp(NC2,2),
      &                 SCRm(NDEX,NDLW,2,2,NDMSCS), SIGnx,
@@ -309,7 +309,7 @@ C
      &                 ZP(NDEX,NC2,3,2), ZSUm(NDEX,NC2,2)
       INTEGER IE(NC2)
       COMMON /DELETE/ GSP
-      COMMON /EB    / EXTr, BMSc, FACt, G
+      COMMON /EB    / EXTr, BMSc, G
       COMMON /MSC   / SCRm, WP, YP, ZP, ZSUm, OMJd, PIM, PREp, IE
       COMMON /PRSI  / SIGnx
 C
@@ -386,12 +386,7 @@ C-----determination of the initial exciton configuration **** done ****
       
       IF (NLW.GT.NDLW - 1) NLW = NDLW - 1
       WRITE (8,*) 'Maximum momentum allowed NLW = ',NLW
-C-----calculation of factorial
-      FACt(1) = 1.d0
-      DO i = 1, 99
-         FACt(i + 1) = FACt(i)*DBLE(i)
-      ENDDO
-C-----calculation of factorial      ***** done *******
+
       CSMsc = 0.d0
       nresn = NREs(1)
       nresp = NREs(2)
@@ -1585,5 +1580,3 @@ C     IF(IOUT.GT.0) CALL AUERST(1, 2)
 99115 FORMAT (1X,12E11.4)
       RETURN
       END
-
-

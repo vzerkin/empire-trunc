@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3999 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-07-29 21:19:12 +0200 (Di, 29 Jul 2014) $
+Ccc   * $Rev: 4123 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3624,6 +3624,9 @@ CCC   Author: P.D. Kunz, University of Colorado, Boulder, Colorado, US *
 CCC   (from CULIB8 library of routines used in DWUCK4 and CHUCK3)      *                                                                     *
 CCC*********************************************************************
 CCC
+
+      use angular_momentum
+
       implicit none 
 
       INTEGER JX1,JX2,JX3,MX1,MX2   
@@ -3635,10 +3638,6 @@ C     IMPLICIT REAL*8(A-H,O-Z)
       INTEGER JT1,JT2,JT3,JT4,JT5,JZ1,JZ2,JZ3
 
       DOUBLE PRECISION PHAS, FCTOR
-
-      DOUBLE PRECISION FACT(0:32)
-
-      COMMON/FACTRL/FACT
 
       DOUBLE PRECISION PHASEF,YXFCT
 
@@ -3704,39 +3703,6 @@ C
       GO TO 150
   120 VCC=VCC*PHASEF(JZ1)
   150 RETURN
-      END
-      BLOCK DATA FACTOR
-c
-c     Factorial table
-c
-
-      implicit none 
-
-C     IMPLICIT REAL*8(A-H,O-Z)
-
-      DOUBLE PRECISION FACT(0:32)
-
-      COMMON/FACTRL/FACT
-
-C
-      DATA FACT/ 1.0000000000E+00, 1.0000000000E+00, 2.0000000000E+00
-     1         , 6.0000000000E+00, 2.4000000000E+01, 1.2000000000E+02
-     2         , 7.2000000000E+02, 5.0400000000E+03, 4.0320000000E+04
-     3         , 3.6288000000E+05, 3.6288000000E+06, 3.9916800000E+07
-     4         , 4.7900160000E+08, 6.2270208000E+09, 8.7178291200E+10
-     5         , 1.3076743680E+12, 2.0922789888E+13, 3.5568742810E+14
-     6         , 6.4023737057E+15, 1.2164510041E+17, 2.4329020082E+18
-     7         , 5.1090942172E+19, 1.1240007278E+21, 2.5852016739E+22
-     8         , 6.2044840173E+23, 1.5511210043E+25, 4.0329146113E+26
-     9         , 1.0888869450E+28, 3.0488834461E+29, 8.8417619937E+30
-     $         , 2.6525285981E+32, 8.2228386542E+33, 2.6313083693E+35/
-C    $         , 8.6833176188D+36, 2.9523279904D+38, 1.0333147966D+40
-C    $         , 3.7199332679D+41, 1.3763753091D+43, 5.2302261747D+44
-C    $         , 2.0397882081D+46, 8.1591528325D+47, 3.3452526613D+49
-C    $         , 1.4050061178D+51, 6.0415263063D+52, 2.6582715748D+54
-C    $         , 1.1962222087D+56, 5.5026221598D+57, 2.5862324151D+59
-C    $         , 1.2413915593D+61, 6.0828186403D+62, 3.0414093202D+64
-C    $         , 1.5511187533D+66/
       END
 
       DOUBLE PRECISION FUNCTION PHASEF(N)

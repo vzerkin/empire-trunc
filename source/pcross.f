@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4117 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-29 02:24:34 +0200 (Mo, 29 Sep 2014) $
+Ccc   * $Rev: 4123 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -52,8 +52,6 @@ C
       DOUBLE PRECISION specNT(0:NDEJC,NDEX),te_e
       DOUBLE PRECISION culbar
 
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
-      COMMON /PFACT / FA, LFA
 C
 C Dummy arguments
 C
@@ -84,7 +82,7 @@ C
       DOUBLE PRECISION SGAM
       CHARACTER*12 status
 C     To correct bug found by M Pigni and C Mattoon, a variable "callpcross" value is saved between calls   
-      SAVE r, callpcross, /PFACT/
+      SAVE r, callpcross
 C
 C
       DATA callpcross/.FALSE./
@@ -955,6 +953,9 @@ Cmbc      Now put in MSC as isotropic, giving:
       end
 
       SUBROUTINE RQFACT(Heq,R)
+
+      use angular_momentum
+
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -963,11 +964,6 @@ C PARAMETER definitions
 C
       INTEGER*4 PMAX
       PARAMETER (PMAX = 50)
-C
-C COMMON variables
-C
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
-      COMMON /PFACT / FA, LFA
 C
 C Dummy arguments
 C
@@ -982,19 +978,6 @@ C
       INTEGER nejc
 C
 C     INDC(CPR)-014 and references there in
-C
-C     FACTORIAL CALCULATION
-C
-      LFA(1) = 0.d0
-      LFA(2) = 0.d0
-      LFA(3) = 0.d0
-      FA(1) = 1.d0
-      FA(2) = 1.d0
-      FA(3) = 1.d0
-      DO i = 4, 2*PMAX + 3
-         LFA(i) = ALOG(FLOAT(i - 3)) + LFA(i - 1)
-         FA(i) = (i - 3)*FA(i - 1)
-      ENDDO
 
       R = 1.d0 
       ac = A(1)
@@ -1028,8 +1011,8 @@ C
                   s1 = 0.D0
                   DO i = 0, hhh
                      f1 = zzz**i*uuu**(hhh - i)
-     &                    *EXP(LFA(hhh + 3) - LFA(hhh - i + 3)
-     &                    - LFA(i + 3))
+     &                    *EXP(lfct(hhh + 1) - lfct(hhh - i + 1)
+     &                    - lfct(i + 1))
                      s2 = 0.D0
                      DO j = minjx, maxjx
                         f21 = 1.D0
@@ -1037,28 +1020,28 @@ C
                            DO j1 = 0, j - 1
                               f21 = f21*FLOAT(zp + i - j1)
                            ENDDO
-                           f21 = f21/FA(j + 3)
+                           f21 = f21/fact(j)
                         ENDIF
                         f22 = 1.D0
                         IF (l - j.GE.1) THEN
                            DO j1 = 0, l - j - 1
                               f22 = f22*FLOAT(np + hhh - i - j1)
                            ENDDO
-                           f22 = f22/FA(l - j + 3)
+                           f22 = f22/fact(l - j)
                         ENDIF
                         f23 = 1.D0
                         IF (zb - j.GE.1) THEN
                            DO j1 = 0, zb - j - 1
                               f23 = f23*FLOAT(zt - i - j1)
                            ENDDO
-                           f23 = f23/FA(zb - j + 3)
+                           f23 = f23/fact(zb - j)
                         ENDIF
                         f24 = 1.D0
                         IF (nb - l + j.GE.1) THEN
                            DO j1 = 0, 2 - l + j - 1
                               f24 = f24*FLOAT(nt - hhh + i - j1)
                            ENDDO
-                           f24 = f24/FA(nb - l + j + 3)
+                           f24 = f24/fact(nb - l + j)
                         ENDIF
                         s2 = f21*f22*f23*f24 + s2
                      ENDDO
@@ -1068,9 +1051,9 @@ C
                   DO j = 0, m - 1
                      f2 = f2*(at - hhh - j)
                   ENDDO
-                  f2 = EXP(LFA(l + 3) + LFA(m + 3) + LFA(p - l + 3)
-     &                 - LFA(p + 3) + LFA(ab + 3) - LFA(zb + 3)
-     &                 - LFA(nb + 3))/f2
+                  f2 = EXP(lfct(l + 1) + lfct(m + 1) + lfct(p - l + 1)
+     &                 - lfct(p + 1) + lfct(ab + 1) - lfct(zb + 1)
+     &                 - lfct(nb + 1))/f2
                   R(l,h1,nejc) = s1*f2*(ta/tz)**zb*(ta/tn)**nb
                ENDIF
             ENDDO
@@ -1390,6 +1373,9 @@ C-----ALPHA PARTICLES (M=4)
 
 
       REAL*8 FUNCTION DENSW(G,D,P,H,E)
+
+      use angular_momentum
+
 C
 C  RIPL FORMULATION
 C
@@ -1405,8 +1391,7 @@ C
 C
 C COMMON variables
 C
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3), VV
-      COMMON /PFACT / FA, LFA
+      REAL*8 VV
       COMMON /VWELL / VV
 C
 C Dummy arguments
@@ -1432,7 +1417,7 @@ C
       a = .5D0*(P*P + H*H)
       sum = 0.d0
       DO j = 0,H
-        fac = LFA(P + 3) + LFA(n + 2) + LFA(j + 3) + LFA(H - j + 3)
+        fac = lfct(P + 2) + lfct(n) + lfct(j + 1) + lfct(H - j + 2)
         u = G*(E - D - j*VV) - a
 C       Changed Sept. 2010  
         IF (u.LE.0.) cycle
@@ -1444,6 +1429,9 @@ C       Changed Sept. 2010
       END
 
       REAL*8 FUNCTION DENSW1(G,D,P,H,E)
+
+      use angular_momentum
+
 C
 C  RIPL FORMULATION
 C
@@ -1456,11 +1444,6 @@ C PARAMETER definitions
 C
       INTEGER*4 PMAX
       PARAMETER (PMAX = 50)
-C
-C COMMON variables
-C
-      REAL*8 FA(2*PMAX + 3), LFA(2*PMAX + 3)
-      COMMON /PFACT / FA, LFA
 C
 C Dummy arguments
 C
@@ -1478,7 +1461,7 @@ C
 
       a = .5D0*(P*P + H*H)
 
-      fac = LFA(P + 3) + LFA(n + 2) + LFA(H + 3)
+      fac = lfct(P + 1) + lfct(n) + lfct(H + 1)
       u = G*(E - D) - a
       IF (u.LE.0.) return
       DENSW1 =  G*(DEXP((n-1)*DLOG(u) - fac))

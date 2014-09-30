@@ -1,6 +1,6 @@
-Ccc   * $Rev: 2537 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2012-02-10 14:07:34 +0100 (Fr, 10 Feb 2012) $
+Ccc   * $Rev: 4123 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
 
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
@@ -16,8 +16,11 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -44,8 +47,8 @@ C     B  - binding energy
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -101,8 +104,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -142,8 +145,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -177,8 +180,8 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -203,8 +206,10 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -251,8 +256,10 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -293,8 +300,10 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -346,8 +355,10 @@ C     g**(p+h)/p!h!(n-1)! and neglecting well depth
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -391,8 +402,8 @@ C     using Oblozinsky's formula for cond. st. den.
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -427,8 +438,8 @@ C     weighting funtion in the case of particles (analogous for holes)
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
@@ -499,8 +510,10 @@ C     (without g**n/p!h! factor which is contained in omj)
 C
 C COMMON variables
 C
-      DOUBLE PRECISION BP, E, FACt(100), G
-      COMMON /EB    / E, BP, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION BP, E, G
+      COMMON /EB    / E, BP, G
 C
 C Dummy arguments
 C
@@ -521,8 +534,10 @@ C     used (ngs=1)
 C
 C COMMON variables
 C
-      DOUBLE PRECISION BP, E, FACt(100), G, SIGnx
-      COMMON /EB    / E, BP, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION BP, E, G, SIGnx
+      COMMON /EB    / E, BP, G
       COMMON /PRSI  / SIGnx
 C
 C Dummy arguments
@@ -577,8 +592,10 @@ Ccc   **************************************************************************
 C
 C COMMON variables
 C
-      DOUBLE PRECISION B, E, FACt(100), G
-      COMMON /EB    / E, B, FACt, G
+      use angular_momentum
+
+      DOUBLE PRECISION B, E, G
+      COMMON /EB    / E, B, G
 C
 C Dummy arguments
 C
