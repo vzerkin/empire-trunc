@@ -310,11 +310,11 @@
 
     ! return log factorial of i-1 = ln((i-1)!)
 
-    if(i < -1) then
+    if(i < -2) then
         write(8,'(a,i4)') ' ERROR: LOG-FACTORIAL function LFCT for negative value = ',i-1
-        STOP ' LOG-FACTORIAL OF NEGATIVE VALUE'
+        STOP ' ERROR: LOG-FACTORIAL OF NEGATIVE VALUE'
     else if(i < 1) then
-        lfct = 0
+        lfct = 0.d0
     else if(i <= mfac) then
         ! use saved value
         lfct = log_fact(i)
@@ -324,7 +324,7 @@
         lfct = x*log(x) - x + log(2.D0*pi*x)/two + one/(12.D0*x) - one/(360.D0*x*x*x)
         if(warn) then
             write(8,'(a,i4)') ' WARNING: LOG-FACTORIAL function LFCT overflowed stored value = ',i
-            write(8,'(a)') ' Increase parameter MFAC in ANGULAR_DISTRIBUTIONS module.'
+            write(8,'(a)') ' WARNING: Increase parameter MFAC in ANGULAR_DISTRIBUTIONS module.'
             warn = .false.
         endif
     endif
@@ -343,9 +343,9 @@
     integer*4, intent(in) :: i
     ! real*8 x
 
-    if(i < -1) then
+    if(i < -2) then
         write(8,'(a,i4)') ' ERROR: FACTORIAL function FACT for negative value = ',i
-        STOP ' FACTORIAL OF NEGATIVE VALUE'
+        STOP ' ERROR: FACTORIAL OF NEGATIVE VALUE'
     else if(i < 0) then
         fact = 1.d0
         return
@@ -354,7 +354,7 @@
         return
     else
         write(8,'(a,i4)') ' ERROR: FACTORIAL function FACT overflow for  = ',i
-        STOP ' FACTORIAL OVERFLOW'
+        STOP ' ERROR: FACTORIAL OVERFLOW'
     endif
 
     end function fact
