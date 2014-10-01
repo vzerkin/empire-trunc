@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4123 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+Ccc   * $Rev: 4125 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-01 09:00:57 +0200 (Mi, 01 Okt 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -1417,7 +1417,8 @@ C
       a = .5D0*(P*P + H*H)
       sum = 0.d0
       DO j = 0,H
-        fac = lfct(P + 2) + lfct(n) + lfct(j + 1) + lfct(H - j + 2)
+C       fac = lfct(P + 2) + lfct(n) + lfct(j + 1) + lfct(H - j + 2)
+        fac = lfct(P + 1) + lfct(n) + lfct(j + 1) + lfct(H - j + 1) !RCN 0914
         u = G*(E - D - j*VV) - a
 C       Changed Sept. 2010  
         IF (u.LE.0.) cycle
