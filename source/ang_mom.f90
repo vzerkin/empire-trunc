@@ -11,7 +11,7 @@
     real*8, parameter :: pi = 3.14159265358979d0
     real*8, parameter :: pi4 = 4.D0*pi
 
-    real*8 log_fact(mfac), lin_fact(0:nfac)
+    real*8 log_fact(-2:mfac), lin_fact(-2:nfac)
 
     public init_factorial,racah,clebg,ZCoefficient,ZBarCoefficient,Blatt
     public parity,paritx,lfct,fact
@@ -79,8 +79,10 @@
         if(i(j) /= 2*k) return
         if(k < 0)       return
         n = min(n,k)
-        i(j) = k + 1
+        i(j) = k
     end do
+
+    if(n < 0) return
 
     ! Find minimum value of summation index
 
@@ -90,34 +92,32 @@
         il = max(il,i(j))
     end do
 
-    j1 = il - i(13) + 1
-    j2 = il - i(14) + 1
-    j3 = il - i(15) + 1
-    j4 = il - i(16) + 1
+    j1 = il - i(13)
+    j2 = il - i(14)
+    j3 = il - i(15)
+    j4 = il - i(16)
     j5 = i(13) + i(4) - il
     j6 = i(15) + i(5) - il
     j7 = i(16) + i(6) - il
 
-    h = lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(13)+2) + lfct(i(4)) + lfct(i(5)) + lfct(i(6)) - lfct(i(14)+2)
-    h = h + lfct(i(7)) + lfct(i(8)) + lfct(i(9)) - lfct(i(15)+2) + lfct(i(10)) + lfct(i(11)) + lfct(i(12)) - lfct(i(16)+2)
-    h = h/two + lfct(il+2) - lfct(j1) - lfct(j2) - lfct(j3) - lfct(j4) - lfct(j5) - lfct(j6) - lfct(j7)
-    h = -paritx(j5)*dexp(h)
-
-    if(n < 0) return
+    h = lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(13)+1) + lfct(i(4)) + lfct(i(5)) + lfct(i(6)) - lfct(i(14)+1)
+    h = h + lfct(i(7)) + lfct(i(8)) + lfct(i(9)) - lfct(i(15)+1) + lfct(i(10)) + lfct(i(11)) + lfct(i(12)) - lfct(i(16)+1)
+    h = h/two + lfct(il+1) - lfct(j1) - lfct(j2) - lfct(j3) - lfct(j4) - lfct(j5) - lfct(j6) - lfct(j7)
+    h = paritx(j5)*dexp(h)
 
     if(n == 0) then
         racah = h
     else
         s = one
-        q = n  - 1
-        p = il + 2
-        r = j1
-        o = j2
-        v = j3
-        w = j4
-        x = j5 - 1
-        y = j6 - 1
-        z = j7 - 1
+        q = dble(n  - 1)
+        p = dble(il + 2)
+        r = dble(j1 + 1)
+        o = dble(j2 + 1)
+        v = dble(j3 + 1)
+        w = dble(j4 + 1)
+        x = dble(j5)
+        y = dble(j6)
+        z = dble(j7)
         do j = 1,n
            t = (p+q)/(r+q)*(x-q)/(o+q)*(y-q)/(v+q)*(z-q)/(w+q)
            s = one - s*t
@@ -182,7 +182,7 @@
     i(8) = j3 - m3
     i(9) = j3 + m3
     i(10) = (j1 + j2 + j3)/2 + 2
-    i(11) = j3 + 2
+    i(11) = j3 + 1
 
     ! Check i(j) = even, triangular inequality, m less than j, find number of terms
 
@@ -192,10 +192,10 @@
         if(i(j) /= 2*k) return
         if(k < 0)       return
         n = min(n,k)
-        i(j) = k + 1
+        i(j) = k
     end do
 
-    if((m3 /= 0) .or. (m1 /= 0) .or. (m1 /= 1)) then
+    if((m3 /= 0) .or. ((m1 /= 0) .and. (m1 /= 1))) then
 
         la = i(1) - i(5)
         lb = i(1) - i(6)
@@ -206,11 +206,11 @@
         j1 = i(1) - il
         j2 = i(4) - il
         j3 = i(7) - il
-        m1 = il + 1
-        m2 = il - la + 1
-        m3 = il - lb + 1
+        m1 = il
+        m2 = il - la
+        m3 = il - lb
 
-        c  = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10))
+        c  = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10)-1)
         c = c + lfct(i(4)) + lfct(i(5)) + lfct(i(6)) + lfct(i(7)) + lfct(i(8)) + lfct(i(9))
         c = c/two - lfct(j1) - lfct(j2) - lfct(j3) - lfct(m1) - lfct(m2) - lfct(m3)
         c  = paritx(il)*dexp(c)
@@ -221,14 +221,14 @@
             clebg = c
         else
             ! Form sum
-            a = j1 - 1
-            b = j2 - 1
-            h = j3 - 1
-            d = m1
-            e = m2
-            f = m3
+            a = dble(j1)
+            b = dble(j2)
+            h = dble(j3)
+            d = dble(m1 + 1)
+            e = dble(m2 + 1)
+            f = dble(m3 + 1)
             s = one
-            q = n - 1
+            q = dble(n - 1)
             do j = 1,n
                 t = (a-q)/(d+q)*(b-q)/(e+q)*(h-q)/(f+q)
                 s = one - s*t
@@ -246,20 +246,20 @@
         if(m1 == 0) then
             l = 0
             if(k /= 0) return
-        else if(m1 == 1) then
+        else
             l = 1
         endif
 
-        x  = l
-        m  = i(3) + (i(1) + k + 1)/2 - l
-        m1 = i(10)/2 + k
-        m2 = i(4) + i(5)
-        m3 = i(6) + i(7)
-        j1 = (i(1) + 1 - k    )/2
-        j2 = (i(2) + 1 + k - l)/2
-        j3 = (i(3) + 1 + k - l)/2
-        c = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10))
-        c = c/two + lfct(m1) - lfct(j1) - lfct(j2) - lfct(j3) + x*(lfct(3) - (lfct(m2) - lfct(m2-1) + lfct(m3) - lfct(m3-1))/two)
+        x  = dble(l)
+        m  = i(3) + (i(1) + k)/2 - l
+        m1 = i(10)/2 + k - 1
+        m2 = i(4) + i(5) + 1
+        m3 = i(6) + i(7) + 1
+        j1 = (i(1) - k    )/2
+        j2 = (i(2) + k - l)/2
+        j3 = (i(3) + k - l)/2
+        c = lfct(i(11)) - lfct(i(11)-1) + lfct(i(1)) + lfct(i(2)) + lfct(i(3)) - lfct(i(10)-1)
+        c = c/two + lfct(m1) - lfct(j1) - lfct(j2) - lfct(j3) + x*(lfct(2) - (lfct(m2) - lfct(m2-1) + lfct(m3) - lfct(m3-1))/two)
         clebg = paritx(m)*dexp(c)
 
     endif
@@ -275,21 +275,27 @@
 
     integer*4 k
 
+    ! allow for slightly negative values (down to -2)
+    ! for compatibility with pcross.f
+
     !  Calculate factorial logarithms from 0! ( =1.) up to (mfac)!
-    !  log(k!) = log_fact(k+1)
+    !  log_fact(k) = ln(k!)
 
-    log_fact(1) = zero
-    log_fact(2) = zero
-
-    do k = 3,mfac
-        log_fact(k) = log_fact(k-1) + dlog(dble(k-1))
+    log_fact(-2) = zero
+    log_fact(-1) = zero
+    log_fact(0)  = zero
+    log_fact(1)  = zero
+    do k = 2,mfac
+        log_fact(k) = log_fact(k-1) + dlog(dble(k))
     end do
 
     !  Calculate factorial from 0! ( =1.) up to (nfac)!
-    !  k! = lin_fact(k)
+    !  lin_fact(k) = k!
 
-    lin_fact(0) = one
-    lin_fact(1) = one
+    lin_fact(-2) = one
+    lin_fact(-1) = one
+    lin_fact(0)  = one
+    lin_fact(1)  = one
     do k = 2,nfac
         lin_fact(k) = dble(k)*lin_fact(k-1)
     end do
@@ -308,19 +314,17 @@
     logical*4, save :: warn = .true.
     real*8 x
 
-    ! return log factorial of i-1 = ln((i-1)!)
+    ! return log factorial of i = ln(i!)
 
     if(i < -2) then
-        write(8,'(a,i4)') ' ERROR: LOG-FACTORIAL function LFCT for negative value = ',i-1
+        write(8,'(a,i4)') ' ERROR: LOG-FACTORIAL function LFCT for negative value = ',i
         STOP ' ERROR: LOG-FACTORIAL OF NEGATIVE VALUE'
-    else if(i < 1) then
-        lfct = 0.d0
     else if(i <= mfac) then
         ! use saved value
         lfct = log_fact(i)
     else
         ! use Stirling's formula
-        x = dble(i-1)
+        x = dble(i)
         lfct = x*log(x) - x + log(2.D0*pi*x)/two + one/(12.D0*x) - one/(360.D0*x*x*x)
         if(warn) then
             write(8,'(a,i4)') ' WARNING: LOG-FACTORIAL function LFCT overflowed stored value = ',i
@@ -341,14 +345,10 @@
     ! return the factorial of i = i!
 
     integer*4, intent(in) :: i
-    ! real*8 x
 
     if(i < -2) then
         write(8,'(a,i4)') ' ERROR: FACTORIAL function FACT for negative value = ',i
         STOP ' ERROR: FACTORIAL OF NEGATIVE VALUE'
-    else if(i < 0) then
-        fact = 1.d0
-        return
     else if(i <= nfac) then
         fact = lin_fact(i)
         return

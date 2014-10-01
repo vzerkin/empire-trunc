@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4128 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-01 15:51:18 +0200 (Mi, 01 Okt 2014) $
+Ccc   * $Rev: 4129 $
+Ccc   * $Author: shoblit $
+Ccc   * $Date: 2014-10-01 22:54:35 +0200 (Mi, 01 Okt 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -1009,8 +1009,7 @@ C
                   s1 = 0.D0
                   DO i = 0, hhh
                      f1 = zzz**i*uuu**(hhh - i)
-     &                    *EXP(lfct(hhh + 1) - lfct(hhh - i + 1)
-     &                    - lfct(i + 1))
+     &                    *DEXP(lfct(hhh) - lfct(hhh - i) - lfct(i))
                      s2 = 0.D0
                      DO j = minjx, maxjx
                         f21 = 1.D0
@@ -1049,9 +1048,9 @@ C
                   DO j = 0, m - 1
                      f2 = f2*(at - hhh - j)
                   ENDDO
-                  f2 = EXP(lfct(l + 1) + lfct(m + 1) + lfct(p - l + 1)
-     &                 - lfct(p + 1) + lfct(ab + 1) - lfct(zb + 1)
-     &                 - lfct(nb + 1))/f2
+                  f2 = DEXP(lfct(l) + lfct(m) + lfct(p - l)
+     &                 - lfct(p) + lfct(ab) - lfct(zb)
+     &                 - lfct(nb))/f2
                   R(l,h1,nejc) = s1*f2*(ta/tz)**zb*(ta/tn)**nb
                ENDIF
             ENDDO
@@ -1374,18 +1373,12 @@ C-----ALPHA PARTICLES (M=4)
 
       use angular_momentum
 
-C
 C  RIPL FORMULATION
 C
 C  G - LEVEL DENSITY PARAMETER
 C  D - PAIRING CORRECTION
 C  P(H) - PARTICLE(HOLE) NUMBER
 C  E - EXCITATION ENERGY
-C
-C PARAMETER definitions
-C
-      INTEGER*4 PMAX
-      PARAMETER (PMAX = 50)
 C
 C COMMON variables
 C
@@ -1400,12 +1393,11 @@ C
 C Local variables
 C
       REAL*8 a, fac, u, sum
-      DOUBLE PRECISION DEXP, DLOG
       INTEGER*4 n, j, jmax
 
       DENSW = 0.D0
-      n = P + H
-      IF (n.LE.0) RETURN
+      n = P + H - 1
+      IF (n < 0) RETURN
 
       jmax = H
       IF(VV.LE.0.d0) jmax=0
@@ -1415,12 +1407,11 @@ C
       a = .5D0*(P*P + H*H)
       sum = 0.d0
       DO j = 0,H
-C       fac = lfct(P + 2) + lfct(n) + lfct(j + 1) + lfct(H - j + 2)
-        fac = lfct(P + 1) + lfct(n) + lfct(j + 1) + lfct(H - j + 1) !RCN 0914
+        fac = lfct(P) + lfct(n) + lfct(j) + lfct(H - j) !RCN 0914
         u = G*(E - D - j*VV) - a
 C       Changed Sept. 2010  
         IF (u.LE.0.) cycle
-        sum = sum + (-1)**j * G*(DEXP((n-1)*DLOG(u) - fac))
+        sum = sum + (-1)**j * G*(DEXP(dble(n)*DLOG(u) - fac))
       ENDDO
       if(sum.lt.0.d0) return
       DENSW = sum
@@ -1431,18 +1422,12 @@ C       Changed Sept. 2010
 
       use angular_momentum
 
-C
 C  RIPL FORMULATION
 C
 C  G - LEVEL DENSITY PARAMETER
 C  D - PAIRING CORRECTION
 C  P(H) - PARTICLE(HOLE) NUMBER
 C  E - EXCITATION ENERGY
-C
-C PARAMETER definitions
-C
-      INTEGER*4 PMAX
-      PARAMETER (PMAX = 50)
 C
 C Dummy arguments
 C
@@ -1454,16 +1439,17 @@ C
       REAL*8 a, fac, u
       DOUBLE PRECISION DEXP, DLOG
       INTEGER*4 n
+
       DENSW1 = 0.D0
-      n = P + H
-      IF (n.LE.0) RETURN
+      n = P + H - 1
+      IF (n < 0) RETURN
 
       a = .5D0*(P*P + H*H)
 
-      fac = lfct(P + 1) + lfct(n) + lfct(H + 1)
+      fac = lfct(P) + lfct(n) + lfct(H)
       u = G*(E - D) - a
-      IF (u.LE.0.) return
-      DENSW1 =  G*(DEXP((n-1)*DLOG(u) - fac))
+      IF (u.LE.0.D0) return
+      DENSW1 =  G*(DEXP(dble(n)*DLOG(u) - fac))
 
       RETURN
       END
