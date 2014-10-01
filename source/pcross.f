@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4125 $
+Ccc   * $Rev: 4128 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-01 09:00:57 +0200 (Mi, 01 Okt 2014) $
+Ccc   * $Date: 2014-10-01 15:51:18 +0200 (Mi, 01 Okt 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -43,13 +43,13 @@ C
      &                 crossPE(0:NDEJC),crossPEt
       COMMON /PEXS/ crossNT,crossNTt,crossPE,crossPEt
 
-      DOUBLE PRECISION specBU(0:NDEJC,NDEX),crossBU(0:NDEJC),crossBUt
+      DOUBLE PRECISION specBU(0:NDEJC,NDECSE),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
 
       LOGICAL lbreakup, ltransfer
       COMMON /LPEXS/lbreakup, ltransfer 
 
-      DOUBLE PRECISION specNT(0:NDEJC,NDEX),te_e
+      DOUBLE PRECISION specNT(0:NDEJC,NDECSE),te_e
       DOUBLE PRECISION culbar
 
 C
@@ -95,6 +95,8 @@ C
       fanisot = 1.d0
 C     fanisot set to 0.d0 means isotropic distribution
 
+      crossBUt= 0.d0
+      crossNTt= 0.d0
       crossBUn= 0.d0
       crossNTn= 0.d0
       specNT  = 0.d0
@@ -373,7 +375,7 @@ C     ** transfer reactions: stripping and pick-up
        GOTO 9
       ENDIF
 
-      CALL DTRANS(iemin,iemax,crossNT,specNT,te_e)
+      CALL DTRANS(iemin,iemax,crossNTt,crossNT,specNT,te_e)
       WRITE(8,89002)
 89002 FORMAT (/4X,
      &'*** Stripping and Pick-up Parameterization (C. Kalbach) ***',
@@ -381,11 +383,7 @@ C     ** transfer reactions: stripping and pick-up
       WRITE(8,'(''  Reaction cross section before transfer'',
      &          F12.5, '' mb'')')scompn
 
-      DO nejc = 1, NEJcm
-         crossNTt = crossNTt + crossNT(nejc)
-      ENDDO   
       crossaftertrans = scompn - crossNTt
-
       IF(crossaftertrans.gt.(1.d0 - NTNorm) * scompn)THEN
          DO nejc = 1, NEJcm
             if(crossNT(nejc).le.0.d0) CYCLE

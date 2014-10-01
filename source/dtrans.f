@@ -1,9 +1,9 @@
-Ccc   * $Rev: 4123 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+Ccc   * $Rev: 4128 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-01 15:51:18 +0200 (Mi, 01 Okt 2014) $
 
 c===========================================================
-      SUBROUTINE DTRANS(iemin,iemax,crossNT,specNT,te_e)
+      SUBROUTINE DTRANS(iemin,iemax,sigNT,crossNT,specNT,te_e)
 C===========================================================
 C     DIRECT TRANSFER REACTIONS INCLUDING STRIPPING AND PICK-UP 
 C     following C.Kalbach /PRECO-2006/sub NUTRA
@@ -14,7 +14,8 @@ C
       include 'global.h'
 C
       INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
-      DOUBLE PRECISION crossNT(0:NDEJC), specNT(0:NDEJC,NDEX),te_e
+      DOUBLE PRECISION sigNT,crossNT(0:NDEJC)
+      DOUBLE PRECISION specNT(0:NDEJC,NDECSE),te_e
 C
 C     Local variables
 C
@@ -40,6 +41,7 @@ C     if(NTSred.LE.0.d0 .or. getout) return
 
       crossNT = 0.d0 
       specNT  = 0.d0  
+      sigNT   = 0.d0
 
       IF(IOUt.GE.3) then
         write(8,*) 
@@ -180,6 +182,7 @@ C
             crossNT(ioute(ip)) = crossNT(ioute(ip)) + spectr * DE
 
          ENDDO
+         sigNT = sigNT + crossNT(ioute(ip))
       ENDDO
       return
       end
@@ -255,7 +258,7 @@ C
       include 'global.h'
       INTEGER*2 iemax(0:NDEJC), iemin(0:NDEJC)
 
-      DOUBLE PRECISION crossBU(0:NDEJC),specBU(0:NDEJC,NDEX),te_e
+      DOUBLE PRECISION crossBU(0:NDEJC),specBU(0:NDEJC,NDECSE),te_e
 
       REAL*8 nab(NDEJC,NDEJC),dd0,expp,thalf,sigBU,ek,dcor,dsum
       REAL*8 rr0,ehalf,ca,cb,zares,e0,fac1,fac2,bnd,gamma
@@ -299,7 +302,7 @@ c     Coulomb barriers
       fac1 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))
 
 C	write(*,*) 'Nproject=',Nproject
-     
+    
       DO iejc=1,NDEJC  ! over particles only
 
          IF(BUReac(iejc).lt.0.01d0) cycle
@@ -315,7 +318,6 @@ C	write(*,*) 'Nproject=',Nproject
 c        te_e = 1.d0/(1.d0 + exp((cb - ek)/(cb/3.d0)))                !eq.9
          thalf = 1.d0/(1.d0 + exp((ehalf-EINl)/14.d0))*te_e           !eq.25
          crossBU(iejc) = nab(NPRoject,iejc) * dd0**2 * expp * thalf   !eq.24
-         sigBU = sigBU + crossBU(iejc)          
 c
 c        ** peak energy
 c
@@ -358,6 +360,10 @@ C    >           e0,iemin(iejc), iemax(iejc)
          else
            crossBU(iejc) = 0.d0
          endif
+
+         sigBU = sigBU + crossBU(iejc)
+C        WRITE(*,*) iejc, sigBU,crossBU(iejc)          
+
       ENDDO
       return
       end
@@ -398,9 +404,9 @@ C     write(*,*) 'ejec',iizp,iiap,sngl(RESmas(iizp,iiap))
       iizr = iizc - iizp
       iiar = iiac - iiap
 C     write(*,*) 'res ',iizr,iiar,sngl(RESmas(iizr,iiar)) 
-
+     
       BN_EJ_PROJ = (RESmas(iizr,iiar) + RESmas(iizp,iiap) 
      &     - RESmas(iizc,iiac))*AMUmev
-
+      
       RETURN
       END
