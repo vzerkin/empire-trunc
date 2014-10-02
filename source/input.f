@@ -1,6 +1,6 @@
-!cc   * $Rev: 4132 $
+!cc   * $Rev: 4141 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-10-02 23:48:59 +0200 (Do, 02 Okt 2014) $
+!cc   * $Date: 2014-10-03 00:41:40 +0200 (Fr, 03 Okt 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -10536,13 +10536,13 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
          call defcal(iz,ia,beta2,ftmp)
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(A40,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (2+) =',beta2
-         WRITE (8,'(A)') '  Nobre et al systematics used for dynamical d 
-     &eformations: Phys.Rev.C76(2007)024605' 
+         WRITE (8,'(A)') ' Nobre et al systematics used for dynamical de 
+     &formations: Phys.Rev.C76(2007)024605' 
       ELSE
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(A40,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (2+) =',beta2
       ENDIF
@@ -10551,14 +10551,14 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,*) 
          WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
-         WRITE (8,'(A)') '  Nobre et al systematics used for dynamical d 
-     &eformations: Phys.Rev.C76(2007)024605' 
+         WRITE (8,'(A)') ' Nobre et al systematics used for dynamical de 
+     &formations: Phys.Rev.C76(2007)024605' 
          call defcal(iz,ia,ftmp,beta3)
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(A40,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (3-) =',beta3
       ELSE
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(A40,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (3-) =',beta3
       ENDIF
@@ -10611,22 +10611,22 @@ C
             D_Llv(ND_nlv) = 0
             D_Klv(ND_nlv) = 0
             D_Def(ND_nlv,2) = 0.01
+
             IF (DEF(1,0).le.1.d-3) THEN
 			  IF(beta2.GT.0.D0) THEN
-                WRITE (8,*) 
-                WRITE (8,*) ' BETA (2+) ASSUMED AS GS BAND DEFORMATION'
+                WRITE (8,*) 'BETA (2+) ASSUMED AS GS BAND DEFORMATION'
                 WRITE (8,*)
 			    D_Def(ND_nlv,2) = beta2
 			  ELSE
 			    D_Def(ND_nlv,2) = 0.01d0
-              ENDIF
-			ELSE
+                ENDIF
+            ELSE
 			  D_Def(ND_nlv,2) = DEF(1,0)
-              WRITE (8,*) 
-              WRITE (8,*) 
-     &            ' INPUT (DEFNUC) ASSUMED AS GS BAND DEFORMATION'
-              WRITE (8,*)
-			ENDIF
+                WRITE (8,*) 
+     &  'Deformation of the gsb taken as the static deformation beta2=',
+     &          DEF(1,0) 
+                WRITE (8,*)
+            ENDIF
             gspin = xjlvr
             gspar = DBLE(lvpr)
          ENDIF
