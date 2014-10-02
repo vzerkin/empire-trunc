@@ -1,6 +1,6 @@
-!cc   * $Rev: 4141 $
+!cc   * $Rev: 4143 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-10-03 00:41:40 +0200 (Fr, 03 Okt 2014) $
+!cc   * $Date: 2014-10-03 00:46:28 +0200 (Fr, 03 Okt 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3690,11 +3690,11 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
           
             IF (.not.CN_isotropic) THEN          
               WRITE (12,
-     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.'')
-     &')
+     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.)''
+     &)')
               WRITE (8,
-     &'('' CN angular distribution calculated by ECIS as anisotropic usi
-     &ng Blatt-Biedenharn coefficients.'')')
+     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.)''
+     &)')
               IF (INTerf.EQ.0 .or. SOFt) THEN
                 WRITE (8,
      &          '('' CN and Direct cross section added incoherently'')')
