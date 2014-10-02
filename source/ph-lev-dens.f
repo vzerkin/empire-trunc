@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4123 $
+Ccc   * $Rev: 4130 $
 Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+Ccc   * $Date: 2014-10-02 21:22:46 +0200 (Do, 02 Okt 2014) $
 
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
@@ -31,7 +31,7 @@ C Local variables
 C
       DOUBLE PRECISION W
 C
-      WT = W(Ip,Ih,X)/FACt(Ip + 1)/FACt(Ih + 1)*G**In
+      WT = W(Ip,Ih,X)/FACt(Ip)/FACt(Ih)*G**In
       END
 C
 C
@@ -219,31 +219,27 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a2, s, sum, sum1, x1, z1
-      INTEGER i, ii, j1, k1, l1, m, m1
+      INTEGER i, m, m1
 C-----seems to be 7b
-      j1 = J + 1
-      x1 = X - J*B
-      l1 = L - 1
-      IF (K.LE.l1) THEN
-         k1 = K + 1
-         a1 = x1**l1
-         s = -1.
+      x1 = X - dble(J)*B
+      IF (K < L) THEN
+         a1 = x1**(L-1)
+         s = -1.D0
          sum = 0.
-         DO i = 1, J
-            ii = i - 1
+         DO i = 0, J-1
             s = -s
-            sum1 = 0.
-            a2 = (J - ii)*B
+            sum1 = 0.D0
+            a2 = dble(J - i)*B
             z1 = x1/a2
-            DO m = 1, k1
-               m1 = m - 1
+            DO m = 0, k
                z1 = z1*a2/x1
-               sum1 = sum1 + z1/FACt(J + m)/FACt(L - m1)
+
+               sum1 = sum1 + z1/FACt(J + m)/FACt(L - m - 1)
             ENDDO
             a2 = a2**J
-            sum = sum + a2/FACt(i)/FACt(j1 - ii)*sum1*s
+            sum = sum + a2/FACt(i)/FACt(j-i)*sum1*s
          ENDDO
-         W1 = sum*a1*FACt(j1)
+         W1 = sum*a1*FACt(j)
          RETURN
       ENDIF
       WRITE (50,99005) J, L, K, X
@@ -268,10 +264,9 @@ C
 C
 C Local variables
 C
-      INTEGER i, ii, j1, jl, k1
+      INTEGER i, ii, jl
       DOUBLE PRECISION s, sum, xx
 C-----looks like 7a
-      j1 = J + 1
       IF (K.EQ.0 .AND. X.EQ.0.0D0) THEN
          W2 = 0.
          RETURN
@@ -282,17 +277,15 @@ C        WRITE (8,*) 'WARNING: message from W2 J, L, K,', J, L, K
          RETURN
       ENDIF
       jl = J + L - 1
-      k1 = K + 1
-      s = -1.
-      sum = 0.
-      DO i = 1, k1
-         ii = i - 1
+      s = -1.D0
+      sum = 0.D0
+      DO i = 0, k
          s = -s
-         xx = X - ii*B
+         xx = X - dble(i)*B
          xx = xx**jl
-         sum = sum + s/FACt(i)/FACt(j1 - ii)*xx
+         sum = sum + s/FACt(i)/FACt(j-i)*xx
       ENDDO
-      W2 = sum/FACt(jl + 1)*FACt(j1)
+      W2 = sum/FACt(jl)*FACt(j)
       END
 C
 C
@@ -313,31 +306,27 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a2, s, sum, sum1, x1, z1
-      INTEGER i, ii, j1, j11, k1, m, m1
+      INTEGER i, j1, m
 C-----seems to be second part of 7c
       x1 = X - J*B
       j1 = J - 1
-      j11 = J + 1
-      k1 = K + 1
       IF (K.LE.j1) THEN
          a1 = x1**L
-         s = 1.
-         sum = 0.
-         DO i = 1, J
-            ii = i - 1
+         s = 1.D0
+         sum = 0.D0
+         DO i = 0, j1
             s = -s
-            sum1 = 0.
-            a2 = (J - ii)*B
+            sum1 = 0.D0
+            a2 = dble(J - i)*B
             z1 = a2/x1
-            DO m = 1, k1
-               m1 = m - 1
+            DO m = 0, k
                z1 = z1*x1/a2
-               sum1 = sum1 + z1/FACt(L + m)/FACt(J - m1)
+               sum1 = sum1 + z1/FACt(L + m)/FACt(J - m - 1)
             ENDDO
             a2 = a2**j1
-            sum = sum + a2/FACt(i)/FACt(j11 - ii)*s*sum1
+            sum = sum + a2/FACt(i)/FACt(J - i)*s*sum1
          ENDDO
-         W3 = sum*a1*FACt(j11)
+         W3 = sum*a1*FACt(j)
          RETURN
       ENDIF
       WRITE (50,99005) J, L, K, X
@@ -375,16 +364,14 @@ C
       IF (Ip.GE.0 .AND. Ih.GE.0 .AND. n.NE.0) THEN
          ipm = AINT(U/B)
          ipm = MIN(Ip,ipm)
-         ipm = ipm + 1
          s = -1.0
-         DO ii = 1, ipm
-            i = ii - 1
+         DO i = 0, ipm
             s = -s
             w = (U - i*B)**n
-            w = w*s/FACt(ii)/FACt(Ip - i + 1)
+            w = w*s/FACt(i)/FACt(Ip - i)
             WOBL = WOBL + w
          ENDDO
-         WOBL = WOBL*FACt(Ip + 1)
+         WOBL = WOBL*FACt(Ip)
          RETURN
       ENDIF
       WRITE (8,99005) Ip, Ih, n
@@ -507,21 +494,18 @@ C
 C
 C     calculates p-h state densities according to williams formula
 C     (without g**n/p!h! factor which is contained in omj)
-C
-C COMMON variables
-C
+
       use angular_momentum
 
-      DOUBLE PRECISION BP, E, G
-      COMMON /EB    / E, BP, G
-C
 C Dummy arguments
 C
       INTEGER N
       DOUBLE PRECISION X
+
       WILLI = 0.0
       IF (X.LT.0.D0 .OR. N.LE.0) RETURN
-      WILLI = X**(N - 1)/FACt(N)
+      WILLI = X**(N-1)/FACt(N-1)
+      return
       END
 C
 C
@@ -548,16 +532,17 @@ C
 C Local variables
 C
       DOUBLE PRECISION sig, w, xj
-      OMJ = 0.
+      OMJ = 0.D0
       IF (N.LE.0 .OR. Ip.LT.0 .OR. Ih.LT.0) RETURN
       sig = SIGnx*N
       xj = J + S
       w = (xj + 1.0)*xj/2./sig
       IF (w.GT.50.D0) RETURN
-      OMJ = 1.
-      IF (Ngs.EQ.0) OMJ = G**N/FACt(Ip + 1)/FACt(Ih + 1)
+      OMJ = 1.D0
+      IF (Ngs.EQ.0) OMJ = G**N/FACt(Ip)/FACt(Ih)
       OMJ = OMJ*(2*xj + 1.)*EXP(( - w))/4./2.50663/sig**1.5
 C     2.50663 STANDS FOR SQRT(2*PI)
+      return
       END
 C
 C
@@ -606,16 +591,15 @@ C Local variables
 C
       DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum,
      &                 t1, t2
-      DOUBLE PRECISION FCTR
       REAL FLOAT
       INTEGER i, ii, j, jj, nn
-      FCTR(n) = FACt(n + 1)
-      WOB1 = 0.
+
+      WOB1 = 0.D0
       nn = Np + Nh
-      p = FLOAT(Np)
-      h = FLOAT(Nh)
-      t1 = (G**(p + h))/FCTR(nn - 1)
-      t2 = FCTR(Np)*FCTR(Nh)
+      p = dble(Np)
+      h = dble(Nh)
+      t1 = (G**(p + h))/fact(nn - 1)
+      t2 = fact(Np)*fact(Nh)
 CIN   Alpha=(P*(P+1.)+H*(H-1.))/(2.*G)
 CIN   Aph=(P*(P+1.)+H*(H-3.))/(4.*G)
       alpha = (p*p + h*h)/(2.*G)
@@ -630,8 +614,8 @@ CIN   Aph=(P*(P+1.)+H*(H-3.))/(4.*G)
             ecor1 = X - alpha - i*B - j*F
             IF (ecor1.GT.0.) THEN
                d = ( - 1.)**(i + j)
-               cp = FCTR(Np)/(FCTR(Np - i)*FCTR(i))
-               ch = FCTR(Nh)/(FCTR(Nh - j)*FCTR(j))
+               cp = fact(Np)/(fact(Np - i)*fact(i))
+               ch = fact(Nh)/(fact(Nh - j)*fact(j))
                sum = sum + d*cp*ch*ecor**(nn - 1)/t2
             ENDIF
          ENDDO

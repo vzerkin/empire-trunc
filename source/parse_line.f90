@@ -9,7 +9,7 @@
     real*8, intent(out) :: val                      ! value
     integer*4, intent(out) :: i1,i2,i3,i4           ! modifiers
 
-    integer*4 i,m,n,ios,is(5),ie(5)
+    integer*4 i,npm,nch,ios,is(5),ie(5)
 
     parse_line = 0
     prm = ' '
@@ -22,40 +22,40 @@
     ! get the length of the line, stripped of any comments
 
     i = 1
-    m = len_trim(inline)
-    do while(i <= m)
+    nch = len_trim(inline)
+    do while(i <= nch)
         if(inline(i:i) == '!') exit
         i = i + 1
     end do
-    m = len_trim(inline(1:i-1))
-    if(m == 0) return
+    nch = len_trim(inline(1:i-1))
+    if(nch == 0) return
 
     ! now get parameter name. length max = 6 chars
 
     i = 1
-    n = min(6,m)
-    do while(i <= n)
+    npm = min(6,nch)
+    do while(i <= npm)
         if(inline(i:i) == ' ') exit
         i = i + 1
     end do
-    n = i - 1
+    npm = i - 1
 
-    prm = inline(1:n)
+    prm = inline(1:npm)
 
     ! if prm = 'GO' or rest of line blank, don't parse
 
     if(prm == 'GO    ') return
-    if(n >= m)          return
+    if(npm >= nch)      return
 
     ! parse string for parameters
 
     call parse_string
 
     read(inline(is(1):ie(1)),*,iostat=ios) val
-    i1 = intl(is(2),ie(2))
-    i2 = intl(is(3),ie(3))
-    i3 = intl(is(4),ie(4))
-    i4 = intl(is(5),ie(5))
+    i1 = intl(2)
+    i2 = intl(3)
+    i3 = intl(4)
+    i4 = intl(5)
 
     parse_line = ios   ! return final status
 
@@ -77,8 +77,8 @@
 
     ! first strip off any leading seps
 
-    ix = n + 1
-    do while(ix <= m)
+    ix = npm + 1
+    do while(ix <= nch)
         if(inline(ix:ix) /= sep) exit
         ix = ix + 1
     end do
@@ -86,12 +86,12 @@
     ! look for sub-strings containing value & optional integer parameters
 
     do i = 1,5
-        do while(ix <= m)
+        do while(ix <= nch)
             if(inline(ix:ix) /= sep) exit
             ix = ix + 1
         end do
         is(i) = ix
-        do while(ix <= m)
+        do while(ix <= nch)
             if(inline(ix:ix) == sep) exit
             ix = ix + 1
         end do
@@ -103,16 +103,15 @@
 
     !---------------------------------------------------------------------
 
-    integer*4 function intl(i1,i2)
+    integer*4 function intl(nx)
 
     implicit none
 
-    integer*4, intent(in) :: i1    ! starting character
-    integer*4, intent(in) :: i2    ! ending character
+    integer*4, intent(in) :: nx     ! substring index
 
-    ! try to convert sub-string bounded by i1:i2 to integer
+    ! try to convert sub-string nx to integer
 
-    integer*4 k,l
+    integer*4 k,l,i1,i2
     character*4 :: fmt = '(Ix)'
 
     intl = 0
@@ -120,6 +119,8 @@
 
     ! try to read the sub-string
 
+    i1 = is(nx)
+    i2 = ie(nx)
     k = i2 - i1 + 1     ! length of sub-string
 
     select case(k)
@@ -135,8 +136,8 @@
     if(ios /= 0) then
         ! on error, warn user of the problem
         write(*,'(a)')' Error parsing following line from input:'
-        write(*,'(a)') inline(1:m)
-        write(8,'(a)')' ERROR: Parsing following line from input:', inline(1:m)
+        write(*,'(a)')  inline(1:nch)
+        write(8,'(a)')' ERROR: Parsing following line from input:', inline(1:nch)
         l = 0
     endif
 

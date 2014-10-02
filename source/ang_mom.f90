@@ -1,5 +1,7 @@
     module angular_momentum
 
+    implicit none
+
     private
 
     integer*4, parameter :: mfac = 400     ! # of stored log-factorials
@@ -148,7 +150,6 @@
     !***********************************************************************
 
     implicit none
-
 
     real*8, intent(in) :: aj1,aj2,aj3,am1,am2,am3
 
