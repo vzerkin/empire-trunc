@@ -97,7 +97,7 @@ C
       ipipe_move=0
       iopsys = igetopsys() ! linux:0
       inquire(file=trim(tofile),exist=fexist)
-      if (fexist) iwin=ipipe_delete(tofile)
+      if (fexist .and. iopsys.eq.0) iwin=ipipe_delete(tofile)
       if (iopsys.eq.0) then
         ctmp='mv '//trim(fromfile)//' '//trim(tofile)
       else
