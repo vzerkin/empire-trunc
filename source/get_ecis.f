@@ -399,8 +399,12 @@ C------------End of adding inelastic to continuum
       IF (DIRect.NE.0) CLOSE (46)
 
       IF (KTRlom(0,0).GT.0 .AND. FIRst_ein .AND. DIRect.NE.0 
+     &  .AND. SINl.GT.0.0001d0) WRITE (8,*)
+     &  ' DWBA contribution added to discrete levels (XS='
+     &  , sngl(SINl), ' mb)'
+      IF (KTRlom(0,0).GT.0 .AND. FIRst_ein .AND. DIRect.NE.0 
      &  .AND. SINlcont.GT.0.0001d0) WRITE (8,*)
-     &  ' Some discrete levels are embedded into continuum (XS='
+     &  ' DWBA contribution added to the continuum   (XS='
      &  , sngl(SINlcont), ' mb)'
 
 C     totcorr = 1.d0
@@ -411,6 +415,7 @@ C     totcorr = 1.d0
       IF (KTRlom(0,0).GT.0) THEN
        IF (INT(ZEJc(0)).EQ.0 .AND. AEJc(0).GT.0) THEN
          WRITE (8,99785) TOTcs,TOTred*totcorr,TOTred*TOTcs*totcorr,
+     &     ((SINlcc + SINl)*FCCred + SINlcont*FCOred) + CSFus,
      &                   CSFus/FUSred,FUSRED,CSFus,
      &                   ELAcs, ELAred, ELAred*ELAcs 
          IF(((SINlcc + SINl)*FCCred + SINlcont*FCOred).GT.0) 
@@ -421,7 +426,9 @@ C     totcorr = 1.d0
          WRITE(8,'(/)')
        ENDIF
        IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
-         WRITE (8,99010) CSFus/FUSred,FUSRED,CSFus
+         WRITE (8,99010) 
+     &     ((SINlcc + SINl)*FCCred + SINlcont*FCOred) + CSFus, 
+     &     CSFus/FUSred,FUSRED,CSFus
          IF(((SINlcc + SINl)*FCCred + SINlcont*FCOred).GT.0) 
      &     WRITE (8,99006) SINlcc + SINl + SINlcont,
      &                  ((SINlcc + SINl)*FCCred + SINlcont*FCOred)/
@@ -524,12 +531,12 @@ C
       ENDIF
       
       RETURN
-99006    FORMAT (/,2x,
+99006 FORMAT (/,2x,
      &           'Direct cross section        :',e14.7,' mb',
-     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
-99010     FORMAT (/,2x,
-     &           'Absorption cross section    :',e14.7,' mb',
-     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
+     &           '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
+99010 FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',    
+     &        /,2x,'CN formation cross section  :',e14.7,' mb',
+     &           '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
 99015 FORMAT (/' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',/)
 99016 FORMAT (/' ',46x,'COMP. ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
@@ -554,9 +561,10 @@ C
 99040 FORMAT (' DIR.INEL',I1,1x,11(E12.6,2x))
 99041 FORMAT (' TOT.INEL',I1,1x,11(E12.6,2x))
 99785    FORMAT (/,2x,'Total cross section         :',e14.7,' mb',
-     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )',/,2x,
-     &           'Absorption cross section    :',e14.7,' mb',
-     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )',/,2x,
-     &           'Shape elastic cross section :',e14.7,' mb',
+     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )',
+     &           /,2x,'Absorption cross section    :',e14.7,' mb',    
+     &           /,2x,'CN formation cross section  :',e14.7,' mb',
+     &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb',
+     &           /,2x,'Shape elastic cross section :',e14.7,' mb',
      &                '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
       END
