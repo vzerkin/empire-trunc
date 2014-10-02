@@ -23,7 +23,7 @@ C
      &                 crossPE(0:NDEJC),crossPEt
       COMMON /PEXS/ crossNT,crossNTt,crossPE,crossPEt
 
-      DOUBLE PRECISION specBU(0:NDEJC,ndecse),crossBU(0:NDEJC),crossBUt
+      DOUBLE PRECISION specBU(0:NDEJC,NDECSE),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
 C
 C     local variables
@@ -31,7 +31,7 @@ C
       CHARACTER*21 reactionx
       INTEGER nejc,i,nnuc,jn,jz,iz,ia,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
-      DOUBLE PRECISION eps,xnub,csinel,s_factor,qout
+      DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
       DATA eps/1.d-8/
 
       DOUBLE PRECISION, external :: mu_bar, SFACTOR
@@ -266,14 +266,25 @@ C-------Printing bare OM results
         IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * OM shape elastic cross section (ELAcs)         '',G13.6,
      &              '' mb  '')') ELAcs
-        IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
-     &  '('' * OM direct inelastic cross section              '',G13.6,
-     &              '' mb  '')')
-     &        (SINl+SINlcc) + SINlcont
-                                WRITE (8,
-     &  '('' * OM CN formation cross section (ABScs)          '',G13.6,
+        WRITE (8,
+     &  '('' * OM absorption cross section (ABScs)            '',G13.6,
      &              '' mb  '')') ABScs
-
+	  IF(SINl + SINlcc + SINlcont.gt.0) then
+          IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  THEN
+            WRITE (8,
+     &  '('' * OM direct inelastic cross section  =           '',G13.6,
+     &              '' mb  '')') SINl + SINlcc + SINlcont
+            WRITE (8,
+     &  '('' * OM coupled-channels cross section         +    '',G13.6,
+     &              '' mb  '')') SINlcc
+            WRITE (8,
+     &  '('' * OM DWBA cross section to discrete levels  +    '',G13.6,
+     &              '' mb  '')') SINl 
+            WRITE (8,
+     &  '('' * OM DWBA cross section to continuum             '',G13.6,
+     &              '' mb  '')') SINlcont
+          ENDIF
+        ENDIF 
         WRITE (8,'('' *'')')
 C-------Printing scaling factors
         IF (NINT(ZEJc(0)).EQ.0 .AND. TOTred.ne.1) THEN
@@ -306,7 +317,6 @@ C-------Printing scaling factors
      &    WRITE (8,'('' * Cont.lev. DIR cross section scaled by '',
      &      G13.6)') FCOred
 
-
         if (NINT(ZEJc(0)).EQ.0) then
             DO i=1,NLV(0) ! loop over target discrete levels
             IF(CINred(i).NE.1) WRITE (8,
@@ -322,23 +332,36 @@ C-------Printing final results after including all scaling factors
      &  '('' * Total cross section                            '',G13.6,
      &              '' mb  '')') TOTcs*TOTred*totcorr
         IF (NINT(ZEJc(0)).EQ.0) WRITE (8,
-     &  '('' * Shape elastic + CN absorption + direct         '',G13.6,
+     &  '('' * Shape elastic + CN formation + direct          '',G13.6,
      &              '' mb  '')') ELAred*ELAcs + 
-C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred+
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
         IF (NINT(ZEJc(0)).EQ.0 .AND. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Shape elastic cross section                    '',G13.6,
      &              '' mb  '')') ELAred*ELAcs
-                                 WRITE (8,
-     &  '('' * CN formation corrected for direct              '',G13.6,
+        WRITE (8,
+     &  '('' * CN formation + direct cross section            '',G13.6,
      &              '' mb  '')')
-C    &        (ABScs - (SINl+SINlcc+SINlcont))*FUSred
-     &   CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
+     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
+        WRITE (8,
+     &  '('' * CN formation                                   '',G13.6,
+     &              '' mb  '')') CSFus
          IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
      &  '('' * Direct inelastic cross section                 '',G13.6,
      &              '' mb  '')')
      &        (SINl+SINlcc)*FCCred + SINlcont*FCOred
-
+         dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
+   	   IF(dtmp.gt.0) WRITE (8,
+     &  '('' * Pre-equilibrium emission cross section         '',G13.6,
+     &              '' mb  '')') dtmp
+         IF (NINT(AEJc(0)).GT.1 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
+     &  '('' * Break-up cross section                         '',G13.6,
+     &              '' mb  '')') crossBUt
+         IF (NINT(AEJc(0)).GT.1 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
+     &  '('' * Transfer cross section (pick-up/stripping)     '',G13.6,
+     &              '' mb  '')') crossNTt
+        WRITE (8,
+     &  '('' * TRUE CN formation (after dir. + preeq. emiss.) '',G13.6,
+     &              '' mb  '')') CSFus - (tothms+xsmsc+xsinl+totemis)
         IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Compound elastic cross section (CE)            '',G13.6,
      &              '' mb  '')') 4.d0*PI*ELCncs
@@ -357,10 +380,10 @@ C-------Printing final cross section balance
      &  '('' * Production cross section (incl.fission)        '',G13.6,
      &              '' mb'')')  checkXS
         WRITE (8,'('' * Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
+     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
      &    100.d0*abs(
-     &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
-     &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
+     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
+     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
@@ -386,10 +409,10 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  '(''   Fission cross section                          '',G13.6,
      &              '' mb  '')') TOTcsfis
         WRITE (*,'(''   Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
+     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
      &    100.d0*abs(
-     &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
-     &    ( CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
+     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
+     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
         IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0 .and. 
      &      ELCncs.gt.0.1d0) THEN
           WRITE (*,
@@ -399,8 +422,8 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
           WRITE (*,*)
         ENDIF
       ENDIF
-      IF(abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS)
-     &  .GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)) THEN
+      IF(   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred -checkXS)
+     &.GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)) THEN
         WRITE (8,*)
         WRITE (8,'(''  WARNING: Sum of production XS (incl.fission)'')')
         WRITE (8,'(''  WARNING: is not equal reaction cross section'')')
@@ -408,11 +431,11 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  WRITE (8,'(''  WARNING:     difference: '', F6.2,'' % at E = '',
      &  G12.5,'' MeV'')') 100.d0*
      &   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS)/
-     &           (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred),EINl
+     &      (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred),EINl
       ENDIF
       IF(TOTred*TOTcs*totcorr.gt.0.d0 .and.
      &     abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred + 
-     &     ELAred*ELAcs - TOTred*TOTcs*totcorr) .GT.
+     &         ELAred*ELAcs - TOTred*TOTcs*totcorr) .GT.
      &                0.01*TOTred*TOTcs*totcorr) THEN
         WRITE (8,*)
         WRITE (8,'(''  WARNING: Total cross section is NOT equal'')')
