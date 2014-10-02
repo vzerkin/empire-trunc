@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4108 $
+Ccc   * $Rev: 4139 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-22 01:21:33 +0200 (Mo, 22 Sep 2014) $
+Ccc   * $Date: 2014-10-03 00:10:33 +0200 (Fr, 03 Okt 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -279,7 +279,8 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
                CSFus = CSFus + POP(NEX(1),j,ip,1)
                csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
             ENDDO
-   60       ABScs=CSFus
+   60       CONTINUE
+            ABScs=CSFus
             NLW = max(NDLW,j) 
 C-----------END of spin distribution from file SDFILE
          ELSE
@@ -444,7 +445,7 @@ C--------------Saving KTRlom(0,0)
                CCCalc = .TRUE.
             ENDIF
             WRITE (8,*) 
-            IF (CCCalc) THEN
+            IF (CCCalc .and. DIRECT.NE.3) THEN
                WRITE (8,*) ' CC   calculation  for inelastic scattering'
                WRITE (8,*) '    on   coupled coll. levels'
             ENDIF
@@ -866,6 +867,7 @@ C
 C-----Save TLs, SINl
 C
 C-----Storing transmission coefficients for the incident channel
+C     write(*,*) ABScs,CSFus  
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
@@ -1133,7 +1135,6 @@ C                 IF(stlj(k,jindex)<=1.0d-15) CYCLE
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
           ENDDO
         ENDDO
-        ABScs = CSFus
 
 	ELSE
 C
@@ -1162,27 +1163,22 @@ C-------absorption spin distribution using Tl's
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
           ENDDO
         ENDDO
-        ABScs = CSFus
 
 	ENDIF
 C	write (*,*) '*** CSFus =',CSFus
 
-C     IF (ldbwacalc .AND. CSFus.GT.0 .AND. 
-      IF (                CSFus.GT.0 .AND. 
-     &   (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
-         IF (DIRect.EQ.3) THEN
-            WRITE (8,*) ' SOMP TLs normalized to substract DWBA contribu
-     &tion to collective levels'
-         ELSE
+      IF (CSFus.GT.0 .AND. (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
+         IF (DIRect.LE.2) THEN
 C-----------DIRECT=1 or DIRECT=2
             WRITE (8,*) ' CC OMP TLs normalized to substract DWBA contri
-     &bution to collective levels'
+     &tion from collective levels'
          ENDIF
       ENDIF
 
       IF (IOUt.EQ.5) THEN
         WRITE (8,*) 
-	  IF(FUSred.ne.1.d0) WRITE (8,*) '        FUSred is considered'
+	  IF(FUSred.ne.1.d0) 
+     &    WRITE (8,*) '        FUSred is NOT considered below'
         WRITE (8,*) 
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
         WRITE (8,'(4x,3(4x,D15.8,4x))')
@@ -1668,7 +1664,6 @@ C Local variables
 C
       CHARACTER*132 ctmp
       INTEGER iwin, ipipe_move 
-
       ctmp = Outname(1:Length)//'.CS'
       iwin = ipipe_move('ecis06.cs',ctmp)
       IF(ICAlangs.GT.0) THEN
