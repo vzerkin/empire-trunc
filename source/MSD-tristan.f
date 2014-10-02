@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4123 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+Ccc   * $Rev: 4133 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-02 23:50:00 +0200 (Do, 02 Okt 2014) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3010,15 +3010,7 @@ C-----if ECIS active use only continuum part of the MSD spectrum
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
-C
-C     DO ne = 1, nmax
-C       DO na = 1, 3
-C          Eliminating the first three angles for continuity
-C          Small error introduced, DIRTY PATCH, RCN, July 2012  
-C          CSEa(ne,na,nej,1) = CSEa(ne,4,nej,1) 
-C       ENDDO
-C     ENDDO
-C
+
       WRITE(8,*) ' '
       WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
      &   nmax
