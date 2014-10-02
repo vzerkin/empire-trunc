@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4129 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-10-01 22:54:35 +0200 (Mi, 01 Okt 2014) $
+Ccc   * $Rev: 4135 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-02 23:53:29 +0200 (Do, 02 Okt 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -263,8 +263,8 @@ C
       crossaftertrans = 0.d0
       crossafterbreak = 0.d0
 
-      IF(AEJc(0).LT.2 .or. ((.not.ltransfer) .and. (.not.lbreakup))) 
-     &  GOTO 9  
+      IF(AEJc(0).LT.2 .or. AEJc(0).GT.4 .or. 
+     & ((.not.ltransfer) .and. (.not.lbreakup))) GOTO 9  
 C
       culbar = 0.8*ZEJc(0)*Z(0)*ELE2
      &         /(1.3d0*(AEJc(0)**0.3333334 + A(0)**0.3333334))
