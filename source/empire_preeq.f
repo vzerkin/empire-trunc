@@ -27,7 +27,7 @@ C     COMMON variables
      &                 crossPE(0:NDEJC),crossPEt
       COMMON /PEXS/ crossNT,crossNTt,crossPE,crossPEt
 
-      DOUBLE PRECISION specBU(0:NDEJC,ndecse),crossBU(0:NDEJC),crossBUt
+      DOUBLE PRECISION specBU(0:NDEJC,NDECSE),crossBU(0:NDEJC),crossBUt
       COMMON /CBREAKUP/specBU,crossBU,crossBUt
 
       CHARACTER*3 ctldir
@@ -293,39 +293,60 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &        + crossBUt + crossNTt
          IF (DIRect.EQ.0) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &      'Non-elastic cross section      ',
-     &      sngl(CSFus),' mb'
+     &       'Absorption cross section        ',
+     &       sngl(CSFus+crossBUt+crossNTt),' mb'
             WRITE (8,*) ' '
+            if(lbreakup) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Break-up contribution          ',
+     &        crossBUt,' mb', crossBUt/ftmp*100,' %'
+            if(ltransfer) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Transfer contribution          ',
+     &        crossNTt,' mb', crossNTt/ftmp*100,' %'
          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &       'Non-elastic cross section      ', ftmp,' mb'
+     &       'Absorption cross section        ',
+     &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
+     &           SINlcont*FCOred + crossBUt + crossNTt),' mb'
             WRITE (8,*) ' '
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &       'CC inelastic to discrete levels',
      &        SINlcc*FCCred,' mb', SINlcc*FCCred/ftmp*100,' %'
-
-            WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &       'DWBA inel to discrete levels   ',
      &        SINl*FCCred,' mb', SINl*FCCred/ftmp*100,' %'
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &       'DWBA to continuum              ',
+     &       'DWBA inel to continuum         ',
      &        SINlcont*FCOred,' mb', SINlcont*FCOred/ftmp*100,' %'
-            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &       'Break-up                       ',
+            if(lbreakup) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Break-up contribution          ',
      &        crossBUt,' mb', crossBUt/ftmp*100,' %'
+            if(ltransfer) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Transfer contribution          ',
+     &        crossNTt,' mb', crossNTt/ftmp*100,' %'
          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &       'Non-elastic cross section      ', ftmp,' mb'
+     &       'Absorption cross section        ',
+     &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
+     &           SINlcont*FCOred + crossBUt + crossNTt),' mb'
             WRITE (8,*) ' '
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &       'DWBA inel to discrete levels   ',
      &        SINl*FCCred,' mb', SINl*FCCred/ftmp*100,' %'
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &       'DWBA to continuum              ',
+     &       'DWBA inel to continuum         ',
      &        SINlcont*FCOred,' mb', SINlcont*FCOred/ftmp*100,' %'
-            if(lbreakup) WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &       'Break-up                       ',
-     &       crossBUt,' mb', crossBUt/ftmp*100,' %'
+            if(lbreakup) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Break-up contribution          ',
+     &        crossBUt,' mb', crossBUt/ftmp*100,' %'
+            if(ltransfer) 
+     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &        'Transfer contribution          ',
+     &        crossNTt,' mb', crossNTt/ftmp*100,' %'
          ENDIF
          dtmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred 
      >        + crossBUt + crossNTt
@@ -340,20 +361,12 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &      xsmsc,' mb', xsmsc/ftmp*100,' %'
          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'PCROSS contribution            ',
-     &      totemis,' mb', totemis/ftmp*100,' %'
+     &      totemis-crossBUt-crossNTt,' mb', totemis/ftmp*100,' %'
          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     'HMS contribution               ',
      &      tothms,' mb',tothms/ftmp*100,' %'
-         if(lbreakup) 
-     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &      'Break-up contribution          ',
-     &       crossBUt,' mb', crossBUt/ftmp*100,' %'
-         if(ltransfer) 
-     &     WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &      'Transfer contribution          ',
-     &       crossNTt,' mb', crossNTt/ftmp*100,' %'
 
-         dtmp = tothms + totemis + xsmsc + xsinl + crossBUt + crossNTt
+         dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
 
          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     '(Total pre-equilibrium)        ',
@@ -364,6 +377,8 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
          WRITE (8,'(2x,A32,F9.2,A3)') 
      &     'CN formation cross section     ',
      &      CSFus*corrmsd - tothms - xsmsc,' mb'
+         WRITE (8,'(2x,A32)') 
+     &     '(after Direct & PE emission)   '
          WRITE (8,*) ' '
       ENDIF
 
