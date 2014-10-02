@@ -1,6 +1,6 @@
-!cc   * $Rev: 4110 $
-!cc   * $Author: shoblit $
-!cc   * $Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
+!cc   * $Rev: 4132 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-10-02 23:48:59 +0200 (Do, 02 Okt 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -346,7 +346,7 @@ C        IOPran = -1 ! Uniform 1 sigma error
          IPArcov= 0  ! Counter of sampled parameters  
 C--------Relativistic kinematics
          RELkin = .FALSE.
-         INTerf = 1 ! Engelbrecht-Weidenmuller transformation used by default
+         INTerf = 0 ! Engelbrecht-Weidenmuller transformation not used by default
 C--------Maximum energy to assume all levels are collective for DWBA calculations
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
@@ -1254,14 +1254,24 @@ C
             WRITE (8,*) ' WARNING!!!! HI reactions)'
             WRITE (8,*) ' '
          ENDIF
+         IF (CNAngd.NE.0 .and. LHRtw.EQ.0) THEN
+            LHRtw = 1
+            EHRtw = EIN + 0.5d0
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING: HRTW has been turned on to calculate'
+            WRITE (8,*) ' WARNING:     anisotropic angular distribution'
+            WRITE (8,*) ' '
+         ENDIF
          IF (LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
             LHRtw = 0
+            EHRtw = 0.d0
             WRITE (8,*) ' '
             WRITE (8,*) ' WARNING!!!! HRTW has been turned off '
             WRITE (8,*) ' WARNING!!!! (It is not allowed for '
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
             WRITE (8,*) ' '
          ENDIF
+
          IF (EMAx_tlj.LT.EHRtw) EMAx_tlj = EHRtw
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
@@ -5998,8 +6008,6 @@ C-----
      &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
               WRITE (12,'('' Tlj coupling for the top CN bin '',
      &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
-            ELSE
-               EMAx_tlj = EHRtw
             ENDIF
             GOTO 100
          ENDIF
@@ -8345,12 +8353,12 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-            IF (val.NE.0.d0) INTerf = 1
-            IF (INTerf.eq.0) 
-     &        WRITE (8,'('' CN-direct interference neglected'')')
-            IF (INTerf.eq.1) 
-     &        WRITE (8,'('' CN-direct interference by Engelbrecht - Weid
-     &enmuller transformation Phys.Rev. C8(1973)859-862 '')')
+C           IF (val.NE.0.d0) INTerf = 1
+            WRITE (8,'('' CN-direct interference NOT IMPLEMENTED'')')
+C           IF (INTerf.eq.0) 
+C    &        WRITE (8,'('' CN-direct interference neglected'')')
+C           IF (INTerf.eq.1) 
+C    &        WRITE (8,'('' CN-direct interference considered'')')
             GOTO 100
          ENDIF
 
