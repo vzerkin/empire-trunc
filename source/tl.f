@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4118 $
+$DEBUG
+Ccc   * $Rev: 4140 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-29 02:25:37 +0200 (Mo, 29 Sep 2014) $
+Ccc   * $Date: 2014-10-03 00:11:44 +0200 (Fr, 03 Okt 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2552,7 +2553,10 @@ C             therefore the ECIS input is always constructed assuming spin 0
 C             So we can not use the real spin of the given nucleus XJLv(1, Nnuc)
 C
 C     OUTPUT: Maxlw and Stl(1:Maxlw+1) are the maximum angular momentum and Tls
-C             SINl is the total inelastic cross section
+C             SINl     is the inelastic cross section to the uncoupled discrete levels
+C             SINlcc   is the inelastic cross section to the coupled discrete levels
+C             SINlcont is the inelastic cross section to the quasi-discrete levels (in the continuum)
+C             SINl, SINlcc, SINlcc are excluded from the Stl() and Stlj() transmission coefficients
 C             Selast is the shape elastic cross section
 C             Sel(L) contains the shape elastic cross section for a given orbital momentum L
 C             Stl(L) contains the transmission coefficient Tl(L) for a given orbital momentum L
@@ -2761,14 +2765,14 @@ C
       sabs  = 0.D0
       sabsj = 0.D0
       selast= 0.D0
-C-----Absorption and elastic cross sections in mb using TUNetl() if needed
+C-----Applying TUNetl() to the transmission coefficients
       DO l = 0, Maxlw
          Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)
          DO jindex = 1,MAXj(Nejc)
            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)
          ENDDO
       ENDDO
-
+C-----Absorption and elastic cross sections in mb are calculated
       DO l = 0, Maxlw
         sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         selast = selast + Sel(l + 1)*DBLE(2*l + 1)
@@ -2804,44 +2808,80 @@ C             Uncoupled discrete levels
 C          Scattering into continuum
            SINlcont = SINlcont + dtmp
          ENDIF
+
       ENDDO
   400 CLOSE (45)
 
-      IF (abs(xsabs + SINlcc - ABScs).gt.0.05*ABScs) THEN ! 5% difference check
+      ftmp = 0.d0
+	if(DIRECT.EQ.3) ftmp = SINl + SINlcont
+C
+C     5% difference check
+      IF (abs(xsabs + SINlcc + ftmp - ABScs).gt.0.05*ABScs) THEN 
          WRITE (8,*)
          WRITE (8,*)
      &     ' WARNING: ECIS ABScs absorption cross section ',ABScs
          WRITE (8,*)
      &     ' WARNING: Calc. sabs absorption cross section ',xsabs
-         WRITE (8,*) ' WARNING: sabs + SINlcc < ECIS ABS'
+         WRITE (8,*) ' WARNING: sabs + direct < ECIS ABS'
          WRITE (8,*) ' WARNING: You may need to increase NDLW !!!'
          write (8,*) ' Lmax',Maxlw
          write (8,*) ' Calc. Sabs                  =',sngl(xsabs)
-         write (8,*) ' ECIS  fusion (ABScs-SINlcc) = ',
-     &                   sngl(ABScs-SINlcc)
-         write (8,*) ' Calc. SINlcc =',sngl(SINlcc)
-         write (8,*) ' ECIS  ABScs  =',sngl(ABScs)
+         write (8,*) ' ECIS  fusion (ABScs-direct) = ',
+     &                   sngl(ABScs-SINlcc-ftmp)
+         write (8,*) ' Calc. direct  =',sngl(SINlcont+SINl+SINlcc)
+         write (8,*) ' Calc. SINlcc  =',sngl(SINlcc)
+         write (8,*) ' Calc. SINl    =',sngl(SINl)
+         write (8,*) ' Calc. SINlcont=',sngl(SINlcont)
+         write (8,*) ' ECIS  ABScs   =',sngl(ABScs)
          WRITE (8,*)
       ENDIF
 
-C     RENORMALIZING TLs and TLJs and TUNING Tl(L)      
-C     sabs  = 0.D0
-C     sabsj = 0.D0
-	ftmp = ABScs/(xsabs+SINlcc)
+C     RENORMALIZING TLs and TLJs to correct for small differences 
+C     between ABScs and sum(Tls) corrected for direct
+C
+C     ABScs is the OMP calculated absorption
+C     xsabs is the cross section calculated as a sum over Tls (Tljs)
+C     SINlcc   is the coupled channels' cross section
+C     SINl     is the uncoupled channels' cross section
+C     SINlcont is the uncoupled channels' cross section to the continuum
+      dtmp = (ABScs -SINlcc -ftmp)/xsabs
+	sabs = 0.d0
+      sabsj = 0.D0
       DO l = 0, Maxlw
-        Stl(l + 1) = Stl(l + 1)*ftmp ! *TUNetl(l + 1)
-C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+        Stl(l + 1) = Stl(l + 1)*dtmp 
+        sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
         DO jindex = 1,MAXj(Nejc)
-          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*ftmp ! *TUNetl(l + 1)
-C         jsp = sjf(l,jindex,SEJc(Nejc)) 
-C         sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
+          jsp = sjf(l,jindex,SEJc(Nejc)) 
+          sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
         ENDDO
       ENDDO
-C     xsabs  = coeff*sabs
-C     xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
-C
-C     write(*,*) sngl(xsabs),sngl(xsabsj),sngl(ABScs)
-C
+      xsabs  = coeff*sabs
+      xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
+
+      if(abs(1.d0-dtmp).gt.0.00001d0) then
+        WRITE (8,
+     &'(1x,'' WARNING: Transmission coefficients renormalized to elimina
+     &te small'',/,1x,'' WARNING:    differences to OMP cross section by
+     & a factor '',F9.6/
+     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: CN formation + Direct                           =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
+     &,F8.2,'' mb''/)') 
+     &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+     &    xsabs+SINlcc+ftmp, ABScs 
+      ENDIF
+
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
 C
 C     ECIS convergence check
@@ -2852,7 +2892,7 @@ C
      &     ' ERROR: Coupled channel calculation does not converge '
          WRITE (8,'(
      &1x, '' ERROR: Coupled-channels cross section ='',F8.2,'' mb''/
-     &1x, '' ERROR: ECIS absorption cross section  ='',F8.2,'' mb''/)') 
+     &1x, '' ERROR: OM absorption cross section    ='',F8.2,'' mb''/)') 
      &   SINlcc, ABScs
          WRITE (8,*)
      &    ' ERROR: Change the selected OMP or coupled-level scheme !! '
@@ -2873,8 +2913,8 @@ C
      &  F8.2,'' mb''/
      &1x,'' ERROR: DWBA cross section to uncoupled discrete levels ='',
      &  F8.2,'' mb''/
-     &1x,'' ERROR: CN formation cross section ='',F8.2,'' mb''/)') 
-     &   SINlcc, SINl, ABScs-SINlcc-SINl
+     &1x,'' ERROR: OM absorption cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, SINl, ABScs
          WRITE (8,*)
      &' ERROR: EDIT the collective level file to decrease dynamical defo
      &rmations of uncoupled DWBA levels'
@@ -2896,8 +2936,8 @@ C
      &  F8.2,'' mb''/
      &1x,'' ERROR: DWBA cross section to the continuum             ='',
      &  F8.2,'' mb''/
-     &1x,'' ERROR: CN formation cross section ='',F8.2,'' mb''/)') 
-     &   SINlcc, SINlcont, ABScs-SINlcc
+     &1x,'' ERROR: OM absorption cross section ='',F8.2,'' mb''/)') 
+     &   SINlcc, SINlcont, ABScs
          WRITE (8,*)
      &' ERROR: EDIT the collective level file to decrease dynamical defo
      &rmations of DWBA levels in the continuum'
@@ -2909,8 +2949,8 @@ C
 C
 C     Absorption cross section includes inelastic scattering cross section
 C     to coupled levels, but not DWBA to uncoupled levels (This is an ECIS double check)
-C
-      sreac = xsabs  + SINlcc   
+C         (except for DIRECT=3)
+      sreac = xsabs  + SINlcc  + ftmp
 
       IF (IOUt.EQ.5) THEN
          WRITE (8,*)
@@ -2951,11 +2991,12 @@ C    &               SNGL(selast), ' mb '
 
       ENDIF
 C
-C-----Renormalizing TLs 
+C-----Renormalizing TLs and Tljs
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
-C     continuum included
+C     continuum included ij the reaction cross section if DIRECT<=2
 C
-      IF( xsabs.gt.0.d0 .and. xsabs.GT.(SINl+SINlcont) ) THEN 
+      IF( DIRECT.LE.2 .and. xsabs.gt.0.d0 .and. 
+     &                      xsabs.GT.(SINl+SINlcont) ) THEN 
         dtmp = 0.d0
         ftmp = 0.d0
         snorm = (xsabs - SINl -SINlcont)/xsabs
@@ -2973,27 +3014,26 @@ C
 
         CSFus = dtmp         
 
-        WRITE (8,
-     &'(1x,'' WARNING: Transmission coefficients renormalized to account
-     & for DWBA calculated cross sections '', F8.5/
+        WRITE (8,'(1x,
+     &  '' WARNING: Transmission coefficients renormalized to account''/
+     &1x,'' WARNING:        for DWBA calc. cross sections by a factor '' 
+     &,F9.6/
      &1x,'' WARNING: CC cross section to coupled discrete levels     =''
      &,F8.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
      &,F8.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
      &,F8.2,'' mb''/
-     &1x,'' WARNING: CN formation cross section (Sum over Stlj)      =''
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
      &,F8.2,'' mb''/ 
-     &1x,'' WARNING: CN formation cross section (Sum over Stl )      =''
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
      &,F8.2,'' mb''/ 
      &1x,'' WARNING: CN formation + Direct                           =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: Reaction cross section corrected by direct      =''
      &,F8.2,'' mb''/ 
      &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
      &,F8.2,'' mb''/)') 
      &    snorm, SINlcc, SINl, SINlcont, 
-     &    ftmp, dtmp, ftmp+SINlcc+SINl+SINlcont, xsabs + SINlcc, ABScs 
+     &    ftmp, dtmp, dtmp+SINlcc+SINl+SINlcont, ABScs 
 
       ENDIF 
     
@@ -3433,7 +3473,13 @@ C        ECIs2(40:40) = 'T'
 C
 C     saving the input value of the key CN_isotropic
       logtmp = CN_isotropic
-
+C
+C     Uncomment the lines below to calculate ECIS CN including 
+C     the Engelcbrecht-Weidenmuller transformation
+C
+C     CN_isotropic = .FALSE.
+C     INTerf = 1
+C
       IF (El.LT.0.D0) THEN
          inc_channel = .true.
          El = DABS( - El)
@@ -4397,6 +4443,13 @@ C        ECIs2(40:40) = 'T'
 C
 C     saving the input value of the key CN_isotropic
       logtmp = CN_isotropic
+
+C
+C     Uncomment the lines below to calculate ECIS CN including 
+C     the Engelcbrecht-Weidenmuller transformation
+C
+C     CN_isotropic = .FALSE.
+C     INTerf = 1
 C
 C-----From cms system to Lab (ECIS do inverse convertion)
       IF (El.LT.0.D0) THEN
