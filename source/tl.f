@@ -1,7 +1,7 @@
-$DEBUG
-Ccc   * $Rev: 4140 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-03 00:11:44 +0200 (Fr, 03 Okt 2014) $
+c$DEBUG
+Ccc   * $Rev: 4144 $
+Ccc   * $Author: dbrown $
+Ccc   * $Date: 2014-10-03 21:13:06 +0200 (Fr, 03 Okt 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
