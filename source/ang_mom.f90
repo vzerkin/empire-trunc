@@ -466,7 +466,11 @@
 
     integer*4, intent(in) :: l     ! ang mom
 
-    parity = 1 - 2*abs(mod(l,2))
+    if(btest(l,0)) then
+        parity = -1
+    else
+        parity = 1
+    endif
 
     return
     end function parity
@@ -481,7 +485,11 @@
 
     integer*4, intent(in) :: l     ! ang mom
 
-    paritx = dble(1 - 2*abs(mod(l,2)))
+    if(btest(l,0)) then
+        paritx = -1.D0
+    else
+        paritx = 1.D0
+    endif
 
     return
     end function paritx
