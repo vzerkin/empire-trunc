@@ -67,13 +67,16 @@ C-----
             WRITE (8,'(11x,'' Total spectra (~LAB) '')')
             WRITE (8,'(11x,''**********************'')')
             DO nejc = 0, NEJcm
-              csemax = 0.d0
-              ftmp = 0.d0
-              DO i = 1, NDEX
+         
+              csemax = DMAX1(CSEt(1,nejc),0.d0)
+              ftmp = CSEt(1,nejc)
+              dtmp = 0.d0
+              DO i = 2, NDEX
                 csemax = DMAX1(CSEt(i,nejc),csemax)
-                ftmp   = ftmp + CSEt(i,nejc)
+                dtmp   = dtmp + CSEt(i,nejc)
               ENDDO
-              if(csemax.le.0.01d0 .or. ftmp.le.0.0001d0) cycle 
+              if(csemax.le.0.01d0 .or. dtmp.le.0.0001d0) cycle 
+              dtmp   = dtmp + ftmp
 
               CALL Print_Total(nejc)
               CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
