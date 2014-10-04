@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4130 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-10-02 21:22:46 +0200 (Do, 02 Okt 2014) $
+Ccc   * $Rev: 4148 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-05 00:06:30 +0200 (So, 05 Okt 2014) $
 
 C
       DOUBLE PRECISION FUNCTION WT(In,Ip,Ih,X)
@@ -219,7 +219,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION a1, a2, s, sum, sum1, x1, z1
-      INTEGER i, m, m1
+      INTEGER i, m
 C-----seems to be 7b
       x1 = X - dble(J)*B
       IF (K < L) THEN
@@ -264,7 +264,7 @@ C
 C
 C Local variables
 C
-      INTEGER i, ii, jl
+      INTEGER i, jl
       DOUBLE PRECISION s, sum, xx
 C-----looks like 7a
       IF (K.EQ.0 .AND. X.EQ.0.0D0) THEN
@@ -286,6 +286,7 @@ C        WRITE (8,*) 'WARNING: message from W2 J, L, K,', J, L, K
          sum = sum + s/FACt(i)/FACt(j-i)*xx
       ENDDO
       W2 = sum/FACt(jl)*FACt(j)
+      RETURN
       END
 C
 C
@@ -356,7 +357,7 @@ C
 C
 C Local variables
 C
-      INTEGER i, ii, ipm, n
+      INTEGER i, ipm, n
       DOUBLE PRECISION s, w
       WOBL = 0.0
       IF (U.LE.0.0D0) RETURN
@@ -377,6 +378,7 @@ C
       WRITE (8,99005) Ip, Ih, n
 99005 FORMAT (1X,/1X,' ERROR IN WOBL CALL P=',I2,'  H=',I2,'  N=',I2,
      &        '    WOBL=0.0 RETURNED',/)
+      RETURN
       END
 C
 C
@@ -591,7 +593,6 @@ C Local variables
 C
       DOUBLE PRECISION alpha, aph, ch, cp, d, ecor, ecor1, h, p, sum,
      &                 t1, t2
-      REAL FLOAT
       INTEGER i, ii, j, jj, nn
 
       WOB1 = 0.D0
@@ -621,6 +622,7 @@ CIN   Aph=(P*(P+1.)+H*(H-3.))/(4.*G)
          ENDDO
       ENDDO
       WOB1 = t1*sum
+      RETURN
       END
 
 
