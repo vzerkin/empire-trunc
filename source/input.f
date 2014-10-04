@@ -1,6 +1,6 @@
-!cc   * $Rev: 4143 $
+!cc   * $Rev: 4146 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-10-03 00:46:28 +0200 (Fr, 03 Okt 2014) $
+!cc   * $Date: 2014-10-04 23:38:20 +0200 (Sa, 04 Okt 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -9656,7 +9656,7 @@ C        CCFUS deformations
          BETcc(iccfus) = beta2
          FLAm(iccfus) = 2
          QCC(iccfus) = -27.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (2+) =',beta2
       ENDIF
@@ -9674,7 +9674,7 @@ C        CCFUS deformations
          BETcc(iccfus) = beta3
          FLAm(iccfus) = 3
          QCC(iccfus) = -50.D0/ia**(2.d0/3.d0)
-         WRITE (8,'(1x,A41,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &   'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &           'BETA (3-) =',beta3
       ENDIF
@@ -10536,13 +10536,13 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,*) ' WARNING: ',
      &    'E(2+) level not found in Raman 2001 database (RIPL)'
          call defcal(iz,ia,beta2,ftmp)
-         WRITE (8,'(A40,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (2+) =',beta2
          WRITE (8,'(A)') ' Nobre et al systematics used for dynamical de 
      &formations: Phys.Rev.C76(2007)024605' 
       ELSE
-         WRITE (8,'(A40,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (2+) =',beta2
       ENDIF
@@ -10554,11 +10554,11 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
          WRITE (8,'(A)') ' Nobre et al systematics used for dynamical de 
      &formations: Phys.Rev.C76(2007)024605' 
          call defcal(iz,ia,ftmp,beta3)
-         WRITE (8,'(A40,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
      &      'BETA (3-) =',beta3
       ELSE
-         WRITE (8,'(A40,1x,A11,F7.3)')
+         WRITE (8,'(1x,A40,1x,A11,F7.3)')
      &      'TARGET EXPERIMENTAL DEFORMATION (RIPL):', 
      &      'BETA (3-) =',beta3
       ENDIF
@@ -10614,7 +10614,7 @@ C
 
             IF (DEF(1,0).le.1.d-3) THEN
 			  IF(beta2.GT.0.D0) THEN
-                WRITE (8,*) 'BETA (2+) ASSUMED AS GS BAND DEFORMATION'
+                WRITE (8,*)'DEFAULT TARGET DYNAM. DEFORMATION beta(2+)='
                 WRITE (8,*)
 			    D_Def(ND_nlv,2) = beta2
 			  ELSE
@@ -10623,7 +10623,7 @@ C
             ELSE
 			  D_Def(ND_nlv,2) = DEF(1,0)
                 WRITE (8,*) 
-     &  'Deformation of the gsb taken as the static deformation beta2=',
+     &  'TARGET DYNAM. DEFORMATION taken from the INPUT beta(2+)=',
      &          DEF(1,0) 
                 WRITE (8,*)
             ENDIF

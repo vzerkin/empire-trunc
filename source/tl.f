@@ -1,7 +1,6 @@
-c$DEBUG
-Ccc   * $Rev: 4144 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2014-10-03 21:13:06 +0200 (Fr, 03 Okt 2014) $
+Ccc   * $Rev: 4146 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-10-04 23:38:20 +0200 (Sa, 04 Okt 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -2995,26 +2994,33 @@ C-----Renormalizing TLs and Tljs
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
 C     continuum included ij the reaction cross section if DIRECT<=2
 C
+
       IF( DIRECT.LE.2 .and. xsabs.gt.0.d0 .and. 
      &                      xsabs.GT.(SINl+SINlcont) ) THEN 
+
+        CSFus = xsabs
+
         dtmp = 0.d0
         ftmp = 0.d0
+
         snorm = (xsabs - SINl -SINlcont)/xsabs
-        DO l = 0, Maxlw
-          Stl(l + 1) = Stl(l + 1)*snorm
-          dtmp   = dtmp + DBLE(2*l + 1)*Stl(l + 1)
-          DO jindex = 1, MAXj(Nejc) 
-            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm
-            jsp = sjf(l,jindex,SEJc(Nejc)) 
-            ftmp   = ftmp + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-          ENDDO 
-        ENDDO
-        dtmp = coeff*dtmp
-        ftmp = coeff*ftmp/DBLE(2*SEJc(Nejc) + 1)
 
-        CSFus = dtmp         
+        IF(dabs(1.d0-snorm).gt.1.d-5) then
+          DO l = 0, Maxlw
+            Stl(l + 1) = Stl(l + 1)*snorm
+            dtmp   = dtmp + DBLE(2*l + 1)*Stl(l + 1)
+            DO jindex = 1, MAXj(Nejc) 
+              Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm
+              jsp = sjf(l,jindex,SEJc(Nejc)) 
+              ftmp   = ftmp + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+            ENDDO 
+          ENDDO
+          dtmp = coeff*dtmp
+          ftmp = coeff*ftmp/DBLE(2*SEJc(Nejc) + 1)
 
-        WRITE (8,'(1x,
+          CSFus = dtmp         
+
+          WRITE (8,'(/1x,
      &  '' WARNING: Transmission coefficients renormalized to account''/
      &1x,'' WARNING:        for DWBA calc. cross sections by a factor '' 
      &,F9.6/
@@ -3034,6 +3040,8 @@ C
      &,F8.2,'' mb''/)') 
      &    snorm, SINlcc, SINl, SINlcont, 
      &    ftmp, dtmp, dtmp+SINlcc+SINl+SINlcont, ABScs 
+
+        ENDIF
 
       ENDIF 
     
@@ -3582,7 +3590,8 @@ C              IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
 C             nd_cons = nd_cons + 1   
 C           ENDIF
 C        ENDDO
-         IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1)
+         IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1 
+     &                  .AND. (.not.TL_calc) )
      &       WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
 
@@ -4528,7 +4537,7 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
          ENDDO
       ENDIF
-      IF (nd_nlvop.EQ.1) WRITE (8,*)
+      IF (nd_nlvop.EQ.1 .AND. (.not.TL_calc) ) WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
@@ -5335,7 +5344,7 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
             IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
          ENDDO
       ENDIF
-      IF (nd_nlvop.EQ.1) WRITE (8,*)
+      IF (nd_nlvop.EQ.1 .AND. (.not.TL_calc) ) WRITE (8,*)
      &               ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
@@ -5544,6 +5553,10 @@ C    *                 NNO(I),NCA(I),I=1,NUR)
 C  43 FORMAT(E12.7,7I2)
             do k=1,ND_nlv
               IF(ICOllev(k).GT.LEVcc) CYCLE
+C             WRITE(*,*) ' Ecoll     level #',
+C    &             ICOllev(k),sngl(D_Elv(k))
+C             WRITE(*,*) ' Ediscrete level #', 
+C    &             ICOller(k),sngl(ELV(ICOller(k),2))
               iparit = -1
               if(D_Lvp(k).gt.0.d0) iparit = +1
               write(1,'(E12.5,6I2)') 
@@ -5654,6 +5667,8 @@ C     OPTMAN input done !
 C
 C-----Running OPTMAN
 C
+C     STOP 'Before optman' 
+
       IF(inc_channel) write (*,*) '  Running OPTMAN ..zz..'
 
       ctmp = trim(empiredir)//'/source/optmand'

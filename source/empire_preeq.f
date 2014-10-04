@@ -293,12 +293,12 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &        + crossBUt + crossNTt
          IF (DIRect.EQ.0) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &       'Absorption cross section        ',
-     &       sngl(CSFus+crossBUt+crossNTt),' mb'
+     &      'Absorption cross section        ',
+     &      sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred),' mb'
             WRITE (8,*) ' '
             if(lbreakup) 
-     &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &        'Break-up contribution          ',
+     &      WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'Break-up contribution          ',
      &        crossBUt,' mb', crossBUt/ftmp*100,' %'
             if(ltransfer) 
      &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
@@ -308,7 +308,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &       'Absorption cross section        ',
      &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
-     &           SINlcont*FCOred + crossBUt + crossNTt),' mb'
+     &           SINlcont*FCOred),' mb'
             WRITE (8,*) ' '
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &       'CC inelastic to discrete levels',
@@ -331,7 +331,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &       'Absorption cross section        ',
      &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
-     &           SINlcont*FCOred + crossBUt + crossNTt),' mb'
+     &           SINlcont*FCOred),' mb'
             WRITE (8,*) ' '
             WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &       'DWBA inel to discrete levels   ',
@@ -384,6 +384,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
 
       IF (IOUt.GE.3 
      &    .AND. (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
+     &                       + CSHms (1,1) + CSHms (2,1) 
      &                       + CSEmis(3,1) + CSEmis(4,1)
      &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
      &    ) THEN
@@ -392,8 +393,8 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*)
      &                ' Preequilibrium + Direct spectra (tot)'
           IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,1)
-          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,1)
-          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,1)
+          IF(CSEmis(1,1).GT.0 .OR. CSHms (1,1).GT.0) CALL AUERST(1,1,1)
+          IF(CSEmis(2,1).GT.0 .OR. CSHms (2,1).GT.0) CALL AUERST(1,2,1)
           IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,1)
           IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,1)
           IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,1)

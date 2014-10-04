@@ -21,7 +21,7 @@ C     COMMON variables
 
 C     Local variables
       INTEGER isigma0, irec, iang, iang1, nspec,  
-     & i, ilv, itmp, icsl, icsh, ncon, isigma, isigma2, ie,
+     & i, ilv, icsl, icsh, ncon, isigma, isigma2, ie,
      & imint, imaxt, j, its, iloc      
       DOUBLE PRECISION ecm, angstep, gang, ftmp, ggmr, ggqr, ggor,
      & xcse, popread, popl, poph, csum, echannel,  
@@ -106,7 +106,7 @@ C---------Get and add inelastic cross sections (including double-differential)
 
            IF(ilv.le.0) then
              WRITE(8,*) ' WARNING: Collective level #',ICOllev(i),
-     &                  ' has wrong number, skipped'
+     &        ' has wrong number, skipped, Ecoll=',sngl(D_Elv(i))
              CYCLE                
            ENDIF
 
@@ -117,40 +117,21 @@ C---------Get and add inelastic cross sections (including double-differential)
 
              IF(ICOller(i).GT.40) then
                WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
-     &                  ' has wrong number (bigger than 40)'
+     &             ' has wrong number (> 40), Ecoll=',sngl(D_Elv(i))
                ilv = 40                 
              ENDIF
 C
 C            D_Elv(i)        Collective level energy (in collective level file)
 C            ELV(ilv,nnurec) Discrete level energy
-             IF(ABS(D_Elv(i) - ELV(ilv,nnurec)).gt.0.0001d0) THEN
-               itmp = 0
-               DO iang = 2, NLV(nnurec)
-                 IF(D_Elv(i).LT.ELV(iang-1,NTArget)) then
-                   itmp = iang-1
-                       IF(abs(D_Elv(i)-ELV(iang-1,NTArget)).gt. 
-     &                abs(D_Elv(i)-ELV(iang,NTArget)) ) itmp = iang
-                   exit
-                 ENDIF               
-               ENDDO
-               IF(itmp.gt.0) then
-                 WRITE(8,*)' WARNING: Energy of the collective level #',
-     &             ICOllev(i)
-                 WRITE(8,*)
+             IF(ABS(D_Elv(i) - ELV(ilv,nnurec)).gt.0.001d0) THEN
+               WRITE(8,*)
+     &           ' WARNING: Check the collective level file  !!!'
+               WRITE(8,*)
+     &           ' WARNING: Energy of the collective level #',
+     &             ICOllev(i),sngl(D_Elv(i))
+               WRITE(8,*)
      &      ' WARNING: not equal to the energy of the discrete level #', 
-     &             ilv
-                 WRITE(8,*) 
-     &          ' WARNING: Cross section reassigned to discrete level #'
-     &           , itmp
-                 ilv        = itmp
-                 ICOller(i) = itmp
-                 ICOllev(i)   = itmp + LEVcc
-                 WRITE(8,*) 
-               ELSE
-                 WRITE(8,*) 
-     &            ' ERROR: Delete the collective level #',ICOller(i)
-                 STOP ' ERROR: see the long output'
-               ENDIF
+     &             ilv,sngl(ELV(ilv,nnurec))
              ENDIF
 C
 C------------Adding inelastic to discrete levels
