@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3788 $
+Ccc   * $Rev: 4150 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:58:03 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2014-10-05 00:28:15 +0200 (So, 05 Okt 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -181,7 +181,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-      DOUBLE PRECISION esum, dtot, dincl
+      DOUBLE PRECISION esum !, dtot, dincl
 
       INTEGER i, ia, kmax, ie, itmp
 
@@ -227,12 +227,12 @@ C
       nspec = kmax - 1
       IF(nspec.LT.1) RETURN
 
-      dtot  = 0.d0
-      dincl = 0.d0
-      DO nnuc = 1, NNUcd
-        dtot = dtot + CSEmis(nejc,nnuc)
-        if (ENDf(nnuc).NE.1) dincl = dincl + CSEmis(nejc,nnuc)
-      ENDDO
+C     dtot  = 0.d0
+C     dincl = 0.d0
+C     DO nnuc = 1, NNUcd
+C       dtot = dtot + CSEmis(nejc,nnuc)
+C       if (ENDf(nnuc).NE.1) dincl = dincl + CSEmis(nejc,nnuc)
+C     ENDDO
 
       IF (Nejc.EQ.0) THEN
 C
@@ -381,9 +381,9 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &     ftmp*DE      
       ENDIF
           
-      if (dincl.gt.0) 
-     &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-     &   dincl      
+C     if (dincl.gt.0) 
+C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
+C    &   dincl      
       IF(Nejc.ne.0) THEN
         WRITE (12,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
