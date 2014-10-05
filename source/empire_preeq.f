@@ -286,15 +286,22 @@ C--------
 C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
       ENDIF
 
+
+      ftmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred +
+     &        tothms + xsmsc + xsinl + totemis
+
       IF (IOUt.GT.0) THEN
-         WRITE (8,*) ' '
-         WRITE (8,*) '*** Summary of PE and direct emission  '
-         ftmp = CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred
-     &        + crossBUt + crossNTt
-         IF (DIRect.EQ.0) THEN
+        WRITE (8,*) ' '
+        WRITE (8,*) '*** Summary of PE and direct emission  '
+        WRITE (8,*) ' '
+        IF (ftmp.gt.0) THEN
+          WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
+     &      'Absorption cross section        ',
+     &      sngl(CSFus),' mb'
+          IF (DIRect.EQ.0) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &      'Absorption cross section        ',
-     &      sngl(CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred),' mb'
+     &      sngl(CSFus),' mb'
             WRITE (8,*) ' '
             if(lbreakup) 
      &      WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
@@ -304,7 +311,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &        'Transfer contribution          ',
      &        crossNTt,' mb', crossNTt/ftmp*100,' %'
-         ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
+          ELSEIF (DIRect.EQ.1 .OR. DIRect.EQ.2) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &       'Absorption cross section        ',
      &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
@@ -327,7 +334,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &        'Transfer contribution          ',
      &        crossNTt,' mb', crossNTt/ftmp*100,' %'
-         ELSEIF (DIRect.EQ.3) THEN
+          ELSEIF (DIRect.EQ.3) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &       'Absorption cross section        ',
      &      sngl(CSFus + (SINl + SINlcc)*FCCred + 
@@ -347,44 +354,55 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &        WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &        'Transfer contribution          ',
      &        crossNTt,' mb', crossNTt/ftmp*100,' %'
-         ENDIF
-         dtmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred 
+          ENDIF
+          dtmp = (SINl + SINlcc)*FCCred + SINlcont*FCOred 
      >        + crossBUt + crossNTt
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &     '(Total direct)                 ',
-     &     dtmp,' mb',dtmp/ftmp*100,' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &     'MSD contribution               ',
-     &      xsinl,' mb', xsinl/ftmp*100,' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &     'MSC contribution               ',
-     &      xsmsc,' mb', xsmsc/ftmp*100,' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &     'PCROSS contribution            ',
-     &      totemis-crossBUt-crossNTt,' mb', totemis/ftmp*100,' %'
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
-     &     'HMS contribution               ',
-     &      tothms,' mb',tothms/ftmp*100,' %'
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      '(Total direct)                 ',
+     &       dtmp,' mb',dtmp/ftmp*100,' %'
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'MSD contribution               ',
+     &       xsinl,' mb', xsinl/ftmp*100,' %'
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'MSC contribution               ',
+     &       xsmsc,' mb', xsmsc/ftmp*100,' %'
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'PCROSS contribution            ',
+     &       totemis - crossBUt - crossNTt,' mb', 
+     &      (totemis - crossBUt - crossNTt)/ftmp*100,' %'
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+     &      'HMS contribution               ',
+     &       tothms,' mb',tothms/ftmp*100,' %'
 
-         dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
+          dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
 
-         WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
+          WRITE (8,'(2x,A32,F9.2,A3,1x,1h(,F7.2,A2,1h))') 
      &     '(Total pre-equilibrium)        ',
      &     dtmp,' mb', dtmp/ftmp*100,' %'
 
-         WRITE (8,'(2x,A44)')
+          WRITE (8,'(2x,A44)')
      &     '----------------------------------------------'
-         WRITE (8,'(2x,A32,F9.2,A3)') 
+          WRITE (8,'(2x,A32,F9.2,A3)') 
      &     'CN formation cross section     ',
      &      CSFus*corrmsd - tothms - xsmsc,' mb'
-         WRITE (8,'(2x,A32)') 
+          WRITE (8,'(2x,A32)') 
      &     '(after Direct & PE emission)   '
-         WRITE (8,*) ' '
+
+        ELSE
+
+           WRITE (8,'(2x,A32,F9.2,A3)') 
+     &      'Absorption cross section        ',
+     &      sngl(CSFus),' mb'
+           WRITE (8,'(2x,A32,F9.2,A3)') 
+     &      'Pre-equil. and direct emission  ',
+     &      0.0,' mb'
+
+	  ENDIF
+        WRITE (8,*) ' '
       ENDIF
 
       IF (IOUt.GE.3 
      &    .AND. (CSEmis(0,1) + CSEmis(1,1) + CSEmis(2,1)
-     &                       + CSHms (1,1) + CSHms (2,1) 
      &                       + CSEmis(3,1) + CSEmis(4,1)
      &                       + CSEmis(5,1) + CSEmis(6,1)) .NE. 0
      &    ) THEN
@@ -393,8 +411,8 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
           WRITE (8,*)
      &                ' Preequilibrium + Direct spectra (tot)'
           IF(CSEmis(0,1).GT.0) CALL AUERST(1,0,1)
-          IF(CSEmis(1,1).GT.0 .OR. CSHms (1,1).GT.0) CALL AUERST(1,1,1)
-          IF(CSEmis(2,1).GT.0 .OR. CSHms (2,1).GT.0) CALL AUERST(1,2,1)
+          IF(CSEmis(1,1).GT.0) CALL AUERST(1,1,1)
+          IF(CSEmis(2,1).GT.0) CALL AUERST(1,2,1)
           IF(CSEmis(3,1).GT.0) CALL AUERST(1,3,1)
           IF(CSEmis(4,1).GT.0) CALL AUERST(1,4,1)
           IF(CSEmis(5,1).GT.0) CALL AUERST(1,5,1)
