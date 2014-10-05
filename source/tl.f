@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4146 $
+Ccc   * $Rev: 4154 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-04 23:38:20 +0200 (Sa, 04 Okt 2014) $
+Ccc   * $Date: 2014-10-05 23:16:29 +0200 (So, 05 Okt 2014) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -301,6 +301,10 @@ C-----------------swapping
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
+                  itmp = ICOller(i)
+                  ICOller(i) = ICOller(j)
+                  ICOller(j) = itmp
+
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
@@ -373,13 +377,13 @@ C
          WRITE (32,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          WRITE (96,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
          READ (97,*) 
-         WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
+         WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-         WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
+         WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-         WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+         WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv,
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
          READ (97,*) 
@@ -403,23 +407,24 @@ C----------rotational model so we are setting it to 0.005
 
              READ (97,'(A80)',END=100,ERR=100) ch_iuf        
 
-             IF (ICOllev(k).LT.LEVcc .and. k.gt.1) D_Def(k,2) = 0.005
+             IF (ICOllev(k).LT.LEVcc .and. k.gt.1 .and. D_Def(k,2).eq.0)
+     &         D_Def(k,2) = 0.005
 
-             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
-     &          D_Def(k,2) = 0.005
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).eq.0) 
+     &         D_Def(k,2) = 0.005
 
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             0, 0, 0, D_Def(k,2)
 
              WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             0, 0, 0, D_Def(k,2)
 
              WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             0, 0, 0, D_Def(k,2)
 
@@ -559,6 +564,10 @@ C-----------------swapping
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
+                  itmp = ICOller(i)
+                  ICOller(i) = ICOller(j)
+                  ICOller(j) = itmp
+
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
@@ -613,6 +622,9 @@ C-----------------swapping
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
+                  itmp = ICOller(i)
+                  ICOller(i) = ICOller(j)
+                  ICOller(j) = itmp
                ENDIF
             ENDDO
          ENDDO
@@ -681,21 +693,21 @@ C          first energy with default TARGET_COLL.DAT
 
              READ (97,'(A80)',END=200,ERR=200) ch_iuf        
 
-             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).eq.0) 
      &          D_Def(k,2) = 0.005
 
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k), 0, 0, D_Def(k,2)
 
              WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k), 0, 0, D_Def(k,2)
 
              WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k), 0, 0, D_Def(k,2)
 
@@ -855,6 +867,10 @@ C-----------------swapping
                   itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
+
+                  itmp = ICOller(i)
+                  ICOller(i) = ICOller(j)
+                  ICOller(j) = itmp
 
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
@@ -1049,20 +1065,21 @@ C
 
              READ (97,'(A80)',END=290,ERR=290) ch_iuf        
 
-             IF (ICOllev(k).LT.LEVcc) D_Def(k,2) = 0.005
+             IF (ICOllev(k).LT.LEVcc .and. D_Def(k,2).eq.0) 
+     &          D_Def(k,2) = 0.005
 
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
              WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
              WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3,1x,I2)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2), D_nno(k)
 
@@ -1223,6 +1240,10 @@ C-----------------swapping
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
+                  itmp = ICOller(i)
+                  ICOller(i) = ICOller(j)
+                  ICOller(j) = itmp
+
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
@@ -1316,13 +1337,13 @@ C
          if(.NOT.ldynamical) then
 C           first run with default TARGET_COLL.DAT
 
-           WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+           WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv,
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-           WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') NCOll(ncalc),
+           WRITE (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') NCOll(ncalc),
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
-           WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.3,1x))') ND_nlv,
+           WRITE (96,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv,
      &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
      &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
            READ (97,*) 
@@ -1338,21 +1359,21 @@ C           first run with default TARGET_COLL.DAT
 
              READ (97,'(A80)',END=1001,ERR=1001) ch_iuf        
 
-             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).le.0.d0) 
+             IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).eq.0) 
      &          D_Def(k,2) = 0.005
 
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
              WRITE (8,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
              WRITE (96,
-     &        '(1x,I2,1x,F7.4,1x,F4.1,1x,F3.0,1x,3(I2,1x),e10.3)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
      &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
 
@@ -3578,23 +3599,9 @@ C-----At least ground state is always open and considered
              ENDIF
            ENDDO
          ENDIF
-C        DO j = 2, ND_nlv
-C           eee = elab - D_Elv(j)/xratio
-C           IF (eee.GT.0.0001) nd_nlvop = nd_nlvop + 1
-C           IF (.not.Ldwba) THEN
-C             IF (ICOllev(j).GT.LEVcc) CYCLE
-C             nd_cons = nd_cons + 1
-C           ELSE
-C             ! skipping DWBA closed channels
-C              IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
-C             nd_cons = nd_cons + 1   
-C           ENDIF
-C        ENDDO
-         IF (.NOT.Ldwba .AND. Inlkey.GT.0 .AND. nd_nlvop.EQ.1 
+         IF (.NOT.Ldwba .AND. Inlkey.NE.0 .AND. nd_nlvop.EQ.1 
      &                  .AND. (.not.TL_calc) )
-     &       WRITE (8,*)
-     &               ' All inelastic channels are closed at this energy'
-
+     &   WRITE (8,*)' All inelastic channels are closed at this energy'
 C        IF (Ldwba) nd_cons = nd_nlvop ! Only open channels considered for DWBA
       ENDIF
 C
@@ -4538,7 +4545,7 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
          ENDDO
       ENDIF
       IF (nd_nlvop.EQ.1 .AND. (.not.TL_calc) ) WRITE (8,*)
-     &               ' All inelastic channels are closed at this energy'
+     &   ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
 C
@@ -5345,7 +5352,7 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
          ENDDO
       ENDIF
       IF (nd_nlvop.EQ.1 .AND. (.not.TL_calc) ) WRITE (8,*)
-     &               ' All inelastic channels are closed at this energy'
+     &  ' All inelastic channels are closed at this energy'
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
 C
@@ -5553,10 +5560,6 @@ C    *                 NNO(I),NCA(I),I=1,NUR)
 C  43 FORMAT(E12.7,7I2)
             do k=1,ND_nlv
               IF(ICOllev(k).GT.LEVcc) CYCLE
-C             WRITE(*,*) ' Ecoll     level #',
-C    &             ICOllev(k),sngl(D_Elv(k))
-C             WRITE(*,*) ' Ediscrete level #', 
-C    &             ICOller(k),sngl(ELV(ICOller(k),2))
               iparit = -1
               if(D_Lvp(k).gt.0.d0) iparit = +1
               write(1,'(E12.5,6I2)') 
