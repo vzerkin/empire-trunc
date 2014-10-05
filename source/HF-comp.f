@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4041 $
+Ccc   * $Rev: 4156 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-28 20:21:11 +0200 (Do, 28 Aug 2014) $
+Ccc   * $Date: 2014-10-06 00:08:57 +0200 (Mo, 06 Okt 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -127,26 +127,27 @@ C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
      &       Nejc.EQ.0 .OR. Nejc.GT.3) THEN
 
+            xcse = eemi/DE + 1.0001
+            icsl = min(INT(xcse),NDECSE-1)
+            icsh = icsl + 1
+
             IF(NPRIm_g.GT.0) THEN  ! Primary gammas stored 
               IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
 C
 C               Primary gammas from the CN: Nnuc=1, Nejc=0 
 C               Originate from the primary excitation energy bin: Iec = NEX(1)
 C
-                xcse = eemi/DE + 1.0001
-                icsl = min(INT(xcse),NDECSE-1)
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
 C
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
-                CYCLE ! for primary gammas no further processing is needed 
-            
+C               CYCLE ! for primary gammas no further processing is needed 
+C
+C               Primary gamma table stored, otherwise primary gammas are also 
+C               included in the total gamma spectra
               ENDIF
             ENDIF 
-            xcse = eemi/DE + 1.0001
-            icsl = min(INT(xcse),NDECSE-1)
-            icsh = icsl + 1
             IF(icsl.LT.nspec) THEN
               popl = pop1*(FLOAT(icsh) - xcse)/DE
               poph = pop1*(xcse - FLOAT(icsl))/DE
