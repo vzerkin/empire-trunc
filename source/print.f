@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4150 $
+Ccc   * $Rev: 4152 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-05 00:28:15 +0200 (So, 05 Okt 2014) $
+Ccc   * $Date: 2014-10-05 23:07:43 +0200 (So, 05 Okt 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -51,7 +51,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5) return
+      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -195,7 +195,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5) return
+      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -447,7 +447,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 0.05 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5) return
+      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -456,6 +456,7 @@ C
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
       IF (totspec*DE.LE.1.d-4) RETURN
+
       if(Iflag.ne.1) totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE     
@@ -597,7 +598,7 @@ C
          csemax = DMAX1(CSE(i,Nejc,Nnuc),csemax)
       ENDDO
 
-      IF (csemax.LE.1.d-5) return
+      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -717,4 +718,3 @@ C
       CLOSE(36)
       RETURN
       END
-
