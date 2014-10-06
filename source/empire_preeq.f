@@ -296,8 +296,6 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
         WRITE (8,*) ' '
         IF (ftmp.gt.0) THEN
           WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
-     &      'Absorption cross section        ',
-     &      sngl(CSFus),' mb'
           IF (DIRect.EQ.0) THEN
             WRITE (8,'(2x,A32,F9.2,A3,'' including'')') 
      &      'Absorption cross section        ',
