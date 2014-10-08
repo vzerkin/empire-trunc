@@ -1,5 +1,5 @@
-! $Rev: 3992 $                                                          | 
-! $Date: 2014-07-18 16:51:29 +0200 (Fr, 18 Jul 2014) $                                                     
+! $Rev: 4159 $                                                          | 
+! $Date: 2014-10-08 22:27:32 +0200 (Mi, 08 Okt 2014) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V
+!-V                        Oct 2014 D. Brown
+!-V                        Disable EMAX tests for atomic relaxation data (NSUB=6)
 !-V         Version 8.20   March 2013 A. Trkov
 !-V                        Enable checking of files with a large number
 !-V                        of angular distribution data
@@ -1826,12 +1828,14 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
-         CASE (4,5,6)
+         CASE (4,5) ! disable test for NSUB=6, EMAX is irrelevant for atomic structure data
             CALL TEST2F(EMAX,0.,'EMAX')
          CASE (12)
             CALL TEST1F(EMAX,0.,5.,'EMAX')
          CASE DEFAULT
-            CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
+            IF (NSUB.NE.6) THEN  ! disable test for NSUB=6, EMAX is irrelevant for atomic structure data
+                CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
+            ENDIF
       END SELECT
 !
 !     Check MAT number against ZA for ENDF/B
