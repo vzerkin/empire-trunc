@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4123 $
+Ccc   * $Rev: 4158 $
 Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+Ccc   * $Date: 2014-10-08 22:07:41 +0200 (Mi, 08 Okt 2014) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -265,6 +265,8 @@ C--------decay to the continuum ------ done -----------------------------
 
 
       SUBROUTINE HMSC(Nvwful)
+
+      use ph_lvl_dens
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:PPu*
@@ -301,17 +303,15 @@ C
 C
 C COMMON variables
 C
-      DOUBLE PRECISION BMSc, EXTr, G, GSP(1),
+      DOUBLE PRECISION GSP(1),
      &                 OMJd(0:2*NDMSCS + IV,NDLW), PIM(NDMSCS,NDMSCS),
      &                 PIM1(NDMSCS), PREp(NC2,2),
-     &                 SCRm(NDEX,NDLW,2,2,NDMSCS), SIGnx,
+     &                 SCRm(NDEX,NDLW,2,2,NDMSCS),
      &                 WP(NDEX,NDLW,2), YP(NDEX,NDMSCS,3,2),
      &                 ZP(NDEX,NC2,3,2), ZSUm(NDEX,NC2,2)
       INTEGER IE(NC2)
       COMMON /DELETE/ GSP
-      COMMON /EB    / EXTr, BMSc, G
       COMMON /MSC   / SCRm, WP, YP, ZP, ZSUm, OMJd, PIM, PREp, IE
-      COMMON /PRSI  / SIGnx
 C
 C Local variables
 C
@@ -329,7 +329,7 @@ C
      &                 tl1, tl2, tl3, tlg, tls, tx, undeg(NG,NG),
      &                 undex(NDMSCS,NDMSCS), vl, vmn, vu, xep(NC2,2),
      &                 xga, xxxx, y, yd, ygdr, ggg
-      DOUBLE PRECISION E1, OMJ, ROPHM, VQ, W, WILLI, WOBL, WT
+      DOUBLE PRECISION E1
 
       INTEGER i, icse, ie1, iec, iex1, iexc, ih(NC2), ikc, 
      &        ini, ip(NC2), ipii, irflag, ispin, ix, ixni, 
@@ -360,7 +360,7 @@ C     WRITE(8,'('' using single particl matrix element with analogy to (
 C     *1,4)-->(2,4)'')')
 C-----input parameters
       SIGnx = 0.26*A(1)**0.66666667
-      BMSc = Q(1,1)
+      bind_e = Q(1,1)
 C-----input parameters              ***** done *******
       sdsp   = 0.d0
       gspmsc = 0.d0       
@@ -382,7 +382,7 @@ C-----determination of the initial exciton configuration for H.I.
          EX2 = EX1
       ENDIF
 C-----determination of the initial exciton configuration **** done ****
-      EXTr = EXCn
+      cnex = EXCn
       
       IF (NLW.GT.NDLW - 1) NLW = NDLW - 1
       WRITE (8,*) 'Maximum momentum allowed NLW = ',NLW
@@ -394,7 +394,7 @@ C-----determination of the initial exciton configuration **** done ****
 C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       ggg = GDIv
       if(GDIV.LE.0) ggg=13.d0
-      G = A(1)/ggg
+      sp_den = A(1)/ggg
 
       IF (STMro.EQ.1.0D0) THEN
          WRITE (8,
@@ -408,7 +408,7 @@ C-----s.p.l.d. for MSC is set to A/GDIV (default g=A/13)
       Nvwful = .FALSE.
       IF (NOUt.GT.0) WRITE (8,99005)
 99005 FORMAT (1X,//,1X,'Heidelberg M.S.C. (auxiliary output)',//)
-      IF (SQRT(1.5D0*G*EXCn) + 6D0.LT.2.0D0*NDMSCS + 1.D0)
+      IF (SQRT(1.5D0*sp_den*EXCn) + 6D0.LT.2.0D0*NDMSCS + 1.D0)
      &    Nvwful = .TRUE.
       IF (Nvwful) WRITE (8,99010)
 99010 FORMAT (1X,
@@ -554,7 +554,7 @@ C-----(RBU=m-to-bound/m-to-unbound)
       DO k = 1, NDMSCS
 C-----Pauli corrected excitation energy
          ecor = EXCn - ((ip(k)**2 + ih(k)**2)/4.0 + (ip(k) - ih(k))
-     &          /4.0 - ih(k)/2.0)/G
+     &          /4.0 - ih(k)/2.0)/sp_den
 C--------try to use Oblozinsky expression
 COBL     AW(K)=WOBL(IP(K),IH(K),ECOR,-1)
          aw(k) = W(ip(k),ih(k),ecor)
@@ -594,7 +594,7 @@ C-----
 C-----calculation of average matrix element vmn from o.m.p.
 C-----(should be divided by 2*pi*g**3 but omitted as it cancels later)
 C-----
-      CALL GDOWN(y,2,1,EXCn)
+      y = GDOWN(2,1,EXCn)
       vmn = 2.0*IE(1)*VQ(2,1,EXCn)*W(2,1,EXCn)/y
 C-----
 C-----calculation of yp, zp and zsum
@@ -602,27 +602,27 @@ C-----
       DO i = 1, NEX(nresn)
          ew = EX(i,nresn)
          en = EMAx(nresn) - ew
-COBL     ZP(I,1,1,1)=WOBL(2,1,EN+Q(1,1),-1)*G**3/4
-         ZP(i,1,1,1) = W(2,1,en + Q(2,1))*G**3/2
+COBL     ZP(I,1,1,1)=WOBL(2,1,EN+Q(1,1),-1)*sp_den**3/4
+         ZP(i,1,1,1) = W(2,1,en + Q(2,1))*sp_den**3/2
          YP(i,1,1,1) = 0.0
          DO k = 1, NDMSCS
 C-----------Pauli corrections
             ecor = ((ip(k)**2 + ih(k)**2)/4.0 + (ip(k) - ih(k))
-     &             /4.0 - ih(k)/2.0)/G
+     &         /4.0 - ih(k)/2.0)/sp_den
             ecor1 = (((ip(k)-2)**2 + (ih(k)-1)**2)
-     &              /4.0 + (ip(k) - ih(k) - 1)/4.0 - (ih(k) - 1)/2.0)/G
+     &         /4.0 + (ip(k) - ih(k) - 1)/4.0 - (ih(k) - 1)/2.0)/sp_den
             ecor2 = (((ip(k)-1)**2 + ih(k)**2)/4.0 + (ip(k) - ih(k) - 1)
-     &              /4.0 - ih(k)/2.0)/G
+     &         /4.0 - ih(k)/2.0)/sp_den
             ecor3 = ((ip(k)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k) + 1)
-     &              /4.0 - (ih(k) + 1)/2.0)/G
+     &         /4.0 - (ih(k) + 1)/2.0)/sp_den
 C----------------------
             ZP(i,k,1,1) = ZP(i,1,1,1)
             IF (ew - ecor2.GT.0.0D0) THEN
-               CALL ZERO(yre,ip(k),ih(k),ew - ecor)
-               IF (yre.NE.0D0) ZP(i,k,2,1)
-     &             = yre*G*G/W(ip(k) - 1,ih(k),ew - ecor2)/ip(k)
+               yre = ZERO(ip(k),ih(k),ew - ecor)
+               IF (yre.NE.0D0) ZP(i,k,2,1) = yre*sp_den*sp_den
+     &            /W(ip(k) - 1,ih(k),ew - ecor2)/ip(k)
             ENDIF
-            ZP(i,k,3,1) = G*(ih(k) + 1)*ih(k)/2.
+            ZP(i,k,3,1) = sp_den*(ih(k) + 1)*ih(k)/2.
 C-----------
 C-----------final state number per bin for neutron emission
 C-----------
@@ -632,8 +632,8 @@ COBL           YP(I,K,2,1)=DE*WOBL(IP(K)-1,IH(K),EW-ECOR2,-1)/2.
 COBL           YP(I,K,3,1)=DE*WOBL(IP(K),IH(K)+1,EW-ECOR3,-1)/2.
                YP(i,k,1,1) = DE*WT(IE(k) - 3,ip(k) - 2,ih(k) - 1,
      &                       ew - ecor1)
-               YP(i,k,2,1) = DE*WT(IE(k) - 1,ip(k) - 1,ih(k),ew - ecor2)
-               YP(i,k,3,1) = DE*WT(IE(k) + 1,ip(k),ih(k) + 1,ew - ecor3)
+               YP(i,k,2,1) = DE*WT(IE(k) - 1,ip(k) - 1,ih(k),ew-ecor2)
+               YP(i,k,3,1) = DE*WT(IE(k) + 1,ip(k),ih(k) + 1,ew-ecor3)
             ELSE
                IF (IE(k).GT.3 .AND. ip(k).GE.2 .AND. ih(k).GE.1) THEN
                   ncont = 20000 + (ip(k) - 2)*100 + ih(k) - 1
@@ -655,15 +655,14 @@ COBL           YP(I,K,3,1)=DE*WOBL(IP(K),IH(K)+1,EW-ECOR3,-1)/2.
          ZP(i,NC2,1,1) = ZP(i,1,1,1)
 C--------Pauli corrections
          ecor1 = (((ip(k)+1)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k))
-     &           /4.0 - (ih(k) + 1)/2.0)/G
+     &           /4.0 - (ih(k) + 1)/2.0)/sp_den
          ecor2 = ((ip(k)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k) + 1)
-     &           /4.0 - (ih(k) + 1)/2.0)/G
+     &           /4.0 - (ih(k) + 1)/2.0)/sp_den
 C----------------------
          IF (ew - ecor2.GT.0.0D0) THEN
-            CALL ZERO(yre,ip(NDMSCS) + 1,ih(NDMSCS) + 1,ew - ecor1)
-            IF (yre.NE.0.D0) ZP(i,nc1,2,1)
-     &          = yre*G*G/W(ip(NDMSCS),ih(NDMSCS) + 1,ew - ecor2)
-     &          /(ip(NDMSCS) + 1)
+            yre = ZERO(ip(NDMSCS) + 1,ih(NDMSCS) + 1,ew - ecor1)
+            IF (yre.NE.0.D0) ZP(i,nc1,2,1) = yre*sp_den*sp_den
+     &    /W(ip(NDMSCS),ih(NDMSCS) + 1,ew - ecor2)/(ip(NDMSCS) + 1)
          ENDIF
       ENDDO
       DO i = 1, NEX(nresn)
@@ -680,29 +679,29 @@ C-----
       DO i = 1, NEX(nresp)
          ew = EX(i,nresp)
          en = EMAx(nresp) - ew
-COBL     ZP(I,1,1,2)=WOBL(2,1,EN+Q(1,1),-1)*G**3/4.
-         ZP(i,1,1,2) = W(2,1,en + Q(2,1))*G**3/2.
+COBL     ZP(I,1,1,2)=WOBL(2,1,EN+Q(1,1),-1)*sp_den**3/4.
+         ZP(i,1,1,2) = W(2,1,en + Q(2,1))*sp_den**3/2.
          YP(i,1,1,2) = 0.0
          DO k = 1, NDMSCS
 C-----------Pauli corrections
             ecor = ((ip(k)**2 + ih(k)**2)/4.0 + (ip(k) - ih(k))
-     &             /4.0 - ih(k)/2.0)/G
+     &        /4.0 - ih(k)/2.0)/sp_den
             ecor1 = (((ip(k)-2)**2 + (ih(k)-1)**2)
-     &              /4.0 + (ip(k) - ih(k) - 1)/4.0 - (ih(k) - 1)/2.0)/G
+     &        /4.0 + (ip(k) - ih(k) - 1)/4.0 - (ih(k) - 1)/2.0)/sp_den
             ecor2 = (((ip(k)-1)**2 + ih(k)**2)/4.0 + (ip(k) - ih(k) - 1)
-     &              /4.0 - ih(k)/2.0)/G
+     &        /4.0 - ih(k)/2.0)/sp_den
             ecor3 = ((ip(k)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k) + 1)
-     &              /4.0 - (ih(k) + 1)/2.0)/G
+     &        /4.0 - (ih(k) + 1)/2.0)/sp_den
 C----------------------
             ZP(i,k,1,2) = ZP(i,1,1,2)
             IF (ew - ecor2.GT.0.0D0) THEN
-               CALL ZERO(yre,ip(k),ih(k),ew - ecor)
+               yre = ZERO(ip(k),ih(k),ew - ecor)
                IF (yre.NE.0.D0) ZP(i,k,2,2)
-     &             = yre*G*G/W(ip(k) - 1,ih(k),ew - ecor2)/ip(k)
+     &       = yre*sp_den*sp_den/W(ip(k) - 1,ih(k),ew - ecor2)/ip(k)
             ELSE
                ZP(i,k,2,2) = 0.0
             ENDIF
-            ZP(i,k,3,2) = G*(ih(k) + 1)*ih(k)/2.
+            ZP(i,k,3,2) = sp_den*(ih(k) + 1)*ih(k)/2.
 C-----------
 C-----------final state number per bin for proton emission
 C-----------
@@ -712,8 +711,8 @@ COBL           YP(I,K,2,2)=DE*WOBL(IP(K)-1,IH(K),EW-ECOR2,-1)/2.
 COBL           YP(I,K,3,2)=DE*WOBL(IP(K),IH(K)+1,EW-ECOR3,-1)/2.
                YP(i,k,1,2) = DE*WT(IE(k) - 3,ip(k) - 2,ih(k) - 1,
      &                       ew - ecor1)
-               YP(i,k,2,2) = DE*WT(IE(k) - 1,ip(k) - 1,ih(k),ew - ecor2)
-               YP(i,k,3,2) = DE*WT(IE(k) + 1,ip(k),ih(k) + 1,ew - ecor3)
+               YP(i,k,2,2) = DE*WT(IE(k) - 1,ip(k) - 1,ih(k),ew-ecor2)
+               YP(i,k,3,2) = DE*WT(IE(k) + 1,ip(k),ih(k) + 1,ew-ecor3)
             ELSE
                IF (IE(k).GT.3 .AND. ip(k).GE.2 .AND. ih(k).GE.1) THEN
                   ncont = 30000 + (ip(k) - 2)*100 + ih(k) - 1
@@ -735,14 +734,14 @@ COBL           YP(I,K,3,2)=DE*WOBL(IP(K),IH(K)+1,EW-ECOR3,-1)/2.
          ZP(i,NC2,1,2) = ZP(i,1,1,2)
 C--------Pauli corrections
          ecor1 = (((ip(k)+1)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k))
-     &           /4.0 - (ih(k) + 1)/2.0)/G
+     &           /4.0 - (ih(k) + 1)/2.0)/sp_den
          ecor2 = ((ip(k)**2 + (ih(k)+1)**2)/4.0 + (ip(k) - ih(k) + 1)
-     &           /4.0 - (ih(k) + 1)/2.0)/G
+     &           /4.0 - (ih(k) + 1)/2.0)/sp_den
 C----------------------
          IF (ew - ecor2.GT.0.0D0) THEN
-            CALL ZERO(yre,ip(NDMSCS) + 1,ih(NDMSCS) + 1,ew - ecor1)
-            ZP(i,nc1,2,2) = yre*G*G/W(ip(NDMSCS),ih(NDMSCS) + 1,
-     &                      ew - ecor2)/(ip(NDMSCS) + 1)
+            yre = ZERO(ip(NDMSCS) + 1,ih(NDMSCS) + 1,ew - ecor1)
+            ZP(i,nc1,2,2) = yre*sp_den*sp_den/W(ip(NDMSCS),
+     &        ih(NDMSCS) + 1,ew - ecor2)/(ip(NDMSCS) + 1)
          ELSE
             ZP(i,nc1,2,2) = 0.0
          ENDIF
@@ -810,15 +809,15 @@ C-----------------
 C-----------------next 4 lines calculate interstage rate VMN calculated from o.m.
 C-----------------ang. mom. coeff. being neglected as they nearly cancel out
                   ecor = ((ip(k1)**2 + ih(k1)**2)
-     &                   /4.0 + (ip(k1) - ih(k1))/4.0 - ih(k1)/2.0)/G
-                  CALL GDOWN(y,ip(k1),ih(k1),EXCn - ecor)
+     &              /4.0 + (ip(k1) - ih(k1))/4.0 - ih(k1)/2.0)/sp_den
+                  y = GDOWN(ip(k1),ih(k1),EXCn - ecor)
 C-----------------YD should be multiplied by G**3 but omitted since omitted in VMN
                   yd = y/aw(k1)
                   PIM(k1,k1 + 1) = -3.14159*2.*rop*vmn*yd
 C
 C-----------------next 4 lines calculate interstage rate using parameter M**2=0.00005
 C ECOR=((IP(K1)**2+IH(K1)**2)/4.0+(IP(K1)-IH(K1))/4.0-IH(K1)/2.0)/G
-C                 CALL GDOWN(Y,IP(K1),IH(K1),$)
+C                 y = GDOWN(IP(K1),IH(K1),$)
 C                 YD=Y*G**3/AW(K1)/2.
 C                 PIM(K1,K1+1)=-39.47835*0.00005*ROP*XD(J,K1)*YD
 C
@@ -840,9 +839,9 @@ C-----------------next 4 lines calculate interstage rate VMN calculated from o.m
 C-----------------ang. mom. coeff. being neglected as they nearly cancel out
                   ecor = ((ip(NDMSCS)**2 + ih(NDMSCS)**2)
      &                   /4.0 + (ip(NDMSCS) - ih(NDMSCS))
-     &                   /4.0 - ih(NDMSCS)/2.0)/G
-                  CALL GDOWN(y,ip(NDMSCS),ih(NDMSCS),EXCn - ecor)
-C-----------------YD should be multiplied by G**3 but omitted since omitted in VMN
+     &                   /4.0 - ih(NDMSCS)/2.0)/sp_den
+                  y = GDOWN(ip(NDMSCS),ih(NDMSCS),EXCn - ecor)
+C-----------------YD should be multiplied by sp_den**3 but omitted since omitted in VMN
                   yd = y/aw(NDMSCS)
                   cgd = 3.14159*2.*vmn*yd
                   PIM(NDMSCS,NDMSCS) = PIM(NDMSCS,NDMSCS)
@@ -851,9 +850,9 @@ C
 C-----------------next 4 lines calculate interstage rate using parameter
 C-----------------|M**2|=0.00005
 C                 ECOR = ((IP(NDMSCS)**2+IH(NDMSCS)**2)/4.0+(IP(NDMSCS)
-C                 1               -IH(NDMSCS))*/4.0-IH(NDMSCS)/2.0)/G
-C                 CALL GDOWN(Y,IP(NDMSCS),IH(NDMSCS),EXCN-ECOR)
-C                 YD = Y*G**3/AW(NDMSCS)/2.
+C                 1               -IH(NDMSCS))*/4.0-IH(NDMSCS)/2.0)/sp_den
+C                 y = GDOWN(IP(NDMSCS),IH(NDMSCS),EXCN-ECOR)
+C                 YD = Y*sp_den**3/AW(NDMSCS)/2.
 C                 PIM(NDMSCS,NDMSCS) = PIM(NDMSCS,NDMSCS) + 39.47835
 C                 1               *0.00005*ROP*XD(J,NDMSCS)*YD
 C
@@ -1046,7 +1045,7 @@ C                       DO KG = 1, NC2
                         IF (STMro.EQ.0.D0) THEN
                            ecor = (((ip(kg)-1)**2 + (ih(kg)-1)**2)
      &                            /4.0 + (ip(kg) - ih(kg))
-     &                            /4.0 - (ih(kg) - 1)/2.0)/G
+     &                            /4.0 - (ih(kg) - 1)/2.0)/sp_den
                            rophc(kg) = WT(IE(kg) - 2,ip(kg) - 1,ih(kg) -
      &                                 1,egdrr - ecor)
                         ELSE
@@ -1088,7 +1087,7 @@ C-----------------------
 C-------------------------(1,4)->(2,1-3) creation of GDR
                            ecor = ((ip(1)**2 + ih(1)**2)
      &                            /4.0 + (ip(1) - ih(1))/4.0 - ih(1)
-     &                            /2.0)/G
+     &                            /2.0)/sp_den
 C--------------------------probability for one hole to have enough energy to create GDR
                            xxxx = WOBL(ip(1),ih(1) - 1,EXCn - ecor,0)
                            ygdr = WOBL(ip(1),ih(1) - 1,egdrr - ecor,0)
@@ -1100,7 +1099,7 @@ C--------------------------using spreading width of the GDR split among three cl
 C                          CCRE=-6.28319*ROPH(1,4)*YGDR*GDRW*D1FRA*ROPHT(1)
 C                          CCRE=CCRE/(ROPHT(1)+ROPHT(2)+ROPHT(3))/ROPH3(2)
 C--------------------------using single particl matrix element with analogy to
-C                          (1,4)-->(2,4) CALL GDOWN(Y,IP(1),IH(1),EXCN-ECOR)
+C                          (1,4)-->(2,4) y = GDOWN(IP(1),IH(1),EXCN-ECOR)
 C                          YSP=Y/AW(1)
 C                          CCRE=-6.28319*ROPH(1,4)*YGDR*VMN*YSP/ROPH3(2)
 C--------------------------
@@ -1111,7 +1110,7 @@ C--------------------------
                            pig(1,4) = ccre*roph(2,3)
                            pig(4,1) = pig(1,4)
 C--------------------------(1,4)->(2,4) use s.p. matrix element
-                           CALL GDOWN(y,ip(1),ih(1),EXCn - ecor)
+                           y = GDOWN(ip(1),ih(1),EXCn - ecor)
                            ysp = y/aw(1)
                            cgd = -6.28319*vmn*ysp
                            pig(1,5) = cgd*roph(1,4)*roph(2,4)/ropht(2)
@@ -1131,9 +1130,9 @@ C--------------------------(m,4)->(m+1,4) use s.p. matrix element
 C--------------------------cancel out
                            ecor = ((ip(kg)**2 + ih(kg)**2)
      &                            /4.0 + (ip(kg) - ih(kg))/4.0 - ih(kg)
-     &                            /2.0)/G
-                           CALL GDOWN(y,ip(kg),ih(kg),EXCn - ecor)
-C--------------------------Y should be multiplied by G**3 but omitted since
+     &                            /2.0)/sp_den
+                           y = GDOWN(ip(kg),ih(kg),EXCn - ecor)
+C--------------------------Y should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            ysp = y/aw(kg)
                            cgd = -3.14159*2.*vmn*ysp
@@ -1147,10 +1146,10 @@ C--------------------------omitted in VMN
      &                            /WOBL(ip(kg),ih(kg) - 1,EXCn - ecor,0)
                            ecor = (((ip(kg)-1)**2 + (ih(kg)-1)**2)
      &                            /4.0 + (ip(kg) - ih(kg))
-     &                            /4.0 - (ih(kg) - 1)/2.0)/G
-                           CALL GDOWN(y,ip(kg) - 1,ih(kg) - 1,
+     &                            /4.0 - (ih(kg) - 1)/2.0)/sp_den
+                           y = GDOWN(ip(kg) - 1,ih(kg) - 1,
      &                                egdrr - ecor)
-C--------------------------Y should be multiplied by G**3 but omitted since
+C--------------------------Y should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            IF (kg.GT.1) THEN
                               ysp = y/aw(kg - 1)
@@ -1158,12 +1157,12 @@ C--------------------------omitted in VMN
 C                             e = egdrr -
 C                             &
 C                             (((ip(kg)-1)**2+(ih(kg)-1)**2)/4.0+ &
-C                             (ip(kg)-ih(kg)-2)/4.0-(ih(kg)-1)/2.0)/G ysp =
-C-----------------------------set 1p-0h level density to G to avoid 0 at energies
+C                             (ip(kg)-ih(kg)-2)/4.0-(ih(kg)-1)/2.0)/sp_den ysp =
+C-----------------------------set 1p-0h level density to sp_den to avoid 0 at energies
 C-----------------------------above neutron binding (it would be more physical
 C-----------------------------to y/W(ip(kg)-1,ih(kg)-1,e) ignore MSC gamma
 C-----------------------------is emission in such cases but it small anyway)
-                              ysp = y/G
+                              ysp = y/sp_den
                            ENDIF
                            cgd = -6.28319*vmn*ysp
                            DO kc1 = 1, 3
@@ -1180,7 +1179,7 @@ C                             (KG)
 C                             CCRE=CCRE/(ROPHT(KG)+ROPHT(KG+1)+ROPHT(KG+2))/ 1
 C-----------------------------using ROPH3(KG+1) single particl matrix element with
 C-----------------------------analogy to (1,4)-->(2,4) CALL
-C                             GDOWN(Y,IP(KG),IH(KG),EXCN-ECOR) YSP=Y/AW(KG)
+C                             y = GDOWN(IP(KG),IH(KG),EXCN-ECOR) YSP=Y/AW(KG)
 C                             CCRE=-6.28319*ROPH(KG,4)*YGDR*VMN*YSP/ROPH3
 C                             1                     (KG+1)
 C-----
@@ -1224,10 +1223,10 @@ C-----------------------
                         IF (.NOT.Nvwful) THEN
                            ecor = ((ip(NDMSCS)**2 + ih(NDMSCS)**2)
      &                            /4.0 + (ip(NDMSCS) - ih(NDMSCS))
-     &                            /4.0 - ih(NDMSCS)/2.0)/G
-                           CALL GDOWN(y,ip(NDMSCS),ih(NDMSCS),
+     &                            /4.0 - ih(NDMSCS)/2.0)/sp_den
+                           y = GDOWN(ip(NDMSCS),ih(NDMSCS),
      &                                EXCn - ecor)
-C--------------------------Yd should be multiplied by G**3 but omitted since
+C--------------------------Yd should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            ysp = y/aw(NDMSCS)
                            cgd = -3.14159*2.*vmn*ysp
@@ -1240,10 +1239,10 @@ C--------------------------omitted in VMN
      &                            EXCn - ecor,0)
                            ecor = ((ip(NDMSCS-1)**2 + ih(NDMSCS-1)**2)
      &                            /4.0 + (ip(NDMSCS-1) - ih(NDMSCS-1))
-     &                            /4.0 - ih(NDMSCS - 1)/2.0)/G
-                           CALL GDOWN(y,ip(NDMSCS) - 1,ih(NDMSCS) - 1,
+     &                            /4.0 - ih(NDMSCS - 1)/2.0)/sp_den
+                           y = GDOWN(ip(NDMSCS) - 1,ih(NDMSCS) - 1,
      &                                egdrr - ecor)
-C--------------------------Yd should be multiplied by G**3 but omitted since
+C--------------------------Yd should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            ysp = y/aw(NDMSCS - 1)
                            cgd = -6.28319*vmn*ysp
@@ -1263,15 +1262,15 @@ C-----------------------
 C-----------------------inclusion of semi-direct into the PIG matrix
 C-----------------------
                         IF (ISD.EQ.1) THEN
-                           ecor = 1./G
+                           ecor = 1./sp_den
                            spw = vmn*WT(3,2,1,egdrr - ecor)
                            prop = 1./(egdrr**2 + 0.25*(gdrw + spw)**2)
-                           propt = prop*G*vmn*gdrw*D1Fra
+                           propt = prop*sp_den*vmn*gdrw*D1Fra
 C                          WRITE(8,'('' 2,.-->2,4, VERT. COL.'',G12.5)')PROPT
                            pig(2,5) = pig(2,5) - propt
                            pig(3,5) = pig(3,5) - propt
                            pig(4,5) = pig(4,5) - propt
-                           propt = prop*gdrw*D1Fra*G/WT(5,3,2,
+                           propt = prop*gdrw*D1Fra*sp_den/WT(5,3,2,
      &                             EXCn - ecor)
 C                          WRITE(8,'('' 2,4-->2,., BOTTOM ROW'',G12.5)')
 C                          1                  (PROPT*SPW)
@@ -1282,7 +1281,7 @@ C                          1                  (PROPT*SPW)
      &                                + propt*(3*spw + (1 - D1Fra)*gdrw)
 C                          TESTT=PROPT*(3*SPW+(1-D1FRA)*GDRW)
 C                          WRITE(8,'('' 2,4-->2,4, LAST    '',G12.5)') TESTT
-                           propt = prop*vmn*G*gdrw
+                           propt = prop*vmn*sp_den*gdrw
 C                          WRITE(8,'('' 2,.-->2,., DIAGONAL'',G12.5)') PROPT
                            pig(2,2) = pig(2,2) + propt
                            pig(3,3) = pig(3,3) + propt
@@ -1433,7 +1432,7 @@ C--------------------------------absorption cross section times propagator
                               ELSE
                                  rog = ROPHM(10100,ini,ew,DE)
                               ENDIF
-C-----------------------------GAMMA GAMMA / ((2 PI G)*(1+X)**2) *G
+C-----------------------------GAMMA GAMMA / ((2 PI G)*(1+X)**2) *sp_den
                               xga = (2.0 - tg - 2.0*SQRT(1.0 - tg))/tg
                               tlg = tg/(1 + xga)**2/(6.28*OMJd(1,j))
 C                             TLG = TG/4./ROPH3(1)
@@ -1459,7 +1458,7 @@ C--------------------------------state density for gamma emission
                                     ecor =
      &                                 (((ip(kg)-1)**2 + (ih(kg)-1)**2)
      &                                 /4.0 + (ip(kg) - ih(kg))
-     &                                 /4.0 - (ih(kg) - 1)/2.0)/G
+     &                                 /4.0 - (ih(kg) - 1)/2.0)/sp_den
                                     rog = WT(IE(kg) - 2,ip(kg) - 1,
      &                                 ih(kg) - 1,ew - ecor)*DE
                                  ELSE

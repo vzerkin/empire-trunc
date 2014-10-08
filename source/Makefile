@@ -1,6 +1,6 @@
-#$Rev: 4123 $
+#$Rev: 4158 $
 #$Author: shoblit $
-#$Date: 2014-09-30 21:02:38 +0200 (Di, 30 Sep 2014) $
+#$Date: 2014-10-08 22:07:41 +0200 (Mi, 08 Okt 2014) $
 
 # set default compilers:
 
@@ -165,6 +165,7 @@ dtrans.o: ang_mom.o
 ph-lev-dens.o : ang_mom.o
 MSD-tristan.o : ang_mom.o
 pcross.o : ang_mom.o
+MSC-NVWY.o : ph-lev-dens.o
 
 clean:
 	rm -f *.o *.mod empire optmand *.exe
