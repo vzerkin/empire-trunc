@@ -14,6 +14,7 @@ C-V  06/12 Increase MXMT from 2000 to 4000 (A.Trkov)
 C-V  07/11 Test for empty files (A. Trkov)
 C-V  08/10 Trap attempts to open non-existent ENDF files (A. Trkov)
 C-V  11/04 Fix case of merging a file with a single material (A. Trkov)
+C-V  14/08 Extend path length again.
 C-M
 C-M  Manual for Program MRGMAT
 C-M  =========================
@@ -32,9 +33,9 @@ C-M  Windows-DOS (95,98,NT) is recognised automatically and can
 C-M  be used instead.
 C-
       PARAMETER    (MXMT=4000)
-      CHARACTER*80  RECI,FLNM
+      CHARACTER*120 RECI,FLNM,PATH
       CHARACTER*66  CH66,HH66
-      CHARACTER*40  BLNK,PATH,FLTM,FLOU,FLER
+      CHARACTER*40  BLNK,FLTM,FLOU,FLER
       DIMENSION     MTLS(MXMT),IZLS(MXMT)
 C*
       DATA BLNK/'                                        '/
@@ -47,7 +48,7 @@ C*
       WRITE(LTT,91) ' MRGMAT - ENDF Material Merging Utility '
       WRITE(LTT,91) ' ====================================== '
       WRITE(LTT,91)
-      PATH=BLNK
+      PATH=BLNK//BLNK
       LPTH=0
       IDOS=0
       IFL =0
@@ -55,6 +56,7 @@ C*
       IDU =0
       JS  =0
       KMT =MXMT
+      MA0 =-1
       OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
       OPEN (UNIT=LER,FILE=FLER,STATUS='UNKNOWN')
@@ -77,14 +79,14 @@ C* End of directory record in the DIR list of DOS
 C* Identify directory path in the DIR list of DOS
       IF(RECI(1:8).EQ.' Directo') THEN
         WRITE(LOU,95) ' MRGMAT files on  '//RECI, 0, 0, 0
-        PATH=RECI(15:54)
+        PATH=RECI(15:120)
    22   IF(PATH(LPTH+1:LPTH+1).NE.' ') THEN
           LPTH=LPTH+1
           GO TO 22
         END IF
         IF(PATH(LPTH:LPTH).NE.'\') THEN
           LPTH=LPTH+1
-          IF(LPTH.GT.40) THEN
+          IF(LPTH.GT.114) THEN
             WRITE(LTT,91) ' MRGMAT ERROR - Path length exceeded    '
             WRITE(LTT,93) RECI
             STOP 'MRGMAT ERROR - Pathlength too long'
@@ -124,18 +126,18 @@ C*        Windows-XP directory listing
           FLNM=PATH(1:LPTH)//RECI(1:LNAM)
         ELSE IF(IDOS.EQ.2) THEN
 C* Case: Windows-NT directory listing
-          FLNM=PATH(1:LPTH)//RECI(40:80)
+          FLNM=PATH(1:LPTH)//RECI(40:120)
         ELSE
 C* Case: Windows-XP directory listing
-          FLNM=PATH(1:LPTH)//RECI(37:80)
+          FLNM=PATH(1:LPTH)//RECI(37:120)
         END IF
       ELSE
 C* Simple ASCII file list
         FLNM=RECI
       END IF
 C* Open the file
-      WRITE(LTT,91) ' Processing ENDF file                 : ',FLNM
-      WRITE(LER,91) ' Processing ENDF file                 : ',FLNM
+      WRITE(LTT,93) ' Processing : '//FLNM
+      WRITE(LER,93) ' Processing : '//FLNM
       OPEN (UNIT=LEN,FILE=FLNM,STATUS='OLD',ERR=25)
       GO TO 26
 C*    Trap non-existent files
@@ -257,7 +259,7 @@ C*
 C*
    91 FORMAT(A40,A80)
    92 FORMAT(A40,I5)
-   93 FORMAT(A80)
+   93 FORMAT(A120)
    94 FORMAT(2F11.0,4I11)
    95 FORMAT(A66,I4,I2,I3,I5)
    96 FORMAT(' WARNING - Duplicate ZA',F9.1,'  MAT',I6)
