@@ -1,6 +1,6 @@
-! $Rev: 4159 $                                                          | 
-! $Date: 2014-10-08 22:27:32 +0200 (Mi, 08 Okt 2014) $                                                     
-! $Author: dbrown $                                                  
+! $Rev: 4160 $                                                          | 
+! $Date: 2014-10-11 22:36:54 +0200 (Sa, 11 Okt 2014) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,9 +29,10 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
-!-V
-!-V                        Oct 2014 D. Brown
-!-V                        Disable EMAX tests for atomic relaxation data (NSUB=6)
+!-V         Version 8.21   September 2014 D. Brown, A. Trkov
+!-V                        - Disable EMAX tests for atomic relaxation data
+!-V                          (NSUB=6, Maximum energy for Atomic relaxation data)
+!-V                        - Add more super-heavy elements.
 !-V         Version 8.20   March 2013 A. Trkov
 !-V                        Enable checking of files with a large number
 !-V                        of angular distribution data
@@ -263,7 +264,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.20'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.21'
 !
 !     Define variable precision
 !
@@ -1712,7 +1713,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
 !     DEFINE ELEMENT SYMBOLS
 !
-      INTEGER(KIND=I4), PARAMETER :: IELM=113
+      INTEGER(KIND=I4), PARAMETER :: IELM=126
       CHARACTER(LEN=2), DIMENSION(IELM), PARAMETER ::                   &       
      &  ELEMNT = (/'nn',                                                &       
      &       'H ','He','Li','Be','B ','C ','N ','O ','F ','Ne',         &       
@@ -1726,7 +1727,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
      &       'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',         &       
      &       'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',         &       
      &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',         &       
-     &       'Rg','XX'/)
+     &       'Rg','Cn','A3','Fl','A5','Lv','A7','A8','A9','B0',         &
+     &       'B1','B2','B3','B4','XX'/)
 !
 !     Set control parameters from the first material record
 !
@@ -1828,14 +1830,15 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
-         CASE (4,5) ! disable test for NSUB=6, EMAX is irrelevant for atomic structure data
+         CASE (4,5,6)
+!           Energy does not appear in Atomic relaxation data
+!           Do not test for EMAX
+            IF(NSUB.EQ.6) EMAX=0.
             CALL TEST2F(EMAX,0.,'EMAX')
          CASE (12)
             CALL TEST1F(EMAX,0.,5.,'EMAX')
          CASE DEFAULT
-            IF (NSUB.NE.6) THEN  ! disable test for NSUB=6, EMAX is irrelevant for atomic structure data
-                CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
-            ENDIF
+            CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
       END SELECT
 !
 !     Check MAT number against ZA for ENDF/B
@@ -1948,6 +1951,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
          CALL RDTEXT
          IF(IERX.EQ.1)   GO TO 100
          IF(NC.EQ.1) THEN
+!           Allow blank instead of zero for elements?
+!           IF(TEXT(7:11).EQ.'     '.AND.IA.EQ.0) ZSA(7:11)='     '
             IF(NSUB.NE.12.AND.ZSA.NE.TEXT(1:11).AND.NINT(ZA).NE.MAT)THEN
                EMESS = 'ZSYNAM SHOULD BE "'//TRIM(ZSA)//'" NOT "'//     &       
      &                 TRIM(TEXT(1:11))//'"'
