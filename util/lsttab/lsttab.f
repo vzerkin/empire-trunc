@@ -50,6 +50,7 @@ C-V         Dimensions of ZEL and FRC should be 24.
 C-V  14/06  Improve the normalisation of the fission spectra by
 C-V         interpolating the ratio to Maxwellian to a fine grid,
 C-V         restoring function values and then integrating.
+C-V  14/07  Restore printout of EXFOR number for fission spectra.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -94,6 +95,7 @@ C-
      1            ,FLEF(MXEN),COM(MXEN)
       CHARACTER*84 COM1,COM2
       CHARACTER*84 C84,RFX(MPT)
+      CHARACTER*124 COML
       DIMENSION    ES(MXP),SG(MXP),UG(MXP)
      &            ,EP(MPT),DA(MPT),DB(MPT),FP(MPT),FA(MPT),FB(MPT)
      &            ,RWO(MXR),ZEL(MXIS),FRC(MXIS)
@@ -457,8 +459,8 @@ C*         the scratch unit LTM:
 C*         Renormalise each set of points to the average of the
 C*         last curve, if present
           REWIND LLL
-   82     READ (LLL,96,END=86) COM1
-          READ (LLL,96,END=84) COM2
+   82     READ (LLL,124,END=86) COML
+          READ (LLL, 96,END=84) COM2
           KP=0
           DO WHILE(COM2(1:20).NE.'                    ')
             KP=KP+1
@@ -467,7 +469,7 @@ C*         last curve, if present
             READ (LLL,96,END=84) COM2
           END DO
 C* Write the header of the experimental data
-   84     WRITE(LPN,96) COM1
+   84     WRITE(LPN,124) COML
           IF(KP.GT.0) THEN
 C*        -- Integrate the function in the range of experimental data
             EA=EP(1)
@@ -538,12 +540,13 @@ C*
    91 FORMAT(2A40)
    92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,F10.3,F8.2,F10.3,6X,I8)
    93 FORMAT(A40,F10.3)
-   94 FORMAT(1P,E11.5E1,2E11.4,E11.5E1,2E11.4)
+   94 FORMAT(1P,E11.5E1,2E11.4,E11.4,2E11.4)
    95 FORMAT(A40,I6)
    96 FORMAT(A84)
    97 FORMAT(BN,I10)
    98 FORMAT(BN,F10.0)
    99 FORMAT(A40,A84)
+  124 FORMAT(A124)
       END
       FUNCTION YTGPNT(NP,XX,YY,XA,XB)
 C-Title  : Function YTGPNT
