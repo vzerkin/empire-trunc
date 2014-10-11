@@ -1,6 +1,6 @@
-! $Rev: 3348 $                                                         |
-! $Date: 2013-03-25 15:16:04 +0100 (Mo, 25 Mär 2013) $                                                     
-! $Author: dbrown $                                                  
+! $Rev: 4161 $                                                         |
+! $Date: 2014-10-11 22:38:28 +0200 (Sa, 11 Okt 2014) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -30,6 +30,12 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.16   September 2014   A. Trkov
+!-V                        Skip warning on AWI test for electrons
+!-V                        Deactivate E-range test for MT=505,506
+!-V         Version 8.15   March 2014   A. Trkov
+!-V                        Increase the upper limit of nu-bar from 10 to 20
+!-V                        (relevant for high-energy files extending to 200 MeV)
 !-V         Version 8.14   October 2012   A. Trkov
 !-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.13   October 2012   A. Trkov
@@ -224,7 +230,7 @@
 !
 !     FIZCON VERSION NUMBER
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.14'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -1812,10 +1818,12 @@
       END DO
       IF(JPART.EQ.11) THEN
          EMESS = 'AWI TEST BYPASSED FOR ELECTRONS.'
-      ELSE
+!        Skip warning message and continue
+         GO TO 10
+       ELSE
          EMESS = 'AWI TEST BYPASSED FOR PARTICLE MASS GREATER THAN 4.'
       END IF
-      CALL ERROR_MESSAGE(0)
+      CALL WARNING_MESSAGE(1)
 !
 !     PROCESS LAST CONTROL RECORD
 !
@@ -1899,8 +1907,9 @@
       INTEGER(KIND=I4), PARAMETER :: NNUS=3
       CHARACTER(LEN=4), DIMENSION(NNUS), PARAMETER ::                   &       
      &         KNU = (/'NU  ','NUD ','NUP '/)
+! Upper limit for the values of nu-bar
       REAL(KIND=R4), DIMENSION(NNUS), PARAMETER ::                       &      
-     &         UPR = (/10.0,1.0,10.0/)
+     &         UPR = (/20.0,1.0,20.0/)
 !
       IF(IENT.EQ.2) THEN
 !********READ DECAY CONSTANTS
@@ -7241,10 +7250,10 @@
       CALL STORF(MF,MT,ELO,EHI)
 !
 !     SEE THAT DATA SPAN THE SAME RANGE AS IN FILE 23
-!
-      IF(MT.EQ.505.OR.MT.EQ.506) THEN
-         CALL ISFIL(MF,23,MT,502)
-      END IF
+!     -- This test is deemed unnecessary by the author of the EPDL library
+!     IF(MT.EQ.505.OR.MT.EQ.506) THEN
+!        CALL ISFIL(MF,23,MT,502)
+!     END IF
 !
       RETURN
       END SUBROUTINE CKF27
