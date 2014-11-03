@@ -1,10 +1,10 @@
-# $Rev: 4164 $
+# $Rev: 3601 $
 # $Author: rcapote $
-# $Date: 2014-11-03 16:32:44 +0100 (Mo, 03 Nov 2014) $
+# $Date: 2013-12-03 12:02:16 +0100 (Tue, 03 Dec 2013) $
 #
 #!/bin/sh
 # the next line restarts using wish\
-exec wish8.4 "$0" "$@" 
+exec wish "$0" "$@" 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -5493,14 +5493,15 @@ global widget file
    gets $plotc4log line
    while {[gets $plotc4log line] >= 0} {
       if [regexp ==== $line] {break}
-   set num [string range $line 72 75]
+   set num [string range $line 73 75]
    set pej [string range $line 80 83]
-   set ej  [string range $line 12 16]
+   set ej  [string range $line 13 16]
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
    set ein [string range $line 45 53]
+   #set ang [string range $line 56 58]
    set ang [string range $line 55 62]
-   set elv [string range $line 63 71]
+   set elv [string range $line 63 72]
    if { $pej == "   0" } {set pejc "g"
    } elseif {$pej == "   1"} {set pejc "n"
    } elseif {$pej == "1001"} {set pejc "p"
@@ -5510,19 +5511,19 @@ global widget file
    } elseif {$pej == "1003"} {set pejc "t"
    } else {set pejc "?"
    }
-   if { $ej == "    0" } {set ejc "g"
-   } elseif {$ej == "    1"} {set ejc "n"
-   } elseif {$ej == " 1001"} {set ejc "p"
-   } elseif {$ej == " 2004"} {set ejc "a"
-   } elseif {$ej == " 1002"} {set ejc "d"
-   } elseif {$ej == " 2003"} {set ejc "h"
-   } elseif {$ej == " 1003"} {set ejc "t"
-   } else {set ejc "$ej"
+   if { $ej == "   0" } {set ejc "g"
+   } elseif {$ej == "   1"} {set ejc "n"
+   } elseif {$ej == "1001"} {set ejc "p"
+   } elseif {$ej == "2004"} {set ejc "a"
+   } elseif {$ej == "1002"} {set ejc "d"
+   } elseif {$ej == "2003"} {set ejc "h"
+   } elseif {$ej == "1003"} {set ejc "t"
+   } else {set ejc "?"
    }
    if { $mtt == "   1" } {set mt "total"
    } elseif {$mtt == "   2"} {set mt "elast."
    } elseif {$mtt == "   3"} {set mt "nonel."
-   } elseif {$mtt == "   4"} {set mt "1n    "
+   } elseif {$mtt == "   4"} {set mt "inel-tot"
    } elseif {$mtt == " 452"} {set mt "nu-tot"
    } elseif {$mtt == " 455"} {set mt "nu-del"
    } elseif {$mtt == " 456"} {set mt "nu-pr "
@@ -5530,14 +5531,6 @@ global widget file
    } elseif {$mtt == "  17"} {set mt "3n   "
    } elseif {$mtt == "  18"} {set mt "fiss."
    } elseif {$mtt == "  37"} {set mt "4n   "
-   } elseif {$mtt == " 152"} {set mt "5n   "
-   } elseif {$mtt == " 153"} {set mt "6n   "
-   } elseif {$mtt == " 154"} {set mt "2nt  "
-   } elseif {$mtt == " 155"} {set mt "ta   "
-   } elseif {$mtt == " 156"} {set mt "4np  "
-   } elseif {$mtt == " 157"} {set mt "3nd  "
-   } elseif {$mtt == " 160"} {set mt "7n   "
-   } elseif {$mtt == " 161"} {set mt "8n   "
    } elseif {$mtt == " 102"} {set mt "capt."
    } elseif {$mtt == " 103"} {set mt "p    "
    } elseif {$mtt == " 104"} {set mt "d    "
@@ -5552,13 +5545,6 @@ global widget file
    } elseif {$mtt == " 115"} {set mt "pd   "
    } elseif {$mtt == " 116"} {set mt "pt   "
    } elseif {$mtt == " 117"} {set mt "da   "
-   } elseif {$mtt == " 201"} {set mt "tot-n"
-   } elseif {$mtt == " 202"} {set mt "tot-g"
-   } elseif {$mtt == " 203"} {set mt "tot-p"
-   } elseif {$mtt == " 204"} {set mt "tot-d"
-   } elseif {$mtt == " 205"} {set mt "tot-t"
-   } elseif {$mtt == " 206"} {set mt "tot-h"
-   } elseif {$mtt == " 207"} {set mt "tot-a"
    } elseif {$mtt == "  19"} {set mt "nf-1c"
    } elseif {$mtt == "  20"} {set mt "nf-2c"
    } elseif {$mtt == "  21"} {set mt "nf-3c"
@@ -5578,22 +5564,12 @@ global widget file
    } elseif {$mtt == "  34"} {set mt "nh   "
    } elseif {$mtt == " 251"} {set mt "mu-el."
    } elseif {$mtt == "  51"} {set mt "inel."
-   } elseif {$mtt >= 9000} {
-     if {$ejc == "g"} {set mt "Xg"
-     } elseif {$ejc == "n"} {set mt "Xn"
-     } elseif {$ejc == "p"} {set mt "Xp"
-     } elseif {$ejc == "a"} {set mt "Xa"
-     } elseif {$ejc == "d"} {set mt "Xd"
-     } elseif {$ejc == "h"} {set mt "Xh"
-     } elseif {$ejc == "t"} {set mt "Xt"
-     } else {set mt "$ejc"
-     }
+   } elseif {$mtt >= 9000} {set mt "X$ejc  "
    } else {set mt $mtt
    }
    if { $mff == "  1" } { set mf INFO
    } elseif {$mff == "  2"} {set mf RES
    } elseif {$mff == "  3"} {set mf XS
-   } elseif {$mff == " 10"} {set mf XSD
    } elseif {$mff == "  4"} {set mf DA
    } elseif {$mff == "  5"} {set mf DE
      if {$mtt == "  18"} {set mt "PFNS"}
@@ -5907,7 +5883,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.2.3 (Malta), September 2014, Graphical User Interface (GUI) "
+    wm title $top "EMPIRE-3.2 (Malta), November 2013, Graphical User Interface (GUI) "
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -6148,8 +6124,8 @@ adjourn .top75}} \
         -command {} -label {Main 2} -width 0 
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
-#2013-zerkin???
-    $top.tab88 add -command {} -label {Reserved} -width 0 
+    $top.tab88 add \
+        -command {} -label {} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -6883,7 +6859,7 @@ lappend dd} \
     vTcl:DefineAlias "$site_9_0.mcl78" "Mclistbox1" vTcl:WidgetProc "Toplevel1" 1
     $site_9_0.mcl78 column add col1 \
         -background #ffffff -font {Helvetica -10} -label # -labelrelief flat \
-        -resizable 1 -visible 1 -width 6 
+        -resizable 1 -visible 1 -width 5 
     $site_9_0.mcl78 column add col2 \
         -background #f999f999f999 -font {Helvetica -10 } -label MF \
         -labelrelief flat -resizable 1 -visible 1 -width 5 
@@ -8266,7 +8242,6 @@ cd $workdir} \
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
         -pady 27 -side left 
-#2013-zerkin???
     pack $site_8_8.fra84 \
         -in $site_8_8 -anchor center -expand 1 -fill both -side top 
     $top.tab88 select 0
@@ -8866,9 +8841,6 @@ cd $workdir} \
         -in $top -anchor center -expand 0 -fill x -side top 
     pack $top.tab88 \
         -in $top -anchor center -expand 1 -fill both -side top 
-
-#---2013.11.21, V.Zerkin@iaea.org--- delete 'Reserved' Tab
-    $top.tab88 delete 3
 
     vTcl:FireEvent $base <<Ready>>
 }
