@@ -1,6 +1,6 @@
-!cc   * $Rev: 4154 $
+!cc   * $Rev: 4166 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-10-05 23:16:29 +0200 (So, 05 Okt 2014) $
+!cc   * $Date: 2014-11-04 19:20:57 +0100 (Di, 04 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1254,14 +1254,16 @@ C
             WRITE (8,*) ' WARNING!!!! HI reactions)'
             WRITE (8,*) ' '
          ENDIF
-         IF (CNAngd.NE.0 .and. LHRtw.EQ.0) THEN
-            LHRtw = 1
-            EHRtw = EIN + 0.5d0
-            WRITE (8,*) ' '
-            WRITE (8,*) ' WARNING: HRTW has been turned on to calculate'
-            WRITE (8,*) ' WARNING:     anisotropic angular distribution'
-            WRITE (8,*) ' '
-         ENDIF
+C        IF (CNAngd.NE.0 .and. LHRtw.EQ.0) THEN
+C           ! LHRtw = 1
+C           ! EHRtw = EIN + 0.5d0
+C           WRITE (8,*) ' '
+C           WRITE (8,*) 
+C    &' ERROR: Anisotropic angular distribution requested BUT'
+C    &' ERROR:   HRTW input keyword is 0 (turned off)        '
+C           STOP 'ERROR: CNANG=1 but HRTW=0 !!! (see long output)'
+C           WRITE (8,*) ' '
+C        ENDIF
          IF (LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
             LHRtw = 0
             EHRtw = 0.d0
@@ -5994,6 +5996,8 @@ C-----
      &           '('' Width fluctuations calculated within HRTW '',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
             ELSE
+              WRITE (8,
+     &        '('' HRTW width fluctuation correction not considered'')') 
                LHRtw = 0
                EHRtw = 0.d0
             ENDIF
