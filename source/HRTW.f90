@@ -172,6 +172,8 @@
    REAL*8 :: elada(NDAngecis), elleg(NDAngecis)
    INTEGER neles
    COMMON /angula/elada,elleg,neles
+   REAL*8 :: sumin_w, sumtt_w
+   COMMON /EWcorr/ sumin_w, sumtt_w
 
    CHARACTER(1), parameter :: cpar(2) = (/'+', '-'/)
 
@@ -184,6 +186,7 @@
    REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
    REAL*8 d0c
    REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
+   REAL*8 :: sumin_s, sumtt_s, stmp, ewcor
 
    type (channel), pointer :: out
    type (fusion),  pointer :: in
@@ -226,7 +229,6 @@
    coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
 
    ! start CN nucleus decay
-
    DO ipar = 1, 2                                       ! do loop over decaying nucleus parity
        ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
        DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
@@ -275,6 +277,8 @@
              nnur = NREs(nejc)
              summa = HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
           ENDDO                                         !do loop over ejectiles  ***done***
+
+          ! write(*,*) sumin_w,sumtt_w
 
           num%part = nch                                !store number of particle channel entries
 
@@ -339,13 +343,38 @@
 
           ! construct scratch matrix for decay of the Jcn state
 
+          sumin_s = 0.d0
+          sumtt_s = 0.d0
+          ! write(*,*) ' NProject=',NPRoject,' LEVtarg=',LEVtarg
+          
           DO i = 1, num%part                          !scan strong particle channels (note: weak channels are already in SCRt)
              out => outchnl(i)
              IF(out%kres>0) THEN                ! continuum channels
                 SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) + out%t*out%rho/de
              ELSE IF(out%kres<0) THEN           ! discrete level channels
-                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho
+                if( (out%nejc.EQ.NPRoject) .and. (-out%kres.NE.LEVtarg) ) then
+                   stmp = out%t*out%rho 
+                   sumin_s = sumin_s + stmp * CINRED(-out%kres) 
+                   sumtt_s = sumtt_s + stmp 
+                   SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
+                   ! write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' CINRED(ilev)=',sngl(CINRED(-out%kres))
+                   ! write(*,*) sumin_s,sumtt_s,' strong'
+                else
+                   SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho
+                endif
              ENDIF
+          ENDDO
+          ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)  
+          !write(*,*) 'EWCORR=', ewcor
+
+          DO i = 1, num%part                          !scan strong particle channels (note: weak channels are already in SCRt)
+             out => outchnl(i)
+             IF(out%kres>0) cycle ! SKIP continuum channels
+             ! discrete level channels
+             if( (out%nejc.EQ.NPRoject) .and. (-out%kres.EQ.LEVtarg) ) then
+                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor
+                !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
+             endif
           ENDDO
 
           IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
@@ -373,6 +402,7 @@
 
              ! CN angular distributions (neutron (in)elastic scattering ONLY!)
 
+             ewcor = 0.d0
              IF(.not.CN_isotropic) THEN
                 ! accumulate Legendre coefficients
                 nejc = 1
@@ -394,13 +424,20 @@
                    ELSEIF(out%kres < 0) THEN
                      PL_lmax(-out%kres) = 2*in%l
                    ENDIF
+
+                   if(i==j) then
+                     stmp = out%t*out%rho 
+                   else
+                     stmp = out%t*out%rho * CINRED(-out%kres) 
+                   endif
+
                    DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
                      xleg = dble(lleg)
                      tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
                      ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(j)%kres
                      ! if(tmp==0.D0) cycle
                      if(dabs(tmp) < 1.d-14) cycle
-                     tmp = tmp*xnor*out%t*out%rho
+                     tmp = tmp*xnor*stmp  !*out%t*out%rho
                      IF(i==j) tmp = tmp*out%eef
 
                      IF(out%kres > 0) THEN
@@ -419,14 +456,23 @@
                    !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
 
                 ENDDO
-             ENDIF    !end of Legendre coeficients accumualtion
+             ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
 
+          
              CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
              IF(LHRtw==1) THEN
                 out => outchnl(i)
                 SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
              ENDIF
+
+             IF(ewcor.NE.0.d0) THEN
+                out => outchnl(i)
+                !restore SCRtl before new elastic is calculated
+                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - ewcor    
+             ENDIF
+
+             !write(*,*) 'ewcor=',ewcor   
 
           ENDDO    !end do loop over incident channels
 
@@ -567,11 +613,12 @@
    !cc
 
    IMPLICIT NONE
-
    ! COMMON variables
    REAL*8, DIMENSION(ndlw,3) :: ELTLJ
    REAL*8, DIMENSION(ndlw) :: ELTL
    COMMON /ELASTIC/ ELTl,ELTlj
+   REAL*8 :: sumin_w, sumtt_w
+   COMMON /EWcorr/ sumin_w, sumtt_w
 
    ! Dummy arguments
 
@@ -579,7 +626,7 @@
 
    ! Local variables
 
-   REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, sumdl, tld, xjc, xj, xjr, summa
+   REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, sumdl, tld, xjc, xj, xjr, summa, sumin, sumtt
    INTEGER*4 :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
 
    type (channel), pointer :: out
@@ -672,6 +719,8 @@
    IF(IZA(nnur)==IZA(0)) memel = 0    !clear memorized elastic channels when entering new J-pi CN state
    eoutc = EX(iec,nnuc) - Q(nejc,nnuc)
 
+   sumin_w = 0.d0
+   sumtt_w = 0.d0
    DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
      IF(IZA(nnur)==IZA(0) .AND. i==levtarg) CYCLE     !skip if elastic
      eout = eoutc - ELV(i,nnur)
@@ -690,7 +739,7 @@
            xj = k + jndex - (2.0 + SEJc(nejc))
            IF(xj<jmin .or. xj>jmax) CYCLE
            rho1 = 1.d0                                !reuse level density variable
-           IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)     !if inelastic - apply respective scaling
+           ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
            tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
            IF(tld<1.0d-15) CYCLE                      !ignore very small channels
            H_Sumtl = H_Sumtl + tld*rho1
@@ -710,7 +759,9 @@
               out%xjrs = XJLv(i,nnur)
               out%pres = LVP(i,nnur)
            ELSEIF(tld>1.0d-15) THEN                       !weak channel (will not be iterated so can be stored in SCRtl)
-              SCRtl(i,nejc) = SCRtl(i,nejc) + tld*rho1
+              SCRtl(i,nejc) = SCRtl(i,nejc) + tld*rho1 * CINred(i) 
+              sumin_w = sumin_w + tld*rho1 * CINRED(i) 
+              sumtt_w = sumtt_w + tld*rho1 
               H_Sweak = H_Sweak + tld*rho1
               H_Sweaks = H_Sweaks + tld**2*rho1
            ENDIF
@@ -746,7 +797,7 @@
               num%elah = nch                          !set it also as the last one in case there are no more
            ENDIF
            IF(nch > num%elah) num%elah = nch          !if another elastic augment position of last elastic channel
-           rho1 = celred
+           rho1 = CELred
            out => outchnl(nch)
            out%l = k-1
            out%j = xj

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4156 $
+Ccc   * $Rev: 4167 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-06 00:08:57 +0200 (Mo, 06 Okt 2014) $
+Ccc   * $Date: 2014-11-04 19:25:40 +0100 (Di, 04 Nov 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -48,7 +48,7 @@ C
 
       INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
 !      INTEGER ilevcol, ilev
-      DOUBLE PRECISION GET_DDXS, GET_DDXScont
+      DOUBLE PRECISION GET_DDXS !, GET_DDXScont
 C-----
 C-----Continuum
 C-----
@@ -90,18 +90,18 @@ C
 C           CN emission angular distribution to the continuum
 C           should be considered
 C 
-            IF (Nnuc.eq.1 .and. Nejc.EQ.1 .and. Iec.EQ.NEX(1) .and.
-     >          PLcont_lmax(icse).ge.0) THEN
+C           IF (Nnuc.eq.1 .and. Nejc.EQ.1 .and. Iec.EQ.NEX(1) .and.
+C    >          PLcont_lmax(icse).ge.0) THEN
 C              xs_norm = PL_CNcont(0,icse)
 C              IF(xs_norm.gt.0.d0) write(*,*) 'Cont. bin=',icse,
 C    >     	 ' PLcont(2)/PLcont(0)=',PL_CNcont(2,icse)/xs_norm
-	         xs_cn  =GET_DDXScont(CANGLE(1),icse)
-	         xs_norm=GET_DDXScont(CANGLE(45),icse)
-	         if( dabs(xs_cn-xs_norm).gt.0.1d0) 
-     >           write(151,'(2x,I5,A7,d12.6,A8,d12.6,A7,d12.6)') icse,
-     >               ' XS(0)=',xs_cn,' XS(90)=',sngl(xs_norm),
-     >               '  Diff=',dabs(xs_cn-xs_norm)
-            ENDIF
+C              xs_cn  =GET_DDXScont(CANGLE(1),icse)
+C	         xs_norm=GET_DDXScont(CANGLE(45),icse)
+C	         if( dabs(xs_cn-xs_norm).gt.0.1d0) 
+C    >           write(151,'(2x,I5,A7,d12.6,A8,d12.6,A7,d12.6)') icse,
+C    >               ' XS(0)=',xs_cn,' XS(90)=',sngl(xs_norm),
+C    >               '  Diff=',dabs(xs_cn-xs_norm)
+C           ENDIF
          ENDIF
       ENDDO !over residual energies in continuum
 C-----
@@ -210,7 +210,8 @@ C
 C                  Normalizing calculated integrated XS ( from PL_CN() )
 C                  to the discrete level population (used for the isotropic calculation)
                    CSAlev(na,il,Nejc) = 
-     >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
+C    >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
+     >                     CSAlev(na,il,Nejc) + xs_cn                    
                  ENDDO
                ELSE
                  DO na = 1, NDANG
@@ -581,6 +582,7 @@ Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      implicit none 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -595,7 +597,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION corr, eout, eoutc, frde, hisr, s, smax,
-     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr
+     &   smin, sumdl, sumtl1, sumtl2, xjc, xjr, sumin, sumtt
       INTEGER i, ichsp, ier, iermax, ietl, iexc, il, ip1, ip2, ipar,
      &        itlc, j, jr, l, lmax, lmaxf, lmin, mul
 C
@@ -768,7 +770,9 @@ C-----
          SCRtl(i,Nejc) = 0.d0
       ENDDO
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-
+      
+      sumin = 0.d0
+      sumtt = 0.d0
 C-----do loop over inelastic levels ------------------------------------
       DO i = 1, NLV(Nnur)
 C        Elastic channels excluded, done after the loop
@@ -799,7 +803,9 @@ C--------do loop over l --- done ----------------------------------------
 C--------loop over channel spin ------ done ----------------------------
          if(IZA(Nnur).EQ.IZA(0)) THEN
            SCRtl(i,Nejc) = sumdl * CINRED(i) 
-           Sum = Sum + sumdl * CINRED(i) 
+           Sum = Sum + sumdl    !* CINRED(i) 
+           sumin = sumin + sumdl * CINRED(i) 
+           sumtt = sumtt + sumdl 
          else
            SCRtl(i,Nejc) = sumdl  
            Sum = Sum + sumdl 
@@ -839,7 +845,8 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
 C--------loop over channel spin ------ done ----------------------------
-         SCRtl(i,Nejc) = sumdl*CELred
+         
+         SCRtl(i,Nejc) = (sumdl +sumtt -sumin)*CELred
          Sum = Sum + sumdl*CELred
 !         write(8,*) 'Sum to elastic', sumdl*CELred
       ENDIF !end of elastic
