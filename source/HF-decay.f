@@ -1105,15 +1105,19 @@ C----------CN contribution to elastic ddx
                WRITE (8,*) ' CN elas. cross section (BB)',
      &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
 
+               xs_norm=1.d0
+ 	         IF(PL_CN(0,LEVtarg).gt.0.d0) 
+     &           xs_norm = ELCncs/PL_CN(0,LEVtarg)
+
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
      &           EINl, 4.d0*pi*ELCncs,  
-     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10),
+     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10),
      &           'ENG-WEID. TRANSF.'  
                ELSE
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
      &           EINl, 4.d0*pi*ELCncs,  
-     &                      (4.d0*pi*PL_CN(0,ilevcol),ilevcol=1,10)
+     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
 
                WRITE (8,*) 
@@ -1121,29 +1125,33 @@ C----------CN contribution to elastic ddx
      &cluding the Compound Elastic'
                WRITE (8,*) 
 
-               xs_norm=1.d0
  	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
-                xs_norm = ELCncs/PL_CN(0,LEVtarg)
 C	          write(*,*) 'NORM=',xs_norm
                 DO iang = 1, NDANG
                   cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
                 ENDDO
 
                 IF(DABS(xs_norm-1.d0).gt.1.d-4) then
-C                WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-C                WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-                 WRITE(8,*)' ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-                 WRITE(8,*)' PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-                 WRITE(8,*) 
+C                 WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+C                 WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+                  WRITE(8,*)' ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+                  WRITE(8,*)' PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+                   WRITE(8,*) 
      &       ' Renormalizing CN Ang.Dist. by ELCncs/PL_CN(0,LEVtarg)=',
      &       sngl(xs_norm)
-                 WRITE(8,*) 
+                   WRITE(8,*) 
                 ENDIF
+
+               ELSE
+
+                 DO iang = 1, NDANG
+                   cel_da(iang) = ELCncs ! isotropic
+                 ENDDO
 
                ENDIF
 
-
              ENDIF
+
            ENDIF
 
            gang = 180.d0/(NDAng - 1)
