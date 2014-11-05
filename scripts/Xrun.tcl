@@ -1,6 +1,6 @@
-# $Rev: 4172 $
+# $Rev: 4174 $
 # $Author: zerkinv $
-# $Date: 2014-11-05 12:01:00 +0100 (Mi, 05 Nov 2014) $
+# $Date: 2014-11-05 16:23:48 +0100 (Mi, 05 Nov 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5955,7 +5955,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/run $file $mat &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 1 1 1 1" &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5969,7 +5969,7 @@ adjourn .top75} \
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 0 0 0 0" &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
