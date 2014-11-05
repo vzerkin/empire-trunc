@@ -22,13 +22,23 @@ echo -n 'Choose one of the above (without .out extention!): '
 read file
 fi
 
+# Checking if EMPIRE run sucessfully (at least .out was produced)
+if [ ! -f $file.out ]; then
+echo ' '
+echo ' '
+echo 'ERROR: EMPIRE output is not available (Run Empire or check the long listing)'
+echo ' '
+echo -n 'Press any key to continue ..'
+read anykey
+exit
+fi
+
 # Deleting previous file if exist
 if [ -s $file-e.endf ]; then
   rm $file-e.endf 2>/dev/null
 fi
 
 #run EMPEND to format EMPIRE output into ENDF
-
 # EMPEND takes .out file, writes endf. Also needs mesh, thinning, and MAT:
 cat >EMPEND.INP <<EOF
 $file.out                                                                                               
@@ -43,7 +53,17 @@ $EMPIREDIR/util/empend/empend <EMPEND.INP
 mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
 
-
+# Checking if EMPEND run sucessfully 
+if [ ! -f $file-e.endf ]; then
+echo ' '
+echo ' '
+echo 'ERROR: ENDF formatting failed, rerun format or Empire'
+echo '       Pls notify Dr. A.Trkov at a.trkov@iaea.org    '
+echo ' '
+echo -n 'Press any key to continue ..'
+read anykey
+exit
+fi
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
 if [ -s $file-res.endf ]; then
