@@ -1,10 +1,10 @@
-# $Rev: 4168 $
+# $Rev: 4170 $
 # $Author: rcapote $
-# $Date: 2014-11-04 19:30:02 +0100 (Di, 04 Nov 2014) $
+# $Date: 2014-11-05 10:17:06 +0100 (Mi, 05 Nov 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
-exec wish8.4 "$0" "$@" 
+exec wish "$0" "$@" 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -5499,9 +5499,10 @@ global widget file
    set mff [string range $line 18 20]
    set mtt [string range $line 22 25]
    set ein [string range $line 45 53]
+   #set ang [string range $line 56 58]
    set ang [string range $line 55 62]
    set elv [string range $line 63 71]
-   if { $pej == "   0" } {set pejc "g"
+   if {$pej == "   0"} {set pejc "g"
    } elseif {$pej == "   1"} {set pejc "n"
    } elseif {$pej == "1001"} {set pejc "p"
    } elseif {$pej == "2004"} {set pejc "a"
@@ -5907,7 +5908,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.2.3 (Malta), September 2014, Graphical User Interface (GUI) "
+    wm title $top "EMPIRE-3.2.3 (Malta), svn 4170, November 2014, Graphical User Interface (GUI) "    
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -6148,8 +6149,9 @@ adjourn .top75}} \
         -command {} -label {Main 2} -width 0 
     $top.tab88 add \
         -command {} -label {ZVV plots} -width 0 
-#2013-zerkin???
-    $top.tab88 add -command {} -label {Reserved} -width 0 
+#2013-zerkin???        
+    $top.tab88 add \
+        -command {} -label {Reserved} -width 0 
     $top.tab88 add \
         -command {} -label Files -width 0 
     $top.tab88 add \
@@ -6989,6 +6991,7 @@ exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
     ::iwidgets::combobox $site_9_0.com77 \
         \
         -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page3.cs.fra79.com77 _addToList}} \
+
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name} -selectioncommand {set ddx $memlist($multi)} \
         -background #d9d9d9 -textbackground #ffffff -textvariable multi -unique 1 -width 37 
@@ -8266,7 +8269,7 @@ cd $workdir} \
     pack $site_9_0.fra79 \
         -in $site_9_0 -anchor nw -expand 0 -fill none -ipady 5 -padx 5 \
         -pady 27 -side left 
-#2013-zerkin???
+#2013-zerkin???        
     pack $site_8_8.fra84 \
         -in $site_8_8 -anchor center -expand 1 -fill both -side top 
     $top.tab88 select 0
@@ -8866,7 +8869,7 @@ cd $workdir} \
         -in $top -anchor center -expand 0 -fill x -side top 
     pack $top.tab88 \
         -in $top -anchor center -expand 1 -fill both -side top 
-
+        
 #---2013.11.21, V.Zerkin@iaea.org--- delete 'Reserved' Tab
     $top.tab88 delete 3
 
@@ -8902,6 +8905,7 @@ bind "_vTclBalloon" <<vTclBalloon>> {
         label .vTcl.balloon.l  -text ${%W} -relief flat  -bg #ffffaa -fg black -padx 2 -pady 0 -anchor w
         pack .vTcl.balloon.l -side left -padx 1 -pady 1
         wm geometry  .vTcl.balloon  +[expr {[winfo rootx %W]+[winfo width %W]/2}]+[expr {[winfo rooty %W]+[winfo height %W]+4}]
+
         set set 1
     }
 }
