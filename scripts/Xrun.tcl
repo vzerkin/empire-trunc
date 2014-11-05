@@ -1,6 +1,6 @@
-# $Rev: 4170 $
-# $Author: rcapote $
-# $Date: 2014-11-05 10:17:06 +0100 (Mi, 05 Nov 2014) $
+# $Rev: 4172 $
+# $Author: zerkinv $
+# $Date: 2014-11-05 12:01:00 +0100 (Mi, 05 Nov 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6203,14 +6203,19 @@ editFile $file.inp } \
     button $site_11_0.cpd75 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #efefef \
-        -command {if {$cempire == 1 && [file exists $file.inp ]} {exec xterm -e $::env(EMPIREDIR)/scripts/runE $file}
-#if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file $mat }
-if {$cformat == 1 && [file exists $file.out ]} {exec xterm -e $::env(EMPIREDIR)/scripts/format $file}
-if {$cverify == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file}
-#if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file $mat }
-if {$cprepro == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/process $file}
-if {$cplot == 1 && [file exists $file.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file}
-#if {$cplot == 1 && [file exists $file-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file}
+        -command {set lst1a "";
+    if {$cempire == 1 && [file exists $file.inp ]} {set a1 "1"} else {set a1 "0"}
+    set lst1a [concat $lst1a " " $a1];
+    if {$cformat == 1} {set a1 "1"} else {set a1 "0"}
+    set lst1a [concat $lst1a " " $a1];
+    if {$cverify == 1} {set a1 "1"} else {set a1 "0"}
+    set lst1a [concat $lst1a " " $a1];
+    if {$cprepro == 1} {set a1 "1"} else {set a1 "0"}
+    set lst1a [concat $lst1a " " $a1];
+    if {$cplot == 1} {set a1 "1"} else {set a1 "0"}
+    set lst1a [concat $lst1a " " $a1];
+#tk_dialog .dialogsi Confirm "Confirm \n...lst1a=$lst1a " "" 0 No Yes;
+    if {$lst1a != "" } {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat $lst1a &}
 
 # create list of possible ddx plots
 ddlist
@@ -6816,7 +6821,7 @@ adjourn .top75 }} \
     button $site_9_0.but88 \
         -activebackground #eccceccceccc -activeforeground limegreen \
         -background #efefef \
-        -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file  &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/guizvv.tcl $file  &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkgreen -highlightbackground #dcdcdc \
@@ -6991,7 +6996,6 @@ exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file $multi &} \
     ::iwidgets::combobox $site_9_0.com77 \
         \
         -command {namespace inscope ::iwidgets::Combobox {::.top75.tab88.canvas.notebook.cs.page3.cs.fra79.com77 _addToList}} \
-
         -justify right -labelfont {Helvetica -12 } -labelpos nw \
         -labeltext {List name} -selectioncommand {set ddx $memlist($multi)} \
         -background #d9d9d9 -textbackground #ffffff -textvariable multi -unique 1 -width 37 
