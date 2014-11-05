@@ -1,0 +1,33 @@
+#! /bin/sh -
+# Script to run selected script: runE, format, verify, process, addresonances
+# Created by V.Zerkin, IAEA-NDS, 2014-09-06
+# Usage: $ multiE file_name MAT_number "actions"
+#
+echo par1=$0
+echo par2=$1
+echo par3=$2
+echo par3=$3
+echo EMPIREDIR=$EMPIREDIR
+echo PWD=$PWD
+
+file=$1
+MAT=$2
+actions=$3
+dd=$EMPIREDIR/scripts
+
+    ls0=${#actions}
+    i=0
+    while [ $i -lt $ls0 ] ; do
+	ch=${actions:i:1}
+	#echo i=$i ch=[$ch]
+	if [ "$ch" = "1" ] ; then
+	    if [ "$i" = "0" ] ; then python $dd/runE $file $MAT; fi
+	    if [ "$i" = "2" ] ; then $dd/format $file $MAT ; fi
+	    if [ "$i" = "4" ] ; then $dd/verify $file $MAT ; fi
+	    if [ "$i" = "6" ] ; then $dd/process $file $MAT ; fi
+	    if [ "$i" = "8" ] ; then $dd/addresonances $file $MAT ; fi
+	fi
+	i=$(($i+1))
+    done
+
+exit
