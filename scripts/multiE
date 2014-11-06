@@ -3,27 +3,28 @@
 # Created by V.Zerkin, IAEA-NDS, 2014-09-06
 # Usage: $ multiE file_name MAT_number "actions"
 #
-echo par1=$0
-echo par2=$1
-echo par3=$2
-echo par3=$3
+#echo par1=$0
+#echo par2=$1
+#echo par3=$2
+#echo par3=$3
 #echo EMPIREDIR=$EMPIREDIR
 #echo PWD=$PWD
+#read -p " Press <Enter> key to continue ..."
 
 file=$1
 MAT=$2
 actions=$3
 dd=$EMPIREDIR/scripts
 
-read -p " Press <Enter> key to continue ..."
+
  
     ls0=${#actions}
     i=0
     while [ $i -lt $ls0 ] ; do
-	ch=${actions:i:1}
-	#echo i=$i ch=[$ch]
-	if [ "$ch" = "1" ] ; then
-	    if [ "$i" = "0" ] ; then 
+      ch=${actions:i:1}
+      #echo i=$i ch=[$ch]
+      if [ "$ch" = "1" ] ; then
+          if [ "$i" = "0" ] ; then 
               python $dd/runE $file $MAT; 
               rc=$?
               if [[ $rc == 1 ]] ; then
@@ -51,36 +52,36 @@ read -p " Press <Enter> key to continue ..."
                 exit 1
               fi
           fi
-	    if [ "$i" = "2" ] ; then 
+          if [ "$i" = "2" ] ; then 
              $dd/format $file $MAT ; 
              rc=$?
              if [[ $rc != 0 ]] ; then
                exit 1
              fi
           fi
-	    if [ "$i" = "4" ] ; then 
+          if [ "$i" = "4" ] ; then 
              $dd/verify $file $MAT ; 
              rc=$?
              if [[ $rc != 0 ]] ; then
                exit 1
              fi
           fi
-	    if [ "$i" = "6" ] ; then 
+          if [ "$i" = "6" ] ; then 
              $dd/process $file $MAT ; 
              rc=$?
              if [[ $rc != 0 ]] ; then
                exit 1
              fi
           fi
-	    if [ "$i" = "8" ] ; then 
+          if [ "$i" = "8" ] ; then 
              $dd/addresonances $file $MAT ;
              rc=$?
              if [[ $rc != 0 ]] ; then
                exit 1
              fi
           fi
-	fi
-	i=$(($i+1))
+      fi
+      i=$(($i+1))
     done
 
 exit
