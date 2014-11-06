@@ -10,7 +10,7 @@ xxx.   xx.           ;TARGET  A , Z
 0  0. 0.             ; reserved
 *************************************************************************************************************
 *   Optional input starts here, FREE format, lines starting with *,#,! are comments
-*-----!---------!----!----!----!----!  
+*************************************************************************************************************
 @ TITLE: This is a default EMPIRE-3.2.3 input
 IOUT       3.                                               
 NEX      080.                           ! Number of points in the outgoing energy grid
