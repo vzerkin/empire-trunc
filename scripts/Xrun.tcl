@@ -1,10 +1,10 @@
-# $Rev: 4174 $
-# $Author: zerkinv $
-# $Date: 2014-11-05 16:23:48 +0100 (Mi, 05 Nov 2014) $
+# $Rev: 4185 $
+# $Author: rcapote $
+# $Date: 2014-11-06 02:18:41 +0100 (Do, 06 Nov 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
-exec wish "$0" "$@" 
+exec wish8.4 "$0" "$@" 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -5908,7 +5908,7 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.2.3 (Malta), svn 4170, November 2014, Graphical User Interface (GUI) "    
+    wm title $top "EMPIRE-3.2.3 (Malta), svn 4185, November 2014, Graphical User Interface (GUI) "    
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -5955,7 +5955,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 1 1 1 1" &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 1 1 1 0" & 
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5964,7 +5964,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but86" "Button8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but86 "$site_3_0.but86 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but86 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Launch full sequence (calculations + formatting + preprocessing) }
+        set ::vTcl::balloon::%W {Launch full sequence (calculations + formatting + verifying + plotting) }
     }
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
@@ -6038,7 +6038,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but84" "Button6" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but84 "$site_3_0.but84 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but84 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {View EXFOR data translated into computational format}
+        set ::vTcl::balloon::%W {View EXFOR data translated into computational format (C4)}
     }
     button $site_3_0.but85 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6258,7 +6258,7 @@ adjourn .top75} \
         -textvariable {} -variable cverify 
     $site_10_0.che77 add chk3 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
-        -justify left -selectcolor #00ff00 -text { Preparing for plotting}\
+        -justify left -selectcolor #00ff00 -text { Plotting (zvd)}\
         -textvariable {} -variable cprepro 
     $site_10_0.che77 add chk4 \
         -anchor w -background #d9d9d9 -highlightbackground #d9d9d9 \
@@ -6864,7 +6864,7 @@ adjourn .top75} \
     label $site_9_0.lab81 \
         -activebackground #d9d9d9 -anchor w -background #d9d9d9 \
         -font {Helvetica -12 } -justify left \
-        -text {Select data for ZVV plotting (multiple allowed)} 
+        -text {Select data for ZVView plotting (multiple allowed)} 
     vTcl:DefineAlias "$site_9_0.lab81" "Label8" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.lab81 "$site_9_0.lab81 Label $top all _vTclBalloon"
     bind $site_9_0.lab81 <<SetBalloon>> {
@@ -8704,7 +8704,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu94 add command \
         -command { editFile $file-s.endf } -label {ENDF for plotting} 
     $site_3_0.menu94 add command \
-        -command { editFile $file-e.endf } -label {ENDF from empend} 
+        -command { editFile $file-e.endf } -label {ENDF from EMPEND} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
