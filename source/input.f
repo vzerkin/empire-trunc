@@ -1,6 +1,6 @@
-!cc   * $Rev: 4166 $
+!cc   * $Rev: 4179 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-04 19:20:57 +0100 (Di, 04 Nov 2014) $
+!cc   * $Date: 2014-11-06 02:02:55 +0100 (Do, 06 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -2193,11 +2193,11 @@ Cpr         END DO
 
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(8,*) 'Nuclei marked with < in the table below produce only
-     & inclusive emission spectra'
+        WRITE(8,*) 'Nuclei marked with < below produces inclusive spect
+     &ra only'
         WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(12,*) 'Nuclei marked with < in the table below produces in
-     &clusive spectra'
+        WRITE(12,*) 'Nuclei marked with < below produces inclusive spect
+     &ra only'
       ENDIF
 
       WRITE (8,*) ' '
@@ -3843,10 +3843,10 @@ C--------PCROSS input
               else
                 WRITE (8,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Recommended ~ 1.5)'')') MFPp
+     &  '' (Recommended~1.5)'')') MFPp
                 WRITE (12,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Recommended ~ 1.5)'')') MFPp
+     &  '' (Recommended~1.5)'')') MFPp
               endif
             ENDIF
             GOTO 100
@@ -4110,8 +4110,8 @@ C
      &'('' Coupled Channels Method used for direct inelastic scattering'
      &')')
             IF (DIRect.EQ.2) WRITE (8,
-     &'('' Coupled Channels Method used for Tl calculations in inelastic
-     & channels'')')
+     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.'
+     &')')
             IF (DIRect.EQ.3) WRITE (12,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
@@ -4119,8 +4119,8 @@ C
      &'('' Coupled Channels Method used for direct inelastic scattering'
      &')')
             IF (DIRect.EQ.2) WRITE (12,
-     &'('' Coupled Channels Method used for Tl calculations in inelastic
-     & channels'')')
+     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.'
+     &')')
             GOTO 100
          ENDIF
 C
@@ -6169,18 +6169,18 @@ C
               ENDf(nnuc) = 10  ! using as a flag 
               WRITE (8,
      &       '('' Exclusive spectra will be available for emission'',
-     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+     &         '' from '',I3,A2)') i2, SYMb(nnuc)
               WRITE (12,
      &       '('' Exclusive spectra will be available for emission'',
-     &         '' from nucleus '',I3,A2)') i2, SYMb(nnuc)
+     &         '' from '',I3,A2)') i2, SYMb(nnuc)
             ENDIF
             IF (ENDf(nnuc).EQ.2) THEN
               WRITE (8,
      &       '('' Emission spectra from nucleus '',I3,A2,
-     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+     &         '' stored as inclusive'')') i2, SYMb(nnuc)
               WRITE (12,
      &       '('' Emission spectra from nucleus '',I3,A2,
-     &         '' will be stored as inclusive'')') i2, SYMb(nnuc)
+     &         '' stored as inclusive'')') i2, SYMb(nnuc)
             ENDIF
             GOTO 100
          ENDIF
@@ -7644,10 +7644,10 @@ C
                DO nnuc = 1, NDNUC
                   FIStga(nnuc) = val
                ENDDO
-               WRITE (8,*) 'Gamma transmission coefficient in ',
-     &                     'isomeric well for all nuclei ', val
-               WRITE (12,*)'Gamma transmission coefficient in ',
-     &                     'isomeric well for all nuclei ', val
+               WRITE (8,*) 'Gamma transm. coeff. in ',
+     &                     'isomeric well for all nuclei:', val
+               WRITE (12,*)'Gamma transm. coeff. in ',
+     &                     'isomeric well for all nuclei:', val
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -7659,10 +7659,10 @@ C
             ENDIF
             FIStga(nnuc) = val
             WRITE (8 ,
-     &  '('' Gamma transmission coefficient in isomeric well for '',
+     &  '('' Gamma transm. coeff. in isomeric well for '',
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
             WRITE (12,
-     &  '('' Gamma transmission coefficient in isomeric well for '',
+     &  '('' Gamma transm. coeff. in isomeric well for '',
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val          
             GOTO 100
          ENDIF
