@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3827 $
+Ccc   * $Rev: 4186 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-07 23:27:02 +0100 (Fr, 07 Feb 2014) $
+Ccc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -435,7 +435,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ed, gdr, gred
-      DOUBLE PRECISION GAMMA_STRENGTH
+      DOUBLE PRECISION GAMMA_STRENGTH,GAMMA_STRENGTH_micro
 
 C     CALL INIT_GDR_COMMONS(Nnuc)
 C
@@ -450,7 +450,11 @@ C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
 C     GRED = 1.
       gdr = 0.d0
  
-      IF (KEY_shape.NE.0) THEN
+      IF(KEY_shape.EQ.8)THEN
+         E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
+C        Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
+         RETURN
+      ELSEIF (KEY_shape.NE.0) THEN
          gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
      &        Eg,KEY_shape)
 C        default TE1 = 1
@@ -541,5 +545,144 @@ C  Then calculate the photoabsorption cross section
       ENDIF
       END
 
+      SUBROUTINE ULM_micro(Nnuc)
+CCC
+CCC   *********************************************************************
+CCC   *                      U L M _ m i c r o                            *
+CCC   *                                                                   *
+CCC   *  Reads gamma-ray strength functions calculated by S. Goriely      *
+CCC   *            (included in RIPL-2/3)                                 *
+CCC   *                                                                   *
+CCC   *  Interpolates GSF linearily in log to the EMPIRE energy grid.     *
+CCC   *                                                                   *
+CCC   *  INPUT:                                                           *
+CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
+CCC   *                                                                   *
+CCC   *                                                                   *
+CCC   * OUTPUT:NONE                                                       *
+CCC   *                                                                   *
+CCC   *********************************************************************
+CCC
+      implicit none 
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+C
+C Local variables
+C
+      CHARACTER*2 car2
+      CHARACTER*50 filename
+      INTEGER i, ia, iar, iz, izr
+      INTEGER lenst
 
+      ia = A(Nnuc)
+      iz = Z(Nnuc)
+C
+C-----initialization
+C
+	uuE1grid = 0.d0
+      E1grid = 0.d0
+	iugMax = 0  
 
+      WRITE (filename,99005) iz
+99005 FORMAT ('/RIPL/gamma/gamma-strength-micro/z',i3.3,
+     &'.dat')
+      lenst = len(trim(filename))
+      OPEN (UNIT = 34,FILE = trim(empiredir)//filename(1:lenst), 
+     &      ERR = 300)
+  100 READ (34,99010,ERR = 300,END = 300) car2
+C     format(' Z=',i4,'A=',i4,2x,a2) 
+99010 FORMAT(1x,a2,i4, 2x ,i4,2x,a2)  
+      IF (car2.NE.'Z=') GOTO 100
+      BACKSPACE (34)
+      READ (34,99010,ERR=300,END = 300) car2, izr, iar
+      IF (iar.NE.ia .OR. izr.NE.iz) GOTO 100
+C
+C-----reading microscopic GRS function from the RIPL-3 file
+C
+      i = 1
+99015 FORMAT (1x,f6.2,f7.3,1x,53E9.2)
+C     SKIPPING TITLE LINE
+  270 READ(34,*,END = 300)
+  280 READ (34,99015,END = 300) uuE1grid(i,Nnuc), E1grid(i,Nnuc)
+      IF (uuE1grid(i,Nnuc).LE.0.001) GOTO 400
+      IF (i.EQ.NLDGRID) GOTO 400
+      i = i + 1
+      GOTO 280
+  300 WRITE (8,*) 
+     &  ' ERROR: NO HFB gamma-ray strength funct. FOR Z=', iz, ' A=', ia
+      WRITE (8,*) ' ERROR: USE OTHER GRS functions. '
+      STOP ' ERROR: RIPL HFB gamma-ray strength function missing'
+  400 CLOSE (34)
+	iugMax(Nnuc) = i -1
+
+C     PLOT_ZVV_GSF() should be prepared following PLOT_ZVV_GSLD() as a template
+C     IF(IOUt.GE.6 .and. ENDf(Nnuc).LE.1) Call PLOT_ZVV_GSF(Nnuc)  
+
+      RETURN
+      END
+
+      REAL*8 FUNCTION GAMMA_STRENGTH_micro(Nnuc,U)
+      implicit none 
+      INCLUDE 'dimension.h'
+
+      REAL*8 E1grid(0:NLDGRID,0:ndnuc),uuE1grid(0:NLDGRID,0:ndnuc)
+	INTEGER iugMax(0:ndnuc)
+      COMMON /GDRHFB/uuE1grid,E1grid,iugMax
+C
+C Dummy arguments
+C
+      INTEGER Nnuc
+      REAL*8 U
+C
+C Local variables
+C
+      REAL*8 c1, c2, hhh, r1, r2, result
+      INTEGER iugrid, k, khi, klo
+
+      GAMMA_STRENGTH_micro = 0.d0
+      IF (U.GT.30.0D0) RETURN
+
+      iugrid = iugMax(Nnuc)
+C
+C--------interpolation in the tables
+C
+      iugrid = NLDGRID
+      klo = 1
+      khi = iugrid
+      IF (U.LE.uuE1grid(klo,Nnuc)) THEN
+        klo = 0
+        khi = 1
+        GOTO 500
+      ENDIF
+      IF (U.GE.uuE1grid(khi,Nnuc)) THEN
+            klo = iugrid - 1
+            GOTO 500
+      ENDIF
+  450 IF (khi - klo.GT.1) THEN
+            k = (khi + klo)/2.
+            IF (uuE1grid(k,Nnuc).GT.U) THEN
+               khi = k
+            ELSE
+               klo = k
+            ENDIF
+            GOTO 450
+      ENDIF
+  500 hhh = uuE1grid(khi,Nnuc) - uuE1grid(klo,Nnuc)
+      c1 = (uuE1grid(khi,Nnuc) - U)/hhh
+      c2 = (U - uuE1grid(klo,Nnuc))/hhh
+      r1 = E1grid(klo,Nnuc)
+      r2 = E1grid(khi,Nnuc)
+      IF (r1.GT.0 .AND. r2.GT.0) THEN
+         result = 10.**(c1*DLOG10(r1) + c2*DLOG10(r2))
+      ELSE
+        result = c1*r1 + c2*r2
+      ENDIF
+      IF (result.LT.0) result = 0.d0
+
+	GAMMA_STRENGTH_micro = result
+	RETURN
+	END

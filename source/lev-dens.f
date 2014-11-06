@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-22 16:36:21 +0200 (Fr, 22 Aug 2014) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -1636,8 +1636,8 @@ C
 C PARAMETER definitions
 C
 C     FOLLOWS RIPL-3 DIMENSIONS
-      INTEGER NLDGRID, JMAX
-      PARAMETER (NLDGRID = 60,JMAX = 50)
+      INTEGER NLGRID, JMAX
+      PARAMETER (NLGRID = 60,JMAX = 50)
 C     COMMON /UCGRID/ uugrid, cgrid,iugrid 
 C
 C Dummy arguments
@@ -1647,9 +1647,9 @@ C
 C Local variables
 C
       REAL*8 c1, c2, hhh, r1, r2, corr1,
-     & rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
-     & rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
-     & uugrid(0:NLDGRID), tgrid(0:NLDGRID), u, pcorr, acorr
+     & rhogrid(0:NLGRID,JMAX,2), rhoogrid(0:NLGRID,2),
+     & rhotgrid(0:NLGRID,2), cgrid(0:NLGRID,2),
+     & uugrid(0:NLGRID), tgrid(0:NLGRID), u, pcorr, acorr
 
       CHARACTER*2 car2
       CHARACTER*50 filename
@@ -2314,9 +2314,9 @@ CCC   *********************************************************************
 C
 C PARAMETER definitions
 C
-      INTEGER NLDGRID, JMAX
+      INTEGER NLGRID, JMAX
 C     FOLLOWS RIPL-3 DIMENSIONS
-      PARAMETER (NLDGRID = 60,JMAX = 50)
+      PARAMETER (NLGRID = 60,JMAX = 50)
 C
 C Dummy arguments
 C
@@ -2325,9 +2325,9 @@ C
 C Local variables
 C
       REAL*8 c1, c2, hhh, r1, r2,
-     &                 rhogrid(0:NLDGRID,JMAX,2), rhoogrid(0:NLDGRID,2),
-     &                 rhotgrid(0:NLDGRID,2), cgrid(0:NLDGRID,2),
-     &                 uugrid(0:NLDGRID), tgrid(0:NLDGRID), u
+     &                 rhogrid(0:NLGRID,JMAX,2), rhoogrid(0:NLGRID,2),
+     &                 rhotgrid(0:NLGRID,2), cgrid(0:NLGRID,2),
+     &                 uugrid(0:NLGRID), tgrid(0:NLGRID), u
 
 
       CHARACTER*2 car2

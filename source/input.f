@@ -1,6 +1,6 @@
-!cc   * $Rev: 4179 $
+!cc   * $Rev: 4186 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-06 02:02:55 +0100 (Do, 06 Nov 2014) $
+!cc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1168,12 +1168,22 @@ C        Prepare gamma transmission parameters
            CALL read_GDRGFLDATA(Numram)
 
            CALL ULM(0,Numram)
+           IF(KEY_shape.GE.7) THEN 
+             CALL ULM_micro(0)
+           ELSE
+             CALL ULM(0,Numram) 
+           ENDIF
            WRITE (8,*) ' -----------------------------------------'
            WRITE(8,*) ' TARGET GDR DATA:'
-           CALL ULM_print(0)
+           IF(KEY_shape.LT.7) CALL ULM_print(0)
            DO i = 1, NNUcd 
-             CALL ULM(i,Numram) 
-             IF(ENDF(i).LE.1 .and. i.ne.NTArget) CALL ULM_print(i) 
+             IF(KEY_shape.eq.8) THEN 
+               CALL ULM_micro(i)
+	       ELSE
+               CALL ULM(i,Numram) 
+             ENDIF
+             IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.LT.7) 
+     &       CALL ULM_print(i) 
            ENDDO
            CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
            WRITE (8,*) ' -----------------------------------------'
@@ -3671,7 +3681,11 @@ C                   going back to 3987 release to limit the number of DWBA state
             IF (KEY_shape.EQ.5) WRITE (8,
      &                    '('' E1 strength function set to RIPL GFL'')')
             IF (KEY_shape.EQ.6) WRITE (8,
-     &              '('' E1 strength shape function set to RIPL SLO'')')
+     &                    '('' E1 strength function set to RIPL SLO'')')
+            IF (KEY_shape.GE.7) WRITE (8,
+     &                    '('' E1 photoabsorption set to RIPL HFB'')')
+            IF (KEY_shape.EQ.8) WRITE (8,
+     &                    '('' E1 strength function set to RIPL HFB'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(8,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(8,
@@ -3748,7 +3762,11 @@ C
             IF (KEY_shape.EQ.5) WRITE (12,
      &                    '('' E1 strength function set to RIPL GFL'')')
             IF (KEY_shape.EQ.6) WRITE (12,
-     &              '('' E1 strength shape function set to RIPL SLO'')')
+     &                    '('' E1 strength function set to RIPL SLO'')')
+            IF (KEY_shape.GE.7) WRITE (12,
+     &                    '('' E1 photoabsorption set to RIPL HFB'')')
+            IF (KEY_shape.EQ.8) WRITE (12,
+     &                    '('' E1 strength function set to RIPL HFB'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
      &         '('' GDR parameters from Messina systematics'')')
             IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
@@ -4110,8 +4128,8 @@ C
      &'('' Coupled Channels Method used for direct inelastic scattering'
      &')')
             IF (DIRect.EQ.2) WRITE (8,
-     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.'
-     &')')
+     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
+     &)')
             IF (DIRect.EQ.3) WRITE (12,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
@@ -4119,8 +4137,8 @@ C
      &'('' Coupled Channels Method used for direct inelastic scattering'
      &')')
             IF (DIRect.EQ.2) WRITE (12,
-     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.'
-     &')')
+     &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
+     &)')
             GOTO 100
          ENDIF
 C
@@ -4924,11 +4942,24 @@ C
          IF (name.EQ.'GSTRFN') THEN
 C           Key_shape = 0 --> ver.2.18 variant of EGLO strength-function
 C           Key_shape =1 --> fE1=MLO1
-C           Key_shape =2 --> fE1=MLO2
+C           Key_shape =2 --> fE1=MLO2 (default)
 C           Key_shape =3 --> fE1=MLO3
 C           Key_shape =4 --> fE1=EGLO
 C           Key_shape =5 --> fE1=GFL
 C           Key_shape =6 --> fE1=SLO
+C-----------the last two options ae not fully implemented yet
+C           Update of the RIPL directory is needed + testing
+C            
+C           Key_shape =7 --> photoabsorption from E1-microscopic HFB GRSF
+C                            fe1=default
+C           Key_shape =8 --> fe1=HFB GRSF
+C
+C           IF (val.GT.8) WRITE (8,
+            IF (val.GT.6) WRITE (8,
+     &'('' WARNING: Gamma-ray strength function not recognized, RIPL MLO
+     & GRSF used'')')
+C           Key_shape =8 --> fE1=microscopic HFB GRSF+ photoabsorption
+C
             KEY_shape = val
             GOTO 100
          ENDIF
@@ -7663,7 +7694,7 @@ C
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
             WRITE (12,
      &  '('' Gamma transm. coeff. in isomeric well for '',
-     &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val          
+     &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
             GOTO 100
          ENDIF
 C--------

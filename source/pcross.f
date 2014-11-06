@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4135 $
+Ccc   * $Rev: 4186 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-02 23:53:29 +0200 (Do, 02 Okt 2014) $
+Ccc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -1475,11 +1475,16 @@ C
 C Local variables
 C
       REAL*8 a3, egr, gam, sgm
-      REAL*8 GAMMA_STRENGTH
-      IF (KEY_shape.NE.0) THEN                                 
-         SGAM = (10.D0/8.674D-7)*Eg*GAMMA_STRENGTH(Z,A,Uex,Tt,Eg,
-     &          KEY_shape)
-         RETURN
+      REAL*8 GAMMA_STRENGTH, GAMMA_STRENGTH_micro
+      INTEGER nnucc
+
+      IF(KEY_shape.GE.7)THEN
+         nnucc = 1
+         SGAM = (10.D0/8.674D-7)*
+     >           Eg*GAMMA_STRENGTH_micro(nnucc,Eg) ! nnnuc = CN
+      ELSEIF (KEY_shape.NE.0) THEN
+         SGAM = (10.D0/8.674D-7)*
+     >           Eg*GAMMA_STRENGTH(Z,A,Uex,Tt,Eg,KEY_shape)
       ELSE
 C        If "Key_shape = 0" old expression for photoabsorption
 C        cross-section  is used, namely:
@@ -1493,4 +1498,5 @@ C        SGAM = GAMMA ABSORPTION CROSS SECTION in mb
          sgm = 53.2D0*(A - Z)*Z/A
          SGAM = sgm*gam*Eg*Eg/((Eg*Eg - egr*egr)**2 + (gam*Eg)**2)
       ENDIF
+      RETURN
       END

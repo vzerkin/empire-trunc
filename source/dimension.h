@@ -1,6 +1,6 @@
-!cc   * $Rev: 4066 $
+!cc   * $Rev: 4186 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-09-14 00:56:05 +0200 (So, 14 Sep 2014) $
+!cc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -20,7 +20,7 @@
 !
 !
       INTEGER MAX_PRN,NDEJC,NDZMAX,NDECSE,NDEPFN,NDANGecis,NDAnghmx
-      INTEGER NDNUCD,NDECSED,NDANGD,NDEX_D,NDEJCD
+      INTEGER NDNUCD,NDECSED,NDANGD,NDEX_D,NDEJCD,NLDGRID
       INTEGER NDVOM,NDWOM,NDVSO,NDRVOM,NDRWOM,NDRVSO
       INTEGER NDETL,NDEREC,NDERO,NDCC,NDROPM
       INTEGER NDGDRPM,NDGQRPM,NDGMRPM
@@ -39,6 +39,7 @@
      &,NDANGD=NDANGecis                                                 &
      &,NDEX_D=NDEX                                                      &
      &,NDEJCD=NDEJC                                                     &
+     &,NLDGRID=301                                                      &! Number of points in the HFBGDR RIPL files 
      &,NDVOM=7                                                          &
      &,NDWOM=7                                                          &
      &,NDVSO=7                                                          &

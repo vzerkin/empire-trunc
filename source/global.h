@@ -1,6 +1,6 @@
-! $Rev: 4110 $
-! $Author: shoblit $
-! $Date: 2014-09-25 21:45:47 +0200 (Do, 25 Sep 2014) $
+! $Rev: 4186 $
+! $Author: rcapote $
+! $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -80,7 +80,7 @@
      &        INExc(0:ndnuc),ISProd(0:ndnuc), NDAng, FITomp, ICAlangs,  &
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
      &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
-     &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX)
+     &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX),iugMax(0:ndnuc)
        
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
@@ -149,6 +149,8 @@
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
      &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
+     &                 E1grid(0:NLDGRID,0:ndnuc),                       &
+     &                 uuE1grid(0:NLDGRID,0:ndnuc),	                    & 
      &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),                 &
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),           &
      &                 TUNEbu(0:ndejc), TUNEnt(0:ndejc),                &
@@ -202,6 +204,8 @@
       COMMON /COMFIS_PAR/FISv_n, FISh_n, FISa_n, FISd_n, FISn_n
 
       COMMON /ROHFBSADD/rohfbp_sd, rohfba_sd,rohfb_norm,barnorm,hnorm
+
+      COMMON /GDRHFB/uuE1grid,E1grid,iugMax
       
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,                    &
      &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
