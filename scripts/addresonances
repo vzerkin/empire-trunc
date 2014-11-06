@@ -17,6 +17,18 @@ else
     ln -sf $file-res.endf ENDRES.DAT
 fi
 
+# Checking if input file available
+if [ ! -f $file-e.endf ]; then
+echo ' '
+echo 'ERROR: Input file '$file'-e.endf is missing'
+echo 'Formatting (EMPEND) should be run first ! '
+echo ' '
+read -p " Press any key to exit or <CTRL>-C to abort ..."
+echo ' '
+exit 1
+fi
+
+
 ln -sf $EMPIREDIR/util/endres/ENDRES.INP ENDRES.INP
 
 rm empire.end endf.dat 2>/dev/null

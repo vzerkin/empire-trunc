@@ -26,11 +26,12 @@ fi
 if [ ! -f $file.out ]; then
 echo ' '
 echo ' '
-echo 'ERROR: EMPIRE output is not available (Run Empire or check the long listing)'
+echo 'ERROR: EMPIRE output file '$file'.out is missing'
+echo '     execute EMPIRE before formatting  !            '
 echo ' '
-echo -n 'Press any key to continue ..'
-read anykey
-exit
+read -p " Press  <Enter> key to exit or <CTRL>-C to abort ..."
+echo ' '
+exit 1
 fi
 
 # Deleting previous file if exist
@@ -50,19 +51,17 @@ $2
 LABLABLABL EVAL-`date "+%b%y"` AUTHORAUTHORAUTHORAUTHORAUTHORAUT
 EOF
 $EMPIREDIR/util/empend/empend <EMPEND.INP
+rc=$?
 mv empend.log $file-log.empend
 rm EMPEND.INP empmf1.tmp
-
-# Checking if EMPEND run sucessfully 
-if [ ! -f $file-e.endf ]; then
-echo ' '
-echo ' '
-echo 'ERROR: ENDF formatting failed, rerun format or Empire'
-echo '       Pls notify Dr. A.Trkov at a.trkov@iaea.org    '
-echo ' '
-echo -n 'Press any key to continue ..'
-read anykey
-exit
+if [[ $rc != 0 ]] ; then
+   echo ' '
+   echo ' EMPEND crashed, check log file '$file'-log.empend for diagnostics!'
+   echo ' Please notify Dr.A.Trkov at a.trkov@iaea.org                      '
+   echo ' '
+   read -p " Press <Enter> key to exit or <CTRL>-C to abort ..."
+   echo ' '
+   exit 3
 fi
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
@@ -94,6 +93,15 @@ $file.endf
 DONE
 EOF
 $EMPIREDIR/util/stanef/stanef <INPUT
+rc=$?
+if [[ $rc != 0 ]] ; then
+   echo ' '
+   echo ' STANEF crashed, please notify Dr.A.Trkov at a.trkov@iaea.org '
+   echo ' '
+   read -p " Press any key to exit or <CTRL>-C to abort ..."
+   echo ' '
+   exit $rc
+fi
 
 #echo $file.endf was produced by STANEF
 # remove left-over files

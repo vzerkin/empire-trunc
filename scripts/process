@@ -19,6 +19,17 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
+# Checking if input file available
+if [ ! -f $file.endf ]; then
+echo ' '
+echo 'ERROR: Input file '$file'.endf is missing               '
+echo 'EMPIRE and Formatting (EMPEND) should be executed first!'
+echo ' '
+read -p " Press any key to exit or <CTRL>-C to abort ..."
+echo ' '
+exit 1
+fi
+
 # RUN LINEAR
 
 rm LINEAR.INP 2>/dev/null
@@ -59,7 +70,7 @@ mv ENDFB.OUT $work/$file-mub.endf
 # Running LEGEND to convert angular distributions into tabular form
 # cp $work/$file-mub.endf $work/$file-l.endf
 
-rm $file-l.endf 2>/dev/null
+rm $file-l.endf LEGEND.INP ENDF.IN 2>/dev/null
 ln -sf $work/$file-mub.endf ENDF.IN
 ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
 
@@ -70,7 +81,7 @@ mv LEGEND.LST $work/$file-log.legend
 
 # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
 
-rm $file-s.endf 2>/dev/null
+rm $file-s.endf ENDF.IN SIXTAB.INP 2>/dev/null
 ln -sf $work/$file-l.endf ENDF.IN
 ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
 

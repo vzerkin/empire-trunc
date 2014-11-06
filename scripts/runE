@@ -76,7 +76,7 @@ def runE(proj):
   
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
-    rm(proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
+    rm('EMPIRE.OK', proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
     rm('OMP_A.DAT', 'EMPIRE.STA', 'PFNM.OUT', 'PFNS.OUT', 'CN-LEV-XS.DAT')
     rm('OUTPUT.DAT', 'LIST.DAT', 'OMPAR.RIPL', 'GAMMA.DAT', 'FUSION')
     rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT', 'TOTCOR.DAT')
@@ -265,6 +265,10 @@ def runE(proj):
         os.system('"%s"' % cmd)
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
+
+    if isEmpty('EMPIRE.OK'):
+        print('\n\n***************************************************************\nEmpire crashed, pls send the input file to r.capotenoy@iaea.org')
+        sys.exit(2) # return 2    
 
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
@@ -538,7 +542,7 @@ def runE(proj):
         cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','preq2zvd')
         os.system('"%s" %s' % (cmd, proj))
     
-    return 0
+    sys.exit(0) # return 0
 
 def splashscreen():
     splash = [
@@ -551,8 +555,8 @@ def splashscreen():
     ' ',\
     ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
     ' ',\
-    ' Upton, New York, USA, September 2014 ',\
-    ' Vienna, Austria, September 2014      ',\
+    ' Upton, New York, USA, November 2014 ',\
+    '    Vienna, Austria, November 2014   ',\
     ' ']
     return '\n'.join( [ x.center(60) for x in splash ] )
 

@@ -19,6 +19,16 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
+# Checking if input file available
+if [ ! -f $file.endf ]; then
+echo ' '
+echo ' ERROR: Input file '$file'.endf is missing               '
+echo ' EMPIRE and Formatting (EMPEND) should be executed first!'
+echo ' '
+read -p " Press any key to exit or <CTRL>-C to abort ..."
+echo ' '
+exit 1
+fi
 
 # RUN CHECKR
 
