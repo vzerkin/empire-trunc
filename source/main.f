@@ -1,6 +1,6 @@
-cc   * $Rev: 4116 $
+cc   * $Rev: 4180 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-27 23:12:24 +0200 (Sa, 27 Sep 2014) $
+Ccc   * $Date: 2014-11-06 02:04:27 +0100 (Do, 06 Nov 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -485,6 +485,9 @@ C     CLOSE(102)
       CLOSE (8)
       CLOSE (12)
 
+      OPEN(222,file='EMPIRE.OK') 
+      WRITE (222,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
+      CLOSE(222)
       STOP ' ' 
 
       END
