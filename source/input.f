@@ -1,6 +1,6 @@
-!cc   * $Rev: 4186 $
+!cc   * $Rev: 4193 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
+!cc   * $Date: 2014-11-07 21:01:08 +0100 (Fr, 07 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -40,7 +40,7 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
-     &         qatom,qnucl,FTMP
+     &         qatom,qnucl,FTMP, fftmp
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       CHARACTER*23 ctmp23
@@ -2124,6 +2124,14 @@ C-----------------Width of the partial bin relative to DE
      &                'Ecut   =',ECUt(nnur),
      &                'Ex(1)  =',EX(1,nnur),
      &                'Ecut+DE=',ECUt(nnur)+DE
+                  IF(DEPart(nnur).gt.1.3d0 .and. FISsil(nnur)) then 
+                    fftmp=(EX(1,nnur)-ECUt(nnur))*
+     &                     (A(nnur)+AEJc(nejc))/A(nnur)
+                    WRITE(8,*) 'WARNING: Large continuum bin correction'
+                    WRITE(8,'(1x,A40,F10.6,1x,A4,F8.6,A4,F10.6,A4)')                    
+     &                'WARNING: Reduce your incident energy of ',EINl,
+     &                ' by ',fftmp, ' to ', EINl-fftmp,' MeV'
+                  ENDIF
                ENDIF
 C              The following line solves the problem of fluctuations
 C              in PCROSS at higher than 7-8 MeV 
