@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4186 $
+Ccc   * $Rev: 4191 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
+Ccc   * $Date: 2014-11-07 12:23:15 +0100 (Fr, 07 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -372,7 +372,6 @@ C
       XM1 = (1 - TM1)*CM1*1.3004E-7*Eg*ed + TM1*gmr
       END
  
- 
       DOUBLE PRECISION FUNCTION E1(Nnuc,Eg,T,Uex)
 Ccc
 Ccc ********************************************************************
@@ -436,32 +435,44 @@ C Local variables
 C
       DOUBLE PRECISION ed, gdr, gred
       DOUBLE PRECISION GAMMA_STRENGTH,GAMMA_STRENGTH_micro
-
-C     CALL INIT_GDR_COMMONS(Nnuc)
 C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
+ 
+      IF(Nnuc.eq.0 .or. Nnuc.eq.NTArget) then
+        IF(KEY_shape.GE.7)THEN
+          E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
+C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
+          RETURN
+        ELSEIF (KEY_shape.NE.0) THEN
+          gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
+     &        Eg,KEY_shape)
+C         default TE1 = 1
+C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
+          E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
+          RETURN
+        ENDIF
+      ELSE
+        IF(KEY_shape.EQ.8)THEN
+          E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
+C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
+          RETURN
+        ELSEIF (KEY_shape.NE.0) THEN
+          gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
+     &        Eg,KEY_shape)
+C         default TE1 = 1
+C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
+          E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
+          RETURN
+        ENDIF
+      ENDIF
+
 C-----setting T=0 below removes non-zero limit in generalized Lorenzian
 C     T=0
 C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
       gred = (ed + 39.478351*T**2)/ED1
-C-----setting GRED=1 removes energy dependence of the width in gener. Lorenzian
-C     GRED = 1.
       gdr = 0.d0
- 
-      IF(KEY_shape.EQ.8)THEN
-         E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
-C        Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
-         RETURN
-      ELSEIF (KEY_shape.NE.0) THEN
-         gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
-     &        Eg,KEY_shape)
-C        default TE1 = 1
-C        Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
-         E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
-         RETURN
-      ENDIF
 
       IF (TE1.NE.0.0D0) THEN
          gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
@@ -478,7 +489,6 @@ C        GRED = 1.
       E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
       RETURN
       END
- 
  
       DOUBLE PRECISION FUNCTION SIGQD(Ztar,Atar,Eg,Lqdfac)
  
