@@ -24,7 +24,7 @@
     i = 1
     nch = len_trim(inline)
     do while(i <= nch)
-        if(inline(i:i) == '!') exit
+        if ((inline(i:i) == '!') .or. (inline(i:i) == '/') .or. (inline(i:i) == '*')) exit
         i = i + 1
     end do
     nch = len_trim(inline(1:i-1))
@@ -137,7 +137,7 @@
         ! on error, warn user of the problem
         write(*,'(a)')' Error parsing following line from input:'
         write(*,'(a)')  inline(1:nch)
-        write(8,'(a)')' ERROR: Parsing following line from input:', inline(1:nch)
+        write(8,'(a,a)')' ERROR: Parsing following line from input:', inline(1:nch)
         l = 0
     endif
 
