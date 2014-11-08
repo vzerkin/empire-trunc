@@ -1,6 +1,6 @@
-! $Rev: 4186 $
+! $Rev: 4201 $
 ! $Author: rcapote $
-! $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
+! $Date: 2014-11-09 00:04:48 +0100 (So, 09 Nov 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -149,8 +149,8 @@
      &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
      &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
-     &                 E1grid(0:NLDGRID,0:ndnuc),                       &
-     &                 uuE1grid(0:NLDGRID,0:ndnuc),	                    & 
+     &                 E1grid(0:NLGRID,0:ndnuc),                        &
+     &                 uuE1grid(0:NLGRID,0:ndnuc),                      & 
      &                 vibfdt(NFHUMP),vibfnorm(NFHUMP),                 &
      &                 VOM(0:ndejc,0:ndnuc), TUNEpe(0:ndejc),           &
      &                 TUNEbu(0:ndejc), TUNEnt(0:ndejc),                &

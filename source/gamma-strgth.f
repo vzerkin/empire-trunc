@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4191 $
+Ccc   * $Rev: 4201 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-07 12:23:15 +0100 (Fr, 07 Nov 2014) $
+Ccc   * $Date: 2014-11-09 00:04:48 +0100 (So, 09 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -619,7 +619,7 @@ C     SKIPPING TITLE LINE
   270 READ(34,*,END = 300)
   280 READ (34,99015,END = 300) uuE1grid(i,Nnuc), E1grid(i,Nnuc)
       IF (uuE1grid(i,Nnuc).LE.0.001) GOTO 400
-      IF (i.EQ.NLDGRID) GOTO 400
+      IF (i.EQ.NLGRID) GOTO 400
       i = i + 1
       GOTO 280
   300 WRITE (8,*) 
@@ -639,7 +639,7 @@ C     IF(IOUt.GE.6 .and. ENDf(Nnuc).LE.1) Call PLOT_ZVV_GSF(Nnuc)
       implicit none 
       INCLUDE 'dimension.h'
 
-      REAL*8 E1grid(0:NLDGRID,0:ndnuc),uuE1grid(0:NLDGRID,0:ndnuc)
+      REAL*8 E1grid(0:NLGRID,0:ndnuc),uuE1grid(0:NLGRID,0:ndnuc)
 	INTEGER iugMax(0:ndnuc)
       COMMON /GDRHFB/uuE1grid,E1grid,iugMax
 C
@@ -660,7 +660,7 @@ C
 C
 C--------interpolation in the tables
 C
-      iugrid = NLDGRID
+      iugrid = NLGRID
       klo = 1
       khi = iugrid
       IF (U.LE.uuE1grid(klo,Nnuc)) THEN
