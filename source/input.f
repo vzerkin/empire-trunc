@@ -1,6 +1,6 @@
-!cc   * $Rev: 4193 $
+!cc   * $Rev: 4199 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-07 21:01:08 +0100 (Fr, 07 Nov 2014) $
+!cc   * $Date: 2014-11-08 23:58:02 +0100 (Sa, 08 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -3533,11 +3533,17 @@ C
       WRITE (8,*)'                       |__________________________|'
 
       itmp = len_trim(EMPtitle)
-      if(itmp.gt.0) then
+      if(itmp.gt.3) then
         WRITE (8,*) 
         WRITE (8,*) EMPtitle(2:itmp)
         WRITE (*,*) 
         WRITE (*,*) EMPtitle(2:itmp)
+C     else
+C	  ! DEFAULT TITLE
+C       WRITE (8,*) 
+C       WRITE (8,*) 'DEFAULT TITLE'
+C       WRITE (*,*) 
+C       WRITE (*,*) 'DEFAULT TITLE'
       endif
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
@@ -3546,7 +3552,12 @@ C
       WRITE (12,*) '***************************************************'
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) ''
-      WRITE (12,*) EMPtitle(2:itmp)
+      if(itmp.gt.3) then
+        WRITE (12,*) EMPtitle(2:itmp)
+      else
+	  ! DEFAULT TITLE
+        WRITE (12,*) 'DEFAULT TITLE'
+      endif
       WRITE (12,*) '___________________________________________________'
       WRITE (12,*) ''
       WRITE (12,*) 'Nuclear reaction model code EMPIRE-',
