@@ -1,6 +1,6 @@
-! $Rev: 4201 $
-! $Author: rcapote $
-! $Date: 2014-11-09 00:04:48 +0100 (So, 09 Nov 2014) $
+! $Rev: 4204 $
+! $Author: bcarlson $
+! $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -180,7 +180,7 @@
      & VIBf12m(NFMOD), VIBfdtm(NFMOD), VIBfnormm(NFMOD)
 
       INTEGER BFFm(NFMOD), NRBinfism(NFMOD)                               ! FISSMOD int
-      DOUBLE PRECISION BUReac(0:ndejc), NTReac(0:ndejc)
+      DOUBLE PRECISION BUReac(0:ndejc), NTReac(0:ndejc), DBRkup
 
       DOUBLE PRECISION barnorm(NFHump),hnorm                              ! ROHFBSADD
       DOUBLE PRECISION rohfbp_sd(NFHump), rohfba_sd(NFHump),            & ! ROHFBSADD
@@ -245,7 +245,7 @@
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,  &
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,  &
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,&
-     &                 BUNorm, NTNorm, COMega, BUReac, NTReac,          &
+     &                 BUNorm, NTNorm, COMega, BUReac, NTReac, DBRkup,  &
      &                 gamm_tr, fiss_tr    
 
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,   & 

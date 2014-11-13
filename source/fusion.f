@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4139 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-03 00:10:33 +0200 (Fr, 03 Okt 2014) $
+Ccc   * $Rev: 4204 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1174,6 +1174,12 @@ C-----------DIRECT=1 or DIRECT=2
      &tion from collective levels'
          ENDIF
       ENDIF
+
+      IF(DBRkup.gt.1.0d-2) THEN
+         ctmp = ctldir//ctmp23//'.DBK'
+         INQUIRE (FILE = ctmp, EXIST = fexist)
+         call dirdbrkup(ctmp)
+        ENDIF
 
       IF (IOUt.EQ.5) THEN
         WRITE (8,*) 

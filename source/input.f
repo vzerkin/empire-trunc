@@ -1,6 +1,6 @@
-!cc   * $Rev: 4199 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-08 23:58:02 +0100 (Sa, 08 Nov 2014) $
+!cc   * $Rev: 4204 $
+!cc   * $Author: bcarlson $
+!cc   * $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -465,6 +465,9 @@ C
          BUReac = 0.d0
          NTReac = 0.d0
          COMega = 1.6d0
+
+C        Direct deuteron breakup 
+         DBRkup = 0.0d0
 
 C--------EMAx_tlj sets incident energy limit for using Tlj
          EMAx_tlj = 0.d0
@@ -3940,6 +3943,31 @@ C
             ENDIF
             GOTO 100
          ENDIF
+C
+         IF( name.EQ.'DBRKUP') THEN
+           IF(NPRoject.NE.4) THEN
+             WRITE (8,
+     &            '('' WARNING: Direct deuteron breakup mechanism'',
+     &              '' requires deuteron projectile.'')')
+             WRITE (8,
+     &            '('' DBRKUP option IGNORED'')')
+             DBRkup = 0.0d0
+            ELSE 
+             IF(val.LT.0.0) THEN
+               WRITE (8,
+     &              '('' WARNING: Direct deuteron breakup scaling'',
+     &                '' is not positive.'')')
+               WRITE (8,
+     &              '('' DBRKUP option IGNORED'')')
+               DBRkup = 0.0d0
+              ELSE
+               WRITE (8,
+     &              '('' Direct deuteron breakup will be calculated'',
+     &                '' and renormalized by'', f5.3)') val
+               dbrkup = val
+              ENDIF            
+            ENDIF
+          ENDIF
 C
          IF (name.EQ.'MAXHOL') THEN
             CHMax = 0.54
