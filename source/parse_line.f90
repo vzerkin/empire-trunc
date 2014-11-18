@@ -1,7 +1,11 @@
     integer*4 function parse_line(inline,prm,val,i1,i2,i3,i4)
 
     ! parse character string inline to get parameter name, value, and 4 optional integer flags
-
+    ! it should be modified to deal with the case of missing default input lines:
+    ! e.g.  ATILNO..................10
+    ! Before this line means 10% uncertainty was taken for the a-level density paremetr for ALL NUCLEI
+    
+    
     implicit none
 
     character*(*), intent(in) :: inline             ! line to parse
