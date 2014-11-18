@@ -1837,12 +1837,13 @@ c
         do nn=1,ndmx
           yy(nn,iy2)=yy(nn,iy2)+cc(6)*ddy(nn,6)
           dyy(nn)=dyy(nn)+dc(6)*ddy(nn,6)
-          errmax=amax1(errmax,abs(dyy(nn)/ysc(nn)))
+C         errmax=amax1(errmax,abs(dyy(nn)/ysc(nn)))
+          errmax=dmax1(errmax,abs(dyy(nn)/ysc(nn)))
          end do
         errmax=errmax/eps
         if(errmax.gt.1.0d0) then
           nbdstp=nbdstp+1
-          h=h*amax1(safety*errmax**pshrnk,0.1d0) 
+          h=h*dmax1(safety*errmax**pshrnk,0.1d0) 
           nstp=int(h0/h)+1
           go to 10
          else
@@ -2090,12 +2091,12 @@ c
         do nn=1,ndmx
           yy(nn,iy2)=yy(nn,iy2)+cc(6)*ddy(nn,6)
           dyy(nn)=dyy(nn)+dc(6)*ddy(nn,6)
-          errmax=amax1(errmax,abs(dyy(nn)/ysc(nn)))
+          errmax=dmax1(errmax,abs(dyy(nn)/ysc(nn)))
          end do
         errmax=errmax/eps
         if(errmax.gt.1.0d0) then
           nbdstp=nbdstp+1
-          h=h*amax1(safety*errmax**pshrnk,0.1d0) 
+          h=h*dmax1(safety*errmax**pshrnk,0.1d0) 
           nstp=int(h0/h)+1
           go to 10
          else
