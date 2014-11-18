@@ -24,7 +24,8 @@
     i = 1
     nch = len_trim(inline)
     do while(i <= nch)
-        if ((inline(i:i) == '!') .or. (inline(i:i) == '/') .or. (inline(i:i) == '*')) exit
+        if ((inline(i:i) == '!') .or. (inline(i:i) == '*')) exit
+        if ((inline(i:i) == '/') .or. (inline(i:i) == ';')) exit
         i = i + 1
     end do
     nch = len_trim(inline(1:i-1))
