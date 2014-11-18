@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4223 $
+Ccc   * $Rev: 4227 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 10:01:40 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-18 13:38:09 +0100 (Di, 18 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -441,7 +441,10 @@ C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
  
-      IF(Nnuc.eq.0 .or. Nnuc.eq.NTArget) then
+      IF(Nnuc.eq.0) then
+C
+C       Called from fusion: photoabsorption calculation
+C
         IF(KEY_shape.GE.7)THEN
           E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
 C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
@@ -455,6 +458,9 @@ C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
           RETURN
         ENDIF
       ELSE
+C
+C       Decay calculation
+C
         IF(KEY_shape.EQ.8)THEN
           E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
 C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
@@ -605,8 +611,7 @@ C
       OPEN (UNIT = 34,FILE = trim(empiredir)//filename(1:lenst), 
      &      ERR = 300)
   100 READ (34,99010,ERR = 300,END = 300) car2
-C     format(' Z=',i4,'A=',i4,2x,a2) 
-99010 FORMAT(1x,a2,i4, 2x ,i4,2x,a2)  
+99010 FORMAT(1x,a2,i4, 3x ,i4,1x,a2)  
       IF (car2.NE.'Z=') GOTO 100
       BACKSPACE (34)
       READ (34,99010,ERR=300,END = 300) car2, izr, iar
@@ -615,7 +620,7 @@ C
 C-----reading microscopic GRS function from the RIPL-3 file
 C
       i = 1
-99015 FORMAT (1x,f9.3,E12.3)
+99015 FORMAT (f9.3,E12.3)
 C     SKIPPING TITLE LINE
   270 READ(34,*,END = 300)
   280 READ (34,99015,END = 300) uuE1grid(i,Nnuc), E1grid(i,Nnuc)
@@ -694,6 +699,6 @@ C     iugrid = NLGRID - 1
       ENDIF
       IF (result.LT.0) result = 0.d0
 
-	GAMMA_STRENGTH_micro = result
+	GAMMA_STRENGTH_micro = result/1.15d7
 	RETURN
 	END

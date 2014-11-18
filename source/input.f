@@ -1,6 +1,6 @@
-!cc   * $Rev: 4216 $
+!cc   * $Rev: 4227 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-18 07:34:01 +0100 (Di, 18 Nov 2014) $
+!cc   * $Date: 2014-11-18 13:38:09 +0100 (Di, 18 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -5007,12 +5007,15 @@ C                            fe1=default
 C           Key_shape =8 --> fe1=HFB GRSF
 C
 C           IF (val.GT.8) WRITE (8,
-            IF (val.GT.6) WRITE (8,
+            IF (val.GT.7) THEN
+              WRITE (8,
      &'('' WARNING: Gamma-ray strength function not recognized, RIPL MLO
-     & GRSF used'')')
+     & GRSF used (default)'')')
 C           Key_shape =8 --> fE1=microscopic HFB GRSF+ photoabsorption
 C
-            KEY_shape = val
+            ELSE
+              KEY_shape = val
+            ENDIF
             GOTO 100
          ENDIF
 C-----
