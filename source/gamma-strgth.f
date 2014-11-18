@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4201 $
+Ccc   * $Rev: 4217 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-09 00:04:48 +0100 (So, 09 Nov 2014) $
+Ccc   * $Date: 2014-11-18 07:36:19 +0100 (Di, 18 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -141,7 +141,8 @@ C
          GMRpar(3,Nnuc) = 1.D0
       ENDIF
 
-      CALL INIT_GDR_COMMONS(Nnuc)
+C     moved to E1_GSA() for a proper initialization for each nucleus
+C     CALL INIT_GDR_COMMONS(Nnuc)
 
       RETURN
       END
@@ -447,7 +448,7 @@ C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
           RETURN
         ELSEIF (KEY_shape.NE.0) THEN
           gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
-     &        Eg,KEY_shape)
+     &        Eg,KEY_shape,Nnuc)
 C         default TE1 = 1
 C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
           E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
@@ -460,7 +461,7 @@ C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
           RETURN
         ELSEIF (KEY_shape.NE.0) THEN
           gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
-     &        Eg,KEY_shape)
+     &        Eg,KEY_shape,Nnuc)
 C         default TE1 = 1
 C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
           E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
@@ -655,8 +656,6 @@ C
 
       GAMMA_STRENGTH_micro = 0.d0
       IF (U.GT.30.0D0) RETURN
-
-      iugrid = iugMax(Nnuc)
 C
 C--------interpolation in the tables
 C

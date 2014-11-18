@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4186 $
+Ccc   * $Rev: 4217 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-07 00:24:58 +0100 (Fr, 07 Nov 2014) $
+Ccc   * $Date: 2014-11-18 07:36:19 +0100 (Di, 18 Nov 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -1477,14 +1477,13 @@ C
       REAL*8 a3, egr, gam, sgm
       REAL*8 GAMMA_STRENGTH, GAMMA_STRENGTH_micro
       INTEGER nnucc
-
+      nnucc = 1
       IF(KEY_shape.GE.7)THEN
-         nnucc = 1
          SGAM = (10.D0/8.674D-7)*
      >           Eg*GAMMA_STRENGTH_micro(nnucc,Eg) ! nnnuc = CN
       ELSEIF (KEY_shape.NE.0) THEN
          SGAM = (10.D0/8.674D-7)*
-     >           Eg*GAMMA_STRENGTH(Z,A,Uex,Tt,Eg,KEY_shape)
+     >           Eg*GAMMA_STRENGTH(Z,A,Uex,Tt,Eg,KEY_shape,nnucc)
       ELSE
 C        If "Key_shape = 0" old expression for photoabsorption
 C        cross-section  is used, namely:

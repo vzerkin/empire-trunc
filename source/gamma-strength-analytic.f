@@ -1,10 +1,10 @@
-Ccc   * $Rev: 3165 $
-Ccc   * $Author: apalumbo $
-Ccc   * $Date: 2012-10-25 01:38:48 +0200 (Do, 25 Okt 2012) $
+Ccc   * $Rev: 4217 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-11-18 07:36:19 +0100 (Di, 18 Nov 2014) $
 
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
-     &   Eexcitf,Temperf,Egamma,Keyshape)
+     &   Eexcitf,Temperf,Egamma,Keyshape,Nnuc)
 C     ****************************************************************
 C     *       E1 strength function calculations                      *
 C     *       ---------------------------------                      *
@@ -120,7 +120,7 @@ C
 C Dummy arguments
 C
       DOUBLE PRECISION Anucleus, Eexcitf, Egamma, Temperf, Znucleus
-      INTEGER Keyshape
+      INTEGER Keyshape, Nnuc
 C
 C Local variables
 C
@@ -129,6 +129,7 @@ C
       DOUBLE PRECISION E1_GSA
       INTEGER ka, keglo, kz
       DATA f0prime/1.49D0/, f1prime/ - 0.04D0/
+ 
       kz = Znucleus + 0.001
       ka = Anucleus + 0.001
       IF (KEYinput.NE.1) THEN
@@ -264,11 +265,11 @@ C        mass and charge of nucleus
          KZZ1 = kz
          KAA1 = ka
       ENDIF
-      GAMMA_STRENGTH = E1_GSA(Egamma,Eexcitf,Temperf,Keyshape)
+      GAMMA_STRENGTH = E1_GSA(Egamma,Eexcitf,Temperf,Keyshape,Nnuc)
       END
 
-
-      DOUBLE PRECISION FUNCTION E1_GSA(Egamma,Eexcitf,Temperf,Keyshape)
+      DOUBLE PRECISION FUNCTION E1_GSA(
+     >        Egamma,Eexcitf,Temperf,Keyshape,Nnuc)
 C     Calculation of the E1 strength function shape
       IMPLICIT NONE
 C
@@ -286,7 +287,7 @@ C
 C Dummy arguments
 C
       DOUBLE PRECISION Eexcitf, Egamma, Temperf
-      INTEGER Keyshape
+      INTEGER Keyshape, Nnuc
 C
 C Local variables
 C
@@ -296,6 +297,9 @@ C
       INTEGER nreson
       DATA pi24/39.47841761D0/
       save pi24
+
+      CALL INIT_GDR_COMMONS(Nnuc)
+
       egiant(1) = EG1
       cross(1) = CS1
       gamwidth(1) = GW1
