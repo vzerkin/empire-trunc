@@ -25,8 +25,8 @@ echo ' '
 echo 'ERROR: Input file '$file'.endf is missing               '
 echo 'EMPIRE and Formatting (EMPEND) should be executed first!'
 echo ' '
-read -p " Press any key to exit or <CTRL>-C to abort ..."
-echo ' '
+echo ' Press any key to exit or <CTRL>-C to abort ...'
+read yes
 exit 1
 fi
 
