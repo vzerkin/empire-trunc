@@ -1,6 +1,6 @@
-# $Rev: 4202 $
+# $Rev: 4218 $
 # $Author: rcapote $
-# $Date: 2014-11-09 00:06:00 +0100 (So, 09 Nov 2014) $
+# $Date: 2014-11-18 07:37:58 +0100 (Di, 18 Nov 2014) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5908,7 +5908,8 @@ proc vTclWindow.top75 {base} {
     wm overrideredirect $top 0
     wm resizable $top 1 1
     wm deiconify $top
-    wm title $top "EMPIRE-3.2.3 (Malta), svn 4203, November 2014, Graphical User Interface (GUI) "    
+    # wm title $top "EMPIRE-3.2.3 (Malta) GUI, svn 4205, Workshop at the University of Calicut, Kerala, India, 10-13 November 2014"    
+    wm title $top "EMPIRE-3.2.3 (Malta) GUI"    
     vTcl:DefineAlias "$top" "Toplevel1" vTcl:Toplevel:WidgetProc "" 1
     bindtags $top "$top Toplevel all _TopLevel"
     vTcl:FireEvent $top <<Create>>
@@ -5955,7 +5956,7 @@ adjourn .top75} \
     button $site_3_0.but86 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 1 1 1 0" & 
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat 1 1 1 1 0 & 
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -5969,7 +5970,7 @@ adjourn .top75} \
     button $site_3_0.but87 \
         -activebackground #eccceccceccc -activeforeground red \
         -background #dcdcdc \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat "1 0 0 0 0" &
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat 1 0 0 0 0 &
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -6206,16 +6207,17 @@ editFile $file.inp } \
         -command {set lst1a "";
     if {$cempire == 1 && [file exists $file.inp ]} {set a1 "1"} else {set a1 "0"}
     set lst1a [concat $lst1a " " $a1];
-    if {$cformat == 1} {set a1 "1"} else {set a1 "0"}
-    set lst1a [concat $lst1a " " $a1];
-    if {$cverify == 1} {set a1 "1"} else {set a1 "0"}
-    set lst1a [concat $lst1a " " $a1];
-    if {$cprepro == 1} {set a1 "1"} else {set a1 "0"}
-    set lst1a [concat $lst1a " " $a1];
-    if {$cplot == 1} {set a1 "1"} else {set a1 "0"}
-    set lst1a [concat $lst1a " " $a1];
+    if {$cformat == 1} {set a2 "1"} else {set a2 "0"}
+    set lst1a [concat $lst1a " " $a2];
+    if {$cverify == 1} {set a3 "1"} else {set a3 "0"}
+    set lst1a [concat $lst1a " " $a3];
+    if {$cprepro == 1} {set a4 "1"} else {set a4 "0"}
+    set lst1a [concat $lst1a " " $a4];
+    if {$cplot == 1} {set a5 "1"} else {set a5 "0"}
+    set lst1a [concat $lst1a " " $a5];
 #tk_dialog .dialogsi Confirm "Confirm \n...lst1a=$lst1a " "" 0 No Yes;
-    if {$lst1a != "" } {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat $lst1a &}
+    if {$lst1a != "" } {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat $a1 $a2 $a3 $a4 $a5 &}
+#    if {$lst1a != "" } {exec xterm -e $::env(EMPIREDIR)/scripts/multiE $file $mat $lst1a &}
 
 # create list of possible ddx plots
 ddlist
