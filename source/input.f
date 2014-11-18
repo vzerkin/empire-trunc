@@ -1,6 +1,6 @@
-!cc   * $Rev: 4204 $
-!cc   * $Author: bcarlson $
-!cc   * $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
+!cc   * $Rev: 4216 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2014-11-18 07:34:01 +0100 (Di, 18 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1162,7 +1162,7 @@ C
 C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
 
-           IF(NINT(AEJc(0)).GE.2)THEN
+           IF(NINT(AEJc(0)).GE.2 .and. DXSred.GT.0.d0)THEN
              BUReac = 0.7d0
              NTReac = 0.9d0
            ENDIF
@@ -1170,7 +1170,6 @@ C        Prepare gamma transmission parameters
            CALL EMPAgdr() ! allocating memory for temporal gdr arrays
            CALL read_GDRGFLDATA(Numram)
 
-           CALL ULM(0,Numram)
            IF(KEY_shape.GE.7) THEN 
              CALL ULM_micro(0)
            ELSE
@@ -1186,7 +1185,7 @@ C        Prepare gamma transmission parameters
                CALL ULM(i,Numram) 
              ENDIF
              IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.LT.7) 
-     &       CALL ULM_print(i) 
+     &         CALL ULM_print(i) 
            ENDDO
            CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
            WRITE (8,*) ' -----------------------------------------'
@@ -2127,7 +2126,8 @@ C-----------------Width of the partial bin relative to DE
      &                'Ecut   =',ECUt(nnur),
      &                'Ex(1)  =',EX(1,nnur),
      &                'Ecut+DE=',ECUt(nnur)+DE
-                  IF(DEPart(nnur).gt.1.3d0 .and. FISsil(nnur)) then 
+C                 IF(DEPart(nnur).gt.1.3d0 .and. FISsil(nnur)) then 
+                  IF(DEPart(nnur).gt.1.3d0                   ) then 
                     fftmp=(EX(1,nnur)-ECUt(nnur))*
      &                     (A(nnur)+AEJc(nejc))/A(nnur)
                     WRITE(8,*) 'WARNING: Large continuum bin correction'
@@ -2237,6 +2237,11 @@ C--------OMPAR.DIR
          CLOSE (33,STATUS = 'DELETE')
 C--------OMPAR.RIPL
          CLOSE (29,STATUS = 'DELETE')
+C        additional lines to avoid the message that EMPIRE stopped !!
+         OPEN(222,file='EMPIRE.OK') 
+         WRITE (222,*) ' PLOTS DONE'
+         CLOSE(222)
+C        additional lines
          STOP 'PLOTS DONE'
       ENDIF
 C
