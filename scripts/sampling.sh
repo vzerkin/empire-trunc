@@ -71,9 +71,9 @@ $EMPIREDIR/scripts/runE $file
 #rm -rf $file-tl 
 #     or 
 # Removing TLs for the incident channel
-#rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
+rm -f $file-tl/*.INC $file-tl/*.ANG $file-tl/*.ICS $file-tl/*.CS $file-tl/*.TLJ $file-tl/*.LEG
 # Removing TLs for the outgoing neutron channel
-#rm -f $file-tl/000001_*.BIN
+rm -f $file-tl/000001_*.BIN
 # Removing TLs for the outgoing proton channel
 #rm -f $file-tl/001001_*.BIN
 # Removing TLs for the outgoing alpha  channel
