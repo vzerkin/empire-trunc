@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4204 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
+Ccc   * $Rev: 4224 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-11-18 10:38:27 +0100 (Di, 18 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -281,7 +281,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             ENDDO
    60       CONTINUE
             ABScs=CSFus
-            NLW = max(NDLW,j) 
+            NLW = min(NDLW,j) 
 C-----------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW !stability limit not a problem for photoreactions
@@ -362,11 +362,11 @@ C-----------end of E2
             maxlw = 0
             DO ip = 1, 2
                DO j = 1, NDLW
-	            e1tmp = POP(NEX(1),j,ip,1)
+                  e1tmp = POP(NEX(1),j,ip,1)
                   if (e1tmp.lt.1.d-15) cycle 
                   CSFus = CSFus + e1tmp
                   csmax = DMAX1(e1tmp,csmax)
-	            maxlw = max(maxlw,j)
+                  if(j.gt.maxlw) maxlw = j
                ENDDO
             ENDDO
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
@@ -383,7 +383,7 @@ C        for photon induced reactions (to process them in EMPEND)
 C
          TOTcs = CSFus
 C
-  100    GOTO 999
+         GOTO 400
       ENDIF
       IF (FUSread) THEN
 C--------if FUSREAD true read l distribution of fusion cross section
@@ -818,6 +818,7 @@ C--------channel spin min and max
          smax = sxj + trgsp
          mul = smax - smin + 1.0001
          CSFus = 0.d0
+         csmax = 0.d0
          DO ip = 1, 2     ! over parity
           DO j = 1, NLW !over compound nucleus spin
             sum = 0.d0
@@ -1110,6 +1111,7 @@ C    &           RELKIN,relcal
 
 C	write (*,*) '*** NLW=',NLW,tljcalc
       CSFus = 0.d0
+      csmax = 0.d0
 	IF (tljcalc) THEN
 C-------absorption spin distribution using Tlj's
         DO ip = 1, 2      ! over parity
@@ -1215,14 +1217,13 @@ C
          IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
          IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
       ENDDO
-
+C
+C     NORMAL RETURN
+  400 CONTINUE
 C-----the next line can be used to increase the number of partial waves
 C-----e.g., to account for a high-spin isomer
 C-----Plujko_new-2005
-  400 NLW = min(NLW + 1 + MAXmult,NDLW)
-
-C     NORMAL RETURN
-  999 CONTINUE
+      NLW = min(NLW + 1 + MAXmult,NDLW)
 C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
@@ -1253,13 +1254,6 @@ C
           ENDIF
           NLW = min(JSTab(1),NDLW)
       ENDIF
-
-C     csmax = 0.d0
-C     DO ip = 1, 2
-C       DO j = 1, NDLW
-C         csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
-C       ENDDO
-C     ENDDO
 
       IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
      &    *20.D0.GT.csmax) .AND. NLW.EQ.NDLW) THEN
