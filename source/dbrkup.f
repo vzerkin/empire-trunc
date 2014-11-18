@@ -20,12 +20,14 @@
       common/intcons/ijkl(3),wxyz(15),lll(3),lmxwf(3)
 
 
-      data ird/5/,iwrt/6/
+C     data ird/5/,iwrt/6/
+      data        iwrt/6/
 
       call prep(lprt,lmx1)
 
-        t0=second()
-        call cpu_time(cpu0)
+C     t0=second()
+C     call cpu_time(cpu0)
+      CALL HORA(iwrt)
 
       write(iwrt,
      1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
@@ -120,15 +122,15 @@ c weight for Simpson integration
       write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
      1                                          ecm,(sigt(i),i=1,5)
 
-      ttot=second()-t0
-      call cpu_time(cpu1)
-      cputot=cpu1-cpu0
-      write(iwrt,*)
-      write(iwrt,'(''  Elapsed time = '',f10.2,'' seconds'')') ttot
-      write(iwrt,'(''      CPU time = '',f10.2,'' seconds'')') cputot
-      write(iwrt,*)
-
-      write(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
+C     ttot=second()-t0
+C     call cpu_time(cpu1)
+C     cputot=cpu1-cpu0
+C     write(iwrt,*)
+C     write(iwrt,'(''  Elapsed time = '',f10.2,'' seconds'')') ttot
+C     write(iwrt,'(''      CPU time = '',f10.2,'' seconds'')') cputot
+C     write(iwrt,*)
+      CALL HORA(iwrt)
+C     write(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
 
       close(iwrt)
 
@@ -176,12 +178,13 @@ C  Proton spectrum
       parameter(nptmx=5000)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
-      character*48 filename
+C     character*48 filename
       complex*16 frc
 
-      double precision ylm1,ylm2,ylmi
+C     double precision ylm1,ylm2,ylmi
+      double precision           ylmi
 
-      dimension ax(4),pox(4,2)
+C     dimension ax(4),pox(4,2)
       dimension amd(6),azd(6),betanl0(3)
       real md,mf,mf3
 
@@ -197,7 +200,8 @@ C  Proton spectrum
 c      data asd/0.5,0.5,1.0,0.5,0.5,0.0/
       data azd/0.,1.,1.,1.,2.,2./
 
-      data am0/939.0/,hc/197.32/,e2/1.44/
+C     data am0/939.0/,hc/197.32/,e2/1.44/
+      data am0/939.0/,hc/197.32/
       data dr00/0.025/
 
       data md/2.0,1.0,1.0/
@@ -208,7 +212,8 @@ c      data asd/0.5,0.5,1.0,0.5,0.5,0.0/
       data wx/1.0,1.0,1.0/
       data frcnst0/0.667/,ebnd/2.224/,dx0/125.0/
 
-      data ird/5/,iwrt/6/
+C     data ird/5/,iwrt/6/
+      data        iwrt/6/
 
       open(unit=iwrt,file='dbrkup.out',status='unknown')
 
@@ -371,7 +376,8 @@ c     potentiels extraits de la compilation de c.m.perey et f.g.perey  *
 c     atomic data and nuclear data tables   17 (1976) 1-101            *
 c***********************************************************************
       real mt,mt2,mt3,mtt,nmzsa
-      real md,mf
+c     real md,mf
+      real md
       common/const/md(3),zd(3),sd(3),betanl(3),mt,zt
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
 c
@@ -756,16 +762,20 @@ c
 
       complex*16 ovrlp,bfint
 
-      complex*16 brkup,ovrlp1,ovrlp2,ovrlpx
+C     complex*16 brkup,ovrlp1,ovrlp2,ovrlpx
+      complex*16 brkup
       complex*16 tb(ntlmx)
       double precision df1(NDANGecis),db1(NDANGecis)
       double precision df2(NDANGecis),db2(NDANGecis)
       double precision dps(nol,3)
-      double precision cg(nol),cgp(nol),fase,fasep,fang,fasem
-      double precision pidp,sig0,dphi
+C     double precision cg(nol),cgp(nol),fase,fasep,fang,fasem
+      double precision cg(nol),cgp(nol),fase,fasep,fang
+C     double precision pidp,sig0,dphi
+      double precision pidp,sig0
 
       real md,mf
-      double precision ylm1,ylm2,ylmi
+C     double precision ylm1,ylm2,ylmi
+      double precision           ylmi
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/intcons/npt1,npt2,npt3,hx,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
@@ -1031,7 +1041,7 @@ c
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
 
-      data hc/197.32/,am0/938.1/,e2/1.43909/
+C     data hc/197.32/,am0/938.1/,e2/1.43909/
       data iwrt/6/
 
       mf3=mf**(1.0/3.0)
@@ -1101,7 +1111,8 @@ c
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
       complex*16 ovrlp0(0:nptmx)
-      complex*16 wf0,ovrlp1,ovrlp2,nr,wfx
+C     complex*16 wf0,ovrlp1,ovrlp2,nr,wfx
+      complex*16     ovrlp1,ovrlp2,nr,wfx
       complex*16 a11,a12,a13,a21,a22,a23,b1,b2,b3
 
       complex*16 wfs,wfc,smtrx,cph
@@ -1115,7 +1126,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-      data iwrt/6/
+C     data iwrt/6/
 
       ovrlp=0.0d0
       ovrlp1=0.0d0
@@ -1292,7 +1303,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-      data iwrt/6/
+C     data iwrt/6/
 
       bfx=wpot(npt1,nf)*conjg(bfwf1(npt1))*bfwf2(npt1)
 
@@ -1330,14 +1341,14 @@ c***********************************************************************
       double precision xnl(nptmx),etad,sigc,al,fldint,zrc
       complex*16 frc
       complex*16 wft(nptmx),dwft(nptmx),wfh(nptmx),dwfh(nptmx)
-      complex*16 wfx(nptmx),dwfx(nptmx)
+C     complex*16 wfx(nptmx),dwfx(nptmx)
       complex*16 hm,hp,hmp,hpp,hm2,hmp2,anorm
       complex*16 wfs,wfc,smtrx,cph
       complex*16 fc0(nol),fcp0(nol),hcp(nol),dhcp(nol)
       complex*16 hcp1(nol),dhcp1(nol)
       complex cgamma,zzz,ak0,rho0
       dimension a(4)
-      dimension u1(7),y1(7)
+C     dimension u1(7),y1(7)
       dimension rv(5),pote(5)
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
@@ -2210,7 +2221,7 @@ c***********************************************************************
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/potn/potxx(2*nptmx),potf(nptmx)
 
-      data iwrt/6/
+c     data iwrt/6/
 
       do ip=2,3
 c
@@ -2416,7 +2427,7 @@ c by back substitution from max m of coupled equations for m1=-m2 states
 
       dimension cg(*)
 c
-      data iwrt/6/
+C     data iwrt/6/
 
       xj1=jj1*(jj1+1.0d0)
       xj2=jj2*(jj2+1.0d0)
@@ -2714,7 +2725,8 @@ c   AND MUST BE INCLUDED EXPLICITLY ELSEWHERE
 c
       complex*16 hcp(*),dhcp(*)
 
-      double precision eta,al,sqn,sqo,pio2
+C     double precision eta,al,sqn,sqo,pio2
+      double precision eta,   sqn,sqo,pio2
       complex*16 rho,rxl,cwfp,dwfp,roi2,ep,em
       complex zzz,cgamma
 
@@ -2794,11 +2806,12 @@ c calculates spherical Bessel wavefunctions using the series expansion
 c
       implicit double precision (a-h,o-z)
 
-      real ets
+C     real ets
       complex rhs
       complex*16 fc(*),fcp(*)
 
-      complex*16 rho,rho0,rho1,ff,fd,df
+C     complex*16 rho,rho0,rho1,ff,fd,df
+      complex*16 rho,rho0,rho2,ff,fd,df
 
       rho=dble(rhs)
       rho2=0.5d0*rho**2
@@ -2910,7 +2923,7 @@ c - IBM PC Lahey FORTRAN
 c      call timer(i100)
 c      second=real(i100)/100
 c - VAX, CDC4360 and INTEL F95
-      second=secnds(0.)
+C     second=secnds(0.)
 c   INTEL F95 cpu time
 c      call cpu_time(second)
       return
