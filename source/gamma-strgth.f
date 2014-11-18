@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4217 $
+Ccc   * $Rev: 4223 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 07:36:19 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-18 10:01:40 +0100 (Di, 18 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -615,7 +615,7 @@ C
 C-----reading microscopic GRS function from the RIPL-3 file
 C
       i = 1
-99015 FORMAT (1x,f6.2,f7.3,1x,53E9.2)
+99015 FORMAT (1x,f9.3,E12.3)
 C     SKIPPING TITLE LINE
   270 READ(34,*,END = 300)
   280 READ (34,99015,END = 300) uuE1grid(i,Nnuc), E1grid(i,Nnuc)
@@ -659,7 +659,9 @@ C
 C
 C--------interpolation in the tables
 C
-      iugrid = NLGRID
+C     iugrid = NLGRID - 1
+      iugrid = iugMax(Nnuc)
+
       klo = 1
       khi = iugrid
       IF (U.LE.uuE1grid(klo,Nnuc)) THEN
