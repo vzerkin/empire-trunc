@@ -3,85 +3,120 @@
 # Created by V.Zerkin, IAEA-NDS, 2014-09-06
 # Usage: $ multiE file_name MAT_number "actions"
 #
-#echo par1=$0
-#echo par2=$1
-#echo par3=$2
+#echo par0=$0
+#echo par1=$1
+#echo par2=$2
+#runE
 #echo par3=$3
+#format
+#echo par4=$4
+#verify
+#echo par5=$5
+#process
+#echo par6=$6
+#addresonances
+#echo par7=$7
 #echo EMPIREDIR=$EMPIREDIR
 #echo PWD=$PWD
-#read -p " Press <Enter> key to continue ..."
+#echo 'Press <Enter> to continue'
+#read yes
 
 file=$1
 MAT=$2
-actions=$3
+#actions=$3
+#echo $actions ' and ' ${#actions} 
 dd=$EMPIREDIR/scripts
 
-
- 
-    ls0=${#actions}
-    i=0
-    while [ $i -lt $ls0 ] ; do
-      ch=${actions:i:1}
-      #echo i=$i ch=[$ch]
-      if [ "$ch" = "1" ] ; then
-          if [ "$i" = "0" ] ; then 
+          if [ "$3" = "1" ]
+            then
               python $dd/runE $file $MAT; 
               rc=$?
-              if [[ $rc == 1 ]] ; then
+              if [ $rc = 1 ]  
+              then
                 echo ' '
                 echo ' EMPIRE input file '$file'.inp not found !'
                 echo ' '
-                read -p " Press <Enter> key to exit ..."
+                echo 'Press <Enter> to exit'
+                read yes
                 echo ' '
                 exit 1
               fi
-              if [[ $rc == 2 ]] ; then
+              if [ $rc = 2 ] 
+              then
                 echo ' '
                 echo ' Check the long output '$file'.lst for diagnostics !'
                 echo ' '
-                read -p " Press <Enter> key to exit ..."
+                echo 'Press <Enter> to exit'
+                read yes
                 echo ' '
                 exit 1
               fi
-              if [[ $rc != 0 ]] ; then
+              if [ $rc != 0 ] 
+              then
                 echo ' '
                 echo ' Indetermined error. Check the long output '$file'.lst for diagnostics !'
                 echo ' '
-                read -p " Press <Enter> key to exit ..."
+                echo 'Press <Enter> to exit'
+                read yes
                 echo ' '
                 exit 1
               fi
           fi
-          if [ "$i" = "2" ] ; then 
+          if [ "$4" = "1" ]
+            then
              $dd/format $file $MAT ; 
              rc=$?
-             if [[ $rc != 0 ]] ; then
+             if [ $rc != 0 ]  
+             then
+               echo ' '
+               echo ' Error while formatting !'
+               echo ' '
+               echo 'Press <Enter> to exit'
+               read yes
                exit 1
              fi
           fi
-          if [ "$i" = "4" ] ; then 
+          if [ "$5" = "1" ]
+            then
              $dd/verify $file $MAT ; 
              rc=$?
-             if [[ $rc != 0 ]] ; then
+             if [ $rc != 0 ]  
+             then
+               echo ' '
+               echo ' Error while verifying !'
+               echo ' '
+               echo 'Press <Enter> to exit'
+               read yes
                exit 1
              fi
           fi
-          if [ "$i" = "6" ] ; then 
+          if [ "$6" = "1" ]
+            then
              $dd/process $file $MAT ; 
              rc=$?
-             if [[ $rc != 0 ]] ; then
+             if [ $rc != 0 ]  
+             then
+               echo ' '
+               echo ' Error while processing !'
+               echo ' '
+               echo 'Press <Enter> to exit'
+               read yes
                exit 1
              fi
           fi
-          if [ "$i" = "8" ] ; then 
+          if [ "$7" = "1" ]
+            then
              $dd/addresonances $file $MAT ;
              rc=$?
-             if [[ $rc != 0 ]] ; then
+             if [ $rc != 0 ]  
+             then
+               echo ' '
+               echo ' Error while adding resonances !'
+               echo ' '
+               echo 'Press <Enter> to exit'
+               read yes
                exit 1
              fi
           fi
-      fi
-      i=$(($i+1))
-    done
 
 exit
