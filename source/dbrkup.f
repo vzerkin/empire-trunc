@@ -19,6 +19,7 @@
       common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
       common/intcons/ijkl(3),wxyz(15),lll(3),lmxwf(3)
 
+      INTEGER iwrt
 
 C     data ird/5/,iwrt/6/
       data        iwrt/6/
@@ -27,7 +28,7 @@ C     data ird/5/,iwrt/6/
 
 C     t0=second()
 C     call cpu_time(cpu0)
-      CALL HORA(iwrt)
+      CALL THORA(iwrt)
 
       write(iwrt,
      1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
@@ -129,7 +130,7 @@ C     write(iwrt,*)
 C     write(iwrt,'(''  Elapsed time = '',f10.2,'' seconds'')') ttot
 C     write(iwrt,'(''      CPU time = '',f10.2,'' seconds'')') cputot
 C     write(iwrt,*)
-      CALL HORA(iwrt)
+      CALL THORA(iwrt)
 C     write(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
 
       close(iwrt)
