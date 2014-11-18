@@ -19,8 +19,9 @@ echo "Command line:" $0 $1 $2 $3
 #echo par3=$2
 #echo par3=$3
 echo EMPIREDIR=$EMPIREDIR
-read -p " Press <Enter> key to execute the command ..."
-
+echo ' '
+echo ' Press <Enter> key to  to execute the command ...'
+read yes
 option=$1
 targetfile=$2
 
