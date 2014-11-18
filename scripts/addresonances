@@ -23,8 +23,8 @@ echo ' '
 echo 'ERROR: Input file '$file'-e.endf is missing'
 echo 'Formatting (EMPEND) should be run first ! '
 echo ' '
-read -p " Press any key to exit or <CTRL>-C to abort ..."
-echo ' '
+echo ' Press any key to exit or <CTRL>-C to abort ...'
+read yes
 exit 1
 fi
 
