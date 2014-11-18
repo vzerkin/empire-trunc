@@ -199,6 +199,7 @@
    gcasc = 1.0         !ensure full gamma cascade when HRTW
    ke = NEX(nnuc)
 
+   IF (AEJc(0).EQ.0.0D0) LHRtw=0
    ! Initialize variables and print heading for normalizing g-strength function
 
    d0c = 0.D0
@@ -216,11 +217,17 @@
    ! xmas_npro = EJMass(NPRoject)
    xmas_npro = EJMass(0)
    xmas_ntrg = AMAss(0)
+   
 
    el = EINl
    relcal = .FALSE.
    !IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
    IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
+
+   IF (AEJc(0).EQ.0.0D0) then  
+     xmas_npro = 0.d0
+     relcal = .TRUE.
+   ENDIF
 
    CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
