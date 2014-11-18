@@ -84,7 +84,7 @@ def runE(proj):
     rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
     rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
     rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT','TL')     
     rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
     rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
 
@@ -266,10 +266,6 @@ def runE(proj):
     print ('DONE !!!')
     #return 0    # to keep temporary files, for debugging
 
-    if isEmpty('EMPIRE.OK'):
-        print('\n\n***************************************************************\nEmpire crashed, pls send the input file to r.capotenoy@iaea.org')
-        sys.exit(2) # return 2    
-
     #Move case-related files to the right place
     mv('OUTPUT.DAT',proj+'.out')
     mv('LIST.DAT',proj+'.lst')
@@ -348,6 +344,10 @@ def runE(proj):
         mv('SYSTEMATICS.TXT',proj+'.sys')
     if not isEmpty('SENSITIVITY.MATRIX'):
         mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
+ 
+    if isEmpty('EMPIRE.OK'):
+        print('\n\n*************************************************************** \nEmpire stopped, pls send the input file to r.capotenoy@iaea.org')
+        sys.exit(2) # return 2    
     
     # move files, no warning if files DNE:
     if not isEmpty('OMP_A.DAT'):
