@@ -186,16 +186,16 @@ def runE(proj):
         #cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (sorted C4): %s' % proj+'.c4')
         if not isEmpty(proj+'-natural.c4'):
-          print('Experimental data for natural element exist %s' % proj+'-natural.c4')
+            print('Experimental data for natural element exist %s' % proj+'-natural.c4')
     else:
         # From parseC4.py, these are the ZA <-> directory name mappings  
         projectiles = {
             0:'gammas',
             1:'neutrons',
             1001:'protons',
-            1002:'deuterons', 
-            2003:'helions',               
-            2004:'alphas',          
+            1002:'deuterons',
+            2003:'helions',
+            2004:'alphas',
             'other':'other'
         }
 
@@ -206,7 +206,7 @@ def runE(proj):
             #print('line: %s' % line)
             if  line.strip().upper().startswith('BENCHM'):
                 if (int(float(line.split()[1]))) == 1: 
-                SKIPC4 = True
+                    SKIPC4 = True
                     print('Benchmark calculation: experimental data not retrieved')
             if  line.strip().upper().startswith('TRGLEV'): 
                 targetIsomer = int(float(line.split()[1]))
@@ -228,8 +228,9 @@ def runE(proj):
             isoC4File = filePatternWithoutSuffixOrA+str(A).zfill(3)+'_M.c4'
 
             if not isEmpty(natC4File): 
-            print('Experimental data found for reactions on the natural element %s :\n   %s' % (el,natC4File) )
-              cp(natC4File,proj+'-natural.c4')
+                print('Experimental data found for reactions on the natural element %s :\n   %s' % (el,natC4File) )
+                cp(natC4File,proj+'-natural.c4')
+                print('Original C4 experimental data on the natural element saved as:\n   %s' % (proj+'-natural.c4'))  
             if not isEmpty(sumC4File): print('Experimental data found for reactions on the isotope %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)),sumC4File) )
             if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground  state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"g"),gsC4File) )
             if not isEmpty(isoC4File): print('Experimental data found for reactions on the excited state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"*"),isoC4File) )
@@ -246,14 +247,16 @@ def runE(proj):
             
             # save the concatenated files together in the two files we need later
             open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
-            cp(proj+'-unsorted.c4',proj+'.c4')
 
-            # Sorting the newly created C4 file
-            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-            os.system('%s %s' % (cmd, proj) )
+            if not isEmpty(proj+'.c4'): 
+                cp(proj+'-unsorted.c4',proj+'.c4')
+                print('Error retrieving experimental data: C4 files not available in /EXFOR subdirectory')
 
-            print('Original C4 experimental data saved as: \n   %s' % (proj+'-unsorted.c4'))  
-            if not isEmpty(natC4File): print('Original C4 experimental data on the natural element saved as:\n   %s' % (proj+'-natural.c4'))  
+                # Sorting the newly created C4 file
+                cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+                os.system('%s %s' % (cmd, proj) )
+
+                print('Original C4 experimental data saved as: \n   %s' % (proj+'-unsorted.c4'))  
  
     # OK, the environment is set up, time to run EMPIRE:
     print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
@@ -459,17 +462,17 @@ def runE(proj):
     rm('LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
     
-    if not isEmpty(proj+'.exf'):
-        if isEmpty(proj+'.c4'):
-            # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+    #if not isEmpty(proj+'.exf'):
+    #    if isEmpty(proj+'.c4'):
+    #        # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
             
-            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
-            os.system('"%s" %s' % (cmd,proj) )
+    #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
+    #        os.system('"%s" %s' % (cmd,proj) )
             
-            # RUN c4sort TO SORT C4 DATA
+    #        # RUN c4sort TO SORT C4 DATA
             
-            cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-            os.system('"%s" %s' % (cmd,proj) )
+    #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+    #        os.system('"%s" %s' % (cmd,proj) )
     
     # REMOVE EMPTY FILES:
     
