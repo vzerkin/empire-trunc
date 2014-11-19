@@ -986,7 +986,7 @@
     type (reaction), pointer :: rx1,rx2
 
     open(14,action='write')
-    open(48,action='write')
+    open(16,action='write')
 
     ! same reactions
 
@@ -1006,11 +1006,11 @@
 
         ! generate endf-like numbers
 
-        write(48,102) rx1%nen,rx1%nam,rx1%nam   !16
-        write(48,500) (rx1%ene(i),i=1,rx1%nen)   !16
-        write(48,500) (rx1%crs(i),i=1,rx1%nen)   !16
+        write(16,102) rx1%nen,rx1%nam,rx1%nam   !16
+        write(16,500) (rx1%ene(i),i=1,rx1%nen)   !16
+        write(16,500) (rx1%crs(i),i=1,rx1%nen)   !16
         do i=1,rx1%nen
-            write(48,500) (vg(i,j),j=1,rx1%nen)   !16
+            write(16,500) (vg(i,j),j=1,rx1%nen)   !16
         end do
 
         do i = 1,rx1%nen
@@ -1055,11 +1055,11 @@
 
             ! generate endf-like numbers
 
-            write(48,102) rx1%nen,rx1%nam,rx2%nam
-            write(48,500) (rx1%ene(i),i=1,rx1%nen)
-            write(48,500) (rx1%crs(i),i=1,rx1%nen)
+            write(16,102) rx1%nen,rx1%nam,rx2%nam
+            write(16,500) (rx1%ene(i),i=1,rx1%nen)
+            write(16,500) (rx1%crs(i),i=1,rx1%nen)
             do i=1,rx1%nen
-                write(48,500) (vg(i,j),j=1,rx2%nen)
+                write(16,500) (vg(i,j),j=1,rx2%nen)
             end do
 
             do i = 1,rx1%nen
@@ -1089,7 +1089,7 @@
     end do
 
     close(14)
-    close(48)
+    close(16)
 
 100 format(i5,2(1pe10.2),50i5)
 101 format(i5,43x,a12)
