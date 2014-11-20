@@ -3469,19 +3469,20 @@ C* (EMPIRE-3 version after November 2010)
         XPOP(I)=0
       END DO
   217 IF(JZA.GE.IZI+IZA) GO TO 310
-      IF     (REC(59:67).EQ.'gammas   ') THEN
+C... Format changed (between 23 Nov and 3 Dec 2012) REC(59:67)-->REC(58:66)
+      IF     (REC(58:67).EQ.'gammas   ') THEN
         JPOP=8
-      ELSE IF(REC(59:67).EQ.'neutrons ') THEN
+      ELSE IF(REC(58:66).EQ.'neutrons ') THEN
         JPOP=1
-      ELSE IF(REC(59:67).EQ.'protons  ') THEN
+      ELSE IF(REC(58:66).EQ.'protons  ') THEN
         JPOP=2
-      ELSE IF(REC(59:67).EQ.'deuterons') THEN
+      ELSE IF(REC(58:66).EQ.'deuterons') THEN
         JPOP=3
-      ELSE IF(REC(59:67).EQ.'tritons  ') THEN
+      ELSE IF(REC(58:66).EQ.'tritons  ') THEN
         JPOP=4
-      ELSE IF(REC(59:67).EQ.'helium-3 ') THEN
+      ELSE IF(REC(58:66).EQ.'helium-3 ') THEN
         JPOP=5
-      ELSE IF(REC(59:67).EQ.'alphas   ') THEN
+      ELSE IF(REC(58:66).EQ.'alphas   ') THEN
         JPOP=6
       ELSE
         JPOP=0
@@ -3502,7 +3503,7 @@ c...
         READ (REC(37:50),*) XX
         XPOP(JPOP)=XX
 c...
-c...    print *,'jpop,ipop,mt,ee,xx',jpop,ipop,mt,ee,xx
+C...    print *,'jpop,ipop,mt,ee,xx',jpop,ipop,mt,ee,xx
 c...          
       END IF
 C* Check for more population cross sections up to a blank line
@@ -3575,7 +3576,7 @@ C* Read the cross section
       IF(XS.LE.0) GO TO 110
       XG =-1
 c...
-c...  print *,'mt,xs,ee',mt,xs,ee
+C...  print *,'mt,xs,ee',mt,xs,ee
 c...
 C* Test for multiple reactions leading to the same residual
   312 XSPROD=XS
