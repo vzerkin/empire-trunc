@@ -118,7 +118,11 @@ C-----
       crossPE = 0.d0
       crossPEt= 0.d0
 
-      IF (EINl.GT.0.1D0 .AND. PEQc.GT.0) THEN
+      IF (EINl.GT.0.1D0 .AND. PEQc.GT.0 .AND. AEJc(NPRoject).LE.1) THEN
+         ftmp = CSFus
+         CALL PCROSS(ftmp,totemis)
+      ENDIF ! PCRoss done
+      IF (EINl.GT.0.1D0 .AND. AEJc(NPRoject).GT.1 .AND. DXSred.gt.0)THEN
          ftmp = CSFus
          CALL PCROSS(ftmp,totemis)
          IF(ltransfer)WRITE(117,'(1P,E11.4,1x,1P,7E13.5)')EINl,crossNTt,

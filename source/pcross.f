@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4222 $
+Ccc   * $Rev: 4234 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 10:01:04 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-21 19:36:29 +0100 (Fr, 21 Nov 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -442,7 +442,10 @@ c
      &          F12.5, '' mb'')')crossaftertrans
       WRITE(8,*)
 C
- 9    IF(scompn.eq.0.d0) goto 60
+C9    IF(scompn.eq.0.d0) goto 60
+ 9    IF(scompn.eq.0.d0) goto 70
+
+      IF(PEQc.eq.0) goto 70  ! skipping PE calculation
 C
 C     **Pre-equilibrium decay
 C
@@ -701,7 +704,7 @@ C        totemis = totemis + crossBU(nejc)
             endif
          ENDIF
       ENDDO
-      IF(ltransfer .or. lbreakup)THEN
+ 70   IF(ltransfer .or. lbreakup)THEN
          WRITE(8,'(10x,''Total PE cross section        '',
      &             F12.5, '' mb'')')crossPEt
          WRITE(8,89004)
@@ -709,7 +712,7 @@ C        totemis = totemis + crossBU(nejc)
 89004 FORMAT (/4X,
      &'*** BU + NT + PE cross sections calculated in PCROSS ***', /)
 
- 70   IF (IOUt.GE.1) THEN
+      IF (IOUt.GE.1) THEN
          DO nejc = 0, NEJcm
             IF (nejc.gt.0 .and. nejc.LE.3) THEN !nucleons and alpha
                IF (IDNa(2*nejc,6).EQ.0) THEN

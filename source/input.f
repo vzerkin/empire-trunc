@@ -1,6 +1,6 @@
-!cc   * $Rev: 4227 $
+!cc   * $Rev: 4234 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-18 13:38:09 +0100 (Di, 18 Nov 2014) $
+!cc   * $Date: 2014-11-21 19:36:29 +0100 (Fr, 21 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -330,7 +330,7 @@ C
          EXClusiv = .TRUE.! Default: All exclusive calculation
          WIDcoll = 0.05d0 ! Default = 50 keV resolution  
 C        Scaling factor for direct processes consideration for complex projectiles
-         DXSred = 1.d0    ! Default: supressed 
+         DXSred = 1.d0    ! Default: enabled 
          DEFdyn = 1.d0
          DEFsta = 1.d0
          DEFnuc = 0.d0
@@ -1162,7 +1162,7 @@ C
 C        Prepare gamma transmission parameters
          IF(FIRST_ein) THEN
 
-           IF(NINT(AEJc(0)).GE.2 .and. DXSred.GT.0.d0)THEN
+           IF(NINT(AEJc(NPRoject)).GE.2 .and. DXSred.GT.0)THEN
              BUReac = 0.7d0
              NTReac = 0.9d0
            ENDIF
@@ -1184,8 +1184,8 @@ C        Prepare gamma transmission parameters
 	       ELSE
                CALL ULM(i,Numram) 
              ENDIF
-             IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.LT.7) 
-     &         CALL ULM_print(i) 
+             IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.LT.7
+     &          .AND. IOUT.GT.3) CALL ULM_print(i) 
            ENDDO
            CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
            WRITE (8,*) ' -----------------------------------------'
@@ -1540,7 +1540,18 @@ C             WRITE (12,
 C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
          ENDIF
 
-C--------set PCROSS  (.,6) cluster emission
+C--------set PCROSS  (.,6) 
+         IF (PEQc.EQ.0.d0 .and. AEJc(NPRoject).gt.1 
+     &      .and. DXSred.gt.0) THEN
+            IDNa(2,6) = 1  ! cont n
+            IDNa(4,6) = 1  ! cont p
+            IDNa(5,6) = 0  ! gammas
+            IDNa(6,6) = 1  ! cont A 
+            IDNa(7,6) = 1  ! cont D 
+            IDNa(8,6) = 1  ! cont T 
+            IDNa(9,6) = 1  ! cont H 
+         ENDIF
+
          IF (PEQc.GT.0.d0) THEN
             IDNa(2,6) = 1  ! cont n
             IDNa(4,6) = 1  ! cont p
@@ -1597,6 +1608,8 @@ C--------print IDNa matrix
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
      &             '           --------------------------------------- '
+         WRITE (8,*)
+     &   '  Note: PCROSS includes break-up and transfer reactions'
          WRITE (8,*) ' '
          WRITE (8,*) 'Exit channel    ECIS    MSD    MSC',
      &              '    HMS   PCROSS'
@@ -1637,6 +1650,8 @@ C----------------------------------------------------------
      &             '           Use of direct and preequilibrium models '
          WRITE(12,*)
      &             '           --------------------------------------- '
+         WRITE(12,*)
+     &   '  Note: PCROSS includes break-up and transfer reactions'
          WRITE(12,*) ' '
          WRITE(12,*) 'Exit channel    ECIS    MSD    MSC',
      &              '    HMS   PCROSS'
@@ -7292,17 +7307,17 @@ C-----
             IF (val.LE.0.d0) THEN
                DXSred = 0.d0
                WRITE ( 8,
-     &'('' Direct reactions for complex projectiles suppressed!'')')
+     &'('' Direct reactions for complex projectiles suppressed'')')
                WRITE (12,
-     &'('' Direct reactions for complex projectiles suppressed!'')')
+     &'('' Direct reactions for complex projectiles suppressed'')')
             ELSE
                DXSred = val
                WRITE ( 8,
-     &'('' Direct-reaction cross sections for complex projectiles'',
-     &  '' normalized by a factor '',F6.3)') DXSred
+     &'('' Direct cross sections for complex projectiles'',
+     &  '' scaled by '',F6.3)') DXSred
                WRITE (12,
-     &'('' Direct-reaction cross sections for complex projectiles'',
-     &  '' normalized by a factor '',F6.3)') DXSred
+     &'('' Direct cross sections for complex projectiles'',
+     &  '' scaled by '',F6.3)') DXSred
             ENDIF
             GOTO 100
          ENDIF
