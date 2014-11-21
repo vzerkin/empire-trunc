@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4128 $
+Ccc   * $Rev: 4235 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-01 15:51:18 +0200 (Mi, 01 Okt 2014) $
+Ccc   * $Date: 2014-11-21 19:42:32 +0100 (Fr, 21 Nov 2014) $
 
 c===========================================================
       SUBROUTINE DTRANS(iemin,iemax,sigNT,crossNT,specNT,te_e)
@@ -42,12 +42,6 @@ C     if(NTSred.LE.0.d0 .or. getout) return
       crossNT = 0.d0 
       specNT  = 0.d0  
       sigNT   = 0.d0
-
-      IF(IOUt.GE.3) then
-        write(8,*) 
-        write(8,*) ' EMISSION SPECTRA : DIRECT reactions'
-        write(8,*) 
-      ENDIF
 
 C     ** (2s+1)*A inc
       sainc =(2.*SEJc(0)+1.)*AEJc(0)
@@ -261,7 +255,7 @@ C
       DOUBLE PRECISION crossBU(0:NDEJC),specBU(0:NDEJC,NDECSE),te_e
 
       REAL*8 nab(NDEJC,NDEJC),dd0,expp,thalf,sigBU,ek,dcor,dsum
-      REAL*8 rr0,ehalf,ca,cb,zares,e0,fac1,fac2,bnd,gamma
+      REAL*8 rr0,ehalf,ca,cb,zares,e0,fac0,fac1,fac2,bnd,gamma,embreak
       INTEGER iejc, ke, nnur, ac, zc
 
       REAL*8 BN_EJ_PROJ
@@ -299,7 +293,9 @@ c     Coulomb barriers
       ac = int(A(1))
       zc = int(Z(1))
 
-      fac1 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))
+c     fac1 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))            !MA2014
+cMA   fac1 replaced by fac0 to remain unchanged along the loop over iejc!MA2014
+      fac0 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))            !MA2014
 
 C	write(*,*) 'Nproject=',Nproject
     
@@ -315,18 +311,26 @@ C	write(*,*) 'Nproject=',Nproject
          nab(NPRoject,iejc) = nab(NPRoject,iejc) * TUNEbu(Iejc)
 
          ehalf = 42.d0*(AEJc(0)-AEJc(iejc))**0.6666                   !eq.26
-c        te_e = 1.d0/(1.d0 + exp((cb - ek)/(cb/3.d0)))                !eq.9
+C        te_e = 1.d0/(1.d0 + exp((cb - ek)/(cb/3.d0)))                !eq.9
          thalf = 1.d0/(1.d0 + exp((ehalf-EINl)/14.d0))*te_e           !eq.25
          crossBU(iejc) = nab(NPRoject,iejc) * dd0**2 * expp * thalf   !eq.24
 c
 c        ** peak energy
 c
          bnd = BN_EJ_PROJ(iejc,NPRoject) 
-        
-         fac2 = 1.d0 - A(0)/(155.*bnd*bnd)
-         gamma = fac1 * fac2
 
-	   if(iejc.eq.2) gamma = max(1.5d0,gamma) ! RCN
+         embreak = EIN - bnd  ! Ed - Bd (CMS)
+         IF(embreak.lt.0) THEN
+           WRITE(8,*) 'WARNING: Incident energy CMS below Bn',sngl(bnd), 
+     >                '; breakup supressed' 
+           crossBU(iejc) = 0.d0
+           CYCLE
+         ENDIF
+         
+         fac2 = 1.d0 - A(0)/(155.*bnd*bnd)
+CMA      gamma = fac1 * fac2                                               !MA2014	 
+CMA      fac1 replaced by fac0 to remain unchanged along the loop over iejc!MA2014
+         gamma = fac0 * fac2                                               !MA2014
 
          IF(AEJc(0)-AEJC(iejc).GT.1.5 .and. gamma.gt.3.1) 
      &     gamma = gamma - 3.d0
@@ -337,15 +341,13 @@ c
 
          e0 = AEJc(iejc)/AEJc(0) * (EINl - ca) + cb
 
-C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) iejc,bnd
-C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) fac1,fac2,gamma
-C        if(iejc.eq.1 .or. iejc.eq.2) write(*,*) 
-C    >           e0,iemin(iejc), iemax(iejc)
-
          dcor = 0.d0
-         fac1 = 1.d0/(sqrt(2.d0 * gamma)*pi)
+CMA      fac1 = 1.d0/(sqrt(2.d0 * gamma)*pi)                            !MA2014
+         fac1 = 1.d0/(sqrt(2.d0 * pi)*gamma)	!corrected, cf. eq.5      !MA2014 
          DO ke = iemin(iejc), iemax(iejc)
             ek = DE * (ke - 1)
+C           Suggested by MA (kinematic limit)
+            if (ek.gt.embreak) exit
             fac2 = exp(-(ek-e0)**2/(2.d0 * gamma**2))
             dcor = dcor + fac2*fac1 
          ENDDO
@@ -353,6 +355,8 @@ C    >           e0,iemin(iejc), iemax(iejc)
            dsum = 0.d0
            DO ke = iemin(iejc), iemax(iejc)
              ek = DE * (ke - 1)
+C            Suggested by MA (kinematic limit)
+             if (ek.gt.embreak) exit
              fac2 = exp(-(ek-e0)**2/(2.d0 * gamma**2))
              specBU(iejc,ke) = crossBU(iejc)/DE * fac2 * fac1 / dcor
              dsum = dsum + specBU(iejc,ke)*DE
