@@ -1,6 +1,6 @@
-!cc   * $Rev: 4239 $
+!cc   * $Rev: 4241 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-22 17:44:20 +0100 (Sa, 22 Nov 2014) $
+!cc   * $Date: 2014-11-22 18:59:00 +0100 (Sa, 22 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -2287,7 +2287,7 @@ C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
          IF (NINT(FISshi(nnuc)).EQ.0 .AND.
-     &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
+     &       (NINT(Z(nnuc)).LT.86 .OR. NINT(A(nnuc)).LT.220)) THEN
             FISsil(nnuc)= .FALSE.
          ENDIF
          IF (NINT(FISshi(nnuc)).EQ.1) THEN
