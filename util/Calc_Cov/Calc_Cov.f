@@ -2,10 +2,12 @@ C
 C     Processing of the EMPIRE randomly genereted (Monte Carlo) cross-section outputs
 C       to calculate COVARIANCE matrix including selected cross-reaction correlations
 C
+C     v 1.2 November 2014 R. Capote
+C     Adapted to use EMPIRE 3.1 & EMPIRE 3.2 XS* files
+C
 C     v 1.1 August  2012 R. Capote
 C
 C     Eigenvalue calculations introduced 
-C     Nu-bar and Mu-bar introduced
 C
 C     v 1.0 January 2008 
 C
@@ -18,7 +20,7 @@ C
       program COVARIANCE
       implicit none
       integer*4 Nenergies, Nreact
-      parameter (Nenergies=150, Nreact=50)
+      parameter (Nenergies=150, Nreact=85)
       real*8 e(Nenergies),dtmp,ftmp,ex(Nenergies),ey(Nenergies),atmp
       real*8 avermod(Nreact,Nenergies)
       real*8 sigmod(Nreact,Nenergies)
@@ -32,41 +34,37 @@ C
       character*21 caz
       character*34 caxy
       character*12 reaction(Nreact)
-      logical lcovar(Nreact,Nreact),lpositive,lzerosigma(Nreact)
+      logical lcovar(Nreact,Nreact),lpositive,lzerosigma(Nreact),fexist
 
 C-Title  : Program eigenv_cov
 C-Purpose: Calculate eigenvalues of the covariance matrix
       REAL*8 Cov(Nenergies,Nenergies)
       REAL*8 EigenVect(Nenergies,Nenergies),EigenVal(Nenergies)
 C       
+C  Since version 3.2
 C
 C  Reac number  1            2            3          4          5           6          7          8           9           10          11 
 C  Einc       Total       Elastic*    Nonelast*   Fission     Mu-bar      Nu-bar    (z,gamma)   (z,n)       (z,2n)      (z,3n)      (z,4n)            
 C
+C  For version 3.1 or earlier
+C  Einc       Total       Elastic     Reaction    Fission   (z,gamma)   (z,n)       (z,2n)      (z,3n)      (z,4n)      
       lcovar = .false.
       lzerosigma = .false.
 
-C     All diagonal reaction covariances to be calculated            
-      do ir=1,Nreact
+C     All diagonal reaction covariances to be calculated  
+      lcovar(1,1) = .true.          
+      do ir=3,Nreact
         lcovar(ir,ir) = .true.
       enddo
 C
 C     Selected cross-reaction (off-diagonal) covariances to be calculated                   
 C
-      do ix=2,Nreact
-        if(ix.eq.6) cycle
-C       Total and Non-elastic vs everything (but Nu-bar) calculated             
-        lcovar(1,ix) = .true.
+      do ix=5,Nreact
+        lcovar(3,ix) = .true.       
+C       Non-elastic vs everything (but Nu-bar) calculated             
+C       lcovar(1,ix) = .true.
         lcovar(3,ix) = .true.       
       enddo
-      lcovar(2,3)  = .true. ! ela - nonel
-      lcovar(2,5)  = .true. ! ela - Mu-bar
-      lcovar(4,7)  = .true. ! fis - gam
-      lcovar(4,8)  = .true. ! fis - n
-      lcovar(4,9)  = .true. ! fis - 2n
-      lcovar(4,10) = .true. ! fis - 3n      
-      lcovar(7,8)  = .true. ! gam - n
-      lcovar(8,9)  = .true. ! n   - 2n
 C
 C     Filling the symmetric matrix    
 C
@@ -88,6 +86,10 @@ C
       do ic=Nstart,Nruns
         
         write(crun,'(I4.4)') ic
+
+        inquire(file='XS'//crun,exist=fexist)
+        if(.not.fexist) cycle
+
         open(10,file='XS'//crun,status='OLD',err=200)
         
         if (Ncalc.LE.5 .or. mod(ic-1,50).eq.0) 
@@ -97,9 +99,13 @@ C
 C         WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
 C    &      nuc_print+6,SYMbe(0), int(Z(0)), SYMb(0), int(A(0))
           read(10,'(1x,I3,10x,I3,1x,A2,1x,I3)') Nnucd,iz,symb,ia
+
+	    write(*,'(1x,A,I3,1H-,A2,1H-,I3.3)') 
+     &      'Target nucleus:',iz,symb,ia
+         	write(*,*) 'Number of calculated reaction paths =',Nnucd
          
           if(Nnucd.gt.Nreact) Nnucd=Nreact
-          if(ia.gt.220) Nnucd=max(10,Nnucd)  ! neglecting all charged=particle emissions for heavy nuclei
+C         if(ia.gt.220) Nnucd=max(12,Nnucd)  ! neglecting all charged=particle emissions for heavy nuclei
 
 C         WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
 C    &      '  Total     ','  Elastic*  ','  Nonelast* ',
@@ -117,40 +123,107 @@ C    &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
             REAction(3) = 'nonel       '
           endif
           REAction(4)     = 'fiss        '
-          REAction(5)     = 'mubar       '
-          REAction(6)     = 'nubar       '
-          REAction(7)     = '(z,g)       '
 
-          do ir= 8,NNUcd
+          do ir= 5,NNUcd
             nstrlenx=len(trim(REAction(ir)))
-            if(nstrlenx.gt.6) then
-              do ix=1,NNUcd
-                lcovar(ix,ir)=.false.
-                lcovar(ir,ix)=.false.
+
+            if(REAction(ir)(1:nstrlenx).eq.'(z,gamma)') then
+              write(*,*) ' Reaction # ',ir,
+     >          ' accepted  (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+              lcovar(ir,ir)=.true.	   
+			do ix=5,NNUcd
+                lcovar(ix,ir)=.true.
+                lcovar(ir,ix)=.true.
               enddo 
               cycle
             endif
 
-            if(nstrlenx.eq.7 .and. REAction(ir)(6:6).ne.'n') then 
+            if(REAction(ir)(1:nstrlenx).eq.'  Nu-bar') 
+     >        REAction(ir)='Nu-bar       '
+
+            if(REAction(ir)(1:nstrlenx).eq.'  Mu-bar') then
+	        REAction(ir)='Mu-bar       '
+              write(*,*) ' Reaction # ',ir,
+     >          ' accepted  (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+ 			do ix=1,NNUcd
+                lcovar(ix,ir)=.false.
+                lcovar(ir,ix)=.false.
+              enddo 
+              lcovar(ir,ir)=.true.	   
+              cycle
+            endif
+
+            if(nstrlenx.ge.7) then 
+              write(*,*) ' Reaction # ',ir,
+     >          ' discarded (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+              lcovar(ir,ir)=.false.	   
               do ix=1,NNUcd
                 lcovar(ix,ir)=.false.
                 lcovar(ir,ix)=.false.
               enddo 
               cycle 
             endif
+
+C           Selecting (z,xn) ..
+            if(nstrlenx.eq.6) then 
+              if(REAction(ir)(5:5).ne.'n') then 
+                write(*,*) ' Reaction # ',ir,
+     >            ' discarded (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+                lcovar(ir,ir)=.false.	   
+			  do ix=1,NNUcd
+                  lcovar(ix,ir)=.false.
+                  lcovar(ir,ix)=.false.
+                enddo 
+                cycle 
+              else
+                write(*,*) ' Reaction # ',ir,
+     >            ' accepted  (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+			  do ix=5,Ncalc
+                  lcovar(ix,ir)=.true.
+                  lcovar(ir,ix)=.true.
+                enddo
+              endif                 
+            endif
+
+C           Accepting (z,n),(z,p),(z,a)
+            if(nstrlenx.eq.5) then
+              if(REAction(ir)(4:4).eq.'d' .or. 
+     &           REAction(ir)(4:4).eq.'h' .or. 		   
+     &           REAction(ir)(4:4).eq.'t') then 	
+                 write(*,*) ' Reaction # ',ir,
+     >             ' discarded (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+                 lcovar(ir,ir)=.false.	   
+                 do ix=1,NNUcd
+                   lcovar(ix,ir)=.false.
+                   lcovar(ir,ix)=.false.
+                 enddo 
+                 cycle
+              else
+                write(*,*) ' Reaction # ',ir,
+     >          ' accepted  (',nstrlenx,') ',REAction(ir)(1:nstrlenx)
+                do ix=5,10
+                  lcovar(ix,ir)=.true.
+                  lcovar(ir,ix)=.true.
+                enddo 
+              endif			    
+            endif
+
 C           restricting the number of reactions to be included                
             Ncalc = min(Nnucd,ir)
                  
           enddo
 
+C         Limiting the maximum number of reactions (z,xn),(z,p),(z,d),...
+          Nnucd = min(Ncalc,Nreact)
+
           WRITE(*,*) 'Number of reactions to read:', Ncalc
           WRITE(*,*) 
           WRITE(*,*) 
      &   'Reactions included in the Monte Carlo covariance calculation:'
-          WRITE(*,'( 10(2x,6(A12,1x)/))') (REAction(ir),ir=1,Ncalc)
+          do ir= 1,Nnucd
+	      if(lcovar(ir,ir)) WRITE(*,*) REAction(ir)
+          enddo
           WRITE(*,*) 
-C         Limiting the maximum number of reactions (z,xn),(z,p),(z,d),...
-          Nnucd = min(Ncalc,Nreact)
 C
           Ncalc = 0
           ie = 1
@@ -161,6 +234,10 @@ C         Reading energy grid
           enddo
 100       ie = ie - 1
           REWIND (10)
+
+          write(*,*) 'Incident energy range: ',sngl(e(1)),sngl(e(ie))
+          WRITE(*,*) 
+          PAUSE 'Press any key to proceed >'	 
         
         endif
 C
@@ -199,16 +276,20 @@ C         setting cross sections to zero below 0.01 mb
 
 200   enddo ! end of the loop over samples (Number of runs) 
 
+      WRITE(*,*) 
+
+      write(*,*) 'Number of MC samples read :',Ncalc
+
       do ir=1,Nnucd
 
-        nt(ir) = 1 
-
         if( .not.lcovar(ir,ir) ) cycle 
+
         do i=1,ie
           avermod(ir,i) = avermod(ir,i)/Ncalc
-          if(avermod(ir,i).le.0)  then 
-            nt(ir)=i
-          else
+C	    if(avermod(ir,i).gt.0) 
+C    >      WRITE(*,*) REAction(ir),' ',avermod(ir,i)
+          if(avermod(ir,i).gt.0)  then 
+            if(nt(ir).eq.0) nt(ir)=i
             dtmp = covmod(ir,ir,i,i)/Ncalc - avermod(ir,i)**2
             if(dtmp.le.0.d0) dtmp = 1.d-7
             sigmod(ir,i) = avermod(ir,i)
@@ -217,14 +298,16 @@ C         setting cross sections to zero below 0.01 mb
         enddo
 
         if ( (nt(ir).EQ.ie) .or. (nt(ir).eq.0) ) then
+          write(*,*) ' Reaction # ',ir,
+     >      ' discarded, zero cross section calculated for ',
+     >      trim(REAction(ir))
+	    lcovar(ir,ir)=.false.
           do ix=1,Nnucd
             lcovar(ix,ir)=.false.
             lcovar(ir,ix)=.false.
           enddo 
           cycle
         endif
-        if ( nt(ir).NE.1 ) nt(ir) = nt(ir) + 1
-
 C
 C       calculating average uncertainty over the whole energy ramge 
 C
@@ -268,7 +351,6 @@ C     Getting covariance matrix
 
       do ir=1,Nnucd
         if( .not.lcovar(ir,ir) ) cycle 
-
         write(16,615) reaction(ir),ie - nt(ir) + 1, e(nt(ir)), Ncalc
         do i=nt(ir),ie
           write(16,616) e(i),avermod(ir,i),sigmod(ir,i)
