@@ -1,6 +1,6 @@
-!cc   * $Rev: 4234 $
+!cc   * $Rev: 4239 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-21 19:36:29 +0100 (Fr, 21 Nov 2014) $
+!cc   * $Date: 2014-11-22 17:44:20 +0100 (Sa, 22 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -139,6 +139,9 @@ C
 C--------default input parameters (skipped in non-first-energy calculation)
 C
          FIRst_ein = .TRUE.
+
+         ncontr = 0
+         QQInc  = 0.d0
 
 C--------select Myers-Swiatecki shell corrections
          SHNix = 0.0
@@ -1101,6 +1104,7 @@ C             residues must be heavier than alpha
 
               IF(mulem.GT.NENdf .AND. ENDf(nnuc).NE.10) THEN
                 EXClusiv = .FALSE.
+C               write(*,*) mulem, NINT(A(nnuc)),NINT(Z(nnuc)),ENDf(nnuc)
                 ENDf(nnuc) = 2
               ENDIF
 C             This nucleus requested as exclusive in the optional input
@@ -2173,7 +2177,25 @@ C           ENDIF
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE
 C-----------determination of Q-value for isotope production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
+
+            QQInc(nnur)  = QQInc(nnur)  + qtmp
+            ncontr(nnur) = ncontr(nnur) + 1 
+
+C           write(*,'(3(A6,i2),A8,i6,1x,3(e12.6,1x))') ' nnuc=',
+C    >        nnuc,' nejc=',nejc,' nnur=',nnur,' izares=',izares,
+C    >        Q(nejc,nnuc),qtmp,QPRod(nnur)
+
+C           The production Q-value is defined by the lowest threshold producing reaction 
             IF (qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
+C           For residuals with multiple contributing reaction we define an average Q-value 
+C           if(ncontr(nnur).gt.1) QPRod(nnur) = QQInc(nnur)/ncontr(nnur)
+     
+C           write(*,'(3(A6,i2),A8,i6,1x,3(e10.4,1x),3H * ,I2)')' nnuc=',
+C    >        nnuc,' nejc=',nejc,' nnur=',nnur,' izares=',izares,
+C    >        QPRod(nnuc) - Q(nejc,nnuc),QPRod(nnur),
+C    >        QQInc(nnur)/ncontr(nnur), ncontr(nnur)
+C            pause
+
 C-----------determination of etl matrix for the transmission coeff. calculation
 C-----------first 4 elements are set independently in order to get more
 C-----------precise grid at low energies. from the 5-th element on the step
@@ -6265,7 +6287,7 @@ C
                WRITE (8,'('' ENDF formatting enabled'')')
                WRITE (12,'('' ENDF formatting enabled'')')
             ENDIF
-            ENDf(nnuc) = INT(val)
+            ENDf(nnuc) = NINT(val)
             IF (ENDf(nnuc).EQ.1) THEN
               ENDf(nnuc) = 10  ! using as a flag 
               WRITE (8,

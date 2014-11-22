@@ -34,6 +34,8 @@ C
       DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
+      LOGICAL key_calc_hrtw
+
       DOUBLE PRECISION, external :: GET_DDXS
 
       iret = 0
@@ -383,203 +385,212 @@ C-----Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
 C-----Account for widths fluctuations (HRTW)
       IF (LHRtw.EQ.1 .AND. EINl.GT.EHRtw) LHRtw = 0
 
+	key_calc_hrtw = .false.
       IF (nnuc.EQ.1 .AND. EINl.LT.EMAx_tlj) THEN
 C
 C       only for CN decay 
 C
         CALL calc_HRTW   ! width fluctuation
+        key_calc_hrtw = .true.
 
-        IF (ENDf(1).GT.0 .AND. RECoil.GT.0)
-     &    CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
-          kemax = max(NEX(nnuc) - 1,1)
-          IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1 ) THEN
-            IF (NINT(FISmod(nnuc)).EQ.0) THEN
-              WRITE (80,*) 'csfis=', CSFis,' mb'
-            ELSE
-              WRITE (80,*) '  '
-              DO m = 1, INT(FISmod(nnuc)) + 1
-                WRITE (80,*) '    Mode=', m,'  csfis=', CSFism(m),' mb'
-              ENDDO
-            ENDIF
+        IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
+        kemax = max(NEX(nnuc) - 1,1)
+        IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1 ) THEN
+          IF (NINT(FISmod(nnuc)).EQ.0) THEN
+            WRITE (80,*) 'csfis=', CSFis,' mb'
+          ELSE
+            WRITE (80,*) '  '
+            DO m = 1, INT(FISmod(nnuc)) + 1
+              WRITE (80,*) '    Mode=', m,'  csfis=', CSFism(m),' mb'
+            ENDDO
           ENDIF
         ENDIF
-C
-        cspg = 0.d0 
-C-------DO loop over c.n. excitation energy
-        DO ke = kemax, kemin, -1
-          IF(ke.le.0) cycle
-          step = DE
-          IF (ke.EQ.NEX(nnuc) .OR. ke.EQ.1) step = 0.5*DE
-          IF (ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1) step = 1.0
 
-          IF (ENDf(1).GT.0) THEN
-C-----------Clean auxiliary particle spectra for calculation of recoils
-            REClev = 0.d0           
-            AUSpec = 0.d0
-C-----------Calculate population in the energy bin ke
-            pope = 0.d0
-            DO jcn = 1, NLW
-              pope = pope + POP(ke,jcn,1,nnuc) + POP(ke,jcn,2,nnuc)
+      ENDIF
+C
+      cspg = 0.d0 
+C-----DO loop over c.n. excitation energy
+      DO ke = kemax, kemin, -1
+        IF(ke.le.0) cycle
+        step = DE
+        IF (ke.EQ.NEX(nnuc) .OR. ke.EQ.1) step = 0.5*DE
+        IF (ke.EQ.NEX(nnuc) .AND. nnuc.EQ.1) step = 1.0
+
+        IF (ENDf(1).GT.0) THEN
+C---------Clean auxiliary particle spectra for calculation of recoils
+          REClev = 0.d0           
+          AUSpec = 0.d0
+C---------Calculate population in the energy bin ke
+          pope = 0.d0
+          DO jcn = 1, NLW
+            pope = pope + POP(ke,jcn,1,nnuc) + POP(ke,jcn,2,nnuc)
+          ENDDO
+          POPbin(ke,nnuc) = pope*step
+        ENDIF
+
+C
+C       posible parallelization over parity and spin of Nnuc
+C
+        fisxse = 0.d0
+        DO ipar = 1, 2 !over decaying nucleus parity
+          ip = INT(( - 1.0)**(ipar + 1))
+          DO jcn = 1, NLW !over decaying nucleus spin
+!           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!             write(8,*) ' '
+!             write(8,*) 'DECAY STATE ke=',ke,' J=',jcn,' Pi=',ipar
+!           endif
+            IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
+            DENhf = 0.d0
+!           sumtll = 0.d0
+            IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
+              popleft = popleft + POP(ke,jcn,ipar,nnuc)*DE
+              CYCLE
+            ENDIF
+            DO nejc = 1, NEJcm !over ejectiles
+              ares = A(nnuc) - AEJc(nejc)
+              zres = Z(nnuc) - ZEJc(nejc)
+C-------------Residual nuclei must be heavier than alpha
+              if(ares.le.4. and. zres.le.2.) cycle
+              izares = INT(1000.0*zres + ares)
+              CALL WHERE(izares,nnur,iloc)
+              if(iloc.eq.1) CYCLE
+              CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
+!             if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.3) then
+!               write(*,*) 'J=',jcn
+!               write(8,*) 'sum for ejectile=', nejc, sum
+!               write(*,*) 'sum for ejectile=', nejc, sum
+!               sumtll = sumtll + sum
+!             endif
             ENDDO
-            POPbin(ke,nnuc) = pope*step
-          ENDIF
-
+C-----------DO loop over ejectiles       ***done***
+!           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!             write(8,*) 'sum for particles at J=',jcn, sumtll
+!             write(*,*) 'sum for particles at J=',jcn, sumtll
+!           endif
 C
-C		posible parallelization over parity and spin of Nnuc
-C
-          fisxse = 0.d0
-          DO ipar = 1, 2 !over decaying nucleus parity
-            ip = INT(( - 1.0)**(ipar + 1))
-            DO jcn = 1, NLW !over decaying nucleus spin
-!             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!               write(8,*) ' '
-!               write(8,*) 'DECAY STATE ke=',ke,' J=',jcn,' Pi=',ipar
-!             endif
-              IF (GDRdyn.EQ.1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc))
-              DENhf = 0.d0
-!             sumtll = 0.d0
-              IF (POP(ke,jcn,ipar,nnuc).LT.POPmax(nnuc)) THEN
-                popleft = popleft + POP(ke,jcn,ipar,nnuc)*DE
-                CYCLE
+C-----------gamma emision
+            CALL DECAYG(nnuc,ke,jcn,ip,sum)
+C           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+C             write(*,*) 'sum for gammas at J=',jcn, sum
+!             write(8,*) 'sum for gammas at J=',jcn, sum
+C           endif
+C-----------Distribute yrast population over discrete levels
+            IF (DENhf.EQ.0.0D0) THEN
+              IF (ke.EQ.1) THEN
+                ded = DE*0.5
+              ELSE
+                ded = DE
               ENDIF
-              DO nejc = 1, NEJcm !over ejectiles
-                ares = A(nnuc) - AEJc(nejc)
-                zres = Z(nnuc) - ZEJc(nejc)
-C---------------Residual nuclei must be heavier than alpha
-                if(ares.le.4. and. zres.le.2.) cycle
-                izares = INT(1000.0*zres + ares)
-                CALL WHERE(izares,nnur,iloc)
-                if(iloc.eq.1) CYCLE
-                CALL DECAY(nnuc,ke,jcn,ip,nnur,nejc,sum)
-!               if (nnuc.eq.1 .and. ke.eq.nex(1) .and. nejc.eq.3) then
-!                 write(*,*) 'J=',jcn
-!                 write(8,*) 'sum for ejectile=', nejc, sum
-!                 write(*,*) 'sum for ejectile=', nejc, sum
-!                 sumtll = sumtll + sum
-!               endif
-              ENDDO
-C-------------DO loop over ejectiles       ***done***
-!             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!               write(8,*) 'sum for particles at J=',jcn, sumtll
-!               write(*,*) 'sum for particles at J=',jcn, sumtll
-!             endif
-C
-C-------------gamma emision
-              CALL DECAYG(nnuc,ke,jcn,ip,sum)
-C             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-C               write(*,*) 'sum for gammas at J=',jcn, sum
-!               write(8,*) 'sum for gammas at J=',jcn, sum
-C             endif
-C-------------Distribute yrast population over discrete levels
-              IF (DENhf.EQ.0.0D0) THEN
-                IF (ke.EQ.1) THEN
-                  ded = DE*0.5
-                ELSE
-                  ded = DE
-                ENDIF
-                IF (IOUt.GT.1) WRITE (8,
+              IF (IOUt.GT.1) WRITE (8,
      & '('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='',   G12.5)'
      & ) ke, FLOAT(ip)*(FLOAT(jcn) + HIS(nnur)), POP(ke,jcn,ipar,nnuc)
      &   *ded
 C
-C               Corrected on Jan 2011, Previously missed gamma XSs
+C             Corrected on Jan 2011, Previously missed gamma XSs
 C
-                CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + 
+              CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + 
      &                         POP(ke,jcn,ipar,nnuc)*ded
-C---------------Look for the discrete level with the closest spin
-                xnl = 1.d0
-                spdiff = 100.d0
-                DO il = 1, NLV(nnuc)
-                  spdif = ABS(FLOAT(jcn) + HIS(nnur) - XJLv(il,nnuc))
-                  IF (spdif.LT.spdiff) THEN
-                    spdiff = spdif
-                    xnl = 1.d0
-                  ELSE
-                    IF (spdif.EQ.spdiff) xnl = xnl + 1.
-                  ENDIF
-                ENDDO
-                DO il = 1, NLV(nnuc)
-                  spdif = ABS(FLOAT(jcn) + HIS(nnur) - XJLv(il,nnuc))
-                  IF (spdif.EQ.spdiff) THEN
-                    SCRtl(il,0) = 1.0D0/xnl
-                    DENhf = DENhf + SCRtl(il,0)
-                    IF (IOUt.GT.1) WRITE (8,
+C-------------Look for the discrete level with the closest spin
+              xnl = 1.d0
+              spdiff = 100.d0
+              DO il = 1, NLV(nnuc)
+                spdif = ABS(FLOAT(jcn) + HIS(nnur) - XJLv(il,nnuc))
+                IF (spdif.LT.spdiff) THEN
+                  spdiff = spdif
+                  xnl = 1.d0
+                ELSE
+                  IF (spdif.EQ.spdiff) xnl = xnl + 1.
+                ENDIF
+              ENDDO
+              DO il = 1, NLV(nnuc)
+                spdif = ABS(FLOAT(jcn) + HIS(nnur) - XJLv(il,nnuc))
+                IF (spdif.EQ.spdiff) THEN
+                  SCRtl(il,0) = 1.0D0/xnl
+                  DENhf = DENhf + SCRtl(il,0)
+                  IF (IOUt.GT.1) WRITE (8,
      &'(10X,I3,''% of this was assumed to populate level #'',
      &I3)') INT(100./xnl), il
-                  ENDIF
-                ENDDO
-              ENDIF
-C-------------
-C-------------Fission ()
-              IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).EQ.1)
-     &                CALL FISSION(nnuc,ke,jcn,sumfis)
-              IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1)
-     &                CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-!             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!               write(8,*) 'sum for fission at J= ',jcn, sumfis
-!               write(*,*) 'sum for fission at J= ',jcn, sumfis
-!             endif 
-C-------------
-C-------------Normalization and accumulation
-C-------------
-              xnor = POP(ke,jcn,ipar,nnuc)*step/DENhf
-!             if (nnuc.eq.1 .and. ke.eq.nex(1)) then
-!               write(8,*) ' '
-!               write(8,*) 'SUMMARY HF Jc =', Jc
-!               write(8,*)'total sum from this state ' , DENhf
-!               write(8,*)'sum gamma ' , sumg
-!               write(8,*)'sum fission ' , sumfis
-!               write(8,*)'first entry DENhf=',denhf
-!               write(8,*) 'HF xnor, DENhf', xnor, DENhf
-!             endif
+                ENDIF
+              ENDDO
+            ENDIF
+C-----------
+C-----------Fission ()
+            IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).EQ.1)
+     &        CALL FISSION(nnuc,ke,jcn,sumfis)
+            IF (FISsil(nnuc) .AND. NINT(FISshi(nnuc)).NE.1)
+     &        CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+!           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!             write(8,*) 'sum for fission at J= ',jcn, sumfis
+!             write(*,*) 'sum for fission at J= ',jcn, sumfis
+!           endif 
+C-----------
+C-----------Normalization and accumulation
+C-----------
+            xnor = POP(ke,jcn,ipar,nnuc)*step/DENhf
+!           if (nnuc.eq.1 .and. ke.eq.nex(1)) then
+!             write(8,*) ' '
+!             write(8,*) 'SUMMARY HF Jc =', Jc
+!             write(8,*)'total sum from this state ' , DENhf
+!             write(8,*)'sum gamma ' , sumg
+!             write(8,*)'sum fission ' , sumfis
+!             write(8,*)'first entry DENhf=',denhf
+!             write(8,*) 'HF xnor, DENhf', xnor, DENhf
+!           endif
 C
-              CALL XSECT(nnuc,m,xnor,sumfis,
+            CALL XSECT(nnuc,m,xnor,sumfis,
      &                   sumfism,ke,ipar,jcn,fisxse)
 C
-C-------------Calculate total emission
+C-----------Calculate total emission
 C
-C             DO nejc = 0, NEJcm
-C               csemist = csemist + CSEmis(nejc,nnuc)
-C             ENDDO
-C             csemist = csemist + CSFis
+C           DO nejc = 0, NEJcm
+C             csemist = csemist + CSEmis(nejc,nnuc)
+C           ENDDO
+C           csemist = csemist + CSFis
 C-----------------
 
-            ENDDO                 !loop over decaying nucleus spin
-          ENDDO                   !loop over decaying nucleus parity
-C
-          IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
-     &         CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
-          IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1
-     &         .and. fisxse.gt.0) THEN
-            IF (NINT(FISmod(nnuc)).EQ.0) THEN
-              WRITE (80,*) 'csfis=', CSFis,
+          ENDDO                 !loop over decaying nucleus spin
+        ENDDO                   !loop over decaying nucleus parity
+
+        IF (nnuc.EQ.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0
+     &     .AND. (.not.key_calc_hrtw)) 
+     &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
+
+        IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
+     &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
+
+        IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1
+     &       .and. fisxse.gt.0) THEN
+          IF (NINT(FISmod(nnuc)).EQ.0) THEN
+            WRITE (80,*) 'csfis=', CSFis,
      &                   ' mb', '   fisxse=', fisxse, ' mb'
-            ELSE
-              WRITE (80,*) '  '
-              DO m = 1, INT(FISmod(nnuc)) + 1
-                WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),' mb'
-              ENDDO
-              WRITE (80,*) 'csfis=', CSFis,
+          ELSE
+            WRITE (80,*) '  '
+            DO m = 1, INT(FISmod(nnuc)) + 1
+              WRITE (80,*) '    Mode=', m, '  csfis=', CSFism(m),' mb'
+            ENDDO
+            WRITE (80,*) 'csfis=', CSFis,
      &            ' mb', '   fisxse=', fisxse, ' mb'
-            ENDIF
           ENDIF
-        ENDDO                  !loop over c.n. excitation energy
+        ENDIF
+
+      ENDDO                  !loop over c.n. excitation energy
 C-------
 C-------Hauser-Feshbach decay of nnuc  ***done***
 C-------
-C-------Printout of results for the decay of NNUC nucleus
-        IF (IOUt.GT.0) WRITE (8,
+C
+C-----Printout of results for the decay of NNUC nucleus
+      IF (IOUt.GT.0) WRITE (8,
      &          '(1X,/,'' Population neglected because too'',
      &                 '' small '',G12.5,/)') popleft*DE
 
-1500    DO il = 1, NLV(nnuc)
-          CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
-        ENDDO
+1500  DO il = 1, NLV(nnuc)
+        CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
+      ENDDO
 
-        IF(CSPrd(nnuc).gt.0.d0) THEN
+      IF(CSPrd(nnuc).gt.0.d0) THEN
 
-           IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
-     &          .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
+         IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
+     &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
              WRITE (12,*)
      &' ---------------------------------------------------------------'
              WRITE ( 8,*)
@@ -610,7 +621,7 @@ C-------Printout of results for the decay of NNUC nucleus
              WRITE (12,*)
              WRITE (8 ,*)
 
-           ELSE
+         ELSE
 
              IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
@@ -625,9 +636,9 @@ C-------Printout of results for the decay of NNUC nucleus
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
              WRITE (8,'(1X,/,10X,40(1H-),/)')
 
-           ENDIF
+         ENDIF
 
-           DO il = 1, NLV(nnuc)
+         DO il = 1, NLV(nnuc)
              IF(ISIsom(il,Nnuc).EQ.0) THEN
                WRITE (8,99070) il, ELV(il,nnuc),
      &           LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc)
@@ -652,16 +663,16 @@ C--------------Check for the number of branching ratios
      &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
      &                          ,ib = 1,nbr)
              ENDIF
-           ENDDO ! over discrete levels
+         ENDDO ! over discrete levels
 
-           IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
+         IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
              WRITE (8,'(1X,/,10X,40(1H-),/)')
              WRITE (8,*)
-           ENDIF
+         ENDIF
 C
-C          Primary gammas printout 
-           IF (nnuc.EQ.1 .and. NPRIm_g.GT.0) THEN  
+C        Primary gammas printout 
+         IF (nnuc.EQ.1 .and. NPRIm_g.GT.0) THEN  
              cspg = 0.d0
              DO il = 1, NLV(nnuc)
                cspg = cspg + CSEpg(il) 
@@ -700,10 +711,10 @@ C
                WRITE (8,'(1X,/,10X,40(1H-),/)')
                WRITE (8,*)
              ENDIF
-           ENDIF
-C          Primary gammas done 
+         ENDIF
+C        Primary gammas done 
 
-           IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
+         IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
              WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,*) ' '
@@ -730,18 +741,18 @@ C--------------Check for the number of branching ratios
      &                 (53X,7(I4,E11.4)))
              ENDDO
              WRITE (12,'(1X,/,10X,40(1H-),/)')
-           ENDIF
-C----------gamma decay of discrete levels (DECAYD)
-           CALL DECAYD(nnuc)
+         ENDIF
+C--------gamma decay of discrete levels (DECAYD)
+         CALL DECAYD(nnuc)
 C
-        ENDIF ! CSPrd(nnuc).gt.0.d0
+      ENDIF ! CSPrd(nnuc).gt.0.d0
 C
-        ia = INT(A(nnuc))
-        iz = INT(Z(nnuc))
-        jz = min(INT(Z(1))-iz,15)     ! adding protection for higher energies
-        jn = min(INT(A(1))-ia-jz,20)  ! adding protection for higher energies
+      ia = INT(A(nnuc))
+      iz = INT(Z(nnuc))
+      jz = min(INT(Z(1))-iz,15)     ! adding protection for higher energies
+      jn = min(INT(A(1))-ia-jz,20)  ! adding protection for higher energies
 
-        IF (CSPrd(nnuc).GT.0.d0) THEN
+      IF (CSPrd(nnuc).GT.0.d0) THEN
            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
@@ -769,26 +780,12 @@ C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
              nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
              DO ispec = 1, nspec
                gtotsp = gtotsp + POPcse(0,0,ispec,INExc(nnuc))*DE
-C              Write(12,*) nnuc,ispec,'g: ',
-C     &           POPcse(0,0,ispec,INExc(nnuc)),CSE(ispec,0,nnuc) 
                xtotsp = xtotsp + POPcse(0,1,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'n: ',
-c     &           POPcse(0,1,ispec,INExc(nnuc)),CSE(ispec,1,nnuc) 
                ptotsp = ptotsp + POPcse(0,2,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'p: ',
-c     &           POPcse(0,2,ispec,INExc(nnuc)),CSE(ispec,2,nnuc) 
                atotsp = atotsp + POPcse(0,3,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'a: ',
-c     &           POPcse(0,3,ispec,INExc(nnuc)),CSE(ispec,3,nnuc) 
                dtotsp = dtotsp + POPcse(0,4,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'d: ',
-c     &          POPcse(0,4,ispec,INExc(nnuc)),CSE(ispec,4,nnuc) 
                ttotsp = ttotsp + POPcse(0,5,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'t: ',
-c     &          POPcse(0,5,ispec,INExc(nnuc)),CSE(ispec,5,nnuc) 
                htotsp = htotsp + POPcse(0,6,ispec,INExc(nnuc))*DE
-c              Write(12,*) nnuc,ispec,'h: ',
-c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc) 
                emedg=emedg+POPcse(0,0,ispec,INExc(nnuc))*DE*(ispec-1)*DE
                emedn=emedn+POPcse(0,1,ispec,INExc(nnuc))*DE*(ispec-1)*DE
                emedp=emedp+POPcse(0,2,ispec,INExc(nnuc))*DE*(ispec-1)*DE
@@ -802,50 +799,6 @@ c     &          POPcse(0,6,ispec,INExc(nnuc)),CSE(ispec,6,nnuc)
      &                    *DE*(ispec - 1)*DE
                ENDIF
              ENDDO
-C            IF (nspec.gt.1) THEN
-C              gtotsp = gtotsp - 0.5d0*DE*
-C    &                             (POPcse(0,0,1,INExc(nnuc))+
-C    &                              POPcse(0,0,nspec,INExc(nnuc)))
-C              xtotsp = xtotsp - 0.5d0*DE*
-C    &                             (POPcse(0,1,1,INExc(nnuc))+
-C    &                              POPcse(0,1,nspec,INExc(nnuc)))
-C              ptotsp = ptotsp - 0.5d0*DE*
-C    &                             (POPcse(0,2,1,INExc(nnuc))+
-C    &                              POPcse(0,2,nspec,INExc(nnuc)))
-C              atotsp = atotsp - 0.5d0*DE*
-C    &                             (POPcse(0,3,1,INExc(nnuc))+
-C    &                              POPcse(0,3,nspec,INExc(nnuc)))
-C              dtotsp = dtotsp - 0.5d0*DE*
-C    &                             (POPcse(0,4,1,INExc(nnuc))+
-C    &                              POPcse(0,4,nspec,INExc(nnuc)))
-C              ttotsp = ttotsp - 0.5d0*DE*
-C    &                             (POPcse(0,5,1,INExc(nnuc))+
-C    &                              POPcse(0,5,nspec,INExc(nnuc)))
-C              htotsp = htotsp - 0.5d0*DE*
-C    &                             (POPcse(0,6,1,INExc(nnuc))+
-C    &                              POPcse(0,6,nspec,INExc(nnuc)))
-C              emedg = emedg - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,0,nspec,INExc(nnuc))
-C              emedn = emedn - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,1,nspec,INExc(nnuc))
-C              emedp = emedp - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,2,nspec,INExc(nnuc))
-C              emeda = emeda - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,3,nspec,INExc(nnuc))
-C              emedd = emedd - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,4,nspec,INExc(nnuc))
-C              emedt = emedt - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,5,nspec,INExc(nnuc))
-C              emedh = emedh - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,6,nspec,INExc(nnuc))
-C              IF (NDEJC.EQ.7) then
-C                ctotsp = ctotsp - 0.5d0*DE*
-C    &                          (POPcse(0,NDEJC,1,INExc(nnuc))+
-C    &                           POPcse(0,NDEJC,nspec,INExc(nnuc)))
-C                emedc = emedc - 0.5d0*DE*(nspec-1)*DE*
-C    &                       POPcse(0,NDEJC,nspec,INExc(nnuc))
-C              ENDIF
-C            ENDIF
              POPcs(0,INExc(nnuc)) = gtotsp
              POPcs(1,INExc(nnuc)) = xtotsp
              POPcs(2,INExc(nnuc)) = ptotsp
@@ -1036,8 +989,9 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
 
              WRITE (8,'(116(1H-)/)') 
            ENDIF
-         ENDIF
-         IF (CSFis.NE.0.0D0) THEN
+      ENDIF
+
+      IF (CSFis.NE.0.0D0) THEN
            WRITE (80,*)
            WRITE (8,*)
            IF (IOUt.GT.0) THEN
@@ -1056,11 +1010,13 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
            WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
-         ENDIF
-         TOTcsfis = TOTcsfis + CSFis
-C--------Add compound elastic to shape elastic before everything falls
-C--------down on the ground state
-9876     IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0
+C
+      ENDIF
+
+      TOTcsfis = TOTcsfis + CSFis
+C-----Add compound elastic to shape elastic before everything falls
+C-----down on the ground state
+9876  IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0
      &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
            WRITE (8,*)
            WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
@@ -1249,11 +1205,14 @@ C                     number of discrete levels is limited to 40
      &                 ilv = 31,MIN(its,40))
                    ENDIF
                    WRITE (8,*) ' '
+
                  ENDIF
+
            ENDIF ! ncollx > 0 ?
 
-         ENDIF
-         IF(CSPrd(nnuc).GT.0.d0) THEN
+      ENDIF
+      
+      IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
            xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
@@ -1417,7 +1376,7 @@ C              WRITE (8,*)
            ENDDO   !over ejectiles
            xcross(NDEJC+3,jz,jn) = checkprd
 
-         ENDIF ! if CSProd > 0
+      ENDIF ! if CSProd > 0
 
       RETURN         
 99016 FORMAT (/' ',46x,'COMP. ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
@@ -1487,6 +1446,7 @@ C-----Normalize recoil spectrum of the parent
             RECcse(ire,Ke,Nnuc) = RECcse(ire,Ke,Nnuc)/sumnor
          ENDDO
       ENDIF
+
       dang = PI/FLOAT(NDANG - 1)
       coeff = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles
@@ -1603,7 +1563,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul
+      DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul,stmp
       INTEGER ie, ilast
 
       IF (CSPrd(Nnuc).LE.0.0D0 .or. NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
@@ -1655,8 +1615,10 @@ C
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
       DO ie = 1, ilast
+	  stmp = RECcse(ie,0,Nnuc) 
+	  if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec/recorr,
-     &                               RECcse(ie,0,Nnuc)*recorr
+     &                                             stmp*recorr
       ENDDO
       WRITE(12,
      &  '(/2x,''Ave.  E  of recoil spectrum   '',G12.6,'' MeV  for '',
@@ -1738,7 +1700,7 @@ C
 C Local variables
 C
       INTEGER ie, ilast, ipart
-      DOUBLE PRECISION csum, corr, xsdisc, ftmp, esum, recorr, cmul
+      DOUBLE PRECISION csum, corr, xsdisc, ftmp, esum, recorr, cmul,stmp
 
       ipart = 1  !neutron
       IF(IZA(1)-IZA(Nnuc) .EQ. 1001) ipart = 2    !proton
@@ -1784,8 +1746,10 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       WRITE (12,*) ' '
 
       DO ie = 1, ilast
+	  stmp = POPcse(0,ipart,ie,INExc(Nnuc)) 
+	  if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorr,
-     &      POPcse(0,ipart,ie,INExc(Nnuc))*recorr     
+     &      stmp*recorr     
       ENDDO
 
       WRITE(12,

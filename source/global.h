@@ -1,6 +1,6 @@
-! $Rev: 4204 $
-! $Author: bcarlson $
-! $Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
+! $Rev: 4239 $
+! $Author: rcapote $
+! $Date: 2014-11-22 17:44:20 +0100 (Sa, 22 Nov 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -70,7 +70,7 @@
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
-     &        LHMs, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc),                  &
+     &        LHMs, LMAxcc, LMAxtl(ndetl,ndejc,ndnuc),ncontr(0:ndnuc),  &
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,    &
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,    &
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,   &
@@ -81,7 +81,7 @@
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
      &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
      &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX),iugMax(0:ndnuc)
-       
+	 
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&
@@ -122,7 +122,7 @@
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,   &
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),  &
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,    &
-     &                 CINred(ndlv), CELcor, Emax_tlj
+     &                 CINred(ndlv), CELcor, Emax_tlj, QQInc(0:NDNUC)
       
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*200 EMPiredir
@@ -228,7 +228,7 @@
      &                 MFPp, ECUtcoll, LQDfac, QDFrac, D1Fra, CSMsc,    &
      &                 CSMsd, QPRod, A, Z, ECUt, HIS, ATIlnor, COEf,    &
      &                 DOBs,BETcc, FLAm, QCC, FCD, XN, AMAss, ANGles,   &
-     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor,         &
+     &                 AEJc, DEF, ZEJc, XNEjc, POPmax, GTIlnor, QQInc,  &
      &                 FNvvomp, FNavomp, FNwvomp,FNwsomp, FNasomp,      &
      &                 FNrvomp, FNrwvomp,FNrsomp,DEFdyn,DEFsta,Emax_tlj,&
      &                 DEFnor, FCCred, TISomer, rFCCred,rFUSred, LDShif,&
@@ -286,7 +286,7 @@
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,        &
-     &                  ngamm_tr, nfiss_tr, PLcont_lmax
+     &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc, &
      &                  OMParfcc, RELkin, FIRst_ein, SDRead, EXClusiv,  &

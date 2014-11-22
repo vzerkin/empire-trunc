@@ -17,8 +17,8 @@ C     local variables
 C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
-      DOUBLE PRECISION recorp,espec,csum,esum,qin,qout,cmul,xsdisc
-      DOUBLE PRECISION dtmp,htmp,ftmp   
+      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,qout
+      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp   
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
@@ -361,39 +361,97 @@ C------------------Exclusive DE spectra (gammas)
                 ENDIF !  (nejc.GT.0)
  1530         ENDDO   ! over ejectiles
 
-              IF (NINT(A(1)-A(nnuc)).GT.1  .AND. RECoil.GT.0) THEN
-                 CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
-              ELSEIF(NINT(A(1)-A(nnuc)).EQ.1  .AND. RECoil.GT.0) THEN
-                 CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
+              IF(RECoil.gt.0) then
+                IF (NINT(A(1)-A(Nnuc)).GT.1) THEN 
+C                 cluster emission
+                  CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
+C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
+C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+                ELSEIF (NINT(A(1)-A(Nnuc)).EQ.1) THEN
+C                 n or p emission
+                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
+C                 write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
+C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+                ENDIF
               ENDIF
 
-       
-              qin = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
-
+              qin     = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
+	        qinaver = qin
+              if(ncontr(nnuc).gt.1) 
+     &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
+              
               WRITE(12,*)
-              WRITE(12,'( 1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',
-     &                /, 1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &        qout, qin
-
-              WRITE(12,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
-     &           qin - qout, (qin - qout)/qin*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
               WRITE(8,*)
-              WRITE(8,'( 1x, '' Total  Q  cont.spec '',G12.6,'' MeV'',/,
-     &                   1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &        qout, qin
+              
+              IF(qinaver.EQ.qin) THEN
 
-              WRITE(8,'( 1x,
+                WRITE(12,*)
+                WRITE(12,'(1x,'' Total <Q> cont.spec '',G12.6,'' MeV'',
+     &               /, 1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
+     &          qout, qin
+
+                WRITE(12,'( 1x,
      &         '' Energy balance      '',G12.6,'' MeV ('',
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
      &           qin - qout, (qin - qout)/qin*100, EINl,
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-                      
+
+                WRITE(8,*)
+                WRITE(8,'(1x,'' Total  Q  cont.spec '',G12.6,'' MeV'',/,
+     &                    1x,'' Qin (CMS)           '',G12.6,'' MeV'')') 
+     &          qout, qin
+
+                WRITE(8,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
+     &           qin - qout, (qin - qout)/qin*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+              ELSE
+
+                WRITE(12,
+     & '(1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
+     &   1x, ''  Qin (QPRod)        '',G12.6,'' MeV (Q='',G12.6,1H)/,
+     &   1x, '' <Qin> contr. react. '',G12.6,'' MeV (Q='',G12.6,1H))') 
+     & qout, qin, QPRod(nnuc), qinaver, QQInc(nnuc)/ncontr(nnuc)
+
+                WRITE(12,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
+     &           qin - qout, (qin - qout)/qin*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+                WRITE(12,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
+     &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+                WRITE(8,
+     & '(1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
+     &   1x, ''  Qin (QPRod)        '',G12.6,'' MeV (Q='',G12.6,1H)/,
+     &   1x, '' <Qin> contr. react. '',G12.6,'' MeV (Q='',G12.6,1H))') 
+     & qout, qin, QPRod(nnuc), qinaver, QQInc(nnuc)/ncontr(nnuc)
+
+                WRITE(8,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
+     &           qin - qout, (qin - qout)/qin*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+                WRITE(8,'( 1x,
+     &         '' Energy balance      '',G12.6,'' MeV ('',
+     &         F6.2,''%)  at E(lab)='',G12.6,
+     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
+     &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
+     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+
+              ENDIF
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
