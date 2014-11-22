@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4235 $
+Ccc   * $Rev: 4240 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-21 19:42:32 +0100 (Fr, 21 Nov 2014) $
+Ccc   * $Date: 2014-11-22 18:58:12 +0100 (Sa, 22 Nov 2014) $
 
 c===========================================================
       SUBROUTINE DTRANS(iemin,iemax,sigNT,crossNT,specNT,te_e)
@@ -321,8 +321,10 @@ c
 
          embreak = EIN - bnd  ! Ed - Bd (CMS)
          IF(embreak.lt.0) THEN
-           WRITE(8,*) 'WARNING: Incident energy CMS below Bn',sngl(bnd), 
-     >                '; breakup supressed' 
+           WRITE(8,'(A,F6.2,A,F7.3,2H; ,A2,1H-,I1,A,A2,A)') 
+     >     'WARNING: Incident energy (CMS) ',sngl(EIN),
+     >     ' below Bn ',sngl(bnd),SYMbe(NPRoject),NINT(AEJc(NPRoject)),
+     >       ' breakup into ',SYMbe(iejc),' suppressed' 
            crossBU(iejc) = 0.d0
            CYCLE
          ENDIF
