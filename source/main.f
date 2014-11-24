@@ -1,6 +1,6 @@
-cc   * $Rev: 4229 $
+cc   * $Rev: 4242 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-19 08:22:33 +0100 (Mi, 19 Nov 2014) $
+Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -59,6 +59,7 @@ C
           STOP       ' ERROR; Absorption cross section equal zero !'
         ENDIF
 C	   
+	  totcorr = 1.d0
 C       Inelastic cross swctions read only for particles (not photons or HI) 
         IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
      >    call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)

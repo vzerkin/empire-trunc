@@ -8,8 +8,11 @@
       PARAMETER (MAXGDR=5986,MEXPPAR=270,MEXP=9000,MDEF=700)
 
 C     HCS1(270),HCS2(270),HE1(270),HE2(270),HGW1(270),HGW2(270)
-      DOUBLE PRECISION, ALLOCATABLE :: HCS1(:),HCS2(:),HE1(:),HE2(:)
-      DOUBLE PRECISION, ALLOCATABLE :: HGW1(:),HGW2(:)
+C     dHCS1(270),dHCS2(270),dHE1(270),dHE2(270),dHGW1(270),dHGW2(270)
+      DOUBLE PRECISION, ALLOCATABLE ::  HCS1(:), HCS2(:), HE1(:), HE2(:)
+      DOUBLE PRECISION, ALLOCATABLE :: dHCS1(:),dHCS2(:),dHE1(:),dHE2(:)
+      DOUBLE PRECISION, ALLOCATABLE ::  HGW1(:), HGW2(:)
+      DOUBLE PRECISION, ALLOCATABLE :: dHGW1(:),dHGW2(:)
 C     NNA(270),NNG(270),NNZ(270)
       INTEGER, ALLOCATABLE :: NNA(:),NNG(:),NNZ(:)
 
@@ -43,30 +46,60 @@ C     HGW1(MEXPPAR),HGW2(MEXPPAR)
       myalloc=myalloc+my
       HCS1 = 0.0d0
 
+      if(allocated(dHCS1)) deallocate(dHCS1)
+      ALLOCATE(dHCS1(MEXPPAR),STAT=my)
+      myalloc=myalloc+my
+      dHCS1 = 0.0d0
+
       if(allocated(HCS2)) deallocate(HCS2)
       ALLOCATE(HCS2(MEXPPAR),STAT=my)
       myalloc=myalloc+my
       HCS2 = 0.0d0
+
+      if(allocated(dHCS2)) deallocate(dHCS2)
+      ALLOCATE(dHCS2(MEXPPAR),STAT=my)
+      myalloc=myalloc+my
+      dHCS2 = 0.0d0
 
       if(allocated(HE1)) deallocate(HE1)
       ALLOCATE(HE1(MEXPPAR),STAT=my)
       myalloc=myalloc+my
       HE1 = 0.0d0
 
+      if(allocated(dHE1)) deallocate(dHE1)
+      ALLOCATE(dHE1(MEXPPAR),STAT=my)
+      myalloc=myalloc+my
+      dHE1 = 0.0d0
+
       if(allocated(HE2)) deallocate(HE2)
       ALLOCATE(HE2(MEXPPAR),STAT=my)
       myalloc=myalloc+my
       HE2 = 0.0d0
+
+      if(allocated(dHE2)) deallocate(dHE2)
+      ALLOCATE(dHE2(MEXPPAR),STAT=my) 
+      myalloc=myalloc+my
+      dHE2 = 0.0d0
 
       if(allocated(HGW1)) deallocate(HGW1)
       ALLOCATE(HGW1(MEXPPAR),STAT=my)
       myalloc=myalloc+my
       HGW1 = 0.0d0
 
+      if(allocated(dHGW1)) deallocate(dHGW1)
+      ALLOCATE(dHGW1(MEXPPAR),STAT=my)
+      myalloc=myalloc+my
+      dHGW1 = 0.0d0
+
       if(allocated(HGW2)) deallocate(HGW2)
       ALLOCATE(HGW2(MEXPPAR),STAT=my)
       myalloc=myalloc+my
       HGW2 = 0.0d0
+
+      if(allocated(dHGW2)) deallocate(dHGW2)
+      ALLOCATE(dHGW2(MEXPPAR),STAT=my)
+      myalloc=myalloc+my
+      dHGW2 = 0.0d0
 
 C     NNA(MEXPPAR),NNG(MEXPPAR),NNZ(MEXPPAR)
       if(allocated(NNA)) deallocate(NNA)
@@ -184,6 +217,13 @@ C     HGW1(MEXPPAR),HGW2(MEXPPAR)
       if(allocated(HE2)) deallocate(HE2)
       if(allocated(HGW1)) deallocate(HGW1)
       if(allocated(HGW2)) deallocate(HGW2)
+
+      if(allocated(dHCS1)) deallocate(dHCS1)
+      if(allocated(dHCS2)) deallocate(dHCS2)
+      if(allocated(dHE1)) deallocate(dHE1)
+      if(allocated(dHE2)) deallocate(dHE2)
+      if(allocated(dHGW1)) deallocate(dHGW1)
+      if(allocated(dHGW2)) deallocate(dHGW2)
 
 C     NNA(MEXPPAR),NNG(MEXPPAR),NNZ(MEXPPAR)
       if(allocated(NNA)) deallocate(NNA)

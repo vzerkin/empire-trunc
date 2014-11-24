@@ -1,6 +1,6 @@
-!cc   * $Rev: 4241 $
+!cc   * $Rev: 4242 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-22 18:59:00 +0100 (Sa, 22 Nov 2014) $
+!cc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -438,7 +438,7 @@ C--------GST controls gamma emission in MSC (0 no gamma, 1 with gamma)
          GST = 0.d0
 C--------D1FRA ratio of the spreading to total width of the GDR
          D1Fra = 0.8d0
-C--------GDR parameters
+C--------begin GDR parameters
          GDRdyn = 0.d0
          EGDr1 = 0.d0
          GGDr1 = 0.d0
@@ -543,7 +543,7 @@ C--------ejectile he-3
          SYMbe(6) = SMAT(iz)
          SEJc(6) = 0.5d0
          MAXj(6) = 2
-C
+C--------begin GDR
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
          KEY_shape = 1   ! MLO1 RIPL-2
@@ -562,6 +562,8 @@ C           continuum and from continuum to discrete levels;
 C           can be changed in the optional input
 C           (keyword 'GRMULT')
          MAXmult = 2
+C--------end GDR
+
 C--------READ entire input for the first energy calculations
 C--------mandatory part of the input
 C--------incident energy (in LAB)
@@ -1104,7 +1106,6 @@ C             residues must be heavier than alpha
 
               IF(mulem.GT.NENdf .AND. ENDf(nnuc).NE.10) THEN
                 EXClusiv = .FALSE.
-C               write(*,*) mulem, NINT(A(nnuc)),NINT(Z(nnuc)),ENDf(nnuc)
                 ENDf(nnuc) = 2
               ENDIF
 C             This nucleus requested as exclusive in the optional input
@@ -1151,7 +1152,7 @@ C
             STOP ' INSUFFICIENT DIMENSION NDExclus'
          ENDIF
 C
-C        Assigning the target gamma parameters from the input
+C        begin GDR - Assigning the target gamma parameters from the input
 C 
          do i=1,NDGDRPM
 	     if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
@@ -1163,38 +1164,52 @@ C
            if(GMRpar(i,NTArget).ne.-1.d0) GMRpar(i,0)=GMRpar(i,NTArget)
          enddo
 C
-C        Prepare gamma transmission parameters
+C    
          IF(FIRST_ein) THEN
 
-           IF(NINT(AEJc(NPRoject)).GE.2 .and. DXSred.GT.0)THEN
+C----------break-up and transfer
+           IF(NINT(AEJc(0)).GE.2 .and. DXSred.GT.0.d0)THEN
              BUReac = 0.7d0
              NTReac = 0.9d0
            ENDIF
 
-           CALL EMPAgdr() ! allocating memory for temporal gdr arrays
-           CALL read_GDRGFLDATA(Numram)
+c----------begin GDR
+C----------Prepare gamma transmission parameters
+           IF(KEY_shape.NE.8)THEN
+             CALL EMPAgdr() ! allocating memory for temporal gdr arrays
+             CALL read_GDRGFLDATA(Numram)
+           ELSE
+             uuE1grid = 0.d0
+             E1grid = 0.d0
+             iugMax = 0  
+           ENDIF
 
-           IF(KEY_shape.GE.7) THEN 
-             CALL ULM_micro(0)
+          IF(KEY_shape.EQ.8) THEN
+             CALL ULM_micro(0)   
            ELSE
              CALL ULM(0,Numram) 
-           ENDIF
-           WRITE (8,*) ' -----------------------------------------'
-           WRITE(8,*) ' TARGET GDR DATA:'
-           IF(KEY_shape.LT.7) CALL ULM_print(0)
-           DO i = 1, NNUcd 
-             IF(KEY_shape.eq.8) THEN 
-               CALL ULM_micro(i)
-	       ELSE
-               CALL ULM(i,Numram) 
-             ENDIF
-             IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.LT.7
-     &          .AND. IOUT.GT.3) CALL ULM_print(i) 
-           ENDDO
-           CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
-           WRITE (8,*) ' -----------------------------------------'
+          ENDIF
 
-           DO i = 1, NNUcd 
+          IF(KEY_shape.NE.8) THEN
+            WRITE (8,*) ' -----------------------------------------'
+            WRITE (8,*) ' TARGET GDR DATA:'
+            CALL ULM_print(0)
+          ENDIF
+
+          DO i = 1, NNUcd 
+             IF(KEY_shape.EQ.8) THEN  
+                CALL ULM_micro(i)
+             ELSE
+                CALL ULM(i,Numram) 
+             ENDIF
+             IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.NE.8 
+     &          .AND. IOUT.GT.3) CALL ULM_print(i) 
+          ENDDO
+          IF(KEY_shape.LT.8) CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+          WRITE (8,*) ' -----------------------------------------'
+c----------end GDR
+
+          DO i = 1, NNUcd 
 C          
 C            Checking fission input consistency 
 C          
@@ -1230,7 +1245,6 @@ C
      &'Uncertainty samp.-uniform pdf. Interval:[-1.732*sig,1.732*sig]'
              WRITE (8,*)
          ENDIF
-
 C
          IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
             GCAsc = 1.
@@ -1544,7 +1558,7 @@ C             WRITE (12,
 C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')          
          ENDIF
 
-C--------set PCROSS  (.,6) 
+C--------set PCROSS  (.,6) cluster emission
          IF (PEQc.EQ.0.d0 .and. AEJc(NPRoject).gt.1 
      &      .and. DXSred.gt.0) THEN
             IDNa(2,6) = 1  ! cont n
@@ -1554,6 +1568,7 @@ C--------set PCROSS  (.,6)
             IDNa(7,6) = 1  ! cont D 
             IDNa(8,6) = 1  ! cont T 
             IDNa(9,6) = 1  ! cont H 
+            IDNa(10,6) = 0 ! cont LI
          ENDIF
 
          IF (PEQc.GT.0.d0) THEN
@@ -1612,7 +1627,7 @@ C--------print IDNa matrix
      &             '           Use of direct and preequilibrium models '
          WRITE (8,*)
      &             '           --------------------------------------- '
-         WRITE (8,*)
+         IF (AEJc(NPRoject).gt.1 .and. DXSred.gt.0) WRITE (8,*)
      &   '  Note: PCROSS includes break-up and transfer reactions'
          WRITE (8,*) ' '
          WRITE (8,*) 'Exit channel    ECIS    MSD    MSC',
@@ -1654,7 +1669,7 @@ C----------------------------------------------------------
      &             '           Use of direct and preequilibrium models '
          WRITE(12,*)
      &             '           --------------------------------------- '
-         WRITE(12,*)
+         IF (AEJc(NPRoject).gt.1 .and. DXSred.gt.0) WRITE (12,*)
      &   '  Note: PCROSS includes break-up and transfer reactions'
          WRITE(12,*) ' '
          WRITE(12,*) 'Exit channel    ECIS    MSD    MSC',
@@ -2194,8 +2209,7 @@ C           write(*,'(3(A6,i2),A8,i6,1x,3(e10.4,1x),3H * ,I2)')' nnuc=',
 C    >        nnuc,' nejc=',nejc,' nnur=',nnur,' izares=',izares,
 C    >        QPRod(nnuc) - Q(nejc,nnuc),QPRod(nnur),
 C    >        QQInc(nnur)/ncontr(nnur), ncontr(nnur)
-C            pause
-
+C           pause
 C-----------determination of etl matrix for the transmission coeff. calculation
 C-----------first 4 elements are set independently in order to get more
 C-----------precise grid at low energies. from the 5-th element on the step
@@ -2286,6 +2300,8 @@ C---- fission input is created if it does not exist and FISSHI=0
 C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
+C        IF (NINT(FISshi(nnuc)).EQ.0 .AND.
+C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
          IF (NINT(FISshi(nnuc)).EQ.0 .AND.
      &       (NINT(Z(nnuc)).LT.86 .OR. NINT(A(nnuc)).LT.220)) THEN
             FISsil(nnuc)= .FALSE.
@@ -3503,7 +3519,7 @@ C
       CHARACTER*120 inline
       CHARACTER*40 fstring
       INTEGER i, i1, i2, i3, i4, ieof, iloc, ipoten, izar, ki, nnuc, 
-     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j
+     &  irun, ios, itmp, i1e, i2e, i3e, i4e, j, i812
 C     INTEGER IPArCOV
       CHARACTER*5 source_rev, emp_rev
       CHARACTER*6 name, namee, emp_nam, emp_ver, emp_def
@@ -3732,37 +3748,7 @@ C                   going back to 3987 release to limit the number of DWBA state
                ENDIF
             ENDIF
 
-            IF (KEY_shape.EQ.0) WRITE (8,
-     &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
-            IF (KEY_shape.EQ.1) WRITE (8,
-     &                   '('' E1 strength function set to RIPL MLO1'')')
-            IF (KEY_shape.EQ.2) WRITE (8,
-     &                   '('' E1 strength function set to RIPL MLO2'')')
-            IF (KEY_shape.EQ.3) WRITE (8,
-     &                   '('' E1 strength function set to RIPL MLO3'')')
-            IF (KEY_shape.EQ.4) WRITE (8,
-     &                   '('' E1 strength function set to RIPL EGLO'')')
-            IF (KEY_shape.EQ.5) WRITE (8,
-     &                    '('' E1 strength function set to RIPL GFL'')')
-            IF (KEY_shape.EQ.6) WRITE (8,
-     &                    '('' E1 strength function set to RIPL SLO'')')
-            IF (KEY_shape.GE.7) WRITE (8,
-     &                    '('' E1 photoabsorption set to RIPL HFB'')')
-            IF (KEY_shape.EQ.8) WRITE (8,
-     &                    '('' E1 strength function set to RIPL HFB'')')
-            IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(8,
-     &         '('' GDR parameters from Messina systematics'')')
-            IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(8,
-     &         '('' GDR parameters from Plujko systematics(RIPL)'')')
-            IF(Key_gdrgfl.EQ.1)WRITE(8,
-     &         '('' GDR parameters from RIPL/Exp.data+'',
-     &           ''Plujko systematics'')')
-            IF(Key_gdrgfl.EQ.2)WRITE(8,
-     &          '('' GDR parameters from RIPL/Exp.data+'',
-     &           ''Goriely calc.'')')
-C-----   print  maximal gamma-ray multipolarity  'MAXmult'
-            IF(MAXmult.GT.2)WRITE(8,
-     &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+
      
             IF (ZEJc(0).GT.0 .or.  CNAngd.eq.0) CN_isotropic = .TRUE.
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
@@ -3813,37 +3799,62 @@ C-----   print  maximal gamma-ray multipolarity  'MAXmult'
      &'('' Input file OMPAR.DIR with optical model'',
      &'' parameters to be used in inelastic scattering'')')
 C
-            IF (KEY_shape.EQ.0) WRITE (12,
+c-----------begin GDR
+            WRITE (8, '(''====== GDR options ====='')')
+
+            DO i812 = 8,12,4
+               IF (KEY_shape.EQ.0) WRITE (i812,
      &          '('' E1 strength function set to EGLO (EMPIRE-2.18)'')')
-            IF (KEY_shape.EQ.1) WRITE (12,
+               IF (KEY_shape.EQ.1) WRITE (i812,
      &                   '('' E1 strength function set to RIPL MLO1'')')
-            IF (KEY_shape.EQ.2) WRITE (12,
+               IF (KEY_shape.EQ.2) WRITE (i812,
      &                   '('' E1 strength function set to RIPL MLO2'')')
-            IF (KEY_shape.EQ.3) WRITE (12,
+               IF (KEY_shape.EQ.3) WRITE (i812,
      &                   '('' E1 strength function set to RIPL MLO3'')')
-            IF (KEY_shape.EQ.4) WRITE (12,
+               IF (KEY_shape.EQ.4) WRITE (i812,
      &                   '('' E1 strength function set to RIPL EGLO'')')
-            IF (KEY_shape.EQ.5) WRITE (12,
+               IF (KEY_shape.EQ.5) WRITE (i812,
      &                    '('' E1 strength function set to RIPL GFL'')')
-            IF (KEY_shape.EQ.6) WRITE (12,
+               IF (KEY_shape.EQ.6) WRITE (i812,
      &                    '('' E1 strength function set to RIPL SLO'')')
-            IF (KEY_shape.GE.7) WRITE (12,
-     &                    '('' E1 photoabsorption set to RIPL HFB'')')
-            IF (KEY_shape.EQ.8) WRITE (12,
+               IF (KEY_shape.EQ.7) WRITE (i812,
+     &                   '('' E1 strength function set to RIPL SMLO'')')
+               IF (KEY_shape.EQ.8) WRITE (i812,
      &                    '('' E1 strength function set to RIPL HFB'')')
-            IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(12,
+C------------------------------------------------------------------------
+               IF(Key_gdrgfl.EQ.0.AND.Key_shape.EQ.0)WRITE(i812,
      &         '('' GDR parameters from Messina systematics'')')
-            IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(12,
-     &         '('' GDR parameters from RIPL/Plujko systematics'')')
-            IF(Key_gdrgfl.EQ.1)WRITE(12,
+               IF(Key_gdrgfl.EQ.0.AND.Key_shape.NE.0)WRITE(i812,
+     &         '('' GDR parameters from Plujko systematics(RIPL)'')')
+
+               IF(Key_gdrgfl.EQ.1)WRITE(i812,
      &         '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Plujko systematics'')')
-            IF(Key_gdrgfl.EQ.2)WRITE(12,
+               IF(Key_gdrgfl.EQ.2)WRITE(i812,
      &          '('' GDR parameters from RIPL/Exp.data+'',
      &           ''Goriely calc.'')')
-C-----      print  maximum gamma-ray multipolarity  'MAXmult'
-            IF(MAXmult.GT.2)WRITE(12,
-     &      '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+
+               IF(Key_gdrgfl.EQ.3)WRITE(i812,
+     &         '('' GDR parameters from RIPL/MLO-exp.data+'',
+     &           ''Plujko systematics'')')
+               IF(Key_gdrgfl.EQ.4)WRITE(i812,
+     &          '('' GDR parameters from RIPL/MLO-exp.data+'',
+     &           ''Goriely calc.'')')
+
+               IF(Key_gdrgfl.EQ.5)WRITE(i812,
+     &         '('' GDR parameters from RIPL/SLO-exp.data+'',
+     &           ''Plujko systematics'')')
+               IF(Key_gdrgfl.EQ.6)WRITE(i812,
+     &          '('' GDR parameters from RIPL/SLO-exp.data+'',
+     &           ''Goriely calc.'')')
+
+
+C-----------   print  maximal gamma-ray multipolarity  'MAXmult'
+C              IF(MAXmult.GT.2)WRITE(i812,
+                               WRITE(i812,
+     &        '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+            ENDDO  
+c-----------end GDR
 
             IF (DIRect.EQ.0 .AND. KTRompcc.NE.0) THEN
                WRITE (8, '(1X,/,
@@ -4374,15 +4385,15 @@ C-----
             Key_GDRGFL = val + 0.001
             GOTO 100
          ENDIF
-C        Key_GDRGFL = 0 and Key_shape =0 -  GDR parameters from Messina systematics
-C        Key_GDRGFL > = 0 and and Key_shape > 0 -  GDR parameters of RIPL introduced;
-C        Key_GDRGFL = 1 -  GDR parameters and other data determined by gdrgfldata.f;
-C                          experimental values or systematics of GDR parameters are set.
-C        Key_GDRGFL = 2 -  GDR parameters and other data determined by gdrgfldata.f;
-C                          if experimental values of GDR parameters not found and Key_GDRGFL=2
-C                          they are going to be retrieved from the RIPL Goriely theoretical
-C                          values and then from systematics.
-C
+C        Key_GDRGFL = 0 and Key_shape =0 -  Messina systematics
+C        Key_GDRGFL >=0 and and Key_shape > 0 - GDR parameters of RIPL;
+C        Key_GDRGFL = 1 -  RIPL/exp + Plujko Systematics
+C        Key_GDRGFL = 2 -  RIPL/exp + Goriely calculations
+C        Key_GDRGFL = 3 -  RIPL/MLO-exp + Plujko Systematics
+C        Key_GDRGFL = 4 -  RIPL/MLO-exp + Goriely calculations
+C        Key_GDRGFL = 5 -  RIPL/SLO-exp + Plujko Systematics
+C        Key_GDRGFL = 6 -  RIPL/SLO-exp + Goriely calculations
+
 C--------input MAXmult - maximal value (=< 10) of gamma-ray multipolarity for GSA
          IF(name.EQ.'GRMULT')THEN
             MAXmult = val + 0.001
@@ -5024,7 +5035,9 @@ C-----
      &I3)') NEXreq
             GOTO 100
          ENDIF
-C-----
+C===========================================================
+C      GDR options
+C===========================================================
 C------- Insert Key for module "gamma-strength-analytic.f",
 C        Key_shape - key to specify the E1 strength shape    .
 C
@@ -5036,22 +5049,16 @@ C           Key_shape =3 --> fE1=MLO3
 C           Key_shape =4 --> fE1=EGLO
 C           Key_shape =5 --> fE1=GFL
 C           Key_shape =6 --> fE1=SLO
-C-----------the last two options ae not fully implemented yet
-C           Update of the RIPL directory is needed + testing
-C            
-C           Key_shape =7 --> photoabsorption from E1-microscopic HFB GRSF
-C                            fe1=default
-C           Key_shape =8 --> fe1=HFB GRSF
+C           Key_shape =7 --> fE1=SMLO
+c           Key_shape =8 --> fE1=HFB
+C-----------the last option requires RIPL/gamma updating
 C
-C           IF (val.GT.8) WRITE (8,
-            IF (val.GT.7) THEN
-              WRITE (8,
+            IF (val.GT.8) THEN
+               WRITE (8,
      &'('' WARNING: Gamma-ray strength function not recognized, RIPL MLO
      & GRSF used (default)'')')
-C           Key_shape =8 --> fE1=microscopic HFB GRSF+ photoabsorption
-C
             ELSE
-              KEY_shape = val
+               KEY_shape = val
             ENDIF
             GOTO 100
          ENDIF
@@ -6287,7 +6294,7 @@ C
                WRITE (8,'('' ENDF formatting enabled'')')
                WRITE (12,'('' ENDF formatting enabled'')')
             ENDIF
-            ENDf(nnuc) = NINT(val)
+            ENDf(nnuc) = INT(val)
             IF (ENDf(nnuc).EQ.1) THEN
               ENDf(nnuc) = 10  ! using as a flag 
               WRITE (8,
@@ -7329,17 +7336,17 @@ C-----
             IF (val.LE.0.d0) THEN
                DXSred = 0.d0
                WRITE ( 8,
-     &'('' Direct reactions for complex projectiles suppressed'')')
+     &'('' Direct reactions for complex projectiles suppressed!'')')
                WRITE (12,
-     &'('' Direct reactions for complex projectiles suppressed'')')
+     &'('' Direct reactions for complex projectiles suppressed!'')')
             ELSE
                DXSred = val
                WRITE ( 8,
-     &'('' Direct cross sections for complex projectiles'',
-     &  '' scaled by '',F6.3)') DXSred
+     &'('' Direct-reaction cross sections for complex projectiles'',
+     &  '' normalized by a factor '',F6.3)') DXSred
                WRITE (12,
-     &'('' Direct cross sections for complex projectiles'',
-     &  '' scaled by '',F6.3)') DXSred
+     &'('' Direct-reaction cross sections for complex projectiles'',
+     &  '' normalized by a factor '',F6.3)') DXSred
             ENDIF
             GOTO 100
          ENDIF
@@ -11624,17 +11631,78 @@ C Local variables
 C
 C     INTEGER NG
       DOUBLE PRECISION btmp, etmp, fjtmp
+      DOUBLE PRECISION cs1,cs2,dcs1,dcs2,sig_TRK,pi,const
       INTEGER i, natmp, nntmp 
+      DATA pi/3.141592654D0/
 
-      OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
-     &      //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
-      READ (81,'(///)') ! Skipping first 4 title lines
-      DO i = 1, MEXPPAR ! 270
-        READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
-     &       NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
-     &       HE2(i), HCS2(i), HGW2(i)
-      ENDDO
-   50 CLOSE (81)
+      IF(key_GDRGFL.EQ.1.OR.key_GDRGFL.EQ.2)THEN
+         OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
+     &        //'/gdr-parameters-exp.dat',STATUS = 'old',ERR = 450)
+         READ (81,'(///)')      ! Skipping first 4 title lines
+         DO i = 1, MEXPPAR      ! 270
+            READ (81,'(2I4, 1x,2x,3x, i3, 6F7.2)',END = 50,ERR = 50)
+     &           NNZ(i), NNA(i), NNG(i), HE1(i), HCS1(i), HGW1(i),
+     &           HE2(i), HCS2(i), HGW2(i)
+         ENDDO
+ 50      CLOSE (81)
+      ENDIF
+
+      IF(key_GDRGFL.EQ.3.OR.key_GDRGFL.EQ.4)THEN
+         OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
+     &        //'/gdr-parameters-exp-MLO.dat',STATUS = 'old',ERR = 460)
+         READ (81,'(///////)')  ! Skipping first 8 title lines
+         DO i = 1,MEXPPAR
+            NNG(i)=2
+C           READ (81,'(2I4, 10x,7f8.3,/,18x,7f8.3)',END = 60 ,ERR = 60)
+            READ (81,'(2I4, 10x,6f8.3,/,18x,6f8.3)',END = 60 ,ERR = 60)
+     &           NNZ(i), NNA(i),
+     &           HE1(i),  HGW1(i), cs1,
+     &           HE2(i),  HGW2(i), cs2,  ! HCS(i),
+     &           dHE1(i), dHGW1(i),dcs1, 
+     &           dHE2(i), dHGW2(i),dcs2  !dHCS(i)
+            IF(HE2(i).LT.0.1) NNG(i)=1
+            sig_TRK= 60.*NNZ(i)*(NNA(i)-NNZ(i))/dble(float(NNA(i)))
+            const = 2.d0 * sig_TRK / pi 
+             HCS1(i)=const * cs1/HGW1(i)
+            dHCS1(i)=const * sqrt(dcs1**2+(cs1*DHGW1(i)/HGW1(i))**2)
+     &               /HGW1(i)  
+            IF(NNG(i).GT.1) THEN
+               HCS2(i)=2.d0 * sig_TRK * cs2/HGW2(i)/pi
+              dHCS2(i)=const*sqrt(dcs2**2+(cs2*DHGW2(i)/HGW2(i))**2)
+     &                  /HGW2(i) 
+            ENDIF
+         ENDDO
+ 60      CLOSE (81)
+      ENDIF
+
+      IF(key_GDRGFL.EQ.5.OR.key_GDRGFL.EQ.6)THEN
+         OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'
+     &        //'/gdr-parameters-exp-SLO.dat',STATUS = 'old',ERR = 470)
+         READ (81,'(///////)')  ! Skipping first 8 title lines
+         DO i = 1,MEXPPAR
+            NNG(i)=2
+C           READ (81,'(2I4, 10x,7f8.3,/,18x,7f8.3)',END = 70 ,ERR = 70)
+            READ (81,'(2I4, 10x,6f8.3,/,18x,6f8.3)',END = 70 ,ERR = 70)
+     &           NNZ(i), NNA(i),
+     &           HE1(i),  HGW1(i), cs1, 
+     &           HE2(i),  HGW2(i), cs2,  ! HCS(i),
+     &           dHE1(i), dHGW1(i),dcs1, 
+     &           dHE2(i), dHGW2(i),dcs2  !dHCS(i)
+            IF(HE2(i).LT.0.1) NNG(i)=1  
+            sig_TRK= 60.*NNZ(i)*(NNA(i)-NNZ(i))/dble(float(NNA(i)))
+            const = 2.d0 * sig_TRK / pi 
+             HCS1(i)=const * cs1/HGW1(i)
+            dHCS1(i)=const * sqrt(dcs1**2+(cs1*DHGW1(i)/HGW1(i))**2)
+     &               /HGW1(i)  
+            IF(NNG(i).GT.1) THEN
+               HCS2(i)=2.d0 * sig_TRK * cs2/HGW2(i)/pi
+              dHCS2(i)=const*sqrt(dcs2**2+(cs2*DHGW2(i)/HGW2(i))**2)
+     &                  /HGW2(i) 
+            ENDIF
+         ENDDO
+ 70      CLOSE (81)
+      ENDIF
+
   100 OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma/'
      &      //'gdr-parameters-theor.dat',STATUS = 'old',ERR = 500)
       READ (81,'(///)') ! Skipping first 4 title lines
@@ -11673,12 +11741,20 @@ C-------Selecting only 2+ states
       WRITE (8,*)  ' RIPL GDR parameters used'
       WRITE (12,*) 
       WRITE (12,*) ' RIPL GDR parameters used'
-      RETURN
   400 CLOSE (84)
+      RETURN
   450 WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
      &   'empire/RIPL/gamma/gdr-parameters-exp.dat',
      &   ' not found, theoretical RIPL will be used'
-      GOTO 100
+      IF(key_GDRGFL.EQ.2)GOTO 100
+  460 WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
+     &   'empire/RIPL/gamma/gdr-parameters-exp-MLO.dat',
+     &   ' not found, theoretical RIPL will be used'
+      IF(key_GDRGFL.EQ.4)GOTO 100
+  470 WRITE (8,'(1x,A14,A42,A43)') ' WARNING: File ',
+     &   'empire/RIPL/gamma/gdr-parameters-exp-SLO.dat',
+     &   ' not found, theoretical RIPL will be used'
+      IF(key_GDRGFL.EQ.6)GOTO 100
   500 WRITE (8,'(1x,A14,A43,A42)') ' WARNING: File ',
      &   'empire/RIPL/gamma/gdr-parameters-theor.dat',
      &   ' not found, default GDR values will be used'
@@ -11693,10 +11769,10 @@ C-------Selecting only 2+ states
       RETURN
       END
 
-
+C=================================================================
       SUBROUTINE assign_GDRGFLDATA
      &     (Numram,Kz,Ka,E,G,S,BETagfl2,S2Plusgfl)
-
+C=================================================================
       use empgdr   
 C
 C
@@ -11731,7 +11807,7 @@ C     INTEGER NG
       cs0 = 1.2*120.*n*zz/(aann*pi*gw0)
 
       IF (KEY_gdrgfl.NE.0) THEN
-         DO i = 1, MEXPPAR ! 270
+         DO i = 1, MEXPPAR
             IF (kz.EQ.NNZ(i) .AND. ka.EQ.NNA(i)) THEN
 C              NG = NNG(i)
                E(1) = HE1(i)
@@ -11749,11 +11825,11 @@ C-----Plujko_new-2005
       ENDIF
 
 C-----Plujko_new-2005
-C     If experimental values of GDR parameters not found and Key_GDRGFL=2
+C     If experimental values of GDR parameters not found and Key_GDRGFL=2,4,6
 C     they are going to be retrieved from the RIPL Goriely theoretical
 C     values. Note that in accordance with Goriely data-file all nuclei are
 C     ELONGATED!?
-      IF (Key_GDRGFL.EQ.2)THEN
+      IF (Key_GDRGFL.EQ.2.OR.Key_GDRGFL.EQ.4.OR.Key_GDRGFL.EQ.6)THEN
          DO i = 1, MAXGDR
             IF (kz.EQ.nnzt(i) .AND. ka.EQ.nnat(i)) THEN
 C              NG = nngt(i)
@@ -11896,7 +11972,6 @@ C
       EG2 = GDRpar(4, Nnuc)
       GW2 = GDRpar(5, Nnuc)
       CS2 = GDRpar(6, Nnuc)
-
       TE1 = GDRpar(7,Nnuc) 
       TE2 = GQRpar(7,Nnuc) 
       TM1 = GMRpar(7,Nnuc) 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4217 $
+Ccc   * $Rev: 4242 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 07:36:19 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
@@ -293,7 +293,7 @@ C Local variables
 C
       DOUBLE PRECISION cross(2), e10, e11, ee, ef, egiant(2), er2,
      &                 gamwidth(2), pi24, siggam, sigma0, ttf
-      DOUBLE PRECISION EGLO, GFL, MLO1, MLO2, MLO3, SLO
+      DOUBLE PRECISION EGLO, GFL, MLO1, MLO2, MLO3, SLO, SMLO
       INTEGER nreson
       DATA pi24/39.47841761D0/
       save pi24
@@ -309,7 +309,7 @@ C
       ee = Egamma
       ef = Eexcitf
       ttf = Temperf
-      e10 = 0.
+      e10 = 0.   
       DO nreson = 1, NG
          EGDr = egiant(nreson)
          GGDr = gamwidth(nreson)
@@ -325,30 +325,49 @@ C        *  Calculations of the 'ALPha' if 'BC' is input
             ENDIF
          ENDIF
          IF (Keyshape.EQ.2) THEN
-            e11 = siggam*MLO2(ttf,ef,ee)
+            e11 = siggam * MLO2(ttf,ef,ee)
          ELSEIF (Keyshape.EQ.3) THEN
-            e11 = siggam*MLO3(ttf,ee)
+            e11 = siggam * MLO3(ttf,ee)
          ELSEIF (Keyshape.EQ.4) THEN
-            e11 = siggam*EGLO(ttf,ee)
+            e11 = siggam * EGLO(ttf,ee)
 C--------for some nuclei with Z=62,64-68 EGLO<0
 C        - problem in the EGLO model
             IF (e11.LT.0) e11 = 0.0
          ELSEIF (Keyshape.EQ.5) THEN
-            e11 = siggam*GFL(ttf,ee)
+            e11 = siggam * GFL(ttf,ee)
          ELSEIF (Keyshape.EQ.6) THEN
-            e11 = siggam*SLO(ee)
+            e11 = siggam * SLO(ee)        
+         ELSEIF(Keyshape.EQ.7) THEN
+            e11 = siggam * SMLO(ee)
          ELSE
             e11 = siggam*MLO1(ttf,ef,ee)
          ENDIF
-         e10 = e10 + e11
+        e10 = e10 + e11
       ENDDO
       E1_GSA = 8.674D-08*e10
       END
 
-
-      DOUBLE PRECISION FUNCTION SLO(Egamma)
+CCC   *********************************************************************
+      DOUBLE PRECISION FUNCTION SMLO(Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
+
+C COMMON variables
+      DOUBLE PRECISION EGDr, GGDr
+      COMMON /HELP  / EGDr, GGDr
+
+C Dummy arguments
+      DOUBLE PRECISION Egamma,a
 C
+      a=GGDr/EGDr
+      SMLO = a * Egamma**2/((EGDr*EGDr - Egamma*Egamma)**2 + 
+     &       (a*Egamma**2)**2)
+      END
+
+CCC   *********************************************************************
+      DOUBLE PRECISION FUNCTION SLO(Egamma)
+CCC   *********************************************************************
+      IMPLICIT NONE
 C
 C COMMON variables
 C
@@ -359,13 +378,14 @@ C Dummy arguments
 C
       DOUBLE PRECISION Egamma
 C
-C
       SLO = Egamma*GGDr/((EGDr*EGDr - Egamma*Egamma)**2 + (Egamma*GGDr)
      &      **2)
       END
+
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION EGLO(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
-C
 C
 C COMMON variables
 C
@@ -397,8 +417,9 @@ C
       EGLO = hh + ceglo2*gel0
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION GFL(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -425,9 +446,10 @@ C     Plujko 2005
      &  ((EGDr*EGDr - egamma2)**2 + LMConst*(Egamma*gamma)**2)
       END
 
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION WIDTHGFL(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
-C
 C
 C COMMON variables
 C
@@ -459,7 +481,9 @@ C
       WIDTHGFL = const2*(egamma2 + pi24*T**2) + gdq
       END
 
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION MLO3(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -493,8 +517,9 @@ C
       MLO3 = phi*amlo3
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION WIDTH(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -525,8 +550,9 @@ C
       WIDTH = g1body + g2body
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION AKSET(Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -572,8 +598,9 @@ C
       AKSET = aksr
 99999 END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION MLO1(T,U,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -599,8 +626,9 @@ C     Protection against T=0
       MLO1 = phi*MLO1
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION SPECRALF(U,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -639,17 +667,16 @@ C
       END
 
 
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION RATEKINC(T,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
-C
 C COMMON variables
-C
       DOUBLE PRECISION ALPha, EG0, GW0, GWAll
       COMMON /WHELP / EG0, GW0, ALPha, GWAll
 C
 C Dummy arguments
-C
       DOUBLE PRECISION Egamma, T
 C
 C Local variables
@@ -661,8 +688,9 @@ C
       RATEKINC = (Egamma**2 + pi24*T**2)/ALPha/pi24
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION RATEEXCC(U,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -687,8 +715,9 @@ C
       RATEEXCC = ei/alphae/pi24
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION MLO2(T,U,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C
@@ -722,8 +751,9 @@ C
       MLO2 = phi*tpa0
       END
 
-
+CCC   *********************************************************************
       DOUBLE PRECISION FUNCTION WIDTHEXC(U,Egamma)
+CCC   *********************************************************************
       IMPLICIT NONE
 C
 C

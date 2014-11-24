@@ -35,7 +35,6 @@ C     Local variables
 
       xsinlcont = 0.d0
       xscclow   = 0.d0
-      totcorr   = 1.d0
       elleg     = 0.d0
       elleg(1)  = 1.d0 
 C
@@ -388,7 +387,6 @@ C------------End of adding inelastic to continuum
      &  ' DWBA contribution added to the continuum   (XS='
      &  , sngl(SINlcont), ' mb)'
 
-C     totcorr = 1.d0
       IF(INT(ZEJc(0)).EQ.0 .AND. TOTcs.GT.0.d0) totcorr = 
      & (ELAcs*ELAred +CSFus+ (SINl + SINlcc)*FCCred + SINlcont*FCOred) /
      &                 (TOTcs*TOTred)

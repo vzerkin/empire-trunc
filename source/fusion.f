@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4224 $
+Ccc   * $Rev: 4242 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 10:38:27 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -382,6 +382,11 @@ C        Total cross section is set to absorption cross section
 C        for photon induced reactions (to process them in EMPEND)
 C
          TOTcs = CSFus
+         WRITE(8,*)
+         WRITE(8,*) ' Photoabsorption cross section =',CSFus
+         WRITE(8,*) ' Maximum CN spin is ', NLW
+         WRITE(8,*) ' Spin dimension  is ', NDLW
+         WRITE(8,*)
 C
          GOTO 400
       ENDIF
@@ -415,8 +420,8 @@ C--------and calculate transmission coefficients
      &  ' Spin distribution of fusion cross section read from the file '
          WRITE (8,*)
      &          ' (all previous instructions concerning fusion ignored)'
-         WRITE (8,*) 'Maximum angular momentum :',maxlw
-         WRITE (8,*) 'Fusion cros section      :',CSFus
+         WRITE (8,*) ' Maximum angular momentum :',maxlw
+         WRITE (8,*) ' Fusion cross section      :',CSFus
          WRITE (8,*) 
 C
 C--------calculation of o.m. transmission coefficients for absorption

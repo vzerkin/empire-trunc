@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4227 $
+Ccc   * $Rev: 4242 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-18 13:38:09 +0100 (Di, 18 Nov 2014) $
+Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -440,39 +440,17 @@ C
 C-----calculates transmission coefficients for E1 gammas /Eqs. 17,18,19/
 C
       ed = Eg*Eg
- 
-      IF(Nnuc.eq.0) then
-C
-C       Called from fusion: photoabsorption calculation
-C
-        IF(KEY_shape.GE.7)THEN
-          E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
-C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
-          RETURN
-        ELSEIF (KEY_shape.NE.0) THEN
-          gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
+      IF(KEY_shape.EQ.8)THEN
+         E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg)
+C        Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
+         RETURN
+      ELSEIF (KEY_shape.NE.0) THEN
+         gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
      &        Eg,KEY_shape,Nnuc)
-C         default TE1 = 1
-C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
-          E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
-          RETURN
-        ENDIF
-      ELSE
-C
-C       Decay calculation
-C
-        IF(KEY_shape.EQ.8)THEN
-          E1 = 2*pi*Eg**3*GAMMA_STRENGTH_micro(Nnuc,Eg) 
-C         Weiskopf estimate is not used in microscopic GDR  (TE1=1 always)
-          RETURN
-        ELSEIF (KEY_shape.NE.0) THEN
-          gdr = 2*pi*Eg**3*GAMMA_STRENGTH(Z(Nnuc),A(Nnuc),Uex,T,
-     &        Eg,KEY_shape,Nnuc)
-C         default TE1 = 1
-C         Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
-          E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
-          RETURN
-        ENDIF
+C     default TE1 = 1
+C     Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
+         E1 = (1 - TE1)*CE1*4.599E-7*A2*ed*Eg + TE1*gdr
+         RETURN
       ENDIF
 
 C-----setting T=0 below removes non-zero limit in generalized Lorenzian
@@ -570,7 +548,7 @@ CCC   *                                                                   *
 CCC   *  Reads gamma-ray strength functions calculated by S. Goriely      *
 CCC   *            (included in RIPL-2/3)                                 *
 CCC   *                                                                   *
-CCC   *  Interpolates GSF linearily in log to the EMPIRE energy grid.     *
+CCC   *  Populates arrays uuE1grid(i,Nnuc), E1grid(i,Nnuc),iugMax(Nnuc)   *
 CCC   *                                                                   *
 CCC   *  INPUT:                                                           *
 CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
@@ -597,12 +575,6 @@ C
 
       ia = A(Nnuc)
       iz = Z(Nnuc)
-C
-C-----initialization
-C
-	uuE1grid = 0.d0
-      E1grid = 0.d0
-	iugMax = 0  
 
       WRITE (filename,99005) iz
 99005 FORMAT ('/RIPL/gamma/gamma-strength-micro/z',i3.3,
@@ -618,12 +590,12 @@ C
       IF (iar.NE.ia .OR. izr.NE.iz) GOTO 100
 C
 C-----reading microscopic GRS function from the RIPL-3 file
-C
       i = 1
 99015 FORMAT (f9.3,E12.3)
 C     SKIPPING TITLE LINE
   270 READ(34,*,END = 300)
   280 READ (34,99015,END = 300) uuE1grid(i,Nnuc), E1grid(i,Nnuc)
+     
       IF (uuE1grid(i,Nnuc).LE.0.001) GOTO 400
       IF (i.EQ.NLGRID) GOTO 400
       i = i + 1
@@ -633,7 +605,7 @@ C     SKIPPING TITLE LINE
       WRITE (8,*) ' ERROR: USE OTHER GRS functions. '
       STOP ' ERROR: RIPL HFB gamma-ray strength function missing'
   400 CLOSE (34)
-	iugMax(Nnuc) = i -1
+      iugMax(Nnuc) = i -1
 
 C     PLOT_ZVV_GSF() should be prepared following PLOT_ZVV_GSLD() as a template
 C     IF(IOUt.GE.6 .and. ENDf(Nnuc).LE.1) Call PLOT_ZVV_GSF(Nnuc)  
@@ -641,12 +613,19 @@ C     IF(IOUt.GE.6 .and. ENDf(Nnuc).LE.1) Call PLOT_ZVV_GSF(Nnuc)
       RETURN
       END
 
+CCC   *********************************************************************
       REAL*8 FUNCTION GAMMA_STRENGTH_micro(Nnuc,U)
+CCC   *********************************************************************
+CCC   *                                                                   *
+CCC   *  Uses arrays uuE1grid(i,Nnuc), E1grid(i,Nnuc),iugMax(Nnuc)        *
+CCC   *  for a linear interpolation in LOG scale of the HFB GRSF          *
+CCC   *********************************************************************
+
       implicit none 
       INCLUDE 'dimension.h'
 
-      REAL*8 E1grid(0:NLGRID,0:ndnuc),uuE1grid(0:NLGRID,0:ndnuc)
-	INTEGER iugMax(0:ndnuc)
+      REAL*8 E1grid(0:NLGRID,0:ndnuc), uuE1grid(0:NLGRID,0:ndnuc)
+      INTEGER iugMax(0:ndnuc)
       COMMON /GDRHFB/uuE1grid,E1grid,iugMax
 C
 C Dummy arguments
@@ -663,10 +642,7 @@ C
       IF (U.GT.30.0D0) RETURN
 C
 C--------interpolation in the tables
-C
-C     iugrid = NLGRID - 1
       iugrid = iugMax(Nnuc)
-
       klo = 1
       khi = iugrid
       IF (U.LE.uuE1grid(klo,Nnuc)) THEN
@@ -698,7 +674,6 @@ C     iugrid = NLGRID - 1
         result = c1*r1 + c2*r2
       ENDIF
       IF (result.LT.0) result = 0.d0
-
-	GAMMA_STRENGTH_micro = result/1.15d7
-	RETURN
-	END
+      GAMMA_STRENGTH_micro = result/1.15d7
+      RETURN
+      END

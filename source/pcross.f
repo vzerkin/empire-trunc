@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4234 $
+Ccc   * $Rev: 4242 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-21 19:36:29 +0100 (Fr, 21 Nov 2014) $
+Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -361,7 +361,8 @@ C        WRITE(*,49010)
      &          '' mb'')')crossafterbreak
       WRITE(8,*)
       scompn = crossafterbreak
-      IF(scompn.eq.0.d0) goto 70
+      scompn = max(crossafterbreak,0.d0)
+      IF(scompn.le.0.d0) goto 70
 C
 c     ****************************************************** 
 C     ** transfer reactions: stripping and pick-up 
@@ -435,7 +436,7 @@ c
          crossNTt = crossNTn
       ENDIF
       crossaftertrans = scompn - crossNTt
-      scompn = crossaftertrans
+      scompn = max(crossaftertrans,0.d0)
       WRITE(8,'(10x,''Total transfer cross section  '',
      &          F12.5, '' mb'')')crossNTt
       WRITE(8,'(''  Reaction cross section after transfer '',
@@ -443,7 +444,7 @@ c
       WRITE(8,*)
 C
 C9    IF(scompn.eq.0.d0) goto 60
- 9    IF(scompn.eq.0.d0) goto 70
+ 9    IF(scompn.le.0.d0) goto 70
 
       IF(PEQc.eq.0) goto 70  ! skipping PE calculation
 C
