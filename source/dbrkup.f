@@ -26,8 +26,6 @@ C     data ird/5/,iwrt/6/
 
       call prep(lprt,lmx1)
 
-C     t0=second()
-C     call cpu_time(cpu0)
       CALL THORA(iwrt)
 
       write(iwrt,
@@ -123,7 +121,6 @@ c weight for Simpson integration
       write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
      1                                          ecm,(sigt(i),i=1,5)
 
-C     ttot=second()-t0
 C     call cpu_time(cpu1)
 C     cputot=cpu1-cpu0
 C     write(iwrt,*)
@@ -2911,21 +2908,3 @@ c recursion for l>m
 c
 c-----------------------------------------------------------------------------
 c
-      function second()
-c
-c- returns seconds since midnight
-c
-c      integer ihr, imin, isec
-c      integer i100
-c - IBM PC Microsoft FORTRAN
-c      call gettim (ihr, imin, isec, i100)
-c      second = real ((ihr*3600 + imin*60 + isec)*100 + i100)/100
-c - IBM PC Lahey FORTRAN
-c      call timer(i100)
-c      second=real(i100)/100
-c - VAX, CDC4360 and INTEL F95
-C     second=secnds(0.)
-c   INTEL F95 cpu time
-c      call cpu_time(second)
-      return
-      end
