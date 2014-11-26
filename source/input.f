@@ -1,6 +1,6 @@
-!cc   * $Rev: 4251 $
+!cc   * $Rev: 4252 $
 !cc   * $Author: bcarlson $
-!cc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
+!cc   * $Date: 2014-11-26 02:00:35 +0100 (Mi, 26 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -4016,11 +4016,12 @@ C
               ELSE
                WRITE (8,
      &              '('' Direct deuteron breakup will be calculated'',
-     &                '' and renormalized by'', f5.3)') val
+     &                '' and renormalized by '', f5.3)') val
                dbrkup = val
                BUReac=0.0d0
               ENDIF            
             ENDIF
+           GO TO 100
           ENDIF
 C
          IF (name.EQ.'MAXHOL') THEN
@@ -6065,7 +6066,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'NHMS  ') THEN
-            IF (val.GT.99.0D0) THEN
+            IF (val.GT.99.0D0 .AND. LHMs.NE.0) THEN
                NHMs = val
                WRITE (8,'('' Number of events in HMS set to '',I10)')
      &                NHMs
@@ -6075,36 +6076,38 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FHMS  ') THEN
-            IF (val.LT.1.0D0) THEN
-               FHMS = 0
-               WRITE (8,
+            IF(LHMs.NE.0) THEN
+              IF (val.LT.1.0D0) THEN
+                 FHMS = 0
+                 WRITE (8,
      &             '('' Exciton densities are used in DDHMS '')')
-               WRITE (12,
+                 WRITE (12,
      &             '('' Exciton densities are used in DDHMS '')')
-             ELSE IF(val.LT.1.99D0) THEN
-               FHMs = 1
-               WRITE (8,
+               ELSE IF(val.LT.1.99D0) THEN
+                 FHMs = 1
+                 WRITE (8,
      &             '('' Fermi gas densities are used in DDHMS '')')
-               WRITE (12,
+                 WRITE (12,
      &             '('' Fermi gas densities are used in DDHMS '')')
-             ELSE IF(val.LT.2.99D0) THEN
-               FHMs = 2
-               WRITE (8,
+               ELSE IF(val.LT.2.99D0) THEN
+                 FHMs = 2
+                 WRITE (8,
      &         '('' Exact NR Fermi gas densities are used in DDHMS '')')
-               WRITE (12,
+                 WRITE (12,
      &         '('' Exact NR Fermi gas densities are used in DDHMS '')')
-             ELSE 
-               FHMs = 3
-               WRITE (8,
+               ELSE 
+                 FHMs = 3
+                 WRITE (8,
      &       '('' Exact rel. Fermi gas densities are used in DDHMS '')')
-               WRITE (12,
+                 WRITE (12,
      &       '('' Exact rel. Fermi gas densities are used in DDHMS '')')
-            ENDIF
+               ENDIF
+             ENDIF
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CHMS  ') THEN
-            IF (val.GT.0.0D0) THEN
+            IF (val.GT.0.0D0 .AND. LHMs.NE.0) THEN
                CHMs = val
                WRITE (8,
      &             '('' Default damp rate in HMS multiplied by '',F6.3)'
