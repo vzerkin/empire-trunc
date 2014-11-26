@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4251 $
+Ccc   * $Rev: 4253 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
+Ccc   * $Date: 2014-11-26 02:07:54 +0100 (Mi, 26 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1200,14 +1200,14 @@ C Read and check energy grid
             OPEN(unit=45,file=ctmp,status='OLD')
             READ(45,'(i6,f12.5)') nxx,dex
             WRITE (8,*)
+            WRITE (8,*)
      &  ' Deuteron breakup cross sections and populations written to : '
             WRITE (8,*) ' ', ctmp
-            WRITE (8,*)
            ELSE
+            WRITE (8,*)
             WRITE (8,*)
      &   ' Deuteron breakup cross sections and populations read from : '
             WRITE (8,*) ' ', ctmp
-            WRITE (8,*)
            ENDIF
 
 C Integrated cross sections - bu, bf,n, bf,p, inclus n, inclus p
