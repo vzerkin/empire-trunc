@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4152 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-05 23:07:43 +0200 (So, 05 Okt 2014) $
+Ccc   * $Rev: 4251 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -215,7 +215,7 @@ C
         itmp = 1
         if(i.eq.1 .or. i.eq.kmax) itmp = 2
         IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &         totspec = totspec + CSEmsd(i,nejc)/itmp
+     &         totspec = totspec + CSEmsd(i,nejc)/itmp + CSEdbk(i,nejc)
         totspec  = totspec  + ftmp/itmp 
         esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
@@ -348,7 +348,7 @@ C--------Inclusive DDX spectrum
            htmp = CSE(ie,nejc,0)
            if(htmp.LE.0.d0) cycle
            IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &       htmp = htmp + CSEmsd(ie,nejc)
+     &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
            itmp = 1
            if(ie.eq.1) itmp = 2
            WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)

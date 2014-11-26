@@ -1,6 +1,6 @@
-! $Rev: 4239 $
-! $Author: rcapote $
-! $Date: 2014-11-22 17:44:20 +0100 (Sa, 22 Nov 2014) $
+! $Rev: 4251 $
+! $Author: bcarlson $
+! $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -26,13 +26,13 @@
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),         &
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc),      &
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     &
-     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1),              &
+     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1), CSDbrkup(5), &
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc), &
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc), &
      &                 CSFis, CSFus, CSGdr1, CSGdr2, COEf, ELCncs,      &
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),   &
      &                 CSRead, D1Fra, DE, DEPart(ndnuc),                &
-     &                 DEF(ndlw,0:ndnuc),                               &
+     &                 CSEdbk(ndecse,0:ndejc), DEF(ndlw,0:ndnuc),       &
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,    &
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,    &
      &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),                  &
@@ -251,7 +251,7 @@
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,   & 
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,   &
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
-     &                 CSEfis, CSE, CSEa, CSEt,                         &
+     &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
      &                 RECcse, POPcon, POPdis,                          &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &

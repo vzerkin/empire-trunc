@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4242 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
+Ccc   * $Rev: 4251 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -57,8 +57,11 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, istat1, istat2, ilev1, mxj,
      &  ipa, il, iloc, l, myalloc, jindex, kmin, kmax
+      INTEGER nx,nxx,nxe,lmx,nspec,nspecc,nspecd,ie,nnur,nti,nthi
+      DOUBLE PRECISION pops,dex,busigs(5),buspec(NDEX)
+      DOUBLE PRECISION sigdep(NDLW),dbfl(NDLW,NDEX),dbf(NDAngecis,NDEX)
       LOGICAL logtmp
-	INTEGER iwin, ipipe_move
+      INTEGER iwin, ipipe_move
       CHARACTER*120 rstring
       DATA ctldir/'TL/'/
       DOUBLE PRECISION xj, xjc, jmin, jmax, sxj, trgsp
@@ -1182,11 +1185,157 @@ C-----------DIRECT=1 or DIRECT=2
          ENDIF
       ENDIF
 
+C Direct deuteron breakup/breakup fusion taken into account here
       IF(DBRkup.gt.1.0d-2) THEN
          ctmp = ctldir//ctmp23//'.DBK'
          INQUIRE (FILE = ctmp, EXIST = fexist)
-         call dirdbrkup(ctmp)
-        ENDIF
+         IF (.not.fexist .OR. CALctl) CALL dirdbrkup(ctmp)
+C            call dirdbrkup(ctmp)
+          OPEN(unit=45,file=ctmp,status='OLD')
+C Read and check energy grid
+          READ(45,'(i6,f12.5)') nxx,dex
+          IF(ABS(dex-DE) .GT. 1.0d-3) THEN
+            CLOSE(45)
+            CALL dirdbrkup
+            OPEN(unit=45,file=ctmp,status='OLD')
+            READ(45,'(i6,f12.5)') nxx,dex
+            WRITE (8,*)
+     &  ' Deuteron breakup cross sections and populations written to : '
+            WRITE (8,*) ' ', ctmp
+            WRITE (8,*)
+           ELSE
+            WRITE (8,*)
+     &   ' Deuteron breakup cross sections and populations read from : '
+            WRITE (8,*) ' ', ctmp
+            WRITE (8,*)
+           ENDIF
+
+C Integrated cross sections - bu, bf,n, bf,p, inclus n, inclus p
+          READ(45,'(5e12.5)') (CSDbrkup(i),i=1,5)
+          DO i=1,5
+            CSDbrkup(i)=DBRkup*CSDbrkup(i)
+           ENDDO
+          CSEmis(1,1)=CSEmis(1,1)+CSDbrkup(4)
+          CSEmis(2,1)=CSEmis(2,1)+CSDbrkup(5)
+          CSprd(Nres(4))=CSDbrkup(1)
+
+C Deplete deuteron fusion cross section and initial population in accordance
+C with breakup losses. The total absorption cross section is increased if
+C breakup losses extend beyond those of the optical model calculation 
+C (usually a small effect).
+          READ(45,'(i6)') lmx
+          READ(45,'(6e12.5)') (sigdep(j),j=1,lmx)
+          DO j=1,MIN(NLW,lmx)
+            DO ip=1,2
+              pops=0.5d0*DBRkup*sigdep(j)
+              ftmp=MIN(pops,POP(NEX(1),j,ip,1))
+              POP(NEX(1),j,ip,1)=POP(NEX(1),j,ip,1)-ftmp
+              CSFus=CSFus-ftmp
+              ABScs=ABScs+pops-ftmp
+             END DO
+           END DO
+
+C Populate neutron emission breakup-fusion residual nucleus
+          Nnur=NRes(1)
+          nspecc = MIN(MAX(NINT((EX(NEX(1),1) - Q(1,1) - ECUt(Nnur))/DE 
+     &                                             + 1.0001),0),ndecsed) 
+          READ(45,'(i6)') lmx
+          READ(45,'(6e13.5)') ((dbfl(j,nx),j=1,lmx),nx=1,nxx)
+          DO nx=1,nxx
+            nxe=nxx+2-nx
+            ie=MAX(nspecc+1-nxe,0)
+            DO j=1,lmx
+              pops = 0.5d0*DBRkup*dbfl(j,nx)
+              POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+              POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+             END DO
+           END DO
+
+C Neutron DDX
+          READ(45,'(2i6)') nthi
+          READ(45,'(6e13.5)') ((dbf(nti,nx),nti=1,nthi),nx=1,nxx)
+
+          DO nx=1,nxx
+            DO nti=1,nthi
+              pops=DBRkup*dbf(nti,nx)
+              nxe=nxx+2-nx
+              CSEa(nxe,nti,1,1) = CSEa(nxe,nti,1,1) + pops
+             END DO
+           END DO
+        
+C Neutron spectrum
+          READ(45,'(6e13.5)') (buspec(nx),nx=1,nxx)
+
+          IF(ENDF(1).GT.0) THEN
+            DO nx=1,nxx
+              pops=DBRkup*buspec(nx)
+              nxe=nxx+2-nx
+              ie=MAX(nspecc+1-nxe,0)
+              POPcse(ie,1,nxe,INExc(Nnur)) =
+     &           POPcse(ie,1,nxe,INExc(Nnur)) + pops
+              POPcsed(ie,1,nxe,INExc(Nnur)) =
+     &            POPcsed(ie,1,nxe,INExc(Nnur)) + pops
+              POPcseaf(ie,1,nxe,INExc(Nnur)) = 1.0
+              POPbin(ie,Nnur) = pops
+             END DO
+            ELSE
+             DO nx=1,nxx
+               pops=DBRkup*buspec(nx)
+               nxe=nxx+2-nx
+               CSEdbk(nxe,1)=CSEdbk(nxe,1)+pops
+               CSE(nxe,1,1)=CSE(nxe,1,1)+pops
+              END DO
+            ENDIF
+
+C Populate proton emission breakup-fusion residual nucleus
+          Nnur=NRes(2)          
+          nspecc = MIN(MAX(NINT((EX(NEX(1),1) - Q(2,1) - ECUt(Nnur))/DE 
+     &                                             + 1.0001),0),ndecsed) 
+          READ(45,'(i6)') lmx
+          READ(45,'(6e13.5)') ((dbfl(j,nx),j=1,lmx),nx=1,nxx)
+          DO nx=1,nxx
+            ie=MAX(nspecc-nx,0)
+            DO j=1,lmx
+              pops = 0.5d0*DBRkup*dbfl(j,nx)
+              POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+              POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+             END DO
+           END DO
+
+C Proton DDX
+          READ(45,'(2i6)') nthi
+          READ(45,'(6e13.5)') ((dbf(nti,nx),nti=1,nthi),nx=1,nxx)
+
+          DO nx=1,nxx
+            DO nti=1,nthi
+              pops=DBRkup*dbf(nti,nx)
+              CSEa(nx+1,nti,2,1) = CSEa(nx+1,nti,2,1) + pops
+             END DO
+           END DO
+        
+C Proton spectrum
+          READ(45,'(6e13.5)') (buspec(nx),nx=1,nxx)
+
+          IF(ENDF(1).GT.0) THEN
+            DO nx=1,nxx
+              pops=DBRkup*buspec(nx)
+              ie=MAX(nspecc-nx,0)
+              POPcse(ie,2,nx+1,INExc(Nnur)) =
+     &            POPcse(ie,2,nx+1,INExc(Nnur)) + pops
+              POPcsed(ie,2,ie,INExc(Nnur)) =
+     &            POPcsed(ie,2,nx+1,INExc(Nnur)) + pops
+              POPcseaf(ie,2,nx+1,INExc(Nnur)) = 1.0
+              POPbin(ie,Nnur) = pops
+             ENDDO
+            ELSE
+            DO nx=1,nxx
+              pops=DBRkup*buspec(nx)            
+              CSEdbk(nx+1,2)=CSEdbk(nx+1,2)+pops
+              CSE(nx+1,2,1)=CSE(nx+1,2,1)+pops
+             END DO
+           ENDIF
+
+        ENDIF  ! End direct dbrkup section
 
       IF (IOUt.EQ.5) THEN
         WRITE (8,*) 

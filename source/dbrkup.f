@@ -10,7 +10,7 @@
       double precision ylmi
 
       double precision ps(nol,3),dps(nol,3,NDEX)
-      double precision dbf1(NDANGecis,NDEX),dbf2(NDANGecis,NDEX)
+      double precision dbf1(NDAngecis,NDEX),dbf2(NDAngecis,NDEX)
       double precision dsigt(3,NDEX),sigt(5)
 
       double precision sigi(NDANGecis,4)
@@ -21,29 +21,23 @@
 
       INTEGER iwrt
 
-C     data ird/5/,iwrt/6/
-      data        iwrt/6/
+      data iwrt/8/
 
       call prep(lprt,lmx1)
 
       CALL THORA(iwrt)
 
-      write(iwrt,
-     1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
-      write(iwrt,'(''    l    dsig-opt    dsig-fld'')')
-      call dscat(1,ecm,lmxd,1,sigr,sigfld)
-      write(iwrt,'(/,'' Ed='',f12.4,'' MeV'', 
-     1    ''    sigr='',f12.4,'' mb   sig-fld='',f12.4,'' mb'',/)') 
-     2                                      ecm,sigr,sigfld
+c      write(iwrt,
+c     1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
+c      write(iwrt,'(''    l    dsig-opt    dsig-fld'')')
+c      call dscat(1,ecm,lmxd,1,sigr,sigfld)
+c      write(iwrt,'(/,'' Ed='',f12.4,'' MeV'', 
+c     1    ''    sigr='',f12.4,'' mb   sig-fld='',f12.4,'' mb'',/)') 
+c     2                                      ecm,sigr,sigfld
 
 c define energy interval de and (even) number of intervals ne
       ext=ecm-ebnd       
       nxx=ext/dex
-      ex0=ext-nxx*dex
-      IF(ex0.LT.0.5*dex) THEN
-        ex0=ex0+dex
-        nxx=nxx-1
-       ENDIF
 
       ps=0.0d0
       sigi=0.0d0
@@ -57,7 +51,7 @@ c weight for Simpson integration
       sigt=0.0
 
       do nx=1,nxx
-        e1=ex0+(nx-1)*dex
+        e1=nx*dex
         e2=ext-e1
 
         call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
@@ -69,12 +63,12 @@ c weight for Simpson integration
 
        end do
 
-      write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
+      IF(IOUT.GT.1) write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
 
-      if(abs(lprt).gt.0 .and. nthi.gt.0) write(iwrt,
+      if(IOUT.gt.1 .and. nthi.gt.0) write(iwrt,
      1            '(//,'' Energy Integrated Angular Distributions'',/)') 
 
-      if(nthi.gt.0) then
+      if(IOUT.GT.1 .AND. nthi.gt.0) then
         write(iwrt,
      1    '(/,''  Inclusive breakup angular distributions - (mb/sr)'')')
         write(iwrt,'(6x,''theta'',7x,''dsig-brkup1'',
@@ -88,51 +82,49 @@ c weight for Simpson integration
          end do
        endif
 
-      if(abs(lprt).gt.0) write(iwrt,'(//,
+      if(IOUT.gt.1) THEN
+        write(iwrt,'(//,
      1  '' Energy Integrated Angular Momentum Distributions - (mb)'',
      1  /)') 
 
-      if(abs(lprt).gt.0) then
         write(iwrt,*)
         write(iwrt,
      1          '(8x,''sigbf(ld)'',3x,''sigf1(l1)'',3x,''sigf2(l2)'')')
-        do ld=1,lmxd
-          ps(ld,1) = dex*ps(ld,1)
-          write(iwrt,'(i5,9f12.6)') ld-1,ps(ld,1),(dex*ps(ld,ip),ip=2,3)
-         end do
-       endif
+       ENDIF
+      do ld=1,lmxwf(1)
+        ps(ld,1) = dex*ps(ld,1)
+        IF(IOUT.GT.1) write(iwrt,'(i5,9f12.6)') 
+     &                             ld-1,ps(ld,1),(dex*ps(ld,ip),ip=2,3)
+       end do
                  
-      if(abs(lprt).gt.0) write(iwrt,
+      IF(IOUT.gt.1) THEN
+        write(iwrt,
      1       '(//,'' Spectra - (mb/MeV)'',/)') 
 
-      write(iwrt,*)
-      write(iwrt,'(5x,''Ex1(MeV)     dsig-brkup'',
+        write(iwrt,*)
+        write(iwrt,'(5x,''Ex1(MeV)     dsig-brkup'',
      1          ''       dsig-bf1       dsig-bf2'')') 
-      do nx=1,nxx
-        e1=ex0+(nx-1)*dex
-        write(iwrt,'(f12.3,3f15.4)') e1,(dsigt(i,nx),i=1,3)
-       end do
+        DO nx=1,nxx
+          e1=nx*dex
+          write(iwrt,'(f12.3,3f15.4)') e1,(dsigt(i,nx),i=1,3)
+         end do
+       ENDIF
 
-      do i=1,3
+      DO i=1,3
         sigt(i)=dex*sigt(i)
        end do
       sigt(4)=sigt(1)+sigt(2)
       sigt(5)=sigt(1)+sigt(3)
-      write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
-     1                                          ecm,(sigt(i),i=1,5)
+      IF(IOUT.GT.1)    
+     & write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
+     &                                         ecm,(sigt(i),i=1,5)
 
-C     call cpu_time(cpu1)
-C     cputot=cpu1-cpu0
-C     write(iwrt,*)
-C     write(iwrt,'(''  Elapsed time = '',f10.2,'' seconds'')') ttot
-C     write(iwrt,'(''      CPU time = '',f10.2,'' seconds'')') cputot
-C     write(iwrt,*)
-      CALL THORA(iwrt)
-C     write(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
-
-      close(iwrt)
+      IF(IOUT.GT.1) CALL THORA(iwrt)
+      IF(IOUT.GT.1) WRITE(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
 
       OPEN(45, FILE=ctmp, STATUS='unknown')
+C Parameters for energy grid - nxx,dex
+      WRITE(45,'(i6,2e12.5)') nxx,dex
 
 C cross sections - bu, bf,n bf,p incl,n incl,p
       WRITE(45,'(5e12.5)') (sigt(i),i=1,5)
@@ -141,25 +133,26 @@ C  Deuteron breakup-fusion loss
       WRITE(45,'(i6)') lmxwf(1)
       WRITE(45,'(6e12.5)') (ps(ld,1),ld=1,lmxwf(1))
 
-C  Neutron fusion occupations
-      WRITE(45,'(2i6,e14.5)') lmxwf(3),nxx,ex0
-      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
-C  Proton fusion occupations
-      WRITE(45,'(2i6,e14.5)') lmxwf(2),nxx,ex0
+C  Proton fusion occupations (neutron emission)
+      WRITE(45,'(i6)') lmxwf(2)
       WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
 
 C  Neutron DDX
-      WRITE(45,'(2i6,e14.5)') nthi,nxx,ex0
+      WRITE(45,'(2i6)') nthi
       WRITE(45,'(6e13.5)') ((dbf1(nti,nx),nti=1,nthi),nx=1,nxx)
-C  Proton DDX
-      WRITE(45,'(2i6,e14.5)') nthi,nxx,ex0
-      WRITE(45,'(6e13.5)') ((dbf2(nti,nx),nti=1,nthi),nx=1,nxx) 
 
 C  Neutron spectrum
-      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(2,nx),nx=1,nxx)
+
+C  Neutron fusion occupations (proton emission)
+      WRITE(45,'(i6)') lmxwf(3)
+      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
+
+C  Proton DDX
+      WRITE(45,'(2i6)') nthi
+      WRITE(45,'(6e13.5)') ((dbf2(nti,nx),nti=1,nthi),nx=1,nxx) 
+
 C  Proton spectrum
-      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(3,nx),nx=1,nxx)
 
       CLOSE(45)
@@ -176,13 +169,10 @@ C  Proton spectrum
       parameter(nptmx=5000)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
-C     character*48 filename
       complex*16 frc
 
-C     double precision ylm1,ylm2,ylmi
-      double precision           ylmi
+      double precision ylmi
 
-C     dimension ax(4),pox(4,2)
       dimension amd(6),azd(6),betanl0(3)
       real md,mf,mf3
 
@@ -198,7 +188,6 @@ C     dimension ax(4),pox(4,2)
 c      data asd/0.5,0.5,1.0,0.5,0.5,0.0/
       data azd/0.,1.,1.,1.,2.,2./
 
-C     data am0/939.0/,hc/197.32/,e2/1.44/
       data am0/939.0/,hc/197.32/
       data dr00/0.025/
 
@@ -210,28 +199,29 @@ C     data am0/939.0/,hc/197.32/,e2/1.44/
       data wx/1.0,1.0,1.0/
       data frcnst0/0.667/,ebnd/2.224/,dx0/125.0/
 
-C     data ird/5/,iwrt/6/
-      data        iwrt/6/
+      data iwrt/8/
 
-      open(unit=iwrt,file='dbrkup.out',status='unknown')
+c      open(unit=iwrt,file='dbrkup.out',status='unknown')
 
-      write(iwrt,'(/,'' ************ In dbrkup **************'')')
+      IF(IOUT.GT.1) 
+     &  write(iwrt,'(/,'' ************ In dbrkup **************'')')
 
-      write(iwrt,*) ' Target:'
+      IF(IOUT.GT.1) write(iwrt,*) ' Target:'
 
       zf = INT(IZA(0)/1000)
       mf = IZA(0)-1000*zf
 
-      write(iwrt,*) zf,mf,frcnst0
+      IF(IOUT.GT.1) write(iwrt,*) zf,mf,frcnst0
 
-      write(iwrt,'(/,'' Entrance and exit channel info --'',/)')
+      IF(IOUT.GT.1) 
+     &  write(iwrt,'(/,'' Entrance and exit channel info --'',/)')
 
       do ip=1,3
 
         if(ip.eq.1) then
-          write(iwrt,*) ' Entrance channel:'
+          IF(IOUT.GT.1) write(iwrt,*) ' Entrance channel:'
          else
-          write(iwrt,*) ' Exit channel:'
+           IF(IOUT.GT.1) write(iwrt,*) ' Exit channel:'
          endif
 
         IF(ip.EQ.1) THEN        
@@ -240,7 +230,8 @@ C     data ird/5/,iwrt/6/
           lmxwf(ip) = MIN(INT(0.6*lmxwf(1)),NDLW)
          ENDIF
 
-        write(iwrt,*) zd(ip),md(ip),sd(ip),betanl0(ip),lmxwf(ip)
+        IF(IOUT.GT.1) 
+     1    write(iwrt,*) zd(ip),md(ip),sd(ip),betanl0(ip),lmxwf(ip)
 
         betanl(ip)=0.25*betanl0(ip)**2*am0*md(ip)*mf/(hc**2*(md(ip)+mf))
 
@@ -251,8 +242,8 @@ C     data ird/5/,iwrt/6/
          end do
 
         ipot=1
-        write(iwrt,*) 'potential parameters'
-        write(iwrt,*) ipot,vx(ip),wx(ip)
+        IF(IOUT.GT.1) write(iwrt,*) 'potential parameters'
+        IF(IOUT.GT.1) write(iwrt,*) ipot,vx(ip),wx(ip)
 c     ****
 c     ip = 1 neutron         ipot = 1 --> koning - delaroche
 c                                   2 --> wilmore - hodgson
@@ -284,21 +275,27 @@ c
         ewmax(ip)=0.0
 c
         call syspot(ip,ipx,ipot)
-
-        write(iwrt,3) rr(1,ip),aa(1,ip),(pot(1,i,ip),i=1,5)
-        write(iwrt,3) rr(2,ip),aa(2,ip),(pot(2,i,ip),i=1,5),aa(5,ip)
-        write(iwrt,3) rr(3,ip),aa(3,ip),(pot(3,i,ip),i=1,5)
-        write(iwrt,3) rr(5,ip),ewmax(ip),ef(ip)
+       
+        IF(IOUT.GT.1) THEN 
+          write(iwrt,3) rr(1,ip),aa(1,ip),(pot(1,i,ip),i=1,5)
+          write(iwrt,3) rr(2,ip),aa(2,ip),(pot(2,i,ip),i=1,5),aa(5,ip)
+          write(iwrt,3) rr(3,ip),aa(3,ip),(pot(3,i,ip),i=1,5)
+          write(iwrt,3) rr(5,ip),ewmax(ip),ef(ip)
+         ENDIF
 
        end do
 
-      write(iwrt,*)' ebnd=? D0=?'
-      write(iwrt,*) ebnd,dx0
+      IF(IOUT.GT.1) THEN 
+        write(iwrt,*)' ebnd=? D0=?'
+        write(iwrt,*) ebnd,dx0
+       ENDIF
 
       dr0=0.1
       lprt=-1
-      write(iwrt,*) 'dr=? lprt=?'
-      write(iwrt,*) dr0,lprt
+      IF(IOUT.GT.1) THEN
+        write(iwrt,*) 'dr=? lprt=?'
+        write(iwrt,*) dr0,lprt
+       ENDIF
 
 c thetai
       nthi = NDAng
@@ -309,24 +306,24 @@ c thetai
 
       ecm = EIN
       dex = DE
-      write(iwrt,*) 'Ecm, dEx:'
-      write(iwrt,*) ecm, dex
-
-      write(iwrt,
+      IF(IOUT.GT.1) THEN
+        write(iwrt,*) 'Ecm, dEx:'
+        write(iwrt,*) ecm, dex
+        write(iwrt,
      1        '(/,'' ************* End of input *****************'',/)')
 
 
-      write(iwrt,
+        write(iwrt,
      1        '('' Entrance channel: Zt = '',f4.0,6x,''At = '',f4.0)') 
      2              zf,mf
-      write(iwrt,'(19x,''Zp = '',f4.0,6x,''Ap = '',f4.0,6x,
+        write(iwrt,'(19x,''Zp = '',f4.0,6x,''Ap = '',f4.0,6x,
      1          ''Sp = '',f4.1,/)') zd(1),md(1),sd(1)
-      write(iwrt,'(''     Exit channel: Zd1= '',f4.0,6x,''Ad1= '',f4.0,
+        write(iwrt,'(''     Exit channel: Zd1= '',f4.0,6x,''Ad1= '',f4.0,
      1          6x,''Sd1= '',f4.1,/)') zd(2),md(2),sd(2)
 
-      write(iwrt,'(''     Exit channel: Zd2= '',f4.0,6x,''Ad2= '',f4.0,
+        write(iwrt,'(''     Exit channel: Zd2= '',f4.0,6x,''Ad2= '',f4.0,
      1          6x,''Sd2= '',f4.1,/)') zd(3),md(3),sd(3)
-
+       ENDIF
 c
       rmax=0.0
       mf3=mf**(1./3.)
@@ -348,10 +345,12 @@ c
       npt2=2*npt1
       npt3=2
 
-      write(iwrt,
+      IF(IOUT.GT.1) THEN
+        write(iwrt,
      1        '(/,'' Wavefunctions and overlaps calculated using:'',/)')
-      write(iwrt,'('' npt1= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
+        write(iwrt,'('' npt1= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
      1             ''rmax1= '',f8.2,'' fm'')') npt1,dr,npt1*dr
+       ENDIF
 
       frcnst=2.*md(2)*md(3)*am0*frcnst0**2/(hc**2*(md(2)+md(3)))
       be=ebnd
@@ -374,7 +373,6 @@ c     potentiels extraits de la compilation de c.m.perey et f.g.perey  *
 c     atomic data and nuclear data tables   17 (1976) 1-101            *
 c***********************************************************************
       real mt,mt2,mt3,mtt,nmzsa
-c     real md,mf
       real md
       common/const/md(3),zd(3),sd(3),betanl(3),mt,zt
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
@@ -760,20 +758,16 @@ c
 
       complex*16 ovrlp,bfint
 
-C     complex*16 brkup,ovrlp1,ovrlp2,ovrlpx
       complex*16 brkup
       complex*16 tb(ntlmx)
       double precision df1(NDANGecis),db1(NDANGecis)
       double precision df2(NDANGecis),db2(NDANGecis)
       double precision dps(nol,3)
-C     double precision cg(nol),cgp(nol),fase,fasep,fang,fasem
       double precision cg(nol),cgp(nol),fase,fasep,fang
-C     double precision pidp,sig0,dphi
       double precision pidp,sig0
 
       real md,mf
-C     double precision ylm1,ylm2,ylmi
-      double precision           ylmi
+      double precision ylmi
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/intcons/npt1,npt2,npt3,hx,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
@@ -781,7 +775,7 @@ C     double precision ylm1,ylm2,ylmi
       common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
 
       data am0/939.0d0/,hc/197.32d0/
-      data iwrt/6/
+      data iwrt/8/
 
       pidp=4.0d0*atan(1.0d0)
 
@@ -793,16 +787,19 @@ C     double precision ylm1,ylm2,ylmi
       call setpoints(ed,e1)
 
       call dscat(1,ed,lmxd,0,sigrd,sigfldd)
-      write(iwrt,'(/,''   Ed='',f12.4,'' MeV    lmaxd='', i3,
-     1    ''    sigrd='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
+      IF(IOUT .GT. 4) 
+     & write(iwrt,'(/,''   Ed='',f12.4,'' MeV    lmaxd='', i3,
+     &    ''    sigrd='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
 
       call dscat(2,e1,lmx1,0,sigr1,sigfld1)
-      write(iwrt,'(''   E1='',f12.4,'' MeV    lmax1='', i3,
-     1    ''    sigr1='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
+      IF(IOUT .GT. 4) 
+     & write(iwrt,'(''   E1='',f12.4,'' MeV    lmax1='', i3,
+     &    ''    sigr1='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
 
       call dscat(3,e2,lmx2,0,sigr2,sigfld2)
-      write(iwrt,'(''   E2='',f12.4,'' MeV    lmax2='', i3,
-     1    ''    sigr2='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
+      IF(IOUT .GT. 4) 
+     &  write(iwrt,'(''   E2='',f12.4,'' MeV    lmax2='', i3,
+     &    ''    sigr2='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
 
       lma=max(lmx1,lmx2)
       lma=lma*(lma+1)*(2*lma+1)/6
@@ -985,10 +982,10 @@ c
 c
 c - printing of differential cross sections and angular distributions
 c
-      if(lprt.lt.0 .and. nthi.gt.0) 
+      if(IOUT.GT.4 .and. nthi.gt.0) 
      1     write(iwrt,'(//,'' Angular Distributions'')') 
 
-      if(nthi.gt.0) then
+      if(IOUT.GT.4 .AND. nthi.gt.0) then
         write(iwrt,'(/,
      1   ''  Inclusive breakup angular distributions - (mb/sr/MeV)'')')
         write(iwrt,'(6x,''theta'',7x,''dsig-brkup1'',
@@ -1002,10 +999,10 @@ c
          end do
        endif
 
-      if(lprt.lt.0) write(iwrt,
+      if(IOUT.GT.4) write(iwrt,
      1         '(//,'' Angular Momentum Distributions - (mb/MeV)'',/)') 
 
-      if(lprt.lt.0) then
+      if(IOUT.GT.4) then
         write(iwrt,*)
         write(iwrt,
      1        '(8x,''sigbf(ld)'',3x,''sigf1u(l1)'',3x,''sigf2(l2)'')')
@@ -1014,8 +1011,9 @@ c
          end do
        endif
 
-      write(iwrt,'(/,3x,''E1='',f7.2,3x,''E2='',f7.2,3x,
-     1          ''dsig/dE='',3f10.4,'' (mb/MeV)'')') e1,e2,dsigt
+      IF(IOUT.GT.4)
+     & write(iwrt,'(/,3x,''E1='',f7.2,3x,''E2='',f7.2,3x,
+     &          ''dsig/dE='',3f10.4,'' (mb/MeV)'')') e1,e2,dsigt
 
       call daxs
       return
@@ -1039,8 +1037,7 @@ c
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
 
-C     data hc/197.32/,am0/938.1/,e2/1.43909/
-      data iwrt/6/
+      data iwrt/8/
 
       mf3=mf**(1.0/3.0)
 
@@ -1079,17 +1076,17 @@ C     data hc/197.32/,am0/938.1/,e2/1.43909/
       dkmn=(ak(1)-ak(2)-mf*ak(3)/(mf+md(2)))*h
       npt3=min(int(10.0/dkmn),nptmx)
 
-      write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
-      write(iwrt,'(/,''   At Ed = '',f8.3,'' MeV     E1 = '',
-     1                             f8.4,'' MeV'')') et,e1
-      write(iwrt,
-     1   '(/,''   Wavefunctions and overlaps calculated using:'')')
-      write(iwrt,'(''   npt1= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
-     1             ''rmax1= '',f8.2,'' fm'')') npt1,h,npt1*h
-      write(iwrt,'(''   npt2= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
-     1             ''rmax2= '',f8.2,'' fm'')') npt2,h,npt2*h
-      write(iwrt,'(''   npt3= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
-     1             ''rmax3= '',f8.2,'' fm'')') npt3,h,npt3*h
+c      write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
+c      write(iwrt,'(/,''   At Ed = '',f8.3,'' MeV     E1 = '',
+c     1                             f8.4,'' MeV'')') et,e1
+c      write(iwrt,
+c     1   '(/,''   Wavefunctions and overlaps calculated using:'')')
+c      write(iwrt,'(''   npt1= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
+c     1             ''rmax1= '',f8.2,'' fm'')') npt1,h,npt1*h
+c      write(iwrt,'(''   npt2= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
+c     1             ''rmax2= '',f8.2,'' fm'')') npt2,h,npt2*h
+c      write(iwrt,'(''   npt3= '',i6,6x,''dr = '',f6.3,'' fm'',6x,
+c     1             ''rmax3= '',f8.2,'' fm'')') npt3,h,npt3*h
 
        return
        end
@@ -1109,8 +1106,7 @@ c
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
       complex*16 ovrlp0(0:nptmx)
-C     complex*16 wf0,ovrlp1,ovrlp2,nr,wfx
-      complex*16     ovrlp1,ovrlp2,nr,wfx
+      complex*16 ovrlp1,ovrlp2,nr,wfx
       complex*16 a11,a12,a13,a21,a22,a23,b1,b2,b3
 
       complex*16 wfs,wfc,smtrx,cph
@@ -1124,7 +1120,7 @@ C     complex*16 wf0,ovrlp1,ovrlp2,nr,wfx
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-C     data iwrt/6/
+C     data iwrt/8/
 
       ovrlp=0.0d0
       ovrlp1=0.0d0
@@ -1301,7 +1297,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-C     data iwrt/6/
+C     data iwrt/8/
 
       bfx=wpot(npt1,nf)*conjg(bfwf1(npt1))*bfwf2(npt1)
 
@@ -1339,14 +1335,12 @@ c***********************************************************************
       double precision xnl(nptmx),etad,sigc,al,fldint,zrc
       complex*16 frc
       complex*16 wft(nptmx),dwft(nptmx),wfh(nptmx),dwfh(nptmx)
-C     complex*16 wfx(nptmx),dwfx(nptmx)
       complex*16 hm,hp,hmp,hpp,hm2,hmp2,anorm
       complex*16 wfs,wfc,smtrx,cph
       complex*16 fc0(nol),fcp0(nol),hcp(nol),dhcp(nol)
       complex*16 hcp1(nol),dhcp1(nol)
       complex cgamma,zzz,ak0,rho0
       dimension a(4)
-C     dimension u1(7),y1(7)
       dimension rv(5),pote(5)
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
@@ -1358,7 +1352,7 @@ C     dimension u1(7),y1(7)
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/potn/poti(nptmx),potr(nptmx),potf(nptmx)
 
-      data iwrt/6/
+      data iwrt/8/
 c
       tenpi=40.0*atan(1.0)
 c
@@ -2219,7 +2213,7 @@ c***********************************************************************
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/potn/potxx(2*nptmx),potf(nptmx)
 
-c     data iwrt/6/
+c     data iwrt/8/
 
       do ip=2,3
 c
@@ -2425,7 +2419,7 @@ c by back substitution from max m of coupled equations for m1=-m2 states
 
       dimension cg(*)
 c
-C     data iwrt/6/
+C     data iwrt/8/
 
       xj1=jj1*(jj1+1.0d0)
       xj2=jj2*(jj2+1.0d0)
@@ -2723,13 +2717,12 @@ c   AND MUST BE INCLUDED EXPLICITLY ELSEWHERE
 c
       complex*16 hcp(*),dhcp(*)
 
-C     double precision eta,al,sqn,sqo,pio2
-      double precision eta,   sqn,sqo,pio2
+      double precision eta,sqn,sqo,pio2
       complex*16 rho,rxl,cwfp,dwfp,roi2,ep,em
       complex zzz,cgamma
 
       data pio2/1.570796326795d0/
-      data iwrt/6/
+      data iwrt/8/
 
       zzz=cmplx(1.0,etas)
       zzz=cgamma(zzz)
@@ -2808,7 +2801,6 @@ C     real ets
       complex rhs
       complex*16 fc(*),fcp(*)
 
-C     complex*16 rho,rho0,rho1,ff,fd,df
       complex*16 rho,rho0,rho2,ff,fd,df
 
       rho=dble(rhs)
@@ -2905,6 +2897,3 @@ c recursion for l>m
 
       return
       end
-c
-c-----------------------------------------------------------------------------
-c

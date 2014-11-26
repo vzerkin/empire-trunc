@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4011 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-08-04 05:44:40 +0200 (Mo, 04 Aug 2014) $
+Ccc   * $Rev: 4251 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -46,6 +46,7 @@ C     CSHms  = 0.d0
       CSE    = 0.d0
       CSEt   = 0.d0
       CSEmsd = 0.d0
+      CSEdbk = 0.d0
 C      CSEhms = 0.d0
 C      CSEhmslab = 0.d0
       AUSpec = 0.d0

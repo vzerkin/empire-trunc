@@ -1,6 +1,6 @@
-!cc   * $Rev: 4242 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
+!cc   * $Rev: 4251 $
+!cc   * $Author: bcarlson $
+!cc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
 
       SUBROUTINE INPUT
 !cc
@@ -1169,7 +1169,7 @@ C
 
 C----------break-up and transfer
            IF(NINT(AEJc(0)).GE.2 .and. DXSred.GT.0.d0)THEN
-             BUReac = 0.7d0
+             IF(DBRkup.lt.0.01d0) BUReac = 0.7d0
              NTReac = 0.9d0
            ENDIF
 
@@ -4018,6 +4018,7 @@ C
      &              '('' Direct deuteron breakup will be calculated'',
      &                '' and renormalized by'', f5.3)') val
                dbrkup = val
+               BUReac=0.0d0
               ENDIF            
             ENDIF
           ENDIF
