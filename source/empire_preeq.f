@@ -435,6 +435,12 @@ C     Renormalizing elastic transmission coefficients to consider PE emission
       ENDDO
 
       WRITE (12,*) ' '
+      IF(DBRkup.GT.1.0d-2) THEN
+        WRITE (12,'('' ABSORP CROSS SECTION = '',1P,E12.5,'' mb'')')
+     &    ABScs
+        WRITE (12,'('' D BKUP CROSS SECTION = '',1P,E12.5,'' mb'')')
+     &    CSDbrkup(6)
+       ENDIF
       WRITE (12,'('' FUSION CROSS SECTION = '',1P,E12.5,'' mb'')')
      &     CSFus + (SINl + SINlcc)*FCCred + SINlcont*FCOred
       WRITE (12,'('' TOTAL  CROSS SECTION = '',1P,E12.5,'' mb'')')

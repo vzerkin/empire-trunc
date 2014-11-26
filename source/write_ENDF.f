@@ -228,7 +228,7 @@ C         Total is 0 for charged particles, no correction
 C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 C
      &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
+     &               + CSDbrkup(6) - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
 C
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
@@ -243,7 +243,7 @@ C         Total is 0 for charged particles, no correction
 C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 C
      &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &                             - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
+     &               + CSDbrkup(6) - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
 C
      &    max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
@@ -344,7 +344,7 @@ C-------Printing final results after including all scaling factors
         WRITE (8,
      &  '('' * CN formation + direct cross section            '',G13.6,
      &              '' mb  '')')
-     &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
+     &    CSFus + CSDbrkup(6) + (SINl+SINlcc)*FCCred + SINlcont*FCOred
         WRITE (8,
      &  '('' * CN formation                                   '',G13.6,
      &              '' mb  '')') CSFus
@@ -352,6 +352,17 @@ C-------Printing final results after including all scaling factors
      &  '('' * Direct inelastic cross section                 '',G13.6,
      &              '' mb  '')')
      &        (SINl+SINlcc)*FCCred + SINlcont*FCOred
+        IF (DBRkup.GT.1.0d-2) THEN
+           WRITE (8,
+     &  '('' * Elastic d breakup cross section                '',G13.6,
+     &              '' mb  '')') CSDbrkup(1)
+           WRITE (8,
+     &  '('' * Inelastic d breakup n emission cross section   '',G13.6,
+     &              '' mb  '')') CSDbrkup(2)
+           WRITE (8,
+     &  '('' * Inelastic d breakup p emission cross section   '',G13.6,
+     &              '' mb  '')') CSDbrkup(3)
+         ENDIF
          dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
    	   IF(dtmp.gt.0) WRITE (8,
      &  '('' * Pre-equilibrium emission cross section         '',G13.6,
@@ -373,20 +384,18 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') TOTcsfis
 
 C-------Printing final cross section balance
+        dtmp = CSFus + CSDbrkup(6) + 
+     &                   (SINl+SINlcc)*FCCred + SINlcont*FCOred
         WRITE (8,'('' * '')')
         WRITE (8,'('' * Unitarity balance: '')')
         WRITE (8,
      &  '('' * CN formation + direct cross section            '',G13.6,
-     &              '' mb  '')')
-     &   CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
+     &              '' mb  '')') dtmp
         WRITE (8,
      &  '('' * Production cross section (incl.fission)        '',G13.6,
      &              '' mb'')')  checkXS
         WRITE (8,'('' * Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
-     &    100.d0*abs(
-     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
-     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
+     &     dtmp - checkXS, 100.d0*abs((dtmp - checkXS ))/dtmp
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
 
@@ -403,8 +412,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
         ENDIF
         WRITE (*,
      &  '(''   CN formation + direct cross section            '',G13.6,
-     &              '' mb  '')')
-     &   CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred
+     &              '' mb  '')') dtmp
         WRITE (*,
      &  '(''   Production cross section (incl.fission)        '',G13.6,
      &              '' mb'')')  checkXS
@@ -412,10 +420,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  '(''   Fission cross section                          '',G13.6,
      &              '' mb  '')') TOTcsfis
         WRITE (*,'(''   Difference: '', F7.2, '' mb ('',F6.2,'') %'')')
-     &     CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS,
-     &    100.d0*abs(
-     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS ))/
-     &    (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)
+     &     dtmp - checkXS, 100.d0*abs((dtmp - checkXS ))/dtmp
         IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0 .and. 
      &      ELCncs.gt.0.1d0) THEN
           WRITE (*,
@@ -425,20 +430,16 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
           WRITE (*,*)
         ENDIF
       ENDIF
-      IF(   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred -checkXS)
-     &.GT.0.01*(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred)) THEN
+      IF(   abs(dtmp -checkXS).GT.0.01*dtmp) THEN
         WRITE (8,*)
         WRITE (8,'(''  WARNING: Sum of production XS (incl.fission)'')')
         WRITE (8,'(''  WARNING: is not equal reaction cross section'')')
-        IF((CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred).NE.0.d0)
+        IF(dtmp.NE.0.d0)
      &  WRITE (8,'(''  WARNING:     difference: '', F6.2,'' % at E = '',
-     &  G12.5,'' MeV'')') 100.d0*
-     &   abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred - checkXS)/
-     &      (CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred),EINl
+     &  G12.5,'' MeV'')') 100.d0*abs(dtmp - checkXS)/dtmp,EINl
       ENDIF
       IF(TOTred*TOTcs*totcorr.gt.0.d0 .and.
-     &     abs(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred + 
-     &         ELAred*ELAcs - TOTred*TOTcs*totcorr) .GT.
+     &     abs(dtmp + ELAred*ELAcs - TOTred*TOTcs*totcorr) .GT.
      &                0.01*TOTred*TOTcs*totcorr) THEN
         WRITE (8,*)
         WRITE (8,'(''  WARNING: Total cross section is NOT equal'')')

@@ -405,9 +405,17 @@ C------------End of adding inelastic to continuum
          WRITE(8,'(/)')
        ENDIF
        IF (ZEJc(0).NE.0 .OR. AEJc(0).EQ.0) THEN
-         WRITE (8,99010) 
-     &     ((SINlcc + SINl)*FCCred + SINlcont*FCOred) + CSFus, 
+         IF(DBRkup.GT.1.0d-2) THEN
+           WRITE (8,99011)
+     &     ((SINlcc + SINl)*FCCred + SINlcont*FCOred) +
+     &      CSDbrkup(6) + CSFus,CSDbrkup(6),
      &     CSFus/FUSred,FUSRED,CSFus
+          ELSE
+           WRITE (8,99010)
+     &     ((SINlcc + SINl)*FCCred + SINlcont*FCOred) + CSFus,
+     &     CSFus/FUSred,FUSRED,CSFus
+          ENDIF
+
          IF(((SINlcc + SINl)*FCCred + SINlcont*FCOred).GT.0) 
      &     WRITE (8,99006) SINlcc + SINl + SINlcont,
      &                  ((SINlcc + SINl)*FCCred + SINlcont*FCOred)/
@@ -514,6 +522,10 @@ C
      &           'Direct cross section        :',e14.7,' mb',
      &           '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
 99010 FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',    
+     &        /,2x,'CN formation cross section  :',e14.7,' mb',
+     &           '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
+99011 FORMAT (/,2x,'Absorption cross section    :',e14.7,' mb',
+     &        /,2x,'d breakup cross section     :',e14.7,' mb',
      &        /,2x,'CN formation cross section  :',e14.7,' mb',
      &           '  ( Scaled by ',f6.3,' to ',e14.7,' mb )')
 99015 FORMAT (/' ',46x,'SHAPE ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',

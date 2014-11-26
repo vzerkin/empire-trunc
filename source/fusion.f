@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4253 $
+Ccc   * $Rev: 4254 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-26 02:07:54 +0100 (Mi, 26 Nov 2014) $
+Ccc   * $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1190,7 +1190,6 @@ C Direct deuteron breakup/breakup fusion taken into account here
          ctmp = ctldir//ctmp23//'.DBK'
          INQUIRE (FILE = ctmp, EXIST = fexist)
          IF (.not.fexist .OR. CALctl) CALL dirdbrkup(ctmp)
-C            call dirdbrkup(ctmp)
           OPEN(unit=45,file=ctmp,status='OLD')
 C Read and check energy grid
           READ(45,'(i6,f12.5)') nxx,dex
@@ -1218,6 +1217,7 @@ C Integrated cross sections - bu, bf,n, bf,p, inclus n, inclus p
           CSEmis(1,1)=CSEmis(1,1)+CSDbrkup(4)
           CSEmis(2,1)=CSEmis(2,1)+CSDbrkup(5)
           CSprd(Nres(4))=CSDbrkup(1)
+          CSDbrkup(6)=CSDbrkup(1)+CSDbrkup(2)+CSDbrkup(3)
 
 C Deplete deuteron fusion cross section and initial population in accordance
 C with breakup losses. The total absorption cross section is increased if

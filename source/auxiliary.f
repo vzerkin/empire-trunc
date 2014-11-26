@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4251 $
+Ccc   * $Rev: 4254 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-26 01:43:13 +0100 (Mi, 26 Nov 2014) $
+Ccc   * $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -36,6 +36,7 @@ C
 
       CSEmis = 0.d0
       CSMsd  = 0.d0
+      CSDbrkup = 0.d0
 C     CSHms  = 0.d0
       CSEfis = 0.d0
       CSMsc  = 0.d0
