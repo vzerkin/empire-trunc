@@ -1388,8 +1388,8 @@ c
 c cutoff of imaginary potential outside Coulomb barrier
 c
       rcut=rv(1)+5.0/mf3-1.0
-      acut=1.0
-c      acut=0.5
+c      acut=1.0
+      acut=0.5
 c     
 c     profondeurs reelles
 c
@@ -1480,8 +1480,8 @@ c
 c
 c cutoff of imaginary potential outside Coulomb barrier
 c
-c      if(ip.gt.1 .and. eta(ip).gt.0.1 .and. r.gt.rcut) 
-c     1       poti(i)=2.0d0*poti(i)/(1.0+exp(min((r-rcut)/acut,600.)))
+      if(ip.gt.1 .and. eta(ip).gt.0.1 .and. r.gt.rcut) 
+     1       poti(i)=2.0d0*poti(i)/(1.0+exp(min((r-rcut)/acut,600.)))
 c
 c finite-range correction
       if(ip.eq.1) then

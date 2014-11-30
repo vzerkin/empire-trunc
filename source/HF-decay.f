@@ -1374,6 +1374,10 @@ C              WRITE (8,*)
              ENDIF
 
            ENDDO   !over ejectiles
+
+           IF(DBRkup.GT.1.0d-2 .AND. jz.EQ.0 .AND. jn.EQ.0)
+     1        checkprd = checkprd - CSDbrkup(1)
+
            xcross(NDEJC+3,jz,jn) = checkprd
 
       ENDIF ! if CSProd > 0
