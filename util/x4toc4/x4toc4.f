@@ -26,6 +26,7 @@ C-V        distribution when MXD qualifier is present (A. Trkov).
 C-V  12/06 Fix translation of discrete inelastic levels when level
 C-V        energies are given in dual representation (level energy
 C-V        or range of levels, e.g.: #20788006) (A. Trkov).
+C-V  14/12 Fix normalisation of Legendre coefficients (A. Trkov).
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
 C-A  -------------------------------------
@@ -3873,13 +3874,14 @@ C-----SAVE ZEROTH ORDER ENERGY AND COEFFICIENT.                         X4T34720
 C-----LOOK UP ZEROTH ORDER COEFFICIENT IN ENERGY TABLE.                 X4T34790
    50 IF(IEF.LE.0) GO TO 70                                             X4T34800
       DO 60 M=1,IEF                                                     X4T34810
-      IF(ABS(ENOW-EF(IEF)).LE.0.00001*EF(IEF)) GO TO 80                 X4T34820
+      MM=M                                                              TRKOV
+      IF(ABS(ENOW-EF(MM)).LE.0.00001*EF(MM)) GO TO 80                   TRKOV
    60 CONTINUE                                                          X4T34830
    70 WRITE(OUTP,6070) ENOW                                             X4T34840
       GO TO 110                                                         X4T34850
 C-----DEFINE NORMALIZATION.                                             X4T34860
-   80 IF(IRFLAG(ISANR).EQ.5) ZNORM=F(M)                                 X4T34870
-      IF(IRFLAG(ISANR).EQ.6) ZNORM=F(M)*(2.0*ORDERL+1.0)                X4T34880
+   80 IF(IRFLAG(ISANR).EQ.5) ZNORM=F(MM)                                TRKOV
+      IF(IRFLAG(ISANR).EQ.6) ZNORM=F(MM)*(2.0*ORDERL+1.0)               TRKOV
       IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.5) WRITE(OUTP,6040)              X4T34890
       IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.6) WRITE(OUTP,6050)              X4T34900
       GO TO 100                                                         X4T34910
