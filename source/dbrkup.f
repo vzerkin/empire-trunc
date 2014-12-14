@@ -54,7 +54,8 @@ c weight for Simpson integration
         e1=nx*dex
         e2=ext-e1
 
-        call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
+C       call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
+        call tmatrx(e1,e2,ecm,     ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
      1                                                 sigi,dsigt(1,nx))
 
         sigt(1)=sigt(1)+dsigt(1,nx)
@@ -742,7 +743,8 @@ c
 *
 *------------------------------------------------------------
 *
-      subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
+c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
+      subroutine tmatrx(e1,e2,ed,     ps,dps,dbf1,dbf2,sigi,dsigt)
 
       use brkfuswf
 
@@ -1037,7 +1039,8 @@ c
       common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
 
-      data iwrt/8/
+C     integer iwrt 
+C     data iwrt/8/
 
       mf3=mf**(1.0/3.0)
 
@@ -2085,9 +2088,11 @@ c
       do nx=1,nstp
 
         iy2=3-iy1
-        call ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+c       call ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+        call ideriv0(r,h,      r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
         do id1=1,5
-          call ideriv(r+aa(id1)*h,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
+c        call ideriv(r+aa(id1)*h,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
+         call ideriv(r+aa(id1)*h,h,      r0,ak2,sl,vcl,iy1,id1,
      *                         yy,dyy,ddy,bb(1,id1),cc(id1),dc(id1))
          end do
         errmax=0.0
@@ -2124,7 +2129,8 @@ c
 c
 c------------------------------------------------------------------------------
 c
-      subroutine ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+c     subroutine ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+      subroutine ideriv0(r,h,      r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
 c
 c - starting derivative
 c
@@ -2134,7 +2140,8 @@ c
       parameter(tiny=1.0d-14)
       complex*16 ddy(ndmx,6),yy(ndmx,2),dyy(ndmx)
       dimension ysc(ndmx)
-      real r0,h0,ak2,sl,vcl
+c     real r0,h0,ak2,sl,vcl
+      real r0,ak2,sl,vcl
 
       complex*16 rx
 c
@@ -2160,7 +2167,9 @@ c
 c
 c------------------------------------------------------------------------------
 c
-      subroutine ideriv(r,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
+C     subroutine ideriv(r,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
+C    1                                        yy,dyy,ddy,bb,cc,dc)
+      subroutine ideriv(r,h,      r0,ak2,sl,vcl,iy1,id1,
      1                                        yy,dyy,ddy,bb,cc,dc)
 c
 c - derivatives
@@ -2170,7 +2179,8 @@ c
       parameter(ndmx=2)
       complex*16 yy(ndmx,2),ddy(ndmx,6),dyy(ndmx)
       dimension bb(5)
-      real r0,h0,ak2,sl,vcl
+c     real r0,h0,ak2,sl,vcl
+      real r0,ak2,sl,vcl
 
       complex*16 ytmp(2),rx
 
