@@ -1,5 +1,5 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-08-22 16:36:21 +0200 (Fr, 22 Aug 2014) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2014-12-17 09:26:32 +0100 (Mi, 17 Dez 2014) $
 Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
 
       SUBROUTINE WKBFIS(Ee, Nnuc, tfdd, tdirp, tabsp)
@@ -101,7 +101,8 @@ C-------Imaginary potential strengths
      &             wimag(iw/2,3)* dexp(Ee - dmom)
 
          if(Ee.le. Vheigth(iw)) W = 0.d0 
-         if(Ee.gt. dmom.and.w.lt.1.d0) W = w+(Ee-dmom)*(1.d0-w)/0.1   
+         if(Ee.gt. dmom.and.w.lt.0.5d0) W = w+(Ee-dmom)*(0.5d0-w)/0.5  
+c         if(Ee.gt. dmom.and.w.lt.1.d0) W = w+(Ee-dmom)*(1.d0-w)/0.1    
          if(ee.lt.Vheigth(iw )) phase(iw) = 0.d0
          deltt(iw) = W * phase(iw)
       ENDDO

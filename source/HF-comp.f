@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4167 $
+Ccc   * $Rev: 4258 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-04 19:25:40 +0100 (Di, 04 Nov 2014) $
+Ccc   * $Date: 2014-12-17 09:26:32 +0100 (Mi, 17 Dez 2014) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -1738,7 +1738,7 @@ C
 
       DOUBLE PRECISION tdirp(NFPARAB,NFPARAB), tabsp(NFPARAB,NFPARAB)
       DOUBLE PRECISION tdirpp(NFPARAB,NFPARAB), tabspp(NFPARAB,NFPARAB)
-      DOUBLE PRECISION sumtp(NFPARAB), wdir(NFPARAB), tindp,vsh,vbar
+      DOUBLE PRECISION sumtp(NFPARAB), wdir(NFPARAB), tindp,vsh
 
       INTEGER ibar, ist, jnc, nr, ipa, ih, ih1, iw, iw1, ib, k
 C
@@ -1786,7 +1786,7 @@ c-----initialization
       DO ih = 2, nrhump
          IF(enh_asym(ih).LT.enh)enh=enh_asym(ih)
       ENDDO   
-
+c      goto 700  ! jumps over discrete contribution
 CCC Discrete transition states contribution
       DO nr = 1, NRFdis(1)
          sfmin = SFDis(nr,1)
@@ -1886,20 +1886,14 @@ c-----continuum direct and indirect weights for surogate optical model
             vsh=0.d0
             barmin = min((vbarmax(iw) + efb(iw)-vsh),
      &                   (vbarmax(iw + 1) + efb(iw + 1))-vsh)
-            vbar= VBArex(NRhump + iw)+efb(NRhump + iw)
-
-            wdir(iw + 1) = 2.d0 * (Ee - VBArex(NRhump + iw)) /
-     &                     ((barmin - VBArex(NRhump + iw)) *
-     &                     (1.d0 + dexp( - (Ee - barmin) / awf(iw))))
-
-            wdir(iw + 1) = 2.d0 * (Ee - vbar) /
-     &                     ((barmin - vbar) *
+            wdir(iw + 1) = 2.d0 * (Ee - efb(NRhump + iw)) /
+     &                     ((barmin - efb(NRhump + iw)) *
      &                     (1.d0 + dexp( - (Ee - barmin) / awf(iw))))
             IF(Ee.GE.barmin) wdir(iw + 1) = 1.d0
-            IF(Ee.LE.VBArex(NRhump + iw))wdir(iw + 1) = 0.d0
+            IF(Ee.LE.efb(NRhump + iw))wdir(iw + 1) = 0.d0
          endif
       ENDDO
-
+c   
 C-----Continuum contribution to each hump transmission coefficient
  800  CALL SIMPSFIS(Nnuc,Ee,JCC,Ipa,tfcon)
       DO ih = 1, nrhump
@@ -1930,8 +1924,6 @@ c-----adding weighted continuum direct
          tdirpp(ih, nrhump) = tdirpp(ih, nrhump) * enh +
      &                        tdircont(ih) * (1.d0 - wdir(ih + 1)) 
       ENDDO
-c     if(nrbar.eq.5) tdirpp(2,3) = tdirpp(2,3) + tdircont(2) 
-c    &                       * (1.d0 - wdir(3))
 c 
       IF (NINT(FISopt(Nnuc)).EQ.0) THEN
 
@@ -1957,6 +1949,9 @@ c--------adding weighted continuum absorption
            tabspp(iw + 1, iw) = tabspp(iw + 1, iw) * enh_asym(iw+1) + 
      &                          tfcon(iw) * wdir(iw)
          ENDDO
+csin
+         tabspp(1,3) = tabspp(1,3) * enh + 
+     &                          tdircont(1) * wdir(1)   
 c--------sum of competting channels in wells
          sumtp(1) = 1.d0
          DO iw = 2, nrwel + 1
@@ -2103,6 +2098,7 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
       RETURN
       END
 c=======================================================================
+     
       SUBROUTINE SIMPSTDIR(Nnuc,Ee,JCC,Ipa,tdircont,vbarmax)
 C-----Simpson integration for direct transmission
       implicit none
@@ -2146,6 +2142,7 @@ C
          IF(NINT(FISBAR(Nnuc)).EQ.3)THEN
             uexcit1 = Ee - ux1
             CALL PHASES(uexcit1, phase,phase_h, nnuc,iphas_opt,discrete)
+c             CALL PHASES_Parab(ee, nnuc, phase, discrete)
          ENDIF
 
          DO ib = 1, NRHump
@@ -2189,3 +2186,4 @@ C    &             (1.d0 + 2.d0 * dSQRT(dmom) * COS(arg1) + dmom)
       ENDDO
       RETURN
       END
+
