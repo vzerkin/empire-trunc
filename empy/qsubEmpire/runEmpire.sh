@@ -1,4 +1,5 @@
 #PBS -m a
+#PBS -l nodes=1#shared
 #PBS -S /bin/bash
 #PBS -j oe
 #
@@ -55,6 +56,9 @@ if [ $clean = Y ]; then
    fi
    if [ -e $file-pfns.out ]; then
       cp $file-pfns.out $dir
+   fi
+   if [ -e $file.out ]; then
+      cp $file.out $dir
    fi
 else
    # copy everything

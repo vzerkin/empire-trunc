@@ -87,6 +87,8 @@ def copyFiles(proj,dir):
     bash.cp(proj+"-lev.col",dir,False)
     bash.cp(proj+"-omp.dir",dir,False)
     bash.cp(proj+"-omp.ripl",dir,False)
+    bash.cp(proj+".c4",dir,False)
+    bash.cp("LEVDEN_SCALE.DAT",dir,False)
 
 
 def linkFiles(proj,src,dir):
@@ -104,6 +106,8 @@ def linkFiles(proj,src,dir):
     mklnk(proj+"-lev.col")
     mklnk(proj+"-omp.dir")
     mklnk(proj+"-omp.ripl")
+    mklnk(proj+".c4")
+    mklnk("LEVDEN_SCALE.DAT")
 
 def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="", jbid={}):
     """
