@@ -1,6 +1,6 @@
-!cc   * $Rev: 4252 $
-!cc   * $Author: bcarlson $
-!cc   * $Date: 2014-11-26 02:00:35 +0100 (Mi, 26 Nov 2014) $
+!cc   * $Rev: 4260 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2015-01-13 17:09:04 +0100 (Di, 13 Jän 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -4429,7 +4429,7 @@ C-----
             IF (ADIv.EQ.1.0D0) WRITE (8,
      &           '('' GSM (Ignatyuk) level densities selected '')')
             IF (ADIv.EQ.2.0D0) THEN
-C           WRITE (8,
+C            WRITE (8,
 C    &           '('' Gilbert-Cameron level densities selected '')')
              WRITE (8,
      &           '('' WARNING: Gilbert-Cameron level densities should be 
@@ -4437,7 +4437,7 @@ C    &           '('' Gilbert-Cameron level densities selected '')')
              WRITE (8,
      &           '('' Changed to EMPIRE 2.18 Gilbert-Cameron (LEVDEN 4)
      &'')')
-           val = 4.d0
+            ADIv = 4.d0
             ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (8,
      &          '('' Microscopic parity dependent HFB level densities se
@@ -4450,7 +4450,7 @@ C
             IF (ADIv.EQ.1.0D0) WRITE (12,
      &           '('' GSM level densities (Ignatyuk)  '')')
             IF (ADIv.EQ.2.0D0) THEN
-C           WRITE (12,
+C            WRITE (12,
 C    &           '('' Gilbert-Cameron level densities '')')
              WRITE (12,
      &           '('' WARNING: Gilbert-Cameron level densities should be 
@@ -4458,7 +4458,7 @@ C    &           '('' Gilbert-Cameron level densities '')')
              WRITE (12,
      &           '('' WARNING: Changed to EMPIRE 2.18 Gilbert-Cameron (L
      &EVDEN 4)'')')
-           val = 4.d0
+             ADIv = 4.d0
             ENDIF
             IF (ADIv.EQ.3.0D0) WRITE (12,
      &     '('' Microscopic parity dependent HFB level densities '')')
