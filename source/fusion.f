@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4254 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
+Ccc   * $Rev: 4261 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-01-20 13:08:25 +0100 (Di, 20 Jän 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -57,8 +57,8 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
      &  nang, itmp2, ncoef1, istat1, istat2, ilev1, mxj,
      &  ipa, il, iloc, l, myalloc, jindex, kmin, kmax
-      INTEGER nx,nxx,nxe,lmx,nspec,nspecc,nspecd,ie,nnur,nti,nthi
-      DOUBLE PRECISION pops,dex,busigs(5),buspec(NDEX)
+      INTEGER nx,nxx,nxe,lmx,nspecc,ie,nnur,nti,nthi
+      DOUBLE PRECISION pops,dex,buspec(NDEX)
       DOUBLE PRECISION sigdep(NDLW),dbfl(NDLW,NDEX),dbf(NDAngecis,NDEX)
       LOGICAL logtmp
       INTEGER iwin, ipipe_move
@@ -1195,7 +1195,7 @@ C Read and check energy grid
           READ(45,'(i6,f12.5)') nxx,dex
           IF(ABS(dex-DE) .GT. 1.0d-3) THEN
             CLOSE(45)
-            CALL dirdbrkup
+            CALL dirdbrkup(ctmp)
             OPEN(unit=45,file=ctmp,status='OLD')
             READ(45,'(i6,f12.5)') nxx,dex
             WRITE (8,*)
