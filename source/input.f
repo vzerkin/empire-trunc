@@ -1,6 +1,6 @@
-!cc   * $Rev: 4260 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2015-01-13 17:09:04 +0100 (Di, 13 Jän 2015) $
+!cc   * $Rev: 4262 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-01-20 17:52:25 +0100 (Di, 20 Jän 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3718,6 +3718,7 @@ C-----------Print some final input options
             ELSE
                ecutof = 3.0d0*30./A(0)**0.6666666d0
                IF(ECUtcoll.LE.0) THEN
+C                ECDWBA keyword not present in the input
                  IF(A(0).ge.40)
      &              ecutof = 2.00d0*30./A(0)**0.6666666d0
 C    &              ecutof = 2.50d0*30./A(0)**0.6666666d0
@@ -3728,13 +3729,16 @@ C                   going back to 3987 release to limit the number of DWBA state
                  ECUtcoll=ecutof 
                  JCUtcoll = 4
                ELSE
+C                ECDWBA keyword present in the input
                  IF(ECUtcoll.GT.ecutof) then
                    ECUtcoll = ecutof
                    WRITE(8,*) 
      & ' WARNING: Cut-of of added collective levels for DWBA calcs (ECDW
      &BA) set to ',sngl(ecutof)
                  ENDIF 
-                 IF(JCUTcoll.GT.4) JCUtcoll = 4
+C                IF(JCUTcoll.GT.4) JCUtcoll = 4
+                 IF(JCUTcoll.LE.4) JCUtcoll = 4
+                 IF(JCUTcoll.GT.9) JCUtcoll = 9
                ENDIF
          
                INQUIRE (FILE = ('TARGET_COLL.DAT'),EXIST = fexist)
@@ -3743,7 +3747,7 @@ C                   going back to 3987 release to limit the number of DWBA state
      &     '('' Collective levels up to '',F5.1,'' MeV used in DWBA'' )'
      &             ) ECUtcoll
                  WRITE (8,
-     &'('' Maximum spin of retrieved collective levels J <'',I1)') 
+     &'('' Maximum spin of retrieved DWBA collective levels J <'',I2)') 
      &             JCUtcoll+1
                ENDIF
             ENDIF
@@ -9979,10 +9983,10 @@ C
       LOGICAL fexist,odd
       CHARACTER*8 finp
       INTEGER i, i0p, i01p, i10p, i12p, i1m, i20p, i21p, i22p, i31p, 
-     &        i3m, i41p, i4p, i5m, i6p, i8p, ia, iar, ierr, ilv, iptmp,
+     &    i3m, i41p, i4p, i5m, i7m, i9m, i6p, i8p, ia, iar, ierr, ilv,
      &        itmp, itmp1, itmp2, iz, izr, j, lvpr, natmp, nbr, ndbrlin,
      &        ngamr, nlvr, nlvs, nmax, nnurec, nztmp, ncont, mintsp
-      INTEGER icoupled, isgor, isgqr, isgmr, jdis1, igreson 
+      INTEGER icoupled, isgor, isgqr, isgmr, jdis1, igreson, iptmp 
       CHARACTER*6 reftmp
 
       ND_nlv = 0
@@ -10596,6 +10600,8 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')')
       i1m = 0
       i3m = 0
       i5m = 0
+      i7m = 0
+      i9m = 0
       i22p = 0
       i41p = 0
       i31p = 0
@@ -11131,6 +11137,30 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
             IF (i5m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 2*delta_k)) THEN
                i5m = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv + LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 0
+               D_Def(ND_nlv,2) = beta3*0.25
+               GOTO 500
+            ENDIF
+            IF (i7m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
+     &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 3*delta_k)) THEN
+               i7m = ilv
+               ND_nlv = ND_nlv + 1
+               ICOllev(ND_nlv) = ilv + LEVcc
+               D_Elv(ND_nlv) = elvr
+               D_Lvp(ND_nlv) = lvpr
+               D_Xjlv(ND_nlv) = xjlvr
+               IPH(ND_nlv) = 0
+               D_Def(ND_nlv,2) = beta3*0.25
+               GOTO 500
+            ENDIF
+            IF (i9m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
+     &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 4*delta_k)) THEN
+               i9m = ilv
                ND_nlv = ND_nlv + 1
                ICOllev(ND_nlv) = ilv + LEVcc
                D_Elv(ND_nlv) = elvr
