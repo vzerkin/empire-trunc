@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4106 $ 
+Ccc   * $Rev: 4263 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2014-09-21 04:08:51 +0200 (So, 21 Sep 2014) $
+Ccc   * $Date: 2015-01-22 02:56:23 +0100 (Do, 22 Jän 2015) $
 Ccc   * $Id$            
 
 C-----It is ripl2empireS.h because it must be compatible
@@ -31,7 +31,7 @@ C                   (multi-level coupling)
      &        IDR, IPArv, NPH, IPAr, JCOul
 C
       REAL*8 EEMin, EEMax, EPOt, RCO, ACO, POT, BANdk, DDEf, EXV, DEFv,
-     &       THEtm, EEX, SPIn, SPInv, EECoul,
+     &       THEtm, EEX, SPIn, SPInv, EECoul, DEFr,
      &       RRCoul, RCOul0, BETa, RCOul1, RCOul2, AACOul, RCOul3
 C
       REAL*8 SR_hw(ndim4),SR_amb0(ndim4),SR_amg0(ndim4),
@@ -74,7 +74,7 @@ C    &                AUThor(80), REFer(80), SUMmary(320)
      &                THEtm(NDIM7, NDIM4), EEX(NDIM6, NDIM4), 
      &                SPIn(NDIM6, NDIM4), SPInv(NDIM7, NDIM4),  
      &                RRCOul(NDIM1), RCOul0(NDIM1), RCOul1(NDIM1),
-     &                RCOul2(NDIM1), RCOul3(NDIM1), 
+     &                RCOul2(NDIM1), RCOul3(NDIM1), DEFr(NDIM7, NDIM4),
      &                AACOul(NDIM1), EECOul(NDIM1), BETa(NDIM1)
 
         COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,

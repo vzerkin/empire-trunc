@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4106 $ 
+Ccc   * $Rev: 4263 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2014-09-21 04:08:51 +0200 (So, 21 Sep 2014) $
+Ccc   * $Date: 2015-01-22 02:56:23 +0100 (Do, 22 Jän 2015) $
 Ccc   * $Id$
             
 
@@ -28,7 +28,7 @@ C                   (multi-level coupling)
      &        IDR, IPArv, NPH, IPAr, JCOul
 C
       REAL*8 EMin, EMax, EPOt, RCO, ACO, POT, BANdk, DEF, EXV, DEFv,
-     &       THEtm, EX, SPIn, SPInv, ECoul,
+     &       THEtm, EX, SPIn, SPInv, ECoul, DEFr,
      &       RCoul, RCOul0, BETa, RCOul1, RCOul2, ACOul, RCOul3
 C
       REAL*8 SR_hw(ndim4),SR_amb0(ndim4),SR_amg0(ndim4),
@@ -54,7 +54,7 @@ C
      &                THEtm(NDIM7, NDIM4), EX(NDIM6, NDIM4), 
      &                SPIn(NDIM6, NDIM4), SPInv(NDIM7, NDIM4),  
      &                RCOul(NDIM1), RCOul0(NDIM1), RCOul1(NDIM1),
-     &                RCOul2(NDIM1), RCOul3(NDIM1),
+     &                RCOul2(NDIM1), RCOul3(NDIM1), DEFr(NDIM7, NDIM4),
      &                ACOul(NDIM1), ECOul(NDIM1), BETa(NDIM1)
 
         COMMON /LIBSFT/ SR_hw, SR_amb0, SR_amg0, SR_gam0, SR_bet0,

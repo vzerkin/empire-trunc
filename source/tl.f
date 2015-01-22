@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4154 $
+Ccc   * $Rev: 4263 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-05 23:16:29 +0200 (So, 05 Okt 2014) $
+Ccc   * $Date: 2015-01-22 02:56:23 +0100 (Do, 22 Jän 2015) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -161,8 +161,8 @@ C
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical
       INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc 
-      INTEGER iwin, ipipe_move
-C     INTEGER iwin, ipipe_move, ipipe_copy
+C     INTEGER iwin, ipipe_move
+      INTEGER iwin, ipipe_move, ipipe_copy
 C
 C-----Sets CC optical model parameters according to RIPL
 C
@@ -1219,6 +1219,7 @@ C
                   D_nno(ilv) = SR_nno(n,ncalc)
 
                   D_Def(ilv,2) = DEFv(n,ncalc)
+                  D_Def(ilv,3) = DEFr(n,ncalc)
 
                   exit 
               endif 
@@ -1227,7 +1228,8 @@ C
        
 C        do k=1,NCOll(n)
 C           read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
-C    +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
+C    +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),
+C    +         DEFv(k,n),DEFr(k,n)
 C        enddo
 
 C
@@ -1259,6 +1261,10 @@ C-----------------swapping
                   dtmp = D_Def(i,2)
                   D_Def(i,2) = D_Def(j,2)
                   D_Def(j,2) = dtmp
+
+                  dtmp = D_Def(i,3)
+                  D_Def(i,3) = D_Def(j,3)
+                  D_Def(j,3) = dtmp
 
                   itmp = IPH(i)
                   IPH(i) = IPH(j)
@@ -1351,31 +1357,36 @@ C           first run with default TARGET_COLL.DAT
            WRITE (32,*)
            WRITE (96,*)
            READ (97,*) 
-           WRITE (8 ,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
-           WRITE (32,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
-           WRITE (96,*)' N   E[MeV]  J   pi 2*K Nc Nb  Dyn.Def.'
+           WRITE (8 ,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
+           WRITE (32,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
+           WRITE (96,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
 
            DO k = 1, ND_nlv
 
              READ (97,'(A80)',END=1001,ERR=1001) ch_iuf        
 
              IF (ICOllev(k).GE.LEVcc .and. D_Def(k,2).eq.0) 
-     &          D_Def(k,2) = 0.005
+     &          D_Def(k,2) = 0.005d0
+
+             IF (ICOllev(k).GE.LEVcc .and. k.gt.1) D_Def(k,3) = 0.d0
 
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
 
              WRITE (8,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
 
              WRITE (96,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
 
            ENDDO
 
@@ -1393,8 +1404,8 @@ C           first run with default TARGET_COLL.DAT
          CLOSE (97)
 C        PAUSE 'Joining of soft-rigid rotor COLL finished'
 
-C        iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
-         iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
+         iwin = ipipe_copy('COLL.DAT','TARGET_COLL.DAT')
+C        iwin = ipipe_move('COLL.DAT','TARGET_COLL.DAT')
 C
 C--------JOIN finished
 C
@@ -1914,7 +1925,8 @@ C
 
             do k=1,NCOll(n)
               read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
-     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
+     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),
+     +         DEFv(k,n),DEFr(k,n)
             enddo
 
          ENDDO
@@ -2030,7 +2042,8 @@ C
 
             do k=1,NCOll(n)
               read(ki,*) EXV(k,n), SPInv(k,n), IPArv(k,n),
-     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),DEFv(k,n)
+     +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),
+     +         DEFv(k,n),DEFr(k,n)
             enddo
          ENDDO
       ENDIF
@@ -5293,9 +5306,10 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab,
-     &                 xmas_nejc, xmas_nnuc, xratio
+     &                 xmas_nejc, xmas_nnuc, xratio, 
+     &                 CAVRss,CARRss,CAARss,CARDss,CAACss
 
-      INTEGER ikey, ip,  j, nd_cons, nd_nlvop
+      INTEGER ikey, ip,  j, nd_cons, nd_nlvop, iaref
 
       CHARACTER*132 ctmp
       INTEGER iwin, ipipe_move, ipipe
@@ -5574,9 +5588,9 @@ C   3 FORMAT(E12.7,5I2,E12.7)
               IF(ICOllev(k).GT.LEVcc) CYCLE
               iparit = -1
               if(D_Lvp(k).gt.0.d0) iparit = +1
-              write(1,'(E12.5,5I2,E12.5)') 
+              write(1,'(E12.5,5I2,2E12.5)') 
      +          D_Elv(k), nint(2*D_Xjlv(k)), iparit,
-     +          IPH(k), D_Klv(k), D_Llv(k), D_Def(k,2)
+     +          IPH(k), D_Klv(k), D_Llv(k), D_Def(k,2), D_Def(k,3)
          ! D_nno(k) is always zero in the rigid rotor model      
             enddo
           endif
@@ -5608,12 +5622,38 @@ C
 C     if(imodel.eq.3 .or. (idr.ne.0 .and. imodel.eq.1) .or.
 C    +   imodel.eq.4 ) then 
 
+      CAVRss  = 0.d0
+      CARRss  = 0.d0
+      CARDss  = 0.d0
+      CAARss  = 0.d0
+      CAACss  = 0.d0
+
+      iaref = 0
+      IF(pot(1,1,23).gt.0 .and. NINT(pot(1,1,24)).eq.1) 
+     >  iaref = NINT(pot(1,1,23))
+
+C     ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
+C     CAAC,ATI
+	IF(iaref.gt.0) THEN
+        CAVRss = pot(1,1,22) ! Real vol HF potential
+        CARRss = rco(1,1,3)  ! Real vol radius
+        CAARss = aco(1,1,7)  ! Real vol diffuseness
+        CARDss = rco(4,1,3)  ! Real sur radius
+        CAACss = aco(2,1,7)  ! Imag vol diffuseness
+      ENDIF 
+C     dtmp = ATIS(IIIS)-ATIS(1)
+C     VRLA=VRG+CAVR*dtmp
+C     RR=(RRG+CARR*dtmp)*ASQ
+C     AR0=ARG+CAAR*dtmp
+C     RD=(RDG+CARD*dtmp)*ASQ
+C     AC0=ACG+CAAC*dtmp
+
       write(1,'(6g12.5)')
 C               Vr0                         Vr1       
      +    pot(1,1,14)+pot(1,1,15)*iatar, -pot(1,1,3)-pot(1,1,4)*iatar, 
 C               Vr2                         Vr3      
      +    pot(1,1,5) +pot(1,1,6) *iatar, -pot(1,1,7), 
-C          VRLA         ALAVR  
+C          VRLA         ALAVR     
      +    pot(1,1,16), pot(1,1,17)
 
       write(1,'(6g12.5)')  0.d0, 0.d0, 0.d0, 
@@ -5632,8 +5672,8 @@ C               Vso                        Lso
 C                 Wso        Bso
      +     pot(6,1,1), pot(6,1,3)
          
-C                                                   nv
-      write(1,'(6g12.5)')  RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
+C                                                  nv
+      write(1,'(6g12.5)') RVOm(Nejc,Nnuc), 0.d0, 0.d0, 
      &                           pot(2,1,13), AVOm (Nejc,Nnuc), 0.d0    
       write(1,'(6g12.5)') RWOm(Nejc,Nnuc) ,   AWOm (Nejc,Nnuc), 0.d0,
      &                    RWOmv(Nejc,Nnuc),   AWOmv(Nejc,Nnuc), 0.d0          
@@ -5648,7 +5688,7 @@ C                                                   nv
       write(1,'(6g12.5)')  rc, 0.d0, 0.d0, ac,Ccoul, 1.d0                      
       write(1,'(6g12.5)')
 C                 Cviso          Cwiso                      Ea
-     +    abs(pot(1,1,20)),abs(pot(4,1,8)), 0.d0, pot(2,1,21)
+     +    abs(pot(1,1,20)),abs(pot(4,1,8)), 0.d0, pot(2,1,21),0.d0,0.d0 
 
       AlphaV = pot(2,1,22)
       if(pot(2,1,21).ne.0.d0 .and. AlphaV.eq.0.d0) AlphaV=1.65d0
@@ -5656,11 +5696,19 @@ C                 Cviso          Cwiso                      Ea
 C     This line is new for OPTMAN v.10 (from March 2008)
 
 C     Modified for OPTMAN v.12 
-      write(1,'(6g12.5)') AlphaV, 0.d0, 0.d0, 0.d0, 0.d0, 0.d0
-
+C    *               ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
+      write(1,'(6g12.5)') AlphaV, 0.d0, CAVRss, CARRss, CAARss, CARDss
 
 C     This line is new for OPTMAN v.12 (from November 2011)
-      write(1,'(6g12.5)') 0.d0, A(Nnuc)
+C    *               CAAC,ATI
+      write(1,'(6g12.5)') CAACss, dble(iaref)
+C
+C     dtmp = ATIS(IIIS)-ATIS(1)
+C     VRLA=VRG+CAVR*dtmp
+C     RR=(RRG+CARR*dtmp)*ASQ
+C     RD=(RDG+CARD*dtmp)*ASQ
+C     AR0=ARG+CAAR*dtmp
+C     AC0=ACG+CAAC*dtmp
 
       if(meham.eq.1 .or. imodel.eq.4 ) ! rigid rotor
      +  write(1,'(6g12.5)') (D_Def(1,k),k = 2,IDEfcc,2) 
@@ -5860,7 +5908,7 @@ C
       real*8 DWS,DWV,DWVnonl,DWVso,DerDWV,DerDWS,dtmp,dtmp1
       real*8 AHF,Visov,WVisov,WSisov,AlphaV
 
-      integer n
+      integer n, iaref
 
       real*8 b(6,NDIM1,15), dwmin, dwplus, dwsm, dwsp, elf,
      &     encoul2, pi, t12der, t1der, t1m, t1p, t2der, t2m, t2p, vc
@@ -5941,6 +5989,10 @@ c
       if(pot(i,j,18).ne.0.) Ef=pot(i,j,18) + pot(i,j,19)*atar
 
       elf = el - Ef - VCshift
+
+	iaref = 0
+C     Reference nucleus defined 
+      if (pot(i,j,24).eq.1. .and. pot(i,j,23).gt.0.) iaref = pot(i,j,23) 
 c
 c     Calculate radius and diffuseness parameters
       if(rco(i,j,13).eq.0.) then
@@ -5961,11 +6013,17 @@ C     RCN, 09/2004, to handle new extension to the OMP RIPL format
      *           ( elf**nn + ( rco(i,j,5) + rco(i,j,6)*atar )**nn ) )
       endif
 
+C     Dependence calculated inside OPTMAN 
+	if(iaref.gt.0) rlib(i)=abs(rco(i,j,1))
+
       alib(i)=abs(aco(i,j,1)) + aco(i,j,2)*el + aco(i,j,3)*eta
      *        + aco(i,j,4)/atar + aco(i,j,5)/sqrt(atar)
      *        + aco(i,j,6)*atar**(2./3.) + aco(i,j,7)*atar
      *        + aco(i,j,8)*atar**2 + aco(i,j,9)*atar**3
      *        + aco(i,j,10)*atar**(1./3.) + aco(i,j,11)*atar**(-1./3.)
+
+C     Dependence calculated inside OPTMAN 
+	if(iaref.gt.0) alib(i)=abs(aco(i,j,1))
 c
       IF (i.eq.2 .and. idr.ge.2) THEN
         IF( ABS(rlib(1)-rlib(2)).gt.0.001 ) IDRs = 1
