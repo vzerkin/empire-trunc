@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4263 $
+Ccc   * $Rev: 4264 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-01-22 02:56:23 +0100 (Do, 22 Jän 2015) $
+Ccc   * $Date: 2015-01-28 18:52:57 +0100 (Mi, 28 Jän 2015) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1373,20 +1373,23 @@ C           first run with default TARGET_COLL.DAT
 
              IF (ICOllev(k).GE.LEVcc .and. k.gt.1) D_Def(k,3) = 0.d0
 
+             dtmp = 1.d0
+             IF (k.gt.1) dtmp = D_Def(k,3)
+
              IF (ICOllev(k).LT.LEVcc) WRITE (32,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),dtmp
 
              WRITE (8,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),dtmp
 
              WRITE (96,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),D_Def(k,3)
+     &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),dtmp
 
            ENDDO
 
@@ -5586,11 +5589,14 @@ C    *     NUMB(I),BETB(I),I=1,NUR)
 C   3 FORMAT(E12.7,5I2,E12.7)
             do k=1,ND_nlv
               IF(ICOllev(k).GT.LEVcc) CYCLE
+	        
+			dtmp = 1.d0
+              if (k.gt.1) dtmp = D_Def(k,3)
               iparit = -1
               if(D_Lvp(k).gt.0.d0) iparit = +1
               write(1,'(E12.5,5I2,2E12.5)') 
      +          D_Elv(k), nint(2*D_Xjlv(k)), iparit,
-     +          IPH(k), D_Klv(k), D_Llv(k), D_Def(k,2), D_Def(k,3)
+     +          IPH(k), D_Klv(k), D_Llv(k), D_Def(k,2), dtmp
          ! D_nno(k) is always zero in the rigid rotor model      
             enddo
           endif
@@ -5632,13 +5638,19 @@ C    +   imodel.eq.4 ) then
       IF(pot(1,1,23).gt.0 .and. NINT(pot(1,1,24)).eq.1) 
      >  iaref = NINT(pot(1,1,23))
 
+      IF(pot(2,1,23).gt.0 .and. NINT(pot(2,1,24)).eq.1) 
+     >  iaref = NINT(pot(2,1,23))
+
+      IF(pot(4,1,23).gt.0 .and. NINT(pot(4,1,24)).eq.1) 
+     >  iaref = NINT(pot(4,1,23))
+
 C     ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
 C     CAAC,ATI
 	IF(iaref.gt.0) THEN
         CAVRss = pot(1,1,22) ! Real vol HF potential
-        CARRss = rco(1,1,3)  ! Real vol radius
+        CARRss = rco(1,1,7)  ! Real vol radius
         CAARss = aco(1,1,7)  ! Real vol diffuseness
-        CARDss = rco(4,1,3)  ! Real sur radius
+        CARDss = rco(4,1,7)  ! Real sur radius
         CAACss = aco(2,1,7)  ! Imag vol diffuseness
       ENDIF 
 C     dtmp = ATIS(IIIS)-ATIS(1)
@@ -5992,7 +6004,8 @@ c
 
 	iaref = 0
 C     Reference nucleus defined 
-      if (pot(i,j,24).eq.1. .and. pot(i,j,23).gt.0.) iaref = pot(i,j,23) 
+      if (NINT(pot(i,j,24)).eq.1 .and. pot(i,j,23).gt.0.) 
+     *  iaref = pot(i,j,23) 
 c
 c     Calculate radius and diffuseness parameters
       if(rco(i,j,13).eq.0.) then
@@ -6014,7 +6027,7 @@ C     RCN, 09/2004, to handle new extension to the OMP RIPL format
       endif
 
 C     Dependence calculated inside OPTMAN 
-	if(iaref.gt.0) rlib(i)=abs(rco(i,j,1))
+	if(iaref.gt.0 .and. rco(i,j,13).eq.0.) rlib(i) =  rco(i,j,1)
 
       alib(i)=abs(aco(i,j,1)) + aco(i,j,2)*el + aco(i,j,3)*eta
      *        + aco(i,j,4)/atar + aco(i,j,5)/sqrt(atar)
@@ -6023,7 +6036,7 @@ C     Dependence calculated inside OPTMAN
      *        + aco(i,j,10)*atar**(1./3.) + aco(i,j,11)*atar**(-1./3.)
 
 C     Dependence calculated inside OPTMAN 
-	if(iaref.gt.0) alib(i)=abs(aco(i,j,1))
+      if(iaref.gt.0) alib(i) =  aco(i,j,1) 
 c
       IF (i.eq.2 .and. idr.ge.2) THEN
         IF( ABS(rlib(1)-rlib(2)).gt.0.001 ) IDRs = 1
