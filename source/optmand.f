@@ -7395,7 +7395,8 @@ C     *******************************************************
       TETA=TET(M)*3.1415927D0/180.D0
       COS_TETA=DCOS(TETA)
       SIN_TETA=DSIN(TETA)
-      COT_TETA=DCOTAN(TETA)
+      COT_TETA=COS_TETA/SIN_TETA
+C     COT_TETA=DCOTAN(TETA)
       PLM_DATA(L+1,L+1,M)=C*(-1.D0*SIN_TETA)**L !P L L
       PLM_DATA(L+1,L,M)=PLM_DATA(L+1,L+1,M)*(-2.D0*COT_TETA)*L/
      *                  DSQRT(2.D0*L) !P L L-1
@@ -7407,7 +7408,7 @@ C     *******************************************************
 
   637 CONTINUE !ANGULAR LOOP
       PLM_DATA(L+1,1:L+1,:)=PLM_DATA(L+1,1:L+1,:)*DSQRT(L+0.5D0)
-      IFLAG=1.
+      IFLAG=1
       DO 635 LM=0,L
       PLM_DATA(L+1,LM+1,:)=PLM_DATA(L+1,LM+1,:)*IFLAG
       IFLAG=-IFLAG
@@ -7485,7 +7486,7 @@ C     *******************************************************
       IC=JO(1)
       !-------------calculate f_c(Coulomb amplitude)-------------
       DO 627 M=1,MTET 
-      TETA=TET(M)*3.1415927/180
+      TETA=TET(M)*3.1415927D0/180.d0
       ALST2=DLOG(DSIN(TETA/2.D0))
       ARGC=2.D0*(COPH(1,1)-ETA*ALST2)
       temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DCOS(ARGC)
