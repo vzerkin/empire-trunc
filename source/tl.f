@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4269 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-01-30 17:32:00 +0100 (Fr, 30 Jän 2015) $
+Ccc   * $Rev: 4270 $
+Ccc   * $Author: dbrown $
+Ccc   * $Date: 2015-01-30 21:36:48 +0100 (Fr, 30 Jän 2015) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1383,7 +1383,7 @@ C          OVERWRITING Default collective levels (TARGET_COLL.DAT) for odd nucle
      &       ' WARNING: Collective level file overwritten, please rerun'
 	     WRITE(*,*) 
 	     PAUSE 
-     &       '  WARNING: Collective level file overwritten, please rerun'
+     &       ' WARNING: Collective level file overwritten, please rerun'
 	     STOP  
 	   endif ! if(lodd) then
 C
