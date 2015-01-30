@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4264 $
+Ccc   * $Rev: 4269 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-01-28 18:52:57 +0100 (Mi, 28 Jän 2015) $
+Ccc   * $Date: 2015-01-30 17:32:00 +0100 (Fr, 30 Jän 2015) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -159,8 +159,8 @@ C
       INTEGER ilv, itmp, lvpr, ndbrlin, nbr	 
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
-      LOGICAL coll_defined, ldynamical
-      INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc 
+      LOGICAL coll_defined, ldynamical, lodd
+      INTEGER iainp, izinp, i, j, k, n, ncalc, nld_cc, ierror
 C     INTEGER iwin, ipipe_move
       INTEGER iwin, ipipe_move, ipipe_copy
 C
@@ -172,6 +172,10 @@ C
 
       iainp = A(Nnuc)
       izinp = Z(Nnuc)
+C     Odd target
+      lodd = .FALSE.
+      if ( mod(iainp-izinp,2).ne.0 .or. mod(izinp,2).ne.0 ) 
+     &      lodd = .TRUE.
 C
 C-----SETTING COLLECTIVE LEVELS for DIRECT CALCULATIONS
 C
@@ -1141,37 +1145,49 @@ C        WRITE (8,*)
            GOTO 300
          ENDIF
 
+         ierror = 0
          IF (ND_nlv .LT. NCOll(ncalc)) THEN
            WRITE (8,*)
      &       ' ERROR: Number of collective levels < RIPL CC '
-           WRITE (8,*)
+
+	     if(.NOT.lodd) then
+             WRITE (8,*)
      &       ' ERROR: Delete ECDWBA from input and the collective'
-           WRITE (8,*)
+             WRITE (8,*)
      &       ' ERROR: level file *-lev.col, and rerun'
-           STOP 'ERROR: see the long output (*.lst)'
+             STOP 'ERROR: see the long output (*.lst)'
+           else
+             ierror = 1
+           endif
          ENDIF
 
 C--------Setting EMPIRE global variables
-         nld_cc = 1
-         DO k = 2, ND_nlv
-            IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
-         ENDDO
+         if(ierror.eq.0) then
 
-         IF (nld_cc.NE.NCOll(ncalc)) THEN
-            WRITE (8,*) 
+           nld_cc = 1
+           DO k = 2, ND_nlv
+             IF (ICOllev(k).LT.LEVcc) nld_cc = nld_cc + 1
+           ENDDO
+
+           IF (nld_cc.NE.NCOll(ncalc)) THEN
+             WRITE (8,*) 
      &  ' WARNING: Default number of coupled levels ', nld_cc
-            WRITE (8,*) 
+             WRITE (8,*) 
      &  ' WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
-            WRITE (8,*) ' WARNING: RIPL number of coupled channels used'
-         ENDIF
+             WRITE (8,*)' WARNING: RIPL number of coupled channels used'
+           ENDIF
+
+         endif
 C        WRITE (8,*) 
 C
 C        Rigid-soft rotor model
 C
 C        Correcting CC energies of the OMP collective levels EXV 
 C
-         OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1061)
-         DO n=2,NCOll(ncalc)
+         if(.NOT.lodd .or. ierror.eq.0) then
+
+          OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=1061)
+          DO n=2,NCOll(ncalc)
             REWIND(32)
             READ (32,'(A80)',END=1061,ERR=1061) ch_iuf
             DO ilv = 1, NLV(nnuc)
@@ -1188,8 +1204,54 @@ C
                    exit 
               endif 
             ENDDO
+          ENDDO
+ 1061     CLOSE(32)  
+
+         else
+
+          nld_cc=0
+
+          LMAxcc = LMAx(ncalc)
+          IDEfcc = IDEf(ncalc)
+          D_Def(1,2) = DDEf(ncalc,2)
+          D_Def(1,4) = DDEf(ncalc,4)
+
+          OPEN (32, FILE = 'TARGET.LEV',STATUS = 'UNKNOWN',ERR=10611)
+          DO n=1,NCOll(ncalc)
+            REWIND(32)
+            READ (32,'(A80)',END=10611,ERR=10611) ch_iuf
+            DO ilv = 1, NLV(nnuc)
+              READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
+     &              ,END=1061,ERR=1061) 
+     &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
+              DO nbr = 1, ndbrlin
+                READ (32,'(A1)',END=1061,ERR=1061) dum
+              ENDDO
+              if( abs(elvr-EXV(n,ncalc)).le.0.001    .and. 
+     &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
+     &           iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
+                   EXV(n,ncalc) = elvr
+                   nld_cc = nld_cc + 1
+	             ICOllev(nld_cc) = ilv
+                   D_Elv(nld_cc) = elvr
+                   D_Xjlv(nld_cc)= xjlvr
+                   D_Lvp(nld_cc) = lvpr
+                   exit 
+              endif 
+            ENDDO
          ENDDO
- 1061    CLOSE(32)  
+	   ND_nlv = nld_cc 
+         IF (nld_cc.NE.NCOll(ncalc)) THEN
+            WRITE (8,*) 
+     &  ' WARNING: Default number of coupled levels ', nld_cc
+            WRITE (8,*) 
+     &  ' WARNING: is not equal ', NCOll(ncalc),' defined in RIPL OMP'
+            WRITE (8,*) 
+     &  ' WARNING: RIPL number of coupled channels used for ODD nucleus'
+         ENDIF
+10611    CLOSE(32)  
+
+        endif	    
 C
 C        Correcting Default Collective Levels using 
 C           corrected CC energies from the RIPL OMP
@@ -1199,14 +1261,19 @@ C
          D_Llv(1) = SR_nng(1,ncalc)
          D_nno(1) = SR_nno(1,ncalc)
 
-         nld_cc = 1
+         if(lodd .and. ierror.eq.1) then
+           D_Def(1,2) = DEFv(1,ncalc)
+           D_Def(1,3) = DEFr(1,ncalc)
+         endif
+
+         if(.NOT.lodd .or. ierror.eq.0) nld_cc = 1
          DO n=2,NCOll(ncalc)
            DO ilv=2,ND_nlv
               if( abs(D_Elv(ilv)-EXV(n,ncalc)).le.0.001  .and. 
      &          abs(D_Xjlv(ilv)-SPInv(n,ncalc)).le.0.005 .and.
      &          iabs(NINT(D_Lvp(ilv))-IPArv(n,ncalc)).le.0.005 ) then
 
-                  nld_cc = nld_cc + 1
+                  if(.NOT.lodd .or. ierror.eq.0) nld_cc = nld_cc + 1
 
                   IF (ICOllev(ilv).GT.LEVcc) 
      &              ICOllev(ilv) = ICOllev(ilv) - LEVcc
@@ -1225,13 +1292,115 @@ C
               endif 
             ENDDO
          ENDDO
-       
+C
+         if(lodd  .and. ierror.eq.1) then
+C          OVERWRITING Default collective levels (TARGET_COLL.DAT) for odd nuclei 
+           OPEN (UNIT = 97,FILE = 'TARGET_COLL.DAT',STATUS = 'UNKNOWN')
+           WRITE (8,*)
+           WRITE (8,*)
+     &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
+           WRITE (8,*)
+     &          ' N <',LEVcc,' for coupled levels in CC calculation'
+           WRITE ( 8,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+
+           WRITE (97,*)
+     &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
+           WRITE (97,*)
+     &          ' N <',LEVcc,' for coupled levels in CC calculation'
+           WRITE (97,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+
+           WRITE (12,*)
+     &      'Collective levels from RIPL CC OMP, rigid+soft rotor model'
+           WRITE (12,*)
+     &          ' N <',LEVcc,' for coupled levels in CC calculation'
+           WRITE (12,'(1x,i3,1x,i3,1x,a46)') izinp, iainp,
+     &      ' nucleus is treated as dynamically deformed'
+
+           WRITE (8,*)
+           WRITE (8,*) '   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+           WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv,
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           WRITE (8,*)
+           WRITE (8,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
+
+           WRITE (97,*)
+           WRITE (97,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+           WRITE (97,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           WRITE (97,*)
+           WRITE (97,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
+
+           WRITE (12,*)
+           WRITE (12,*)'   Ncoll  Lmax IDef  Kgs  (Def(1,j),j=2,IDef,2)'
+           WRITE (12,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
+     &                LMAx(ncalc), IDEf(ncalc), BANdk(ncalc),
+     &                (DDEf(ncalc,k),k = 2,IDEf(ncalc),2)
+           WRITE (12,*)
+           WRITE (12,*)
+     &       ' N   E[MeV]  J   pi 2*K Nc Nb   Dyn.Def.   BandCoup.'
+
+           DO i = 1, ND_nlv
+             dtmp = 1.d0
+             IF (i.gt.1) dtmp = D_Def(i,3)
+             IF (ICOllev(i).LE.NLV(nnuc)) then
+               WRITE (97,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+               WRITE (8,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+               WRITE (12,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+             ELSE
+               WRITE (97,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x,A5))')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+               WRITE (8,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+               WRITE (12,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+             ENDIF
+           ENDDO
+           WRITE(12,*) ' '
+           CLOSE (97)
+	     WRITE(8,*) 
+	     WRITE(8,*) 
+     &       ' WARNING: Collective level file overwritten, please rerun'
+	     WRITE(*,*) 
+	     PAUSE 
+     &       '  WARNING: Collective level file overwritten, please rerun'
+	     STOP  
+	   endif ! if(lodd) then
+C
+C        DO k = 1, ND_nlv
+C           dtmp = 1.d0
+C           IF (k.gt.1) dtmp = D_Def(k,3)
+C           WRITE (*,
+C    &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+C    &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
+C    &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),dtmp
+C        ENDDO
+C
 C        do k=1,NCOll(n)
 C           read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
 C    +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),
 C    +         DEFv(k,n),DEFr(k,n)
 C        enddo
-
 C
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
@@ -2529,7 +2698,7 @@ C
 C--------------Transmission coefficient matrix for incident channel
 C--------------is calculated (DIRECT = 2 (CCM)) using ECIS code.
 C--------------Only coupled levels are considered
-            ELSEIF (DEFormed) THEN
+            ELSEIF (DEFormed .AND. (.not.SOFT)) THEN
 C--------------CC rotational calculation (ECIS)
                CALL ECIS_CCVIBROT(Nejc,Nnuc,ener,.TRUE.)
                CALL ECIS2EMPIRE_TR(Nejc,Nnuc,i,.FALSE.,Maxl,Ttll,Ttllj)
