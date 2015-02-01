@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4270 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2015-01-30 21:36:48 +0100 (Fr, 30 Jän 2015) $
+Ccc   * $Rev: 4274 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-02-01 23:30:12 +0100 (So, 01 Feb 2015) $
 
       SUBROUTINE HITL(Stl)
 Ccc
@@ -1352,55 +1352,40 @@ C          OVERWRITING Default collective levels (TARGET_COLL.DAT) for odd nucle
                WRITE (97,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp
                WRITE (8,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp
                WRITE (12,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp
              ELSE
                WRITE (97,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x,A5))')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp,' cont'
                WRITE (8,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp,' cont'
                WRITE (12,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
      &           ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &           D_Llv(i), D_Klv(i), D_Def(i,2),dtmp,' cont'
+     &           D_Klv(i), D_Llv(i), D_Def(i,2),dtmp,' cont'
              ENDIF
            ENDDO
            WRITE(12,*) ' '
            CLOSE (97)
 	     WRITE(8,*) 
 	     WRITE(8,*) 
-     &       ' WARNING: Collective level file overwritten, please rerun'
+     &      ' WARNING: Collective level file overwritten, please rerun'
 	     WRITE(*,*) 
 	     PAUSE 
-     &       ' WARNING: Collective level file overwritten, please rerun'
+     &      '  WARNING: Collective level file overwritten, please rerun'
 	     STOP  
 	   endif ! if(lodd) then
-C
-C        DO k = 1, ND_nlv
-C           dtmp = 1.d0
-C           IF (k.gt.1) dtmp = D_Def(k,3)
-C           WRITE (*,
-C    &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
-C    &             ICOllev(k), D_Elv(k), D_Xjlv(k), D_Lvp(k),
-C    &             IPH(k),D_Klv(k),D_Llv(k),D_Def(k,2),dtmp
-C        ENDDO
-C
-C        do k=1,NCOll(n)
-C           read(ko,*) EXV(k,n),SPInv(k,n),IPArv(k,n),
-C    +         SR_ntu(k,n),SR_nnb(k,n),SR_nng(k,n),SR_nno(k,n),
-C    +         DEFv(k,n),DEFr(k,n)
-C        enddo
 C
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv

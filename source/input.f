@@ -1,6 +1,6 @@
-!cc   * $Rev: 4262 $
+!cc   * $Rev: 4274 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-01-20 17:52:25 +0100 (Di, 20 Jän 2015) $
+!cc   * $Date: 2015-02-01 23:30:12 +0100 (So, 01 Feb 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -4154,12 +4154,8 @@ C
 C           EcDWBA meaningless if Collective level file exists
             INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
             IF(fexist) then
-              WRITE(8,*) 
-     &        ' WARNING: Collective levels for DWBA calculations  '
-              WRITE(8,*) 
-     &        ' WARNING:  can not be automatically selected if the'
-              WRITE(8,*) 
-     &        ' WARNING:  collective level file *-lev.col exists !'
+              WRITE (8,*) 
+     &        'Collective level file *-lev.col exists: EcDWBA not used'
               goto 100
             ENDIF
             ECUtcoll = val
@@ -10200,7 +10196,9 @@ C
              WRITE (12,'(3x,3I5)') ND_nlv
 
            else
-
+C
+C            rigid-soft optical model
+C
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
      &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
@@ -10235,59 +10233,125 @@ C----------'collective levels:'
            WRITE (12,'(a80)') comment
 C----------Reading ground state information (to avoid overwriting deformation)
 
-           READ(32,
+           if(.not.DYNam) then
+C
+C            soft-rotor optical model
+C
+             READ(32,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
 
-           WRITE(8,
+             WRITE(8,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
-           WRITE(12,
+             WRITE(12,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
-C          mintsp = mod(NINT(2*D_Xjlv(1)),2)
+           else
+C
+C            rigid-soft optical model
+C
+             READ(32,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Klv(1), D_Llv(1), ftmp, dtmp
+
+             WRITE(8,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Klv(1), D_Llv(1), ftmp, dtmp
+             WRITE(12,
+     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
+     &           D_Klv(1), D_Llv(1), ftmp, dtmp
+
+           endif
+
            igreson = 0
            DO i = 2, ND_nlv
-            READ (32,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
+
+           if(.not.DYNam) then
+C
+C             soft-rotor optical model
+C
+              READ (32,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), ftmp, D_nno(i), ctmp5  
-C           For odd nuclides, collective states in continuum have
-C           different spin than the ground state
-C           if ( mod(NINT(2*D_Xjlv(i)),2).ne.mintsp) ctmp5 = ' cont'
+     &          D_Klv(i), D_Llv(i), ftmp, D_nno(i)  
 
-            if (D_Elv(i) .gt. ELV( NLV(0),0)) then
+              if (D_Elv(i) .gt. ELV( NLV(0),0)) then
                 ctmp5 = ' cont'
-            else
+              else
                 ctmp5 = '     '
-            endif
+              endif
 C
-C           For covariance calculation of dynamical deformation
-            D_Def(i,2) = ftmp*DEFdyn
+C             For covariance calculation of dynamical deformation
+              D_Def(i,2) = ftmp*DEFdyn
 C
-C           Giant Resonances flag: negative deformation 
-            IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
-              IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-              IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-              IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-              igreson = 1
-            ENDIF
+C             Giant Resonances flag: negative deformation 
+              IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
+                IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+                IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+                IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+                igreson = 1
+              ENDIF
 
-            WRITE (8,
+              WRITE (8,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
 
-            itmp1 = ICOllev(i)
-            if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
+              itmp1 = ICOllev(i)
+              if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
-            WRITE (12,
+              WRITE (12,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), abs(D_Def(i,2)), D_nno(i), ctmp5
+     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
+
+            else
+C
+C            rigid-soft optical model
+C
+              READ (32,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Klv(i), D_Llv(i), ftmp, D_Def(i,3)
+
+              if (D_Elv(i) .gt. ELV( NLV(0),0)) then
+                ctmp5 = ' cont'
+              else
+                ctmp5 = '     '
+              endif
+C
+C             For covariance calculation of dynamical deformation
+              D_Def(i,2) = ftmp*DEFdyn
+C
+C             Giant Resonances flag: negative deformation 
+              IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
+                IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
+                IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
+                IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
+                igreson = 1
+              ENDIF
+
+              WRITE (8,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
+
+              itmp1 = ICOllev(i)
+              if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
+
+              WRITE (12,
+     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
+     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
+
+            endif
 C
 C           CHECKING EWSR (only for neutrons)
 C
@@ -10423,13 +10487,14 @@ C           Giant Resonances flag: negative deformation
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
             WRITE (12,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), abs(D_Def(i,2)), ctmp5
+     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
 C
 C           CHECKING EWSR (only for neutrons)
 C
