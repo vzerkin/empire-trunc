@@ -1,14 +1,14 @@
-!cc   * $Rev: 4254 $
-!cc   * $Author: bcarlson $
-!cc   * $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
+!cc   * $Rev: 4273 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-02-01 17:10:15 +0100 (So, 01 Feb 2015) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
-     & NDNUC= 200                                                       &
+     & NDNUC= 100                                                       &
      &,NDEXCLUS= 20                                                     &
-     &,NDEX= 201                                                        &
-     &,NDLW= 110                                                        &
+     &,NDEX= 101                                                        &
+     &,NDLW= 55                                                         &
      &,LEVCC=30                                                         &
      &,NDLV=40                                                          &
      &,NDBR=40                                                          &
@@ -40,6 +40,7 @@
      &,NDEX_D=NDEX                                                      &
      &,NDEJCD=NDEJC                                                     &
      &,NLGRID=301                                                       & !Number of points in the HFB GDR RIPL files 
+
      &,NDVOM=7                                                          &
      &,NDWOM=7                                                          &
      &,NDVSO=7                                                          &
@@ -53,6 +54,7 @@
      &,NDROPM=7                                                         &
      &,NDGDRPM=10,NDGQRPM=8,NDGMRPM=8                                   &
      &,NDKNTR=3,NMAsse=9066                                             &
-     &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
+     &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=99                    &     
+!    &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
      &,NFtrans=30,NFMOD=3,NFisbarpnt=300                                &
      &,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
