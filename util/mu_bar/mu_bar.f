@@ -157,10 +157,16 @@ C*  LD  - Scratch array of distributions
   144 IF(NEE.GT.MXEN) THEN
         STOP 'MU_BAR ERROR - Insufficient MXRW for MXEN'
       END IF
+      JE=0
       DO I=1,NE
         IE=IE+1
+        JE=JE+1
+        IF(JE.GE.10000) THEN
+          PRINT *,' Done energies',IE
+          JE=0
+        END IF
 c...
-c...    print *,' begin energy',IE,' of Ltt',ltt2
+C...    print *,' begin energy',IE,' of Ltt',ltt2
 c...
         IF(LTT2.EQ.1) THEN
           NP =MCS
@@ -276,7 +282,7 @@ C...
 C*        -- Return to process the tabulated range
           CALL RDTAB2(LIN,DMY,DMY,L1,L2,NR,NE2,NBT,INR,IER)
 c...
-c...      print *,'Reading tabular range points',ne2
+C...      print *,'Reading tabular range points',ne2
 c...
           NE  =NE2
           NEE =NE1+NE2
@@ -351,11 +357,15 @@ C* Copy the source ENDF file up to the position for insertion
   220 MF0=MF
       CALL RDTEXT(LIN,MAT ,MF ,MT ,C66,IER)
       IF(MAT.EQ.MATH .AND.
-     &  ( (MF.EQ.3 .AND.  MT.GT.MTH) .OR.
+     &  ( (MF.EQ.3 .AND.  MT.GE.MTH) .OR.
      &    (MF.EQ.0 .AND. MF0.EQ.3  )  ) ) THEN
 C...
 C...    print *,'Insert before',mat,mf,mt
 c...
+C*      -- If MT 251 present, skip existing dat
+        DO WHILE(MT.EQ.251)
+          CALL RDTEXT(LIN,MAT ,MF ,MT ,C66,IER)
+        END DO
         GO TO 260
       END IF
 C*    -- Write the record to the output ENDF file
@@ -368,9 +378,10 @@ C* Insert the mu-bar data
       IF(MFH.NE.0) GO TO 260
       GO TO 210
 C* Copy the rest of the ENDF
-  280 CALL WRTEXT(LOU,MAT,MF,MT,NS,C66)
+  280 print *,'Copying to EOF'
+  282 CALL WRTEXT(LOU,MAT,MF,MT,NS,C66)
       CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
-      IF(IER.EQ.0) GO TO 280
+      IF(IER.EQ.0) GO TO 282
   290 CLOSE(UNIT=LIN)
       CLOSE(UNIT=LOU)
       CLOSE(UNIT=LTM)
@@ -544,7 +555,7 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
-      DOUBLE PRECISION RUFL,RR(6)
+      DIMENSION    RR(6)
       DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
