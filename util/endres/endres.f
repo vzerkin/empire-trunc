@@ -28,6 +28,7 @@ C-V  12/07 Allow filenames up to 80 characters long.
 C-V  13/03 Increase MXRW from 10 000 to 100 000 to process Fe-56 (JEFF)
 C-V  13/09 Increase tolerance for matching AWR from 1E-4(rel) to 1(abs)
 C-V  14/02 Unify common routines with EMPEND.
+C-V  14/12 Allow energy-dependent scattering radius.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -274,6 +275,17 @@ C* Process a resonance section
       CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       READ (CH66,891) EL,EH,LRU,LRF,NRO,NAPS
+C*    -- Copy energy-dependent scattering radius, if present
+      IF(NRO.EQ.1) THEN
+        CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+        CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+        READ (CH66(45:66),*) NR,NP
+        NN=(NP+2)/3 + (NR+2)/3
+        DO L=1,NN
+          CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+          CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+        END DO
+      END IF      
       IF(LRU.EQ.0) THEN
 C* Case: no resonance parameters
         ERL=ELE
