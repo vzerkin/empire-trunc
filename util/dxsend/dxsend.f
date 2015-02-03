@@ -24,6 +24,8 @@ C-V        - Fix retrieval of uncertainties from MF40.
 C-V  13/04 - Fix explicit printing of MT 5
 C-V        - Fix trivial error setting the error flag for gamma spectra
 C-V  14/02 Standardize some dimension statements.
+C-V  14/11 Reconstruct angle-dependent cross sections when the
+C-V        angular distributions are given in MF4 (from resonance param.)
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -877,6 +879,11 @@ C*         (if search by ZA, FINDMT reads 2 records)
         CALL RDHEAD(LEF,MAT,MFX,MTX,C1,C2,L1,L2,N1,N2,IER)
         IZAI=N1/10
       END IF
+C* If elastic, ejectile equals projectile
+      IF(MT0.EQ.2 .AND. ZAP0.LT.0) THEN
+        ZAP0=IZAI
+        ZAP =ZAP0
+      END IF
 C*
 C* Do not include particle multiplicities for cross sections
       IF(KEA.EQ.0 .AND. MT0/10000.NE.4) ZAP =-1
@@ -1637,7 +1644,7 @@ c...
       DIMENSION    AMU(100),PMU(100)
       DIMENSION    PLEG(MXLEG)
 C*
-      DATA PI/3.14159265/
+      DATA PI/3.141592654/
 C...
 C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
 C... 1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
@@ -1824,7 +1831,7 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-C...  print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+      print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -1908,6 +1915,10 @@ C*        -- Skip to the end of section
         IF(MT0/10000 .EQ. 4 .AND. MFJ.EQ.4) THEN
 C*        -- Prepare cross sections at fixed angle with MF4 given
           LTT1=L2
+          MT  =MT0-10000*(MT0/10000)
+c...
+          print *,'Read angular distributions for MT/LTT',MT,LTT1
+c...
           IF(LTT1.EQ.0) THEN
 C*          -- Distribution is isotropic - no action needed
             print *,'Distribution is isotropic - no action needed',LTT1
@@ -1946,6 +1957,7 @@ C*            -- Constants (Table 1, Appendix H, ENDF-102 manual)
               AA =DBLE(AWR)/DBLE(AWI)
               AAD=DBLE(APR)/DBLE(AWI)
             END IF
+C*          -- Loop over energies
             DO IE=1,NE
 C*            -- For each incident energy read the ang. distribution
               CALL RDTAB1(LEF,TEMP,EI2,LT,L2,NRP,NEP1,NBT(NM),INR(NM)
@@ -2022,13 +2034,50 @@ C*          --Interpolate cross sections on union grid to LAF
             CALL FITGRD(NEN,ENR,DXS,NP,RWO(LAA),RWO(LAF))
 C*          --Interpolate yields to union grid into DXS
             CALL FITGRD(NE,RWO(LXE),RWO(LXX),NP,RWO(LAA),DXS)
-C*          --Save energy union grid and multiply cross section
+C*          --Save energy union grid and multiply cross section with
 C*            the distribution * 2 (= Sig(mu,E)*4Pi)
             NEN=NP
             DO I=1,NEN
               ENR(I)=RWO(LAA-1+I)
               DXS(I)=DXS(I)*RWO(LAF-1+I) * 2
             END DO
+C*          -- Add Coulomb contribution for charged particles
+c...
+c...        print *,'izai,mt',izai,mt, acos(ain)*180/PI
+c...
+            IF(IZAI.GT.1000 .AND. MT.EQ.2) THEN
+              IF(IZAI.EQ.NINT(ZA)) THEN
+                LIDP=1
+                SPI =0
+                print *,'WARNING - spin for identical particles'
+     &                 ,' undefined - assume zero'
+              ELSE
+                LIDP=0
+                SPI=0
+              END IF
+c...
+c...          open(unit=85,file='SIGMD.cur',status='unknown')
+c...          write(85,*) 'Res.Coulomb'
+c...
+              QI  =0
+              DO I=1,NEN
+                EE=ENR(I)
+                CALL COULXS(ZA,ZAP0,AWR,AWI,SPI,QI,EE,AIN,LIDP
+     &                     ,COUL,TJAC)
+c...
+C...            PRINT *,'ZA,ZAP0,AWR,AWI,SPI,QI,EI2,AIN'
+C... &                 , ZA,ZAP0,AWR,AWI,SPI,QI,EI2,AIN
+C...            print *,EE,DXS(I),COUL,DXS(I)+COUL
+c...            write(85,'(f11.2,1p,e11.4)') EE/1000,COUL*1000
+c...
+c... Don'r really know the definition ???
+c...            print *,ee,dxs(i),acs,coul
+c...            DXS(I)=DXS(I)/(1-ACS)+COUL
+c...            DXS(I)=DXS(I)        +COUL
+                DXS(I)=DXS(I)/(4*PI) +COUL
+              END DO
+            END IF
+C*
             GO TO 900
           ELSE
             PRINT *,
@@ -2038,6 +2087,9 @@ C*            the distribution * 2 (= Sig(mu,E)*4Pi)
             GO TO 900    
           END IF
         END IF
+c...
+        print *,'Scaled by angular distribution'
+c...
 C* Error trapping when no data found in the ENDF file
         IF(MFJ.NE.6) THEN
           PRINT *,
@@ -2055,16 +2107,20 @@ C* LX  - First function
 C* LXE - Second argument
 C* LXX - Second function
 C* IPRC- Counter of successfully processed sections
-        KX =MRW/3
+        KX =MRW/5
+        LD =KX
         LE =1
-        LX0=LE+KX
-        LX =LX0+KX
-        LD =KX/2
-        LXE=LE+LD
-        LXX=LX+LD
+        LX =LE+KX
+        LX0=LX+KX
+        LXE=LX0+LD
+        LXX=LXE+LD
         IPRC=0
+        IF(NEN.GT.KX) STOP 'DXSEND ERROR - MRW limit exceeded'
+        KEN=MIN(KX,MEN)
         DO I=1,NEN
           RWO(LX0-1+I)=DXS(I)
+        END DO
+        DO I=1,MEN
           DXS(I)=0
         END DO
 C* Loop over particles
@@ -2084,7 +2140,8 @@ c...
 C*            --Particle not found - yield assumed zero
               NEN=0
               IER=1
-              PRINT *,'WARNING - Zero yield for MT',MT0, ' particle',IZAP0
+              PRINT *,'WARNING - Zero yield for MT',MT0
+     &               ,' particle',IZAP0
             END IF
             GO TO 900
           END IF
@@ -2134,6 +2191,7 @@ C* Interpolate yields to union grid into ENR (temporarily)
         CALL FITGRD(NP,RWO(LE),RWO(LX),NE2,RWO(LXE),ENR)
 C* Save energy union grid and multiply cross section by the yield
         NEN=NE2
+        IF(NEN.GT.MEN) STOP 'DXSEND ERROR - MEN limit exceeded'
         DO I=1,NEN
 C*        -- Add the product xs*yield into DXS
           DXS(I)=DXS(I)+ENR(I)*RWO(LXX-1+I)
@@ -2161,11 +2219,11 @@ C...
 C...      open(unit=81,file='SIGMT.cur',status='unknown')
 C...      open(unit=82,file='SIGMA.cur',status='unknown')
 C...      open(unit=83,file='SIGMB.cur',status='unknown')
-          open(unit=84,file='SIGMC.cur',status='unknown')
+c...      open(unit=84,file='SIGMC.cur',status='unknown')
 C...      write(81,*) 'Endtab'
 C...      write(82,*) 'Endtab interference'
 C...      write(83,*) 'Endtab scattering'
-          write(83,*) 'Endtab Coulomb'
+c...      write(84,*) 'Endtab Coulomb'
 C...
           DO IE=1,NE
 C*          -- Read the angular distribution
@@ -2175,6 +2233,9 @@ C*          -- Read the angular distribution
               STOP 'DXSEN1 ERROR - Reading Law 5 data in RDLIST'
             END IF
 C*          -- Coulomb scattering contribution
+C...        CALL COULXS(ZA,ZAP0,AWR,AWI,SPI,QI,EE,AIN,LIDP,COUL,TJAC)
+C... (the routine is available but not used because some constants
+C...  are also needed in subsequent calculations - more work is needed)
 C*          -- Neutron mass, projectile mass, charge and target charge
             INTR=1
             CALL PROMAS(INTR ,AWN)
@@ -2236,6 +2297,10 @@ C*          -- More constatns
               END IF
             RWO(LE-1+IE)=EE
             RWO(LX-1+IE)=SIGC
+c...
+c...        write(83,'(1p,2e11.4)') ee,sigc
+c...        write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
+c...
             IF     (LTP.EQ.1) THEN
 C*            -- Case: Nuclear amplitude expansion
               IF(LIDP.EQ.0) THEN
@@ -2278,7 +2343,6 @@ C...
 C...            write(81,'(f11.2,1p,e11.4)') EE/1000,RWO(LX-1+IE)*1000
 C...            write(82,'(f11.2,1p,e11.4)') EE/1000,-AAI*1000
 C...            write(83,'(f11.2,1p,e11.4)') EE/1000,AAS*1000
-C...            write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
 C...            PRINT *,EE/1000,RWO(LX-1+IE),AA,ARE,SRE,AIM,SIM
 C...            
               ELSE IF(LIDP.EQ.1) THEN
@@ -2327,12 +2391,25 @@ C...
 C...            write(81,'(f11.2,1p,e11.4)') EE/1000,RWO(LX-1+IE)*1000
 C...            write(82,'(f11.2,1p,e11.4)') EE/1000,-AAI*1000
 C...            write(83,'(f11.2,1p,e11.4)') EE/1000,AAS*1000
-C...            write(84,'(f11.2,1p,e11.4)') EE/1000,SIGC*1000
 C...            PRINT *,EE/1000,RWO(LX-1+IE),AA,ARE,SRE,AIM,SIM
 C...            
               ELSE
                 PRINT *,'Invalid LIDP in MF/MT/LTP/LIDP',MF,MT,LTP,LIDP
                 STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP/LIDP'
+              END IF
+            ELSE IF(LTP.EQ.2) THEN
+              IF(LIDP.EQ.0) THEN
+C...  This option has not been thouroughly tested!!!
+                CALL PLNLEG(ACM,PLEG,NL)
+                NL1=NL+1
+                SRE=0
+                DO L=1,NL1
+                  SRE=SRE+dble(RWO(LXX+2*L-1)*PLEG(L))*(2*L-1)/2
+                END DO
+                RWO(LX-1+IE)=RWO(LX-1+IE) + SRE/(1-ACM)
+              ELSE
+                PRINT *,'Reading Law 5 - unsupported LIDP/LTP',LIDP,LTP
+                STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP'
               END IF
             ELSE IF(LTP.GE.12 .AND. LTP.LE.15) THEN
 C*            -- Case: Tabulated distribution of Pni
@@ -2362,6 +2439,11 @@ C*               current energy
               RWO(LX-1+IE)=RWO(LX-1+IE)
      &                    +FINTXS(AIN,RWO(LXX),RWO(LX1),NC,INC,IER1)
      &                    *FINTXS(EE,ENR,DXS,NEN,INX,IER2)
+c...
+c...          xa=FINTXS(AIN,RWO(LXX),RWO(LX1),NC,INC,IER1)
+c...          xe=FINTXS(EE,ENR,DXS,NEN,INX,IER2)
+c...          write(83,'(1p,4e11.4)') ee,sigc,xe,xa
+c...
             ELSE
               PRINT *,'Reading Law 5 - unsupported LTP',LTP
               STOP 'DXSEND ERROR - MF6 LAW 5 unsupported LTP'
@@ -2486,8 +2568,8 @@ C* Find the energy/angle distribution data
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...      print *,'find1 mf,mt,ier',mat,mf,mt,ier
-c...      print *,'izap0',izap0
+C...      print *,'Find1 MF,MT,IER',mat,mf,mt,ier
+C...      print *,'izap0',izap0
 c...
 C* Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
@@ -3525,6 +3607,95 @@ C* Subtract electron mass and add ionisation energy defect
       END IF
       RETURN
       END
+      SUBROUTINE COULXS(ZA,ZAP,AWR,AWI,SPI,QI,EE,AIN,LIDP,COUL,TJAC)
+C-Title  : Subroutine COULXS
+C-Purpose: Calculate the Coulomb scattering cross section COUL
+C-Description:
+C-D Didfferential Coulomb scattering cross section in CM coordinate
+C-D system is calculated for incident particles with energy EE
+C-D scattered at a given angle. The formal parameters are:
+C-D  ZA    - Target ZA designation (real)
+C-D  ZAP   - Ejectile ZA designation (real)
+C-D  AWR   - Atomic weight ratio of the target
+C-D  AWI   - Atomic weight ratio of the projectile
+C-D  SPI   - Spin of the particle (for identical particles)
+C-D  QI    - Reaction Q-value [eV]
+C-D  EE    - Incident energy [eV]
+C-D  AIN   - Cosine of the scattering angle in the Lab system
+C-D  LIDP  - Flag (1=identical particles/0=otherwise)
+C-D  COUL  - Coulomb scattering cross section in the Lab system (barns)
+C-D  TJAC  - Jacobian of the CM-Lab transformation
+C-D
+C-Externals:
+C-E PROMAS - Mass of the particle defined by its ZA designation
+C-E ROOTSQ - Solution of a quadratic equation
+C*
+      DATA SMALL/1.E-5/
+C*    -- Neutron mass, projectile mass, charge and target charge
+      INTR=1
+      IZAP=NINT(ZAP)
+      CALL PROMAS(INTR ,AWN)
+      CALL PROMAS(IZAP ,AM1)
+      ZZI=IZAP/1000
+      ZZT=NINT(ZA)/1000
+C*    -- define constants (Table 1, Appendix H, ENDF-102 manual)
+      PCP=6.58211889E-16
+      RAL=137.03599976
+      AMUEV=9.31494013E8
+      CC=299792458
+C*    -- Calculate CM cosine of scattering (take the larger root)
+      APR=AM1/AWN
+      AA =AWR/AWI
+      AAD=APR/AWI
+      BET2=(1+(1+AA)*QI/(AA*EE))*AA*(AA+1-AAD)/AAD
+      BETA=SQRT(BET2)
+      CC2=BET2
+      CC1=2*BETA*(1-AIN*AIN)
+      CC0=1-AIN*AIN*(1+BET2)
+      CALL ROOTSQ(CC2,CC1,CC0,XX1,XX2,IER)
+      IF(IER.EQ.1 .AND. XX2.LT.1.E-5) THEN
+        IER=0
+        XX2=XX1
+      END IF
+      IF(IER.EQ.0 .AND.
+     &  (ABS(XX1).GT.1+SMALL .AND. ABS(XX2).GT.1+SMALL)) THEN
+          IER=1
+      END IF
+      IF(IER.NE.0) THEN
+        PRINT *,'AWR,APR,AM1,AWP,AWN',AWR,APR,AM1,AWI,AWN
+        PRINT *,'AA,AAD,BETA',AA,AAD,BETA
+        PRINT *,'AIN,AA,AAD,EIN,QI',AIN,AA,AAD,EE,QI
+        PRINT *,'CC2,CC1,CC0,IER,XX1,XX2',CC2,CC1,CC0,IER,XX1,XX2
+        STOP 'COULXS ERROR - Lab cosine imaginary'
+      END IF
+      IF(AIN.LT.0) THEN
+        ACM=XX1
+      ELSE
+        ACM=XX2
+      END IF
+      IF(ACM.LT.-1) ACM=-1
+      IF(ACM.GT. 1) ACM= 1
+C*    -- Jacobian of CM-Lab transformation d_omega/d_mu
+      TJAC=BET2*(BETA+ACM)/(BET2+1+2*BETA*ACM)**1.5
+C*    -- More constatns
+      AK =2*AMUEV/(PCP*CC*1D14)**2
+      AE =AMUEV/(2*RAL*RAL)
+      AKA=SQRT(AK*AM1*EE)*AA/(AA+1)
+      AET=ZZT*ZZI*SQRT(AE*AM1/EE)
+      IF(LIDP.EQ.0) THEN
+        COUL=AET*AET/(AKA*AKA*(1-ACM)**2)
+      ELSE
+        A0 =LOG((1+ACM)/(1-ACM))
+        A1 =COS(AET*A0)
+        A2 =A1* (-1)**NINT(2*SPI) /(2*SPI+1)
+        A3 =A2+ (1+ACM*ACM)/(1-ACM*ACM)
+        COUL=A3* 2 * (AET*AET/(AKA*AKA*(1-ACM*ACM)))
+      END IF
+c...
+c...  write(83,'(1p,2e11.4)') ee,sigc
+c...
+      RETURN
+      END
       SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
      &                 ,NP,EN,XS,DX,RWO,MXRW)
 C-Title  : Subroutine LSTSTD
@@ -4020,7 +4191,7 @@ C...
       FUNCTION SPMAXW(EE,EI,EU,THETA)
 C-Title  : Function SPMAXW
 C-Purpose: Calculate the Maxwellian fission spectrum value at energy EE
-      DATA PI/3.1415926/
+      DATA PI/3.141592654/
 C* Normalisation constant
       E0=(EI-EU)/THETA
       E1=SQRT(E0)
@@ -4042,7 +4213,7 @@ C* Spectrum
       FUNCTION SPWATT(EE,EI,EU,WA,WB)
 C-Title  : Function SPWATT
 C-Purpose: Calculate the Watt fission spectrum value at energy EE
-      DATA PI/3.1415926/
+      DATA PI/3.141592654/
 C* Upper limit of the final particle energy
       EPF=EI-EU
 C* Normalisation constant
