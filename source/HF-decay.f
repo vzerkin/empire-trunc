@@ -117,7 +117,7 @@ C
           dtmp = 0.d0
           DO il = 1, NLV(nnuc)
             dtmp = dtmp + CSDirlev(il,nejc)
-            disc_int(il,nejc) = CSDirlev(il,nejc)                  
+            disc_int(il,nejc) = CSDirlev(il,nejc)
           ENDDO
           IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
           WRITE (12,*)
@@ -1017,14 +1017,16 @@ C
 C-----Add compound elastic to shape elastic before everything falls
 C-----down on the ground state
 9876  IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0
-     &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
+C    &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
+     &                       .AND. CSDirlev(1,1).GT.0.) THEN
            WRITE (8,*)
            WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
            WRITE (8,*) ' Shape elastic cross section',
      &                     ELAred*ELAcs, ' mb'
 
 C----------CN contribution to elastic ddx
-           ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
+C          ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
+           ELCncs = CSDirlev(1,1)/4.d0/PI 
 
            if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
              CN_isotropic = .TRUE.
@@ -1046,8 +1048,9 @@ C----------CN contribution to elastic ddx
            ELSE
 
              WRITE (8,*) ' CN elastic cross section   ',
-     &                sngl(POPlv(LEVtarg,mt2)),' mb'
-
+C    &                sngl(POPlv(LEVtarg,mt2)),' mb'
+     &                sngl(4.d0*PI*ELCncs),' mb'
+	 
              IF(CN_isotropic) then   
 
                WRITE (8,*)
@@ -1090,9 +1093,9 @@ C	          write(*,*) 'NORM=',xs_norm
                 IF(DABS(xs_norm-1.d0).gt.1.d-4) then
 C                 WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
 C                 WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-                  WRITE(8,*)' ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-                  WRITE(8,*)' PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-                   WRITE(8,*) 
+                  WRITE(8,*)' EMPIRE CN ELCncs= ',4*PI*ELCncs
+                  WRITE(8,*)' PL_CN(0,LEVtarg)=',4*PI*PL_CN(0,LEVtarg)
+                  WRITE(8,*) 
      &       ' Renormalizing CN Ang.Dist. by ELCncs/PL_CN(0,LEVtarg)=',
      &       sngl(xs_norm)
                    WRITE(8,*) 
