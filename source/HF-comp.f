@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4258 $
+Ccc   * $Rev: 4276 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-12-17 09:26:32 +0100 (Mi, 17 Dez 2014) $
+Ccc   * $Date: 2015-02-03 19:03:29 +0100 (Di, 03 Feb 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -210,8 +210,7 @@ C
 C                  Normalizing calculated integrated XS ( from PL_CN() )
 C                  to the discrete level population (used for the isotropic calculation)
                    CSAlev(na,il,Nejc) = 
-C    >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-     >                     CSAlev(na,il,Nejc) + xs_cn                    
+     >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
                  ENDDO
                ELSE
                  DO na = 1, NDANG
