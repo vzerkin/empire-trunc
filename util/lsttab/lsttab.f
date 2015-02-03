@@ -51,6 +51,7 @@ C-V  14/06  Improve the normalisation of the fission spectra by
 C-V         interpolating the ratio to Maxwellian to a fine grid,
 C-V         restoring function values and then integrating.
 C-V  14/07  Restore printout of EXFOR number for fission spectra.
+C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -743,6 +744,9 @@ C*   E2TOL fractional tolerance on discrete level energy
 C*
       DATA PI/3.14159265/
 C*
+
+        
+
       RF0 ='                         '
       CHX0='         '
       IZAI=ZAI
@@ -759,7 +763,7 @@ C*
       IF(MT0/10000.EQ.4) THEN
         MTH=MT0-40000
       END IF
-      IF(MF0.EQ.10) LFS=NINT(ELV)
+      IF(MF0.EQ.10) LFS=NINT(PR0)
       IC4=0
       LAU=0
       NAU=0
