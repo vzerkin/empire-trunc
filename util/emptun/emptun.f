@@ -486,7 +486,7 @@ C* Read the calculated cross sections
      &              ,' [eV]  Points',NCX
       WRITE(LTT,901) ' '
       WRITE(LLS,901) ' Header      : '//TSTR//BLNK
-      WRITE(LLS,922) ' Energy range',ECX(1),ECX(NEG)
+      WRITE(LLS,922) ' Energy range',ECX(1),ECX(NCX)
      &              ,' [eV]  Points',NCX
       WRITE(LLS,901) ' '
 C*    -- Interpolate the calculated cross sections to the specified grid
@@ -623,7 +623,14 @@ C*
             XFUSM  = XTOTM - XSELM
 C*
             CALL TUNFAC(LTT,EE,FUSR(I),ELAR(I),CELR(I)
-     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC,IER)
+c...
+            IF(IER.NE.0) THEN
+              PRINT *,'   IER=',IER,' Negative',label(ier)
+              PRINT *,'   Xtotm,Xcelc,Xselc,Xfusc,Xcelm,Xfusm'
+              PRINT *,    Xtotm,Xcelc,Xselc,Xfusc,Xcelm,Xfusm
+            END IF
+c...
             IF(I1.EQ.0) I1=I
             I2=I
           END IF
@@ -713,7 +720,14 @@ C...        stop
 C...
 C*
             CALL TUNFAC(LTT,EE,FUSR(I),ELAR(I),CELR(I)
-     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC,IER)
+c...
+            IF(IER.NE.0) THEN
+              PRINT *,'   IER=',IER
+              PRINT *,'   Xtotm,Xcelc,Xselc,Xfusc,Xcelm,Xfusm'
+              PRINT *,    Xtotm,Xcelc,Xselc,Xfusc,Xcelm,Xfusm
+            END IF
+c...
             IF(I1.EQ.0) I1=I
             I2=I
           END IF
@@ -1140,24 +1154,21 @@ C*
   926 FORMAT(A,I4,A,I4,A)
       END
       SUBROUTINE TUNFAC(LTT,EE,FUSR,ELAR,CELR
-     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC)
+     &                 ,XFUSM,XSELM,XCELM,XFUSC,XSELC,XCELC,IER)
 C-Title  : SUBROUTINE TUNFAC
 C-Purpose: Define tuning factors according to EMPIRE internal definitions
+      IER = 0
       FUSR= XFUSM/XFUSC
       ELAR= XSELM/XSELC
       FCE = XCELM/XCELC
 C*    -- Correction for CELRRED
-      FCE = FCE/FUSR
-C*    -- Take into account the internal EMPIRE definition
-C...
-C... What I think it should be (definition is unclear)
-C...  FCE = FCE*(XFUSC-XCELC)/(XFUSC-FCE*XCELC)
-C... What is programmed in FLUCTU ???
-      FCE = XCELM/XFUSM
-C...
-      CELR= FCE
+C*       (Take into account the internal EMPIRE definition)
+      CELR= XCELM/XFUSM
 C*    -- Check for unreasonable values
-      IF(FUSR.LT.0 .OR. ELAR.LT.0 .OR. CELR.LT.0) THEN
+      IF(FUSR.LT.0) IER=1
+      IF(ELAR.LT.0) IER=2
+      IF(CELR.LT.0) IER=3 
+      IF(IER.NE.0) THEN
         WRITE(LTT, * ) ' WARNING - Unreasonable tuning factors at'
      &                ,' Energy [eV]',EE
         WRITE(LTT,924) ' FUSRED',FUSR,' ELARED',ELAR
