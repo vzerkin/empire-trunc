@@ -119,6 +119,8 @@ C-V  14/01 Check the order of Legendre expansion for elastic ang.distr.
 C-V        Try to fit tabulated distribution.
 C-V  14/02 - Include compound elastic MF3/MT50 (MF4 still pending).
 C-V        - Allow narrow printout of separation energies.
+C-V  14/12 - Trivial definition of unassigned variable.
+C-V        - Suppress printing MT50 (in SCNMF6) - interferes with NJOY.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -1884,6 +1886,7 @@ C* Create MT 5 if not present
           XSC(J,I5)=0
         END DO
         QQM(I5)=-1.E12
+        QQI(I5)=-1.E12
       END IF
 C* Create MT 201 if not present (flagged -ve for no spectra)
       IF(I201.LE.0) THEN
@@ -1895,6 +1898,7 @@ c...    MTH(NXS)= 201
           XSC(J,I201)=0
         END DO
         QQM(I201)=-1.E12
+        QQI(I201)=-1.E12
       END IF
 C* Create MT 203 if not present (flagged -ve for no spectra)
       IF(I203.LE.0) THEN
@@ -1905,6 +1909,7 @@ C* Create MT 203 if not present (flagged -ve for no spectra)
           XSC(J,I203)=0
         END DO
         QQM(I203)=-1.E12
+        QQI(I203)=-1.E12
       END IF
 C* Create MT 207 if not present (flagged -ve for no spectra)
       IF(I207.LE.0) THEN
@@ -1915,6 +1920,7 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
           XSC(J,I207)=0
         END DO
         QQM(I207)=-1.E12
+        QQI(I207)=-1.E12
       END IF
 C* Add contribution of reactions without differential data to MT5
 C* (identified by MT=10*ZA+LFS, LFS>0).
@@ -2636,8 +2642,10 @@ C* Test for elastic angular distributions of neutral particles
         GO TO 120
       END IF
 C* Test for compound-elastic Legendre coefficients
-      IF(IZI.LT.1000 .AND. REC(1:20).EQ.'  CE Legendre coeffi'    ) THEN
-        MT=50
+      IF(IZI.EQ.1 .AND. REC(1:20).EQ.'  CE Legendre coeffi'    ) THEN
+C...    -- Suppress output by -ve flag (interferes with NJOY)
+C...    MT= 50
+        MT=-50
         GO TO 120
       END IF
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
@@ -3438,8 +3446,9 @@ C* Check if "Decaying nucleus" section was processed
 C*    -- Product nucleus without "Decaying nucleus" section
       READ (REC(2:11),802) JZ,CH,JA
       JZA=JZ*1000+JA
+      MEQ=0
 C* Assign MT number from residual ZA
-      CALL EMTIZA(IZI,IZA,JZA,MT,IZR)
+      CALL EMTIZA(IZI,IZA,JZA,MT,MEQ)
       IF(MT.EQ.0) MT=10*JZA+5
       IF(IDCY.NE.0) GO TO 311
 C*    -- no "decaying nucleus" --> no discrete levels
