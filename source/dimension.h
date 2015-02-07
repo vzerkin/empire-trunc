@@ -1,6 +1,6 @@
-!cc   * $Rev: 4273 $
+!cc   * $Rev: 4285 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-02-01 17:10:15 +0100 (So, 01 Feb 2015) $
+!cc   * $Date: 2015-02-07 23:08:01 +0100 (Sa, 07 Feb 2015) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -40,7 +40,6 @@
      &,NDEX_D=NDEX                                                      &
      &,NDEJCD=NDEJC                                                     &
      &,NLGRID=301                                                       & !Number of points in the HFB GDR RIPL files 
-
      &,NDVOM=7                                                          &
      &,NDWOM=7                                                          &
      &,NDVSO=7                                                          &
