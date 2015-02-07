@@ -1,5 +1,5 @@
-! $Rev: 4161 $                                                         |
-! $Date: 2014-10-11 22:38:28 +0200 (Sa, 11 Okt 2014) $                                                     
+! $Rev: 4284 $                                                         |
+! $Date: 2015-02-07 18:17:37 +0100 (Sa, 07 Feb 2015) $                                                     
 ! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,11 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.18   February 2015   A. Trkov
+!-V                        Check that NLS for the unresolved resonance
+!-V                        range in MF32 less or equal NLS in MF2
+!-V         Version 8.17   October 2014   A. Trkov
+!-V                        Check product ZA in MF10, MF40
 !-V         Version 8.16   September 2014   A. Trkov
 !-V                        Skip warning on AWI test for electrons
 !-V                        Deactivate E-range test for MT=505,506
@@ -230,7 +235,7 @@
 !
 !     FIZCON VERSION NUMBER
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.16'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.18'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -438,6 +443,10 @@
 !     ENERGY LIMITS OF THE RESONANCE REGION
 !
       REAL(KIND=R4) :: E1,E2
+!
+!     MAXIMUM NUMBR OF L-STATES IN THE UNRESOLVED RESONANCE REGION
+!
+      INTEGER(KIND=I4) :: MF2URL
 !
 !     ARRAY FOR UNRESOLVED ENERGY GRID
 !
@@ -1008,6 +1017,7 @@
          NISSEC = 0
          NCKF5 = 0
          NCKF6 = 0
+         MF2URL= 0
          REWIND (UNIT=ISCRX)
          REWIND (UNIT=ISCRY)
          REWIND (UNIT=ISCRXY)
@@ -2703,6 +2713,7 @@
 !        PROCESS ALL L VALUES
 !
          NLS = N1H
+         MF2URL=MAX(MF2URL,NLS)
          DO NL=1,NLS
             CALL RDCONT
 !***********TEST AWRI
@@ -6259,6 +6270,11 @@
          IA = MOD(IZA,1000)
          IZ = IZA/1000
 !
+!        Check that the value of IZAP is within range
+!        Photons IZAP=0) can be the last but not the only
+!
+         IF(N.LT.NS .OR. NS.EQ.1) CALL TEST6I(IZAP,3000,120000,'IZAP')
+!
 !        If IZAP can be uniquely defined from IZ, IA, MT and projectile
 !        check for valid IZAP
 !
@@ -7363,6 +7379,7 @@
       INTEGER(KIND=I4) :: NIS,NER,LRU,LRF,NROO,NIT,LCOMP,ISR,NLS
       INTEGER(KIND=I4) :: NSRS,NLRS,NLSA,NDIGIT
       INTEGER(KIND=I4) :: NI,N,NN,I1,NM,NNN,NJSX,I3
+      INTEGER(KIND=I4) :: NSEQP2
 !
 !     CHECK THAT SECTION IS IN THE INDEX
 !
@@ -7491,6 +7508,13 @@
             ELSE
                CALL RDCONT
                NLS = N1H
+               IF(NLS.GT.MF2URL) THEN
+               NSEQP2 = NSEQP1
+                 WRITE(EMESS,'(4X,A,I4,A,I4,A)')                        &       
+     &             'Number of l-states',NLS,' in MF32 >'
+     &             ,MF2URL,' in MF 2'                                   &
+                 CALL ERROR_MESSAGE(NSEQP2)
+               END IF
                DO NN=1,NLS
                   CALL RDLIST
                END DO
@@ -7803,7 +7827,7 @@
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4) :: NS,NL,MAT1,MT1,NC,NI
+      INTEGER(KIND=I4) :: NS,NL,MAT1,MT1,NC,NI,IZAP
       INTEGER(KIND=I4) :: IMIN
       INTEGER(KIND=I4) :: N,I,I1,I2,I3,J
       REAL(KIND=R4) :: ER,EL
@@ -7826,6 +7850,12 @@
       NS = N1H
       DO N=1,NS
          CALL RDCONT
+!
+!        Check that the value of IZAP is within range
+!        Photons IZAP=0) can be the last but not the only
+!
+         IZAP=L1H
+         IF(N.LT.NS .OR. NS.EQ.1) CALL TEST6I(IZAP,3000,120000,'IZAP')
 !
 !        LOOP OVER SUBSECTIONS
 !
@@ -11292,6 +11322,29 @@ C...        GO TO 10
 !
       RETURN
       END SUBROUTINE TEST6
+!
+!***********************************************************************
+!
+      SUBROUTINE TEST6I(IZ,IA,IB,KXXX)
+!
+!     CHECK THAT IZ LIES BETWEEN IA AND IB
+!
+      IMPLICIT NONE
+!
+      CHARACTER(LEN=*) :: KXXX
+      INTEGER(KIND=I4) :: IZ,IA,IB
+!
+      IF(IZ.LT.IA.OR.IZ.GT.IB)   THEN
+!
+!        ERROR MESSAGE
+!
+         WRITE(EMESS,'(A4,I8,A,I8,A,I8)')                               &       
+     &               KXXX,IZ,' NOT IN RANGE',IA,' TO',IB
+         CALL ERROR_MESSAGE(NSEQP)
+      END IF
+!
+      RETURN
+      END SUBROUTINE TEST6I
 !
 !***********************************************************************
 !
