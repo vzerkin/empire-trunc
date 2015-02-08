@@ -3,7 +3,7 @@ Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
       SUBROUTINE write_xs()
-      USE empcess, ONLY: POPcsea, disc_int, check_DL 
+      USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
 
       implicit none
       INCLUDE "dimension.h"
@@ -158,6 +158,10 @@ c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                                  + CSAlev(nang-1,il,nejc))
      &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
                         ENDDO
+C                       DO nang = 1, NDANG  ! over angles
+C                         csum = csum + CSAlev(nang,il,nejc)* 
+C    &                                  SANgler(nang)*PI/90.d0
+C                       ENDDO
                         check_DL(il) = max(2.0d0*PI*csum,1.d-10)
                      ENDDO
                    ENDIF
@@ -238,10 +242,10 @@ C
 C                      espec is the outgoing energy corresponding to the level "il"
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE (12,'(4x,I3,4x,F10.5,3(E14.5,2x),F7.4)')  
+                       WRITE (12,'(4x,I3,4x,F10.5,3(E14.6,2x),F7.4)')  
      &                   il, -espec, check_DL(il)             ,! *recorp,
-     &                        disc_int(il,nejc)               ,! *recorp,
-     &                        (check_DL(il)-disc_int(il,nejc)),!*recorp,
+     &                        CSDirsav(il,nejc)               ,! *recorp,
+     &                        (check_DL(il)-CSDirsav(il,nejc)),!*recorp,
      &                        ELV(il,nnuc)        
                            htmp = htmp + check_DL(il)          !*recorp
                      ENDDO

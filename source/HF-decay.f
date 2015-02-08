@@ -4,7 +4,7 @@ Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
-      USE empcess, ONLY: disc_int, CSHms
+      USE empcess, ONLY: CSDirsav, CSHms
       use hrtw
 
       implicit none
@@ -22,7 +22,7 @@ C
 
       INTEGER i,ia,nejc,il,nbr,ib,iang,its,ilv,j,m,ke,iz,nxsp,npsp
       INTEGER kemin,kemax,jcn,ipar,ip,izares,iloc,nnur,nspec,ispec
-      INTEGER ilevcol,jz,jn,imint,imaxt
+      INTEGER ilevcol,jz,jn,imint,imaxt,na
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
@@ -31,7 +31,7 @@ C
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
-      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum
+      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum, xs_cn
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
       LOGICAL key_calc_hrtw
@@ -98,9 +98,9 @@ C
         ENDIF
         WRITE (12,*)
      &' ---------------------------------------------------------------'
-        WRITE (12,
-     &'(1X,/,10X,''Discrete level population before gamma cascade'')')
-            WRITE (12,'(1X,/,10X,40(1H-),/)')
+C       WRITE (12,
+C    &'(1X,/,10X,''Discrete level population before gamma cascade'')')
+C       WRITE (12,'(1X,/,10X,40(1H-),/)')
       ENDIF
 
       IF (FITomp.LE.0) THEN
@@ -116,9 +116,17 @@ C
           ENDIF
           dtmp = 0.d0
           DO il = 1, NLV(nnuc)
-            dtmp = dtmp + CSDirlev(il,nejc)
-            disc_int(il,nejc) = CSDirlev(il,nejc)
+C            dtmp = dtmp + POPlv(il,nnuc)
+C            CSDirsav(il,nejc) = POPlv(il,nnuc) 
+             dtmp = dtmp + CSDirlev(il,nejc)
+C           Saving CSDirlev() array before the gamma cascade to CSDirsav()
+            CSDirsav(il,nejc) = CSDirlev(il,nejc) 
           ENDDO
+C---------CN contribution to elastic ddx
+C         ELCncs = POPlv(LEVtarg,mt2)/(4.d0*PI) 
+          ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
+C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
+
           IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
           WRITE (12,*)
           WRITE (12,*)
@@ -153,7 +161,7 @@ C
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
           WRITE (12,'(1X,/,10X,40(1H-),/)')
-C
+ 
           DO il = 1, NLV(nnuc)
 C-----------Check for the number of branching ratios
             nbr = 0
@@ -215,6 +223,9 @@ C---------Write elastic to tape 12 and to tape 68
      &                (FLOAT(iang - 1)*delang,iang = 1,NANgela)
             ENDIF
 
+C           ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
+C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
+
             if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
               CN_isotropic = .TRUE.
               WRITE(8,*)
@@ -259,10 +270,54 @@ C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
              ELSE
 
                xs_norm = ELCncs/PL_CN(0,LEVtarg)
+
+               IF(INTerf.eq.1) then
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
+     &           EINl, 4.d0*pi*ELCncs,  
+     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10),
+     &           'ENG-WEID. TRANSF.'  
+               ELSE
+                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
+     &           EINl, 4.d0*pi*ELCncs,  
+     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
+               ENDIF                
+
+               WRITE (8,*) 
+               WRITE (8,*) ' Nonisotropic Compound to discrete levels in
+     &cluding the Compound Elastic'
+               WRITE (8,*) 
+
+               IF(DABS(xs_norm-1.d0).gt.1.d-4) then
+C                WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
+C                WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
+                 WRITE(8,*)' EMPIRE CN ELCncs= ',4*PI*ELCncs
+                 WRITE(8,*)' PL_CN(0,LEVtarg)=',4*PI*PL_CN(0,LEVtarg)
+                 WRITE(8,*) 
+     &       ' Renormalizing CN Ang.Dist. by ELCncs/PL_CN(0,LEVtarg)=',
+     &       sngl(xs_norm)
+                  WRITE(8,*) 
+               ENDIF
+ 
 C	         write(*,*) 'NORM=',xs_norm
                DO iang = 1, NDANG
                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
                ENDDO
+
+               gang = 180.d0/(NDAng - 1)
+               angstep = 180.d0/(NANgela - 1)
+ 
+               IF(.NOT.CN_isotropic) then   
+                 WRITE (8,99016)
+                 WRITE (8,99020)
+                 DO iang = 1, NANgela/4 + 1
+                   imint = 4*(iang - 1) + 1
+                   imaxt = MIN0(4*iang,NANgela)
+                   WRITE (8,99025) 
+     &               ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
+                 ENDDO
+                 WRITE (8,*)
+                 WRITE (8,*)
+               ENDIF
 
                WRITE (12,'(9X,8E15.5)') 
      &            ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
@@ -587,6 +642,53 @@ C-----Printout of results for the decay of NNUC nucleus
         CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
       ENDDO
 
+C     Updating discrete level double differential cross sections
+C     Moved from ACCUM to do it outside the excitation energy loop
+      IF (nnuc.EQ.1) THEN
+        DO nejc = 1, NEJcm
+	    nnur = NREs(nejc)
+          if (nnur.lt.0) cycle
+
+          ares = A(1) - AEJc(nejc)
+          zres = Z(1) - ZEJc(nejc)
+C         residual nuclei must be heavier than alpha
+          if(ares.le.4. and. zres.le.2.) cycle
+
+C         IF( (nejc.eq.NPRoject) .and. (.not.CN_isotropic)) then
+C           write(*,*) 'CSComplev    =', CSComplev(LEVtarg,NPRoject)
+C           write(*,*) '4piPL_CN(0,) =', 4*PI*PL_CN(0,LEVtarg)
+C           write(*,*) 'POPlv(1,mt2) =', POPlv(LEVtarg,mt2)
+C         ENDIF
+
+          DO il = 1, NLV(nnur)
+
+	      ftmp = CSComplev(il,nejc)
+	      if(ftmp.le.0) cycle
+
+            IF( (nejc.eq.NPRoject) .and. (.not.CN_isotropic) 
+     >        .and. (PL_CN(0,il).gt.0) ) then
+C
+              xs_norm = ftmp/(4*PI*PL_CN(0,il))
+              DO na = 1, NDANG
+                xs_cn = GET_DDXS(CANGLE(na),il)  
+                CSAlev(na,il,nejc) = CSAlev(na,il,nejc) + xs_cn*xs_norm                     
+              ENDDO
+C
+            ELSE
+C
+C             Not the inelastic channel OR isotropic CN DA
+C              
+              xs_cn = ftmp/(4.d0*PI)  ! default isotropic
+              DO na = 1, NDANG
+                CSAlev(na,il,nejc) = CSAlev(na,il,nejc) + xs_cn
+              ENDDO ! loop over angles
+
+            ENDIF
+
+          ENDDO  !loop over levels
+        ENDDO  ! loop over emitted particles  
+	ENDIF
+
       IF(CSPrd(nnuc).gt.0.d0) THEN
 
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
@@ -618,8 +720,12 @@ C-----Printout of results for the decay of NNUC nucleus
      &' ---------------------------------------------------------------'
              WRITE (8 ,*)
      &' ---------------------------------------------------------------'
-             WRITE (12,*)
+C            WRITE (12,*)
              WRITE (8 ,*)
+C            WRITE (12,
+C    &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
+C    &cade 2'')')
+C            WRITE (12,'(1X,/,10X,40(1H-),/)')
 
          ELSE
 
@@ -632,10 +738,16 @@ C-----Printout of results for the decay of NNUC nucleus
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
 
-             WRITE (8,
+	       if(nnuc.eq.1) then
+               WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
-             WRITE (8,'(1X,/,10X,40(1H-),/)')
-
+               WRITE (8,'(1X,/,10X,40(1H-),/)')
+               WRITE (12,
+     &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
+     &cade'')')
+               WRITE (12,'(1X,/,10X,40(1H-),/)')
+             endif
+		     
          ENDIF
 
          DO il = 1, NLV(nnuc)
@@ -716,7 +828,7 @@ C        Primary gammas done
 
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
-             WRITE (12,'(1X,/,10X,40(1H-),/)')
+C            WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,*) ' '
 C------------Write Int. Conv. Coefff. for discrete transitions
              WRITE (12,'(1X,/,10X,
@@ -992,22 +1104,22 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
       ENDIF
 
       IF (CSFis.NE.0.0D0) THEN
-           WRITE (80,*)
-           WRITE (8,*)
-           IF (IOUt.GT.0) THEN
+        WRITE (80,*)
+        WRITE (8,*)
+        IF (IOUt.GT.0) THEN
           
-             DO m = 1, INT(FISmod(nnuc)) + 1
-               WFIsm(m) = 0.d0
-               IF (CSFis.GT.0.d0) WFIsm(m) = CSFism(m)/CSFis
-               IF( NINT(FISmod(nnuc)).GT.0 .and. 
-     >             NINT(FISshi(nnuc)).NE.1 )
-     >           WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
-             ENDDO
-             IF(NINT(FISshi(nnuc)).NE.1)
-     >         WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
-           ENDIF
-           CSPfis(nnuc) = CSFis
-           WRITE (8,
+          DO m = 1, INT(FISmod(nnuc)) + 1
+            WFIsm(m) = 0.d0
+            IF (CSFis.GT.0.d0) WFIsm(m) = CSFism(m)/CSFis
+            IF( NINT(FISmod(nnuc)).GT.0 .and. 
+     >          NINT(FISshi(nnuc)).NE.1 )
+     >          WRITE (80,*) '    Mode=', m, '   weight=', WFIsm(m)
+          ENDDO
+          IF(NINT(FISshi(nnuc)).NE.1)
+     >      WRITE (80,*) '   Fission cross section=', CSFis, ' mb'
+        ENDIF
+        CSPfis(nnuc) = CSFis
+        WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
 C
@@ -1016,202 +1128,92 @@ C
       TOTcsfis = TOTcsfis + CSFis
 C-----Add compound elastic to shape elastic before everything falls
 C-----down on the ground state
-9876  IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0
-C    &                       .AND. POPlv(LEVtarg,mt2).GT.0.) THEN
-     &                       .AND. CSDirlev(1,1).GT.0.) THEN
-           WRITE (8,*)
-           WRITE (8,*) ' Incident energy (CMS)      ', EIN, ' MeV'
-           WRITE (8,*) ' Shape elastic cross section',
-     &                     ELAred*ELAcs, ' mb'
-
-C----------CN contribution to elastic ddx
-C          ELCncs = POPlv(LEVtarg,mt2)/4.d0/PI 
-           ELCncs = CSDirlev(1,1)/4.d0/PI 
-
-           if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
-             CN_isotropic = .TRUE.
-             WRITE(8,*)
-             WRITE(8,*) 
-     &       'CN angular distribution assumed isotropic at Einc = ',
-     &       sngl(EINl)
-             WRITE(12,*)      
-     &       'CN angular distribution assumed isotropic at Einc = ',
-     &       sngl(EINl)
-
-             WRITE(8,*)
-           endif  
-
-           IF (ELCncs.EQ.0) then
-
-             WRITE (8,*) ' WARNING: CN elastic is 0'
-
-           ELSE
-
-             WRITE (8,*) ' CN elastic cross section   ',
-C    &                sngl(POPlv(LEVtarg,mt2)),' mb'
-     &                sngl(4.d0*PI*ELCncs),' mb'
-	 
-             IF(CN_isotropic) then   
-
-               WRITE (8,*)
-     &          '    Elastic=', sngl(ELCncs), ' mb/str'
-               DO iang = 1, NDANG
-                 cel_da(iang) = ELCncs ! isotropic
-               ENDDO
-
-             ELSE
-
-               WRITE (8,*) ' CN elas. cross section (BB)',
-     &           sngl(4.d0*pi*PL_CN(0,LEVtarg)),' mb'
-
-               xs_norm=1.d0
- 	         IF(PL_CN(0,LEVtarg).gt.0.d0) 
-     &           xs_norm = ELCncs/PL_CN(0,LEVtarg)
-
-               IF(INTerf.eq.1) then
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10),
-     &           'ENG-WEID. TRANSF.'  
-               ELSE
-                 WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
-               ENDIF                
-
-               WRITE (8,*) 
-               WRITE (8,*) ' Nonisotropic Compound to discrete levels in
-     &cluding the Compound Elastic'
-               WRITE (8,*) 
-
- 	         IF(PL_CN(0,LEVtarg).gt.0.d0) then
-C	          write(*,*) 'NORM=',xs_norm
-                DO iang = 1, NDANG
-                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
-                ENDDO
-
-                IF(DABS(xs_norm-1.d0).gt.1.d-4) then
-C                 WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
-C                 WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
-                  WRITE(8,*)' EMPIRE CN ELCncs= ',4*PI*ELCncs
-                  WRITE(8,*)' PL_CN(0,LEVtarg)=',4*PI*PL_CN(0,LEVtarg)
-                  WRITE(8,*) 
-     &       ' Renormalizing CN Ang.Dist. by ELCncs/PL_CN(0,LEVtarg)=',
-     &       sngl(xs_norm)
-                   WRITE(8,*) 
-                ENDIF
-
-               ELSE
-
-                 DO iang = 1, NDANG
-                   cel_da(iang) = ELCncs ! isotropic
-                 ENDDO
-
-               ENDIF
-
-             ENDIF
-
-           ENDIF
-
-           gang = 180.d0/(NDAng - 1)
-           angstep = 180.d0/(NANgela - 1)
-
-           IF(.NOT.CN_isotropic) then   
-             WRITE (8,99016)
-             WRITE (8,99020)
-             DO iang = 1, NANgela/4 + 1
-               imint = 4*(iang - 1) + 1
-               imaxt = MIN0(4*iang,NANgela)
-               WRITE (8,99025) 
-     &           ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
-             ENDDO
-           ENDIF
-
-           IF (ncollx.GT.0) THEN
-C----------------Locate position of the projectile among ejectiles
-                 CALL WHEREJC(IZAejc(0),nejcec,iloc)
+      IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0 .AND. ncollx.GT.0) then
+C  -----Locate position of the projectile among ejectiles
+        CALL WHEREJC(IZAejc(0),nejcec,iloc)
 C
-                 its = ncollx
-                 IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
-                   WRITE(8,99029)
-                   WRITE(8,99030) (ICOller(ilv),ilv = 2,MIN(its,10))
-                   WRITE(8,99031) (ELV(ICOller(ilv),nnurec),
-     &               ilv = 2,MIN(its,10))
-                   WRITE(8,99033) (XJLv(ICOller(ilv),nnurec)*
+        its = ncollx
+        IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
+
+          gang = 180.d0/(NDAng - 1)
+
+          WRITE(8,99029)
+          WRITE(8,99030) (ICOller(ilv),ilv = 1,MIN(its,10))
+          WRITE(8,99032) (ELV(ICOller(ilv),nnurec),
+     &               ilv = 1,MIN(its,10))
+          WRITE(8,99034) (XJLv(ICOller(ilv),nnurec)*
      &               LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
-     &               ilv = 2,MIN(its,10))  
-                   WRITE(8,*) ' '
-                   DO iang = 1, NDANG
-                     WRITE (8,99035) (iang - 1)*gang,
+     &               ilv = 1,MIN(its,10))  
+          WRITE(8,*) ' '
+          DO iang = 1, NDANG
+            WRITE (8,99035) (iang - 1)*gang,
      &               (CSAlev(iang,ICOller(ilv),nejcec),
-     &               ilv = 2,MIN(its,10)) 
-                   ENDDO
-                   WRITE(8,*) ' '
-                   WRITE(8,99041) 1,(POPlv(ICOller(ilv),nnurec),
-     &               ilv= 2,MIN(its,10))
+     &               ilv = 1,MIN(its,10)) 
+          ENDDO
+          WRITE(8,*) ' '
+          WRITE(8,99041) 1,(POPlv(ICOller(ilv),nnurec),
+     &               ilv= 1,MIN(its,10))
 C
-                   IF(its.gt.10) THEN
-                     WRITE(8,*) ' '
-                     WRITE(8,99030)(ICOller(ilv),ilv = 11,MIN(its,20))
-                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+          IF(its.gt.10) THEN
+            WRITE(8,*) ' '
+            WRITE(8,99030)(ICOller(ilv),ilv = 11,MIN(its,20))
+            WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
      &                 ilv=11,MIN(its,20))
-                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+            WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
      &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
      &                 ilv=11,MIN(its,20))  
-                     WRITE (8,*) ' '
-                     DO iang = 1, NDANG
-                       WRITE (8,99035) (iang - 1)*gang,
+            WRITE (8,*) ' '
+            DO iang = 1, NDANG
+              WRITE (8,99035) (iang - 1)*gang,
      &                 (CSAlev(iang,ICOller(ilv),nejcec),
      &                 ilv = 11,MIN(its,20))
-                     ENDDO
-                     WRITE (8,*) ' '
-                     WRITE (8,99041) 2,(POPlv(ICOller(ilv),nnurec),
+            ENDDO
+            WRITE (8,*) ' '
+            WRITE (8,99041) 2,(POPlv(ICOller(ilv),nnurec),
      &                 ilv = 11,MIN(its,20))
-                   ENDIF
+          ENDIF
 C
-                   IF(its.gt.20) THEN
-                     WRITE(8,*) ' '
-                     WRITE(8,99030)(ICOller(ilv),ilv = 21,MIN(its,30))
-                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+          IF(its.gt.20) THEN
+            WRITE(8,*) ' '
+            WRITE(8,99030)(ICOller(ilv),ilv = 21,MIN(its,30))
+            WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
      &                 ilv=21,MIN(its,30))
-                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+            WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
      &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
      &                 ilv=21,MIN(its,30))
-                     WRITE (8,*) ' '
-                     DO iang = 1, NDANG
-                       WRITE (8,99035) (iang - 1)*gang,
+            WRITE (8,*) ' '
+            DO iang = 1, NDANG
+              WRITE (8,99035) (iang - 1)*gang,
      &                 (CSAlev(iang,ICOller(ilv),nejcec),
      &                 ilv=21,MIN(its,30))
-                     ENDDO
-                     WRITE (8,*) ' '
-                     WRITE (8,99041) 3,(POPlv(ICOller(ilv),nnurec),
+            ENDDO
+            WRITE (8,*) ' '
+            WRITE (8,99041) 3,(POPlv(ICOller(ilv),nnurec),
      &                 ilv=21,MIN(its,30))
-                   ENDIF
-C                  Because of the ENDF format restrictions the maximum
-C                     number of discrete levels is limited to 40
-                   IF(its.gt.30) THEN
-                     WRITE(8,*) ' '
-                     WRITE(8,99030)(ICOller(ilv),ilv = 31,MIN(its,40))
-                     WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
+          ENDIF
+C         Because of the ENDF format restrictions the maximum
+C         number of discrete levels is limited to 40
+          IF(its.gt.30) THEN
+            WRITE(8,*) ' '
+            WRITE(8,99030)(ICOller(ilv),ilv = 31,MIN(its,40))
+            WRITE(8,99032)(ELV(ICOller(ilv),nnurec),
      &                 ilv = 31,MIN(its,40))
-                     WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
+            WRITE(8,99034)(XJLv(ICOller(ilv),nnurec)*
      &                 LVP(ICOller(ilv),nnurec),D_DEF(ilv,2),
      &                 ilv = 31,MIN(its,40))
-                     WRITE (8,*) ' '
-                     DO iang = 1, NDANG
-                       WRITE (8,99035) (iang - 1)*gang,
+            WRITE (8,*) ' '
+            DO iang = 1, NDANG
+              WRITE (8,99035) (iang - 1)*gang,
      &                 (CSAlev(iang,ICOller(ilv),nejcec),
      &                 ilv = 31,MIN(its,40))
-                     ENDDO
-                     WRITE (8,*) ' '
-                     WRITE (8,99041) 4,(POPlv(ICOller(ilv),nnurec),
+            ENDDO
+            WRITE (8,*) ' '
+            WRITE (8,99041) 4,(POPlv(ICOller(ilv),nnurec),
      &                 ilv = 31,MIN(its,40))
-                   ENDIF
-                   WRITE (8,*) ' '
+          ENDIF
+          WRITE (8,*) ' '
 
-                 ENDIF
-
-           ENDIF ! ncollx > 0 ?
+        ENDIF	! CSAlev(1,ICOller(2),nejcec).GT.0
 
       ENDIF
       

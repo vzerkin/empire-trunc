@@ -1,6 +1,6 @@
-! $Rev: 4254 $
-! $Author: bcarlson $
-! $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
+! $Rev: 4286 $
+! $Author: rcapote $
+! $Date: 2015-02-09 00:28:35 +0100 (Mo, 09 Feb 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -20,7 +20,7 @@
      &                 AWOm(0:ndejc,0:ndnuc),SHLlnor(0:ndnuc),          &
      &                 AWOmv(0:ndejc,0:ndnuc), AWSo(0:ndejc,0:ndnuc),   &
      &                 BETav, BETcc(ndcc), BFUs,BR(ndlv,ndbr,3,0:ndnuc),&
-     &                 BUNorm, NTNorm, COMega,                          &
+     &                 BUNorm, NTNorm, COMega, CSComplev(ndlv,0:ndejc), &
      &                 AMUele, CANgler(ndangecis), CETa, CHMs, CRL,     &
      &                 CHMax, CSAlev(ndangecis,ndlv,0:ndejc),           &
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),         &
@@ -42,7 +42,7 @@
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,         &
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),          &
      &                 EFB(nfparab),EFDis(nftrans,nfparab),             &
-     &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)
+     &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)       
 
       DOUBLE PRECISION FNvvomp(0:ndejc,0:ndnuc), D0_obs, D0_unc,        & 
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,        &
@@ -122,7 +122,8 @@
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,   &
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),  &
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,    &
-     &                 CINred(ndlv), CELcor, Emax_tlj, QQInc(0:NDNUC)
+     &                 CINred(ndlv), CELcor, Emax_tlj, QQInc(0:NDNUC),  &
+     &                 CSDirinel(ndlv,0:ndejc)  
       
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*200 EMPiredir
@@ -241,7 +242,7 @@
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,    &
      &                 WIDcoll, TOTred, REDsef, rTUNe, rTUNEpe, rTUNefi,&
      &                 rTOTred, ROHfbp, ROHfba, ROHfbp_off, ROHfba_off, &
-     &                 CSEpg, ENPg, ELAred,                             &
+     &                 CSEpg, ENPg, ELAred, CSComplev,                  &
      &                 rELAred, PFNtke, PFNalp, PFNere, ECOnt, CELred,  &
      &                 PFNrat, PFNniu, TMAxw, rCELred, XNAver, CANGle,  &
      &                 CINred, rCINred, TUNebu, TUNent, CELcor, rCELcor,&
@@ -253,7 +254,7 @@
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
      &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
-     &                 RECcse, POPcon, POPdis,                          &
+     &                 RECcse, POPcon, POPdis, CSDirinel,               &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &

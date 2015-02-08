@@ -536,7 +536,7 @@
         WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', gg_obs, ' meV (systematics)'
      ENDIF
 
-     WRITE(12,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+     WRITE(12,'(/1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
 
      IF(d0_obs>0.0D0) THEN
         WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', d0_obs, ' +/- ', d0_unc, ' keV'
@@ -568,6 +568,9 @@
    ENDIF
 
    CALL DelHRTW()    !deallocate HRTW arrays
+
+
+ 
 
    RETURN
    END SUBROUTINE calc_hrtw

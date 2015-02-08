@@ -12,7 +12,7 @@ C     not used at present
 C     DOUBLE PRECISION, ALLOCATABLE :: CSEhmslab(:,:,:)
 C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
 
-      DOUBLE PRECISION, ALLOCATABLE :: check_DL(:),disc_int(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: check_DL(:),CSDirsav(:,:)
 
       CONTAINS
 
@@ -76,18 +76,18 @@ C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
       ENDIF
       CSHms = 0.0d0
 
-      if(allocated(disc_int)) deallocate(disc_int)
+      if(allocated(CSDirsav)) deallocate(CSDirsav)
 
-      ALLOCATE(disc_int(ndlv,3),STAT=myalloc)
+      ALLOCATE(CSDirsav(ndlv,3),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*)  
-     &    'ERROR: Insufficient memory for disc_int'
+     &    'ERROR: Insufficient memory for CSDirsav'
         WRITE(12,*) 
-     &    'ERROR: Insufficient memory for disc_int'
+     &    'ERROR: Insufficient memory for CSDirsav'
         STOP 
-     &    'ERROR: Insufficient memory for disc_int'
+     &    'ERROR: Insufficient memory for CSDirsav'
       ENDIF     
-      disc_int = 0.d0
+      CSDirsav = 0.d0
 
       if(allocated(check_DL)) deallocate(check_DL)
       ALLOCATE(check_DL(ndlv),STAT=myalloc)
@@ -111,7 +111,7 @@ C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
       if(allocated(CSHms)) deallocate(CSHms)
 
       if(allocated(check_DL)) deallocate(check_DL)
-      if(allocated(disc_int)) deallocate(disc_int)
+      if(allocated(CSDirsav)) deallocate(CSDirsav)
 
       END SUBROUTINE EMPDAXS
 

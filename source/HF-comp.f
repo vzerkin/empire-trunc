@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4276 $
+Ccc   * $Rev: 4286 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-03 19:03:29 +0100 (Di, 03 Feb 2015) $
+Ccc   * $Date: 2015-02-09 00:28:35 +0100 (Mo, 09 Feb 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -44,11 +44,11 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &  popll, pops, popt, xcse, xscalc, xs_cn, xs_norm
+     &  popll, pops, popt, xcse
 
-      INTEGER icse, icsh, icsl, ie, il, j, na, nexrt, nspec
-!      INTEGER ilevcol, ilev
-      DOUBLE PRECISION GET_DDXS !, GET_DDXScont
+      INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec
+!      INTEGER ilevcol, ilev, na
+!      DOUBLE PRECISION GET_DDXS !, GET_DDXScont
 C-----
 C-----Continuum
 C-----
@@ -66,6 +66,7 @@ C-----
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
             pop2 = Xnor*SCRt(ie,j,2,Nejc)
             pops = pop1 + pop2
+            if(pops.le.0) cycle
             IF (ie.EQ.1) pops = pops*0.5 
             popt = popt + pops !sum over spin/pi at a given energy bin
             POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pop1
@@ -112,6 +113,7 @@ C-----
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)
+         IF (pop1.le.0) CYCLE
 C        if(il.eq.levtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
@@ -185,48 +187,36 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
          ENDIF
 
 C--------Add CN contribution to direct ang. distributions
-         IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. 
-     >       Nejc.NE.0 .AND. pop1.gt.0.d0 ) THEN
+         IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
 
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
-            xscalc = pop1/(4.d0*PI)  ! default isotropic
-                       
-            IF((Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
-C 
-C              Calculating CN DA from Legendre expansion
-C              IF(IL.EQ.1 .AND. NEJC.EQ.1) THEN 
-C                write(*,*) 'Disc.lev=',il     ,' CN xs(isotr )=',pop1
-C                write(*,*) 'Disc.lev=',il     ,' CN xs(4pi*A0)=',
-C    >            4.d0*PI*PL_CN(0,il)
-C                write(*,*) 'LMAX=',PL_lmax(il),' NEJC=',NEJC
-C                PAUSE
-C              ENDIF
+C           Compound elastic and inelastic stored for final renormalization
+            CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
 
-               xs_norm = PL_CN(0,il)
-               IF(xs_norm.gt.0.d0) then
-                 DO na = 1, NDANG
-                   xs_cn = GET_DDXS(CANGLE(na),il)
 C
-C                  Normalizing calculated integrated XS ( from PL_CN() )
-C                  to the discrete level population (used for the isotropic calculation)
-                   CSAlev(na,il,Nejc) = 
-     >                     CSAlev(na,il,Nejc) + xs_cn/xs_norm*xscalc                     
-                 ENDDO
-               ELSE
-                 DO na = 1, NDANG
-                   xs_cn = GET_DDXS(CANGLE(na),il)
-                   CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn                     
-                 ENDDO
-               ENDIF
-            ELSE
-
+C		  Moved outside the decaying state loop to normalize 
+C           the CSAlev contribution by the ratio CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))  
+C           IF( (Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
+C
+C	        xs_norm = CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))
+C             DO na = 1, NDANG
+C               xs_cn = GET_DDXS(CANGLE(na),il)  
+C               CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn*xs_norm                     
+C             ENDDO
+C
+C           ELSE
+C
 C              Not the inelastic channel OR isotropic CN DA
 C              
-               DO na = 1, NDANG
-                  CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xscalc
-               ENDDO ! loop over angles
-            ENDIF ! on inelastics and non-isotropic
+C              xs_cn = CSComplev(il,NPRoject)/(4.d0*PI)  ! default isotropic
+C              DO na = 1, NDANG
+C                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn
+C              ENDDO ! loop over angles
+C
+C           ENDIF
+
          ENDIF ! on top  CN state, non-gamma with non-zero population 
+
       ENDDO   !loop over levels
 
       RETURN
@@ -917,7 +907,7 @@ C-----------Normal level without branching ratios
 C-----------Well... let it go down to the ground state
             gacs = POPlv(l,Nnuc)
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
-            POPlv(l,Nnuc) = 0.0
+            POPlv(l,Nnuc) = 0.d0
             egd = ELV(l,Nnuc)
 C
 C           Xs should be stored in the second bin to avoid losing 

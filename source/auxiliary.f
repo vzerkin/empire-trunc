@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4254 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-11-26 14:03:48 +0100 (Mi, 26 Nov 2014) $
+Ccc   * $Rev: 4286 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-02-09 00:28:35 +0100 (Mo, 09 Feb 2015) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -57,6 +57,8 @@ C      CSEahmslab = 0.d0
 
       REClev   = 0.d0
       CSDirlev = 0.d0
+      CSDirinel= 0.d0
+      CSComplev= 0.d0
 
       POPmax   = 0.d0
       CSPrd    = 0.d0
