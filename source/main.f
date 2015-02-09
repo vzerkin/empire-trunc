@@ -1,6 +1,6 @@
-cc   * $Rev: 4242 $
+cc   * $Rev: 4287 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
+Ccc   * $Date: 2015-02-09 14:55:21 +0100 (Mo, 09 Feb 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -556,11 +556,15 @@ C
       IF (EIN.LT.0.0D0) THEN
           CALL end_of_calc()
       ELSE
+          WRITE (8,*)
+          WRITE (8,'(1x,61(''=''))')
           WRITE (8,
      &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
           WRITE (8,'(1x,61(''=''))')
           WRITE (8,*)
 
+          WRITE (12,*) ' '
+          WRITE (12,'(1x,61(''=''))')
           WRITE (12,
      &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
           WRITE (12,'(1x,61(''=''))')

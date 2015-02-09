@@ -1,3 +1,4 @@
+$DEBUG
 Ccc   * $Rev: 3705 $
 Ccc   * $Author: rcapote $
 Ccc   * $Date: 2014-01-04 22:01:02 +0100 (Sat, 04 Jan 2014) $
@@ -200,6 +201,14 @@ C---------proton or alpha without storing emitted gammas in the spectra.
 C
 C---------Write elastic to tape 12 and to tape 68
  1460     IF (nnuc.EQ.mt2) THEN
+
+            WRITE (8,*)
+            WRITE (8,*) ' Incident energy (CMS)      ',sngl(EIN), ' MeV'
+            WRITE (8,*) ' Shape elastic cross section',
+     &                       sngl(ELAred*ELAcs), ' mb'
+            WRITE (8,*) ' CN elastic cross section   ',
+     &                     sngl(4.d0*PI*ELCncs),' mb'
+
             WRITE (12,*) ' '
             WRITE (12,
      &             '('' ELASTIC CROSS SECTION= '',1P,E12.5,'' mb'')')
@@ -246,8 +255,8 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
 
              IF(CN_isotropic .or. PL_CN(0,LEVtarg).le.0.d0) then   
 C
-C              WRITE (8,*)
-C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
+               WRITE (8,*)
+     &          ' Isotropic Elastic=', sngl(ELCncs), ' mb/str'
 
                DO iang = 1, NDANG
                  cel_da(iang) = ELCncs ! isotropic
@@ -270,6 +279,9 @@ C    &          '    Elastic=', sngl(ELCncs), ' mb/str'
              ELSE
 
                xs_norm = ELCncs/PL_CN(0,LEVtarg)
+
+               WRITE (8,*) ' CN elas. cross section (BB)',
+     &             sngl(4.d0*PI*PL_CN(0,LEVtarg)),' mb'
 
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
@@ -303,21 +315,19 @@ C	         write(*,*) 'NORM=',xs_norm
                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
                ENDDO
 
+C--------------PRINT compound elastic
                gang = 180.d0/(NDAng - 1)
                angstep = 180.d0/(NANgela - 1)
  
-               IF(.NOT.CN_isotropic) then   
-                 WRITE (8,99016)
-                 WRITE (8,99020)
-                 DO iang = 1, NANgela/4 + 1
-                   imint = 4*(iang - 1) + 1
-                   imaxt = MIN0(4*iang,NANgela)
-                   WRITE (8,99025) 
-     &               ((j - 1)*angstep,cel_da(j),j = imint,imaxt)
-                 ENDDO
-                 WRITE (8,*)
-                 WRITE (8,*)
-               ENDIF
+               WRITE (8,99016)
+               WRITE (8,99020)
+               DO iang = 1, NANgela/4 + 1
+                 imint = 4*(iang - 1) + 1
+                 imaxt = MIN0(4*iang,NANgela)
+                 WRITE (8,99025) ((j - 1)*angstep,
+     &                  cel_da(j),j = imint,imaxt)
+               ENDDO
+               WRITE (8,*)
 
                WRITE (12,'(9X,8E15.5)') 
      &            ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
@@ -738,10 +748,11 @@ C            WRITE (12,'(1X,/,10X,40(1H-),/)')
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
 
-	       if(nnuc.eq.1) then
-               WRITE (8,
+             WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
-               WRITE (8,'(1X,/,10X,40(1H-),/)')
+             WRITE (8,'(1X,/,10X,40(1H-),/)')
+
+	       if(nnuc.eq.1) then
                WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
@@ -1126,8 +1137,7 @@ C
       ENDIF
 
       TOTcsfis = TOTcsfis + CSFis
-C-----Add compound elastic to shape elastic before everything falls
-C-----down on the ground state
+
       IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0 .AND. ncollx.GT.0) then
 C  -----Locate position of the projectile among ejectiles
         CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -1147,12 +1157,16 @@ C
           WRITE(8,*) ' '
           DO iang = 1, NDANG
             WRITE (8,99035) (iang - 1)*gang,
+     &	      ELAred*elada(iang)+CSAlev(iang,1,nejcec),
      &               (CSAlev(iang,ICOller(ilv),nejcec),
-     &               ilv = 1,MIN(its,10)) 
+     &               ilv = 2,MIN(its,10)) 
           ENDDO
           WRITE(8,*) ' '
-          WRITE(8,99041) 1,(POPlv(ICOller(ilv),nnurec),
-     &               ilv= 1,MIN(its,10))
+          WRITE(8,99041) 1,
+     &        ELAred*ELAcs + 4.d0*pi*PL_CN(0,LEVtarg),                          
+C    &                     POPlv(1,nnurec),
+     &            (POPlv(ICOller(ilv),nnurec),
+     &               ilv= 2,MIN(its,10))
 C
           IF(its.gt.10) THEN
             WRITE(8,*) ' '
@@ -1212,7 +1226,6 @@ C         number of discrete levels is limited to 40
      &                 ilv = 31,MIN(its,40))
           ENDIF
           WRITE (8,*) ' '
-
         ENDIF	! CSAlev(1,ICOller(2),nejcec).GT.0
 
       ENDIF
@@ -1392,7 +1405,9 @@ C              WRITE (8,*)
      &        46x,40('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',/)
 99020 FORMAT (' ',5x,4('    TETA ',2x,'D.SIGMA/D.OMEGA',6x),/)
 99025 FORMAT (' ',5x,4(1p,e12.5,2x,e12.5,6x))
-99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
+C99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
+99029 FORMAT (/' ',40x,
+     &       'ELASTIC AND INELASTIC DIFFERENTIAL CROSS-SECTION',/,
      &              ' ',46x,'    (including compound + direct)',/,' '
      &              ' ',46x,' (only discrete levels are listed)',/,' '
      &                 ,46x,36('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',
@@ -1403,6 +1418,7 @@ C              WRITE (8,*)
 99033 FORMAT ('        ',9(4x,f4.1,'/',f5.4))
 99034 FORMAT ('        ',10(4x,f4.1,'/',f5.4))
 99035 FORMAT (1x,f5.1,3x,11(2x,E12.6))
+99039 FORMAT (' COMP.ELASTIC ',E12.6,' mb')
 99041 FORMAT (' TOT.INEL',I1,1x,11(E12.6,2x))
 C
 99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
