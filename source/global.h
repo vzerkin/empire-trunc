@@ -1,6 +1,6 @@
-! $Rev: 4286 $
+! $Rev: 4288 $
 ! $Author: rcapote $
-! $Date: 2015-02-09 00:28:35 +0100 (Mo, 09 Feb 2015) $
+! $Date: 2015-02-09 14:59:01 +0100 (Mo, 09 Feb 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -122,8 +122,7 @@
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,   &
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),  &
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,    &
-     &                 CINred(ndlv), CELcor, Emax_tlj, QQInc(0:NDNUC),  &
-     &                 CSDirinel(ndlv,0:ndejc)  
+     &                 CINred(ndlv), CELcor, Emax_tlj, QQInc(0:NDNUC)
       
       CHARACTER*21 REAction(ndnuc)
       CHARACTER*200 EMPiredir
@@ -254,7 +253,7 @@
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
      &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
-     &                 RECcse, POPcon, POPdis, CSDirinel,               &
+     &                 RECcse, POPcon, POPdis,                          &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
