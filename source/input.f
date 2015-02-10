@@ -1,6 +1,6 @@
-!cc   * $Rev: 4274 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-02-01 23:30:12 +0100 (So, 01 Feb 2015) $
+!cc   * $Rev: 4291 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2015-02-10 16:30:11 +0100 (Di, 10 Feb 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3945,6 +3945,17 @@ C--------PCROSS input
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
      &  '' (Recommended~1.5)'')') MFPp
               endif
+            ELSE
+              WRITE (8,
+     &'('' ERROR: PCROSS = '',F5.2,'' is outside valid range, '',
+     &''which is 0.5 < PCROSS < 3.0'')') val
+              WRITE (12,
+     &'('' ERROR: PCROSS = '',F5.2,'' is outside valid range, '', 
+     &''which is 0.5 < PCROSS < 3.0'')') val
+              WRITE (*,
+     &'('' ERROR: PCROSS = '',F5.2,'' is outside valid range, '', 
+     &''which is 0.5 < PCROSS < 3.0'')') val
+              STOP 
             ENDIF
             GOTO 100
          ENDIF
