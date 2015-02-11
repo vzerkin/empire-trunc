@@ -240,9 +240,6 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
               WRITE(8,*) 
      &        'CN angular distribution assumed isotropic at Einc = ',
      &        sngl(EINl)
-              WRITE(12,*)      
-     &        'CN angular distribution assumed isotropic at Einc = ',
-     &        sngl(EINl)
               WRITE(8,*)
             endif  
 
