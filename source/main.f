@@ -1,6 +1,6 @@
-cc   * $Rev: 4287 $
+cc   * $Rev: 4295 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-09 14:55:21 +0100 (Mo, 09 Feb 2015) $
+Ccc   * $Date: 2015-02-11 14:59:17 +0100 (Mi, 11 Feb 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -556,19 +556,34 @@ C
       IF (EIN.LT.0.0D0) THEN
           CALL end_of_calc()
       ELSE
-          WRITE (8,*)
-          WRITE (8,'(1x,61(''=''))')
+          WRITE (8,'(61(''=''))')
           WRITE (8,
-     &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
-          WRITE (8,'(1x,61(''=''))')
-          WRITE (8,*)
+     &'('' Reaction '',A2,''+ '',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') SYMbe(0),INT(A(0)), SYMb(0), EIN
+          WRITE (8,'(61(''=''))')
 
           WRITE (12,*) ' '
-          WRITE (12,'(1x,61(''=''))')
+          WRITE (12,'(61(''=''))')
           WRITE (12,
-     &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
-          WRITE (12,'(1x,61(''=''))')
+     &'('' Reaction '',I3,A2,''+'',I3,A2,'' at incident energy '',
+     &    1P,D10.3, '' MeV (LAB)'')') INT(AEJc(0)), SYMbe(0), 
+     &    INT(A(0)), SYMb(0), EIN
+          WRITE (12,'(61(''=''))')
           WRITE (12,*) ' '
+
+C         WRITE (8,*)
+C         WRITE (8,'(1x,61(''=''))')
+C         WRITE (8,
+C    &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
+C         WRITE (8,'(1x,61(''=''))')
+C         WRITE (8,*)
+
+C         WRITE (12,*) ' '
+C         WRITE (12,'(1x,61(''=''))')
+C         WRITE (12,
+C    &'('' Incident energy '',1P,D10.3, '' MeV (LAB)'')') EIN
+C         WRITE (12,'(1x,61(''=''))')
+C         WRITE (12,*) ' '
 
       ENDIF
 
@@ -684,20 +699,20 @@ C
 C     Changing CN-isotropic to false if energy is too high as CN
 C     decay to discrete levels is negligible         
 C     ELV(NLV(0),0) is the energy of the last discrete level of the target nucleus
-      if(.not.CN_isotropic) then    
+C     if(.not.CN_isotropic) then    
 C       Only for actinides, more conditions need to be added        
 C       depending on odd/even properties and mass number
-        if(A(0).gt.220 .and. EIN.gt.8.d0) then
-          CN_isotropic = .TRUE.
-          WRITE(8,*)
-          WRITE(8,*) 
-     &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
-          WRITE(*,*)      
-          WRITE(*,*) 
-     &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
-          WRITE(8,*)
-        endif  
-      endif
+C       if(A(0).gt.220 .and. EIN.gt.8.d0) then
+C         CN_isotropic = .TRUE.
+C         WRITE(8,*)
+C         WRITE(8,*) 
+C    &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
+C         WRITE(*,*)      
+C         WRITE(*,*) 
+C    &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
+C         WRITE(8,*)
+C       endif  
+C     endif
 
       RETURN
       END

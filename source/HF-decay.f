@@ -201,10 +201,13 @@ C
 C---------Write elastic to tape 12 and to tape 68
  1460     IF (nnuc.EQ.mt2) THEN
 
+C           ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
+C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
             WRITE (8,*)
             WRITE (8,*) ' Incident energy (CMS)      ',sngl(EIN), ' MeV'
             WRITE (8,*) ' Shape elastic cross section',
      &                       sngl(ELAred*ELAcs), ' mb'
+            
             WRITE (8,*) ' CN elastic cross section   ',
      &                     sngl(4.d0*PI*ELCncs),' mb'
 
@@ -231,25 +234,16 @@ C---------Write elastic to tape 12 and to tape 68
      &                (FLOAT(iang - 1)*delang,iang = 1,NANgela)
             ENDIF
 
-C           ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
-C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
-
             if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
               CN_isotropic = .TRUE.
               WRITE(8,*)
               WRITE(8,*) 
-     &        'CN angular distribution assumed isotropic at Einc = ',
+     &        ' CN angular distribution assumed isotropic at Einc = ',
      &        sngl(EINl)
               WRITE(8,*)
             endif  
 
-            IF (ELCncs.EQ.0) then
-
-              WRITE (8,*) ' WARNING: CN elastic is 0'
-
-            ELSE
-
-             IF(CN_isotropic .or. PL_CN(0,LEVtarg).le.0.d0) then   
+            IF(CN_isotropic .or. PL_CN(0,LEVtarg).le.0.d0) then   
 C
                WRITE (8,*)
      &          ' Isotropic Elastic=', sngl(ELCncs), ' mb/str'
@@ -272,7 +266,7 @@ C
      &          (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                WRITE (12,*) ' '
 
-             ELSE
+            ELSE
 
                xs_norm = ELCncs/PL_CN(0,LEVtarg)
 
@@ -356,8 +350,6 @@ C--------------PRINT compound elastic
                WRITE (12,'(9X,8D15.8)') xs_norm*PL_CN(0,LEVtarg), 
      &            (xs_norm*PL_CN(iang-1,1),iang = 2,
      &                       min(NDAng,PL_lmax(LEVtarg)))
-
-             ENDIF
 
             ENDIF
 
@@ -700,7 +692,9 @@ C
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
              WRITE (12,*)
+             WRITE (12,*)
      &' ---------------------------------------------------------------'
+             WRITE ( 8,*)
              WRITE ( 8,*)
      &' ---------------------------------------------------------------'
              IF(abs(QPRod(nnuc) + ELV(LEVtarg,0)).gt.99.99) THEN
@@ -726,7 +720,7 @@ C
      &' ---------------------------------------------------------------'
              WRITE (8 ,*)
      &' ---------------------------------------------------------------'
-C            WRITE (12,*)
+             WRITE (12,*)
              WRITE (8 ,*)
 C            WRITE (12,
 C    &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
