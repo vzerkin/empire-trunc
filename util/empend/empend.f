@@ -1,6 +1,6 @@
+Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
 Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Thu, 12 Sep 2013) $
-Ccc   * $Id: empend.f$ 
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -121,6 +121,10 @@ C-V  14/02 - Include compound elastic MF3/MT50 (MF4 still pending).
 C-V        - Allow narrow printout of separation energies.
 C-V  14/12 - Trivial definition of unassigned variable.
 C-V        - Suppress printing MT50 (in SCNMF6) - interferes with NJOY.
+C-V  15/02 - Fix a problem with mesh densification of angular
+C-V          distributions.
+C-V        - Fix formatting when isomer-production cross sections are
+C-V          given.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -453,6 +457,10 @@ c...
       WRITE(LTT,991)
       WRITE(LTT,991) ' Initial list of MT numbers for MF3     '
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
+C... Suppress writing MT50 because it interferes with NJOY processing
+      DO J=1,NXS
+        IF(IWO(MTH-1+J).EQ.50) IWO(MTH-1+J)=-50
+      END DO
 c...
 c...
 c...  WRITE(LTT, * ) ' '
@@ -2643,9 +2651,7 @@ C* Test for elastic angular distributions of neutral particles
       END IF
 C* Test for compound-elastic Legendre coefficients
       IF(IZI.EQ.1 .AND. REC(1:20).EQ.'  CE Legendre coeffi'    ) THEN
-C...    -- Suppress output by -ve flag (interferes with NJOY)
-C...    MT= 50
-        MT=-50
+        MT=50
         GO TO 120
       END IF
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
@@ -2751,7 +2757,7 @@ C-D    by linear interpolation are removed.
 C-D
 C-D Formal parameters have the following meaning:
 C-D  LIN  Logical unit number of the EMPIRE short output.
-C-D  NEN  Number of outfoing particle energies.
+C-D  NEN  Number of outgoing particle energies.
 C-D  NAN  Number of angles at which the distribution is tabulated
 C-D  RWO  Work array, which contains on exit a packed matrix of
 C-D       dimensions RWO(NAN+1,NEN).
@@ -3363,11 +3369,12 @@ C* Allow for metastable targets
       IDCY=0
       NOQV=0
       IPOP=-1
+      ISOM=-1
 C* Read and check the energy
   201 READ (REC(51:60),994) EE
 c...
-c...  print *,' '
-c...  print *,'New energy point [MeV]',EE
+C...  print *,' '
+C...  print *,'New energy point [MeV]',EE
 c...
       EE = EE*1.E6
       IF(NEN.LE.0) GO TO 206
@@ -3429,10 +3436,11 @@ C* Read the reaction Q-value
       READ (REC(56:65),994) QQ
       QQ=QQ*1.E6
       QI=QQ
-C* Assign MT number from residual ZA
+C* Assign MT number from residual ZA (save MT into MTSV)
       MEQ=0
       CALL EMTIZA(IZI,IZA,JZA,MT,MEQ)
       IF(MT.EQ.0) MT=10*JZA+5
+      MTSV=MT
       NOQV=0
       IPOP=-1
 C* Test for discrete levels inelastic, (n,p) and (n,a) cross sections
@@ -3526,6 +3534,9 @@ C*    -- Allow for isomer production without blank line delimiter
       GO TO 310
 C*
 C* Isomer production cross section - ground state
+C*   EISO=Energy of the isomeric state
+C*   MISO=Number of the isomeric state
+C*   ISOM Flag that isomeric state is being processed
   220 CONTINUE
       EISO=0
       MISO=0
@@ -3543,6 +3554,10 @@ C*    -- Format options for backward compatibility (B.V. Carlson)
   226 QI  =QQ-EISO
       MT  =JZA*10+MISO
       NOQV=0
+      ISOM=1
+C...
+C...  print *,rec(1:66)
+C...
       GO TO 311
 C*
 C* Read the total cross section but exclude incident charged particles
@@ -3602,7 +3617,7 @@ C*      -- Check for significant differences
         END IF
         XSSUM=XSSUM+XS
 C...
-c...    print *,'ipop,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
+C...    print *,'ipop,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
 C...
       END IF
 C* Reconstruct Q-values from MT and the binding energies
@@ -3665,6 +3680,11 @@ C* Add cross section and gamma-production contributions
             XSG(NEN,IXS)=XSG(NEN,IXS)+XG/1000
           END IF
         END IF
+      END IF
+      IF(ISOM.GT.0) THEN
+        ISOM=0
+        MT  =MTSV
+        GO TO 218
       END IF
       IF(IPOP.LE.0) GO TO 110
 C* Assign next MT number from the same residual ZA, if present
@@ -3865,13 +3885,15 @@ C* Subtract the discrete levels
       XS=XC-XI
       XG=-1
       IF(XS.LE.XC*2.E-5) THEN
-c...        CPC=100*XS/XC
-c...        print *
-c...        print *, ' ---            Skip continuum for MT : ',MT0
-c...        print *, '                      Incident energy : ',EE
-c...        print *, '                  Total cross section : ',XC
-c...        print *, '       Sum of discrete cross sections : ',XI
-c...        print *, '       Continuum contribution percent : ',CPC
+C...
+C...    CPC=100*XS/XC
+C...    print *
+C...    print *, ' ---            Skip continuum for MT : ',MT0
+C...    print *, '                      Incident energy : ',EE
+C...    print *, '                  Total cross section : ',XC
+C...    print *, '       Sum of discrete cross sections : ',XI
+C...    print *, '       Continuum contribution percent : ',CPC
+C...
         XS=0.
       END IF
 C* Skip continuum if its contribution is negligible
@@ -4364,8 +4386,14 @@ C* Check if Legendre coefficients are given explicitly
         READ (LIN,891) REC
         READ (LIN,891) REC
         READ (REC(9:13),'(I5)') LHI
-        WRITE(LTT, * ) ' Found Elastic Legendre expansion of order',LHI
-        WRITE(LER, * ) ' Found Elastic Legendre expansion of order',LHI
+C...
+C...    WRITE(LTT,'(A,I4,A,1P,E10.3,A)') 
+C... &    ' Found Elastic Legendre expansion of order',LHI
+C... &   ,' at E=',EE,' eV'
+C...    WRITE(LER,'(A,I4,A,1P,E10.3,A)') 
+C... &    ' Found Elastic Legendre expansion of order',LHI
+C... &   ,' at E=',EE,' eV'
+C...
         IF(LHI.GE.LMX) STOP 'REAMF6 - LMX array capacity exceeded'
         IF(LHI.LE. 1 ) THEN
           PRINT *,'WARNING - Invalid expansion order'
@@ -4386,8 +4414,8 @@ C...    IF(LHI.LE.LOMX+1) THEN
         END IF
       END IF
 C*
-  432 PRINT *,'WARNING - Elastic angular distributions'
-     &       ,' reconstructed from tabular data'
+  432 PRINT *,'WARNING - Tabular data at used for '
+     &       ,'Elastic ang.distr. at E=',EE,' eV'
 C*
 C* Convert tabulated distribution to Legendre polynomial expansion
       LSC=LAN+NEP*(NAN+1)
@@ -4600,6 +4628,22 @@ C...          end do
 C...          if(ee.ge.1.5e6) stop
 C...      end if
 c...
+C*
+C* Check that all distributions are non-negative
+      DO I=1,NEP
+        K=L64+(I-1)*(NAN+1)
+        DO J=1,NAN
+          IF(RWO(K+j).LT.0) THEN
+            WRITE(LER,*) 'REAMF6 WARNING - Negative distributions found'
+     &                  ,' for MT',MT6,' at E',RWO(K)
+            WRITE(LTT,*) 'REAMF6 WARNING - Negative distributions found'
+     &                  ,' for MT',MT6,' at E',RWO(K)
+            WRITE(LTT,*) '         Angle',ANG(J),RWO(K+J)
+            RWO(K+J)=0
+          END IF
+        END DO
+      END DO
+C*
       LSC=L64+NEP*(NAN+1)
       LMX=MXR-LSC
       LOX=MIN(LOMX,NAN-1)
@@ -7011,6 +7055,7 @@ C-
       PARAMETER (MXEH=120)
       DIMENSION  ERHI(MXEH)
       DIMENSION  XP(NP),YP(NP),QQ(*),RWO(MXR)
+      ZRO=0
       ERR=0
       NLG=0
       LM0=LMX
@@ -7087,8 +7132,10 @@ C* and for negative distributions
    30 ERR=0
       YNP=YP(1)
       YNM=YP(1)
+C*    -- Count of calculated -ve distrib. at nodes and midpoints
       KNP=0
       KNM=0
+C*    -- Location of calculated -ve distrib. at nodes and midpoints
       JNP=0
       JNM=0
       JRE=0
@@ -7180,6 +7227,8 @@ C*    Force extra point if distribution negative at midpoint
         ELSE
           IP=JNM
         END IF
+        IP=MIN(IP,NP-1)
+        IP=MAX(IP, 2  )
         K=NNP-IP
         DO J=1,K
           RWO(LXP+NNP+1-J)=RWO(LXP+NNP-J)
@@ -7191,7 +7240,17 @@ C*    Force extra point if distribution negative at midpoint
 C*      Assign average value to midpoint
 C...        YPA=(YP1+YP2)/2
 C*      Assign log-average value to midpoint
-        YPA=SQRT(YP1*YP2)
+        YPA=SQRT(MAX(ZRO,YP1*YP2))
+c...
+C...    if(JNP.GE.NP) then
+C...      print *,'knm,knp,mns,jnp,jnm,ip,yp1,yp2'
+C... &           ,knm,knp,mns,jnp,jnm,ip,yp1,yp2
+C...      do j=1,nnp+1
+C...        print *,j,rwo(lxp-1+j),rwo(lyp-1+j)
+C...      end do
+C...      stop
+C...    end if
+c...
         RWO(LYP+IP)=YPA
         NNP=NNP+1
 C...
