@@ -1,6 +1,6 @@
-! $Rev: 4288 $
-! $Author: rcapote $
-! $Date: 2015-02-09 14:59:01 +0100 (Mo, 09 Feb 2015) $
+! $Rev: 4298 $
+! $Author: mherman $
+! $Date: 2015-02-19 08:07:45 +0100 (Do, 19 Feb 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -114,8 +114,7 @@
 !    &                 0:ndexclus),                                     &
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,       &
 !                      This array is only used in EXCLUSIVEL, commented &
-!    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      6
-!23456789012345678901234567890123456789012345678901234567890123456789012&
+!    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      &
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,     &
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,  &
      &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)&
@@ -258,8 +257,8 @@
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,     &
-     &                 D_Elv, D_Xjlv, D_Lvp, D_Def, D_Klv, D_Llv,       &
-     &                 D_nno, CSPfis, RECoil, SR_Ham_hw, SR_Ham_amb0,   &
+     &                 D_Elv, D_Xjlv, D_Lvp, D_Def,                     &
+     &                 CSPfis, RECoil, SR_Ham_hw, SR_Ham_amb0,          &
      &                 SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4, &
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3, &
      &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,   &
@@ -286,6 +285,7 @@
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
      &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,        &
+     &                  D_Klv, D_Llv,  D_nno,                           &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc, &
