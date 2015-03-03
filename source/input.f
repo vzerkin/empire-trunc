@@ -1,6 +1,6 @@
-!cc   * $Rev: 4300 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-03-03 09:05:26 +0100 (Di, 03 Mär 2015) $
+!cc   * $Rev: 4301 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-03-03 16:16:08 +0100 (Di, 03 Mär 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -598,6 +598,13 @@ C--------target
          ENDIF
 C--------projectile
          READ (5,*) AEJc(0), ZEJc(0)
+         IF (AEJc(0).GT.A(0)) THEN
+            WRITE (8,*) ' ERROR: Aproj > Atarget, please switch them !'
+            STOP ' ERROR: Aproj > Atarget, please switch them !'
+         ENDIF
+
+C--------ejectile 
+
          IF (AEJc(0).EQ.0 .AND. ZEJc(0).EQ.0) THEN
 C-----------GAMMA EMISSION
             SEJc(0) = 1
@@ -631,6 +638,10 @@ C        LVP(LEVtarg,0) = LVP(LEVtarg,0)*lpar
 C        RCN, We assume is only the target parity !!!
          XNEjc(0) = AEJc(0) - ZEJc(0)
          IZAejc(0) = INT(1000.*ZEJc(0) + AEJc(0))
+         IF (AEJc(0).gt.4) then
+           SEJc(0) = 0.
+           MAXj(0) = 1
+         ENDIF
          iz = INT(ZEJc(0))
          SYMbe(0) = SMAT(iz)
          QCC(3) = -e2pej
@@ -1302,43 +1313,27 @@ C
          ENDIF
 
 C        IF (CNAngd.NE.0 .and. LHRtw.EQ.0) THEN
-
 C           ! LHRtw = 1
-
 C           ! EHRtw = EIN + 0.5d0
-
 C           WRITE (8,*) ' '
-
 C           WRITE (8,*) 
 C    &' ERROR: Anisotropic angular distribution requested BUT'
 C    &' ERROR:   HRTW input keyword is 0 (turned off)        '
 C           STOP 'ERROR: CNANG=1 but HRTW=0 !!! (see long output)'
-
 C           WRITE (8,*) ' '
-
 C        ENDIF
 
          IF (LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
-
             LHRtw = 0
-
             EHRtw = 0.d0
-
             WRITE (8,*) ' '
-
             WRITE (8,*) ' WARNING!!!! HRTW has been turned off '
-
             WRITE (8,*) ' WARNING!!!! (It is not allowed for '
-
             WRITE (8,*) ' WARNING!!!! photo-nuclear reactions)'
-
             WRITE (8,*) ' '
-
          ENDIF
 
-
          IF (EMAx_tlj.LT.EHRtw) EMAx_tlj = EHRtw
-
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
@@ -3702,25 +3697,15 @@ C
 
       if(itmp.gt.3) then
         WRITE (8,*) 
-
         WRITE (8,*) EMPtitle(2:itmp)
-
         WRITE (*,*) 
-
         WRITE (*,*) EMPtitle(2:itmp)
-
 C     else
-
 C	  ! DEFAULT TITLE
-
 C       WRITE (8,*) 
-
 C       WRITE (8,*) 'DEFAULT TITLE'
-
 C       WRITE (*,*) 
-
 C       WRITE (*,*) 'DEFAULT TITLE'
-
       endif
       WRITE (8,*) ' '
       WRITE (8,*) 'Following options/parameters have been used'
@@ -3730,15 +3715,10 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) 'FAST ENERGY REGION'
       WRITE (12,*) ''
       if(itmp.gt.3) then
-
         WRITE (12,*) EMPtitle(2:itmp)
-
       else
-
 	  ! DEFAULT TITLE
-
         WRITE (12,*) 'DEFAULT TITLE'
-
       endif
 
       WRITE (12,*) '___________________________________________________'
@@ -3983,13 +3963,9 @@ C------------------------------------------------------------------------
                IF(Key_gdrgfl.EQ.6)WRITE(i812,
      &          '('' GDR parameters from RIPL/SLO-exp.data+'',
      &           ''Goriely calc.'')')
-
-
 C-----------   print  maximal gamma-ray multipolarity  'MAXmult'
 C              IF(MAXmult.GT.2)WRITE(i812,
-
                                WRITE(i812,
-
      &        '('' Gamma-transition multipolarity set to '',I4)')MAXmult
             ENDDO  
 c-----------end GDR
@@ -4008,7 +3984,6 @@ c-----------end GDR
      &'('' Reaction '',A2,''+ '',I3,A2,'' at incident energy '',
      &    1P,D10.3, '' MeV (LAB)'')') SYMbe(0),INT(A(0)), SYMb(0), EIN
             WRITE (8,'(61(''=''))')
-
             WRITE (12,*) ' '
             WRITE (12,'(61(''=''))')
             WRITE (12,
@@ -8878,15 +8853,16 @@ C-----previously I had a problem for be6 => be5 +n since mass be5 undefined
          zmx = MAX(Z(nnuc),zmx)
          zmn = MIN(Z(nnuc),zmn)
       ENDDO
+
       DO k = 1, NMASSE
          nixz = izaf(k)/1000
          nixa = MOD(izaf(k),1000)
          iz = izaf(k)/1000
          ia = MOD(izaf(k),1000)
 
-         IF (nixz.GE.zmn .AND. nixz.LE.zmx) THEN
-            CALL WHERE(izaf(k),nnuc,iloc)
-            IF (iloc.EQ.0) THEN
+         IF (nixz.GE.NINT(zmn) .AND. nixz.LE.NINT(zmx)) THEN
+           CALL WHERE(izaf(k),nnuc,iloc)
+           IF (iloc.EQ.0) THEN
                SHC(nnuc) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(nnuc),Z(nnuc),SHC(nnuc))
 C
@@ -8901,8 +8877,8 @@ C              Atomic masses
                AMAss(nnuc) = A(nnuc) +  XMAss(nnuc)/AMUmev
 C              Nuclear masses
 C              AMAss(nnuc) = A(nnuc) + (XMAss(nnuc) - iz*AMUele)/AMUmev   
-            ENDIF
-            IF (nixz.EQ.Z(0) .AND. nixa.EQ.A(0)) THEN
+           ENDIF
+           IF (nixz.EQ.NINT(Z(0)) .AND. nixa.EQ.NINT(A(0))) THEN
                SHC(0) = emicx(k)
                IF (SHNix.EQ.0.D0) CALL SHELLC(A(0),Z(0),SHC(0))
                IF(ABS(DEF(1,0)).LT.1.d-3) then
@@ -8929,62 +8905,60 @@ C              Atomic masses
                AMAss(0) = A(0) + XMAss(0)/AMUmev
 C              Nuclear masses
 C              AMAss(0) = A(0) + (XMAss(0)- iz*AMUele)/AMUmev   
-            ENDIF
+           ENDIF
 C
-         ELSE
+         ENDIF
 C
 C-----------set projectile/ejectile masses
 C
-C           Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
-            DO ii = 0, NDEJC
-               IF (nixz.EQ.ZEJc(ii) .AND. nixa.EQ.AEJc(ii)) THEN
-C                DEFprj = beta2x(k)
-                 DEFprj = 0.d0
-                 IF( AEJc(ii) .gt. 4 ) THEN ! for Heavy Ions
-                   call defcal(NINT(ZEJc(ii)),NINT(AEJc(ii)),beta2,ftmp)
-                   DEFprj = beta2
-                 ENDIF
-C                Atomic mass excess 
-                 XMAss_ej(ii) = EXCessmass(iz,ia)
+C        Values from ENDF manual 2009 are used for usual projectiles/ejectiles;
+         DO ii = 0, NDEJC
+           IF (nixz.EQ.NINT(ZEJc(ii)) .AND. nixa.EQ.NINT(AEJc(ii))) THEN
+C              DEFprj = beta2x(k)
+               DEFprj = 0.d0
+               IF( NINT(AEJc(ii)) .gt. 4 ) THEN ! for Heavy Ions
+                 call defcal(NINT(ZEJc(ii)),NINT(AEJc(ii)),beta2,ftmp)
+                 DEFprj = beta2
+               ENDIF
+C              Atomic mass excess 
+               XMAss_ej(ii) = EXCessmass(iz,ia)
 C
-C                Rounded ENDF values of nuclear masses  (without electron mass)
+C              Rounded ENDF values of nuclear masses  (without electron mass)
 C
-C                mn    neutron mass  1.008 665 amu 
-C                mp    proton mass   1.007 276 amu      ! bare proton (no electron)
-C                      hidrogen mass = mp + me = 1.0078245799                       
-C                ma    4He mass      4.001 506 amu 
-C                md    deuteron mass 2.013 553 amu 
-C                mt    triton mass   3.015 501 amu 
-C                m3He  3He mass      3.014 932 amu 
+C              mn    neutron mass  1.008 665 amu 
+C              mp    proton mass   1.007 276 amu      ! bare proton (no electron)
+C                    hidrogen mass = mp + me = 1.0078245799                       
+C              ma    4He mass      4.001 506 amu 
+C              md    deuteron mass 2.013 553 amu 
+C              mt    triton mass   3.015 501 amu 
+C              m3He  3He mass      3.014 932 amu 
 
-C                me    electron mass 5.485 799�10-4 amu 
+C              me    electron mass 5.485 799�10-4 amu 
 C
-C                Setting projectile/ejectiles mass 
+C              Setting projectile/ejectiles mass 
 C
-C                Nuclear masses following ENDF Manual 2009, so electron mass is not considered
-
-C                In general we assume that all incident and outgoing particles have nuclear masses
-C                   (i.e. they are stripped of electrons)
+C              Nuclear masses following ENDF Manual 2009, so electron mass is not considered
+C
+C              In general we assume that all incident and outgoing particles have nuclear masses
+C                 (i.e. they are stripped of electrons)
 C
 C              Nuclear masses
-                 EJMass(ii) = 
-     &              AEJc(ii) +(XMAss_ej(ii)- ZEJc(ii)*AMUele)/AMUmev
+               EJMass(ii) = 
+     &           AEJc(ii) +(XMAss_ej(ii)- ZEJc(ii)*AMUele)/AMUmev
 C
-C                Atomic masses 
-C                EJMass(ii) = AEJc(ii) + XMAss_ej(ii)/AMUmev
+C              Atomic masses 
+C              EJMass(ii) = AEJc(ii) + XMAss_ej(ii)/AMUmev
+           ENDIF
+         ENDDO
 
-             ENDIF
-            ENDDO
-
-         ENDIF
       ENDDO
 C-----Fermi energies calculated for all nuclei and projectile combinations
       DO nnuc = 0, NNUct
          iztar = Z(nnuc)
          iatar = A(nnuc)
          DO ii = 0, NDEJC
-            izpro = ZEJc(ii)
-            iapro = AEJc(ii)
+            izpro = NINT(ZEJc(ii))
+            iapro = NINT(AEJc(ii))
            if((iztar - izpro).ge.0 .and. (iatar - iapro).ge.0) then
               efermi = -0.5*(EXCessmass(iztar - izpro,iatar - iapro)
      &               - EXCessmass(iztar + izpro,iatar + iapro)
@@ -11712,9 +11686,7 @@ C             Skipping 1+/1- states  for levels higher than #15 (or in the conti
       CLOSE (32)
 
 C     write(*,*) DEFormed,sngl(DEF(1,0)),
-
 C    >      sngl(D_Def(1,2)),sngl(D_Def(2,2))
-
 
       OPEN (UNIT = 32,FILE = 'TARGET_COLL.DAT',STATUS = 'UNKNOWN')
       IF (.NOT.DEFormed) THEN

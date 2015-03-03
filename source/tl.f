@@ -1,7 +1,6 @@
-Ccc   * $Rev: 4274 $
+Ccc   * $Rev: 4301 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-01 23:30:12 +0100 (So, 01 Feb 2015) $
-
+Ccc   * $Date: 2015-03-03 16:16:08 +0100 (Di, 03 Mär 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -5972,6 +5971,7 @@ C
       DOUBLE PRECISION DSQRT
       DATA one/1.0D+00/
       DATA two/2.0D+00/
+
       ck2 = (two*AMUmev)/(HHBarc**2)
       mtot = Mi + Mt
       IF (Iopt.EQ.1) THEN
@@ -6000,28 +6000,29 @@ C           Amu = etoti*etott/(etoti + etott)
 C           Amu = Amu/AMUmev
          ENDIF
 C
-C--------From  CM to lab (the input quantity is Ecm)
+      ELSE ! (Iopt.NE.1) 
 C
-      ELSEIF (.NOT.Relcal) THEN
+C--------From  CM to lab (the input quantity is Ecm=E1)
 C
-C--------Classical    kinematics
+         IF (.NOT.Relcal) THEN
 C
-         El = E1*mtot/Mt
-         Ak2 = ck2*Mi*Mt/mtot*E1
-      ELSE
+C----------Classical    kinematics
 C
-C--------Relativistic kinematics
+           El = E1*mtot/Mt
+           Ak2 = ck2*Mi*Mt/mtot*E1
+         ELSE
 C
-         El = E1*(E1 + two*AMUmev*mtot)/(two*AMUmev*Mt)
-         p2 = E1*(E1 + two*AMUmev*mtot)*(E1 + two*AMUmev*Mi)
+C----------Relativistic kinematics
+C
+           El = E1*(E1 + two*AMUmev*mtot)/(two*AMUmev*Mt)
+           p2 = E1*(E1 + two*AMUmev*mtot)*(E1 + two*AMUmev*Mi)
      &        *(E1 + two*AMUmev*Mt)/((two*(E1+AMUmev*mtot))**2)
-         Ak2 = p2/(HHBarc*HHBarc)
-C        etoti = DSQRT((AMUmev*Mi)**2 + p2)
-C        etott = DSQRT((AMUmev*Mt)**2 + p2)
-C        Amu = etoti*etott/(etoti + etott)
-C        Amu = Amu/AMUmev
-C
-C
+           Ak2 = p2/(HHBarc*HHBarc)
+C          etoti = DSQRT((AMUmev*Mi)**2 + p2)
+C          etott = DSQRT((AMUmev*Mt)**2 + p2)
+C          Amu = etoti*etott/(etoti + etott)
+C          Amu = Amu/AMUmev
+         ENDIF
       ENDIF
 C
       END
