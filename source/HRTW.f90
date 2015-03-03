@@ -432,10 +432,10 @@
                      PL_lmax(-out%kres) = 2*in%l
                    ENDIF
 
-                   if(i==j) then
-                     stmp = out%t*out%rho 
-                   else
+                   if(i/=j.AND.out%kres<=0) then               ! Inelastic to discrete level
                      stmp = out%t*out%rho * CINRED(-out%kres) 
+                   else                                        ! Elastic and continuum
+                     stmp = out%t*out%rho 
                    endif
 
                    DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
