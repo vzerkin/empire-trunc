@@ -1,6 +1,6 @@
-!cc   * $Rev: 4294 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-02-11 13:44:52 +0100 (Mi, 11 Feb 2015) $
+!cc   * $Rev: 4300 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-03-03 09:05:26 +0100 (Di, 03 Mär 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -2851,6 +2851,19 @@ C
               IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
      >           XJLv(1,Nnuc) = 0.5d0
               ISIsom(1,Nnuc) = 0
+            ENDIF
+
+            IF (LVP(ilv,Nnuc).EQ.0) THEN
+               WRITE (8,'(''  WARNING:'')')
+               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
+     &                      chelem, izr
+               WRITE (8,'(''  WARNING: excited state No.'',I3,
+     &         ''has no parity '')') ilv
+!              Assuming natural parity; for odd A it is assumed that
+!              l=INT(l+s)=INT(J) while J=l-s case is ignored
+               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
+               WRITE (8, '(''  WARNING: assuming parity '',I2)')  
+     &         LVP(ilv,Nnuc)      
             ENDIF
 
             IF (ilv.NE.1) THEN
