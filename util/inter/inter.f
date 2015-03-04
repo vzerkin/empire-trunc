@@ -34,6 +34,8 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
+!-V         Version 8.08   March 2015       A. Trkov
+!-V                        Fix printing multiple isomeric states.
 !-V         Version 8.07   October 2013     A. Trkov
 !-V                        Improve numerical stability of Maxwellian
 !-V                        average cross sections at high spectrum
@@ -150,9 +152,9 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
 !
 !+++MDC+++
 !...VMS, UNX, ANSI, WIN, LWI, DVF
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !...MOD
-!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.07'
+!/      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.08'
 !---MDC---
 !
 !     Define variable precision
@@ -348,6 +350,7 @@ Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $
       INTEGER(KIND=I4) :: IDESC
       INTEGER(KIND=I4) :: MATP,MTP
       INTEGER(KIND=I4) :: MAT,MF,MT,NS
+      INTEGER(KIND=I4) :: NNS,JNS
       INTEGER(KIND=I4) :: I,I000
       REAL(KIND=R8) :: TZ
       REAL(KIND=R8) :: Z1,Z2
@@ -515,6 +518,13 @@ C...
       GO TO 80
 !
    45 JSECT = JSECT + 1
+      IF(MFH.EQ.10) THEN
+        NNS=N1H
+      ELSE
+        NNS=1
+      END IF
+      JNS=0
+   46 JNS=JNS+1
       CALL PRSEC
 C...
 C     print *,'read one xs set',JSECT,NSECT
@@ -522,7 +532,7 @@ C...
 !
 !     READING DONE, READ SEND RECORD IF LAST SECTION
 !
-      IF(JSECT.GE.NSECT) CALL SEND
+      IF(JNS.GE.NNS .AND. JSECT.GE.NSECT) CALL SEND
 !
 !     CHECK IF REQUESTED LIMITS WERE ACTUALLY USED IN THERMAL
 !       INTEGRATION
@@ -613,6 +623,10 @@ C...
    55 FORMAT(I4,I4,A2,6X,A2,I4,2X,A8,2X,2(1PE12.5),1PE11.4,             &       
      &        0PF8.5,1PE13.5,2(1PE12.5),I5)
       LINES = LINES+1
+!
+!     CHECK IF ALL SUB-SECTIONS WERE PROCESSED
+!
+      IF(JNS.LT.NNS) GO TO 46
 !
 !     CHECK IF ALL SECTIONS WERE PROCESSED
 !
@@ -1305,6 +1319,8 @@ c...        END IF
         ELSE
           FS = '*'
         END IF
+      ELSE
+        FS = ' '
       END IF
       N1 = N1H
       N2 = N2H
@@ -1315,32 +1331,32 @@ c...        END IF
       IST = 1
       ITOP = MIN0(IPMAX-1,N2)
       N2 = N2 - ITOP
-!
+!     
 !        READ IN NEXT PAGE
-!
+!     
    10    READ(JIN,'(6E11.4,14X)')(X(I),Y(I),I=IST,ITOP)
-!
+!     
 !        FIND 2200 M/S VALUE
-!
+!     
          IF(ETH.GE.X(1).AND.ETH.LE.X(ITOP))  THEN
             CALL FIND(ETH,C025,INTX)
          END IF
-!
+!     
 !        EXTRACT THERMAL POINT
-!
+!     
          IF(INTER_DATA%EZERO.GE.X(1).AND.                               &       
      &                   INTER_DATA%EZERO.LE.X(ITOP)) THEN
             CALL FIND(INTER_DATA%EZERO,CZERO,INTX)
          END IF
-!
+!     
 !        EXTRACT ANY OTHER POINT
-!
+!     
          IF(INTER_DATA%E14.GE.X(1).AND.INTER_DATA%E14.LE.X(ITOP)) THEN
             CALL FIND(INTER_DATA%E14,C14,INTX)
          END IF
-!
+!     
 !        THERMAL MAXWELLIAN INTEGRATION
-!
+!     
          IF(INTER_DATA%ITHER.NE.0)   THEN
             IF(X(1).LT.INTER_DATA%EHT.AND.                              &       
      &                     X(ITOP).GT.INTER_DATA%ELT) THEN
@@ -1349,9 +1365,9 @@ c...        END IF
                TIN1 = TIN1 + AAINT
             END IF
          END IF
-!
+!     
 !        RESONANCE INTEGRAL
-!
+!     
          IF(INTER_DATA%IRESI.NE.0) THEN
             IF(X(1).LT.INTER_DATA%EHRI.AND.                             &       
      &                          X(ITOP).GT.INTER_DATA%ELRI) THEN
@@ -1360,9 +1376,9 @@ c...        END IF
                TIN2 = TIN2 + AAINT
             END IF
          END IF
-!
+!     
 !        FISSION MAXWELLIAN INTEGRATION
-!
+!     
          IF(INTER_DATA%IFISSI.NE.0)   THEN
             IF(X(1).LT.INTER_DATA%EHFI.AND.                             &       
      &                         X(ITOP).GT.INTER_DATA%ELFI) THEN
@@ -1371,9 +1387,9 @@ c...        END IF
                TIN3 = TIN3 + AAINT
             END IF
          END IF
-!
+!     
 !        SEE IF MORE PAGES TO BE PROCESSED
-!
+!     
       IF(N2.GT.0) THEN
 !*****SAVE LAST POINT OF PREVIOUS PAGE
          X(1) = X(ITOP)
