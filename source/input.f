@@ -1,6 +1,6 @@
-!cc   * $Rev: 4301 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-03-03 16:16:08 +0100 (Di, 03 Mär 2015) $
+!cc   * $Rev: 4303 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-03-04 22:22:37 +0100 (Mi, 04 Mär 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -2852,8 +2852,8 @@ C
                WRITE (8,'(''  WARNING:'')')
                WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
-               WRITE (8,'(''  WARNING: excited state No.'',I3,
-     &         ''has no parity '')') ilv
+               WRITE (8,'(''  WARNING: excited state No. '',I3,
+     &         '' has no parity '')') ilv
 !              Assuming natural parity; for odd A it is assumed that
 !              l=INT(l+s)=INT(J) while J=l-s case is ignored
                LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
@@ -10297,11 +10297,9 @@ C
            CALctl = .TRUE.
 
            WRITE (8,
-
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
 
               WRITE (8,
-
      &  '('' OMP (TLs) calculations will be undertaken'')') 
 
 	     WRITE(8,*) 
@@ -10920,7 +10918,7 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')')
       i21p = 0
       i0p = 0
 
-	i1p = 0
+      i1p = 0
       i4p = 0
       i6p = 0
       i8p = 0
