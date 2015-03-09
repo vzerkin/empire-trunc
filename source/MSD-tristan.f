@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4133 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-10-02 23:50:00 +0200 (Do, 02 Okt 2014) $
+Ccc   * $Rev: 4305 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-03-09 01:07:02 +0100 (Mo, 09 Mär 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3112,10 +3112,10 @@ C-----total number of bins
 C
 C     We need statements below as long as discrete data are calculated in MSD
 C
-C      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
-C     & nexrt = next
-C      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
-C     & nexrt = next
+      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
+     & nexrt = next
+      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
+     & nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
