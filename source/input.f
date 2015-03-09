@@ -1,6 +1,6 @@
-!cc   * $Rev: 4303 $
+!cc   * $Rev: 4306 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2015-03-04 22:22:37 +0100 (Mi, 04 Mär 2015) $
+!cc   * $Date: 2015-03-09 06:43:09 +0100 (Mo, 09 Mär 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1479,8 +1479,8 @@ C--------set ECIS (.,1)
          ENDIF
 C
 C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 always)
-         IF (MSD.EQ.1) THEN
-            IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN
+         IF (MSD.EQ.1 .OR. MSD.EQ.2) THEN
+            IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN  ! non-nucleon projectile
                MSD = 0
                WRITE (8,*) ''
                WRITE (8,*)
@@ -1492,12 +1492,12 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
                IDNa(3,2) = 0
                IDNa(4,2) = 0
           ELSE
-               IF (NPRoject.EQ.1) THEN
-                 IF (DIRect.EQ.0) IDNa(1,2) = 1
-                 IDNa(2,2) = 1
-               ELSE ! (NPRoject.EQ.2) 
-                 IF (DIRect.EQ.0) IDNa(3,2) = 1
-                 IDNa(4,2) = 1
+               IF (NPRoject.EQ.1) THEN   ! neutron projectile
+                 IDNa(1,2) = MSD-1       ! discrete levels only if MSD=2
+                 IDNa(2,2) = 1           ! continnum always if MSD>0    
+               ELSE ! (NPRoject.EQ.2)    ! proton projectile
+                 IDNa(3,2) = MSD-1       ! discrete levels only if MSD=2
+                 IDNa(4,2) = 1           ! continnum always if MSD>0    
                ENDIF
                PESpin = 0
                WRITE (8,*)
@@ -1505,35 +1505,6 @@ C--------set MSD  (.,2) (with MSD=1 discrete only if ECIS not used, with MSD=2 a
             ENDIF
          ENDIF
 
-         IF (MSD.EQ.2) THEN
-            IF ( NPRoject.EQ.0 .OR. NPRoject.GT.2 ) THEN
-               MSD = 0
-               WRITE (8,*) ''
-               WRITE (8,*)
-     &          ' WARNING: MSD DISABLED FOR INCIDENT PARTICLES '
-               WRITE (8,*)
-     &          ' WARNING: OTHER THAN NUCLEONS, USE PCROSS     '
-               IDNa(1,2) = 0 ! MSD
-               IDNa(2,2) = 0
-               IDNa(3,2) = 0
-               IDNa(4,2) = 0
-            ELSE
-               IF (NPRoject.EQ.1) THEN
-                 IDNa(1,2) = 1
-                 IDNa(2,2) = 1
-                 PESpin = 0
-                 WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
-            ENDIF
-               IF (NPRoject.EQ.2) THEN
-                 IDNa(3,2) = 1
-                 IDNa(4,2) = 1
-                 PESpin = 0
-               ENDIF
-               WRITE (8,*)
-     &          ' WARNING: PE spin cut-off set as default (MSD is on)'
-            ENDIF
-         ENDIF
 C
 C--------set MSC  (.,3) (note no discrete transitions in MSC)
          IF (MSC.GT.0) THEN
