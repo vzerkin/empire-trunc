@@ -536,7 +536,7 @@ module ENDF_MF2_IO
     type (MF2_ml_subsection), intent(out) :: ml
 
     integer j,l,n
-    real x1,x2
+    real x1,x2,xtmp
 
     type (mf2_ml_spin_grp), pointer :: sg
     type (mf2_ml_chn), pointer :: chn
@@ -568,20 +568,35 @@ module ENDF_MF2_IO
         end do
         call read_endf(n, sg%nrs, n, sg%nx)
 
-        allocate(sg%er(sg%nrs),stat=n)
-        if(n .ne. 0) call endf_badal
-        do j = 1,sg%nch
-            chn => sg%chn(j)
-            allocate(chn%gam(sg%nrs),stat=n)
-            if(n .ne. 0) call endf_badal
-        end do
+!        if(sg%nrs.eq.0) sg%nx=1
 
-        do j = 1,sg%nrs
-            call read_endf(sg%er(j))
-            do n = 1,sg%nch
-                call get_endf(sg%chn(n)%gam(j))
+        if(sg%nrs.eq.0)then
+
+            ! no resonances in this spin group, skip a line and keep going
+
+            sg%nx=1
+            call read_endf(xtmp,xtmp,xtmp,xtmp,xtmp,xtmp)
+
+        else
+
+            ! this spin group has resonances, read them
+
+            allocate(sg%er(sg%nrs),stat=n)
+            if(n .ne. 0) call endf_badal
+            do j = 1,sg%nch
+                chn => sg%chn(j)
+                allocate(chn%gam(sg%nrs),stat=n)
+                if(n .ne. 0) call endf_badal
             end do
-        end do
+
+            do j = 1,sg%nrs
+                call read_endf(sg%er(j))
+                do n = 1,sg%nch
+                    call get_endf(sg%chn(n)%gam(j))
+                end do
+            end do
+        
+        end if
 
         nullify(sg%bck)
         nullify(sg%psf)
