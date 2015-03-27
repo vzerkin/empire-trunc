@@ -48,8 +48,8 @@ else ifeq ($(FC),lf90)
 
 endif
 
-OBJF =	empend.o
-
+OBJF =	empend_routines.o empend_main.o
+ 
 empend:   $(OBJF)
 	$(FC) -o $@ $(OBJF)
 
