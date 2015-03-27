@@ -54,6 +54,33 @@ contains
     !
     !-----------------------------------------------------------------------------
 
+    !
+    ! PLNLEG computes the Legendre polynomials up to order NL-1 at fix value of UU
+    !
+    ! Test against: 
+    !
+    !   x^3 = (2/5) * P_3(x) + (3/5) * P_1(x)
+    !
+    subroutine test_POLLG1
+        integer:: NL
+        parameter(NL=4)
+        real, dimension (NL):: QL=(/ 0.0, 0.6, 0.0, 0.4 /)
+        real:: UU, POLLG1, answer
+        integer:: i=0, Ni=10
+        do while (i.le.Ni)
+            UU = -1.0 + i*2.0/Ni 
+            answer = UU**3  
+            call assert_close( answer, POLLG1(UU,QL,NL), 1e-6, 1e-6, 'Legendre series representation of UU**3'   )
+            i = i + 1
+        end do
+    end subroutine test_POLLG1
+
+
+    !
+    ! PLNLEG computes the Legendre polynomials up to order NL-1 at fix value of UU
+    !
+    ! Test against known values of P_L(x)
+    !
     subroutine test_PLNLEG
         integer::NL
         parameter(NL=4)
