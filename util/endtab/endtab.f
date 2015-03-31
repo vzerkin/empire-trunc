@@ -27,6 +27,7 @@ C-V  14/02 Re-design to accurately print values at interval boundaries.
 C-V  14/03 Guard against upper boundary outside data range.
 C-V  14/05 Fix typo (applicable when Ehi > last point on file).
 C-V  14/06 Implement ratios of fission spectra to Maxwellian.
+C-V  15/03 Fix bug printing NaN for PFNS ratio to Maxwellian at 0 eV.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -536,10 +537,11 @@ C* Write the data to the PLOTTAB file
         EEB=ES(NP)
         SC=YTGPNT(NP,ES,SG,EEA,EEB)
         PWR=0.5
-        FF=0
-        IF(EE2.GT.0) FF=THRMXW(EE2,TMXW,PWR)
-        SG2=SG2/FF/SC
-        UG2=UG2/FF/SC
+        FF=THRMXW(EE2,TMXW,PWR)
+        IF(FF .GT.0) THEN
+          SG2=SG2/FF/SC
+          UG2=UG2/FF/SC
+        END IF
       END IF
    81 IF(KK.GT.MPT) THEN
         PRINT *,' ENDTAB ERROR - MPT limit',MPT,KK
