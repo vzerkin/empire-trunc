@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4305 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-03-09 01:07:02 +0100 (Mo, 09 Mär 2015) $
+$DEBUG
+Ccc   * $Rev: 4314 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-04-03 00:23:34 +0200 (Fr, 03 Apr 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -36,7 +37,7 @@ C COMMON variables
 C
       DOUBLE PRECISION AI, ALSin, ANGle(NDANGecis), AR, CLRn(8,8),      
      &                 CNOrin(8,8), CROs1(30,49,2*NDANGecis),           
-     &                   CROs2(30,49,2*NDANGecis),BET2in, GRin(2),      
+     &                 CROs2(30,49,2*NDANGecis),BET2in, GRin(2),      
      &                 DTHeta, ECEntr(5), EFItin(8,8), EOUtmi, EOUtmx,
      &                 ESTep, ETMax, ETMin, EXTcom(10), FACb,
      &                 FAClog(500), FFAc1d(2), FFAc2d(2), FFAc3d(2),
@@ -128,7 +129,8 @@ C     nangle = NDANGecis
       KEXcom(3) = 10
       KEXcom(4) = 0
       icpx = KTRl(1)
-      iout2 = KTRl(2)
+C     iout2 = KTRl(2)
+      iout2 = 1
       NQ1x = KEXcom(1)
       NQ2x = KEXcom(2)
       nq12x = KEXcom(3)
@@ -269,10 +271,10 @@ C
                   kb = ka - 1 + nangle
                   IF (icp.EQ.1) WRITE (8,99030) (ANGle(n),n = 1,nangle)
 99030             FORMAT (//20X,'1-STEP INPUT LEFT CROSS SECTIONS'//' ',
-     &                    ' L1',2X,'Q1',2X,9F12.2)
+     &                    ' L1',2X,'Q1',2X,91F12.2)
                   IF (icp.EQ.2) WRITE (8,99035) (ANGle(n),n = 1,nangle)
 99035             FORMAT (//20X,'1-STEP INPUT RIGHT CROSS SECTIONS'//
-     &                    ' ',' L1',2X,'Q1',2X,9F12.2)
+     &                    ' ',' L1',2X,'Q1',2X,91F12.2)
                   DO i1 = 1, IC1x
                      l1 = KEX3*(i1 - 1)
                      q1 = QMAx - QSTep
@@ -280,7 +282,7 @@ C
                         q1 = q1 + QSTep
                         WRITE (8,99040) l1, q1,
      &                                  (CROs1(nq,i1,na),na = ka,kb)
-99040                   FORMAT (' ',I3,F6.2,9E12.5)
+99040                   FORMAT (' ',I3,F6.2,91E12.5)
                      ENDDO
                   ENDDO
                ENDDO
@@ -292,10 +294,10 @@ C
                kb = ka - 1 + nangle
                IF (icp.EQ.1) WRITE (8,99045) (ANGle(n),n = 1,nangle)
 99045          FORMAT (//20X,'2-STEP INPUT LEFT CROSS SECTIONS'//' ',
-     &                 ' L1 L2  Q1',4X,'Q2  ',9F12.2)
+     &                 ' L1 L2  Q1',4X,'Q2  ',91F12.2)
                IF (icp.EQ.2) WRITE (8,99050) (ANGle(n),n = 1,nangle)
 99050          FORMAT (//20X,'2-STEP INPUT RIGHT CROSS SECTIONS'//' ',
-     &                 ' L1 L2  Q1',4X,'Q2  ',9F12.2)
+     &                 ' L1 L2  Q1',4X,'Q2  ',91F12.2)
                ic = 0
                DO i1 = 1, IC1x
                   l1 = KEX3*(i1 - 1)
@@ -315,7 +317,7 @@ C
                            nq = nq + 1
                            WRITE (8,99060) l1, l2, q1, q2,
      &                            (CROs2(nq,ic,n),n = ka,kb)
-99060                      FORMAT (' ',2I3,2F6.1,9E12.5)
+99060                      FORMAT (' ',2I3,2F6.1,91E12.5)
                         ENDDO
                      ENDDO
                   ENDDO
@@ -2562,7 +2564,7 @@ C
      &                 fq2(6,6), gmat(15,15), piece, pxsec, q1, q2,
      &                 qq(5), rb12, s1, s2, s3, sg(3*(NDEx+25)), sigm,
      &                 sn, sum, sumpx(3*(NDEx+25),2), x, x2, xl, xq, yl,
-     &                 zz(15), f1(15), ftmp, dtmp
+     &                 zz(15), f1(15), ftmp, dtmp, f4tmp
       REAL hhh
       INTEGER i, ic, icp, icpmx, icpx, ier, j, jx, k, k1, k2, k2n,
      &        kc, kcp, kcpmx, kkp, kq, kr, krtx, kx, ky, l, l1p1, l2p1,
@@ -2884,10 +2886,26 @@ C-----------------------suggestion
                         kcp = kcpmx*icp - icpmx + kr
                         Crose(ne,na,kcp) = Crose(ne,na,kcp)
      &                     + sumpx(icp,1)
+C                       if(na.ge.3 .and. na.le.4 .and. ne.eq.70) then
+C                         write(*,*) ' na=',na,' ne=',ne 
+C                         write(*,*)  kcp,sngl(Crose(ne,na,kcp))
+C                       endif
                      ENDDO
                   ENDDO
                ENDDO
             ENDDO
+
+C           if(na.ge.3 .and. na.le.4) then
+C             write(*,*) '********************'
+C             ne=70
+C             write(*,*) ' na=',na,' ne=',ne 
+C             write(*,*) 1,kcpmx + 1
+C             write(*,*) sngl(Crose(ne,na,1)),
+C    >                   sngl(Crose(ne,na,kcpmx + 1))
+C             write(*,*) NAVerg,KTRl(7),kr
+C           endif
+C	      pause
+
             IF (NAVerg.GT.0) THEN
                IF (KTRl(7).EQ.1 .AND. kr.EQ.1) GOTO 50
 C
@@ -2916,6 +2934,7 @@ C
                   ENDDO
                ENDDO
             ENDIF
+
             DO ne = 1, Nbinx
                DO k = 1, 2
                   kx = k*kcpmx
@@ -2927,6 +2946,7 @@ C
                   ENDDO
                ENDDO
             ENDDO
+
    20       IF (IOUt.GT.3) THEN
                WRITE (8,99010) ANGle(na), delta,
      &                         (FAC1d(n),FAC2d(n),FAC3d(n),n = 1,NFAc12)
@@ -2948,6 +2968,7 @@ C              WRITE (66,99015) ANGle(na), Nbinx
             a3 = 0.d0
             k1 = kcpmx
             k2 = 2*k1
+
             DO ne = 1, Nbinx
                eout = eout - ESTep
                IF (ne.NE.1) THEN
@@ -2962,6 +2983,15 @@ C              WRITE (66,99015) ANGle(na), Nbinx
                      s3 = 0.5*(Crose(ne,na,3) + Crose(ne,na,7))
                      a3 = 50.*(Crose(ne,na,3) - Crose(ne,na,7))/sigm
                   ENDIF
+
+C                 if(ne.eq.70 .and.
+C    >               na.ge.3 .and. na.le.4) then
+C                  write(*,*) 'eout=',eout,' na=',na,' ne=',ne, ' SUM!!'
+C                  write(*,*) sngl(s1), 
+C    >               sngl(Crose(ne,na,1)),sngl(Crose(ne,na,k1 + 1))
+C                  write(*,*) '---------'
+C                 endif
+
                   IF (NFAc12.NE.0) THEN
                      DO nad = 1, NFAc12
                         sn = FAC1d(nad)*s1 + FAC2d(nad)*s2
@@ -2981,13 +3011,13 @@ C                    WRITE (66,99020) eout, s1, s2, sigm
 C                 necs = Nbinx - ne + 2
 C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
-                  sigm = sigm/2.0
+C                 sigm = sigm/2.0
 C-----------------store ddx to continuum
                   IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
      &                THEN
-                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
+                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm/2
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
 C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
@@ -2995,12 +3025,29 @@ C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
      &                    necs.GT.(NEX(nnur)-1)) THEN
 C    &                    necs.GT.(NEX(nnur)  )) THEN
 C    &                    necs.GT.(NEX(nnur)+1)) THEN
-                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm
+                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm/2
                   ENDIF
                ENDIF
-            ENDDO
-   50    ENDDO
+            ENDDO	 ! over ne
+   50    ENDDO ! over na
       ENDDO
+C===========================================================================
+C	A problem was identified in the MSD calculation of the DDXS, the first
+C     three angles had a trend lower than the rest, reason unknown.
+C     This was causing problems in the Legendre fit of angular distributions. 
+C   
+C     A patch below was proposed, RCN & MH, 04/2015
+C
+      DO ne = 2, Nbinx
+        necs = (Nbinx - ne)/2 + 2
+        DO na = 1, 3
+          f4tmp = CSEa(necs,na,nej,1)
+          if(f4tmp.lt.CSEa(necs,4,nej,1)) 
+     >        CSEa(necs,na,nej,1) = CSEa(necs,4,nej,1)
+        ENDDO
+      ENDDO
+C===========================================================================
+C
 C     IF(IOUT.GT.3) CLOSE(66)
       REWIND (14)
       k1 = kcpmx
@@ -3008,8 +3055,9 @@ C-----integrate angular distributions over angle (and energy)
       nmax = MIN(NDEx,Nbinx/2+2)
 C-----if ECIS active use only continuum part of the MSD spectrum
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
-C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
-      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
+C     Adding one more bin to MSD spectra
+      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
+C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
 
       WRITE(8,*) ' '
       WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
@@ -3020,6 +3068,10 @@ C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
             ftmp = ftmp +     CSEa(ne,nangle - na + 1,nej,1)
             csfit(na) = CSEa(ne,nangle - na + 1,nej,1)
          ENDDO
+C
+C        write(*,'(i3,2x,4(f7.4,1x))')  
+C    >     ne,csfit(88),csfit(89),csfit(90),csfit(91)
+C
          if(ftmp.le.0.d0) cycle
 C        csfit(NDANGecis)
          CALL LSQLEG(CANgler,csfit,nangle,qq,5,ier)
