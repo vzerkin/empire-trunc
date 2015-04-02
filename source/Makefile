@@ -1,6 +1,6 @@
-#$Rev: 4204 $
-#$Author: bcarlson $
-#$Date: 2014-11-13 02:41:14 +0100 (Do, 13 Nov 2014) $
+#$Rev: 4315 $
+#$Author: dbrown $
+#$Date: 2015-04-03 00:56:00 +0200 (Fr, 03 Apr 2015) $
 
 # set default compilers:
 
@@ -29,15 +29,15 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native 
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
+  EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -march=native
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
