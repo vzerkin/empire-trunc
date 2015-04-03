@@ -1,6 +1,6 @@
-!cc   * $Rev: 4306 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-03-09 06:43:09 +0100 (Mo, 09 Mär 2015) $
+!cc   * $Rev: 4319 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-04-03 20:22:29 +0200 (Fr, 03 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -2752,8 +2752,9 @@ C---------levels for nucleus NNUC copied to file *.lev
      &     nmk = NCOmp(Nnuc)
 
           DO ilv = 1, nmk
-
-            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
+C           READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
+C           Updating to the new RIPL level format
+            READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.3,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
 
@@ -2779,7 +2780,7 @@ C
               GOTO 200
             ENDIF
 C
-C             if ECONT input keyword present, then it takes precedence 
+C           if ECONT input keyword present, then it takes precedence 
 C
             IF (ECOnt(Nnuc).GT.0.d0 .and. ECOnt(Nnuc).LT.qn) THEN
               IF (ELV(ilv,Nnuc).GT.ECOnt(Nnuc)) THEN
@@ -3415,7 +3416,9 @@ C-----constructing input and filenames
          GOTO 400
       ELSE
          DO ilv = 1, nlvr
-            READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
+C           READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') ilvr, elvr,
+C           Updating to the new RIPL level format
+            READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.3,I3)') ilvr, elvr,
      &            xjlvr, lvpr, t12, ndbrlin
             IF (ilv.EQ.1) THEN
                Gspin = xjlvr
@@ -10391,20 +10394,14 @@ C----------'collective levels:'
            WRITE (12,'(a80)') comment
 C----------Reading ground state information (to avoid overwriting deformation)
 
-
            if(.not.DYNam) then
-
 C
-
 C            soft-rotor optical model
-
 C
-
              READ(32,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
-
              WRITE(8,
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
@@ -10414,64 +10411,33 @@ C
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
            else
-
 C
-
 C            rigid-soft optical model
-
 C
-
              READ(32,
-
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
-
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
-
-
-
              WRITE(8,
-
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
-
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
-
              WRITE(12,
-
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
-
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
-
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
-
-
-
            endif
-
-
-
            igreson = 0
            DO i = 2, ND_nlv
-
-
-
            if(.not.DYNam) then
-
 C
-
 C             soft-rotor optical model
-
 C
-
               READ (32,
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Klv(i), D_Llv(i), ftmp, D_nno(i)  
 
-
               if (D_Elv(i) .gt. ELV( NLV(0),0)) then
                 ctmp5 = ' cont'
               else
@@ -10501,86 +10467,45 @@ C             Giant Resonances flag: negative deformation
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
      &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
-
-
 
             else
-
 C
-
 C            rigid-soft optical model
-
 C
-
               READ (32,
-
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
-
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &          D_Klv(i), D_Llv(i), ftmp, D_Def(i,3)
 
-
-
               if (D_Elv(i) .gt. ELV( NLV(0),0)) then
-
                 ctmp5 = ' cont'
-
               else
-
                 ctmp5 = '     '
-
               endif
-
 C
-
 C             For covariance calculation of dynamical deformation
-
               D_Def(i,2) = ftmp*DEFdyn
-
 C
-
 C             Giant Resonances flag: negative deformation 
-
               IF(D_Def(i,2).LT.0 .and. ICOllev(i).GE.LEVcc) then
-
                 IF(int(D_Xjlv(i)).eq.0) ctmp5=' GMR'
-
                 IF(int(D_Xjlv(i)).eq.2) ctmp5=' GQR'
-
                 IF(int(D_Xjlv(i)).eq.3) ctmp5=' GOR'
-
                 igreson = 1
-
               ENDIF
 
-
-
               WRITE (8,
-
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
-
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
-
-
 
               itmp1 = ICOllev(i)
-
               if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
-
-
               WRITE (12,
-
      &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
-
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-
      &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
-
-
 
             endif
 C
@@ -10997,53 +10922,31 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
      &     'E(2+) level not found in Raman 2001 database (RIPL)'
         call defcal(iz,ia,beta2,ftmp)
         IF(.NOT.DEFORMED) THEN
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
-
      &      '1QP QUADR. def =',beta2,
-
      &      ', 2QP QUADR. def =',beta2**2
-
           WRITE (8,'(A)') ' Nobre et al systematics used for dynamical d
-
      &eformations: Phys.Rev.C76(2007)024605' 
-
         ELSE
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
-
      &      '1QP QUADR. def =',beta2,' reduced by 75% to ',beta2*0.25d0
-
           WRITE (8,'(A)') ' Nobre et al systematics used for dynamical d
-
      &eformations: Phys.Rev.C76(2007)024605' 
-
         ENDIF        
 
       ELSE
 
         IF(.NOT.DEFORMED) THEN
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (FRDM RIPL):  ', 
-
      &      '1QP QUADR. def =',beta2,
-
      &      ', 2QP QUADR. def =',beta2**2
-
         ELSE
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (FRDM RIPL):  ', 
-
      &      '1QP QUADR. def =',beta2,' reduced by 75% to ',beta2*0.25d0
-
         ENDIF        
 
       ENDIF
@@ -11053,55 +10956,33 @@ C    &       'Default dynamical deformations 0.15(2+) and 0.05(3-) used'
         WRITE (8,*) ' WARNING: ',
      &        'E(3-) level not found in Kibedi database (RIPL)'
         call defcal(iz,ia,ftmp,beta3)
-
         IF(.NOT.DEFORMED) THEN
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
-
      &      '1QP OCTUP. def =',beta3,
-
      &      ', 2QP OCTUP. def =',beta3**2
-
           WRITE (8,'(A)') ' Nobre et al systematics used for dynamical d
-
      &eformations: Phys.Rev.C76(2007)024605' 
-
         ELSE
 
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (Nobre et al):', 
-
      &      '1QP OCTUP. def =',beta3,' reduced by 75% to ',beta3*0.25d0
-
           WRITE (8,'(A)') ' Nobre et al systematics used for dynamical d
-
      &eformations: Phys.Rev.C76(2007)024605' 
-
         ENDIF        
 
       ELSE 
 
         IF(.NOT.DEFORMED) THEN
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (FRDM RIPL):  ', 
-
      &      '1QP OCTUP. def =',beta3,
-
      &      ', 2QP OCTUP. def =',beta3**2
-
         ELSE
-
           WRITE (8,'(1x,A40,1x,2(A,F8.4))')
-
      &      'TARGET DYNAM. DEFORMATION (FRDM RIPL):  ', 
-
      &      '1QP OCTUP. def =',beta3,' reduced by 75% to ',beta3*0.25d0
-
         ENDIF        
 
       ENDIF
@@ -11683,44 +11564,33 @@ C-----------------swapping
                   IPH(i) = IPH(j)
                   IPH(j) = itmp
 
-
                   dtmp = D_Def(i,2)
                   D_Def(i,2) = D_Def(j,2)
                   D_Def(j,2) = dtmp
-
 
                   dtmp = D_Lvp(i)
                   D_Lvp(i) = D_Lvp(j)
                   D_Lvp(j) = dtmp
 
-
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
-
 
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
-
                   itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
-
                   itmp = ICOller(i)
-
                   ICOller(i) = ICOller(j)
-
                   ICOller(j) = itmp
-
-
 
                   dtmp = D_Llv(i)
                   D_Llv(i) = D_Llv(j)
                   D_Llv(j) = dtmp
-
 
                   dtmp = D_Klv(i)
                   D_Klv(i) = D_Klv(j)
@@ -11739,44 +11609,33 @@ C-----------------swapping
                   IPH(i) = IPH(j)
                   IPH(j) = itmp
 
-
                   dtmp = D_Def(i,2)
                   D_Def(i,2) = D_Def(j,2)
                   D_Def(j,2) = dtmp
-
 
                   dtmp = D_Lvp(i)
                   D_Lvp(i) = D_Lvp(j)
                   D_Lvp(j) = dtmp
 
-
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
-
 
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
-
                   itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
-
                   itmp = ICOller(i)
-
                   ICOller(i) = ICOller(j)
-
                   ICOller(j) = itmp
-
-
 
                   dtmp = D_Llv(i)
                   D_Llv(i) = D_Llv(j)
                   D_Llv(j) = dtmp
-
 
                   dtmp = D_Klv(i)
                   D_Klv(i) = D_Klv(j)
@@ -11869,44 +11728,33 @@ C-----------------swapping
                   IPH(i) = IPH(j)
                   IPH(j) = itmp
 
-
                   dtmp = D_Def(i,2)
                   D_Def(i,2) = D_Def(j,2)
                   D_Def(j,2) = dtmp
-
 
                   dtmp = D_Lvp(i)
                   D_Lvp(i) = D_Lvp(j)
                   D_Lvp(j) = dtmp
 
-
                   dtmp = D_Elv(i)
                   D_Elv(i) = D_Elv(j)
                   D_Elv(j) = dtmp
-
 
                   dtmp = D_Xjlv(i)
                   D_Xjlv(i) = D_Xjlv(j)
                   D_Xjlv(j) = dtmp
 
-
                   itmp = ICOllev(i)
                   ICOllev(i) = ICOllev(j)
                   ICOllev(j) = itmp
 
-
                   itmp = ICOller(i)
-
                   ICOller(i) = ICOller(j)
-
                   ICOller(j) = itmp
-
-
 
                   dtmp = D_Llv(i)
                   D_Llv(i) = D_Llv(j)
                   D_Llv(j) = dtmp
-
 
                   dtmp = D_Klv(i)
                   D_Klv(i) = D_Klv(j)
