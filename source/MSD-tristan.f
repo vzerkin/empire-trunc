@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4314 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-03 00:23:34 +0200 (Fr, 03 Apr 2015) $
+Ccc   * $Rev: 4316 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-04-03 02:11:58 +0200 (Fr, 03 Apr 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -595,7 +594,7 @@ C
       efitx = -10.
       DO l = 1, ICMax
          do k=1,l                                                        
-            efitx = MAX(efit(l,k),efitx)                                 
+            efitx = MAX(efit(l,k),efitx)                                
          enddo                                                           
       ENDDO
       nebinx = MAX(INT((efitx+5.*WIDex)/ESTep + 1.),Nebins)
@@ -2904,7 +2903,7 @@ C             write(*,*) sngl(Crose(ne,na,1)),
 C    >                   sngl(Crose(ne,na,kcpmx + 1))
 C             write(*,*) NAVerg,KTRl(7),kr
 C           endif
-C	      pause
+C           pause
 
             IF (NAVerg.GT.0) THEN
                IF (KTRl(7).EQ.1 .AND. kr.EQ.1) GOTO 50
@@ -2953,10 +2952,10 @@ C
 99010          FORMAT (/'0',6X,
      &                 'X-SECTION AND ANALYZING POWER FOR THETA=',
      &                 F6.2/' ',5X,'AVERAGING:',F6.2,5X,'FACND:',
-     &                 2(3F7.3,3X)//' ',2X,'EOUT',3X,'1-STEP',10X,
+     &                 2(3F7.3,3X)/' ',2X,'EOUT',3X,'1-STEP',10X,
      &                 '2-STEP',11X,'TOTAL',32X,'1-STEP',10X,'2-STEP',
      &                 11X,'TOTAL')
-C              WRITE (66,99015) ANGle(na), Nbinx
+               WRITE (66,99015) ANGle(na), Nbinx
 99015          FORMAT (' THETA= ',F5.1,I5)
             ENDIF
             eout = EOUtmx + ESTep
@@ -3028,11 +3027,11 @@ C    &                    necs.GT.(NEX(nnur)+1)) THEN
                      CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm/2
                   ENDIF
                ENDIF
-            ENDDO	 ! over ne
+            ENDDO  ! over ne
    50    ENDDO ! over na
       ENDDO
 C===========================================================================
-C	A problem was identified in the MSD calculation of the DDXS, the first
+C     A problem was identified in the MSD calculation of the DDXS, the first
 C     three angles had a trend lower than the rest, reason unknown.
 C     This was causing problems in the Legendre fit of angular distributions. 
 C   
