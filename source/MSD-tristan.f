@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4316 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-04-03 02:11:58 +0200 (Fr, 03 Apr 2015) $
+Ccc   * $Rev: 4320 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-04-05 22:23:44 +0200 (So, 05 Apr 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -2955,8 +2955,8 @@ C
      &                 2(3F7.3,3X)/' ',2X,'EOUT',3X,'1-STEP',10X,
      &                 '2-STEP',11X,'TOTAL',32X,'1-STEP',10X,'2-STEP',
      &                 11X,'TOTAL')
-               WRITE (66,99015) ANGle(na), Nbinx
-99015          FORMAT (' THETA= ',F5.1,I5)
+C              WRITE (66,99015) ANGle(na), Nbinx
+C99015          FORMAT (' THETA= ',F5.1,I5)
             ENDIF
             eout = EOUtmx + ESTep
             f1 = 0.d0
