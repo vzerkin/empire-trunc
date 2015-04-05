@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4261 $
+Ccc   * $Rev: 4321 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-01-20 13:08:25 +0100 (Di, 20 Jän 2015) $
+Ccc   * $Date: 2015-04-05 22:26:37 +0200 (So, 05 Apr 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1274,8 +1274,8 @@ C Neutron spectrum
               POPcse(ie,1,nxe,INExc(Nnur)) =
      &           POPcse(ie,1,nxe,INExc(Nnur)) + pops
               POPcsed(ie,1,nxe,INExc(Nnur)) =
-     &            POPcsed(ie,1,nxe,INExc(Nnur)) + pops
-              POPcseaf(ie,1,nxe,INExc(Nnur)) = 1.0
+     &           POPcsed(ie,1,nxe,INExc(Nnur)) + pops
+              POPcseaf(ie,1,nxe,INExc(Nnur)) = 1.d0
               POPbin(ie,Nnur) = pops
              END DO
             ELSE
@@ -1324,7 +1324,7 @@ C Proton spectrum
      &            POPcse(ie,2,nx+1,INExc(Nnur)) + pops
               POPcsed(ie,2,ie,INExc(Nnur)) =
      &            POPcsed(ie,2,nx+1,INExc(Nnur)) + pops
-              POPcseaf(ie,2,nx+1,INExc(Nnur)) = 1.0
+              POPcseaf(ie,2,nx+1,INExc(Nnur)) = 1.d0
               POPbin(ie,Nnur) = pops
              ENDDO
             ELSE
