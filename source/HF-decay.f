@@ -123,8 +123,8 @@ C           Saving CSDirlev() array before the gamma cascade to CSDirsav()
             CSDirsav(il,nejc) = CSDirlev(il,nejc) 
           ENDDO
 C---------CN contribution to elastic ddx
-C         ELCncs = POPlv(LEVtarg,mt2)/(4.d0*PI) 
-          ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
+C         ELCncs = POPlv(LEVtarg,mt2)/PIx4 
+          ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
 C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
 
           IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
@@ -201,7 +201,7 @@ C
 C---------Write elastic to tape 12 and to tape 68
  1460     IF (nnuc.EQ.mt2) THEN
 
-C           ELCncs = CSDirsav(LEVtarg,NPRoject)/(4.d0*PI) ! isotropic 
+C           ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
 C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
             WRITE (8,*)
             WRITE (8,*) ' Incident energy (CMS)      ',sngl(EIN), ' MeV'
@@ -214,7 +214,7 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
             WRITE (12,*) ' '
             WRITE (12,
      &             '('' ELASTIC CROSS SECTION= '',1P,E12.5,'' mb'')')
-     &              ELAcs*ELAred + 4.d0*PI*ELCncs
+     &              ELAcs*ELAred + PIx4*ELCncs
             WRITE (12,*) ' '
             WRITE (12,
      &             '('' SHAPE ELASTIC CROSS SECTION= '',1P,E12.5,
@@ -222,7 +222,7 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
             WRITE (12,*) ' '
             WRITE (12,
      &             '('' COMP. ELASTIC CROSS SECTION= '',1P,E12.5,
-     &               '' mb'')') 4.d0*PI*ELCncs
+     &               '' mb'')') PIx4*ELCncs
             WRITE (12,*) ' '
             WRITE (12,*) ' Elastic angular distribution '
             WRITE (12,*) ' '
@@ -271,17 +271,17 @@ C
                xs_norm = ELCncs/PL_CN(0,LEVtarg)
 
                WRITE (8,*) ' CN elas. cross section (BB)',
-     &             sngl(4.d0*PI*PL_CN(0,LEVtarg)),' mb'
+     &             sngl(PIx4*PL_CN(0,LEVtarg)),' mb'
 
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10),
+     &           EINl, PIx4*ELCncs,  
+     &           (PIx4*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10),
      &           'ENG-WEID. TRANSF.'  
                ELSE
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x))') 
-     &           EINl, 4.d0*pi*ELCncs,  
-     &           (4.d0*pi*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
+     &           EINl, PIx4*ELCncs,  
+     &           (PIx4*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
 
                WRITE (8,*) 
@@ -361,7 +361,7 @@ C---------------locate position of the projectile among ejectiles
                 CALL WHEREJC(IZAejc(0),nejcec,iloc)
                 its = ncollx
                 WRITE (40,'(12x,11D12.5)') 
-     &            ELAred*ELAcs + 4.d0*PI*ELCncs,
+     &            ELAred*ELAcs + PIx4*ELCncs,
      &            (CSDirlev(ICOller(ilv),nejcec),ilv = 2,MIN(its,10))
                 IF (ICAlangs.gt.0) THEN
                   DO iang = 1, NDANG
@@ -373,7 +373,7 @@ C---------------locate position of the projectile among ejectiles
                 ENDIF
               ELSE
                 WRITE (40,'(12x,11D12.5)') 
-     &                           ELAred*ELAcs + 4.d0*PI*ELCncs
+     &                           ELAred*ELAcs + PIx4*ELCncs
                 IF (ICAlangs.gt.0) THEN
                   DO iang = 1, NDANG
                     WRITE (40,'(f12.4,11D12.5)') ANGles(iang),
@@ -676,7 +676,7 @@ C
 C
 C             Not the inelastic channel OR isotropic CN DA
 C              
-              xs_cn = ftmp/(4.d0*PI)  ! default isotropic
+              xs_cn = ftmp/PIx4  ! default isotropic
               DO na = 1, NDANG
                 CSAlev(na,il,nejc) = CSAlev(na,il,nejc) + xs_cn
               ENDDO ! loop over angles
@@ -1153,7 +1153,7 @@ C
           ENDDO
           WRITE(8,*) ' '
           WRITE(8,99041) 1,
-     &        ELAred*ELAcs + 4.d0*pi*PL_CN(0,LEVtarg),                          
+     &        ELAred*ELAcs + PIx4*PL_CN(0,LEVtarg),                          
 C    &                     POPlv(1,nnurec),
      &            (POPlv(ICOller(ilv),nnurec),
      &               ilv= 2,MIN(its,10))

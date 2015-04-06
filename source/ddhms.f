@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3930 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2014-03-24 20:28:05 +0100 (Mo, 24 Mär 2014) $
+Ccc   * $Rev: 4324 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 3930 $
+C CVS Version Management $Revision: 4324 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2474,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 3930 $')
+99005 FORMAT ('  xddhms version: $Revision: 4324 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -4157,9 +4157,9 @@ C
 C COMMON variables
 C
       REAL*8 AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2, HHBarc, PI,
-     &       AMUele
+     &       AMUele, PIx4
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
-     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
+     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele, PIx4 
 C
 C local variables r0,
 C
@@ -6788,7 +6788,7 @@ C
       INTEGER ii, imhi, j, ne, nth
       INTEGER INT
       DOUBLE PRECISION QDPHP, RANG
-      DATA pi/3.14159265359D0/
+      DATA pi/3.1415926535897932D0/
       re = RANG()
       IF (re.GT.0.5D0) THEN
          re = 1.0D0 - re
@@ -7296,7 +7296,7 @@ C
       DOUBLE PRECISION QDPHP
 C  np must be even (Simpson)
       DATA nth/8/
-      DATA pi/3.14159265359D0/
+      DATA pi/3.1415926535897932D0/
       QDPHTH = 0.0D0
       IF (Thmxx.LE.0.0D0) RETURN
       thmx = MIN(Thmxx,pi)
@@ -7406,7 +7406,7 @@ C
       INTEGER jn, jp, kn, kp, nk, nph
 C akf=sqrt(2*938*35), alf2=4*(2.23*m)**2
       DATA akf/256.242D0/, am/938.D0/, alf2/8366.96D0/
-      DATA pi/3.14159265359D0/
+      DATA pi/3.1415926535897932D0/
 C  nk must be odd and nph must even (Simpson)
       DATA nk/17/, nph/16/
       QDPH = 0.0D0

@@ -12,7 +12,7 @@
     REAL*8, INTENT(IN)    :: cmp(*)          ! compound elastic cross section (npt) (cel_da in main.f)
     REAL*8, INTENT(IN)    :: crs(*)          ! shape elastic cross sections (npt)   (elada  in main.f)
 
-    REAL*8, PARAMETER :: pi = 3.1415926535897932384626433d0
+    REAL*8, PARAMETER :: pi = 3.1415926535897932D0
 
     ! it is assumed that these shape elastic diff crs sections are from
     ! empire where they are in the CM frame uniformly spaced from 0 -180 deg.

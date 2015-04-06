@@ -86,6 +86,20 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
            elada(iang) = ftmp
         ENDDO
       ENDIF
+C-----Check whether integral over angles agrees with x-sec. read from ECIS
+      csum = 0.d0
+      DO iang = 1, NDANG  ! over angles
+        csum = csum + elada(iang)*SANgler(iang)*PI/90.d0
+      ENDDO
+      csum = 2.0d0*PI*csum 
+C     write(*,*) ELAcs,csum,' SIN'
+      if (csum.gt.0.d0) then
+C-------Correct elada() for eventual imprecision
+        ftmp = ELAcs/csum
+        DO iang = 1, NANgela
+          elada(iang)=elada(iang)*ftmp
+        ENDDO
+      endif
 C
 C-----
 C-----Get ECIS results for excited levels
@@ -187,7 +201,7 @@ C              IF (icsl.EQ.1) popl = 2.0*popl
                   DO iang = 1, NANgela
                     READ (45,'(24x,D12.5)',END = 1400) ftmp
                     CSAlev(iang,ilv,nejcec) = 
-     >              CSAlev(iang,ilv,nejcec) + ftmp
+     >              CSAlev(iang,ilv,nejcec) + ftmp*FCCred
                   ENDDO
                 ENDIF
                ELSE
@@ -199,24 +213,23 @@ C-----------------To use only those values corresponding to EMPIRE grid for inel
                   if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                   iang = iang +1
                   CSAlev(iang,ilv,nejcec) = CSAlev(iang,ilv,nejcec)
-     &                                    + ftmp
+     &                                    + ftmp*FCCred
                 ENDDO
                ENDIF
 C--------------Check whether integral over angles agrees with x-sec. read from ECIS
                csum = 0.d0
-               DO iang = 2, NANgela  ! over angles
-                 csum = csum + (CSAlev(iang  ,ilv,nejcec) 
-     &                       +  CSAlev(iang-1,ilv,nejcec))
-     &                       * 0.5d0 * (CAngler(iang)-CANgler(iang-1))
+               DO iang = 1, NANgela  ! over angles
+                 csum = csum + CSAlev(iang,ilv,nejcec)*
+     &                  SANgler(iang)*PI/90.d0
                ENDDO
                csum = 2.0d0*PI*csum 
-C              if (csum.gt.0.d0) then
+               if (csum.gt.0.d0) then
 C----------------Correct CSAlev() for eventual imprecision
-C                ftmp = POPlv(ilv,nnurec)/csum
-C                DO iang = 1, NANgela
-C                  CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
-C                ENDDO
-C              endif
+                 ftmp = POPlv(ilv,nnurec)/csum
+                 DO iang = 1, NANgela
+                   CSAlev(iang,ilv,nejcec)=CSAlev(iang,ilv,nejcec)*ftmp
+                 ENDDO
+               endif
 C--------------Construct recoil spectra due to direct transitions
                IF (ENDf(nnurec).GT.0 .AND. RECoil.GT.0) THEN
 C-----------------Correct 'coeff' for eventual imprecision and include recoil DE
@@ -324,7 +337,7 @@ C
                  if(int(D_Xjlv(i)).eq.3) isigma  = nint(ggor/DE+0.5)
                endif
                isigma2 = 2*isigma*isigma
-C
+
                if(isigma.gt.0) then
                  dcor  = 0.d0
                  do ie = max(icsl - 3*isigma,1) ,
@@ -352,6 +365,7 @@ C
                  iang = 0
                  DO iang1 = 1, NANgela
                     READ (45,'(3x,12x,D12.5)',END = 1400) ftmp    ! ecis06
+	              ftmp = ftmp * FCOred
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1

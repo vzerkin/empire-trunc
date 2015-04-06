@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4320 $
+Ccc   * $Rev: 4324 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-05 22:23:44 +0200 (So, 05 Apr 2015) $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -453,8 +453,8 @@ c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,
       STOP
       ENDIF
 C     WRITE(17,*)NEBINX,ICMAX
-      fpi = 4.*PI
-      fourpi = 1.0/fpi
+      fpi = PIx4
+      fourpi = 1.d0/fpi
 C-----selfconsistent strength taken for the l=0 transfer field
       efit(1,1) = 0.d0                                                   
       IF (EFItin(1,1).GT.0.0D0) efit(1,1) = EFItin(1,1)                  
@@ -1581,8 +1581,8 @@ C
       INTEGER i, ii, imax, k, n, nrxx, nst
       CHARACTER*40 text(2)
       DATA imax/100/
-      pi = 4.*ATAN(1.)
-      fpi = 4.*pi
+      pi = 4.d0*ATAN(1.d0)
+      fpi = 4.d0*pi
       IF (Gap.LT.0.0D0) Gap = 2.
       text(1) = 'PROTONS '
       text(2) = 'NEUTRONS'

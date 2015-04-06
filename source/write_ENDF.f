@@ -39,7 +39,7 @@ C
       csinel=CSPrd(2) ! for charged particles or photons
 
       IF(INT(AEJc(0)).GT.0 .and. INT(ZEJc(0)).EQ.0) ! for neutrons
-     >  csinel=CSPrd(2)-4.d0*PI*ELCncs
+     >  csinel=CSPrd(2)-PIx4*ELCncs
 
       if (csinel.lt.eps) csinel=0.d0
       do nnuc=1,NNUcd
@@ -126,20 +126,20 @@ C    &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
           WRITE(41,'(1P,E10.4,1x,1P,95E12.5)') 
      &    EINl, TOTcs*TOTred*totcorr,
 C                          Low-lying XS   and       CE         added to elastic
-     &    ELAcs*ELAred  +   xscclow       +    4.d0*PI*ELCncs, 
-     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+4.d0*PI*ELCncs),
+     &    ELAcs*ELAred  +   xscclow       +    PIx4*ELCncs, 
+     &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+xscclow+PIx4*ELCncs),
      &    TOTcsfis, 
      &    mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &     CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred  +  4.d0*PI*ELCncs,                !elastic (SE + CN_el) 
-     &                     4.d0*PI*ELCncs,                !CN_el
+     &    ELAcs*ELAred  +  PIx4*ELCncs,                !elastic (SE + CN_el) 
+     &                     PIx4*ELCncs,                !CN_el
      &    ELAcs*ELAred                   ,                !SE
-C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+PIx4*ELCncs),
      &    CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred  !Nonelastic
-     &                             - 4.d0*PI*ELCncs,      !   CE substracted from nonelastic
+     &                             - PIx4*ELCncs,      !   CE substracted from nonelastic
      &    CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -156,11 +156,11 @@ C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred+4.d0*PI*ELCncs),
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &    ELAcs*ELAred,   
-     &    4.d0*PI*ELCncs,                                 !CN_el
+     &    PIx4*ELCncs,                                 !CN_el
      &    ELAcs*ELAred,                                   !shape elastic 
 C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Nonelastic
-     &      FCOred - 4.d0*PI*ELCncs - CSPrd(1),0.d0),     !CE substracted from nonelastic
+     &      FCOred - PIx4*ELCncs - CSPrd(1),0.d0),     !CE substracted from nonelastic
      &    max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
      &    SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -176,20 +176,20 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
 
             WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')
      &      EINl,TOTcs*TOTred*totcorr,
-     &      ELAcs*ELAred           + 4.d0*PI*ELCncs,        ! CE added to elastic
+     &      ELAcs*ELAred           + PIx4*ELCncs,        ! CE added to elastic
      &      max(TOTcs*TOTred*totcorr - ELAcs*ELAred 
-     &                           - 4.d0*PI*ELCncs,0.d0),    ! CE substracted from nonelastic
+     &                           - PIx4*ELCncs,0.d0),    ! CE substracted from nonelastic
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &      CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &      ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
-     &                       4.d0*PI*ELCncs,                !CN_el
+     &      ELAcs*ELAred  +  PIx4*ELCncs,                !CE added to elastic 
+     &                       PIx4*ELCncs,                !CN_el
      &      ELAcs*ELAred                   ,                !shape elastic 
-C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + PIx4*ELCncs),
      &      max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Total nonelastic
-     &         FCOred - 4.d0*PI*ELCncs,0.d0),               !   CE substracted from nonelastic
+     &         FCOred - PIx4*ELCncs,0.d0),               !   CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -206,12 +206,12 @@ C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
 
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &      ELAcs*ELAred  +  4.d0*PI*ELCncs,                !CE added to elastic 
-     &      4.d0*PI*ELCncs,                                 !CN_el
+     &      ELAcs*ELAred  +  PIx4*ELCncs,                !CE added to elastic 
+     &      PIx4*ELCncs,                                 !CN_el
      &      ELAcs*ELAred,                                   !shape elastic 
-C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + PIx4*ELCncs),
      &      max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Nonelastic
-     &         FCOred - CSPrd(1) - 4.d0*PI*ELCncs,0.d0),    !   CE substracted from nonelastic
+     &         FCOred - CSPrd(1) - PIx4*ELCncs,0.d0),    !   CE substracted from nonelastic
      &      max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  
@@ -222,28 +222,28 @@ C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
         ELSE ! charged-particles
 
           WRITE(41,'(1P,E10.4,1x,1P,95E12.5)')EINl,TOTcs*TOTred*totcorr,
-     &    ELAcs*ELAred             + 4.d0*PI*ELCncs,      !CN_el (CE) added to elastic 
+     &    ELAcs*ELAred             + PIx4*ELCncs,      !CN_el (CE) added to elastic 
 C
 C         Total is 0 for charged particles, no correction
-C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + PIx4*ELCncs),
 C
      &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &               + CSDbrkup(6) - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
+     &               + CSDbrkup(6) - PIx4*ELCncs,0.d0),! CE substracted from nonelastic
 C
      &    TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &    CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
 C
           WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &    TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &    ELAcs*ELAred   + 4.d0*PI*ELCncs,                !CN_el (CE) added to elastic 
-     &                     4.d0*PI*ELCncs,                !CN_el
+     &    ELAcs*ELAred   + PIx4*ELCncs,                !CN_el (CE) added to elastic 
+     &                     PIx4*ELCncs,                !CN_el
      &    ELAcs*ELAred                   ,                !shape elastic 
 C
 C         Total is 0 for charged particles, no correction
-C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + 4.d0*PI*ELCncs),
+C    &    TOTcs*TOTred*totcorr - (ELAcs*ELAred + PIx4*ELCncs),
 C
      &    max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*FCOred 
-     &               + CSDbrkup(6) - 4.d0*PI*ELCncs,0.d0),! CE substracted from nonelastic
+     &               + CSDbrkup(6) - PIx4*ELCncs,0.d0),! CE substracted from nonelastic
 C
      &    max(CSFus*corrmsd - tothms - xsmsc,0.d0),       !CN-formation 
      &    xsdirect, xspreequ,                             !direct, preequil
@@ -378,7 +378,7 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') CSFus - (tothms+xsmsc+xsinl+totemis)
         IF (NINT(ZEJc(0)).EQ.0 .and. NINT(AEJc(0)).GT.0) WRITE (8,
      &  '('' * Compound elastic cross section (CE)            '',G13.6,
-     &              '' mb  '')') 4.d0*PI*ELCncs
+     &              '' mb  '')') PIx4*ELCncs
         IF(FISsil(1)) WRITE (8,
      &  '('' * Fission cross section                          '',G13.6,
      &              '' mb  '')') TOTcsfis
@@ -425,7 +425,7 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &      ELCncs.gt.0.1d0) THEN
           WRITE (*,
      &  '(''   Compound elastic cross section (CE)            '',G13.6,
-     &              '' mb  '')') 4.d0*PI*ELCncs
+     &              '' mb  '')') PIx4*ELCncs
         ELSE
           WRITE (*,*)
         ENDIF

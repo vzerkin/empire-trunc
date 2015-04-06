@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3804 $
+Ccc   * $Rev: 4324 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-06 04:58:36 +0100 (Do, 06 Feb 2014) $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE get_fragmPFNS (fragmPFNS, emiss_en, nen_emis,
      &      eincid, af, zf, emed, tequiv, qval, deltae,
@@ -376,7 +376,7 @@ C     Itkis
 
       real*8 FUNCTION fwatt(E,Eniu,T)
       real*8 E,T,pi,Eniu,b
-      data pi/3.1415926d0/
+      data pi/3.1415926535897932D0/
       fwatt = 0.d0
       if(E.le.0.1d-11) E=0.1d-11
       if(T.le.0.1d-11) return
@@ -389,7 +389,7 @@ C     Itkis
 
       real*8 FUNCTION fmaxw(E,T)
       real*8 E,T,pi
-      data pi/3.1415926d0/
+      data pi/3.1415926535897932D0/
       fmaxw = 0.d0
       if(E.le.0.1d-11) E=0.1d-11
       if(T.le.0.1d-11) return

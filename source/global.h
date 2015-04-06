@@ -1,6 +1,6 @@
-! $Rev: 4298 $
-! $Author: mherman $
-! $Date: 2015-02-19 08:07:45 +0100 (Do, 19 Feb 2015) $
+! $Rev: 4324 $
+! $Author: rcapote $
+! $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -103,7 +103,7 @@
      &                 HIS(0:ndnuc), HJ(ndnuc,nfparab), LQDfac, HHBarc, &
      &                 MFPp, MOMortcrt, MOMparcrt,HCOnt(nfparab),       &
      &                 OMEmax(0:ndejc,0:ndnuc), OMEmin(0:ndejc,0:ndnuc),&
-     &                 PEQc, PEQcont, PI, POP(ndex,ndlw,2,ndnuc),       &
+     &                 PEQc, PEQcont, PI, PIx4, POP(ndex,ndlw,2,ndnuc), &
      &                 POPbin(ndex,ndnuc), POPcs(0:ndejc,0:ndexclus),   &       
      &                 POPcse(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),     &
      &                 POPcsed(0:ndex_d,0:ndejc,ndecsed,0:ndexclus),    &
@@ -207,7 +207,7 @@
       COMMON /GDRHFB/uuE1grid,E1grid,iugMax
       
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,                    &
-     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
+     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele, PIx4
 !     COMMON /DEPTH / POTe
 !      COMMON /ENDFEA/ POPcsed, POPcsea, POPcseaf
       COMMON /ENDFEA/ POPcsed, POPcseaf

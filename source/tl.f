@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4301 $
+Ccc   * $Rev: 4324 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-03-03 16:16:08 +0100 (Di, 03 Mär 2015) $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3002,7 +3002,8 @@ C          Scattering into continuum
   400 CLOSE (45)
 
       ftmp = 0.d0
-	if(DIRECT.EQ.3) ftmp = SINl + SINlcont
+      if(DIRECT.EQ.3) ftmp = SINl + SINlcont
+C     if(DIRECT.EQ.1 .or. DIRECT.EQ.3) ftmp = SINl + SINlcont
 C
 C     5% difference check
       IF (abs(xsabs + SINlcc + ftmp - ABScs).gt.0.05*ABScs) THEN 
@@ -5955,9 +5956,9 @@ C
 C COMMON variables
 C
       DOUBLE PRECISION AMPi, AMUmev, AMUneu, AMUpro, CETa, CSO, ELE2,
-     &                 HHBarc, PI, AMUele
+     &                 HHBarc, PI, AMUele, PIx4
       COMMON /CONSTANT/ AMUmev, PI, CETa, CSO, AMPi,
-     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele
+     &                  ELE2, HHBarc, AMUneu, AMUpro, AMUele, PIx4
 C
 C Dummy arguments
 C

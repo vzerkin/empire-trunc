@@ -459,7 +459,7 @@
     ! the latter factor is set to 1 when microscopic densities are
     ! used (ngs=1)
 
-    real*8, parameter :: pi = 3.141592654  ! until we have base class
+    real*8, parameter :: pi = 3.1415926535897932D0 ! until we have base class
 
     integer*4, intent(in) :: N    ! 
     integer*4, intent(in) :: Ip   ! particle number

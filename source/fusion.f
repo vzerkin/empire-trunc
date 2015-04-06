@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4321 $
+Ccc   * $Rev: 4324 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-05 22:26:37 +0200 (So, 05 Apr 2015) $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1799,12 +1799,12 @@ C
       DOUBLE PRECISION arg, htom, pi
       DOUBLE PRECISION F
       EXTERNAL F
-      DATA pi, htom/3.14159D0, 4.D0/
-      arg = -2.*pi*(E - X - EROt)/htom
+      DATA pi, htom/3.1415926535897932D0, 4.D0/
+      arg = -2*pi*(E - X - EROt)/htom
       IF (arg.LT.( - 74.D0)) G = F(X)
-      IF (arg.GT.74.D0) G = 0.
+      IF (arg.GT.74.D0) G = 0.d0
       IF (ABS(arg).LE.74.D0) G = F(X)
-     &                           /(1 + EXP((-2.*pi*(E-X-EROt)/htom)))
+     &                           /(1 + EXP((-2*pi*(E-X-EROt)/htom)))
       END
 
       SUBROUTINE PROCESS_ECIS(Outname,Length,Iret,ICAlangs)

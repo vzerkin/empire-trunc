@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4158 $
-Ccc   * $Author: shoblit $
-Ccc   * $Date: 2014-10-08 22:07:41 +0200 (Mi, 08 Okt 2014) $
+Ccc   * $Rev: 4324 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -813,7 +813,7 @@ C-----------------ang. mom. coeff. being neglected as they nearly cancel out
                   y = GDOWN(ip(k1),ih(k1),EXCn - ecor)
 C-----------------YD should be multiplied by G**3 but omitted since omitted in VMN
                   yd = y/aw(k1)
-                  PIM(k1,k1 + 1) = -3.14159*2.*rop*vmn*yd
+                  PIM(k1,k1 + 1) = -PI*2*rop*vmn*yd
 C
 C-----------------next 4 lines calculate interstage rate using parameter M**2=0.00005
 C ECOR=((IP(K1)**2+IH(K1)**2)/4.0+(IP(K1)-IH(K1))/4.0-IH(K1)/2.0)/G
@@ -843,9 +843,9 @@ C-----------------ang. mom. coeff. being neglected as they nearly cancel out
                   y = GDOWN(ip(NDMSCS),ih(NDMSCS),EXCn - ecor)
 C-----------------YD should be multiplied by sp_den**3 but omitted since omitted in VMN
                   yd = y/aw(NDMSCS)
-                  cgd = 3.14159*2.*vmn*yd
+                  cgd = PI*2*vmn*yd
                   PIM(NDMSCS,NDMSCS) = PIM(NDMSCS,NDMSCS)
-     &                                 + 3.14159*2*rop*vmn*yd
+     &                                 + PI*2*rop*vmn*yd
 C
 C-----------------next 4 lines calculate interstage rate using parameter
 C-----------------|M**2|=0.00005
@@ -1135,7 +1135,7 @@ C--------------------------cancel out
 C--------------------------Y should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            ysp = y/aw(kg)
-                           cgd = -3.14159*2.*vmn*ysp
+                           cgd = -PI*2*vmn*ysp
                            ix = (kg - kgin + 1)*4 + ISD
                            jx = (kg - kgin + 2)*4 + ISD
                            pig(ix,jx) = cgd*roph(kg,4)
@@ -1229,7 +1229,7 @@ C-----------------------
 C--------------------------Yd should be multiplied by sp_den**3 but omitted since
 C--------------------------omitted in VMN
                            ysp = y/aw(NDMSCS)
-                           cgd = -3.14159*2.*vmn*ysp
+                           cgd = -PI*2*vmn*ysp
                            ix = (NDMSCS - kgin + 1)*4 + ISD
                            jx = (NDMSCS - kgin + 2)*4 + ISD
                            pig(ix,ix) = pig(ix,ix) - cgd*roph(NDMSCS,4)

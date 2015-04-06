@@ -1,6 +1,6 @@
-!cc   * $Rev: 4319 $
+!cc   * $Rev: 4324 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-03 20:22:29 +0200 (Fr, 03 Apr 2015) $
+!cc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -131,8 +131,9 @@ C m3He  3He mass      3.014 932 234 69 amu 1
 C ma    4He mass      4.001 506 1747 amu 1
 C
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
-      CSO = (HHBarc/AMPi)**2
-      PI = 4.D0*DATAN(1.D0)
+      CSO  = (HHBarc/AMPi)**2
+      PI   = 4.D0*DATAN(1.D0)
+	PIx4 = 4.D0*PI
 
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
@@ -12144,7 +12145,7 @@ C     INTEGER NG
       DOUBLE PRECISION a0, a3, aann, alambda, alpha2, b0, betagfl, 
      &                 cs0, csaa, csb, ea, eb, eg0, gw0, pi, zz
       INTEGER i, n 
-      DATA pi/3.141592654D0/
+      DATA pi/3.1415926535897932D0/
       
       n    = ka - kz
       zz   = kz
