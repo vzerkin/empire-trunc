@@ -1,6 +1,6 @@
-!cc   * $Rev: 4329 $
+!cc   * $Rev: 4330 $
 !cc   * $Author: gnobre $
-!cc   * $Date: 2015-04-06 18:30:14 +0200 (Mo, 06 Apr 2015) $
+!cc   * $Date: 2015-04-06 22:09:19 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -12609,14 +12609,14 @@ Ccc
       ios=0
       do while (ios==0)
         read(fileunit,'(A)',iostat=ios) comment
-        if(lnblnk(comment).le.66) then
+        if(len_trim(comment).le.66) then
           write(outfile,'(A)') trim(comment)
         else ! Accommodating the possibility of having comment longer than 66 columns (endf limit)
-          nlines=int(lnblnk(comment)/66)+1
+          nlines=int(len_trim(comment)/66)+1
           do i=1,nlines
             i0=1+66*(i-1)
             ifinal=i*66
-            if(ifinal==nlines) ifinal=lnblnk(comment)
+            if(ifinal==nlines) ifinal=len_trim(comment)
             write(outfile,'(A)') comment(i0:ifinal)
           enddo
         endif
