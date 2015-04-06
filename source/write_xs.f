@@ -18,7 +18,7 @@ C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
       DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,qout
-      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp   
+      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1   
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
@@ -146,23 +146,22 @@ C                       espec is the outgoing energy corresponding to the level 
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                         IF (espec.GE.0) WRITE (12,
      &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
-c                     Discrete level cros section CSAlev contains angular distribution, NOT DDXS
-c                     recoil correction is not needed as we do not integrate over energy 
+c                       Discrete level cros section CSAlev contains angular distribution, NOT DDXS
+c                       recoil correction is not needed as we do not integrate over energy 
 c                       We only sum over discrete levels ! 
      &                     (max(CSAlev(nang,il,nejc), 
 c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
                         csum = 0.d0
-                        DO nang = 2, NDANG  ! over angles
-                          csum = csum + (CSAlev(nang,il,nejc) 
-     &                                  + CSAlev(nang-1,il,nejc))
-     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
-                        ENDDO
-C                       DO nang = 1, NDANG  ! over angles
-C                         csum = csum + CSAlev(nang,il,nejc)* 
-C    &                                  SANgler(nang)*PI/90.d0
+C                       DO nang = 2, NDANG  ! over angles
+C                         csum = csum + (CSAlev(nang,il,nejc) 
+C    &                                  + CSAlev(nang-1,il,nejc))
+C    &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
 C                       ENDDO
-                        check_DL(il) = max(2.0d0*PI*csum,1.d-10)
+                        DO nang = 1, NDANG  ! over angles
+                          csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
+                        ENDDO
+                        check_DL(il)=max(2.0d0*PI*csum*PI/90.d0,1.d-10)
                      ENDDO
                    ENDIF
 C
@@ -179,42 +178,58 @@ C                    if(ie.eq.1 .or. ie.eq.nspec) ftmp=0.5d0
                      if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
                      dtmp = dtmp + htmp*DE*ftmp
                      esum = esum + htmp*DE*ftmp*FLOAT(ie - 1)*DE/recorp
-                     ftmp = max((htmp - xnorm(nejc,INExc(nnuc))
-     &                    * POPcsed(0,nejc,ie,INExc(nnuc)))/4.0/PI,0.d0)
                      csum = 0.d0
                      IF(LHMs.GT.0 .AND. (nejc.EQ.1 .OR. nejc.EQ.2)) THEN
 C----------------------Check whether integral over angles agrees with DE spectra
+                       ftmp = max((htmp - xnorm(nejc,INExc(nnuc))
+     &                  *POPcsed(0,nejc,ie,INExc(nnuc)))/PIx4,0.d0)
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) = 
      &                     ftmp + xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc))
-                           IF(nang.GT.1) csum = csum 
-     &                         + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
-     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
+                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
                        ENDDO
                      ELSE
 c The following is equivalent the definition of ftmp above, when LHMs=0.
-c                      ftmp =(POPcse(0,nejc,ie,INExc(nnuc))-
-c     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc))/4.0/PI
+                       ftmp = max( (POPcse(0,nejc,ie,INExc(nnuc)) -
+     &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc)))  
+     &                  /PIx4,0.d0)
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
-                           IF(nang.GT.1) csum = csum 
-     &                         + (cseaprnt(ie,nang)+cseaprnt(ie,nang-1))
-     &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
+                           csum = csum + cseaprnt(ie,nang)*SANgler(nang)
                        ENDDO
                      ENDIF
                      if(ie.ne.1) then
-                       check_DE(ie) = 2.0d0*PI*csum
+                       check_DE(ie) = 2.0d0*PI*csum*PI/90.d0
                      else
-                       check_DE(ie) =       PI*csum
+                       check_DE(ie) =       PI*csum*PI/90.d0
                      endif
+                   ENDDO
+C
+C                  This is a patch to correct the printed DDXS
+C                  for DWBA to the continuum
+C
+                   DO ie = 1, nspec 
+                     IF(check_DE(ie).le.0) cycle
+                     DO nang = 1, NDANG
+                       cseaprnt(ie,nang) = 
+     > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
+     >                 cseaprnt(ie,nang)
+                       if(ie.gt.1) then
+                         check_DE(ie) = 
+     >                      POPcse(0,nejc,ie,INExc(nnuc)) 
+                       else
+ 	                   check_DE(ie) = 
+     >                      0.5d0*POPcse(0,nejc,ie,INExc(nnuc)) 
+                       endif
+                     ENDDO
                    ENDDO
 
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
-                     if(check_DE(ie).LE.0.d0) cycle ! skipping zeroes
+                     if(check_DE(ie).LE.0) cycle ! skipping zeroes
 
                      WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp,
@@ -263,6 +278,8 @@ C                      espec is the outgoing energy corresponding to the level "
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
                    WRITE (12,*) ' '
+                   csum  = 0.d0
+                   csum1 = 0.d0
                    DO ie = 1, nspec 
                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
                       if (ie.eq.1) ftmp = ftmp*0.5d0
@@ -272,6 +289,12 @@ C                      espec is the outgoing energy corresponding to the level "
      &                check_DE(ie)*recorp,
      &                (ftmp - check_DE(ie)) * recorp, 
      &                (ftmp - check_DE(ie)) / ftmp * 100
+                      csum  = csum  + ftmp
+                      if (ie.eq.1) then
+                        csum1 = csum1 + check_DE(ie)*0.5d0
+                      else
+                        csum1 = csum1 + check_DE(ie)
+                      endif 
                    ENDDO
                                         ! exact endpoint
                    WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
@@ -281,6 +304,10 @@ C                      espec is the outgoing energy corresponding to the level "
      &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
      &                  check_DE(nspec+1) )*recorp, 0.d0
 
+                   WRITE(12,*) 
+                   WRITE(12,'(10x,12x,2(A14,1x))') 
+     &                ' Integral(DE) ', ' Integ (DDXS) '
+                   WRITE(12,'(10x,10x,2(E14.5,1x))') csum*DE,csum1*DE 
                    WRITE(12,*) 
                    if(dtmp.gt.0) then
                      WRITE(12,'(10x,
