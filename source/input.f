@@ -1,6 +1,6 @@
-!cc   * $Rev: 4324 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
+!cc   * $Rev: 4329 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2015-04-06 18:30:14 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3165,6 +3165,10 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
         WRITE (12,*) 'MF=14 Photon angular distributions              '
         WRITE (12,*) '      isotropic distributions were assumed      '
         WRITE (12,*) '                                                '
+
+        call write_comments(3,12)
+
+        WRITE (12,*) '                                                '
         WRITE (12,*) 'REFERENCES                                      '
         WRITE (12,*) '                                                '
         WRITE (12,*) '[EMP]                                           '
@@ -3718,6 +3722,9 @@ C       WRITE (*,*) 'DEFAULT TITLE'
      >  'NDNUC=',NDNUC,'NDEXCLUS=',NDEXCLUS,'NDEX=',NDEX,
      >  'NDLW=',NDLW,'LEVCC=',LEVCC,'NDLV=',NDLV,
      >  'NDBR=',NDBR,'NDMSCS=',NDMSCS
+
+      call write_comments(1,12)
+
       WRITE (12,*) ''
       WRITE (12,*) 'CROSS-SECTION EVALUATION PROCEDURE                 '
       WRITE (12,*) ''
@@ -3759,6 +3766,10 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) '  PrePro codes by D. Cullen                        '
       WRITE (12,*) '- ENDF checking codes (CHECKR, FIZCON, PSYCHE)     '
       WRITE (12,*) '- Support for NJOY                                 '
+      WRITE (12,*) '                                                   '
+
+      call write_comments(2,12)
+
       WRITE (12,*) '                                                   '
       WRITE (12,*) 'PARAMETERIZATIONS                                  '
       WRITE (12,*) '                                                   '
@@ -12575,3 +12586,42 @@ Ccc
      &  ' for Einc=',EINl,' MeV'          
       RETURN
       END
+
+
+      subroutine write_comments(comfile,outfile)
+
+      implicit none
+
+      integer*4 :: comfile,outfile,ios,i,i0,ifinal,nlines,fileunit
+      character*1 :: icom
+      character*500 :: comment
+      character*20 :: filename
+      logical :: file_exists
+
+      write(icom,'(i1)') comfile
+      filename='COMMENTS'//icom//'.TXT'
+
+      inquire(file=filename,exist=file_exists)
+      if(.NOT.file_exists) return
+      fileunit=100+comfile
+      open(unit=fileunit,file=filename,status='old')
+
+      ios=0
+      do while (ios==0)
+        read(fileunit,'(A)',iostat=ios) comment
+        if(lnblnk(comment).le.66) then
+          write(outfile,'(A)') trim(comment)
+        else ! Accommodating the possibility of having comment longer than 66 columns (endf limit)
+          nlines=int(lnblnk(comment)/66)+1
+          do i=1,nlines
+            i0=1+66*(i-1)
+            ifinal=i*66
+            if(ifinal==nlines) ifinal=lnblnk(comment)
+            write(outfile,'(A)') comment(i0:ifinal)
+          enddo
+        endif
+      enddo
+
+      close(fileunit)
+
+      end
