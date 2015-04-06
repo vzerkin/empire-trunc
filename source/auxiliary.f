@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4288 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-09 14:59:01 +0100 (Mo, 09 Feb 2015) $
+Ccc   * $Rev: 4322 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-04-06 02:23:07 +0200 (Mo, 06 Apr 2015) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -8,7 +8,7 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:apu*
 Ccc   *                         C L E A R                                *
 Ccc   *                                                                  *
-Ccc   *             Sets to 0 some matrices and variables                *
+Ccc   *        Initializes and resets some matrices and variables        *
 Ccc   *                                                                  *
 Ccc   * input:none                                                       *
 Ccc   *                                                                  *
@@ -276,7 +276,7 @@ C
       INTEGER NL,L
       DOUBLE PRECISION PL(0:NDANGecis)
 
-	GET_DDXS = 0.d0
+      GET_DDXS = 0.d0
       NL = PL_lmax(ILEV)
       IF (NL.LT.0) RETURN
       PL(0) = 1.d0
@@ -295,7 +295,7 @@ C     GET_DDXS = COEFF(0)
 
       DOUBLE PRECISION FUNCTION GET_DDXScont(X,IE)
 
-	implicit none
+      implicit none
 C
 C-Title  : GET_DDXScont Subroutine
 C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS in the continuum
@@ -331,7 +331,7 @@ C
       INTEGER NL,L
       DOUBLE PRECISION PL(0:NDANGecis)
 
-	GET_DDXScont = 0.d0
+      GET_DDXScont = 0.d0
       NL = PLcont_lmax(IE)
       IF (NL.LT.0) RETURN
       PL(0) = 1.d0
