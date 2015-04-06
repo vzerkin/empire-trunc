@@ -136,7 +136,7 @@ C-----
 C--------Print inelastic PE double differential cross sections
          nejc = NPRoject
          nnur = NREs(nejc)
-         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.5) THEN
+         IF (CSMsd(nejc).GT.0.D0 .AND. IOUt.GE.4) THEN
             itimes = FLOAT(NDANG)/11.0 + 0.95
             DO its = 1, itimes
               iad = 1 + (its - 1)*11
@@ -214,11 +214,9 @@ C             Following changes in PCROSS to cover discrete levels , Jan 2011
               STOP 'ERROR: PE EMISSION LARGER THAN FUSION CROSS SECTION'
             ENDIF
          ENDIF
-C        ftmp = 0.d0
          DO i = 1, NLW
             POP(NEX(1),i,1,1) = POP(NEX(1),i,1,1)*corrmsd
             POP(NEX(1),i,2,1) = POP(NEX(1),i,2,1)*corrmsd
-C           ftmp = ftmp + POP(NEX(1),i,1,1) + POP(NEX(1),i,2,1)
          ENDDO
          WRITE (8,*) ' '
 C--------TRISTAN *** done ***

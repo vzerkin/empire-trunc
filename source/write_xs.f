@@ -194,11 +194,13 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
                        ftmp = max( (POPcse(0,nejc,ie,INExc(nnuc)) -
      &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc)))  
      &                  /PIx4,0.d0)
+
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+
                        ENDDO
                      ENDIF
                      if(ie.ne.1) then
@@ -250,19 +252,22 @@ C
      &              '(4x,''Lev #'',5x,''Integrated Discrete Spectra'')')
                      WRITE (12,
      &    '(10x,''    Energy    Int-DDX[mb]      Disc.Lev.XS     Differe
-     &nce     Elev'')')
+     &nce   Diff[%]     Elev'')')
                      WRITE (12,*) ' '
                      htmp = 0.d0
                      DO il = 1, NLV(nnuc)  ! discrete levels
+                       if(check_DL(il).LE.0) cycle ! skipping zeroes
 C                      espec is the outgoing energy corresponding to the level "il"
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE (12,'(4x,I3,4x,F10.5,3(E14.6,2x),F7.4)')  
-     &                   il, -espec, check_DL(il)             ,! *recorp,
-     &                        CSDirsav(il,nejc)               ,! *recorp,
-     &                        (check_DL(il)-CSDirsav(il,nejc)),!*recorp,
-     &                        ELV(il,nnuc)        
-                           htmp = htmp + check_DL(il)          !*recorp
+                       WRITE(12, 
+     &                   '(4x,I3,4x,F10.5,3(E14.6,2x),F6.2,4x,F7.4)')  
+     &                   il, -espec, check_DL(il)             ,
+     &                    CSDirsav(il,nejc)               ,
+     &                   (check_DL(il)-CSDirsav(il,nejc)),
+     &                   (check_DL(il)-CSDirsav(il,nejc))/
+     &                    check_DL(il)*100,  ELV(il,nnuc)        
+                         htmp = htmp + check_DL(il)         
                      ENDDO
                      WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4324 $
+Ccc   * $Rev: 4331 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
+Ccc   * $Date: 2015-04-06 22:37:23 +0200 (Mo, 06 Apr 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3153,7 +3153,7 @@ C-----
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
 C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
-      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE + 1.0001),0),ndecsed) 
+      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE+1.0001),0),ndecsed) 
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
@@ -3265,7 +3265,7 @@ C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             - 0.5*CSEmsd(icsp,Nejc)
 
 C--------------DDX 
-               POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.0
+               POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
 C   equivalent to POPcseaf when only the 1st emission is anisotropic
 C               DO na = 1,NDANG
 C                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
