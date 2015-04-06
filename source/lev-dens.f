@@ -1,5 +1,5 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-09 00:04:48 +0100 (So, 09 Nov 2014) $
+Ccc   * $Date: 2015-04-06 02:25:36 +0200 (Mo, 06 Apr 2015) $
 Ccc   * $Id: lev-dens.f,v 1.77 2009/08/03 00:35:20 Capote Exp $
 C
 C
@@ -357,7 +357,7 @@ C
       REAL*8 s,det,seff2, ro,ro_u,ro_j,ro_pi,pi
       REAL*8 rot_K, rot_Q, vib_KQ   
 
-      DATA const/0.01473144/,pi/3.14159259d0/
+      DATA const/0.01473144d0/,pi/3.1415926535897932D0/
 C-----CONST=1.0/(24.0*SQRT(2.0))/2.0
 C-----the last 2.0 takes into account parity (half to half)
 C-----BF controls shape of the nucleus
@@ -509,10 +509,10 @@ C
 C Local variables
 C
       REAL*8 cost, ht, m0, pi, r0, sdrop
-      DATA m0, pi, r0, ht/1.044, 3.14159259, 1.26, 6.589/
-      sdrop = 17./(4.*pi*r0**2)
-      cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-      Vibrk = EXP(1.7*cost**(2./3.)*T**(4./3.))
+      DATA m0,pi,r0,ht/1.044d0, 3.1415926535897932D0, 1.26d0, 6.589d0/
+      sdrop = 17.d0/(4.d0*pi*r0**2)
+      cost = 3.d0*m0*A/(4.d0*pi*ht**2*sdrop)
+      Vibrk = EXP(1.7d0*cost**(2.d0/3.d0)*T**(4.d0/3.d0))
       END
 
       SUBROUTINE VIB_Q_EGSM(T,Q)
@@ -593,7 +593,7 @@ C****************************************************
       real*8 pi, pi2, xr, ar
       INTEGER ix
 
-      pi=3.141592654D0   
+      pi=3.1415926535897932D0   
       pi2 = PI*PI
       TCRt = 0.567*DELp
 
@@ -684,7 +684,7 @@ C
      &       dt, eta, gamma, pi, r1, r2, r3, ry,
      &       rbmsph, t, tgscr, x, y, ycrit
 
-      pi=3.14159259d0
+      pi=3.1415926535897932D0
       IF (A.LE.0.D0) RETURN
 C-----Damping ground state deformation (DT=0.4 Tgscr=1.5 MeV)
       dt = 0.4
@@ -967,12 +967,12 @@ Ccc
       INTEGER LAM
       REAL*8 cga, gam, fn, U, S
       Q=1.D0
-      IF(T.LT.0.01) RETURN
-      GAM=cga*(OM**2+(2.*3.141593*T)**2)
+      IF(T.LT.0.01d0) RETURN
+      GAM=cga*(OM**2+(2.d0*3.1415926535897932D0*T)**2)
       FN=DEXP(-GAM/OM/2.D0)/(DEXP(OM/T)-1.D0)
       IF(FN.LT.0.d0) RETURN
       U=LAM*OM*FN
-      S=LAM*((1.+FN)*DLOG(1.+FN)-FN*DLOG(FN))
+      S=LAM*((1.d0+FN)*DLOG(1.d0+FN)-FN*DLOG(FN))
       Q=DEXP(S-U/T)
       if (Q.lt.1.D0) Q=1.D0
       RETURN
@@ -2783,24 +2783,24 @@ C
       INTEGER egsm
 
 C-----vib_K
-      DATA m0, pi, r0, ht/1.044, 3.141592, 1.26, 6.589/    
-      sdrop = 17./(4.*pi*r0**2)
-      cost = 3.*m0*A/(4.*pi*ht**2*sdrop)
-      Vibrk = vn*4.d0* EXP(1.7*cost**(2./3.)*T**(4./3.))
+      DATA m0,pi,r0,ht/1.044d0, 3.1415926535897932D0, 1.26d0, 6.589d0/
+      sdrop = 17.d0/(4*pi*r0**2)
+      cost = 3.d0*m0*A/(4*pi*ht**2*sdrop)
+      Vibrk = vn*4.d0* EXP(1.7d0*cost**(2.d0/3.d0)*T**(4.d0/3.d0))
 C-----vib_Q
       arg = (T - thalf)/dt
-      qv = 1.0/(EXP((-arg)) + 1.0)
-      IF (qv.GE.0.999D0) vibrk = 1.0
-      vib_KQ = qv - vibrk*(qv - 1.)
+      qv = 1.d0/(EXP((-arg)) + 1.d0)
+      IF (qv.GE.0.999D0) vibrk = 1.d0
+      vib_KQ = qv - vibrk*(qv - 1.d0)
 C-----rot_K
-      rot_K  = 1.0
+      rot_K  = 1.d0
       IF(egsm.eq.0)rot_K  = momo*t
 C-----rot_Q
       dmphalf = 120.d0*A**0.333*def2**2         !according to RIPL
-      dmpdiff =1400.*A**(-0.666)*def2**2
-      Qr = 1./(1. + EXP((-dmphalf/dmpdiff)))
-     &     - 1./(1. + EXP((e1-dmphalf)/dmpdiff))
-      rot_Q  = 1.0 - qr * (1.0 - 1.0/(momo*t))
+      dmpdiff =1400.d0*A**(-0.666)*def2**2
+      Qr = 1.d0/(1 + EXP((-dmphalf/dmpdiff)))
+     &     - 1.d0/(1 + EXP((e1-dmphalf)/dmpdiff))
+      rot_Q  = 1.d0 - qr * (1.d0 - 1.d0/(momo*t))
       RETURN
       END
 C
