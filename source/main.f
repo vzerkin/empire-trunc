@@ -1,6 +1,6 @@
-cc   * $Rev: 4295 $
+cc   * $Rev: 4326 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-11 14:59:17 +0100 (Mi, 11 Feb 2015) $
+Ccc   * $Date: 2015-04-06 02:30:58 +0200 (Mo, 06 Apr 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -43,7 +43,6 @@ C-----
  
         CALL INPUT()
 
-C       CALL EMPAXS(LHMs, NDAng, NDECSE, NNucd, !NNuct ??, 
         CALL EMPAXS(LHMs, NDAng, NDECSE, NNuct, 
      1                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
         call open_xs_files()
@@ -60,7 +59,7 @@ C
         ENDIF
 C	   
 	  totcorr = 1.d0
-C       Inelastic cross swctions read only for particles (not photons or HI) 
+C       Inelastic cross sections read only for particles (not photons or HI) 
         IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
      >    call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
 C
@@ -695,24 +694,6 @@ C-------Set angles for inelastic calculations
       ENDIF
 
       IF(.not.BENchm) FIRst_ein = .FALSE.
-C     
-C     Changing CN-isotropic to false if energy is too high as CN
-C     decay to discrete levels is negligible         
-C     ELV(NLV(0),0) is the energy of the last discrete level of the target nucleus
-C     if(.not.CN_isotropic) then    
-C       Only for actinides, more conditions need to be added        
-C       depending on odd/even properties and mass number
-C       if(A(0).gt.220 .and. EIN.gt.8.d0) then
-C         CN_isotropic = .TRUE.
-C         WRITE(8,*)
-C         WRITE(8,*) 
-C    &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
-C         WRITE(*,*)      
-C         WRITE(*,*) 
-C    &    'CN angular distribution assumed isotropic above Einc = 8 MeV'
-C         WRITE(8,*)
-C       endif  
-C     endif
 
       RETURN
       END
