@@ -180,7 +180,7 @@
    ! Local variables
 
    LOGICAL*4 relcal
-   INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg
+   INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
    REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
    REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
    REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
@@ -374,14 +374,12 @@
           ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)  
           !write(*,*) 'EWCORR=', ewcor
 
-          DO i = 1, num%part                          !scan strong particle channels (note: weak channels are already in SCRt)
+          ! Correcting the elastic cross section for inelastic enhancement CINRED
+          numch_el = max(num%elah - num%elal + 1 , 1 ) 
+          DO i = num%elal, num%elah  ! do loop over elastic channels
              out => outchnl(i)
-             IF(out%kres>0) cycle ! SKIP continuum channels
-             ! discrete level channels
-             if( (out%nejc.EQ.NPRoject) .and. (-out%kres.EQ.LEVtarg) ) then
-                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor
-                !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
-             endif
+             SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
+             !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
           ENDDO
 
           IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
