@@ -87,7 +87,9 @@ C* MTOL Angle difference (degrees) for differentiating energy-dependent
 C*      cross sections at fixed angles.
       DATA ETOL,ITOL,MTOL/ 0.015, 5, 1 /
       DATA BL10/'          '/
-      DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
+C     DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
+C     Adapting to low energy evaluation work
+      DATA EDDX/ 2.E6, 5.E6, 7.E6, 10.E6, 14.E6, 17.E6, 20.E6/
       DATA ADDX/ 20., 160./
       DATA MJRXS/ 1, 3, 4, 16, 18, 102 /
       NO4000=0
