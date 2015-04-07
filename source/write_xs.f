@@ -213,7 +213,8 @@ C
 C                  This is a patch to correct the printed DDXS
 C                  for DWBA to the continuum
 C
-                   DO ie = 1, nspec 
+                   if(nejc.eq.7) then
+                    DO ie = 1, nspec 
                      IF(check_DE(ie).le.0) cycle
                      DO nang = 1, NDANG
                        cseaprnt(ie,nang) = 
@@ -227,7 +228,8 @@ C
      >                      0.5d0*POPcse(0,nejc,ie,INExc(nnuc)) 
                        endif
                      ENDDO
-                   ENDDO
+                    ENDDO
+                   endif
 
                    DO ie = 1, nspec 
                                      ! print DDX spectrum

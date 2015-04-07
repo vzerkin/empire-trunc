@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4335 $
+Ccc   * $Rev: 4338 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
+Ccc   * $Date: 2015-04-08 00:56:04 +0200 (Mi, 08 Apr 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -597,7 +597,6 @@ C                   Saving EW matrices
                   tljcalc = .TRUE. 
                 ENDIF
               ENDIF
-
             ENDIF
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
@@ -910,14 +909,16 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 C
-         ctmp = ctldir//ctmp23//'_Smatr.txt'
-         iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
-         ctmp = ctldir//ctmp23//'_Pmatr.txt'
-         iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
-         ctmp = ctldir//ctmp23//'_Umatr.txt'
-         iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
-         ctmp = ctldir//ctmp23//'_Pdiag.txt'
-         iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+         IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
+           ctmp = ctldir//ctmp23//'_Smatr.txt'
+           iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Pmatr.txt'
+           iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Umatr.txt'
+           iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Pdiag.txt'
+           iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+         ENDIF
       ENDIF
 C
 C-----Save TLs, SINl

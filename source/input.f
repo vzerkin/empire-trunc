@@ -1,6 +1,6 @@
-!cc   * $Rev: 4337 $
+!cc   * $Rev: 4338 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-08 00:24:39 +0200 (Mi, 08 Apr 2015) $
+!cc   * $Date: 2015-04-08 00:56:04 +0200 (Mi, 08 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3793,16 +3793,16 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
           
             IF (.not.CN_isotropic) THEN          
-               WRITE (12,'('' CN anisotropy by Blatt-Biedenharn coeffs. 
-     &'')')
-               WRITE ( 8,'('' CN anisotropy by Blatt-Biedenharn coeffs. 
-     &'')')
+               WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
+     &nharn coefficients'')')
+               WRITE ( 8,'('' CN anisotropy calculated using Blatt-Biede
+     &nharn coefficients'')')
 C            IF (INTerf.EQ.0 .or. SOFt) THEN
              IF (INTerf.EQ.0) THEN
                 WRITE (8,
-     &          '('' CN and Direct cross section added incoherently'')')
+     &   '('' CN decay and Direct cross sections added incoherently'')')
                 WRITE (12,
-     &          '('' CN and Direct cross section added incoherently'')')
+     &   '('' CN decay and Direct cross sections added incoherently'')')
               ELSE
                 WRITE ( 8,'('' CN-direct interference by Engelbrecht & W
      &eidenmuller, Phys.Rev. C8(1973)859-862 '')')
