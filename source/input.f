@@ -1,6 +1,6 @@
-!cc   * $Rev: 4336 $
+!cc   * $Rev: 4337 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-08 00:22:51 +0200 (Mi, 08 Apr 2015) $
+!cc   * $Date: 2015-04-08 00:24:39 +0200 (Mi, 08 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3793,9 +3793,9 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
           
             IF (.not.CN_isotropic) THEN          
-               WRITE (12,'('' CN anisotropy by Blatt-Biedenharn coeffs.)
+               WRITE (12,'('' CN anisotropy by Blatt-Biedenharn coeffs. 
      &'')')
-               WRITE ( 8,'('' CN anisotropy by Blatt-Biedenharn coeffs.)
+               WRITE ( 8,'('' CN anisotropy by Blatt-Biedenharn coeffs. 
      &'')')
 C            IF (INTerf.EQ.0 .or. SOFt) THEN
              IF (INTerf.EQ.0) THEN
