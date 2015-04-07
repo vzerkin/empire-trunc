@@ -1,6 +1,6 @@
-!cc   * $Rev: 4335 $
+!cc   * $Rev: 4336 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
+!cc   * $Date: 2015-04-08 00:22:51 +0200 (Mi, 08 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -8700,8 +8700,6 @@ C    >      write(*,*) nixz,nixa,beta2x(k)
   100 CLOSE (UNIT = 27)
       RESmas = 0.d0
       EXCessmass = 0.d0
-
-      write(*,*) AMUMev 
       DO k = 1, NMASSE
          iz = izaf(k)/1000
          ia = MOD(izaf(k),1000)
