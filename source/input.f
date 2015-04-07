@@ -1,6 +1,6 @@
-!cc   * $Rev: 4330 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2015-04-06 22:09:19 +0200 (Mo, 06 Apr 2015) $
+!cc   * $Rev: 4335 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -40,7 +40,7 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
-     &         qatom,qnucl,FTMP, fftmp
+     &         qatom,qnucl,FTMP, fftmp !, XNExc
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
       CHARACTER*23 ctmp23
@@ -133,20 +133,15 @@ C
       CETa = ELE2*DSQRT(AMUmev/2.D0)/HHBarc
       CSO  = (HHBarc/AMPi)**2
       PI   = 4.D0*DATAN(1.D0)
-	PIx4 = 4.D0*PI
-
+      PIx4 = 4.D0*PI
+ 
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
 C--------default input parameters (skipped in non-first-energy calculation)
 C
          FIRst_ein = .TRUE.
-
-
          ncontr = 0
-
          QQInc  = 0.d0
-
-
 C--------select Myers-Swiatecki shell corrections
          SHNix = 0.0
 C--------neutralize tuning factors and OMP normalization factors
@@ -1561,28 +1556,16 @@ C    &'('' Discrete levels turned off in PCROSS as PCROSS is off'')')
 
 C--------set PCROSS  (.,6) cluster emission
          IF (PEQc.EQ.0.d0 .and. AEJc(NPRoject).gt.1 
-
      &      .and. DXSred.gt.0) THEN
-
             IDNa(2,6) = 1  ! cont n
-
             IDNa(4,6) = 1  ! cont p
-
             IDNa(5,6) = 0  ! gammas
-
             IDNa(6,6) = 1  ! cont A 
-
             IDNa(7,6) = 1  ! cont D 
-
             IDNa(8,6) = 1  ! cont T 
-
             IDNa(9,6) = 1  ! cont H 
-
             IDNa(10,6) = 0 ! cont LI
-
          ENDIF
-
-
 
          IF (PEQc.GT.0.d0) THEN
             IDNa(2,6) = 1  ! cont n
@@ -2216,41 +2199,20 @@ C           ENDIF
             IF(Q(nejc,nnuc).GE.98.5d0) CYCLE
 C-----------determination of Q-value for isotope production
             qtmp = QPRod(nnuc) - Q(nejc,nnuc)
-
-
-
             QQInc(nnur)  = QQInc(nnur)  + qtmp
-
             ncontr(nnur) = ncontr(nnur) + 1 
-
-
-
 C           write(*,'(3(A6,i2),A8,i6,1x,3(e12.6,1x))') ' nnuc=',
-
 C    >        nnuc,' nejc=',nejc,' nnur=',nnur,' izares=',izares,
-
 C    >        Q(nejc,nnuc),qtmp,QPRod(nnur)
 
-
-
 C           The production Q-value is defined by the lowest threshold producing reaction 
-
             IF (qtmp.GT.QPRod(nnur)) QPRod(nnur) = qtmp
-
 C           For residuals with multiple contributing reaction we define an average Q-value 
-
 C           if(ncontr(nnur).gt.1) QPRod(nnur) = QQInc(nnur)/ncontr(nnur)
-
-     
-
 C           write(*,'(3(A6,i2),A8,i6,1x,3(e10.4,1x),3H * ,I2)')' nnuc=',
-
 C    >        nnuc,' nejc=',nejc,' nnur=',nnur,' izares=',izares,
-
 C    >        QPRod(nnuc) - Q(nejc,nnuc),QPRod(nnur),
-
 C    >        QQInc(nnur)/ncontr(nnur), ncontr(nnur)
-
 C           pause
 
 C-----------determination of etl matrix for the transmission coeff. calculation
@@ -2307,19 +2269,12 @@ Cpr         END DO
       WRITE (12,*) 'Total number of nuclei considered :', NNUct
 
       IF(ENDF(1).GT.0) THEN
-
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-
         WRITE(8,*) 'Nuclei marked with < below produces inclusive spect
-
      &ra only'
-
         WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
-
         WRITE(12,*) 'Nuclei marked with < below produces inclusive spect
-
      &ra only'
-
       ENDIF
 
       WRITE (8,*) ' '
@@ -2338,16 +2293,12 @@ C--------OMPAR.DIR
          CLOSE (33,STATUS = 'DELETE')
 C--------OMPAR.RIPL
          CLOSE (29,STATUS = 'DELETE')
+
 C        additional lines to avoid the message that EMPIRE stopped !!
-
          OPEN(222,file='EMPIRE.OK') 
-
          WRITE (222,*) ' PLOTS DONE'
-
          CLOSE(222)
-
 C        additional lines
-
          STOP 'PLOTS DONE'
       ENDIF
 C
@@ -2356,13 +2307,9 @@ C
       DO nnuc = 1, NNUct
          FISsil(nnuc) = .TRUE.
 C        IF (NINT(FISshi(nnuc)).EQ.0 .AND.
-
 C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
-
          IF (NINT(FISshi(nnuc)).EQ.0 .AND.
-
      &       (NINT(Z(nnuc)).LT.86 .OR. NINT(A(nnuc)).LT.220)) THEN
-
             FISsil(nnuc)= .FALSE.
          ENDIF
          IF (NINT(FISshi(nnuc)).EQ.1) THEN
@@ -2394,7 +2341,6 @@ C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
 
 99010 FORMAT (1X,14(G10.4,1x))
       END
-
 
       SUBROUTINE INP_LD(Nnur)
 
@@ -3828,9 +3774,7 @@ C                ECDWBA keyword present in the input
      &BA) set to ',sngl(ecutof)
                  ENDIF 
 C                IF(JCUTcoll.GT.4) JCUtcoll = 4
-
                  IF(JCUTcoll.LE.4) JCUtcoll = 4
-
                  IF(JCUTcoll.GT.9) JCUtcoll = 9
                ENDIF
          
@@ -3844,35 +3788,26 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &             JCUtcoll+1
                ENDIF
             ENDIF
-
-
      
             IF (ZEJc(0).GT.0 .or.  CNAngd.eq.0) CN_isotropic = .TRUE.
             IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
           
             IF (.not.CN_isotropic) THEN          
-              WRITE (12,
-
-     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.)''
-
-     &)')
-
-              WRITE (8,
-     &'('' Anisotropic CN ang. distribution (Blatt-Biedenharn coeffs.)''
-
-     &)')
-
-              IF (INTerf.EQ.0 .or. SOFt) THEN
+               WRITE (12,'('' CN anisotropy by Blatt-Biedenharn coeffs.)
+     &'')')
+               WRITE ( 8,'('' CN anisotropy by Blatt-Biedenharn coeffs.)
+     &'')')
+C            IF (INTerf.EQ.0 .or. SOFt) THEN
+             IF (INTerf.EQ.0) THEN
                 WRITE (8,
      &          '('' CN and Direct cross section added incoherently'')')
                 WRITE (12,
      &          '('' CN and Direct cross section added incoherently'')')
               ELSE
-                WRITE (8,'('' CN-direct interference by Engelbrecht - We
-     &idenmuller transformation Phys.Rev. C8(1973)859-862 '')')
-                WRITE(12,
-     &'('' CN-direct interference considered (Engelbrecht - Weidenmuller
-     & transf.)'')')
+                WRITE ( 8,'('' CN-direct interference by Engelbrecht & W
+     &eidenmuller, Phys.Rev. C8(1973)859-862 '')')
+                WRITE (12,'('' CN-direct interference by Engelbrecht & W
+     &eidenmuller, PRC8(1973)859'')')
               ENDIF
             ELSE
               WRITE (8,
@@ -4262,9 +4197,7 @@ C           EcDWBA meaningless if Collective level file exists
             INQUIRE (FILE = 'TARGET_COLL.DAT',EXIST = fexist)
             IF(fexist) then
               WRITE (8,*) 
-
      &        'Collective level file *-lev.col exists: EcDWBA not used'
-
               goto 100
             ENDIF
             ECUtcoll = val
@@ -4339,11 +4272,8 @@ C
      &'('' Coupled Channels Method used for direct inelastic scattering'
      &')')
             IF (DIRect.EQ.2) WRITE (8,
-
      &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
-
      &)')
-
             IF (DIRect.EQ.3) WRITE (12,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
@@ -4354,7 +4284,6 @@ C
      &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
 
      &)')
-
             GOTO 100
          ENDIF
 C
@@ -5260,20 +5189,15 @@ C
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
      &           '('' WARNING: Volume potential diffuseness uncertainty 
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPAV '',I2)') i3
                WRITE (8,
      &           '('' WARNING: Volume potential diffuseness uncertainty 
-
      &ignored'')')
-
                GOTO 100
             ENDIF
             if(val.gt.0. .and. IOPran.ne.0) then
@@ -5523,7 +5447,6 @@ C        RWOmv(Nejc,Nnuc) = rlib(2)*FNrwvomp(Nejc,Nnuc)
                WRITE (8,'('' WARNING: UNKNOWN EJECTILE in UOMPRW'',I2)') i3
                WRITE (8,
      &           '('' WARNING: Volume imaginary potential radius uncerta
-
      &inty ignored'')')
                GOTO 100
             ENDIF
@@ -5571,7 +5494,6 @@ C        RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
             ENDIF
             IF (i3.GT.NDEJC) THEN
                WRITE (8,
-
      &           '('' WARNING: UNKNOWN EJECTILE in UOMPRV'',I2)') i3
                WRITE (8,
      &           '('' WARNING: Volume real potential radius uncertainty
@@ -7908,15 +7830,10 @@ C
                DO nnuc = 1, NDNUC
                   FIStga(nnuc) = val
                ENDDO
-
                WRITE (8,*) 'Gamma transm. coeff. in ',
-
      &                     'isomeric well for all nuclei:', val
-
                WRITE (12,*)'Gamma transm. coeff. in ',
-
      &                     'isomeric well for all nuclei:', val
-
                GOTO 100
             ENDIF
             CALL WHERE(izar,nnuc,iloc)
@@ -7928,16 +7845,11 @@ C
             ENDIF
             FIStga(nnuc) = val
             WRITE (8 ,
-
      &  '('' Gamma transm. coeff. in isomeric well for '',
-
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
-
             WRITE (12,
      &  '('' Gamma transm. coeff. in isomeric well for '',
-
      &             I3,A2,'' set to '', F7.5)') i2, SYMb(nnuc),val
-
             GOTO 100
          ENDIF
 C--------
@@ -8630,16 +8542,11 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-C           IF (val.NE.0.d0) INTerf = 1
-
-            WRITE (8,'('' CN-direct interference NOT IMPLEMENTED'')')
-
-C           IF (INTerf.eq.0) 
-
-C    &        WRITE (8,'('' CN-direct interference neglected'')')
-
-C           IF (INTerf.eq.1) 
-C    &        WRITE (8,'('' CN-direct interference considered'')')
+            IF (val.GT.0) INTerf = 1
+            IF (INTerf.eq.0) 
+     &        WRITE (8,'('' CN-direct interference neglected'')')
+            IF (INTerf.eq.1) 
+     &        WRITE (8,'('' CN-direct interference considered'')')
             GOTO 100
          ENDIF
 
@@ -8794,6 +8701,7 @@ C    >      write(*,*) nixz,nixa,beta2x(k)
       RESmas = 0.d0
       EXCessmass = 0.d0
 
+      write(*,*) AMUMev 
       DO k = 1, NMASSE
          iz = izaf(k)/1000
          ia = MOD(izaf(k),1000)
@@ -11984,7 +11892,7 @@ C     INTEGER NG
       DOUBLE PRECISION btmp, etmp, fjtmp
       DOUBLE PRECISION cs1,cs2,dcs1,dcs2,sig_TRK,pi,const
       INTEGER i, natmp, nntmp 
-      DATA pi/3.141592654D0/
+      DATA pi/3.1415926535897932D0/
 
       IF(key_GDRGFL.EQ.1.OR.key_GDRGFL.EQ.2)THEN
          OPEN (81,FILE = trim(empiredir)//'/RIPL/gamma'

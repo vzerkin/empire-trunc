@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4324 $
+Ccc   * $Rev: 4335 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
+Ccc   * $Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2811,7 +2811,7 @@ C------------------------------------------
 C-----| Input of transmission coefficients|
 C------------------------------------------
 C-----Opening ecis03 output file containing Smatrix
-      OPEN(UNIT = 45, STATUS = 'old', FILE = 'ecis06.smat', ERR=90)
+      OPEN(UNIT=45, STATUS = 'old', FILE = 'ecis06.smat', ERR=90)
       READ (45,*,END = 90)   ! To skip first line <SMATRIX> ..
    80 READ (45,'(1x,f9.1,4x,a1,2(1x,i4))',END = 90) 
      &     jc, parc, nceq, nctot ! ecis06
@@ -3666,6 +3666,9 @@ C--------DWBA
 c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
+C     Default: No EW
+      ECIs2(33:33) = 'T'  ! E-W transformation NOT used
+
       xmas_nejc = EJMass(Nejc)
       xmas_nnuc = AMAss(Nnuc)
       xratio = xmas_nnuc/(xmas_nejc + xmas_nnuc)
@@ -3673,11 +3676,9 @@ C
 C     saving the input value of the key CN_isotropic
       logtmp = CN_isotropic
 C
-C     Uncomment the lines below to calculate ECIS CN including 
-C     the Engelcbrecht-Weidenmuller transformation
-C
-C     CN_isotropic = .FALSE.
-C     INTerf = 1
+C     IF CN_isotropic = .FALSE. & INTerf = 1
+C     then the Engelbrecht-Weidenmuller transformation
+C     is applied and Matrices P,Pdiag,U, and S are written
 C
       IF (El.LT.0.D0) THEN
          inc_channel = .true.
@@ -3692,7 +3693,7 @@ C        CN_isotropic = .TRUE.
 
       IF (TL_calc .or. (.not.inc_channel)) CN_isotropic = .TRUE.
       if (INLkey.EQ.0 .or. DIRect.EQ.3) CN_isotropic = .TRUE. 
-C
+
 C     INLkey = 0  DWBA calculation for the ground state = Spher.OMP
 C     INLkey > 0  Calculation for coupled and uncoupled states = DWBA or CC
 C     INLkey < 0  Calculation for coupled states only = CC
