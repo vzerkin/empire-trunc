@@ -34,8 +34,6 @@ C
       DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum, xs_cn
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
-      LOGICAL key_calc_hrtw
-
       DOUBLE PRECISION, external :: GET_DDXS
 
       iret = 0
@@ -436,15 +434,13 @@ C-----Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
       kemax = NEX(nnuc)
 
 C-----Account for widths fluctuations (HRTW)
-      IF (LHRtw.EQ.1 .AND. EINl.GT.EHRtw) LHRtw = 0
+      IF (LHRtw.GT.0 .AND. EINl.GT.EHRtw) LHRtw = 0
 
-	key_calc_hrtw = .false.
       IF (nnuc.EQ.1 .AND. EINl.LT.EMAx_tlj) THEN
 C
 C       only for CN decay 
 C
         CALL calc_HRTW   ! width fluctuation
-        key_calc_hrtw = .true.
 
         IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
         kemax = max(NEX(nnuc) - 1,1)
@@ -603,10 +599,6 @@ C-----------------
 
           ENDDO                 !loop over decaying nucleus spin
         ENDDO                   !loop over decaying nucleus parity
-
-        IF (nnuc.EQ.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0
-     &     .AND. (.not.key_calc_hrtw)) 
-     &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
 
         IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
