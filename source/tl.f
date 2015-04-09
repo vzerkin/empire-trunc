@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4335 $
+Ccc   * $Rev: 4340 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
+Ccc   * $Date: 2015-04-09 02:56:10 +0200 (Do, 09 Apr 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -96,7 +96,6 @@ C           IF distributed barrier, then BASS barriers are used
 
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
      &                NLW,NDLW)
-
 	      RETURN
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model
@@ -2772,7 +2771,7 @@ C Local variables
 C
       DOUBLE PRECISION ak2,dtmp,ecms,elab,jj,sabs,sabsj,sreac,jc,
      & xmas_nejc,xmas_nnuc,selast,sreal,simag,stmp,snorm,ftmp
-      DOUBLE PRECISION xsabs,xsabsj,jsp, coeff
+      DOUBLE PRECISION xsabs,xsabsj,jsp,coeff,sxj,trgsp
       INTEGER ilv, l, nc, nceq, ncoll, nlev, nc1, nc2
       INTEGER nctot, ncsol, ncint, jindex
       LOGICAL relcal, unformat
@@ -2788,6 +2787,8 @@ C
       Sel  = 0.d0
       Stlj = 0.d0
       CSFus   = 0.D0
+      sxj   = SEJc(NPRoject)          
+	trgsp = XJLv(LEVtarg,NTArget)
 C
 C-----Estimating needed coefficient for calculation of the 
 C     absorption cross section from obtained TLs
@@ -2948,7 +2949,7 @@ C
       IF (ZEJc(Nejc).EQ.0) READ (45,*,END=300) ELAcs
   300 CLOSE (45)
       IF (ABScs.LE.0.D0) RETURN
-      
+
       CSFus = ABScs
 
       sabs  = 0.D0
@@ -2973,10 +2974,10 @@ C-----Absorption and elastic cross sections in mb are calculated
       xsabs  = coeff*sabs
       xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
       selast = coeff*selast
-C
-C	write(*,*) sngl(xsabs),sngl(xsabsj)
-C
-      NLW=min(NDLW,maxlw+1)
+
+C     write(*,*)'*** xsabs, xsabsj=',sngl(xsabs),sngl(xsabsj)
+
+      NLW=min(NDLW,maxlw+1+NINT(trgsp+0.6d0))
 
       IF (xsabs.le.0.d0) RETURN
 
@@ -3003,6 +3004,8 @@ C          Scattering into continuum
 
       ftmp = 0.d0
       if(DIRECT.EQ.3) ftmp = SINl + SINlcont
+C     if(DIRECT.EQ.3) ftmp = SINl 
+C     if(DIRECT.GT.0) ftmp = ftmp + SINlcont
 C     if(DIRECT.EQ.1 .or. DIRECT.EQ.3) ftmp = SINl + SINlcont
 C
 C     5% difference check
@@ -3025,7 +3028,6 @@ C     5% difference check
          write (8,*) ' ECIS  ABScs   =',sngl(ABScs)
          WRITE (8,*)
       ENDIF
-
 C     RENORMALIZING TLs and TLJs to correct for small differences 
 C     between ABScs and sum(Tls) corrected for direct
 C
@@ -3034,7 +3036,9 @@ C     xsabs is the cross section calculated as a sum over Tls (Tljs)
 C     SINlcc   is the coupled channels' cross section
 C     SINl     is the uncoupled channels' cross section
 C     SINlcont is the uncoupled channels' cross section to the continuum
+
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
+
 	sabs = 0.d0
       sabsj = 0.D0
       DO l = 0, Maxlw
@@ -3051,9 +3055,8 @@ C     SINlcont is the uncoupled channels' cross section to the continuum
 
       if(abs(1.d0-dtmp).gt.0.00001d0) then
         WRITE (8,
-     &'(1x,'' WARNING: Transmission coefficients renormalized to elimina
-     &te small'',/,1x,'' WARNING:    differences to OMP cross section by
-     & a factor '',F9.6/
+     &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
+     &r '',F9.6/
      &1x,'' WARNING: CC cross section to coupled discrete levels     =''
      &,F8.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
@@ -3138,7 +3141,7 @@ C
       ENDIF
 C
 C     Absorption cross section includes inelastic scattering cross section
-C     to coupled levels, but not DWBA to uncoupled levels (This is an ECIS double check)
+C     to coupled levels, but not DWBA to uncoupled levels 
 C         (except for DIRECT=3)
       sreac = xsabs  + SINlcc  + ftmp
 
@@ -3183,7 +3186,7 @@ C    &               SNGL(selast), ' mb '
 C
 C-----Renormalizing TLs and Tljs
 C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
-C     continuum included ij the reaction cross section if DIRECT<=2
+C     continuum included in the reaction cross section if DIRECT<=2
 C
 
       IF( DIRECT.LE.2 .and. xsabs.gt.0.d0 .and. 

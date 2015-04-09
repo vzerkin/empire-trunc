@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4338 $
+Ccc   * $Rev: 4340 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-08 00:56:04 +0200 (Mi, 08 Apr 2015) $
+Ccc   * $Date: 2015-04-09 02:56:10 +0200 (Do, 09 Apr 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -55,7 +55,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       LOGICAL lodd, tljcalc
       DOUBLE PRECISION E1, E2, SIGQD, XM1
       INTEGER i, ichsp, ip, itmp1, j, k, lmax, lmin, maxlw, mul,
-     &  nang, itmp2, ncoef1, istat1, istat2, ilev1, mxj,
+     &  nang, itmp2, ncoef1, istat1, istat2, ilev1, mxj, 
      &  ipa, il, iloc, l, myalloc, jindex, kmin, kmax
       INTEGER nx,nxx,nxe,lmx,nspecc,ie,nnur,nti,nthi
       DOUBLE PRECISION pops,dex,buspec(NDEX)
@@ -209,7 +209,7 @@ C-----------Absorption and elastic cross sections in mb
    40       CLOSE (45 )
             IF (fexistj) CLOSE (451)
       
-            NLW = min(NDLW,maxlw+1)
+            NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
@@ -223,8 +223,10 @@ C-----------Absorption and elastic cross sections in mb
             ENDIF
             WRITE(8,*)
             WRITE(8,*) ' Maximum CN spin is ', NLW
+            WRITE(8,*) ' Max. gamma multip. ', MAXmult
+            WRITE(8,*) ' Projectile spin is ', sngl(sxj)
+            WRITE(8,*) ' Target     spin is ', sngl(trgsp)
             WRITE(8,*) ' Spin dimension  is ', NDLW
-C           NLW = NDLW
             GOTO 300
          ENDIF
 C
@@ -284,7 +286,7 @@ C--------------Spin of c.n. cnJ=j-S1 => j=cnJ+S1
             ENDDO
    60       CONTINUE
             ABScs=CSFus
-            NLW = min(NDLW,j) 
+            NLW = min(NDLW,j+2*MAXmult+NINT(trgsp+0.6d0)) 
 C-----------END of spin distribution from file SDFILE
          ELSE
             JSTab(1) = NDLW !stability limit not a problem for photoreactions
@@ -375,7 +377,7 @@ C-----------end of E2
             IF (IGE1.NE.0 .AND. CSFus.GT.0.D0) QDFrac = qdtmp/CSFus
  
             ABScs = CSFus
-            NLW   = maxlw
+            NLW   = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
   
          ENDIF
 C--------END of calculation of fusion cross section
@@ -388,6 +390,9 @@ C
          WRITE(8,*)
          WRITE(8,*) ' Photoabsorption cross section =',CSFus
          WRITE(8,*) ' Maximum CN spin is ', NLW
+         WRITE(8,*) ' Max. gamma multip. ', MAXmult
+         WRITE(8,*) ' Projectile spin is ', sngl(sxj)
+         WRITE(8,*) ' Target     spin is ', sngl(trgsp)
          WRITE(8,*) ' Spin dimension  is ', NDLW
          WRITE(8,*)
 C
@@ -416,8 +421,9 @@ C--------and calculate transmission coefficients
             ENDIF
          ENDDO
 
-  150    NLW = il - 1
-         maxlw = min(NLW,NDLW-1)
+  150    maxlw = min(il - 1,NDLW)  
+         NLW   = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
+
          ABScs = CSFus
          WRITE (8,*)
      &  ' Spin distribution of fusion cross section read from the file '
@@ -430,6 +436,7 @@ C
 C--------calculation of o.m. transmission coefficients for absorption
 C
       ELSEIF (KTRlom(Npro,Ntrg).GT.0) THEN
+
          einlab = -EINl
          IWArn = 0
          ldbwacalc = .FALSE.
@@ -488,6 +495,7 @@ C           restoring the input value of the key CN_isotropic
                WRITE (8,*) 
                WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                     'fusion determination'
+
             ENDIF
             IF (DIRect.EQ.1 .OR. DIRect.EQ.3) THEN
 C--------------Restoring KTRlom(0,0)
@@ -496,7 +504,6 @@ C--------------Restoring KTRlom(0,0)
             ENDIF
             ldbwacalc = .TRUE.
          ENDIF
-
 C
 C--------In EMPIRE code the options DIRECT=1 and DIRECT=2 produces exactly the
 C--------same array of transmission coefficients for the incident channel
@@ -812,7 +819,7 @@ C           restoring the input value of the key CN_isotropic
      &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
             ltlj = .TRUE.
             tljcalc = .TRUE. 
-
+      
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
 
          ENDIF
@@ -827,8 +834,11 @@ C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
          ENDIF
          WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', NLW 
+         WRITE(8,*) ' Max. gamma multip. ', MAXmult
+         WRITE(8,*) ' Projectile spin is ', sngl(sxj)
+         WRITE(8,*) ' Target     spin is ', sngl(trgsp)
          WRITE(8,*) ' Spin dimension  is ', NDLW
-C        NLW = NDLW
+
 C--------IWARN=0 - 'NO Warnings'
 C--------IWARN=1 - 'A out of the recommended range '
 C--------IWARN=2 - 'Z out of the recommended range '
@@ -844,14 +854,17 @@ C--------IWARN=4 - 'Energy requested higher than recommended for this potential'
 C--------calculation of h.i. transmission coefficients for fusion
          maxlw = NDLW-1
          CALL HITL(stl)
-	   
+         NLW = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
+
          ltlj    = .TRUE.
          tljcalc = .FALSE.
-         if(NLW.GT.0) maxlw = min(NDLW-1,NLW)
+
          WRITE(8,*) 
          WRITE(8,*) ' Maximum CN spin is ', NLW 
+         WRITE(8,*) ' Max. gamma multip. ', MAXmult
+         WRITE(8,*) ' Projectile spin is ', sngl(sxj)
+         WRITE(8,*) ' Target     spin is ', sngl(trgsp)
 	   WRITE(8,*) ' Spin dimension  is ', NDLW
-         NLW = maxlw+1
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
@@ -864,8 +877,8 @@ C--------channel spin min and max
          mul = smax - smin + 1.0001
          CSFus = 0.d0
          csmax = 0.d0
-         DO ip = 1, 2     ! over parity
-          DO j = 1, NLW !over compound nucleus spin
+         DO ip = 1, 2   ! over parity
+          DO j = 1, NLW ! over compound nucleus spin
             sum = 0.d0
             DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
@@ -956,6 +969,7 @@ C--------Absorption and elastic cross sections in mb
          WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
          WRITE (46,'(1x,8(D15.9,1x))') 
      &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
+
          IF(FIRST_ein) then
            WRITE (8,*)
            WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
@@ -1018,7 +1032,6 @@ C-----Print elastic and direct cross sections from ECIS
      &     ' Inelastic scattering results provided by DWBA calculations'
         ENDIF
       ENDIF
-C     write(*,*) 'CSFus=',CSFus,NLW 
 
       IF(TOTred.NE.1) then
         FUSred = TOTred*FUSred0
@@ -1158,20 +1171,21 @@ C--------Corrected scattering radius
       relcal = .FALSE.
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-	coef = 1.d0
-      IF (INT(AEJc(0)).GT.0)
-     &        coef = 10.d0*PI/ak2/
-     &           (2*trgsp + 1.d0)/(2*sxj + 1.d0)
-C     write(*,*) 'FUSI=',10.d0*PI/ak2,el,IRElat(NPRo,Ntrg),
-C    &           RELKIN,relcal
 
+	coef = 1.d0
+      IF (INT(AEJc(0)).GT.0) coef = 10.d0*PI/ak2
+     &      /(2*trgsp + 1.d0)/(2*sxj + 1.d0)
+
+C     write(*,*) el,IRElat(NPRo,Ntrg),RELKIN,relcal
 C	write (*,*) '*** NLW=',NLW,tljcalc
+
       CSFus = 0.d0
       csmax = 0.d0
+
 	IF (tljcalc) THEN
 C-------absorption spin distribution using Tlj's
-        DO ip = 1, 2      ! over parity
-          DO j = 1, NLW   !over compound nucleus spin
+        DO ip = 1, 2    ! over parity
+          DO j = 1, NLW ! over compound nucleus spin
             sum = 0.d0
             xjc = float(j) + HIS(1)
             jmin = abs(xjc - trgsp)
@@ -1200,8 +1214,8 @@ C-------absorption spin distribution using Tl's
         smin = ABS(sxj - trgsp)
         smax = sxj + trgsp
         mul = smax - smin + 1.0001
-        DO ip = 1, 2     ! over parity
-          DO j = 1, NLW   !over compound nucleus spin
+        DO ip = 1, 2    ! over parity
+          DO j = 1, NLW ! over compound nucleus spin
             sum = 0.d0
             DO ichsp = 1, mul
                chsp = smin + FLOAT(ichsp - 1)
@@ -1223,7 +1237,7 @@ C-------absorption spin distribution using Tl's
         ENDDO
 
 	ENDIF
-C	write (*,*) '*** CSFus =',CSFus
+C 	write (*,*) '*** CSFus =',CSFus
 
       IF (CSFus.GT.0 .AND. (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
          IF (DIRect.LE.2) THEN
@@ -1414,18 +1428,14 @@ C
          ENDDO
       ENDDO
 C
-      DO j = NDLW, 1, -1
-         NLW = j 
-         IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
-         IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
-      ENDDO
+C     DO j = NDLW, 1, -1
+C        NLW = j 
+C        IF (POP(NEX(1),j,1,1)*10000.D0.GT.csmax) exit
+C        IF (POP(NEX(1),j,2,1)*10000.D0.GT.csmax) exit
+C     ENDDO
 C
 C     NORMAL RETURN
   400 CONTINUE
-C-----the next line can be used to increase the number of partial waves
-C-----e.g., to account for a high-spin isomer
-C-----Plujko_new-2005
-      NLW = min(NLW + 1 + MAXmult,NDLW)
 C
 C-----check whether NLW is not larger than 
 C-----max spin at which nucleus is still stable 
@@ -1441,20 +1451,20 @@ C
      & Jstab(1) + 1
           IF(Jstab(1).LE.NDLW) then
             ftmp = 0.d0
-            DO j = Jstab(1), min(NDLW,NLW)
+            DO j = Jstab(1), NLW
               ftmp = ftmp + POP(NEX(1),j,1,1) + POP(NEX(1),j,2,1)
               POP(NEX(1),j,1,1) = 0.d0
               POP(NEX(1),j,2,1) = 0.d0
             ENDDO
+            NLW = min(JSTab(1),NDLW)
             CSFus = CSFus - ftmp
             WRITE (8,'(''  WARNING: Some fusion cross section lost : '',
      & F9.3,'' mb, due to the stability limit'')') ftmp  
-          ELSE
-            WRITE (8,
-     &'(''  WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
-     & )')
+C         ELSE
+C           WRITE (8,
+C    &'(''  WARNING: Increase NDLW in dimension.h and recompile EMPIRE''
+C    & )')
           ENDIF
-          NLW = min(JSTab(1),NDLW)
       ENDIF
 
       IF ((POP(NEX(1),NLW,1,1)*20.D0.GT.csmax .OR. POP(NEX(1),NLW,2,1)
@@ -1812,7 +1822,7 @@ C
          EROt = EROt/2.0
          CALL INTGRS(xlow,xmax,G,prob)
          Stl(j) = prob/dintf
-         IF (Stl(j).gt.1.d-10) Nlw = j
+         IF (Stl(j).gt.1.d-10) NLW = j 
       ENDDO
       END
 
