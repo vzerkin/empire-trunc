@@ -49,7 +49,8 @@ filelist="a-ni58-pcross
           u238-HFB-num-fis-tun
           u238-HFB-par-fis    
           u238-rigid-soft-omp 
-          u238-rot-CC-direct-2"
+          u238-rot-CC-direct-2
+		  nb93-high-spin"
 
 echo option    =$option
 echo targetfile=$targetfile
