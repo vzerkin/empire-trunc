@@ -1,6 +1,6 @@
-#$Rev: 4335 $
+#$Rev: 4345 $
 #$Author: rcapote $
-#$Date: 2015-04-08 00:17:48 +0200 (Mi, 08 Apr 2015) $
+#$Date: 2015-04-10 07:15:05 +0200 (Fr, 10 Apr 2015) $
 
 # set default compilers:
 
@@ -130,15 +130,15 @@ OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxilia
        gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o \
        fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o \
        defsystematics.o pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o \
-       write_ENDF.o pfns_calc.o ang_mom.o subecis13.o parse_line.o dbrkup.o
+       write_ENDF.o pfns_calc.o ang_mom.o subecis06m.o parse_line.o dbrkup.o
 
 all: 
 	$(MAKE) empire
 	$(MAKE) optmand
 	@../scripts/getrevnum
 
-subecis13.o: subecis13.f
-	$(FC) $(EFLAGS) -c subecis13.f	
+subecis06m.o: subecis06m.f
+	$(FC) $(EFLAGS) -c subecis06m.f	
 
 empire: $(OBJF) 
 	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)

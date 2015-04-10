@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3910 $
+Ccc   * $Rev: 4345 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-03-10 11:35:06 +0100 (Mo, 10 Mär 2014) $
+Ccc   * $Date: 2015-04-10 07:15:05 +0200 (Fr, 10 Apr 2015) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -8,8 +8,7 @@ C     20. Aug. 2008
 C--------------------------------------------------------------------------------------
 C     October 2012 Printing changed if HF calculation undertaken (LO(81)=.TRUE.)
 C--------------------------------------------------------------------------------------
-      SUBROUTINE ECIS(fname)
-
+      SUBROUTINE ECIS(fnamei)
 C 19/04/07                                                      ECIS06  ECIS-000
 C                                                                       ECIS-001
 C THE COMMON /INOUT/ IS USED IN ANY SUBROUTINE WITH STANDARD INPUT OR   ECIS-002
@@ -48,7 +47,7 @@ C***********************************************************************ECIS-025
 C
 C Dummy arguments
 C
-      CHARACTER*(*) fname
+      CHARACTER*(*) fnamei
 
       PARAMETER (IDMX=35000000)                                         ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
@@ -58,8 +57,11 @@ C
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
-      LOGICAL unformat 
+      LOGICAL unformat, fexp 
       COMMON /CTRL1/ unformat
+      CHARACTER*80 cline                                                RCN  RCN
+      CHARACTER*50 fname                                                RCN  RCN
+      COMMON /FILEN/fname                                               RCN  RCN
 
 C     data iFlagSpeed99/1/
 C     data iFlagSpeed94/1/
@@ -79,8 +81,13 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       MS=97
       unformat = .TRUE.
 
+      fname = TRIM(fnamei)                                              RCN  RCN
+      fname = TRIM(fnamei)                                              RCN  RCN
+      OPEN (MR,FILE = TRIM(fname)//'.inp')                              RCN  RCN
+      READ(MR,*,END=100,ERR=100) cline                                  RCN  RCN
+      REWIND (MR)                                                       RCN  RCN
+
       OPEN (58,FILE = TRIM(fname)//'.cs')
-      OPEN (55,FILE = TRIM(fname)//'.dat')
       OPEN (59,FILE = TRIM(fname)//'.ics')
       OPEN (60,FILE = TRIM(fname)//'.smat')
       OPEN (61,FILE = 'file61')
@@ -108,19 +115,19 @@ C     OPEN (94,FILE = 'file94')
       OPEN (MS,FILE = 'file97')
 C     OPEN (99,FILE = 'file99')
       OPEN (99,FILE = 'file99',form='unformatted')                      zv-2013
-      OPEN (MR,FILE = TRIM(fname)//'.inp')
+C     OPEN (MR,FILE = TRIM(fname)//'.inp')
 
       CALL THORA(MW)      
       CALL CALC(NW,CW,DW,IDMX)                                          ECIS-040
       CALL THORA(MW)
       CLOSE (58)
-      CLOSE (55)
       CLOSE (59)
       CLOSE (60)
       CLOSE (61,STATUS = 'delete')
       CLOSE (62,STATUS = 'delete')
       CLOSE (63)
-      CLOSE (64)
+      INQUIRE(64,exist=fexp)                                            RCN  RCN
+      IF (fexp) CLOSE (64)                                              RCN  RCN
       CLOSE (65)
       CLOSE (66)
 C     CLOSE (85,STATUS = 'delete')
@@ -137,7 +144,20 @@ C     CLOSE (93,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
       CLOSE (MR)
 
+      INQUIRE(121,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (121)                                             RCN  RCN
+      INQUIRE(122,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (122)                                             RCN  RCN
+      INQUIRE(123,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (123)                                             RCN  RCN
+C     INQUIRE(124,exist=fexp)                                           RCN  RCN
+C     IF (fexp) CLOSE (124)                                             RCN  RCN
+      INQUIRE(125,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (125)                                             RCN  RCN
+
       RETURN                                                            ECIS-041
+ 100  CLOSE (MR,STATUS = 'delete')                                      RCN  RCN
+      RETURN                                                            ECIS-040
       END                                                               ECIS-042
 C 19/11/05                                                      ECIS06  MEMO-000
       SUBROUTINE MEMO(NAME,IDMT,NPLACE)                                 MEMO-001
@@ -481,6 +501,8 @@ C***********************************************************************CALC-278
       COMMON /POTE1/ ITX(16),IMAX,INTC,INLS,INVC,INVD,ITXM              CALC-298
       COMMON /POTE2/ ITY(12),INVT,INTV,INSL,NPX                         CALC-299
       COMMON /TITRE/ TITLE(18)                                          CALC-300
+      CHARACTER*50 fname                                                RCN  RCN
+      COMMON /FILEN/fname                                      
       DATA FIN /'FIN '/                                                 CALC-301
       IDMT=IDMX                                                         CALC-302
       CMB=CM/CHB                                                        CALC-303
@@ -489,6 +511,11 @@ C***********************************************************************CALC-278
 C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
+      open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
+      open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
+      open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
+C     open(124,file=TRIM(fname)//'_Cmatrix.txt')                        RCN  RCN
+      open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
       IF (LO(36)) GO TO 17                                              CALC-311
@@ -19271,7 +19298,61 @@ C COMPUTATION OF SATCHLER P-MATRIX ("PR","PI").                         SCAM-312
    25 P(I,J,2)=P(I,J,2)+4.D0*(FAR(I,K)*FAI(J,K)-FAI(I,K)*FAR(J,K))      SCAM-330
    26 CONTINUE                                                          SCAM-331
    27 P(I,I,3)=1.D0                                                     SCAM-332
+C----
+      IF(I.EQ.0 .OR. J.EQ.0) LO(83)=.TRUE.                              RCN  RCN            
+      IF(I.EQ.0 .OR. J.EQ.0) GOTO 28                                    RCN  RCN            
+      WRITE (121,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     C-matrix commented                                                RCN  RCN 
+C     WRITE (124,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     S-matrix                                                          RCN  RCN 
+      WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      I=0                                                               RCN  RCN
+      DO II=1,NC                                                        RCN  RCN
+        IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
+        I=I+1                                                           RCN  RCN
+        J=0                                                             RCN  RCN
+        DO JJ=1,II                                                      RCN  RCN
+          IF (WV(3,MC(JJ,1)).LT.0.D0) CYCLE                             RCN  RCN
+          J=J+1                                                         RCN  RCN
+          write(121,'(1x,2(I4,1x),2(D15.9,1x))') I,J,P(I,J,1),P(I,J,2)  RCN  RCN
+C         C-matrix commented                                            RCN  RCN       
+C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
+C         S-matrix                                                      RCN  RCN 
+          IF(I.EQ.J) THEN                                               RCN  RCN
+            write(125,'(1x,2(I4,1x),4(D15.9,1x))') I,J,                 RCN  RCN
+     >                1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J)                  RCN  RCN
+          ELSE                                                          RCN  RCN
+            write(125,'(1x,2(I4,1x),4(D15.9,1x))') I,J,                 RCN  RCN
+     >                    -2.d0*FAI(I,J),2.d0*FAR(I,J)                  RCN  RCN
+          ENDIF                                                         RCN  RCN
+        ENDDO                                                           RCN  RCN
+      ENDDO                                                             RCN  RCN
+C----
       CALL DIAG(P,P(1,1,2),P(1,1,3),P(1,1,4),NC,NJC,1.D-12,A1,IERR)     SCAM-333
+      WRITE (122,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (123,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      I=0                                                               RCN  RCN
+      DO II=1,NC                                                        RCN  RCN
+        IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
+        I=I+1                                                           RCN  RCN
+        J=0                                                             RCN  RCN
+        DO JJ=1,II                                                      RCN  RCN
+          IF (WV(3,MC(JJ,1)).LT.0.D0 ) CYCLE                            RCN  RCN
+          J=J+1                                                         RCN  RCN
+          IF(P(I,J,1).LE.0.d0) CYCLE                                    RCN  RCN
+          write(122,'(1x,2(I4,1x),2(D15.9,1x))') I,J,P(I,J,1),P(I,J,2)  RCN  RCN
+        ENDDO                                                           RCN  RCN
+      ENDDO                                                             RCN  RCN
+      DO J=1,I                                                          RCN  RCN
+        write(123,'(1x,I4)') J                                          RCN  RCN
+        write(123,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,NC)  RCN  RCN
+      ENDDO                                                             RCN  RCN
+C=======================================================================
+C     AVOIDING CN DECAY & WF correction in ECIS to speed-up EMPIRE calcs
+C     Matrices needed for EW transformation already saved
+C=======================================================================
+      RETURN
+C
       IF (IERR.EQ.0) GO TO 28                                           SCAM-334
       WRITE (MW,1008)                                                   SCAM-335
       LO(83)=.TRUE.                                                     SCAM-336
@@ -20564,15 +20645,17 @@ C COEFFICIENT OF OTHER PL.                                              LCSP-252
       IF (.NOT.LS) WRITE (65,1007) JK,L,AX(LL)                          LCSP-291
    31 CONTINUE                                                          LCSP-292
    32 IF (.NOT.LO(81)) GO TO 36                                         LCSP-293
-      WRITE (65,1008) JK,IPK                                            LCSP-294
+C     UNCOUPLED CN LEVELS NOT NEEDED IN EMPIRE 
+C     WRITE (65,1008) JK,IPK                                            LCSP-294
       WRITE (MW,1009) JK,IPK                                            LCSP-295
       DO 33 LL=1,IPK,5                                                  LCSP-296
       L=2*LL-2                                                          LCSP-297
       LM=MIN0(IPK,LL+4)                                                 LCSP-298
    33 WRITE (MW,1005) L,(FCN(M,JK),M=LL,LM)                             LCSP-299
-      DO 34 LL=1,IPK                                                    LCSP-300
-      L=2*LL-2                                                          LCSP-301
-   34 WRITE (65,1010) JK,L,FCN(LL,JK)                                   LCSP-302
+C     UNCOUPLED CN LEVELS NOT NEEDED IN EMPIRE 
+C     DO 34 LL=1,IPK                                                    LCSP-300
+C     L=2*LL-2                                                          LCSP-301
+C  34 WRITE (65,1010) JK,L,FCN(LL,JK)                                   LCSP-302
       GO TO 36                                                          LCSP-303
    35 WRITE (65,1011) JK                                                LCSP-304
    36 CONTINUE                                                          LCSP-305
@@ -20944,31 +21027,22 @@ C COMPUTATION AT EQUIDISTANT ANGLES.                                    RESU-337
       IF (WV(5,1).EQ.0.D0) ND=3                                         RESU-344
       IF (LO(81)) ND=ND+1                                               RESU-345
       WRITE (58,1009) WV(1,1),WV(13,1),WV(2,1),IPI(4,1),ND              RESU-346
-      WRITE (55,'(1x,F10.3,$)') Wv(13,1)
       IF (NCOLS.NE.1) WRITE (59,1010) WV(1,1),WV(13,1),WV(2,1),IPI(4,1),RESU-347
      1NCOLS-1                                                           RESU-348
    30 IF (WV(5,1).NE.0.D0) GO TO 31                                     RESU-349
-      IF (LO(59)) WRITE (55,'(3x,F10.2,$)') Tx(1)
       WRITE (MW,1011) TX(1)                                             RESU-350
       IF (LO(59)) WRITE (58,1012) TX(1)                                 RESU-351
    31 RX=TX(1)-TX(2)                                                    RESU-352
-      IF (LO(59)) WRITE (58,1012) RX                                    RESU-353
-      IF (LO(59)) THEN
-         IF (Wv(5,1).NE.0.D0) THEN
-            WRITE (55,'(1x,F10.2)') rx
-         ELSE
-            WRITE (55,'(1x,F10.2,$)') rx
-         ENDIF
-      ENDIF
       IF (LO(81)) GO TO 32                                              RESU-354
       WRITE (MW,1013) RX                                                RESU-355
+      IF (LO(59)) WRITE (58,1012) RX                                    RESU-353
       GO TO 42                                                          RESU-356
 C COMPOUND NUCLEUS RESULTS.                                             RESU-357
    32 WRITE (MW,1014) RX                                                RESU-358
+      IF (LO(59)) WRITE (58,1012) RX                                    RESU-353
       NDP=2*NCOLL+NSP(1)+1                                              RESU-359
       RX=RX-TX(NCOLL+2)                                                 RESU-360
       WRITE (MW,1015) RX                                                RESU-361
-      IF (LO(59)) WRITE (55,'(1x,F10.2,$)') RX                          RCN
       IF (LO(85)) WRITE (MW,1016) TX(NDP+1)                             RESU-362
       IF (LO(86)) WRITE (MW,1017) TX(NDP+2)                             RESU-363
       RX=TX(NDP+1)+TX(NDP+2)                                            RESU-364
@@ -21023,7 +21097,6 @@ C COMPOUND NUCLEUS RESULTS.                                             RESU-357
    40 CONTINUE                                                          RESU-413
    41 WRITE (MW,1025) RX                                                RESU-414
       WRITE (MW,1002) TITLE                                             RESU-415
-      IF (LO(59)) WRITE (58,1012) RX                                    RESU-416
    42 INIV=1                                                            RESU-417
       SP2=0.5D0*DFLOAT(IPI(3,INIV)-1)                                   RESU-418
       WRITE (MW,1026) SP2,SIGM(IPI(1,INIV)+1)                           RESU-419
@@ -21044,19 +21117,19 @@ C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
       GO TO 46                                                          RESU-434
    45 IF (WV(5,1).NE.0.D0) GO TO 47                                     RESU-435
       WRITE (MW,1032) RX                                                RESU-436
-   46 IF (LO(81)) WRITE (MW,1033) TX(INIV+1)                            RESU-437
-      IF (.NOT.LO(59)) GO TO 47                                         RESU-438
-      IF (INIV.EQ.1) WRITE (58,1012) RX                                 RESU-439
-
-      IF (INIV.EQ.1) WRITE (55,'(1x,F10.2)') RX                         RCN
+   46 IF (LO(81)) THEN
+        WRITE (MW,1033) TX(INIV+1)                            
+        IF (INIV.EQ.1) WRITE (58,1012) TX(INIV+1)                          
+      ELSE
+        IF (INIV.EQ.1) WRITE (58,1012) RX                          
+	ENDIF
+      IF (.NOT.LO(59)) GO TO 47                                         
       IF (LO(81)) THEN 
         RRnoCN = RX-TX(NCOLL+INIV+1)                          
       ELSE
         RRnoCN = RX
       ENDIF
       IF (INIV.NE.1) WRITE (59,1034) RRnoCN,INIV-1
-C     IF (INIV.NE.1) WRITE (59,1034) RX,INIV-1                          RESU-440
-
    47 IF (LO(81)) WRITE (MW,1035) TX(NCOLL+INIV+1)                      RESU-441
       IF (LO(66)) GO TO 62                                              RESU-442
       IF (JG.LE.0) GO TO 57                                             RESU-443
