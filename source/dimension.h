@@ -1,15 +1,15 @@
-!cc   * $Rev: 4344 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-04-10 05:30:10 +0200 (Fr, 10 Apr 2015) $
+!cc   * $Rev: 4346 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-04-10 07:17:53 +0200 (Fr, 10 Apr 2015) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
      & NDNUC= 100                                                       &
      &,NDEXCLUS= 20                                                     &
-     &,NDEX= 151                                                        &
+     &,NDEX= 101                                                        &
      &,NDLW= 55                                                         &
-     &,LEVCC=40                                                         &
+     &,LEVCC=30                                                         &
      &,NDLV=40                                                          &
      &,NDBR=40                                                          &
      &,NDMSCS=4)
@@ -40,6 +40,7 @@
      &,NDEX_D=NDEX                                                      &
      &,NDEJCD=NDEJC                                                     &
      &,NLGRID=301                                                       & !Number of points in the HFB GDR RIPL files 
+
      &,NDVOM=7                                                          &
      &,NDWOM=7                                                          &
      &,NDVSO=7                                                          &
