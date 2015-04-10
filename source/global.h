@@ -1,6 +1,6 @@
-! $Rev: 4324 $
-! $Author: rcapote $
-! $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
+! $Rev: 4344 $
+! $Author: mherman $
+! $Date: 2015-04-10 05:30:10 +0200 (Fr, 10 Apr 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -14,7 +14,7 @@
 !
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),  &
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,    &
-     &                 ANGles(ndangecis), ATIlnor(0:ndnuc),             &
+     &                 ANGles(ndangecis), ATIlnor(0:ndnuc), EHRtw,      &
      &                 AUSpec(ndecse,0:ndejc), AVOm(0:ndejc,0:ndnuc),   &
      &                 AVSo(0:ndejc,0:ndnuc), awf(nfhump),              &
      &                 AWOm(0:ndejc,0:ndnuc),SHLlnor(0:ndnuc),          &
@@ -60,7 +60,7 @@
      &                 PL_CNcont(0:(2*NDLW), NDEX),                     &
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
-      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, CNAngd,          &
+      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, LHRtw,           &
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,   &
      &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe, &
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,      &
@@ -252,7 +252,7 @@
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
      &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
-     &                 RECcse, POPcon, POPdis,                          &
+     &                 RECcse, POPcon, POPdis, EHRtw,                   &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
@@ -273,7 +273,7 @@
       COMMON /GLOBAL_E/ EMPiredir, EMPtitle
       COMMON /GLOBAL_I/ NLW, NNUcd, NEJcm, MSD, MSC, NNUct, NSCc, NACc, &
      &                  FHMs, LHMs, NHMs, NEXreq, FISspe, NRSmooth,     &
-     &                  ISIsom, IFLuc, NEMc, NOUt, IOUt, NEX,           &
+     &                  ISIsom, IFLuc, NEMc, NOUt, IOUt, NEX, LHRtw,    &
      &                  IX4ret, JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, &
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, &
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,     &
@@ -284,7 +284,7 @@
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
-     &                  PL_lmax, SFAct, INTerf, CNAngd, IPArcov,        &
+     &                  PL_lmax, SFAct, INTerf, IPArcov,                &
      &                  D_Klv, D_Llv,  D_nno,                           &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&

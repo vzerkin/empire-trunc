@@ -1,6 +1,6 @@
-!cc   * $Rev: 4338 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-04-08 00:56:04 +0200 (Mi, 08 Apr 2015) $
+!cc   * $Rev: 4344 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-04-10 05:30:10 +0200 (Fr, 10 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -20,7 +20,7 @@
 !cc
       use nubar_reader
       use empgdr
-      use hrtw
+      use width_fluct
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -256,8 +256,6 @@ C--------fission barrier multiplier, viscosity, and spin fade-out
          SHRj = 24.d0
          SHRd = 2.5d0          ! diffuness of the shell correction damping
 C--------fusion parameters
-         CNAngd = 0
-         CN_isotropic = .TRUE.     
          CAlctl = .FALSE.
          CSRead = -2.d0
          SIG = 0.d0
@@ -470,9 +468,12 @@ C
 
 C        Direct deuteron breakup 
          DBRkup = 0.0d0
-
+C--------Isotropic CN angular distributions
+         CN_isotropic = .FALSE.
 C--------EMAx_tlj sets incident energy limit for using Tlj
          EMAx_tlj = 0.d0
+C--------EHRtw sets incident energy limit for using width fluctuation correction
+         EHRtw = 8.d0
 C--------ENDF global setting initialized to zero (no formatting)
          NENdf = 0
 C
@@ -1300,24 +1301,11 @@ C
             WRITE (8,*) ' '
          ENDIF
          IF (MSC.NE.0 .AND. AEJc(0).GT.4.0D0) THEN
-            MSC = 0
             WRITE (8,*) ' '
-            WRITE (8,*) ' WARNING!!!! MSC has been turned off    '
-            WRITE (8,*) ' WARNING!!!! (It is not well tested for '
+            WRITE (8,*) ' WARNING!!!! (MSC is not well tested for '
             WRITE (8,*) ' WARNING!!!! HI reactions)'
             WRITE (8,*) ' '
          ENDIF
-
-C        IF (CNAngd.NE.0 .and. LHRtw.EQ.0) THEN
-C           ! LHRtw = 1
-C           ! EHRtw = EIN + 0.5d0
-C           WRITE (8,*) ' '
-C           WRITE (8,*) 
-C    &' ERROR: Anisotropic angular distribution requested BUT'
-C    &' ERROR:   HRTW input keyword is 0 (turned off)        '
-C           STOP 'ERROR: CNANG=1 but HRTW=0 !!! (see long output)'
-C           WRITE (8,*) ' '
-C        ENDIF
 
          IF (LHRtw.NE.0 .AND. AEJc(0).EQ.0.0D0) THEN
             LHRtw = 0
@@ -1329,7 +1317,16 @@ C        ENDIF
             WRITE (8,*) ' '
          ENDIF
 
-         IF (EMAx_tlj.LT.EHRtw) EMAx_tlj = EHRtw
+         IF (EMAx_tlj.LT.EHRtw) THEN
+            EMAx_tlj = EHRtw
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING!!!! Maximum energy for Tlj coupling '
+            WRITE (8,*) ' WARNING!!!! set to the one for width fluct. '
+         ENDIF
+
+         IF (LHRtw.NE.0) WRITE (8,
+     &           '('' Width fluctuation correction calculated'',
+     &             '' up to '',f4.2,'' MeV'')') EHRtw
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
@@ -1347,24 +1344,16 @@ C--------reset angles for inelastic calculations
             DO na = 1, NDAng
               CANgler(na) = DCOS(ANGles(NDAng - na + 1)*PI/180.d0)
               SANgler(na) = DSIN(ANGles(NDAng - na + 1)*PI/180.d0)
-C             SANgler(na) = DSQRT(1.D0 - CANgler(na)**2)
             ENDDO
          ENDIF
-c         IF (LHMs.NE.0 .AND. (NDAng.NE.19 .OR. NDAng.NE.37)) THEN
-c            WRITE (8,*) ' '
-c            WRITE (8,*) ' ERROR: NDAng IN dimension.h MUST BE 19 or 37'
-c            WRITE (8,*)
-c     &' ERROR: FOR COMPATIBILITY OF ANGLE GRID IN EMPIRE AND HMS.'
-c            WRITE (8,*)
-c     &' ERROR: SET NDAng TO 19 or 37 AND RECOMPILE OR GIVE UP HMS OPTION'
-c            STOP ' ERROR: NDAng IN dimension.h MUST BE 19 or 37 for HMS'
-c         ENDIF
+
          IF (LHMs.NE.0 .AND. AEJc(0).GT.1.D0) THEN
             WRITE (8,*) ' '
             WRITE (8,*) ' ERROR: HMS allowed only for incident nucleons'
             WRITE (8,*) ' ERROR: and gammas -  Execution STOPPED'
             STOP ' HMS allowed only for incident nucleons and gammas'
          ENDIF
+
          IF (DIRect.GT.0 .AND. INT(AEJc(0)).EQ.0) THEN
             DIRect = 0
             WRITE (8,*)' '
@@ -3519,7 +3508,7 @@ Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
-      use hrtw
+      use width_fluct
 
       implicit none
 	 
@@ -3687,7 +3676,7 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) '  coupled-channels code OPTMAN by E.Soukhovitskii  '
       WRITE (12,*) '  and coworkers                                    '
       WRITE (12,*) '- Hauser-Feshbach statistical model including      '
-      WRITE (12,*) '  HRTW width fluctuation correction, and the       '
+      WRITE (12,*) '  width fluctuation correction, and the       '
       WRITE (12,*) '  optical model for fission with partial damping   '
       WRITE (12,*) '- Quantum-mechanical MSD TUL model (codes ORION &  '
       WRITE (12,*) '  TRISTAN by H.Lenske), and MSC NVWY model         '
@@ -3789,8 +3778,7 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
             ENDIF
      
-            IF (ZEJc(0).GT.0 .or.  CNAngd.eq.0) CN_isotropic = .TRUE.
-            IF (ZEJc(0).EQ.0 .and. CNAngd.ne.0) CN_isotropic = .FALSE. 
+            IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0)  CN_isotropic = .TRUE.
           
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
@@ -6162,19 +6150,72 @@ C-----
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'WFCORR') THEN
+            IF (val.GT.0) THEN
+              LHRtw = INT(val)
+C              EHRtw = val
+              IF (LHRtw.EQ.1) WRITE (8,
+     &           '('' HRTW width fluctuation correction with '',
+     &             ''Z. Phys. A297, 153 (1980) nu selected'')')
+              IF (LHRtw.EQ.2) WRITE (8,
+     &           '('' HRTW width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+              IF (LHRtw.EQ.3) WRITE (8,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' original nu was selected'')')
+              IF (LHRtw.EQ.4) WRITE (8,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+              IF (LHRtw.EQ.1) WRITE (12,
+     &           '('' HRTW width fluctuation correction with '',
+     &             ''Z. Phys. A297, 153 (1980) nu selected'')')
+              IF (LHRtw.EQ.2) WRITE (12,
+     &           '('' HRTW width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+              IF (LHRtw.EQ.3) WRITE (12,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' original nu was selected'')')
+              IF (LHRtw.EQ.4) WRITE (12,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+            ELSE
+              WRITE (8,
+     &        '('' Width fluctuation correction not considered'')')
+               LHRtw = 0
+              WRITE (12,
+     &        '('' Width fluctuation correction not considered'')')
+               LHRtw = 0
+            ENDIF
+            GOTO 100
+         ENDIF
+
+C-----
+         IF (name.EQ.'WFEMAX') THEN
+            IF (val.GT.0) THEN
+              EHRtw = val
+              IF (LHRtw.NE.0) WRITE (8,
+     &           '('' Width fluctuation correction calculated'',
+     &             '' up to '',f4.2,'' MeV'')') EHRtw
+              IF (LHRtw.NE.0) WRITE (12,
+     &           '('' Width fluctuations correction calculated '',
+     &             '' up to '',f4.2,'' MeV'')') EHRtw
+            ENDIF
+            GOTO 100
+         ENDIF
+C-----
          IF (name.EQ.'HRTW  ') THEN
             IF (val.GT.0) THEN
               LHRtw = 1
               EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
-     &           '('' HRTW width fluctuation correction was selected'',
+     &           '('' HRTW width fluctuation correction calculated'',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
               IF (LHRtw.NE.0) WRITE (12,
-     &           '('' Width fluctuations calculated within HRTW '',
+     &           '('' HRTW width fluctuation correction calculated '',
      &             '' up to '',f4.2,'' MeV'')') EHRtw
             ELSE
               WRITE (8,
-     &        '('' HRTW width fluctuation correction not considered'')') 
+     &        '('' Width fluctuation correction not considered'')')
                LHRtw = 0
                EHRtw = 0.d0
             ENDIF
@@ -8550,13 +8591,10 @@ C--------------------------------------------------------------------------
             GOTO 100
          ENDIF
 
-         IF (name.EQ.'CNANGD') THEN
-            CNAngd = 0  ! isotropic
-            IF (val.NE.0.d0) CNAngd = 1
-            IF (CNAngd.eq.0) THEN
+         IF (name.EQ.'CNANGD' .OR. name.EQ.'CNANIS') THEN
+            IF (abs(val).le.1.d-7) then
+              CN_isotropic = .TRUE.
               WRITE (8,'('' CN angular distribution isotropic'')')
-            ELSE
-              WRITE (8,'('' CN angular distribution anisotropic'')')
             ENDIF 
             GOTO 100
          ENDIF
