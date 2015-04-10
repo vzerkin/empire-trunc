@@ -1,108 +1,112 @@
-   module HRTW
+   MODULE width_fluct
 
-   use angular_momentum
+   USE angular_momentum
 
-   implicit none
-
-   private
+   IMPLICIT NONE
 
    include 'dimension.h'
    include 'global.h'
 
-   type channel
-     integer*4 l         ! ejectile l
-     real*8 j            ! ejectile j
-     real*8 t            ! ejectile Tlj
-     real*8 ti1          ! temporary Tlj used for iteration
-     real*8 ti2          ! temporary Tlj used for iteration
-     real*8 rho          ! final level density for this channel
-     real*8 eef          ! elastic enhancement factor
-     integer*4 nejc      ! ejectile index (nejc)
-     integer*4 kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
-     real*8 xjrs         ! spin of the populated state
-     integer*4 jres      ! spin index of the populated state
-     integer*4 pres      ! parity index of the populated state
-   end type channel
+   PRIVATE
 
-   type numchnl
-      integer*4 neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
-      integer*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
-      integer*4 elal     ! position of the first (low) elastic channel
-      integer*4 elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
-      integer*4 fiss     ! effective number of fission channels
-      integer*4 gamm     ! effective number of gamma channels
-   end type numchnl
+! $Rev: 4324 $
+! $Author: rcapote $
+! $Date: 2015-04-05 20:26:38 -0400 (Sun, 05 Apr 2015) $
+!
 
-   type fusion
-     integer*4 nout      ! position of the corresponding outgoing channel in outchnl
-     integer*4 l         ! projectile l
-     real*8 j            ! projectile j
-     real*8 t            ! projectile Tlj
-     real*8 sig          ! absorption x-section for this channel
-   end type fusion
+   TYPE channel
+     INTEGER*4 l         ! ejectile l
+     REAL*8 j            ! ejectile j
+     REAL*8 t            ! ejectile Tlj
+     REAL*8 ti1          ! temporary Tlj used for iteration
+     REAL*8 ti2          ! temporary Tlj used for iteration
+     REAL*8 rho          ! final level density for this channel
+     REAL*8 eef          ! elastic enhancement factor
+     INTEGER*4 nejc      ! ejectile index (nejc)
+     INTEGER*4 kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
+     REAL*8 xjrs         ! spin of the populated state
+     INTEGER*4 jres      ! spin index of the populated state
+     INTEGER*4 pres      ! parity index of the populated state
+   END TYPE channel
 
-   integer*4, parameter :: ndhrtw1 = 4000
-   integer*4, parameter :: ndhrtw2 = 30
+   TYPE numchnl
+      INTEGER*4 neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
+      INTEGER*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
+      INTEGER*4 elal     ! position of the first (low) elastic channel
+      INTEGER*4 elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
+      INTEGER*4 fiss     ! effective number of fission channels
+      INTEGER*4 gamm     ! effective number of gamma channels
+   END TYPE numchnl
 
-   real*8 :: H_Sumtl      ! Sum of strong Tlj
-   real*8 :: H_Sumtls     ! Sum of strong Tlj**2
-   real*8 :: H_Sweak      ! Sum of weak Tlj
-   real*8 :: H_Sweaks     ! Sum of weak Tlj**2
-   real*8 :: H_Tav        ! Avarage strong Tlj
-   real*8 :: H_Tthr       ! Thershold for Tlj to be considered strong
-   real*8 :: TFIs         ! Sum of fission transmission coefficients
-   real*8 :: TGam         ! Sum of gamma transmission coefficients
-   integer*4 :: NCH       ! Number of strong channels (Tlj's)
-   integer*4 :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
+   TYPE fusion
+     INTEGER*4 nout      ! position of the corresponding outgoing channel in outchnl
+     INTEGER*4 l         ! projectile l
+     REAL*8 j            ! projectile j
+     REAL*8 t            ! projectile Tlj
+     REAL*8 sig          ! absorption x-section for this channel
+   END TYPE fusion
 
-   integer*4, allocatable :: MEMel(:,:)
-   real*8, allocatable :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
-   real*8, allocatable :: H_Abs(:,:)
-   type(channel), allocatable, target :: outchnl(:)      ! outgoing channels
-   type(fusion),  allocatable, target :: inchnl(:)       ! fusion channels
-   type(numchnl) :: num                                  ! number of particular channels
+   INTEGER*4, PARAMETER :: ndhrtw1 = 10000
+   INTEGER*4, PARAMETER :: ndhrtw2 = 30
 
-   integer*4, public :: lhrtw = 0                        ! flag for HRTW. 0=no, 1=yes, up to ehrtw MeV incident
-   real*8, public :: ehrtw = 0.D0                        ! energy limit for width corrections
+   REAL*8 :: H_Sumtl      ! Sum of strong Tlj
+   REAL*8 :: H_Sumtls     ! Sum of strong Tlj**2
+   REAL*8 :: H_Sweak      ! Sum of weak Tlj
+   REAL*8 :: H_Sweaks     ! Sum of weak Tlj**2
+   REAL*8 :: sumg         ! Sum of gamma channels
+   REAL*8 :: H_Tav        ! Avarage strong Tlj
+   REAL*8 :: H_Tthr       ! Thershold for Tlj to be considered strong
+   REAL*8 :: TFIs         ! Sum of fission transmission coefficients
+   REAL*8 :: TGam         ! Sum of gamma transmission coefficients
+   INTEGER*4 :: NCH       ! Number of strong channels (Tlj's)
+   INTEGER*4 :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
 
-   public calc_hrtw
+   INTEGER*4, ALLOCATABLE :: MEMel(:,:)
+   REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
+   REAL*8, ALLOCATABLE :: H_Abs(:,:)
+   TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
+   TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
+   TYPE(numchnl) :: num                                  ! number of particular channels
+   REAL*8 :: save_WFC1(20)                                ! stores central part of the Moldauer integral
 
-   contains
+   PUBLIC HRTW, Moldauer
+
+   CONTAINS
 
    !----------------------------------------------------------------------------------------------------
 
-   subroutine AllocHRTW(nd1,nd2)
+   SUBROUTINE AllocHRTW(nd1,nd2)
 
-   implicit none
+   IMPLICIT NONE
 
-   integer*4, intent(in), optional :: nd1, nd2
+   INTEGER*4, INTENT(IN), OPTIONAL :: nd1, nd2
 
-   integer my,ndch,ndfus
+   INTEGER my,ndch,ndfus
 
    ndch = ndhrtw1
    ndfus = ndhrtw2
 
-   if(present(nd1)) ndch = nd1
-   if(present(nd2)) ndfus = nd2
+   IF(present(nd1)) ndch = nd1
+   IF(present(nd2)) ndfus = nd2
 
-   if(allocated(MEMel)) deallocate(MEMel)
-   allocate(MEMel(ndfus,3),stat=my)
-   if(my /= 0) goto 10
+   IF(allocated(MEMel)) DEALLOCATE(MEMel)
+   ALLOCATE(MEMel(ndfus,3),STAT=my)
+   IF(my /= 0) GOTO 10
    MEMel = 0
 
-   if(allocated(H_Tl)) deallocate(H_Tl)
-   allocate(H_Tl(ndch,2),stat=my)
-   if(my /= 0) goto 10
+   IF(allocated(H_Tl)) DEALLOCATE(H_Tl)
+   ALLOCATE(H_Tl(ndch,2),STAT=my)
+   IF(my /= 0) GOTO 10
    H_Tl = 0.0d0
 
-   if(allocated(H_Abs)) deallocate(H_Abs)
-   allocate(H_Abs(ndfus,3),stat=my)
-   if(my /= 0) goto 10
+   IF(allocated(H_Abs)) DEALLOCATE(H_Abs)
+   ALLOCATE(H_Abs(ndfus,3),STAT=my)
+   IF(my /= 0) GOTO 10
    H_Abs = 0.0d0
 
-   if(allocated(outchnl)) deallocate(outchnl)
-   allocate(outchnl(ndch),stat=my)
-   if(my /= 0) goto 10
+   IF(allocated(outchnl)) DEALLOCATE(outchnl)
+   ALLOCATE(outchnl(ndch),STAT=my)
+   IF(my /= 0) GOTO 10
    outchnl%l = 0
    outchnl%j = 0.d0
    outchnl%t = 0.d0
@@ -116,41 +120,41 @@
    outchnl%jres = 0
    outchnl%pres = 0
 
-   if(allocated(inchnl)) deallocate(inchnl)
-   allocate(inchnl(ndfus),stat=my)
-   if(my /= 0) goto 10
+   IF(allocated(inchnl)) DEALLOCATE(inchnl)
+   ALLOCATE(inchnl(ndfus),STAT=my)
+   IF(my /= 0) GOTO 10
    inchnl%nout = 0
    inchnl%l = 0
    inchnl%j = 0.d0
    inchnl%t = 0.d0
    inchnl%sig = 0.d0
 
-   return
+   RETURN
 
-10 write(8,*)  'ERROR: Insufficient memory for HRTW'
-   write(12,*) 'ERROR: Insufficient memory for HRTW'
-   stop 'ERROR: Insufficient memory for HRTW'
+10 WRITE(8,*)  'ERROR: Insufficient memory for HRTW'
+   WRITE(12,*) 'ERROR: Insufficient memory for HRTW'
+   STOP 'ERROR: Insufficient memory for HRTW'
 
-   end subroutine AllocHRTW
-
-   !----------------------------------------------------------------------------------------------------
-
-   subroutine DelHRTW()
-
-   implicit none
-
-   if(allocated(MEMel))   deallocate(MEMel)
-   if(allocated(H_Tl))    deallocate(H_Tl)
-   if(allocated(H_Abs))   deallocate(H_Abs)
-   if(allocated(outchnl)) deallocate(outchnl)
-   if(allocated(inchnl))  deallocate(inchnl)
-
-   return
-   end subroutine DelHRTW
+   END SUBROUTINE AllocHRTW
 
    !----------------------------------------------------------------------------------------------------
 
-   SUBROUTINE calc_hrtw
+   SUBROUTINE DelHRTW()
+
+   IMPLICIT NONE
+
+   IF(allocated(MEMel))   DEALLOCATE(MEMel)
+   IF(allocated(H_Tl))    DEALLOCATE(H_Tl)
+   IF(allocated(H_Abs))   DEALLOCATE(H_Abs)
+   IF(allocated(outchnl)) DEALLOCATE(outchnl)
+   IF(allocated(inchnl))  DEALLOCATE(inchnl)
+
+   RETURN
+   END SUBROUTINE DelHRTW
+
+   !----------------------------------------------------------------------------------------------------
+
+   SUBROUTINE HRTW
 
    !cc
    !cc   ********************************************************************
@@ -160,8 +164,8 @@
    !cc   *  Calculate decay of the Compound Nucleus capture states in       *
    !cc   *  terms of the HRTW theory (width fluctuation correction).        *
    !cc   *  Uses modified routines of standard Hauser-Feshbach (DECAY,      *
-   !cc   *  DECAYG, FISSION) and HRTW_MARENG to decompose capture           *
-   !cc   *  cross sections into partial wave components.                    *
+   !cc   *  DECAYG, FISSION) and decomposes fusion cross section into       *
+   !cc   *  partial wave components.                                        *
    !cc   *                                                                  *
    !cc   *                                                                  *
    !cc   ********************************************************************
@@ -175,7 +179,7 @@
    REAL*8 :: sumin_w, sumtt_w
    COMMON /EWcorr/ sumin_w, sumtt_w
 
-   CHARACTER(1), parameter :: cpar(2) = (/'+', '-'/)
+   CHARACTER(1), PARAMETER :: cpar(2) = (/'+', '-'/)
 
    ! Local variables
 
@@ -188,10 +192,10 @@
    REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
    REAL*8 :: sumin_s, sumtt_s, stmp, ewcor
 
-   type (channel), pointer :: out
-   type (fusion),  pointer :: in
+   TYPE (channel), POINTER :: out
+   TYPE (fusion),  POINTER :: in
 
-   call AllocHRTW()    !allocate HRTW matrices
+   CALL AllocHRTW()    !allocate HRTW matrices
    H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
    nnuc = 1            !set CN nucleus
    csfis = 0.D0
@@ -199,13 +203,13 @@
    gcasc = 1.0         !ensure full gamma cascade when HRTW
    ke = NEX(nnuc)
 
-   IF (AEJc(0).EQ.0.0D0) LHRtw=0
+
    ! Initialize variables and print heading for normalizing g-strength function
 
    d0c = 0.D0
    sumtg = 0.D0
    tgexper = 0.D0
-   IF(.not. benchm) THEN
+   IF(.NOT. benchm) THEN
        WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
        WRITE(8,'(1x,''-------------------------------------------------------------'')')
    ENDIF
@@ -219,17 +223,24 @@
    xmas_ntrg = AMAss(0)
    
 
+
    el = EINl
    relcal = .FALSE.
    !IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
    IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
 
-   IF (AEJc(0).EQ.0.0D0) then  
+   IF (AEJc(0).EQ.0.0D0) THEN  
+
      xmas_npro = 0.d0
+
      relcal = .TRUE.
+
    ENDIF
 
+
+
    CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+
 
    ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
 
@@ -345,7 +356,7 @@
           ! collecting outgoing channels completed
 
           ! write(*,*)'pre  AUSTER DENhf=', DENhf
-          IF(LHRtw==1) CALL AUSTER            !calculate V's for the strong channels (iteration)
+          IF(LHRtw==1 .OR. LHRtw==2) CALL AUSTER(LHRtw)                  !calculate V's for the strong channels (iteration)
           DENhf = H_Sumtl                     !reset DENhf using V's instead of T's
 
           ! construct scratch matrix for decay of the Jcn state
@@ -359,28 +370,36 @@
              IF(out%kres>0) THEN                ! continuum channels
                 SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) + out%t*out%rho/de
              ELSE IF(out%kres<0) THEN           ! discrete level channels
-                if( (out%nejc.EQ.NPRoject) .and. (-out%kres.NE.LEVtarg) ) then
+                IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN
                    stmp = out%t*out%rho 
                    sumin_s = sumin_s + stmp * CINRED(-out%kres) 
                    sumtt_s = sumtt_s + stmp 
                    SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
                    ! write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' CINRED(ilev)=',sngl(CINRED(-out%kres))
                    ! write(*,*) sumin_s,sumtt_s,' strong'
-                else
+                ELSE
                    SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho
-                endif
+                ENDIF
              ENDIF
           ENDDO
           ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)  
           !write(*,*) 'EWCORR=', ewcor
 
+
           ! Correcting the elastic cross section for inelastic enhancement CINRED
+
           numch_el = max(num%elah - num%elal + 1 , 1 ) 
+
           DO i = num%elal, num%elah  ! do loop over elastic channels
+
              out => outchnl(i)
+
              SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
+
              !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
+
           ENDDO
+
 
           IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
 
@@ -398,7 +417,7 @@
              in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
              xnor = in%sig/DENhf                      ! normalization factor
              ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
-             IF(LHRtw==1) THEN
+             IF(LHRtw==1 .OR. LHRtw==2) THEN
                 elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
                 ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                 SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
@@ -408,7 +427,7 @@
              ! CN angular distributions (neutron (in)elastic scattering ONLY!)
 
              ewcor = 0.d0
-             IF(.not.CN_isotropic) THEN
+             IF(.NOT.CN_isotropic) THEN
                 ! accumulate Legendre coefficients
                 nejc = 1
                 nnur = 2
@@ -430,18 +449,18 @@
                      PL_lmax(-out%kres) = 2*in%l
                    ENDIF
 
-                   if(i/=j.AND.out%kres<=0) then               ! Inelastic to discrete level
+                   IF(i/=j.AND.out%kres<=0) THEN               ! Inelastic to discrete level
                      stmp = out%t*out%rho * CINRED(-out%kres) 
-                   else                                        ! Elastic and continuum
+                   ELSE                                        ! Elastic and continuum
                      stmp = out%t*out%rho 
-                   endif
+                   ENDIF
 
                    DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
                      xleg = dble(lleg)
                      tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
                      ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(j)%kres
                      ! if(tmp==0.D0) cycle
-                     if(dabs(tmp) < 1.d-14) cycle
+                     IF(dabs(tmp) < 1.d-14) CYCLE
                      tmp = tmp*xnor*stmp  !*out%t*out%rho
                      IF(i==j) tmp = tmp*out%eef
 
@@ -466,7 +485,7 @@
           
              CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
-             IF(LHRtw==1) THEN
+             IF(LHRtw==1 .OR. LHRtw==2) THEN
                 out => outchnl(i)
                 SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
              ENDIF
@@ -501,23 +520,23 @@
    IF(d0c>0.D0) d0c = 1000.0/d0c
    IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
 
-   if(benchm) THEN
+   IF(benchm) THEN
       WRITE(8,*)
       WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
       WRITE(8,*)
-   endif
+   ENDIF
 
    itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 )
-   if(itmp.eq.1 .and. (.not.benchm)) THEN
+   IF(itmp.EQ.1 .AND. (.NOT.benchm)) THEN
       WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
       WRITE(8,*)
-   endif
+   ENDIF
 
-   if(itmp.gt.1 .and. (.not.benchm)) THEN
+   IF(itmp.GT.1 .AND. (.NOT.benchm)) THEN
       WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
       WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
       WRITE(8,*)
-   endif
+   ENDIF
 
    ! IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
    IF(einl<=1.D0 .AND. first_ein) THEN
@@ -547,7 +566,7 @@
      WRITE(8,*)
      WRITE(12,*)
 
-     if(itmp==0 .and. (.not.benchm)) then
+     IF(itmp==0 .AND. (.NOT.benchm)) THEN
         IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
            tune(0,nnuc) = tgexper/sumtg
            WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
@@ -556,26 +575,29 @@
            WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
         ENDIF
         WRITE(8,*)
-     endif
+     ENDIF
 
-     if(itmp==1 .and. (.not.benchm) .and. (sumtg>0.D0 .and. tgexper>0.D0) ) then
+     IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
         WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
         WRITE(8,*)
-     endif
+     ENDIF
 
    ENDIF
 
    CALL DelHRTW()    !deallocate HRTW arrays
 
 
+
+
+
  
 
    RETURN
-   END SUBROUTINE calc_hrtw
+   END SUBROUTINE HRTW
 
    !----------------------------------------------------------------------------------------------------
 
-   real*8 function HRTW_DECAY(nnuc,iec,jc,ipc,nnur,nejc)
+   REAL*8 FUNCTION HRTW_DECAY(nnuc,iec,jc,ipc,nnur,nejc)
    !cc
    !cc   ********************************************************************
    !cc   *                                                         class:PPu*
@@ -630,15 +652,15 @@
 
    ! Dummy arguments
 
-   INTEGER*4, intent(in) :: ipc, jc, nejc, nnuc, nnur, iec
+   INTEGER*4, INTENT(IN) :: ipc, jc, nejc, nnuc, nnur, iec
 
    ! Local variables
 
    REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, sumdl, tld, xjc, xj, xjr, summa
    INTEGER*4 :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
 
-   type (channel), pointer :: out
-   type (fusion),  pointer :: in
+   TYPE (channel), POINTER :: out
+   TYPE (fusion),  POINTER :: in
 
    summa = 0.D0
 
@@ -680,9 +702,9 @@
            ip1 = 2 - (1 + ipc*( - 1)**(k - 1))/2         ! parity index of r.n. state populated by emission with l=k-1
            DO jndex = 1, MAXj(nejc)                      ! do loop over j-index in Tlj
               xj = k + jndex - (2.0 + SEJc(nejc))
-              IF(xj<jmin .or. xj>jmax) CYCLE
+              IF(xj<jmin .OR. xj>jmax) CYCLE
               DO ier = iermax, 1, -1
-                 IF(INT(ZEJc(nejc))==0 .and. ier==iermax) CYCLE   ! omit top bin transition for neutrons
+                 IF(INT(ZEJc(nejc))==0 .AND. ier==iermax) CYCLE   ! omit top bin transition for neutrons
                  ietl = iec - ier - itlc
                  tld = TLJ(ietl,k,jndex,nejc)
                  rho1 = RO(ier,jr,ip1,nnur)*de*TUNe(nejc,nnuc)
@@ -695,7 +717,7 @@
                  ENDIF
                  IF(tld>H_Tthr) THEN                     !store strong channels
                     nch = nch + 1
-                    if(nch>ndhrtw1) call HRTW_error()    !STOP - insufficent space allocation
+                    IF(nch>ndhrtw1) CALL HRTW_error()    !STOP - insufficent space allocation
                     out => outchnl(nch)
                     out%l = k-1
                     out%j = xj
@@ -745,7 +767,7 @@
         IF(ipar==0) CYCLE
         DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
            xj = k + jndex - (2.0 + SEJc(nejc))
-           IF(xj<jmin .or. xj>jmax) CYCLE
+           IF(xj<jmin .OR. xj>jmax) CYCLE
            rho1 = 1.d0                                !reuse level density variable
            ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
            tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
@@ -755,7 +777,7 @@
            sumdl = sumdl + tld*rho1  !think there is no need for it
            IF(tld>H_Tthr) THEN
               nch = nch + 1                              !we've got non-zero channel
-              if(nch>ndhrtw1) call HRTW_error()          !STOP - insiufficent space allocation
+              IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insiufficent space allocation
               out => outchnl(nch)
               out%l = k-1
               out%j = xj
@@ -796,10 +818,10 @@
         IF(ipar==0) CYCLE
         DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
            xj = k + jndex - (2.0 + SEJc(nejc))
-           IF(xj<jmin .or. xj>jmax) CYCLE
+           IF(xj<jmin .OR. xj>jmax) CYCLE
            tld = ELTLJ(k,jndex)                       !no IF - all elastic channels treated as 'strong'
            nch = nch + 1
-           if(nch>ndhrtw1) call HRTW_error()          !STOP - insufficient space allocation
+           IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insufficient space allocation
            IF(num%elal == 0) THEN
               num%elal = nch                          !memorize position of the first elastic in the 'outchnl' matrix
               num%elah = nch                          !set it also as the last one in case there are no more
@@ -840,12 +862,12 @@
 
    hrtw_decay = summa
 
-   return
-   end function hrtw_decay
+   RETURN
+   END FUNCTION hrtw_decay
 
    !----------------------------------------------------------------------------------------------------
 
-   real*8 function HRTW_DECAYG(nnuc,iec,jc,ipc)
+   REAL*8 FUNCTION HRTW_DECAYG(nnuc,iec,jc,ipc)
    !
    !********************************************************************
    !*                                                         class:PPu*
@@ -881,7 +903,7 @@
 
    ! Dummy arguments
 
-   INTEGER*4, intent(in)  :: iec, ipc, jc, nnuc
+   INTEGER*4, INTENT(IN)  :: iec, ipc, jc, nnuc
 
    ! Local variables
 
@@ -1064,24 +1086,24 @@
 
    hrtw_decayg = summa
 
-   return
-   end function hrtw_decayg
+   RETURN
+   END FUNCTION hrtw_decayg
 
    !----------------------------------------------------------------------------------------------------
 
    SUBROUTINE HRTW_error()
 
-   write(8,*) 'Insufficient space allocated for HRTW'
-   write(8,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
-   write(*,*) 'Insufficient space allocated for HRTW'
-   write(*,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
+   WRITE(8,*) 'Insufficient space allocated for HRTW'
+   WRITE(8,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
+   WRITE(*,*) 'Insufficient space allocated for HRTW'
+   WRITE(*,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
    STOP 'Insufficient space allocated for HRTW'
 
    END SUBROUTINE HRTW_error
 
    !----------------------------------------------------------------------------------------------------
 
-   real*8 function EEF(tl,tav,sumtl)
+   REAL*8 FUNCTION EEF(tl,tav,sumtl,LHRtw)
 
    !cc   *****************************************************************
    !cc   *                                                      Class:PPu*
@@ -1092,6 +1114,9 @@
    !cc   * input: Tl     - transmission coefficient                      *
    !cc   * Tav    - average of all transmission coefficients             *
    !cc   * Sumtl  - sum of transmission coefficients                     *
+   !cc   * LHRtw  - selects origin of elastic enhancement factor         *
+   !cc   *                1 - Hofmann, Mertelmeier, Herman, Tepel        *
+   !cc   *                2 - Kawano, Talou                              *
    !cc   *                                                               *
    !cc   * output: Eef - elastic enhancement factor                      *
    !cc   *                                                               *
@@ -1104,7 +1129,8 @@
 
    ! Dummy arguments
 
-   REAL*8, intent(in) :: sumtl, tav, tl
+   REAL*8, INTENT(IN) :: sumtl, tav, tl
+   INTEGER*4, INTENT(IN) :: LHRtw
 
    ! Local variables
 
@@ -1114,10 +1140,14 @@
      eef = 3.D0
      RETURN
    ENDIF
-
+   SELECT CASE(LHRtw)
+   CASE(1)
    al = 4.D0*tav/sumtl*(1.D0 + tl/sumtl)/(1.D0 + 3.D0*tav/sumtl)
    a = 87.D0*(tl - tav)**2*tl**5/sumtl**7
    eef = 1.D0 + 2.D0/(1.D0 + tl**al) + a
+   CASE(2)
+   eef = 1.D0 + 2.D0/NU(tl,Sumtl,2)
+   END SELECT
    ! eef = 1.D0   !uncomment to eliminate elastic enhancement factor, i.e., no HRTW
    eef = min(eef,3.D0)
 
@@ -1126,7 +1156,7 @@
 
    !----------------------------------------------------------------------------------------------------
 
-   SUBROUTINE AUSTER
+   SUBROUTINE AUSTER(LHRtw)
 
    !cc   *****************************************************************
    !cc   *                                                      Class:PPu*
@@ -1137,17 +1167,21 @@
    !cc   * not iterated. All communication occures through the outchnl   *
    !cc   * structure in the HRTW_mod module.                             *
    !cc   *                                                               *
+   !cc   * Input: LHRtw - selects origin of elastic enhancement factor   *
+   !cc   *                1 - Hofmann, Mertelmeier, Herman, Tepel        *
+   !cc   *                2 - Kawano, Talou                              *
    !cc   *                                                               *
    !cc   *****************************************************************
 
    IMPLICIT NONE
 
+   INTEGER*4, INTENT(IN) :: Lhrtw
    INTEGER*4 i, icount
 
    icount = 0
    outchnl(1:NCH)%ti1 = outchnl(1:NCH)%t                     !copy Tlj on the temporary 'ti1' location for iteration
    DO i = 1, NCH
-     outchnl(i)%eef = EEF(outchnl(i)%t,H_Tav,H_Sumtl)        !calculate elastic enhancement for all channels
+     outchnl(i)%eef = EEF(outchnl(i)%t,H_Tav,H_Sumtl,LHRtw)  !calculate elastic enhancement for all channels
    ENDDO
 
    iter: DO
@@ -1177,4 +1211,859 @@
    RETURN
    END SUBROUTINE AUSTER
 
-   end module HRTW
+   !----------------------------------------------------------------------------------------------------
+
+   SUBROUTINE Moldauer
+
+      !cc
+      !cc   ********************************************************************
+      !cc   *                                                         class:ppu*
+      !cc   *               M o l d a u e r                                    *
+      !cc   *                                                                  *
+      !cc   *  Calculate decay of the Compound Nucleus capture states in       *
+      !cc   *  terms of the  Moldauer approach to account for the width        *
+      !cci  *  fluctuation correction.                                         *
+      !cc   *                                                                  *
+      !cc   *                                                                  *
+      !cc   ********************************************************************
+      !cc
+
+      IMPLICIT NONE
+
+      REAL*8 :: elada(NDAngecis), elleg(NDAngecis)
+      INTEGER neles
+      COMMON /angula/elada,elleg,neles
+      REAL*8 :: sumin_w, sumtt_w
+      COMMON /EWcorr/ sumin_w, sumtt_w
+
+      CHARACTER(1), PARAMETER :: cpar(2) = (/'+', '-'/)
+
+      ! Local variables
+
+      LOGICAL*4 relcal
+      INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
+      REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, elcor, xjc
+      REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
+      REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
+      REAL*8 d0c
+      REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
+      REAL*8 :: sumin_s, sumtt_s, stmp, ewcor, w
+      !
+      TYPE (channel), POINTER :: out
+      TYPE (fusion),  POINTER :: in
+
+      CALL AllocHRTW()    !allocate HRTW matrices
+      H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
+      nnuc = 1            !set CN nucleus
+      csfis = 0.D0
+      SUMfis = 0.D0
+      gcasc = 1.0         !ensure full gamma cascade with WFC
+      ke = NEX(nnuc)
+
+
+      IF (AEJc(0).EQ.0.0D0) THEN
+         WRITE(8,*) 'WARNING:  Width fluctuation correction for neutron reactions only.'
+         RETURN
+      END IF
+
+      ! Initialize variables and print heading for normalizing g-strength function
+
+      d0c = 0.D0
+      sumtg = 0.D0
+      tgexper = 0.D0
+      IF(.NOT. benchm) THEN
+         WRITE(8,'(1x,''Renormalization of gamma-ray strength function'')')
+         WRITE(8,'(1x,''-------------------------------------------------------------'')')
+      ENDIF
+      IF(first_ein .AND. (einl>1.D0) ) THEN
+         WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
+         WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
+      ENDIF
+
+      ! xmas_npro = EJMass(NPRoject)
+      xmas_npro = EJMass(0)
+      xmas_ntrg = AMAss(0)
+
+
+      el = EINl
+      relcal = .FALSE.
+      !IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
+      IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
+
+      IF (AEJc(0).EQ.0.0D0) THEN
+         xmas_npro = 0.d0
+         relcal = .TRUE.
+      ENDIF
+
+      CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
+
+      ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
+      coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
+      ! start CN nucleus decay
+      DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
+         ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
+         DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
+            xjc = float(jcn) + HIS(nnuc)
+            IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE      ! skip if absorption cross section negligible
+            ! write(8,*) ' '
+            ! write(8,*) 'CN Jpi=',xjc*ip
+            nhrtw = 0
+            DENhf = 0.D0
+            NSCh = 0
+            NCH = 0
+            outchnl%l = 0
+            outchnl%j = 0.d0
+            outchnl%t = 0.d0
+            outchnl%ti1 = 0.d0
+            outchnl%ti2 = 0.d0
+            outchnl%rho = 0.d0
+            outchnl%eef = 1.d0
+            outchnl%nejc = 0
+            outchnl%kres = 0
+            outchnl%xjrs = 0.d0
+            outchnl%jres = 0
+            outchnl%pres = 0
+            inchnl%nout = 0
+            inchnl%l = 0
+            inchnl%j = 0.d0
+            inchnl%t = 0.d0
+            inchnl%sig = 0.d0
+            num%neut = 0
+            num%part = 0
+            num%elal = 0
+            num%elah = 0
+            num%fiss = 0
+            num%gamm = 0
+            H_Sumtls = 0.D0
+            H_Sumtl = 0.D0
+            H_Tav = 0.D0
+            H_Sweak = 0.D0
+            H_Tl = 0.D0
+            IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
+
+            ! Collecting outgoing channels **********************************************************************************************
+
+            ! particle decay
+
+            DO nejc = 1, nejcm                            !do loop over ejectiles
+               IF(NREs(nejc)<0) CYCLE
+               nnur = NREs(nejc)
+               summa = HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
+            ENDDO                                         !do loop over ejectiles  ***done***
+
+            ! write(*,*) sumin_w,sumtt_w
+
+            num%part = nch                                !store number of particle channel entries
+
+            ! gamma emission is always a weak channel (one iteration)
+
+            sumg = HRTW_DECAYG(nnuc,ke,jcn,ip)
+            ! H_Sumtl = H_Sumtl + sumg
+            ! H_Sweak = H_Sweak + sumg
+
+            ! Trying to include gamma in Moldauer the same way we do with continuum bin
+            !               nch = nch + 1
+            !               if(nch>ndhrtw1) call HRTW_error()    !STOP - insufficent space allocation
+            !               num%gamm = nch
+            !               out => outchnl(nch)
+            !               out%t = sumg/out%rho
+            !               out%rho = sumg/H_Tthr + 1.D0
+            !               out%nejc = 0
+
+            ! fission (may be a weak or strong channel)
+
+            sumfis = 0.D0
+            tfis = 0.D0
+            ndivf = 1
+            num%fiss = 0
+            IF(FISsil(nnuc)) THEN
+               IF(nint(FISshi(nnuc))==1) THEN
+                  CALL FISSION(nnuc,ke,jcn,sumfis)
+               ELSE
+                  CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
+               ENDIF
+               DENhf = DENhf + sumfis
+               H_Sumtl = H_Sumtl + sumfis
+               ! dividing sumfis into channels with TFIs < 0.25 each
+
+               ndivf = int(sumfis/0.25) + 1
+               tfis = sumfis/dfloat(ndivf)
+               H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
+               IF(tfis>=H_Tthr) THEN                      ! fission treated as a strong channel
+                  nch = nch + 1                           ! otherwise 'sumfis' it is left untouched
+                  num%fiss = nch                          ! store position of fission (only one entry with 'ndivf')
+                  outchnl(nch)%t = tfis
+                  outchnl(nch)%rho = dfloat(ndivf)
+                  outchnl(nch)%nejc = 100                 ! nejc=100 convention identifies fission
+               ENDIF
+            ENDIF
+            IF(H_Sumtl.LE.0.0D0) CYCLE                    ! no transitions from the current state
+
+
+            !  write(*,*)' '
+            !  write(*,*)'SUMMARY OF DECAY FOR J=',xjc
+            !  write(*,*)'total sum of  Tls ', H_Sumtl
+            !  write(*,*)'sum of strong Tls ', H_Sumtl-H_Sweak
+            !  write(*,*)'sum of weak   Tls ', H_Sweak
+            !  write(*,*)'sum of weak part. ', H_Sweak-sumg
+            !  write(*,*)'sum of gammas     ', sumg
+            !  write(*,*)'sum fission       ', sumfis
+            !  write(*,*)'sum Tl**2         ', H_Sumtls
+            !  write(*,*)'# of strong Tls   ', nch
+            !  write(*,*)'average Tl        ', H_Tav
+            !  write(*,*)'first entry DENhf=', DENhf
+
+            ! Collecting outgoing channels completed  ************************************************************************************
+
+!            write(*,*) 'Decay state ',jcn*ip, ' DENhf calculated before HRTW or Moldauer', DENhf
+
+            !Special treatment of the gamma channels in Moldauer -
+            !replace all gammas by a fixed number of equal gammas (outchnl(num%gamm) and apply W to all SCRt and SCRtl
+            !before strong channels are added.
+            !               w = WFC(num%elal,num%gamm)
+            !               write(*,*) 'W for gammas', w
+            !               SCRt = SCRt*w
+            !               SCRtl = SCRtl*w
+
+            ! Loop over incoming (fusion) channels *****************************************************************************************
+
+            DO i = num%elal, num%elah                   ! do loop over elastic channels
+               in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
+               out => outchnl(i)
+               in%t = out%t
+               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+               xnor=0.D0
+               IF(DENhf==0.D0) CYCLE
+               xnor = in%sig/DENhf                                 ! normalization factor
+               ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+               sumin_s = 0.d0
+               sumtt_s = 0.d0
+               DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
+                  out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
+                  w = WFC2(i,iout)                          !Moldauer width fluctuation factor
+                  ! WRITE(8,*) 'continuum WFC', iout, w
+                  IF(out%kres>0) THEN                      !continuum channels
+                     SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
+                        + out%t*out%rho*w/de
+                  ELSE IF(out%kres<0) THEN
+                     IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
+                        stmp = out%t*out%rho*w
+                        sumin_s = sumin_s + stmp * CINRED(-out%kres)
+                        sumtt_s = sumtt_s + stmp
+                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
+                     ELSE
+                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
+                     ENDIF
+                  ENDIF
+               ENDDO
+               ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
+               ! Correcting the elastic cross section for inelastic enhancement CINRED
+               numch_el = max(num%elah - num%elal + 1 , 1 )
+               DO iout = num%elal, num%elah  ! do loop over elastic channels
+                  out => outchnl(iout)
+                  SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
+                  !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
+               ENDDO
+               IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
+               !Renormalizing scratch matrices to recover unitarity
+               DENhf = 0.0d0                             !test that SCRt+SCRtl sum to the same DENhf
+               DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
+               DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
+!               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
+               !IF(DENhf>0.D0) xnor = in%sig/DENhf                                 ! normalization factor
+
+               ! CN angular distributions (neutron (in)elastic scattering ONLY!)  *******************************************************
+               ewcor = 0.d0
+               IF(.NOT.CN_isotropic) THEN
+                  ! accumulate Legendre coefficients
+                  nejc = 1
+                  nnur = 2
+                  Ia = XJLv(LEVtarg,0)                  !target spin
+                  la = in%l                             !incident neutron l
+                  ja = in%j                             !incident neutron j
+                  ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
+                  DO iout = 1, num%neut                    !do loop over neutron channels only
+                     ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
+                     ! write(8,*) '                                  leg      BB               Jcn   &
+                     ! &               l_inc           j_inc                 J_res              l_out              J_out'
+                     ! w = 1.D0
+                     w = WFC2(i,iout)             !Moldauer width fluctuation factor
+                     out => outchnl(iout)
+                     xjr = out%xjrs              !residual nucleus J
+                     lb = out%l                  !outgoing neutron l
+                     jb = out%j                  !outgoing neutron j
+                     IF(out%kres > 0) THEN
+                        PLcont_lmax(out%kres) = 2*in%l
+                     ELSEIF(out%kres < 0) THEN
+                        PL_lmax(-out%kres) = 2*in%l
+                     ENDIF
+
+                     IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
+                        stmp = out%t*out%rho*w*CINRED(-out%kres)
+                     ELSE                                        ! Elastic and continuum
+                        stmp = out%t*out%rho*w
+                     ENDIF
+
+                     DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
+                        xleg = dble(lleg)
+                        tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
+                        ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
+                        ! if(tmp==0.D0) cycle
+                        IF(dabs(tmp) < 1.d-14) CYCLE
+                        tmp = tmp*xnor*stmp  !*out%t*out%rho
+                        IF(out%kres > 0) THEN
+                           PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
+                        ELSEIF(out%kres < 0) THEN
+                           PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
+                        ENDIF
+                     ENDDO
+
+                     !IF(out%kres > 0) THEN
+                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
+                     !ELSEIF(outchnl(iout)%kres < 0) THEN
+                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
+                     !ENDIF
+                     !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
+
+                  ENDDO
+               ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
+
+               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+
+               IF(ewcor.NE.0.d0) THEN
+                  out => outchnl(i)
+                  !restore SCRtl before new elastic is calculated
+                  SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - ewcor
+               ENDIF
+
+               !write(*,*) 'ewcor=',ewcor
+
+            ENDDO    !end do loop over incident channels
+
+            ! Gamma width calculation *************************************************************************************
+
+            IF((first_ein .OR. benchm) .AND. einl<=1.D0) THEN
+               cnspin = jcn - 0.5
+               IF(mod(XJLv(levtarg,0)*2.,2.D+0)==1)cnspin = jcn - 1
+               IF(ip==LVP(levtarg,0) .AND. ((cnspin==XJLv(levtarg,0)+0.5) .OR. (cnspin==XJLv(levtarg,0)-0.5))) THEN
+                  d0c = d0c + RO(ke,jcn,ipar,nnuc)
+                  ! write(8,*)'ke,jcn,ipar,ro',ke,jcn,ipar,RO(ke,jcn,ipar,nnuc)
+                  WRITE(8,'(A12,f4.1,A6,A1,A6,F7.3,A4,/,A37,d12.6)')'CN state J=', cnspin, ', Par:', cpar(ipar), ' at U=',&
+                     EX(ke,nnuc), ' MeV', 'Int[Rho(U)*Tlg(U)] + Sum[Tlg(Ui)] = ', sumg
+                  sumtg = sumtg + sumg
+               ENDIF
+            ENDIF
+         ENDDO       !loop over decaying nucleus spin
+      ENDDO          !loop over decaying nucleus parity
+      IF(d0c>0.D0) d0c = 1000.0/d0c
+      IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
+      IF(benchm) THEN
+         WRITE(8,*)
+         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
+         WRITE(8,*)
+      ENDIF
+      itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 )
+      IF(itmp.EQ.1 .AND. (.NOT.benchm)) THEN
+         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
+         WRITE(8,*)
+      ENDIF
+      IF(itmp.GT.1 .AND. (.NOT.benchm)) THEN
+         WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)),&
+            SYMb(nnuc), TUNe(0,nnuc)
+         WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+         WRITE(8,*)
+      ENDIF
+      ! IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
+      IF(einl<=1.D0 .AND. first_ein) THEN
+         IF(d0_obs>0.D0) THEN
+            tgexper = 2*pi*gg_obs/d0_obs/1.E6
+            WRITE(8,'(1x,''Experimental information from capture channel'')')
+            WRITE(8,'(1x,A13,D12.6)')'2*pi*Gg/D0 = ', tgexper
+         ENDIF
+         IF(gg_unc>0.0D0) THEN
+            WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+         ELSE
+            WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', gg_obs, ' meV (systematics)'
+         ENDIF
+         WRITE(12,'(/1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+         IF(d0_obs>0.0D0) THEN
+            WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', d0_obs, ' +/- ', d0_unc, ' keV'
+            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')')d0_obs
+         ELSE
+            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
+         ENDIF
+         WRITE(8,*)
+         WRITE(12,*)
+         IF(itmp==0 .AND. (.NOT.benchm)) THEN
+            IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
+               tune(0,nnuc) = tgexper/sumtg
+               WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
+               IF (first_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')')
+            ELSE
+               WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
+            ENDIF
+            WRITE(8,*)
+         ENDIF
+         IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
+            WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
+            WRITE(8,*)
+         ENDIF
+      ENDIF
+
+      CALL DelHRTW()    !deallocate HRTW arrays
+
+      RETURN
+   END SUBROUTINE Moldauer
+
+
+
+   real*8 function NU(Tl,Sumtl,Itype)
+
+      !cc   *****************************************************************
+      !cc   *                                                      Class:PPu*
+      !cc   *                          N U                                  *
+      !cc   *                                                               *
+      !cc   * Calculates channel degree  of freedom for Width Fluctuation   *
+      !cc   * Correction used in statistiacl model using original Moldauer  *
+      !cc   * and Kawano formulations                                       *
+      !cc   *                                                               *
+      !cc   * input:                                                        *
+      !cc   * Tl     - transmission coefficient                             *
+      !cc   * Sumtl  - sum of transmission coefficients                     *
+      !cc   * Itype  - 1 Moldauer                                           *
+      !cc   *        - 2 Kawano and Talou                                   *
+      !cc   *                                                               *
+      !cc   * output: NU- channel degree of freedom                         *
+      !cc   *                                                               *
+      !cc   *                                                               *
+      !cc   *                                                               *
+      !cc   *****************************************************************
+
+      IMPLICIT NONE
+
+      ! Dummy arguments
+
+      REAL*8, intent(in) :: Sumtl, Tl
+      INTEGER*4, intent(in) :: Itype
+
+      ! Local variables
+
+      REAL*8 :: al, be, ce
+
+      SELECT CASE (Itype)
+         CASE (1)
+            NU = 1.78D0+(Tl**1.212D0-0.78D0)*exp(-0.228D0*Sumtl)
+         CASE (2)  !Kawano
+            al = 0.0287892D0*Tl + 0.245856D0
+            ce = Tl**2 - (Sumtl - 2*Tl)**2
+            be = 1.D0 + 2.5D0*Tl*(1.D0 - Tl)*exp(-2.D0*Sumtl)
+            IF(Sumtl<2.0D0*Tl .AND. ce>0.d0) THEN
+               ! f = al*be1*(Tl + Sumtl)/(1.D0 - Tl)*sqrt(c)/Tl
+               NU = 2 -  (1.D0-Tl)*Tl / ( (1.D0-Tl)*Tl + al*be*(Sumtl + Tl)*sqrt(ce) )
+            ELSE
+               NU = 2 -  (1.D0-Tl)    / ( (1.D0-Tl)    + al*be*(Sumtl + Tl) )
+            ENDIF
+         CASE DEFAULT
+            write(8,'(''Stop: unsupported nu model '',i3)') Itype
+            write(*,'(''Stop: unsupported nu model '',i3)') Itype
+            STOP
+      END SELECT
+      NU = Max(1.D0, NU)
+      NU = Min(2.D0, NU)
+      RETURN
+   END FUNCTION NU
+
+   !----------------------------------------------------------------------------------------------------
+
+   real*8 function WFC(in,out)
+      !
+      !  Calculates width fluctuation correction (WFC) using Moldauer approach
+      !
+      IMPLICIT NONE
+      integer*4, intent(in):: in, out         ! index number of incoming (in) and outgoing (out) channels
+      integer*4:: del_ic=0, del_co=0          ! delta function for (in,channel c), and (channle c,out)
+      integer*4, parameter:: ndGL=20
+      integer*4:: i,ic
+      real*8:: nu_c, nu_in, tmp
+      !  Data (x and weights) for Gauss-Laguerre quadrature
+      REAL*8, DIMENSION(1:ndGL), PARAMETER:: x = (/ &
+         7.0539889691988753D-02,&
+         3.7212681800161144D-01,&
+         9.1658210248327356D-01,&
+         1.7073065310283439D+00,&
+         2.7491992553094321D+00,&
+         4.0489253138508869D+00,&
+         5.6151749708616165D+00,&
+         7.4590174536710633D+00,&
+         9.5943928695810968D+00,&
+         1.2038802546964316D+01,&
+         1.4814293442630740D+01,&
+         1.7948895520519376D+01,&
+         2.1478788240285011D+01,&
+         2.5451702793186906D+01,&
+         2.9932554631700612D+01,&
+         3.5013434240479000D+01,&
+         4.0833057056728571D+01,&
+         4.7619994047346502D+01,&
+         5.5810795750063899D+01,&
+         6.6524416525615754D+01/)
+      REAL*8, DIMENSION(1:ndGL), PARAMETER:: w = (/ &
+         1.8108006241898926D-01,&
+         4.2255676787856397D-01,&
+         6.6690954670184815D-01,&
+         9.1535237278307367D-01,&
+         1.1695397071955460D+00,&
+         1.4313549859282060D+00,&
+         1.7029811379850227D+00,&
+         1.9870158907927472D+00,&
+         2.2866357812534308D+00,&
+         2.6058347275538333D+00,&
+         2.9497837342139509D+00,&
+         3.3253957820093196D+00,&
+         3.7422554705898109D+00,&
+         4.2142367102518804D+00,&
+         4.7625184614902093D+00,&
+         5.4217260442455743D+00,&
+         6.2540123569324213D+00,&
+         7.3873143890544346D+00,&
+         9.1513287309874796D+00,&
+         1.2893388645939997D+01/)
+      !      REAL*8, DIMENSION(1:ndGL), PARAMETER:: x = (/ &
+      !         0.035700394308888385122084471D0,&
+      !         0.188162283158698516003589346D0,&
+      !         0.462694281314576453564937525D0,&
+      !         0.859772963972934922257272225D0,&
+      !         1.380010820527337186498000330D0,&
+      !         2.024209135922826733442066003D0,&
+      !         2.793369353506816457653514486D0,&
+      !         3.688702677908270209591526352D0,&
+      !         4.711641146554972693618722836D0,&
+      !         5.863850878343718114273164238D0,&
+      !         7.147247908102288250685691952D0,&
+      !         8.564017017586163762718522042D0,&
+      !         10.11663404845193940684962966D0,&
+      !         11.80789229400458484284158670D0,&
+      !         13.64093371253708722837167636D0,&
+      !         15.61928589333907383720196365D0,&
+      !         17.74690595009566304257387749D0,&
+      !         20.02823283457489052961261481D0,&
+      !         22.46824998349841835137178623D0,&
+      !         25.07256077242620379439608621D0,&
+      !         27.84748000916886272075170414D0,&
+      !         30.80014573944546270075438520D0,&
+      !         33.93865708491371960909885859D0,&
+      !         37.27224588047600432832076099D0,&
+      !         40.81149282388692046615567558D0,&
+      !         44.56860317533446270712302063D0,&
+      !         48.55776353305999228096204881D0,&
+      !         52.79561118721693296935202114D0,&
+      !         57.30186332339362749503374700D0,&
+      !         62.10017907277511161216819906D0,&
+      !         67.21937092712699879908027755D0,&
+      !         72.69515884761246211752192772D0,&
+      !         78.57280291157130928054389683D0,&
+      !         84.91123113570498454270156471D0,&
+      !         91.78987467123637699233719348D0,&
+      !         99.32080871744680825010905416D0,&
+      !         107.6724406393882725207967676D0,&
+      !         117.1223095126906888076506441D0,&
+      !         128.2018419882556511925411044D0,&
+      !         142.2800444691599978883488354D0/)
+      !      REAL*8, DIMENSION(1:ndGL), PARAMETER:: w = (/ &
+      !         0.091625471157459897311511698080137483D0,&
+      !         0.213420584905012080007193367121512341D0,&
+      !         0.335718116680284673880510701616292191D0,&
+      !         0.458540935033497560385432380376452497D0,&
+      !         0.582068165779105168990996365401543284D0,&
+      !         0.706495216367219392989830015673016682D0,&
+      !         0.832026903003485238099112947978349524D0,&
+      !         0.958878198794443111448122679676028907D0,&
+      !         1.087276162030549715753869333172026616D0,&
+      !         1.217462327977780978954277850665609481D0,&
+      !         1.349695491356765307923938594423945197D0,&
+      !         1.484254929776846711205611786129787199D0,&
+      !         1.621444162811821978023168843164545274D0,&
+      !         1.761595374676769611184242204209815984D0,&
+      !         1.905074665894799676682993205972793711D0,&
+      !         2.052288347261716717601995822729474548D0,&
+      !         2.203690553245095889098283443281405708D0,&
+      !         2.359792538523203323540373753789014974D0,&
+      !         2.521174140376432991653136902874228210D0,&
+      !         2.688498055408842264159505447063746595D0,&
+      !         2.862527813210448812034763959831043113D0,&
+      !         3.044150665311517100410439679543336704D0,&
+      !         3.234407097263531941774902394288671117D0,&
+      !         3.434529398427748092203984818916024650D0,&
+      !         3.645992824994089072389656466994904344D0,&
+      !         3.870584597216516568084753202134443384D0,&
+      !         4.110498680432822655835822472639515779D0,&
+      !         4.368468723254063474508083382729450258D0,&
+      !         4.64795898407446688299303399883883991D0, &
+      !         4.95344611240989326218696150785562721D0, &
+      !         5.29084840590073657468737365718858969D0, &
+      !         5.66820460903297677000730529023263795D0, &
+      !         6.09679641474342030593376010859198806D0, &
+      !         6.59310886103999953794429664206294899D0, &
+      !         7.18249599553689315064429801626699575D0, &
+      !         7.90666631138422877369310742310586595D0, &
+      !         8.84089249281034652079125595063026792D0, &
+      !         10.1408992656211694839094600306940469D0, &
+      !         12.2100212992046038985226485875881110D0, &
+      !         16.7055206420242974052468774398573550D0/)
+
+      nu_in =  outchnl(in)%eef/2.D0      ! half of the degree of freedom for the incoming channel
+      WFC = 0.D0
+      do i = 1, ndGL        ! do loop over Gauss Laguerre integration steps
+         tmp = 0.D0
+         !         tmp = 1.D0
+         do ic = 1, NCH    ! do loop over channels
+            !            if(ic==num%gamm) cycle
+            if(in==ic) then
+               del_ic = 1
+            else
+               del_ic = 0
+            endif
+            if(out==ic) then
+               del_co = 1
+            else
+               del_co = 0
+            endif
+            nu_c  =  outchnl(ic)%eef/2.D0      ! half of the degree of freedom for the running channel c
+            !        Integral in Moldauer formula for WFC using log to turn product into a sum
+            tmp = tmp - (outchnl(ic)%rho*nu_c + del_ic + del_co)*dlog(1.D0 + x(i)*outchnl(ic)%t/nu_c/H_Sumtl)
+         !            tmp = tmp*(1.D0 + x(i)*outchnl(ic)%t/nu_c/H_Sumtl)**(-nu_c - del_ic - del_co)
+         end do
+         tmp = tmp - x(i)*H_Sweak/H_Sumtl
+
+         WFC = WFC + w(i)*dexp(tmp)
+      !         WFC = WFC + w(i)*tmp
+      end do
+      if(in==out) then                       ! case of elastic
+         WFC = (1.D0 + 1.D0/nu_in)*WFC
+      end if
+
+      return
+   end function WFC
+
+  SUBROUTINE WFC1()
+
+      !****************************************************************************************
+      !                            W F C 1
+      !
+      !   Moldauer width fluctuation formula - part 1. Calculates global component of the
+      !   integral that is independent of the incident and outgoing channels. Uses 20-point
+      !   Gauss-Laguerre quadratuire and includes calculation of the degrees of freedom.
+      !
+      !****************************************************************************************
+
+
+      integer*4, parameter:: ndGL=20
+      integer*4:: i,ic
+      real*8:: nu_c, a1
+      TYPE (channel), POINTER :: out
+
+      !  Data (x and weights) for Gauss-Laguerre quadrature
+      REAL*8, DIMENSION(1:ndGL), PARAMETER:: x = (/ &
+         7.0539889691988753D-02,&
+         3.7212681800161144D-01,&
+         9.1658210248327356D-01,&
+         1.7073065310283439D+00,&
+         2.7491992553094321D+00,&
+         4.0489253138508869D+00,&
+         5.6151749708616165D+00,&
+         7.4590174536710633D+00,&
+         9.5943928695810968D+00,&
+         1.2038802546964316D+01,&
+         1.4814293442630740D+01,&
+         1.7948895520519376D+01,&
+         2.1478788240285011D+01,&
+         2.5451702793186906D+01,&
+         2.9932554631700612D+01,&
+         3.5013434240479000D+01,&
+         4.0833057056728571D+01,&
+         4.7619994047346502D+01,&
+         5.5810795750063899D+01,&
+         6.6524416525615754D+01/)
+
+        save_WFC1 = 1.D0
+        do ic = 1, NCH                           ! do loop over all channels
+           out => outchnl(ic)
+           out%eef = NU(out%t,H_Sumtl,LHRtw-2)   ! Calculate degrees of freedom for all  channels
+           nu_c = out%eef/2.D0
+           a1 = out%t/nu_c/H_Sumtl
+           IF(a1==0) CYCLE
+           IF(a1>1.D-9) THEN
+           do i = 1, ndGL                                                     ! do loop over Gauss Laguerre integration steps
+              save_WFC1(i) = save_WFC1(i)*((H_Sumtl + x(i)*out%t/nu_c)/H_Sumtl)**outchnl(ic)%rho*nu_c
+           end do
+           ELSE
+           do i = 1, ndGL                                                     ! do loop over Gauss Laguerre integration steps
+              save_WFC1(i) = save_WFC1(i)*DEXP(x(i)*out%t/H_Sumtl*out%rho*(1.D0 - 0.5D0*x(i)*a1))
+           end do
+           ENDIF
+        end do
+        do i = 1, ndGL                                                        ! do loop over Gauss Laguerre integration steps
+           save_WFC1(i) = save_WFC1(i)*(1.D0+x(i)*sumg/20.D0/H_Sumtl)**20     !adding gammas
+        end do
+      return
+   end subroutine WFC1
+
+
+
+
+   !----------------------------------------------------------------------------------------------------
+
+     real*8 function WFC2(in,ou)
+      !
+      !  Calculates width fluctuation correction (WFC) using Moldauer approach
+      !
+      IMPLICIT NONE
+      integer*4, intent(in):: in, ou         ! index number of incoming (in) and outgoing (out) channels
+      integer*4, parameter:: ndGL=20
+      integer*4:: i
+      real*8:: nu_ou, nu_in, tmp
+      !  Data (x and weights) for Gauss-Laguerre quadrature
+      REAL*8, DIMENSION(1:ndGL), PARAMETER:: x = (/ &
+         7.0539889691988753D-02,&
+         3.7212681800161144D-01,&
+         9.1658210248327356D-01,&
+         1.7073065310283439D+00,&
+         2.7491992553094321D+00,&
+         4.0489253138508869D+00,&
+         5.6151749708616165D+00,&
+         7.4590174536710633D+00,&
+         9.5943928695810968D+00,&
+         1.2038802546964316D+01,&
+         1.4814293442630740D+01,&
+         1.7948895520519376D+01,&
+         2.1478788240285011D+01,&
+         2.5451702793186906D+01,&
+         2.9932554631700612D+01,&
+         3.5013434240479000D+01,&
+         4.0833057056728571D+01,&
+         4.7619994047346502D+01,&
+         5.5810795750063899D+01,&
+         6.6524416525615754D+01/)
+      REAL*8, DIMENSION(1:ndGL), PARAMETER:: w = (/ &
+         1.8108006241898926D-01,&
+         4.2255676787856397D-01,&
+         6.6690954670184815D-01,&
+         9.1535237278307367D-01,&
+         1.1695397071955460D+00,&
+         1.4313549859282060D+00,&
+         1.7029811379850227D+00,&
+         1.9870158907927472D+00,&
+         2.2866357812534308D+00,&
+         2.6058347275538333D+00,&
+         2.9497837342139509D+00,&
+         3.3253957820093196D+00,&
+         3.7422554705898109D+00,&
+         4.2142367102518804D+00,&
+         4.7625184614902093D+00,&
+         5.4217260442455743D+00,&
+         6.2540123569324213D+00,&
+         7.3873143890544346D+00,&
+         9.1513287309874796D+00,&
+         1.2893388645939997D+01/)
+      !      REAL*8, DIMENSION(1:ndGL), PARAMETER:: x = (/ &
+      !         0.035700394308888385122084471D0,&
+      !         0.188162283158698516003589346D0,&
+      !         0.462694281314576453564937525D0,&
+      !         0.859772963972934922257272225D0,&
+      !         1.380010820527337186498000330D0,&
+      !         2.024209135922826733442066003D0,&
+      !         2.793369353506816457653514486D0,&
+      !         3.688702677908270209591526352D0,&
+      !         4.711641146554972693618722836D0,&
+      !         5.863850878343718114273164238D0,&
+      !         7.147247908102288250685691952D0,&
+      !         8.564017017586163762718522042D0,&
+      !         10.11663404845193940684962966D0,&
+      !         11.80789229400458484284158670D0,&
+      !         13.64093371253708722837167636D0,&
+      !         15.61928589333907383720196365D0,&
+      !         17.74690595009566304257387749D0,&
+      !         20.02823283457489052961261481D0,&
+      !         22.46824998349841835137178623D0,&
+      !         25.07256077242620379439608621D0,&
+      !         27.84748000916886272075170414D0,&
+      !         30.80014573944546270075438520D0,&
+      !         33.93865708491371960909885859D0,&
+      !         37.27224588047600432832076099D0,&
+      !         40.81149282388692046615567558D0,&
+      !         44.56860317533446270712302063D0,&
+      !         48.55776353305999228096204881D0,&
+      !         52.79561118721693296935202114D0,&
+      !         57.30186332339362749503374700D0,&
+      !         62.10017907277511161216819906D0,&
+      !         67.21937092712699879908027755D0,&
+      !         72.69515884761246211752192772D0,&
+      !         78.57280291157130928054389683D0,&
+      !         84.91123113570498454270156471D0,&
+      !         91.78987467123637699233719348D0,&
+      !         99.32080871744680825010905416D0,&
+      !         107.6724406393882725207967676D0,&
+      !         117.1223095126906888076506441D0,&
+      !         128.2018419882556511925411044D0,&
+      !         142.2800444691599978883488354D0/)
+      !      REAL*8, DIMENSION(1:ndGL), PARAMETER:: w = (/ &
+      !         0.091625471157459897311511698080137483D0,&
+      !         0.213420584905012080007193367121512341D0,&
+      !         0.335718116680284673880510701616292191D0,&
+      !         0.458540935033497560385432380376452497D0,&
+      !         0.582068165779105168990996365401543284D0,&
+      !         0.706495216367219392989830015673016682D0,&
+      !         0.832026903003485238099112947978349524D0,&
+      !         0.958878198794443111448122679676028907D0,&
+      !         1.087276162030549715753869333172026616D0,&
+      !         1.217462327977780978954277850665609481D0,&
+      !         1.349695491356765307923938594423945197D0,&
+      !         1.484254929776846711205611786129787199D0,&
+      !         1.621444162811821978023168843164545274D0,&
+      !         1.761595374676769611184242204209815984D0,&
+      !         1.905074665894799676682993205972793711D0,&
+      !         2.052288347261716717601995822729474548D0,&
+      !         2.203690553245095889098283443281405708D0,&
+      !         2.359792538523203323540373753789014974D0,&
+      !         2.521174140376432991653136902874228210D0,&
+      !         2.688498055408842264159505447063746595D0,&
+      !         2.862527813210448812034763959831043113D0,&
+      !         3.044150665311517100410439679543336704D0,&
+      !         3.234407097263531941774902394288671117D0,&
+      !         3.434529398427748092203984818916024650D0,&
+      !         3.645992824994089072389656466994904344D0,&
+      !         3.870584597216516568084753202134443384D0,&
+      !         4.110498680432822655835822472639515779D0,&
+      !         4.368468723254063474508083382729450258D0,&
+      !         4.64795898407446688299303399883883991D0, &
+      !         4.95344611240989326218696150785562721D0, &
+      !         5.29084840590073657468737365718858969D0, &
+      !         5.66820460903297677000730529023263795D0, &
+      !         6.09679641474342030593376010859198806D0, &
+      !         6.59310886103999953794429664206294899D0, &
+      !         7.18249599553689315064429801626699575D0, &
+      !         7.90666631138422877369310742310586595D0, &
+      !         8.84089249281034652079125595063026792D0, &
+      !         10.1408992656211694839094600306940469D0, &
+      !         12.2100212992046038985226485875881110D0, &
+      !         16.7055206420242974052468774398573550D0/)
+
+      nu_in =  outchnl(in)%eef/2.D0      ! half of the degree of freedom for the incoming channel
+      nu_ou =  outchnl(ou)%eef/2.D0      ! half of the degree of freedom for the incoming channel
+      WFC2 = 0.D0
+      do i = 1, ndGL        ! do loop over Gauss Laguerre integration steps
+            tmp = (1.D0 + x(i)*outchnl(ou)%t/nu_ou/H_Sumtl)*(1.D0 + x(i)*outchnl(in)%t/nu_in/H_Sumtl)
+            WFC2 = WFC2 + w(i)/(save_WFC1(i)*tmp)
+      end do
+      if(in==ou) then                       ! case of elastic
+         WFC2 = (1.D0 + 1.D0/nu_in)*WFC2
+      end if
+
+      return
+      end function WFC2
+
+
+
+   END MODULE width_fluct
