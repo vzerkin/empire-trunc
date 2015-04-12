@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4340 $
+Ccc   * $Rev: 4348 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-09 02:56:10 +0200 (Do, 09 Apr 2015) $
+Ccc   * $Date: 2015-04-13 01:46:32 +0200 (Mo, 13 Apr 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -1220,10 +1220,10 @@ C
             READ (32,'(A80)',END=10611,ERR=10611) ch_iuf
             DO ilv = 1, NLV(nnuc)
               READ (32,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)'
-     &              ,END=1061,ERR=1061) 
+     &              ,END=10611,ERR=10611) 
      &          itmp, elvr, xjlvr, lvpr, t12, ndbrlin
               DO nbr = 1, ndbrlin
-                READ (32,'(A1)',END=1061,ERR=1061) dum
+                READ (32,'(A1)',END=10611,ERR=10611) dum
               ENDDO
               if( abs(elvr-EXV(n,ncalc)).le.0.001    .and. 
      &            abs(xjlvr-SPInv(n,ncalc)).le.0.005 .and.
