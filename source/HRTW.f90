@@ -67,7 +67,9 @@
    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
    TYPE(numchnl) :: num                                  ! number of particular channels
-   REAL*8 :: save_WFC1(20)                                ! stores central part of the Moldauer integral
+   REAL*8 :: save_WFC1(20)                               ! stores central part of the Moldauer integral
+
+   COMPLEX*16, ALLOCATABLE :: Umatr(:,:),Umatr_T(:,:),Smatr(:,:),Pmatr(:,:),Pdiag(:,:) ! EW matrices 
 
    PUBLIC HRTW, Moldauer
 
@@ -129,11 +131,44 @@
    inchnl%t = 0.d0
    inchnl%sig = 0.d0
 
+!  EW matrices
+!  COMPLEX*16, ALLOCATABLE :: Umatr(:,:),Umatr_T(:,:),Smatr(:,:),Pmatr(:,:),Pdiag(:,:) ! EW matrices 
+   IF(INTERF==0) RETURN
+
+   IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+   ALLOCATE(Pmatr(2*NDLW,2*NDLW),STAT=my)
+   IF(my /= 0) GOTO 20
+   Pmatr = 0.0d0
+
+   IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
+   ALLOCATE(Pdiag(2*NDLW,2*NDLW),STAT=my)
+   IF(my /= 0) GOTO 20
+   Pdiag = 0.0d0
+
+   IF(allocated(Smatr)) DEALLOCATE(Smatr)
+   ALLOCATE(Smatr(2*NDLW,2*NDLW),STAT=my)
+   IF(my /= 0) GOTO 20
+   Smatr = 0.0d0
+
+   IF(allocated(Umatr)) DEALLOCATE(Umatr)
+   ALLOCATE(Umatr(2*NDLW,2*NDLW),STAT=my)
+   IF(my /= 0) GOTO 20
+   Umatr = 0.0d0
+
+   IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
+   ALLOCATE(Umatr_T(2*NDLW,2*NDLW),STAT=my)
+   IF(my /= 0) GOTO 20
+   Umatr_T = 0.0d0
+
    RETURN
 
 10 WRITE(8,*)  'ERROR: Insufficient memory for HRTW'
    WRITE(12,*) 'ERROR: Insufficient memory for HRTW'
    STOP 'ERROR: Insufficient memory for HRTW'
+   RETURN
+20 WRITE(8,*)  'ERROR: Insufficient memory for EW matrices in HRTW'
+   WRITE(12,*) 'ERROR: Insufficient memory for EW matrices in HRTW'
+   STOP 'ERROR: Insufficient memory for EW matrices in HRTW'
 
    END SUBROUTINE AllocHRTW
 
@@ -149,8 +184,144 @@
    IF(allocated(outchnl)) DEALLOCATE(outchnl)
    IF(allocated(inchnl))  DEALLOCATE(inchnl)
 
+!  EW matrices
+   IF(INTERF==0) RETURN
+
+   IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+   IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
+   IF(allocated(Smatr)) DEALLOCATE(Smatr)
+   IF(allocated(Umatr)) DEALLOCATE(Umatr)
+   IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
+
    RETURN
    END SUBROUTINE DelHRTW
+
+   LOGICAL FUNCTION Open_EW_files()
+
+   IMPLICIT NONE
+   LOGICAL fexist
+   CHARACTER*3 ctldir
+   CHARACTER*23 ctmp23
+   DATA ctldir/'TL/'/
+
+   Open_EW_files = .FALSE.
+
+   IF(INTERF==0) RETURN
+!--------------
+!--EW matrices 
+!--------------
+   WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),INT(AEJc(0)),INT(Z(0)),INT(A(0)),INT(EINl*1000000)
+
+!--The INQUIRE statement determines whether or not the file exists.
+!--If it does not, the program calculates new transmission coeff.
+   INQUIRE (FILE = (ctldir//ctmp23//'_Pmatr.txt'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Pmatr.txt not found
+   INQUIRE (FILE = (ctldir//ctmp23//'_Pdiag.txt'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Pdiag.txt not found
+   INQUIRE (FILE = (ctldir//ctmp23//'_Smatr.txt'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Smatr.txt not found
+   INQUIRE (FILE = (ctldir//ctmp23//'_Umatr.txt'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Umatr.txt not found
+
+   OPEN (58 ,FILE = (ctldir//ctmp23//'_Pmatr.txt'), STATUS = 'old',ERR=10)
+   OPEN (59 ,FILE = (ctldir//ctmp23//'_Smatr.txt'), STATUS = 'old',ERR=10)
+   OPEN (60 ,FILE = (ctldir//ctmp23//'_Umatr.txt'), STATUS = 'old',ERR=10)
+   OPEN (61 ,FILE = (ctldir//ctmp23//'_Pdiag.txt'), STATUS = 'old',ERR=10)
+
+   Open_EW_files = .TRUE. ! normal return
+
+10 RETURN
+   END FUNCTION Open_EW_files
+
+   Subroutine Close_EW_files()
+   Close(58)
+   Close(59)
+   Close(60)
+   Close(61)
+   END Subroutine Close_EW_files
+
+   LOGICAL FUNCTION Read_EW_matrices()
+   IMPLICIT NONE
+   DOUBLE PRECISION jc, sreal, simag
+   INTEGER nceq, nc1, nc2, i1, i2
+   CHARACTER*1 parc
+
+   Read_EW_matrices = .FALSE.
+   
+!==Reading Pmatr
+!--jc,parc are the channel spin and parity
+!--nceq is the number of coupled equations
+   READ (58,'(1x,f9.1,4x,a1,1x,i4)',END=5,ERR=5) jc, parc, nceq  
+   write(*,'(1x,A6,1x,f9.1,4x,a1,1x,i4)') 'Pmatr:', jc,parc,nceq  
+!
+!--Loop over the number of coupled equations (squared)
+   DO i1 = 1, nceq
+     DO i2 = 1, i1
+       READ (58,*,END = 5,ERR = 5) nc1, nc2, sreal, simag
+       Pmatr(nc1,nc2) = CMPLX(sreal,simag,8)
+       if(nc1 /= nc2) Pmatr(nc2,nc1) = Pmatr(nc1,nc2) 
+     ENDDO
+   ENDDO
+
+!==Reading Smatr
+!---Here the calculated files are read
+!--jc,parc are the channel spin and parity
+!--nceq is the number of coupled equations
+   READ (59,'(1x,f9.1,4x,a1,1x,i4)',END=6,ERR=6) jc, parc, nceq  
+!  write(*,*) jc,parc,nceq  
+!
+!--Loop over the number of coupled equations
+   DO i1 = 1, nceq
+     DO i2 = 1, i1
+       READ (59,*,END = 6,ERR = 6) nc1, nc2, sreal, simag
+       Smatr(nc1,nc2) = CMPLX(sreal,simag,8)
+       if(nc1 /= nc2) Smatr(nc2,nc1) = Smatr(nc1,nc2) 
+     ENDDO
+   ENDDO
+
+!==Reading Umatr
+!--jc,parc are the channel spin and parity
+!--nceq is the number of coupled equations
+   READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=7,ERR=7) jc, parc, nceq  
+!  write(*,*) jc,parc,nceq  
+!
+!--Loop over the number of coupled equations
+   DO i1 = 1, nceq
+     READ (60,*,END = 7,ERR = 7) nc1
+     DO i2 = 1, nceq
+       READ (60,*,END = 7,ERR = 7)  sreal, simag
+       Umatr(nc1,i2) = CMPLX(sreal,simag,8)
+     ENDDO
+   ENDDO
+
+!  Calculating the transposed matrix
+   Umatr_T = TRANSPOSE(Umatr)
+
+!==Reading Pdiag
+!--jc,parc are the channel spin and parity
+!--nceq is the number of coupled equations
+   READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=8,ERR=8) jc, parc, nceq  
+!  write(*,*) jc,parc,nceq  
+!
+!--Loop over the number of coupled equations
+   DO i1 = 1, nceq
+     READ (61,*,END = 8,ERR = 8) nc1, nc2, sreal, simag
+     Pdiag(nc1,nc2) = CMPLX(sreal,simag,8)
+   ENDDO
+
+   Read_EW_matrices = .TRUE.
+
+   RETURN
+ 5 WRITE(8,*)' WARNING: Problem reading EW Pmatr matrix'
+   STOP' WARNING: Problem reading EW Pmatrix'
+ 6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
+   STOP' WARNING: Problem reading EW Pmatrix'
+ 7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
+   STOP' WARNING: Problem reading EW Pmatrix'
+ 8 WRITE(8,*)' WARNING: Problem reading EW Pdiag matrix'
+   STOP' WARNING: Problem reading EW Pmatrix'
+
+   END FUNCTION Read_EW_matrices
 
    !----------------------------------------------------------------------------------------------------
 
@@ -195,7 +366,21 @@
    TYPE (channel), POINTER :: out
    TYPE (fusion),  POINTER :: in
 
+   ! COMPLEX*16 cres(2*NDLW,2*NDLW)
+
    CALL AllocHRTW()    !allocate HRTW matrices
+
+   IF(INTERF.GT.0) then
+     IF(.NOT.Open_EW_files()) WRITE(*,*) 'ERROR opening EW matrices' 
+     IF(.NOT.Read_EW_matrices()) WRITE(*,*) 'ERROR reading EW matrices'  
+ 
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',2,1,DREAL(Umatr(2,1)),DIMAG(Umatr(2,1))
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,2,DREAL(Umatr_T(1,2)),DIMAG(Umatr_T(1,2))
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',2,1,DREAL(Pmatr(2,1)),DIMAG(Pmatr(2,1))
+
+     CALL Close_EW_files()
+   ENDIF
+
    H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
    nnuc = 1            !set CN nucleus
    csfis = 0.D0
@@ -585,12 +770,6 @@
    ENDIF
 
    CALL DelHRTW()    !deallocate HRTW arrays
-
-
-
-
-
- 
 
    RETURN
    END SUBROUTINE HRTW
@@ -1242,8 +1421,8 @@
 
       LOGICAL*4 relcal
       INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
-      REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, elcor, xjc
-      REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
+      REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc
+      REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c
       REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
