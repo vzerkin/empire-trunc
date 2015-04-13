@@ -247,7 +247,12 @@
    CHARACTER*1 parc
 
    Read_EW_matrices = .FALSE.
-   
+
+   Pmatr   = 0.d0   
+   Smatr   = 0.d0   
+   Pdiag   = 0.d0   
+   Umatr   = 0.d0   
+   Umatr_T = 0.d0   
 !==Reading Pmatr
 !--jc,parc are the channel spin and parity
 !--nceq is the number of coupled equations
@@ -366,17 +371,22 @@
    TYPE (channel), POINTER :: out
    TYPE (fusion),  POINTER :: in
 
-   ! COMPLEX*16 cres(2*NDLW,2*NDLW)
+   COMPLEX*16 cres(2*NDLW,2*NDLW)
 
    CALL AllocHRTW()    !allocate HRTW matrices
 
    IF(INTERF.GT.0) then
-     IF(.NOT.Open_EW_files()) WRITE(*,*) 'ERROR opening EW matrices' 
+     IF(.NOT.Open_EW_files()   ) WRITE(*,*) 'ERROR opening EW matrices' 
      IF(.NOT.Read_EW_matrices()) WRITE(*,*) 'ERROR reading EW matrices'  
  
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',2,1,DREAL(Umatr(2,1)),DIMAG(Umatr(2,1))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,2,DREAL(Umatr_T(1,2)),DIMAG(Umatr_T(1,2))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',2,1,DREAL(Pmatr(2,1)),DIMAG(Pmatr(2,1))
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',1,2,DREAL(Pmatr(1,2)),DIMAG(Pmatr(1,2))
+
+	 cres = Umatr*Smatr*Umatr_T
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,1,DREAL(cres(2,1)),DIMAG(cres(2,1))
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,2,DREAL(cres(2,2)),DIMAG(cres(2,2))
 
      CALL Close_EW_files()
    ENDIF
@@ -406,8 +416,6 @@
    ! xmas_npro = EJMass(NPRoject)
    xmas_npro = EJMass(0)
    xmas_ntrg = AMAss(0)
-   
-
 
    el = EINl
    relcal = .FALSE.
