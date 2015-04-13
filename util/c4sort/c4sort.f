@@ -46,6 +46,7 @@ C-V  13/12 - Cosmetic changes for compiler compatibility
 C-V        - Increase max. number of levels from 400 to 500
 C-V  14/01 Add RIPL level filename to the error message.
 C-V  14/02 Fix undefined variable in a warning message.
+C-V  15/04 Fix sorting when last set is a discrete level data set.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -312,6 +313,7 @@ C*
         MT1 =-1
         NER = 0
         NRC = 0
+        KRC = 0
         NDG = 0
         GO TO 17
 C*        -- Count records with illegal entries or read-errors
@@ -320,6 +322,9 @@ C*        -- Count records with illegal entries or read-errors
 C*      -- Skip comments
         IF(REC(1:1).EQ.'#') GO TO 17
         NRC = NRC+1
+c...
+c...    print *,'nrc',nrc,'"',rec(1:77)
+c...
         READ (REC( 6:11),'(I6)',ERR=16) IZAT
         READ (REC(13:15),'(I4)',ERR=16) MF
         READ (REC(16:19),'(I4)',ERR=16) MT
@@ -538,9 +543,9 @@ C*        -- If reaction changed, add discrete level data to LS2
           END IF
         END IF
 C* Suppress entry if the same is preceeded by the ratio entry
-        IF(REC(1:40).NE.RC1(1:40) .OR.
+        IF(REC( 1: 40).NE.RC1( 1: 40) .OR.
      &     REC(98:130).NE.RC1(98:130)) THEN
-             WRITE(LS2,901) REC
+           WRITE(LS2,901) REC
         END IF
         GO TO 17
 C* Reaction ratios converted, C4 file copied to scratch-2        
@@ -577,6 +582,7 @@ C* Begin processing the source file
 C* Copy records to scratch until the reference changes
    20 NSET=NSET+1
       READ (LC4,901,END=200) REC
+      KRC=KRC+1
 c...
 c...  print *,'nset',nset,'"',rec(1:30)
 c...
@@ -636,6 +642,9 @@ C*
 C* Record identified to belong to the same set - process next record
         WRITE(LSC,901) REC
         JLN=JLN+1
+C...
+C...    print *,'jln',jln,'"',rec(1:77)
+C...
         GO TO 20
       END IF
 C* On change in ZA, MF, MT or reference - make an index entry
@@ -720,7 +729,7 @@ C* Re-sequence MF3 data of same type and author by level energy
    32 IR  =IR+1
       IF(IR.GT.MXIR) STOP 'C4SORT ERROR - MXIR limit exceeded (32)'
 c...
-c...        print *,ir,rec
+c...        print *,'ir',ir,'"',rec,'"'
 c...
 C* If range of levels/energies is given, redefine
 C...      READ(REC(86:94),931,ERR=801) FLD
@@ -743,7 +752,14 @@ C* Save record to RC6 field and sorting string to ELL
       ELL(IR)=ELW//POU//'  '
 C*
 C* Read a new record from the C4 file
-      READ (LC4,901,END=200) REC
+c...
+c...  print *,'Attempt to read next record',jln,ir
+c...
+      READ (LC4,901,END= 33) REC
+      KRC=KRC+1
+C...
+C...  print *,' next ','"',rec,'"'
+C...
       IF(REC(1:20).EQ.'                    ') GO TO 34
 C* Decode the MF number
       READ (REC(13:15), * ,END=801,ERR=801) MF
@@ -782,8 +798,8 @@ c...
           PRINT *,'ERROR Reading RIPL energy level file for ZA',IZA
      &           ,' from ',FRLV
 c...
-          print *,'   "',rec(1:20),'" iza,flv0,flv,ier'
-     &                               ,iza,flv0,flv,ier
+c...      print *,'   "',rec(1:20),'" iza,flv0,flv,ier'
+c... &                               ,iza,flv0,flv,ier
 c...
         END IF
         IF(FLV.LT.1.E8) THEN
@@ -802,6 +818,7 @@ C* Check for the presence of level or secondary energy
       GO TO 32
 C*
 C* Block for one data type/author read - Sort by level
+   33 REC(1:20)='                    '
    34 CALL SRTTCH(IR,MEL1,ID3,ID4,EL1)
 C* Write the sorted set from saved record sequence in RC6
       ELV='#########'
@@ -855,6 +872,8 @@ c...
         NSET=NSET+1
       END DO
 c...
+C...  print *,'jln',jln
+c...
 c...       WRITE(41,*) 'i,lne,nse,id2,ent'
 c...       DO I=1,NEN
 c...         WRITE(41,'(4I6,A53)') I,LNE(I),NSE(I),ID2(I),ENT(I)
@@ -897,6 +916,7 @@ C* Sort MF6 by angle and outgoing energy
 C* Read the next record
       IEN=1
       READ (LC4,901,END=64) REC
+      KRC=KRC+1
       IEN=0
 c...
 c...  print *,'ir',ir,'"',rec(1:30)
@@ -1012,6 +1032,10 @@ C* Source C4 file processed
 c...
 c...    if(nen.gt.0) print *,'      at 200 nen,nset',nen,nset
 c...
+C... Without this print statement KRC is undefined (Lahey compiler bug???)
+      PRINT *,'NRC,KRC',NRC,KRC
+C...
+      IF(NRC.EQ.0) NRC=KRC
       WRITE(LTT,921) ' Total No. input C4 records           : ',NRC
       WRITE(LTT,921) ' No. of invalid entries/read-errors   : ',NER
       WRITE(LTT,921) ' No. of EXFOR entries to sort         : ',NEN
