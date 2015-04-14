@@ -29,6 +29,14 @@
      INTEGER*4 pres      ! parity index of the populated state
    END TYPE channel
 
+   TYPE cc_channel
+     INTEGER*4 lev       ! number of the collective level (in the collective level file)
+     INTEGER*4 l         ! orbital angular momentum l
+     REAL*8 j            ! channel spin (j in T_lj)
+     REAL*8 t            ! Tlj value
+     REAL*8 Jcn          ! CN spin to which cc-channel couples
+   END TYPE cc_channel
+
    TYPE numchnl
       INTEGER*4 neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
       INTEGER*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
@@ -45,6 +53,7 @@
      REAL*8 t            ! projectile Tlj
      REAL*8 sig          ! absorption x-section for this channel
    END TYPE fusion
+
 
    INTEGER*4, PARAMETER :: ndhrtw1 = 10000
    INTEGER*4, PARAMETER :: ndhrtw2 = 30
@@ -66,6 +75,7 @@
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
+   TYPE(cc_channel), ALLOCATABLE, TARGET :: STLj(:)      ! coupled channels for inelstic calculations (including E-W transformation)
    TYPE(numchnl) :: num                                  ! number of particular channels
    REAL*8 :: save_WFC1(20)                               ! stores central part of the Moldauer integral
 
@@ -83,12 +93,14 @@
 
    INTEGER*4, INTENT(IN), OPTIONAL :: nd1, nd2
 
-   INTEGER my,ndch,ndfus
+   INTEGER my,ndch,ndfus, ndcc
 
    ndch = ndhrtw1
+   ndcc = ndhrtw1/10
    ndfus = ndhrtw2
 
    IF(present(nd1)) ndch = nd1
+   IF(present(nd1)) ndcc = nd1/10
    IF(present(nd2)) ndfus = nd2
 
    IF(allocated(MEMel)) DEALLOCATE(MEMel)
@@ -122,14 +134,23 @@
    outchnl%jres = 0
    outchnl%pres = 0
 
+   IF(allocated(STLj)) DEALLOCATE(STLj)
+   ALLOCATE(STLj(ndch),STAT=my)
+   IF(my /= 0) GOTO 10
+   STLj%lev = 0
+   STLj%l   = 0
+   STLj%j   = 0.d0
+   STLj%t   = 0.d0
+   STLj%Jcn = 0.d0
+
    IF(allocated(inchnl)) DEALLOCATE(inchnl)
    ALLOCATE(inchnl(ndfus),STAT=my)
    IF(my /= 0) GOTO 10
    inchnl%nout = 0
-   inchnl%l = 0
-   inchnl%j = 0.d0
-   inchnl%t = 0.d0
-   inchnl%sig = 0.d0
+   inchnl%l    = 0
+   inchnl%j    = 0.d0
+   inchnl%t    = 0.d0
+   inchnl%sig  = 0.d0
 
 !  EW matrices
 !  COMPLEX*16, ALLOCATABLE :: Umatr(:,:),Umatr_T(:,:),Smatr(:,:),Pmatr(:,:),Pdiag(:,:) ! EW matrices 
@@ -183,6 +204,7 @@
    IF(allocated(H_Abs))   DEALLOCATE(H_Abs)
    IF(allocated(outchnl)) DEALLOCATE(outchnl)
    IF(allocated(inchnl))  DEALLOCATE(inchnl)
+   IF(allocated(STLj))    DEALLOCATE(STLj)
 
 !  EW matrices
    IF(INTERF==0) RETURN
