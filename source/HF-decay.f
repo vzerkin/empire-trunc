@@ -592,6 +592,11 @@ C       only for top bin of CN
 C
         IF(LHRtw.LE.2) CALL HRTW ! HF or HRTW width fluctuation
         IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) CALL Moldauer ! Moldauer width fluctuation
+!        IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) THEN
+!           WRITE(8,*) 'Moldauer WFC not yet operational - use HRTW'
+!           STOP 'Moldauer not implemented'
+!        ENDIF
+
 
         IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
         kemax = max(NEX(nnuc) - 1,1)

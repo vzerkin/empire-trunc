@@ -383,8 +383,9 @@
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,2,DREAL(Umatr_T(1,2)),DIMAG(Umatr_T(1,2))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',2,1,DREAL(Pmatr(2,1)),DIMAG(Pmatr(2,1))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',1,2,DREAL(Pmatr(1,2)),DIMAG(Pmatr(1,2))
+     write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pdiag  =',2,2,DREAL(Pdiag(2,2)),DIMAG(Pdiag(2,2))
 
-	 cres = Umatr*Smatr*Umatr_T
+	  cres = Umatr*Pmatr*Umatr_T
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,1,DREAL(cres(2,1)),DIMAG(cres(2,1))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,2,DREAL(cres(2,2)),DIMAG(cres(2,2))
 
@@ -940,6 +941,7 @@
    sumtt_w = 0.d0
    DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
      IF(IZA(nnur)==IZA(0) .AND. i==levtarg) CYCLE     !skip if elastic
+     IF(IZA(nnur)==IZA(0) .AND. (ICOllev(i)>0 .AND. ICOllev(i)<=LEVcc)) CYCLE   !skip coupled levels
      eout = eoutc - ELV(i,nnur)
      IF(eout<0.0D0) EXIT
      sumdl = 0.D0
@@ -986,9 +988,53 @@
      ENDDO    !do loop over 'l'            --------- done --------------------
    ENDDO    ! do loop over inelastic levels --------- done --------------------
 
+!  decay to coupled levels
+   IF(IZA(nnur)==IZA(0)) THEN
+   DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
+     IF(i==levtarg) CYCLE     !skip if elastic
+     IF(ICOllev(i)==0 .OR. ICOllev(i)>LEVcc) CYCLE   !skip DWBA coupled levels
+     eout = eoutc - ELV(i,nnur)
+     IF(eout<0.0D0) EXIT
+     sumdl = 0.D0
+     CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
+     jmin = abs(XJLv(i,nnur) - xjc)
+     jmax = XJLv(i,nnur) + xjc
+     kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    !minimum k=l+1
+     kmax = jmax - 1  + (2.0 + SEJc(nejc))            !maximum k=l+1
+     kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
+     DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
+        ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
+        IF(ipar==0) CYCLE
+        DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
+           xj = k + jndex - (2.0 + SEJc(nejc))
+           IF(xj<jmin .OR. xj>jmax) CYCLE
+           rho1 = 1.d0                                !reuse level density variable
+           ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
+           tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
+           IF(tld<1.0d-15) CYCLE                      !ignore very small channels
+           H_Sumtl = H_Sumtl + tld*rho1
+           H_Sumtls = H_Sumtls + tld**2*rho1
+           sumdl = sumdl + tld*rho1  !think there is no need for it
+              nch = nch + 1                              !we've got non-zero channel
+              IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insiufficent space allocation
+              out => outchnl(nch)
+              out%l = k-1
+              out%j = xj
+              out%t = tld
+              out%rho = rho1
+              out%nejc = nejc
+              out%kres = -i                         !minus indicates channel leading to a discrete level 'i'
+              out%xjrs = XJLv(i,nnur)
+              out%pres = LVP(i,nnur)
+           WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), nch', xjc, xj, ipar, ELV(i,nnur), nch
+        ENDDO     !do loop over 'jndex'    --------- done --------------------
+     ENDDO    !do loop over 'l'            --------- done --------------------
+   ENDDO    ! do loop over inelastic levels --------- done --------------------
+
+
    ! elastic channel
 
-   IF(IZA(nnur)==IZA(0)) THEN
+!   IF(IZA(nnur)==IZA(0)) THEN
      sumdl = 0.D0
      i = levtarg
      eout = eoutc - ELV(i,nnur)
@@ -1611,6 +1657,7 @@
             !               write(*,*) 'W for gammas', w
             !               SCRt = SCRt*w
             !               SCRtl = SCRtl*w
+!            CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral that doesn't depend on incoming and outgoing channles
 
             ! Loop over incoming (fusion) channels *****************************************************************************************
 
@@ -1627,7 +1674,8 @@
                sumtt_s = 0.d0
                DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
                   out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
-                  w = WFC2(i,iout)                          !Moldauer width fluctuation factor
+!                  w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
+                  w = WFC(i,iout)                          !Moldauer width fluctuation factor (paper formula)
                   ! WRITE(8,*) 'continuum WFC', iout, w
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &

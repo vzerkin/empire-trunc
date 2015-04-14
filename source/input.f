@@ -1,6 +1,6 @@
-!cc   * $Rev: 4344 $
+!cc   * $Rev: 4353 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2015-04-10 05:30:10 +0200 (Fr, 10 Apr 2015) $
+!cc   * $Date: 2015-04-14 22:52:27 +0200 (Di, 14 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -6157,27 +6157,27 @@ C              EHRtw = val
               IF (LHRtw.EQ.1) WRITE (8,
      &           '('' HRTW width fluctuation correction with '',
      &             ''Z. Phys. A297, 153 (1980) nu selected'')')
-              IF (LHRtw.EQ.2) WRITE (8,
+              IF (LHRtw.GE.2) WRITE (8,
      &           '('' HRTW width fluctuation correction with'',
      &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
-              IF (LHRtw.EQ.3) WRITE (8,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' original nu was selected'')')
-              IF (LHRtw.EQ.4) WRITE (8,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+!              IF (LHRtw.EQ.3) WRITE (8,
+!     &           '('' Moldauer width fluctuation correction with'',
+!     &             '' original nu was selected'')')
+!              IF (LHRtw.EQ.4) WRITE (8,
+!     &           '('' Moldauer width fluctuation correction with'',
+!     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
               IF (LHRtw.EQ.1) WRITE (12,
      &           '('' HRTW width fluctuation correction with '',
      &             ''Z. Phys. A297, 153 (1980) nu selected'')')
-              IF (LHRtw.EQ.2) WRITE (12,
+              IF (LHRtw.GE.2) WRITE (12,
      &           '('' HRTW width fluctuation correction with'',
      &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
-              IF (LHRtw.EQ.3) WRITE (12,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' original nu was selected'')')
-              IF (LHRtw.EQ.4) WRITE (12,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+!              IF (LHRtw.EQ.3) WRITE (12,
+!     &           '('' Moldauer width fluctuation correction with'',
+!     &             '' original nu was selected'')')
+!              IF (LHRtw.EQ.4) WRITE (12,
+!     &           '('' Moldauer width fluctuation correction with'',
+!     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
             ELSE
               WRITE (8,
      &        '('' Width fluctuation correction not considered'')')
