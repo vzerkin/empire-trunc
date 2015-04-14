@@ -33,7 +33,7 @@
      INTEGER*4 lev       ! number of the collective level (in the collective level file)
      INTEGER*4 l         ! orbital angular momentum l
      REAL*8 j            ! channel spin (j in T_lj)
-     REAL*8 t            ! Tlj value
+     REAL*8 tlj          ! Tlj value
      REAL*8 Jcn          ! CN spin to which cc-channel couples
    END TYPE cc_channel
 
@@ -75,7 +75,7 @@
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
-   TYPE(cc_channel), ALLOCATABLE, TARGET :: STLj(:)      ! coupled channels for inelstic calculations (including E-W transformation)
+   TYPE(cc_channel), ALLOCATABLE, TARGET :: STLj(:)      ! coupled channels for inelastic calculations (including E-W transformation)
    TYPE(numchnl) :: num                                  ! number of particular channels
    REAL*8 :: save_WFC1(20)                               ! stores central part of the Moldauer integral
 
@@ -135,12 +135,12 @@
    outchnl%pres = 0
 
    IF(allocated(STLj)) DEALLOCATE(STLj)
-   ALLOCATE(STLj(ndch),STAT=my)
+   ALLOCATE(STLj(ndcc),STAT=my)
    IF(my /= 0) GOTO 10
-   STLj%lev = 0
+   STLj%lev = 1
    STLj%l   = 0
    STLj%j   = 0.d0
-   STLj%t   = 0.d0
+   STLj%tlj = 0.d0
    STLj%Jcn = 0.d0
 
    IF(allocated(inchnl)) DEALLOCATE(inchnl)
