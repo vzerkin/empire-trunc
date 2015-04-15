@@ -123,8 +123,8 @@ C---------Get and add inelastic cross sections (including double-differential)
              CYCLE                
            ENDIF
 
-           IF(ICOllev(i).le.LEVcc .and. SINlcc.le.0.d0) exit
-           IF(ICOllev(i).gt.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
+           IF(ICOllev(i).LT.LEVcc .and. SINlcc.le.0.d0) exit
+           IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
 
