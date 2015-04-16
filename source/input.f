@@ -1,6 +1,6 @@
-!cc   * $Rev: 4353 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-04-14 22:52:27 +0200 (Di, 14 Apr 2015) $
+!cc   * $Rev: 4365 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-04-16 20:49:34 +0200 (Do, 16 Apr 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -3785,31 +3785,27 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &nharn coefficients'')')
                WRITE ( 8,'('' CN anisotropy calculated using Blatt-Biede
      &nharn coefficients'')')
-C            IF (INTerf.EQ.0 .or. SOFt) THEN
-             IF (INTerf.EQ.0) THEN
-                WRITE (8,
-     &   '('' CN decay and Direct cross sections added incoherently'')')
-                WRITE (12,
-     &   '('' CN decay and Direct cross sections added incoherently'')')
-              ELSE
-                WRITE ( 8,'('' CN-direct interference by Engelbrecht & W
-     &eidenmuller, Phys.Rev. C8(1973)859-862 '')')
-                WRITE (12,'('' CN-direct interference by Engelbrecht & W
-     &eidenmuller, PRC8(1973)859'')')
-              ENDIF
             ELSE
               WRITE (8,
      &          '('' CN angular distribution assumed isotropic'')')
               WRITE (12,
      &          '('' CN angular distribution assumed isotropic'')')
-
-              IF (INTerf.EQ.1) INTerf=0
-
-              WRITE (8,
-     &          '('' CN and Direct cross section added incoherently'')')
-              WRITE (12,
-     &          '('' CN and Direct cross section added incoherently'')')
             ENDIF 
+
+C           IF (INTerf.EQ.0 .or. SOFt) THEN
+            IF (DIRect.EQ.0 .and. INTerf.GT.0) INTerf=0 ! EW disabled if no collective levels
+
+            IF (INTerf.EQ.0) THEN
+              WRITE (8,
+     &   '('' CN decay and Direct cross sections added incoherently'')')
+              WRITE (12,
+     &   '('' CN decay and Direct cross sections added incoherently'')')
+            ELSE
+              WRITE ( 8,'('' CN-direct interference by Engelbrecht & W
+     &eidenmuller, Phys.Rev. C8(1973)859-862 '')')
+              WRITE (12,'('' CN-direct interference by Engelbrecht & W
+     &eidenmuller, PRC8(1973)859'')')
+            ENDIF
 
             WRITE (8,*) ' '
             IF (OMPar_riplf .OR. OMParfcc) THEN
