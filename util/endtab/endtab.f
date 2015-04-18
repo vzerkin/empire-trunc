@@ -290,7 +290,8 @@ C* Select the energy interval
         GO TO 14
       END IF
 C* Select the reaction type number
-   30 WRITE(LTT,91) '$Enter the ENDF reaction type  MT No. : '
+   30 WRITE(LTT,91) ' Enter the ENDF reaction type  MT No.   '
+      WRITE(LTT,91) '$      (MT>40000 for angle-dep. x.s.) : '
       READ (LKB,99) FLNM
       READ (FLNM(1:10),97,ERR=30) IDMY
       IF(FLNM(11:50).NE.BLNK) THEN
