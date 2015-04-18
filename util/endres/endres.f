@@ -29,6 +29,8 @@ C-V  13/03 Increase MXRW from 10 000 to 100 000 to process Fe-56 (JEFF)
 C-V  13/09 Increase tolerance for matching AWR from 1E-4(rel) to 1(abs)
 C-V  14/02 Unify common routines with EMPEND.
 C-V  14/12 Allow energy-dependent scattering radius.
+C-V  15/04 Force zero cross sections in MF3 for additional reactions in
+C-M        the resolved resonance represented under LRF=7.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -52,15 +54,15 @@ C-External routines from DXSEND.F
 C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
 C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
-      PARAMETER    (MXRW=100000, MXNB=20, MXMT=100)
+      PARAMETER    (MXRW=100000, MXNB=20, MXMT=100, MXMT7=12)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
       CHARACTER*40  BLNK
       CHARACTER*80  FLNM,FLEM,FLRR,FLOU,FLLG,FLSC,FLS1
       CHARACTER*11  CHZA,CHAW
 C*
-      DIMENSION     NBT(MXNB),INR(MXNB),MTLS(MXMT),ELOW(MXMT)
-      DIMENSION     RWO(MXRW)
+      DIMENSION     NBT(MXNB),INR(MXNB),MTLS(MXMT),MTLRF7(MXMT7)
+      DIMENSION     ELOW(MXMT),RWO(MXRW)
 C*
       DATA BLNK/'                                        '/
      1     FLEM/'empire.end'/
@@ -81,6 +83,12 @@ C*
       NF09=0
       IZRO=0
       ZERO=0
+      NMT7=5
+      MTLRF7(1)=1
+      MTLRF7(2)=2
+      MTLRF7(3)=18
+      MTLRF7(4)=19
+      MTLRF7(5)=102
 C-F  Write ENDRES banner
       WRITE(LTT,691) ' ENDRES - Add Resonance Data to ENDF    '
       WRITE(LTT,691) ' ===================================    '
@@ -302,6 +310,27 @@ C* Case: Resolved resonance range present -  copy to output
           WRITE(LLG,691) '                  limited support       '
           GO TO 126
         END IF
+C*       Check reactions included in the LRF=7 option
+        IF(LRF.EQ.7) THEN
+          CALL RDHEAD(LRR,MA1,MF,MT,   C1,C2,IFG,KRM,NJS,KRL,IER)
+          CALL WRCONT(LOU,MAT,MF,MT,NS,C1,C2,IFG,KRM,NJS,KRL)
+          CALL RDLIST(LRR,C1,C2,NPP,IDM,NW ,IDM,RWO,MXRW,IER)
+          NPP12=NPP*12
+          NPP2 =NPP*2
+          CALL WRLIST(LOU,MAT,MF,MT,NS,C1,C2,NPP,IZRO,NPP12,NPP2,RWO)
+          IF(NMT7.GT.MXMT7) STOP 'ENDRES ERROR - MXMT7 Limit exceeded'
+C*          Chect if the reaction is already registered
+          DO I=1,NPP
+            MT7=NINT(RWO((I-1)*12+10))
+            DO J=1,NMT7
+              IF(MTLRF7(J).EQ.MT7) GO TO 124
+            END DO
+C*           Add additional reaction identified in LRF7 RRR
+            NMT7=NMT7+1
+            MTLRF7(NMT7)=MT7
+  124       CONTINUE
+          END DO
+        END IF
 C*       No special procedures needed for single range evaluations
         IF(NER.EQ.1) GO TO 126
 C*       Processing the resolved resonance range
@@ -445,6 +474,7 @@ C* Read the cross sections
       K1 =L1+3
       K2 =L2+3
       NM2=NMX-3
+      K0 =K1
       CALL RDTAB1(LEM,QM,QI,LL,LR,NR,NP,NBT,INR
      &           ,RWO(K1),RWO(K2),NM2,IER)
       IF(IER.NE.0) THEN
@@ -453,10 +483,16 @@ C* Read the cross sections
       END IF
 C* First energy point for the present reaction
       E1 =RWO(K1)
+C* Define threshold energy
+      ETH=-QI*(AWR+1)/AWR
 C*
 C* Correct first energy for the total, elastic, fission, capture
-      IF(MT.EQ.1 .OR. MT.EQ.2 .OR. MT.EQ.18 .OR. MT. EQ. 19 .OR.
-     &   MT.EQ.102) THEN
+C* and any additional reaction included in LRF 7 RRR
+      IPROC=0
+      DO J=1,NMT7
+         IF(MTLRF7(J).EQ.MT) IPROC=1
+      END DO
+      IF(IPROC.EQ.1) THEN
 C* Check the first energy on the file
         IF(E1.GT.ERH) THEN
           WRITE(LTT,692) ' WARNING - ERH < first data point of MT ',MT
@@ -474,6 +510,7 @@ C* Check the first energy on the file
           DO K=1,NR
             NBT(K)=NBT(K)+1
           END DO
+          K0 =K1
         ELSE
 C* Skip points that overlap with the resonance range
           DO WHILE (RWO(K1+1).LE.ERH .AND. NP.GT.1)
@@ -488,10 +525,11 @@ C* Interpolate cross section to the upper resonance range energy
           E1=ERH
         END IF
       END IF
-C* Define threshold energy
-      ETH=-QI*(AWR+1)/AWR
 C* Low energy limit on file is used for reactions with Q>0
       ELL=MAX(ETH,E1)
+c...
+c...  print *,'mt,eth,ell,ele',mt,eth,ell,ele
+c...
       IF(ETH.LT.ELL .AND. ELL.GT.ELE) THEN
 C* Check points below threshold
 c...
