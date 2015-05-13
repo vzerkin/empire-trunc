@@ -6,7 +6,7 @@ PS_COLOR: COLOR
 PS_ORIENT: Portrait
 PS_FONTAXNUM: 1 15 Helvetica
 PS_FONTAXTEXT: 0 16 Helvetica
-PS_FONTTIT1: 0 16 Helvetica
+PS_FONTTIT1: 0  1 Helvetica
 PS_FONTTIT2: 0 16 Helvetica
 PS_FONTTIMESTAMP: 1 9 Times-Italic
 PS_RTAXNUM: 1
