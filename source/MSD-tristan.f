@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4331 $
+Ccc   * $Rev: 4384 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-06 22:37:23 +0200 (Mo, 06 Apr 2015) $
+Ccc   * $Date: 2015-07-02 10:09:19 +0200 (Do, 02 Jul 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3172,13 +3172,17 @@ C-----calculate spin distribution for 1p-1h states
 
       IF (nexrt.GT.0) THEN
 C
-        IF( (IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) .or. PESpin.eq.0) then  
+        IF( IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  
 C
 C          distribution of the continuum neutron or proton MSD contribution -
 C          proportional to the 1p-1h (n=2) spin distribution shifted by the target
 C          target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
 C          SIG = n*0.26*A**(2.d0/3.d0) with n=2
            SIG = 2*0.26*A(Nnur)**0.66666667
+
+C          if PESpin>0 then spin cut-off = PESpin
+	     IF(PESpin.GT.0) SIG = PESpin
+
            somj = 0.0
            DO j = 1, NLW
              xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
@@ -3213,6 +3217,9 @@ C          shifted by the target ground state target spin XJLv(LEVtarg,0)
 
              SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
      >            0.26d0*A(Nnur)**0.66666667
+
+C            if PESpin>0 then spin cut-off = PESpin
+     	       IF(PESpin.GT.0) SIG = PESpin
 
              if(SIG.LE.0) CYCLE         
 
