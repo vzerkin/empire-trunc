@@ -1,6 +1,6 @@
-!cc   * $Rev: 4385 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-07-03 16:06:36 +0200 (Fr, 03 Jul 2015) $
+!cc   * $Rev: 4386 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-07-10 07:37:17 +0200 (Fr, 10 Jul 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -803,7 +803,7 @@ C                 IF(mulem.eq.in .and. in.le.4 .and. (ip.eq.0 .and.
 C    &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0))  
 C    &                ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
 C                 IF(mulem.eq.(in+1)  .and. ip.eq.1  
-C    &				.and. in.le.1) ENDf(nnuc) = 1 ! n,np
+C    &                        .and. in.le.1) ENDf(nnuc) = 1 ! n,np
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -838,6 +838,9 @@ C-----------------set reaction string
                      IF(ip.eq.1 .and. nemp.gt.0 .and. (in.eq.0 .and.
      &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0)) 
      &               ENDf(nnuc) = 1 
+                     IF(ip.eq.1 .and. nemp.gt.0 .and. (in.eq.0 .and.
+     &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0)) 
+     &               ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
@@ -846,6 +849,7 @@ C                    From n,np   to   n,d
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
 		           IF(nemd.gt.0) ENDF(nnuc) = 1
+                       IF(nemd.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
@@ -854,6 +858,7 @@ C                    From n,2np   to   n,t
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
 		           IF(nemt.gt.0) ENDF(nnuc) = 1
+                       IF(nemt.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
@@ -861,7 +866,7 @@ C                    From n,n2p   to   n,he3
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
-		           IF(nemh.gt.0) ENDF(nnuc) = 1
+                       IF(nemh.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
@@ -869,6 +874,7 @@ C                    From n,2n2p   to   n,a
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
+                     IF(nema.gt.0) ENDF(nnuc) = 1
                      IF(nema.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
@@ -890,6 +896,8 @@ C                    From n,3n2p   to   n,na
                      iend = iend + 1
 C                    IF(mulem.eq.ia .and. ia.eq.1 .and. nema.gt.0) 
 C    &                 ENDf(nnuc) = 1 
+C                    IF(mulem.eq.ia .and. ia.eq.1 .and. nema.gt.0) 
+C    &                 ENDf(nnuc) = 1 
                   ENDIF
                   
                   IF (id.NE.0) THEN
@@ -901,6 +909,8 @@ C    &                 ENDf(nnuc) = 1
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
+C                    IF(mulem.eq.id .and. id.eq.1 .and. nemd.gt.0) 
+C    &                 ENDf(nnuc) = 1 
 C                    IF(mulem.eq.id .and. id.eq.1 .and. nemd.gt.0) 
 C    &                 ENDf(nnuc) = 1 
                   ENDIF
@@ -916,6 +926,8 @@ C    &                 ENDf(nnuc) = 1
                      iend = iend + 1
 C                    IF(mulem.eq.it .and. it.eq.1 .and. nemt.gt.0) 
 C    &                 ENDf(nnuc) = 1 
+C                    IF(mulem.eq.it .and. it.eq.1 .and. nemt.gt.0) 
+C    &                 ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (ih.NE.0) THEN
@@ -927,6 +939,8 @@ C    &                 ENDf(nnuc) = 1
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
+C                    IF(mulem.eq.ih .and. ih.eq.1 .and. nemh.gt.0) 
+C    &                 ENDf(nnuc) = 1 
 C                    IF(mulem.eq.ih .and. ih.eq.1 .and. nemh.gt.0) 
 C    &                 ENDf(nnuc) = 1 
                   ENDIF
@@ -1095,14 +1109,11 @@ C        Changing the incident input energy to plot LDs
          IF(NENdf.gt.0)    ENDf(1)=1 ! for compound
          IF(ENDf(0).EQ.10) ENDf(0)=1 ! for compound
 
-	   IF(NENdf.EQ.0) THEN
-
+            IF(NENdf.EQ.0) THEN
            ENDf = 0
            NEXclusive = 0
            EXClusiv = .FALSE.
-
          ELSE ! NENdf.GT.0
-
             DO iac = 0, NEMc
             DO ih = 0, nemh
             DO it = 0, nemt
@@ -1179,6 +1190,7 @@ C        write(*,*) 'NENdf=',NENdf,' FINAL'
 C        do nnuc=1,12
 C          write(*,*) nnuc,A(nnuc),Z(nnuc),ENDF(nnuc)
 C        enddo
+         write(8,*) 'ENDf matrix', ENDf
 C
 C--------check input for consistency
 C
@@ -1192,7 +1204,7 @@ C
 C        begin GDR - Assigning the target gamma parameters from the input
 C 
          do i=1,NDGDRPM
-	     if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
+           if(GDRpar(i,NTArget).ne.-1.d0) GDRpar(i,0)=GDRpar(i,NTArget)
          enddo
          do i=1,NDGQRPM
            if(GQRpar(i,NTArget).ne.-1.d0) GQRpar(i,0)=GQRpar(i,NTArget)
@@ -1425,7 +1437,7 @@ C------------statement then determines whether or not the TL file exists.
      &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
                WRITE (8,*)
              ENDIF
-             EXIT	    
+             EXIT     
            endif 
          enddo
 C--------input consistency check  *** done ***
@@ -2299,7 +2311,7 @@ C-----LEVEL DENSITY for residual nuclei
          CALL INP_LD(nnur)
       ENDDO
 
-	ATIlnor(0) = ATIlnor(Ntarget)
+      ATIlnor(0) = ATIlnor(Ntarget)
       WRITE (8,*)
 
       IF (FITlev.GT.0) THEN
@@ -3537,7 +3549,7 @@ Ccc
       use width_fluct
 
       implicit none
-	 
+       
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -3641,7 +3653,7 @@ C
         WRITE (*,*) 
         WRITE (*,*) EMPtitle(2:itmp)
 C     else
-C	  ! DEFAULT TITLE
+C       ! DEFAULT TITLE
 C       WRITE (8,*) 
 C       WRITE (8,*) 'DEFAULT TITLE'
 C       WRITE (*,*) 
@@ -3657,7 +3669,7 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       if(itmp.gt.3) then
         WRITE (12,*) EMPtitle(2:itmp)
       else
-	  ! DEFAULT TITLE
+        ! DEFAULT TITLE
         WRITE (12,*) 'DEFAULT TITLE'
       endif
 
@@ -4410,7 +4422,7 @@ C-----
               DEFORMED=.TRUE. 
             ELSE
               DEFORMED=.FALSE. 
-            ENDIF		  		           
+            ENDIF                              
             GOTO 100
          ENDIF
 
@@ -6410,18 +6422,18 @@ C
             IF (ENDf(nnuc).EQ.1) THEN
               ENDf(nnuc) = 10  ! using as a flag 
               WRITE (8,
-     &       '('' Exclusive spectra will be available for emission'',
-     &         '' from '',I3,A2)') i2, SYMb(nnuc)
+     &       '('' Exclusive spectra for production of '',
+     &         I3,A2)') i2, SYMb(nnuc)
               WRITE (12,
-     &       '('' Exclusive spectra will be available for emission'',
-     &         '' from '',I3,A2)') i2, SYMb(nnuc)
+     &       '('' Exclusive spectra for production of '',
+     &         I3,A2)') i2, SYMb(nnuc)
             ENDIF
             IF (ENDf(nnuc).EQ.2) THEN
               WRITE (8,
-     &       '('' Emission spectra from nucleus '',I3,A2,
+     &       '('' Emission spectra for production of '',I3,A2,
      &         '' stored as inclusive'')') i2, SYMb(nnuc)
               WRITE (12,
-     &       '('' Emission spectra from nucleus '',I3,A2,
+     &       '('' Emission spectra for production of '',I3,A2,
      &         '' stored as inclusive'')') i2, SYMb(nnuc)
             ENDIF
             GOTO 100
@@ -8736,7 +8748,7 @@ C-----Skipping header lines
 C  Z   A    fl    Mexp      Mth      Emic    beta2   beta3   beta4   beta6
          READ (27,'(2i4,4x,i1,3f10.3,f8.3)',END = 100) nixz, nixa,
      &         iflag, xmassexp, xmassth, emicx(k), beta2x(k)
-C	   if(nixz.eq.92 .and. nixa.lt.239 .and. nixa.gt.234) 
+C        if(nixz.eq.92 .and. nixa.lt.239 .and. nixa.gt.234) 
 C    >      write(*,*) nixz,nixa,beta2x(k)
          izaf(k) = nixz*1000 + nixa
          IF (iflag.GE.1) THEN
@@ -10151,15 +10163,15 @@ C
          WRITE (12,'(a80)') comment
 
          write(*,*)
-	   write(*,*)'  Nucl.Deform:',sngl(DEF(1,0)),'   DEF:',DEFORMED,
+         write(*,*)'  Nucl.Deform:',sngl(DEF(1,0)),'   DEF:',DEFORMED,
      &             '   OMP Deform:',comment(36:39),' Coll.file exists'
 
          IF (ABS(DEF(1,0)).LE.0.1D0 .and. 
      &            comment(36:39).eq.'defo') THEN
            COLfile = .FALSE.
-	     fexist = .FALSE.
-	     WRITE(8,*) 
-	     WRITE(8,*) 
+           fexist = .FALSE.
+           WRITE(8,*) 
+           WRITE(8,*) 
      &' WARNING: Spher.nucl. with deformed COLL file, file DISMISSED' 
            CALctl = .TRUE.
 
@@ -10171,7 +10183,7 @@ C
 
      &  '('' OMP (TLs) calculations will be undertaken'')') 
 
-	     WRITE(8,*) 
+           WRITE(8,*) 
 
            goto 123
          ENDIF
@@ -10179,9 +10191,9 @@ C
          IF (ABS(DEF(1,0)).LE.0.1D0 .and. 
      &            comment(36:39).eq.'dyna') THEN
            COLfile = .FALSE.
-	     fexist = .FALSE.
-	     WRITE(8,*) 
-	     WRITE(8,*) 
+           fexist = .FALSE.
+           WRITE(8,*) 
+           WRITE(8,*) 
      &' WARNING: Spher.nucl. with dynam. deformed COLL file, file DISMIS
 
      &SED'
@@ -10196,7 +10208,7 @@ C
 
      &  '('' OMP (TLs) calculations will be undertaken'')') 
 
-	     WRITE(8,*) 
+           WRITE(8,*) 
 
            goto 123
          ENDIF
@@ -10204,9 +10216,9 @@ C
          IF (ABS(DEF(1,0)).GT.0.1D0 .and. 
      &       comment(36:39).eq.'sphe') THEN
            COLfile = .FALSE.
-	     fexist = .FALSE.
-	     WRITE(8,*) 
-	     WRITE(8,*) 
+           fexist = .FALSE.
+           WRITE(8,*) 
+           WRITE(8,*) 
      &' WARNING: Deformed nucl. with vibrational COLL file, file DISMISS
 
      &ED' 
@@ -10220,7 +10232,7 @@ C
 
      &  '('' OMP (TLs) calculations will be undertaken'')') 
 
-	     WRITE(8,*) 
+           WRITE(8,*) 
 
            goto 123
          ENDIF
@@ -10228,9 +10240,9 @@ C
          IF (ABS(DEF(1,0)).GT.0.1D0 .and. 
      &       comment(36:39).eq.'soft') THEN
            COLfile = .FALSE.
-	     fexist = .FALSE.
-	     WRITE(8,*) 
-	     WRITE(8,*) 
+           fexist = .FALSE.
+           WRITE(8,*) 
+           WRITE(8,*) 
      &' WARNING: Deformed nucl. with soft rotator COLL file, file DISMIS
 
      &SED' 
@@ -10242,7 +10254,7 @@ C
               WRITE (8,
      &  '('' OMP (TLs) calculations will be undertaken'')') 
 
-	     WRITE(8,*) 
+           WRITE(8,*) 
 
            goto 123
          ENDIF
