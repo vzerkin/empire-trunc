@@ -1,6 +1,6 @@
-!cc   * $Rev: 4386 $
+!cc   * $Rev: 4387 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2015-07-10 07:37:17 +0200 (Fr, 10 Jul 2015) $
+!cc   * $Date: 2015-07-14 08:54:52 +0200 (Di, 14 Jul 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -797,13 +797,6 @@ C            residues must be heavier than alpha !! (RCN)
                   HIS(nnuc) = -1.
                   IF (A(nnuc)*0.5.NE.AINT(A(nnuc)*0.5))
      &                HIS(nnuc) = -0.5
-                  IF(mulem.eq.in .and. in.le.4)
-     &                ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
-C                 IF(mulem.eq.in .and. in.le.4 .and. (ip.eq.0 .and.
-C    &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0))  
-C    &                ENDf(nnuc) = 1 ! multiple neutron emission (up to 4 neutrons)
-C                 IF(mulem.eq.(in+1)  .and. ip.eq.1  
-C    &                        .and. in.le.1) ENDf(nnuc) = 1 ! n,np
 C-----------------set reaction string
                   REAction(nnuc) = '(z,'
                   iend = 3
@@ -835,12 +828,6 @@ C-----------------set reaction string
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'p'
                      iend = iend + 1
-                     IF(ip.eq.1 .and. nemp.gt.0 .and. (in.eq.0 .and.
-     &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0)) 
-     &               ENDf(nnuc) = 1 
-                     IF(ip.eq.1 .and. nemp.gt.0 .and. (in.eq.0 .and.
-     &               id.eq.0 .and. ia.eq.0 .and. ih.eq.0 .and. ih.eq.0)) 
-     &               ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
@@ -848,8 +835,6 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-		           IF(nemd.gt.0) ENDF(nnuc) = 1
-                       IF(nemd.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
@@ -857,8 +842,6 @@ C                    From n,2np   to   n,t
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
-		           IF(nemt.gt.0) ENDF(nnuc) = 1
-                       IF(nemt.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
@@ -866,7 +849,6 @@ C                    From n,n2p   to   n,he3
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
-                       IF(nemh.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
@@ -874,8 +856,6 @@ C                    From n,2n2p   to   n,a
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
-                     IF(nema.gt.0) ENDF(nnuc) = 1
-                     IF(nema.gt.0) ENDF(nnuc) = 1
                   ENDIF
 
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
@@ -894,10 +874,6 @@ C                    From n,3n2p   to   n,na
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
-C                    IF(mulem.eq.ia .and. ia.eq.1 .and. nema.gt.0) 
-C    &                 ENDf(nnuc) = 1 
-C                    IF(mulem.eq.ia .and. ia.eq.1 .and. nema.gt.0) 
-C    &                 ENDf(nnuc) = 1 
                   ENDIF
                   
                   IF (id.NE.0) THEN
@@ -909,10 +885,6 @@ C    &                 ENDf(nnuc) = 1
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-C                    IF(mulem.eq.id .and. id.eq.1 .and. nemd.gt.0) 
-C    &                 ENDf(nnuc) = 1 
-C                    IF(mulem.eq.id .and. id.eq.1 .and. nemd.gt.0) 
-C    &                 ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (it.NE.0) THEN
@@ -924,10 +896,6 @@ C    &                 ENDf(nnuc) = 1
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
-C                    IF(mulem.eq.it .and. it.eq.1 .and. nemt.gt.0) 
-C    &                 ENDf(nnuc) = 1 
-C                    IF(mulem.eq.it .and. it.eq.1 .and. nemt.gt.0) 
-C    &                 ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (ih.NE.0) THEN
@@ -939,10 +907,6 @@ C    &                 ENDf(nnuc) = 1
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
-C                    IF(mulem.eq.ih .and. ih.eq.1 .and. nemh.gt.0) 
-C    &                 ENDf(nnuc) = 1 
-C                    IF(mulem.eq.ih .and. ih.eq.1 .and. nemh.gt.0) 
-C    &                 ENDf(nnuc) = 1 
                   ENDIF
 
                   IF (NDEJC.GT.6 .AND. iac.NE.0) THEN
@@ -974,9 +938,6 @@ C    &                 ENDf(nnuc) = 1
          NPRoject = -1
 
          DO nnuc = 1, NNUcd
-
-C           ENDf(nnuc) = 1
-            if(ENDf(nnuc).eq.0) ENDf(nnuc) = 2
             irepeated = 0
             do i=1,nnuc-1
               IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
@@ -1003,8 +964,6 @@ C              residual nuclei must be heavier than alpha
                   HIS(nnur) = -1.
                   IF (A(nnur)*0.5.NE.AINT(A(nnur)*0.5)) HIS(nnur) = -0.5
                   NNUct = NNUct + 1
-C                 These nuclei are always considered inclusive
-                  ENDf(nnur) = 2
                ENDIF
             ENDDO ! end of nejc loop
          ENDDO    ! end of nnuc loop 
@@ -1091,106 +1050,73 @@ C        Changing the incident input energy to plot LDs
             WRITE (8,*)'Coupled channels calculations will be performed'
             WRITE (8,*)'   for the incident proton channel (DIRECT 1)  '
          ENDIF
-
          IF(DIRECT.LT.-0.1) DIRECT = 0 ! Restoring the default to zero
                                        ! if DIRECT not present in the input
-
          IF(DIRECT.GT.1.9 .and. KTRompcc.eq.0) 
      >      KTRompcc = KTRlom(NPRoject,NTArget)
-
          IF(DIRECT.GT.1.9 .and. KTRompcc.ne.0) 
      >      KTRlom(NPRoject,NTArget) = KTRompcc
-
          IF(DIRECT.EQ.0 .and. KTRlom(NPRoject,NTArget).ne.KTRlom(0,0)) 
      >      KTRlom(0,0) = KTRlom(NPRoject,NTArget) 
-
-         IF(ENDf(NTArget).EQ.10) ENDf(NTArget)=1
-         IF(ENDf(1).EQ.10) ENDf(1)=1 ! for compound
-         IF(NENdf.gt.0)    ENDf(1)=1 ! for compound
-         IF(ENDf(0).EQ.10) ENDf(0)=1 ! for compound
-
-            IF(NENdf.EQ.0) THEN
-           ENDf = 0
-           NEXclusive = 0
-           EXClusiv = .FALSE.
-         ELSE ! NENdf.GT.0
-            DO iac = 0, NEMc
-            DO ih = 0, nemh
-            DO it = 0, nemt
-            DO id = 0, nemd
-            DO ia = 0, nema
-            DO ip = 0, nemp
-            DO in = 0, nemn
-              mulem = iac + ia + ip + in + id + it + ih
-              if(mulem.eq.0) cycle
-              atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-     &                    - FLOAT(ia)*AEJc(3) - FLOAT(id)*AEJc(4)
-     &                    - FLOAT(it)*AEJc(5) - FLOAT(ih)*AEJc(6)
-
-              IF (NDEJC.GT.6) atmp = atmp - FLOAT(iac)*AEJc(NDEJC)
-              ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-     &                    - FLOAT(ia)*ZEJc(3) - FLOAT(id)*ZEJc(4)
-     &                    - FLOAT(it)*ZEJc(5) - FLOAT(ih)*ZEJc(6)
-
-              IF (NDEJC.GT.6) ztmp = ztmp - FLOAT(iac)*ZEJc(NDEJC)
-
-C             residues must be heavier than alpha
-              if(atmp.le.4 . or. ztmp.le.2) cycle
-              izatmp = INT(1000*ztmp + atmp)
-              CALL WHERE(izatmp,nnuc,iloc)
-
-              IF(ENDf(nnuc).EQ.2 .or. nnuc.EQ.NTArget) cycle
-              irepeated = 0
-              do i=1,nnuc-1
-                IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
-              enddo
-              if(irepeated.eq.1) cycle
-
-C             IF(mulem.GT.NENdf .AND. ENDf(nnuc).NE.10) THEN
-C               EXClusiv = .FALSE.
-C               ENDf(nnuc) = 2
-C             ENDIF
-             IF(mulem.GT.NENdf .AND. ENDf(nnuc).NE.1 .AND.
-     &          ENDf(nnuc).NE.10) ENDf(nnuc) = 2
-C             This nucleus requested as exclusive in the optional input
-              IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  
-
+!
+!--------Set actual flags for exclusive spectra
+!
+         IF(NENdf.EQ.0) THEN
+              ENDf = 0
+              NEXclusive = 0
+              EXClusiv = .FALSE.
+!        Initially set all spectra as inclusive except those explicitely
+!        requested in the input (ENDF(nnuc)=10)
+         ELSEIF(NENdf.GT.0) THEN
+            DO in = 0, NDNuc
+               IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
-            ENDDO
+            IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
+               ENDf(0) = 1
+               ENDf(1) = 1
+               DO in = 1, MIN(4,nemn)   !neutron emissions
+                  ENDf(in+1) = 1
+               ENDDO
+               DO ip = 1, MIN(1,nemp)
+                  atmp = A(1) - AEJc(2)
+                  ztmp = Z(1) - ZEJc(2)
+                  izatmp = INT(1000*ztmp + atmp)
+                  CALL WHERE(izatmp,nnuc,iloc)
+                  ENDf(nnuc) = 1            !single proton emission
+               ENDDO
+            ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
+               ENDf(0) = 1
+               ENDf(1) = 1
+               DO in = 0, NENdf
+                  DO ip = 0, NENdf
+                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+                     izatmp = INT(1000*ztmp + atmp)
+                     CALL WHERE(izatmp,nnuc,iloc)
+                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
+                     IF(iloc.EQ.0) ENDf(nnuc) = 1
+                  ENDDO
+               ENDDO
+            ENDIF
+            IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  !nucleus requested as exclusive in the optional input
 C
-C           Reducing the number of exclusive nuclei 
-C           by eliminating those from higher emission loops 
+C           Create list of exclusive nuclei
 C
-            itmp = 0          
-            DO i = 1, NEXclusive
+            itmp = 0
+            DO i = 1, NNUct
               iatmp = INT(a(i))
               iztmp = INT(z(i))
               izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
-              
-              IF(ENDf(nnuc).EQ.1) THEN 
+
+              IF(ENDf(nnuc).EQ.1) THEN
                 itmp = itmp + 1
-                INExc(nnuc) = itmp 
-              ELSE
-               ENDf(nnuc)  = 2 
+                INExc(nnuc) = itmp
               ENDIF
-C               write(*,'(7i5)') i,INT(a(i)),INT(z(i)),nnuc,INExc(nnuc),
-C     &                                            ENDf(nnuc) 
             ENDDO
             NEXclusive = itmp
-C           write(*,'(a3,i5)') '***',NEXclusive
-          
          ENDIF
-C        write(*,*) 'NENdf=',NENdf,' FINAL'
-C        do nnuc=1,12
-C          write(*,*) nnuc,A(nnuc),Z(nnuc),ENDF(nnuc)
-C        enddo
-         write(8,*) 'ENDf matrix', ENDf
+!         write(8,*) 'ENDf matrix', ENDf
 C
 C--------check input for consistency
 C
@@ -1226,37 +1152,23 @@ C----------break-up and transfer
 c----------begin GDR
 C----------Prepare gamma transmission parameters
            IF(KEY_shape.NE.8)THEN
-
              CALL EMPAgdr() ! allocating memory for temporal gdr arrays
-
              CALL read_GDRGFLDATA(Numram)
-
            ELSE
-
              uuE1grid = 0.d0
-
              E1grid = 0.d0
-
              iugMax = 0  
-
            ENDIF
-
           IF(KEY_shape.EQ.8) THEN
              CALL ULM_micro(0)   
            ELSE
              CALL ULM(0,Numram) 
           ENDIF
-
           IF(KEY_shape.NE.8) THEN
-
             WRITE (8,*) ' -----------------------------------------'
-
             WRITE (8,*) ' TARGET GDR DATA:'
-
             CALL ULM_print(0)
           ENDIF
-
-
           DO i = 1, NNUcd 
              IF(KEY_shape.EQ.8) THEN  
                 CALL ULM_micro(i)
@@ -1265,12 +1177,10 @@ C----------Prepare gamma transmission parameters
              ENDIF
              IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.NE.8 
      &          .AND. IOUT.GT.3) CALL ULM_print(i) 
-
           ENDDO
           IF(KEY_shape.LT.8) CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
           WRITE (8,*) ' -----------------------------------------'
 c----------end GDR
-
           DO i = 1, NNUcd 
 C          
 C            Checking fission input consistency 
@@ -1282,7 +1192,6 @@ C
      >for nucleus ',A(i),SYMb(i)
                FISden(i) = 0.d0
              ENDIF
-
              IF(NINT(FISmod(i)).GT.0 .and. NINT(FISden(i)).ne.0 )  THEN        
                WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
@@ -1292,7 +1201,6 @@ C
              ENDIF
            ENDDO            
            WRITE (8,*) ' -----------------------------------------'
-
            WRITE (8,*)
            IF(AEJc(0).gt.4 .and. NDLW.LT.100) THEN
              WRITE (8,*)
