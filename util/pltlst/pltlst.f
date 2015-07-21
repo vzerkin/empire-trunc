@@ -85,7 +85,7 @@ C* ITOL Angle difference for differentiating energy distributions at
 C*      fixed angles.
 C* MTOL Angle difference (degrees) for differentiating energy-dependent
 C*      cross sections at fixed angles.
-      DATA ETOL,ITOL,MTOL/ 0.015, 5, 1 /
+      DATA ETOL,ITOL,MTOL/ 0.0001, 5, 1 /
       DATA BL10/'          '/
 C     DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
 C     Adapting to low energy evaluation work
@@ -478,10 +478,10 @@ C* Check for any entries forced from input
       END IF
       IF(NXSMJR.GT.0) THEN
 C*      -- Force major cross sections listing
-        IF(IEF.NE.0) THEN
-          IF(IDX.LE.0) STOP 'PLTLST ERROR - No data in C4 file'
-          GO TO 43
-        END IF
+c       IF(IEF.NE.0) THEN
+c         IF(IDX.LE.0) STOP 'PLTLST ERROR - No data in C4 file'
+c         GO TO 43
+c       END IF
         IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 43
         IF(MMF.GT.3 .AND. MMF.NE.10) GO TO 43
         IF(MMF.EQ.3) THEN
