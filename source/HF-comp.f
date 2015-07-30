@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4286 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-02-09 00:28:35 +0100 (Mo, 09 Feb 2015) $
+Ccc   * $Rev: 4389 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -58,7 +58,7 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
-	if(nexrt.le.0) goto 123
+      if(nexrt.le.0) goto 123
 
       DO ie = 1, nexrt          !loop over residual energies (continuum)
          popt = 0.D0
@@ -192,45 +192,33 @@ C--------Add CN contribution to direct ang. distributions
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
 C           Compound elastic and inelastic stored for final renormalization
             CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
-
 C
 C		  Moved outside the decaying state loop to normalize 
-C           the CSAlev contribution by the ratio CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))  
+C       the CSAlev contribution by the ratio CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))
 C           IF( (Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
 C
-C	        xs_norm = CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))
+C	           xs_norm = CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))
 C             DO na = 1, NDANG
 C               xs_cn = GET_DDXS(CANGLE(na),il)  
 C               CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn*xs_norm                     
 C             ENDDO
-C
 C           ELSE
-C
 C              Not the inelastic channel OR isotropic CN DA
-C              
 C              xs_cn = CSComplev(il,NPRoject)/(4.d0*PI)  ! default isotropic
 C              DO na = 1, NDANG
 C                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn
 C              ENDDO ! loop over angles
-C
 C           ENDIF
-
          ENDIF ! on top  CN state, non-gamma with non-zero population 
-
       ENDDO   !loop over levels
-
       RETURN
       END
 
-
       SUBROUTINE EXCLUSIVEC(Iec,Ief,Nejc,Nnuc,Nnur,Popt)
-
       USE empcess, ONLY: POPcsea
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
-
-
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:mpu*
@@ -264,7 +252,6 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
 C
-C
 C Dummy arguments
 C
       INTEGER Iec, Ief, Nejc, Nnuc, Nnur
@@ -280,7 +267,6 @@ C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
-C
 C-----
 C-----Fission
 C-----

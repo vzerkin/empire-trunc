@@ -272,7 +272,7 @@ C-------Printing bare OM results
         WRITE (8,
      &  '('' * OM absorption cross section (ABScs)            '',G13.6,
      &              '' mb  '')') ABScs
-	  IF(SINl + SINlcc + SINlcont.gt.0) then
+          IF(SINl + SINlcc + SINlcont.gt.0) then
           IF (NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)  THEN
             WRITE (8,
      &  '('' * OM direct inelastic cross section  =           '',G13.6,

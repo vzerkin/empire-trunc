@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4348 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-13 01:46:32 +0200 (Mo, 13 Apr 2015) $
+Ccc   * $Rev: 4389 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2956,12 +2956,12 @@ C
       sabsj = 0.D0
       selast= 0.D0
 C-----Applying TUNetl() to the transmission coefficients
-      DO l = 0, Maxlw
-         Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)
-         DO jindex = 1,MAXj(Nejc)
-           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)
-         ENDDO
-      ENDDO
+!      DO l = 0, Maxlw
+!         Stl(l + 1) = Stl(l + 1)*TUNetl(l + 1)
+!         DO jindex = 1,MAXj(Nejc)
+!           Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*TUNetl(l + 1)
+!         ENDDO
+!      ENDDO
 C-----Absorption and elastic cross sections in mb are calculated
       DO l = 0, Maxlw
         sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)

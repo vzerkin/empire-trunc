@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4340 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-09 02:56:10 +0200 (Do, 09 Apr 2015) $
+Ccc   * $Rev: 4389 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -40,8 +40,8 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2, chsp, cnj, csmax, csvalue, ftmp,
-     &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,	jsp,
-     &    qdtmp, r2, rp, s0, s1a, smax, smin, selast,	ssabs, ssabsj,
+     &    e1tmp, ecms, einlab, el, ener, p1, p2, parcnj, s2a,     jsp,
+     &    qdtmp, r2, rp, s0, s1a, smax, smin, selast, ssabs, ssabsj,
      &    sum, wparg, xmas_npro, xmas_ntrg, S1, stmp,
      &    xssabs, xssabsj
 C     fftmp(3) 
@@ -71,7 +71,7 @@ C     DOUBLE PRECISION stl(NDLW),stlj(NDLW,3),sel(NDLW)
       PAR(i,ipa,l) = (1 - (-1)**i*ipa*(-1)**l)/2
 
       ltlj = .FALSE.
-	tljcalc = .FALSE.
+      tljcalc = .FALSE.
 C
 C-----Zero qd fraction of photabsorption before it can do any damage
 C
@@ -95,7 +95,7 @@ C-----Reduced mass corrected for proper mass values
       ecms = EIN
       mxj   = MAXj(Npro)
       sxj   = SEJc(Npro)
-	trgsp = XJLv(LEVtarg,Ntrg)
+      trgsp = XJLv(LEVtarg,Ntrg)
 
       S1 = 0.5d0
       IF (AINT(trgsp + sxj) - trgsp - sxj
@@ -130,7 +130,7 @@ C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
       INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
       IF (fexist .and. .not.CALctl) THEN
-	   if(fexistj) tljcalc = .TRUE. 
+         if(fexistj) tljcalc = .TRUE. 
 C--------Here the old calculated files are read
          OPEN (45 ,FILE = (ctldir//ctmp23//'.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
@@ -171,7 +171,7 @@ C-----------Absorption and elastic cross sections in mb
                   jsp = sjf(l,jindex,sxj) 
                   ssabsj = ssabsj + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
                 ENDDO 
-			ENDIF   
+                  ENDIF   
             ENDDO
             xssabs  = 10.d0*PI/ak2*ssabs
             xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*sxj+1)
@@ -186,12 +186,12 @@ C-----------Absorption and elastic cross sections in mb
               WRITE (46,'(1x,8(D15.9,1x))')
      &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
               IF(FIRST_ein) then
-	          WRITE(8,*)
+                WRITE(8,*)
                 WRITE (8,*) 
      &            'EL,TOT,ABS,INEL,CC,INELcont,CSFus,SumTl,SumTlj'
                 WRITE (8,'(1x,9(D15.9,1x))') ELAcs, TOTcs, ABScs, 
      &            SINl, SINlcc, SINlcont,CSFus, xssabs,xssabsj
-	          WRITE(8,*)
+                WRITE(8,*)
               ENDIF 
             ENDIF
             READ (45,END = 40, ERR=40) L
@@ -864,14 +864,14 @@ C--------calculation of h.i. transmission coefficients for fusion
          WRITE(8,*) ' Max. gamma multip. ', MAXmult
          WRITE(8,*) ' Projectile spin is ', sngl(sxj)
          WRITE(8,*) ' Target     spin is ', sngl(trgsp)
-	   WRITE(8,*) ' Spin dimension  is ', NDLW
+         WRITE(8,*) ' Spin dimension  is ', NDLW
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
          coef = 1.d0
          IF (INT(AEJc(0)).GT.0) coef = 10.d0*PI/ak2/
      &      (2*trgsp + 1.d0)/(2*sxj + 1.d0)
-	                   
+                         
          smin = ABS(sxj - trgsp)
          smax = sxj + trgsp
          mul = smax - smin + 1.0001
@@ -941,7 +941,7 @@ C     write(*,*) ABScs,CSFus
       IF (IOUt.EQ.5) THEN
          OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
-	   if(tljcalc) then
+         if(tljcalc) then
           DO l = 0, maxlw
             WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
             WRITE (46,'(2x,3x,3(3x,D15.8))') 
@@ -978,7 +978,7 @@ C--------Absorption and elastic cross sections in mb
            WRITE (8,*)
          ENDIF 
 
-	   IF (ELAcs.gt.0) THEN 
+         IF (ELAcs.gt.0) THEN 
            WRITE (46,'(1x,I6)') 123456
            DO l = 0, maxlw
              WRITE (46,'(2x,I3,3x,D15.9)') l, sel(l + 1)
@@ -1009,7 +1009,7 @@ C
         DO l = 0, maxlw
           WRITE (45) sel(l + 1)
         ENDDO
-	ENDIF
+      ENDIF
       CLOSE (45 )
       if(tljcalc) CLOSE (451)
   300 CONTINUE
@@ -1172,17 +1172,17 @@ C--------Corrected scattering radius
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
-	coef = 1.d0
+      coef = 1.d0
       IF (INT(AEJc(0)).GT.0) coef = 10.d0*PI/ak2
      &      /(2*trgsp + 1.d0)/(2*sxj + 1.d0)
 
 C     write(*,*) el,IRElat(NPRo,Ntrg),RELKIN,relcal
-C	write (*,*) '*** NLW=',NLW,tljcalc
+C     write (*,*) '*** NLW=',NLW,tljcalc
 
       CSFus = 0.d0
       csmax = 0.d0
 
-	IF (tljcalc) THEN
+      IF (tljcalc) THEN
 C-------absorption spin distribution using Tlj's
         DO ip = 1, 2    ! over parity
           DO j = 1, NLW ! over compound nucleus spin
@@ -1199,7 +1199,7 @@ C           ensure we are within dimensions for the min=1, and the max=NDLW
                   IF(xj<jmin .or. xj>jmax) CYCLE
 C                 IF(stlj(k,jindex)<=1.0d-15) CYCLE
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
-     &                stlj(k,jindex)
+     &                stlj(k,jindex)*TUNetl(k)
                ENDDO
             ENDDO
             POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)*FUSred
@@ -1208,7 +1208,7 @@ C                 IF(stlj(k,jindex)<=1.0d-15) CYCLE
           ENDDO
         ENDDO
 
-	ELSE
+      ELSE
 C
 C-------absorption spin distribution using Tl's
         smin = ABS(sxj - trgsp)
@@ -1236,8 +1236,8 @@ C-------absorption spin distribution using Tl's
           ENDDO
         ENDDO
 
-	ENDIF
-C 	write (*,*) '*** CSFus =',CSFus
+      ENDIF
+C     write (*,*) '*** CSFus =',CSFus
 
       IF (CSFus.GT.0 .AND. (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
          IF (DIRect.LE.2) THEN
@@ -1401,7 +1401,7 @@ C Proton spectrum
 
       IF (IOUt.EQ.5) THEN
         WRITE (8,*) 
-	  IF(FUSred.ne.1.d0) 
+        IF(FUSred.ne.1.d0) 
      &    WRITE (8,*) '        FUSred is NOT considered below'
         WRITE (8,*) 
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
@@ -1422,9 +1422,9 @@ C-----Passing ELTL() and ELTLJ () to HRTW routine, note that they never contain
 C-----direct contribution !!!
 C
       DO i = 1, NDLW
-         ELTl(i) = stl(i)
+         ELTl(i) = stl(i)*TUNetl(i)
          DO j = 1, mxj
-           ELTlj(i,j) = stlj(i,j)
+           ELTlj(i,j) = stlj(i,j)*TUNetl(i)
          ENDDO
       ENDDO
 C

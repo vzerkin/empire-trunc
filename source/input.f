@@ -1,6 +1,6 @@
-!cc   * $Rev: 4387 $
+!cc   * $Rev: 4389 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2015-07-14 08:54:52 +0200 (Di, 14 Jul 2015) $
+!cc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1329,25 +1329,25 @@ C--------reset angles for inelastic calculations
             ENDIF
          ENDIF
 
-         do l=1,ndlw
-           if(dabs(TUNetl(l)-1.d0).gt.1.d-5) then
-             WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
-     &         INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
-     &         INT(A(0)), INT(EIN*1000000)
-C------------This part prompts for the name of a data file. The INQUIRE
-C------------statement then determines whether or not the TL file exists.
-             INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
-             IF (fexist) THEN
-               WRITE (8,*)
-     &' WARNING: TUNetl parameters are not applied as TL were already ca
-     &lculated'
-               WRITE (8,*)
-     &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
-               WRITE (8,*)
-             ENDIF
-             EXIT     
-           endif 
-         enddo
+!         do l=1,ndlw
+!           if(dabs(TUNetl(l)-1.d0).gt.1.d-5) then
+!             WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
+!     &         INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
+!     &         INT(A(0)), INT(EIN*1000000)
+!C------------This part prompts for the name of a data file. The INQUIRE
+!C------------statement then determines whether or not the TL file exists.
+!             INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
+!             IF (fexist) THEN
+!               WRITE (8,*)
+!     &' WARNING: TUNetl parameters are not applied as TL were already ca
+!     &lculated'
+!               WRITE (8,*)
+!     &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
+!               WRITE (8,*)
+!             ENDIF
+!             EXIT
+!           endif
+!         enddo
 C--------input consistency check  *** done ***
          IF (NENdf.eq.0) THEN          
             NPRIm_g = 0
