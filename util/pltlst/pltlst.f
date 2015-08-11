@@ -24,6 +24,9 @@ C-V  2012/07 - Improve the checking against illegal cosines.
 C-V          - Add to list some MT9000 entries that got missed.
 C-V  2013/12 Suppress adding total cross sections for incident
 C-V          charged particles and duplicate entries. (A. Trkov)
+C-V  2015/06 - Fix bug when a single entry exists in the C4 file.
+C-V          - Tighten tolerance for lumping angular distributions.
+C-V          - Extend the grid of forced DDX entries.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -39,7 +42,7 @@ C-M  Instructions:
 C-M  Two input records may be specified:
 C-M  - Name of the file with EXFOR data in C4 format (default C4.DAT)
 C-M  - Name of the output list file (default PLOTC4.LST)
-C-M  - Flags in any order (until EOF):
+C-M  - Flags in any order (until EOF or blank):
 C-M      "no4000"  Suppress MT reactions of 4000 series
 C-M      "xsmajor" Force major cross sections to the list
 C-M      "xsddx"   Force double-differential cross sections to the list.
@@ -49,7 +52,7 @@ C-M  exist, the program tries to read the entries from the default
 C-M  input. If an end-of-file is encountered on the input file, the
 C-M  remaining entries assume their default values.
 C-
-      PARAMETER   (MXAN=200,MXDDE=7,MXDDA=2,MXXS=6)
+      PARAMETER   (MXAN=200,MXDDE=10,MXDDA=2,MXXS=6)
       LOGICAL      EXST
       CHARACTER*1  CHA0,CHA1,CHB0,CHB1,MS0,MS1,MSX
       CHARACTER*2  CH(100)
@@ -85,11 +88,13 @@ C* ITOL Angle difference for differentiating energy distributions at
 C*      fixed angles.
 C* MTOL Angle difference (degrees) for differentiating energy-dependent
 C*      cross sections at fixed angles.
-      DATA ETOL,ITOL,MTOL/ 0.0001, 5, 1 /
+c...  DATA ETOL,ITOL,MTOL/ 0.015, 5, 1 /
+      DATA ETOL,ITOL,MTOL/ 0.001, 5, 1 /
       DATA BL10/'          '/
 C     DATA EDDX/ 2.E6, 10.E6, 14.E6, 20.E6, 60.E6, 100.E6, 150.E6/
-C     Adapting to low energy evaluation work
-      DATA EDDX/ 2.E6, 5.E6, 7.E6, 10.E6, 14.E6, 17.E6, 20.E6/
+C     Extending the list for low energy evaluation work
+      DATA EDDX/ 2.E6, 5.E6, 7.E6, 10.E6, 14.E6, 17.E6, 20.E6
+     &          , 60.E6, 100.E6, 150.E6/
       DATA ADDX/ 20., 160./
       DATA MJRXS/ 1, 3, 4, 16, 18, 102 /
       NO4000=0
@@ -149,13 +154,13 @@ C* If input does not exist, try reading the default input
 C* Read flags until blank or EOF
       IF(.NOT. EXST)
      &WRITE(LTT,903) ' Enter additional commands (end=CTRL^Z) '
-    8 READ (LIN,903,END=10) FLNM
+    8 READ (LIN,903,END=10,ERR=10) FLNM
       IF(FLNM.EQ.BLNK) GO TO 10
       IF(FLNM(1:6).EQ.'no4000') THEN
         NO4000=1
         WRITE(LTT,903) ' Suppress MT reactions of 4000 series   '
       END IF
-      IF(FLNM(1:6).EQ.'xsddx') THEN
+      IF(FLNM(1:5).EQ.'xsddx') THEN
         NDDXN=1
         WRITE(LTT,903) ' Force double-differen. x.s. to the list'
       END IF
@@ -236,8 +241,8 @@ C* Process all C4 records and check for changes
       IEF =1
       MMF =99
       MMT =999
-   18 READ (LEX,901,END=40) REC
-      IF(REC(1:1).EQ.'#') GO TO 18
+   30 READ (LEX,901,END=40) REC
+      IF(REC(1:1).EQ.'#') GO TO 30
       IF(REC(1:40).EQ.BLNK) GO TO 40
       READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
@@ -478,10 +483,12 @@ C* Check for any entries forced from input
       END IF
       IF(NXSMJR.GT.0) THEN
 C*      -- Force major cross sections listing
-c       IF(IEF.NE.0) THEN
-c         IF(IDX.LE.0) STOP 'PLTLST ERROR - No data in C4 file'
-c         GO TO 43
-c       END IF
+        IF(IEF.NE.0) THEN
+C*        -- The inserted total can be the first entry
+          IF(IDX.LE.0 .AND. MJRXS(NXSMJR).NE.1)
+     &      STOP 'PLTLST ERROR - No data in C4 file'
+          GO TO 43
+        END IF
         IF(IDX.GT.0 .AND. (IZ.NE.IZX .OR. IA.NE.IAX)) GO TO 43
         IF(MMF.GT.3 .AND. MMF.NE.10) GO TO 43
         IF(MMF.EQ.3) THEN
