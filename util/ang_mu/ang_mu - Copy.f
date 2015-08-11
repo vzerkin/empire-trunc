@@ -8,10 +8,6 @@ C-V  12/09 Include sorting internally for better grouping of data
 C-V  12/10 Include scattering angular distributions (MT9000)
 C-V  13/12 - Skip comments if processing a C5 file
 C-V        - Improve the logic to fix -ve distributions
-C-V  15/07 Relax the condition on range [-0.8:0.8] to [-0.8:0.75]
-C-V        on codines to activate fitting of Legendre polynomials.
-C-V        Guard against negative distributions.
-C-V        Add log-file for diagnostic messages.
 C-M  
 C-M  Manual for Program ANG_MU
 C-M  =========================
@@ -46,7 +42,7 @@ C-M   - Source C4 filename
 C-M   - Output C4 filename.
 C-M
 C-
-      PARAMETER   (MXNP=4000,MXLG=65,MXRW=20000
+      PARAMETER   (MXNP=2000,MXLG=65,MXRW=20000
      &            ,MXEN=80000,LCH=53,MEL1=20,MXIR=80000)
 C*
       CHARACTER*1      CH,ZAMH,ZAMG
@@ -57,7 +53,7 @@ C*
       CHARACTER*30     HDR
       CHARACTER*35     REF
       CHARACTER*40     BLNK
-      CHARACTER*80     FLNM,FLIN,FLOU,FL92,FLCU,FLPT,FLLG
+      CHARACTER*80     FLNM,FLIN,FLOU,FL92,FLCU,FLPT
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*(LCH)  ENT(MXEN),ENTI
 C*
@@ -69,11 +65,10 @@ C* Character to mark the modification in the string
       DATA CH/'+'/
       DATA PI/3.1415926/
 C* Filenames and logical file units
-      DATA LIN,LOU,LKB,LTT,LLG / 1, 2, 5, 6, 7/
+      DATA LIN,LOU,LKB,LTT / 1, 2, 5, 6/
       DATA BLNK/'                                        '/
      1    ,FLIN/'C4.bkp'/
      2    ,FLOU/'C4.dat'/
-     7    ,FLLG/'ang_mu.lst'/
 C*
 C* Test print filenames and logical file units
       DATA FL92/'angdis.p92'/
@@ -84,7 +79,6 @@ C*
 C* Define C4 input and output files
           OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
           OPEN (UNIT=LPT,FILE=FLPT,STATUS='UNKNOWN')
-          OPEN (UNIT=LLG,FILE=FLLG,STATUS='UNKNOWN')
 C* Initialise PLOTTAB input file
           OPEN (UNIT=L92,FILE=FL92,STATUS='UNKNOWN')
           WRITE(L92,821) 0.5,14., 0.5,10., 1, 1, 1.2
@@ -99,10 +93,6 @@ C* Define input parameters - Write banner to terminal
       WRITE(LTT,901) ' ANG_MU - Add mu-bar to a C4 file       '
       WRITE(LTT,901) ' ================================       '
       WRITE(LTT,901) ' '
-      WRITE(LLG,901) ' '
-      WRITE(LLG,901) ' ANG_MU - Add mu-bar to a C4 file       '
-      WRITE(LLG,901) ' ================================       '
-      WRITE(LLG,901) ' '
 C* Define the source file
    12 WRITE(LTT,901) ' Default source C4 filename           : ',FLIN
       WRITE(LTT,901) '$          Enter new name to redefine : '
@@ -119,9 +109,6 @@ C*
       WRITE(LTT,901) ' '
       WRITE(LTT,901) ' Source C4 filename                   : ',FLIN
       WRITE(LTT,901) ' Output C4 filename                   : ',FLOU
-      WRITE(LLG,901) ' '
-      WRITE(LLG,901) ' Source C4 filename                   : ',FLIN
-      WRITE(LLG,901) ' Output C4 filename                   : ',FLOU
 C*
 C* Begin processing the data - search for elastic angular distributions
   100 READ (LIN,932,END=800) REC
@@ -141,7 +128,8 @@ c...
 c...    print *,'      at 112 nen,nset',nen,nset
 c...
       IR  =0
-  112 IF(IR+1.GT.MXIR) STOP 'ANG_MU ERROR - MXIR limit exceeded'
+  112 IR  =IR+1
+      IF(IR.GT.MXIR) STOP 'ANG_MU ERROR - MXIR limit exceeded'
 C* Save record to output and to RC6 field and sorting string to ELL
       WRITE(LOU,932) REC
       READ (REC(23:31),931) FIN
@@ -152,19 +140,6 @@ C* Save record to output and to RC6 field and sorting string to ELL
         REC(59:67)=ELW
         WRITE(ELW,936) ANG+1
       END IF
-      ELW=REC(41:49)
-      READ (ELW,931) DST
-      IF(DST.LE.0) THEN
-C* Skip negative distributions
-        IDEG=NINT(ACOS(ANG))
-        WRITE(LTT,*) 'WARNING - Negative distribution for ',REC(98:130)
-        WRITE(LTT,*) '          Ein',REC(23:32),' Ang',IDEG,' dst',DST
-        WRITE(LLG,*) 'WARNING - Negative distribution for ',REC(98:130)
-        WRITE(LLG,*) '          Ein',REC(23:32),' Ang',IDEG,' dst',DST
-        IEN=1
-        GO TO 113
-      END IF
-      IR  =IR+1
       RC6(IR)=REC
       WRITE(POU,938) MIN(999999999,NINT(FIN))
       ELL(IR)=POU//ELW//'  '
@@ -186,7 +161,7 @@ C*
 C* Block for one data type/author read - Sort by angle/energy
   114 CONTINUE
 c...
-      print *,'Begin sorting DDX, IR',IR
+c...  print *,'Begin sorting DDX, IR',IR
 c...  do j=1,ir
 c...    print *,j,'"',ELL(j),'"'
 c...  end do
@@ -194,7 +169,7 @@ c...  print *,'ir,mel1',ir,mel1
 c...
       CALL SRTTCH(IR,MEL1,ID3,ID4,ELL)
 c...
-      print *,'Sorting completed'
+c...  print *,'Sorting completed'
 c...
 C* Write the sorted set from saved record sequence in RC6
 c...
@@ -209,8 +184,6 @@ c...         print *,l,rc1(12:50),'"',rc1(98:132)
 c...      end do
 c...
       NP  = 0
-      NPL = 0
-      KPL = 0
       CSMN= 1
       CSMX=-1
       EMM = 0
@@ -231,7 +204,6 @@ C...    print *,l,eing,csng,xsrg
 c...
         IF(CH20(1:9).EQ.POU) THEN
           NP = NP+1
-          IF(NP.GT.MXNP) STOP 'ANG_MU ERROR - MXNP limit exceeded'
 C*        -- Check if conversion CM-->Lab is needed
 C*        no need to add to C4, conversion is done in DXSEXF if needed)
           IF(REC(22:22).EQ.'C') THEN
@@ -268,9 +240,7 @@ C*        -- Skip fitting if less than four points or narrow range.
 C...
 C...      print *,'np,csmn,csmx',np,csmn,csmx
 C...
-          NPL=NPL+1
-          IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.75)) GO TO 118
-          KPL=KPL+1
+          IF(NP.LT.4 .OR. (CSMN.GT.-0.8 .OR. CSMX.LT.0.8)) GO TO 118
 C*        -- One panel read - calculate mu-bar
 C*        Prepare header for test print in TESTPLT
           WRITE(HDR,'(A2,1P,E8.2E1,A20)') 'E',EINH/1.E6,'MeV '
@@ -285,14 +255,8 @@ c...
           CALL LSQLGV(CSN,XSR,NP,PLN,LMI,LMX,EMMF,ERR,RWO,MXRW)
           EEMX=MAX(EMMF,ERR)
           IF(EEMX.GT.1 .OR. PLN(1).LT.0 .OR. PLN(2).LT.0) THEN
-            WRITE(LTT,'(2A)')
-     &       ' WARNING - Large error fitting ang.dist. for ',HDR
-            WRITE(LTT,'(A,1P,2E10.3,A,E10.3)')
-     &       '           first 2 coeff.',PLN(1),PLN(2),' er',EEMX
-            WRITE(LLG,'(2A)')
-     &       ' WARNING - Large error fitting ang.dist. for ',HDR
-            WRITE(LLG,'(A,1P,2E10.3,A,E10.3)')
-     &       '           first 2 coeff.',PLN(1),PLN(2),' er',EEMX
+            PRINT *,'WARNING - Large error fitting ang.dist',EEMX
+     &             ,PLN(1),PLN(2),hdr
             GO TO 118
           END IF
 C*        --Compare fitted curve to measured
@@ -327,7 +291,6 @@ C*        -- Normalised P1 component (dividing Pl by (2l+1)/2)
 C*        -- mu-bar entered, save elastic cross section
           SGEL=4*PI*PLN(1)
           NEL=NEL+1
-          IF(NEL.GT.MXNP) STOP 'ANG_MU ERROR - MXNP limit exceeded'
           ELE(NEL)=POU
           ELX(NEL)=SGEL
           ELU(NEL)=SGEL*MAX(EMM,ERR)
@@ -344,15 +307,6 @@ C*        --(next record is already in REC)
           END IF
         END IF
       END DO
-C* Check how many entries did not get converted to Legendre Polynmials
-      IF(KPL.LT.NPL) THEN
-        WRITE(LTT,'(A,I4,A,I5,A)')
-     &               ' WARNING -',NPL-KPL,' out of',NPL
-     &               ,' distrib. not fitted for'//HDR
-        WRITE(LLG,'(A,I4,A,I5,A)')
-     &               ' WARNING -',NPL-KPL,' out of',NPL
-     &               ,' distrib. not fitted for'//HDR
-      END IF
 C* Enter the elastic cross sections - prepare the output record
       WRITE(RC1( 1:19),902) IZIH,IZAH,ZAMH,  3,MTH
 C*    --Arbitrarily increment the subsection number by 600
@@ -749,19 +703,11 @@ C*       Legendre polynomial
         IF( (ONE-ABS(XX1)).GT. TOL .OR. (ONE-ABS(XX2)).GT.TOL) THEN
 c...
 c...      print *,'Expand to boundaries'
-c...      print *,'lxp,lyp,nnp,xx1,xx2,yp1,yp2'
-c...      print *, lxp,lyp,nnp,xx1,xx2,yp1,yp2
-c...      if(yp1.le.0 .or. yp2.le.0) then
-c...        print *,(rwo(lxp-1+j),j=1,nnp)
-c...        print *,(rwo(lyp-1+j),j=1,nnp)
-c...        stop
-c...      end if
+c...      print *,'lxp,lyp,nnp,xx1,xx2',lxp,lyp,nnp,xx1,xx2
 c...
           IF(XX1.GT.0) THEN
             XXB=1
             IF(XXB-XX1.GT.TOL) THEN
-              IF(YP1.LE.0) YP1=YP2/100
-              IF(YP2.LE.0) YP2=YP1/100
               ZP1=LOG(YP1)
               ZP2=LOG(YP2)
               YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
@@ -777,8 +723,6 @@ c...
             END IF
             XXB=-1
             IF(XX2-XXB.GT.TOL) THEN
-              IF(YP1.LE.0) YP1=YP2/100
-              IF(YP2.LE.0) YP2=YP1/100
               ZP1=LOG(YP1)
               ZP2=LOG(YP2)
               YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
@@ -794,8 +738,6 @@ c...
           ELSE
             XXB=-1
             IF(XX1-XXB.GT.TOL) THEN
-              IF(YP1.LE.0) YP1=YP2/100
-              IF(YP2.LE.0) YP2=YP1/100
               ZP1=LOG(YP1)
               ZP2=LOG(YP2)
               YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
@@ -812,8 +754,6 @@ C...
             END IF
             XXB= 1
             IF(XXB-XX2.GT.TOL) THEN
-              IF(YP1.LE.0) YP1=YP2/100
-              IF(YP2.LE.0) YP2=YP1/100
               ZP1=LOG(YP1)
               ZP2=LOG(YP2)
               YYB=EXP(ZP1+(XXB-XX1)*(ZP2-ZP1)/(XX2-XX1))
@@ -924,8 +864,6 @@ C...
 C*      Assign average value to midpoint
 C...        YPA=(YP1+YP2)/2
 C*      Assign log-average value to midpoint
-        IF(YP1.LE.0) YP1=YP2/100
-        IF(YP2.LE.0) YP2=YP1/100
         YPA=SQRT(YP1*YP2)
         RWO(LYP+IP)=YPA
         NNP=NNP+1
