@@ -47,6 +47,8 @@ C-V        - Increase max. number of levels from 400 to 500
 C-V  14/01 Add RIPL level filename to the error message.
 C-V  14/02 Fix undefined variable in a warning message.
 C-V  15/04 Fix sorting when last set is a discrete level data set.
+C-V  15/08 - Improve ENDF data search logic (Contrib. by O. Cabellos).
+C-V        - Fix the columns to define MF.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -415,7 +417,7 @@ C*              -- Label reaction converted from ratio by inserting CH
 C...
 C...            print *,IZAT,MF,MT,'"',rec(98:122),'"'
 C...
-                REC(12:15)='   3'
+                REC(13:15)='  3'
                 RC1=REC
                 WRITE(LS2,901) REC
                 GO TO 17
@@ -508,7 +510,7 @@ C*              -- Label reaction converted from ratio by inserting CH
 C...
 C...            print *,IZAT,MF,MT,'"',rec(98:122),'"'
 C...
-                REC(12:15)='   5'
+                REC(13:15)='  5'
                 RC1=REC
                 WRITE(LS2,901) REC
                 GO TO 17
@@ -1559,11 +1561,10 @@ C* Start processing the ENDF file
    20 CALL RDTEXT(LES,MAT,MF,MT,C66,IER)
       IF(IER.NE. 0) GO TO 90
 C*
-      IF(MF.EQ.MF0) GO TO 20
+      IF(MF.EQ.MF0 .AND. MT.EQ.MT0) GO TO 20
       MF0=MF
       IF(MF0.EQ. 0) GO TO 20
 C*
-      IF(MT.EQ.MT0) GO TO 20
       MT0=MT
       IF(MT.EQ.  0) GO TO 20
       IF(MF.NE.  3 .AND. MF.NE.5) GO TO 20
