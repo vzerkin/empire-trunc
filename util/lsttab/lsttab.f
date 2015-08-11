@@ -52,6 +52,7 @@ C-V         interpolating the ratio to Maxwellian to a fine grid,
 C-V         restoring function values and then integrating.
 C-V  14/07  Restore printout of EXFOR number for fission spectra.
 C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
+C-V  15/07  Prepare PLOTTAB input for the curves and points file.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -92,7 +93,8 @@ C-Extern.: DXSELM,DXSEND,DXSEN1,DXSEXF,COMCUR
 C-
       PARAMETER   (MPT=5000,MXP=800000,MXR=4000000,MXEN=10,MXIS=24)
       CHARACTER*1  CM
-      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG,FLTM
+      CHARACTER*40 HL1P92,HL2P92,HLXP92,HUXP92,HLYP92,HUYP92
+      CHARACTER*40 BLNK,FLNM,FLLS,FLC4,FLPN,FLCU,FLLG,FLTM,FLPI
      1            ,FLEF(MXEN),COM(MXEN)
       CHARACTER*84 COM1,COM2
       CHARACTER*84 C84,RFX(MPT)
@@ -101,8 +103,8 @@ C-
      &            ,EP(MPT),DA(MPT),DB(MPT),FP(MPT),FA(MPT),FB(MPT)
      &            ,RWO(MXR),ZEL(MXIS),FRC(MXIS)
 C* Default logical file units
-      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG,LTM
-     1    /  1,  2,  3,  5,  6, 7, 8, 9, 10 /
+      DATA LLS,LEF,LC4,LKB,LTT,LCU,LPN,LLG,LTM,LPI
+     1    /  1,  2,  3,  5,  6, 7, 8, 9, 10, 12 /
       DATA BLNK/'                                        '/
      1     FLLS/'PLOTC4.LST'/
      3     FLC4/'C4.DAT'/
@@ -111,11 +113,18 @@ C* Default logical file units
      9     FLLG/'LSTTAB.LST'/
      2     FLEF(1)/'ENDF.DAT'/
      3     FLTM/'LSTTAB.TMP'/
+     4     FLPI/'LSTTAB.P92'/
 C*
       DATA PI/3.14159265/
       DATA EP6/0.03/
 C* Maxwellian fission spectrum temperature
       EKTNRM=1.382E6
+C* Default labels
+      HL2P92='Energy-Dependent Parameters'
+      HLXP92='Energy'
+      HUXP92='eV'
+      HLYP92='Cross Sections'
+      HUYP92='barns'
 C*
 C* Write banner
       WRITE(LTT,91) ' LSTTAB - Extract Data from ENDF / C4   '
@@ -206,6 +215,11 @@ C* Write banner to log file
       END DO
       WRITE(LLG,93) ' Resolution broadening fraction       : ',EP6
 C*
+C* Open the output curves and points files
+      OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
+      OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
+      OPEN (UNIT=LPI,FILE=FLPI,STATUS='UNKNOWN')
+C*
 C* Select the PLOTC4 list entry index
    50 WRITE(LTT,91) '$Enter entry index number             : '
       READ (LKB,97,ERR=50,END=90) IDX
@@ -236,18 +250,42 @@ C*
       ZAI=IZI
 C*
       COM2=C84(1:11)//C84(19:21)//C84(22:26)//' '
+      HL1P92=C84(1:10)//' MF'//C84(18:21)//' MT'//C84(22:26)
       IF(MF.EQ.3) THEN
         IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
+        HL2P92='Energy-Dependent Parameters'
+        HLXP92='Energy'
+        HUXP92='eV'
+        HLYP92='Cross Sections'
+        HUYP92='barns'
       ELSE IF(MF.EQ.10) THEN
         WRITE(COM2(31:40),'(''M'',I2,7X)') NINT(EOU)
+        HL2P92='Energy-Dependent Parameters'
+        HLXP92='Energy'
+        HUXP92='eV'
+        HLYP92='Cross Sections'
+        HUYP92='barns'
       ELSE
         MTH=MT
-        IF(MF.EQ.4 .AND. MT/10000.EQ.4) THEN
-C*        -- For x-sect at fixed angle write level energy and angle
-          MTH=MT-40000
-          WRITE(COM2(21:30),'(''El'',1P,E7.2E1,1X)') EOU
-          WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        IF(MF.EQ.4) THEN
+          IF(MT/10000.EQ.4) THEN
+C*          -- For x-sect at fixed angle write level energy and angle
+            MTH=MT-40000
+            WRITE(COM2(21:30),'(''El'',1P,E7.2E1,1X)') EOU
+            WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+            HL2P92='Cross Sections at Angle'//C84(63:72)//' deg.'
+            HLXP92='Energy'
+            HUXP92='eV'
+            HLYP92='Cross Sections'
+            HUYP92='barns/St'
+          ELSE
+            HL2P92='Angular Distributions at Ei'//C84(46:54)//' eV'
+            HLXP92='Angle'
+            HUXP92='Degrees'
+            HLYP92='Cross Sections'
+            HUYP92='barns/St'
+          END IF
         ELSE
           IF(C84(46:54).NE.'    ')
      &    WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
@@ -255,6 +293,12 @@ C*        -- For x-sect at fixed angle write level energy and angle
      &    WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
           IF(C84(63:67).NE.'    ')
      &    WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
+C*
+          HL2P92='Double-Differen. x.s. at Ei'//C84(46:54)//' eV'
+          HLXP92='E_out'
+          HUXP92='eV'
+          HLYP92='Cross Sections'
+          HUYP92='barns/eV/St'
         END IF
         WRITE(COM2(12:19),'(I3,I5)') MF,MTH
       END IF
@@ -271,10 +315,6 @@ C* Log the start of request
       WRITE(LTT,93) ' Scaling factor                       : ',SCL
       WRITE(LTT,95) ' Emitted particle ZA                  : ',IZP
       WRITE(LTT,96) COM2
-C*
-C* Open the output curves and points files
-      OPEN (UNIT=LPN,FILE=FLPN,STATUS='UNKNOWN')
-      OPEN (UNIT=LCU,FILE=FLCU,STATUS='UNKNOWN')
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
@@ -423,7 +463,7 @@ C* Suppress printing negative or zero points
           END IF
         END IF
       END DO
-      WRITE(LCU,94)
+      WRITE(LCU,91) ' '
       IF(NP.GT.0) ICUR=1
    66 CONTINUE
 C*
@@ -532,6 +572,18 @@ C*          -- Normalise and print the experimental data
         END IF
       END IF
 C*
+C*  Write the PLOTTAB instructions
+      print *,'Start writing LPI',LPI
+      WRITE(LPI,132) 1., 14., 1., 10., 1, 1, 1.5
+      WRITE(LPI,134) NEN,NS, 1, 0, 4, 0, 0
+      WRITE(LPI, 91) HLXP92,HUXP92
+      WRITE(LPI, 91) HLYP92,HUYP92
+      WRITE(LPI, 91) HL1P92
+      WRITE(LPI, 91) HL2P92
+      WRITE(LPI,136) 0., 180., 0, 0, 0, 0
+      WRITE(LPI,138)           1, 2, 0
+      WRITE(LPI, 91) ' '
+C*
 C* Try another set of points
       REWIND LC4
       GO TO 50
@@ -548,6 +600,10 @@ C*
    98 FORMAT(BN,F10.0)
    99 FORMAT(A40,A84)
   124 FORMAT(A124)
+  132 FORMAT(4F11.1,2I11,F4.2)
+  134 FORMAT(6I11,I4)
+  136 FORMAT(2F11.1,4I11)
+  138 FORMAT(22X,4I11)
       END
       FUNCTION YTGPNT(NP,XX,YY,XA,XB)
 C-Title  : Function YTGPNT
@@ -740,13 +796,11 @@ C*   ETOL  fractional tolerance on energy
 C*   ATOL  tolerance on angle for double-differential data [deg]
 C*   AANG  tolerance on angle for double-differential data [deg]
 C*   E2TOL fractional tolerance on discrete level energy
-      DATA ETOL,ATOL,AANG,E2TOL/0.015, 1.0, 1.0, 0.003/
+C...  DATA ETOL,ATOL,AANG,E2TOL/0.015 , 1.0, 1.0, 0.003/
+      DATA ETOL,ATOL,AANG,E2TOL/0.0005, 1.0, 1.0, 0.003/
 C*
       DATA PI/3.14159265/
 C*
-
-        
-
       RF0 ='                         '
       CHX0='         '
       IZAI=ZAI
@@ -852,6 +906,7 @@ C* Test level energy for angular distribution data
               IF(LBL.EQ.'DE2') EL=EH-EL
             END IF
 c...
+C...        print *,'EI0,F1,ETOL',EI0,F1,ETOL
 c...        print *,'el,eh,elv,pr0',el,eh,elv,pr0
 c...
             IF(EH.GT.0 .AND. ABS(ELV-EH).GT.E2TOL*EH) GO TO 20
