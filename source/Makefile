@@ -1,6 +1,6 @@
-#$Rev: 4345 $
-#$Author: rcapote $
-#$Date: 2015-04-10 07:15:05 +0200 (Fr, 10 Apr 2015) $
+#$Rev: 4397 $
+#$Author: dbrown $
+#$Date: 2015-08-14 17:19:37 +0200 (Fr, 14 Aug 2015) $
 
 # set default compilers:
 
@@ -135,10 +135,11 @@ OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxilia
 all: 
 	$(MAKE) empire
 	$(MAKE) optmand
-	@../scripts/getrevnum
+	rm -f .versionnumbers 2> /dev/null
+	svn info . 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
 
 subecis06m.o: subecis06m.f
-	$(FC) $(EFLAGS) -c subecis06m.f	
+	$(FC) $(EFLAGS) -c subecis06m.f
 
 empire: $(OBJF) 
 	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)
