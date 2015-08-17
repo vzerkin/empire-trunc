@@ -118,9 +118,10 @@ c       that will be searched in the reaction headers in the -mat.sen file.
         MTLIST(15) = LISTOFMT(45,'(z,npa)')
         MTLIST(16) = LISTOFMT(11,'(z,2nd)')
         MTLIST(17) = LISTOFMT(115,'(z,pd)')
+        MTLIST(18) = LISTOFMT(207,'(z,xa)')
 
 C       Number of implemented reactions
-        IMPREAC=17
+        IMPREAC=18
 
 
 C       Printing which reactions have been implemented
