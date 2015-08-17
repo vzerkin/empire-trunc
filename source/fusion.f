@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4389 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
+Ccc   * $Rev: 4398 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2015-08-17 16:23:30 +0200 (Mo, 17 Aug 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1199,7 +1199,7 @@ C           ensure we are within dimensions for the min=1, and the max=NDLW
                   IF(xj<jmin .or. xj>jmax) CYCLE
 C                 IF(stlj(k,jindex)<=1.0d-15) CYCLE
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
-     &                stlj(k,jindex)*TUNetl(k)
+     &                min(stlj(k,jindex)*TUNetl(k),1.0d0)
                ENDDO
             ENDDO
             POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)*FUSred
@@ -1422,9 +1422,9 @@ C-----Passing ELTL() and ELTLJ () to HRTW routine, note that they never contain
 C-----direct contribution !!!
 C
       DO i = 1, NDLW
-         ELTl(i) = stl(i)*TUNetl(i)
+         ELTl(i) = min(stl(i)*TUNetl(i),1.0d0)
          DO j = 1, mxj
-           ELTlj(i,j) = stlj(i,j)*TUNetl(i)
+           ELTlj(i,j) = min(stlj(i,j)*TUNetl(i),1.0d0)
          ENDDO
       ENDDO
 C
