@@ -170,7 +170,7 @@
 
        read(oname(i)(lp+1:lp+6),'(3I2)') is(1:3)
  
-       if(.not.(global(nam) .or. pfns(nam))) then
+       if(.not.(global(nam) .or. pfns(nam) .or. opt(nam))) then
             ! is(1) = zdiff; is(2) = ndiff; is(1)+is(2) = adiff
             is(2) = atgt + aprj - (is(2)+is(1))
             is(1) = ztgt + zprj - is(1)
@@ -245,7 +245,7 @@
     cln(17:36) = ' '
     k = 4
     do while(k > 0)
-       if(ipr(k) /= 0) exit
+       if(ipr(k) /= 0 .or. (ipr(k) == 0 .and. opt(cln(1:6)))) exit
        k = k - 1
     end do
     if(k > 0) write(cln(17:36),'(4I5)') (ipr(n),n=1,k)
@@ -289,7 +289,7 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 109
+    integer*4, parameter :: nrs = 110
     character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS  ', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP ', 'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP ', &
         'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS  ', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE  ', 'TUNEFI', &
@@ -301,7 +301,7 @@
         'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 'GCROD ', &
         'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', &
         'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', &
-        'PFNNIU', 'CELRED', 'CINRED'/)
+        'PFNNIU', 'CELRED', 'CINRED', 'TUNETL'/)
 
     integer*4 i
 
@@ -403,6 +403,33 @@
 
     return
     end function pfns
+
+    !------------------------------------------------------------------------------------
+
+    logical*4 function opt(pnm)
+
+    implicit none
+
+    ! return true if pnm is one of the parameters with optional input (not Z or
+    ! A related)
+
+    character*6, intent(in) :: pnm
+
+    integer*4, parameter :: nrs = 1
+    character*6, parameter :: pnp(nrs) = (/'TUNETL'/)
+
+    integer*4 i
+
+    do i = 1,nrs
+       if(pnm /= pnp(i)) cycle
+       opt = .true.
+       return
+    end do
+
+    opt = .false.
+
+    return
+    end function opt
 
     !------------------------------------------------------------------------------------
 
