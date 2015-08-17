@@ -30,7 +30,7 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'ELARED', 'FISAT1', 'FISAT2', 'FISAT3', 'CELRED','CINRED',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
         'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3',
-        'ROHFBA', 'ROHFBP')
+        'ROHFBA', 'ROHFBP', 'TUNETL')
 
 # restricted: variations allowed only when default value provided
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
@@ -50,7 +50,10 @@ pfnsPar = ('PFNTKE','PFNALP','PFNRAT','PFNERE')
 
 # these global parameters don't need Z,A of isotope specified
 Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED','CELRED','CINRED')
-# not a complete list yet!
+# not a complete list yet!!
+
+# these parameters have additional options but they are not linked to specific nuclei
+optional = ('TUNETL')
 
 
 def parseInput(proj):
@@ -164,7 +167,7 @@ def init(proj):
         name, val, i1, i2, i3, i4 = tmp[:]
         # some parameters are isotope-specific (optical model, for example)
         # in this case, we get Z,A of isotope from i1, i2:
-        if not name in Globals and not name in pfnsPar:
+        if not name in Globals and not name in pfnsPar and not name in optional:
             i2 = atarget - (i1+i2) + aproj
             i1 = ztarget - i1 + zproj
             # i1 = zdiff, i2 = ndiff, i1+i2 = adiff
