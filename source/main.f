@@ -1,6 +1,6 @@
-cc   * $Rev: 4326 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-06 02:30:58 +0200 (Mo, 06 Apr 2015) $
+cc   * $Rev: 4399 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2015-08-17 16:41:27 +0200 (Mo, 17 Aug 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -309,13 +309,14 @@ C           to include/exclude low-lying coupled states
           ELSE
             WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
-     &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+     &      nuc_print+7,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
             WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
-            WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
+            WRITE(41,'(''#'',A10,1X,1P,96A12)') '  Einc    ',
      &      '  Total     ','  Elastic   ',' Nonel-Cel  ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
-     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn)),
+     &      '   (z,xa)   '
             WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','     Cel    ',
      &      '   Sel      ',

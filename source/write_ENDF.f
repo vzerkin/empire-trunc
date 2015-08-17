@@ -180,7 +180,9 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &      max(TOTcs*TOTred*totcorr - ELAcs*ELAred 
      &                           - PIx4*ELCncs,0.d0),    ! CE substracted from nonelastic
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
-     &      CSPrd(1), csinel,(CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn))
+     &      CSPrd(1),csinel,
+     &      (CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn)),
+     &      SUM(xcross(3,:,:)) ! Alpha production
 
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
