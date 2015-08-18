@@ -1,6 +1,6 @@
-!cc   * $Rev: 4413 $
+!cc   * $Rev: 4414 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2015-08-19 00:13:58 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Date: 2015-08-19 00:39:50 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1074,6 +1074,7 @@ C        Changing the incident input energy to plot LDs
             IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
                ENDf(0) = 1
                ENDf(1) = 1
+               ENDf(NTArget) = 1
                DO in = 1, MIN(4,nemn)   !neutron emissions
                   ENDf(in+1) = 1
                ENDDO
@@ -1087,18 +1088,19 @@ C        Changing the incident input energy to plot LDs
             ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
                ENDf(0) = 1
                ENDf(1) = 1
+               ENDf(NTArget) = 1
                DO in = 0, NENdf
                   DO ip = 0, NENdf
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
                      izatmp = INT(1000*ztmp + atmp)
                      CALL WHERE(izatmp,nnuc,iloc)
-                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
                      IF(iloc.EQ.0) ENDf(nnuc) = 1
                   ENDDO
                ENDDO
             ENDIF
-            IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  !nucleus requested as exclusive in the optional input
+C            IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  !nucleus requested as exclusive in the optional input
 C
 C           Create list of exclusive nuclei
 C
