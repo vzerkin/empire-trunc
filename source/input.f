@@ -1,6 +1,6 @@
-!cc   * $Rev: 4389 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
+!cc   * $Rev: 4404 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-08-18 04:43:04 +0200 (Di, 18 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -43,17 +43,17 @@ C
      &         qatom,qnucl,FTMP, fftmp !, XNExc
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
-      CHARACTER*23 ctmp23
+c     CHARACTER*23 ctmp23
 
-      LOGICAL gexist, calc_fiss, fexist
+      LOGICAL gexist, calc_fiss !, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
      &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
 
-      CHARACTER*3 ctldir
-      DATA ctldir/'TL/'/
+C     CHARACTER*3 ctldir
+C     DATA ctldir/'TL/'/
 
       DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
