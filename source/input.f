@@ -1,6 +1,6 @@
-!cc   * $Rev: 4412 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-18 23:27:41 +0200 (Di, 18 Aug 2015) $
+!cc   * $Rev: 4413 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-08-19 00:13:58 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -5801,12 +5801,12 @@ C-----
      &     '('' E1 mixing coeff. Weiskopf & GDR in '',I3,A2,'' set to ''
      &      ,F7.2)') i2, SYMb(nnuc), val
               WRITE (8,
-     &'('' E1 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' E1 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
               WRITE (12,
-     &'('' E1 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' E1 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
             GOTO 100
          ENDIF
@@ -5853,12 +5853,12 @@ C-----
      &     '('' M1 mixing coeff. Weiskopf & GMR in '',I3,A2,'' set to ''
      &      ,F7.2)') i2, SYMb(nnuc), val
               WRITE (8,
-     &'('' M1 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' M1 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
               WRITE (12,
-     &'('' M1 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' M1 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
             GOTO 100
          ENDIF
@@ -5882,10 +5882,10 @@ C-----
      &      '('' E2 mixing coeff. Weiskopf & GQR in all nuclei set to ''
      &        ,F7.2)') val
               WRITE (8,
-     &'('' E2 gamma strength composed of '',F7.3''% GDR + ''
+     &'('' E2 gamma strength composed of '',F7.3,''% GDR + ''
      &,F7.3,''% Weisskopf'')') val*100., (1. - val)*100.0
               WRITE (12,
-     &'('' E2 gamma strength composed of '',F7.3''% GDR + ''
+     &'('' E2 gamma strength composed of '',F7.3,''% GDR + ''
      &,F7.3,''% Weisskopf'')') val*100., (1. - val)*100.0
               GOTO 100
             ENDIF
@@ -5905,12 +5905,12 @@ C-----
      &     '('' E2 mixing coeff. Weiskopf & GQR in '',I3,A2,'' set to ''
      &      ,F7.2)') i2, SYMb(nnuc), val
               WRITE (8,
-     &'('' E2 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' E2 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
               WRITE (12,
-     &'('' E2 gamma strength composed of '',F7.3''% GDR + ''
-     &,F7.3,''% Weisskopf in '',I3,A2,)') val*100., (1. - val)*100.0,
+     &'('' E2 gamma strength composed of '',F7.3,''% GDR + ''
+     &,F7.3,''% Weisskopf in '',I3,A2)') val*100., (1. - val)*100.0,
      &i2, SYMb(nnuc) 
             GOTO 100
          ENDIF
