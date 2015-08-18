@@ -2097,7 +2097,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
      &                  sngl(csum*DE),' mb'
         WRITE (8,*) ' WARNING: Prod. cross section = ',
      &                  sngl(CSPrd(Nnuc)),' mb'
-        IF((nnuc).EQ.1) then
+        IF(ENDf(nnuc).EQ.1) then
           WRITE (8,*) ' WARNING: Cont. cross section = ',
      &                  sngl(CSPrd(Nnuc)-xsdisc),' mb'
           WRITE (8,*) ' WARNING: Discr.cross section = ',
