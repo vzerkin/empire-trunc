@@ -58,7 +58,8 @@ C-----ENDF spectra inclusive representation
 C-----
       WRITE (8,*) ' '
 
-      IF (IOUt.GT.3 .AND. .NOT.EXClusiv ) THEN
+C     IF (IOUt.GT.3 .AND. .NOT.EXClusiv ) THEN
+      IF (IOUt.GE.3) THEN
 
          IF (FIRst_ein) THEN 
             WRITE (8,*)
