@@ -1,6 +1,6 @@
-!cc   * $Rev: 4414 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-08-19 00:39:50 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Rev: 4417 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-08-19 01:31:15 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1110,7 +1110,6 @@ C
               iztmp = INT(z(i))
               izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
-
               IF(ENDf(nnuc).EQ.1) THEN
                 itmp = itmp + 1
                 INExc(nnuc) = itmp
@@ -1330,26 +1329,6 @@ C--------reset angles for inelastic calculations
               WRITE (8,*) 
             ENDIF
          ENDIF
-
-!         do l=1,ndlw
-!           if(dabs(TUNetl(l)-1.d0).gt.1.d-5) then
-!             WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)')
-!     &         INT(ZEJc(0)), INT(AEJc(0)), INT(Z(0)),
-!     &         INT(A(0)), INT(EIN*1000000)
-!C------------This part prompts for the name of a data file. The INQUIRE
-!C------------statement then determines whether or not the TL file exists.
-!             INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
-!             IF (fexist) THEN
-!               WRITE (8,*)
-!     &' WARNING: TUNetl parameters are not applied as TL were already ca
-!     &lculated'
-!               WRITE (8,*)
-!     &' WARNING: Recalculate TLs if you changed TUNetl() parameters !!'
-!               WRITE (8,*)
-!             ENDIF
-!             EXIT
-!           endif
-!         enddo
 C--------input consistency check  *** done ***
          IF (NENdf.eq.0) THEN          
             NPRIm_g = 0
@@ -6142,27 +6121,27 @@ C              EHRtw = val
               IF (LHRtw.EQ.1) WRITE (8,
      &           '('' HRTW width fluctuation correction with '',
      &             ''Z. Phys. A297, 153 (1980) nu selected'')')
-              IF (LHRtw.GE.2) WRITE (8,
+              IF (LHRtw.EQ.2) WRITE (8,
      &           '('' HRTW width fluctuation correction with'',
      &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
-!              IF (LHRtw.EQ.3) WRITE (8,
-!     &           '('' Moldauer width fluctuation correction with'',
-!     &             '' original nu was selected'')')
-!              IF (LHRtw.EQ.4) WRITE (8,
-!     &           '('' Moldauer width fluctuation correction with'',
-!     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+              IF (LHRtw.EQ.3) WRITE (8,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' original nu was selected'')')
+              IF (LHRtw.EQ.4) WRITE (8,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
               IF (LHRtw.EQ.1) WRITE (12,
      &           '('' HRTW width fluctuation correction with '',
      &             ''Z. Phys. A297, 153 (1980) nu selected'')')
-              IF (LHRtw.GE.2) WRITE (12,
+              IF (LHRtw.EQ.2) WRITE (12,
      &           '('' HRTW width fluctuation correction with'',
      &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
-!              IF (LHRtw.EQ.3) WRITE (12,
-!     &           '('' Moldauer width fluctuation correction with'',
-!     &             '' original nu was selected'')')
-!              IF (LHRtw.EQ.4) WRITE (12,
-!     &           '('' Moldauer width fluctuation correction with'',
-!     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+              IF (LHRtw.EQ.3) WRITE (12,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' original nu was selected'')')
+              IF (LHRtw.EQ.4) WRITE (12,
+     &           '('' Moldauer width fluctuation correction with'',
+     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
             ELSE
               WRITE (8,
      &        '('' Width fluctuation correction not considered'')')
@@ -6326,67 +6305,67 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ENDF  ') THEN
-            IF(i1.eq.0 .AND. i2.eq.0) THEN
+C           IF(i1.eq.0 .AND. i2.eq.0) THEN
 C              Setting ENDF for all emission loops
+            IF(val.GE.0) THEN
                NENdf = INT(val)
                IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
                  WRITE (8,'(
-     &            '' Exclusive spectra available up to'',
-     &            '' emission loop # '',I2)') NENdf
+     &            '' Exclusive spectra available for residues'',
+     &            '' distant from CN up to '',I1,'' neut. & '',I1
+     &            '' prot.'')') NENdf,NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
                  WRITE (12,'(
-     &            '' Exclusive spectra available up to'',
-     &            '' emission loop # '',I2)') NENdf
+     &            '' Exclusive spectra available for residues'',
+     &            '' distant from CN up to '',I1,'' neut. & '',I1
+     &            '' prot.'')') NENdf,NENdf
                      GOTO 100
                ENDIF
                IF(NENdf.EQ.0) THEN
                  WRITE ( 8,'('' ENDF formatting disabled'')')
                  WRITE (12,'('' ENDF formatting disabled'')')
-                 GOTO 100
                ENDIF
-            ENDIF
-            IF(val.LT.0) THEN
+            ELSE  ! IF(val.LT.0) THEN
                WRITE (8,'('' WARNING: WRONG ENDF value in input'',I3)')
      &                i2
                WRITE (8,'('' WARNING: SETTING IGNORED'')')
-               GOTO 100
             ENDIF
 C           Setting ENDF for a single nucleus
-            izar = i1*1000 + i2
-            CALL WHERE(izar,nnuc,iloc)
-            IF (iloc.EQ.1) THEN
-               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
-     &                '' NOT NEEDED'')') i2,i1
-               WRITE (8,'('' WARNING: ENDF SETTING IGNORED'')')
-               GOTO 100
-            ENDIF
+C           izar = i1*1000 + i2
+C           CALL WHERE(izar,nnuc,iloc)
+C           IF (iloc.EQ.1) THEN
+C              WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
+C    &                '' NOT NEEDED'')') i2,i1
+C              WRITE (8,'('' WARNING: ENDF SETTING IGNORED'')')
+C              GOTO 100
+C           ENDIF
 C
-            if(INT(val).gt.0 .and. NENdf.EQ.0) THEN
-               NENdf = INT(val)
-               WRITE (8,'('' ENDF formatting enabled'')')
-               WRITE (8,'('' Exclusive emission from CN enabled'')')
-               WRITE (12,'('' ENDF formatting enabled'')')
-               WRITE (12,'('' Exclusive emission from CN enabled'')')
-            ENDIF
-            ENDf(nnuc) = INT(val)
-            IF (ENDf(nnuc).EQ.1) THEN
-              ENDf(nnuc) = 10  ! using as a flag 
-              WRITE (8,
-     &       '('' Exclusive spectra for production of '',
-     &         I3,A2)') i2, SYMb(nnuc)
-              WRITE (12,
-     &       '('' Exclusive spectra for production of '',
-     &         I3,A2)') i2, SYMb(nnuc)
-            ENDIF
-            IF (ENDf(nnuc).EQ.2) THEN
-              WRITE (8,
-     &       '('' Emission spectra for production of '',I3,A2,
-     &         '' stored as inclusive'')') i2, SYMb(nnuc)
-              WRITE (12,
-     &       '('' Emission spectra for production of '',I3,A2,
-     &         '' stored as inclusive'')') i2, SYMb(nnuc)
-            ENDIF
+C           if(INT(val).gt.0 .and. NENdf.EQ.0) THEN
+C              NENdf = INT(val)
+C              WRITE (8,'('' ENDF formatting enabled'')')
+C              WRITE (8,'('' Exclusive emission from CN enabled'')')
+C              WRITE (12,'('' ENDF formatting enabled'')')
+C              WRITE (12,'('' Exclusive emission from CN enabled'')')
+C           ENDIF
+C           ENDf(nnuc) = INT(val)
+C           IF (ENDf(nnuc).EQ.1) THEN
+C             ENDf(nnuc) = 10  ! using as a flag 
+C             WRITE (8,
+C    &       '('' Exclusive spectra for production of '',
+C    &         I3,A2)') i2, SYMb(nnuc)
+C             WRITE (12,
+C    &       '('' Exclusive spectra for production of '',
+C    &         I3,A2)') i2, SYMb(nnuc)
+C           ENDIF
+C           IF (ENDf(nnuc).EQ.2) THEN
+C             WRITE (8,
+C    &       '('' Emission spectra for production of '',I3,A2,
+C    &         '' stored as inclusive'')') i2, SYMb(nnuc)
+C             WRITE (12,
+C    &       '('' Emission spectra for production of '',I3,A2,
+C    &         '' stored as inclusive'')') i2, SYMb(nnuc)
+C           ENDIF
             GOTO 100
          ENDIF
 C-----
