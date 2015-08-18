@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4406 $
+Ccc   * $Rev: 4409 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-18 04:48:31 +0200 (Di, 18 Aug 2015) $
+Ccc   * $Date: 2015-08-18 20:53:11 +0200 (Di, 18 Aug 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -1043,7 +1043,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION gacs, popl, gacs_noicc, egd
+      DOUBLE PRECISION gacs, popl !, gacs_noicc, egd
       INTEGER i, j, j1, l
 C
 C
@@ -1064,31 +1064,9 @@ C-----------Well... let it go down to the ground state
                   gacs = popl*BR(l,j,2,Nnuc)
                   CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
 
-                  gacs_noicc = gacs                 ! no int. conversion
+C                 gacs_noicc = gacs                 ! no int. conversion
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-
-                  CYCLE
-
-C                 Skipping printout
-                  IF(NNG_xs.gt.0 .and. ENDF(nnuc).eq.1) then
-                   
-                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                  ENDIF
-
                ENDDO
             ENDIF
          ENDIF
