@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4389 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-07-30 17:19:26 +0200 (Do, 30 Jul 2015) $
+Ccc   * $Rev: 4406 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-18 04:48:31 +0200 (Di, 18 Aug 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -987,7 +987,8 @@ C-----------------NOTE: internal conversion taken into account
 C
 99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-                  IF(NNG_xs.gt.0 .and. ENDF(Nnuc).eq.0) then
+C                 IF(NNG_xs.gt.0 .and. ENDF(Nnuc).eq.0) then
+                  IF(NNG_xs.gt.0 .and. ENDF(Nnuc).le.1) then
                    if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
@@ -1067,6 +1068,9 @@ C-----------Well... let it go down to the ground state
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 
+                  CYCLE
+
+C                 Skipping printout
                   IF(NNG_xs.gt.0 .and. ENDF(nnuc).eq.1) then
                    
                    egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
