@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4422 $
+Ccc   * $Rev: 4426 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-19 15:37:07 +0200 (Mi, 19 Aug 2015) $
+Ccc   * $Date: 2015-08-19 17:16:25 +0200 (Mi, 19 Aug 2015) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -142,7 +142,7 @@ C
       ENDIF
 
 C     repeated in E1_GSA() 
-      CALL INIT_GDR_COMMONS(Nnuc)
+C     CALL INIT_GDR_COMMONS(Nnuc)
 
       RETURN
       END
