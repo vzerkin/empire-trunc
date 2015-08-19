@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4425 $
+Ccc   * $Rev: 4429 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-19 17:15:22 +0200 (Mi, 19 Aug 2015) $
+Ccc   * $Date: 2015-08-19 17:50:12 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -326,7 +326,7 @@ C
 C-----------M1
             IF (IGM1.NE.0) THEN
 C--------------factor 10 near HHBarc from fm**2-->mb
-               e1tmp = 10*HHBarc**2*PI*XM1(Ntrg,EINl)/(2*EINl**2)
+               e1tmp = 10*HHBarc**2*PI*XM1(EINl)/(2*EINl**2)
      &                 /(2*trgsp + 1.d0)
 C--------------do loop over parity
                DO ip = 1, 2
