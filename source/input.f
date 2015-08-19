@@ -1,6 +1,6 @@
-!cc   * $Rev: 4428 $
+!cc   * $Rev: 4431 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-19 17:46:20 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Date: 2015-08-19 22:28:03 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -452,6 +452,7 @@ C--------begin GDR parameters
          EWSr2 = 1.0d0
          GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
+C        Discrete levels not included in PCROSS calculatin (default) 
          PEQcont = 0.0d0
          PEQc = 1.5d0 ! default PE
          MFPp = 1.5d0
