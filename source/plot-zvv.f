@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3704 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2014-01-04 08:34:23 +0100 (Sa, 04 Jän 2014) $
+Ccc   * $Rev: 4430 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-19 17:53:01 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -153,7 +153,7 @@ C
       ENDDO
       CALL CLOSE_ZVV(36,'  ','  ')
 
-      CALL OPEN_ZVV(36,'RHO(U,-) at GS of '//caz//ldname,' ')
+      CALL OPEN_ZVV(36,'RHO(U,-) at GS of '//caz//ldname,'  ')
 
       DO kk = kminex, NEX(Nnuc)
 
@@ -245,7 +245,7 @@ C       write(ctmp2,'(A28,F5.2,A4)') 'Fission continuum starts at ',
 C    >  Elv(NLV(Nnuc),Nnuc),' MeV' 
 C       CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
 
-        CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ' ')
+        CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', '  ')
         CLOSE (36)
       RETURN
 
@@ -282,7 +282,7 @@ C       write(ctmp2,'(A28,F5.2,A4)') 'Fission continuum starts at ',
 C    >  Elv(NLV(Nnuc),Nnuc),' MeV' 
 C     CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ctmp2)
 
-      CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', ' ')
+      CALL CLOSE_ZVV_LEVDEN(36,' LEVEL DENSITY ', '  ')
  
       CLOSE (36)
       return
