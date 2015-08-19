@@ -1,6 +1,6 @@
-!cc   * $Rev: 4417 $
+!cc   * $Rev: 4421 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-19 01:31:15 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Date: 2015-08-19 15:36:20 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -560,7 +560,7 @@ C         - maximal value (=< 10) of gamma-ray multipolarity in
 C           calculation of gamma-transitions both between states in
 C           continuum and from continuum to discrete levels;
 C           can be changed in the optional input
-C           (keyword 'GRMULT')
+C           (keyword 'MAXMUL')
          MAXmult = 2
 C--------end GDR
 
@@ -4351,10 +4351,14 @@ C        Key_GDRGFL = 5 -  RIPL/SLO-exp + Plujko Systematics
 C        Key_GDRGFL = 6 -  RIPL/SLO-exp + Goriely calculations
 
 C--------input MAXmult - maximal value (=< 10) of gamma-ray multipolarity for GSA
-         IF(name.EQ.'GRMULT')THEN
+         IF(name.EQ.'MAXMUL')THEN
             MAXmult = val + 0.001
             IF(MAXmult.GT.10) MAXmult = 10
             IF(MAXmult.LT.2) MAXmult = 2
+            WRITE(8,
+     &        '('' Gamma-transition multipolarity set to '',I4)')MAXmult
+            WRITE(12,
+     &        '('' Gamma-transition multipolarity set to '',I4)')MAXmult
             GOTO 100
          ENDIF
 C-----

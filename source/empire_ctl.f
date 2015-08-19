@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4084 $
+Ccc   * $Rev: 4421 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-09-15 02:10:34 +0200 (Mo, 15 Sep 2014) $
+Ccc   * $Date: 2015-08-19 15:36:20 +0200 (Mi, 19 Aug 2015) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1860,7 +1860,7 @@ C
      &  'TRUNC ', 'WIDEX ', 'COMPFF', 'PFNALP', 'DIRECT', 'DIRPOT',
      &  'E1    ', 'E2    ', 'EcDWBA', 'ENDF  ', 'FISBAR', 'FISDEN',
      &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP',
-     &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'GRMULT',
+     &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'MAXMUL',
      &  'GSTRFN', 'GST   ', 'HMS   ', 'HRTW  ', 'IOUT  ', 'JSTAB ',
      &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ',
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
