@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4242 $
+Ccc   * $Rev: 4422 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
+Ccc   * $Date: 2015-08-19 15:37:07 +0200 (Mi, 19 Aug 2015) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -141,8 +141,8 @@ C
          GMRpar(3,Nnuc) = 1.D0
       ENDIF
 
-C     moved to E1_GSA() for a proper initialization for each nucleus
-C     CALL INIT_GDR_COMMONS(Nnuc)
+C     repeated in E1_GSA() 
+      CALL INIT_GDR_COMMONS(Nnuc)
 
       RETURN
       END
