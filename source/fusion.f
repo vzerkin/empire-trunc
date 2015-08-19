@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4398 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2015-08-17 16:23:30 +0200 (Mo, 17 Aug 2015) $
+Ccc   * $Rev: 4425 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-19 17:15:22 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -326,7 +326,7 @@ C
 C-----------M1
             IF (IGM1.NE.0) THEN
 C--------------factor 10 near HHBarc from fm**2-->mb
-               e1tmp = 10*HHBarc**2*PI*XM1(EINl)/(2*EINl**2)
+               e1tmp = 10*HHBarc**2*PI*XM1(Ntrg,EINl)/(2*EINl**2)
      &                 /(2*trgsp + 1.d0)
 C--------------do loop over parity
                DO ip = 1, 2
@@ -1055,7 +1055,7 @@ C-----Print elastic and direct cross sections from ECIS
       IF (IRElat(Npro,Ntrg).GT.0  .or. RELkin) relcal = .TRUE.
       CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
-      IF (EINl.LT.0.3D0 .AND. ZEJc(Npro).EQ.0) THEN
+      IF (EINl.LT.(15.d0/A(Ntrg)**0.67).AND. ZEJc(Npro).EQ.0) THEN
          s0 = FUSred * stl(1)/(2.0D+00*PI*SQRT(1.0D+06*EINl))
          rp = 1.35*(A(Ntrg)**0.333333333)
          r2 = rp*rp
