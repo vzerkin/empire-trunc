@@ -1,6 +1,6 @@
-!cc   * $Rev: 4421 $
+!cc   * $Rev: 4427 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-19 15:36:20 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Date: 2015-08-19 17:17:14 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1179,7 +1179,7 @@ C----------Prepare gamma transmission parameters
              IF(ENDF(i).LE.1 .and. i.ne.NTArget .AND. KEY_shape.NE.8 
      &          .AND. IOUT.GT.3) CALL ULM_print(i) 
           ENDDO
-          IF(KEY_shape.LT.8) CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
+          IF(KEY_shape.NE.8) CALL EMPDgdr() ! deallocating memory for temporal gdr arrays
           WRITE (8,*) ' -----------------------------------------'
 c----------end GDR
           DO i = 1, NNUcd 
