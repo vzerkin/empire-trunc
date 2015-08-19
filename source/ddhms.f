@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4324 $
+Ccc   * $Rev: 4424 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-04-06 02:26:38 +0200 (Mo, 06 Apr 2015) $
+Ccc   * $Date: 2015-08-19 17:13:40 +0200 (Mi, 19 Aug 2015) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,7 +10,7 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4324 $
+C CVS Version Management $Revision: 4424 $
 C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
 C
 C  name ddhms stands for "double-differential HMS preeq."
@@ -2474,7 +2474,7 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4324 $')
+99005 FORMAT ('  xddhms version: $Revision: 4424 $')
       WRITE (28,99010)
 99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
 C
@@ -3789,14 +3789,14 @@ C
 C COMMON variables
 C
       REAL*8 ACOm(3), BEN(3,7), E, ECUt, EPS(2001), RZZ, SIGin(7,2001),
-     &       XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6), XN2(6),
+     &       XL0(6), XL1(6), XM0(6), XM1m(6), XN0(6), XN1(6), XN2(6),
      &       XP0(6), XP1(6), XP2(6)
       INTEGER INOut(3), IPOut(3), IWRi, JIN, JNIn, JNOut(7), JPIn,
      &        JPOut(7), NEPs1(3,7), NPHd(3,7,2), NSD(6)
       COMMON /ENERGY/ ACOm, BEN, E, EPS, RZZ, SIGin
       COMMON /IENERGY/ INOut, IPOut, IWRi, JIN, JNIn, JPIn, JNOut,
      &                 JPOut, NEPs1, NSD, NPHd
-      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2,
+      COMMON /PAR   / XL0, XL1, XM0, XM1m, XN0, XN1, XN2, XP0, XP1, XP2,
      &                ECUt
 C
 C Dummy arguments
@@ -3823,7 +3823,7 @@ C     signor reduces p and n result for light targs as per expt.
       IF (Kp.EQ.1) THEN
          IF (ares.LT.40.D0) signor = 0.7 + ares*0.0075
          xlamb = XL0(1)/athrd + XL1(1)
-         xmu = XM0(1)*athrd + XM1(1)*athrd*athrd
+         xmu = XM0(1)*athrd + XM1m(1)*athrd*athrd
          xnu = XN0(1)*athrd*ares + XN1(1)*athrd*athrd + XN2(1)
 Cc       ec = 2.4
 Cc       ecsq = 5.76
@@ -3854,7 +3854,7 @@ C        xnulam here is a dummy value to be used later.
          ecsq = ec*ec
          p = XP0(Kp) + XP1(Kp)/ec + XP2(Kp)/ecsq
          xlamb = XL0(Kp)*ares + XL1(Kp)
-         a = ares**XM1(Kp)
+         a = ares**XM1m(Kp)
          xmu = XM0(Kp)*a
          xnu = a*(XN0(Kp) + XN1(Kp)*ec + XN2(Kp)*ecsq)
          IF (jout.EQ.2) ra = 0.8
@@ -3949,9 +3949,9 @@ C
 C
 C COMMON variables
 C
-      REAL*8 ECUt, XL0(6), XL1(6), XM0(6), XM1(6), XN0(6), XN1(6),
+      REAL*8 ECUt, XL0(6), XL1(6), XM0(6), XM1m(6), XN0(6), XN1(6),
      &       XN2(6), XP0(6), XP1(6), XP2(6)
-      COMMON /PAR   / XL0, XL1, XM0, XM1, XN0, XN1, XN2, XP0, XP1, XP2,
+      COMMON /PAR   / XL0, XL1, XM0, XM1m, XN0, XN1, XN2, XP0, XP1, XP2,
      &                ECUt
 C     n from mani, melkanoff and iori
       XP0(1) = -312.
@@ -3960,7 +3960,7 @@ C     n from mani, melkanoff and iori
       XL0(1) = 12.10
       XL1(1) = -11.27
       XM0(1) = 234.1
-      XM1(1) = 38.26
+      XM1m(1) = 38.26
       XN0(1) = 1.55
       XN1(1) = -106.1
       XN2(1) = 1280.8
@@ -3972,7 +3972,7 @@ C     xp2(2) = -449.
       XL0(2) = 0.00437
       XL1(2) = -16.58
       XM0(2) = 244.7
-      XM1(2) = 0.503
+      XM1m(2) = 0.503
       XN0(2) = 273.1
       XN1(2) = -182.4
       XN2(2) = -1.872
@@ -3983,7 +3983,7 @@ C     d from o.m. of perey and perey
       XL0(3) = 0.00619
       XL1(3) = -7.54
       XM0(3) = 583.5
-      XM1(3) = 0.337
+      XM1m(3) = 0.337
       XN0(3) = 421.8
       XN1(3) = -474.5
       XN2(3) = -3.592
@@ -3994,7 +3994,7 @@ C     t from o.m. of hafele, flynn et al
       XL0(4) = 0.0186
       XL1(4) = -8.90
       XM0(4) = 686.3
-      XM1(4) = 0.325
+      XM1m(4) = 0.325
       XN0(4) = 368.9
       XN1(4) = -522.2
       XN2(4) = -4.998
@@ -4005,7 +4005,7 @@ C     3he from o.m. of gibson et al
       XL0(5) = 0.00459
       XL1(5) = -8.93
       XM0(5) = 611.2
-      XM1(5) = 0.35
+      XM1m(5) = 0.35
       XN0(5) = 473.8
       XN1(5) = -468.2
       XN2(5) = -2.225
@@ -4016,7 +4016,7 @@ C     alpha from huizenga and igo
       XL0(6) = 0.0643
       XL1(6) = -13.96
       XM0(6) = 781.2
-      XM1(6) = 0.29
+      XM1m(6) = 0.29
       XN0(6) = -304.7
       XN1(6) = -470.
       XN2(6) = -8.580
