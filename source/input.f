@@ -1,6 +1,6 @@
-!cc   * $Rev: 4427 $
+!cc   * $Rev: 4428 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-19 17:17:14 +0200 (Mi, 19 Aug 2015) $
+!cc   * $Date: 2015-08-19 17:46:20 +0200 (Mi, 19 Aug 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -6315,11 +6315,15 @@ C              Setting ENDF for all emission loops
                NENdf = INT(val)
                IF(NENdf.GT.0) THEN
                  WRITE (8,'('' ENDF formatting enabled'')')
+                 WRITE (8,
+     &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (8,'(
      &            '' Exclusive spectra available for residues'',
      &            '' distant from CN up to '',I1,'' neut. & '',I1
      &            '' prot.'')') NENdf,NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
+                 WRITE (12,
+     &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (12,'(
      &            '' Exclusive spectra available for residues'',
      &            '' distant from CN up to '',I1,'' neut. & '',I1
@@ -10108,17 +10112,11 @@ C
            WRITE(8,*) 
      &' WARNING: Spher.nucl. with deformed COLL file, file DISMISSED' 
            CALctl = .TRUE.
-
            WRITE (8,
-
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
-
               WRITE (8,
-
      &  '('' OMP (TLs) calculations will be undertaken'')') 
-
            WRITE(8,*) 
-
            goto 123
          ENDIF
 
@@ -10129,21 +10127,13 @@ C
            WRITE(8,*) 
            WRITE(8,*) 
      &' WARNING: Spher.nucl. with dynam. deformed COLL file, file DISMIS
-
      &SED'
-
            CALctl = .TRUE.
-
            WRITE (8,
-
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
-
               WRITE (8,
-
      &  '('' OMP (TLs) calculations will be undertaken'')') 
-
            WRITE(8,*) 
-
            goto 123
          ENDIF
 
@@ -10154,20 +10144,13 @@ C
            WRITE(8,*) 
            WRITE(8,*) 
      &' WARNING: Deformed nucl. with vibrational COLL file, file DISMISS
-
      &ED' 
            CALctl = .TRUE.
-
            WRITE (8,
-
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
-
               WRITE (8,
-
      &  '('' OMP (TLs) calculations will be undertaken'')') 
-
            WRITE(8,*) 
-
            goto 123
          ENDIF
 
@@ -10178,18 +10161,13 @@ C
            WRITE(8,*) 
            WRITE(8,*) 
      &' WARNING: Deformed nucl. with soft rotator COLL file, file DISMIS
-
      &SED' 
            CALctl = .TRUE.
-
            WRITE (8,
      &      '('' Transmission cofficients stored in \*-tl dismissed'')') 
-
               WRITE (8,
      &  '('' OMP (TLs) calculations will be undertaken'')') 
-
            WRITE(8,*) 
-
            goto 123
          ENDIF
 
