@@ -1,6 +1,6 @@
-Ccc   * $Rev: 1862 $
-Ccc   * $Author: mherman $ 
-Ccc   * $Date: 2010-10-05 08:14:44 +0200 (Di, 05 Okt 2010) $
+Ccc   * $Rev: 4456 $
+Ccc   * $Author: rcapote $ 
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
             
 c      ---------------------------------------------------------
 c      | File with common blocks and declarations for PRE_ECIS  |

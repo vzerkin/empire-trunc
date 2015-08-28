@@ -1,6 +1,6 @@
-Ccc   * $Rev: 3783 $
+Ccc   * $Rev: 4456 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-02-05 06:40:51 +0100 (Mi, 05 Feb 2014) $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)

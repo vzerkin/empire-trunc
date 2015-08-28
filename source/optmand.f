@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4761 $
+Ccc   * $Rev: 4456 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-01-19 $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 C
 C      VERSION 14 (Dec. 2013, LANE CONSISTENT COULOMB CORRECTION 
 C      WITH DISPERSIVE OPTICAL POTENTIAL RELATIONS, NON-AXIAL AND
@@ -7077,8 +7077,8 @@ C     *******************************************************
 C     *******************************************************
 C     AUTHOR: R. Capote, March 2005
 C     
-C     * $Date: 2007/09/03 14:20:35 $
-C     * $Id: thora.f,v 1.6 2007/09/03 14:20:35 Capote Exp $
+C     * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+C     * $Id: optmand.f 4456 2015-08-28 14:58:23Z rcapote $
 C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
 C     Note: Elapsed time must be less than one month

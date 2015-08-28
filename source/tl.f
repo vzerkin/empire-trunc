@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4407 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2015-08-18 14:32:36 +0200 (Di, 18 Aug 2015) $
+Ccc   * $Rev: 4456 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************

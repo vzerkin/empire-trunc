@@ -1,6 +1,6 @@
-cc   * $Rev: 4399 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2015-08-17 16:41:27 +0200 (Mo, 17 Aug 2015) $
+cc   * $Rev: 4456 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 
       SUBROUTINE EMPIRE
 Ccc

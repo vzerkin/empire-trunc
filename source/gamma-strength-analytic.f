@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4242 $
+Ccc   * $Rev: 4456 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-11-24 23:31:10 +0100 (Mo, 24 Nov 2014) $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,

@@ -1,7 +1,7 @@
-Ccc   * $Rev: 4263 $ 
+Ccc   * $Rev: 4456 $ 
 Ccc   * $Author: rcapote $ 
-Ccc   * $Date: 2015-01-22 02:56:23 +0100 (Do, 22 Jän 2015) $
-Ccc   * $Id$
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Id: ripl2empire.h 4456 2015-08-28 14:58:23Z rcapote $
             
 
       INTEGER NDIM1, NDIM2, NDIM3, NDIM4, NDIM5, NDIM6, NDIM7, NDIM8

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4424 $
+Ccc   * $Rev: 4456 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-19 17:13:40 +0200 (Mi, 19 Aug 2015) $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4424 $
-C $Id: ddhms.f,v 1.25 2006/01/02 06:13:33 herman Exp $
+C CVS Version Management $Revision: 4456 $
+C $Id: ddhms.f 4456 2015-08-28 14:58:23Z rcapote $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2474,9 +2474,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4424 $')
+99005 FORMAT ('  xddhms version: $Revision: 4456 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f,v 1.99 2011/01/18 06:13:33 herman Exp $')
+99010 FORMAT ('  $Id: ddhms.f 4456 2015-08-28 14:58:23Z rcapote $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'

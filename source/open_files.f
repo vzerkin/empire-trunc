@@ -1,7 +1,7 @@
-Ccc   * $Rev: 2576 $
-Ccc   * $Author: gnobre $ 
-Ccc   * $Date: 2012-02-15 09:27:34 -0500 (Wed, 15 Feb 2012) $
-Ccc   * $Id$
+Ccc   * $Rev: 4456 $
+Ccc   * $Author: rcapote $ 
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Id: open_files.f 4456 2015-08-28 14:58:23Z rcapote $
 
       subroutine open_files
 

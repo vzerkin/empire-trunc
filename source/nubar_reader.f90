@@ -1,6 +1,6 @@
-!cc   * $Rev: 2647 $
-!cc   * $Author: shoblit $
-!cc   * $Date: 2012-03-08 16:28:30 -0500 (Thu, 08 Mar 2012) $
+!cc   * $Rev: 4456 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 
 MODULE nubar_reader
 

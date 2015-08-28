@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 3327 $
-c $Id: ddhms.cmb,v 1.8 2007/09/03 14:20:29 Capote Exp $
+c CVS Version Management $Revision: 4456 $
+c $Id: ddhms.cmb 4456 2015-08-28 14:58:23Z rcapote $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin

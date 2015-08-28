@@ -1,10 +1,10 @@
-ccc   $Rev: 3212 $
+ccc   $Rev: 4456 $
 Cc    $Author: rcapote $
-Ccc   $Date: 2012-11-15 11:52:39 +0100 (Thu, 15 Nov 2012) $
+Ccc   $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
 C
 Cc    $Original: 3210 $
-CC    $Author: apalumbo $ 
-CCc   $Date: 2012-11-14 $
+CC    $Author: rcapote $ 
+CCc   $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
  
       REAL*8 FUNCTION SFACTOR(Csection)
 

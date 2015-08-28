@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2014-12-17 09:26:32 +0100 (Mi, 17 Dez 2014) $
-Ccc   * $Id: fitbarrier.f,v 1.7 2009/06/15 21:52:21 Capote Exp $
+Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Id: fitbarrier.f 4456 2015-08-28 14:58:23Z rcapote $
 
       SUBROUTINE WKBFIS(Ee, Nnuc, tfdd, tdirp, tabsp)
 C
