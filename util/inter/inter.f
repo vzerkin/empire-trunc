@@ -1,6 +1,6 @@
-Ccc   * $Author: trkov $
-Ccc   * $Date: 2012/03/09 18:47:57 $ 
-Ccc   * $Id: inter.f,v 8.02 2012/05/16 08:47:57 trkov Exp $ 
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $ 
+Ccc   * $Id: inter.f 4468 2015-08-29 15:06:00Z rcapote $ 
 
 !+++MDC+++
 !...VMS, ANS, WIN, UNX

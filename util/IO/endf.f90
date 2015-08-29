@@ -66,7 +66,7 @@ module ENDF_IO
 
     public
 
-    character*75, parameter, private :: hdlin = ' $Rev::          $  $Date::            $                             1 0  0'
+    character*75, parameter, private :: hdlin = ' $Rev:: 4468     $  $Date:: 2015-08-29#$                             1 0  0'
 
     type endf_mat
         integer mat

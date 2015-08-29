@@ -1,5 +1,5 @@
 *
-* $Id: mnhess.F,v 1.1.1.1 1996/03/07 14:31:30 mclareni Exp $
+* $Id: mnhess.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnhess.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:30  mclareni

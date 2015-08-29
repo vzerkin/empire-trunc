@@ -1,5 +1,5 @@
 *
-* $Id: mnpsdf.F,v 1.2 1996/03/15 18:02:50 james Exp $
+* $Id: mnpsdf.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnpsdf.F,v $
 * Revision 1.2  1996/03/15 18:02:50  james

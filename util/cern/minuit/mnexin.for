@@ -1,5 +1,5 @@
 *
-* $Id: mnexin.F,v 1.1.1.1 1996/03/07 14:31:29 mclareni Exp $
+* $Id: mnexin.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnexin.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:29  mclareni

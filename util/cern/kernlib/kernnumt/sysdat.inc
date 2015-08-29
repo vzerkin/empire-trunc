@@ -1,5 +1,5 @@
 *
-* $Id: sysdat.inc,v 1.1.1.1 1996/02/15 17:48:37 mclareni Exp $
+* $Id: sysdat.inc 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: sysdat.inc,v $
 * Revision 1.1.1.1  1996/02/15 17:48:37  mclareni

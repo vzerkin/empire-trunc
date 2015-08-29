@@ -1,5 +1,5 @@
 *
-* $Id: mnlims.F,v 1.2 1996/03/15 18:02:48 james Exp $
+* $Id: mnlims.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnlims.F,v $
 * Revision 1.2  1996/03/15 18:02:48  james

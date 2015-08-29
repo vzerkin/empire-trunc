@@ -1,5 +1,5 @@
 *
-* $Id: tmprnt.F,v 1.1.1.1 1996/02/15 17:49:04 mclareni Exp $
+* $Id: tmprnt.F 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: tmprnt.F,v $
 * Revision 1.1.1.1  1996/02/15 17:49:04  mclareni

@@ -1,5 +1,5 @@
 *
-* $Id: mnstin.F,v 1.1.1.1 1996/03/07 14:31:32 mclareni Exp $
+* $Id: mnstin.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnstin.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:32  mclareni

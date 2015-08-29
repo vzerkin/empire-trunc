@@ -1,5 +1,5 @@
 *
-* $Id: mncuve.F,v 1.1.1.1 1996/03/07 14:31:29 mclareni Exp $
+* $Id: mncuve.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mncuve.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:29  mclareni

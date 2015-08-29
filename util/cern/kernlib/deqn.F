@@ -1,5 +1,5 @@
 *
-* $Id: deqn.F,v 1.1.1.1 1996/02/15 17:48:49 mclareni Exp $
+* $Id: deqn.F 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: deqn.F,v $
 * Revision 1.1.1.1  1996/02/15 17:48:49  mclareni

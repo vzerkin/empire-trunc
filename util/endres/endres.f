@@ -1,6 +1,6 @@
-Ccc   * $Author: Capote $
-Ccc   * $Date: 2009-11-01 01:01:20 $
-Ccc   * $Id: auxiliary.f,v 1.42 2009-11-01 01:01:20 Capote Exp $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
+Ccc   * $Id: endres.f 4468 2015-08-29 15:06:00Z rcapote $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES

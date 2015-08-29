@@ -1,5 +1,5 @@
 *
-* $Id: mnset.F,v 1.2 1996/03/15 18:02:52 james Exp $
+* $Id: mnset.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnset.F,v $
 * Revision 1.2  1996/03/15 18:02:52  james

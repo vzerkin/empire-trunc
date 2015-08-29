@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2013-09-12 01:33:31 +0200 (Thu, 12 Sep 2013) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
 
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA

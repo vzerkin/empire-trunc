@@ -1,5 +1,5 @@
 *
-* $Id: mnderi.F,v 1.2 1996/03/15 18:02:43 james Exp $
+* $Id: mnderi.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnderi.F,v $
 * Revision 1.2  1996/03/15 18:02:43  james

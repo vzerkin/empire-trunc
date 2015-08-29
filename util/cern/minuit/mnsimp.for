@@ -1,5 +1,5 @@
 *
-* $Id: mnsimp.F,v 1.2 1996/03/15 18:02:54 james Exp $
+* $Id: mnsimp.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnsimp.F,v $
 * Revision 1.2  1996/03/15 18:02:54  james

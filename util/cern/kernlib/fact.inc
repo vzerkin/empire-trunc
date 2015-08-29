@@ -1,5 +1,5 @@
 *
-* $Id: fact.inc,v 1.1.1.1 1996/02/15 17:49:03 mclareni Exp $
+* $Id: fact.inc 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: fact.inc,v $
 * Revision 1.1.1.1  1996/02/15 17:49:03  mclareni

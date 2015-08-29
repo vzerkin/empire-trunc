@@ -1,5 +1,5 @@
 *
-* $Id: mnexcm.F,v 1.2 1996/03/15 18:02:45 james Exp $
+* $Id: mnexcm.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnexcm.F,v $
 * Revision 1.2  1996/03/15 18:02:45  james

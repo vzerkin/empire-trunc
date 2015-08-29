@@ -1,5 +1,5 @@
 *
-* $Id: mnwarn.F,v 1.1.1.1 1996/03/07 14:31:32 mclareni Exp $
+* $Id: mnwarn.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnwarn.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:32  mclareni

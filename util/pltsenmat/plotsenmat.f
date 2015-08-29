@@ -1,6 +1,6 @@
-Ccc   * $Rev$
-Ccc   * $Author$
-Ccc   * $Date$
+Ccc   * $Rev: 4468 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
 
 Ccc
 Ccc   ********************************************************************

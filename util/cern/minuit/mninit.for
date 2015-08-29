@@ -1,5 +1,5 @@
 *
-* $Id: mninit.F,v 1.4 1997/09/02 15:16:08 mclareni Exp $
+* $Id: mninit.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mninit.F,v $
 * Revision 1.4  1997/09/02 15:16:08  mclareni

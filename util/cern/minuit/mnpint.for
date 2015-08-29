@@ -1,5 +1,5 @@
 *
-* $Id: mnpint.F,v 1.1.1.1 1996/03/07 14:31:31 mclareni Exp $
+* $Id: mnpint.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnpint.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:31  mclareni

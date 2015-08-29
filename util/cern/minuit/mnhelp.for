@@ -1,5 +1,5 @@
 *
-* $Id: mnhelp.F,v 1.2 1999/09/03 09:17:47 couet Exp $
+* $Id: mnhelp.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mnhelp.F,v $
 * Revision 1.2  1999/09/03 09:17:47  couet

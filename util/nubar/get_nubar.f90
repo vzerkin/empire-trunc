@@ -1,6 +1,6 @@
-!cc   * $Rev: 2647 $
-!cc   * $Author: shoblit $
-!cc   * $Date: 2012-03-08 16:28:30 -0500 (Thu, 08 Mar 2012) $
+!cc   * $Rev: 4468 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
 
     program get_nubar
 

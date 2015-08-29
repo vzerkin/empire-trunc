@@ -1,5 +1,5 @@
 *
-* $Id: mncomd.F,v 1.1.1.1 1996/03/07 14:31:29 mclareni Exp $
+* $Id: mncomd.for 4468 2015-08-29 15:06:00Z rcapote $
 *
 * $Log: mncomd.F,v $
 * Revision 1.1.1.1  1996/03/07 14:31:29  mclareni
