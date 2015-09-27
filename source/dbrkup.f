@@ -13,31 +13,42 @@
       double precision dbf1(NDAngecis,NDEX),dbf2(NDAngecis,NDEX)
       double precision dsigt(3,NDEX),sigt(5)
 
-      double precision sigi(NDANGecis,4)
-
-      common/main/ebnd,ecm,dex
-      common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
-      common/intcons/ijkl(3),wxyz(15),lll(3),lmxwf(3)
+      double precision sigi(NDAngecis,4)
 
       INTEGER iwrt
 
+      common/main/ebnd,ecm,dex
+      common/angles/ylmi(ndlmx,NDAngecis),thi(NDAngecis),nthi
+      common/intcons/ijkl(3),wxyz(15),lll(3),lmxwf(3)
+
+
       data iwrt/8/
 
-      call prep(lprt,lmx1)
+      call prep(lmx1)
 
-      CALL THORA(iwrt)
+      IF(IOUT.GT.1) THEN
+        CALL THORA(iwrt)
+        write(iwrt,*)
+        write(iwrt,
+     1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
+        write(iwrt,'(''    l    dsig-opt    dsig-fld'')')
+       ENDIF
 
-c      write(iwrt,
-c     1   '(/,'' Partial wave cross sections for projectile - (mb)'')')
-c      write(iwrt,'(''    l    dsig-opt    dsig-fld'')')
-c      call dscat(1,ecm,lmxd,1,sigr,sigfld)
-c      write(iwrt,'(/,'' Ed='',f12.4,'' MeV'', 
-c     1    ''    sigr='',f12.4,'' mb   sig-fld='',f12.4,'' mb'',/)') 
-c     2                                      ecm,sigr,sigfld
+      call dscat(1,ecm,lmxd,1,sigr,sigfld)
+
+      IF(IOUT.GT.1)
+     1   write(iwrt,'(/,'' Ed='',f12.4,'' MeV'', 
+     2    ''    sigr='',f12.4,'' mb   sig-fld='',f12.4,'' mb'',/)') 
+     3                                      ecm,sigr,sigfld
 
 c define energy interval de and (even) number of intervals ne
       ext=ecm-ebnd       
       nxx=ext/dex
+      ex0=ext-nxx*dex
+      IF(ex0.LT.0.5*dex) THEN
+        ex0=ex0+dex
+        nxx=nxx-1
+       ENDIF
 
       ps=0.0d0
       sigi=0.0d0
@@ -51,11 +62,10 @@ c weight for Simpson integration
       sigt=0.0
 
       do nx=1,nxx
-        e1=nx*dex
+        e1=ex0+(nx-1)*dex
         e2=ext-e1
 
-C       call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
-        call tmatrx(e1,e2,ecm,     ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
+        call tmatrx(e1,e2,ecm,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
      1                                                 sigi,dsigt(1,nx))
 
         sigt(1)=sigt(1)+dsigt(1,nx)
@@ -64,18 +74,16 @@ C       call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
 
        end do
 
-      IF(IOUT.GT.1) write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
-
-      if(IOUT.gt.1 .and. nthi.gt.0) write(iwrt,
-     1            '(//,'' Energy Integrated Angular Distributions'',/)') 
-
-      if(IOUT.GT.1 .AND. nthi.gt.0) then
+      if(IOUT.GT.1 .and. nthi.gt.0) THEN
+        write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
+        write(iwrt,
+     1    '(//,'' Energy Integrated Angular Distributions'',/)') 
         write(iwrt,
      1    '(/,''  Inclusive breakup angular distributions - (mb/sr)'')')
-        write(iwrt,'(6x,''theta'',7x,''dsig-brkup1'',
-     1                 6x,''dsig-bf1'',7x,''dsig-tot1'',
-     2                 6x,''dsig-brkup2'',6x,''dsig-bf2'',
-     2                 7x,''dsig-tot2'')')
+        write(iwrt,'(6x,''theta'',7x,''dsig-brkupn'',
+     1                 6x,''dsig-bfn'',7x,''dsig-totn'',
+     2                 6x,''dsig-brkupp'',6x,''dsig-bfp'',
+     2                 7x,''dsig-totp'')')
         do nti=1,nthi
           write(iwrt,'(1f12.4,2(2x,3e15.4))') thi(nti),
      1  dex*sigi(nti,1), dex*sigi(nti,2), dex*(sigi(nti,1)+sigi(nti,2)), 
@@ -83,50 +91,59 @@ C       call tmatrx(e1,e2,ecm,lprt,ps,dps(1,1,nx),dbf1(1,nx),dbf2(1,nx),
          end do
        endif
 
-      if(IOUT.gt.1) THEN
+      if(IOUT.gt.1) then
         write(iwrt,'(//,
      1  '' Energy Integrated Angular Momentum Distributions - (mb)'',
      1  /)') 
 
         write(iwrt,*)
         write(iwrt,
-     1          '(8x,''sigbf(ld)'',3x,''sigf1(l1)'',3x,''sigf2(l2)'')')
+     1          '(8x,''sigbf(ld)'',3x,''sigfp(l1)'',3x,''sigfn(l2)'')')
        ENDIF
-      do ld=1,lmxwf(1)
+
+      do ld=1,lmxd
         ps(ld,1) = dex*ps(ld,1)
-        IF(IOUT.GT.1) write(iwrt,'(i5,9f12.6)') 
-     &                             ld-1,ps(ld,1),(dex*ps(ld,ip),ip=2,3)
+        IF(IOUT.GT.1)
+     1    write(iwrt,'(i5,9f12.6)') ld-1,ps(ld,1),(dex*ps(ld,ip),ip=2,3)
        end do
                  
-      IF(IOUT.gt.1) THEN
-        write(iwrt,
-     1       '(//,'' Spectra - (mb/MeV)'',/)') 
+      if(IOUT.gt.1) THEN 
+        write(iwrt,'(//,'' Spectra - (mb/MeV)'',/)') 
 
         write(iwrt,*)
-        write(iwrt,'(5x,''Ex1(MeV)     dsig-brkup'',
-     1          ''       dsig-bf1       dsig-bf2'')') 
-        DO nx=1,nxx
-          e1=nx*dex
+        write(iwrt,'(6x,''Ep(MeV)     dsig-brkup'',
+     1          ''       dsig-bfn       dsig-bfp'')') 
+        do nx=1,nxx
+          e1=ex0+(nx-1)*dex
           write(iwrt,'(f12.3,3f15.4)') e1,(dsigt(i,nx),i=1,3)
          end do
        ENDIF
 
-      DO i=1,3
+      do i=1,3
         sigt(i)=dex*sigt(i)
        end do
       sigt(4)=sigt(1)+sigt(2)
       sigt(5)=sigt(1)+sigt(3)
-      IF(IOUT.GT.1)    
-     & write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
-     &                                         ecm,(sigt(i),i=1,5)
 
-      IF(IOUT.GT.1) CALL THORA(iwrt)
-      IF(IOUT.GT.1) WRITE(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
+      IF(IOUT.GT.1)
+     1 write(iwrt,'(/,'' Ed='',f12.4,'' MeV  sigbkp='',5f10.4,'' mb'')')
+     1                                          ecm,(sigt(i),i=1,5)
+
+c      write(iwrt,*)
+c      write(iwrt,'(''  Elapsed time = '',f10.2,'' seconds'')') ttot
+c      write(iwrt,'(''      CPU time = '',f10.2,'' seconds'')') cputot
+c      write(iwrt,*)
+
+      IF(IOUT.GT.1) THEN
+        CALL THORA(iwrt)
+        write(iwrt,'(/,8(''=-=-=-=-=-=-=-''),''='',/)')
+       ENDIF
 
       OPEN(45, FILE=ctmp, STATUS='unknown')
-C Parameters for energy grid - nxx,dex
-      WRITE(45,'(i6,2e12.5)') nxx,dex
 
+C neutron-proton energy grid      
+      WRITE(45,'(i6,f12.5)') nxx,dex
+      
 C cross sections - bu, bf,n bf,p incl,n incl,p
       WRITE(45,'(5e12.5)') (sigt(i),i=1,5)
 
@@ -134,26 +151,24 @@ C  Deuteron breakup-fusion loss
       WRITE(45,'(i6)') lmxwf(1)
       WRITE(45,'(6e12.5)') (ps(ld,1),ld=1,lmxwf(1))
 
-C  Proton fusion occupations (neutron emission)
-      WRITE(45,'(i6)') lmxwf(2)
-      WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
-
+C  Neutron fusion occupations
+      WRITE(45,'(2i6,e14.5)') lmxwf(3) !,nxx,ex0
+      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
 C  Neutron DDX
-      WRITE(45,'(2i6)') nthi
+      WRITE(45,'(2i6,e14.5)') nthi !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dbf1(nti,nx),nti=1,nthi),nx=1,nxx)
-
 C  Neutron spectrum
+C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(2,nx),nx=1,nxx)
 
-C  Neutron fusion occupations (proton emission)
-      WRITE(45,'(i6)') lmxwf(3)
-      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
-
+C     Proton fusion occupations
+      WRITE(45,'(2i6,e14.5)') lmxwf(2) !,nxx,ex0
+      WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
 C  Proton DDX
-      WRITE(45,'(2i6)') nthi
+      WRITE(45,'(2i6,e14.5)') nthi !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dbf2(nti,nx),nti=1,nthi),nx=1,nxx) 
-
 C  Proton spectrum
+C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(3,nx),nx=1,nxx)
 
       CLOSE(45)
@@ -162,7 +177,7 @@ C  Proton spectrum
 *
 *------------------------------------------------------------
 *
-      subroutine prep(lprt,lmx1)
+      subroutine prep(lmx1)
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -170,24 +185,21 @@ C  Proton spectrum
       parameter(nptmx=5000)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
+      character*48 filename
       complex*16 frc
 
       double precision ylmi
 
-      dimension amd(6),azd(6),betanl0(3)
-      real md,mf,mf3
+c      dimension ax(4),pox(4,2)
+      dimension betanl0(3)
+      real md,mf
 
       common/main/ebnd,ecm,dex
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/frcor/frc(nptmx),be,frcnst,dr0
       common/intcons/npt1,npt2,npt3,dr,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                             lmx(3),lmxwf(3)
-      common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
-
-      data amd/1.,1.,2.,3.,3.,4./
-c      data asd/0.5,0.5,1.0,0.5,0.5,0.0/
-      data azd/0.,1.,1.,1.,2.,2./
 
       data am0/939.0/,hc/197.32/
       data dr00/0.025/
@@ -199,31 +211,32 @@ c      data asd/0.5,0.5,1.0,0.5,0.5,0.0/
       data vx/1.0,1.0,1.0/
       data wx/1.0,1.0,1.0/
       data frcnst0/0.667/,ebnd/2.224/,dx0/125.0/
+      data rmax0/1.6/,amax0/0.75/
 
       data iwrt/8/
 
-c      open(unit=iwrt,file='dbrkup.out',status='unknown')
-
-      IF(IOUT.GT.1) 
-     &  write(iwrt,'(/,'' ************ In dbrkup **************'')')
-
-      IF(IOUT.GT.1) write(iwrt,*) ' Target:'
+      IF(IOUT.GT.1) THEN
+        write(iwrt,'(/,'' ************ In dbrkup **************'')')
+        write(iwrt,*) ' Target:'
+       ENDIF
 
       zf = INT(IZA(0)/1000)
       mf = IZA(0)-1000*zf
 
-      IF(IOUT.GT.1) write(iwrt,*) zf,mf,frcnst0
-
-      IF(IOUT.GT.1) 
-     &  write(iwrt,'(/,'' Entrance and exit channel info --'',/)')
+      IF(IOUT.GT.1) THEN
+        write(iwrt,*) zf,mf,frcnst0
+        write(iwrt,'(/,'' Entrance and exit channel info --'',/)')
+       ENDIF
 
       do ip=1,3
 
-        if(ip.eq.1) then
-          IF(IOUT.GT.1) write(iwrt,*) ' Entrance channel:'
-         else
-           IF(IOUT.GT.1) write(iwrt,*) ' Exit channel:'
-         endif
+        IF(IOUT.GT.1) THEN
+          if(ip.eq.1) then
+            write(iwrt,*) ' Entrance channel:'
+           else
+            write(iwrt,*) ' Exit channel:'
+           endif
+         ENDIF
 
         IF(ip.EQ.1) THEN        
           lmxwf(1) = MIN(MAX(30,INT(0.1*sqrt(EIN)*nol+5)),nol)
@@ -231,71 +244,22 @@ c      open(unit=iwrt,file='dbrkup.out',status='unknown')
           lmxwf(ip) = MIN(INT(0.6*lmxwf(1)),NDLW)
          ENDIF
 
-        IF(IOUT.GT.1) 
+        IF(IOUT.GT.1)
      1    write(iwrt,*) zd(ip),md(ip),sd(ip),betanl0(ip),lmxwf(ip)
 
         betanl(ip)=0.25*betanl0(ip)**2*am0*md(ip)*mf/(hc**2*(md(ip)+mf))
 
-        ipx=99
-        do ipy=1,6
-          if(abs(zd(ip)-azd(ipy)).lt.0.1 .and. 
-     1       abs(md(ip)-amd(ipy)).lt.0.1) ipx=ipy
-         end do
-
-        ipot=1
-        IF(IOUT.GT.1) write(iwrt,*) 'potential parameters'
-        IF(IOUT.GT.1) write(iwrt,*) ipot,vx(ip),wx(ip)
-c     ****
-c     ip = 1 neutron         ipot = 1 --> koning - delaroche
-c                                   2 --> wilmore - hodgson
-c                                   3 --> beccheti - greenless
-c                                   4 --> ferrer - carlson - rapaport
-c                                   5 --> bersillon - cindro
-c                                   6 --> madland (actinides)
-c          2 proton          ipot = 1 --> koning - delaroche
-c                                   2 --> perey
-c                                   3 --> beccheti - greenless
-c          3 deuteron        ipot = 1 --> an - cai
-c                                   2 --> han - shi - shen
-c                                   3 --> lohr - haeberli
-c                                   4 --> perey
-c          4 triton          ipot = 1 --> beccheti - greenless
-c          5 helium-3        ipot = 1 --> beccheti - greenless
-c          6 alpha           ipot = 1 --> potentiel moyen
-c
-
-        do i=1,5
-          aa(i,ip)=0.0
-          rr(i,ip)=0.0
-          do j=1,4
-            pot(j,i,ip)=0.0
-           end do
-         end do
-        vc(ip)=0.0
-        ef(ip)=0.0
-        ewmax(ip)=0.0
-c
-        call syspot(ip,ipx,ipot)
-       
-        IF(IOUT.GT.1) THEN 
-          write(iwrt,3) rr(1,ip),aa(1,ip),(pot(1,i,ip),i=1,5)
-          write(iwrt,3) rr(2,ip),aa(2,ip),(pot(2,i,ip),i=1,5),aa(5,ip)
-          write(iwrt,3) rr(3,ip),aa(3,ip),(pot(3,i,ip),i=1,5)
-          write(iwrt,3) rr(5,ip),ewmax(ip),ef(ip)
-         ENDIF
-
        end do
 
-      IF(IOUT.GT.1) THEN 
+      IF(IOUT.GT.1) THEN
         write(iwrt,*)' ebnd=? D0=?'
         write(iwrt,*) ebnd,dx0
        ENDIF
 
       dr0=0.1
-      lprt=-1
       IF(IOUT.GT.1) THEN
-        write(iwrt,*) 'dr=? lprt=?'
-        write(iwrt,*) dr0,lprt
+        write(iwrt,*) 'dr=?'
+        write(iwrt,*) dr0
        ENDIF
 
 c thetai
@@ -307,9 +271,11 @@ c thetai
 
       ecm = EIN
       dex = DE
+
       IF(IOUT.GT.1) THEN
         write(iwrt,*) 'Ecm, dEx:'
         write(iwrt,*) ecm, dex
+
         write(iwrt,
      1        '(/,'' ************* End of input *****************'',/)')
 
@@ -319,20 +285,14 @@ c thetai
      2              zf,mf
         write(iwrt,'(19x,''Zp = '',f4.0,6x,''Ap = '',f4.0,6x,
      1          ''Sp = '',f4.1,/)') zd(1),md(1),sd(1)
-        write(iwrt,'(''     Exit channel: Zd1= '',f4.0,6x,''Ad1= '',f4.0,
-     1          6x,''Sd1= '',f4.1,/)') zd(2),md(2),sd(2)
+        write(iwrt,'(''     Exit channel: Zd1= '',f4.0,6x,''Ad1= '',
+     1          f4.0,6x,''Sd1= '',f4.1,/)') zd(2),md(2),sd(2)
 
-        write(iwrt,'(''     Exit channel: Zd2= '',f4.0,6x,''Ad2= '',f4.0,
-     1          6x,''Sd2= '',f4.1,/)') zd(3),md(3),sd(3)
+        write(iwrt,'(''     Exit channel: Zd2= '',f4.0,6x,''Ad2= '',
+     1          f4.0,6x,''Sd2= '',f4.1,/)') zd(3),md(3),sd(3)
        ENDIF
-c
-      rmax=0.0
-      mf3=mf**(1./3.)
-      do ip=1,3
-        do j=1,3
-          rmax=max(rmax,rr(j,ip)*mf3+10.0*aa(j,ip))
-         end do
-       end do
+
+      rmax=rmax0*mf**(1./3.)+10.0*amax0
 
       dr0=max(dr0,dr00)
       dr=dr0
@@ -363,350 +323,6 @@ c
       return
 
  3    format(7f10.5,f6.3)
-      end
-*
-*------------------------------------------------------------
-*
-c     deck syspot
-      subroutine syspot(ip,ipx,ipot)
-c***********************************************************************
-c     potentiels extraits de la compilation de c.m.perey et f.g.perey  *
-c     atomic data and nuclear data tables   17 (1976) 1-101            *
-c***********************************************************************
-      real mt,mt2,mt3,mtt,nmzsa
-      real md
-      common/const/md(3),zd(3),sd(3),betanl(3),mt,zt
-      common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
-c
-      mt2=mt*mt
-      mt3=mt2*mt
-      mtt=mt**(1./3.)
-      nmzsa=(mt-2.0*zt)/mt
-c
-      go to (10,20,30,40,50,60),ipx
-c
-   10 go to (11,12,13,14,15,16),ipot
-c     neutrons
-c     ********
- 11   continue
-c     parametres de Koning - Delaroche                    23 < a < 210
-c                                                      0.001 < e < 200
-      rr(1,ip)=1.3039-0.4054/mtt
-      aa(1,ip)=0.6778-1.487e-4*mt
-      pot(1,1,ip)=59.30-21.0*nmzsa-0.024*mt
-      pot(1,2,ip)=7.228e-3-1.48e-6*mt
-      pot(1,3,ip)=1.994e-5-2.0e-8*mt
-      pot(1,4,ip)=7.0e-9
-      rr(2,ip)=1.3424-0.01585*mtt
-      aa(2,ip)=0.5446-1.656e-4*mt
-      pot(2,1,ip)=16.0-16.0*nmzsa
-      pot(2,2,ip)=0.0180+3.802e-3/(1.+exp((mt-156.)/8.))
-      pot(2,3,ip)=11.5
-      rr(3,ip)=rr(1,ip)
-      aa(3,ip)=aa(1,ip)
-      pot(3,1,ip)=12.195+0.0167*mt
-      pot(3,2,ip)=73.55+0.0795*mt
-      rr(4,ip)=1.1854-0.647/mtt
-      aa(4,ip)=0.59
-      pot(4,1,ip)=5.922+0.0030*mt
-      pot(4,2,ip)=0.0040
-      ef(ip)=-11.2814+0.02646*mt
-      rr(5,ip)=0.
-      go to 100
- 12   continue
-c     parametres de wilmore - hodgson                     40 < a
-c                                                          e < # 10
-      rr(1,ip)=1.322-7.6e-04*mt+4.0e-06*mt2-8.0e-09*mt3
-      aa(1,ip)=0.66
-      pot(1,1,ip)=47.01
-      pot(1,2,ip)=-0.267
-      pot(1,3,ip)=-0.00118
-      rr(2,ip)=1.266-3.7e-04*mt+2.0e-06*mt2-4.0e-09*mt3
-      aa(2,ip)=0.48
-      pot(2,1,ip)=9.52
-      pot(2,2,ip)=-0.053
-      rr(4,ip)=rr(1,ip)
-      aa(4,ip)=aa(1,ip)
-      pot(4,1,ip)=7.0
-      go to 100
- 13   continue
-c     parametres de beccheti - greenless              40 < a
-c                                                     10 < e < 50
-      rr(1,ip)=1.17
-      aa(1,ip)=0.75
-      pot(1,1,ip)=56.3-24.0*nmzsa
-      pot(1,2,ip)=-0.32
-      rr(2,ip)=1.26
-      aa(2,ip)=0.58
-      pot(2,1,ip)=13.0-12.0*nmzsa
-      pot(2,2,ip)=-0.25
-      rr(3,ip)=1.26
-      aa(3,ip)=0.58
-      pot(3,1,ip)=-1.56
-      pot(3,2,ip)=0.22
-      rr(4,ip)=1.01
-      aa(4,ip)=0.75
-      pot(4,1,ip)=6.2
-      go to 100
- 14   continue
-c     parametres de ferrer et al.                     24 < a < 209
-c     nucl.phys. a275(1977)325-341                         e = 11
-c
-      rr(1,ip)=1.27
-      aa(1,ip)=0.71
-      pot(1,1,ip)=47.14-22.50*nmzsa
-      rr(2,ip)=1.27
-      aa(2,ip)=0.434
-      pot(2,1,ip)=12.16-2.03*nmzsa
-      rr(4,ip)=1.08
-      aa(4,ip)=0.71
-      pot(4,1,ip)=4.55
-      go to 100
- 15   continue
-c     parametres bersillon cindro
-c     contribution to the 5th international symposium on
-c     interactions of fast neutrons with nuclei,
-c     gaussig, ddr, 17-21 nov 1975
-c
-      rr(1,ip)=1.182+1.93e-04*mt
-      aa(1,ip)=0.65
-      pot(1,1,ip)=71.
-      rr(2,ip)=1.21
-      aa(2,ip)=0.47
-      pot(2,1,ip)=7.
-      pot(2,2,ip)=0.4
-      rr(4,ip)=rr(1,ip)
-      aa(4,ip)=aa(1,ip)
-      pot(4,1,ip)=7.
-      beta=0.85
-      go to 100
- 16   continue
-c     parametres de madland                      actinides
-c     harwell conference                         e < 10 mev
-c     september 25-29, 1978
-c     -----  temporary values  -----
-c
-      rr(1,ip)=1.264
-      aa(1,ip)=0.612
-      pot(1,1,ip)=50.378-27.073*nmzsa
-      pot(1,2,ip)=-0.354
-      rr(2,ip)=1.256
-      aa(2,ip)=0.553
-      aa(5,ip)=0.0144
-      pot(2,1,ip)=9.265-12.666*nmzsa
-      pot(2,2,ip)=-0.232
-      pot(2,3,ip)=+0.03318
-      rr(4,ip)=1.01
-      aa(4,ip)=0.75
-      pot(4,1,ip)=6.2
-      ewmax(ip)=10.
-      go to 100
-c
-   20 go to (21,22,23),ipot
-c     protons
-c     *******
- 21   continue
-c     parametres de Koning - Delaroche           23 < a < 210
-c                                             0.001 < e < 200
-      rr(1,ip)=1.3039-0.4054/mtt
-      aa(1,ip)=0.6778-1.487e-4*mt
-      pot(1,1,ip)=59.30+21.0*nmzsa-0.024*mt
-      pot(1,2,ip)=7.067e-3+4.23e-6*mt
-      pot(1,3,ip)=1.729e-5+1.136e-8*mt
-      pot(1,4,ip)=7.0e-9
-      rr(2,ip)=1.3424-0.01585*mtt
-      aa(2,ip)=0.5187+5.205e-4*mt
-      pot(2,1,ip)=16.0+16.0*nmzsa
-      pot(2,2,ip)=0.0180+3.802e-3/(1.+exp((mt-156.)/8.))
-      pot(2,3,ip)=11.5
-      rr(3,ip)=rr(1,ip)
-      aa(3,ip)=aa(1,ip)
-      pot(3,1,ip)=14.667+0.009629*mt
-      pot(3,2,ip)=73.55+0.0795*mt
-      rr(4,ip)=1.1854-0.647/mtt
-      aa(4,ip)=0.59    
-      pot(4,1,ip)=5.922+0.0030*mt
-      pot(4,2,ip)=0.0040
-      ef(ip)=-8.4075+0.01378*mt
-      rr(5,ip)=1.198+(0.697+12.994/mt)/mtt**2  
-      vc(ip)=1.73*zt*pot(1,1,ip)/(rr(5,ip)*mtt)
-      go to 100
- 22   continue
-c     parametres de perey                        30 < a < 100
-c                                                     e < 20
-      rr(1,ip)=1.25
-      aa(1,ip)=0.65
-      pot(1,1,ip)=53.3+27.0*nmzsa+0.4*zt/mtt
-      pot(1,2,ip)=-0.55
-      rr(2,ip)=1.25
-      aa(2,ip)=0.47
-      pot(2,1,ip)=13.5
-      rr(4,ip)=1.25
-      aa(4,ip)=0.47
-      pot(4,1,ip)=7.5
-      rr(5,ip)=1.25
-      go to 100
- 23   continue
-c     parametres de beccheti - greenless          a < 40
-c                                            20 < e < 50
-      rr(1,ip)=1.17
-      aa(1,ip)=0.75
-      pot(1,1,ip)=54.0+24.0*nmzsa+0.4*zt/mtt
-      pot(1,2,ip)=-0.32
-      rr(2,ip)=1.32
-      aa(2,ip)=0.51+0.7*nmzsa
-      pot(2,1,ip)=11.8+12.0*nmzsa
-      pot(2,2,ip)=-0.25
-      rr(3,ip)=1.32
-      aa(3,ip)=0.51+0.7*nmzsa
-      pot(3,1,ip)=-2.7
-      pot(3,2,ip)=0.22
-      rr(4,ip)=1.01
-      aa(4,ip)=0.75
-      pot(4,1,ip)=6.2
-      rr(5,ip)=1.25
-      go to 100
-c
-   30 go to (31,32,33),ipot
-c     deuterons
-c     *********
- 31   continue
-c     parametres de An - Cai                        11 < a <239
-c                                                    e < 200
-      rr(1,ip)=1.152-7.76e-3/mtt
-      aa(1,ip)=0.719+0.0126*mtt
-      pot(1,1,ip)=91.85+1.605*0.4*zt/mtt
-      pot(1,2,ip)=-0.249
-      pot(1,3,ip)=1.16e-4
-      rr(2,ip)=1.334+0.152/mtt
-      aa(2,ip)=0.531+0.062*mtt
-      pot(2,1,ip)=10.83
-      pot(2,2,ip)=-0.0306
-      rr(3,ip)=1.305+0.0997/mtt
-      aa(3,ip)=0.855-0.1*mtt
-      pot(3,1,ip)=1.104
-      pot(3,2,ip)=0.0622
-      rr(4,ip)=0.972
-      aa(4,ip)=1.011
-      pot(4,1,ip)=3.557
-      rr(5,ip)=1.3030
-      go to 100
- 32   continue
-c     parametres de Han - Shi - Shen               11 < a <210
-c                                                    e < 200
-      rr(1,ip)=1.174
-      aa(1,ip)=0.809
-      pot(1,1,ip)=82.178-34.811*nmzsa+2.646*0.4*zt/mtt
-      pot(1,2,ip)=-0.14809
-      pot(1,3,ip)=-8.8571e-4
-      rr(2,ip)=1.3275
-      aa(2,ip)=0.4649+0.045*mtt
-      pot(2,1,ip)=20.968-43.398*nmzsa
-      pot(2,2,ip)=-7.94e-2
-      rr(3,ip)=1.563
-      aa(3,ip)=0.700+0.045*mtt
-      pot(3,1,ip)=-4.916+35.0*nmzsa
-      pot(3,2,ip)=5.55e-2
-      pot(3,3,ip)=4.42e-5
-      rr(4,ip)=1.234
-      aa(4,ip)=0.813
-      pot(4,1,ip)=3.703
-c     Wso=-0.206
-      rr(5,ip)=1.698
-      go to 100
- 33   continue
-c     parametres de lohr - haeberli               40 < a
-c                                                  8 < e < 13
-      rr(1,ip)=1.05
-      aa(1,ip)=0.86
-      pot(1,1,ip)=91.13+2.2*zt/mtt
-      rr(2,ip)=1.43
-      aa(2,ip)=0.5+0.013*mtt**2
-      pot(2,1,ip)=218.0/mtt**2
-      rr(4,ip)=0.75
-      aa(4,ip)=0.50
-      pot(4,1,ip)=7.0
-      rr(5,ip)=1.3
-      go to 100
- 34   continue
-c     parametres de perey                             12 < e < 25
-      rr(1,ip)=1.15
-      aa(1,ip)=0.81
-      pot(1,1,ip)=81.0+2.0*zt/mtt
-      pot(1,2,ip)=-0.22
-      rr(2,ip)=1.34
-      aa(2,ip)=0.68
-      pot(2,1,ip)=14.4
-      pot(2,2,ip)=0.24
-      rr(5,ip)=1.15
-      go to 100
-c
-   40 continue
-c     tritons
-c     *******
-c     parametres de beccheti - greenless              40 < a
-c                                                          e < 40
-      rr(1,ip)=1.20
-      aa(1,ip)=0.72
-      pot(1,1,ip)=165.0-6.4*nmzsa
-      pot(1,2,ip)=-0.17
-      rr(3,ip)=1.40
-      aa(3,ip)=0.84
-      pot(3,1,ip)=46.0-110.0*nmzsa
-      pot(3,2,ip)=-0.33
-      rr(4,ip)=1.20
-      aa(4,ip)=0.72
-      pot(4,1,ip)=2.5
-      rr(5,ip)=1.30
-      go to 100
-c
-   50 continue
-c     helium-3
-c     ********
-c     parametres de beccheti - greenless              40 < a
-c                                                          e < 40
-      rr(1,ip)=1.20
-      aa(1,ip)=0.72
-      pot(1,1,ip)=151.9+50.0*nmzsa
-      pot(1,2,ip)=-0.17
-      rr(3,ip)=1.40
-      aa(3,ip)=0.88
-      pot(3,1,ip)=41.7-44.0*nmzsa
-      pot(3,2,ip)=-0.33
-      rr(4,ip)=1.20
-      aa(4,ip)=0.72
-      pot(4,1,ip)=2.5
-      rr(5,ip)=1.30
-      go to 100
-c
-   60 go to (61,62),ipot
-c     alphas
-c     ******
-   61 continue
-c     parametres moyens
-c     mac fadden et satchler  nucl.phys. 84(1966)177
-c
-      rr(1,ip)=1.40
-      aa(1,ip)=0.52
-      pot(1,1,ip)=185.
-      rr(3,ip)=1.40
-      aa(3,ip)=0.52
-      pot(3,1,ip)=25.
-      rr(5,ip)=1.40
-      go to 100
-   62 continue
-c     mac fadden and satchler    nea parameters  13/10/83
-c
-      rr(1,ip)=1.442
-      aa(1,ip)=0.520
-      pot(1,1,ip)=164.7
-      rr(3,ip)=1.442
-      aa(3,ip)=0.520
-      pot(3,1,ip)=22.4
-      rr(5,ip)=1.25
-      go to 100
-c
-  100 return
       end
 *
 *------------------------------------------------------------
@@ -743,8 +359,7 @@ c
 *
 *------------------------------------------------------------
 *
-c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
-      subroutine tmatrx(e1,e2,ed,     ps,dps,dbf1,dbf2,sigi,dsigt)
+      subroutine tmatrx(e1,e2,ed,ps,dps,dbf1,dbf2,sigi,dsigt)
 
       use brkfuswf
 
@@ -758,7 +373,7 @@ c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
       double precision dbf1(NDANGecis),dbf2(NDANGecis)
       double precision sigi(NDANGecis,4)
 
-      complex*16 ovrlp,bfint
+      complex*16 ovrlp0,ovrlp,bfint
 
       complex*16 brkup
       complex*16 tb(ntlmx)
@@ -766,7 +381,8 @@ c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
       double precision df2(NDANGecis),db2(NDANGecis)
       double precision dps(nol,3)
       double precision cg(nol),cgp(nol),fase,fasep,fang
-      double precision pidp,sig0
+      double precision pidp,sig0,dphi
+      double precision bf1,bf2
 
       real md,mf
       double precision ylmi
@@ -789,19 +405,19 @@ c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
       call setpoints(ed,e1)
 
       call dscat(1,ed,lmxd,0,sigrd,sigfldd)
-      IF(IOUT .GT. 4) 
-     & write(iwrt,'(/,''   Ed='',f12.4,'' MeV    lmaxd='', i3,
-     &    ''    sigrd='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
+      IF(IOUT.GT.4)
+     1  write(iwrt,'(/,''   Ed='',f12.4,'' MeV    lmaxd='', i3,
+     1    ''    sigrd='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
 
       call dscat(2,e1,lmx1,0,sigr1,sigfld1)
-      IF(IOUT .GT. 4) 
-     & write(iwrt,'(''   E1='',f12.4,'' MeV    lmax1='', i3,
-     &    ''    sigr1='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
+      IF(IOUT.GT.4)
+     1  write(iwrt,'(''   E1='',f12.4,'' MeV    lmax1='', i3,
+     1    ''    sigr1='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
 
       call dscat(3,e2,lmx2,0,sigr2,sigfld2)
-      IF(IOUT .GT. 4) 
-     &  write(iwrt,'(''   E2='',f12.4,'' MeV    lmax2='', i3,
-     &    ''    sigr2='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
+      IF(IOUT.GT.4)
+     1  write(iwrt,'(''   E2='',f12.4,'' MeV    lmax2='', i3,
+     1    ''    sigr2='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
 
       lma=max(lmx1,lmx2)
       lma=lma*(lma+1)*(2*lma+1)/6
@@ -835,17 +451,29 @@ c     subroutine tmatrx(e1,e2,ed,lprt,ps,dps,dbf1,dbf2,sigi,dsigt)
               sqx123=fase*sqx12*cg(1)
 
               id=id+1
-              brkup=sqx123*ovrlp(ld,l1,l2,bfwf(1,1,id),bfwf(1,2,id))
+              if(l1.gt.lmx(2). and. l2.gt.lmx(3)) then
+                brkup=sqx123*ovrlp0(ld,l1,l2,bfwf(1,1,id),bfwf(1,2,id))
+               else
+                brkup=sqx123*ovrlp(ld,l1,l2,bfwf(1,1,id),bfwf(1,2,id))
+               endif
 
               tb(id)=brkup
 c
 c  loops for calculation of inclusive angular distributions when nthi.gt.0
 c
               if(nthi.le.0) then
-                bf1=sqx123**2*bfint(2,ld,l1,l2,ld,l1,l2,
+                if(l1.gt.lmx(2)) then
+                  bf1=0.0d0
+                 else
+                  bf1=sqx123**2*bfint(2,ld,l1,l2,ld,l1,l2,
      1                                     bfwf(1,1,id),bfwf(1,1,id))
-                bf2=sqx123**2*bfint(3,ld,l1,l2,ld,l1,l2,
+                 endif
+                if(l2.gt.lmx(3)) then
+                  bf2=0.0d0
+                 else
+                  bf2=sqx123**2*bfint(3,ld,l1,l2,ld,l1,l2,
      1                                     bfwf(1,2,id),bfwf(1,2,id))
+                 endif
                else
 
                 idp=0
@@ -874,15 +502,19 @@ c
 c accumulate inclusive angular distributions for particle 1
                         if(l1.eq.l1p) then
 
-                          mp=l1p+l2p-ldp-1
-                          fasep=1+4*(mp/4)-mp
-
                           call cleb(l1p-1,l2p-1,ldp-1,cgp) 
-                          sqx123p=fasep*sqx12p*cgp(1)
 
-                          bf1=sqx123*sqx123p
-     1                      *bfint(2,ld,l1,l2,ldp,l1p,l2p,
+                          if(l1.gt.lmx(2)) then
+                            bf1=0.0d0
+                           else
+                            mp=l1p+l2p-ldp-1
+                            fasep=1+4*(mp/4)-mp
+                            sqx123p=fasep*sqx12p*cgp(1)
+  
+                            bf1=sqx123*sqx123p
+     1                         *bfint(2,ld,l1,l2,ldp,l1p,l2p,
      2                                      bfwf(1,1,id),bfwf(1,1,idp))
+                           endif
 
                           do nti=1,nthi
                             fang=cg(1)*ylmi(il2+1,nti)
@@ -904,15 +536,20 @@ c accumulate inclusive angular distributions for particle 1
 c accumulate inclusive angular distributions for particle 2
                         if(l2.eq.l2p) then
 
-                          mp=l1p+l2p-ldp-1
-                          fasep=1+4*(mp/4)-mp
-
                           call cleb(l1p-1,l2p-1,ldp-1,cgp) 
-                          sqx123p=fasep*sqx12p*cgp(1)
 
-                          bf2=sqx123*sqx123p
-     1                      *bfint(3,ld,l1,l2,ldp,l1p,l2p,
+                          if(l2.gt.lmx(3)) then
+                            bf2=0.0d0
+                           else
+                            mp=l1p+l2p-ldp-1
+                            fasep=1+4*(mp/4)-mp
+                            sqx123p=fasep*sqx12p*cgp(1)
+
+                            bf2=sqx123*sqx123p
+     1                         *bfint(3,ld,l1,l2,ldp,l1p,l2p,
      2                                      bfwf(1,2,id),bfwf(1,2,idp))
+
+                           endif
 
                           do nti=1,nthi
                             fang=cg(1)*ylmi(il1+1,nti)
@@ -984,10 +621,10 @@ c
 c
 c - printing of differential cross sections and angular distributions
 c
-      if(IOUT.GT.4 .and. nthi.gt.0) 
+      if(IOUT.gt.4 .and. nthi.gt.0) 
      1     write(iwrt,'(//,'' Angular Distributions'')') 
 
-      if(IOUT.GT.4 .AND. nthi.gt.0) then
+      if(IOUT.gt.4 .and. nthi.gt.0) then
         write(iwrt,'(/,
      1   ''  Inclusive breakup angular distributions - (mb/sr/MeV)'')')
         write(iwrt,'(6x,''theta'',7x,''dsig-brkup1'',
@@ -1013,9 +650,9 @@ c
          end do
        endif
 
-      IF(IOUT.GT.4)
-     & write(iwrt,'(/,3x,''E1='',f7.2,3x,''E2='',f7.2,3x,
-     &          ''dsig/dE='',3f10.4,'' (mb/MeV)'')') e1,e2,dsigt
+      IF(IOUT.GT.4) 
+     1  write(iwrt,'(/,3x,''E1='',f7.2,3x,''E2='',f7.2,3x,
+     1          ''dsig/dE='',3f10.4,'' (mb/MeV)'')') e1,e2,dsigt
 
       call daxs
       return
@@ -1027,28 +664,27 @@ c
 
       parameter(nptmx=5000)
 
-      real mu,mf3
+      real mu
       dimension ecm(3)
 
       real md,mf
       complex*16 frc
+      integer iwrt
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
-      common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
 
-C     integer iwrt 
-C     data iwrt/8/
+      data rmax0/1.6/,amax0/0.75/
 
-      mf3=mf**(1.0/3.0)
+C      data iwrt/8/
 
       ecm(1)=et
       ecm(2)=e1
       ecm(3)=et-e1-be
 
-      rmax1=0.0
+      rmax1=rmax0*mf**(1.0/3.0)+10.0*amax0
       rmax2=0.0
       do ip=1,3
         mu=md(ip)*mf/(md(ip)+mf)
@@ -1057,9 +693,6 @@ C     data iwrt/8/
         ak(ip)=sqrt(ak2)
         zz=zd(ip)*zf
         eta(ip)=max(0.15748603*zz*sqrt(mu/ecm(ip)),1.01e-6)
-        do j=1,3
-          rmax1=max(rmax1,rr(j,ip)*mf3+10.0*aa(j,ip))
-         end do
         rmax2=max(rmax2,
      1       (eta(ip)+sqrt(eta(ip)**2+lmxwf(ip)*(lmxwf(ip)+1.)))/ak(ip))
        end do
@@ -1096,6 +729,98 @@ c     1             ''rmax3= '',f8.2,'' fm'')') npt3,h,npt3*h
 *
 *------------------------------------------------------------
 *
+      function ovrlp0(l1,l2,l3,bfwf1,bfwf2)
+c
+c  calculates the overlap of the projectile and the two breakup product
+c  scattering wavefunctions
+c
+      parameter(npt1mx=500,nptmx=5000)
+      parameter(nol=95)
+
+      complex*16 ovrlp0
+      complex*16 bfwf1(npt1mx),bfwf2(npt1mx)
+
+      double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
+      complex*16 wf0,nr,wfx
+
+      complex*16 wfs,wfc,smtrx,cph
+      complex*16 frc
+      real md,mf
+      
+      common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
+      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
+     1                                            lmx(3),lmxwf(3)
+      common/frcor/frc(nptmx),be,frcnst,dr0
+      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
+     1  cph(nol,3),wpot(nptmx,3)
+
+      data iwrt/6/
+
+      ovrlp0=0.0d0
+
+      wt=4.0d0/3.0d0
+      dwt=-0.5d0*wt
+
+      do n=1,npt2
+        ovrlp0=ovrlp0+wt*frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,3)/n
+        wt=wt+dwt
+        dwt=-dwt
+       end do
+
+c  Correct for last term in real integral and first term in complex integrals
+
+      wfx=frc(npt2)*((1.0d0,-1.0d0)*conjg(wfc(1,l1,1))
+     1         +(1.0d0,1.0d0)*smtrx(l1,1)*wfc(1,l1,1))/npt2
+
+      ovrlp0=ovrlp0+0.125d0*wt*wfx*wfs(npt2,l2,2)*wfs(npt2,l3,3)
+
+c  Decaying exponential part of Coulomb functions (k*Im(r)) from
+c  the complex plane integral are included explicitly here as 
+c  differences (or decaying sums) to avoid overflow/underflow errors
+
+      dx21=exp((ak(2)-md(2)*ak(1)/(md(2)+md(3)))*h)
+      sx21=exp(-(ak(2)+md(2)*ak(1)/(md(2)+md(3)))*h)
+      dx31=exp((mf*ak(3)/(mf+md(2))-md(3)*ak(1)/(md(2)+md(3)))*h)
+      sx31=exp(-(mf*ak(3)/(mf+md(2))+md(3)*ak(1)/(md(2)+md(3)))*h)
+
+      d21=1.0d0
+      s21=1.0d0
+      d31=1.0d0
+      s31=1.0d0  
+
+      do n=2,npt3
+        nr=npt2+(0.0d0,1.0d0)*(n-1)
+
+        d21=d21*dx21
+        s21=s21*sx21
+        d31=d31*dx31
+        s31=s31*sx31
+
+        ovrlp0=ovrlp0
+     1   -0.125d0*wt*frc(npt2)*(conjg(wfc(n,l1,1)/nr)
+     2      *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,4)))
+     3      *(s31*conjg(wfc(n,l3,3))-smtrx(l3,3)*d31*conjg(wfc(n,l3,5)))
+     4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
+     5                 *(d21*wfc(n,l2,4)-smtrx(l2,2)*s21*wfc(n,l2,2))
+     6                 *(d31*wfc(n,l3,5)-smtrx(l3,3)*s31*wfc(n,l3,3)))
+        wt=wt+dwt
+        dwt=-dwt
+       end do
+
+      ovrlp0=cph(l1,1)*cph(l2,2)*cph(l3,3)*ovrlp0/(ak(1)*ak(2)*ak(3))
+
+      do n=1,npt1
+
+        bfwf1(n)=0.0d0
+        bfwf2(n)=0.0d0
+
+       end do
+
+      return
+      end
+*
+*------------------------------------------------------------
+*
       function ovrlp(l1,l2,l3,bfwf1,bfwf2)
 c
 c  calculates the overlap of the projectile and the two breakup product
@@ -1108,8 +833,8 @@ c
       complex*16 bfwf1(npt1),bfwf2(npt1)
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
-      complex*16 ovrlp0(0:nptmx)
-      complex*16 ovrlp1,ovrlp2,nr,wfx
+      complex*16 ovrlpi0(0:nptmx)
+      complex*16 vrlp1,ovrlp2,nr,wfx
       complex*16 a11,a12,a13,a21,a22,a23,b1,b2,b3
 
       complex*16 wfs,wfc,smtrx,cph
@@ -1123,7 +848,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-C     data iwrt/8/
+C      data iwrt/8/
 
       ovrlp=0.0d0
       ovrlp1=0.0d0
@@ -1220,20 +945,20 @@ c      write(*,'(15x,3e15.5)') abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
       ovrlp2=12.0d0*ovrlp2
 
       b1=0.0d0
-      ovrlp0(0)=0.0d0
+      ovrlpi0(0)=0.0d0
       do n=1,npt1,2
 
         b2=frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,3)/n
         b3=frc(n+1)*wfs(n+1,l1,1)*wfs(n+1,l2,2)*wfs(n+1,l3,3)/(n+1)
 
-        ovrlp0(n)=ovrlp0(n-1)+5.0d0*b1+8.0d0*b2-b3
-        ovrlp0(n+1)=ovrlp0(n)-b1+8.0d0*b2+5.0d0*b3
+        ovrlpi0(n)=ovrlpi0(n-1)+5.0d0*b1+8.0d0*b2-b3
+        ovrlpi0(n+1)=ovrlpi0(n)-b1+8.0d0*b2+5.0d0*b3
 
         b1=b3
        end do
 
-      bfwf1(npt1)=wfs(npt1,l2,2)*ovrlp1+wfs(npt1,l2,4)*ovrlp0(npt1)
-      bfwf2(npt1)=wfs(npt1,l3,3)*ovrlp2+wfs(npt1,l3,5)*ovrlp0(npt1)
+      bfwf1(npt1)=wfs(npt1,l2,2)*ovrlp1+wfs(npt1,l2,4)*ovrlpi0(npt1)
+      bfwf2(npt1)=wfs(npt1,l3,3)*ovrlp2+wfs(npt1,l3,5)*ovrlpi0(npt1)
 
       a11=frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,4)*wfs(npt1,l3,3)/npt1
       a21=frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,2)*wfs(npt1,l3,5)/npt1
@@ -1248,14 +973,14 @@ c      write(*,'(15x,3e15.5)') abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
         ovrlp1=ovrlp1+5.0d0*a11+8.0d0*a12-a13
         ovrlp2=ovrlp2+5.0d0*a21+8.0d0*a22-a23
 
-        bfwf1(n)=wfs(n,l2,2)*ovrlp1+wfs(n,l2,4)*ovrlp0(n)
-        bfwf2(n)=wfs(n,l3,3)*ovrlp2+wfs(n,l3,5)*ovrlp0(n)
+        bfwf1(n)=wfs(n,l2,2)*ovrlp1+wfs(n,l2,4)*ovrlpi0(n)
+        bfwf2(n)=wfs(n,l3,3)*ovrlp2+wfs(n,l3,5)*ovrlpi0(n)
 
         ovrlp1=ovrlp1-a11+8.0d0*a12+5.0d0*a13
         ovrlp2=ovrlp2-a21+8.0d0*a22+5.0d0*a23
 
-        bfwf1(n-1)=wfs(n-1,l2,2)*ovrlp1+wfs(n-1,l2,4)*ovrlp0(n-1)
-        bfwf2(n-1)=wfs(n-1,l3,3)*ovrlp2+wfs(n-1,l3,5)*ovrlp0(n-1)
+        bfwf1(n-1)=wfs(n-1,l2,2)*ovrlp1+wfs(n-1,l2,4)*ovrlpi0(n-1)
+        bfwf2(n-1)=wfs(n-1,l3,3)*ovrlp2+wfs(n-1,l3,5)*ovrlpi0(n-1)
 
         a11=a13
         a21=a23
@@ -1267,8 +992,8 @@ c      write(*,'(15x,3e15.5)') abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
       ovrlp1=ovrlp1+5.0d0*a11+8.0d0*a12
       ovrlp2=ovrlp2+5.0d0*a21+8.0d0*a22
 
-      bfwf1(1)=wfs(1,l2,2)*ovrlp1+wfs(1,l2,4)*ovrlp0(1)
-      bfwf2(1)=wfs(1,l3,3)*ovrlp2+wfs(1,l3,5)*ovrlp0(1)
+      bfwf1(1)=wfs(1,l2,2)*ovrlp1+wfs(1,l2,4)*ovrlpi0(1)
+      bfwf2(1)=wfs(1,l3,3)*ovrlp2+wfs(1,l3,5)*ovrlpi0(1)
 
       return
       end
@@ -1300,7 +1025,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-C     data iwrt/8/
+C      data iwrt/8/
 
       bfx=wpot(npt1,nf)*conjg(bfwf1(npt1))*bfwf2(npt1)
 
@@ -1332,7 +1057,7 @@ c     calcul des amplitudes de diffusion smtrx(l,j)                    *
 c***********************************************************************
       parameter(nol=95)
       parameter(nptmx=5000)
-      real md,mf,mf3,mu
+      real md,mf,mu
       double precision fc(nol),fcp(nol),gc(nol),gcp(nol)
       double precision fc2(nol),fcp2(nol),gc2(nol),gcp2(nol)
       double precision xnl(nptmx),etad,sigc,al,fldint,zrc
@@ -1343,16 +1068,15 @@ c***********************************************************************
       complex*16 fc0(nol),fcp0(nol),hcp(nol),dhcp(nol)
       complex*16 hcp1(nol),dhcp1(nol)
       complex cgamma,zzz,ak0,rho0
-      dimension a(4)
-      dimension rv(5),pote(5)
-
+      dimension u1(7),y1(7)
+      dimension a(5),rv(5),pote(5)
+      
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1 cph(nol,3),wpot(nptmx,3)
-      common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/potn/poti(nptmx),potr(nptmx),potf(nptmx)
 
       data iwrt/8/
@@ -1378,63 +1102,15 @@ c
       ak(ip)=sqrt(ak2)
       zz=zd(ip)*zf
       eta(ip)=max(0.15748603*zz*sqrt(mu/ecm),1.01e-6)
-      mf3=mf**(1.0/3.0)
-c
-c     rayons reels
-c
-      do i=1,5
-        rv(i)=abs(rr(i,ip))*mf3
-        if(rv(i).lt.0.1) rv(i)=mf3
-        pote(i)=0.
-       end do
+
+      call getpot(ip,md(ip),mf,el,a,rv,pote)
 c
 c cutoff of imaginary potential outside Coulomb barrier
 c
-      rcut=rv(1)+5.0/mf3-1.0
-c      acut=1.0
-      acut=0.5
-c     
-c     profondeurs reelles
-c
-c*****
-      do i=1,4
-        a(i)=aa(i,ip)
-        if(a(i).lt.0.001) a(i)=1.0
-       end do
-c
-c*****
-c
-      if(ef(ip).lt.0.0) then
-c
-c     potentiels Koning-Delaroche
-c
-        f=el-ef(ip)
-        pote(1)=(pot(1,2,ip)-2.*pot(1,3,ip)*f+3.*pot(1,4,ip)*f*f)
-        pote(1)=vc(ip)*pote(1)+pot(1,1,ip)
-     1         *(1.-pot(1,2,ip)*f+pot(1,3,ip)*f*f-pot(1,4,ip)*f**3)  
-        pote(2)=pot(2,1,ip)*f*f*exp(-pot(2,2,ip)*f)/(pot(2,3,ip)**2+f*f)
-        pote(3)=pot(3,1,ip)*f*f/(pot(3,2,ip)**2+f*f)
-c        pote(4)=pot(4,1,ip)*exp(-pot(4,2,ip)*f)
-       else
-c
-c     potentiels
-c
-        do i=1,3
-          pote(i)=pot(i,1,ip)+pot(i,2,ip)*el+pot(i,3,ip)*el*el
-          if(i.gt.1 .and. pote(i).lt.0.0) pote(i)=0.0
-         end do
-c
-c     potentiels imaginaires constants
-c
-        if(ewmax(ip)*(el-ewmax(ip)).gt.0.0) then
-          do i=2,3
-            pote(i)=pot(i,1,ip)+pot(i,2,ip)*ewmax(ip)
-     1                   +pot(i,3,ip)*ewmax(ip)*ewmax(ip)
-            if(pote(i).lt.0.0) pote(i)=0.0
-           end do
-         endif
-       endif
-c
+      rcut=rv(1)+5.0/mf**(1./3.)-1.0
+      acut=1.0
+c      acut=0.5
+
 c     calcul des potentiels
 c
       if(ip.eq.1 .and. ipr.ne.0) call dfold(npt1,h,ecm) 
@@ -1444,10 +1120,12 @@ c
       t1=exp(rv(1)/a(1))
       t2=exp(rv(2)/a(2))
       t3=exp(rv(3)/a(3))
+      t4=exp(rv(4)/a(4))
 c
       dt1=1.0d0/exp(h/a(1))
       dt2=1.0d0/exp(h/a(2))
       dt3=1.0d0/exp(h/a(3))
+      dt4=1.0d0/exp(h/a(4))
 c
       do 100 i=1,npt1
       r=float(i)*h
@@ -1456,35 +1134,40 @@ c     potentiel reel
       t1=t1*dt1
 c      t1=exp(max((rv(1)-r)/a(1),-600.))
       potr(i)=+pote(1)*t1/(1.0+t1)
-c non-locality correction
-      xnl(i)=exp(-betanl(ip)*potr(i))
 c
-c     potentiel imaginaire de volume
-      t3=t3*dt3
-c      t3=exp(max((rv(3)-r)/a(3),-600.))
-      poti(i)=+pote(3)*t3/(1.0+t3)
-      if(rr(2,ip))19,19,25
-   25 continue
-c
-c     + potentiel imaginaire de surface ( derivee de w - s )
+c     potentiel reel de surface
       t2=t2*dt2
 c      t2=exp(max((rv(2)-r)/a(2),-600.))
-      poti(i)=poti(i)+4.0*pote(2)*t2/((1.0+t2)**2)
-      go to 20
+      potr(i)=potr(i)+4.0*pote(2)*t2/(1.0+t2)**2
+c
+c     potentiel imaginaire de volume
+      t4=t4*dt4
+c      t4=exp(max((rv(4)-r)/a(4),-600.))
+      poti(i)=+pote(4)*t4/(1.0+t4)
+
+      if(pote(5).GT.0.0) THEN
+c
+c     + potentiel imaginaire de surface ( derivee de w - s )
+        t3=t3*dt3
+c      t3=exp(max((rv(3)-r)/a(3),-600.))
+        poti(i)=poti(i)+4.0*pote(3)*t3/(1.0+t3)**2
+       ELSE
 c
 c     + potentiel imaginaire de surface ( gaussien)
-   19 yy=-(((r-rv(2))/a(2))**2)
-      if(yy.lt.-600.) yy=-600.
-      poti(i)=poti(i)+pote(2)*exp(yy)
-   20 continue
+        yy=-(((r-rv(3))/a(3))**2)
+        if(yy.lt.-600.) yy=-600.
+        poti(i)=poti(i)+pote(3)*exp(yy)
+       ENDIF
 c
       potr(i)=vx(ip)*potr(i)
       poti(i)=wx(ip)*poti(i)
+c non-locality correction
+      xnl(i)=exp(-betanl(ip)*potr(i))
 c
 c cutoff of imaginary potential outside Coulomb barrier
 c
-      if(ip.gt.1 .and. eta(ip).gt.0.1 .and. r.gt.rcut) 
-     1       poti(i)=2.0d0*poti(i)/(1.0+exp(min((r-rcut)/acut,600.)))
+c      if(ip.gt.1 .and. eta(ip).gt.0.1 .and. r.gt.rcut) 
+c     1       poti(i)=2.0d0*poti(i)/(1.0+exp(min((r-rcut)/acut,600.)))
 c
 c finite-range correction
       if(ip.eq.1) then
@@ -1578,7 +1261,7 @@ c calculate regular wave functions integrating out
         smtrx(l,ip)=(wft(npt1)*hmp-dwft(npt1)*hm)/
      1                     (wft(npt1)*hpp-dwft(npt1)*hp)
 
-        if(abs(smtrx(l,ip)-1.0d0).gt.1.0d-6) then
+        if(abs(smtrx(l,ip)-1.0d0).gt.1.0d-7) then
           lmx(ip)=l
           fldint=4.0*(2.*l-1.)*fldint*abs(anorm)**2/ak(ip)
           sigfld=sigfld+fldint
@@ -1700,6 +1383,52 @@ c      if(ip.eq.3) stop
 c
 c------------------------------------------------------------
 c
+      subroutine getpot(ip,md,mf,el,ax,rvx,potex)
+c
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+
+      dimension ax(5),rvx(5),potex(5)
+      real md,mf
+      double precision eilab,eicms,mi,mt,mt3,ak2      
+c
+      mi=md
+      mt=mf
+      mt3=mt**(1./3.)
+      eilab=el
+
+      Nnuc=0
+      CALL WHERE(IZA(0),Nnuc,iloc)
+      if(ip.eq.1) then
+         nejc=4
+        else
+         nejc=4-ip
+        end if
+
+      call OMPAR(Nejc,Nnuc,eilab,eicms,mi,mt,ak2,29,-1)
+
+      potex(1)=VOM(Nejc,Nnuc)
+      potex(2)=VOMs(Nejc,Nnuc)
+      potex(3)=WOMs(Nejc,Nnuc)
+      potex(4)=WOMv(Nejc,Nnuc)
+      potex(5)=SFIom(Nejc,Nnuc)
+      rvx(1)=RVOm(Nejc,Nnuc)*mt3
+      rvx(2)=rvx(1)
+      rvx(3)=RWOm(Nejc,Nnuc)*mt3
+      rvx(4)=RWOmv(Nejc,Nnuc)*mt3
+      rvx(5)=RCOul(Nejc,Nnuc)*mt3
+      ax(1)=AVOm(Nejc,Nnuc)
+      ax(2)=ax(1)
+      ax(3)=AWOm(Nejc,Nnuc)
+      ax(4)=AWOmv(Nejc,Nnuc)
+      ax(5)=ACOul(Nejc,Nnuc)
+      
+      return
+      end  
+c     
+c------------------------------------------------------------
+c
+      
       subroutine intoutrk(ak2,sl,wf,dwf,fldint)
 c***********************************************************************
 c     Outward integration of Schrodinger equation using                * 
@@ -1737,7 +1466,7 @@ c
 
       return
       end
-c
+c     
 c------------------------------------------------------------
 c
       subroutine intinrk(ak2,sl,wf,dwf)
@@ -1843,7 +1572,6 @@ c
         do nn=1,ndmx
           yy(nn,iy2)=yy(nn,iy2)+cc(6)*ddy(nn,6)
           dyy(nn)=dyy(nn)+dc(6)*ddy(nn,6)
-C         errmax=amax1(errmax,abs(dyy(nn)/ysc(nn)))
           errmax=dmax1(errmax,abs(dyy(nn)/ysc(nn)))
          end do
         errmax=errmax/eps
@@ -2088,18 +1816,16 @@ c
       do nx=1,nstp
 
         iy2=3-iy1
-c       call ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
-        call ideriv0(r,h,      r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+        call ideriv0(r,h,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
         do id1=1,5
-c        call ideriv(r+aa(id1)*h,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
-         call ideriv(r+aa(id1)*h,h,      r0,ak2,sl,vcl,iy1,id1,
-     *                         yy,dyy,ddy,bb(1,id1),cc(id1),dc(id1))
+          call ideriv(r+aa(id1)*h,h,r0,ak2,sl,vcl,iy1,id1,yy,dyy,ddy,
+     *                                     bb(1,id1),cc(id1),dc(id1))
          end do
         errmax=0.0
         do nn=1,ndmx
           yy(nn,iy2)=yy(nn,iy2)+cc(6)*ddy(nn,6)
           dyy(nn)=dyy(nn)+dc(6)*ddy(nn,6)
-          errmax=dmax1(errmax,abs(dyy(nn)/ysc(nn)))
+          errmax=max(errmax,abs(dyy(nn)/ysc(nn)))
          end do
         errmax=errmax/eps
         if(errmax.gt.1.0d0) then
@@ -2129,8 +1855,7 @@ c        call ideriv(r+aa(id1)*h,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
 c
 c------------------------------------------------------------------------------
 c
-c     subroutine ideriv0(r,h,h0,n0,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
-      subroutine ideriv0(r,h,      r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
+      subroutine ideriv0(r,h,r0,ak2,sl,vcl,iy1,yy,dyy,ddy,ysc)
 c
 c - starting derivative
 c
@@ -2140,7 +1865,6 @@ c
       parameter(tiny=1.0d-14)
       complex*16 ddy(ndmx,6),yy(ndmx,2),dyy(ndmx)
       dimension ysc(ndmx)
-c     real r0,h0,ak2,sl,vcl
       real r0,ak2,sl,vcl
 
       complex*16 rx
@@ -2167,10 +1891,7 @@ c
 c
 c------------------------------------------------------------------------------
 c
-C     subroutine ideriv(r,h,h0,n0,r0,ak2,sl,vcl,iy1,id1,
-C    1                                        yy,dyy,ddy,bb,cc,dc)
-      subroutine ideriv(r,h,      r0,ak2,sl,vcl,iy1,id1,
-     1                                        yy,dyy,ddy,bb,cc,dc)
+      subroutine ideriv(r,h,r0,ak2,sl,vcl,iy1,id1,yy,dyy,ddy,bb,cc,dc)
 c
 c - derivatives
 c
@@ -2179,7 +1900,6 @@ c
       parameter(ndmx=2)
       complex*16 yy(ndmx,2),ddy(ndmx,6),dyy(ndmx)
       dimension bb(5)
-c     real r0,h0,ak2,sl,vcl
       real r0,ak2,sl,vcl
 
       complex*16 ytmp(2),rx
@@ -2216,67 +1936,20 @@ c     calculation of the folding (Watanabe) potential                  *
 c***********************************************************************
       parameter(nptmx=5000)
 
-      real md,mf,mf3
-      dimension a(4,3),rv(5,3),pote(5,3),rf(3)
+      real md,mf
+      dimension a(5,3),rv(5,3),pote(5,3),rf(3)
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/poten/aa(5,3),pot(4,5,3),rr(5,3),vc(3),ef(3),ewmax(3)
       common/potn/potxx(2*nptmx),potf(nptmx)
 
-c     data iwrt/8/
+C      data iwrt/8/
 
       do ip=2,3
-c
-c     constantes
-c
+
         ecm=md(ip)*ecd/(md(ip)+md(5-ip))
         el=(md(ip)+mf)*ecm/mf
-        mf3=mf**(1.0/3.0)
-c
-c     rayons reels
-c
-        do i=2,3
-          rv(i,ip)=abs(rr(i,ip))*mf3
-          if(rv(i,ip).lt.0.1) rv(i,ip)=mf3
-          pote(i,ip)=0.
-         end do
-c     
-c     profondeurs reelles
-c
-        do i=2,3
-          a(i,ip)=aa(i,ip)
-          if(a(i,ip).lt.0.001) a(i,ip)=1.0
-         end do
-c
-c*****
-c
-        if(ef(ip).lt.0.0) then
-c
-c     potentiels Koning-Delaroche
-c
-          f=el-ef(ip)
-          pote(2,ip)=pot(2,1,ip)*f*f*exp(-pot(2,2,ip)*f)
-     1                                            /(pot(2,3,ip)**2+f*f)
-          pote(3,ip)=pot(3,1,ip)*f*f/(pot(3,2,ip)**2+f*f)
-         else
-c
-c     potentiels
-c
-          do i=2,3
-            pote(i,ip)=pot(i,1,ip)+pot(i,2,ip)*el+pot(i,3,ip)*el*el
-            if(i.gt.1 .and. pote(i,ip).lt.0.0) pote(i,ip)=0.0
-           end do
-c
-c     potentiels imaginaires constants
-c
-          if(ewmax(ip)*(el-ewmax(ip)).gt.0.0) then
-            do i=2,3
-              pote(i,ip)=pot(i,1,ip)+pot(i,2,ip)*ewmax(ip)
-     1                     +pot(i,3,ip)*ewmax(ip)*ewmax(ip)
-              if(pote(i,ip).lt.0.0) pote(i,ip)=0.0
-             end do
-           endif
-         endif
+
+        call getpot(ip,md(ip),mf,el,a(1,ip),rv(1,ip),pote(1,ip))
 
        end do
 
@@ -2315,15 +1988,15 @@ c          nxmx=max(nx,nxmx)
           pox=0.0
           do ip=2,3
             rx=sqrt(abs(r*r+rf(ip)*rf(ip)+2.*r*rf(ip)*x))
-            ex=exp((rv(3,ip)-rx)/a(3,ip))
-            pox=pox+pote(3,ip)*ex/(1.0+ex)
-            if(rr(2,ip).gt.0.0) then
-              ex=exp((rv(2,ip)-rx)/a(2,ip))
-              pox=pox+4.0*pote(2,ip)*ex/((1.0+ex)**2)
+            ex=exp((rv(4,ip)-rx)/a(4,ip))
+            pox=pox+pote(4,ip)*ex/(1.0+ex)
+            if(pote(5,ip).gt.0.0) then
+              ex=exp((rv(3,ip)-rx)/a(3,ip))
+              pox=pox+4.0*pote(3,ip)*ex/((1.0+ex)**2)
              else
-              yy=-(((rx-rv(2,ip))/a(2,ip))**2)
+              yy=-(((rx-rv(3,ip))/a(3,ip))**2)
               if(yy.lt.-600.) yy=-600.
-              pox=pox+pote(2,ip)*exp(yy)
+              pox=pox+pote(3,ip)*exp(yy)
              endif
            end do
 
@@ -2338,15 +2011,15 @@ c            write(iwrt,*) 'x:',r,rd,rf(2),rf(3),x,pox,potx
             pox=0.0
             do ip=2,3
               rx=sqrt(r*r+rf(ip)*rf(ip)+2.*r*rf(ip)*x)
-              ex=exp((rv(3,ip)-rx)/a(3,ip))
-              pox=pox+pote(3,ip)*ex/(1.0+ex)
-              if(rr(2,ip).gt.0.0) then
-                ex=exp((rv(2,ip)-rx)/a(2,ip))
-                pox=pox+4.0*pote(2,ip)*ex/((1.0+ex)**2)
+              ex=exp((rv(4,ip)-rx)/a(4,ip))
+              pox=pox+pote(4,ip)*ex/(1.0+ex)
+              if(pote(5,ip).gt.0.0) then
+                ex=exp((rv(3,ip)-rx)/a(3,ip))
+                pox=pox+4.0*pote(3,ip)*ex/((1.0+ex)**2)
                else
-                yy=-(((rx-rv(2,ip))/a(2,ip))**2)
+                yy=-(((rx-rv(3,ip))/a(3,ip))**2)
                 if(yy.lt.-600.) yy=-600.
-                pox=pox+pote(2,ip)*exp(yy)
+                pox=pox+pote(3,ip)*exp(yy)
                endif
              end do
 
@@ -2363,15 +2036,15 @@ c            write(iwrt,*) 'x:',r,rd,x,pox,potx
           pox=0.0
           do ip=2,3
             rx=sqrt(r*r+rf(ip)*rf(ip)+2.*r*rf(ip)*x)
-            ex=exp((rv(3,ip)-rx)/a(3,ip))
-            pox=pox+pote(3,ip)*ex/(1.0+ex)
-            if(rr(2,ip).gt.0.0) then
-              ex=exp((rv(2,ip)-rx)/a(2,ip))
-              pox=pox+4.0*pote(2,ip)*ex/((1.0+ex)**2)
+            ex=exp((rv(4,ip)-rx)/a(4,ip))
+            pox=pox+pote(4,ip)*ex/(1.0+ex)
+            if(pote(5,ip).gt.0.0) then
+              ex=exp((rv(3,ip)-rx)/a(3,ip))
+              pox=pox+4.0*pote(3,ip)*ex/((1.0+ex)**2)
              else
-              yy=-(((rx-rv(2,ip))/a(2,ip))**2)
+              yy=-(((rx-rv(3,ip))/a(3,ip))**2)
               if(yy.lt.-600.) yy=-600.
-              pox=pox+pote(2,ip)*exp(yy)
+              pox=pox+pote(3,ip)*exp(yy)
              endif
            end do
 
@@ -2429,8 +2102,6 @@ c by back substitution from max m of coupled equations for m1=-m2 states
 
       dimension cg(*)
 c
-C     data iwrt/8/
-
       xj1=jj1*(jj1+1.0d0)
       xj2=jj2*(jj2+1.0d0)
       c0=jj3*(jj3+1.0d0)-xj1-xj2
@@ -2807,7 +2478,6 @@ c calculates spherical Bessel wavefunctions using the series expansion
 c
       implicit double precision (a-h,o-z)
 
-C     real ets
       complex rhs
       complex*16 fc(*),fcp(*)
 
