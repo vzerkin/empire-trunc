@@ -1,6 +1,6 @@
-!cc   * $Rev: 4456 $
+!cc   * $Rev: 4482 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+!cc   * $Date: 2015-11-12 10:42:58 +0100 (Do, 12 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1069,7 +1069,7 @@ C        Changing the incident input energy to plot LDs
 !        Initially set all spectra as inclusive except those explicitely
 !        requested in the input (ENDF(nnuc)=10)
          ELSEIF(NENdf.GT.0) THEN
-            DO in = 0, NDNuc
+            DO in = 0, NNUct
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
             IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
@@ -1111,6 +1111,7 @@ C
               iztmp = INT(z(i))
               izatmp = INT(1000*iztmp + iatmp)
               CALL WHERE(izatmp,nnuc,iloc)
+              IF(ENDf(nnuc).EQ.0) ENDf(nnuc)=2
               IF(ENDf(nnuc).EQ.1) THEN
                 itmp = itmp + 1
                 INExc(nnuc) = itmp
@@ -10246,11 +10247,8 @@ C
 
            else
 C
-
 C            rigid-soft optical model
-
 C
-
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
      &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
@@ -11135,7 +11133,6 @@ C
      &          lvpr.EQ.gspar) THEN
                i20p = ilv
                ND_nlv = ND_nlv + 1
-
                ICOllev(ND_nlv) = ilv
                IF (DIRECT.EQ.3)
      &            ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
@@ -11145,13 +11142,9 @@ C
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
                IF (DIRECT.NE.3 .and. beta2.NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = beta2               
-
                IF (DIRECT.NE.3 .and. DEF(1,0).NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = DEF(1,0)               
-
                GOTO 500
             ENDIF
             IF (i4p.EQ.0 .AND. xjlvr.EQ.(gspin + 2*delta_k) .AND.
@@ -11167,13 +11160,9 @@ C
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
                IF (DIRECT.NE.3 .and. beta2.NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = beta2               
-
                IF (DIRECT.NE.3 .and. DEF(1,0).NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = DEF(1,0)               
-
                GOTO 500
             ENDIF
             IF (i6p.EQ.0 .AND. xjlvr.EQ.(gspin + 3*delta_k) .AND.
@@ -11189,13 +11178,9 @@ C
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
                IF (DIRECT.NE.3 .and. beta2.NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = beta2               
-
                IF (DIRECT.NE.3 .and. DEF(1,0).NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = DEF(1,0)               
-
                IF(odd) goto 600
                GOTO 500
             ENDIF
@@ -11214,13 +11199,9 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                IPH(ND_nlv) = 0
                D_Def(ND_nlv,2) = 0.01
                IF (DIRECT.NE.3 .and. beta2.NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = beta2               
-
                IF (DIRECT.NE.3 .and. DEF(1,0).NE.0.D0) 
-
      &           D_Def(ND_nlv,2) = DEF(1,0)               
-
                GOTO 500
             ENDIF
             IF (i10p.EQ.0 .AND. xjlvr.EQ.(gspin + 5*delta_k) .AND.
@@ -11260,27 +11241,16 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                GOTO 500
             ENDIF
             IF (i01p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1) THEN
-
                i01p = ilv
-
                ND_nlv = ND_nlv + 1
-
                ICOllev(ND_nlv) = ilv + LEVcc
-
                D_Elv(ND_nlv) = elvr
-
                D_Lvp(ND_nlv) = lvpr
-
                D_Xjlv(ND_nlv) = xjlvr
-
                IPH(ND_nlv) = 0
-
                D_Def(ND_nlv,2) = beta3**2
-
                GOTO 500
-
             ENDIF
-
             IF (i1m.EQ.0 .AND. xjlvr.EQ.(gspin + NINT(delta_k)/2) .AND.
      &          lvpr.EQ. - 1*gspar  .AND. .NOT.odd ) THEN
                i1m = ilv
@@ -11318,51 +11288,29 @@ C              IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
                GOTO 500
             ENDIF
             IF (i7m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
-
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 3*delta_k)) THEN
-
                i7m = ilv
-
                ND_nlv = ND_nlv + 1
-
                ICOllev(ND_nlv) = ilv + LEVcc
-
                D_Elv(ND_nlv) = elvr
-
                D_Lvp(ND_nlv) = lvpr
-
                D_Xjlv(ND_nlv) = xjlvr
-
                IPH(ND_nlv) = 0
-
                D_Def(ND_nlv,2) = beta3*0.25
-
                GOTO 500
-
             ENDIF
 
             IF (i9m.EQ.0 .AND. lvpr.EQ. - 1*gspar .AND. .NOT.odd  .AND.
-
      &          xjlvr.EQ.(gspin + NINT(delta_k)/2 + 4*delta_k)) THEN
-
                i9m = ilv
-
                ND_nlv = ND_nlv + 1
-
                ICOllev(ND_nlv) = ilv + LEVcc
-
                D_Elv(ND_nlv) = elvr
-
                D_Lvp(ND_nlv) = lvpr
-
                D_Xjlv(ND_nlv) = xjlvr
-
                IPH(ND_nlv) = 0
-
                D_Def(ND_nlv,2) = beta3*0.25
-
                GOTO 500
-
             ENDIF
 
             IF (i21p.EQ.0 .AND. xjlvr.EQ.(gspin + delta_k) .AND.

@@ -9,9 +9,9 @@
 
    PRIVATE
 
-! $Rev: 4456 $
+! $Rev: 4482 $
 ! $Author: rcapote $
-! $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+! $Date: 2015-11-12 10:42:58 +0100 (Do, 12 Nov 2015) $
 !
 
    TYPE channel
@@ -1048,7 +1048,7 @@
               out%kres = -i                         !minus indicates channel leading to a discrete level 'i'
               out%xjrs = XJLv(i,nnur)
               out%pres = LVP(i,nnur)
-           WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), nch', xjc, xj, ipar, ELV(i,nnur), nch
+           ! WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), nch', xjc, xj, ipar, ELV(i,nnur), nch
         ENDDO     !do loop over 'jndex'    --------- done --------------------
      ENDDO    !do loop over 'l'            --------- done --------------------
    ENDDO    ! do loop over inelastic levels --------- done --------------------
