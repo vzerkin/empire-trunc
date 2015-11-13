@@ -185,7 +185,6 @@ C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       parameter(nptmx=5000)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
-      character*48 filename
       complex*16 frc
 
       double precision ylmi
@@ -381,7 +380,7 @@ c thetai
       double precision df2(NDANGecis),db2(NDANGecis)
       double precision dps(nol,3)
       double precision cg(nol),cgp(nol),fase,fasep,fang
-      double precision pidp,sig0,dphi
+      double precision pidp,sig0
       double precision bf1,bf2
 
       real md,mf
@@ -669,7 +668,6 @@ c
 
       real md,mf
       complex*16 frc
-      integer iwrt
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
@@ -741,7 +739,8 @@ c
       complex*16 bfwf1(npt1mx),bfwf2(npt1mx)
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
-      complex*16 wf0,nr,wfx
+C     complex*16 wf0,nr,wfx
+      complex*16 nr,wfx
 
       complex*16 wfs,wfc,smtrx,cph
       complex*16 frc
@@ -754,7 +753,7 @@ c
       common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
      1  cph(nol,3),wpot(nptmx,3)
 
-      data iwrt/6/
+C     data iwrt/6/
 
       ovrlp0=0.0d0
 
@@ -834,7 +833,8 @@ c
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
       complex*16 ovrlpi0(0:nptmx)
-      complex*16 vrlp1,ovrlp2,nr,wfx
+C     complex*16 vrlp1,ovrlp2,nr,wfx
+      complex*16       ovrlp2,nr,wfx
       complex*16 a11,a12,a13,a21,a22,a23,b1,b2,b3
 
       complex*16 wfs,wfc,smtrx,cph
@@ -1068,7 +1068,7 @@ c***********************************************************************
       complex*16 fc0(nol),fcp0(nol),hcp(nol),dhcp(nol)
       complex*16 hcp1(nol),dhcp1(nol)
       complex cgamma,zzz,ak0,rho0
-      dimension u1(7),y1(7)
+C     dimension u1(7),y1(7)
       dimension a(5),rv(5),pote(5)
       
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
