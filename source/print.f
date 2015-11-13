@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4484 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -51,7 +51,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
+      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -195,7 +195,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
+      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -236,6 +236,29 @@ C     ENDDO
 
       IF (Nejc.EQ.0) THEN
 C
+         WRITE (8,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
+         WRITE (8,*) ' '
+         WRITE (8,'(''    Energy    mb/MeV'')')
+         WRITE (8,*) ' '
+         DO i = 1, nspec
+           ftmp = CSE(i,Nejc,0) 
+           if(ftmp.le.0.d0) cycle
+           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
+         ENDDO
+C--------Exact endpoint
+C        WRITE (8,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+         WRITE (8,'(F9.4,E15.5)') 
+     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
+         WRITE(8,*) 
+         WRITE(8,'(2x,
+     &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
+     &     esum/totspec
+         qout = qout + esum/totspec
+         WRITE (8,*) ' '    
+         WRITE (8,
+     &   '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
+     &        totspec*DE
+C
          WRITE (12,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
          WRITE (12,*) ' '
          WRITE (12,'(''    Energy    mb/MeV'')')
@@ -246,7 +269,9 @@ C
            WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
-         WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+C        WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+         WRITE (12,'(F9.4,E15.5)') 
+     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
          WRITE(12,*) 
          WRITE(12,'(2x,
      &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
@@ -259,6 +284,54 @@ C--------Exact endpoint
 
       ELSE
 
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) 
+     &     WRITE (8,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
+         IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (8,*) ' Spectrum of protons  (z,x)  ZAP=  1001'
+         IF (AEJc(Nejc).EQ.4.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) 
+     &     WRITE (8,*) ' Spectrum of alphas   (z,x)  ZAP=  2004'
+         IF (AEJc(Nejc).EQ.2.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (8,*) ' Spectrum of deuterons(z,x)  ZAP=  1002'
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
+     &     WRITE (8,*) ' Spectrum of tritons  (z,x)  ZAP=  1003'
+         IF (AEJc(Nejc).EQ.3.0D0 .AND. ZEJc(Nejc).EQ.2.0D0) 
+     &     WRITE (8,*) ' Spectrum of helium-3 (z,x)  ZAP=  2003'
+C        IF ( AEJc(Nejc).GT.4.0D0) THEN
+C         WRITE (8,99010) ia, SYMbe(Nejc)
+C99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
+C        ENDIF
+         WRITE (8,*) ' '
+         WRITE (8,'(''    Energy    mb/MeV'')')
+         WRITE (8,*) ' '
+         DO i = 1, nspec
+           ftmp = CSE(i,Nejc,0) 
+           if(ftmp.le.0.d0) cycle
+           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
+         ENDDO
+C--------Exact endpoint
+C        WRITE (8,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
+         WRITE (8,'(F9.4,E15.5)') 
+     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
+
+         WRITE(8,*) 
+         WRITE(8,'(2x,
+     &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
+     &     '' MeV  (inclusive)'' )') SYMbe(Nejc),esum/totspec
+
+C        WRITE(8,'(2x,
+C    &     ''Ave. <Q> '',A2,'' cont.spec '',G12.6,
+C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
+
+         WRITE (8,*) ' '    
+         WRITE (8,'(1x,'' Integrated spectrum   '',G12.6,
+     &     '' mb   (inclusive)'')') totspec*DE      
+
+
+
+
+C
+C        DOUBLE DIFFERENTIAL PARTICLE SPECTRA (Inclusive)
+C
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.0.0D0) 
      &     WRITE (12,*) ' Spectrum of neutrons (z,x)  ZAP=     1'
          IF (AEJc(Nejc).EQ.1.0D0 .AND. ZEJc(Nejc).EQ.1.0D0) 
@@ -328,9 +401,10 @@ C--------Inclusive DDX spectrum
      &     FLOAT(ie - 1)*DE/recorp,
      &     (itmp*cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
-         ! exact DDX spectrum endpoint
          WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &      (EMAx(1)-Q(nejc,1))/recorp,
+         ! exact DDX spectrum endpoint
+C    &      (EMAx(1)-Q(nejc,1))/recorp,
+     &      FLOAT(nspec)*DE/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
 
          WRITE (12,*) ' '
@@ -356,9 +430,10 @@ C--------Inclusive DDX spectrum
      &       (htmp - check_DE(ie)) / htmp * 100
            ftmp = ftmp + check_DE(ie)/itmp 
          ENDDO
-         ! exact endpoint
          WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
-     &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
+C        ! exact endpoint
+C    &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
+     &     FLOAT(nspec)*DE/recorp,CSE(nspec+1,nejc,0)*recorp,
      &     check_DE(nspec+1)*recorp,
      &     ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
 
@@ -384,15 +459,20 @@ C     if (dincl.gt.0)
 C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
 C    &   dincl      
       IF(Nejc.ne.0) THEN
+        WRITE (8,
+     &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
+     &          SYMbe(Nejc),totspec*DE
         WRITE (12,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),totspec*DE
       ELSE
+        WRITE (8,
+     &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
         WRITE (12,
      &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE
       ENDIF
+      WRITE (8,*) ' '    
       WRITE (12,*) ' '    
-
       RETURN 
       END
 
@@ -446,7 +526,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 0.05 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-5 .or. kmax.eq.1) return
+      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)

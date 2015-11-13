@@ -1,6 +1,6 @@
-!cc   * $Rev: 4482 $
+!cc   * $Rev: 4484 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-12 10:42:58 +0100 (Do, 12 Nov 2015) $
+!cc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -327,7 +327,6 @@ C
 C
          IOMwritecc = 0
          MODelecis = 0
-         EXClusiv = .TRUE.! Default: All exclusive calculation
          WIDcoll = 0.05d0 ! Default = 50 keV resolution  
 C        Scaling factor for direct processes consideration for complex projectiles
          DXSred = 1.d0    ! Default: enabled 
@@ -937,6 +936,7 @@ C                    From n,3n2p   to   n,na
 
          NEXclusive = 0
          NPRoject = -1
+         NTArget = 0
 
          DO nnuc = 1, NNUcd
             irepeated = 0
@@ -944,6 +944,10 @@ C                    From n,3n2p   to   n,na
               IF (A(i).EQ.A(nnuc) .AND. Z(i).EQ.Z(nnuc)) irepeated = 1
             enddo
             if(irepeated.eq.0) NEXclusive = NEXclusive + 1 
+C           Finding target
+            IF (irepeated.eq.0 .and. 
+     &          A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
+C
             DO nejc = 1, NEJcm
 C--------------To find inelastic channel
                IF (AEJc(0).EQ.AEJc(nejc) .AND. ZEJc(0).EQ.ZEJc(nejc))
@@ -972,12 +976,7 @@ C
 C        Protection to avoid problems for HI reactions
 C    
          IF(NPRoject.lt.0) NPRoject = 0
-         NTArget = 0
-C        Finding target
-         DO nnuc = 1, NNUct
-            IF (A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
-         ENDDO
-
+C
 C--------inteligent defaults
          KTRlom(0,0) = 0 ! default (allows for HI reactions)
 C--------optical model parameter set selection
@@ -1065,7 +1064,6 @@ C        Changing the incident input energy to plot LDs
          IF(NENdf.EQ.0) THEN
               ENDf = 0
               NEXclusive = 0
-              EXClusiv = .FALSE.
 !        Initially set all spectra as inclusive except those explicitely
 !        requested in the input (ENDF(nnuc)=10)
          ELSEIF(NENdf.GT.0) THEN
@@ -9049,10 +9047,12 @@ C-------------of no collective enhancements) normalized to existing exp. data
                 atiln =  arogc/asys
               ELSE
                 atiln = 1.d0   
-              ENDIF                  
+              ENDIF                 
             ENDIF 
 
 C           The internal normalization is stored into ATIlnor() at the first incident energy  
+            if(atiln.eq.0) atiln=1.d0  ! protection
+
             if (BENchm .or. (.not.FIRst_ein)) THEN
               atiln = 1.d0           
               asys  = 1.d0           

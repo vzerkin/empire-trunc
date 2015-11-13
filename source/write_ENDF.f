@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4484 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -57,11 +57,8 @@ C-----
 C-----ENDF spectra inclusive representation
 C-----
       WRITE (8,*) ' '
-
-C     IF (IOUt.GT.3 .AND. .NOT.EXClusiv ) THEN
-      IF (IOUt.GE.3) THEN
-
-         IF (FIRst_ein) THEN 
+      IF(NNUct.gt.NEXclusive .and. IOUT.GT.2) then
+C        IF (FIRst_ein) THEN 
             WRITE (8,*)
             WRITE (8,*)
             WRITE (8,'(11X,''**********************'')')
@@ -97,7 +94,7 @@ C     IF (IOUt.GT.3 .AND. .NOT.EXClusiv ) THEN
               endif
             ENDDO
 
-         ENDIF  
+C        ENDIF  
       ENDIF
       WRITE (8,*)
       WRITE (8,*)
@@ -452,19 +449,21 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &    abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*totcorr)/
      &                 (TOTred*TOTcs*totcorr),EINl
       ENDIF
-      WRITE (8,*)
-      WRITE (8,*) '+++ end of one energy +++'
-      WRITE (8,*) 
 C-----
 C-----ENDF spectra printout (inclusive representation)
 C-----
-      IF (.NOT.EXClusiv) THEN
+      IF(NNUct.gt.NEXclusive) then
+         WRITE (8,*) 
+         WRITE (8,*) '********************************************'
+         WRITE (8,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+         WRITE (8,*) '********************************************'
+         WRITE (8,*) 
+
          WRITE (12,*) 
          WRITE (12,*) '********************************************'
          WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
          WRITE (12,*) '********************************************'
-         WRITE (12,*)    
- 
+         WRITE (12,*)  
 C--------Print spectra of residues
          reactionx = '(z,x)  '
          qout = 0.d0
@@ -480,6 +479,10 @@ C--------Print inclusive spectra of gamma and ejectiles
          ENDDO
          WRITE (12,*) ' '    
       ENDIF
+
+      WRITE (8,*)
+      WRITE (8,*) '+++ end of one energy +++'
+      WRITE (8,*) 
 
 C  Summary of exclusive emission cross sections
       jnmx = 0
