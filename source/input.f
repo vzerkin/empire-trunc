@@ -1,6 +1,6 @@
-!cc   * $Rev: 4487 $
+!cc   * $Rev: 4488 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-14 14:42:41 +0100 (Sa, 14 Nov 2015) $
+!cc   * $Date: 2015-11-14 15:46:25 +0100 (Sa, 14 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -864,7 +864,28 @@ C                    From n,3n2p   to   n,na
                      REAction(nnuc)(iend + 1:iend + 2) = 'na'
                      iend = iend + 2
                   ENDIF
+
+                  IF (mulem.eq.5 .and. (in.eq.2 .and. ip.eq.3) ) THEN
+C                    From n,2n3p   to   n,pa   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 2) = 'pa'
+                     iend = iend + 2
+                  ENDIF
                                   
+                  IF (mulem.eq.6 .and. (in.eq.4 .and. ip.eq.2) ) THEN
+C                    From n,4n2p   to   n,2na   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 3) = '2na'
+                     iend = iend + 3
+                  ENDIF
+
+                  IF (mulem.eq.6 .and. (in.eq.3 .and. ip.eq.3) ) THEN
+C                    From n,3n3p   to   n,npa   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 3) = 'npa'
+                     iend = iend + 3
+                  ENDIF
+
                   IF (ia.NE.0) THEN
                      WRITE (cnejec,'(I1)') ia
                      IF (ia.GT.1) THEN
