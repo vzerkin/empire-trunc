@@ -1,6 +1,6 @@
-!cc   * $Rev: 4484 $
+!cc   * $Rev: 4487 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
+!cc   * $Date: 2015-11-14 14:42:41 +0100 (Sa, 14 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1956,10 +1956,18 @@ C-----setting irec=1 below practically removes CM motion energy from recoils
       RECcse(irec,NEX(1),1) = 1.d0
 
 C-----calculate compound nucleus level density 
+      IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(3X,
+     &''Nucleus          Gilbert & Cameron level density parameters'')')
+         WRITE(8,'(3X,
+     &''                  a        Ux      Delta       E0        T'')')
+      ENDIF
       CALL INP_LD(nnuc)      
-C
-C-----other decaying nuclei
-C
+      IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(1X)')
+      ENDIF
       DO nnuc = 1, NNUcd
          DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
@@ -2194,12 +2202,26 @@ Cpr         END DO
       ENDIF
 
       WRITE (8,*) ' '
+      IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) WRITE(8,'(1X)')
+C
+C-----other decaying nuclei
+C
+      IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(3X,
+     &''Nucleus          Gilbert & Cameron level density parameters'')')
+         WRITE(8,'(3X,
+     &''                  a        Ux      Delta       E0        T'')')
+      ENDIF
 C-----LEVEL DENSITY for residual nuclei 
       DO nnur = 2, NNUct
          IF (NEX(nnur).LE.0) cycle
          CALL INP_LD(nnur)
       ENDDO
-
+      IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) THEN
+         WRITE(8,'(1X)')
+         WRITE(8,'(1X)')
+      ENDIF
       ATIlnor(0) = ATIlnor(Ntarget)
       WRITE (8,*)
 
@@ -9154,6 +9176,7 @@ C-----------Print resulting level density parameters
      &     ATIlnor(nnuc)
          ENDIF
       ENDDO
+
       RETURN
       END
 C
@@ -10292,11 +10315,11 @@ C
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
              WRITE(8,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
+     &        '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
              WRITE(12,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
+     &        '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,I2)')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, D_nno(1)
            else
@@ -10308,11 +10331,11 @@ C
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
              WRITE(8,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &        '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
              WRITE(12,
-     &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
+     &        '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x))')
      &           ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &           D_Klv(1), D_Llv(1), ftmp, dtmp
            endif
@@ -10345,17 +10368,17 @@ C             Giant Resonances flag: negative deformation
               ENDIF
 
               WRITE (8,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
+     &          D_Klv(i), D_Llv(i), ABS(D_Def(i,2)), D_nno(i), ctmp5
 
               itmp1 = ICOllev(i)
               if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
               WRITE (12,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,1x,i2,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_nno(i), ctmp5
+     &          D_Klv(i), D_Llv(i), ABS(D_Def(i,2)), D_nno(i), ctmp5
 
             else
 C
@@ -10384,17 +10407,17 @@ C             Giant Resonances flag: negative deformation
               ENDIF
 
               WRITE (8,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
+     &          D_Klv(i), D_Llv(i), ABS(D_Def(i,2)), D_Def(i,3), ctmp5
 
               itmp1 = ICOllev(i)
               if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
               WRITE (12,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),2(F10.5,1x),A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Klv(i), D_Llv(i), D_Def(i,2), D_Def(i,3), ctmp5
+     &          D_Klv(i), D_Llv(i), ABS(D_Def(i,2)), D_Def(i,3), ctmp5
 
             endif
 C
@@ -10497,10 +10520,10 @@ C----------Reading ground state information (to avoid overwriting deformation)
      &        '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), ftmp
-           WRITE(8,'(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
+           WRITE(8,'(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), ftmp
-           WRITE(12,'(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
+           WRITE(12,'(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5)')
      &          ICOllev(1), D_Elv(1), D_Xjlv(1), D_Lvp(1), IPH(1),
      &          D_Llv(1), D_Klv(1), ftmp
 C
@@ -10529,18 +10552,18 @@ C           Giant Resonances flag: negative deformation
             ENDIF
 
             WRITE (8,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
      &          ICOllev(i), D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+     &          D_Llv(i), D_Klv(i), ABS(D_Def(i,2)), ctmp5
 
 
             itmp1 = ICOllev(i)
             if(itmp1.gt.LEVcc) itmp1 = itmp1 - LEVcc
 
             WRITE (12,
-     &     '(1x,I2,1x,F7.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
+     &     '(1x,I2,1x,F8.5,1x,F4.1,1x,F3.0,1x,3(I2,1x),F10.5,3x,A5)')
      &          itmp1, D_Elv(i), D_Xjlv(i), D_Lvp(i), IPH(i),
-     &          D_Llv(i), D_Klv(i), D_Def(i,2), ctmp5
+     &          D_Llv(i), D_Klv(i), ABS(D_Def(i,2)), ctmp5
 C
 C           CHECKING EWSR (only for neutrons)
 C
@@ -10643,21 +10666,21 @@ C    >======='
            write(8,*)
      >       '__________________________________________________________
      >_______'
-           if(betagmr.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GMR :',
+C          if(betagmr.LT.1.d0)
+           write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GMR :',
      >       sgmr,egrcoll(0,1),ggrcoll(0,1),-betagmr
-           if(betagqr.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GQR :',
+C          if(betagqr.LT.1.d0)
+           write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') '  GQR :',
      >       sgqr,egrcoll(2,1),ggrcoll(2,1),-betagqr
-           if(betalegor.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'leGOR :',
+C          if(betalegor.LT.1.d0)
+           write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'leGOR :',
      >       sleor,egrcoll(3,1),ggrcoll(3,1),-betalegor
-           if(betahegor.LT.1.d0)
-     >       write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'heGOR :',
+C          if(betahegor.LT.1.d0)
+           write(8,'(1x,A7,2x,d12.5,1x,3(f6.3,2x),i3)') 'heGOR :',
      >       sheor,egrcoll(3,2),ggrcoll(3,2),-betahegor
-C          write(8,*)
-C    >       '==========================================================
-C    >======='
+           write(8,*)
+     >       '==========================================================
+     >======='
            write(8,*)
          endif
 

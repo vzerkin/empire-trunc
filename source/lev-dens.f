@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
-Ccc   * $Id: lev-dens.f 4456 2015-08-28 14:58:23Z rcapote $
+Ccc   * $Date: 2015-11-14 14:42:41 +0100 (Sa, 14 Nov 2015) $
+Ccc   * $Id: lev-dens.f 4487 2015-11-14 13:42:41Z rcapote $
 C
 C
 C
@@ -1483,6 +1483,11 @@ C-----fit nuclear temperature (and Ux) to discrete levels
       ROPar(3,Nnuc) = DEL
       ROPar(4,Nnuc) = eo
       ROPar(5,Nnuc) = t
+
+      WRITE(8,'(I3,''-'',A2,''-'',I3, 5X,5(2x,1F8.5))')
+     &       INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
+     &       (ROPar(j,nnuc),j=1,5)
+
       IF (ig.NE.0) THEN
 C-----calculation of level densities below EXL
 C-----(low energy formula)
