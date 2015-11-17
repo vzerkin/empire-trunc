@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4492 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-17 10:27:30 +0100 (Di, 17 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -161,8 +161,9 @@ C                       ENDDO
                         DO nang = 1, NDANG  ! over angles
                           csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
                         ENDDO
-                        check_DL(il)=max(2.0d0*PI*csum*PI/90.d0,1.d-10)
-                     ENDDO
+                        check_DL(il)=
+     &                    max(2.0d0*PI*csum*PI/(NDAng - 1),1.d-10)  ! PI/90.d0
+                     ENDDO                                
                    ENDIF
 C
 C------------------(continuum part - same for all particles)
@@ -203,10 +204,11 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
 
                        ENDDO
                      ENDIF
+
                      if(ie.ne.1) then
-                       check_DE(ie) = 2.0d0*PI*csum*PI/90.d0
+                       check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
                      else
-                       check_DE(ie) =       PI*csum*PI/90.d0
+                       check_DE(ie) =       PI*csum*PI/(NDAng - 1) ! PI/90.d0
                      endif
                    ENDDO
 C

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4484 $
+Ccc   * $Rev: 4492 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
+Ccc   * $Date: 2015-11-17 10:27:30 +0100 (Di, 17 Nov 2015) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -393,9 +393,9 @@ C--------Inclusive DDX spectrum
            if(CSE(ie,nejc,0).le.0.d0) cycle
            csum = 0.d0
            DO nang = 1, NDANG  ! over angles
-             csum = csum + cseaprnt(ie,nang)*SANgler(nang)*PI/90.d0
+             csum = csum + cseaprnt(ie,nang)*SANgler(nang)
            ENDDO
-           check_DE(ie) = 2.0d0*PI*csum
+           check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
            if(ie.le.nspec)
      &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
