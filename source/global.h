@@ -1,6 +1,6 @@
-! $Rev: 4456 $
+! $Rev: 4494 $
 ! $Author: rcapote $
-! $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+! $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -31,7 +31,7 @@
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc), &
      &                 CSFis, CSFus, CSGdr1, CSGdr2, COEf, ELCncs,      &
      &                 CSMsc(0:2), CSMsd(0:ndejc), CSO, CSPrd(ndnuc),   &
-     &                 CSRead, D1Fra, DE, DEPart(ndnuc),                &
+     &                 CSRead, D1Fra, DE, DEPart(ndnuc), CSPopul(ndnuc),&
      &                 CSEdbk(ndecse,0:ndejc), DEF(ndlw,0:ndnuc),       &
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,    &
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,    &
@@ -67,6 +67,7 @@
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
      &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc),               &
+     &                                     ENDfp(0:ndejc,0:ndnuc),      &
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
@@ -252,7 +253,7 @@
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
      &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
-     &                 RECcse, POPcon, POPdis, EHRtw,                   &
+     &                 RECcse, POPcon, POPdis, EHRtw, CSPopul,          &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
@@ -280,7 +281,7 @@
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,     &
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH,  &
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,     &
-     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,            &
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, ENDfp,     &
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &

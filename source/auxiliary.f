@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -61,6 +61,7 @@ C      CSEahmslab = 0.d0
 
       POPmax   = 0.d0
       CSPrd    = 0.d0
+      CSPopul  = 0.d0
       CSPfis   = 0.d0
       EX       = 0.d0
       JSTab    = 0.d0

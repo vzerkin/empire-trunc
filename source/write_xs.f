@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4492 $
+Ccc   * $Rev: 4494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-17 10:27:30 +0100 (Di, 17 Nov 2015) $
+Ccc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -18,7 +18,7 @@ C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
       DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,qout
-      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1   
+      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
@@ -73,6 +73,19 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
 C
 C---- ENDF spectra printout (exclusive representation)
 C----
+C     DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
+C        IF (ENDf(nnuc).EQ.1 .and. CSPrd(nnuc).GT.0.0D0) THEN
+C           write(*,*) 'Residual nucleus:', NINT(Z(nnuc)),NINT(A(Nnuc))
+C           DO nejc = 1, NDEJC         !loop over ejectiles
+C             IF (POPcs(nejc,INExc(nnuc)).GT.0.d0) 
+C    &           write(*,'(2x,3(I3,1x),A8,2x,I2,2x,d12.6)') 
+C    &            nejc, nnuc, INExc(nnuc),
+C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
+C           ENDDO
+C           write(*,*)
+C        ENDIF 
+C	ENDDO
+
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
@@ -80,6 +93,19 @@ C----
              DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
+C 
+                IF(ENDfp(nejc,nnuc).NE.1) THEN
+C                  To add spectra to inclusive
+                   nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C------------------(continuum part - same for all particles)
+                   DO ie = 1, nspec + 1 
+                     htmp = POPcse(0,nejc,ie,INExc(nnuc))
+                     if(htmp.LE.0.d0) cycle
+	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
+                   ENDDO 
+                   CYCLE
+                ENDIF
+                
                 IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
                 ELSE
@@ -113,6 +139,7 @@ C----
                   cejectile = 'lt. ions '
                   iizaejc = IZAejc(NDEJC)
                 ENDIF
+
 C---------------Double the first bin x-sec to preserve integral in EMPEND
                 POPcse(0, nejc, 1, INExc(nnuc)) =  
      &                  POPcse(0, nejc, 1, INExc(nnuc))*2

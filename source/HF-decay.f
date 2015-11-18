@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4470 $
+Ccc   * $Rev: 4494 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-29 17:09:45 +0200 (Sa, 29 Aug 2015) $
+Ccc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -22,7 +22,7 @@ C
 
       INTEGER i,ia,nejc,il,nbr,ib,iang,its,ilv,j,m,ke,iz,nxsp,npsp
       INTEGER kemin,kemax,jcn,ipar,ip,izares,iloc,nnur,nspec,ispec
-      INTEGER ilevcol,jz,jn,imint,imaxt,na
+      INTEGER ilevcol,jz,jn,imint,imaxt,na, itmp
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
@@ -31,7 +31,7 @@ C
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
       DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
-      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum, xs_cn
+      DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum,xs_cn,ftmp_disc
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
 
@@ -931,10 +931,21 @@ C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
                ELSEIF (nejc.EQ.NDEJC) THEN
                  cejectile = 'lt. ions '
                ENDIF
+               IF(ENDfp(nejc,nnuc).EQ.1) THEN
+                 itmp = 1
+C                estimating multiplicity
+                 IF (nejc.eq.1) itmp = NINT(A(1)-A(nnuc))   ! n,xn
+                 IF (nejc.eq.2) itmp = NINT(A(1)-A(nnuc))   ! n,xp
+C                Summing exclusive cross section
+                 CSPopul(nnuc) = CSPopul(nnuc) +
+     &                      POPcs(nejc,INExc(nnuc))/itmp
+C                WRITE (*,*) nnuc,POPcs(nejc,INExc(nnuc)) 
+               ENDIF
                WRITE (12,9753) iz, SYMb(nnuc), ia, 
      &           POPcs(nejc,INExc(nnuc)),cejectile
-9753           FORMAT(1X,I3,'-',A2,'-',I3,
+9753             FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section',G12.6,'  mb   : ',A9) 
+C              ENDIF
              ENDDO
              WRITE (8,*)
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
@@ -953,9 +964,7 @@ C--------------(merely for checking purpose)
              IF (nnuc.EQ.mt91) THEN
                nejc = 1
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
-
      &                G12.6,''  mb  '')') xtotsp
-
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
 C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
@@ -964,9 +973,7 @@ C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
-
      &                G12.6,''  mb  '')') xtotsp
-
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
@@ -979,9 +986,7 @@ C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
-
      &                G12.6,''  mb  '')') ptotsp
-
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
                WRITE (8,'(6X,'' Cont. popul. before g-cascade '',
@@ -993,11 +998,8 @@ C    &                G12.6,''  mb  '')') atotsp
 C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
 C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)
-
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
-
      &                G12.6,''  mb  '')') atotsp
-
              ELSE
                IF (LHMs.GT.0 .and. atotsp.LT.1.0d-8) THEN
                  totsp = CSprd(nnuc) - dtotsp - htotsp - ttotsp
@@ -1120,18 +1122,14 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
         WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' fission cross  section '',G12.5,''
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
-
 C
       ENDIF
 
-
       TOTcsfis = TOTcsfis + CSFis
-
 
       IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0 .AND. ncollx.GT.0) then
 C  -----Locate position of the projectile among ejectiles
         CALL WHEREJC(IZAejc(0),nejcec,iloc)
-
 C
         its = ncollx
         IF (CSAlev(1,ICOller(2),nejcec).GT.0) THEN
@@ -1146,21 +1144,15 @@ C
           WRITE(8,*) ' '
           DO iang = 1, NDANG
             WRITE (8,99035) (iang - 1)*gang,
-
      &	      ELAred*elada(iang)+CSAlev(iang,1,nejcec),
-
      &               (CSAlev(iang,ICOller(ilv),nejcec),
      &               ilv = 2,MIN(its,10)) 
           ENDDO
           WRITE(8,*) ' '
           WRITE(8,99041) 1,
-
      &        ELAred*ELAcs + PIx4*PL_CN(0,LEVtarg),                          
-
 C    &                     POPlv(1,nnurec),
-
      &            (POPlv(ICOller(ilv),nnurec),
-
      &               ilv= 2,MIN(its,10))
 C
           IF(its.gt.10) THEN
@@ -1226,6 +1218,7 @@ C         number of discrete levels is limited to 40
 
       ENDIF
 
+      ftmp_disc = 0.d0
       IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
@@ -1233,6 +1226,10 @@ C         number of discrete levels is limited to 40
            ilv = 0  ! count of meta-stable states
            ftmp_gs = CSPrd(nnuc)
            DO its= NLV(Nnuc), 2, -1
+            IF (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849) THEN
+C	        write(*,*) nnuc, POPlv(its,nnuc)
+              ftmp_disc = ftmp_disc + POPlv(its,nnuc)
+            ENDIF 
             IF(ISIsom(its,Nnuc).EQ.1) THEN
               ilv = ilv + 1
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
@@ -1247,23 +1244,53 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
            IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           '' ground state population  '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, ftmp_gs
-         ENDIF
+      ENDIF
 
-5753     FORMAT(1X,I3,'-',A2,'-',I3,
+5753  FORMAT(1X,I3,'-',A2,'-',I3,
      &    '    fission cross section',G12.6,'  mb') 
-         IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
 
-         IF(CSPrd(nnuc).gt.0.d0) then 
+      IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
+
+      IF(CSPrd(nnuc).gt.0.d0) then 
            WRITE (12,*)
            WRITE (8,*)
-           WRITE (8,
+           IF(CSPrd(nnuc).GT.1.d-7) then
+              WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-           WRITE (12,
+              WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
+           ELSE
+              WRITE (8,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+     &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
+     &                             REAction(nnuc)
+              WRITE (12,
+     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
+     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
+     &                             REAction(nnuc)
+           ENDIF
+           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
+             IF(nnuc.eq.mt849) then
+             WRITE (12,
+     &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
+     &''  mb '','' !!!  reac: '',A21)') iz, SYMb(nnuc), ia, 
+     &     CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
+             ELSE
+               WRITE (12,
+     &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
+     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
+     &     CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
+             ENDIF              
+           ELSE
+             WRITE (12,
+     &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
+     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
+     &     0.d0, REAction(nnuc)
+           ENDIF
            checkprd = checkprd + CSFis
            xcross(NDEJC+1,jz,jn) = CSFis
          ENDIF
@@ -1272,7 +1299,7 @@ C        WRITE (8,*)
 C        Integral is calculated by trapezoidal rule being consistent with cross section
          IF(IOUt.GT.0) CALL AUERST(nnuc,0,0)
          IF(CSEmis(0,nnuc).gt.0) THEN
-           WRITE (12,'(10x,
+           if(nnuc.eq.1)  WRITE (12,'(10x,
      &                 '' g  emission cross section'',G12.6,''  mb'')')
      &       CSEmis(0,nnuc)
            if(nnuc.eq.1) WRITE (12,'(2x,
@@ -1297,9 +1324,9 @@ C------------Residual nuclei must be heavier than alpha
              IF(iloc.EQ.1) CYCLE
 C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
              IF(CSEmis(nejc,nnuc).LE.0) CYCLE
-             WRITE (12,
-     &           '(11X,A2,'' emission cross section'',G12.6,''  mb'')')
-     &             SYMbe(nejc), CSEmis(nejc,nnuc)
+C            WRITE (12,
+C    &           '(11X,A2,'' emission cross section'',G12.6,''  mb'')')
+C    &             SYMbe(nejc), CSEmis(nejc,nnuc)
              IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
      &           AEJc(0).LE.4.)  ! excluding HI reactions
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
@@ -1777,11 +1804,8 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       WRITE (12,*) ' '
 
       DO ie = 1, ilast
-
 	  stmp = POPcse(0,ipart,ie,INExc(Nnuc)) 
-
 	  if(stmp.le.0 .and. ie.ne.ilast) cycle 
-
         WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorr,
      &      stmp*recorr     
       ENDDO

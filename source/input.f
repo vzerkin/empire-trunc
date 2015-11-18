@@ -1,6 +1,6 @@
-!cc   * $Rev: 4488 $
+!cc   * $Rev: 4494 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-14 15:46:25 +0100 (Sa, 14 Nov 2015) $
+!cc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -48,7 +48,7 @@ c     CHARACTER*23 ctmp23
       LOGICAL gexist, calc_fiss !, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated 
+     &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
 
@@ -212,8 +212,8 @@ C
             delp_ig(nnuc)  = 0.d0
             atil_ig(nnuc)  = 0.d0
             dshift_ig(nnuc)= 0.d0           
-C-----------set ENDF flag to 0 (no ENDF formatting)
-            ENDf(nnuc) = 0
+C-----------set ENDF flag to 0 (no ENDF formatting or printing)
+            ENDf (nnuc) = 0
 c-----------set Levels flag to -1 (no levels stored)
             NSTOred(nnuc) = -1
 C
@@ -313,7 +313,6 @@ C
 
          NPRIm_g = 0       ! No primary gammas (default)
          NNG_xs  = 0       ! Gamma production cross section not printed
-
 C
 C        PFNS keywords
 C        
@@ -621,7 +620,7 @@ C-----------GAMMA EMISSION
          XN(0) = A(0) - Z(0)
          IZA(0) = INT(1000*Z(0) + A(0))
 
-         ENDF(0) = 1
+         ENDF (0) = 1
 
          ia = INT(A(0))
          iz = INT(Z(0))
@@ -761,6 +760,8 @@ C
 C        Please note that the order in which the array IZA(nnuc) is filled is
 C        quite important.
 C
+         ENDFp = 0
+C
          DO iac = 0, NEMc
          DO ih = 0, nemh
          DO it = 0, nemt
@@ -787,6 +788,11 @@ C            residues must be heavier than alpha !! (RCN)
              izatmp = INT(1000*ztmp + atmp)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
+C                 (n,n),(n,2n),(n,3n),(n,4n)
+                  if(in.eq.mulem .and. in.le.4) ENDfp(1,nnuc) = 1 
+C                 (n,p),(n,2p)
+                  if(ip.eq.mulem .and. ip.le.2) ENDfp(2,nnuc) = 1 
+
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
@@ -835,6 +841,10 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
+C                    (n,np),(n,pn),(n,d)
+                     ENDfp(1,nnuc) = 1 
+                     ENDfp(2,nnuc) = 1 
+                     ENDfp(4,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
@@ -842,6 +852,8 @@ C                    From n,2np   to   n,t
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
+C                    (n,t)
+                     ENDfp(5,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
@@ -849,6 +861,8 @@ C                    From n,n2p   to   n,he3
                      iend = iend - 3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
+C                    (n,he3)
+                     ENDfp(6,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
@@ -856,6 +870,8 @@ C                    From n,2n2p   to   n,a
                      iend = iend - 4
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
+C                    (n,a)
+                     ENDfp(3,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
@@ -977,7 +993,6 @@ C--------------To find inelastic channel
                zres = Z(nnuc) - ZEJc(nejc)
 C              residual nuclei must be heavier than alpha
                if(ares.le.4 . or. zres.le.2) cycle
-
                izares = INT(1000*zres + ares)
                CALL WHERE(izares,nnur,iloc)
                IF (iloc.EQ.1) THEN
@@ -1083,7 +1098,7 @@ C        Changing the incident input energy to plot LDs
 !--------Set actual flags for exclusive spectra
 !
          IF(NENdf.EQ.0) THEN
-              ENDf = 0
+              ENDf  = 0
               NEXclusive = 0
 !        Initially set all spectra as inclusive except those explicitely
 !        requested in the input (ENDF(nnuc)=10)
@@ -1092,9 +1107,9 @@ C        Changing the incident input energy to plot LDs
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
             IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
-               ENDf(0) = 1
-               ENDf(1) = 1
-               ENDf(NTArget) = 1
+               ENDf (0) = 1
+               ENDf(1)  = 1
+               ENDf(NTArget)  = 1
                DO in = 1, MIN(4,nemn)   !neutron emissions
                   ENDf(in+1) = 1
                ENDDO
@@ -1120,7 +1135,8 @@ C        Changing the incident input energy to plot LDs
                   ENDDO
                ENDDO
             ENDIF
-C            IF(ENDf(nnuc).EQ.10) ENDf(nnuc) = 1  !nucleus requested as exclusive in the optional input
+C           Disabling all exclusive conversion to inclusive (testing)
+C           ENDfp = 0
 C
 C           Create list of exclusive nuclei
 C
@@ -3032,17 +3048,17 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
         WRITE (12,*) '   MT=16   (n,2n)                               '
         WRITE (12,*) '   MT=17   (n,3n)                               '
         WRITE (12,*) '   MT=18   (n,f)                                '
-        WRITE (12,*) '   MT=22   (n,na)                               '
-        WRITE (12,*) '   MT=24   (n,2na)                              '
+C       WRITE (12,*) '   MT=22   (n,na)                               '
+C       WRITE (12,*) '   MT=24   (n,2na)                              '
         WRITE (12,*) '   MT=28   (n,np+pn)                            '
         WRITE (12,*) '   MT=37   (n,4n)                               '
-        WRITE (12,*) '   MT=45   (n,npa)                              '
+C       WRITE (12,*) '   MT=45   (n,npa)                              '
         WRITE (12,*) '   MT=103, 600-649 (n,p)                        '
         WRITE (12,*) '   MT=104, (n,d)                                '
         WRITE (12,*) '   MT=105, (n,t)                                '
         WRITE (12,*) '   MT=106, (n,He-3)                             '
         WRITE (12,*) '   MT=107, 800-849 (n,a)                        '
-        WRITE (12,*) '   MT=112  (n,pa)                               '
+C       WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '                                                '
         WRITE (12,*) 'MF=4 Angular distributions                      '
         WRITE (12,*) '     EMPIRE calculations were adopted           '
@@ -6382,41 +6398,6 @@ C              Setting ENDF for all emission loops
      &                i2
                WRITE (8,'('' WARNING: SETTING IGNORED'')')
             ENDIF
-C           Setting ENDF for a single nucleus
-C           izar = i1*1000 + i2
-C           CALL WHERE(izar,nnuc,iloc)
-C           IF (iloc.EQ.1) THEN
-C              WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
-C    &                '' NOT NEEDED'')') i2,i1
-C              WRITE (8,'('' WARNING: ENDF SETTING IGNORED'')')
-C              GOTO 100
-C           ENDIF
-C
-C           if(INT(val).gt.0 .and. NENdf.EQ.0) THEN
-C              NENdf = INT(val)
-C              WRITE (8,'('' ENDF formatting enabled'')')
-C              WRITE (8,'('' Exclusive emission from CN enabled'')')
-C              WRITE (12,'('' ENDF formatting enabled'')')
-C              WRITE (12,'('' Exclusive emission from CN enabled'')')
-C           ENDIF
-C           ENDf(nnuc) = INT(val)
-C           IF (ENDf(nnuc).EQ.1) THEN
-C             ENDf(nnuc) = 10  ! using as a flag 
-C             WRITE (8,
-C    &       '('' Exclusive spectra for production of '',
-C    &         I3,A2)') i2, SYMb(nnuc)
-C             WRITE (12,
-C    &       '('' Exclusive spectra for production of '',
-C    &         I3,A2)') i2, SYMb(nnuc)
-C           ENDIF
-C           IF (ENDf(nnuc).EQ.2) THEN
-C             WRITE (8,
-C    &       '('' Emission spectra for production of '',I3,A2,
-C    &         '' stored as inclusive'')') i2, SYMb(nnuc)
-C             WRITE (12,
-C    &       '('' Emission spectra for production of '',I3,A2,
-C    &         '' stored as inclusive'')') i2, SYMb(nnuc)
-C           ENDIF
             GOTO 100
          ENDIF
 C-----
