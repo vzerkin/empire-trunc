@@ -1,6 +1,6 @@
-!cc   * $Rev: 4498 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-19 17:06:03 +0100 (Do, 19 Nov 2015) $
+!cc   * $Rev: 4500 $
+!cc   * $Author: bcarlson $
+!cc   * $Date: 2015-11-19 19:13:23 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -6131,7 +6131,8 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'NHMS  ') THEN
-            IF (val.GT.99.0D0 .AND. LHMs.NE.0) THEN
+C            IF (val.GT.99.0D0 .AND. LHMs.NE.0) THEN
+            IF (val.GT.99.0D0) THEN
                NHMs = val
                WRITE (8,'('' Number of events in HMS set to '',I10)')
      &                NHMs
@@ -6141,7 +6142,7 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'FHMS  ') THEN
-            IF(LHMs.NE.0) THEN
+C            IF(LHMs.NE.0) THEN
               IF (val.LT.1.0D0) THEN
                  FHMS = 0
                  WRITE (8,
@@ -6167,12 +6168,13 @@ C-----
                  WRITE (12,
      &       '('' Exact rel. Fermi gas densities are used in DDHMS '')')
                ENDIF
-             ENDIF
+C             ENDIF
             GOTO 100
          ENDIF
 C-----
          IF (name.EQ.'CHMS  ') THEN
-            IF (val.GT.0.0D0 .AND. LHMs.NE.0) THEN
+C            IF (val.GT.0.0D0 .AND. LHMs.NE.0) THEN
+            IF (val.GT.0.0D0) THEN
                CHMs = val
                WRITE (8,
      &             '('' Default damp rate in HMS multiplied by '',F6.3)'

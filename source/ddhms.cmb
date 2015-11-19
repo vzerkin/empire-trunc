@@ -1,12 +1,12 @@
-c CVS Version Management $Revision: 4456 $
-c $Id: ddhms.cmb 4456 2015-08-28 14:58:23Z rcapote $
+c CVS Version Management $Revision: 4500 $
+c $Id: ddhms.cmb 4500 2015-11-19 18:13:23Z bcarlson $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
 	integer maxnemiss  
 	parameter (maxnemiss = 5)  ! max number of emitted preeq. nucleons  
         integer ndexcluhms
-        parameter (ndexcluhms = 15) ! max number of exclusive spectra and DDX's 
+        parameter (ndexcluhms = 20) ! max number of exclusive spectra and DDX's 
 
 	integer ndim_zem,ndim_nem   
 	parameter (ndim_zem = maxnemiss)  !max # of protons emitted	

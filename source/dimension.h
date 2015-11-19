@@ -1,17 +1,17 @@
-!cc   * $Rev: 4456 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+!cc   * $Rev: 4500 $
+!cc   * $Author: bcarlson $
+!cc   * $Date: 2015-11-19 19:13:23 +0100 (Do, 19 Nov 2015) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
-     & NDNUC= 100                                                       &
-     &,NDEXCLUS= 20                                                     &
-     &,NDEX= 101                                                        &
-     &,NDLW= 55                                                         &
-     &,LEVCC=30                                                         &
+     & NDNUC= 160                                                       &
+     &,NDEXCLUS= 100                                                    &
+     &,NDEX= 201                                                        &
+     &,NDLW= 100                                                        &
+     &,LEVCC=40                                                         &
      &,NDLV=40                                                          &
-     &,NDBR=40                                                          &
+     &,NDBR=60                                                          &
      &,NDMSCS=4)
 !
 !    DO NOT CHANGE parameters below 

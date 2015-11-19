@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4499 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-19 17:39:42 +0100 (Do, 19 Nov 2015) $
+Ccc   * $Rev: 4500 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2015-11-19 19:13:23 +0100 (Do, 19 Nov 2015) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -365,7 +365,7 @@ C
                  iang = 0
                  DO iang1 = 1, NANgela
                     READ (45,'(3x,12x,D12.5)',END = 1400) ftmp    ! ecis06
-	              ftmp = ftmp * FCOred
+	              ftmp = ftmp * FCOred/DE
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
@@ -374,11 +374,12 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
      &                        min(icsl + 3*isigma,ncon)
                         CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1)
      &                  + ftmp * dexp(-dble(ie-icsl)**2/isigma2)/dcor  
-     &                  * 2 * pi                               ! added 2pi, BVC 
+C     &                  * 2 * pi                               ! 2pi taken out, BVC 
                       enddo
                     else
                       CSEa(icsl,iang,nejcec,1) =
-     &                CSEa(icsl,iang,nejcec,1) + ftmp * 2 * pi ! added 2pi, BVC 
+     &                CSEa(icsl,iang,nejcec,1) + ftmp ! 2 * pi taken out BVC 
+C     &                CSEa(icsl,iang,nejcec,1) + ftmp * 2 * pi ! added 2pi, BVC 
                     endif
                  ENDDO
                ENDIF
