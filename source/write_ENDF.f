@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4484 $
+Ccc   * $Rev: 4495 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-13 16:38:51 +0100 (Fr, 13 Nov 2015) $
+Ccc   * $Date: 2015-11-19 11:41:17 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -467,10 +467,25 @@ C-----
 C--------Print spectra of residues
          reactionx = '(z,x)  '
          qout = 0.d0
-         DO nnuc = 1, NNUcd    !loop over decaying nuclei
+         IF(RECoil.gt.0) then
+          DO nnuc = 1, NNUcd    !loop over decaying nuclei
+
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1)-A(Nnuc)).GT.4 )  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+            IF (ENDf(nnuc).EQ.1 .AND. 
+     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.1))  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+            IF (ENDf(nnuc).EQ.1 .AND. 
+     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.3))  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
             IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
      &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
-         ENDDO !over decaying nuclei in ENDF spectra printout
+
+          ENDDO !over decaying nuclei in ENDF spectra printout
+         ENDIF
 C
          WRITE (12,*) ' '    
 C--------Print inclusive spectra of gamma and ejectiles

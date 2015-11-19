@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4494 $
+Ccc   * $Rev: 4495 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
+Ccc   * $Date: 2015-11-19 11:41:17 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -428,25 +428,32 @@ C------------------Exclusive DE spectra (gammas)
                 ENDIF !  (nejc.GT.0)
  1530         ENDDO   ! over ejectiles
 
-              IF(RECoil.gt.0) then
-                IF (NINT(A(1)-A(Nnuc)).GT.1) THEN 
-C                 cluster emission
-                  CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
-C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
-C    &                NINT(A(nnuc)),NINT(Z(nnuc))
-                ELSEIF (NINT(A(1)-A(Nnuc)).EQ.1) THEN
-C                 n or p emission
-                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
-C                 write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
-C    &                NINT(A(nnuc)),NINT(Z(nnuc))
-                ENDIF
-              ENDIF
-
               qin     = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
 	        qinaver = qin
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
-              
+
+              IF (NINT(A(1)-A(Nnuc)).GT.4 )  GOTO 1550
+              IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
+     &            NINT(Z(1)-Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
+              IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
+     &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
+
+              IF(RECoil.gt.0) then
+                IF (NINT(A(1)-A(Nnuc)).GT.1 .AND. 
+     &              NINT(A(1)-A(Nnuc)).LE.4) THEN 
+C                  (n,xn),(n,xp) x>1; (n,d),(n,t),(n,h),(n,a)
+                   CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
+C                  write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
+C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+                ENDIF
+                IF (NINT(A(1)-A(Nnuc)).EQ.1) THEN !  n or p emission
+                   CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
+C                  write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
+C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+                ENDIF
+              ENDIF
+
               WRITE(12,*)
               WRITE(8,*)
               
@@ -462,7 +469,7 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
      &           qin - qout, (qin - qout)/qin*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
                 WRITE(8,*)
                 WRITE(8,'(1x,'' Total  Q  cont.spec '',G12.6,'' MeV'',/,
@@ -474,7 +481,7 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
      &           qin - qout, (qin - qout)/qin*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
               ELSE
 
@@ -489,14 +496,14 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
      &           qin - qout, (qin - qout)/qin*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
                 WRITE(12,'( 1x,
      &         '' Energy balance      '',G12.6,'' MeV ('',
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
      &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
                 WRITE(8,
      & '(1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
@@ -509,21 +516,21 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
      &           qin - qout, (qin - qout)/qin*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
                 WRITE(8,'( 1x,
      &         '' Energy balance      '',G12.6,'' MeV ('',
      &         F6.2,''%)  at E(lab)='',G12.6,
      &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
      &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
-     &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
+     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
 
               ENDIF
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
 C********************************************
-         CALL PFNS_calc(nnuc)
+1550     CALL PFNS_calc(nnuc)
 C********************************************
 
       ENDDO  ! loop over residues (not decaying nuclei)

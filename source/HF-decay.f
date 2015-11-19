@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4494 $
+Ccc   * $Rev: 4495 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
+Ccc   * $Date: 2015-11-19 11:41:17 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -934,18 +934,18 @@ C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
                IF(ENDfp(nejc,nnuc).EQ.1) THEN
                  itmp = 1
 C                estimating multiplicity
-                 IF (nejc.eq.1) itmp = NINT(A(1)-A(nnuc))   ! n,xn
-                 IF (nejc.eq.2) itmp = NINT(A(1)-A(nnuc))   ! n,xp
-C                Summing exclusive cross section
-                 CSPopul(nnuc) = CSPopul(nnuc) +
-     &                      POPcs(nejc,INExc(nnuc))/itmp
-C                WRITE (*,*) nnuc,POPcs(nejc,INExc(nnuc)) 
+                 IF (nejc.eq.1 .or. nejc.eq.2) 
+     &             itmp = NINT(A(1)-A(nnuc))   ! (n,xn), (n,xp)
+C                  Summing exclusive cross section
+                   CSPopul(nnuc) = CSPopul(nnuc) +
+     &                             POPcs(nejc,INExc(nnuc))/itmp
+C                  WRITE (*,*) NINT(A(nnuc)),NINT(Z(nnuc)),
+C    &                          POPcs(nejc,INExc(nnuc)) 
                ENDIF
                WRITE (12,9753) iz, SYMb(nnuc), ia, 
      &           POPcs(nejc,INExc(nnuc)),cejectile
 9753             FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section',G12.6,'  mb   : ',A9) 
-C              ENDIF
              ENDDO
              WRITE (8,*)
              IF (gtotsp.NE.0) emedg = emedg/gtotsp
@@ -1218,7 +1218,6 @@ C         number of discrete levels is limited to 40
 
       ENDIF
 
-      ftmp_disc = 0.d0
       IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
@@ -1226,10 +1225,6 @@ C         number of discrete levels is limited to 40
            ilv = 0  ! count of meta-stable states
            ftmp_gs = CSPrd(nnuc)
            DO its= NLV(Nnuc), 2, -1
-            IF (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849) THEN
-C	        write(*,*) nnuc, POPlv(its,nnuc)
-              ftmp_disc = ftmp_disc + POPlv(its,nnuc)
-            ENDIF 
             IF(ISIsom(its,Nnuc).EQ.1) THEN
               ilv = ilv + 1
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
@@ -1273,18 +1268,17 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
      &                             REAction(nnuc)
            ENDIF
+           
+           ftmp_disc = 0.d0
+           IF(nnuc.eq.mt91) ftmp_disc = CSDirlev(1,1)
+           IF(nnuc.eq.mt649) ftmp_disc = CSDirlev(1,2)
+           IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
+
            IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
-             IF(nnuc.eq.mt849) then
              WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
-     &''  mb '','' !!!  reac: '',A21)') iz, SYMb(nnuc), ia, 
-     &     CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
-             ELSE
-               WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
      &     CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
-             ENDIF              
            ELSE
              WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
