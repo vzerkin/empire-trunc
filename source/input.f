@@ -1,6 +1,6 @@
-!cc   * $Rev: 4494 $
+!cc   * $Rev: 4497 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
+!cc   * $Date: 2015-11-19 16:04:04 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -967,6 +967,7 @@ C                    From n,3n3p   to   n,npa
          ENDDO
          ENDDO
          ENDDO
+         ENDfp(0,1) = 1  ! (n,g) = capture
 
          NNUcd = nnuc
          NNUct = nnuc
