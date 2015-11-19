@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4499 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-19 17:39:42 +0100 (Do, 19 Nov 2015) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -89,7 +89,7 @@ C----------To use only those values corresponding to EMPIRE grid for elastic XS
 C-----Check whether integral over angles agrees with x-sec. read from ECIS
       csum = 0.d0
       DO iang = 1, NDANG  ! over angles
-        csum = csum + elada(iang)*SANgler(iang)*PI/90.d0
+        csum = csum + elada(iang)*SANgler(iang)*PI/(NDAng-1) !/90.d0
       ENDDO
       csum = 2.0d0*PI*csum 
 C     write(*,*) ELAcs,csum,' SIN'
@@ -220,7 +220,7 @@ C--------------Check whether integral over angles agrees with x-sec. read from E
                csum = 0.d0
                DO iang = 1, NANgela  ! over angles
                  csum = csum + CSAlev(iang,ilv,nejcec)*
-     &                  SANgler(iang)*PI/90.d0
+     &                  SANgler(iang)*PI/(NDAng-1) !/90.d0
                ENDDO
                csum = 2.0d0*PI*csum 
                if (csum.gt.0.d0) then

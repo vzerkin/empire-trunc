@@ -1,6 +1,6 @@
-cc   * $Rev: 4456 $
+cc   * $Rev: 4499 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2015-11-19 17:39:42 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -679,6 +679,9 @@ C-----
           NANgela = 91
           NDAng   = 91
         ELSE
+          WRITE (8,*)
+          WRITE (8,*) ' WARNING: NDAng reset to ',NDAnghmx, 
+     &                             ' for compatibility with HMS'
           NANgela = NDAnghmx
           NDAng   = NDAnghmx
         ENDIF
