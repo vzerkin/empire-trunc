@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4495 $
+Ccc   * $Rev: 4496 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-19 11:41:17 +0100 (Do, 19 Nov 2015) $
+Ccc   * $Date: 2015-11-19 15:00:03 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -438,6 +438,8 @@ C------------------Exclusive DE spectra (gammas)
      &            NINT(Z(1)-Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
               IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
      &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
+              IF (NINT(A(1)-A(Nnuc)).EQ.3 .AND. 
+     &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 3p
 
               IF(RECoil.gt.0) then
                 IF (NINT(A(1)-A(Nnuc)).GT.1 .AND. 
