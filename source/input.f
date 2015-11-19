@@ -1,6 +1,6 @@
-!cc   * $Rev: 4497 $
+!cc   * $Rev: 4498 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-19 16:04:04 +0100 (Do, 19 Nov 2015) $
+!cc   * $Date: 2015-11-19 17:06:03 +0100 (Do, 19 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -789,10 +789,16 @@ C            residues must be heavier than alpha !! (RCN)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
-                  if(in.eq.mulem .and. in.le.4) ENDfp(1,nnuc) = 1 
+                  if(in.eq.mulem .and. in.le.4) THEN
+				  ENDfp(1,nnuc) = 1 
+				  ENDfp(0,nnuc) = 1 
+                  endif
+C                 
 C                 (n,p),(n,2p)
-                  if(ip.eq.mulem .and. ip.le.2) ENDfp(2,nnuc) = 1 
-
+                  if(ip.eq.mulem .and. ip.le.2) THEN
+				  ENDfp(2,nnuc) = 1 
+				  ENDfp(0,nnuc) = 1 
+                  endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
