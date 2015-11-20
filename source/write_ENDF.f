@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4495 $
+Ccc   * $Rev: 4503 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-19 11:41:17 +0100 (Do, 19 Nov 2015) $
+Ccc   * $Date: 2015-11-20 19:13:02 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -107,6 +107,8 @@ C     for complex projectiles: reaction, BU,NT,PE,CN
       IF(ltransfer .or. lbreakup)
      &   WRITE(114,'(1P,E11.4,1x,1P,5E13.5)') EINl, CSFus,
      &   crossBUt,crossNTt, csprd(4),CSFus-crossBUt-crossNTt-crossPEt
+
+
 
 C
 C     Elastic and Nonelastic modified for actinides
@@ -253,6 +255,56 @@ C
 
       ENDIF
 C     write(*,*) 'Got here with ABScs =', ABScs
+
+C-----
+C-----ENDF spectra printout (inclusive representation)
+C-----
+      IF(NNUct.gt.NEXclusive) then
+         WRITE (8,*) 
+         WRITE (8,*) '********************************************'
+         WRITE (8,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+         WRITE (8,*) '********************************************'
+         WRITE (8,*) 
+
+         WRITE (12,*) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
+         WRITE (12,*) '********************************************'
+         WRITE (12,*)  
+C--------Print spectra of residues
+         reactionx = '(z,x)  '
+         qout = 0.d0
+         IF(RECoil.gt.0) then
+          DO nnuc = 1, NNUcd    !loop over decaying nuclei
+
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1)-A(Nnuc)).GT.4 )  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+            IF (ENDf(nnuc).EQ.1 .AND. 
+     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.1))  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+            IF (ENDf(nnuc).EQ.1 .AND. 
+     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.3))  
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+            IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
+     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
+
+          ENDDO !over decaying nuclei in ENDF spectra printout
+         ENDIF
+C
+         WRITE (12,*) ' '    
+C--------Print inclusive spectra of gamma and ejectiles
+         DO nejc = 0, NEJcm
+           CALL Print_Inclusive(nejc,qout)
+         ENDDO
+         WRITE (12,*) ' '    
+      ENDIF
+
+C-----
+C-----SUMMA SUMMARUM
+C-----
       IF(ABScs.GT.0.) THEN
         WRITE (8,'('' ********************************************'',
      &           23(1H*))')
@@ -448,51 +500,6 @@ C    &    SINlcont*FCOred + ELAred*ELAcs  = TOTcs*TOTred*totcorr
      &  G12.5,'' MeV'')') 100.d0*
      &    abs(ABScs + ELAred*ELAcs - TOTred*TOTcs*totcorr)/
      &                 (TOTred*TOTcs*totcorr),EINl
-      ENDIF
-C-----
-C-----ENDF spectra printout (inclusive representation)
-C-----
-      IF(NNUct.gt.NEXclusive) then
-         WRITE (8,*) 
-         WRITE (8,*) '********************************************'
-         WRITE (8,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
-         WRITE (8,*) '********************************************'
-         WRITE (8,*) 
-
-         WRITE (12,*) 
-         WRITE (12,*) '********************************************'
-         WRITE (12,*) '* INCLUSIVE SPECTRA at Einc =', sngl(EINl) 
-         WRITE (12,*) '********************************************'
-         WRITE (12,*)  
-C--------Print spectra of residues
-         reactionx = '(z,x)  '
-         qout = 0.d0
-         IF(RECoil.gt.0) then
-          DO nnuc = 1, NNUcd    !loop over decaying nuclei
-
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1)-A(Nnuc)).GT.4 )  
-     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
-
-            IF (ENDf(nnuc).EQ.1 .AND. 
-     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.1))  
-     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
-
-            IF (ENDf(nnuc).EQ.1 .AND. 
-     &        (NINT(A(1)-A(Nnuc)).EQ.4 .AND. NINT(Z(1)-Z(Nnuc)).EQ.3))  
-     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
-
-            IF (ENDf(nnuc).EQ.2 .AND. RECoil.GT.0)
-     &        CALL PRINT_RECOIL(nnuc,reactionx,qout)
-
-          ENDDO !over decaying nuclei in ENDF spectra printout
-         ENDIF
-C
-         WRITE (12,*) ' '    
-C--------Print inclusive spectra of gamma and ejectiles
-         DO nejc = 0, NEJcm
-           CALL Print_Inclusive(nejc,qout)
-         ENDDO
-         WRITE (12,*) ' '    
       ENDIF
 
       WRITE (8,*)

@@ -1,6 +1,6 @@
-!cc   * $Rev: 4500 $
-!cc   * $Author: bcarlson $
-!cc   * $Date: 2015-11-19 19:13:23 +0100 (Do, 19 Nov 2015) $
+!cc   * $Rev: 4503 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-11-20 19:13:02 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -2231,21 +2231,7 @@ Cpr         WRITE(8,*) I,ETL(I,NEJC,NNUR)
 Cpr         END DO
          ENDDO     !over ejectiles (nejc)
       ENDDO     !over nuclei (nnuc)
-      WRITE (8,*) ' '
-      WRITE (8,*) 'Total number of nuclei considered :', NNUct
-      WRITE (12,*) ' '
-      WRITE (12,*) 'Total number of nuclei considered :', NNUct
 
-      IF(ENDF(1).GT.0) THEN
-        WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(8,*) 'Nuclei marked with < below produces inclusive spect
-     &ra only'
-        WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(12,*) 'Nuclei marked with < below produces inclusive spect
-     &ra only'
-      ENDIF
-
-      WRITE (8,*) ' '
       IF (ADIv.EQ.2.0D0 .or. ADIv.EQ.4.0D0) WRITE(8,'(1X)')
 C
 C-----other decaying nuclei
@@ -2267,6 +2253,22 @@ C-----LEVEL DENSITY for residual nuclei
          WRITE(8,'(1X)')
       ENDIF
       ATIlnor(0) = ATIlnor(Ntarget)
+
+      WRITE (8,*) ' '
+      WRITE (8,*) ' '
+      WRITE (8,*) 'Total number of nuclei considered :', NNUct
+      WRITE (12,*) ' '
+      WRITE (12,*) 'Total number of nuclei considered :', NNUct
+
+      IF(ENDF(1).GT.0) THEN
+        WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
+        WRITE(8,*) 'Nuclei marked with < below produces inclusive spect
+     &ra only'
+        WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
+        WRITE(12,*) 'Nuclei marked with < below produces inclusive spect
+     &ra only'
+      ENDIF
+
       WRITE (8,*)
 
       IF (FITlev.GT.0) THEN
@@ -2750,16 +2752,18 @@ C
             ENDIF
 
             IF (LVP(ilv,Nnuc).EQ.0) THEN
-               WRITE (8,'(''  WARNING:'')')
-               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
+               IF (IOUT.GE.5) THEN
+                 WRITE (8,'(''  WARNING:'')')
+                 WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
-               WRITE (8,'(''  WARNING: excited state No. '',I3,
-     &         '' has no parity '')') ilv
-!              Assuming natural parity; for odd A it is assumed that
-!              l=INT(l+s)=INT(J) while J=l-s case is ignored
-               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
-               WRITE (8, '(''  WARNING: assuming parity '',I2)')  
-     &         LVP(ilv,Nnuc)      
+                 WRITE (8,'(''  WARNING: excited state No. '',I3,
+     &            '' has no parity '')') ilv
+               ENDIF
+!                Assuming natural parity; for odd A it is assumed that
+!                l=INT(l+s)=INT(J) while J=l-s case is ignored
+                 LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
+                 IF (IOUT.GE.5) WRITE (8, 
+     &            '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
             ENDIF
 
             IF (ilv.NE.1) THEN
