@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3181,7 +3181,7 @@ C          SIG = n*0.26*A**(2.d0/3.d0) with n=2
            SIG = 2*0.26*A(Nnur)**0.66666667
 
 C          if PESpin>0 then spin cut-off = PESpin
-	     IF(PESpin.GT.0) SIG = PESpin
+           IF(PESpin.GT.0) SIG = PESpin
 
            somj = 0.0
            DO j = 1, NLW
@@ -3219,7 +3219,7 @@ C          shifted by the target ground state target spin XJLv(LEVtarg,0)
      >            0.26d0*A(Nnur)**0.66666667
 
 C            if PESpin>0 then spin cut-off = PESpin
-     	       IF(PESpin.GT.0) SIG = PESpin
+             IF(PESpin.GT.0) SIG = PESpin
 
              if(SIG.LE.0) CYCLE         
 

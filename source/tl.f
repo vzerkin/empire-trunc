@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -96,7 +96,7 @@ C           IF distributed barrier, then BASS barriers are used
 
             CALL PUSH(EIN,A(1),AEJc(0),A(0),BFUs,EXPush,SIG,TRUnc,Stl,
      &                NLW,NDLW)
-	      RETURN
+            RETURN
          ENDIF
 C--------calculation of fusion Tl's with distributed barrier model
 C        *** done ***
@@ -128,7 +128,7 @@ C-----setting transmission coefficients for fusion if not distr. barr.
          arg = MIN(70.0D0,arg)
          Stl(i) = 1.d0/(1.d0 + EXP((-arg)))
       ENDDO
-	RETURN
+      RETURN
       END
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
       implicit none 
@@ -154,7 +154,7 @@ C
       DOUBLE PRECISION alib(6), rlib(6), vlib(6), xmas_nejc, xmas_nnuc
       DOUBLE PRECISION EcollTarget, RCCC, elevcc
       DOUBLE PRECISION elvr, xjlvr, t12, dtmp
-      INTEGER ilv, itmp, lvpr, ndbrlin, nbr	 
+      INTEGER ilv, itmp, lvpr, ndbrlin, nbr      
       CHARACTER*80 ch_iuf
       CHARACTER*1 dum
       LOGICAL coll_defined, ldynamical, lodd
@@ -1148,7 +1148,7 @@ C        WRITE (8,*)
            WRITE (8,*)
      &       ' ERROR: Number of collective levels < RIPL CC '
 
-	     if(.NOT.lodd) then
+           if(.NOT.lodd) then
              WRITE (8,*)
      &       ' ERROR: Delete ECDWBA from input and the collective'
              WRITE (8,*)
@@ -1230,7 +1230,7 @@ C
      &           iabs(lvpr-IPArv(n,ncalc)).eq. 0 ) then
                    EXV(n,ncalc) = elvr
                    nld_cc = nld_cc + 1
-	             ICOllev(nld_cc) = ilv
+                   ICOllev(nld_cc) = ilv
                    D_Elv(nld_cc) = elvr
                    D_Xjlv(nld_cc)= xjlvr
                    D_Lvp(nld_cc) = lvpr
@@ -1238,7 +1238,7 @@ C
               endif 
             ENDDO
          ENDDO
-	   ND_nlv = nld_cc 
+         ND_nlv = nld_cc 
          IF (nld_cc.NE.NCOll(ncalc)) THEN
             WRITE (8,*) 
      &  ' WARNING: Default number of coupled levels ', nld_cc
@@ -1249,7 +1249,7 @@ C
          ENDIF
 10611    CLOSE(32)  
 
-        endif	    
+        endif         
 C
 C        Correcting Default Collective Levels using 
 C           corrected CC energies from the RIPL OMP
@@ -1376,14 +1376,14 @@ C          OVERWRITING Default collective levels (TARGET_COLL.DAT) for odd nucle
            ENDDO
            WRITE(12,*) ' '
            CLOSE (97)
-	     WRITE(8,*) 
-	     WRITE(8,*) 
+           WRITE(8,*) 
+           WRITE(8,*) 
      &      ' WARNING: Collective level file overwritten, please rerun'
-	     WRITE(*,*) 
-	     PAUSE 
+           WRITE(*,*) 
+           PAUSE 
      &      '  WARNING: Collective level file overwritten, please rerun'
-	     STOP  
-	   endif ! if(lodd) then
+           STOP  
+         endif ! if(lodd) then
 C
 C--------Putting Coupled levels first
          DO i = 2, ND_nlv
@@ -2586,7 +2586,7 @@ C
          GOTO 400
       ENDIF
       ETL(ien,Nejc,Nnuc) = ener
-      Maxl(ien) = lmax					   
+      Maxl(ien) = lmax                             
       DO l = 0, lmax
          READ (45 ,END= 300,ERR=300) Ttll(ien,l+1)
          if(fexistj) READ (451,END= 300,ERR=300)
@@ -2705,9 +2705,9 @@ C        restoring the input value of the key CN_isotropic
          CLOSE (46 )
          CLOSE (461)
          IF (IOUT.GT.4) THEN
-	     WRITE (8,*) ' Transm. coeff. Tl  written to file:',
+           WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
-	     WRITE (8,*) ' Transm. coeff. Tlj written to file:',
+           WRITE (8,*) ' Transm. coeff. Tlj written to file:',
      &                              (ctldir//ctmp23//'J.BIN')
          ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
@@ -2777,7 +2777,7 @@ C
       LOGICAL relcal, unformat
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
-	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      sjf(l,jindex,stmp)= l - 1 + jindex - stmp
 
       data unformat/.TRUE./ 
 
@@ -2788,7 +2788,7 @@ C
       Stlj = 0.d0
       CSFus   = 0.D0
       sxj   = SEJc(NPRoject)          
-	trgsp = XJLv(LEVtarg,NTArget)
+      trgsp = XJLv(LEVtarg,NTArget)
 C
 C-----Estimating needed coefficient for calculation of the 
 C     absorption cross section from obtained TLs
@@ -2806,7 +2806,7 @@ C
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
 C
-C	write(*,*) 'ilv=',ilv
+C     write(*,*) 'ilv=',ilv
 C
 C------------------------------------------
 C-----| Input of transmission coefficients|
@@ -3039,7 +3039,7 @@ C     SINlcont is the uncoupled channels' cross section to the continuum
 
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
 
-	sabs = 0.d0
+      sabs = 0.d0
       sabsj = 0.D0
       DO l = 0, Maxlw
         Stl(l + 1) = Stl(l + 1)*dtmp 
@@ -3282,7 +3282,7 @@ C
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex, ilv
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
-	sjf(l,jindex,stmp)= l - 1 + jindex - stmp
+      sjf(l,jindex,stmp)= l - 1 + jindex - stmp
       LOGICAL unformat
       data unformat/.TRUE./
 
@@ -3310,7 +3310,7 @@ C-----nceq is the number of coupled equations
 
 C-----Selecting only the ground state ilv=1, note that inverse reaction XSs are 
 C      calculated assuming that the target is always in the GS 
-	ilv = 1
+      ilv = 1
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
@@ -5747,8 +5747,8 @@ C    *     NUMB(I),BETB(I),I=1,NUR)
 C   3 FORMAT(E12.7,5I2,E12.7)
             do k=1,ND_nlv
               IF(ICOllev(k).GT.LEVcc) CYCLE
-	        
-			dtmp = 1.d0
+              
+                  dtmp = 1.d0
               if (k.gt.1) dtmp = D_Def(k,3)
               iparit = -1
               if(D_Lvp(k).gt.0.d0) iparit = +1
@@ -5804,7 +5804,7 @@ C    +   imodel.eq.4 ) then
 
 C     ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
 C     CAAC,ATI
-	IF(iaref.gt.0) THEN
+      IF(iaref.gt.0) THEN
         CAVRss = pot(1,1,22) ! Real vol HF potential
         CARRss = rco(1,1,7)  ! Real vol radius
         CAARss = aco(1,1,7)  ! Real vol diffuseness
@@ -6162,7 +6162,7 @@ c
 
       elf = el - Ef - VCshift
 
-	iaref = 0
+      iaref = 0
 C     Reference nucleus defined 
       if (NINT(pot(i,j,24)).eq.1 .and. pot(i,j,23).gt.0.) 
      *  iaref = pot(i,j,23) 
@@ -6187,7 +6187,7 @@ C     RCN, 09/2004, to handle new extension to the OMP RIPL format
       endif
 
 C     Dependence calculated inside OPTMAN 
-	if(iaref.gt.0 .and. rco(i,j,13).eq.0.) rlib(i) =  rco(i,j,1)
+      if(iaref.gt.0 .and. rco(i,j,13).eq.0.) rlib(i) =  rco(i,j,1)
 
       alib(i)=abs(aco(i,j,1)) + aco(i,j,2)*el + aco(i,j,3)*eta
      *        + aco(i,j,4)/atar + aco(i,j,5)/sqrt(atar)

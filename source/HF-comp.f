@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4482 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-12 10:42:58 +0100 (Do, 12 Nov 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -95,10 +95,10 @@ C           IF (Nnuc.eq.1 .and. Nejc.EQ.1 .and. Iec.EQ.NEX(1) .and.
 C    >          PLcont_lmax(icse).ge.0) THEN
 C              xs_norm = PL_CNcont(0,icse)
 C              IF(xs_norm.gt.0.d0) write(*,*) 'Cont. bin=',icse,
-C    >     	 ' PLcont(2)/PLcont(0)=',PL_CNcont(2,icse)/xs_norm
+C    >       ' PLcont(2)/PLcont(0)=',PL_CNcont(2,icse)/xs_norm
 C              xs_cn  =GET_DDXScont(CANGLE(1),icse)
-C	         xs_norm=GET_DDXScont(CANGLE(45),icse)
-C	         if( dabs(xs_cn-xs_norm).gt.0.1d0) 
+C              xs_norm=GET_DDXScont(CANGLE(45),icse)
+C              if( dabs(xs_cn-xs_norm).gt.0.1d0) 
 C    >           write(151,'(2x,I5,A7,d12.6,A8,d12.6,A7,d12.6)') icse,
 C    >               ' XS(0)=',xs_cn,' XS(90)=',sngl(xs_norm),
 C    >               '  Diff=',dabs(xs_cn-xs_norm)

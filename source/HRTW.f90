@@ -9,9 +9,9 @@
 
    PRIVATE
 
-! $Rev: 4482 $
-! $Author: rcapote $
-! $Date: 2015-11-12 10:42:58 +0100 (Do, 12 Nov 2015) $
+! $Rev: 4504 $
+! $Author: mherman $
+! $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 !
 
    TYPE channel
@@ -407,7 +407,7 @@
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pmatr  =',1,2,DREAL(Pmatr(1,2)),DIMAG(Pmatr(1,2))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Pdiag  =',2,2,DREAL(Pdiag(2,2)),DIMAG(Pdiag(2,2))
 
-	  cres = Umatr*Pmatr*Umatr_T
+        cres = Umatr*Pmatr*Umatr_T
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,1,DREAL(cres(2,1)),DIMAG(cres(2,1))
      write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Sdiag  =',2,2,DREAL(cres(2,2)),DIMAG(cres(2,2))
 

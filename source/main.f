@@ -1,6 +1,6 @@
-cc   * $Rev: 4499 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-19 17:39:42 +0100 (Do, 19 Nov 2015) $
+cc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -30,7 +30,7 @@ C
 
       INTEGER nnuc,nnurec,nejcec,ncollx,iret
 
-	LOGICAL nvwful
+      LOGICAL nvwful
 
       EIN  = 0.0d0
       epre = EIN
@@ -52,13 +52,13 @@ C-----
         CALL MARENG(0,0,nnurec,nejcec)
 C
         IF(CSFus.LE.0) THEN
-		write(*,*) 
-		write(*,*) ' CSFus=',CSFus
+            write(*,*) 
+            write(*,*) ' CSFus=',CSFus
           WRITE(8,*) ' ERROR; Absorption cross section equal zero !'
           STOP       ' ERROR; Absorption cross section equal zero !'
         ENDIF
-C	   
-	  totcorr = 1.d0
+C        
+        totcorr = 1.d0
 C       Inelastic cross sections read only for particles (not photons or HI) 
         IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
      >    call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -258,7 +258,7 @@ C-----
         ENDDO
 
         nuc_print = i
-	  
+        
 C       write(*,*) 'nuc_print=',nuc_print,' First energy?',FIRst_ein
 
         IF (AEJc(NPRoject).EQ.0) then  ! incident photons
@@ -511,7 +511,7 @@ C
 
       lheader = .true.
  1156 READ (5,'(A72)',ERR=11570,END=1200) nextenergy
-	itmp = len_trim(nextenergy)
+      itmp = len_trim(nextenergy)
 
       IF(nextenergy(1:1).eq.'@' .and. itmp.gt.1) THEN 
         write( *,*) '*** ',nextenergy(2:itmp)
@@ -607,7 +607,7 @@ C
       INTEGER iang, itmp
 
  1158 READ (5,'(A72)',ERR=11570,END=1200) nextenergy
-	itmp = len_trim(nextenergy)
+      itmp = len_trim(nextenergy)
 
       IF (nextenergy(1:1).EQ.'*' .OR. nextenergy(1:1).EQ.'#' .OR. 
      &     nextenergy(1:1).EQ.'!' .OR. nextenergy(1:1).EQ.'$')GOTO 1158

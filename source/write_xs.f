@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4496 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-19 15:00:03 +0100 (Do, 19 Nov 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -61,7 +61,7 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
         WRITE (8,*) 
         WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-	ENDIF
+      ENDIF
 
       IF(ENDf(1).GT.0) THEN 
         WRITE (12,*) 
@@ -84,7 +84,7 @@ C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
 C           ENDDO
 C           write(*,*)
 C        ENDIF 
-C	ENDDO
+C     ENDDO
 
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
@@ -101,7 +101,7 @@ C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
-	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
+                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
                    ENDDO 
                    CYCLE
                 ENDIF
@@ -247,13 +247,13 @@ C
                      IF(check_DE(ie).le.0) cycle
                      DO nang = 1, NDANG
                        cseaprnt(ie,nang) = 
-     > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
+     >                       POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
      >                 cseaprnt(ie,nang)
                        if(ie.gt.1) then
                          check_DE(ie) = 
      >                      POPcse(0,nejc,ie,INExc(nnuc)) 
                        else
- 	                   check_DE(ie) = 
+                         check_DE(ie) = 
      >                      0.5d0*POPcse(0,nejc,ie,INExc(nnuc)) 
                        endif
                      ENDDO
@@ -429,7 +429,7 @@ C------------------Exclusive DE spectra (gammas)
  1530         ENDDO   ! over ejectiles
 
               qin     = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
-	        qinaver = qin
+              qinaver = qin
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
 

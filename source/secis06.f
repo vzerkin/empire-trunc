@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       MODULE secis06
 
@@ -148,7 +148,7 @@ C     OPEN (93,FILE = 'file93')
         OPEN (94,FILE = TRIM(fname)//'_94',form='unformatted')          !zv-2013
         OPEN (99,FILE = TRIM(fname)//'_99',form='unformatted')          !zv-2013
       else
-        OPEN (94,FILE = TRIM(fname)//'_94')				!zv-2013
+        OPEN (94,FILE = TRIM(fname)//'_94')                       !zv-2013
         OPEN (99,FILE = TRIM(fname)//'_99')                             !zv-2013
       endif
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -21122,7 +21122,7 @@ C     IF (LO(64)) WRITE (66,1028) INIV,SP2,SIGM(IPI(1,INIV)+1)          RESU-425
         IF (INIV.EQ.1) WRITE (58,1012) TX(INIV+1)                          
       ELSE
         IF (INIV.EQ.1) WRITE (58,1012) RX                          
-	ENDIF
+      ENDIF
       IF (.NOT.LO(59)) GO TO 47                                         
       IF (LO(81)) THEN 
         RRnoCN = RX-TX(NCOLL+INIV+1)                          

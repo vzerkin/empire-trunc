@@ -1,6 +1,6 @@
-#$Rev: 4456 $
-#$Author: rcapote $
-#$Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+#$Rev: 4504 $
+#$Author: mherman $
+#$Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
 # set default compilers:
 
@@ -155,6 +155,7 @@ dbg:
 $(OBJF) : global.h dimension.h main_common.h
 main.o  : nubar_reader.o empcess.o ang_mom.o
 input.o : nubar_reader.o empgdr.o HRTW.o
+#input.o : nubar_reader.o empgdr.o 
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 print.o : empcess.o

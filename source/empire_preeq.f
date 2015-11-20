@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE EMPIRE_PREEQ
      &     (xsinl,xsmsc,tothms,totemis,corrmsd,totcorr,nvwful)
@@ -39,7 +39,7 @@ C     initialization
       tothms  = 0.d0
       totemis = 0.d0  
       corrmsd = 1.d0
-	nvwful = .FALSE.
+      nvwful = .FALSE.
 
       WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),
      &       INT(AEJc(0)), INT(Z(0)), INT(A(0)), INT(EINl*1000000)
@@ -397,7 +397,7 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
      &      'Pre-equil. and direct emission  ',
      &      0.0,' mb'
 
-	  ENDIF
+        ENDIF
         WRITE (8,*) ' '
       ENDIF
 

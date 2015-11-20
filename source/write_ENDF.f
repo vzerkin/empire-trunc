@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4503 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-20 19:13:02 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -416,7 +416,7 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') CSDbrkup(3)
          ENDIF
          dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
-   	   IF(dtmp.gt.0) WRITE (8,
+         IF(dtmp.gt.0) WRITE (8,
      &  '('' * Pre-equilibrium emission cross section         '',G13.6,
      &              '' mb  '')') dtmp
          IF (NINT(AEJc(0)).GT.1 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,

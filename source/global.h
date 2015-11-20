@@ -1,6 +1,6 @@
-! $Rev: 4494 $
-! $Author: rcapote $
-! $Date: 2015-11-18 23:59:44 +0100 (Mi, 18 Nov 2015) $
+! $Rev: 4504 $
+! $Author: mherman $
+! $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -82,7 +82,7 @@
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
      &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
      &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX),iugMax(0:ndnuc)
-	 
+       
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&

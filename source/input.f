@@ -1,6 +1,6 @@
-!cc   * $Rev: 4503 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-20 19:13:02 +0100 (Fr, 20 Nov 2015) $
+!cc   * $Rev: 4504 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -790,14 +790,14 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
-				  ENDfp(1,nnuc) = 1 
-				  ENDfp(0,nnuc) = 1 
+                          ENDfp(1,nnuc) = 1 
+                          ENDfp(0,nnuc) = 1 
                   endif
 C                 
 C                 (n,p),(n,2p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
-				  ENDfp(2,nnuc) = 1 
-				  ENDfp(0,nnuc) = 1 
+                          ENDfp(2,nnuc) = 1 
+                          ENDfp(0,nnuc) = 1 
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp

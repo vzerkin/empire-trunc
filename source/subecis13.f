@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
 C-------------------------------------------------------------------------------
 C     Customized version of ECIS2013 (some printing added)
@@ -11266,7 +11266,7 @@ C CHANGE OF PARITY.                                                     CAL1-360
       IF (.NOT.LO(63)) GO TO 22                                         CAL1-370
       if (.not.unformat)                                                RCN  RCN
      >  WRITE (63,1006) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT        CAL1-371
-C     RCN commented, add. information not needed if binary file		  RCN  RCN
+C     RCN commented, add. information not needed if binary file           RCN  RCN
 C     WRITE (63) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT               !zv-2013
       REWIND (94,ERR=592)                                               RCN  RCN
       IF(unformat) then                                                 RCN  RCN
@@ -11286,7 +11286,7 @@ C     WRITE (63) DW(NWV),DW(NWV+12),DW(NWV+1),NW(2,2),NPT               !zv-2013
    20     WRITE (63,1008) K1,K2,U1,U2                                   CAL1-378
    21   CONTINUE                                                        CAL1-379
       ENDIF                                                             RCN  RCN
-  592 CONTINUE                                                       	  RCN  RCN
+  592 CONTINUE                                                            RCN  RCN
 C     CLOSE (94)                                                        CAL1-380
    22 KCB=MAX0(NCT(5),NCT(6))                                           CAL1-381
       NDX=NXC+4*KCB                                                     CAL1-382
@@ -18961,7 +18961,7 @@ C    77D+01/                                                            SCAM-134
      >117.1223095126906888076506441D0,
      >128.2018419882556511925411044D0,
      >142.2800444691599978883488354D0/
-      DATA W40/	 
+      DATA W40/    
      >0.091625471157459897311511698080137483D0,
      >0.213420584905012080007193367121512341D0,
      >0.335718116680284673880510701616292191D0,

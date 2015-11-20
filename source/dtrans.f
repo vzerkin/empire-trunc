@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
 c===========================================================
       SUBROUTINE DTRANS(iemin,iemax,sigNT,crossNT,specNT,te_e)
@@ -297,7 +297,7 @@ c     fac1 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))            !MA2014
 cMA   fac1 replaced by fac0 to remain unchanged along the loop over iejc!MA2014
       fac0 = (62.d0/2.3548d0) * (1.d0 - 1.d0/exp(EINl/173.))            !MA2014
 
-C	write(*,*) 'Nproject=',Nproject
+C     write(*,*) 'Nproject=',Nproject
     
       DO iejc=1,NDEJC  ! over particles only
 
@@ -330,7 +330,7 @@ c
          ENDIF
          
          fac2 = 1.d0 - A(0)/(155.*bnd*bnd)
-CMA      gamma = fac1 * fac2                                               !MA2014	 
+CMA      gamma = fac1 * fac2                                               !MA2014   
 CMA      fac1 replaced by fac0 to remain unchanged along the loop over iejc!MA2014
          gamma = fac0 * fac2                                               !MA2014
 
@@ -345,7 +345,7 @@ CMA      fac1 replaced by fac0 to remain unchanged along the loop over iejc!MA20
 
          dcor = 0.d0
 CMA      fac1 = 1.d0/(sqrt(2.d0 * gamma)*pi)                            !MA2014
-         fac1 = 1.d0/(sqrt(2.d0 * pi)*gamma)	!corrected, cf. eq.5      !MA2014 
+         fac1 = 1.d0/(sqrt(2.d0 * pi)*gamma)    !corrected, cf. eq.5      !MA2014 
          DO ke = iemin(iejc), iemax(iejc)
             ek = DE * (ke - 1)
 C           Suggested by MA (kinematic limit)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4500 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2015-11-19 19:13:23 +0100 (Do, 19 Nov 2015) $
+Ccc   * $Rev: 4504 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -365,7 +365,7 @@ C
                  iang = 0
                  DO iang1 = 1, NANgela
                     READ (45,'(3x,12x,D12.5)',END = 1400) ftmp    ! ecis06
-	              ftmp = ftmp * FCOred/DE
+                    ftmp = ftmp * FCOred/DE
 C-------------------Use only those values that correspond to EMPIRE grid for inelastic XS
                     if(mod(DBLE(iang1-1)*angstep+gang,gang).NE.0) cycle
                     iang = iang + 1
