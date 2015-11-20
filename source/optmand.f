@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
+Ccc   * $Rev: 4506 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Date: 2015-11-20 23:39:37 +0100 (Fr, 20 Nov 2015) $
 C
 C      VERSION 14 (Dec. 2013, LANE CONSISTENT COULOMB CORRECTION 
 C      WITH DISPERSIVE OPTICAL POTENTIAL RELATIONS, NON-AXIAL AND
@@ -7077,8 +7077,8 @@ C     *******************************************************
 C     *******************************************************
 C     AUTHOR: R. Capote, March 2005
 C     
-C     * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
-C     * $Id: optmand.f 4504 2015-11-20 22:29:16Z mherman $
+C     * $Date: 2015-11-20 23:39:37 +0100 (Fr, 20 Nov 2015) $
+C     * $Id: optmand.f 4506 2015-11-20 22:39:37Z mherman $
 C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
 C     Note: Elapsed time must be less than one month
@@ -10683,4 +10683,1178 @@ C     LAMBDA3 NON-AXIAL DEFORMATION
       FOKS=BET3
       FOKS1=BET3*BET3
 C
-C     VECTOR COEFFICIENTS FOR E2-,E3- 
+C     VECTOR COEFFICIENTS FOR E2-,E3- ˆ E4-TRANSITIONS
+C
+      QQQ00=-0.5345224838D0
+      QQQ22=-QQQ00
+      GQQ00=0.7171371656D0
+      GQQ20=0.1195228609D0
+      GQQ22=0.4629100500D0
+      GQQ24=1.D0
+      GQG00=-0.5096471915D0
+      GQG20=0.5921565255D0
+      GQG22=-0.2038588766D0
+      GQG02=GQG20
+      GQG42=0.3302891295D0
+      GQG44=0.7135060680D0
+      GQG24=GQG42
+      QGG00=CQ59*GQG00
+      QGG20=CQ59*GQG22
+      QGG02=CQ59*GQG02
+      QGG42=CQ59*GQG24
+      QGG40=CQ59*GQG44
+      QQG00=CQ59*GQQ00
+      QQG20=CQ59*GQQ22
+      QQG22=QQG20
+      QQG02=CQ59*GQQ20
+      QQG42=CQ59*GQQ24
+      GOO00=-0.4834937784D0
+      GOO20=0.5640760748D0
+      GOO02=0.1395726315D0
+      GOO24=-0.6741998625D0
+      GOO22=GOO02
+      GGG00=0.4022911408D0
+      GGG20=-0.245844586D0
+      GGG40=0.3128931094D0
+      GGG22=GGG20
+      GGG42=0.560968194D0
+      GGG44=GGG40
+      GGG24=GGG42
+      OQO00=-0.5163977795D0
+      OQO20=0.5773502692D0
+      OQO02=OQO20
+      OQO22=0.D0
+      OOG00=-CQ79*GOO00
+      OOG20=-CQ79*GOO20
+      OOG22=-CQ79*GOO22
+      OOG02=-CQ79*GOO20
+      OOG42=-CQ79*GOO24
+      QOO00=-CQ57*OQO00
+      QOO02=-CQ57*OQO02
+      QOO20=-CQ57*OQO22
+C
+C     CONSTANTS FOR E2-TRANSITIONS
+C     Q20=3.*Z*e*RR*2*BETTA20/SQRT(5*PI)
+C     CONST=5*Q20**2/16/PI   RESULTS TO BE MULTIPLIED BY
+C
+      QCG1A=6.D0*BET4/SQPI
+      QSG1A=QCG1A*C1
+      QC2GA=SQ5/SQPI*BET0
+      QG0A=3.D0*BET4**2/SQ5/SQPI/BET0
+      QO0A=7.D0/SQPI/SQ5/BET0
+C     QO0A=7.D0/SQPI/SQ5/BET0*BET3**2
+      QSG1B=QCG1A/C1
+      QCG1B=QCG1A
+      QS2GB=QC2GA/C1
+      QG0B=QG0A*2.D0
+      QO0B=QO0A*2.D0
+      AC2=1.D0+QCG1A*QQG00**2*A40
+      AS2=QSG1A*QQG00*QQG20*A42
+      AC22=QC2GA*QQQ00**2
+      AQG2=QG0A*QGG00*(2.D0*QGG40*A44**2+2.D0*QGG20*A42**2+
+     1QGG00*A40**2)
+      AQO2=QO0A*QOO00*(QOO00*A30**2+2.D0*QOO20*A32**2)
+      BS2=1.D0/C1+QSG1B*QQG00*(QQG02*A40+QQG42*A44)
+      BC2=QCG1B*QQG00*QQG22*A42
+      BS22=QS2GB*QQQ00*QQQ22
+      BQG2=QG0B*QGG00*(QGG02*A40*A42+QGG42*A42*A44)
+      BQO2=QO0B*QOO00*QOO02*A30*A32
+C
+C     CONSTANTS FOR E3-TRANSITIONS
+C     Q30=3.*Z*e*RR*3*BETTA30/SQRT(7*PI)
+C     CONST=7*Q30**2/16/PI RESULTS TO BE MULTIPLIED BY
+C
+      OC1=2.5D0*SQ5/SQPI*BET0
+      OC2=7.5D0*BET4/SQPI
+      AC3=OC1*OQO00**2*COS(ETO)
+      AS3=OC1*OQO00*OQO20*SIN(ETO)*0.5D0
+      AC00=COS(ETO)
+      AOG3=OC2*OOG00*(OOG00*COS(ETO)*A40+C1*OOG20*SIN(ETO)*A42)
+      BC3=OC1*OQO00*OQO22*SIN(ETO)/C1
+      BS3=OC1*OQO00*OQO02*COS(ETO)/C1
+      BS00=SIN(ETO)/C1
+      BOG3=OC2*OOG00*(OOG22*COS(ETO)*A42+SIN(ETO)/C1*
+     1(OOG02*A40+OOG42*A44))
+C
+C     CONSTANTS FOR E4-TRANSITIONS
+C     Q40=3.*Z*e*RR*4*BETTA40/SQRT(9*PI)
+C     CONST=9*Q40**2/16/PI  RESULTS TO BE MULTIPLIED BY
+C
+      A1=2.5D0/SQPI*BET0**2/BET4
+      A2=3.D0*SQ5/SQPI*BET0
+      A3=4.5D0/SQPI*BET4
+      A4=3.5D0/SQPI/BET4
+C     A4=3.5D0/SQPI/BET4*BET3**2
+      BB1=A1/C1
+      BB2=A2
+      BB3=A3*2.D0
+      BB4=A4*2.D0
+      G1=A1/2.D0
+      G2=A2
+      G3=A3
+      G4=A4
+      AC4=A2*GQG00**2*A40
+      AS4=A2*GQG00*GQG20*C1*A42
+      AC24=A1*GQQ00**2
+      AS24=A1*GQQ00*GQQ20
+      AGG4=A3*GGG00*(GGG00*A40**2+2.D0*GGG20*A44**2+
+     12.D0*GGG40*A44**2)
+      AGO4=A4*GOO00*(GOO00*A30**2+2.D0*GOO20*A32**2)
+      BC4=BB2*GQG00*GQG22*A42
+      BS4=BB2*GQG00*(GQG02*A40+GQG42*A44)/C1
+      BS24=BB1*GQQ00*GQQ22
+      BGG4=BB3*GGG00*(GGG22*A40*A42+GGG42*A44*A42)
+      BGO4=BB4*GOO00*GOO22*A30*A32
+      CC4=G2*GQG00**2*A44
+      CS4=G2*GQG00*GQG24*A42/C1
+      CS24=G1*GQG00*GQG24
+      CGG4=G3*GGG00*(2.D0*GGG44*A40*A44+GGG24*A42**2)
+      CGO4=G4*GOO00*GOO24*A32**2
+C     CALCULATIONS OF E2-TRANSITION PROBABILITIES
+      J2=4
+      DO 1 I=1,NUR
+      JI=JU(I)
+      PO1=(-1)**NNO(I)
+      DG1=0.
+      IF(PO1.NE.1) DG1=GAMDE
+      KG1=(3-PO1)/2
+      NG1I=NNG(I)+1
+      ANG1=ANG(NG1I,KG1)
+      NO1I=NNO(I)+1
+      AONU1=ANO(NO1I)
+      CD1=CD(NG1I,KG1)
+      J1=2*JI
+      KMI=1-(-1)**(JI+NNO(I))
+      NKI=(2*(JI/2)-KMI+2)/2
+      DO 1 JJ=1,NUR
+      JF=JU(JJ)
+      PO2=(-1)**NNO(JJ)
+      DG2=0.
+      IF(PO2.NE.1) DG2=GAMDE
+      KG2=(3-PO2)/2
+      NG1F=NNG(JJ)+1
+      ANG2=ANG(NG1F,KG2)
+      NO1F=NNO(JJ)+1
+      AONU2=ANO(NO1F)
+      CD2=CD(NG1F,KG2)
+      J=2*JF
+      JIF=IABS(JI-JF)
+      IF(JIF.GT.2) GO TO 111
+      IF(JI.EQ.0.AND.JF.EQ.0) GO TO 111
+      IF(PO1.NE.PO2) GO TO 111
+      IF(MEHAO.EQ.0) GO TO 45
+      IF(MEHAO.LT.2) GO TO 51
+      EBM=EXP(-(BET3/AMUO)**2)
+      FOKS1=AMUO**2/2.D0+BET3**2/(1.D0-(-1)**NO1I*EBM)
+      IF(MEHAO.GE.2) GO TO 45
+   51 NNT=2
+      X1=-BET3/AMUO
+      X2=X1
+      P1=BET3
+      P2=BET3
+      ANU1=AONU1
+      ANU2=AONU2
+      IF(BET3.EQ.0.D0) CALL OVLAO
+      IF(BET3.NE.0.D0) CALL OVLAB
+      FOKS1=FOLAR
+   45 IF(MEHAM.GE.5)  CALL TRLAG
+      X1= XI(I)
+      X2= XI(JJ)
+      P1=PT(I)
+      P2=PT(JJ)
+      ANU1=ANB(I)
+      ANU2=ANB(JJ)
+      FOLAR2=1.D0
+      IF(MEHAM.EQ.4) GO TO 12
+      NNT=3
+      CALL OVLAB
+      FOLAR2=FOLAR
+   12 NNT=2
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.
+      FOLAR1=FOLAR
+      IF(MEHAO.EQ.2) FOKS1=FOKS1*FOLAR1*BET0**2
+      NNT=1
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.
+      NNTG=1
+      IF(MEHAM.GT.4)CALL OVLAG
+      KMF=1-(-1)**(JF+NNO(JJ))
+      NKF=(2*(JF/2)-KMF+2)/2
+      SUM=0.D0
+      DO 2 JKI=1,NKI
+      KI=KMI+2*(JKI-1)
+      DI=1.D0
+      IF(KI.EQ.0) DI=C1
+      DO 2 JKF=1,NKF
+      KF=KMF+2*(JKF-1)
+      SUM1=0.D0
+      DF=1.D0
+      IF(KF.EQ.0) DF=C1
+      M=2*KF
+      IF(KF.NE.KI) GO TO 3
+      M1=2*KI
+      M2=0
+      CALL KLEGO
+      T1=AKG
+      IF(KF.NE.0) GO TO 4
+      M1=-2*KI
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+    4 SUM1=SUM1 +T1*((AC2*FOLAC+AS2*FOLAS)*FOLAR+
+     1AC22*FOLC2*FOLAR1+AQG2+AQO2*FOKS1)
+    3 T1=0.
+      IF((KI+2).NE.KF) GO TO 5
+      M1=2*KI
+      M2=4
+      CALL KLEGO
+      T1=AKG
+    5 IF((KI-2).NE.KF) GO TO 6
+      M1=2*KI
+      M2=-4
+      CALL KLEGO
+      T1=T1+AKG
+    6 IF((2-KI).NE.KF) GO TO 7
+      M1=-2*KI
+      M2=4
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+    7 SUM1=SUM1 +T1*((BC2*FOLAC+BS2*FOLAS)*FOLAR+BS22*FOLS2*FOLAR1+
+     1BQG2+BQO2*FOKS1)
+      SUM=SUM+SUM1*AIT(I,JKI)*AIT(JJ,JKF)/DI/DF
+    2 CONTINUE
+      IF(I.NE.JJ) GO TO 20
+      Q1= SQRT(JI*(2.D0*JI-1.D0)/((JI+1.D0)*(2.D0*JI+1.)*(2.D0*JI+3.)))
+      Q1=Q1*SUM*SQRT(2.D0*JI+1.D0)
+      IF(MEPRI.LT.99) 
+     *  PRINT 17,ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q1
+      WRITE(21,17)ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q1
+   17 FORMAT(10X,'AVERAGE VALUE OF LAMBDA2 MOMENT FOR STATE  E=',
+     *D11.4,'JI=',I2,'TAU=',I1,'NB=',I1,'NG=',I1,'NO=',I1,3X,
+     *'DEVIDED BY Q20=',D11.4)
+      GO TO 1
+   20 B2(I,JJ)=SUM*SUM
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE(21,11)
+      IF(MEPRI.LT.99) 
+     *  PRINT 8, ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B2(I,JJ)
+      WRITE(21,8) ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B2(I,JJ)
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE(21,11)
+      IF(MEPRI.LT.99) 
+     *  PRINT 9,FOLAC,FOLAS,FOLAR,COGO,SIGO,FOKS1,FOLAG
+      WRITE(21,9)FOLAC,FOLAS,FOLAR,COGO,SIGO,FOKS1,FOLAG
+    9 FORMAT(5X,'I(COS)=',D11.4,'  I(SIN)=',D11.4,
+     *'  FOLAR=',D11.4,'  COS(G0)=',D11.4,'  SIN(G0)=',
+     *D11.4,'  FOKS1=', D11.4,' FOLAG=',D11.4//)
+    8 FORMAT(5X,'B(E2:(',D11.4,')JI=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,'--->(',D11.4,')JF=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,')=',D11.4)
+C     LAMBDA0 TRANSITION PROBABILITIES
+  111 IF(JIF.NE.0) GO TO 1
+      IF(I.EQ.JJ) GO TO 1
+      IF(MEHAM.EQ.4) GO TO 1
+      B0(I,JJ)=(BET0*BET0*FOLAR1+C00*BET0**3*FOLAR2*FOLC3)**2
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE(21,11)
+      IF(MEPRI.LT.99) 
+     *  PRINT 81,ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B0(I,JJ)
+      WRITE(21,81)ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B0(I,JJ)
+   81 FORMAT(5X,'B(E0:(',D11.4,')JI=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,'--->(',D11.4,')JF=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,')=',D11.4)
+      IF(MEPRI.LT.99) PRINT 91,FOLC3,FOLAR2,FOLAR1,C3G0
+      WRITE(21,91)FOLC3,FOLAR2,FOLAR1,C3G0
+   91 FORMAT(5X,'I(COS(3*GAM0))=',D11.4,' FOLAR2 =',D11.4,
+     *' FOLAR1=',D11.4,'  COS(3*G0)=',D11.4/)
+    1 CONTINUE
+      IF(MESHA.LT.2) GO TO 100
+          IF(MEPRI.LT.99) PRINT 110
+          WRITE(21,110)
+          IF(MEPRI.LT.99) PRINT 11
+          WRITE(21,11)
+C     CALCULATIONS OF E4- TRANSITION PROBABILITIES
+      J2=8
+      DO 19 I=1,NUR
+      JI=JU(I)
+      PO1=(-1)**NNO(I)
+      DG1=0.
+      IF(PO1.NE.1) DG1=GAMDE
+      KG1=(3-PO1)/2
+      NG1I=NNG(I)+1
+      ANG1=ANG(NG1I,KG1)
+      NO1I=NNO(I)+1
+      AONU1=ANO(NO1I)
+      CD1=CD(NG1I,KG1)
+      J1=2*JI
+      KMI=1-(-1)**(JI+NNO(I))
+      NKI=(2*(JI/2)-KMI+2)/2
+      DO 19 JJ=1,NUR
+      JF=JU(JJ)
+      PO2=(-1)**NNO(JJ)
+      DG2=0.
+      IF(PO2.NE.1) DG2=GAMDE
+      KG2=(3-PO2)/2
+      NG1F=NNG(JJ)+1
+      ANG2=ANG(NG1F,KG2)
+      NO1F=NNO(JJ)+1
+      AONU2=ANO(NO1F)
+      CD2=CD(NG1F,KG2)
+      J=2*JF
+      JIF=IABS(JI-JF)
+      IF(JIF.GT.4) GO TO 19
+      IF(JI.EQ.0.AND.JF.EQ.0) GO TO 19
+      IF(PO1.NE.PO2) GO TO 19
+      IF(MEHAO.EQ.0) GO TO 46
+      IF(MEHAO.LT.2) GO TO 52
+      EBM=EXP(-(BET3/AMUO)**2)
+      FOKS1=AMUO**2/2.D0+BET3**2/(1.D0-(-1)**NO1I*EBM)
+      IF(MEHAO.GE.2) GO TO 46
+   52 NNT=2
+      X1=-BET3/AMUO
+      X2=X1
+      P1=BET3
+      P2=BET3
+      ANU1=AONU1
+      ANU2=AONU2
+      IF(BET3.EQ.0.D0) CALL OVLAO
+      IF(BET3.NE.0.D0) CALL OVLAB
+      FOKS1=FOLAR
+   46 IF(MEHAM.GE.5)  CALL TRLAG
+      FLC2=(1.D0+FOLC2)/2.D0
+      FLS2=(1.D0-FOLC2)/2.D0
+      X1= XI(I)
+      X2= XI(JJ)
+      P1=PT(I)
+      P2=PT(JJ)
+      ANU1=ANB(I)
+      ANU2=ANB(JJ)
+      NNT=2
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.D0
+      FOLAR1=FOLAR
+      IF(MEHAO.EQ.2) FOKS1=FOKS1*FOLAR1*BET0**2
+      NNT=1
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.
+      KMF=1-(-1)**(JF+NNO(JJ))
+      NKF=(2*(JF/2)-KMF+2)/2
+      SUM=0.D0
+      DO 120 JKI=1,NKI
+      KI=KMI+2*(JKI-1)
+      DI=1.D0
+      IF(KI.EQ.0) DI=C1
+      DO 120 JKF=1,NKF
+      KF=KMF+2*(JKF-1)
+      SUM1=0.D0
+      DF=1.D0
+      IF(KF.EQ.0) DF=C1
+      M=2*KF
+      IF(KF.NE.KI) GO TO 30
+      M1=2*KI
+      M2=0
+      CALL KLEGO
+      T1=AKG
+      IF(KF.NE.0) GO TO 40
+      M1=-2*KI
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+   40 SUM1=SUM1 +T1*(A40+(AC4*FOLAC+AS4*FOLAS)*FOLAR+
+     1(AC24*FLC2+AS24*FLS2)*FOLAR1+AGG4+AGO4*FOKS1)
+   30 T1=0.
+      IF((KI+2).NE.KF) GO TO 50
+      M1=2*KI
+      M2=4
+      CALL KLEGO
+      T1=AKG
+   50 IF((KI-2).NE.KF) GO TO 60
+      M1=2*KI
+      M2=-4
+      CALL KLEGO
+      T1=T1+AKG
+   60 IF((2-KI).NE.KF) GO TO 70
+      M1=-2*KI
+      M2=4
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+   70 SUM1=SUM1 +T1*(A42+(BC4*FOLAC+BS4*FOLAS)*FOLAR+
+     1BS24*FOLS2*FOLAR1+BGG4+BGO4*FOKS1)
+      T1=0.
+      IF((KI+4).NE.KF) GO TO 80
+      M1=2*KI
+      M2=8
+      CALL KLEGO
+      T1=T1+AKG
+   80 IF((KI-4).NE.KF) GO TO 90
+      M1=2*KI
+      M2=-8
+      CALL KLEGO
+      T1=T1+AKG
+   90 IF((4-KI).NE.KF) GO TO 95
+      M1=-2*KI
+      M2=8
+      CALL KLEGO
+      T1=T1+(-1)**JI*AKG
+   95 SUM1=SUM1+T1*(A44+(CC4*FOLAC+CS4*FOLAS)*FOLAR+CS24*FLS2*FOLAR1+
+     1CGG4+CGO4*FOKS1)
+      SUM=SUM+SUM1*AIT(I,JKI)*AIT(JJ,JKF)/DI/DF
+  120 CONTINUE
+      IF(I.NE.JJ) GO TO 130
+      Q4=SUM
+      IF(MEPRI.LT.99) 
+     * PRINT 117,ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q4
+      WRITE(21,117)ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q4
+  117 FORMAT(10X,'AVERAGE VALUE OF LAMBDA4 MOMENT FOT STATE  E=',
+     *D11.4,'JI=',I2,'TAU=',I1,'NB=',I1,'NG=',I1,'NO=',I1,3X,
+     *'DEVIDED BY Q40=',D11.4)
+      GO TO 19
+  130 B4(I,JJ)=SUM*SUM
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE (21,11)
+      IF(MEPRI.LT.99) PRINT 88,ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B4(I,JJ)
+      WRITE(21,88)ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B4(I,JJ)
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE(21,11)
+      IF(MEPRI.LT.99) PRINT 99,FLC2,FLS2,FOLS2,FOLAR1,FOKS1
+      WRITE(21,99)FLC2,FLS2,FOLS2,FOLAR1,FOKS1
+   99 FORMAT(5X,'I(CS**2)',D11.4,'I(SS**2)=',D11.4,
+     *'I(SS(2G0))',D11.4,' FOLAR1=',D11.4,' FOKS1=',D11.4//)
+   88 FORMAT(5X,'B(E4:(',D11.4,')JI=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,'--->(',D11.4,')JF=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,')=',D11.4)
+   19 CONTINUE
+      IF(MEHAO.EQ.0) GO TO 100
+      IF(MEPRI.LT.99) PRINT 16
+      WRITE(21,16)
+C     CALCULATIONS OF E3- TRANSITION PROBABILITIES
+      J2=6
+      DO 42 I=1,NUR
+      PO1=(-1)**NNO(I)
+      DG1=0.D0
+      IF(PO1.NE.1) DG1=GAMDE
+      KG1=(3-PO1)/2
+      JI=JU(I)
+      NG1I=NNG(I)+1
+      ANG1=ANG(NG1I,KG1)
+      NO1I=NNO(I)+1
+      AONU1=ANO(NO1I)
+      CD1=CD(NG1I,KG1)
+      J1=2*JI
+      KMI=1-(-1)**(JI+NNO(I))
+      NKI=(2*(JI/2)-KMI+2)/2
+      DO 42 JJ=1,NUR
+      JF=JU(JJ)
+      PO2=(-1)**NNO(JJ)
+      DG2=0.D0
+      IF(PO2.NE.1) DG2=GAMDE
+      KG2=(3-PO2)/2
+      NG1F=NNG(JJ)+1
+      ANG2=ANG(NG1F,KG2)
+      NO1F=NNO(JJ)+1
+      AONU2=ANO(NO1F)
+      CD2=CD(NG1F,KG2)
+      J=2*JF
+      JIF=IABS(JI-JF)
+      IF(JIF.GT.3) GO TO 42
+      IF(PO1.EQ.PO2) GO TO 42
+      IF(JI.EQ.0.AND.JF.EQ.0) GO TO 42
+      IF(MEHAO.EQ.0) GO TO 47
+      IF(MEHAO.LT.2) GO TO 53
+      EBM=EXP(-(BET3/AMUO)**2)
+      FOKS=BET3/SQRT(1.D0-EBM**2)
+      IF(MEHAO.GE.2) GO TO 47
+   53 NNT=1
+      X1=-BET3/AMUO
+      X2=X1
+      P1=BET3
+      P2=BET3
+      ANU1=AONU1
+      ANU2=AONU2
+      IF(BET3.EQ.0.D0) CALL OVLAO
+      IF(BET3.NE.0.D0) CALL OVLAB
+      FOKS=FOLAR
+   47 FOKS=FOKS/BET3
+      IF(MEHAO.EQ.2) FOKS=FOKS/BET0
+      IF(MEHAM.GE.5)  CALL TRLAG
+      NNT=2
+      X1= XI(I)
+      X2= XI(JJ)
+      P1=PT(I)
+      P2=PT(JJ)
+      ANU1=ANB(I)
+      ANU2=ANB(JJ)
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.
+      FOLAR1=FOLAR
+      NNT=1
+      IF(MEHAM.NE.4) CALL OVLAB
+      IF(MEHAM.EQ.4) FOLAR=1.
+      KMF=1-(-1)**(JF+NNO(JJ))
+      NKF=(2*(JF/2)-KMF+2)/2
+      SUM=0.
+      DO 31 JKI=1,NKI
+      KI=KMI+2*(JKI-1)
+      DI=1.
+      IF(KI.EQ.0) DI=C1
+      DO 31 JKF=1,NKF
+      KF=KMF+2*(JKF-1)
+      SUM1=0.D0
+      DF=1.D0
+      IF(KF.EQ.0) DF=C1
+      M=2*KF
+      IF(KF.NE.KI) GO TO 32
+      M1=2*KI
+      M2=0
+      CALL KLEGO
+      T1=AKG
+      IF(KF.NE.0) GO TO 33
+      M1=-2*KI
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+   33 IF(MEHAO.EQ.2) SUM1=SUM1+T1*((AC3*FOLAC+AS3*FOLAS)
+     1*FOLAR1+(AC00+AOG3)*FOLAR)*FOKS*BET0
+      IF(MEHAO.EQ.2) GO TO 32
+      SUM1=SUM1 +T1*(AC00+(AC3*FOLAC+AS3*FOLAS)*FOLAR+
+     1AOG3)*FOKS
+   32 T1=0.
+      IF((KI+2).NE.KF) GO TO 34
+      M1=2*KI
+      M2=4
+      CALL KLEGO
+      T1=AKG
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+   34 IF((KI-2).NE.KF) GO TO 35
+      M1=2*KI
+      M2=-4
+      CALL KLEGO
+      T1=T1+AKG
+   35 IF((2-KI).NE.KF) GO TO 36
+      M1=-2*KI
+      M2=4
+      CALL KLEGO
+      T1=T1+AKG*(-1)**(JI+NNO(I))
+   36 IF(MEHAO.EQ.2) SUM1=SUM1+T1*((BC3*FOLAC+BS3*FOLAS)
+     1*FOLAR1+(BS00+AOG3)*FOLAR)*FOKS*BET0
+      IF(MEHAO.EQ.2) GO TO 43
+      SUM1=SUM1 +T1*(BS00+(BC3*FOLAC+BS3*FOLAS)*FOLAR+
+     1BOG3)*FOKS
+   43 SUM=SUM+SUM1*AIT(I,JKI)*AIT(JJ,JKF)/DI/DF
+   31 CONTINUE
+      IF(I.NE.JJ) GO TO 37
+      Q3= SUM
+      IF(MEPRI.LT.99) PRINT 38,ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q3
+      WRITE(21,38)ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),Q3
+   38 FORMAT(10X,'AVERAGE VALUE OF LAMBDA3 MOMENT FOT STATE  E=',
+     *D11.4,'JI=',I2,'TAU=',I1,'NB=',I1,'NG=',I1,'NO=',I1,3X,
+     *'DEVIDED BY Q30=',D11.4)
+   37 B3(I,JJ)=SUM*SUM
+      IF(MEPRI.LT.99) PRINT 11
+      WRITE(21,11)
+      IF(MEPRI.LT.99) PRINT 39, ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B3(I,JJ)
+      WRITE(21,39) ES(I),JI,NTU(I),NNB(I),NNG(I),NNO(I),
+     *         ES(JJ),JF,NTU(JJ),NNB(JJ),NNG(JJ),NNO(JJ),B3(I,JJ)
+   39 FORMAT(5X,'B(E3:(',D11.4,')JI=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,'--->(',D11.4,')JF=',I2,'TAU=',I1,'NB=',
+     *I1,'NG=',I1,'NO=',I1,')=',D11.4)
+      IF(MEPRI.LT.99) PRINT 83,FOKS
+      WRITE(21,83) FOKS
+   83 FORMAT(5X,'FOKS=',D11.4/)
+   42 CONTINUE
+  100 STOP
+      END
+C     *****************************************************************
+      SUBROUTINE SHEMTEK
+C     *****************************************************************
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
+      COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),
+     *NPI(40)
+      COMMON/ENA/EN,EL(40),BET(10),NUR,NMAX,NPD,LAS
+      COMMON/SHEM1/HW,AMG0,AMB0,GAM0,BET0,BET4,GAMDE,GSHAPE
+     */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
+      COMMON/MAT/GAM,IS,NO
+      COMMON/AA/ANO(40)
+      COMMON/EIT/EPIT1,EPIT2,EPIT12
+     */MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
+     *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
+     */SHEM2/GIT(40),EP0(40),EP1(40),EP2(40),EP12(40),ANG(40,2),EPB(40),
+     *EPG(40),EGB(40),AIT(31,16),PT(40),FOG(2,8,8),XI(40),ANB(40),
+     *CD(40,2)
+      COMMON/VEC/ TM(16,16),AM(16,16),EIN(31,16),NK,KMI,ITAU
+      COMMON/XI12/XIT,XIT1,DET,NROOT/FUDN/Y,DN,ANU,DNV,CDV
+      COMMON/OVLG/ANG1,ANG2,FOLAG,FOLAC,FOLAS,CD1,CD2,DG1,DG2,NNTG
+     */NP/NPJ(25)
+      COMMON/INRM/AMO,BMO,CMO,BB42,GAMG,DELG
+     */OVLB/X1,P1,ANU1,X2,P2,ANU2,FOLAR,NNT
+     */SGB/FOLGB(10),FOLB(10),FOLKS(10),FOLGA(10)
+     */PB/PBET2,PBET3
+      AMB4=AMB0**4
+      AMG4=AMG0**4
+      PBET2=1.D0
+      PBET3=1.D0
+C     PI3=1.0471975512D0
+      PI3=4.d0/3.d0*atan(1.d0)      
+      C1=SQRT(2.d0)
+      AMO2=AMUO**2/2.
+      IF(MEHAO.EQ.0) GO TO 31
+      NOM=0
+      DO 30 I=1,NUR
+      IF(NOM.LT.NNO(I)) NOM=NNO(I)
+   30 CONTINUE
+      NOM1=NOM+1
+      XIT=-BET3/AMUO
+      X1=XIT
+      X2=XIT
+      P1=BET3
+      P2=BET3
+      DO 32 I=1,NOM1
+      NROOT=I-1
+      IF(BET3.EQ.0.) ANO(I)=2*NROOT+1.D0
+      IF(BET3.EQ.0.) GO TO 2
+      CALL ANUDF
+      ANO(I)=ANU
+    2 IF(MEHAO.LT.1) GO TO 32
+      IF(MEHAO.EQ.1) GO TO 45
+      FOLB(I)=AMO2*(1.D0+(-1)**NO*EXP(-(BET3/AMUO)**2))+BET3**2
+      GO TO 32
+   45 ANU1=ANU
+      ANU2=ANU
+      IF(BET3.EQ.0.) GO TO 40
+      NNT=1
+      CALL OVLAB
+      FOLB(I)=(FOLAR-BET3)/BET3
+      GO TO 32
+   40 FOLB(I)=(2.D0*ANO(I)+1.D0)*AMO2
+   32 CONTINUE
+   31 NGD=2
+      IF(MEHAM.EQ.5.OR.MEHAM.EQ.7) NGD=0
+      NGM=0
+      IF(MEHAM.LE.4) GO TO 26
+      DO 23 I=1,NUR
+      IF(NGM.LT.NNG(I)) NGM=NNG(I)
+   23 CONTINUE
+      GAMM=GAM0
+      NGMP=NGM+NGD+1
+      DO 46 INO=1,2
+      DO 24 I=1,NGMP
+      NROOT=I-1
+      XIT=-C1*GAM0/AMG0
+      XIT1=C1*(PI3-GAM0)/AMG0
+      IF(XIT1.GT.7.D0) GO TO 21
+      CALL ANDET0
+      ANG(I,INO)=ANU
+      CD(I,INO)=CDV
+      GO TO 24
+   21 XIT=-GAM0/AMG0
+      CALL ANUDF
+      ANG(I,INO)=ANU
+      CD(I,INO)=0.D0
+   24 CONTINUE
+      GAM0=GAM0+GAMDE
+   46 CONTINUE
+      GAM0=GAMM
+      NGM1=NGM+1
+      DO 25 I=1,NGM1
+      JP1=I+NGD
+      ANG1=ANG(I,1)
+      CD1=CD(I,1)
+      DO 25 J=I,JP1
+      ANG2=ANG(J,1)
+      CD2=CD(J,1)
+      IF(MEHAM.EQ.5.OR.MEHAM.EQ.7) GO TO 22
+      NNTG=1
+      CALL OVLAG
+      FOG(1,I,J)=FOLAG
+      FOG(1,J,I)=FOG(1,I,J)
+      NNTG=2
+      CALL OVLAG
+      FOG(2,I,J)=FOLAG
+      FOG(2,J,I)=FOG(2,I,J)
+   22 CONTINUE
+      IF(I.NE.J) GO TO 25
+      IF(MEHAM.NE.7) GO TO 25
+      NNTG=11
+      CALL OVLAG
+      FOLGB(I)=FOLAG
+   25 CONTINUE
+      GAM=GAM0
+      IF(BET3.EQ.0.D0.OR.MEHAO.EQ.2) PBET3=0.
+      IF(MESHA.EQ.1) GO TO 37
+      BB420=BB42
+      DEBET=0.001D0*BB420
+      BB42=BB420+DEBET
+      CALL INERMO
+      AMOP=AMO
+      BMOP=BMO
+      CMOP=CMO
+      BB42=BB420-DEBET
+      CALL INERMO
+      AMOM=AMO
+      BMOM=BMO
+      CMOM=CMO
+      BB42=BB420
+      A1D=(AMOP-AMOM)/DEBET/2.D0
+      B1D=(BMOP-BMOM)/DEBET/2.D0
+      C1D=(CMOP-CMOM)/DEBET/2.D0
+      AB1DM=A1D-B1D
+      AB1DP=A1D+B1D
+   37 IF(MESHO.EQ.0) GO TO 26
+      BB320=BB32
+      IF(BET3.EQ.0.OR.MEHAO.EQ.2) PBET3=0.001D0/BB32*GAM**2
+      IF(BET3.EQ.0.OR.MEHAO.EQ.2) GO TO 41
+      DEBET=0.001D0*BB320
+      BB32=BB320+DEBET
+   41 CALL INERMO
+      AMOP=AMO
+      BMOP=BMO
+      CMOP=CMO
+      IF(BET3.EQ.0.D0.OR.MEHAO.EQ.2) PBET3=0.D0
+      IF(BET3.EQ.0.D0.OR.MEHAO.EQ.2) GO TO 42
+      BB32=BB320-DEBET
+   42 CALL INERMO
+      AMOM=AMO
+      BMOM=BMO
+      CMOM=CMO
+      BB32=BB320
+      IF(BET3.EQ.0.D0.OR.MEHAO.EQ.2) DEBET=0.0005D0*GAM**2
+      AOD=(AMOP-AMOM)/DEBET/2.D0
+      BOD=(BMOP-BMOM)/DEBET/2.D0
+      COD=(CMOP-CMOM)/DEBET/2.D0
+      ABODM=AOD-BOD
+      ABODP=AOD+BOD
+      IF(BET3.EQ.0.D0.OR.MEHAO.EQ.2) PBET3=0.D0
+      GAMM=GAM0
+   26 DO 1 I=1,NUR
+      IS=JU(I)
+      ITAU=NTU(I)
+      NG=NNG(I)
+      NB=NNB(I)
+      NO=NNO(I)
+      NROOT=NG
+      GAM=GAM0
+      IF((-1)**NO.NE.1) GAM=GAM+GAMDE
+      CALL MATAM
+      EP0(I)=EIN(IS+1,ITAU)
+      IF(MEHAM.LE.4) GO TO 27
+      CALL EIT12
+      GIT(I)=GAM
+      EP1(I)=EPIT1
+      EP2(I)=EPIT2
+      EP12(I)=EPIT12
+   27 DO 20 J=1,NK
+      AIT(I,J)=TM(J,ITAU)
+   20 CONTINUE
+      IF(MEHAM.EQ.4) EGB(I)=EP0(I)
+      IF(MEHAM.EQ.4) GO TO 1
+      IF(MEHAM.EQ.3) GO TO 29
+      ANU=ANG(NG+1,(3-(-1)**NO)/2)
+      EPG(I)=(ANU+0.5D0)*2.D0/AMG0**2+EPIT1+EPIT2+EPIT12
+      EE=EP0(I)+EPG(I)-EPG(1)
+   29 IF(MEHAM.EQ.3) EE=EP0(I)
+      IF(MEHAO.EQ.0) GO TO 43
+      EDO=DPAR*(-1)**(NO+1)
+      IF(I.EQ.1) EDO1=EDO
+      IF(MEHAO.EQ.2) EE=EE+EDO-EDO1
+   43 AA=AMB4*EE
+      PIT0=1.D0
+      DPI=100.D0
+      IF(AA.EQ.0.D0) GO TO 5
+    7 PIT=PIT0+DPI
+      IF((PIT-1.)*PIT**3-AA) 8,6,9
+    8 PIT0=PIT
+      GO TO 7
+    9 DPI=DPI/5.D0
+      IF(DPI.LE.1.D-8) GO TO 6
+      GO TO 7
+    5 PIT=1.D0
+    6 CONTINUE
+      PT(I)=PIT
+      XIT=-PIT/AMB0*(4.D0-3.D0/PIT)**0.25D0
+      XI(I)=XIT
+      NROOT=NB
+      AP=AMB0/PIT
+      AP2=AP*AP
+      AP6=AP2*AP2*AP2
+      CALL ANUDF
+      ANB(I)=ANU
+      EPIBO1=0.D0
+      P1=PIT
+      P2=PIT
+      X1=XIT
+      X2=XIT
+      ANU1=ANU
+      ANU2=ANU
+      IF(MESHA.EQ.1.AND.MESHO.EQ.0) GO TO 33
+      SUM1=0.D0
+      SUM2=0.D0
+      DO 11 J=1,NK
+      AK=TM(J,ITAU)
+      AKA=TM(J,ITAU)
+      KA=KMI+(J-1)*2
+      SUM1=SUM1+AK*AKA*KA*KA
+      D=1.D0
+      DD=0.D0
+      IF(KA.EQ.0) DD=1.d0
+      IF(KA.EQ.0) D=SQRT(2.d0)
+      IF(J.EQ.NK) GO TO 11
+      AK1=TM(J+1,ITAU)
+      AKA1=TM(J+1,ITAU)
+      SUM2=SUM2+(AK1*AKA+AK*AKA1)*(1.D0+(-1)**(IS+NO)*DD)/D*
+     *SQRT((IS+KA+2.D0)*(IS+KA+1.D0)*(IS-KA-1.D0)*(IS-KA))
+   11 CONTINUE
+      IF(MESHO.EQ.0) GO TO 34
+      EPIOO=ABODP/8.D0*IS*(IS+1)+(0.25D0*COD-ABODP/8.D0)*SUM1+
+     *ABODM/16.D0*SUM2
+      IF(MEHAO.LT.1) GO TO 35
+      NNT=13
+      CALL OVLAB
+      EPIBO1=HW*BB32*AMB0**2*FOLAR*EPIOO*FOLB(NO+1)
+   35 IF(BET3.EQ.0.D0) GO TO 33
+      NNT=10
+      CALL OVLAB
+      IF(MEHAO.EQ.2) GO TO 33
+      EPIBO1=-HW*BB32*FOLAR*AMB0**2*EPIOO+EPIBO1
+   33 IF(MESHA.EQ.1) EPIB1=0.D0
+      IF(MESHA.EQ.1) GO TO 28
+      IF(MESHO.GT.0) GO TO 36
+   34 NNT=10
+      CALL OVLAB
+   36 EPIB1=AB1DP/8.D0*IS*(IS+1)+(0.25D0*C1D-AB1DP/8.D0)*SUM1+
+     *AB1DM/16.D0*SUM2
+      EPIB1=EPIB1*FOLAR*AMB0**2*BB42*HW
+   28 EPB(I)=EPIB1
+      EGB(I)=HW*((ANU+0.5D0)*SQRT(4.D0-3.D0/PIT)
+     *+0.5D0*AP2*EE+0.5D0*AP6*EE*EE)-EPIB1+EPIBO1
+      IF(MEHAO.EQ.1) EGB(I)=EGB(I)+HWO*(ANO(NO+1)+0.5D0)
+      IF(MEHAM.NE.7) GO TO 1
+      G3=3.D0*GAM0
+      CBG1=1.D0/AMG0**4+81.D0/4.D0*(1.D0/SIN(G3)**2+3.D0*COS(G3)**2/
+     *SIN(G3)**4)
+      NNT=11
+      X1=XIT
+      P1=PIT
+      X2=XIT
+      P2=PIT
+      ANU1=ANU
+      ANU2=ANU
+      CALL OVLAB
+      EBG1=HW*AMB0**2/4.D0*BET0**2*CBG1*FOLAR*FOLGB(NG+1)*AMG0**2
+      EGB(I)=EGB(I)+EBG1
+    1 CONTINUE
+      EGB1=EGB(1)
+      DO 10 I=1,NUR
+   10 EGB(I)=EGB(I)-EGB1
+      RETURN
+      END
+C     *****************************************************************
+      SUBROUTINE SHEM
+C     *****************************************************************
+      IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
+      COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),
+     *NPI(40)
+      COMMON/ENA/EN,EL(40),BET(10),NUR,NMAX,NPD,LAS
+      COMMON/SHEM1/HW,AMG0,AMB0,GAM0,BET0,BET4,GAMDE,GSHAPE
+     */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
+      COMMON/MAT/GAM,IS,NO
+      COMMON/AA/ANO(40)
+      COMMON/EIT/EPIT1,EPIT2,EPIT12
+     */MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
+     *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
+     */SHEM2/GIT(40),EP0(40),EP1(40),EP2(40),EP12(40),ANG(40,2),EPB(40),
+     *EPG(40),EGB(40),AIT(31,16),PT(40),FOG(2,8,8),XI(40),ANB(40),
+     *CD(40,2)
+      COMMON/VEC/ TM(16,16),AM(16,16),EIN(31,16),NK,KMI,ITAU
+      COMMON/XI12/XIT,XIT1,DET,NROOT/FUDN/Y,DN,ANU,DNV,CDV
+      COMMON/OVLG/ANG1,ANG2,FOLAG,FOLAC,FOLAS,CD1,CD2,DG1,DG2,NNTG
+     */NP/NPJ(25)
+      COMMON/INRM/AMO,BMO,CMO,BB42,GAMG,DELG
+     */OVLB/X1,P1,ANU1,X2,P2,ANU2,FOLAR,NNT
+     */SGB/FOLGB(10),FOLB(10),FOLKS(10),FOLGA(10)
+     */PB/PBET2,PBET3
+      PI=4.d0*atan(1.d0)
+      SQPI=SQRT(PI)
+      AMB4=AMB0**4
+      AMG4=AMG0**4
+      PBET2=1.D0
+      PBET3=1.D0
+C     PI3=1.0471975512D0
+      PI3=PI/3.d0      
+      C1=SQRT(2.d0)
+      AMO2=AMUO**2/2.D0
+      IF(MEHAO.EQ.0) GO TO 31
+      NOM=0
+      DO 30 I=1,NUR
+      IF(NOM.LT.NNO(I)) NOM=NNO(I)
+   30 CONTINUE
+      NOM1=NOM+1
+      XIT=-BET3/AMUO
+      X1=XIT
+      X2=XIT
+      P1=BET3
+      P2=BET3
+      DO 32 I=1,NOM1
+      NROOT=I-1
+      IF(BET3.EQ.0.D0) ANO(I)=2*NROOT+1.
+      IF(BET3.EQ.0.D0) GO TO 2
+      CALL ANUDF
+      ANO(I)=ANU
+    2 IF(MEHAO.EQ.1) GO TO 45
+      EBM=EXP(-XIT**2)
+      FOL=EBM*(-1.D0/XIT/SQPI*(1-(-1)**I)+(-1)**I)-ERFC2(-XIT)
+      FOLB(I)=FOL/(1-(-1)**I*EBM)
+      GO TO 32
+   45 ANU1=ANU
+      ANU2=ANU
+      IF(BET3.EQ.0.D0) GO TO 40
+      NNT=1
+      CALL OVLAB
+      FOLB(I)=(FOLAR-BET3)/BET3
+      GO TO 32
+   40 FOLB(I)=(2.D0*ANO(I)+1.D0)*AMO2
+   32 CONTINUE
+   31 NGD=2
+      IF(MEHAM.EQ.5.OR.MEHAM.EQ.7) NGD=0
+      NGM=0
+      IF(MEHAM.LE.4) GO TO 26
+      DO 23 I=1,NUR
+      IF(NGM.LT.NNG(I)) NGM=NNG(I)
+   23 CONTINUE
+      GAMM=GAM0
+      NGMP=NGM+NGD+1
+      DO 46 INO=1,2
+      DO 24 I=1,NGMP
+      NROOT=I-1
+      XIT=-C1*GAM0/AMG0
+      XIT1=C1*(PI3-GAM0)/AMG0
+      IF(XIT1.GT.7.D0) GO TO 21
+      CALL ANDET0
+      ANG(I,INO)=ANU
+      CD(I,INO)=CDV
+      GO TO 24
+   21 XIT=-GAM0/AMG0
+      CALL ANUDF
+      ANG(I,INO)=ANU
+      CD(I,INO)=0.D0
+   24 CONTINUE
+      GAM0=GAM0+GAMDE
+   46 CONTINUE
+      GAM0=GAMM
+      NGM1=NGM+1
+      DO 25 I=1,NGM1
+      JP1=I+NGD
+      ANG1=ANG(I,1)
+      CD1=CD(I,1)
+      DO 25 J=I,JP1
+      ANG2=ANG(J,1)
+      CD2=CD(J,1)
+      IF(MEHAM.EQ.5.OR.MEHAM.EQ.7) GO TO 22
+      NNTG=1
+      CALL OVLAG
+      FOG(1,I,J)=FOLAG
+      FOG(1,J,I)=FOG(1,I,J)
+      NNTG=2
+      CALL OVLAG
+      FOG(2,I,J)=FOLAG
+      FOG(2,J,I)=FOG(2,I,J)
+   22 CONTINUE
+      IF(I.NE.J) GO TO 25
+      IF(MEHAM.NE.7) GO TO 25
+      NNTG=11
+      CALL OVLAG
+      FOLGB(I)=FOLAG
+   25 CONTINUE
+      GAM=GAM0
+      IF(BET3.EQ.0.) PBET3=0.D0
+      IF(MESHA.EQ.1) GO TO 37
+      BB420=BB42
+      DEBET=0.001D0*BB420
+      BB42=BB420+DEBET
+      CALL INERMO
+      AMOP=AMO
+      BMOP=BMO
+      CMOP=CMO
+      BB42=BB420-DEBET
+      CALL INERMO
+      AMOM=AMO
+      BMOM=BMO
+      CMOM=CMO
+      BB42=BB420
+      A1D=(AMOP-AMOM)/DEBET/2.D0
+      B1D=(BMOP-BMOM)/DEBET/2.D0
+      C1D=(CMOP-CMOM)/DEBET/2.D0
+      AB1DM=A1D-B1D
+      AB1DP=A1D+B1D
+   37 IF(MESHO.EQ.0) GO TO 26
+      BB320=BB32
+      IF(BET3.EQ.0.D0) PBET3=0.001D0/BB32*GAM**2
+      IF(BET3.EQ.0.D0) GO TO 41
+      DEBET=0.001*BB320
+      BB32=BB320+DEBET
+   41 CALL INERMO
+      AMOP=AMO
+      BMOP=BMO
+      CMOP=CMO
+      IF(BET3.EQ.0.D0) PBET3=0.D0
+      IF(BET3.EQ.0.D0) GO TO 42
+      BB32=BB320-DEBET
+   42 CALL INERMO
+      AMOM=AMO
+      BMOM=BMO
+      CMOM=CMO
+      BB32=BB320
+      IF(BET3.EQ.0.D0) DEBET=0.0005D0*GAM**2
+      AOD=(AMOP-AMOM)/DEBET/2.D0
+      BOD=(BMOP-BMOM)/DEBET/2.D0
+      COD=(CMOP-CMOM)/DEBET/2.D0
+      ABODM=AOD-BOD
+      ABODP=AOD+BOD
+      IF(BET3.EQ.0.) PBET3=0.D0
+      GAMM=GAM0
+   26 DO 1 I=1,NUR
+      IS=JU(I)
+      ITAU=NTU(I)
+      NG=NNG(I)
+      NB=NNB(I)
+      NO=NNO(I)
+      NROOT=NG
+      GAM=GAM0
+      IF((-1)**NO.NE.1) GAM=GAM+GAMDE
+      CALL MATAM
+      EP0(I)=EIN(IS+1,ITAU)
+      IF(MEHAM.LE.4) GO TO 27
+      CALL EIT12
+      GIT(I)=GAM
+      EP1(I)=EPIT1
+      EP2(I)=EPIT2
+      EP12(I)=EPIT12
+   27 DO 20 J=1,NK
+      AIT(I,J)=TM(J,ITAU)
+   20 CONTINUE
+      IF(MEHAM.EQ.4) EGB(I)=EP0(I)
+      IF(MEHAM.EQ.4) GO TO 1
+      IF(MEHAM.EQ.3) GO TO 29
+      ANU=ANG(NG+1,(3-(-1)**NO)/2)
+      EPG(I)=(ANU+0.5D0)*2./AMG0**2+EPIT1+EPIT2+EPIT12
+      EE=EP0(I)+EPG(I)-EPG(1)
+   29 IF(MEHAM.EQ.3) EE=EP0(I)
+      IF(MEHAO.EQ.0) GO TO 43
+      EDO=DPAR*(-1)**(NO+1)
+      IF(I.EQ.1) EDO1=EDO
+      IF(MEHAO.EQ.2) EE=EE+EDO-EDO1
+   43 AA=AMB4*EE
+      PIT0=1.D0
+      DPI=100.D0
+      IF(AA.EQ.0.D0) GO TO 5
+    7 PIT=PIT0+DPI
+      IF((PIT-1.D0)*PIT**3-AA) 8,6,9
+    8 PIT0=PIT
+      GO TO 7
+    9 DPI=DPI/5.
+      IF(DPI.LE.1.D-8) GO TO 6
+      GO TO 7
+    5 PIT=1.
+    6 CONTINUE
+      PT(I)=PIT
+      XIT=-PIT/AMB0*(4.D0-3.D0/PIT)**0.25D0
+      XI(I)=XIT
+      NROOT=NB
+      AP=AMB0/PIT
+      AP2=AP*AP
+      AP6=AP2*AP2*AP2
+      CALL ANUDF
+      ANB(I)=ANU
+      EPIBO1=0.D0
+      P1=PIT
+      P2=PIT
+      X1=XIT
+      X2=XIT
+      ANU1=ANU
+      ANU2=ANU
+      IF(MESHA.EQ.1.AND.MESHO.EQ.0) GO TO 33
+      SUM1=0.D0
+      SUM2=0.D0
+      DO 11 J=1,NK
+      AK=TM(J,ITAU)
+      AKA=TM(J,ITAU)
+      KA=KMI+(J-1)*2
+      SUM1=SUM1+AK*AKA*KA*KA
+      D=1.D0
+      DD=0.D0
+      IF(KA.EQ.0) DD=1.D0
+      IF(KA.EQ.0) D=SQRT(2.d0)
+      IF(J.EQ.NK) GO TO 11
+      AK1=TM(J+1,ITAU)
+      AKA1=TM(J+1,ITAU)
+      SUM2=SUM2+(AK1*AKA+AK*AKA1)*(1.D0+(-1)**(IS+NO)*DD)/D*
+     *SQRT((IS+KA+2.D0)*(IS+KA+1.D0)*(IS-KA-1.D0)*(IS-KA))
+   11 CONTINUE
+      IF(MESHO.EQ.0) GO TO 34
+      EPIOO=ABODP/8.D0*IS*(IS+1)+(0.25D0*COD-ABODP/8.D0)*SUM1+
+     *ABODM/16.D0*SUM2
+      IF(MEHAO.LT.1) GO TO 35
+      NNT=13
+      CALL OVLAB
+      EPIBO1=HW*BB32*AMB0**2*FOLAR*EPIOO*FOLB(NO+1)
+   35 NNT=10
+      CALL OVLAB
+      IF(BET3.EQ.0.D0) GO TO 33
+      EPIBO1=-HW*BB32*FOLAR*AMB0**2*EPIOO+EPIBO1
+   33 IF(MESHA.EQ.1) EPIB1=0.D0
+      IF(MESHA.EQ.1) GO TO 28
+      IF(MESHO.GT.0) GO TO 36
+   34 NNT=10
+      CALL OVLAB
+   36 EPIB1=AB1DP/8.D0*IS*(IS+1)+(0.25D0*C1D-AB1DP/8.D0)*SUM1+
+     *AB1DM/16.D0*SUM2
+      EPIB1=EPIB1*FOLAR*AMB0**2*BB42*HW
+   28 EPB(I)=EPIB1
+      EGB(I)=HW*((ANU+0.5D0)*SQRT(4.-3./PIT)+0.5*AP2*EE+0.5*AP6*EE*EE)
+     *-EPIB1+EPIBO1
+      IF(MEHAO.EQ.1) EGB(I)=EGB(I)+HWO*(ANO(NO+1)+0.5D0)
+      IF(MEHAO.EQ.3) EGB(I)=EGB(I)+EDO
+      IF(MEHAM.NE.7) GO TO 1
+      G3=3.D0*GAM0
+      CBG1=1.D0/AMG0**4+81.D0/4.D0*(1.D0/SIN(G3)**2+3.D0*COS(G3)**2/
+     *SIN(G3)**4)
+      NNT=11
+      X1=XIT
+      P1=PIT
+      X2=XIT
+      P2=PIT
+      ANU1=ANU
+      ANU2=ANU
+      CALL OVLAB
+      EBG1=HW*AMB0**2/4.0*BET0**2*CBG1*FOLAR*FOLGB(NG+1)*AMG0**2
+      EGB(I)=EGB(I)+EBG1
+    1 CONTINUE
+      EGB1=EGB(1)
+      DO 10 I=1,NUR
+   10 EGB(I)=EGB(I)-EGB1
+      RETURN
+      END                        
+C **********************************************************************
+      DOUBLE PRECISION FUNCTION ERFC2(XX)
+C **********************************************************************
+C     Abramowitz & Stegun, p.299, Eq. 7.1.26 (Error < 1.5E-7)
+C
+      DOUBLE PRECISION P,A1,A2,A3,A4,A5,P1,R1,R2,R3,R4,R5,XX
+      DATA P,A1,A2,A3,A4,A5/0.3275911d0,0.254829592d0,-0.284496736d0,
+     *1.421413741d0,-1.453152027d0,1.061405429d0/
+      P1=EXP(-XX*XX)
+      R1=1.d0/(1.+P*XX)
+      R2=R1*R1
+      R3=R2*R1
+      R4=R3*R1
+      R5=R4*R1
+      ERFC2=(A5*R5+A4*R4+A3*R3+A2*R2+A1*R1)*P1
+      RETURN
+      END
+C     *******************************************************
+C     END of shemsofd
+C     *******************************************************
