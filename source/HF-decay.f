@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
+Ccc   * $Rev: 4509 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Date: 2015-11-22 08:30:18 +0100 (So, 22 Nov 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -97,6 +97,7 @@ C
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
         ENDIF
         WRITE (12,*)
+
      &' ---------------------------------------------------------------'
 C       WRITE (12,
 C    &'(1X,/,10X,''Discrete level population before gamma cascade'')')
@@ -124,10 +125,10 @@ C           Saving CSDirlev() array before the gamma cascade to CSDirsav()
             CSDirsav(il,nejc) = CSDirlev(il,nejc) 
           ENDDO
 C---------CN contribution to elastic ddx
+          ELCncs = 0.d0  
 C         ELCncs = POPlv(LEVtarg,mt2)/PIx4 
-          ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
+          if (nejc.eq.1) ELCncs = CSDirsav(LEVtarg,nejc)/PIx4 ! isotropic 
 C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
-
           IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
           WRITE (12,*)
           WRITE (12,*)
@@ -207,7 +208,6 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
             WRITE (8,*) ' Incident energy (CMS)      ',sngl(EIN), ' MeV'
             WRITE (8,*) ' Shape elastic cross section',
      &                       sngl(ELAred*ELAcs), ' mb'
-
             WRITE (8,*) ' CN elastic cross section   ',
      &                     sngl(4.d0*PI*ELCncs),' mb'
             WRITE (12,*) ' '
@@ -232,7 +232,6 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
                WRITE (12,'(10X,8G15.5)') 
      &                (FLOAT(iang - 1)*delang,iang = 1,NANgela)
             ENDIF
-
             if(.not.CN_isotropic .and. ELCncs.LT.0.05d0) then    
               CN_isotropic = .TRUE.
               WRITE(8,*)
@@ -240,8 +239,7 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
      &        ' CN angular distribution assumed isotropic at Einc = ',
      &        sngl(EINl)
               WRITE(8,*)
-            endif  
-
+            endif
             IF(CN_isotropic .or. PL_CN(0,LEVtarg).le.0.d0) then   
 C
                WRITE (8,*)
@@ -249,7 +247,6 @@ C
                DO iang = 1, NDANG
                  cel_da(iang) = ELCncs ! isotropic
                ENDDO
-
                WRITE (12,'(9X,8E15.5)') 
      &           ((ELAred*elada(iang)+cel_da(iang)),iang=1,NANgela)
                WRITE (12,*) ' '
@@ -262,13 +259,10 @@ C
      &          (ELAred*elleg(1) + ELCncs),
      &          (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
                WRITE (12,*) ' '
-
-            ELSE
-
+             ELSE
                xs_norm = ELCncs/PL_CN(0,LEVtarg)
                WRITE (8,*) ' CN elas. cross section (BB)',
      &             sngl(PIx4*PL_CN(0,LEVtarg)),' mb'
-
                IF(INTerf.eq.1) then
                  WRITE (110,'(1x,E12.5,3x,11(F9.2,1x),A17)') 
      &           EINl, PIx4*ELCncs,  
@@ -279,12 +273,10 @@ C
      &           EINl, PIx4*ELCncs,  
      &           (PIx4*xs_norm*PL_CN(0,ilevcol),ilevcol=1,10)
                ENDIF                
-
                WRITE (8,*) 
                WRITE (8,*) ' Nonisotropic Compound to discrete levels in
      &cluding the Compound Elastic'
                WRITE (8,*) 
-
                IF(DABS(xs_norm-1.d0).gt.1.d-4) then
 C                WRITE(*,*) 'ELCncs = POPlv(LEVtarg,mt2)/4/PI =',ELCncs
 C                WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
@@ -302,7 +294,6 @@ C              write(*,*) 'NORM=',xs_norm
 C--------------PRINT compound elastic
                gang = 180.d0/(NDAng - 1)
                angstep = 180.d0/(NANgela - 1)
-
                WRITE (8,99016)
                WRITE (8,99020)
                DO iang = 1, NANgela/4 + 1
@@ -331,7 +322,6 @@ C--------------PRINT compound elastic
                WRITE (12,*)' '
                WRITE (12,'(9X,8D15.8)') ELAred*elleg(1),
      &            (ELAred*elleg(iang),iang = 2,min(NDAng,neles))
-
                WRITE (12,*)' '
                WRITE (12,*)' CE Legendre coefficients expansion'
                WRITE (12,*)' '
@@ -341,9 +331,7 @@ C--------------PRINT compound elastic
                WRITE (12,'(9X,8D15.8)') xs_norm*PL_CN(0,LEVtarg), 
      &            (xs_norm*PL_CN(iang-1,1),iang = 2,
      &                       min(NDAng,PL_lmax(LEVtarg)))
-
             ENDIF
-
             IF (FITomp.LT.0) THEN
               WRITE(40,'(F12.4,3D12.5)') 
      &          EINl,TOTcs*TOTred*totcorr,ABScs*FUSred
@@ -427,7 +415,7 @@ C-----Turn  off (KEMIN=NEX(NNUC)) gamma cascade in the case of OMP fit
       IF (FITomp.NE.0) kemin = NEX(nnuc)
       kemax = NEX(nnuc)
 
-C-----Account for widths fluctuations (HRTW)
+C-----Account for widths fluctuations (Moldauer or HRTW methods)
       IF (LHRtw.GT.0 .AND. EINl.GT.EHRtw) LHRtw = 0
 
       IF (nnuc.EQ.1 .AND. EINl.LT.EMAx_tlj) THEN
@@ -435,12 +423,8 @@ C
 C       only for top bin of CN
 C
         IF(LHRtw.LE.2) CALL HRTW ! HF or HRTW width fluctuation
-        IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) CALL Moldauer ! Moldauer width fluctuation
-!        IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) THEN
-!           WRITE(8,*) 'Moldauer WFC not yet operational - use HRTW'
-!           STOP 'Moldauer not implemented'
-!        ENDIF
 
+        IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) CALL Moldauer ! Moldauer width fluctuation
 
         IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
         kemax = max(NEX(nnuc) - 1,1)
@@ -595,13 +579,10 @@ C             csemist = csemist + CSEmis(nejc,nnuc)
 C           ENDDO
 C           csemist = csemist + CSFis
 C-----------------
-
           ENDDO                 !loop over decaying nucleus spin
         ENDDO                   !loop over decaying nucleus parity
-
         IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
-
         IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1
      &       .and. fisxse.gt.0) THEN
           IF (NINT(FISmod(nnuc)).EQ.0) THEN
@@ -616,7 +597,6 @@ C-----------------
      &            ' mb', '   fisxse=', fisxse, ' mb'
           ENDIF
         ENDIF
-
       ENDDO                  !loop over c.n. excitation energy
 C-------
 C-------Hauser-Feshbach decay of nnuc  ***done***
@@ -631,11 +611,9 @@ C-----Printout of results for the decay of NNUC nucleus
 1500  DO il = 1, NLV(nnuc)
         CSPrd(nnuc) = CSPrd(nnuc) + POPlv(il,nnuc)
       ENDDO
-
 C     Updating discrete level double differential cross sections
 C     Moved from ACCUM to do it outside the excitation energy loop
       IF (nnuc.EQ.1) THEN
-
         DO nejc = 1, NEJcm
           nnur = NREs(nejc)
           if (nnur.lt.0) cycle
@@ -643,13 +621,11 @@ C     Moved from ACCUM to do it outside the excitation energy loop
           zres = Z(1) - ZEJc(nejc)
 C         residual nuclei must be heavier than alpha
           if(ares.le.4. and. zres.le.2.) cycle
-
 C         IF( (nejc.eq.NPRoject) .and. (.not.CN_isotropic)) then
 C           write(*,*) 'CSComplev    =', CSComplev(LEVtarg,NPRoject)
 C           write(*,*) '4piPL_CN(0,) =', 4*PI*PL_CN(0,LEVtarg)
 C           write(*,*) 'POPlv(1,mt2) =', POPlv(LEVtarg,mt2)
 C         ENDIF
-
           DO il = 1, NLV(nnur)
             ftmp = CSComplev(il,nejc)
             if(ftmp.le.0) cycle
@@ -665,18 +641,15 @@ C
             ELSE
 C
 C             Not the inelastic channel OR isotropic CN DA
-C              
+C
               xs_cn = ftmp/PIx4  ! default isotropic
               DO na = 1, NDANG
                 CSAlev(na,il,nejc) = CSAlev(na,il,nejc) + xs_cn
               ENDDO ! loop over angles
             ENDIF
-
           ENDDO  !loop over levels
-        ENDDO  ! loop over emitted particles  
-
+        ENDDO  ! loop over emitted particles
       ENDIF
-
       IF(CSPrd(nnuc).gt.0.d0) THEN
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
@@ -715,18 +688,14 @@ C            WRITE (12,
 C    &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
 C    &cade 2'')')
 C            WRITE (12,'(1X,/,10X,40(1H-),/)')
-
          ELSE
-
              IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
      &  3X,''NOTE:   was not included in emission spectra and direct ''/
      &  3X,''NOTE:   particle contribution was shifted to the g.s.'')')
-
              IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
-
              WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
              WRITE (8,'(1X,/,10X,40(1H-),/)')
@@ -736,9 +705,7 @@ C            WRITE (12,'(1X,/,10X,40(1H-),/)')
      &cade'')')
                WRITE (12,'(1X,/,10X,40(1H-),/)')
              endif
-                 
          ENDIF
-
          DO il = 1, NLV(nnuc)
              IF(ISIsom(il,Nnuc).EQ.0) THEN
                WRITE (8,99070) il, ELV(il,nnuc),
@@ -748,7 +715,6 @@ C            WRITE (12,'(1X,/,10X,40(1H-),/)')
                WRITE (8,99071) il, ELV(il,nnuc),
      &         LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc),' ISOMER'
              ENDIF
-
              IF (nnuc.EQ.1) THEN            
 C--------------Check for the number of branching ratios
                nbr = 0
@@ -765,7 +731,6 @@ C--------------Check for the number of branching ratios
      &                          ,ib = 1,nbr)
              ENDIF
          ENDDO ! over discrete levels
-
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
              WRITE (8,'(1X,/,10X,40(1H-),/)')
@@ -814,7 +779,6 @@ C
              ENDIF
          ENDIF
 C        Primary gammas done 
-
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
 C            WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -846,7 +810,6 @@ C--------------Check for the number of branching ratios
 C--------gamma decay of discrete levels (DECAYD)
          CALL DECAYD(nnuc)
 C
-
       ENDIF ! CSPrd(nnuc).gt.0.d0
 C
       ia = INT(A(nnuc))
@@ -1042,7 +1005,6 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
              ENDIF
              WRITE (8,*) 
              WRITE (8,'(116(1H_))') 
-
              WRITE (8,*) 
      &        'Population of residual nuclei (exclusive spectra - CMS)'
              WRITE (8,
@@ -1102,12 +1064,10 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
              WRITE (8,'(116(1H-)/)') 
            ENDIF
       ENDIF
-
       IF (CSFis.NE.0.0D0) THEN
         WRITE (80,*)
         WRITE (8,*)
         IF (IOUt.GT.0) THEN
-          
           DO m = 1, INT(FISmod(nnuc)) + 1
             WFIsm(m) = 0.d0
             IF (CSFis.GT.0.d0) WFIsm(m) = CSFism(m)/CSFis
@@ -1124,9 +1084,7 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &mb  ''/)') iz, SYMb(nnuc), ia, CSFis
 C
       ENDIF
-
       TOTcsfis = TOTcsfis + CSFis
-
       IF (nnuc.EQ.1  .AND. INT(AEJc(0)).NE.0 .AND. ncollx.GT.0) then
 C  -----Locate position of the projectile among ejectiles
         CALL WHEREJC(IZAejc(0),nejcec,iloc)
@@ -1213,11 +1171,8 @@ C         number of discrete levels is limited to 40
      &                 ilv = 31,MIN(its,40))
           ENDIF
           WRITE (8,*) ' '
-
         ENDIF     ! CSAlev(1,ICOller(2),nejcec).GT.0
-
       ENDIF
-
       IF(CSPrd(nnuc).GT.0.d0) THEN
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
@@ -1243,18 +1198,16 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
 
 5753  FORMAT(1X,I3,'-',A2,'-',I3,
      &    '    fission cross section',G12.6,'  mb') 
+         IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
 
-      IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
-
-      IF(CSPrd(nnuc).gt.0.d0) then 
+         IF(CSPrd(nnuc).gt.0.d0) then 
            WRITE (12,*)
            WRITE (8,*)
-           IF(CSPrd(nnuc).GT.1.d-7) then
-              WRITE (8,
+           WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-              WRITE (12,
+           WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
@@ -1299,7 +1252,6 @@ C        Integral is calculated by trapezoidal rule being consistent with cross 
            if(nnuc.eq.1) WRITE (12,'(2x,
      &     '' Primary g  emission cross section'',G12.6,''  mb'')') cspg
          ENDIF
-
          xcross(0,jz,jn) = CSEmis(0,nnuc)
 C----------------------------------------------------------------------
          IF(CSPrd(nnuc).GT.0.d0) THEN
@@ -1353,7 +1305,6 @@ C------------Print residual nucleus population
                  poptot = poptot + CSHms(1,nnur) + CSHms(2,nnur)
                ENDIF
              ENDIF
-
              if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
      &                          .and. ENDF(nnuc).gt.0) then
                WRITE (12,
@@ -1378,7 +1329,6 @@ C    &         '(1x,''    Total popul.disc.lev. '',G12.6,''  mb'')')
 C    &          poplev
 C              WRITE (8,*)
              endif
-
              IF (IOUt.EQ.4) THEN
                ia = INT(A(nnur))
                WRITE (8,*) ' '
@@ -1405,18 +1355,12 @@ C              WRITE (8,*)
      &             WRITE (8,99075) EX(i,nnur),(POP(i,j,2,nnur),j = 1,12)
                enddo
                WRITE (8,'('' '')')
-
              ENDIF
-
            ENDDO   !over ejectiles
-
            IF(DBRkup.GT.1.0d-2 .AND. jz.EQ.0 .AND. jn.EQ.0)
      1        checkprd = checkprd - CSDbrkup(1)
-
            xcross(NDEJC+3,jz,jn) = checkprd
-
       ENDIF ! if CSProd > 0
-
       RETURN         
 99016 FORMAT (/' ',46x,'COMP. ELASTIC DIFFERENTIAL CROSS-SECTION',/,' ',
      &        46x,40('*'),/,' ',50x,'CENTER-OF-MASS SYSTEM',/)
@@ -1490,8 +1434,6 @@ C-----Normalize recoil spectrum of the parent
             RECcse(ire,Ke,Nnuc) = RECcse(ire,Ke,Nnuc)/sumnor
          ENDDO
       ENDIF
-
-
       dang = PI/FLOAT(NDANG - 1)
       coeff = dang/DERec/2.0
       DO nejc = 1, NEJcm   !over ejectiles

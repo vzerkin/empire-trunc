@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
+Ccc   * $Rev: 4509 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Date: 2015-11-22 08:30:18 +0100 (So, 22 Nov 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -113,12 +113,11 @@ C-----
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)
-C        if(il.eq.LEVtarg) pop1 = Xnor*SCRtl(il,Nejc)*CELred 
          IF (pop1.le.0) CYCLE
 C        if(il.eq.LEVtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
-C        write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
+C         write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
 C--------Add contribution to recoils auxiliary matrix for discrete levels
          REClev(il,Nejc) = REClev(il,Nejc) + pop1
 C--------Add contribution of discrete levels to emission spectra
@@ -203,22 +202,15 @@ C             DO na = 1, NDANG
 C               xs_cn = GET_DDXS(CANGLE(na),il)  
 C               CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn*xs_norm                     
 C             ENDDO
-C
 C           ELSE
-C
 C              Not the inelastic channel OR isotropic CN DA
-C              
 C              xs_cn = CSComplev(il,NPRoject)/(4.d0*PI)  ! default isotropic
 C              DO na = 1, NDANG
 C                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn
 C              ENDDO ! loop over angles
-C
 C           ENDIF
-
          ENDIF ! on top  CN state, non-gamma with non-zero population 
-
       ENDDO   !loop over levels
-
       RETURN
       END
 
@@ -260,7 +252,6 @@ Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
 C
-C
 C Dummy arguments
 C
       INTEGER Iec, Ief, Nejc, Nnuc, Nnur
@@ -276,7 +267,6 @@ C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
 C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
-C
 C-----
 C-----Fission
 C-----
@@ -571,8 +561,8 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-      DOUBLE PRECISION ELTl(NDLW),ELTlj(NDLW,3)
-      COMMON /ELASTIC/ ELTl,ELTlj
+      DOUBLE PRECISION ELTl(NDLW) !,ELTlj(NDLW,3)
+      COMMON /ELASTIC/ ELTl       !,ELTlj
 C
 C Dummy arguments
 C
@@ -1077,7 +1067,6 @@ C-----------Well... let it go down to the ground state
 C                 gacs_noicc = gacs                 ! no int. conversion
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-
                ENDDO
             ENDIF
          ENDIF
