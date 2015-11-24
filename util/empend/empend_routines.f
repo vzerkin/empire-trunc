@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-11-24 19:31:33 +0100 (Di, 24 Nov 2015) $
+Ccc   * $Date: 2015-11-24 20:17:25 +0100 (Di, 24 Nov 2015) $
 
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
@@ -1227,7 +1227,7 @@ C* Create MT 206 if not present (flagged -ve for no spectra)
         MTH(NXS)=-206
         I206=NXS
         DO J=1,NPT
-          XSC(J,I2036)=0
+          XSC(J,I206)=0
         END DO
         QQM(I206)=-1.E12
         QQI(I206)=-1.E12
@@ -1264,7 +1264,7 @@ c...
         WRITE(LTT,904) ' Added to MT5 the production of ZA/Q',KM,QQ
         WRITE(LLG,904) ' Added to MT5 the production of ZA/Q',KM,QQ
 C*
-        IF(INCL.EQ.1) GO TO 80
+        IF(INCL.EQ.1) CYCLE
 C*      -- Check for inclusive particle production
 C*         This coding is applicable to older Empire outputs in which
 C*         emitted particle spectra were not added to the inclusive
