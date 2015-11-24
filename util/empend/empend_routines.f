@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2015-11-24 19:31:33 +0100 (Di, 24 Nov 2015) $
 
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
@@ -81,6 +81,106 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=IZA+IZI-1001-1003
       ELSE IF(MT.EQ.117) THEN
         JZA=IZA+IZI-1002-2004
+      ELSE IF(MT.EQ.152) THEN
+        JZA=IZA+IZI-  5
+      ELSE IF(MT.EQ.153) THEN
+        JZA=IZA+IZI-  6
+      ELSE IF(MT.EQ.154) THEN
+        JZA=IZA+IZI-  2-1003
+      ELSE IF(MT.EQ.155) THEN
+        JZA=IZA+IZI-1003-2004
+      ELSE IF(MT.EQ.156) THEN
+        JZA=IZA+IZI-  4-1001
+      ELSE IF(MT.EQ.157) THEN
+        JZA=IZA+IZI-  3-1002
+      ELSE IF(MT.EQ.158) THEN
+        JZA=IZA+IZI-  1-1002-2004
+      ELSE IF(MT.EQ.159) THEN
+        JZA=IZA+IZI-  2-1001-2004
+      ELSE IF(MT.EQ.160) THEN
+        JZA=IZA+IZI-  7
+      ELSE IF(MT.EQ.161) THEN
+        JZA=IZA+IZI-  8
+      ELSE IF(MT.EQ.162) THEN
+        JZA=IZA+IZI-  5-1001
+      ELSE IF(MT.EQ.163) THEN
+        JZA=IZA+IZI-  6-1001
+      ELSE IF(MT.EQ.164) THEN
+        JZA=IZA+IZI-  7-1001
+      ELSE IF(MT.EQ.165) THEN
+        JZA=IZA+IZI-  4-2004
+      ELSE IF(MT.EQ.166) THEN
+        JZA=IZA+IZI-  5-2004
+      ELSE IF(MT.EQ.167) THEN
+        JZA=IZA+IZI-  6-2004
+      ELSE IF(MT.EQ.168) THEN
+        JZA=IZA+IZI-  7-2004
+      ELSE IF(MT.EQ.169) THEN
+        JZA=IZA+IZI-  4-1002
+      ELSE IF(MT.EQ.170) THEN
+        JZA=IZA+IZI-  5-1002
+      ELSE IF(MT.EQ.171) THEN
+        JZA=IZA+IZI-  6-1002
+      ELSE IF(MT.EQ.172) THEN
+        JZA=IZA+IZI-  3-1003
+      ELSE IF(MT.EQ.173) THEN
+        JZA=IZA+IZI-  4-1003
+      ELSE IF(MT.EQ.174) THEN
+        JZA=IZA+IZI-  5-1003
+      ELSE IF(MT.EQ.175) THEN
+        JZA=IZA+IZI-  6-1003
+      ELSE IF(MT.EQ.176) THEN
+        JZA=IZA+IZI-  2-2003
+      ELSE IF(MT.EQ.177) THEN
+        JZA=IZA+IZI-  3-2003
+      ELSE IF(MT.EQ.178) THEN
+        JZA=IZA+IZI-  4-2003
+      ELSE IF(MT.EQ.179) THEN
+        JZA=IZA+IZI-  3-2002
+      ELSE IF(MT.EQ.180) THEN
+        JZA=IZA+IZI-  3-4008
+      ELSE IF(MT.EQ.181) THEN
+        JZA=IZA+IZI-  3-1001-2004
+      ELSE IF(MT.EQ.182) THEN
+        JZA=IZA+IZI-1002-1003
+      ELSE IF(MT.EQ.183) THEN
+        JZA=IZA+IZI-  1-1001-1002
+      ELSE IF(MT.EQ.184) THEN
+        JZA=IZA+IZI-  1-1001-1003
+      ELSE IF(MT.EQ.185) THEN
+        JZA=IZA+IZI-  1-1002-1003
+      ELSE IF(MT.EQ.186) THEN
+        JZA=IZA+IZI-  1-1001-2003
+      ELSE IF(MT.EQ.187) THEN
+        JZA=IZA+IZI-  1-1002-2003
+      ELSE IF(MT.EQ.188) THEN
+        JZA=IZA+IZI-  1-1003-2003
+      ELSE IF(MT.EQ.189) THEN
+        JZA=IZA+IZI-  1-1003-2004
+      ELSE IF(MT.EQ.190) THEN
+        JZA=IZA+IZI-  2-2002
+      ELSE IF(MT.EQ.191) THEN
+        JZA=IZA+IZI-1001-2003
+      ELSE IF(MT.EQ.192) THEN
+        JZA=IZA+IZI-1002-2003
+      ELSE IF(MT.EQ.193) THEN
+        JZA=IZA+IZI-2003-2004
+      ELSE IF(MT.EQ.194) THEN
+        JZA=IZA+IZI-  4-2002
+      ELSE IF(MT.EQ.195) THEN
+        JZA=IZA+IZI-  4-4008
+      ELSE IF(MT.EQ.196) THEN
+        JZA=IZA+IZI-  4-1001-2004
+      ELSE IF(MT.EQ.197) THEN
+        JZA=IZA+IZI-3003
+      ELSE IF(MT.EQ.198) THEN
+        JZA=IZA+IZI-  1-3003
+      ELSE IF(MT.EQ.199) THEN
+        JZA=IZA+IZI-  3-2002-2004
+      ELSE IF(MT.EQ.200) THEN
+        JZA=IZA+IZI-  5-2002
+
+
       ELSE IF(MT.GE.600 .AND. MT.LE.649) THEN
         JZA=IZA+IZI-1001
       ELSE IF(MT.GE.650 .AND. MT.LE.699) THEN
@@ -154,7 +254,27 @@ C*        --(z,3n) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-2005) THEN
 C*        --(z,na) cross section
             MT =   22
-            IF(MEQ.GT.0) MT =0
+C*        --(z,d+t)
+            IF(MEQ.EQ.1) MT =  182
+C*        --(z,2n+h)
+            IF(MEQ.EQ.2) MT =  176
+C*        --(z,n+p+t)
+            IF(MEQ.EQ.3) MT =  184
+            IF(MEQ.GE.4) MT =0
+        ELSE IF(JZA  .EQ. IZA+IZI-2006) THEN
+C*        --(z,2na) cross section
+            MT =   24
+C*        --(z,3n+h)
+            IF(MEQ.EQ.1) MT =  177
+C*        --(z,4n+2p)
+            IF(MEQ.EQ.2) MT =  194
+            IF(MEQ.GE.3) MT =0
+        ELSE IF(JZA  .EQ. IZA+IZI-3006) THEN
+C*        --(z,n+p+a) cross section
+            MT =   45
+C*        --(z,d+a)
+            IF(MEQ.EQ.1) MT =  117
+            IF(MEQ.GE.2) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-6013) THEN
 C*        --(z,n3a) cross section
             MT =   23
@@ -236,7 +356,11 @@ C*        --(z,2p) cross section
         ELSE IF(JZA  .EQ. IZA+IZI-3005) THEN
 C*        --(z,pa) cross section
             MT =  112
-            IF(MEQ.GT.0) MT =0
+C*        --(z,dh)
+            IF(MEQ.EQ.1) MT=192
+C*        --(z,nph)
+            IF(MEQ.EQ.2) MT=186
+            IF(MEQ.GE.3) MT =0
         ELSE IF(JZA  .EQ. IZA+IZI-5010) THEN
 C*        --(z,d2a) cross section
             MT =114
@@ -965,7 +1089,7 @@ C*          Check for non-zero fission cross section
       
       
       SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSC,QQM,QQI,MXE,MXT
-     &                 ,LTT,LLG)
+     &                 ,LTT,LLG,INCL)
 C-Title  : Subroutine SUMMT5
 C-Purpose: Sum reactions contributing to MT 5
 C-Version:
@@ -980,11 +1104,16 @@ C-D that the reaction cross section will also be processable in MF10.
 C-D The exception are discrete level reactions, which do not necessarily
 C-D require differential data (if isotropic distributions are assumed).
 C-D   All reactions with MT>9999 and LFS>4 (if any) will be added to
-C-D MT5. Possible light-particle products are registered and the cross
-C-D sections added to construct special particle production cross 
+C-D MT5. The older convention is to try and identify possible 
+C-D light-particle products and add them to theparticle production cross 
 C-D sections MT201, 203 and 207 that contribute to MT5. These are used
 C-D to calculate the particle yields in MF6/MT5 and do not include
-C-D particle production from explicitly represented reactions.
+C-D particle production from explicitly represented reactions. In the
+C-D new EMPIRE convention the particle spectra from exclusively
+C-D calculated cross sections that do not appear explicitly with the
+C-D spectra in the ENDF file are added to MT5 within EMPIRE, so there
+C-D is no need for the approximate treatment according to the old
+C-D convention. The new convention is identified by INCL=1.
 C-
       DIMENSION  MTH(MXT),MT6(MXT),XSC(MXE,MXT),QQM(MXT),QQI(MXT)
 C* Process only if NT6>0
@@ -993,12 +1122,18 @@ C* Process only if NT6>0
       I5  =0
       I201=0
       I203=0
+      I204=0
+      I205=0
+      I206=0
       I207=0
       DO IX=1,NXS
         MT=MTH(IX)
         IF(MT.EQ.  5) I5  =IX
         IF(MT.EQ.201) I201=IX
         IF(MT.EQ.203) I203=IX
+        IF(MT.EQ.204) I204=IX
+        IF(MT.EQ.205) I205=IX
+        IF(MT.EQ.206) I206=IX
         IF(MT.EQ.207) I207=IX
 C* Consider eligible reactions
         IF((MT.GT.  5 .AND. MT.LT. 50 .AND. MT.NE.18) .OR.
@@ -1064,6 +1199,39 @@ C* Create MT 203 if not present (flagged -ve for no spectra)
         QQM(I203)=-1.E12
         QQI(I203)=-1.E12
       END IF
+C* Create MT 204 if not present (flagged -ve for no spectra)
+      IF(I204.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-204
+        I204=NXS
+        DO J=1,NPT
+          XSC(J,I204)=0
+        END DO
+        QQM(I204)=-1.E12
+        QQI(I204)=-1.E12
+      END IF
+C* Create MT 205 if not present (flagged -ve for no spectra)
+      IF(I205.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-205
+        I205=NXS
+        DO J=1,NPT
+          XSC(J,I205)=0
+        END DO
+        QQM(I205)=-1.E12
+        QQI(I205)=-1.E12
+      END IF
+C* Create MT 206 if not present (flagged -ve for no spectra)
+      IF(I206.LE.0) THEN
+        NXS=NXS+1
+        MTH(NXS)=-206
+        I206=NXS
+        DO J=1,NPT
+          XSC(J,I2036)=0
+        END DO
+        QQM(I206)=-1.E12
+        QQI(I206)=-1.E12
+      END IF
 C* Create MT 207 if not present (flagged -ve for no spectra)
       IF(I207.LE.0) THEN
         NXS=NXS+1
@@ -1080,54 +1248,60 @@ C* (identified by MT=10*ZA+LFS, LFS>0).
       DO IX=1,NXS
         MT=MTH(IX)
         M5=0
-        IF(MT.LE.9999) GO TO 80
-          M5=MT-10*(MT/10)
-          IF(M5.LT.5) GO TO 80
-            DO J=1,NPT
+        IF(MT.LE.9999) CYCLE
+        M5=MT-10*(MT/10)
+        IF(M5.LT.5) CYCLE
+        DO J=1,NPT
 c...
-c...          print *,XSC(J,I5),XSC(J,IX),XSC(J,I5)+XSC(J,IX)
+c...      print *,XSC(J,I5),XSC(J,IX),XSC(J,I5)+XSC(J,IX)
 c...
-              XSC(J,I5)=XSC(J,I5)+XSC(J,IX)
-            END DO
-            QQ=MAX(QQM(IX),QQM(I5))
-            QQM(I5)=QQ
-            QQI(I5)=QQ
-            KM=MT/10
-            WRITE(LTT,904) ' Added to MT5 the production of ZA/Q',KM,QQ
-            WRITE(LLG,904) ' Added to MT5 the production of ZA/Q',KM,QQ
-C*          -- Add alpha production to MT207
-   20       IF(IZA+IZI-2004.LT.KM) GO TO 40
-              KM=KM+2004
-              YI=1
-              DO J=1,NPT
-                XSC(J,I207)=XSC(J,I207)+YI*XSC(J,IX)
-              END DO
-              QQM(I207)=MAX(QQM(IX),QQM(I207))
-              QQI(I207)=QQM(I207)
-              GO TO 20
-C*          -- Add proton production to MT203
-   40       IF(IZA+IZI-1001.LT.KM) GO TO 60
-              KM=KM+1001
-              YI=1
-              DO J=1,NPT
-                XSC(J,I203)=XSC(J,I203)+YI*XSC(J,IX)
-              END DO
-              QQM(I203)=MAX(QQM(IX),QQM(I203))
-              QQI(I203)=QQM(I203)
-              GO TO 40
-C*          -- Add neutron production to MT201
-   60       IF(IZA+IZI-   1.LT.KM) GO TO 80
-              KM=KM+   1
-              YI=1
-              DO J=1,NPT
-                XSC(J,I201)=XSC(J,I201)+YI*XSC(J,IX)
-              END DO
-              QQM(I201)=MAX(QQM(IX),QQM(I201))
-              QQI(I201)=QQM(I201)
-              GO TO 60
-   80 CONTINUE
+          XSC(J,I5)=XSC(J,I5)+XSC(J,IX)
+        END DO
+        QQ=MAX(QQM(IX),QQM(I5))
+        QQM(I5)=QQ
+        QQI(I5)=QQ
+        KM=MT/10
+        WRITE(LTT,904) ' Added to MT5 the production of ZA/Q',KM,QQ
+        WRITE(LLG,904) ' Added to MT5 the production of ZA/Q',KM,QQ
+C*
+        IF(INCL.EQ.1) GO TO 80
+C*      -- Check for inclusive particle production
+C*         This coding is applicable to older Empire outputs in which
+C*         emitted particle spectra were not added to the inclusive
+C*         spectra
+C*
+C*      -- Add alpha production to MT207
+        DO WHILE (IZA+IZI-2004.GE.KM)
+          YI=1
+          DO J=1,NPT
+            XSC(J,I207)=XSC(J,I207)+YI*XSC(J,IX)
+          END DO
+          QQM(I207)=MAX(QQM(IX),QQM(I207))
+          QQI(I207)=QQM(I207)
+          KM=KM+2004
+        END DO
+C*      -- Add proton production to MT203
+        DO WHILE (IZA+IZI-1001.GE.KM)
+          YI=1
+          DO J=1,NPT
+            XSC(J,I203)=XSC(J,I203)+YI*XSC(J,IX)
+          END DO
+          QQM(I203)=MAX(QQM(IX),QQM(I203))
+          QQI(I203)=QQM(I203)
+          KM=KM+1001
+        END DO
+C*      -- Add neutron production to MT201
+        DO WHILE (IZA+IZI-   1.GE.KM)
+          YI=1
+          DO J=1,NPT
+            XSC(J,I201)=XSC(J,I201)+YI*XSC(J,IX)
+          END DO
+          QQM(I201)=MAX(QQM(IX),QQM(I201))
+          QQI(I201)=QQM(I201)
+          KM=KM+   1
+        END DO
       END DO
-      RETURN
+  100 RETURN
   904 FORMAT(A,I6,1P,E10.3)
       END
       
@@ -1782,21 +1956,32 @@ C* Repack the array, removing All-zero cross section from the list
       END
       
       
-      SUBROUTINE SCNMF6(LIN,LTT,LER,NT6,MTH,MXI,IZI,IZA)
+      SUBROUTINE SCNMF6(LIN,LTT,LER,NT6,MTH,MXI,IZI,IZA,INCL)
 C-Title  : SCNMF6 Subroutine
 C-Purpose: Scan EMPIRE output for all react. with energy/angle distrib.
 C-Description:
 C-D  The output is scanned for the spectra. Reaction MT number is
 C-D  assigned, if possible.
+C-D    According to the new convention the light-particle production
+C-D  spectra are summed into the inclusive (where relevant) within the
+C-D  Empire code since SVN rev.  4484. The version number is checked
+C-D  and the INCL parameter is set.
+C-
       PARAMETER    (MXKUN=20)
       CHARACTER*136 REC
       CHARACTER*8   CUN(MXKUN)
       DIMENSION MTH(MXI)
 C*
-      MEQ=0
-      KUN=0
-      NT6=0
+      INCL=0
+      MEQ =0
+      KUN =0
+      NT6 =0
   110 READ (LIN,891,END=200) REC
+C* Check the Empire code version
+      IF(REC(1:10).EQ.' (SVN rev.') THEN
+        READ(REC(11:16),*) IVER
+        IF(IVER.GT.4484) INCL=1
+      END IF
 C* Test for elastic angular distributions of neutral particles
       IF(IZI.LT.1000 .AND. REC(1:14).EQ.'  Elastic angu'    ) THEN
         MT=2
@@ -2765,19 +2950,30 @@ C* Test for multiple reactions leading to the same residual
   312 XSPROD=XS
       XSSUM =0
   314 CONTINUE
+C...
+C...  write(ler,*) 'IPOP-314',IPOP,XSPROD,XSSUM,XS
+C...  print *,'IPOP-314',IPOP,JZA,XSPROD,XSSUM,XS
+C...  print *,(xpop(j),j=1,7)
+C...
       IF(IPOP.GT.0) THEN
-        CALL XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XS,XG)
+C...
+c...    print *,'ipop1,mt,e,qm,qi,xp,xsum',ipop,mt,ee,qq,qi,xsprod,xssum
+C...
+        CALL XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XSSUM,XS,XG)
+C...
+c...    print *,'ipop2,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
+C...
         IF(XS.LE.0) GO TO 322
-C*      -- Check for significant differences
-        IF(ABS(XSPROD-XS).GT.XSPROD/1000) THEN
-          WRITE(LTT,'(A,1P,E10.3,A,E10.3,A,I6,A,E10.3)')
-     &        ' Ein',EE,' eV Prod.x.s',XSPROD
-     &       ,' redefined to MT',MT,' x.s.',XS
+C*      -- Check for split production by reactions
+        IF(ABS(XSPROD-XS).GT.XSPROD/500) THEN
+          WRITE(LTT,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
+     &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
+     &       ,' split into MT',MT,' x.s.',XS
+          WRITE(LER,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
+     &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
+     &       ,' split into MT',MT,' x.s.',XS,' b'
         END IF
         XSSUM=XSSUM+XS
-C...
-C...    print *,'ipop,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
-C...
       END IF
 C* Reconstruct Q-values from MT and the binding energies
       QQ0=QQ
@@ -2813,7 +3009,7 @@ C...
 C...  print *,'New MT/Q',MT,QQ,QI ,ipop
 C...
       IF(ABS(QQ0-QQ) .GT. ABS(QQ)/10000) THEN
-        WRITE(LTT,'(A,I7,1P,E11.3,2(A,E11.3))')
+        WRITE(LTT,'(A,I7,1P,E11.3,2(A,E11.4))')
      &  ' QVAL WARNING - MT,Q',MT,QQ0,' changed to',QQ, ' at E',EE
       END IF
       IXS=NXS
@@ -2849,25 +3045,39 @@ C* Add cross section and gamma-production contributions
 C* Assign next MT number from the same residual ZA, if present
   322 MEQ=MEQ+1
       CALL EMTIZA(IZI,IZA,JZA,MT,MEQ)
+C...
+C...  print *,'meq,ipop,jza,mt',meq,ipop,jza,mt
+C...
       QI =QQ
       IF(MT.GT.0) GO TO 314
 C* Check if population contributions sum up to production
-      XS=XSPROD-XSSUM
-      IF(XS/XSPROD .LT. 0.001) GO TO 110
-      WRITE(LTT,904) ' Diff. between Prod. and Popul. Residual',JZA
-      WRITE(LTT,902) '          incident energy [eV]          ',EE
-      WRITE(LTT,902) '          production x.s. [millibarns]  ',XSPROD
-      WRITE(LTT,902) '        summed-up to MT 5 [millibarns]  ',XS
-      WRITE(LTT,902) ' '
-      WRITE(LER,904) ' Diff. between Prod. and Popul. Residual',JZA
-      WRITE(LER,902) '          incident energy [eV]          ',EE
-      WRITE(LER,902) '          production x.s. [millibarns]  ',XSPROD
-      WRITE(LER,902) '        summed-up to MT 5 [millibarns]  ',XS
-      WRITE(LER,902) ' '
-      MT= 5
-      XG=-1
-      IPOP=-1
-      GO TO 312
+      XS=(XSPROD-XSSUM)
+      IF(ABS(XS) .GT. 0.002*XSPROD) THEN
+        WRITE(LTT,904) ' Diff. between Prod. and Popul. Residual',JZA
+        WRITE(LTT,902) '          incident energy [eV]          ',EE
+        WRITE(LTT,902) '          population sum  [millibarns]  ',XSSUM
+        WRITE(LTT,902) '          production x.s. [millibarns]  ',XSPROD
+        WRITE(LTT,903) '               Difference [%]           '
+     &                ,100*XS/XSPROD
+        WRITE(LER,904) ' Diff. between Prod. and Popul. Residual',JZA
+        WRITE(LER,902) '          incident energy [eV]          ',EE
+        WRITE(LER,902) '          population sum  [millibarns]  ',XSSUM
+        WRITE(LER,902) '          production x.s. [millibarns]  ',XSPROD
+        WRITE(LER,903) '               Difference [%]           '
+     &                ,100*XS/XSPROD
+        IF(XS.GT.0) THEN
+          WRITE(LTT,902) ' Unassigned summed to MT 5 [millibarns] ',XS
+          WRITE(LTT,902) ' '
+          WRITE(LER,902) ' Unassigned summed to MT 5 [millibarns] ',XS
+          WRITE(LER,902) ' '
+          MT= 5
+          XG=-1
+          IPOP=-1
+          GO TO 312
+        END IF
+        WRITE(LER,902) ' '
+      END IF
+      GO TO 110
 C*
 C* Process discrete levels - (n,n'), (n,p), (n,a)
   350 READ (LIN,891)
@@ -3041,6 +3251,9 @@ C*      Test if reaction is already registered
   391   XSC(NEN,IXS)=(XC-XL0)*1.E-3
       END IF
 C* Subtract the discrete levels
+C...
+C...  write(ler,*) 'mt0,mt,ee,xc,xi',mt0,mt,ee,xc,xi,XC-XI
+C...
       XS=XC-XI
       XG=-1
       IF(XS.LE.XC*2.E-5) THEN
@@ -3065,6 +3278,9 @@ C* Reaction QM value from the last discrete level
 C* Reaction QI may be lower due to (z,g+x) reactions
       QIE=-0.99*EE*AWR/(AWR+AWI)
       QI =MAX(QI,QIE)
+C...
+C...  write(ler,*) 'IPOP',ipop
+C...
       IF(IPOP.GT.0) GO TO 312
 C* Test if reaction is already registered
   392 IF(NXS.GT.0  ) THEN
@@ -3134,17 +3350,18 @@ c.809 FORMAT(26X,F12.0)
   814 FORMAT(1X,I3,1X,A2,1X,I3,4X,6F8.0)
   891 FORMAT(A80)
   902 FORMAT(A40,1P,2E10.3)
+  903 FORMAT(A40,F10.2)
   904 FORMAT(A40,I10)
   994 FORMAT(BN,F10.0)
   995 FORMAT(BN,I6)
       END
       
       
-      SUBROUTINE XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XS,XG)
+      SUBROUTINE XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XSSUM,XS,XG)
 C-Title  : Subroutine XSPOP
 C-Purpose: Define cross section for specified MT from population x.s.
 C-Description:
-C-D  XPOP Population of residual by precursor-emission of
+C-D XPOP Population of residual by precursor-emission of
 C-D   1  neutron
 C-D   2  proton
 C-D   3  deuteron
@@ -3153,75 +3370,155 @@ C-D   5  He-3
 C-D   6  alpha
 C-D   7  not used
 C-D   8  gamma
-C-D IZI   Projectile ZA
-C-D IZA   Target ZA
-C-D JZA   Residual ZA
-C-D MT    reaction designation
-C-D XSPROD total residual production cross section (mb)
-C-D XS    cross-section (output) (mb)
-C-D XG    gamma-production cross section (mb)
+C-D IZI    Projectile ZA
+C-D IZA    Target ZA
+C-D JZA    Residual ZA
+C-D MT     Reaction designation
+C-D XSPROD Total residual production cross section (mb)
+C-D XS     Cross-section from population (output) (mb)
+C-D XG     Gamma-production cross section from population (mb)
 C-
-      DOUBLE PRECISION XPOP,XSPROD,XS,ZERO
+      DOUBLE PRECISION XPOP,XSPROD,XSSUM,XS,XN,XD,XP,ZERO
       DIMENSION XPOP(8)
       ZERO= 0
       XS  = XSPROD
       XG  =-1
       IF(XSPROD.LE.ZERO) RETURN
-      IF     (MT.EQ. 16) THEN
+      IF     (MT.EQ. 11) THEN
+C* (z,2n+d)
+        XS=XPOP(3)
+      ELSE IF(MT.EQ. 16) THEN
 C* (z,2n)
         XS=XPOP(1)/2
-      ELSE IF(MT.EQ.103 .OR. MT.EQ.600 .OR. MT.EQ.649) THEN
-C* (z,p)
-        XS=XPOP(2)
+      ELSE IF(MT.EQ. 17) THEN
+C* (z,3n)
+        XS=XPOP(1)/3
+      ELSE IF(MT.EQ. 22) THEN
+C* (z,n+a)
+        XS=XPOP(6)
+      ELSE IF(MT.EQ. 24) THEN
+C* (z,2n+a)
+        XS=XPOP(6)
       ELSE IF(MT.EQ. 28) THEN
 C* (z,n+p)
-        XS=XPOP(2)
-      ELSE IF(MT.EQ.104) THEN
-C* (z,d)
-C... XPOP(3) contains only the continuum - calculate from difference
-C...    XS=XPOP(3)
-        XS=XSPROD-XPOP(2)
-        XS=MAX(XS,ZERO)
-      ELSE IF(MT.EQ. 41) THEN
-C* (z,2n+p)
         XS=XPOP(2)
       ELSE IF(MT.EQ. 32) THEN
 C* (z,n+d)
         XS=XPOP(3)
+      ELSE IF(MT.EQ. 33) THEN
+C* (z,n+t)
+        XS=XPOP(4)
+      ELSE IF(MT.EQ. 34) THEN
+C* (z,n+h)
+        XS=XPOP(5)
+      ELSE IF(MT.EQ. 37) THEN
+C* (z,4n)
+        XS=XPOP(1)/4
+      ELSE IF(MT.EQ. 41) THEN
+C* (z,2n+p)
+        XS=XPOP(2)
+      ELSE IF(MT.EQ. 42) THEN
+C* (z,3n+p)
+        XS=XPOP(2)
+      ELSE IF(MT.EQ. 44) THEN
+C* (z,n+2p)
+        XS=XPOP(1)
+      ELSE IF(MT.EQ. 45) THEN
+C* (z,n+p+a), excluding (z,d+a)
+        XS=XPOP(6)-XPOP(3)
+      ELSE IF(MT.EQ.103 .OR. MT.EQ.600 .OR. MT.EQ.649) THEN
+C* (z,p)
+        XS=XPOP(2)
+      ELSE IF(MT.EQ.104) THEN
+C* (z,d)
+C... XPOP(3) contains only the continuum - calculate from difference
+        XS=XPOP(3)
+C...    XS=XSPROD-XPOP(2)
+C...    XS=MAX(XS,ZERO)
       ELSE IF(MT.EQ.105) THEN
 C* (z,t)
 C... XPOP(4) contains only the continuum - calculate from difference
-C...    XS=XPOP(4)
-        XS=XSPROD-XPOP(3)-XPOP(2)
-        XS=MAX(XS,ZERO)
+        XS=XPOP(4)
+C...    XS=XSPROD-XPOP(3)-XPOP(2)
+C...    XS=MAX(XS,ZERO)
+      ELSE IF(MT.EQ.106) THEN
+C* (z,h)
+C... XPOP(5) contains only the continuum - calculate from difference
+        XS=XPOP(5)
+C...    XS=XSPROD-XPOP(3)-XPOP(1)
+C...    XS=MAX(XS,ZERO)
+      ELSE IF(MT.EQ.107 .OR. MT.EQ.800 .OR. MT.EQ.849) THEN
+C* (z,a)
+        XS=XPOP(6)
       ELSE IF(MT.EQ.111) THEN
 C* (z,2p)
 C... XPOP(2) contains only the continuum - adopt XSPROD
         XS=XSPROD
-      ELSE IF(MT.EQ. 44) THEN
-C* (z,n+2p)
-        XS=XPOP(1)
+      ELSE IF(MT.EQ.112) THEN
+C* (z,p+a)
+        XS=XPOP(6)
       ELSE IF(MT.EQ.115) THEN
 C* (z,p+d)
         XS=XPOP(3)
-      ELSE IF(MT.EQ.106) THEN
-C* (z,h)
-C... XPOP(5) contains only the continuum - calculate from difference
-C...    XS=XPOP(5)
-        XS=XSPROD-XPOP(3)-XPOP(1)
-        XS=MAX(XS,ZERO)
-      ELSE IF(MT.EQ.10*JZA+5) THEN
-C* (z,2n+2p) + (z,n+p+d) + (z,2d)
-        XS=XSPROD-XPOP(5)-XPOP(4)
-      ELSE IF(MT.EQ. 34) THEN
-C* (z,n+h)
-        XS=XPOP(5)
       ELSE IF(MT.EQ.116) THEN
 C* (z,p+t)
         XS=XPOP(4)
-      ELSE IF(MT.EQ.107 .OR. MT.EQ.800 .OR. MT.EQ.849) THEN
-C* (z,a)
-        XS=XPOP(6)
+      ELSE IF(MT.EQ.117) THEN
+C* (z,d+a)
+        XS=XPOP(3)
+      ELSE IF(MT.EQ.157) THEN
+C* (z,3n+d) - Subtract p
+C*      -- Remove protons from (n,t)
+        XP=XPOP(2)-XPOP(4)
+        XS=XPOP(5)
+      ELSE IF(MT.EQ.176) THEN
+C* (z,2n+h)
+        XS=XPOP(5)
+      ELSE IF(MT.EQ.177) THEN
+C* (z,3n+h)
+        XS=XPOP(5)
+      ELSE IF(MT.EQ.179) THEN
+C* (z,2n+2p)
+        XP=XPOP(2)-XPOP(3)-XPOP(4)
+        XS=XP/2
+      ELSE IF(MT.EQ.182) THEN
+C* (z,d+t)
+        XS=XPOP(3)
+      ELSE IF(MT.EQ.183) THEN
+C* (z,n+p+d)
+        XS=XPOP(3)
+      ELSE IF(MT.EQ.184) THEN
+C* (z,n+p+t)
+        XS=XPOP(4)-XPOP(3)
+      ELSE IF(MT.EQ.186) THEN
+C* (z,n+p+h)
+        XS=XPOP(5)-XPOP(3)
+      ELSE IF(MT.EQ.192) THEN
+C* (z,dh)
+        XS=XPOP(3)
+      ELSE IF(MT.EQ.194) THEN
+C* (z,4n+2p)
+        XS=(XPOP(2)-XPOP(4)-XPOP(3))/2
+      ELSE IF(MT.GE. 100000) THEN
+C* Radionuclide production cross section
+        XS=XSPROD-XSSUM
+C...    print *,'     XS=XSPROD-XSSUM',XS,XSPROD,XSSUM
+C...      ELSE IF(MT.EQ.10*JZA+5) THEN
+C...C* (z,a) + (z,n+h) + (z,n+p+d) + (z,2d) + (z,2n+2p)
+C...C*      -- Subtract neutrons from (z,n+h)
+C...        XN=XPOP(1)-XPOP(5)
+C...C*      -- Subtract deuterons from (z,n+p+d)
+C...        XD=MIN(XPOP(3),XPOP(2),XN)
+C...C*      -- Subtract protons from (z,n+p+d)
+C...        XN=XN-XD
+C...        XP=XPOP(2)-XD
+C...C*      -- Remaining deuterons from (z,2d)
+C...        X2=XD/2
+C...C*
+C...        XS=XSPROD-XPOP(6)-X2-XD-XP/2
+C...  ELSE
+C...    PRINT *,'EMPEND ERROR - Unaccounted reaction',MT
+C...    STOP 'EMPEND ERROR - Unaccounted reaction'
       END IF
 C* Scale gamma-production cross section
       XG=XPOP(8)*XS/XSPROD
@@ -4084,6 +4381,7 @@ c...            print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
 c...
            DFP=100*(XSP-XS3)/XS3
            IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
+             DFP=MIN(DFP,9999.9)
              WRITE(LTT,909) MT,EE,XS3,DFP
              WRITE(LER,909) MT,EE,XS3,DFP
            END IF
@@ -4191,7 +4489,7 @@ C*
      1      ,' sp.rnrm.max',0P,F10.1,' % at',I3,' pnt')
   908 FORMAT(' EMPEND WARNING - At Ein',1P,E9.2,' Eou',E9.2
      1      ,' spectrum renormalised',0P,F10.1,' %')
-  909 FORMAT(' EMPEND WARNING - MT',I3,' E',1P,E10.3
+  909 FORMAT(' EMPEND WARNING - MT',I4,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
   910 FORMAT(' EMPEND WARNING - Can not recognise spectrum for '
      1      ,A8,' MT',I8)
@@ -5119,15 +5417,21 @@ C* Initialize constants
       QI =0
       CALL POUCHR(PTST,IZI,AWI)
 C* Identify indices of MT 5,201,203,207
-      NK =0
-      MT5=0
+      NK   =0
+      MT5  =0
       MT201=0
       MT203=0
+      MT204=0
+      MT205=0
+      MT206=0
       MT207=0
       DO I=1,NXS
         IF(IABS(MTH(I)).EQ.  5) MT5  =I
         IF(IABS(MTH(I)).EQ.201) MT201=I
         IF(IABS(MTH(I)).EQ.203) MT203=I
+        IF(IABS(MTH(I)).EQ.204) MT204=I
+        IF(IABS(MTH(I)).EQ.205) MT205=I
+        IF(IABS(MTH(I)).EQ.206) MT206=I
         IF(IABS(MTH(I)).EQ.207) MT207=I
       END DO
       IF(MT5.LE.0) RETURN
@@ -5161,6 +5465,51 @@ C* Convert proton yields to multiplicities
         END DO
         NK=NK+JK203
       END IF
+C* Convert deuteron yields to multiplicities
+      IF(MT204.GT.0) THEN
+        JK204=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X204=XSC(I,MT204)
+          IF(X204.GT.0 .AND. X5.GT.0) THEN
+            XSC(I,MT204)=X204/X5
+            JK204=1
+          ELSE
+            XSC(I,MT204)=0
+          END IF
+        END DO
+        NK=NK+JK204
+      END IF
+C* Convert triton yields to multiplicities
+      IF(MT205.GT.0) THEN
+        JK205=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X205=XSC(I,MT205)
+          IF(X205.GT.0 .AND. X5.GT.0) THEN
+            XSC(I,MT205)=X205/X5
+            JK205=1
+          ELSE
+            XSC(I,MT205)=0
+          END IF
+        END DO
+        NK=NK+JK205
+      END IF
+C* Convert He-3 yields to multiplicities
+      IF(MT206.GT.0) THEN
+        JK206=0
+        DO I=1,NEN
+          X5  =XSC(I,MT5)
+          X206=XSC(I,MT206)
+          IF(X206.GT.0 .AND. X5.GT.0) THEN
+            XSC(I,MT206)=X206/X5
+            JK206=1
+          ELSE
+            XSC(I,MT206)=0
+          END IF
+        END DO
+        NK=NK+JK206
+      END IF
 C* Convert alpha yields to multiplicities
       IF(MT207.GT.0) THEN
         JK207=0
@@ -5192,7 +5541,7 @@ C*
       LE  =1
       LX  =MXR/2
       ETH =-QQI(MT5)*(AWR+AWI)/AWR
-C* Write the yield for neutrons, protons and alphas
+C* Write the yield for the light particles
       IZAP=1
       IXS =MT201
       JK  =JK201
@@ -5230,11 +5579,31 @@ C*      -- Write TAB1 record for yields
       END IF
 C* Repeat for other particles
       IF(IZAP.EQ.1) THEN
+C*      -- Next particle is proton
         IZAP=1001
         IXS =MT203
         JK  =JK203
         GO TO 200
       ELSE IF(IZAP.EQ.1001) THEN
+C*      -- Next particle is deuteron
+        IZAP=1002
+        IXS=MT204
+        JK =JK204
+        GO TO 200
+      ELSE IF(IZAP.EQ.1002) THEN
+C*      -- Next particle is triton
+        IZAP=1003
+        IXS=MT205
+        JK =JK205
+        GO TO 200
+      ELSE IF(IZAP.EQ.1003) THEN
+C*      -- Next particle is helion
+        IZAP=2003
+        IXS=MT206
+        JK =JK206
+        GO TO 200
+      ELSE IF(IZAP.EQ.2003) THEN
+C*      -- Next particle is alpha
         IZAP=2004
         IXS=MT207
         JK =JK207
