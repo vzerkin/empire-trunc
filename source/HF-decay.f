@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4509 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-22 08:30:18 +0100 (So, 22 Nov 2015) $
+Ccc   * $Rev: 4511 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2015-11-24 18:24:28 +0100 (Di, 24 Nov 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1211,17 +1211,6 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-           ELSE
-              WRITE (8,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-     &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-     &                             REAction(nnuc)
-              WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
-     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-     &                             REAction(nnuc)
-           ENDIF
-           
            ftmp_disc = 0.d0
            IF(nnuc.eq.mt91) ftmp_disc = CSDirlev(1,1)
            IF(nnuc.eq.mt649) ftmp_disc = CSDirlev(1,2)
