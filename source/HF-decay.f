@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4516 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-24 21:33:06 +0100 (Di, 24 Nov 2015) $
+Ccc   * $Rev: 4517 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-11-24 22:07:43 +0100 (Di, 24 Nov 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
