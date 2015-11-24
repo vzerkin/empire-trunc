@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2015-11-24 19:33:09 +0100 (Di, 24 Nov 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -125,6 +125,11 @@ C-V  15/02 - Fix a problem with mesh densification of angular
 C-V          distributions.
 C-V        - Fix formatting when isomer-production cross sections are
 C-V          given.
+C-V  15/11 - Fix test comparing population/production cross sections
+C-V          Increase MXR from 0.8 M to 2.4 M.
+C-V        - Major upgrade involving new convention for residual
+C-M          production x.s. that can be split into partly-exclusive
+C-M          and partly inclusive particle emission spectra
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -292,7 +297,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=400,MXM=120,MXR=800000,MXI=8000,MLV=3)
+      PARAMETER   (MXE=200,MXT=400,MXM=120,MXR=2400000,MXI=8000,MLV=3)
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK
       CHARACTER*80 FLNM,FLN1,FLN2,FLER
@@ -490,10 +495,10 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       IF(ISPE.NE.0) THEN
         REWIND LIN
         JT6=MXI-LBI
-        CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA)
+        CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA,INCL)
 C* Summ MT 5 contributions as necessary
         CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
-     &             ,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER)
+     &             ,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER,INCL)
       END IF
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
