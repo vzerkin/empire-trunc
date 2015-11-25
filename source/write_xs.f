@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4520 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -17,8 +17,8 @@ C     local variables
 C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
-      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,qout
-      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1
+      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver
+      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1,ginclus,gexclus
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
@@ -61,7 +61,7 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
         WRITE (8,*) 
         WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-      ENDIF
+	ENDIF
 
       IF(ENDf(1).GT.0) THEN 
         WRITE (12,*) 
@@ -84,12 +84,12 @@ C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
 C           ENDDO
 C           write(*,*)
 C        ENDIF 
-C     ENDDO
+C	ENDDO
 
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
-             qout = 0.d0                    
+
              DO nejc = 0, NDEJC         !loop over ejectiles
                 IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -101,9 +101,42 @@ C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
-                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
+	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
                    ENDDO 
                    CYCLE
+                ENDIF
+
+                ginclus = 0.d0
+                gexclus = 1.d0
+                IF(ENDfp(nejc,nnuc).EQ.1 .and. nejc.eq.0) THEN
+                  IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
+     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
+                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(5)
+                    gexclus = CSGinc(5)/POPcs(0,INExc(nnuc))
+                  ENDIF  
+                  IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
+     &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
+                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(6)
+                    gexclus = CSGinc(6)/POPcs(0,INExc(nnuc))
+                  ENDIF  
+                  IF(NINT(A(1)-A(nnuc)).eq.4 .and. 
+     &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-4
+                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(3)
+                    gexclus = CSGinc(3)/POPcs(0,INExc(nnuc))
+                  ENDIF  
+
+                  IF(ginclus.gt.0) THEN
+C                   To add partial gamma spectra to inclusive
+                    nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C-------------------(continuum part - same for all particles)
+                    ftmp = ginclus/POPcs(0,INExc(nnuc))
+C                   write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
+                    DO ie = 1, nspec + 1 
+                       htmp = POPcse(0,nejc,ie,INExc(nnuc))
+                       if(htmp.LE.0.d0) cycle
+	                 CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp*ftmp
+                    ENDDO 
+                  ENDIF
                 ENDIF
                 
                 IF(nejc.GT.0) THEN
@@ -114,6 +147,7 @@ C------------------(continuum part - same for all particles)
                 ENDIF
                 IF(iloc.NE.0) CYCLE
 
+                ftmp = 1.d0 
                 IF (nejc.EQ.0) THEN
                   cejectile = 'gammas   '
                   iizaejc = 0
@@ -247,13 +281,13 @@ C
                      IF(check_DE(ie).le.0) cycle
                      DO nang = 1, NDANG
                        cseaprnt(ie,nang) = 
-     >                       POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
+     > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
      >                 cseaprnt(ie,nang)
                        if(ie.gt.1) then
                          check_DE(ie) = 
      >                      POPcse(0,nejc,ie,INExc(nnuc)) 
                        else
-                         check_DE(ie) = 
+ 	                   check_DE(ie) = 
      >                      0.5d0*POPcse(0,nejc,ie,INExc(nnuc)) 
                        endif
                      ENDDO
@@ -357,7 +391,6 @@ C                      espec is the outgoing energy corresponding to the level "
                      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
 
                      cmul = dtmp/(CSPrd(nnuc)-xsdisc)
-                     qout = qout + esum/(CSPrd(nnuc)-xsdisc)
 
                      WRITE(12,'(10x,
      &                ''Ave. <Q> '',A2,'' cont.spec '',G12.6,'' MeV'')') 
@@ -384,7 +417,7 @@ C------------------Exclusive DE spectra (gammas)
                    dtmp =0.d0          
                    esum =0.d0          
                    DO ie = 1, nspec + 1     
-                     htmp = POPcse(0,nejc,ie,INExc(nnuc))          
+                     htmp = POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
                      if(htmp.LE.0.d0) cycle
                      ftmp = 1.d0
                      if(ie.eq.1 .or. ie.eq.nspec+1) ftmp = 0.5d0
@@ -408,7 +441,6 @@ C------------------Exclusive DE spectra (gammas)
      &                 xsdisc
 
                      cmul = dtmp/(CSPrd(nnuc)-xsdisc)
-                     qout = qout + cmul*esum/dtmp
                      WRITE(12,'(2x,
      &                 ''Ave.  Q   g cont.spec '',G12.6,'' MeV'')') 
      &                 cmul*esum/dtmp  
@@ -422,35 +454,41 @@ C------------------Exclusive DE spectra (gammas)
      &                  dtmp 
                    WRITE(12,'(2x,
      &                  ''Popul. cross section  '',G12.6,'' mb'' )') 
-     &                  POPcs(nejc,INExc(nnuc))
+     &                  POPcs(nejc,INExc(nnuc))*gexclus
                    WRITE(12,*) 
 
                 ENDIF !  (nejc.GT.0)
  1530         ENDDO   ! over ejectiles
 
               qin     = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
-              qinaver = qin
+	        qinaver = qin
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
 
               IF (NINT(A(1)-A(Nnuc)).GT.4 )  GOTO 1550
+
               IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
      &            NINT(Z(1)-Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
+
               IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
      &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
+
               IF (NINT(A(1)-A(Nnuc)).EQ.3 .AND. 
      &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 3p
+
+C             IF (NINT(A(1)-A(Nnuc)).EQ.3 .AND. 
+C    &            NINT(Z(1)-Z(Nnuc)).EQ.2) GOTO 1550  ! pd
 
               IF(RECoil.gt.0) then
                 IF (NINT(A(1)-A(Nnuc)).GT.1 .AND. 
      &              NINT(A(1)-A(Nnuc)).LE.4) THEN 
 C                  (n,xn),(n,xp) x>1; (n,d),(n,t),(n,h),(n,a)
-                   CALL PRINT_RECOIL(nnuc,REAction(nnuc),qout)
+                   CALL PRINT_RECOIL(nnuc,REAction(nnuc))
 C                  write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
                 IF (NINT(A(1)-A(Nnuc)).EQ.1) THEN !  n or p emission
-                   CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc),qout)
+                   CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc))
 C                  write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
@@ -459,75 +497,6 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
               WRITE(12,*)
               WRITE(8,*)
               
-              IF(qinaver.EQ.qin) THEN
-
-                WRITE(12,*)
-                WRITE(12,'(1x,'' Total <Q> cont.spec '',G12.6,'' MeV'',
-     &               /, 1x, '' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &          qout, qin
-
-                WRITE(12,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
-     &           qin - qout, (qin - qout)/qin*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-                WRITE(8,*)
-                WRITE(8,'(1x,'' Total  Q  cont.spec '',G12.6,'' MeV'',/,
-     &                    1x,'' Qin (CMS)           '',G12.6,'' MeV'')') 
-     &          qout, qin
-
-                WRITE(8,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' decay'')')
-     &           qin - qout, (qin - qout)/qin*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-              ELSE
-
-                WRITE(12,
-     & '(1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
-     &   1x, ''  Qin (QPRod)        '',G12.6,'' MeV (Q='',G12.6,1H)/,
-     &   1x, '' <Qin> contr. react. '',G12.6,'' MeV (Q='',G12.6,1H))') 
-     & qout, qin, QPRod(nnuc), qinaver, QQInc(nnuc)/ncontr(nnuc)
-
-                WRITE(12,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
-     &           qin - qout, (qin - qout)/qin*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-                WRITE(12,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
-     &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-                WRITE(8,
-     & '(1x, '' Total <Q> cont.spec '',G12.6,'' MeV'',/,
-     &   1x, ''  Qin (QPRod)        '',G12.6,'' MeV (Q='',G12.6,1H)/,
-     &   1x, '' <Qin> contr. react. '',G12.6,'' MeV (Q='',G12.6,1H))') 
-     & qout, qin, QPRod(nnuc), qinaver, QQInc(nnuc)/ncontr(nnuc)
-
-                WRITE(8,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
-     &           qin - qout, (qin - qout)/qin*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-                WRITE(8,'( 1x,
-     &         '' Energy balance      '',G12.6,'' MeV ('',
-     &         F6.2,''%)  at E(lab)='',G12.6,
-     &         '' MeV for '',I3,''-'',A2,''-'',I3,'' production'')')
-     &           qinaver - qout, (qinaver - qout)/qinaver*100, EINl,
-     &           INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc))   
-
-              ENDIF
            ENDIF ! IF (CSPrd(nnuc).GT.0.0D0)
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 

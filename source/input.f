@@ -1,6 +1,6 @@
-!cc   * $Rev: 4504 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+!cc   * $Rev: 4520 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -790,14 +790,14 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
-                          ENDfp(1,nnuc) = 1 
-                          ENDfp(0,nnuc) = 1 
+				  ENDfp(1,nnuc) = 1 
+				  ENDfp(0,nnuc) = 1 
                   endif
 C                 
 C                 (n,p),(n,2p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
-                          ENDfp(2,nnuc) = 1 
-                          ENDfp(0,nnuc) = 1 
+				  ENDfp(2,nnuc) = 1 
+				  ENDfp(0,nnuc) = 1 
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
@@ -848,6 +848,7 @@ C                    From n,np   to   n,d
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
 C                    (n,np),(n,pn),(n,d)
+                     ENDfp(0,nnuc) = 1 
                      ENDfp(1,nnuc) = 1 
                      ENDfp(2,nnuc) = 1 
                      ENDfp(4,nnuc) = 1 
@@ -859,6 +860,7 @@ C                    From n,2np   to   n,t
                      REAction(nnuc)(iend + 1:iend + 1) = 't'
                      iend = iend + 1
 C                    (n,t)
+                     ENDfp(0,nnuc) = 1 
                      ENDfp(5,nnuc) = 1 
                   ENDIF
 
@@ -868,6 +870,7 @@ C                    From n,n2p   to   n,he3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
 C                    (n,he3)
+                     ENDfp(0,nnuc) = 1 
                      ENDfp(6,nnuc) = 1 
                   ENDIF
 
@@ -877,6 +880,7 @@ C                    From n,2n2p   to   n,a
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
 C                    (n,a)
+                     ENDfp(0,nnuc) = 1 
                      ENDfp(3,nnuc) = 1 
                   ENDIF
 

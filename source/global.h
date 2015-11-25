@@ -1,6 +1,6 @@
-! $Rev: 4504 $
-! $Author: mherman $
-! $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+! $Rev: 4520 $
+! $Author: rcapote $
+! $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -35,7 +35,7 @@
      &                 CSEdbk(ndecse,0:ndejc), DEF(ndlw,0:ndnuc),       &
      &                 DEFfis(nfparab), DEFga, DEFgp, DEFgw, DEFpar,    &
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,    &
-     &                 DEFnor(0:NDNUC), DOBs(0:ndnuc),                  &
+     &                 DEFnor(0:NDNUC), DOBs(0:ndnuc), CSGinc(ndejc),   &
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro,           &
      &                 DV, D_Def(ndcollev,nddefcc),                     &
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,&
@@ -82,7 +82,7 @@
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
      &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
      &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX),iugMax(0:ndnuc)
-       
+	 
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&
@@ -253,7 +253,7 @@
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
      &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
-     &                 RECcse, POPcon, POPdis, EHRtw, CSPopul,          &
+     &                 RECcse, POPcon, POPdis, EHRtw, CSPopul, CSGinc,  &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
