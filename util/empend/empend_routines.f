@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-11-24 20:17:25 +0100 (Di, 24 Nov 2015) $
+Ccc   * $Date: 2015-11-26 10:19:47 +0100 (Do, 26 Nov 2015) $
 
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
@@ -1140,21 +1140,40 @@ C* Consider eligible reactions
      &     (MT.GE. 91 .AND. MT.LT.200).OR.
      &     (MT.EQ.649 .OR.  MT.EQ.699 .OR.
      &      MT.EQ.749 .OR.  MT.EQ.799 .OR. MT.EQ.849) ) THEN
+C* Identify the reaction product JZA
+          CALL MTTOZA(IZI,IZA,JZA,MT)
 C* Compare MT values in MT6 for reactions having differential data
-          M5=1
+          M5 =1
           DO J6=1,NT6
-            IF(MT.EQ.MT6(J6)) M5=0
+            IF(MT .EQ.MT6(J6)) M5=0
           END DO
-          IF(M5.EQ.1) THEN
-C* MT with no differential data flagged for summation into MT5
+C*
+C* MT with no differential data (M5=1) flagged for summation into MT5
 C* and inclusion in MF10 (set LFS to 5)
-            CALL MTTOZA(IZI,IZA,JZA,MT)
+          IF(M5.EQ.1) THEN
+C* Check for the existence of residual production index
+            JX =0
+            MTJ=0
+            IF(JZA.GT.0) MTJ=10*JZA+5
+            DO J=1,NXS
+              IF(MTJ.EQ.MTH(J)) JX=J
+            END DO
 c...
-c...            PRINT *,'IZI,IZA,JZA,MT',IZI,IZA,JZA,MT
+c...        PRINT *,'IZI,IZA,JZA,MT,IX,JX,MTJ',IZI,IZA,JZA,MT,IX,JX,MTJ
 c...
-            IF(JZA.GT.0) MT=10*JZA+5
-C           MT=-MT
-            MTH(IX)=MT
+            IF(JX.GT.0 .AND. JX.NE.IX) THEN
+c...
+c...          print *,'     flag',mth(ix),' for MF10 only'
+c...
+              MTH(IX)=-MTH(IX)
+              DO J=1,NPT
+                XSC(J,JX)=XSC(J,JX)+XSC(J,IX)
+              END DO
+            ELSE
+              IF(JZA.GT.0) MT=10*JZA+5
+              print *,'     redefine',mth(ix),' to',mt
+              MTH(IX)=MT
+            END IF
           END IF
         END IF
 C* Count any other reactions that need to be added to MT 5
@@ -1244,7 +1263,7 @@ C* Create MT 207 if not present (flagged -ve for no spectra)
         QQI(I207)=-1.E12
       END IF
 C* Add contribution of reactions without differential data to MT5
-C* (identified by MT=10*ZA+LFS, LFS>0).
+C* (identified by MT=10*ZA+LFS, LFS>=5).
       DO IX=1,NXS
         MT=MTH(IX)
         M5=0
@@ -2965,14 +2984,14 @@ c...    print *,'ipop2,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
 C...
         IF(XS.LE.0) GO TO 322
 C*      -- Check for split production by reactions
-        IF(ABS(XSPROD-XS).GT.XSPROD/500) THEN
-          WRITE(LTT,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
-     &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
-     &       ,' split into MT',MT,' x.s.',XS
-          WRITE(LER,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
-     &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
-     &       ,' split into MT',MT,' x.s.',XS,' b'
-        END IF
+C...    IF(ABS(XSPROD-XS).GT.XSPROD/500) THEN
+C...      WRITE(LTT,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
+C... &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
+C... &       ,' split into MT',MT,' x.s.',XS
+C...      WRITE(LER,'(A,1P,E10.3,A,E10.3,A,I6,A,I6,A,E10.3,A)')
+C... &        ' Ein',EE,' eV Prod.x.s',XSPROD,' of',JZA
+C... &       ,' split into MT',MT,' x.s.',XS,' b'
+C...    END IF
         XSSUM=XSSUM+XS
       END IF
 C* Reconstruct Q-values from MT and the binding energies
@@ -4355,37 +4374,56 @@ c...          print *,'      Processed energy ne6',ne6,ee,eth
 c...          print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
 c...
       IF(MT6.LT.0) GO TO 210
-C* Particle multiplicity for MT5 or gamma from integral/x.s. ratio
-      IF(JT6.EQ.5 .OR. IZAP.EQ.0) THEN
+C* Particle multiplicity for gammas and light particles in MT 5
+C* from integral/x.s. ratio
+      IF(IZAP.EQ.0 .OR. (IZAP.LE.2004 .AND. JT6.EQ.5) ) THEN
         NP=NE6
-C* Move first energy to lower boundary, if necessary
+C*      -- Move first energy to lower boundary, if necessary
         EIS(NE6)=EE
           IF(IXS3.NE.0) THEN
             YLD(NE6)=(SPC/XS3)
           ELSE
             YLD(NE6)=1
           END IF
+      ELSE IF(IZAP.GT.2004 .AND. JT6.EQ.5) THEN
+C*      -- Recoil multiplicities in MT 5 from residual/x.s. ratio
+        NP=NE6
+C*      -- Move first energy to lower boundary, if necessary
+        EIS(NE6)=EE
+        YLD(NE6)=(SPC/XS3)
+        IFRST=0
+        DO I=1,NXS
+          IF(MTH(I).EQ.IZAP*10+5) THEN
+C*          -- Find residual production cross section
+            XSZ=XSC(JE3,I)
+            IF(IFIRST.EQ.0 .AND. XSZ.LT.1.E-8) XSZ=0
+            IF(XSZ.GT.0) IFIRST=I
+            YLD(NE6)=XSZ/XS3
+C...
+c...        IF(izap.eq.24053)
+c... &      print *,'zap,ee,spc,xs3,ne6',izap,ee,spc,xs3,ne6
+c... &             ,XSZ
+C...
+          END IF
+        END DO
+      END IF
+      IF(JT6.NE.5 .AND. (IZAP.EQ.1 .AND.XS3.GT.0 ) ) THEN
+C*       -- Check for consistency between the spectrum integral and
+C*          the cross section (neutrons only, exclude fission & MT5)
+         IF(YL0.GT.1E-12) THEN
+           XSP=SPC/YL0
+         ELSE
+           XSP=0
+         END IF
 c...
-c...        print *,'zap,ee,spc,xs3,ne6',izap,ee,spc,xs3,ne6
+c...          print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
 c...
-      ELSE
-C* Check for consistency (neutrons only, exclude fission)
-        IF(IZAP.EQ.1 .AND.XS3.GT.0 ) THEN
-           IF(YL0.GT.1E-12) THEN
-             XSP=SPC/YL0
-           ELSE
-             XSP=0
-           END IF
-c...
-c...            print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
-c...
-           DFP=100*(XSP-XS3)/XS3
-           IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
-             DFP=MIN(DFP,9999.9)
-             WRITE(LTT,909) MT,EE,XS3,DFP
-             WRITE(LER,909) MT,EE,XS3,DFP
-           END IF
-        END IF
+         DFP=100*(XSP-XS3)/XS3
+         IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
+           DFP=MIN(DFP,9999.9)
+           WRITE(LTT,909) MT,EE,XS3,DFP
+           WRITE(LER,909) MT,EE,XS3,DFP
+         END IF
       END IF
       GO TO 210
 C*
