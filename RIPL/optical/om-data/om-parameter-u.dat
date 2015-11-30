@@ -13914,7 +13914,7 @@ rgy used. Soft rotor. OPTMAN should be used.
 
       .001  200.0000
    26   26
-   54   56
+   54   58
     3    0    1    1    3
     1
    200.000
@@ -14017,7 +14017,7 @@ d. Equivalent to 614 with rigid rotor couplings.
 
       .001  200.0000
    26   26
-   54   56
+   57   57
     1    0    1    1    3
     1
    200.000
