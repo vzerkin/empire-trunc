@@ -51,12 +51,16 @@ mv -f C4.TMP C4.DAT
 
 # RUN c4sort the second time TO SORT C4 DATA   
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
-mv C4.SRT $file.c4
 echo ' '
-if [ -s $file.c4 ]; then
+if [ -s C4.SRT ]; then
+  mv C4.SRT $file.c4
   echo 'EXFOR sorted data in computational (c4) format are stored in : '$file.c4
 else
-  echo 'File with EXFOR data in computational (c4) format is EMPTY'
+  mv C4.DAT $file.c4
+  echo 'ERROR: File with EXFOR data in computational (c4) format is EMPTY or '
+  echo 'ERROR: c4sort crashed. '
+  echo 'ERROR: C4 file NOT sorted.'
+  read
 fi
 echo ' '
 rm ANG_MU.INP C4SORT.INP C4SORT.TMP C4.DAT iaea-std.dat c4sort.scr C4SORT.TM2
