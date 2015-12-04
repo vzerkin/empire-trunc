@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4509 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-22 08:30:18 +0100 (So, 22 Nov 2015) $
+Ccc   * $Rev: 4527 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-04 12:16:59 +0100 (Fr, 04 Dez 2015) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -561,8 +561,8 @@ Ccc
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
-      DOUBLE PRECISION ELTl(NDLW) !,ELTlj(NDLW,3)
-      COMMON /ELASTIC/ ELTl       !,ELTlj
+      DOUBLE PRECISION ELTl(NDLW),ELTlj(NDLW,3)
+      COMMON /ELASTIC/ ELTl,ELTlj
 C
 C Dummy arguments
 C
