@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4528 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -227,13 +227,6 @@ C
       nspec = kmax - 1
       IF(nspec.LT.1) RETURN
 
-C     dtot  = 0.d0
-C     dincl = 0.d0
-C     DO nnuc = 1, NNUcd
-C       dtot = dtot + CSEmis(nejc,nnuc)
-C       if (ENDf(nnuc).NE.1) dincl = dincl + CSEmis(nejc,nnuc)
-C     ENDDO
-
       IF (Nejc.EQ.0) THEN
 C
          WRITE (8,*) ' Spectrum of gammas   (z,x)  ZAP=     0'
@@ -246,9 +239,8 @@ C
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
-C        WRITE (8,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
          WRITE (8,'(F9.4,E15.5)') 
-     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
+     &     min(FLOAT(nspec)*DE,EMAx(1)), max(0.d0,CSE(nspec+1,0,0))
          WRITE(8,*) 
          WRITE(8,'(2x,
      &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
@@ -269,9 +261,8 @@ C
            WRITE (12,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
-C        WRITE (12,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
          WRITE (12,'(F9.4,E15.5)') 
-     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
+     &     min(EMAx(1),FLOAT(nspec)*DE), max(0.d0,CSE(nspec+1,0,0))
          WRITE(12,*) 
          WRITE(12,'(2x,
      &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
@@ -300,19 +291,23 @@ C        IF ( AEJc(Nejc).GT.4.0D0) THEN
 C         WRITE (8,99010) ia, SYMbe(Nejc)
 C99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
 C        ENDIF
+         recorp = 1.d0 
+         IF (RECoil.GT.0) recorp=(1.d0+EJMass(nejc)/AMAss(1))
+
          WRITE (8,*) ' '
          WRITE (8,'(''    Energy    mb/MeV'')')
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
            if(ftmp.le.0.d0) cycle
-           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
+           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
          ENDDO
 C--------Exact endpoint
-C        WRITE (8,'(F9.4,E15.5)') EMAx(1), max(0.d0,CSE(nspec+1,0,0))
          WRITE (8,'(F9.4,E15.5)') 
-     &     FLOAT(nspec)*DE, max(0.d0,CSE(nspec+1,0,0))
-
+     &     FLOAT(nspec)*DE/recorp, max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
+C        WRITE (8,'(F9.4,E15.5)') 
+C    &     min((EMAx(1)-Q(nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+C    &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
          WRITE(8,*) 
          WRITE(8,'(2x,
      &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
@@ -325,10 +320,6 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
          WRITE (8,*) ' '    
          WRITE (8,'(1x,'' Integrated spectrum   '',G12.6,
      &     '' mb   (inclusive)'')') totspec*DE      
-
-
-
-
 C
 C        DOUBLE DIFFERENTIAL PARTICLE SPECTRA (Inclusive)
 C
@@ -352,9 +343,6 @@ C        ENDIF
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
-         recorp = 1.d0 
-         IF (RECoil.GT.0) recorp=(1.d0+EJMass(nejc)/AMAss(1))
-
          cseaprnt = 0.d0
          DO ie = 1, nspec + 1
          if(CSE(ie,nejc,0).le.0.d0) cycle
@@ -389,7 +377,7 @@ C          Subtract direct contribution to CM emission spectrum
 C
 C--------Inclusive DDX spectrum 
          check_DE = 0.d0
-         DO ie = 1, nspec + 1
+         DO ie = 1, nspec ! + 1
            if(CSE(ie,nejc,0).le.0.d0) cycle
            csum = 0.d0
            DO nang = 1, NDANG  ! over angles
@@ -399,14 +387,14 @@ C--------Inclusive DDX spectrum
            if(ie.le.nspec)
      &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
-     &     (itmp*cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+     &     (     cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
+         ! exact DDX spectrum endpoint
          WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
          ! exact DDX spectrum endpoint
-C    &      (EMAx(1)-Q(nejc,1))/recorp,
+C    &      min((EMAx(1)-Q(nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
      &      FLOAT(nspec)*DE/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
-
          WRITE (12,*) ' '
          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS cor
      &rected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)')
@@ -425,13 +413,14 @@ C    &      (EMAx(1)-Q(nejc,1))/recorp,
            itmp = 1
            if(ie.eq.1) itmp = 2
            WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
-     &       *DE/recorp, htmp*recorp/itmp, check_DE(ie)*recorp/itmp,
-     &       (htmp - check_DE(ie)) * recorp /itmp , 
+     &       *DE/recorp, htmp*recorp      , check_DE(ie)*recorp     ,
+C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
+     &       (htmp - check_DE(ie)) * recorp, !/itmp , 
      &       (htmp - check_DE(ie)) / htmp * 100
            ftmp = ftmp + check_DE(ie)/itmp 
          ENDDO
-         WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
 C        ! exact endpoint
+         WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
 C    &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
      &     FLOAT(nspec)*DE/recorp,CSE(nspec+1,nejc,0)*recorp,
      &     check_DE(nspec+1)*recorp,
@@ -455,9 +444,6 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &     ftmp*DE      
       ENDIF
           
-C     if (dincl.gt.0) 
-C    &   WRITE (12,'(1x,'' Total inclus. emiss.  '',G12.6,'' mb'')')
-C    &   dincl      
       IF(Nejc.ne.0) THEN
         WRITE (8,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')

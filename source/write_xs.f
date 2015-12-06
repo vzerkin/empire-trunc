@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4520 $
+$DEBUG
+Ccc   * $Rev: 4528 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -16,11 +17,12 @@ C
 C     local variables
 C
       CHARACTER*9 cejectile
-      INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc
-      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver
+      INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc,itmp
+      INTEGER nspec_np,iemm
+      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,csnp,emax_np
       DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1,ginclus,gexclus
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-      DOUBLE PRECISION, ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
+      DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:),csenp(:)
 
       if(allocated(cseaprnt)) deallocate(cseaprnt)
  
@@ -44,6 +46,18 @@ C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
      &            'ERROR: Insufficient memory for check_DE: write_xs()!'
         STOP
      &            'ERROR: Insufficient memory for check_DE: write_xs()!'
+      ENDIF
+
+      if(allocated(csenp)) deallocate(csenp)
+
+      ALLOCATE(csenp(ndecse),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(8,*)  
+     &            'ERROR: Insufficient memory for csenp: write_xs()!'
+        WRITE(12,*) 
+     &            'ERROR: Insufficient memory for csenp: write_xs()!'
+        STOP
+     &            'ERROR: Insufficient memory for csenp: write_xs()!'
       ENDIF
 C
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
@@ -86,6 +100,8 @@ C           write(*,*)
 C        ENDIF 
 C	ENDDO
 
+      csnp = 0.d0
+      csenp = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.0.0D0) THEN
@@ -99,16 +115,21 @@ C                  To add spectra to inclusive
                    nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
 C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 
-                     htmp = POPcse(0,nejc,ie,INExc(nnuc))
-                     if(htmp.LE.0.d0) cycle
-	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp
+	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+     &                                POPcse(0,nejc,ie,INExc(nnuc))
                    ENDDO 
                    CYCLE
                 ENDIF
 
                 ginclus = 0.d0
                 gexclus = 1.d0
+                CSnp = 0.d0
                 IF(ENDfp(nejc,nnuc).EQ.1 .and. nejc.eq.0) THEN
+                  IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
+     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
+                    gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
+                  ENDIF  
                   IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
      &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
                     ginclus = POPcs(0,INExc(nnuc)) - CSGinc(5)
@@ -126,19 +147,39 @@ C------------------(continuum part - same for all particles)
                   ENDIF  
 
                   IF(ginclus.gt.0) THEN
-C                   To add partial gamma spectra to inclusive
-                    nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-C-------------------(continuum part - same for all particles)
-                    ftmp = ginclus/POPcs(0,INExc(nnuc))
-C                   write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
-                    DO ie = 1, nspec + 1 
-                       htmp = POPcse(0,nejc,ie,INExc(nnuc))
-                       if(htmp.LE.0.d0) cycle
-	                 CSE(ie,nejc,0) = CSE(ie,nejc,0) + htmp*ftmp
-                    ENDDO 
+                    IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
+     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+C                     To split gamma spectra in (z,d) and (z,np+pn)
+                      nspec    = min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+                      nspec_np = 
+     &                 min(INT((EMAx(MT91) -Q(2,MT91))/DE) + 1,NDECSE-1)
+C	                write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
+C	                write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
+C	                write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
+C                     write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)					
+
+C---------------------(continuum part - same for all particles)
+                      ftmp = ginclus/POPcs(0,INExc(nnuc))
+C                     write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
+                      DO ie = 1, nspec_np
+                        CSEnp(ie) =  POPcse(0,nejc,ie,INExc(nnuc))*ftmp
+                      ENDDO 
+                    ELSE
+C                     To add partial gamma spectra to inclusive
+                      nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C---------------------(continuum part - same for all particles)
+                      ftmp = ginclus/POPcs(0,INExc(nnuc))
+C                     write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
+                      DO ie = 1, nspec + 1 
+	                   CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+     &                               POPcse(0,nejc,ie,INExc(nnuc))*ftmp
+                      ENDDO 
+                    ENDIF
                   ENDIF
                 ENDIF
-                
+C 
+C               nnur is the decaying compound: nnur = nnuc + nejc
+C
                 IF(nejc.GT.0) THEN
                   CALL WHERE(IZA(nnuc)+IZAejc(nejc),nnur,iloc)
                 ELSE
@@ -177,17 +218,24 @@ C                   write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
 C---------------Double the first bin x-sec to preserve integral in EMPEND
                 POPcse(0, nejc, 1, INExc(nnuc)) =  
      &                  POPcse(0, nejc, 1, INExc(nnuc))*2
-                WRITE (12,*) ' '
-                WRITE (12,*) ' Spectrum of ', cejectile,
-     &                         REAction(nnuc), ' ZAP= ', iizaejc
+
 C
 C---------------Exclusive DDX spectra (all particles but gammas)
                 recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C               nspec= min(INT(EMAx(nnuc)/DE)    ,NDECSE-1)
+C-------------------------------------------------------------------
+C               A different way of calculating the Q-value using the 
+C               residual and ejectile
+C               nspec= min(INT((EMAx(nnur)-Q(nejc,nnur))/DE) + 1,
+C    &                     NDECSE-1)
 C               dang = PI/FLOAT(NDANG - 1)
                 IF (nejc.GT.0) THEN
-C---------------recorp is a recoil correction factor defined 1+Ap/Ar that
-C---------------multiplies cross sections and divides outgoing energies
+                  WRITE (12,*) ' '
+                  WRITE (12,*) ' Spectrum of ', cejectile,
+     &                         REAction(nnuc), ' ZAP= ', iizaejc
+C-----------------recorp is a recoil correction factor defined 1+Ap/Ar that
+C-----------------multiplies cross sections and divides outgoing energies
                   IF (RECoil.GT.0) 
      &              recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
                    WRITE (12,
@@ -214,11 +262,6 @@ c                       We only sum over discrete levels !
 c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
                         csum = 0.d0
-C                       DO nang = 2, NDANG  ! over angles
-C                         csum = csum + (CSAlev(nang,il,nejc) 
-C    &                                  + CSAlev(nang-1,il,nejc))
-C    &                         * 0.5d0 * (CAngler(nang)-CANgler(nang-1))
-C                       ENDDO
                         DO nang = 1, NDANG  ! over angles
                           csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
                         ENDDO
@@ -235,11 +278,12 @@ C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 ! reconstruct continuum DDX spectrum
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))
                      if(htmp.LE.0.d0) cycle
-                     ftmp = 1.d0
-C                    if(ie.eq.1 .or. ie.eq.nspec) ftmp=0.5d0
-                     if(ie.eq.1 .or. ie.eq.nspec + 1) ftmp=0.5d0
-                     dtmp = dtmp + htmp*DE*ftmp
-                     esum = esum + htmp*DE*ftmp*FLOAT(ie - 1)*DE/recorp
+                     itmp = 1
+C                    if(ie.eq.1 .or. ie.eq.nspec + 1) itmp=2
+                     if(ie.eq.1) itmp=2
+                     dtmp = dtmp + htmp*DE/itmp
+                     esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE/recorp
+
                      csum = 0.d0
                      IF(LHMs.GT.0 .AND. (nejc.EQ.1 .OR. nejc.EQ.2)) THEN
 C----------------------Check whether integral over angles agrees with DE spectra
@@ -256,43 +300,36 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
                        ftmp = max( (POPcse(0,nejc,ie,INExc(nnuc)) -
      &                  CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,INExc(nnuc)))  
      &                  /PIx4,0.d0)
-
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
      &                     ftmp + CSEa(ie,nang,nejc,1)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
-
                        ENDDO
                      ENDIF
 
-                     if(ie.ne.1) then
-                       check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
-                     else
-                       check_DE(ie) =       PI*csum*PI/(NDAng - 1) ! PI/90.d0
-                     endif
+                     check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
+C                    if(ie.ne.1) then
+C                      check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
+C                    else
+C                      check_DE(ie) =       PI*csum*PI/(NDAng - 1) ! PI/90.d0
+C                    endif
                    ENDDO
 C
 C                  This is a patch to correct the printed DDXS
 C                  for DWBA to the continuum
 C
-                   if(nejc.eq.7) then
-                    DO ie = 1, nspec 
-                     IF(check_DE(ie).le.0) cycle
-                     DO nang = 1, NDANG
-                       cseaprnt(ie,nang) = 
-     > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
-     >                 cseaprnt(ie,nang)
-                       if(ie.gt.1) then
-                         check_DE(ie) = 
-     >                      POPcse(0,nejc,ie,INExc(nnuc)) 
-                       else
- 	                   check_DE(ie) = 
-     >                      0.5d0*POPcse(0,nejc,ie,INExc(nnuc)) 
-                       endif
-                     ENDDO
-                    ENDDO
-                   endif
+C                  if(nejc.eq.7) then
+C                   DO ie = 1, nspec + 1
+C                    IF(check_DE(ie).le.0) cycle
+C                     DO nang = 1, NDANG
+C                      cseaprnt(ie,nang) = 
+C    > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
+C    >                 cseaprnt(ie,nang)
+C                      check_DE(ie) = POPcse(0,nejc,ie,INExc(nnuc)) 
+C                    ENDDO
+C                   ENDDO
+C                  endif
 
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
@@ -304,7 +341,11 @@ C
                    ENDDO
                                      ! exact DDX spectrum endpoint
                    WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
-     &               EMAx(nnuc)/recorp,
+C                    A different way of calculating the Q-value using the 
+C                    residual and ejectile
+C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
+     &               min(EMAx(nnuc)/recorp,
+     &               FLOAT(nspec)*DE/recorp),
      &                (cseaprnt(nspec + 1,nang)*recorp,nang = 1,NDANG)
                    WRITE (12,*) ' '    
 C
@@ -327,8 +368,8 @@ C                      espec is the outgoing energy corresponding to the level "
                        IF (espec.LT.0) cycle 
                        WRITE(12, 
      &                   '(4x,I3,4x,F10.5,3(E14.6,2x),F6.2,4x,F7.4)')  
-     &                   il, -espec, check_DL(il)             ,
-     &                    CSDirsav(il,nejc)               ,
+     &                   il,  -espec, check_DL(il),
+     &                    CSDirsav(il,nejc),
      &                   (check_DL(il)-CSDirsav(il,nejc)),
      &                   (check_DL(il)-CSDirsav(il,nejc))/
      &                    check_DL(il)*100,  ELV(il,nnuc)        
@@ -352,23 +393,25 @@ C                      espec is the outgoing energy corresponding to the level "
                    csum1 = 0.d0
                    DO ie = 1, nspec 
                       ftmp = POPcse(0,nejc,ie,INExc(nnuc))             
-                      if (ie.eq.1) ftmp = ftmp*0.5d0
                       if(ftmp.LE.0.d0) cycle
+                      itmp = 1 
+                      if (ie.eq.1) itmp = 2
                       WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
      &                FLOAT(ie - 1)*DE/recorp, ftmp*recorp, 
      &                check_DE(ie)*recorp,
      &                (ftmp - check_DE(ie)) * recorp, 
      &                (ftmp - check_DE(ie)) / ftmp * 100
-                      csum  = csum  + ftmp
-                      if (ie.eq.1) then
-                        csum1 = csum1 + check_DE(ie)*0.5d0
-                      else
-                        csum1 = csum1 + check_DE(ie)
-                      endif 
+                      csum  = csum  + ftmp/itmp
+                      csum1 = csum1 + check_DE(ie)/itmp
                    ENDDO
-                                        ! exact endpoint
+                   ! exact endpoint
                    WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
-     &               EMAx(nnuc)/recorp,max(0.d0,POPcse(0,nejc,nspec+1,
+C                    A different way of calculating the Q-value using the 
+C                    residual and ejectile
+C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
+     &               min(EMAx(nnuc)/recorp,
+     &                   FLOAT(nspec)*DE/recorp),
+     &               max(0.d0,POPcse(0,nejc,nspec+1,
      &               INExc(nnuc)))*recorp,
      &               check_DE(nspec+1)*recorp,
      &               ( max(0.d0,POPcse(0,nejc,nspec+1,INExc(nnuc))) - 
@@ -411,21 +454,134 @@ C                      espec is the outgoing energy corresponding to the level "
                 ELSE !  (nejc=0) GAMMAS
 C
 C------------------Exclusive DE spectra (gammas)
+C
+C	             write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
+C	             write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
+C	             write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
+C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
+					
+                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. !	gammas 
+     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! from deuteron residual 
+C
+C                     To split gamma spectra in (z,d) and (z,np+pn)
+C
+C                     First, gammas from (z,np+pn) 
+                      WRITE (12,*) ' '
+                      WRITE (12,*) ' Spectrum of ', cejectile,
+     &                       '(z,np)               ', ' ZAP= ', iizaejc
+                      emax_np  = EMAx(MT91) -Q(2,MT91)
+                      nspec_np = min(INT(emax_np/DE) + 1,NDECSE-1)
+                      WRITE (12,*) ' '
+                      WRITE (12,'(''    Energy    mb/MeV'')')
+                      WRITE (12,*) ' '
+                      dtmp =0.d0          
+                      esum =0.d0          
+                      DO ie = 1, nspec_np +1 !       
+                        htmp = CSEnp(ie)  ! POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
+                        if(htmp.LE.0.d0) cycle
+                        itmp = 1
+                        if(ie.eq.1) itmp = 2
+                        dtmp = dtmp + htmp*DE/itmp
+                        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE,htmp
+                      ENDDO
+                      WRITE (12,'(F10.5,E14.5)') 
+     &                    min(emax_np,FLOAT(nspec_np+1)*DE), 0.d0
+                      if(dtmp.gt.0) then
+                        csnp = dtmp
+                        WRITE(12,*) 
+                        WRITE(12,'(2x,'' g multiplicity (np)  '',
+     &                  G12.6)') dtmp/CSPrd(nnuc)
+                        WRITE(12,*) 
+C                       WRITE(12,'(2x,
+C    &                    ''Total Integr.(gamma)np'',G12.6,'' mb'' )') 
+C    &                  csnp
+ 					endif
+C                     Second, remaining gammas from (z,d) 
+                      WRITE (12,*) ' '
+                      WRITE (12,*) ' Spectrum of ', cejectile,
+     &                         REAction(nnuc), ' ZAP= ', iizaejc
+                      nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+                      WRITE (12,*) ' '
+                      WRITE (12,'(''    Energy    mb/MeV             (z,
+     &np)       (z,np+pn+d)'')')
+                      WRITE (12,*) ' '
+                      dtmp =0.d0          
+                      esum =0.d0 
+					iemm = 1         
+                      DO ie = 1, nspec + 1        
+                        htmp = POPcse(0,nejc,ie,INExc(nnuc))-CSEnp(ie)
+                        if(htmp.LE.0.d0) cycle
+                        iemm = ie - 1
+                        itmp = 1
+                        if(ie.eq.1) itmp = 2
+                        dtmp = dtmp + htmp*DE/itmp
+                        esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
+                        WRITE (12,'(F10.5,E14.5,2x,E14.5,2x,E14.5)') 
+     &                    FLOAT(ie - 1)*DE,htmp,
+     &                    CSEnp(ie),POPcse(0,nejc,ie,INExc(nnuc))
+                      ENDDO
+C                       A different way of calculating the Q-value using the 
+C                       residual and ejectile
+C    &                  min((EMAx(nnur)-Q(nejc,nnur))/recorp,
+                      WRITE (12,'(F10.5,E14.5,2x,E14.5,2x,E14.5)') 
+     &                 min(EMAx(nnuc),FLOAT(iemm+1)*DE),0.d0,0.d0,0.d0  
+                      WRITE(12,*) 
+                      if(dtmp.gt.0) then
+                        WRITE(12,'(2x,
+     &                  ''Ave.  E   g cont.spec '',G12.6,'' MeV  for '',
+     &                    I3,''-'',A2,''-'',I3,A21)') esum/dtmp,
+     &                    INT(Z(nnuc)),SYMb(nnuc),
+     &                    INT(A(nnuc)),REAction(nnuc) 
+                       cmul = dtmp/CSPrd(nnuc)
+                       WRITE(12,'(2x,
+     &                  ''Ave.  Q   g cont.spec '',G12.6,'' MeV'')') 
+     &                    cmul*esum/dtmp  
+                       WRITE(12,'(2x,'' g multiplicity (d)   '',G12.6)') 
+     &                    cmul
+                      endif
+                      WRITE(12,*) 
+                      WRITE(12,'(2x,
+     &                  ''Total Integr.(gamma)np'',G12.6,'' mb'' )') 
+     &                  csnp 
+                      WRITE(12,'(2x,
+     &                  ''Total Integr.(gamma)d '',G12.6,'' mb'' )') 
+     &                  dtmp 
+                      WRITE(12,'(2x,
+     &                  ''Total Integr.(gamma)  '',G12.6,'' mb'' )') 
+     &                  csnp+dtmp 
+                      WRITE(12,'(2x,
+     &                  ''Popul. cross section  '',G12.6,'' mb'' )') 
+     &                  POPcs(nejc,INExc(nnuc))
+
+                      GOTO 1515 ! skipping other gammas for this reaction
+                   ENDIF
+
+                   WRITE (12,*) ' '
+                   WRITE (12,*) ' Spectrum of ', cejectile,
+     &                         REAction(nnuc), ' ZAP= ', iizaejc
                    WRITE (12,*) ' '
                    WRITE (12,'(''    Energy    mb/MeV'')')
                    WRITE (12,*) ' '
                    dtmp =0.d0          
                    esum =0.d0          
-                   DO ie = 1, nspec + 1     
+                   iemm = 1         
+                   DO ie = 1, nspec  !       
                      htmp = POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
                      if(htmp.LE.0.d0) cycle
-                     ftmp = 1.d0
-                     if(ie.eq.1 .or. ie.eq.nspec+1) ftmp = 0.5d0
-                     dtmp = dtmp + htmp*DE*ftmp
-                     esum = esum + htmp*DE*ftmp*FLOAT(ie - 1)*DE
+                     iemm = ie -1
+                     itmp = 1
+                     if(ie.eq.1) itmp = 2
+                     dtmp = dtmp + htmp*DE/itmp
+                     esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
                      WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE, htmp
                    ENDDO
-                   WRITE (12,'(F10.5,E14.5)') EMAx(nnuc),  0.d0
+C                  WRITE (12,'(F10.5,E14.5)') EMAx(nnuc), 0.d0
+                   WRITE (12,'(F10.5,E14.5)') 
+C                    A different way of calculating the Q-value using the 
+C                    residual and ejectile
+C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
+     &               min(EMAx(nnuc),FLOAT(iemm+1)*DE),
+     &               POPcse(0,nejc,nspec+1,INExc(nnuc))*gexclus
                    if(dtmp.gt.0) then
                      WRITE(12,*) 
                      WRITE(12,'(2x,
@@ -455,7 +611,7 @@ C------------------Exclusive DE spectra (gammas)
                    WRITE(12,'(2x,
      &                  ''Popul. cross section  '',G12.6,'' mb'' )') 
      &                  POPcs(nejc,INExc(nnuc))*gexclus
-                   WRITE(12,*) 
+ 1515              WRITE(12,*) 
 
                 ENDIF !  (nejc.GT.0)
  1530         ENDDO   ! over ejectiles
@@ -508,6 +664,7 @@ C********************************************
 
       if(allocated(cseaprnt)) deallocate(cseaprnt)
       if(allocated(check_DE)) deallocate(check_DE)
+      if(allocated(CSEnp)) deallocate(CSEnp)
 
 C********************************************
       CALL print_PFNS()

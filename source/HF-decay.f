@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4520 $
+Ccc   * $Rev: 4528 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -953,6 +953,11 @@ C    &                          POPcs(nejc,INExc(nnuc))
 
                IF (nejc.eq.0) THEN
                  ftmp = -1.d0
+                 IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
+     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                    ftmp = POPcs(4,INExc(nnuc))/CSPrd(nnuc)
+                    CSGinc(4) = POPcs(0,INExc(nnuc))*ftmp
+                 ENDIF
                  IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
      &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
                     ftmp = POPcs(5,INExc(nnuc))/CSPrd(nnuc)
@@ -969,12 +974,22 @@ C    &                          POPcs(nejc,INExc(nnuc))
                     CSGinc(3) = POPcs(0,INExc(nnuc))*ftmp
                  ENDIF
 	           IF (ftmp.gt.0) THEN
-                   WRITE (12,97532) iz, SYMb(nnuc), ia, 
-     &                           POPcs(nejc,INExc(nnuc)),cejectile
-                   WRITE (12,97533) iz, SYMb(nnuc), ia, 
-     &               (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
-                   WRITE (12,97531) iz, SYMb(nnuc), ia, 
-     &               ftmp*POPcs(nejc,INExc(nnuc)),cejectile	 
+                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
+     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                     WRITE (12,9753) iz, SYMb(nnuc), ia, 
+     &                 POPcs(nejc,INExc(nnuc)),cejectile
+                     WRITE (12,97535) iz, SYMb(nnuc), ia, 
+     &                (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
+                     WRITE (12,97534) iz, SYMb(nnuc), ia, 
+     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile	 
+	             ELSE 
+                     WRITE (12,97532) iz, SYMb(nnuc), ia, 
+     &                 POPcs(nejc,INExc(nnuc)),cejectile
+                     WRITE (12,97533) iz, SYMb(nnuc), ia, 
+     &                 (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
+                     WRITE (12,97531) iz, SYMb(nnuc), ia, 
+     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile	 
+                   ENDIF
                  ELSE  
 C                  WRITE (12,9753) iz, SYMb(nnuc), ia, 
 C    &               0.d0,'incl.gam '
@@ -990,6 +1005,12 @@ C    &               0.d0,'incl.gam '
 97531          FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' population cross section',G12.6,'  mb   : ',A9,
      &           '   (exclus)') 
+97534          FORMAT(1X,I3,'-',A2,'-',I3,
+     &           ' deut. pop. cross section',G12.6,'  mb   : ',A9,
+     &           '   (deut  )') 
+97535          FORMAT(1X,I3,'-',A2,'-',I3,
+     &           ' np+pn pop. cross section',G12.6,'  mb   : ',A9,
+     &           '   (np+pn )') 
 97532          FORMAT(1X,I3,'-',A2,'-',I3,
      &           ' tot. gamma cross section',G12.6,'  mb   : ',A9) 
 97533          FORMAT(1X,I3,'-',A2,'-',I3,
