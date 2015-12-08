@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-11-26 10:17:48 +0100 (Do, 26 Nov 2015) $
+Ccc   * $Date: 2015-12-08 15:08:37 +0100 (Di, 08 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -473,9 +473,8 @@ c...  WRITE(LTT,'(A)') '        MT       QM          QI'
 c...  DO J=1,NXS
 c...    WRITE(LTT,'(I10,1P,2E12.5)') IWO(MTH-1+J),QQM(J),QQI(J)
 c...  END DO
-
-      write(ler,'(10x,10i10)') iwo(mth+77),iwo(mth+95),iwo(mth+96)
-
+c...
+c...  write(ler,'(10x,10i10)') iwo(mth+77),iwo(mth+95),iwo(mth+96)
 c...
 C*
 C* Redefine lower energy limit to first point, if not a neutron file
@@ -578,14 +577,14 @@ C*
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
 C...
-      k1=lxs+mxe*77-1
-      k2=lxs+mxe*95-1
-      k3=lxs+mxe*96-1
-      write(ler,'(10x,10i10)') iwo(mth+77),iwo(mth+95),iwo(mth+96)
-      do j=1,nen
-        write(ler,'(1p,10e10.3)') ein(j),rwo(k1+j),rwo(k2+j),rwo(k3+j)
-     &                                  ,rwo(k1+j)+rwo(k2+j)+rwo(k3+j)        
-      end do
+c...  k1=lxs+mxe*77-1
+c...  k2=lxs+mxe*95-1
+c...  k3=lxs+mxe*96-1
+c...  write(ler,'(10x,10i10)') iwo(mth+77),iwo(mth+95),iwo(mth+96)
+c...  do j=1,nen
+c...    write(ler,'(1p,10e10.3)') ein(j),rwo(k1+j),rwo(k2+j),rwo(k3+j)
+c... &                                  ,rwo(k1+j)+rwo(k2+j)+rwo(k3+j)        
+c...  end do
 c...
       WRITE(LER, * ) ' '
       WRITE(LER,'(A)') '        MT       QM          QI'
@@ -660,7 +659,7 @@ c...
      1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
      2           ,MXE,LX,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
 c...
-c...  print *,'Done reamf6 MT,ier',MT6,ier
+      print *,'Done reamf6 MT,ier',MT6,ier
 c...
       IF(MT4.GT.0) THEN
         WRITE(LTT,995) ' WARNING - No recoil spectra given      '
