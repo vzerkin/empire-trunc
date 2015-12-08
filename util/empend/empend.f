@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-12-08 15:53:34 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2015-12-08 16:22:37 +0100 (Di, 08 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -130,6 +130,9 @@ C-V          Increase MXR from 0.8 M to 2.4 M.
 C-V        - Major upgrade involving new convention for residual
 C-M          production x.s. that can be split into partly-exclusive
 C-M          and partly inclusive particle emission spectra
+C-M        - Angular distributions for charged particles in MF4 and MF6
+C-M          in pointwise form, controlled by setting LANG>10.
+C-M          WARNING - ENDF file size considerably increased.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -5165,8 +5168,7 @@ C...
 c...    print *,'Before ANGPNT nan',nan
 c...    print '(1x,1p,5e12.5)',(rwo(l64-1+j),j=1,nan+1)
 C...
-        CALL ANGPNT(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC)
-     &           ,MT6,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
+        CALL ANGPNT(NAN,ANG,NEP,RWO(L64),LOX,LHI,RWO(L64),LMX,RWO(LSC))
 C...
 c...    print *,'After ANGPNT','lox,lhi',lox,lhi
 c...    print '(1x,1p,5e12.5)',(rwo(l64-1+j),j=1,200)
