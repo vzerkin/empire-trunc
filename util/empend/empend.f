@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-08 15:03:40 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Date: 2015-12-08 15:34:09 +0100 (Di, 08 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -659,7 +659,7 @@ c...
      1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
      2           ,MXE,LX,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
 c...
-      print *,'Done reamf6 MT,ier',MT6,ier
+C...  print *,'Done reamf6 MT,ier',MT6,ier
 c...
       IF(MT4.GT.0) THEN
         WRITE(LTT,995) ' WARNING - No recoil spectra given      '
@@ -887,9 +887,7 @@ C*
   998 FORMAT(10I5)
   999 FORMAT(10I8)
       END PROGRAM EMPEND
-Ccc   * $Id: empend.f$ 
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-08 15:03:40 +0100 (Di, 08 Dez 2015) $
+
 
       SUBROUTINE MTTOZA(IZI,IZA,JZA,MT)
 C-Title  : Subroutine MTTOZA
@@ -6427,11 +6425,11 @@ C* Write file MF4 angular distributions (first outgoing particle)
       ZA =IZA
 c...
 c...  if(mt6.ge.600) then
-      if(mt6.gt.  2) then
-        PRINT *,'At 22,lct0,mt6',lct0,mt6
-        PRINT '(1x,1p,5e12.5)',(RWO(J),J=1,400)    
+c...  if(mt6.gt.  2) then
+c...    PRINT *,'At 22,lct0,mt6',lct0,mt6
+c...    PRINT '(1x,1p,5e12.5)',(RWO(J),J=1,400)    
 c...    stop
-      end if
+c...  end if
 c...
       IF(LCT0.LT.0) THEN
 C*      -- No data given, assume purely isotropic
@@ -6598,7 +6596,7 @@ C*      -- Process the main data block
         E2  =RWO(L2)
 c...    
 c...    print *,' '
-        print *,'First E_out',E2,' NEP,NA,LANG',NEP,NA,LANG,lshf
+c...    print *,'First E_out',E2,' NEP,NA,LANG',NEP,NA,LANG,lshf
 c...
 C*      -- Check if discrete level data are present
         IF(E2.GE.0) EOU=ABS(EOU)
@@ -6771,9 +6769,11 @@ C...    ERR=0
 C*        -- Cosines at QQ(1+NA1+NP), distributins at QQ(1+NP)
           CALL THINXS(QQ(1),       QQ(1+NA1),NP
      &               ,QQ(1+NA1+NP),QQ(1+NP ),MP,ERR)
-          ipp=2*(na1+np)
-          print *,'Thinning unsorted na1,np',na1,np,mp
-          PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,ipp)
+c...
+c...      ipp=2*(na1+np)
+c...      print *,'Thinning unsorted na1,np',na1,np,mp
+c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,ipp)
+c...
 C*        -- Re-pack cosines
           CALL FLDMOV(NP,QQ(1+NA1+NP),QQ(1))
         ELSE
