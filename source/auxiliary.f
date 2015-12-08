@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4520 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+Ccc   * $Rev: 4529 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2015-12-08 02:56:01 +0100 (Di, 08 Dez 2015) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -165,7 +165,7 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION det
+      DOUBLE PRECISION det, dxp
       INTEGER i, j, ldig, m, nlg, myalloc
       DOUBLE PRECISION, ALLOCATABLE :: fp(:), fy(:), Aa(:,:)
 
@@ -188,11 +188,18 @@ C*    Set up the matrix
       DO m = 1, Np
 C*       Calculate Legendre polynomials
          CALL PLNLEG(Xp(m),fp,nlg)
+         IF(m.EQ.1) THEN
+           dxp = 0.5d0*(Xp(2)-Xp(1))
+          ELSE IF(m.EQ.Np) THEN
+           dxp = 0.5d0*(Xp(Np)-Xp(Np-1))
+          ELSE
+           dxp = 0.5d0*(Xp(m+1)-Xp(m-1))
+          ENDIF
          DO i = 1, N1
             if(fp(i).eq.0.d0) cycle 
-            fy(i) = fy(i) + Yp(m)*fp(i)
+            fy(i) = fy(i) + Yp(m)*fp(i)*dxp
             DO j = i, N1
-               Aa(j,i) = Aa(j,i) + fp(i)*fp(j)
+               Aa(j,i) = Aa(j,i) + fp(i)*fp(j)*dxp
                if (j.gt.i) Aa(i,j) = Aa(j,i)
             ENDDO
          ENDDO
@@ -200,6 +207,16 @@ C*       Calculate Legendre polynomials
 
 C*    Solve the system of equations
       CALL MTXGUP(Aa,fy,Qq,N1,ldig,det)
+
+C* Reconstitute the angular distribution in Yp 
+      DO m = 1, Np
+C*       Calculate Legendre polynomials
+         CALL PLNLEG(Xp(m),fp,nlg)
+         Yp(m) = 0.0d0
+         DO i = 1, N1
+           Yp(m) = Yp(m) + Qq(i)*fp(i)
+          END DO
+       END DO
 
       deallocate(fp,fy,Aa)
 
