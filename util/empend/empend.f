@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-08 16:22:37 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Date: 2015-12-08 18:13:12 +0100 (Di, 08 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6565,15 +6565,16 @@ c...
           GO TO 40
         END IF
 C...
-C...    print *,'writing Ein,Eou,je,j2',EIN,Eou,je,j2
+C...    print *,'writing Ein,Eou,je,j2',EIN,Eou,je,j2,QQI(IT)
 C...
 C*      -- Print header CONT and TAB2 records
         IF(J2.EQ.0) THEN
-          IF(ABS(EIN-ETH).LT.1.E-4*EIN) THEN
+          IF(ABS(EIN-ETH).LT.1.E-4*EIN .OR. LANG.GT.10) THEN
             EIN=ETH
           ELSE
             IF(QQI(IT).LT.0) THEN
 C*            Set the threshold data and flag JTH to add extra point
+C*            (Legendre representation only)
               JE=JE+1
               JTH=1
               NL=2
@@ -6599,6 +6600,10 @@ C*      -- Process the main data block
 c...    
 c...    print *,' '
 c...    print *,'First E_out',E2,' NEP,NA,LANG',NEP,NA,LANG,lshf
+c...    if(mt.ge.601) then
+c...      print *,na1,ie,ne1,(rwo(l2-1+j),j=1,20)
+c...      stop
+c...    end if
 c...
 C*      -- Check if discrete level data are present
         IF(E2.GE.0) EOU=ABS(EOU)
@@ -6607,7 +6612,7 @@ C*
 C*        -- Copy the coefficients if a single point is given
           IF(NW.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
 c...
-c...      if(mt.ge.600) then
+c...      if(mt.ge.601) then
 c...        print *,na1,ie,ne1,(rwo(l2-1+j),j=1,20)
 c...        stop
 c...      end if
@@ -6743,8 +6748,8 @@ C*      -- Tabular representation of angular distributions
           STOP 'WRIMF4 ERROR - MXQ limit exceeded'
         END IF
 c...
-c...    if(mt6.ge.600) then
-c...      PRINT *,'lct0,na1',lct0,na1
+c...    if(mt6.ge.601) then
+c...      PRINT *,'lct0,na,na1',lct0,na,na1
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J),J=1,NA1)    
 c...      stop
 c...    end if
@@ -6756,12 +6761,12 @@ C* (no need to store energy for MF4)
           QQ(I+NA1)=QQ(2*I+2)
         END DO
 c...
-c...    if(mt6.ge.600) then
+c...    if(mt6.ge.601) then
 c...      PRINT *,'mt,lct0,Ein',mt,lct0,EIN
 c...      IP=MIN(NP,500)
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,IP)
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J+NA1),J=1,IP)
-c...      IF(ein.GT.4.5e6) stop
+c...c...      IF(ein.GT.4.5e6) stop
 c...    end if
 c...
 C*      -- Angular distributions thinning tolerance
@@ -6777,7 +6782,7 @@ c...      print *,'Thinning unsorted na1,np',na1,np,mp
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,ipp)
 c...
 C*        -- Re-pack cosines
-          CALL FLDMOV(NP,QQ(1+NA1+NP),QQ(1))
+          CALL FLDMOV(MP,QQ(1+NA1+NP),QQ(1))
         ELSE
 C*        -- Re-pack distributions
           CALL FLDMOV(NP,QQ(1+NA1),QQ(1+NP))
@@ -6787,12 +6792,13 @@ C*        -- Re-pack distributions
         CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
      1             ,NR,MP,NBT,INR,QQ(1),QQ(1+NP))
 c...
-c...    if(mt6.ge.600) then
-c...      PRINT *,'After thinning'
+c...    if(mt.ge.601) then
+c...      PRINT *,'After thinning mt6,np,mt',mt6,NP,MP
 c...      IP=MIN(MP,500)
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J   ),J=1,IP)
 c...      PRINT '(1x,1p,5e12.5)',(QQ(J+NP),J=1,IP)
-c...      IF(ein.GT.4.5e6) stop
+c...      stop
+c...c...      IF(ein.GT.4.5e6) stop
 c...    end if
 c...
 C*      -- One energy point processed
