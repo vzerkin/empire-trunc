@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4528 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
+Ccc   * $Rev: 4535 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-12-08 15:48:54 +0100 (Di, 08 Dez 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -75,7 +74,7 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
         WRITE (8,*) 
         WRITE (8,'(''  Tot. fission cross section '',G12.4,'' mb'')')
      &       TOTcsfis
-	ENDIF
+      ENDIF
 
       IF(ENDf(1).GT.0) THEN 
         WRITE (12,*) 
@@ -98,7 +97,7 @@ C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
 C           ENDDO
 C           write(*,*)
 C        ENDIF 
-C	ENDDO
+C     ENDDO
 
       csnp = 0.d0
       csenp = 0.d0
@@ -115,7 +114,7 @@ C                  To add spectra to inclusive
                    nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
 C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 
-	               CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
      &                                POPcse(0,nejc,ie,INExc(nnuc))
                    ENDDO 
                    CYCLE
@@ -153,10 +152,10 @@ C                     To split gamma spectra in (z,d) and (z,np+pn)
                       nspec    = min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
                       nspec_np = 
      &                 min(INT((EMAx(MT91) -Q(2,MT91))/DE) + 1,NDECSE-1)
-C	                write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
-C	                write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
-C	                write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
-C                     write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)					
+C                     write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
+C                     write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
+C                     write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
+C                     write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)                          
 
 C---------------------(continuum part - same for all particles)
                       ftmp = ginclus/POPcs(0,INExc(nnuc))
@@ -171,7 +170,7 @@ C---------------------(continuum part - same for all particles)
                       ftmp = ginclus/POPcs(0,INExc(nnuc))
 C                     write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
                       DO ie = 1, nspec + 1 
-	                   CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+                         CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
      &                               POPcse(0,nejc,ie,INExc(nnuc))*ftmp
                       ENDDO 
                     ENDIF
@@ -324,7 +323,7 @@ C                   DO ie = 1, nspec + 1
 C                    IF(check_DE(ie).le.0) cycle
 C                     DO nang = 1, NDANG
 C                      cseaprnt(ie,nang) = 
-C    > 			     POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
+C    >                       POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
 C    >                 cseaprnt(ie,nang)
 C                      check_DE(ie) = POPcse(0,nejc,ie,INExc(nnuc)) 
 C                    ENDDO
@@ -455,12 +454,12 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
 C
 C------------------Exclusive DE spectra (gammas)
 C
-C	             write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
-C	             write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
-C	             write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
+C                  write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
+C                  write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
+C                  write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
 C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
-					
-                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. !	gammas 
+                              
+                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. ! gammas 
      &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! from deuteron residual 
 C
 C                     To split gamma spectra in (z,d) and (z,np+pn)
@@ -495,7 +494,7 @@ C                     First, gammas from (z,np+pn)
 C                       WRITE(12,'(2x,
 C    &                    ''Total Integr.(gamma)np'',G12.6,'' mb'' )') 
 C    &                  csnp
- 					endif
+                              endif
 C                     Second, remaining gammas from (z,d) 
                       WRITE (12,*) ' '
                       WRITE (12,*) ' Spectrum of ', cejectile,
@@ -507,7 +506,7 @@ C                     Second, remaining gammas from (z,d)
                       WRITE (12,*) ' '
                       dtmp =0.d0          
                       esum =0.d0 
-					iemm = 1         
+                              iemm = 1         
                       DO ie = 1, nspec + 1        
                         htmp = POPcse(0,nejc,ie,INExc(nnuc))-CSEnp(ie)
                         if(htmp.LE.0.d0) cycle
@@ -617,7 +616,7 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
  1530         ENDDO   ! over ejectiles
 
               qin     = EIN  + QPRod(nnuc) + ELV(LEVtarg,0) ! CMS
-	        qinaver = qin
+              qinaver = qin
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
 
