@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-08 15:34:09 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2015-12-08 15:53:34 +0100 (Di, 08 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -8470,4 +8470,3 @@ C*    --Solve by backward substitution
       X(1)=F(1)/A(1,1)
       RETURN
       END
-
