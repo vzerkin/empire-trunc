@@ -35,10 +35,17 @@ struct  SubentInfo info;
 char    *fileName;
 char    *outZVDFileName;
 
-FILE    *inFile;
-FILE    *outFile;
-char    *ss,*ss1,*my_fgets();
-char    *my_calloc();
+FILE *inFile;
+FILE *outFile;
+char *ss,*ss1,*my_fgets();
+char *my_calloc();
+int   delLiderSpace(char* str1);
+int   delEndSpace(char* str1);
+int   mystrcat(char *so, char *si, int ll);
+int   setFNumeration();
+int   setN1Numeration(int i1);
+int   myReal2ShortStr(float rr, char *str);
+int   r4tos11(float rr, char *str);
 
 #define LREACT 300
 int     nReactions;
@@ -88,7 +95,7 @@ int firstDA_E=0;
 
 int  checkEnoughMemry(char *mem, char *msg, int lx, int ly);
 
-main (argc,argv)
+int main (argc,argv)
 int     argc;
 char    **argv;
 {
@@ -99,14 +106,21 @@ char    **argv;
     float   seMin, seMax;
     float   rr;
     char    *filter;
-    int myReal2ShortStr(float rr, char *str);
-    int r4tos11(float rr, char *str);
 
+    printf(" Translate DAT file to ZVD for plotting\n");
+    printf(" V.Zerkin, IAEA, 2000-2015\n");
     if (argc<3) {
-        printf(" C:\\> datzvd.exe aaaa.dat aaaa.zvd\n");
-        printf("       where:\n");
-        printf("       aaaa.dat - datasets in Z4 computational format from EXFOR\n");
-        printf("       aaaa.zvd - TABLE + XREF in Vicki McLane computational format\n");
+        printf("\n Run:\n");
+        printf(" $ datzvd.exe inp.dat out.zvd\n");
+        printf("   where:\n");
+        printf("   inp.dat - experimental data from EXFOR\n");
+        printf("             given by datasets with descritive part\n");
+        printf("             and data points in 6 columns:\n");
+        printf("             {X +dX -dX Y +dY -dY}\n");
+        printf("   out.zvd - file for plotting by ZVView;\n");
+        printf("             contains two parts in NNDC formats:\n");
+        printf("             TABLE: all data points sorted by energy\n");
+        printf("             XREF:  all references\n");
         exit(0);
     }
     argv++; argc--;
@@ -132,9 +146,6 @@ char    **argv;
         }
     }
 
-    printf(" Sort my C4 file\n");
-    printf("   X  +dX  -dX   Y  +dY  -dY\n");
-    printf(" V.Zerkin, IAEA, 01.2000\n");
     printf("\n");
     printf(" Input file: %s\n",fileName);
 
@@ -142,13 +153,13 @@ char    **argv;
     setN1Numeration(1);
 
     //--- define number of subentries (lXref)
-    printf("===Define number of subentries ");
     lXref=0;
     lData=0;
     lDataMax=0;
     inFile = fopen(fileName, "r");
-    if (inFile==NULL) { printf(" No file <%s>\n",fileName); exit(0); }
-    for (; ; ) {
+    if ((void*)inFile==NULL) { printf("\nError. No input file [%s]\n",fileName); exit(1); }
+    printf("===Define number of subentries ");
+    for (;;) {
 //        if(kbhit()!=0) if(getch()==033){printf("\nInterrupted...\n");exit(0);}
         ss=my_fgets(str0,LSTR,inFile); if (ss==NULL) break;
 //      printf("[%s]...",str0); getch(); printf("\n");
@@ -187,7 +198,7 @@ char    **argv;
 //--- print memory allocation
     printf(" reactions: <%p> %d*%ld =%ld\n",reactions,LREACT,lXref,LREACT*lXref);
     printf("      data: <%p> %d*%ld =%ld\n",data,ld,lData,ld*lData);
-    printf(" dataIndex: <%p> %d*%ld =%ld\n",dataIndex,sizeof(int),lData,sizeof(int)*lData);
+    printf(" dataIndex: <%p> %d*%ld =%ld\n",dataIndex,(int)sizeof(int),lData,sizeof(int)*lData);
     printf("      xref: <%p> %d*%ld =%ld\n",xref,lx,lXref,lx*lXref);
 
 //    getchar();
@@ -618,7 +629,7 @@ char    **argv;
     fclose(outFile);
 }
 
-mystrcat(char *so, char *si, int ll)
+int mystrcat(char *so, char *si, int ll)
 {
     int i,ls,lcopy,ladd;
     ls=strlen(si);
@@ -635,7 +646,7 @@ mystrcat(char *so, char *si, int ll)
     return(0);
 }
 
-myReal2ShortStr(float rr, char *str)
+int myReal2ShortStr(float rr, char *str)
 {
     char sss[20];
     int  i,ls,nn;
@@ -653,7 +664,7 @@ myReal2ShortStr(float rr, char *str)
     return(0);
 }
 
-r4tos11(float rr, char *str)
+int r4tos11(float rr, char *str)
 {
     char sss[30];
     int  i,ls,nn;
@@ -672,7 +683,7 @@ r4tos11(float rr, char *str)
     return(0);
 }
 
-int  checkEnoughMemry(char *mem, char *msg, int lx, int ly)
+int checkEnoughMemry(char *mem, char *msg, int lx, int ly)
 {
     long lAlloc;
     if (mem==NULL) {
