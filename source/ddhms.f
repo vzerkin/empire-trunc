@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4530 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2015-12-08 02:57:05 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Rev: 4542 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4530 $
-C $Id: ddhms.f 4530 2015-12-08 01:57:05Z bcarlson $
+C CVS Version Management $Revision: 4542 $
+C $Id: ddhms.f 4542 2015-12-09 17:55:10Z rcapote $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2343,8 +2343,6 @@ C     INTEGER INT, NINT
       INTEGER j, ja, jen, jn, jnmax, jsp, jz, jzmax, llll, mrec, ne,
      &        inx, nx, nemax, norder, nth, nu, numax, iwritxddx
 
-      DOUBLE PRECISION uchk,ujchk
-
       restot = 0             !count array for printing energies
 C     !the total production of all heavy residuals
 
@@ -2396,12 +2394,10 @@ C
          DO jz = 0, NDIM_ZEM
             DO jn = 0, NDIM_NEM
                USPec(jz,jn,nu) = USPec(jz,jn,nu)*anorm
-               uchk= uchk+USPec(jz,jn,nu)
                RESpop(jz,jn) = RESpop(jz,jn) + USPec(jz,jn,nu)*DEBin
                restot = restot + USPec(jz,jn,nu)*DEBin
                DO jsp = 0, NDIM_JBINS
                   UJSpec(jz,jn,nu,jsp) = UJSpec(jz,jn,nu,jsp)*anorm
-                  ujchk= ujchk+UJSpec(jz,jn,nu,jsp)
                ENDDO
                DO mrec = 0, NDIM_RECBINS
                   RECspec(mrec,nu,jz,jn) = RECspec(mrec,nu,jz,jn)
@@ -2409,7 +2405,6 @@ C
                ENDDO
             ENDDO
          ENDDO
-
 C
 C        infer max non-zero j=value and mrec values:
          DO jz = 0, NDIM_ZEM
@@ -2479,9 +2474,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4530 $')
+99005 FORMAT ('  xddhms version: $Revision: 4542 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4530 2015-12-08 01:57:05Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4542 2015-12-09 17:55:10Z rcapote $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5867,7 +5862,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION csfit(NDAnghms), csx0(NDAnghms), qq(5)
-      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn,
+      DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, csum,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
@@ -5952,19 +5947,60 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
       DO ne = 1, nspec
          CSEhms(ne,1,0) = DXSn(ne-1)
          CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
-         DO na = 1, NDAnghms
-C           CSEahms(ne,na,1) = DDXsn(ne-1,na)
-           csfit(NDAnghms-na+1) = DDXsn(ne-1,na)
+
+         CSEahms(ne,1,1) = DDXsn(ne-1,1)
+         csfit(NDAnghms) = DDXsn(ne-1,1)
+         DO na = 2, NDAnghms
+           ftmp = DDXsn(ne-1,na)
+           if(ftmp.lt.0.05d0*CSEahms(ne,na-1,1)) 
+     &       ftmp = CSEahms(ne,na-1,1)
+           CSEahms(ne,na,1) = ftmp
+           csfit(NDAnghms-na+1) = ftmp
          ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,1,0)/(4.0*PI_g*qq(1))
+
+         DO na = NDAnghms-1,1,-1
+           ftmp = CSEahms(ne,na,1)
+           if(ftmp.lt.0.05d0*CSEahms(ne,na+1,1)) 
+     &         ftmp = CSEahms(ne,na+1,1)
+           CSEahms(ne,na,1) = ftmp
+           csfit(NDAnghms-na+1) = ftmp
+C          write(*,*)sngl(CANgler(na)),
+C    &                 sngl(DDXsn(ne-1,na)),
+C    &                 sngl(csfit(NDAnghms-na+1))
+         ENDDO
+
+         csum = 0.d0
+         DO na = 1, NDAnghms
+           csum = csum + csfit(NDAnghms-na+1)*SANgler(NDAnghms-na+1)
+         ENDDO
+         csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+
+         csfit = 0.d0 ! cleaning the csfit array
+
+         IF (csum.gt.0.0D+0) THEN
+            xnor = CSEhms(ne,1,0)/csum
             DO na = 1, NDAnghms
-C               CSEahms(ne,na,1) = CSEahms(ne,na,1)*xnor
-               CSEahms(ne,na,1) = csfit(NDAnghms-na+1)*xnor
-             ENDDO
+                CSEahms(ne,na,1) = CSEahms(ne,na,1)*xnor
+            ENDDO
          ENDIF
+
+C        CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C        write(*,*) 'ne=',ne,sngl(CSEhms(ne,1,0)),
+C    &     sngl(csum),sngl(4.0*PI_g*qq(1))
+C        IF (qq(1).NE.0.0D+0) THEN
+C           xnor = CSEhms(ne,1,0)/(4.0*PI_g*qq(1))
+C           write(*,*) 
+C           write(*,*) 'ne=',ne,CSEhms(ne,1,0),4.0*PI_g*qq(1)
+C           DO na = 1, NDAnghms
+C               CSEahms(ne,na,1) = CSEahms(ne,na,1)*xnor
+C               CSEahms(ne,na,1) = csfit(NDAnghms-na+1)*xnor
+C               write(*,*)sngl(CANgler(NDAnghms-na+1)),
+C    &                    sngl(CSEahms(ne,na,1)),
+C    &                    sngl(csfit(NDAnghms-na+1)*xnor)
+C            ENDDO
+C        ENDIF
        ENDDO
+
 C-----transfer inclusive neutron lab spectrum
 C-----transfer inclusive neutron lab double-differential cross sections
 C-----integrate ddx over angle and normalize ddx to the angle
@@ -5976,7 +6012,7 @@ C         DO na = 1, NDAnghms
 C           CSEahmslab(ne,na,1) = DDXsnlab(ne-1,na)
 C           csfit(NDAnghms-na+1) = DDXsnlab(ne-1,na)
 C         ENDDO
-C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 C         IF (qq(1).NE.0.0D+0) THEN
 C            xnor = CSEhmslab(ne,1,0)/(4.0*PI_g*qq(1))
 C            DO na = 1, NDAnghms
@@ -5997,19 +6033,56 @@ C      CSEmis(2,0) = CSEmis(2,0) + XSP0
       DO ne = 1, nspec
          CSEhms(ne,2,0) = DXSp(ne-1)
          CSE(ne,2,0) = CSE(ne,2,0) + DXSp(ne-1)
-         DO na = 1, NDAnghms
-C           CSEahms(ne,na,2) = DDXsp(ne-1,na)
-           csfit(NDAnghms-na+1) = DDXsp(ne-1,na)
+
+C        DO na = 1, NDAnghms
+C          CSEahms(ne,na,2) = DDXsp(ne-1,na)
+C          csfit(NDAnghms-na+1) = DDXsp(ne-1,na)
+C        ENDDO
+
+         CSEahms(ne,1,2) = DDXsp(ne-1,1)
+         csfit(NDAnghms) = DDXsp(ne-1,1)
+         DO na = 2, NDAnghms
+           ftmp = DDXsp(ne-1,na)
+           if(ftmp.lt.0.05d0*CSEahms(ne,na-1,2)) 
+     &       ftmp = CSEahms(ne,na-1,2)
+           CSEahms(ne,na,2) = ftmp
+           csfit(NDAnghms-na+1) = ftmp
          ENDDO
-         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-         IF (qq(1).NE.0.0D+0) THEN
-            xnor = CSEhms(ne,2,0)/(4.0*PI_g*qq(1))
+
+         DO na = NDAnghms-1,1,-1
+           ftmp = CSEahms(ne,na,2)
+           if(ftmp.lt.0.05d0*CSEahms(ne,na+1,2)) 
+     &         ftmp = CSEahms(ne,na+1,2)
+           CSEahms(ne,na,2) = ftmp
+           csfit(NDAnghms-na+1) = ftmp
+C          write(*,*)sngl(CANgler(na)),
+C    &                 sngl(DDXsp(ne-1,na)),
+C    &                 sngl(csfit(NDAnghms-na+1))
+         ENDDO
+
+         csum = 0.d0
+         DO na = 1, NDAnghms
+           csum = csum + csfit(NDAnghms-na+1)*SANgler(NDAnghms-na+1)
+         ENDDO
+         csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+
+         csfit = 0.d0 ! cleaning the csfit array
+
+         IF (csum.gt.0.0D+0) THEN
+            xnor = CSEhms(ne,2,0)/csum
             DO na = 1, NDAnghms
-C               CSEahms(ne,na,2) = CSEahms(ne,na,2)*xnor
-               CSEahms(ne,na,2) = csfit(NDAnghms-na+1)*xnor
+               CSEahms(ne,na,2) = CSEahms(ne,na,2)*xnor
              ENDDO
-          ENDIF
-        ENDDO
+         ENDIF
+
+C        CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C        IF (qq(1).NE.0.0D+0) THEN
+C           xnor = CSEhms(ne,2,0)/(4.0*PI_g*qq(1))
+C           DO na = 1, NDAnghms
+C              CSEahms(ne,na,2) = CSEahms(ne,na,2)*xnor
+C            ENDDO
+C         ENDIF
+       ENDDO
 C
 C-----transfer inclusive proton lab spectrum
 C-----transfer inclusive proton lab double-differential cross sections
@@ -6022,7 +6095,7 @@ C         DO na = 1, NDAnghms
 C           CSEahmslab(ne,na,2) = DDXsplab(ne-1,na)
 C           csfit(NDAnghms-na+1) = DDXsplab(ne-1,na)
 C         ENDDO
-C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+C         CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 C         IF (qq(1).NE.0.0D+0) THEN
 C            xnor = CSEhmslab(ne,2,0)/(4.0*PI_g*qq(1))
 C            DO na = 1, NDAnghms
@@ -6071,11 +6144,13 @@ C
 
 C           write(8,*) ' endf 1 ',jz,jn,nnur,endf(nnur),endfa(nnur) 
           IF (ENDf(nnur).EQ.1 .OR. (jz.EQ.0 .AND. jn.EQ.0)) THEN
-c           IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c             DO nth = 1, NDAnghms
-c               csx0(nth)=0.0d0
-c              ENDDO
-c             ENDIF
+
+           IF(jz.EQ.0 .AND. jn.EQ.0) csx0 = 0.0d0
+C          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+C            DO nth = 1, NDAnghms
+C              csx0(nth)=0.0d0
+C             ENDDO
+C            ENDIF
              ecres = ecn-Q(1,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
@@ -6090,7 +6165,6 @@ c             If(Inxr.EQ.0) then
 c               write(*,*) 'n: ',jz,jn,nnur,nspec,nspecc
 c               stop
 c              endif
-
              DO ne = 1,nspec
                pophmsx = 0.0d0
 
@@ -6120,32 +6194,64 @@ c                 chkpopd = chkpopd + pops
                 ENDDO
 
                IF(jz.NE.0 .OR. jn.NE.0) THEN
-                 POPcse(0,1,ne,Inxr) = pophmsx 
-                 POPcsed(0,1,ne,Inxr) = pophmsx 
-                ENDIF
+                 POPcse(0,1,ne,Inxr) = pophmsx
+                 POPcsed(0,1,ne,Inxr) = pophmsx
+               ENDIF
 
-               csfit(1) = POPcsea(NDAnghms,0,1,ne,Inxr) 
-               DO nth = NDAnghms1, 2, -1
-                 csfit(NDAnghms-nth+1) = POPcsea(nth,0,1,ne,Inxr) 
+               csfit(NDAnghms) = POPcsea(1,0,1,ne,Inxr)
+               DO nth = 2, NDAnghms
+                 if(POPcsea(nth,0,1,ne,Inxr).lt.0.05d0*
+     &              POPcsea(nth-1,0,1,ne,Inxr)) 
+     &              POPcsea(nth,0,1,ne,Inxr) = 
+     &                POPcsea(nth-1,0,1,ne,Inxr)
+                 csfit(NDAnghms-nth+1) = POPcsea(nth,0,1,ne,Inxr)
                 ENDDO
-               csfit(NDAnghms) =  POPcsea(1,0,1,ne,Inxr)
-               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-               IF (qq(1).NE.0.0D+0) THEN
-                 xnor = pophmsx/(4.0*PI_g*qq(1))
+
+               csum = 0.d0
+               DO nth = 1, NDAnghms
+                 csum = csum + 
+     &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
+                ENDDO
+               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+
+               csfit = 0.d0 ! cleaning the csfit array
+
+               IF (csum.GT.0.d0) THEN
+                 xnor = pophmsx/csum
                  DO nth = 1, NDAnghms
-C                   POPcsea(nth,0,1,ne,Inxr) = 
-C     &                                 POPcsea(nth,0,1,ne,Inxr)*xnor
                    POPcsea(nth,0,1,ne,Inxr) = 
-     &                                 csfit(NDAnghms-nth+1)*xnor
+     &                                 POPcsea(nth,0,1,ne,Inxr)*xnor
                    CSEahms(ne,nth,1) = CSEahms(ne,nth,1)
      &                              - POPcsea(nth,0,1,ne,Inxr)
-
+ 
                   IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c                    csx0(nth) = csx0(nth) + POPcsea(nth,0,1,ne,Inxr)
+                    csx0(nth) = csx0(nth) + POPcsea(nth,0,1,ne,Inxr)
                     POPcsea(nth,0,1,ne,Inxr) = 0.0d0
                    ENDIF
                  ENDDO
-                ENDIF
+               ENDIF
+               
+C              csfit(1) = POPcsea(NDAnghms,0,1,ne,Inxr) 
+C              DO nth = NDAnghms1, 2, -1
+C                csfit(NDAnghms-nth+1) = POPcsea(nth,0,1,ne,Inxr) 
+C               ENDDO
+C              csfit(NDAnghms) =  POPcsea(1,0,1,ne,Inxr)
+C              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C
+C              IF (qq(1).NE.0.0D+0) THEN
+C                xnor = pophmsx/(4.0*PI_g*qq(1))
+C                DO nth = 1, NDAnghms
+C                  POPcsea(nth,0,1,ne,Inxr) = 
+C     &                                 POPcsea(nth,0,1,ne,Inxr)*xnor
+C                  CSEahms(ne,nth,1) = CSEahms(ne,nth,1)
+C    &                              - POPcsea(nth,0,1,ne,Inxr)
+ 
+C                 IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+C                   csx0(nth) = csx0(nth) + POPcsea(nth,0,1,ne,Inxr)
+C                   POPcsea(nth,0,1,ne,Inxr) = 0.0d0
+C                  ENDIF
+c                ENDDO
+C               ENDIF
 
                IF(ne.GT.nspecc) THEN
                  CSEhms(ne,1,0) = CSEhms(ne,1,0) - pophmsx
@@ -6165,7 +6271,8 @@ c                 chkpop = chkpop + pops
 
                  POPcsea(NDAnghms,nu,1,ne,Inxr) = 
      &                             DDXsnex(NDAnghms1,nux,ne-1,Inxr)
-                 csfit(1) = POPcsea(NDAnghms,nu,1,ne,Inxr) 
+
+C                csfit(1) = POPcsea(NDAnghms,nu,1,ne,Inxr) 
                  thx = PI_g - dth
                  xhi = DCOS(thx)
                  dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
@@ -6176,24 +6283,50 @@ c                 chkpop = chkpop + pops
                   POPcsea(nth,nu,1,ne,Inxr) = 
      &               (dxhi*DDXsnex(nth,nux,ne-1,Inxr)
      &                +dxlo*DDXsnex(nth-1,nux,ne-1,Inxr))/(dxhi+dxlo)
-                  csfit(NDAnghms-nth+1) = POPcsea(nth,nu,1,ne,Inxr) 
+C                 csfit(NDAnghms-nth+1) = POPcsea(nth,nu,1,ne,Inxr) 
                   xhi = xlo
                   dxhi = dxlo
                  ENDDO
+
                  POPcsea(1,nu,1,ne,Inxr) = DDXsnex(1,nux,ne-1,Inxr)
                  csfit(NDAnghms) =  POPcsea(1,nu,1,ne,Inxr)
-                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-                 IF (qq(1).NE.0.0D+0) THEN
-                  xnor = POPcsed(nu,1,ne,Inxr)/(4.0*PI_g*qq(1))
+                 DO nth = 2, NDAnghms
+                   if(POPcsea(nth,nu,1,ne,Inxr) .lt.0.05d0*
+     &              POPcsea(nth-1,nu,1,ne,Inxr) ) 
+     &              POPcsea(nth,nu,1,ne,Inxr) = 
+     &                 POPcsea(nth-1,nu,1,ne,Inxr)
+                    csfit(NDAnghms-nth+1) = POPcsea(nth,nu,1,ne,Inxr)
+                  ENDDO
+
+                 csum = 0.d0
+                 DO nth = 1, NDAnghms
+                   csum = csum + 
+     &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
+                 ENDDO
+                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+
+                 csfit = 0.d0 ! cleaning the csfit array
+            
+                 IF (csum.gt.0.0D+0) THEN
+                  xnor = POPcsed(nu,1,ne,Inxr)/csum
                   DO nth = 1, NDAnghms
-C                   POPcsea(nth,nu,1,ne,Inxr) = 
-C     &                                POPcsea(nth,nu,1,ne,Inxr)*xnor
                    POPcsea(nth,nu,1,ne,Inxr) = 
-     &                                csfit(NDAnghms-nth+1)*xnor
+     &                                POPcsea(nth,nu,1,ne,Inxr)*xnor
                    CSEahms(ne,nth,1) = CSEahms(ne,nth,1)
      &                              - POPcsea(nth,nu,1,ne,Inxr)
                   ENDDO
                  ENDIF
+
+C                CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C                IF (qq(1).NE.0.0D+0) THEN
+C                 xnor = POPcsed(nu,1,ne,Inxr)/(4.0*PI_g*qq(1))
+C                 DO nth = 1, NDAnghms
+C                  POPcsea(nth,nu,1,ne,Inxr) = 
+C    &                                POPcsea(nth,nu,1,ne,Inxr)*xnor
+C                  CSEahms(ne,nth,1) = CSEahms(ne,nth,1)
+C    &                              - POPcsea(nth,nu,1,ne,Inxr)
+C                 ENDDO
+C                ENDIF
                 ENDDO ! nu
                 CSEhms(ne,1,0) = CSEhms(ne,1,0) - pophmsx
                ENDIF
@@ -6247,7 +6380,7 @@ c              DO nth = NDAnghms1, 2, -1
 c               csfit(NDAnghms-nth+1) = POPcsealab(nth,0,1,ne,Inxr) 
 c              ENDDO
 c              csfit(NDAnghms) =  POPcsealab(1,0,1,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(0,1,ne,Inxr)/(4.0*PI_g*qq(1))
 c               IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,1,ne,Inxr) = 0.0d0
@@ -6294,7 +6427,7 @@ c               dxhi = dxlo
 c              ENDDO
 c              POPcsealab(1,nux,1,ne,Inxr) = DDXsnexlab(1,nu-1,ne-1,Inxr)
 c              csfit(NDAnghms) =  POPcsealab(1,nux,1,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(nux,1,ne,Inxr)/(4.0*PI_g*qq(1))
 c               DO nth = 1, NDAnghms
@@ -6315,14 +6448,14 @@ c          ENDDO
 c          write(8,'(a5,i8,6f12.6)') ' l-n:',nnur,chk*DE,XSNx(jz,jn),
 c     &            chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
 
-c          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c            DO nth = 1, NDAnghms
-c              difcon = csx0(nth)*DE/NLV(nnur)
-c              DO il = 1, NLV(nnur)
-c                CSAlev(nth,il,1) = CSAlev(nth,il,1) + difcon
-c               ENDDO
-c             ENDDO
-c           ENDIF
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+            DO nth = 1, NDAnghms
+              difcon = csx0(nth)*DE/NLV(nnur)
+              DO il = 1, NLV(nnur)
+                CSAlev(nth,il,1) = CSAlev(nth,il,1) + difcon
+               ENDDO
+             ENDDO
+           ENDIF
           ENDIF ! ENDF(nnur) = 1
          ENDIF ! iloc
 C
@@ -6335,11 +6468,13 @@ C
 
 C           write(8,*) ' endf 2 ',jz,jn,nnur,endf(nnur),endfa(nnur) 
           IF (ENDf(nnur).EQ.1 .OR. (jz.EQ.0 .AND. jn.EQ.0)) THEN
-c            IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c              DO nth = 1, NDAnghms
-c                csx0(nth)=0.0d0
-c               ENDDO
-c              ENDIF
+
+            IF(jz.EQ.0 .AND. jn.EQ.0) csx0 = 0.0d0
+C           IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+C             DO nth = 1, NDAnghms
+C               csx0(nth)=0.0d0
+C              ENDDO
+C             ENDIF
              ecres = ecn-Q(2,nnuc)
              nspec = min(INT(ecres/DE) + 1,NDECSE)
              nspecc = min(INT((ecres-ECUT(Nnur))/DE) + 1,NDECSE)
@@ -6383,28 +6518,57 @@ c                chkpopd = chkpopd + pops
                 POPcsed(0,2,ne,Inxr) = pophmsx 
                ENDIF
 
-               csfit(1) = POPcsea(NDAnghms,0,2,ne,Inxr) 
-               DO nth = NDAnghms1, 2, -1
-                 csfit(NDAnghms-nth+1) = POPcsea(nth,0,2,ne,Inxr) 
+               csfit(NDAnghms) = POPcsea(1,0,2,ne,Inxr)
+               DO na = 2, NDAnghms
+                 if(POPcsea(na,0,2,ne,Inxr).lt.0.05d0*
+     &              POPcsea(na-1,0,2,ne,Inxr)) 
+     &              POPcsea(na,0,2,ne,Inxr) = POPcsea(na-1,0,2,ne,Inxr)
+                 csfit(NDAnghms-na+1) = POPcsea(na,0,2,ne,Inxr)
                 ENDDO
-               csfit(NDAnghms) =  POPcsea(1,0,2,ne,Inxr)
-               CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-               IF (qq(1).NE.0.0D+0) THEN
-                 xnor = pophmsx/(4.0*PI_g*qq(1))
+
+               csum = 0.d0
+               DO na = 1, NDAnghms
+                 csum = csum + 
+     &                  csfit(NDAnghms-na+1)*SANgler(NDAnghms-na+1)
+                ENDDO
+               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+               
+               csfit = 0.d0 ! cleaning the csfit array
+
+               IF (csum.gt.0.0D+0) THEN
+                 xnor = pophmsx/csum
                  DO nth = 1, NDAnghms
-C                   POPcsea(nth,0,2,ne,Inxr) = 
-C     &                                 POPcsea(nth,0,2,ne,Inxr)*xnor
                    POPcsea(nth,0,2,ne,Inxr) = 
-     &                                 csfit(NDAnghms-nth+1)*xnor
+     &                                 POPcsea(nth,0,2,ne,Inxr)*xnor
                    CSEahms(ne,nth,2) = CSEahms(ne,nth,2)
      &                              - POPcsea(nth,0,2,ne,Inxr)
 
                   IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c                    csx0(nth) = csx0(nth) + POPcsea(nth,0,2,ne,Inxr)
+                    csx0(nth) = csx0(nth) + POPcsea(nth,0,2,ne,Inxr)
                     POPcsea(nth,0,2,ne,Inxr) = 0.0d0
                    ENDIF
                  ENDDO
-                ENDIF
+               ENDIF
+
+C              csfit(1) = POPcsea(NDAnghms,0,2,ne,Inxr) 
+C              DO nth = NDAnghms1, 2, -1
+C                csfit(NDAnghms-nth+1) = POPcsea(nth,0,2,ne,Inxr) 
+C               ENDDO
+C              csfit(NDAnghms) =  POPcsea(1,0,2,ne,Inxr)
+C              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C              IF (qq(1).NE.0.0D+0) THEN
+C                xnor = pophmsx/(4.0*PI_g*qq(1))
+C                DO nth = 1, NDAnghms
+C                  POPcsea(nth,0,2,ne,Inxr) = 
+C    &                                 POPcsea(nth,0,2,ne,Inxr)*xnor
+C                  CSEahms(ne,nth,2) = CSEahms(ne,nth,2)
+C    &                              - POPcsea(nth,0,2,ne,Inxr)
+C                 IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+C                   csx0(nth) = csx0(nth) + POPcsea(nth,0,2,ne,Inxr)
+C                   POPcsea(nth,0,2,ne,Inxr) = 0.0d0
+C                  ENDIF
+C                ENDDO
+C               ENDIF
 
               IF(ne.GT.nspecc) THEN
                CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
@@ -6423,7 +6587,7 @@ c                 chkpop = chkpop + pops
 
                  POPcsea(NDAnghms,nu,2,ne,Inxr) = 
      &                             DDXspex(NDAnghms1,nux,ne-1,Inxr)
-                 csfit(1) = POPcsea(NDAnghms,nu,2,ne,Inxr) 
+C                csfit(1) = POPcsea(NDAnghms,nu,2,ne,Inxr) 
                  thx = PI_g - dth
                  xhi = DCOS(thx)
                  dxhi = xhi + 1.  ! DCOS(th)-DCOS(PI_g)
@@ -6434,24 +6598,50 @@ c                 chkpop = chkpop + pops
                   POPcsea(nth,nu,2,ne,Inxr) = 
      &               (dxhi*DDXspex(nth,nux,ne-1,Inxr)
      &                +dxlo*DDXspex(nth-1,nux,ne-1,Inxr))/(dxhi+dxlo)
-                  csfit(NDAnghms-nth+1) = POPcsea(nth,nu,2,ne,Inxr) 
+C                 csfit(NDAnghms-nth+1) = POPcsea(nth,nu,2,ne,Inxr) 
                   xhi = xlo
                   dxhi = dxlo
                  ENDDO
+
                  POPcsea(1,nu,2,ne,Inxr) = DDXspex(1,nux,ne-1,Inxr)
                  csfit(NDAnghms) =  POPcsea(1,nu,2,ne,Inxr)
-                 CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
-                 IF (qq(1).NE.0.0D+0) THEN
-                  xnor = POPcsed(nu,2,ne,Inxr)/(4.0*PI_g*qq(1))
+                 DO nth = 2, NDAnghms
+                   if(POPcsea(nth,nu,2,ne,Inxr).lt.0.05d0*
+     &                POPcsea(nth-1,nu,2,ne,Inxr)) 
+     &                POPcsea(nth,nu,2,ne,Inxr) = 
+     &                  POPcsea(nth-1,nu,2,ne,Inxr)
+                   csfit(NDAnghms-nth+1) = POPcsea(nth,nu,2,ne,Inxr)
+                 ENDDO
+
+                 csum = 0.d0
+                 DO nth = 1, NDAnghms
+                   csum = csum + 
+     &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
+                  ENDDO
+                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+
+                 csfit = 0.d0 ! cleaning the csfit array
+
+                 IF (csum.GT.0.0D+0) THEN
+                  xnor = POPcsed(nu,2,ne,Inxr)/csum
                   DO nth = 1, NDAnghms
-C                   POPcsea(nth,nu,2,ne,Inxr) = 
-C     &                                POPcsea(nth,nu,2,ne,Inxr)*xnor
                    POPcsea(nth,nu,2,ne,Inxr) = 
-     &                                csfit(NDAnghms-nth+1)*xnor
+     &                                POPcsea(nth,nu,2,ne,Inxr)*xnor
                    CSEahms(ne,nth,2) = CSEahms(ne,nth,2)
      &                              - POPcsea(nth,nu,2,ne,Inxr)
                   ENDDO
                  ENDIF
+
+C                CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
+C                IF (qq(1).NE.0.0D+0) THEN
+C                 xnor = POPcsed(nu,2,ne,Inxr)/(4.0*PI_g*qq(1))
+C                 DO nth = 1, NDAnghms
+C                  POPcsea(nth,nu,2,ne,Inxr) = 
+C    &                                POPcsea(nth,nu,2,ne,Inxr)*xnor
+C                  CSEahms(ne,nth,2) = CSEahms(ne,nth,2)
+C    &                              - POPcsea(nth,nu,2,ne,Inxr)
+C                 ENDDO
+C                ENDIF
                 ENDDO ! nu
                CSEhms(ne,2,0) = CSEhms(ne,2,0) - pophmsx
               ENDIF
@@ -6507,7 +6697,7 @@ c            DO nth = NDAnghms1, 2, -1
 c              csfit(NDAnghms-nth+1) = POPcsealab(nth,0,2,ne,Inxr) 
 c             ENDDO
 c             csfit(NDAnghms) =  POPcsealab(1,0,2,ne,Inxr)
-c             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+c             CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c             IF (qq(1).NE.0.0D+0) THEN
 c              xnor = POPcsedlab(0,2,ne,Inxr)/(4.0*PI_g*qq(1))
 c              IF(jz.EQ.0 .AND. jn.EQ.0) POPcsedlab(0,2,ne,Inxr) = 0.0d0
@@ -6554,7 +6744,7 @@ c               dxhi = dxlo
 c              ENDDO
 c              POPcsealab(1,nux,2,ne,Inxr) = DDXspexlab(1,nu-1,ne-1,Inxr)
 c              csfit(NDAnghms) =  POPcsealab(1,nux,2,ne,Inxr)
-c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,6,ier)
+c              CALL LSQLEG(CANgler,csfit,NDAnghms,qq,5,ier)
 c              IF (qq(1).NE.0.0D+0) THEN
 c               xnor = POPcsedlab(nux,2,ne,Inxr)/(4.0*PI_g*qq(1))
 c               DO nth = 1, NDAnghms
@@ -6575,14 +6765,15 @@ c           ENDDO
 c           write(8,'(a5,i8,6f12.6)') ' l-p:',nnur,chk*DE,XSPx(jz,jn),
 c     &           chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
 
-c          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
-c            DO nth = 1, NDAnghms
-c              difcon = csx0(nth)*DE/NLV(nnur)
-c              DO il = 1, NLV(nnur)
-c                CSAlev(nth,il,2) = CSAlev(nth,il,2) + difcon
-c               ENDDO
-c             ENDDO
-c           ENDIF
+          IF(jz.EQ.0 .AND. jn.EQ.0) THEN
+            DO nth = 1, NDAnghms
+              difcon = csx0(nth)*DE/NLV(nnur)
+              DO il = 1, NLV(nnur)
+                CSAlev(nth,il,2) = CSAlev(nth,il,2) + difcon
+               ENDDO
+
+             ENDDO
+           ENDIF
           ENDIF ! ENDF(nnuc) = 1
          ENDIF ! iloc
 
@@ -6663,7 +6854,6 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
               nspecc = min(INT((ecn-ECUT(Nnur))/DE) + 1,NEX(nnur))
               ndspc = nspec-nspecc
               sumcon = 0.0D0
-
               DO nu = 1, nspecc
                 DO jsp = 1, JMAxujspec(jz,jn,nu+ndspc-1)+1
                   pops = 0.5*UJSpec(jz,jn,nu+ndspc-1,jsp-1)
@@ -6690,18 +6880,7 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
                  ENDDO
                ENDDO
 
-              difcon = 0.0D0
-              DO nu = 0,ndspc-1
-                DO jsp = 1, JMAxujspec(jz,jn,nu)+1
-                  pops = 0.5*UJSpec(jz,jn,nu,jsp-1)
-                  difcon = difcon + 2*pops
-                 END DO
-               END DO
-               difcon =difcon*DE
-
                sumcon = sumcon*DE
-               WRITE(12,'(a5,2i5,4f15.5)') 'dtst:',jz,jn,sumcon,difcon,
-     &                                sumcon+difcon,RESpop(jz,jn)
                chk = sumcon
                IF (nnur.GT.3 .AND. FIRst_ein) THEN
                   IF (IDNa(2,5).EQ.0) THEN
@@ -6729,8 +6908,6 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
                POPdis(nnur) = RESpop(jz,jn)-sumcon
 C--------------population of discrete levels (evenly distributed)
                difcon = (RESpop(jz,jn) - sumcon)/NLV(nnur)
-               WRITE(12,'(15x,2f15.5)') POPcon(nnur),POPdis(nnur)
-               difcon=0.0d0
                IF (IDNa(1,5).EQ.1 .AND. nnur.EQ.mt91) THEN
                   DO il = 1, NLV(nnur)
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon

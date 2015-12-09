@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4528 $
+Ccc   * $Rev: 4542 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
+Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -295,7 +295,7 @@ C                WRITE(*,*) 'PL_CN(0,LEVtarg)=',PL_CN(0,LEVtarg)
      &       sngl(xs_norm)
                   WRITE(8,*) 
                ENDIF
-C	         write(*,*) 'NORM=',xs_norm
+C              write(*,*) 'NORM=',xs_norm
                DO iang = 1, NDANG
                  cel_da(iang) = xs_norm*GET_DDXS(CANGLE(iang),LEVtarg)
                ENDDO
@@ -637,7 +637,7 @@ C     Moved from ACCUM to do it outside the excitation energy loop
       IF (nnuc.EQ.1) THEN
 
         DO nejc = 1, NEJcm
-	    nnur = NREs(nejc)
+          nnur = NREs(nejc)
           if (nnur.lt.0) cycle
           ares = A(1) - AEJc(nejc)
           zres = Z(1) - ZEJc(nejc)
@@ -651,8 +651,8 @@ C           write(*,*) 'POPlv(1,mt2) =', POPlv(LEVtarg,mt2)
 C         ENDIF
 
           DO il = 1, NLV(nnur)
-	      ftmp = CSComplev(il,nejc)
-	      if(ftmp.le.0) cycle
+            ftmp = CSComplev(il,nejc)
+            if(ftmp.le.0) cycle
             IF( (nejc.eq.NPRoject) .and. (.not.CN_isotropic) 
      >        .and. (PL_CN(0,il).gt.0) ) then
 C
@@ -675,7 +675,7 @@ C
           ENDDO  !loop over levels
         ENDDO  ! loop over emitted particles  
 
-	ENDIF
+      ENDIF
 
       IF(CSPrd(nnuc).gt.0.d0) THEN
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
@@ -730,13 +730,13 @@ C            WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
              WRITE (8,'(1X,/,10X,40(1H-),/)')
-	       if(nnuc.eq.1) then
+             if(nnuc.eq.1) then
                WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
                WRITE (12,'(1X,/,10X,40(1H-),/)')
              endif
-		     
+                 
          ENDIF
 
          DO il = 1, NLV(nnuc)
@@ -973,22 +973,24 @@ C    &                          POPcs(nejc,INExc(nnuc))
                     ftmp = POPcs(3,INExc(nnuc))/CSPrd(nnuc)
                     CSGinc(3) = POPcs(0,INExc(nnuc))*ftmp
                  ENDIF
-	           IF (ftmp.gt.0) THEN
+                 IF (ftmp.gt.0) THEN
                    IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
      &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
                      WRITE (12,9753) iz, SYMb(nnuc), ia, 
      &                 POPcs(nejc,INExc(nnuc)),cejectile
+                     dtmp = (1.d0-ftmp)*POPcs(nejc,INExc(nnuc))
+                     IF(dtmp.lt.1.d-10) dtmp = 0.d0 
                      WRITE (12,97535) iz, SYMb(nnuc), ia, 
-     &                (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
+     &                 dtmp,cejectile
                      WRITE (12,97534) iz, SYMb(nnuc), ia, 
-     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile	 
-	             ELSE 
+     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile      
+                   ELSE 
                      WRITE (12,97532) iz, SYMb(nnuc), ia, 
      &                 POPcs(nejc,INExc(nnuc)),cejectile
                      WRITE (12,97533) iz, SYMb(nnuc), ia, 
      &                 (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
                      WRITE (12,97531) iz, SYMb(nnuc), ia, 
-     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile	 
+     &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile      
                    ENDIF
                  ELSE  
 C                  WRITE (12,9753) iz, SYMb(nnuc), ia, 
@@ -1214,7 +1216,7 @@ C
           WRITE(8,*) ' '
           DO iang = 1, NDANG
             WRITE (8,99035) (iang - 1)*gang,
-     &	      ELAred*elada(iang)+CSAlev(iang,1,nejcec),
+     &            ELAred*elada(iang)+CSAlev(iang,1,nejcec),
      &               (CSAlev(iang,ICOller(ilv),nejcec),
      &               ilv = 2,MIN(its,10)) 
           ENDDO
@@ -1284,7 +1286,7 @@ C         number of discrete levels is limited to 40
           ENDIF
           WRITE (8,*) ' '
 
-        ENDIF	! CSAlev(1,ICOller(2),nejcec).GT.0
+        ENDIF     ! CSAlev(1,ICOller(2),nejcec).GT.0
 
       ENDIF
 
@@ -1734,9 +1736,9 @@ C
       WRITE (12,*) ' '
       DO ie = 1, ilast
 
-	  stmp = RECcse(ie,0,Nnuc) 
+        stmp = RECcse(ie,0,Nnuc) 
 
-	  if(stmp.le.0 .and. ie.ne.ilast) cycle 
+        if(stmp.le.0 .and. ie.ne.ilast) cycle 
 
         WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
@@ -1871,8 +1873,8 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       WRITE (12,*) ' '
 
       DO ie = 1, ilast
-	  stmp = POPcse(0,ipart,ie,INExc(Nnuc)) 
-	  if(stmp.le.0 .and. ie.ne.ilast) cycle 
+        stmp = POPcse(0,ipart,ie,INExc(Nnuc)) 
+        if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorr,
      &      stmp*recorr     
       ENDDO

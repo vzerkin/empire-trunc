@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4528 $
+Ccc   * $Rev: 4542 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-06 23:41:06 +0100 (So, 06 Dez 2015) $
+Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -303,11 +303,11 @@ C        ENDIF
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
          ENDDO
 C--------Exact endpoint
-         WRITE (8,'(F9.4,E15.5)') 
-     &     FLOAT(nspec)*DE/recorp, max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
 C        WRITE (8,'(F9.4,E15.5)') 
-C    &     min((EMAx(1)-Q(nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
-C    &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
+C    &     FLOAT(nspec)*DE/recorp, max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
+         WRITE (8,'(F9.4,E15.5)') 
+     &     min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+     &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
          WRITE(8,*) 
          WRITE(8,'(2x,
      &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
@@ -392,8 +392,8 @@ C--------Inclusive DDX spectrum
          ! exact DDX spectrum endpoint
          WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
          ! exact DDX spectrum endpoint
-C    &      min((EMAx(1)-Q(nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
-     &      FLOAT(nspec)*DE/recorp,
+     &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+C    &      FLOAT(nspec)*DE/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
          WRITE (12,*) ' '
          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS cor
@@ -421,9 +421,10 @@ C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
          ENDDO
 C        ! exact endpoint
          WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
-C    &     (EMAx(1)-Q(nejc,1))/recorp,CSE(nspec+1,nejc,0)*recorp,
-     &     FLOAT(nspec)*DE/recorp,CSE(nspec+1,nejc,0)*recorp,
-     &     check_DE(nspec+1)*recorp,
+     &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+C    &     (EMAx(1)-Q(nejc,1))/recorp,,
+C    &     FLOAT(nspec)*DE/recorp,
+     &     CSE(nspec+1,nejc,0)*recorp, check_DE(nspec+1)*recorp,
      &     ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
 
          WRITE(12,*) 
