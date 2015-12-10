@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4542 $
+Ccc   * $Rev: 4543 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
+Ccc   * $Date: 2015-12-10 09:41:38 +0100 (Do, 10 Dez 2015) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4542 $
-C $Id: ddhms.f 4542 2015-12-09 17:55:10Z rcapote $
+C CVS Version Management $Revision: 4543 $
+C $Id: ddhms.f 4543 2015-12-10 08:41:38Z rcapote $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2474,9 +2474,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4542 $')
+99005 FORMAT ('  xddhms version: $Revision: 4543 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4542 2015-12-09 17:55:10Z rcapote $')
+99010 FORMAT ('  $Id: ddhms.f 4543 2015-12-10 08:41:38Z rcapote $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5861,12 +5861,12 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csfit(NDAnghms), csx0(NDAnghms), qq(5)
+      DOUBLE PRECISION csfit(NDAnghms), csx0(NDAnghms) !, qq(5)
       DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, csum,
      &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
-      INTEGER ier, il, iloc, izar, jmax, jn, jsp, jz,
+      INTEGER il, iloc, izar, jmax, jn, jsp, jz, !ier
      &        mrec, na, ne, nspec, Inxr,
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
 C     INTEGER INT
