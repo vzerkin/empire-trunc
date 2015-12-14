@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4542 $
+Ccc   * $Rev: 4545 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
+Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -677,7 +677,7 @@ C
 
       ENDIF
 
-      IF(CSPrd(nnuc).gt.0.d0) THEN
+      IF(CSPrd(nnuc).gt.CSMinim) THEN
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
              WRITE (12,*)
@@ -854,7 +854,7 @@ C
       jz = min(INT(Z(1))-iz,15)     ! adding protection for higher energies
       jn = min(INT(A(1))-ia-jz,20)  ! adding protection for higher energies
 
-      IF (CSPrd(nnuc).GT.0.d0) THEN
+      IF (CSPrd(nnuc).GT.CSMinim) THEN
            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
@@ -926,8 +926,10 @@ C                estimating multiplicity
 C                  Summing exclusive cross section
      &             CSPopul(nnuc) = CSPopul(nnuc) +
      &                             POPcs(nejc,INExc(nnuc))/itmp
-C                  WRITE (*,*) NINT(A(nnuc)),NINT(Z(nnuc)),
-C    &                          POPcs(nejc,INExc(nnuc)) 
+C                  RCN 12/2015
+C                  WRITE (*,*) 'excl:',NINT(A(nnuc)),NINT(Z(nnuc)),
+C    &              nejc,sngl(POPcs(nejc,INExc(nnuc))/itmp),
+C    &              ' ',trim(Reaction(nnuc)) 
                ENDIF
              ENDDO
 
@@ -958,20 +960,29 @@ C    &                          POPcs(nejc,INExc(nnuc))
                     ftmp = POPcs(4,INExc(nnuc))/CSPrd(nnuc)
                     CSGinc(4) = POPcs(0,INExc(nnuc))*ftmp
                  ENDIF
-                 IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
-                    ftmp = POPcs(5,INExc(nnuc))/CSPrd(nnuc)
-                    CSGinc(5) = POPcs(0,INExc(nnuc))*ftmp
-                 ENDIF
-                 IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
-                    ftmp = POPcs(6,INExc(nnuc))/CSPrd(nnuc)
-                    CSGinc(6) = POPcs(0,INExc(nnuc))*ftmp
-                 ENDIF
+C                IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
+C    &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
+C                   ftmp = POPcs(5,INExc(nnuc))/CSPrd(nnuc)
+C                   CSGinc(5) = POPcs(0,INExc(nnuc))*ftmp
+C                ENDIF
+C                IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
+C    &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
+C                   ftmp = POPcs(6,INExc(nnuc))/CSPrd(nnuc)
+C                   CSGinc(6) = POPcs(0,INExc(nnuc))*ftmp
+C                ENDIF
                  IF(NINT(A(1)-A(nnuc)).eq.4 .and. 
      &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-4
-                    ftmp = POPcs(3,INExc(nnuc))/CSPrd(nnuc)
+                    ftmp_disc = 0.d0
+                    IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
+                    ftmp = (POPcs(3,INExc(nnuc))+ftmp_disc)/CSPrd(nnuc)
                     CSGinc(3) = POPcs(0,INExc(nnuc))*ftmp
+                    dtmp = (1.d0-ftmp)*POPcs(nejc,INExc(nnuc))
+                    IF(dtmp.lt.1.d-7) THEN
+                      CSGinc(3) = POPcs(0,INExc(nnuc))
+C                     write (*,*) sngl(ftmp),sngl(ftmp_disc),
+C    &                          sngl(CSGinc(3))
+                      ftmp = -1.d0
+                    ENDIF
                  ENDIF
                  IF (ftmp.gt.0) THEN
                    IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
@@ -979,7 +990,7 @@ C    &                          POPcs(nejc,INExc(nnuc))
                      WRITE (12,9753) iz, SYMb(nnuc), ia, 
      &                 POPcs(nejc,INExc(nnuc)),cejectile
                      dtmp = (1.d0-ftmp)*POPcs(nejc,INExc(nnuc))
-                     IF(dtmp.lt.1.d-10) dtmp = 0.d0 
+                     IF(dtmp.lt.1.d-7) dtmp = 0.d0 
                      WRITE (12,97535) iz, SYMb(nnuc), ia, 
      &                 dtmp,cejectile
                      WRITE (12,97534) iz, SYMb(nnuc), ia, 
@@ -987,8 +998,10 @@ C    &                          POPcs(nejc,INExc(nnuc))
                    ELSE 
                      WRITE (12,97532) iz, SYMb(nnuc), ia, 
      &                 POPcs(nejc,INExc(nnuc)),cejectile
+                     dtmp = (1.d0-ftmp)*POPcs(nejc,INExc(nnuc))
+                     IF(dtmp.lt.1.d-7) dtmp = 0.d0 
                      WRITE (12,97533) iz, SYMb(nnuc), ia, 
-     &                 (1.d0-ftmp)*POPcs(nejc,INExc(nnuc)),cejectile
+     &                 dtmp,cejectile
                      WRITE (12,97531) iz, SYMb(nnuc), ia, 
      &                 ftmp*POPcs(nejc,INExc(nnuc)),cejectile      
                    ENDIF
@@ -1290,7 +1303,7 @@ C         number of discrete levels is limited to 40
 
       ENDIF
 
-      IF(CSPrd(nnuc).GT.0.d0) THEN
+      IF(CSPrd(nnuc).GT.CSMinim) THEN
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
            xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
@@ -1321,7 +1334,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
       IF(CSPrd(nnuc).gt.0.d0) then 
            WRITE (12,*)
            WRITE (8,*)
-           IF(CSPrd(nnuc).GT.1.d-7) then
+           IF(CSPrd(nnuc).GT.CSMinim) then
               WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
@@ -1331,6 +1344,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
            ELSE
+              CSPrd(nnuc) = 0.d0
               WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
@@ -1346,15 +1360,16 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
            IF(nnuc.eq.mt649) ftmp_disc = CSDirlev(1,2)
            IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
 
-           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
+           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.CSMinim) then
 C
-C            CSInc(nnuc) = CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc
+             CSInc(nnuc) = max(CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc,0.d0)
 C
              WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &       ''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
      &       CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
            ELSE
+             CSInc(nnuc) = 0.d0
              WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &       ''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
@@ -1377,7 +1392,7 @@ C        Integral is calculated by trapezoidal rule being consistent with cross 
 
          xcross(0,jz,jn) = CSEmis(0,nnuc)
 C----------------------------------------------------------------------
-         IF(CSPrd(nnuc).GT.0.d0) THEN
+         IF(CSPrd(nnuc).GT.CSMinim) THEN
            DO nejc = 1, NEJcm
              ares = A(nnuc) - AEJc(nejc)
              zres = Z(nnuc) - ZEJc(nejc)
@@ -1429,18 +1444,18 @@ C------------Print residual nucleus population
                ENDIF
              ENDIF
 
-             if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
-     &                          .and. ENDF(nnuc).gt.0) then
-               WRITE (12,
-     &            '(13x,   '' total population      '',G12.6,''  mb'')')
-     &            poplev + poptot
-               WRITE (12,
-     &            '(13x,   '' total popul.continuum '',G12.6,''  mb'')')
-     &            poptot
-               WRITE (12,
-     &            '(13x,   '' total popul.disc.lev. '',G12.6,''  mb'')')
-     &            poplev
-
+C            if(A(nnuc).eq.A(1) .and. Z(nnuc).eq.Z(1) 
+C    &         .and. ENDF(nnuc).EQ.1) then
+C              WRITE (12,
+C    &            '(13x,   '' total population      '',G12.6,''  mb'')')
+C    &            poplev + poptot
+C              WRITE (12,
+C    &            '(13x,   '' total popul.continuum '',G12.6,''  mb'')')
+C    &            poptot
+C              WRITE (12,
+C    &            '(13x,   '' total popul.disc.lev. '',G12.6,''  mb'')')
+C    &            poplev
+C
 C              WRITE (8,*) '    RESIDUAL = TARGET NUCLEUS'
 C              WRITE (8,
 C    &         '(1x,''    Total population      '',G12.6,''  mb'')')
@@ -1452,7 +1467,7 @@ C              WRITE (8,
 C    &         '(1x,''    Total popul.disc.lev. '',G12.6,''  mb'')')
 C    &          poplev
 C              WRITE (8,*)
-             endif
+C            endif
 
              IF (IOUt.EQ.4) THEN
                ia = INT(A(nnur))
@@ -1686,7 +1701,7 @@ C
       DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul,stmp
       INTEGER ie, ilast
 
-      IF (CSPrd(Nnuc).LE.0.0D0 .or. NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
+      IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
 C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
@@ -1695,7 +1710,7 @@ C-----and find last non-zero cross section for printing
 C
 C     To get consistent integral value
 C
-      RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
+C     RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
 
       csum  = 0.d0
       esum  = 0.d0
@@ -1708,7 +1723,7 @@ C
           ilast = ie
         ENDIF
       ENDDO
-      IF (csum.EQ.0) RETURN
+
       ilast = MIN(ilast + 1,NDEX)
 
       if (ilast.gt.1)  then
@@ -1845,7 +1860,7 @@ C-----Find last non-zero cross section for printing
           ilast = ie
         ENDIF
       ENDDO
-      IF (csum.EQ.0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
+      IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       ilast = MIN(ilast + 1,NDEX)
 
       if (ilast.gt.1) then

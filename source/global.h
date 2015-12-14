@@ -1,6 +1,6 @@
-! $Rev: 4520 $
+! $Rev: 4545 $
 ! $Author: rcapote $
-! $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+! $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -37,7 +37,7 @@
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,    &
      &                 DEFnor(0:NDNUC), DOBs(0:ndnuc), CSGinc(ndejc),   &
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro,           &
-     &                 DV, D_Def(ndcollev,nddefcc),                     &
+     &                 DV, D_Def(ndcollev,nddefcc), CSInc(ndnuc),       &
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,&
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,         &
      &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),          &
@@ -48,7 +48,7 @@
      &                 FNwvomp(0:ndejc,0:ndnuc), S0_obs, S0_unc,        &
      &                 FNavomp(0:ndejc,0:ndnuc), Gg_obs, Gg_unc,        &
      &                 FNwsomp(0:ndejc,0:ndnuc), TISomer,               &
-     &                 FNasomp(0:ndejc,0:ndnuc),                        &
+     &                 FNasomp(0:ndejc,0:ndnuc), CSMinim,               &
      &                 FNrvomp(0:ndejc,0:ndnuc),  CANGle(ndangecis),    &
      &                 FNrwvomp(0:ndejc,0:ndnuc),                       &
      &                 FNrsomp(0:ndejc,0:ndnuc), LDShif(0:ndnuc),       &
@@ -82,7 +82,7 @@
      &        KALman, FISspe, ISIsom(ndlv,0:ndnuc), NRSmooth(0:ndnuc),  &
      &        PL_lmax(ndlv), SFAct, INTerf, IPArcov, MAXj(0:ndejc),     &
      &        ngamm_tr, nfiss_tr, PLcont_lmax(NDEX),iugMax(0:ndnuc)
-	 
+       
       LOGICAL CCCalc, DEFault_energy_functional, DEFormed, FILevel,     & 
      &        FIRst_ein, FISsil(ndnuc), FUSread, OMParfcc, OMPar_riplf, &
      &        RELkin, SDRead, EXClusiv, SOFt, NUBarread, BENchm, CALctl,&
@@ -235,7 +235,7 @@
      &                 D0_obs,D0_unc,S0_obs,S0_unc,Gg_obs,Gg_unc,ELCncs,&
      &                 EMInmsd, ATIlnoz, DXSred, SHLlnor, PEQcont,PL_CN,&
      &                 PL_CNcont, FCCred0, FUSred0, ELAred0, FCOred0,   &
-     &                 TOTred0, DEPart
+     &                 TOTred0, DEPart, CSMinim
       COMMON /GLOBAL1/ EMAx, ROPaa, ETL, SEJc, SFIom, ELV, XJLv,        &
      &                 CSAlev, CSDirlev, SHC, XMAss, BR, XMAss_ej,      &
      &                 REDmsc, TUNe, TUNEpe, TUNefi, EJMass, SIGabs,    &
@@ -251,7 +251,7 @@
       COMMON /GLOBAL2/ POPlv, Q, CSPrd, YRAst, SHCjf, GDRpar, GQRpar,   & 
      &                 FISb, GMRpar, ROPar, EX, TNUc, RO, TNUcf, ROF,   &
      &                 POP, SCRt, POPbin, SCRtl, SCRtem, CSEmis, CSEmsd,&
-     &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup,       &
+     &                 CSEdbk, CSEfis, CSE, CSEa, CSEt, CSDbrkup, CSInc,&
 !    &                 CSEhms, CSEahms, CSEhmslab, CSEahmslab,          &
      &                 RECcse, POPcon, POPdis, EHRtw, CSPopul, CSGinc,  &
      &                 AUSpec, REClev, CANgler, SANgler, VOM, VOMs,     &

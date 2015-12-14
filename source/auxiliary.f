@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4529 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2015-12-08 02:56:01 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Rev: 4545 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -63,6 +63,7 @@ C      CSEahmslab = 0.d0
       CSPrd    = 0.d0
       CSGinc   = 0.d0
       CSPopul  = 0.d0
+      CSInc    = 0.d0
       CSPfis   = 0.d0
       EX       = 0.d0
       JSTab    = 0.d0
@@ -259,7 +260,7 @@ C
 
       DOUBLE PRECISION FUNCTION GET_DDXS(X,ILEV)
 
-	implicit none
+      implicit none
 C
 C-Title  : GET_DDXS Subroutine
 C-Purpose: Evaluate Legendre polynomials to calculate the double diff. XS

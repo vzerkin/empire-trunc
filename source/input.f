@@ -1,6 +1,6 @@
-!cc   * $Rev: 4520 $
+!cc   * $Rev: 4545 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+!cc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -134,6 +134,7 @@ C
       CSO  = (HHBarc/AMPi)**2
       PI   = 4.D0*DATAN(1.D0)
       PIx4 = 4.D0*PI
+      CSMinim = 1.d-7  ! Minimum cross section
  
       IF (EIN.EQ.0.0D0) THEN   ! EIN IF BLOCK (I)
 C
@@ -790,14 +791,13 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
-				  ENDfp(1,nnuc) = 1 
-				  ENDfp(0,nnuc) = 1 
+                          ENDfp(1,nnuc) = 1 
+                          ENDfp(0,nnuc) = 1
                   endif
-C                 
 C                 (n,p),(n,2p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
-				  ENDfp(2,nnuc) = 1 
-				  ENDfp(0,nnuc) = 1 
+                          ENDfp(2,nnuc) = 1 
+                          ENDfp(0,nnuc) = 1 
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
@@ -840,76 +840,6 @@ C-----------------set reaction string
                      ENDIF
                      REAction(nnuc)(iend + 1:iend + 1) = 'p'
                      iend = iend + 1
-                  ENDIF
-
-                  IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
-C                    From n,np   to   n,d   
-                     iend = iend - 2
-                     REAction(nnuc)(iend + 1:iend + 1) = 'd'
-                     iend = iend + 1
-C                    (n,np),(n,pn),(n,d)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(1,nnuc) = 1 
-                     ENDfp(2,nnuc) = 1 
-                     ENDfp(4,nnuc) = 1 
-                  ENDIF
-
-                  IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
-C                    From n,2np   to   n,t   
-                     iend = iend - 3
-                     REAction(nnuc)(iend + 1:iend + 1) = 't'
-                     iend = iend + 1
-C                    (n,t)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(5,nnuc) = 1 
-                  ENDIF
-
-                  IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
-C                    From n,n2p   to   n,he3   
-                     iend = iend - 3
-                     REAction(nnuc)(iend + 1:iend + 1) = 'h'
-                     iend = iend + 1
-C                    (n,he3)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(6,nnuc) = 1 
-                  ENDIF
-
-                  IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
-C                    From n,2n2p   to   n,a   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 1) = 'a'
-                     iend = iend + 1
-C                    (n,a)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(3,nnuc) = 1 
-                  ENDIF
-
-                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
-C                    From n,3n2p   to   n,na   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 2) = 'na'
-                     iend = iend + 2
-                  ENDIF
-
-                  IF (mulem.eq.5 .and. (in.eq.2 .and. ip.eq.3) ) THEN
-C                    From n,2n3p   to   n,pa   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 2) = 'pa'
-                     iend = iend + 2
-                  ENDIF
-                                  
-                  IF (mulem.eq.6 .and. (in.eq.4 .and. ip.eq.2) ) THEN
-C                    From n,4n2p   to   n,2na   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 3) = '2na'
-                     iend = iend + 3
-                  ENDIF
-
-                  IF (mulem.eq.6 .and. (in.eq.3 .and. ip.eq.3) ) THEN
-C                    From n,3n3p   to   n,npa   
-                     iend = iend - 4
-                     REAction(nnuc)(iend + 1:iend + 3) = 'npa'
-                     iend = iend + 3
                   ENDIF
 
                   IF (ia.NE.0) THEN
@@ -956,6 +886,100 @@ C                    From n,3n3p   to   n,npa
                      iend = iend + 1
                   ENDIF
 
+                  IF (mulem.eq.2 .and. (in.eq.1 .and. ip.eq.1) ) THEN
+C                    From n,np   to   n,d   
+                     iend = iend - 2
+                     REAction(nnuc)(iend + 1:iend + 1) = 'd'
+                     iend = iend + 1
+C                    (n,np),(n,pn),(n,d)
+                     ENDfp(0,nnuc) = 1 
+                     ENDfp(1,nnuc) = 1 
+                     ENDfp(2,nnuc) = 1 
+                     ENDfp(4,nnuc) = 1 
+                  ENDIF
+
+                  IF (mulem.eq.2 .and. (in.eq.1 .and. id.eq.1) ) THEN
+C                    From n,nd   to   n,t   
+                     iend = iend - 2
+                     REAction(nnuc)(iend + 1:iend + 1) = 't'
+                     iend = iend + 1
+C                    (n,t)
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(5,nnuc) = 1 
+                  ENDIF
+
+                  IF (mulem.eq.3 .and. (in.eq.2 .and. ip.eq.1) ) THEN
+C                    From n,2np   to   n,t   
+                     iend = iend - 3
+                     REAction(nnuc)(iend + 1:iend + 1) = 't'
+                     iend = iend + 1
+C                    (n,t)
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(5,nnuc) = 1 
+                  ENDIF
+
+                  IF (mulem.eq.2 .and. (ip.eq.1 .and. id.eq.1) ) THEN
+C                    From n,pd   to   n,he3   
+                     iend = iend - 2
+                     REAction(nnuc)(iend + 1:iend + 1) = 'h'
+                     iend = iend + 1
+C                    (n,he3)
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(6,nnuc) = 1 
+C                    write(*,*) 'n,pd   to   n,he3'   
+                  ENDIF
+
+                  IF (mulem.eq.3 .and. (in.eq.1 .and. ip.eq.2) ) THEN
+C                    From n,n2p   to   n,he3   
+                     iend = iend - 3
+                     REAction(nnuc)(iend + 1:iend + 1) = 'h'
+                     iend = iend + 1
+C                    (n,he3)
+C                    ENDf(nnuc) = 1 
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(6,nnuc) = 1 
+C                    write(*,*) 'n,n2p   to   n,he3'   
+                  ENDIF
+
+                  IF (mulem.eq.4 .and. (in.eq.2 .and. ip.eq.2) ) THEN
+C                    From n,2n2p   to   n,a   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 1) = 'a'
+                     iend = iend + 1
+C                    (n,a)
+C                    ENDf(nnuc) = 1 
+                     ENDfp(0,nnuc) = 1 
+                     ENDfp(3,nnuc) = 1 
+                  ENDIF
+
+                  IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
+C                    From n,3n2p   to   n,na   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 2) = 'na'
+                     iend = iend + 2
+                  ENDIF
+
+                  IF (mulem.eq.5 .and. (in.eq.2 .and. ip.eq.3) ) THEN
+C                    From n,2n3p   to   n,pa   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 2) = 'pa'
+                     iend = iend + 2
+                  ENDIF
+                                  
+                  IF (mulem.eq.6 .and. (in.eq.4 .and. ip.eq.2) ) THEN
+C                    From n,4n2p   to   n,2na   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 3) = '2na'
+                     iend = iend + 3
+                  ENDIF
+
+                  IF (mulem.eq.6 .and. (in.eq.3 .and. ip.eq.3) ) THEN
+C                    From n,3n3p   to   n,npa   
+                     iend = iend - 4
+                     REAction(nnuc)(iend + 1:iend + 3) = 'npa'
+                     iend = iend + 3
+                  ENDIF
+
                   IF (NDEJC.GT.6 .AND. iac.NE.0) THEN
                      WRITE (cnejec,'(I1)') iac
                      IF (iac.GT.1) THEN
@@ -968,6 +992,7 @@ C                    From n,3n3p   to   n,npa
                   ENDIF
                   REAction(nnuc)(iend + 1:iend + 1) = ')'
                   REAction(nnuc)(iend + 2:iend + 4) = '   '
+C                 write(*,*) REAction(nnuc)(1:iend+4)
              ENDIF
            ENDIF
          ENDDO
@@ -994,7 +1019,8 @@ C                    From n,3n3p   to   n,npa
             if(irepeated.eq.0) NEXclusive = NEXclusive + 1 
 C           Finding target
             IF (irepeated.eq.0 .and. 
-     &          A(0).EQ.A(nnuc) .AND. Z(0).EQ.Z(nnuc)) NTArget = nnuc
+     &          NINT(A(0)).EQ.NINT(A(nnuc)) .AND. 
+     &          NINT(Z(0)).EQ.NINT(Z(nnuc)) ) NTArget = nnuc
 C
             DO nejc = 1, NEJcm
 C--------------To find inelastic channel
@@ -1056,6 +1082,7 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C-----------(McFadden global potential 9100 could be used)
          ENDIF
 
+
          DO i = 1, NNUct ! NDNUC
             KTRlom(1,i) = 2405
             KTRlom(2,i) = 5405
@@ -1108,6 +1135,11 @@ C        Changing the incident input energy to plot LDs
 !
 !--------Set actual flags for exclusive spectra
 !
+C        DO in = 0, NNUct
+C          IF(in.le.22) write(*,*) 
+C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
+C        ENDDO
+C
          IF(NENdf.EQ.0) THEN
               ENDf  = 0
               NEXclusive = 0
@@ -1117,35 +1149,59 @@ C        Changing the incident input energy to plot LDs
             DO in = 0, NNUct
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
-            IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
-               ENDf (0) = 1
-               ENDf(1)  = 1
-               ENDf(NTArget)  = 1
-               DO in = 1, MIN(4,nemn)   !neutron emissions
-                  ENDf(in+1) = 1
-               ENDDO
-               DO ip = 1, MIN(1,nemp)
-                  atmp = A(1) - AEJc(2)
-                  ztmp = Z(1) - ZEJc(2)
-                  izatmp = INT(1000*ztmp + atmp)
-                  CALL WHERE(izatmp,nnuc,iloc)
-                  ENDf(nnuc) = 1            !single proton emission
-               ENDDO
-            ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
+C           IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
+C              ENDf (0) = 1
+C              ENDf(1)  = 1
+C              ENDf(NTArget)  = 1
+C              DO in = 1, MIN(4,nemn)   !neutron emissions
+C                 ENDf(in+1) = 1
+C              ENDDO
+C              DO ip = 1, MIN(1,nemp)
+C                 atmp = A(1) - AEJc(2)
+C                 ztmp = Z(1) - ZEJc(2)
+C                 izatmp = INT(1000*ztmp + atmp)
+C                 CALL WHERE(izatmp,nnuc,iloc)
+C                 ENDf(nnuc) = 1            !single proton emission
+C              ENDDO
+C           ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
+            IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               DO in = 0, NENdf
-                  DO ip = 0, NENdf
+               DO in = 0, 2    ! NENdf
+                  DO ip = 0, 2 ! NENdf 
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
                      if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
                      izatmp = INT(1000*ztmp + atmp)
                      CALL WHERE(izatmp,nnuc,iloc)
-                     IF(iloc.EQ.0) ENDf(nnuc) = 1
+                     IF(iloc.EQ.0) THEN
+                       ENDf (nnuc) = 1
+                       if(in.eq.2 .and. ip.eq.2) THEN
+                         ENDfp(3,nnuc) = 1  ! alphas
+                         ENDfp(0,nnuc) = 1
+                       endif
+C                      if(in.eq.2 .and. ip.eq.1) THEN
+C                        ENDfp(5,nnuc) = 1  ! triton
+C                        ENDfp(0,nnuc) = 1
+C                       endif
+C                      if(in.eq.1 .and. ip.eq.2) THEN
+C                        ENDfp(6,nnuc) = 1  ! He-3
+C                        ENDfp(0,nnuc) = 1
+C                      endif
+                     ENDIF
                   ENDDO
                ENDDO
             ENDIF
+C           write(*,*) 'After reassigments'
+C           DO in = 0, NNUct
+C             IF(in.le.10) THEN
+C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
+C             ELSE
+C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(3,in)
+C             ENDIF
+C           ENDDO
+C
 C           Disabling all exclusive conversion to inclusive (testing)
 C           ENDfp = 0
 C
@@ -2266,8 +2322,8 @@ C-----LEVEL DENSITY for residual nuclei
 
       IF(ENDF(1).GT.0) THEN
         WRITE(8,*) 'Number of exclusive nuclei        :',NEXclusive
-        WRITE(8,*) 'Nuclei marked with < below produces inclusive spect
-     &ra only'
+        WRITE(8,*) 'Nuclei marked with < below produces inclusive spectr
+     &a only'
         WRITE(12,*) 'Number of exclusive nuclei        :',NEXclusive
         WRITE(12,*) 'Nuclei marked with < below produces inclusive spect
      &ra only'

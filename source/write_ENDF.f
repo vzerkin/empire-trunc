@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4520 $
+Ccc   * $Rev: 4545 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-25 21:30:36 +0100 (Mi, 25 Nov 2015) $
+Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -32,7 +32,7 @@ C
       INTEGER nejc,i,nnuc,jn,jz,iz,ia,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
       DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
-	LOGICAL lprint
+      LOGICAL lprint
       DATA eps/1.d-8/
 
       DOUBLE PRECISION, external :: mu_bar, SFACTOR
@@ -365,7 +365,7 @@ C-------Printing final results after including all scaling factors
      &              '' mb  '')') CSDbrkup(3)
          ENDIF
          dtmp = tothms + xsmsc + xsinl + totemis - crossBUt - crossNTt
-   	   IF(dtmp.gt.0) WRITE (8,
+         IF(dtmp.gt.0) WRITE (8,
      &  '('' * Pre-equilibrium emission cross section         '',G13.6,
      &              '' mb  '')') dtmp
          IF (NINT(AEJc(0)).GT.1 .AND. NINT(AEJc(0)).LE.4)  WRITE (8,
@@ -471,30 +471,51 @@ C        qout = 0.d0
 
          IF(RECoil.gt.0) then
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
-	      lprint = .FALSE.
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1)-A(Nnuc)).GT.4 ) THEN
+            lprint = .FALSE.
+            IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).GT.4 ) THEN
               CALL PRINT_RECOIL(nnuc,reactionx) 
-	        lprint = .TRUE.
-            ENDIF
-             
-            IF ((NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
-     &           NINT(Z(1)-Z(Nnuc)).EQ.1)) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx)    ! 3np
-	        lprint = .TRUE.
+              lprint = .TRUE.
             ENDIF
 
-            IF ((NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
-     &           NINT(Z(1)-Z(Nnuc)).EQ.3)) THEN 
-              CALL PRINT_RECOIL(nnuc,reactionx)    ! 3p
-	        lprint = .TRUE.
+            IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).EQ.3 ) THEN
+              CALL PRINT_RECOIL(nnuc,reactionx) 
+              lprint = .TRUE.
+            ENDIF
+
+            IF ((NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &           NINT(Z(1))-NINT(Z(Nnuc)).EQ.1)) THEN
+              CALL PRINT_RECOIL(nnuc,reactionx)    ! 3np
+              lprint = .TRUE.
+            ENDIF
+
+            IF ((NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &           NINT(Z(1))-NINT(Z(Nnuc)).EQ.3)) THEN
+              CALL PRINT_RECOIL(nnuc,reactionx)    ! 2pd
+              lprint = .TRUE.
+            ENDIF
+
+C           IF ((NINT(A(1)-A(Nnuc)).EQ.3 .AND. 
+C    &           NINT(Z(1)-Z(Nnuc)).EQ.3)) THEN 
+C             CALL PRINT_RECOIL(nnuc,reactionx)    ! 3p
+C             lprint = .TRUE.
+C           ENDIF
+
+C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1) 
+C    &        write(*,*) NINT(A(nnuc)),INT(Z(nnuc)),' ',
+C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
+
+            IF ((.not.lprint) .and. ENDf(nnuc).EQ.1) THEN
+              IF(CSInc(nnuc).gt.0.d0) 
+     &          CALL PRINT_RECOIL(nnuc,reactionx)
+              lprint = .TRUE.
             ENDIF
 
             IF ((.not.lprint) .and. ENDf(nnuc).EQ.2) THEN
               CALL PRINT_RECOIL(nnuc,reactionx)
-	        lprint = .TRUE.
+              lprint = .TRUE.
             ENDIF
 
-            IF ((.not.lprint) .and. NINT(A(1)-A(Nnuc)).GT.2 ) 
+            IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GT.2) 
      &        CALL PRINT_RECOIL(nnuc,reactionx)
 
           ENDDO !over decaying nuclei in ENDF spectra printout

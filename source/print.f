@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4542 $
+Ccc   * $Rev: 4545 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-09 18:55:10 +0100 (Mi, 09 Dez 2015) $
+Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -51,7 +51,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
+      IF (csemax.LE.1.D-10 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -63,7 +63,7 @@ C
       totspec = totspec - 
      &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE     
-      IF (totspec.LE.1.d-4) RETURN
+      IF (totspec.LE.CSMinim) RETURN
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
@@ -195,7 +195,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
+      IF (csemax.LE.1.D-10 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -219,7 +219,7 @@ C
         totspec  = totspec  + ftmp/itmp 
         esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
-      IF (totspec.LE.1.d-4) RETURN
+      IF (totspec*DE.LE.CSMinim) RETURN
 
       WRITE (12,*) ' '
       ia = AEJc(Nejc)
@@ -513,7 +513,7 @@ C
 C     Stringest test to avoid plotting problems.
 C     Cross sections smaller than 0.05 mb are not relevant at all.  
 C
-      IF (csemax.LE.1.d-7 .or. kmax.eq.1) return
+      IF (csemax.LE.1.D-10 .or. kmax.eq.1) return
 
       kmax = kmax + 1
       kmax = MIN0(kmax,NDECSE)
@@ -521,11 +521,12 @@ C
       DO i = 1, kmax
         totspec  = totspec  + CSE(i,Nejc,Nnuc)
       ENDDO
-      IF (totspec*DE.LE.1.d-4) RETURN
 
       if(Iflag.ne.1) totspec = totspec - 
      &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE     
+
+      IF (totspec.LE.CSMinim) RETURN
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
