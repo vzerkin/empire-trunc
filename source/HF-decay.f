@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4545 $
+Ccc   * $Rev: 4546 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Date: 2015-12-14 14:58:07 +0100 (Mo, 14 Dez 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1345,14 +1345,14 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
      &                             REAction(nnuc)
            ELSE
               CSPrd(nnuc) = 0.d0
-              WRITE (8,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-     &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-     &                             REAction(nnuc)
-              WRITE (12,
-     &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
-     &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-     &                             REAction(nnuc)
+C             WRITE (8,
+C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
+C    &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
+C    &                             REAction(nnuc)
+C             WRITE (12,
+C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
+C    &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
+C    &                             REAction(nnuc)
            ENDIF
            
            ftmp_disc = 0.d0
@@ -1370,7 +1370,7 @@ C
      &       CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
            ELSE
              CSInc(nnuc) = 0.d0
-             WRITE (12,
+             IF(CSPrd(nnuc).GT.CSMinim) WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &       ''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
      &       0.d0, REAction(nnuc)
