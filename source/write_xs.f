@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4545 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Rev: 4547 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2015-12-14 16:41:33 +0100 (Mo, 14 Dez 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
