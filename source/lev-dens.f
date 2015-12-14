@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-11-20 19:13:02 +0100 (Fr, 20 Nov 2015) $
-Ccc   * $Id: lev-dens.f 4503 2015-11-20 18:13:02Z rcapote $
+Ccc   * $Date: 2015-12-14 14:06:18 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Id: lev-dens.f 4544 2015-12-14 13:06:18Z rcapote $
 C
 C
 C
@@ -1404,26 +1404,30 @@ C
 C-----calculation of matching point /if UX=0.0/
 C
       iter = 0
+      
   100 IF (am*t.LE.6.D0 .OR. iter.GT.300) THEN
-         WRITE (8,*) 'WARNING: '
-         IF (iter.LT.101) THEN
-            WRITE (8,*) 'WARNING: Number of iterations in ROGC ',
-     &                  iter
-            WRITE (8,*) 'WARNING: Can not calculate Ux'
-         ELSE
-            WRITE (8,*) 'WARNING: Maximum number if iterations in ROGC'
+C        IF (iter.LT.301) THEN
+C         WRITE (8,*) 'WARNING: '
+C         WRITE (8,*) 'WARNING: Number of iterations in ROGC ', iter
+C         WRITE (8,*) 'WARNING: Can not calculate Ux'
+C         WRITE (8,*)'WARNING: Level density parameters inconsistent'
+C         WRITE (8,*)'WARNING: This may happen if you have used default'
+C         WRITE (8,*)'WARNING: systematics for too light nucleus or '
+C         WRITE (8,*)
+C    &              'WARNING: have allowed for too many discrete levels'
+C         WRITE (8,*)'WARNING: entering the region where these are lost'
+C         WRITE (8,*)'WARNING: Reanalise GC l.d. parameters for:'
+C         WRITE (8,*)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
+C         WRITE (8,*)'WARNING: a=', am, ' T=', t
+C        ENDIF
+         IF (iter.GT.300) THEN
+          WRITE (8,*) 'WARNING: '
+          WRITE (8,*) 
+     &      'WARNING: Maximum number of iterations in ROGC reached for'
+          WRITE (8,*)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
+          WRITE (8,*) 'WARNING: I will use the last T=', tm,' for calc.'
+          WRITE (8,*) 'WARNING: '
          ENDIF
-         WRITE (8,*) 'WARNING: Level density parameters inconsistent'
-         WRITE (8,*) 'WARNING: This may happen if you have used default'
-         WRITE (8,*) 'WARNING: systematics for too light nucleus or '
-         WRITE (8,*)
-     &              'WARNING: have allowed for too many discrete levels'
-         WRITE (8,*) 'WARNING: entering the region where these are lost'
-         WRITE (8,*) 'WARNING: Reanalise GC l.d. parameters for:'
-         WRITE (8,*) 'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
-         WRITE (8,*) 'WARNING: a=', am, ' T=', t
-         WRITE (8,*) 'WARNING: I will use the last T=', tm,' for calc.'
-         WRITE (8,*) 'WARNING: '
 C--------set nuclear temperature to the value from the systematics
          t = 0.9 - 0.0024*amas
          IF (amas.LT.100.D0) t = 60./amas + 0.06
@@ -1463,18 +1467,25 @@ C
       ENDIF
       eom = eo
 C-----fit nuclear temperature (and Ux) to discrete levels
-      IF (NLV(Nnuc).GT.5 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
+C     IF (NLV(Nnuc).GT.5 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
+      IF (NLV(Nnuc).GT.2 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
      &    ROPar(5,Nnuc).EQ.0.0D0) THEN
          eps = MIN(NLV(Nnuc)*0.03, 0.5)
          rolowint = EXP(( - eo/t))*(EXP(ELV(NLV(Nnuc),Nnuc)/t) - 1.)
-         IF (ABS(rolowint + 1.0 - NLV(Nnuc)).GT.eps) THEN
+         IF (ABS(rolowint + 1.0 - NLV(Nnuc)).GT.eps)
+     &      THEN
             tm = t
             t = t + 0.01*LOG((NLV(Nnuc)-1)/EXP((-eo/t))
      &          /(EXP(ELV(NLV(Nnuc),Nnuc)/t) - 1))
-            ux = 0.0
-            eo = 0.0
             iter = iter + 1
-            if (iter.le.300) GOTO 100
+            if (iter.le.300) THEN
+              ux = 0.0
+              eo = 0.0
+              GOTO 100
+            else
+              ux = 0.0
+              eo = 0.0
+            endif
          ENDIF
       ENDIF
      
@@ -1483,6 +1494,9 @@ C-----fit nuclear temperature (and Ux) to discrete levels
       ROPar(3,Nnuc) = DEL
       ROPar(4,Nnuc) = eo
       ROPar(5,Nnuc) = t
+
+      IF (ux.lE.0.0D0) 
+     >  write(*,*) INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
 
       IF (ig.NE.0) THEN
 C-----calculation of level densities below EXL
