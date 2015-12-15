@@ -1,6 +1,6 @@
-!cc   * $Rev: 4545 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+!cc   * $Rev: 4548 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2015-12-15 09:07:30 +0100 (Di, 15 Dez 2015) $
 
       SUBROUTINE INPUT
 !cc
@@ -1856,14 +1856,14 @@ C-----determination of discrete levels and pairing shift for cn
       write(8,*)
       CALL LEVREAD(nnuc)
       IF (ROPar(3,nnuc).EQ.0.0D0) THEN
-         IF (Z(nnuc).GT.98.0D0 .OR. ROPaa(nnuc).LE.0.0D0) THEN
+         IF (Z(nnuc).GT.98.0D0) THEN
             delp = 12.0/SQRT(A(nnuc))
             IF (Z(nnuc)/2. - AINT(Z(nnuc)/2.).LT.0.01D0) ROPar(3,nnuc)
      &          = delp
          ELSE
             ROPar(3,nnuc) = delz(INT(Z(nnuc) + 0.001))
          ENDIF
-         IF (XN(nnuc).GT.150.0D0 .OR. ROPaa(nnuc).LE.0.0D0) THEN
+         IF (XN(nnuc).GT.150.0D0) THEN
             delp = 12.0/SQRT(A(nnuc))
             IF (XN(nnuc)/2. - AINT(XN(nnuc)/2.).LT.0.01D0) ROPar(3,nnuc)
      &          = ROPar(3,nnuc) + delp
@@ -2091,14 +2091,14 @@ C           residual nuclei must be heavier than alpha
 C--------------determination of discrete levels and pairing shifts for rn
                CALL LEVREAD(nnur)
                IF (ROPar(3,nnur).EQ.0.0D0) THEN
-                  IF (Z(nnur).GT.98.0D0 .OR. ROPaa(nnur).LE.0.0D0) THEN
+                  IF (Z(nnur).GT.98.0D0) THEN
                      delp = 12.0/SQRT(A(nnur))
                      IF (Z(nnur)/2. - AINT(Z(nnur)/2.).LT.0.01D0)
      &                   ROPar(3,nnur) = delp
                   ELSE
                      ROPar(3,nnur) = delz(INT(Z(nnur) + 0.001))
                   ENDIF
-                  IF (XN(nnur).GT.150.D0 .OR. ROPaa(nnur).LE.0.0D0) THEN
+                  IF (XN(nnur).GT.150.D0) THEN
                      delp = 12.0/SQRT(A(nnur))
                      IF (XN(nnur)/2. - AINT(XN(nnur)/2.).LT.0.01D0)
      &                   ROPar(3,nnur) = ROPar(3,nnur) + delp
