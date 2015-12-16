@@ -1,6 +1,6 @@
-cc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+cc   * $Rev: 4550 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2015-12-16 17:56:28 +0100 (Mi, 16 Dez 2015) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -287,7 +287,8 @@ C           elastic and nonelastic modified for actinides
 C           to include/exclude low-lying coupled states
             WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &        A123)') 
-     &      nuc_print+6,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0)),
+     &      min(nuc_print,max_prn)+6,
+     &      SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0)),
      &   ' Elastic* and Nonelast* modified for A>220 (CE & Cross section
      &s of 2 CC added/substracted to Elastic/Nonelast respectively)'
             WRITE(107, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
@@ -309,7 +310,8 @@ C           to include/exclude low-lying coupled states
           ELSE
             WRITE(41, '(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3,5x,
      &A123)') 
-     &      nuc_print+7,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
+     &      min(nuc_print,max_prn)+7,
+     &      SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
             WRITE(107,'(''#'',I3,6X,A1,'' + '',i3,''-'',A2,''-'',I3)') 
      &      15    ,SYMbe(NPRoject), int(Z(0)), SYMb(0), int(A(0))
             WRITE(41,'(''#'',A10,1X,1P,96A12)') '  Einc    ',
