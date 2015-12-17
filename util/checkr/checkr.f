@@ -1,6 +1,6 @@
-! $Rev: 4468 $                                                          | 
-! $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $                                                     
-! $Author: rcapote $                                                  
+! $Rev: 4552 $                                                          | 
+! $Date: 2015-12-17 21:35:49 +0100 (Do, 17 Dez 2015) $                                                     
+! $Author: atrkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,6 +29,8 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
+!-V         Version 8.22   October 2015, A. Trkov
+!-V                        Increase EMAX to 3 GeV for neutrons.
 !-V         Version 8.21   September 2014 D. Brown, A. Trkov
 !-V                        - Disable EMAX tests for atomic relaxation data
 !-V                          (NSUB=6, Maximum energy for Atomic relaxation data)
@@ -264,7 +266,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.21'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
 !
 !     Define variable precision
 !
@@ -1827,7 +1829,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       SELECT CASE (NSUB)
          CASE (10)
-            CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
+            CALL TEST1F(EMAX,20.E+6,  3.E+9,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
          CASE (4,5,6)
