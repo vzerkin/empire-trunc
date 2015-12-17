@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-08 18:13:12 +0100 (Di, 08 Dez 2015) $
+Ccc   * $Date: 2015-12-17 21:31:13 +0100 (Do, 17 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -133,6 +133,10 @@ C-M          and partly inclusive particle emission spectra
 C-M        - Angular distributions for charged particles in MF4 and MF6
 C-M          in pointwise form, controlled by setting LANG>10.
 C-M          WARNING - ENDF file size considerably increased.
+C-M  15/12 - Major upgrade to split more correctly the reactions
+C-M          that produce the same residuals as (n,a) and (n,d)
+C-M          at higher energies.
+C-M          WARNING - full backward compatibility is not guaranteed.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -503,7 +507,7 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
         CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA,INCL)
 C* Summ MT 5 contributions as necessary
         CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
-     &             ,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER,INCL)
+     &             ,EIN,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER,INCL)
       END IF
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
@@ -1327,9 +1331,10 @@ C*        -- Try (z,d)
 C*        -- Try (z,np)
           ELSE IF(POUT.EQ.'protons ' .OR.
      &            POUT.EQ.'neutrons' .OR.
-     &          ((POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
-c... &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
+     &           (POUT.EQ.'recoils ' .AND. MEQ.EQ.1)) THEN
+C... Gammas are given explicitly
+C... &          ((POUT.EQ.'recoils ' .OR.
+c... &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
             MT= 28
           ELSE
             MT=-104
@@ -1342,17 +1347,8 @@ C*        -- Checking under reaction label (z,np), otherwise same
             MT=0
             GO TO 200
           END IF
-C*        -- Try (z,d)
-          IF     (POUT.EQ.'deuteron' .OR.
-     &          ((POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.1)) THEN
-C... &          ((POUT.EQ.'recoils ').AND. MEQ.EQ.1)) THEN
-            MT=104
 C*        -- Try (z,np)
-          ELSE IF(POUT.EQ.'protons ' .OR.
-     &            POUT.EQ.'neutrons' .OR.
-     &          ((POUT.EQ.'recoils ' .OR.
-     &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
+          IF     (POUT.EQ.'gammas  ' .AND. MEQ.EQ.1) THEN
             MT= 28
           ELSE
             MT=-104
@@ -1978,8 +1974,8 @@ C*          Check for non-zero fission cross section
       END
       
       
-      SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,XSC,QQM,QQI,MXE,MXT
-     &                 ,LTT,LLG,INCL)
+      SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,EIN,XSC
+     &                 ,QQM,QQI,MXE,MXT,LTT,LLG,INCL)
 C-Title  : Subroutine SUMMT5
 C-Purpose: Sum reactions contributing to MT 5
 C-Version:
@@ -2005,7 +2001,8 @@ C-D spectra in the ENDF file are added to MT5 within EMPIRE, so there
 C-D is no need for the approximate treatment according to the old
 C-D convention. The new convention is identified by INCL=1.
 C-
-      DIMENSION  MTH(MXT),MT6(MXT),XSC(MXE,MXT),QQM(MXT),QQI(MXT)
+      DIMENSION  MTH(MXT),MT6(MXT)
+     &          ,EIN(MXE),XSC(MXE,MXT),QQM(MXT),QQI(MXT)
 C* Process only if NT6>0
       IF(NT6.LE.0) RETURN
       MT5 =0
@@ -2160,18 +2157,26 @@ C* (identified by MT=10*ZA+LFS, LFS>=5).
         IF(MT.LE.9999) CYCLE
         M5=MT-10*(MT/10)
         IF(M5.LT.5) CYCLE
+        ETH5=-1
         DO J=1,NPT
+          XX=XSC(J,IX)
 c...
-c...      print *,XSC(J,I5),XSC(J,IX),XSC(J,I5)+XSC(J,IX)
+c...      print *,XSC(J,I5),XSC(J,IX),XSC(J,I5)+XX
 c...
-          XSC(J,I5)=XSC(J,I5)+XSC(J,IX)
+          XSC(J,I5)=XSC(J,I5)+XX
+          IF(ETH5.LE.0 .AND. XX.GT.0) THEN
+            ETH5=EIN(J)
+            XTH5=XX
+          END IF
         END DO
         QQ=MAX(QQM(IX),QQM(I5))
         QQM(I5)=QQ
         QQI(I5)=QQ
         KM=MT/10
-        WRITE(LTT,904) ' Added to MT5 the production of ZA/Q',KM,QQ
-        WRITE(LLG,904) ' Added to MT5 the production of ZA/Q',KM,QQ
+        WRITE(LTT,904) ' Added to MT5 the production of ZA/Q/E/X'
+     &                ,KM,QQ,ETH5,XTH5
+        WRITE(LLG,904) ' Added to MT5 the production of ZA/Q/E/X'
+     &                ,KM,QQ,ETH5,XTH5
 C*
         IF(INCL.EQ.1) CYCLE
 C*      -- Check for inclusive particle production
@@ -2211,7 +2216,7 @@ C*      -- Add neutron production to MT201
         END DO
       END DO
   100 RETURN
-  904 FORMAT(A,I6,1P,E10.3)
+  904 FORMAT(A,I6,1P,3E10.3)
       END
       
       
@@ -3614,7 +3619,7 @@ C...There seems to be a bug in Lahey compiler - next statement helps
       SAVE QI
       DIMENSION    EIN(MXE),XSC(MXE,MXT),XSG(MXE,MXT),QQM(MXT),QQI(MXT)
      1            ,MTH(MXT),IZB(MXM),BEN(6,MXM)
-     &            ,XPOP(8)
+     &            ,XPOP(10)
 C* Particle masses (neutron, proton, deuteron, triton, He-3, alpha, el.)
       COMMON /PMASS/ AWN,AWH,AWD, AWT, AW3,AWA, AWE
 C* Search for the reaction header cards
@@ -3845,9 +3850,11 @@ C* Process population cross sections to decouple complex reactions
 C* (EMPIRE-3 version after November 2010)
   216 IPOP=0
       JPOP=0
-      DO I=1,8
+      DO I=1,9
         XPOP(I)=0
       END DO
+C*    -- Preset inclusive to "undefined"
+      XPOP(10)=-1
   217 IF(JZA.GE.IZI+IZA) GO TO 310
 C... Format changed (between 23 Nov and 3 Dec 2012) REC(59:67)-->REC(58:66)
       IF     (REC(58:67).EQ.'gammas   ') THEN
@@ -3881,7 +3888,7 @@ c...
         END IF
         IPOP=IPOP+1
         READ (REC(37:50),*) XX
-        XPOP(JPOP)=XX
+        XPOP(JPOP)=XX/1000
 c...
 C...    print *,'jpop,ipop,mt,ee,xx',jpop,ipop,mt,ee,xx
 c...          
@@ -3926,6 +3933,7 @@ C*
 C* Read the total cross section but exclude incident charged particles
   290 IF(IZI.GE.1000) GO TO 110
       READ (REC,808) XS
+      XS=XS/1000
       XG=-1
       MT=1
       QQ=0
@@ -3959,15 +3967,27 @@ C* Next entry should be population or production cross section
       IF(REC(13:36).EQ.'isomer state population '    ) GO TO 224
       IF(REC(13:36).NE.'production cross section'    ) GO TO 310
 C* Read the cross section
-  311 READ (REC,803) XS
+  311 READ (REC,803) XS  
+      XS=XS/1000
       IF(XS.LE.0) GO TO 110
       XG =-1
 c...
-C...  print *,'mt,xs,ee',mt,xs,ee
+c...  print *,'mt,xs,ee,ipop',mt,xs,ee,ipop
 c...
 C* Test for multiple reactions leading to the same residual
   312 XSPROD=XS
       XSSUM =0
+C* Read the inclusive cross section from the next record
+      IF(IPOP.GT.0) THEN
+        READ (LIN,891,END=700) REC
+        IF(REC(13:36).EQ.'inclusive  cross section') THEN
+          READ(REC(37:48),*) XPOP10
+          XPOP(10)=XPOP10/1000
+        END IF
+c...
+c...    print *,'"',rec(13:36),'"',rec(37:48),xpop(10)
+c...
+      END IF
   314 CONTINUE
 C...
 C...  write(ler,*) 'IPOP-314',IPOP,XSPROD,XSSUM,XS
@@ -3980,7 +4000,8 @@ c...    print *,'ipop1,mt,e,qm,qi,xp,xsum',ipop,mt,ee,qq,qi,xsprod,xssum
 C...
         CALL XSPOP(XPOP,IZI,IZA,JZA,MT,XSPROD,XSSUM,XS,XG)
 C...
-c...    print *,'ipop2,mt,e,qm,qi,xs',ipop,mt,ee,qq,qi,xs
+C...    WRITE(LER,*) 'ipop2,mt,e,qm,qi,xs'
+C... &                ,ipop,mt,ee,qq,qi,xs,xsprod,xssum
 C...
         IF(XS.LE.0) GO TO 322
 C*      -- Check for split production by reactions
@@ -4045,13 +4066,12 @@ C* Add cross section and gamma-production contributions
      &   (MT.GE.1000 .AND. MT.LE.9999)) THEN
         XSC(NEN,IXS)=XS
       ELSE
-        XS=XS/1000
         XSC(NEN,IXS)=XSC(NEN,IXS)+XS
         IF(XG.GE.0) THEN
           IF(XSG(NEN,IXS).LT.0) THEN
-            XSG(NEN,IXS)=XG/1000
+            XSG(NEN,IXS)=XG
           ELSE
-            XSG(NEN,IXS)=XSG(NEN,IXS)+XG/1000
+            XSG(NEN,IXS)=XSG(NEN,IXS)+XG
           END IF
         END IF
       END IF
@@ -4074,26 +4094,26 @@ C* Check if population contributions sum up to production
       IF(ABS(XS) .GT. 0.002*XSPROD) THEN
         WRITE(LTT,904) ' Diff. between Prod. and Popul. Residual',JZA
         WRITE(LTT,902) '          incident energy [eV]          ',EE
-        WRITE(LTT,902) '          population sum  [millibarns]  ',XSSUM
-        WRITE(LTT,902) '          production x.s. [millibarns]  ',XSPROD
+        WRITE(LTT,902) '          population sum  [barns]       ',XSSUM
+        WRITE(LTT,902) '          production x.s. [barns]       ',XSPROD
         WRITE(LTT,903) '               Difference [%]           '
      &                ,100*XS/XSPROD
         WRITE(LER,904) ' Diff. between Prod. and Popul. Residual',JZA
         WRITE(LER,902) '          incident energy [eV]          ',EE
-        WRITE(LER,902) '          population sum  [millibarns]  ',XSSUM
-        WRITE(LER,902) '          production x.s. [millibarns]  ',XSPROD
+        WRITE(LER,902) '          population sum  [barns]       ',XSSUM
+        WRITE(LER,902) '          production x.s. [barns]       ',XSPROD
         WRITE(LER,903) '               Difference [%]           '
      &                ,100*XS/XSPROD
-        IF(XS.GT.0) THEN
-          WRITE(LTT,902) ' Unassigned summed to MT 5 [millibarns] ',XS
-          WRITE(LTT,902) ' '
-          WRITE(LER,902) ' Unassigned summed to MT 5 [millibarns] ',XS
-          WRITE(LER,902) ' '
-          MT= 5
-          XG=-1
-          IPOP=-1
-          GO TO 312
-        END IF
+C...    IF(XS.GT.0) THEN
+C...      WRITE(LTT,902) ' Unassigned summed to MT 5 [millibarns] ',XS
+C...      WRITE(LTT,902) ' '
+C...      WRITE(LER,902) ' Unassigned summed to MT 5 [millibarns] ',XS
+C...      WRITE(LER,902) ' '
+C...      MT= 5
+C...      XG=-1
+C...      IPOP=-1
+C...      GO TO 312
+C...    END IF
         WRITE(LER,902) ' '
       END IF
       GO TO 110
@@ -4135,6 +4155,7 @@ C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,II,X,XS,NBR
+      XS=XS/1000
 c...
 c...  print *,'Reading discrete level xs,xi,il,el',xs,xi,il,el,mt0+jl
 c...
@@ -4203,7 +4224,7 @@ c...
 c...  print *,'New discrete level MT,ee,xs',MT,ee,xs
 c...
 C* Enter cross section for this discrete level
-  360 XSC(NEN,IXS)=XS*1.E-3
+  360 XSC(NEN,IXS)=XS
 C*      Save QI for this level
       QI=QQI(IXS)
       QM=QQM(IXS)
@@ -4227,12 +4248,13 @@ c...      QQ=QQ*1.0E6
 C* Q value for elastic scattering may be non-zero for metastable targets
       QQM(IXS)=QQ
       QQI(IXS)=QQ
-  372 XSC(NEN,IXS)=XE*1.E-3
+  372 XSC(NEN,IXS)=XE
       GO TO 351
 C* Read the compound elastic cross section (no inc. charged particles)
   374 IF(IZI.GE.1000) GO TO 351
       MT=50
       READ (REC,807) XE
+      XE=XE/1000
       DO I=1,NXS
         IXS=I
         MTI=ABS(MTH(I))
@@ -4245,11 +4267,12 @@ C* Read the compound elastic cross section (no inc. charged particles)
 C* Q value for elastic scattering may be non-zero for metastable targets
       QQM(IXS)=QQ
       QQI(IXS)=QQ
-  376 XSC(NEN,IXS)=XE*1.E-3
+  376 XSC(NEN,IXS)=XE
       GO TO 351
 C* Positioned to read total (discrete+continuum) cross section
   390 CONTINUE
       READ (REC,803) XC
+      XC=XC/1000
 c...
 c...  print *,'Discrete+continuum xs,ipop,xi',xc,ipop,xi
 c...
@@ -4270,11 +4293,11 @@ C*      Test if reaction is already registered
         MTH(IXS)=MT
         QQM(IXS)=QM
         QQI(IXS)=QM-EL1
-  391   XSC(NEN,IXS)=(XC-XL0)*1.E-3
+  391   XSC(NEN,IXS)=(XC-XL0)
       END IF
 C* Subtract the discrete levels
 C...
-C...  write(ler,*) 'mt0,mt,ee,xc,xi',mt0,mt,ee,xc,xi,XC-XI
+c...  write(ler,*) 'mt0,mt,ee,xc,xi',mt0,mt,ee,xc,xi,XC-XI
 C...
       XS=XC-XI
       XG=-1
@@ -4392,6 +4415,8 @@ C-D   5  He-3
 C-D   6  alpha
 C-D   7  not used
 C-D   8  gamma
+C-D   9  unassigned
+C-D  10  inclusive
 C-D IZI    Projectile ZA
 C-D IZA    Target ZA
 C-D JZA    Residual ZA
@@ -4401,7 +4426,7 @@ C-D XS     Cross-section from population (output) (mb)
 C-D XG     Gamma-production cross section from population (mb)
 C-
       DOUBLE PRECISION XPOP,XSPROD,XSSUM,XS,XN,XD,XP,ZERO
-      DIMENSION XPOP(8)
+      DIMENSION XPOP(10)
       ZERO= 0
       XS  = XSPROD
       XG  =-1
@@ -4524,6 +4549,12 @@ C* (z,4n+2p)
       ELSE IF(MT.GE. 100000) THEN
 C* Radionuclide production cross section
         XS=XSPROD-XSSUM
+        IF((IZI+IZA-2004)*10+5.NE.MT .AND.
+     &     (IZI+IZA-1002)*10+5.NE.MT) THEN
+C*        -- The (n,a) and (n,d), reactions are treated
+C*           explicitly, so inclusive printout is not applicable
+          IF(XPOP(10).GE.0) XS=XPOP(10)
+        END IF
 C...    print *,'     XS=XSPROD-XSSUM',XS,XSPROD,XSSUM
 C...      ELSE IF(MT.EQ.10*JZA+5) THEN
 C...C* (z,a) + (z,n+h) + (z,n+p+d) + (z,2d) + (z,2n+2p)
@@ -4674,7 +4705,7 @@ C...
         GO TO 112
       END IF
 C...
-C...      print *,'   Found MT,JT,MTC',MT,JT6,MTC,REC(15:22),REC(23:30)
+C...  print *,'   Found MT,JT,MTC',MT,JT6,MTC,REC(15:22),REC(23:30)
 C...
 C* Assign KZAK to outgoing particle ZA for unique react. identification
       PTST=REC(15:22)
@@ -4747,7 +4778,7 @@ c...      NE6N=0
       ETEF=0
       LTTE=1
 C...
-C... Use tabular distributions for charged particles
+C... Use tabular angular distributions for charged particles
 C...  IF(IZAK(IK).GE.1001) LTTE=3
 C...
 C* Find the cross section index
@@ -5455,6 +5486,10 @@ C* from integral/x.s. ratio
 C*      -- Move first energy to lower boundary, if necessary
         EIS(NE6)=EE
           IF(IXS3.NE.0) THEN
+c...
+c...        print *,'mt,izap,ee,spc,xs3,yld'
+c... &              ,mt,izap,ee,spc,xs3,spc/xs3
+c...
             YLD(NE6)=(SPC/XS3)
           ELSE
             YLD(NE6)=1
