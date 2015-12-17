@@ -28,6 +28,7 @@ C-V  14/03 Guard against upper boundary outside data range.
 C-V  14/05 Fix typo (applicable when Ehi > last point on file).
 C-V  14/06 Implement ratios of fission spectra to Maxwellian.
 C-V  15/03 Fix bug printing NaN for PFNS ratio to Maxwellian at 0 eV.
+C-V  15/11 Print input instructions to screen.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -192,7 +193,7 @@ C-
       CHARACTER*1  UN,UO
       CHARACTER*11 E11
       CHARACTER*40 BLNK,COM,COM1
-      CHARACTER*80 FLNM
+      CHARACTER*80 FLNM,FLIN,FLOU
       CHARACTER*66 REC
       DOUBLE PRECISION ED
       DIMENSION    ES(MPT),SG(MPT),UG(MPT),RWO(MXR),ZEL(MXIS),FRC(MXIS)
@@ -215,17 +216,26 @@ C* Write banner
 C* Define the files
    12 WRITE(LTT,91) '$Enter the ENDF source filename       : '
       READ (LKB,99) FLNM
-      OPEN (UNIT=LIN,FILE=FLNM,STATUS='OLD',ERR=12)
+      IF(FLNM(1:40).NE.BLNK) FLIN=FLNM
+      OPEN (UNIT=LIN,FILE=FLIN,STATUS='OLD',ERR=12)
       WRITE(LTT,91) '$Enter the PLOTTAB output filename    : '
       READ (LKB,99) FLNM
-      OPEN (UNIT=LOU,FILE=FLNM,STATUS='UNKNOWN')
+      IF(FLNM(1:40).NE.BLNK) FLOU=FLNM
+      OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
+      WRITE(LTT,91) ' ENDF Source file                       '
+      WRITE(LTT,99) '   '//FLIN
+      WRITE(LTT,91) ' Output curves file                     '
+      WRITE(LTT,99) '   '//FLOU
+      WRITE(LTT,99) ' '
 C* Select the material
    13 WRITE(LTT,91) '$Enter requested ZA(>0) or MAT(<0) No.: '
       READ (LKB,98,ERR=13) ZA0
+      WRITE(LTT,991) ' Selected ZA                          : ',ZA0
 C* Select the ENDF file (3, 6, 10 or 15)
    14 WRITE(LTT,91) '$Enter the requested ENDF file MF No. : '
       READ (LKB,97,ERR=14) IDMY
       IF(IDMY.GT.0) MF0=IDMY
+      WRITE(LTT,91) ' Selected MF                          : ',MF0
       DEG=-1
       EOU=-1
       ZAP=-1
@@ -243,12 +253,18 @@ C* Select the energy interval
    15   WRITE(LTT,91) '$Thinning min.rel.diff.in energy pts. : '
         READ (LKB,91) COM
         IF(COM.NE.BLNK) READ (COM,98,ERR=15) EPS
+        WRITE(LTT,99) ' '
+        WRITE(LTT,992) ' Selected lower energy bound [eV]     : ',EA
+        WRITE(LTT,992) ' Selected upper energy bound [eV]     : ',EB
+        WRITE(LTT,992) ' Selected thinning tolerance [fract.] : ',EPS
       ELSE IF(MF0.EQ.4) THEN
         KEA=1
         EA =   0
         EB = 180
    16   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=16) EIN
+        WRITE(LTT,99) ' '
+        WRITE(LTT,992) ' Selected incident particle energy [eV]:',EA
         EOU=0.
         PAR=EOU
         EP6=0.02
@@ -267,6 +283,9 @@ C* Select the energy interval
         READ (LKB,98,ERR=18) EP6
         IF(EP6.LT.0 .OR. EP6.GT.0.1) GO TO 18
         IF(EP6.EQ.0) EP6=0.02
+        WRITE(LTT,99) ' '
+        WRITE(LTT,992) ' Selected incident particle energy [eV]:',EIN
+        WRITE(LTT,992) ' Resolution-broadening fraction        :',EP6
       ELSE IF(MF0.EQ.6) THEN
         KEA=2
         EA =0
@@ -282,9 +301,15 @@ C* Select the energy interval
         READ (LKB,98,ERR=23) EP6
         IF(EP6.LT.0 .OR. EP6.GT.0.1) GO TO 23
         IF(EP6.EQ.0) EP6=0.02
+        WRITE(LTT,99) ' '
+        WRITE(LTT,992) ' Selected incident particle energy [eV]:',EIN
+        WRITE(LTT,991) ' Selected scattering angle [degrees]   :',DEG
+        WRITE(LTT,992) ' Resolution-broadening fraction        :',EP6
       ELSE IF(MF0.EQ.15) THEN
    29   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=29) EIN
+        WRITE(LTT,99) ' '
+        WRITE(LTT,992) ' Selected incident particle energy [eV]:',EIN
       ELSE
         WRITE(LTT,91) ' ERROR - Please redo - Illegal MF number',MF0
         GO TO 14
@@ -294,6 +319,7 @@ C* Select the reaction type number
       WRITE(LTT,91) '$      (MT>40000 for angle-dep. x.s.) : '
       READ (LKB,99) FLNM
       READ (FLNM(1:10),97,ERR=30) IDMY
+      WRITE(LTT,91) ' Selected MT                          : ',IDMY
       IF(FLNM(11:50).NE.BLNK) THEN
         COM1=FLNM(11:50)
         ICOM=1
@@ -646,6 +672,8 @@ C*
   927 FORMAT(' ZA',I6,' LFS',I2)
   928 FORMAT(' Ang',I5)
   961 FORMAT(40X,'Searching for MT',I5,'  MF',I2,'  Mat',F8.1)
+  991 FORMAT(A40,F10.1)
+  992 FORMAT(A40,1P,E10.3)
       END
       FUNCTION YTGPNT(NP,XX,YY,XA,XB)
 C-Title  : Function YTGPNT
