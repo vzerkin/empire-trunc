@@ -1,6 +1,6 @@
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-17 21:42:30 +0100 (Do, 17 Dez 2015) $
-Ccc   * $Id: endres.f 4554 2015-12-17 20:42:30Z atrkov $
+Ccc   * $Date: 2015-12-21 00:02:56 +0100 (Mo, 21 Dez 2015) $
+Ccc   * $Id: endres.f 4556 2015-12-20 23:02:56Z atrkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -1254,32 +1254,6 @@ C* Case: ZERO beyond last point in original grid
       END IF
 C*
       END
-      SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
-C-Title  : RDTEXT Subroutine
-C-Purpose: Read a text record to an ENDF file
-      CHARACTER*66  REC
-      READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
-      IER=0
-      RETURN
-   81 IER=1
-      RETURN
-   82 IER=2
-      RETURN
-   40 FORMAT(A66,I4,I2,I3,I5)
-      END
-      SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
-C-Title  : WRTEXT Subroutine
-C-Purpose: Write a text record to an ENDF file
-      CHARACTER*66  REC
-   12 NS=NS+1
-      IF(NS.GT.99999) NS=0
-      IF(MT.EQ.0)     NS=99999
-      IF(MF.EQ.0)     NS=0
-      WRITE(LIB,40) REC,MAT,MF,MT,NS
-      IF(MT.EQ.0)     NS=0
-      RETURN
-   40 FORMAT(A66,I4,I2,I3,I5)
-      END
       SUBROUTINE FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
 C-Title  : Subroutine FINDMT
 C-Purpose: Find specified reaction in an ENDF file
@@ -1371,33 +1345,24 @@ C* Error traps
 C*
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
-      SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
-C-Title  : WRCONT Subroutine
-C-Purpose: Write a CONT record to an ENDF file
-      CHARACTER*11  BLN,REC(6)
-      DATA BLN/'           '/
-      DO 10 I=1,6
-      REC(I)=BLN
-   10 CONTINUE
-      IF( (C1.EQ.0. .AND. C2.EQ.0.) .AND.
-     1    (L1.EQ.0  .AND. L2.EQ.0 ) .AND.
-     2    (N1.EQ.0  .AND. N2.EQ.0 ) ) GO TO 12
-      CALL CHENDF(C1,REC(1))
-      CALL CHENDF(C2,REC(2))
-      WRITE(REC(3),20) L1
-      WRITE(REC(4),20) L2
-      WRITE(REC(5),20) N1
-      WRITE(REC(6),20) N2
-   12 NS=NS+1
-      IF(NS.GT.99999) NS=0
-      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
+C-Title  : RDTEXT Subroutine
+C-Purpose: Read a text record to an ENDF file
+      CHARACTER*66  REC
+      READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
+      IER=0
       RETURN
-   20 FORMAT(I11)
-   40 FORMAT(6A11,I4,I2,I3,I5)
+   81 IER=1
+      RETURN
+   82 IER=2
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
       END
       SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
 C-Title  : Subroutine RDHEAD
 C-Purpose: Read an ENDF HEAD record
+C-Version:
+C-V  2014/02 Implement the setting of the error flag
 C-Description:
 C-D  The HEAD record of an ENDF file is read. The following error
 C-D  conditions are trapped by setting the IER flag:
@@ -1405,12 +1370,14 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
-      IER = 0
-      READ (LEF,92,ERR=20,END=10) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      IER=0
+      READ (LEF,92,END=81,ERR=82) C1,C2,L1,L2,N1,N2,MAT,MF,MT
       RETURN
-   10 IER = 1
+C* Trap aN E.O.F error
+   81 IER=1
       RETURN
-   20 IER = 2
+C* Trap a read-error
+   82 IER=2
       RETURN
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
@@ -1420,19 +1387,47 @@ C-Purpose: Read an ENDF TAB1 record
 C-Description:
 C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
-C-D    IER=9 on exit if available field length NMX is exceeded.
+C-D    IER=1  End-of-file
+C-D        2  Read error
+C-D       -8  WARNING - Numerical underflow (<E-36)
+C-D        8  WARNING - Numerical overflow  (>E+36)
+C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
-      DIMENSION    NBT(20),INR(20)
+      DOUBLE PRECISION EE(3),XX(3)
+      DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
-      READ (LEF,902) C1,C2,L1,L2,N1,N2
-      READ (LEF,903) (NBT(J),INR(J),J=1,N1)
+      IER=0
+      READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
       JP=N2
       IF(N2.GT.NMX) THEN
         JP=NMX
         IER=9
       END IF
-      READ (LEF,904) (EN(J),XS(J),J=1,JP)
+      JR=(JP+2)/3
+      J=0
+      DO K=1,JR
+        READ(LEF,904,END=100,ERR=200) (EE(M),XX(M),M=1,3)
+        DO M=1,3
+          J=J+1
+          IF(J.LE.JP) THEN
+            IF(ABS(XX(M)).LT.1E-36) THEN
+              XX(M)=0
+C...          IER=-8
+            ELSE IF(ABS(XX(M)).GT.1.E36) THEN
+              XX(M)=1E36
+              IER=8
+            END IF
+            EN(J)=EE(M)
+            XS(J)=XX(M)
+          END IF
+        END DO
+      END DO
+      RETURN
+  100 IER=1
+      RETURN
+  200 IER=2
       RETURN
 C*
   902 FORMAT(2F11.0,4I11)
@@ -1442,16 +1437,18 @@ C*
       SUBROUTINE RDTAB2(LEF,C1,C2,L1,L2,N1,N2,NBT,INR,IER)
 C-Title  : Subroutine RDTAB2
 C-Purpose: Read an ENDF TAB2 record
-      DIMENSION    NBT(20),INR(20)
-      IER = 0
+C-D  Error condition:
+C-D    IER=1  End-of-file
+C-D        2  Read error
+      DIMENSION    NBT(*),INR(*)
 C*
-      READ (LEF,902,END=10,ERR=20) C1,C2,L1,L2,N1,N2
-      READ (LEF,903,END=10,ERR=20) (NBT(J),INR(J),J=1,N1)
+      READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
+      READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
       RETURN
-C*
-   10 IER = 1
+  100 IER=1
       RETURN
-   20 IER = 2
+  200 IER=2
+      RETURN
 C*
   902 FORMAT(2F11.0,4I11)
   903 FORMAT(6I11)
@@ -1489,6 +1486,46 @@ C* Read the LIST2 entries, watch for underflow
 C*
   902 FORMAT(2F11.0,4I11)
   903 FORMAT(6F11.0)
+      END
+      SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
+C-Title  : WRTEXT Subroutine
+C-Purpose: Write a text record to an ENDF file
+      CHARACTER*66  REC
+      NS=NS+1
+      IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
+      WRITE(LIB,40) REC,MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
+      RETURN
+   40 FORMAT(A66,I4,I2,I3,I5)
+      END
+      SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
+C-Title  : WRCONT Subroutine
+C-Purpose: Write a CONT record to an ENDF file
+      CHARACTER*11  BLN,REC(6)
+      DATA BLN/'           '/
+      DO 10 I=1,6
+      REC(I)=BLN
+   10 CONTINUE
+      IF( (C1.EQ.0. .AND. C2.EQ.0.) .AND.
+     1    (L1.EQ.0  .AND. L2.EQ.0 ) .AND.
+     2    (N1.EQ.0  .AND. N2.EQ.0 ) ) GO TO 12
+      CALL CHENDF(C1,REC(1))
+      CALL CHENDF(C2,REC(2))
+      WRITE(REC(3),20) L1
+      WRITE(REC(4),20) L2
+      WRITE(REC(5),20) N1
+      WRITE(REC(6),20) N2
+   12 NS=NS+1
+      IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
+      WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
+      RETURN
+   20 FORMAT(I11)
+   40 FORMAT(6A11,I4,I2,I3,I5)
       END
       SUBROUTINE WRTAB1(LIB,MAT,MF,MT,NS,C1,C2,L1,L2
      1                 ,NR,NP,NBT,INR,X,Y)
@@ -1604,6 +1641,7 @@ C* Write data
    24 I =I +1
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NPL) GO TO 20
       RETURN
