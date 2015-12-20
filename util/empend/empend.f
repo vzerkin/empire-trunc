@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-17 21:31:13 +0100 (Do, 17 Dez 2015) $
+Ccc   * $Date: 2015-12-21 00:02:14 +0100 (Mo, 21 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -7785,6 +7785,7 @@ C* Write data
    24 I =I +1
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NPL) GO TO 20
       RETURN
