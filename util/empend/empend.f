@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-21 00:02:14 +0100 (Mo, 21 Dez 2015) $
+Ccc   * $Date: 2015-12-22 08:35:39 +0100 (Di, 22 Dez 2015) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -4233,6 +4233,7 @@ C* Read the elastic cross section but exclude incident charged particles
   370 IF(IZI.GE.1000) GO TO 351
       MT=2
       READ (REC,808) XE
+      XE=XE/1000
 c...C* Read the level energy in the case of a metastable target
 c...      READ (REC(52:61),994) QQ
 c...      QQ=QQ*1.0E6
@@ -4344,7 +4345,7 @@ C* Test if reaction is already registered
 c...
 c...  print *,'Define discrete level MT',MT,QM,QI
 c...
-  396 XSC(NEN,IXS)=XS*1.E-3
+  396 XSC(NEN,IXS)=XS
 c...
 c...  print *,'Discrete level cross section',XS
 c...
