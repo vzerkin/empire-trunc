@@ -1,6 +1,6 @@
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-21 00:02:56 +0100 (Mo, 21 Dez 2015) $
-Ccc   * $Id: endres.f 4556 2015-12-20 23:02:56Z atrkov $
+Ccc   * $Date: 2015-12-22 08:37:06 +0100 (Di, 22 Dez 2015) $
+Ccc   * $Id: endres.f 4558 2015-12-22 07:37:06Z atrkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -1300,9 +1300,15 @@ C* Initialise
         MAT0=-1
         GO TO 21
       END IF
+c...
+c...  print *,'Searching za0,mf0,mt0',za0,mf0,mt0
+c...
 C*
 C* Loop to find the specified material
    20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+c...
+c...  print *,'za0,mat,mmm,mf,mt',za0,mat,mmm,mf,mt,ier
+c...
       IF(IER.GT.0 .OR. MAT.LT.0) GO TO 80
       IF(ZA0.LT.0) THEN
 C* Case: Search by MAT number
@@ -1310,17 +1316,31 @@ C* Case: Search by MAT number
       ELSE
 C* Case: Search by ZA number (including decimal LIS0)
         IF(MT.EQ.0) GO TO 20
-        IF(MAT.EQ.MMM ) GO TO 20
+        IF(MF.EQ.1. AND. MAT.EQ.MMM ) GO TO 20
         MMM=MAT
         READ (C66,92) ZA
-        IZA=ZA*10
+        IZA=NINT(ZA)*10
         IF(MF.EQ.1. AND. MT.EQ.451) THEN
           READ (LEF,92) DD,DD,LIS,LIS0
           IZA=IZA+LIS0
         END IF
-        IF(IZA.NE.IZA0) GO TO 20
+c...
+C...    print *,'    Try za0,mat',za0,mat,mat0,mf,mt
+c...
+        IF(IZA.NE.IZA0) THEN
+C*        -- Incorrect material, skip section
+          DO WHILE(MT.GT.0)
+            CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+            IF(IER.NE.0) GO TO 80
+          END DO
+          GO TO 20
+        END IF
+C*      -- Material found
         ZA=IZA*0.1
         ZA0=-MAT
+c...
+c...    print *,'    Found za0,mat',za0,mat
+c...
       END IF
 C* Loop to find the file number
    21 IF(MF0.EQ. 0) GO TO 30
@@ -1337,6 +1357,9 @@ C* Loop to find the reaction type number
       GO TO 32
 C* Normal termination
    40 READ (C66,92) ZA,AW,L1,L2,N1,N2
+c...
+c...  print *,'Found',za,mat,mf,mt
+c...
       RETURN
 C*
 C* Error traps
