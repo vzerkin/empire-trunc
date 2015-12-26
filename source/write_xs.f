@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4547 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2015-12-14 16:41:33 +0100 (Mo, 14 Dez 2015) $
+$DEBUG
+Ccc   * $Rev: 4559 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-26 21:29:21 +0100 (Sa, 26 Dez 2015) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -104,9 +105,8 @@ C     ENDDO
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.CSMinim) THEN
-
              DO nejc = 0, NDEJC         !loop over ejectiles
-                IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) CYCLE
+                IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim) CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
 C 
                 IF(ENDfp(nejc,nnuc).NE.1) THEN
@@ -127,7 +127,12 @@ C------------------(continuum part - same for all particles)
                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
      &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
                     ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
-                    gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
+                    IF(POPcs(0,INExc(nnuc)).gt.0) THEN
+                      gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
+                    ELSE
+                      ginclus = 0.d0
+                      gexclus = 1.d0
+                    ENDIF
                     if(ginclus.LE.CSMinim) THEN
                       ginclus = 0.d0
                       gexclus = 1.d0
@@ -471,6 +476,7 @@ C
 C                     First, gammas from (z,np+pn) 
                       emax_np  = EMAx(MT91) -Q(2,MT91)
                       nspec_np = min(INT(emax_np/DE) + 1,NDECSE-1)
+
                       dtmp =0.d0          
                       DO ie = 1, nspec_np +1 !       
                         dtmp = dtmp + CSEnp(ie)

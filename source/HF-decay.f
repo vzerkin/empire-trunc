@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4546 $
+Ccc   * $Rev: 4559 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:58:07 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Date: 2015-12-26 21:29:21 +0100 (Sa, 26 Dez 2015) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1723,6 +1723,8 @@ C     RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
           ilast = ie
         ENDIF
       ENDDO
+
+	IF(csum.LE.CSMinim) RETURN 
 
       ilast = MIN(ilast + 1,NDEX)
 
