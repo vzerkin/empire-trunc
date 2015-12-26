@@ -1,6 +1,6 @@
-! $Rev: 4545 $
+! $Rev: 4560 $
 ! $Author: rcapote $
-! $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+! $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -40,7 +40,8 @@
      &                 DV, D_Def(ndcollev,nddefcc), CSInc(ndnuc),       &
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,&
      &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,         &
-     &                 ECFis(NFHUMP),EEFermi(0:ndejc,0:ndnuc),          &
+     &                 ECFis(NFHUMP),ECDamp(NFHUMP),                    &
+     &                 EEFermi(0:ndejc,0:ndnuc),                        &
      &                 EFB(nfparab),EFDis(nftrans,nfparab),             &
      &                 EGDr1, EGDr2, EIN, EINl,  EJMass(0:ndejc)       
 
@@ -195,7 +196,7 @@
       COMMON /COMFIS_CON/ ROFisp, UGRid, ENH_ld, SHCfis,                &
      &                    DELtafis,XMInn, AFIs, awf, vibf12, vibfdt,    &
      &                    vibfnorm, GAMmafis, NRBinfis,  BFF, DEStepp,  &
-     &                    HCOnt, ECFis
+     &                    HCOnt, ECFis, ECDamp
 
       COMMON /COMFIS_I/ NRBar, NRWel, NRHump, NRFdis, IPFdis
       COMMON /COMFIS_OPT/FISbar, FISden, FISdis, FISopt, FISshi, FISmod,&

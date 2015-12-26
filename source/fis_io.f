@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4560 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -652,8 +652,10 @@ c
      &um weight(s) '
       WRITE (79,*)chstar
       DO nr = 1, nrwel
-         awf(nr) = 0.d0
-         WRITE (79,'(1x, A8, 1x, I1, 1f9.3)') '    Well', nr, awf(nr)
+         AWF(nr) = 0.d0
+         ECDamp(nr) = 0.d0
+         WRITE (79,'(1x, A8, 1x, I1, 2f9.3)') '    Well', nr, AWF(nr), 
+     &                                        ECDamp(nr)
       ENDDO
       WRITE (79,*)
       WRITE (79,*)'****************************************************'
@@ -831,8 +833,8 @@ c         READ (79,*)
 
       READ (79,'(//)')
       DO nr = 1, nrwel
-         READ (79,'(1x, A8, 1x, I1, 1f9.3)',ERR=385,END=385) 
-     &          cara8, i, awf(nr)
+         READ (79,'(1x, A8, 1x, I1, 2f9.3)',ERR=385,END=385) 
+     &          cara8, i, AWF(nr), ECDamp(nr)
       ENDDO
       GOTO 500
  385  CLOSE(79)
@@ -1339,7 +1341,8 @@ c
       WRITE (80,*)'Coefficient(s) used to calculate the direct continuum
      & weight(s) '
       DO nr = 1, nrwel
-         WRITE (80,'(1x, A8, 1x, I1, 1f9.3)') '    Well', nr, awf(nr)
+         WRITE (80,'(1x, A8, 1x, I1, 2f9.3)') '    Well', nr, AWF(nr),
+     &                              ECDamp(nr)
       ENDDO
       WRITE (80,*)
 

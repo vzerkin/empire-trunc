@@ -1,6 +1,6 @@
-!cc   * $Rev: 4504 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+!cc   * $Rev: 4560 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -56,5 +56,5 @@
      &,NDKNTR=3,NMAsse=9066                                             &
      &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=99                    &     
 !    &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
-     &,NFtrans=30,NFMOD=3,NFisbarpnt=300                                &
+     &,NFtrans=40,NFMOD=3,NFisbarpnt=300                                &
      &,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
