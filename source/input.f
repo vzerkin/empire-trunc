@@ -1,6 +1,6 @@
-!cc   * $Rev: 4548 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2015-12-15 09:07:30 +0100 (Di, 15 Dez 2015) $
+!cc   * $Rev: 4564 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2016-01-06 10:19:52 +0100 (Mi, 06 Jän 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -4051,18 +4051,22 @@ C
 C
          IF (name.EQ.'PEDISC') THEN
             PEQcont = 0
-            IF (val.GE.0.1) THEN
-              PEQcont = 1
-              WRITE (8,
-     &'('' Discrete levels included in PCROSS calculations'')')
-              WRITE (12,
-     &'('' Discrete levels included in PCROSS calculations'')')
-            ELSE
-              WRITE (8,
+C           IF (val.GE.0.1) THEN
+C             PEQcont = 1
+C             WRITE (8,
+C    &'('' Discrete levels included in PCROSS calculations'')')
+C             WRITE (12,
+C    &'('' Discrete levels included in PCROSS calculations'')')
+C           ELSE
+C             WRITE (8,
+C    &'('' Discrete levels not included in PCROSS calculations'')')
+C             WRITE (12,
+C    &'('' Discrete levels not included in PCROSS calculations'')')
+C           ENDIF
+            WRITE (8,
      &'('' Discrete levels not included in PCROSS calculations'')')
-              WRITE (12,
+            WRITE (12,
      &'('' Discrete levels not included in PCROSS calculations'')')
-            ENDIF
             GOTO 100
          ENDIF
 C
