@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4563 $
+Ccc   * $Rev: 4565 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-01-06 10:19:02 +0100 (Mi, 06 Jän 2016) $
+Ccc   * $Date: 2016-01-06 12:23:21 +0100 (Mi, 06 Jän 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -471,6 +471,10 @@ C        qout = 0.d0
 
          IF(RECoil.gt.0) then
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
+
+C            write(*,*) ENDf(nnuc),' ',NINT(A(nnuc)),INT(Z(nnuc)),' ',
+C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),sngl(CSPrd(nnuc))
+
             lprint = .FALSE.
             IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).GT.4 ) THEN
               CALL PRINT_RECOIL(nnuc,reactionx) 
@@ -510,13 +514,15 @@ C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
               lprint = .TRUE.
             ENDIF
 
-            IF ((.not.lprint) .and. ENDf(nnuc).EQ.2) THEN
+            IF ((.not.lprint) .and. ENDf(nnuc).EQ.2 .and. 
+     &           CSInc(nnuc).gt.0) THEN
               CALL PRINT_RECOIL(nnuc,reactionx)
               lprint = .TRUE.
             ENDIF
 
-            IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GE.2) 
-     &        CALL PRINT_RECOIL(nnuc,reactionx)
+            IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GE.2) THEN
+              CALL PRINT_RECOIL(nnuc,reactionx)
+            ENDIF
 
           ENDDO !over decaying nuclei in ENDF spectra printout
          ENDIF

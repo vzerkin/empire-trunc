@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4559 $
+Ccc   * $Rev: 4565 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-26 21:29:21 +0100 (Sa, 26 Dez 2015) $
+Ccc   * $Date: 2016-01-06 12:23:21 +0100 (Mi, 06 Jän 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -442,8 +442,10 @@ C
 !        ENDIF
 
 
-        IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
+
         kemax = max(NEX(nnuc) - 1,1)
+C       IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
+
         IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1 ) THEN
           IF (NINT(FISmod(nnuc)).EQ.0) THEN
             WRITE (80,*) 'csfis=', CSFis,' mb'
@@ -599,7 +601,11 @@ C-----------------
           ENDDO                 !loop over decaying nucleus spin
         ENDDO                   !loop over decaying nucleus parity
 
-        IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
+C       write(*,*) nnuc,ke,ENDf(nnuc),' ',
+C    &        NINT(A(nnuc)),INT(Z(nnuc)),' ',trim(Reaction(nnuc))
+
+C       IF (nnuc.GT.1 .AND. ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
+        IF (                ENDf(nnuc).GT.0  .AND. RECoil.GT.0)
      &       CALL GET_RECOIL(ke,nnuc) !recoil spectrum for ke bin
 
         IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1
