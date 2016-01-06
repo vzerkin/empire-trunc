@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-22 08:35:39 +0100 (Di, 22 Dez 2015) $
+Ccc   * $Date: 2016-01-06 17:00:24 +0100 (Mi, 06 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -469,10 +469,15 @@ c...
       WRITE(LTT,991)
       WRITE(LTT,991) ' Initial list of MT numbers for MF3     '
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LER,991)
+      WRITE(LER,991) ' Initial list of MT numbers for MF3     '
+      WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
 C... Suppress writing MT50 because it interferes with NJOY processing
       DO J=1,NXS
-        IF(IWO(MTH-1+J).EQ.50) IWO(MTH-1+J)=-50
+        IF(IWO(MTH-1+J).EQ. 50) IWO(MTH-1+J)=-50
       END DO
+c...
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
 c...
 c...
 c...  WRITE(LTT, * ) ' '
@@ -499,6 +504,10 @@ C* Separate out (z,t) from (z,2np) into MT105
 C* Eliminate all (nearly)-zero cross sections
       CALL FIXZRO(NXS,NEN,IWO(MTH),RWO(LXS),RWO(LXG)
      &           ,QQM,QQI,MXE,MXT,LTT,LER)
+c...
+c...  write(ler,*) 'After FIXZRO'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
 C*
 C* Scan the EMPIRE output for all reactions with energy/angle distrib.
       IF(ISPE.NE.0) THEN
@@ -509,6 +518,10 @@ C* Summ MT 5 contributions as necessary
         CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
      &             ,EIN,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER,INCL)
       END IF
+c...
+c...  write(ler,*) 'After SUMMT'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
 C* Write the ENDF file header record to output
       REC=' EMPEND Processing file : '//FLN1
       NS =-1
@@ -583,6 +596,10 @@ C*
       WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
+c...       
+c...  write(ler,*) 'After MF3'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...       
 C...
 c...  k1=lxs+mxe*77-1
 c...  k2=lxs+mxe*95-1
@@ -668,6 +685,10 @@ c...
 c...
 C...  print *,'Done reamf6 MT,ier',MT6,ier
 c...
+c...  write(ler,*) 'After REAMF6 for angular distributions'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
+c...
       IF(MT4.GT.0) THEN
         WRITE(LTT,995) ' WARNING - No recoil spectra given      '
         WRITE(LER,995) ' WARNING - No recoil spectra given      '
@@ -711,11 +732,18 @@ C* Check if yields for unassigned reactions need to be printed
         IF(IWO(LBI-1+I).EQ.5) GO TO 600
         IF(IWO(LBI-1+I).EQ.201) NK=NK+1
         IF(IWO(LBI-1+I).EQ.203) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.204) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.205) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.206) NK=NK+1
         IF(IWO(LBI-1+I).EQ.207) NK=NK+1
       END DO
       CALL WRMF6Y(LOU,MXE,MXT,LXR
      1           ,EIN,RWO(LXS),QQI,IWO(MTH),RWO(LSC)
      1           ,MAT,IZI,IZA,AWR,NEN,NXS,NS)
+c...
+c...  write(ler,*) 'After WRMF6Y'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
       WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',5
       WRITE(LTT,995) '         Number of outgoing particles : ',NK
       WRITE(LTT,991)
@@ -739,6 +767,10 @@ C* Read the EMPIRE output file to extract energy/angle distrib.
 c...
 c...      print *,'Read data for',nk,' particles'
 c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
+c...
+c...  write(ler,*) 'After REAMF6 for MT 5'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
 c...
       IF(NK.LE.0) GO TO 620
 C* Write the ENDF file-6 data
@@ -1972,8 +2004,26 @@ C*          Check for non-zero fission cross section
       END DO
       RETURN
       END
-      
-      
+c...  
+c...  subroutine prtinc(nxs,npt,MTH,ein,xsc,mxe,lou)
+c...  DIMENSION  MTH(nxs),EIN(MXE),XSC(MXE,nxs)
+c...  I005=0
+c...  I207=0
+c...  do IX=1,nxs
+c...    MT=ABS(MTH(IX))
+c...    IF(MT.EQ.  5) I005=IX
+c...    IF(MT.EQ.207) I207=IX
+c...  end do
+c...  write(lou,*) 'Write i005,i207',i005,i207,nxs
+c...  write(lou,*) (mth(j),j=1,nxs)
+c...  if(i005.eq.0 .or. i207.eq.0) return
+c...  do j=1,npt
+c...    write(lou,*) ein(j),xsc(j,i005),xsc(j,i207)
+c...  end do
+c...  write(lou,*) ' '
+c...  return
+c...  end
+c...  
       SUBROUTINE SUMMT5(IZI,IZA,NXS,NPT,MTH,NT6,MT6,EIN,XSC
      &                 ,QQM,QQI,MXE,MXT,LTT,LLG,INCL)
 C-Title  : Subroutine SUMMT5
@@ -1991,9 +2041,9 @@ C-D The exception are discrete level reactions, which do not necessarily
 C-D require differential data (if isotropic distributions are assumed).
 C-D   All reactions with MT>9999 and LFS>4 (if any) will be added to
 C-D MT5. The older convention is to try and identify possible 
-C-D light-particle products and add them to theparticle production cross 
-C-D sections MT201, 203 and 207 that contribute to MT5. These are used
-C-D to calculate the particle yields in MF6/MT5 and do not include
+C-D light-particle products and add them to the particle production
+C-D cross sections MT201, 203 and 207 that contribute to MT5. These are
+C-D used to calculate the particle yields in MF6/MT5 and do not include
 C-D particle production from explicitly represented reactions. In the
 C-D new EMPIRE convention the particle spectra from exclusively
 C-D calculated cross sections that do not appear explicitly with the
@@ -2174,9 +2224,9 @@ c...
         QQI(I5)=QQ
         KM=MT/10
         WRITE(LTT,904) ' Added to MT5 the production of ZA/Q/E/X'
-     &                ,KM,QQ,ETH5,XTH5
+     &                ,KM,QQ,ETH5,XTH5,INCL
         WRITE(LLG,904) ' Added to MT5 the production of ZA/Q/E/X'
-     &                ,KM,QQ,ETH5,XTH5
+     &                ,KM,QQ,ETH5,XTH5,INCL
 C*
         IF(INCL.EQ.1) CYCLE
 C*      -- Check for inclusive particle production
@@ -2216,7 +2266,7 @@ C*      -- Add neutron production to MT201
         END DO
       END DO
   100 RETURN
-  904 FORMAT(A,I6,1P,3E10.3)
+  904 FORMAT(A,I6,1P,3E10.3,I4)
       END
       
       
@@ -2290,7 +2340,7 @@ C* Integrate to calculate the cross section
         SS =SS + (E2-E1)*(X2+X1)/2
       END DO
 C*    -- Convert units from mb/MeV/st to b/eV
-      SS =SS*PI*4.0D-9
+      SS =SS*PI*2.0D-9
 C*
 C* Find the cross section in the stored array
   130 DO I=1,NXS
@@ -2607,7 +2657,7 @@ c...
         IF(E1.GE.0) SS =SS + (E2-E1)*(X2+X1)/2
       END DO
 C* Convert from mb/MeV/st to b/eV/st
-      SS=SS*PI*4D-9
+      SS=SS*PI*2D-9
 C* Normalise by the proton multiplicity
       SS =SS/NPROT
 C* Check if new Empire output with spectrum integral printout
@@ -3046,7 +3096,7 @@ C*    -- Suppress thinning of the fission spectra
 C-F Check if angles are given (No. of angles NAN=1 if isotropic)
       READ (LIN,891) REC
       IF(REC(1:40).EQ.'                                        ') THEN
-        FF =1/(4*PI)
+        FF =1/(2*PI)
         NAN=1
       ELSE
 C-F Read the angles at which the distributions are given (8 per row)
@@ -3364,7 +3414,7 @@ C...            stop
 C...    end if
 C...
 C...    IF(SPP.NE.0) THEN
-C...      SPL=SCR(1)*4*PI
+C...      SPL=SCR(1)*2*PI
 C...      ERL=100*(SPL/SPP-1)
 C...      WRITE(LTT,'(1P,3E10.3,0P,F10.2)') EOU,SPP,SPL,ERL
 C...      WRITE(LER,'(1P,3E10.3,0P,F10.2)') EOU,SPP,SPL,ERL
@@ -4697,7 +4747,7 @@ C* Identify reaction and check if it matches the required given by JT6
       MEQ=0
   112 CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 C...
-c...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
+C...  print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
 C...
       IF(MT.EQ.  0) GO TO 110
       IF(MT.NE.JT6) THEN
@@ -4790,7 +4840,7 @@ C* Find the cross section index
           IF(QQI(I).GE.0) ELO=EMIN
           ETH=MAX(ETH,EIN(1))
 c...
-c...    print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
+c...      print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
 c...
           MT =MTC
           MTX=MT
@@ -5222,6 +5272,10 @@ C...
 C* Calculate the double-dfferential spectrum integral SPC
 C* Check the angle-integrated spectrum against the read-in spectrum
       CALL CHKSPC(LIN,LTT,LER,MT6,LHI,NEP,EE,SPC,RWO(L64),MXSC,RWO(LSC))
+c...
+c...  print *,'CHKSPC: JT6,IZAP,EE,XS3,SPC',JT6,IZAP,EE,XS3,SPC
+c... &       ,SPC*2.E-9*PI
+c...
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
         WRITE(LTT,914) JT6,IZAP,EE,XS3,SPC
@@ -5256,7 +5310,8 @@ c...
 C*
 C* Scale distribution integral by 4*Pi to get the cross section
 C* Scale by 1.E-9 to change mb/MeV into b/eV
-      SPC=SPC*4.E-9*PI
+c...  SPC=SPC*4.E-9*PI
+      SPC=SPC*2.E-9*PI
 C* In case of gammas, replace the spectrum integral by the
 C* previously stored gamma production cross section.
 C* Test gamma yield consistency, but exclude reactions
@@ -5526,9 +5581,12 @@ C*          the cross section (neutrons only, exclude fission & MT5)
            XSP=0
          END IF
 c...
-c...          print *,'spc,y,xsp,xs3',spc,yl0,xsp,xs3
+c...     if(mt.eq.16) print *,'e,spc,y,xsp,xs3',ee,spc,yl0,xsp,xs3
 c...
-         DFP=100*(XSP-XS3)/XS3
+c...     I don't know where the factor of 2 comes from????
+c...
+c...     DFP=100*(XSP  -XS3)/XS3
+         DFP=100*(XSP*2-XS3)/XS3
          IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
            DFP=MIN(DFP,9999.9)
            WRITE(LTT,909) MT,EE,XS3,DFP
@@ -5763,7 +5821,7 @@ c...
 C*      -- Renormalise the distribution to match angle-integrated spectrum
         IF(JSP.GT.0 .AND. MT6.NE.0) THEN
           DO J=1,JSP
-            EJ =RWO(LSP+2*J-2)*1.e6
+            EJ =RWO(LSP+2*J-2)*1.E6
             SJ =RWO(LSP+2*J-1)/(4*PI)
             IF(NINT(EJ-EOU).EQ.0) THEN
 C...
