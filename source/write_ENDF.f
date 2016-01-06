@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4545 $
+Ccc   * $Rev: 4563 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Date: 2016-01-06 10:19:02 +0100 (Mi, 06 Jän 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -515,7 +515,7 @@ C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
               lprint = .TRUE.
             ENDIF
 
-            IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GT.2) 
+            IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GE.2) 
      &        CALL PRINT_RECOIL(nnuc,reactionx)
 
           ENDDO !over decaying nuclei in ENDF spectra printout
