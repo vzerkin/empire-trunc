@@ -1,6 +1,7 @@
+$DEBUG
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-01-06 17:00:24 +0100 (Mi, 06 Jän 2016) $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-01-07 12:20:02 +0100 (Do, 07 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6428,8 +6429,10 @@ C* Extrapolate points down to EMIN
             EE=RWO(LX)
             YY=0
           END IF
-          LX =LX-2
-          LY =LY-2
+C       TO AVOID NEGATIVE OR ZERO INDEXES, RCN
+          LX =max(LX-2,1)
+          LY =max(LY-2,1)
+C       TO AVOID NEGATIVE OR ZERO INDEXES, RCN
           NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
@@ -6828,6 +6831,9 @@ C*      -- Normalize the distribution
           F2=QQ(I+NP)
           SS=SS+(E2-E1)*(F2+F1)/2
         END DO
+C       TO AVOID DIVISION BY ZERO, RCN
+	  if(SS.LE.0) GOTO 39  
+C       TO AVOID DIVISION BY ZERO, RCN
         DO I=1,NP
           QQ(I+NP)=QQ(I+NP)/SS
         END DO
