@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-01-07 12:21:33 +0100 (Do, 07 Jän 2016) $
+Ccc   * $Date: 2016-01-07 14:42:35 +0100 (Do, 07 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6831,11 +6831,13 @@ C*      -- Normalize the distribution
           SS=SS+(E2-E1)*(F2+F1)/2
         END DO
 C       TO AVOID DIVISION BY ZERO, RCN
-        if(SS.LE.0) GOTO 39  
+C       if(SS.LE.0) GOTO 39  
 C       TO AVOID DIVISION BY ZERO, RCN
-        DO I=1,NP
-          QQ(I+NP)=QQ(I+NP)/SS
-        END DO
+        IF(SS.GT.0) THEN
+          DO I=1,NP
+            QQ(I+NP)=QQ(I+NP)/SS
+          END DO
+        ENDIF 
         CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
      1             ,NR,NP,NBT,INR,QQ(1),QQ(1+NP))
         GO TO 39
