@@ -9,9 +9,9 @@
 
    PRIVATE
 
-! $Rev: 4504 $
-! $Author: mherman $
-! $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+! $Rev: 4571 $
+! $Author: rcapote $
+! $Date: 2016-01-07 14:51:58 +0100 (Do, 07 Jän 2016) $
 !
 
    TYPE channel
@@ -682,8 +682,10 @@
 
                      IF(out%kres > 0) THEN
                        PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
+                       PLcont_lmax(out%kres) = lleg
                      ELSEIF(out%kres < 0) THEN
                        PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
+                       PL_lmax(-out%kres) = lleg
                      ENDIF
 
                    ENDDO
@@ -1770,8 +1772,10 @@
                         tmp = tmp*xnor*stmp  !*out%t*out%rho
                         IF(out%kres > 0) THEN
                            PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
+                           PLcont_lmax(out%kres) = lleg
                         ELSEIF(out%kres < 0) THEN
                            PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
+                           PL_lmax(-out%kres) = lleg
                         ENDIF
                      ENDDO
 
