@@ -1,7 +1,6 @@
-$DEBUG
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-01-07 12:20:02 +0100 (Do, 07 Jän 2016) $
+Ccc   * $Date: 2016-01-07 12:21:33 +0100 (Do, 07 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6832,7 +6831,7 @@ C*      -- Normalize the distribution
           SS=SS+(E2-E1)*(F2+F1)/2
         END DO
 C       TO AVOID DIVISION BY ZERO, RCN
-	  if(SS.LE.0) GOTO 39  
+        if(SS.LE.0) GOTO 39  
 C       TO AVOID DIVISION BY ZERO, RCN
         DO I=1,NP
           QQ(I+NP)=QQ(I+NP)/SS
