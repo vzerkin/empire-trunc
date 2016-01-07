@@ -9,7 +9,7 @@ library (EXFOR/CSISRS) -  operated through the Graphic User Interface (GUI).
 EMPIRE 3.2 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X
 (10.5 and higher).  It can also be run on Windows with either the MinGW and
 Cygwin environments.  EMPIRE is provided as source code that must be compiled to 
-function.  See the file INSTALL.TXT for installation instructions.
+function.  See the file INSTALL.TXT for installation instructions. 
 
 EMPIRE is intended to be a general, flexible, and easy to use tool 
 for basic research and evaluation of nuclear data. It offers a  possibility
