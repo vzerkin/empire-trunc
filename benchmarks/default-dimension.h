@@ -41,6 +41,7 @@
      &,NDEJCD=NDEJC                                                     &
      &,NLGRID=301                                                       & !Number of points in the HFB GDR RIPL files 
 
+
      &,NDVOM=7                                                          &
      &,NDWOM=7                                                          &
      &,NDVSO=7                                                          &
@@ -56,5 +57,5 @@
      &,NDKNTR=3,NMAsse=9066                                             &
      &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=99                    &     
 !    &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
-     &,NFtrans=30,NFMOD=3,NFisbarpnt=300                                &
+     &,NFtrans=40,NFMOD=3,NFisbarpnt=300                                &
      &,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
