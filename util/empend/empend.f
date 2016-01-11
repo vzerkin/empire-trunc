@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-01-07 14:42:35 +0100 (Do, 07 Jän 2016) $
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2016-01-11 20:40:10 +0100 (Mo, 11 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -137,6 +137,9 @@ C-M  15/12 - Major upgrade to split more correctly the reactions
 C-M          that produce the same residuals as (n,a) and (n,d)
 C-M          at higher energies.
 C-M          WARNING - full backward compatibility is not guaranteed.
+C-M  16/01 - Fix fission cross section (mb-b prolem)
+C-M        - Fix switching to tabular representation of elastic
+C-M          angular distributions (LTT=3).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3712,6 +3715,7 @@ c...  IF(REC( 5:20).EQ.'fission  cross s'            ) THEN
         QI=QQ
         MT=18
         READ(REC,809) XS
+        XS=XS/1000
         XG=-1
         GO TO 312
       END IF
@@ -4667,7 +4671,8 @@ C*
       DATA PI/3.1415926/
       DATA SMALL/1.E-5 /
 C* Maximum Legendre order
-      DATA LOMX/ 64 /
+C...  DATA LOMX/ 64 /
+      DATA LOMX/ 60 /
 C* Test print filenames and logical file units
       DATA FL92/'angdis.p92'/
      &     FLCU/'angdis.cur'/
@@ -4726,6 +4731,7 @@ C* For other reactions scan the file to identify all outgoing particles
       IF(REC(1:14).NE.'  Spectrum of '    ) GO TO 110
 C...
 c...      print *,'mt6',mt6,rec(14:30)
+C...      if(-mt6.gt.2) stop
 C...
       IF(MT6.LT.0) THEN
 C* For discrete level reactions consider only neutrons, protons, alphas
@@ -4966,12 +4972,11 @@ C...
         IF(LHI.LE. 1 ) THEN
           PRINT *,'WARNING - Invalid expansion order'
      &           ,' - try to fit tabular data'
-          GO TO 432
+          GO TO 440
         END IF
         READ (LIN,891) REC
 C* 
-C...    IF(LHI.LE.LOMX+1) THEN
-        IF(LHI.LE.LOMX-3) THEN
+        IF(LHI.LE.LOMX+1) THEN
           READ (LIN,809) (RWO(L64+L),L=1,LHI)
           LHI=LHI-1
           RWO(L64)=0
@@ -4982,24 +4987,20 @@ C...    IF(LHI.LE.LOMX+1) THEN
         END IF
       END IF
 C*
-  432 PRINT *,'WARNING - Tabular data at used for '
-     &       ,'Elastic ang.distr. at E=',EE,' eV'
-C*
 C* Convert tabulated distribution to Legendre polynomial expansion
       LSC=LAN+NEP*(NAN+1)
       LMX=MXR-LSC
-C...
-C... Temporarily limit order to suppress switching to tabulated form
-      LOX=MIN(LOMX+1,NAN)
-c...  LOX=MIN(LOMX,NAN-1)
-C...
+C*    -- Legendre order cannot exceed the number of intervals
+      LOX=MIN(LOMX,NAN-1)
       CALL ANGLEG(NAN,ANG,NEP,RWO(LAN),LOX,LHI,RWO(L64),LMX,RWO(LSC)
      &    ,MTC,EE,ZAP,IPRNT,LTT,LER,L92,LCU,LPT,EI1,EI2,EO1,EO2)
       LVEC=LHI+2
-      IF(LHI.LE.LOMX) GO TO 450
+      IF(LHI.LE.LOX) GO TO 450
 C* Number of Legendre coefficients too big - save tabular data
   440 IF(LTTE.NE.3) THEN
 C* On first pass duplicate previous point in tabular form
+        PRINT *,'WARNING - Tabular data at used for '
+     &         ,'Elastic ang.distr. at E=',EINZ,' eV'
         LHI=-NANZ
         LVEC=NANZ*2
         LTTE=3
@@ -6495,7 +6496,8 @@ C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INR(1)
       DIMENSION    QQ(MXQ)
 C* Tolerance limit for energy levels (eV)
-      DATA DLVL/1.E2/
+c...  DATA DLVL/1.E2/
+      DATA DLVL/5.E2/
 C*
       DATA ZRO/0./
       DATA PTST/'        '/
@@ -6526,7 +6528,6 @@ c...  if(mt6.ge.600) then
 c...  if(mt6.gt.  2) then
 c...    PRINT *,'At 22,lct0,mt6',lct0,mt6
 c...    PRINT '(1x,1p,5e12.5)',(RWO(J),J=1,400)    
-c...    stop
 c...  end if
 c...
       IF(LCT0.LT.0) THEN
@@ -6565,8 +6566,11 @@ C* Scan the data-set to check if any tabular data exist
       NM =0
       DO IE=1,NE
 c...
-c...    print *,'ie,ne,ll',ie,ne,ll,np
-c...    print *,(rwo(j),j=LL,LL+12+2*NP)
+C...    if(rwo(ll).ge.1.5e7) then
+C...      print *,'ie,ne,ll',ie,ne,ll,np
+C...      print *,(rwo(j),j=LL,LL+12+2*NP)
+C...      stop
+C...    end if
 c...    stop
 c...
         NA  =NINT(RWO(LL+1))
@@ -6584,22 +6588,16 @@ c...
       LL =LL0
       JE =NE1
       NE2=NE-NE1
+      LTTE=1
+      IF(NE2.GT.0) LTTE=3
       IF(NE2.EQ.0) NM  =0
 C* Define format-specific shift and length parameters
       IF(LANG.GT.10) THEN
         LTTE=2
         LSHF=0
         LNA1=2
-      ELSE
-        LTTE=1
-        IF(NE2.GT.0) LTTE=3
-        IF(IE.LE.NE1) THEN
-          LSHF=1
-          LNA1=1
-        ELSE
-          LSHF=0
-          LNA1=0
-        END IF
+        IF(NE2.GT.0)
+     &    STOP 'WRIMF4 ERROR - LANG>10 and NE1<NE'
       END IF
 C*
 C* Loop over the incident particle energies
@@ -6611,13 +6609,8 @@ C* Loop over the incident particle energies
         NW  =NINT(RWO(LL+2))
         NEP =NINT(RWO(LL+3))
 C*      --Define format-specific shift and length parameters
-        IF(LANG.GT.10) THEN
-          LTTE=2
-          LSHF=0
-          LNA1=2
-        ELSE
-          LTTE=1
-          IF(NE2.GT.0) LTTE=3
+C*        for Legendre and mixed representation
+        IF(LANG.LE.10) THEN
           IF(IE.LE.NE1) THEN
             LSHF=1
             LNA1=1
@@ -6630,7 +6623,7 @@ c...
 c...    print *,'MT,Ein,NA,NW,NEP,LTTE',MT,Ein,NA,NW,NEP,LTTE
 C... &         ,IE,NA1,LSHF,LNA1
 c...    
-        NA1 =NA+LNA1
+        NA1 =ABS(NA)+LNA1
         LL  =LL+4
 C*      -- Determine the outgoing particle energy
         IF(MT.EQ.2) THEN
@@ -6642,7 +6635,7 @@ C*        Determine the outgoing particle energy for discrete levels
 c...    
 c...      IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
 c...      -- Do recoil correction unconditionally since this 
-c...         is how it isdone in EMPIRE
+c...         is how it is done in EMPIRE
           EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
 c...
 c...      print *,'AWR,AWI,AWP',AWR,AWI,AWP
@@ -6704,6 +6697,9 @@ c...
 C*      -- Check if discrete level data are present
         IF(E2.GE.0) EOU=ABS(EOU)
 C*
+C...
+C...    print *,'nep,na1,l2,e2',nep,na1,l2,e2
+C...
         IF(NEP.LE.1) THEN
 C*        -- Copy the coefficients if a single point is given
           IF(NW.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
@@ -6713,7 +6709,7 @@ c...        print *,na1,ie,ne1,(rwo(l2-1+j),j=1,20)
 c...        stop
 c...      end if
 c...
-          CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
+          IF(NA.GT.0) CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
         ELSE
 C*       --Linearly interpolate angular distributions to EOU
           IF(IE.GT.NE1)
@@ -6818,7 +6814,17 @@ C*        -- Write the TAB2 record for the tabular data
      1               ,NR,NE2,NBT,INR)
         END IF
         NP  =IABS(NA)
+        NP2 =NP*2
+        CALL FLDMOV(NP2,RWO(L2+LSHF),QQ)
         NBT(1)=NP
+c...
+c...      PRINT *,'mt,NP,Ein',mt,NP,EIN
+c...      IP=MIN(2*NP,500)
+c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,IP)
+C...      PRINT '(1x,1p,5e12.5)',(QQ(J+NA1),J=1,IP)
+c...      STOP
+c...c...      IF(ein.GT.4.5e6) stop
+c...
 C*      -- Normalize the distribution
         SS=0
         E2=QQ(1)
@@ -6871,7 +6877,7 @@ c...c...      IF(ein.GT.4.5e6) stop
 c...    end if
 c...
 C*      -- Angular distributions thinning tolerance
-C...    ERR=0
+c...    ERR=0
         ERR=0.005
         IF(ERR.GT.0) THEN
 C*        -- Cosines at QQ(1+NA1+NP), distributins at QQ(1+NP)
@@ -7265,7 +7271,7 @@ C* Scan activation cross sections for associated MT numbers
       NRC=0
       CALL POUCHR(PTST,IZI,AWI)
 c...
-      print '(10I8)',(mth(i),i=1,nxs)
+C...  print '(10I8)',(mth(i),i=1,nxs)
 c...
       IF(NXS.GT.MXI) STOP 'WRMF10 ERROR - MXI limit exceeded'
       DO I=1,NXS
