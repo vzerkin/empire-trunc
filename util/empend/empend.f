@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-01-11 20:40:10 +0100 (Mo, 11 Jän 2016) $
+Ccc   * $Date: 2016-01-22 12:36:39 +0100 (Fr, 22 Jän 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -4648,6 +4648,7 @@ C-V        (adjustment of lower energy limit done in WRMF6).
 C-V  08/02 Set LCT=3 (CM-light particles, LAB-recoils).
 C-V  12/02 Set LCT=2 after careful review of Empire methods.
 C-V  12/01 Set LCT=1 for fission spectra
+C-V  16/01 Set LANG to switch between Legendre and tabular format
 C-Description:
 C-D  Error trap flags:
 C-D  IER = -1  Corrupted work array?
@@ -5204,8 +5205,9 @@ C*
 C* Switch to tabular representation for anisotropic outgoing
 C* charged particles
 C...
+C... Lin-log interpolation might be better but lin-lin is simpler
 C...  IF(KZAK.GE.1001 .AND. NAN.GT.1) LANG=14
-      IF(KZAK.GE.1001 .AND. NAN.GT.1) LANG=12
+C...  IF(KZAK.GE.1001 .AND. NAN.GT.1) LANG=12
 C...
 C*
 C* Check that all read distributions are non-negative
