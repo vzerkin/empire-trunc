@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4578 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2016-02-01 20:09:15 +0100 (Mo, 01 Feb 2016) $
 
       SUBROUTINE PFNS_calc(nnuc)
 
@@ -155,6 +155,10 @@ C
      &          , deltae_pfns, PFNtke, PFNrat, PFNalp, PFNere)
 
             fnorm = CSPfis(nnuc)/TOTcsfis
+
+C           write (*,*) nint(A(nnuc)),nint(Z(nnuc)),
+C    *            sngl(CSPfis(nnuc)),sngl(TOTcsfis)
+
             if(eneutr.gt.0) then
               DO ie = 1, nepfns
                    ftmp = fmaxw(enepfns(ie),tequiv)
@@ -268,6 +272,10 @@ C                       ! Default value 1.32 MeV
      &   ,'  MeV'
         WRITE ( 8,'(''  Tmaxwell for plot = '',G12.5,A5)') tequiv
      &   ,'  MeV'
+        WRITE (8,'(''  Delta-epsil   '',F12.9)') deltae_pfns
+        WRITE 
+     &     (8,'(   ''  Total fission cross section '',G12.5,'' mb'')')
+     &            TOTcsfis
         WRITE ( 8,'(''  Multiplicity (nue) '',F6.3)') fnubar
         if(fnubar.ne.1) 
      &         WRITE ( 8,'(''  Nubar from evaluated library '')')
@@ -280,13 +288,16 @@ C                       ! Default value 1.32 MeV
         WRITE(12,*)
         WRITE (12,'(''  Total PFNS  for  Elab='',
      &  E10.4,'' MeV, Norm='',F10.8)') EINl, ftmp
-
         WRITE (12,'(''  Number of fissioning nuclei '',I3)') nfission
         WRITE (12,'(''  Total PFNS average energy  '',G12.5,A5)') eneutr
      &   ,'  MeV'
         WRITE (12,'(''  Tmaxwell for plot = '',G12.5,A5)') tequiv
      &   ,'  MeV'
         WRITE (12,'(''  Normalization '',F12.9)') ftmp
+        WRITE (12,'(''  Delta-epsil   '',F12.9)') deltae_pfns
+        WRITE 
+     &     (12,'(   ''  Total fission cross section '',G12.5,'' mb'')')
+     &            TOTcsfis
         WRITE (12,'(''  Multiplicity (nue) '',F6.3)') fnubar
         if(fnubar.ne.1) 
      &        WRITE (12,'(''  Nubar from evaluated library '')')
