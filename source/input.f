@@ -1,6 +1,6 @@
-!cc   * $Rev: 4564 $
+!cc   * $Rev: 4580 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-01-06 10:19:52 +0100 (Mi, 06 Jän 2016) $
+!cc   * $Date: 2016-02-03 11:57:27 +0100 (Mi, 03 Feb 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -1965,6 +1965,13 @@ C
 C-----determination of excitation energy matrix in CN
 C
       ECUt(1) = ELV(NLV(1),1)
+      IF(EMAX(1).LT.ECUT(1)) THEN
+      WRITE(*,*) 'ERROR: INCREASE THE INCIDENT ENERGY or'
+      WRITE(*,*) 'ERROR:  SET ECONT  for the target < Einc'
+      WRITE(8,*) 'ERROR: INCREASE THE INCIDENT ENERGY or'
+      WRITE(8,*) 'ERROR:  SET ECONT  for the target < Einc'
+      STOP 'ERROR: See the long output'
+      ENDIF
       NEX(1) = NEXreq
       IF (FITlev.GT.0) THEN
          ECUt(1) = 0.d0  

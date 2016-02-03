@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4566 $
+Ccc   * $Rev: 4580 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-01-06 12:42:10 +0100 (Mi, 06 Jän 2016) $
+Ccc   * $Date: 2016-02-03 11:57:27 +0100 (Mi, 03 Feb 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -105,6 +105,7 @@ C       WRITE (12,'(1X,/,10X,40(1H-),/)')
       ENDIF
 
       IF (FITomp.LE.0) THEN
+
         IF (nnuc.NE.1) THEN
           IF (nnuc.EQ.mt91) THEN
             nejc = 1
@@ -124,8 +125,10 @@ C           Saving CSDirlev() array before the gamma cascade to CSDirsav()
             CSDirsav(il,nejc) = CSDirlev(il,nejc) 
           ENDDO
 C---------CN contribution to elastic ddx
+          ELCncs = 0.d0
 C         ELCncs = POPlv(LEVtarg,mt2)/PIx4 
-          ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
+          IF(nint(ZEJc(0)).eq.0 .AND. nint(AEJc(0)).GT.0) 
+     *      ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
 C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
 
           IF(dtmp.LE.0.0 .AND. POPlv(1,nnuc).LE.0.d0) GOTO 1460
