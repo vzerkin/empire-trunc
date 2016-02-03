@@ -1,8 +1,8 @@
-Ccc   * $Rev: 4578 $
+Ccc   * $Rev: 4582 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-01 20:09:15 +0100 (Mo, 01 Feb 2016) $
+Ccc   * $Date: 2016-02-04 00:06:07 +0100 (Do, 04 Feb 2016) $
 
-      SUBROUTINE PFNS_calc(nnuc)
+      SUBROUTINE PFNS_calc(nnuc,eincid)
 
       use nubar_reader
 
@@ -11,11 +11,12 @@ Ccc   * $Date: 2016-02-01 20:09:15 +0100 (Mo, 01 Feb 2016) $
       INCLUDE "global.h"
 
       INTEGER nnuc
+      DOUBLE PRECISION eincid 
 
 C     PFNS quantities  
 C     Total prompt fission spectra only for neutrons and assumed isotropic 
       DOUBLE PRECISION  emiss_en(NDEPFN),
-     & tequiv, fmaxw, fnorm, eincid, eneutr, ftmp, 
+     & tequiv, fmaxw, fnorm, eneutr, ftmp, 
      & post_fisn(NDEPFN), ratio2maxw(NDEPFN), fniueval
 
       INTEGER iaf, izf, nejc, ie 
@@ -33,6 +34,9 @@ C     Checked if Z of the fissioning nucleus
 C     is equal to the target, if not PFNS skipped  
       IF (NINT(Z(0)) .NE. NINT(Z(nnuc))) RETURN
 C     (Z(0).eq.Z(nnuc) .OR. Z(0)-1.eq.Z(nnuc)) ! neutron or proton chain
+
+C     If no more excitation energy available, then PFN emission stopped
+      if(eincid.LT.0.d0) RETURN
 
       IF (FISSPE.EQ.0 .OR. TOTcsfis.LE.0.d0 .OR.
      &    CSPfis(nnuc).LE.0.0D0 .OR.
@@ -70,6 +74,7 @@ C             Below first chance, no emissive contributions to fission spectra
 C             Only fission neutrons emitted from fully accelerated fragments
 C             Initializing the pseudo incident energy
               eincid = EXCn - Q(1,1)  ! emitting from CN, nnuc = 1
+C             write(*,*) 'Eincid*=',eincid,' nfission=   0'
 C
 C             The total nubar is calculated for the incident energy and 
 C                used for the normalization of the total PFNS
@@ -95,7 +100,7 @@ C             For higher emission chances, the corresponding
 C             neutron binding energy is substracted iteratively
 C
               eincid = eincid - Q(1,nnuc)               
-
+C             write(*,*) 'Eincid*=',eincid,' nfission=',nfission
             ENDIF
 C
 C           If no more excitation energy available, then PFN emission stopped

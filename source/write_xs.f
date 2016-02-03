@@ -1,7 +1,6 @@
-c$DEBUG
-Ccc   * $Rev: 4562 $
-Ccc   * $Author: dbrown $
-Ccc   * $Date: 2016-01-04 14:59:02 +0100 (Mo, 04 Jän 2016) $
+Ccc   * $Rev: 4582 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-02-04 00:06:07 +0100 (Do, 04 Feb 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -16,6 +15,7 @@ C     common variables
 C
 C     local variables
 C
+	DOUBLE PRECISION eincid 
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc,itmp
       INTEGER nspec_np,iemm,iprn
@@ -102,6 +102,7 @@ C     ENDDO
 
       csnp = 0.d0
       csenp = 0.d0
+	eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
            IF (CSPrd(nnuc).GT.CSMinim) THEN
@@ -318,27 +319,8 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
                      ENDIF
 
                      check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
-C                    if(ie.ne.1) then
-C                      check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
-C                    else
-C                      check_DE(ie) =       PI*csum*PI/(NDAng - 1) ! PI/90.d0
-C                    endif
                    ENDDO
 C
-C                  This is a patch to correct the printed DDXS
-C                  for DWBA to the continuum
-C
-C                  if(nejc.eq.7) then
-C                   DO ie = 1, nspec + 1
-C                    IF(check_DE(ie).le.0) cycle
-C                     DO nang = 1, NDANG
-C                      cseaprnt(ie,nang) = 
-C    >                       POPcse(0,nejc,ie,INExc(nnuc))/check_DE(ie)*
-C    >                 cseaprnt(ie,nang)
-C                      check_DE(ie) = POPcse(0,nejc,ie,INExc(nnuc)) 
-C                    ENDDO
-C                   ENDDO
-C                  endif
                    iprn = 1
                    DO ie = 1, nspec 
                                      ! print DDX spectrum
@@ -673,7 +655,7 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
 C********************************************
-1550     CALL PFNS_calc(nnuc)
+1550     CALL PFNS_calc(nnuc,eincid)
 C********************************************
 
       ENDDO  ! loop over residues (not decaying nuclei)
