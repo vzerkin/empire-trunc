@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:06:18 +0100 (Mo, 14 Dez 2015) $
-Ccc   * $Id: lev-dens.f 4544 2015-12-14 13:06:18Z rcapote $
+Ccc   * $Date: 2016-02-03 11:56:07 +0100 (Mi, 03 Feb 2016) $
+Ccc   * $Id: lev-dens.f 4579 2016-02-03 10:56:07Z rcapote $
 C
 C
 C
@@ -1437,7 +1437,11 @@ C--------set nuclear temperature to the value from the systematics
       IF (igna.NE.0D0) THEN
          DO i = 1, 10  
 C           write(*,*) '***',a(nnuc),z(nnuc),ux
-C           write(*,*) am, 6/t, atil
+C           write(*,*) am, 6.d0/t, atil
+            IF(am*t.LT.6.d0) then
+	        am = atil
+              exit
+            ENDIF
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
             am = atil*FSHELL(ux,SHC(Nnuc),-GAMma)
          ENDDO
