@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-01-22 12:36:39 +0100 (Fr, 22 Jän 2016) $
+Ccc   * $Date: 2016-02-05 10:05:04 +0100 (Fr, 05 Feb 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -140,6 +140,7 @@ C-M          WARNING - full backward compatibility is not guaranteed.
 C-M  16/01 - Fix fission cross section (mb-b prolem)
 C-M        - Fix switching to tabular representation of elastic
 C-M          angular distributions (LTT=3).
+C-M  16/02 Fix multiplicities in MF6/MT5 that were off by a factor 2.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -773,6 +774,7 @@ c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
 c...
 c...  write(ler,*) 'After REAMF6 for MT 5'
 c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...  stop
 c...
 c...
       IF(NK.LE.0) GO TO 620
@@ -2011,17 +2013,19 @@ c...
 c...  subroutine prtinc(nxs,npt,MTH,ein,xsc,mxe,lou)
 c...  DIMENSION  MTH(nxs),EIN(MXE),XSC(MXE,nxs)
 c...  I005=0
+c...  I203=0
 c...  I207=0
 c...  do IX=1,nxs
 c...    MT=ABS(MTH(IX))
 c...    IF(MT.EQ.  5) I005=IX
+c...    IF(MT.EQ.203) I203=IX
 c...    IF(MT.EQ.207) I207=IX
 c...  end do
-c...  write(lou,*) 'Write i005,i207',i005,i207,nxs
+c...  write(lou,*) 'Write i005,i203,i207',i005,i203,i207,nxs
 c...  write(lou,*) (mth(j),j=1,nxs)
-c...  if(i005.eq.0 .or. i207.eq.0) return
+c...  if(i005.eq.0 .or. i203.eq.0 .or. i207.eq.0) return
 c...  do j=1,npt
-c...    write(lou,*) ein(j),xsc(j,i005),xsc(j,i207)
+c...    write(lou,*) ein(j),xsc(j,i005),xsc(j,i203),xsc(j,i207)
 c...  end do
 c...  write(lou,*) ' '
 c...  return
@@ -2075,6 +2079,14 @@ C* Process only if NT6>0
         IF(MT.EQ.205) I205=IX
         IF(MT.EQ.206) I206=IX
         IF(MT.EQ.207) I207=IX
+c...
+        if(mt.eq.203) then
+          write(*,*) ' Cross section for MT',MT
+          do j=1,npt
+            write(*,'(1p,2e11.4)') j,ein(j),xsc(j,ix)
+          end do
+        end if
+c...
 C* Consider eligible reactions
         IF((MT.GT.  5 .AND. MT.LT. 50 .AND. MT.NE.18) .OR.
      &     (MT.GE. 91 .AND. MT.LT.200).OR.
@@ -2111,7 +2123,8 @@ c...
               END DO
             ELSE
               IF(JZA.GT.0) MT=10*JZA+5
-              print *,'     redefine',mth(ix),' to',mt
+              WRITE(LTT,'(A,I4,A,I7)') '   Redefine MT',mth(ix),' to',mt
+              WRITE(LLG,'(A,I4,A,I7)') '   Redefine MT',mth(ix),' to',mt
               MTH(IX)=MT
             END IF
           END IF
@@ -2268,6 +2281,14 @@ C*      -- Add neutron production to MT201
           KM=KM+   1
         END DO
       END DO
+c...
+        if(mt.eq.203) then
+          write(*,*) ' Cross section for MT',MT
+          do j=1,npt
+            write(*,'(1p,2e11.4)') j,ein(j),xsc(j,ix)
+          end do
+        end if
+c...
   100 RETURN
   904 FORMAT(A,I6,1P,3E10.3,I4)
       END
@@ -3099,7 +3120,7 @@ C*    -- Suppress thinning of the fission spectra
 C-F Check if angles are given (No. of angles NAN=1 if isotropic)
       READ (LIN,891) REC
       IF(REC(1:40).EQ.'                                        ') THEN
-        FF =1/(2*PI)
+        FF =1/(4*PI)
         NAN=1
       ELSE
 C-F Read the angles at which the distributions are given (8 per row)
@@ -3604,8 +3625,8 @@ c...      if(i.eq.1 .and. j.lt.10) print *,j,csb,dsb,ds0
 C...      if(i.eq.1              ) print *,j,csb,dsb,ds0
 c...
         END DO
-C*      -- Save the integral as the first angular point
-        RWO(LDZ+1)=DS0
+C*      -- Save the average value as the first angular point
+        RWO(LDZ+1)=DS0/2
         DS1=DS0
         IF(DS0.LE.0) THEN
 C*        -- If integral is zero, replace with isotropic distribution
@@ -3614,7 +3635,6 @@ C*        -- If integral is zero, replace with isotropic distribution
             DST(LDX+NAN+1-J)=0.5
           END DO
         END IF
-        DS0=DS0/2
 C*      -- Save the normalised distribution for all angular points
         DO J=1,NAN
           RWO(LDZ  +J*2)=ANG(  1+NAN-J)
@@ -4787,7 +4807,7 @@ C* New particle for this reaction identified
         RETURN
       END IF
 C...
-C...  print *,'    New NK',NK,' particle ',PTST,KZAK
+c...  print *,'    New NK',NK,' particle ',PTST,KZAK
 C...
       POUT(NK)=PTST
       IZAK(NK)=KZAK
@@ -5064,7 +5084,7 @@ C* Identify reaction and check if it matches the required given by JT6
       MEQ=0
   612 CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 C...
-C...      print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
+C...  print *,'     Assigned MT, requested JT,MTC',MT,JT6,MTC
 C...
       IF(MT.EQ.  0) GO TO 210
       IF(MT.NE.JT6) THEN
@@ -5123,7 +5143,7 @@ c...
       END IF
 C*
 C...
-c...  print *,'  particle ZAP,AWP',Kzak,awp
+C...  print *,'  particle ZAP,AWP',Kzak,awp
 c...
       IZAP=KZAK
       ZAP=KZAK
@@ -5159,13 +5179,13 @@ C*   LPK - beginnng of the data for a specific subsection
       LPK=LXA+12+2*(NE3+1)
       LB1=LPK
 c...
-c...       PRINT *,'      REAMF6 IK,LXA,LPK,LB1',IK,LXA,LPK,LB1
+c...  PRINT *,'      REAMF6 IK,LXA,LPK,LB1',IK,LXA,LPK,LB1
 c...
   620 CONTINUE
-c
-c...      print *,'   ee,e1,e2',ee,e1,e2
-c...      print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
-c
+c...
+c...  print *,'   ee,e1,e2',ee,e1,e2
+c...  print *,'       jt6,je3,xs,nxs',jt6,je3,xs3,nxs,NE6
+c...
 C*
 C* Process correlated energy/angle distribution for this energy
       L6 =LB1
@@ -5277,7 +5297,7 @@ C* Check the angle-integrated spectrum against the read-in spectrum
       CALL CHKSPC(LIN,LTT,LER,MT6,LHI,NEP,EE,SPC,RWO(L64),MXSC,RWO(LSC))
 c...
 c...  print *,'CHKSPC: JT6,IZAP,EE,XS3,SPC',JT6,IZAP,EE,XS3,SPC
-c... &       ,SPC*2.E-9*PI
+c... &       ,SPC*4.E-9*PI
 c...
 C* If the integral is zero, skip this energy point
       IF(SPC.LE.0) THEN
@@ -5313,16 +5333,16 @@ c...
 C*
 C* Scale distribution integral by 4*Pi to get the cross section
 C* Scale by 1.E-9 to change mb/MeV into b/eV
-c...  SPC=SPC*4.E-9*PI
-      SPC=SPC*2.E-9*PI
+      SPC=SPC*4.E-9*PI
+C...  SPC=SPC*2.E-9*PI
 C* In case of gammas, replace the spectrum integral by the
 C* previously stored gamma production cross section.
 C* Test gamma yield consistency, but exclude reactions
 C* producing the same residual (gamma-spectra are lumped by residual)
       IF(ZAP.EQ.0 .AND. XG3.GT.0) THEN
-        IF((MT.NE. 28.AND.MT.NE.104) .AND.
-     &     (MT.NE. 41.AND.MT.NE. 32.AND.MT.NE.105) .AND.
-     &     (MT.NE. 44.AND.MT.NE.115.AND.MT.NE.106)) THEN
+        IF((MT.NE. 28 .AND. MT.NE.104) .AND. MT.NE.849  .AND.
+     &     (MT.NE. 41 .AND. MT.NE. 32  .AND. MT.NE.105) .AND.
+     &     (MT.NE. 44 .AND. MT.NE.115  .AND. MT.NE.106)) THEN
           DXG=100*(SPC/XG3-1)
           IF(ABS(DXG).GT.2) THEN
             IF(DXG.GT. 999) DXG= 999
@@ -5534,8 +5554,8 @@ C*
 C* Distributions for one incident energy processed - define yields
       NE6=NE6+1
 c...
-c...          print *,'      Processed energy ne6',ne6,ee,eth
-c...          print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
+c...  print *,'      Processed energy ne6',ne6,ee,eth
+c...  print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
 c...
       IF(MT6.LT.0) GO TO 210
 C* Particle multiplicity for gammas and light particles in MT 5
@@ -5586,14 +5606,13 @@ C*          the cross section (neutrons only, exclude fission & MT5)
 c...
 c...     if(mt.eq.16) print *,'e,spc,y,xsp,xs3',ee,spc,yl0,xsp,xs3
 c...
-c...     I don't know where the factor of 2 comes from????
-c...
-c...     DFP=100*(XSP  -XS3)/XS3
-         DFP=100*(XSP*2-XS3)/XS3
+         DFP=100*(XSP  -XS3)/XS3
          IF(XS3.GT.1.E-6.AND.ABS(DFP).GT.2. .AND. MT.NE.18) THEN
-           DFP=MIN(DFP,9999.9)
-           WRITE(LTT,909) MT,EE,XS3,DFP
-           WRITE(LER,909) MT,EE,XS3,DFP
+           DDD=ABS(DFP)
+           DDD=MIN(DDD,9999.9)
+           IF(DFP.LT.0) DDD=-DDD
+           WRITE(LTT,909) MT,EE,XS3,DDD
+           WRITE(LER,909) MT,EE,XS3,DDD
          END IF
       END IF
       GO TO 210
@@ -5752,6 +5771,7 @@ c.   &       18X,'Expected',1P,E10.3,' Diff.',F6.1,'%')
       SUBROUTINE CHKSPC(LIN,LTT,LER,MT6,LHI,NEP,EE,SPC,DST,MXR,RWO)
 C-Title  : Subroutine CHKSPC
 C-Purpose: Check the spectrum integral against the read-in, if present
+C-
       CHARACTER*136 REC
       DIMENSION DST(*),RWO(MXR)
       DATA PI/3.1415926/
@@ -5760,7 +5780,7 @@ C*
       LSC=1
       LSP=0
       JSP=0
-C* Try reading angle-integrated spectra
+C* Try reading angle-integrated spectra at index LSP
       READ (LIN,891) REC
 C*      -- Read the angle integrated continuum spectra if present
       IF(REC(1:30).EQ.'    Lev #     Integrated Discr') THEN
@@ -5791,7 +5811,7 @@ C*      -- Read the angle integrated continuum spectra if present
           JSP=JSP+1
           READ (REC,*) RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
 C...
-C...      print *,jsp,RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C...      print *, jsp,RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
 C...
           GO TO 624
         END IF
@@ -5821,14 +5841,14 @@ c...
 c...
 c...    if(abs(mt6).gt.100) print *,'eou,peu',eou,peu
 c...
-C*      -- Renormalise the distribution to match angle-integrated spectrum
-        IF(JSP.GT.0 .AND. MT6.NE.0) THEN
+C*      -- Renormalise the distribution to match angle-integ.spectrum
+        IF(JSP.GT.0 .AND. MT6.GT.0) THEN
           DO J=1,JSP
             EJ =RWO(LSP+2*J-2)*1.E6
             SJ =RWO(LSP+2*J-1)/(4*PI)
             IF(NINT(EJ-EOU).EQ.0) THEN
 C...
-C...          print *,'Matching', J,EOU,EJ,PEU,SJ ,ee
+c...        print *,'Matching', J,EOU,EJ,PEU,SJ ,ee
 C...
               IF(PEU.GT.0) THEN
                 IF(ABS(SJ-PEU).GT.PEU*0.02) THEN
@@ -5837,7 +5857,7 @@ C...
                   DO L=1,LL1
                     DST(LI+L)=DST(LI+L)*RR
                   END DO
-                  IF(ABS(RR-1).GT.ABS(RNRM-1) .AND. PEU.GT.1E-10) THEN
+C#                IF(ABS(RR-1).GT.ABS(RNRM-1) .AND. PEU.GT.1E-10) THEN
                     ENRM=EOU
                     RNRM=RR
                     SPMX=PEU
@@ -5846,12 +5866,12 @@ C...
                     IF(DD.GT. 99999.9) DD= 99999.9
                     IF(DD.LT.-99999.9) DD=-99999.9
 c...
-c...                WRITE(LTT,908) EE,EOU,DD,PEU,SJ
-                    WRITE(LER,908) EE,EOU,DD,PEU,SJ
+c...                WRITE(LTT,908) EE,EOU,DD,PEU*4*PI,SJ*4*PI
+                    WRITE(LER,908) EE,EOU,DD,PEU*4*PI,SJ*4*PI
 c...
                   END IF
                   PEU=SJ
-                END IF
+C#              END IF
               END IF
               EXIT
             END IF
@@ -5865,11 +5885,10 @@ C...
         IF(EOU.GT.0) SPC=SPC+(PEU+PEL)*(EOU-EOL)/2
 c...
 C...    if(abs(mt6).gt.100) then
-C...    if(IZAP.gt.2004) then
-C...      print *,'eol,eou,pel,peu,spc',eol,eou,pel,peu,spc
+c...      print *,'eol,eou,pel,peu,spc',eol,eou,pel,peu,spc
 C...      print *,(rwo(li-1+j),j=1,5)
 C...      if(spc.le.0) stop
-C...    end if
+c...    end if
 c...
         LI =LI+LHI+2
       END DO
