@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-02-14 12:12:47 +0100 (So, 14 Feb 2016) $
+Ccc   * $Date: 2016-02-14 20:07:56 +0100 (So, 14 Feb 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -142,6 +142,7 @@ C-M        - Fix switching to tabular representation of elastic
 C-M          angular distributions (LTT=3).
 C-M  16/02 - Fix multiplicities in MF6/MT5 that were off by a factor 2.
 C-M        - Read CHMSPC spectrum double precision to avoid underflow.
+C-M        - Guard against incomplete decaying nucleus data.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -470,7 +471,7 @@ C* Read the EMPIRE output file to extract the cross sections
         WRITE(LER,995) ' EMPEND ERROR - Number of energy points:',NEN
         STOP 'EMPEND ERROR - Zero energy entries in EMPIRE output'
       END IF
-c...
+C*
       WRITE(LTT,991)
       WRITE(LTT,991) ' Initial list of MT numbers for MF3     '
       WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
@@ -4215,6 +4216,11 @@ C* Next could be elastic, discrete level or continuum cross section
       IF(REC( 1:23).EQ.' COMP. ELASTIC CROSS SE'     ) GO TO 374
       IF(REC(13:36).EQ.'population cross section'    ) GO TO 216
       IF(REC(13:36).EQ.'production cross section'    ) GO TO 390
+      IF(REC( 1:18).EQ.'  Decaying nucleus'          ) THEN
+        WRITE(LTT,904) ' WARNING - Incomplete data for ZA/EE    ',JZA,EE
+        WRITE(LER,904) ' WARNING - Incomplete data for ZA/EE    ',JZA,EE
+        GO TO 210
+      END IF
       IF(REC(11:34).NE.'Discrete level populatio'    ) GO TO 351
 C* Positioned to read discrete levels
       READ (LIN,891)
@@ -4232,7 +4238,9 @@ C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,II,X,XS,NBR
       XS=XS/1000
 c...
-c...  print *,'Reading discrete level xs,xi,il,el',xs,xi,il,el,mt0+jl
+c...  if(mt.ge.800) then
+c...  print *,'Read discr.lvl. ee,xs,xi,il,el',ee,xs,xi,il,el,mt0,jl
+c...  end if
 c...
 C*      -- Assign spin from first level when product=target
       IF(IZA.EQ.JZA .AND. IL.EQ.1) SPI=X
@@ -4472,7 +4480,7 @@ c.809 FORMAT(26X,F12.0)
   891 FORMAT(A80)
   902 FORMAT(A40,1P,2E10.3)
   903 FORMAT(A40,F10.2)
-  904 FORMAT(A40,I10)
+  904 FORMAT(A40,I10,1P,E10.3)
   994 FORMAT(BN,F10.0)
   995 FORMAT(BN,I6)
       END
