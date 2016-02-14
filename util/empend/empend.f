@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-02-05 10:05:04 +0100 (Fr, 05 Feb 2016) $
+Ccc   * $Date: 2016-02-14 12:12:47 +0100 (So, 14 Feb 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -140,7 +140,8 @@ C-M          WARNING - full backward compatibility is not guaranteed.
 C-M  16/01 - Fix fission cross section (mb-b prolem)
 C-M        - Fix switching to tabular representation of elastic
 C-M          angular distributions (LTT=3).
-C-M  16/02 Fix multiplicities in MF6/MT5 that were off by a factor 2.
+C-M  16/02 - Fix multiplicities in MF6/MT5 that were off by a factor 2.
+C-M        - Read CHMSPC spectrum double precision to avoid underflow.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -5773,6 +5774,7 @@ C-Title  : Subroutine CHKSPC
 C-Purpose: Check the spectrum integral against the read-in, if present
 C-
       CHARACTER*136 REC
+      DOUBLE PRECISION RR1,RR2
       DIMENSION DST(*),RWO(MXR)
       DATA PI/3.1415926/
 C*
@@ -5790,10 +5792,13 @@ C*      -- Read the angle integrated continuum spectra if present
   622   READ (LIN,891) REC
         IF(REC(1:30).NE.'                              ') THEN
           JSP=JSP+1
-          READ (REC(8:35),*) RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C*        -- Read in double precision to avoid underflow
+          READ (REC(8:35),*) RR1,RR2
 C...
-C...      print *,jsp,RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C...      print *,jsp,RR1,RR2
 C...
+          RWO(LSP+2*JSP-2)=RR1
+          RWO(LSP+2*JSP-1)=RR2
           GO TO 622
         END IF
         READ (LIN,891) REC
@@ -5809,10 +5814,13 @@ C*      -- Read the angle integrated continuum spectra if present
   624   READ (LIN,891) REC
         IF(REC(1:30).NE.'                              ') THEN
           JSP=JSP+1
-          READ (REC,*) RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C*        -- Read in double precision to avoid underflow
+          READ (REC,*) RR1,RR2
 C...
-C...      print *, jsp,RWO(LSP+2*JSP-2),RWO(LSP+2*JSP-1)
+C...      print *,jsp,RR1,RR2
 C...
+          RWO(LSP+2*JSP-2)=RR1
+          RWO(LSP+2*JSP-1)=RR2
           GO TO 624
         END IF
       END IF
