@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4580 $
+Ccc   * $Rev: 4587 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-03 11:57:27 +0100 (Mi, 03 Feb 2016) $
+Ccc   * $Date: 2016-02-15 18:27:44 +0100 (Mo, 15 Feb 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -30,7 +30,7 @@ C
       DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_norm
                        
       DOUBLE PRECISION gtotsp,xtotsp,ptotsp,atotsp,dtotsp,ttotsp,htotsp
-      DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh
+      DOUBLE PRECISION emedg,emedn,emedp,emeda,emedd,emedt,emedh, csum
       DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum,xs_cn,ftmp_disc
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
 
@@ -686,6 +686,7 @@ C
 
       ENDIF
 
+      csum = 0.d0
       IF(CSPrd(nnuc).gt.CSMinim) THEN
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
@@ -720,35 +721,38 @@ C
      &' ---------------------------------------------------------------'
              WRITE (12,*)
              WRITE (8 ,*)
-C            WRITE (12,
-C    &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
-C    &cade 2'')')
-C            WRITE (12,'(1X,/,10X,40(1H-),/)')
 
          ELSE
-
-             IF (ENDF(nnuc).gt.0) WRITE (8,
+C
+C            nnuc.EQ.1. OR. nnuc.EQ.mt91
+C    &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849)
+C
+             DO il = 1, NLV(nnuc)
+               csum = csum + POPlv(il,nnuc)
+             ENDDO 
+             IF(csum.gt.CSMinim) THEN
+               IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
      &  3X,''NOTE:   was not included in emission spectra and direct ''/
      &  3X,''NOTE:   particle contribution was shifted to the g.s.'')')
-
-             IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
+               IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(10X,''(no gamma cascade in the compound nucleus, primary transit
      &ions only)'',/)')
 
-             WRITE (8,
+               WRITE (8,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
-             WRITE (8,'(1X,/,10X,40(1H-),/)')
-             if(nnuc.eq.1) then
-               WRITE (12,
+               WRITE (8,'(1X,/,10X,40(1H-),/)')
+               if(nnuc.eq.1) then
+                 WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
-               WRITE (12,'(1X,/,10X,40(1H-),/)')
-             endif
+                 WRITE (12,'(1X,/,10X,40(1H-),/)')
+               endif
+             ENDIF 
                  
          ENDIF
-
-         DO il = 1, NLV(nnuc)
+         IF(csum.gt.CSMinim) THEN
+           DO il = 1, NLV(nnuc)
              IF(ISIsom(il,Nnuc).EQ.0) THEN
                WRITE (8,99070) il, ELV(il,nnuc),
      &           LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc)
@@ -773,7 +777,8 @@ C--------------Check for the number of branching ratios
      &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
      &                          ,ib = 1,nbr)
              ENDIF
-         ENDDO ! over discrete levels
+           ENDDO ! over discrete levels
+         ENDIF 
 
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
      &           nnuc.EQ.mt849)) THEN
@@ -787,7 +792,7 @@ C        Primary gammas printout
              DO il = 1, NLV(nnuc)
                cspg = cspg + CSEpg(il) 
              ENDDO
-             IF(cspg.gt.0.d0) then
+             IF(cspg.gt.CSMinim) then
                WRITE (12,*)
                WRITE (12,'(1X,/,10X,40(1H-),/)')
                WRITE (12,'(2x,
@@ -825,7 +830,7 @@ C
 C        Primary gammas done 
 
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
-     &           nnuc.EQ.mt849)) THEN
+     &           nnuc.EQ.mt849) .AND. (csum.gt.CSMinim)) THEN
 C            WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,*) ' '
 C------------Write Int. Conv. Coefff. for discrete transitions
@@ -863,7 +868,8 @@ C
       jz = min(INT(Z(1))-iz,15)     ! adding protection for higher energies
       jn = min(INT(A(1))-ia-jz,20)  ! adding protection for higher energies
 
-      IF (CSPrd(nnuc).GT.CSMinim) THEN
+C     IF ( (CSPrd(nnuc).GT.CSMinim) .OR. (csum.gt.CSMinim) ) THEN
+      IF ( CSPrd(nnuc).GT.0.d0 ) THEN
            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
@@ -1343,7 +1349,7 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
       IF(CSPrd(nnuc).gt.0.d0) then 
            WRITE (12,*)
            WRITE (8,*)
-           IF(CSPrd(nnuc).GT.CSMinim) then
+C          IF(CSPrd(nnuc).GT.CSMinim) then
               WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
@@ -1352,8 +1358,8 @@ C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-           ELSE
-              CSPrd(nnuc) = 0.d0
+C          ELSE
+C             CSPrd(nnuc) = 0.d0
 C             WRITE (8,
 C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
 C    &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
@@ -1362,7 +1368,7 @@ C             WRITE (12,
 C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
 C    &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
 C    &                             REAction(nnuc)
-           ENDIF
+C          ENDIF
            
            ftmp_disc = 0.d0
            IF(nnuc.eq.mt91) ftmp_disc = CSDirlev(1,1)
@@ -1379,7 +1385,8 @@ C
      &       CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc, REAction(nnuc)
            ELSE
              CSInc(nnuc) = 0.d0
-             IF(CSPrd(nnuc).GT.CSMinim) WRITE (12,
+C            IF(CSPrd(nnuc).GT.CSMinim) WRITE (12,
+                                        WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &       ''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
      &       0.d0, REAction(nnuc)
