@@ -79,9 +79,9 @@ else
    cp $file-e.endf $file-endres.endf
 fi
 
-# Deleting previous file if exist
+# Saving previous file if exist
 if [ -s $file.endf ]; then
-  rm $file.endf 2>/dev/null
+  mv $file.endf $file-prev.endf
 fi
 
 # RUN STANEF
