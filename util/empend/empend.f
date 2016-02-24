@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-02-14 20:07:56 +0100 (So, 14 Feb 2016) $
+Ccc   * $Date: 2016-02-24 20:49:41 +0100 (Mi, 24 Feb 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -143,6 +143,7 @@ C-M          angular distributions (LTT=3).
 C-M  16/02 - Fix multiplicities in MF6/MT5 that were off by a factor 2.
 C-M        - Read CHMSPC spectrum double precision to avoid underflow.
 C-M        - Guard against incomplete decaying nucleus data.
+C-M        - Fix isomer production from inelastic scttering.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -4045,12 +4046,16 @@ C* Next entry should be population or production cross section
 C* Read the cross section
   311 READ (REC,803) XS  
       XS=XS/1000
-      IF(XS.LE.0) GO TO 110
+      IF(XS.LE.0) GO TO 310
       XG =-1
 c...
-c...  print *,'mt,xs,ee,ipop',mt,xs,ee,ipop
+c...  if(nint(ee).eq.2000000) then
+c...    print *,'mt,xs,ee,ipop,isom',mt,xs,ee,ipop,isom
+c...  end if
 c...
-C* Test for multiple reactions leading to the same residual
+      IF(ISOM.EQ.1) GO TO 316
+C*
+C* Test for multiple population x.s. leading to the same residual
   312 XSPROD=XS
       XSSUM =0
 C* Read the inclusive cross section from the next record
@@ -4092,7 +4097,7 @@ C...    END IF
         XSSUM=XSSUM+XS
       END IF
 C* Reconstruct Q-values from MT and the binding energies
-      QQ0=QQ
+  316 QQ0=QQ
       EL =QI-QQ
       CALL QVALUE(IMT,MT,IZA,IZI,JZA,IZB,BEN,QQ)
       QI =QQ+EL
@@ -7295,8 +7300,9 @@ C* (e.g.: 10ZA+0,1,2...=(n,a)-->107, 10ZA+5=(n,2n+2p)
             END DO
           END IF
 C* Suppress processing of compound-elastic for incident neutrons
-          JZA=MTH(I)/10
-          IF(IZI.EQ.1 .AND. IZA.EQ.JZA) MTH(I)=-ABS(MTH(I))
+c... (Should not do this - it suppresses inelastic isomers)
+c...      JZA=MTH(I)/10
+c...      IF(IZI.EQ.1 .AND. IZA.EQ.JZA) MTH(I)=-ABS(MTH(I))
         END IF
       END DO
 c...
