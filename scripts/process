@@ -81,6 +81,10 @@ mv LEGEND.LST $work/$file-log.legend
 
 # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
 
+# Saving previous file if it exists
+if [ -s $file-s.endf ]; then
+  mv $file-s.endf $file-prev-s.endf
+fi
 rm $file-s.endf ENDF.IN SIXTAB.INP 2>/dev/null
 ln -sf $work/$file-l.endf ENDF.IN
 ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
