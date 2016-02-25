@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4587 $
+Ccc   * $Rev: 4592 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-15 18:27:44 +0100 (Mo, 15 Feb 2016) $
+Ccc   * $Date: 2016-02-25 09:55:10 +0100 (Do, 25 Feb 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -852,7 +852,8 @@ C--------------Check for the number of branching ratios
      &               XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &               (NINT(BR(il,ib,1,nnuc)),BR(il,ib,3,nnuc)
      &                          ,ib = 1,nbr)
-99065          FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
+C99065          FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
+99065          FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
      &                 (53X,7(I4,E11.4)))
              ENDDO
              WRITE (12,'(1X,/,10X,40(1H-),/)')
@@ -1329,7 +1330,7 @@ C         number of discrete levels is limited to 40
               ilv = ilv + 1
               WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &         '' isomer state population  '',G12.6,
-     &         '' mb (m'',I1,'' E='',F7.4,''MeV Jp='',F5.1,'')'')')
+     &         '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'')'')')
      &         iz, SYMb(nnuc), ia, POPlv(its,Nnuc),
      &         ilv, ELV(its,Nnuc), LVP(its,Nnuc)*XJLv(its,Nnuc)
               ftmp_gs = ftmp_gs - POPlv(its,Nnuc)
@@ -1546,7 +1547,8 @@ C99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
 99041 FORMAT (' TOT.INEL',I1,1x,11(E12.6,2x))
 
 C
-99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
+C99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
+99070 FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12E10.3)
       END
       SUBROUTINE GET_RECOIL(Ke,Nnuc)
