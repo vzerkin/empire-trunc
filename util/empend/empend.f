@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-02-24 20:49:41 +0100 (Mi, 24 Feb 2016) $
+Ccc   * $Date: 2016-02-25 10:06:36 +0100 (Do, 25 Feb 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -143,7 +143,9 @@ C-M          angular distributions (LTT=3).
 C-M  16/02 - Fix multiplicities in MF6/MT5 that were off by a factor 2.
 C-M        - Read CHMSPC spectrum double precision to avoid underflow.
 C-M        - Guard against incomplete decaying nucleus data.
-C-M        - Fix isomer production from inelastic scttering.
+C-M        - Fix isomer production from inelastic scattering.
+C-M        - Increase precision for reading level energy of isomers
+C-M          (backward compatible).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -3992,7 +3994,12 @@ C* Isomer production cross section - isomeric state
   224 CONTINUE
 C*    -- Format options for backward compatibility (B.V. Carlson)
       IF(REC(59:59).EQ.'=') THEN
-        READ (REC(60:66),'(F7.0)') EISO
+        IF(REC(67:69).EQ.'MeV') THEN
+          READ (REC(60:66),'(F7.0)') EISO
+        ELSE
+C*        -- Further change of format to increase precision (Feb.2016)
+          READ (REC(60:69),'(F10.0)') EISO
+        END IF
       ELSE
         READ (REC(59:65),'(F7.0)') EISO
       END IF
