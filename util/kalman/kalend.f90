@@ -203,7 +203,7 @@ program kalend
     integer*4 i,ix
     real*8 xf
     character rxc*12
-
+    
     ! look for index of requested MT1 in empire data
     ! read index from temp file for PFNS
 
@@ -364,7 +364,6 @@ program kalend
         write(6,*) ' Error reading '//file(l1:l2)//'.endf'
         return
     endif
-
     mat => endf%mat
     if(mat1 == 0) then
        ! use first mat in file
@@ -529,6 +528,7 @@ program kalend
        mf3 => mat%mf3
        do while(associated(mf3))
           if(mf3%mt == mt1) exit
+          mf3 => mf3%next
        end do
        if(associated(mf3)) then
          tb => mf3%tb
