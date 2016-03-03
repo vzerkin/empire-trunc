@@ -26,6 +26,7 @@ C-V        - Fix trivial error setting the error flag for gamma spectra
 C-V  14/02 Standardize some dimension statements.
 C-V  14/11 Reconstruct angle-dependent cross sections when the
 C-V        angular distributions are given in MF4 (from resonance param.)
+C-V  16/03 Allow reconstruction of alpha (SifC/SigF)
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -144,7 +145,13 @@ C* Check if the specified material exist as is
       MF=0
       MT=0
       ZE=ZEL(IEL)
+C...
+C...  print *,' Calling FINDMT'
+C...
       CALL FINDMT(LEF,ZE,ZA,AWR,L1,L2,NS,N2,MAT,MF,MT,IER)
+c...
+C...  print *,'ZAin,ZAout,MAT,IER',zel(iel),ze,mat,IER
+c...
       IF(IER.EQ.0) THEN
         REWIND LEF
         GO TO 60
@@ -258,6 +265,11 @@ c...
 c...      print *,'nen',nen
 C...      print *,enr(1),dxs(1)
 C...      print *,enr(nen),dxs(nen)
+c...      pi=3.1415926
+c...      do i=1,nen
+c...        enr(i)=enr(i)/1e6
+c...        dxs(i)=dxs(i)*1e6*4*PI
+c...      end do
 c...
       RETURN
 C*
@@ -814,7 +826,14 @@ C-D  particle is defined by its ZA designation in ZAP0), DXSEN1
 C-D  is called recursively for all neutron emission reactions and
 C-D  all contributions are summed.
 C-D  For details see the description of the DXSEN1 routine.
-C-Extern.: DXSEN1
+C-D
+C-D  The summation rules for redundant reactions are defined in
+C-D  routine RDNDMT.
+C-D
+C-D  Special coding is provided complex quantities like:
+C-D    MF 203 MT 102  Alpha (ratio capture/fission)
+C-D
+C-Extern.: DXSEN1, RDNDMT
 C-
 C* Limits: Max.No.of reactions=MXL, interp.ranges=MXI
       PARAMETER   (MXL=200,MXI=20,MXE=20)
@@ -892,11 +911,19 @@ c...
       print *, NINT(10*ZA0),NINT(ZAP0),MF0,MT0,KEA,EIN,PAR,EPS,ELV
 c...
 C*
+C* Special coding for complex quantities
+      IF(MF0.EQ.203 .AND. MT0.EQ.102) THEN
+        LOOP=2
+        LST(1)=18
+        LST(2)=102
+        GO TO 50
+      END IF
+C*
 C* Find the appropriate discrete level for inelastic angular distrib.
       MTJ=MT0-10000*(MT0/10000)
       IF(ELV.GT.0 .AND. (MF0.EQ.3 .OR. MF0.EQ.4) .AND.
      &  (MTJ.EQ.9000 .OR. (MTJ.GE. 50 .AND. MTJ.LT. 91))) THEN
-C* Check energy level for discrete inelastic ang.distr.
+C*      -- Check energy level for discrete inelastic ang.distr.
         REWIND LEF
         CALL SKIPSC(LEF)
         MF=3
@@ -906,7 +933,7 @@ C* Check energy level for discrete inelastic ang.distr.
    12   MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0 .OR. MT.GE.91) THEN
-C* No more discrete levels - go to data retrieval
+C*        -- No more discrete levels - go to data retrieval
           IF(MTJ.NE.9000 .AND. PAR.LE.0) THEN
 C*          -- Case: search for specific level
             IF(MT1.EQ.0) GO TO 50
@@ -1003,6 +1030,7 @@ C*
       IF(IZAP.GE.1 .AND.IZAP.LE.2004) THEN
 C*
 C* Particle emission (except gamma); special treatment for fission
+C* Test each reaction for chosen outgoing particle
         M18=0
    20   MF=3
         MT=0
@@ -1288,7 +1316,9 @@ c...
         RWO(LX    -1+I)=RWO(  NE1+I)
         RWO(LX+NE1-1+I)=RWO(2*NE1+I)
 c...
-c...    print *,i,RWO(I),RWO(  NE1+I),RWO(2*NE1+I)
+c...    if(rwo(i).gt. 0.02 .and. rwo(i).lt.0.03) then
+c...      print *,i,RWO(I),RWO(  NE1+I),RWO(2*NE1+I)
+c...    end if
 c...
       END DO
 c...
@@ -1315,13 +1345,37 @@ C* Interpolate current distribution to the union grid
       NEN=NE2
 C* Interpolate saved distribution to the union grid and add current
       CALL FITGRD(NE1,RWO,RWO(LX    ),NEN,RWO(LUE),RWO(LUX))
-      DO I=1,NEN
-        DXS(I)=DXS(I)+RWO(LUX-1+I)
-      END DO
-      CALL FITGRD(NE1,RWO,RWO(LX+NE1),NEN,RWO(LUE),RWO(LUX))
-      DO I=1,NEN
-        UXS(I)=UXS(I)+RWO(LUX-1+I)
-      END DO
+      IF(MF0.EQ.203 .AND. MT0.EQ.102) THEN
+C*      -- Reaction ratio (rel.unc. of current and final ratio)
+        DO I=1,NEN
+          UXS(I)=UXS(I)/DXS(I)
+c...
+c...      if(enr(i).gt. 0.02 .and. enr(i).lt.0.03) then
+c...        print *,i,enr(i),dxs(i),rwo(lux-1+i)
+c...      end if
+c...
+          DXS(I)=DXS(I)/RWO(LUX-1+I)
+        END DO
+C*      -- Relative uncertainty of stored
+        DO I=1,NE1
+          RWO(LX+NE1-1+I)=RWO(LX+NE1-1+I)/RWO(LX-1+I)
+        END DO
+C*      -- Fit rel.unc. of stored x.s. to LUX
+        CALL FITGRD(NE1,RWO,RWO(LX+NE1),NEN,RWO(LUE),RWO(LUX))
+C*      -- Reconstruct the total uncertainty of the ratio
+        DO I=1,NEN
+          UXS(I)=(UXS(I)+RWO(LUX-1+I))*DXS(I)
+        END DO
+      ELSE
+C*      -- Normal reaction summation
+        DO I=1,NEN
+          DXS(I)=DXS(I)+RWO(LUX-1+I)
+        END DO
+        CALL FITGRD(NE1,RWO,RWO(LX+NE1),NEN,RWO(LUE),RWO(LUX))
+        DO I=1,NEN
+          UXS(I)=UXS(I)+RWO(LUX-1+I)
+        END DO
+      END IF
 C* Save the summed distribution 
    70 LX=1+NEN*3
       KRW=MRW-LX
@@ -1512,6 +1566,104 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
         JZA=IZA+IZI-1001-1003
       ELSE IF(MT.EQ.117) THEN
         JZA=IZA+IZI-1002-2004
+      ELSE IF(MT.EQ.152) THEN
+        JZA=IZA+IZI-  5
+      ELSE IF(MT.EQ.153) THEN
+        JZA=IZA+IZI-  6
+      ELSE IF(MT.EQ.154) THEN
+        JZA=IZA+IZI-  2-1003
+      ELSE IF(MT.EQ.155) THEN
+        JZA=IZA+IZI-1003-2004
+      ELSE IF(MT.EQ.156) THEN
+        JZA=IZA+IZI-  4-1001
+      ELSE IF(MT.EQ.157) THEN
+        JZA=IZA+IZI-  3-1002
+      ELSE IF(MT.EQ.158) THEN
+        JZA=IZA+IZI-  1-1002-2004
+      ELSE IF(MT.EQ.159) THEN
+        JZA=IZA+IZI-  2-1001-2004
+      ELSE IF(MT.EQ.160) THEN
+        JZA=IZA+IZI-  7
+      ELSE IF(MT.EQ.161) THEN
+        JZA=IZA+IZI-  8
+      ELSE IF(MT.EQ.162) THEN
+        JZA=IZA+IZI-  5-1001
+      ELSE IF(MT.EQ.163) THEN
+        JZA=IZA+IZI-  6-1001
+      ELSE IF(MT.EQ.164) THEN
+        JZA=IZA+IZI-  7-1001
+      ELSE IF(MT.EQ.165) THEN
+        JZA=IZA+IZI-  4-2004
+      ELSE IF(MT.EQ.166) THEN
+        JZA=IZA+IZI-  5-2004
+      ELSE IF(MT.EQ.167) THEN
+        JZA=IZA+IZI-  6-2004
+      ELSE IF(MT.EQ.168) THEN
+        JZA=IZA+IZI-  7-2004
+      ELSE IF(MT.EQ.169) THEN
+        JZA=IZA+IZI-  4-1002
+      ELSE IF(MT.EQ.170) THEN
+        JZA=IZA+IZI-  5-1002
+      ELSE IF(MT.EQ.171) THEN
+        JZA=IZA+IZI-  6-1002
+      ELSE IF(MT.EQ.172) THEN
+        JZA=IZA+IZI-  3-1003
+      ELSE IF(MT.EQ.173) THEN
+        JZA=IZA+IZI-  4-1003
+      ELSE IF(MT.EQ.174) THEN
+        JZA=IZA+IZI-  5-1003
+      ELSE IF(MT.EQ.175) THEN
+        JZA=IZA+IZI-  6-1003
+      ELSE IF(MT.EQ.176) THEN
+        JZA=IZA+IZI-  2-2003
+      ELSE IF(MT.EQ.177) THEN
+        JZA=IZA+IZI-  3-2003
+      ELSE IF(MT.EQ.178) THEN
+        JZA=IZA+IZI-  4-2003
+      ELSE IF(MT.EQ.179) THEN
+        JZA=IZA+IZI-  3-2002
+      ELSE IF(MT.EQ.180) THEN
+        JZA=IZA+IZI-  3-4008
+      ELSE IF(MT.EQ.181) THEN
+        JZA=IZA+IZI-  3-1001-2004
+      ELSE IF(MT.EQ.182) THEN
+        JZA=IZA+IZI-1002-1003
+      ELSE IF(MT.EQ.183) THEN
+        JZA=IZA+IZI-  1-1001-1002
+      ELSE IF(MT.EQ.184) THEN
+        JZA=IZA+IZI-  1-1001-1003
+      ELSE IF(MT.EQ.185) THEN
+        JZA=IZA+IZI-  1-1002-1003
+      ELSE IF(MT.EQ.186) THEN
+        JZA=IZA+IZI-  1-1001-2003
+      ELSE IF(MT.EQ.187) THEN
+        JZA=IZA+IZI-  1-1002-2003
+      ELSE IF(MT.EQ.188) THEN
+        JZA=IZA+IZI-  1-1003-2003
+      ELSE IF(MT.EQ.189) THEN
+        JZA=IZA+IZI-  1-1003-2004
+      ELSE IF(MT.EQ.190) THEN
+        JZA=IZA+IZI-  2-2002
+      ELSE IF(MT.EQ.191) THEN
+        JZA=IZA+IZI-1001-2003
+      ELSE IF(MT.EQ.192) THEN
+        JZA=IZA+IZI-1002-2003
+      ELSE IF(MT.EQ.193) THEN
+        JZA=IZA+IZI-2003-2004
+      ELSE IF(MT.EQ.194) THEN
+        JZA=IZA+IZI-  4-2002
+      ELSE IF(MT.EQ.195) THEN
+        JZA=IZA+IZI-  4-4008
+      ELSE IF(MT.EQ.196) THEN
+        JZA=IZA+IZI-  4-1001-2004
+      ELSE IF(MT.EQ.197) THEN
+        JZA=IZA+IZI-3003
+      ELSE IF(MT.EQ.198) THEN
+        JZA=IZA+IZI-  3-3003
+      ELSE IF(MT.EQ.199) THEN
+        JZA=IZA+IZI-  3-2002-2004
+      ELSE IF(MT.EQ.200) THEN
+        JZA=IZA+IZI-  5-2002
       ELSE IF(MT.GE.600 .AND. MT.LE.649) THEN
         JZA=IZA+IZI-1001
       ELSE IF(MT.GE.650 .AND. MT.LE.699) THEN
@@ -1646,8 +1798,8 @@ c...
 C*
       DATA PI/3.141592654/
 C...
-C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-C... 1        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+c...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+c... &        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -1726,7 +1878,7 @@ C* Special treatment for nu-bar and neutrons from fission
           END IF
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
 c...
-c...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
+C...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
 c...
           IF(IER.NE.0) THEN
             REWIND LEF
@@ -1753,7 +1905,7 @@ c...
 C* Case: Neutron yield at incident energy from polynomial representation
               YL=POLYNX(EIN,RWO,NN)
 C...
-c...          print *,'nu-bar from LNU=1 at E',EIN,' is',yl
+C...          print *,'nu-bar from LNU=1 at E',EIN,' is',yl
 C...
             ELSE
 C* Case: Assemble nu-bar from polynomial representation
@@ -1813,6 +1965,8 @@ C* Retrieve the cross section on MF3
         MF=10
       ELSE IF(MF0.EQ.23 .OR. MF0.EQ.26) THEN
         MF=23
+      ELSE IF(MF0.EQ.203)               THEN
+        MF= 3
       ELSE
         PRINT *,'DXSEN1 ERROR - Illegal MF output request',MF0
         STOP 'DXSEN1 ERROR - Illegal MF output request'
@@ -1917,7 +2071,7 @@ C*        -- Prepare cross sections at fixed angle with MF4 given
           LTT1=L2
           MT  =MT0-10000*(MT0/10000)
 c...
-          print *,'Read angular distributions for MT/LTT',MT,LTT1
+c...      print *,'Read angular distributions for MT/LTT',MT,LTT1
 c...
           IF(LTT1.EQ.0) THEN
 C*          -- Distribution is isotropic - no action needed
@@ -2088,7 +2242,7 @@ C*
           END IF
         END IF
 c...
-        print *,'Scaled by angular distribution'
+c...    if(mt0.gt.40000) print *,'Scaled by angular distribution'
 c...
 C* Error trapping when no data found in the ENDF file
         IF(MFJ.NE.6) THEN
@@ -2555,7 +2709,7 @@ C* Case: Proceed with the retrieval of differential data
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-c...      print *,'     Cross section=',xs,ein,ier
+C...  print *,'     Cross section=',xs,ein,ier,yl
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -2568,8 +2722,8 @@ C* Find the energy/angle distribution data
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-C...      print *,'Find1 MF,MT,IER',mat,mf,mt,ier
-C...      print *,'izap0',izap0
+c...  print *,'Find1 MF,MT,IER',mat,mf,mt,ier
+c...  print *,'izap0',izap0
 c...
 C* Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
@@ -3136,7 +3290,7 @@ C* Neutron multiplicities for fission are included in MF1
       END IF
 C* Check the data representation for this particle
 c...
-c...      print *,'processing particle/mf/mt/law',nint(zap),mf,mt,law
+C...  print *,'processing particle/mf/mt/law',nint(zap),mf,mt,law
 c...
       IF     (LAW.EQ.2) THEN
         GO TO 62
@@ -3295,6 +3449,9 @@ C... Should calculate the proper lower bound for the cosine !!!
         INM=INR(NM)
         INM=INM-10*(INM/10)
         CALL YTGEOU(SS,A1,A2,NMU,AMU,PMU,INM)
+C...
+c...    print *,'after ang.interp SS',SS
+c...
         IF(DEG.LT.0) SS=SS*(A2-A1)
         DO I=1,NEP1
           RWO(LX-1+I)=RWO(LX-1+I)/SS
@@ -3307,6 +3464,9 @@ C*      --Lin-interpolate between distributions for two inc.energies
         CALL FINT2D(EIN,EI1,NE1 ,ENR,DXS    ,INA
      1                 ,EI2,NEP1,RWO,RWO(LX),INE,MX)
       END DO
+C...
+C...  print *,'After E-interpolation SAN',SAN
+C...
 c...      
       IF(DEG.LT.0) SAN=SAN*2
 c...      
@@ -3570,11 +3730,28 @@ C* Scale the distribution by the cross section
       SS=YL*XS*SAN
 c...
 c...  print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
+c...  sst=0
+c...  ssn=0
+c...  e2=enr(1)
+c...  x2=dxs(1)
+c...  t2=x2*ss
 c...
       DO I=1,NEN
+c...
+c...    e1=e2
+c...    x1=x2
+c...    t1=t2
+c...    e2=enr(i)
+c...    x2=dxs(i)
+c...    t2=x2*ss
+c...    sst=sst+(e2-e1)*(x2+x1)/2
+c...    ssn=ssn+(e2-e1)*(t2+t1)/2
+c...    print *,enr(i),dxs(i),dxs(i)*ss
+c...
         DXS(I)=SS*DXS(I)
       END DO
 c...
+c...      print *,'Integral before normalisation',sst,ssn
 c...      print *,'nen',nen,' points, first and last'
 c...      print *,enr(1),dxs(1)
 c...      print *,enr(nen),dxs(nen)
@@ -3774,7 +3951,7 @@ c...
 c...  print *,'Found mat,mf,mt,ier',mat,mf,mt,ier ,l1,l2,n1,n2
 c...
       IF(IER.NE. 0) THEN
-        PRINT *,'WARNING - No uncertainties for MAT/MT',NINT(ZA1),MT1
+C...    PRINT *,'WARNING - No uncertainties for MAT/MT',NINT(ZA1),MT1
         GO TO 90
       END IF
 C*
@@ -3954,46 +4131,77 @@ C*      -- single neutron emission
         IF(MT.EQ. 4 .OR. MT.EQ.22 .OR. MT.EQ.23 .OR.
      &    (MT.GE.28.AND. MT.LE.29).OR.
      &    (MT.GE.32.AND.MT.LE.36) .OR. MT.EQ.44 .OR. MT.EQ.45 .OR.
-     &    (MT.GE.50.AND.MT.LE.91)) YI=1
+     &    (MT.GE.50.AND.MT.LE.91) .OR.
+     &     MT.EQ.158 .OR. (MT.GE.183 .AND. MT.LE.189) .OR.
+     &     MT.EQ.198 ) YI=1
 C*      -- two neutron emission
         IF(MT.EQ.11 .OR. MT.EQ.16 .OR. MT.EQ.24 .OR.
-     &     MT.EQ.30 .OR. MT.EQ.41) YI=2
+     &     MT.EQ.30 .OR. MT.EQ.41 .OR. MT.EQ.154 .OR. MT.EQ.159 .OR.
+     &     MT.EQ.176 .OR. MT.EQ.190) YI=2
 C*      -- three neutron emission
-        IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42) YI=3
+        IF(MT.EQ.17 .OR. MT.EQ.25 .OR. MT.EQ.42 .OR.
+     &     MT.EQ.157 .OR. MT.EQ.172 .OR. MT.EQ.177 .OR. 
+     &    (MT.GE.179 .AND. MT.LE.181) .OR. MT.EQ.199) YI=3
 C*      -- four neutron emission
-        IF(MT.EQ.37) YI=4
+        IF(MT.EQ.37 .OR. MT.EQ.156 .OR. MT.EQ.165 .OR. MT.EQ.169 .OR.
+     &     MT.EQ.173 .OR. MT.EQ.178 .OR.
+     &    (MT.GE.194 .AND. MT.LE.196) )YI=4
 C*      -- five neutron emission (z,5n) 
-        IF(MT.EQ.47) YI=5
+        IF(MT.EQ.152 .OR. MT.EQ.162 .OR. MT.EQ.166 .OR. MT.EQ.170 .OR.
+     &     MT.EQ.174 .OR. MT.EQ.200) YI=5
+C*      -- six neutron emission (z,5n) 
+        IF(MT.EQ.153 .OR. MT.EQ.163 .OR. MT.EQ.167 .OR. MT.EQ.171 .OR.
+     &     MT.EQ.175 .OR. MT.EQ.164 .OR. MT.EQ.168) YI=6
+C*      -- seven neutron emission (z,5n) 
+        IF(MT.EQ.160) YI=7
       ELSE IF(KZAP.EQ.1001) THEN
 C* Outgoing protons
         IF(MT.EQ.  5) YI=0
         IF(MT.EQ. 28 .OR. (MT.GE.41 .AND.MT.LE.42) .OR.
      &     MT.EQ. 45 .OR. MT.EQ.103 .OR. MT.EQ.112 .OR.
      &     MT.EQ.115 .OR. MT.EQ.116 .OR.
-     &    (MT.GE.600.AND. MT.LE.649)) YI=1
-        IF(MT.EQ.44 .OR. MT.EQ.111) YI=2
+     &    (MT.GE.600.AND. MT.LE.649) .OR.
+     &     MT.EQ.156 .OR. MT.EQ.159 .OR.
+     &    (MT.GE.162 .AND. MT.LE.164) .OR. MT.EQ.181 .OR.
+     &     MT.EQ.183 .OR. MT.EQ.184 .OR. MT.EQ.186 .OR. MT.EQ.191 .OR.
+     &     MT.EQ.196) YI=1
+        IF(MT.EQ.44 .OR. MT.EQ.111 .OR. MT.EQ.179 .OR. MT.EQ.190 .OR.
+     &     MT.EQ.194 .OR. MT.EQ.199 .OR. MT.EQ.200) YI=2
+        IF(MT.EQ.197 .OR. MT.EQ.198) YI=3
       ELSE IF(KZAP.EQ.1002) THEN
 C* Outgoing deuterons
         IF(MT.EQ.  5) YI=0
         IF(MT.EQ. 11 .OR. MT.EQ. 32 .OR. MT.EQ. 35 .OR.
-     &     MT.EQ.104 .OR. MT.EQ.115 .OR. MT.EQ.117) YI=1
+     &     MT.EQ.104 .OR. MT.EQ.115 .OR. MT.EQ.117 .OR.
+     &     MT.EQ.157 .OR. MT.EQ.158 .OR.
+     &    (MT.GE.169 .AND. MT.LE.171) .OR. MT.EQ.182 .OR.
+     &     MT.EQ.183 .OR. MT.EQ.185 .OR. MT.EQ.192) YI=1
       ELSE IF(KZAP.EQ.1003) THEN
 C* Outgoing tritons
         IF(MT.EQ.  5) YI=0
         IF(MT.EQ. 33 .OR. MT.EQ. 36 .OR. MT.EQ.105 .OR.
-     &     MT.EQ.113 .OR. MT.EQ.116) YI=1
+     &     MT.EQ.113 .OR. MT.EQ.116 .OR. MT.EQ.154 .OR.
+     &     MT.EQ.155 .OR. (MT.GE.172 .AND. MT.LE.175) .OR.
+     &     MT.EQ.182 .OR. MT.EQ.184 .OR. MT.EQ.185 .OR.
+     &     MT.EQ.188 .OR. MT.EQ.189) YI=1
       ELSE IF(KZAP.EQ.2003) THEN
 C* Outgoing He-3
         IF(MT.EQ. 5) YI=0
-        IF(MT.EQ.34 .OR. MT.EQ.106) YI=1
+        IF(MT.EQ.34 .OR. MT.EQ.106 .OR. (MT.GE.176 .AND. MT.LE.178) .OR.
+     &    (MT.GE.186 .AND. MT.LE.188) .OR.
+     &    (MT.GE.191 .AND. MT.LE.193) ) YI=1
       ELSE IF(KZAP.EQ.2004) THEN
 C* Outgoing alphas
         IF(MT.EQ. 5) YI=0
         IF(MT.EQ. 22 .OR. MT.EQ.24 .OR. MT.EQ.25 .OR. MT.EQ.45 .OR.
-     &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849)) YI=1
+     &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849) .OR.
+     &     MT.EQ.117 .OR. MT.EQ.155 .OR. MT.EQ.158 .OR. MT.EQ.159 .OR.
+     &    (MT.GE.165 .AND. MT.LE.168) .OR. MT.EQ.181 .OR.
+     &     MT.EQ.189 .OR. MT.EQ.193 .OR. MT.EQ.196 .OR. MT.EQ.199) YI=1
         IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
-     &     MT.EQ.108) YI=2
-        IF(MT.EQ.109) YI=3
+     &     MT.EQ.108 .OR. MT.EQ.113 .OR. MT.EQ.114 .OR. MT.EQ.180 .OR.
+     &     MT.EQ.195) YI=2
+        IF(MT.EQ. 23 .OR. MT.EQ.109) YI=3
       ELSE IF(KZAP.EQ.0) THEN
 C* Outgoing photons
         YI=0
@@ -4298,10 +4506,22 @@ C* Case: Search by ZA number (including decimal LIS0)
           READ (LEF,92) DD,DD,LIS,LIS0
           IZA=IZA+LIS0
         END IF
+c...
+C...    print *,'    Try za0,mat',za0,mat,mat0,mf,mt
+c...
+        IF(IZA.NE.IZA0) THEN
+C*        -- Incorrect material, skip section
+          DO WHILE(MT.GT.0)
+            CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+            IF(IER.NE.0) GO TO 80
+          END DO
+          GO TO 20
+        END IF
+C*      -- Material found
         ZA=IZA*0.1
         ZA0=-MAT
 c...
-c...    print *,'    za0,mat',za0,mat
+c...    print *,'    Found za0,mat',za0,mat
 c...
       END IF
 C* Loop to find the file number
@@ -4481,47 +4701,16 @@ C*
   902 FORMAT(2F11.0,4I11)
   903 FORMAT(6F11.0)
       END
-      FUNCTION FINTXS(EIN,EN,XS,NP,INR,IER)
-C-Title  : Function FINTXS
-C-Purpose: Interpolate the cross section table to EIN
-C-Description:
-C-D  EIN  Incident energy
-C-D  EN   Array of energies
-C-D  XS   Array of corresponding cross sections
-C-D  NP   Number of points in the cross section array
-C-D  INR  Interpolation law (INR=1,2 allowed)
-C-D  IER  = 0 - normal termination
-C-D        11 - requested point outside interpolation range
-      DIMENSION EN(NP),XS(NP)
-      IER=0
-      IF     (EIN.LT.EN(1)) THEN
-        FINTXS=XS(1)
-        RETURN
-      ELSE IF(EIN.GT.EN(NP)) THEN
-        FINTXS=XS(NP)
-        RETURN
-      END IF
-      DO I=2,NP
-        I2=I
-        IF(EN(I).GE.EIN) GO TO 22
-      END DO
-      IER=11
-   22 I1=I2-1
-      IF(INR.EQ.2) THEN
-        FF=XS(I1)+(XS(I2)-XS(I1))*(EIN-EN(I1))/(EN(I2)-EN(I1))
-      ELSE
-        FF=XS(I1)
-      END IF
-      FINTXS=FF
-      RETURN
-      END
       SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
 C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
       CHARACTER*66  REC
       NS=NS+1
       IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) REC,MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
       RETURN
    40 FORMAT(A66,I4,I2,I3,I5)
       END
@@ -4544,7 +4733,10 @@ C-Purpose: Write a CONT record to an ENDF file
       WRITE(REC(6),20) N2
    12 NS=NS+1
       IF(NS.GT.99999) NS=0
+      IF(MT.EQ.0)     NS=99999
+      IF(MF.EQ.0)     NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
+      IF(MT.EQ.0)     NS=0
       RETURN
    20 FORMAT(I11)
    40 FORMAT(6A11,I4,I2,I3,I5)
@@ -4704,9 +4896,48 @@ C* Sign of the exponent
 C* Sign of the mantissa
       IF(FF.LT.0) FA=-FA
 C* Write character fiels
-      WRITE(CH,80) FA,SN,IA
+      IF(IA.GE.10) THEN
+        WRITE(CH,80) FA,SN,IA
+      ELSE
+        WRITE(CH,81) FA,SN,IA
+      END IF
       RETURN
    80 FORMAT(F8.5,A1,I2.2)
+   81 FORMAT(F9.6,A1,I1)
+      END
+      FUNCTION FINTXS(EIN,EN,XS,NP,INR,IER)
+C-Title  : Function FINTXS
+C-Purpose: Interpolate the cross section table to EIN
+C-Description:
+C-D  EIN  Incident energy
+C-D  EN   Array of energies
+C-D  XS   Array of corresponding cross sections
+C-D  NP   Number of points in the cross section array
+C-D  INR  Interpolation law (INR=1,2 allowed)
+C-D  IER  = 0 - normal termination
+C-D        11 - requested point outside interpolation range
+      DIMENSION EN(NP),XS(NP)
+      IER=0
+      IF     (EIN.LT.EN(1)) THEN
+        FINTXS=XS(1)
+        RETURN
+      ELSE IF(EIN.GT.EN(NP)) THEN
+        FINTXS=XS(NP)
+        RETURN
+      END IF
+      DO I=2,NP
+        I2=I
+        IF(EN(I).GE.EIN) GO TO 22
+      END DO
+      IER=11
+   22 I1=I2-1
+      IF(INR.EQ.2) THEN
+        FF=XS(I1)+(XS(I2)-XS(I1))*(EIN-EN(I1))/(EN(I2)-EN(I1))
+      ELSE
+        FF=XS(I1)
+      END IF
+      FINTXS=FF
+      RETURN
       END
       SUBROUTINE FINT2D(AI, AI1,NEP1,EN1,XS1 ,INR
      1                    , AI2,NEP2,EN2,XS2 ,INE, MEP2)
