@@ -27,6 +27,7 @@ C-V          charged particles and duplicate entries. (A. Trkov)
 C-V  2015/06 - Fix bug when a single entry exists in the C4 file.
 C-V          - Tighten tolerance for lumping angular distributions.
 C-V          - Extend the grid of forced DDX entries.
+C-V  2016/03 Add MF203/MT102 for alpha (SigC/SigF).
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -394,7 +395,12 @@ c...
 C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'passed 40'
 c...
       IF(MF0.NE.1 .AND. MF0.NE.3 .AND. MF0.NE.10 .AND.
-     &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.6) GO TO 60
+     &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.6  .AND.
+     &   MF0.NE.203) GO TO 60
+C* - MF 203 is currently supported for MT102 only (alpha=SigC/SigF)
+C...  IF(MF0.EQ.203) GO TO 60
+C...  IF(MF0.EQ.203 .AND. IZA0.EQ.90232) GO TO 60
+      IF(MF0.EQ.203 .AND. MT0.NE.102) GO TO 60
 C* - MT out of range
       IF(MT0.GT.999 .AND. MT0.NE.9000) GO TO 60
 C* - Insufficient number of points (this also excludes distributions
@@ -404,7 +410,7 @@ c...  print *,'iex,mf0,mt0',iex,mf0,mt0
 c...
 c...  IF(IEX.LE.2) GO TO 60
       IF(IEX.LE.2 .AND.
-     &  (MF0.GT.3 .AND. MF0.NE.10)) GO TO 50
+     &  (MF0.GT.3 .AND. MF0.NE.10 .AND. MF0.NE.203)) GO TO 50
 C*
 C* Printout conditions satisfied - prepare output record
       IZ=IZA0/1000
@@ -458,10 +464,11 @@ C... Print 2 decimal places for consistency with PLOTC4 output
 C...    WRITE(CH10(2),'(F8.1)') ACOS(PRA0)*180/PI
         WRITE(CH10(2),'(F8.2)') ACOS(PRA0)*180/PI
       END IF
-C* Check for close-lying discrete levels
+C* Prepare the output record
       RC2=RC1
       WRITE(RC1,914) IZ,CH(IZ),IA,MS0,IZP0,MF0,MT0,IEX,CH10,IDX
-      IF(MMF.EQ.3 .AND. IDX.GT.0) THEN
+      IF((MMF.EQ.3 .OR. MMF.EQ.203) .AND. IDX.GT.0) THEN
+C*      -- Check for close-lying discrete levels
         IF(RC1(1:26).EQ.RC2(1:26)) THEN
           READ (RC1(63:72),904) FLV
           READ (RC2(63:72),904) FL1
@@ -504,7 +511,7 @@ C*      -- Set output record
    43   IF(NXSMJR.GT.MXXS) GO TO 44
         MTX   =MJRXS(NXSMJR)
         NXSMJR=NXSMJR+1
-C*      -- Suppress fission for nuclides with Z>90
+C*      -- Suppress fission for nuclides with Z<90
         IF(MTX.EQ.18 .AND.IZX.LT.90) GO TO 48
 C*      -- Suppress total for incident charged particles
 C...
@@ -574,7 +581,8 @@ C*        -- Force neutron emission spectra
      &                  ,CX10,IDX,IZIX
           GO TO 42
       END IF
-      IF(MMF.GE.99) GO TO 80
+c...  IF(MMF.GE.99) GO TO 80
+      IF(MMF.GE.99 .AND. MMF.NE.203) GO TO 80
 C* Write a record to output list file
 C* Suppress elastic angular distributions for charged particles
       IF(MMF.NE.4 .OR. MMT.NE.2 .OR. IZI0.LE.1) THEN
