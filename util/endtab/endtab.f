@@ -29,6 +29,7 @@ C-V  14/05 Fix typo (applicable when Ehi > last point on file).
 C-V  14/06 Implement ratios of fission spectra to Maxwellian.
 C-V  15/03 Fix bug printing NaN for PFNS ratio to Maxwellian at 0 eV.
 C-V  15/11 Print input instructions to screen.
+C-V  16/03 Allow MF203 for alpha (SigC/SigF).
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -79,6 +80,8 @@ C-M     3  - Request cross section data.
 C-M     4  - Request angular distribution data.
 C-M     5  - Request outgoing particle energy distribution data.
 C-M     6  - Request double differential data.
+C-M   203  - Request cross section ratios.
+C-M          (Currently only MT102=SigC/SigF is supported).
 C-M    Note: The requested MF number implies the type of output and
 C-M          need not coincide with the data actually on the file.
 C-M          For example, requesting MF 4 will give outgoing particle
@@ -240,7 +243,8 @@ C* Select the ENDF file (3, 6, 10 or 15)
       EOU=-1
       ZAP=-1
 C* Case: MF3/10 Energy range and grid thinning criterion
-      IF(MF0. EQ. 1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR. MF0.EQ.23) THEN
+      IF(MF0. EQ. 1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
+     &   MF0.EQ.23 .OR. MF0.EQ.203) THEN
         KEA=0
 C* Select the energy interval
         WRITE(LTT,91) '$Enter the lower energy bound [eV]    : '
@@ -384,7 +388,8 @@ C* Search for the material, the file and the reaction
       MT =MT0
       WRITE(LTT,961) MT,MF,ZA0
 C* Appropriate section in the ENDF file found
-      IF(MF. EQ. 1 .OR. MF.EQ.3 .OR. MF.EQ.10 .OR. MF.EQ.23) THEN
+      IF(MF. EQ. 1 .OR. MF.EQ.3 .OR. MF.EQ.10 .OR.
+     &   MF.EQ.23 .OR. MF.EQ.203) THEN
 C*
 C* Read the cross sections from file MF 1, 3,10,23
         MTE=MT
