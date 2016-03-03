@@ -53,6 +53,7 @@ C-V         restoring function values and then integrating.
 C-V  14/07  Restore printout of EXFOR number for fission spectra.
 C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
 C-V  15/07  Prepare PLOTTAB input for the curves and points file.
+C-V  16/03  Retrieve MF203/MT102 (alpha=SigC/SigF) from C4.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -810,24 +811,29 @@ C*
       NS   =0
       NPP  =0
       NP   =0
-      DO 12 J=1,6
-      REC(J)='           '
-      MTH=MT0
-      MFH=MF0
-      IF(MT0/10000.EQ.4) THEN
-        MTH=MT0-40000
-      END IF
-      IF(MF0.EQ.10) LFS=NINT(PR0)
-      IC4=0
-      LAU=0
-      NAU=0
-   12 CONTINUE
+      DO J=1,6
+        REC(J)='           '
+        MTH=MT0
+        MFH=MF0
+        IF(MT0/10000.EQ.4) THEN
+          MTH=MT0-40000
+        END IF
+        IF(MF0.EQ.10) LFS=NINT(PR0)
+        IC4=0
+        LAU=0
+        NAU=0
+      END DO
 C*
    20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
+c...
+c...  if(mf.eq.203 .and. mt.eq.102) then
+c...     print *,iza,iza0,cm,mm(im),ref
+c...  end if
+c...
 C* Test for Legendre coefficients of elastic scattering
 c     IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
-      IF( MF.EQ.154 .AND. NINT(F5).EQ.1) THEN
+      IF(MF.EQ.154 .AND. NINT(F5).EQ.1) THEN
         MF=3
         IF(MT.EQ.2) THEN
           MT=251
@@ -941,6 +947,12 @@ C* Test isomer production
 c...
 c...    print *,'passed ',ref
 c...
+      ELSE IF(MF.EQ.203) THEN
+C*      -- Ratio data processed for MF203/MT102=SigC/SigF
+c...
+c...    print *,'Found MF,MT',MF,MT
+c...
+        IF(MT.NE.102) GO TO 20
       ELSE
 C* Ignore other MF cases
         GO TO 20
@@ -973,8 +985,8 @@ c...
         CHXR=CHX4
       END IF
 C*
-      IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
-     &  (MF0.EQ.4 .AND. MT0/10000.EQ.4)) THEN
+      IF(MF0.EQ.  1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
+     &   MF0.EQ.203 .OR.(MF0.EQ.4 .AND. MT0/10000.EQ.4)) THEN
 C* Simple cross sections and cross sections at fixed angle
         IF(F1.GT.1.0E-9 .AND. F1.LT.9.9E+9) THEN
           WRITE(REC(1),911) F1
