@@ -1,6 +1,6 @@
-!cc   * $Rev: 4580 $
+!cc   * $Rev: 4599 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-02-03 11:57:27 +0100 (Mi, 03 Feb 2016) $
+!cc   * $Date: 2016-03-09 00:01:25 +0100 (Mi, 09 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -791,8 +791,9 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
-                          ENDfp(1,nnuc) = 1 
-                          ENDfp(0,nnuc) = 1
+C                         ENDfp(1,nnuc) = 1 
+C                         ENDfp(0,nnuc) = 1
+                          ENDf(nnuc) = 1 
                   endif
 C                 (n,p),(n,2p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
@@ -1136,8 +1137,8 @@ C        Changing the incident input energy to plot LDs
 !--------Set actual flags for exclusive spectra
 !
 C        DO in = 0, NNUct
-C          IF(in.le.22) write(*,*) 
-C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
+C          IF(in.le.22) 
+C    >       write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
 C
          IF(NENdf.EQ.0) THEN
@@ -1168,6 +1169,11 @@ C           ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei 
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
+               IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
+                 DO in = 1, MIN(4,nemn)   !neutron emissions
+                   ENDf(in+1) = 1
+                 ENDDO
+               ENDIF  
                DO in = 0, 2    ! NENdf
                   DO ip = 0, 2 ! NENdf 
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
