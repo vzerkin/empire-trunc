@@ -1,6 +1,6 @@
-!cc   * $Rev: 4599 $
+!cc   * $Rev: 4603 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-09 00:01:25 +0100 (Mi, 09 Mär 2016) $
+!cc   * $Date: 2016-03-09 18:38:56 +0100 (Mi, 09 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -791,9 +791,8 @@ C            residues must be heavier than alpha !! (RCN)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
-C                         ENDfp(1,nnuc) = 1 
-C                         ENDfp(0,nnuc) = 1
-                          ENDf(nnuc) = 1 
+                          ENDfp(1,nnuc) = 1 
+                          ENDfp(0,nnuc) = 1
                   endif
 C                 (n,p),(n,2p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
@@ -1137,10 +1136,12 @@ C        Changing the incident input energy to plot LDs
 !--------Set actual flags for exclusive spectra
 !
 C        DO in = 0, NNUct
-C          IF(in.le.22) 
-C    >       write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
+C          IF(in.le.22) write(*,*) 
+C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
 C
+C        write(*,*) 'NENdf=',NENdf
+
          IF(NENdf.EQ.0) THEN
               ENDf  = 0
               NEXclusive = 0
@@ -1165,17 +1166,13 @@ C                 CALL WHERE(izatmp,nnuc,iloc)
 C                 ENDf(nnuc) = 1            !single proton emission
 C              ENDDO
 C           ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
+C           IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
             IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
-                 DO in = 1, MIN(4,nemn)   !neutron emissions
-                   ENDf(in+1) = 1
-                 ENDDO
-               ENDIF  
-               DO in = 0, 2    ! NENdf
-                  DO ip = 0, 2 ! NENdf 
+               DO in = 0, NENdf    ! 2 NENdf
+                  DO ip = 0, NENdf ! 2 NENdf 
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
                      if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
