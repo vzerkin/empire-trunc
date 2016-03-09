@@ -267,6 +267,12 @@ C*
         HUXP92='eV'
         HLYP92='Cross Sections'
         HUYP92='barns'
+      ELSE IF(MF.EQ.203) THEN
+        HL2P92='Energy-Dependent Parameters'
+        HLXP92='Energy'
+        HUXP92='eV'
+        HLYP92='Cross Section Ratio'
+        HUYP92='no-units'
       ELSE
         MTH=MT
         IF(MF.EQ.4) THEN
@@ -377,6 +383,9 @@ C*          Request energy spectra
       ELSE IF(MF0.EQ.10) THEN
         KEA=0
         PAR=EOU
+      ELSE IF(MF0.EQ.203) THEN
+        KEA=0
+        PAR=0
       END IF
 C*
 C* Extract the data from the ENDF file
