@@ -864,6 +864,7 @@ C*
       KRW =MRW
       MF  =MF0
       MT  =MT0
+      M18 =0
       ML  =0
       MULN=0
       IINL=0
