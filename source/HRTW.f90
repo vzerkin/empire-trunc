@@ -9,9 +9,9 @@
 
    PRIVATE
 
-! $Rev: 4571 $
+! $Rev: 4604 $
 ! $Author: rcapote $
-! $Date: 2016-01-07 14:51:58 +0100 (Do, 07 Jän 2016) $
+! $Date: 2016-03-14 22:06:29 +0100 (Mo, 14 Mär 2016) $
 !
 
    TYPE channel
@@ -1063,6 +1063,7 @@
      i = levtarg
      eout = eoutc - ELV(i,nnur)
      IF(eout<0.0D0) GOTO 10
+     ! CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
      jmin = abs(XJLv(i,nnur) - xjc)
      jmax = XJLv(i,nnur) + xjc
      kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    !minimum k=l+1
@@ -1077,6 +1078,7 @@
            xj = k + jndex - (2.0 + SEJc(nejc))
            IF(xj<jmin .OR. xj>jmax) CYCLE
            tld = ELTLJ(k,jndex)                       !no IF - all elastic channels treated as 'strong'
+           ! tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
            nch = nch + 1
            IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insufficient space allocation
            IF(num%elal == 0) THEN
