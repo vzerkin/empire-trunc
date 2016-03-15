@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4592 $
+Ccc   * $Rev: 4605 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-25 09:55:10 +0100 (Do, 25 Feb 2016) $
+Ccc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -937,8 +937,8 @@ C
                  itmp = 1
 C                estimating multiplicity
                  IF (nejc.eq.1 .or. nejc.eq.2) 
-     &             itmp = NINT(A(1)-A(nnuc))   ! (n,xn), (n,xp)
-                 IF(.not.(NINT(A(1)-A(nnuc)).GT.2 .and. nejc.eq.0)) 
+     &             itmp = NINT(A(1))-NINT(A(nnuc))   ! (n,xn), (n,xp)
+                 IF(.not.(NINT(A(1))-NINT(A(nnuc)).GT.2.and.nejc.eq.0)) 
 C                  Summing exclusive cross section
      &             CSPopul(nnuc) = CSPopul(nnuc) +
      &                             POPcs(nejc,INExc(nnuc))/itmp
@@ -971,8 +971,8 @@ C    &              ' ',trim(Reaction(nnuc))
 
                IF (nejc.eq.0) THEN
                  ftmp = -1.d0
-                 IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                 IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
+     &              NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
                     ftmp = POPcs(4,INExc(nnuc))/CSPrd(nnuc)
                     CSGinc(4) = POPcs(0,INExc(nnuc))*ftmp
                  ENDIF
@@ -986,8 +986,8 @@ C    &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
 C                   ftmp = POPcs(6,INExc(nnuc))/CSPrd(nnuc)
 C                   CSGinc(6) = POPcs(0,INExc(nnuc))*ftmp
 C                ENDIF
-                 IF(NINT(A(1)-A(nnuc)).eq.4 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-4
+                 IF(NINT(A(1))-NINT(A(nnuc)).eq.4 .and. 
+     &              NINT(Z(1))-NINT(Z(nnuc)).eq.2) THEN ! he-4
                     ftmp_disc = 0.d0
                     IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
                     ftmp = (POPcs(3,INExc(nnuc))+ftmp_disc)/CSPrd(nnuc)
@@ -1001,8 +1001,8 @@ C    &                          sngl(CSGinc(3))
                     ENDIF
                  ENDIF
                  IF (ftmp.gt.0) THEN
-                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
-     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                   IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
+     &                NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
                      WRITE (12,9753) iz, SYMb(nnuc), ia, 
      &                 POPcs(nejc,INExc(nnuc)),cejectile
                      dtmp = (1.d0-ftmp)*POPcs(nejc,INExc(nnuc))

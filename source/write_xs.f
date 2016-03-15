@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4582 $
+Ccc   * $Rev: 4605 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-04 00:06:07 +0100 (Do, 04 Feb 2016) $
+Ccc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -125,8 +125,8 @@ C------------------(continuum part - same for all particles)
                 gexclus = 1.d0
                 CSnp = 0.d0
                 IF(ENDfp(nejc,nnuc).EQ.1 .and. nejc.eq.0) THEN
-                  IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
+                  IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
+     &               NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
                     ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
                     IF(POPcs(0,INExc(nnuc)).gt.0) THEN
                       gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
@@ -149,8 +149,8 @@ C    &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
 C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(6)
 C                   gexclus = CSGinc(6)/POPcs(0,INExc(nnuc))
 C                 ENDIF  
-                  IF(NINT(A(1)-A(nnuc)).eq.4 .and. 
-     &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-4
+                  IF(NINT(A(1))-NINT(A(nnuc)).eq.4 .and. 
+     &               NINT(Z(1))-NINT(Z(nnuc)).eq.2) THEN ! he-4
                     ginclus = POPcs(0,INExc(nnuc)) - CSGinc(3)
                     gexclus = CSGinc(3)/POPcs(0,INExc(nnuc))
                   ENDIF  
@@ -618,29 +618,29 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
 
-              IF (NINT(A(1)-A(Nnuc)).GT.4 )  GOTO 1550
+              IF (NINT(A(1))-NINT(A(Nnuc)).GT.4 )  GOTO 1550
 
-              IF (NINT(A(1)-A(Nnuc)).EQ.3 )  GOTO 1550
+C             IF (NINT(A(1)-A(Nnuc)).EQ.3 )  GOTO 1550
+              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.3 .AND. 
+     &            NINT(Z(1))-NINT(Z(Nnuc)).NE.0 ) GOTO 1550 ! t,h,2np,2pn
 
-              IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
-     &            NINT(Z(1)-Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
+              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
 
-              IF (NINT(A(1)-A(Nnuc)).EQ.4 .AND. 
-     &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
-
-C             IF (NINT(A(1)-A(Nnuc)).EQ.3 .AND. 
-C    &            NINT(Z(1)-Z(Nnuc)).EQ.3) GOTO 1550  ! 3p
+              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
 
               IF(RECoil.gt.0) then
-                IF (NINT(A(1)-A(Nnuc)).GT.1 .AND. 
-     &              NINT(A(1)-A(Nnuc)).LE.4) THEN 
+
+                IF (NINT(A(1))-NINT(A(Nnuc)).GT.1 .AND. 
+     &              NINT(A(1))-NINT(A(Nnuc)).LE.4) THEN
 C                  (n,xn),(n,xp) x>1; (n,d),(n,a)   (removed (n,t),(n,h) before)
                    CALL PRINT_RECOIL(nnuc,REAction(nnuc))
 C                  write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
 
-                IF (NINT(A(1)-A(Nnuc)).EQ.1) THEN !  n or p emission
+                IF (NINT(A(1))-NINT(A(Nnuc)).EQ.1) THEN !  n or p emission
                    CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc))
 C                  write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))

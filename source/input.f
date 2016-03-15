@@ -1,6 +1,6 @@
-!cc   * $Rev: 4603 $
+!cc   * $Rev: 4605 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-09 18:38:56 +0100 (Mi, 09 Mär 2016) $
+!cc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -793,11 +793,13 @@ C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
                           ENDfp(1,nnuc) = 1 
                           ENDfp(0,nnuc) = 1
+                          ENDf(nnuc) = 1
                   endif
-C                 (n,p),(n,2p)
+C                 (n,p),(n,2p),(n,3p)
                   if(ip.eq.mulem .and. ip.le.2) THEN
                           ENDfp(2,nnuc) = 1 
                           ENDfp(0,nnuc) = 1 
+                          ENDf(nnuc) = 1
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
@@ -891,6 +893,7 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
+                     ENDf(nnuc) = 1
 C                    (n,np),(n,pn),(n,d)
                      ENDfp(0,nnuc) = 1 
                      ENDfp(1,nnuc) = 1 
@@ -935,7 +938,6 @@ C                    From n,n2p   to   n,he3
                      REAction(nnuc)(iend + 1:iend + 1) = 'h'
                      iend = iend + 1
 C                    (n,he3)
-C                    ENDf(nnuc) = 1 
 C                    ENDfp(0,nnuc) = 1 
 C                    ENDfp(6,nnuc) = 1 
 C                    write(*,*) 'n,n2p   to   n,he3'   
@@ -947,7 +949,6 @@ C                    From n,2n2p   to   n,a
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
 C                    (n,a)
-C                    ENDf(nnuc) = 1 
                      ENDfp(0,nnuc) = 1 
                      ENDfp(3,nnuc) = 1 
                   ENDIF
@@ -1136,43 +1137,24 @@ C        Changing the incident input energy to plot LDs
 !--------Set actual flags for exclusive spectra
 !
 C        DO in = 0, NNUct
-C          IF(in.le.22) write(*,*) 
+C          IF(in.le.10) write(*,*) 
 C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
 C
-C        write(*,*) 'NENdf=',NENdf
-
          IF(NENdf.EQ.0) THEN
               ENDf  = 0
               NEXclusive = 0
-!        Initially set all spectra as inclusive except those explicitely
-!        requested in the input (ENDF(nnuc)=10)
          ELSEIF(NENdf.GT.0) THEN
+!           Initially set all spectra as inclusive 
             DO in = 0, NNUct
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
-C           IF(NENdf.EQ.1) THEN  !Standard case: up to 4 neutrons and 1 proton exclusive
-C              ENDf (0) = 1
-C              ENDf(1)  = 1
-C              ENDf(NTArget)  = 1
-C              DO in = 1, MIN(4,nemn)   !neutron emissions
-C                 ENDf(in+1) = 1
-C              ENDDO
-C              DO ip = 1, MIN(1,nemp)
-C                 atmp = A(1) - AEJc(2)
-C                 ztmp = Z(1) - ZEJc(2)
-C                 izatmp = INT(1000*ztmp + atmp)
-C                 CALL WHERE(izatmp,nnuc,iloc)
-C                 ENDf(nnuc) = 1            !single proton emission
-C              ENDDO
-C           ELSEIF(NENdf.GT.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
-C           IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
             IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               DO in = 0, NENdf    ! 2 NENdf
-                  DO ip = 0, NENdf ! 2 NENdf 
+               DO in = 0, 2    !NENdf
+                  DO ip = 0, 2 !NENdf 
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
                      if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
@@ -1201,9 +1183,10 @@ C           DO in = 0, NNUct
 C             IF(in.le.10) THEN
 C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C             ELSE
-C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(3,in)
+C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C             ENDIF
 C           ENDDO
+C           pause
 C
 C           Disabling all exclusive conversion to inclusive (testing)
 C           ENDfp = 0
@@ -2097,8 +2080,12 @@ C           residual nuclei must be heavier than alpha
                STOP
             ENDIF
 
+C           write(*,*) 
+C    &       NINT(A(nnur)),NINT(Z(nnur)), NLV(nnur), EMAx(nnur)
             IF (EMAx(nnur).EQ.0.0D0) THEN
 C--------------determination of discrete levels and pairing shifts for rn
+C              write(*,*) 
+C     &          NINT(A(nnur)),NINT(Z(nnur)), 'ROPar(3)=',ROPar(3,nnur)
                CALL LEVREAD(nnur)
                IF (ROPar(3,nnur).EQ.0.0D0) THEN
                   IF (Z(nnur).GT.98.0D0) THEN
@@ -2121,6 +2108,9 @@ C--------------determination of giant resonance parameters for residual nuclei
 C              removed
             ENDIF
 C-----------determination of excitation energy matrix in res. nuclei
+C           write(*,*) 
+C    &       NINT(A(nnur)),NINT(Z(nnur)), NLV(nnur), ELV(NLV(nnur),nnur)
+
             ECUt(nnur) = ELV(NLV(nnur),nnur)
             IF (FITlev.GT.0) ECUt(nnur) = 0.0
             IF (Q(nejc,nnuc).EQ.0.0D0 .OR. Q(nejc,nnuc).EQ.99)
@@ -2190,30 +2180,22 @@ C-----------------Width of the partial bin relative to DE
 !                 DEPart(nnur) = 1.d0
 !     Scaling DEPart even by 10% has a significant effect on MT=4 and 18
 !                 DEPart(nnur) = DEPart(nnur)*0.9
-                  WRITE(8,
+                  IF(DEPart(nnur). GT.1.7d0) then
+                    WRITE(8,
      &'(1x,A27,F9.5,1x,3Hfor,1x,I3,1H-,A2,1H-,I2,1x,6H(nres=,I3,1H))')
      &                'Continuum bin correction = ',DEPart(nnur),
-     &               NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
-                  WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
+     &                NINT(A(nnur)),SYMb(nnur),NINT(Z(nnur)),nnur
+                    WRITE(8,'(1x,3(A8,1x,F9.5,1x))') 
      &                'Ecut   =',ECUt(nnur),
      &                'Ex(1)  =',EX(1,nnur),
      &                'Ecut+DE=',ECUt(nnur)+DE
-
-C                 IF(DEPart(nnur).gt.1.3d0 .and. FISsil(nnur)) then 
-
-                  IF(DEPart(nnur).gt.1.3d0                   ) then 
-
                     fftmp=(EX(1,nnur)-ECUt(nnur))*
      &                     (A(nnur)+AEJc(nejc))/A(nnur)
-                    WRITE(8,*) 'WARNING: Large continuum bin correction'
-
-                    WRITE(8,'(1x,A40,F10.6,1x,A4,F8.6,A4,F10.6,A4)')                    
-
-     &                'WARNING: Reduce your incident energy of ',EINl,
-
-     &                ' by ',fftmp, ' to ', EINl-fftmp,' MeV'
-
-                  ENDIF
+                    WRITE(8,*)'WARNING: Large continuum bin correction'
+                    WRITE(8,'(1x,A48,F10.6,1x,A4,F8.6,A4,F10.6,A4)')                    
+     &                'WARNING: You may reduce your incident energy of '
+     &                ,EINl,' by ',fftmp, ' to ', EINl-fftmp,' MeV'
+				  ENDIF
                ENDIF
 C              The following line solves the problem of fluctuations
 C              in PCROSS at higher than 7-8 MeV 
