@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4605 $
+Ccc   * $Rev: 4606 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
+Ccc   * $Date: 2016-03-16 02:38:57 +0100 (Mi, 16 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1719,7 +1719,8 @@ C
       DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul,stmp
       INTEGER ie, ilast
 
-      IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
+C     IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
+      IF (CSPrd(Nnuc).LE.0.d0.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
 C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
@@ -1742,7 +1743,8 @@ C     RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
         ENDIF
       ENDDO
 
-	IF(csum.LE.CSMinim) RETURN 
+C     IF(csum.LE.CSMinim) RETURN 
+      IF(csum.LE.0.d0) RETURN 
 
       ilast = MIN(ilast + 1,NDEX)
 
@@ -1875,7 +1877,8 @@ C-----Find last non-zero cross section for printing
           ilast = ie
         ENDIF
       ENDDO
-      IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
+C     IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
+      IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       ilast = MIN(ilast + 1,NDEX)
 
       if (ilast.gt.1) then
