@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4608 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2016-03-18 07:30:12 +0100 (Fr, 18 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -630,6 +630,7 @@ C
                  iwin=ipipe_move('ccm_Pmatr.txt','INCIDENT_Pmatr.txt')
                  iwin=ipipe_move('ccm_Pdiag.txt','INCIDENT_Pdiag.txt')
                  iwin=ipipe_move('ccm_Umatr.txt','INCIDENT_Umatr.txt')
+                 iwin=ipipe_move('ccm_Pcccc.txt','INCIDENT_Pcccc.txt')
                ENDIF 
 C
 C              Joining dwba.LEG and ccm.LEG
@@ -931,6 +932,8 @@ C
            iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
            ctmp = ctldir//ctmp23//'_Pdiag.txt'
            iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Pcccc.txt'
+           iwin = ipipe_move('INCIDENT_Pcccc.txt',ctmp)
          ENDIF
       ENDIF
 C
@@ -1906,6 +1909,9 @@ C     open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
 C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Smatr.txt'
       iwin = ipipe_move('ecis06_Smatr.txt',ctmp)
+C     open(126,file=TRIM(fname)//'_Pcccc.txt')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pcccc.txt'
+      iwin = ipipe_move('ecis06_Pcccc.txt',ctmp)
       RETURN
       END
 
