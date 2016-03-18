@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4607 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-03-18 04:58:59 +0100 (Fr, 18 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19319,11 +19319,13 @@ C         C-matrix commented                                            RCN  RCN
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
 C         S-matrix                                                      RCN  RCN 
           IF(I.EQ.J) THEN                                               RCN  RCN
-            write(125,'(1x,2(I4,1x),4(D15.9,1x))') I,J,                 RCN  RCN
-     >                1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J)                  RCN  RCN
+            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+     >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
+     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
           ELSE                                                          RCN  RCN
-            write(125,'(1x,2(I4,1x),4(D15.9,1x))') I,J,                 RCN  RCN
-     >                    -2.d0*FAI(I,J),2.d0*FAR(I,J)                  RCN  RCN
+            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+     >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
+     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
           ENDIF                                                         RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
@@ -19590,6 +19592,7 @@ C COMPOUND NUCLEUS.                                                     SCAM-502
  1001 FORMAT (' C MATRIX LARGER THAN 1 FOR AJ IPI NC NCIN IC ICP =',F5.1SCAM-568
      1,A1,4I3,2X,2D12.4)                                                SCAM-569
  1002 FORMAT (1X,I3,I4,I3,I5,F7.1,4X,1P,2D15.7,' I',4X,0P,2F11.8)       SCAM-570
+10021 FORMAT(1X,3(I3,1x),I3,I5,F7.1,4X,1P,2D15.7,' I',4X,0P,F11.8,1x,a1)SCAM-570
  1003 FORMAT (1X,I3,I4,I3,I5,F7.1,4X,1P,2D15.7,' I',4X,'CLOSED')        SCAM-571
  1004 FORMAT (/' TRANSMISSION COEFFICIENTS FOR CHANNEL SPIN AND PARITY =SCAM-572
      1',F7.1,A1/4(' LEVEL   L     J',16X))                              SCAM-573
