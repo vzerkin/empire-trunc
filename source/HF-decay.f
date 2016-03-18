@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4611 $
+Ccc   * $Rev: 4614 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 22:00:24 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -759,7 +759,7 @@ C
                WRITE (8,99070) il, ELV(il,nnuc),
      &           LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc)
              ELSE
-99071          FORMAT (I12,F10.5,I5,F8.1,G15.6,A7)
+99071          FORMAT (I12,F10.6,I5,F8.1,G15.6,A7)
                WRITE (8,99071) il, ELV(il,nnuc),
      &         LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc),' ISOMER'
              ENDIF
@@ -808,7 +808,7 @@ C        Primary gammas printout
                DO il = 1, NLV(nnuc)
                  WRITE (12,99910) il, ELV(il,nnuc), LVP(il,nnuc),
      &           XJLv(il,nnuc), CSEpg(il), CSEpg(il)/cspg*100., ENPg(il) 
-99910            FORMAT (I12,F10.5,I5,F8.1,G15.6,1x,F6.2,1x,F10.5)
+99910            FORMAT (I12,F10.6,I5,F8.1,G15.6,1x,F6.2,1x,F10.6)
                ENDDO
                WRITE (12,'(1X,/,10X,40(1H-),/)')
                WRITE (12,*)
@@ -855,7 +855,7 @@ C--------------Check for the number of branching ratios
      &               XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &               (NINT(BR(il,ib,1,nnuc)),BR(il,ib,3,nnuc)
      &                          ,ib = 1,nbr)
-C99065          FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
+C99065          FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
 99065          FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
      &                 (53X,7(I4,E11.4)))
              ENDDO
@@ -1576,7 +1576,7 @@ C99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
 99041 FORMAT (' TOT.INEL',I1,1x,11(E12.6,2x))
 
 C
-C99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
+C99070 FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99070 FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12E10.3)
       END
@@ -1803,7 +1803,7 @@ C
       DO ie = 1, ilast
         stmp = RECcse(ie,0,Nnuc) 
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
-        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DERec/recorr,
+        WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
       ENDDO
       WRITE(12,
@@ -1941,7 +1941,7 @@ C-----simply A(1) since ejectile mass is here always 1 (neutron or proton)
       DO ie = 1, ilast
         stmp = POPcse(0,ipart,ie,INExc(Nnuc)) 
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
-        WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE/recorr,
+        WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DE/recorr,
      &      stmp*recorr     
       ENDDO
 

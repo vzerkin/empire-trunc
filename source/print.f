@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4545 $
+Ccc   * $Rev: 4614 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-14 14:06:52 +0100 (Mo, 14 Dez 2015) $
+Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -385,19 +385,19 @@ C--------Inclusive DDX spectrum
            ENDDO
            check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
            if(ie.le.nspec)
-     &     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+     &     WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
      &     (     cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
          ! exact DDX spectrum endpoint
-         WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+         WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
          ! exact DDX spectrum endpoint
      &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
 C    &      FLOAT(nspec)*DE/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
          WRITE (12,*) ' '
          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS cor
-     &rected) - consistency check,  Ein ='',F9.5,'' MeV, nejc='',i1)')
+     &rected) - consistency check,  Ein ='',F10.6,'' MeV, nejc='',i1)')
      &   EINl,nejc 
          WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
@@ -412,7 +412,7 @@ C    &      FLOAT(nspec)*DE/recorp,
      &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
            itmp = 1
            if(ie.eq.1) itmp = 2
-           WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
+           WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
      &       *DE/recorp, htmp*recorp      , check_DE(ie)*recorp     ,
 C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
      &       (htmp - check_DE(ie)) * recorp, !/itmp , 
@@ -420,7 +420,7 @@ C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
            ftmp = ftmp + check_DE(ie)/itmp 
          ENDDO
 C        ! exact endpoint
-         WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
+         WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
      &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
 C    &     (EMAx(1)-Q(nejc,1))/recorp,,
 C    &     FLOAT(nspec)*DE/recorp,

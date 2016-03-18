@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4613 $
+Ccc   * $Rev: 4614 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 22:04:29 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -269,8 +269,8 @@ C------------------(discrete levels part)
                      DO il = 1, NLV(nnuc)  ! discrete levels
 C                       espec is the outgoing energy corresponding to the level "il"
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
-                        IF (espec.GE.0) WRITE (12,
-     &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
+                        IF (espec.GE.0.d0) WRITE (12,
+     &                     '(F10.6,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
 c                       Discrete level cros section CSAlev contains angular distribution, NOT DDXS
 c                       recoil correction is not needed as we do not integrate over energy 
 c                       We only sum over discrete levels ! 
@@ -332,12 +332,12 @@ C
                                      ! print DDX spectrum
                      if(check_DE(ie).LE.0) cycle ! skipping zeroes
                      iprn = ie
-                     WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+                     WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp,
      &                     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                    ENDDO
                                      ! exact DDX spectrum endpoint
-                   WRITE (12,'(F10.5,E14.5,7E15.5,/,(9X,8E15.5))')
+                   WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
 C                    A different way of calculating the Q-value using the 
 C                    residual and ejectile
 C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
@@ -363,7 +363,7 @@ C                      espec is the outgoing energy corresponding to the level "
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE(12, 
-     &                   '(4x,I3,4x,F10.5,3(E14.6,2x),F6.2,4x,F9.7)')  
+     &                   '(4x,I3,4x,F10.6,3(E14.6,2x),F6.2,4x,F9.7)')  
      &                   il,  -espec, check_DL(il),
      &                    CSDirsav(il,nejc),
      &                   (check_DL(il)-CSDirsav(il,nejc)),
@@ -381,7 +381,7 @@ C                      espec is the outgoing energy corresponding to the level "
 
                    if (dtmp.gt.0.d0) then
                    WRITE (12,'(15x,''Integrated Emission Spectra (printe
-     &d DDXS corrected) - consistency check,  Ein ='',F9.5,'' MeV, nejc 
+     &d DDXS corrected) - consistency check,  Ein ='',F10.6,'' MeV, nejc 
      &= '',i1)') EINl, nejc
                    WRITE (12,'(10x,
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
@@ -396,7 +396,7 @@ C                      espec is the outgoing energy corresponding to the level "
                       itmp = 1 
                       if (ie.eq.1) itmp = 2
                       iprn = ie
-                      WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
+                      WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
      &                FLOAT(ie - 1)*DE/recorp, ftmp*recorp, 
      &                check_DE(ie)*recorp,
      &                (ftmp - check_DE(ie)) * recorp, 
@@ -405,7 +405,7 @@ C                      espec is the outgoing energy corresponding to the level "
                       csum1 = csum1 + check_DE(ie)/itmp
                    ENDDO
                    ! exact endpoint
-                   WRITE (12,'(10x,F10.5,3(E14.5,1x),4x,F6.2)') 
+                   WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
 C                    A different way of calculating the Q-value using the 
 C                    residual and ejectile
 C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
@@ -486,9 +486,9 @@ C                     First, gammas from (z,np+pn)
                           itmp = 1
                           if(ie.eq.1) itmp = 2
                           dtmp = dtmp + htmp*DE/itmp
-                          WRITE (12,'(F10.5,E14.5)') FLOAT(ie-1)*DE,htmp
+                          WRITE (12,'(F10.6,E14.5)') FLOAT(ie-1)*DE,htmp
                         ENDDO
-                        WRITE (12,'(F10.5,E14.5)') 
+                        WRITE (12,'(F10.6,E14.5)') 
      &                      min(emax_np,FLOAT(nspec_np+1)*DE), 0.d0
                         csnp = dtmp
                         WRITE(12,*) 
@@ -525,14 +525,14 @@ C                     Second, remaining gammas from (z,d)
                           if(ie.eq.1) itmp = 2
                           dtmp = dtmp + htmp*DE/itmp
                           esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
-                          WRITE (12,'(F10.5,E14.5,2x,E14.5,2x,E14.5)') 
+                          WRITE (12,'(F10.6,E14.5,2x,E14.5,2x,E14.5)') 
      &                      FLOAT(ie - 1)*DE,htmp,
      &                      CSEnp(ie),POPcse(0,nejc,ie,INExc(nnuc))
                         ENDDO
 C                       A different way of calculating the Q-value using the 
 C                       residual and ejectile
 C    &                  min((EMAx(nnur)-Q(nejc,nnur))/recorp,
-                        WRITE (12,'(F10.5,E14.5,2x,E14.5,2x,E14.5)') 
+                        WRITE (12,'(F10.6,E14.5,2x,E14.5,2x,E14.5)') 
      &                   min(EMAx(nnuc),FLOAT(iemm+1)*DE),0.d0,0.d0,0.d0  
                         WRITE(12,*) 
                         WRITE(12,'(2x,
@@ -592,10 +592,10 @@ C    &                  min((EMAx(nnur)-Q(nejc,nnur))/recorp,
                        itmp = 1
                        if(ie.eq.1) itmp = 2
                        esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
-                       WRITE (12,'(F10.5,E14.5)') FLOAT(ie - 1)*DE, htmp
+                       WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DE, htmp
                      ENDDO
-C                    WRITE (12,'(F10.5,E14.5)') EMAx(nnuc), 0.d0
-                     WRITE (12,'(F10.5,E14.5)') 
+C                    WRITE (12,'(F10.6,E14.5)') EMAx(nnuc), 0.d0
+                     WRITE (12,'(F10.6,E14.5)') 
 C                    A different way of calculating the Q-value using the 
 C                    residual and ejectile
 C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
