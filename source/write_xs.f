@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4605 $
+Ccc   * $Rev: 4610 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
+Ccc   * $Date: 2016-03-18 07:53:04 +0100 (Fr, 18 Mär 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -105,9 +105,12 @@ C     ENDDO
 	eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF (ENDf(nnuc).EQ.1) THEN
-           IF (CSPrd(nnuc).GT.CSMinim) THEN
+           IF (CSPrd(nnuc).GT.CSMinim .or. 
+     >        (CSPrd(nnuc).GT.0.d0 .and. EINl.LT.1.d0)) THEN
              DO nejc = 0, NDEJC         !loop over ejectiles
-                IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim) CYCLE
+C               IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim) CYCLE
+                IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim .and.
+     >              EINl.GT.1.d0 )CYCLE
                 IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
 C 
                 IF(ENDfp(nejc,nnuc).NE.1) THEN
