@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4609 $
+Ccc   * $Rev: 4611 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 07:33:40 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Date: 2016-03-18 22:00:24 +0100 (Fr, 18 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -954,9 +954,10 @@ C    &              ' ',trim(Reaction(nnuc))
 
              DO nejc = 0, NDEJC         !loop over ejectiles
 
-               IF (POPcs(nejc,INExc(nnuc)).LT.0.d0) CYCLE
-               IF ((nejc.gt.0 .and. nejc.ne.NPRoject)  .and.
-     &        	 POPcs(nejc,INExc(nnuc)).EQ.0.d0 ) CYCLE
+               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
+C              IF (POPcs(nejc,INExc(nnuc)).LT.0.d0) CYCLE
+C              IF ((nejc.gt.0 .and. nejc.ne.NPRoject)  .and.
+C    &        	 POPcs(nejc,INExc(nnuc)).EQ.0.d0 ) CYCLE
 
                IF (nejc.EQ.0) THEN
                  cejectile = 'gammas   '
@@ -976,11 +977,11 @@ C    &              ' ',trim(Reaction(nnuc))
                  cejectile = 'lt. ions '
                ENDIF
 
-               IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) THEN
-                 WRITE (12,9753) iz, SYMb(nnuc), ia, 
-     &               0.d0,cejectile
-                 CYCLE
-               ENDIF
+C              IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) THEN
+C                WRITE (12,9753) iz, SYMb(nnuc), ia, 
+C    &               0.d0,cejectile
+C                CYCLE
+C              ENDIF
 
                IF (nejc.eq.0) THEN
                  ftmp = -1.d0
@@ -1897,7 +1898,7 @@ C-----Find last non-zero cross section for printing
       esum  = 0.d0
       ilast = 0
       recorr = A(Nnuc)/(A(1)-A(Nnuc))
-      DO ie = 1, NDEX
+      DO ie = 1, NDEX			          
         ftmp = POPcse(0,ipart,ie,INExc(Nnuc))
         IF (ftmp.GT.0) then
           csum = csum + ftmp
@@ -1905,6 +1906,10 @@ C-----Find last non-zero cross section for printing
           ilast = ie
         ENDIF
       ENDDO
+C     IF (A(Nnuc).eq.A(1)-1 .and. Z(Nnuc).eq.Z(1)) 
+C    & write(*,*) '  Spectrum of recoils  ',
+C    &       React, 'ZAP=', IZA(Nnuc), ' csum=', csum
+
 C     IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       ilast = MIN(ilast + 1,NDEX)
