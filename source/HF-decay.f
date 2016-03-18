@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4606 $
+Ccc   * $Rev: 4609 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-16 02:38:57 +0100 (Mi, 16 Mär 2016) $
+Ccc   * $Date: 2016-03-18 07:33:40 +0100 (Fr, 18 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -687,7 +687,8 @@ C
       ENDIF
 
       csum = 0.d0
-      IF(CSPrd(nnuc).gt.CSMinim) THEN
+      IF(CSPrd(nnuc).gt.CSMinim .or. 
+     &   (CSPrd(nnuc).gt.0.d0 .and. EINl.LT. 1.d0) ) THEN
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
              WRITE (12,*)
@@ -751,6 +752,7 @@ C
              ENDIF 
                  
          ENDIF
+          
          IF(csum.gt.CSMinim) THEN
            DO il = 1, NLV(nnuc)
              IF(ISIsom(il,Nnuc).EQ.0) THEN
@@ -772,6 +774,7 @@ C--------------Check for the number of branching ratios
                IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein) WRITE (8,*)
      &           ' WARNING: Branching ratios for level ', il, ' in ',
      &           INT(A(nnuc)), '-', SYMb(nnuc), ' are missing'
+
                WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
      &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
@@ -950,7 +953,11 @@ C    &              ' ',trim(Reaction(nnuc))
              ENDDO
 
              DO nejc = 0, NDEJC         !loop over ejectiles
-               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
+
+               IF (POPcs(nejc,INExc(nnuc)).LT.0.d0) CYCLE
+               IF ((nejc.gt.0 .and. nejc.ne.NPRoject)  .and.
+     &        	 POPcs(nejc,INExc(nnuc)).EQ.0.d0 ) CYCLE
+
                IF (nejc.EQ.0) THEN
                  cejectile = 'gammas   '
                ELSEIF (nejc.EQ.1) THEN
@@ -967,6 +974,12 @@ C    &              ' ',trim(Reaction(nnuc))
                  cejectile = 'helium-3 '
                ELSEIF (nejc.EQ.NDEJC) THEN
                  cejectile = 'lt. ions '
+               ENDIF
+
+               IF (POPcs(nejc,INExc(nnuc)).EQ.0.d0) THEN
+                 WRITE (12,9753) iz, SYMb(nnuc), ia, 
+     &               0.d0,cejectile
+                 CYCLE
                ENDIF
 
                IF (nejc.eq.0) THEN
@@ -1068,12 +1081,14 @@ C--------------(merely for checking purpose)
      &                G12.6,''  mb  '')') xtotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') xtotsp
-C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') xtotsp
+               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') xtotsp
+               WRITE (12,'(6X,''Total popul. before g-cascade '',
      &                G12.6,''  mb  '')') xtotsp
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
@@ -1081,12 +1096,14 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                G12.6,''  mb  '')') ptotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') ptotsp
-C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') ptotsp
+               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') ptotsp
+               WRITE (12,'(6X,''Total popul. before g-cascade '',
      &                G12.6,''  mb  '')') ptotsp
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
@@ -1094,12 +1111,14 @@ C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
      &                G12.6,''  mb  '')') atotsp
                WRITE (8,'(6X,'' Disc. popul. before g-cascade '',
      &                G12.6,''  mb  '')') CSDirlev(1,nejc)
-C              WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') atotsp
-C              WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
-C    &                G12.6,''  mb  '')') CSDirlev(1,nejc)
+               WRITE (12,'(5X,'' Cont. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') atotsp
+               WRITE (12,'(5X,'' Disc. popul. before g-cascade '',
+     &                G12.6,''  mb  '')') CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)
                WRITE (8,'(6X,'' Total popul. before g-cascade '',
+     &                G12.6,''  mb  '')') atotsp
+               WRITE (12,'(6X,''Total popul. before g-cascade '',
      &                G12.6,''  mb  '')') atotsp
              ELSE
                IF (LHMs.GT.0 .and. atotsp.LT.1.0d-8) THEN
@@ -1320,26 +1339,35 @@ C         number of discrete levels is limited to 40
       ENDIF
 
       IF(CSPrd(nnuc).GT.CSMinim) THEN
+	     nejc=-1
+           IF(nnuc.eq.mt91 ) nejc=1
+           IF(nnuc.eq.mt649)  nejc=2
+           IF(nnuc.eq.mt849)  nejc=3
+
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
            xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
-           ilv = 0  ! count of meta-stable states
-           ftmp_gs = CSPrd(nnuc)
-           DO its= NLV(Nnuc), 2, -1
-            IF(ISIsom(its,Nnuc).EQ.1) THEN
-              ilv = ilv + 1
-              WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
-     &         '' isomer state population  '',G12.6,
-     &         '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'')'')')
-     &         iz, SYMb(nnuc), ia, POPlv(its,Nnuc),
-     &         ilv, ELV(its,Nnuc), LVP(its,Nnuc)*XJLv(its,Nnuc)
-              ftmp_gs = ftmp_gs - POPlv(its,Nnuc)
-C             CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
-            ENDIF
-           ENDDO
-           IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+           if(nejc.gt.0) then
+		   ilv = 0  ! count of meta-stable states
+             ftmp_gs = CSPrd(nnuc)
+             DO its= NLV(nnuc), 2, -1
+               IF(ISIsom(its,Nnuc).EQ.1) THEN
+                 ilv = ilv + 1
+                 WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+     &            '' isomer state population  '',G12.6,
+     &            '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'')'')')
+     &            iz, SYMb(nnuc), ia,  CSDirlev(its,nejc),    
+C    &            iz, SYMb(nnuc), ia, POPlv(its,Nnuc),    
+     &            ilv, ELV(its,Nnuc), LVP(its,Nnuc)*XJLv(its,Nnuc)
+                  ftmp_gs = ftmp_gs - CSDirlev(its,nejc)
+C                 ftmp_gs = ftmp_gs - POPlv(its,Nnuc)
+C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
+               ENDIF
+             ENDDO
+             IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           '' ground state population  '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, ftmp_gs
+	     ENDIF
       ENDIF
 
 5753  FORMAT(1X,I3,'-',A2,'-',I3,
@@ -1548,7 +1576,7 @@ C99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
 
 C
 C99070 FORMAT (I12,F10.5,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
-99070 FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
+99070 FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12E10.3)
       END
       SUBROUTINE GET_RECOIL(Ke,Nnuc)
@@ -1932,8 +1960,9 @@ C    &     cmul*esum/csum
      &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &     csum*DE
 
-      if(xsdisc.gt.0.d0 .and. ENDf(nnuc).eq.1) then
-        WRITE (12,'(2X,''Cont. popul. before g-cascade '',
+      if(xsdisc.gt.0.d0 .and. ENDf(nnuc).eq.1) THEN
+        IF (CSPrd(nnuc).gt.xsdisc) WRITE (12,
+     &            '(2X,''Cont. popul. before g-cascade '',
      &         G12.6,'' mb'')') CSPrd(nnuc) - xsdisc
         WRITE (12,'(2X,''Disc. popul. before g-cascade '',
      &                G12.6,'' mb'')') xsdisc
