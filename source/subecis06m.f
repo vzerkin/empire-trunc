@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4608 $
+Ccc   * $Rev: 4615 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 07:30:12 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Date: 2016-03-19 07:40:20 +0100 (Sa, 19 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -514,11 +514,15 @@ C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
       open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
+C     open(124,file=TRIM(fname)//'_Cmatrix.txt')                        RCN  RCN
+C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
+      open(126,file=TRIM(fname)//'_Pchan.txt')                          RCN  RCN
+C
+C     For EW transformation
+C
       open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
       open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
-C     open(124,file=TRIM(fname)//'_Cmatrix.txt')                        RCN  RCN
-      open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
-      open(126,file=TRIM(fname)//'_Pcccc.txt')                          RCN  RCN
+C
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
       IF (LO(36)) GO TO 17                                              CALC-311
@@ -19279,7 +19283,11 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
    24 SGF(1)=0.D0                                                       SCAM-308
       SGF(2)=0.D0                                                       SCAM-309
       IF (LO(82)) GO TO 58                                              SCAM-310
-      IF (LO(83)) GO TO 28                                              SCAM-311
+C
+C	To allow calculation of Pmatrix independently of EW request
+C
+C     IF (LO(83)) GO TO 28                                              SCAM-311
+C
 C COMPUTATION OF SATCHLER P-MATRIX ("PR","PI").                         SCAM-312
       I=0                                                               SCAM-313
       DO 27 II=1,NC                                                     SCAM-314
@@ -19309,7 +19317,7 @@ C----
 C     C-matrix commented                                                RCN  RCN 
 C     WRITE (124,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     S-matrix                                                          RCN  RCN 
-      WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       I=0                                                               RCN  RCN
       DO II=1,NC                                                        RCN  RCN
         IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
@@ -19325,18 +19333,20 @@ C     S-matrix                                                          RCN  RCN
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
 C         S-matrix                                                      RCN  RCN 
-          IF(I.EQ.J) THEN                                               RCN  RCN
-            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
-     >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
-     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
-          ELSE                                                          RCN  RCN
-            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
-     >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
-     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
-          ENDIF                                                         RCN  RCN
+C         IF(I.EQ.J) THEN                                               RCN  RCN
+C           write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+C    >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
+C    >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
+C         ELSE                                                          RCN  RCN
+C           write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+C    >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
+C    >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
+C         ENDIF                                                         RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
 C----
+      IF (LO(83)) GO TO 28                                              SCAM-311
+
       CALL DIAG(P,P(1,1,2),P(1,1,3),P(1,1,4),NC,NJC,1.D-12,A1,IERR)     SCAM-333
       WRITE (122,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (123,1005) AJ,IP(JPI+1),JC                                  RCN  RCN

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4608 $
+Ccc   * $Rev: 4615 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 07:30:12 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Date: 2016-03-19 07:40:20 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -624,13 +624,14 @@ C--------------Total, elastic and reaction cross section is from CCM
 C
                iwin=ipipe_move('ccm.CS','INCIDENT.CS')
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
+
+               iwin=ipipe_move('ccm_Pmatr.txt','INCIDENT_Pmatr.txt')
+               iwin=ipipe_move('ccm_Pchan.txt','INCIDENT_Pchan.txt')
+C              iwin=ipipe_move('ccm_Smatr.txt','INCIDENT_Smatr.txt')
 C
                IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-                 iwin=ipipe_move('ccm_Smatr.txt','INCIDENT_Smatr.txt')
-                 iwin=ipipe_move('ccm_Pmatr.txt','INCIDENT_Pmatr.txt')
                  iwin=ipipe_move('ccm_Pdiag.txt','INCIDENT_Pdiag.txt')
                  iwin=ipipe_move('ccm_Umatr.txt','INCIDENT_Umatr.txt')
-                 iwin=ipipe_move('ccm_Pcccc.txt','INCIDENT_Pcccc.txt')
                ENDIF 
 C
 C              Joining dwba.LEG and ccm.LEG
@@ -922,18 +923,19 @@ C
          iwin = ipipe_move('INCIDENT.LEG',ctmp)
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
+
+C        ctmp = ctldir//ctmp23//'_Smatr.txt'
+C        iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
+         ctmp = ctldir//ctmp23//'_Pmatr.txt'
+         iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
+         ctmp = ctldir//ctmp23//'_Pchan.txt'
+         iwin = ipipe_move('INCIDENT_Pchan.txt',ctmp)
 C
          IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-           ctmp = ctldir//ctmp23//'_Smatr.txt'
-           iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
-           ctmp = ctldir//ctmp23//'_Pmatr.txt'
-           iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
            ctmp = ctldir//ctmp23//'_Umatr.txt'
            iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
            ctmp = ctldir//ctmp23//'_Pdiag.txt'
            iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
-           ctmp = ctldir//ctmp23//'_Pcccc.txt'
-           iwin = ipipe_move('INCIDENT_Pcccc.txt',ctmp)
          ENDIF
       ENDIF
 C
@@ -1896,22 +1898,24 @@ C
       IF (Iret.EQ.3) RETURN
       ctmp = Outname(1:Length)//'.ICS'
       iwin = ipipe_move('ecis06.ics',ctmp)
-      IF (Iret.EQ.4) RETURN
+C
 C     open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pmatr.txt'
       iwin = ipipe_move('ecis06_Pmatr.txt',ctmp)
+C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
+C     ctmp = Outname(1:Length)//'_Smatr.txt'
+C     iwin = ipipe_move('ecis06_Smatr.txt',ctmp)
+C     open(126,file=TRIM(fname)//'_Pchan.txt')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pchan.txt'
+      iwin = ipipe_move('ecis06_Pchan.txt',ctmp)
+
+      IF (Iret.EQ.4) RETURN
 C     open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pdiag.txt'
       iwin = ipipe_move('ecis06_Pdiag.txt',ctmp)
 C     open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Umatr.txt'
       iwin = ipipe_move('ecis06_Umatr.txt',ctmp)
-C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Smatr.txt'
-      iwin = ipipe_move('ecis06_Smatr.txt',ctmp)
-C     open(126,file=TRIM(fname)//'_Pcccc.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Pcccc.txt'
-      iwin = ipipe_move('ecis06_Pcccc.txt',ctmp)
       RETURN
       END
 
