@@ -10,9 +10,9 @@
 
    PRIVATE
 
-! $Rev: 4617 $
+! $Rev: 4620 $
 ! $Author: rcapote $
-! $Date: 2016-03-19 18:12:50 +0100 (Sa, 19 Mär 2016) $
+! $Date: 2016-03-19 19:22:47 +0100 (Sa, 19 Mär 2016) $
 !
 
    TYPE channel
@@ -407,13 +407,13 @@
 
    RETURN
  5 WRITE(8,*)' WARNING: Problem reading EW Pmatr matrix'
-   STOP' WARNING: Problem reading EW Pmatrix'
+   STOP ' WARNING: Problem reading EW Pmatrix'
  6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
-   STOP' WARNING: Problem reading EW Pmatrix'
+   STOP ' WARNING: Problem reading EW Pmatrix'
  7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
-   STOP' WARNING: Problem reading EW Pmatrix'
+   STOP ' WARNING: Problem reading EW Pmatrix'
  8 WRITE(8,*)' WARNING: Problem reading EW Pdiag matrix'
-   STOP' WARNING: Problem reading EW Pmatrix'
+   STOP ' WARNING: Problem reading EW Pmatrix'
 
    END FUNCTION Read_EW_matrices
 
