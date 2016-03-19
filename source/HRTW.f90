@@ -1,6 +1,7 @@
    MODULE width_fluct
 
    USE angular_momentum
+   USE TLJs
 
    IMPLICIT NONE
 
@@ -9,9 +10,9 @@
 
    PRIVATE
 
-! $Rev: 4615 $
+! $Rev: 4617 $
 ! $Author: rcapote $
-! $Date: 2016-03-19 07:40:20 +0100 (Sa, 19 Mär 2016) $
+! $Date: 2016-03-19 18:12:50 +0100 (Sa, 19 Mär 2016) $
 !
 
    TYPE channel
@@ -29,17 +30,12 @@
      INTEGER*4 pres      ! parity index of the populated state
    END TYPE channel
 
-   TYPE cc_channel
-     INTEGER*4 lev       ! number of the collective level (in the collective level file)
-     INTEGER*4 l         ! orbital angular momentum l
-     REAL*8 j            ! channel spin (j in T_lj)
-     REAL*8 tlj          ! Tlj value
-     REAL*8 Jcn          ! CN spin to which cc-channel couples
-   END TYPE cc_channel
-
    TYPE numchnl
       INTEGER*4 neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
       INTEGER*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
+      INTEGER*4 coll     ! position of the first (low) coupled level channel
+      INTEGER*4 colh     ! position of the last coupled channel; 
+	                     ! coupled channels are embedded in particle channels coll <= colh <=part
       INTEGER*4 elal     ! position of the first (low) elastic channel
       INTEGER*4 elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
       INTEGER*4 fiss     ! effective number of fission channels
@@ -75,7 +71,6 @@
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
-   TYPE(cc_channel), ALLOCATABLE, TARGET :: STLj(:)      ! coupled channels for inelastic calculations (including E-W transformation)
    TYPE(numchnl) :: num                                  ! number of particular channels
    REAL*8 :: save_WFC1(20)                               ! stores central part of the Moldauer integral
 
@@ -134,14 +129,14 @@
    outchnl%jres = 0
    outchnl%pres = 0
 
-   IF(allocated(STLj)) DEALLOCATE(STLj)
-   ALLOCATE(STLj(ndcc),STAT=my)
-   IF(my /= 0) GOTO 10
-   STLj%lev = 1
-   STLj%l   = 0
-   STLj%j   = 0.d0
-   STLj%tlj = 0.d0
-   STLj%Jcn = 0.d0
+   !IF(allocated(STLccj)) DEALLOCATE(STLccj)
+   !ALLOCATE(STLccj(ndcc),STAT=my)
+   !IF(my /= 0) GOTO 10
+   !STLccj%lev = 1
+   !STLccj%l   = 0
+   !STLccj%j   = 0.d0
+   !STLccj%tlj = 0.d0
+   !STLccj%Jcn = 0.d0
 
    IF(allocated(inchnl)) DEALLOCATE(inchnl)
    ALLOCATE(inchnl(ndfus),STAT=my)
@@ -210,7 +205,7 @@
    IF(allocated(H_Abs))   DEALLOCATE(H_Abs)
    IF(allocated(outchnl)) DEALLOCATE(outchnl)
    IF(allocated(inchnl))  DEALLOCATE(inchnl)
-   IF(allocated(STLj))    DEALLOCATE(STLj)
+   !IF(allocated(STLccj))    DEALLOCATE(STLccj)
 
    IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
    IF(allocated(Pchan)) DEALLOCATE(Pchan)
@@ -255,7 +250,7 @@
 
    IF(INTERF==0) RETURN
 
-   Open_EW_files = .FALSE. ! normal return
+   Open_EW_files = .FALSE. 
 
 !--------------
 !--EW matrices 
@@ -465,7 +460,8 @@
    TYPE (channel), POINTER :: out
    TYPE (fusion),  POINTER :: in
 
-   CALL AllocHRTW()    !allocate HRTW matrices
+   CALL AllocHRTW()       !allocate HRTW matrices
+   CALL AllocTLJs(2*NDLW) !allocate HRTW matrices
 
    IF(.NOT.Open_EW_files()   ) WRITE(*,*) 'ERROR opening EW matrices' 
    IF(.NOT.Read_EW_matrices()) WRITE(*,*) 'ERROR reading EW matrices'  
@@ -501,20 +497,12 @@
    IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
 
    IF (AEJc(0).EQ.0.0D0) THEN  
-
      xmas_npro = 0.d0
-
      relcal = .TRUE.
-
    ENDIF
 
-
-
    CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
-
-
    ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
-
    coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
 
    ! start CN nucleus decay
@@ -550,6 +538,8 @@
           num%part = 0
           num%elal = 0
           num%elah = 0
+          num%coll = 0
+          num%colh = 0
           num%fiss = 0
           num%gamm = 0
           H_Sumtls = 0.D0
@@ -568,7 +558,6 @@
           ENDDO                                         !do loop over ejectiles  ***done***
 
           ! write(*,*) sumin_w,sumtt_w
-
           num%part = nch                                !store number of particle channel entries
 
           ! gamma emission is always a weak channel (one iteration)
@@ -857,6 +846,7 @@
 
    ENDIF
 
+   CALL DelTLJs()
    CALL DelHRTW()    !deallocate HRTW arrays
 
    RETURN
@@ -1096,6 +1086,13 @@
            sumdl = sumdl + tld*rho1  !think there is no need for it
               nch = nch + 1                              !we've got non-zero channel
               IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insiufficent space allocation
+
+              IF(num%coll == 0) THEN
+                 num%coll = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
+                 num%colh = nch                          !set it also as the last one in case there are no more
+              ENDIF
+              IF(nch > num%colh) num%colh = nch          !in case of another coupled level augment position of last coupled channel
+
               out => outchnl(nch)
               out%l = k-1
               out%j = xj

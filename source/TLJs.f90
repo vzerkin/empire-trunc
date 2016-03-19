@@ -1,6 +1,6 @@
-! $Rev: 4616 $
+! $Rev: 4617 $
 ! $Author: rcapote $
-! $Date: 2016-03-19 17:18:53 +0100 (Sa, 19 Mär 2016) $
+! $Date: 2016-03-19 18:12:50 +0100 (Sa, 19 Mär 2016) $
 !
    MODULE TLJs
 
@@ -17,7 +17,8 @@
 
    INTEGER*4, PUBLIC :: MAX_CCch, MAX_CC
 
-   TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLj(:) ! coupled channels for inelastic calculations (including E-W transformation)
+   ! coupled-channel TLJs for inelastic calculations (including E-W transformation)
+   TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: TLJcc(:) 
    
    PUBLIC AllocTLJs, DelTLJs 
 
@@ -33,21 +34,21 @@
 
    INTEGER my
 
-   IF(allocated(STLj)) DEALLOCATE(STLj)
-   ALLOCATE(STLj(nch),STAT=my)
+   IF(allocated(TLJcc)) DEALLOCATE(TLJcc)
+   ALLOCATE(TLJcc(nch),STAT=my)
    IF(my /= 0) THEN
-     WRITE(8,*)  'ERROR: Insufficient memory for TLJs'
-     WRITE(12,*) 'ERROR: Insufficient memory for TLJs'
-     STOP 'ERROR: Insufficient memory for TLJs'
+     WRITE(8,*)  'ERROR: Insufficient memory for TLJcc'
+     WRITE(12,*) 'ERROR: Insufficient memory for TLJcc'
+     STOP 'ERROR: Insufficient memory for TLJcc'
      RETURN
    ENDIF
 
-   STLj%NJcn = 1      
-   STLj%Jcn  = 0.d0
-   STLj%lev  = 0
-   STLj%l    = 0
-   STLj%j    = 0.d0
-   STLj%tlj  = 0.d0
+   TLJcc%NJcn = 1      
+   TLJcc%Jcn  = 0.d0
+   TLJcc%lev  = 0
+   TLJcc%l    = 0
+   TLJcc%j    = 0.d0
+   TLJcc%tlj  = 0.d0
 
    RETURN
 
@@ -59,7 +60,7 @@
 
    IMPLICIT NONE
 
-   IF(allocated(STLj))    DEALLOCATE(STLj)
+   IF(allocated(TLJcc))    DEALLOCATE(TLJcc)
 
    RETURN
    END SUBROUTINE DelTLJs
