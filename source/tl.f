@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4622 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-03-19 21:57:16 +0100 (Sa, 19 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2789,6 +2789,8 @@ C
       CSFus   = 0.D0
       sxj   = SEJc(NPRoject)          
       trgsp = XJLv(LEVtarg,NTArget)
+
+      write(*,*) 'MAX_cc=',MAX_cc
 C
 C-----Estimating needed coefficient for calculation of the 
 C     absorption cross section from obtained TLs
@@ -3443,6 +3445,11 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       WRITE (46) sreacecis
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
+
+c     IF(IOPSYS.EQ.1) THEN
+c	  CALL SYSTEM(
+c       DELETE ecis06.ang, ecis06.leg,...,ecis06_Pchan.txt
+
       RETURN
       END
 C
@@ -4454,7 +4461,7 @@ C
       IF(inc_channel .and. Inlkey.EQ.0) 
      >  write (*,*) '  Running ECIS (sphe) ...'
 
-      CALL ECIS('ecis06 ')
+      CALL ECIS('ecis06 ',MAX_cc)
 
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
@@ -5401,7 +5408,7 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 C-----Running ECIS
 
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
-      CALL ECIS('ecis06 ')
+      CALL ECIS('ecis06 ',MAX_cc)
 
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp

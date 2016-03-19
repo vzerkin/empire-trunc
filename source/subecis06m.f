@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4621 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4622 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-03-19 21:57:16 +0100 (Sa, 19 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -8,7 +8,7 @@ C     20. Aug. 2008
 C--------------------------------------------------------------------------------------
 C     October 2012 Printing changed if HF calculation undertaken (LO(81)=.TRUE.)
 C--------------------------------------------------------------------------------------
-      SUBROUTINE ECIS(fnamei)
+      SUBROUTINE ECIS(fnamei,Max_ccch)
 C 19/04/07                                                      ECIS06  ECIS-000
 C                                                                       ECIS-001
 C THE COMMON /INOUT/ IS USED IN ANY SUBROUTINE WITH STANDARD INPUT OR   ECIS-002
@@ -48,6 +48,7 @@ C
 C Dummy arguments
 C
       CHARACTER*(*) fnamei
+      INTEGER*4 Max_ccch
 
       PARAMETER (IDMX=35000000)                                         ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
@@ -57,8 +58,10 @@ C
       COMMON DW                                                         ECIS-031
       COMMON /DCONS/ CM,CHB,CZ,CMB,CCZ,CK,XZ                            ECIS-032
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
-      LOGICAL unformat, fexp 
+      LOGICAL unformat, fexp
       COMMON /CTRL1/ unformat
+      INTEGER*4 MAXcc 
+      COMMON /CC_chan/ MAXcc
       CHARACTER*80 cline                                                RCN  RCN
       CHARACTER*50 fname                                                RCN  RCN
       COMMON /FILEN/fname                                               RCN  RCN
@@ -80,6 +83,7 @@ C     CZ=137.03599911D0  ! EMPIRE 3.1                                   ECIS-036
       MW=96                                                             ECIS-038
       MS=97
       unformat = .TRUE.
+      MAXcc=0
 
       fname = TRIM(fnamei)                                              RCN  RCN
       fname = TRIM(fnamei)                                              RCN  RCN
@@ -156,6 +160,8 @@ C     IF (fexp) CLOSE (124)                                             RCN  RCN
       IF (fexp) CLOSE (125)                                             RCN  RCN
       INQUIRE(126,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (126)                                             RCN  RCN
+      Max_ccch = MAXcc
+	IF(MAXcc.eq.0) Max_ccch=1
 
       RETURN                                                            ECIS-041
  100  CLOSE (MR,STATUS = 'delete')                                      RCN  RCN
@@ -19084,6 +19090,8 @@ C***********************************************************************SCAM-104
      1,ACN(8),BZ(5),TG0,BN,FNUG,EGD,GGD,TG1,SGSQ                        SCAM-115
       COMMON /NOEQU/ NCXN,NIC,NCI,NC,NCIN,NIN,JPI,IPJ,R1(2),NAJ         SCAM-116
       COMMON /INOUT/ MR,MW,MS                                           SCAM-117
+      INTEGER*4 MAXcc 
+      COMMON /CC_chan/ MAXcc
       DATA IP,AL,PI,NSY /'+','-',' FISSION','   GAMMA',3.141592653589793SCAM-118
      12D0,0/                                                            SCAM-119
       DATA X /7.0539889691988753D-02,3.7212681800161144D-01,9.1658210248SCAM-120
@@ -19166,6 +19174,7 @@ C OUTPUT OF TRANSMISSION COEFFICIENTS FOR COUPLED CHANNELS.             SCAM-195
       IC=1+(JC-1)/4                                                     SCAM-197
 C     IF (LO(63)) WRITE (99,1005) AJ,IP(JPI+1),JC                       SCAM-198
       IF (LO(63)) WRITE (99)      AJ,IP(JPI+1),JC                       !zv-2013
+      
       DO 7 I=1,IC                                                       SCAM-199
       J1=4*(I-1)                                                        SCAM-200
       J2=MIN0(JC-J1,4)                                                  SCAM-201
@@ -19314,6 +19323,7 @@ C----
       IF(I.EQ.0 .OR. J.EQ.0) GOTO 28                                    RCN  RCN            
       WRITE (121,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (126,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      MAXcc = MAXcc + JC 
 C     C-matrix commented                                                RCN  RCN 
 C     WRITE (124,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     S-matrix                                                          RCN  RCN 
