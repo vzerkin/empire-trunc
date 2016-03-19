@@ -10,9 +10,9 @@
 
    PRIVATE
 
-! $Rev: 4620 $
-! $Author: rcapote $
-! $Date: 2016-03-19 19:22:47 +0100 (Sa, 19 Mär 2016) $
+! $Rev: 4621 $
+! $Author: mherman $
+! $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 !
 
    TYPE channel
@@ -35,7 +35,7 @@
       INTEGER*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
       INTEGER*4 coll     ! position of the first (low) coupled level channel
       INTEGER*4 colh     ! position of the last coupled channel; 
-	                     ! coupled channels are embedded in particle channels coll <= colh <=part
+                           ! coupled channels are embedded in particle channels coll <= colh <=part
       INTEGER*4 elal     ! position of the first (low) elastic channel
       INTEGER*4 elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
       INTEGER*4 fiss     ! effective number of fission channels

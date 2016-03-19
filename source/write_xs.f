@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4614 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4621 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -15,7 +15,7 @@ C     common variables
 C
 C     local variables
 C
-	DOUBLE PRECISION eincid
+      DOUBLE PRECISION eincid
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc,itmp
       INTEGER nspec_np,iemm,iprn
@@ -102,7 +102,7 @@ C     ENDDO
 
       csnp = 0.d0
       csenp = 0.d0
-	eincid = 0.d0
+      eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
 

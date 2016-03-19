@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4615 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 07:40:20 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4621 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19284,7 +19284,7 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
       SGF(2)=0.D0                                                       SCAM-309
       IF (LO(82)) GO TO 58                                              SCAM-310
 C
-C	To allow calculation of Pmatrix independently of EW request
+C     To allow calculation of Pmatrix independently of EW request
 C
 C     IF (LO(83)) GO TO 28                                              SCAM-311
 C

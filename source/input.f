@@ -1,6 +1,6 @@
-!cc   * $Rev: 4605 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-15 05:55:33 +0100 (Di, 15 Mär 2016) $
+!cc   * $Rev: 4621 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -2195,7 +2195,7 @@ C-----------------Width of the partial bin relative to DE
                     WRITE(8,'(1x,A48,F10.6,1x,A4,F8.6,A4,F10.6,A4)')                    
      &                'WARNING: You may reduce your incident energy of '
      &                ,EINl,' by ',fftmp, ' to ', EINl-fftmp,' MeV'
-				  ENDIF
+                          ENDIF
                ENDIF
 C              The following line solves the problem of fluctuations
 C              in PCROSS at higher than 7-8 MeV 
@@ -6550,28 +6550,28 @@ C-----
                   ROPaa(i) = val
                ENDDO
                IF (val.GT.0.0D0) WRITE (8,
-     &       '('' L. d. a-parameter set to '',F6.2,'' for all nuclei'')'
-     &       ) val
+     &       '('' GC l.d. a-parameter set '',F6.2,'' for all nuclei'')'
+     &        ) val
                IF (val.EQ.0.0D0) WRITE (8,
-     &      '('' L. d. a-parameter according to Ignatyuk systematics'')'
+     &      '('' GC l.d. a-parameter following Ignatyuk systematics'')'
      &      )
                IF (val.EQ.( - 1.D0)) WRITE (8,
-     &        '('' L. d. a-parameter according to Arthur systematics'')'
+     &        '('' GC l.d. a-parameter following Arthur systematics'')'
      &        )
                IF (val.EQ.( - 2.D0)) WRITE (8,
-     &         '('' L. d. a-parameter according to Mebel systematics'')'
+     &         '('' GC l.d. a-parameter following Mebel systematics'')'
      &         )
                IF (val.GT.0.0D0) WRITE (12,
-     &       '('' L. d. a-parameter set to '',F6.2,'' for all nuclei'')'
-     &       ) val
+     &       '('' GC l.d. a-parameter set '',F6.2,'' for all nuclei'')'
+     &        ) val
                IF (val.EQ.0.0D0) WRITE (12,
-     &      '('' L. d. a-parameter according to Ignatyuk systematics'')'
+     &      '('' GC l.d. a-parameter following Ignatyuk systematics'')'
      &      )
                IF (val.EQ.( - 1.D0)) WRITE (12,
-     &        '('' L. d. a-parameter according to Arthur systematics'')'
+     &        '('' GC l.d. a-parameter following Arthur systematics'')'
      &        )
                IF (val.EQ.( - 2.D0)) WRITE (12,
-     &         '('' L. d. a-parameter according to Mebel systematics'')'
+     &         '('' GC l.d. a-parameter following Mebel systematics'')'
      &         )
                GOTO 100
             ENDIF
@@ -6580,17 +6580,16 @@ C-----
                WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
      &                '' NOT NEEDED'')') i2,i1
                WRITE (8,
-
      &           '('' WARNING: L.D. a-PARAMETER SETTING IGNORED'')')
                GOTO 100
             ENDIF
             ROPaa(nnuc) = val
             WRITE (8,
-     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
-     & ) i2, SYMb(nnuc), val
+     & '('' GC l.d. a-parameter in '',I3,A2,'' set to '',F6.2)')
+     &  i2, SYMb(nnuc), val
             WRITE (12,
-     & '('' L.d. a-parameter   in '',I3,A2,'' set to ''          ,F6.2)'
-     & ) i2, SYMb(nnuc), val
+     & '('' GC l.d. a-parameter in '',I3,A2,'' set to '',F6.2)')
+     &  i2, SYMb(nnuc), val
             GOTO 100
          ENDIF
 C-----

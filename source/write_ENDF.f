@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4612 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-18 22:01:31 +0100 (Fr, 18 Mär 2016) $
+Ccc   * $Rev: 4621 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -502,7 +502,7 @@ C    &        write(*,*) NINT(A(nnuc)),INT(Z(nnuc)),' ',
 C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
 
             IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
-     &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN		  
+     &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
               IF(CSInc(nnuc).gt.0.d0) 
      &          CALL PRINT_RECOIL(nnuc,reactionx)
               lprint = .TRUE.

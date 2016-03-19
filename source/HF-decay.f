@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4614 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4621 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -957,7 +957,7 @@ C    &              ' ',trim(Reaction(nnuc))
                IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
 C              IF (POPcs(nejc,INExc(nnuc)).LT.0.d0) CYCLE
 C              IF ((nejc.gt.0 .and. nejc.ne.NPRoject)  .and.
-C    &        	 POPcs(nejc,INExc(nnuc)).EQ.0.d0 ) CYCLE
+C    &             POPcs(nejc,INExc(nnuc)).EQ.0.d0 ) CYCLE
 
                IF (nejc.EQ.0) THEN
                  cejectile = 'gammas   '
@@ -1340,7 +1340,7 @@ C         number of discrete levels is limited to 40
       ENDIF
 
       IF(CSPrd(nnuc).GT.CSMinim) THEN
-	     nejc=-1
+           nejc=-1
            IF(nnuc.eq.mt91 ) nejc=1
            IF(nnuc.eq.mt649)  nejc=2
            IF(nnuc.eq.mt849)  nejc=3
@@ -1349,7 +1349,7 @@ C         number of discrete levels is limited to 40
            checkprd = CSPrd(nnuc)
            xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
            if(nejc.gt.0) then
-		   ilv = 0  ! count of meta-stable states
+               ilv = 0  ! count of meta-stable states
              ftmp_gs = CSPrd(nnuc)
              DO its= NLV(nnuc), 2, -1
                IF(ISIsom(its,Nnuc).EQ.1) THEN
@@ -1368,7 +1368,7 @@ C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
              IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           '' ground state population  '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, ftmp_gs
-	     ENDIF
+           ENDIF
       ENDIF
 
 5753  FORMAT(1X,I3,'-',A2,'-',I3,
@@ -1898,7 +1898,7 @@ C-----Find last non-zero cross section for printing
       esum  = 0.d0
       ilast = 0
       recorr = A(Nnuc)/(A(1)-A(Nnuc))
-      DO ie = 1, NDEX			          
+      DO ie = 1, NDEX                         
         ftmp = POPcse(0,ipart,ie,INExc(Nnuc))
         IF (ftmp.GT.0) then
           csum = csum + ftmp

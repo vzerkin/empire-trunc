@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4615 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 07:40:20 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4621 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -15,7 +15,7 @@ Ccc   *                                                                  *
 Ccc   * input:NPRO    - projectile index (normally 0)                    *
 Ccc   *       NTRG    - target index (normally 0)                        *
 Ccc   *       Nnurec  - target index among residual nuclei               *
-Ccc   *       Nejcec  - projectile index among ejectiles                         *
+Ccc   *       Nejcec  - projectile index among ejectiles                 *
 Ccc   *                                                                  *
 Ccc   * output:none                                                      *
 Ccc   *                                                                  *
