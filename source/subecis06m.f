@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4622 $
+Ccc   * $Rev: 4624 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 21:57:16 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -161,7 +161,6 @@ C     IF (fexp) CLOSE (124)                                             RCN  RCN
       INQUIRE(126,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (126)                                             RCN  RCN
       Max_ccch = MAXcc
-	IF(MAXcc.eq.0) Max_ccch=1
 
       RETURN                                                            ECIS-041
  100  CLOSE (MR,STATUS = 'delete')                                      RCN  RCN

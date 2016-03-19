@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4621 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4624 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -483,9 +483,9 @@ C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
             IF (DIRect.NE.3) THEN
-               CALL PROCESS_ECIS('dwba',4,4,ICAlangs)
+               CALL PROCESS_ECIS('dwba',4,4,ICAlangs,DIRect,INTerf)
             ELSE
-               CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
+               CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs,DIRect,INTerf)
                CALL ECIS2EMPIRE_TL_TRG(
      &           Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
                             ! TLs are obtained here for DIRECT=3
@@ -540,17 +540,19 @@ C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
 C               EW to be implemented in OPTMAN
 C               IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                 Saving EW matrices
-C                 CALL PROCESS_ECIS('ccm',3,5,ICAlangs)
+C                 CALL PROCESS_ECIS('ccm',3,5,ICAlangs,DIRect,INTerf)
 C               ELSE
-                  CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
+                  CALL PROCESS_ECIS('ccm',3,4,ICAlangs,DIRect,INTerf)
 C               ENDIF 
               ELSE
 C               EW to be implemented in OPTMAN
 C               IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                 Saving EW matrices
-C                 CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs)
+C                 CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs,
+C                                   DIRect,INTerf)
 C               ELSE
-                  CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
+                  CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs,
+     &                              DIRect,INTerf)
 C               ENDIF 
                 CALL ECIS2EMPIRE_TL_TRG(
      &            Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
@@ -565,16 +567,18 @@ C               including CN calculation
                 IF (ldbwacalc) THEN
                   IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                   Saving EW matrices
-                    CALL PROCESS_ECIS('ccm',3,5,ICAlangs)
+                    CALL PROCESS_ECIS('ccm',3,5,ICAlangs,DIRect,INTerf)
                   ELSE
-                    CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
+                    CALL PROCESS_ECIS('ccm',3,4,ICAlangs,DIRect,INTerf)
                   ENDIF 
                 ELSE
                   IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                   Saving EW matrices
-                    CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs)
+                    CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs,
+     >                                DIRect,INTerf)
                   ELSE
-                    CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
+                    CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs,
+     >                                DIRect,INTerf)
                   ENDIF 
                   CALL ECIS2EMPIRE_TL_TRG(
      >              Npro,Ntrg,maxlw,stl,stlj,sel,.FALSE.)
@@ -587,16 +591,20 @@ C---------------EXACT VIBRATIONAL MODEL CC calc. (only coupled levels)
                 IF (ldbwacalc) THEN
                   IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                   Saving EW matrices
-                    CALL PROCESS_ECIS('ccm',3,5,ICAlangs)
+                    CALL PROCESS_ECIS('ccm',3,5,ICAlangs,
+     >                                DIRect,INTerf)
                   ELSE
-                    CALL PROCESS_ECIS('ccm',3,4,ICAlangs)
+                    CALL PROCESS_ECIS('ccm',3,4,ICAlangs,
+     >                                DIRect,INTerf)
                   ENDIF 
                 ELSE
                   IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
 C                   Saving EW matrices
-                    CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs)
+                    CALL PROCESS_ECIS('INCIDENT',8,5,ICAlangs,
+     >                                DIRect,INTerf)
                   ELSE
-                    CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs)
+                    CALL PROCESS_ECIS('INCIDENT',8,4,ICAlangs,
+     >                                DIRect,INTerf)
                   ENDIF 
                   CALL ECIS2EMPIRE_TL_TRG(
      &              Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
@@ -813,7 +821,9 @@ C           all OMP calculations calculate only the direct component (no CN)
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
 
-            CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs)
+            CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs,
+     >                                DIRect,INTerf)
+
             WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
@@ -924,19 +934,22 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
-C        ctmp = ctldir//ctmp23//'_Smatr.txt'
-C        iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
-         ctmp = ctldir//ctmp23//'_Pmatr.txt'
-         iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
-         ctmp = ctldir//ctmp23//'_Pchan.txt'
-         iwin = ipipe_move('INCIDENT_Pchan.txt',ctmp)
+         IF(NINT(DIRect).GT.0) THEN
+C          ctmp = ctldir//ctmp23//'_Smatr.txt'
+C          iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Pmatr.txt'
+           iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
+           ctmp = ctldir//ctmp23//'_Pchan.txt'
+           iwin = ipipe_move('INCIDENT_Pchan.txt',ctmp)
 C
-         IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-           ctmp = ctldir//ctmp23//'_Umatr.txt'
-           iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
-           ctmp = ctldir//ctmp23//'_Pdiag.txt'
-           iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+           IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
+             ctmp = ctldir//ctmp23//'_Umatr.txt'
+             iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
+             ctmp = ctldir//ctmp23//'_Pdiag.txt'
+             iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+           ENDIF
          ENDIF
+
       ENDIF
 C
 C-----Save TLs, SINl
@@ -1870,12 +1883,13 @@ C
      &                           /(1 + EXP((-2*pi*(E-X-EROt)/htom)))
       END
 
-      SUBROUTINE PROCESS_ECIS(Outname,Length,Iret,ICAlangs)
+      SUBROUTINE PROCESS_ECIS(Outname,Length,Iret,ICAlangs,Direc,Inter)
 C
 C Dummy arguments
 C
-      INTEGER Iret, Length
+      INTEGER Iret, Length, Inter
       CHARACTER*(*) Outname
+      REAL*8 Direc
 C
 C Local variables
 C
@@ -1899,6 +1913,7 @@ C
       ctmp = Outname(1:Length)//'.ICS'
       iwin = ipipe_move('ecis06.ics',ctmp)
 C
+      IF (NINT(Direc).EQ.0) RETURN
 C     open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pmatr.txt'
       iwin = ipipe_move('ecis06_Pmatr.txt',ctmp)
@@ -1909,7 +1924,7 @@ C     open(126,file=TRIM(fname)//'_Pchan.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pchan.txt'
       iwin = ipipe_move('ecis06_Pchan.txt',ctmp)
 
-      IF (Iret.EQ.4) RETURN
+      IF (Iret.EQ.4 .OR. Inter.EQ.0) RETURN
 C     open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pdiag.txt'
       iwin = ipipe_move('ecis06_Pdiag.txt',ctmp)
