@@ -9,9 +9,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4628 $
-   ! $Author: rcapote $
-   ! $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+   ! $Rev: 4630 $
+   ! $Author: mherman $
+   ! $Date: 2016-03-21 00:28:35 +0100 (Mo, 21 Mär 2016) $
    !
 
    TYPE channel
@@ -64,7 +64,6 @@ MODULE width_fluct
    INTEGER*4 :: NCH       ! Number of strong channels (Tlj's)
    INTEGER*4 :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
 
-   INTEGER*4, ALLOCATABLE :: MEMel(:,:)
    REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
@@ -90,11 +89,6 @@ CONTAINS
       IF(present(nd1)) ndch = nd1
       IF(present(nd1)) ndcc = nd1/10
       IF(present(nd2)) ndfus = nd2
-
-      IF(allocated(MEMel)) DEALLOCATE(MEMel)
-      ALLOCATE(MEMel(ndfus,3),STAT=my)
-      IF(my /= 0) GOTO 10
-      MEMel = 0
 
       IF(allocated(H_Tl)) DEALLOCATE(H_Tl)
       ALLOCATE(H_Tl(ndch,2),STAT=my)
@@ -146,7 +140,6 @@ CONTAINS
 
       IMPLICIT NONE
 
-   IF(allocated(MEMel))   DEALLOCATE(MEMel)
    IF(allocated(H_Tl))    DEALLOCATE(H_Tl)
    IF(allocated(H_Abs))   DEALLOCATE(H_Abs)
    IF(allocated(outchnl)) DEALLOCATE(outchnl)
@@ -603,7 +596,6 @@ CONTAINS
       !cc   *             H_abs(.,.) - absorption x-sec decomposed in l's      *
       !cc   *             H_Tav - average transmission coefficient             *
       !cc   *             H_Tthr - threshold to consider Tl as strong          *
-      !cc   *             MEMel  - records l and position of elastic channel   *
       !cc   *                                                                  *
       !cc   *                                                                  *
       !cc   *                                                                  *
@@ -625,7 +617,7 @@ CONTAINS
       ! Dummy arguments
       INTEGER*4, INTENT(IN) :: ipc, jc, nejc, nnuc, nnur, iec
       ! Local variables
-      REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, sumdl, tld, xjc, xj, xjr, summa
+      REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, tld, xjc, xj, xjr, summa
       INTEGER*4 :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -715,7 +707,6 @@ CONTAINS
       !----------------------------------------------------------------------------------------------------
 
       SCRtl(:,nejc) = 0.D0
-      IF(IZA(nnur)==IZA(0)) memel = 0    !clear memorized elastic channels when entering new J-pi CN state
       eoutc = EX(iec,nnuc) - Q(nejc,nnuc)
       sumin_w = 0.d0
       sumtt_w = 0.d0
@@ -725,7 +716,6 @@ CONTAINS
          IF(IZA(nnur)==IZA(0) .AND. (ICOllev(i)>0 .AND. ICOllev(i)<=LEVcc)) CYCLE   !skip coupled levels
          eout = eoutc - ELV(i,nnur)
          IF(eout<0.0D0) EXIT
-         sumdl = 0.D0
          CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
          jmin = abs(XJLv(i,nnur) - xjc)
          jmax = XJLv(i,nnur) + xjc
@@ -744,7 +734,6 @@ CONTAINS
                IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                H_Sumtl = H_Sumtl + tld*rho1
                H_Sumtls = H_Sumtls + tld**2*rho1
-               sumdl = sumdl + tld*rho1  !think there is no need for it
                IF(tld>H_Tthr) THEN
                   nch = nch + 1                              !we've got non-zero channel
                   IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insiufficent space allocation
@@ -783,7 +772,6 @@ CONTAINS
                   IF(tld<1.0d-15) CYCLE                              !ignore very small channels
                   H_Sumtl = H_Sumtl + tld
                   H_Sumtls = H_Sumtls + tld**2
-                  sumdl = sumdl + tld     !think there is no need for it
                   nch = nch + 1                                !we've got non-zero channel
                   IF(nch>ndhrtw1) CALL HRTW_error()            !STOP - insiufficent space allocation
                   IF(num%coll == 0) THEN
@@ -832,7 +820,6 @@ CONTAINS
                IF(ICOllev(i)==0 .OR. ICOllev(i)>LEVcc) CYCLE   !skip DWBA coupled levels
                eout = eoutc - ELV(i,nnur)
                IF(eout<0.0D0) EXIT
-               sumdl = 0.D0
                CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                jmin = abs(XJLv(i,nnur) - xjc)
                jmax = XJLv(i,nnur) + xjc
@@ -851,7 +838,6 @@ CONTAINS
                      IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                      H_Sumtl = H_Sumtl + tld*rho1
                      H_Sumtls = H_Sumtls + tld**2*rho1
-                     sumdl = sumdl + tld*rho1  !think there is no need for it
                      nch = nch + 1                              !we've got non-zero channel
                      IF(nch>ndhrtw1) CALL HRTW_error()          !STOP - insiufficent space allocation
 
@@ -879,7 +865,6 @@ CONTAINS
             ! elastic channel
     write(8,*)'Got into old elastic decay'
 
-            sumdl = 0.D0
             i = levtarg
             eout = eoutc - ELV(i,nnur)
             IF(eout<0.0D0) GOTO 10
@@ -923,10 +908,8 @@ CONTAINS
                   in%t = tld                       !          "
                   h_sumtl = h_sumtl + tld*rho1
                   h_sumtls = h_sumtls + tld**2*rho1
-                  sumdl = sumdl + tld*rho1  !think there is no need for it
                ENDDO                 ! do loop over jndex --- done -------
             ENDDO                    ! loop over 'l' ------ done ---------
-            summa = summa + sumdl
          ENDIF !end of elastic
    write(8,*) 'Just before the end'
       ENDIF !TEMPORARY to allow for the old treatment of the direct outgoing channels
