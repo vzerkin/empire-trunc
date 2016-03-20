@@ -1,6 +1,6 @@
-! $Rev: 4626 $
+! $Rev: 4627 $
 ! $Author: rcapote $
-! $Date: 2016-03-20 20:10:32 +0100 (So, 20 Mär 2016) $
+! $Date: 2016-03-20 21:52:19 +0100 (So, 20 Mär 2016) $
 !
    MODULE TLJs
    IMPLICIT NONE
@@ -35,7 +35,6 @@
      COMPLEX*16 umatrix   ! U(irow,icol) - Matrix element of the unitary transformation matrix U 
    END TYPE cc_umatrix
 
-   INTEGER*4, PUBLIC :: MAX_CCch
    TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)      
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:) 
    TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
@@ -297,25 +296,27 @@
 
    Read_CC_matrices = .FALSE.
 
+   nch = 0
 !==Reading Pchan
    DO ncc = 1, MAX_CC
-     ps_tlj => STLcc(ncc)
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq  
      ! write(*,*) jc,parc,nceq  
-     ps_tlj%Jcn = jc
-     ps_tlj%Pcn = 1
-     if(parc == '-') ps_tlj%Pcn = -1
-     ps_tlj%nceq = nceq                        
      DO i1 = 1, nceq
+       nch = nch + 1
+       ps_tlj => STLcc(nch)
        READ (126,*,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj 
 	   ! write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') nlev,nl,sngl(jj),sngl(sreal),sngl(jc),ps_tlj%Pcn
+       ps_tlj%Jcn = jc
+       ps_tlj%Pcn = 1
+       if(parc == '-') ps_tlj%Pcn = -1
+       ps_tlj%nceq = nceq                        
        ps_tlj%lev = nlev
        ps_tlj%l   = nl
        ps_tlj%j   = jj
        ps_tlj%pchan = sreal
-       ps_tlj%tlj = 1.d0 - sreal
+       ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
 10 Read_CC_matrices = .TRUE.
@@ -371,10 +372,10 @@
      ps_umatrix => CCumatrix(ncc)
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=7,ERR=7) jc, parc, nceq  
+     READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq  
      !  write(*,*) jc,parc,nceq  
      ps_umatrix%Jcn = jc
-     ps_umatrix%Pcn = 1
+     ps_umatrix%Pcn = 1                                           
      if(parc == '-') ps_umatrix%Pcn = -1
      ps_umatrix%nceq = nceq                        
      !
@@ -383,6 +384,7 @@
        READ (60,*,END = 7,ERR = 7) ! nc1
        DO i2 = 1, nceq
          READ (60,*,END = 7,ERR = 7)  sreal, simag
+  	     ! write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sngl(sreal),sngl(simag)
          ps_umatrix%irow = i1
          ps_umatrix%icol = i2
          ps_umatrix%umatrix = CMPLX(sreal,simag,8)
@@ -390,13 +392,16 @@
      ENDDO
    ENDDO
 
+14 CONTINUE
+   ! PAUSE 
+
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
    !==Reading Pdiag
    DO ncc = 1, MAX_CC
      ps_pdiag => CCpdiag(ncc)
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=8,ERR=8) jc, parc, nceq  
+     READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq  
      ps_pdiag%Jcn = jc
      ps_pdiag%Pcn = 1
      if(parc == '-') ps_pdiag%Pcn = -1
@@ -410,9 +415,12 @@
      ENDDO
    ENDDO
 
+16 CONTINUE
+   ! PAUSE 
+
    Read_CC_matrices = .TRUE.
 
-   !RETURN
+   RETURN
 
    DO ncc = 1, MAX_CC
 
