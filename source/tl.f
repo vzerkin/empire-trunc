@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4622 $
+Ccc   * $Rev: 4626 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 21:57:16 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Date: 2016-03-20 20:10:32 +0100 (So, 20 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2752,6 +2752,8 @@ C             Stlj(L,j) contains the transmission coefficient Tlj(L,s) for a giv
 C             J = L + s (vectorial sum) 
 C
 C
+      use TLJs
+
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -2786,6 +2788,7 @@ C
       Stl  = 0.d0
       Sel  = 0.d0
       Stlj = 0.d0
+
       CSFus   = 0.D0
       sxj   = SEJc(NPRoject)          
       trgsp = XJLv(LEVtarg,NTArget)
@@ -2802,18 +2805,15 @@ C
       IF (IRElat(Nejc,Nnuc).GT.0 .OR. RELkin) relcal = .TRUE.
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
-C
-C     write(*,*) elab,sngl(xmas_nejc),sngl(xmas_nnuc)
-C     
       ilv = 1
       If(Nnuc.eq.0) ilv = Levtarg
 C
 C     write(*,*) 'ilv=',ilv
 C
 C------------------------------------------
-C-----| Input of transmission coefficients|
+C-----| Input of Smatrix 
 C------------------------------------------
-C-----Opening ecis03 output file containing Smatrix
+C-----Opening ecis06 output file containing Smatrix
       OPEN(UNIT=45, STATUS = 'old', FILE = 'ecis06.smat', ERR=90)
       READ (45,*,END = 90)   ! To skip first line <SMATRIX> ..
    80 READ (45,'(1x,f9.1,4x,a1,2(1x,i4))',END = 90) 
@@ -2837,15 +2837,17 @@ C       (nlev=LEVtarg corresponds to the target state)
 C-----------Averaging over particle and target spin, summing over channel spin jc
 C    &      stot = stot + (2*jj + 1)*(1.d0-sreal) ! /DBLE(2*L + 1)
             Sel(l+1) = Sel(l+1) +(2*jc + 1)*((1 - sreal)**2 + simag**2)
-     &           /DBLE(2*L + 1)
-     &           /DBLE(2*XJLv(1,Nnuc) + 1)
-     &           /DBLE(2*SEJc(Nejc) + 1)
+     &           /DBLE(2*L + 1)/(2.d0*trgsp + 1.d0)/(2.d0*sxj + 1.d0)
         ENDIF
         enddo
       enddo
       GOTO 80
    90 CLOSE(45)
 
+C
+C     Note: .TLJ files printed by ECIS are identical to 
+C           .Pchan files introduced by RCN for EW  
+C
       if(unformat) then
         OPEN (UNIT = 45,STATUS = 'old',FILE = 'INCIDENT.TLJ', ERR=200,
      1                                 form='unformatted') !-zvv-2013
@@ -2861,7 +2863,6 @@ C-----nceq is the number of coupled equations
       else
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       endif  
-      
 C     write(*,*) jc,parc,nceq  
 C
 C-----Loop over the number of coupled equations
@@ -2891,9 +2892,8 @@ C--------Selecting only target state LEVtarg
          IF (nlev.eq.ilv) then
 C-----------Averaging over target and particle spin, summing over channel spin jc
             Stl(l + 1) = Stl(l + 1) + 
-     &                           (2*jc + 1)*dtmp/DBLE(2*l + 1)  
-     &                           /DBLE(2*SEJc(Nejc) + 1)
-     &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                   (2*jc + 1)*dtmp/DBLE(2*l + 1)/
+     &                   (2.d0*trgsp + 1.d0)/(2.d0*sxj + 1.d0)  
 
 C           It always contain the TRUE maximum L to be used in loops over L from 0 to Maxlw
             Maxlw = max(l,Maxlw)
@@ -2909,7 +2909,7 @@ C
 C-----------Averaging over target and particle spin, summing over channel spin jc
             Stlj(l + 1,jindex) = Stlj(l + 1,jindex) + 
      &                           (2*jc + 1)*dtmp/DBLE(2*jj+1)   
-     &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                           /(2.d0*trgsp + 1.d0)
 C
 C           Sreac = Sum_{L} Sum_{j} (2j+1)/(2s+1) Stlj(L,j)   
 C           j goes from |L-s| to L+s
@@ -2920,19 +2920,31 @@ C           Sreac = Sum_{L} (2L+1) Stl(L)
 C
          ENDIF
       ENDDO
+C     pause
       GOTO 100
   200 CLOSE (45)
-C-----For vibrational the Tls must be multiplied by (2*XJLv(ilv,Nnuc) + 1)
+C-----For vibrational the Tls must be multiplied by (2*XJLv(ilv,Nnuc) + 1)=(2.d0*trgsp + 1.d0)
 C     as the spin of the target nucleus is neglected for spherical and DWBA calcs
       IF (Lvibrat) THEN
         DO l = 0, Maxlw
-           Stl(l + 1) = Stl(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
-           Sel(l + 1) = Sel(l + 1)*DBLE(2*XJLv(ilv,Nnuc) + 1)
+           Stl(l + 1) = Stl(l + 1)*(2.d0*trgsp + 1.d0)
+           Sel(l + 1) = Sel(l + 1)*(2.d0*trgsp + 1.d0)
            DO jindex = 1,MAXj(Nejc)
              Stlj(l + 1,jindex) = Stlj(l + 1,jindex)
-     &                          *DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                          *(2.d0*trgsp + 1.d0)
            ENDDO
         ENDDO
+      ENDIF
+C
+      IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
+         CALL AllocTLJs(MAX_cc)
+         IF(Open_CC_files()) THEN 
+           IF(.NOT.Read_CC_matrices()) 
+     >       WRITE(8,*) 'ERROR: Reading ECIS CC files for EW'  
+           CALL Close_CC_files()
+         ELSE
+	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
+         ENDIF
       ENDIF
 C
 C     write(*,*) nejc,'Maxlw=',maxlw

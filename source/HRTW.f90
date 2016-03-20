@@ -6,12 +6,14 @@
    ! WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),INT(AEJc(0)),INT(Z(0)),INT(A(0)),INT(EINl*1000000)
 
    IMPLICIT NONE
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
 
    PRIVATE
 
-! $Rev: 4624 $
+! $Rev: 4626 $
 ! $Author: rcapote $
-! $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
+! $Date: 2016-03-20 20:10:32 +0100 (So, 20 Mär 2016) $
 !
 
    TYPE channel
@@ -179,6 +181,8 @@
    !cc
 
    IMPLICIT NONE
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
 
    REAL*8 :: elada(NDAngecis), elleg(NDAngecis)
    INTEGER neles
@@ -588,9 +592,8 @@
 
    ENDIF
 
-  !CALL DelTLJs()
-  !CALL DelCCmatr()
-   CALL DelHRTW()    !deallocate HRTW arrays
+   CALL DelHRTW()    ! deallocate HRTW arrays
+   IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
 
    RETURN
    END SUBROUTINE HRTW
@@ -643,6 +646,8 @@
    !cc
 
    IMPLICIT NONE
+   INCLUDE 'dimension.h'
+   INCLUDE 'global.h'
    ! COMMON variables
    REAL*8, DIMENSION(ndlw,3) :: ELTLJ
    REAL*8, DIMENSION(ndlw) :: ELTL
@@ -1670,7 +1675,8 @@
          ENDIF
       ENDIF
 
-      CALL DelHRTW()    !deallocate HRTW arrays
+      CALL DelHRTW()    ! deallocate HRTW arrays
+      IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
 
       RETURN
    END SUBROUTINE Moldauer
