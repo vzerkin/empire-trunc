@@ -1,6 +1,6 @@
-! $Rev: 4624 $
-! $Author: rcapote $
-! $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
+! $Rev: 4625 $
+! $Author: mherman $
+! $Date: 2016-03-20 04:17:41 +0100 (So, 20 Mär 2016) $
 !
    MODULE TLJs
    IMPLICIT NONE
@@ -9,7 +9,7 @@
    include 'global.h'
 
    TYPE, PUBLIC :: cc_channel
-     INTEGER*4 NJcn       ! CN parity to which cc-channel couples (+1 or -1)
+     INTEGER*4 Pcn        ! CN parity to which cc-channel couples (+1 or -1)
      REAL*8 Jcn           ! CN spin   to which cc-channel couples
      INTEGER*4 nceq       ! Number of diagonal TLj in the P-matrix for a given CN J-pi
      INTEGER*4 lev        ! number of the collective level (in the collective level file)
@@ -44,7 +44,7 @@
      RETURN
    ENDIF
 
-   STLcc%NJcn = 1
+   STLcc%Pcn = 1
    STLcc%Jcn  = 0.d0
    STLcc%nceq = 0
    STLcc%lev  = 0
