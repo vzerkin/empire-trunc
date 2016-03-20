@@ -1,6 +1,6 @@
-!cc   * $Rev: 4621 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
+!cc   * $Rev: 4628 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -20,7 +20,7 @@
 !cc
       use nubar_reader
       use empgdr
-      use width_fluct
+      ! use width_fluct
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -3557,7 +3557,7 @@ Ccc   * calls:none                                                       *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
-      use width_fluct
+      !use width_fluct
 
       implicit none
        

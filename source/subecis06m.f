@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4624 $
+Ccc   * $Rev: 4628 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -48,7 +48,7 @@ C
 C Dummy arguments
 C
       CHARACTER*(*) fnamei
-      INTEGER*4 Max_ccch
+      INTEGER Max_ccch
 
       PARAMETER (IDMX=35000000)                                         ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
@@ -60,7 +60,7 @@ C
       COMMON /INOUT/ MR,MW,MS                                           ECIS-033
       LOGICAL unformat, fexp
       COMMON /CTRL1/ unformat
-      INTEGER*4 MAXcc 
+      INTEGER MAXcc 
       COMMON /CC_chan/ MAXcc
       CHARACTER*80 cline                                                RCN  RCN
       CHARACTER*50 fname                                                RCN  RCN
@@ -19089,7 +19089,7 @@ C***********************************************************************SCAM-104
      1,ACN(8),BZ(5),TG0,BN,FNUG,EGD,GGD,TG1,SGSQ                        SCAM-115
       COMMON /NOEQU/ NCXN,NIC,NCI,NC,NCIN,NIN,JPI,IPJ,R1(2),NAJ         SCAM-116
       COMMON /INOUT/ MR,MW,MS                                           SCAM-117
-      INTEGER*4 MAXcc 
+      INTEGER MAXcc 
       COMMON /CC_chan/ MAXcc
       DATA IP,AL,PI,NSY /'+','-',' FISSION','   GAMMA',3.141592653589793SCAM-118
      12D0,0/                                                            SCAM-119

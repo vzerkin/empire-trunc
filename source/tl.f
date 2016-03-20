@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4626 $
+Ccc   * $Rev: 4628 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-20 20:10:32 +0100 (So, 20 Mär 2016) $
+Ccc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2792,8 +2792,6 @@ C
       CSFus   = 0.D0
       sxj   = SEJc(NPRoject)          
       trgsp = XJLv(LEVtarg,NTArget)
-
-      write(*,*) 'MAX_cc=',MAX_cc
 C
 C-----Estimating needed coefficient for calculation of the 
 C     absorption cross section from obtained TLs
@@ -2945,6 +2943,10 @@ C
          ELSE
 	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
          ENDIF
+C        l = 5
+C        write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
+C    >     STLcc(l)%lev,STLcc(l)%l,sngl(STLcc(l)%j),sngl(STLcc(l)%tlj),
+C    >     sngl(STLcc(l)%Jcn),STLcc(l)%Pcn
       ENDIF
 C
 C     write(*,*) nejc,'Maxlw=',maxlw
@@ -4474,7 +4476,7 @@ C
      >  write (*,*) '  Running ECIS (sphe) ...'
 
       CALL ECIS('ecis06 ',MAX_cc)
-
+C	write (*,*) 'from ECIS MAX_cc=',MAX_cc
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 

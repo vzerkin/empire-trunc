@@ -1,12 +1,14 @@
-! $Rev: 4627 $
+! $Rev: 4628 $
 ! $Author: rcapote $
-! $Date: 2016-03-20 21:52:19 +0100 (So, 20 Mär 2016) $
+! $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
 !
-   MODULE TLJs
+MODULE TLJs
    IMPLICIT NONE
 
    include 'dimension.h'
    include 'global.h'
+
+   INTEGER, PUBLIC :: MAX_cc_mod 
 
    TYPE, PUBLIC :: cc_channel
      INTEGER*4 Pcn        ! CN parity to which cc-channel couples (+1 or -1)
@@ -53,8 +55,11 @@
 
    SUBROUTINE AllocTLJs(nch)
    IMPLICIT NONE
-   INTEGER*4 nch
+   INTEGER nch
    INTEGER my
+
+   MAX_cc_mod = nch
+   ! write(*,*) 'Inside AllocTLJs:',nch,MAX_cc_mod,MAX_cc
 
    ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)      
    IF(allocated(STLcc)) DEALLOCATE(STLcc)
@@ -327,6 +332,7 @@
 
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:) 
    !==Reading Pmatr
+   nch = 0
    DO ncc = 1, MAX_CC
      ps_pmatrix => CCpmatrix(ncc)
      !--jc,parc are the channel spin and parity
