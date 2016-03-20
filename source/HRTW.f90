@@ -9,9 +9,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4630 $
+   ! $Rev: 4631 $
    ! $Author: mherman $
-   ! $Date: 2016-03-21 00:28:35 +0100 (Mo, 21 Mär 2016) $
+   ! $Date: 2016-03-21 00:37:22 +0100 (Mo, 21 Mär 2016) $
    !
 
    TYPE channel
@@ -280,11 +280,10 @@ CONTAINS
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
             ! particle decay
-     write(8,*) '********* HRTW-decay called for CN state J-pi:',jcn*ip
             DO nejc = 1, nejcm                            !do loop over ejectiles
                IF(NREs(nejc)<0) CYCLE
                nnur = NREs(nejc)
-     write(8,*) 'HRTW-decay ejectile:',nejc
+               !write(8,*) 'HRTW-decay ejectile:',nejc
                summa = HRTW_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
             ENDDO                                         !do loop over ejectiles  ***done***
             ! write(*,*) sumin_w,sumtt_w
@@ -636,7 +635,6 @@ CONTAINS
          ! Decay to the continuum
          !----------------------------------------------------------------------------------------------------
 
-    write(8,*)'Got into continuum decay'
          ! Relations between  TLJ(k,j) and physical transmission coefficients labeled l, s, and J
          ! l = k-1 (TLJ matrix starts with index 1 for l=0)
          ! Structure of the TLJ matrix
@@ -765,7 +763,6 @@ CONTAINS
       ! IF(DIRect>0 .and. MAX_cc_mod>0  .and. .FALSE.) THEN      !TEMPORARY to allow for the old treatment of the direct outgoing channels
       IF(DIRect>0 .and. MAX_cc_mod>0) THEN !TEMPORARY to allow for the old treatment of the direct outgoing channels
          IF(IZA(nnur)==IZA(0)) THEN
-  write(8,*)'Got into new coupled levels decay'
             DO i = 1, MAX_cc_mod
                IF(STLcc(i)%Jcn==xjc .and. STLcc(i)%Pcn==ipc) THEN   !we've got right CN state
                   tld = STLcc(i)%tlj
@@ -812,9 +809,7 @@ CONTAINS
 
       ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
          !  Old version for collective levels
-   write(8,*) 'Passed ELSE to get into old stuff'
          IF(IZA(nnur)==IZA(0)) THEN
-   write(8,*)'Got into old discrete decay'
             DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
                IF(i==levtarg) CYCLE          !skip if elastic
                IF(ICOllev(i)==0 .OR. ICOllev(i)>LEVcc) CYCLE   !skip DWBA coupled levels
@@ -862,8 +857,7 @@ CONTAINS
             ENDDO    ! do loop over inelastic levels --------- done --------------------
 
 
-            ! elastic channel
-    write(8,*)'Got into old elastic decay'
+            ! elastic channel (old version)
 
             i = levtarg
             eout = eoutc - ELV(i,nnur)
@@ -911,7 +905,6 @@ CONTAINS
                ENDDO                 ! do loop over jndex --- done -------
             ENDDO                    ! loop over 'l' ------ done ---------
          ENDIF !end of elastic
-   write(8,*) 'Just before the end'
       ENDIF !TEMPORARY to allow for the old treatment of the direct outgoing channels
    ! decay to discrete levels --------- done --------------------
 
@@ -922,7 +915,6 @@ CONTAINS
    ! decay to the continuum and discrete levels ------ done -----------------------------
 
    hrtw_decay = summa
-   write(8,*) 'Im out DENhf=', DENhf
    RETURN
 END FUNCTION hrtw_decay
 
