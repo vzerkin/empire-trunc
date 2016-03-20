@@ -1,6 +1,6 @@
-#$Rev: 4504 $
+#$Rev: 4629 $
 #$Author: mherman $
-#$Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+#$Date: 2016-03-20 23:35:40 +0100 (So, 20 Mär 2016) $
 
 # set default compilers:
 
@@ -124,7 +124,7 @@ endif
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-OBJF = empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o \
+OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o auxiliary.o \
        bar_mom.o ccfus.o fusion.o gamma-strgth.o input.o lev-dens.o main.o \
        ph-lev-dens.o pipe.o print.o tl.o HRTW.o ddhms.o pcross.o nubar_reader.o \
        gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o \
@@ -154,15 +154,15 @@ dbg:
 
 $(OBJF) : global.h dimension.h main_common.h
 main.o  : nubar_reader.o empcess.o ang_mom.o
-input.o : nubar_reader.o empgdr.o HRTW.o
-#input.o : nubar_reader.o empgdr.o 
+#input.o : nubar_reader.o empgdr.o HRTW.o
+input.o : nubar_reader.o empgdr.o 
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
 print.o : empcess.o
 ddhms.o : empcess.o
 HF-comp.o : empcess.o
 HF-decay.o : HRTW.o
-HRTW.o  : ang_mom.o
+HRTW.o  : ang_mom.o TLJs.o
 dtrans.o: ang_mom.o
 ph-lev-dens.o : ang_mom.o
 MSD-tristan.o : ang_mom.o
