@@ -1,6 +1,6 @@
-!cc   * $Rev: 4628 $
+!cc   * $Rev: 4635 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+!cc   * $Date: 2016-03-21 01:41:08 +0100 (Mo, 21 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -3850,10 +3850,10 @@ C           IF (INTerf.EQ.0 .or. SOFt) THEN
               WRITE (12,
      &   '('' CN decay and Direct cross sections added incoherently'')')
             ELSE
-              WRITE ( 8,'('' CN-direct interference by Engelbrecht & W
-     &eidenmuller, Phys.Rev. C8(1973)859-862 '')')
-              WRITE (12,'('' CN-direct interference by Engelbrecht & W
-     &eidenmuller, PRC8(1973)859'')')
+              WRITE ( 8,'('' CN-direct interference by Engelbrecht & Wei
+     &denmuller, Phys.Rev. C8(1973)859-862 '')')
+              WRITE (12,'('' CN-direct interference by Engelbrecht & Wei
+     &denmuller, PRC8(1973)859'')')
             ENDIF
 
             WRITE (8,*) ' '
