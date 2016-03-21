@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4634 $
+Ccc   * $Rev: 4636 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 01:42:54 +0100 (Mo, 21 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -215,22 +215,43 @@ C-----------Absorption and elastic cross sections in mb
 
 C           Reading EW structures
             if (fexistj .and. DIRect.GT.0) then
+
               OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      &                   FORM = 'UNFORMATTED',ERR=42)
+
 	        READ(451,ERR=42) MAX_cc
+
               IF(MAX_cc.GT.0) THEN
                 CALL AllocTLJs(MAX_cc)
-                READ(451,ERR=42) STLcc
+                READ(451,ERR=43) STLcc
+
 	          IF(INTerf.GT.0) THEN
-C                 READ(451,ERR=42)           ! Smatrix  
-                  READ(451,ERR=42) CCpmatrix ! Pmatrix 
-                  READ(451,ERR=42) CCpdiag   ! Pdiag  
-                  READ(451,ERR=42) CCumatrix ! Umatrix
+C                 READ(451,ERR=43)           ! Smatrix  
+                  READ(451,ERR=43) CCpmatrix ! Pmatrix 
+                  READ(451,ERR=43) CCpdiag   ! Pdiag  
+                  READ(451,ERR=43) CCumatrix ! Umatrix
                 ENDIF 
+
 	          CLOSE(451)
+
               ENDIF  
 	        GOTO 44
- 42           WRITE(8,*) 'WARNING: EW matrices not found' 
+ 42           IF(INTerf.GT.0) THEN
+                WRITE(8,*) 'WARNING: EW matrices not found'
+              ELSE
+                WRITE(8,*) 'WARNING: CC Pchan matrix not found'
+              ENDIF                                 
+              WRITE(8,*) 'WARNING: Recalculating Tlj' 
+              CLOSE(451, STATUS = 'DELETE')
+	        GOTO 50
+ 43           IF(INTerf.GT.0) THEN
+                WRITE(8,*) 'WARNING: Error reading EW matrices'
+              ELSE
+                WRITE(8,*) 'WARNING: Error reading CC Pchan matrix'
+              ENDIF                                 
+              WRITE(8,*) 'WARNING: Recalculating Tlj' 
+              CLOSE(451, STATUS = 'DELETE')
+              GOTO 50
 	      endif
       
  44         NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
