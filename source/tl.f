@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4634 $
+Ccc   * $Rev: 4639 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2935,7 +2935,7 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
       ENDIF
 C
       IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
-         CALL AllocTLJs(MAX_cc)
+         CALL AllocTLJmatr(MAX_cc)
          IF(Open_CC_files()) THEN 
            IF(.NOT.Read_CC_matrices()) 
      >       WRITE(8,*) 'ERROR: Reading ECIS CC files for EW'  
@@ -2943,10 +2943,28 @@ C
          ELSE
 	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
          ENDIF
-C        l = 5
-C        write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
-C    >     STLcc(l)%lev,STLcc(l)%l,sngl(STLcc(l)%j),sngl(STLcc(l)%tlj),
-C    >     sngl(STLcc(l)%Jcn),STLcc(l)%Pcn
+         write(*,*) 'Pchan: MAX_CC=',MAX_cc_mod
+         l = 5
+         write(*,'(1x,I3,1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
+     >   l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
+     >   STLcc(l)%Jcn,STLcc(l)%Pcn
+
+         write(*,*) 'MAX_pmatr=',MAX_pmatr
+         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >     CCpmatrix(l)%irow,CCpmatrix(l)%icol,
+     >     DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
+     >     CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
+
+         write(*,*) 'MAX_umatr=',MAX_umatr
+         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >     CCumatrix(l)%irow,CCumatrix(l)%icol,
+     >     DREAL(CCumatrix(l)%umatrix),DIMAG(CCumatrix(l)%umatrix),
+     >     CCumatrix(l)%Jcn,CCumatrix(l)%Pcn,CCumatrix(l)%nceq
+
+         write(*,*) 'Pdiag: MAX_CC=',MAX_cc_mod
+         write(*,'(1x,I3,1x,d12.6,1x,F5.1,1x,I2,1x,I3)') 
+     >     l,CCpdiag(l)%pdiag,
+     >     CCpdiag(l)%Jcn,CCpdiag(l)%Pcn,CCpdiag(l)%nceq
       ENDIF
 C
 C     write(*,*) nejc,'Maxlw=',maxlw

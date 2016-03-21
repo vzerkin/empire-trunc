@@ -1,6 +1,6 @@
-! $Rev: 4634 $
+! $Rev: 4639 $
 ! $Author: rcapote $
-! $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
+! $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -8,7 +8,7 @@ MODULE TLJs
    include 'dimension.h'
    include 'global.h'
 
-   INTEGER, PUBLIC :: MAX_cc_mod 
+   INTEGER, PUBLIC :: MAX_cc_mod,MAX_pmatr,MAX_umatr 
 
    TYPE, PUBLIC :: cc_channel
      INTEGER*4 Pcn        ! CN parity to which cc-channel couples (+1 or -1)
@@ -42,7 +42,8 @@ MODULE TLJs
    TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:) 
 
-   PUBLIC AllocTLJs, DelTLJs, AllocCCmatr, DelCCmatr, Open_CC_Files, Read_CC_Matrices, Close_CC_Files  
+   PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs, AllocCCmatr, DelCCmatr
+   PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files  
 
    PRIVATE
 
@@ -52,8 +53,52 @@ MODULE TLJs
    CONTAINS
 
    !----------------------------------------------------------------------------------------------------
+   SUBROUTINE AllocCCmatr(nch)
+   IMPLICIT NONE
+   INTEGER*4, INTENT(IN) :: nch
+   INTEGER my
 
-   SUBROUTINE AllocTLJs(nch)
+   IF(allocated(Pchan)) DEALLOCATE(Pchan)
+   ALLOCATE(Pchan(nch),STAT=my)
+   IF(my /= 0) GOTO 20
+   Pchan = 0.0d0
+
+   IF(INTERF==0) RETURN
+
+!  EW matrices
+
+!  IF(allocated(Smatr)) DEALLOCATE(Smatr)
+!  ALLOCATE(Smatr(nch,nch),STAT=my)
+!  IF(my /= 0) GOTO 20
+!  Smatr = (0.d0,0.d0)
+
+   IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+   ALLOCATE(Pmatr(nch,nch),STAT=my)
+   IF(my /= 0) GOTO 30
+   Pmatr = (0.d0,0.d0)
+
+   IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
+   ALLOCATE(Pdiag(nch),STAT=my)
+   IF(my /= 0) GOTO 30
+   Pdiag = 0.0d0
+
+   IF(allocated(Umatr)) DEALLOCATE(Umatr)
+   ALLOCATE(Umatr(nch,nch),STAT=my)
+   IF(my /= 0) GOTO 30
+   Umatr = (0.d0,0.d0)
+
+   RETURN
+20 WRITE(8,*)  'ERROR: Insufficient memory for CC matrices in HRTW'
+   WRITE(12,*) 'ERROR: Insufficient memory for CC matrices in HRTW'
+   STOP 'ERROR: Insufficient memory for CC matrices in HRTW'
+30 WRITE(8,*)  'ERROR: Insufficient memory for EW matrices in HRTW'
+   WRITE(12,*) 'ERROR: Insufficient memory for EW matrices in HRTW'
+   STOP 'ERROR: Insufficient memory for EW matrices in HRTW'
+END SUBROUTINE AllocCCmatr
+
+
+
+SUBROUTINE AllocTLJmatr(nch)
    IMPLICIT NONE
    INTEGER nch
    INTEGER my
@@ -80,6 +125,20 @@ MODULE TLJs
    STLcc%tlj   = 0.d0
    STLcc%pchan = 0.d0
 
+   RETURN
+   END SUBROUTINE AllocTLJmatr
+
+   !----------------------------------------------------------------------------------------------------
+
+   SUBROUTINE AllocEWmatr(nch,npmat,numat)
+   IMPLICIT NONE
+   INTEGER nch,npmat,numat
+   INTEGER my
+
+   MAX_cc_mod = nch
+   MAX_pmatr  = npmat
+   MAX_umatr  = numat
+
    IF(INTerf==0) RETURN
 
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CC_pdiag(:)     
@@ -94,12 +153,12 @@ MODULE TLJs
 
    CCpdiag%Pcn   = 1
    CCpdiag%Jcn   = 0.d0
-   CCpdiag%nceq  = 1
+   CCpdiag%nceq  = 0
    CCpdiag%pdiag = 0.d0
 
    !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CC_umatrix(:) 
    IF(allocated(CCumatrix)) DEALLOCATE(CCumatrix)
-   ALLOCATE(CCumatrix(nch),STAT=my)
+   ALLOCATE(CCumatrix(numat),STAT=my)
    IF(my /= 0) THEN
      WRITE(8,*)  'ERROR: Insufficient memory for CCumatrix (in TLJs)'
      WRITE(12,*) 'ERROR: Insufficient memory for CCumatrix (in TLJs)'
@@ -109,13 +168,13 @@ MODULE TLJs
 
    CCumatrix%Pcn     = 1
    CCumatrix%Jcn     = 0.d0
-   CCumatrix%nceq    = 1
-   CCumatrix%irow    = 1
-   CCumatrix%icol    = 1
+   CCumatrix%nceq    = 0
+   CCumatrix%irow    = 0
+   CCumatrix%icol    = 0
    CCumatrix%umatrix = (0.d0,0.d0)
 
    IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
-   ALLOCATE(CCpmatrix(nch),STAT=my)
+   ALLOCATE(CCpmatrix(npmat),STAT=my)
    IF(my /= 0) THEN
      WRITE(8,*)  'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
      WRITE(12,*) 'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
@@ -125,13 +184,13 @@ MODULE TLJs
 
    CCpmatrix%Pcn     = 1
    CCpmatrix%Jcn     = 0.d0
-   CCpmatrix%nceq    = 1
-   CCpmatrix%irow    = 1
-   CCpmatrix%icol    = 1
+   CCpmatrix%nceq    = 0
+   CCpmatrix%irow    = 0
+   CCpmatrix%icol    = 0
    CCpmatrix%umatrix = (0.d0,0.d0)
 
    RETURN
-   END SUBROUTINE AllocTLJs
+   END SUBROUTINE AllocEWmatr
 
    !----------------------------------------------------------------------------------------------------
 
@@ -144,52 +203,6 @@ MODULE TLJs
    IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
    RETURN
    END SUBROUTINE DelTLJs
-
-   !----------------------------------------------------------------------------------------------------
-
-   SUBROUTINE AllocCCmatr(nch)
-
-   IMPLICIT NONE
-   INTEGER*4, INTENT(IN) :: nch
-   INTEGER my
-
-   IF(allocated(Pchan)) DEALLOCATE(Pchan)
-   ALLOCATE(Pchan(nch),STAT=my)
-   IF(my /= 0) GOTO 20
-   Pchan = 0.0d0
-
-!  IF(allocated(Smatr)) DEALLOCATE(Smatr)
-!  ALLOCATE(Smatr(nch,nch),STAT=my)
-!  IF(my /= 0) GOTO 20
-!  Smatr = (0.d0,0.d0)
-
-   IF(INTERF==0) RETURN
-
-   IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
-   ALLOCATE(Pmatr(nch,nch),STAT=my)
-   IF(my /= 0) GOTO 30
-   Pmatr = (0.d0,0.d0)
-
-!  EW matrices
-   IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
-   ALLOCATE(Pdiag(nch),STAT=my)
-   IF(my /= 0) GOTO 30
-   Pdiag = 0.0d0
-
-   IF(allocated(Umatr)) DEALLOCATE(Umatr)
-   ALLOCATE(Umatr(nch,nch),STAT=my)
-   IF(my /= 0) GOTO 30
-   Umatr = (0.d0,0.d0)
-
-   RETURN
-20 WRITE(8,*)  'ERROR: Insufficient memory for CC matrices in HRTW'
-   WRITE(12,*) 'ERROR: Insufficient memory for CC matrices in HRTW'
-   STOP 'ERROR: Insufficient memory for CC matrices in HRTW'
-30 WRITE(8,*)  'ERROR: Insufficient memory for EW matrices in HRTW'
-   WRITE(12,*) 'ERROR: Insufficient memory for EW matrices in HRTW'
-   STOP 'ERROR: Insufficient memory for EW matrices in HRTW'
-
-   END SUBROUTINE AllocCCmatr
 
    !----------------------------------------------------------------------------------------------------
 
@@ -290,7 +303,7 @@ MODULE TLJs
    LOGICAL FUNCTION Read_CC_matrices()
    IMPLICIT NONE
    DOUBLE PRECISION jc, jj, sreal, simag
-   INTEGER nceq, nc1, nc2, i1, i2, nelem, my, ncc, nch
+   INTEGER nceq, nc1, nc2, i1, i2, nelem, my, ncc, nch, npmat, numat
    INTEGER nlev, nl
    CHARACTER*1 parc
    COMPLEX*16, ALLOCATABLE :: cres(:,:),ctmp(:,:), Umatr_T(:,:) ! temporal matrices 
@@ -302,12 +315,17 @@ MODULE TLJs
    Read_CC_matrices = .FALSE.
 
    nch = 0
+   npmat = 0
+   numat = 0
+   
 !==Reading Pchan
    DO ncc = 1, MAX_CC
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq  
-     ! write(*,*) jc,parc,nceq  
+     ! write(*,*) jc,parc,nceq
+     npmat = npmat + (nceq*(nceq+1))/2  
+     numat = numat + nceq**2  
      DO i1 = 1, nceq
        nch = nch + 1
        ps_tlj => STLcc(nch)
@@ -324,38 +342,47 @@ MODULE TLJs
        ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
-10 Read_CC_matrices = .TRUE.
+10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
+   ! pause
+
+   Read_CC_matrices = .TRUE.
 
    IF(INTerf==0) RETURN
 
+   CALL AllocEWmatr(nch,npmat,numat)
    Read_CC_matrices = .FALSE.
 
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:) 
    !==Reading Pmatr
    nch = 0
    DO ncc = 1, MAX_CC
-     ps_pmatrix => CCpmatrix(ncc)
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq  
-     write(*,*) jc,parc,nceq  
-     ps_pmatrix%Jcn = jc
-     ps_pmatrix%Pcn = 1
-     if(parc == '-') ps_pmatrix%Pcn = -1
-     ps_pmatrix%nceq = nceq                        
+     ! write(*,*) jc,parc,nceq  
      !--Loop over the number of coupled equations (squared)
      nelem = nceq*(nceq+1)/2
      DO i1 = 1, nelem
-       READ (125,*,END = 6,ERR = 6) nc1, nc2, sreal, simag
-	   write(*,'(1x,I3,1x,I3,2(1x,d12.6))') nc1,nc2,sngl(sreal),sngl(simag)
+       nch = nch + 1
+       ps_pmatrix => CCpmatrix(nch)
+       READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
+	   !write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
+       ps_pmatrix%Jcn = jc
+       ps_pmatrix%Pcn = 1
+       if(parc == '-') ps_pmatrix%Pcn = -1
+       ps_pmatrix%nceq = nceq                        
        ps_pmatrix%irow = nc1
        ps_pmatrix%icol = nc2
-       ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
+       ps_pmatrix%umatrix = DCMPLX(sreal,simag,8)
      ENDDO
    ENDDO
 
-12 CONTINUE
-   PAUSE 
+12 MAX_pmatr = nch
+   WRITE(*,*) 'Pmatrix channels read:',nch
+   WRITE(*,*) 'Pmatrix channels calc:',npmat
+   CONTINUE
+   ! PAUSE
+
    !==Reading Smatr
    !---Here the calculated files are read
    !--jc,parc are the channel spin and parity
@@ -374,55 +401,64 @@ MODULE TLJs
 
    !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:) 
    !==Reading Umatr
+   nch = 0
    DO ncc = 1, MAX_CC
-     ps_umatrix => CCumatrix(ncc)
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq  
      !  write(*,*) jc,parc,nceq  
-     ps_umatrix%Jcn = jc
-     ps_umatrix%Pcn = 1                                           
-     if(parc == '-') ps_umatrix%Pcn = -1
-     ps_umatrix%nceq = nceq                        
      !
      !--Loop over the number of coupled equations
      DO i1 = 1, nceq
        READ (60,*,END = 7,ERR = 7) ! nc1
        DO i2 = 1, nceq
-         READ (60,*,END = 7,ERR = 7)  sreal, simag
+         nch = nch + 1
+         ps_umatrix => CCumatrix(nch)
+         READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
   	     ! write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sngl(sreal),sngl(simag)
+         ps_umatrix%Jcn = jc
+         ps_umatrix%Pcn = 1                                           
+         if(parc == '-') ps_umatrix%Pcn = -1
+         ps_umatrix%nceq = nceq                        
          ps_umatrix%irow = i1
          ps_umatrix%icol = i2
-         ps_umatrix%umatrix = CMPLX(sreal,simag,8)
+         ps_umatrix%umatrix = DCMPLX(sreal,simag,8)
        ENDDO
      ENDDO
    ENDDO
 
-14 CONTINUE
+14 MAX_umatr = nch
+   WRITE(*,*) 'Umatrix channels read:',nch
+   WRITE(*,*) 'Umatrix channels calc:',numat
+   CONTINUE
    ! PAUSE 
 
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
    !==Reading Pdiag
-   DO ncc = 1, MAX_CC
-     ps_pdiag => CCpdiag(ncc)
+   nch = 0
+   DO ncc = 1, MAX_cc
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq  
-     ps_pdiag%Jcn = jc
-     ps_pdiag%Pcn = 1
-     if(parc == '-') ps_pdiag%Pcn = -1
-     ps_pdiag%nceq = nceq                        
-     !  write(*,*) jc,parc,nceq  
+     READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq  
+     ! write(*,*) jc,parc,nceq  
      !
      !--Loop over the number of coupled equations
      DO i1 = 1, nceq
-       READ (61,*,END = 8,ERR = 8) nc1, sreal
+       nch = nch + 1
+       ps_pdiag => CCpdiag(nch)
+       READ (61,'(1x,I4,1x,D15.9))',END = 8,ERR = 8) nc1, sreal
+       ! write(*,*) nc1,sreal  
+       ps_pdiag%Jcn = jc
+       ps_pdiag%Pcn = 1
+       if(parc == '-') ps_pdiag%Pcn = -1
+       ps_pdiag%nceq = nceq                        
        ps_pdiag%pdiag = sreal
      ENDDO
    ENDDO
 
-16 CONTINUE
-   ! PAUSE 
+16 WRITE(*,*) 'Pdiag channels read:',nch
+   WRITE(*,*) 'Pdiag channels expected:',MAX_cc
+   ! PAUSE
 
    Read_CC_matrices = .TRUE.
 
@@ -433,6 +469,7 @@ MODULE TLJs
      ps_umatrix => CCumatrix(ncc)
 
      write(*,*) 'J,Pi=',ps_umatrix%Jcn, ps_umatrix%Pcn
+
      nch = ps_pdiag%nceq
      CALL AllocCCmatr(nch)
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4634 $
+Ccc   * $Rev: 4639 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19331,13 +19331,13 @@ C     WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       DO II=1,NC                                                        RCN  RCN
         IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
         I=I+1                                                           RCN  RCN
-        write(126,'(1x,I4,1x,D15.9,2x,2(I3,1x),F5.1)')
-     >    I,P(I,I,1),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))   
+        write(126,'(1x,I4,1x,D15.9,2x,2(I3,1x),F5.1)')                  RCN  RCN
+     >    I,P(I,I,1),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))              RCN  RCN
         J=0                                                             RCN  RCN
         DO JJ=1,II                                                      RCN  RCN
           IF (WV(3,MC(JJ,1)).LT.0.D0) CYCLE                             RCN  RCN
           J=J+1                                                         RCN  RCN
-          write(121,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)') 
+          write (121,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
      >      I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3)) RCN  RCN  
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
@@ -19367,8 +19367,11 @@ C----
         DO JJ=1,II                                                      RCN  RCN
           IF (WV(3,MC(JJ,1)).LT.0.D0 ) CYCLE                            RCN  RCN
           J=J+1                                                         RCN  RCN
-          IF(P(I,J,1).LE.0.d0) CYCLE                                    RCN  RCN
-          write(122,'(1x,2(I4,1x),2(D15.9,1x))') I,J,P(I,J,1),P(I,J,2)  RCN  RCN
+C         IF(P(I,J,1).LE.0.d0) CYCLE                                    RCN  RCN
+C         write(122,'(1x,2(I4,1x),2(D15.9,1x))') I,J,P(I,J,1),P(I,J,2)  RCN  RCN
+          IF(I.EQ.J)                                                    RCN  RCN
+C    >      write(122,'(1x,I4,1x,2(D15.9,1x))') I,P(I,J,1),P(I,J,2)     RCN  RCN
+     >      write(122,'(1x,I4,1x,D15.9)') I,P(I,J,1)                    RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
       DO J=1,I                                                          RCN  RCN

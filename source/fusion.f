@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4636 $
+Ccc   * $Rev: 4639 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 01:42:54 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -219,13 +219,15 @@ C           Reading EW structures
               OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      &                   FORM = 'UNFORMATTED',ERR=42)
 
-	        READ(451,ERR=42) MAX_cc
+	        READ(451,ERR=42) MAX_cc,MAX_pmatr,MAX_umatr
 
               IF(MAX_cc.GT.0) THEN
-                CALL AllocTLJs(MAX_cc)
+                CALL AllocTLJmatr(MAX_cc)
                 READ(451,ERR=43) STLcc
 
 	          IF(INTerf.GT.0) THEN
+                  CALL AllocEWmatr(MAX_cc,MAX_pmatr,MAX_umatr)
+
 C                 READ(451,ERR=43)           ! Smatrix  
                   READ(451,ERR=43) CCpmatrix ! Pmatrix 
                   READ(451,ERR=43) CCpdiag   ! Pdiag  
@@ -251,6 +253,7 @@ C                 READ(451,ERR=43)           ! Smatrix
               ENDIF                                 
               WRITE(8,*) 'WARNING: Recalculating Tlj' 
               CLOSE(451, STATUS = 'DELETE')
+              CALL DelTLJs()
               GOTO 50
 	      endif
       
@@ -1086,7 +1089,7 @@ C
 C     Saving EW structures
       if (tljcalc .and. MAX_cc.GT.0 .and. DIRect.GT.0) then
        OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),FORM = 'UNFORMATTED')
-	 WRITE(451) MAX_cc
+	 WRITE(451) MAX_cc,MAX_pmatr,MAX_umatr
 	 WRITE(451) STLcc
 	 IF(INTerf.GT.0) THEN
 C        WRITE(451)           ! Smatrix  
