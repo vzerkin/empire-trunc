@@ -9,9 +9,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4631 $
+   ! $Rev: 4632 $
    ! $Author: mherman $
-   ! $Date: 2016-03-21 00:37:22 +0100 (Mo, 21 Mär 2016) $
+   ! $Date: 2016-03-21 01:15:23 +0100 (Mo, 21 Mär 2016) $
    !
 
    TYPE channel
@@ -491,64 +491,66 @@ CONTAINS
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
 
-      IF(d0c>0.D0) d0c = 1000.0/d0c
-      IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
+      CALL Gamma_renormalization(d0c, sumtg, tgexper, itmp, nnuc)
 
-      IF(benchm) THEN
-         WRITE(8,*)
-         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
-         WRITE(8,*)
-      ENDIF
-
-      itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 )
-      IF(itmp.EQ.1 .AND. (.NOT.benchm)) THEN
-         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
-         WRITE(8,*)
-      ENDIF
-      IF(itmp.GT.1 .AND. (.NOT.benchm)) THEN
-         WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') &
-            NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
-         WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
-         WRITE(8,*)
-      ENDIF
-      ! IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
-      IF(einl<=1.D0 .AND. first_ein) THEN
-         IF(d0_obs>0.D0) THEN
-            tgexper = 2*pi*gg_obs/d0_obs/1.E6
-            WRITE(8,'(1x,''Experimental information from capture channel'')')
-            WRITE(8,'(1x,A13,D12.6)')'2*pi*Gg/D0 = ', tgexper
-         ENDIF
-         IF(gg_unc>0.0D0) THEN
-            WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
-         ELSE
-            WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', gg_obs, ' meV (systematics)'
-         ENDIF
-         WRITE(12,'(/1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
-         IF(d0_obs>0.0D0) THEN
-            WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', d0_obs, ' +/- ', d0_unc, ' keV'
-            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
-            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')')d0_obs
-         ELSE
-            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
-            WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
-         ENDIF
-         WRITE(8,*)
-         WRITE(12,*)
-         IF(itmp==0 .AND. (.NOT.benchm)) THEN
-            IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
-               tune(0,nnuc) = tgexper/sumtg
-               WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
-               IF (first_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')')
-            ELSE
-               WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
-            ENDIF
-            WRITE(8,*)
-         ENDIF
-         IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
-            WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
-            WRITE(8,*)
-         ENDIF
-      ENDIF
+!      IF(d0c>0.D0) d0c = 1000.0/d0c
+!      IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
+!
+!      IF(benchm) THEN
+!         WRITE(8,*)
+!         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
+!         WRITE(8,*)
+!      ENDIF
+!
+!      itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 )
+!      IF(itmp.EQ.1 .AND. (.NOT.benchm)) THEN
+!         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
+!         WRITE(8,*)
+!      ENDIF
+!      IF(itmp.GT.1 .AND. (.NOT.benchm)) THEN
+!         WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') &
+!            NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+!         WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+!         WRITE(8,*)
+!      ENDIF
+!      ! IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
+!      IF(einl<=1.D0 .AND. first_ein) THEN
+!         IF(d0_obs>0.D0) THEN
+!            tgexper = 2*pi*gg_obs/d0_obs/1.E6
+!            WRITE(8,'(1x,''Experimental information from capture channel'')')
+!            WRITE(8,'(1x,A13,D12.6)')'2*pi*Gg/D0 = ', tgexper
+!         ENDIF
+!         IF(gg_unc>0.0D0) THEN
+!            WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+!         ELSE
+!            WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', gg_obs, ' meV (systematics)'
+!         ENDIF
+!         WRITE(12,'(/1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+!         IF(d0_obs>0.0D0) THEN
+!            WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', d0_obs, ' +/- ', d0_unc, ' keV'
+!            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+!            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')')d0_obs
+!         ELSE
+!            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+!            WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
+!         ENDIF
+!         WRITE(8,*)
+!         WRITE(12,*)
+!         IF(itmp==0 .AND. (.NOT.benchm)) THEN
+!            IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
+!               tune(0,nnuc) = tgexper/sumtg
+!               WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
+!               IF (first_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')')
+!            ELSE
+!               WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
+!            ENDIF
+!            WRITE(8,*)
+!         ENDIF
+!         IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
+!            WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
+!            WRITE(8,*)
+!         ENDIF
+!      ENDIF
 
       !CALL DelTLJs()
 
@@ -2124,6 +2126,71 @@ real*8 function WFC2(in,ou)
    return
 end function WFC2
 
+SUBROUTINE Gamma_renormalization(d0c, sumtg, tgexper, itmp, nnuc)
+               ! Gamma width calculation
 
+   REAL*8 :: d0c, sumtg, tgexper
+   INTEGER*4 :: itmp, nnuc
+
+      IF(d0c>0.D0) d0c = 1000.0/d0c
+      IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
+
+      IF(benchm) THEN
+         WRITE(8,*)
+         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized in benchmark calculations'')')
+         WRITE(8,*)
+      ENDIF
+
+      itmp = iabs( NINT(1000*TUNe(0,nnuc)) - 999 )
+      IF(itmp.EQ.1 .AND. (.NOT.benchm)) THEN
+         WRITE(8,'(1x,'' WARNING: Gamma emission width not normalized (TUNE set to 1.000 in input)'')')
+         WRITE(8,*)
+      ENDIF
+      IF(itmp.GT.1 .AND. (.NOT.benchm)) THEN
+         WRITE (8 ,'('' WARNING: Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') &
+            NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+         WRITE (12,'('' Gamma emission width from '',I3,A2,'' normalized by '',F7.3)') NINT(A(nnuc)), SYMb(nnuc), TUNe(0,nnuc)
+         WRITE(8,*)
+      ENDIF
+      ! IF(EINl<=1.D0 .AND. (FIRst_ein .or. BENchm)) THEN
+      IF(einl<=1.D0 .AND. first_ein) THEN
+         IF(d0_obs>0.D0) THEN
+            tgexper = 2*pi*gg_obs/d0_obs/1.E6
+            WRITE(8,'(1x,''Experimental information from capture channel'')')
+            WRITE(8,'(1x,A13,D12.6)')'2*pi*Gg/D0 = ', tgexper
+         ENDIF
+         IF(gg_unc>0.0D0) THEN
+            WRITE(8,'(1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+         ELSE
+            WRITE(8,'(1x,A5,F9.3,A18)')'Gg = ', gg_obs, ' meV (systematics)'
+         ENDIF
+         WRITE(12,'(/1x,A5,F9.3,A5,F8.3,A4)')'Gg = ', gg_obs, ' +/- ', gg_unc, ' meV'
+         IF(d0_obs>0.0D0) THEN
+            WRITE(8,'(1x,A5,F11.6,A5,F11.6,A4)')'D0 = ', d0_obs, ' +/- ', d0_unc, ' keV'
+            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV'')')d0_obs
+         ELSE
+            WRITE(8,'(1x,A5,F11.6,A17)')'D0 = ', d0c, ' keV (calculated)'
+            WRITE(12,'(1x,''D0 = '',F8.3,'' keV, CALC'')')d0c
+         ENDIF
+         WRITE(8,*)
+         WRITE(12,*)
+         IF(itmp==0 .AND. (.NOT.benchm)) THEN
+            IF(sumtg>0.D0 .AND. tgexper>0.D0) THEN
+               tune(0,nnuc) = tgexper/sumtg
+               WRITE(8,'(1x,'' WARNING: Gamma emission normalization factor is set to '',F7.3)') TUNe(0,nnuc)
+               IF (first_ein) WRITE(8,'(1x,'' WARNING: The normalization is not applied to this incident energy'')')
+            ELSE
+               WRITE(8,'(1x,'' WARNING: Gamma emission width is not normalized to Do'')')
+            ENDIF
+            WRITE(8,*)
+         ENDIF
+         IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
+            WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '',F7.3,'' in input'')')  tgexper/sumtg
+            WRITE(8,*)
+         ENDIF
+      ENDIF
+
+END SUBROUTINE Gamma_renormalization
 
 END MODULE width_fluct
