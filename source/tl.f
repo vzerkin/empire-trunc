@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4628 $
+Ccc   * $Rev: 4634 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3053,45 +3053,46 @@ C     SINlcc   is the coupled channels' cross section
 C     SINl     is the uncoupled channels' cross section
 C     SINlcont is the uncoupled channels' cross section to the continuum
 
-      dtmp = (ABScs -SINlcc -ftmp)/xsabs
+C     dtmp = (ABScs -SINlcc -ftmp)/xsabs
 
-      sabs = 0.d0
-      sabsj = 0.D0
-      DO l = 0, Maxlw
-        Stl(l + 1) = Stl(l + 1)*dtmp 
-        sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
-        DO jindex = 1,MAXj(Nejc)
-          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
-          jsp = sjf(l,jindex,SEJc(Nejc)) 
-          sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-        ENDDO
-      ENDDO
-      xsabs  = coeff*sabs
-      xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
+C     sabs = 0.d0
+C     sabsj = 0.D0
+C     DO l = 0, Maxlw
+C       Stl(l + 1) = Stl(l + 1)*dtmp 
+C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+C       DO jindex = 1,MAXj(Nejc)
+C         Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
+C         jsp = sjf(l,jindex,SEJc(Nejc)) 
+C         sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+C       ENDDO
+C     ENDDO
+C     xsabs  = coeff*sabs
+C     xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
 
-      if(abs(1.d0-dtmp).gt.0.00001d0) then
-        WRITE (8,
-     &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
-     &r '',F9.6/
-     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: CN formation + Direct                           =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
-     &,F8.2,'' mb''/)') 
-     &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
-     &    xsabs+SINlcc+ftmp, ABScs 
-      ENDIF
+C     if(abs(1.d0-dtmp).gt.0.00001d0) then
+C       WRITE (8,
+C    &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
+C    &r '',F9.6/
+C    &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: CN formation + Direct                           =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
+C    &,F8.2,'' mb''/)') 
+C    &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+C    &    xsabs+SINlcc+ftmp, ABScs 
+C     ENDIF
 
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
+
 C
 C     ECIS convergence check
 C
@@ -3460,9 +3461,11 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
 
-c     IF(IOPSYS.EQ.1) THEN
-c	  CALL SYSTEM(
-c       DELETE ecis06.ang, ecis06.leg,...,ecis06_Pchan.txt
+      IF(IOPSYS.EQ.1) THEN
+ 	  CALL SYSTEM(
+     > 'del ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
+     >6_*.LST ecis06.tlj')
+	ENDIF
 
       RETURN
       END

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4624 $
+Ccc   * $Rev: 4634 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 23:21:18 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -21,6 +21,8 @@ Ccc   * output:none                                                      *
 Ccc   *                                                                  *
 Ccc   ********************************************************************
 Ccc
+      use TLJs
+
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -107,6 +109,8 @@ C-----Reduced mass corrected for proper mass values
       SINlcont = 0.D0
       csmax = 0.d0
       CSFus = 0.d0
+
+	MAX_cc = 0
       maxlw = 0
 C     allocate stl(), stlj(), sel() 
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
@@ -208,8 +212,28 @@ C-----------Absorption and elastic cross sections in mb
             ENDIF
    40       CLOSE (45 )
             IF (fexistj) CLOSE (451)
+
+C           Reading EW structures
+            if (fexistj .and. DIRect.GT.0) then
+              OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
+     &                   FORM = 'UNFORMATTED',ERR=42)
+	        READ(451,ERR=42) MAX_cc
+              IF(MAX_cc.GT.0) THEN
+                CALL AllocTLJs(MAX_cc)
+                READ(451,ERR=42) STLcc
+	          IF(INTerf.GT.0) THEN
+C                 READ(451,ERR=42)           ! Smatrix  
+                  READ(451,ERR=42) CCpmatrix ! Pmatrix 
+                  READ(451,ERR=42) CCpdiag   ! Pdiag  
+                  READ(451,ERR=42) CCumatrix ! Umatrix
+                ENDIF 
+	          CLOSE(451)
+              ENDIF  
+	        GOTO 44
+ 42           WRITE(8,*) 'WARNING: EW matrices not found' 
+	      endif
       
-            NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
+ 44         NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
 
             IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
@@ -220,6 +244,14 @@ C-----------Absorption and elastic cross sections in mb
               IF (fexistj) WRITE (8,*)
      &' Transmission coefficients Tlj for incident channel read from: '
               IF (fexistj) WRITE (8,*) ' ', ctldir//ctmp23//'J.INC'
+              IF(DIRect.GT.0 .and. MAX_cc.GT.0 .and. fexistj) THEN
+                WRITE (8,*)
+     &' Coupled channel STlcc for the incident channel read from : '
+                WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
+	          IF(INTerf.GT.0) WRITE (8,*)
+     &' EW matrices Umatrix,Pdiag for the incident channel read from : '
+                WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
+              ENDIF
             ENDIF
             WRITE(8,*)
             WRITE(8,*) ' Maximum CN spin is ', NLW
@@ -633,13 +665,13 @@ C
                iwin=ipipe_move('ccm.CS','INCIDENT.CS')
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
 
-               iwin=ipipe_move('ccm_Pmatr.txt','INCIDENT_Pmatr.txt')
-               iwin=ipipe_move('ccm_Pchan.txt','INCIDENT_Pchan.txt')
-C              iwin=ipipe_move('ccm_Smatr.txt','INCIDENT_Smatr.txt')
+               iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
+               iwin=ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
+C              iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
 C
                IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-                 iwin=ipipe_move('ccm_Pdiag.txt','INCIDENT_Pdiag.txt')
-                 iwin=ipipe_move('ccm_Umatr.txt','INCIDENT_Umatr.txt')
+                 iwin=ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
+                 iwin=ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
                ENDIF 
 C
 C              Joining dwba.LEG and ccm.LEG
@@ -934,19 +966,19 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
-         IF(NINT(DIRect).GT.0) THEN
-C          ctmp = ctldir//ctmp23//'_Smatr.txt'
-C          iwin = ipipe_move('INCIDENT_Smatr.txt',ctmp)
-           ctmp = ctldir//ctmp23//'_Pmatr.txt'
-           iwin = ipipe_move('INCIDENT_Pmatr.txt',ctmp)
-           ctmp = ctldir//ctmp23//'_Pchan.txt'
-           iwin = ipipe_move('INCIDENT_Pchan.txt',ctmp)
+         IF(NINT(DIRect).GT.0 .AND. IOUT.EQ.5) THEN
+C          ctmp = ctldir//ctmp23//'_Smatr.LST'
+C          iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
+           ctmp = ctldir//ctmp23//'_Pmatr.LST'
+           iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
+           ctmp = ctldir//ctmp23//'_Pchan.LST'
+           iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
 C
            IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-             ctmp = ctldir//ctmp23//'_Umatr.txt'
-             iwin = ipipe_move('INCIDENT_Umatr.txt',ctmp)
-             ctmp = ctldir//ctmp23//'_Pdiag.txt'
-             iwin = ipipe_move('INCIDENT_Pdiag.txt',ctmp)
+             ctmp = ctldir//ctmp23//'_Umatr.LST'
+             iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
+             ctmp = ctldir//ctmp23//'_Pdiag.LST'
+             iwin = ipipe_move('INCIDENT_Pdiag.LST',ctmp)
            ENDIF
          ENDIF
 
@@ -1027,9 +1059,23 @@ C
         DO l = 0, maxlw
           WRITE (45) sel(l + 1)
         ENDDO
-      ENDIF
+      ENDIF                          
       CLOSE (45 )
       if(tljcalc) CLOSE (451)
+C     Saving EW structures
+      if (tljcalc .and. MAX_cc.GT.0 .and. DIRect.GT.0) then
+       OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),FORM = 'UNFORMATTED')
+	 WRITE(451) MAX_cc
+	 WRITE(451) STLcc
+	 IF(INTerf.GT.0) THEN
+C        WRITE(451)           ! Smatrix  
+         WRITE(451) CCpmatrix ! Pmatrix 
+         WRITE(451) CCpdiag   ! Pdiag  
+         WRITE(451) CCumatrix ! Umatrix
+       ENDIF 
+	 CLOSE(451)
+	endif
+
   300 CONTINUE
 
 C-----Print elastic and direct cross sections from ECIS
@@ -1914,23 +1960,23 @@ C
       iwin = ipipe_move('ecis06.ics',ctmp)
 C
       IF (NINT(Direc).EQ.0) RETURN
-C     open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Pmatr.txt'
-      iwin = ipipe_move('ecis06_Pmatr.txt',ctmp)
-C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
-C     ctmp = Outname(1:Length)//'_Smatr.txt'
-C     iwin = ipipe_move('ecis06_Smatr.txt',ctmp)
-C     open(126,file=TRIM(fname)//'_Pchan.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Pchan.txt'
-      iwin = ipipe_move('ecis06_Pchan.txt',ctmp)
+C     open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pmatr.LST'
+      iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
+C     open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
+C     ctmp = Outname(1:Length)//'_Smatr.LST'
+C     iwin = ipipe_move('ecis06_Smatr.LST',ctmp)
+C     open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pchan.LST'
+      iwin = ipipe_move('ecis06_Pchan.LST',ctmp)
 
       IF (Iret.EQ.4 .OR. Inter.EQ.0) RETURN
-C     open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Pdiag.txt'
-      iwin = ipipe_move('ecis06_Pdiag.txt',ctmp)
-C     open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Umatr.txt'
-      iwin = ipipe_move('ecis06_Umatr.txt',ctmp)
+C     open(122,file=TRIM(fname)//'_Pdiag.LST')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pdiag.LST'
+      iwin = ipipe_move('ecis06_Pdiag.LST',ctmp)
+C     open(123,file=TRIM(fname)//'_Umatr.LST')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Umatr.LST'
+      iwin = ipipe_move('ecis06_Umatr.LST',ctmp)
       RETURN
       END
 

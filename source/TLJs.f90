@@ -1,6 +1,6 @@
-! $Rev: 4628 $
+! $Rev: 4634 $
 ! $Author: rcapote $
-! $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+! $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -228,17 +228,17 @@ MODULE TLJs
 
 !--The INQUIRE statement determines whether or not the file exists.
 !--If it does not, the program calculates new transmission coeff.
-   !INQUIRE (FILE = (ctldir//ctmp23//'_Pchan.txt'),EXIST = fexist)
-   INQUIRE (FILE = ('INCIDENT_Pchan.txt'),EXIST = fexist)
-   IF (.not. fexist) RETURN ! *_Pchan.txt not found
-!  INQUIRE (FILE = (ctldir//ctmp23//'_Smatr.txt'),EXIST = fexist)
-!  INQUIRE (FILE = ('INCIDENT_Smatr.txt'),EXIST = fexist)
-!  IF (.not. fexist) RETURN ! *_Smatr.txt not found
+   !INQUIRE (FILE = (ctldir//ctmp23//'_Pchan.LST'),EXIST = fexist)
+   INQUIRE (FILE = ('INCIDENT_Pchan.LST'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Pchan.LST not found
+!  INQUIRE (FILE = (ctldir//ctmp23//'_Smatr.LST'),EXIST = fexist)
+!  INQUIRE (FILE = ('INCIDENT_Smatr.LST'),EXIST = fexist)
+!  IF (.not. fexist) RETURN ! *_Smatr.LST not found
 
-!  OPEN (126, FILE = (ctldir//ctmp23//'_Pchan.txt'), STATUS = 'old')
-   OPEN (126, FILE = ('INCIDENT_Pchan.txt'), STATUS = 'old')
-!  OPEN (58 , FILE = (ctldir//ctmp23//'_Smatr.txt'), STATUS = 'old')
-!  OPEN (58 , FILE = ('INCIDENT_Smatr.txt'), STATUS = 'old')
+!  OPEN (126, FILE = (ctldir//ctmp23//'_Pchan.LST'), STATUS = 'old')
+   OPEN (126, FILE = ('INCIDENT_Pchan.LST'), STATUS = 'old')
+!  OPEN (58 , FILE = (ctldir//ctmp23//'_Smatr.LST'), STATUS = 'old')
+!  OPEN (58 , FILE = ('INCIDENT_Smatr.LST'), STATUS = 'old')
 
    Open_CC_files = .TRUE. ! normal return
 
@@ -251,22 +251,22 @@ MODULE TLJs
 
 !--The INQUIRE statement determines whether or not the file exists.
 !--If it does not, the program calculates new transmission coeff.
-   !INQUIRE (FILE = (ctldir//ctmp23//'_Pmatr.txt'),EXIST = fexist)
-   INQUIRE (FILE = ('INCIDENT_Pmatr.txt'),EXIST = fexist)
-   IF (.not. fexist) RETURN ! *_Pmatr.txt not found
-   !INQUIRE (FILE = (ctldir//ctmp23//'_Pdiag.txt'),EXIST = fexist)
-   INQUIRE (FILE = ('INCIDENT_Pdiag.txt'),EXIST = fexist)
-   IF (.not. fexist) RETURN ! *_Pdiag.txt not found
-   !INQUIRE (FILE = (ctldir//ctmp23//'_Umatr.txt'),EXIST = fexist)
-   INQUIRE (FILE = ('INCIDENT_Umatr.txt'),EXIST = fexist)
-   IF (.not. fexist) RETURN ! *_Umatr.txt not found
+   !INQUIRE (FILE = (ctldir//ctmp23//'_Pmatr.LST'),EXIST = fexist)
+   INQUIRE (FILE = ('INCIDENT_Pmatr.LST'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Pmatr.LST not found
+   !INQUIRE (FILE = (ctldir//ctmp23//'_Pdiag.LST'),EXIST = fexist)
+   INQUIRE (FILE = ('INCIDENT_Pdiag.LST'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Pdiag.LST not found
+   !INQUIRE (FILE = (ctldir//ctmp23//'_Umatr.LST'),EXIST = fexist)
+   INQUIRE (FILE = ('INCIDENT_Umatr.LST'),EXIST = fexist)
+   IF (.not. fexist) RETURN ! *_Umatr.LST not found
 
-   !OPEN (125, FILE = (ctldir//ctmp23//'_Pmatr.txt'), STATUS = 'old')
-   !OPEN (60 , FILE = (ctldir//ctmp23//'_Umatr.txt'), STATUS = 'old')
-   !OPEN (61 , FILE = (ctldir//ctmp23//'_Pdiag.txt'), STATUS = 'old')
-   OPEN (125, FILE = ('INCIDENT_Pmatr.txt'), STATUS = 'old')
-   OPEN (60 , FILE = ('INCIDENT_Umatr.txt'), STATUS = 'old')
-   OPEN (61 , FILE = ('INCIDENT_Pdiag.txt'), STATUS = 'old')
+   !OPEN (125, FILE = (ctldir//ctmp23//'_Pmatr.LST'), STATUS = 'old')
+   !OPEN (60 , FILE = (ctldir//ctmp23//'_Umatr.LST'), STATUS = 'old')
+   !OPEN (61 , FILE = (ctldir//ctmp23//'_Pdiag.LST'), STATUS = 'old')
+   OPEN (125, FILE = ('INCIDENT_Pmatr.LST'), STATUS = 'old')
+   OPEN (60 , FILE = ('INCIDENT_Umatr.LST'), STATUS = 'old')
+   OPEN (61 , FILE = ('INCIDENT_Pdiag.LST'), STATUS = 'old')
 
    Open_CC_files = .TRUE. ! normal return
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4628 $
+Ccc   * $Rev: 4634 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+Ccc   * $Date: 2016-03-21 01:23:36 +0100 (Mo, 21 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -518,15 +518,15 @@ C***********************************************************************CALC-278
 C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
-      open(121,file=TRIM(fname)//'_Pmatr.txt')                          RCN  RCN
-C     open(124,file=TRIM(fname)//'_Cmatrix.txt')                        RCN  RCN
-C     open(125,file=TRIM(fname)//'_Smatr.txt')                          RCN  RCN
-      open(126,file=TRIM(fname)//'_Pchan.txt')                          RCN  RCN
+      open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
+C     open(124,file=TRIM(fname)//'_Cmatrix.LST')                        RCN  RCN
+C     open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
+      open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
 C
 C     For EW transformation
 C
-      open(122,file=TRIM(fname)//'_Pdiag.txt')                          RCN  RCN
-      open(123,file=TRIM(fname)//'_Umatr.txt')                          RCN  RCN
+      open(122,file=TRIM(fname)//'_Pdiag.LST')                          RCN  RCN
+      open(123,file=TRIM(fname)//'_Umatr.LST')                          RCN  RCN
 C
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
