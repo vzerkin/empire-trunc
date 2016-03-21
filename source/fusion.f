@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4639 $
+Ccc   * $Rev: 4641 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 23:41:12 +0100 (Mo, 21 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -591,6 +591,14 @@ C           CN_isotropic = .TRUE.
 
             IF (SOFt) THEN
 C-------------EXACT SOFT ROTOR MODEL CC calc. by OPTMAN (only coupled levels)
+C    
+              IF(INTerf.GT.0) THEN
+                WRITE(8,*) 
+     >    'WARNING: OPTMAN used, EW transformation not available yet'
+                WRITE(8,*)
+     >    'WARNING: Disabling EW transformation                     '
+                INTerf = 0
+              ENDIF
               CALL OPTMAN_CCSOFTROT(Npro,Ntrg,einlab,.FALSE.) 
               IF (ldbwacalc) THEN
 C               EW to be implemented in OPTMAN
@@ -689,14 +697,16 @@ C
                iwin=ipipe_move('ccm.CS','INCIDENT.CS')
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
 
-               iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
-               iwin=ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
-C              iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
-C
-               IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
-                 iwin=ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
-                 iwin=ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
-               ENDIF 
+               IF(MAX_cc.GT.0) THEN
+                 iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
+                 iwin=ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
+C                iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
+C              
+                 IF(INTerf.gt.0) THEN
+                   iwin=ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
+                   iwin=ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
+                 ENDIF 
+               ENDIF
 C
 C              Joining dwba.LEG and ccm.LEG
 C
@@ -990,7 +1000,7 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
-         IF(NINT(DIRect).GT.0 .AND. IOUT.EQ.5) THEN
+         IF(NINT(DIRect).GT.0 .AND. MAX_cc.GT.0 .AND. IOUT.EQ.5) THEN
 C          ctmp = ctldir//ctmp23//'_Smatr.LST'
 C          iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pmatr.LST'
@@ -998,7 +1008,7 @@ C          iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pchan.LST'
            iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
 C
-           IF(.NOT.CN_isotropic .and. INTerf.gt.0) THEN
+           IF(INTerf.gt.0) THEN
              ctmp = ctldir//ctmp23//'_Umatr.LST'
              iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
              ctmp = ctldir//ctmp23//'_Pdiag.LST'

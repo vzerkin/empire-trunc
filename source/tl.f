@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4639 $
+Ccc   * $Rev: 4641 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-21 23:41:12 +0100 (Mo, 21 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2776,12 +2776,12 @@ C
       DOUBLE PRECISION xsabs,xsabsj,jsp,coeff,sxj,trgsp
       INTEGER ilv, l, nc, nceq, ncoll, nlev, nc1, nc2
       INTEGER nctot, ncsol, ncint, jindex
-      LOGICAL relcal, unformat
+      LOGICAL relcal, unformat, debug
       CHARACTER*1 parc
       DOUBLE PRECISION sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
 
-      data unformat/.TRUE./ 
+      data unformat/.TRUE./, debug/.FALSE./ 
 
       Maxlw  = 0
       ncoll = 0
@@ -2943,6 +2943,8 @@ C
          ELSE
 	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
          ENDIF
+
+         IF(debug) THEN
          write(*,*) 'Pchan: MAX_CC=',MAX_cc_mod
          l = 5
          write(*,'(1x,I3,1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
@@ -2965,6 +2967,8 @@ C
          write(*,'(1x,I3,1x,d12.6,1x,F5.1,1x,I2,1x,I3)') 
      >     l,CCpdiag(l)%pdiag,
      >     CCpdiag(l)%Jcn,CCpdiag(l)%Pcn,CCpdiag(l)%nceq
+         ENDIF
+
       ENDIF
 C
 C     write(*,*) nejc,'Maxlw=',maxlw

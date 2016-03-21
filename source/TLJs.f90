@@ -1,6 +1,6 @@
-! $Rev: 4639 $
+! $Rev: 4641 $
 ! $Author: rcapote $
-! $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
+! $Date: 2016-03-21 23:41:12 +0100 (Mo, 21 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -342,7 +342,8 @@ SUBROUTINE AllocTLJmatr(nch)
        ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
-10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
+10 CONTINUE
+   ! WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
    ! pause
 
    Read_CC_matrices = .TRUE.
@@ -378,8 +379,8 @@ SUBROUTINE AllocTLJmatr(nch)
    ENDDO
 
 12 MAX_pmatr = nch
-   WRITE(*,*) 'Pmatrix channels read:',nch
-   WRITE(*,*) 'Pmatrix channels calc:',npmat
+   ! WRITE(*,*) 'Pmatrix channels read:',nch
+   ! WRITE(*,*) 'Pmatrix channels calc:',npmat
    CONTINUE
    ! PAUSE
 
@@ -428,8 +429,8 @@ SUBROUTINE AllocTLJmatr(nch)
    ENDDO
 
 14 MAX_umatr = nch
-   WRITE(*,*) 'Umatrix channels read:',nch
-   WRITE(*,*) 'Umatrix channels calc:',numat
+   !WRITE(*,*) 'Umatrix channels read:',nch
+   !WRITE(*,*) 'Umatrix channels calc:',numat
    CONTINUE
    ! PAUSE 
 
@@ -456,8 +457,10 @@ SUBROUTINE AllocTLJmatr(nch)
      ENDDO
    ENDDO
 
-16 WRITE(*,*) 'Pdiag channels read:',nch
-   WRITE(*,*) 'Pdiag channels expected:',MAX_cc
+16 CONTINUE
+
+   ! WRITE(*,*) 'Pdiag channels read:',nch
+   ! WRITE(*,*) 'Pdiag channels expected:',MAX_cc
    ! PAUSE
 
    Read_CC_matrices = .TRUE.
