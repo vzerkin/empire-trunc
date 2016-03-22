@@ -1,6 +1,6 @@
-! $Rev: 4645 $
+! $Rev: 4646 $
 ! $Author: rcapote $
-! $Date: 2016-03-22 05:42:14 +0100 (Di, 22 Mär 2016) $
+! $Date: 2016-03-22 20:17:34 +0100 (Di, 22 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -9,7 +9,7 @@ MODULE TLJs
    include 'global.h'
 
    INTEGER, PUBLIC :: MAX_cc_mod,MAX_pmatr,MAX_umatr 
-
+    
    TYPE, PUBLIC :: cc_channel
      INTEGER*4 Pcn        ! CN parity to which cc-channel couples (+1 or -1)
      REAL*8 Jcn           ! CN spin   to which cc-channel couples
@@ -321,7 +321,7 @@ SUBROUTINE AllocTLJmatr(nch)
    numat = 0
    
 !==Reading Pchan
-   DO ncc = 1, MAX_CC
+   DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq  
@@ -344,7 +344,7 @@ SUBROUTINE AllocTLJmatr(nch)
        ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
-10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
+10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
    ! pause
 
    Read_CC_matrices = .TRUE.
@@ -357,7 +357,7 @@ SUBROUTINE AllocTLJmatr(nch)
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:) 
    !==Reading Pmatr
    nch = 0
-   DO ncc = 1, MAX_CC
+   DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq  
@@ -404,7 +404,7 @@ SUBROUTINE AllocTLJmatr(nch)
    !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:) 
    !==Reading Umatr
    nch = 0
-   DO ncc = 1, MAX_CC
+   DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq  
@@ -438,7 +438,7 @@ SUBROUTINE AllocTLJmatr(nch)
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
    !==Reading Pdiag
    nch = 0
-   DO ncc = 1, MAX_cc
+   DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
      READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq  
@@ -459,7 +459,7 @@ SUBROUTINE AllocTLJmatr(nch)
    ENDDO
 
 16 WRITE(*,*) 'Pdiag channels read:',nch
-   WRITE(*,*) 'Pdiag channels expected:',MAX_cc
+   WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
    ! PAUSE
 
    Read_CC_matrices = .TRUE.
