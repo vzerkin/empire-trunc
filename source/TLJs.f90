@@ -1,6 +1,6 @@
-! $Rev: 4641 $
+! $Rev: 4642 $
 ! $Author: rcapote $
-! $Date: 2016-03-21 23:41:12 +0100 (Mo, 21 Mär 2016) $
+! $Date: 2016-03-22 04:26:59 +0100 (Di, 22 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -342,8 +342,7 @@ SUBROUTINE AllocTLJmatr(nch)
        ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
-10 CONTINUE
-   ! WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
+10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc
    ! pause
 
    Read_CC_matrices = .TRUE.
@@ -374,13 +373,13 @@ SUBROUTINE AllocTLJmatr(nch)
        ps_pmatrix%nceq = nceq                        
        ps_pmatrix%irow = nc1
        ps_pmatrix%icol = nc2
-       ps_pmatrix%umatrix = DCMPLX(sreal,simag,8)
+       ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
      ENDDO
    ENDDO
 
 12 MAX_pmatr = nch
-   ! WRITE(*,*) 'Pmatrix channels read:',nch
-   ! WRITE(*,*) 'Pmatrix channels calc:',npmat
+   WRITE(*,*) 'Pmatrix channels read:',nch
+   WRITE(*,*) 'Pmatrix channels calc:',npmat
    CONTINUE
    ! PAUSE
 
@@ -423,14 +422,14 @@ SUBROUTINE AllocTLJmatr(nch)
          ps_umatrix%nceq = nceq                        
          ps_umatrix%irow = i1
          ps_umatrix%icol = i2
-         ps_umatrix%umatrix = DCMPLX(sreal,simag,8)
+         ps_umatrix%umatrix = CMPLX(sreal,simag,8)
        ENDDO
      ENDDO
    ENDDO
 
 14 MAX_umatr = nch
-   !WRITE(*,*) 'Umatrix channels read:',nch
-   !WRITE(*,*) 'Umatrix channels calc:',numat
+   WRITE(*,*) 'Umatrix channels read:',nch
+   WRITE(*,*) 'Umatrix channels calc:',numat
    CONTINUE
    ! PAUSE 
 
@@ -457,24 +456,32 @@ SUBROUTINE AllocTLJmatr(nch)
      ENDDO
    ENDDO
 
-16 CONTINUE
-
-   ! WRITE(*,*) 'Pdiag channels read:',nch
-   ! WRITE(*,*) 'Pdiag channels expected:',MAX_cc
+16 WRITE(*,*) 'Pdiag channels read:',nch
+   WRITE(*,*) 'Pdiag channels expected:',MAX_cc
    ! PAUSE
 
    Read_CC_matrices = .TRUE.
 
    RETURN
+   write(*,*) 'Start checking ...' 
 
-   DO ncc = 1, MAX_CC
+   DO ncc = 1, MAX_cc_mod
 
      ps_umatrix => CCumatrix(ncc)
 
-     write(*,*) 'J,Pi=',ps_umatrix%Jcn, ps_umatrix%Pcn
+     if(NINT(2*ps_umatrix%Jcn) /= 1 .or. ps_umatrix%Pcn /= 1) cycle ! Jpi = 3/2+
+     write(*,*) 'J,Pi,nceq=',ps_umatrix%Jcn, ps_umatrix%Pcn,ps_umatrix%nceq
 
-     nch = ps_pdiag%nceq
+     nch = ps_umatrix%nceq
      CALL AllocCCmatr(nch)
+     do i1=1,nch
+       do i2=1,nch
+         Umatr(i1,i2) = CCumatrix(ncc + i1-1 + i2-1)%umatrix
+         write(*,*) nch,i1,i2,Umatr(i1,i2)
+       enddo
+     enddo
+
+     pause
 
      IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
      ALLOCATE(Umatr_T(nch,nch),STAT=my)
