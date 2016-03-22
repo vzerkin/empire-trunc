@@ -1,6 +1,6 @@
-! $Rev: 4642 $
+! $Rev: 4643 $
 ! $Author: rcapote $
-! $Date: 2016-03-22 04:26:59 +0100 (Di, 22 Mär 2016) $
+! $Date: 2016-03-22 04:28:34 +0100 (Di, 22 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -446,7 +446,7 @@ SUBROUTINE AllocTLJmatr(nch)
      DO i1 = 1, nceq
        nch = nch + 1
        ps_pdiag => CCpdiag(nch)
-       READ (61,'(1x,I4,1x,D15.9))',END = 8,ERR = 8) nc1, sreal
+       READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
        ! write(*,*) nc1,sreal  
        ps_pdiag%Jcn = jc
        ps_pdiag%Pcn = 1
