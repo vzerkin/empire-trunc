@@ -1,6 +1,6 @@
-! $Rev: 4646 $
+! $Rev: 4647 $
 ! $Author: rcapote $
-! $Date: 2016-03-22 20:17:34 +0100 (Di, 22 Mär 2016) $
+! $Date: 2016-03-22 21:00:04 +0100 (Di, 22 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -312,7 +312,7 @@ SUBROUTINE AllocTLJmatr(nch)
    TYPE (cc_umatrix), POINTER :: ps_umatrix
    TYPE (cc_pdiag), POINTER :: ps_pdiag
    logical debug
-   DATA debug/.TRUE./
+   DATA debug/.FALSE./
 
    Read_CC_matrices = .FALSE.
 
@@ -344,8 +344,7 @@ SUBROUTINE AllocTLJmatr(nch)
        ps_tlj%tlj = sreal
      ENDDO
    ENDDO 
-10 WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
-   ! pause
+10 if (debug) WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
 
    Read_CC_matrices = .TRUE.
 
@@ -380,10 +379,8 @@ SUBROUTINE AllocTLJmatr(nch)
    ENDDO
 
 12 MAX_pmatr = nch
-   WRITE(*,*) 'Pmatrix channels read:',nch
-   WRITE(*,*) 'Pmatrix channels calc:',npmat
-   CONTINUE
-   ! PAUSE
+   if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
+   if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
 
    !==Reading Smatr
    !---Here the calculated files are read
@@ -430,10 +427,8 @@ SUBROUTINE AllocTLJmatr(nch)
    ENDDO
 
 14 MAX_umatr = nch
-   WRITE(*,*) 'Umatrix channels read:',nch
-   WRITE(*,*) 'Umatrix channels calc:',numat
-   CONTINUE
-   ! PAUSE 
+   if (debug) WRITE(*,*) 'Umatrix channels read:',nch
+   if (debug) WRITE(*,*) 'Umatrix channels calc:',numat
 
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)     
    !==Reading Pdiag
@@ -458,20 +453,19 @@ SUBROUTINE AllocTLJmatr(nch)
      ENDDO
    ENDDO
 
-16 WRITE(*,*) 'Pdiag channels read:',nch
-   WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
-   ! PAUSE
+16 if (debug) WRITE(*,*) 'Pdiag channels read:',nch
+   if (debug) WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
 
    Read_CC_matrices = .TRUE.
 
-   RETURN
-   write(*,*) 'Start checking ...' 
+   if (.not. debug) RETURN
 
+   write(*,*) 'Start checking ...' 
 
    Jcn = 1.5
    Pcn = +1
 
-   if(debug) write(*,*) 'Pdiag'
+   write(*,*) 'Pdiag'
    DO ncc = 1, MAX_cc_mod
      if(NINT(2*CCpdiag(ncc)%Jcn) == NINT(2*Jcn) .and. CCpdiag(ncc)%Pcn == Pcn) THEN
        write(*,*) 'J,Pi,nceq=',CCpdiag(ncc)%Jcn, CCpdiag(ncc)%Pcn, CCpdiag(ncc)%nceq
@@ -485,7 +479,7 @@ SUBROUTINE AllocTLJmatr(nch)
          WRITE (*,*) i1, i1 - ncc +1, CCpdiag(i1)%pdiag
          Pdiag(i1 - ncc +1) = CCpdiag(i1)%pdiag
        enddo
-       if(debug) pause
+       pause
        EXIT
      endif
    ENDDO
@@ -493,27 +487,17 @@ SUBROUTINE AllocTLJmatr(nch)
    DO ncc = 1, MAX_umatr
 
      if(NINT(2*CCumatrix(ncc)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(ncc)%Pcn /= Pcn) cycle ! Jpi = 3/2+
-     if (debug) write(*,*) 'J,Pi,nceq=',CCumatrix(ncc)%Jcn, CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
+     write(*,*) 'J,Pi,nceq=',CCumatrix(ncc)%Jcn, CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
 
      nch = CCumatrix(ncc)%nceq
 
-     if (debug) write(*,*) 'Umatr'
+     write(*,*) 'Umatr'
      nmax = ncc + nch*nch - 1
      do i1 = ncc, nmax
        if (debug) WRITE (*,*) i1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
        Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
      enddo
 
-     if (debug) then
-       pause
-       do i1=1,nch
-         write(*,*) i1
-         do i2=1,nch
-           write(*,*) i2,Umatr(i1,i2)
-         enddo
-       enddo
-       pause
-     endif
      EXIT
    
    ENDDO
