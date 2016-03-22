@@ -1,6 +1,6 @@
-! $Rev: 4643 $
+! $Rev: 4645 $
 ! $Author: rcapote $
-! $Date: 2016-03-22 04:28:34 +0100 (Di, 22 Mär 2016) $
+! $Date: 2016-03-22 05:42:14 +0100 (Di, 22 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -302,15 +302,17 @@ SUBROUTINE AllocTLJmatr(nch)
 
    LOGICAL FUNCTION Read_CC_matrices()
    IMPLICIT NONE
-   DOUBLE PRECISION jc, jj, sreal, simag
+   DOUBLE PRECISION jc, jj, sreal, simag, jcn 
    INTEGER nceq, nc1, nc2, i1, i2, nelem, my, ncc, nch, npmat, numat
-   INTEGER nlev, nl
+   INTEGER nlev, nl, nmax, pcn
    CHARACTER*1 parc
    COMPLEX*16, ALLOCATABLE :: cres(:,:),ctmp(:,:), Umatr_T(:,:) ! temporal matrices 
    TYPE (cc_channel), POINTER :: ps_tlj
    TYPE (cc_umatrix), POINTER :: ps_pmatrix
    TYPE (cc_umatrix), POINTER :: ps_umatrix
    TYPE (cc_pdiag), POINTER :: ps_pdiag
+   logical debug
+   DATA debug/.TRUE./
 
    Read_CC_matrices = .FALSE.
 
@@ -465,67 +467,84 @@ SUBROUTINE AllocTLJmatr(nch)
    RETURN
    write(*,*) 'Start checking ...' 
 
+
+   Jcn = 1.5
+   Pcn = +1
+
+   if(debug) write(*,*) 'Pdiag'
    DO ncc = 1, MAX_cc_mod
+     if(NINT(2*CCpdiag(ncc)%Jcn) == NINT(2*Jcn) .and. CCpdiag(ncc)%Pcn == Pcn) THEN
+       write(*,*) 'J,Pi,nceq=',CCpdiag(ncc)%Jcn, CCpdiag(ncc)%Pcn, CCpdiag(ncc)%nceq
+       nch = CCpdiag(ncc)%nceq
+   
+       CALL AllocCCmatr(nch)
 
-     ps_umatrix => CCumatrix(ncc)
-
-     if(NINT(2*ps_umatrix%Jcn) /= 1 .or. ps_umatrix%Pcn /= 1) cycle ! Jpi = 3/2+
-     write(*,*) 'J,Pi,nceq=',ps_umatrix%Jcn, ps_umatrix%Pcn,ps_umatrix%nceq
-
-     nch = ps_umatrix%nceq
-     CALL AllocCCmatr(nch)
-     do i1=1,nch
-       do i2=1,nch
-         Umatr(i1,i2) = CCumatrix(ncc + i1-1 + i2-1)%umatrix
-         write(*,*) nch,i1,i2,Umatr(i1,i2)
+       ! reading diagonal elements p_{alpha}
+       nmax = ncc + nch - 1
+       do i1 = ncc, nmax
+         WRITE (*,*) i1, i1 - ncc +1, CCpdiag(i1)%pdiag
+         Pdiag(i1 - ncc +1) = CCpdiag(i1)%pdiag
        enddo
+       if(debug) pause
+       EXIT
+     endif
+   ENDDO
+
+   DO ncc = 1, MAX_umatr
+
+     if(NINT(2*CCumatrix(ncc)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(ncc)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+     if (debug) write(*,*) 'J,Pi,nceq=',CCumatrix(ncc)%Jcn, CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
+
+     nch = CCumatrix(ncc)%nceq
+
+     if (debug) write(*,*) 'Umatr'
+     nmax = ncc + nch*nch - 1
+     do i1 = ncc, nmax
+       if (debug) WRITE (*,*) i1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+       Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
      enddo
 
-     pause
+     if (debug) then
+       pause
+       do i1=1,nch
+         write(*,*) i1
+         do i2=1,nch
+           write(*,*) i2,Umatr(i1,i2)
+         enddo
+       enddo
+       pause
+     endif
+     EXIT
+   
+   ENDDO
 
-     IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
-     ALLOCATE(Umatr_T(nch,nch),STAT=my)
-     IF(my /= 0) then
-       WRITE(8,*)  'ERROR: Insufficient memory for Umatr_T matrix in TLJs'
-       WRITE(12,*) 'ERROR: Insufficient memory for Umatr_Ts matrix in TLJs'
-       STOP
-     ENDIF
-     Umatr_T = 0.0d0
+   IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
+   ALLOCATE(Umatr_T(nch,nch),STAT=my)
+   IF(my /= 0) then
+     WRITE(8,*)  'ERROR: Insufficient memory for Umatr_T matrix in TLJs'
+     WRITE(12,*) 'ERROR: Insufficient memory for Umatr_Ts matrix in TLJs'
+     STOP
+   ENDIF
+   Umatr_T = 0.0d0
 
-     ! Calculating the transposed matrix
-     Umatr_T = TRANSPOSE(Umatr)
+   ! Calculating the transposed matrix
+   Umatr_T = TRANSPOSE(Umatr)
 
-     !  TRANSPOSE WORKS !!!! March 2016
-     !  write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',2,1,DREAL(Umatr(2,1)),DIMAG(Umatr(2,1))
-     !  write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,2,DREAL(Umatr_T(1,2)),DIMAG(Umatr_T(1,2))
-     !  write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',3,1,DREAL(Umatr(3,1)),DIMAG(Umatr(3,1))
-     !  write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,3,DREAL(Umatr_T(1,3)),DIMAG(Umatr_T(1,3))
-     !  write (*,*)
+   !  TRANSPOSE WORKS !!!! March 2016
+   write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',2,1,DREAL(Umatr(2,1)),DIMAG(Umatr(2,1))
+   write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,2,DREAL(Umatr_T(1,2)),DIMAG(Umatr_T(1,2))
+   write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr  =',3,1,DREAL(Umatr(3,1)),DIMAG(Umatr(3,1))
+   write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr_T=',1,3,DREAL(Umatr_T(1,3)),DIMAG(Umatr_T(1,3))
+   write (*,*)
 
-     write (*,'(1x,A,1x,6(d12.6,1x))') 'Pdiag =',(Pdiag(i1),i1=1,2)
-
-     write(*,*) '1,1=',Pmatr(1,1)
-     write(*,*) '2,2=',Pmatr(2,2)
-     write(*,*) '1,2=',Pmatr(1,2)
-     write(*,*) '2,1=',Pmatr(2,1)
-
-     IF(allocated(cres)) DEALLOCATE(cres)
-     ALLOCATE(cres(nch,nch),STAT=my)
-     IF(my /= 0) then
-       WRITE(8,*)  'ERROR: Insufficient memory for cres matrix in TLJs'
-       WRITE(12,*) 'ERROR: Insufficient memory for cres matrix in TLJs'
-       STOP
-     ENDIF
-     cres = 0.0d0
-
-     IF(allocated(ctmp)) DEALLOCATE(ctmp)
-     ALLOCATE(ctmp(nch,nch),STAT=my)
-     IF(my /= 0) then
-       WRITE(8,*)  'ERROR: Insufficient memory for ctmp matrix in TLJs'
-       WRITE(12,*) 'ERROR: Insufficient memory for ctmp matrix in TLJs'
-       STOP
-     ENDIF    
-     ctmp = 0.0d0
+   IF(allocated(ctmp)) DEALLOCATE(ctmp)
+   ALLOCATE(ctmp(nch,nch),STAT=my)
+   IF(my /= 0) then
+     WRITE(8,*)  'ERROR: Insufficient memory for ctmp matrix in TLJs'
+     WRITE(12,*) 'ERROR: Insufficient memory for ctmp matrix in TLJs'
+     STOP
+   ENDIF    
+   ctmp = 0.0d0
 
      ctmp = MATMUL(Umatr,Pmatr)
 
@@ -544,11 +563,10 @@ SUBROUTINE AllocTLJmatr(nch)
      IF(allocated(cres)) DEALLOCATE(cres)
      IF(allocated(ctmp)) DEALLOCATE(ctmp)
      IF(allocated(Umatr_T)) DEALLOCATE(Umatr_T)
-     CALL DelCCmatr() 
 
      pause
 
-   ENDDO
+     CALL DelCCmatr() 
 
    RETURN
 
