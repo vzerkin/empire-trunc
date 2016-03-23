@@ -1,6 +1,6 @@
-! $Rev: 4650 $
+! $Rev: 4651 $
 ! $Author: rcapote $
-! $Date: 2016-03-23 04:22:00 +0100 (Mi, 23 Mär 2016) $
+! $Date: 2016-03-23 05:01:39 +0100 (Mi, 23 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -42,7 +42,8 @@ MODULE TLJs
    TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
 
-   PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs, AllocCCmatr, DelCCmatr, PREPARE_CCmatr
+   PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
+   PUBLIC AllocCCmatr, DelCCmatr, PREPARE_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
    REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:)
 
@@ -350,6 +351,8 @@ CONTAINS
 
       IF(INTerf==0) RETURN
 
+      write(*,*) nch,npmat,numat
+
       CALL AllocEWmatr(nch,npmat,numat)
       Read_CC_matrices = .FALSE.
 
@@ -458,9 +461,9 @@ CONTAINS
 
 Read_CC_matrices = .TRUE.
 
-   if (.not. debug) RETURN
+RETURN
 
-   write(*,*) 'Start checking ...'
+write(*,*) 'Start checking ...'
 
 Jcn = 1.5
 Pcn = +1
@@ -572,24 +575,24 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
    REAL*8 Jcn
    INTEGER pcn, ndim, ncc, nmaxp, nmaxu, i1
    LOGICAL debug
-   DATA debug/.false./
+   DATA debug/.FALSE./
    ndim = 0
    nmaxp = 0
    nmaxu = 0
-   if (debug) write(*,*) MAX_cc_mod
-   if(debug) write(*,*) 'Pdiag'
+   if (debug) write(*,*) 
+   if(debug) write(*,*) 'Pdiag, MAX_cc_mod:',MAX_cc_mod
    DO ncc = 1, MAX_cc_mod
       ndim  = 0
       nmaxp = 0
       if(NINT(2*STLcc(ncc)%Jcn) == NINT(2*Jcn) .and. STLcc(ncc)%Pcn == Pcn) THEN
-         if (debug) write(*,*) 'J,Pi,nceq=',STLcc(ncc)%Jcn, STLcc(ncc)%Pcn, STLcc(ncc)%nceq
+
          ndim = STLcc(ncc)%nceq
 
          CALL AllocCCmatr(ndim)
 
          ! reading diagonal elements p_{alpha}
          nmaxp = ncc + ndim - 1
-         !write(*,*) 'ncc,ndim,nmaxp=', ncc,ndim,nmaxp
+         if (debug) write(*,*) 'J,Pi,nceq=',sngl(STLcc(ncc)%Jcn), STLcc(ncc)%Pcn, STLcc(ncc)%nceq, nmaxp
          IF (INTerf==0) THEN
             do i1 = ncc, nmaxp
                if (debug) WRITE (*,*) i1, i1 - ncc +1, STLcc(i1)%tlj
@@ -606,20 +609,24 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       endif
    ENDDO
 
+   RETURN !!! DISABLE Umatrix reading
    IF(INTerf==0) RETURN
 
-   if (debug) write(*,*) 'Umatr'
+   ! if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
+                write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
    DO ncc = 1, MAX_umatr
       ndim =  0
       nmaxu = 0
       if(NINT(2*CCumatrix(ncc)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(ncc)%Pcn /= Pcn) cycle ! Jpi = 3/2+
-      if (debug) write(*,*) 'J,Pi,nceq=',CCumatrix(ncc)%Jcn, CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
 
       ndim = CCumatrix(ncc)%nceq
+      nmaxu = ncc + ndim*ndim - 1                                                                           
 
-      nmaxu = ncc + ndim*ndim - 1
+      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(ncc)%Jcn), CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
+      if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
+
       do i1 = ncc, nmaxu
-         if (debug) WRITE (*,*) i1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+         if (debug) WRITE (*,*) i1, i1-ncc+1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
          Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
       enddo
       EXIT

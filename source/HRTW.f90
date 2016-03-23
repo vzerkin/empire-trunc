@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4648 $
-   ! $Author: mherman $
-   ! $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
+   ! $Rev: 4651 $
+   ! $Author: rcapote $
+   ! $Date: 2016-03-23 05:01:39 +0100 (Mi, 23 Mär 2016) $
    !
 
    TYPE channel
@@ -963,7 +963,7 @@ CONTAINS
       !* output:      outchnl(:) outgoing channel structure (list)        *
       !*               inchnl(:) incident channel structure (list)        *
       !*                                                                  *
-      !* calls:PREPARE_CCmatr                                             *
+      !* calls:Prepare_CCmatr                                             *
       !*                                                                  *
       !********************************************************************
       INTEGER i, ipc, nel, nnur, nejc, nch, ncc, nccp, nccu, ndim
@@ -972,7 +972,7 @@ CONTAINS
       TYPE (fusion),  POINTER :: in
 
       IF(IZA(nnur)/=IZA(0)) RETURN
-      CALL PREPARE_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)      ! open  CC P-diagonal and U-matrix for EW transformation
+      CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)      ! open  CC P-diagonal and U-matrix for EW transformation
       IF(ndim==0) RETURN                              ! no colective channels found
 !      write(*,*) 'xjc, ipc, nccp, nccu, ndim',xjc, ipc, nccp, nccu, ndim
       DO i = ncc, nccp
