@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4646 $
+Ccc   * $Rev: 4649 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-22 20:17:34 +0100 (Di, 22 Mär 2016) $
+Ccc   * $Date: 2016-03-23 04:19:35 +0100 (Mi, 23 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -211,6 +211,7 @@ C-----------Absorption and elastic cross sections in mb
               ENDDO
             ENDIF
    40       CLOSE (45 )
+            IF (IOUt.EQ.5) CLOSE (46)
             IF (fexistj) CLOSE (451)
 
 C           Reading EW structures
@@ -238,7 +239,8 @@ C                 READ(451,ERR=43,END=43)           ! Smatrix
 	          CLOSE(451)
 
               ENDIF  
-	        GOTO 44
+	        GOTO 44 ! EW matrices read successfully
+
  42           IF(INTerf.GT.0) THEN
                 WRITE(8,*) 'WARNING: EW matrices not found'
                 WRITE(8,*) 'WARNING: EW transformation disabled'
@@ -264,7 +266,6 @@ C                 READ(451,ERR=43,END=43)           ! Smatrix
       
  44         NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
 
-            IF (IOUt.EQ.5) CLOSE (46)
             IF (IOUt.GT.1) THEN
               WRITE (8,*)
               WRITE (8,*)
@@ -295,14 +296,15 @@ C--------If (energy read from file do not coincide
 C--------this nucleus should be recalculated (after the ENDIF)
 C
          IF (FITomp.EQ.0) WRITE (8,*)
-     &     ' WARNING: ENERGY MISMATCH:  Elab =', 
+     &     'WARNING: ENERGY MISMATCH:  Elab =', 
      &     sngl(EINl),' REQUESTED ENERGY=', SNGL(ener)
 
-   50    CLOSE (45,STATUS = 'DELETE')
-         IF (FITomp.EQ.0) WRITE (8,*) 
-     &     ' WARNING: FILE WITH TRANSM. COEFF.',
+   50    IF (FITomp.EQ.0) WRITE (8,*) 
+     &     'WARNING: FILE WITH TRANSM. COEFF.',
      &     ' FOR INCID.CHANNEL HAS BEEN DELETED',
      &     ' AND WILL BE RECALCULATED for Einc=',sngl(EINl)
+
+   52    CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
       ENDIF
