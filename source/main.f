@@ -1,6 +1,6 @@
-cc   * $Rev: 4550 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2015-12-16 17:56:28 +0100 (Mi, 16 Dez 2015) $
+cc   * $Rev: 4648 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -8,7 +8,7 @@ Ccc   ********************************************************************
 Ccc   *                                                         class:ppu        
 Ccc   *                         E M P I R E                                    
 Ccc   *                                                                        
-Ccc   *               Used to be main of the EMPIRE code 
+Ccc   *               Used to be the main of the EMPIRE code
 Ccc   *                                                 
 Ccc   *                                                 
 Ccc   ********************************************************************

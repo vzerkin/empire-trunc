@@ -2,10 +2,14 @@ MODULE width_fluct
 
    !
    !   ********************************************************************
-   !   *                                                         class:ppu*
+   !   *                  W I D T H _ F L U C T                           *
    !   *                                                                  *
-   !   *                                                                  *
-   !   *                                                                  *
+   !   * Calculates Hauser-Fesbach with width fluctuation correction      *
+   !   * using HRTW and Moldauer approaches including angular distr.      *
+   !   * In presence of direct reactions proper transmission coefficients *
+   !   * are used for the incoming as well as outging channels.           *
+   !   * Engelbrecht-Weidenmueller tranformation is used to account for   *
+   !   * direct reactions' effect on compound nucleus emission. (in work) *
    !   *                                                                  *
    !   *                                                                  *
    !   ********************************************************************
@@ -21,48 +25,48 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4644 $
-   ! $Author: rcapote $
-   ! $Date: 2016-03-22 04:36:19 +0100 (Di, 22 Mär 2016) $
+   ! $Rev: 4648 $
+   ! $Author: mherman $
+   ! $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
    !
 
    TYPE channel
-      INTEGER*4 l         ! ejectile l
+      INTEGER l         ! ejectile l
       REAL*8 j            ! ejectile j
       REAL*8 t            ! ejectile Tlj
       REAL*8 ti1          ! temporary Tlj used for iteration
       REAL*8 ti2          ! temporary Tlj used for iteration
       REAL*8 rho          ! final level density for this channel
       REAL*8 eef          ! elastic enhancement factor
-      INTEGER*4 nejc      ! ejectile index (nejc)
-      INTEGER*4 kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
+      INTEGER nejc      ! ejectile index (nejc)
+      INTEGER kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
       REAL*8 xjrs         ! spin of the populated state
-      INTEGER*4 jres      ! spin index of the populated state
-      INTEGER*4 pres      ! parity index of the populated state
+      INTEGER jres      ! spin index of the populated state
+      INTEGER pres      ! parity index of the populated state
    END TYPE channel
 
    TYPE numchnl
-      INTEGER*4 neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
-      INTEGER*4 part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
-      INTEGER*4 coll     ! position of the first (low) coupled level channel
-      INTEGER*4 colh     ! position of the last coupled channel; 
+      INTEGER neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
+      INTEGER part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
+      INTEGER coll     ! position of the first (low) coupled level channel
+      INTEGER colh     ! position of the last coupled channel;
                            ! coupled channels are embedded in particle channels coll <= colh <=part
-      INTEGER*4 elal     ! position of the first (low) elastic channel
-      INTEGER*4 elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
-      INTEGER*4 fiss     ! effective number of fission channels
-      INTEGER*4 gamm     ! effective number of gamma channels
+      INTEGER elal     ! position of the first (low) elastic channel
+      INTEGER elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
+      INTEGER fiss     ! effective number of fission channels
+      INTEGER gamm     ! effective number of gamma channels
    END TYPE numchnl
 
    TYPE fusion
-      INTEGER*4 nout      ! position of the corresponding outgoing channel in outchnl
-      INTEGER*4 l         ! projectile l
+      INTEGER nout      ! position of the corresponding outgoing channel in outchnl
+      INTEGER l         ! projectile l
       REAL*8 j            ! projectile j
       REAL*8 t            ! projectile Tlj
       REAL*8 sig          ! absorption x-section for this channel
    END TYPE fusion
 
-   INTEGER*4, PARAMETER :: ndhrtw1 = 10000        ! max. number of channels in the HRTW decay for a given CN J-pi
-   INTEGER*4, PARAMETER :: ndhrtw2 = 30           ! max. number of absorption channels for a given CN J-pi
+   INTEGER, PARAMETER :: ndhrtw1 = 10000        ! max. number of channels in the HRTW decay for a given CN J-pi
+   INTEGER, PARAMETER :: ndhrtw2 = 30           ! max. number of absorption channels for a given CN J-pi
 
    REAL*8 :: H_Sumtl      ! Sum of strong Tlj
    REAL*8 :: H_Sumtls     ! Sum of strong Tlj**2
@@ -73,8 +77,8 @@ MODULE width_fluct
    REAL*8 :: H_Tthr       ! Thershold for Tlj to be considered strong
    REAL*8 :: TFIs         ! Sum of fission transmission coefficients
    REAL*8 :: TGam         ! Sum of gamma transmission coefficients
-   INTEGER*4 :: NCH       ! Number of strong channels (Tlj's)
-   INTEGER*4 :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
+   INTEGER :: NCH         ! Number of strong channels (Tlj's)
+   INTEGER :: NSCh        ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
 
    REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
@@ -87,92 +91,92 @@ MODULE width_fluct
    REAL*8, ALLOCATABLE :: WFC(:,:)                       ! for Moldauer integral
    REAL*8, ALLOCATABLE :: SCRt_mem(:,:,:,:), SCRtl_mem(:,:)      ! preserve weak transitions in Moldauer looping over elastic channels for traget spin >0
 
-!  Data (x) for Gauss-Legendre quadrature from 0 to 1
+   !  Data (x) for Gauss-Legendre quadrature from 0 to 1
    REAL*8, DIMENSION(1:41), PARAMETER:: xgk = (/ &
-   5.7048420586114368D-004,&
-   3.4357004074525577D-003,&
-   9.2460612748748727D-003,&
-   1.8014036361043095D-002,&
-   2.9588683084122602D-002,&
-   4.3882785874337027D-002,&
-   6.0861594373859018D-002,&
-   8.0441514088890609D-002,&
-   1.0247928558122438D-001,&
-   1.2683404676992460D-001,&
-   1.5338117183262429D-001,&
-   1.8197315963674249D-001,&
-   2.1242977659014484D-001,&
-   2.4456649902458644D-001,&
-   2.7820341238063745D-001,&
-   3.1314695564229023D-001,&
-   3.4918606594254353D-001,&
-   3.8610707442917747D-001,&
-   4.2369726737953867D-001,&
-   4.6173673943325133D-001,&
-   5.0000000000000000D-001,&
-   5.3826326056674867D-001,&
-   5.7630273262046128D-001,&
-   6.1389292557082253D-001,&
-   6.5081393405745647D-001,&
-   6.8685304435770977D-001,&
-   7.2179658761936261D-001,&
-   7.5543350097541362D-001,&
-   7.8757022340985516D-001,&
-   8.1802684036325757D-001,&
-   8.4661882816737566D-001,&
-   8.7316595323007540D-001,&
-   8.9752071441877557D-001,&
-   9.1955848591110945D-001,&
-   9.3913840562614093D-001,&
-   9.5611721412566297D-001,&
-   9.7041131691587745D-001,&
-   9.8198596363895696D-001,&
-   9.9075393872512518D-001,&
-   9.9656429959254744D-001,&
-   9.9942951579413886D-001 /)
-!
+      5.7048420586114368D-004,&
+      3.4357004074525577D-003,&
+      9.2460612748748727D-003,&
+      1.8014036361043095D-002,&
+      2.9588683084122602D-002,&
+      4.3882785874337027D-002,&
+      6.0861594373859018D-002,&
+      8.0441514088890609D-002,&
+      1.0247928558122438D-001,&
+      1.2683404676992460D-001,&
+      1.5338117183262429D-001,&
+      1.8197315963674249D-001,&
+      2.1242977659014484D-001,&
+      2.4456649902458644D-001,&
+      2.7820341238063745D-001,&
+      3.1314695564229023D-001,&
+      3.4918606594254353D-001,&
+      3.8610707442917747D-001,&
+      4.2369726737953867D-001,&
+      4.6173673943325133D-001,&
+      5.0000000000000000D-001,&
+      5.3826326056674867D-001,&
+      5.7630273262046128D-001,&
+      6.1389292557082253D-001,&
+      6.5081393405745647D-001,&
+      6.8685304435770977D-001,&
+      7.2179658761936261D-001,&
+      7.5543350097541362D-001,&
+      7.8757022340985516D-001,&
+      8.1802684036325757D-001,&
+      8.4661882816737566D-001,&
+      8.7316595323007540D-001,&
+      8.9752071441877557D-001,&
+      9.1955848591110945D-001,&
+      9.3913840562614093D-001,&
+      9.5611721412566297D-001,&
+      9.7041131691587745D-001,&
+      9.8198596363895696D-001,&
+      9.9075393872512518D-001,&
+      9.9656429959254744D-001,&
+      9.9942951579413886D-001 /)
+   !
    REAL*8, DIMENSION(1:41), PARAMETER:: wgk = (/ &
-   0.003073583718520531501218293246031D0,&
-   0.008600269855642942198661787950102D0,&
-   0.014626169256971252983787960308868D0,&
-   0.020388373461266523598010231432755D0,&
-   0.025882133604951158834505067096153D0,&
-   0.031287306777032798958543119323801D0,&
-   0.036600169758200798030557240707211D0,&
-   0.041668873327973686263788305936895D0,&
-   0.046434821867497674720231880926108D0,&
-   0.050944573923728691932707670050345D0,&
-   0.055195105348285994744832372419777D0,&
-   0.059111400880639572374967220648594D0,&
-   0.062653237554781168025870122174255D0,&
-   0.065834597133618422111563556969398D0,&
-   0.068648672928521619345623411885368D0,&
-   0.071054423553444068305790361723210D0,&
-   0.073030690332786667495189417658913D0,&
-   0.074582875400499188986581418362488D0,&
-   0.075704497684556674659542775376617D0,&
-   0.076377867672080736705502835038061D0,&
-   0.076600711917999656445049901530102D0,&
-   0.076377867672080736705502835038061D0,&
-   0.075704497684556674659542775376617D0,&
-   0.074582875400499188986581418362488D0,&
-   0.073030690332786667495189417658913D0,&
-   0.071054423553444068305790361723210D0,&
-   0.068648672928521619345623411885368D0,&
-   0.065834597133618422111563556969398D0,&
-   0.062653237554781168025870122174255D0,&
-   0.059111400880639572374967220648594D0,&
-   0.055195105348285994744832372419777D0,&
-   0.050944573923728691932707670050345D0,&
-   0.046434821867497674720231880926108D0,&
-   0.041668873327973686263788305936895D0,&
-   0.036600169758200798030557240707211D0,&
-   0.031287306777032798958543119323801D0,&
-   0.025882133604951158834505067096153D0,&
-   0.020388373461266523598010231432755D0,&
-   0.014626169256971252983787960308868D0,&
-   0.008600269855642942198661787950102D0,&
-   0.003073583718520531501218293246031D0/)
+      0.003073583718520531501218293246031D0,&
+      0.008600269855642942198661787950102D0,&
+      0.014626169256971252983787960308868D0,&
+      0.020388373461266523598010231432755D0,&
+      0.025882133604951158834505067096153D0,&
+      0.031287306777032798958543119323801D0,&
+      0.036600169758200798030557240707211D0,&
+      0.041668873327973686263788305936895D0,&
+      0.046434821867497674720231880926108D0,&
+      0.050944573923728691932707670050345D0,&
+      0.055195105348285994744832372419777D0,&
+      0.059111400880639572374967220648594D0,&
+      0.062653237554781168025870122174255D0,&
+      0.065834597133618422111563556969398D0,&
+      0.068648672928521619345623411885368D0,&
+      0.071054423553444068305790361723210D0,&
+      0.073030690332786667495189417658913D0,&
+      0.074582875400499188986581418362488D0,&
+      0.075704497684556674659542775376617D0,&
+      0.076377867672080736705502835038061D0,&
+      0.076600711917999656445049901530102D0,&
+      0.076377867672080736705502835038061D0,&
+      0.075704497684556674659542775376617D0,&
+      0.074582875400499188986581418362488D0,&
+      0.073030690332786667495189417658913D0,&
+      0.071054423553444068305790361723210D0,&
+      0.068648672928521619345623411885368D0,&
+      0.065834597133618422111563556969398D0,&
+      0.062653237554781168025870122174255D0,&
+      0.059111400880639572374967220648594D0,&
+      0.055195105348285994744832372419777D0,&
+      0.050944573923728691932707670050345D0,&
+      0.046434821867497674720231880926108D0,&
+      0.041668873327973686263788305936895D0,&
+      0.036600169758200798030557240707211D0,&
+      0.031287306777032798958543119323801D0,&
+      0.025882133604951158834505067096153D0,&
+      0.020388373461266523598010231432755D0,&
+      0.014626169256971252983787960308868D0,&
+      0.008600269855642942198661787950102D0,&
+      0.003073583718520531501218293246031D0/)
 
    PUBLIC HRTW, Moldauer
 
@@ -182,7 +186,7 @@ CONTAINS
 
    SUBROUTINE AllocHRTW(nd1,nd2)
       IMPLICIT NONE
-      INTEGER*4, INTENT(IN), OPTIONAL :: nd1, nd2
+      INTEGER, INTENT(IN), OPTIONAL :: nd1, nd2
       INTEGER my,ndch,ndfus, ndcc
 
       ndch = ndhrtw1
@@ -240,7 +244,6 @@ CONTAINS
       ALLOCATE(SCRtl_mem(NDLV,0:NDEJC),STAT=my)
       IF(my /= 0) CALL WFC_error()
 
-
       RETURN
 
 10    WRITE(8,*)  'ERROR: Insufficient memory for HRTW'
@@ -278,9 +281,6 @@ CONTAINS
       !cc   *                                                                  *
       !cc   *  Calculate decay of the Compound Nucleus capture states in       *
       !cc   *  terms of the HRTW theory (width fluctuation correction).        *
-      !cc   *  Uses modified routines of standard Hauser-Feshbach (DECAY,      *
-      !cc   *  DECAYG, FISSION) and decomposes fusion cross section into       *
-      !cc   *  partial wave components.                                        *
       !cc   *                                                                  *
       !cc   *                                                                  *
       !cc   ********************************************************************
@@ -302,7 +302,7 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
       REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
       REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
@@ -475,6 +475,18 @@ CONTAINS
             ! construct scratch matrix for decay of the Jcn state
             !----------------------------------------------------------------------------------
 
+!  HERE WE NEED TO CALCULATE DIAGONALIZED CROSS SECTIONS AND THEN TRANSFORM THEM BACK TO CHANNEL SPACE
+!  NEXT WE NEED TO SCALE THEM DOWN BY XNORM FACTOR SO THAT THEY CAN BE SENT TO ACCUM
+!  NOTE: elastic might be calculated further below
+            !----------------------------------------------------------------------------------
+            ! Enegelbrecht- Weidenmueller transformation
+            ! - Calulate diagonalized cross sections
+            ! - Transform them back to the channel space
+            ! - Store on the scratch matrix after dividing by xnorm so that they can be send to ACCUM
+            !
+            !
+            !----------------------------------------------------------------------------------
+
             sumin_s = 0.d0
             sumtt_s = 0.d0
             ! write(*,*) ' NProject=',NPRoject,' LEVtarg=',LEVtarg
@@ -611,6 +623,7 @@ CONTAINS
 
       CALL DelHRTW()    !deallocate HRTW arrays
       IF(DIRECT>0 .and. MAX_cc_mod>0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
+      CALL DelCCmatr() ! deallocate EW matrices
 
       RETURN
    END SUBROUTINE HRTW
@@ -621,7 +634,7 @@ CONTAINS
       !cc
       !cc   ********************************************************************
       !cc   *                                                         class:PPu*
-      !cc   *                      H R T W  _  D E C A Y                       *
+      !cc   *                     W F C  _  D E C A Y                          *
       !cc   *                (function to function version)                    *
       !cc   *                                                                  *
       !cc   * Calculates decay of a continuum state in nucleus NNUC into       *
@@ -670,10 +683,10 @@ CONTAINS
       REAL*8 :: sumin_w, sumtt_w
       COMMON /EWcorr/ sumin_w, sumtt_w
       ! Dummy arguments
-      INTEGER*4, INTENT(IN) :: ipc, jc, nejc, nnuc, nnur, iec
+      INTEGER, INTENT(IN) :: ipc, jc, nejc, nnuc, nnur, iec
       ! Local variables
       REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, tld, xjc, xj, xjr, summa
-      INTEGER*4 :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
+      INTEGER :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
       summa = 0.D0
@@ -816,58 +829,15 @@ CONTAINS
       !----------------------------------------------------------------------------------------------------
       !  Decay to coupled levels including the elastic channels
       !----------------------------------------------------------------------------------------------------
-      ! IF(DIRect>0 .and. MAX_cc_mod>0  .and. .FALSE.) THEN      !TEMPORARY to allow for the old treatment of the direct outgoing channels
       IF(DIRect>0 .and. MAX_cc_mod>0) THEN !TEMPORARY to allow for the old treatment of the direct outgoing channels
-         IF(IZA(nnur)==IZA(0)) THEN
-            DO i = 1, MAX_cc_mod
-               IF(STLcc(i)%Jcn==xjc .and. STLcc(i)%Pcn==ipc) THEN   !we've got right CN state
-                  tld = STLcc(i)%tlj
-                  IF(tld<1.0d-15) CYCLE                              !ignore very small channels
-                  H_Sumtl = H_Sumtl + tld
-                  H_Sumtls = H_Sumtls + tld**2
-                  nch = nch + 1                                !we've got non-zero channel
-                  IF(nch>ndhrtw1) CALL WFC_error()            !STOP - insiufficent space allocation
-                  IF(num%coll == 0) THEN
-                     num%coll = nch                            !memorize position of the first coupled level in the 'outchnl' matrix
-                     num%colh = nch                            !set it also as the last one in case there are no more
-                  ENDIF
-                  IF(nch > num%colh) num%colh = nch            !in case of another coupled level augment position of last coupled channel
-                  out => outchnl(nch)
-                  out%l = STLcc(i)%l
-                  out%j = STLcc(i)%j
-                  out%t = tld
-                  out%rho = 1.0D0
-                  out%nejc = nejc
-                  out%kres = -STLcc(i)%lev                      !minus indicates channel leading to a discrete level 'i'
-                  out%xjrs = XJLv(STLcc(i)%lev,nnur)
-                  out%pres = LVP(STLcc(i)%lev,nnur)
-                  IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
-                     IF(num%elal == 0) THEN
-                        num%elal = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
-                        num%elah = nch                          !set it also as the last one in case there are no more
-                     ENDIF
-                     IF(nch > num%elah) num%elah = nch          !in case of another coupled level augment position of last coupled channel
 
-                     nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
-                     in => inchnl(nel)
-                     in%nout = nch                    !setting incident channel
-                     in%l = out%l                     !setting incident channel
-                     in%j = out%j                     !setting incident channel
-                     in%t = tld                       !setting incident channel
-                  ENDIF
-                  IF(i<MAX_cc_mod) THEN
-                     IF(STLcc(i+1)%Jcn/=xjc .or. STLcc(i+1)%Pcn/=ipc) EXIT    !exit if CN J-pi changes in next line (end of the current J-pi)
-                  ENDIF
-               ENDIF   !over inelastic channels for a given CN J-pi
-            ENDDO
-         ENDIF
-         !  End of new collective levels' treatment
+         CALL DECAY2CC(xjc, ipc, nejc, nnur, nch)             ! Decay to collective levels including elastic
 
       ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
          !  Old version for collective levels
          IF(IZA(nnur)==IZA(0)) THEN
-            DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
-               IF(i==levtarg) CYCLE          !skip if elastic
+            DO i = 1, NLV(nnur)                                !do loop over inelastic levels, elastic done after the loop
+               IF(i==levtarg) CYCLE                            !skip if elastic
                IF(ICOllev(i)==0 .OR. ICOllev(i)>LEVcc) CYCLE   !skip DWBA coupled levels
                eout = eoutc - ELV(i,nnur)
                IF(eout<0.0D0) EXIT
@@ -890,7 +860,7 @@ CONTAINS
                      H_Sumtl = H_Sumtl + tld*rho1
                      H_Sumtls = H_Sumtls + tld**2*rho1
                      nch = nch + 1                              !we've got non-zero channel
-                     IF(nch>ndhrtw1) CALL WFC_error()          !STOP - insiufficent space allocation
+                     IF(nch>ndhrtw1) CALL WFC_error()           !STOP - insiufficent space allocation
 
                      IF(num%coll == 0) THEN
                         num%coll = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
@@ -904,7 +874,7 @@ CONTAINS
                      out%t = tld
                      out%rho = rho1
                      out%nejc = nejc
-                     out%kres = -i                         !minus indicates channel leading to a discrete level 'i'
+                     out%kres = -i                              !minus indicates channel leading to a discrete level 'i'
                      out%xjrs = XJLv(i,nnur)
                      out%pres = LVP(i,nnur)
                      ! WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), nch', xjc, xj, ipar, ELV(i,nnur), nch
@@ -976,11 +946,79 @@ CONTAINS
 
    !----------------------------------------------------------------------------------------------------
 
+   SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur, nch)
+      !
+      !********************************************************************
+      !*                                                         class:PPu*
+      !*                    D E C A Y 2 C C                               *
+      !*                                                                  *
+      !* Fills up outchnl and inchnl structures for particle decay        *
+      !* to the coupled levels. It also allocates and prepares            *
+      !* matrices for the Engelbrecht-Weidenmueller (EW) transformation.  *
+      !*                                                                  *
+      !* input:xjc  - spin index of the decaying CN state                 *
+      !*       IPC  - parity of the decaying CN state (+1 or -1)          *
+      !*                                                                  *
+      !*                                                                  *
+      !* output:      outchnl(:) outgoing channel structure (list)        *
+      !*               inchnl(:) incident channel structure (list)        *
+      !*                                                                  *
+      !* calls:PREPARE_CCmatr                                             *
+      !*                                                                  *
+      !********************************************************************
+      INTEGER i, ipc, nel, nnur, nejc, nch, ncc, nccp, nccu, ndim
+      REAL*8 tld, xjc
+      TYPE (channel), POINTER :: out
+      TYPE (fusion),  POINTER :: in
+
+      IF(IZA(nnur)/=IZA(0)) RETURN
+      CALL PREPARE_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)      ! open  CC P-diagonal and U-matrix for EW transformation
+      IF(ndim==0) RETURN                              ! no colective channels found
+!      write(*,*) 'xjc, ipc, nccp, nccu, ndim',xjc, ipc, nccp, nccu, ndim
+      DO i = ncc, nccp
+!         write(*,*) i,ncc,nccp,sngl(xjc)
+         tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
+         H_Sumtl = H_Sumtl + tld
+         H_Sumtls = H_Sumtls + tld**2
+         nch = nch + 1                                !we've got non-zero channel
+         IF(nch>ndhrtw1) CALL WFC_error()            !STOP - insiufficent space allocation
+         IF(num%coll == 0) THEN
+            num%coll = nch                            !memorize position of the first coupled level in the 'outchnl' matrix
+            num%colh = nch                            !set it also as the last one in case there are no more
+         ENDIF
+         IF(nch > num%colh) num%colh = nch            !in case of another coupled level augment position of last coupled channel
+         out => outchnl(nch)
+         out%l = STLcc(i)%l
+         out%j = STLcc(i)%j
+         out%t = tld
+         out%rho = 1.0D0
+         out%nejc = nejc
+         out%kres = -STLcc(i)%lev                      !minus indicates channel leading to a discrete level 'i'
+         out%xjrs = XJLv(STLcc(i)%lev,nnur)
+         out%pres = LVP(STLcc(i)%lev,nnur)
+         IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
+            IF(num%elal == 0) THEN
+               num%elal = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
+               num%elah = nch                          !set it also as the last one in case there are no more
+            ENDIF
+            IF(nch > num%elah) num%elah = nch          !in case of another coupled level augment position of last coupled channel
+            nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+            in => inchnl(nel)
+            in%nout = nch                    !setting incident channel
+            in%l = out%l                     !setting incident channel
+            in%j = out%j                     !setting incident channel
+            in%t = tld                       !setting incident channel
+         ENDIF
+      ENDDO
+   END SUBROUTINE DECAY2CC
+
+   !----------------------------------------------------------------------------------------------------
+
    REAL*8 FUNCTION WFC_decayg(nnuc,iec,jc,ipc)
       !
       !********************************************************************
       !*                                                         class:PPu*
-      !*                         D E C A Y G                              *
+      !*                    W F C _ D E C A Y G                           *
       !*                (function to function version)                    *
       !*                                                                  *
       !* Calculates gamma decay of a continuum state in nucleus NNUC into *
@@ -1012,13 +1050,13 @@ CONTAINS
 
       ! Dummy arguments
 
-      INTEGER*4, INTENT(IN)  :: iec, ipc, jc, nnuc
+      INTEGER, INTENT(IN)  :: iec, ipc, jc, nnuc
 
       ! Local variables
 
       REAL*8 :: cee, cme, eg, ha, hscrtl, hsumtls, scrtneg
       REAL*8 :: e1, e2, xm1, scrtpos, xjc, xjr, summa
-      INTEGER*4 i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, jr, lamb, lambmax, lambmin, kmax, kmin
+      INTEGER i, ier, ineg, iodd, ipar, ipos, j, jmax, jmin, jr, lamb, lambmax, lambmin, kmax, kmin
       REAL*8, DIMENSION(10) :: xle, xlm
 
       ! MAXmult - maximal gamma-ray multipolarity
@@ -1239,7 +1277,7 @@ CONTAINS
       ! Dummy arguments
 
       REAL*8, INTENT(IN) :: sumtl, tav, tl
-      INTEGER*4, INTENT(IN) :: LHRtw
+      INTEGER, INTENT(IN) :: LHRtw
 
       ! Local variables
 
@@ -1284,8 +1322,8 @@ CONTAINS
 
       IMPLICIT NONE
 
-      INTEGER*4, INTENT(IN) :: Lhrtw
-      INTEGER*4 i, icount
+      INTEGER, INTENT(IN) :: Lhrtw
+      INTEGER i, icount
 
       icount = 0
       outchnl(1:NCH)%ti1 = outchnl(1:NCH)%t                     !copy Tlj on the temporary 'ti1' location for iteration
@@ -1331,7 +1369,7 @@ CONTAINS
       !cc   *                                                                  *
       !cc   *  Calculate decay of the Compound Nucleus capture states in       *
       !cc   *  terms of the  Moldauer approach to account for the width        *
-      !cci  *  fluctuation correction.                                         *
+      !cc  *  fluctuation correction.                                         *
       !cc   *                                                                  *
       !cc   *                                                                  *
       !cc   ********************************************************************
@@ -1349,7 +1387,7 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER*4 i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coeff, sxj
       REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
@@ -1405,9 +1443,9 @@ CONTAINS
       coeff = 1.d0
       IF (AEJc(0)>0) coeff = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
 
-!----------------------------------------------------------
-! start CN nucleus decay
-!----------------------------------------------------------
+      !----------------------------------------------------------
+      ! start CN nucleus decay
+      !----------------------------------------------------------
 
       DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
          ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
@@ -1452,9 +1490,9 @@ CONTAINS
             H_Tl = 0.D0
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
-!----------------------------------------------------------
-! Collecting outgoing channels
-!----------------------------------------------------------
+            !----------------------------------------------------------
+            ! Collecting outgoing channels
+            !----------------------------------------------------------
 
             !----------------------------------------------------------
             ! particle decay
@@ -1492,6 +1530,7 @@ CONTAINS
                   CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
                ENDIF
                H_Sumtl = H_Sumtl + sumfis
+
                ! dividing sumfis into channels with TFIs < 0.25 each
 
                ndivf = int(sumfis/0.25) + 1
@@ -1521,9 +1560,9 @@ CONTAINS
             !  write(*,*)'average Tl        ', H_Tav
             !  write(*,*)'first entry DENhf=', DENhf
 
-!----------------------------------------------------------
-! Collecting outgoing channels completed
-!----------------------------------------------------------
+            !----------------------------------------------------------
+            ! Collecting outgoing channels completed
+            !----------------------------------------------------------
 
             !write(*,*) 'Decay state ',jcn*ip, ' DENhf calculated before HRTW or Moldauer', DENhf
 
@@ -1531,7 +1570,7 @@ CONTAINS
             !----------------------------------------------------------
             ! Calculate WF term common for all channels
             !----------------------------------------------------------
-            CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral     
+            CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral
                             ! that doesn't depend on incoming and outgoing channles
 
             !----------------------------------------------------------
@@ -1624,12 +1663,12 @@ CONTAINS
                      xjr = out%xjrs              !residual nucleus J
                      lb = out%l                  !outgoing neutron l
                      jb = out%j                  !outgoing neutron j
-!                     IF(out%kres > 0) THEN
-!                        PLcont_lmax(out%kres) = 2*in%l
-!                     ELSEIF(out%kres < 0) THEN
-!                        PL_lmax(-out%kres) = 2*in%l
-!                     ENDIF
-                      PL_lmax(-out%kres) = 2*in%l
+                     !                     IF(out%kres > 0) THEN
+                     !                        PLcont_lmax(out%kres) = 2*in%l
+                     !                     ELSEIF(out%kres < 0) THEN
+                     !                        PL_lmax(-out%kres) = 2*in%l
+                     !                     ENDIF
+                     PL_lmax(-out%kres) = 2*in%l
 
                      IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
                         stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
@@ -1688,6 +1727,7 @@ CONTAINS
 
       CALL DelHRTW()    !deallocate HRTW arrays
       IF(DIRECT>0 .and. MAX_cc_mod>0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
+      CALL DelCCmatr() ! deallocate EW matrices
       RETURN
 
    END SUBROUTINE Moldauer
@@ -1721,7 +1761,7 @@ CONTAINS
       ! Dummy arguments
 
       REAL*8, intent(in) :: Sumtl, Tl
-      INTEGER*4, intent(in) :: Itype
+      INTEGER, intent(in) :: Itype
 
       ! Local variables
 
@@ -1770,7 +1810,7 @@ CONTAINS
       !****************************************************************************************
 
 
-      integer*4:: i,ic
+      INTEGER:: i,ic
       real*8:: nu_c, a1, g1, z, zm, dsum
       TYPE (channel), POINTER :: out
 
@@ -1780,7 +1820,7 @@ CONTAINS
       end do
       save_WFC1 = 0.0D0                          !logarithmic version
       do i = 1, 41
-!        save_WFC1(i) = 1.0D0                    !multiplicative version
+         !        save_WFC1(i) = 1.0D0                    !multiplicative version
          z = xgk(i)
          zm = 1.d0 - z
          dsum = 0.d0
@@ -1789,14 +1829,14 @@ CONTAINS
             nu_c = out%eef/2.D0                  ! calculated number of degrees of freedom nu
             a1 = out%t/nu_c/H_Sumtl              ! calculate alpha
             IF(a1==0) CYCLE
-            g1 = (1.0D0-(1.0D0-a1)*z)/zm 
-!            save_WFC1(i) = save_WFC1(i)*g1**(outchnl(ic)%rho*nu_c)      !multiplicative version
-!            save_WFC1(i) = MIN(save_WFC1(i),10.0D0**80)                 !multiplicative limit
+            g1 = (1.0D0-(1.0D0-a1)*z)/zm
+            !            save_WFC1(i) = save_WFC1(i)*g1**(outchnl(ic)%rho*nu_c)      !multiplicative version
+            !            save_WFC1(i) = MIN(save_WFC1(i),10.0D0**80)                 !multiplicative limit
             dsum = dsum + outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
          end do !over channels
          a1 = sumg/20.0D0/H_Sumtl                !calculate alpha for a cumulative gamma channel (nu=20 assumed)
          g1 = (1.0D0-(1.0D0-a1)*z)/zm            !calculating G for a cumulative gamma channel
-!         save_WFC1(i) = save_WFC1(i)*g1**20     !adding gammas multiplicative
+         !         save_WFC1(i) = save_WFC1(i)*g1**20     !adding gammas multiplicative
          save_WFC1(i) = dsum + 20.0D0*DLOG(g1)   !adding gammas logarithmic
       end do !over integration steps
       return
@@ -1810,7 +1850,7 @@ CONTAINS
       !  The in & out channel independent part has been calculated upfront with the WFC1 subroutine.
       !
       IMPLICIT NONE
-      integer*4, intent(in):: in, ou         ! index number of incoming (in) and outgoing (out) channels
+      INTEGER, intent(in):: in, ou         ! index number of incoming (in) and outgoing (out) channels
       real*8:: nu_ou, nu_in, a_in, a_ou, gl_in, gl_ou
       REAL*8 RESK1,z,zm
       INTEGER j
@@ -1834,11 +1874,11 @@ CONTAINS
       ENDDO
       WFC2 = resk1*0.5d0
       if(in==ou) WFC2 = (1.D0 + 1.D0/nu_in)*WFC2 ! case of elastic
-!     write(8,'(''in channel '',2I5,4E12.5,2i5)') in, outchnl(in)%l, outchnl(in)%j, outchnl(in)%t, outchnl(in)%rho, &
-!                 outchnl(in)%eef, outchnl(in)%nejc, outchnl(in)%kres
-!     write(8,'(''ou channel '',2I5,4E12.5,2i5,'' WFC = '',F10.5)') ou, outchnl(ou)%l, outchnl(ou)%j, outchnl(ou)%t, &
-!                outchnl(ou)%rho, outchnl(ou)%eef, outchnl(ou)%nejc, outchnl(ou)%kres, WFC2
-!      WFC2 = 1.0D0
+      !     write(8,'(''in channel '',2I5,4E12.5,2i5)') in, outchnl(in)%l, outchnl(in)%j, outchnl(in)%t, outchnl(in)%rho, &
+      !                 outchnl(in)%eef, outchnl(in)%nejc, outchnl(in)%kres
+      !     write(8,'(''ou channel '',2I5,4E12.5,2i5,'' WFC = '',F10.5)') ou, outchnl(ou)%l, outchnl(ou)%j, outchnl(ou)%t, &
+      !                outchnl(ou)%rho, outchnl(ou)%eef, outchnl(ou)%nejc, outchnl(ou)%kres, WFC2
+      !      WFC2 = 1.0D0
       return
    end function WFC2
 
@@ -1847,7 +1887,7 @@ CONTAINS
    SUBROUTINE Gamma_renormalization(d0c, sumtg, tgexper, itmp, nnuc)
 
       REAL*8 :: d0c, sumtg, tgexper
-      INTEGER*4 :: itmp, nnuc
+      INTEGER :: itmp, nnuc
 
       IF(d0c>0.D0) d0c = 1000.0/d0c
       IF(d0_obs==0.0D0) d0_obs = d0c    !use calculated D0 (in keV) if not measured
