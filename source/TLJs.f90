@@ -1,6 +1,6 @@
-! $Rev: 4648 $
-! $Author: mherman $
-! $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
+! $Rev: 4650 $
+! $Author: rcapote $
+! $Date: 2016-03-23 04:22:00 +0100 (Mi, 23 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -570,7 +570,7 @@ END FUNCTION Read_CC_matrices
 SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
 
    REAL*8 Jcn
-   INTEGER pcn, ndim, ncc, nmaxp, nmaxu, i1, i2
+   INTEGER pcn, ndim, ncc, nmaxp, nmaxu, i1
    LOGICAL debug
    DATA debug/.false./
    ndim = 0
