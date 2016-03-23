@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4651 $
+   ! $Rev: 4652 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-23 05:01:39 +0100 (Mi, 23 Mär 2016) $
+   ! $Date: 2016-03-23 23:08:46 +0100 (Mi, 23 Mär 2016) $
    !
 
    TYPE channel
@@ -1588,6 +1588,7 @@ CONTAINS
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
+               ! absorption ~ sigma_a
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                !xnor=0.D0
                !IF(DENhf==0.D0) CYCLE
@@ -1600,6 +1601,12 @@ CONTAINS
                   w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
                   WFC(i,iout) = w                          ! saving the calculated WF correction
+
+                  IF(INTerf>0) THEN
+                    ! i, iout & WFC(i,iout) 
+                    ! backward transformation from alpha,beta to a,b
+                    ! to transform in%t and out%t iback to the normal space
+                  ENDIF
 
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
@@ -1619,6 +1626,11 @@ CONTAINS
                !----------------------------------------------------------
                ! Fission
                !----------------------------------------------------------
+               IF(INTerf>0) THEN
+                 ! i, iout & WFC(i,iout) 
+                 ! backward transformation from alpha,beta to a,b
+                 ! to transform in%t and out%chnl()%t iback to the normal space
+                ENDIF
                IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
 
                !----------------------------------------------------------------------------------------
@@ -1642,7 +1654,7 @@ CONTAINS
                DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
                !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
                IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
-               xnor = in%sig/DENhf                                 ! normalization factor
+               xnor = in%sig/DENhf                          ! normalization factor
 
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
