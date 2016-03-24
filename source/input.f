@@ -1,6 +1,6 @@
-!cc   * $Rev: 4648 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
+!cc   * $Rev: 4653 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2016-03-24 01:11:10 +0100 (Do, 24 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -8635,7 +8635,7 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-!            IF (val.GT.0) INTerf = 1
+            IF (val.GT.0) INTerf = 1
             IF (INTerf.eq.0) 
      &        WRITE (8,'('' CN-direct interference neglected'')')
             IF (INTerf.eq.1) 

@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4652 $
+   ! $Rev: 4653 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-23 23:08:46 +0100 (Mi, 23 Mär 2016) $
+   ! $Date: 2016-03-24 01:11:10 +0100 (Do, 24 Mär 2016) $
    !
 
    TYPE channel
@@ -65,8 +65,8 @@ MODULE width_fluct
       REAL*8 sig          ! absorption x-section for this channel
    END TYPE fusion
 
-   INTEGER, PARAMETER :: ndhrtw1 = 10000        ! max. number of channels in the HRTW decay for a given CN J-pi
-   INTEGER, PARAMETER :: ndhrtw2 = 30           ! max. number of absorption channels for a given CN J-pi
+   INTEGER, PARAMETER :: ndhrtw1 = 20000        ! max. number of channels in the HRTW decay for a given CN J-pi
+   INTEGER, PARAMETER :: ndhrtw2 = 500          ! max. number of absorption channels for a given CN J-pi
 
    REAL*8 :: H_Sumtl      ! Sum of strong Tlj
    REAL*8 :: H_Sumtls     ! Sum of strong Tlj**2
@@ -558,14 +558,17 @@ CONTAINS
                      ! write(8,*) '                                  leg      BB               Jcn   &
                      ! &               l_inc           j_inc                 J_res              l_out              J_out'
                      out => outchnl(j)
+                     IF(out%kres > 0) CYCLE      ! skipping continuum channels in DA calculation
+
                      xjr = out%xjrs              !residual nucleus J
                      lb = out%l                  !outgoing neutron l
                      jb = out%j                  !outgoing neutron j
-                     IF(out%kres > 0) THEN
-                        PLcont_lmax(out%kres) = 2*in%l
-                     ELSEIF(out%kres < 0) THEN
-                        PL_lmax(-out%kres) = 2*in%l
-                     ENDIF
+                     !IF(out%kres > 0) THEN
+                     !   PLcont_lmax(out%kres) = 2*in%l
+                     !ELSEIF(out%kres < 0) THEN
+                     !   PL_lmax(-out%kres) = 2*in%l
+                     !ENDIF
+                     PL_lmax(-out%kres) = 2*in%l
                      IF(i/=j.AND.out%kres<=0) THEN               ! Inelastic to discrete level
                         stmp = out%t*out%rho * CINRED(-out%kres)
                      ELSE                                        ! Elastic and continuum
@@ -581,13 +584,15 @@ CONTAINS
                         tmp = tmp*xnor*stmp  !*out%t*out%rho
                         IF(i==j) tmp = tmp*out%eef
 
-                        IF(out%kres > 0) THEN
-                           PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
-                           PLcont_lmax(out%kres) = lleg
-                        ELSEIF(out%kres < 0) THEN
-                           PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
-                           PL_lmax(-out%kres) = lleg
-                        ENDIF
+                        !IF(out%kres > 0) THEN
+                        !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
+                        !   PLcont_lmax(out%kres) = lleg
+                        !ELSEIF(out%kres < 0) THEN
+                        !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
+                        !   PL_lmax(-out%kres) = lleg
+                        !ENDIF
+                        PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
+                        PL_lmax(-out%kres) = lleg
                      ENDDO
                      !IF(out%kres > 0) THEN
                      !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
@@ -1241,9 +1246,9 @@ CONTAINS
    SUBROUTINE WFC_error()
 
       WRITE(8,*) 'Insufficient space allocated for HRTW'
-      WRITE(8,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
+      WRITE(8,*) 'ndhrtw1 in HRTW.f90 needs to be increased'
       WRITE(*,*) 'Insufficient space allocated for HRTW'
-      WRITE(*,*) 'NDHrtw1 in HRTW-mod.f90 needs to be increased'
+      WRITE(*,*) 'ndhrtw2 in HRTW.f90 needs to be increased'
       STOP 'Insufficient space allocated for HRTW'
 
    END SUBROUTINE WFC_error
@@ -1566,7 +1571,6 @@ CONTAINS
 
             !write(*,*) 'Decay state ',jcn*ip, ' DENhf calculated before HRTW or Moldauer', DENhf
 
-
             !----------------------------------------------------------
             ! Calculate WF term common for all channels
             !----------------------------------------------------------
@@ -1588,6 +1592,7 @@ CONTAINS
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
+
                ! absorption ~ sigma_a
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                !xnor=0.D0
@@ -1602,11 +1607,28 @@ CONTAINS
                   ! WRITE(8,*) 'continuum WFC', iout, w
                   WFC(i,iout) = w                          ! saving the calculated WF correction
 
-                  IF(INTerf>0) THEN
+                    !IF(INTerf>0) THEN
+                    !WRiTE(*,*) num%coll, num%colh
                     ! i, iout & WFC(i,iout) 
                     ! backward transformation from alpha,beta to a,b
                     ! to transform in%t and out%t iback to the normal space
-                  ENDIF
+												 
+					!sigma_EW = 0.d0
+                    !do ialph = num%coll, num%colh
+					!  sig_alpha = 
+					!  sigma_EW = sigma_EW +                                            &
+       			    !    Umatr(ialph,i   )*CONJG(Umatr(ialph,i)) +                      &
+					!    Umatr(ialph,iout)*CONJG(Umatr(ialph,iout))*WFC(ialph,ialph)*   &  !WFC(i,iout)  
+					!	sig_aa
+				    !enddo
+     				!do ialph = num%coll, num%colh
+      				!  do ibeta = num%coll, num%colh
+					!    sigma_EW = sigma_EW +                                  &
+					!      CONJG(Umatr(ialph,i))*CONJG(Umatr(ibeta,iout))* 
+ 					!           (Umatr(ialpha,i)*Umatr(ibeta,iout) +            &
+					!            Umatr(ibeta,i)*Umatr(ialph,iout)) *            & 
+					!  enddo
+					!endif
 
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
@@ -1675,12 +1697,15 @@ CONTAINS
                      xjr = out%xjrs              !residual nucleus J
                      lb = out%l                  !outgoing neutron l
                      jb = out%j                  !outgoing neutron j
+                     
+					 IF(out%kres > 0) cycle
+   
+                     PL_lmax(-out%kres) = 2*in%l
                      !                     IF(out%kres > 0) THEN
                      !                        PLcont_lmax(out%kres) = 2*in%l
                      !                     ELSEIF(out%kres < 0) THEN
                      !                        PL_lmax(-out%kres) = 2*in%l
                      !                     ENDIF
-                     PL_lmax(-out%kres) = 2*in%l
 
                      IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
                         stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
