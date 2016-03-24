@@ -1,6 +1,6 @@
-! $Rev: 4651 $
+! $Rev: 4655 $
 ! $Author: rcapote $
-! $Date: 2016-03-23 05:01:39 +0100 (Mi, 23 Mär 2016) $
+! $Date: 2016-03-24 04:28:09 +0100 (Do, 24 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -43,14 +43,17 @@ MODULE TLJs
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
 
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
-   PUBLIC AllocCCmatr, DelCCmatr, PREPARE_CCmatr
+   PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
    REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:)
 
-   PRIVATE
+   COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:) ! EW matrices Smatr(:,:)
 
-   COMPLEX*16, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:) ! EW matrices Smatr(:,:)
+   PRIVATE
+  
    REAL*8, ALLOCATABLE :: Pchan(:)
+
+   
 
 CONTAINS
 
