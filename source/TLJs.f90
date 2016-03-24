@@ -1,6 +1,6 @@
-! $Rev: 4656 $
+! $Rev: 4657 $
 ! $Author: rcapote $
-! $Date: 2016-03-24 05:09:10 +0100 (Do, 24 Mär 2016) $
+! $Date: 2016-03-24 06:34:19 +0100 (Do, 24 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -574,15 +574,14 @@ STOP ' WARNING: Problem reading EW Pmatrix'
 END FUNCTION Read_CC_matrices
 
 SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
-
    REAL*8 Jcn
-   INTEGER pcn, ndim, ncc, nmaxp, nmaxu, i1
+   INTEGER pcn, ndim,  ncc, nccu, nmaxp, nmaxu, i1
    LOGICAL debug
-   DATA debug/.FALSE./
+   DATA debug/.false./
    ndim = 0
    nmaxp = 0
    nmaxu = 0
-   if (debug) write(*,*) 
+   if (debug) write(*,*)  
    if(debug) write(*,*) 'Pdiag, MAX_cc_mod:',MAX_cc_mod
    DO ncc = 1, MAX_cc_mod
       ndim  = 0
@@ -611,27 +610,31 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
          EXIT
       endif
    ENDDO
+   ! write(*,*) ' Prepare_CC: Pdiag', sngl(Jcn), pcn, ncc, nmaxp
 
-   RETURN !!! DISABLE Umatrix reading
    IF(INTerf==0) RETURN
 
    ! if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
-                write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
-   DO ncc = 1, MAX_umatr
+   !            write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
+   DO nccu = 1, MAX_umatr
       ndim =  0
       nmaxu = 0
-      if(NINT(2*CCumatrix(ncc)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(ncc)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+      if(NINT(2*CCumatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
 
-      ndim = CCumatrix(ncc)%nceq
-      nmaxu = ncc + ndim*ndim - 1                                                                           
+      ndim = CCumatrix(nccu)%nceq
+      nmaxu = nccu + ndim*ndim - 1                                                                           
 
-      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(ncc)%Jcn), CCumatrix(ncc)%Pcn, CCumatrix(ncc)%nceq
+      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(nccu)%Jcn), CCumatrix(nccu)%Pcn, CCumatrix(nccu)%nceq
       if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
 
-      do i1 = ncc, nmaxu
-         if (debug) WRITE (*,*) i1, i1-ncc+1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+      do i1 = nccu, nmaxu
+         if (debug) WRITE (*,*) i1, i1-nccu+1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
          Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
+         ! Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
       enddo
+      ! write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
+
+      !pause
       EXIT
 
    ENDDO

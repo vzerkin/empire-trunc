@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4656 $
+   ! $Rev: 4657 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-24 05:09:10 +0100 (Do, 24 Mär 2016) $
+   ! $Date: 2016-03-24 06:34:19 +0100 (Do, 24 Mär 2016) $
    !
 
    TYPE channel
@@ -969,11 +969,12 @@ CONTAINS
       TYPE (fusion),  POINTER :: in
 
       IF(IZA(nnur)/=IZA(0)) RETURN
-      CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)      ! open  CC P-diagonal and U-matrix for EW transformation
-      IF(ndim==0) RETURN                              ! no colective channels found
-!      write(*,*) 'xjc, ipc, nccp, nccu, ndim',xjc, ipc, nccp, nccu, ndim
+
+      CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)    ! open  CC P-diagonal and U-matrix for EW transformation
+      IF(ndim==0) RETURN                                      ! no collective channels found
+      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',sngl(xjc), ipc, ncc, nccp, nccu, ndim
       DO i = ncc, nccp
-!         write(*,*) i,ncc,nccp,sngl(xjc)
+!        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
          H_Sumtl = H_Sumtl + tld
          H_Sumtls = H_Sumtls + tld**2
@@ -1596,6 +1597,7 @@ CONTAINS
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                sumin_s = 0.d0
                sumtt_s = 0.d0
+            
                DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
                   out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
  
@@ -1603,21 +1605,24 @@ CONTAINS
 
                   w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
-                  WFC(i,iout) = w                          ! saving the calculated WF correction
+                  WFC(i,iout) = w                          ! saving the calculated sigma corrected by WF
 
 				  sigma_ = out%t*w
 
                   IF(INTerf>0) THEN 
 				    ! Engelbrecht- Weidenmuller backward transformation Eq.(16),(17),(18) TK paper 
                     WRiTE(*,*) sngl(xjc),ip,num%coll, num%colh
-                    do iaa = num%coll, num%colh
-					  write(*,*) iaa	
-                      do ibb = num%coll, num%colh	
-			            write(*,*) iaa,ibb,Umatr(iaa,ibb)
-					  enddo												
-					enddo
-					pause							 
-					sigma_EW = 0.d0
+                    if(num%coll == 1) then
+                      do iaa = num%coll, num%colh
+					    write(*,*) iaa	
+                        do ibb = num%coll, num%colh	
+			              write(*,*) iaa,ibb,Umatr(iaa,ibb)
+					    enddo												
+					  enddo
+					  ! pause
+                    endif  			
+                    				 
+					if(num%coll == 1) sigma_EW = 0.d0
 					! loop over collective levels in the normal space
 					ialph = i
 					ibeta = iout
@@ -1633,6 +1638,7 @@ CONTAINS
 					      ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*    &
  					            ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +           &
 					              Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +         &
+                    
                            CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*	  &
 						         Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *	  &
 						   DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )	       
@@ -1643,6 +1649,8 @@ CONTAINS
                     sigma_ = sigma_EW	                
 					 
 			      ENDIF
+
+                  ! WFC(i,iout) = sigma_  ! saving the calculated sigma corrected by WF
 
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
@@ -1712,7 +1720,7 @@ CONTAINS
                      ! write(8,*) '                                  leg      BB               Jcn   &
                      ! &               l_inc           j_inc                 J_res              l_out              J_out'
                      ! w = 1.D0
-                     w = WFC(i,iout)             !Moldauer width fluctuation factor
+                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
                      out => outchnl(iout)
 
                      xjr = out%xjrs              !residual nucleus J
@@ -1763,6 +1771,8 @@ CONTAINS
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                
+               CALL DelCCmatr() ! deallocate EW matrices
 
             ENDDO    !end do loop over incident channels
 
@@ -1786,7 +1796,7 @@ CONTAINS
 
       CALL DelHRTW()    !deallocate HRTW arrays
       IF(DIRECT>0 .and. MAX_cc_mod>0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
-      CALL DelCCmatr() ! deallocate EW matrices
+      ! CALL DelCCmatr() ! deallocate EW matrices
       RETURN
 
    END SUBROUTINE Moldauer
