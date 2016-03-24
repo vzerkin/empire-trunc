@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4653 $
-   ! $Author: rcapote $
-   ! $Date: 2016-03-24 01:11:10 +0100 (Do, 24 Mär 2016) $
+   ! $Rev: 4654 $
+   ! $Author: mherman $
+   ! $Date: 2016-03-24 01:16:57 +0100 (Do, 24 Mär 2016) $
    !
 
    TYPE channel
@@ -534,12 +534,17 @@ CONTAINS
                out => outchnl(i)
                in%t = out%t
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-               xnor = in%sig/DENhf                      ! normalization factor
+!               xnor = in%sig/DENhf                      ! normalization factor
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
                ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
                ! write(*,*)'post AUSTER DENhf=', DENhf + elcor
+               xnor = in%sig/DENhf                          ! normalization factor
+               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+               sumfis = sumfis*xnor                         !                                  "
 
                !----------------------------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -603,7 +608,8 @@ CONTAINS
                   ENDDO
                ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
 
-               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+!               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                out => outchnl(i)
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
             ENDDO    !end do loop over incident channels
@@ -696,7 +702,7 @@ CONTAINS
       TYPE (fusion),  POINTER :: in
       summa = 0.D0
       ! clear scratch matrices
-      scrtem(nejc) = H_Sumtl        !temporarily store here entry value of H_Sumtl
+      SCRtem(nejc) = H_Sumtl        !temporarily store here entry value of H_Sumtl
       SCRt(:,:,:,nejc) = 0.D0
       iexc = NEX(nnuc) - NEXr(nejc,nnuc)
       itlc = iexc - 5
@@ -939,8 +945,8 @@ CONTAINS
       ENDIF !TEMPORARY to allow for the old treatment of the direct outgoing channels
       ! decay to discrete levels --------- done --------------------
 
-10    summa = H_Sumtl - scrtem(nejc)     !we may NOT NEED IT
-      scrtem(nejc) = summa               !we may NOT NEED IT
+10    summa = H_Sumtl - SCRtem(nejc)     !we may NOT NEED IT
+      SCRtem(nejc) = summa               !we may NOT NEED IT
       DENhf = DENhf + summa
       IF(nejc==1) num%neut = nch         !store number of neutron-out channels
       ! decay to the continuum and discrete levels ------ done -----------------------------
@@ -1231,7 +1237,7 @@ CONTAINS
 
       ! do loop over discrete levels --------- done --------------------
 
-      scrtem(0) = summa
+      SCRtem(0) = summa
       DENhf = DENhf + summa
       H_Sumtl = H_Sumtl + summa
       H_Sweak = H_Sweak + summa
@@ -1677,7 +1683,11 @@ CONTAINS
                !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
                IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
                xnor = in%sig/DENhf                          ! normalization factor
-
+               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+               sumfis = sumfis*xnor                         !                                  "
+               sumfism = sumfism*xnor                       !                                  "
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
@@ -1740,7 +1750,8 @@ CONTAINS
                   ENDDO
                ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
 
-               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+!               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
             ENDDO    !end do loop over incident channels
 
