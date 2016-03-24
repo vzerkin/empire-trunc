@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4654 $
-   ! $Author: mherman $
-   ! $Date: 2016-03-24 01:16:57 +0100 (Do, 24 Mär 2016) $
+   ! $Rev: 4656 $
+   ! $Author: rcapote $
+   ! $Date: 2016-03-24 05:09:10 +0100 (Do, 24 Mär 2016) $
    !
 
    TYPE channel
@@ -307,8 +307,8 @@ CONTAINS
       REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c
-      REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
-      REAL*8 :: sumin_s, sumtt_s, stmp, ewcor
+      REAL*8 sumfism(nfmod) 
+      REAL*8 sumin_s, sumtt_s, stmp, ewcor
 
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -336,13 +336,11 @@ CONTAINS
          WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
       ENDIF
 
-      ! xmas_npro = EJMass(NPRoject)
       xmas_npro = EJMass(0)
       xmas_ntrg = AMAss(0)
 
       el = EINl
       relcal = .FALSE.
-      !IF(IRElat(NPRoject,0)>0 .OR. RELkin) relcal = .TRUE.
       IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
 
       IF (AEJc(0).EQ.0.0D0) THEN
@@ -473,18 +471,6 @@ CONTAINS
 
             !----------------------------------------------------------------------------------
             ! construct scratch matrix for decay of the Jcn state
-            !----------------------------------------------------------------------------------
-
-!  HERE WE NEED TO CALCULATE DIAGONALIZED CROSS SECTIONS AND THEN TRANSFORM THEM BACK TO CHANNEL SPACE
-!  NEXT WE NEED TO SCALE THEM DOWN BY XNORM FACTOR SO THAT THEY CAN BE SENT TO ACCUM
-!  NOTE: elastic might be calculated further below
-            !----------------------------------------------------------------------------------
-            ! Enegelbrecht- Weidenmueller transformation
-            ! - Calulate diagonalized cross sections
-            ! - Transform them back to the channel space
-            ! - Store on the scratch matrix after dividing by xnorm so that they can be send to ACCUM
-            !
-            !
             !----------------------------------------------------------------------------------
 
             sumin_s = 0.d0
@@ -1403,8 +1389,10 @@ CONTAINS
       REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sumfis_mem
-      REAL*8 sumfism(nfmod) ! , cel_da(NDAngecis), GET_DDXS
-      REAL*8 :: sumin_s, sumtt_s, stmp, ewcor, w
+      REAL*8 sumfism(nfmod) 
+      REAL*8 sumin_s, sumtt_s, stmp, ewcor, w
+	  REAL*8 nu_in, nu_ou, sigma_ , sigma_EW
+	  INTEGER ialph,ibeta,iaa,ibb 
       !
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -1598,55 +1586,78 @@ CONTAINS
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
+        	   nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
 
                ! absorption ~ sigma_a
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                !xnor=0.D0
-               !IF(DENhf==0.D0) CYCLE
-               ! xnor = in%sig/DENhf                                 ! normalization factor
+               IF(DENhf==0.D0) CYCLE
+               xnor = in%sig/DENhf                                 ! normalization factor
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                sumin_s = 0.d0
                sumtt_s = 0.d0
                DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
                   out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
+ 
+                  nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
+
                   w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
                   WFC(i,iout) = w                          ! saving the calculated WF correction
 
-                    !IF(INTerf>0) THEN
-                    !WRiTE(*,*) num%coll, num%colh
-                    ! i, iout & WFC(i,iout) 
-                    ! backward transformation from alpha,beta to a,b
-                    ! to transform in%t and out%t iback to the normal space
-												 
-					!sigma_EW = 0.d0
-                    !do ialph = num%coll, num%colh
-					!  sig_alpha = 
-					!  sigma_EW = sigma_EW +                                            &
-       			    !    Umatr(ialph,i   )*CONJG(Umatr(ialph,i)) +                      &
-					!    Umatr(ialph,iout)*CONJG(Umatr(ialph,iout))*WFC(ialph,ialph)*   &  !WFC(i,iout)  
-					!	sig_aa
-				    !enddo
-     				!do ialph = num%coll, num%colh
-      				!  do ibeta = num%coll, num%colh
-					!    sigma_EW = sigma_EW +                                  &
-					!      CONJG(Umatr(ialph,i))*CONJG(Umatr(ibeta,iout))* 
- 					!           (Umatr(ialpha,i)*Umatr(ibeta,iout) +            &
-					!            Umatr(ibeta,i)*Umatr(ialph,iout)) *            & 
-					!  enddo
-					!endif
+				  sigma_ = out%t*w
+
+                  IF(INTerf>0) THEN 
+				    ! Engelbrecht- Weidenmuller backward transformation Eq.(16),(17),(18) TK paper 
+                    WRiTE(*,*) sngl(xjc),ip,num%coll, num%colh
+                    do iaa = num%coll, num%colh
+					  write(*,*) iaa	
+                      do ibb = num%coll, num%colh	
+			            write(*,*) iaa,ibb,Umatr(iaa,ibb)
+					  enddo												
+					enddo
+					pause							 
+					sigma_EW = 0.d0
+					! loop over collective levels in the normal space
+					ialph = i
+					ibeta = iout
+
+                    do iaa = num%coll, num%colh												
+                      do ibb = num%coll, num%colh				
+					    if(ialph == ibeta) then 								
+					      sigma_EW = sigma_EW +                               &
+       			          Umatr(ialph,iaa)*CONJG(Umatr(ialph,iaa)) +          &
+					      Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*sigma_   
+						else
+   					      sigma_EW = sigma_EW + sigma_ *                      &
+					      ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*    &
+ 					            ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +           &
+					              Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +         &
+                           CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*	  &
+						         Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *	  &
+						   DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )	       
+						endif
+					  enddo	      
+				    enddo
+
+                    sigma_ = sigma_EW	                
+					 
+			      ENDIF
 
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
-                        + out%t*out%rho*w/de
+					      + sigma_ *out%rho/de
+                        ! + out%t*out%rho*w/de
                   ELSE IF(out%kres<0) THEN
                      IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
-                        stmp = out%t*out%rho*w
+                        ! stmp = out%t*out%rho*w
+						stmp = sigma_ *out%rho
                         sumin_s = sumin_s + stmp * CINRED(-out%kres)
                         sumtt_s = sumtt_s + stmp
                         SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
                      ELSE
-                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
+                        ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
+                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
                      ENDIF
                   ENDIF
                ENDDO
@@ -1658,7 +1669,7 @@ CONTAINS
                  ! i, iout & WFC(i,iout) 
                  ! backward transformation from alpha,beta to a,b
                  ! to transform in%t and out%chnl()%t iback to the normal space
-                ENDIF
+               ENDIF
                IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
 
                !----------------------------------------------------------------------------------------

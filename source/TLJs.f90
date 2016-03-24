@@ -1,6 +1,6 @@
-! $Rev: 4655 $
+! $Rev: 4656 $
 ! $Author: rcapote $
-! $Date: 2016-03-24 04:28:09 +0100 (Do, 24 Mär 2016) $
+! $Date: 2016-03-24 05:09:10 +0100 (Do, 24 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -485,7 +485,7 @@ Pcn = +1
          WRITE (*,*) i1, i1 - ncc +1, CCpdiag(i1)%pdiag
          Pdiag(i1 - ncc +1) = CCpdiag(i1)%pdiag
       enddo
-      if(debug) pause
+      ! if(debug) pause
       EXIT
    endif
 ENDDO
@@ -504,7 +504,7 @@ DO ncc = 1, MAX_umatr
       Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
    enddo
 
-     EXIT
+   EXIT
 
 ENDDO
 
