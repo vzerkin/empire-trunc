@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4657 $
-   ! $Author: rcapote $
-   ! $Date: 2016-03-24 06:34:19 +0100 (Do, 24 Mär 2016) $
+   ! $Rev: 4658 $
+   ! $Author: mherman $
+   ! $Date: 2016-03-25 03:01:06 +0100 (Fr, 25 Mär 2016) $
    !
 
    TYPE channel
@@ -520,7 +520,7 @@ CONTAINS
                out => outchnl(i)
                in%t = out%t
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-!               xnor = in%sig/DENhf                      ! normalization factor
+               !               xnor = in%sig/DENhf                      ! normalization factor
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
                ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
@@ -595,7 +595,7 @@ CONTAINS
                ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-!               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                out => outchnl(i)
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
             ENDDO    !end do loop over incident channels
@@ -974,7 +974,7 @@ CONTAINS
       IF(ndim==0) RETURN                                      ! no collective channels found
       ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',sngl(xjc), ipc, ncc, nccp, nccu, ndim
       DO i = ncc, nccp
-!        write(*,*) i,ncc,nccp,sngl(xjc)
+         !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
          H_Sumtl = H_Sumtl + tld
          H_Sumtls = H_Sumtls + tld**2
@@ -1392,8 +1392,8 @@ CONTAINS
       REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s, stmp, ewcor, w
-	  REAL*8 nu_in, nu_ou, sigma_ , sigma_EW
-	  INTEGER ialph,ibeta,iaa,ibb 
+      REAL*8 nu_in, nu_ou, sigma_ , sigma_EW
+      INTEGER ialph,ibeta,iaa,ibb
       !
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -1579,6 +1579,9 @@ CONTAINS
             SCRtl_mem = SCRtl
             sumfis_mem = sumfis
 
+
+            ! The loops over i and iout below are over normal space if INTerf==0,
+            !           and over the transformed space if INTerf>0
             DO i = num%elal, num%elah                   ! do loop over elastic channels
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
@@ -1587,7 +1590,7 @@ CONTAINS
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
-        	   nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
+               !nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
 
                ! absorption ~ sigma_a
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
@@ -1595,71 +1598,37 @@ CONTAINS
                IF(DENhf==0.D0) CYCLE
                xnor = in%sig/DENhf                                 ! normalization factor
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+
+               !----------------------------------------------------------
+               ! Fission
+               !----------------------------------------------------------
+               IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
+
                sumin_s = 0.d0
                sumtt_s = 0.d0
-            
                DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
                   out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
  
-                  nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
+                  !nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
 
                   w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
                   WFC(i,iout) = w                          ! saving the calculated sigma corrected by WF
+                  sigma_ = out%t*w
 
-				  sigma_ = out%t*w
-
-                  IF(INTerf>0) THEN 
-				    ! Engelbrecht- Weidenmuller backward transformation Eq.(16),(17),(18) TK paper 
-                    WRiTE(*,*) sngl(xjc),ip,num%coll, num%colh
-                    if(num%coll == 1) then
-                      do iaa = num%coll, num%colh
-					    write(*,*) iaa	
-                        do ibb = num%coll, num%colh	
-			              write(*,*) iaa,ibb,Umatr(iaa,ibb)
-					    enddo												
-					  enddo
-					  ! pause
-                    endif  			
-                    				 
-					if(num%coll == 1) sigma_EW = 0.d0
-					! loop over collective levels in the normal space
-					ialph = i
-					ibeta = iout
-
-                    do iaa = num%coll, num%colh												
-                      do ibb = num%coll, num%colh				
-					    if(ialph == ibeta) then 								
-					      sigma_EW = sigma_EW +                               &
-       			          Umatr(ialph,iaa)*CONJG(Umatr(ialph,iaa)) +          &
-					      Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*sigma_   
-						else
-   					      sigma_EW = sigma_EW + sigma_ *                      &
-					      ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*    &
- 					            ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +           &
-					              Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +         &
-                    
-                           CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*	  &
-						         Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *	  &
-						   DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )	       
-						endif
-					  enddo	      
-				    enddo
-
-                    sigma_ = sigma_EW	                
-					 
-			      ENDIF
-
-                  ! WFC(i,iout) = sigma_  ! saving the calculated sigma corrected by WF
+                  IF(INTerf>0 .and. iout>=num%coll .and. iout<=num%colh) THEN
+                     Sab(i-num%coll + 1,iout-num%coll + 1) = xnor*sigma_
+                     CYCLE	! Skipping coupled channels if INTerf>0
+                  ENDIF
 
                   IF(out%kres>0) THEN                      !continuum channels
                      SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
-					      + sigma_ *out%rho/de
+                        + sigma_ *out%rho/de
                         ! + out%t*out%rho*w/de
                   ELSE IF(out%kres<0) THEN
                      IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
-                        ! stmp = out%t*out%rho*w
-						stmp = sigma_ *out%rho
+                                                ! stmp = out%t*out%rho*w
+                        stmp = sigma_ *out%rho
                         sumin_s = sumin_s + stmp * CINRED(-out%kres)
                         sumtt_s = sumtt_s + stmp
                         SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
@@ -1668,17 +1637,9 @@ CONTAINS
                         SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
                      ENDIF
                   ENDIF
-               ENDDO
+               ENDDO ! end of outgoing channel loop over iout
 
-               !----------------------------------------------------------
-               ! Fission
-               !----------------------------------------------------------
-               IF(INTerf>0) THEN
-                 ! i, iout & WFC(i,iout) 
-                 ! backward transformation from alpha,beta to a,b
-                 ! to transform in%t and out%chnl()%t iback to the normal space
-               ENDIF
-               IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
+               IF(INTerf>0) CYCLE ! If EW active, all elastic channels assumed collective !!
 
                !----------------------------------------------------------------------------------------
                ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
@@ -1701,12 +1662,13 @@ CONTAINS
                DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
                !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
                IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
+
                xnor = in%sig/DENhf                          ! normalization factor
                SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
                SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
                SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
                sumfis = sumfis*xnor                         !                                  "
-               sumfism = sumfism*xnor                       !                                  "
+               sumfism = sumfism*xnor                         !                                  "
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
@@ -1715,40 +1677,35 @@ CONTAINS
                   la = in%l                             !incident neutron l
                   ja = in%j                             !incident neutron j
                   ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
-                  DO iout = 1, num%neut                    !do loop over neutron channels only
+                  DO iout = 1, num%neut !do loop over neutron channels only
                      ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
                      ! write(8,*) '                                  leg      BB               Jcn   &
                      ! &               l_inc           j_inc                 J_res              l_out              J_out'
                      ! w = 1.D0
-                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
                      out => outchnl(iout)
+                     IF(out%kres > 0) cycle      ! skipping continuum channels
 
                      xjr = out%xjrs              !residual nucleus J
                      lb = out%l                  !outgoing neutron l
                      jb = out%j                  !outgoing neutron j
-                     
-					 IF(out%kres > 0) cycle
-   
+                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
                      PL_lmax(-out%kres) = 2*in%l
                      !                     IF(out%kres > 0) THEN
                      !                        PLcont_lmax(out%kres) = 2*in%l
                      !                     ELSEIF(out%kres < 0) THEN
                      !                        PL_lmax(-out%kres) = 2*in%l
                      !                     ENDIF
-
                      IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
                         stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
                      ELSE                                        ! Elastic and continuum
                         stmp = xnor*out%t*out%rho*w
                      ENDIF
-
                      DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
                         xleg = dble(lleg)
                         tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
                         ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
                         ! if(tmp==0.D0) cycle
                         IF(dabs(tmp) < 1.d-14) CYCLE
-
                         PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp*stmp
                         ! CN ang. distr. for continuum assumed isotropic
                         !IF(out%kres > 0) THEN
@@ -1756,25 +1713,194 @@ CONTAINS
                         !ELSEIF(out%kres < 0) THEN
                         !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + stmp*tmp
                         !ENDIF
-
                      ENDDO
-
                      !IF(out%kres > 0) THEN
                      !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
                      !ELSEIF(outchnl(iout)%kres < 0) THEN
                      !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
                      !ENDIF
                      !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
-
                   ENDDO
                ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-!               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                 
-               CALL DelCCmatr() ! deallocate EW matrices
+               IF (INTerf==0) CALL DelCCmatr() ! deallocate EW matrices
 
             ENDDO    !end do loop over incident channels
+
+            IF(INTerf>0) THEN
+               ! Engelbrecht- Weidenmueller transformation
+               ! loop over iaa=i (coupled channels in the normal space)
+               DO i = num%elal, num%elah
+                  iaa = i
+
+                  if(iaa<=2) then
+                     WRITE(*,*) sngl(xjc),ip,num%coll, num%colh
+                     write(*,*) iaa
+                     do ibb = num%coll, num%colh
+                        write(*,*) iaa,ibb,Umatr(iaa,ibb)
+                     enddo
+                  endif
+
+                  in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
+                  out => outchnl(i)
+                  in%t = out%t
+                  nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
+
+                  ! absorption ~ sigma_a
+                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+                  !xnor=0.D0
+                  IF(DENhf==0.D0) CYCLE
+                  xnor = in%sig/DENhf                                 ! normalization factor
+                  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+
+                  ! loop over ibb=iout (coupled channels in the normal space)
+                  DO iout = num%coll, num%colh
+                     ibb = iout
+                     out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
+                     nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
+
+                     ! Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+                     !------------------------------------------------------------------------------
+                     sigma_EW = 0.d0  ! This is the cross section \sigma_{ab} in the normal space
+                     ! loops over collective levels in the transformed space (ialph & ibeta)
+                     do ialph = num%coll, num%colh
+                        do ibeta = num%coll, num%colh
+
+                           sigma_ = Sab(ialph,ibeta)
+
+                           if(ialph == ibeta) then
+                              sigma_EW = sigma_EW +                                  &
+                                 Umatr(ialph,iaa)*CONJG(Umatr(ialph,iaa)) +          &
+                                 Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*sigma_
+                           else
+                              sigma_EW = sigma_EW + sigma_ *                         &
+                                 ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
+                                 ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +               &
+                                 Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +               &
+                                 CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*    &
+                                 Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *          &
+                                 DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )
+                           endif
+                        enddo ! end of the loop over ibeta (transformed space)
+                     enddo   ! end of the loop over ialph (transformed space)
+
+                     sigma_ = sigma_EW
+                     ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+                     !------------------------------------------------------------------------------
+
+                     IF(out%kres>0) THEN                      !continuum channels
+                        SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
+                           + sigma_ *out%rho/de
+                           ! + out%t*out%rho*w/de
+                     ELSE IF(out%kres<0) THEN
+                        IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
+                                                   ! stmp = out%t*out%rho*w
+                           stmp = sigma_ *out%rho
+                           sumin_s = sumin_s + stmp * CINRED(-out%kres)
+                           sumtt_s = sumtt_s + stmp
+                           SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
+                        ELSE
+                           ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
+                           SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
+                        ENDIF
+                     ENDIF
+
+                  ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
+
+                  !----------------------------------------------------------------------------------------
+                  ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
+                  !----------------------------------------------------------------------------------------
+                  ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
+                  ! Correcting the elastic cross section for inelastic enhancement CINRED
+                  if(ewcor .NE. 0.d0) then
+                     numch_el = max(num%elah - num%elal + 1 , 1 )
+                     DO iout = num%elal, num%elah  ! do loop over elastic channels
+                        out => outchnl(iout)
+                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
+                        !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
+                     ENDDO
+                  endif
+
+                  !----------------------------------------------------------
+                  ! Renormalizing scratch matrices to recover unitarity
+                  !----------------------------------------------------------
+                  DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
+                  DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
+                  !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
+                  IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
+                  xnor = in%sig/DENhf                          ! normalization factor
+                  SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+                  SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+                  SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+                  sumfis = sumfis*xnor                         !                                  "
+                  sumfism = sumfism*xnor                       !                                  "
+                  !---------------------------------------------------------------
+                  ! CN angular distributions (neutron (in)elastic scattering ONLY!)
+                  !---------------------------------------------------------------
+                  IF(.NOT.CN_isotropic) THEN
+                     ! accumulate Legendre coefficients
+                     la = in%l                             !incident neutron l
+                     ja = in%j                             !incident neutron j
+                     ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
+                     DO iout = num%coll, num%colh  ! 1,num%neut !do loop over neutron channels only
+                        ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
+                        ! write(8,*) '                                  leg      BB               Jcn   &
+                        ! &               l_inc           j_inc                 J_res              l_out              J_out'
+                        ! w = 1.D0
+                        out => outchnl(iout)
+                        !IF(out%kres > 0) cycle      ! skipping continuum channels
+
+                        xjr = out%xjrs              !residual nucleus J
+                        lb = out%l                  !outgoing neutron l
+                        jb = out%j                  !outgoing neutron j
+                        w = Sab(i,iout)             !sigma corrected by Moldauer width fluctuation factor
+
+                        PL_lmax(-out%kres) = 2*in%l
+                        !                     IF(out%kres > 0) THEN
+                        !                        PLcont_lmax(out%kres) = 2*in%l
+                        !                     ELSEIF(out%kres < 0) THEN
+                        !                        PL_lmax(-out%kres) = 2*in%l
+                        !                     ENDIF
+                        IF(i/=iout) THEN               ! Inelastic to discrete level
+                           stmp = w*CINRED(-out%kres)
+                        ELSE                                        ! Elastic and continuum
+                           stmp = w
+                        ENDIF
+                        DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
+                           xleg = dble(lleg)
+                           tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
+                           ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
+                           ! if(tmp==0.D0) cycle
+                           IF(dabs(tmp) < 1.d-14) CYCLE
+                           PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp*stmp
+                           ! CN ang. distr. for continuum assumed isotropic
+                           !IF(out%kres > 0) THEN
+                           !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + stmp*tmp/de
+                           !ELSEIF(out%kres < 0) THEN
+                           !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + stmp*tmp
+                           !ENDIF
+                        ENDDO
+                        !IF(out%kres > 0) THEN
+                        !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
+                        !ELSEIF(outchnl(iout)%kres < 0) THEN
+                        !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
+                        !ENDIF
+                        !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
+                     ENDDO
+                  ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
+
+                  CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                  !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+
+                  CALL DelCCmatr() ! deallocate EW matrices
+
+               ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
+
+            Endif ! ENDIF over INTerf>0
+
 
             ! Gamma width calculation *************************************************************************************
 
