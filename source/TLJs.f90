@@ -1,6 +1,6 @@
-! $Rev: 4657 $
-! $Author: rcapote $
-! $Date: 2016-03-24 06:34:19 +0100 (Do, 24 Mär 2016) $
+! $Rev: 4659 $
+! $Author: mherman $
+! $Date: 2016-03-25 03:05:11 +0100 (Fr, 25 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -45,16 +45,12 @@ MODULE TLJs
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
-   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:)
+   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sab(:,:)
 
    COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:) ! EW matrices Smatr(:,:)
 
    PRIVATE
-  
-   REAL*8, ALLOCATABLE :: Pchan(:)
-
    
-
 CONTAINS
 
    !----------------------------------------------------------------------------------------------------
@@ -70,17 +66,21 @@ CONTAINS
 
       IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
       ALLOCATE(Pdiag(nch),STAT=my)
-      IF(my /= 0) GOTO 30
+      IF(my /= 0) GOTO 20
       Pdiag = 0.0d0
 
       IF(INTERF==0) RETURN
-
       !  EW matrices
 
       !  IF(allocated(Smatr)) DEALLOCATE(Smatr)
       !  ALLOCATE(Smatr(nch,nch),STAT=my)
       !  IF(my /= 0) GOTO 20
       !  Smatr = (0.d0,0.d0)
+
+      IF(allocated(Sab)) DEALLOCATE(Sab)
+      ALLOCATE(Sab(nch,nch),STAT=my)
+      IF(my /= 0) GOTO 30
+      Sab = 0.0d0
 
       IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
       ALLOCATE(Pmatr(nch,nch),STAT=my)
@@ -101,8 +101,6 @@ CONTAINS
       STOP 'ERROR: Insufficient memory for EW matrices in HRTW'
    END SUBROUTINE AllocCCmatr
 
-
-
    SUBROUTINE AllocTLJmatr(nch)
       IMPLICIT NONE
       INTEGER nch
@@ -111,7 +109,7 @@ CONTAINS
       MAX_cc_mod = nch
       ! write(*,*) 'Inside AllocTLJs:',nch,MAX_cc_mod,MAX_cc
 
-      ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
+         ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
       IF(allocated(STLcc)) DEALLOCATE(STLcc)
       ALLOCATE(STLcc(nch),STAT=my)
       IF(my /= 0) THEN
@@ -215,14 +213,13 @@ CONTAINS
 
       IMPLICIT NONE
 
-      IF(DIRECT==0) RETURN
-
       IF(allocated(Pchan)) DEALLOCATE(Pchan)
       IF(allocated(Pdiag)) DEALLOCATE(Pdiag)
 
       IF(INTERF==0) RETURN
       !  IF(allocated(Smatr)) DEALLOCATE(Smatr)
       !  EW matrices
+      IF(allocated(Sab)) DEALLOCATE(Sab)
       IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
       IF(allocated(Umatr)) DEALLOCATE(Umatr)
 
