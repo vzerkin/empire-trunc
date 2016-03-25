@@ -1,6 +1,6 @@
-!cc   * $Rev: 4653 $
+!cc   * $Rev: 4660 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-24 01:11:10 +0100 (Do, 24 Mär 2016) $
+!cc   * $Date: 2016-03-25 07:41:27 +0100 (Fr, 25 Mär 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -8635,7 +8635,12 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-            IF (val.GT.0) INTerf = 1
+C
+            ! IF (val.GT.0) INTerf = 1
+            WRITE (8,'('' EW transformation is in development'')')
+            PAUSE 
+     &       ' EW transformation in development, change INTerf to 0'
+C
             IF (INTerf.eq.0) 
      &        WRITE (8,'('' CN-direct interference neglected'')')
             IF (INTerf.eq.1) 

@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4658 $
-   ! $Author: mherman $
-   ! $Date: 2016-03-25 03:01:06 +0100 (Fr, 25 Mär 2016) $
+   ! $Rev: 4660 $
+   ! $Author: rcapote $
+   ! $Date: 2016-03-25 07:41:27 +0100 (Fr, 25 Mär 2016) $
    !
 
    TYPE channel
@@ -60,9 +60,9 @@ MODULE width_fluct
    TYPE fusion
       INTEGER nout      ! position of the corresponding outgoing channel in outchnl
       INTEGER l         ! projectile l
-      REAL*8 j            ! projectile j
-      REAL*8 t            ! projectile Tlj
-      REAL*8 sig          ! absorption x-section for this channel
+      REAL*8 j          ! projectile j
+      REAL*8 t          ! projectile Tlj
+      REAL*8 sig        ! absorption x-section for this channel
    END TYPE fusion
 
    INTEGER, PARAMETER :: ndhrtw1 = 20000        ! max. number of channels in the HRTW decay for a given CN J-pi
@@ -994,20 +994,41 @@ CONTAINS
          out%kres = -STLcc(i)%lev                      !minus indicates channel leading to a discrete level 'i'
          out%xjrs = XJLv(STLcc(i)%lev,nnur)
          out%pres = LVP(STLcc(i)%lev,nnur)
-         IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
-            IF(num%elal == 0) THEN
+
+         IF(INTerf==0) THEN  
+
+           IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
+             IF(num%elal == 0) THEN
                num%elal = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
                num%elah = nch                          !set it also as the last one in case there are no more
-            ENDIF
-            IF(nch > num%elah) num%elah = nch          !in case of another coupled level augment position of last coupled channel
-            nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
-            in => inchnl(nel)
-            in%nout = nch                    !setting incident channel
-            in%l = out%l                     !setting incident channel
-            in%j = out%j                     !setting incident channel
-            in%t = tld                       !setting incident channel
+             ENDIF
+             IF(nch > num%elah) num%elah = nch          !in case of another coupled level augment position of last coupled channel
+             nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+             in => inchnl(nel)
+             in%nout = nch                    !setting incident channel
+             in%l = out%l                     !setting incident channel
+             in%j = out%j                     !setting incident channel
+             in%t = tld                       !setting incident channel
+           ENDIF
+
+		 ELSE
+		   ! EW transformed space               
+		   ! in the transformed space (INTerf>0) all coupled channels are considered elastic
+           nel = nch - num%coll + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+           in => inchnl(nel)
+           in%nout = nch                    !setting incident channel
+           in%l = out%l                     !setting incident channel
+           in%j = out%j                     !setting incident channel
+           in%t = tld                       !setting incident channel
+
          ENDIF
+
       ENDDO
+      IF (INTerf>0) THEN
+        num%elal = num%coll
+        num%elah = num%colh
+      ENDIF
+	   
    END SUBROUTINE DECAY2CC
 
    !----------------------------------------------------------------------------------------------------
@@ -1385,8 +1406,8 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
-      REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coeff, sxj
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el, ndim
+      REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sumfis_mem
@@ -1394,6 +1415,7 @@ CONTAINS
       REAL*8 sumin_s, sumtt_s, stmp, ewcor, w
       REAL*8 nu_in, nu_ou, sigma_ , sigma_EW
       INTEGER ialph,ibeta,iaa,ibb
+	  COMPLEX*16 ctmp
       !
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -1440,8 +1462,8 @@ CONTAINS
       CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
       ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
-      coeff = 1.d0
-      IF (AEJc(0)>0) coeff = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
+      coef = 1.d0
+      IF (AEJc(0)>0) coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
 
       !----------------------------------------------------------
       ! start CN nucleus decay
@@ -1504,8 +1526,9 @@ CONTAINS
                summa = WFC_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
             ENDDO                                         !do loop over ejectiles  ***done***
             ! write(*,*) sumin_w,sumtt_w
-
-            if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
+			! write(*,*) num%elal,num%elah,num%coll,num%colh
+            
+			if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
  
             num%part = nch                                !store number of particle channel entries
 
@@ -1547,6 +1570,8 @@ CONTAINS
 
             IF(H_Sumtl.LE.0.0D0) CYCLE                    ! no transitions from the current state
 
+            IF(DENhf==0.D0) CYCLE
+
             !  write(*,*)' '
             !  write(*,*)'SUMMARY OF DECAY FOR J=',xjc
             !  write(*,*)'total sum of  Tls ', H_Sumtl
@@ -1575,30 +1600,31 @@ CONTAINS
             !----------------------------------------------------------
             ! Loop over incoming (fusion) channels
             !----------------------------------------------------------
+
             SCRt_mem  = SCRt                    ! store initial values
             SCRtl_mem = SCRtl
             sumfis_mem = sumfis
 
-
-            ! The loops over i and iout below are over normal space if INTerf==0,
-            !           and over the transformed space if INTerf>0
-            DO i = num%elal, num%elah                   ! do loop over elastic channels
+			! write(*,*) 'Elastic channels:',num%elal, num%elah 
+            DO i = num%elal, num%elah
+          	   ! write(*,*) 'Current elastic channels:',i 
+			         
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
                sumfis = sumfis_mem
 
-               in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
-               out => outchnl(i)
-               in%t = out%t
-               !nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
+               in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
+               ! out => outchnl(i)
+               ! in%t = out%t
 
-               ! absorption ~ sigma_a
-               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-               !xnor=0.D0
-               IF(DENhf==0.D0) CYCLE
-               xnor = in%sig/DENhf                                 ! normalization factor
-               ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
-
+			   IF (INTerf==0) THEN
+                 ! absorption ~ sigma_a
+                 in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+                 xnor = in%sig/DENhf ! normalization factor
+                 ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+               ELSE
+                 xnor = 1.d0/DENhf ! normalization factor
+			   ENDIF
                !----------------------------------------------------------
                ! Fission
                !----------------------------------------------------------
@@ -1608,17 +1634,17 @@ CONTAINS
                sumtt_s = 0.d0
                DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
                   out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
- 
-                  !nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
-
                   w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
+
                   WFC(i,iout) = w                          ! saving the calculated sigma corrected by WF
                   sigma_ = out%t*w
 
                   IF(INTerf>0 .and. iout>=num%coll .and. iout<=num%colh) THEN
+                     ndim  = STLcc(iout)%nceq
                      Sab(i-num%coll + 1,iout-num%coll + 1) = xnor*sigma_
-                     CYCLE	! Skipping coupled channels if INTerf>0
+				     write(*,*) i-num%coll + 1, iout-num%coll + 1, sngl(Sab(i-num%coll + 1,iout-num%coll + 1)),ndim
+				     CYCLE	! Skipping coupled channels if INTerf>0
                   ENDIF
 
                   IF(out%kres>0) THEN                      !continuum channels
@@ -1731,18 +1757,15 @@ CONTAINS
             ENDDO    !end do loop over incident channels
 
             IF(INTerf>0) THEN
-               ! Engelbrecht- Weidenmueller transformation
+
+               pause
+               
+			   ! Engelbrecht- Weidenmueller transformation
                ! loop over iaa=i (coupled channels in the normal space)
                DO i = num%elal, num%elah
-                  iaa = i
-
-                  if(iaa<=2) then
-                     WRITE(*,*) sngl(xjc),ip,num%coll, num%colh
-                     write(*,*) iaa
-                     do ibb = num%coll, num%colh
-                        write(*,*) iaa,ibb,Umatr(iaa,ibb)
-                     enddo
-                  endif
+                  
+				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels 
+				  iaa = i
 
                   in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                   out => outchnl(i)
@@ -1750,42 +1773,54 @@ CONTAINS
                   nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
 
                   ! absorption ~ sigma_a
-                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-                  !xnor=0.D0
-                  IF(DENhf==0.D0) CYCLE
-                  xnor = in%sig/DENhf                                 ! normalization factor
-                  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+                  ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+                  in%sig = coef*STLcc(i)%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+                  !xnor = in%sig/DENhf                     ! normalization factor
+                  !xnor = 1.d0/DENhf                        ! normalization factor
+                  xnor = 1.d0
+				  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
 
                   ! loop over ibb=iout (coupled channels in the normal space)
                   DO iout = num%coll, num%colh
                      ibb = iout
                      out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
                      nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
+                     ndim  = STLcc(iout)%nceq
 
                      ! Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
                      sigma_EW = 0.d0  ! This is the cross section \sigma_{ab} in the normal space
                      ! loops over collective levels in the transformed space (ialph & ibeta)
-                     do ialph = num%coll, num%colh
-                        do ibeta = num%coll, num%colh
 
-                           sigma_ = Sab(ialph,ibeta)
+                     write(*,*) 'EW transformation: Space dimension',ndim
+                     ctmp = (0.d0,0.d0) 
+					 sigma_ = 0.d0
+                     do ialph = 1, ndim    ! num%coll, num%colh
+                        do ibeta = 1, ndim !num%coll, num%colh
 
+    				       write(*,*) 'EW loops',ialph, ibeta, sngl(Sab(ialph,ibeta))
+						   
                            if(ialph == ibeta) then
                               sigma_EW = sigma_EW +                                  &
                                  Umatr(ialph,iaa)*CONJG(Umatr(ialph,iaa)) +          &
-                                 Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*sigma_
+                                 Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*Sab(ialph,ibeta)
                            else
-                              sigma_EW = sigma_EW + sigma_ *                         &
-                                 ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
-                                 ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +               &
-                                 Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +               &
-                                 CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*    &
-                                 Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *          &
-                                 DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )
+							  ctmp = ctmp + Sab(ialph,ibeta) *            				 &
+							       ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*    &
+                                   ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +                 &
+                                     Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +               &
+                                     CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*    &
+                                     Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *          &
+                                     DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )
+							  sigma_ = sigma_ + DIMAG(ctmp)
+                              sigma_EW = sigma_EW + REAL(ctmp) 
                            endif
                         enddo ! end of the loop over ibeta (transformed space)
+
                      enddo   ! end of the loop over ialph (transformed space)
+					 write(*,*) ctmp*in%sig
+					 write(*,*) 'Sigma_abs=',in%sig
+                     write(*,*) 'Sigma(a=',iaa,',=',ibb,')=',in%sig*sigma_EW, in%sig*sigma_
 
                      sigma_ = sigma_EW
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
@@ -1810,6 +1845,7 @@ CONTAINS
 
                   ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
+				  PAUSE
                   !----------------------------------------------------------------------------------------
                   ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
                   !----------------------------------------------------------------------------------------

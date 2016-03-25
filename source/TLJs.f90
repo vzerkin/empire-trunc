@@ -1,6 +1,6 @@
-! $Rev: 4659 $
-! $Author: mherman $
-! $Date: 2016-03-25 03:05:11 +0100 (Fr, 25 Mär 2016) $
+! $Rev: 4660 $
+! $Author: rcapote $
+! $Date: 2016-03-25 07:41:27 +0100 (Fr, 25 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -422,8 +422,8 @@ CONTAINS
             ps_umatrix%Pcn = 1
             if(parc == '-') ps_umatrix%Pcn = -1
             ps_umatrix%nceq = nceq
-            ps_umatrix%irow = i1
-            ps_umatrix%icol = i2
+            ps_umatrix%irow = i2
+            ps_umatrix%icol = i1
             ps_umatrix%umatrix = CMPLX(sreal,simag,8)
          ENDDO
       ENDDO
@@ -474,15 +474,14 @@ Pcn = +1
        write(*,*) 'J,Pi,nceq=',CCpdiag(ncc)%Jcn, CCpdiag(ncc)%Pcn, CCpdiag(ncc)%nceq
        nch = CCpdiag(ncc)%nceq
 
-      CALL AllocCCmatr(nch)
+       CALL AllocCCmatr(nch)
 
-      ! reading diagonal elements p_{alpha}
-      nmax = ncc + nch - 1
-      do i1 = ncc, nmax
+       ! reading diagonal elements p_{alpha}
+       nmax = ncc + nch - 1
+       do i1 = ncc, nmax
          WRITE (*,*) i1, i1 - ncc +1, CCpdiag(i1)%pdiag
          Pdiag(i1 - ncc +1) = CCpdiag(i1)%pdiag
-      enddo
-      ! if(debug) pause
+       enddo
       EXIT
    endif
 ENDDO
@@ -535,15 +534,14 @@ ctmp = 0.0d0
 
 ctmp = MATMUL(Umatr,Pmatr)
 
-do i1=1,nceq
-   do i2=1,nceq
-      sreal =  REAL(Umatr_T(i1,i2))
-      simag = -DIMAG(UMatr_T(i1,i2))
-      Umatr_T(i1,i2) = CMPLX(sreal,simag,8)
-   enddo
-enddo
-
-cres = MATMUL(ctmp,Umatr_T)
+IF(allocated(cres)) DEALLOCATE(cres)
+ALLOCATE(cres(nch,nch),STAT=my)
+IF(my /= 0) then
+   WRITE(8,*)  'ERROR: Insufficient memory for cres matrix in TLJs'
+   WRITE(12,*) 'ERROR: Insufficient memory for cres matrix in TLJs'
+   STOP
+ENDIF
+cres = MATMUL(ctmp,CONJG(Umatr_T))
 
 write (*,'(1x,A,1x,6(d12.6,1x))') 'Calc  =',(cres(i1,i1),i1=1,2)
 
