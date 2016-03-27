@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4641 $
+Ccc   * $Rev: 4661 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 23:41:12 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2781,7 +2781,7 @@ C
       DOUBLE PRECISION sjf
       sjf(l,jindex,stmp)= l - 1 + jindex - stmp
 
-      data unformat/.TRUE./, debug/.FALSE./ 
+      data unformat/.TRUE./, debug/.false./ 
 
       Maxlw  = 0
       ncoll = 0
@@ -2956,6 +2956,12 @@ C
      >     CCpmatrix(l)%irow,CCpmatrix(l)%icol,
      >     DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
      >     CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
+
+         write(*,*) 'MAX_smatr=',MAX_pmatr
+         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >     CCsmatrix(l)%irow,CCsmatrix(l)%icol,
+     >     DREAL(CCsmatrix(l)%umatrix),DIMAG(CCsmatrix(l)%umatrix),
+     >     CCsmatrix(l)%Jcn,CCsmatrix(l)%Pcn,CCsmatrix(l)%nceq
 
          write(*,*) 'MAX_umatr=',MAX_umatr
          write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 

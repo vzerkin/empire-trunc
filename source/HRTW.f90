@@ -1,3 +1,4 @@
+$DEBUG
 MODULE width_fluct
 
    !
@@ -25,9 +26,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4660 $
+   ! $Rev: 4661 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-25 07:41:27 +0100 (Fr, 25 Mär 2016) $
+   ! $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
    !
 
    TYPE channel
@@ -1406,17 +1407,19 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el, ndim
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
-      REAL*8 sumin_s, sumtt_s, stmp, ewcor, w
-      REAL*8 nu_in, nu_ou, sigma_ , sigma_EW
-      INTEGER ialph,ibeta,iaa,ibb
-	  COMPLEX*16 ctmp
-      !
+      REAL*8 sumin_s, sumtt_s, stmp, ewcor, w, dtmp
+      REAL*8 nu_ialph, nu_ibeta, sigma_ , sigma_EW
+      INTEGER ialph,ibeta,iaa,ibb,ialph_ch,ibeta_ch,IER
+	  REAL*8 deg_alph,deg_beta
+      COMPLEX*16 ctmp1, phas
+	  
+	  !
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
 
@@ -1605,17 +1608,17 @@ CONTAINS
             SCRtl_mem = SCRtl
             sumfis_mem = sumfis
 
-			! write(*,*) 'Elastic channels:',num%elal, num%elah 
+    		! write(*,*) 'Elastic channels:',num%elal, num%elah 
+    		! write(*,*) 'Collective channels:',num%coll, num%colh 
             DO i = num%elal, num%elah
-          	   ! write(*,*) 'Current elastic channels:',i 
-			         
+
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
                sumfis = sumfis_mem
 
                in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
-               ! out => outchnl(i)
-               ! in%t = out%t
+               out => outchnl(i)
+               in%t = out%t
 
 			   IF (INTerf==0) THEN
                  ! absorption ~ sigma_a
@@ -1640,10 +1643,9 @@ CONTAINS
                   WFC(i,iout) = w                          ! saving the calculated sigma corrected by WF
                   sigma_ = out%t*w
 
-                  IF(INTerf>0 .and. iout>=num%coll .and. iout<=num%colh) THEN
-                     ndim  = STLcc(iout)%nceq
-                     Sab(i-num%coll + 1,iout-num%coll + 1) = xnor*sigma_
-				     write(*,*) i-num%coll + 1, iout-num%coll + 1, sngl(Sab(i-num%coll + 1,iout-num%coll + 1)),ndim
+                  IF(INTerf>0 .and. (iout>=num%coll .and. iout<=num%colh) ) THEN
+                     Sab(i-num%coll+1, iout-num%coll+1) = xnor*sigma_
+				     ! write(*,*) iaa, ibb, sngl(Sab(i-num%coll + 1,iout-num%coll + 1))
 				     CYCLE	! Skipping coupled channels if INTerf>0
                   ENDIF
 
@@ -1665,7 +1667,8 @@ CONTAINS
                   ENDIF
                ENDDO ! end of outgoing channel loop over iout
 
-               IF(INTerf>0) CYCLE ! If EW active, all elastic channels assumed collective !!
+               ! If EW active, all elastic channels assumed collective !!
+               IF(INTerf>0 .and. (iout>=num%coll .and. iout<=num%colh) ) CYCLE
 
                !----------------------------------------------------------------------------------------
                ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
@@ -1758,20 +1761,79 @@ CONTAINS
 
             IF(INTerf>0) THEN
 
+       		   write(*,*) 'Dimension of Umatr:',NDIm_cc_matrix
+			   write (*,*) 'Dimension of Umatr (real):',sqrt(DBLE(size(Umatr)))
+
+               ! Calculating the transposed matrix
+               !Umatr_T = TRANSPOSE(CONJG(Umatr)) 
+               !comptmp = MATMUL(Umatr,Umatr_T)   ! CHECKED, OK !!!
+               !do i=1,NDIm_cc_matrix
+               !  do iout=1,NDIm_cc_matrix
+      	       !    write (*,'(1x,A20,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr*(Umatr^T)*  =',i,iout,  &
+      		   !      comptmp(i,iout)
+			   !  enddo
+			   !enddo
+
+               !do i=1,NDIm_cc_matrix
+               !  do iout=1,NDIm_cc_matrix
+      		   !    write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)')'Smatr =',i,iout, Smatr(i,iout)
+			   !  enddo
+			   !enddo
+
+               do i=1,NDIm_cc_matrix
+      		     write (*,'(1x,A7,i3,1x,d12.6,1x,d12.6)')'Pdiag =',i, Pdiag(i)
+                 do iout=1,NDIm_cc_matrix
+      		       write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)')'Umatr =',i,iout, Umatr(i,iout)
+			     enddo
+			   enddo
                pause
-               
-			   ! Engelbrecht- Weidenmueller transformation
+
+			   ! setting the complex identity matrix to call DIAG() (UNIT MATRIX)
+			   ZRtmp1 = 0.d0
+               do i=1,NDIm_cc_matrix
+                 ZRtmp1(i,i) = 1.d0			     
+			   enddo
+			   ZItmp1 = 0.d0
+
+			   ! Diagonalizing the Smatrix in the transformed space
+			   Sdiag = REAL(Pmatr) 
+			   ZItmp = IMAG(Pmatr)
+
+			   CALL DIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,NDIm_cc_matrix,1.d-12,dtmp,IER)                     
+			   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
+		     
+               !
+    		   ! 02/04/06                                                           from ECIS06
+			   !     SUBROUTINE DIAG(ZR,ZI,XR,XI,N,NC,EPS,AX,IER)                      DIAG-001
+			   ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE  DIAG-002
+			   ! JACOBI'S METHOD.                                                      DIAG-003
+			   ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.            DIAG-004
+			   !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.       DIAG-005
+			   !            N:      FIRST DIMENSION OF ZR,ZI,XR AND XI.                DIAG-006
+			   !            NC:     DIMENSION OF THE MATRIX.                           DIAG-007
+			   !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.    DIAG-008
+			   ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.         DIAG-009
+			   !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.DIAG-010
+			   !            XR,XI:  EIGENVECTORS.                                      DIAG-011
+			   !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.DIAG-012
+			   !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.           DIAG-013
+			   !***********************************************************************DIAG-014
+
+        	   ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
+			   do i=1,NDIm_cc_matrix
+      	         write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
+			     Sphase(i) = datan(Sdiag(i,i))
+			   enddo
+               !PAUSE
+
+			   ! Engelbrecht- Weidenmueller transformaion
                ! loop over iaa=i (coupled channels in the normal space)
                DO i = num%elal, num%elah
                   
-				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels 
-				  iaa = i
+				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
 
-                  in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
-                  out => outchnl(i)
-                  in%t = out%t
-                  nu_in =  out%eef/2.D0                    ! half of the degree of freedom for the incoming channel
-
+				  iaa = i - num%elal + 1
+                  in => inchnl(iaa) ! elastic channels for each Jcn are numbered 1,2,3,...
                   ! absorption ~ sigma_a
                   ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                   in%sig = coef*STLcc(i)%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
@@ -1782,49 +1844,63 @@ CONTAINS
 
                   ! loop over ibb=iout (coupled channels in the normal space)
                   DO iout = num%coll, num%colh
-                     ibb = iout
-                     out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
-                     nu_ou =  out%eef/2.D0                    ! half of the degree of freedom for the outgoing channel
-                     ndim  = STLcc(iout)%nceq
-
+                     ibb = iout - num%coll + 1
+                     !write(*,*) 'Matrix dimension a & b:',STLcc(i)%nceq,STLcc(iout)%nceq   
+					 !write(*,*) 'num%elal,num%coll:',num%elal,num%coll
+					 
                      ! Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
                      sigma_EW = 0.d0  ! This is the cross section \sigma_{ab} in the normal space
                      ! loops over collective levels in the transformed space (ialph & ibeta)
 
-                     write(*,*) 'EW transformation: Space dimension',ndim
-                     ctmp = (0.d0,0.d0) 
+                     !write(*,*) 'EW transformation, space dimension',NDIm_cc_matrix
+                     ctmp1 = (0.d0,0.d0) 
 					 sigma_ = 0.d0
-                     do ialph = 1, ndim    ! num%coll, num%colh
-                        do ibeta = 1, ndim !num%coll, num%colh
+                     do ialph = 1, NDIm_cc_matrix    
+						ialph_ch = num%coll + ialph -1
+                        nu_ialph =  outchnl(ialph_ch)%eef/2.D0   ! half of the degree of freedom for alpha channel
+						deg_alph = 	DSQRT(1.d0/nu_ialph - 1.d0)
 
-    				       write(*,*) 'EW loops',ialph, ibeta, sngl(Sab(ialph,ibeta))
+                        do ibeta = 1, NDIm_cc_matrix 
+						  ! phas represents the arctan(S_{alpha,alpha}) given in eq.(20)
+						  dtmp = Sphase(ialph)-Sphase(ibeta)
+						  phas = CMPLX(sin(dtmp),cos(dtmp))
+						  ! phas = (1.d0,0.d0) ! assumed one for the time being
+   					      ibeta_ch = num%coll + ibeta -1
+                          nu_ibeta =  outchnl(ibeta_ch)%eef/2.D0 ! half of the degree of freedom for the outgoing channel
+                          deg_beta =  DSQRT(1.d0/nu_ibeta - 1.d0)
+
+        			      ! write(*,*) 'EW loops',ialph, ibeta, sngl(Sab(ialph,ibeta)),sngl(WFC(ialph_ch,ibeta_ch))
 						   
                            if(ialph == ibeta) then
-                              sigma_EW = sigma_EW +                                  &
-                                 Umatr(ialph,iaa)*CONJG(Umatr(ialph,iaa)) +          &
-                                 Umatr(ialph,ibb)*CONJG(Umatr(ialph,ibb))*Sab(ialph,ibeta)
+                              sigma_EW = sigma_EW + Umatr(ialph,iaa)*CONJG(Umatr(iaa,ialph)) &
+							                      * Umatr(ialph,ibb)*CONJG(Umatr(ibb,ialph)) &
+												  * Sab(ialph,ialph)
                            else
-							  ctmp = ctmp + Sab(ialph,ibeta) *            				 &
-							       ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*    &
-                                   ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +                 &
-                                     Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +               &
-                                     CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*    &
-                                     Umatr(ibeta,iaa) *      Umatr(ibeta,ibb) *          &
-                                     DSQRT((1.d0/nu_in - 1.d0) * (1.d0/nu_ou - 1.d0)) )
-							  sigma_ = sigma_ + DIMAG(ctmp)
-                              sigma_EW = sigma_EW + REAL(ctmp) 
+							  ctmp1 = ctmp1 + Sab(ialph,ibeta)*                              &
+							       ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*        &
+                                      ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +                  &
+                                        Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +                &
+                                     CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*        &
+                                           Umatr(ibeta,iaa) *      Umatr(ibeta,ibb)*		 &
+								                phas*deg_alph*deg_beta )
+							  sigma_ = sigma_ + DIMAG(ctmp1)
+                              sigma_EW = sigma_EW + REAL(ctmp1) 
                            endif
-                        enddo ! end of the loop over ibeta (transformed space)
+                        enddo ! end of the loop over ibeta (transformed space)					 
 
                      enddo   ! end of the loop over ialph (transformed space)
-					 write(*,*) ctmp*in%sig
 					 write(*,*) 'Sigma_abs=',in%sig
-                     write(*,*) 'Sigma(a=',iaa,',=',ibb,')=',in%sig*sigma_EW, in%sig*sigma_
+                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', sigma_EW,' REAL'
+                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', sigma_  ,' IMAG'
 
                      sigma_ = sigma_EW
+
+					 PAUSE
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
+
+					 out => outchnl(iout) ! reassigning output channel to the outgoing CC in the normal space
 
                      IF(out%kres>0) THEN                      !continuum channels
                         SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
@@ -1845,7 +1921,6 @@ CONTAINS
 
                   ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
-				  PAUSE
                   !----------------------------------------------------------------------------------------
                   ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
                   !----------------------------------------------------------------------------------------

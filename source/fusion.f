@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4649 $
+Ccc   * $Rev: 4661 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-23 04:19:35 +0100 (Mi, 23 Mär 2016) $
+Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -230,7 +230,7 @@ C           Reading EW structures
 	          IF(INTerf.GT.0) THEN
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
 
-C                 READ(451,ERR=43,END=43)           ! Smatrix  
+                  READ(451,ERR=43,END=43) CCsmatrix ! Smatrix  
                   READ(451,ERR=43,END=43) CCpmatrix ! Pmatrix 
                   READ(451,ERR=43,END=43) CCpdiag   ! Pdiag  
                   READ(451,ERR=43,END=43) CCumatrix ! Umatrix
@@ -709,7 +709,7 @@ C
                IF(MAX_cc.GT.0) THEN
                  iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
                  iwin=ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
-C                iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
+                 iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
 C              
                  IF(INTerf.gt.0) THEN
                    iwin=ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
@@ -1010,8 +1010,8 @@ C
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
          IF(NINT(DIRect).GT.0 .AND. MAX_cc.GT.0 .AND. IOUT.EQ.5) THEN
-C          ctmp = ctldir//ctmp23//'_Smatr.LST'
-C          iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
+           ctmp = ctldir//ctmp23//'_Smatr.LST'
+           iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pmatr.LST'
            iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pchan.LST'
@@ -1112,7 +1112,7 @@ C     Saving EW structures
 	 WRITE(451) MAX_cc,MAX_pmatr,MAX_umatr
 	 WRITE(451) STLcc
 	 IF(INTerf.GT.0) THEN
-C        WRITE(451)           ! Smatrix  
+         WRITE(451) CCsmatrix ! Smatrix  
          WRITE(451) CCpmatrix ! Pmatrix 
          WRITE(451) CCpdiag   ! Pdiag  
          WRITE(451) CCumatrix ! Umatrix
@@ -2008,8 +2008,8 @@ C     open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pmatr.LST'
       iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
 C     open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
-C     ctmp = Outname(1:Length)//'_Smatr.LST'
-C     iwin = ipipe_move('ecis06_Smatr.LST',ctmp)
+      ctmp = Outname(1:Length)//'_Smatr.LST'
+      iwin = ipipe_move('ecis06_Smatr.LST',ctmp)
 C     open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pchan.LST'
       iwin = ipipe_move('ecis06_Pchan.LST',ctmp)

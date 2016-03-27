@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4639 $
+Ccc   * $Rev: 4661 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 08:36:36 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -520,7 +520,7 @@ C MAIN INPUT.                                                           CALC-306
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
       open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
 C     open(124,file=TRIM(fname)//'_Cmatrix.LST')                        RCN  RCN
-C     open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
+      open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
       open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
 C
 C     For EW transformation
@@ -19326,7 +19326,7 @@ C----
 C     C-matrix commented                                                RCN  RCN 
 C     WRITE (124,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     S-matrix                                                          RCN  RCN 
-C     WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       I=0                                                               RCN  RCN
       DO II=1,NC                                                        RCN  RCN
         IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
@@ -19342,15 +19342,15 @@ C     WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
 C         S-matrix                                                      RCN  RCN 
-C         IF(I.EQ.J) THEN                                               RCN  RCN
-C           write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
-C    >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
-C    >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
-C         ELSE                                                          RCN  RCN
-C           write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
-C    >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
-C    >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
-C         ENDIF                                                         RCN  RCN
+          IF(I.EQ.J) THEN                                               RCN  RCN
+            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+     >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
+     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
+          ELSE                                                          RCN  RCN
+            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+     >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
+     >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
+          ENDIF                                                         RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
 C----
