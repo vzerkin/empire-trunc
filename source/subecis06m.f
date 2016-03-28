@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4661 $
+Ccc   * $Rev: 4662 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
+Ccc   * $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -50,7 +50,7 @@ C
       CHARACTER*(*) fnamei
       INTEGER Max_ccch
 
-      PARAMETER (IDMX=35000000)                                         ECIS-027
+      PARAMETER (IDMX=3500000)                                          ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
 
       DIMENSION NW(2,IDMX),DW(IDMX)                                     ECIS-029
@@ -160,6 +160,20 @@ C     IF (fexp) CLOSE (124)                                             RCN  RCN
       IF (fexp) CLOSE (125)                                             RCN  RCN
       INQUIRE(126,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (126)                                             RCN  RCN
+
+      INQUIRE(221,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (221)                                             RCN  RCN
+      INQUIRE(222,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (222)                                             RCN  RCN
+      INQUIRE(223,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (223)                                             RCN  RCN
+C     INQUIRE(224,exist=fexp)                                           RCN  RCN
+C     IF (fexp) CLOSE (224)                                             RCN  RCN
+      INQUIRE(225,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (225)                                             RCN  RCN
+      INQUIRE(226,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (226)                                             RCN  RCN
+
       Max_ccch = MAXcc
 
       RETURN                                                            ECIS-041
@@ -508,6 +522,8 @@ C***********************************************************************CALC-278
       COMMON /POTE1/ ITX(16),IMAX,INTC,INLS,INVC,INVD,ITXM              CALC-298
       COMMON /POTE2/ ITY(12),INVT,INTV,INSL,NPX                         CALC-299
       COMMON /TITRE/ TITLE(18)                                          CALC-300
+      LOGICAL unformat
+      COMMON /CTRL1/ unformat
       CHARACTER*50 fname                                                RCN  RCN
       COMMON /FILEN/fname                                      
       DATA FIN /'FIN '/                                                 CALC-301
@@ -518,16 +534,25 @@ C***********************************************************************CALC-278
 C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
-      open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
-C     open(124,file=TRIM(fname)//'_Cmatrix.LST')                        RCN  RCN
-      open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
-      open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
-C
-C     For EW transformation
-C
-      open(122,file=TRIM(fname)//'_Pdiag.LST')                          RCN  RCN
-      open(123,file=TRIM(fname)//'_Umatr.LST')                          RCN  RCN
-C
+      if(unformat) then 
+        open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
+        open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+        open(122,FILE = TRIM(fname)//'_Pdiag.bin',form='unformatted')   zv-2013
+        open(222,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
+        open(123,FILE = TRIM(fname)//'_Umatr.bin',form='unformatted')   zv-2013
+        open(223,file=TRIM(fname)//'_Umatr.LST')                        RCN  RCN
+        open(125,FILE = TRIM(fname)//'_Smatr.bin',form='unformatted')   zv-2013
+        open(225,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
+        open(126,FILE = TRIM(fname)//'_Pchan.bin',form='unformatted')   zv-2013
+        open(226,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
+      else 
+        open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+        open(122,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
+        open(123,file=TRIM(fname)//'_Umatr.LST')                        RCN  RCN
+        open(125,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
+        open(126,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
+	endif
+
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
       IF (LO(36)) GO TO 17                                              CALC-311
@@ -19090,6 +19115,10 @@ C***********************************************************************SCAM-104
       COMMON /NOEQU/ NCXN,NIC,NCI,NC,NCIN,NIN,JPI,IPJ,R1(2),NAJ         SCAM-116
       COMMON /INOUT/ MR,MW,MS                                           SCAM-117
       INTEGER MAXcc 
+	logical lcalc
+      REAL*8, ALLOCATABLE :: PRmatr(:,:), PImatr(:,:), 
+     >   PRdiag(:,:),PIdiag(:,:)
+	DATA lcalc/.TRUE./
       COMMON /CC_chan/ MAXcc
       DATA IP,AL,PI,NSY /'+','-',' FISSION','   GAMMA',3.141592653589793SCAM-118
      12D0,0/                                                            SCAM-119
@@ -19293,10 +19322,8 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
       IF (LO(82)) GO TO 58                                              SCAM-310
 C
 C     To allow calculation of Pmatrix independently of EW request
-C
 C     IF (LO(83)) GO TO 28                                              SCAM-311
 C
-C COMPUTATION OF SATCHLER P-MATRIX ("PR","PI").                         SCAM-312
       I=0                                                               SCAM-313
       DO 27 II=1,NC                                                     SCAM-314
       IF (WV(3,MC(II,1)).LT.0.D0) GO TO 27                              SCAM-315
@@ -19320,35 +19347,46 @@ C COMPUTATION OF SATCHLER P-MATRIX ("PR","PI").                         SCAM-312
 C----
       IF(I.EQ.0 .OR. J.EQ.0) LO(83)=.TRUE.                              RCN  RCN            
       IF(I.EQ.0 .OR. J.EQ.0) GOTO 28                                    RCN  RCN            
-      WRITE (121,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
-      WRITE (126,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       MAXcc = MAXcc + JC 
+      WRITE (121     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (221,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (126     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (226,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     C-matrix commented                                                RCN  RCN 
 C     WRITE (124,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     S-matrix                                                          RCN  RCN 
-      WRITE (125,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (125     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (225,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       I=0                                                               RCN  RCN
       DO II=1,NC                                                        RCN  RCN
         IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
         I=I+1                                                           RCN  RCN
-        write(126,'(1x,I4,1x,D15.9,2x,2(I3,1x),F5.1)')                  RCN  RCN
+C       Pchan()
+        write(126)                                                      RCN  RCN
+     >    I,P(I,I,1),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))              RCN  RCN
+        write(226,'(1x,I4,1x,D15.9,2x,2(I3,1x),F5.1)')                  RCN  RCN
      >    I,P(I,I,1),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))              RCN  RCN
         J=0                                                             RCN  RCN
         DO JJ=1,II                                                      RCN  RCN
           IF (WV(3,MC(JJ,1)).LT.0.D0) CYCLE                             RCN  RCN
           J=J+1                                                         RCN  RCN
-          write (121,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
-     >      I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3)) RCN  RCN  
+C         P-matrix
+          write (121) I, J, P(I,J,1),P(I,J,2)                           RCN  RCN
+          write (221,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
+     >     I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))  RCN  RCN  
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
+C
 C         S-matrix                                                      RCN  RCN 
           IF(I.EQ.J) THEN                                               RCN  RCN
-            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+            write(125) I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J)             RCN  RCN
+            write(225,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
      >             I,J,1.d0-2.d0*FAI(I,J),2.d0*FAR(I,J),                RCN  RCN
      >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
           ELSE                                                          RCN  RCN
-            write(125,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
-     >             I,J,   -2.d0*FAI(I,J),2.d0*FAR(I,J),                 RCN  RCN
+            write(125) I,J,-2.d0*FAI(I,J),2.d0*FAR(I,J)                 RCN  RCN
+            write(225,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1,A1)')  RCN  RCN
+     >             I,J, -2.d0*FAI(I,J),2.d0*FAR(I,J),                   RCN  RCN
      >             MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))                RCN  RCN
           ENDIF                                                         RCN  RCN
         ENDDO                                                           RCN  RCN
@@ -19356,10 +19394,73 @@ C         S-matrix                                                      RCN  RCN
 C----
       IF (LO(83)) GO TO 28                                              SCAM-311
 
-      CALL DIAG(P,P(1,1,2),P(1,1,3),P(1,1,4),NC,NJC,1.D-12,A1,IERR)     SCAM-333
-      WRITE (122,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
-      WRITE (123,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+	IF(lcalc) then
+      IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
+      ALLOCATE(PRmatr(NC,NC))
+      IF(allocated(PImatr)) DEALLOCATE(PImatr)
+      ALLOCATE(PImatr(NC,NC))
+      IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
+      ALLOCATE(PRdiag(NC,NC))
+      IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
+      ALLOCATE(PIdiag(NC,NC))
+
+      PIdiag = 0.d0
+	PRdiag = 0.d0
+C     write(*,*) 'P matrix'  
+	DO I = 1,NC
+	  PRdiag(I,I) = 1.d0
+	  DO J=1,NC
+      	PRmatr(I,J)=P(I,J,1)   
+	    PImatr(I,J)=P(I,J,2)   
+	  ENDDO
+	ENDDO
+C     DO I = 1,NC
+C       DO J = 1,NC
+C	    write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6)') 
+C    >    I,J,PRmatr(I,J),PImatr(I,J)
+C       ENDDO
+C	ENDDO
+      endif 
+
+      CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
+     >    NJC,1.D-12,A1,IERR)    
+
+	IF(lcalc) then
+	lcalc=.FALSE.
+C     CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
+C    >    NJC,1.D-12,A1,IERR)    
+C     write(*,*) 'ECIS matrix:'
+C     EIGENVALUES
+C 	DO I = 1,NC
+C 	 write(*,'(1x,9(d12.6,1x,d12.6/)')(P(I,J,1),P(I,J,2),J=1,NC)
+C	ENDDO
+C     EIGENVECTORS
+C 	DO I = 1,NC
+C 	 write(*,'(1x,9(d12.6,1x,d12.6/)')(P(I,J,3),P(I,J,4),J=1,NC)
+C	ENDDO
+	write(*,*) 'Square matrix:'
+      CALL DIAG(PRmatr,PImatr,PRdiag,PIdiag,NC,NC,1.D-12,A1,IERR)      
+	DO J = 1,NC
+        write(*,'(1x,A13,1x,9(d12.6,1x,d12.6)') 
+     >    'Eigenvalues=',PRmatr(J,J),PImatr(J,J)
+ 	  DO I = 1,NC
+	    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') 
+     >      I,J,PRdiag(I,J),PIdiag(I,J)
+        ENDDO
+	ENDDO
+      IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
+      IF(allocated(PImatr)) DEALLOCATE(PImatr)
+      IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
+      IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
+	PAUSE
+      endif
+
+      WRITE (122     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (123     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (222,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (223,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       I=0                                                               RCN  RCN
+C     Pdiag matrix
       DO II=1,NC                                                        RCN  RCN
         IF (WV(3,MC(II,1)).LT.0.D0) CYCLE                               RCN  RCN
         I=I+1                                                           RCN  RCN
@@ -19367,16 +19468,20 @@ C----
         DO JJ=1,II                                                      RCN  RCN
           IF (WV(3,MC(JJ,1)).LT.0.D0 ) CYCLE                            RCN  RCN
           J=J+1                                                         RCN  RCN
-C         IF(P(I,J,1).LE.0.d0) CYCLE                                    RCN  RCN
-C         write(122,'(1x,2(I4,1x),2(D15.9,1x))') I,J,P(I,J,1),P(I,J,2)  RCN  RCN
-          IF(I.EQ.J)                                                    RCN  RCN
-C    >      write(122,'(1x,I4,1x,2(D15.9,1x))') I,P(I,J,1),P(I,J,2)     RCN  RCN
-     >      write(122,'(1x,I4,1x,D15.9)') I,P(I,J,1)                    RCN  RCN
+          IF(I.EQ.J) THEN                                               RCN  RCN
+            write(122) P(I,I,1)                                         RCN  RCN
+            write(222,'(1x,I4,1x,D15.9)') I,P(I,I,1)                    RCN  RCN
+          ENDIF                                                         RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
+C     U-matrix
       DO J=1,I                                                          RCN  RCN
-        write(123,'(1x,I4)') J                                          RCN  RCN
-        write(123,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,NC)  RCN  RCN
+        !write(123) J                                                   RCN  RCN
+        DO II=1,NC                                                      RCN  RCN
+          write(123) P(II,J,3),P(II,J,4)                                RCN  RCN
+        ENDDO                                                           RCN  RCN
+        write(223,'(1x,I4)') J                                          RCN  RCN
+        write(223,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,NC)  RCN  RCN
       ENDDO                                                             RCN  RCN
 C=======================================================================
 C     AVOIDING CN DECAY & WF correction in ECIS to speed-up EMPIRE calcs
@@ -19653,7 +19758,7 @@ C            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.DIAG-012
 C            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.           DIAG-013
 C***********************************************************************DIAG-014
       IMPLICIT REAL*8 (A-H,O-Z)                                         DIAG-015
-      DIMENSION ZR(N,*),ZI(N,*),XR(N,*),XI(N,*)                         DIAG-016
+      DIMENSION ZR(N,NC),ZI(N,NC),XR(N,NC),XI(N,NC)                     DIAG-016
       IER=0                                                             DIAG-017
       NT=0                                                              DIAG-018
     1 NT=NT+1                                                           DIAG-019
@@ -19661,6 +19766,21 @@ C***********************************************************************DIAG-014
       AX=0.D0                                                           DIAG-021
       L=1                                                               DIAG-022
       M=2                                                               DIAG-023
+      
+C     if(lcalc .and. nt.le.1) then
+C       write(*,*) 'Inside DIAG to diag, iter',NT,N,NC,sngl(EPS)
+C       DO I = 1,NC
+C    	    DO J = 1,NC
+C	      write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6)') 
+C    >        I,J,ZR(I,J),ZI(I,J)
+C         ENDDO
+C	  ENDDO
+!       write(*,*) 'Inside DIAG unitary, iter'
+!       DO I = 1,NC
+!	      write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
+! 	    ENDDO
+C     endif
+
 C SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.       DIAG-024
       DO 3 I=1,NC                                                       DIAG-025
       DO 2 J=I,NC                                                       DIAG-026

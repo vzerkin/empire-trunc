@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4661 $
+Ccc   * $Rev: 4662 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
+Ccc   * $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -707,13 +707,19 @@ C
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
 
                IF(MAX_cc.GT.0) THEN
-                 iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
+
                  iwin=ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
-                 iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
+                 iwin=ipipe_move('ccm_Pchan.bin','INCIDENT_Pchan.bin')
 C              
                  IF(INTerf.gt.0) THEN
+                   iwin=ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
+                   iwin=ipipe_move('ccm_Pmatr.bin','INCIDENT_Pmatr.bin')
+                   iwin=ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
+                   iwin=ipipe_move('ccm_Smatr.bin','INCIDENT_Smatr.bin')
                    iwin=ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
+                   iwin=ipipe_move('ccm_Pdiag.bin','INCIDENT_Pdiag.bin')
                    iwin=ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
+                   iwin=ipipe_move('ccm_Umatr.bin','INCIDENT_Umatr.bin')
                  ENDIF 
                ENDIF
 C
@@ -1010,18 +1016,30 @@ C
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
          IF(NINT(DIRect).GT.0 .AND. MAX_cc.GT.0 .AND. IOUT.EQ.5) THEN
-           ctmp = ctldir//ctmp23//'_Smatr.LST'
-           iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
-           ctmp = ctldir//ctmp23//'_Pmatr.LST'
-           iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pchan.LST'
            iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
+           ctmp = ctldir//ctmp23//'_Pchan.bin'
+           iwin = ipipe_move('INCIDENT_Pchan.bin',ctmp)
+
 C
            IF(INTerf.gt.0) THEN
+             ctmp = ctldir//ctmp23//'_Smatr.LST'
+             iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
+             ctmp = ctldir//ctmp23//'_Pmatr.LST'
+             iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
              ctmp = ctldir//ctmp23//'_Umatr.LST'
              iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
              ctmp = ctldir//ctmp23//'_Pdiag.LST'
              iwin = ipipe_move('INCIDENT_Pdiag.LST',ctmp)
+
+             ctmp = ctldir//ctmp23//'_Smatr.bin'
+             iwin = ipipe_move('INCIDENT_Smatr.bin',ctmp)
+             ctmp = ctldir//ctmp23//'_Pmatr.bin'
+             iwin = ipipe_move('INCIDENT_Pmatr.bin',ctmp)
+             ctmp = ctldir//ctmp23//'_Umatr.bin'
+             iwin = ipipe_move('INCIDENT_Umatr.bin',ctmp)
+             ctmp = ctldir//ctmp23//'_Pdiag.bin'
+             iwin = ipipe_move('INCIDENT_Pdiag.bin',ctmp)
            ENDIF
          ENDIF
 
@@ -2004,23 +2022,29 @@ C
       iwin = ipipe_move('ecis06.ics',ctmp)
 C
       IF (NINT(Direc).EQ.0) RETURN
-C     open(121,file=TRIM(fname)//'_Pmatr.LST')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Pmatr.LST'
-      iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
-C     open(125,file=TRIM(fname)//'_Smatr.LST')                          RCN  RCN
-      ctmp = Outname(1:Length)//'_Smatr.LST'
-      iwin = ipipe_move('ecis06_Smatr.LST',ctmp)
-C     open(126,file=TRIM(fname)//'_Pchan.LST')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Pchan.LST'
       iwin = ipipe_move('ecis06_Pchan.LST',ctmp)
+      ctmp = Outname(1:Length)//'_Pchan.bin'
+      iwin = ipipe_move('ecis06_Pchan.bin',ctmp)
 
       IF (Iret.EQ.4 .OR. Inter.EQ.0) RETURN
-C     open(122,file=TRIM(fname)//'_Pdiag.LST')                          RCN  RCN
+      ctmp = Outname(1:Length)//'_Pmatr.LST'
+      iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
+      ctmp = Outname(1:Length)//'_Smatr.LST'
+      iwin = ipipe_move('ecis06_Smatr.LST',ctmp)
       ctmp = Outname(1:Length)//'_Pdiag.LST'
       iwin = ipipe_move('ecis06_Pdiag.LST',ctmp)
-C     open(123,file=TRIM(fname)//'_Umatr.LST')                          RCN  RCN
       ctmp = Outname(1:Length)//'_Umatr.LST'
       iwin = ipipe_move('ecis06_Umatr.LST',ctmp)
+
+      ctmp = Outname(1:Length)//'_Pmatr.bin'
+      iwin = ipipe_move('ecis06_Pmatr.bin',ctmp)
+      ctmp = Outname(1:Length)//'_Smatr.bin'
+      iwin = ipipe_move('ecis06_Smatr.bin',ctmp)
+      ctmp = Outname(1:Length)//'_Pdiag.bin'
+      iwin = ipipe_move('ecis06_Pdiag.bin',ctmp)
+      ctmp = Outname(1:Length)//'_Umatr.bin'
+      iwin = ipipe_move('ecis06_Umatr.bin',ctmp)
       RETURN
       END
 

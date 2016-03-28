@@ -1,7 +1,6 @@
-$DEBUG
-! $Rev: 4661 $
+! $Rev: 4662 $
 ! $Author: rcapote $
-! $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
+! $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -47,7 +46,7 @@ MODULE TLJs
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
-   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), Sab(:,:), Sdiag(:,:), ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
+   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), Sab(:,:), PPdiag(:,:), Sdiag(:,:), ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
 
    COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:) ! EW matrices 
 
@@ -105,6 +104,11 @@ CONTAINS
       ALLOCATE(Sdiag(nch,nch),STAT=my)
       IF(my /= 0) GOTO 30
       Sdiag = 0.d0
+
+      IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
+      ALLOCATE(PPdiag(nch,nch),STAT=my)
+      IF(my /= 0) GOTO 30
+      PPdiag = 0.d0
 
       IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
       ALLOCATE(ZItmp(nch,nch),STAT=my)
@@ -272,6 +276,7 @@ CONTAINS
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
       !  Temporal matrices 
       IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
+      IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
       IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
       IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
       IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
@@ -285,23 +290,14 @@ CONTAINS
 
       IMPLICIT NONE
       LOGICAL fexist
-      !CHARACTER*3 ctldir
-      !CHARACTER*23 ctmp23
-      !DATA ctldir/'TL/'/
 
       Open_CC_files = .FALSE.
 
-      !WRITE (ctmp23,'(i3.3,i3.3,1h_,i3.3,i3.3,1h_,i9.9)') INT(ZEJc(0)),INT(AEJc(0)),INT(Z(0)),INT(A(0)),INT(EINl*1000000)
-
       !--The INQUIRE statement determines whether or not the file exists.
       !--If it does not, the program calculates new transmission coeff.
-      !INQUIRE (FILE = (ctldir//ctmp23//'_Pchan.LST'),EXIST = fexist)
-      INQUIRE (FILE = ('INCIDENT_Pchan.LST'),EXIST = fexist)
-      IF (.not. fexist) RETURN ! *_Pchan.LST not found
-      !  INQUIRE (FILE = (ctldir//ctmp23//'_Smatr.LST'),EXIST = fexist)
-
-      !  OPEN (126, FILE = (ctldir//ctmp23//'_Pchan.LST'), STATUS = 'old')
-      OPEN (126, FILE = ('INCIDENT_Pchan.LST'), STATUS = 'old')
+      INQUIRE (FILE = ('INCIDENT_Pchan.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Pchan.bin not found
+      OPEN (126, FILE = ('INCIDENT_Pchan.bin'), STATUS = 'old',form='unformatted')
 
       Open_CC_files = .TRUE. ! normal return
 
@@ -314,26 +310,19 @@ CONTAINS
 
       !--The INQUIRE statement determines whether or not the file exists.
       !--If it does not, the program calculates new transmission coeff.
-      !INQUIRE (FILE = (ctldir//ctmp23//'_Pmatr.LST'),EXIST = fexist)
-      INQUIRE (FILE = ('INCIDENT_Pmatr.LST'),EXIST = fexist)
-      IF (.not. fexist) RETURN ! *_Pmatr.LST not found
-      !INQUIRE (FILE = (ctldir//ctmp23//'_Pdiag.LST'),EXIST = fexist)
-      INQUIRE (FILE = ('INCIDENT_Pdiag.LST'),EXIST = fexist)
-      IF (.not. fexist) RETURN ! *_Pdiag.LST not found
-      !INQUIRE (FILE = (ctldir//ctmp23//'_Umatr.LST'),EXIST = fexist)
-      INQUIRE (FILE = ('INCIDENT_Umatr.LST'),EXIST = fexist)
-      IF (.not. fexist) RETURN ! *_Umatr.LST not found
-      INQUIRE (FILE = ('INCIDENT_Smatr.LST'),EXIST = fexist)
-      IF (.not. fexist) RETURN ! *_Smatr.LST not found
+      INQUIRE (FILE = ('INCIDENT_Pmatr.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Pmatr.bin not found
+      INQUIRE (FILE = ('INCIDENT_Pdiag.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Pdiag.bin not found
+      INQUIRE (FILE = ('INCIDENT_Umatr.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Umatr.bin not found
+      INQUIRE (FILE = ('INCIDENT_Smatr.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Smatr.bin not found
 
-      !OPEN (125, FILE = (ctldir//ctmp23//'_Pmatr.LST'), STATUS = 'old')
-      !OPEN (58 , FILE = (ctldir//ctmp23//'_Smatr.LST'), STATUS = 'old')
-      !OPEN (60 , FILE = (ctldir//ctmp23//'_Umatr.LST'), STATUS = 'old')
-      !OPEN (61 , FILE = (ctldir//ctmp23//'_Pdiag.LST'), STATUS = 'old')
-      OPEN (125, FILE = ('INCIDENT_Pmatr.LST'), STATUS = 'old')
-      OPEN (58 , FILE = ('INCIDENT_Smatr.LST'), STATUS = 'old')
-      OPEN (60 , FILE = ('INCIDENT_Umatr.LST'), STATUS = 'old')
-      OPEN (61 , FILE = ('INCIDENT_Pdiag.LST'), STATUS = 'old')
+      open(125,FILE = ('INCIDENT_Pmatr.bin'), STATUS = 'old',form='unformatted')   
+      open( 58,FILE = ('INCIDENT_Smatr.bin'), STATUS = 'old',form='unformatted')   
+      open( 60,FILE = ('INCIDENT_Umatr.bin'), STATUS = 'old',form='unformatted')   
+      open( 61,FILE = ('INCIDENT_Pdiag.bin'), STATUS = 'old',form='unformatted')   
 
       Open_CC_files = .TRUE. ! normal return
 
@@ -366,7 +355,7 @@ CONTAINS
    TYPE (cc_umatrix), POINTER :: ps_umatrix
    TYPE (cc_pdiag), POINTER :: ps_pdiag
    logical debug
-   DATA debug/.FALSE./
+   DATA debug/.false./
 
    Read_CC_matrices = .FALSE.
 
@@ -378,15 +367,19 @@ CONTAINS
    DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq
-     ! write(*,*) jc,parc,nceq
+
+     !READ (126,END=10,ERR=10) jc, parc, nceq
+     READ (126,END=10,ERR=10) jc, parc, nceq
+     !READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq
+     !write(*,*) jc,parc,nceq
      npmat = npmat + (nceq*(nceq+1))/2
      numat = numat + nceq**2
      DO i1 = 1, nceq
        nch = nch + 1
        ps_tlj => STLcc(nch)
-       READ (126,*,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
-      ! write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') nlev,nl,sngl(jj),sngl(sreal),sngl(jc),ps_tlj%Pcn
+       READ (126,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
+       !READ (126,*,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
+       !write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') nlev,nl,sngl(jj),sngl(sreal),sngl(jc),ps_tlj%Pcn
        ps_tlj%Jcn = jc
        ps_tlj%Pcn = 1
        if(parc == '-') ps_tlj%Pcn = -1
@@ -415,15 +408,17 @@ CONTAINS
    DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq
-     ! write(*,*) jc,parc,nceq
+     READ (125,END=12,ERR=12) jc, parc, nceq
+     !READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq
+     !write(*,*) jc,parc,nceq
      !--Loop over the number of coupled equations (squared)
      nelem = (nceq*(nceq+1))/2
      DO i1 = 1, nelem
        nch = nch + 1
        ps_pmatrix => CCpmatrix(nch)
-       READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
-       ! write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
+       READ (125,END = 5,ERR = 5) nc1, nc2, sreal, simag
+       !READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
+       !write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
        ps_pmatrix%Jcn = jc
        ps_pmatrix%Pcn = 1
        if(parc == '-') ps_pmatrix%Pcn = -1
@@ -437,22 +432,24 @@ CONTAINS
 12 MAX_pmatr = nch
    if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
    if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
+   if (debug) pause
 
-   !debug = .FALSE.
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCsmatrix(:)
    !==Reading Smatr
    nch = 0
    DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (58,'(1x,f9.1,4x,a1,1x,i4)',END=13,ERR=13) jc, parc, nceq
+     READ (58,END=13,ERR=13) jc, parc, nceq
+     !READ (58,'(1x,f9.1,4x,a1,1x,i4)',END=13,ERR=13) jc, parc, nceq
      if (debug) write(*,*) jc,parc,nceq
      !--Loop over the number of coupled equations (squared)
      nelem = (nceq*(nceq+1))/2
      DO i1 = 1, nelem
        nch = nch + 1
        ps_smatrix => CCsmatrix(nch)
-       READ (58,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
+       READ (58,END = 6,ERR = 6) nc1, nc2, sreal, simag
+       !READ (58,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
        if (debug) write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
        ps_smatrix%Jcn = jc
        ps_smatrix%Pcn = 1
@@ -467,25 +464,25 @@ CONTAINS
 13 if (debug) WRITE(*,*) 'Smatrix channels read:',nch
    if (debug) WRITE(*,*) 'Smatrix channels calc:',npmat
 
-   !debug = .FALSE.
-
    !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
    !==Reading Umatr
    nch = 0
    DO ncc = 1, MAX_cc_mod
       !--jc,parc are the channel spin and parity
       !--nceq is the number of coupled equations
-      READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq
-      !  write(*,*) jc,parc,nceq
+      READ (60,END=14,ERR=14) jc, parc, nceq
+      !READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq
+      !write(*,*) jc,parc,nceq
       !
       !--Loop over the number of coupled equations
       DO i1 = 1, nceq
-         READ (60,*,END = 7,ERR = 7) ! nc1
+         ! READ (60,*,END = 7,ERR = 7) ! nc1
          DO i2 = 1, nceq
             nch = nch + 1
             ps_umatrix => CCumatrix(nch)
-            READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
-            ! write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sngl(sreal),sngl(simag)
+            READ (60,END = 7,ERR = 7) sreal,simag
+            !READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
+            !write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sreal,simag
             ps_umatrix%Jcn = jc
             ps_umatrix%Pcn = 1
             if(parc == '-') ps_umatrix%Pcn = -1
@@ -507,14 +504,16 @@ CONTAINS
    DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-     READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq
+     READ (61,END=16,ERR=16) jc, parc, nceq
+     !READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq
      ! write(*,*) jc,parc,nceq
      !
      !--Loop over the number of coupled equations
      DO i1 = 1, nceq
        nch = nch + 1
        ps_pdiag => CCpdiag(nch)
-       READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
+       READ (61,END = 8,ERR = 8) sreal
+       !READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
        ! write(*,*) nc1,sreal
        ps_pdiag%Jcn = jc
        ps_pdiag%Pcn = 1
@@ -529,8 +528,6 @@ CONTAINS
 
 Read_CC_matrices = .TRUE.
 
-pause
-
 RETURN
 
 4 WRITE(8,*)' WARNING: Problem reading Pchan matrix'
@@ -538,11 +535,11 @@ STOP ' WARNING: Problem reading Pchan matrix'
 5 WRITE(8,*)' WARNING: Problem reading EW Pmatrix'
 STOP ' WARNING: Problem reading EW Pmatrix'
 6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
-STOP ' WARNING: Problem reading EW Pmatrix'
+STOP ' WARNING: Problem reading EW Smatrix'
 7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
-STOP ' WARNING: Problem reading EW Pmatrix'
+STOP ' WARNING: Problem reading EW Umatrix'
 8 WRITE(8,*)' WARNING: Problem reading EW Pdiag matrix'
-STOP ' WARNING: Problem reading EW Pmatrix'
+STOP ' WARNING: Problem reading EW Pdiag'
 
 END FUNCTION Read_CC_matrices
 
@@ -586,9 +583,11 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
    if (debug) write(*,*) ' Prepare_CC: Pdiag', sngl(Jcn), pcn, ncc, nmaxp
 
    IF(INTerf==0) RETURN
+       
+   ! if(NINT(2*CCpmatrix(nccu)%Jcn) == 1 .and. CCpmatrix(nccu)%Pcn == +1) debug = .TRUE.
 
-      if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
-      DO nccu = 1, MAX_umatr
+   if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
+   DO nccu = 1, MAX_umatr
       ndim =  0
       nmaxu = 0
       if(NINT(2*CCumatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
@@ -600,8 +599,8 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
 
       do i1 = nccu, nmaxu
-         if (debug) WRITE (*,*) i1, i1-nccu+1, CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
-         Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
+         if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+         Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
       enddo
       if (debug) write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
 
@@ -609,6 +608,8 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       EXIT
 
    ENDDO
+
+   ! debug = .false.
 
    if (debug) write(*,*) 'Pmatr, MAX_pumatr: ',MAX_umatr
    DO nccu = 1, MAX_pmatr
@@ -623,13 +624,18 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
 
       do i1 = nccu, nmaxu
-	     irow = CCpmatrix(i1)%irow
-		 icol = CCpmatrix(i1)%icol
-         Pmatr(irow,icol) = CCpmatrix(i1)%umatrix
-		 if(irow /= icol) Pmatr(icol,irow) = Pmatr(irow,icol) 
+	     icol = CCpmatrix(i1)%irow
+		 irow = CCpmatrix(i1)%icol
+         if(irow == icol) then
+           Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
+         else
+           Pmatr(irow,icol) =  CONJG(CCpmatrix(i1)%umatrix)
+           Pmatr(icol,irow) =  CONJG(Pmatr(irow,icol))
+         endif
       enddo
-      
+            
 	  if (debug) then
+        WRITE (*,*) 'preparing Pmatrix...'
 	    do irow = 1, ndim
 	      do icol = 1, ndim
             WRITE (*,*) irow, icol, Pmatr(irow,icol) 
@@ -657,13 +663,18 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
 
       do i1 = nccu, nmaxu
-	     irow = CCsmatrix(i1)%irow
-		 icol = CCsmatrix(i1)%icol
-         Smatr(irow,icol) = CCsmatrix(i1)%umatrix
-		 if(irow /= icol) Smatr(icol,irow) = Smatr(irow,icol)
+	     icol = CCsmatrix(i1)%irow
+		 irow = CCsmatrix(i1)%icol
+         if(irow == icol) then
+           Smatr(irow,icol) =  CCsmatrix(i1)%umatrix
+         else
+           Smatr(irow,icol) =  CONJG(CCSmatrix(i1)%umatrix)
+           Smatr(icol,irow) =  CONJG(Smatr(irow,icol))
+         endif
       enddo
       
 	  if (debug) then
+        WRITE (*,*) 'preparing Smatrix...'
 	    do irow = 1, ndim
 	      do icol = 1, ndim
             WRITE (*,*) irow, icol, Smatr(irow,icol) 

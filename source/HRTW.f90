@@ -1,4 +1,3 @@
-$DEBUG
 MODULE width_fluct
 
    !
@@ -26,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4661 $
+   ! $Rev: 4662 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
+   ! $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
    !
 
    TYPE channel
@@ -180,6 +179,8 @@ MODULE width_fluct
       0.003073583718520531501218293246031D0/)
 
    PUBLIC HRTW, Moldauer
+
+   PRIVATE QDIAG
 
 CONTAINS
 
@@ -1414,10 +1415,11 @@ CONTAINS
       REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s, stmp, ewcor, w, dtmp
-      REAL*8 nu_ialph, nu_ibeta, sigma_ , sigma_EW
+      REAL*8 nu_ialph, nu_ibeta, sigma_ , sigma_EW, epsil
       INTEGER ialph,ibeta,iaa,ibb,ialph_ch,ibeta_ch,IER
 	  REAL*8 deg_alph,deg_beta
       COMPLEX*16 ctmp1, phas
+	  DATA epsil/1.d-12/
 	  
 	  !
       TYPE (channel), POINTER :: out
@@ -1626,7 +1628,8 @@ CONTAINS
                  xnor = in%sig/DENhf ! normalization factor
                  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                ELSE
-                 xnor = 1.d0/DENhf ! normalization factor
+                 !xnor = 1.d0/DENhf ! normalization factor
+                 xnor = 1.d0
 			   ENDIF
                !----------------------------------------------------------
                ! Fission
@@ -1761,70 +1764,64 @@ CONTAINS
 
             IF(INTerf>0) THEN
 
-       		   write(*,*) 'Dimension of Umatr:',NDIm_cc_matrix
+       		   write (*,*) 'Dimension of Umatr:',NDIm_cc_matrix
 			   write (*,*) 'Dimension of Umatr (real):',sqrt(DBLE(size(Umatr)))
 
-               ! Calculating the transposed matrix
-               !Umatr_T = TRANSPOSE(CONJG(Umatr)) 
-               !comptmp = MATMUL(Umatr,Umatr_T)   ! CHECKED, OK !!!
-               !do i=1,NDIm_cc_matrix
-               !  do iout=1,NDIm_cc_matrix
-      	       !    write (*,'(1x,A20,2(1x,i3),1x,d12.6,1x,d12.6)') 'Umatr*(Umatr^T)*  =',i,iout,  &
-      		   !      comptmp(i,iout)
-			   !  enddo
-			   !enddo
-
-               !do i=1,NDIm_cc_matrix
-               !  do iout=1,NDIm_cc_matrix
-      		   !    write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)')'Smatr =',i,iout, Smatr(i,iout)
-			   !  enddo
-			   !enddo
-
-               do i=1,NDIm_cc_matrix
-      		     write (*,'(1x,A7,i3,1x,d12.6,1x,d12.6)')'Pdiag =',i, Pdiag(i)
-                 do iout=1,NDIm_cc_matrix
-      		       write (*,'(1x,A7,2(1x,i3),1x,d12.6,1x,d12.6)')'Umatr =',i,iout, Umatr(i,iout)
-			     enddo
-			   enddo
-               pause
-
-			   ! setting the complex identity matrix to call DIAG() (UNIT MATRIX)
+			   ! setting the complex identity matrix to call DIAG() 
 			   ZRtmp1 = 0.d0
                do i=1,NDIm_cc_matrix
                  ZRtmp1(i,i) = 1.d0			     
 			   enddo
 			   ZItmp1 = 0.d0
 
-			   ! Diagonalizing the Smatrix in the transformed space
-			   Sdiag = REAL(Pmatr) 
-			   ZItmp = IMAG(Pmatr)
+			   !Diagonalizing the Smatrix in the transformed space
+               Sdiag =   REAL(Smatr) 
+               ZItmp =   IMAG(Smatr) 
+               !write(*,*) 'Smatrix HRTW'
+               !DO i = 1,NDIm_cc_matrix
+               !  DO iout = 1,NDIm_cc_matrix
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') i,iout,Sdiag(i,iout),ZItmp(i,iout)
+               !  ENDDO
+	           !ENDDO
 
-			   CALL DIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,NDIm_cc_matrix,1.d-12,dtmp,IER)                     
+			   CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+               IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Smatrix in CN Jpi=',sngl(xjc*ip)   
 			   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
-		     
-               !
-    		   ! 02/04/06                                                           from ECIS06
-			   !     SUBROUTINE DIAG(ZR,ZI,XR,XI,N,NC,EPS,AX,IER)                      DIAG-001
-			   ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE  DIAG-002
-			   ! JACOBI'S METHOD.                                                      DIAG-003
-			   ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.            DIAG-004
-			   !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.       DIAG-005
-			   !            N:      FIRST DIMENSION OF ZR,ZI,XR AND XI.                DIAG-006
-			   !            NC:     DIMENSION OF THE MATRIX.                           DIAG-007
-			   !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.    DIAG-008
-			   ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.         DIAG-009
-			   !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.DIAG-010
-			   !            XR,XI:  EIGENVECTORS.                                      DIAG-011
-			   !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.DIAG-012
-			   !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.           DIAG-013
-			   !***********************************************************************DIAG-014
-
         	   ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
 			   do i=1,NDIm_cc_matrix
       	         write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
 			     Sphase(i) = datan(Sdiag(i,i))
 			   enddo
-               !PAUSE
+
+			   ! setting the complex identity matrix to call DIAG() 
+			   ZRtmp1 = 0.d0
+               do i=1,NDIm_cc_matrix
+                 ZRtmp1(i,i) = 1.d0			     
+			   enddo
+			   ZItmp1 = 0.d0
+			   !Diagonalizing the Pmatrix in the transformed space for cross checking 
+               PPdiag =   REAL(Pmatr) 
+               ZItmp  =   IMAG(Pmatr) 
+               !write(*,*) 'Pmatrix HRTW'
+               !DO i = 1,NDIm_cc_matrix
+               !  DO iout = 1,NDIm_cc_matrix
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') i,iout,PPdiag(i,iout),ZItmp(i,iout)
+               !  ENDDO
+	           !ENDDO
+			   CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+               IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)   
+			   ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space 
+               ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix            
+		     
+			   WRITE(*,*) 'HRTW diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+               DO iout = 1,NDIm_cc_matrix
+      	         write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
+			     DO I = 1,NDIm_cc_matrix
+			   	   write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6)') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
+                 ENDDO
+			   ENDDO
+
+               PAUSE
 
 			   ! Engelbrecht- Weidenmueller transformaion
                ! loop over iaa=i (coupled channels in the normal space)
@@ -1850,12 +1847,10 @@ CONTAINS
 					 
                      ! Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
-                     sigma_EW = 0.d0  ! This is the cross section \sigma_{ab} in the normal space
                      ! loops over collective levels in the transformed space (ialph & ibeta)
-
                      !write(*,*) 'EW transformation, space dimension',NDIm_cc_matrix
                      ctmp1 = (0.d0,0.d0) 
-					 sigma_ = 0.d0
+                     sigma_EW = 0.d0      ! This is the cross section \sigma_{ab} in the normal space
                      do ialph = 1, NDIm_cc_matrix    
 						ialph_ch = num%coll + ialph -1
                         nu_ialph =  outchnl(ialph_ch)%eef/2.D0   ! half of the degree of freedom for alpha channel
@@ -1864,37 +1859,37 @@ CONTAINS
                         do ibeta = 1, NDIm_cc_matrix 
 						  ! phas represents the arctan(S_{alpha,alpha}) given in eq.(20)
 						  dtmp = Sphase(ialph)-Sphase(ibeta)
-						  phas = CMPLX(sin(dtmp),cos(dtmp))
-						  ! phas = (1.d0,0.d0) ! assumed one for the time being
+						  !phas = CMPLX(cos(dtmp),sin(dtmp))
+						  phas = (1.d0,0.d0) ! assumed one for the time being
    					      ibeta_ch = num%coll + ibeta -1
                           nu_ibeta =  outchnl(ibeta_ch)%eef/2.D0 ! half of the degree of freedom for the outgoing channel
                           deg_beta =  DSQRT(1.d0/nu_ibeta - 1.d0)
 
         			      ! write(*,*) 'EW loops',ialph, ibeta, sngl(Sab(ialph,ibeta)),sngl(WFC(ialph_ch,ibeta_ch))
 						   
-                           if(ialph == ibeta) then
-                              sigma_EW = sigma_EW + Umatr(ialph,iaa)*CONJG(Umatr(iaa,ialph)) &
-							                      * Umatr(ialph,ibb)*CONJG(Umatr(ibb,ialph)) &
-												  * Sab(ialph,ialph)
-                           else
-							  ctmp1 = ctmp1 + Sab(ialph,ibeta)*                              &
-							       ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*        &
-                                      ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +                  &
-                                        Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +                &
-                                     CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*        &
-                                           Umatr(ibeta,iaa) *      Umatr(ibeta,ibb)*		 &
+                          if(ialph == ibeta) then
+                            ctmp1 = ctmp1 + ABS(Umatr(ialph,iaa))**2 & !  Umatr(ialph,iaa)*CONJG(Umatr(iaa,ialph))   &
+							              * ABS(Umatr(ialph,ibb))**2 & !* Umatr(ialph,ibb)*CONJG(Umatr(ibb,ialph)) &
+										  * Sab(ialph,ialph)
+                          else
+                            ctmp1 = ctmp1 + Sab(ialph,ibeta)*                          &
+							       ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
+                                      ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +            &
+                                        Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +          &
+                                     CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*  &
+                                           Umatr(ibeta,iaa) *      Umatr(ibeta,ibb)*   &
 								                phas*deg_alph*deg_beta )
-							  sigma_ = sigma_ + DIMAG(ctmp1)
-                              sigma_EW = sigma_EW + REAL(ctmp1) 
-                           endif
+                          endif
                         enddo ! end of the loop over ibeta (transformed space)					 
-
                      enddo   ! end of the loop over ialph (transformed space)
-					 write(*,*) 'Sigma_abs=',in%sig
-                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', sigma_EW,' REAL'
-                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', sigma_  ,' IMAG'
 
-                     sigma_ = sigma_EW
+                     sigma_EW = sigma_EW + REAL(ctmp1)   
+
+					 write(*,*) 'Sigma_abs=',in%sig
+                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', REAL (ctmp1),' REAL' ! the cross section \sigma_{ab} in the normal space
+                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', DIMAG(ctmp1),' IMAG' ! the imaginary part expected to be zero
+
+                     sigma_ = sigma_EW*in%sig
 
 					 PAUSE
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
@@ -2255,5 +2250,121 @@ CONTAINS
       ENDIF
 
    END SUBROUTINE Gamma_renormalization
+
+   SUBROUTINE QDIAG(ZR,ZI,XR,XI,NC,EPS,AX,IER)
+!
+! TAKEN FROM ECIS2006 by J. RAYNAL
+! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE  
+! JACOBI'S METHOD.                                                      
+! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.            
+!            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.       
+!            NC:     DIMENSION OF SQUARE MATRICES ZR,ZI,XR AND XI.                
+!            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.    
+! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.         
+!                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.
+!            XR,XI:  EIGENVECTORS.                                      
+!            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.
+!            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.           
+!***********************************************************************
+      IMPLICIT NONE
+	  INTEGER NC
+	  REAL*8 ZR,ZI,XR,XI
+	  DIMENSION ZR(NC,NC),ZI(NC,NC),XR(NC,NC),XI(NC,NC)                     
+	  REAL*8 EPS,AX
+	  INTEGER IER
+      ! local variables	  
+      INTEGER NT,I,J,L,M
+	  REAL*8 AR,AI,AY,BI,BR,U,V,UC,US,TC,TS,UCC,UCS,USC,USS
+
+      IER=0                                                             
+      NT=0                                                              
+    1 NT=NT+1                                                           
+      IF (NT.GT.4*NC*NC) GO TO 6                                        
+      AX=0.D0                                                           
+      L=1                                                               
+      M=2                                                               
+      
+!     if(NT<=1) then 
+!       write(*,*) 'Inside QDIAG to diag, iter',NT,NC,sngl(EPS)
+!       DO I = 1,NC
+!           write(*,'(1x,9(d12.6,1x,d12.6/)') (ZR(I,J),ZI(I,J),J=1,NC)
+!         ENDDO
+!        write(*,*) 'Inside QDIAG unitary, iter'
+!        DO I = 1,NC
+!            write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
+!          ENDDO
+!     endif
+
+! SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.       
+      DO I=1,NC                                                       
+		DO J=I,NC                                                       
+		  IF (ZR(J,I).EQ.0.D0) ZR(I,J)=0.D0                                 
+		  IF (ZI(J,I).EQ.0.D0) ZI(I,J)=0.D0                                 
+		  IF (ZR(I,J).EQ.0.D0) ZR(J,I)=0.D0                                 
+		  IF (ZI(I,J).EQ.0.D0) ZI(J,I)=0.D0                                 
+		  AR=(ZR(I,J)+ZR(J,I))/2.D0                                         
+		  AI=(ZI(I,J)-ZI(J,I))/2.D0                                         
+		  ZR(J,I)=AR                                                        
+		  ZR(I,J)=AR                                                        
+		  ZI(I,J)=AI                                                        
+		  ZI(J,I)=-AI                                                       
+		  IF (I.EQ.J) CYCLE
+		  AY=ZR(I,J)**2+ZI(I,J)**2                                          
+		  IF (AX.GT.AY) CYCLE
+		  AX=AY                                                             
+		  L=I                                                               
+		  M=J
+		ENDDO
+	  ENDDO                                                               
+      IF (AX.EQ.0.D0) RETURN                                            
+! ELEMENTARY TRANSFORMATION.                                            
+      U=DATAN2(-ZI(L,M),ZR(L,M))/2.D0                                   
+      V=DATAN2(2.D0*DSQRT(ZR(L,M)**2+ZI(L,M)**2),ZR(M,M)-ZR(L,L))/2.D0  
+      UC=DCOS(U)                                                        
+      US=DSIN(U)                                                        
+      TC=DCOS(V)                                                        
+      TS=-DSIN(V)                                                       
+      UCC=UC*TC                                                         
+      UCS=UC*TS                                                         
+      USC=US*TC                                                         
+      USS=US*TS                                                         
+   ! TRANSFORMATION OF ROWS.                                               
+      DO I=1,NC                                                       
+		  AR=XR(I,L)*UCC+XI(I,L)*USC+XR(I,M)*UCS-XI(I,M)*USS                
+		  BR=-XR(I,L)*UCS-XI(I,L)*USS+XR(I,M)*UCC-XI(I,M)*USC               
+		  AI=XI(I,L)*UCC-XR(I,L)*USC+XI(I,M)*UCS+XR(I,M)*USS                
+		  BI=-XI(I,L)*UCS+XR(I,L)*USS+XI(I,M)*UCC+XR(I,M)*USC               
+		  XR(I,L)=AR                                                        
+		  XR(I,M)=BR                                                        
+		  XI(I,L)=AI                                                        
+		  XI(I,M)=BI                                                        
+		  AR=ZR(I,L)*UCC+ZI(I,L)*USC+ZR(I,M)*UCS-ZI(I,M)*USS                
+		  BR=-ZR(I,L)*UCS-ZI(I,L)*USS+ZR(I,M)*UCC-ZI(I,M)*USC               
+		  AI=ZI(I,L)*UCC-ZR(I,L)*USC+ZI(I,M)*UCS+ZR(I,M)*USS                
+		  BI=-ZI(I,L)*UCS+ZR(I,L)*USS+ZI(I,M)*UCC+ZR(I,M)*USC               
+		  ZR(I,L)=AR                                                        
+		  ZR(I,M)=BR                                                        
+		  ZI(I,L)=AI                                                        
+		  ZI(I,M)=BI                                                        
+	  ENDDO
+   ! TRANSFORMATION OF COLUMNS.                                            
+      DO I=1,NC                                                       
+      AR=ZR(L,I)*UCC-ZI(L,I)*USC+ZR(M,I)*UCS+ZI(M,I)*USS                
+      BR=-ZR(L,I)*UCS+ZI(L,I)*USS+ZR(M,I)*UCC+ZI(M,I)*USC               
+      AI=ZI(L,I)*UCC+ZR(L,I)*USC+ZI(M,I)*UCS-ZR(M,I)*USS                
+      BI=-ZI(L,I)*UCS-ZR(L,I)*USS+ZI(M,I)*UCC-ZR(M,I)*USC               
+      IF (DABS(AR).LT.EPS) AR=0.D0                                      
+      IF (DABS(BR).LT.EPS) BR=0.D0                                      
+      IF (DABS(AI).LT.EPS) AI=0.D0                                      
+      IF (DABS(BI).LT.EPS) BI=0.D0                                      
+      ZR(L,I)=AR                                                        
+      ZR(M,I)=BR                                                        
+      ZI(L,I)=AI                                                        
+      ZI(M,I)=BI                                                        
+	  ENDDO
+      GO TO 1                                                           
+    6 IER=-1                                                            
+      RETURN                                                            
+   END SUBROUTINE QDIAG
 
 END MODULE width_fluct
