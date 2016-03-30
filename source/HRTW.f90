@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4662 $
+   ! $Rev: 4663 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
+   ! $Date: 2016-03-30 02:55:18 +0200 (Mi, 30 Mär 2016) $
    !
 
    TYPE channel
@@ -1764,8 +1764,8 @@ CONTAINS
 
             IF(INTerf>0) THEN
 
-       		   write (*,*) 'Dimension of Umatr:',NDIm_cc_matrix
-			   write (*,*) 'Dimension of Umatr (real):',sqrt(DBLE(size(Umatr)))
+       		   ! write (*,*) 'Dimension of Umatr:',NDIm_cc_matrix
+			   ! write (*,*) 'Dimension of Umatr (real):',sqrt(DBLE(size(Umatr)))
 
 			   ! setting the complex identity matrix to call DIAG() 
 			   ZRtmp1 = 0.d0
@@ -1789,7 +1789,7 @@ CONTAINS
 			   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
         	   ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
 			   do i=1,NDIm_cc_matrix
-      	         write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
+      	         ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
 			     Sphase(i) = datan(Sdiag(i,i))
 			   enddo
 
@@ -1813,24 +1813,28 @@ CONTAINS
 			   ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space 
                ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix            
 		     
-			   WRITE(*,*) 'HRTW diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
-               DO iout = 1,NDIm_cc_matrix
-      	         write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
-			     DO I = 1,NDIm_cc_matrix
-			   	   write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6)') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
-                 ENDDO
-			   ENDDO
-
-               PAUSE
+			   !WRITE(*,*) 'HRTW diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+               !DO iout = 1,NDIm_cc_matrix
+      	       !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
+			   !  DO I = 1,NDIm_cc_matrix
+			   !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6)') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
+               !  ENDDO
+			   !ENDDO
 
 			   ! Engelbrecht- Weidenmueller transformaion
                ! loop over iaa=i (coupled channels in the normal space)
+               write(*,*) 'CN decay state Jpi',xjc,ip
+			   write(*,*) 'num%elal, num%elah=',num%elal, num%elah 
+			   write(*,*) 'num%coll, num%colh=',num%coll, num%colh
+			   write(*,*) '1-num%part=',1,num%part
                DO i = num%elal, num%elah
                   
 				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
 
 				  iaa = i - num%elal + 1
                   in => inchnl(iaa) ! elastic channels for each Jcn are numbered 1,2,3,...
+                  out => outchnl(i)
+	     	      write(*,*) 'i,iaa, -out%kres, in%t=', i, iaa, -out%kres  
                   ! absorption ~ sigma_a
                   ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                   in%sig = coef*STLcc(i)%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
@@ -1859,8 +1863,8 @@ CONTAINS
                         do ibeta = 1, NDIm_cc_matrix 
 						  ! phas represents the arctan(S_{alpha,alpha}) given in eq.(20)
 						  dtmp = Sphase(ialph)-Sphase(ibeta)
-						  !phas = CMPLX(cos(dtmp),sin(dtmp))
-						  phas = (1.d0,0.d0) ! assumed one for the time being
+						  phas = CMPLX(cos(dtmp),sin(dtmp))
+						  !phas = (1.d0,0.d0) ! assumed one for the time being
    					      ibeta_ch = num%coll + ibeta -1
                           nu_ibeta =  outchnl(ibeta_ch)%eef/2.D0 ! half of the degree of freedom for the outgoing channel
                           deg_beta =  DSQRT(1.d0/nu_ibeta - 1.d0)
@@ -1891,11 +1895,13 @@ CONTAINS
 
                      sigma_ = sigma_EW*in%sig
 
-					 PAUSE
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
 
 					 out => outchnl(iout) ! reassigning output channel to the outgoing CC in the normal space
+	     	         write(*,*) 'iout,ibb, -out%kres=', iout, ibb, -out%kres  
+
+					 PAUSE
 
                      IF(out%kres>0) THEN                      !continuum channels
                         SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
@@ -1916,6 +1922,8 @@ CONTAINS
 
                   ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
+                  CALL DelCCmatr() ! deallocate EW matrices
+				  CYCLE
                   !----------------------------------------------------------------------------------------
                   ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
                   !----------------------------------------------------------------------------------------
@@ -2028,7 +2036,7 @@ CONTAINS
 
       CALL DelHRTW()    !deallocate HRTW arrays
       IF(DIRECT>0 .and. MAX_cc_mod>0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
-      ! CALL DelCCmatr() ! deallocate EW matrices
+      IF(INTerf==0) CALL DelCCmatr() ! deallocate EW matrices
       RETURN
 
    END SUBROUTINE Moldauer

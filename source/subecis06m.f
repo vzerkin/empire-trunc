@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4662 $
+Ccc   * $Rev: 4663 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
+Ccc   * $Date: 2016-03-30 02:55:18 +0200 (Mi, 30 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19115,10 +19115,10 @@ C***********************************************************************SCAM-104
       COMMON /NOEQU/ NCXN,NIC,NCI,NC,NCIN,NIN,JPI,IPJ,R1(2),NAJ         SCAM-116
       COMMON /INOUT/ MR,MW,MS                                           SCAM-117
       INTEGER MAXcc 
-	logical lcalc
-      REAL*8, ALLOCATABLE :: PRmatr(:,:), PImatr(:,:), 
-     >   PRdiag(:,:),PIdiag(:,:)
-	DATA lcalc/.TRUE./
+C	logical lcalc
+C     REAL*8, ALLOCATABLE :: PRmatr(:,:), PImatr(:,:), 
+C    >   PRdiag(:,:),PIdiag(:,:)
+C	DATA lcalc/.TRUE./
       COMMON /CC_chan/ MAXcc
       DATA IP,AL,PI,NSY /'+','-',' FISSION','   GAMMA',3.141592653589793SCAM-118
      12D0,0/                                                            SCAM-119
@@ -19394,39 +19394,39 @@ C         S-matrix                                                      RCN  RCN
 C----
       IF (LO(83)) GO TO 28                                              SCAM-311
 
-	IF(lcalc) then
-      IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
-      ALLOCATE(PRmatr(NC,NC))
-      IF(allocated(PImatr)) DEALLOCATE(PImatr)
-      ALLOCATE(PImatr(NC,NC))
-      IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
-      ALLOCATE(PRdiag(NC,NC))
-      IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
-      ALLOCATE(PIdiag(NC,NC))
+C     IF(lcalc) then
+C     IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
+C     ALLOCATE(PRmatr(NC,NC))
+C     IF(allocated(PImatr)) DEALLOCATE(PImatr)
+C     ALLOCATE(PImatr(NC,NC))
+C     IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
+C     ALLOCATE(PRdiag(NC,NC))
+C     IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
+C      ALLOCATE(PIdiag(NC,NC))
 
-      PIdiag = 0.d0
-	PRdiag = 0.d0
+C     PIdiag = 0.d0
+C     PRdiag = 0.d0
 C     write(*,*) 'P matrix'  
-	DO I = 1,NC
-	  PRdiag(I,I) = 1.d0
-	  DO J=1,NC
-      	PRmatr(I,J)=P(I,J,1)   
-	    PImatr(I,J)=P(I,J,2)   
-	  ENDDO
-	ENDDO
+C     DO I = 1,NC
+C	  PRdiag(I,I) = 1.d0
+C	  DO J=1,NC
+C      	PRmatr(I,J)=P(I,J,1)   
+C	    PImatr(I,J)=P(I,J,2)   
+C	  ENDDO
+C	ENDDO
 C     DO I = 1,NC
 C       DO J = 1,NC
 C	    write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6)') 
 C    >    I,J,PRmatr(I,J),PImatr(I,J)
 C       ENDDO
 C	ENDDO
-      endif 
+C     endif 
 
       CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
      >    NJC,1.D-12,A1,IERR)    
 
-	IF(lcalc) then
-	lcalc=.FALSE.
+C     IF(lcalc) then
+C     lcalc=.FALSE.
 C     CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
 C    >    NJC,1.D-12,A1,IERR)    
 C     write(*,*) 'ECIS matrix:'
@@ -19438,22 +19438,22 @@ C     EIGENVECTORS
 C 	DO I = 1,NC
 C 	 write(*,'(1x,9(d12.6,1x,d12.6/)')(P(I,J,3),P(I,J,4),J=1,NC)
 C	ENDDO
-	write(*,*) 'Square matrix:'
-      CALL DIAG(PRmatr,PImatr,PRdiag,PIdiag,NC,NC,1.D-12,A1,IERR)      
-	DO J = 1,NC
-        write(*,'(1x,A13,1x,9(d12.6,1x,d12.6)') 
-     >    'Eigenvalues=',PRmatr(J,J),PImatr(J,J)
- 	  DO I = 1,NC
-	    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') 
-     >      I,J,PRdiag(I,J),PIdiag(I,J)
-        ENDDO
-	ENDDO
-      IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
-      IF(allocated(PImatr)) DEALLOCATE(PImatr)
-      IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
-      IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
-	PAUSE
-      endif
+C     write(*,*) 'Square matrix:'
+C     CALL DIAG(PRmatr,PImatr,PRdiag,PIdiag,NC,NC,1.D-12,A1,IERR)      
+C     DO J = 1,NC
+C       write(*,'(1x,A13,1x,9(d12.6,1x,d12.6)') 
+C    >    'Eigenvalues=',PRmatr(J,J),PImatr(J,J)
+C	  DO I = 1,NC
+C         write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') 
+C    >      I,J,PRdiag(I,J),PIdiag(I,J)
+C       ENDDO
+C     ENDDO
+C     IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
+C     IF(allocated(PImatr)) DEALLOCATE(PImatr)
+C     IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
+C     IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
+C     PAUSE
+C     endif
 
       WRITE (122     ) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (123     ) AJ,IP(JPI+1),JC                                  RCN  RCN
