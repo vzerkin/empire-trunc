@@ -1,6 +1,6 @@
-! $Rev: 4662 $
-! $Author: rcapote $
-! $Date: 2016-03-29 01:52:16 +0200 (Di, 29 Mär 2016) $
+! $Rev: 4666 $
+! $Author: mherman $
+! $Date: 2016-03-31 18:08:49 +0200 (Do, 31 Mär 2016) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -46,7 +46,8 @@ MODULE TLJs
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
-   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), Sab(:,:), PPdiag(:,:), Sdiag(:,:), ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
+   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), Sab(:,:), PPdiag(:,:), Sdiag(:,:), &
+                                  ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
 
    COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:) ! EW matrices 
 
