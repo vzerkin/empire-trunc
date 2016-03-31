@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4663 $
+   ! $Rev: 4664 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-30 02:55:18 +0200 (Mi, 30 Mär 2016) $
+   ! $Date: 2016-03-31 09:00:27 +0200 (Do, 31 Mär 2016) $
    !
 
    TYPE channel
@@ -1408,9 +1408,9 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, numch_el
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
-      REAL*8 Ia, xjr, ja, jb, la, lb, xleg, tmp
+      REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
@@ -1704,56 +1704,7 @@ CONTAINS
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
-               IF(.NOT.CN_isotropic) THEN
-                  ! accumulate Legendre coefficients
-                  la = in%l                             !incident neutron l
-                  ja = in%j                             !incident neutron j
-                  ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
-                  DO iout = 1, num%neut !do loop over neutron channels only
-                     ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
-                     ! write(8,*) '                                  leg      BB               Jcn   &
-                     ! &               l_inc           j_inc                 J_res              l_out              J_out'
-                     ! w = 1.D0
-                     out => outchnl(iout)
-                     IF(out%kres > 0) cycle      ! skipping continuum channels
-
-                     xjr = out%xjrs              !residual nucleus J
-                     lb = out%l                  !outgoing neutron l
-                     jb = out%j                  !outgoing neutron j
-                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
-                     PL_lmax(-out%kres) = 2*in%l
-                     !                     IF(out%kres > 0) THEN
-                     !                        PLcont_lmax(out%kres) = 2*in%l
-                     !                     ELSEIF(out%kres < 0) THEN
-                     !                        PL_lmax(-out%kres) = 2*in%l
-                     !                     ENDIF
-                     IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
-                        stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
-                     ELSE                                        ! Elastic and continuum
-                        stmp = xnor*out%t*out%rho*w
-                     ENDIF
-                     DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
-                        xleg = dble(lleg)
-                        tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
-                        ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
-                        ! if(tmp==0.D0) cycle
-                        IF(dabs(tmp) < 1.d-14) CYCLE
-                        PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp*stmp
-                        ! CN ang. distr. for continuum assumed isotropic
-                        !IF(out%kres > 0) THEN
-                        !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + stmp*tmp/de
-                        !ELSEIF(out%kres < 0) THEN
-                        !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + stmp*tmp
-                        !ENDIF
-                     ENDDO
-                     !IF(out%kres > 0) THEN
-                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
-                     !ELSEIF(outchnl(iout)%kres < 0) THEN
-                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
-                     !ENDIF
-                     !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
-                  ENDDO
-               ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
+               CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
@@ -1951,60 +1902,11 @@ CONTAINS
                   SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
                   sumfis = sumfis*xnor                         !                                  "
                   sumfism = sumfism*xnor                       !                                  "
+
                   !---------------------------------------------------------------
                   ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                   !---------------------------------------------------------------
-                  IF(.NOT.CN_isotropic) THEN
-                     ! accumulate Legendre coefficients
-                     la = in%l                             !incident neutron l
-                     ja = in%j                             !incident neutron j
-                     ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
-                     DO iout = num%coll, num%colh  ! 1,num%neut !do loop over neutron channels only
-                        ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
-                        ! write(8,*) '                                  leg      BB               Jcn   &
-                        ! &               l_inc           j_inc                 J_res              l_out              J_out'
-                        ! w = 1.D0
-                        out => outchnl(iout)
-                        !IF(out%kres > 0) cycle      ! skipping continuum channels
-
-                        xjr = out%xjrs              !residual nucleus J
-                        lb = out%l                  !outgoing neutron l
-                        jb = out%j                  !outgoing neutron j
-                        w = Sab(i,iout)             !sigma corrected by Moldauer width fluctuation factor
-
-                        PL_lmax(-out%kres) = 2*in%l
-                        !                     IF(out%kres > 0) THEN
-                        !                        PLcont_lmax(out%kres) = 2*in%l
-                        !                     ELSEIF(out%kres < 0) THEN
-                        !                        PL_lmax(-out%kres) = 2*in%l
-                        !                     ENDIF
-                        IF(i/=iout) THEN               ! Inelastic to discrete level
-                           stmp = w*CINRED(-out%kres)
-                        ELSE                                        ! Elastic and continuum
-                           stmp = w
-                        ENDIF
-                        DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
-                           xleg = dble(lleg)
-                           tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
-                           ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
-                           ! if(tmp==0.D0) cycle
-                           IF(dabs(tmp) < 1.d-14) CYCLE
-                           PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp*stmp
-                           ! CN ang. distr. for continuum assumed isotropic
-                           !IF(out%kres > 0) THEN
-                           !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + stmp*tmp/de
-                           !ELSEIF(out%kres < 0) THEN
-                           !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + stmp*tmp
-                           !ENDIF
-                        ENDDO
-                        !IF(out%kres > 0) THEN
-                        !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
-                        !ELSEIF(outchnl(iout)%kres < 0) THEN
-                        !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
-                        !ENDIF
-                        !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
-                     ENDDO
-                  ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
+				  CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                   !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
@@ -2374,5 +2276,72 @@ CONTAINS
     6 IER=-1                                                            
       RETURN                                                            
    END SUBROUTINE QDIAG
+
+!**************************************************************
+
+   SUBROUTINE CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+      INTEGER i
+      TYPE (fusion),  POINTER :: in
+      REAL*8 Ia, sxj, xjc, xnor 
+
+      REAL*8 la,ja,lb,jb,xjr, w, stmp, xleg, tmp
+      INTEGER iout, lleg
+      TYPE (channel), POINTER :: out
+
+      IF(.NOT.CN_isotropic) RETURN
+      !---------------------------------------------------------------
+      ! CN angular distributions (neutron (in)elastic scattering ONLY!)
+      !---------------------------------------------------------------
+
+                  ! accumulate Legendre coefficients
+                  la = in%l                             !incident neutron l
+                  ja = in%j                             !incident neutron j
+                  ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
+                  DO iout = 1, num%neut !do loop over neutron channels only
+                     ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
+                     ! write(8,*) '                                  leg      BB               Jcn   &
+                     ! &               l_inc           j_inc                 J_res              l_out              J_out'
+                     ! w = 1.D0
+                     out => outchnl(iout)
+                     IF(out%kres > 0) cycle      ! skipping continuum channels
+
+                     xjr = out%xjrs              !residual nucleus J
+                     lb = out%l                  !outgoing neutron l
+                     jb = out%j                  !outgoing neutron j
+                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
+                     PL_lmax(-out%kres) = 2*la
+                     !                     IF(out%kres > 0) THEN
+                     !                        PLcont_lmax(out%kres) = la
+                     !                     ELSEIF(out%kres < 0) THEN
+                     !                        PL_lmax(-out%kres) = la
+                     !                     ENDIF
+                     IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
+                        stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
+                     ELSE                                        ! Elastic and continuum
+                        stmp = xnor*out%t*out%rho*w
+                     ENDIF
+                     DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
+                        xleg = dble(lleg)
+                        tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
+                        ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(iout)%kres
+                        ! if(tmp==0.D0) cycle
+                        IF(dabs(tmp) < 1.d-14) CYCLE
+                        PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp*stmp
+                        ! CN ang. distr. for continuum assumed isotropic
+                        !IF(out%kres > 0) THEN
+                        !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + stmp*tmp/de
+                        !ELSEIF(out%kres < 0) THEN
+                        !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + stmp*tmp
+                        !ENDIF
+                     ENDDO
+                     !IF(out%kres > 0) THEN
+                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
+                     !ELSEIF(outchnl(iout)%kres < 0) THEN
+                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
+                     !ENDIF
+                     !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
+                  ENDDO
+      RETURN
+   END SUBROUTINE CN_DA_anis
 
 END MODULE width_fluct
