@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4664 $
+   ! $Rev: 4667 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-31 09:00:27 +0200 (Do, 31 Mär 2016) $
+   ! $Date: 2016-03-31 19:49:02 +0200 (Do, 31 Mär 2016) $
    !
 
    TYPE channel
@@ -304,9 +304,9 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, lleg, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, numch_el
       REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
-      REAL*8 j, Ia, xjr, ja, jb, la, lb, xleg, tmp
+      REAL*8 Ia, sxj
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c
       REAL*8 sumfism(nfmod) 
@@ -323,6 +323,9 @@ CONTAINS
       SUMfis = 0.D0
       gcasc = 1.0         !ensure full gamma cascade when HRTW
       ke = NEX(nnuc)
+
+      sxj = SEJc(0)
+      Ia  = XJLv(LEVtarg,0)
 
       ! Initialize variables and print heading for normalizing g-strength function
 
@@ -352,7 +355,9 @@ CONTAINS
 
       CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
       ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
-      coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
+
+      !coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
+      IF (AEJc(0)>0) coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
 
       ! start CN nucleus decay
       DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
@@ -398,7 +403,14 @@ CONTAINS
             H_Tl = 0.D0
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
+            !----------------------------------------------------------
+            ! Collecting outgoing channels
+            !----------------------------------------------------------
+
+            !----------------------------------------------------------
             ! particle decay
+            !----------------------------------------------------------
+
             DO nejc = 1, nejcm                            !do loop over ejectiles
                IF(NREs(nejc)<0) CYCLE
                nnur = NREs(nejc)
@@ -411,13 +423,15 @@ CONTAINS
 
             num%part = nch                                !store number of particle channel entries
 
-            ! gamma emission is always a weak channel (one iteration)
+            !----------------------------------------------------------
+            ! gammas (weak channels) (one iteration)
+            !----------------------------------------------------------
 
             sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
-            ! H_Sumtl = H_Sumtl + sumg
-            ! H_Sweak = H_Sweak + sumg
 
-            ! fission (may be a weak or strong channel)
+            !----------------------------------------------------------
+            ! Fission (may be a weak or strong channel)
+            !----------------------------------------------------------
 
             sumfis = 0.D0
             tfis = 0.D0
@@ -430,7 +444,6 @@ CONTAINS
                   CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
                ENDIF
                H_Sumtl = H_Sumtl + sumfis
-               !               DENhf = DENhf + sumfis
 
                ! dividing sumfis into channels with TFIs < 0.25 each
 
@@ -445,8 +458,8 @@ CONTAINS
                   outchnl(nch)%nejc = 100                 ! nejc=100 convention identifies fission
                ENDIF
             ENDIF
-            IF(H_Sumtl.LE.0.0D0) CYCLE                    ! no transitions from the current state
-            H_Tav = H_Sumtls/H_Sumtl                      ! average transmission coefficient (Sum(T**2)/Sum(T))
+
+            IF(H_Sumtl.LE.0.0D0) H_Tav = H_Sumtls/H_Sumtl ! average transmission coefficient (Sum(T**2)/Sum(T))
 
             ! gamma decay
 
@@ -464,11 +477,12 @@ CONTAINS
             !  write(*,*)'average Tl        ', H_Tav
             !  write(*,*)'first entry DENhf=', DENhf
 
-            ! collecting outgoing channels completed
-
+            !----------------------------------------------------------
+            ! Collecting outgoing channels completed
+            !----------------------------------------------------------
             ! write(*,*)'pre  AUSTER DENhf=', DENhf
-            IF(LHRtw==1 .OR. LHRtw==2) CALL AUSTER(LHRtw)                  !calculate V's for the strong channels (iteration)
-            DENhf = H_Sumtl                     !reset DENhf using V's instead of T's
+            IF(LHRtw==1 .OR. LHRtw==2) CALL AUSTER(LHRtw)  !calculate V's for the strong channels (iteration)
+            DENhf = H_Sumtl                                !reset DENhf using V's instead of T's
             IF(DENhf .LE. 0.d0) CYCLE
 
             !----------------------------------------------------------------------------------
@@ -479,7 +493,7 @@ CONTAINS
             sumtt_s = 0.d0
             ! write(*,*) ' NProject=',NPRoject,' LEVtarg=',LEVtarg
           
-            DO i = 1, num%part                          !scan strong particle channels (note: weak channels are already in SCRt)
+            DO i = 1, num%part  !scan strong particle channels (note: weak channels are already in SCRt)
                out => outchnl(i)
                IF(out%kres>0) THEN                ! continuum channels
                   SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) + out%t*out%rho/de
@@ -496,7 +510,9 @@ CONTAINS
                   ENDIF
                ENDIF
             ENDDO
-            ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
+
+            ! Correcting the elastic cross section for inelastic enhancement CINRED
+			ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
             !write(*,*) 'EWCORR=', ewcor
             IF(ewcor.ne.0.d0) then
                numch_el = max(num%elah - num%elal + 1 , 1 )
@@ -507,7 +523,12 @@ CONTAINS
                   ! write(*,*) 'i=',i,' ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
                ENDDO
             ENDIF
+
+            !----------------------------------------------------------
+            ! Fission
+            !----------------------------------------------------------
             IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
+
             ! DENhf = 0.0d0                             !test that SCRt+SCRtl sum to the same DENhf
             ! DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
             ! DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
@@ -521,85 +542,49 @@ CONTAINS
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
-               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-               !               xnor = in%sig/DENhf                      ! normalization factor
+
+			   IF (INTerf==0) THEN
+                 ! absorption ~ sigma_a
+                 in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
+                 xnor = in%sig/DENhf ! normalization factor
+                 ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+               ELSE
+                 !xnor = 1.d0/DENhf ! normalization factor
+                 xnor = 1.d0
+			   ENDIF
+			   
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
                ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
                ! write(*,*)'post AUSTER DENhf=', DENhf + elcor
-               xnor = in%sig/DENhf                          ! normalization factor
-               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
-               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
-               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
-               sumfis = sumfis*xnor                         !                                  "
+
+               !----------------------------------------------------------
+               ! Renormalizing scratch matrices to recover unitarity
+               !----------------------------------------------------------
+               !DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
+               !DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
+               !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
+               !IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
+
+               !xnor = in%sig/DENhf                          ! normalization factor
+               !SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+               !SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+               !SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+               !sumfis = sumfis*xnor                         !                                  "
+               !sumfism = sumfism*xnor                         !                                  "
 
                !----------------------------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !----------------------------------------------------------------------------------
+			   CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
-               IF(.NOT.CN_isotropic) THEN
-                  ! accumulate Legendre coefficients
-                  nejc = 1
-                  nnur = 2
-                  Ia = XJLv(LEVtarg,0)                  !target spin
-                  la = in%l                             !incident neutron l
-                  ja = in%j                    !incident neutron j
-                  ! write(8,*) 'Incident chnl',i, 'J_pi ',xjc*ip,' number of outgoing n channels', num%neut
-                  DO j = 1, num%neut                    !do loop over neutron channels only
-                     ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
-                     ! write(8,*) '                                  leg      BB               Jcn   &
-                     ! &               l_inc           j_inc                 J_res              l_out              J_out'
-                     out => outchnl(j)
-                     IF(out%kres > 0) CYCLE      ! skipping continuum channels in DA calculation
+               !CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
-                     xjr = out%xjrs              !residual nucleus J
-                     lb = out%l                  !outgoing neutron l
-                     jb = out%j                  !outgoing neutron j
-                     !IF(out%kres > 0) THEN
-                     !   PLcont_lmax(out%kres) = 2*in%l
-                     !ELSEIF(out%kres < 0) THEN
-                     !   PL_lmax(-out%kres) = 2*in%l
-                     !ENDIF
-                     PL_lmax(-out%kres) = 2*in%l
-                     IF(i/=j.AND.out%kres<=0) THEN               ! Inelastic to discrete level
-                        stmp = out%t*out%rho * CINRED(-out%kres)
-                     ELSE                                        ! Elastic and continuum
-                        stmp = out%t*out%rho
-                     ENDIF
-
-                     DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
-                        xleg = dble(lleg)
-                        tmp = Blatt(xjc,Ia,la,ja,SEJc(nejc),xjr,lb,jb,SEJc(nejc),xleg)/(2*xleg + 1.0d0)
-                        ! write(8,*) ' Leg => tmp,xjc,la,ja,xjr,lb,jb,',lleg,tmp,xjc,la,ja,xjr,lb,jb,outchnl(j)%kres
-                        ! if(tmp==0.D0) cycle
-                        IF(dabs(tmp) < 1.d-14) CYCLE
-                        tmp = tmp*xnor*stmp  !*out%t*out%rho
-                        IF(i==j) tmp = tmp*out%eef
-
-                        !IF(out%kres > 0) THEN
-                        !   PL_CNcont(lleg,out%kres) = PL_CNcont(lleg,out%kres) + tmp
-                        !   PLcont_lmax(out%kres) = lleg
-                        !ELSEIF(out%kres < 0) THEN
-                        !   PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
-                        !   PL_lmax(-out%kres) = lleg
-                        !ENDIF
-                        PL_CN(lleg,-out%kres) = PL_CN(lleg,-out%kres) + tmp
-                        PL_lmax(-out%kres) = lleg
-                     ENDDO
-                     !IF(out%kres > 0) THEN
-                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H cont  )') 'HRTW-comp ',out%kres, PLcont_lmax(out%kres)
-                     !ELSEIF(outchnl(j)%kres < 0) THEN
-                     !  write (8,'(2x,A10, 5Hchan= ,I4,2x,5Hlmax= ,I4,5H disc  )') 'HRTW-comp ',out%kres, PL_lmax(-out%kres)
-                     !ENDIF
-                     !write(8,*) 'PL_CNcont(lleg,1) = ', PL_CNcont(0,1), PL_CNcont(2,1), PL_CNcont(4,1), PL_CNcont(6,1), PL_CNcont(8,1)
-                  ENDDO
-               ENDIF    !end of Legendre coeficients accumulation for Anisotropic CN
-
-               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-               !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                out => outchnl(i)
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
+
             ENDDO    !end do loop over incident channels
 
             ! Gamma width calculation
@@ -622,7 +607,7 @@ CONTAINS
 
       CALL DelHRTW()    !deallocate HRTW arrays
       IF(DIRECT>0 .and. MAX_cc_mod>0) CALL DelTLJs() ! deallocate incident channel TLJs for CC
-      CALL DelCCmatr() ! deallocate EW matrices
+      !IF(INTerf==0) CALL DelCCmatr() ! deallocate EW matrices
 
       RETURN
    END SUBROUTINE HRTW
@@ -1408,13 +1393,13 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
-      REAL*8 sumin_s, sumtt_s, stmp, ewcor, w, dtmp
+      REAL*8 sumin_s, sumtt_s, w, dtmp
       REAL*8 nu_ialph, nu_ibeta, sigma_ , sigma_EW, epsil
       INTEGER ialph,ibeta,iaa,ibb,ialph_ch,ibeta_ch,IER
 	  REAL*8 deg_alph,deg_beta
@@ -1652,40 +1637,14 @@ CONTAINS
 				     CYCLE	! Skipping coupled channels if INTerf>0
                   ENDIF
 
-                  IF(out%kres>0) THEN                      !continuum channels
-                     SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
-                        + sigma_ *out%rho/de
-                        ! + out%t*out%rho*w/de
-                  ELSE IF(out%kres<0) THEN
-                     IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
-                                                ! stmp = out%t*out%rho*w
-                        stmp = sigma_ *out%rho
-                        sumin_s = sumin_s + stmp * CINRED(-out%kres)
-                        sumtt_s = sumtt_s + stmp
-                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
-                     ELSE
-                        ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
-                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
-                     ENDIF
-                  ENDIF
+                  CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
+
                ENDDO ! end of outgoing channel loop over iout
 
                ! If EW active, all elastic channels assumed collective !!
                IF(INTerf>0 .and. (iout>=num%coll .and. iout<=num%colh) ) CYCLE
 
-               !----------------------------------------------------------------------------------------
-               ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
-               !----------------------------------------------------------------------------------------
-               ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
-               ! Correcting the elastic cross section for inelastic enhancement CINRED
-               if(ewcor .NE. 0.d0) then
-                  numch_el = max(num%elah - num%elal + 1 , 1 )
-                  DO iout = num%elal, num%elah  ! do loop over elastic channels
-                     out => outchnl(iout)
-                     SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
-                     !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
-                  ENDDO
-               endif
+      		   CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
                !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
@@ -1731,7 +1690,7 @@ CONTAINS
                !write(*,*) 'Smatrix HRTW'
                !DO i = 1,NDIm_cc_matrix
                !  DO iout = 1,NDIm_cc_matrix
-   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') i,iout,Sdiag(i,iout),ZItmp(i,iout)
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Sdiag(i,iout),ZItmp(i,iout)
                !  ENDDO
 	           !ENDDO
 
@@ -1756,7 +1715,7 @@ CONTAINS
                !write(*,*) 'Pmatrix HRTW'
                !DO i = 1,NDIm_cc_matrix
                !  DO iout = 1,NDIm_cc_matrix
-   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') i,iout,PPdiag(i,iout),ZItmp(i,iout)
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
                !  ENDDO
 	           !ENDDO
 			   CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
@@ -1768,7 +1727,7 @@ CONTAINS
                !DO iout = 1,NDIm_cc_matrix
       	       !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
 			   !  DO I = 1,NDIm_cc_matrix
-			   !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6)') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
+			   !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6))') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
                !  ENDDO
 			   !ENDDO
 
@@ -1778,6 +1737,9 @@ CONTAINS
 			   write(*,*) 'num%elal, num%elah=',num%elal, num%elah 
 			   write(*,*) 'num%coll, num%colh=',num%coll, num%colh
 			   write(*,*) '1-num%part=',1,num%part
+
+               sumin_s = 0.d0
+               sumtt_s = 0.d0
                DO i = num%elal, num%elah
                   
 				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
@@ -1854,40 +1816,14 @@ CONTAINS
 
 					 PAUSE
 
-                     IF(out%kres>0) THEN                      !continuum channels
-                        SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
-                           + sigma_ *out%rho/de
-                           ! + out%t*out%rho*w/de
-                     ELSE IF(out%kres<0) THEN
-                        IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
-                                                   ! stmp = out%t*out%rho*w
-                           stmp = sigma_ *out%rho
-                           sumin_s = sumin_s + stmp * CINRED(-out%kres)
-                           sumtt_s = sumtt_s + stmp
-                           SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
-                        ELSE
-                           ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
-                           SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
-                        ENDIF
-                     ENDIF
+					 CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
 
                   ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
                   CALL DelCCmatr() ! deallocate EW matrices
 				  CYCLE
-                  !----------------------------------------------------------------------------------------
-                  ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
-                  !----------------------------------------------------------------------------------------
-                  ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
-                  ! Correcting the elastic cross section for inelastic enhancement CINRED
-                  if(ewcor .NE. 0.d0) then
-                     numch_el = max(num%elah - num%elal + 1 , 1 )
-                     DO iout = num%elal, num%elah  ! do loop over elastic channels
-                        out => outchnl(iout)
-                        SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
-                        !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
-                     ENDDO
-                  endif
+
+				  CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
                   !----------------------------------------------------------
                   ! Renormalizing scratch matrices to recover unitarity
@@ -2343,5 +2279,53 @@ CONTAINS
                   ENDDO
       RETURN
    END SUBROUTINE CN_DA_anis
+
+
+   SUBROUTINE update_SCRt(out,sigma_, sumin_s, sumtt_s)
+   IMPLICIT none
+   TYPE (channel), POINTER :: out
+   REAL*8 sigma_, sumin_s, sumtt_s
+   REAL*8 stmp
+
+   IF(out%kres>0) THEN                      !continuum channels
+     SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
+	                                           + sigma_ *out%rho/de
+                                             ! + out%t*out%rho*w/de
+   ELSE IF(out%kres<0) THEN
+     IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
+                                                ! stmp = out%t*out%rho*w
+      stmp = sigma_ *out%rho
+      sumin_s = sumin_s + stmp * CINRED(-out%kres)
+      sumtt_s = sumtt_s + stmp
+      SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
+    ELSE
+    ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
+      SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
+    ENDIF
+  ENDIF
+  RETURN
+  END SUBROUTINE update_SCRt
+
+  SUBROUTINE elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
+  IMPLICIT none
+  REAL*8 sumin_s, sumtt_s, sumtt_w, sumin_w
+  REAL*8 ewcor
+  INTEGER iout, numch_el
+  TYPE (channel), POINTER :: out  
+  !----------------------------------------------------------------------------------------
+  ! Correcting the elastic cross section for inelastic enhancement CINRED if any (ewcor/=0)
+  !----------------------------------------------------------------------------------------
+  ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
+  ! Correcting the elastic cross section for inelastic enhancement CINRED
+  if(ewcor .NE. 0.d0) then
+     numch_el = max(num%elah - num%elal + 1 , 1 )
+     DO iout = num%elal, num%elah  ! do loop over elastic channels
+       out => outchnl(iout)
+       SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
+       !write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
+     ENDDO
+  endif
+  RETURN
+  END SUBROUTINE elastic_corr
 
 END MODULE width_fluct
