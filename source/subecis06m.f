@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4663 $
+Ccc   * $Rev: 4668 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-30 02:55:18 +0200 (Mi, 30 Mär 2016) $
+Ccc   * $Date: 2016-03-31 19:51:58 +0200 (Do, 31 Mär 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19416,7 +19416,7 @@ C	  ENDDO
 C	ENDDO
 C     DO I = 1,NC
 C       DO J = 1,NC
-C	    write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6)') 
+C	    write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6))') 
 C    >    I,J,PRmatr(I,J),PImatr(I,J)
 C       ENDDO
 C	ENDDO
@@ -19432,19 +19432,19 @@ C    >    NJC,1.D-12,A1,IERR)
 C     write(*,*) 'ECIS matrix:'
 C     EIGENVALUES
 C 	DO I = 1,NC
-C 	 write(*,'(1x,9(d12.6,1x,d12.6/)')(P(I,J,1),P(I,J,2),J=1,NC)
+C 	 write(*,'(1x,9(d12.6,1x,d12.6))')(P(I,J,1),P(I,J,2),J=1,NC)
 C	ENDDO
 C     EIGENVECTORS
 C 	DO I = 1,NC
-C 	 write(*,'(1x,9(d12.6,1x,d12.6/)')(P(I,J,3),P(I,J,4),J=1,NC)
+C 	 write(*,'(1x,9(d12.6,1x,d12.6))')(P(I,J,3),P(I,J,4),J=1,NC)
 C	ENDDO
 C     write(*,*) 'Square matrix:'
 C     CALL DIAG(PRmatr,PImatr,PRdiag,PIdiag,NC,NC,1.D-12,A1,IERR)      
 C     DO J = 1,NC
-C       write(*,'(1x,A13,1x,9(d12.6,1x,d12.6)') 
+C       write(*,'(1x,A13,1x,9(d12.6,1x,d12.6))') 
 C    >    'Eigenvalues=',PRmatr(J,J),PImatr(J,J)
 C	  DO I = 1,NC
-C         write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6)') 
+C         write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') 
 C    >      I,J,PRdiag(I,J),PIdiag(I,J)
 C       ENDDO
 C     ENDDO
