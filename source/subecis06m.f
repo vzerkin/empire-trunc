@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4668 $
+Ccc   * $Rev: 4669 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-31 19:51:58 +0200 (Do, 31 Mär 2016) $
+Ccc   * $Date: 2016-04-02 00:30:01 +0200 (Sa, 02 Apr 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -50,7 +50,7 @@ C
       CHARACTER*(*) fnamei
       INTEGER Max_ccch
 
-      PARAMETER (IDMX=3500000)                                          ECIS-027
+      PARAMETER (IDMX=35000000)                                         ECIS-027
       CHARACTER*4 CW(2,IDMX)                                            ECIS-028
 
       DIMENSION NW(2,IDMX),DW(IDMX)                                     ECIS-029
