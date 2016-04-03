@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4628 $
+Ccc   * $Rev: 4671 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-20 23:33:11 +0100 (So, 20 Mär 2016) $
+Ccc   * $Date: 2016-04-04 00:33:25 +0200 (Mo, 04 Apr 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -439,16 +439,7 @@ C       only for top bin of CN
 C
         IF(LHRtw.LE.2) CALL HRTW() ! HF or HRTW width fluctuation
         IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) CALL Moldauer() ! Moldauer width fluctuation
-!        IF(LHRtw.EQ.3 .OR. LHRtw.EQ.4) THEN
-!           WRITE(8,*) 'Moldauer WFC not yet operational - use HRTW'
-!           STOP 'Moldauer not implemented'
-!        ENDIF
-
-
-
         kemax = max(NEX(nnuc) - 1,1)
-C       IF (RECoil.GT.0) CALL GET_RECOIL(kemax,nnuc) !recoil spectrum
-
         IF (FISsil(nnuc) .and. NINT(FISshi(nnuc)).NE.1 ) THEN
           IF (NINT(FISmod(nnuc)).EQ.0) THEN
             WRITE (80,*) 'csfis=', CSFis,' mb'
