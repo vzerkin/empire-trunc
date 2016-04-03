@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4669 $
+Ccc   * $Rev: 4670 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-02 00:30:01 +0200 (Sa, 02 Apr 2016) $
+Ccc   * $Date: 2016-04-04 00:32:35 +0200 (Mo, 04 Apr 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -66,10 +66,6 @@ C
       CHARACTER*50 fname                                                RCN  RCN
       COMMON /FILEN/fname                                               RCN  RCN
 
-C     data iFlagSpeed99/1/
-C     data iFlagSpeed94/1/
-C     data iFlagSpeed63/1/
-C     data iFlagSpeedOpen/1/
 C     CM=931.494043D0    ! EMPIRE 3.1                                   ECIS-034
       CM=931.494061D0    
 C     CHB=197.326968D0   ! EMPIRE 3.1                                   ECIS-035
@@ -194,9 +190,12 @@ C***********************************************************************MEMO-009
       COMMON /INOUT/ MR,MW,MS                                           MEMO-011
       IF (IDMT.GE.NPLACE) RETURN                                        MEMO-012
       WRITE (MW,1000) IDMT,NPLACE,NAME                                  MEMO-013
+      WRITE (*,1000)  IDMT,NPLACE,NAME                                  MEMO-013
+	WRITE (* ,*)' ERROR: Increase the PARAMETER IDMX= in subecis06m.f'
+	WRITE (MW,*)' ERROR: Increase the PARAMETER IDMX= in subecis06m.f'
       STOP                                                              MEMO-014
- 1000 FORMAT (' NOT ENOUGH PLACE .....   ',I10,' MEMORIES ALLOWED',I10,'MEMO-015
-     1 MEMORIES REQUESTED.'///' IN ',A4,'  ...  STOP  ...')             MEMO-016
+ 1000 FORMAT (' ERROR: NOT ENOUGH PLACE ..... ',I10,' MEMORIES ALLOWED',MEMO-015
+     1 I10,' MEMORIES REQUESTED.'///' IN ',A4,' (ECIS)')                MEMO-016
       END                                                               MEMO-017
 C 07/02/06                                                      ECIS06  HORA-000
       SUBROUTINE HORA                                                   HORA-001
@@ -1306,7 +1305,9 @@ C DO LOOPS AND CG-COEFFICIENTS FOR OBSERVABLES.                         CALX-590
    20 WRITE (MW,1033) NSP(3),NCONT                                      CALX-615
       GO TO 22                                                          CALX-616
    21 WRITE (MW,1034) I,NW(K,1),L                                       CALX-617
+      WRITE (*,1034) I,NW(K,1),L                                        
    22 WRITE (MW,1035)                                                   CALX-618
+	WRITE (*,1035)                                                   
       STOP                                                              CALX-619
  1000 FORMAT (18A4)                                                     CALX-620
  1001 FORMAT (50L1)                                                     CALX-621
@@ -1450,9 +1451,9 @@ C DO LOOPS AND CG-COEFFICIENTS FOR OBSERVABLES.                         CALX-590
      1 COULOMB FUNCTIONS AND FINITE INTEGRALS.')                        CALX-759
  1033 FORMAT (' NUMBER OF UNCOUPLED STATES WITHOUT ANGULAR DISTRIBUTION'CALX-760
      1,I5,' LESS THAN THE NUMBER OF CONTINUA:',I5)                      CALX-761
- 1034 FORMAT (2X,I3,'TH LIMIT OF INTERPOLATION',I6,' SMALLER THAN PREVIOCALX-762
-     1US ONE',I6)                                                       CALX-763
- 1035 FORMAT (//' IN CALX  ...  STOP  ...')                             CALX-764
+ 1034 FORMAT (2X,' ERROR: ',I3,'TH LIMIT OF INTERPOLATION',I6,' SMALLER 
+     1THAN PREVIOUS ONE ',I6)                                              
+ 1035 FORMAT (//' ERROR: IN CALX (ECIS) ...  STOP  ...') 
       END                                                               CALX-765
 C C 05/03/                                                      ECIS06  INPA-000
       SUBROUTINE INPA                                                   INPA-001
@@ -3683,7 +3684,9 @@ C ASYMMETRIC ROTATIONAL MODEL - INPUT OF MIXING PARAMETERS.             LECL-223
       WRITE (MW,1024) SP1                                               LECL-244
       GO TO 33                                                          LECL-245
    32 WRITE (MW,1025) K,NPP                                             LECL-246
+	WRITE (*,1025) K,NPP
    33 WRITE (MW,1026)                                                   LECL-247
+	WRITE (*,1026)                                                   
       STOP                                                              LECL-248
  1000 FORMAT (/' FIRST ORDER VIBRATIONAL MODEL.'/)                      LECL-249
  1001 FORMAT (/' SECOND ORDER VIBRATIONAL MODEL.'/)                     LECL-250
@@ -3728,7 +3731,7 @@ C ASYMMETRIC ROTATIONAL MODEL - INPUT OF MIXING PARAMETERS.             LECL-223
      2 SCHROEDINGER FORMALISM.')                                        LECL-289
  1024 FORMAT (' PARTICLE SPIN',F5.1,' NOT ALLOWED FOR DIRAC EQUATION.') LECL-290
  1025 FORMAT (' POTENTIAL',I3,' WILL NOT BE READ.TOTAL NUMBER IS:',I3)  LECL-291
- 1026 FORMAT (//' IN LECL  ...  STOP  ...')                             LECL-292
+ 1026 FORMAT (//' ERROR: IN LECL (ECIS) ...  STOP  ...')                     
       END                                                               LECL-293
 C 01/10/06                                                      ECIS06  LECT-000
       SUBROUTINE LECT(NBET,IPI,IPP,WV,RM,IDT,LO,NBETA,BETA,VAL,FISS,GAM,LECT-001
@@ -8141,7 +8144,7 @@ C OUTPUT OF REDUCED MATRIX ELEMENTS ON REQUEST.                         REDM-430
      1CORRECT. LIMIT:',I2)                                              REDM-526
  1023 FORMAT (/' 2*TRANSFER OF ANG. MOMENTUM',I4,' NOT BETWEEN',I4,' ANDREDM-527
      1',I4)                                                             REDM-528
- 1024 FORMAT (//' IN REDM  ...  STOP  ...')                             REDM-529
+ 1024 FORMAT (//' ERROR: IN REDM  (ECIS) ...  STOP  ...')   
       END                                                               REDM-530
 C 04/07/06                                                      ECIS06  VIBM-000
       SUBROUTINE VIBM(NIV,IQ,T,IPI,NCOLL,IT,IPH,NVAR,VAR,NBETA,FAC,IDT,LVIBM-001
@@ -8520,13 +8523,14 @@ C  (L1,L2,IP||Q||0) WITH IP=J2.                                         VIBM-314
       GO TO 42                                                          VIBM-374
    41 WRITE (MW,1002) I1,I2                                             VIBM-375
    42 WRITE (MW,1003)                                                   VIBM-376
+      WRITE (* ,1003) 
       STOP                                                              VIBM-377
  1000 FORMAT (' STATE',I4,F15.5,' DEGREES      AMPLITUDES =',F15.7,'  1 VIBM-378
      1PHONON AND',F15.7,'  2 PHONONS.')                                 VIBM-379
  1001 FORMAT (' NUMBER OF VARIABLES USED:',I5,5X,'EXCEEDS NUMBER OF VARIVIBM-380
      1ABLES READ:',I6)                                                  VIBM-381
  1002 FORMAT (' INCORRECT DESCRIPTION OF LEVEL',I3,'  OR',I3)           VIBM-382
- 1003 FORMAT (//' IN VIBM  ...  STOP  ...')                             VIBM-383
+ 1003 FORMAT (//' ERROR: IN VIBM (ECIS) ...  STOP  ...')                             
       END                                                               VIBM-384
 C 04/07/06                                                      ECIS06  ROTM-000
       SUBROUTINE ROTM(NIV,IQ,T,IPI,NCOLL,IPH,NBETA,NVAR,VAR,IT,FAC,IDT,LROTM-001
@@ -8712,26 +8716,39 @@ C 0 PHONONS -1 PHONON.                                                  ROTM-121
       IT=IT-1                                                           ROTM-181
       RETURN                                                            ROTM-182
    25 WRITE (MW,1001) JVAR,NVA                                          ROTM-183
+      WRITE (* ,1001) JVAR,NVA                                          ROTM-183
       GO TO 29                                                          ROTM-184
    26 WRITE (MW,1002) I1,I2                                             ROTM-185
+      WRITE (* ,1002) I1,I2                                             
       GO TO 29                                                          ROTM-186
    27 WRITE (MW,1003) I1,I2                                             ROTM-187
+      WRITE (* ,1003) I1,I2                                             
       GO TO 29                                                          ROTM-188
    28 WRITE (MW,1004) I1,I2,N3                                          ROTM-189
+	WRITE (* ,1004) I1,I2,N3
       GO TO 29                                                          ROTM-190
    29 WRITE (MW,1005)                                                   ROTM-191
+	WRITE (*,1005)          
       STOP                                                              ROTM-192
  1000 FORMAT (' STATE',I4,F15.5,' DEGREES      AMPLITUDES =',F15.7,' GROROTM-193
      1UND STATE BAND AND',F15.5,' VIBRATIONAL BAND.')                   ROTM-194
- 1001 FORMAT (' NUMBER OF VARIABLES USED:',I5,5X,'EXCEEDS NUMBER OF VARIROTM-195
-     2ABLES READ:',I6)                                                  ROTM-196
- 1002 FORMAT (/' PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT FOR THE ROTM-197
-     1ROTATIONAL MODEL.')                                               ROTM-198
- 1003 FORMAT (' TOO LARGE MAGNETIC QUANTUM NUMBER BETWEEN LEVELS',I4,' AROTM-199
-     1ND',I4)                                                           ROTM-200
- 1004 FORMAT (/' PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT FOR THE ROTM-201
-     1ROTATIONAL MODEL WITH THE VIBRATION',I4)                          ROTM-202
- 1005 FORMAT (//' IN ROTM  ...  STOP  ...')                             ROTM-203
+C1001 FORMAT (' NUMBER OF VARIABLES USED:',I5,5X,'EXCEEDS NUMBER OF VARIROTM-195
+C    2ABLES READ:',I6)                                                  ROTM-196
+C1002 FORMAT (/' PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT FOR THE ROTM-197
+C    1ROTATIONAL MODEL.')                                               ROTM-198
+C1003 FORMAT (' TOO LARGE MAGNETIC QUANTUM NUMBER BETWEEN LEVELS',I4,' AROTM-199
+C    1ND',I4)                                                           ROTM-200
+C1004 FORMAT (/' PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT FOR THE ROTM-201
+C    1ROTATIONAL MODEL WITH THE VIBRATION',I4)                          ROTM-202
+ 1001 FORMAT (' ERROR: NUMBER OF VARIABLES USED:',I5,5X,'EXCEEDS NUMBER 
+     2OF VARIABLES READ:',I6)                                                  
+ 1002 FORMAT (/' ERROR: PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT F
+     1OR THE ROTATIONAL MODEL.')                                               
+ 1003 FORMAT (' ERROR: TOO LARGE MAGNETIC QUANTUM NUMBER BETWEEN LEVELS'
+     1,I4,' AND',I4)                                                           
+ 1004 FORMAT (/' ERROR: PARITIES OF STATES',I4,'  AND',I4,'  INCORRECT F
+     1OR THE ROTATIONAL MODEL WITH THE VIBRATION',I4)                          
+ 1005 FORMAT (//' ERROR: IN ROTM (ECIS) ...  STOP  ...')                             
       END                                                               ROTM-204
 C 28/02/07                                                      ECIS06  ROAM-000
       SUBROUTINE ROAM(NIV,IQ,T,IPI,NCOLL,IT,BETA,IPH,VAR,VA,FAC,IDT,LO) ROAM-001
