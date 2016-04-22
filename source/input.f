@@ -1,6 +1,6 @@
-!cc   * $Rev: 4665 $
+!cc   * $Rev: 4672 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-03-31 16:37:32 +0200 (Do, 31 Mär 2016) $
+!cc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -472,8 +472,10 @@ C--------Isotropic CN angular distributions
          CN_isotropic = .FALSE.
 C--------EMAx_tlj sets incident energy limit for using Tlj
          EMAx_tlj = 0.d0
+C--------LHRtw makes HRTW WFC default using Talou-Kawano parameters
+         LHRtw = 2
 C--------EHRtw sets incident energy limit for using width fluctuation correction
-         EHRtw = 8.d0
+         EHRtw = 10.d0
 C--------ENDF global setting initialized to zero (no formatting)
          NENdf = 0
 C
@@ -1831,7 +1833,7 @@ C     for the incident channel
       IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0  ! HI
       IF (AEJc(0).EQ.0.0D0) KTRlom(0,0) = -1 ! photons
 
-      IF (KTRompcc.GT.0 .AND. DIRect.EQ.2) THEN
+      IF (KTRompcc.GT.0 .AND. DIRect.GE.1) THEN
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
@@ -3827,8 +3829,9 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
             ENDIF
      
-            IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0)  CN_isotropic = .TRUE.
-          
+            IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0)  
+     &         CN_isotropic = .TRUE.
+                      
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
      &nharn coefficients'')')
@@ -3841,8 +3844,8 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &          '('' CN angular distribution assumed isotropic'')')
             ENDIF 
 
-C           IF (INTerf.EQ.0 .or. SOFt) THEN
-            IF (DIRect.EQ.0 .and. INTerf.GT.0) INTerf=0 ! EW disabled if no collective levels
+            IF (DIRect.NE.1 .and. INTerf.GT.0) INTerf=0 ! EW disabled if DIRECT<>1
+            IF (LHRtw.EQ.0 .and. INTerf.GT.0) INTerf=0 ! EW disabled if no WFC calculation
 
             IF (INTerf.EQ.0) THEN
               WRITE (8,
@@ -4305,19 +4308,20 @@ C
             IF (DIRect.EQ.3) WRITE (8,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
+C           IF (DIRect.EQ.1 .OR. DIRect.EQ.2) WRITE (8,
+C    &'('' Coupled Channels Method used for direct inelastic scattering'
+C    &')')
+C           Changed during EW implementation  
             IF (DIRect.EQ.1 .OR. DIRect.EQ.2) WRITE (8,
-     &'('' Coupled Channels Method used for direct inelastic scattering'
-     &')')
-            IF (DIRect.EQ.2) WRITE (8,
      &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
      &)')
             IF (DIRect.EQ.3) WRITE (12,
      &         '('' DWBA (ECIS) used for direct inelastic scattering'')'
      &         )
+C           IF (DIRect.EQ.1 .OR. DIRect.EQ.2) WRITE (12,
+C    &'('' Coupled Channels Method used for direct inelastic scattering'
+C    &')')
             IF (DIRect.EQ.1 .OR. DIRect.EQ.2) WRITE (12,
-     &'('' Coupled Channels Method used for direct inelastic scattering'
-     &')')
-            IF (DIRect.EQ.2) WRITE (12,
      &'('' Coupled Channels Method used for Tl calcul. in outgoing ch.''
 
      &)')

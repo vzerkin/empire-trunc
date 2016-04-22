@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4667 $
+   ! $Rev: 4672 $
    ! $Author: rcapote $
-   ! $Date: 2016-03-31 19:49:02 +0200 (Do, 31 Mär 2016) $
+   ! $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
    !
 
    TYPE channel
@@ -78,7 +78,7 @@ MODULE width_fluct
    REAL*8 :: TFIs         ! Sum of fission transmission coefficients
    REAL*8 :: TGam         ! Sum of gamma transmission coefficients
    INTEGER :: NCH         ! Number of strong channels (Tlj's)
-   INTEGER :: NSCh        ! Number of strong  Tlj processed by VT routine, i.e. poistion in H_Tl matrix
+   ! INTEGER :: NSCh        ! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
 
    REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
    REAL*8, ALLOCATABLE :: H_Abs(:,:)
@@ -304,23 +304,23 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp, numch_el
+      INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
+	  REAL*8 sumfism(nfmod)
       REAL*8 Ia, sxj
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
-      REAL*8 d0c
-      REAL*8 sumfism(nfmod) 
-      REAL*8 sumin_s, sumtt_s, stmp, ewcor
+      REAL*8 d0c, sigma_
+      REAL*8 sumin_s, sumtt_s
 
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
 
-      CALL AllocHRTW()       !allocate HRTW matrices
+      CALL AllocHRTW()    !allocate HRTW matrices
 
       H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
       nnuc = 1            !set CN nucleus
       csfis = 0.D0
-      SUMfis = 0.D0
+      sumfis = 0.D0
       gcasc = 1.0         !ensure full gamma cascade when HRTW
       ke = NEX(nnuc)
 
@@ -328,7 +328,6 @@ CONTAINS
       Ia  = XJLv(LEVtarg,0)
 
       ! Initialize variables and print heading for normalizing g-strength function
-
       d0c = 0.D0
       sumtg = 0.D0
       tgexper = 0.D0
@@ -343,23 +342,23 @@ CONTAINS
 
       xmas_npro = EJMass(0)
       xmas_ntrg = AMAss(0)
-
       el = EINl
+
       relcal = .FALSE.
       IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
-
       IF (AEJc(0).EQ.0.0D0) THEN
          xmas_npro = 0.d0
          relcal = .TRUE.
       ENDIF
-
       CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
       ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
 
-      !coef = 10.D0*PI/ak2/(2.D0*XJLv(LEVtarg,0) + 1.d0)/(2.D0*SEJc(0) + 1.d0)
+      coef = 1.d0
       IF (AEJc(0)>0) coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
 
+      !----------------------------------------------------------
       ! start CN nucleus decay
+      !----------------------------------------------------------
       DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
          ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
          DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
@@ -369,38 +368,8 @@ CONTAINS
             ! write(8,*) 'CN Jpi=',xjc*ip
             nhrtw = 0
             DENhf = 0.D0
-            NSCh = 0
-            NCH = 0
-            outchnl%l = 0
-            outchnl%j = 0.d0
-            outchnl%t = 0.d0
-            outchnl%ti1 = 0.d0
-            outchnl%ti2 = 0.d0
-            outchnl%rho = 0.d0
-            outchnl%eef = 1.d0
-            outchnl%nejc = 0
-            outchnl%kres = 0
-            outchnl%xjrs = 0.d0
-            outchnl%jres = 0
-            outchnl%pres = 0
-            inchnl%nout = 0
-            inchnl%l = 0
-            inchnl%j = 0.d0
-            inchnl%t = 0.d0
-            inchnl%sig = 0.d0
-            num%neut = 0
-            num%part = 0
-            num%elal = 0
-            num%elah = 0
-            num%coll = 0
-            num%colh = 0
-            num%fiss = 0
-            num%gamm = 0
-            H_Sumtls = 0.D0
-            H_Sumtl = 0.D0
-            H_Tav = 0.D0
-            H_Sweak = 0.D0
-            H_Tl = 0.D0
+
+			CALL zeroing_module_vars()
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
             !----------------------------------------------------------
@@ -410,7 +379,6 @@ CONTAINS
             !----------------------------------------------------------
             ! particle decay
             !----------------------------------------------------------
-
             DO nejc = 1, nejcm                            !do loop over ejectiles
                IF(NREs(nejc)<0) CYCLE
                nnur = NREs(nejc)
@@ -420,50 +388,22 @@ CONTAINS
             ! write(*,*) sumin_w,sumtt_w
 
             if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop  
-
-            num%part = nch                                !store number of particle channel entries
+            num%part = NCH                                !store number of particle channel entries
 
             !----------------------------------------------------------
-            ! gammas (weak channels) (one iteration)
+            ! gamma decay (weak channels) (one iteration)
             !----------------------------------------------------------
-
             sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
 
             !----------------------------------------------------------
             ! Fission (may be a weak or strong channel)
             !----------------------------------------------------------
+            sumfis = WFC_DECAYF(nnuc,ke,jcn,ip)
+            
+            IF(H_Sumtl.LE.0.0D0) CYCLE
 
-            sumfis = 0.D0
-            tfis = 0.D0
-            ndivf = 1
-            num%fiss = 0
-            IF(FISsil(nnuc)) THEN
-               IF(nint(FISshi(nnuc))==1) THEN
-                  CALL FISSION(nnuc,ke,jcn,sumfis)
-               ELSE
-                  CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-               ENDIF
-               H_Sumtl = H_Sumtl + sumfis
+            H_Tav = H_Sumtls/H_Sumtl ! average transmission coefficient (Sum(T**2)/Sum(T))
 
-               ! dividing sumfis into channels with TFIs < 0.25 each
-
-               ndivf = int(sumfis/0.25) + 1
-               tfis = sumfis/dfloat(ndivf)
-               H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
-               IF(tfis>=H_Tthr) THEN                      ! fission treated as a strong channel
-                  nch = nch + 1                           ! otherwise 'sumfis' it is left untouched
-                  num%fiss = nch                          ! store position of fission (only one entry with 'ndivf')
-                  outchnl(nch)%t = tfis
-                  outchnl(nch)%rho = dfloat(ndivf)
-                  outchnl(nch)%nejc = 100                 ! nejc=100 convention identifies fission
-               ENDIF
-            ENDIF
-
-            IF(H_Sumtl.LE.0.0D0) H_Tav = H_Sumtls/H_Sumtl ! average transmission coefficient (Sum(T**2)/Sum(T))
-
-            ! gamma decay
-
-            ! sumg = WFC_DECAYG(nnuc,ke,jcn,ip)           ! gamma emission is always a weak channel (V=T)
             !  write(*,*)' '
             !  write(*,*)'SUMMARY OF DECAY FOR J=',xjc
             !  write(*,*)'total sum of  Tls ', H_Sumtl
@@ -473,14 +413,13 @@ CONTAINS
             !  write(*,*)'sum of gammas     ', sumg
             !  write(*,*)'sum fission       ', sumfis
             !  write(*,*)'sum Tl**2         ', H_Sumtls
-            !  write(*,*)'# of strong Tls   ', nch
+            !  write(*,*)'# of strong Tls   ', NCH
             !  write(*,*)'average Tl        ', H_Tav
-            !  write(*,*)'first entry DENhf=', DENhf
+            !  write(*,*)'pre  AUSTER DENhf=', DENhf
 
             !----------------------------------------------------------
             ! Collecting outgoing channels completed
             !----------------------------------------------------------
-            ! write(*,*)'pre  AUSTER DENhf=', DENhf
             IF(LHRtw==1 .OR. LHRtw==2) CALL AUSTER(LHRtw)  !calculate V's for the strong channels (iteration)
             DENhf = H_Sumtl                                !reset DENhf using V's instead of T's
             IF(DENhf .LE. 0.d0) CYCLE
@@ -488,56 +427,34 @@ CONTAINS
             !----------------------------------------------------------------------------------
             ! construct scratch matrix for decay of the Jcn state
             !----------------------------------------------------------------------------------
-
             sumin_s = 0.d0
             sumtt_s = 0.d0
             ! write(*,*) ' NProject=',NPRoject,' LEVtarg=',LEVtarg
           
             DO i = 1, num%part  !scan strong particle channels (note: weak channels are already in SCRt)
                out => outchnl(i)
-               IF(out%kres>0) THEN                ! continuum channels
-                  SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) + out%t*out%rho/de
-               ELSE IF(out%kres<0) THEN           ! discrete level channels
-                  IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN
-                     stmp = out%t*out%rho
-                     sumin_s = sumin_s + stmp * CINRED(-out%kres)
-                     sumtt_s = sumtt_s + stmp
-                     SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
-                     ! write(*,*) 'ilev=',-out%kres,' nejc=',out%nejc,' CINRED(ilev)=',sngl(CINRED(-out%kres))
-                     ! write(*,*) sumin_s,sumtt_s,' strong'
-                  ELSE
-                     SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho
-                  ENDIF
-               ENDIF
+			   sigma_  = out%t
+			   CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
             ENDDO
 
-            ! Correcting the elastic cross section for inelastic enhancement CINRED
-			ewcor = (sumtt_s - sumin_s +  sumtt_w - sumin_w)
-            !write(*,*) 'EWCORR=', ewcor
-            IF(ewcor.ne.0.d0) then
-               numch_el = max(num%elah - num%elal + 1 , 1 )
-               ! write(*,*) numch_el,num%elah,num%elal
-               DO i = num%elal, num%elah  ! do loop over elastic channels
-                  out => outchnl(i)
-                  SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + ewcor/numch_el
-                  ! write(*,*) 'i=',i,' ilev=',-out%kres,' nejc=',out%nejc,' ewcor=',ewcor
-               ENDDO
-            ENDIF
+			CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
             !----------------------------------------------------------
             ! Fission
             !----------------------------------------------------------
             IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho  !redefining sumfis to account for the HRTW T=>V transition
 
-            ! DENhf = 0.0d0                             !test that SCRt+SCRtl sum to the same DENhf
-            ! DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-            ! DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
-            ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf    !should be the same as after AUSTER
+            !----------------------------------------------------------
+            ! Renormalizing scratch matrices to recover unitarity
+            !----------------------------------------------------------
+            DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
+            DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
+            ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
 
+            IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
             !----------------------------------------------------------------------------------
             !Loop over incident channels to calculate cross sections and angular distributions
             !----------------------------------------------------------------------------------
-
             DO i = num%elal, num%elah                   ! do loop over elastic channels
                in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
@@ -558,14 +475,6 @@ CONTAINS
                ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
                ! write(*,*)'post AUSTER DENhf=', DENhf + elcor
-
-               !----------------------------------------------------------
-               ! Renormalizing scratch matrices to recover unitarity
-               !----------------------------------------------------------
-               !DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-               !DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
-               !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
-               !IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
 
                !xnor = in%sig/DENhf                          ! normalization factor
                !SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
@@ -600,6 +509,7 @@ CONTAINS
                   sumtg = sumtg + sumg
                ENDIF
             ENDIF
+
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
 
@@ -726,9 +636,9 @@ CONTAINS
                         H_Sumtls = H_Sumtls - 0.5*tld**2*rho1
                      ENDIF
                      IF(tld>H_Tthr) THEN                     !store strong channels
-                        nch = nch + 1
-                        IF(nch>ndhrtw1) CALL WFC_error()    !STOP - insufficent space allocation
-                        out => outchnl(nch)
+                        NCH = NCH +1
+                        IF(NCH>ndhrtw1) CALL WFC_error()    !STOP - insufficient space allocation
+                        out => outchnl(NCH)
                         out%l = k-1
                         out%j = xj
                         out%t = tld
@@ -786,9 +696,9 @@ CONTAINS
                H_Sumtl = H_Sumtl + tld*rho1
                H_Sumtls = H_Sumtls + tld**2*rho1
                IF(tld>H_Tthr) THEN
-                  nch = nch + 1                              !we've got non-zero channel
-                  IF(nch>ndhrtw1) CALL WFC_error()          !STOP - insiufficent space allocation
-                  out => outchnl(nch)
+                  NCH = NCH + 1                             !we've got non-zero channel
+                  IF(NCH>ndhrtw1) CALL WFC_error()          !STOP - insufficient space allocation
+                  out => outchnl(NCH)
                   out%l = k-1
                   out%j = xj
                   out%t = tld
@@ -815,7 +725,7 @@ CONTAINS
       !----------------------------------------------------------------------------------------------------
       IF(DIRect>0 .and. MAX_cc_mod>0) THEN !TEMPORARY to allow for the old treatment of the direct outgoing channels
 
-         CALL DECAY2CC(xjc, ipc, nejc, nnur, nch)             ! Decay to collective levels including elastic
+         CALL DECAY2CC(xjc, ipc, nejc, nnur)                   ! Decay to collective levels including elastic
 
       ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
          !  Old version for collective levels
@@ -843,16 +753,16 @@ CONTAINS
                      IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                      H_Sumtl = H_Sumtl + tld*rho1
                      H_Sumtls = H_Sumtls + tld**2*rho1
-                     nch = nch + 1                              !we've got non-zero channel
-                     IF(nch>ndhrtw1) CALL WFC_error()           !STOP - insiufficent space allocation
+                     NCH = NCH + 1                              !we've got non-zero channel
+                     IF(NCH>ndhrtw1) CALL WFC_error()           !STOP - insiufficent space allocation
 
                      IF(num%coll == 0) THEN
-                        num%coll = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
-                        num%colh = nch                          !set it also as the last one in case there are no more
+                        num%coll = NCH                          !memorize position of the first coupled level in the 'outchnl' matrix
+                        num%colh = NCH                          !set it also as the last one in case there are no more
                      ENDIF
-                     IF(nch > num%colh) num%colh = nch          !in case of another coupled level augment position of last coupled channel
+                     IF(NCH > num%colh) num%colh = NCH          !in case of another coupled level augment position of last coupled channel
 
-                     out => outchnl(nch)
+                     out => outchnl(NCH)
                      out%l = k-1
                      out%j = xj
                      out%t = tld
@@ -861,7 +771,7 @@ CONTAINS
                      out%kres = -i                              !minus indicates channel leading to a discrete level 'i'
                      out%xjrs = XJLv(i,nnur)
                      out%pres = LVP(i,nnur)
-                     ! WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), nch', xjc, xj, ipar, ELV(i,nnur), nch
+                     ! WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), NCH', xjc, xj, ipar, ELV(i,nnur), NCH
                   ENDDO     !do loop over 'jndex'    --------- done --------------------
                ENDDO    !do loop over 'l'            --------- done --------------------
             ENDDO    ! do loop over inelastic levels --------- done --------------------
@@ -886,15 +796,15 @@ CONTAINS
                   xj = k + jndex - (2.0 + SEJc(nejc))
                   IF(xj<jmin .OR. xj>jmax) CYCLE
                   tld = ELTLJ(k,jndex)                       !no IF - all elastic channels treated as 'strong'
-                  nch = nch + 1
-                  IF(nch>ndhrtw1) CALL WFC_error()          !STOP - insufficient space allocation
+                  NCH = NCH + 1
+                  IF(NCH>ndhrtw1) CALL WFC_error()          !STOP - insufficient space allocation
                   IF(num%elal == 0) THEN
-                     num%elal = nch                          !memorize position of the first elastic in the 'outchnl' matrix
-                     num%elah = nch                          !set it also as the last one in case there are no more
+                     num%elal = NCH                          !memorize position of the first elastic in the 'outchnl' matrix
+                     num%elah = NCH                          !set it also as the last one in case there are no more
                   ENDIF
-                  IF(nch > num%elah) num%elah = nch          !if another elastic augment position of last elastic channel
+                  IF(NCH > num%elah) num%elah = NCH          !if another elastic augment position of last elastic channel
                   rho1 = CELred
-                  out => outchnl(nch)
+                  out => outchnl(NCH)
                   out%l = k-1
                   out%j = xj
                   out%t = tld
@@ -904,9 +814,9 @@ CONTAINS
                   out%xjrs = XJLv(i,nnur)
                   out%pres = LVP(i,nnur)
 
-                  nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+                  nel = NCH - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
                   in => inchnl(nel)
-                  in%nout = nch                    !setting incident channel
+                  in%nout = NCH                    !setting incident channel
                   in%l = k-1                       !setting incident channel
                   in%j = xj                        !          "
                   in%t = tld                       !          "
@@ -921,7 +831,7 @@ CONTAINS
 10    summa = H_Sumtl - SCRtem(nejc)     !we may NOT NEED IT
       SCRtem(nejc) = summa               !we may NOT NEED IT
       DENhf = DENhf + summa
-      IF(nejc==1) num%neut = nch         !store number of neutron-out channels
+      IF(nejc==1) num%neut = NCH         !store number of neutron-out channels
       ! decay to the continuum and discrete levels ------ done -----------------------------
 
       WFC_decay = summa
@@ -930,7 +840,7 @@ CONTAINS
 
    !----------------------------------------------------------------------------------------------------
 
-   SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur, nch)
+   SUBROUTINE DECAY2CC(xjc, ipc, nejc, nnur)
       !
       !********************************************************************
       !*                                                         class:PPu*
@@ -950,7 +860,7 @@ CONTAINS
       !* calls:Prepare_CCmatr                                             *
       !*                                                                  *
       !********************************************************************
-      INTEGER i, ipc, nel, nnur, nejc, nch, ncc, nccp, nccu, ndim
+      INTEGER i, ipc, nel, nnur, nejc, ncc, nccp, nccu, ndim
       REAL*8 tld, xjc
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -958,21 +868,23 @@ CONTAINS
       IF(IZA(nnur)/=IZA(0)) RETURN
 
       CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)    ! open  CC P-diagonal and U-matrix for EW transformation
+
       IF(ndim==0) RETURN                                      ! no collective channels found
+	  
       ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',sngl(xjc), ipc, ncc, nccp, nccu, ndim
       DO i = ncc, nccp
          !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
          H_Sumtl = H_Sumtl + tld
          H_Sumtls = H_Sumtls + tld**2
-         nch = nch + 1                                !we've got non-zero channel
-         IF(nch>ndhrtw1) CALL WFC_error()            !STOP - insiufficent space allocation
+         NCH = NCH + 1                                !we've got non-zero channel
+         IF(nch>ndhrtw1) CALL WFC_error()             !STOP - insufficient space allocation
          IF(num%coll == 0) THEN
-            num%coll = nch                            !memorize position of the first coupled level in the 'outchnl' matrix
-            num%colh = nch                            !set it also as the last one in case there are no more
+            num%coll = NCH                            !memorize position of the first coupled level in the 'outchnl' matrix
+            num%colh = NCH                            !set it also as the last one in case there are no more
          ENDIF
-         IF(nch > num%colh) num%colh = nch            !in case of another coupled level augment position of last coupled channel
-         out => outchnl(nch)
+         IF(NCH > num%colh) num%colh = NCH            !in case of another coupled level augment position of last coupled channel
+         out => outchnl(NCH)
          out%l = STLcc(i)%l
          out%j = STLcc(i)%j
          out%t = tld
@@ -986,13 +898,13 @@ CONTAINS
 
            IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
              IF(num%elal == 0) THEN
-               num%elal = nch                          !memorize position of the first coupled level in the 'outchnl' matrix
-               num%elah = nch                          !set it also as the last one in case there are no more
+               num%elal = NCH                          !memorize position of the first coupled level in the 'outchnl' matrix
+               num%elah = NCH                          !set it also as the last one in case there are no more
              ENDIF
-             IF(nch > num%elah) num%elah = nch          !in case of another coupled level augment position of last coupled channel
-             nel = nch - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+             IF(NCH > num%elah) num%elah = NCH          !in case of another coupled level augment position of last coupled channel
+             nel = NCH - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
              in => inchnl(nel)
-             in%nout = nch                    !setting incident channel
+             in%nout = NCH                    !setting incident channel
              in%l = out%l                     !setting incident channel
              in%j = out%j                     !setting incident channel
              in%t = tld                       !setting incident channel
@@ -1001,9 +913,9 @@ CONTAINS
 		 ELSE
 		   ! EW transformed space               
 		   ! in the transformed space (INTerf>0) all coupled channels are considered elastic
-           nel = nch - num%coll + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+           nel = NCH - num%coll + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
            in => inchnl(nel)
-           in%nout = nch                    !setting incident channel
+           in%nout = NCH                    !setting incident channel
            in%l = out%l                     !setting incident channel
            in%j = out%j                     !setting incident channel
            in%t = tld                       !setting incident channel
@@ -1244,6 +1156,83 @@ CONTAINS
 
    !----------------------------------------------------------------------------------------------------
 
+
+   REAL*8 FUNCTION WFC_decayf(nnuc,iec,jcn,ip)
+      !
+      !********************************************************************
+      !*                                                         class:PPu*
+      !*                    W F C _ D E C A Y F                           *
+      !*                (function to function version)                    *
+      !*                                                                  *
+      !* Calculates fission decay in nucleus NNUC                         *
+      !*                                                                  *
+      !* input:NNUC - decaying nucleus index                              *
+      !*       NCH  - outgoing channel index                              *
+      !*       IEC  - energy index of the decaying state                  *
+      !*       JC   - spin index of the decaying state                    *
+      !*       IPC  - parity of the decaying state (+1 or -1)             *
+      !*                                                                  *
+      !*                                                                  *
+      !* output:      Sum of fission transmission coefficients over all   *
+      !*              fission channels.                                   *
+      !*              Apart of this standard feature it comunicates       *
+      !*              quantities needed for the HRTW model through        *
+      !*              the HRTW_mod module.                                *    
+      !*                                                                  *
+      !* calls:none                                                       *
+      !*                                                                  *
+      !********************************************************************
+
+      IMPLICIT NONE
+
+      ! Dummy arguments
+
+      INTEGER, INTENT(IN)  :: iec, ip, jcn, nnuc
+
+      ! Local variables
+      REAL*8 :: sumfis
+      REAL*8 sumfism(nfmod) 
+      REAL*8 :: tfis
+      INTEGER ndivf
+
+      WFC_decayf = 0.d0
+
+      IF(.not.FISsil(nnuc)) RETURN
+
+      sumfis = 0.D0
+      tfis = 0.D0
+      ndivf = 1
+      num%fiss = 0
+ 
+      IF(nint(FISshi(nnuc))==1) THEN
+        CALL FISSION(nnuc,iec,jcn,sumfis)
+      ELSE
+        CALL FISCROSS(nnuc,iec,ip,jcn,sumfis,sumfism)
+      ENDIF
+
+	  IF(sumfis<=0.d0) RETURN
+
+      H_Sumtl = H_Sumtl + sumfis
+
+      ! dividing sumfis into channels with TFIs < 0.25 each
+      ndivf = int(sumfis/0.25) + 1
+      tfis = sumfis/dfloat(ndivf)
+      H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
+      IF(tfis>=H_Tthr) THEN                      ! fission treated as a strong channel
+        NCH = NCH + 1                           ! otherwise 'sumfis' it is left untouched
+        num%fiss = NCH                          ! store position of fission (only one entry with 'ndivf')
+        outchnl(NCH)%t = tfis
+        outchnl(NCH)%rho = dfloat(ndivf)
+        outchnl(NCH)%nejc = 100                 ! nejc=100 convention identifies fission
+      ENDIF
+
+      WFC_decayf = sumfis
+
+      RETURN
+   END FUNCTION WFC_decayf
+
+
+
    SUBROUTINE WFC_error()
 
       WRITE(8,*) 'Insufficient space allocated for HRTW'
@@ -1393,7 +1382,7 @@ CONTAINS
       ! Local variables
 
       LOGICAL*4 relcal
-      INTEGER i, ip, ipar, jcn, ke, m, ndivf, nejc, nhrtw, nnuc, nnur, itmp
+      INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
@@ -1411,6 +1400,7 @@ CONTAINS
       TYPE (fusion),  POINTER :: in
 
       CALL AllocHRTW()    !allocate HRTW matrices
+
       H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
       nnuc = 1            !set CN nucleus
       csfis = 0.D0
@@ -1427,7 +1417,6 @@ CONTAINS
       END IF
 
       ! Initialize variables and print heading for normalizing g-strength function
-
       d0c = 0.D0
       sumtg = 0.D0
       tgexper = 0.D0
@@ -1439,9 +1428,11 @@ CONTAINS
          WRITE(8,'(1x,'' WARNING: First incident energy Einc must be < 1MeV for Do and Gg calculations and'')')
          WRITE(8,'(1x,'' WARNING: for the renormalization of gamma-ray strength function'')')
       ENDIF
+
       xmas_npro = EJMass(0)
       xmas_ntrg = AMAss(0)
       el = EINl
+
       relcal = .FALSE.
       IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
       IF (AEJc(0).EQ.0.0D0) THEN
@@ -1458,7 +1449,6 @@ CONTAINS
       !----------------------------------------------------------
       ! start CN nucleus decay
       !----------------------------------------------------------
-
       DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
          ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
          DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
@@ -1467,49 +1457,18 @@ CONTAINS
             ! write(8,*) ' '
             ! write(8,*) 'CN Jpi=',xjc*ip
             nhrtw = 0
-            DENhf = 0.D0
-            NSCh = 0
-            NCH = 0
-            outchnl%l = 0
-            outchnl%j = 0.d0
-            outchnl%t = 0.d0
-            outchnl%ti1 = 0.d0
-            outchnl%ti2 = 0.d0
-            outchnl%rho = 0.d0
-            outchnl%eef = 1.d0
-            outchnl%nejc = 0
-            outchnl%kres = 0
-            outchnl%xjrs = 0.d0
-            outchnl%jres = 0
-            outchnl%pres = 0
-            inchnl%nout = 0
-            inchnl%l = 0
-            inchnl%j = 0.d0
-            inchnl%t = 0.d0
-            inchnl%sig = 0.d0
-            num%neut = 0
-            num%part = 0
-            num%elal = 0
-            num%elah = 0
-            num%coll = 0
-            num%colh = 0
-            num%fiss = 0
-            num%gamm = 0
-            H_Sumtls = 0.D0
-            H_Sumtl = 0.D0
-            H_Tav = 0.D0
-            H_Sweak = 0.D0
-            H_Tl = 0.D0
+            ! NSCh = 0
+
+			CALL zeroing_module_vars()
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
-            !----------------------------------------------------------
-            ! Collecting outgoing channels
-            !----------------------------------------------------------
+         !----------------------------------------------------------
+         ! Collecting outgoing channels
+         !----------------------------------------------------------
 
             !----------------------------------------------------------
             ! particle decay
             !----------------------------------------------------------
-
             DO nejc = 1, nejcm                            !do loop over ejectiles
                IF(NREs(nejc)<0) CYCLE
                nnur = NREs(nejc)
@@ -1519,48 +1478,22 @@ CONTAINS
 			! write(*,*) num%elal,num%elah,num%coll,num%colh
             
 			if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
- 
-            num%part = nch                                !store number of particle channel entries
+            num%part = NCH         !store number of particle channel entries
 
             !----------------------------------------------------------
             ! gammas (weak channels)
             !----------------------------------------------------------
-
             sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
 
             !----------------------------------------------------------
             ! Fission (may be a weak or strong channel)
             !----------------------------------------------------------
+            sumfis = WFC_DECAYF(nnuc,ke,jcn,ip)
 
-            sumfis = 0.D0
-            tfis = 0.D0
-            ndivf = 1
-            num%fiss = 0
-            IF(FISsil(nnuc)) THEN
-               IF(nint(FISshi(nnuc))==1) THEN
-                  CALL FISSION(nnuc,ke,jcn,sumfis)
-               ELSE
-                  CALL FISCROSS(nnuc,ke,ip,jcn,sumfis,sumfism)
-               ENDIF
-               H_Sumtl = H_Sumtl + sumfis
-
-               ! dividing sumfis into channels with TFIs < 0.25 each
-
-               ndivf = int(sumfis/0.25) + 1
-               tfis = sumfis/dfloat(ndivf)
-               H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
-               IF(tfis>=H_Tthr) THEN                      ! fission treated as a strong channel
-                  nch = nch + 1                           ! otherwise 'sumfis' it is left untouched
-                  num%fiss = nch                          ! store position of fission (only one entry with 'ndivf')
-                  outchnl(nch)%t = tfis
-                  outchnl(nch)%rho = dfloat(ndivf)
-                  outchnl(nch)%nejc = 100                 ! nejc=100 convention identifies fission
-               ENDIF
-            ENDIF
-
-            IF(H_Sumtl.LE.0.0D0) CYCLE                    ! no transitions from the current state
-
-            IF(DENhf==0.D0) CYCLE
+         !----------------------------------------------------------
+         ! Collecting outgoing channels completed
+         !----------------------------------------------------------
+             IF(DENhf==0.D0) CYCLE
 
             !  write(*,*)' '
             !  write(*,*)'SUMMARY OF DECAY FOR J=',xjc
@@ -1571,15 +1504,10 @@ CONTAINS
             !  write(*,*)'sum of gammas     ', sumg
             !  write(*,*)'sum fission       ', sumfis
             !  write(*,*)'sum Tl**2         ', H_Sumtls
-            !  write(*,*)'# of strong Tls   ', nch
+            !  write(*,*)'# of strong Tls   ', NCH
             !  write(*,*)'average Tl        ', H_Tav
-            !  write(*,*)'first entry DENhf=', DENhf
-
-            !----------------------------------------------------------
-            ! Collecting outgoing channels completed
-            !----------------------------------------------------------
-
-            !write(*,*) 'Decay state ',jcn*ip, ' DENhf calculated before HRTW or Moldauer', DENhf
+            !  write(*,*)'Decay state ',jcn*ip
+			!  write(*,*)'DENhf calculated before Moldauer', DENhf
 
             !----------------------------------------------------------
             ! Calculate WF term common for all channels
@@ -1590,10 +1518,9 @@ CONTAINS
             !----------------------------------------------------------
             ! Loop over incoming (fusion) channels
             !----------------------------------------------------------
-
-            SCRt_mem  = SCRt                    ! store initial values
+            SCRt_mem  = SCRt    ! store initial values
             SCRtl_mem = SCRtl
-            sumfis_mem = sumfis
+            sumfis_mem = sumfis	
 
     		! write(*,*) 'Elastic channels:',num%elal, num%elah 
     		! write(*,*) 'Collective channels:',num%coll, num%colh 
@@ -1704,22 +1631,22 @@ CONTAINS
 			   enddo
 
 			   ! setting the complex identity matrix to call DIAG() 
-			   ZRtmp1 = 0.d0
-               do i=1,NDIm_cc_matrix
-                 ZRtmp1(i,i) = 1.d0			     
-			   enddo
-			   ZItmp1 = 0.d0
+			   !ZRtmp1 = 0.d0
+               !do i=1,NDIm_cc_matrix
+               !  ZRtmp1(i,i) = 1.d0			     
+			   !enddo
+			   !ZItmp1 = 0.d0
 			   !Diagonalizing the Pmatrix in the transformed space for cross checking 
-               PPdiag =   REAL(Pmatr) 
-               ZItmp  =   IMAG(Pmatr) 
+               !PPdiag =   REAL(Pmatr) 
+               !ZItmp  =   IMAG(Pmatr) 
                !write(*,*) 'Pmatrix HRTW'
                !DO i = 1,NDIm_cc_matrix
                !  DO iout = 1,NDIm_cc_matrix
    	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
                !  ENDDO
 	           !ENDDO
-			   CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
-               IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)   
+			   !CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+               !IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)   
 			   ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space 
                ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix            
 		     
@@ -1797,17 +1724,17 @@ CONTAINS
                                            Umatr(ibeta,iaa) *      Umatr(ibeta,ibb)*   &
 								                phas*deg_alph*deg_beta )
                           endif
+                          sigma_EW = sigma_EW + REAL(ctmp1)   
+                          
+                          write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', REAL (ctmp1),' REAL' ! the cross section \sigma_{ab} in the normal space
+                          write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', DIMAG(ctmp1),' IMAG' ! the imaginary part expected to be zero
+
                         enddo ! end of the loop over ibeta (transformed space)					 
                      enddo   ! end of the loop over ialph (transformed space)
 
-                     sigma_EW = sigma_EW + REAL(ctmp1)   
-
-					 write(*,*) 'Sigma_abs=',in%sig
-                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', REAL (ctmp1),' REAL' ! the cross section \sigma_{ab} in the normal space
-                     write(*,*) 'Sigma(a=',iaa,', b=',ibb,')=', DIMAG(ctmp1),' IMAG' ! the imaginary part expected to be zero
-
+   				     write(*,*) 'Sigma_abs=',in%sig
                      sigma_ = sigma_EW*in%sig
-
+   				     write(*,*) 'Sigma_ab =',sigma_ 
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
 
@@ -1832,6 +1759,7 @@ CONTAINS
                   DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
                   !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
                   IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
+
                   xnor = in%sig/DENhf                          ! normalization factor
                   SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
                   SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
@@ -1845,9 +1773,7 @@ CONTAINS
 				  CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-                  !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-
-                  CALL DelCCmatr() ! deallocate EW matrices
+                  ! CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
@@ -1855,7 +1781,6 @@ CONTAINS
 
 
             ! Gamma width calculation *************************************************************************************
-
             IF((first_ein .OR. benchm) .AND. einl<=1.D0) THEN
                cnspin = jcn - 0.5
                IF(mod(XJLv(levtarg,0)*2.,2.D+0)==1)cnspin = jcn - 1
@@ -1867,6 +1792,7 @@ CONTAINS
                   sumtg = sumtg + sumg
                ENDIF
             ENDIF
+
          ENDDO       !loop over decaying nucleus spin
       ENDDO          !loop over decaying nucleus parity
 
@@ -2094,6 +2020,8 @@ CONTAINS
             WRITE(8,*)
          ENDIF
       ENDIF
+
+      RETURN
 
    END SUBROUTINE Gamma_renormalization
 
@@ -2327,5 +2255,48 @@ CONTAINS
   endif
   RETURN
   END SUBROUTINE elastic_corr
+
+  SUBROUTINE zeroing_module_vars()
+     DENhf = 0.D0
+     NCH = 0
+
+     outchnl%l = 0
+     outchnl%j = 0.d0
+     outchnl%t = 0.d0
+     outchnl%ti1 = 0.d0
+     outchnl%ti2 = 0.d0
+     outchnl%rho = 0.d0
+     outchnl%eef = 1.d0
+     outchnl%nejc = 0
+     outchnl%kres = 0
+     outchnl%xjrs = 0.d0
+     outchnl%jres = 0
+     outchnl%pres = 0
+
+     inchnl%nout = 0
+     inchnl%l = 0
+     inchnl%j = 0.d0
+     inchnl%t = 0.d0
+     inchnl%sig = 0.d0
+ 
+     num%neut = 0
+     num%part = 0
+     num%elal = 0
+     num%elah = 0
+     num%coll = 0
+     num%colh = 0
+     num%fiss = 0
+     num%gamm = 0
+ 
+     H_Sumtls = 0.D0
+     H_Sumtl = 0.D0
+     H_Tav = 0.D0
+     H_Sweak = 0.D0
+     H_Tl = 0.D0
+
+
+
+     RETURN
+  END SUBROUTINE zeroing_module_vars
 
 END MODULE width_fluct

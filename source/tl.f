@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4661 $
+Ccc   * $Rev: 4672 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-27 01:57:01 +0100 (So, 27 Mär 2016) $
+Ccc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2642,13 +2642,24 @@ C
             IF (A(Nnuc).EQ.A(0) .AND. Z(Nnuc).EQ.Z(0) .AND.
      &          AEJc(Nejc).EQ.AEJc(0) ) THEN
               WRITE (8,*)
+
               IF (DIRect.EQ.2 .AND. AEJc(Nejc).LE.1) THEN 
                WRITE (8,*) ' CC transmission coefficients used for the',
      &                     ' inelastic outgoing channel'
-              ELSE
+               WRITE (8,*) ' WARNING: This is a legacy option'
+               WRITE (8,*) ' WARNING: DIRECT 1 is recommended'
+
+              ELSEIF(DIRect.EQ.1 .AND. AEJc(Nejc).LE.1) THEN
+               WRITE (8,*) ' CC transmission coefficients used for the',
+     &                 ' coupled channels (both incident and outgoing)'
+               WRITE (8,*) ' Spherical OM transmission coefficients',
+     &                     ' used for the uncoupled channels'
+			ELSE
                WRITE (8,*) ' Spherical OM transmission coefficients',
      &                     ' used for the inelastic outgoing channel'
               ENDIF 
+
+
             ENDIF
          ENDIF
 C--------OPEN Unit=46 for Tl output
@@ -2772,7 +2783,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION ak2,dtmp,ecms,elab,jj,sabs,sabsj,sreac,jc,
-     & xmas_nejc,xmas_nnuc,selast,sreal,simag,stmp,snorm,ftmp
+     & xmas_nejc,xmas_nnuc,selast,sreal,simag,stmp,ftmp
       DOUBLE PRECISION xsabs,xsabsj,jsp,coeff,sxj,trgsp
       INTEGER ilv, l, nc, nceq, ncoll, nlev, nc1, nc2
       INTEGER nctot, ncsol, ncint, jindex
@@ -2934,7 +2945,9 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
         ENDDO
       ENDIF
 C
-      IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
+C     IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
+      IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
+     >   .and. MAX_cc.GT.0) then
          CALL AllocTLJmatr(MAX_cc)
          IF(Open_CC_files()) THEN 
            IF(.NOT.Read_CC_matrices()) 
@@ -3016,7 +3029,7 @@ C-----Absorption and elastic cross sections in mb are calculated
         ENDDO 
       ENDDO
       xsabs  = coeff*sabs
-      xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
+      xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
       selast = coeff*selast
 
 C     write(*,*)'*** xsabs, xsabsj=',sngl(xsabs),sngl(xsabsj)
@@ -3045,14 +3058,75 @@ C          Scattering into continuum
 
       ENDDO
   400 CLOSE (45)
+C
+	ftmp = SINl + SINlcont
+C
+C     ABScs is the OMP calculated absorption
+C     xsabs is the cross section calculated as a sum over Tls (Tljs)
+C     SINlcc   is the coupled channels' cross section
+C     SINl     is the uncoupled channels' cross section
+C     SINlcont is the uncoupled channels' cross section to the continuum
+C     dtmp = (ABScs -SINlcc -ftmp)/xsabs
+      dtmp = (ABScs -SINlcc -ftmp)/xsabs
+C-----Renormalizing TLs and Tljs
+      sabs = 0.d0
+      sabsj = 0.D0
+      DO l = 0, Maxlw
+        Stl(l + 1) = Stl(l + 1)*dtmp 
+        sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+        DO jindex = 1,MAXj(Nejc)
+          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
+          jsp = sjf(l,jindex,SEJc(Nejc)) 
+          sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+        ENDDO
+      ENDDO
+      xsabs  = coeff*sabs
+      xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
 
-      ftmp = 0.d0
-      if(DIRECT.EQ.3) ftmp = SINl + SINlcont
-C     if(DIRECT.EQ.3) ftmp = SINl 
-C     if(DIRECT.GT.0) ftmp = ftmp + SINlcont
-C     if(DIRECT.EQ.1 .or. DIRECT.EQ.3) ftmp = SINl + SINlcont
+      if(abs(1.d0-dtmp).gt.1.d-6) then
+        WRITE (8,
+     &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
+     &r '',F9.6/
+     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb''/
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: CN formation + Direct                           =''
+     &,F8.2,'' mb''/ 
+     &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
+     &,F8.2,'' mb''/)') 
+     &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+     &    xsabs+SINlcc+ftmp, ABScs 
+C       WRITE (*,
+C    &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
+C    &r '',F9.6/
+C    &1x,'' WARNING: CC cross section to coupled discrete levels     =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+C    &,F8.2,'' mb''/
+C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: CN formation + Direct                           =''
+C    &,F8.2,'' mb''/ 
+C    &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
+C    &,F8.2,'' mb''/)') 
+C    &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+C    &    xsabs+SINlcc+ftmp, ABScs
+C       WRITE (*,*) 
+      ENDIF
 C
 C     5% difference check
+C     write(*,*) xsabs + SINlcc + ftmp, ABScs
       IF (abs(xsabs + SINlcc + ftmp - ABScs).gt.0.05*ABScs) THEN 
          WRITE (8,*)
          WRITE (8,*)
@@ -3072,55 +3146,8 @@ C     5% difference check
          write (8,*) ' ECIS  ABScs   =',sngl(ABScs)
          WRITE (8,*)
       ENDIF
-C     RENORMALIZING TLs and TLJs to correct for small differences 
-C     between ABScs and sum(Tls) corrected for direct
-C
-C     ABScs is the OMP calculated absorption
-C     xsabs is the cross section calculated as a sum over Tls (Tljs)
-C     SINlcc   is the coupled channels' cross section
-C     SINl     is the uncoupled channels' cross section
-C     SINlcont is the uncoupled channels' cross section to the continuum
-
-C     dtmp = (ABScs -SINlcc -ftmp)/xsabs
-
-C     sabs = 0.d0
-C     sabsj = 0.D0
-C     DO l = 0, Maxlw
-C       Stl(l + 1) = Stl(l + 1)*dtmp 
-C       sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
-C       DO jindex = 1,MAXj(Nejc)
-C         Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
-C         jsp = sjf(l,jindex,SEJc(Nejc)) 
-C         sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-C       ENDDO
-C     ENDDO
-C     xsabs  = coeff*sabs
-C     xsabsj = coeff*sabsj/DBLE(2*SEJc(Nejc) + 1)
-
-C     if(abs(1.d0-dtmp).gt.0.00001d0) then
-C       WRITE (8,
-C    &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
-C    &r '',F9.6/
-C    &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-C    &,F8.2,'' mb''/
-C    &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-C    &,F8.2,'' mb''/
-C    &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
-C    &,F8.2,'' mb''/
-C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
-C    &,F8.2,'' mb''/ 
-C    &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
-C    &,F8.2,'' mb''/ 
-C    &1x,'' WARNING: CN formation + Direct                           =''
-C    &,F8.2,'' mb''/ 
-C    &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
-C    &,F8.2,'' mb''/)') 
-C    &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
-C    &    xsabs+SINlcc+ftmp, ABScs 
-C     ENDIF
 
       IF (SINl+SINlcc+SINlcont.EQ.0.D0) RETURN
-
 C
 C     ECIS convergence check
 C
@@ -3228,61 +3255,6 @@ C    &               SNGL(selast), ' mb '
          WRITE (8,*)
 
       ENDIF
-C
-C-----Renormalizing TLs and Tljs
-C     Discrete level inelastic scattering (not coupled levels) and DWBA to the
-C     continuum included in the reaction cross section if DIRECT<=2
-C
-
-      IF( DIRECT.LE.2 .and. xsabs.gt.0.d0 .and. 
-     &                      xsabs.GT.(SINl+SINlcont) ) THEN 
-
-        CSFus = xsabs
-
-        dtmp = 0.d0
-        ftmp = 0.d0
-
-        snorm = (xsabs - SINl -SINlcont)/xsabs
-
-        IF(dabs(1.d0-snorm).gt.1.d-5) then
-          DO l = 0, Maxlw
-            Stl(l + 1) = Stl(l + 1)*snorm
-            dtmp   = dtmp + DBLE(2*l + 1)*Stl(l + 1)
-            DO jindex = 1, MAXj(Nejc) 
-              Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*snorm
-              jsp = sjf(l,jindex,SEJc(Nejc)) 
-              ftmp   = ftmp + DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-            ENDDO 
-          ENDDO
-          dtmp = coeff*dtmp
-          ftmp = coeff*ftmp/DBLE(2*SEJc(Nejc) + 1)
-
-          CSFus = dtmp         
-
-          WRITE (8,'(/1x,
-     &  '' WARNING: Transmission coefficients renormalized to account''/
-     &1x,'' WARNING:        for DWBA calc. cross sections by a factor '' 
-     &,F9.6/
-     &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
-     &,F8.2,'' mb''/
-     &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: CN formation + Direct                           =''
-     &,F8.2,'' mb''/ 
-     &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
-     &,F8.2,'' mb''/)') 
-     &    snorm, SINlcc, SINl, SINlcont, 
-     &    ftmp, dtmp, dtmp+SINlcc+SINl+SINlcont, ABScs 
-
-        ENDIF
-
-      ENDIF 
     
       RETURN
       END
@@ -3322,7 +3294,8 @@ C Local variables
 C
       DOUBLE PRECISION ak2, dtmp, ecms, elab, jc, jj, sabs, sabsj,
      &                 selecis, sinlss, sreac, sreacecis, stotecis,
-     &                 xmas_nejc, xmas_nnuc, stmp, xsabsj, xsabs, jsp
+     &                 xmas_nejc, xmas_nnuc, stmp, xsabsj, xsabs, jsp,
+     &                 sxj, trgsp 
       LOGICAL relcal
       INTEGER l, lmax, nc, nceq, ncoll, nlev, jindex, ilv
       CHARACTER*1 parc
@@ -3334,6 +3307,13 @@ C
       lmax = 0
       ncoll = 0
       ecms = ETL(Ien,Nejc,Nnuc)
+
+C-----Selecting only the ground state ilv=1, note that inverse reaction XSs are 
+C      calculated assuming that the target is always in the GS 
+      ilv = 1
+      sxj   = SEJc(Nejc)          
+      trgsp = XJLv(ilv,Nnuc)
+
 C-----
 C----- Input of transmission coefficients
 C-----
@@ -3353,9 +3333,6 @@ C-----nceq is the number of coupled equations
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       ENDIF  
 
-C-----Selecting only the ground state ilv=1, note that inverse reaction XSs are 
-C      calculated assuming that the target is always in the GS 
-      ilv = 1
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
 C--------Reading the coupled level number nlev, the orbital momentum L,
@@ -3373,8 +3350,7 @@ C--------(nlev=1 corresponds to the ground state)
 C-----------Averaging over particle and target spin, summing over channel spin JC
             TTLl(Ien,l+1) = TTLl(Ien,l+1) + 
      &                           (2*jc + 1)*dtmp/DBLE(2*l + 1)  
-     &                           /DBLE(2*SEJc(Nejc) + 1)
-     &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                           /(2*sxj + 1.d0)/(2*trgsp + 1.d0)
 
 C           It always contain the TRUE maximum L to be used in loops over L from 0 to Maxlw
             lmax = max(lmax,l)
@@ -3389,7 +3365,7 @@ C
 
             Ttllj(Ien,l+1,jindex) = Ttllj(Ien,l+1,jindex) +
      &                           (2*jc + 1)*dtmp/DBLE(2*jj+1)   
-     &                           /DBLE(2*XJLv(ilv,Nnuc) + 1)
+     &                           /(2*trgsp + 1.d0)
 C
 C           Sreac = Sum_{L} Sum_{j} (2j+1)/(2s+1) Ttllj(L,j)   
 C           j goes from |L-s| to L+s
@@ -3405,10 +3381,10 @@ C
 C-----For vibrational the Tls must be multiplied by 
       IF (Lvibrat) THEN
          DO l = 0, lmax
-            Ttll(Ien,l+1) = Ttll(Ien,l+1)*DBLE(2*XJLv(1,Nnuc) + 1)
+            Ttll(Ien,l+1) = Ttll(Ien,l+1)*(2*trgsp + 1.d0)
             DO jindex = 1,MAXj(Nejc)
                Ttllj(Ien,l+1,jindex) = Ttllj(Ien,l+1,jindex)
-     &                               *DBLE(2*XJLv(1,Nnuc) + 1)
+     &                               *(2*trgsp + 1.d0)
             ENDDO
          ENDDO
       ENDIF
@@ -3594,6 +3570,7 @@ C     5 HELIUM-3
 C     6 ALPHA
 C     >6 HEAVY ION
 C
+      IMPLICIT none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -3628,16 +3605,15 @@ C
      &                 xmas_nejc, xmas_nnuc, xratio, zerosp, convg,ecoul
 
       DOUBLE PRECISION vvref, wvref, wsref, vsoref, wsoref
-      DOUBLE PRECISION fv, fs, fvv, fvs, tv, ts, fso, tso
+      DOUBLE PRECISION fv, fs, fvv, fvs, tv, ts, fso, tso, dtmp
 
       CHARACTER*1 ch
 
-      INTEGER ncollx 
+      INTEGER ncollx, ilv, i, iang, nn2 
       LOGICAL lodd
 
       INTEGER ikey, ip, iterm, j, ldwmax, nppaa,
-     &        nd_cons, nd_nlvop, njmax, npp, nwrite,
-     &        nuncoupled, ncontinua, nphonon 
+     &        nd_cons, nd_nlvop, njmax, npp, nwrite, nphonon 
 
       INTEGER iwin, ipipe_move
       LOGICAL inc_channel, logtmp
@@ -3699,9 +3675,10 @@ C-----Calculations at experimental angles
 C-----Cmatrix output
       ECIs2(5:5) = 'F'
 C-----Smatrix output
-      ECIs2(6:6) = 'T'
-      ECIs2(10:10) = 'T'
-
+      IF(.not.TL_calc) then
+        ECIs2(6:6) = 'T'
+        ECIs2(10:10) = 'T'
+	ENDIF
 C-----Penetrabilities punched on cards
       ECIs2(9:9) = 'T'
       ECIs2(13:13) = 'T'
@@ -3773,18 +3750,12 @@ C                .FALSE. IF NONE ARE READ.
 C
 C       35- LO(85) FISSION TRANSMISSION COEFFICIENTS (TO BE READ FROM   
 C                CARDS) FOR COMPOUND NUCLEUS. IT IS SET .FALSE. IF NONE ARE READ.                                              
-C
         ECIs2(35:35) = 'F'    ! default: no fission in HF
                               ! Gf(J,pi) fission widths should be properly trasferred 
-        IF(nfiss_tr.gt.0)
-     &    ECIs2(35:35) = 'T'  ! .TRUE. must be used for fissiles !!!!
 C
 C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.                    
-
         ECIs2(36:36) = 'F'    ! default: no gamma emission in HF
                               ! Gg(L) gamma width should be properly trasferred 
-        IF(ngamm_tr.gt.0)     
-     &    ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
 C
         ECIs2(37:37) = 'F'    ! Moldauer's width fluctuation correction
 
@@ -3899,39 +3870,11 @@ C-----CARD 5
 C     To obtain Legendre expansion a blank card calling for default values of the expansion
       WRITE (1,*)
 
-      nuncoupled = 0
-      ncontinua  = 0
-
       IF(.not.CN_isotropic) then
-        DO j = 2, ND_nlv
-C         skipping coupled levels
-          IF (.NOT.Ldwba .AND. ICOllev(j).LE.LEVcc) CYCLE
-C---------If channel is closed then eee < 0
-          eee = elab - D_Elv(j)/xratio
-          ! only open channels considered for DWBA (and closed CC channels)
-          IF (eee.LT.0.0001 .AND. ICOllev(j).GT.LEVcc) EXIT 
-          nuncoupled = nuncoupled + 1
-        ENDDO
-C       For DWBA calculations, no additional levels are considered
-        IF (Ldwba) nuncoupled = 0
-C
 C       For CN calculation a card stating a total number of coupled and uncoupled levels + 1 continua
-C        1- 5   NSP(1) NUMBER OF UNCOUPLED STATES AND CONTINUA. IF IT IS  ECIS-413
-C                      ZERO, LO(84)=.FALSE.                               ECIS-414
-C        6-10   NSP(2) NUMBER OF UNCOUPLED STATES WITH ANGULAR            ECIS-415
-C                      DISTRIBUTION. THEY MUST BE THE FIRST GIVEN.        ECIS-416
-C                      IT IS REPLACED BY MIN(NSP(1),NSP(2)).              ECIS-417
-C       11-15   NFISS  NUMBER OF FISSION DATA. IF NFISS=0, LO(85)=.FALSE. ECIS-418
-C       16-20   NRD    NUMBER OF GAMMA TRANSMISSION FACTORS. IF IT IS 0,  ECIS-419
-C                      THESE COEFFICIENTS ARE COMPUTED.                   ECIS-420
-C       21-25   NCONT  NUMBER OF CONTINUA. THEY MUST BE THE LAST GIVEN,   ECIS-421
-C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-422
+C       no uncoupled, no fission, no gammas, no continua
 C-------CARD 7
-C
         WRITE (1,'(5i5)') 
-     >      nuncoupled, nuncoupled, 2*nfiss_tr, ngamm_tr, ncontinua 
-C           Fission transmission multiplied by 2 to account for both parities
-C
       ENDIF
 
 C-----ground state
@@ -4020,28 +3963,6 @@ C--------------only one phonon states need deformations as input
                IF (IPH(j).EQ.1) WRITE (1,'(i5,5x,6f10.5)')
      &                                 INT(D_Xjlv(j)), ABS(D_Def(j,2))
             ENDIF
-         ENDDO
-      ENDIF
-
-      IF(.not.CN_isotropic .and. nuncoupled.GT.0) then
-C        Uncoupled levels
-         DO j = 2, ND_nlv
-C           skipping coupled levels for CC calculation
-            IF (.NOT.Ldwba .AND. ICOllev(j).LT.LEVcc) CYCLE
-            ch = '-'
-            IF (D_Lvp(j).GT.0) ch = '+'
-C-----------skipping closed uncoupled levels
-            eee = elab - D_Elv(j)/xratio
-C           IF (eee.LT.0.0001) CYCLE
-            ! only open channels considered for DWBA (and closed CC channels)
-            IF (eee.LT.0.0001 .and. ICOllev(j).GT.LEVcc) CYCLE
-
-            if(nppaa.gt.1) nwrite = nwrite + 1
-            dtmp = D_Xjlv(j)
-            ! making integer spin for odd nuclides CC levels in DWBA calculations
-            if(Ldwba .and. lodd) dtmp = INT(D_Xjlv(j))
-             WRITE (1,'(f5.2,i2,a1,5f10.5)')  
-     &         dtmp, nwrite, ch, D_Elv(j)
          ENDDO
       ENDIF
 C
@@ -4145,82 +4066,7 @@ C       Storing reference depths for the first level
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
 
-        IF(.not.CN_isotropic) then
-C
-C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
-C         ***************************                                             
-C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
-C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
-C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
-C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
-C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
-C
-C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
-C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
-C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
-C
-          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
-C
-C
-C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
-C
-C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
-C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
-C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
-C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
-C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
-C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
-          IF(nfiss_tr.gt.0) THEN
-C           write(*,*) 
-C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
-            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ELSE
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ENDIF 
-          ENDIF 
-C
-C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
-C          1-10   GAM(1) FOR L=0.                               
-C         11-20   GAM(2) FOR L=1.                               
-C         .......................                               
-C         61-70   GAM(7) FOR L=6.                               
-C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
-C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
-C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
-          IF(ngamm_tr.gt.0) THEN
-            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
-C
-C            
-C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
-C
-C EXAMPLES OF LD:
-C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
-C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
-C
-C           IF ncontinua > 0
-C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
-C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
-C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
-C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
-C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
-C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
-C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
-C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
-C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
-C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
-C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
-C                           PAIRING GIVEN BY COOK)                      ECIS-953
-C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),     ...
-          ENDIF
-        ENDIF
+        IF(.not.CN_isotropic) WRITE (1,*)   ! Blank line to get all Moldauer's defaults
 
         nn2 = 2
         if(ea.ge.1000.d0) nn2=0 ! there is non non-locality
@@ -4411,82 +4257,7 @@ C
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
 
-        IF(.not.CN_isotropic) then
-C
-C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
-C         ***************************                                             
-C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
-C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
-C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
-C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
-C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
-C
-C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
-C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
-C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
-C
-          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
-C
-C
-C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
-C
-C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
-C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
-C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
-C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
-C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
-C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
-          IF(nfiss_tr.gt.0) THEN
-            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
-C             write(*,*) 
-C    >          'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ELSE
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ENDIF 
-          ENDIF 
-C
-C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
-C          1-10   GAM(1) FOR L=0.                               
-C         11-20   GAM(2) FOR L=1.                               
-C         .......................                               
-C         61-70   GAM(7) FOR L=6.                               
-C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
-C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
-C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
-          IF(ngamm_tr.gt.0) THEN
-            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
-C
-C            
-C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
-C
-C EXAMPLES OF LD:
-C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
-C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
-C
-C           IF ncontinua > 0
-C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
-C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
-C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
-C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
-C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
-C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
-C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
-C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
-C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
-C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
-C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
-C                           PAIRING GIVEN BY COOK)                      ECIS-953
-C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),     ...
-          ENDIF
-        ENDIF
+        IF(.not.CN_isotropic) WRITE (1,*)   ! Blank line to get all Moldauer's defaults
 
       ENDIF
 
@@ -4500,12 +4271,18 @@ C           WRITE(1,'(7f10.5)') Z(0),     ...
 C
 C-----Running ECIS06
 C
-      IF(inc_channel .and. Inlkey.NE.0) 
-     >  write (*,*) '  Running ECIS (vibr) ...'
 
-      IF(inc_channel .and. Inlkey.EQ.0) 
-     >  write (*,*) '  Running ECIS (sphe) ...'
+C     INLkey = 0  DWBA calculation for the ground state = Spher.OMP
+C     INLkey > 0  Calculation for coupled and uncoupled states = DWBA or CC
+C     INLkey < 0  Calculation for coupled states only = CC
+      if(.not.TL_calc) then
+        IF(inc_channel .and. Inlkey.NE.0) 
+     >    write (*,*) '  Running ECIS (vibr) ...'
 
+        IF(inc_channel .and. Inlkey.EQ.0) 
+     >    write (*,*) '  Running ECIS (sphe) ...'
+	endif
+	
       CALL ECIS('ecis06 ',MAX_cc)
 C	write (*,*) 'from ECIS MAX_cc=',MAX_cc
 C     restoring the input value of the key CN_isotropic
@@ -4553,6 +4330,7 @@ C     >6 HEAVY ION
 C
 C     INTEGER NINT
 C
+      IMPLICIT none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
       INCLUDE "pre_ecis.h"
@@ -4592,9 +4370,9 @@ C
 
       CHARACTER*1 ch
 
-      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), nppaa,
-     &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite,
-     &        nuncoupled, ncontinua
+      INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), nppaa, ilv,
+     &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite, nn2,
+     &        i, iang
 
       INTEGER iwin, ipipe_move
 
@@ -4814,42 +4592,11 @@ C     To obtain Legendre expansion a blank card calling for default values of th
 C-----CARD 6
       WRITE(1, *)
 
-      nuncoupled = 0
-      ncontinua  = 0
-
       IF(.not.CN_isotropic) then
-
-C--------
-C       Uncoupled levels considered only in DWBA calculations
-C
-C       IF (ND_nlv.GT.0) THEN
-C         DO j = 2, ND_nlv
-C           skipping coupled levels
-C           if(ICOllev(j).LT.LEVcc) CYCLE
-C           eee = elab - D_Elv(j)/xratio
-C           if (eee.LT.0.0001) EXIT
-C           nuncoupled = nuncoupled + 1
-C         ENDDO
-C       ENDIF
-C--------
-C
 C       For CN calculation a card stating a total number of coupled and uncoupled levels + 1 continua
-C        1- 5   NSP(1) NUMBER OF UNCOUPLED STATES AND CONTINUA. IF IT IS  ECIS-413
-C                      ZERO, LO(84)=.FALSE.                               ECIS-414
-C        6-10   NSP(2) NUMBER OF UNCOUPLED STATES WITH ANGULAR            ECIS-415
-C                      DISTRIBUTION. THEY MUST BE THE FIRST GIVEN.        ECIS-416
-C                      IT IS REPLACED BY MIN(NSP(1),NSP(2)).              ECIS-417
-C       11-15   NFISS  NUMBER OF FISSION DATA. IF NFISS=0, LO(85)=.FALSE. ECIS-418
-C       16-20   NRD    NUMBER OF GAMMA TRANSMISSION FACTORS. IF IT IS 0,  ECIS-419
-C                      THESE COEFFICIENTS ARE COMPUTED.                   ECIS-420
-C       21-25   NCONT  NUMBER OF CONTINUA. THEY MUST BE THE LAST GIVEN,   ECIS-421
-C                      NO ANGULAR DISTRIBUTION CAN BE REQUESTED FOR THEM. ECIS-422
+C          no uncoupled levels, no fission, no gammas, no continua
 C-------CARD 7
-C     
         WRITE (1,'(5i5)') 
-     >      nuncoupled, nuncoupled, 2*nfiss_tr, ngamm_tr, ncontinua 
-C           Fission transmission multiplied by 2 to account for both parities
-C
       ENDIF
 C
 C-----Matching radius calculated within ECIS
@@ -4915,29 +4662,6 @@ C--------L3_pho(lev(j)) = 0
      &      INT(D_Klv(lev(j))+ 0.1),ABS(D_Def(lev(j),2))
          ENDDO
       ENDIF
-C
-
-C--------
-C       Uncoupled levels considered only in DWBA calculations
-C
-C     IF(.not.CN_isotropic) then
-C
-C        Uncoupled levels
-C
-C        DO j = 2, ND_nlv
-C          skipping coupled levels
-C          if(ICOllev(j).LE.LEVcc) CYCLE
-C          ch = '-'
-C          IF (D_Lvp(j).GT.0) ch = '+'
-C          skipping closed channels
-C          eee = elab - D_Elv(j)/xratio
-C          IF (eee.LT.0.0001) CYCLE
-C          if(nppaa.gt.1) nwrite = nwrite + 1
-C          WRITE (1,'(f5.2,2i2,a1,5f10.5)') 
-C    &       D_Xjlv(j),0, nwrite, ch, D_Elv(j)
-C        ENDDO
-C     ENDIF
-C--------
 
 C-----Deformation of rotational band (only ground state band is present)
 C-----IdefCC   = maximum degree of deformation
@@ -5045,82 +4769,7 @@ C       Storing reference depths for the first level
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
 
-        IF(.not.CN_isotropic) then
-C
-C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
-C         ***************************                                             
-C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
-C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
-C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
-C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
-C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
-C
-C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
-C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
-C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
-C
-          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
-C
-C
-C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
-C
-C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
-C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
-C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
-C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
-C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
-C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
-          IF(nfiss_tr.gt.0) THEN
-C           write(*,*) 
-C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
-            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ELSE
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ENDIF 
-          ENDIF 
-C
-C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
-C          1-10   GAM(1) FOR L=0.                               
-C         11-20   GAM(2) FOR L=1.                               
-C         .......................                               
-C         61-70   GAM(7) FOR L=6.                               
-C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
-C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
-C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
-          IF(ngamm_tr.gt.0) THEN
-            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
-C
-C            
-C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
-C
-C EXAMPLES OF LD:
-C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
-C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
-C
-C           IF ncontinua > 0
-C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
-C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
-C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
-C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
-C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
-C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
-C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
-C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
-C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
-C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
-C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
-C                           PAIRING GIVEN BY COOK)                      ECIS-953
-C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),     ...
-          ENDIF
-        ENDIF
+        IF(.not.CN_isotropic) WRITE (1,*)   ! Blank line to get all Moldauer's defaults
 
         nn2 = 2
         if(ea.ge.1000.d0) nn2=0 ! there is non non-locality
@@ -5232,7 +4881,7 @@ C-------------SETPOTS : subroutine for optical model parameters
 C-------------From  cms system to Lab
 C             ecms = eee
 C             ikey = +1   ! WE NEED TO SET IKEY TO -1 AS ENERGIES ARE IN THE LAB FRAME
-              elabe = eee     ! Changed on Aug. 2008
+              elabe = eee ! Changed on Aug. 2008
               ikey  = -1   
 C
 C-------------Transformation of energies from laboratory to center-of-mass if
@@ -5367,82 +5016,7 @@ C
           WRITE (1,'(3f10.5)') 0.D0, angstep, 180.D0
         ENDIF
 
-        IF(.not.CN_isotropic) then
-C
-C         HAUSER-FESHBACH CORRECTIONS             FORMAT (7F10.5)                 
-C         ***************************                                             
-C          1-10   BZ1.   SQUARE ROOT OF ELASTIC ENHANCEMENT.  (DEFAULT VALUE 1.4142)
-C         11-20   BZ2.   PARTICLE DEGREES OF FREEDOM (DEFAULT = MOLDAUER prescription)
-C         21-30   BZ3.   PARAMETER BZ3 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 1.212 )
-C         31-40   BZ4.   PARAMETER BZ4 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.78  )
-C         41-50   BZ5.   PARAMETER BZ5 IN MOLDAUER'S FORMULA  (DEFAULT VALUE 0.228 )
-C
-C           IF BZ2=0., THE CHANNEL DEGREE OF FREEDOM PARAMETER, FORMULA (1) 
-C           IN P.A.MOLDAUER, NUCLEAR PHYSICS A344 (1980), PAGE 185-195, 
-C           WHICH IS:  1.78D0+(TL**1.212D0-0.78D0)*DEXP(-0.228D0*SUM ON TL)
-C
-          WRITE (1,*)   ! Blank line to get all Moldauer's defaults
-C
-C
-C         FISSION DATA                            FORMAT (7F10.5) IF LO(85)=.TRUE. AND nfiss_tr IS NOT 0. 
-C
-C          1-10   FISS(1,*)  TRANSMISSION COEFFICIENT                       
-C         11-20   FISS(2,*)  DEGREE OF FREEDOM. IF <.5, IT IS REPLACED BY 0.
-C         THERE ARE NFISS SUCH CARDS. THE FIRST COEFFICIENT IS FOR THE SMALLEST 
-C         TOTAL J VALUE OF THE SYSTEM AND THE SAME PARITY OF THE GROUND STATE. THE
-C         SECOND ONE IS FOR THE OPPOSITE PARITY. THE FOLLOWING ONES ARE FOR HIGHER
-C         J VALUES, WITH THE SAME ORDER FOR PARITIES.                             
-          IF(nfiss_tr.gt.0) THEN
-C           write(*,*) 
-C    >        'TARGET PARITY =',LVP(LEVtarg,Nnuc),' LEVtarg =',LEVtarg
-            IF(LVP(LEVtarg,Nnuc).GT.0) THEN
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ELSE
-              do j = 1, nfiss_tr
-                WRITE (1,'(2f10.5)') fiss_tr(j,2),1.0  ! first parity  , fiss_tr(j,1),fiss_dof(j) should be defined
-                WRITE (1,'(2f10.5)') fiss_tr(j,1),1.0  ! oposite parity, fiss_tr(j,2),fiss_dof(j) should be defined
-              enddo
-            ENDIF 
-          ENDIF 
-C
-C         GAMMA TRANSMISSION FACTORS              FORMAT (7F10.5) IF LO(86)=.TRUE. AND ngamm_tr IS NOT 0. 
-C          1-10   GAM(1) FOR L=0.                               
-C         11-20   GAM(2) FOR L=1.                               
-C         .......................                               
-C         61-70   GAM(7) FOR L=6.                               
-C         UP TO GAM(NRD), EVENTUALLY ON OTHERS CARDS.           
-C         WRITE (1,'(6f10.5)') 2.24*Gg_obs/D0_obs/1.E6, Q(1,1)
-C         WRITE (1,*)  ! Gilbert & Cameron target LD (as described in ECIS)
-          IF(ngamm_tr.gt.0) THEN
-            WRITE (1,'(6f10.5)') (gamm_tr(j),j=1,ngamm_tr) !  gamm_tr(j) should be defined
-C
-C            
-C           LEVEL DENSITY OF COMPOUND NUCLEUS       FORMAT (7F10.5)               
-C
-C EXAMPLES OF LD:
-C 92.       21.79      3.40100   0.48000   6.14200  -0.40000   4.26100  U-239 LD
-C 92.       20.69      4.62000   0.53000   5.30000  -0.15000   6.06000  U-238 LD
-C
-C           IF ncontinua > 0
-C             FOR THE TOTAL RESIDUAL NUCLEUS NEEDED FOR THE GAMMA GIANT RESONANCE,  
-C             FOLLOWED BY THE RESIDUAL NUCLEUS OF EACH CONTINUUM:                   
-C             1-10   SCN(7,I) Z:   CHARGE OF THE COMPOUND NUCLEUS             
-C            11-20   SCN(1,I) SA:  LEVEL DENSITY PARAMETER FOR S-WAVE 
-C            21-30   SCN(2,I) UX:  MATCHING ENERGY FOR THE TWO DENSITY FORMULA 
-C                             SHIFTED BY PAIRING ENERGY. (DEFAULT VALUE 2.5+150/NA).                             
-C            31-40   SCN(3,I) TAU: NUCLEAR TEMPERATURE. (DEFAULT VALUE 1/TAU=SQRT(SA/UX)-1.5/UX).                  
-C            41-50   SCN(4,I) SG:  SPIN CUT OFF PARAMETER. (DEFAULT VALUE FORMULA (11)  G&C
-C            51-60   SCN(5,I) E0:  ENERGY SHIFT. (DEFAULT VALUE FORMULA (28) G&C
-C            61-70   SCN(6,I) EX:  MATCHING ENERGY BETWEEN THE TWO DENSITY    51
-C                           FORMULAE. (DEFAULT VALUE UX+PAIRING WITH    ECIS-952
-C                           PAIRING GIVEN BY COOK)                      ECIS-953
-C           WRITE(1,'(7f10.5)') Z(1), ...
-C           WRITE(1,'(7f10.5)') Z(0),     ...
-          ENDIF
-        ENDIF
+        IF(.not.CN_isotropic) WRITE (1,*)   ! Blank line to get all Moldauer's defaults
 
       ENDIF
 

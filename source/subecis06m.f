@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4670 $
+Ccc   * $Rev: 4672 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-04 00:32:35 +0200 (Mo, 04 Apr 2016) $
+Ccc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -169,7 +169,6 @@ C     IF (fexp) CLOSE (224)                                             RCN  RCN
       IF (fexp) CLOSE (225)                                             RCN  RCN
       INQUIRE(226,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (226)                                             RCN  RCN
-
       Max_ccch = MAXcc
 
       RETURN                                                            ECIS-041
@@ -533,7 +532,9 @@ C***********************************************************************CALC-278
 C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
-      if(unformat) then 
+
+      IF (.NOT.LO(83)) then
+       if(unformat) then 
         open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
         open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,FILE = TRIM(fname)//'_Pdiag.bin',form='unformatted')   zv-2013
@@ -544,13 +545,14 @@ C MAIN INPUT.                                                           CALC-306
         open(225,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
         open(126,FILE = TRIM(fname)//'_Pchan.bin',form='unformatted')   zv-2013
         open(226,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
-      else 
+       else 
         open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
         open(123,file=TRIM(fname)//'_Umatr.LST')                        RCN  RCN
         open(125,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
         open(126,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
-	endif
+  	 endif
+	ENDIF
 
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
@@ -19337,9 +19339,8 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
    24 SGF(1)=0.D0                                                       SCAM-308
       SGF(2)=0.D0                                                       SCAM-309
       IF (LO(82)) GO TO 58                                              SCAM-310
-C
 C     To allow calculation of Pmatrix independently of EW request
-C     IF (LO(83)) GO TO 28                                              SCAM-311
+      IF (LO(83)) GO TO 28                                              SCAM-311
 C
       I=0                                                               SCAM-313
       DO 27 II=1,NC                                                     SCAM-314
