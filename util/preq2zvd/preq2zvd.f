@@ -83,7 +83,7 @@ C       Skipping plots
         if(j.le.7 .or. j.eq.9 .or. j.eq.16) then 
           if(j.eq.1) then 
             CALL OPEN_ZVV(20,caz,
-     &        'Elastic and nonelastic cross sections ')
+     &        '# Elastic and nonelastic cross sections ')
           else
             CALL OPEN_ZVV(20,caz,' ')
           endif 
@@ -97,7 +97,7 @@ C       Skipping plots
      &                (j.gt.10 .and. j.le.15)) then 
           if(j.eq.5) then 
             CALL OPEN_ZVV(21,caz,
-     &      'CN and preequilibrium cross sections  ')
+     &      '# CN and preequilibrium cross sections  ')
           else
             CALL OPEN_ZVV(21,caz,' ')
           endif
