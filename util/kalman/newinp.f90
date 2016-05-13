@@ -204,6 +204,10 @@
           npm = npm + 1
           prm(npm) = ' '
           prm(npm)(1:6) = nam
+          if(prm(npm)(1:4)=='UOMP'.and.fnl(i)>0.d0) then
+            write(*,*) prm(npm)(1:6),' parameter value > 0; multiplying by -1 to ensure it is negative.'
+            fnl(i)=-fnl(i)
+          endif
           call write_line(prm(npm), fnl(i), is)
           write(6,*) ' Appended ',oname(i)
           qx = .true.
