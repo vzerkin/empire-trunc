@@ -15,8 +15,8 @@ dir2=$5
 name2=$6
 dir3=$7
 name3=$8
-dir3=$9
-name3=$10
+dir4=$9
+name4=$10
 
 $EMPIREDIR/scripts/mtacomp 1   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
 $EMPIREDIR/scripts/mtacomp 2   $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
@@ -61,4 +61,5 @@ $EMPIREDIR/scripts/mtacomp 77  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3
 $EMPIREDIR/scripts/mtacomp 78  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
 $EMPIREDIR/scripts/mtacomp 79  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
 $EMPIREDIR/scripts/mtacomp 80  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
+$EMPIREDIR/scripts/mtacomp 91  $suf $root $dir1 $name1 $dir2 $name2 $dir3 $name3 $dir4 $name4
 exit
