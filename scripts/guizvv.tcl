@@ -679,7 +679,7 @@ proc vTclWindow.topwindow {base} {
         -menu "$top.m67" -background #dcdcdc -highlightbackground #dcdcdc \
         -highlightcolor #000000 
     wm focusmodel $top passive
-    wm geometry $top 332x758+315+233; update
+    wm geometry $top 362x798+315+233; update
     wm maxsize $top 1265 994
     wm minsize $top 1 1
     wm overrideredirect $top 0
@@ -880,7 +880,7 @@ if {$i != ""} {exec xterm -e $::env(EMPIREDIR)/scripts/mtacomp $i $suff $root $d
     button $top.creatazvd \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
-        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ $::env(EMPIREDIR)/scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\} \
+        -command set\ suff\ -\$suf\nexec\ xterm\ -e\ $::env(EMPIREDIR)/scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\ \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Create all} \
         -width 15 
