@@ -17,8 +17,10 @@ list=""
 for file in $*
 do
 list=$list$file$blank
-ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 done
+if [ ! -f ps01.tit ]; then
+   cp $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+fi
 $EMPIREDIR/util/c4zvd/zvview.exe -p:$file $list ps01.tit/c
-rm ps01.tit
+#rm ps01.tit
 exit

@@ -24,9 +24,12 @@ if [ "$file" = "" ]; then
     echo -n 'List files to be merged separating them by a space (include .zvd extention): '
     read file
 fi
-ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+if [ ! -f ps01.tit ]; then
+   cp $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+!  ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
+fi
 $EMPIREDIR/util/c4zvd/zvview.exe ps01.tit/c $file
-rm ps01.tit
+!rm ps01.tit
 if [ -f zv00.ps ]; then
    mv zv00.ps $1-mrg.ps
 fi

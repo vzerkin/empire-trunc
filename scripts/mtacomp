@@ -26,7 +26,6 @@ name3=$9
 dir4=${10}
 name4=${11}
 
-
 if [ $suf == "-" ]; then
         suf=""
 fi
