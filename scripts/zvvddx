@@ -23,6 +23,9 @@ ln -sf $work/$file-log.plotc4 PLOTC4.LST
 
 $EMPIREDIR/util/lsttab/lsttab <LSTTAB.INP
 rm LSTTAB.INP 2>/dev/null
+# the two lines below may be used to change (simplfiy) line labels
+sed 's/^Fe56-cndc.*/CIELO-CNDC/' LSTTAB.CUR >tmp1
+sed 's/^CIELO-Iron.*/CIELO-BNL/' tmp1 >LSTTAB.CUR 
 
 # stay in local dir, don't cd to util/c4zvd:
 if [ ! -f ps01.tit ]; then
