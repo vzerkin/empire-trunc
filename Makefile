@@ -36,8 +36,13 @@ UTILS = lib util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort ut
        util/fis2zvd util/c5-nng2zvd util/preq2zvd util/inter util/gam-sort-2zvd util/rw1omp2fast
 
 all:
+# check that EMPIREDIR defined
+ifndef EMPIREDIR
+	echo; echo ERROR: Environment variable $$EMPIREDIR not defined.  In the BASH shell, set it like this: ; echo "    " export EMPIREDIR=/path/to/empire; exit 0
+else
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source; $(MAKE) FC=$(FC) $(FLG) 
+endif
 
 clean:
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
