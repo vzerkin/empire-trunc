@@ -105,6 +105,7 @@ Manual Installation
 3)  Build the package
 
         $ cd EMPIRE-3.2-MALTA/
+        $ export EMPIREDIR=$PWD
         $ make
         $ cd ~/empire-tmp/
 
