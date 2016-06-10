@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4672 $
+Ccc   * $Rev: 4682 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
+Ccc   * $Date: 2016-06-10 11:07:46 +0200 (Fr, 10 Jun 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3059,6 +3059,44 @@ C          Scattering into continuum
       ENDDO
   400 CLOSE (45)
 C
+C     WRITE (*,
+C    &'(1x, '' *********************************************************
+C    &******'' /
+C    &1x,''          CC cross section to coupled discrete levels     =''
+C    &,F8.2,'' mb''/
+C    &1x,''          DWBA cross section to uncoupled discrete levels =''
+C    &,F8.2,'' mb''/
+C    &1x,''          DWBA cross section to levels in the continuum   =''
+C    &,F8.2,'' mb''/
+C    &1x,''          CN formation cross section (Sum over ren. Stlj) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,''          CN formation cross section (Sum over ren. Stl ) =''
+C    &,F8.2,'' mb''/ 
+C    &1x,''          CN formation + Direct                           =''
+C    &,F8.2,'' mb''/ 
+C    &1x,''          OMP calculated reaction  cross section (ABScs)  =''
+C    &,F8.2,'' mb''/)') 
+C    &    SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+C    &    xsabs+SINlcc+SINl+SINlcont, ABScs 
+
+	IF(xsabs+SINlcc+SINl+SINlcont.GT.ABScs) then
+  	  IF(xsabs+SINlcc+SINl.LE.ABScs) then
+           WRITE (8,'(
+     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb SET to zero''/)') SINl, SINlcont
+C          discarding DWBA inelastic to continuum   	   
+	     SINlcont = 0.d0
+        ELSE
+           WRITE (8,'(
+     &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb SET to zero''/
+     &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb SET to zero''/)') SINl, SINlcont
+C          discarding DWBA inelastic to discrete and continuum   	   
+	     SINl     = 0.d0
+	     SINlcont = 0.d0
+	  ENDIF
+	ENDIF
 	ftmp = SINl + SINlcont
 C
 C     ABScs is the OMP calculated absorption
