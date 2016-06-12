@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4683 $
+Ccc   * $Rev: 4684 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+Ccc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -444,7 +444,7 @@ C------------End of adding inelastic to continuum
          WRITE(8,'(/)')
        ENDIF
 
-       IF (AEJc(0).GT.0  .and. ZEJc(0).EQ.0) THEN
+       IF (AEJc(0).GT.0) THEN
          WRITE (8,99015)
          WRITE (8,99020)
          DO iang = 1, NANgela/4 + 1

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4683 $
+Ccc   * $Rev: 4684 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+Ccc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2962,11 +2962,11 @@ C
      >   l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
      >   STLcc(l)%Jcn,STLcc(l)%Pcn
 
-         write(*,*) 'MAX_pmatr=',MAX_pmatr
-         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
-     >     CCpmatrix(l)%irow,CCpmatrix(l)%icol,
-     >     DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
-     >     CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
+C        write(*,*) 'MAX_pmatr=',MAX_pmatr
+C        write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+C    >     CCpmatrix(l)%irow,CCpmatrix(l)%icol,
+C    >     DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
+C    >     CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
 
          write(*,*) 'MAX_smatr=',MAX_pmatr
          write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
@@ -3117,24 +3117,24 @@ C-----Renormalizing TLs and Tljs
       xsabs  = coeff*sabs
       xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
 
-      if(abs(1.d0-dtmp).gt.1.d-6) then
+      if(abs(1.d0-dtmp).gt.1.d-6 .and. (SINlcc+ftmp).gt.0.d0) then
         WRITE (8,
      &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
      &r '',F9.6/
      &1x,'' WARNING: CC cross section to coupled discrete levels     =''
-     &,F8.2,'' mb''/
+     &,F9.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
-     &,F8.2,'' mb''/
+     &,F9.2,'' mb''/
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
-     &,F8.2,'' mb''/
+     &,F9.2,'' mb''/
      &1x,'' WARNING: CN formation cross section (Sum over ren. Stlj) =''
-     &,F8.2,'' mb''/ 
+     &,F9.2,'' mb''/ 
      &1x,'' WARNING: CN formation cross section (Sum over ren. Stl ) =''
-     &,F8.2,'' mb''/ 
+     &,F9.2,'' mb''/ 
      &1x,'' WARNING: CN formation + Direct                           =''
-     &,F8.2,'' mb''/ 
+     &,F9.2,'' mb''/ 
      &1x,'' WARNING: OMP calculated reaction  cross section (ABScs)  =''
-     &,F8.2,'' mb''/)') 
+     &,F9.2,'' mb''/)') 
      &    dtmp, SINlcc, SINl, SINlcont, xsabsj, xsabs, 
      &    xsabs+SINlcc+ftmp, ABScs 
 C       WRITE (*,

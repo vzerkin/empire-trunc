@@ -1,6 +1,6 @@
-!cc   * $Rev: 4683 $
+!cc   * $Rev: 4684 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+!cc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -1356,16 +1356,26 @@ C
             WRITE (8,*) ' '
          ENDIF
 
+         IF (LHRtw.NE.0 .AND. ZEJc(0).NE.0.0D0) THEN
+            LHRtw = 0
+            EHRtw = 0.d0
+            WRITE (8,*) ' '
+            WRITE (8,*) ' WARNING!!!! HRTW has been turned off '
+            WRITE (8,*) ' WARNING!!!! (It is not allowed for charged'
+            WRITE (8,*) ' WARNING!!!! particle induced reactions)'
+            WRITE (8,*) ' '
+         ENDIF
+
+         IF (LHRtw.NE.0) WRITE (8,
+     &           '('' Width fluctuation correction calculated'',
+     &             '' up to '',f5.2,'' MeV'')') EHRtw
+
          IF (EMAx_tlj.LT.EHRtw) THEN
             EMAx_tlj = EHRtw
             WRITE (8,*) ' '
             WRITE (8,*) ' WARNING!!!! Maximum energy for Tlj coupling '
             WRITE (8,*) ' WARNING!!!! set to the one for width fluct. '
          ENDIF
-
-         IF (LHRtw.NE.0) WRITE (8,
-     &           '('' Width fluctuation correction calculated'',
-     &             '' up to '',f4.2,'' MeV'')') EHRtw
 
          IF (LHMs.NE.0 .AND. NDAng.NE.NDAnghmx ) THEN
             WRITE (8,*)
@@ -6287,6 +6297,7 @@ C              EHRtw = val
               WRITE (12,
      &        '('' Width fluctuation correction not considered'')')
                LHRtw = 0
+               EHRtw = 0.d0
             ENDIF
             GOTO 100
          ENDIF
@@ -6297,10 +6308,10 @@ C-----
               EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
      &           '('' Width fluctuation correction calculated'',
-     &             '' up to '',f4.2,'' MeV'')') EHRtw
+     &             '' up to '',f5.2,'' MeV'')') EHRtw
               IF (LHRtw.NE.0) WRITE (12,
      &           '('' Width fluctuations correction calculated '',
-     &             '' up to '',f4.2,'' MeV'')') EHRtw
+     &             '' up to '',f5.2,'' MeV'')') EHRtw
             ENDIF
             GOTO 100
          ENDIF
@@ -6311,10 +6322,10 @@ C-----
               EHRtw = val
               IF (LHRtw.NE.0) WRITE (8,
      &           '('' HRTW width fluctuation correction calculated'',
-     &             '' up to '',f4.2,'' MeV'')') EHRtw
+     &             '' up to '',f5.2,'' MeV'')') EHRtw
               IF (LHRtw.NE.0) WRITE (12,
      &           '('' HRTW width fluctuation correction calculated '',
-     &             '' up to '',f4.2,'' MeV'')') EHRtw
+     &             '' up to '',f5.2,'' MeV'')') EHRtw
             ELSE
               WRITE (8,
      &        '('' Width fluctuation correction not considered'')')
@@ -6328,9 +6339,9 @@ C-----
             IF (val.GT.0) THEN
               EMAx_tlj = val
               WRITE (8,'('' Tlj coupling for the top CN bin'',
-     &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
+     &             '' up to incident '',f5.2,'' MeV'')') EMAx_tlj
               WRITE (12,'('' Tlj coupling for the top CN bin '',
-     &             '' up to incident '',f4.2,'' MeV'')') EMAx_tlj
+     &             '' up to incident '',f5.2,'' MeV'')') EMAx_tlj
             ENDIF
             GOTO 100
          ENDIF
