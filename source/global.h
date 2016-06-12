@@ -1,6 +1,6 @@
-! $Rev: 4622 $
+! $Rev: 4683 $
 ! $Author: rcapote $
-! $Date: 2016-03-19 21:57:16 +0100 (Sa, 19 Mär 2016) $
+! $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -61,7 +61,7 @@
      &                 PL_CNcont(0:(2*NDLW), NDEX),                     &
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
-      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, LHRtw, MAX_cc,   &
+      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, LHRtw,           &
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,   &
      &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe, &
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,      &
@@ -286,7 +286,7 @@
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
-     &                  PL_lmax, SFAct, INTerf, IPArcov, MAX_cc,        &
+     &                  PL_lmax, SFAct, INTerf, IPArcov,                &
      &                  D_Klv, D_Llv,  D_nno,                           &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&

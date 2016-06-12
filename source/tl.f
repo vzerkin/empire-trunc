@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4682 $
+Ccc   * $Rev: 4683 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-10 11:07:46 +0200 (Fr, 10 Jun 2016) $
+Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2945,10 +2945,9 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
         ENDDO
       ENDIF
 C
-C     IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
       IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
-     >   .and. MAX_cc.GT.0) then
-         CALL AllocTLJmatr(MAX_cc)
+     >   .and. MAX_cc_mod.GT.0) then
+         CALL AllocTLJmatr(MAX_cc_mod)
          IF(Open_CC_files()) THEN 
            IF(.NOT.Read_CC_matrices()) 
      >       WRITE(8,*) 'ERROR: Reading ECIS CC files for EW'  
@@ -2958,7 +2957,6 @@ C     IF(DIRECT.GT.0.d0 .and. MAX_cc.GT.0) then
          ENDIF
 
          IF(debug) THEN
-         write(*,*) 'Pchan: MAX_CC=',MAX_cc_mod
          l = 5
          write(*,'(1x,I3,1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
      >   l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
@@ -3059,28 +3057,27 @@ C          Scattering into continuum
       ENDDO
   400 CLOSE (45)
 C
-C     WRITE (*,
-C    &'(1x, '' *********************************************************
-C    &******'' /
-C    &1x,''          CC cross section to coupled discrete levels     =''
-C    &,F8.2,'' mb''/
-C    &1x,''          DWBA cross section to uncoupled discrete levels =''
-C    &,F8.2,'' mb''/
-C    &1x,''          DWBA cross section to levels in the continuum   =''
-C    &,F8.2,'' mb''/
-C    &1x,''          CN formation cross section (Sum over ren. Stlj) =''
-C    &,F8.2,'' mb''/ 
-C    &1x,''          CN formation cross section (Sum over ren. Stl ) =''
-C    &,F8.2,'' mb''/ 
-C    &1x,''          CN formation + Direct                           =''
-C    &,F8.2,'' mb''/ 
-C    &1x,''          OMP calculated reaction  cross section (ABScs)  =''
-C    &,F8.2,'' mb''/)') 
-C    &    SINlcc, SINl, SINlcont, xsabsj, xsabs, 
-C    &    xsabs+SINlcc+SINl+SINlcont, ABScs 
-
-	IF(xsabs+SINlcc+SINl+SINlcont.GT.ABScs) then
-  	  IF(xsabs+SINlcc+SINl.LE.ABScs) then
+	IF((ABScs-SINlcc).LE.(SINl + SINlcont)) THEN
+        WRITE (8,
+     &'(1x, '' *********************************************************
+     &******'' /
+     &1x,'' CC cross section to coupled discrete levels     =''
+     &,F8.2,'' mb''/
+     &1x,'' DWBA cross section to uncoupled discrete levels =''
+     &,F8.2,'' mb''/
+     &1x,'' DWBA cross section to levels in the continuum   =''
+     &,F8.2,'' mb''/
+     &1x,'' CN formation cross section (Sum over ren. Stlj) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' CN formation cross section (Sum over ren. Stl ) =''
+     &,F8.2,'' mb''/ 
+     &1x,'' CN formation + Direct                           =''
+     &,F8.2,'' mb''/ 
+     &1x,'' OMP calculated reaction  cross section (ABScs)  =''
+     &,F8.2,'' mb''/)') 
+     &    SINlcc, SINl, SINlcont, xsabsj, xsabs, 
+     &    xsabs+SINlcc+SINl+SINlcont, ABScs 
+  	  IF(ABScs-SINlcc.GT.SINl) then
            WRITE (8,'(
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
      &,F8.2,'' mb SET to zero''/)') SINl, SINlcont
@@ -3104,7 +3101,6 @@ C     xsabs is the cross section calculated as a sum over Tls (Tljs)
 C     SINlcc   is the coupled channels' cross section
 C     SINl     is the uncoupled channels' cross section
 C     SINlcont is the uncoupled channels' cross section to the continuum
-C     dtmp = (ABScs -SINlcc -ftmp)/xsabs
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
 C-----Renormalizing TLs and Tljs
       sabs = 0.d0
@@ -3583,6 +3579,7 @@ CPR---write(8,'(1x,A8)') ' UNIQUE NAME OF THE OUTPUT FILE:',outfile
 
       SUBROUTINE ECIS_CCVIB(Nejc,Nnuc,El,Ldwba,Inlkey,TL_calc)
 C
+      USE TLJs, ONLY:MAX_cc_mod
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
 C     |    harmonic vibrational model                             |
@@ -4321,8 +4318,8 @@ C     INLkey < 0  Calculation for coupled states only = CC
      >    write (*,*) '  Running ECIS (sphe) ...'
 	endif
 	
-      CALL ECIS('ecis06 ',MAX_cc)
-C	write (*,*) 'from ECIS MAX_cc=',MAX_cc
+      CALL ECIS('ecis06 ',MAX_cc_mod)
+C	write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
@@ -4346,6 +4343,7 @@ C     restoring the input value of the key CN_isotropic
 
       SUBROUTINE ECIS_CCVIBROT(Nejc,Nnuc,El,TL_calc)
 C
+      USE TLJs, ONLY:MAX_cc_mod
 C     -------------------------------------------------------------
 C     |    Create input files for ECIS06 for COUPLED CHANNELS     |
 C     |    rotational-vibrational model                           |
@@ -5065,7 +5063,7 @@ C
 C-----Running ECIS
 
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
-      CALL ECIS('ecis06 ',MAX_cc)
+      CALL ECIS('ecis06 ',MAX_cc_mod)
 
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp

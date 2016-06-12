@@ -1,6 +1,6 @@
-!cc   * $Rev: 4672 $
+!cc   * $Rev: 4683 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
+!cc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -3829,8 +3829,10 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
                ENDIF
             ENDIF
      
-            IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0)  
-     &         CN_isotropic = .TRUE.
+            IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0) THEN 
+              CN_isotropic = .TRUE.
+              INTerf=0
+            ENDIF 
                       
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede

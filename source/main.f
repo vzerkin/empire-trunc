@@ -1,6 +1,6 @@
-cc   * $Rev: 4648 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-03-23 04:16:55 +0100 (Mi, 23 Mär 2016) $
+cc   * $Rev: 4683 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -52,8 +52,10 @@ C-----
         CALL MARENG(0,0,nnurec,nejcec)
 C
         IF(CSFus.LE.0) THEN
-            write(*,*) 
-            write(*,*) ' CSFus=',CSFus
+          write(*,*) 
+          write(*,*) ' CSFus=',CSFus
+          write(8,*) 
+          write(8,*) ' CSFus=',CSFus
           WRITE(8,*) ' ERROR; Absorption cross section equal zero !'
           STOP       ' ERROR; Absorption cross section equal zero !'
         ENDIF

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4683 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -127,6 +127,8 @@ C---------Get and add inelastic cross sections (including double-differential)
            IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
+
+             IF(ICOllev(i).GE.LEVcc .and. SINl.le.0.d0) cycle
 
              IF(ICOller(i).GT.40) then
                WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
@@ -257,6 +259,9 @@ C
 C          Allowing states in the continuum even for MSD>0
 C          ELSEIF(MSD.eq.0)then
            ELSE
+
+             IF(ICOllev(i).GE.LEVcc .and. SINlcont.le.0.d0) cycle
+
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
              echannel = EX(NEX(1),1) - Q(nejcec,1) - D_Elv(i)
              icsl = INT(echannel/DE + 1.0001)
@@ -439,7 +444,7 @@ C------------End of adding inelastic to continuum
          WRITE(8,'(/)')
        ENDIF
 
-       IF (AEJc(0).GT.0) THEN
+       IF (AEJc(0).GT.0  .and. ZEJc(0).EQ.0) THEN
          WRITE (8,99015)
          WRITE (8,99020)
          DO iang = 1, NANgela/4 + 1

@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4672 $
+   ! $Rev: 4683 $
    ! $Author: rcapote $
-   ! $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
+   ! $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
    !
 
    TYPE channel
@@ -1622,7 +1622,7 @@ CONTAINS
 	           !ENDDO
 
 			   CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
-               IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Smatrix in CN Jpi=',sngl(xjc*ip)   
+               IF(IER/=0) WRITE (8,*) 'WARNING: EW Smatrix DIAGONALIZATION PROBLEMS for CN Jpi=',sngl(xjc*ip)   
 			   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
         	   ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
 			   do i=1,NDIm_cc_matrix

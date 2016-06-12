@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4672 $
+Ccc   * $Rev: 4683 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
+Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -110,7 +110,6 @@ C-----Reduced mass corrected for proper mass values
       csmax = 0.d0
       CSFus = 0.d0
 
-	MAX_cc = 0
       maxlw = 0
 C     allocate stl(), stlj(), sel() 
       ALLOCATE(stl(NDLW),sel(NDLW),stlj(NDLW,3),STAT=myalloc)
@@ -214,7 +213,6 @@ C-----------Absorption and elastic cross sections in mb
             IF (IOUt.EQ.5) CLOSE (46)
             IF (fexistj) CLOSE (451)
 	      
-C		  write(*,*) MAX_cc
 C           Reading EW structures
 C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
             if (fexistj .and. DIRect.GT.0) then
@@ -224,7 +222,6 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
 
 	        READ(451,ERR=42,END=42) MAX_cc_mod,MAX_pmatr,MAX_umatr
 
-              MAX_cc = MAX_cc_mod
               IF(MAX_cc_mod.GT.0) THEN
                 CALL AllocTLJmatr(MAX_cc_mod)
                 READ(451,ERR=42,END=42) STLcc
@@ -710,7 +707,7 @@ C
                iwin=ipipe_move('ccm.CS','INCIDENT.CS')
                iwin=ipipe_move('ccm.TLJ','INCIDENT.TLJ')
 
-               IF(MAX_cc.GT.0) THEN
+               IF(MAX_cc_mod.GT.0) THEN
                  INQUIRE (FILE = 'ccm_Pchan.LST', EXIST = fexist)
                  IF (fexist) iwin = 
      &              ipipe_move('ccm_Pchan.LST','INCIDENT_Pchan.LST')
@@ -921,10 +918,8 @@ C           all OMP calculations calculate only the direct component (no CN)
             CALL ECIS_CCVIB(Npro,Ntrg,einlab,.TRUE.,0,.FALSE.)
 C           restoring the input value of the key CN_isotropic
             CN_isotropic = logtmp
-
             CALL PROCESS_ECIS('INCIDENT',8,3,ICAlangs,
      >                                DIRect,INTerf)
-
             WRITE (8,*) 
             WRITE (8,*) ' SOMP transmission coefficients used for ',
      &                  'fusion determination'
@@ -1035,7 +1030,7 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
-         IF(NINT(DIRect).GT.0 .AND. MAX_cc.GT.0 .AND. IOUT.EQ.5) THEN
+         IF(NINT(DIRect).GT.0 .AND. MAX_cc_mod.GT.0 .AND. IOUT.EQ.5)THEN
            ctmp = ctldir//ctmp23//'_Pchan.LST'
            iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
            ctmp = ctldir//ctmp23//'_Pchan.bin'
@@ -1143,19 +1138,21 @@ C
       CLOSE (45 )
       if(tljcalc) CLOSE (451)
 C     Saving EW structures
-      if (tljcalc .and. MAX_cc.GT.0 .and. DIRect.GT.0) then
+      if (tljcalc .and. DIRect.GT.0) then
        OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      >   FORM = 'UNFORMATTED')
-	 WRITE(451) MAX_cc,MAX_pmatr,MAX_umatr
-	 WRITE(451) STLcc
-	 IF(INTerf.GT.0) THEN
-         WRITE(451) CCsmatrix ! Smatrix  
-         WRITE(451) CCpmatrix ! Pmatrix 
-         WRITE(451) CCpdiag   ! Pdiag  
-         WRITE(451) CCumatrix ! Umatrix
-       ENDIF 
-	 CLOSE(451)
-	endif
+ 	   WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
+       IF(MAX_cc_mod.GT.0) THEN 
+	     WRITE(451) STLcc
+	     IF(INTerf.GT.0) THEN
+           WRITE(451) CCsmatrix ! Smatrix  
+           WRITE(451) CCpmatrix ! Pmatrix 
+           WRITE(451) CCpdiag   ! Pdiag  
+           WRITE(451) CCumatrix ! Umatrix
+         ENDIF
+       ENDIF   
+	   CLOSE(451)
+	  endif
 
   300 CONTINUE
 
