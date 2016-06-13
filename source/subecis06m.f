@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4672 $
+Ccc   * $Rev: 4685 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-22 09:20:41 +0200 (Fr, 22 Apr 2016) $
+Ccc   * $Date: 2016-06-13 04:03:45 +0200 (Mo, 13 Jun 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -144,8 +144,8 @@ C     CLOSE (93,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
       CLOSE (MR)
 
-      INQUIRE(121,exist=fexp)                                           RCN  RCN
-      IF (fexp) CLOSE (121)                                             RCN  RCN
+C     INQUIRE(121,exist=fexp)                                           RCN  RCN
+C     IF (fexp) CLOSE (121)                                             RCN  RCN
       INQUIRE(122,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (122)                                             RCN  RCN
       INQUIRE(123,exist=fexp)                                           RCN  RCN
@@ -157,8 +157,8 @@ C     IF (fexp) CLOSE (124)                                             RCN  RCN
       INQUIRE(126,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (126)                                             RCN  RCN
 
-      INQUIRE(221,exist=fexp)                                           RCN  RCN
-      IF (fexp) CLOSE (221)                                             RCN  RCN
+C     INQUIRE(221,exist=fexp)                                           RCN  RCN
+C     IF (fexp) CLOSE (221)                                             RCN  RCN
       INQUIRE(222,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (222)                                             RCN  RCN
       INQUIRE(223,exist=fexp)                                           RCN  RCN
@@ -533,10 +533,9 @@ C MAIN INPUT.                                                           CALC-306
     1 CHI2M=1.D35                                                       CALC-307
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
 
-      IF (.NOT.LO(83)) then
-       if(unformat) then 
-        open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
-        open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+      if(unformat) then 
+C       open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
+C       open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,FILE = TRIM(fname)//'_Pdiag.bin',form='unformatted')   zv-2013
         open(222,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
         open(123,FILE = TRIM(fname)//'_Umatr.bin',form='unformatted')   zv-2013
@@ -545,14 +544,13 @@ C MAIN INPUT.                                                           CALC-306
         open(225,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
         open(126,FILE = TRIM(fname)//'_Pchan.bin',form='unformatted')   zv-2013
         open(226,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
-       else 
-        open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+      else 
+C       open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
         open(123,file=TRIM(fname)//'_Umatr.LST')                        RCN  RCN
         open(125,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
         open(126,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
-  	 endif
-	ENDIF
+      endif
 
       IF (TITLE(1).EQ.FIN) RETURN                                       CALC-309
       NSP1D=NSP(1)                                                      CALC-310
@@ -19340,7 +19338,7 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
       SGF(2)=0.D0                                                       SCAM-309
       IF (LO(82)) GO TO 58                                              SCAM-310
 C     To allow calculation of Pmatrix independently of EW request
-      IF (LO(83)) GO TO 28                                              SCAM-311
+C     IF (LO(83)) GO TO 28                                              SCAM-311
 C
       I=0                                                               SCAM-313
       DO 27 II=1,NC                                                     SCAM-314
@@ -19366,8 +19364,8 @@ C----
       IF(I.EQ.0 .OR. J.EQ.0) LO(83)=.TRUE.                              RCN  RCN            
       IF(I.EQ.0 .OR. J.EQ.0) GOTO 28                                    RCN  RCN            
       MAXcc = MAXcc + JC 
-      WRITE (121     ) AJ,IP(JPI+1),JC                                  RCN  RCN
-      WRITE (221,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     WRITE (121     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     WRITE (221,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (126     ) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (226,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     C-matrix commented                                                RCN  RCN 
@@ -19389,9 +19387,9 @@ C       Pchan()
           IF (WV(3,MC(JJ,1)).LT.0.D0) CYCLE                             RCN  RCN
           J=J+1                                                         RCN  RCN
 C         P-matrix
-          write (121) I, J, P(I,J,1),P(I,J,2)                           RCN  RCN
-          write (221,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
-     >     I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))  RCN  RCN  
+C         write (121) I, J, P(I,J,1),P(I,J,2)                           RCN  RCN
+C         write (221,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
+C    >     I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))  RCN  RCN  
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
 C
@@ -19410,7 +19408,7 @@ C         S-matrix                                                      RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
 C----
-      IF (LO(83)) GO TO 28                                              SCAM-311
+C     IF (LO(83)) GO TO 28                                              SCAM-311
 
 C     IF(lcalc) then
 C     IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
