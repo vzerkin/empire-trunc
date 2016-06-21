@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4689 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
 C
 C       Does not need a "C" call, but produces a much slower executable
 C       (left for debugging purposes ONLY,not recommended for production executables) 
@@ -95,6 +95,11 @@ C
       logical fexist
       integer iwin,iopsys,igetopsys,ipipe_delete
       ipipe_move=0
+      inquire(file=trim(fromfile),exist=fexist)
+	if (.not.fexist) then
+        write(*,*) 'Missing ',trim(fromfile)
+        pause
+      endif    
       iopsys = igetopsys() ! linux:0
       inquire(file=trim(tofile),exist=fexist)
       if (fexist .and. iopsys.eq.0) iwin=ipipe_delete(tofile)

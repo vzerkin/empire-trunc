@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4683 $
+Ccc   * $Rev: 4689 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+Ccc   * $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -132,6 +132,7 @@ C-----statement then determines whether or not the file exists.
 C-----If it does not, the program calculates new transmission coeff.
       INQUIRE (FILE = (ctldir//ctmp23//'.INC'),EXIST = fexist)
       INQUIRE (FILE = (ctldir//ctmp23//'J.INC'),EXIST = fexistj)
+
       IF (fexist .and. .not.CALctl) THEN
          if(fexistj) tljcalc = .TRUE. 
 C--------Here the old calculated files are read
@@ -180,20 +181,24 @@ C-----------Absorption and elastic cross sections in mb
             xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*sxj+1)
 
             IF (fexistj) READ (451,END = 50,ERR=50) 
-     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
             READ (45 ,END = 50,ERR=50) 
-     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-             SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
+     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
+
+C            SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
+
             IF (IOUt.EQ.5) THEN
-              WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-              WRITE (46,'(1x,8(D15.9,1x))')
-     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, xssabs,xssabsj
+              WRITE (46,*) 
+     &          'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj,INELcont'
+              WRITE (46,'(1x,9(D15.9,1x))')
+     &          ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus,xssabs,xssabsj,
+     &          SINlcont
               IF(FIRST_ein) then
                 WRITE(8,*)
                 WRITE (8,*) 
-     &            'EL,TOT,ABS,INEL,CC,INELcont,CSFus,SumTl,SumTlj'
+     &         'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj,INELcont'
                 WRITE (8,'(1x,9(D15.9,1x))') ELAcs, TOTcs, ABScs, 
-     &            SINl, SINlcc, SINlcont,CSFus, xssabs,xssabsj
+     &            SINl, SINlcc, CSFus, xssabs,xssabsj,SINlcont
                 WRITE(8,*)
               ENDIF 
             ENDIF
@@ -230,7 +235,7 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
 
                   READ(451,ERR=43,END=43) CCsmatrix ! Smatrix  
-                  READ(451,ERR=43,END=43) CCpmatrix ! Pmatrix 
+C                 READ(451,ERR=43,END=43) CCpmatrix ! Pmatrix 
                   READ(451,ERR=43,END=43) CCpdiag   ! Pdiag  
                   READ(451,ERR=43,END=43) CCumatrix ! Umatrix
                 ENDIF 
@@ -277,9 +282,11 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
                 WRITE (8,*)
      &' Coupled channel STlcc for the incident channel read from : '
                 WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
-	          IF(INTerf.GT.0 .and. fexist) WRITE (8,*)
+	          IF(INTerf.GT.0) THEN
+			    WRITE (8,*)
      &' EW matrices Umatrix,Pdiag for the incident channel read from : '
-                WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
+                  WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
+                ENDIF
               ENDIF
             ENDIF
             WRITE(8,*)
@@ -308,7 +315,8 @@ C
    52    CLOSE (45,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
 
-      ENDIF
+      ENDIF ! fusion cross sections from pre-calculated files
+
 C-----Calculation of fusion cross section for photon induced reactions
       IF (NINT(AEJc(Npro)).EQ.0) THEN
          IF (SDRead) THEN
@@ -716,9 +724,9 @@ C
      &              ipipe_move('ccm_Pchan.bin','INCIDENT_Pchan.bin')
 C              
                  IF(INTerf.gt.0) THEN
-                 INQUIRE (FILE = 'ccm_Pmatr.bin', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Pmatr.bin','INCIDENT_Pmatr.bin')
+C                INQUIRE (FILE = 'ccm_Pmatr.bin', EXIST = fexist)
+C                IF (fexist) iwin = 
+C    &              ipipe_move('ccm_Pmatr.bin','INCIDENT_Pmatr.bin')
 
                  INQUIRE (FILE = 'ccm_Smatr.bin', EXIST = fexist)
                  IF (fexist) iwin = 
@@ -1006,7 +1014,6 @@ C--------channel spin min and max
             csmax = DMAX1(POP(NEX(1),j,ip,1),csmax)
           ENDDO
          ENDDO
-
          ABScs = CSFus
       ENDIF ! END of FUSREAD block
 C
@@ -1030,26 +1037,29 @@ C
          ctmp = ctldir//ctmp23//'.TLJ'
          iwin = ipipe_move('INCIDENT.TLJ',ctmp)
 
-         IF(NINT(DIRect).GT.0 .AND. MAX_cc_mod.GT.0 .AND. IOUT.EQ.5)THEN
-           ctmp = ctldir//ctmp23//'_Pchan.LST'
-           iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
+         IF(NINT(DIRect).GT.0 .AND. MAX_cc_mod.GT.0)THEN
+           if(IOUt.eq.5) then
+             ctmp = ctldir//ctmp23//'_Pchan.LST'
+             iwin = ipipe_move('INCIDENT_Pchan.LST',ctmp)
+           endif
            ctmp = ctldir//ctmp23//'_Pchan.bin'
            iwin = ipipe_move('INCIDENT_Pchan.bin',ctmp)
-           ctmp = ctldir//ctmp23//'_Smatr.bin'
-           iwin = ipipe_move('INCIDENT_Smatr.bin',ctmp)
-           ctmp = ctldir//ctmp23//'_Pmatr.bin'
-           iwin = ipipe_move('INCIDENT_Pmatr.bin',ctmp)
 C
            IF(INTerf.gt.0) THEN
-             ctmp = ctldir//ctmp23//'_Smatr.LST'
-             iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
-             ctmp = ctldir//ctmp23//'_Pmatr.LST'
-             iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
-             ctmp = ctldir//ctmp23//'_Umatr.LST'
-             iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
-             ctmp = ctldir//ctmp23//'_Pdiag.LST'
-             iwin = ipipe_move('INCIDENT_Pdiag.LST',ctmp)
-
+	       if(IOUt.eq.5) then
+               ctmp = ctldir//ctmp23//'_Smatr.LST'
+               iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
+C              ctmp = ctldir//ctmp23//'_Pmatr.LST'
+C              iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
+               ctmp = ctldir//ctmp23//'_Umatr.LST'
+               iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
+               ctmp = ctldir//ctmp23//'_Pdiag.LST'
+               iwin = ipipe_move('INCIDENT_Pdiag.LST',ctmp)
+             endif
+             ctmp = ctldir//ctmp23//'_Smatr.bin'
+             iwin = ipipe_move('INCIDENT_Smatr.bin',ctmp)
+C            ctmp = ctldir//ctmp23//'_Pmatr.bin'
+C            iwin = ipipe_move('INCIDENT_Pmatr.bin',ctmp)
              ctmp = ctldir//ctmp23//'_Umatr.bin'
              iwin = ipipe_move('INCIDENT_Umatr.bin',ctmp)
              ctmp = ctldir//ctmp23//'_Pdiag.bin'
@@ -1091,15 +1101,17 @@ C--------Absorption and elastic cross sections in mb
          ENDDO
          xssabs  = 10.d0*PI/ak2*ssabs
          xssabsj = 10.d0*PI/ak2*ssabsj/(2*sxj+1.d0)
-         WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-         WRITE (46,'(1x,8(D15.9,1x))') 
-     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
+         WRITE (46,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj,INELcont'
+         WRITE (46,'(1x,9(D15.9,1x))') 
+     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj,
+     &     SINLcont 
 
          IF(FIRST_ein) then
            WRITE (8,*)
-           WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj'
-           WRITE (8,'(1x,8(D15.9,1x))') 
-     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj
+           WRITE (8,*) 'EL,TOT,ABS,INEL,CC,CSFus,SumTl,SumTlj,INELcont'
+           WRITE (8,'(1x,9(D15.9,1x))') 
+     &     ELAcs, TOTcs, ABScs, SINl, SINLcc, CSFus, xssabs, xssabsj,
+     &     SINLcont 
            WRITE (8,*)
          ENDIF 
 
@@ -1123,8 +1135,9 @@ C     write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' stor ',tljcalc
          WRITE (45 )  stl(l + 1)
          if (tljcalc) WRITE (451) (stlj(l + 1,jindex), jindex=1,mxj)
       ENDDO
-      WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
-      if(tljcalc) WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus
+      WRITE (45 ) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
+      if(tljcalc) WRITE (451) ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, 
+     &                        SINlcont
 C
 C     A new flag is introduced to signal storage of the Shape elastic XS (Sel(L))
 C
@@ -1139,20 +1152,20 @@ C
       if(tljcalc) CLOSE (451)
 C     Saving EW structures
       if (tljcalc .and. DIRect.GT.0) then
-       OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
-     >   FORM = 'UNFORMATTED')
+         OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
+     >     FORM = 'UNFORMATTED')
  	   WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
-       IF(MAX_cc_mod.GT.0) THEN 
+         IF(MAX_cc_mod.GT.0) THEN 
 	     WRITE(451) STLcc
 	     IF(INTerf.GT.0) THEN
-           WRITE(451) CCsmatrix ! Smatrix  
-           WRITE(451) CCpmatrix ! Pmatrix 
-           WRITE(451) CCpdiag   ! Pdiag  
-           WRITE(451) CCumatrix ! Umatrix
-         ENDIF
-       ENDIF   
+             WRITE(451) CCsmatrix ! Smatrix  
+C            WRITE(451) CCpmatrix ! Pmatrix 
+             WRITE(451) CCpdiag   ! Pdiag  
+             WRITE(451) CCumatrix ! Umatrix
+           ENDIF
+         ENDIF   
 	   CLOSE(451)
-	  endif
+	endif
 
   300 CONTINUE
 
@@ -2041,6 +2054,8 @@ C
       ctmp = Outname(1:Length)//'.ICS'
       iwin = ipipe_move('ecis06.ics',ctmp)
 C
+
+C     write(*,*) 'Direc=',NINT(Direc),Iret,' ',Outname(1:Length) 
       IF (NINT(Direc).EQ.0) RETURN
 
       ctmp = Outname(1:Length)//'_Pchan.LST'
@@ -2051,12 +2066,12 @@ C
       IF (fexist) iwin = ipipe_move('ecis06_Pchan.bin',ctmp)
 
       IF (Iret.EQ.4 .OR. Inter.EQ.0) RETURN
-      ctmp = Outname(1:Length)//'_Pmatr.LST'
-      INQUIRE (FILE = 'ecis06_Pmatr.LST', EXIST = fexist)
-      IF (fexist) iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
-      ctmp = Outname(1:Length)//'_Pmatr.bin'
-      INQUIRE (FILE = 'ecis06_Pmatr.bin', EXIST = fexist)
-      IF (fexist) iwin = ipipe_move('ecis06_Pmatr.bin',ctmp)
+C     ctmp = Outname(1:Length)//'_Pmatr.LST'
+C     INQUIRE (FILE = 'ecis06_Pmatr.LST', EXIST = fexist)
+C     IF (fexist) iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
+C     ctmp = Outname(1:Length)//'_Pmatr.bin'
+C     INQUIRE (FILE = 'ecis06_Pmatr.bin', EXIST = fexist)
+C     IF (fexist) iwin = ipipe_move('ecis06_Pmatr.bin',ctmp)
 
       ctmp = Outname(1:Length)//'_Smatr.LST'
       INQUIRE (FILE = 'ecis06_Smatr.LST', EXIST = fexist)

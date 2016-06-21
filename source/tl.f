@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4684 $
+Ccc   * $Rev: 4689 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
+Ccc   * $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3101,6 +3101,7 @@ C     xsabs is the cross section calculated as a sum over Tls (Tljs)
 C     SINlcc   is the coupled channels' cross section
 C     SINl     is the uncoupled channels' cross section
 C     SINlcont is the uncoupled channels' cross section to the continuum
+C     write(*,*) 'renormalizing Tljs'
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
 C-----Renormalizing TLs and Tljs
       sabs = 0.d0
@@ -3116,6 +3117,10 @@ C-----Renormalizing TLs and Tljs
       ENDDO
       xsabs  = coeff*sabs
       xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
+
+C-----Renormalizing collective Tljs
+      IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
+     >   .and. MAX_cc_mod.GT.0) STLcc%tlj = STLcc%tlj*dtmp
 
       if(abs(1.d0-dtmp).gt.1.d-6 .and. (SINlcc+ftmp).gt.0.d0) then
         WRITE (8,
@@ -3246,9 +3251,8 @@ C
      &rmations of DWBA levels in the continuum'
       ENDIF
 C
-C     Absorption cross section includes inelastic scattering cross section
-C     to coupled levels, but not DWBA to uncoupled levels 
-C         (except for DIRECT=3)
+C     Absorption cross section includes all inelastic scattering cross section
+C     to collective levels
       sreac = xsabs  + SINlcc  + ftmp
 
       IF (IOUt.EQ.5) THEN
