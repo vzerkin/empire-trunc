@@ -248,6 +248,7 @@ module ENDF_MF2_IO
     type MF2_UR_subsection              ! Unresolved Res subsection, LRU=2
         real spi                        ! spin of target
         real ap                         ! scat radius
+        type (tab1), pointer :: ape    ! E-dep AP, if specified (NRO.ne.0)
         integer lssf                    ! flag for use of URR
         integer nls                     ! # of l-values
         integer ne                      ! number of fission energies, Case B, LFW=LRF=1, only
@@ -699,6 +700,13 @@ module ENDF_MF2_IO
 
     if((lfw.eq.0) .and. (lrf.eq.1)) then
 
+        nullify(ur%ape)
+        if(qape) then
+            allocate(ur%ape)
+            call read_endf(n, n, ur%ape%nr, ur%ape%np)
+            call read_endf(ur%ape)
+        endif
+        
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
         allocate(ur%lpm(ur%nls),stat=n)
         if(n .ne. 0) call endf_badal
@@ -720,6 +728,13 @@ module ENDF_MF2_IO
 
     else if((lfw.eq.1) .and. (lrf.eq.1)) then
 
+        nullify(ur%ape)
+        if(qape) then
+            allocate(ur%ape)
+            call read_endf(n, n, ur%ape%nr, ur%ape%np)
+            call read_endf(ur%ape)
+        endif
+        
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%ne, ur%nls)
         allocate(ur%lpm(ur%nls),stat=n)
         if(n .ne. 0) call endf_badal
@@ -747,6 +762,13 @@ module ENDF_MF2_IO
 
     else if(lrf.eq.2)then
 
+        nullify(ur%ape)
+        if(qape) then
+            allocate(ur%ape)
+            call read_endf(n, n, ur%ape%nr, ur%ape%np)
+            call read_endf(ur%ape)
+        endif
+        
         call read_endf(ur%spi, ur%ap, ur%lssf, n, ur%nls, n)
         allocate(ur%lpm(ur%nls),stat=n)
         if(n .ne. 0) call endf_badal
@@ -1111,6 +1133,11 @@ module ENDF_MF2_IO
 
     if((lfw.eq.0) .and. (lrf.eq.1)) then
 
+        if(qape) then
+            call write_endf(0, 0, ur%ape%nr, ur%ape%np)
+            call write_endf(ur%ape)
+        endif
+
         call write_endf(ur%spi, ur%ap, ur%lssf, 0, ur%nls, 0)
 
         do l = 1,ur%nls
@@ -1124,6 +1151,11 @@ module ENDF_MF2_IO
         end do
 
     else if((lfw.eq.1) .and. (lrf.eq.1)) then
+
+        if(qape) then
+            call write_endf(0, 0, ur%ape%nr, ur%ape%np)
+            call write_endf(ur%ape)
+        endif
 
         call write_endf(ur%spi, ur%ap, ur%lssf, 0, ur%ne, ur%nls)
         call write_endf(ur%es,ur%ne)
@@ -1141,6 +1173,11 @@ module ENDF_MF2_IO
         end do
 
     else if(lrf.eq.2)then
+
+        if(qape) then
+            call write_endf(0, 0, ur%ape%nr, ur%ape%np)
+            call write_endf(ur%ape)
+        endif
 
         call write_endf(ur%spi, ur%ap, ur%lssf, 0, ur%nls, 0)
 
