@@ -27,6 +27,7 @@ C-V  14/02 Standardize some dimension statements.
 C-V  14/11 Reconstruct angle-dependent cross sections when the
 C-V        angular distributions are given in MF4 (from resonance param.)
 C-V  16/03 Allow reconstruction of alpha (SifC/SigF)
+C-V  16/06 Trivial fix to initialize IER in ENDF IO routines
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -4657,6 +4658,7 @@ C-D    IER=1  End-of-file
 C-D        2  Read error
       DIMENSION    NBT(*),INR(*)
 C*
+      IER=0
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
       RETURN
@@ -4674,6 +4676,7 @@ C-Purpose: Read an ENDF LIST record
       DOUBLE PRECISION RUFL,RR(6)
       DIMENSION    VK(*)
 C*
+      IER=0
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
         IER=-1
@@ -4916,14 +4919,27 @@ C-D  XS   Array of corresponding cross sections
 C-D  NP   Number of points in the cross section array
 C-D  INR  Interpolation law (INR=1,2 allowed)
 C-D  IER  = 0 - normal termination
+C-D         1 - Single point given - no interpolation
+C-D        10 - No data given - zero output
 C-D        11 - requested point outside interpolation range
       DIMENSION EN(NP),XS(NP)
+      IF(NP.LT.1) THEN
+        IER=10
+        FINTXS=0
+        RETURN
+      ELSE IF(NP.EQ.1) THEN
+        IER= 1
+        FINTXS=XS(1)
+        RETURN
+      END IF
       IER=0
       IF     (EIN.LT.EN(1)) THEN
         FINTXS=XS(1)
+        IER=11
         RETURN
       ELSE IF(EIN.GT.EN(NP)) THEN
         FINTXS=XS(NP)
+        IER=11
         RETURN
       END IF
       DO I=2,NP
