@@ -1,6 +1,6 @@
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2015-12-22 08:37:06 +0100 (Di, 22 Dez 2015) $
-Ccc   * $Id: endres.f 4558 2015-12-22 07:37:06Z atrkov $
+Ccc   * $Date: 2016-07-07 00:47:07 +0200 (Do, 07 Jul 2016) $
+Ccc   * $Id: endres.f 4691 2016-07-06 22:47:07Z atrkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -32,6 +32,7 @@ C-V  14/12 Allow energy-dependent scattering radius.
 C-V  15/04 Force zero cross sections in MF3 for additional reactions in
 C-V        the resolved resonance represented under LRF=7.
 C-V  15/11 Cosmetic tidying of input parameter printout.
+C-V  16/02 Add capability for multi-region data in MF2/LRF7 (RRR+URR)
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -339,17 +340,6 @@ C*       No special procedures needed for single range evaluations
         IF(NER.EQ.1) GO TO 126
 C*       Processing the resolved resonance range
         IF(LRF.EQ.1 .OR. LRF.EQ.2 .OR. LRF.EQ.3) THEN
-C*         Copy the energy-dependent radius
-          IF(NRO.NE.0) THEN
-            CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
-            READ (CH66,891) DMY,DMY,IDMY,IDMY,NR,IDMY
-            CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-            NN=(NR-1)/3+1
-            DO I=1,NN
-              CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
-              CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-            END DO
-          END IF
           CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
           CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
           READ (CH66,891) DMY,DMY,IDMY,IDMY,NLS,IDMY
@@ -363,12 +353,39 @@ C*         Copy the energy-dependent radius
             END DO
           END DO
           IF(JER.LT.NER) GO TO 122
+        ELSE IF(LRF.EQ.7) THEN
+
+          print *,'Number of spin groups',NJS
+
+          DO K=1,NJS
+C*        -- LIST record of LRF 7 for channel description
+            CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+            CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            READ (CH66,891) DMY,DMY,IDMY,IDMY,NW,NCH
+            NN=(NW-1)/6+1
+            DO I=1,NN
+              CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+              CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            END DO
+C*          -- LIST record of LRF 7 for resonance of the spin group
+            CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+            CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            READ (CH66,891) DMY,DMY,IDMY,IDMY,NW,IDM
+            NN=(NW-1)/6+1
+            DO I=1,NN
+              CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
+              CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+            END DO
+          END DO
+C... 
+C...      -- Coding is not fully tested for LRF=7
+C...
         ELSE
 C*
           WRITE(LTT,692) ' ENDRES ERROR - No coding fo NER >1/LRF=',LRF  
           WRITE(LLG,692) ' ENDRES ERROR - No coding fo NER >1/LRF=',LRF  
 C*
-          STOP 'ENDRES ERROR - No coding fo NER>1/LRF'
+          STOP 'ENDRES ERROR - No coding for NER>1/LRF'
 C*
         END IF
       ELSE IF(LRU.EQ.2) THEN
