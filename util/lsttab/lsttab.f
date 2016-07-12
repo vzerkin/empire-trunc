@@ -55,6 +55,7 @@ C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
 C-V  15/07  Prepare PLOTTAB input for the curves and points file.
 C-V  16/03  Retrieve MF203/MT102 (alpha=SigC/SigF) from C4.
 C-V  16/04  Fix trivial bug to print Ei to CUR file.
+C-V  16/07  Initialize MTH
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -250,6 +251,7 @@ C* Proceed with the processing of data
    56 READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
 C*
       ZAI=IZI
+      MTH=MT
 C*
       COM2=C84(1:11)//C84(19:21)//C84(22:26)//' '
       HL1P92=C84(1:10)//' MF'//C84(18:21)//' MT'//C84(22:26)
