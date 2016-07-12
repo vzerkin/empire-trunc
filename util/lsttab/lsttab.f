@@ -54,6 +54,7 @@ C-V  14/07  Restore printout of EXFOR number for fission spectra.
 C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
 C-V  15/07  Prepare PLOTTAB input for the curves and points file.
 C-V  16/03  Retrieve MF203/MT102 (alpha=SigC/SigF) from C4.
+C-V  16/04  Fix trivial bug to print Ei to CUR file.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -273,42 +274,46 @@ C*
         HUXP92='eV'
         HLYP92='Cross Section Ratio'
         HUYP92='no-units'
-      ELSE
-        MTH=MT
-        IF(MF.EQ.4) THEN
-          IF(MT/10000.EQ.4) THEN
-C*          -- For x-sect at fixed angle write level energy and angle
-            MTH=MT-40000
-            WRITE(COM2(21:30),'(''El'',1P,E7.2E1,1X)') EOU
-            WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
-            HL2P92='Cross Sections at Angle'//C84(63:72)//' deg.'
-            HLXP92='Energy'
-            HUXP92='eV'
-            HLYP92='Cross Sections'
-            HUYP92='barns/St'
-          ELSE
-            HL2P92='Angular Distributions at Ei'//C84(46:54)//' eV'
-            HLXP92='Angle'
-            HUXP92='Degrees'
-            HLYP92='Cross Sections'
-            HUYP92='barns/St'
-          END IF
-        ELSE
-          IF(C84(46:54).NE.'    ')
-     &    WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
-          IF(C84(56:59).NE.'    ')
-     &    WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
-          IF(C84(63:67).NE.'    ')
-     &    WRITE(COM2(31:40),'(''Eo'',1P,E7.2E1,1X)') EOU
-C*
-          HL2P92='Double-Differen. x.s. at Ei'//C84(46:54)//' eV'
-          HLXP92='E_out'
+      ELSE IF(MF.EQ.4) THEN
+        IF(MT/10000.EQ.4) THEN
+C*        -- For x-sect at fixed angle write level energy and angle
+          MTH=MT-40000
+          WRITE(COM2(21:30),'(''El'',1P,E7.2E1,1X)') EOU
+          WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+          HL2P92='Cross Sections at Angle'//C84(63:72)//' deg.'
+          HLXP92='Energy'
           HUXP92='eV'
           HLYP92='Cross Sections'
-          HUYP92='barns/eV/St'
+          HUYP92='barns/St'
+        ELSE
+          HL2P92='Angular Distributions at Ei'//C84(46:54)//' eV'
+          HLXP92='Angle'
+          HUXP92='Degrees'
+          HLYP92='Cross Sections'
+          HUYP92='barns/St'
         END IF
-        WRITE(COM2(12:19),'(I3,I5)') MF,MTH
+        IF(C84(46:54).NE.'         ')
+     &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+        IF(C84(56:59).NE.'    ')
+     &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        IF(C84(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''Lv'',1P,E7.2E1,1X)') EOU
+      ELSE
+        MTH=MT
+        IF(C84(46:54).NE.'         ')
+     &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+        IF(C84(56:59).NE.'    ')
+     &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        IF(C84(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''Lv'',1P,E7.2E1,1X)') EOU
+C*
+        HL2P92='Double-Differen. x.s. at Ei'//C84(46:54)//' eV'
+        HLXP92='E_out'
+        HUXP92='eV'
+        HLYP92='Cross Sections'
+        HUYP92='barns/eV/St'
       END IF
+      WRITE(COM2(12:19),'(I3,I5)') MF,MTH
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C*
 C* Log the start of request
@@ -322,6 +327,7 @@ C* Log the start of request
       WRITE(LTT,93) ' Scaling factor                       : ',SCL
       WRITE(LTT,95) ' Emitted particle ZA                  : ',IZP
       WRITE(LTT,96) COM2
+      write(ltt,*) '"',c84(1:60),'"'
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
@@ -565,7 +571,6 @@ C*            -- Integrate the function in the range of experim. data
 C*            -- Integrate the experimental data directly
               SP=YTGPNT(KP,EP,FP,EA,EB)
             END IF
-
 C*          -- Normalise and print the experimental data
             DO I=1,KP
               EE=EP(I)
