@@ -11,7 +11,7 @@ ifeq ($(FC),gfortran)
 
   #----GNU FORTRAN compiler
   #----flags for production compilation with gfortran
-  FFLAGS = -std=legacy -O3
+  FFLAGS = -std=legacy -O3 -fno-automatic
   #FFLAGS = -std=legacy -O0
 
 else ifeq ($(FC),ifort)

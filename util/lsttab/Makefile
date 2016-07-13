@@ -11,15 +11,19 @@ ifeq ($(FC),gfortran)
 
   #----GNU FORTRAN compiler
   #----flags for production compilation with gfortran
-  FFLAGS = -std=legacy -O3
-  #FFLAGS = -std=legacy -O0
+  FFLAGS = -std=legacy -O3  -fno-automatic
+  #----flags for debuging
+  #FFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
 
 else ifeq ($(FC),ifort)
 
   #----INTEL f95 compiler
   FFLAGS =  -O3 -x=host
-  #----flags for debuging using ifort compiler
-  #FFLAGS =  -C -ftrapuv -g -debug all
+  #----flags for debuging
+  #FFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -Wuninitialized -fno-automatic
+  #----flags for debuging using gfortran compiler
+  #----From http://www.macresearch.org/best-fortran-compiler-leopard
+  #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
   #----flags for automatic parallelization
   #FFLAGS =  -parallel
 
