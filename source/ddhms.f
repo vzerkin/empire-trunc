@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4543 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-10 09:41:38 +0100 (Do, 10 Dez 2015) $
+Ccc   * $Rev: 4697 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-07-13 22:34:07 +0200 (Mi, 13 Jul 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4543 $
-C $Id: ddhms.f 4543 2015-12-10 08:41:38Z rcapote $
+C CVS Version Management $Revision: 4697 $
+C $Id: ddhms.f 4697 2016-07-13 20:34:07Z mherman $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -1749,18 +1749,18 @@ C     Now use rel expression for density of neut or proton:
         ind0=1
         IF (SELtype.EQ.'prot') ind0=2
         vd = VDEp(ind0)
-       ELSE
+      ELSE
         IF (SELtype.EQ.'neut') vd = efermin
         IF (SELtype.EQ.'prot') vd = efermip
-       ENDIF
+      ENDIF
       r0f=1.5d0
       c = 4.*(r0f**3.)/(3.*PI_g*(HBArc**3))*ATAr
       IF(IFErmi.GT.2) THEN
         glev = c*(Epart + vd)*DSQRT((Epart + vd)**2-ZMf(ind0)**2)
-       ELSE
+      ELSE
         glev = c*DSQRT(Epart + vd)*(ZMNuc + Epart + vd)
      &       *DSQRT(2.*ZMNuc + Epart + vd)
-       ENDIF
+      ENDIF
 C     this is the density for each type of nucleon. While I use A (and not N,Z)
 C     in the above, I do not include a 2 isospin degeneracy, thus it is for
 C     separate n,p
@@ -1787,6 +1787,10 @@ C     now calculate relativistic free phase space
 C     this doesn't include the free volume, which does not enter here
 C
       cons=1.0d0
+C     'Ad hoc' factor to rescale neutron and/or proton emissison
+C     uncomment one or both of the lines below and set 'cons' =/ 1.0
+C      IF (SELtype.EQ.'neut') cons=1.0d0
+C      IF (SELtype.EQ.'prot') cons=1.0d0
 C      cons = 3.E22  ! constants multiplier (inc c, and fm*3 to mb)
       Emrate = cons*beta*siginv*gfree/glev
 C
@@ -2474,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4543 $')
+99005 FORMAT ('  xddhms version: $Revision: 4697 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4543 2015-12-10 08:41:38Z rcapote $')
+99010 FORMAT ('  $Id: ddhms.f 4697 2016-07-13 20:34:07Z mherman $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
