@@ -26,8 +26,9 @@ C-V        - Fix trivial error setting the error flag for gamma spectra
 C-V  14/02 Standardize some dimension statements.
 C-V  14/11 Reconstruct angle-dependent cross sections when the
 C-V        angular distributions are given in MF4 (from resonance param.)
-C-V  16/03 Allow reconstruction of alpha (SifC/SigF)
+C-V  16/03 Allow reconstruction of alpha (SigC/SigF)
 C-V  16/06 Trivial fix to initialize IER in ENDF IO routines
+C-V  16/07 Fix undefined LXX
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -1818,6 +1819,10 @@ C* Check the requested type of output
       AWP=-1
       ZAP= ZAP0
       IZAP0=NINT(ZAP0)
+C...
+C...  lxx=-99999
+C...  print *,'lxx',lxx
+c...
       IF     (KEA.EQ.2) THEN
 C* Case: Energy spectrum at fixed scattering angle requested
         MST=0
@@ -1832,8 +1837,9 @@ C* Case: Angular distribution at fixed outgoing particle energy requested
         MST=0
         EOU=PAR
       ELSE
-C* Case: Cross section at fixed angle
+C* Case: Cross section are requested
         IF(MT0/10000.EQ.4) THEN
+C*        Special Case: Cross section at fixed angle
           MT=MT0-40000
           DEG=PAR
           IF(DEG.GE.0) THEN
@@ -2032,6 +2038,10 @@ C*        -- Save the nu-bar
         INR1=2
         YY=1
         IF(YL.GT.0) YY=YL
+C...
+C...    print *,'lxx 0 ',lxx
+C...    if(lxx.lt.0) stop
+C...
         DO I=1,NEN
           EE=RWO(LE-1+I)
 C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
@@ -2114,6 +2124,10 @@ C*            -- Constants (Table 1, Appendix H, ENDF-102 manual)
               AAD=DBLE(APR)/DBLE(AWI)
             END IF
 C*          -- Loop over energies
+C...
+C...        print *,'lxx 1 ',lxx
+C...        if(lxx.lt.0) stop
+C...
             DO IE=1,NE
 C*            -- For each incident energy read the ang. distribution
               CALL RDTAB1(LEF,TEMP,EI2,LT,L2,NRP,NEP1,NBT(NM),INR(NM)
@@ -2189,6 +2203,10 @@ c...
 C*          --Interpolate cross sections on union grid to LAF
             CALL FITGRD(NEN,ENR,DXS,NP,RWO(LAA),RWO(LAF))
 C*          --Interpolate yields to union grid into DXS
+C...
+C...        print *,'lxx 2 ',lxx
+C...        if(lxx.lt.0) stop
+C...
             CALL FITGRD(NE,RWO(LXE),RWO(LXX),NP,RWO(LAA),DXS)
 C*          --Save energy union grid and multiply cross section with
 C*            the distribution * 2 (= Sig(mu,E)*4Pi)
@@ -2307,6 +2325,10 @@ C*         No subsection for Law 0, 3, 4
           ELSE IF(LAW.EQ.1 .OR. LAW.EQ.2 .OR.LAW.EQ.5) THEN
 C*         Skip subsection for Law 1, 2, 5
            CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+C...
+C...       print *,'lxx 3 ',lxx
+C...       if(lxx.lt.0) stop
+C...
            MX=MRW-LXX
            DO IE=1,NE
              CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO(LXX),MX,IER)
@@ -2342,6 +2364,10 @@ C* Found the required particle
 C* Define union grid of cross sections and yields at LXE
         CALL UNIGRD(NEN,ENR,NP,RWO(LE),NE2,RWO(LXE),LD)
 C* Interpolate cross sections on union grid to LXX
+C...
+C...    print *,'lxx 5 ',lxx
+C...    if(lxx.lt.0) stop
+C...
         CALL FITGRD(NEN,ENR,RWO(LX0),NE2,RWO(LXE),RWO(LXX))
 C* Interpolate yields to union grid into ENR (temporarily)
         CALL FITGRD(NP,RWO(LE),RWO(LX),NE2,RWO(LXE),ENR)
@@ -2368,6 +2394,10 @@ C*        -- Reset ZAP to skip the remainder of the section
 C* Process cross section at fixed angle for charged particles
         IF(LAW.EQ.5) THEN
           CALL RDTAB2(LEF,SPI,C2,LIDP,L2,NR,NE,NBT,INR,IER)
+C...
+C...      print *,'lxx 6 ',lxx
+C...      if(lxx.lt.0) stop
+C...
           MX=MRW-LXX
           IF(MX.LE.0) STOP 'DXSEND ERROR - Array capacity exceeded'
 C*        -- Loop over incident particle energies
@@ -2380,6 +2410,10 @@ C...      write(81,*) 'Endtab'
 C...      write(82,*) 'Endtab interference'
 C...      write(83,*) 'Endtab scattering'
 c...      write(84,*) 'Endtab Coulomb'
+C...
+C...
+C...      print *,'lxx 7 ',lxx
+C...      if(lxx.lt.0) stop
 C...
           DO IE=1,NE
 C*          -- Read the angular distribution
@@ -2474,6 +2508,10 @@ C*              -- Prepare legendre coefficients
                 NL1=NL+1
                 SRE=0
                 SIM=0
+C...
+C...            print *,'lxx 8 ',lxx
+C...            if(lxx.lt.0) stop
+C...
                 DO L=1,NL1
 C*                -- Real part of interference term
                   SRE=SRE+dble(RWO(LXX+2*NL+2*L-1)*PLEG(L))*(2*L-1)/2
@@ -2518,6 +2556,10 @@ C*              -- Prepare legendre coefficients
                 NL1=NL+1
                 SRE=0
                 ILL=1
+C...
+C...            print *,'lxx 9 ',lxx
+C...            if(lxx.lt.0) stop
+C...
                 DO L=1,NL1
 C*                -- Real part of interference term
                   XRE=dble(RWO(LXX+2*NL+2*L-1)*PLEG(L))*(2*L-1)/2
@@ -2559,6 +2601,10 @@ C...  This option has not been thouroughly tested!!!
                 CALL PLNLEG(ACM,PLEG,NL)
                 NL1=NL+1
                 SRE=0
+C...
+C...            print *,'lxx 10 ',lxx
+C...            if(lxx.lt.0) stop
+C...
                 DO L=1,NL1
                   SRE=SRE+dble(RWO(LXX+2*L-1)*PLEG(L))*(2*L-1)/2
                 END DO
@@ -2571,6 +2617,10 @@ C...  This option has not been thouroughly tested!!!
 C*            -- Case: Tabulated distribution of Pni
               NC=NL
               IF(NW+NC.GT.LD) STOP 'DXSEND ERROR - MRW limit exceeded'
+C...
+C...          print *,'lxx 11 ',lxx
+C...          if(lxx.lt.0) stop
+C...
               LX1=LXX+NW
 C*            -- Separate distribution (LX1) from the cosine (LXX)
               DO J=1,NC
@@ -2608,6 +2658,10 @@ c...
 C*        -- Define union grid of cross sections and angular
 C*           cross sect. at LXE
           CALL UNIGRD(NEN,ENR,NE,RWO(LE),NE2,RWO(LXE),LD)
+C...
+C...      print *,'lxx 12 ',lxx
+C...      if(lxx.lt.0) stop
+C...
 C*        -- Interpolate angular cross section to union grid at LXX
           CALL FITGRD(NE,RWO(LE),RWO(LX),NE2,RWO(LXE),RWO(LXX))
 C*        -- Save cross sections on energy union grid
@@ -2682,6 +2736,10 @@ c...        print *,I,je,jp,enr(je),rwo(jp),rwo(lxe-1+i),rwo(lxx-1+i)
 c...      end do
 c...      stop
 c...      
+C...
+C...      print *,'lxx 13 ',lxx
+C...      if(lxx.lt.0) stop
+C...
 C*        --Interpolate cross sections DXS(ENR) on union grid to LX
           CALL FITGRD(NEN,ENR,DXS,NP,RWO(LE),RWO(LX))
 C*        --Interpolate distribution LXX(LXE) to union grid into DXS
@@ -2959,6 +3017,13 @@ C*        Interpolate precomputed Eou corresponding to Xlb
       ELSE
 C* Case: Angle-integrated energy distribution
 C*       Calculate cosine*distribution
+        KX =MRW/2
+        LXE=1
+        LXX=LXE+KX
+C...
+C...    print *,'lxx 14 ',lxx
+C...    if(lxx.lt.0) stop
+C...
         DO I=1,NE1
           RWO(LXX-1+I)=ENR(I)*DXS(I)
         END DO
@@ -3079,6 +3144,10 @@ Case: Interpolate outgoing particle energy distributions
      1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
         ELSE
 Case: Interpolate distrib. to a given outgoing particle energy
+
+            print *,'lxx 15 ',lxx
+            if(lxx.lt.0) stop
+
           EA=RWO(LXE)
           EB=RWO(LXE-1+NF)
           CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
@@ -3246,6 +3315,10 @@ C*       No subsection for Law 0
         ELSE IF(LAW.EQ.2 .OR. LAW.EQ.5) THEN
 C*        Skip subsection for Law 2
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+
+            print *,'lxx 17 ',lxx
+            if(lxx.lt.0) stop
+
           MX=MRW-LXX
           DO IE=1,NE
             CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO(LXX),MX,IER)
