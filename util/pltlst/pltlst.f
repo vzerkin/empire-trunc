@@ -27,7 +27,8 @@ C-V          charged particles and duplicate entries. (A. Trkov)
 C-V  2015/06 - Fix bug when a single entry exists in the C4 file.
 C-V          - Tighten tolerance for lumping angular distributions.
 C-V          - Extend the grid of forced DDX entries.
-C-V  2016/03 Add MF203/MT102 for alpha (SigC/SigF).
+C-V  2016/03 Add MF203/MT102 for alpha (SigC/SigF)
+c-v          Add "target" qualifier to limit list to selected target.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -47,6 +48,9 @@ C-M  - Flags in any order (until EOF or blank):
 C-M      "no4000"  Suppress MT reactions of 4000 series
 C-M      "xsmajor" Force major cross sections to the list
 C-M      "xsddx"   Force double-differential cross sections to the list.
+C-M  - Special keywords
+C-M      "target"  ZA to exclude entries that do not correspond to
+C-M                the selected target defined by its ZA.m
 C-M
 C-M  The default input filename is PLTLST.INP. If the file does not
 C-M  exist, the program tries to read the entries from the default
@@ -134,10 +138,11 @@ C     Extending the list for low energy evaluation work
       NEN1=0
       NSU1=0
       IZIX=0
+      ITARGET=0
 C* Write the banner
       WRITE(LTT,903) BLNK
       WRITE(LTT,903) ' PLTLST - Generate listing of EXFOR data'
-      WRITE(LTT,903) ' ---------------------------------------'
+      WRITE(LTT,903) ' --------------------------------------1'
       WRITE(LTT,903) BLNK
 C*
 C* Check for the existence of the input file
@@ -154,20 +159,22 @@ C* If input does not exist, try reading the default input
       IF(FLNM.NE.BLNK) FLLS=FLNM
 C* Read flags until blank or EOF
       IF(.NOT. EXST)
-     &WRITE(LTT,903) ' Enter additional commands (end=CTRL^Z) '
+     &WRITE(LTT,903) ' Enter additional commands (end=blank)  '
     8 READ (LIN,903,END=10,ERR=10) FLNM
       IF(FLNM.EQ.BLNK) GO TO 10
       IF(FLNM(1:6).EQ.'no4000') THEN
         NO4000=1
         WRITE(LTT,903) ' Suppress MT reactions of 4000 series   '
-      END IF
-      IF(FLNM(1:5).EQ.'xsddx') THEN
+      ELSE IF(FLNM(1:5).EQ.'xsddx') THEN
         NDDXN=1
         WRITE(LTT,903) ' Force double-differen. x.s. to the list'
-      END IF
-      IF(FLNM(1:7).EQ.'xsmajor') THEN
+      ELSE IF(FLNM(1:7).EQ.'xsmajor') THEN
         NXSMJR=1
         WRITE(LTT,903) ' Force major cross sections to the list '
+      ELSE IF(FLNM(1:6).EQ.'target') THEN
+        IF(FLNM(7:18).NE.BLNK(1:12)) READ(FLNM(7:18),*) TARGET
+        WRITE(LTT,906) ' Limit list to target                   ',TARGET
+        ITARGET=NINT(TARGET)
       END IF
       GO TO 8
 C* Open the files
@@ -576,16 +583,20 @@ C*      -- Set output record
       END IF
    48 IF(MFX.NE.0) THEN
 C*        -- Force neutron emission spectra
+        IF( ITARGET.EQ.0 .OR. ITARGET.EQ.(1000*IZX+IAX) ) THEN
           IDX=IDX+1
           WRITE(LLS,914) IZX,CH(IZX),IAX,MSX,IZPX,MFX,MTX,0
      &                  ,CX10,IDX,IZIX
-          GO TO 42
+        END IF
+        GO TO 42
       END IF
 c...  IF(MMF.GE.99) GO TO 80
       IF(MMF.GE.99 .AND. MMF.NE.203) GO TO 80
 C* Write a record to output list file
 C* Suppress elastic angular distributions for charged particles
-      IF(MMF.NE.4 .OR. MMT.NE.2 .OR. IZI0.LE.1) THEN
+C* Suppress target if not matching the specified
+      IF( (MMF.NE.4 .OR. MMT.NE.2 .OR. IZI0.LE.1) .AND.
+     &    (ITARGET.EQ.0 .OR. ITARGET.EQ.(1000*IZ+IA) ) ) THEN
         IDX=IDX+1
         WRITE(LLS,914) IZ,CH(IZ),IA,MS0,IZP0,MMF,MMT,IEX,CH10,IDX,IZI0
       END IF
@@ -666,6 +677,7 @@ C*
   903 FORMAT(2A40)
   904 FORMAT(BN,F10.0)
   905 FORMAT(A40,1P,E10.3)
+  906 FORMAT(A40,   F10.1)
   910 FORMAT(' ======================================='
      &      ,'====================================  ======')
   912 FORMAT(' MATERIAL   ZAOUT  MF   MT  EVAL. EXPR. '
