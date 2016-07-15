@@ -49,6 +49,8 @@ C-V  14/02 Fix undefined variable in a warning message.
 C-V  15/04 Fix sorting when last set is a discrete level data set.
 C-V  15/08 - Improve ENDF data search logic (Contrib. by O. Cabellos).
 C-V        - Fix the columns to define MF.
+C-V  15/12 - Increase MXNP from 300000 to 600000
+C-V  16/03 Do not convert alpha=SigC/SigF of U-235 to x.s.
 C-M
 C-M  Program C4SORT Users' Guide
 C-M  ===========================
@@ -214,7 +216,7 @@ C-M           at different energies).
 C-M    MXMT - Maximum number of reactions in the Standards file.
 C-
       PARAMETER       (MXEN=80000,MXAL=60,LCH=53,MXIR=80000,MXMT=300)
-      PARAMETER       (MEL1=20,MXNP=300000,MXRW=20000)
+      PARAMETER       (MEL1=20,MXNP=600000,MXRW=20000)
       CHARACTER*132    REC,RC1,RC6(MXIR)
       CHARACTER*80     DPATH
       CHARACTER*40     BLNK,FLIN,FLC4,FLOU,FLES,FLSC,FLS2,FLS3
@@ -365,28 +367,36 @@ C*           assume it is the same as the numerator
           IF(RZA.LE.0) THEN
             RZA=IZAT+0.9
           END IF
-          IZAT=10*IFIX(RZA)
+          IZAR=IFIX(RZA)
+          JZAR=10*IZAR
           MFR =3
           MTR =IFIX(RMT)
+C*        -- Exclude alpha=SigC/SigF for U-235
+          IF(IZAT.EQ.IZAR .AND. IZAT.EQ.92235 .AND. 
+     &         MT.EQ.102  .AND.  MTR.EQ.18 ) THEN
+            WRITE(LS2,901) REC
+            GO TO 17
+          END IF
+C*        -- Loop to check if denominator is a standard
           DO I=1,NMT
-            IF(MATS(I).EQ.IZAT .AND. 
+            IF(MATS(I).EQ.JZAR .AND. 
      &          MFS(I).EQ.MFR  .AND. MTS(I).EQ.MTR) THEN
 C*            Matching standard reaction found - check energy            
 C...
 C...            print *,'"',rec( 1:49),'"'
-C...            print *,'Require standard mat,mt',IZAT,mtr,iza1,mt1
+C...            print *,'Require standard mat,mt',JZAR,mtr,iza1,mt1
 C...
               READ (REC(23:31),931,ERR=801) FIN
               IF(FIN.GE.ELO(I) .AND. FIN.LE.EHI(I)) THEN
 C*              Energy range of the standard is valid - retrieve              
-                IF(MTR.NE.MT1 .OR. MFR.NE.MF1 .OR. IZAT.NE.IZA1) THEN
+                IF(MTR.NE.MT1 .OR. MFR.NE.MF1 .OR. JZAR.NE.IZA1) THEN
 C...
-c...              print *,'      Load Standard mf,mt,za',mf,mtr,IZAT
+c...              print *,'      Load Standard mf,mt,za',mf,mtr,JZAR
 C...
                   MF1 =3
                   MT1 =MTR
-                  IZA1=IZAT
-                  ZA1 =IZAT*0.1
+                  IZA1=JZAR
+                  ZA1 =JZAR*0.1
                   MST =0
                   CALL GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
      &                       ,NP,EST,XST,DST,RWO,MXRW)
@@ -415,7 +425,7 @@ C*              -- Sum errors from measurement and standard
 C*              -- Label reaction converted from ratio by inserting CH
                 CALL LBLMRK(REC(98:122),25,CH)
 C...
-C...            print *,IZAT,MF,MT,'"',rec(98:122),'"'
+C...            print *,JZAR,MF,MT,'"',rec(98:122),'"'
 C...
                 REC(13:15)='  3'
                 RC1=REC
@@ -425,7 +435,7 @@ C...
             END IF
           END DO
         ELSE IF(MF.EQ.205) THEN
-          IZAT=10*IFIX(RZA)
+          JZAR=10*IFIX(RZA)
           MFR =5
           MTR =IFIX(RMT)
 C*        -- Check specifically for Cf-252 sf spectrum in the numerator
@@ -436,11 +446,11 @@ C...
 C...        print *,' "',REC(1:76),'"'
 C...
             KIN=1
-            WRITE(REC( 1:19),902) KIN,IZAT/10,KF,MTR
+            WRITE(REC( 1:19),902) KIN,IZAR,KF,MTR
             RMT=KMT+0.9
             RZA=KZA+0.9
             WRITE(REC(59:76),'(2F9.1)') RMT,RZA
-            IZAT=10*IFIX(RZA)
+            JZAR=10*IFIX(RZA)
             MTR =IFIX(RMT)
             READ (REC(41:49),931,ERR=801) FXS
             READ (REC(50:58),931,ERR=801) DXS
@@ -456,26 +466,26 @@ C...        print *,' "',REC(1:76),'"'
 C...
           END IF
           DO I=1,NMT
-            IF(MATS(I).EQ.IZAT .AND. 
+            IF(MATS(I).EQ.JZAR .AND. 
      &          MFS(I).EQ.MFR  .AND. MTS(I).EQ.MTR) THEN
 C*            Matching standard reaction found - check energy            
 C...
 C...            print *,'"',rec( 1:49),'"'
 C...            print *,'Require standard mat,mf,mt'
-C... &                 ,IZAT,mfr,mtr,iza1,mt1
+C... &                 ,JZAR,mfr,mtr,iza1,mt1
 C...
 
               READ (REC(77:85),931,ERR=801) FOU
               IF(FOU.GE.ELO(I) .AND. FOU.LE.EHI(I)) THEN
 C*              Energy range of the standard is valid - retrieve              
-                IF(MTR.NE.MT1 .OR. MFR.NE.MF1 .OR. IZAT.NE.IZA1) THEN
+                IF(MTR.NE.MT1 .OR. MFR.NE.MF1 .OR. JZAR.NE.IZA1) THEN
 C...
-C...              print *,'      Load Standard mf,mt,za',mfr,mtr,IZAT
+C...              print *,'      Load Standard mf,mt,za',mfr,mtr,JZAR
 C...
                   MF1 =5
                   MT1 =MTR
-                  IZA1=IZAT
-                  ZA1 =IZAT*0.1
+                  IZA1=JZAR
+                  ZA1 =JZAR*0.1
                   MST =0
                   CALL GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
      &                       ,NP,EST,XST,DST,RWO,MXRW)
@@ -508,7 +518,7 @@ C*              -- Sum errors from measurement and standard
 C*              -- Label reaction converted from ratio by inserting CH
                 CALL LBLMRK(REC(98:122),25,CH)
 C...
-C...            print *,IZAT,MF,MT,'"',rec(98:122),'"'
+C...            print *,JZAR,MF,MT,'"',rec(98:122),'"'
 C...
                 REC(13:15)='  5'
                 RC1=REC
@@ -1874,9 +1884,15 @@ C* Initialise
         MAT0=-1
         GO TO 21
       END IF
+c...
+c...  print *,'Searching za0,mf0,mt0',za0,mf0,mt0
+c...
 C*
 C* Loop to find the specified material
    20 CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+c...
+c...  print *,'za0,mat,mmm,mf,mt',za0,mat,mmm,mf,mt,ier
+c...
       IF(IER.GT.0 .OR. MAT.LT.0) GO TO 80
       IF(ZA0.LT.0) THEN
 C* Case: Search by MAT number
@@ -1884,17 +1900,31 @@ C* Case: Search by MAT number
       ELSE
 C* Case: Search by ZA number (including decimal LIS0)
         IF(MT.EQ.0) GO TO 20
-        IF(MAT.EQ.MMM ) GO TO 20
+        IF(MF.EQ.1. AND. MAT.EQ.MMM ) GO TO 20
         MMM=MAT
         READ (C66,92) ZA
-        IZA=ZA*10
+        IZA=NINT(ZA)*10
         IF(MF.EQ.1. AND. MT.EQ.451) THEN
           READ (LEF,92) DD,DD,LIS,LIS0
           IZA=IZA+LIS0
         END IF
-        IF(IZA.NE.IZA0) GO TO 20
+c...
+C...    print *,'    Try za0,mat',za0,mat,mat0,mf,mt
+c...
+        IF(IZA.NE.IZA0) THEN
+C*        -- Incorrect material, skip section
+          DO WHILE(MT.GT.0)
+            CALL RDTEXT(LEF,MAT,MF,MT,C66,IER)
+            IF(IER.NE.0) GO TO 80
+          END DO
+          GO TO 20
+        END IF
+C*      -- Material found
         ZA=IZA*0.1
         ZA0=-MAT
+c...
+c...    print *,'    Found za0,mat',za0,mat
+c...
       END IF
 C* Loop to find the file number
    21 IF(MF0.EQ. 0) GO TO 30
@@ -1911,6 +1941,9 @@ C* Loop to find the reaction type number
       GO TO 32
 C* Normal termination
    40 READ (C66,92) ZA,AW,L1,L2,N1,N2
+c...
+c...  print *,'Found',za,mat,mf,mt
+c...
       RETURN
 C*
 C* Error traps
