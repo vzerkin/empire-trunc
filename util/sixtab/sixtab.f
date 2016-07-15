@@ -20,6 +20,7 @@ C-V        - Increase the number of angular points for two-body
 C-V          reactions (Law 2) from 2*L+2 to 3*L+1
 C-V        - Refine the first and last angle intervals to half-nominal
 C-V          value.
+C-V  16/06 Allow Kalbach representation with NA=2.
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -555,9 +556,13 @@ C*      Don't know how to process - file incomplete - terminate.
 C*
 C* Read Law 1 format specifications for outgoing energies
   130 CALL RDTAB2(LEN,C1,C2,LANG ,LEP ,NR,NE,NBT,INR,IER)
-
-      print *,'lang,lep,nr,ne',lang,lep,nr,ne
-
+      IF(IER.NE.0) THEN
+        PRINT *,'SIXTAB ERROR - Reading RDLIST IER=',IER
+        STOP 'MF6LW7 ERROR - reading interpolation table TAB2'
+      END IF
+C...
+C...  print *,'lang,lep,nr,ne',lang,lep,nr,ne
+C...
       IF(LTT.GT.0) THEN
         IF     (LANG.EQ.1)THEN
           CLANG='Legendre'
@@ -582,8 +587,10 @@ C* Begin loop over incident particle energies
 C* Read in the data for this energy
       NMX=MXRW-LX1
       CALL RDLIST(LEN,C1,EIN,ND,NA,NW,NEP,RWO(LX1),NMX,IER)
-      IF(IER.NE.0)
-     1  STOP 'MF6LW7 ERROR - reading incident energy LIST'
+      IF(IER.NE.0) THEN
+        PRINT *,'SIXTAB ERROR - Reading RDLIST IER=',IER
+        STOP 'MF6LW7 ERROR - reading incident energy LIST'
+      END IF
       IF(ND.GT.0) THEN
 C*
 C* Case: Discrete particle energies present
@@ -706,8 +713,10 @@ C* Write the distribution for extreme cosines (-1, +1)
       END IF
 C*
 C* Case: Normal Law-1 distribution with angular dependence
-      IF(LANG.EQ.2 .AND. NA.NE.1)
-     1  STOP 'MF6LW7 ERROR - Kalbach requires NA=1'
+      IF(LANG.EQ.2 .AND. (NA.LT.1 .OR. NA.GT.2) ) THEN
+        PRINT *,' SIXTAB ERROR - for LANG=2 illegal value of NA',NA
+        STOP 'MF6LW7 ERROR - Kalbach requires NA=1 or 2'
+      END IF
       LXE =LX1+NW
       LXX =LX1+(MXRW-LXE)/2
       KX  =MXRW-LXX
@@ -811,7 +820,11 @@ C*
 C* Calculate the probability from Kalbach-Mann representation
         SS=RWO(LX1+NCYC*(IP-1)+1)
         RR=RWO(LX1+NCYC*(IP-1)+2)
-        AA=BACH(IZPR,IZAP,IZA,EIN,ECM)
+        IF(NA.EQ.1) THEN
+          AA=BACH(IZPR,IZAP,IZA,EIN,ECM)
+        ELSE
+          AA=RWO(LX1+NCYC*(IP-1)+3)
+        END IF
         FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
       ELSE IF(LANG.GT.10) THEN
 C*
