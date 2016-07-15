@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-02-25 10:06:36 +0100 (Do, 25 Feb 2016) $
+Ccc   * $Date: 2016-07-15 09:49:13 +0200 (Fr, 15 Jul 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -146,6 +146,7 @@ C-M        - Guard against incomplete decaying nucleus data.
 C-M        - Fix isomer production from inelastic scattering.
 C-M        - Increase precision for reading level energy of isomers
 C-M          (backward compatible).
+C-M  16/04 Fix bug in removing all-zero cross sections.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -2941,6 +2942,19 @@ C* Repack the array, removing All-zero cross section from the list
      &                  ,MTH(I)
           WRITE(LER,904) ' Eliminated all-zero reaction MT        '
      &                  ,MTH(I)
+C*
+C*        -- If ground state is eliminated, force any metastable
+C*           state to zero, if present
+          IF(MTH(I).GT.999) THEN
+            DO K=I,NXS
+              MM=MTH(K)-MTH(I)
+              IF(MM .GT.0 .AND. MM.LT.10) THEN
+                DO J=1,NEN
+                  XSC(J,K)=0
+                END DO
+              END IF
+            END DO
+          END IF
         END IF
       END DO
       NXS=II
@@ -5403,7 +5417,8 @@ c...  end if
 c...
 C* Insert the incident particle threshold energy if necessary
 c...
-c...      print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
+C...  print *,'Inserting the incident particle threshold energy'
+C...  print *,'ne6,izap,ee,eth,etef',ne6,izap,ee,eth,etef
 c...
       INSE=0
       IF(NE6.EQ.0 .AND. EE.GT.ETH) THEN
@@ -5468,12 +5483,12 @@ C*            Shift the existing points forward by NSH words
               NSH=NWX+4
             END IF
 c...        
-c...        print *,'inserting Eth before energy',rwo(l6),' Eth',EINS
+C...        print *,'inserting Eth before energy',rwo(l6),' Eth',EINS
 c...        
             NW =4+NEP*(LHI+2)
             LB1=L6+NW+NSH
 c...
-c...        print *,'rwo(first,last)',rwo(l6),rwo(l6+nw-1),l6,lb1-1,nsh
+C...        print *,'rwo(first,last)',rwo(l6),rwo(l6+nw-1),l6,lb1-1,nsh
 c...
             IF(LB1.GT.MXR) THEN
               PRINT *,'REAMF6 ERROR - MXR limit exceeded'
