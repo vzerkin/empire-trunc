@@ -30,6 +30,7 @@ C-V  14/06 Implement ratios of fission spectra to Maxwellian.
 C-V  15/03 Fix bug printing NaN for PFNS ratio to Maxwellian at 0 eV.
 C-V  15/11 Print input instructions to screen.
 C-V  16/03 Allow MF203 for alpha (SigC/SigF).
+C-V  16/07 Fix missing "REWIND" before calling DXSEND for MF5.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -465,6 +466,7 @@ c...
         NUC=0
         ZEL(1)=ZA0
         FRC(1)=1
+        REWIND LIN
         CALL DXSELM(LIN,NUC,ZEL,FRC,ZAP,MF,MTE,KEA,EIN,PAR,EP6
      1             ,ES,SG,UG,RWO,NP,MPT,MXR,LTT,ELV)
 c...
