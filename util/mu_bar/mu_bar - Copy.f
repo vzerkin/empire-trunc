@@ -87,10 +87,10 @@ C* Log file
       WRITE(LLG,940) ' MU_BAR - Average cosine of scattering  '
       WRITE(LLG,940) ' =====================================  '
       WRITE(LLG,940) BLNK
-      WRITE(LLG,940) ' Source ENDF file                       : '
+      WRITE(LLG,940) ' Source ENDF file                     : '
      & ,FLIN(1:40)
       IF(FLIN(41:80).NE.BLNK) WRITE(LLG,940) BLNK,FLIN(41:80)
-      WRITE(LLG,940) ' Output ENDF file                       : '
+      WRITE(LLG,940) ' Output ENDF file                     : '
      & ,FLOU(1:40)
       IF(FLOU(41:80).NE.BLNK) WRITE(LLG,940) BLNK,FLOU(41:80)
       WRITE(LLG,940) BLNK
