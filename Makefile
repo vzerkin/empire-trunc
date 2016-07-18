@@ -57,7 +57,7 @@ up:
 
 upall: up all 
 
-release: release-tarball txt-installer gui-installer-base gui-installer-full
+release: release-tarball
 
 release-tarball:
 #	python installer/makeTarball.py --release --full
@@ -67,14 +67,6 @@ release-tarball:
 
 txt-installer: installer/install.sh.template
 	sed -e s:VERSIONNUMBER:`\grep VERSIONNUMBER version | sed -e 's/VERSIONNUMBER = //g'`:g  installer/install.sh.template | sed -e s:VERSIONNAME:`\grep VERSIONNAME version | sed -e 's/VERSIONNAME   = //g'`:g > installer/install.sh
-
-IZPACK = installer/IzPack
-
-gui-installer-base: txt-installer installer/install-base.xml
-	$(IZPACK)/bin/compile installer/install-base.xml -o installer/EMPIRE-base-installer.jar
-
-gui-installer-full: txt-installer installer/install-full.xml
-	$(IZPACK)/bin/compile installer/install-full.xml -k web -o installer/EMPIRE-full-installer.jar
 
 tarball-latest: 
 	python installer/makeTarball.py --latest
