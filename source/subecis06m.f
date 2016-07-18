@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4685 $
+Ccc   * $Rev: 4708 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-13 04:03:45 +0200 (Mo, 13 Jun 2016) $
+Ccc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19339,7 +19339,6 @@ C COMPOUND NUCLEUS.                                                     SCAM-307
       IF (LO(82)) GO TO 58                                              SCAM-310
 C     To allow calculation of Pmatrix independently of EW request
 C     IF (LO(83)) GO TO 28                                              SCAM-311
-C
       I=0                                                               SCAM-313
       DO 27 II=1,NC                                                     SCAM-314
       IF (WV(3,MC(II,1)).LT.0.D0) GO TO 27                              SCAM-315
@@ -19408,68 +19407,11 @@ C         S-matrix                                                      RCN  RCN
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
 C----
-C     IF (LO(83)) GO TO 28                                              SCAM-311
+      IF (LO(83)) GO TO 28                                              SCAM-311
 
-C     IF(lcalc) then
-C     IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
-C     ALLOCATE(PRmatr(NC,NC))
-C     IF(allocated(PImatr)) DEALLOCATE(PImatr)
-C     ALLOCATE(PImatr(NC,NC))
-C     IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
-C     ALLOCATE(PRdiag(NC,NC))
-C     IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
-C      ALLOCATE(PIdiag(NC,NC))
-
-C     PIdiag = 0.d0
-C     PRdiag = 0.d0
-C     write(*,*) 'P matrix'  
-C     DO I = 1,NC
-C	  PRdiag(I,I) = 1.d0
-C	  DO J=1,NC
-C      	PRmatr(I,J)=P(I,J,1)   
-C	    PImatr(I,J)=P(I,J,2)   
-C	  ENDDO
-C	ENDDO
-C     DO I = 1,NC
-C       DO J = 1,NC
-C	    write(*,'(1x,I3,1x,I3,1x,9(d12.6,1x,d12.6))') 
-C    >    I,J,PRmatr(I,J),PImatr(I,J)
-C       ENDDO
-C	ENDDO
-C     endif 
 
       CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
      >    NJC,1.D-12,A1,IERR)    
-
-C     IF(lcalc) then
-C     lcalc=.FALSE.
-C     CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
-C    >    NJC,1.D-12,A1,IERR)    
-C     write(*,*) 'ECIS matrix:'
-C     EIGENVALUES
-C 	DO I = 1,NC
-C 	 write(*,'(1x,9(d12.6,1x,d12.6))')(P(I,J,1),P(I,J,2),J=1,NC)
-C	ENDDO
-C     EIGENVECTORS
-C 	DO I = 1,NC
-C 	 write(*,'(1x,9(d12.6,1x,d12.6))')(P(I,J,3),P(I,J,4),J=1,NC)
-C	ENDDO
-C     write(*,*) 'Square matrix:'
-C     CALL DIAG(PRmatr,PImatr,PRdiag,PIdiag,NC,NC,1.D-12,A1,IERR)      
-C     DO J = 1,NC
-C       write(*,'(1x,A13,1x,9(d12.6,1x,d12.6))') 
-C    >    'Eigenvalues=',PRmatr(J,J),PImatr(J,J)
-C	  DO I = 1,NC
-C         write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') 
-C    >      I,J,PRdiag(I,J),PIdiag(I,J)
-C       ENDDO
-C     ENDDO
-C     IF(allocated(PRmatr)) DEALLOCATE(PRmatr)
-C     IF(allocated(PImatr)) DEALLOCATE(PImatr)
-C     IF(allocated(PRdiag)) DEALLOCATE(PRdiag)
-C     IF(allocated(PIdiag)) DEALLOCATE(PIdiag)
-C     PAUSE
-C     endif
 
       WRITE (122     ) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (123     ) AJ,IP(JPI+1),JC                                  RCN  RCN
@@ -19503,7 +19445,7 @@ C=======================================================================
 C     AVOIDING CN DECAY & WF correction in ECIS to speed-up EMPIRE calcs
 C     Matrices needed for EW transformation already saved
 C=======================================================================
-      RETURN
+C     RETURN
 C
       IF (IERR.EQ.0) GO TO 28                                           SCAM-334
       WRITE (MW,1008)                                                   SCAM-335

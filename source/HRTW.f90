@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4683 $
+   ! $Rev: 4708 $
    ! $Author: rcapote $
-   ! $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+   ! $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
    !
 
    TYPE channel
@@ -420,9 +420,11 @@ CONTAINS
             !----------------------------------------------------------
             ! Collecting outgoing channels completed
             !----------------------------------------------------------
-            IF(LHRtw==1 .OR. LHRtw==2) CALL AUSTER(LHRtw)  !calculate V's for the strong channels (iteration)
-            DENhf = H_Sumtl                                !reset DENhf using V's instead of T's
-            IF(DENhf .LE. 0.d0) CYCLE
+            IF(LHRtw==1 .OR. LHRtw==2) THEN
+			  CALL AUSTER(LHRtw)  ! calculate V's for the strong channels (iteration)
+              DENhf = H_Sumtl     ! reset DENhf using V's instead of T's
+            ENDIF
+			IF(DENhf .LE. 0.d0) CYCLE
 
             !----------------------------------------------------------------------------------
             ! construct scratch matrix for decay of the Jcn state

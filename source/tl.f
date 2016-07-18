@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4689 $
+Ccc   * $Rev: 4708 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
+Ccc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3102,27 +3102,30 @@ C     SINlcc   is the coupled channels' cross section
 C     SINl     is the uncoupled channels' cross section
 C     SINlcont is the uncoupled channels' cross section to the continuum
 C     write(*,*) 'renormalizing Tljs'
+C     dtmp = 1.d0
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
-C-----Renormalizing TLs and Tljs
-      sabs = 0.d0
-      sabsj = 0.D0
-      DO l = 0, Maxlw
-        Stl(l + 1) = Stl(l + 1)*dtmp 
-        sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
-        DO jindex = 1,MAXj(Nejc)
-          Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
-          jsp = sjf(l,jindex,SEJc(Nejc)) 
-          sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
-        ENDDO
-      ENDDO
-      xsabs  = coeff*sabs
-      xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
-
 C-----Renormalizing collective Tljs
-      IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
-     >   .and. MAX_cc_mod.GT.0) STLcc%tlj = STLcc%tlj*dtmp
-
       if(abs(1.d0-dtmp).gt.1.d-6 .and. (SINlcc+ftmp).gt.0.d0) then
+        sabs = 0.d0
+        sabsj = 0.D0
+        DO l = 0, Maxlw
+          Stl(l + 1) = Stl(l + 1)*dtmp 
+          sabs   = sabs   + Stl(l + 1)*DBLE(2*l + 1)
+          DO jindex = 1,MAXj(Nejc)
+            Stlj(l + 1,jindex) = Stlj(l + 1,jindex)*dtmp 
+            jsp = sjf(l,jindex,SEJc(Nejc)) 
+            sabsj = sabsj +  DBLE(2*jsp+1)*Stlj(l + 1,jindex)
+          ENDDO
+        ENDDO
+        xsabs  = coeff*sabs
+        xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
+
+        if(MAX_cc_mod.GT.0) THEN
+	    do nlev=1,MAX_cc_mod 
+            IF(STLcc(nlev)%lev==levtarg) 
+     &        STLcc(nlev)%tlj = STLcc(nlev)%tlj*dtmp
+          enddo  
+	  endif
         WRITE (8,
      &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
      &r '',F9.6/

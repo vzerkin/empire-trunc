@@ -1,6 +1,6 @@
-!cc   * $Rev: 4684 $
+!cc   * $Rev: 4708 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
+!cc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -897,10 +897,10 @@ C                    From n,np   to   n,d
                      iend = iend + 1
                      ENDf(nnuc) = 1
 C                    (n,np),(n,pn),(n,d)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(1,nnuc) = 1 
-                     ENDfp(2,nnuc) = 1 
-                     ENDfp(4,nnuc) = 1 
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(1,nnuc) = 1 
+C                    ENDfp(2,nnuc) = 1 
+C                    ENDfp(4,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.2 .and. (in.eq.1 .and. id.eq.1) ) THEN
@@ -951,8 +951,8 @@ C                    From n,2n2p   to   n,a
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
 C                    (n,a)
-                     ENDfp(0,nnuc) = 1 
-                     ENDfp(3,nnuc) = 1 
+C                    ENDfp(0,nnuc) = 1 
+C                    ENDfp(3,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN
@@ -2823,11 +2823,11 @@ C
                  WRITE (8,'(''  WARNING: excited state No. '',I3,
      &            '' has no parity '')') ilv
                ENDIF
-!                Assuming natural parity; for odd A it is assumed that
-!                l=INT(l+s)=INT(J) while J=l-s case is ignored
-                 LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
-                 IF (IOUT.GE.5) WRITE (8, 
-     &            '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
+!              Assuming natural parity; for odd A it is assumed that
+!              l=INT(l+s)=INT(J) while J=l-s case is ignored
+               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
+               IF (IOUT.GE.5) WRITE (8, 
+     &          '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
             ENDIF
 
             IF (ilv.NE.1) THEN
@@ -3838,7 +3838,8 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &             JCUtcoll+1
                ENDIF
             ENDIF
-     
+
+C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf     
             IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0) THEN 
               CN_isotropic = .TRUE.
               INTerf=0
@@ -8652,12 +8653,10 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-C
-            ! IF (val.GT.0) INTerf = 1
-C           WRITE (8,'('' EW transformation is in development'')')
-C           PAUSE 
-C    &       ' EW transformation in development, change INTerf to 0'
-C
+            IF (val.GT.0) INTerf = 1
+            WRITE (8,'('' EW transformation is in development'')')
+            PAUSE 
+     &  ' EW transformation in development, change INTerf to 0 in input'
             IF (INTerf.eq.0) 
      &        WRITE (8,'('' CN-direct interference neglected'')')
             IF (INTerf.eq.1) 
