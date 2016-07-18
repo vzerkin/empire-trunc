@@ -1,6 +1,6 @@
-! $Rev: 4468 $                                                         |
-! $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $                                                     
-! $Author: rcapote $                                                  
+! $Rev: 4704 $                                                         |
+! $Date: 2016-07-18 18:24:13 +0200 (Mo, 18 Jul 2016) $                                                     
+! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -3686,6 +3686,16 @@
          NE = NP2
          DO N=1,NE
             CALL RDLIST
+!
+!           NL is determined by the behavior of the Blatt-Biedenharn Zbar coefficients.  
+!           Inside each Zbar coefficient, there is a Racah coefficient
+!           and a Clebsh-Gordon coefficient.  The CG coefficient looks like this:
+!               ( l1 l2  L )
+!               (  0  0  0 )
+!           So, this means two things:  
+!               1. The CG coeff (and hence Zbar) will be zero if l1+l2+L=odd.
+!               2. The maximum value of L will be l1max+l2max.  Hence, NL=2*lmax.
+!
             IF(NPL.GE.2.AND.MOD(NPL,2).NE.0) THEN
                WRITE(EMESS,'(A,I3,A)')                                  &       
      &            'NL=',NPL,' SHOULD BE EVEN'
