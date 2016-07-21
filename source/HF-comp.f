@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4709 $
+Ccc   * $Rev: 4710 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-07-21 16:14:37 +0200 (Do, 21 Jul 2016) $
+Ccc   * $Date: 2016-07-21 16:22:08 +0200 (Do, 21 Jul 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -1966,7 +1966,10 @@ C--------FISSION CONTRIBUTION TO THE HAUSER-FESHBACH denominator
 
       ENDIF ! END OF COMPLETE OR PARTIAL DAMPING
 
- 890  IF(NINT(FISmod(nnuc)).EQ.0) DENhf = DENhf + Sumfis
+C     Now TUNEFI() considered for all discr. & cont. transitions
+ 890  Sumfis = Sumfis*TUNEfi(Nnuc)
+
+      IF(NINT(FISmod(nnuc)).EQ.0) DENhf = DENhf + Sumfis
 
 c-----WRITING FISSION OUTPUT
 
@@ -2060,7 +2063,8 @@ c-----iphas_opt=0 parabolic shape, iphas_opt=1 non-parabolic numerical shape
      &             ROFisp(i, JCC, ipa, Ibar)/(1.d0 + EXP(arg1))
         ENDDO
         TFCc = TFCc * DEStepp(Ibar)/3.
-        tfcon(ibar) = TFCc * TUNEfi(Nnuc)
+                            ! Now considered for all discr. & cont. transitions
+        tfcon(ibar) = TFCc  ! * TUNEfi(Nnuc)
       ENDDO
       RETURN
       END
