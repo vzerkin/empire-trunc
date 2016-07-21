@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4560 $
+Ccc   * $Rev: 4709 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
+Ccc   * $Date: 2016-07-21 16:14:37 +0200 (Do, 21 Jul 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -1844,14 +1844,22 @@ c-----continuum direct and indirect weights for surogate optical model
          IF(awf(iw).EQ.0.d0)THEN
             wdir(iw + 1) = 1.d0
          ELSE
-           barmin = ECDamp(iw)+ efb(iw)-vsh
 
-           wdir(iw + 1) = 1.d0*(Ee**2 - efb(NRhump + iw)**2) /
-     &                   ((barmin**2 - efb(NRhump + iw)**2)* 1.d0)/
-     &          dexp(- (Ee - barmin) / awf(iw))
+C          barmin = ECDamp(iw)+ efb(iw)-vsh
+           barmin = ECDamp(iw)+ efb(iw)
+csin=================================================================
+           vsh=0.65
+c          wdir(iw + 1) = 1.d0*(Ee**2 - efb(NRhump + iw)**2-0.5) /
+c    &                   ((barmin**2 - efb(NRhump + iw)**2)* 1.d0)/
+c    &          dexp(- (Ee - barmin) / awf(iw))
 c    &                   (1.d0 + dexp(- (Ee - barmin) / awf(iw))))
+           wdir(iw + 1) = 1.d0*(Ee**2 - (efb(NRhump + iw)-vsh)**2) /
+     &                 ((barmin**2 - (efb(NRhump + iw)-vsh)**2)* 1.d0)/
+     &          dexp(- (Ee - barmin) / awf(iw))
+
            IF(Ee.GE.barmin) wdir(iw + 1) = 1.d0
-           IF(Ee.LE.efb(NRhump + iw))wdir(iw + 1) = 0.d0
+           IF(Ee.LE.(efb(NRhump + iw)-vsh)) wdir(iw + 1) = 0.d0
+csin==============================================================
          ENDIF
       ENDDO
 c   

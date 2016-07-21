@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4560 $
+Ccc   * $Rev: 4709 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
+Ccc   * $Date: 2016-07-21 16:14:37 +0200 (Do, 21 Jul 2016) $
 
 C
       SUBROUTINE INPFIS(Nnuc)
@@ -1050,6 +1050,14 @@ C-----deformations at saddles and wells and matching points-----------
       DO k = 1, NRwel
          DEFfis(NRhump + k) = epsil(2 * k)
       ENDDO
+csin===========================================================
+      IF(NRBar.EQ.1)THEN
+         HO(1) = Hcont(1)
+         VJJ(1) = EFB(1)
+         epsil(1) = SQRT(vjj(1))/(smiu*ho(1)) + DEF(1,Nnuc)
+         DEFfis(1) = epsil(1)
+      ENDIF
+csin============================================================
       RETURN
       END
 C
