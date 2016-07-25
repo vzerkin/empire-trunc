@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-07-15 09:49:13 +0200 (Fr, 15 Jul 2016) $
+Ccc   * $Date: 2016-07-25 21:47:30 +0200 (Mo, 25 Jul 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -147,6 +147,8 @@ C-M        - Fix isomer production from inelastic scattering.
 C-M        - Increase precision for reading level energy of isomers
 C-M          (backward compatible).
 C-M  16/04 Fix bug in removing all-zero cross sections.
+C-M  16/07 Check dynamic range of angular distributioons and switch to
+C-M        tabular representation if needed.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -5034,6 +5036,19 @@ C...
 C* 
         IF(LHI.LE.LOMX+1) THEN
           READ (LIN,809) (RWO(L64+L),L=1,LHI)
+C*        -- Check the dynamic range of the distribution
+          SFOR=0
+          SBCK=1
+          SGN =1
+          DO L=1,LHI
+            SFOR=SFOR+RWO(L64+L)
+            SBCK=SFOR+RWO(L64+L)*SGN
+            SGN =-SGN
+          END DO
+          RNG =SBCK/SFOR
+C*        -- If dynamic range > 1e5, switch to tabular
+          IF(RNG.LT.1.E-5) GO TO 440
+C*        -- Legendre expansion is acceptable
           LHI=LHI-1
           RWO(L64)=0
           LVEC=LHI+2
