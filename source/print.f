@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4614 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-19 00:13:03 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4713 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-07-29 22:18:25 +0200 (Fr, 29 Jul 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -49,7 +49,7 @@ C
       ENDDO
 C
 C     Stringest test to avoid plotting problems.
-C     Cross sections smaller than 1.d-5 mb are not relevant at all.  
+C     Cross sections smaller than 1.d-10 mb are not relevant at all.
 C
       IF (csemax.LE.1.D-10 .or. kmax.eq.1) return
 
