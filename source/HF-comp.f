@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4710 $
+Ccc   * $Rev: 4714 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-07-21 16:22:08 +0200 (Do, 21 Jul 2016) $
+Ccc   * $Date: 2016-07-31 01:27:01 +0200 (So, 31 Jul 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -302,8 +302,8 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(Ief,Nejc,icsp,INExc(Nnur)) =
      &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt
-      ELSE
-         CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
+C     ELSE
+C        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
       ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
@@ -435,11 +435,12 @@ C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C
 C-----Contribution coming straight from the current decay
+C-----(ignore if residue is inclusive since summation already done in ACCUM)
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur))
      &       + Popt
-      ELSE
-         CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
+C     ELSE
+C        CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
       ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
