@@ -1,6 +1,6 @@
-!cc   * $Rev: 4708 $
+!cc   * $Rev: 4715 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
+!cc   * $Date: 2016-08-01 17:45:31 +0200 (Mo, 01 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -897,10 +897,10 @@ C                    From n,np   to   n,d
                      iend = iend + 1
                      ENDf(nnuc) = 1
 C                    (n,np),(n,pn),(n,d)
-C                    ENDfp(0,nnuc) = 1 
-C                    ENDfp(1,nnuc) = 1 
-C                    ENDfp(2,nnuc) = 1 
-C                    ENDfp(4,nnuc) = 1 
+                     ENDfp(0,nnuc) = 1 
+                     ENDfp(1,nnuc) = 1 
+                     ENDfp(2,nnuc) = 1 
+                     ENDfp(4,nnuc) = 1 
                   ENDIF
 
                   IF (mulem.eq.2 .and. (in.eq.1 .and. id.eq.1) ) THEN
@@ -8653,10 +8653,17 @@ C--------------------------------------------------------------------------
 
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
-            IF (val.GT.0) INTerf = 1
-            WRITE (8,'('' EW transformation is in development'')')
-            PAUSE 
-     &  ' EW transformation in development, change INTerf to 0 in input'
+            IF (val.GT.0) THEN
+	        IF(val.GE.2) THEN
+C               For development
+                INTerf = 1
+	        ELSE
+                WRITE (8,'('' EW transformation is in development'')')
+                PAUSE 
+     &   ' EW transformation in development and disabled, press any key'
+                INTerf = 0  
+              ENDIF  
+            ENDIF
             IF (INTerf.eq.0) 
      &        WRITE (8,'('' CN-direct interference neglected'')')
             IF (INTerf.eq.1) 
