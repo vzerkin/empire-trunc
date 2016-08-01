@@ -1,6 +1,6 @@
-!cc   * $Rev: 4715 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-01 17:45:31 +0200 (Mo, 01 Aug 2016) $
+!cc   * $Rev: 4718 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2016-08-01 17:55:15 +0200 (Mo, 01 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -202,8 +202,8 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.d0
             ATIlnor(nnuc) = 0.d0
             LDShif(Nnuc) = 0.d0
-            ROHfba(nnuc)  = 0.d0  
-            ROHfbp(nnuc)  = 0.d0  
+            ROHfba(nnuc)  = 0.d0
+            ROHfbp(nnuc)  = 0.d0
             ROHfba_off(nnuc)  = 0.d0  
             ROHfbp_off(nnuc)  = 0.d0  
             GTIlnor(nnuc) = 1.d0
@@ -711,8 +711,9 @@ C
             SYMbe(NDEJC) = SMAT(iz)
          ENDIF
 C--------cluster ejectile *** done ***
-
+C
 C--------ascribing location to each nucleus
+C
 C--------compound nucleus 1
          nnuc = 1
          A(1) = A(0) + AEJc(0)
@@ -730,7 +731,6 @@ C
          IF(iz. ge. 90 .and. iz. le. 98) then 
 C
 C          retrieving NUBAR if available for actinides (Th to Cf)
-C
 C          the NUBAR.DAT file is expected to be created by runE script
 C          before calling EMPIRE
 C
@@ -745,12 +745,11 @@ C          NUBarread = .TRUE.
 C
 C--------other decaying nuclei
 C
-C--------NNUcd number of decaying nuclei
-C--------NNUct total number of nuclei considered
-C
+C        NNUcd number of decaying nuclei
+C        NNUct total number of nuclei considered
          NEJcm = NDEJC
-         IF (ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0) SYMbe(0) = gamma
 C--------correct ejectiles symbols
+         IF (ZEJc(0).EQ.0.0D0 .AND. AEJc(0).EQ.0.0D0) SYMbe(0) = gamma
          DO nejc = 1, NEJcm
             IF (ZEJc(nejc).EQ.1.0D0 .AND. AEJc(nejc).EQ.2.0D0)
      &          SYMbe(nejc) = deut
@@ -760,11 +759,13 @@ C--------correct ejectiles symbols
      &          SYMbe(nejc) = he3
          ENDDO
 C
-C        Please note that the order in which the array IZA(nnuc) is filled is
+C        Note that the order in which the array IZA(nnuc) is filled is
 C        quite important.
 C
+C--------Set default inclusive/exclusive flag ENDFp to 0 for all nuclei and ejectiles
          ENDFp = 0
 C
+C--------Major set of DO loops over ejectiles for setting up residual nuclei
          DO iac = 0, NEMc
          DO ih = 0, nemh
          DO it = 0, nemt
