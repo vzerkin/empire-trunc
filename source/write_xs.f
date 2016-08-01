@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4621 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-03-19 19:32:07 +0100 (Sa, 19 Mär 2016) $
+Ccc   * $Rev: 4716 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-01 17:46:17 +0200 (Mo, 01 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -132,20 +132,20 @@ C------------------(continuum part - same for all particles)
                 gexclus = 1.d0
                 CSnp = 0.d0
                 IF(ENDfp(nejc,nnuc).EQ.1 .and. nejc.eq.0) THEN
-                  IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
-     &               NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
-                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
-                    IF(POPcs(0,INExc(nnuc)).gt.0.d0) THEN
-                      gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
-                    ELSE
-                      ginclus = 0.d0
-                      gexclus = 1.d0
-                    ENDIF
-                    if(ginclus.LE.CSMinim) THEN
-                      ginclus = 0.d0
-                      gexclus = 1.d0
-                    endif
-                  ENDIF  
+C                 IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
+C    &               NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
+C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
+C                   IF(POPcs(0,INExc(nnuc)).gt.0.d0) THEN
+C                     gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
+C                   ELSE
+C                     ginclus = 0.d0
+C                     gexclus = 1.d0
+C                   ENDIF
+C                   if(ginclus.LE.CSMinim) THEN
+C                     ginclus = 0.d0
+C                     gexclus = 1.d0
+C                   endif
+C                 ENDIF  
 C                 IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
 C    &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
 C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(5)
@@ -156,11 +156,11 @@ C    &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
 C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(6)
 C                   gexclus = CSGinc(6)/POPcs(0,INExc(nnuc))
 C                 ENDIF  
-                  IF(NINT(A(1))-NINT(A(nnuc)).eq.4 .and. 
-     &               NINT(Z(1))-NINT(Z(nnuc)).eq.2) THEN ! he-4
-                    ginclus = POPcs(0,INExc(nnuc)) - CSGinc(3)
-                    gexclus = CSGinc(3)/POPcs(0,INExc(nnuc))
-                  ENDIF  
+C                 IF(NINT(A(1))-NINT(A(nnuc)).eq.4 .and. 
+C    &               NINT(Z(1))-NINT(Z(nnuc)).eq.2) THEN ! he-4
+C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(3)
+C                   gexclus = CSGinc(3)/POPcs(0,INExc(nnuc))
+C                 ENDIF  
 
                   ftmp = 0.d0
                   IF(ginclus.gt.0) THEN
@@ -457,115 +457,6 @@ C                  write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
 C                  write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
 C                  write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
 C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
-                              
-                   IF(NINT(A(1)-A(nnuc)).eq.2 .and. ! gammas 
-     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! from deuteron residual 
-C
-C                     To split gamma spectra in (z,d) and (z,np+pn)
-C
-C                     First, gammas from (z,np+pn) 
-                      emax_np  = EMAx(MT91) -Q(2,MT91)
-                      nspec_np = min(INT(emax_np/DE) + 1,NDECSE-1)
-
-                      dtmp = 0.d0          
-                      DO ie = 1, nspec_np +1 !       
-                        dtmp = dtmp + CSEnp(ie)
-                      ENDDO
-                      if(dtmp.gt.0.d0) then
-                        WRITE (12,*) ' '
-                        WRITE (12,*) ' Spectrum of ', cejectile,
-     &                       '(z,np)               ', ' ZAP= ', iizaejc
-                        WRITE (12,*) ' '
-                        WRITE (12,'(''    Energy    mb/MeV'')')
-                        WRITE (12,*) ' '
-                        dtmp =0.d0          
-                        esum =0.d0          
-                        DO ie = 1, nspec_np +1 !       
-                          htmp = CSEnp(ie)  ! POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
-                          if(htmp.LE.0.d0) cycle
-                          itmp = 1
-                          if(ie.eq.1) itmp = 2
-                          dtmp = dtmp + htmp*DE/itmp
-                          WRITE (12,'(F10.6,E14.5)') FLOAT(ie-1)*DE,htmp
-                        ENDDO
-                        WRITE (12,'(F10.6,E14.5)') 
-     &                      min(emax_np,FLOAT(nspec_np+1)*DE), 0.d0
-                        csnp = dtmp
-                        WRITE(12,*) 
-                        WRITE(12,'(2x,'' g multiplicity (np)  '',
-     &                     G12.6)') dtmp/CSPrd(nnuc)
-                        WRITE(12,*) 
-                        WRITE(12,'(2x,
-     &                      ''Total Integr.(gamma)np'',G12.6,'' mb'' )') 
-     &                      csnp
-                      ENDIF ! dtmp>0
-
-C                     Second, remaining gammas from (z,d) 
-                      dtmp = 0.d0          
-                      DO ie = 1, nspec +1 
-                        dtmp = dtmp + POPcse(0,nejc,ie,INExc(nnuc))
-                      ENDDO
-                      if(dtmp.gt.0.d0) then
-                        WRITE (12,*) ' '
-                        WRITE (12,*) ' Spectrum of ', cejectile,
-     &                         REAction(nnuc), ' ZAP= ', iizaejc
-                        nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-                        WRITE (12,*) ' '
-                        WRITE (12,'(''    Energy    mb/MeV             (
-     &z,np)       (z,np+pn+d)'')')
-                        WRITE (12,*) ' '
-                        dtmp =0.d0          
-                        esum =0.d0 
-                        iemm = 1         
-                        DO ie = 1, nspec + 1        
-                          htmp = POPcse(0,nejc,ie,INExc(nnuc))-CSEnp(ie)
-                          if(htmp.LE.0.d0) cycle
-                          iemm = ie - 1
-                          itmp = 1
-                          if(ie.eq.1) itmp = 2
-                          dtmp = dtmp + htmp*DE/itmp
-                          esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
-                          WRITE (12,'(F10.6,E14.5,2x,E14.5,2x,E14.5)') 
-     &                      FLOAT(ie - 1)*DE,htmp,
-     &                      CSEnp(ie),POPcse(0,nejc,ie,INExc(nnuc))
-                        ENDDO
-C                       A different way of calculating the Q-value using the 
-C                       residual and ejectile
-C    &                  min((EMAx(nnur)-Q(nejc,nnur))/recorp,
-                        WRITE (12,'(F10.6,E14.5,2x,E14.5,2x,E14.5)') 
-     &                   min(EMAx(nnuc),FLOAT(iemm+1)*DE),0.d0,0.d0,0.d0  
-                        WRITE(12,*) 
-                        WRITE(12,'(2x,
-     &                  ''Ave.  E   g cont.spec '',G12.6,'' MeV  for '',
-     &                    I3,''-'',A2,''-'',I3,A21)') esum/dtmp,
-     &                    INT(Z(nnuc)),SYMb(nnuc),
-     &                    INT(A(nnuc)),REAction(nnuc) 
-                        cmul = dtmp/CSPrd(nnuc)
-                        WRITE(12,'(2x,
-     &                    ''Ave.  Q   g cont.spec '',G12.6,'' MeV'')') 
-     &                    cmul*esum/dtmp  
-                       WRITE(12,'(2x,'' g multiplicity (d)   '',G12.6)') 
-     &                    cmul
-
-                        WRITE(12,*) 
-                        WRITE(12,'(2x,
-     &                    ''Total Integr.(gamma)np'',G12.6,'' mb'' )') 
-     &                    csnp 
-                        WRITE(12,'(2x,
-     &                    ''Total Integr.(gamma)d '',G12.6,'' mb'' )') 
-     &                    dtmp 
-                        WRITE(12,'(2x,
-     &                    ''Total Integr.(gamma)  '',G12.6,'' mb'' )') 
-     &                    csnp+dtmp 
-                        WRITE(12,'(2x,
-     &                    ''Popul. cross section  '',G12.6,'' mb'' )') 
-     &                    POPcs(nejc,INExc(nnuc))
-
-                      endif ! dtmp > 0
-
-                      GOTO 1515 ! skipping other gammas for this reaction
-
-                   ENDIF 
 
                    dtmp =0.d0          
                    DO ie = 1, nspec  !       
