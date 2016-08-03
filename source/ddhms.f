@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4697 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-07-13 22:34:07 +0200 (Mi, 13 Jul 2016) $
+Ccc   * $Rev: 4720 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-03 21:38:43 +0200 (Mi, 03 Aug 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4697 $
-C $Id: ddhms.f 4697 2016-07-13 20:34:07Z mherman $
+C CVS Version Management $Revision: 4720 $
+C $Id: ddhms.f 4720 2016-08-03 19:38:43Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2478,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4697 $')
+99005 FORMAT ('  xddhms version: $Revision: 4720 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4697 2016-07-13 20:34:07Z mherman $')
+99010 FORMAT ('  $Id: ddhms.f 4720 2016-08-03 19:38:43Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5950,7 +5950,7 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
       nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
       DO ne = 1, nspec
          CSEhms(ne,1,0) = DXSn(ne-1)
-         CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
+C         CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
 
          CSEahms(ne,1,1) = DDXsn(ne-1,1)
          csfit(NDAnghms) = DDXsn(ne-1,1)
@@ -6036,7 +6036,7 @@ C      CSEmis(2,0) = CSEmis(2,0) + XSP0
       nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
       DO ne = 1, nspec
          CSEhms(ne,2,0) = DXSp(ne-1)
-         CSE(ne,2,0) = CSE(ne,2,0) + DXSp(ne-1)
+C         CSE(ne,2,0) = CSE(ne,2,0) + DXSp(ne-1)
 
 C        DO na = 1, NDAnghms
 C          CSEahms(ne,na,2) = DDXsp(ne-1,na)

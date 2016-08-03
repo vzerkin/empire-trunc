@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4719 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-02 23:29:23 +0200 (Di, 02 Aug 2016) $
+Ccc   * $Rev: 4720 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-03 21:38:43 +0200 (Mi, 03 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -302,8 +302,8 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(Ief,Nejc,icsp,INExc(Nnur)) =
      &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt  !adding Popt to population spectra in residue
-C     ELSE
-C        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
+      ELSE
+        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
       ENDIF
 C-----
 C-----Contribution due to feeding spectra from Nnuc
@@ -443,8 +443,8 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(0,Nejc,Ie,INExc(Nnur)) = POPcse(0,Nejc,Ie,INExc(Nnur))
      &       + Popt
-C     ELSE
-C        CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
+      ELSE
+        CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
       ENDIF
 C-----Contribution due to feeding spectra from Nnuc
 C-----DE spectra
