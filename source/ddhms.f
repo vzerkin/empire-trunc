@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4722 $
+Ccc   * $Rev: 4724 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-06 20:34:59 +0200 (Sa, 06 Aug 2016) $
+Ccc   * $Date: 2016-08-06 22:43:44 +0200 (Sa, 06 Aug 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4722 $
-C $Id: ddhms.f 4722 2016-08-06 18:34:59Z bcarlson $
+C CVS Version Management $Revision: 4724 $
+C $Id: ddhms.f 4724 2016-08-06 20:43:44Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2478,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4722 $')
+99005 FORMAT ('  xddhms version: $Revision: 4724 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4722 2016-08-06 18:34:59Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4724 2016-08-06 20:43:44Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5950,6 +5950,8 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
       nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
       DO ne = 1, nspec
          CSEhms(ne,1,0) = DXSn(ne-1)
+         CSEmsd(ne,1) = CSEmsd(ne,1) + DXSn(ne-1)
+C         CSEmsd(ne,1) = CSEmsd(ne,1) + DXSnx(ne-1,0,0)
 C         CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
 
          CSEahms(ne,1,1) = DDXsn(ne-1,1)
@@ -6036,6 +6038,8 @@ C      CSEmis(2,0) = CSEmis(2,0) + XSP0
       nspec = min(INT(EMAx(nnur)/DE) + 1,NDECSE)
       DO ne = 1, nspec
          CSEhms(ne,2,0) = DXSp(ne-1)
+         CSEmsd(ne,2) = CSEmsd(ne,2) + DXSp(ne-1)
+C         CSEmsd(ne,2) = CSEmsd(ne,2) + DXSpx(ne-1,0,0)
 C         CSE(ne,2,0) = CSE(ne,2,0) + DXSp(ne-1)
 
 C        DO na = 1, NDAnghms
@@ -6581,6 +6585,7 @@ c               chk=chk+DXSpx(ne-1,jz,jn)
                pops = DXSpx(ne-1,jz,jn)
                IF(ne.EQ.1 .OR. ne.EQ.nspecc) pops = 2*pops
                CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + pops
+
                DO nu = 1, nspecc-ne+1
                  nux = nu+ndspc-1
                  pops =  DXSpex(nux,ne-1,Inxr)*DE
