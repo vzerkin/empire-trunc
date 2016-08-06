@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4713 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-07-29 22:18:25 +0200 (Fr, 29 Jul 2016) $
+Ccc   * $Rev: 4723 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-06 20:37:53 +0200 (Sa, 06 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -235,7 +235,7 @@ C
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
-           if(ftmp.le.0.d0) cycle
+C           if(ftmp.le.0.d0) cycle
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
@@ -299,15 +299,21 @@ C        ENDIF
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
-           if(ftmp.le.0.d0) cycle
-           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
+           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+     &         ftmp = ftmp + CSEmsd(i,nejc) + CSEdbk(i,nejc)
+           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
+C           if(ftmp.le.0.d0) cycle
+C           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
          ENDDO
 C--------Exact endpoint
 C        WRITE (8,'(F9.4,E15.5)') 
 C    &     FLOAT(nspec)*DE/recorp, max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
          WRITE (8,'(F9.4,E15.5)') 
-     &     min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
-     &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
+     &     min((EMAx(1)-Q(Nejc,1)),FLOAT(nspec)*DE),
+     &     max(0.d0,CSE(nspec+1,Nejc,0))
+C         WRITE (8,'(F9.4,E15.5)') 
+C     &     min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+C     &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
          WRITE(8,*) 
          WRITE(8,'(2x,
      &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
