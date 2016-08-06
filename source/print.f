@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4723 $
+Ccc   * $Rev: 4725 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-06 20:37:53 +0200 (Sa, 06 Aug 2016) $
+Ccc   * $Date: 2016-08-06 22:44:54 +0200 (Sa, 06 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -214,8 +214,8 @@ C
         if(ftmp.le.0.d0) cycle
         itmp = 1
         if(i.eq.1 .or. i.eq.kmax) itmp = 2
-        IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-     &         totspec = totspec + CSEmsd(i,nejc)/itmp + CSEdbk(i,nejc)
+        IF(ENDF(1).EQ.0)
+     &         ftmp = ftmp + CSEmsd(i,nejc) + CSEdbk(i,nejc)
         totspec  = totspec  + ftmp/itmp 
         esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
@@ -299,7 +299,8 @@ C        ENDIF
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
-           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+           IF(ENDF(1).EQ.0) 
      &         ftmp = ftmp + CSEmsd(i,nejc) + CSEdbk(i,nejc)
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
 C           if(ftmp.le.0.d0) cycle
