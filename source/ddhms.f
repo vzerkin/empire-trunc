@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4720 $
+Ccc   * $Rev: 4722 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-03 21:38:43 +0200 (Mi, 03 Aug 2016) $
+Ccc   * $Date: 2016-08-06 20:34:59 +0200 (Sa, 06 Aug 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4720 $
-C $Id: ddhms.f 4720 2016-08-03 19:38:43Z bcarlson $
+C CVS Version Management $Revision: 4722 $
+C $Id: ddhms.f 4722 2016-08-06 18:34:59Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2478,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4720 $')
+99005 FORMAT ('  xddhms version: $Revision: 4722 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4720 2016-08-03 19:38:43Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4722 2016-08-06 18:34:59Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -6164,7 +6164,7 @@ c             chkpop = 0.0d0
 c             chkpopd = 0.0d0
 c             Inxr = matex(jz,jn+1)
              Inxr=INExc(nnur)
-             IF(Inxr.EQ.0) CYCLE
+             IF(Inxr.EQ.0) GO TO 100
 c             If(Inxr.EQ.0) then
 c               write(*,*) 'n: ',jz,jn,nnur,nspec,nspecc
 c               stop
@@ -6465,7 +6465,7 @@ c     &            chkpop*DE,chkpopd*DE,PI_g*chkpopa*DE,PI_g*chkpopda*DE
 C
 C-----transfer exclusive proton CM spectrum
 C
-          CALL WHERE(izar-1001,nnur,iloc)
+ 100     CALL WHERE(izar-1001,nnur,iloc)
           IF(iloc .EQ. 0 .AND. XSPx(jz,jn) .GT. 1.0d-6) THEN
            CSHms(2,nnuc) =  XSPx(jz,jn)
            CSEmis(2,nnuc) = CSEmis(2,nnuc) + XSPx(jz,jn)
