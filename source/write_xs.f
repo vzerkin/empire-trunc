@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4716 $
+Ccc   * $Rev: 4721 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-01 17:46:17 +0200 (Mo, 01 Aug 2016) $
+Ccc   * $Date: 2016-08-06 12:28:46 +0200 (Sa, 06 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -18,11 +18,11 @@ C
       DOUBLE PRECISION eincid
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc,itmp
-      INTEGER nspec_np,iemm,iprn
-      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver,csnp,emax_np
-      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1,ginclus,gexclus
+      INTEGER iemm,iprn
+      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver
+      DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
-      DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:),csenp(:)
+      DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
       if(allocated(cseaprnt)) deallocate(cseaprnt)
  
@@ -46,18 +46,6 @@ C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
      &            'ERROR: Insufficient memory for check_DE: write_xs()!'
         STOP
      &            'ERROR: Insufficient memory for check_DE: write_xs()!'
-      ENDIF
-
-      if(allocated(csenp)) deallocate(csenp)
-
-      ALLOCATE(csenp(ndecse),STAT=myalloc)
-      IF(myalloc.NE.0) THEN
-        WRITE(8,*)  
-     &            'ERROR: Insufficient memory for csenp: write_xs()!'
-        WRITE(12,*) 
-     &            'ERROR: Insufficient memory for csenp: write_xs()!'
-        STOP
-     &            'ERROR: Insufficient memory for csenp: write_xs()!'
       ENDIF
 C
 C-----Write a row in the table of cross sections (Note: inelastic has CN elastic subtracted)
@@ -100,8 +88,6 @@ C           write(*,*)
 C        ENDIF 
 C     ENDDO
 
-      csnp = 0.d0
-      csenp = 0.d0
       eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -118,7 +104,7 @@ C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
      >              EINl.GT.1.d0 ) CYCLE
 C 
                 IF(ENDfp(nejc,nnuc).NE.1) THEN
-C                  To add spectra to inclusive
+C                  To add ENDF() exclusive spectra to inclusive
                    nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
 C------------------(continuum part - same for all particles)
                    DO ie = 1, nspec + 1 
@@ -126,73 +112,6 @@ C------------------(continuum part - same for all particles)
      &                                POPcse(0,nejc,ie,INExc(nnuc))
                    ENDDO 
                    CYCLE
-                ENDIF
-
-                ginclus = 0.d0
-                gexclus = 1.d0
-                CSnp = 0.d0
-                IF(ENDfp(nejc,nnuc).EQ.1 .and. nejc.eq.0) THEN
-C                 IF(NINT(A(1))-NINT(A(nnuc)).eq.2 .and. 
-C    &               NINT(Z(1))-NINT(Z(nnuc)).eq.1) THEN ! deuteron
-C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(4)
-C                   IF(POPcs(0,INExc(nnuc)).gt.0.d0) THEN
-C                     gexclus = CSGinc(4)/POPcs(0,INExc(nnuc))
-C                   ELSE
-C                     ginclus = 0.d0
-C                     gexclus = 1.d0
-C                   ENDIF
-C                   if(ginclus.LE.CSMinim) THEN
-C                     ginclus = 0.d0
-C                     gexclus = 1.d0
-C                   endif
-C                 ENDIF  
-C                 IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
-C    &              NINT(Z(1)-Z(nnuc)).eq.1) THEN ! triton
-C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(5)
-C                   gexclus = CSGinc(5)/POPcs(0,INExc(nnuc))
-C                 ENDIF  
-C                 IF(NINT(A(1)-A(nnuc)).eq.3 .and. 
-C    &              NINT(Z(1)-Z(nnuc)).eq.2) THEN ! he-3
-C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(6)
-C                   gexclus = CSGinc(6)/POPcs(0,INExc(nnuc))
-C                 ENDIF  
-C                 IF(NINT(A(1))-NINT(A(nnuc)).eq.4 .and. 
-C    &               NINT(Z(1))-NINT(Z(nnuc)).eq.2) THEN ! he-4
-C                   ginclus = POPcs(0,INExc(nnuc)) - CSGinc(3)
-C                   gexclus = CSGinc(3)/POPcs(0,INExc(nnuc))
-C                 ENDIF  
-
-                  ftmp = 0.d0
-                  IF(ginclus.gt.0) THEN
-                    IF(NINT(A(1)-A(nnuc)).eq.2 .and. 
-     &                NINT(Z(1)-Z(nnuc)).eq.1) THEN ! deuteron
-C                     To split gamma spectra in (z,d) and (z,np+pn)
-                      nspec    = min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-                      nspec_np = 
-     &                 min(INT((EMAx(MT91) -Q(2,MT91))/DE) + 1,NDECSE-1)
-C                     write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
-C                     write(*,*) 'Emaxd=',EMAx(1)-Q(4,1)
-C                     write(*,*) 'Emaxpn=',EMAx(MT649)-Q(1,MT649)
-C                     write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)                          
-
-C---------------------(continuum part - same for all particles)
-                      ftmp = ginclus/POPcs(0,INExc(nnuc))
-C                     write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
-                      DO ie = 1, nspec_np
-                        CSEnp(ie) =  POPcse(0,nejc,ie,INExc(nnuc))*ftmp
-                      ENDDO 
-                    ELSE
-C                     To add partial gamma spectra to inclusive
-                      nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-C---------------------(continuum part - same for all particles)
-                      ftmp = ginclus/POPcs(0,INExc(nnuc))
-C                     write(*,*) nejc,nnuc,ginclus,POPcs(0,INExc(nnuc))
-                      DO ie = 1, nspec + 1 
-                         CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
-     &                               POPcse(0,nejc,ie,INExc(nnuc))*ftmp
-                      ENDDO 
-                    ENDIF
-                  ENDIF
                 ENDIF
 C 
 C               nnur is the decaying compound: nnur = nnuc + nejc
@@ -460,7 +379,7 @@ C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
 
                    dtmp =0.d0          
                    DO ie = 1, nspec  !       
-                     htmp = POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
+                     htmp = POPcse(0,nejc,ie,INExc(nnuc))     
                      if(htmp.LE.0.d0) cycle
                      itmp = 1
                      if(ie.eq.1) itmp = 2
@@ -476,14 +395,14 @@ C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
                      WRITE (12,*) ' '
                      esum =0.d0          
                      iemm = 1         
-                     DO ie = 1, nspec  !       
-                       htmp = POPcse(0,nejc,ie,INExc(nnuc))*gexclus          
+                     DO ie = 1, nspec         
+                       htmp = POPcse(0,nejc,ie,INExc(nnuc))          
                        if(htmp.LE.0.d0) cycle
                        iemm = ie -1
                        itmp = 1
                        if(ie.eq.1) itmp = 2
-                       esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE
-                       WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DE, htmp
+                       esum = esum + htmp*DE/itmp*FLOAT(iemm)*DE
+                       WRITE (12,'(F10.6,E14.5)') FLOAT(iemm)*DE, htmp
                      ENDDO
 C                    WRITE (12,'(F10.6,E14.5)') EMAx(nnuc), 0.d0
                      WRITE (12,'(F10.6,E14.5)') 
@@ -491,7 +410,7 @@ C                    A different way of calculating the Q-value using the
 C                    residual and ejectile
 C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
      &               min(EMAx(nnuc),FLOAT(iemm+1)*DE),
-     &               POPcse(0,nejc,nspec+1,INExc(nnuc))*gexclus
+     &               POPcse(0,nejc,nspec+1,INExc(nnuc))
                      WRITE(12,*) 
                      WRITE(12,'(2x,
      &                 ''Ave.  E   g cont.spec '',G12.6,'' MeV  for '',
@@ -518,7 +437,7 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
      &                  dtmp 
                      WRITE(12,'(2x,
      &                  ''Popul. cross section  '',G12.6,'' mb'' )') 
-     &                  POPcs(nejc,INExc(nnuc))*gexclus
+     &                  POPcs(nejc,INExc(nnuc))
 
                    endif ! dtmp>0
  1515              WRITE(12,*) 
@@ -575,7 +494,6 @@ C********************************************
 
       if(allocated(cseaprnt)) deallocate(cseaprnt)
       if(allocated(check_DE)) deallocate(check_DE)
-      if(allocated(CSEnp)) deallocate(CSEnp)
 
 C********************************************
       CALL print_PFNS()
