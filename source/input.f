@@ -1,6 +1,6 @@
-!cc   * $Rev: 4718 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2016-08-01 17:55:15 +0200 (Mo, 01 Aug 2016) $
+!cc   * $Rev: 4727 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2016-08-09 00:28:38 +0200 (Di, 09 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -549,7 +549,7 @@ C--------begin GDR
 C        Default values for keys (Key_shape, Key_GDRGFL) to set
 C        shape of E1 strength function and GDR parameters
          KEY_shape = 1   ! MLO1 RIPL-2
-         KEY_gdrgfl = 1  ! GDR parameters of RIPL introduced
+         KEY_gdrgfl = 1  ! GDR parameters are set as default
          KEYinput = 0
          KZZ1 = 0
          KAA1 = 0
@@ -1192,7 +1192,7 @@ C           ENDDO
 C           pause
 C
 C           Disabling all exclusive conversion to inclusive (testing)
-C           ENDfp = 0
+            ENDfp = 1
 C
 C           Create list of exclusive nuclei
 C
@@ -4482,7 +4482,17 @@ C-----
 C--------CCFUS input  ** done ***
 C-----
          IF (name.EQ.'GDRGFL') THEN
-            Key_GDRGFL = val + 0.001
+	      IF(val.LE.0.1d0) THEN
+              WRITE(8,'('' WARNING: Messina GDR systematics should be ad
+     &apted to RIPL'')')
+              WRITE(8,'('' RIPL GDR data used instead'')')
+              WRITE(12,'('' WARNING: Messina GDR systematics should be a
+     &dapted to RIPL'')')
+              WRITE(12,'('' RIPL GDR data used instead'')')
+              Key_GDRGFL = 1
+            ELSE
+              Key_GDRGFL = val + 0.001
+            ENDIF
             GOTO 100
          ENDIF
 C        Key_GDRGFL = 0 and Key_shape =0 -  Messina systematics
@@ -12125,6 +12135,13 @@ C              NG = NNG(i)
                E(2) = HE2(i)
                G(2) = HGW2(i)
                S(2) = HCS2(i)  
+
+C              write(*,*) kz, ka, ' RIPL EXP'	  
+C              write(*,*) E(1),E(2)
+C	         write(*,*) G(1),G(2)
+C	         write(*,*) S(1),S(2)
+C              write(*,*) 
+
 C--------------Plujko_new-2005
                IF(Key_shape.NE.5) RETURN 
                GOTO 900
@@ -12157,6 +12174,13 @@ C--------------(classical sum rule with correction)
                ENDIF
                S(1) = CS1      
                S(2) = CS2      
+
+C              write(*,*) kz, ka, ' Goriely'	  
+C              write(*,*) E(1),E(2)
+C	         write(*,*) G(1),G(2)
+C	         write(*,*) S(1),S(2)
+C              write(*,*) 
+
 C--------------Plujko_new-2005
                IF(Key_shape.NE.5) RETURN
                GOTO 900
@@ -12211,7 +12235,13 @@ C        NG = 1
       S(1) = CS1   
       E(2) = EG2
       G(2) = GW2
-      S(2) = CS2   
+      S(2) = CS2 
+C     write(*,*) kz, ka, ' Global systematics'	  
+C     write(*,*) E(1),E(2)
+C     write(*,*) G(1),G(2)
+C     write(*,*) S(1),S(2)
+C     write(*,*) 
+C
 C-----Plujko_new-2005
       IF(Key_shape.NE.5)RETURN
 C-----Setting the GFL parameters '|beta|' from "defeff.dat"
