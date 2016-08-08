@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4728 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-09 00:29:09 +0200 (Di, 09 Aug 2016) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -177,26 +177,36 @@ C
       WRITE (8,*) ' -----------------------------------------'
       IF(Key_GDRGFL.EQ.0 .and. Key_shape.EQ.0) 
      &  WRITE (8,*) ' GDR parameters from Messina systematics'
+
       IF(Key_GDRGFL.GE.0 .and. Key_shape.GT.0) 
      &  WRITE (8,*) ' GDR parameters from RIPL database'
+
       WRITE (8,*) ' -----------------------------------------'
       WRITE (8,99006) nint(Z(Nnuc)),SYMb(Nnuc), nint(A(Nnuc)) 
-99006 FORMAT(1X,' Gamma transitions parameters of ',
-     &   i3,1H-,A2,1H-,i3,// 10X,'E1 ',11X, 'E2 ',11X,'M1 ') 
-      WRITE (8,99010)  
-     &   GDRpar(7,Nnuc), GQRpar(7,Nnuc), GMRpar(7,Nnuc),
-     &   GDRpar(8,Nnuc), GQRpar(8,Nnuc), GMRpar(8,Nnuc),
-     &   GDRpar(1,Nnuc), GQRpar(1,Nnuc), GMRpar(1,Nnuc)
-99010    FORMAT (2X,'TE',7X,F4.2,2(9X,F4.2),/,2X,'CE ',4X,F7.3,
-     &           2(6X,F7.3),/,2X,'E1 ',4X,F6.2,2(7X,F6.2))
-      WRITE (8,99015) GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
+99006 FORMAT(1X,' Gamma transitions parameters of ',i3,1H-,A2,1H-,i3,//,
+     &       1X,'Multip->',2x,'E1 ',11X, 'E2 ',11X,'M1 ') 
+
+      WRITE (8,99015) GDRpar(1,Nnuc), GQRpar(1,Nnuc), GMRpar(1,Nnuc),
+     &                GDRpar(2,Nnuc), GQRpar(2,Nnuc), GMRpar(2,Nnuc), 
      &                GDRpar(3,Nnuc), GQRpar(3,Nnuc), GMRpar(3,Nnuc)
-99015 FORMAT(2X,'W1 ',4X,F6.2,2(7X,F6.2),/,2X,'D1',1X,F10.2,2(3X,F10.2))
-      WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
-99020 FORMAT (2X,'E2 ',4X,F6.2,/,2X,'W2 ',4X,F6.2,/,2X,'D2 ',F10.2)
+
+99015 FORMAT(2X,'Er1 ',3X,F6.2,2(7X,F6.2),/,
+     &       2X,'Wr1 ',3X,F6.2,2(7X,F6.2),/,2X,'Sr1',F10.2,2(3X,F10.2))
+
+	IF(GDRpar(6,Nnuc).GT.0) 
+     &  WRITE (8,99020) GDRpar(4,Nnuc), GDRpar(5,Nnuc), GDRpar(6,Nnuc)
+99020 FORMAT (2X,'Er2 ',3X,F6.2,/,2X,'Wr2 ',3X,F6.2,/,2X,'Sr2 ',F10.2)
+
       IF(Key_shape.EQ.5) 
      &  WRITE (8,99021) GDRpar(9,Nnuc), GDRpar(10,Nnuc)
 99021 FORMAT (2X,'beta',3X,F6.3,/,2X,'S2+',4X,F6.3)
+
+      WRITE (8,99022)  
+     &   GDRpar(7,Nnuc), GQRpar(7,Nnuc), GMRpar(7,Nnuc),
+     &   GDRpar(8,Nnuc), GQRpar(8,Nnuc), GMRpar(8,Nnuc)
+99022    FORMAT (/2X,'TE',7X,F4.2,2(9X,F4.2),/,2X,'CE ',3X,F7.3,
+     &           2(6X,F7.3))
+
       WRITE (8,99025)
 99025 FORMAT(1X,/,2X,'(1-TE)*Weiss. + TE*GiR (i=D,Q,M) D=E1; Q=E2; M=M1'
      &  ,1X,/,2X,
@@ -453,13 +463,13 @@ C     Restoring the Weiskopf estimate for RIPL GDR parameterization (TE1<1)
          RETURN
       ENDIF
 
-C-----setting T=0 below removes non-zero limit in generalized Lorenzian
-C     T=0
-C-----GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
-      gred = (ed + 39.478351*T**2)/ED1
       gdr = 0.d0
+      IF (TE1.NE.0 .AND. ED1.GT.0) THEN
+C--------setting T=0 below removes non-zero limit in generalized Lorenzian
+C        T=0
+C--------GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
+         gred = (ed + 39.478351*T**2)/ED1
 
-      IF (TE1.NE.0.0D0) THEN
          gdr = D1*ed*ed*gred/((ed - ED1)**2 + W1*gred**2*ed)
      &         + 0.7*D1*39.478351*T**2*ed*Eg/ED1/ED1/SQRT(ED1)
 C-----setting GRED=1 removes energy dependence of the width
