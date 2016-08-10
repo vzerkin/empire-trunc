@@ -1,6 +1,6 @@
-!cc   * $Rev: 4729 $
+!cc   * $Rev: 4730 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-09 18:32:45 +0200 (Di, 09 Aug 2016) $
+!cc   * $Date: 2016-08-10 23:54:02 +0200 (Mi, 10 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -10191,6 +10191,11 @@ C
       sheor=0.7*sgor
       egrcoll(3,2)=115.*A(0)**(-1./3.)
       ggrcoll(3,2)=9.3-A(0)/48.
+
+      betagmr=0.d0
+      betagqr=0.d0
+      betalegor=0.d0
+      betahegor=0.d0
 
       DEFormed = .FALSE.
       IF (ABS(DEF(1,0)).GT.0.1) DEFormed = .TRUE.
