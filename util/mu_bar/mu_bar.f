@@ -9,6 +9,7 @@ C-V  2014/02  Unify ENDF IO routines with EMPEND
 C-V  2016/06  Fix bug when MF4 is the last on file.
 C-V           Fix processing when tabular CM distribution grid is
 C-V           sparse.
+C-V  2016/08  If no MF4, copy to output as is.
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -393,7 +394,9 @@ C* All ENDF material processed - insert mu-bar into the ENDF file
   200 MON=-1
       IF(MUB.LE.0) THEN
         WRITE(LTT,*) 'MU-BAR ERROR - No ang.distrib.data found'
-        GO TO 902
+        REWIND LIN
+        CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
+        GO TO 280
       END IF
       CALL WRCONT(LTM,MON ,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       REWIND LIN
