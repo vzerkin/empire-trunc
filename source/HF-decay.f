@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4671 $
+Ccc   * $Rev: 4732 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-04-04 00:33:25 +0200 (Mo, 04 Apr 2016) $
+Ccc   * $Date: 2016-08-11 18:50:25 +0200 (Do, 11 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -927,7 +927,9 @@ C            Accumulating population cross sections
 C
              DO nejc = 0, NDEJC         !loop over ejectiles
                IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
-               IF(ENDfp(nejc,nnuc).EQ.1) THEN
+
+	         nnur = NREs(nejc)
+               IF(ENDf(nnuc).EQ.1) THEN
                  itmp = 1
 C                estimating multiplicity
                  IF (nejc.eq.1 .or. nejc.eq.2) 
