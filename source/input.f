@@ -1,6 +1,6 @@
-!cc   * $Rev: 4734 $
+!cc   * $Rev: 4735 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-12 23:28:00 +0200 (Fr, 12 Aug 2016) $
+!cc   * $Date: 2016-08-13 01:39:39 +0200 (Sa, 13 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -1192,7 +1192,7 @@ C           ENDDO
 C           pause
 C
 C           Disabling all exclusive conversion to inclusive (testing)
-            ENDfp = 1
+C           ENDfp = 1
 C
 C           Create list of exclusive nuclei
 C
