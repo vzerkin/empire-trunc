@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4725 $
+Ccc   * $Rev: 4733 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-06 22:44:54 +0200 (Sa, 06 Aug 2016) $
+Ccc   * $Date: 2016-08-12 16:04:56 +0200 (Fr, 12 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -415,7 +415,8 @@ C    &      FLOAT(nspec)*DE/recorp,
          DO ie = 1, nspec 
            htmp = CSE(ie,nejc,0)
            if(htmp.LE.0.d0) cycle
-           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+           IF(ENDF(1).EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
            itmp = 1
            if(ie.eq.1) itmp = 2
