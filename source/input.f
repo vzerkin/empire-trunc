@@ -1,6 +1,6 @@
-!cc   * $Rev: 4730 $
+!cc   * $Rev: 4734 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-10 23:54:02 +0200 (Mi, 10 Aug 2016) $
+!cc   * $Date: 2016-08-12 23:28:00 +0200 (Fr, 12 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -799,7 +799,7 @@ C                 (n,n),(n,2n),(n,3n),(n,4n)
                           ENDf(nnuc) = 1
                   endif
 C                 (n,p),(n,2p),(n,3p)
-                  if(ip.eq.mulem .and. ip.le.2) THEN
+                  if(ip.eq.mulem .and. ip.le.3) THEN
                           ENDfp(2,nnuc) = 1 
                           ENDfp(0,nnuc) = 1 
                           ENDf(nnuc) = 1
@@ -1156,8 +1156,8 @@ C
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               DO in = 0, 7    !NENdf
-                  DO ip = 0, 7 !NENdf 
+               DO in = 0, 2    ! NENdf
+                  DO ip = 0, 2 ! NENdf 
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
                      if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
@@ -1165,10 +1165,10 @@ C
                      CALL WHERE(izatmp,nnuc,iloc)
                      IF(iloc.EQ.0) THEN
                        ENDf (nnuc) = 1
-C                      if(in.eq.2 .and. ip.eq.2) THEN
-C                        ENDfp(3,nnuc) = 1  ! alphas
-C                        ENDfp(0,nnuc) = 1
-C                      endif
+                       if(in.eq.2 .and. ip.eq.2) THEN
+                         ENDfp(3,nnuc) = 1  ! alphas
+                         ENDfp(0,nnuc) = 1
+                       endif
 C                      if(in.eq.2 .and. ip.eq.1) THEN
 C                        ENDfp(5,nnuc) = 1  ! triton
 C                        ENDfp(0,nnuc) = 1

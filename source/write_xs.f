@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4721 $
+Ccc   * $Rev: 4734 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-06 12:28:46 +0200 (Sa, 06 Aug 2016) $
+Ccc   * $Date: 2016-08-12 23:28:00 +0200 (Fr, 12 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -103,16 +103,16 @@ C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
                 IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim .and.
      >              EINl.GT.1.d0 ) CYCLE
 C 
-                IF(ENDfp(nejc,nnuc).NE.1) THEN
+C               IF(ENDfp(nejc,nnuc).NE.1) THEN
 C                  To add ENDF() exclusive spectra to inclusive
-                   nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C                  nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
 C------------------(continuum part - same for all particles)
-                   DO ie = 1, nspec + 1 
-                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
-     &                                POPcse(0,nejc,ie,INExc(nnuc))
-                   ENDDO 
-                   CYCLE
-                ENDIF
+C                  DO ie = 1, nspec + 1 
+C                    CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+C    &                                POPcse(0,nejc,ie,INExc(nnuc))
+C                  ENDDO 
+C                  CYCLE
+C               ENDIF
 C 
 C               nnur is the decaying compound: nnur = nnuc + nejc
 C
