@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4637 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-03-21 01:51:30 +0100 (Mo, 21 Mär 2016) $
+Ccc   * $Rev: 4736 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-23 02:55:40 +0200 (Di, 23 Aug 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -550,58 +550,108 @@ C  Summary of exclusive emission cross sections
         ENDDO
       ENDDO
       IF(jnmx.gt.1 .AND. jzmx.gt.1) THEN
+
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(0,jz,jn)
+           ENDDO
+         ENDDO
         iz = INT(Z(1))
         ia = INT(A(1))-iz
         WRITE (12,*) ' '
-        WRITE (12,*) ' Gamma emission cross sections (mb) ZAP=    0'
+        WRITE (12,'('' Gamma emission cross sections (mb) ZAP=    0'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(0,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(1,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Neutron emission cross sections (mb) ZAP=    1'
+        WRITE (12,'('' Neutron emission cross sections (mb) ZAP=    1'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(1,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(2,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Proton emission cross sections (mb) ZAP= 1001'
+        WRITE (12,'('' Proton emission cross sections (mb) ZAP= 1001'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(2,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(3,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Alpha emission cross sections (mb) ZAP= 2004'
+        WRITE (12,'('' Alpha emission cross sections (mb) ZAP= 2004'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(3,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(4,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Deuteron emission cross sections (mb) ZAP= 1002'
+        WRITE (12,'('' Deuteron emission cross sections (mb) ZAP= 1002'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(4,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(5,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Triton emission cross sections (mb) ZAP= 1003'
+        WRITE (12,'('' Triton emission cross sections (mb) ZAP= 1003'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(5,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        totsum=0.d0
+        DO jz = 0, jzmx 
+          DO jn = 0, jnmx
+            totsum = totsum + xcross(6,jz,jn)
+           ENDDO
+         ENDDO
         WRITE (12,*) ' '
-        WRITE (12,*) ' Helium-3 emission cross sections (mb) ZAP= 2003'
+        WRITE (12,'('' Helium-3 emission cross sections (mb) ZAP= 2003'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
 
@@ -625,8 +675,15 @@ C  Summary of exclusive emission cross sections
           WRITE (12,*) ' '
         ENDIF
         IF(jfiss.GT.0) THEN
+          totsum=0.d0
+          DO jz = 0, jzmx 
+            DO jn = 0, jnmx
+              totsum = totsum + xcross(NDEJC+1,jz,jn)
+             ENDDO
+           ENDDO
           WRITE (12,*) ' '
-          WRITE (12,*) ' Fission cross sections (mb)'
+          WRITE (12,'('' Fission cross sections (mb)'',
+     1              ''  Total ='',f8.2, '' mb'')') totsum
           WRITE (12,*) ' '
           WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
           DO jz = 0, jzmx 
@@ -653,7 +710,8 @@ C  Summary of exclusive emission cross sections
           ENDDO
         ENDDO
 
-        WRITE (12,*) ' Total production cross sections (mb) :', totsum
+        WRITE (12,'('' Production cross sections (mb) :''
+     1              ''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
