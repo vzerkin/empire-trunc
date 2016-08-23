@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4734 $
+Ccc   * $Rev: 4738 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-12 23:28:00 +0200 (Fr, 12 Aug 2016) $
+Ccc   * $Date: 2016-08-23 11:33:43 +0200 (Di, 23 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -72,12 +72,11 @@ C
           WRITE (8,*) ' '
           DO i = 1, NLW
             IF (MOD(ia,2).EQ.0) THEN
-              WRITE (8,'(1X,I5,G12.5,5X,I5,G12.5)') i - 1,
-     &           POP(NEX(1),i,1,1), ( - (i - 1)), POP(NEX(1),i,2,1)
+              WRITE (8,'(1X,SP,I5,SS,G12.5,5X,I5,G12.5)') 
+     &            i - 1, POP(NEX(1),i,1,1),   -(i-1), POP(NEX(1),i,2,1)
             ELSE
-              WRITE (8,'(1X,I4,''/2'',G12.5,5X,I4,''/2'',G12.5)')
-     &           2*i - 1, POP(NEX(1),i,1,1), ( - (2*i - 1)),
-     &           POP(NEX(1),i,2,1)
+              WRITE (8,'(1X,SP,I4,SS,''/2'',G12.5,5X,I4,''/2'',G12.5)')
+     &          2*i - 1, POP(NEX(1),i,1,1), -(2*i-1), POP(NEX(1),i,2,1)
             ENDIF
           ENDDO
           WRITE (8,*) ' '
