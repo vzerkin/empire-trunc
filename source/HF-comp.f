@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4720 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-03 21:38:43 +0200 (Mi, 03 Aug 2016) $
+Ccc   * $Rev: 4737 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-23 08:21:49 +0200 (Di, 23 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -44,7 +44,7 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &  popll, pops, popt, xcse
+     &  popll, pops, popt, xcse, fnor
 
       INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec
 !      INTEGER ilevcol, ilev, na
@@ -77,6 +77,7 @@ C-----
      &          POPmax(Nnur) = POP(ie,j,2,Nnur)
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
+            fnor = popt*DE/POPbin(Iec,Nnuc)
             icse = min(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDEcse)
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
@@ -86,6 +87,9 @@ C-----
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)  !exclusive spectra stored
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
+               IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+     &         POPcseaf(0,Nejc,icse,0) = POPcseaf(0,Nejc,icse,0)
+     &         + POPcseaf(Iec,Nejc,icse,INExc(Nnuc))*fnor
             ENDIF
 C
 C           CN emission angular distribution to the continuum
@@ -174,6 +178,9 @@ C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
                ELSE
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
+                  IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+     &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
+     &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1
                ENDIF
             ENDIF
             IF (poph.GT.0.0D+0) THEN
@@ -182,6 +189,9 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
                ELSE
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
+                  IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+     &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
+     &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1
                ENDIF
             ENDIF
          ENDIF
@@ -297,20 +307,18 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
 C-----Contribution coming straight from the current decay
-C-----(ignore if residue is inclusive since summation already done in ACCUM)
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       IF(ENDf(Nnur).EQ.1) THEN
          POPcse(Ief,Nejc,icsp,INExc(Nnur)) =
-     &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt  !adding Popt to population spectra in residue
+     &      POPcse(Ief,Nejc,icsp,INExc(Nnur)) + Popt  !adding Popt to population spectra in exclusive residue
       ELSE
-        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt
+        CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + Popt    !inclusive residue - add Popt directly to spectra
       ENDIF
 C-----
 C-----Contribution due to feeding spectra from Nnuc
 C-----
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
-         IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
             DO iejc = 0, NDEJC
@@ -326,29 +334,20 @@ C-----DE spectra
                ENDIF
 C-------------POPcsed seems to be equivalent to POPcse but for HMS or MSD rather than for CN
               IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 IF(ENDF(Nnur).EQ.2) THEN
-                    POPcsed(Ief,iejc,ie,0)
-     &                = POPcsed(Ief,iejc,ie,0)
-     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
-                 ELSE
+                 IF(ENDF(Nnur).EQ.1) THEN
                      POPcsed(Ief,iejc,ie,INExc(Nnur))
      &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
      &               + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor  !DE feeding HMS/MSD contribution added to population spectrum
+                 ELSE
+                    POPcsed(Ief,iejc,ie,0)
+     &                = POPcsed(Ief,iejc,ie,0)
+     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
                  ENDIF
               ENDIF
 C-----DDX spectra for HMS
               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
                  IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                    IF(ENDF(Nnur).EQ.2) THEN
-c                      POPcsed(Ief,iejc,ie,0)
-c     &                = POPcsed(Ief,iejc,ie,0)
-c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
-                       DO nth = 1, NDAng
-                          POPcsea(nth,Ief,iejc,ie,0)
-     &                    = POPcsea(nth,Ief,iejc,ie,0)
-     &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
-                       ENDDO
-                    ELSE
+                    IF(ENDF(Nnur).EQ.1) THEN
 c                      POPcsed(Ief,iejc,ie,INExc(Nnur))
 c     &                = POPcsed(Ief,iejc,ie,INExc(Nnur))
 c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -357,18 +356,27 @@ c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
      &                    = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
      &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
                        ENDDO
+                    ELSE
+c                      POPcsed(Ief,iejc,ie,0)
+c     &                = POPcsed(Ief,iejc,ie,0)
+c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
+                       DO nth = 1, NDAng
+                          POPcsea(nth,Ief,iejc,ie,0)
+     &                    = POPcsea(nth,Ief,iejc,ie,0)
+     &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
+                       ENDDO
                     ENDIF
                  ENDIF
-C-----DDX spectra using portions (NOT CLEAR WHETHER USED!)
+C-----DDX spectra using portions
               ELSE ! original loop to NDEJCD
                  IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                    IF(ENDf(Nnur).EQ.2) THEN
-                       POPcseaf(Ief,iejc,ie,0)
-     &                 = POPcseaf(Ief,iejc,ie,0)
-     &                 + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
-                    ELSE
+                    IF(ENDf(Nnur).EQ.1) THEN
                        POPcseaf(Ief,iejc,ie,INExc(Nnur))
      &                 = POPcseaf(Ief,iejc,ie,INExc(Nnur))
+     &                 + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
+                    ELSE
+                       POPcseaf(0,iejc,ie,0)
+     &                 = POPcseaf(0,iejc,ie,0)
      &                 + POPcseaf(Iec,iejc,ie,INExc(Nnuc))*xnor
                     ENDIF
                  ENDIF 
@@ -454,12 +462,12 @@ C-----DE spectra
             DO iesp = 1, NDECSE
               DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 IF(ENDF(Nnur).EQ.2) THEN
-                   CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
-     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                 ELSE
+                 IF(ENDF(Nnur).EQ.1) THEN
                    POPcse(0,iejc,iesp,INExc(Nnur))
      &                = POPcse(0,iejc,iesp,INExc(Nnur))
+     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                 ELSE
+                   CSE(iesp,iejc,0) = CSE(iesp,iejc,0)
      &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
 C---------------------Store also population spectra for discrete levels 
 C   
@@ -473,48 +481,42 @@ C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                 ENDIF
 
                IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 IF(ENDf(Nnur).EQ.2) then
-                   POPcsed(0,iejc,iesp,0)
-     &                  = POPcsed(0,iejc,iesp,0)
-     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                  ELSE
+                 IF(ENDf(Nnur).EQ.1) then
                    POPcsed(0,iejc,iesp,INExc(Nnur))
      &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
+     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                  ELSE
+                   POPcsed(0,iejc,iesp,0)
+     &                  = POPcsed(0,iejc,iesp,0)
      &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
                   ENDIF
                 ENDIF
                IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN !HMS n & p only
                  IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                   IF(ENDf(Nnur).EQ.2) THEN
-c                     POPcsed(0,iejc,iesp,0)
-c     &                  = POPcsed(0,iejc,iesp,0)
-c     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                   IF(ENDf(Nnur).EQ.1) THEN
+                     DO nth = 1, NDAng
+                       POPcsea(nth,0,iejc,iesp,INExc(Nnur))
+     &                    = POPcsea(nth,0,iejc,iesp,INExc(Nnur))
+     &                     + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
+                      ENDDO
+                    ELSE
                       DO nth = 1, NDAng
                          POPcsea(nth,0,iejc,iesp,0)
      &                    = POPcsea(nth,0,iejc,iesp,0)
      &                    + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
                       ENDDO  
-                    ELSE
-c                     POPcsed(0,iejc,iesp,INExc(Nnur))
-c     &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
-c     &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                     DO nth = 1, NDAng
-                       POPcsea(nth,0,iejc,iesp,INExc(Nnur))
-     &                    = POPcsea(nth,0,iejc,iesp,INExc(Nnur))
-     &                     + POPcsea(nth,Iec,iejc,iesp,INExc(Nnuc))*xnor
-                      ENDDO  
                     ENDIF
                   ENDIF
-C-----------DDX spectra using portions (NOT CLEAR WHETHER USED!)
+C-----------DDX spectra using portions
                ELSE ! original loop to NDEJCD
                  IF (POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                   IF(ENDf(Nnur).EQ.2) THEN
-                      POPcseaf(0,iejc,iesp,0)
-     &                = POPcseaf(0,iejc,iesp,0)
-     &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                   ELSE
+                   IF(ENDf(Nnur).EQ.1) THEN
                       POPcseaf(0,iejc,iesp,INExc(Nnur))
      &                = POPcseaf(0,iejc,iesp,INExc(Nnur))
+     &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                   ELSE
+                      POPcseaf(0,iejc,iesp,0)
+     &                = POPcseaf(0,iejc,iesp,0)
      &                + POPcseaf(Iec,iejc,iesp,INExc(Nnuc))*xnor
                    ENDIF
                  ENDIF 
