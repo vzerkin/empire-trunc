@@ -1,6 +1,6 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-03 11:56:07 +0100 (Mi, 03 Feb 2016) $
-Ccc   * $Id: lev-dens.f 4579 2016-02-03 10:56:07Z rcapote $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-24 16:58:03 +0200 (Mi, 24 Aug 2016) $
+Ccc   * $Id: lev-dens.f 4739 2016-08-24 14:58:03Z mherman $
 C
 C
 C
@@ -1323,17 +1323,53 @@ C
       REAL*8 am, amas, arg, atil, e, enorm, eo,
      &                 eom, exl, ro_u, ro_j, ro_pi,rolowint, sigh, sigl, 
      &                 t, tm, u, ux, xj
-      REAL*8 FSHELL
-      INTEGER i, ig, igna, iter, j
-
+      REAL*8 FSHELL, ratio(1:2), a1, b1, c1
+      INTEGER i, ig, igna, iter, j, igs
       eom = 0.d0
 C-----next call prepares for lev. dens. calculations
       CALL PRERO(Nnuc)
-
       amas = A(Nnuc)
       A23 = A(Nnuc)**0.666667d0
       igna = 0
-      ro_pi=0.5
+      igs = 1                        ! set ground state parity index
+      ratio = 0.5D0                  ! 50%/50% default for parity distribution
+      IF(LVP(1,Nnuc).EQ.-1) igs = 2
+!     Set parameters of the parity energy dependence
+!     Preliminary imlementation  valid only for the major nuclides involved
+!     in the 56Fe evaluation (other calculations not affected)
+      IF(IZA(nnuc).EQ.26055) THEN
+         a1 = 0.017139
+         b1 = -0.0672441
+         c1 = 1.05495
+      ELSEIF(IZA(nnuc).EQ.26056) THEN
+         a1 = 0.0327456
+         b1 = -0.082746
+         c1 = 1.066    
+      ELSEIF(IZA(nnuc).EQ.26057) THEN
+         a1 = 0.0359514
+         b1 = -0.086571
+         c1 = 1.05589  
+      ELSEIF(IZA(nnuc).EQ.25055) THEN
+         a1 = 0.0293767 
+         b1 = -0.0971741
+         c1 = 1.07698   
+      ELSEIF(IZA(nnuc).EQ.25056) THEN
+         a1 = 0.0482035 
+         b1 = -0.0978324
+         c1 = 1.04671   
+      ELSEIF(IZA(nnuc).EQ.24052) THEN
+         a1 = 0.0164111
+         b1 = -0.107355
+         c1 = 1.13664  
+      ELSEIF(IZA(nnuc).EQ.24053) THEN
+         a1 = 0.0241924 
+         b1 = -0.0849786
+         c1 = 1.0703    
+      ELSE
+         a1 = 0.0D0
+         b1 = 0.0D0
+         c1 = 0.0D0
+      ENDIF
 C-----zero potentially undefined variables
       GAMma = 0.d0
       exl = 0.d0
@@ -1505,8 +1541,10 @@ C     IF (NLV(Nnuc).GT.5 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
       IF (ig.NE.0) THEN
 C-----calculation of level densities below EXL
 C-----(low energy formula)
-         DO i = 1, ig
+         DO i = 1, ig     !Do loop over excitation energies
             e = EX(i,Nnuc)
+C            CALL PARITY_FRACTION(e,a1,b1,c1,ratio,igs) ! get parity multipliers 'ratio'
+C            write(8,*) 'E, ratios, igs, nnuc', E, ratio, igs, nnuc
             arg = (e - eo)/t
             IF (arg.LT.EXPmax) THEN
                ro_u = EXP(arg)/t
@@ -1519,14 +1557,14 @@ C--------------Spin-cutoff is interpolated
                   arg = (xj + 0.5)**2/(2.*SIG)
                   IF (arg.LE.EXPmax) THEN
                      ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
-                     RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi
-                     RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi
+                     RO(i,j,1,Nnuc) = ro_u*ro_j*ratio(1)
+                     RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
                   ENDIF
                ENDDO
                UEXcit(i,Nnuc) = e
                TNUc(i,Nnuc) = SQRT(e/am)
             ENDIF
-         ENDDO
+         ENDDO     ! Loop over excitation energies
       ENDIF
       ig = ig + 1
       IF (ig.LE.NEX(Nnuc)) THEN
@@ -1534,8 +1572,10 @@ C
 C--------calculation of level densities for energies surpassing
 C--------EXL /fermi gas formula/
 C
-         DO i = ig, NEX(Nnuc)
+         DO i = ig, NEX(Nnuc)         !Do loop over excitation energies
             u = EX(i,Nnuc) - DEL
+C             CALL PARITY_FRACTION(EX(i,Nnuc),a1,b1,c1,ratio,igs)
+C            write(8,*) 'E, ratios, Igs, nnuc',EX(i,Nnuc),ratio,igs,nnuc
             if(u.lt.0.d0) cycle
             IF (igna.EQ.1) am = atil*FSHELL(u,SHC(Nnuc),-GAMma)
             UEXcit(i,Nnuc) = u
@@ -1550,12 +1590,12 @@ C-----------Dilg's recommendations
                   arg = (xj + 0.5)**2/(2.*SIG)
                   IF (arg.LT.EXPmax) THEN
                      ro_j = (2*xj + 1.)/(2.*SIG)*EXP( - arg)
-                     RO(i,j,1,Nnuc) = ro_u*ro_j*ro_pi  
-                     RO(i,j,2,Nnuc) = ro_u*ro_j*ro_pi  
+                     RO(i,j,1,Nnuc) = ro_u*ro_j*ratio(1)
+                     RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
                   ENDIF
                ENDDO
             ENDIF
-         ENDDO
+         ENDDO     ! Loop over excitation energies
       ENDIF
 
       IF((FITlev.gt.0 .or. IOUt.eq.6) .and. NLV(Nnuc).GT.3 
@@ -1575,6 +1615,49 @@ C       Call PLOT_GNU_NumCumul(Nnuc,0.d0,0.d0)
       RETURN
       END
 
+      SUBROUTINE PARITY_FRACTION(E,a1,b1,c1,Ratio,Igs)
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                          class:au*
+Ccc   *             P A R I T Y _ F R A C T I O N                        *
+Ccc   *                                                                  *
+Ccc   * Calculates ratio of parities for level density (non-g.s to g.s)) *
+Ccc   *                                                                  *
+Ccc   * input: E  - excitation energy                                    *
+Ccc   *        a1 - parameter in parity distribution formula             *
+Ccc   *        b1 - parameter in parity distribution formula             *
+Ccc   *        c1 - parameter in parity distribution formula             *
+Ccc   *        Igs - ground-state parity (1 for plus, 2 for negative,    *
+Ccc   *             3 to return equal probability )                      *                                   *
+Ccc   *                                                                  *
+Ccc   * output:Ratio(1) - fraction of positive parity                    *
+Ccc   *        Ratio(2) - fraction of negative parity                    *
+Ccc   *                                                                  *
+Ccc   *  Ground state parity fration is assumed to be 0.5                *
+Ccc   *  Only non-ground-state parity fraction is changed                *
+Ccc   *  If inputed parity factors are all 0 equal parity is returned    *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+      REAL*8 Ratio(1:2)
+      REAL*8 E, a1, b1, c1, tmp
+      Integer*4 Igs,Ings
+
+      Ratio = 0.5D0
+      IF(Igs.EQ.3) RETURN   ! Return equal probability for both parities if Ip=3
+      Ings = 2
+      IF(Igs.EQ.2) Ings = 1
+      tmp = a1*E**2 + b1*E + c1
+      tmp = 1.0D0 - 1.0D0/tmp  ! Ratio of lev. den. for non-g.s. to g.s. parity
+      IF(tmp.LE.0.0D0) THEN
+         Ratio(Ings) = 0.0D0
+         RETURN
+      ENDIF
+      Ratio(Ings) = 0.5D0*tmp
+      RETURN
+      END
 C
 C
 
