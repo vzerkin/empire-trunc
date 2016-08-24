@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4738 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-23 11:33:43 +0200 (Di, 23 Aug 2016) $
+Ccc   * $Rev: 4740 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -924,24 +924,24 @@ C    &                 A(nnuc),Z(nnuc),' - ',ENDF(nnuc)
 C
 C            Accumulating population cross sections 
 C
-             DO nejc = 0, NDEJC         !loop over ejectiles
-               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
-C              IF(ENDf(NREs(nejc)).EQ.1) THEN
-               IF(ENDfp(nejc,nnuc).EQ.1) THEN
-                 itmp = 1
+!     MH commented this part to eliminate possible intereference from ENDfp
+!             DO nejc = 0, NDEJC         !loop over ejectiles
+!               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
+!               IF(ENDfp(nejc,nnuc).EQ.1) THEN
+!                 itmp = 1
 C                estimating multiplicity
-                 IF (nejc.eq.1 .or. nejc.eq.2) 
-     &             itmp = NINT(A(1))-NINT(A(nnuc))   ! (n,xn), (n,xp)
-                 IF(.not.(NINT(A(1))-NINT(A(nnuc)).GT.2.and.nejc.eq.0)) 
+!                 IF (nejc.eq.1 .or. nejc.eq.2)
+!     &             itmp = NINT(A(1))-NINT(A(nnuc))   ! (n,xn), (n,xp)
+!                 IF(.not.(NINT(A(1))-NINT(A(nnuc)).GT.2.and.nejc.eq.0))
 C                  Summing exclusive cross section
-     &             CSPopul(nnuc) = CSPopul(nnuc) +
-     &                             POPcs(nejc,INExc(nnuc))/itmp
+!     &             CSPopul(nnuc) = CSPopul(nnuc) +
+!     &                             POPcs(nejc,INExc(nnuc))/itmp
 C                  RCN 12/2015
 C                  WRITE (*,*) 'excl:',NINT(A(nnuc)),NINT(Z(nnuc)),
 C    &              nejc,sngl(POPcs(nejc,INExc(nnuc))/itmp),
 C    &              ' ',trim(Reaction(nnuc)) 
-               ENDIF
-             ENDDO
+!               ENDIF
+!             ENDDO
 
              DO nejc = 0, NDEJC         !loop over ejectiles
 
@@ -2038,7 +2038,7 @@ C        residual nuclei must be heavier than alpha
          CALL ACCUM(Ke,Nnuc,nnur,nejc,Xnor)
          CSEmis(nejc,Nnuc) = CSEmis(nejc,Nnuc) + Xnor*SCRtem(nejc)
       ENDDO
-C-----gammas
+C-----gammas scrtem
       CALL ACCUM(Ke,Nnuc,Nnuc,0,Xnor)
       CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + Xnor*SCRtem(0)
       POP(Ke,Jcn,Ipar,Nnuc) = 0.d0

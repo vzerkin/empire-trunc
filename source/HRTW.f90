@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4726 $
-   ! $Author: rcapote $
-   ! $Date: 2016-08-08 09:28:19 +0200 (Mo, 08 Aug 2016) $
+   ! $Rev: 4740 $
+   ! $Author: mherman $
+   ! $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
    !
 
    TYPE channel
@@ -50,7 +50,7 @@ MODULE width_fluct
       INTEGER part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
       INTEGER coll     ! position of the first (low) coupled level channel
       INTEGER colh     ! position of the last coupled channel;
-                           ! coupled channels are embedded in particle channels coll <= colh <=part
+                          ! coupled channels are embedded in particle channels coll <= colh <=part
       INTEGER elal     ! position of the first (low) elastic channel
       INTEGER elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
       INTEGER fiss     ! effective number of fission channels
@@ -306,7 +306,7 @@ CONTAINS
       LOGICAL*4 relcal
       INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
-      REAL*8 sumfism(nfmod)
+	  REAL*8 sumfism(nfmod)
       REAL*8 Ia, sxj
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
       REAL*8 d0c, sigma_
@@ -369,7 +369,7 @@ CONTAINS
             nhrtw = 0
             DENhf = 0.D0
 
-            CALL zeroing_module_vars()
+			CALL zeroing_module_vars()
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
 
             !----------------------------------------------------------
@@ -421,10 +421,10 @@ CONTAINS
             ! Collecting outgoing channels completed
             !----------------------------------------------------------
             IF(LHRtw==1 .OR. LHRtw==2) THEN
-		  CALL AUSTER(LHRtw)  ! calculate V's for the strong channels (iteration)
+			  CALL AUSTER(LHRtw)  ! calculate V's for the strong channels (iteration)
               DENhf = H_Sumtl     ! reset DENhf using V's instead of T's
             ENDIF
-            IF(DENhf .LE. 0.d0) CYCLE
+			IF(DENhf .LE. 0.d0) CYCLE
 
             !----------------------------------------------------------------------------------
             ! construct scratch matrix for decay of the Jcn state
@@ -435,11 +435,11 @@ CONTAINS
           
             DO i = 1, num%part  !scan strong particle channels (note: weak channels are already in SCRt)
                out => outchnl(i)
-               sigma_  = out%t
-               CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
+			   sigma_  = out%t
+			   CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
             ENDDO
 
-            CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
+			CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
             !----------------------------------------------------------
             ! Fission
@@ -462,7 +462,7 @@ CONTAINS
                out => outchnl(i)
                in%t = out%t
 
-               IF (INTerf==0) THEN
+			   IF (INTerf==0) THEN
                  ! absorption ~ sigma_a
                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                  xnor = in%sig/DENhf ! normalization factor
@@ -470,7 +470,7 @@ CONTAINS
                ELSE
                  !xnor = 1.d0/DENhf ! normalization factor
                  xnor = 1.d0
-               ENDIF
+			   ENDIF
 			   
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
@@ -488,7 +488,7 @@ CONTAINS
                !----------------------------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !----------------------------------------------------------------------------------
-               CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+			   CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                !CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
@@ -1477,9 +1477,9 @@ CONTAINS
                summa = WFC_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
             ENDDO                                         !do loop over ejectiles  ***done***
             ! write(*,*) sumin_w,sumtt_w
-            ! write(*,*) num%elal,num%elah,num%coll,num%colh
+			! write(*,*) num%elal,num%elah,num%coll,num%colh
             
-            if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
+			if(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
             num%part = NCH         !store number of particle channel entries
 
             !----------------------------------------------------------
@@ -1509,7 +1509,7 @@ CONTAINS
             !  write(*,*)'# of strong Tls   ', NCH
             !  write(*,*)'average Tl        ', H_Tav
             !  write(*,*)'Decay state ',jcn*ip
-            !  write(*,*)'DENhf calculated before Moldauer', DENhf
+			!  write(*,*)'DENhf calculated before Moldauer', DENhf
 
             !----------------------------------------------------------
             ! Calculate WF term common for all channels
@@ -1536,7 +1536,7 @@ CONTAINS
                out => outchnl(i)
                in%t = out%t
 
-		   IF (INTerf==0) THEN
+			   IF (INTerf==0) THEN
                  ! absorption ~ sigma_a
                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                  xnor = in%sig/DENhf ! normalization factor
@@ -1544,7 +1544,7 @@ CONTAINS
                ELSE
                  !xnor = 1.d0/DENhf ! normalization factor
                  xnor = 1.d0
-		   ENDIF
+			   ENDIF
                !----------------------------------------------------------
                ! Fission
                !----------------------------------------------------------
@@ -1573,7 +1573,7 @@ CONTAINS
                ! If EW active, all elastic channels assumed collective !!
                IF(INTerf>0 .and. (iout>=num%coll .and. iout<=num%colh) ) CYCLE
 
-     		   CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
+      		   CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
                !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
@@ -1610,70 +1610,70 @@ CONTAINS
 			   ZRtmp1 = 0.d0
                do i=1,NDIm_cc_matrix
                  ZRtmp1(i,i) = 1.d0			     
-		   enddo
-		   ZItmp1 = 0.d0
+			   enddo
+			   ZItmp1 = 0.d0
 
-		   !Diagonalizing the Smatrix in the transformed space
+			   !Diagonalizing the Smatrix in the transformed space
                Sdiag =   REAL(Smatr) 
                ZItmp =   IMAG(Smatr) 
                !write(*,*) 'Smatrix HRTW'
                !DO i = 1,NDIm_cc_matrix
                !  DO iout = 1,NDIm_cc_matrix
-               !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Sdiag(i,iout),ZItmp(i,iout)
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Sdiag(i,iout),ZItmp(i,iout)
                !  ENDDO
-               !ENDDO
+	           !ENDDO
 
-		   CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+			   CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
                IF(IER/=0) WRITE (8,*) 'WARNING: EW Smatrix DIAGONALIZATION PROBLEMS for CN Jpi=',sngl(xjc*ip)   
-		   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
+			   ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space 
         	   ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
-		   do i=1,NDIm_cc_matrix
-                 ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
-		     Sphase(i) = datan(Sdiag(i,i))
-		   enddo
+			   do i=1,NDIm_cc_matrix
+      	         ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i)) 
+			     Sphase(i) = datan(Sdiag(i,i))
+			   enddo
 
-		   ! setting the complex identity matrix to call DIAG() 
-		   !ZRtmp1 = 0.d0
+			   ! setting the complex identity matrix to call DIAG() 
+			   !ZRtmp1 = 0.d0
                !do i=1,NDIm_cc_matrix
                !  ZRtmp1(i,i) = 1.d0			     
-		   !enddo
-		   !ZItmp1 = 0.d0
-		   !Diagonalizing the Pmatrix in the transformed space for cross checking 
+			   !enddo
+			   !ZItmp1 = 0.d0
+			   !Diagonalizing the Pmatrix in the transformed space for cross checking 
                !PPdiag =   REAL(Pmatr) 
                !ZItmp  =   IMAG(Pmatr) 
                !write(*,*) 'Pmatrix HRTW'
                !DO i = 1,NDIm_cc_matrix
                !  DO iout = 1,NDIm_cc_matrix
-   	         !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
+   	           !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
                !  ENDDO
-	         !ENDDO
-		   !CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+	           !ENDDO
+			   !CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
                !IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)   
-		   ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space 
+			   ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space 
                ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix            
 		     
 			   !WRITE(*,*) 'HRTW diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
                !DO iout = 1,NDIm_cc_matrix
-     	         !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
-		   !  DO I = 1,NDIm_cc_matrix
-		   !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6))') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
+      	       !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout) 
+			   !  DO I = 1,NDIm_cc_matrix
+			   !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6))') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
                !  ENDDO
 			   !ENDDO
 
-		   ! Engelbrecht- Weidenmueller transformaion
+			   ! Engelbrecht- Weidenmueller transformaion
                ! loop over iaa=i (coupled channels in the normal space)
                write(*,*) 'CN decay state Jpi',xjc,ip
-		   write(*,*) 'num%elal, num%elah=',num%elal, num%elah 
-		   write(*,*) 'num%coll, num%colh=',num%coll, num%colh
-		   write(*,*) '1-num%part=',1,num%part
+			   write(*,*) 'num%elal, num%elah=',num%elal, num%elah 
+			   write(*,*) 'num%coll, num%colh=',num%coll, num%colh
+			   write(*,*) '1-num%part=',1,num%part
 
                sumin_s = 0.d0
                sumtt_s = 0.d0
                DO i = num%elal, num%elah
                   
-		      if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
+				  if(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
 
-		      iaa = i - num%elal + 1
+				  iaa = i - num%elal + 1
                   in => inchnl(iaa) ! elastic channels for each Jcn are numbered 1,2,3,...
                   out => outchnl(i)
 	     	      write(*,*) 'i,iaa, -out%kres, in%t=', i, iaa, -out%kres  
@@ -1683,7 +1683,7 @@ CONTAINS
                   !xnor = in%sig/DENhf                     ! normalization factor
                   !xnor = 1.d0/DENhf                        ! normalization factor
                   xnor = 1.d0
-		      ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+				  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
 
                   ! loop over ibb=iout (coupled channels in the normal space)
                   DO iout = num%coll, num%colh
@@ -1734,25 +1734,25 @@ CONTAINS
                         enddo ! end of the loop over ibeta (transformed space)					 
                      enddo   ! end of the loop over ialph (transformed space)
 
-   		         write(*,*) 'Sigma_abs=',in%sig
+   				     write(*,*) 'Sigma_abs=',in%sig
                      sigma_ = sigma_EW*in%sig
-   		         write(*,*) 'Sigma_ab =',sigma_ 
+   				     write(*,*) 'Sigma_ab =',sigma_ 
                      ! END of Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
 
-		         out => outchnl(iout) ! reassigning output channel to the outgoing CC in the normal space
+					 out => outchnl(iout) ! reassigning output channel to the outgoing CC in the normal space
 	     	         write(*,*) 'iout,ibb, -out%kres=', iout, ibb, -out%kres  
 
-			   PAUSE
+					 PAUSE
 
-			   CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
+					 CALL update_SCRt(out, sigma_, sumin_s, sumtt_s)
 
                   ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
                   CALL DelCCmatr() ! deallocate EW matrices
-			CYCLE
+				  CYCLE
 
-			CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
+				  CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
                   !----------------------------------------------------------
                   ! Renormalizing scratch matrices to recover unitarity
@@ -1772,9 +1772,8 @@ CONTAINS
                   !---------------------------------------------------------------
                   ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                   !---------------------------------------------------------------
-                  CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
-                  
-                  ! DOUBLE CHECK, different from HRTW, 
+				  CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+
                   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                   ! CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4733 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-12 16:04:56 +0200 (Fr, 12 Aug 2016) $
+Ccc   * $Rev: 4740 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -354,27 +354,29 @@ C        ENDIF
          DO ie = 1, nspec + 1
          if(CSE(ie,nejc,0).le.0.d0) cycle
 
-C          Subtract direct contribution to CM emission spectrum 
            IF(ENDF(1).GT.0) THEN
-            ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI
-            IF(LHMs.GT.0 .and. nejc.le.2) THEN
+C          Subtract anisotropic contribution to CM emission spectrum
+!           ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI  !WARNING: COULD BE NEEDED FOR HMS
+           ftmp = (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
+     &            )/PIx4
+            IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,nejc,ie,0)
               ENDDO
-            ELSE
+            ELSE                                 ! all non-HMS cases
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp +
      &                CSEa(ie,nang,nejc,1)*POPcseaf(0,nejc,ie,0)
               ENDDO
             ENDIF
-           ELSE
-            IF(LHMs.GT.0 .and. nejc.le.2) THEN
-              ftmp = (CSE(ie,nejc,0) - CSEhms(ie,nejc,0))/4.d0/PI
+           ELSE   ! ENDF(1)=0 option (no ENDF formating)
+            IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
+              ftmp = (CSE(ie,nejc,0) - CSEhms(ie,nejc,0))/PIx4
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,nejc)
               ENDDO
-            ELSE
-              ftmp = CSE(ie,nejc,0)/4.d0/PI
+            ELSE                                 ! all non-HMS cases
+              ftmp = CSE(ie,nejc,0)/PIx4
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc,1)
               ENDDO
@@ -415,8 +417,7 @@ C    &      FLOAT(nspec)*DE/recorp,
          DO ie = 1, nspec 
            htmp = CSE(ie,nejc,0)
            if(htmp.LE.0.d0) cycle
-C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
-           IF(ENDF(1).EQ.0) 
+           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
            itmp = 1
            if(ie.eq.1) itmp = 2
@@ -452,6 +453,27 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
          WRITE (12,'(1x,'' Int. DDXS  spectrum   '',G12.6,'' mb'')')
      &     ftmp*DE      
       ENDIF
+
+!     Test printout for 56Fe at 96 MeV TO DELETE
+!      write(8,*) '  '
+!      write(8,*) 'Test printout of POPcseaf'
+!      write(8,*) 'ENDf= ',
+!     &ENDf(2), ENDf(3), ENDF(17), ENDf(18), ENDf(19)
+!      write(8,'(''IZA= '',6I15)')
+!     &IZA(2), IZA(3), IZA(17),IZA(18), IZA(19),0
+!      write(8,*) '  '
+!      do ie=1,NDECSE
+!       write(8,'(i5, 7E15.6)') ie,
+!     &                POPcseaf(0,1,ie,INExc(2)),
+!     &                POPcseaf(0,1,ie,INExc(3)),
+!     &                POPcseaf(0,1,ie,INExc(17)),
+!     &                POPcseaf(0,1,ie,INExc(18)),
+!     &                POPcseaf(0,1,ie,INExc(19)),
+!     &                POPcseaf(0,1,ie,0),
+!     &            SUM(POPcseaf(0,1,ie,0:106))
+!
+!      enddo
+!      write(8,*) '  '
           
       IF(Nejc.ne.0) THEN
         WRITE (8,

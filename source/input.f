@@ -1,6 +1,6 @@
-!cc   * $Rev: 4735 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-13 01:39:39 +0200 (Sa, 13 Aug 2016) $
+!cc   * $Rev: 4740 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -796,13 +796,13 @@ C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
                           ENDfp(1,nnuc) = 1 
                           ENDfp(0,nnuc) = 1
-                          ENDf(nnuc) = 1
+!                          ENDf(nnuc) = 1
                   endif
 C                 (n,p),(n,2p),(n,3p)
                   if(ip.eq.mulem .and. ip.le.3) THEN
                           ENDfp(2,nnuc) = 1 
                           ENDfp(0,nnuc) = 1 
-                          ENDf(nnuc) = 1
+!                          ENDf(nnuc) = 1
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
@@ -896,7 +896,7 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-C                    ENDf(nnuc) = 1
+!                     ENDf(nnuc) = 1
 C                    (n,np),(n,pn),(n,d)
                      ENDfp(0,nnuc) = 1 
                      ENDfp(1,nnuc) = 1 
@@ -1152,12 +1152,12 @@ C
             DO in = 0, NNUct
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
-            IF(NENdf.GE.1) THEN !Special case: square of NENdf*NENdf nuclei in Z,N plane
+            IF(NENdf.GE.1) THEN !Square of NENdf*NENdf nuclei in Z,N plane made exclusive
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               DO in = 0, 2    ! NENdf
-                  DO ip = 0, 2 ! NENdf 
+               DO in = 0, NENdf
+                  DO ip = 0, NENdf
                      atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
                      ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
                      if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
@@ -1165,10 +1165,10 @@ C
                      CALL WHERE(izatmp,nnuc,iloc)
                      IF(iloc.EQ.0) THEN
                        ENDf (nnuc) = 1
-                       if(in.eq.2 .and. ip.eq.2) THEN
-                         ENDfp(3,nnuc) = 1  ! alphas
-                         ENDfp(0,nnuc) = 1
-                       endif
+!                       if(in.eq.2 .and. ip.eq.2) THEN
+!                         ENDfp(3,nnuc) = 1  ! alphas
+!                         ENDfp(0,nnuc) = 1
+!                       endif
 C                      if(in.eq.2 .and. ip.eq.1) THEN
 C                        ENDfp(5,nnuc) = 1  ! triton
 C                        ENDfp(0,nnuc) = 1
@@ -1180,6 +1180,21 @@ C                      endif
                      ENDIF
                   ENDDO
                ENDDO
+!              Making only pure neutron and pure proton emissions exclusive
+!               ztmp = Z(1)
+!               DO in = 0, 7 !NENdf
+!                  atmp = A(1) - FLOAT(in)
+!                  izatmp = INT(1000*ztmp + atmp)
+!                  CALL WHERE(izatmp,nnuc,iloc)
+!                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+!               ENDDO
+!               DO ip = 0, 7 !NENdf
+!                  atmp = A(1) - FLOAT(ip)
+!                  ztmp = Z(1) - FLOAT(ip)
+!                  izatmp = INT(1000*ztmp + atmp)
+!                  CALL WHERE(izatmp,nnuc,iloc)
+!                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+!               ENDDO
             ENDIF
 C           write(*,*) 'After reassigments'
 C           DO in = 0, NNUct
@@ -3085,7 +3100,7 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
 
       IF (iexclus.EQ.1) THEN
         WRITE(8,*)
-        WRITE(8,*) ' < indicates inclusive spectra only'
+        WRITE(8,*) ' < signs indicate inclusive spectra only'
       ENDIF
 
       IF (FIRst_ein) THEN
@@ -3107,6 +3122,7 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
           WRITE(12,*)
           WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
+
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS:                                        '
         IF(FISspe.GT.0 .and. NUBarread) THEN
