@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4684 $
+Ccc   * $Rev: 4743 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 13:10:24 +0200 (So, 12 Jun 2016) $
+Ccc   * $Date: 2016-08-25 13:08:07 +0200 (Do, 25 Aug 2016) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -123,18 +123,24 @@ C---------Get and add inelastic cross sections (including double-differential)
              CYCLE                
            ENDIF
 
-           IF(ICOllev(i).LT.LEVcc .and. SINlcc.le.0.d0) exit
-           IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
+C          We consider CC or DWBA contributions to discrete levels in two cases:
+C          1) ICOllev(i).LT.LEVcc  => discrete levels
+C          2) ICOllev(i).GE.LEVcc  => continuum
+C
+C          IF(ICOllev(i).LT.LEVcc .and. SINlcc.le.0.d0) exit
+           IF(ICOllev(i).LT.LEVcc .and. SINl+SINlcc.le.0.d0) exit 
+C          IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
+           IF(ICOllev(i).GE.LEVcc .and. SINlcont.le.0.d0) cycle
 
            IF(ilv.LE.NLV(nnurec)) then
+C            discrete levels
 
-             IF(ICOllev(i).GE.LEVcc .and. SINl.le.0.d0) cycle
-
-             IF(ICOller(i).GT.40) then
-               WRITE(8,*) ' WARNING: Collective level #',ICOller(i),
-     &             ' has wrong number (> 40), Ecoll=',sngl(D_Elv(i))
-               ilv = 40                 
-             ENDIF
+C            Block below commented as it should never happens -> ilv.LE.NLV(nnurec)
+C            IF(ilv.GT.LEVcc) then
+C              WRITE(8,*) ' WARNING: Collective level #',ilv,
+C    &              ' has wrong number (> 40), Ecoll=',sngl(D_Elv(i))
+C              ilv = 40                 
+C            ENDIF
 C
 C            D_Elv(i)        Collective level energy (in collective level file)
 C            ELV(ilv,nnurec) Discrete level energy
@@ -259,7 +265,7 @@ C
 C          Allowing states in the continuum even for MSD>0
 C          ELSEIF(MSD.eq.0)then
            ELSE
-
+C            continuum 
              IF(ICOllev(i).GE.LEVcc .and. SINlcont.le.0.d0) cycle
 
 C------------Adding inelastic to continuum  (D_Elv(ND_nlv) = elvr)
