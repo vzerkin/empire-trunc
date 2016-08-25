@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4728 $
+Ccc   * $Rev: 4742 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-09 00:29:09 +0200 (Di, 09 Aug 2016) $
+Ccc   * $Date: 2016-08-25 12:41:58 +0200 (Do, 25 Aug 2016) $
 
 C
       SUBROUTINE ULM(Nnuc,Numram)
@@ -475,7 +475,7 @@ C--------GRED ACCOUNTS FOR THE ENERGY AND TEMP DEPENDENCE OF THE GDR WIDTHS
 C-----setting GRED=1 removes energy dependence of the width
 C-----for the second hump of gener. Lorenzian
 C        GRED = 1.
-         IF (D2.NE.0.0D0) gdr = gdr + 
+         IF (D2.NE.0.0D0 .AND. ED2.GT.0) gdr = gdr + 
      &                          D2*ed*ed*gred/((ed - ED2)**2 + W2*gred**
      &                          2*ed)
      &                          + 0.7*D2*39.478351*T**2*ed*Eg/ED2/ED2/
