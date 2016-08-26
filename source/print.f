@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4749 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4750 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-26 18:24:57 +0200 (Fr, 26 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -468,26 +468,40 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &     ftmp*DE      
       ENDIF
 
-!     Test printout for 56Fe at 96 MeV TO DELETE
-!      write(8,*) '  '
-!      write(8,*) 'Test printout of POPcseaf'
+!     Test printout for 56Fe at 96 MeV TO BE DELETED
+      write(8,*) '  '
+      write(8,*) 'Test printout of POPcseaf'
 !      write(8,*) 'ENDf= ',
 !     &ENDf(2), ENDf(3), ENDF(17), ENDf(18), ENDf(19)
 !      write(8,'(''IZA= '',6I15)')
 !     &IZA(2), IZA(3), IZA(17),IZA(18), IZA(19),0
-!      write(8,*) '  '
-!      do ie=1,NDECSE
-!       write(8,'(i5, 7E15.6)') ie,
+      write(8,*) '  '
+      do ie=1,NDECSE
+       write(8,'(i5, 7E15.6)') ie,
+!     Fractions for selected  nuclei
 !     &                POPcseaf(0,1,ie,INExc(2)),
 !     &                POPcseaf(0,1,ie,INExc(3)),
 !     &                POPcseaf(0,1,ie,INExc(17)),
 !     &                POPcseaf(0,1,ie,INExc(18)),
 !     &                POPcseaf(0,1,ie,INExc(19)),
 !     &                POPcseaf(0,1,ie,0),
-!     &            SUM(POPcseaf(0,1,ie,0:106))
-!
-!      enddo
-!      write(8,*) '  '
+!     Sum of fractions over all nuclei plus inclusive
+     &            SUM(POPcseaf(0,1,ie,0:106)),
+     &            SUM(POPcseaf(0,2,ie,0:106)),
+     &            SUM(POPcseaf(0,3,ie,0:106)),
+     &            SUM(POPcseaf(0,4,ie,0:106)),
+     &            SUM(POPcseaf(0,5,ie,0:106)),
+     &            SUM(POPcseaf(0,6,ie,0:106))
+!     Inclusive fractions only for all ejectiles
+!     &            POPcseaf(0,1,ie,0),
+!     &            POPcseaf(0,2,ie,0),
+!     &            POPcseaf(0,3,ie,0),
+!     &            POPcseaf(0,4,ie,0),
+!     &            POPcseaf(0,5,ie,0),
+!     &            POPcseaf(0,6,ie,0)
+
+      enddo
+      write(8,*) '  '
           
       IF(Nejc.ne.0) THEN
         WRITE (8,

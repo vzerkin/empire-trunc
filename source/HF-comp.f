@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4746 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:44:04 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4750 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-26 18:24:57 +0200 (Fr, 26 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       USE empcess, ONLY: POPcsea
@@ -131,10 +131,12 @@ C-----Discrete levels
 C-----
 123   nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
       DO il = 1, NLV(Nnur)
-         eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) RETURN
          pop1 = Xnor*SCRtl(il,Nejc)
          IF (pop1.le.0) CYCLE
+!         fnor should be pop1/POPbin * (popll or poph)/pop1
+         fnor = pop1/POPbin(Iec,Nnuc)
+         eemi = excnq - ELV(il,Nnur)
+         IF (eemi.LT.0.0D0) RETURN
 C        if(il.eq.LEVtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
@@ -197,25 +199,9 @@ C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
                   IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
      &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
-     &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1
-
-               IF(POPcsed(Iec,Nejc,icsl,INExc(Nnuc)).GT.0)
-     &            POPcsed(0,Nejc,icsl,0) = POPcsed(0,Nejc,icsl,0)
-     &             + POPcsed(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
-
-C-----DDX spectra for HMS
-              IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-                 IF (POPcsed(Iec,Nejc,icsl,INExc(Nnuc)).GT.0) THEN
-                   DO nth = 1, NDAng
-                     POPcsea(nth,0,Nejc,icsl,0)
-     &                = POPcsea(nth,0,Nejc,icsl,0)
-     &                + POPcsea(nth,Iec,Nejc,icsl,INExc(Nnuc))*fnor
-     &                                                      *popll/pop1
-                    ENDDO
-                 ENDIF
+     &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))
+     &            *fnor*popll*DE/pop1
                ENDIF
-
-              ENDIF
             ENDIF
             IF (poph.GT.0.0D+0) THEN
                IF (ENDf(Nnuc).EQ.1) THEN
@@ -225,11 +211,13 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
                   IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
      &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
-     &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1
+     &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))
+     &            *fnor*poph*DE/pop1
 
                IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
      &            POPcsed(0,Nejc,icsh,0) = POPcsed(0,Nejc,icsh,0)
-     &             + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+     &             + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph
+     &             *DE/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
 
 C-----DDX spectra for HMS
                 IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
@@ -238,7 +226,7 @@ C-----DDX spectra for HMS
                        POPcsea(nth,0,Nejc,icsh,0)
      &                  = POPcsea(nth,0,Nejc,icsh,0)
      &                  + POPcsea(nth,Iec,Nejc,icsh,INExc(Nnuc))*fnor
-     &                                                       *poph/pop1
+     &                  *poph*DE/pop1
                     ENDDO
                   ENDIF
                  ENDIF
