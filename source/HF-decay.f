@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4749 $
+Ccc   * $Rev: 4751 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-08-26 23:23:38 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -525,7 +525,7 @@ C-----------Distribute yrast population over discrete levels
                 ded = DE
               ENDIF
               IF (IOUt.GT.1) WRITE (8,
-     &'('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='', G12.5\)'
+     &'('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='', G12.5$)'
      & ) ke, FLOAT(ip)*(FLOAT(jcn) + HIS(nnur)), POP(ke,jcn,ipar,nnuc)
      &   *ded
 C
