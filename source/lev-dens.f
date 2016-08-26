@@ -1,6 +1,6 @@
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-24 16:58:03 +0200 (Mi, 24 Aug 2016) $
-Ccc   * $Id: lev-dens.f 4739 2016-08-24 14:58:03Z mherman $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-26 10:58:45 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Id: lev-dens.f 4747 2016-08-26 08:58:45Z rcapote $
 C
 C
 C
@@ -1321,7 +1321,8 @@ C
 C Local variables
 C
       REAL*8 am, amas, arg, atil, e, enorm, eo,
-     &                 eom, exl, ro_u, ro_j, ro_pi,rolowint, sigh, sigl, 
+C    &                 eom, exl, ro_u, ro_j, ro_pi,rolowint, sigh, sigl, 
+     &                 eom, exl, ro_u, ro_j,       rolowint, sigh, sigl, 
      &                 t, tm, u, ux, xj
       REAL*8 FSHELL, ratio(1:2), a1, b1, c1
       INTEGER i, ig, igna, iter, j, igs
