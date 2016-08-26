@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4750 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-26 18:24:57 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4752 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-26 23:26:04 +0200 (Fr, 26 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -486,12 +486,12 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
 !     &                POPcseaf(0,1,ie,INExc(19)),
 !     &                POPcseaf(0,1,ie,0),
 !     Sum of fractions over all nuclei plus inclusive
-     &            SUM(POPcseaf(0,1,ie,0:106)),
-     &            SUM(POPcseaf(0,2,ie,0:106)),
-     &            SUM(POPcseaf(0,3,ie,0:106)),
-     &            SUM(POPcseaf(0,4,ie,0:106)),
-     &            SUM(POPcseaf(0,5,ie,0:106)),
-     &            SUM(POPcseaf(0,6,ie,0:106))
+     &            SUM(POPcseaf(0,1,ie,0:ndexclus)),   
+     &            SUM(POPcseaf(0,2,ie,0:ndexclus)),
+     &            SUM(POPcseaf(0,3,ie,0:ndexclus)),
+     &            SUM(POPcseaf(0,4,ie,0:ndexclus)),
+     &            SUM(POPcseaf(0,5,ie,0:ndexclus)),
+     &            SUM(POPcseaf(0,6,ie,0:ndexclus))
 !     Inclusive fractions only for all ejectiles
 !     &            POPcseaf(0,1,ie,0),
 !     &            POPcseaf(0,2,ie,0),
