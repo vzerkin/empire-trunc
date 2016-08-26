@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4749 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -72,6 +72,10 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
         WRITE (12,*) '*******************************************'
         WRITE (12,*) 
       ENDIF 
+
+      do nnuc=1,NNUcd
+        if (CSPrd(nnuc).lt.CSMinim) CSPrd(nnuc)=0.d0
+      enddo
 C
 C---- ENDF spectra printout (exclusive representation)
 C----
@@ -93,15 +97,16 @@ C     ENDDO
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
 
          IF (ENDf(nnuc).EQ.1) THEN
-           IF (CSPrd(nnuc).GT.CSMinim .or. 
-     >        (CSPrd(nnuc).GT.0.d0 .and. EINl.LT.1.d0)) THEN
+C           IF (CSPrd(nnuc).GT.CSMinim .or. 
+C    >        (CSPrd(nnuc).GT.0.d0 .and. EINl.LT.1.d0)) THEN
+            IF (CSPrd(nnuc).GT.0) THEN 
 
              DO nejc = 0, NDEJC         !loop over ejectiles
 
 C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
 
-                IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim .and.
-     >              EINl.GT.1.d0 ) CYCLE
+C               IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim .and.
+C    >              EINl.GT.1.d0 ) CYCLE
 C 
 !                IF(ENDfp(nejc,nnuc).NE.1) THEN
 !C                  To add ENDF() exclusive spectra to inclusive
@@ -200,8 +205,8 @@ c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
                         DO nang = 1, NDANG  ! over angles
                           csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
                         ENDDO
-                        check_DL(il)=
-     &                    max(2.0d0*PI*csum*PI/(NDAng - 1),1.d-10)  ! PI/90.d0
+                        check_DL(il)=	2.0d0*PI*csum*PI/(NDAng - 1)
+c    &                    max(2.0d0*PI*csum*PI/(NDAng - 1),1.d-10)  ! PI/90.d0
                      ENDDO                                
                    ENDIF
 C

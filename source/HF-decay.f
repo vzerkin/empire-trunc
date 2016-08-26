@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4744 $
+Ccc   * $Rev: 4749 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-25 13:24:56 +0200 (Do, 25 Aug 2016) $
+Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -525,7 +525,7 @@ C-----------Distribute yrast population over discrete levels
                 ded = DE
               ENDIF
               IF (IOUt.GT.1) WRITE (8,
-     & '('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='',   G12.5)'
+     &'('' Yrast state at bin'',I4,'' spin='',F5.1,'' pop='', G12.5\)'
      & ) ke, FLOAT(ip)*(FLOAT(jcn) + HIS(nnur)), POP(ke,jcn,ipar,nnuc)
      &   *ded
 C
@@ -551,8 +551,10 @@ C-------------Look for the discrete level with the closest spin
                   SCRtl(il,0) = 1.0D0/xnl
                   DENhf = DENhf + SCRtl(il,0)
                   IF (IOUt.GT.1) WRITE (8,
-     &'(10X,I3,''% of this was assumed to populate level #'',
-     &I3)') INT(100./xnl), il
+     &'(3H - ,I3,''% populating lev # '',I3)') INT(100./xnl), il
+C                 IF (IOUt.GT.1) WRITE (8,
+C    &'(10X,I3,''% of this was assumed to populate level #'',
+C    &I3)') INT(100./xnl), il
                 ENDIF
               ENDDO
             ENDIF
@@ -677,8 +679,9 @@ C
       ENDIF
 
       csum = 0.d0
-      IF(CSPrd(nnuc).gt.CSMinim .or. 
-     &   (CSPrd(nnuc).gt.0.d0 .and. EINl.LT. 1.d0) ) THEN
+C     IF(CSPrd(nnuc).gt.CSMinim .or. 
+C    &   (CSPrd(nnuc).gt.0.d0 .and. EINl.LT. 1.d0) ) THEN
+      IF (CSPrd(nnuc).gt.0) THEN 
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
              WRITE (12,*)
@@ -721,7 +724,8 @@ C
              DO il = 1, NLV(nnuc)
                csum = csum + POPlv(il,nnuc)
              ENDDO 
-             IF(csum.gt.CSMinim) THEN
+C            IF(csum.gt.CSMinim) THEN
+             IF(csum.gt.0) THEN
                IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
      &  3X,''NOTE:   was not included in emission spectra and direct ''/
@@ -743,7 +747,8 @@ C
                  
          ENDIF
           
-         IF(csum.gt.CSMinim) THEN
+C        IF(csum.gt.CSMinim) THEN
+         IF(csum.gt.0) THEN
            DO il = 1, NLV(nnuc)
              IF(ISIsom(il,Nnuc).EQ.0) THEN
                WRITE (8,99070) il, ELV(il,nnuc),
@@ -785,7 +790,8 @@ C        Primary gammas printout
              DO il = 1, NLV(nnuc)
                cspg = cspg + CSEpg(il) 
              ENDDO
-             IF(cspg.gt.CSMinim) then
+C            IF(cspg.gt.CSMinim) then
+             IF(cspg.gt.0) then 
                WRITE (12,*)
                WRITE (12,'(1X,/,10X,40(1H-),/)')
                WRITE (12,'(2x,
@@ -823,7 +829,8 @@ C
 C        Primary gammas done 
 
          IF ( (nnuc.EQ.1 .OR. nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
-     &           nnuc.EQ.mt849) .AND. (csum.gt.CSMinim)) THEN
+     &           nnuc.EQ.mt849) .AND. (csum.gt.0)) THEN
+C    &           nnuc.EQ.mt849) .AND. (csum.gt.CSMinim)) THEN
 C            WRITE (12,'(1X,/,10X,40(1H-),/)')
              WRITE (12,*) ' '
 C------------Write Int. Conv. Coefff. for discrete transitions
@@ -863,7 +870,7 @@ C
       jn = min(INT(A(1))-ia-jz,20)  ! adding protection for higher energies
 
 C     IF ( (CSPrd(nnuc).GT.CSMinim) .OR. (csum.gt.CSMinim) ) THEN
-      IF ( CSPrd(nnuc).GT.0.d0 ) THEN
+      IF ( (CSPrd(nnuc).GT.0) .OR. (csum.gt.0) ) THEN
            IF (kemin.EQ.NEX(nnuc) .AND. nnuc.EQ.1) WRITE (8,
      &'(1X,''(no gamma cascade in the compound nucleus, primary transiti
      &ons only)'',/)')
@@ -1333,7 +1340,8 @@ C         number of discrete levels is limited to 40
 
       ENDIF
 
-      IF(CSPrd(nnuc).GT.CSMinim) THEN
+C     IF(CSPrd(nnuc).GT.CSMinim) THEN
+      IF(CSPrd(nnuc).GT.0) THEN
            nejc=-1
            IF(nnuc.eq.mt91 ) nejc=1
            IF(nnuc.eq.mt649)  nejc=2
@@ -1370,36 +1378,25 @@ C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
 
       IF (CSFis.gt.0.) WRITE (12,5753) iz, SYMb(nnuc), ia, CSFis
 
-      IF(CSPrd(nnuc).gt.0.d0) then 
+      IF(CSPrd(nnuc).gt.0) then 
            WRITE (12,*)
            WRITE (8,*)
-C          IF(CSPrd(nnuc).GT.CSMinim) then
-              WRITE (8,
+           WRITE (8,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
      &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-              WRITE (12,
+           WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
      &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, CSPrd(nnuc),
      &                             REAction(nnuc)
-C          ELSE
-C             CSPrd(nnuc) = 0.d0
-C             WRITE (8,
-C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section '',G12.6,
-C    &'' mb  '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-C    &                             REAction(nnuc)
-C             WRITE (12,
-C    &'(1X,I3,''-'',A2,''-'',I3,'' production cross section'',G12.6,
-C    &''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 0.d0,
-C    &                             REAction(nnuc)
-C          ENDIF
-           
+         
            ftmp_disc = 0.d0
            IF(nnuc.eq.mt91) ftmp_disc = CSDirlev(1,1)
            IF(nnuc.eq.mt649) ftmp_disc = CSDirlev(1,2)
            IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
 
-           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.CSMinim) then
+C          IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.CSMinim) then
+           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.0) then
 C
              CSInc(nnuc) = max(CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc,0.d0)
 C
@@ -1410,7 +1407,7 @@ C
            ELSE
              CSInc(nnuc) = 0.d0
 C            IF(CSPrd(nnuc).GT.CSMinim) WRITE (12,
-                                        WRITE (12,
+             WRITE (12,
      &'(1X,I3,''-'',A2,''-'',I3,'' inclusive  cross section'',G12.6,
      &       ''  mb '',''      reac: '',A21)') iz, SYMb(nnuc), ia, 
      &       0.d0, REAction(nnuc)
@@ -1432,7 +1429,8 @@ C        Integral is calculated by trapezoidal rule being consistent with cross 
 
          xcross(0,jz,jn) = CSEmis(0,nnuc)
 C----------------------------------------------------------------------
-         IF(CSPrd(nnuc).GT.CSMinim) THEN
+C        IF(CSPrd(nnuc).GT.CSMinim) THEN
+         IF(CSPrd(nnuc).GT.0) THEN
            DO nejc = 1, NEJcm
              ares = A(nnuc) - AEJc(nejc)
              zres = Z(nnuc) - ZEJc(nejc)

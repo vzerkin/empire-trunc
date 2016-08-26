@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4749 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -63,7 +63,8 @@ C
       totspec = totspec - 
      &          0.5d0*(CSEt(1,Nejc) + CSEt(kmax,Nejc))
       totspec = totspec*DE     
-      IF (totspec.LE.CSMinim) RETURN
+C     IF (totspec.LE.CSMinim) RETURN
+      IF (totspec.LE.0) RETURN
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN
@@ -219,7 +220,8 @@ C
         totspec  = totspec  + ftmp/itmp 
         esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
-      IF (totspec*DE.LE.CSMinim) RETURN
+C     IF (totspec*DE.LE.CSMinim) RETURN
+      IF (totspec*DE.LE.0) RETURN
 
       WRITE (12,*) ' '
       ia = AEJc(Nejc)
@@ -365,6 +367,15 @@ C          Subtract anisotropic contribution to CM emission spectrum
             ELSE                                 ! all non-HMS cases
            ftmp = (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
      &            )/PIx4
+C
+C           TO PRINT NEGATIVE DDXS 
+C
+            if (ftmp.lt.0) then
+              write(*,*) CSE(ie,nejc,0), 
+     &        CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
+            endif
+C
+C
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp +
      &                CSEa(ie,nang,nejc)*POPcseaf(0,nejc,ie,0)
@@ -559,7 +570,8 @@ C
      &          0.5d0*(CSE(1,Nejc,Nnuc) + CSE(kmax,Nejc,Nnuc))
       totspec = totspec*DE     
 
-      IF (totspec.LE.CSMinim) RETURN
+C     IF (totspec.LE.CSMinim) RETURN
+      IF (totspec.LE.0) RETURN 
 
       ia = AEJc(Nejc)
       IF (Nejc.EQ.0) THEN

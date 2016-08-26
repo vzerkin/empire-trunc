@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4736 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-23 02:55:40 +0200 (Di, 23 Aug 2016) $
+Ccc   * $Rev: 4749 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -31,9 +31,10 @@ C
       CHARACTER*21 reactionx
       INTEGER nejc,i,nnuc,jn,jz,iz,ia,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
-      DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
+C     DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
+      DOUBLE PRECISION     xnub,csinel,s_factor,qout,dtmp
       LOGICAL lprint
-      DATA eps/1.d-8/
+C     DATA eps/1.d-8/
 
       DOUBLE PRECISION, external :: mu_bar, SFACTOR
 
@@ -42,9 +43,9 @@ C
       IF(INT(AEJc(0)).GT.0 .and. INT(ZEJc(0)).EQ.0) ! for neutrons
      >  csinel=CSPrd(2)-PIx4*ELCncs
 
-      if (csinel.lt.eps) csinel=0.d0
+      if (csinel.lt.CSMinim) csinel=0.d0
       do nnuc=1,NNUcd
-        if (CSPrd(nnuc).lt.eps) CSPrd(nnuc)=0.d0
+        if (CSPrd(nnuc).lt.CSMinim) CSPrd(nnuc)=0.d0
       enddo
 
       if(NUBarread) then
