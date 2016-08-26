@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE EMPIRE_PREEQ
      &     (xsinl,xsmsc,tothms,totemis,corrmsd,totcorr,nvwful)
@@ -161,7 +161,7 @@ C
 C             Following changes in PCROSS to cover discrete levels , Jan 2011
               DO i = 1, MAX(INT(echannel/DE + 1.0001),1)
                 WRITE (8,'(1X,F7.3,1X,11E11.4)') FLOAT(i - 1)*DE,
-     &           (max(CSEa(i,iang,nejc,1),0.d0),iang = iad,iam)
+     &           (max(CSEa(i,iang,nejc),0.d0),iang = iad,iam)
               ENDDO
               WRITE (8,*) ' '
             ENDDO

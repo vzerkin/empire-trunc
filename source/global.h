@@ -1,6 +1,6 @@
-! $Rev: 4683 $
-! $Author: rcapote $
-! $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+! $Rev: 4745 $
+! $Author: bcarlson $
+! $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -26,7 +26,7 @@
      &                 CSDirlev(ndlv,0:ndejc), ATIlnoz(NDZmax),         &
      &                 CSE(ndecse,0:ndejc,0:ndnuc),ECOnt(0:ndnuc),      &
      &                 CSEt(ndecse,0:ndejc),CSEpg(ndlv),ENPg(ndlv),     &
-     &                 CSEa(ndecse,ndangecis,0:ndejc,0:1), CSDbrkup(6), &
+     &                 CSEa(ndecse,ndangecis,0:ndejc), CSDbrkup(6),     &
      &                 CSEfis(NDEPFN,0:ndejc,0:ndnuc), CSPfis(0:ndnuc), &
      &                 CSEmis(0:ndejc,0:ndnuc), CSEmsd(ndecse,0:ndejc), &
      &                 CSFis, CSFus, CSGdr1, CSGdr2, COEf, ELCncs,      &

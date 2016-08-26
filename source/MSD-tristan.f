@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3016,7 +3016,7 @@ C-----------------store ddx to continuum
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
      &                THEN
-                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm/2
+                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigm/2
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
 C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
@@ -3024,7 +3024,7 @@ C                 ELSEIF (IDNa(2*nej - 1,2).NE.0 .AND. necs.GE.NEX(nnur)
      &                    necs.GT.(NEX(nnur)-1)) THEN
 C    &                    necs.GT.(NEX(nnur)  )) THEN
 C    &                    necs.GT.(NEX(nnur)+1)) THEN
-                     CSEa(necs,na,nej,1) = CSEa(necs,na,nej,1) + sigm/2
+                     CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigm/2
                   ENDIF
                ENDIF
             ENDDO  ! over ne
@@ -3040,9 +3040,9 @@ C
       DO ne = 2, Nbinx
         necs = (Nbinx - ne)/2 + 2
         DO na = 1, 3
-          f4tmp = CSEa(necs,na,nej,1)
-          if(f4tmp.lt.CSEa(necs,4,nej,1)) 
-     >        CSEa(necs,na,nej,1) = CSEa(necs,4,nej,1)
+          f4tmp = CSEa(necs,na,nej)
+          if(f4tmp.lt.CSEa(necs,4,nej)) 
+     >        CSEa(necs,na,nej) = CSEa(necs,4,nej)
         ENDDO
       ENDDO
 C===========================================================================
@@ -3064,8 +3064,8 @@ C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
       DO ne = 1, nmax
          ftmp = 0.d0
          DO na = 1, nangle
-            ftmp = ftmp +     CSEa(ne,nangle - na + 1,nej,1)
-            csfit(na) = CSEa(ne,nangle - na + 1,nej,1)
+            ftmp = ftmp +     CSEa(ne,nangle - na + 1,nej)
+            csfit(na) = CSEa(ne,nangle - na + 1,nej)
          ENDDO
 C
 C        write(*,'(i3,2x,4(f7.4,1x))')  
@@ -3276,7 +3276,7 @@ C--------------DDX
 C   equivalent to POPcseaf when only the 1st emission is anisotropic
 C               DO na = 1,NDANG
 C                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
-C     &                                             CSEa(icsp,na,Nejc,1)
+C     &                                             CSEa(icsp,na,Nejc)
 C                ENDDO
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
@@ -3302,7 +3302,7 @@ C-----------divides outgoing energies
                 weight = (erecoil - (irec - 1)*DERec)/DERec
 C               IF (irec + 1.GT.NDEREC) GOTO 20
                 IF (irec + 1.GT.NDEREC) EXIT
-                csmsdl = CSEa(nexrt - ie + 1,na,Nejc,1)*SANgler(na)
+                csmsdl = CSEa(nexrt - ie + 1,na,Nejc)*SANgler(na)
      &                        *coeff
                 RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
      &                  + csmsdl*(1.d0 - weight)
@@ -3358,7 +3358,7 @@ C
                irec = erecoil/DERec + 1.001
                weight = (erecoil - (irec - 1)*DERec)/DERec
                IF (irec + 1.GT.NDEREC) EXIT
-               csmsdl = CSEa(ie,na,Nejc,1)*SANgler(na)*coeff*DE
+               csmsdl = CSEa(ie,na,Nejc)*SANgler(na)*coeff*DE
                RECcse(irec,0,Nnur) = RECcse(irec,0,Nnur)
      &            + csmsdl*(1.d0 - weight)
                RECcse(irec + 1,0,Nnur) = RECcse(irec + 1,0,Nnur)
@@ -3462,9 +3462,9 @@ C--------Normalization factor
 C--------Store ang. dist.
          DO na = 1, NDANG
             CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc)
-     &                           + xnor*CSEa(ie,na,Nejc,1)
+     &                           + xnor*CSEa(ie,na,Nejc)
 C           Deleting the corresponding angular distribution
-            IF (ENDf(1).GT.0) CSEa(ie,na,Nejc,1) = 0.d0
+            IF (ENDf(1).GT.0) CSEa(ie,na,Nejc) = 0.d0
          ENDDO
        ENDDO
 
@@ -3493,7 +3493,7 @@ C        Assigning angular distribution of the first continuum bin
 C        "istart" to the angular distribution of the discrete level "il"
 C                                                    
          do na=1,NDAng 
-           ddxs(na) = CSEa(istart,na,Nejc,1)
+           ddxs(na) = CSEa(istart,na,Nejc)
          enddo
 
          csmsdl = 0.d0
@@ -3507,7 +3507,7 @@ C              as it is moved to discrete spectra
              CSEmsd(ie,Nejc) = 0.d0
 C            Deleting the corresponding angular distribution
              do na=1,NDAng 
-               CSEa(ie,na,Nejc,1) = 0.d0
+               CSEa(ie,na,Nejc) = 0.d0
              enddo
            ENDIF
 C          Commented, RCN, July 2012, probably wrong, CHECK !!!!!

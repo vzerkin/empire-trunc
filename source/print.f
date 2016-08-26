@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4741 $
+Ccc   * $Rev: 4745 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-24 22:20:57 +0200 (Mi, 24 Aug 2016) $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -356,29 +356,31 @@ C        ENDIF
 
            IF(ENDF(1).GT.0) THEN
 C          Subtract anisotropic contribution to CM emission spectrum
-!           ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI  !WARNING: COULD BE NEEDED FOR HMS
-           ftmp = (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
-     &            )/PIx4
+
             IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
+              ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI 
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,nejc,ie,0)
               ENDDO
             ELSE                                 ! all non-HMS cases
+           ftmp = (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
+     &            )/PIx4
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp +
-     &                CSEa(ie,nang,nejc,1)*POPcseaf(0,nejc,ie,0)
+     &                CSEa(ie,nang,nejc)*POPcseaf(0,nejc,ie,0)
               ENDDO
             ENDIF
            ELSE   ! ENDF(1)=0 option (no ENDF formating)
             IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
-              ftmp = (CSE(ie,nejc,0) - CSEhms(ie,nejc,0))/PIx4
+c              ftmp = (CSE(ie,nejc,0) - CSEmsd(ie,nejc))/PIx4
+              ftmp = CSE(ie,nejc,0)/PIx4
               DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + CSEahms(ie,nang,nejc)
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc)
               ENDDO
             ELSE                                 ! all non-HMS cases
               ftmp = CSE(ie,nejc,0)/PIx4
               DO nang = 1, NDANG
-                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc,1)
+                cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc)
               ENDDO
             ENDIF
            ENDIF

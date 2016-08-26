@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4737 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-23 08:21:49 +0200 (Di, 23 Aug 2016) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -87,9 +87,13 @@ C-----
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)  !exclusive spectra stored
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
-               IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+               IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)   
      &         POPcseaf(0,Nejc,icse,0) = POPcseaf(0,Nejc,icse,0)
      &         + POPcseaf(Iec,Nejc,icse,INExc(Nnuc))*fnor
+
+               IF(POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0)
+     &            POPcsed(ie,Nejc,icse,0) = POPcsed(ie,Nejc,icse,0)
+     &                + POPcsed(Iec,Nejc,icse,INExc(Nnuc))*fnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
             ENDIF
 C
 C           CN emission angular distribution to the continuum
@@ -181,6 +185,11 @@ C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
      &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
      &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1
+
+               IF(POPcsed(Iec,Nejc,icsl,INExc(Nnuc)).GT.0)
+     &            POPcsed(0,Nejc,icsl,0) = POPcsed(0,Nejc,icsl,0)
+     &             + POPcsed(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+
                ENDIF
             ENDIF
             IF (poph.GT.0.0D+0) THEN
@@ -192,6 +201,11 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
      &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
      &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1
+
+               IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
+     &            POPcsed(0,Nejc,icsh,0) = POPcsed(0,Nejc,icsh,0)
+     &             + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+
                ENDIF
             ENDIF
          ENDIF

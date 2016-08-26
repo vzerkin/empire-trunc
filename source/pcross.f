@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -791,7 +791,7 @@ C     totemis = 0.D0
             Call Kalbach( ac, zp, ap-zp, zo, ao-zo, EINl, EXCn,
      &              ebind, eee, ftmp, fanisot, ddxs, CANgle, NDAng, PI)
             DO iang = 1, NDANG
-              CSEa(ie,iang,nejc,1) = CSEa(ie,iang,nejc,1) + ddxs(iang)
+              CSEa(ie,iang,nejc) = CSEa(ie,iang,nejc) + ddxs(iang)
             ENDDO
          ENDDO
       ENDDO

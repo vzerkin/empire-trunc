@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4689 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1476,7 +1476,7 @@ C Neutron DDX
             DO nti=1,nthi
               pops=DBRkup*dbf(nti,nx)
               nxe=nxx+2-nx
-              CSEa(nxe,nti,1,1) = CSEa(nxe,nti,1,1) + pops
+              CSEa(nxe,nti,1) = CSEa(nxe,nti,1) + pops
              END DO
            END DO
         
@@ -1526,7 +1526,7 @@ C Proton DDX
           DO nx=1,nxx
             DO nti=1,nthi
               pops=DBRkup*dbf(nti,nx)
-              CSEa(nx+1,nti,2,1) = CSEa(nx+1,nti,2,1) + pops
+              CSEa(nx+1,nti,2) = CSEa(nx+1,nti,2) + pops
              END DO
            END DO
         

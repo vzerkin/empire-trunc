@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4740 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -237,7 +237,7 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
      &                  /PIx4,0.d0)
                        DO nang = 1, NDANG
                          cseaprnt(ie,nang) =
-     &                     ftmp + CSEa(ie,nang,nejc,1)*
+     &                     ftmp + CSEa(ie,nang,nejc)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
                        ENDDO

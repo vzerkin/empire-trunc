@@ -1,11 +1,11 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
       MODULE empcess
 
-      DOUBLE PRECISION, ALLOCATABLE :: CSEhms(:,:,:)
-      DOUBLE PRECISION, ALLOCATABLE :: CSEahms(:,:,:)
+C      DOUBLE PRECISION, ALLOCATABLE :: CSEhms(:,:,:)
+C      DOUBLE PRECISION, ALLOCATABLE :: CSEahms(:,:,:)
       DOUBLE PRECISION, ALLOCATABLE :: POPcsea(:,:,:,:,:)
       DOUBLE PRECISION, ALLOCATABLE :: CSHms(:,:)
 C     not used at present
@@ -35,25 +35,25 @@ C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
         mydexclus = ndexclus
       ENDIF
 
-      if(allocated(CSEhms)) deallocate(CSEhms)
+C      if(allocated(CSEhms)) deallocate(CSEhms)
 
-      ALLOCATE(CSEhms(mydecse,2,0:mydnuc),STAT=myalloc)
-      IF(myalloc.NE.0) THEN
-        WRITE(8,*) 'Insufficient memory for CSEhms!'
-        WRITE(12,*) 'Insufficient memory for CSEhms!'
-        STOP
-      ENDIF
-      CSEhms = 0.0d0
+C      ALLOCATE(CSEhms(mydecse,2,0:mydnuc),STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(8,*) 'Insufficient memory for CSEhms!'
+C        WRITE(12,*) 'Insufficient memory for CSEhms!'
+C        STOP
+C      ENDIF
+C      CSEhms = 0.0d0
 
-      if(allocated(CSEahms)) deallocate(CSEahms)
+C      if(allocated(CSEahms)) deallocate(CSEahms)
 
-      ALLOCATE(CSEahms(mydecse,ndangecis,2),STAT=myalloc)
-      IF(myalloc.NE.0) THEN
-        WRITE(8,*) 'Insufficient memory for CSEahms!'
-        WRITE(12,*) 'Insufficient memory for CSEahms!'
-        STOP
-      ENDIF
-      CSEahms = 0.0d0
+C      ALLOCATE(CSEahms(mydecse,ndangecis,2),STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(8,*) 'Insufficient memory for CSEahms!'
+C        WRITE(12,*) 'Insufficient memory for CSEahms!'
+C        STOP
+C      ENDIF
+C      CSEahms = 0.0d0
 
       if(allocated(POPcsea)) deallocate(POPcsea)
 
@@ -105,8 +105,8 @@ C     DOUBLE PRECISION, ALLOCATABLE :: CSEahmslab(:,:,:)
 
       SUBROUTINE EMPDAXS
 
-      if(allocated(CSEhms)) deallocate(CSEhms)
-      if(allocated(CSEahms)) deallocate(CSEahms)
+C      if(allocated(CSEhms)) deallocate(CSEhms)
+C      if(allocated(CSEahms)) deallocate(CSEahms)
       if(allocated(POPcsea)) deallocate(POPcsea)
       if(allocated(CSHms)) deallocate(CSHms)
 

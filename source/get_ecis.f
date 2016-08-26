@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4743 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-25 13:08:07 +0200 (Do, 25 Aug 2016) $
+Ccc   * $Rev: 4745 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -383,14 +383,14 @@ C-------------------Use only those values that correspond to EMPIRE grid for ine
                     if(isigma.gt.0 .and. dcor.gt.0.d0) then
                       do ie = max(icsl - 3*isigma,1) ,
      &                        min(icsl + 3*isigma,ncon)
-                        CSEa(ie,iang,nejcec,1) =  CSEa(ie,iang,nejcec,1)
+                        CSEa(ie,iang,nejcec) =  CSEa(ie,iang,nejcec)
      &                  + ftmp * dexp(-dble(ie-icsl)**2/isigma2)/dcor  
 C     &                  * 2 * pi                               ! 2pi taken out, BVC 
                       enddo
                     else
-                      CSEa(icsl,iang,nejcec,1) =
-     &                CSEa(icsl,iang,nejcec,1) + ftmp ! 2 * pi taken out BVC 
-C     &                CSEa(icsl,iang,nejcec,1) + ftmp * 2 * pi ! added 2pi, BVC 
+                      CSEa(icsl,iang,nejcec) =
+     &                CSEa(icsl,iang,nejcec) + ftmp ! 2 * pi taken out BVC 
+C     &                CSEa(icsl,iang,nejcec) + ftmp * 2 * pi ! added 2pi, BVC 
                     endif
                  ENDDO
                ENDIF
