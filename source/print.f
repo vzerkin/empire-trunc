@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4753 $
+Ccc   * $Rev: 4754 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-28 16:01:11 +0200 (So, 28 Aug 2016) $
+Ccc   * $Date: 2016-08-28 18:00:34 +0200 (So, 28 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -778,7 +778,7 @@ C
      &     FLOAT(i - 1)*DE*1.D6/recorp, 
      &       CSE(i,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
       ENDDO
-      CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
+      CALL CLOSE_ZVV_DE(36,'Energy','Emission spectra')
       CLOSE(36)
       RETURN
       END
@@ -854,7 +854,7 @@ C
          WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6/recorp, 
      &       CSEt(i,Nejc)*1.d-3*recorp ! Energy, Spectra in b/MeV
       ENDDO
-      CALL CLOSE_ZVV(36,'Energy','EMISSION SPECTRA')
+      CALL CLOSE_ZVV_DE(36,'Energy','Emission spectra')
       CLOSE(36)
       RETURN
       END

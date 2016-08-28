@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
+Ccc   * $Rev: 4754 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Date: 2016-08-28 18:00:34 +0200 (So, 28 Aug 2016) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -447,6 +447,29 @@ C======================================================
       write(iout,'(A17)') '#end LSTTAB.CUR/c  '
       return
       end   
+
+      SUBROUTINE CLOSE_ZVV_DE(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/u'
+      write(iout,'(A19)') '#begin LSTTAB.CUR/c'
+      if(titlex(1:2).ne.'  ') write(iout,*) 'x: ',trim(titlex)
+      if(titley(1:2).ne.'  ') write(iout,*) 'y: ',trim(titley)
+      write(iout,'(A19)') 'x-scale: auto      '
+      write(iout,'(A17)') 'y-scale: auto      '
+      write(iout,'(A19)')  'x: Energy          '
+      write(iout,'(A24)')  'x-long: Outgoing Energy '
+      write(iout,'(A19)')  'y: Emission spectra'
+      WRITE (iout,'(A19)') 'x-unit: 1e6, (MeV) '
+      WRITE (iout,'(A11)') 'ix-unit: 1 '
+      WRITE (iout,'(A19)') 'y-unit: 1, (b/MeV) '
+      WRITE (iout,'(A11)') 'iy-unit: 1 '
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/c  '
+      return
+      end   
+
 
       SUBROUTINE CLOSE_ZVV_CUMUL(iout,titlex,titley)
       character*(*) titlex,titley
