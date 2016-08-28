@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4755 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-28 18:17:34 +0200 (So, 28 Aug 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4745 $
-C $Id: ddhms.f 4745 2016-08-26 02:20:30Z bcarlson $
+C CVS Version Management $Revision: 4755 $
+C $Id: ddhms.f 4755 2016-08-28 16:17:34Z rcapote $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2478,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4745 $')
+99005 FORMAT ('  xddhms version: $Revision: 4755 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4745 2016-08-26 02:20:30Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4755 2016-08-28 16:17:34Z rcapote $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5922,6 +5922,7 @@ C      CSEmis(1,0) = CSEmis(1,0) + XSN0
       DO ne = 1, nspec
          CSEhm = DXSn(ne-1)
          CSEmsd(ne,1) = CSEmsd(ne,1) + DXSn(ne-1)
+
 C         CSE(ne,1,0) = CSE(ne,1,0) + DXSn(ne-1)
 
          csfit(1) = DDXsn(ne-1,1)
@@ -6185,6 +6186,7 @@ c                chk=chk + DXSnx(ne-1,jz,jn)
                 pops = DXSnx(ne-1,jz,jn)
                 if(ne.eq.1 .or. ne.eq.nspecc) pops = 2*pops
                 CSE(ne,1,nnuc) = CSE(ne,1,nnuc) + pops
+                CSEt(ne,1  )   = CSEt(ne,1  )   + pops
 
                 DO nu = 1, nspecc-ne+1
                  nux = nu+ndspc-1
@@ -6386,6 +6388,7 @@ c               chk=chk+DXSpx(ne-1,jz,jn)
                pops = DXSpx(ne-1,jz,jn)
                IF(ne.EQ.1 .OR. ne.EQ.nspecc) pops = 2*pops
                CSE(ne,2,nnuc) = CSE(ne,2,nnuc) + pops
+               CSEt(ne,2  )   = CSEt(ne,2  )   + pops
 
                DO nu = 1, nspecc-ne+1
                  nux = nu+ndspc-1
