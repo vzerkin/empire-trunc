@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4752 $
+Ccc   * $Rev: 4753 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 23:26:04 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-08-28 16:01:11 +0200 (So, 28 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -360,19 +360,23 @@ C        ENDIF
 C          Subtract anisotropic contribution to CM emission spectrum
 
             IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
-              ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/4.d0/PI 
+              ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/PIx4
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,nejc,ie,0)
               ENDDO
             ELSE                                 ! all non-HMS cases
-           ftmp = (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
-     &            )/PIx4
+C           ftmp= (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
+C    &            )/PIx4
+            ftmp= (CSE(ie,nejc,0) -CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,0)
+     &            )/PIx4  ! BVC
 C
 C           TO PRINT NEGATIVE DDXS 
 C
             if (ftmp.lt.0) then
-              write(*,*) CSE(ie,nejc,0), 
-     &        CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
+              write(12,'(a4,2i5,5f15.5)') 'EXC ',nejc,ie,CSE(ie,nejc,0),
+     &        CSE(ie,nejc,1),CSEmsd(ie,nejc),POPcseaf(0,nejc,ie,0),ftmp
+C             write(*,*) CSE(ie,nejc,0), 
+C    &        CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
             endif
 C
 C
@@ -428,13 +432,13 @@ C    &      FLOAT(nspec)*DE/recorp,
 
          ftmp = 0.d0
          DO ie = 1, nspec 
+           itmp = 1
+           if(ie.eq.1) itmp = 2
            htmp = CSE(ie,nejc,0)
            if(htmp.LE.0.d0) cycle
 C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
            IF(ENDF(1).EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
-           itmp = 1
-           if(ie.eq.1) itmp = 2
            WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
      &       *DE/recorp, htmp*recorp      , check_DE(ie)*recorp     ,
 C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
@@ -468,41 +472,6 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &     ftmp*DE      
       ENDIF
 
-!     Test printout for 56Fe at 96 MeV TO BE DELETED
-      write(8,*) '  '
-      write(8,*) 'Test printout of POPcseaf'
-!      write(8,*) 'ENDf= ',
-!     &ENDf(2), ENDf(3), ENDF(17), ENDf(18), ENDf(19)
-!      write(8,'(''IZA= '',6I15)')
-!     &IZA(2), IZA(3), IZA(17),IZA(18), IZA(19),0
-      write(8,*) '  '
-      do ie=1,NDECSE
-       write(8,'(i5, 7E15.6)') ie,
-!     Fractions for selected  nuclei
-!     &                POPcseaf(0,1,ie,INExc(2)),
-!     &                POPcseaf(0,1,ie,INExc(3)),
-!     &                POPcseaf(0,1,ie,INExc(17)),
-!     &                POPcseaf(0,1,ie,INExc(18)),
-!     &                POPcseaf(0,1,ie,INExc(19)),
-!     &                POPcseaf(0,1,ie,0),
-!     Sum of fractions over all nuclei plus inclusive
-     &            SUM(POPcseaf(0,1,ie,0:ndexclus)),   
-     &            SUM(POPcseaf(0,2,ie,0:ndexclus)),
-     &            SUM(POPcseaf(0,3,ie,0:ndexclus)),
-     &            SUM(POPcseaf(0,4,ie,0:ndexclus)),
-     &            SUM(POPcseaf(0,5,ie,0:ndexclus)),
-     &            SUM(POPcseaf(0,6,ie,0:ndexclus))
-!     Inclusive fractions only for all ejectiles
-!     &            POPcseaf(0,1,ie,0),
-!     &            POPcseaf(0,2,ie,0),
-!     &            POPcseaf(0,3,ie,0),
-!     &            POPcseaf(0,4,ie,0),
-!     &            POPcseaf(0,5,ie,0),
-!     &            POPcseaf(0,6,ie,0)
-
-      enddo
-      write(8,*) '  '
-          
       IF(Nejc.ne.0) THEN
         WRITE (8,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
@@ -510,6 +479,51 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
         WRITE (12,
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),totspec*DE
+
+!       Test printout for 56Fe at 96 MeV TO BE DELETED
+	  IF(Nejc.le.4 .and. IOUT.ge.3) then
+	    ftmp =  SUM(POPcseaf(0,Nejc,0:NDECSE,0:ndexclus))
+	    if(ftmp.gt.0) then
+            write(8,*)
+            IF(Nejc.eq.1)
+     &        write(8,*) ' Test printout of POPcseaf(0,1,ie,...)',
+     &                   ' for all residual nuclei -neutron emitted'
+            IF(Nejc.eq.2)
+     &        write(8,*) ' Test printout of POPcseaf(0,2,ie,...)',
+     &                   ' for all residual nuclei -proton  emitted'
+            IF(Nejc.eq.3)
+     &        write(8,*) ' Test printout of POPcseaf(0,3,ie,...)',
+     &                   ' for all residual nuclei -alpha   emitted'
+            IF(Nejc.eq.4)
+     &        write(8,*) ' Test printout of POPcseaf(0,4,ie,...)',
+     &                   ' for all residual nuclei -deut    emitted'
+!         write(8,*) 'ENDf= ',
+!     &     ENDf(2), ENDf(3), ENDF(17), ENDf(18), ENDf(19)
+!         write(8,'(''IZA= '',6I15)')
+!     &     IZA(2), IZA(3), IZA(17),IZA(18), IZA(19),0
+
+            do ie=1,NDECSE
+  	        ftmp =  SUM(POPcseaf(0,Nejc,ie,0:ndexclus))
+              write(8,'(i5, 7E15.6)') ie, ftmp
+	        IF(ftmp.gt.0.999999d0) EXIT
+!     Fractions for selected  nuclei
+!     &                POPcseaf(0,1,ie,INExc(2)),
+!     &                POPcseaf(0,1,ie,INExc(3)),
+!     &                POPcseaf(0,1,ie,INExc(17)),
+!     &                POPcseaf(0,1,ie,INExc(18)),
+!     &                POPcseaf(0,1,ie,INExc(19)),
+!     &                POPcseaf(0,1,ie,0),
+!     Inclusive fractions only for all ejectiles
+!     &            POPcseaf(0,1,ie,0),
+!     &            POPcseaf(0,2,ie,0),
+!     &            POPcseaf(0,3,ie,0),
+!     &            POPcseaf(0,4,ie,0),
+!     &            POPcseaf(0,5,ie,0),
+!     &            POPcseaf(0,6,ie,0)
+            enddo
+          endif
+        endif
+
       ELSE
         WRITE (8,
      &     '(1x,'' Tot. gamma emission   '',G12.6,'' mb'')') totspec*DE

@@ -1,9 +1,9 @@
-Ccc   * $Rev: 4750 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-26 18:24:57 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4753 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-28 16:01:11 +0200 (So, 28 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
-      USE empcess, ONLY: POPcsea
+C     USE empcess, ONLY: POPcsea
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -47,7 +47,7 @@ C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
      &  popll, pops, popt, xcse, fnor
 
-      INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec, nth
+      INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec !, nth
 !      INTEGER ilevcol, ilev, na
 !      DOUBLE PRECISION GET_DDXS !, GET_DDXScont
 C-----
@@ -88,25 +88,25 @@ C-----
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)  !exclusive spectra stored
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
-               IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)   
-     &         POPcseaf(0,Nejc,icse,0) = POPcseaf(0,Nejc,icse,0)
-     &         + POPcseaf(Iec,Nejc,icse,INExc(Nnuc))*fnor
+C              IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)   
+C    &         POPcseaf(0,Nejc,icse,0) = POPcseaf(0,Nejc,icse,0)
+C    &         + POPcseaf(Iec,Nejc,icse,INExc(Nnuc))*fnor
 
-               IF(POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0)
-     &            POPcsed(ie,Nejc,icse,0) = POPcsed(ie,Nejc,icse,0)
-     &                + POPcsed(Iec,Nejc,icse,INExc(Nnuc))*fnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+C              IF(POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0)
+C    &            POPcsed(ie,Nejc,icse,0) = POPcsed(ie,Nejc,icse,0)
+C    &                + POPcsed(Iec,Nejc,icse,INExc(Nnuc))*fnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
 
 C-----DDX spectra for HMS
-              IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-                 IF (POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0.0) THEN
-                   DO nth = 1, NDAng
-                      POPcsea(nth,0,Nejc,icse,0)
-     &                    = POPcsea(nth,0,Nejc,icse,0)
-     &                    + POPcsea(nth,Iec,Nejc,icse,INExc(Nnuc))*fnor
+C             IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
+C                IF (POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0.0) THEN
+C                  DO nth = 1, NDAng
+C                     POPcsea(nth,0,Nejc,icse,0)
+C    &                    = POPcsea(nth,0,Nejc,icse,0)
+C    &                    + POPcsea(nth,Iec,Nejc,icse,INExc(Nnuc))*fnor
 
-                    ENDDO
-                 ENDIF
-               ENDIF
+C                   ENDDO
+C                ENDIF
+C              ENDIF
             ENDIF
 C
 C           CN emission angular distribution to the continuum
@@ -134,7 +134,7 @@ C-----
          pop1 = Xnor*SCRtl(il,Nejc)
          IF (pop1.le.0) CYCLE
 !         fnor should be pop1/POPbin * (popll or poph)/pop1
-         fnor = pop1/POPbin(Iec,Nnuc)
+         fnor = pop1*DE/POPbin(Iec,Nnuc)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
 C        if(il.eq.LEVtarg) write(8,*)'Elastic pop1=',pop1
@@ -192,47 +192,68 @@ C
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
    
             IF (popll.GT.0.0D+0) THEN
+
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
                ELSE
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
-                  IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
-     &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
-     &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))
-     &            *fnor*popll*DE/pop1
+C                 IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+C    &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
+C    &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))
+C    &            *fnor*popll/pop1
+
+C                 IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
+C    &              POPcsed(0,Nejc,icsl,0) = POPcsed(0,Nejc,icsl,0)
+C    &              + POPcsed(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1 ! feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+
+C-----DDX spectra for HMS
+C                 IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
+C                   IF (POPcsed(Iec,Nejc,icsl,INExc(Nnuc)).NE.0) THEN
+C                    DO nth = 1, NDAng
+C                      POPcsea(nth,0,Nejc,icsl,0)
+C    &                  = POPcsea(nth,0,Nejc,icsl,0)
+C    &                  + POPcsea(nth,Iec,Nejc,icsl,INExc(Nnuc))*fnor
+C    &                  *popll/pop1
+C                   ENDDO
+C                  ENDIF
+C                 ENDIF
+
                ENDIF
+
             ENDIF
+
             IF (poph.GT.0.0D+0) THEN
+
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
                ELSE
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
-                  IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
-     &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
-     &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))
-     &            *fnor*poph*DE/pop1
+C                 IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
+C    &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
+C    &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))
+C    &            *fnor*poph/pop1
 
-               IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
-     &            POPcsed(0,Nejc,icsh,0) = POPcsed(0,Nejc,icsh,0)
-     &             + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph
-     &             *DE/pop1 !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+C                 IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
+C    &              POPcsed(0,Nejc,icsh,0) = POPcsed(0,Nejc,icsh,0)
+C    &              + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1 ! feeding HMS/MSD contribution added to inclusive spectrum POPcsed
 
 C-----DDX spectra for HMS
-                IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-                   IF (POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).NE.0) THEN
-                     DO nth = 1, NDAng
-                       POPcsea(nth,0,Nejc,icsh,0)
-     &                  = POPcsea(nth,0,Nejc,icsh,0)
-     &                  + POPcsea(nth,Iec,Nejc,icsh,INExc(Nnuc))*fnor
-     &                  *poph*DE/pop1
-                    ENDDO
-                  ENDIF
-                 ENDIF
+C                 IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
+C                  IF (POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).NE.0) THEN
+C                    DO nth = 1, NDAng
+C                      POPcsea(nth,0,Nejc,icsh,0)
+C    &                  = POPcsea(nth,0,Nejc,icsh,0)
+C    &                  + POPcsea(nth,Iec,Nejc,icsh,INExc(Nnuc))*fnor
+C    &                  *poph/pop1
+C                   ENDDO
+C                  ENDIF
+C                 ENDIF
 
                ENDIF
             ENDIF
+
          ENDIF
 
 C--------Add CN contribution to direct ang. distributions
