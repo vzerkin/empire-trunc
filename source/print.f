@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4754 $
+Ccc   * $Rev: 4756 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-28 18:00:34 +0200 (So, 28 Aug 2016) $
+Ccc   * $Date: 2016-08-29 10:11:46 +0200 (Mo, 29 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -373,7 +373,7 @@ C
 C           TO PRINT NEGATIVE DDXS 
 C
             if (ftmp.lt.0) then
-              write(12,'(a4,2i5,5f15.5)') 'EXC ',nejc,ie,CSE(ie,nejc,0),
+              write(8,'(a4,2i5,5f15.5)') 'EXC ',nejc,ie,CSE(ie,nejc,0),
      &        CSE(ie,nejc,1),CSEmsd(ie,nejc),POPcseaf(0,nejc,ie,0),ftmp
 C             write(*,*) CSE(ie,nejc,0), 
 C    &        CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
