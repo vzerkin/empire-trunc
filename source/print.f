@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4756 $
+Ccc   * $Rev: 4757 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-29 10:11:46 +0200 (Mo, 29 Aug 2016) $
+Ccc   * $Date: 2016-08-29 16:25:49 +0200 (Mo, 29 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -482,7 +482,7 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
 
 !       Test printout for 56Fe at 96 MeV TO BE DELETED
 	  IF(Nejc.le.4 .and. IOUT.ge.3) then
-	    ftmp =  SUM(POPcseaf(0,Nejc,0:NDECSE,0:ndexclus))
+	    ftmp =  SUM(POPcseaf(0,Nejc,1:NDECSE,0:ndexclus))
 	    if(ftmp.gt.0) then
             write(8,*)
             IF(Nejc.eq.1)
