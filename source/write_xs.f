@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4749 $
+Ccc   * $Rev: 4759 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -23,6 +23,11 @@ C
       DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
+
+      CHARACTER*27 caz 
+      CHARACTER*42 title
+      character*1 part(0:6)
+      data part/'g','n','p','a','d','t','h'/
 
       if(allocated(cseaprnt)) deallocate(cseaprnt)
  
@@ -79,45 +84,15 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
 C
 C---- ENDF spectra printout (exclusive representation)
 C----
-C     DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
-C        IF (ENDf(nnuc).EQ.1 .and. CSPrd(nnuc).GT.0.0D0) THEN
-C           write(*,*) 'Residual nucleus:', NINT(Z(nnuc)),NINT(A(Nnuc))
-C           DO nejc = 1, NDEJC         !loop over ejectiles
-C             IF (POPcs(nejc,INExc(nnuc)).GT.0.d0) 
-C    &           write(*,'(2x,3(I3,1x),A8,2x,I2,2x,d12.6)') 
-C    &            nejc, nnuc, INExc(nnuc),
-C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
-C           ENDDO
-C           write(*,*)
-C        ENDIF 
-C     ENDDO
-
       eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
-
          IF (ENDf(nnuc).EQ.1) THEN
-C           IF (CSPrd(nnuc).GT.CSMinim .or. 
-C    >        (CSPrd(nnuc).GT.0.d0 .and. EINl.LT.1.d0)) THEN
             IF (CSPrd(nnuc).GT.0) THEN 
 
              DO nejc = 0, NDEJC         !loop over ejectiles
 
 C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
-
-C               IF (POPcs(nejc,INExc(nnuc)).LE.CSMinim .and.
-C    >              EINl.GT.1.d0 ) CYCLE
-C 
-!                IF(ENDfp(nejc,nnuc).NE.1) THEN
-!C                  To add ENDF() exclusive spectra to inclusive
-!                   nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-!C------------------(continuum part - same for all particles)
-!                   DO ie = 1, nspec + 1
-!                     CSE(ie,nejc,0) = CSE(ie,nejc,0) +
-!     &                                POPcse(0,nejc,ie,INExc(nnuc))
-!                   ENDDO
-!                   CYCLE
-!                ENDIF
 C 
 C               nnur is the decaying compound: nnur = nnuc - nejc
 C
@@ -161,7 +136,6 @@ C---------------Double the first bin x-sec to preserve integral in EMPEND
      &                  POPcse(0, nejc, 1, INExc(nnuc))*2
 C
 C---------------Exclusive DDX spectra (all particles but gammas)
-                recorp = 1.d0
                 nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
 C               nspec= min(INT(EMAx(nnuc)/DE)    ,NDECSE-1)
 C-------------------------------------------------------------------
@@ -171,13 +145,16 @@ C               nspec= min(INT((EMAx(nnur)-Q(nejc,nnur))/DE) + 1,
 C    &                     NDECSE-1)
 C               dang = PI/FLOAT(NDANG - 1)
                 IF (nejc.GT.0) THEN
-                  WRITE (12,*) ' '
-                  WRITE (12,*) ' Spectrum of ', cejectile,
+                   WRITE (12,*) ' '
+                   WRITE (12,*) ' Spectrum of ', cejectile,
      &                         REAction(nnuc), ' ZAP= ', iizaejc
-C-----------------recorp is a recoil correction factor defined 1+Ap/Ar that
-C-----------------multiplies cross sections and divides outgoing energies
-                  IF (RECoil.GT.0) 
-     &              recorp = 1.d0 + EJMass(nejc)/AMAss(nnuc)
+C------------------recorp is a recoil correction factor defined 1+Ap/Ar that
+C------------------multiplies cross sections and divides outgoing energies
+C                  recorp = 1.d0
+C                  IF(RECoil.gt.0) ! using the mass of the corresponding CN nnur
+C                  recorp = 1.d0 + EJMass(nejc)/AMAss(nnur) 
+C                  IF(RECoil.gt.0) ! using the mass of the CN for all (to keep the same energy grid)
+                   recorp = 1.d0 + EJMass(nejc)/AMAss(1) 
                    WRITE (12,
      &                      '(30X,''A     n     g     l     e     s '')'
      &                      )
@@ -268,6 +245,64 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
      &               min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp),
      &                (cseaprnt(iprn + 1,nang)*recorp,nang = 1,NDANG)
                    WRITE (12,*) ' '    
+
+C***********************************************************************  
+                   IF(nejc.eq.1 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+C                    write(*,*) 'exclusive: DE=',DE,' reccor=', recorp,
+C    >                    ' CN=',NINT(A(nnuc)),NINT(Z(nnuc))
+C                    ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
+                     itmp = 0
+	               do nang=16,76,60
+                      itmp = itmp + 1
+C****                 Only two angles can be selected to print DDXS !!!
+                      if(itmp.gt.2) EXIT
+
+                      if(SYMb(Nnuc)(2:2).eq.' ') then
+                        write(caz,'(A4,I2.2,A1,I3.3,A3,A1,A2,I3.3,A7)')
+     &                    'DDe_',int(Z(nnur)), SYMb(nnur)(1:1),
+     &                    int(A(nnur)),'(z,',part(Nejc),')_',
+     &                    NINT(ANGles(nang)),'deg.zvd'
+                      else
+                        write(caz,'(A4,I2.2,A2,I3.3,A3,A1,A2,I3.3,A7)')
+     &                    'DDe_',int(Z(nnur)), SYMb(nnur)(1:2),
+     &                    int(A(nnur)),'(z,',part(Nejc),')_',
+     &                    NINT(ANGles(nang)),'deg.zvd'
+                      endif
+    	                OPEN(36,file=caz,status='unknown')
+                    
+                      write(title,'(a17, i2,1h-,A2,1h-,
+     &                  I3,3h(z, ,a1, 2h): ,F8.2, 2Hmb)')
+     &                  'tit: Emission XS ',int(Z(Nnur)),SYMb(Nnur),
+     &                  int(A(Nnur)),part(Nejc),CSPrd(Nnuc)
+
+                      if(SYMb(Nnuc)(2:2).eq.' ') then
+                        CALL OPEN_ZVV(36,
+     &                   caz(5:10)//' (z,'//part(Nejc)//') '//caz(17:22)
+     &                   , title)
+                      else
+                        CALL OPEN_ZVV(36,
+     &                   caz(5:11)//' (z,'//part(Nejc)//') '//caz(18:23)
+     &                   , title)
+                      endif
+
+	                DO ie = 1, iprn
+		            IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
+                        CSEat(ie,itmp)=CSEat(ie,itmp) +cseaprnt(ie,nang)
+		            WRITE (36,'(1X,E12.6,3X,E12.6)') 
+     &                    FLOAT(ie - 1)*DE*1.D6/recorp, 
+     &                    cseaprnt(ie,nang)*recorp*1.d-9 ! DDXS in b/eV/str
+                      ENDDO
+  	                WRITE (36,'(1X,E12.6,3X,E12.6)') 1.D6* 
+                        ! exact DDX spectrum endpoint
+     &                  min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp), 
+     &                  cseaprnt(iprn + 1,nang)*recorp*1.d-9 ! DDXS in b/eV/str
+	                CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
+	                CLOSE(36)
+                     enddo
+
+                   ENDIF
+C***********************************************************************  
+
 C
 C                  Integrated spectrum
 C
@@ -375,6 +410,7 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
 
                 ELSE !  (nejc=0) GAMMAS
 C
+                   recorp = 1.d0
 C------------------Exclusive DE spectra (gammas)
 C
 C                  write(*,*) 'Emax(nnuc)=',EMAx(nnuc),nnuc
@@ -409,7 +445,6 @@ C                  write(*,*) 'Emaxnp=',EMAx(MT91) -Q(2,MT91)
                        esum = esum + htmp*DE/itmp*FLOAT(iemm)*DE
                        WRITE (12,'(F10.6,E14.5)') FLOAT(iemm)*DE, htmp
                      ENDDO
-C                    WRITE (12,'(F10.6,E14.5)') EMAx(nnuc), 0.d0
                      WRITE (12,'(F10.6,E14.5)') 
 C                    A different way of calculating the Q-value using the 
 C                    residual and ejectile

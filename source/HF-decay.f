@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4751 $
+Ccc   * $Rev: 4759 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 23:23:38 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1449,8 +1449,8 @@ C            IF(CSEmis(nejc,nnuc).LE.1.d-8) CYCLE
 C            WRITE (12,
 C    &           '(11X,A2,'' emission cross section'',G12.6,''  mb'')')
 C    &             SYMbe(nejc), CSEmis(nejc,nnuc)
-             IF (ENDf(nnuc).EQ.1 .and. FIRst_ein .and. IOUT.GT.5 .and.
-     &           AEJc(0).LE.4.)  ! excluding HI reactions
+             IF (ENDf(nnuc).EQ.1 .and. dabs(EINl-EDDfig).le.1.d-5 .and. 
+     &           AEJc(0).LE.4. .and. nejc.le.3)  ! excluding HI reactions
      &           CALL PLOT_EMIS_SPECTRA(nnuc,nejc)
 C
 C            Integral is calculated by trapezoidal rule being consistent with cross section

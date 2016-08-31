@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4757 $
+Ccc   * $Rev: 4759 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-29 16:25:49 +0200 (Mo, 29 Aug 2016) $
+Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -183,6 +183,10 @@ C
       DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION esum !, dtot, dincl
+      CHARACTER*21 caz 
+      CHARACTER*34 title
+      character*1 part(0:6)
+      data part/'g','n','p','a','d','t','h'/
 
       INTEGER i, ia, kmax, ie, itmp
 
@@ -295,7 +299,6 @@ C99010 FORMAT (1X,/,1X,54('*'),1X,I3,'-',A2,' spectrum  ',54('*'))
 C        ENDIF
          recorp = 1.d0 
          IF (RECoil.GT.0) recorp=(1.d0+EJMass(nejc)/AMAss(1))
-
          WRITE (8,*) ' '
          WRITE (8,'(''    Energy    mb/MeV'')')
          WRITE (8,*) ' '
@@ -352,9 +355,10 @@ C        ENDIF
          WRITE (12,*) ' '
          WRITE (12,'('' Energy   '',8G15.5,/,(10X,8G15.5))')
      &                      (ANGles(nang),nang=1,NDANG)
+
          cseaprnt = 0.d0
          DO ie = 1, nspec + 1
-         if(CSE(ie,nejc,0).le.0.d0) cycle
+           if(CSE(ie,nejc,0).le.0.d0) cycle
 
            IF(ENDF(1).GT.0) THEN
 C          Subtract anisotropic contribution to CM emission spectrum
@@ -365,21 +369,19 @@ C          Subtract anisotropic contribution to CM emission spectrum
                 cseaprnt(ie,nang) = ftmp + POPcsea(nang,0,nejc,ie,0)
               ENDDO
             ELSE                                 ! all non-HMS cases
-C           ftmp= (CSE(ie,nejc,0) - CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0)
+C             ftmp=(CSE(ie,nejc,0)-CSE(ie,nejc,1) *POPcseaf(0,nejc,ie,0)
 C    &            )/PIx4
-            ftmp= (CSE(ie,nejc,0) -CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,0)
+              ftmp=(CSE(ie,nejc,0)-CSEmsd(ie,nejc)*POPcseaf(0,nejc,ie,0)
      &            )/PIx4  ! BVC
 C
-C           TO PRINT NEGATIVE DDXS 
+C             TO PRINT NEGATIVE DDXS 
 C
-            if (ftmp.lt.0) then
-              write(8,'(a4,2i5,5f15.5)') 'EXC ',nejc,ie,CSE(ie,nejc,0),
-     &        CSE(ie,nejc,1),CSEmsd(ie,nejc),POPcseaf(0,nejc,ie,0),ftmp
-C             write(*,*) CSE(ie,nejc,0), 
-C    &        CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
-            endif
-C
-C
+              if (ftmp.lt.0) then
+               write(8,'(a4,2i5,5f15.5)') 'EXC ',nejc,ie,CSE(ie,nejc,0),
+     &         CSE(ie,nejc,1),CSEmsd(ie,nejc),POPcseaf(0,nejc,ie,0),ftmp
+C              write(*,*) CSE(ie,nejc,0), 
+C    &         CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
+              endif
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp +
      &                CSEa(ie,nang,nejc)*POPcseaf(0,nejc,ie,0)
@@ -399,8 +401,42 @@ c              ftmp = (CSE(ie,nejc,0) - CSEmsd(ie,nejc))/PIx4
               ENDDO
             ENDIF
            ENDIF
+
          ENDDO 
 C
+C***********************************************************************  
+         IF(nejc.eq.1 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+           recorp=1.d0+EJMass(nejc)/AMAss(1)
+C	     write(*,*) 'inclusive: DE=',DE,' reccor=', recorp
+C          ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
+           itmp = 0
+	     do nang=16,76,60
+             itmp = itmp + 1
+C****        Only two angles can be selected to print DDXS !!!
+             if(itmp.gt.2) EXIT
+             write(caz,'(A8,A1,A2,I3.3,A7)') 'DDi_(z,X',part(Nejc),')_',
+     &       NINT(ANGles(nang)),'deg.zvd'
+    	       OPEN(36,file=caz,status='unknown')
+	       write(title,'(a21,a1,2h): ,F8.2, 2Hmb)')
+     &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
+             CALL OPEN_ZVV(36,
+     &        '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (incl)',title)
+	       DO ie = 1, nspec 
+		   IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
+               CSEat(ie,itmp) = CSEat(ie,itmp) + cseaprnt(ie,nang)
+		   WRITE (36,'(1X,E12.6,3X,E12.6)') 
+     &         FLOAT(ie - 1)*DE*1.D6/recorp, 
+     &         cseaprnt(ie,nang)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
+             ENDDO
+             WRITE (36,'(1X,E12.6,3X,E12.6)') 1.D6*
+               ! exact DDX spectrum endpoint
+     &         min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
+     &         cseaprnt(nspec + 1,nang)*recorp*1.d-9 ! DDXS in b/eV/sr
+	       CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
+	       CLOSE(36)
+           enddo
+         ENDIF
+C***********************************************************************  
 C--------Inclusive DDX spectrum 
          check_DE = 0.d0
          DO ie = 1, nspec ! + 1
@@ -415,11 +451,9 @@ C--------Inclusive DDX spectrum
      &     FLOAT(ie - 1)*DE/recorp,
      &     (     cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
-         ! exact DDX spectrum endpoint
          WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
          ! exact DDX spectrum endpoint
      &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
-C    &      FLOAT(nspec)*DE/recorp,
      &      (max(cseaprnt(nspec + 1,nang)*recorp,0.d0),nang = 1,NDANG)
          WRITE (12,*) ' '
          WRITE (12,'(15x,''Integrated Emission Spectra (printed DDXS cor
@@ -449,8 +483,6 @@ C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
 C        ! exact endpoint
          WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
      &      min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
-C    &     (EMAx(1)-Q(nejc,1))/recorp,,
-C    &     FLOAT(nspec)*DE/recorp,
      &     CSE(nspec+1,nejc,0)*recorp, check_DE(nspec+1)*recorp,
      &     ( CSE(nspec+1,nejc,0) - check_DE(nspec+1) )*recorp, 0.d0
 
@@ -480,7 +512,6 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),totspec*DE
 
-!       Test printout for 56Fe at 96 MeV TO BE DELETED
 	  IF(Nejc.le.4 .and. IOUT.ge.3) then
 	    ftmp =  SUM(POPcseaf(0,Nejc,1:NDECSE,0:ndexclus))
 	    if(ftmp.gt.0) then
@@ -497,29 +528,13 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
             IF(Nejc.eq.4)
      &        write(8,*) ' Test printout of POPcseaf(0,4,ie,...)',
      &                   ' for all residual nuclei -deut    emitted'
-!         write(8,*) 'ENDf= ',
-!     &     ENDf(2), ENDf(3), ENDF(17), ENDf(18), ENDf(19)
-!         write(8,'(''IZA= '',6I15)')
-!     &     IZA(2), IZA(3), IZA(17),IZA(18), IZA(19),0
-
             do ie=1,NDECSE
   	        ftmp =  SUM(POPcseaf(0,Nejc,ie,0:ndexclus))
               write(8,'(i5, 7E15.6)') ie, ftmp
 	        IF(ftmp.gt.0.999999d0) EXIT
-!     Fractions for selected  nuclei
+!     Fractions for selected  nuclei (neutrons)
 !     &                POPcseaf(0,1,ie,INExc(2)),
-!     &                POPcseaf(0,1,ie,INExc(3)),
-!     &                POPcseaf(0,1,ie,INExc(17)),
-!     &                POPcseaf(0,1,ie,INExc(18)),
-!     &                POPcseaf(0,1,ie,INExc(19)),
-!     &                POPcseaf(0,1,ie,0),
-!     Inclusive fractions only for all ejectiles
-!     &            POPcseaf(0,1,ie,0),
-!     &            POPcseaf(0,2,ie,0),
-!     &            POPcseaf(0,3,ie,0),
-!     &            POPcseaf(0,4,ie,0),
-!     &            POPcseaf(0,5,ie,0),
-!     &            POPcseaf(0,6,ie,0)
+!     Inclusive fraction only for all ejectiles  (neutrons)
             enddo
           endif
         endif
@@ -726,7 +741,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
-      CHARACTER*16 caz 
+      CHARACTER*18 caz 
       CHARACTER*31 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
@@ -753,12 +768,12 @@ C
       IF (totspec.LE.1.d-4) RETURN
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-        write(caz,'(A3,I2.2,A1,A1,I3.3,A1,A1,A4)')
-     &   'sp_',int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',
+        write(caz,'(A4,I2.2,A1,A1,I3.3,A1,A1,A4)')
+     &   'DEe_',int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',
      &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
       else
-        write(caz,'(A3,I2.2,A2,I3.3,A1,A1,A4)')
-     &   'sp_',int(Z(Nnuc)), SYMb(Nnuc), 
+        write(caz,'(A4,I2.2,A2,I3.3,A1,A1,A4)')
+     &   'DEe_',int(Z(Nnuc)), SYMb(Nnuc), 
      &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
       endif
 
@@ -771,12 +786,19 @@ C
       recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
 
-      CALL OPEN_ZVV(36,'SP_'//part(Nejc),title)
+      if(SYMb(Nnuc)(2:2).eq.' ') then
+        CALL OPEN_ZVV(36,
+     &    caz(5:10)//' (z,'//part(Nejc)//')', title)
+      else
+        CALL OPEN_ZVV(36,
+     &    caz(5:11)//' (z,'//part(Nejc)//')', title)
+      endif
+
       DO i = 1, kmax 
          IF(CSE(i,Nejc,Nnuc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') 
      &     FLOAT(i - 1)*DE*1.D6/recorp, 
-     &       CSE(i,Nejc,Nnuc)*recorp*1.d-3 ! Energy, Spectra in b/MeV
+     &       CSE(i,Nejc,Nnuc)*recorp*1.d-9 ! Energy, Spectra in b/eV
       ENDDO
       CALL CLOSE_ZVV_DE(36,'Energy','Emission spectra')
       CLOSE(36)
@@ -813,7 +835,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
-      CHARACTER*8 caz 
+      CHARACTER*9 caz 
       CHARACTER*31 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
@@ -838,7 +860,7 @@ C
       totspec = totspec*DE
       IF (totspec.LE.1.d-4) RETURN
 
-      write(caz,'(A3,A1,A4)') 'sp_',part(Nejc),'.zvd'
+      write(caz,'(A4,A1,A4)') 'DEt_',part(Nejc),'.zvd'
       OPEN(36,file=caz,status='unknown')
       write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
      & 'tit: Total Emission Spectra ',part(Nejc),totspec
@@ -848,11 +870,11 @@ C
       recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
-      CALL OPEN_ZVV(36,'sp_'//part(Nejc),title)
+      CALL OPEN_ZVV(36,'Total '//part(Nejc)//' spectrum',title)
       DO i = 1, kmax
       IF(CSEt(i,Nejc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6/recorp, 
-     &       CSEt(i,Nejc)*1.d-3*recorp ! Energy, Spectra in b/MeV
+     &       CSEt(i,Nejc)*1.d-9*recorp ! Energy, Spectra in b/eV
       ENDDO
       CALL CLOSE_ZVV_DE(36,'Energy','Emission spectra')
       CLOSE(36)

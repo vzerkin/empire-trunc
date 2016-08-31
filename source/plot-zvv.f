@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4754 $
+Ccc   * $Rev: 4759 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-28 18:00:34 +0200 (So, 28 Aug 2016) $
+Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -427,7 +427,7 @@ C======================================================
       integer iout
       write(iout,'(A19)') '#begin LSTTAB.CUR/u'
       if(title(1:2).ne.'  ') write(iout,*) trim(title)      
-      write(iout,'(A12,A)') 'fun: ',tfunct
+      write(iout,'(A12,A)') 'fun: ',trim(tfunct)
       write(iout,'(A10)') 'thick: 2   '
       write(iout,'(A10/2H//)') 'length:250'
       return
@@ -448,6 +448,28 @@ C======================================================
       return
       end   
 
+      SUBROUTINE CLOSE_ZVV_DDX(iout,titlex,titley)
+      character*(*) titlex,titley
+      integer iout
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/u'
+      write(iout,'(A19)') '#begin LSTTAB.CUR/c'
+      if(titlex(1:2).ne.'  ') write(iout,*) 'x: ',trim(titlex)
+      if(titley(1:2).ne.'  ') write(iout,*) 'y: ',trim(titley)
+      write(iout,'(A19)')  'x-scale: LIN       '
+      write(iout,'(A19)')  'y-scale: LOG       '
+C     write(iout,'(A19)')  'x: Energy          '
+      write(iout,'(A24)')  'x-long: outgoing energy '
+C     write(iout,'(A19)')  'y: DDXS            '
+      WRITE (iout,'(A19)') 'x-unit: 1e6, (MeV) '
+      WRITE (iout,'(A11)') 'ix-unit: 1 '
+      WRITE (iout,'(A23)') 'y-unit: 1, (b/eV/str) '
+      WRITE (iout,'(A11)') 'iy-unit: 1 '
+      write(iout,'(A2)') '//'
+      write(iout,'(A17)') '#end LSTTAB.CUR/c  '
+      return
+      end   
+
       SUBROUTINE CLOSE_ZVV_DE(iout,titlex,titley)
       character*(*) titlex,titley
       integer iout
@@ -456,20 +478,19 @@ C======================================================
       write(iout,'(A19)') '#begin LSTTAB.CUR/c'
       if(titlex(1:2).ne.'  ') write(iout,*) 'x: ',trim(titlex)
       if(titley(1:2).ne.'  ') write(iout,*) 'y: ',trim(titley)
-      write(iout,'(A19)') 'x-scale: auto      '
-      write(iout,'(A17)') 'y-scale: auto      '
+      write(iout,'(A19)')  'x-scale: LIN       '
+      write(iout,'(A19)')  'y-scale: LOG       '
       write(iout,'(A19)')  'x: Energy          '
       write(iout,'(A24)')  'x-long: Outgoing Energy '
       write(iout,'(A19)')  'y: Emission spectra'
       WRITE (iout,'(A19)') 'x-unit: 1e6, (MeV) '
       WRITE (iout,'(A11)') 'ix-unit: 1 '
-      WRITE (iout,'(A19)') 'y-unit: 1, (b/MeV) '
+      WRITE (iout,'(A19)') 'y-unit: 1, (b/eV)  '
       WRITE (iout,'(A11)') 'iy-unit: 1 '
       write(iout,'(A2)') '//'
       write(iout,'(A17)') '#end LSTTAB.CUR/c  '
       return
       end   
-
 
       SUBROUTINE CLOSE_ZVV_CUMUL(iout,titlex,titley)
       character*(*) titlex,titley

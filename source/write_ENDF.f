@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4749 $
+Ccc   * $Rev: 4759 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 12:55:11 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -33,8 +33,13 @@ C
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
 C     DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
       DOUBLE PRECISION     xnub,csinel,s_factor,qout,dtmp
+      DOUBLE PRECISION     recorp
+      INTEGER itmp, nang, ie
       LOGICAL lprint
 C     DATA eps/1.d-8/
+      CHARACTER*21 caz 
+      character*1 part(0:6)
+      data part/'g','n','p','a','d','t','h'/
 
       DOUBLE PRECISION, external :: mu_bar, SFACTOR
 
@@ -79,8 +84,8 @@ C        IF (FIRst_ein) THEN
               dtmp   = dtmp + ftmp
 
               CALL Print_Total(nejc)
-              IF(IOUT.GT.5) CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)
-
+              IF(dabs(EINl-EDDfig).le.1.d-5 .and. nejc.le.3) 
+     &           CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)          			 
               csum = 0.d0
               DO nnuc = 1, NNUcd
                   csum = csum + CSEmis(nejc,nnuc)
@@ -188,6 +193,33 @@ C--------Print inclusive spectra of gamma and ejectiles
          WRITE (12,*) ' '    
 
       ENDIF
+C***********************************************************************  
+C     Plotting total DDXS
+      IF(IOUT.EQ.6 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+         nejc =1 ! for neutron emission
+         recorp = 1.d0 + EJMass(nejc)/AMAss(1)
+C        write(*,*) 'TOTAL    : DE=',DE,' reccor=', recorp
+C        ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
+         itmp = 0
+         do nang=16,76,60
+           itmp = itmp + 1
+           write(caz,'(A8,A1,A2,I3.3,A7)') 'DDt_(z,X',part(Nejc)
+     &       ,')_',NINT(ANGles(nang)),'deg.zvd'
+           OPEN(36,file=caz,status='unknown')
+           CALL OPEN_ZVV(36,
+     &          '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (tot)',' ')
+           DO ie = 1, ndecse 
+            IF(CSEat(ie,itmp).LE.0.d0) CYCLE
+	      WRITE (36,'(1X,E12.6,3X,E12.6)') 
+     &        FLOAT(ie - 1)*DE*1.D6/recorp, 
+     &        CSEat(ie,itmp)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
+           ENDDO
+	     CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
+	     CLOSE(36)
+         enddo
+      ENDIF
+C***********************************************************************  
+
 C
 C     Elastic and Nonelastic modified for actinides
 C     to include/exclude scattering cross section (xscclow) low-lying coupled states

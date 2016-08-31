@@ -1,6 +1,6 @@
-!cc   * $Rev: 4740 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
+!cc   * $Rev: 4759 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -237,6 +237,7 @@ C--------set fission normalization factors
             ENDDO           
          ENDDO
 C
+         EDDfig = -1
          IZA(0) = 0
          LVP(1,0) = 1
          NNUcd = 0
@@ -3990,6 +3991,16 @@ C-----------Printout of some final input options   *** done ***
          i2 = i2e
          i3 = i3e
          i4 = i4e
+         ENDIF
+
+C--------EDDFIG input
+         IF (name.EQ.'EDDFIG') THEN
+            IF (val.GT.0) THEN
+              EDDfig = val
+              WRITE (8, '('' DE and DD ZZView plots will be produced for 
+     & incident energy E ='',d12.6,'' MeV'')') EDDfig
+            ENDIF
+            GOTO 100
          ENDIF
 
 C--------DEGAS input
