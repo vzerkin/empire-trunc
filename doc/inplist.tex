@@ -56,7 +56,8 @@
 \appendix
 \chapter{EMPIRE optional input keywords\label{InputList}}
 
-{\color{red} Rev.1, 18 August 2015}\newline
+%{\color{red} Rev.1, 18 August 2015}\newline
+{\color{red} Rev.2, 31 August 2016}\newline
 The optional input allows modifications to the default model parameters.
 Optional input consists of an arbitrary number of records, entered in any order
 and closed with the GO record, which indicates the end of the input.
@@ -225,6 +226,12 @@ population (up to spin 12),
 
 \item [{NOUT}] MSC\index{MSC} calculation output control set to VAL (default:
 0).
+
+\item [{EDDFIG}] (default 0). If VAL$>0$, then emission spectra (DE) and double differential
+ cross sections (DD) will be plotted at incident energy E=VAL; double differential
+ will be plotted at angles I1 and I2.\\
+ Angular values I1 and I2 are expected in degrees and should be less than 175 deg.
+Default angles are 30 and 150 degrees. 
 \end{description}
 
 \subsubsection*{Optical Model Potential }
@@ -234,19 +241,12 @@ population (up to spin 12),
 \item [{OMPOT}] Selects optical model parameters for outgoing particle
 
         The value of I1 selects the outgoing particle as follows:
-
         =1 neutrons,
-
         =2 protons,
-
         =3 alphas,
-
         =4 deuterons,
-
         =5 tritons,
-
         =6 He-3;
-
         VAL must be set to a RIPL catalog number (e.g. 2408 for Capote et al OMP)
         of the potential as it appears in the empire/RIPL/optical/om-data/om-index.txt
         file or in Help $=>$ 'RIPL omp' when using GUI. For backward compatibility this
