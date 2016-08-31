@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4762 $
+Ccc   * $Rev: 4764 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 18:17:48 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -410,7 +410,7 @@ C***********************************************************************
 C	     write(*,*) 'inclusive: DE=',DE,' reccor=', recorp
 C          ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
            itmp = 0
-	     do nang=16,76,60
+	     do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
              itmp = itmp + 1
 C****        Only two angles can be selected to print DDXS !!!
              if(itmp.gt.2) EXIT

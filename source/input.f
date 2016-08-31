@@ -1,6 +1,6 @@
-!cc   * $Rev: 4759 $
+!cc   * $Rev: 4764 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
+!cc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -238,6 +238,8 @@ C--------set fission normalization factors
          ENDDO
 C
          EDDfig = -1
+	   IDDfig(1) = 16 !  30 deg
+	   IDDfig(2) = 76 ! 150 deg
          IZA(0) = 0
          LVP(1,0) = 1
          NNUcd = 0
@@ -3997,12 +3999,18 @@ C--------EDDFIG input
          IF (name.EQ.'EDDFIG') THEN
             IF (val.GT.0) THEN
               EDDfig = val
-              WRITE (8, '('' DE and DD ZZView plots will be produced for 
-     & incident energy E ='',d12.6,'' MeV'')') EDDfig
+C             write (*,*) i1,i2
+              if(i1.gt.0 .and. i1.le.175) 
+     &          IDDfig(1)= NINT(dble(i1)/180.d0*(NDANGecis-1))+1
+              if(i2.gt.0 .and. i1.le.175) 
+     &          IDDfig(2)= NINT(dble(i2)/180.d0*(NDANGecis-1))+1
+              WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
+     &          '' MeV; DD at angles :'',i3,1x,i3)')
+     &          EDDfig,NINT(ANGles(IDDfig(1))),NINT(ANGles(IDDfig(2)))
             ENDIF
             GOTO 100
          ENDIF
-
+C
 C--------DEGAS input
          IF (name.EQ.'DEGAS ') THEN
               WRITE (8,

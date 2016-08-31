@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4759 $
+Ccc   * $Rev: 4764 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -252,7 +252,7 @@ C                    write(*,*) 'exclusive: DE=',DE,' reccor=', recorp,
 C    >                    ' CN=',NINT(A(nnuc)),NINT(Z(nnuc))
 C                    ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
                      itmp = 0
-	               do nang=16,76,60
+	               do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
                       itmp = itmp + 1
 C****                 Only two angles can be selected to print DDXS !!!
                       if(itmp.gt.2) EXIT
