@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4761 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2016-08-31 17:25:23 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Rev: 4762 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-08-31 18:17:48 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -461,6 +461,7 @@ C======================================================
 C     write(iout,'(A19)')  'x: Energy          '
       write(iout,'(A24)')  'x-long: outgoing energy '
 C     write(iout,'(A19)')  'y: DDXS            '
+C     WRITE (iout,'(A19)') 'x-unit: 1e6, (MeV) '
       WRITE (iout,'(A19)') 'x-unit: 1, (eV) '
       WRITE (iout,'(A11)') 'ix-unit: 1 '
       WRITE (iout,'(A23)') 'y-unit: 1, (b/eV/str) '
@@ -483,6 +484,7 @@ C     write(iout,'(A19)')  'y: DDXS            '
       write(iout,'(A19)')  'x: Energy          '
       write(iout,'(A24)')  'x-long: Outgoing Energy '
       write(iout,'(A19)')  'y: Emission spectra'
+C     WRITE (iout,'(A19)') 'x-unit: 1e6, (MeV) '
       WRITE (iout,'(A19)') 'x-unit: 1, (eV) '
       WRITE (iout,'(A11)') 'ix-unit: 1 '
       WRITE (iout,'(A19)') 'y-unit: 1, (b/eV)  '

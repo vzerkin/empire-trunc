@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4759 $
+Ccc   * $Rev: 4762 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-08-31 18:17:48 +0200 (Mi, 31 Aug 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -835,8 +835,8 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
-      CHARACTER*9 caz 
-      CHARACTER*31 title
+      CHARACTER*14 caz 
+      CHARACTER*22 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
 
@@ -860,17 +860,16 @@ C
       totspec = totspec*DE
       IF (totspec.LE.1.d-4) RETURN
 
-      write(caz,'(A4,A1,A4)') 'DEt_',part(Nejc),'.zvd'
+      write(caz,'(A8,A1,A5)') 'DEt_(z,X',part(Nejc),').zvd'
       OPEN(36,file=caz,status='unknown')
-      write(title,'(a13,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
-     & 'tit: Total Emission Spectra ',part(Nejc),totspec
+      write(title,'(a10,2H :,F8.2, 2Hmb)') 'tit: '//caz(5:10),totspec*DE
 C
 C     The CMS-LAB assumes only the emission dominated by the 1st CNA
 C
       recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(1)
 
-      CALL OPEN_ZVV(36,'Total '//part(Nejc)//' spectrum',title)
+      CALL OPEN_ZVV(36,'Total '//caz(5:10)//' spectrum','  ')
       DO i = 1, kmax
       IF(CSEt(i,Nejc).LE.0.d0) CYCLE
          WRITE (36,'(1X,E12.6,3X,E12.6)') FLOAT(i - 1)*DE*1.D6/recorp, 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4759 $
+Ccc   * $Rev: 4762 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-08-31 18:17:48 +0200 (Mi, 31 Aug 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -195,7 +195,7 @@ C--------Print inclusive spectra of gamma and ejectiles
       ENDIF
 C***********************************************************************  
 C     Plotting total DDXS
-      IF(IOUT.EQ.6 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+      IF(dabs(EINl-EDDfig).le.1.d-5) THEN 
          nejc =1 ! for neutron emission
          recorp = 1.d0 + EJMass(nejc)/AMAss(1)
 C        write(*,*) 'TOTAL    : DE=',DE,' reccor=', recorp
@@ -205,9 +205,10 @@ C        ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
            itmp = itmp + 1
            write(caz,'(A8,A1,A2,I3.3,A7)') 'DDt_(z,X',part(Nejc)
      &       ,')_',NINT(ANGles(nang)),'deg.zvd'
+
            OPEN(36,file=caz,status='unknown')
            CALL OPEN_ZVV(36,
-     &          '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (tot)',' ')
+     &          '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (tot)','  ')
            DO ie = 1, ndecse 
             IF(CSEat(ie,itmp).LE.0.d0) CYCLE
 	      WRITE (36,'(1X,E12.6,3X,E12.6)') 
