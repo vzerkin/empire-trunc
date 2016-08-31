@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4764 $
+Ccc   * $Rev: 4765 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -25,7 +25,6 @@ C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
 
       CHARACTER*27 caz 
-      CHARACTER*42 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
 
@@ -247,7 +246,8 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
                    WRITE (12,*) ' '    
 
 C***********************************************************************  
-                   IF(nejc.eq.1 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+                   IF(nejc.eq.IDDfig(3) .and. 
+     &                dabs(EINl-EDDfig).le.1.d-5) THEN 
 C                    write(*,*) 'exclusive: DE=',DE,' reccor=', recorp,
 C    >                    ' CN=',NINT(A(nnuc)),NINT(Z(nnuc))
 C                    ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
@@ -270,19 +270,19 @@ C****                 Only two angles can be selected to print DDXS !!!
                       endif
     	                OPEN(36,file=caz,status='unknown')
                     
-                      write(title,'(a17, i2,1h-,A2,1h-,
-     &                  I3,3h(z, ,a1, 2h): ,F8.2, 2Hmb)')
-     &                  'tit: Emission XS ',int(Z(Nnur)),SYMb(Nnur),
-     &                  int(A(Nnur)),part(Nejc),CSPrd(Nnuc)
+C                     write(title,'(a17, i2,1h-,A2,1h-,
+C    &                  I3,3h(z, ,a1, 2h): ,F8.2, 2Hmb)')
+C    &                  'tit: Emission XS ',int(Z(Nnur)),SYMb(Nnur),
+C    &                  int(A(Nnur)),part(Nejc),CSPrd(Nnuc)
 
                       if(SYMb(Nnuc)(2:2).eq.' ') then
                         CALL OPEN_ZVV(36,
      &                   caz(5:10)//' (z,'//part(Nejc)//') '//caz(17:22)
-     &                   , title)
+     &                   , '  ')
                       else
                         CALL OPEN_ZVV(36,
      &                   caz(5:11)//' (z,'//part(Nejc)//') '//caz(18:23)
-     &                   , title)
+     &                   , '  ')
                       endif
 
 	                DO ie = 1, iprn

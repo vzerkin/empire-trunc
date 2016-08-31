@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4764 $
+Ccc   * $Rev: 4765 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -184,7 +184,8 @@ C
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION esum !, dtot, dincl
       CHARACTER*21 caz 
-      CHARACTER*34 title
+      CHARACTER*14 caz1 
+
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
 
@@ -224,7 +225,6 @@ C
         totspec  = totspec  + ftmp/itmp 
         esum = esum + ftmp/itmp*FLOAT(i - 1)*DE/recorp
       ENDDO
-C     IF (totspec*DE.LE.CSMinim) RETURN
       IF (totspec*DE.LE.0) RETURN
 
       WRITE (12,*) ' '
@@ -241,7 +241,6 @@ C
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
-C           if(ftmp.le.0.d0) cycle
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
@@ -304,7 +303,7 @@ C        ENDIF
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
-C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
+C          IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
            IF(ENDF(1).EQ.0) 
      &         ftmp = ftmp + CSEmsd(i,nejc) + CSEdbk(i,nejc)
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
@@ -312,14 +311,34 @@ C           if(ftmp.le.0.d0) cycle
 C           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
          ENDDO
 C--------Exact endpoint
-C        WRITE (8,'(F9.4,E15.5)') 
-C    &     FLOAT(nspec)*DE/recorp, max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
          WRITE (8,'(F9.4,E15.5)') 
      &     min((EMAx(1)-Q(Nejc,1)),FLOAT(nspec)*DE),
      &     max(0.d0,CSE(nspec+1,Nejc,0))
 C         WRITE (8,'(F9.4,E15.5)') 
 C     &     min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
 C     &     max(0.d0,CSE(nspec+1,Nejc,0)*recorp)
+
+C*************************************************************************
+         IF(nejc.eq.IDDfig(3) .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+           write(caz1,'(A8,A1,A5)') 'DEi_(z,X',part(nejc),').zvd'
+           OPEN(36,file=caz1,status='unknown')
+C          write(title1,'(a11,2H :,F8.2, 2Hmb)') 
+C    &       'tit: '//caz1(5:10),totspec*DE
+C
+C          The CMS-LAB assumes only the emission dominated by the 1st CNA
+C
+           recorp = 1.d0 + EJMass(nejc)/AMAss(1)
+           CALL OPEN_ZVV(36,caz1(5:10)//' spectrum (incl)','  ')
+           DO i = 1, nspec
+            IF(CSE(i,nejc,0).LE.0.d0) CYCLE
+            WRITE(36,'(1X,E12.6,3X,E12.6)')FLOAT(i - 1)*DE*1.D6/recorp, 
+     &         CSE(i,nejc,0)*1.d-9*recorp ! Energy, Spectra in b/eV
+           ENDDO
+           CALL CLOSE_ZVV_DE(36,'Energy','Emission spectra')
+           CLOSE(36)
+         ENDIF
+C*************************************************************************
+
          WRITE(8,*) 
          WRITE(8,'(2x,
      &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
@@ -389,7 +408,7 @@ C    &         CSE(ie,nejc,1)*POPcseaf(0,nejc,ie,0),CSE(ie,nejc,1)
             ENDIF
            ELSE   ! ENDF(1)=0 option (no ENDF formating)
             IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
-c              ftmp = (CSE(ie,nejc,0) - CSEmsd(ie,nejc))/PIx4
+c             ftmp = (CSE(ie,nejc,0) - CSEmsd(ie,nejc))/PIx4
               ftmp = CSE(ie,nejc,0)/PIx4
               DO nang = 1, NDANG
                 cseaprnt(ie,nang) = ftmp + CSEa(ie,nang,nejc)
@@ -405,7 +424,7 @@ c              ftmp = (CSE(ie,nejc,0) - CSEmsd(ie,nejc))/PIx4
          ENDDO 
 C
 C***********************************************************************  
-         IF(nejc.eq.1 .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
+         IF(nejc.eq.IDDfig(3) .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
            recorp=1.d0+EJMass(nejc)/AMAss(1)
 C	     write(*,*) 'inclusive: DE=',DE,' reccor=', recorp
 C          ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
@@ -417,10 +436,10 @@ C****        Only two angles can be selected to print DDXS !!!
              write(caz,'(A8,A1,A2,I3.3,A7)') 'DDi_(z,X',part(Nejc),')_',
      &       NINT(ANGles(nang)),'deg.zvd'
     	       OPEN(36,file=caz,status='unknown')
-	       write(title,'(a21,a1,2h): ,F8.2, 2Hmb)')
-     &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
+C            write(title,'(a21,a1,2h): ,F8.2, 2Hmb)')
+C    &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
              CALL OPEN_ZVV(36,
-     &        '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (incl)',title)
+     &        '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (incl)','  ')
 	       DO ie = 1, nspec 
 		   IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
                CSEat(ie,itmp) = CSEat(ie,itmp) + cseaprnt(ie,nang)
@@ -741,8 +760,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
-      CHARACTER*18 caz 
-      CHARACTER*31 title
+      CHARACTER*21 caz 
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
 
@@ -768,30 +786,30 @@ C
       IF (totspec.LE.1.d-4) RETURN
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
-        write(caz,'(A4,I2.2,A1,A1,I3.3,A1,A1,A4)')
+        write(caz,'(A4,I2.2,A1,A1,I3.3,A3,A1,A5)')
      &   'DEe_',int(Z(Nnuc)), SYMb(Nnuc)(1:1),'_',
-     &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
+     &    int(A(Nnuc)),'(z,',part(Nejc),').zvd'
       else
-        write(caz,'(A4,I2.2,A2,I3.3,A1,A1,A4)')
+        write(caz,'(A4,I2.2,A2,I3.3,A3,A1,A5)')
      &   'DEe_',int(Z(Nnuc)), SYMb(Nnuc), 
-     &    int(A(Nnuc)),'_',part(Nejc),'.zvd'
+     &    int(A(Nnuc)),'(z,',part(Nejc),').zvd'
       endif
 
       OPEN(36,file=caz,status='unknown')
 
-      write(title,
-     & '(a5, i2,1h-,A2,1h-,I3,3h(x, ,a1, 2h): ,F8.2, 2Hmb)')
-     & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
+C     write(title,
+C    & '(a5, i2,1h-,A2,1h-,I3,3h(z, ,a1, 2h): ,F8.2, 2Hmb)')
+C    & 'tit: ',int(Z(Nnuc)),SYMb(Nnuc),int(A(Nnuc)),part(Nejc),totspec
 
       recorp = 1.d0
       if(Nejc.gt.0) recorp = 1.d0 + EJMass(Nejc)/AMAss(Nnuc)
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
         CALL OPEN_ZVV(36,
-     &    caz(5:10)//' (z,'//part(Nejc)//')', title)
+     &    caz(5:10)//' (z,'//part(Nejc)//')', '  ')
       else
         CALL OPEN_ZVV(36,
-     &    caz(5:11)//' (z,'//part(Nejc)//')', title)
+     &    caz(5:11)//' (z,'//part(Nejc)//')', '  ')
       endif
 
       DO i = 1, kmax 
@@ -836,7 +854,6 @@ C
       DOUBLE PRECISION csemax, totspec, recorp
       INTEGER i, kmax
       CHARACTER*14 caz 
-      CHARACTER*22 title
       character*1 part(0:6)
       data part/'g','n','p','a','d','t','h'/
 
@@ -862,7 +879,7 @@ C
 
       write(caz,'(A8,A1,A5)') 'DEt_(z,X',part(Nejc),').zvd'
       OPEN(36,file=caz,status='unknown')
-      write(title,'(a10,2H :,F8.2, 2Hmb)') 'tit: '//caz(5:10),totspec*DE
+C     write(title,'(a10,2H :,F8.2, 2Hmb)') 'tit: '//caz(5:10),totspec*DE
 C
 C     The CMS-LAB assumes only the emission dominated by the 1st CNA
 C

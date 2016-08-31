@@ -1,6 +1,6 @@
-!cc   * $Rev: 4764 $
+!cc   * $Rev: 4765 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
+!cc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -240,6 +240,7 @@ C
          EDDfig = -1
 	   IDDfig(1) = 16 !  30 deg
 	   IDDfig(2) = 76 ! 150 deg
+	   IDDfig(3) =  1 ! neutrons
          IZA(0) = 0
          LVP(1,0) = 1
          NNUcd = 0
@@ -4004,9 +4005,26 @@ C             write (*,*) i1,i2
      &          IDDfig(1)= NINT(dble(i1)/180.d0*(NDANGecis-1))+1
               if(i2.gt.0 .and. i1.le.175) 
      &          IDDfig(2)= NINT(dble(i2)/180.d0*(NDANGecis-1))+1
-              WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
-     &          '' MeV; DD at angles :'',i3,1x,i3)')
+              if(i3.gt.1 .and. i3.le.4) THEN
+                IDDfig(3) = i3
+                if(i3.eq.2) 
+     &          WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
+     &            '' MeV; DD at angles :'',i3,1x,i3,''; for protons'')')
      &          EDDfig,NINT(ANGles(IDDfig(1))),NINT(ANGles(IDDfig(2)))
+                if(i3.eq.3) 
+     &          WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
+     &            '' MeV; DD at angles :'',i3,1x,i3,''; for alphas '')')
+     &          EDDfig,NINT(ANGles(IDDfig(1))),NINT(ANGles(IDDfig(2)))
+                if(i3.eq.4) 
+     &          WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
+     &            '' MeV; DD at angles :'',i3,1x,i3,''; for deut '')')
+     &          EDDfig,NINT(ANGles(IDDfig(1))),NINT(ANGles(IDDfig(2)))
+              else
+                IDDfig(3) = 1
+                WRITE (8, '('' DE and DD ZZView plots for Einc='',G12.5,
+     &        '' MeV; DD at angles :'',i3,1x,i3,'' for neutrons'')')
+     &          EDDfig,NINT(ANGles(IDDfig(1))),NINT(ANGles(IDDfig(2)))
+              endif
             ENDIF
             GOTO 100
          ENDIF

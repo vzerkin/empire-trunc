@@ -1,6 +1,6 @@
-! $Rev: 4764 $
+! $Rev: 4765 $
 ! $Author: rcapote $
-! $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
+! $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -68,7 +68,7 @@
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,      &
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
-     &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc), IDDfig(2),    &
+     &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc), IDDfig(3),    &
      &                                     ENDfp(0:ndejc,0:ndnuc),      &
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &

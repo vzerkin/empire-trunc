@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4764 $
+Ccc   * $Rev: 4765 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 22:48:08 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -84,7 +84,7 @@ C        IF (FIRst_ein) THEN
               dtmp   = dtmp + ftmp
 
               CALL Print_Total(nejc)
-              IF(dabs(EINl-EDDfig).le.1.d-5 .and. nejc.le.3) 
+              IF(dabs(EINl-EDDfig).le.1.d-5 .and. nejc.eq.IDDfig(3)) 
      &           CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)          			 
               csum = 0.d0
               DO nnuc = 1, NNUcd
@@ -196,7 +196,7 @@ C--------Print inclusive spectra of gamma and ejectiles
 C***********************************************************************  
 C     Plotting total DDXS
       IF(dabs(EINl-EDDfig).le.1.d-5) THEN 
-         nejc =1 ! for neutron emission
+         nejc = IDDfig(3) 
          recorp = 1.d0 + EJMass(nejc)/AMAss(1)
 C        write(*,*) 'TOTAL    : DE=',DE,' reccor=', recorp
 C        ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
