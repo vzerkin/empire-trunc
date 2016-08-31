@@ -1,9 +1,8 @@
-Ccc   * $Rev: 4753 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-28 16:01:11 +0200 (So, 28 Aug 2016) $
+Ccc   * $Rev: 4758 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-08-31 15:44:34 +0200 (Mi, 31 Aug 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
-C     USE empcess, ONLY: POPcsea
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -48,8 +47,6 @@ C
      &  popll, pops, popt, xcse, fnor
 
       INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec !, nth
-!      INTEGER ilevcol, ilev, na
-!      DOUBLE PRECISION GET_DDXS !, GET_DDXScont
 C-----
 C-----Continuum
 C-----
@@ -88,42 +85,7 @@ C-----
                CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)  !exclusive spectra stored
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
-C              IF(POPcseaf(Iec,Nejc,icse,INExc(Nnuc)) .GT. 0)   
-C    &         POPcseaf(0,Nejc,icse,0) = POPcseaf(0,Nejc,icse,0)
-C    &         + POPcseaf(Iec,Nejc,icse,INExc(Nnuc))*fnor
-
-C              IF(POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0)
-C    &            POPcsed(ie,Nejc,icse,0) = POPcsed(ie,Nejc,icse,0)
-C    &                + POPcsed(Iec,Nejc,icse,INExc(Nnuc))*fnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
-
-C-----DDX spectra for HMS
-C             IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-C                IF (POPcsed(Iec,Nejc,icse,INExc(Nnuc)).GT.0.0) THEN
-C                  DO nth = 1, NDAng
-C                     POPcsea(nth,0,Nejc,icse,0)
-C    &                    = POPcsea(nth,0,Nejc,icse,0)
-C    &                    + POPcsea(nth,Iec,Nejc,icse,INExc(Nnuc))*fnor
-
-C                   ENDDO
-C                ENDIF
-C              ENDIF
             ENDIF
-C
-C           CN emission angular distribution to the continuum
-C           should be considered
-C 
-C           IF (Nnuc.eq.1 .and. Nejc.EQ.1 .and. Iec.EQ.NEX(1) .and.
-C    >          PLcont_lmax(icse).ge.0) THEN
-C              xs_norm = PL_CNcont(0,icse)
-C              IF(xs_norm.gt.0.d0) write(*,*) 'Cont. bin=',icse,
-C    >       ' PLcont(2)/PLcont(0)=',PL_CNcont(2,icse)/xs_norm
-C              xs_cn  =GET_DDXScont(CANGLE(1),icse)
-C              xs_norm=GET_DDXScont(CANGLE(45),icse)
-C              if( dabs(xs_cn-xs_norm).gt.0.1d0) 
-C    >           write(151,'(2x,I5,A7,d12.6,A8,d12.6,A7,d12.6)') icse,
-C    >               ' XS(0)=',xs_cn,' XS(90)=',sngl(xs_norm),
-C    >               '  Diff=',dabs(xs_cn-xs_norm)
-C           ENDIF
          ENDIF
       ENDDO !over residual energies in continuum
 C-----
@@ -133,14 +95,11 @@ C-----
       DO il = 1, NLV(Nnur)
          pop1 = Xnor*SCRtl(il,Nejc)
          IF (pop1.le.0) CYCLE
-!         fnor should be pop1/POPbin * (popll or poph)/pop1
          fnor = pop1*DE/POPbin(Iec,Nnuc)
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0.0D0) RETURN
-C        if(il.eq.LEVtarg) write(8,*)'Elastic pop1=',pop1
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
-C         write(8,*) 'HF: ',il,nnur,nejc,pop1,poplv(il,nnur)
 C--------Add contribution to recoils auxiliary matrix for discrete levels
          REClev(il,Nejc) = REClev(il,Nejc) + pop1
 C--------Add contribution of discrete levels to emission spectra
@@ -148,27 +107,20 @@ C--------Transitions to discrete levels are distributed
 C--------between the nearest spectrum bins (inversely proportional to the
 C--------distance of the actual energy to the bin energy
 C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
-    
          IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
      &       Nejc.EQ.0 .OR. Nejc.GT.3) THEN
-
             xcse = eemi/DE + 1.0001
             icsl = min(INT(xcse),NDECSE-1)
             icsh = icsl + 1
-
             IF(NPRIm_g.GT.0) THEN  ! Primary gammas
               IF (Nnuc.eq.1 .and. Nejc.EQ.0  .AND. Iec.eq.NEX(1))  THEN
-C
 C               Selected primary gammas from the CN: Nnuc=1, Nejc=0
 C               Originate from the primary excitation energy bin: Iec = NEX(1)
-C
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
-C
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
 C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
 C               CYCLE ! for primary gammas no further processing is needed 
-C
 C               Primary gamma table stored, they are also(!)
 C               included in the total gamma spectra
               ENDIF
@@ -187,38 +139,15 @@ C           Addition of discrete gamma to spectra
 C
             CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
             CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
-C
             CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
             CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
    
             IF (popll.GT.0.0D+0) THEN
-
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
                ELSE
                   CSE(icsl,Nejc,0) = CSE(icsl,Nejc,0) + popll
-C                 IF(POPcseaf(Iec,Nejc,icsl,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
-C    &            POPcseaf(0,Nejc,icsl,0) = POPcseaf(0,Nejc,icsl,0)
-C    &            + POPcseaf(Iec,Nejc,icsl,INExc(Nnuc))
-C    &            *fnor*popll/pop1
-
-C                 IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
-C    &              POPcsed(0,Nejc,icsl,0) = POPcsed(0,Nejc,icsl,0)
-C    &              + POPcsed(Iec,Nejc,icsl,INExc(Nnuc))*fnor*popll/pop1 ! feeding HMS/MSD contribution added to inclusive spectrum POPcsed
-
-C-----DDX spectra for HMS
-C                 IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-C                   IF (POPcsed(Iec,Nejc,icsl,INExc(Nnuc)).NE.0) THEN
-C                    DO nth = 1, NDAng
-C                      POPcsea(nth,0,Nejc,icsl,0)
-C    &                  = POPcsea(nth,0,Nejc,icsl,0)
-C    &                  + POPcsea(nth,Iec,Nejc,icsl,INExc(Nnuc))*fnor
-C    &                  *popll/pop1
-C                   ENDDO
-C                  ENDIF
-C                 ENDIF
-
                ENDIF
 
             ENDIF
@@ -230,27 +159,6 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
                ELSE
                   CSE(icsh,Nejc,0) = CSE(icsh,Nejc,0) + poph
-C                 IF(POPcseaf(Iec,Nejc,icsh,INExc(Nnuc)) .GT. 0)     !WARNING: likely incompatible with HMS
-C    &            POPcseaf(0,Nejc,icsh,0) = POPcseaf(0,Nejc,icsh,0)
-C    &            + POPcseaf(Iec,Nejc,icsh,INExc(Nnuc))
-C    &            *fnor*poph/pop1
-
-C                 IF(POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).GT.0)
-C    &              POPcsed(0,Nejc,icsh,0) = POPcsed(0,Nejc,icsh,0)
-C    &              + POPcsed(Iec,Nejc,icsh,INExc(Nnuc))*fnor*poph/pop1 ! feeding HMS/MSD contribution added to inclusive spectrum POPcsed
-
-C-----DDX spectra for HMS
-C                 IF(LHMs.NE.0 .AND. Nejc.GT.0 .AND. Nejc.LT.3) THEN
-C                  IF (POPcsed(Iec,Nejc,icsh,INExc(Nnuc)).NE.0) THEN
-C                    DO nth = 1, NDAng
-C                      POPcsea(nth,0,Nejc,icsh,0)
-C    &                  = POPcsea(nth,0,Nejc,icsh,0)
-C    &                  + POPcsea(nth,Iec,Nejc,icsh,INExc(Nnuc))*fnor
-C    &                  *poph/pop1
-C                   ENDDO
-C                  ENDIF
-C                 ENDIF
-
                ENDIF
             ENDIF
 
@@ -262,23 +170,6 @@ C--------Add CN contribution to direct ang. distributions
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
 C           Compound elastic and inelastic stored for final renormalization
             CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
-C
-C           Moved outside the decaying state loop to normalize 
-C           the CSAlev contribution by the ratio CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))  
-C           IF( (Nejc.eq.NPRoject) .and. (.not.CN_isotropic) ) then
-C
-C             xs_norm = CSComplev(il,NPRoject)/(4*PI*PL_CN(0,il))
-C             DO na = 1, NDANG
-C               xs_cn = GET_DDXS(CANGLE(na),il)  
-C               CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn*xs_norm                     
-C             ENDDO
-C           ELSE
-C              Not the inelastic channel OR isotropic CN DA
-C              xs_cn = CSComplev(il,NPRoject)/(4.d0*PI)  ! default isotropic
-C              DO na = 1, NDANG
-C                 CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xs_cn
-C              ENDDO ! loop over angles
-C           ENDIF
          ENDIF ! on top  CN state, non-gamma with non-zero population 
       ENDDO   !loop over levels
       RETURN
@@ -348,9 +239,9 @@ C        fission of n,nx and npx nuclei considered
          IF (POPbin(Iec,Nnuc).EQ.0) RETURN
          xnor = Popt*DE/POPbin(Iec,Nnuc)
          DO ie = 1, NDECSE
-C           DO iejc = 0, NDEJC
+           DO iejc = 0, NDEJC
 C           DO iejc = 0, 1  ! only neutrons and photons for the time being
-            DO iejc = 1, 1  ! only neutrons for the time being
+C            DO iejc = 1, 1  ! only neutrons for the time being
               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
      &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
      &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
@@ -408,18 +299,12 @@ C-----DDX spectra for HMS
               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
                  IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
                     IF(ENDF(Nnur).EQ.1) THEN
-c                      POPcsed(Ief,iejc,ie,INExc(Nnur))
-c     &                = POPcsed(Ief,iejc,ie,INExc(Nnur))
-c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                        DO nth = 1, NDAng
                           POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
      &                    = POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
      &                    + POPcsea(nth,Iec,iejc,ie,INExc(Nnuc))*xnor
                        ENDDO
                     ELSE
-c                      POPcsed(Ief,iejc,ie,0)
-c     &                = POPcsed(Ief,iejc,ie,0)
-c     &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor
                        DO nth = 1, NDAng
                           POPcsea(nth,Ief,iejc,ie,0)
      &                    = POPcsea(nth,Ief,iejc,ie,0)
@@ -778,10 +663,6 @@ C
                       SCRt(ier,jr,ip2,Nejc) = SCRt(ier,jr,ip2,Nejc)*
      &                DEPart(Nnur)
                   ENDIF
-!                   write(8,*) 'ietl, lmin, lmax', ietl, lmin, lmax
-!                   write(8,*) 'ier, sumtl1,2', ier, sumtl1, sumtl2
-!                   write(8,*) 'SCRt ',SCRt(ier,jr,ip1,Nejc),
-!     &              SCRt(ier,jr,ip2,Nejc)
                ENDDO
 C--------------do loop over r.n. energies ***done***
             ENDDO
@@ -800,10 +681,6 @@ C--------trapezoidal integration of ro*tl in continuum for ejectile nejc
 !         write(8,*)'sum to continuum for ejectile ', Nejc, Sum
 C--------integration of ro*tl in continuum for ejectile nejc -- done ----
 C
-C        if(nnuc.eq.1 .and. Nnur.eq.2 .and. sum.gt.0.d0) then 
-C           write(*,*) 'HF  =',Iec,Jc,Ipc
-C           write(*,*) '     ',0    ,sngl(Sum)
-C        endif
       ENDIF
 C-----
 C-----decay to discrete levels 
