@@ -414,8 +414,13 @@ def runE(proj):
         mv(LDfile,proj+'-'+LDfile,0)
     for LDfile in glob("NL_*.zvd"):
         mv(LDfile,proj+'-'+LDfile,0)
-    # spectra for one energy run:
-    for LDfile in glob("sp_*.zvd"):
+
+    # DE (spectra) plots:
+    for LDfile in glob("DE*.zvd"):
+        mv(LDfile,proj+'-'+LDfile,0)
+
+    # DD (double differential plots):
+    for LDfile in glob("DD*.zvd"):
         mv(LDfile,proj+'-'+LDfile,0)
 
     # Extract Warnings from the list file:
