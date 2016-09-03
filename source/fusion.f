@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4772 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-09-03 19:54:25 +0200 (Sa, 03 Sep 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -99,6 +99,8 @@ C-----Reduced mass corrected for proper mass values
       sxj   = SEJc(Npro)
       trgsp = XJLv(LEVtarg,Ntrg)
 
+C     write(*,*) 'trgsp=',trgsp,' spin-part=',sxj
+
       S1 = 0.5d0
       IF (AINT(trgsp + sxj) - trgsp - sxj
      &   .EQ.0.0D0) S1 = 1.d0
@@ -141,14 +143,14 @@ C--------Here the old calculated files are read
          IF (fexistj) OPEN (451,FILE = (ctldir//ctmp23//'J.INC'),
      &         FORM = 'UNFORMATTED',ERR = 50)
          IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'_INC.LST')
-         IF (fexistj) 
-     &     READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
          READ (45 ,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+         IF (fexistj) then
+           READ (451,END = 50,ERR = 50) lmax, ener, IRElat(Npro,Ntrg)
+         ENDIF
 
          IF (IOUt.EQ.5) WRITE (46,'(A5,I6,E12.6)') 'LMAX:', lmax, ener
-          
          IF (ABS(ener - EINl).LT.1.d-6 .AND. FITomp.EQ.0) THEN
-            maxlw = lmax
+            maxlw=min(NDLW-1,lmax)
             DO l = 0, maxlw
               READ (45,END = 50,ERR=50) stl(l+1)
               IF(fexistj) READ (451,END = 50,ERR=50) 
@@ -160,6 +162,9 @@ C--------Here the old calculated files are read
               ENDIF
             ENDDO
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' read'
+
+            NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
+C           write(*,*) 'Spins :',maxlw,2*MAXmult,NINT(trgsp+0.6d0)
 
             el = EINl
             relcal = .FALSE.
@@ -180,11 +185,10 @@ C-----------Absorption and elastic cross sections in mb
             xssabs  = 10.d0*PI/ak2*ssabs
             xssabsj = 10.d0*PI/ak2*ssabsj/DBLE(2*sxj+1)
 
-            IF (fexistj) READ (451,END = 50,ERR=50) 
-     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
             READ (45 ,END = 50,ERR=50) 
      &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
-
+            IF (fexistj) READ (451,END = 50,ERR=50) 
+     &        ELAcs, TOTcs, ABScs, SINl, SINlcc, CSFus, SINlcont
 C            SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
 
             IF (IOUt.EQ.5) THEN
@@ -289,7 +293,10 @@ C                 READ(451,ERR=43,END=43) CCpmatrix ! Pmatrix
                 ENDIF
               ENDIF
             ENDIF
-            WRITE(8,*)
+            WRITE(8,*) 
+            WRITE(8,*) ' Reading TLS' 
+            WRITE(8,*) ' Absorption cross section =',ABScs
+            WRITE(8,*) ' Max. orb. mom. l is', maxlw
             WRITE(8,*) ' Maximum CN spin is ', NLW
             WRITE(8,*) ' Max. gamma multip. ', MAXmult
             WRITE(8,*) ' Projectile spin is ', sngl(sxj)
@@ -462,13 +469,17 @@ C        for photon induced reactions (to process them in EMPEND)
 C
          TOTcs = CSFus
          WRITE(8,*)
+         WRITE(8,*) ' Calculating TLs' 
          WRITE(8,*) ' Photoabsorption cross section =',CSFus
+         WRITE(8,*) ' Max. orb. mom. l is', maxlw
          WRITE(8,*) ' Maximum CN spin is ', NLW
          WRITE(8,*) ' Max. gamma multip. ', MAXmult
          WRITE(8,*) ' Projectile spin is ', sngl(sxj)
          WRITE(8,*) ' Target     spin is ', sngl(trgsp)
          WRITE(8,*) ' Spin dimension  is ', NDLW
          WRITE(8,*)
+
+
 C
          GOTO 400
       ENDIF
@@ -910,7 +921,10 @@ C-----------------checking the correspondence of the excited states
 
             ENDIF  ! END of LDWBA (DWBA and CCM joining process)
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' def calc'
-  
+
+            NLW   = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
+
+ 
          ENDIF  ! END of DIRECT=1/2 block
 
          IF (.NOT.ltlj) THEN
@@ -935,6 +949,8 @@ C           restoring the input value of the key CN_isotropic
      &        Npro,Ntrg,maxlw,stl,stlj,sel,.TRUE.)
             ltlj = .TRUE.
             tljcalc = .TRUE. 
+
+            NLW   = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
       
 C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
 
@@ -948,8 +964,12 @@ C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
             WRITE (8,*) ' ERROR: AND RECOMPILE THE CODE'
             STOP ' FATAL: INSUFFICIENT NUMBER OF PARTIAL WAVES ALLOWED'
          ENDIF
+
          WRITE(8,*) 
-         WRITE(8,*) ' Maximum CN spin is ', NLW 
+         WRITE(8,*) ' Calculating TLS' 
+         WRITE(8,*) ' Absorption cross section =',ABScs
+         WRITE(8,*) ' Max. orb. mom. l is', maxlw
+         WRITE(8,*) ' Maximum CN spin is ', NLW
          WRITE(8,*) ' Max. gamma multip. ', MAXmult
          WRITE(8,*) ' Projectile spin is ', sngl(sxj)
          WRITE(8,*) ' Target     spin is ', sngl(trgsp)
@@ -975,12 +995,6 @@ C--------calculation of h.i. transmission coefficients for fusion
          ltlj    = .TRUE.
          tljcalc = .FALSE.
 
-         WRITE(8,*) 
-         WRITE(8,*) ' Maximum CN spin is ', NLW 
-         WRITE(8,*) ' Max. gamma multip. ', MAXmult
-         WRITE(8,*) ' Projectile spin is ', sngl(sxj)
-         WRITE(8,*) ' Target     spin is ', sngl(trgsp)
-         WRITE(8,*) ' Spin dimension  is ', NDLW
 C--------channel spin min and max
          el = EINl
          CALL KINEMA(el,ecms,xmas_npro,xmas_ntrg,ak2,1,RELkin)
@@ -1015,7 +1029,19 @@ C--------channel spin min and max
           ENDDO
          ENDDO
          ABScs = CSFus
+
+         WRITE(8,*) 
+         WRITE(8,*) ' Calculating TLS ' 
+         WRITE(8,*) ' HI absorption cross section =',ABScs
+         WRITE(8,*) ' Max. orb. mom. l is', maxlw
+         WRITE(8,*) ' Maximum CN spin is ', NLW 
+         WRITE(8,*) ' Max. gamma multip. ', MAXmult
+         WRITE(8,*) ' Projectile spin is ', sngl(sxj)
+         WRITE(8,*) ' Target     spin is ', sngl(trgsp)
+         WRITE(8,*) ' Spin dimension  is ', NDLW
+
       ENDIF ! END of FUSREAD block
+
 C
 C-----Moving incident channel results to TL/ directory
 C
@@ -1392,7 +1418,7 @@ C-------absorption spin distribution using Tl's
         ENDDO
 
       ENDIF
-C     write (*,*) '*** CSFus =',CSFus
+C     write (*,*) '*** CSFus =',CSFus,' maxlw=',maxlw
 
       IF (CSFus.GT.0 .AND. (SINl.GT.0 .or. SINLcont.GT.0) ) THEN
          IF (DIRect.LE.2) THEN

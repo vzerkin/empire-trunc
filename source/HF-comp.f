@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4758 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-08-31 15:44:34 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Rev: 4772 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-09-03 19:54:25 +0200 (Sa, 03 Sep 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -44,21 +44,24 @@ C
 C Local variables
 C
       DOUBLE PRECISION eemi, excnq, pop1, pop2, poph, popl,
-     &  popll, pops, popt, xcse, fnor
+     &  popll, pops, popt, xcse
 
       INTEGER icse, icsh, icsl, ie, il, j, nexrt, nspec !, nth
 C-----
 C-----Continuum
 C-----
+      IF(Xnor.LE.0) RETURN
+ 
       IF (Nnuc.EQ.Nnur) THEN
          excnq = EX(Iec,Nnuc)
       ELSE
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
-      if(nexrt.le.0) goto 123
 
-      DO ie = 1, nexrt          !loop over residual energies (continuum)
+      IF(nexrt.GT.0) THEN
+
+       DO ie = 1, nexrt          !loop over residual energies (continuum)
          popt = 0.D0
          DO j = 1, NLW  !loop over residual spins
             pop1 = Xnor*SCRt(ie,j,1,Nejc)
@@ -75,7 +78,6 @@ C-----
      &          POPmax(Nnur) = POP(ie,j,2,Nnur)
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
-            fnor = popt*DE/POPbin(Iec,Nnuc)
             icse = min(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDEcse)
             icse = MAX0(2,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
@@ -87,17 +89,18 @@ C-----
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
             ENDIF
          ENDIF
-      ENDDO !over residual energies in continuum
+       ENDDO !over residual energies in continuum
+
+      ENDIF
 C-----
 C-----Discrete levels
 C-----
-123   nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
+      nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
       DO il = 1, NLV(Nnur)
          pop1 = Xnor*SCRtl(il,Nejc)
          IF (pop1.le.0) CYCLE
-         fnor = pop1*DE/POPbin(Iec,Nnuc)
          eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) RETURN
+         IF (eemi.LT.0) RETURN
 C--------Add contribution to discrete level population
          POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
 C--------Add contribution to recoils auxiliary matrix for discrete levels
@@ -166,12 +169,12 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
 
 C--------Add CN contribution to direct ang. distributions
          IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
-
             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
 C           Compound elastic and inelastic stored for final renormalization
             CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
          ENDIF ! on top  CN state, non-gamma with non-zero population 
       ENDDO   !loop over levels
+
       RETURN
       END
 
