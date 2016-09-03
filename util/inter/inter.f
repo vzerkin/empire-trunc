@@ -1,6 +1,6 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $ 
-Ccc   * $Id: inter.f 4468 2015-08-29 15:06:00Z rcapote $ 
+Ccc   * $Author: atrkov $
+Ccc   * $Date: 2016-09-03 22:36:54 +0200 (Sa, 03 Sep 2016) $ 
+Ccc   * $Id: inter.f 4774 2016-09-03 20:36:54Z atrkov $ 
 
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
@@ -34,6 +34,8 @@ Ccc   * $Id: inter.f 4468 2015-08-29 15:06:00Z rcapote $
 !-T Program INTER
 !-P Calculate integral constants from cross sections
 !-V
+!-V         Version 8.09   August 2016      A. Trkov
+!-V                        Correct the text defining the g-factor
 !-V         Version 8.08   March 2015       A. Trkov
 !-V                        Fix printing multiple isomeric states.
 !-V         Version 8.07   October 2013     A. Trkov
@@ -1104,9 +1106,8 @@ c...        END IF
      &    ,' Integration Limits    : E1 = ',INTER_DATA%ELT              &
      &    ,' (eV)  E2 = ',INTER_DATA%EHT,' (eV)'                        &
      &    ,' Integral of Spectrum       = ',PNORM1
-         WRITE(NOUT,'(/A,A)')                                           &       
-     &     ' Westcott g-factor     : G-fact = 2/sqrt(Pi)'               &
-     &    ,'  Avg-Sigma / Sig(2200)'
+         WRITE(NOUT,'(/A)')                                             &       
+     &     ' Westcott g-factor     : G-fact = Avg-Sigma / Sig(2200)'
       END IF
       IF(INTER_DATA%IRESI.NE.0)  THEN
          WRITE(NOUT,'(/A/A,1P,E12.5,A,E12.5,A/A,E12.5,A)')              &
