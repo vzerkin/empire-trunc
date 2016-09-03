@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4740 $
-   ! $Author: mherman $
-   ! $Date: 2016-08-24 17:25:15 +0200 (Mi, 24 Aug 2016) $
+   ! $Rev: 4770 $
+   ! $Author: rcapote $
+   ! $Date: 2016-09-03 16:00:42 +0200 (Sa, 03 Sep 2016) $
    !
 
    TYPE channel
@@ -581,7 +581,7 @@ CONTAINS
       ! Dummy arguments
       INTEGER, INTENT(IN) :: ipc, jc, nejc, nnuc, nnur, iec
       ! Local variables
-      REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, tld, xjc, xj, xjr, summa
+      REAL*8 :: eout, eoutc, frde, rho1, jmax, jmin, tld, xjc, xj, xjr, summa, ssxj
       INTEGER :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -593,6 +593,7 @@ CONTAINS
       itlc = iexc - 5
       iermax = iec - iexc
       xjc = dble(jc) + HIS(nnuc)  !actual spin  of the CN state
+      ssxj = 2.d0 + SEJc(nejc)
 
       IF(iermax>=1) THEN
 
@@ -617,13 +618,13 @@ CONTAINS
             xjr = dble(jr) + HIS(nnur)                       ! actual spin of the residual nucleus state
             jmin = ABS(xjr - xjc)
             jmax = xjr + xjc
-            kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    ! minimum k=l+1
-            kmax = jmax - 1 + (2.0 + SEJc(nejc))             ! maximum k=l+1
+            kmin = jmin - MAXj(nejc) + ssxj                  ! minimum k=l+1
+            kmax = jmax - 1 + ssxj                           ! maximum k=l+1
             kmax = MIN(ndlw, kmax)                           ! ensure we are within dimensions
             DO k = kmin, kmax                                ! do loop over l in Tlj (note that k=l+1)
                ip1 = 2 - (1 + ipc*( - 1)**(k - 1))/2         ! parity index of r.n. state populated by emission with l=k-1
                DO jndex = 1, MAXj(nejc)                      ! do loop over j-index in Tlj
-                  xj = k + jndex - (2.0 + SEJc(nejc))
+                  xj = k + jndex - ssxj
                   IF(xj<jmin .OR. xj>jmax) CYCLE
                   DO ier = iermax, 1, -1
                      IF(INT(ZEJc(nejc))==0 .AND. ier==iermax) CYCLE   ! omit top bin transition for neutrons
@@ -682,14 +683,14 @@ CONTAINS
          CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
          jmin = abs(XJLv(i,nnur) - xjc)
          jmax = XJLv(i,nnur) + xjc
-         kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    !minimum k=l+1
-         kmax = jmax - 1  + (2.0 + SEJc(nejc))            !maximum k=l+1
+         kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+         kmax = jmax - 1  + ssxj                          !maximum k=l+1
          kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
          DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
             ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
             IF(ipar==0) CYCLE
             DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
-               xj = k + jndex - (2.0 + SEJc(nejc))
+               xj = k + jndex - ssxj
                IF(xj<jmin .OR. xj>jmax) CYCLE
                rho1 = 1.d0                                !reuse level density variable
                ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
@@ -740,14 +741,14 @@ CONTAINS
                CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                jmin = abs(XJLv(i,nnur) - xjc)
                jmax = XJLv(i,nnur) + xjc
-               kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    !minimum k=l+1
-               kmax = jmax - 1  + (2.0 + SEJc(nejc))            !maximum k=l+1
+               kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+               kmax = jmax - 1  + ssxj                          !maximum k=l+1
                kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
                DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
                   ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
                   IF(ipar==0) CYCLE
                   DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
-                     xj = k + jndex - (2.0 + SEJc(nejc))
+                     xj = k + jndex - ssxj
                      IF(xj<jmin .OR. xj>jmax) CYCLE
                      rho1 = 1.d0                                !reuse level density variable
                      ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
@@ -786,8 +787,8 @@ CONTAINS
             IF(eout<0.0D0) GOTO 10
             jmin = abs(XJLv(i,nnur) - xjc)
             jmax = XJLv(i,nnur) + xjc
-            kmin = jmin - MAXj(nejc) + (2.0 + SEJc(nejc))    !minimum k=l+1
-            kmax = jmax - 1 + (2.0 + SEJc(nejc))             !maximum k=l+1
+            kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+            kmax = jmax - 1 + ssxj                           !maximum k=l+1
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             DO k = kmin, kmax                                !do loop over k in Tlj (note that real l is k-1)
                !         ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity
@@ -795,7 +796,7 @@ CONTAINS
                ipar = (1.d0 - (-1.d0)*ipc*LVP(i,nnur)*(-1)**(k-1))/2.d0
                IF(ipar==0) CYCLE
                DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
-                  xj = k + jndex - (2.0 + SEJc(nejc))
+                  xj = k + jndex - ssxj
                   IF(xj<jmin .OR. xj>jmax) CYCLE
                   tld = ELTLJ(k,jndex)                       !no IF - all elastic channels treated as 'strong'
                   NCH = NCH + 1
@@ -1015,18 +1016,20 @@ CONTAINS
 
       ! clear scratch matrix (continuum)
 
-      DO j = 1, ndlw    ! NLW
-         DO i = 1, ndex !NEX(Nnuc)
-            scrt(i,j,1,0) = 0.D0
-            scrt(i,j,2,0) = 0.D0
-         ENDDO
-      ENDDO
+      !DO j = 1, ndlw    ! NLW
+      !   DO i = 1, ndex !NEX(Nnuc)
+      !      scrt(i,j,1,0) = 0.D0
+      !      scrt(i,j,2,0) = 0.D0
+      !   ENDDO
+      !ENDDO
+
+      scrt(1:ndex,1:ndlw,1:2,0) = 0.D0
 
       ! clear scratch matrix (discrete levels)
-
-      DO i = 1, ndlv ! NLV(Nnuc)
-         scrtl(i,0) = 0.D0
-      ENDDO
+      !DO i = 1, ndlv ! NLV(Nnuc)
+      !   scrtl(i,0) = 0.D0
+      !ENDDO
+      scrtl(1:ndlv,0) = 0.D0
 
       ! IPOS is a parity-index of final states reached by gamma
       ! transitions which do not change parity (E2 and M1)
