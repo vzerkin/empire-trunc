@@ -21,7 +21,7 @@ C-V          reactions (Law 2) from 2*L+2 to 3*L+1
 C-V        - Refine the first and last angle intervals to half-nominal
 C-V          value.
 C-V  16/06 Allow Kalbach representation with NA=2.
-C-V  16/09 Fix error summing Legendre components in (09/12).
+C-V  16/09 Fix error summing Legendre components in update 09/12.
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
