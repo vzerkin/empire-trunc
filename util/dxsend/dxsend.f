@@ -29,6 +29,7 @@ C-V        angular distributions are given in MF4 (from resonance param.)
 C-V  16/03 Allow reconstruction of alpha (SigC/SigF)
 C-V  16/06 Trivial fix to initialize IER in ENDF IO routines
 C-V  16/07 Fix undefined LXX
+C-V  16/09 Deactivate aliasing of MT 5 to 9000.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -125,8 +126,8 @@ C*
       DIMENSION  RWO(MRW),ENR(MEN),DXS(MEN),UXS(MEN),ZEL(MXIZ),FRC(MXIZ)
 C*
 C... Temporary aliasing of MT0=5 with MT0=9000 for backward compatibility
-      IF(MT0.EQ. 5) MT0=9000
-      IF(MT0.EQ.-5) MT0=5
+C...  IF(MT0.EQ. 5) MT0=9000
+C...  IF(MT0.EQ.-5) MT0=5
 C...
       ELV=ELV0
       PAR=PAR0
@@ -5577,7 +5578,7 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
-      DOUBLE PRECISION P1,P2,P3,WW
+      DOUBLE PRECISION P1,P2,P3,WW,EL
       DIMENSION PL(*)
       WW=DBLE(UU)
       P1=1
@@ -5588,7 +5589,8 @@ C-
       PL(L2)=P2
       IF(NL.LT.2) RETURN
       DO L=2,NL
-        P3=( P2*WW*(2*L-1) - P1*(L-1) )/L
+        EL=L
+        P3=( P2*WW*(2*L-1) - P1*(L-1) )/EL
         PL(L+1)=P3
         P1=P2
         P2=P3
