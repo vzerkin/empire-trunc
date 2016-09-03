@@ -208,10 +208,10 @@ C* Default logical file units
 C* Default ENDF file and reaction type numbers
       DATA MF,MT/ 3,  102 /
       DATA EPS,MT0/-.1,0/
-      DATA EA0,EB0/1.E-5,20.E6/
+      DATA EA0,EB0/1.E-5,200.E6/
       DATA BLNK/'                                        '/
 C*
-      DATA PI/3.1415966/
+      DATA PI/3.1415926/
 C* Write banner
       WRITE(LTT,91)
       WRITE(LTT,91) ' ENDTAB - Extract Data from ENDF files  '
@@ -409,7 +409,10 @@ c...
         CALL DXSELM(LIN,NUC,ZEL,FRC,ZAP,MF,MTE,KEA,EIN,PAR,EP6
      1             ,ES,SG,UG,RWO,NP,MPT,MXR,LTT,ELV)
 c...
-c...    print *,'                   mte,np',mte,np
+C...    print *,'                   mte,np',mte,np
+C...    do k=1,np
+C...      print *,k,es(k),sg(k)
+C...    end do
 c...
         MAT=NINT(ZA0)
         MFX=MF
@@ -440,23 +443,30 @@ c...
           IER=1
           GO TO 80
         END IF
-C* Thin the cross sections to the specified tolerance
+C* Eliminate the near-coincident energy points
         E0=ES(1)
         KP=1
-        DO 51 I=2,NP
-        E1=ES(I)
-        IF(E1-E0 .LT. EPS*E1 .AND. I.LT.NP) GO TO 51
-        KP=KP+1
-        E0=E1
-        ES(KP)=E0
-        SG(KP)=SG(I)
-        UG(KP)=UG(I)
-   51   CONTINUE
+        DO I=2,NP
+          E1=ES(I)
+          IF(E1-E0 .LT. EPS*E1 .AND. I.LT.NP) CYCLE
+          KP=KP+1
+          E0=E1
+          ES(KP)=E0
+          SG(KP)=SG(I)
+          UG(KP)=UG(I)
+        END DO
         IN2=2
         NP =KP
+c...
+C...    print *,'                   mte,np',mte,np
+C...    do k=1,np
+C...      print *,k,es(k),sg(k)
+C...    end do
+c...
       ELSE IF((MF.GE.4 .AND. MF.LE.6) .OR. MF.EQ.26) THEN
 C*
-C* Read the outgoing neutron energy distributions from file MF3/4/5/6
+C*      -- Read the outgoing neutron energy distributions from 
+C*         file MF3/4/5/6
         MTE=MT
         IF(MF.EQ.4 .OR. MF.EQ.5) PAR=-2
 c...
@@ -478,7 +488,7 @@ c... 1             ,RWO,NP,MPT,MXR,LTT,ELV)
 c...
 c...    print *,'                   mte,np',mte,np
 c...
-C* Prepare the comment header record for the PLOTTAB file
+C*      -- Prepare the comment header record for the PLOTTAB file
         IF     (EIN.GT.999999) THEN
           UN='M'
           EE=EIN/1000000
@@ -518,7 +528,7 @@ C* Prepare the comment header record for the PLOTTAB file
 C*
 C* Process secondary neutron spectra
       ELSE IF(MF.EQ.15) THEN
-C* Process photon spectra
+C*      -- Process photon spectra
         CALL FINDMT(LIN,ZA0,ZA,MAT,MF,MT,REC,IER)
         IF     (IER.EQ.1) THEN
           GO TO 90
@@ -529,16 +539,17 @@ C* Process photon spectra
         READ (REC,96) C1,C2,L1,L2,NC,N2
         IF(NC.NE.1)
      1    STOP ' ENDTAB ERROR - More than one distribution given'
-C* Read but ignore weights for distributions
+C*      -- Read but ignore weights for distributions
         CALL RDTAB1(LIN,C1,C2,L1,LF,NR,NP,NBT,INR
      1             ,ES,SG,MPT,IER)
         IF(LF.NE.1)
      1    STOP ' ENDTAB ERROR - not a tabulated distribution'
-C* Read the number of energies at which distributions are tabulated
+C*      -- Read the number of energies at which distributions are 
+C*         tabulated
         CALL RDTAB2(LIN,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
         IF(NR.NE.1)
      1  STOP ' ENDTAB ERROR - More than one interpolation range'
-C* Read the distribution to be tabulated
+C*      -- Read the distribution to be tabulated
    53   CALL RDTAB1(LIN,C1,EI,L1,L2,NR,NP,NBT,INR
      1             ,ES,SG,MPT,IER)
         IE=IE+1
@@ -558,6 +569,12 @@ C* Section processed
         WRITE(LTT,91) ' WARNING - No data written for MT     : ',MT
         GO TO 30
       END IF
+c...
+C...    print *,'                   mte,np',mte,np,EA,EB
+C...    do k=1,np
+C...      print *,k,es(k),sg(k)
+C...    end do
+c...
 C* Write the data to the PLOTTAB file
       WRITE(LOU,91) COM
       IF(NP.LT.1) GO TO 84
@@ -566,6 +583,9 @@ C* Write the data to the PLOTTAB file
       EE2=ES(KK)
       SG2=SG(KK)
       UG2=UG(KK)
+C...
+C...  PRINT *,KK,EE2,SG2,NP
+C...
       IF(TMXW.GT.0) THEN
         EEA=ES(1)
         EEB=ES(NP)
@@ -588,6 +608,9 @@ C* Write the data to the PLOTTAB file
       EE2=ES(KK)
       SG2=SG(KK)
       UG2=UG(KK)
+C...
+C...  PRINT *,KK,EE2,SG2
+C...
       IF(TMXW.GT.0) THEN
         PWR=0.5
         FF=0
@@ -613,6 +636,9 @@ C*    -- First point
         IF(ABS(ED).LE.1.D-9) ED=0
         CALL CH11PK(E11,ED)
         WRITE(LOU,194) E11,SG1,UG1
+C...
+C...      PRINT *,'WRITTEN FIRST',KK,E11,SG1
+C...
       END IF
       IF(EE2.GE.EB .OR. KK.GE.NP) THEN
 C*      -- Last point
@@ -629,12 +655,18 @@ C*      -- Last point
         CALL CH11PK(E11,ED)
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
+C...
+C...      PRINT *,'WRITTEN LAST',KK,E11,SG2,EE2,EB,NP
+C...
       ELSE
 C*      -- Intermediate points
         ED=DBLE(EE2)
         CALL CH11PK(E11,ED)
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
+C...
+C...      PRINT *,'WRITTEN INTERM',KK,E11,SG2,NP
+C...
         IF(KK.LT.NP) GO TO 81
       END IF
 C*    -- End of data set - write blank delimiter
