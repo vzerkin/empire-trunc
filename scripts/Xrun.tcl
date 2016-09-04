@@ -1,6 +1,6 @@
-# $Rev: 4466 $
+# $Rev: 4777 $
 # $Author: rcapote $
-# $Date: 2015-08-29 17:04:17 +0200 (Sa, 29 Aug 2015) $
+# $Date: 2016-09-04 15:29:31 +0200 (So, 04 Sep 2016) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5597,7 +5597,7 @@ global widget file
    } elseif {$mff == " 10"} {set mf XSD
    } elseif {$mff == "  4"} {set mf DA
    } elseif {$mff == "  5"} {set mf DE
-     if {$mtt == "  18"} {set mt "PFNS"}
+     if {$mtt == "  18"} {set mt "f"}
    } elseif {$mff == "  6"} {set mf DD
      if {$mtt == "  18"} {set mt "PFNS"}
    } else {set mf $mff
@@ -5615,6 +5615,9 @@ global widget file
    } else { 
      if {$mff == "  4"} {set ang ""}
      if {$mff == "  4" && $mtt >= 9000 } {set elv "EL + INEL"}
+     if {$mff == "  5"} {set ang ""}
+     if {$mff == "  5" && $mtt != 18} {set elv "EMISS.SP."}
+     if {$mff == "  5" && $mtt == 18} {set elv "PFNS     "}
      Mclistbox1 insert end [list $num  $mf $mtt $pejc $mt $ein $elv $ang "#" ]
    }
   }
@@ -6623,7 +6626,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.cpd84" "Button37" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd84 "$site_10_0.cpd84 Button $top all _vTclBalloon"
     bind $site_10_0.cpd84 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Sort C4 file resulting from the X4TOC4 run}
+        set ::vTcl::balloon::%W {Sort C4 file containing available experimental data}
     }
     button $site_10_0.cpd85 \
         -activebackground #eccceccceccc -activeforeground limegreen \
@@ -6634,7 +6637,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_10_0.cpd85" "Button173" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd85 "$site_10_0.cpd85 Button $top all _vTclBalloon"
     bind $site_10_0.cpd85 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {View experimental data in computational format}
+        set ::vTcl::balloon::%W {View experimental data in computational format C4}
     }
     grid $site_10_0.cpd81 \
         -in $site_10_0 -column 0 -row 0 -columnspan 2 -rowspan 1 -pady 5 

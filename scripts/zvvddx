@@ -15,8 +15,8 @@ fi
 
 file=$1
 work=`pwd`
-rm C4.DAT ENDF.DAT PLOTC4.LST 2>/dev/null
-rm LSTTAB.CUR LSTTAB.PNT HF.DAT 2>/dev/null
+rm -f C4.DAT ENDF.DAT PLOTC4.LST 2>/dev/null
+rm -f LSTTAB.CUR LSTTAB.PNT HF.DAT 2>/dev/null
 ln -sf $work/$file.c4 C4.DAT
 ln -sf $work/$file-s.endf ENDF.DAT
 ln -sf $work/$file-log.plotc4 PLOTC4.LST
@@ -40,6 +40,6 @@ if [ "$2" = "" ]
 else
   mv DDXPLOT.zvd $work/$file-$2.zvd
 fi
-rm COMPARE.DAT angdis.p92 C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
+rm -f COMPARE.DAT angdis.p92 C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
 exit
 
