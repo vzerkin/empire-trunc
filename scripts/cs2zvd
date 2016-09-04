@@ -30,15 +30,18 @@ if [ -f "$file-zh.zvd"        ]; then  rm "$file-zh.zvd"; fi
 if [ -f "$file-za.zvd"        ]; then  rm "$file-za.zvd"; fi       
 if [ -f "$file-zna.zvd"       ]; then  rm "$file-zna.zvd"; fi       
 if [ -f "$file-z2na.zvd"      ]; then  rm "$file-z2na.zvd"; fi       
+if [ -f "$file-z3na.zvd"      ]; then  rm "$file-z3na.zvd"; fi       
 if [ -f "$file-z2n.zvd"       ]; then  rm "$file-z2n.zvd"; fi      
 if [ -f "$file-z3n.zvd"       ]; then  rm "$file-z3n.zvd"; fi      
 if [ -f "$file-z4n.zvd"       ]; then  rm "$file-z4n.zvd"; fi      
 if [ -f "$file-z5n.zvd"       ]; then  rm "$file-z5n.zvd"; fi      
 if [ -f "$file-zpa.zvd"       ]; then  rm "$file-zpa.zvd"; fi      
-#if [ -f "$file-z2n3p.zvd"     ]; then  rm "$file-z2n3p.zvd"; fi      
+if [ -f "$file-znpa.zvd"      ]; then  rm "$file-znpa.zvd"; fi      
+if [ -f "$file-z2npa.zvd"     ]; then  rm "$file-z2npa.zvd"; fi      
+#if [ -f "$file-z2n3p.zvd"    ]; then  rm "$file-z2n3p.zvd"; fi      
 if [ -f "$file-z3np.zvd"      ]; then  rm "$file-z3np.zvd"; fi      
-#if [ -f "$file-z3n3p.zvd"     ]; then  rm "$file-z3n3p.zvd"; fi      
-#if [ -f "$file-z4n2p.zvd"     ]; then  rm "$file-z4n2p.zvd"; fi      
+#if [ -f "$file-z3n3p.zvd"    ]; then  rm "$file-z3n3p.zvd"; fi      
+#if [ -f "$file-z4n2p.zvd"    ]; then  rm "$file-z4n2p.zvd"; fi      
 if [ -f "$file-z4n3p.zvd"     ]; then  rm "$file-z4n3p.zvd"; fi      
 if [ -f "$file-Mu-bar.zvd"    ]; then  rm "$file-Mu-bar.zvd"; fi   
 if [ -f "$file-Nu-bar.zvd"    ]; then  rm "$file-Nu-bar.zvd"; fi   
@@ -71,6 +74,7 @@ if [ -f "XS_(z,3np).zvd"   ]; then  mv "XS_(z,3np).zvd"   $file-znt.zvd; fi     
 if [ -f "XS_(z,pa).zvd"    ]; then  mv "XS_(z,pa).zvd"    $file-zpa.zvd; fi 
 if [ -f "XS_(z,npa).zvd"   ]; then  mv "XS_(z,npa).zvd"   $file-znpa.zvd; fi 
 if [ -f "XS_(z,2na).zvd"   ]; then  mv "XS_(z,2na).zvd"   $file-z2na.zvd; fi       
+if [ -f "XS_(z,3na).zvd"   ]; then  mv "XS_(z,3na).zvd"   $file-z3na.zvd; fi       
 #if [ -f "XS_(z,2n3p).zvd" ]; then  mv "XS_(z,2n3p).zvd"  $file-zpa.zvd; fi     # $file-z2n3p.zvd; fi       
 #if [ -f "XS_(z,3n3p).zvd"  ]; then  mv "XS_(z,3n3p).zvd"  $file-znpa.zvd; fi    # file-z3n3p.zvd; fi   
 #if [ -f "XS_(z,4n2p).zvd"  ]; then  mv "XS_(z,4n2p).zvd"  $file-z2na.zvd; fi    # $file-z4n2p.zvd; fi       
