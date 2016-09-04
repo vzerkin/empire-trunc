@@ -3011,7 +3011,8 @@ C* Case: Specified outgoing particle cosine
 C*        Interpolate precomputed Eou corresponding to Xlb
           IER=0
           EO =FINTXS(XLB,ENR,RWO(LXE),NE1,INA,IER)
-          NE1=21
+c...      NE1=21
+          NE1=31
           CALL FNGAUS(EO ,NE1,ENR,DXS,EPS)
           GO TO 800
         END IF
@@ -5303,12 +5304,25 @@ C*
       SUBROUTINE FNGAUS(ELV,NEN,ENR,DXS,EPS)
 C-Title  : Subroutine FGAUS
 C-Purpose: Tabulate normalised Gaussian function at NEN points
+C-Description:
+C-D  ELV  Centre point of the Gaussian 
+C-D  NEN  Number of points for the Gaussian
+C-D  ENR  Array of arguments for the Gaussian
+C-D  DXS  Array of Gaussian funcion values
+C-D  EPS  Gaussian half-width precision parameter
+C-D  The gaussian function is centred around argument ELV with
+C-D  a width of EPS*ELV at half-maximum. The function is tabulated
+C-D  over NEN points over the interval of NEPS half-widths on either
+C-M  side of the central point.
+C-
       DIMENSION ENR(NEN),DXS(NEN)
+c...  NEPS=5
+      NEPS=7
 C*
 C* Define constant A such that Gauss(A*(E-ELV))=1/2 at E=ELV*(1+EPS)
       AA =0.83/(EPS*ELV)
-C* Define range of tabulation +/- 5*EPS*ELV
-      DE =ELV*EPS*5
+C* Define range of tabulation +/- NEPS*EPS*ELV
+      DE =ELV*EPS*NEPS
       EB =ELV+DE
       EA =ELV-DE
       EA =MAX(1.E-5,EA)
