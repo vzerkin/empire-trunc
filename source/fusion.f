@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4772 $
+Ccc   * $Rev: 4782 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-03 19:54:25 +0200 (Sa, 03 Sep 2016) $
+Ccc   * $Date: 2016-09-04 19:24:31 +0200 (So, 04 Sep 2016) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1104,8 +1104,8 @@ C     write(*,*) ABScs,CSFus
          WRITE (46,'(A5,I6,E12.6)') 'LMAX:', maxlw, EINl
          if(tljcalc) then
           DO l = 0, maxlw
-            WRITE (46,'(2x,I3,3(3x,D15.8))') l, stl(l + 1)
-            WRITE (46,'(2x,3x,3(3x,D15.8))') 
+            WRITE (46,'(2x,I3,3(3x,D15.9))') l, stl(l + 1)
+            WRITE (46,'(2x,3x,3(3x,D15.9))') 
      &        (stlj(l + 1,jindex), jindex=1,mxj)
           ENDDO
          endif
@@ -1586,11 +1586,11 @@ C Proton spectrum
      &    WRITE (8,*) '        FUSred is NOT considered below'
         WRITE (8,*) 
      &'        CSFus(SUM_Tl)      CSFus+SINl+CC+SINlcont     ABScs(OMP)'
-        WRITE (8,'(4x,3(4x,D15.8,4x))')
+        WRITE (8,'(4x,3(4x,D15.9,4x))')
      &   CSFus/Fusred, CSFus/Fusred + SINl + SINlcc + SINlcont, ABScs
         WRITE (8,*) 
      &'           SINl                  SINlcc                SINlcont'
-        WRITE (8,'(4x,3(4x,D15.8,4x))') SINl, SINlcc, SINlcont
+        WRITE (8,'(4x,3(4x,D15.9,4x))') SINl, SINlcc, SINlcont
         WRITE (8,*) 
       ENDIF
 
