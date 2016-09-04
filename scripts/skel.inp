@@ -22,16 +22,24 @@ RECOIL     0.                           ! No recoils are calculated. Sizeable sp
 *                                    
 FITLEV     0.                           ! FITLEV>0 is recommended for 1st run to compare vs NLD exp.data
 LEVDEN     0.                           ! EMPIRE NLD (EGSM RIPL-3) as default
-*LEVDEN     1.                          ! Refitted GSM model (Ignatyuk) NLD (future option)  
-*LEVDEN     2.                          ! Refitted Gilbert & Cameron NLD (future option)  
-*LEVDEN     3.                          ! RIPL-3 HFB parity dependent NLD 
-*LEVDEN     4.                          ! EMPIRE 2.18 Gilbert & Cameron NLD  
+*LEVDEN     1.                           ! Refitted GSM model (Ignatyuk) NLD (future option)  
+*LEVDEN     2.                           ! Refitted Gilbert & Cameron NLD (future option)  
+*LEVDEN     3.                           ! RIPL-3 HFB parity dependent NLD 
+*LEVDEN     4.                           ! EMPIRE 2.18 Gilbert & Cameron NLD  
 *ATILNO    1.05   Z0   A0               ! Level density parameter of nucleus(Z0,A0) increased by 5%            
-HRTW       3.                           ! Width fluctuations considered up to 3 MeV (for neutron induced)
+WFCORR     1.                           ! Width fluctuation method: HRTW original
+*WFCORR     2.                           ! Width fluctuation method: HRTW with Kawano-Talou degres of freedom (nu)
+*WFCORR     3.                           ! Width fluctuation method: Moldauer original
+*WFCORR     4.                           ! Width fluctuation method: Moldauer with Kawano-Talou degres of freedom (nu)
+ETLJ       8.                           ! ETLJ defines the maximum energy up to which WFCORR are calculated 
+*CNANGD    1.                           ! Calculates proper (anisotropic) CN angular distributions foo discrete states 
+*                                       !    Requires WF correction (Default: isotropic CN angular distributions)     
+*                                       ! WF corrections are automatically set off if calculated Compound elastic is lower than 1 mb.
+*HRTW       8.                           ! Obsolete: Use WFCORR and ETLJ
 *TUNE      0.90   Z0    A0    0         ! Gamma width  of nucleus(Z0,A0) decreeased by 10%
 GSTRFN     1.                           ! Default gamma ray strength function (Plujko MLO RIPL-2)
-***									 
-* OPTICAL MODEL INPUT				 
+***                                                    
+* OPTICAL MODEL INPUT                      
 *
 * for A <= 220
 *OMPOT   2405.       1                  ! OMP for the inverse neutron channel  - Koning & Delaroche
@@ -53,14 +61,16 @@ GSTRFN     1.                           ! Default gamma ray strength function (P
 *DIRECT     2.                          ! CC TLs for the incident and outgoing channel + DWBA (uncoupled)
 *DIRECT     3.                          ! DWBA calculation for all collective levels
 *DIRPOT  2408.                          ! OMP for the scattering on collective levels if DIRECT>0 (CC/DWBA)
-***									 
-* Prequilibrium models				 
+***                                                    
+* Prequilibrium models                     
 *                                    
 MSD        0.                           ! Quantum statistical Multi-Step-Direct model
 MSC        0.                           ! Quantum statistical Multi-Step-Compound model
 PCROSS    1.5                           ! Exciton model with default 1.5 MFP parameter  
 HMS        0.                           ! Monte Carlo Hybrid (DDHMS)preequilibrium model 
 *GTILNO    1.1    Z0    A0    1         ! Single particle LD for neutron PE emission increased by 10%          
+*
+*GAMPRN    1.                           ! Output n,xng cross sections. Requires ENDF=0 calculation
 GO                                                  
 @ Running title may be given in any line starting with @ 
 0.002
