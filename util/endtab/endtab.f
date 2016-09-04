@@ -344,7 +344,7 @@ C* Check if ratio to Maxwellian is to be printed
         IF(FLNM(1:40).NE.BLNK) READ(FLNM,98) TMXW
       END IF
 C... Special case for backward compatibility to force MT 5 explicitly
-      IF(IDMY.EQ.5) IDMY=-5
+C...  IF(IDMY.EQ.5) IDMY=-5
 C...
       IF(IDMY.NE.0) MT0=IDMY
       ELV=0
