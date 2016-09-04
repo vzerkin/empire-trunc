@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4708 $
+Ccc   * $Rev: 4783 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
+Ccc   * $Date: 2016-09-04 19:25:18 +0200 (So, 04 Sep 2016) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2564,7 +2564,7 @@ C-----Here the previously calculated files should be read
       OPEN (45 ,FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
       if(fexistj) 
      &  OPEN (451,FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
-      IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
+        IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
   100 READ (45 ,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       if(fexistj)READ (451,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:',lmax,ien,ener
@@ -2597,7 +2597,7 @@ C
      &        (Ttllj(ien,l+1,jindex), jindex=1,MAXj(Nejc))
          ENDIF
       ENDDO
-      READ (45,END = 300) SIGabs(ien,Nejc,Nnuc)
+      READ (45,END = 300, ERR=300) SIGabs(ien,Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45 )
       CLOSE (451) 
