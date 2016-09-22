@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4765 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+Ccc   * $Rev: 4784 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2016-09-22 18:27:22 +0200 (Do, 22 Sep 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -170,7 +170,7 @@ C------------------(discrete levels part)
 C                       espec is the outgoing energy corresponding to the level "il"
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                         IF (espec.GE.0.d0) WRITE (12,
-     &                     '(F10.6,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
+     &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
 c                       Discrete level cros section CSAlev contains angular distribution, NOT DDXS
 c                       recoil correction is not needed as we do not integrate over energy 
 c                       We only sum over discrete levels ! 
