@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4784 $
+Ccc   * $Rev: 4785 $
 Ccc   * $Author: gnobre $
-Ccc   * $Date: 2016-09-22 18:27:22 +0200 (Do, 22 Sep 2016) $
+Ccc   * $Date: 2016-09-27 16:19:10 +0200 (Di, 27 Sep 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -322,7 +322,7 @@ C                      espec is the outgoing energy corresponding to the level "
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
                        WRITE(12, 
-     &                   '(4x,I3,4x,F10.6,3(E14.6,2x),F6.2,4x,F9.7)')  
+     &                   '(4x,I3,4x,F10.5,3(E14.6,2x),F6.2,4x,F9.7)')  
      &                   il,  -espec, check_DL(il),
      &                    CSDirsav(il,nejc),
      &                   (check_DL(il)-CSDirsav(il,nejc)),
