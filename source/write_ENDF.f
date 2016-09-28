@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4765 $
+Ccc   * $Rev: 4786 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+Ccc   * $Date: 2016-09-29 00:24:09 +0200 (Do, 29 Sep 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -139,6 +139,12 @@ C        qout = 0.d0
 
             lprint = .FALSE.
 
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) CYCLE 
+
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE 
+
             IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).GT.4 ) THEN
               CALL PRINT_RECOIL(nnuc,reactionx) 
               lprint = .TRUE.
@@ -166,12 +172,12 @@ C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1)
 C    &        write(*,*) NINT(A(nnuc)),INT(Z(nnuc)),' ',
 C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
 
-            IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
-     &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
-              IF(CSInc(nnuc).gt.0.d0) 
-     &          CALL PRINT_RECOIL(nnuc,reactionx)
-              lprint = .TRUE.
-            ENDIF
+C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
+C    &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
+C             IF(CSInc(nnuc).gt.0.d0) 
+C    &          CALL PRINT_RECOIL(nnuc,reactionx)
+C             lprint = .TRUE.
+C           ENDIF
 
             IF ((.not.lprint) .and. ENDf(nnuc).EQ.2) THEN
               CALL PRINT_RECOIL(nnuc,reactionx)

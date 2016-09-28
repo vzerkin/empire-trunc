@@ -1,6 +1,6 @@
-!cc   * $Rev: 4765 $
+!cc   * $Rev: 4786 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+!cc   * $Date: 2016-09-29 00:24:09 +0200 (Do, 29 Sep 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -800,13 +800,13 @@ C                 (n,n),(n,2n),(n,3n),(n,4n)
                   if(in.eq.mulem .and. in.le.4) THEN
                           ENDfp(1,nnuc) = 1 
                           ENDfp(0,nnuc) = 1
-!                          ENDf(nnuc) = 1
+                          ENDf(nnuc) = 1
                   endif
 C                 (n,p),(n,2p),(n,3p)
                   if(ip.eq.mulem .and. ip.le.3) THEN
                           ENDfp(2,nnuc) = 1 
                           ENDfp(0,nnuc) = 1 
-!                          ENDf(nnuc) = 1
+                          ENDf(nnuc) = 1
                   endif 
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp

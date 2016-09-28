@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4765 $
+Ccc   * $Rev: 4786 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+Ccc   * $Date: 2016-09-29 00:24:09 +0200 (Do, 29 Sep 2016) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1394,10 +1394,11 @@ C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
            IF(nnuc.eq.mt91) ftmp_disc = CSDirlev(1,1)
            IF(nnuc.eq.mt649) ftmp_disc = CSDirlev(1,2)
            IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
-
-C          IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.CSMinim) then
-           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.0) then
+C          write(*,*) A(nnuc),Z(nnuc),ENDF(nnuc)
+C          write(*,*) CSPrd(nnuc),CSPopul(nnuc)
+C          IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.0) then
 C
+           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
              CSInc(nnuc) = max(CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc,0.d0)
 C
              WRITE (12,
