@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4788 $
+Ccc   * $Rev: 4789 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-10-03 21:20:27 +0200 (Mo, 03 Okt 2016) $
+Ccc   * $Date: 2016-10-03 21:25:24 +0200 (Mo, 03 Okt 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -149,9 +149,9 @@ C               dang = PI/FLOAT(NDANG - 1)
      &                         REAction(nnuc), ' ZAP= ', iizaejc
 C------------------recorp is a recoil correction factor defined 1+Ap/Ar that
 C------------------multiplies cross sections and divides outgoing energies
-C                  recorp = 1.d0
-c                  IF(RECoil.gt.0) ! using the mass of the corresponding CN nnur
-c                  recorp = 1.d0 + EJMass(nejc)/AMAss(nnur) 
+                   recorp = 1.d0
+C                  IF(RECoil.gt.0) ! using the mass of the corresponding CN nnur
+C                  recorp = 1.d0 + EJMass(nejc)/AMAss(nnur) 
                    IF(RECoil.gt.0) ! using the mass of the CN for all (to keep the same energy grid)
      &               recorp = 1.d0 + EJMass(nejc)/AMAss(1) 
                    WRITE (12,
