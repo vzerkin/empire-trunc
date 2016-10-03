@@ -182,7 +182,7 @@ C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
 c     character*48 filename
@@ -211,7 +211,7 @@ c      dimension ax(4),pox(4,2)
       data vx/1.0,1.0,1.0/
       data wx/1.0,1.0,1.0/
       data frcnst0/0.667/,ebnd/2.224/,dx0/125.0/
-      data rmax0/1.6/,amax0/0.75/
+      data rmax0/1.6/,amax0/0.95/
 
       data iwrt/8/
 
@@ -239,7 +239,7 @@ c      dimension ax(4),pox(4,2)
          ENDIF
 
         IF(ip.EQ.1) THEN        
-          lmxwf(1) = MIN(MAX(30,INT(0.1*sqrt(EIN)*nol+5)),nol)
+          lmxwf(1) = MIN(MAX(30,INT(0.15*sqrt(EIN)*nol+5)),nol)
          ELSE
           lmxwf(ip) = MIN(INT(0.6*lmxwf(1)),NDLW)
          ENDIF
@@ -366,7 +366,7 @@ c thetai
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      parameter(npt1mx=500,nptmx=5000)
+      parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2,ntlmx=(2*nol+1)*ndlmx/3)
 
       double precision ps(nol,3),dsigt(3)
@@ -662,7 +662,7 @@ c
 *
       subroutine setpoints(et,e1)
 
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
 
       real mu
       dimension ecm(3)
@@ -676,7 +676,7 @@ c     integer iwrt
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
 
-      data rmax0/1.6/,amax0/0.75/
+      data rmax0/1.6/,amax0/0.95/
 
 C      data iwrt/8/
 
@@ -734,7 +734,7 @@ c
 c  calculates the overlap of the projectile and the two breakup product
 c  scattering wavefunctions
 c
-      parameter(npt1mx=500,nptmx=5000)
+      parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
       complex*16 ovrlp0
@@ -827,7 +827,7 @@ c
 c  calculates the overlap of the projectile and the two breakup product
 c  scattering wavefunctions
 c
-      parameter(npt1mx=500,nptmx=5000)
+      parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
       complex*16 ovrlp
@@ -1009,7 +1009,7 @@ c  scattering wavefunctions
 c
 c  nf = 2 or 3
 c
-      parameter(npt1mx=500,nptmx=5000)
+      parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
       complex*16 bfint
@@ -1058,7 +1058,7 @@ c***********************************************************************
 c     calcul des amplitudes de diffusion smtrx(l,j)                    *
 c***********************************************************************
       parameter(nol=95)
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
       real md,mf,mu
       double precision fc(nol),fcp(nol),gc(nol),gcp(nol)
       double precision fc2(nol),fcp2(nol),gc2(nol),gcp2(nol)
@@ -1436,7 +1436,7 @@ c***********************************************************************
 c     Outward integration of Schrodinger equation using                * 
 c     adaptive stepsize runge-kutta to obtain regular solution         *
 c***********************************************************************
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
       complex*16 wf(nptmx),dwf(nptmx)
 
       complex*16 yy(2)
@@ -1608,7 +1608,7 @@ c
 c
 c - starting derivative
 c
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
 
       implicit double precision(a-h,o-z)
 
@@ -1651,7 +1651,7 @@ c
 c
 c - derivatives
 c
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
 
       implicit double precision(a-h,o-z)
 
@@ -1936,7 +1936,7 @@ c
 c***********************************************************************
 c     calculation of the folding (Watanabe) potential                  *
 c***********************************************************************
-      parameter(nptmx=5000)
+      parameter(nptmx=7500)
 
       real md,mf
       dimension a(5,3),rv(5,3),pote(5,3),rf(3)

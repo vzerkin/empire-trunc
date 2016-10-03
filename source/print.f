@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4765 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+Ccc   * $Rev: 4787 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-10-03 04:14:52 +0200 (Mo, 03 Okt 2016) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -180,7 +180,8 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum
+      DOUBLE PRECISION csemax, totspec, recorp, ftmp, htmp, csum,
+     &                 sangsum
       DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION esum !, dtot, dincl
       CHARACTER*21 caz 
@@ -461,10 +462,14 @@ C--------Inclusive DDX spectrum
          DO ie = 1, nspec ! + 1
            if(CSE(ie,nejc,0).le.0.d0) cycle
            csum = 0.d0
+           sangsum = 0.0d0
            DO nang = 1, NDANG  ! over angles
              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
+             sangsum = sangsum + SANgler(nang)
            ENDDO
-           check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
+c           check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
+           check_DE(ie) = 4.0d0*PI*csum/sangsum
+           
            if(ie.le.nspec)
      &     WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,

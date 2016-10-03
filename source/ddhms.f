@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4755 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-28 18:17:34 +0200 (So, 28 Aug 2016) $
+Ccc   * $Rev: 4787 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-10-03 04:14:52 +0200 (Mo, 03 Okt 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4755 $
-C $Id: ddhms.f 4755 2016-08-28 16:17:34Z rcapote $
+C CVS Version Management $Revision: 4787 $
+C $Id: ddhms.f 4787 2016-10-03 02:14:52Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -2478,9 +2478,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4755 $')
+99005 FORMAT ('  xddhms version: $Revision: 4787 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4755 2016-08-28 16:17:34Z rcapote $')
+99010 FORMAT ('  $Id: ddhms.f 4787 2016-10-03 02:14:52Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5867,7 +5867,7 @@ C Local variables
 C
       DOUBLE PRECISION csfit(NDAnghms), csx0(NDAnghms) !, qq(5)
       DOUBLE PRECISION sumcon, difcon, elf, pops, ecres, ecn, csum,
-     &                 xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
+     &          sangsum, xnor, zero, thx, dth, xlo, dxlo, xhi, dxhi
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
       INTEGER il, iloc, izar, jmax, jn, jsp, jz, !ier
@@ -5944,10 +5944,13 @@ C    &                 sngl(csfit(na))
          ENDDO
 
          csum = 0.d0
+         sangsum = 0.0d0
          DO na = 1, NDAnghms
            csum = csum + csfit(na)*SANgler(na)
-         ENDDO
-         csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+           sangsum = sangsum + SANgler(na)
+        ENDDO
+c        csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)
+        csum = 4.0d0*PI*csum/sangsum
 
          IF (csum.gt.0.0D+0) THEN
             xnor = CSEhm/csum
@@ -6010,8 +6013,9 @@ C    &                 sngl(csfit(NDAnghms-na+1))
          DO na = 1, NDAnghms
            csum = csum + csfit(na)*SANgler(na)
          ENDDO
-         csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
-
+c         csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)
+          csum = 4.0d0*PI*csum/sangsum
+         
          IF (csum.gt.0.0D+0) THEN
             xnor = CSEhm /csum
             DO na = 1, NDAnghms
@@ -6138,8 +6142,10 @@ c                 chkpopd = chkpopd + pops
                  csum = csum + 
      &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
                 ENDDO
-               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+c               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+                csum = 4.0d0*PI*csum/sangsum
 
+                
                csfit = 0.d0 ! cleaning the csfit array
 
                IF (csum.GT.0.d0) THEN
@@ -6230,8 +6236,9 @@ C                 csfit(NDAnghms-nth+1) = POPcsea(nth,nu,1,ne,Inxr)
                    csum = csum + 
      &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
                  ENDDO
-                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
-
+c                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+                  csum = 4.0d0*PI*csum/sangsum
+                 
                  csfit = 0.d0 ! cleaning the csfit array
             
                  IF (csum.gt.0.0D+0) THEN
@@ -6342,8 +6349,9 @@ c                chkpopd = chkpopd + pops
                  csum = csum + 
      &                  csfit(NDAnghms-na+1)*SANgler(NDAnghms-na+1)
                 ENDDO
-               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
-               
+c               csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+                csum = 4.0d0*PI*csum/sangsum
+                
                csfit = 0.d0 ! cleaning the csfit array
 
                IF (csum.gt.0.0D+0) THEN
@@ -6431,7 +6439,8 @@ C                 csfit(NDAnghms-nth+1) = POPcsea(nth,nu,2,ne,Inxr)
                    csum = csum + 
      &                  csfit(NDAnghms-nth+1)*SANgler(NDAnghms-nth+1)
                   ENDDO
-                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+c                 csum = 2.0d0*PI*csum*PI/(NDAnghms - 1)  
+                 csum = 4.0d0*PI*csum/sangsum
 
                  csfit = 0.d0 ! cleaning the csfit array
 

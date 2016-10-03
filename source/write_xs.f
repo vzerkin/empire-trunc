@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4785 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2016-09-27 16:19:10 +0200 (Di, 27 Sep 2016) $
+Ccc   * $Rev: 4787 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2016-10-03 04:14:52 +0200 (Mo, 03 Okt 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -19,7 +19,7 @@ C
       CHARACTER*9 cejectile
       INTEGER nnuc,nejc,nnur,iloc,nspec,nang,il,ie,iizaejc,myalloc,itmp
       INTEGER iemm,iprn
-      DOUBLE PRECISION recorp,espec,csum,esum,qin,qinaver
+      DOUBLE PRECISION recorp,espec,csum,esum,sangsum,qin,qinaver
       DOUBLE PRECISION cmul,xsdisc,dtmp,htmp,ftmp,csum1
 C     DOUBLE PRECISION cseaprnt(ndecse,ndangecis),check_DE(ndecse)
       DOUBLE PRECISION,ALLOCATABLE :: cseaprnt(:,:),check_DE(:)
@@ -178,10 +178,13 @@ c                       We only sum over discrete levels !
 c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
      &                               0.d0),nang = 1,NDANG)
                         csum = 0.d0
-                        DO nang = 1, NDANG  ! over angles
+                        sangsum = 0.0d0
+                        DO nang = 1, NDANG ! over angles
                           csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
-                        ENDDO
-                        check_DL(il)=	2.0d0*PI*csum*PI/(NDAng - 1)
+                          sangsum = sangsum + SANgler(nang)
+                       ENDDO
+c                          check_DL(il)=	2.0d0*PI*csum*PI/(NDAng - 1)
+                          check_DL(il)=	4.0d0*PI*csum/sangsum
 c    &                    max(2.0d0*PI*csum*PI/(NDAng - 1),1.d-10)  ! PI/90.d0
                      ENDDO                                
                    ENDIF
@@ -201,6 +204,7 @@ C                    if(ie.eq.1 .or. ie.eq.nspec + 1) itmp=2
                      esum = esum + htmp*DE/itmp*FLOAT(ie - 1)*DE/recorp
 
                      csum = 0.d0
+                     sangsum = 0.0d0
                      IF(LHMs.GT.0 .AND. (nejc.EQ.1 .OR. nejc.EQ.2)) THEN
 C----------------------Check whether integral over angles agrees with DE spectra
                        ftmp = max((htmp - xnorm(nejc,INExc(nnuc))
@@ -210,7 +214,8 @@ C----------------------Check whether integral over angles agrees with DE spectra
      &                     ftmp + xnorm(nejc,INExc(nnuc))*
      &                            POPcsea(nang,0,nejc,ie,INExc(nnuc))
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
-                       ENDDO
+                           sangsum = sangsum + SANgler(nang)
+                        ENDDO
                      ELSE
 c The following is equivalent the definition of ftmp above, when LHMs=0.
                        ftmp = max( (POPcse(0,nejc,ie,INExc(nnuc)) -
@@ -221,10 +226,12 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
      &                     ftmp + CSEa(ie,nang,nejc)*
      &                            POPcseaf(0,nejc,ie,INExc(nnuc))
                            csum = csum + cseaprnt(ie,nang)*SANgler(nang)
-                       ENDDO
+                           sangsum = sangsum + SANgler(nang)
+                        ENDDO
                      ENDIF
 
-                     check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
+c                     check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
+                     check_DE(ie) = 4.0d0*PI*csum/sangsum ! PI/90.d0
                    ENDDO
 C
                    iprn = 1
