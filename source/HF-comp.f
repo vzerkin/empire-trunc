@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4772 $
+Ccc   * $Rev: 4790 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-03 19:54:25 +0200 (Sa, 03 Sep 2016) $
+Ccc   * $Date: 2016-10-04 23:45:18 +0200 (Di, 04 Okt 2016) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -271,6 +271,7 @@ C-----Contribution coming straight from the current decay
 C-----
 C-----Contribution due to feeding spectra from Nnuc
 C-----
+      IF (POPbin(Iec,Nnuc).EQ.0) RETURN
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
          xnor = Popt*DE/POPbin(Iec,Nnuc)
@@ -403,11 +404,11 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
         CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
       ENDIF
 C-----Contribution due to feeding spectra from Nnuc
+      IF (POPbin(Iec,Nnuc).EQ.0) RETURN
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
-         IF (POPbin(Iec,Nnuc).GT.0) THEN
-            xnor = Popt*DE/POPbin(Iec,Nnuc)
-            DO iesp = 1, NDECSE
+         xnor = Popt*DE/POPbin(Iec,Nnuc)
+         DO iesp = 1, NDECSE
               DO iejc = 0, NDEJC
                IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
                  IF(ENDF(Nnur).EQ.1) THEN
@@ -471,8 +472,7 @@ C-----------DDX spectra using portions
                ENDIF
              ENDDO
 C--------------DDX spectra using portions
-            ENDDO
-         ENDIF
+         ENDDO
       ENDIF
       END
 
