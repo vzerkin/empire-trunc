@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4787 $
+Ccc   * $Rev: 4791 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-10-03 04:14:52 +0200 (Mo, 03 Okt 2016) $
+Ccc   * $Date: 2016-10-09 04:26:57 +0200 (So, 09 Okt 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4787 $
-C $Id: ddhms.f 4787 2016-10-03 02:14:52Z bcarlson $
+C CVS Version Management $Revision: 4791 $
+C $Id: ddhms.f 4791 2016-10-09 02:26:57Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -234,7 +234,8 @@ C     Skip:
       ENDDO
 C     END Random number setup -------------------
 C
-C
+C       write(*,*) rtar,adif
+C     
 C
 C
 C%%%%%%%%%%% MAIN LOOP OVER EVENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2478,9 +2479,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4787 $')
+99005 FORMAT ('  xddhms version: $Revision: 4791 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4787 2016-10-03 02:14:52Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4791 2016-10-09 02:26:57Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -4167,7 +4168,7 @@ C
 C
 C local variables r0,
 C
-      REAL*8 r0,akf0,ekf0,vsigma
+      REAL*8 r0,akf0,ekf0,vsigma,r0g
 
 C     ZMNuc = 939.D0
       ZMNuc = AMUpro*AMUmev          ! bare proton mass
@@ -4226,9 +4227,11 @@ c      vv2=40.0d0*AMUltdamprate
       vv2=0.13*AMUltdamprate
 
 c  parameters used in geometry dependence
-      rtar = r0*ATAr**(1.0d0/3.0d0)
-      bth2 = 4.17*r0**2*sqrt(ATAr)
-      adif = 0.55
+
+      r0g = 1.4
+      rtar = r0g*ATAr**(1.0d0/3.0d0)+1.0d0
+      bth2 = 4.17*r0g**2*sqrt(ATAr)
+      adif = 0.75
 
       END
 C
@@ -4320,16 +4323,10 @@ C
 C Local variables
 C
       REAL*8 prob, xran, yran
-C      REAL*8 probmax
       REAL*8 RANG
-C      probmax = Rnucleus
-C  100 xran = RANG()*(Rnucleus + 3*Adiffuse)
-C      yran = RANG()*probmax
-C      prob = xran/(1 + EXP((xran-Rnucleus)/Adiffuse))
-C sampling area not length!
-  100 xran = SQRT(RANG())*(Rnucleus + 3.*Adiffuse)
-      yran = RANG()
-      prob = 1.0/(1.0 + EXP((xran-Rnucleus)/Adiffuse))
+  100 xran = SQRT(RANG())*(Rnucleus + 3*Adiffuse)
+      yran = RANG()*xran
+      prob = xran/(1 + EXP((xran-Rnucleus)/Adiffuse))
       IF (yran.GT.prob) GOTO 100
       Rsample = xran
       END
@@ -5871,7 +5868,7 @@ C
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
       INTEGER il, iloc, izar, jmax, jn, jsp, jz, !ier
-     &        mrec, na, ne, nspec, Inxr,
+     &        mrec, na, ne, nspec, Inxr, ip,
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
 C     INTEGER INT
 C
@@ -6071,7 +6068,7 @@ C
            IF(iloc .EQ. 0 .AND. XSNx(jz,jn) .GT. 1.0d-6) THEN
             CSHms(1,nnuc) =  XSNx(jz,jn)
             CSEmis(1,nnuc) = CSEmis(1,nnuc) + XSNx(jz,jn)
-
+            
 C           write(8,*) ' endf 1 ',jz,jn,nnur,endf(nnur),endfa(nnur) 
           IF (ENDf(nnur).EQ.1 .OR. (jz.EQ.0 .AND. jn.EQ.0)) THEN
 
@@ -6515,21 +6512,31 @@ C
                ELSE
                 nucn=nucnhi
                ENDIF 
-              ENDIF
+             ENDIF
+             sumcon = DEBin*Uspec(0,0,nucn)
+             POPcon(1) = sumcon
+             POPdis(1) = 0.0d0
+C             WRITE(8,*)' continuum pop = ', sumcon, ' mb'
+             sumcon = sumcon/SIGreac      
              DO jsp = 1, NDLW
-               POP(NEX(1),jsp,1,1)=0.0d0
-               POP(NEX(1),jsp,2,1)=0.0d0
-               ENDDO
-             sumcon = 0.0
-             DO jsp = 0, JMAxujspec(0,0,nucn)
-               sumcon = sumcon + UJSpec(0,0,nucn,jsp)
-               POP(NEX(1),jsp+1,1,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
-               POP(NEX(1),jsp+1,2,1) = 0.5*DEBin*UJSpec(0,0,nucn,jsp)
+              POP(NEX(1),jsp,1,1) = sumcon*POP(NEX(1),jsp,1,1)
+              POP(NEX(1),jsp,2,1) = sumcon*POP(NEX(1),jsp,2,1)
+C              write(8,'(i5,2f15.5)') jsp,(POP(NEX(1),jsp,ip,1),ip=1,2)
+              IF(POP(NEX(1),jsp,1,1)+POP(NEX(1),jsp,2,1).LT.1.0d-6) EXIT
              ENDDO
-              sumcon = DEBin*sumcon
-              POPcon(1) = sumcon
-              POPdis(1) = 0.0d0
-C              WRITE(8,*)' continuum pop = ', sumcon, ' mb'
+C             sumcon = 0.0
+C             sumcon = sumcon + UJSpec(0,0,nucn,0)
+C             POP(NEX(1),1,1,1) = DEBin*UJSpec(0,0,nucn,0)
+c             write(8,*) 'jmax', JMAxujspec(0,0,nucn)
+C             DO jsp = 1, JMAxujspec(0,0,nucn)
+C               sumcon = sumcon + UJSpec(0,0,nucn,jsp)
+C               ip = mod(jsp,2)+1
+C               POP(NEX(1),jsp,ip,1) = POP(NEX(1),jsp,ip,1)
+C     &                   + jsp*DEBin*UJSpec(0,0,nucn,jsp)/(2*jsp+1)
+C               POP(NEX(1),jsp+1,ip,1) = POP(NEX(1),jsp+1,ip,1)
+C     &              + (jsp+1)*DEBin*UJSpec(0,0,nucn,jsp)/(2*jsp+1)
+C             ENDDO
+C              sumcon = DEBin*sumcon
               GO TO 50
             ENDIF
 
@@ -6632,9 +6639,9 @@ C--------------population of discrete levels (evenly distributed)
                      sumcon=sumcon+difcon
                   ENDDO
                ENDIF
-c              WRITE(8,*)' discrete pop  = ',real(difcon*NLV(nnur)),' mb'
-c              WRITE(8,*)' continuum pop = ', chk, ' mb'
-c              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
+C              WRITE(8,*)' discrete pop  = ',real(difcon*NLV(nnur)),' mb'
+C              WRITE(8,*)' continuum pop = ', chk, ' mb'
+C              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
 C
 C--------------transfer excitation energy dependent recoil spectra
 C
