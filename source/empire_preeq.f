@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
+Ccc   * $Rev: 4793 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Date: 2016-10-14 03:07:48 +0200 (Fr, 14 Okt 2016) $
 
       SUBROUTINE EMPIRE_PREEQ
      &     (xsinl,xsmsc,tothms,totemis,corrmsd,totcorr,nvwful)
@@ -18,7 +18,7 @@ C
       LOGICAL nvwful, fexist
       CHARACTER*23 ctmp23
 
-      DOUBLE PRECISION qmax,qstep,q2,q3,ftmp,echannel,dtmp 
+      DOUBLE PRECISION qmax,qstep,q2,q3,ftmp,echannel,dtmp,corrHMS 
       INTEGER ltrmax,i,nejc,nnur,itimes,its,iad,iam,ia,iang,ie,j 
 
 C     COMMON variables
@@ -254,12 +254,15 @@ C----------Add PE contribution to the total NEJC emission
 C
 C-----
 C-----HMS Monte Carlo preequilibrium emission
-C-----        
-      IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0 .AND. MSD+MSC.EQ.0) THEN
+C-----
+      
+       corrHMS = 1.0d0
+
+       IF ( EINl.GT.0.1D0 .AND. LHMs.NE.0 .AND. MSD+MSC.EQ.0) THEN
          ftmp = IZA(0)
          CALL DDHMS(IZAejc(0),ftmp,XJLv(LEVtarg,0),EINl,
      &             CSFus*corrmsd,CHMs,DE,DERec,FHMs,NHMs,QDFrac,
-     &                 0,1,0,icalled)
+     &                 corrHMS,0,1,0,icalled)
          icalled = 1
 c        CSEmis(1,1) = CSEmis(1,1) + CSHms(1,0)
 c        CSEmis(2,1) = CSEmis(2,1) + CSHms(2,0)
@@ -425,10 +428,11 @@ C        WRITE(8,*) 'MSC: ',CSMsc(0),CSMsc(1),CSMsc(2)
       ENDIF
 
 C     Renormalizing elastic transmission coefficients to consider PE emission
+      corrHMS = corrHMS * corrmsd
       DO i = 1, NDLW
-          ELTl(i) = ELTl(i) * corrmsd 
+          ELTl(i) = ELTl(i) * corrHMS
           DO j = 1, 3
-            ELTlj(i,j) = ELTlj(i,j) * corrmsd 
+            ELTlj(i,j) = ELTlj(i,j) * corrHMS 
           ENDDO
       ENDDO
 

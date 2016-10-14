@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 4500 $
-c $Id: ddhms.cmb 4500 2015-11-19 18:13:23Z bcarlson $
+c CVS Version Management $Revision: 4793 $
+c $Id: ddhms.cmb 4793 2016-10-14 01:07:48Z bcarlson $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
@@ -38,6 +38,10 @@ c  damping rate test
 c input flags controling print of history file and recoil information in o/p
       common/iflagprint/ ihistlab, irecprint, iomlread
       integer ihistlab,irecprint, iomlread
+
+c renormalization factor for elastic channel transmission coefficients when LHRtw not 0
+      REAL*8 corrHMS
+      common/HMSreduc/corrHMS
 
 c quasideuteron frac. of photoabsorption cross section -- used in SETUPINITPH
       real*8 QDFrax

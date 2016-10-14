@@ -1,17 +1,17 @@
-Ccc   * $Rev: 4791 $
+Ccc   * $Rev: 4793 $
 Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-10-09 04:26:57 +0200 (So, 09 Okt 2016) $
+Ccc   * $Date: 2016-10-14 03:07:48 +0200 (Fr, 14 Okt 2016) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Debrecr,FHMs,NHMs,Qdfracr,
-     &                 Ihistlabr,Irecprintr,Iomlreadr,Icalled)
+     &                 corrHMSr,Ihistlabr,Irecprintr,Iomlreadr,Icalled)
 C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4791 $
-C $Id: ddhms.f 4791 2016-10-09 02:26:57Z bcarlson $
+C CVS Version Management $Revision: 4793 $
+C $Id: ddhms.f 4793 2016-10-14 01:07:48Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -84,7 +84,7 @@ C
 C Dummy arguments
 C
       REAL*8 Ajtarr, Amultdamp, Debinr, Debrecr, Elabprojr, Qdfracr, 
-     &       Sigreacr, Tartyper
+     &       Sigreacr, Tartyper, corrHMSr
       INTEGER Icalled, Ihistlabr, Iomlreadr, Irecprintr, Izaproj
       INTEGER FHMs, NHMs
 C
@@ -138,6 +138,10 @@ C
      &                         'unknown')                     !big file
 C
       CALL XHMS(Icalled)
+
+      corrHMSr = corrHMS
+      
+      RETURN
       END
 C
 C
@@ -2479,9 +2483,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4791 $')
+99005 FORMAT ('  xddhms version: $Revision: 4793 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4791 2016-10-09 02:26:57Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 4793 2016-10-14 01:07:48Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -5868,7 +5872,7 @@ C
 C     REAL FLOAT
 C     DOUBLE PRECISION DCOS
       INTEGER il, iloc, izar, jmax, jn, jsp, jz, !ier
-     &        mrec, na, ne, nspec, Inxr, ip,
+     &        mrec, na, ne, nspec, Inxr, ip, ilvmax,
      &        nnur, nth, nu, nucn, nucnhi, nucnlo
 C     INTEGER INT
 C
@@ -6517,7 +6521,10 @@ C
              POPcon(1) = sumcon
              POPdis(1) = 0.0d0
 C             WRITE(8,*)' continuum pop = ', sumcon, ' mb'
-             sumcon = sumcon/SIGreac      
+             sumcon = sumcon/SIGreac
+C             corrHMS = 1.0d0
+C             IF(LHRtw.GT.0) corrHMS = sumcon
+             corrHMS = sumcon
              DO jsp = 1, NDLW
               POP(NEX(1),jsp,1,1) = sumcon*POP(NEX(1),jsp,1,1)
               POP(NEX(1),jsp,2,1) = sumcon*POP(NEX(1),jsp,2,1)
@@ -6562,7 +6569,7 @@ C              sumcon = DEBin*sumcon
             CALL WHERE(izar,nnur,iloc)
             IF (iloc.NE.1) THEN   !ignore population of not considered nuclei
 
-C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
+c              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
               nspec = min(INT(ecn/DE) + 1,NDECSE)
               nspecc = min(INT((ecn-ECUT(Nnur))/DE) + 1,NEX(nnur))
               ndspc = nspec-nspecc
@@ -6620,28 +6627,40 @@ C              write(8,'(a5,i8,f12.6)') 'emax:',izar,ecn
                POPcon(nnur) = sumcon
                POPdis(nnur) = RESpop(jz,jn)-sumcon
 C--------------population of discrete levels (evenly distributed)
-               difcon = (RESpop(jz,jn) - sumcon)/NLV(nnur)
+               DO il = NLV(nnur), 1, -1
+c                WRITE(8,'(2i5,3f15.5)') 0,il,Elv(il,nnur),ecn
+                  ilvmax = il
+                  IF(ELV(il,nnur).LT.ecn) EXIT
+               ENDDO
+c               write(8,*) ilvmx
+               difcon = (RESpop(jz,jn) - sumcon)/ilvmax
                IF (IDNa(1,5).EQ.1 .AND. nnur.EQ.mt91) THEN
-                  DO il = 1, NLV(nnur)
+                  DO il = 1, ilvmax
+c                     WRITE(8,'(2i5,3f15.5)') 1,il,Elv(il,nnur),
+c     &                     POPlv(il,nnur),difcon
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon
                      CSDirlev(il,1) = CSDirlev(il,1) + difcon
                      sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (IDNa(3,5).EQ.1 .AND. nnur.EQ.mt649) THEN
-                  DO il = 1, NLV(nnur)
+                  DO il = 1, ilvmax
+c                     WRITE(8,'(2i5,3f15.5)') 1,il,Elv(il,nnur),
+c     &                     POPlv(il,nnur),difcon
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon
                      CSDirlev(il,2) = CSDirlev(il,2) + difcon
                      sumcon=sumcon+difcon
                   ENDDO
                ELSEIF (nnur.NE.mt91 .AND. nnur.NE.mt649) THEN
-                  DO il = 1, NLV(nnur)
+                  DO il = 1, ilvmax
+c                     WRITE(8,'(2i5,3f15.5)') 1,il,Elv(il,nnur),
+c     &                     POPlv(il,nnur),difcon
                      POPlv(il,nnur) = POPlv(il,nnur) + difcon
                      sumcon=sumcon+difcon
                   ENDDO
                ENDIF
-C              WRITE(8,*)' discrete pop  = ',real(difcon*NLV(nnur)),' mb'
-C              WRITE(8,*)' continuum pop = ', chk, ' mb'
-C              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
+c              WRITE(8,*)' discrete pop  = ',real(difcon*ilvmax),' mb'
+c              WRITE(8,*)' continuum pop = ', chk, ' mb'
+c              WRITE(8,*)' HMS resid pop = ', real(RESpop(jz, jn)),' mb'
 C
 C--------------transfer excitation energy dependent recoil spectra
 C
