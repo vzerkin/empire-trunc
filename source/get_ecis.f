@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4794 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2016-10-14 17:50:39 +0200 (Fr, 14 Okt 2016) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -127,10 +127,9 @@ C          We consider CC or DWBA contributions to discrete levels in two cases:
 C          1) ICOllev(i).LT.LEVcc  => discrete levels
 C          2) ICOllev(i).GE.LEVcc  => continuum
 C
-C          IF(ICOllev(i).LT.LEVcc .and. SINlcc.le.0.d0) exit
-           IF(ICOllev(i).LT.LEVcc .and. SINl+SINlcc.le.0.d0) exit 
-C          IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle
-           IF(ICOllev(i).GE.LEVcc .and. SINlcont.le.0.d0) cycle
+           IF(ICOllev(i).LT.LEVcc .and. SINlcc.le.0.d0) exit                       ! potential CC calculation
+           IF(ICOllev(i).GE.LEVcc .and. SINl+SINlcont.le.0.d0) cycle    ! potential DWBA calculation for discrete or continuum
+ 
 
            IF(ilv.LE.NLV(nnurec)) then
 C            discrete levels
