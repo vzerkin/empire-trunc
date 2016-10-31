@@ -151,9 +151,9 @@ C  Deuteron breakup-fusion loss
       WRITE(45,'(i6)') lmxwf(1)
       WRITE(45,'(6e12.5)') (ps(ld,1),ld=1,lmxwf(1))
 
-C  Neutron fusion occupations
-      WRITE(45,'(2i6,e14.5)') lmxwf(3) !,nxx,ex0
-      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(3)),nx=1,nxx)
+C  Proton fusion occupations
+      WRITE(45,'(2i6,e14.5)') lmxwf(2) !,nxx,ex0
+      WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
 C  Neutron DDX
       WRITE(45,'(2i6,e14.5)') nthi !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dbf1(nti,nx),nti=1,nthi),nx=1,nxx)
@@ -161,9 +161,9 @@ C  Neutron spectrum
 C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
       WRITE(45,'(6e13.5)') (dsigt(1,nx)+dsigt(2,nx),nx=1,nxx)
 
-C     Proton fusion occupations
-      WRITE(45,'(2i6,e14.5)') lmxwf(2) !,nxx,ex0
-      WRITE(45,'(6e13.5)') ((dps(l1,2,nx),l1=1,lmxwf(2)),nx=1,nxx)
+C    Neutron fusion occupations
+      WRITE(45,'(2i6,e14.5)') lmxwf(3) !,nxx,ex0
+      WRITE(45,'(6e13.5)') ((dps(l1,3,nx),l1=1,lmxwf(2)),nx=1,nxx)
 C  Proton DDX
       WRITE(45,'(2i6,e14.5)') nthi !,nxx,ex0
       WRITE(45,'(6e13.5)') ((dbf2(nti,nx),nti=1,nthi),nx=1,nxx) 
@@ -1293,12 +1293,9 @@ c          call intimoutrk(ak2,sl,vcl,wfc(1,l,ip+2),dwfh)
 
        end do ! l=1,lmxwf(ip)
 
-      nptxa=2.*sqrt(eta(ip)**2+lmxwf(ip)**2)/(ak(ip)*h)
-      if(nptxa.gt.npt2) nptxa=npt2
+      if(npt2.gt.npt1) then
 
-      if(nptxa.gt.npt1) then
-
-        do i=npt1+1,nptxa
+        do i=npt1+1,npt2
           rho=ak(ip)*h*i
           frc(i)=1.0d0
           call rcwfn(rho,eta(ip),0,lmxwf(ip),fc,fcp,gc,gcp,accur,step)
@@ -1306,21 +1303,6 @@ c          call intimoutrk(ak2,sl,vcl,wfc(1,l,ip+2),dwfh)
             hp=(gc(l)+(0.0d0,1.0d0)*fc(l))
             wfs(i,l,ip)=(0.0d0,0.5d0)*(conjg(hp)-hp*smtrx(l,ip))/zrc
             if(ip.gt.1) wfs(i,l,ip+2)=hp/zrc
-           end do
-         end do
-
-       endif
-
-      if(npt2.gt.nptxa) then
-
-        do i = nptxa+1,npt2
-          rho=ak(ip)*h*i
-          frc(i)=1.0d0
-          call hcpwf(rho,0.0,eta(ip),lmxwf(ip),hcp,dhcp,ierr)
-          do l=1,lmxwf(ip)
-            wfs(i,l,ip)=
-     1              (0.0d0,0.5d0)*(conjg(hcp(l))-hcp(l)*smtrx(l,ip))/zrc
-            if(ip.gt.1) wfs(i,l,ip+2)=hcp(l)/zrc
            end do
          end do
 
@@ -2435,6 +2417,7 @@ c
         if(abs(dwfp/cwfp).lt.1.0d-12) go to 10
         em=em+1.0d0
        end do
+      if(abs(dwfp/cwfp).lt.1.0d-10) go to 10
       ierr=1
       write(iwrt,*) ' j,jmx:',j,jmx
       write(iwrt,*) ' rho,eta,lmax,dwfp,cwfp:',rhor,rhoi,etas,lmax,
