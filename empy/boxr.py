@@ -209,10 +209,11 @@ class mgCovars(mgBase):
 
 
         corrmat = self.covars[key].copy()
-        for i in range( self.ngroups ):
-            corrmat[i,:] /= rsd1[i]
-        for j in range( self.ngroups ):
-            corrmat[:,j] /= rsd2[j]
+        with numpy.errstate( invalid='ignore' ):
+            for i in range( self.ngroups ):
+                corrmat[i,:] /= rsd1[i]
+            for j in range( self.ngroups ):
+                corrmat[:,j] /= rsd2[j]
         corrmat[ numpy.isnan(corrmat) ] = 0
         self.corrs[ key ] = corrmat
     
