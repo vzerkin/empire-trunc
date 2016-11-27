@@ -1,10 +1,11 @@
-# $Rev: 4777 $
-# $Author: rcapote $
-# $Date: 2016-09-04 15:29:31 +0200 (So, 04 Sep 2016) $
+# $Rev: 4802 $
+# $Author: mherman $
+# $Date: 2016-11-28 00:11:49 +0100 (Mo, 28 Nov 2016) $
 #
 #!/bin/sh
 # the next line restarts using wish\
 exec wish8.4 "$0" "$@" 
+exec wish 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -6977,7 +6978,7 @@ puts $lsttab ""
 puts $lsttab "ENDF.DAT"
 if {$compeval != ""} {puts $lsttab "COMPARE.DAT"}
 puts $lsttab "-"
-puts $lsttab "Empire"
+puts $lsttab $file
 if {$compeval != ""} {puts $lsttab [file tail $compeval]}
 puts $lsttab $eres
 puts $lsttab $maxwelltemp
@@ -8329,6 +8330,9 @@ exit} \
         -command { editFile $::env(EMPIREDIR)/util/fixup/FIXUP.INP } \
         -label {FIXUP input} 
     $site_3_0.menu90 add command \
+        -command { editFile $::env(EMPIREDIR)/util/Groupie/GROUPIE.INP } \
+        -label {GROUPIE input} 
+    $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/c4sort/C4SORT.INP } \
         -label {C4SORT input} 
     $site_3_0.menu90 add command \
@@ -8459,6 +8463,10 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file &} \
         -label {Reconstruct (n,p), (n,a) and inel} 
+    $site_3_0.menu93 add command \
+        \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/group $file &} \
+        -label {Create groupwise file -grp.endf} 
     $site_3_0.menu93 add command \
         \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
@@ -8710,6 +8718,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command { editFile $file-s.endf } -label {ENDF for plotting} 
     $site_3_0.menu94 add command \
         -command { editFile $file-e.endf } -label {ENDF from EMPEND} 
+    $site_3_0.menu94 add command \
+        -command { editFile $file-grp.endf } -label {ENDF groupwise} 
     $site_3_0.menu94 add separator \
         
     $site_3_0.menu94 add command \
