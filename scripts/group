@@ -1,5 +1,16 @@
 #! /bin/sh -
 #script to produce groupwise ENDF-6 file from a pointwise ENDF-6 file  
+
+if [ "$1" = "-h" ]
+   then
+echo 'This script runs GROUPIE code on the ENDF formatted file, with extension .endf or -s.endf to produce groupwise cross sections.'
+echo 'Group structure may be selected in the GROUPIE.INP file acccessible from the GUI under Options menue.'
+echo 'Script argumet should be a name of the ENDF file WITHOUTOUT extension .endf or -s.endf'
+echo 'If a file with -s.endf ending is available it will be used instead of .endf eliminating runs of RECENT and LINEAR. '
+exit
+fi
+
+
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
@@ -12,9 +23,9 @@ if [ "$1" = "" ]
    then
 echo 'Files ready to run'
 echo ' '
-ls *-s.endf
+ls *.endf
 echo ' '
-echo -n 'Choose one of the above (without -s.endf extention!): '
+echo -n 'Choose one of the above (without -*.endf or .endf extention!): '
 read file
 fi  
                         
@@ -29,8 +40,9 @@ echo ' '
 if [ ! -f $file.endf ]; then
 echo ' '
 echo 'ERROR: Input file '$file'.endf does not exist!!!            '
-echo ' '
-echo ' Press any key to exit or <CTRL>-C to abort ...'
+echo 'Please note that script expects the ENDF file with extension .endf, but... '
+echo 'this extension must NOT be included in the script argument.'
+echo 'Press any key to exit and retry.'
 read yes
 exit 1
 fi
