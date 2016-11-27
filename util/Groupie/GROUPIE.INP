@@ -1,0 +1,33 @@
+          0         -1         0           0 1.00000-03           0
+ENDFB.IN
+ENDFB.OUT
+          0          0         0           1          1
+Calculating group cross sections
+     1 1  1  999999999
+                        (blank line terminate request list)
+ 
+ 
+===(this line and below is not read)==================================
+The following  group structures can be selected by repalacing second 
+number (columns 12-22) on the first line of the input with one of the following: 
+
+   =  0   - TART    175 GROUPS
+   = -1   - ORNL     50 GROUPS
+   = -2   - ORNL    126 GROUPS
+   = -3   - ORNL    171 GROUPS
+   = -4   - SAND-II 620 (665) GROUPS TO 18 MEV
+   = -5   - SAND-II 640 (685) GROUPS TO 20 MEV
+   = -6   - WIMS     69 GROUPS
+   = -7   - GAM-I    68 GROUPS
+   = -8   - GAM-II   99 GROUPS
+   = -9   - MUFT     54 GROUPS
+   =-10   - ABBN     28 GROUPS
+   =-11   - TART    616 GROUPS TO 20 MEV
+   =-12   - TART    700 GROUPS TO 1 GEV
+   =-13   - SAND-II 665 GROUPS TO 18 MEV
+   =-14   - SAND-II 685 GROUPS TO 20 MEV
+   =-15   - TART    666 GROUPS TO 200 MEV
+   =-16   - SAND-II 725 GROUPS TO 60 MEV
+   =-17   - SAND-II 755 GROUPS TO 150 MEV
+   =-18   - SAND-II 765 GROUPS TO 200 MEV
+
