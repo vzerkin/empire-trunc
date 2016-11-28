@@ -1,6 +1,6 @@
-# $Rev: 4802 $
+# $Rev: 4805 $
 # $Author: mherman $
-# $Date: 2016-11-28 00:11:49 +0100 (Mo, 28 Nov 2016) $
+# $Date: 2016-11-28 08:41:33 +0100 (Mo, 28 Nov 2016) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8448,27 +8448,24 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/format $file &} \
         -label Format 
     $site_3_0.menu93 add command \
-        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file &} \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
-        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-elastic $file &} \
         -label {Reconstruct elastic} 
     $site_3_0.menu93 add command \
-        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-total $file &} \
         -label {Reconstruct total} 
     $site_3_0.menu93 add command \
-        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file &} \
         -label {Reconstruct (n,p), (n,a) and inel} 
     $site_3_0.menu93 add command \
-        \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/group $file &} \
         -label {Create groupwise file -grp.endf} 
     $site_3_0.menu93 add command \
-        \
+        -command {exec xterm -e $::env(EMPIREDIR)/util/mu_rsl/mu_rsl &} \
+        -label {Interactive smoothing of ddx and x-sec} 
+    $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
         -label {Accept last OMP fit} 
     $site_3_0.menu93 add command \
