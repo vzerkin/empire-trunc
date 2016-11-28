@@ -105,10 +105,14 @@ C* Define the output file
       IF(FLNM(1:40).NE.BLNK) FLOU=FLNM
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
 C* Define the material to be processed
-      WRITE(LTT,991) '$Material MAT to be processed         : '
+      WRITE(LTT,991) '$Material MAT to be processed           '
+      WRITE(LTT,991) '$(if MAT=0 all will be processed)     : '
       READ (LKB,995) MAT0
 C* Define the MT to be processed
-      WRITE(LTT,991) '$Reaction MT to be processed          : '
+      WRITE(LTT,991) '$Reaction MT to be resolution-broaden   '
+      WRITE(LTT,991) '  MT>1000 implies MF=MT/1000 and MT=MT-1000*MF'
+      WRITE(LTT,991) '  MF=   4 for Leg. coefficients smoothing'
+      WRITE(LTT,991) '  MF= 304 for scattering moments smoothing:'
       READ (LKB,995) MTCMB
       MT0=MTCMB
       IF(MT0.GT.1000) THEN
@@ -122,7 +126,9 @@ C*      -- Check if angular distribution moments are to be calculated
         MF0=3
       END IF
 C* Define the Fractional or absolute half-width at half-maximum
-      WRITE(LTT,991) '$Fract./Abs(eV). width at half-maximum: '
+      WRITE(LTT,991) '$Fract./Abs(eV). width at half-maximum '
+      WRITE(LTT,991) '   typically 0.3 for fractional '
+      WRITE(LTT,991) '   if >1.0 absolute in eV (strong ~10000) :'
       READ (LKB,996) FRC
 C*    -- Detect if relative (IRR=0) or absolute (IRR=1)
       IF(FRC.GT.1) THEN
@@ -133,7 +139,7 @@ C*    -- Detect if relative (IRR=0) or absolute (IRR=1)
       END IF
 C* Define the maximum number of points for the resolution function
       WRITE(LTT,991) ' No. of points for resolution function  '
-      WRITE(LTT,991) '                         (default 50) : '
+      WRITE(LTT,991) '        (typically 20-50, default 50) : '
       READ (LKB,986,END=20) FLNM
       IF(FLNM(1:40).NE.BLNK) READ (FLNM,995) NRS
       IF(NRS.GT.MXR) STOP 'MU_RSL ERROR - MXR limit exceeded'
@@ -390,7 +396,7 @@ c...
           GO TO 902
         END IF
 C*      -- Read in the first moment
-  60    READ (LTM,'(A))') FLNM
+  60    READ (LTM,'(A)') FLNM
         IF(FLNM(1:17).NE.' Broadened Moment') GO TO 60
         DO I=1,NEO
           READ(LTM,'(2F11.0)') EE,PL
@@ -406,12 +412,12 @@ C*      -- Read in the remaining moments, interpolating to the
 C*         chosen grid, if needed
         DO L=2,NL4
           NPL=0
-   62     READ (LTM,'(A))') FLNM
+   62     READ (LTM,'(A)') FLNM
           IF(FLNM(1:17).NE.' Broadened Moment') GO TO 62
 c...
 c...      PRINT *,'Reading ',FLNM(1:40)
 c...
-   64     READ (LTM,'(A))') FLNM
+   64     READ (LTM,'(A)') FLNM
           IF(FLNM(1:40).NE.BLNK) THEN
             NPL=NPL+1
             READ(FLNM,'(2F11.0)') RWO(LPE-1+NPL),RWO(LPX-1+NPL)
