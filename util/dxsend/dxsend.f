@@ -1225,6 +1225,8 @@ c...
 C...  M =NINT(ZA0)
 C...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
 C... &       ,m,mf0,mt,ne,ier
+c...  print *,'DXSEND',(enr(j),j=1,5)
+c...  print *,'      ',(dxs(j),j=1,5)
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -2057,7 +2059,7 @@ C...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
 C...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
-C* Find particle yields when these are not implicit in MT
+C*      -- Find particle yields when these are not implicit in MT
         IF(IZAP0.EQ.0) THEN
           print *,'WARNING - photon multiplicities not coded (only MF6)'
         END IF
@@ -2245,7 +2247,7 @@ C... &                 , ZA,ZAP0,AWR,AWI,SPI,QI,EI2,AIN
 C...            print *,EE,DXS(I),COUL,DXS(I)+COUL
 c...            write(85,'(f11.2,1p,e11.4)') EE/1000,COUL*1000
 c...
-c... Don'r really know the definition ???
+c...            -- Don'r really know the definition ???
 c...            print *,ee,dxs(i),acs,coul
 c...            DXS(I)=DXS(I)/(1-ACS)+COUL
 c...            DXS(I)=DXS(I)        +COUL
@@ -2265,23 +2267,23 @@ C*
 c...
 c...    if(mt0.gt.40000) print *,'Scaled by angular distribution'
 c...
-C* Error trapping when no data found in the ENDF file
+C*      -- Error trapping when no data found in the ENDF file
         IF(MFJ.NE.6) THEN
           PRINT *,
      &    'DXSEND WARNING - No double-differential data for MT',MT0
           GO TO 900
         END IF
-C* Process data when given in MF 6 representation
+C*      -- Process data when given in MF 6 representation
         LCT=L2
         NK =N1
         JNK=0
-C* Split the work array RWO to operate on function and argument
-C* LE  - First argument
-C* LX0 - Original cross section
-C* LX  - First function
-C* LXE - Second argument
-C* LXX - Second function
-C* IPRC- Counter of successfully processed sections
+C*      -- Split the work array RWO to operate on function and argument
+C*         LE  - First argument
+C*         LX0 - Original cross section
+C*         LX  - First function
+C*         LXE - Second argument
+C*         LXX - Second function
+C*         IPRC- Counter of successfully processed sections
         KX =MRW/5
         LD =KX
         LE =1
@@ -2298,12 +2300,12 @@ C* IPRC- Counter of successfully processed sections
         DO I=1,MEN
           DXS(I)=0
         END DO
-C* Loop over particles
+C*      -- Loop over particles
    32   JNK=JNK+1
-C* Retrieve the particle yield
+C*      -- Retrieve the particle yield
         CALL RDTAB1(LEF,ZAP,AWP,LIP,LAW,NR,NP,NBT,INR
      &             ,RWO(LE),RWO(LX),KX,IER)
-C* Check for matching particle - else skip section
+C*      -- Check for matching particle - else skip section
    33   IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
 c...
 C...      print *,'Skipping particle/mf/mt/lip/law'
@@ -2320,7 +2322,7 @@ C*            --Particle not found - yield assumed zero
             END IF
             GO TO 900
           END IF
-C* Skip the subsection for this particle
+C*        -- Skip the subsection for this particle
           IF     (LAW.EQ.0 .OR. LAW.EQ.3 .OR. LAW.EQ.4) THEN
 C*         No subsection for Law 0, 3, 4
           ELSE IF(LAW.EQ.1 .OR. LAW.EQ.2 .OR.LAW.EQ.5) THEN
@@ -2360,19 +2362,19 @@ C*          Set IER to flag error and terminate
           END IF
           GO TO 32
         END IF
-C* Found the required particle
+C*      -- Found the required particle
         IPRC=IPRC+1
-C* Define union grid of cross sections and yields at LXE
+C*      -- Define union grid of cross sections and yields at LXE
         CALL UNIGRD(NEN,ENR,NP,RWO(LE),NE2,RWO(LXE),LD)
-C* Interpolate cross sections on union grid to LXX
+C*      -- Interpolate cross sections on union grid to LXX
 C...
 C...    print *,'lxx 5 ',lxx
 C...    if(lxx.lt.0) stop
 C...
         CALL FITGRD(NEN,ENR,RWO(LX0),NE2,RWO(LXE),RWO(LXX))
-C* Interpolate yields to union grid into ENR (temporarily)
+C*      -- Interpolate yields to union grid into ENR (temporarily)
         CALL FITGRD(NP,RWO(LE),RWO(LX),NE2,RWO(LXE),ENR)
-C* Save energy union grid and multiply cross section by the yield
+C*      --Save energy union grid and multiply cross section by the yield
         NEN=NE2
         IF(NEN.GT.MEN) STOP 'DXSEND ERROR - MEN limit exceeded'
         DO I=1,NEN
@@ -2386,13 +2388,13 @@ C*        -- Save the cross section on new grid at LX0
 C...
 C...    PRINT *,' Added contribution of ZAP,LIP',NINT(ZAP0),LIP
 C...
-C* Check if there are more LIP states present for this particle
+C*      -- Check if there are more LIP states present for this particle
         IF(MT0/10000.NE.4) THEN
 C*        -- Reset ZAP to skip the remainder of the section
           ZAP=-1
           GO TO 33
         END IF
-C* Process cross section at fixed angle for charged particles
+C*      -- Process cross section at fixed angle for charged particles
         IF(LAW.EQ.5) THEN
           CALL RDTAB2(LEF,SPI,C2,LIDP,L2,NR,NE,NBT,INR,IER)
 C...
@@ -2425,8 +2427,9 @@ C*          -- Read the angular distribution
             END IF
 C*          -- Coulomb scattering contribution
 C...        CALL COULXS(ZA,ZAP0,AWR,AWI,SPI,QI,EE,AIN,LIDP,COUL,TJAC)
-C... (the routine is available but not used because some constants
-C...  are also needed in subsequent calculations - more work is needed)
+C...         (the routine is available but not used because some
+C...          constants are also needed in subsequent calculations;
+C...          more work is needed)
 C*          -- Neutron mass, projectile mass, charge and target charge
             INTR=1
             CALL PROMAS(INTR ,AWN)
@@ -2598,7 +2601,7 @@ C...
               END IF
             ELSE IF(LTP.EQ.2) THEN
               IF(LIDP.EQ.0) THEN
-C...  This option has not been thouroughly tested!!!
+C...            -- This option has not been thouroughly tested!!!
                 CALL PLNLEG(ACM,PLEG,NL)
                 NL1=NL+1
                 SRE=0
@@ -2786,9 +2789,9 @@ c...
 c...  print *,'Find1 MF,MT,IER',mat,mf,mt,ier
 c...  print *,'izap0',izap0
 c...
-C* Error trapping when no data found in the ENDF file
+C*    -- Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
-C* No MF4/5/6 possible only for discrete level (two-body isotr.) react.
+C*    --No MF4/5/6 possible only for discrete level (two-body isotr.)
         IF     (IZAP0.EQ.   1) THEN
           IF(MT0.EQ.2 .OR. (MT0.GE.50 .AND. MT0.LT.91) ) GO TO 40
         ELSE IF(IZAP0.EQ.1001) THEN
@@ -2800,7 +2803,7 @@ C* No MF4/5/6 possible only for discrete level (two-body isotr.) react.
         PRINT *,'WARNING - No differential data for MT',MT0
         GO TO 900
       END IF
-C* Gamma production only from MF 6,12,13,14,15
+C*    -- Gamma production only from MF 6,12,13,14,15
       IF(IZAP0.EQ.   0) THEN
         IF(MF.EQ.12 .OR. MF.EQ.13) REWIND LEF
         IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12 .OR. MF.EQ.13) THEN
@@ -2862,8 +2865,11 @@ C* Check for error condition
       END IF
 C*
 C* Process angular distribution data in MF 4
-   42 LVT=L1
-      LTT=L2
+   42 LVT =L1
+      LTT1=L2
+c...
+c...    print *,'LVT,LTT',LVT,LTT1
+c...
 C* Assume two-body scattering for elastic & inelastic scattering
 C* and other discrete-level reactions for INCIDENT NEUTRONS
       IF(MT0.EQ.2 .OR. (MT0.GT.50 .AND. MT0.LT.91) ) THEN
@@ -2875,9 +2881,9 @@ C* and other discrete-level reactions for INCIDENT NEUTRONS
       ELSE
         AWP=-1
       END IF
-      IF(LTT.EQ.0) GO TO 45
-      IF(LTT.NE.2) THEN
-        PRINT *,'WARNING - Can not process MF/MT/LTT',MF,MT,LTT
+      IF(LTT1.EQ.0) GO TO 45
+      IF(LTT1.NE.2) THEN
+        PRINT *,'WARNING - Can not process MF/MT/LTT',MF,MT,LTT1
         PRINT *,'          Distributions not pointwise'
         IER=41
         GO TO 45
@@ -2885,15 +2891,18 @@ C* and other discrete-level reactions for INCIDENT NEUTRONS
 C* Secondary particle angular distributions MF4 processing
       IF(LVT.LE.1) THEN
         CALL RDLIST(LEF,C1,C2,LI,LCT,NK,NM,RWO,MRW,IER)
+c...
+c...    print *,'LVT,LCT',LVT,LCT
+c...
       ELSE
         PRINT *,'WARNING - Illegal value for MF4       LVT=',LVT
         IER=41
         GO TO 45
       END IF
-C* Split the work array RWO to operate on function and argument
-C* LXE - argument
-C* LXX - function
-C* KX  - Max. permissible number of points per set
+C*    -- Split the work array RWO to operate on function and argument
+C*      LXE - argument
+C*      LXX - function
+C*      KX  - Max. permissible number of points per set
       KX =MRW/2
       LXE=1
       LXX=LXE+KX
@@ -2917,6 +2926,14 @@ C*      --Lin-interpolate angular distributions over incident energies
         INE=2
         CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INR(NM)
      1             ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,KX)
+c...
+c...      print *,'ei1,ei2',ei1,ei2
+c...      print *,(rwo(lxe-1+j),j=1,5)
+c...      print *,(rwo(lxx-1+j),j=1,5)
+c...      print *,(enr(j)      ,j=1,5)
+c...      print *,(dxs(j)      ,j=1,5)
+c...      if(ei2.gt.ein) stop
+c...
       END DO
 C*
 C* Angular distribution at incident energy Ein processed
@@ -2926,20 +2943,20 @@ C* Calculate  integral SS over distribution DXS at cosines ENR
       INA=INR(1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INA)
 c...
-C...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
+c...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou,LCT
 c...
 C*
-C* Process energy distributions for two-body reactions (AWP>0)
-C* Definitions:
-C*  XCM - cosine os scattering angle in CM system
-C*  XLB - cosine os scattering angle in Lab system
-C*  AWR - mass ratio of target and neutron
-C*  AWP - mass ratio of ejectile and neutron
-C*  AWI - mass ratio of projectile and neutron
-C*  AAA - mass ratio of target and projectile (=A)
-C*  AAD - mass ratio of ejectile and projectile (=A-dash)
-C* Kinematics equations for 2-body problem form ENDF-102 Appendix E
-C* Equation (E.3)
+C*    Process energy distributions for two-body reactions (AWP>0)
+C*    Definitions:
+C*     XCM - cosine os scattering angle in CM system
+C*     XLB - cosine os scattering angle in Lab system
+C*     AWR - mass ratio of target and neutron
+C*     AWP - mass ratio of ejectile and neutron
+C*     AWI - mass ratio of projectile and neutron
+C*     AAA - mass ratio of target and projectile (=A)
+C*     AAD - mass ratio of ejectile and projectile (=A-dash)
+C*    Kinematics equations for 2-body problem form ENDF-102
+C*    Appendix E Equation (E.3)
       IF(AWP.GT.0) THEN
         AAA=AWR/AWI
         AAD=AWP/AWI
@@ -2975,7 +2992,7 @@ C*        Outgoing particle energy: equation (E.10)
           DXS(I)=DXS(I)*DCM
           RWO(LXE-1+I)=EO
 C...
-c...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,dxs(i)
+C...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,dxs(i)
 C...
         END DO
       END IF
