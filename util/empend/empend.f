@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-07-25 21:47:30 +0200 (Mo, 25 Jul 2016) $
+Ccc   * $Date: 2016-12-13 00:07:48 +0100 (Di, 13 Dez 2016) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -149,6 +149,7 @@ C-M          (backward compatible).
 C-M  16/04 Fix bug in removing all-zero cross sections.
 C-M  16/07 Check dynamic range of angular distributioons and switch to
 C-M        tabular representation if needed.
+C-M  16/12 Fix the patch to switch to tabular representation.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -4706,6 +4707,7 @@ C-V  08/02 Set LCT=3 (CM-light particles, LAB-recoils).
 C-V  12/02 Set LCT=2 after careful review of Empire methods.
 C-V  12/01 Set LCT=1 for fission spectra
 C-V  16/01 Set LANG to switch between Legendre and tabular format
+C-V  16/12 Set RMIN for switching to tabular representation
 C-Description:
 C-D  Error trap flags:
 C-D  IER = -1  Corrupted work array?
@@ -4738,6 +4740,8 @@ C* Test print filenames and logical file units
       DATA L92,LCU,LPT/-30,31,32/
       ZRO=0
       IER=0
+C* Threshold F_back/F_forw for switching to tabular representation
+      RMIN=1.E-5
 C* Test print files
       IF(IPRNT.GE.0) THEN
         IF(L92.LT.0) THEN
@@ -5037,17 +5041,20 @@ C*
         IF(LHI.LE.LOMX+1) THEN
           READ (LIN,809) (RWO(L64+L),L=1,LHI)
 C*        -- Check the dynamic range of the distribution
-          SFOR=0
-          SBCK=1
-          SGN =1
+          SFOR= 0
+          SBCK= 0
+          SGN = 1
           DO L=1,LHI
-            SFOR=SFOR+RWO(L64+L)
-            SBCK=SFOR+RWO(L64+L)*SGN
+            SFOR=SFOR+RWO(L64+L)*(2*L-1)*0.5
+            SBCK=SBCK+RWO(L64+L)*(2*L-1)*0.5*SGN
             SGN =-SGN
           END DO
           RNG =SBCK/SFOR
-C*        -- If dynamic range > 1e5, switch to tabular
-          IF(RNG.LT.1.E-5) GO TO 440
+C...
+C...      print *,'ltte,lhi,ee,rng',ltte,lhi,ee,rng,sbck,sfor
+C...
+C*        -- If dynamic range < RMIN switch to tabular
+          IF(RNG.LT.RMIN) GO TO 440
 C*        -- Legendre expansion is acceptable
           LHI=LHI-1
           RWO(L64)=0
