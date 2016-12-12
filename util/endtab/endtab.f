@@ -31,6 +31,7 @@ C-V  15/03 Fix bug printing NaN for PFNS ratio to Maxwellian at 0 eV.
 C-V  15/11 Print input instructions to screen.
 C-V  16/03 Allow MF203 for alpha (SigC/SigF).
 C-V  16/07 Fix missing "REWIND" before calling DXSEND for MF5.
+C-V  16/12 Fix printout of the backward angle in the distributions.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -269,7 +270,7 @@ C* Select the energy interval
    16   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=16) EIN
         WRITE(LTT,99) ' '
-        WRITE(LTT,992) ' Selected incident particle energy [eV]:',EA
+        WRITE(LTT,992) ' Selected incid. particle energy [eV]: ',EIN
         EOU=0.
         PAR=EOU
         EP6=0.02
@@ -487,6 +488,10 @@ c...    CALL DXSEND(LIN,ZA0,ZAP,MF,MTE,KEA,EIN,PAR,EP6,ES,SG,UG
 c... 1             ,RWO,NP,MPT,MXR,LTT,ELV)
 c...
 c...    print *,'                   mte,np',mte,np
+c...    do k=1,np
+c...      print *,k,es(k),sg(k)
+c...    end do
+c...
 c...
 C*      -- Prepare the comment header record for the PLOTTAB file
         IF     (EIN.GT.999999) THEN
@@ -570,19 +575,27 @@ C* Section processed
         GO TO 30
       END IF
 c...
-C...    print *,'                   mte,np',mte,np,EA,EB
-C...    do k=1,np
-C...      print *,k,es(k),sg(k)
-C...    end do
+c...    print *,'                   mte,np',mte,np,EA,EB
+c...    do k=1,np
+c...      print *,k,es(k),sg(k)
+c...    end do
 c...
 C* Write the data to the PLOTTAB file
       WRITE(LOU,91) COM
       IF(NP.LT.1) GO TO 84
-      IF(EB.LE.0) EB=ES(NP)
       KK =1
-      EE2=ES(KK)
-      SG2=SG(KK)
-      UG2=UG(KK)
+      JK =1
+      JD =1
+      IF(KEA.EQ.1) THEN
+        JK=NP
+        JD=-1
+      ELSE
+        IF(EB.LE.0) EB =ES(NP)
+      END IF
+      EE2=ES(JK)
+      IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
+      SG2=SG(JK)
+      UG2=UG(JK)
 C...
 C...  PRINT *,KK,EE2,SG2,NP
 C...
@@ -602,14 +615,16 @@ C...
         STOP 'ENDTAB ERROR - MPT Limit exceeded'
       END IF
       KK =KK+1
+      JK =JK+JD
       EE1=EE2
       SG1=SG2
       UG1=UG2
-      EE2=ES(KK)
-      SG2=SG(KK)
-      UG2=UG(KK)
+      EE2=ES(JK)
+      IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
+      SG2=SG(JK)
+      UG2=UG(JK)
 C...
-C...  PRINT *,KK,EE2,SG2
+C...  PRINT *,JK,EE2,SG2
 C...
       IF(TMXW.GT.0) THEN
         PWR=0.5
@@ -618,7 +633,6 @@ C...
         SG2=SG2/FF/SC
         UG2=UG2/FF/SC
       END IF
-      IF(KEA.EQ.1) EE2=ACOS(EE2)*180/PI
       IF(EE2.LE.EA .AND. KK.LT.NP) GO TO 81
 C*    -- First point
       IF(EE1.LE.EA .OR. KK.LE.2) THEN
