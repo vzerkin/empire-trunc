@@ -55,7 +55,8 @@ C-V  15/02  Corrected flag to retrieve metastable states (ELV->PR0)
 C-V  15/07  Prepare PLOTTAB input for the curves and points file.
 C-V  16/03  Retrieve MF203/MT102 (alpha=SigC/SigF) from C4.
 C-V  16/04  Fix trivial bug to print Ei to CUR file.
-C-V  16/07  Initialize MTH
+C-V  16/07  Initialize MTH.
+C-V  16/12  Fix PLOTTAB input file for MF6.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -597,8 +598,16 @@ C*  Write the PLOTTAB instructions
       WRITE(LPI, 91) HLYP92,HUYP92
       WRITE(LPI, 91) HL1P92
       WRITE(LPI, 91) HL2P92
-      WRITE(LPI,136) 0., 180., 0, 0, 0, 0
-      WRITE(LPI,138)           1, 2, 0
+      IF(MF.EQ.4) THEN
+        WRITE(LPI,136) 0., 180., 0, 0, 0, 0
+        WRITE(LPI,138)           1, 2, 0
+      ELSE IF(MF.EQ.6) THEN
+        WRITE(LPI,138)           0, 2, 0, 0
+        WRITE(LPI,138)           1, 2, 0
+      ELSE
+        WRITE(LPI,138)           0, 0, 0, 0
+        WRITE(LPI,138)           1, 0, 0
+      END IF
       WRITE(LPI, 91) ' '
 C*
 C* Try another set of points
