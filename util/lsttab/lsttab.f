@@ -301,7 +301,7 @@ C*        -- For x-sect at fixed angle write level energy and angle
      &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
         IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''Lv'',1P,E7.2E1,1X)') EOU
-      ELSE
+      ELSE IF(MF.EQ.5) THEN
         MTH=MT
         IF(C84(46:54).NE.'         ')
      &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
@@ -310,11 +310,34 @@ C*        -- For x-sect at fixed angle write level energy and angle
         IF(C84(63:67).NE.'    ')
      &  WRITE(COM2(31:40),'(''Lv'',1P,E7.2E1,1X)') EOU
 C*
-        HL2P92='Double-Differen. x.s. at Ei'//C84(46:54)//' eV'
+        HL2P92='Differential x.s. at Ei'//C84(46:54)//' eV'
+        HLXP92='E_out'
+        HUXP92='eV'
+        HLYP92='Cross Sections'
+        HUYP92='barns/eV'
+      ELSE IF(MF.EQ.6) THEN
+        MTH=MT
+        IF(C84(46:54).NE.'         ')
+     &  WRITE(COM2(21:30),'(''Ei'',1PE7.2E1,1X)') EIN
+        IF(C84(56:59).NE.'    ')
+     &  WRITE(COM2(31:35),'(''An'',I3)') NINT(DEG)
+        IF(C84(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''Lv'',1P,E7.2E1,1X)') EOU
+C*
+        HL2P92='DDX at Ei'//C84(46:54)//' eV'
+     &        //COM2(30:35)//' deg.        '
         HLXP92='E_out'
         HUXP92='eV'
         HLYP92='Cross Sections'
         HUYP92='barns/eV/St'
+      ELSE
+        IF(C84(63:67).NE.'    ')
+     &  WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EOU
+        HL2P92='Energy-Dependent Parameters'
+        HLXP92='Energy'
+        HUXP92='eV'
+        HLYP92='Cross Sections'
+        HUYP92='barns'
       END IF
       WRITE(COM2(12:19),'(I3,I5)') MF,MTH
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
@@ -453,6 +476,10 @@ C* Normalise fission spectra if needed to plot ratio to Maxwellian
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,99) COM1,COM2
       IUF=0
+      YMX=-1.E32
+      YMN=-YMX
+      YPK= 0
+      YY0=SG(1)*SCL
       DO I=1,NP
 C* Suppress printing negative or zero points
         EE=ES(I)
@@ -472,6 +499,14 @@ C* Suppress printing negative or zero points
           FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
           FF=SG(I)/FC
           UF=UG(I)/FC
+        END IF
+        IF(MF.EQ.6 .AND. FF.NE.0) THEN
+C*        -- Determine range of the ordinate
+          IF(FF.GT.YMX) YMX=FF
+          IF(FF.LT.YMN) YMN=FF
+C*        -- Determine height of the last peak
+          IF(FF.GT.YY0) YPK=FF
+          YY0=FF
         END IF
         IF(UF.GT.0) IUF=1
         IF(SG(I).GT.0) THEN
@@ -599,13 +634,22 @@ C*  Write the PLOTTAB instructions
       WRITE(LPI, 91) HL1P92
       WRITE(LPI, 91) HL2P92
       IF(MF.EQ.4) THEN
-        WRITE(LPI,136) 0., 180., 0, 0, 0, 0
+        WRITE(LPI,136) 0., 180., 1, 0, 0, 0
         WRITE(LPI,138)           1, 2, 0
       ELSE IF(MF.EQ.6) THEN
-        WRITE(LPI,138)           0, 2, 0, 0
-        WRITE(LPI,138)           1, 2, 0
+C...
+C...    PRINT *,'YMN,YMX,YPK',YMN,YMX,YPK
+C...
+        YMX=YMX*1.1
+        IF(YPK.GT.0) YMN=YPK/100
+        WRITE(LPI,138)           0, 1, 0, 0
+        IF(YMX.GT.YMN) THEN
+          WRITE(LPI,137) YMN, YMX, 1, 2, 0
+        ELSE
+          WRITE(LPI,138)           1, 2, 0, 0
+        END IF
       ELSE
-        WRITE(LPI,138)           0, 0, 0, 0
+        WRITE(LPI,138)           1, 0, 0, 0
         WRITE(LPI,138)           1, 0, 0
       END IF
       WRITE(LPI, 91) ' '
@@ -629,6 +673,7 @@ C*
   132 FORMAT(4F11.1,2I11,F4.2)
   134 FORMAT(6I11,I4)
   136 FORMAT(2F11.1,4I11)
+  137 FORMAT(1P,2E11.2,4I11)
   138 FORMAT(22X,4I11)
       END
       FUNCTION YTGPNT(NP,XX,YY,XA,XB)
