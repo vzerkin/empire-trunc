@@ -480,6 +480,7 @@ C* Write the data to the PLOTTAB curves file
       YMN=-YMX
       YPK= 0
       YY0=SG(1)*SCL
+      YY1=YY0
       DO I=1,NP
 C* Suppress printing negative or zero points
         EE=ES(I)
@@ -506,6 +507,10 @@ C*        -- Determine range of the ordinate
           IF(FF.LT.YMN) YMN=FF
 C*        -- Determine height of the last peak
           IF(FF.GT.YY0) YPK=FF
+C*        -- Determine depth of the last dip
+          IF(YY1.GT.YY0 .AND. FF.GT.YY0) YDP=YY0
+C*
+          YY1=YY0
           YY0=FF
         END IF
         IF(UF.GT.0) IUF=1
@@ -641,7 +646,10 @@ C...
 C...    PRINT *,'YMN,YMX,YPK',YMN,YMX,YPK
 C...
         YMX=YMX*1.1
-        IF(YPK.GT.0) YMN=YPK/100
+        YPK=YPK/100
+        YDP=YDP/5
+        IF(YPK.GT.0) YMN=YPK
+        IF(YDP.GT.0 .AND. YDP.LT.YMN) YMN=YDP
         WRITE(LPI,138)           0, 1, 0, 0
         IF(YMX.GT.YMN) THEN
           WRITE(LPI,137) YMN, YMX, 1, 2, 0
