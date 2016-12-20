@@ -53,7 +53,7 @@ Globals = ('FUSRED','PCROSS','TOTRED','TUNEPE','GDIV','RESNOR','FCCRED', 'ELARED
 # not a complete list yet!!
 
 # these parameters have additional options but they are not linked to specific nuclei
-optional = ('TUNETL')
+optional = ('TUNETL',)
 
 
 def parseInput(proj):
