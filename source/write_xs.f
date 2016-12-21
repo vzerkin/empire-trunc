@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4789 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-10-03 21:25:24 +0200 (Mo, 03 Okt 2016) $
+Ccc   * $Rev: 4814 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2016-12-21 18:01:22 +0100 (Mi, 21 Dez 2016) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -83,6 +83,19 @@ C-----Reaction Cross Sections lower than 1.d-8 are considered zero.
 C
 C---- ENDF spectra printout (exclusive representation)
 C----
+C----
+C     DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
+C        IF (ENDf(nnuc).EQ.1 .and. CSPrd(nnuc).GT.0.0D0) THEN
+C           write(*,*) 'Residual nucleus:', NINT(Z(nnuc)),NINT(A(Nnuc))
+C           DO nejc = 1, NDEJC         !loop over ejectiles
+C             IF (POPcs(nejc,INExc(nnuc)).GT.0.d0) 
+C    &           write(*,'(2x,3(I3,1x),A8,2x,I2,2x,d12.6)') 
+C    &            nejc, nnuc, INExc(nnuc),
+C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
+C           ENDDO
+C           write(*,*)
+C        ENDIF 
+C     ENDDO
       eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -92,6 +105,17 @@ C----
              DO nejc = 0, NDEJC         !loop over ejectiles
 
 C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
+
+                IF(ENDfp(nejc,nnuc).NE.1) THEN
+C                  To add spectra to inclusive
+                   nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
+C------------------(continuum part - same for all particles)
+                   DO ie = 1, nspec + 1 
+                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
+     &                                POPcse(0,nejc,ie,INExc(nnuc))
+                   ENDDO 
+                   CYCLE
+                ENDIF
 C 
 C               nnur is the decaying compound: nnur = nnuc - nejc
 C
@@ -509,11 +533,17 @@ C             IF (NINT(A(1)-A(Nnuc)).EQ.3 )  GOTO 1550
               IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
      &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
 
+              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) GOTO 1550  ! 2n2p, a
+
+              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.2 .AND. 
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) GOTO 1550  ! d, np, pn
+
               IF(RECoil.gt.0) then
 
                 IF (NINT(A(1))-NINT(A(Nnuc)).GT.1 .AND. 
      &              NINT(A(1))-NINT(A(Nnuc)).LE.4) THEN
-C                  (n,xn),(n,xp) x>1; (n,d),(n,a)   (removed (n,t),(n,h) before)
+C                  (n,xn),(n,xp) x>1; (removed (n,d), (n,a), (n,t),(n,h) before)
                    CALL PRINT_RECOIL(nnuc,REAction(nnuc))
 C                  write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))
@@ -524,6 +554,7 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
 C                  write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
 C    &                NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
+
 
               ENDIF
 

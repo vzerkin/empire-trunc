@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4786 $
+Ccc   * $Rev: 4814 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-29 00:24:09 +0200 (Do, 29 Sep 2016) $
+Ccc   * $Date: 2016-12-21 18:01:22 +0100 (Mi, 21 Dez 2016) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -142,8 +142,8 @@ C        qout = 0.d0
             IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
      &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) CYCLE 
 
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE 
+C           IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
+C    &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE 
 
             IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).GT.4 ) THEN
               CALL PRINT_RECOIL(nnuc,reactionx) 
@@ -172,12 +172,24 @@ C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1)
 C    &        write(*,*) NINT(A(nnuc)),INT(Z(nnuc)),' ',
 C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
 
-C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
-C    &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
-C             IF(CSInc(nnuc).gt.0.d0) 
-C    &          CALL PRINT_RECOIL(nnuc,reactionx)
-C             lprint = .TRUE.
-C           ENDIF
+            IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
+     &          NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) THEN  
+              CALL PRINT_RECOIL(nnuc,reactionx)   ! 2n2p, a 
+              lprint = .TRUE.
+            ENDIF
+
+            IF (NINT(A(1))-NINT(A(Nnuc)).EQ.2 .AND. 
+     &          NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) THEN
+              CALL PRINT_RECOIL(nnuc,reactionx)   ! d, np, pn
+              lprint = .TRUE.
+            ENDIF
+
+            IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
+     &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
+              IF(CSInc(nnuc).gt.0.d0) 
+     &          CALL PRINT_RECOIL(nnuc,reactionx)
+              lprint = .TRUE.
+            ENDIF
 
             IF ((.not.lprint) .and. ENDf(nnuc).EQ.2) THEN
               CALL PRINT_RECOIL(nnuc,reactionx)
