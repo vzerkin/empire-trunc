@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4770 $
-   ! $Author: rcapote $
-   ! $Date: 2016-09-03 16:00:42 +0200 (Sa, 03 Sep 2016) $
+   ! $Rev: 4816 $
+   ! $Author: gnobre $
+   ! $Date: 2016-12-21 23:05:16 +0100 (Mi, 21 Dez 2016) $
    !
 
    TYPE channel
@@ -2157,7 +2157,7 @@ CONTAINS
       INTEGER iout, lleg
       TYPE (channel), POINTER :: out
 
-      IF(.NOT.CN_isotropic) RETURN
+      IF(CN_isotropic) RETURN
       !---------------------------------------------------------------
       ! CN angular distributions (neutron (in)elastic scattering ONLY!)
       !---------------------------------------------------------------
