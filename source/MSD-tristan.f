@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4817 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2016-12-21 23:50:52 +0100 (Mi, 21 Dez 2016) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3251,21 +3251,18 @@ C              as calculated by PCROSS
 C--------add MSD/PCROSS contribution to the population spectra
 C--------used for ENDF exclusive spectra
          IF (ENDf(1).GT.0) THEN
+      write(8,*) 'Got into ACCUMSD pop spectra part Nejc, Nnur', nejc,
+     1 Nnur
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
-C
-C              Population increased to preserve total flux
-C              as calculated by PCROSS or MSD+MSC
-C
                pops = CSEmsd(icsp,Nejc)
 C              Commented on Dec 2011 by RCN, to keep integral of spectra = XS
-C              Uncommented on July 2012
 C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-
-               POPcse(ie,Nejc,icsp,INExc(Nnur)) =
-     &            POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
-               POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
-     &            POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
+               IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue
+                  POPcse(ie,Nejc,icsp,INExc(Nnur)) =
+     &               POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
+                  POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
+     &               POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
 C--------------Correct last bin (not needed for POP as for this it is done at the end)
 C              IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
@@ -3281,6 +3278,10 @@ C                ENDDO
 C--------------DDX
 C--------------Bin population by MSD (spin/parity integrated)
                POPbin(ie,Nnur) = pops
+               ELSE                                    !inclusive residue - add Popt directly to spectra
+                  CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + pops
+                  POPcseaf(0,Nejc,icsp,0) = 1.0D0
+               ENDIF
             ENDDO
          ENDIF
 C--------storing continuum recoils
