@@ -1353,12 +1353,12 @@ c      if(ip.eq.3) stop
       sigr=tenpi*sigr/ak2
       sigfld=tenpi*sigfld/ak2
 
-      if(ipr.gt.1) then
-        write(iwrt,*) 'ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip):',
-     1                 ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip)
-        write(iwrt,10) ak(ip),eta(ip),rho,h,sigr,sigfld
-   10   format(' k,eta,rm,dr,sigr,sigfld:',2f7.3,4f9.3)
-       endif
+C     if(ipr.gt.1) then
+C       write(iwrt,*) 'ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip):',
+C    1                 ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip)
+C       write(iwrt,10) ak(ip),eta(ip),rho,h,sigr,sigfld
+C  10   format(' k,eta,rm,dr,sigr,sigfld:',2f7.3,4f9.3)
+C      endif
 
       h=h0
 
