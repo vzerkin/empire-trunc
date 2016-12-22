@@ -1,6 +1,6 @@
-!cc   * $Rev: 4814 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2016-12-21 18:01:22 +0100 (Mi, 21 Dez 2016) $
+!cc   * $Rev: 4818 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2016-12-22 20:27:48 +0100 (Do, 22 Dez 2016) $
 
       SUBROUTINE INPUT
 !cc
@@ -202,8 +202,8 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.d0
             ATIlnor(nnuc) = 0.d0
             LDShif(Nnuc) = 0.d0
-            ROHfba(nnuc)  = 0.d0
-            ROHfbp(nnuc)  = 0.d0
+            ROHfba(nnuc)  = 0.d0  
+            ROHfbp(nnuc)  = 0.d0  
             ROHfba_off(nnuc)  = 0.d0  
             ROHfbp_off(nnuc)  = 0.d0  
             GTIlnor(nnuc) = 1.d0
@@ -238,9 +238,9 @@ C--------set fission normalization factors
          ENDDO
 C
          EDDfig = -1
-	   IDDfig(1) = 16 !  30 deg
-	   IDDfig(2) = 76 ! 150 deg
-	   IDDfig(3) =  1 ! neutrons
+           IDDfig(1) = 16 !  30 deg
+           IDDfig(2) = 76 ! 150 deg
+           IDDfig(3) =  1 ! neutrons
          IZA(0) = 0
          LVP(1,0) = 1
          NNUcd = 0
@@ -1863,7 +1863,7 @@ C     for the incident channel
       IF (AEJc(0).GT.4.0D0) KTRlom(0,0) = 0  ! HI
       IF (AEJc(0).EQ.0.0D0) KTRlom(0,0) = -1 ! photons
 
-      IF (KTRompcc.GT.0 .AND. DIRect.GE.1) THEN
+      IF (KTRompcc.GT.0 .AND. DIRect.EQ.2) THEN
          KTRlom(0,0) = KTRompcc
          KTRlom(NPRoject,NTArget) = KTRompcc
       ENDIF
@@ -2843,11 +2843,11 @@ C
                  WRITE (8,'(''  WARNING: excited state No. '',I3,
      &            '' has no parity '')') ilv
                ENDIF
-!              Assuming natural parity; for odd A it is assumed that
-!              l=INT(l+s)=INT(J) while J=l-s case is ignored
-               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
-               IF (IOUT.GE.5) WRITE (8, 
-     &          '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
+!                Assuming natural parity; for odd A it is assumed that
+!                l=INT(l+s)=INT(J) while J=l-s case is ignored
+                 LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
+                 IF (IOUT.GE.5) WRITE (8, 
+     &            '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
             ENDIF
 
             IF (ilv.NE.1) THEN
@@ -3126,7 +3126,6 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
           WRITE(12,*)
           WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
-
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS:                                        '
         IF(FISspe.GT.0 .and. NUBarread) THEN
@@ -3859,13 +3858,13 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &             JCUtcoll+1
                ENDIF
             ENDIF
-
+     
 C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf     
             IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0) THEN 
               CN_isotropic = .TRUE.
               INTerf=0
             ENDIF 
-                      
+          
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
      &nharn coefficients'')')
@@ -4535,7 +4534,7 @@ C-----
 C--------CCFUS input  ** done ***
 C-----
          IF (name.EQ.'GDRGFL') THEN
-	      IF(val.LE.0.1d0) THEN
+              IF(val.LE.0.1d0) THEN
               WRITE(8,'('' WARNING: Messina GDR systematics should be ad
      &apted to RIPL'')')
               WRITE(8,'('' RIPL GDR data used instead'')')
@@ -4544,7 +4543,7 @@ C-----
               WRITE(12,'('' RIPL GDR data used instead'')')
               Key_GDRGFL = 1
             ELSE
-              Key_GDRGFL = val + 0.001
+            Key_GDRGFL = val + 0.001
             ENDIF
             GOTO 100
          ENDIF
@@ -8718,10 +8717,10 @@ C--------------------------------------------------------------------------
          IF (name.EQ.'INTERF') THEN
             INTerf = 0  
             IF (val.GT.0) THEN
-	        IF(val.GE.2) THEN
+                IF(val.GE.2) THEN
 C               For development
                 INTerf = 1
-	        ELSE
+                ELSE
                 WRITE (8,'('' EW transformation is in development'')')
                 PAUSE 
      &   ' EW transformation in development and disabled, press any key'
@@ -12194,10 +12193,10 @@ C              NG = NNG(i)
                G(2) = HGW2(i)
                S(2) = HCS2(i)  
 
-C              write(*,*) kz, ka, ' RIPL EXP'	  
+C              write(*,*) kz, ka, ' RIPL EXP'     
 C              write(*,*) E(1),E(2)
-C	         write(*,*) G(1),G(2)
-C	         write(*,*) S(1),S(2)
+C                write(*,*) G(1),G(2)
+C                write(*,*) S(1),S(2)
 C              write(*,*) 
 
 C--------------Plujko_new-2005
@@ -12233,10 +12232,10 @@ C--------------(classical sum rule with correction)
                S(1) = CS1      
                S(2) = CS2      
 
-C              write(*,*) kz, ka, ' Goriely'	  
+C              write(*,*) kz, ka, ' Goriely'      
 C              write(*,*) E(1),E(2)
-C	         write(*,*) G(1),G(2)
-C	         write(*,*) S(1),S(2)
+C                write(*,*) G(1),G(2)
+C                write(*,*) S(1),S(2)
 C              write(*,*) 
 
 C--------------Plujko_new-2005
@@ -12293,8 +12292,8 @@ C        NG = 1
       S(1) = CS1   
       E(2) = EG2
       G(2) = GW2
-      S(2) = CS2 
-C     write(*,*) kz, ka, ' Global systematics'	  
+      S(2) = CS2   
+C     write(*,*) kz, ka, ' Global systematics'    
 C     write(*,*) E(1),E(2)
 C     write(*,*) G(1),G(2)
 C     write(*,*) S(1),S(2)
