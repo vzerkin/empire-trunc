@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4816 $
+   ! $Rev: 4819 $
    ! $Author: gnobre $
-   ! $Date: 2016-12-21 23:05:16 +0100 (Mi, 21 Dez 2016) $
+   ! $Date: 2016-12-23 16:46:48 +0100 (Fr, 23 Dez 2016) $
    !
 
    TYPE channel
@@ -2177,7 +2177,11 @@ CONTAINS
                      xjr = out%xjrs              !residual nucleus J
                      lb = out%l                  !outgoing neutron l
                      jb = out%j                  !outgoing neutron j
-                     w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
+                     if(LHRtw==3.or.LHRtw==4) then
+                        w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
+                     else
+                        w=1.0d0
+                     endif
                      PL_lmax(-out%kres) = 2*la
                      !                     IF(out%kres > 0) THEN
                      !                        PLcont_lmax(out%kres) = la
