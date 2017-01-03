@@ -1,5 +1,5 @@
-! $Rev: 4821 $                                                          | 
-! $Date: 2017-01-03 19:57:15 +0100 (Di, 03 Jän 2017) $                                                     
+! $Rev: 4822 $                                                          | 
+! $Date: 2017-01-03 20:25:43 +0100 (Di, 03 Jän 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -1838,7 +1838,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
          CASE (12)
             CALL TEST1F(EMAX,0.,5.,'EMAX')
          CASE DEFAULT
-            CALL TEST1F(EMAX,1.E+6,500.E+6,'EMAX')
+            CALL TEST1F(EMAX,1.E+6,3.E+9,'EMAX')
       END SELECT
 !
 !     Check MAT number against ZA for ENDF/B
