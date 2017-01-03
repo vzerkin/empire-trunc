@@ -1,5 +1,5 @@
-! $Rev: 4820 $                                                          | 
-! $Date: 2017-01-03 19:51:51 +0100 (Di, 03 Jän 2017) $                                                     
+! $Rev: 4821 $                                                          | 
+! $Date: 2017-01-03 19:57:15 +0100 (Di, 03 Jän 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -1827,7 +1827,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       SELECT CASE (NSUB)
          CASE (10)
-            CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
+            CALL TEST1F(EMAX,20.E+6,1000.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
          CASE (4,5,6)
