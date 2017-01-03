@@ -1,6 +1,6 @@
-! $Rev: 4552 $                                                          | 
-! $Date: 2015-12-17 21:35:49 +0100 (Do, 17 Dez 2015) $                                                     
-! $Author: atrkov $                                                  
+! $Rev: 4820 $                                                          | 
+! $Date: 2017-01-03 19:51:51 +0100 (Di, 03 Jän 2017) $                                                     
+! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,8 +29,6 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
-!-V         Version 8.22   October 2015, A. Trkov
-!-V                        Increase EMAX to 3 GeV for neutrons.
 !-V         Version 8.21   September 2014 D. Brown, A. Trkov
 !-V                        - Disable EMAX tests for atomic relaxation data
 !-V                          (NSUB=6, Maximum energy for Atomic relaxation data)
@@ -266,7 +264,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.21'
 !
 !     Define variable precision
 !
@@ -1729,7 +1727,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
      &       'Tl','Pb','Bi','Po','At','Rn','Fr','Ra','Ac','Th',         &       
      &       'Pa','U ','Np','Pu','Am','Cm','Bk','Cf','Es','Fm',         &       
      &       'Md','No','Lr','Rf','Db','Sg','Bh','Hs','Mt','Ds',         &       
-     &       'Rg','Cn','A3','Fl','A5','Lv','A7','A8','A9','B0',         &
+     &       'Rg','Cn','Nh','Fl','Mc','Lv','Ts','Og','A9','B0',         &
      &       'B1','B2','B3','B4','XX'/)
 !
 !     Set control parameters from the first material record
@@ -1829,7 +1827,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       SELECT CASE (NSUB)
          CASE (10)
-            CALL TEST1F(EMAX,20.E+6,  3.E+9,'EMAX')
+            CALL TEST1F(EMAX,20.E+6,500.E+6,'EMAX')
          CASE (3,113)
             CALL TEST1F(EMAX,20.E+6,100.E+9,'EMAX')
          CASE (4,5,6)
