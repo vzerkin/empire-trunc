@@ -1,6 +1,6 @@
-!cc   * $Rev: 4818 $
+!cc   * $Rev: 4823 $
 !cc   * $Author: gnobre $
-!cc   * $Date: 2016-12-22 20:27:48 +0100 (Do, 22 Dez 2016) $
+!cc   * $Date: 2017-01-04 21:27:07 +0100 (Mi, 04 Jän 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -956,8 +956,8 @@ C                    From n,2n2p   to   n,a
                      REAction(nnuc)(iend + 1:iend + 1) = 'a'
                      iend = iend + 1
 C                    (n,a)
-C                    ENDfp(0,nnuc) = 1 
-C                    ENDfp(3,nnuc) = 1 
+                     ENDfp(0,nnuc) = 1  ! Made default the printing of gamma as exclusive 
+                     ENDfp(3,nnuc) = 1  ! Made default the printing of alpha as exclusive 
                   ENDIF
 
                   IF (mulem.eq.5 .and. (in.eq.3 .and. ip.eq.2) ) THEN

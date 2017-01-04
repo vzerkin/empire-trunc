@@ -1,6 +1,6 @@
-cc   * $Rev: 4683 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-06-12 02:59:41 +0200 (So, 12 Jun 2016) $
+cc   * $Rev: 4823 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2017-01-04 21:27:07 +0100 (Mi, 04 Jän 2017) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -663,8 +663,8 @@ C
 C     
 C     local variables
 C
-      DOUBLE PRECISION da
-      INTEGER iang    
+      DOUBLE PRECISION da,ztmp,atmp
+      INTEGER iang,izatmp,iloc,nnuc    
 
       IF(EIN.LT.epre .and. .NOT. BENchm) THEN
          WRITE(8,*) EIN,epre
@@ -702,6 +702,19 @@ C-------Set angles for inelastic calculations
       ENDIF
 
       IF(.not.BENchm) FIRst_ein = .FALSE.
+      
+!     Hardwiring the change from exclusive to inclusive printing of
+!     (n,a) above 20.0 MeV to keep the MT=800's (discrete and continuum)
+!     as the components which, when summed up, will correspond to (n,a)
+!     (MT-107)
+      IF(EIN.GT.20.d0) then
+        ztmp=Z(1)-2
+        atmp=A(1)-4
+        izatmp = INT(1000*ztmp + atmp)
+        CALL WHERE(izatmp,nnuc,iloc)
+        ENDfp(0,nnuc) = 0 
+        ENDfp(3,nnuc) = 0
+      ENDIF
 
       RETURN
       END
