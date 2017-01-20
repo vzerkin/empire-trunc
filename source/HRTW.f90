@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4819 $
+   ! $Rev: 4825 $
    ! $Author: gnobre $
-   ! $Date: 2016-12-23 16:46:48 +0100 (Fr, 23 Dez 2016) $
+   ! $Date: 2017-01-20 21:36:27 +0100 (Fr, 20 Jän 2017) $
    !
 
    TYPE channel
@@ -692,7 +692,7 @@ CONTAINS
             DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
                xj = k + jndex - ssxj
                IF(xj<jmin .OR. xj>jmax) CYCLE
-               rho1 = 1.d0                                !reuse level density variable
+               rho1 = 1.d0 * TUNe(nejc,nnuc)              !reuse level density variable
                ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
                IF(tld<1.0d-15) CYCLE                      !ignore very small channels
@@ -753,6 +753,7 @@ CONTAINS
                      rho1 = 1.d0                                !reuse level density variable
                      ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                      tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
+                     tld = min(1.d0,tld * TUNe(nejc,nnuc)) 
                      IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                      H_Sumtl = H_Sumtl + tld*rho1
                      H_Sumtls = H_Sumtls + tld**2*rho1
