@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4825 $
-   ! $Author: gnobre $
-   ! $Date: 2017-01-20 21:36:27 +0100 (Fr, 20 Jän 2017) $
+   ! $Rev: 4826 $
+   ! $Author: rcapote $
+   ! $Date: 2017-01-22 17:27:42 +0100 (So, 22 Jän 2017) $
    !
 
    TYPE channel
@@ -692,7 +692,8 @@ CONTAINS
             DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
                xj = k + jndex - ssxj
                IF(xj<jmin .OR. xj>jmax) CYCLE
-               rho1 = 1.d0 * TUNe(nejc,nnuc)              !reuse level density variable
+               !rho1 = 1.d0                               !level density variable
+               rho1 = TUNe(nejc,nnuc)                     !reuse level density variable for tuning
                ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
                IF(tld<1.0d-15) CYCLE                      !ignore very small channels
@@ -750,10 +751,11 @@ CONTAINS
                   DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
                      xj = k + jndex - ssxj
                      IF(xj<jmin .OR. xj>jmax) CYCLE
-                     rho1 = 1.d0                                !reuse level density variable
+                     !rho1 = 1.d0  						        !level density variable
+                     rho1 = TUNe(nejc,nnuc)                     !reuse level density variable for tuning
                      ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                      tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
-                     tld = min(1.d0,tld * TUNe(nejc,nnuc)) 
+                     !tld = min(1.d0,tld * TUNe(nejc,nnuc)) 	! thsi protection is not used anywhere, should be avoided (or used in all places)
                      IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                      H_Sumtl = H_Sumtl + tld*rho1
                      H_Sumtls = H_Sumtls + tld**2*rho1
@@ -807,7 +809,9 @@ CONTAINS
                      num%elah = NCH                          !set it also as the last one in case there are no more
                   ENDIF
                   IF(NCH > num%elah) num%elah = NCH          !if another elastic augment position of last elastic channel
-                  rho1 = CELred
+                  !rho1 = CELred
+                  rho1 = CELred*TUNe(nejc,NTArget)           !reuse level density variable for tuning
+
                   out => outchnl(NCH)
                   out%l = k-1
                   out%j = xj
@@ -865,7 +869,7 @@ CONTAINS
       !*                                                                  *
       !********************************************************************
       INTEGER i, ipc, nel, nnur, nejc, ncc, nccp, nccu, ndim
-      REAL*8 tld, xjc
+      REAL*8 tld, xjc, rho1
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
 
@@ -879,8 +883,11 @@ CONTAINS
       DO i = ncc, nccp
          !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
-         H_Sumtl = H_Sumtl + tld
-         H_Sumtls = H_Sumtls + tld**2
+         !rho1 = 1.d0  			                     !level density variable
+         rho1 = TUNe(nejc,NTArget)                   !reuse level density variable for tuning
+
+         H_Sumtl = H_Sumtl + tld*rho1
+         H_Sumtls = H_Sumtls + tld**2*rho1
          NCH = NCH + 1                                !we've got non-zero channel
          IF(nch>ndhrtw1) CALL WFC_error()             !STOP - insufficient space allocation
          IF(num%coll == 0) THEN
@@ -892,7 +899,7 @@ CONTAINS
          out%l = STLcc(i)%l
          out%j = STLcc(i)%j
          out%t = tld
-         out%rho = 1.0D0
+         out%rho = rho1
          out%nejc = nejc
          out%kres = -STLcc(i)%lev                      !minus indicates channel leading to a discrete level 'i'
          out%xjrs = XJLv(STLcc(i)%lev,nnur)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4825 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-01-20 21:36:27 +0100 (Fr, 20 Jän 2017) $
+Ccc   * $Rev: 4826 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-01-22 17:27:42 +0100 (So, 22 Jän 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -724,6 +724,7 @@ C--------do loop over l --- done ----------------------------------------
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
          sumdl = sumdl * TUNe(Nejc,Nnuc)     ! Allowing for tuning of discrete levels
+	
          if(IZA(Nnur).EQ.IZA(0)) THEN
            SCRtl(i,Nejc) = sumdl * CINRED(i) 
            Sum = Sum + sumdl    !* CINRED(i) 
@@ -766,10 +767,11 @@ c     &                          - TL(il,l,Nejc,Nnur))
          ENDDO
 C--------do loop over l --- done ----------------------------------------
          s = s + 1.
-         sumdl = sumdl * TUNe(Nejc,Nnuc)
          IF (s.LE.smax) GOTO 30
+         !sumdl = sumdl * TUNe(Nejc,Nnuc)  
+	   sumdl = sumdl * TUNe(Nejc,NTArget)
+
 C--------loop over channel spin ------ done ----------------------------
-         
          SCRtl(i,Nejc) = (sumdl +sumtt -sumin)*CELred
          Sum = Sum + sumdl*CELred
 !         write(8,*) 'Sum to elastic', sumdl*CELred
