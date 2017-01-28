@@ -1,6 +1,6 @@
-# $Rev: 4805 $
+# $Rev: 4827 $
 # $Author: mherman $
-# $Date: 2016-11-28 08:41:33 +0100 (Mo, 28 Nov 2016) $
+# $Date: 2017-01-28 09:22:17 +0100 (Sa, 28 Jän 2017) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5782,8 +5782,8 @@ global widget file profilter zvfilter archfilter
 ## Initialization Procedure:  init
 
 proc ::init {argc argv} {
-global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer wwwviewer compeval mat EXPDAT
-global svnfilelist selsvnfilelist svnlog repository maxwelltemp
+global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer wwwviewer compeval compeval2 compeval3 compeval4 mat EXPDAT
+global svnfilelist selsvnfilelist svnlog repository maxwelltemp RepWriter
 
 if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
@@ -5793,6 +5793,9 @@ if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    gets $rcfl psviewer
    gets $rcfl wwwviewer
    gets $rcfl compeval
+   gets $rcfl compeval2
+   gets $rcfl compeval3
+   gets $rcfl compeval4
    gets $rcfl mat
    gets $rcfl EXPDAT
    gets $rcfl RepWriter
@@ -5802,9 +5805,13 @@ close $rcfl
    set workdir [pwd]
    set file ""
    set editor ""
+   set workdir ""
    set psviewer ""
    set wwwviewer ""
    set compeval ""
+   set compeval2 ""
+   set compeval3 ""
+   set compeval4 ""
    set mat 1111
    set EXPDAT 1
    set RepWriter ""
@@ -6434,8 +6441,12 @@ puts $rcfl $workdir
 puts $rcfl $psviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
+puts $rcfl $compeval2
+puts $rcfl $compeval3
+puts $rcfl $compeval4
 puts $rcfl $mat
 puts $rcfl $EXPDAT
+puts $rcfl $RepWriter
 close $rcfl
 
 
@@ -6512,7 +6523,6 @@ foreach el $ddx {
 }
 puts $lsttab ""
 close $lsttab
-#exec gvim LSTTAB.INP
 #exec mv LSTTAB.INP $::env(EMPIREDIR)/util/lsttab/LSTTAB.INP
 exec xterm -e $::env(EMPIREDIR)/scripts/zvvddx $file omp1 1
 exec xterm -e $::env(EMPIREDIR)/scripts/zvv $file-omp1.zvd $file-omp1R.zvd &
@@ -6967,19 +6977,30 @@ foreach el $ddx {
 #if {$compeval != ""} {file copy -force $compeval $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT }
 #file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
 
-if {$compeval != ""} {file delete COMPARE.DAT
+if {$compeval != ""} {file delete COMPARE.DAT }
 #if {$compeval != ""} {file copy -force $compeval COMPARE.DAT }
 if {$compeval != ""} {file link -symbolic COMPARE.DAT $compeval }
-#file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval }
-
+#file link -symbolic $::env(EMPIREDIR)/util/lsttab/COMPARE.DAT $compeval 
+if {$compeval2 != ""} {file delete COMPARE2.DAT }
+if {$compeval2 != ""} {file link -symbolic COMPARE2.DAT $compeval2 }
+if {$compeval3 != ""} {file delete COMPARE3.DAT }
+if {$compeval3 != ""} {file link -symbolic COMPARE3.DAT $compeval3 }
+if {$compeval4 != ""} {file delete COMPARE4.DAT }
+if {$compeval4 != ""} {file link -symbolic COMPARE4.DAT $compeval4 }
 set lsttab [open LSTTAB.INP w+]
 puts $lsttab ""
 puts $lsttab ""
 puts $lsttab "ENDF.DAT"
 if {$compeval != ""} {puts $lsttab "COMPARE.DAT"}
+if {$compeval2 != ""} {puts $lsttab "COMPARE2.DAT"}
+if {$compeval3 != ""} {puts $lsttab "COMPARE3.DAT"}
+if {$compeval4 != ""} {puts $lsttab "COMPARE4.DAT"}
 puts $lsttab "-"
 puts $lsttab $file
 if {$compeval != ""} {puts $lsttab [file tail $compeval]}
+if {$compeval2 != ""} {puts $lsttab [file tail $compeval2]}
+if {$compeval3 != ""} {puts $lsttab [file tail $compeval3]}
+if {$compeval4 != ""} {puts $lsttab [file tail $compeval4]}
 puts $lsttab $eres
 puts $lsttab $maxwelltemp
 set i 0
@@ -7036,6 +7057,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -labelfont {Helvetica -12 } -labelpos nw -labeltext {Compare to:} \
         -background #d9d9d9 -textbackground #ffffff -textvariable compeval -width 0 
     vTcl:DefineAlias "$site_10_0.cpd71" "Entryfield7" vTcl:WidgetProc "Toplevel1" 1
+
     pack $site_10_0.cpd70 \
         -in $site_10_0 -anchor center -expand 0 -fill none -side left 
     pack $site_10_0.cpd71 \
@@ -8301,8 +8323,12 @@ puts $rcfl $workdir
 puts $rcfl $psviewer
 puts $rcfl $wwwviewer
 puts $rcfl $compeval
+puts $rcfl $compeval2
+puts $rcfl $compeval3
+puts $rcfl $compeval4
 puts $rcfl $mat
 puts $rcfl $EXPDAT
+puts $rcfl $RepWriter
 close $rcfl
 
 
@@ -8341,6 +8367,9 @@ exit} \
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/source/Makefile } \
         -label {Edit Makefile} 
+    $site_3_0.menu90 add command \
+        -command { editFile $::env(EMPIREDIR)/.Xrunrc } \
+        -label {Edit .Xrunrc } 
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
     set site_4_0 $site_3_0.menu90
@@ -8353,6 +8382,7 @@ exit} \
         -value 1 -variable EXPDAT -label {Exp. data for selected reaction} 
     $site_4_0.menu77 add radiobutton \
         -value 2 -variable EXPDAT -label {All exp. data} 
+
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu97" -command {} -label {Select editor} 
     set site_4_0 $site_3_0.menu90
@@ -8383,7 +8413,6 @@ set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.men87 \
         -tearoff 0 
-
     $site_4_0.men87 add radiobutton \
         -value evince -variable psviewer -command {} -label evince 
     $site_4_0.men87 add radiobutton \
