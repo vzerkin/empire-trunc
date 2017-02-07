@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 4830 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-02-07 18:29:50 +0100 (Di, 07 Feb 2017) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -157,6 +157,7 @@ C
 C     We suppress pairing if requested in input
 C     Pairing is implicitly considered in the distribution of discrete levels
       if(NPAirpe.eq.0) pc = 0.d0
+
 C-----Compound gamma emitting nucleus
       g(0) = gc
       pair(0) = pc
@@ -219,8 +220,7 @@ C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C
 C        Assuming PE calculates over discrete levels' region as well
-         nexrt = MAX(INT(excnq/DE + 1.0001),1)
-
+         nexrt = MAX(INT((excnq -ECUt(1))/DE + 1.0001),1)
 C        IDNa(1,6) = 0   ! discrete N is included even with ECIS active
 C        IDNa(3,6) = 0   ! discrete P is included even with ECIS active
 C        IDNa(11,6) = 0  ! discrete A is included even with ECIS active
@@ -470,7 +470,7 @@ C-----Maximum and minimum energy bin for gamma emission
 C     No PE contribution to discrete for gammas
       nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
 C     Assuming PE calculates over discrete levels' region as well
-C     nexrt = MAX(INT(EXCn/DE + 1.0001),1)
+      IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 2.0001),1)
       iemax(0) = nexrt
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS           
@@ -535,7 +535,6 @@ C
 C
 C-----------PRIMARY ENERGY CYCLE
 C
-
             DO ienerg = iemin(nejc), iemax(nejc)
                eee = DE*(ienerg - 1)
                er = EMAx(nnur) - eee

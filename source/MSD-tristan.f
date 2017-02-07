@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4817 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2016-12-21 23:50:52 +0100 (Mi, 21 Dez 2016) $
+Ccc   * $Rev: 4830 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-02-07 18:29:50 +0100 (Di, 07 Feb 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3153,11 +3153,12 @@ C-----
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
 C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
-      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE+1.0001),0),ndecsed) 
+      nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE+1.0001),1),ndecsed) 
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
-      next  = INT(excnq/DE + 1.0001)
+C     next  = INT(excnq/DE + 1.0001)
+	next  = MAX(INT(excnq/DE + 1.0001),1)
 
       somj = CSMsd(Nejc)
 C
@@ -3167,6 +3168,9 @@ C
      & nexrt = next
       IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
      & nexrt = next
+
+C     Assuming PE calculates over discrete levels' region as well
+      IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
