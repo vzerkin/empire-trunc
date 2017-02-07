@@ -1,6 +1,6 @@
-!cc   * $Rev: 4828 $
+!cc   * $Rev: 4829 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-02-07 18:18:29 +0100 (Di, 07 Feb 2017) $
+!cc   * $Date: 2017-02-07 18:28:34 +0100 (Di, 07 Feb 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -461,7 +461,8 @@ C        Discrete levels not included in PCROSS calculatin (default)
          MFPp = 1.5d0
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
-         NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
+C        NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
+         NPAirpe = 0  ! default changed to avoid pairing corrections in PCROSS !02/2017
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C
 C        Breakup and pickup reactions 
