@@ -1,6 +1,6 @@
-!cc   * $Rev: 4829 $
+!cc   * $Rev: 4831 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-02-07 18:28:34 +0100 (Di, 07 Feb 2017) $
+!cc   * $Date: 2017-02-07 18:36:14 +0100 (Di, 07 Feb 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -455,8 +455,8 @@ C--------begin GDR parameters
          EWSr2 = 1.0d0
          GDRweis = 1.d0
 C--------set options for PCROSS (exciton preequilibrium + cluster emission)
-C        Discrete levels not included in PCROSS calculatin (default) 
-         PEQcont = 0.0d0
+C        Discrete levels not included in PCROSS calculation (default) 
+         PEQcont = 1.0d0  ! default changed to get right the gamma spectra     !02/2017
          PEQc = 1.5d0 ! default PE
          MFPp = 1.5d0
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
