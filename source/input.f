@@ -1,6 +1,6 @@
-!cc   * $Rev: 4831 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2017-02-07 18:36:14 +0100 (Di, 07 Feb 2017) $
+!cc   * $Rev: 4832 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2017-02-13 08:10:40 +0100 (Mo, 13 Feb 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -155,6 +155,8 @@ C--------neutralize tuning factors and OMP normalization factors
             rTUNefi(nnuc) = 1.d0
             SHLlnor(nnuc) = 1.d0
 C
+            NLVc(nnuc) = 0      ! Maximum number of discrete levels used
+            NLVt(nnuc) = 0      ! Input number of max discr. levels used
             ECOnt(nnuc) = 0.d0  ! Continuum starts at 0.0 by default
 C                               ! Used to change the default cut-off energy in LEVELS
 C
@@ -202,8 +204,8 @@ C-----------set level density parameters
             ROPar(5,nnuc) = 0.d0
             ATIlnor(nnuc) = 0.d0
             LDShif(Nnuc) = 0.d0
-            ROHfba(nnuc)  = 0.d0  
-            ROHfbp(nnuc)  = 0.d0  
+            ROHfba(nnuc)  = 0.d0
+            ROHfbp(nnuc)  = 0.d0
             ROHfba_off(nnuc)  = 0.d0  
             ROHfbp_off(nnuc)  = 0.d0  
             GTIlnor(nnuc) = 1.d0
@@ -238,9 +240,9 @@ C--------set fission normalization factors
          ENDDO
 C
          EDDfig = -1
-           IDDfig(1) = 16 !  30 deg
-           IDDfig(2) = 76 ! 150 deg
-           IDDfig(3) =  1 ! neutrons
+         IDDfig(1) = 16 !  30 deg
+         IDDfig(2) = 76 ! 150 deg
+         IDDfig(3) =  1 ! neutrons
          IZA(0) = 0
          LVP(1,0) = 1
          NNUcd = 0
@@ -634,6 +636,7 @@ C-----------GAMMA EMISSION
          iz = INT(Z(0))
          SYMb(0) = SMAT(iz)
          NLV(0) = 1
+         NLVc(0) = 0
          ELV(1,0) = 0.d0
          QCC(1) = -e2p
          QCC(2) = -e3m
@@ -1230,7 +1233,6 @@ C
             ENDDO
             NEXclusive = itmp
          ENDIF
-!         write(8,*) 'ENDf matrix', ENDf
 C
 C--------check input for consistency
 C
@@ -1872,7 +1874,6 @@ C
 C-----compound nucleus 1
       nnuc = 1
 C-----determination of discrete levels and pairing shift for cn
-      write(8,*)
       CALL LEVREAD(nnuc)
       IF (ROPar(3,nnuc).EQ.0.0D0) THEN
          IF (Z(nnuc).GT.98.0D0) THEN
@@ -1913,7 +1914,7 @@ C-----determination of discrete levels and pairing shift for cn
       write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
      &      '*          deuteron:',qatom,qnucl
       CALL QVAL(5,1,qatom,qnucl) 
-      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
+      write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)')
      &      '*          triton  :',qatom,qnucl
       CALL QVAL(6,1,qatom,qnucl) 
       write(8,'(2x,A20,f9.4,4x,f9.4,10x,1h*)') 
@@ -1924,7 +1925,9 @@ C-----determination of discrete levels and pairing shift for cn
 
       EINl = EIN
       CALL KINEMA(EINl,EIN,EJMass(0),AMAss(0),ak2,1,RELkin)
+!     Set levels and ECUt for the target
       CALL LEVREAD(0)
+      ECUt(0) = ELV(NLV(0),0)
       IF (DIRect.GT.0 .AND. FIRst_ein  .AND. AEJc(0).LE.4 ) THEN
                               ! Inelastic scattering by DWBA for all particles
 C
@@ -2144,8 +2147,11 @@ C-----------determination of excitation energy matrix in res. nuclei
 C           write(*,*) 
 C    &       NINT(A(nnur)),NINT(Z(nnur)), NLV(nnur), ELV(NLV(nnur),nnur)
 
-            ECUt(nnur) = ELV(NLV(nnur),nnur)
-            IF (FITlev.GT.0) ECUt(nnur) = 0.0
+            IF (FITlev.EQ.0) THEN
+               ECUt(nnur) = ELV(NLV(nnur),nnur)
+            ELSE
+               ECUt(nnur) = 0.0
+            ENDIF
             IF (Q(nejc,nnuc).EQ.0.0D0 .OR. Q(nejc,nnuc).EQ.99)
      &                           CALL BNDG(nejc,nnuc,Q(nejc,nnuc))
             emaxr = 0.0
@@ -2449,11 +2455,11 @@ C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
 
            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
-     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+     &        'Continuum starts at Ex=',ECUt(nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'
 
            DO i = 1, NEX(nnur)
-              IF(EX(i,nnur).LT.ELV( NLV(nnur),nnur)) cycle
+              IF(EX(i,nnur).LT.ECUt(nnur)) cycle
               rocumul = 0.D0
               DO j = 1, NDLW
                 rocumul = rocumul + RO(i,j,1,nnur)
@@ -2469,7 +2475,7 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
 
          ELSE
 
-           IF(EX(NEX(nnur),nnur).LT.ELV( NLV(nnur),nnur)) return 
+           IF(EX(NEX(nnur),nnur).LT.ECUt(nnur)) return
 
            WRITE (8,'(1X,/,''  HFB LEVEL DENSITY DEPENDENCE FOR '' 
      &        ,I3,''-'',A2)') ia, SYMb(nnur)
@@ -2477,8 +2483,8 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
            WRITE (8,'(1X,/,''  TOTAL LEVEL DENSITY'')')
            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
-     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+     &        'Continuum starts at Ex=',ECUt(nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'
 
            DO i = 1, NEX(nnur)
               IF(ADIv.eq.0) then
@@ -2487,7 +2493,7 @@ c    &              (2*RO(i,j,1,nnur),j = 21,31)
                 u = UEXcit(i,nnur)
               ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ECUt(nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2505,8 +2511,8 @@ c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
            WRITE (8,'(1X,/,''  POSITIVE PARITY'')')
            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
-     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+     &        'Continuum starts at Ex=',ECUt(nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'
 
            DO i = 1, NEX(nnur)
 
@@ -2516,7 +2522,7 @@ c    &              ((RO(i,j,1,nnur)+RO(i,j,2,nnur)),j = 21,31)
                 u = UEXcit(i,nnur)
               ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ECUt(nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2533,8 +2539,8 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
            WRITE (8,'(1X,/,''  NEGATIVE PARITY'')')
            WRITE(8,'(/2x,A23,1x,F6.3,A15,I3,A18//
      &1x,''   Ex     RHO(Ex,pi)   RHO(Ex,pi,J => ...)   '')')     
-     &        'Continuum starts at Ex=',ELV( NLV(nnur),nnur),
-     &        ' MeV above the ',NLV(nnur),'-th discrete level'     
+     &        'Continuum starts at Ex=',ECUt(nnur),
+     &        ' MeV above the ',NLV(nnur),'-th discrete level'
            DO i = 1, NEX(nnur)
 
               IF(ADIv.eq.0) then
@@ -2543,7 +2549,7 @@ c     &             (RO(i,j,1,nnur),j = 21,31)
                 u = UEXcit(i,nnur)
               ENDIF
 
-              IF(u.LT.ELV( NLV(nnur),nnur)) cycle
+              IF(u.LT.ECUt(nnur)) cycle
 
               rocumul = 0.D0
               DO j = 1, NDLW
@@ -2674,15 +2680,18 @@ C         Changed to RIPL-3 file
       izatmp = INT(1000*iz + ia)
       DO itmp = 0,NDNuc
         IF(NSTOred(itmp).eq.izatmp) THEN
-          LREad = .FALSE.
+          LREad = .FALSE. !don't read, nucleus already exist under itmp
           GOTO 50
         ENDIF
       ENDDO
 
-   50 IF(.NOT.LREad) then
-        NLV(Nnuc) = NLV(itmp)
+   50 IF(.NOT.LREad) then !copying levels from itmp nucleus
+        IF(NLV(Nnuc).LE.1) NLV(Nnuc) = NLV(itmp)
+        IF(NLVc(Nnuc).EQ.0)  NLVc(Nnuc) = NLVc(itmp)
+        ECUt(Nnuc) = ECUt(itmp)
         NCOmp(Nnuc) = NCOmp(itmp)
-        DO ilv = 1, NLV(Nnuc)
+!        write(8,*) 'LREad: nnuc, NLV, NLVc', Nnuc, NLV(Nnuc), NLVc(Nnuc)
+        DO ilv = 1, NLVc(Nnuc)
           ELV(ilv,Nnuc) = ELV(ilv,itmp)
           XJLv(ilv,Nnuc) = XJLv(ilv,itmp)
           LVP(ilv,Nnuc) = LVP(ilv,itmp)
@@ -2695,14 +2704,14 @@ C         Changed to RIPL-3 file
         ENDDO
         RETURN
       ENDIF
-C-----set ground state in case nucleus not in file
 C
 C     Avoid overwriting the NLV(nnuc) assigned in READLDP 
 C       (coming from level-density-param.dat file)
-C
       IF(NLV(Nnuc)  .le.0) NLV(Nnuc)   = 1
+      IF(NLVc(Nnuc) .le.0) NLVc(Nnuc)  = NLV(Nnuc)
       IF(NCOmp(Nnuc).le.0) NCOmp(Nnuc) = 1
 
+C-----set ground state in case nucleus not in file
       ELV(1,Nnuc) = 0.d0
       LVP(1,Nnuc) = 1
       XJLv(1,Nnuc) = 0.d0
@@ -2723,34 +2732,41 @@ C-------constructing input and filenames
 C
 C     nlvr  is the total number of levels
 C     ngamr is the total number of gamma rays
+C     nmax is a number of levels that constitute a complete scheme as
+C     estimated by Belgya for RIPL. We find it generally much too high.
 C
-      IF (ia.NE.iar .OR. iz.NE.izr) THEN
+      IF (ia.NE.iar .OR. iz.NE.izr) THEN  !skipping levels for not needed nucleus
         DO ilv = 1, nlvr + ngamr
           READ(13,'(A1)',END = 200,ERR=200) dum
         ENDDO
         GOTO 100
-      ELSE
-C-------create file with levels (*.lev)
-C-------nmax is a number of levels that constitute a complete scheme as
-C-------estimated by Belgya for RIPL. We find it generally much too high.
-C-------NLV   number of levels with unique spin and parity
-C-------NCOMP number of levels up to which the level scheme is estimated
-C-------------to be complete
-C
-        IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
+      ELSE  !nucleus is relevant levels will be read
+C-------create file with levels (*.lev), heading line
+        IF ((.NOT.FILevel) .OR. ADDnuc) THEN ! writting file *.lev
           BACKSPACE (13)
           READ (13,'(A110)') ch_iuf
-C         WRITE (14,'(A60,'' RIPL-3'')') ch_iuf
           WRITE (14,'(A110)') ch_iuf
         ENDIF
-        IF (nlvr.NE.0) THEN
+C-------NLVc  total number of levels for Nnuc used in the calculations
+C-------NLV   number of the level after which continuum starts
+        IF (nlvr.GT.0) THEN
+           IF(NLVt(Nnuc).GT.0) THEN
+              NLVc(Nnuc) = MIN(NDLV,NLVt(Nnuc)) ! retain input value if requested
+           ELSE
+              NLVc(Nnuc) = MIN(NDLV,nmax)  !set NLVc to the RIPL recommendation
+           ENDIF
+           NLV(Nnuc) = MIN(NDLV,nmax,NLVc(Nnuc))
+!           IF (ENDf(Nnuc).GT.0) THEN  ! ENDF-6 limit applied only to exclusive nuclei
+           IF (ENDf(0).GT.0) THEN    ! ENDF-6 limit applied to all nuclei
+              NLV(Nnuc) = MIN(NLV(Nnuc),40) ! impose ENDF-6 limit
+              NLVc(Nnuc) = MIN(NLVc(Nnuc),40)
+           ENDIF
+           IF(NLV(Nnuc).GT.NLVc(Nnuc)) NLV(Nnuc) = NLVc(Nnuc) ! imposing consistency NLV.LE.NLVc
+!           IF (nlvr.GT.1) NCOmp(Nnuc) = MIN(NDLV,nlvr) !SHOULD BE NLV
+!           IF (nmax.GT.1) NLV(Nnuc)   = MIN(NDLV,nmax) !SHOULD BE NLVc
+!           IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40) ! ENDF-6 limit
 
-          IF (nlvr.GT.1) NCOmp(Nnuc) = MIN(NDLV,nlvr)
-          IF (nmax.GT.1) NLV(Nnuc)   = MIN(NDLV,nmax)
-
-C---------limit to max. of 40 levels if ENDF active
-          IF (ENDf(1).GT.0) NLV(Nnuc) = MIN(NLV(Nnuc),40)
-
+C-------create file with levels (*.lev), lines with levels
           IF ( (.NOT.FILevel) .OR. ADDnuc) THEN
              DO ilv = 1, nlvr + ngamr
                READ (13,'(A110)') ch_iuf
@@ -2761,15 +2777,10 @@ C---------limit to max. of 40 levels if ENDF active
              ENDDO
           ENDIF
 C---------levels for nucleus NNUC copied to file *.lev
-          NSTored(nnuc) = izatmp
+          NSTored(nnuc) = izatmp ! record position of nuclei
 
-          nmk = NLV(Nnuc) 
-          IF (ECOnt(Nnuc).GT.0.d0 .and. ECOnt(Nnuc).LT.qn) 
-     &     nmk = NCOmp(Nnuc)
-
-          DO ilv = 1, nmk
-C           READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.2,I3)') istart,
-C           Updating to the new RIPL level format
+          DO ilv = 1, NLVc(Nnuc)
+!           Updating to the new RIPL level format
             READ (13,'(I3,1X,F10.6,1X,F5.1,I3,1X,E10.3,I3)') istart,
      &               ELV(ilv,Nnuc), XJLv(ilv,Nnuc), LVP(ilv,Nnuc), t12,
      &               ndbrlin
@@ -2783,16 +2794,16 @@ C           Updating to the new RIPL level format
             ENDIF
 C
             IF (ELV(ilv,Nnuc).GT.qn) THEN
-              NLV(Nnuc) = max(ilv - 1,1)
-              WRITE (8,'(''  WARNING:'')')
+              NLV(Nnuc) = min(ilv - 1,NLV(Nnuc))
+              NLVc(Nnuc) = min(ilv - 1,NLVc(Nnuc))
               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                   chelem, izr
               WRITE (8,
      &'(''  WARNING: Excited state '',I3,                             ''
      & is above neutron binding energy '',F6.3,                       ''
      & MeV'')') ilv, qn
-              WRITE (8,'(''  WARNING: Number of levels set to '',I3)'
-     &                   ) NLV(Nnuc)
+              WRITE (8,'(''  WARNING: Total # of levels set to '',I3)'
+     &                   ) NLVc(Nnuc)
               GOTO 200
             ENDIF
 C
@@ -2808,21 +2819,26 @@ C
                    WRITE (8,
      &'('' Number of discrete levels changed from RIPL default of '',
      &I3,'' to '',I3)') NLV(Nnuc), max(ilv - 1,1)
-                   NLV(Nnuc) = max(ilv - 1,1)
+                   NLV(Nnuc) = max(ilv - 1,1) !Note: NLVc not affected
                 ENDIF 
+                IF(NLVt(Nnuc).EQ.0) NLVc(Nnuc) = NLV(Nnuc)
                 GOTO 200
               ENDIF 
-            ENDIF
-
-            IF (ilv.EQ.1 .AND. ELV(ilv,Nnuc).GT.4.) THEN
+            ENDIF  !end of ECOnt check
+!
+!     Integrity of dicrete levels, checking whether:
+!
+!           First excited state lower than 4 MeV
+            IF (ilv.EQ.2 .AND. ELV(ilv,Nnuc).GT.4.) THEN
               WRITE (8,'(''  WARNING:'')')
               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
               WRITE (8,
-     &'(''  WARNING: excited state No.'',I3,                         ''
-     &has energy of '',F6.3,'' MeV'')') ilv, ELV(ilv,Nnuc)
+     &'(''  WARNING: first excited state '',                         ''
+     &has energy of '',F6.3,'' MeV'')') ELV(ilv,Nnuc)
             ENDIF
 
+!           Ground state spin and parity set
             IF (ilv.EQ.1 .AND. XJLv(ilv,Nnuc).LT.0.) THEN
               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
@@ -2836,6 +2852,7 @@ C
               ISIsom(1,Nnuc) = 0
             ENDIF
 
+!           Any excitaed state  parity set
             IF (LVP(ilv,Nnuc).EQ.0) THEN
                IF (IOUT.GE.5) THEN
                  WRITE (8,'(''  WARNING:'')')
@@ -2844,14 +2861,15 @@ C
                  WRITE (8,'(''  WARNING: excited state No. '',I3,
      &            '' has no parity '')') ilv
                ENDIF
-!                Assuming natural parity; for odd A it is assumed that
-!                l=INT(l+s)=INT(J) while J=l-s case is ignored
-                 LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
-                 IF (IOUT.GE.5) WRITE (8, 
-     &            '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
+!              Assuming natural parity; for odd A it is assumed that
+!              l=INT(l+s)=INT(J) while J=l-s case is ignored
+               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc)) 
+               IF (IOUT.GE.5) WRITE (8, 
+     &          '(''  WARNING: assuming parity '',I2)')  LVP(ilv,Nnuc)      
             ENDIF
 
-            IF (ilv.NE.1) THEN
+!           Non-zero energy for the excited state
+            IF (ilv.NE.1) THEN  !excited state
               IF (ELV(ilv,Nnuc).EQ.0.) THEN
                 WRITE (8,'(''  WARNING:'')')
                 WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
@@ -2861,20 +2879,20 @@ C
      &has got zero excitation energy'')') ilv
               ENDIF
 
-              IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1
+              IF (t12.ge.TISomer) ISIsom(ilv,Nnuc) = 1   !setting up isomer
 
+!             number of decays within NDBR dimension
               IF (ndbrlin.GT.NDBR) THEN
                 WRITE (8,'(''  WARNING:'')')
                 WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
      &                      chelem, izr
                 WRITE (8,
-     &'(''  WARNING: too many gamma decays ='',                      I3)
-     &') ndbrlin
+     &          '(''  WARNING: too many gamma decays ='',I3)') ndbrlin
                 WRITE (8,
-     &'(''  WARNING: Dimension allows for ='',                       I3)
-     &') NDBR
+     &          '(''  WARNING: Dimension allows for ='',I3)') NDBR
                 WRITE (8,'(''  WARNING: some gammas discarded'')')
               ENDIF
+
 C-------------clean BR matrix
               DO nbr = 1, NDBR
                 BR(ilv,nbr,1,Nnuc) = 0.d0
@@ -2884,6 +2902,7 @@ C-------------clean BR matrix
               ndb = MIN(ndbrlin,NDBR)
               sum = 0.d0
               isum = 0
+!             Branching ratios
               DO nbr = 1, ndb
                 READ (13,'(39X,I4,1X,F10.3,3(1X,E10.3))') ifinal,
      &                     egamma, pgamma, pelm, xicc
@@ -2896,12 +2915,12 @@ C--------------------only gamma decay is considered up to now
                   BR(ilv,isum,3,Nnuc) = xicc      !int. conversion coeff.
                 ENDIF
               ENDDO
-              IF (sum.NE.1.D0 .AND. sum.NE.0.D0) THEN
+              IF (sum.NE.1.D0 .AND. sum.NE.0.D0) THEN   !renormalize brenching ratios
                 sum = 1.D0/sum
                 DO nbr = 1, isum
                   BR(ilv,nbr,2,Nnuc) = BR(ilv,nbr,2,Nnuc)*sum
                 ENDDO
-              ENDIF
+              ENDIF   !renormalize brenching ratios
             ENDIF
           ENDDO  ! end of loop over levels
         ENDIF
@@ -3127,6 +3146,7 @@ C99012 FORMAT (1X,10x,4X,12(F10.6,1x))
           WRITE(12,*)
           WRITE(12,*) ' < indicates inclusive spectra only'
         ENDIF
+
         WRITE (12,*) '                                                '
         WRITE (12,*) 'RESULTS:                                        '
         IF(FISspe.GT.0 .and. NUBarread) THEN
@@ -3776,12 +3796,16 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) '  and gamma strength functions based on the RIPL   '
       WRITE (12,*) '  library [RIPL]                                   '
       WRITE (12,*) '- Automatic retrieval of experimental data from the'
-      WRITE (12,*) '  EXFOR/CSISRS library                             '
+      WRITE (12,*) '  EXFOR library                                    '
       WRITE (12,*) '- ENDF-6 formatting (code EMPEND by A.Trkov)       '
       WRITE (12,*) '  coupled to graphical presentation capabilities   '
       WRITE (12,*) '  (code ZVView by V. Zerkin) through the chain of  '
       WRITE (12,*) '  PrePro codes by D. Cullen                        '
       WRITE (12,*) '- ENDF checking codes (CHECKR, FIZCON, PSYCHE)     '
+      WRITE (12,*) '- Highly automated fitting of optical model        '
+      WRITE (12,*) '  parameters (by B.V. Carlson)                     '
+      WRITE (12,*) '- KALMAN code for fitting experimental data and    '
+      WRITE (12,*) '- generating covariances                           '
       WRITE (12,*) '- Support for NJOY                                 '
       WRITE (12,*) '                                                   '
 
@@ -3793,8 +3817,8 @@ C       WRITE (*,*) 'DEFAULT TITLE'
       WRITE (12,*) 'Following models and parameters were used in the   '
       WRITE (12,*) 'current evaluation:                                '
       WRITE (12,*) '                                                   '
-      WRITE (12,*) 'Discrete levels were taken from the RIPL-3 level   '
-      WRITE (12,*) 'file, based on the 2007 version of ENSDF.          '
+      WRITE (12,*) 'Discrete levels were taken from the RIPL-3+        '
+      WRITE (12,*) 'library based on the 2015 version of ENSDF.        '
       irun = 0
   100 IF(irun.EQ.1) RETURN
       READ (5,'(A)',END=150,ERR=160) inline
@@ -3859,13 +3883,13 @@ C                IF(JCUTcoll.GT.4) JCUtcoll = 4
      &             JCUtcoll+1
                ENDIF
             ENDIF
-     
+
 C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf     
             IF (ZEJc(0).GT.0 .or. AEJc(0).EQ.0 .or. LHRtw.EQ.0) THEN 
               CN_isotropic = .TRUE.
               INTerf=0
             ENDIF 
-          
+                      
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
      &nharn coefficients'')')
@@ -4535,7 +4559,7 @@ C-----
 C--------CCFUS input  ** done ***
 C-----
          IF (name.EQ.'GDRGFL') THEN
-              IF(val.LE.0.1d0) THEN
+	      IF(val.LE.0.1d0) THEN
               WRITE(8,'('' WARNING: Messina GDR systematics should be ad
      &apted to RIPL'')')
               WRITE(8,'('' RIPL GDR data used instead'')')
@@ -4632,6 +4656,40 @@ C    &           '('' Gilbert-Cameron level densities '')')
             GOTO 100
          ENDIF
 C-----
+         IF (name.EQ.'LEVTOT') THEN
+            izar = i1*1000 + i2
+            if(izar.eq.0) then
+               WRITE (8,'('' WARNING: LEVTOT should be defined for a sel
+     &ected nucleus, not globally. This entry is ignored. '')')
+               GOTO 100
+            endif
+C
+            CALL WHERE(izar,nnuc,iloc)
+            IF (iloc.EQ.1) THEN
+               WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+               WRITE (8,
+     &           '('' WARNING: additional levels ingnored'')')
+               GOTO 100
+            ENDIF
+            if(val.ge.0.) then
+              NLVt(nnuc) = int(val)
+              IF(A(nnuc).eq.A(0).and.Z(nnuc).eq.Z(0)) NLVt(0) = int(val)  !set it also for the terget
+              WRITE (8,
+     &        '('' Total number of levels in nucleus '',I3,A2,
+     &        '' set to '',i3)') i2, SYMb(nnuc), int(val)
+              WRITE (12,
+     &        '('' Total number of levels in nucleus '',I3,A2,
+     &        '' set to '',i3)') i2, SYMb(nnuc), int(val)
+            else
+              WRITE (8,
+     &        '('' WARNING: Energy continuum for nucleus '',I3,A2,
+     &        '' is negative, ignored '',f6.2)') i2, SYMb(nnuc), val
+            endif
+            GOTO 100
+
+         ENDIF
+C-----
          IF (name.EQ.'ECONT ') THEN
             izar = i1*1000 + i2
             if(izar.eq.0) then
@@ -4652,7 +4710,7 @@ C
             ENDIF
             if(val.ge.0.) then
               ECOnt(nnuc) = val
-              IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val
+              IF(A(nnuc).eq.A(0) .and. Z(nnuc).eq.Z(0)) ECOnt(0) = val  !set it also for the terget
               WRITE (8,
      &        '('' Energy continuum for nucleus '',I3,A2,
      &        '' starts at '',f6.2)') i2, SYMb(nnuc), val
@@ -8721,7 +8779,7 @@ C--------------------------------------------------------------------------
                 IF(val.GE.2) THEN
 C               For development
                 INTerf = 1
-                ELSE
+	        ELSE
                 WRITE (8,'('' EW transformation is in development'')')
                 PAUSE 
      &   ' EW transformation in development and disabled, press any key'
@@ -12194,10 +12252,10 @@ C              NG = NNG(i)
                G(2) = HGW2(i)
                S(2) = HCS2(i)  
 
-C              write(*,*) kz, ka, ' RIPL EXP'     
+C              write(*,*) kz, ka, ' RIPL EXP'	  
 C              write(*,*) E(1),E(2)
-C                write(*,*) G(1),G(2)
-C                write(*,*) S(1),S(2)
+C	         write(*,*) G(1),G(2)
+C	         write(*,*) S(1),S(2)
 C              write(*,*) 
 
 C--------------Plujko_new-2005
@@ -12231,12 +12289,12 @@ C--------------(classical sum rule with correction)
                  CS2 = 0.d0
                ENDIF
                S(1) = CS1      
-               S(2) = CS2      
+               S(2) = CS2
 
-C              write(*,*) kz, ka, ' Goriely'      
+C              write(*,*) kz, ka, ' Goriely'	  
 C              write(*,*) E(1),E(2)
-C                write(*,*) G(1),G(2)
-C                write(*,*) S(1),S(2)
+C	         write(*,*) G(1),G(2)
+C	         write(*,*) S(1),S(2)
 C              write(*,*) 
 
 C--------------Plujko_new-2005
@@ -12293,8 +12351,8 @@ C        NG = 1
       S(1) = CS1   
       E(2) = EG2
       G(2) = GW2
-      S(2) = CS2   
-C     write(*,*) kz, ka, ' Global systematics'    
+      S(2) = CS2 
+C     write(*,*) kz, ka, ' Global systematics'	  
 C     write(*,*) E(1),E(2)
 C     write(*,*) G(1),G(2)
 C     write(*,*) S(1),S(2)

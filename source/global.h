@@ -1,6 +1,6 @@
-! $Rev: 4765 $
-! $Author: rcapote $
-! $Date: 2016-09-01 01:05:23 +0200 (Do, 01 Sep 2016) $
+! $Rev: 4832 $
+! $Author: mherman $
+! $Date: 2017-02-13 08:10:40 +0100 (Mo, 13 Feb 2017) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -40,7 +40,7 @@
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro,           &
      &                 DV, D_Def(ndcollev,nddefcc), CSInc(ndnuc),       &
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,&
-     &                 D_Xjlv(ndcollev), ECUt(ndnuc), ECUtcoll,         &
+     &                 D_Xjlv(ndcollev), ECUt(0:ndnuc), ECUtcoll,       &
      &                 ECFis(NFHUMP),ECDamp(NFHUMP),                    &
      &                 EEFermi(0:ndejc,0:ndnuc),                        &
      &                 EFB(nfparab),EFDis(nftrans,nfparab),             &
@@ -77,6 +77,7 @@
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,    &
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,    &
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,   &
+     &        NLVc(0:ndnuc), NLVt(0:ndnuc),                             &
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,   &
      &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab), NRWel,  &
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,       &
@@ -278,6 +279,7 @@
      &                  FHMs, LHMs, NHMs, NEXreq, FISspe, NRSmooth,     &
      &                  ISIsom, IFLuc, NEMc, NOUt, IOUt, NEX, LHRtw,    &
      &                  IX4ret, JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, &
+     &                  NLVc, NLVt,                                     &  ! total # of discrete levels (including those in the continuum)
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, &
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,     &
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,     &
