@@ -25,9 +25,9 @@ MODULE width_fluct
 
    PRIVATE
 
-   ! $Rev: 4826 $
-   ! $Author: rcapote $
-   ! $Date: 2017-01-22 17:27:42 +0100 (So, 22 Jän 2017) $
+   ! $Rev: 4833 $
+   ! $Author: mherman $
+   ! $Date: 2017-02-17 20:13:17 +0100 (Fr, 17 Feb 2017) $
    !
 
    TYPE channel
@@ -684,6 +684,7 @@ CONTAINS
          jmin = abs(XJLv(i,nnur) - xjc)
          jmax = XJLv(i,nnur) + xjc
          kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+         kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
          kmax = jmax - 1  + ssxj                          !maximum k=l+1
          kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
          DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
