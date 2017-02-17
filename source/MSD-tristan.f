@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4830 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-02-07 18:29:50 +0100 (Di, 07 Feb 2017) $
+Ccc   * $Rev: 4834 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-02-17 23:09:27 +0100 (Fr, 17 Feb 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3157,8 +3157,10 @@ C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
-C     next  = INT(excnq/DE + 1.0001)
-	next  = MAX(INT(excnq/DE + 1.0001),1)
+!      next  = MAX(INT(excnq/DE + 1.0001),1)
+!     The line above extending caculations to discrete levels temporarily
+!     disabled (see line below) since causes out of boundary error in XNAver
+       next  = nexrt
 
       somj = CSMsd(Nejc)
 C
