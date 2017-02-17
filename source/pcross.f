@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4830 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-02-07 18:29:50 +0100 (Di, 07 Feb 2017) $
+Ccc   * $Rev: 4835 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-02-17 23:12:14 +0100 (Fr, 17 Feb 2017) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -470,7 +470,9 @@ C-----Maximum and minimum energy bin for gamma emission
 C     No PE contribution to discrete for gammas
       nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
 C     Assuming PE calculates over discrete levels' region as well
-      IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 2.0001),1)
+!     is temporarily disabled since nexrt has to be defined in terms of
+!     (EXCn -ECUt(nnur)). Otherwise we go out of dimension in TNUc (line 549)
+!     IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 2.0001),1)
       iemax(0) = nexrt
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS           
@@ -535,6 +537,7 @@ C
 C
 C-----------PRIMARY ENERGY CYCLE
 C
+
             DO ienerg = iemin(nejc), iemax(nejc)
                eee = DE*(ienerg - 1)
                er = EMAx(nnur) - eee
