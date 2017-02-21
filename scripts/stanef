@@ -1,5 +1,5 @@
 #! /bin/sh -
-#script to standardize ENDF formatted file with STANEF
+#script to standardize ENDF formatted file with STAN
 # if processing is successful, result is renamed back to $1.endf
 
 if [ -z $EMPIREDIR ]; then
@@ -20,24 +20,12 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi                          
 
-# RUN STANEF
+# RUN STAN
 
-rm -f INPUT
-cat >INPUT <<EOF
-$file.endf
-$file-stan.endf
-0
 
-DONE
-EOF
-$EMPIREDIR/util/stanef/stanef <INPUT 2>| err.log
+$EMPIREDIR/util/stan/stan  $file.endf > $file-log.stan
 
-if grep 'Completed successfully' err.log; then
-    mv $file-stan.endf $file.endf
-else
-    echo STANEF did not finish successfully!
-fi
-
-rm err.log INPUT
+echo "  Renaming $file.STN as $file.endf"  >> $file-log.stan
+mv $file.STN $file.endf
 
 exit
