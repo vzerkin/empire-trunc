@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4814 $
+Ccc   * $Rev: 4837 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-12-21 18:01:22 +0100 (Mi, 21 Dez 2016) $
+Ccc   * $Date: 2017-03-01 22:50:20 +0100 (Mi, 01 Mär 2017) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -105,17 +105,6 @@ C     ENDDO
              DO nejc = 0, NDEJC         !loop over ejectiles
 
 C               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
-
-                IF(ENDfp(nejc,nnuc).NE.1) THEN
-C                  To add spectra to inclusive
-                   nspec= min(INT(EMAx(nnuc)/DE) + 1,NDECSE-1)
-C------------------(continuum part - same for all particles)
-                   DO ie = 1, nspec + 1 
-                     CSE(ie,nejc,0) = CSE(ie,nejc,0) + 
-     &                                POPcse(0,nejc,ie,INExc(nnuc))
-                   ENDDO 
-                   CYCLE
-                ENDIF
 C 
 C               nnur is the decaying compound: nnur = nnuc - nejc
 C
