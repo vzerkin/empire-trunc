@@ -1,6 +1,6 @@
-!cc   * $Rev: 4839 $
+!cc   * $Rev: 4840 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2017-03-09 23:31:46 +0100 (Do, 09 Mär 2017) $
+!cc   * $Date: 2017-03-09 23:42:29 +0100 (Do, 09 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -1190,22 +1190,18 @@ C
 !               ENDDO
 !              Making only pure neutron and pure proton emissions exclusive
                ztmp = Z(1)
-               DO in = 0, NENdf
+               DO in = 0, MIN(5,NENdf)
                   atmp = A(1) - FLOAT(in)
                   izatmp = INT(1000*ztmp + atmp)
                   CALL WHERE(izatmp,nnuc,iloc)
                   IF(iloc.EQ.0) ENDf (nnuc) = 1
-                  write(8,*)'in, iloc, nnuc, izatmp, endf ',in, iloc,
-     &            nnuc, izatmp, endf(nnuc)
                ENDDO
-               DO ip = 0, NENdf
+               DO ip = 0, MIN(5,NENdf)
                   atmp = A(1) - FLOAT(ip)
                   ztmp = Z(1) - FLOAT(ip)
                   izatmp = INT(1000*ztmp + atmp)
                   CALL WHERE(izatmp,nnuc,iloc)
                   IF(iloc.EQ.0) ENDf (nnuc) = 1
-                  write(8,*)'ip, iloc, nnuc, izatmp, endf ',ip, iloc,
-     &            nnuc, izatmp, endf(nnuc)
                ENDDO
             ENDIF
 C           write(*,*) 'After reassigments'
