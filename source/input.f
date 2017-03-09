@@ -1,6 +1,6 @@
-!cc   * $Rev: 4832 $
+!cc   * $Rev: 4839 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2017-02-13 08:10:40 +0100 (Mo, 13 Feb 2017) $
+!cc   * $Date: 2017-03-09 23:31:46 +0100 (Do, 09 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -801,17 +801,17 @@ C            residues must be heavier than alpha !! (RCN)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
 C                 (n,n),(n,2n),(n,3n),(n,4n)
-                  if(in.eq.mulem .and. in.le.4) THEN
-                          ENDfp(1,nnuc) = 1 
-                          ENDfp(0,nnuc) = 1
-                          ENDf(nnuc) = 1
-                  endif
+!                  if(in.eq.mulem .and. in.le.4) THEN
+!                          ENDfp(1,nnuc) = 1
+!                          ENDfp(0,nnuc) = 1
+!                          ENDf(nnuc) = 1
+!                  endif
 C                 (n,p),(n,2p),(n,3p)
-                  if(ip.eq.mulem .and. ip.le.2) THEN
-                          ENDfp(2,nnuc) = 1 
-                          ENDfp(0,nnuc) = 1 
-                          ENDf(nnuc) = 1
-                  endif 
+!                  if(ip.eq.mulem .and. ip.le.2) THEN
+!                          ENDfp(2,nnuc) = 1
+!                          ENDfp(0,nnuc) = 1
+!                          ENDf(nnuc) = 1
+!                  endif
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
@@ -1164,45 +1164,49 @@ C
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-               DO in = 0, NENdf
-                  DO ip = 0, NENdf
-                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
-                     izatmp = INT(1000*ztmp + atmp)
-                     CALL WHERE(izatmp,nnuc,iloc)
-                     IF(iloc.EQ.0) THEN
-                       ENDf (nnuc) = 1
-!                       if(in.eq.2 .and. ip.eq.2) THEN
-!                         ENDfp(3,nnuc) = 1  ! alphas
-!                         ENDfp(0,nnuc) = 1
-!                       endif
-C                      if(in.eq.2 .and. ip.eq.1) THEN
-C                        ENDfp(5,nnuc) = 1  ! triton
-C                        ENDfp(0,nnuc) = 1
-C                       endif
-C                      if(in.eq.1 .and. ip.eq.2) THEN
-C                        ENDfp(6,nnuc) = 1  ! He-3
-C                        ENDfp(0,nnuc) = 1
-C                      endif
-                     ENDIF
-                  ENDDO
-               ENDDO
+!               DO in = 0, NENdf
+!                  DO ip = 0, NENdf
+!                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+!                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+!                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
+!                     izatmp = INT(1000*ztmp + atmp)
+!                     CALL WHERE(izatmp,nnuc,iloc)
+!                     IF(iloc.EQ.0) THEN
+!                       ENDf (nnuc) = 1
+!!                       if(in.eq.2 .and. ip.eq.2) THEN
+!!                         ENDfp(3,nnuc) = 1  ! alphas
+!!                         ENDfp(0,nnuc) = 1
+!!                       endif
+!C                      if(in.eq.2 .and. ip.eq.1) THEN
+!C                        ENDfp(5,nnuc) = 1  ! triton
+!C                        ENDfp(0,nnuc) = 1
+!C                       endif
+!C                      if(in.eq.1 .and. ip.eq.2) THEN
+!C                        ENDfp(6,nnuc) = 1  ! He-3
+!C                        ENDfp(0,nnuc) = 1
+!C                      endif
+!                     ENDIF
+!                  ENDDO
+!               ENDDO
 !              Making only pure neutron and pure proton emissions exclusive
-!               ztmp = Z(1)
-!               DO in = 0, 7 !NENdf
-!                  atmp = A(1) - FLOAT(in)
-!                  izatmp = INT(1000*ztmp + atmp)
-!                  CALL WHERE(izatmp,nnuc,iloc)
-!                  IF(iloc.EQ.0) ENDf (nnuc) = 1
-!               ENDDO
-!               DO ip = 0, 7 !NENdf
-!                  atmp = A(1) - FLOAT(ip)
-!                  ztmp = Z(1) - FLOAT(ip)
-!                  izatmp = INT(1000*ztmp + atmp)
-!                  CALL WHERE(izatmp,nnuc,iloc)
-!                  IF(iloc.EQ.0) ENDf (nnuc) = 1
-!               ENDDO
+               ztmp = Z(1)
+               DO in = 0, NENdf
+                  atmp = A(1) - FLOAT(in)
+                  izatmp = INT(1000*ztmp + atmp)
+                  CALL WHERE(izatmp,nnuc,iloc)
+                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+                  write(8,*)'in, iloc, nnuc, izatmp, endf ',in, iloc,
+     &            nnuc, izatmp, endf(nnuc)
+               ENDDO
+               DO ip = 0, NENdf
+                  atmp = A(1) - FLOAT(ip)
+                  ztmp = Z(1) - FLOAT(ip)
+                  izatmp = INT(1000*ztmp + atmp)
+                  CALL WHERE(izatmp,nnuc,iloc)
+                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+                  write(8,*)'ip, iloc, nnuc, izatmp, endf ',ip, iloc,
+     &            nnuc, izatmp, endf(nnuc)
+               ENDDO
             ENDIF
 C           write(*,*) 'After reassigments'
 C           DO in = 0, NNUct
@@ -6587,14 +6591,14 @@ C              Setting ENDF for all emission loops
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (8,'(
      &            '' Exclusive spectra available for residues'',
-     &            '' distant from CN up to '',I1,'' neut. & '',I1
+     &            '' distant from CN up to '',I1,'' neut. or '',I1
      &            '' prot.'')') NENdf,NENdf
                  WRITE (12,'('' ENDF formatting enabled'')')
                  WRITE (12,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (12,'(
      &            '' Exclusive spectra available for residues'',
-     &            '' distant from CN up to '',I1,'' neut. & '',I1
+     &            '' distant from CN up to '',I1,'' neut. or '',I1
      &            '' prot.'')') NENdf,NENdf
                      GOTO 100
                ENDIF
