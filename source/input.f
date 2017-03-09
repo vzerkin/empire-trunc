@@ -1,6 +1,6 @@
-!cc   * $Rev: 4840 $
+!cc   * $Rev: 4841 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2017-03-09 23:42:29 +0100 (Do, 09 Mär 2017) $
+!cc   * $Date: 2017-03-09 23:44:27 +0100 (Do, 09 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -1190,13 +1190,13 @@ C
 !               ENDDO
 !              Making only pure neutron and pure proton emissions exclusive
                ztmp = Z(1)
-               DO in = 0, MIN(5,NENdf)
+               DO in = 0, MIN(8,NENdf)
                   atmp = A(1) - FLOAT(in)
                   izatmp = INT(1000*ztmp + atmp)
                   CALL WHERE(izatmp,nnuc,iloc)
                   IF(iloc.EQ.0) ENDf (nnuc) = 1
                ENDDO
-               DO ip = 0, MIN(5,NENdf)
+               DO ip = 0, MIN(3,NENdf)
                   atmp = A(1) - FLOAT(ip)
                   ztmp = Z(1) - FLOAT(ip)
                   izatmp = INT(1000*ztmp + atmp)
