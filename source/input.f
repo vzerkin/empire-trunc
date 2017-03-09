@@ -1,6 +1,6 @@
-!cc   * $Rev: 4841 $
+!cc   * $Rev: 4842 $
 !cc   * $Author: mherman $
-!cc   * $Date: 2017-03-09 23:44:27 +0100 (Do, 09 Mär 2017) $
+!cc   * $Date: 2017-03-09 23:47:33 +0100 (Do, 09 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -6588,14 +6588,14 @@ C              Setting ENDF for all emission loops
                  WRITE (8,'(
      &            '' Exclusive spectra available for residues'',
      &            '' distant from CN up to '',I1,'' neut. or '',I1
-     &            '' prot.'')') NENdf,NENdf
+     &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
                  WRITE (12,'('' ENDF formatting enabled'')')
                  WRITE (12,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (12,'(
      &            '' Exclusive spectra available for residues'',
      &            '' distant from CN up to '',I1,'' neut. or '',I1
-     &            '' prot.'')') NENdf,NENdf
+     &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
                      GOTO 100
                ENDIF
                IF(NENdf.EQ.0) THEN
