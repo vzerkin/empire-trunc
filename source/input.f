@@ -1,6 +1,6 @@
-!cc   * $Rev: 4844 $
+!cc   * $Rev: 4845 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-03-10 05:04:01 +0100 (Fr, 10 Mär 2017) $
+!cc   * $Date: 2017-03-10 06:28:49 +0100 (Fr, 10 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -767,6 +767,9 @@ C--------correct ejectiles symbols
      &          SYMbe(nejc) = he3
          ENDDO
 C
+C--------Set default inclusive/exclusive flag ENDFp to 0 for all nuclei and ejectiles
+         ENDFp = 0
+C
 C        Note that the order in which the array IZA(nnuc) is filled is
 C        quite important.
 C
@@ -797,18 +800,18 @@ C            residues must be heavier than alpha !! (RCN)
              izatmp = INT(1000*ztmp + atmp)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
-C                 (n,n),(n,2n),(n,3n),(n,4n)
-!                  if(in.eq.mulem .and. in.le.4) THEN
-!                          ENDfp(1,nnuc) = 1
-!                          ENDfp(0,nnuc) = 1
-!                          ENDf(nnuc) = 1
-!                  endif
+C               (n,n),(n,2n),...,(n,8n)
+!                 if(in.eq.mulem .and. in.le.8) THEN
+!                   ENDfp(1,nnuc) = 1
+!                   ENDfp(0,nnuc) = 1
+!                   ENDf(nnuc) = 1
+!                 endif
 C                 (n,p),(n,2p),(n,3p)
-!                  if(ip.eq.mulem .and. ip.le.2) THEN
-!                          ENDfp(2,nnuc) = 1
-!                          ENDfp(0,nnuc) = 1
-!                          ENDf(nnuc) = 1
-!                  endif
+!                 if(ip.eq.mulem .and. ip.le.3) THEN
+!                   ENDfp(2,nnuc) = 1
+!                   ENDfp(0,nnuc) = 1
+!                   ENDf(nnuc) = 1
+!                 endif
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
@@ -1011,7 +1014,7 @@ C                 write(*,*) REAction(nnuc)(1:iend+4)
          ENDDO
          ENDDO
          ENDDO
-C        ENDfp(0,1) = 1  ! (n,g) = capture
+         ENDfp(0,1) = 1  ! (n,g) = capture
 
          NNUcd = nnuc
          NNUct = nnuc
@@ -1145,9 +1148,10 @@ C        Changing the incident input energy to plot LDs
 !--------Set actual flags for exclusive spectra
 !
 C        DO in = 0, NNUct
-C          IF(in.le.10) write(*,*) 
+C          IF(in.le.20) write(*,*) 
 C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
+C        PAUSE
 C
          IF(NENdf.EQ.0) THEN
               ENDf  = 0
@@ -1191,14 +1195,22 @@ C
                   atmp = A(1) - FLOAT(in)
                   izatmp = INT(1000*ztmp + atmp)
                   CALL WHERE(izatmp,nnuc,iloc)
-                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+                  IF(iloc.EQ.0) THEN
+                    ENDf (nnuc) = 1
+                    ENDfp(1,nnuc) = 1
+                    ENDfp(0,nnuc) = 1
+                  ENDIF 
                ENDDO
                DO ip = 0, MIN(3,NENdf)
                   atmp = A(1) - FLOAT(ip)
                   ztmp = Z(1) - FLOAT(ip)
                   izatmp = INT(1000*ztmp + atmp)
                   CALL WHERE(izatmp,nnuc,iloc)
-                  IF(iloc.EQ.0) ENDf (nnuc) = 1
+                  IF(iloc.EQ.0) THEN
+                    ENDf (nnuc) = 1
+                    ENDfp(2,nnuc) = 1
+                    ENDfp(0,nnuc) = 1
+                  ENDIF 
                ENDDO
             ENDIF
 C           write(*,*) 'After reassigments'

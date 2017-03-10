@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4844 $
+Ccc   * $Rev: 4845 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-10 05:04:01 +0100 (Fr, 10 Mär 2017) $
+Ccc   * $Date: 2017-03-10 06:28:49 +0100 (Fr, 10 Mär 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -22,7 +22,7 @@ C
 
       INTEGER i,ia,nejc,il,nbr,ib,iang,its,ilv,j,m,ke,iz,nxsp,npsp
       INTEGER kemin,kemax,jcn,ipar,ip,izares,iloc,nnur,nspec,ispec
-      INTEGER ilevcol,jz,jn,imint,imaxt,na !, itmp
+      INTEGER ilevcol,jz,jn,imint,imaxt,na, itmp
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
       DOUBLE PRECISION ares,zres,ded,sum !,csemist
@@ -935,23 +935,23 @@ C
 !         CSPopul() and CSInc() are not used for any formatting, it is just informative, but useful. 
 !         It is comented as no exclusive complex particle emission left
 ! 
-!            DO nejc = 0, NDEJC         !loop over ejectiles
-!             IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
-!              IF(ENDfp(nejc,nnuc).EQ.1) THEN
-!                itmp = 1
+             DO nejc = 0, NDEJC         !loop over ejectiles
+               IF (POPcs(nejc,INExc(nnuc)).LE.0.d0) CYCLE
+               IF(ENDfp(nejc,nnuc).EQ.1) THEN
+                 itmp = 1
 !                estimating multiplicity
-!                IF (nejc.eq.1 .or. nejc.eq.2)
-!    &             itmp = NINT(A(1))-NINT(A(nnuc))   ! (n,xn), (n,xp)
-!                IF(.not.(NINT(A(1))-NINT(A(nnuc)).GT.2.and.nejc.eq.0))
+                 IF (nejc.eq.1 .or. nejc.eq.2)
+     &             itmp = NINT(A(1))-NINT(A(nnuc))   ! (n,xn), (n,xp)
+                 IF(.not.(NINT(A(1))-NINT(A(nnuc)).GT.2.and.nejc.eq.0))
 !                  Summing exclusive cross section
-!    &             CSPopul(nnuc) = CSPopul(nnuc) +
-!    &                             POPcs(nejc,INExc(nnuc))/itmp
+     &             CSPopul(nnuc) = CSPopul(nnuc) +
+     &                             POPcs(nejc,INExc(nnuc))/itmp
 C                  RCN 12/2015
 C                  WRITE (*,*) 'excl:',NINT(A(nnuc)),NINT(Z(nnuc)),
 C    &              nejc,sngl(POPcs(nejc,INExc(nnuc))/itmp),
 C    &              ' ',trim(Reaction(nnuc)) 
-!              ENDIF
-!            ENDDO
+               ENDIF
+             ENDDO
 
              DO nejc = 0, NDEJC         !loop over ejectiles
 
