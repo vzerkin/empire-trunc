@@ -1,6 +1,6 @@
-!cc   * $Rev: 4842 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2017-03-09 23:47:33 +0100 (Do, 09 Mär 2017) $
+!cc   * $Rev: 4844 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2017-03-10 05:04:01 +0100 (Fr, 10 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -770,9 +770,6 @@ C
 C        Note that the order in which the array IZA(nnuc) is filled is
 C        quite important.
 C
-C--------Set default inclusive/exclusive flag ENDFp to 0 for all nuclei and ejectiles
-         ENDFp = 0
-C
 C--------Major set of DO loops over ejectiles for setting up residual nuclei
          DO iac = 0, NEMc
          DO ih = 0, nemh
@@ -1014,7 +1011,7 @@ C                 write(*,*) REAction(nnuc)(1:iend+4)
          ENDDO
          ENDDO
          ENDDO
-         ENDfp(0,1) = 1  ! (n,g) = capture
+C        ENDfp(0,1) = 1  ! (n,g) = capture
 
          NNUcd = nnuc
          NNUct = nnuc
@@ -2621,7 +2618,7 @@ C
       CHARACTER*8 finp
       CHARACTER*1 dum
       INTEGER ia, iar, ifinal, ilv, istart, isum, itmp2, iz, izr, nbr,
-     &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp, nmk
+     &        ndb, ndbrlin, ngamr, nlvr, nmax, izatmp !, nmk
       LOGICAL LREad, ADDnuc
 
       ADDnuc = .FALSE.

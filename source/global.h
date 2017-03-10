@@ -1,6 +1,6 @@
-! $Rev: 4832 $
-! $Author: mherman $
-! $Date: 2017-02-13 08:10:40 +0100 (Mo, 13 Feb 2017) $
+! $Rev: 4844 $
+! $Author: rcapote $
+! $Date: 2017-03-10 05:04:01 +0100 (Fr, 10 Mär 2017) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -69,7 +69,7 @@
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
      &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc), IDDfig(3),    &
-     &                                     ENDfp(0:ndejc,0:ndnuc),      &
+!    &                                     ENDfp(0:ndejc,0:ndnuc),      &
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
@@ -285,7 +285,8 @@
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,     &
      &                  KTRompcc, IOMwritecc, MODelecis, ICOmpff, IPH,  &
      &                  IRElat, IGE1, IGM1, IGE2, MAXmult, NSTored,     &
-     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, ENDfp,     &
+!    &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, ENDfp,     &
+     &                  NENdf, NEMn, NEMp, NEMa, NEXclusive,            &
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
