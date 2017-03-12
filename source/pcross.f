@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4835 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-02-17 23:12:14 +0100 (Fr, 17 Feb 2017) $
+Ccc   * $Rev: 4848 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -220,7 +220,7 @@ C--------Maximum and minimum energy bin
          excnq = EXCn - Q(nejc,1)
 C
 C        Assuming PE calculates over discrete levels' region as well
-         nexrt = MAX(INT((excnq -ECUt(1))/DE + 1.0001),1)
+         nexrt = MIN(MAX(INT((excnq -ECUt(1))/DE+1.0001),1),ndecsed)
 C        IDNa(1,6) = 0   ! discrete N is included even with ECIS active
 C        IDNa(3,6) = 0   ! discrete P is included even with ECIS active
 C        IDNa(11,6) = 0  ! discrete A is included even with ECIS active
@@ -228,17 +228,17 @@ C        IDNa(12,6) = 0  ! discrete D is included even with ECIS active
 C        IDNa(13,6) = 0  ! discrete T is included even with ECIS active
 C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
          if(nejc.eq.1 .and. IDNa(1,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1)
          if(nejc.eq.2 .and. IDNa(3,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1)
          if(nejc.eq.3 .and. IDNa(11,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
          if(nejc.eq.4 .and. IDNa(12,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
          if(nejc.eq.5 .and. IDNa(13,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
          if(nejc.eq.6 .and. IDNa(14,6).eq.0) 
-     &     nexrt = MAX(INT((excnq-ECUt(nnur))/DE + 1.0001),1)
+     &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
 
          iemax(nejc) = nexrt
          DO ienerg = 2, nexrt
@@ -466,13 +466,15 @@ C
 C
      
 C-----Maximum and minimum energy bin for gamma emission
-      nnur = NREs(0)
+C     nnur = NREs(0)
 C     No PE contribution to discrete for gammas
-      nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
+C     nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
+      nexrt = MIN(MAX(INT((EXCn -ECUt(1))/DE + 1.0001),1),ndecsed)
 C     Assuming PE calculates over discrete levels' region as well
 !     is temporarily disabled since nexrt has to be defined in terms of
 !     (EXCn -ECUt(nnur)). Otherwise we go out of dimension in TNUc (line 549)
-!     IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 2.0001),1)
+!     IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 1.0001),1)
+      IF(PEQcont.gt.0) nexrt = MIN(MAX(INT(EXCn/DE + 1.0001),1),ndecsed)
       iemax(0) = nexrt
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS           

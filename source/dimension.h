@@ -1,13 +1,13 @@
-!cc   * $Rev: 4560 $
+!cc   * $Rev: 4848 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2015-12-26 21:39:52 +0100 (Sa, 26 Dez 2015) $
+!cc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
       PARAMETER(                                                        &
-     & NDNUC= 160                                                       &
-     &,NDEXCLUS= 100                                                    &
-     &,NDEX= 201                                                        &
+     & NDNUC= 100                                                       &
+     &,NDEXCLUS= 50                                                     &
+     &,NDEX= 101                                                        &
      &,NDLW= 100                                                        &
      &,LEVCC=40                                                         &
      &,NDLV=40                                                          &
@@ -30,7 +30,8 @@
       PARAMETER(MAX_PRN=30,                                             &
      & NDEJC=6                                                          &
      &,NDZMAX=110                                                       &
-     &,NDECSE=NDEX+30                                                   &
+!    &,NDECSE=NDEX+30                                                   &
+     &,NDECSE=NDEX*1.30                                                 &
      &,NDEPFN=251                                                       &
      &,NDANGecis=91                                                     &
      &,NDAnghmx=37                                                      & !Must be equal to NDAnghms in ddhms.cmb

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4834 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-02-17 23:09:27 +0100 (Fr, 17 Feb 2017) $
+Ccc   * $Rev: 4848 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3157,10 +3157,11 @@ C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
-!      next  = MAX(INT(excnq/DE + 1.0001),1)
-!     The line above extending caculations to discrete levels temporarily
-!     disabled (see line below) since causes out of boundary error in XNAver
-       next  = nexrt
+C     next  = INT(excnq/DE + 1.0001)
+      next  = MAX(INT(excnq/DE + 1.0001),1)
+
+C     Assuming PE calculates over discrete levels' region as well
+      IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = MIN(next,ndecsed)
 
       somj = CSMsd(Nejc)
 C
@@ -3170,9 +3171,6 @@ C
      & nexrt = next
       IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
      & nexrt = next
-
-C     Assuming PE calculates over discrete levels' region as well
-      IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
