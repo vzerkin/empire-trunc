@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4787 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-10-03 04:14:52 +0200 (Mo, 03 Okt 2016) $
+Ccc   * $Rev: 4847 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-03-12 04:04:05 +0100 (So, 12 Mär 2017) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -692,7 +692,7 @@ C     IF (totspec.LE.CSMinim) RETURN
       WRITE (8,99045)
 
       DO i = 1, kmax
-         if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
+C        if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
          e = FLOAT(i - 1)*DE
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
             l = IFIX(SNGL(LOG10(CSE(i,Nejc,Nnuc)) - n + 3)*31. + 0.5)
