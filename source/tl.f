@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4783 $
+Ccc   * $Rev: 4849 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-04 19:25:18 +0200 (So, 04 Sep 2016) $
+Ccc   * $Date: 2017-03-13 22:08:23 +0100 (Mo, 13 Mär 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2382,7 +2382,7 @@ C
 C-----TL trans. coeff. at zero energy must be zero
 C
       DO i = 1, NDETL
-         LMAxtl(i,Nejc,Nnuc) = 0
+         LMAxtl(i,Nejc,Nnuc) = -1
          DO l = 1, NDLW
             TL(i,l,Nejc,Nnuc) = 0.D0
             IF(Nnuc.eq.NREs(Nejc)) then      
@@ -2415,6 +2415,7 @@ C-----IWARN=4 - 'Energy requested higher than recommended for this potential'
 
 C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
       DO i = 2, NDETL
+	   if(maxl(i)<0) cycle
          LMAxtl(i,Nejc,Nnuc) = MIN(maxl(i),NDLW-1)
          DO l = 0, LMAxtl(i,Nejc,Nnuc)
             ftmp = ttll(i,l+1)
@@ -2422,16 +2423,20 @@ C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
             TL(i,l+1,Nejc,Nnuc) = ftmp
             Nonzero = .TRUE.
          ENDDO
-         IF(Nnuc.eq.NREs(nejc)) then      
-           DO l = 0, LMAxtl(i,Nejc,Nnuc)
+         IF(NREs(nejc)<0) CYCLE
+C
+C        IF(Nnuc.eq.NREs(nejc)) then      
+c          DO l = 0, LMAxtl(i,Nejc,Nnuc)
+           DO l = 0, LMAxtl(i,Nejc,NREs(nejc))
               DO k=1,MAXj(Nejc)
                 ftmp = ttllj(i,l+1,k)
                 IF (ftmp.LT.1.D-16) cycle
                 TLJ(i,l+1,k,Nejc) = ftmp
               ENDDO 
            ENDDO
-         ENDIF
+C        ENDIF
       ENDDO
+
 C     deallocate ttll,ttllj,maxl
       if(allocated(maxl))  deallocate(maxl)
       if(allocated(ttll))  deallocate(ttll)
@@ -2539,7 +2544,7 @@ C     --------------------------------------------------------------------
 C-----data initialization
       CALL INIT(Nejc,Nnuc)
 C-----Cleaning transmission coefficient matrices
-      Maxl  = 0
+      Maxl  = -1
       Ttll  = 0.d0
       Ttllj = 0.d0
 
@@ -2567,12 +2572,26 @@ C-----Here the previously calculated files should be read
         IF (IOUt.EQ.5) OPEN (46,FILE = ctldir//ctmp23//'.LST')
   100 READ (45 ,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
       if(fexistj)READ (451,END = 200) lmax, ien, ener, IRElat(Nejc,Nnuc)
-      IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6)') 'LMAX:',lmax,ien,ener
+      IF (IOUt.EQ.5) WRITE (46,'(A5,2I6,E12.6,I6)') 
+     &    'LMAX:',lmax,ien,ener,IRElat(Nejc,Nnuc)
+C
+C-----Storing transmission coefficients for EMPIRE energy grid
+C     WRITE (46 ) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
+C     WRITE (461) lmax, Ien, ecms, IRElat(Nejc,Nnuc)
+C     DO l = 0, lmax 
+C        WRITE (46 )  Ttll(Ien,l+1)
+C        WRITE (461) (Ttllj(Ien,l+1,jindex), jindex=1,MAXj(Nejc))
+C     ENDDO
+C     WRITE (46) sreacecis
+C     Maxl(Ien) = lmax
+C     SIGabs(Ien,Nejc,Nnuc) = sreacecis
+
 C
 C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
       IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
+         PAUSE 'wrong energy!!!'
          CLOSE (45 ,STATUS = 'DELETE')
          if(fexistj) CLOSE (451,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
@@ -2585,8 +2604,11 @@ C
          ENDIF
          GOTO 400
       ENDIF
+
       ETL(ien,Nejc,Nnuc) = ener
       Maxl(ien) = lmax                             
+      IF (IOUt.EQ.5) 
+     &  write(46,*) 'Nejc,MAXj(Nejc)=',Nejc,MAXj(Nejc)
       DO l = 0, lmax
          READ (45 ,END= 300,ERR=300) Ttll(ien,l+1)
          if(fexistj) READ (451,END= 300,ERR=300)
@@ -2598,6 +2620,8 @@ C
          ENDIF
       ENDDO
       READ (45,END = 300, ERR=300) SIGabs(ien,Nejc,Nnuc)
+      IF (IOUt.EQ.5) 
+     &  WRITE (46,'(2x,3I4,D15.8)') ien,Nejc,Nnuc,SIGabs(ien,Nejc,Nnuc)
       GOTO 100
   200 CLOSE (45 )
       CLOSE (451) 
@@ -2614,7 +2638,7 @@ C
   300 CLOSE (45 ,STATUS = 'DELETE')
       if(fexistj) CLOSE (451,STATUS = 'DELETE')
       IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
-      Maxl  = 0
+      Maxl  = -1
       Ttll  = 0.d0
       Ttllj = 0.d0
       WRITE (8,*) ' WARNING: ERROR WHEN READING TLs in ', ctmp23
@@ -2667,6 +2691,8 @@ C--------OPEN Unit=46 for Tl output
      &         FILE = (ctldir//ctmp23//'.BIN'),FORM = 'UNFORMATTED')
          OPEN (UNIT = 461,STATUS = 'unknown',
      &         FILE = (ctldir//ctmp23//'J.BIN'),FORM = 'UNFORMATTED')
+         OPEN (UNIT = 462,STATUS = 'unknown',
+     &         FILE = (ctldir//ctmp23//'J.LST'))
 C
 C--------do loop over energy
 C
@@ -2677,7 +2703,6 @@ C        saving the input value of the key CN_isotropic
          logtmp = CN_isotropic  
 C        all OMP calculations calculate only the direct component (no CN)
          CN_isotropic = .TRUE.     
-     
          DO i = Nen ,ien_beg, -1
 
             ener = ETL(i,Nejc,Nnuc)
@@ -2715,11 +2740,15 @@ C        restoring the input value of the key CN_isotropic
 
          CLOSE (46 )
          CLOSE (461)
+         IF(IOUT.EQ.5) CLOSE(462)
          IF (IOUT.GT.4) THEN
            WRITE (8,*) ' Transm. coeff. Tl  written to file:',
      &                              (ctldir//ctmp23//'.BIN')
            WRITE (8,*) ' Transm. coeff. Tlj written to file:',
      &                              (ctldir//ctmp23//'J.BIN')
+           IF(IOUT.EQ.5) WRITE (8,*) 
+     &                 ' Transm. coeff. Tlj listed in file:',
+     &                              (ctldir//ctmp23//'J.LST')
          ENDIF   
       ELSEIF (IOUt.EQ.5) THEN
          WRITE (8,'(1x,A12,I3,A3,I3,A3,F4.1)') 'EJECTILE: A=',
@@ -3105,7 +3134,7 @@ C     write(*,*) 'renormalizing Tljs'
 C     dtmp = 1.d0
       dtmp = (ABScs -SINlcc -ftmp)/xsabs
 C-----Renormalizing collective Tljs
-      if(abs(1.d0-dtmp).gt.1.d-6 .and. (SINlcc+ftmp).gt.0.d0) then
+      if(abs(1.d0-dtmp).gt.1.d-8 .and. (SINlcc+ftmp).gt.0.d0) then
         sabs = 0.d0
         sabsj = 0.D0
         DO l = 0, Maxlw
@@ -3345,7 +3374,7 @@ C
       LOGICAL unformat
       data unformat/.TRUE./
 
-      lmax = 0
+      lmax = -1
       ncoll = 0
       ecms = ETL(Ien,Nejc,Nnuc)
 
@@ -3506,6 +3535,18 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       Maxl(Ien) = lmax
       SIGabs(Ien,Nejc,Nnuc) = sreacecis
 
+      IF (IOUt.EQ.5) then
+         WRITE (462,'(A5,2I6,E12.6,I6)') 
+     &    'LMAX:',lmax, Ien, ecms, IRElat(Nejc,Nnuc)
+         WRITE (462,*) 'Nejc,MAXj(Nejc)=',Nejc,MAXj(Nejc)
+         DO l = 0, lmax 
+           WRITE (462,'(2x,I3,3(3x,D15.8))') l, Ttll(Ien,l+1)
+           WRITE (462,'(2x,3x,3(3x,D15.8))') 
+     &        (Ttllj(Ien,l+1,jindex), jindex=1,MAXj(Nejc))
+         ENDDO
+         WRITE (462,'(2x,3I4,D15.8)') Ien,Nejc,Nnuc,sreacecis
+      ENDIF
+ 
       IF(IOPSYS.EQ.1) THEN
  	  CALL SYSTEM(
      > 'del ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
@@ -5071,7 +5112,6 @@ C-----Running ECIS
 
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
       CALL ECIS('ecis06 ',MAX_cc_mod)
-
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
