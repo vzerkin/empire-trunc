@@ -1,5 +1,7 @@
 MODULE width_fluct
-
+   ! $Rev: 4851 $
+   ! $Author: mherman $
+   ! $Date: 2017-03-15 01:08:26 +0100 (Mi, 15 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -21,22 +23,9 @@ MODULE width_fluct
    IMPLICIT NONE
 
    INCLUDE 'dimension.h'
-! $Rev: 4850 $
-! $Author: mherman $
-! $Date: 2017-03-14 20:07:52 +0100 (Di, 14 Mär 2017) $
-!
-!     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
-!     If global.h is not included, then add the variable definition and the common
-!     line to have access to the system directory, RCN, July 2009
-!
-         INCLUDE 'global.h'
+   INCLUDE 'global.h'
 
    PRIVATE
-
-   ! $Rev: 4850 $
-   ! $Author: mherman $
-   ! $Date: 2017-03-14 20:07:52 +0100 (Di, 14 Mär 2017) $
-   !
 
    TYPE channel
       INTEGER l         ! ejectile l
@@ -297,17 +286,9 @@ CONTAINS
       !cc
 
       IMPLICIT NONE
-      INCLUDE 'dimension.h'
-! $Rev: 4850 $
-! $Author: mherman $
-! $Date: 2017-03-14 20:07:52 +0100 (Di, 14 Mär 2017) $
-!
-!     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
-!     If global.h is not included, then add the variable definition and the common
-!     line to have access to the system directory, RCN, July 2009
-!
-            INCLUDE 'global.h'
 
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
 
       REAL*8 :: elada(NDAngecis), elleg(NDAngecis)
       INTEGER neles
@@ -1568,9 +1549,8 @@ CONTAINS
                   ! absorption ~ sigma_a
                   in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                   xnor = in%sig/DENhf ! normalization factor
-                 ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
+                  ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                ELSE
-                  !xnor = 1.d0/DENhf ! normalization factor
                   xnor = 1.d0
                ENDIF
                !----------------------------------------------------------
@@ -1623,7 +1603,7 @@ CONTAINS
                CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-               !               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               ! CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                IF (INTerf==0) CALL DelCCmatr() ! deallocate EW matrices
 
@@ -1699,7 +1679,6 @@ CONTAINS
                ! loop over iaa=i (coupled channels in the normal space)
                DO i = num%elal, num%elah
                   IF(STLcc(i)%lev /= levtarg) CYCLE ! Skipping non-elastic collective channels in the normal space
-
                   iaa = i - num%elal + 1
                   in => inchnl(iaa) ! elastic channels for each Jcn are numbered 1,2,3,...
                   out => outchnl(i)
@@ -1718,7 +1697,7 @@ CONTAINS
                      !write(*,*) 'Matrix dimension a & b:',STLcc(i)%nceq,STLcc(iout)%nceq   
                      !write(*,*) 'num%elal,num%coll:',num%elal,num%coll
                                
-                     ! Engelbrecht- Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+                     ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      !------------------------------------------------------------------------------
                      ! loops over collective levels in the transformed space (ialph & ibeta)
                      !write(*,*) 'EW transformation, space dimension',NDIm_cc_matrix
