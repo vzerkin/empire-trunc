@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4849 $
+Ccc   * $Rev: 4852 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-13 22:08:23 +0100 (Mo, 13 Mär 2017) $
+Ccc   * $Date: 2017-03-15 05:20:09 +0100 (Mi, 15 Mär 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3695,7 +3695,7 @@ C
       INTEGER ncollx, ilv, i, iang, nn2 
       LOGICAL lodd
 
-      INTEGER ikey, ip, iterm, j, ldwmax, nppaa,
+      INTEGER ikey, ip, iterm, j, ldwmax, nppaa, itmp,
      &        nd_cons, nd_nlvop, njmax, npp, nwrite, nphonon 
 
       INTEGER iwin, ipipe_move
@@ -4366,8 +4366,8 @@ C     INLkey < 0  Calculation for coupled states only = CC
      >    write (*,*) '  Running ECIS (sphe) ...'
 	endif
 	
-      CALL ECIS('ecis06 ',MAX_cc_mod)
-C	write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
+      CALL ECIS('ecis06 ',itmp)
+C 	write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
@@ -4382,6 +4382,7 @@ C     restoring the input value of the key CN_isotropic
           iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
         ENDIF
       ELSE
+         MAX_cc_mod = itmp
          iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
          iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
       ENDIF
@@ -4456,7 +4457,7 @@ C
 
       INTEGER ikey, ip, iterm, j, jdm, k, ldwmax, lev(NDLV), nppaa, ilv,
      &        nd_cons, nd_nlvop, ncollm, njmax, npho, npp, nwrite, nn2,
-     &        i, iang
+     &        i, iang, itmp
 
       INTEGER iwin, ipipe_move
 
@@ -5111,11 +5112,12 @@ C
 C-----Running ECIS
 
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
-      CALL ECIS('ecis06 ',MAX_cc_mod)
+      CALL ECIS('ecis06 ',itmp)
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
       IF(TL_calc) RETURN
+      MAX_cc_mod = itmp
 
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')
@@ -5140,6 +5142,8 @@ C     |    R.Capote  05/2011 OPTMAN v10,v11                       |
 C     |    R.Capote  02/2012 OPTMAN v12                           |                                     |
 C     -------------------------------------------------------------
 C
+      USE TLJs, ONLY:MAX_cc_mod
+
 C     ****
 C     IP = 1 NEUTRON
 C          2 PROTON
@@ -5179,7 +5183,7 @@ C
      &                 xmas_nejc, xmas_nnuc, xratio, 
      &                 CAVRss,CARRss,CAARss,CARDss,CAACss
 
-      INTEGER ikey, ip,  j, nd_cons, nd_nlvop, iaref
+      INTEGER ikey, ip,  j, nd_cons, nd_nlvop, iaref, itmp
 
       CHARACTER*132 ctmp
       INTEGER iwin, ipipe_move, ipipe
@@ -5603,8 +5607,13 @@ C     STOP 'Before optman'
 
       ctmp = trim(empiredir)//'/source/optmand'
       iwin = ipipe(ctmp)
- 
+C     itmp should be returned by OPTMAN as ECIS is doing
+      itmp = 0
+
       IF(TL_calc) RETURN
+
+C 	  to assign number of coupled channels for WFC 
+      MAX_CC_mod = itmp      
 
       iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')
       iwin = ipipe_move('OPTMAN.OUT','OPTMAN-INC.out')

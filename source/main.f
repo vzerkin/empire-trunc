@@ -1,6 +1,6 @@
-cc   * $Rev: 4824 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-01-18 17:59:00 +0100 (Mi, 18 Jän 2017) $
+cc   * $Rev: 4852 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-03-15 05:20:09 +0100 (Mi, 15 Mär 2017) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -13,7 +13,8 @@ Ccc   *
 Ccc   *                                                 
 Ccc   ********************************************************************
       USE empcess
-      use angular_momentum
+      USE angular_momentum
+      USE TLJs, ONLY: MAX_cc_mod
 
       Implicit none
 
@@ -50,6 +51,7 @@ C-----
 C-----  Calculate reaction cross section and its spin distribution
 C-----
         CALL MARENG(0,0,nnurec,nejcec)
+C       write(*,*) ' after fusion MAX_cc_mod=',MAX_cc_mod       
 C
         IF(CSFus.LE.0) THEN
           write(*,*) 
@@ -59,7 +61,7 @@ C
           WRITE(8,*) ' ERROR; Absorption cross section equal zero !'
           STOP       ' ERROR; Absorption cross section equal zero !'
         ENDIF
-C        
+C 
         totcorr = 1.d0
 C       Inelastic cross sections read only for particles (not photons or HI) 
         IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
