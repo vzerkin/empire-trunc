@@ -1,6 +1,6 @@
-! $Rev: 4689 $
+! $Rev: 4853 $
 ! $Author: rcapote $
-! $Date: 2016-06-21 10:17:41 +0200 (Di, 21 Jun 2016) $
+! $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -320,7 +320,6 @@ CONTAINS
       IF (.not. fexist) RETURN ! *_Umatr.bin not found
       INQUIRE (FILE = ('INCIDENT_Smatr.bin'),EXIST = fexist)
       IF (.not. fexist) RETURN ! *_Smatr.bin not found
-
       ! open(125,FILE = ('INCIDENT_Pmatr.bin'), STATUS = 'old',form='unformatted')   
       open( 58,FILE = ('INCIDENT_Smatr.bin'), STATUS = 'old',form='unformatted')   
       open( 60,FILE = ('INCIDENT_Umatr.bin'), STATUS = 'old',form='unformatted')   
@@ -357,7 +356,7 @@ CONTAINS
    TYPE (cc_umatrix), POINTER :: ps_umatrix
    TYPE (cc_pdiag), POINTER :: ps_pdiag
    logical debug
-   DATA debug/.false./
+   DATA debug/.FALSE./
 
    Read_CC_matrices = .FALSE.
 
@@ -399,7 +398,7 @@ CONTAINS
 
    IF(INTerf==0) RETURN
 
-   ! write(*,*) 'nch,npmat,numat=',nch,npmat,numat
+   if (debug) write(*,*) 'nch,npmat,numat=',nch,npmat,numat
 
    CALL AllocEWmatr(nch,npmat,numat)
    Read_CC_matrices = .FALSE.
@@ -474,17 +473,17 @@ CONTAINS
       !--nceq is the number of coupled equations
       READ (60,END=14,ERR=14) jc, parc, nceq
       !READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq
-      !write(*,*) jc,parc,nceq
+      if (debug) write(*,*) jc,parc,nceq
       !
       !--Loop over the number of coupled equations
       DO i1 = 1, nceq
-         ! READ (60,*,END = 7,ERR = 7) ! nc1
+         ! READ (60,END = 7,ERR = 7) !nc1
          DO i2 = 1, nceq
             nch = nch + 1
             ps_umatrix => CCumatrix(nch)
             READ (60,END = 7,ERR = 7) sreal,simag
             !READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
-            !write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sreal,simag
+            if (debug) write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sreal,simag
             ps_umatrix%Jcn = jc
             ps_umatrix%Pcn = 1
             if(parc == '-') ps_umatrix%Pcn = -1
@@ -499,6 +498,7 @@ CONTAINS
 14 MAX_umatr = nch
    if (debug) WRITE(*,*) 'Umatrix channels read:',nch
    if (debug) WRITE(*,*) 'Umatrix channels calc:',numat
+   if (debug) pause 'End of Umatrix read, press any key'
 
    !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)
    !==Reading Pdiag
@@ -516,7 +516,7 @@ CONTAINS
        ps_pdiag => CCpdiag(nch)
        READ (61,END = 8,ERR = 8) sreal
        !READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
-       ! write(*,*) nc1,sreal
+       if (debug) write(*,*) nc1,sreal
        ps_pdiag%Jcn = jc
        ps_pdiag%Pcn = 1
        if(parc == '-') ps_pdiag%Pcn = -1
@@ -527,6 +527,7 @@ CONTAINS
 
 16 if (debug) WRITE(*,*) 'Pdiag channels read:',nch
    if (debug) WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
+   if (debug) pause
 
 Read_CC_matrices = .TRUE.
 

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4852 $
+Ccc   * $Rev: 4853 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-15 05:20:09 +0100 (Mi, 15 Mär 2017) $
+Ccc   * $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2977,6 +2977,12 @@ C
       IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
      >   .and. MAX_cc_mod.GT.0) then
          CALL AllocTLJmatr(MAX_cc_mod)
+C
+C        We could use diagonalization to avoid i/o for EW transformation
+C                      or to use OPTMAN
+C
+C        In that case we only need to read Pmatr and Smatr and call QDIAG()
+C
          IF(Open_CC_files()) THEN 
            IF(.NOT.Read_CC_matrices()) 
      >       WRITE(8,*) 'ERROR: Reading ECIS CC files for EW'  
@@ -2984,35 +2990,36 @@ C
          ELSE
 	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
          ENDIF
-
+C         
          IF(debug) THEN
-         l = 5
-         write(*,'(1x,I3,1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
-     >   l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
-     >   STLcc(l)%Jcn,STLcc(l)%Pcn
+           l = 5
+           write(*,'(1x,I3,1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') 
+     >      l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
+     >      STLcc(l)%Jcn,STLcc(l)%Pcn
 
-C        write(*,*) 'MAX_pmatr=',MAX_pmatr
-C        write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
-C    >     CCpmatrix(l)%irow,CCpmatrix(l)%icol,
-C    >     DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
-C    >     CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
+C          write(*,*) 'MAX_pmatr=',MAX_pmatr
+C          write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+C    >       CCpmatrix(l)%irow,CCpmatrix(l)%icol,
+C    >       DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
+C    >       CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
 
-         write(*,*) 'MAX_smatr=',MAX_pmatr
-         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
-     >     CCsmatrix(l)%irow,CCsmatrix(l)%icol,
-     >     DREAL(CCsmatrix(l)%umatrix),DIMAG(CCsmatrix(l)%umatrix),
-     >     CCsmatrix(l)%Jcn,CCsmatrix(l)%Pcn,CCsmatrix(l)%nceq
+           write(*,*) 'MAX_smatr=',MAX_pmatr
+           write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >       CCsmatrix(l)%irow,CCsmatrix(l)%icol,
+     >       DREAL(CCsmatrix(l)%umatrix),DIMAG(CCsmatrix(l)%umatrix),
+     >       CCsmatrix(l)%Jcn,CCsmatrix(l)%Pcn,CCsmatrix(l)%nceq
 
-         write(*,*) 'MAX_umatr=',MAX_umatr
-         write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
-     >     CCumatrix(l)%irow,CCumatrix(l)%icol,
-     >     DREAL(CCumatrix(l)%umatrix),DIMAG(CCumatrix(l)%umatrix),
-     >     CCumatrix(l)%Jcn,CCumatrix(l)%Pcn,CCumatrix(l)%nceq
+           write(*,*) 'MAX_umatr=',MAX_umatr
+           write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >       CCumatrix(l)%irow,CCumatrix(l)%icol,
+     >       DREAL(CCumatrix(l)%umatrix),DIMAG(CCumatrix(l)%umatrix),
+     >       CCumatrix(l)%Jcn,CCumatrix(l)%Pcn,CCumatrix(l)%nceq
 
-         write(*,*) 'Pdiag: MAX_CC=',MAX_cc_mod
-         write(*,'(1x,I3,1x,d12.6,1x,F5.1,1x,I2,1x,I3)') 
-     >     l,CCpdiag(l)%pdiag,
-     >     CCpdiag(l)%Jcn,CCpdiag(l)%Pcn,CCpdiag(l)%nceq
+           write(*,*) 'Pdiag: MAX_CC=',MAX_cc_mod
+           write(*,'(1x,I3,1x,d12.6,1x,F5.1,1x,I2,1x,I3)') 
+     >       l,CCpdiag(l)%pdiag,
+     >       CCpdiag(l)%Jcn,CCpdiag(l)%Pcn,CCpdiag(l)%nceq
+	     PAUSE 
          ENDIF
 
       ENDIF

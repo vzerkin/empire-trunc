@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4851 $
-   ! $Author: mherman $
-   ! $Date: 2017-03-15 01:08:26 +0100 (Mi, 15 Mär 2017) $
+   ! $Rev: 4853 $
+   ! $Author: rcapote $
+   ! $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -872,62 +872,73 @@ CONTAINS
       TYPE (fusion),  POINTER :: in
 
       IF(IZA(nnur)/=IZA(0)) RETURN
+      
+      ! open  CC P-diagonal and U-matrix for EW transformation
+      CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)    
 
-      CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)    ! open  CC P-diagonal and U-matrix for EW transformation
-
-      IF(ndim==0) RETURN                                      ! no collective channels found
+      IF(ndim==0) RETURN   ! no collective channels found
         
-      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',sngl(xjc), ipc, ncc, nccp, nccu, ndim
+      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',
+      !            sngl(xjc), ipc, ncc, nccp, nccu, ndim
       DO i = ncc, nccp
          !        write(*,*) i,ncc,nccp,sngl(xjc)
-         tld = Pdiag(i-ncc+1)                        ! use Tlj in diagonalized space Pdiag if EW transformation is requested
-         !rho1 = 1.d0                                    !level density variable
-         rho1 = TUNe(nejc,NTArget)                   !reuse level density variable for tuning
+         tld = Pdiag(i-ncc+1)          ! use Tlj in diagonalized space Pdiag if 
+                                       !         EW transformation is requested
+         !rho1 = 1.d0                  !level density variable
+         rho1 = TUNe(nejc,NTArget)     !reuse level density variable for tuning
 
          H_Sumtl = H_Sumtl + tld*rho1
          H_Sumtls = H_Sumtls + tld**2*rho1
-         NCH = NCH + 1                                !we've got non-zero channel
-         IF(nch>ndhrtw1) CALL WFC_error()             !STOP - insufficient space allocation
+         NCH = NCH + 1                     !we've got non-zero channel
+         IF(nch>ndhrtw1) CALL WFC_error()  !STOP - insufficient space allocation
          IF(num%coll == 0) THEN
-            num%coll = NCH                            !memorize position of the first coupled level in the 'outchnl' matrix
-            num%colh = NCH                            !set it also as the last one in case there are no more
+            !memorize position of the first coupled level in the 'outchnl' matrix
+            num%coll = NCH                 
+            !set it also as the last one in case there are no more
+            num%colh = NCH                 
          ENDIF
-         IF(NCH > num%colh) num%colh = NCH            !in case of another coupled level augment position of last coupled channel
+         !in case of another coupled level augment position of last coupled channel
+         IF(NCH > num%colh) num%colh = NCH 
          out => outchnl(NCH)
          out%l = STLcc(i)%l
          out%j = STLcc(i)%j
          out%t = tld
          out%rho = rho1
          out%nejc = nejc
-         out%kres = -STLcc(i)%lev                      !minus indicates channel leading to a discrete level 'i'
+         !minus indicates channel leading to a discrete level 'i'
+         out%kres = -STLcc(i)%lev          
          out%xjrs = XJLv(STLcc(i)%lev,nnur)
          out%pres = LVP(STLcc(i)%lev,nnur)
 
          IF(INTerf==0) THEN  
 
-            IF(STLcc(i)%lev==levtarg) THEN                ! we've got elastic!
+            IF(STLcc(i)%lev==levtarg) THEN  ! we've got elastic!
                IF(num%elal == 0) THEN
-                  num%elal = NCH                          !memorize position of the first coupled level in the 'outchnl' matrix
-                  num%elah = NCH                          !set it also as the last one in case there are no more
+                  !memorize position of the first coupled level in the 'outchnl' matrix
+                  num%elal = NCH            
+                  !set it also as the last one in case there are no more
+                  num%elah = NCH            
                ENDIF
-               IF(NCH > num%elah) num%elah = NCH          !in case of another coupled level augment position of last coupled channel
-               nel = NCH - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+               !in case of another coupled level augment position of last coupled channel               
+               IF(NCH > num%elah) num%elah = NCH 
+               !setting correspondence between 'nch' and elastic numbering 'nel'
+               nel = NCH - num%elal + 1          
                in => inchnl(nel)
-               in%nout = NCH                    !setting incident channel
-               in%l = out%l                     !setting incident channel
-               in%j = out%j                     !setting incident channel
-               in%t = tld                       !setting incident channel
+               in%nout = NCH           !setting incident channel
+               in%l = out%l            !setting incident channel
+               in%j = out%j            !setting incident channel
+               in%t = tld              !setting incident channel
             ENDIF
 
          ELSE
-                ! EW transformed space
-                ! in the transformed space (INTerf>0) all coupled channels are considered elastic
-            nel = NCH - num%coll + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
+            ! EW transformed space
+            ! in the transformed space (INTerf>0) all coupled channels are considered elastic
+            nel = NCH - num%coll + 1  !setting correspondence between 'nch' and elastic numbering 'nel'
             in => inchnl(nel)
-            in%nout = NCH                    !setting incident channel
-            in%l = out%l                     !setting incident channel
-            in%j = out%j                     !setting incident channel
-            in%t = tld                       !setting incident channel
+            in%nout = NCH             !setting incident channel
+            in%l = out%l              !setting incident channel
+            in%j = out%j              !setting incident channel
+            in%t = tld                !setting incident channel
 
          ENDIF
 
@@ -1375,11 +1386,12 @@ CONTAINS
       !cc   *                                                                  *
       !cc   *  Calculate decay of the Compound Nucleus capture states in       *
       !cc   *  terms of the  Moldauer approach to account for the width        *
-      !cc  *  fluctuation correction.                                         *
+      !cc   *  fluctuation correction.                                         *
       !cc   *                                                                  *
       !cc   *                                                                  *
       !cc   ********************************************************************
       !cc
+      !cc   All Eq. numbers are referred to PRC94 (2016) 014612
 
       IMPLICIT NONE
 
@@ -1524,7 +1536,7 @@ CONTAINS
             ! Calculate WF term common for all channels
             !----------------------------------------------------------
             CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral
-                            ! that doesn't depend on incoming and outgoing channles
+                            ! that doesn't depend on incoming and outgoing channels
 
             !----------------------------------------------------------
             ! Loop over incoming (fusion) channels
@@ -1535,7 +1547,7 @@ CONTAINS
 
             ! write(*,*) 'Elastic channels:',num%elal, num%elah 
             ! write(*,*) 'Collective channels:',num%coll, num%colh 
-            DO i = num%elal, num%elah
+            DO i = num%elal, num%elah  ! i = loop over incoming channels
 
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
@@ -1560,16 +1572,17 @@ CONTAINS
 
                sumin_s = 0.d0
                sumtt_s = 0.d0
-               DO iout = 1, num%part                       !Scan strong particle channels (note: weak channels are already in SCRt)
-                  out => outchnl(iout)                     !ATTENTION: redefining outgoing channel!!!
-                  w = WFC2(i,iout)                         !Moldauer width fluctuation factor (ECIS style)
+               ! iout = loop over outgoing particle channels
+               DO iout = 1, num%part   
+                  out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
+                  w = WFC2(i,iout)     !Moldauer width fluctuation factor (ECIS style)
                   ! WRITE(8,*) 'continuum WFC', iout, w
 
-                  WFC(i,iout) = w                          ! saving the calculated sigma corrected by WF
-                  sigma_ = out%t*w
+                  WFC(i,iout) = w   ! saving the calculated sigma corrected by WF
+                  sigma_ = out%t*w  
 
                   IF(INTerf>0 .AND. (iout>=num%coll .AND. iout<=num%colh) ) THEN
-                     Sab(i-num%coll+1, iout-num%coll+1) = xnor*sigma_
+                     Sab(i-num%coll+1, iout-num%coll+1) = xnor*sigma_  ! Eq.1
                      ! write(*,*) iaa, ibb, sngl(Sab(i-num%coll + 1,iout-num%coll + 1))
                      CYCLE  ! Skipping coupled channels if INTerf>0
                   ENDIF
@@ -1579,7 +1592,7 @@ CONTAINS
                ENDDO ! end of outgoing channel loop over iout
 
                ! If EW active, all elastic channels assumed collective !!
-               IF(INTerf>0 .AND. (iout>=num%coll .AND. iout<=num%colh) ) CYCLE
+               IF(INTerf>0) CYCLE
 
                CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
 
@@ -1605,7 +1618,7 @@ CONTAINS
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                ! CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
-               IF (INTerf==0) CALL DelCCmatr() ! deallocate EW matrices
+               CALL DelCCmatr() ! deallocate EW matrices
 
             ENDDO    !end do loop over incident channels
 
@@ -1637,7 +1650,7 @@ CONTAINS
                ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
                DO i=1,NDIm_cc_matrix
                   ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i))
-                  Sphase(i) = datan(Sdiag(i,i))
+                  Sphase(i) = datan(Sdiag(i,i)) ! from below Eq.21, phi_{alpha}
                ENDDO
 
                ! setting the complex identity matrix to call DIAG()

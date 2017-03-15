@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4708 $
+Ccc   * $Rev: 4853 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-07-18 22:48:48 +0200 (Mo, 18 Jul 2016) $
+Ccc   * $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19409,14 +19409,11 @@ C         S-matrix                                                      RCN  RCN
 C----
       IF (LO(83)) GO TO 28                                              SCAM-311
 
-
       CALL DIAG(P(1,1,1),P(1,1,2),P(1,1,3),P(1,1,4),NC,
      >    NJC,1.D-12,A1,IERR)    
 
       WRITE (122     ) AJ,IP(JPI+1),JC                                  RCN  RCN
-      WRITE (123     ) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (222,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
-      WRITE (223,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       I=0                                                               RCN  RCN
 C     Pdiag matrix
       DO II=1,NC                                                        RCN  RCN
@@ -19433,13 +19430,18 @@ C     Pdiag matrix
         ENDDO                                                           RCN  RCN
       ENDDO                                                             RCN  RCN
 C     U-matrix
+      WRITE (123     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (223,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+C     write(*,*) I,NC 
       DO J=1,I                                                          RCN  RCN
         !write(123) J                                                   RCN  RCN
-        DO II=1,NC                                                      RCN  RCN
+C       DO II=1,NC                                                      RCN  RCN
+        DO II=1,I                                                       RCN  RCN
           write(123) P(II,J,3),P(II,J,4)                                RCN  RCN
         ENDDO                                                           RCN  RCN
         write(223,'(1x,I4)') J                                          RCN  RCN
-        write(223,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,NC)  RCN  RCN
+C       write(223,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,NC)  RCN  RCN
+        write(223,'(1x,D15.9,1x,D15.9)') (P(II,J,3),P(II,J,4),II=1,I)   RCN  RCN
       ENDDO                                                             RCN  RCN
 C=======================================================================
 C     AVOIDING CN DECAY & WF correction in ECIS to speed-up EMPIRE calcs
@@ -19688,7 +19690,7 @@ C COMPOUND NUCLEUS.                                                     SCAM-502
  1003 FORMAT (1X,I3,I4,I3,I5,F7.1,4X,1P,2D15.7,' I',4X,'CLOSED')        SCAM-571
  1004 FORMAT (/' TRANSMISSION COEFFICIENTS FOR CHANNEL SPIN AND PARITY =SCAM-572
      1',F7.1,A1/4(' LEVEL   L     J',16X))                              SCAM-573
- 1005 FORMAT (1X,F9.1,4X,A1,1X,I4)                                      SCAM-574
+ 1005 FORMAT (1X,F9.1,4X,A1,3(1X,I4))                                   SCAM-574
  1006 FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                             SCAM-575
  1007 FORMAT (4(1X,I2,I4,F6.1,2X,1P,D14.7,0P,3X))                       SCAM-576
  1008 FORMAT (' ERROR IN EIGENSYSTEM.  E-W CORRECTION DISCONTINUED.')   SCAM-577
