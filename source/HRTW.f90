@@ -1,8 +1,7 @@
-$DEBUG
 MODULE width_fluct
-   ! $Rev: 4855 $
+   ! $Rev: 4856 $
    ! $Author: rcapote $
-   ! $Date: 2017-03-16 23:50:58 +0100 (Do, 16 Mär 2017) $
+   ! $Date: 2017-03-17 00:58:29 +0100 (Fr, 17 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -1412,11 +1411,11 @@ CONTAINS
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
-      REAL*8 d0c, sumfis_mem, dtmp
+      REAL*8 d0c, sumfis_mem
       REAL*8 sumfism(nfmod) 
-      REAL*8 sumin_s, sumtt_s, w
-      REAL*8 sigma_ab
-      INTEGER iaa,ibb,ialph
+      REAL*8 sumin_s, sumtt_s 
+      REAL*8 sigma_ab,sigma_alph_b
+      INTEGER iaa,ibb
 
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -1540,77 +1539,91 @@ CONTAINS
             !----------------------------------------------------------
             ! Loop over incoming (fusion) channels
             !----------------------------------------------------------
+            IF(INTerf>0) CALL EW_diagonalization(xjc,ip)
+            ! Engelbrecht- Weidenmueller diagonalization
+
+            ! write(*,*) 'Elastic channels:',num%elal, num%elah 
+            ! write(*,*) 'Collective channels:',num%coll, num%colh 
+            IF(INTerf>0) THEN
+               DO i = num%elal, num%elah  ! i = loop over incoming channels
+	             ! iout = loop over collective particle channels
+                 DO iout = num%coll, num%colh
+                   out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
+                   sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = out%t*WFC2(i,iout)
+                   ! write(*,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1))
+                 ENDDO ! end of outgoing channel loop over iout
+			   ENDDO
+			ENDIF
+
+            WRITE(*,*) 'CN decay state Jpi',xjc,ip
+            WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
+            WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
+
             SCRt_mem  = SCRt    ! store initial values
             SCRtl_mem = SCRtl
             sumfis_mem = sumfis     
 
-            ! write(*,*) 'Elastic channels:',num%elal, num%elah 
-            ! write(*,*) 'Collective channels:',num%coll, num%colh 
-            DO i = num%elal, num%elah  ! i = loop over incoming channels
+            ! loop over iaa=i (coupled channels in the normal space)
+            DO i = num%elal, num%elah
                iaa = i - num%elal + 1
 
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
                sumfis = sumfis_mem
 
-               sumin_s = 0.d0
-               sumtt_s = 0.d0
-               ! iout = loop over outgoing particle channels
+               ! loop over ibb=iout (coupled channels in the normal space)
                DO iout = 1, num%part   
-                  out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
-                  w = WFC2(i,iout)     !Moldauer width fluctuation factor (ECIS style)
-                  ! WRITE(8,*) 'continuum WFC', iout, w
+                 ibb = iout - num%coll + 1
+                 out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
+   				 sigma_alph_b = out%t*WFC2(i,iout)
 
-                  WFC(i,iout) = w   ! saving the calculated sigma corrected by WF
-                  Sigma_ab = out%t*w  
-
-                  IF(INTerf>0) THEN
-				   IF( (iout>=num%coll .AND. iout<=num%colh) ) THEN
-                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = Sigma_ab ! Eq.(1)
-                     ! sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = sigma_ab !xnor*sigma_ab ! Eq.1
-                     ! write(*,*) iaa, ibb, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1))
-                     CYCLE  ! Skipping coupled channels if INTerf>0
+                 IF(INTerf>0) THEN
+				   IF(iout>=num%coll .AND. iout<=num%colh) THEN
+                     ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+                     Sigma_ab = INVERSE_EW(iaa,ibb)          
 				   ELSE
-     				 dtmp = 0.d0 
-                     DO ialph = 1, NDIm_cc_matrix                           
-                        dtmp = dtmp + Sigma_ab*ABS(Umatr(ialph,iaa))**2 ! Eq.(23)
-					 ENDDO
-					 ! sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = dtmp
-				   	 Sigma_ab = dtmp
+                     Sigma_ab = INVERSE_EW_diag(iaa,sigma_alph_b)          
 				   ENDIF
-                  ENDIF
+				 ELSE
+				   Sigma_ab = sigma_alph_b
+				 ENDIF
 
-                  CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
+                 CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
 
-               ENDDO ! end of outgoing channel loop over iout
-
-               IF(INTerf>0 .AND. (i>=num%coll .AND. i<=num%colh) ) CYCLE
+               ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
                CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
                !----------------------------------------------------------
                ! Fission
                !----------------------------------------------------------
-               IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
-               !----------------------------------------------------------
+               IF(num%fiss>0) THEN
+			     sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
+                 IF(INTerf>0) THEN
+                   Sigma_ab = INVERSE_EW_diag(iaa,sumfis)          
+				   sumfis = Sigma_ab
+				 ENDIF
+               ENDIF
+			   !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
                !----------------------------------------------------------
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-               DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
-               !               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
-               IF(DENhf.LE.0.0D0) CYCLE                    ! no transitions from the current state
+               DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de    !correct for the edge effect in trapezoidal integration
+               !write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
+               IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-			   ! absorption for incoming channel
+   			   ! absorption for incoming channel
                in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  
 			   ! renormalization
-               xnor = in%sig/DENhf         ! normalization factor
-               SCRt = SCRt*xnor            ! normalizing scratch matrices instead of passing xnor to XSECT,
-               SCRtl = SCRtl*xnor          ! the above helps implementation of the EW transformation that provides
-               SCRtem = SCRtem*xnor        ! unfactorized cross sections.
-               sumfis = sumfis*xnor        !              "
-               sumfism = sumfism*xnor      !              "
+               xnor = in%sig/DENhf                          ! normalization factor
+               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+               sumfis = sumfis*xnor                         !                                  "
+               sumfism = sumfism*xnor                       !                                  "
+
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
@@ -1618,67 +1631,7 @@ CONTAINS
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
-            ENDDO    !end do loop "i" over incident channels
-
-            IF(INTerf>0) THEN
-			
-               ! Engelbrecht- Weidenmueller diagonalization
-			   CALL EW_diagonalization(xjc,ip)
-
-               WRITE(*,*) 'CN decay state Jpi',xjc,ip
-               WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
-               WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
-
-               ! loop over iaa=i (coupled channels in the normal space)
-               DO i = num%elal, num%elah
-                  iaa = i - num%elal + 1
-                  ! loop over ibb=iout (coupled channels in the normal space)
-                  DO iout = num%coll, num%colh
-                     ibb = iout - num%coll + 1
-				 
-                     ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
-					 Sigma_ab = INVERSE_EW(iaa,ibb)          
-                   
-                     CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
-
-                  ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
-
-                  CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
-                  !----------------------------------------------------------
-                  ! Fission
-                  !----------------------------------------------------------
-                  IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
-                  !----------------------------------------------------------
-                  ! Renormalizing scratch matrices to recover unitarity
-                  !----------------------------------------------------------
-                  DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-                  DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de    !correct for the edge effect in trapezoidal integration
-                  !write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
-                  IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
-
-   			      ! absorption for incoming channel
-                  in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
-                  out => outchnl(i)
-                  in%t = out%t
-                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  
-			      ! renormalization
-                  xnor = in%sig/DENhf                          ! normalization factor
-                  SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
-                  SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
-                  SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
-                  sumfis = sumfis*xnor                         !                                  "
-                  sumfism = sumfism*xnor                       !                                  "
-
-                  !---------------------------------------------------------------
-                  ! CN angular distributions (neutron (in)elastic scattering ONLY!)
-                  !---------------------------------------------------------------
-                  CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
-
-                  CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-
-               ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
-
-            ENDIF ! ENDIF over INTerf>0
+            ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
             ! Gamma width calculation *************************************************************************************
             IF((first_ein .OR. benchm) .AND. einl<=1.D0) THEN
@@ -1819,7 +1772,8 @@ CONTAINS
 
    !----------------------------------------------------------------------------------------------------
 
-   REAL*8 FUNCTION INVERSE_EW(iaa,ibb)  
+   REAL*8 FUNCTION INVERSE_EW(iaa,ibb)
+   ! Both iaa and ibb have to be collective channels  
    ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
    
       IMPLICIT NONE
@@ -1886,6 +1840,35 @@ CONTAINS
 
       RETURN
    END FUNCTION INVERSE_EW
+
+   REAL*8 FUNCTION INVERSE_EW_diag(iaa,sigma_alph_b)  
+   ! iaa is collective (incoming)
+   ! ibb is uncoupled (non-collective)  
+   ! Engelbrecht-Weidenmueller backward transformation Eq.(23) TK paper
+   
+      IMPLICIT NONE
+
+      ! Dummy arguments
+
+      INTEGER, INTENT(IN) :: iaa
+	  REAL*8 , INTENT(IN) :: sigma_alph_b
+
+      ! Local variables
+      INTEGER ialph
+	  REAL*8 dtmp
+ 
+      !------------------------------------------------------------------------------
+      ! loops over collective levels in the transformed space (ialph & ibeta=ibb)
+                    
+      dtmp = 0.d0 
+      DO ialph = 1, NDIm_cc_matrix    
+        dtmp = dtmp + sigma_alph_b*ABS(Umatr(ialph,iaa))**2  
+      ENDDO   ! end of the loop over ialph (transformed space)
+      INVERSE_EW_diag = REAL(dtmp)  ! this is Sigma_ab cross section (in the normal space)
+
+      RETURN
+   END FUNCTION INVERSE_EW_diag
+
 
    REAL*8 FUNCTION NU(Tl,Sumtl,Itype)
 
