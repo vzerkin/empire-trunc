@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4856 $
+   ! $Rev: 4857 $
    ! $Author: rcapote $
-   ! $Date: 2017-03-17 00:58:29 +0100 (Fr, 17 Mär 2017) $
+   ! $Date: 2017-03-17 00:59:58 +0100 (Fr, 17 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -1555,9 +1555,9 @@ CONTAINS
 			   ENDDO
 			ENDIF
 
-            WRITE(*,*) 'CN decay state Jpi',xjc,ip
-            WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
-            WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
+            !WRITE(*,*) 'CN decay state Jpi',xjc,ip
+            !WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
+            !WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
 
             SCRt_mem  = SCRt    ! store initial values
             SCRtl_mem = SCRtl
