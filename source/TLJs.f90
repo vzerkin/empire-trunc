@@ -1,6 +1,6 @@
-! $Rev: 4853 $
+! $Rev: 4855 $
 ! $Author: rcapote $
-! $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
+! $Date: 2017-03-16 23:50:58 +0100 (Do, 16 Mär 2017) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -46,7 +46,8 @@ MODULE TLJs
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
-   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), Sab(:,:), PPdiag(:,:), Sdiag(:,:), &
+   REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), sigma_alph_beta(:,:), & 
+                                  PPdiag(:,:), Sdiag(:,:), &
                                   ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
 
    !COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:) ! EW matrices 
@@ -82,10 +83,10 @@ CONTAINS
       IF(my /= 0) GOTO 20
       Sphase = 0.0d0
 
-      IF(allocated(Sab)) DEALLOCATE(Sab)
-      ALLOCATE(Sab(nch,nch),STAT=my)
+      IF(allocated(sigma_alph_beta)) DEALLOCATE(sigma_alph_beta)
+      ALLOCATE(sigma_alph_beta(nch,nch),STAT=my)
       IF(my /= 0) GOTO 30
-      Sab = 0.0d0
+      sigma_alph_beta = 0.0d0
 
       !IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
       !ALLOCATE(Pmatr(nch,nch),STAT=my)
@@ -272,7 +273,7 @@ CONTAINS
 
       !  EW matrices
       IF(allocated(Sphase)) DEALLOCATE(Sphase)
-      IF(allocated(Sab)) DEALLOCATE(Sab)
+      IF(allocated(sigma_alph_beta)) DEALLOCATE(sigma_alph_beta)
       ! IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
       IF(allocated(Umatr)) DEALLOCATE(Umatr)
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
