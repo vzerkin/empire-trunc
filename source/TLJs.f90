@@ -1,6 +1,6 @@
-! $Rev: 4855 $
+! $Rev: 4859 $
 ! $Author: rcapote $
-! $Date: 2017-03-16 23:50:58 +0100 (Do, 16 Mär 2017) $
+! $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -63,7 +63,7 @@ CONTAINS
       INTEGER, INTENT(IN) :: nch
       INTEGER my
 
-       NDIm_cc_matrix = nch
+      NDIm_cc_matrix = nch
 
       IF(allocated(Pchan)) DEALLOCATE(Pchan)
       ALLOCATE(Pchan(nch),STAT=my)
@@ -142,7 +142,7 @@ CONTAINS
       INTEGER nch
       INTEGER my
 
-      MAX_cc_mod = nch
+      ! MAX_cc_mod = nch
       ! write(*,*) 'Inside AllocTLJs:',nch,MAX_cc_mod,MAX_cc
 
          ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
@@ -178,6 +178,7 @@ CONTAINS
       MAX_pmatr  = npmat
       MAX_umatr  = numat
 
+      ! write(*,*) 'Inside AllocEWmatr:',nch,npmat,numat
       IF(INTerf==0) RETURN
 
       !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CC_pdiag(:)
@@ -394,7 +395,7 @@ CONTAINS
      ENDDO
    ENDDO
 10 if (debug) WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
-
+   
    Read_CC_matrices = .TRUE.
 
    IF(INTerf==0) RETURN
@@ -548,36 +549,40 @@ STOP ' WARNING: Problem reading EW Pdiag'
 END FUNCTION Read_CC_matrices
 
 SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
+   IMPLICIT NONE
    REAL*8 Jcn
-   INTEGER pcn, ndim,  ncc, nccu, nmaxp, nmaxu, i1, irow, icol
+   INTEGER pcn, ndim, ncc, nccu, nmaxp, nmaxu, i1, i2, irow, icol
    LOGICAL debug
    DATA debug/.false./
+   ncc  = 0
    ndim = 0
    nmaxp = 0
    nmaxu = 0
    
    if (debug) write(*,*) 'Pdiag, MAX_cc_mod:',MAX_cc_mod
-   DO ncc = 1, MAX_cc_mod
+
+   DO i2 = 1, MAX_cc_mod
       ndim  = 0
       nmaxp = 0
-      if(NINT(2*STLcc(ncc)%Jcn) == NINT(2*Jcn) .and. STLcc(ncc)%Pcn == Pcn) THEN
+      if(NINT(2*STLcc(i2)%Jcn) == NINT(2*Jcn) .and. STLcc(i2)%Pcn == Pcn) THEN
+         if(ncc.eq.0) ncc=i2
 
-         ndim = STLcc(ncc)%nceq
+         ndim = STLcc(i2)%nceq
 
          CALL AllocCCmatr(ndim)
 
          ! reading diagonal elements p_{alpha}
-         nmaxp = ncc + ndim - 1
-         if (debug) write(*,*) 'J,Pi,nceq=',sngl(STLcc(ncc)%Jcn), STLcc(ncc)%Pcn, STLcc(ncc)%nceq, nmaxp
+         nmaxp = i2 + ndim - 1
+         if (debug) write(*,*) 'J,Pi,nceq=',sngl(STLcc(i2)%Jcn), STLcc(i2)%Pcn, STLcc(i2)%nceq, nmaxp
          IF (INTerf==0) THEN
-            do i1 = ncc, nmaxp
-               if (debug) WRITE (*,*) i1, i1 - ncc +1, STLcc(i1)%tlj
-               Pdiag(i1 - ncc +1) = STLcc(i1)%tlj
+            do i1 = i2, nmaxp
+               if (debug) WRITE (*,*) i1, i1 - i2 +1, STLcc(i1)%tlj
+               Pdiag(i1 - i2 +1) = STLcc(i1)%tlj
             enddo
          ELSE
-            do i1 = ncc, nmaxp
-               if (debug) WRITE (*,*) i1, i1 - ncc +1, CCpdiag(i1)%pdiag
-               Pdiag(i1 - ncc +1) = CCpdiag(i1)%pdiag
+            do i1 = i2, nmaxp
+               if (debug) WRITE (*,*) i1, i1 - i2 +1, CCpdiag(i1)%pdiag
+               Pdiag(i1 - i2 +1) = CCpdiag(i1)%pdiag
             enddo
          END IF
 
@@ -589,8 +594,8 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
    IF(INTerf==0) RETURN
        
    ! if(NINT(2*CCpmatrix(nccu)%Jcn) == 1 .and. CCpmatrix(nccu)%Pcn == +1) debug = .TRUE.
-
    if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
+
    DO nccu = 1, MAX_umatr
       ndim =  0
       nmaxu = 0
@@ -655,6 +660,7 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
 	!if (debug) pause
 
     if (debug) write(*,*) 'Smatr, MAX_smatr: ',MAX_pmatr
+
     DO nccu = 1, MAX_pmatr
       ndim =  0
       nmaxu = 0

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4782 $
+Ccc   * $Rev: 4859 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-09-04 19:24:31 +0200 (So, 04 Sep 2016) $
+Ccc   * $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -228,13 +228,16 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
 
               OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      &                   FORM = 'UNFORMATTED',ERR=42)
-
 	        READ(451,ERR=42,END=42) MAX_cc_mod,MAX_pmatr,MAX_umatr
-
               IF(MAX_cc_mod.GT.0) THEN
                 CALL AllocTLJmatr(MAX_cc_mod)
                 READ(451,ERR=42,END=42) STLcc
-
+                OPEN (651,FILE=(ctldir//ctmp23//'_EW_r.LST'),ERR=42)
+    	          WRITE(651,*) MAX_cc_mod,MAX_pmatr,MAX_umatr
+        	      do i=1, MAX_CC_mod
+	            WRITE(651,*)'**',i,STLcc(i)
+	          enddo
+                close(651)
 	          IF(INTerf.GT.0) THEN
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
 
@@ -1180,8 +1183,13 @@ C     Saving EW structures
       if (tljcalc .and. DIRect.GT.0) then
          OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      >     FORM = 'UNFORMATTED')
+         OPEN (651,FILE=(ctldir//ctmp23//'_EW.LST'))
  	   WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
+ 	   WRITE(651,*) MAX_cc_mod,MAX_pmatr,MAX_umatr
          IF(MAX_cc_mod.GT.0) THEN 
+	     do i=1, MAX_CC_mod
+	       WRITE(651,*)'**',i,STLcc(i)
+	     enddo
 	     WRITE(451) STLcc
 	     IF(INTerf.GT.0) THEN
              WRITE(451) CCsmatrix ! Smatrix  
@@ -1191,6 +1199,7 @@ C            WRITE(451) CCpmatrix ! Pmatrix
            ENDIF
          ENDIF   
 	   CLOSE(451)
+	   CLOSE(651)
 	endif
 
   300 CONTINUE

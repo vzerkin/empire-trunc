@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4858 $
+   ! $Rev: 4859 $
    ! $Author: rcapote $
-   ! $Date: 2017-03-17 03:07:09 +0100 (Fr, 17 Mär 2017) $
+   ! $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -312,6 +312,11 @@ CONTAINS
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
 
+      IF (AEJc(0).EQ.0.0D0) THEN
+         WRITE(8,*) 'WARNING:  Width fluctuation correction for neutron reactions only.'
+         RETURN
+      END IF
+
       CALL AllocHRTW()    !allocate HRTW matrices
 
       H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
@@ -364,7 +369,6 @@ CONTAINS
             ! write(8,*) ' '
             ! write(8,*) 'CN Jpi=',xjc*ip
             nhrtw = 0
-            DENhf = 0.D0
 
             CALL zeroing_module_vars()
             IF(gdrdyn==1.0D0) CALL ULMDYN(nnuc,jcn,EX(ke,nnuc)) ! prepare GDR parameters (if spin dependent GDR selected)
@@ -576,7 +580,9 @@ CONTAINS
       INTEGER :: i, ier, iermax, ietl, iexc, il, ip1, ipar, itlc, jr, k, kmax, kmin, nel, jndex
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
-      summa = 0.D0
+
+	  summa = 0.D0
+	  WFC_decay = 0.D0
       ! clear scratch matrices
       SCRtem(nejc) = H_Sumtl        !temporarily store here entry value of H_Sumtl
       SCRt(:,:,:,nejc) = 0.D0
@@ -871,10 +877,11 @@ CONTAINS
       CALL Prepare_CCmatr(xjc, ipc, ncc, nccp, nccu, ndim)    
 
       IF(ndim==0) RETURN   ! no collective channels found
-        
-      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim',
+
+      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
       !            sngl(xjc), ipc, ncc, nccp, nccu, ndim
-      DO i = ncc, nccp
+        
+	  DO i = ncc, nccp
          !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)          ! use Tlj in diagonalized space Pdiag if 
                                        !         EW transformation is requested
@@ -1403,7 +1410,7 @@ CONTAINS
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
-      REAL*8 d0c, sumfis_mem, w
+      REAL*8 d0c, sumfis_mem, w, dtmp
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s 
       REAL*8 sigma_ab,sigma_alph_b
@@ -1411,6 +1418,11 @@ CONTAINS
 
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
+
+      IF (AEJc(0).EQ.0.0D0) THEN
+         WRITE(8,*) 'WARNING:  Width fluctuation correction for neutron reactions only.'
+         RETURN
+      END IF
 
       CALL AllocHRTW()    !allocate HRTW matrices
 
@@ -1423,11 +1435,6 @@ CONTAINS
 
       sxj = SEJc(0)
       Ia  = XJLv(LEVtarg,0)
-
-      IF (AEJc(0).EQ.0.0D0) THEN
-         WRITE(8,*) 'WARNING:  Width fluctuation correction for neutron reactions only.'
-         RETURN
-      END IF
 
       ! Initialize variables and print heading for normalizing g-strength function
       d0c = 0.D0
@@ -1486,7 +1493,10 @@ CONTAINS
                IF(NREs(nejc)<0) CYCLE
                nnur = NREs(nejc)
                summa = WFC_DECAY(nnuc,ke,jcn,ip,nnur,nejc)
+               ! if(summa>0.d0) write(*,*) nejc,NCH,summa,DENhf
             ENDDO                                         !do loop over ejectiles  ***done***
+            ! write(*,*) 'p**',NCH,DENhf
+
             ! write(*,*) sumin_w,sumtt_w
             ! write(*,*) num%elal,num%elah,num%coll,num%colh
             
@@ -1497,11 +1507,13 @@ CONTAINS
             ! gammas (weak channels)
             !----------------------------------------------------------
             sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
+            ! if(sumg>0.d0) write(*,*) 'g**',NCH,sumg,DENhf
 
             !----------------------------------------------------------
             ! Fission (may be a weak or strong channel)
             !----------------------------------------------------------
             sumfis = WFC_DECAYF(nnuc,ke,jcn,ip)
+            ! if(sumfis>0.d0) write(*,*) 'f**',NCH,sumfis,DENhf
 
             !----------------------------------------------------------
             ! Collecting outgoing channels completed
@@ -1604,9 +1616,10 @@ CONTAINS
                ! Renormalizing scratch matrices to recover unitarity
                !----------------------------------------------------------
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-               DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de    !correct for the edge effect in trapezoidal integration
-               !write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
-               IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
+			   dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
+               DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
+               ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf,dtmp
+			   IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
    			   ! absorption for incoming channel
                in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
@@ -1706,7 +1719,6 @@ CONTAINS
                   Sphase(i) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
 				  ! write(*,*) i,sngl(Sdiag(i,i)),sngl(Pdiag(i)),sngl(Sphase(i))
                ENDDO
-			   pause
 
                ! setting the complex identity matrix to call DIAG()
                !ZRtmp1 = 0.d0
