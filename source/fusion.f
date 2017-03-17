@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4859 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
+Ccc   * $Rev: 4860 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-03-17 20:17:59 +0100 (Fr, 17 Mär 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -231,26 +231,17 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
 	        READ(451,ERR=42,END=42) MAX_cc_mod,MAX_pmatr,MAX_umatr
               IF(MAX_cc_mod.GT.0) THEN
                 CALL AllocTLJmatr(MAX_cc_mod)
-                READ(451,ERR=42,END=42) STLcc
-                OPEN (651,FILE=(ctldir//ctmp23//'_EW_r.LST'),ERR=42)
-    	          WRITE(651,*) MAX_cc_mod,MAX_pmatr,MAX_umatr
-        	      do i=1, MAX_CC_mod
-	            WRITE(651,*)'**',i,STLcc(i)
-	          enddo
-                close(651)
-	          IF(INTerf.GT.0) THEN
+                READ(451,ERR=42,END=42)  (STLcc(i),i=1,MAX_CC_mod)    
+	             IF(INTerf.GT.0) THEN
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
-
-                  READ(451,ERR=43,END=43) CCsmatrix ! Smatrix  
-C                 READ(451,ERR=43,END=43) CCpmatrix ! Pmatrix 
-                  READ(451,ERR=43,END=43) CCpdiag   ! Pdiag  
-                  READ(451,ERR=43,END=43) CCumatrix ! Umatrix
+                  READ(451,ERR=43,END=43) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
+C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
+                  READ(451,ERR=43,END=43) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag 
+                  READ(451,ERR=43,END=43) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
                 ENDIF 
-
-	          CLOSE(451)
-
+	             CLOSE(451)
               ENDIF  
-	        GOTO 44 ! EW matrices read successfully
+	           GOTO 44 ! EW matrices read successfully
 
  42           IF(INTerf.GT.0) THEN
                 WRITE(8,*) 'WARNING: EW matrices not found'
@@ -1183,23 +1174,19 @@ C     Saving EW structures
       if (tljcalc .and. DIRect.GT.0) then
          OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      >     FORM = 'UNFORMATTED')
-         OPEN (651,FILE=(ctldir//ctmp23//'_EW.LST'))
- 	   WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
- 	   WRITE(651,*) MAX_cc_mod,MAX_pmatr,MAX_umatr
-         IF(MAX_cc_mod.GT.0) THEN 
-	     do i=1, MAX_CC_mod
-	       WRITE(651,*)'**',i,STLcc(i)
-	     enddo
-	     WRITE(451) STLcc
+      WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
+      WRITE(*,*) 'MAX_cc_mod,MAX_pmatr,MAX_umatr', 
+     & MAX_cc_mod,MAX_pmatr,MAX_umatr
+      IF(MAX_cc_mod.GT.0) THEN 
+	     WRITE(451) (STLcc(i),i=1,MAX_CC_mod) 
 	     IF(INTerf.GT.0) THEN
-             WRITE(451) CCsmatrix ! Smatrix  
-C            WRITE(451) CCpmatrix ! Pmatrix 
-             WRITE(451) CCpdiag   ! Pdiag  
-             WRITE(451) CCumatrix ! Umatrix
+             WRITE(451) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
+C            WRITE(451) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix 
+             WRITE(451) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag  
+             WRITE(451) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
            ENDIF
          ENDIF   
 	   CLOSE(451)
-	   CLOSE(651)
 	endif
 
   300 CONTINUE
