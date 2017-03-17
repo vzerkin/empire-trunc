@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4857 $
+   ! $Rev: 4858 $
    ! $Author: rcapote $
-   ! $Date: 2017-03-17 00:59:58 +0100 (Fr, 17 Mär 2017) $
+   ! $Date: 2017-03-17 03:07:09 +0100 (Fr, 17 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -459,22 +459,14 @@ CONTAINS
                out => outchnl(i)
                in%t = out%t
 
-               ! absorption ~ sigma_a
-			   !IF(INTerf == 0) THEN
-               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
-               xnor = in%sig/DENhf ! normalization factor
-               ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
-               !ELSE
-               ! xnor = 1.d0/DENhf ! normalization factor
-               ! xnor = 1.d0
-               !ENDIF
-                     
                ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
                elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
                ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
                ! write(*,*)'post AUSTER DENhf=', DENhf + elcor
 
+               ! absorption ~ sigma_a
+               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                ! renormalization
 			   xnor = in%sig/DENhf     ! normalization factor
                SCRt = SCRt*xnor        ! normalizing scratch matrices instead of passing xnor to XSECT,
@@ -1411,7 +1403,7 @@ CONTAINS
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
       REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
-      REAL*8 d0c, sumfis_mem
+      REAL*8 d0c, sumfis_mem, w
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s 
       REAL*8 sigma_ab,sigma_alph_b
@@ -1528,7 +1520,12 @@ CONTAINS
             !  write(*,*)'# of strong Tls   ', NCH
             !  write(*,*)'average Tl        ', H_Tav
             !  write(*,*)'Decay state ',jcn*ip
-                  !  write(*,*)'DENhf calculated before Moldauer', DENhf
+            !  write(*,*)'DENhf calculated before Moldauer', DENhf
+
+
+            ! WRITE(*,*) 'CN decay state Jpi',xjc,ip
+            ! Engelbrecht- Weidenmueller diagonalization
+            IF(INTerf>0) CALL EW_diagonalization(xjc,ip)
 
             !----------------------------------------------------------
             ! Calculate WF term common for all channels
@@ -1539,11 +1536,6 @@ CONTAINS
             !----------------------------------------------------------
             ! Loop over incoming (fusion) channels
             !----------------------------------------------------------
-            IF(INTerf>0) CALL EW_diagonalization(xjc,ip)
-            ! Engelbrecht- Weidenmueller diagonalization
-
-            ! write(*,*) 'Elastic channels:',num%elal, num%elah 
-            ! write(*,*) 'Collective channels:',num%coll, num%colh 
             IF(INTerf>0) THEN
                DO i = num%elal, num%elah  ! i = loop over incoming channels
 	             ! iout = loop over collective particle channels
@@ -1555,7 +1547,6 @@ CONTAINS
 			   ENDDO
 			ENDIF
 
-            !WRITE(*,*) 'CN decay state Jpi',xjc,ip
             !WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
             !WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
 
@@ -1575,7 +1566,13 @@ CONTAINS
                DO iout = 1, num%part   
                  ibb = iout - num%coll + 1
                  out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
-   				 sigma_alph_b = out%t*WFC2(i,iout)
+
+                 w = WFC2(i,iout)     !Moldauer width fluctuation factor (ECIS style)
+                 ! WRITE(8,*) 'continuum WFC', iout, w
+
+                 WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
+
+				 sigma_alph_b = out%t*w
 
                  IF(INTerf>0) THEN
 				   IF(iout>=num%coll .AND. iout<=num%colh) THEN
@@ -1707,7 +1704,9 @@ CONTAINS
                DO i=1,NDIm_cc_matrix
                   ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i))
                   Sphase(i) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
+				  ! write(*,*) i,sngl(Sdiag(i,i)),sngl(Pdiag(i)),sngl(Sphase(i))
                ENDDO
+			   pause
 
                ! setting the complex identity matrix to call DIAG()
                !ZRtmp1 = 0.d0
