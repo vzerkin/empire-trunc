@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4860 $
+Ccc   * $Rev: 4861 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-03-17 20:17:59 +0100 (Fr, 17 Mär 2017) $
+Ccc   * $Date: 2017-03-20 06:11:56 +0100 (Mo, 20 Mär 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -221,27 +221,27 @@ C            SINlcont = max(ABScs - (SINl + SINlcc + CSFus),0.d0)
    40       CLOSE (45 )
             IF (IOUt.EQ.5) CLOSE (46)
             IF (fexistj) CLOSE (451)
-	      
+            
 C           Reading EW structures
 C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
             if (fexistj .and. DIRect.GT.0) then
 
               OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      &                   FORM = 'UNFORMATTED',ERR=42)
-	        READ(451,ERR=42,END=42) MAX_cc_mod,MAX_pmatr,MAX_umatr
+              READ(451,ERR=42,END=42) MAX_cc_mod,MAX_pmatr,MAX_umatr
               IF(MAX_cc_mod.GT.0) THEN
                 CALL AllocTLJmatr(MAX_cc_mod)
                 READ(451,ERR=42,END=42)  (STLcc(i),i=1,MAX_CC_mod)    
-	             IF(INTerf.GT.0) THEN
+                   IF(INTerf.GT.0) THEN
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
                   READ(451,ERR=43,END=43) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
 C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
                   READ(451,ERR=43,END=43) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag 
                   READ(451,ERR=43,END=43) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
                 ENDIF 
-	             CLOSE(451)
+                   CLOSE(451)
               ENDIF  
-	           GOTO 44 ! EW matrices read successfully
+                 GOTO 44 ! EW matrices read successfully
 
  42           IF(INTerf.GT.0) THEN
                 WRITE(8,*) 'WARNING: EW matrices not found'
@@ -252,7 +252,7 @@ C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
               ENDIF                                 
               WRITE(8,*) 'WARNING: Recalculating Tlj' 
               CLOSE(451, STATUS = 'DELETE')
-	        GOTO 50
+              GOTO 50
  43           IF(INTerf.GT.0) THEN
                 WRITE(8,*) 'WARNING: Error reading EW matrices'
                 WRITE(8,*) 'WARNING: EW transformation disabled'
@@ -264,7 +264,7 @@ C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
               CLOSE(451, STATUS = 'DELETE')
               CALL DelTLJs()
               GOTO 50
-	      endif
+            endif
       
  44         NLW = min(NDLW,maxlw+2*MAXmult+NINT(trgsp+0.6d0))
 
@@ -280,8 +280,8 @@ C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
                 WRITE (8,*)
      &' Coupled channel STlcc for the incident channel read from : '
                 WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
-	          IF(INTerf.GT.0) THEN
-			    WRITE (8,*)
+                IF(INTerf.GT.0) THEN
+                      WRITE (8,*)
      &' EW matrices Umatrix,Pdiag for the incident channel read from : '
                   WRITE (8,*) ' ', ctldir//ctmp23//'_EW.INC'
                 ENDIF
@@ -1066,7 +1066,7 @@ C
            iwin = ipipe_move('INCIDENT_Pchan.bin',ctmp)
 C
            IF(INTerf.gt.0) THEN
-	       if(IOUt.eq.5) then
+             if(IOUt.eq.5) then
                ctmp = ctldir//ctmp23//'_Smatr.LST'
                iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
 C              ctmp = ctldir//ctmp23//'_Pmatr.LST'
@@ -1178,16 +1178,16 @@ C     Saving EW structures
       WRITE(*,*) 'MAX_cc_mod,MAX_pmatr,MAX_umatr', 
      & MAX_cc_mod,MAX_pmatr,MAX_umatr
       IF(MAX_cc_mod.GT.0) THEN 
-	     WRITE(451) (STLcc(i),i=1,MAX_CC_mod) 
-	     IF(INTerf.GT.0) THEN
+           WRITE(451) (STLcc(i),i=1,MAX_CC_mod) 
+           IF(INTerf.GT.0) THEN
              WRITE(451) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
 C            WRITE(451) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix 
              WRITE(451) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag  
              WRITE(451) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
            ENDIF
          ENDIF   
-	   CLOSE(451)
-	endif
+         CLOSE(451)
+      endif
 
   300 CONTINUE
 
@@ -2053,7 +2053,7 @@ C
 C Local variables
 C
       CHARACTER*132 ctmp
-	  LOGICAL fexist
+        LOGICAL fexist
       INTEGER iwin, ipipe_move 
       ctmp = Outname(1:Length)//'.CS'
       iwin = ipipe_move('ecis06.cs',ctmp)
