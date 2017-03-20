@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4859 $
-   ! $Author: rcapote $
-   ! $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
+   ! $Rev: 4862 $
+   ! $Author: mherman $
+   ! $Date: 2017-03-20 06:16:23 +0100 (Mo, 20 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -472,7 +472,7 @@ CONTAINS
                ! absorption ~ sigma_a
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                ! renormalization
-			   xnor = in%sig/DENhf     ! normalization factor
+                     xnor = in%sig/DENhf     ! normalization factor
                SCRt = SCRt*xnor        ! normalizing scratch matrices instead of passing xnor to XSECT,
                SCRtl = SCRtl*xnor      !   the above helps implementation of the EW transformation that provides
                SCRtem = SCRtem*xnor    !   unfactorized cross sections.
@@ -486,7 +486,7 @@ CONTAINS
 
                CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                ! if renormalization skipped
-			   !CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                     !CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                out => outchnl(i)
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
@@ -581,8 +581,8 @@ CONTAINS
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
 
-	  summa = 0.D0
-	  WFC_decay = 0.D0
+        summa = 0.D0
+        WFC_decay = 0.D0
       ! clear scratch matrices
       SCRtem(nejc) = H_Sumtl        !temporarily store here entry value of H_Sumtl
       SCRt(:,:,:,nejc) = 0.D0
@@ -881,7 +881,7 @@ CONTAINS
       ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
       !            sngl(xjc), ipc, ncc, nccp, nccu, ndim
         
-	  DO i = ncc, nccp
+        DO i = ncc, nccp
          !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)          ! use Tlj in diagonalized space Pdiag if 
                                        !         EW transformation is requested
@@ -1550,14 +1550,14 @@ CONTAINS
             !----------------------------------------------------------
             IF(INTerf>0) THEN
                DO i = num%elal, num%elah  ! i = loop over incoming channels
-	             ! iout = loop over collective particle channels
+                   ! iout = loop over collective particle channels
                  DO iout = num%coll, num%colh
                    out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
                    sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = out%t*WFC2(i,iout)
                    ! write(*,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1))
                  ENDDO ! end of outgoing channel loop over iout
-			   ENDDO
-			ENDIF
+                     ENDDO
+                  ENDIF
 
             !WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
             !WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
@@ -1584,18 +1584,18 @@ CONTAINS
 
                  WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
 
-				 sigma_alph_b = out%t*w
+                         sigma_alph_b = out%t*w
 
                  IF(INTerf>0) THEN
-				   IF(iout>=num%coll .AND. iout<=num%colh) THEN
+                           IF(iout>=num%coll .AND. iout<=num%colh) THEN
                      ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
                      Sigma_ab = INVERSE_EW(iaa,ibb)          
-				   ELSE
+                           ELSE
                      Sigma_ab = INVERSE_EW_diag(iaa,sigma_alph_b)          
-				   ENDIF
-				 ELSE
-				   Sigma_ab = sigma_alph_b
-				 ENDIF
+                           ENDIF
+                         ELSE
+                           Sigma_ab = sigma_alph_b
+                         ENDIF
 
                  CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
 
@@ -1606,27 +1606,27 @@ CONTAINS
                ! Fission
                !----------------------------------------------------------
                IF(num%fiss>0) THEN
-			     sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
+                       sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
                  IF(INTerf>0) THEN
                    Sigma_ab = INVERSE_EW_diag(iaa,sumfis)          
-				   sumfis = Sigma_ab
-				 ENDIF
+                           sumfis = Sigma_ab
+                         ENDIF
                ENDIF
-			   !----------------------------------------------------------
+                     !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
                !----------------------------------------------------------
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
-			   dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
+                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf,dtmp
-			   IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
+                     IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-   			   ! absorption for incoming channel
+                     ! absorption for incoming channel
                in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  
-			   ! renormalization
+                     ! renormalization
                xnor = in%sig/DENhf                          ! normalization factor
                SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
                SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
@@ -1671,7 +1671,7 @@ CONTAINS
 
    SUBROUTINE EW_diagonalization(xjc,ip)  
    ! Engelbrecht-Weidenmueller digonalization of the Smatrix
-   ! It may be changed to diagonalize Pmatr	(instead)
+   ! It may be changed to diagonalize Pmatr     (instead)
 
       IMPLICIT NONE
 
@@ -1681,13 +1681,13 @@ CONTAINS
       REAL*8, INTENT(IN) :: xjc
 
       ! Local variables
-	  LOGICAL debug
+        LOGICAL debug
       INTEGER ialph,ibeta,iaa,ibb,IER,i
       REAL*8 epsil 
-	  REAL*8 dtmp
+        REAL*8 dtmp
       COMPLEX*16 ctmp1, ctmp2
       DATA epsil/1.d-12/, debug/.FALSE./
-			   
+                     
                ! write (*,*) 'Dimension of Umatr:',NDIm_cc_matrix
                ! write (*,*) 'Dimension of Umatr (real):',sqrt(DBLE(size(Umatr)))
 
@@ -1710,14 +1710,14 @@ CONTAINS
 
                if(debug) write(*,*) 'EW transformation, space dimension',NDIm_cc_matrix
                
-			   CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+                     CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
                IF(IER/=0) WRITE (8,*) 'WARNING: EW Smatrix DIAGONALIZATION PROBLEMS for CN Jpi=',sngl(xjc*ip)
                ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
                ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
                DO i=1,NDIm_cc_matrix
                   ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i))
                   Sphase(i) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
-				  ! write(*,*) i,sngl(Sdiag(i,i)),sngl(Pdiag(i)),sngl(Sphase(i))
+                          ! write(*,*) i,sngl(Sdiag(i,i)),sngl(Pdiag(i)),sngl(Sphase(i))
                ENDDO
 
                ! setting the complex identity matrix to call DIAG()
@@ -1748,7 +1748,7 @@ CONTAINS
                !  ENDDO
                !ENDDO
 
-			   if(debug) then
+                     if(debug) then
                 ! loop over ibb=iout (coupled channels in the normal space)
                 DO iout = num%coll, num%colh
                   ibb = iout - num%coll + 1
@@ -1796,13 +1796,13 @@ CONTAINS
       ! Local variables
       REAL*8 nu_ialph, nu_ibeta 
       INTEGER ialph,ibeta,ialph_ch,ibeta_ch
-	  REAL*8 deg_alph,deg_beta,dtmp
+        REAL*8 deg_alph,deg_beta,dtmp
       COMPLEX*16 ctmp1, ctmp2, phas
  
                      !------------------------------------------------------------------------------
                      ! loops over collective levels in the transformed space (ialph & ibeta)
                      
-					 ctmp1 = (0.d0,0.d0) 
+                               ctmp1 = (0.d0,0.d0) 
                      ctmp2 = (0.d0,0.d0) 
                      DO ialph = 1, NDIm_cc_matrix    
                         ialph_ch = num%coll + ialph -1
@@ -1827,8 +1827,8 @@ CONTAINS
                            !phas = (1.d0,0.d0) ! assumed one for the time being
 
                            ! write(*,*) 'EW loops',ialph, ibeta, 
-						   !             sngl(sigma_alph_beta(ialph,ibeta)),
-						   !             sngl(WFC(ialph_ch,ibeta_ch))
+                                       !             sngl(sigma_alph_beta(ialph,ibeta)),
+                                       !             sngl(WFC(ialph_ch,ibeta_ch))
                            ! second and third sums, Eq.(16)
                            ctmp2 = ctmp2 +                                           &
                                  ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
@@ -1862,11 +1862,11 @@ CONTAINS
       ! Dummy arguments
 
       INTEGER, INTENT(IN) :: iaa
-	  REAL*8 , INTENT(IN) :: sigma_alph_b
+        REAL*8 , INTENT(IN) :: sigma_alph_b
 
       ! Local variables
       INTEGER ialph
-	  REAL*8 dtmp
+        REAL*8 dtmp
  
       !------------------------------------------------------------------------------
       ! loops over collective levels in the transformed space (ialph & ibeta=ibb)
