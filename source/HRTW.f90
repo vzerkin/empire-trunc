@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4863 $
+   ! $Rev: 4864 $
    ! $Author: mherman $
-   ! $Date: 2017-03-20 06:22:29 +0100 (Mo, 20 Mär 2017) $
+   ! $Date: 2017-03-24 07:30:50 +0100 (Fr, 24 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -878,11 +878,10 @@ CONTAINS
 
       IF(ndim==0) RETURN   ! no collective channels found
 
-      ! write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
-      !            sngl(xjc), ipc, ncc, nccp, nccu, ndim
+       write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
+                  sngl(xjc), ipc, ncc, nccp, nccu, ndim
         
       DO i = ncc, nccp
-         !        write(*,*) i,ncc,nccp,sngl(xjc)
          tld = Pdiag(i-ncc+1)          ! use Tlj in diagonalized space Pdiag if 
                                        !         EW transformation is requested
          !rho1 = 1.d0                  !level density variable
@@ -910,8 +909,9 @@ CONTAINS
          out%kres = -STLcc(i)%lev          
          out%xjrs = XJLv(STLcc(i)%lev,nnur)
          out%pres = LVP(STLcc(i)%lev,nnur)
+!         write(*,*) 'i, NCH, level, T ', i, NCH, -STLcc(i)%lev, out%t
 
-         IF(INTerf==0) THEN  
+!         IF(INTerf==0) THEN
 
             IF(STLcc(i)%lev==levtarg) THEN  ! we've got elastic!
                IF(num%elal == 0) THEN
@@ -931,23 +931,23 @@ CONTAINS
                in%t = tld              !setting incident channel
             ENDIF
 
-         ELSE
+!         ELSE
             ! EW transformed space
             ! in the transformed space (INTerf>0) all coupled channels are considered elastic
-            nel = NCH - num%coll + 1  !setting correspondence between 'nch' and elastic numbering 'nel'
-            in => inchnl(nel)
-            in%nout = NCH             !setting incident channel
-            in%l = out%l              !setting incident channel
-            in%j = out%j              !setting incident channel
-            in%t = tld                !setting incident channel
+!            nel = NCH - num%coll + 1  !setting correspondence between 'nch' and elastic numbering 'nel'
+!            in => inchnl(nel)
+!            in%nout = NCH             !setting incident channel
+!            in%l = out%l              !setting incident channel
+!            in%j = out%j              !setting incident channel
+!            in%t = tld                !setting incident channel
 
-         ENDIF
+!         ENDIF
 
       ENDDO
-      IF (INTerf>0) THEN
-         num%elal = num%coll
-         num%elah = num%colh
-      ENDIF
+!      IF (INTerf>0) THEN
+!         num%elal = num%coll
+!         num%elah = num%colh
+!      ENDIF
          
    END SUBROUTINE DECAY2CC
 
@@ -1409,7 +1409,7 @@ CONTAINS
       INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
-      REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
+      REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2, xnor_c
       REAL*8 d0c, sumfis_mem, w, dtmp
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s 
@@ -1535,7 +1535,8 @@ CONTAINS
             !  write(*,*)'DENhf calculated before Moldauer', DENhf
 
 
-            ! WRITE(*,*) 'CN decay state Jpi',xjc,ip
+            WRITE(8,*) 'CN decay state Jpi',xjc,ip
+            write(*,*)'DENhf calculated before Moldauer', DENhf
             ! Engelbrecht- Weidenmueller diagonalization
             IF(INTerf>0) CALL EW_diagonalization(xjc,ip)
 
@@ -1546,50 +1547,70 @@ CONTAINS
                             ! that doesn't depend on incoming and outgoing channels
 
             !----------------------------------------------------------
-            ! Loop over incoming (fusion) channels
+            ! normalization factor without incident channel, i.e. Sigma_ab = xnor_c*Ta*Tb
             !----------------------------------------------------------
-            IF(INTerf>0) THEN
-               DO i = num%elal, num%elah  ! i = loop over incoming channels
-                    ! iout = loop over collective particle channels
-                  DO iout = num%coll, num%colh
-                     out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
-                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = out%t*WFC2(i,iout)
-                    ! write(*,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1))
-                  ENDDO ! end of outgoing channel loop over iout
-               ENDDO
-            ENDIF
-
-            !WRITE(*,*) 'num%elal, num%elah=',num%elal, num%elah
-            !WRITE(*,*) 'num%coll, num%colh=',num%coll, num%colh
-
+            xnor_c = coef*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
             SCRt_mem  = SCRt    ! store initial values
             SCRtl_mem = SCRtl
-            sumfis_mem = sumfis     
+            sumfis_mem = sumfis
+
+
+            IF(INTerf>0) THEN
+            !----------------------------------------------------------
+            ! Calculate normalized cross sections in the rotated channel space
+            !----------------------------------------------------------
+               DO i = num%coll, num%colh  ! i = loop over incoming channels
+                  in => inchnl(i-num%coll+1)
+                  in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
+
+                  ! iout = loop over collective particle channels
+                  DO iout = num%coll, num%colh
+                     out => outchnl(iout-num%coll+1) !ATTENTION: redefining outgoing channel!!!
+                     ! For invers transformation to work sigma must contain 'in' and 'out' channels,
+                     ! as well as WFC, only xnor_c could be applied later.
+                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC2(i,iout)
+!                     write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
+!                                in%t, out%t, WFC2(i,iout)
+                  ENDDO ! end of outgoing channel loop over iout
+               ENDDO
+            !----------------------------------------------------------
+            ! Engelbrecht-Weidenmueller transformation back to the normal space for collective channels
+            ! coupled to the elastic (fusion) incident channel
+            !----------------------------------------------------------
+               DO i = num%elal, num%elah ! loop over elastic (fusion) channels in normal spacce
+                  iaa = i - num%elal + 1
+                  DO iout = num%coll, num%colh !loop over all collective channels
+                     ibb = iout - num%coll + 1
+                     Sigma_ab = INVERSE_EW(iaa,ibb) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
+                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, -outchnl(ibb)%kres
+                  ENDDO
+               ENDDO
+            ENDIF ! INTerf>0
+
 
             ! loop over iaa=i (coupled channels in the normal space)
             DO i = num%elal, num%elah
                iaa = i - num%elal + 1
+               in => inchnl(iaa)
+               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
 
                SCRt   = SCRt_mem
                SCRtl  = SCRtl_mem
                sumfis = sumfis_mem
 
-               ! loop over ibb=iout (coupled channels in the normal space)
+               ! loop over ibb=iout (all channels in the normal space)
                DO iout = 1, num%part   
                   ibb = iout - num%coll + 1
                   out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
 
-                  w = WFC2(i,iout)     !Moldauer width fluctuation factor (ECIS style)
-                  ! WRITE(8,*) 'continuum WFC', iout, w
-
+                  w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                   WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
 
                   sigma_alph_b = out%t*w
 
                   IF(INTerf>0) THEN
                      IF(iout>=num%coll .AND. iout<=num%colh) THEN
-                        ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
-                        Sigma_ab = INVERSE_EW(iaa,ibb)
+                        CYCLE  ! collective channels were considered
                      ELSE
                         Sigma_ab = INVERSE_EW_diag(iaa,sigma_alph_b)
                      ENDIF
@@ -1612,7 +1633,7 @@ CONTAINS
                      sumfis = Sigma_ab
                   ENDIF
                ENDIF
-                     !----------------------------------------------------------
+               !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
                !----------------------------------------------------------
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
@@ -1621,7 +1642,7 @@ CONTAINS
                ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf,dtmp
                IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-                     ! absorption for incoming channel
+               ! absorption for incoming channel
                in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
                out => outchnl(i)
                in%t = out%t
