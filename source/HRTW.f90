@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4864 $
+   ! $Rev: 4865 $
    ! $Author: mherman $
-   ! $Date: 2017-03-24 07:30:50 +0100 (Fr, 24 Mär 2017) $
+   ! $Date: 2017-03-25 17:39:25 +0100 (Sa, 25 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -1409,12 +1409,14 @@ CONTAINS
       INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
       REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
       REAL*8 Ia
-      REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2, xnor_c
+      REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2, xnor_c, xnor_cc
       REAL*8 d0c, sumfis_mem, w, dtmp
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s 
       REAL*8 sigma_ab,sigma_alph_b
       INTEGER iaa,ibb
+
+      REAL*8, DIMENSION(6) :: sig_cc !temporary to sum CC x-sec
 
       TYPE (channel), POINTER :: out
       TYPE (fusion),  POINTER :: in
@@ -1424,6 +1426,7 @@ CONTAINS
          RETURN
       END IF
 
+      sig_cc = 0.D0
       CALL AllocHRTW()    !allocate HRTW matrices
 
       H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
@@ -1549,16 +1552,16 @@ CONTAINS
             !----------------------------------------------------------
             ! normalization factor without incident channel, i.e. Sigma_ab = xnor_c*Ta*Tb
             !----------------------------------------------------------
-            xnor_c = coef*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
+            xnor_c = coef*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
             SCRt_mem  = SCRt    ! store initial values
             SCRtl_mem = SCRtl
             sumfis_mem = sumfis
 
 
             IF(INTerf>0) THEN
-            !----------------------------------------------------------
-            ! Calculate normalized cross sections in the rotated channel space
-            !----------------------------------------------------------
+            !------------------------------------------------------------------
+            ! Calculate un-normalized cross sections in the rotated channel space
+            !------------------------------------------------------------------
                DO i = num%coll, num%colh  ! i = loop over incoming channels
                   in => inchnl(i-num%coll+1)
                   in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
@@ -1566,25 +1569,36 @@ CONTAINS
                   ! iout = loop over collective particle channels
                   DO iout = num%coll, num%colh
                      out => outchnl(iout-num%coll+1) !ATTENTION: redefining outgoing channel!!!
-                     ! For invers transformation to work sigma must contain 'in' and 'out' channels,
-                     ! as well as WFC, only xnor_c could be applied later.
-                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC2(i,iout)
+                     ! For inverse transformation to work sigma must contain 'in' and 'out' channels,
+                     ! as well as WFC, only xnor_c normalization can be applied later.
+                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = in%t*out%t*WFC2(i,iout)
+!                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC2(i,iout)/DENhf !normalized x-sec
 !                     write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
 !                                in%t, out%t, WFC2(i,iout)
                   ENDDO ! end of outgoing channel loop over iout
                ENDDO
             !----------------------------------------------------------
-            ! Engelbrecht-Weidenmueller transformation back to the normal space for collective channels
-            ! coupled to the elastic (fusion) incident channel
+            ! Inverse Engelbrecht-Weidenmueller transformation for collective
+            ! channels to obtain Sigma_iaa,ibb in the normal space
             !----------------------------------------------------------
                DO i = num%elal, num%elah ! loop over elastic (fusion) channels in normal spacce
                   iaa = i - num%elal + 1
+                  xnor_cc = EW_absorption(iaa)        ! We'll need it to reduce real x-sec to the sum of
+                                                      ! outgoing Tlj so they can be summed on SCRt matrix
+                  SCRt   = SCRt_mem
+                  SCRtl  = SCRtl_mem
+                  sumfis = sumfis_mem
+
                   DO iout = num%coll, num%colh !loop over all collective channels
                      ibb = iout - num%coll + 1
+                     out => outchnl(iout)
                      Sigma_ab = INVERSE_EW(iaa,ibb) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
-                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, -outchnl(ibb)%kres
+                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab*xnor_c/DENhf, ' level=', -out%kres
+                     sig_cc(-out%kres) = sig_cc(-out%kres) + Sigma_ab*xnor_c/DENhf
+                     CALL update_SCRt(out, Sigma_ab/xnor_cc, sumin_s, sumtt_s)
                   ENDDO
                ENDDO
+               write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
             ENDIF ! INTerf>0
 
 
@@ -1592,61 +1606,44 @@ CONTAINS
             DO i = num%elal, num%elah
                iaa = i - num%elal + 1
                in => inchnl(iaa)
-               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-
-               SCRt   = SCRt_mem
-               SCRtl  = SCRtl_mem
-               sumfis = sumfis_mem
+               IF(INTerf>0) THEN
+                  in%sig = coef*EW_absorption(iaa)*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+               ELSE
+                  in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+               ENDIF
 
                ! loop over ibb=iout (all channels in the normal space)
                DO iout = 1, num%part   
                   ibb = iout - num%coll + 1
-                  out => outchnl(iout) !ATTENTION: redefining outgoing channel!!!
-
+                  out => outchnl(iout)
                   w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                   WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
-
                   sigma_alph_b = out%t*w
-
-                  IF(INTerf>0) THEN
-                     IF(iout>=num%coll .AND. iout<=num%colh) THEN
-                        CYCLE  ! collective channels were considered
-                     ELSE
-                        Sigma_ab = INVERSE_EW_diag(iaa,sigma_alph_b)
-                     ENDIF
-                  ELSE
-                     Sigma_ab = sigma_alph_b
-                  ENDIF
-
+                  IF(INTerf>0 .AND. iout>=num%coll .AND. iout<=num%colh ) CYCLE ! collective channels were done already
+                  Sigma_ab = sigma_alph_b
                   CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
-
                ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
 
                CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
                !----------------------------------------------------------
                ! Fission
                !----------------------------------------------------------
-               IF(num%fiss>0) THEN
-                  sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for the HRTW T=>V transition
-                  IF(INTerf>0) THEN
-                     Sigma_ab = INVERSE_EW_diag(iaa,sumfis)
-                     sumfis = Sigma_ab
-                  ENDIF
-               ENDIF
+               IF(num%fiss>0) sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for WFC
+
                !----------------------------------------------------------
                ! Renormalizing scratch matrices to recover unitarity
                !----------------------------------------------------------
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
-               ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf,dtmp
+               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
                IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-               ! absorption for incoming channel
-               in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
-               out => outchnl(i)
-               in%t = out%t
-               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  
+!               ! absorption for incoming channel
+!               in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
+!               out => outchnl(i)
+!               in%t = out%t
+!               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                      ! renormalization
                xnor = in%sig/DENhf                          ! normalization factor
                SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
@@ -1879,18 +1876,15 @@ CONTAINS
       ! Engelbrecht-Weidenmueller backward transformation Eq.(23) TK paper
    
       IMPLICIT NONE
-
       ! Dummy arguments
-
       INTEGER, INTENT(IN) :: iaa
       REAL*8 , INTENT(IN) :: sigma_alph_b
-
       ! Local variables
       INTEGER ialph
       REAL*8 dtmp
  
       !------------------------------------------------------------------------------
-      ! loops over collective levels in the transformed space (ialph & ibeta=ibb)
+      ! loop over collective levels in the transformed space (ialph & ibeta=ibb)
                     
       dtmp = 0.d0 
       DO ialph = 1, NDIm_cc_matrix    
@@ -1900,6 +1894,43 @@ CONTAINS
 
       RETURN
    END FUNCTION INVERSE_EW_diag
+
+
+   REAL*8 FUNCTION EW_absorption(iaa)
+      !**************************************************************************************
+      !                                                                                     *
+      !                         EW-absorption                                               *
+      !                                                                                     *
+      ! For the diagonal part of the S-matrix (non-collective channels) the                 *
+      ! Engelbrecht-Weidenmueller backward transformation (Eq.(23) of TK paper)             *
+      ! can be factorized into incident and outgoing terms. This function returns           *
+      ! the incident part that playes a role of fusion Tlj in HF.                           *
+      !                                                                                     *
+      ! Input:                                                                              *
+      !    iaa - collective (incoming) channel index in the usual space                     *
+      ! Output:                                                                             *
+      !    EW-absorption - transmission coefficient for iaa channel in a                    *
+      !                    normal space calculated from the rotated (diagonalized) space.   *
+      !                                                                                     *
+      !    ialph runs over all collective channels in the rotated spce.                     *
+      !                                                                                     *
+      !**************************************************************************************
+
+      IMPLICIT NONE
+      ! Dummy arguments
+      INTEGER, INTENT(IN) :: iaa
+      ! Local variables
+      INTEGER ialph
+      REAL*8 dtmp
+
+      dtmp = 0.d0
+      DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
+         dtmp = dtmp + inchnl(ialph)%t*ABS(Umatr(ialph,iaa))**2
+      ENDDO   ! end of the loop over ialph (transformed space)
+      EW_absorption = REAL(dtmp)  ! this is Sigma_ab cross section (in the normal space)
+
+      RETURN
+   END FUNCTION EW_absorption
 
 
    REAL*8 FUNCTION NU(Tl,Sumtl,Itype)
