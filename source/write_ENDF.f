@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4814 $
+Ccc   * $Rev: 4867 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-12-21 18:01:22 +0100 (Mi, 21 Dez 2016) $
+Ccc   * $Date: 2017-03-27 03:10:40 +0200 (Mo, 27 Mär 2017) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -35,7 +35,6 @@ C     DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
       DOUBLE PRECISION     xnub,csinel,s_factor,qout,dtmp
       DOUBLE PRECISION     recorp
       INTEGER itmp, nang, ie
-      LOGICAL lprint
 C     DATA eps/1.d-8/
       CHARACTER*21 caz 
       character*1 part(0:6)
@@ -85,7 +84,7 @@ C        IF (FIRst_ein) THEN
 
               CALL Print_Total(nejc)
               IF(dabs(EINl-EDDfig).le.1.d-5 .and. nejc.eq.IDDfig(3)) 
-     &           CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)          			 
+     &           CALL PLOT_TOTAL_EMIS_SPECTRA(nejc)                            
               csum = 0.d0
               DO nnuc = 1, NNUcd
                   csum = csum + CSEmis(nejc,nnuc)
@@ -137,68 +136,21 @@ C        qout = 0.d0
          IF(RECoil.gt.0) then
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
 
-            lprint = .FALSE.
+C           Skipping recoils for exclusive reactions
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.8 
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) CYCLE    !(n,xn)
 
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) CYCLE 
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.1 
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE  !(n,p)
 
-C           IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.4 
-C    &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE 
-
-            IF (ENDf(nnuc).EQ.1.AND.NINT(A(1))-NINT(A(Nnuc)).GT.4 ) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx) 
-              lprint = .TRUE.
-            ENDIF
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.2 
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) CYCLE    !(n,2p)
 
             IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.3 
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).NE.0) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx) 
-              lprint = .TRUE.
-            ENDIF
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.3) CYCLE    !(n,3p)
 
-            IF ((NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &           NINT(Z(1))-NINT(Z(Nnuc)).EQ.1)) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx)    ! 3np
-              lprint = .TRUE.
-            ENDIF
-
-            IF ((NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &           NINT(Z(1))-NINT(Z(Nnuc)).EQ.3)) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx)    ! 2pd
-              lprint = .TRUE.
-            ENDIF
-
-C           IF ((.not.lprint) .and. ENDf(nnuc).EQ.1) 
-C    &        write(*,*) NINT(A(nnuc)),INT(Z(nnuc)),' ',
-C    &        trim(Reaction(nnuc)),sngl(CSInc(nnuc)),' excl'
-
-            IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &          NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) THEN  
-              CALL PRINT_RECOIL(nnuc,reactionx)   ! 2n2p, a 
-              lprint = .TRUE.
-            ENDIF
-
-            IF (NINT(A(1))-NINT(A(Nnuc)).EQ.2 .AND. 
-     &          NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx)   ! d, np, pn
-              lprint = .TRUE.
-            ENDIF
-
-            IF ((.not.lprint) .and. ENDf(nnuc).EQ.1 .and.
-     &         NINT(A(1))-NINT(A(Nnuc)).GT.1 ) THEN           
-              IF(CSInc(nnuc).gt.0.d0) 
-     &          CALL PRINT_RECOIL(nnuc,reactionx)
-              lprint = .TRUE.
-            ENDIF
-
-            IF ((.not.lprint) .and. ENDf(nnuc).EQ.2) THEN
-              CALL PRINT_RECOIL(nnuc,reactionx)
-              lprint = .TRUE.
-            ENDIF
-
-C           IF ((.not.lprint) .and. NINT(A(1))-NINT(A(Nnuc)).GT.2
-C    &           .and. ENDf(nnuc).EQ.2 ) 
-C    &        CALL PRINT_RECOIL(nnuc,reactionx)
+C           Print everything else if non-zero recoil
+            CALL PRINT_RECOIL(nnuc,reactionx) 
 
           ENDDO !over decaying nuclei in ENDF spectra printout
          ENDIF
@@ -219,7 +171,7 @@ C     Plotting total DDXS
 C        write(*,*) 'TOTAL    : DE=',DE,' reccor=', recorp
 C        ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
          itmp = 0
-	   do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
+         do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
            itmp = itmp + 1
            write(caz,'(A8,A1,A2,I3.3,A7)') 'DDt_(z,X',part(Nejc)
      &       ,')_',NINT(ANGles(nang)),'deg.zvd'
@@ -229,12 +181,12 @@ C        ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
      &          '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (tot)','  ')
            DO ie = 1, ndecse 
             IF(CSEat(ie,itmp).LE.0.d0) CYCLE
-	      WRITE (36,'(1X,E12.6,3X,E12.6)') 
+            WRITE (36,'(1X,E12.6,3X,E12.6)') 
      &        FLOAT(ie - 1)*DE*1.D6/recorp, 
      &        CSEat(ie,itmp)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
            ENDDO
-	     CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
-	     CLOSE(36)
+           CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
+           CLOSE(36)
          enddo
       ENDIF
 C***********************************************************************  
@@ -620,12 +572,16 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(0,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(1,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Neutron emission cross sections (mb) ZAP=    1'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -635,12 +591,18 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(1,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        ENDIF
+
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(2,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Proton emission cross sections (mb) ZAP= 1001'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -650,12 +612,18 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(2,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+
+        ENDIF
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(3,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Alpha emission cross sections (mb) ZAP= 2004'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -665,12 +633,18 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(3,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+        ENDIF
+
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(4,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Deuteron emission cross sections (mb) ZAP= 1002'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -680,12 +654,18 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(4,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+
+        ENDIF
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(5,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Triton emission cross sections (mb) ZAP= 1003'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -695,12 +675,18 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(5,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+
+        ENDIF
+
+
         totsum=0.d0
         DO jz = 0, jzmx 
           DO jn = 0, jnmx
             totsum = totsum + xcross(6,jz,jn)
            ENDDO
          ENDDO
+
+        IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
         WRITE (12,'('' Helium-3 emission cross sections (mb) ZAP= 2003'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -711,6 +697,8 @@ C  Summary of exclusive emission cross sections
           WRITE(12,'(i5,2x,20f8.2)')iz-jz,(xcross(6,jz,jn), jn = 0,jnmx)
         ENDDO
         WRITE (12,*) ' '
+
+        ENDIF
 
         IF(NDEJC.EQ.7) THEN
           WRITE (12,*) ' '
@@ -733,6 +721,8 @@ C  Summary of exclusive emission cross sections
               totsum = totsum + xcross(NDEJC+1,jz,jn)
              ENDDO
            ENDDO
+
+          IF (totsum.ge.0.01) THEN
           WRITE (12,*) ' '
           WRITE (12,'('' Fission cross sections (mb)'',
      1              ''  Total ='',f8.2, '' mb'')') totsum
@@ -743,6 +733,8 @@ C  Summary of exclusive emission cross sections
      &                              (xcross(NDEJC+1,jz,jn), jn = 0,jnmx)
            ENDDO
           WRITE (12,*) ' '
+
+          ENDIF
         ENDIF
         WRITE (12,*) ' '
         WRITE (12,*) ' Initial populations (mb)'
