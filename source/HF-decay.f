@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4866 $
+Ccc   * $Rev: 4868 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-03-27 23:43:44 +0200 (Mo, 27 Mär 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1641,6 +1641,7 @@ C--------divides outgoing energies
             icse = (exqcut - (ie - 1)*DE)/DE + 1.001
 C-----------Daughter bin
             IF (icse.LE.0) EXIT
+
             erecejc = (ie - 1)*DE/recorr
             DO ire = 1, NDEREC          !over recoil spectrum
                erecpar = (ire - 1)*DERec
@@ -1652,6 +1653,7 @@ C-----------Daughter bin
                  IF (irec + 1.GT.NDEREC) EXIT
                  csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
      &                    SANgler(na)*coeff*recorr
+	           
                  RECcse(irec,icse,nnur) = RECcse(irec,icse,nnur)
      &               + csmsdl*(1.0 - weight)
                  RECcse(irec + 1,icse,nnur) = RECcse(irec + 1,icse,nnur)  
@@ -1659,6 +1661,7 @@ C-----------Daughter bin
                ENDDO                  !over angles
             ENDDO                  !over recoil spectrum
          ENDDO                  !over  daugther excitation
+
 C--------Decay to discrete levels (stored with icse=0)
          exqcut = exqcut + ECUt(nnur)
          DO il = 1, NLV(nnur)
@@ -1695,6 +1698,7 @@ c------------------------
                ENDDO                  !over angles
    60       ENDDO                  !over recoil spectrum
          ENDDO                  !over levels
+
   100 ENDDO                  !over ejectiles
 C-----
 C-----Parent recoil spectrum after gamma decay
@@ -1712,14 +1716,16 @@ C--------!daughter bin
      &          *AUSpec(ie,0)/DERec
          ENDDO                  !over recoil spectrum
       ENDDO                  !over  daugther excitation
-C-----gamma decay to discrete levels (stored with icse=0)
+
+C-------gamma decay to discrete levels (stored with icse=0)
       DO il = 1, NLV(nnur)
-         DO ire = 1, NDEREC             !over recoil spectrum
-            RECcse(ire,0,nnur) = RECcse(ire,0,nnur)
+        DO ire = 1, NDEREC             !over recoil spectrum
+          RECcse(ire,0,nnur) = RECcse(ire,0,nnur)
      &                           + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
      &                           /DERec
-         ENDDO                  !over recoil spectrum
+        ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
+      RETURN	 
       END
 
       SUBROUTINE PRINT_RECOIL(Nnuc,React) !,qout)
@@ -1738,7 +1744,8 @@ C     DOUBLE PRECISION qout
 C
 C Local variables
 C
-      DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul,stmp
+      DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,recorr,cmul,stmp
+      DOUBLE PRECISION dtmp,sstmp
       INTEGER ie, ilast
 
 C     IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
@@ -1770,7 +1777,7 @@ C     IF(csum.LE.CSMinim) RETURN
       ilast = MIN(ilast + 1,NDEX)
 
       if (ilast.gt.1)  then
-        csum  = csum - 
+        csum  = csum -  
      &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
         esum  = esum - RECcse(ilast,0,Nnuc)*
      &          0.5d0*FLOAT(ilast - 1)*DERec/recorr
@@ -1792,19 +1799,26 @@ C
       WRITE (12,*) ' '
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
+
+      dtmp = 1.d0
+      IF(ENDF(nnuc).eq.2) dtmp = CSInc(nnuc)/(csum*DERec)
+
+      sstmp = 0.d0
       DO ie = 1, ilast
-        stmp = RECcse(ie,0,Nnuc) 
+        stmp = RECcse(ie,0,Nnuc)*dtmp
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
+        sstmp = sstmp + stmp
       ENDDO
+
       WRITE(12,
      &  '(/2x,''Ave.  E  of recoil spectrum   '',G12.6,'' MeV  for '',
      &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
      &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
       xsdisc = 0.d0        
-      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)  
 
       IF (ENDf(nnuc).LE.1) THEN
         cmul = csum*DERec/(CSPrd(nnuc)-xsdisc)  ! multiplicity
@@ -1813,12 +1827,14 @@ C       WRITE(12,
 C    &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
 C    &     cmul*esum/csum
         WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
-      ENDIF 
-      WRITE(12,*)
-
-      WRITE(12,
+        WRITE(12,
      &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &       csum*DERec
+      ELSE
+        WRITE(12,
+     &     '( 2x,''Integral of recoil spectrum   '',G12.6,
+     &     '' mb (incl)'' )') sstmp*DERec
+      ENDIF 
         
       if(xsdisc.gt.0.d0  .and. ENDf(nnuc).eq.1) then
         WRITE (12,'(2X,''Cont. popul. before g-cascade '',
@@ -1827,35 +1843,32 @@ C    &     cmul*esum/csum
      &                G12.6,'' mb'')') xsdisc
       endif 
 
-C     IF(ENDf(nnuc).EQ.1) then      
-C       corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
-C     ELSE
-C       corr = CSPrd(Nnuc)/(csum*DERec)
-C     ENDIF
-      corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
-
-      IF(xsdisc.gt.0) THEN
+      IF(ENDF(nnuc).eq.2) THEN
+        corr = CSInc(Nnuc)/(sstmp*DERec)
+	  WRITE(12,
+     & '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb (incl)'' )') 
+     &      CSInc(Nnuc)
+      ELSE
+        corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
 	  WRITE(12,
      &     '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)-xsdisc
-      ELSE
         WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)
 	ENDIF
 
-      IF(xsdisc.gt.0) THEN
+      IF(ENDF(nnuc).eq.2) THEN
 	  WRITE(12,
-     &     '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,'' mb'')') 
-C    &      corr 
-     &      (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
-	ELSE
+     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,'' (incl)'')') 
+     &  corr 
+      ELSE  
+	  WRITE(12,
+     &     '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6)') corr 
         WRITE(12,
-     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb'')') 
-C    &      corr 
+     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6)') 
      &      CSPrd(Nnuc)/(csum*DERec)
-      ENDIF	 
-	
+	ENDIF	
       WRITE(12,*)
       WRITE(12,*)
 
