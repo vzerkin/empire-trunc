@@ -1,6 +1,6 @@
-! $Rev: 4845 $
+! $Rev: 4866 $
 ! $Author: rcapote $
-! $Date: 2017-03-10 06:28:49 +0100 (Fr, 10 Mär 2017) $
+! $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -77,7 +77,7 @@
      &        LVP(ndlv,0:ndnuc), MODelecis, MSC, MSD, MAXmult, NACc,    &
      &        NCOmp(0:ndnuc), ND_nlv, NEJcm, NEMn, NEMp, NEMa, NEMc,    &
      &        NEX(ndnuc), NEXr(0:ndejc,ndnuc), NEXreq, NHMs, NANgela,   &
-     &        NLVc(0:ndnuc), NLVt(0:ndnuc),                             &
+     &        NLVc(0:ndnuc), NLVt(0:ndnuc), IHFnew,                     &
      &        NLV(0:ndnuc), NLW, NNUcd, NNUct, NOUt, NPRoject, NRBar,   &
      &        NRBinfis(nfhump), NREs(0:ndejc), NRFdis(nfparab), NRWel,  &
      &        NSCc, NTArget, NSTored(0:ndnuc), NENdf, NEXclusive,       &
@@ -290,7 +290,7 @@
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
      &                  PL_lmax, SFAct, INTerf, IPArcov, IDDfig,        &
-     &                  D_Klv, D_Llv,  D_nno,                           &
+     &                  D_Klv, D_Llv,  D_nno, IHFnew,                   &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
       COMMON /GLOBAL_L/ FISsil, FILevel, FUSread, DEFormed, SOFt, DYNam,&
      &                  DEFault_energy_functional, OMPar_riplf, CCCalc, &

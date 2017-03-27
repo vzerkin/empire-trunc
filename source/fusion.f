@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4861 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-03-20 06:11:56 +0100 (Mo, 20 Mär 2017) $
+Ccc   * $Rev: 4866 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1175,8 +1175,8 @@ C     Saving EW structures
          OPEN (451,FILE=(ctldir//ctmp23//'_EW.INC'),
      >     FORM = 'UNFORMATTED')
       WRITE(451) MAX_cc_mod,MAX_pmatr,MAX_umatr
-      WRITE(*,*) 'MAX_cc_mod,MAX_pmatr,MAX_umatr', 
-     & MAX_cc_mod,MAX_pmatr,MAX_umatr
+C     WRITE(*,*) 'MAX_cc_mod,MAX_pmatr,MAX_umatr', 
+C    & MAX_cc_mod,MAX_pmatr,MAX_umatr
       IF(MAX_cc_mod.GT.0) THEN 
            WRITE(451) (STLcc(i),i=1,MAX_CC_mod) 
            IF(INTerf.GT.0) THEN

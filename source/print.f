@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4847 $
+Ccc   * $Rev: 4866 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-12 04:04:05 +0100 (So, 12 Mär 2017) $
+Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -242,6 +242,7 @@ C
          WRITE (8,*) ' '
          DO i = 1, nspec
            ftmp = CSE(i,Nejc,0) 
+           if(ftmp.le.0.d0) cycle
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
          ENDDO
 C--------Exact endpoint
@@ -307,6 +308,7 @@ C        ENDIF
 C          IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
            IF(ENDF(1).EQ.0) 
      &         ftmp = ftmp + CSEmsd(i,nejc) + CSEdbk(i,nejc)
+           if(ftmp.le.0.d0) cycle
            WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE, ftmp
 C           if(ftmp.le.0.d0) cycle
 C           WRITE (8,'(F9.4,E15.5)') FLOAT(i - 1)*DE/recorp, ftmp*recorp
@@ -382,7 +384,6 @@ C        ENDIF
 
            IF(ENDF(1).GT.0) THEN
 C          Subtract anisotropic contribution to CM emission spectrum
-
             IF(LHMs.GT.0 .and. nejc.le.2) THEN   ! HMS case n & p only
               ftmp = (CSE(ie,nejc,0) - POPcsed(0,nejc,ie,0))/PIx4
               DO nang = 1, NDANG
@@ -442,11 +443,11 @@ C    &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
              CALL OPEN_ZVV(36,
      &        '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (incl)','  ')
 	       DO ie = 1, nspec 
-		   IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
+               IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
                CSEat(ie,itmp) = CSEat(ie,itmp) + cseaprnt(ie,nang)
-		   WRITE (36,'(1X,E12.6,3X,E12.6)') 
-     &         FLOAT(ie - 1)*DE*1.D6/recorp, 
-     &         cseaprnt(ie,nang)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
+		     WRITE (36,'(1X,E12.6,3X,E12.6)') 
+     &           FLOAT(ie - 1)*DE*1.D6/recorp, 
+     &           cseaprnt(ie,nang)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
              ENDDO
              WRITE (36,'(1X,E12.6,3X,E12.6)') 1.D6*
                ! exact DDX spectrum endpoint
@@ -459,7 +460,7 @@ C    &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
 C***********************************************************************  
 C--------Inclusive DDX spectrum 
          check_DE = 0.d0
-         DO ie = 1, nspec ! + 1
+         DO ie = 1, nspec 
            if(CSE(ie,nejc,0).le.0.d0) cycle
            csum = 0.d0
            sangsum = 0.0d0
@@ -467,11 +468,9 @@ C--------Inclusive DDX spectrum
              csum = csum + cseaprnt(ie,nang)*SANgler(nang)
              sangsum = sangsum + SANgler(nang)
            ENDDO
-c           check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
+c          check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
            check_DE(ie) = 4.0d0*PI*csum/sangsum
-           
-           if(ie.le.nspec)
-     &     WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
+           WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
      &     FLOAT(ie - 1)*DE/recorp,
      &     (     cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
          ENDDO
@@ -487,16 +486,15 @@ c           check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng-1) ! 90.d0
      &             ''    Energy      mb/MeV   Int-DDX[mb/MeV]       Diff
      &           Diff[%]    '')')
          WRITE (12,*) ' '
-
          ftmp = 0.d0
          DO ie = 1, nspec 
            itmp = 1
            if(ie.eq.1) itmp = 2
            htmp = CSE(ie,nejc,0)
-           if(htmp.LE.0.d0) cycle
 C           IF(ENDF(1).EQ.0 .AND. LHMs.EQ.0) 
            IF(ENDF(1).EQ.0) 
      &       htmp = htmp + CSEmsd(ie,nejc) + CSEdbk(ie,nejc)
+           if(htmp.LE.0.d0) cycle
            WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') FLOAT(ie - 1)
      &       *DE/recorp, htmp*recorp      , check_DE(ie)*recorp     ,
 C    &       *DE/recorp, htmp*recorp /itmp, check_DE(ie)*recorp/itmp,
@@ -536,7 +534,7 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),totspec*DE
 
-	  IF(Nejc.le.4 .and. IOUT.ge.3) then
+	  IF(Nejc.le.6 .and. IOUT.ge.3) then
 	    ftmp =  SUM(POPcseaf(0,Nejc,1:NDECSE,0:ndexclus))
 	    if(ftmp.gt.0) then
             write(8,*)
@@ -552,10 +550,16 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
             IF(Nejc.eq.4)
      &        write(8,*) ' Test printout of POPcseaf(0,4,ie,...)',
      &                   ' for all residual nuclei -deut    emitted'
+            IF(Nejc.eq.5)
+     &        write(8,*) ' Test printout of POPcseaf(0,5,ie,...)',
+     &                   ' for all residual nuclei -triton  emitted'
+            IF(Nejc.eq.6)
+     &        write(8,*) ' Test printout of POPcseaf(0,6,ie,...)',
+     &                   ' for all residual nuclei -helion  emitted'
             do ie=1,NDECSE
   	        ftmp =  SUM(POPcseaf(0,Nejc,ie,0:ndexclus))
-              write(8,'(i5, 7E15.6)') ie, ftmp
-	        IF(ftmp.gt.0.999999d0) EXIT
+              IF(ftmp.GT.0) write(8,'(i5, 7E15.6)') ie,ftmp
+              IF(ftmp.GT.0.99999d0) EXIT
 !     Fractions for selected  nuclei (neutrons)
 !     &                POPcseaf(0,1,ie,INExc(2)),
 !     Inclusive fraction only for all ejectiles  (neutrons)

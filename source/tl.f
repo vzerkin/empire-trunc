@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4853 $
+Ccc   * $Rev: 4866 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
+Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2425,16 +2425,16 @@ C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
          ENDDO
          IF(NREs(nejc)<0) CYCLE
 C
-C        IF(Nnuc.eq.NREs(nejc)) then      
-c          DO l = 0, LMAxtl(i,Nejc,Nnuc)
-           DO l = 0, LMAxtl(i,Nejc,NREs(nejc))
+         IF(Nnuc.eq.NREs(nejc)) then      
+           DO l = 0, LMAxtl(i,Nejc,Nnuc)
+C          DO l = 0, LMAxtl(i,Nejc,NREs(nejc))
               DO k=1,MAXj(Nejc)
                 ftmp = ttllj(i,l+1,k)
                 IF (ftmp.LT.1.D-16) cycle
                 TLJ(i,l+1,k,Nejc) = ftmp
               ENDDO 
            ENDDO
-C        ENDIF
+         ENDIF
       ENDDO
 
 C     deallocate ttll,ttllj,maxl
@@ -4374,6 +4374,8 @@ C     INLkey < 0  Calculation for coupled states only = CC
 	endif
 	
       CALL ECIS('ecis06 ',itmp)
+      IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
+
 C 	write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
@@ -5120,6 +5122,8 @@ C-----Running ECIS
 
       IF(inc_channel) write (*,*) '  Running ECIS (rot) ...'
       CALL ECIS('ecis06 ',itmp)
+      IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
+
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
@@ -5615,7 +5619,8 @@ C     STOP 'Before optman'
       ctmp = trim(empiredir)//'/source/optmand'
       iwin = ipipe(ctmp)
 C     itmp should be returned by OPTMAN as ECIS is doing
-      itmp = 0
+C     IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
+                       itmp = 0 ! disabling advanced HF
 
       IF(TL_calc) RETURN
 

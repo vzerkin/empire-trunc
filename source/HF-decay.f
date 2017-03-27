@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4845 $
+Ccc   * $Rev: 4866 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-10 06:28:49 +0100 (Fr, 10 Mär 2017) $
+Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1396,9 +1396,9 @@ C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
            IF(nnuc.eq.mt849) ftmp_disc = CSDirlev(1,3)
 C          write(*,*) A(nnuc),Z(nnuc),ENDF(nnuc)
 C          write(*,*) CSPrd(nnuc),CSPopul(nnuc)
-C          IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.0) then
+           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.0) then
 C
-           IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
+C          IF((CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc).GT.1.d-7) then
              CSInc(nnuc) = max(CSPrd(nnuc)-CSPopul(nnuc)-ftmp_disc,0.d0)
 C
              WRITE (12,
@@ -1747,11 +1747,10 @@ C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
       recorr = A(Nnuc)/(A(1)-A(Nnuc))
-
 C
 C     To get consistent integral value
 C
-C     RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
+      RECcse(1,0,Nnuc) = RECcse(1,0,Nnuc)*2.d0
 
       csum  = 0.d0
       esum  = 0.d0
@@ -1835,21 +1834,38 @@ C       corr = CSPrd(Nnuc)/(csum*DERec)
 C     ENDIF
       corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
 
-      WRITE(12,
+      IF(xsdisc.gt.0) THEN
+	  WRITE(12,
+     &     '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb'' )') 
+     &      CSPrd(Nnuc)-xsdisc
+      ELSE
+        WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)
-      WRITE(12,
-     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb''//)') 
+	ENDIF
+
+      IF(xsdisc.gt.0) THEN
+	  WRITE(12,
+     &     '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,'' mb'')') 
+C    &      corr 
+     &      (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+	ELSE
+        WRITE(12,
+     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb'')') 
 C    &      corr 
      &      CSPrd(Nnuc)/(csum*DERec)
+      ENDIF	 
+	
+      WRITE(12,*)
+      WRITE(12,*)
 
-      IF (ABS(1.d0-corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
+      IF (ABS(1.d0-corr).GT.0.10D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
         WRITE (8,*) 
         WRITE (8,*) ' ******' 
         WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
         WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
         WRITE (8,*) 
-     &       ' WARNING: x-section balance in recoils >5%, ratio=',corr
+     &       ' WARNING: x-section balance in recoils >10%, ratio=',corr
         WRITE (8,*) ' WARNING: recoil integral     = ',
      &                  sngl(csum*DERec),' mb'
         WRITE (8,*) ' WARNING: Prod. cross section = ',
@@ -1971,20 +1987,18 @@ C    &     cmul*esum/csum
       ELSE
         corr = CSPrd(Nnuc)/(csum*DE)
       ENDIF
-      WRITE(12,
-     &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
-     &      CSPrd(Nnuc) 
+
       WRITE(12,
      &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb''//)') 
      &      corr 
 
-      IF (ABS(1.d0-corr).GT.0.05D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
+      IF (ABS(1.d0-corr).GT.0.1D0 .AND. CSPrd(Nnuc).GT.0.001D0) THEN
         WRITE (8,*) 
         WRITE (8,*) ' ******' 
         WRITE (8,*) ' WARNING:  Ein = ', sngl(EIN), ' MeV'
         WRITE (8,*) ' WARNING:  ZAP = ', IZA(Nnuc), ' from ', React
         WRITE (8,*) 
-     &       ' WARNING: x-section balance in recoils >5%, ratio=',corr
+     &       ' WARNING: x-section balance in recoils >10%, ratio=',corr
         WRITE (8,*) ' WARNING: recoil integral     = ',
      &                  sngl(csum*DE),' mb'
         WRITE (8,*) ' WARNING: Prod. cross section = ',

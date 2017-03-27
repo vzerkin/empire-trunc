@@ -1,6 +1,6 @@
-!cc   * $Rev: 4846 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2017-03-10 21:58:39 +0100 (Fr, 10 Mär 2017) $
+!cc   * $Rev: 4866 $
+!cc   * $Author: rcapote $
+!cc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -352,6 +352,7 @@ C        IOPran = -1 ! Uniform 1 sigma error
 C--------Relativistic kinematics
          RELkin = .FALSE.
          INTerf = 0 ! Engelbrecht-Weidenmuller transformation not used by default
+         IHFnew = 0 ! Modified Hauser-Feshbach to include Tlj(E) not default
 C--------Maximum energy to assume all levels are collective for DWBA calculations
 C--------        Default value 0. i.e. none but those selected automatically
          ECUtcoll = 0.
@@ -801,17 +802,17 @@ C            residues must be heavier than alpha !! (RCN)
              CALL WHERE(izatmp,nnuc,iloc)
              IF (iloc.EQ.1) THEN
 C               (n,n),(n,2n),...,(n,8n)
-!                 if(in.eq.mulem .and. in.le.8) THEN
-!                   ENDfp(1,nnuc) = 1
-!                   ENDfp(0,nnuc) = 1
-!                   ENDf(nnuc) = 1
-!                 endif
+C                 if(in.eq.mulem .and. in.le.8) THEN
+C                   ENDfp(1,nnuc) = 1
+C                   ENDfp(0,nnuc) = 1
+C                   ENDf(nnuc) = 1
+C                 endif
 C                 (n,p),(n,2p),(n,3p)
-!                 if(ip.eq.mulem .and. ip.le.3) THEN
-!                   ENDfp(2,nnuc) = 1
-!                   ENDfp(0,nnuc) = 1
-!                   ENDf(nnuc) = 1
-!                 endif
+C                 if(ip.eq.mulem .and. ip.le.3) THEN
+C                   ENDfp(2,nnuc) = 1
+C                   ENDfp(0,nnuc) = 1
+C                   ENDf(nnuc) = 1
+C                 endif
                   A(nnuc) = atmp
                   Z(nnuc) = ztmp
                   XN(nnuc) = A(nnuc) - Z(nnuc)
@@ -1094,7 +1095,6 @@ C                                    ! Replaced by Capote, Soukhovistkii et al O
 C-----------(McFadden global potential 9100 could be used)
          ENDIF
 
-
          DO i = 1, NNUct ! NDNUC
             KTRlom(1,i) = 2405
             KTRlom(2,i) = 5405
@@ -1147,8 +1147,9 @@ C        Changing the incident input energy to plot LDs
 !
 !--------Set actual flags for exclusive spectra
 !
+C        write(*,*) 'NENdf=', NENdf
 C        DO in = 0, NNUct
-C          IF(in.le.20) write(*,*) 
+C          IF(in.le.11) write(*,*) 
 C    &          NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
 C        ENDDO
 C        PAUSE
@@ -1157,7 +1158,7 @@ C
               ENDf  = 0
               NEXclusive = 0
          ELSEIF(NENdf.GT.0) THEN
-!           Initially set all spectra as inclusive 
+!           Initially set non-exclusive spectra as inclusive 
             DO in = 0, NNUct
                IF(ENDf(in).EQ.0) ENDF(in) = 2
             ENDDO
@@ -1165,6 +1166,7 @@ C
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
+	         ENDfp(NPRoject,NTArget) = 1
 !               DO in = 0, NENdf
 !                  DO ip = 0, NENdf
 !                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
@@ -1215,11 +1217,9 @@ C
             ENDIF
 C           write(*,*) 'After reassigments'
 C           DO in = 0, NNUct
-C             IF(in.le.10) THEN
-C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
-C             ELSE
-C               write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),ENDFp(1,in)
-C             ENDIF
+C             IF(in.le.11) 
+C    &          write(*,*) NINT(A(in)),NINT(Z(in)),ENDF(in),
+C    &                     ENDFp(0,in),ENDFp(1,in),ENDFp(2,in)
 C           ENDDO
 C           pause
 C
@@ -3920,10 +3920,28 @@ C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf
               WRITE (12,
      &   '('' CN decay and Direct cross sections added incoherently'')')
             ELSE
+	        IHFnew = 1 ! Advanced HF enabled for EW transformation
               WRITE ( 8,'('' CN-direct interference by Engelbrecht & Wei
      &denmuller, Phys.Rev. C8(1973)859-862 '')')
               WRITE (12,'('' CN-direct interference by Engelbrecht & Wei
      &denmuller, PRC8(1973)859'')')
+            ENDIF
+
+            IF (IHFnew.EQ.0) THEN
+              WRITE (8,
+     &         '('' Traditional Hauser-Feschbach Tlj_{CC}(E)=Tlj_{GS}(E-
+     &Egs)'')')
+              WRITE (12,
+     &         '('' Traditional Hauser-Feschbach Tlj_{CC}(E)=Tlj_{GS}(E-
+     &Egs)'')')
+	      ENDIF
+            IF (IHFnew.EQ.1) THEN
+              WRITE (8,
+     &         '('' Coupled channels Tlj(E) by Kawano et al, Phys.Rev. C
+     &94(2016)014612 '')')
+              WRITE (12,
+     &         '('' Coupled channels Tlj(E) by Kawano et al, Phys.Rev. C
+     &94(2016)014612 '')')
             ENDIF
 
             WRITE (8,*) ' '
@@ -4107,10 +4125,10 @@ C--------PCROSS input
               else
                 WRITE (8,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Recommended~1.5)'')') MFPp
+     &  '' (Recomm:~1.5)'')') MFPp
                 WRITE (12,
      &'('' Mean free path parameter in PCROSS set to '',F4.1,
-     &  '' (Recommended~1.5)'')') MFPp
+     &  '' (Recomm:~1.5)'')') MFPp
               endif
             ELSE
               WRITE (8,
@@ -6411,17 +6429,17 @@ C              EHRtw = val
      &           '('' Moldauer width fluctuation correction with'',
      &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
               IF (LHRtw.EQ.1) WRITE (12,
-     &           '('' HRTW width fluctuation correction with '',
-     &             ''Z. Phys. A297, 153 (1980) nu selected'')')
+     &           '('' HRTW width fluctuation correction with '',/,
+     &             ''  Z. Phys. A297, 153 (1980) nu selected'')')
               IF (LHRtw.EQ.2) WRITE (12,
-     &           '('' HRTW width fluctuation correction with'',
-     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+     &           '('' HRTW width fluctuation correction with'',/,
+     &             ''  Kawano-Talou (NDS118, 183, 2014) nu selected'')')
               IF (LHRtw.EQ.3) WRITE (12,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' original nu was selected'')')
+     &           '('' Moldauer width fluctuation correction with'',/,
+     &             ''  original Moldauer nu was selected'')')
               IF (LHRtw.EQ.4) WRITE (12,
-     &           '('' Moldauer width fluctuation correction with'',
-     &             '' Kawano-Talou (NDS118, 183, 2014) nu selected'')')
+     &           '('' Moldauer width fluctuation correction with'',/,
+     &             ''  Kawano-Talou (NDS118, 183, 2014) nu selected'')')
             ELSE
               WRITE (8,
      &        '('' Width fluctuation correction not considered'')')
@@ -6595,15 +6613,15 @@ C              Setting ENDF for all emission loops
                  WRITE (8,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (8,'(
-     &            '' Exclusive spectra available for residues'',
-     &            '' distant from CN up to '',I1,'' neut. or '',I1
+     &            '' Exclusive spectra available for residues distant'',
+     &            '' from CN up to '',I1,'' neut. or '',I1
      &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
                  WRITE (12,'('' ENDF formatting enabled'')')
                  WRITE (12,
      &           '('' Exclusive emission from CN and target enabled'')')
                  WRITE (12,'(
-     &            '' Exclusive spectra available for residues'',
-     &            '' distant from CN up to '',I1,'' neut. or '',I1
+     &           '' Exclusive spectra available for residues distant'',/
+     &          ,''   from CN up to '',I1,'' neut. or '',I1
      &            '' prot.'')') MIN(8,NENdf),MIN(3,NENdf)
                      GOTO 100
                ENDIF
@@ -8799,6 +8817,15 @@ C               For development
      &        WRITE (8,'('' CN-direct interference neglected'')')
             IF (INTerf.eq.1) 
      &        WRITE (8,'('' CN-direct interference considered'')')
+            GOTO 100
+         ENDIF
+
+         IF (name.EQ.'IHFNEW') THEN
+            IHFnew = 0  
+            IF (val.GT.0) IHFnew = 1
+            IF (IHFnew.eq.1) WRITE (8,
+     &        '('' Coupled channels Tlj(E) by Kawano et al, Phys.Rev. C
+     &94(2016)014612 '')')
             GOTO 100
          ENDIF
 
