@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4868 $
+Ccc   * $Rev: 4869 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 23:43:44 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-03-28 02:16:51 +0200 (Di, 28 Mär 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1800,16 +1800,16 @@ C
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
 
-      dtmp = 1.d0
+	dtmp = 1.d0
       IF(ENDF(nnuc).eq.2) dtmp = CSInc(nnuc)/(csum*DERec)
 
-      sstmp = 0.d0
+	sstmp = 0.d0
       DO ie = 1, ilast
         stmp = RECcse(ie,0,Nnuc)*dtmp
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
-        sstmp = sstmp + stmp
+	  sstmp = sstmp + stmp
       ENDDO
 
       WRITE(12,
@@ -1846,7 +1846,7 @@ C    &     cmul*esum/csum
       IF(ENDF(nnuc).eq.2) THEN
         corr = CSInc(Nnuc)/(sstmp*DERec)
 	  WRITE(12,
-     & '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb (incl)'' )') 
+     &  '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb (incl)'')') 
      &      CSInc(Nnuc)
       ELSE
         corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
@@ -1860,13 +1860,13 @@ C    &     cmul*esum/csum
 
       IF(ENDF(nnuc).eq.2) THEN
 	  WRITE(12,
-     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,'' (incl)'')') 
+     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,''    (incl)'')') 
      &  corr 
       ELSE  
 	  WRITE(12,
-     &     '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6)') corr 
+     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6)') corr 
         WRITE(12,
-     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6)') 
+     &  '( 2x,''Ratio Production XS/Recoil XS '',G12.6)') 
      &      CSPrd(Nnuc)/(csum*DERec)
 	ENDIF	
       WRITE(12,*)

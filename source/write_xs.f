@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4837 $
+Ccc   * $Rev: 4869 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-01 22:50:20 +0100 (Mi, 01 Mär 2017) $
+Ccc   * $Date: 2017-03-28 02:16:51 +0200 (Di, 28 Mär 2017) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -510,40 +510,33 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
               if(ncontr(nnuc).gt.1) 
      &        qinaver = EIN  + QQInc(nnuc)/ncontr(nnuc) + ELV(LEVtarg,0) ! CMS
 
-              IF (NINT(A(1))-NINT(A(Nnuc)).GT.4 )  GOTO 1550
-
-C             IF (NINT(A(1)-A(Nnuc)).EQ.3 )  GOTO 1550
-              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.3 .AND. 
-     &            NINT(Z(1))-NINT(Z(Nnuc)).NE.0 ) GOTO 1550 ! t,h,2np,2pn
-
-              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) GOTO 1550  ! 3np
-
-              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.3) GOTO 1550  ! 2pd
-
-              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.4 .AND. 
-     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) GOTO 1550  ! 2n2p, a
-
-              IF (NINT(A(1))-NINT(A(Nnuc)).EQ.2 .AND. 
-     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) GOTO 1550  ! d, np, pn
-
-              IF(RECoil.gt.0) then
-
-                IF (NINT(A(1))-NINT(A(Nnuc)).GT.1 .AND. 
-     &              NINT(A(1))-NINT(A(Nnuc)).LE.4) THEN
-C                  (n,xn),(n,xp) x>1; (removed (n,d), (n,a), (n,t),(n,h) before)
-                   CALL PRINT_RECOIL(nnuc,REAction(nnuc))
-C                  write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
-C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+              IF(RECoil.gt.0 .AND. (NINT(A(1))-NINT(A(Nnuc)).LE.8)) then
+                
+                IF (NINT(A(1))-NINT(A(Nnuc)).EQ.1 .AND. NENdf.GE.1) THEN 
+                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc)) !  n or p emission
+C                 write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
+C    &               NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
 
-                IF (NINT(A(1))-NINT(A(Nnuc)).EQ.1) THEN !  n or p emission
-                   CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc))
-C                  write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
-C    &                NINT(A(nnuc)),NINT(Z(nnuc))
+                IF (NINT(A(1))-NINT(A(Nnuc)).LE.NENdf .AND.
+     &			NINT(A(1))-NINT(A(Nnuc)).GT.1 .AND.
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) THEN  
+                  CALL PRINT_RECOIL(nnuc,REAction(nnuc))	!(n,xn), x>1
+C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
+C    &               NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
 
+                IF (NINT(A(1))-NINT(A(Nnuc)).EQ.2 .AND.
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.2 .AND. NENdf.GE.2) THEN !(n,2p)
+C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
+C    &               NINT(A(nnuc)),NINT(Z(nnuc))
+                ENDIF
+
+                IF (NINT(A(1))-NINT(A(Nnuc)).EQ.3 .AND.
+     &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.3 .AND. NENdf.GE.3) THEN !(n,3p)
+C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
+C    &               NINT(A(nnuc)),NINT(Z(nnuc))
+                ENDIF
 
               ENDIF
 
@@ -554,7 +547,7 @@ C    &                NINT(A(nnuc)),NINT(Z(nnuc))
          ENDIF ! IF (ENDf(nnuc).EQ.1)
 
 C********************************************
-1550     CALL PFNS_calc(nnuc,eincid)
+         CALL PFNS_calc(nnuc,eincid)
 C********************************************
 
       ENDDO  ! loop over residues (not decaying nuclei)

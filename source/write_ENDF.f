@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4867 $
+Ccc   * $Rev: 4869 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 03:10:40 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-03-28 02:16:51 +0200 (Di, 28 Mär 2017) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -137,17 +137,19 @@ C        qout = 0.d0
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
 
 C           Skipping recoils for exclusive reactions
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.8 
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).LE.NENdf 
      &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) CYCLE    !(n,xn)
 
             IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.1 
      &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.1) CYCLE  !(n,p)
 
             IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.2 
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.2) CYCLE    !(n,2p)
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.2 .AND. NENdf.GE.2) 
+     &         CYCLE    !(n,2p)
 
-            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.3 
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.3) CYCLE    !(n,3p)
+            IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.3
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.3 .AND. NENdf.GE.3) 		    
+     &         CYCLE    !(n,3p)
 
 C           Print everything else if non-zero recoil
             CALL PRINT_RECOIL(nnuc,reactionx) 
