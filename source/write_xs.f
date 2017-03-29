@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4870 $
+Ccc   * $Rev: 4871 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-29 00:05:47 +0200 (Mi, 29 Mär 2017) $
+Ccc   * $Date: 2017-03-29 10:35:19 +0200 (Mi, 29 Mär 2017) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -253,12 +253,15 @@ C
                                      ! print DDX spectrum
                      if(check_DE(ie).LE.0) cycle ! skipping zeroes
                      iprn = ie
-                     WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
+                     WRITE (12,
+     &                    '(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
+C                    WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
      &                     FLOAT(ie - 1)*DE/recorp,
      &                     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
                    ENDDO
                                      ! exact DDX spectrum endpoint
-                   WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
+C                  WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
+                   WRITE (12,'(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
 C                    A different way of calculating the Q-value using the 
 C                    residual and ejectile
 C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
