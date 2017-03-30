@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4865 $
+   ! $Rev: 4874 $
    ! $Author: mherman $
-   ! $Date: 2017-03-25 17:39:25 +0100 (Sa, 25 Mär 2017) $
+   ! $Date: 2017-03-30 08:43:30 +0200 (Do, 30 Mär 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -878,6 +878,7 @@ CONTAINS
 
       IF(ndim==0) RETURN   ! no collective channels found
 
+       write(*,*) ' '
        write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
                   sngl(xjc), ipc, ncc, nccp, nccu, ndim
         
@@ -1593,8 +1594,8 @@ CONTAINS
                      ibb = iout - num%coll + 1
                      out => outchnl(iout)
                      Sigma_ab = INVERSE_EW(iaa,ibb) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
-                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab*xnor_c/DENhf, ' level=', -out%kres
                      sig_cc(-out%kres) = sig_cc(-out%kres) + Sigma_ab*xnor_c/DENhf
+                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab/xnor_cc, ' level=', -out%kres
                      CALL update_SCRt(out, Sigma_ab/xnor_cc, sumin_s, sumtt_s)
                   ENDDO
                ENDDO
@@ -1608,8 +1609,10 @@ CONTAINS
                in => inchnl(iaa)
                IF(INTerf>0) THEN
                   in%sig = coef*EW_absorption(iaa)*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+                  write(*,*) 'EW Incident Tl=',EW_absorption(iaa)
                ELSE
                   in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+                  write(*,*) '   Incident Tl=',in%t
                ENDIF
 
                ! loop over ibb=iout (all channels in the normal space)
@@ -1621,8 +1624,13 @@ CONTAINS
                   sigma_alph_b = out%t*w
                   IF(INTerf>0 .AND. iout>=num%coll .AND. iout<=num%colh ) CYCLE ! collective channels were done already
                   Sigma_ab = sigma_alph_b
+                  IF(iout>=num%coll .AND. iout<=num%colh ) THEN
+                     write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, ' level=', -out%kres
+                     sig_cc(-out%kres) = sig_cc(-out%kres) + in%t*Sigma_ab*xnor_c/DENhf
+                  ENDIF
                   CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
                ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
+               IF(INTerf==0) write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
 
                CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
                !----------------------------------------------------------
@@ -1636,7 +1644,7 @@ CONTAINS
                DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
-               write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
+               write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
                IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
 !               ! absorption for incoming channel
