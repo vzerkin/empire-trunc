@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4826 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-01-22 17:27:42 +0100 (So, 22 Jän 2017) $
+Ccc   * $Rev: 4872 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-03-30 08:34:46 +0200 (Do, 30 Mär 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -79,7 +79,7 @@ C-----
          ENDDO !over residual spins
          IF (popt.NE.0.0D+0) THEN
             icse = min(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDEcse)
-            icse = MAX0(2,icse)
+            icse = MAX0(1,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt             
@@ -846,18 +846,11 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.d0
             egd = ELV(l,Nnuc)
-C
-C           Xs should be stored in the second bin to avoid losing 
-C           discrete level XS which should be accounted for entirely
-C
-            icse = min(INT(2.0001 + egd/DE),ndecse)  
+            icse = min(INT(1.0001 + egd/DE),ndecse)
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
-
             CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
-
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
-
             IF (ENDf(Nnuc).EQ.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
      &          ,INExc(Nnuc)) + gacs/DE
@@ -915,15 +908,10 @@ C-----------Normal level with branching ratios
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  !    int. conversion
 
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-C
-C                 Xs should be stored in the second bin to avoid losing 
-C                 discrete level XS which should be accounted for entirely
-C
-                  icse = min(INT(2.0001 + egd/DE),ndecse)    
+                  icse = min(INT(1.0001 + egd/DE),ndecse)
+                  if(icse==1) icse = 2  ! TEMPORARY; shift low energy gammas to the second bin   
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
-
                   CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
-
                   CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------------Add transition to the exclusive gamma spectrum
 C-----------------NOTE: internal conversion taken into account
