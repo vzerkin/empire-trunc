@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4872 $
+Ccc   * $Rev: 4873 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-03-30 08:34:46 +0200 (Do, 30 Mär 2017) $
+Ccc   * $Date: 2017-03-30 08:36:12 +0200 (Do, 30 Mär 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -724,7 +724,7 @@ C--------do loop over l --- done ----------------------------------------
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
          sumdl = sumdl * TUNe(Nejc,Nnuc)     ! Allowing for tuning of discrete levels
-	
+      
          if(IZA(Nnur).EQ.IZA(0)) THEN
            SCRtl(i,Nejc) = sumdl * CINRED(i) 
            Sum = Sum + sumdl    !* CINRED(i) 
@@ -769,7 +769,7 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
          !sumdl = sumdl * TUNe(Nejc,Nnuc)  
-	   sumdl = sumdl * TUNe(Nejc,NTArget)
+         sumdl = sumdl * TUNe(Nejc,NTArget)
 
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = (sumdl +sumtt -sumin)*CELred
