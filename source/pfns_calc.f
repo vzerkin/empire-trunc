@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4582 $
+Ccc   * $Rev: 4878 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-02-04 00:06:07 +0100 (Do, 04 Feb 2016) $
+Ccc   * $Date: 2017-04-03 21:14:27 +0200 (Mo, 03 Apr 2017) $
 
       SUBROUTINE PFNS_calc(nnuc,eincid)
 
@@ -172,8 +172,9 @@ C------------------Accumulating total spectrum for neutrons
                    csepfns(ie) = csepfns(ie) + post_fisn(ie)*fnorm
 C
 C                  CSEfis contains the n,xnf spectra, not being used for now
-C                  CSEfis is initialized inside HF-comp.f (EXCLUSIVE..)
+C                  CSEfis is initialized inside HF-comp.f (EXCLUSIVEF..)
 C                  csepfns(ie) = csepfns(ie) + CSEfis(ie,nejc,nnuc)
+C                  Call to EXCLUSIVEF should be activated
 C
               ENDDO
 
