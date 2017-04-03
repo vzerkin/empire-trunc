@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4873 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-03-30 08:36:12 +0200 (Do, 30 Mär 2017) $
+Ccc   * $Rev: 4881 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-04-03 21:50:01 +0200 (Mo, 03 Apr 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -77,14 +77,15 @@ C-----
             IF (Nejc.NE.0 .AND. POPmax(Nnur).LT.POP(ie,j,2,Nnur))
      &          POPmax(Nnur) = POP(ie,j,2,Nnur)
          ENDDO !over residual spins
-         IF (popt.NE.0.0D+0) THEN
+         IF (popt>0) THEN
             icse = min(INT((excnq - EX(ie,Nnur))/DE + 1.0001),NDEcse)
+C           icse = MAX0(2,icse)
             icse = MAX0(1,icse)
             AUSpec(icse,Nejc) = AUSpec(icse,Nejc) + popt
             CSE(icse,Nejc,Nnuc) = CSE(icse,Nejc,Nnuc) + popt
             CSEt(icse,Nejc) = CSEt(icse,Nejc) + popt             
             IF (ENDf(Nnuc).EQ.1) THEN
-               CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,popt)  !exclusive spectra stored
+               CALL EXCLUSIVEC(Iec,ie,Nejc,Nnuc,Nnur,excnq,popt) !exclusive spectra stored
             ELSE
                CSE(icse,Nejc,0) = CSE(icse,Nejc,0) + popt   !inclusive spectrum stored on Nnuc=0
             ENDIF
@@ -97,20 +98,21 @@ C-----Discrete levels
 C-----
       nspec= min(INT(EMAx(Nnur)/DE) + 1,NDECSE-1)
       DO il = 1, NLV(Nnur)
-         pop1 = Xnor*SCRtl(il,Nejc)
-         IF (pop1.le.0) CYCLE
          eemi = excnq - ELV(il,Nnur)
          IF (eemi.LT.0) RETURN
-C--------Add contribution to discrete level population
-         POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
-C--------Add contribution to recoils auxiliary matrix for discrete levels
-         REClev(il,Nejc) = REClev(il,Nejc) + pop1
-C--------Add contribution of discrete levels to emission spectra
-C--------Transitions to discrete levels are distributed
-C--------between the nearest spectrum bins (inversely proportional to the
-C--------distance of the actual energy to the bin energy
-C--------Eliminate transitions from the top bin in the 1-st CN (except gammas)
-         IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
+
+         pop1 = Xnor*SCRtl(il,Nejc)
+         IF (pop1>0) THEN
+C----------Add contribution to discrete level population
+           POPlv(il,Nnur) = POPlv(il,Nnur) + pop1
+C----------Add contribution to recoils auxiliary matrix for discrete levels
+           REClev(il,Nejc) = REClev(il,Nejc) + pop1
+C----------Add contribution of discrete levels to emission spectra
+C----------Transitions to discrete levels are distributed
+C----------between the nearest spectrum bins (inversely proportional to the
+C----------distance of the actual energy to the bin energy
+C----------Eliminate transitions from the top bin in the 1-st CN (except gammas)
+           IF (Nnuc.NE.1 .OR. ENDf(Nnuc).NE.1 .OR. Iec.NE.NEX(1) .OR.
      &       Nejc.EQ.0 .OR. Nejc.GT.3) THEN
             xcse = eemi/DE + 1.0001
             icsl = min(INT(xcse),NDECSE-1)
@@ -140,12 +142,9 @@ C               included in the total gamma spectra
 C
 C           Addition of discrete gamma to spectra 
 C
-            CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
-            CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
-            CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
-            CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
-   
-            IF (popll.GT.0.0D+0) THEN
+            IF (popll>0) THEN
+               CSE(icsl,Nejc,Nnuc) = CSE(icsl,Nejc,Nnuc) + popl
+               CSEt(icsl,Nejc) = CSEt(icsl,Nejc) + popl
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
                   CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   popll)
@@ -155,8 +154,9 @@ C                 CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
 
             ENDIF
 
-            IF (poph.GT.0.0D+0) THEN
-
+            IF (poph>0) THEN
+               CSE(icsh,Nejc,Nnuc) = CSE(icsh,Nejc,Nnuc) + poph
+               CSEt(icsh,Nejc) = CSEt(icsh,Nejc) + poph
                IF (ENDf(Nnuc).EQ.1) THEN
 C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                   CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,   poph)
@@ -165,20 +165,95 @@ C                 CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
                ENDIF
             ENDIF
 
-         ENDIF
+           ENDIF
 
-C--------Add CN contribution to direct ang. distributions
-         IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
-            CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
-C           Compound elastic and inelastic stored for final renormalization
-            CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
-         ENDIF ! on top  CN state, non-gamma with non-zero population 
+C----------Add CN contribution to direct ang. distributions
+           IF (Nnuc.EQ.1 .AND. Iec.EQ.NEX(1) .AND. Nejc.NE.0) THEN
+             CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + pop1
+C            Compound elastic and inelastic stored for final renormalization
+             CSComplev(il,Nejc) = CSComplev(il,Nejc) + pop1
+           ENDIF ! on top  CN state, non-gamma with non-zero population 
+
+         ENDIF ! if pop1>0  
+
       ENDDO   !loop over levels
 
       RETURN
       END
 
-      SUBROUTINE EXCLUSIVEC(Iec,Ief,Nejc,Nnuc,Nnur,Popt)
+      SUBROUTINE EXCLUSIVEF(Iec,Nnuc,Popt)
+      implicit none
+      INCLUDE 'dimension.h'
+      INCLUDE 'global.h'
+Ccc
+Ccc   ********************************************************************
+Ccc   *                                                         class:mpu*
+Ccc   *                   E X C L U S I V E F                            *
+Ccc   *                                                                  *
+Ccc   * Deconvolutes inclusive spectra calculated by the statistical     *
+Ccc   * model into spectra for individual reactions (exclusive) as       *
+Ccc   * requested by the ENDF format. EXCLUSIVEF is for transitions      *
+Ccc   * to continuum.                                                    *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * input:Iec  - energy index of the decaying state                  *
+Ccc   *       Nnuc - index of the decaying nucleus                       *
+Ccc   *       Popt - x-sec/MeV for the transition from the initial       *
+Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+Ccc   *              This cross section is directly added to the spectrum*
+Ccc   *              and Popt*DE is used to define a portion of the      *
+Ccc   *              feeding spectrum that has to be moved.              *
+Ccc   *                                                                  *
+Ccc   * output:none                                                      *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   * calls:none                                                       *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   *                                                                  *
+Ccc   ********************************************************************
+Ccc
+C
+C Dummy arguments
+C
+      INTEGER Iec, Nnuc
+      DOUBLE PRECISION Popt
+C
+C Local variables
+C
+      DOUBLE PRECISION xnor
+      INTEGER ie, iejc
+C     data jsigma/0/,jsigma2/36/
+C
+C     POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
+C                                   energy bin with index Ief in Nnuc by
+C                                   Nejc particles (cumulative over all
+C                                   decays leading to this energy bin)
+C-----
+C-----Fission
+C-----
+C-----Contribution due to feeding spectra from Nnuc (no decay contribution)
+C-----DE spectra (DDX are not done for fission although they could be)
+C
+C     fission of n,nx and npx nuclei considered
+C
+C     Should be used to calculate pre-fission spectra. Not used for the time being
+      RETURN   
+C
+      IF (POPbin(Iec,Nnuc)<=0) RETURN
+      xnor = Popt*DE/POPbin(Iec,Nnuc)
+      DO ie = 1, NDEcse
+        DO iejc = 0, NDEJC
+          IF (POPcse(Iec,iejc,ie,INExc(Nnuc))>0)
+     &      CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc) +
+     &        POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
+        ENDDO
+      ENDDO
+      RETURN   
+      END
+
+      SUBROUTINE EXCLUSIVEC(Iec,Ief,Nejc,Nnuc,Nnur,Excnq,Popt)
       USE empcess, ONLY: POPcsea
       implicit none
       INCLUDE 'dimension.h'
@@ -195,10 +270,10 @@ Ccc   * to continuum.                                                    *
 Ccc   *                                                                  *
 Ccc   *                                                                  *
 Ccc   * input:Iec  - energy index of the decaying state                  *
-Ccc   *       Ief  - energy index of the final state (irrel. for fission)*
-Ccc   *       Nejc - index of the ejectile (-1 for fission)              *
+Ccc   *       Ief  - energy index of the final state                     *
+Ccc   *       Nejc - index of the ejectile                               *
 Ccc   *       Nnuc - index of the decaying nucleus                       *
-Ccc   *       Nnur - index of the final nucleus (irrelevant for fission) *
+Ccc   *       Nnur - index of the final nucleus                          *
 Ccc   *       Popt - x-sec/MeV for the transition from the initial       *
 Ccc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
 Ccc   *              This cross section is directly added to the spectrum*
@@ -232,34 +307,8 @@ C                                   energy bin with index Ief in Nnuc by
 C                                   Nejc particles (cumulative over all
 C                                   decays leading to this energy bin)
 C-----
-C-----Fission
-C-----
-C-----Contribution due to feeding spectra from Nnuc (no decay contribution)
-C-----DE spectra (DDX are not done for fission although they could be)
-C
-      IF (Nejc.EQ. -1) THEN
-C        fission of n,nx and npx nuclei considered
-         IF (POPbin(Iec,Nnuc).EQ.0) RETURN
-         xnor = Popt*DE/POPbin(Iec,Nnuc)
-         DO ie = 1, NDECSE
-           DO iejc = 0, NDEJC
-C           DO iejc = 0, 1  ! only neutrons and photons for the time being
-C            DO iejc = 1, 1  ! only neutrons for the time being
-              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0)
-     &           CSEfis(ie,iejc,Nnuc) = CSEfis(ie,iejc,Nnuc)
-     &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor
-            ENDDO
-         ENDDO
-         RETURN   !if fission
-      ENDIF
-C-----
 C-----Particle decay
-C-----
-      IF (Nnuc.EQ.Nnur) THEN
-         excnq = EX(Iec,Nnuc)
-      ELSE
-         excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
-      ENDIF
+
 C-----Contribution coming straight from the current decay
       icsp = INT((excnq - EX(Ief,Nnur))/DE + 1.0001)
       IF(ENDf(Nnur).EQ.1) THEN
@@ -275,9 +324,14 @@ C-----
 C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
          xnor = Popt*DE/POPbin(Iec,Nnuc)
-         DO ie = 1, NDECSE
+
+C	   DO ie = 1, NDEcse
+ 	   DO ie = 1,NEX(Nnuc)
             DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+	        
+C             if(Nejc_open(iejc)==0) cycle
+
+              IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
                   IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
      &                + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor  !DE feeding contribution added to inclusive spectrum
@@ -286,22 +340,25 @@ C-----DE spectra
      &                 POPcse(Ief,iejc,ie,INExc(Nnur))
      &               + POPcse(Iec,iejc,ie,INExc(Nnuc))*xnor   !DE feeding contribution added to population spectrum
                   ENDIF
-               ENDIF
-C-------------POPcsed seems to be equivalent to POPcse but for HMS or MSD rather than for CN
-              IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
-                 IF(ENDF(Nnur).EQ.1) THEN
+              ENDIF
+
+C-----DDX spectra for HMS
+              IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
+
+C----------------POPcsed seems to be equivalent to POPcse but for HMS or MSD rather than for CN
+                 IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
+                   IF(ENDF(Nnur).EQ.1) THEN
                      POPcsed(Ief,iejc,ie,INExc(Nnur))
      &               = POPcsed(Ief,iejc,ie,INExc(Nnur))
      &               + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor  !DE feeding HMS/MSD contribution added to population spectrum
-                 ELSE
-                    POPcsed(Ief,iejc,ie,0)
+                   ELSE
+                     POPcsed(Ief,iejc,ie,0)
      &                = POPcsed(Ief,iejc,ie,0)
      &                + POPcsed(Iec,iejc,ie,INExc(Nnuc))*xnor !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+                   ENDIF
                  ENDIF
-              ENDIF
-C-----DDX spectra for HMS
-              IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN
-                 IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+
+                 IF (POPcsed(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
                     IF(ENDF(Nnur).EQ.1) THEN
                        DO nth = 1, NDAng
                           POPcsea(nth,Ief,iejc,ie,INExc(Nnur))
@@ -318,7 +375,7 @@ C-----DDX spectra for HMS
                  ENDIF
 C-----DDX spectra using portions
               ELSE ! original loop to NDEJCD
-                 IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).NE.0) THEN
+                 IF (POPcseaf(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
                     IF(ENDf(Nnur).EQ.1) THEN
                        POPcseaf(Ief,iejc,ie,INExc(Nnur))
      &                 = POPcseaf(Ief,iejc,ie,INExc(Nnur))
@@ -331,6 +388,9 @@ C-----DDX spectra using portions
                  ENDIF 
               ENDIF
             ENDDO
+
+C           PAUSE
+
          ENDDO
       ENDIF
       END
@@ -404,13 +464,15 @@ C-----(ignore if residue is inclusive since summation already done in ACCUM)
         CSE(ie,Nejc,0) = CSE(ie,Nejc,0) + Popt
       ENDIF
 C-----Contribution due to feeding spectra from Nnuc
-      IF (POPbin(Iec,Nnuc).EQ.0) RETURN
+      IF (POPbin(Iec,Nnuc).LE.0) RETURN
 C-----DE spectra
       IF (Nnur.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
          xnor = Popt*DE/POPbin(Iec,Nnuc)
-         DO iesp = 1, NDECSE
+C        DO iesp = 1, NDECSE
+         DO iesp = 1, NEX(nnuc)
               DO iejc = 0, NDEJC
-               IF (POPcse(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+C              if(Nejc_open(iejc)==0) cycle
+               IF (POPcse(Iec,iejc,iesp,INExc(Nnuc))>0) THEN
                  IF(ENDF(Nnur).EQ.1) THEN
                    POPcse(0,iejc,iesp,INExc(Nnur))
      &                = POPcse(0,iejc,iesp,INExc(Nnur))
@@ -427,21 +489,23 @@ C                      POPcselv(Il,iejc,iesp,INExc(Nnur))
 C     &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
 C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                  ENDIF
-                ENDIF
+               ENDIF
 
-               IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
-                 IF(ENDf(Nnur).EQ.1) then
-                   POPcsed(0,iejc,iesp,INExc(Nnur))
+               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN !HMS n & p only
+
+                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc))>0) THEN
+                   IF(ENDf(Nnur).EQ.1) then
+                     POPcsed(0,iejc,iesp,INExc(Nnur))
      &                  = POPcsed(0,iejc,iesp,INExc(Nnur))
      &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                  ELSE
-                   POPcsed(0,iejc,iesp,0)
+                   ELSE
+                     POPcsed(0,iejc,iesp,0)
      &                  = POPcsed(0,iejc,iesp,0)
      &                    + POPcsed(Iec,iejc,iesp,INExc(Nnuc))*xnor
-                  ENDIF
-                ENDIF
-               IF(LHMs.NE.0 .AND. iejc.GT.0 .AND. iejc.LT.3) THEN !HMS n & p only
-                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                   ENDIF
+                 ENDIF
+
+                 IF (POPcsed(Iec,iejc,iesp,INExc(Nnuc))>0) THEN
                    IF(ENDf(Nnur).EQ.1) THEN
                      DO nth = 1, NDAng
                        POPcsea(nth,0,iejc,iesp,INExc(Nnur))
@@ -458,7 +522,7 @@ C     &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                   ENDIF
 C-----------DDX spectra using portions
                ELSE ! original loop to NDEJCD
-                 IF (POPcseaf(Iec,iejc,iesp,INExc(Nnuc)).NE.0) THEN
+                 IF (POPcseaf(Iec,iejc,iesp,INExc(Nnuc))>0) THEN
                    IF(ENDf(Nnur).EQ.1) THEN
                       POPcseaf(0,iejc,iesp,INExc(Nnur))
      &                = POPcseaf(0,iejc,iesp,INExc(Nnur))
@@ -536,18 +600,23 @@ C
       Sum = 0.d0
       hisr = HIS(Nnur)
       xjc = FLOAT(Jc) + HIS(Nnuc)
-C-----clear scratch matrices
-      SCRtem(Nejc) = 0.d0
-      DO j = 1, NDLW    ! NLW
-         DO i = 1, NDEX ! NEX(Nnur) + 1
-            SCRt(i,j,1,Nejc) = 0.d0
-            SCRt(i,j,2,Nejc) = 0.d0
-         ENDDO
-      ENDDO
       iexc = NEX(Nnuc) - NEXr(Nejc,Nnuc)
       itlc = iexc - 5
       iermax = Iec - iexc
+C-----clear scratch matrix
+      SCRtem(Nejc) = 0.d0
+
       IF (iermax.GE.1) THEN
+C-------clear scratch matrices
+        SCRt(:,1:NLW,1,Nejc) = 0.d0
+        SCRt(:,1:NLW,2,Nejc) = 0.d0
+C       DO j = 1, NDLW    ! NLW
+C         DO i = 1, NDEX ! NEX(Nnur) + 1
+C           SCRt(i,j,1,Nejc) = 0.d0
+C           SCRt(i,j,2,Nejc) = 0.d0
+C         ENDDO
+C       ENDDO
+
 C-----
 C-----decay to the continuum
 C-----
@@ -688,9 +757,11 @@ C
 C-----
 C-----decay to discrete levels 
 C-----
-      DO i = 1, NDLV ! NLV(Nnur)
-         SCRtl(i,Nejc) = 0.d0
-      ENDDO
+C     DO i = 1, NDLV ! NLV(Nnur)
+C        SCRtl(i,Nejc) = 0.d0
+C     ENDDO
+      SCRtl(1:NDLV,Nejc) = 0.d0
+
       eoutc = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       
       sumin = 0.d0
@@ -724,7 +795,7 @@ C--------do loop over l --- done ----------------------------------------
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
          sumdl = sumdl * TUNe(Nejc,Nnuc)     ! Allowing for tuning of discrete levels
-      
+	
          if(IZA(Nnur).EQ.IZA(0)) THEN
            SCRtl(i,Nejc) = sumdl * CINRED(i) 
            Sum = Sum + sumdl    !* CINRED(i) 
@@ -769,7 +840,7 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
          !sumdl = sumdl * TUNe(Nejc,Nnuc)  
-         sumdl = sumdl * TUNe(Nejc,NTArget)
+	   sumdl = sumdl * TUNe(Nejc,NTArget)
 
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = (sumdl +sumtt -sumin)*CELred
@@ -846,11 +917,13 @@ C-----------Well... let it go down to the ground state
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
             POPlv(l,Nnuc) = 0.d0
             egd = ELV(l,Nnuc)
-            icse = min(INT(1.0001 + egd/DE),ndecse)
+C           icse = min(INT(2.0001 + egd/DE),ndecse)  
+            icse = min(INT(1.0001 + egd/DE),ndecse)  
             CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
             CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
 C-----------Add transition to the exclusive or inclusive gamma spectrum
+
             IF (ENDf(Nnuc).EQ.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
      &          ,INExc(Nnuc)) + gacs/DE
@@ -908,7 +981,8 @@ C-----------Normal level with branching ratios
                   gacs = gacs/(1 + BR(l,j,3,Nnuc))  !    int. conversion
 
                   egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-                  icse = min(INT(1.0001 + egd/DE),ndecse)
+C                 icse = min(INT(2.0001 + egd/DE),ndecse)    
+                  icse = min(INT(1.0001 + egd/DE),ndecse)    
                   if(icse==1) icse = 2  ! TEMPORARY; shift low energy gammas to the second bin   
                   CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
                   CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
