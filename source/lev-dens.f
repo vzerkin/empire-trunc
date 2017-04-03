@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-26 10:58:45 +0200 (Fr, 26 Aug 2016) $
-Ccc   * $Id: lev-dens.f 4747 2016-08-26 08:58:45Z rcapote $
+Ccc   * $Date: 2017-04-03 22:11:44 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Id: lev-dens.f 4882 2017-04-03 20:11:44Z rcapote $
 C
 C
 C
@@ -1018,8 +1018,7 @@ C
 C
 C Local variables
 C
-      INTEGER i, ia, iz, k
-      INTEGER INT
+      INTEGER ia, iz 
 
 C-----check of the input data ---------------------------------------
       ia = INT(A(Nnuc))
@@ -1050,16 +1049,20 @@ C-----check of the input data ---------------------------------------
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
 
 C-----set to 0 level density array
-      DO i = 1, NDEX
-         DO k = 1, NDLW
-            IF (BF.NE.0.0D0) THEN
-               RO(i,k,1,Nnuc) = 0.0
-               RO(i,k,2,Nnuc) = 0.0
-            ELSE
-               ROF(i,k,Nnuc) = 0.0
-            ENDIF
-         ENDDO
-      ENDDO
+C     DO i = 1, NDEX
+C       DO k = 1, NDLW
+C           IF (BF.NE.0.0D0) THEN
+C              RO(i,k,1,Nnuc) = 0.0
+C              RO(i,k,2,Nnuc) = 0.0
+C           ELSE
+C              ROF(i,k,Nnuc) = 0.0
+C           ENDIF
+C        ENDDO
+C     ENDDO
+
+      RO(:,:,:,Nnuc) = 0.d0
+      ROF(:,:,Nnuc) = 0.d0
+
       RETURN
       END
 
@@ -2068,7 +2071,7 @@ C
      &                 rocumd, rocumu, rocumul, rolev,
      &                 rotemp, ecrt !,ldshif(40)
 
-      INTEGER i, ij, iter, kk, kkl, kku, nplot
+      INTEGER ij, iter, kk, kkl, kku, nplot
 
 C-----fit level densities to discrete levels applying energy shift
 C-----which will linearly go to 0 at neutron binding energy
@@ -2099,13 +2102,15 @@ C-----than three
          iter = iter + 1
          kkl = 0
          kku = 0
-         DO kk = 1, NDEX
+C        DO kk = 1, NDEX
 C-----------clean RO matrix
-            DO i = 1, NDLW
-               RO(kk,i,1,Nnuc) = 0.d0
-               RO(kk,i,2,Nnuc) = 0.d0
-            ENDDO
-         ENDDO
+C           DO i = 1, NDLW
+C              RO(kk,i,1,Nnuc) = 0.d0
+C              RO(kk,i,2,Nnuc) = 0.d0
+C           ENDDO
+C        ENDDO
+	   RO(:,:,:,Nnuc) = 0.d0
+
          DO kk = 1, NEXreq
 C-----------decrease energy shift above the last level to become 0 at Qn
             exkk = (kk - 1)*defit

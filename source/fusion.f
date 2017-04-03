@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4879 $
+Ccc   * $Rev: 4882 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 21:16:47 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Date: 2017-04-03 22:11:44 +0200 (Mo, 03 Apr 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1607,6 +1607,7 @@ C-----Passing ELTL() and ELTLJ () to HRTW routine, note that they never contain
 C-----direct contribution !!!
 C
       DO i = 1, NDLW
+	   if(stl(i).LE.0.d0) CYCLE
          ELTl(i) = min(stl(i)*TUNetl(i),1.0d0)
          DO j = 1, mxj
            ELTlj(i,j) = min(stlj(i,j)*TUNetl(i),1.0d0)
