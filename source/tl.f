@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4866 $
+Ccc   * $Rev: 4876 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-04-03 21:10:36 +0200 (Mo, 03 Apr 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -5161,6 +5161,7 @@ C          2 PROTON
 C
 C Dummy arguments
 C
+      IMPLICIT NONE
       DOUBLE PRECISION El
       INTEGER Nejc, Nnuc
       LOGICAL TL_calc
@@ -5192,10 +5193,16 @@ C Local variables
 C
       DOUBLE PRECISION ak2, angstep, ecms, eee, elab,
      &                 xmas_nejc, xmas_nnuc, xratio, 
-     &                 CAVRss,CARRss,CAARss,CARDss,CAACss
+     &                 CAVRss,CARRss,CAARss,CARDss,CAACss,
+     &                 dtmp, ac, Ccoul, AlphaV 
 
-      INTEGER ikey, ip,  j, nd_cons, nd_nlvop, iaref, itmp
+      INTEGER ikey, ip,  j, nd_cons, nd_nlvop, iaref, itmp,
+     &        ncollm, npd, las, i, k, iparit, iatar, iztar
 
+      INTEGER mejob, mepot, meham, mesho, mehao, mesha, mesol,
+     &        mepri, meapp, mevol, merel, mecul, merzz, merrr,
+     &        medis, merip, medef, meaxi 
+      
       CHARACTER*132 ctmp
       INTEGER iwin, ipipe_move, ipipe
 
@@ -5255,8 +5262,8 @@ C-----------All levels with icollev(j)>LEVcc should be calculated by DWBA
 C-----Considering even closed channels in calculations
       ncollm = nd_cons
 C
-      iatar = A(0) 
-      iztar = Z(0)
+      iatar = int(A(0)) 
+      iztar = int(Z(0))
 C==============================================================================
 C     OPTMAN input parameters
 C     OPTMAN 1st line
@@ -5328,6 +5335,18 @@ C     Dispersive potentials
 C     If merip = 1 then potentials defined at every energy (loop over energies)
       merip = 0 
       if(idr.eq.0 .and. imodel.lt.4) merip = 1
+
+c     Deformations on levels
+      medef = 0
+C#17  MEDEF 0-DEFORMATIONS OF NON-GS-BAND LEVELS ARE INPUTTED AND CAN BE ADJUSTED
+C           1-DEFORMATIONS OF NON-GS-BAND LEVELS ARE CALCULATED FROM SOFT-ROTATOR MODEL
+C           2-DEFORMATIONS OF GS-BAND LEVELS AND NON-AXIAL BAND ARE FROM RIGID-ROTATOR MODEL      
+    
+c     Nucleus non-axiality      
+      meaxi = 0
+C#18  MEAXI 0-USES AXIAL WEIGHTS (DOES NOT AFFECT "EFFECTIVE" DEFORMATIONS)
+C           1-USES NON-AXIAL WEIGHTS      
+      
 c------------------------------------------------------------------------------
 
 C   Defining potential depths (needs changes in OPTMAN)
@@ -5381,7 +5400,7 @@ C-----CARD 1 : Title
 
       write(1,'(20i2.2)') 
      +mejob,mepot,meham,mepri,mesol,mesha,mesho,mehao,
-     +meapp,mevol,merel,mecul,merzz,merrr,medis,merip,0,0,0,0
+     +meapp,mevol,merel,mecul,merzz,merrr,medis,merip,medef,meaxi,0,0
 C
 C     Soft rotor hamiltonian
 C
