@@ -1,6 +1,6 @@
-!cc   * $Rev: 4866 $
+!cc   * $Rev: 4883 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+!cc   * $Date: 2017-04-03 22:31:12 +0200 (Mo, 03 Apr 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -2045,12 +2045,12 @@ C--------Coulomb barrier (20% decreased) setting lower energy limit
            CALL CHECK_DE_grid(EMAx(1)-qmin,NDECSE)
          ELSE
            if(ichanmin.eq.3) then
-             WRITE(8,'(A33,A5,A28,F7.2,A4)') 
+             WRITE(8,'(A33,A5,A28,F9.3,A4)') 
      &       'Exotermic reaction: Emission of ','alpha',
      &       ' neglected for Einc (CMS) < ',              
      &       0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
            else
-             WRITE(8,'(A33,A2,A28,F7.2,A4)') 
+             WRITE(8,'(A33,A2,A28,F9.3,A4)') 
      &       'Exotermic reaction: Emission of ',SYMbe(ichanmin),
      &       ' neglected for Einc (CMS) < ',              
      &       0.7d0*culbar + qmin - Q(0,1) - ELV(LEVtarg,0),' MeV'     
@@ -2058,8 +2058,8 @@ C--------Coulomb barrier (20% decreased) setting lower energy limit
          ENDIF
       ENDIF
 
-      WRITE(8,'(1x,''Number of requested energy points ='',i3,
-     &  ''   NDEX ='',i3)') NEXreq, NDEX
+      WRITE(8,'(1x,''Number of requested energy points ='',i4,
+     &  ''   NDEX ='',i4)') NEXreq, NDEX
       IF(2*NEX(1).GT.NDEX .and. FIRst_ein) WRITE(8,'(A,I4,A,A,I4)')  
      & '  WARNING: NDEX in dimension.h is ',NDEX,'  recommended',
      & ' value is ', 2*NEX(1)
