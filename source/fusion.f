@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4866 $
+Ccc   * $Rev: 4879 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-04-03 21:16:47 +0200 (Mo, 03 Apr 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1512,8 +1512,10 @@ C Neutron spectrum
               ie=MAX(nspecc+1-nxe,0)
               POPcse(ie,1,nxe,INExc(Nnur)) =
      &           POPcse(ie,1,nxe,INExc(Nnur)) + pops
-              POPcsed(ie,1,nxe,INExc(Nnur)) =
+              IF(LHMs.NE.0) THEN !HMS n & p only	
+                POPcsed(ie,1,nxe,INExc(Nnur)) =
      &           POPcsed(ie,1,nxe,INExc(Nnur)) + pops
+              ENDIF
               POPcseaf(ie,1,nxe,INExc(Nnur)) = 1.d0
               POPbin(ie,Nnur) = pops
              END DO
@@ -1536,8 +1538,10 @@ C Populate proton emission breakup-fusion residual nucleus
             ie=MAX(nspecc-nx,0)
             DO j=1,lmx
               pops = 0.5d0*DBRkup*dbfl(j,nx)
-              POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
-              POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+	        if(pops>0) then
+                POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+                POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+              endif
              END DO
            END DO
 
@@ -1548,7 +1552,7 @@ C Proton DDX
           DO nx=1,nxx
             DO nti=1,nthi
               pops=DBRkup*dbf(nti,nx)
-              CSEa(nx+1,nti,2) = CSEa(nx+1,nti,2) + pops
+	        if(pops>0) CSEa(nx+1,nti,2) = CSEa(nx+1,nti,2) + pops
              END DO
            END DO
         
@@ -1561,16 +1565,20 @@ C Proton spectrum
               ie=MAX(nspecc-nx,0)
               POPcse(ie,2,nx+1,INExc(Nnur)) =
      &            POPcse(ie,2,nx+1,INExc(Nnur)) + pops
-              POPcsed(ie,2,ie,INExc(Nnur)) =
+              IF(LHMs.NE.0) THEN !HMS n & p only	
+                POPcsed(ie,2,ie,INExc(Nnur)) =
      &            POPcsed(ie,2,nx+1,INExc(Nnur)) + pops
+              ENDIF
               POPcseaf(ie,2,nx+1,INExc(Nnur)) = 1.d0
               POPbin(ie,Nnur) = pops
              ENDDO
             ELSE
             DO nx=1,nxx
               pops=DBRkup*buspec(nx)            
-              CSEdbk(nx+1,2)=CSEdbk(nx+1,2)+pops
-              CSE(nx+1,2,1)=CSE(nx+1,2,1)+pops
+	        if(pops>0) then
+                CSEdbk(nx+1,2)=CSEdbk(nx+1,2)+pops
+                CSE(nx+1,2,1)=CSE(nx+1,2,1)+pops
+              endif
              END DO
            ENDIF
 

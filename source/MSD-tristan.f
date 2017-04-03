@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4848 $
+Ccc   * $Rev: 4879 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
+Ccc   * $Date: 2017-04-03 21:16:47 +0200 (Mo, 03 Apr 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3260,31 +3260,36 @@ C--------used for ENDF exclusive spectra
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
                pops = CSEmsd(icsp,Nejc)
-C              Commented on Dec 2011 by RCN, to keep integral of spectra = XS
-C              if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-               IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue
+	         IF(pops>0) THEN
+C               Commented on Dec 2011 by RCN, to keep integral of spectra = XS
+C               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+                IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue
                   POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &               POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
-                  POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
+
+                  IF(LHMs.NE.0 .and. Nejc.Ge.1 .and. Nejc.Le.3) THEN !HMS n & p only
+                    POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
      &               POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
-C--------------Correct last bin (not needed for POP as for this it is done at the end)
-C              IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
+                  ENDIF
+C---------------Correct last bin (not needed for POP as for this it is done at the end)
+C               IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
 C    &             - 0.5*CSEmsd(icsp,Nejc)
 
-C--------------DDX 
-               POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
+C---------------DDX 
+                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
 C   equivalent to POPcseaf when only the 1st emission is anisotropic
-C               DO na = 1,NDANG
+C                DO na = 1,NDANG
 C                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
 C     &                                             CSEa(icsp,na,Nejc)
 C                ENDDO
-C--------------DDX
-C--------------Bin population by MSD (spin/parity integrated)
-               POPbin(ie,Nnur) = pops
-               ELSE                                    !inclusive residue - add Popt directly to spectra
+C---------------DDX
+C---------------Bin population by MSD (spin/parity integrated)
+                POPbin(ie,Nnur) = pops
+                ELSE                                    !inclusive residue - add Popt directly to spectra
                   CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + pops
                   POPcseaf(0,Nejc,icsp,0) = 1.0D0
+                ENDIF
                ENDIF
             ENDDO
          ENDIF
@@ -3315,7 +3320,7 @@ C               IF (irec + 1.GT.NDEREC) GOTO 20
      &                  + csmsdl*weight
 C
               ENDDO
-   20       ENDDO
+            ENDDO
          ENDIF
       ENDIF
 C-----
