@@ -1,6 +1,6 @@
-!cc   * $Rev: 4848 $
+!cc   * $Rev: 4877 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
+!cc   * $Date: 2017-04-03 21:12:41 +0200 (Mo, 03 Apr 2017) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -48,7 +48,8 @@
      &,NDRVOM=3                                                         &
      &,NDRWOM=3                                                         &
      &,NDRVSO=3                                                         &
-     &,NDETL=NDEX+6                                                     &
+!    &,NDETL=NDEX+6                                                     &
+     &,NDETL=NDECSE                                                     &
      &,NDEREC=NDECSE                                                    &
      &,NDERO=NDEX                                                       &
      &,NDCC=10                                                          &
