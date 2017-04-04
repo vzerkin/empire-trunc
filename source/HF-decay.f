@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4884 $
+Ccc   * $Rev: 4885 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-04 09:40:47 +0200 (Di, 04 Apr 2017) $
+Ccc   * $Date: 2017-04-04 13:44:11 +0200 (Di, 04 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -97,7 +97,6 @@ C
         ENDIF
         WRITE (12,*)
      &' ---------------------------------------------------------------'
-
       ENDIF
 
       IF (FITomp.LE.0) THEN
@@ -153,54 +152,51 @@ C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
      &0.6,'' Q-value='',F10.6)') INT(Z(nnuc)), SYMb(nnuc), ia,
      &         AMAss(nnuc), QPRod(nnuc) + ELV(LEVtarg,0)
           ENDIF
-
-          IF(ENDf(nnuc).NE.0) THEN 
-            WRITE (8,*)
+          WRITE (8,*)
      &' ---------------------------------------------------------------'
-            WRITE (12,*)
+          WRITE (12,*)
      &' ---------------------------------------------------------------'
-            WRITE (12,
+          WRITE (12,
      &'(1X,/,10X,''Discrete level population '',      ''before gamma cas
      &cade'')')
-            WRITE (12,'(1X,/,10X,40(1H-),/)')
+          WRITE (12,'(1X,/,10X,40(1H-),/)')
  
-            DO il = 1, NLV(nnuc)
+          DO il = 1, NLV(nnuc)
 C-----------Check for the number of branching ratios
-              nbr = 0
-              DO ib = 1, NDBR
-                IF (BR(il,ib,2,nnuc).EQ.0.) EXIT
-                nbr = ib
-              ENDDO
-              IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
-     &          (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
-     &           nnuc.EQ.mt849)) ! .AND. ENDf(nnuc).NE.0)
+            nbr = 0
+            DO ib = 1, NDBR
+              IF (BR(il,ib,2,nnuc).EQ.0.) EXIT
+              nbr = ib
+            ENDDO
+            IF (nbr.EQ.0 .AND. il.NE.1 .AND. FIRst_ein .AND.
+     &        (nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR.
+     &         nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0)
      &        WRITE (8,*) ' WARNING: Branching ratios for level ', il,
      &                     ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                     ' are missing'
-              WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
-     &          XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
-     &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
+            WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+     &        XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
+     &        (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
 C-----------Next IF moves levels population to the ground state
 C-----------to avoid gamma cascade between discrete levels
 C-----------originating from the direct population
 C-----------of discrete levels by a neutron, proton or alpha.
 C-----------These gammas should not go into MT=91, 649, or 849.
-              IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
-     &                mt849) .AND. il.NE.1) THEN ! .AND. ENDf(nnuc).NE.0 ) THEN
-                POPlv(1,nnuc) = POPlv(1,nnuc) + CSDirlev(il,nejc)
-                POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
-              ENDIF
-            ENDDO ! end of the loop over discrete levels
-            WRITE (12,'(1X,/,10X,40(1H-),/)')
+            IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
+     &                mt849) .AND. il.NE.1 .AND. ENDf(nnuc).NE.0 ) THEN
+              POPlv(1,nnuc) = POPlv(1,nnuc) + CSDirlev(il,nejc)
+              POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
+            ENDIF
+          ENDDO ! end of the loop over discrete levels
+
+          WRITE (12,'(1X,/,10X,40(1H-),/)')
 C
-C-----------Decay direct population of discrete levels by a neutron,
-C-----------proton or alpha without storing emitted gammas in the spectra.
-            IF ((nnuc.EQ.mt91   .OR.  nnuc.EQ.mt649 .OR. 
-     &        nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0 .AND. il.NE.1) 
-     &        CALL DECAYD_DIR(nnuc, nejc)
-
-		ENDIF
-
+C---------Decay direct population of discrete levels by a neutron,
+C---------proton or alpha without storing emitted gammas in the spectra.
+          IF ((nnuc.EQ.mt91   .OR.  nnuc.EQ.mt649 .OR. 
+     &      nnuc.EQ.mt849) .AND. ENDf(nnuc).NE.0 .AND. il.NE.1) 
+     &      CALL DECAYD_DIR(nnuc, nejc)
+C
 C---------Write elastic to tape 12 and to tape 68
  1460     IF (nnuc.EQ.mt2) THEN
 C           ELCncs = CSDirsav(LEVtarg,NPRoject)/PIx4 ! isotropic 
@@ -489,7 +485,6 @@ C
               popleft = popleft + POP(ke,jcn,ipar,nnuc)*DE
               CYCLE
             ENDIF
-
             DO nejc = 1, NEJcm !over ejectiles
               ares = A(nnuc) - AEJc(nejc)
               zres = Z(nnuc) - ZEJc(nejc)
@@ -680,8 +675,6 @@ C
       ENDIF
 
       csum = 0.d0
-C     IF(CSPrd(nnuc).gt.CSMinim .or. 
-C    &   (CSPrd(nnuc).gt.0.d0 .and. EINl.LT. 1.d0) ) THEN
       IF (CSPrd(nnuc).gt.0) THEN 
          IF (.not.(nnuc.EQ.1. OR. nnuc.EQ.mt91
      &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849))  THEN 
@@ -722,7 +715,12 @@ C
 C            nnuc.EQ.1. OR. nnuc.EQ.mt91
 C    &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849)
 C
-             IF (ENDF(nnuc).gt.0) WRITE (8,
+             DO il = 1, NLV(nnuc)
+               csum = csum + POPlv(il,nnuc)
+             ENDDO 
+C            IF(csum.gt.CSMinim) THEN
+             IF(csum.gt.0) THEN
+               IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
      &  3X,''NOTE:   was not included in emission spectra and direct ''/
      &  3X,''NOTE:   particle contribution was shifted to the g.s.'')')
@@ -737,7 +735,8 @@ C
                  WRITE (12,'(1X,/,10X,''Discrete level population includ
      &ing continum contribution'')')
                  WRITE (12,'(1X,/,10X,40(1H-),/)')
-             endif
+               endif
+             ENDIF 
                  
          ENDIF
           
@@ -1635,29 +1634,26 @@ C--------divides outgoing energies
             icse = (exqcut - (ie - 1)*DE)/DE + 1.001
 C-----------Daughter bin
             IF (icse.LE.0) EXIT
-
             erecejc = (ie - 1)*DE/recorr
             DO ire = 1, NDEREC          !over recoil spectrum
-              IF(RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc).GT.0.d0) THEN
-                 erecpar = (ire - 1)*DERec
-                 DO na = 1, NDANG
-                   erecoil = erecejc+ erecpar+ 2.0*SQRT(erecejc*erecpar)
-     &                      *CANgler(na)
-                   irec = erecoil/DERec + 1.001
-                   weight = (erecoil - (irec - 1)*DERec)/DERec
-                   IF (irec + 1.GT.NDEREC) EXIT
-                   csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
-     &                    SANgler(na)*coeff*recorr
-	           
-                   RECcse(irec,icse,nnur)=RECcse(irec,icse,nnur)
-     &               + csmsdl*(1.0 - weight)
-                   RECcse(irec + 1,icse,nnur)=RECcse(irec + 1,icse,nnur)  
-     &               + csmsdl*weight
-                 ENDDO                  !over angles
-              endif
+               IF(RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc).GT.0.d0) THEN
+               erecpar = (ire - 1)*DERec
+                  DO na = 1, NDANG
+                    erecoil = erecejc + erecpar + 
+     &                         2.0*SQRT(erecejc*erecpar)*CANgler(na)
+                    irec = erecoil/DERec + 1.001
+                    weight = (erecoil - (irec - 1)*DERec)/DERec
+                    IF (irec + 1.GT.NDEREC) EXIT
+                    csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
+     &                       SANgler(na)*coeff*recorr
+                    RECcse(irec,icse,nnur) = RECcse(irec,icse,nnur)
+     &                  + csmsdl*(1.0 - weight)
+                    RECcse(irec + 1,icse,nnur) =   
+     &                  RECcse(irec + 1,icse,nnur) + csmsdl*weight
+                  ENDDO                  !over angles
+               ENDIF
             ENDDO                  !over recoil spectrum
          ENDDO                  !over  daugther excitation
-
 C--------Decay to discrete levels (stored with icse=0)
          exqcut = exqcut + ECUt(nnur)
          DO il = 1, NLV(nnur)
@@ -1665,18 +1661,18 @@ C--------Decay to discrete levels (stored with icse=0)
             erecod = erecod/recorr
             IF (erecod.LT.0) GOTO 100
             DO ire = 1, NDEREC      !over recoil spectrum
-              IF(RECcse(ire,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN 
-                DO na = 1, NDANG !over angles
-                  erecoil = (ire - 1)*DERec + erecod +
-     &                       2.0*SQRT((ire - 1)*DERec*erecod)
-     &                      *CANgler(na)
-                  irec = erecoil/DERec + 1.001
-                  weight = (erecoil - (irec - 1)*DERec)/DERec
-                  IF (irec.GT.NDEREC) GOTO 60
-                  RECcse(irec,0,nnur) = RECcse(irec,0,nnur)
-     &                                  + RECcse(ire,Ke,Nnuc)
-     &                                  *REClev(il,nejc)*(1.0 - weight)
-     &                                  *SANgler(na)*coeff
+               IF(RECcse(ire,Ke,Nnuc)*REClev(il,nejc).GT.0.d0) THEN 
+                  DO na = 1, NDANG !over angles
+                     erecoil = (ire - 1)*DERec + erecod +
+     &                          2.0*SQRT((ire - 1)*DERec*erecod)
+     &                         *CANgler(na)
+                     irec = erecoil/DERec + 1.001
+                     weight = (erecoil - (irec - 1)*DERec)/DERec
+                     IF (irec.GT.NDEREC) GOTO 60
+                     RECcse(irec,0,nnur) = RECcse(irec,0,nnur)
+     &                                     + RECcse(ire,Ke,Nnuc)
+     &                                     *REClev(il,nejc)*(1.0-weight)
+     &                                     *SANgler(na)*coeff
 c------------------------
 !                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
 !     &               .AND.na.EQ.10) THEN
@@ -1688,15 +1684,14 @@ c------------------------
 !     &            REClev(il,nejc)
 !                  ENDIF
 c------------------------
-                  IF (irec + 1.GT.NDEREC) GOTO 60
-                  RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
-     &               + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
-     &               *weight*SANgler(na)*coeff
-                ENDDO                  !over angles
-              ENDIF
+                     IF (irec + 1.GT.NDEREC) GOTO 60
+                     RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
+     &                  + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
+     &                  *weight*SANgler(na)*coeff
+                  ENDDO                  !over angles
+               ENDIF
    60       ENDDO                  !over recoil spectrum
          ENDDO                  !over levels
-
   100 ENDDO                  !over ejectiles
 C-----
 C-----Parent recoil spectrum after gamma decay
@@ -1705,29 +1700,23 @@ C-----
       nejc = 0
 C-----gamma decay to continuum
       DO ie = 1, NDECSE !over ejec. energy (daughter excitation)
-        icse = (EX(Ke,Nnuc) - (ie - 1)*DE - ECUt(nnur))/DE + 1.001
-        IF (icse.LE.0) CYCLE  
-C-------!daughter bin
-        DO irec = 1, NDEREC         !over recoil spectrum
-          IF(RECcse(irec,Ke,Nnuc)*AUSpec(ie,0).GT.0) THEN
-             RECcse(irec,icse,nnur)
+         icse = (EX(Ke,Nnuc) - (ie - 1)*DE - ECUt(nnur))/DE + 1.001
+         IF (icse.LE.0) CYCLE  
+C--------!daughter bin
+         DO irec = 1, NDEREC         !over recoil spectrum
+           RECcse(irec,icse,nnur)
      &          = RECcse(irec,icse,nnur) + RECcse(irec,Ke,Nnuc)
      &          *AUSpec(ie,0)/DERec
-          ENDIF
-        ENDDO                  !over recoil spectrum
+         ENDDO                  !over recoil spectrum
       ENDDO                  !over  daugther excitation
-
-C-------gamma decay to discrete levels (stored with icse=0)
+C-----gamma decay to discrete levels (stored with icse=0)
       DO il = 1, NLV(nnur)
-        DO ire = 1, NDEREC             !over recoil spectrum
-          IF(RECcse(irec,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN
+         DO ire = 1, NDEREC             !over recoil spectrum
             RECcse(ire,0,nnur) = RECcse(ire,0,nnur)
      &                           + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
      &                           /DERec
-          ENDIF
-        ENDDO                  !over recoil spectrum
+         ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
-      RETURN	 
       END
 
       SUBROUTINE PRINT_RECOIL(Nnuc,React) !,qout)
@@ -1746,8 +1735,7 @@ C     DOUBLE PRECISION qout
 C
 C Local variables
 C
-      DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,recorr,cmul,stmp
-      DOUBLE PRECISION dtmp,sstmp
+      DOUBLE PRECISION csum, ftmp, corr, xsdisc, esum, recorr, cmul,stmp
       INTEGER ie, ilast
 
 C     IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
@@ -1779,7 +1767,7 @@ C     IF(csum.LE.CSMinim) RETURN
       ilast = MIN(ilast + 1,NDEX)
 
       if (ilast.gt.1)  then
-        csum  = csum -  
+        csum  = csum - 
      &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
         esum  = esum - RECcse(ilast,0,Nnuc)*
      &          0.5d0*FLOAT(ilast - 1)*DERec/recorr
@@ -1801,26 +1789,19 @@ C
       WRITE (12,*) ' '
       WRITE (12,'(''    Energy    mb/MeV'')')
       WRITE (12,*) ' '
-
-	dtmp = 1.d0
-      IF(ENDF(nnuc).eq.2) dtmp = CSInc(nnuc)/(csum*DERec)
-
-	sstmp = 0.d0
       DO ie = 1, ilast
-        stmp = RECcse(ie,0,Nnuc)*dtmp
+        stmp = RECcse(ie,0,Nnuc) 
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
-	  sstmp = sstmp + stmp
       ENDDO
-
       WRITE(12,
      &  '(/2x,''Ave.  E  of recoil spectrum   '',G12.6,'' MeV  for '',
      &  I3,''-'',A2,''-'',I3,A21)') esum/csum,
      &  INT(Z(nnuc)),SYMb(nnuc),INT(A(nnuc)),REAction(nnuc)     
 
       xsdisc = 0.d0        
-      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)  
+      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
 
       IF (ENDf(nnuc).LE.1) THEN
         cmul = csum*DERec/(CSPrd(nnuc)-xsdisc)  ! multiplicity
@@ -1829,14 +1810,12 @@ C       WRITE(12,
 C    &  '( 2x,''Ave. <Q> of recoil spectrum   '',G12.6,'' MeV'')') 
 C    &     cmul*esum/csum
         WRITE(12,'(2x,''Recoil multiplicity          '',G12.6)') cmul
-        WRITE(12,
+      ENDIF 
+      WRITE(12,*)
+
+      WRITE(12,
      &     '( 2x,''Integral of recoil spectrum   '',G12.6,'' mb'' )') 
      &       csum*DERec
-      ELSE
-        WRITE(12,
-     &     '( 2x,''Integral of recoil spectrum   '',G12.6,
-     &     '' mb (incl)'' )') sstmp*DERec
-      ENDIF 
         
       if(xsdisc.gt.0.d0  .and. ENDf(nnuc).eq.1) then
         WRITE (12,'(2X,''Cont. popul. before g-cascade '',
@@ -1845,32 +1824,35 @@ C    &     cmul*esum/csum
      &                G12.6,'' mb'')') xsdisc
       endif 
 
-      IF(ENDF(nnuc).eq.2) THEN
-        corr = CSInc(Nnuc)/(sstmp*DERec)
-	  WRITE(12,
-     &  '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb (incl)'')') 
-     &      CSInc(Nnuc)
-      ELSE
-        corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+C     IF(ENDf(nnuc).EQ.1) then      
+C       corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+C     ELSE
+C       corr = CSPrd(Nnuc)/(csum*DERec)
+C     ENDIF
+      corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+
+      IF(xsdisc.gt.0) THEN
 	  WRITE(12,
      &     '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)-xsdisc
+      ELSE
         WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)
 	ENDIF
 
-      IF(ENDF(nnuc).eq.2) THEN
+      IF(xsdisc.gt.0) THEN
 	  WRITE(12,
-     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,''    (incl)'')') 
-     &  corr 
-      ELSE  
-	  WRITE(12,
-     &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6)') corr 
+     &     '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,'' mb'')') 
+C    &      corr 
+     &      (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
+	ELSE
         WRITE(12,
-     &  '( 2x,''Ratio Production XS/Recoil XS '',G12.6)') 
+     &     '( 2x,''Ratio Production XS/Recoil XS '',G12.6,'' mb'')') 
+C    &      corr 
      &      CSPrd(Nnuc)/(csum*DERec)
-	ENDIF	
+      ENDIF	 
+	
       WRITE(12,*)
       WRITE(12,*)
 
@@ -2081,7 +2063,8 @@ C-----fission
          IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.GT.0.d0 .AND.
      &       POPbin(Ke,Nnuc).GT.0.d0)
      &       CALL EXCLUSIVEF(Ke,Nnuc,Fisxse)
-	
+C    &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
+
       ELSE ! Multimodal
          DO M = 1, INT(FISmod(Nnuc)) + 1
             Fisxse = Fisxse + Sumfism(M)*Xnor
@@ -2091,6 +2074,7 @@ C-----fission
          IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.GT.0.d0 .AND.
      &       POPbin(Ke,Nnuc).GT.0.d0)
      &       CALL EXCLUSIVEF(Ke,Nnuc,Fisxse)
+C    &       CALL EXCLUSIVEC(Ke,0, -1,Nnuc,0,Fisxse)
       ENDIF
       RETURN
       END
