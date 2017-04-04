@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4880 $
+Ccc   * $Rev: 4884 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 21:19:54 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Date: 2017-04-04 09:40:47 +0200 (Di, 04 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -722,12 +722,7 @@ C
 C            nnuc.EQ.1. OR. nnuc.EQ.mt91
 C    &       .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.mt849)
 C
-             DO il = 1, NLV(nnuc)
-               csum = csum + POPlv(il,nnuc)
-             ENDDO 
-C            IF(csum.gt.CSMinim) THEN
-             IF(csum.gt.0) THEN
-               IF (ENDF(nnuc).gt.0) WRITE (8,
+             IF (ENDF(nnuc).gt.0) WRITE (8,
      &'(3X,''NOTE: Due to ENDF option discrete levels contribution'',/, 
      &  3X,''NOTE:   was not included in emission spectra and direct ''/
      &  3X,''NOTE:   particle contribution was shifted to the g.s.'')')
@@ -742,8 +737,7 @@ C            IF(csum.gt.CSMinim) THEN
                  WRITE (12,'(1X,/,10X,''Discrete level population includ
      &ing continum contribution'')')
                  WRITE (12,'(1X,/,10X,40(1H-),/)')
-               endif
-             ENDIF 
+             endif
                  
          ENDIF
           
