@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-12-13 00:07:48 +0100 (Di, 13 Dez 2016) $
+Ccc   * $Date: 2017-04-05 00:50:07 +0200 (Mi, 05 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -150,6 +150,8 @@ C-M  16/04 Fix bug in removing all-zero cross sections.
 C-M  16/07 Check dynamic range of angular distributioons and switch to
 C-M        tabular representation if needed.
 C-M  16/12 Fix the patch to switch to tabular representation.
+C-M  17/04 Extrapolate non-threshold reactions as 1/v.
+C-M        Fix roundoff errors in total inelastic.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -176,7 +178,7 @@ C-M     particle distributions are coded in ENDF File-6.
 C-M  
 C-M  In the first sweep radionuclide production cross sections are
 C-M  located and the MT numbers are assigned, when possible.
-C-M  Cross sections, which can not be identified uniquely by an MT
+C-M  Cross sections, which cannot be identified uniquely by an MT
 C-M  number are assigned MT=10(Z*1000+A)+LFS where LFS is the final
 C-M  isomeric state of the nuclide. The spin of the target nucleus,
 C-M  the S0-strength function, the average gamma width, the average
@@ -3709,7 +3711,7 @@ C-
       CHARACTER*30 CHEN
       CHARACTER*80 REC
 C* Declare XS,XC,XI,XX double precision to avoid underflow on reading
-      DOUBLE PRECISION XS,XC,XI,XX,XSPROD,XSSUM,XPOP,XL0
+      DOUBLE PRECISION XS,XC,XI,XX,XSPROD,XSSUM,XPOP,XL0,XL
 C...There seems to be a bug in Lahey compiler - next statement helps
       SAVE QI
       DIMENSION    EIN(MXE),XSC(MXE,MXT),XSG(MXE,MXT),QQM(MXT),QQI(MXT)
@@ -3736,6 +3738,20 @@ C*   ISPE Flag to mark that spectra other than (z,x) are given
           XSG(J,I)=-1
         END DO
       END DO
+      XL0 =0
+      XL  =0
+      ELI1=0
+      ELA1=0
+      ELP1=0
+      QMI =0
+      QMA =0
+      QMP =0
+      QII =0
+      QIA =0
+      QIP =0
+      JLI =0
+      JLP =0
+      JLA =0
 C*
 C* Search EMPIRE output for specific strings
   110 READ (LIN,891,END=700) REC
@@ -4236,9 +4252,8 @@ C* Special case when no discrete levels are given
         IF(MT0.EQ.800) MT=107
         GO TO 311
       END IF
-      XL0=0
-      EL1=0
-      JL1=0
+      XL0 =0
+      XL  =0
 C* Next could be elastic, discrete level or continuum cross section
   351 READ (LIN,891,END=710) REC
       IF(REC( 1:23).EQ.' ELASTIC CROSS SECTION='     ) GO TO 370
@@ -4256,6 +4271,7 @@ C* Positioned to read discrete levels
       READ (LIN,891)
       READ (LIN,891)
       XI=0
+      XC=0
       JL=0
 C* For incident neutrons allow ground state for other particles
       IF(IZI.EQ.   1 .AND. MT0.NE. 50) JL=-1
@@ -4265,23 +4281,27 @@ C* For incident alphas allow ground state for other particles
       IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
 C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,II,X,XS,NBR
+      DO WHILE (NBR.GT.7)
+        READ (LIN,891)
+        NBR=NBR-7
+      END DO
+C*    -- Test for last level (IL=0 for reading blank line)
+      IF(IL.LE.0 ) GO TO 351
+      EL=EL*1.E6
       XS=XS/1000
+      XI=XI+XS
+C*    -- Sum discrete inelastic, exclude compound elastic
+C*       (might not work for incident charged particles)
+      IF(IZI.NE.1 .OR. NINT(EL/100).NE.NINT(QQ/100)) XL=XL+XS
 c...
 c...  if(mt.ge.800) then
 c...  print *,'Read discr.lvl. ee,xs,xi,il,el',ee,xs,xi,il,el,mt0,jl
 c...  end if
 c...
-C*      -- Assign spin from first level when product=target
+C*    -- Assign spin from first level when product=target
       IF(IZA.EQ.JZA .AND. IL.EQ.1) SPI=X
-      DO WHILE (NBR.GT.7)
-        READ (LIN,891)
-        NBR=NBR-7
-      END DO
-C* Test for last level (IL=0 for reading blank line)
-      IF(IL.LE.0 ) GO TO 351
-      EL=EL*1.E6
-      XI=XI+XS
-C* Exclude level that results in the same energy state (=elastic by def.)
+C*    -- Exclude level that results in the same energy state
+C*       (=elastic by definition)
       IF(IZI.EQ.1 .AND. NINT(EL/100).EQ.NINT(QQ/100)) THEN
 c...
 c...    print *,' Exclude discrete level il,el,xs,jl',il,el,xs,jl,qq
@@ -4289,9 +4309,6 @@ c...
         XL0=XS
         GO TO 352
       END IF
-C*    -- Save the level energy of the first level
-        IF(JL1.EQ.0) EL1=EL
-        JL1=1
 c... Inelastic scattering on metastable target to ground is MT51, not 50
 c...  MT=MT0-1+IL
       JL=JL+1
@@ -4329,15 +4346,32 @@ C* Reconstruct Q values from MT and the binding energies if necessary
           END IF
         END DO
       END IF
+C*    -- Save the level energy of the first and last level
       QI      =QM-EL
+      IF     (MT0.EQ. 50) THEN
+        IF(JLI.EQ.0) ELI1=EL
+        QII=QI
+        QMI=QM
+        JLI=1
+      ELSE IF(MT0.EQ.600) THEN
+        IF(JLP.EQ.0) ELP1=EL
+        QIP=QI
+        QMP=QM
+        JLP=1
+      ELSE IF(MT0.EQ.800) THEN
+        IF(JLA.EQ.0) ELA1=EL
+        QIA=QI
+        QMA=QM
+        JLA=1
+      END IF
       QQM(IXS)=QM
       QQI(IXS)=QI
 c...
-c...  print *,'New discrete level MT,ee,xs',MT,ee,xs
+c...  print *,'New discrete level MT,ee,xs,qi',MT,ee,xs,qi
 c...
 C* Enter cross section for this discrete level
   360 XSC(NEN,IXS)=XS
-C*      Save QI for this level
+C*    -- Save QI for this level
       QI=QQI(IXS)
       QM=QQM(IXS)
       GO TO 352
@@ -4387,7 +4421,8 @@ C* Positioned to read total (discrete+continuum) cross section
       READ (REC,803) XC
       XC=XC/1000
 c...
-c...  print *,'Discrete+continuum xs,ipop,xi',xc,ipop,xi
+c...  print *,'Discrete+continuum xs,ipop,xi,xl0',xc,ipop,xi,xl0
+c...  print *,'Discrete+continuum ee,xc,xl0',ee,xc,xl0
 c...
 C* If inelastic, add total inelastic
       IF(XC.GT.0 .AND. MT0.EQ.50) THEN
@@ -4403,10 +4438,17 @@ C*      Test if reaction is already registered
           IF(NXS.GT.MXT) STOP 'EMPEND ERROR - MXT limit exceeded'
           IXS=NXS
         END IF
+c...
+c...    print *,'mt,qii,qmi,eli1',mt,qii,qmi,eli1
+c...
+        QI=QM-ELI1
         MTH(IXS)=MT
         QQM(IXS)=QM
-        QQI(IXS)=QM-EL1
-  391   XSC(NEN,IXS)=(XC-XL0)
+        QQI(IXS)=QI
+  391   CONTINUE
+C...    -- Discrete levels are summed into XL without compound contrib.
+C...    XSC(NEN,IXS)=(XC-XL0)
+        XSC(NEN,IXS)=    XL
       END IF
 C* Subtract the discrete levels
 C...
@@ -4429,14 +4471,26 @@ C...
 C* Skip continuum if its contribution is negligible
       IF(XS.LE.0) GO TO 110
 C* Add continuum to the list
-      IF(MT0.EQ. 50) MT= 91
-      IF(MT0.EQ.600) MT=649
-      IF(MT0.EQ.800) MT=849
+      IF(MT0.EQ. 50) THEN
+        MT= 91
+        QI=QII
+        QQ=QMI
+      ELSE IF(MT0.EQ.600) THEN
+        MT=649
+        QI=QIP
+        QQ=QMP
+      ELSE IF(MT0.EQ.800) THEN
+        MT=849
+        QI=QIA
+        QQ=QMA
+      END IF
 C* Reaction QM value from the last discrete level
 C* Reaction QI may be lower due to (z,g+x) reactions
-      QIE=-0.99*EE*AWR/(AWR+AWI)
-      QI =MAX(QI,QIE)
+      QIE=QQ-0.99*EE*AWR/(AWR+AWI)
 C...
+C...  if(mt.eq.91) print *,'mt,ee,qie,qi,qq',mt,ee,qie,qi,qq
+C...
+      QI =MAX(QI,QIE)
 C...  write(ler,*) 'IPOP',ipop
 C...
       IF(IPOP.GT.0) GO TO 312
@@ -4708,6 +4762,7 @@ C-V  12/02 Set LCT=2 after careful review of Empire methods.
 C-V  12/01 Set LCT=1 for fission spectra
 C-V  16/01 Set LANG to switch between Legendre and tabular format
 C-V  16/12 Set RMIN for switching to tabular representation
+C-V  17/03 Improved treatment of yields for threshold in yields of MT5
 C-Description:
 C-D  Error trap flags:
 C-D  IER = -1  Corrupted work array?
@@ -4740,6 +4795,10 @@ C* Test print filenames and logical file units
       DATA L92,LCU,LPT/-30,31,32/
       ZRO=0
       IER=0
+      XSMAL=1.E-10
+
+      lae92232=0
+
 C* Threshold F_back/F_forw for switching to tabular representation
       RMIN=1.E-5
 C* Test print files
@@ -4871,18 +4930,27 @@ C* File scanned for particles - eliminate unknown particles
   140 IK=0
       JK=NK
       NK=0
-      DO 142 J=1,JK
-      IF(IZAK(J).GE.0) THEN
-        NK=NK+1
-        POUT(NK)=POUT(J)
-        IZAK(NK)=IZAK(J)
-        AWPK(NK)=AWPK(J)
-      ELSE
-C* Unidentified outgoing particle
-        WRITE(LTT,910) POUT(J),MTC
-        WRITE(LER,910) POUT(J),MTC
-      END IF
-  142 CONTINUE
+      DO J=1,JK
+C*      -- Check if x.s. exist for the recoilS
+        JZAK=-1
+        DO K=1,NXS
+          IF(MTH(K).LT.10010 .OR. IZAK(J)*10+5 .EQ. MTH(K)) THEN
+            JZAK=IZAK(J)
+            EXIT
+          END IF
+        END DO
+        IF(JZAK.GE.0) THEN
+C*        -- Save the particle
+          NK=NK+1
+          POUT(NK)=POUT(J)
+          IZAK(NK)=JZAK
+          AWPK(NK)=AWPK(J)
+        ELSE
+C*        -- Unidentified outgoing particle
+          WRITE(LTT,910) POUT(J),IZAK(J),MTC
+          WRITE(LER,910) POUT(J),IZAK(J),MTC
+        END IF
+      END DO
 C*
 C* Process the spectra - Search for the reaction header cards
   200 IK=IK+1
@@ -4896,6 +4964,7 @@ c...      NE6N=0
       YL0= 1
       ETEF=0
       LTTE=1
+      IFRST=0
 C...
 C... Use tabular angular distributions for charged particles
 C...  IF(IZAK(IK).GE.1001) LTTE=3
@@ -5612,8 +5681,8 @@ C*
 C* Distributions for one incident energy processed - define yields
       NE6=NE6+1
 c...
-c...  print *,'      Processed energy ne6',ne6,ee,eth
-c...  print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
+C...  print *,'      Processed energy ne6',ne6,ee,eth
+C...  print '(1p,10e12.3)',(rwo(j),j=lpk,lb1)
 c...
       IF(MT6.LT.0) GO TO 210
 C* Particle multiplicity for gammas and light particles in MT 5
@@ -5637,21 +5706,47 @@ C*      -- Recoil multiplicities in MT 5 from residual/x.s. ratio
 C*      -- Move first energy to lower boundary, if necessary
         EIS(NE6)=EE
         YLD(NE6)=(SPC/XS3)
-        IFRST=0
+        ZSX=0
+c...
+c..    print *,' ne6,E,izap',ne6,ee,izap,nxs
+c..
         DO I=1,NXS
+c...
+c...      print *,'      mth',i,mth(i),ifrst
+c...
           IF(MTH(I).EQ.IZAP*10+5) THEN
 C*          -- Find residual production cross section
             XSZ=XSC(JE3,I)
-            IF(IFIRST.EQ.0 .AND. XSZ.LT.1.E-8) XSZ=0
-            IF(XSZ.GT.0) IFIRST=I
+C*          -- Locate the first non-zero cross section
+            IF(IFRST.EQ.0) THEN
+              ETHP=-QQI(I)*(AWR+AWI)/AWR
+c...
+c...          print *,'  ne6,E,qi,ethp,xsz',ne6,ee,qqi(i),ethp,xsz
+c...
+              IF(EE.GT.ETHP .AND. XSZ.GE.XSMAL) THEN
+                IF(NE6.GE.2) THEN
+                  IF(EIS(NE6-1).LT.ETHP) THEN
+                    EIS(NE6-1)=ETHP
+                    YLD(NE6-1)=0
+                    IFRST=1
+                  END IF
+                END IF
+              ELSE
+                XSZ=0
+              END IF
+            END IF
             YLD(NE6)=XSZ/XS3
-C...
-c...        IF(izap.eq.24053)
-c... &      print *,'zap,ee,spc,xs3,ne6',izap,ee,spc,xs3,ne6
-c... &             ,XSZ
-C...
+            EXIT
           END IF
         END DO
+C...
+C...    IF(izap.eq.92232) THEN
+C...      print *,'EIS',(EIS(J),J=1,NE6)
+C...      print *,'zap,ee,spc,xs3,ne6',zap,ee,spc,xs3,ne6
+C... &           ,XSZ
+c...      stop
+C...    end if
+C...
       END IF
       IF(JT6.NE.5 .AND. (IZAP.EQ.1 .AND.XS3.GT.0 ) ) THEN
 C*       -- Check for consistency between the spectrum integral and
@@ -5694,6 +5789,18 @@ c...
           WRITE(LER,995) '      No distribution data for particle ',IZAP
           NSK=NSK+1
           GO TO 704
+        END IF
+      END IF
+      IF(NYL.NE.1) THEN
+C*      -- Insert incident particle threshold for yield
+        IF(EIS(1).GT.ETH) THEN
+          DO I=1,NP
+            EIS(NP+2-I)=EIS(NP+1-I)
+            YLD(NP+2-I)=YLD(NP+1-I)
+          END DO
+          EIS(1)=ETH
+          YLD(1)=0
+          NP=NP+1
         END IF
       END IF
       RWO(LXA   )=ZAP
@@ -5775,6 +5882,7 @@ c...
       NW=LB1-LPK
       DO I=1,NW
         RWO(LP1-1+I)=RWO(LPK-1+I)
+        if(lpk-1+i.eq.lae92232) lae92232=lp1-1+i
       END DO
       LBL=LP1+NW
 c...
@@ -5794,6 +5902,9 @@ C* All data for a reaction processed
       MTH(IT)=-MT
 C* Check for skipped particles
       NK=NK-NSK
+
+      if(lae92232.gt.0) print *,'final eth',ik,rwo(lae92232)
+
       RETURN
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
@@ -5809,8 +5920,8 @@ C*
   891 FORMAT(A136)
   909 FORMAT(' EMPEND WARNING - MT',I4,' E',1P,E10.3
      1      ,'eV  Expected x.s.',E10.3,'b  Dif.',0P,F6.1,'%')
-  910 FORMAT(' EMPEND WARNING - Can not recognise spectrum for '
-     1      ,A8,' MT',I8)
+  910 FORMAT(' EMPEND WARNING - No x.s. data for '
+     1      ,A8,' ZAP',I6' MT',I8)
   912 FORMAT(' EMPEND WARNING - Spectrum not processed for MT',I6/
      1       '                  No cross section data available')
   914 FORMAT(' EMPEND WARNING - skip MT',I4,' Zap',I6,' Ein'
@@ -6338,7 +6449,7 @@ C-
       DIMENSION    EIN(MXE),XSC(MXE,MXT),MTH(MXT),QQM(MXT),QQI(MXT)
      1            ,RWO(MXR)
 C* Only one interpolation range is allowed, hence array length is one.
-      DIMENSION NBT(1),INR(1)
+      DIMENSION NBT(20),INR(20)
 C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
       DATA XSMALL,ZRO/ 1.0E-34, 0./
       DATA PTST/'        '/
@@ -6505,9 +6616,18 @@ C* Remove redundant zeroes below pseudo-threshold
         RWO(LY  )=0
         RWO(LY+1)=0
       END DO
-C* Extrapolate points down to EMIN
+C* Define the interpolation law as lin-lin
+      NR    =1
+      INR(1)=2
+      NBT(1)=NEO
+      IF(LX.LT.1) THEN
+        print *,'ERROR - Invalid LX,LY',LX,LY
+        STOP 'EMPEND ERROR - assigning LX in WRIMF3'
+      END IF
+C* Extrapolate points down to EMIN for incident neutrons
       IF(IZI.EQ.1 .AND. QQI(IT).GE.0) THEN
         IF(RWO(LY+1).GT.0) THEN
+          E1 =RWO(LX)
           EE =ETHRM
           YY =RWO(LY)
           IF( LRP.GT.0 .AND.
@@ -6515,15 +6635,29 @@ C* Extrapolate points down to EMIN
             EE=RWO(LX)
             YY=0
           END IF
-C       TO AVOID NEGATIVE OR ZERO INDEXES, RCN
-          LX =max(LX-2,1)
-          LY =max(LY-2,1)
-C       TO AVOID NEGATIVE OR ZERO INDEXES, RCN
-          NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
-          RWO(LY  )=YY
-          RWO(LY+1)=YY
+          IF(YY.GT.0 .AND. 
+     &          ((MT.LT.452 .AND.MT.NE.2) .OR.
+     &            MT.GT.456)) THEN
+C*          -- Extrapolate to thermal as 1/v
+C*             except elastic and nu-bar
+c...
+c...          print *,mt,emin,ee,e1,yy
+c...          if(mt.gt.801) stop
+c...
+            RWO(LY  )=YY*SQRT(E1/EMIN)
+            RWO(LY+1)=YY*SQRT(E1/EE)
+            NR    =2
+            NBT(1)=3
+            INR(1)=5
+            NBT(2)=NEO
+            INR(2)=2
+          ELSE
+C*          -- Extrapolate flat
+            RWO(LY  )=YY
+            RWO(LY+1)=YY
+          END IF
         ELSE
           RWO(LX)=EMIN
         END IF
@@ -6536,9 +6670,6 @@ C* Write HEAD record
       IF(MF.EQ.1) L2=2
       CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR,L1,L2,N1,N2)
 C* Write TAB1 record
-      NR    =1
-      INR(1)=2
-      NBT(1)=NEO
       CALL WRTAB1(LOU,MAT,MF,MT,NS,QQM(IT),QQI(IT), 0, 0
      1           ,NR,NEO,NBT,INR,RWO(LX),RWO(LY))
 C* Write CONT record - end of data set
@@ -6769,7 +6900,7 @@ C*        -- Print isotropic threshold distribution (if necessary)
           END IF
         END IF
 C*      -- Process the main data block
-        RR  =0.
+        RR  =0
         L2  =LL
         E2  =RWO(L2)
 c...    
@@ -6808,8 +6939,9 @@ C*       --Linearly interpolate angular distributions to EOU
           E2  =RWO(L2)
           TST =DLVL*EIN*1E-6
 c...    
-C...      print *,'iep,nep,na1,EIN,EOU,e1,e2'
-C... &            ,iep,nep,na1,EIN,EOU,e1,e2
+c...      print *,'iep,nep,na1,EIN,EOU,e1,e2'
+c... &            ,iep,nep,na1,EIN,EOU,e1,e2
+c...      if(nep.gt.3) stop
 c...    
 C*        -- Read until EOU is enclosed by E1 and E2
           IF(E2.LT.EOU .AND. IEP.LT.NEP) GO TO 32
@@ -7249,6 +7381,9 @@ C* Write file MF6 (energy/angle distributions)
       LL =1
 C* Loop over outgoing particles
       DO IK=1,NK
+C...
+C...    print *,'ik,zap',ik,zap
+C...
         ZAP=RWO(LL  )
         AWP=RWO(LL+1)
         LIP=RWO(LL+2)+0.1
@@ -7958,23 +8093,25 @@ C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
       CHARACTER*1  SN
       CHARACTER*11 CH
-      CH=' 0.00000+00'
-      FA=ABS(FF)
+      DOUBLE PRECISION FA
+      CH=' 0.000000+0'
+      FA=DBLE(FF)
+      FA=ABS(FA)
       IA=0
 C* Trap unreasonably large values, print as "9.99999+99"
-      IF(FA.GT.1E30) THEN
+      IF(FA.GT.1D30) THEN
         CH=' 9.99999+99'
         RETURN
       END IF
 C* Check for small values, print as zero
-   20 IF(FA.LT.1.0E-30 ) RETURN
+   20 IF(FA.LT.1.0D-30 ) RETURN
 C* Condition mantissa of small numnbers
-      IF(FA.LT.9.999950) GO TO 40
+      IF(FA.LT.9.999950D0) GO TO 40
       FA=FA/10
       IA=IA+1
       GO TO 20
 C* Condition mantissa of large numnbers
-   40 IF(FA.GE.0.999995) GO TO 50
+   40 IF(FA.GE.0.999995D0) GO TO 50
       FA=FA*10
       IA=IA-1
       GO TO 40
