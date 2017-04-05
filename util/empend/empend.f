@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-04-05 00:50:07 +0200 (Mi, 05 Apr 2017) $
+Ccc   * $Date: 2017-04-05 10:19:04 +0200 (Mi, 05 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -4446,8 +4446,10 @@ c...
         QQM(IXS)=QM
         QQI(IXS)=QI
   391   CONTINUE
-C...    -- Discrete levels are summed into XL without compound contrib.
+C*      -- Discrete levels are summed into XL without compound contrib.
 C...    XSC(NEN,IXS)=(XC-XL0)
+C*      -- Add continuum contribution to inelastic, if significant
+        IF(XC-XI.GT.1.E-5) XL=XL+(XC-XI)
         XSC(NEN,IXS)=    XL
       END IF
 C* Subtract the discrete levels
