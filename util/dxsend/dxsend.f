@@ -30,6 +30,7 @@ C-V  16/03 Allow reconstruction of alpha (SigC/SigF)
 C-V  16/06 Trivial fix to initialize IER in ENDF IO routines
 C-V  16/07 Fix undefined LXX
 C-V  16/09 Deactivate aliasing of MT 5 to 9000.
+C-V  17/03 Retrieve gamma production x.s. from MF 12/ LO 1.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -1996,7 +1997,8 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
-      print *,'Found MAT,MF,MT,NP,Ei,ZAp',nint(za0),MF,MTJ,NP,ein,izap0
+      iza=nint(za0)
+      print *,'  Found MAT,MF,MT,NP,Ei,ZAp',iza,MF,MTJ,NP,ein,izap0
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -2060,23 +2062,51 @@ C...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
-        IF(IZAP0.EQ.0) THEN
-          print *,'WARNING - photon multiplicities not coded (only MF6)'
-        END IF
+C...    IF(IZAP0.EQ.0) THEN
+C...      print *,'WARNING - photon multiplicities not coded (only MF6)'
+C...    END IF
         REWIND LEF
 C*      -- Search for angular distributions or double differential data
    31   MFJ=0
         MTJ=MT0-10000*(MT0/10000)
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MFJ,MTJ,IER)
-        IF(MFJ.GT.6 .OR. IER.NE.0) THEN
+        IF(IER.NE.0 .OR.
+     &     (IZAP0.EQ.0 .AND. MFJ.GT.12) .OR.
+     &     (IZAP0.GT.0 .AND. MFJ.GT. 6) ) THEN
           PRINT *,
-     &    'DXSEND WARNING - No differential data for MT',MT0
+     &      'DXSEND WARNING - No differential data for MT',MT0
           NEN=0
           GO TO 900
         END IF
         IF(MFJ.LT.4) THEN
 C*        -- Skip to the end of section
           DO WHILE(MTJ.GT.0)
+            CALL RDTEXT(LEF,MAT,MFJ,MTJ,C66,IER)
+          END DO
+          GO TO 31
+        END IF
+C...
+        print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
+C...
+C*
+        IF(MFJ.GT.4) GO TO 500
+C*      -- Angular distributions are allowed for two-body reactions
+        IF((IZAP0.EQ.   2 .AND. (MTJ.EQ.  2 .OR.  MTJ.EQ. 18 .OR.
+     &                          (MTJ.GE. 50 .AND. MTJ.LE. 91) ) ) .OR.
+     &     (IZAP0.EQ.1001 .AND. (MTJ.EQ.2 .OR. 
+     &                          (MTJ.GE.600 .AND. MTJ.LE.649) ) ) .OR.
+     &     (IZAP0.EQ.1002 .AND. (MTJ.EQ.2 .OR. 
+     &                          (MTJ.GE.650 .AND. MTJ.LE.699) ) ) .OR.
+     &     (IZAP0.EQ.1003 .AND. (MTJ.EQ.2 .OR. 
+     &                          (MTJ.GE.700 .AND. MTJ.LE.749) ) ) .OR.
+     &     (IZAP0.EQ.2003 .AND. (MTJ.EQ.2 .OR. 
+     &                          (MTJ.GE.750 .AND. MTJ.LE.799) ) ) .OR.
+     &     (IZAP0.EQ.2004 .AND. (MTJ.EQ.2 .OR. 
+     &                          (MTJ.GE.800 .AND. MTJ.LE.849) ) ))THEN
+C*        -- Proceed with processing     
+        ELSE
+C*        -- Skip to the end of section
+           DO WHILE(MTJ.GT.0)
             CALL RDTEXT(LEF,MAT,MFJ,MTJ,C66,IER)
           END DO
           GO TO 31
@@ -2267,8 +2297,27 @@ C*
 c...
 c...    if(mt0.gt.40000) print *,'Scaled by angular distribution'
 c...
-C*      -- Error trapping when no data found in the ENDF file
-        IF(MFJ.NE.6) THEN
+C*      -- Particle emission spectra are not relevant for x.s.
+  500   IF(MFJ.EQ.5) THEN
+C*        -- Skip to the end of section
+          DO WHILE(MTJ.GT.0)
+            CALL RDTEXT(LEF,MAT,MFJ,MTJ,C66,IER)
+          END DO
+          GO TO 31
+        END IF
+C*      -- Check for gamma spectra in MF12
+        IF(MFJ.GT.6) THEN
+          IF(IZAP0.EQ.0) THEN
+            IF(MFJ.LT.12) THEN
+C*            -- Skip to the end of section
+              DO WHILE(MTJ.GT.0)
+                CALL RDTEXT(LEF,MAT,MFJ,MTJ,C66,IER)
+              END DO
+              GO TO 31
+            ELSE IF(MFJ.EQ.12) THEN
+              GO TO 620
+            END IF
+          END IF
           PRINT *,
      &    'DXSEND WARNING - No double-differential data for MT',MT0
           GO TO 900
@@ -2386,7 +2435,7 @@ C*        -- Save the cross section on new grid at LX0
           RWO(LX0-1+I)=RWO(LXX-1+I)
         END DO
 C...
-C...    PRINT *,' Added contribution of ZAP,LIP',NINT(ZAP0),LIP
+        PRINT *,' Added contribution of ZAP,LIP',NINT(ZAP0),LIP
 C...
 C*      -- Check if there are more LIP states present for this particle
         IF(MT0/10000.NE.4) THEN
@@ -2765,6 +2814,58 @@ C*        -- Unsupported law for c.s. at fixed angle
           PRINT *,'               Isotropic distribution assumed'
         END IF
         GO TO 900
+C*
+C*      -- Process discrete and continuum photon production
+  620   LO=L1
+C...
+C...    print *,'  Found MAT,MF,MT,LO,ZAp',nint(za0),MF,MTJ,LO,izap0
+C...
+        IF(LO.EQ.1) THEN
+C*        -- Extract the total yield
+          KX =MRW/2
+          LXE=1
+          LXX=LXE+KX
+          CALL RDTAB1(LEF,C1,C2,N1,N2,NRY,NPY,NBT,INR
+     1             ,RWO(LXE),RWO(LXX),KX,IER)
+C*        -- Make union grid and interpolate x.s. to union grid
+          LE1=LXE+NPY
+          LX1=LXX+NPY
+          K1 =KX -NPY
+          CALL UNIGRD(NEN,ENR,NPY,RWO(LXE),NE1,RWO(LE1),K1)
+          CALL FITGRD(NEN,ENR,DXS,NE1,RWO(LE1),RWO(LX1))
+          DO I=1,NE1
+            ENR(I)=RWO(LE1-1+I)
+            DXS(I)=RWO(LX1-1+I)
+          END DO
+C*        -- Interpolate the yield to union grid and multiply
+          CALL FITGRD(NPY,RWO(LXE),RWO(LXX),NE1,RWO(LE1),RWO(LX1))
+          DO I=1,NE1
+            DXS(I)=DXS(I)*RWO(LX1-1+I)
+          END DO
+          NEN=NE1
+        ELSE IF(LO.EQ.2) THEN
+C*        -- Read number of photons
+C*********** WARNING: Photon cascade to lower levels is approximate
+          YLD=0
+          DO I=1,NL
+C*          -- One photon is emitted to the specified level
+            YLD=YLD+1
+C*          -- If the level is not ground state, at least one more
+            IF(RWO(2*I-1).GT.0) YLD=YLD+1
+          END DO
+          CALL RDLIST(LEF,C1,C2,N1,N2,NW,NL,RWO,MRW,IER)
+          DO I=1,NEN
+            DXS(I)=DXS(I)*YLD
+          END DO
+          IF(NL.GT.1 .OR. RWO(1).GT.0)
+     &    PRINT *,'DXSEND WARNING - Photon production cascade in MF12'
+     &           ,' is incomplete for MT',MT0
+        ELSE
+          PRINT *,'DXSEND ERROR - Photon production in MF12'
+     &           ,' not supported for MT/LO',MT0,LO
+        END IF
+        GO TO 900
+C*
 C*      -- Done procssing of cross sections (KEA=0)
       END IF
 C*
