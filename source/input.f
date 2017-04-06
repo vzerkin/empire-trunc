@@ -1,6 +1,6 @@
-!cc   * $Rev: 4883 $
+!cc   * $Rev: 4891 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-04-03 22:31:12 +0200 (Mo, 03 Apr 2017) $
+!cc   * $Date: 2017-04-06 20:07:22 +0200 (Do, 06 Apr 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -2830,7 +2830,7 @@ C
      &I3,'' to '',I3)') NLV(Nnuc), max(ilv - 1,1)
                    NLV(Nnuc) = max(ilv - 1,1) !Note: NLVc not affected
                 ENDIF 
-                IF(NLVt(Nnuc).EQ.0) NLVc(Nnuc) = NLV(Nnuc)
+                IF(NLVt(Nnuc).EQ.0) NLVt(Nnuc) = NLV(Nnuc)
                 GOTO 200
               ENDIF 
             ENDIF  !end of ECOnt check
