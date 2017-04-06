@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4876 $
+Ccc   * $Rev: 4890 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 21:10:36 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Date: 2017-04-06 20:06:32 +0200 (Do, 06 Apr 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2591,14 +2591,15 @@ C-----If energy read from the file does not coincide
 C-----this nucleus should be recalculated (goto 300)
 C
       IF (ABS(ener - ETL(ien,Nejc,Nnuc)).GT.0.0001) THEN
-         PAUSE 'wrong energy!!!'
+C         PAUSE 'wrong energy!!!'
          CLOSE (45 ,STATUS = 'DELETE')
          if(fexistj) CLOSE (451,STATUS = 'DELETE')
          IF (IOUt.EQ.5) CLOSE (46,STATUS = 'DELETE')
          IF (IOUt.EQ.5) THEN
            WRITE (8,*)
      &       ' WARNING: ENERGY MISMATCH: ETL(ien=', ien, '...)=',
-     &       ETL(ien,Nejc,Nnuc), ' REQUESTED ENERGY=', SNGL(ener)
+     &       SNGL(ETL(ien,Nejc,Nnuc)), ' REQUESTED ENERGY=', SNGL(ener),
+     &       ' for ',NINT(A(nnuc)),NINT(Z(nnuc))
            WRITE (8,*)
      &       ' WARNING: FILES WITH TRANSM. COEFF. HAVE BEEN DELETED'
          ENDIF
