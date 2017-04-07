@@ -82,7 +82,7 @@ C  *************************************************************
       INCLUDE 'PRIVCOM10.FOR'
       INCLUDE 'PRIVCOM17D.FOR'  
       
-      DIMENSION TITLE(80)
+      CHARACTER*80 TITLE
 
       REAL*16 LFA(400),dtmp  
 C     REAL*8  LFA(400),dtmp  
