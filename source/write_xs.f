@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4871 $
+Ccc   * $Rev: 4903 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-29 10:35:19 +0200 (Mi, 29 Mär 2017) $
+Ccc   * $Date: 2017-04-07 22:43:51 +0200 (Fr, 07 Apr 2017) $
 
       SUBROUTINE write_xs()
       USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
@@ -84,18 +84,6 @@ C
 C---- ENDF spectra printout (exclusive representation)
 C----
 C----
-C     DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
-C        IF (ENDf(nnuc).EQ.1 .and. CSPrd(nnuc).GT.0.0D0) THEN
-C           write(*,*) 'Residual nucleus:', NINT(Z(nnuc)),NINT(A(Nnuc))
-C           DO nejc = 1, NDEJC         !loop over ejectiles
-C             IF (POPcs(nejc,INExc(nnuc)).GT.0.d0) 
-C    &           write(*,'(2x,3(I3,1x),A8,2x,I2,2x,d12.6)') 
-C    &            nejc, nnuc, INExc(nnuc),
-C    &          ' ENDfp= ',ENDfp(nejc,nnuc),POPcs(nejc,INExc(nnuc))
-C           ENDDO
-C           write(*,*)
-C        ENDIF 
-C     ENDDO
       eincid = 0.d0
       DO nnuc = 1, NNUcd  ! loop over residues (not decaying nuclei)
          IF(A(nnuc).LE.4. AND. Z(nnuc).LE.2.) CYCLE
@@ -182,24 +170,30 @@ C------------------(discrete levels part)
                      DO il = 1, NLV(nnuc)  ! discrete levels
 C                       espec is the outgoing energy corresponding to the level "il"
                         espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
-                        IF (espec.GE.0.d0) WRITE (12,
-     &                '(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
-C    &                     '(F10.5,E14.5,7E15.5,/,(9X,8E15.5))') -espec, 
-c                       Discrete level cros section CSAlev contains angular distribution, NOT DDXS
-c                       recoil correction is not needed as we do not integrate over energy 
-c                       We only sum over discrete levels ! 
-     &                     (max(CSAlev(nang,il,nejc), 
-c    &                     (max(CSAlev(nang,il,nejc)*recorp/DE,
-     &                               0.d0),nang = 1,NDANG)
+                        IF (espec.GE.0.d0) THEN
+c                         Discrete level cros section CSAlev contains angular distribution, NOT DDXS
+c                         recoil correction is not needed as we do not integrate over energy 
+c                         We only sum over discrete levels ! 
+                          IF(dabs(espec)<0.1d0 .OR. dabs(espec)>99.d0)
+     &                      THEN
+                            WRITE (12,
+     &                       '(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                        -espec, (max(CSAlev(nang,il,nejc),0.d0) ! (max(CSAlev(nang,il,nejc)*recorp/DE,
+     &                        ,nang=1,NDANG) 
+                          ELSE
+                            WRITE (12,
+     &                       '(F10.6     ,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                        -espec, (max(CSAlev(nang,il,nejc),0.d0)
+     &                        ,nang=1,NDANG) 
+                          ENDIF 
+                        ENDIF 
                         csum = 0.d0
                         sangsum = 0.0d0
                         DO nang = 1, NDANG ! over angles
                           csum = csum+CSAlev(nang,il,nejc)*SANgler(nang)
                           sangsum = sangsum + SANgler(nang)
                        ENDDO
-c                          check_DL(il)=	2.0d0*PI*csum*PI/(NDAng - 1)
                           check_DL(il)=	4.0d0*PI*csum/sangsum
-c    &                    max(2.0d0*PI*csum*PI/(NDAng - 1),1.d-10)  ! PI/90.d0
                      ENDDO                                
                    ENDIF
 C
@@ -243,8 +237,6 @@ c The following is equivalent the definition of ftmp above, when LHMs=0.
                            sangsum = sangsum + SANgler(nang)
                         ENDDO
                      ENDIF
-
-c                     check_DE(ie) = 2.0d0*PI*csum*PI/(NDAng - 1) ! PI/90.d0
                      check_DE(ie) = 4.0d0*PI*csum/sangsum ! PI/90.d0
                    ENDDO
 C
@@ -253,20 +245,28 @@ C
                                      ! print DDX spectrum
                      if(check_DE(ie).LE.0) cycle ! skipping zeroes
                      iprn = ie
-                     WRITE (12,
-     &                    '(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
-C                    WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
-     &                     FLOAT(ie - 1)*DE/recorp,
-     &                     (cseaprnt(ie,nang)*recorp,nang = 1,NDANG)
+                     espec = FLOAT(ie - 1)*DE/recorp
+                     IF(dabs(espec)<0.1d0 .OR. dabs(espec)>99.d0) THEN
+                       WRITE (12,
+     &                   '(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
+     &                   espec,(cseaprnt(ie,nang)*recorp,nang = 1,NDANG) 
+                     ELSE
+                       WRITE (12,
+     &                   '(F10.6     ,E14.5,7E15.5,/,(9X,8E15.5))') 
+     &                   espec,(cseaprnt(ie,nang)*recorp,nang = 1,NDANG) 
+                     ENDIF 
                    ENDDO
                                      ! exact DDX spectrum endpoint
-C                  WRITE (12,'(F10.6,E14.5,7E15.5,/,(9X,8E15.5))')
-                   WRITE (12,'(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))')
-C                    A different way of calculating the Q-value using the 
-C                    residual and ejectile
-C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
-     &               min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp),
-     &                (cseaprnt(iprn + 1,nang)*recorp,nang = 1,NDANG)
+
+                   espec = min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp)
+                   IF(dabs(espec)<0.1d0 .OR. dabs(espec)>99.d0) THEN
+                     WRITE(12,'(1P,E10.4E1,E14.5,7E15.5,/,(9X,8E15.5))') 
+     &                 espec,(cseaprnt(iprn+1,nang)*recorp,nang=1,NDANG)
+                   ELSE
+                     WRITE(12,'(F10.6     ,E14.5,7E15.5,/,(9X,8E15.5))') 
+     &                 espec,(cseaprnt(iprn+1,nang)*recorp,nang=1,NDANG)
+                   ENDIF 
+ 
                    WRITE (12,*) ' '    
 
 C***********************************************************************  
@@ -345,14 +345,25 @@ C
 C                      espec is the outgoing energy corresponding to the level "il"
                        espec = (EMAx(nnuc) - ELV(il,nnuc))/recorp
                        IF (espec.LT.0) cycle 
-                       WRITE(12, 
+ 
+                       IF(dabs(espec)<0.1d0 .OR. dabs(espec)>99.d0) THEN
+                         WRITE (12,
      &           '(4x,I3,4x,1P,E10.4E1,3(E14.6,2x),F6.2,4x,1P,E10.4E1)')  
      &                   il,  -espec, check_DL(il),
      &                    CSDirsav(il,nejc),
      &                   (check_DL(il)-CSDirsav(il,nejc)),
      &                   (check_DL(il)-CSDirsav(il,nejc))/
      &                    check_DL(il)*100,  ELV(il,nnuc)        
-                         htmp = htmp + check_DL(il)         
+                       ELSE
+                         WRITE (12,
+     &           '(4x,I3,4x,   F10.6  ,3(E14.6,2x),F6.2,4x,1P,F10.6  )') 
+     &                   il,  -espec, check_DL(il),
+     &                    CSDirsav(il,nejc),
+     &                   (check_DL(il)-CSDirsav(il,nejc)),
+     &                   (check_DL(il)-CSDirsav(il,nejc))/
+     &                    check_DL(il)*100,  ELV(il,nnuc)        
+                       ENDIF 
+                       htmp = htmp + check_DL(il)         
                      ENDDO
                      WRITE (12,*) ' '
                      WRITE (12,'(7X,''Integral of discrete-level DDXS '',
@@ -379,24 +390,33 @@ C                      espec is the outgoing energy corresponding to the level "
                       itmp = 1 
                       if (ie.eq.1) itmp = 2
                       iprn = ie
-                      WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
-     &                FLOAT(ie - 1)*DE/recorp, ftmp*recorp, 
-     &                check_DE(ie)*recorp,
-     &                (ftmp - check_DE(ie)) * recorp, 
-     &                (ftmp - check_DE(ie)) / ftmp * 100
+
+                      espec = FLOAT(ie - 1)*DE/recorp
+                      WRITE (12,
+     &                   '(10x,F10.6     ,3(E14.5,1x),4x,F6.2)') 
+     &                   espec, ftmp*recorp, check_DE(ie)*recorp,
+     &                   (ftmp - check_DE(ie)) * recorp, 
+     &                   (ftmp - check_DE(ie)) / ftmp * 100
                       csum  = csum  + ftmp/itmp
                       csum1 = csum1 + check_DE(ie)/itmp
                    ENDDO
                    ! exact endpoint
-                   WRITE (12,'(10x,F10.6,3(E14.5,1x),4x,F6.2)') 
-C                    A different way of calculating the Q-value using the 
-C                    residual and ejectile
-C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
-     &               min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp),
+                   espec = min(EMAx(nnuc)/recorp,FLOAT(iprn)*DE/recorp)
+                   IF(dabs(espec)<0.1d0 .OR. dabs(espec)>99.d0) THEN
+                     WRITE (12,'(10x,1P,E10.4E1,3(E14.5,1x),4x,F6.2)') 
+     &                   espec,   
      &               max(0.d0,POPcse(0,nejc,iprn+1,INExc(nnuc)))*recorp,
      &               check_DE(iprn+1)*recorp,
      &               ( max(0.d0,POPcse(0,nejc,iprn+1,INExc(nnuc))) - 
      &                  check_DE(iprn+1) )*recorp, 0.d0
+                   ELSE
+                     WRITE (12,'(10x,F10.6     ,3(E14.5,1x),4x,F6.2)')
+     &                   espec,   
+     &               max(0.d0,POPcse(0,nejc,iprn+1,INExc(nnuc)))*recorp,
+     &               check_DE(iprn+1)*recorp,
+     &               ( max(0.d0,POPcse(0,nejc,iprn+1,INExc(nnuc))) - 
+     &                  check_DE(iprn+1) )*recorp, 0.d0
+                   ENDIF
 
                    WRITE(12,*) 
                    WRITE(12,'(10x,12x,2(A14,1x))') 
