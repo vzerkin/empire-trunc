@@ -31,6 +31,7 @@ C-V  16/06 Trivial fix to initialize IER in ENDF IO routines
 C-V  16/07 Fix undefined LXX
 C-V  16/09 Deactivate aliasing of MT 5 to 9000.
 C-V  17/03 Retrieve gamma production x.s. from MF 12/ LO 1.
+C-V  17/04 More improvements to the retrieval of gamma spectra.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2887,8 +2888,7 @@ C* Find the energy/angle distribution data
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...  print *,'Find1 MF,MT,IER',mat,mf,mt,ier
-c...  print *,'izap0',izap0
+      print *,'    Found MAT,MF,MT,IZAP,IER',mat,mf,mt,izap0,ier
 c...
 C*    -- Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
@@ -2927,7 +2927,7 @@ C*    -- Gamma production only from MF 6,12,13,14,15
           JT=MT
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
 c...
-c...      print *,' After lbl 36 ier/mf,mt',ier,mf,mt
+          print *,'    Found MAT,MF,MT,KEA,LO,IER',mat,mf,mt,kea,l1,ier
 c...
           IF(IER.NE.0) THEN
             IF(MF.EQ.12) THEN
@@ -3429,7 +3429,7 @@ c...
           IER=14
           GO TO 900
         END IF
-C* Skip the subsection for this particle
+C*      -- Skip the subsection for this particle
         IF     (LAW.EQ.0) THEN
 C*       No subsection for Law 0
         ELSE IF(LAW.EQ.2 .OR. LAW.EQ.5) THEN
@@ -3473,19 +3473,19 @@ C*        Set IER to flag error and terminate
         END IF
         GO TO 61
       END IF
-C* Particle found - extract the yield
+C*    -- Particle found - extract the yield
       CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
       INR(1)=2
       YL6=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
       IF(MT.EQ.18) THEN
-C* Neutron multiplicities for fission are included in MF1
+C*      -- Neutron multiplicities for fission are included in MF1
         YL=YL*YL6
       ELSE
         YL=YL6
       END IF
 C* Check the data representation for this particle
 c...
-C...  print *,'processing particle/mf/mt/law',nint(zap),mf,mt,law
+      print *,'    processing particle/mf/mt/law',nint(zap),mf,mt,law
 c...
       IF     (LAW.EQ.2) THEN
         GO TO 62
@@ -3685,7 +3685,7 @@ C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-c...      print *,'Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
+C...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
@@ -3711,20 +3711,20 @@ c...
         END IF
         RWO(LLI)=ES
         LLI=LLI+1+LL
-C* Read the data for the next level
+C*      -- Read the data for the next level
         CALL SKIPSC(LEF)
         MM =MT
         MT =0
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...    print *,'findmt mat,mf,mt,ier',mat,mf,mt,ier
+c...    print *,'      findmt mat,mf,mt,ier',mat,mf,mt,ier
 c...
         IF(IER.EQ.0 .AND.
      1     (MM+1.EQ.MT .AND. MT.LE.MT0) ) GO TO 122
         IWO(LV+1)=LLI
         IER=0
 C*
-C* All levels up to the current one read - sum the yields
+C*      -- All levels up to the current one read - sum the yields
 c...
 c...    print *,'     Summing discr.level yields MF/MT,LV',MF,MT0,LV
 c...
@@ -3732,7 +3732,7 @@ c...
         LLI=1
 c...
 c...    CALL SUMYLG(LV,LG,IWO,RWO,GTO,NT,NW,RWO(LLI))
-C* Process the gamma lines
+C*      -- Process the gamma lines
         NX =(MRW-(LLI+NW))/2
         LXE=LLI+NW
         LXB=LXE+NX
@@ -3756,42 +3756,46 @@ C* Process the gamma lines
           LUX=LXB+NEN
           KX =NX -NEN
           CALL UNIGRD(NE1,ENR,NEN,RWO(LXE),NE2,RWO(LUE),KX)
-C* Interpolate current distribution to the union grid
+C*        -- Interpolate current distribution to the union grid
           CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
           NE1=NE2
           DO 124 I=1,NE1
             ENR(I)=RWO(LUE-1+I)
             DXS(I)=RWO(LUX-1+I)
   124     CONTINUE
-C* Interpolate saved distribution to the union grid
+C*        -- Interpolate saved distribution to the union grid
           CALL FITGRD(NEN,RWO(LXE),RWO(LXB),NE2,RWO(LUE),RWO(LUX))
-C* Assume isotropic photon distributions
+C*        -- Assume isotropic photon distributions
           ANG=0.5
-C* Add the current distribution to the saved one
+C*        -- Add the current distribution to the saved one
           FRC=ANG*RWO(2+(JT-1)*(LG+1))
           IF(LG.EQ.2) FRC=FRC*RWO(3+(JT-1)*(LG+1))
-          DO 126 I=1,NE1
+          DO I=1,NE1
             DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
-  126     CONTINUE
+          END DO
+          YL=1
   128   CONTINUE
         GO TO 800
       ELSE IF(LO.EQ.1) THEN
-C* Multiplicities given
+C*      -- Multiplicities given
+C...
+C...    print *,'    Multiplicities given'
+c...
         NK =N1
         NE1=0
-C* Subdivide the available work array
+C*      -- Subdivide the available work array
         LXE=1
         LE =MRW/2
         KXX=LE
         KX =LE/2
         LXX=LXE+KX
         LX =LE +KX
-C* Dummy-read the total photon multiplicity
+C*      -- Dummy-read the total photon multiplicity
         IF(NK.GT.1) CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
      1                         ,RWO(LXE),RWO(LXX),KXX,IER)
-C* Read photon data for all subsections
+C*      -- Read photon data for all subsections
         DO 138 IK=1,NK
-C* Photon energy and yield
+C*      -- Photon energy and yield
         CALL RDTAB1(LEF,EG,ES,LP,LF,NR,NP,NBT,INR
      1             ,RWO(LXE),RWO(LXX),KXX,IER)
         IF(IER.NE.0) THEN
@@ -3800,30 +3804,37 @@ C* Photon energy and yield
         END IF
         INA=INR(1)
         YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INA,IER)
+c...
+c...    print *,'    Yield for',IK,' of',NK,' is',YLK,' with LF',LF
+c...
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
           STOP 'DXSEND1 ERROR - Reading MF12'
         END IF
-C* Modify photon energy for primary photons
+C*      -- Modify photon energy for primary photons
         IF(LP.EQ.2) EG=EG+EIN*AWR/(AWR+1)
-C* Consider various data representations in MF12
+C*      -- Consider various data representations in MF12
         IF(LF.EQ.1) THEN
-C* Normalised tabulated function given in file MF15
+C*        -- Normalised tabulated function given in file MF15
           IF(IK.LT.NK) THEN
             PRINT *,'DXSEN1 WARNING - Tabulated distr. not last'
           END IF
           MF=15
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
+c...
+          print *,'    Found MAT,MF,MT,NC',MAT,MF,MT,NC,le,lxe
+c...
           IF(IER.NE.0) THEN
             PRINT *,'WARNING - No tabulated data for MF15 MT',MT0
             GO TO 800
           END IF
-C* Only one section for tabulated distributions is allowed at present
+C*        -- Only one section for tabulated distributions is allowed
+C*           at present
           IF(NC.GT.1) THEN
             PRINT *,'DXSEN1 WARNING >1 section for MF/MT',MF,MT
             STOP 'DXSEN1 ERROR >1 section for MF 15'
           END IF
-C* Read the fractional contribution of the section 
+C*        -- Read the fractional contribution of the section 
           CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
      1               ,RWO(LE),RWO(LX),KX,IER)
           INA=INR(1)
@@ -3835,63 +3846,85 @@ C* Read the fractional contribution of the section
           END IF
           EI1=0
           NEN=0
-C* Read interpolation data for the incident energies
+C*        -- Read interpolation data for the incident energies
           CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
           NM =NR+1
           NNI=1
           INA=INR(NNI)
-          DO 134 IE=1,NE
-          IF(IE.GT.NBT(NNI)) THEN
-            NNI=NNI+1
-            INA=INR(NNI)
-          END IF
-C* For each incident energy read the outg.particle energy distribution
-          CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
-     1               ,RWO(LE),RWO(LX),KX,IER)
-          IF(IER.NE.0) THEN
-            PRINT *,'DXSEN1 ERROR - Reading MF/MT',MF,MT
-            STOP 'DXSEN1 ERROR reading energy.distrib.'
-          END IF
-C* Scale by the fractional contribution
-          DO J=1,NF
-            RWO(LX-1+J)=RWO(LX-1+J)*YLT
+C*        -- Loop over incident energies
+          DO IE=1,NE
+            IF(IE.GT.NBT(NNI)) THEN
+              NNI=NNI+1
+              INA=INR(NNI)
+            END IF
+C*          -- For each incident energy read the outgoing particle
+C*             energy distribution
+            CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
+     1                 ,RWO(LE),RWO(LX),KX,IER)
+            IF(IER.NE.0) THEN
+              PRINT *,'DXSEN1 ERROR - Reading MF/MT',MF,MT
+              STOP 'DXSEN1 ERROR reading energy.distrib.'
+            END IF
+C*          -- Scale by the fractional contribution
+            DO J=1,NF
+              RWO(LX-1+J)=RWO(LX-1+J)*YLT
+            END DO
+C*          -- Linearise to tolerance EXS, if necessary
+            EXS=0.01
+            IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
+     1                              ,RWO(LE),RWO(LX),KX,EXS)
+            IF(EI2.GE.EIN .AND. IE.GT.1) EXIT
+            EIN1=EIN2
+            NEN =NF
+            DO I=1,NF
+              RWO(LXE-1+I)=RWO(LE-1+I)
+              RWO(LXX-1+I)=RWO(LX-1+I)
+            END DO
           END DO
-C* Linearise to tolerance EXS, if necessary
-          EXS=0.01
-          IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
-     1                            ,RWO(LE),RWO(LX),KX,EXS)
           INE=2
-C* Interpolate outgoing particle energy distributions
+C*        -- Interpolate outgoing particle energy distributions
           CALL FINT2D(EIN,EI1,NEN ,RWO(LXE),RWO(LXX),INA
      1                   ,EI2,NF  ,RWO(LE) ,RWO(LX) ,INE,KX)
-  134     CONTINUE
 C*
+c...
+c...      print *,'    Interpolated points',nen,nf
+c...      do k=1,5
+c...        print *,k,enr(k),dxs(k)
+c... &               ,rwo(lxe-1+k),rwo(lxx-1+k)
+c... &               ,rwo(le -1+k),rwo(lx -1+k)
+c...      end do
+c...
         ELSE IF(LF.EQ.2) THEN
-C* Discrete photon energy
+C*        -- Discrete photon energy
           NEN=21
           CALL FNGAUS(EG,NEN,RWO(LXE),RWO(LXX),EPS)
         ELSE
           PRINT *,'ERROR - Illegal flag MF/MT/LF',MF,MT,LF
           STOP 'DXSEND1 ERROR - Illegal LF in MF 12'
         END IF
-C* Generate the union grid
+C*      -- Generate the union grid
         LUE=LXE+NEN
         LUX=LXX+NEN
         KX =NX -NEN
         CALL UNIGRD(NE1,ENR,NEN,RWO(LXE),NE2,RWO(LUE),KX)
-C* Interpolate accumulated distribution to the union grid
+C*      -- Interpolate accumulated distribution to the union grid
         CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
         NE1=NE2
         DO I=1,NE1
           ENR(I)=RWO(LUE-1+I)
           DXS(I)=RWO(LUX-1+I)
         END DO
-C* Interpolate distribution for the current photon to the union grid
+C*      -- Interpolate distribution for the current photon to the
+C*         union grid
         CALL FITGRD(NEN,RWO(LXE),RWO(LXX),NE1,RWO(LUE),RWO(LUX))
-C* Assume isotropic photon distributions
+C*      -- Assume isotropic photon distrib. and define yield factor
         ANG=0.5
-C* Add the current to the saved distribution
         FRC=ANG*YLK
+        YL =1
+C*      -- Add the current to the saved distribution
+c...
+c...    print *,'    ANG,YLK,FRC',ANG,YLK,FRC
+c...
         DO I=1,NE1
           DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
         END DO
