@@ -1004,9 +1004,9 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
        if (unformatted) then
-           open(unit=92,file=TRIM(fname)//'.TLJ', form='unformatted')
+           open(unit=92,file=TRIM(fname)//'.tlj', form='unformatted')
        else
-           open(unit=92,file=TRIM(fname)//'.TLJ')
+           open(unit=92,file=TRIM(fname)//'.tlj')
        endif
 
 C      WRITE(92,'(10H<TLJ     >,F10.2,F10.5,F10.2,2I5)') 
@@ -6329,8 +6329,8 @@ C     *******************************************************
 C     *******************************************************
 C     AUTHOR: R. Capote, March 2005
 C     
-C     * $Date: 2017-04-07 12:52:00 +0200 (Fr, 07 Apr 2017) $
-C     * $Id: ccrd.f 4892 2017-04-07 10:52:00Z rcapote $
+C     * $Date: 2017-04-07 16:16:41 +0200 (Fr, 07 Apr 2017) $
+C     * $Id: ccrd.f 4898 2017-04-07 14:16:41Z rcapote $
 C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
 C     Note: Elapsed time must be less than one month

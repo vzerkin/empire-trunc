@@ -12,12 +12,12 @@ FC  =  ifort
 
 
 # set mode
-MODE = 
-# set to "EMPIRE" for EMPIRE mode or leave empty for pure OPTMAN
+MODE = EMPMODE
+# set to "EMPMODE" for EMPIRE mode or leave empty for pure OPTMAN
 
 # set formatted output for *.tlj
-OUTMODE =
-# set to "formatted" for formatted output of *.tlj or leave blank
+OUTMODE = 
+# set to "FORMATTEDOUT" for formatted output of *.tlj or leave blank
 # for unformatted
 
 # set parallel
@@ -33,15 +33,11 @@ MATRIX =
 
 # various flags are set based on compiler FC:
 # FFLAGS are the normal complier options for production code
-# DFLAGS are the options used when debugging (except for ECIS)
-# EFLAGS are the options used for ECIS (no debug allowed)
-# OFLAGS are the options used for OPTMAN
+# DFLAGS are the options used when debugging 
 
 LIBS =
-DFLAGS = 
 FFLAGS = 
-EFLAGS = 
-OFLAGS = 
+DFLAGS = 
 
 ifeq ($(FC),gfortran)
 
@@ -49,7 +45,8 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
+  # FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
+  FFLAGS = -O2 -std=legacy -ffast-math
   ifeq ($(PARALLEL),OPENMP) 
     FFLAGS = $(FFLAGS) -fopenmp
   endif
@@ -57,11 +54,6 @@ ifeq ($(FC),gfortran)
   #----flags for debuging
   DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
-  #----flags for ECIS
-  EFLAGS = -O2 -std=legacy -ffast-math
-  #----flags for OPTMAN
-  OFLAGS = -O2 -std=legacy -ffast-math
-  #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
 
@@ -82,19 +74,12 @@ else ifeq ($(FC),ifort)
   endif
   
   #----flags for automatic parallelization
-  FFLAGS = -O3 -fpp #-x=host -parallel -par-report1
+  FFLAGS = -x=host -O3 -fpp -diag-disable id8290,8291,8293  #-x=host -parallel -par-report1
   ifeq ($(PARALLEL),OPENMP) 
     FFLAGS = $(FFLAGS) -qopenmp
   endif
-  # Flags for ECIS
-  EFLAGS = -O2 -x=host
-  # Flags for OPTMAN
-  OFLAGS = -O2 -x=host -parallel -par-report1
-  #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
-      FFLAGS = -O3
-      EFLAGS = -O2
-      OFLAGS = -O2
+      FFLAGS = -O2
   endif
 
 else ifeq ($(FC),af95)
@@ -109,10 +94,6 @@ else ifeq ($(FC),af95)
   FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
   DFLAGS = -O0 -m64 -g -s
-  #----flags for ECIS
-  EFLAGS = -O2 -march=host -s -m64
-  #----flags for OPTMAN
-  OFLAGS = -O2 -march=host -s -m64
 
 else ifeq ($(FC),pfg90)
  
@@ -123,10 +104,6 @@ else ifeq ($(FC),pfg90)
   FFLAGS =  -O3 
   #----flags for debuging
   DFLAGS = -O0 -g
-  #----flags for ECIS
-  EFLAGS = -O2
-  #----flags for OPTMAN
-  OFLAGS = -O2
 
 else ifeq ($(FC),lf90)
  
@@ -137,10 +114,6 @@ else ifeq ($(FC),lf90)
   FFLAGS = -O3
   #----flags for debuging
   DFLAGS = -O0 -g --chk
-  #----flags for ECIS
-  EFLAGS = -O2
-  #----flags for OPTMAN
-  OFLAGS = -O2
 
 endif
 
@@ -148,17 +121,17 @@ ifeq ($(MATRIX),LAPACK)
    FFLAGS = $(FFLAGS) -DLAPACK
 endif
 
-ifeq ($(MODE),EMPIRE)
-   FFLAGS = $(FFLAGS) -DEMPMODE
-endif
+#ifeq ($(MODE),EMPIRE)
+#   FFLAGS = $(FFLAGS) -DEMPMODE
+#endif
 
-ifeq ($(OUTMODE),formatted)
-   FFLAGS = $(FFLAGS) -DFORMATTEDOUT
-endif
+#ifeq ($(OUTMODE),formatted)
+#   FFLAGS = $(FFLAGS) -DFORMATTEDOUT
+#endif
 
 # make sure MAKE knows f90 extension
 %.o : %.f
-	$(FC) $(FFLAGS) -c $<
+	$(FC) $(FFLAGS) -D$(MODE) $(OUTMODE) -c $<
 
 OBJF = OPTMAND.o SHEMSOFD.o dispers.o KNDITD.o ccrd.o ABCTpar.o DATETpar.o LU_matrix_inv.o opt2Rmatrix.o
 
