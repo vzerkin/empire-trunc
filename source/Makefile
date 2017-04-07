@@ -1,6 +1,6 @@
-#$Rev: 4895 $
+#$Rev: 4899 $
 #$Author: rcapote $
-#$Date: 2017-04-07 13:28:02 +0200 (Fr, 07 Apr 2017) $
+#$Date: 2017-04-07 16:17:59 +0200 (Fr, 07 Apr 2017) $
 
 # set default compilers:
 
@@ -58,7 +58,7 @@ else ifeq ($(FC),ifort)
   #----flags for automatic parallelization
   #FFLAGS = -O3 -x=host -parallel -par-report1
   #----flags for automatic parallelization (no report)
-  FFLAGS = -O3 -x=host -diag-disable warn -parallel
+  FFLAGS = -O3 -x=host -diag-disable warn -parallel -mcmodel=large -shared-intel
   #    -diag-disable id8290,8291,8293
   # FFLAGS = -O3 -x=host -diag-disable warn 
   # Flags for ECIS
@@ -134,13 +134,11 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
 
 all: 
 	$(MAKE) empire
-	cd ../source-optman
-	$(MAKE) $(FC) $(OFLAGS) $(LIBS)
-	cd ../source
+	cd ../source-optman; $(MAKE) "FC=$(FC)"; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
-	svn info . 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+	svn info ../../empire-repos 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
 
 subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
@@ -175,6 +173,8 @@ MSC-NVWY.o : ph-lev-dens.o
 
 clean:
 	rm -f *.o *.mod empire optmand *.exe
+	cd ../source-optman; $(MAKE) clean; cd ../source
 
 cleanall:
 	rm -f *.o *.mod empire optmand *.exe
+	cd ../source-optman; $(MAKE) cleanall; cd ../source
