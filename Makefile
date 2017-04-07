@@ -43,15 +43,22 @@ ifndef EMPIREDIR
 else
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source; $(MAKE) FC=$(FC) $(FLG) 
+      cd ..;
+      cd source-optman; $(MAKE) FC=$(FC) $(FLG) 
+
 endif
 
 clean:
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean); done
 	cd source; $(MAKE) clean; $(MAKE) cleanall
+      cd ..;
+      cd source-optman; $(MAKE) clean; $(MAKE) cleanall
 
 cleanall:
 	@for dir in $(UTILS); do (cd $$dir; $(MAKE) clean; $(MAKE) cleanall); done
 	cd source; $(MAKE) clean; $(MAKE) cleanall
+      cd ..;
+      cd source-optman; $(MAKE) clean; $(MAKE) cleanall
 
 up:
 	svn up
