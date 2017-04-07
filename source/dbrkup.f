@@ -752,11 +752,8 @@ c
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
-C     common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-C    1  cph(nol,3),wpot(nptmx,3)
-      common/wfna/wfs(nptmx,nol,5)
-      common/wfnb/wfc(nptmx,nol,5)
-      common/wfnc/smtrx(nol,3),cph(nol,3),wpot(nptmx,3)
+      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
+     1  cph(nol,3),wpot(nptmx,3)
 
 !     data iwrt/6/
 
@@ -850,12 +847,8 @@ c
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
-C     common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-C    1  cph(nol,3),wpot(nptmx,3)
-      common/wfna/wfs(nptmx,nol,5)
-      common/wfnb/wfc(nptmx,nol,5)
-      common/wfnc/smtrx(nol,3),cph(nol,3),wpot(nptmx,3)
-
+      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
+     1  cph(nol,3),wpot(nptmx,3)
 
 C      data iwrt/8/
 
@@ -1031,11 +1024,8 @@ c
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
-C     common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-C    1  cph(nol,3),wpot(nptmx,3)
-      common/wfna/wfs(nptmx,nol,5)
-      common/wfnb/wfc(nptmx,nol,5)
-      common/wfnc/smtrx(nol,3),cph(nol,3),wpot(nptmx,3)
+      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
+     1  cph(nol,3),wpot(nptmx,3)
 
 C      data iwrt/8/
 
@@ -1087,12 +1077,9 @@ c     dimension u1(7),y1(7)
       common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
      1                                            lmx(3),lmxwf(3)
       common/frcor/frc(nptmx),be,frcnst,dr0
-C     common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-C    1 cph(nol,3),wpot(nptmx,3)
+      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
+     1 cph(nol,3),wpot(nptmx,3)
       common/potn/poti(nptmx),potr(nptmx),potf(nptmx)
-      common/wfna/wfs(nptmx,nol,5)
-      common/wfnb/wfc(nptmx,nol,5)
-      common/wfnc/smtrx(nol,3),cph(nol,3),wpot(nptmx,3)
 
       data iwrt/8/
 c
