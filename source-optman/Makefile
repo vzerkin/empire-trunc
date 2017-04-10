@@ -5,8 +5,8 @@
 # set default fortran compiler:
 
 #FC   =  gfortran
-FC  =  ifort
-#FC  =  af95
+#FC  =  ifort
+FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
 
@@ -46,13 +46,13 @@ ifeq ($(FC),gfortran)
   #---------------------------------
   #----flags for production compilation with gfortran
   # FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
-  FFLAGS = -O2 -std=legacy -ffast-math
+  FFLAGS = -O2 -std=legacy -ffast-math -cpp
   ifeq ($(PARALLEL),OPENMP) 
     FFLAGS = $(FFLAGS) -fopenmp
   endif
-  #FFLAGS = -O3 -pg -std=legacy
+  #FFLAGS = -O3 -pg -std=legacy -cpp
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv  -cpp
   # -pg shoudl be added for profiling
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -89,11 +89,11 @@ else ifeq ($(FC),af95)
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft
-  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64
+  LIBS =  -lU77 -lV77 -L/Applications/Absoft16.0/lib64
   #----flags for production
-  FFLAGS = -march=host -m64 -O3 -s
+  FFLAGS = -march=host -m64 -O2 -s -cpp
   #----flags for debuging
-  DFLAGS = -O0 -m64 -g -s
+  DFLAGS = -O0 -m64 -g -s -cpp
 
 else ifeq ($(FC),pfg90)
  
@@ -111,7 +111,7 @@ else ifeq ($(FC),lf90)
   #----Lahey/Fujitsu f95 compiler
   #--------------------------------------
   #----flag for Lahey/Fujitsu production 
-  FFLAGS = -O3
+  FFLAGS = -O3 -Cpp
   #----flags for debuging
   DFLAGS = -O0 -g --chk
 
