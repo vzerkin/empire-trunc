@@ -4,9 +4,9 @@
 
 # set default fortran compiler:
 
-#FC   =  gfortran
+FC   =  gfortran
 #FC  =  ifort
-FC  =  af95
+#FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
 
