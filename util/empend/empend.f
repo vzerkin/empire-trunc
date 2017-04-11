@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-04-05 10:19:04 +0200 (Mi, 05 Apr 2017) $
+Ccc   * $Date: 2017-04-11 07:13:06 +0200 (Di, 11 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -843,7 +843,8 @@ C*   MXLJ - maximum number of transitions from a level
      1STOP 'EMPEND ERROR - MXI limit exceeded'
       LEL=LBE
       LBR=LEL+MXLI
-      LSC=LBR+MXLI*MXLJ
+      LCN=LBR+MXLI*MXLJ
+      LSC=LCN+MXLI*MXLJ
       IF(LSC+MXLI*2.GT.MXR)
      1STOP 'EMPEND ERROR - MXR limit exceeded'
 C* Select discrete level reactions to be processed
@@ -878,7 +879,7 @@ C* Process selecte discrete level reactions
           MT0=LVMT(L)-NL1
           REWIND LIN
           CALL REMF12(LIN,LTT,LER,JZA,NLV,RWO(LEL),IWO(LNB),IWO(LLB)
-     1               ,RWO(LBR),MXLI,MXLJ)
+     1               ,LG,RWO(LBR),RWO(LCN),MXLI,MXLJ)
           KLV=NLV-NL1
           WRITE(LTT,995) ' Processed discrete level photon prod.: ',MT0
           WRITE(LTT,995) '           Number of processed levels : ',KLV
@@ -892,8 +893,11 @@ C* Process selecte discrete level reactions
           WRITE(LER,995) ' REMF12 WARNING - expected No.of levels:',JLV
           END IF
           NLV=JLV+NL1
+C*        -- LF=1 branching ratios only are given
+C*        --    2 branching ratios and conversion coefficient given
           CALL WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,RWO(LEL)
-     1               ,IWO(LNB),IWO(LLB),RWO(LBR),RWO(LSC),MXLI,MXLJ,NBL)
+     &               ,IWO(LNB),IWO(LLB),LG,RWO(LBR),RWO(LCN)
+     &               ,RWO(LSC),MXLI,MXLJ,NBL)
           IF(NLV.GT.0) JPP=JPP+1
         END IF
         LNB=LNB+MXLI
@@ -3184,8 +3188,11 @@ C*    -- Shift non-monotonic energies
       IF(EOU.LE.EOO .AND. LD.GT.1) THEN
 C*      -- Shift previous point down a little
         EOO=MAX(EOU*0.99999,(EOO+EOU)/2)
-        RWO(LD-1)=EOO
-C...    EOU=EOU*1.00001
+C...
+C...    print *,'Shift previous point down',eoo,eou,rwo(ld-nan-1),ld
+C...    stop
+C...
+        RWO(LD-1-NAN)=EOO
       END IF
       EOO=EOU
       RWO(LD)=EOU
@@ -3217,8 +3224,8 @@ C* Mark point with all-zero distributions (except if discrete level)
         NZZ=0
       END IF
 c...
-c...  print *,'NEG,NEP,KZE,NZZ,NEN,EOU',NEG,NEP,KZE,NZZ,NEN+1,EOU
-c...  print *,'   ',(rwo(ld-1+k),k=1,5)
+C...  print *,'NEG,NEP,KZE,NZZ,NEN,EOU',NEG,NEP,KZE,NZZ,NEN+1,EOU
+C...  print *,'   ',(rwo(ld-1+k),k=1,5)
 c...
       IF(NEG.GT. 0) THEN
 C* Force zero points to half of the average of neighbours until all >0
@@ -3410,7 +3417,7 @@ C-D  EO1
 C-D  EO2
 C-D
 C-D  Note: it is permissible to use implicit equivalence between DST
-C-D  and PLG by specifying the same array when calling the routineC-D  
+C-D  and PLG by specifying the same array when calling this routine 
 C-
       PARAMETER  (MAN=120)
       DIMENSION   SCR(MAN)
@@ -3498,7 +3505,7 @@ C*        Original values to the "points" file file on unit LPT
 C*        Fitted values to the "curves" file file on unit LCU
           WRITE(L92,*) 'EMPEND Plotting MT',MT,' Err',ERR
           WRITE(L92,*) 'Ein',EIN,' Eou',EOU,' Particle ZA',NINT(ZAP)
-          WRITE(L92,821) 0,0,0,0
+          WRITE(L92,821) 0,1,0,0
           WRITE(L92,821) 0,2,0
           IF(EOU.GE.0) THEN
             WRITE(LPT,932) EIN,EOU,MT,IFIX(ZAP+0.1)
@@ -6092,15 +6099,17 @@ C...
       END      
 
       
-      SUBROUTINE REMF12(LIN,LTT,LER,IZA,NLV,ENL,NBR,LBR,BRR,MXLI,MXLJ)
+      SUBROUTINE REMF12(LIN,LTT,LER,IZA,NLV,ENL,NBR
+     &                 ,LBR,LG,BRR,CNV,MXLI,MXLJ)
 C-Title  : REMF12 Subroutine
 C-Purpose: Read EMPIRE output discrete levels
       CHARACTER*2    CH
       CHARACTER*136  REC
       DIMENSION      NBR(MXLI),ENL(MXLI)
-     1              ,LBR(MXLJ,MXLI),BRR(MXLJ,MXLI)
+     1              ,LBR(MXLJ,MXLI),BRR(MXLJ,MXLI),CNV(MXLJ,MXLI)
 C*
 C* Search for the product nucleus data
+      LG=0
    20 READ (LIN,891,END=90) REC
       IF(REC(1:18).NE.'  Decaying nucleus') GO TO 20
       READ (REC(20:29),802) JZ,CH,JA
@@ -6111,14 +6120,14 @@ C* Process discrete levels
    35 READ (LIN,891) REC
       IF(REC(13:22).EQ.'production') GO TO 20
       IF(REC(11:30).NE.'Discrete level popul') GO TO 35
+      LG=1
 C* Positioned to read discrete levels
       READ (LIN,891)
       READ (LIN,891)
       READ (LIN,891)
-      XI=0.
    36 READ (LIN,891) REC
       READ (REC,805) IL,EL,X,JL
-      IF(IL.LE.0) GO TO 70
+      IF(IL.LE.0) GO TO 40
       IF(IL.GT.MXLI) STOP 'REMF12 ERROR - MXLI Limit exceeded'
       IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - MXLJ Limit exceeded'
       IF(JL.LE.0) THEN
@@ -6165,18 +6174,70 @@ C* Normalise the branching ratios
       ENL(IL)=EL*1.E6
       GO TO 36
 C* Branching ratios for all discrete levels processed
-   70 CONTINUE
-      RETURN
-C* No discrete level data given
+C*
+C* Read the Internal conversion coefficients
+   40 READ (LIN,891) REC
+      IF(REC(13:22).EQ.'production') GO TO 70
+      IF(REC(11:42).NE.'Internal conversion coefficients') GO TO 40
+C* Positioned to read the conversion coefficients
+      READ (LIN,891)
+      READ (LIN,891)
+      READ (LIN,891)
+      LG=2
+   46 READ (LIN,891) REC
+      READ (REC,805) IL,EL,X,JL
+      IF(IL.LE.0) GO TO 70
+      IF(IL.GT.MXLI) STOP 'REMF12 ERROR - MXLI Limit exceeded'
+      IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - MXLJ Limit exceeded'
+      IF(JL.LE.0) THEN
+C* Trap levels with no branching ratios given
+        IF(IL.GT.1) THEN
+C* Assume 100% transition to ground level
+          JL=1
+          CNV(1,IL)=1
+        END IF
+        GO TO 46
+      END IF
+C* Read the branching ratios
+      IF(REC(60:60).EQ.'.') THEN
+C*      Format OF EMPIRE-2.17 and later
+        J2=7
+        READ (REC,808,ERR=94) IL,EL,X,JL,(LDMY,CNV(J,IL),J= 1,J2)
+        IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - FORMAT 806 Limit exceeded'
+   47   J1=J2+1
+        IF(J1.LE.JL) THEN
+          J2=MIN(JL,J1+6)
+          READ(LIN,809) (LDMY,CNV(J,IL),J=J1,J2)
+          GO TO 47
+        END IF
+      ELSE
+C*      Format up to EMPIRE-2.16 (Montenotte)
+        READ (REC,805,ERR=92) IL,EL,X,JL,(LDMY,CNV(J,IL),J=1,JL)
+      END IF
+C* Check the range of the conversion coefficients
+      DO J=1,JL
+        CC=CNV(J,IL)
+        CC=MAX( 0.0, CC )
+        CC=1/(1+CC)
+        CNV(J,IL)=MIN( 1.0, CC )
+      END DO
+      GO TO 46
+C*
+C* Internal conversion coefficients processed
+   70 RETURN
+C* Trap - No discrete level data given
    90 NLV=0
       RETURN
 C* Trap read error
-   92 STOP 'EMPEND ERROR reading MF12 data'
+   92 STOP 'EMPEND ERROR reading MF12 branching ratio data'
+   94 STOP 'EMPEND ERROR reading MF12 conversion coefficients'
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
   805 FORMAT(I12,F10.0,15X,F13.0,I3,13(I3,F3.0))
   806 FORMAT(I12,F10.0,13X,F15.0,I3, 7(I4,F7.0))
   807 FORMAT(53X,7(I4,F7.0))
+  808 FORMAT(I12,F10.0,13X,F15.0,I3, 7(I4,F11.0))
+  809 FORMAT(53X,7(I4,F11.0))
   891 FORMAT(A136)
   912 FORMAT(' EMPEND WARNING - No b.r. data for level ',I4/
      1       '                  Transfer to ground state assumed')
@@ -7844,18 +7905,24 @@ c...
       END
       
       
-      SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,ENL,NBR,LBR,BRR
-     1                 ,RWO,MXLI,MXLJ,NBL)
+      SUBROUTINE WRMF12(LOU,MAT,MT0,IZA,AWR,NLV,NL1,ENL,NBR
+     &                 ,LBR,LG,BRR,CNV,RWO,MXLI,MXLJ,NBL)
 C-Title  : WRMF12 Subroutine
 C-Purpose: Write MF 12 data in ENDF-6 format
-      DIMENSION      NBR(MXLI),ENL(MXLI),RWO(2,MXLI)
-     1              ,LBR(MXLJ,MXLI),BRR(MXLJ,MXLI)
+C-D  LG=1 if only the branching ratios are given
+C-D     2 if branching ratios and internal conversion coeff. are given
+C-
+      DIMENSION      NBR(MXLI),ENL(MXLI),RWO(LG+1,MXLI)
+     1              ,LBR(MXLJ,MXLI),BRR(MXLJ,MXLI),CNV(MXLJ,MXLI)
 C*
+      IF(LG.LT.1 .OR. LG.GT.2) THEN
+        PRINT *,'ERROR - Illegal discrete-level MF 12 flag LG',LG
+        STOP 'WRMF12 ERROR - Illegal MF12 flag LG'
+      END IF
       ZRO=0
       ZA =IZA
       MF =12
       L0 =2
-      LG =1
       LP =0
       NS =1
 C* Loop over all discrete levels
@@ -7880,10 +7947,12 @@ C...        print *,'jt,ll,le',jt,ll,le
 C...        print *,'       E',enl(le)
 C...
             RWO(1,JT)=ENL(LE)
-C* Determine the branching fraction for this level
+C*          -- Enter the branching fraction for this level
             RWO(2,JT)=BRR(JT,LL)
+C*          -- Enter the internal conversion coefficient
+            IF(LG.GT.1) RWO(3,JT)=CNV(JT,LL)
           END DO
-          CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,2*NT,NT,RWO)
+          CALL WRLIST(LOU,MAT,MF,MT,NS,ES, 0., LP,  0,(LG+1)*NT,NT,RWO)
 C* Section end
           NS=99998
           CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
