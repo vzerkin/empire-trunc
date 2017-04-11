@@ -43,7 +43,7 @@ ifndef EMPIREDIR
 else
 	@for dir in $(UTILS) ; do (echo $$dir ; cd $$dir ; $(MAKE) FC=$(FC) $(FLG) ); done
 	cd source; $(MAKE) FC=$(FC) $(FLG) 
-	cd ../source-optman; $(MAKE) FC=$(FC) $(FLG) 
+	cd source-optman; $(MAKE) FC=$(FC) $(FLG) 
 
 endif
 
