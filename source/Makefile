@@ -1,6 +1,6 @@
-#$Rev: 4899 $
-#$Author: rcapote $
-#$Date: 2017-04-07 16:17:59 +0200 (Fr, 07 Apr 2017) $
+#$Rev: 4909 $
+#$Author: gnobre $
+#$Date: 2017-04-11 17:48:21 +0200 (Di, 11 Apr 2017) $
 
 # set default compilers:
 
@@ -138,7 +138,7 @@ all:
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
-	svn info ../../empire-repos 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
+	svn info . 2> /dev/null | grep -e 'Revision:' -e 'Last Changed Rev:' > .versionnumbers
 
 subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
