@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4889 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-05 16:40:35 +0200 (Mi, 05 Apr 2017) $
+Ccc   * $Rev: 4911 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-04-11 22:43:30 +0200 (Di, 11 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1693,7 +1693,7 @@ C-------!daughter bin
 C-----gamma decay to discrete levels (stored with icse=0)
       DO il = 1, NLV(nnur)
         DO ire = 1, NDEREC             !over recoil spectrum
-          IF(RECcse(irec,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN
+          IF(RECcse(ire,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN
             RECcse(ire,0,nnur) = RECcse(ire,0,nnur)
      &                           + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
      &                           /DERec
