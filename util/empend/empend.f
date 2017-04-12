@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-04-11 07:13:06 +0200 (Di, 11 Apr 2017) $
+Ccc   * $Date: 2017-04-12 21:35:08 +0200 (Mi, 12 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -152,6 +152,7 @@ C-M        tabular representation if needed.
 C-M  16/12 Fix the patch to switch to tabular representation.
 C-M  17/04 Extrapolate non-threshold reactions as 1/v.
 C-M        Fix roundoff errors in total inelastic.
+C-M        Fix setting of cross sections below the first EMPIRE point.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -6679,7 +6680,7 @@ C* Remove redundant zeroes below pseudo-threshold
         RWO(LY  )=0
         RWO(LY+1)=0
       END DO
-C* Define the interpolation law as lin-lin
+C* Define the default interpolation law as lin-lin
       NR    =1
       INR(1)=2
       NBT(1)=NEO
@@ -6698,8 +6699,13 @@ C* Extrapolate points down to EMIN for incident neutrons
             EE=RWO(LX)
             YY=0
           END IF
+          LX =LX-2
+          LY =LY-2
+          NE0=NE0+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
+          RWO(LY  )=YY
+          RWO(LY+1)=YY
           IF(YY.GT.0 .AND. 
      &          ((MT.LT.452 .AND.MT.NE.2) .OR.
      &            MT.GT.456)) THEN
@@ -6716,10 +6722,6 @@ c...
             INR(1)=5
             NBT(2)=NEO
             INR(2)=2
-          ELSE
-C*          -- Extrapolate flat
-            RWO(LY  )=YY
-            RWO(LY+1)=YY
           END IF
         ELSE
           RWO(LX)=EMIN
