@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-04-12 21:35:08 +0200 (Mi, 12 Apr 2017) $
+Ccc   * $Date: 2017-04-13 23:08:21 +0200 (Do, 13 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -6701,7 +6701,7 @@ C* Extrapolate points down to EMIN for incident neutrons
           END IF
           LX =LX-2
           LY =LY-2
-          NE0=NE0+2
+          NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
           RWO(LY  )=YY
