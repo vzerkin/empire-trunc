@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 22:11:44 +0200 (Mo, 03 Apr 2017) $
-Ccc   * $Id: lev-dens.f 4882 2017-04-03 20:11:44Z rcapote $
+Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Id: lev-dens.f 4914 2017-04-17 12:54:57Z rcapote $
 C
 C
 C
@@ -1060,8 +1060,11 @@ C           ENDIF
 C        ENDDO
 C     ENDDO
 
-      RO(:,:,:,Nnuc) = 0.d0
-      ROF(:,:,Nnuc) = 0.d0
+      IF (BF.NE.0.0D0) THEN
+        RO(:,:,:,Nnuc) = 0.d0
+      ELSE
+        ROF(:,:,Nnuc) = 0.d0
+      ENDIF 
 
       RETURN
       END

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4759 $
+Ccc   * $Rev: 4914 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 16:31:01 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -71,7 +71,7 @@ C      CSEahmslab = 0.d0
       QPRod    = -1000.0
       FISb     = 0.d0
       ETL      = 0.d0
-      LMAxtl   = 0.d0
+      LMAxtl   = -1
       TL       = 0.d0
 
       TNUc     = 0.d0

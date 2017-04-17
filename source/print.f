@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4866 $
+Ccc   * $Rev: 4914 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -615,7 +615,7 @@ C Local variables
 C
       DOUBLE PRECISION csemax, e, s0, s1, s2, s3, totspec, recorp
       CHARACTER haha, hstar, symc(93)
-      INTEGER i, ia, ij, kmax, l, n
+      INTEGER i, ia, ij, kmax, l, n, kkmm
       DATA hstar, haha/'*', ' '/
 
       csemax = 0.d0
@@ -693,9 +693,14 @@ C     IF (totspec.LE.CSMinim) RETURN
      &        E6.1)
       WRITE (8,99035)
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
-      WRITE (8,99045)
+      WRITE (8,99045)                        
 
+	  kkmm = 1
       DO i = 1, kmax
+        if(CSE(i,Nejc,Nnuc)>0) exit
+	    kkmm = i
+	  ENDDO
+      DO i = kkmm, kmax
 C        if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
          e = FLOAT(i - 1)*DE
          IF (CSE(i,Nejc,Nnuc).GE.s0) THEN
