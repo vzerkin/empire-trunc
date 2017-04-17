@@ -1,6 +1,6 @@
-! $Rev: 4866 $
+! $Rev: 4915 $
 ! $Author: rcapote $
-! $Date: 2017-03-27 03:05:48 +0200 (Mo, 27 Mär 2017) $
+! $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -121,7 +121,7 @@
 !    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      &
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,     &
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,  &
-     &                 RECcse(nderec,0:ndex,ndnuc), REClev(ndlv,0:ndejc)&
+     &                RECcse(nderec,0:nderec,ndnuc),REClev(ndlv,0:ndejc)&
      &                 , REDmsc(ndlw,2), RESmas(0:130,0:400), TOTred,   &
      &                 RNOnl(0:ndejc,0:ndnuc), ACOul(0:ndejc,0:ndnuc),  &
      &                 POPcon(ndnuc), POPdis(ndnuc), ELAred, CELred,    &
@@ -147,10 +147,10 @@
      &                 SHC(0:ndnuc), SHCfis(nfhump), SHCjf(ndlw,ndnuc), &
      &                 SHNix, SHRd, SHRj, SHRt, SIG,                    &
      &                 SIGabs(ndetl,ndejc,ndnuc), STMro, TEMp0,         &
-     &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndex,ndnuc),    &
+     &                 TL(ndetl,ndlw,ndejc,ndnuc), TNUc(ndecse,ndnuc),  &
      &                 TLJ(ndetl,ndlw,3,ndejc), TUNetl(ndlw),           &
-     &                 TNUcf(ndex,ndnuc), TORy, TOTcsfis, TRUnc,        &
-     &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndex,ndnuc),       &
+     &                 TNUcf(ndecse,ndnuc), TORy, TOTcsfis, TRUnc,      &
+     &                 TUNe(0:ndejc,0:ndnuc), UEXcit(ndecse,ndnuc),     &
      &                 UGRid(0:nfisenmax,nfhump),vibf12(NFHUMP),        &
      &                 E1grid(0:NLGRID,0:ndnuc),                        &
      &                 uuE1grid(0:NLGRID,0:ndnuc),                      & 

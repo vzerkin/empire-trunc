@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4879 $
+Ccc   * $Rev: 4915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 21:16:47 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3158,19 +3158,20 @@ C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
 C     next  = INT(excnq/DE + 1.0001)
-      next  = MAX(INT(excnq/DE + 1.0001),1)
+      next  = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed) 
 
 C     Assuming PE calculates over discrete levels' region as well
-      IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = MIN(next,ndecsed)
+C     IF(PEQcont.gt.0 .and. NEJc.eq.0) nexrt = MIN(next,ndecsed)
 
       somj = CSMsd(Nejc)
 C
 C     We need statements below as long as discrete data are calculated in MSD
+C     MH: Not really, nexrt must run only over continuum
 C
-      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 ) 
-     & nexrt = next
-      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 ) 
-     & nexrt = next
+!      IF (Nejc.eq.1 .and. NPRoject.eq.1 .and. IDNa(1,2).EQ.1 )
+!     & nexrt = next
+!      IF (Nejc.eq.2 .and. NPRoject.eq.2 .and. IDNa(3,2).EQ.1 )
+!     & nexrt = next
 
 C-----calculate spin distribution for 1p-1h states
 
@@ -3218,7 +3219,9 @@ C          distribution of the PCROSS continuum particle or photon emissions
 C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
 C          shifted by the target ground state target spin XJLv(LEVtarg,0)
            DO ie = 1, nexrt
-
+C            if(ie.gt.NDEX) then
+C               write(*,*)'ie, nexrt, nejc',ie, nexrt, nejc
+C            endif
              SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
      >            0.26d0*A(Nnur)**0.66666667
 
@@ -3310,12 +3313,12 @@ C-----------divides outgoing energies
      &                         *CANgler(na)
                 irec = erecoil/DERec + 1.001
                 weight = (erecoil - (irec - 1)*DERec)/DERec
-C               IF (irec + 1.GT.NDEREC) GOTO 20
-                IF (irec + 1.GT.NDEREC) EXIT
                 csmsdl = CSEa(nexrt - ie + 1,na,Nejc)*SANgler(na)
      &                        *coeff
+                IF (irec.GE.NDEREC) EXIT                
                 RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
      &                  + csmsdl*(1.d0 - weight)
+                IF (irec + 1.GE.NDEREC) EXIT                                
                 RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
      &                  + csmsdl*weight
 C
@@ -3548,6 +3551,8 @@ C--------Store ang. dist.
       ENDIF
       RETURN
       END
+
+
       Subroutine Nilsson(d,e0,als, HOMega,n,k,v, BETa2,all)
 CCC
 CCC   ******************************************************************

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4890 $
+Ccc   * $Rev: 4915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-06 20:06:32 +0200 (Do, 06 Apr 2017) $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2375,23 +2375,27 @@ C     allocate MAXl(), TTLl(), TTLlj()
         WRITE(12,*) ' ERROR: Insufficient memory for TLEVAL (tl.f)'
         STOP        ' ERROR: Insufficient memory for TLEVAL (tl.f)'
       ENDIF
-C     maxl  = 0
-C     ttll  = 0.d0
-C     ttllj = 0.d0
+      maxl  = -1
+      ttll  = 0.d0
+      ttllj = 0.d0
 C
 C-----TL trans. coeff. at zero energy must be zero
 C
-      DO i = 1, NDETL
-         LMAxtl(i,Nejc,Nnuc) = -1
-         DO l = 1, NDLW
-            TL(i,l,Nejc,Nnuc) = 0.D0
-            IF(Nnuc.eq.NREs(Nejc)) then      
-              DO k=1,MAXj(Nejc)
-                TLJ(i,l,k,Nejc) = 0.D0
-              ENDDO 
-            ENDIF
-         ENDDO
-      ENDDO
+C     DO i = 1, NDETL
+C        LMAxtl(i,Nejc,Nnuc) = -1
+C        DO l = 1, NDLW
+C           TL(i,l,Nejc,Nnuc) = 0.D0
+C           IF(Nnuc.eq.NREs(Nejc)) then      
+C             DO k=1,MAXj(Nejc)
+C               TLJ(i,l,k,Nejc) = 0.D0
+C             ENDDO 
+C           ENDIF
+C        ENDDO
+C     ENDDO
+	LMAxtl(:,Nejc,Nnuc) = -1
+	TL(:,:,Nejc,Nnuc) = 0.D0
+      IF(Nnuc.eq.NREs(Nejc)) TLJ(:,:,:,Nejc) = 0.D0
+C
 C-----TARGET NUCLEUS (ELASTIC CHANNEL), incident neutron or proton
 C-----Transmission coefficient matrix for elastic channel
 C-----ECIS code is used

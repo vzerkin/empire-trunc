@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4794 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2016-10-14 17:50:39 +0200 (Fr, 14 Okt 2016) $
+Ccc   * $Rev: 4915 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -248,11 +248,13 @@ C                 coeff = coeff*POPlv(ilv,nnurec)/csum/DERec
      &                         *CANgler(iang)
                      irec = erecoil/DERec + 1.001
                      weight = (erecoil - (irec - 1)*DERec)/DERec
-C--------------------Escape if we go beyond recoil spectrum dimension
-                     IF (irec + 1.GT.NDEREC) GOTO 1350
                      csmsdl =CSAlev(iang,ilv,nejcec)*SANgler(iang)*coeff
+C--------------------Escape if we go beyond recoil spectrum dimension
+                     IF (irec.GT.NDEREC) GOTO 1350
                      RECcse(irec,0,nnurec) = RECcse(irec,0,nnurec)
      &                  + csmsdl*(1.d0 - weight)
+C--------------------Escape if we go beyond recoil spectrum dimension
+                     IF (irec + 1.GT.NDEREC) GOTO 1350
                      RECcse(irec + 1,0,nnurec)
      &                  = RECcse(irec + 1,0,nnurec) + csmsdl*weight
                   ENDDO

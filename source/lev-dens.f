@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
-Ccc   * $Id: lev-dens.f 4914 2017-04-17 12:54:57Z rcapote $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Id: lev-dens.f 4915 2017-04-17 20:57:33Z rcapote $
 C
 C
 C
@@ -186,8 +186,7 @@ C
 C Local variables
 C
       REAL*8 ac, bsq, cigor, momort, mompar, stab, t, u
-
-c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
+c     REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
       LOGICAL bcs
       REAL*8 FSHELL, ROBCS, RODEF
       INTEGER i, ia, iz,egsm,lazy
@@ -195,12 +194,8 @@ c      REAL*8 erac,arac,tconst,rofgrac,e0,urac,sigg,u1
 
       bcs = .TRUE.
 c-----EGSM - J>>K (egsm=0) and EGSM (egsm=1)
-
       egsm=0
-
-
       lazy=0
-
 
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))

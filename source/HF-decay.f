@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4911 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-04-11 22:43:30 +0200 (Di, 11 Apr 2017) $
+Ccc   * $Rev: 4915 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1573,21 +1573,22 @@ C
 C Local variables
 C
       DOUBLE PRECISION coeff, dang, erecejc, erecod, erecoil, erecpar,
-     &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl
+     &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl, ftmp
       INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
 C
 C
 C-----Normalize recoil spectrum of the parent
-      sumnor = 0.d0
-      DO ire = 1, NDEREC
-         sumnor = sumnor + RECcse(ire,Ke,Nnuc)
-      ENDDO
-      IF (sumnor.NE.0.0D0) THEN
-         DO ire = 1, NDEREC
-            RECcse(ire,Ke,Nnuc) = RECcse(ire,Ke,Nnuc)/sumnor
-         ENDDO
-      ENDIF
-
+C     sumnor = 0.d0
+C     DO ire = 1, NDEREC
+C        sumnor = sumnor + RECcse(ire,Ke,Nnuc)
+C     ENDDO
+C     IF (sumnor.NE.0.0D0) THEN
+C        DO ire = 1, NDEREC
+C           RECcse(ire,Ke,Nnuc) = RECcse(ire,Ke,Nnuc)/sumnor
+C        ENDDO
+C     ENDIF
+      sumnor = SUM(RECcse(:,Ke,Nnuc))
+      IF (sumnor>0) RECcse(:,Ke,Nnuc) = RECcse(:,Ke,Nnuc)/sumnor
 
       dang = PI/FLOAT(NDANG - 1)
       coeff = dang/DERec/2.0
@@ -1611,19 +1612,19 @@ C-----------Daughter bin
 
             erecejc = (ie - 1)*DE/recorr
             DO ire = 1, NDEREC          !over recoil spectrum
-              IF(RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc).GT.0.d0) THEN
+              ftmp = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*coeff*recorr  
+              IF(ftmp>0) THEN
                  erecpar = (ire - 1)*DERec
                  DO na = 1, NDANG
                    erecoil = erecejc+ erecpar+ 2.0*SQRT(erecejc*erecpar)
      &                      *CANgler(na)
                    irec = erecoil/DERec + 1.001
                    weight = (erecoil - (irec - 1)*DERec)/DERec
-                   IF (irec + 1.GT.NDEREC) EXIT
-                   csmsdl = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*
-     &                    SANgler(na)*coeff*recorr
-	           
+                   csmsdl = ftmp*SANgler(na)
+                   IF (irec > NDEREC) EXIT                                      
                    RECcse(irec,icse,nnur)=RECcse(irec,icse,nnur)
      &               + csmsdl*(1.0 - weight)
+                   IF (irec + 1 > NDEREC) EXIT                                                         
                    RECcse(irec + 1,icse,nnur)=RECcse(irec + 1,icse,nnur)  
      &               + csmsdl*weight
                  ENDDO                  !over angles
@@ -1635,21 +1636,20 @@ C--------Decay to discrete levels (stored with icse=0)
          exqcut = exqcut + ECUt(nnur)
          DO il = 1, NLV(nnur)
             erecod = exqcut - ELV(il,nnur)   !emission energy
+            IF (erecod.LT.0) EXIT
             erecod = erecod/recorr
-            IF (erecod.LT.0) GOTO 100
             DO ire = 1, NDEREC      !over recoil spectrum
-              IF(RECcse(ire,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN 
+              ftmp = RECcse(ire,Ke,Nnuc)*REClev(il,nejc)*coeff                  
+              IF(ftmp>0) THEN 
                 DO na = 1, NDANG !over angles
                   erecoil = (ire - 1)*DERec + erecod +
      &                       2.0*SQRT((ire - 1)*DERec*erecod)
      &                      *CANgler(na)
                   irec = erecoil/DERec + 1.001
                   weight = (erecoil - (irec - 1)*DERec)/DERec
-                  IF (irec.GT.NDEREC) GOTO 60
+                  IF (irec.GT.NDEREC) EXIT                  
                   RECcse(irec,0,nnur) = RECcse(irec,0,nnur)
-     &                                  + RECcse(ire,Ke,Nnuc)
-     &                                  *REClev(il,nejc)*(1.0 - weight)
-     &                                  *SANgler(na)*coeff
+     &               + ftmp*(1.d0 - weight)*SANgler(na)
 c------------------------
 !                 IF(irec.EQ.5 .AND. RECcse(irec,0,nnur).GT.0
 !     &               .AND.na.EQ.10) THEN
@@ -1661,10 +1661,9 @@ c------------------------
 !     &            REClev(il,nejc)
 !                  ENDIF
 c------------------------
-                  IF (irec + 1.GT.NDEREC) GOTO 60
+                  IF (irec + 1.GT.NDEREC) EXIT
                   RECcse(irec + 1,0,nnur) = RECcse(irec + 1,0,nnur)
-     &               + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
-     &               *weight*SANgler(na)*coeff
+     &               + ftmp*weight*SANgler(na)
                 ENDDO                  !over angles
               ENDIF
    60       ENDDO                  !over recoil spectrum
@@ -1679,25 +1678,21 @@ C-----
 C-----gamma decay to continuum
       DO ie = 1, NDECSE !over ejec. energy (daughter excitation)
         icse = (EX(Ke,Nnuc) - (ie - 1)*DE - ECUt(nnur))/DE + 1.001
-        IF (icse.LE.0) CYCLE  
+        IF (icse<0) EXIT
 C-------!daughter bin
         DO irec = 1, NDEREC         !over recoil spectrum
-          IF(RECcse(irec,Ke,Nnuc)*AUSpec(ie,0).GT.0) THEN
-             RECcse(irec,icse,nnur)
-     &          = RECcse(irec,icse,nnur) + RECcse(irec,Ke,Nnuc)
-     &          *AUSpec(ie,0)/DERec
-          ENDIF
+          ftmp = RECcse(irec,Ke,Nnuc)*AUSpec(ie,0)/DERec                  
+          IF(ftmp>0) RECcse(irec,icse,nnur) = 
+     &               RECcse(irec,icse,nnur) + ftmp
         ENDDO                  !over recoil spectrum
       ENDDO                  !over  daugther excitation
 
 C-----gamma decay to discrete levels (stored with icse=0)
       DO il = 1, NLV(nnur)
         DO ire = 1, NDEREC             !over recoil spectrum
-          IF(RECcse(ire,Ke,Nnuc)*REClev(il,nejc).GT.0) THEN
-            RECcse(ire,0,nnur) = RECcse(ire,0,nnur)
-     &                           + RECcse(ire,Ke,Nnuc)*REClev(il,nejc)
-     &                           /DERec
-          ENDIF
+          ftmp = RECcse(ire,Ke,Nnuc)*REClev(il,nejc)/DERec                              
+          IF(ftmp>0) RECcse(ire,0,nnur) = 
+     &               RECcse(ire,0,nnur) + ftmp            
         ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
       RETURN	 
@@ -1748,7 +1743,8 @@ C
 
       IF(csum.LE.0.d0) RETURN 
 
-      ilast = MIN(ilast + 1,NDEX)
+C     ilast = MIN(ilast + 1,NDEX)
+      ilast = MIN(ilast + 1,NDEREC)
 
       if (ilast.gt.1)  then
         csum  = csum -  
@@ -1913,8 +1909,9 @@ C    &       React, 'ZAP=', IZA(Nnuc), ' csum=', csum
 
 C     IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
-      ilast = MIN(ilast + 1,NDEX)
-
+C     ilast = MIN(ilast + 1,NDEX)
+      ilast = MIN(ilast + 1,NDEREC)
+      
       if (ilast.gt.1) then
         csum  = csum - 0.5d0*
      &   (POPcse(0,ipart,1,INExc(Nnuc))+

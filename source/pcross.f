@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4848 $
+Ccc   * $Rev: 4915 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-12 04:04:40 +0100 (So, 12 Mär 2017) $
+Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -37,7 +37,7 @@ C
       COMMON /CALC5 / L, NHEq
       COMMON /VWELL / VV
 
-      DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDEX)
+      DOUBLE PRECISION cross(0:NDEJC), spec(0:NDEJC,NDECSE)
 
       DOUBLE PRECISION crossNT(0:NDEJC),crossNTt,
      &                 crossPE(0:NDEJC),crossPEt
@@ -59,13 +59,13 @@ C
 C
 C Local variables
 C
-      DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDEX), em(PMAX),
+      DOUBLE PRECISION aat, azt, cme, ec, eee, eint(NDECSE), em(PMAX),
      &       ebind, emaxi, emini, emis, er, excnq, ff, ff1, ff2, ff3,
-     &       fint(NDEX), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
+     &       fint(NDECSE), flm(4,4), fanisot, fr, ftmp, gc, hlp1, pc,
      &       r(4,PMAX,NDEJC), sg, vvf, vsurf, wb, wda, step, ggg
 
       DOUBLE PRECISION g(0:NDEJC), pair(0:NDEJC), scompn, 
-     &                 we(0:NDEJC,PMAX,NDEX) !, ddxs(NDAngecis)
+     &                 we(0:NDEJC,PMAX,NDECSE) !, ddxs(NDAngecis)
 
       DOUBLE PRECISION, ALLOCATABLE :: ddxs(:)
 
@@ -185,19 +185,11 @@ C
 C     callpcross = .TRUE.  ! To avoid r factor recalculation at each call
 
 C-----ZERO ARRAY INITIALIZATION
-      DO nejc = 0, NDEJC
-         iemin(nejc) = 2
-         iemax(nejc) = NDEX
-         DO ienerg = 1, NDEX
-            spec(nejc,ienerg) = 0.D0
-            DO hh = 1, PMAX
-               we(nejc,hh,ienerg) = 0.D0
-            ENDDO
-         ENDDO
-         DO hh = 1, PMAX
-             L(nejc,hh) = 0.D0
-         ENDDO
-      ENDDO
+      iemin = 2
+      iemax = NDECSE
+      spec = 0.d0 
+      we   = 0.d0
+      L    = 0.d0
       pair = 0
 C
 C-----NEJcm is the maximum number of particles emitted
@@ -239,6 +231,11 @@ C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
      &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
          if(nejc.eq.6 .and. IDNa(14,6).eq.0) 
      &     nexrt = MIN(MAX(INT((excnq-ECUt(nnur))/DE+1.0001),1),ndecsed)
+
+C        to check, extend PE spectra to discrete levels for all particles
+C        require additional changes in ACCUMSD
+C        IF(PEQcont.gt.0) 
+C    &     nexrt = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed)
 
          iemax(nejc) = nexrt
          DO ienerg = 2, nexrt
@@ -466,16 +463,12 @@ C
 C
      
 C-----Maximum and minimum energy bin for gamma emission
-C     nnur = NREs(0)
 C     No PE contribution to discrete for gammas
-C     nexrt = MAX(INT((EXCn -ECUt(nnur))/DE + 1.0001),1)
       nexrt = MIN(MAX(INT((EXCn -ECUt(1))/DE + 1.0001),1),ndecsed)
-C     Assuming PE calculates over discrete levels' region as well
-!     is temporarily disabled since nexrt has to be defined in terms of
-!     (EXCn -ECUt(nnur)). Otherwise we go out of dimension in TNUc (line 549)
-!     IF(PEQcont.gt.0) nexrt = MAX(INT(EXCn/DE + 1.0001),1)
+C     to check, extend PE spectra to discrete levels for gammas
+C     require additional changes in ACCUMSD to keep balance ok
       IF(PEQcont.gt.0) nexrt = MIN(MAX(INT(EXCn/DE + 1.0001),1),ndecsed)
-      iemax(0) = nexrt
+C     iemax(0) = nexrt
 C
 C-----EMISSION RATES CALCULATIONS FOLLOWS           
 C
