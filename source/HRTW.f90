@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4874 $
+   ! $Rev: 4917 $
    ! $Author: mherman $
-   ! $Date: 2017-03-30 08:43:30 +0200 (Do, 30 Mär 2017) $
+   ! $Date: 2017-04-18 20:21:34 +0200 (Di, 18 Apr 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -473,20 +473,20 @@ CONTAINS
                in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                ! renormalization
                xnor = in%sig/DENhf     ! normalization factor
-               SCRt = SCRt*xnor        ! normalizing scratch matrices instead of passing xnor to XSECT,
-               SCRtl = SCRtl*xnor      !   the above helps implementation of the EW transformation that provides
-               SCRtem = SCRtem*xnor    !   unfactorized cross sections.
-               sumfis = sumfis*xnor    !                                  "
-               sumfism = sumfism*xnor  !                                  "
+!               SCRt = SCRt*xnor        ! normalizing scratch matrices instead of passing xnor to XSECT,
+!               SCRtl = SCRtl*xnor      !   the above helps implementation of the EW transformation that provides
+!               SCRtem = SCRtem*xnor    !   unfactorized cross sections.
+!               sumfis = sumfis*xnor    !                                  "
+!               sumfism = sumfism*xnor  !                                  "
 
                !----------------------------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !----------------------------------------------------------------------------------
                CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
-               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+!               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                ! if renormalization skipped
-                     !CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                out => outchnl(i)
                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
@@ -1654,18 +1654,19 @@ CONTAINS
 !               in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                      ! renormalization
                xnor = in%sig/DENhf                          ! normalization factor
-               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
-               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
-               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
-               sumfis = sumfis*xnor                         !                                  "
-               sumfism = sumfism*xnor                       !                                  "
+!               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+!               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+!               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+!               sumfis = sumfis*xnor                         !                                  "
+!               sumfism = sumfism*xnor                       !                                  "
 
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
                CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
-               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+!               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+               CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
             ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
