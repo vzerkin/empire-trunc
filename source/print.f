@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4914 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -428,24 +428,24 @@ C
 C***********************************************************************  
          IF(nejc.eq.IDDfig(3) .and. dabs(EINl-EDDfig).le.1.d-5) THEN 
            recorp=1.d0+EJMass(nejc)/AMAss(1)
-C	     write(*,*) 'inclusive: DE=',DE,' reccor=', recorp
+C          write(*,*) 'inclusive: DE=',DE,' reccor=', recorp
 C          ANGles(nang) nang=16 (30 deg), nang=76 (150 deg)
            itmp = 0
-	     do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
+           do nang=IDDfig(1),IDDfig(2),IDDfig(2)-IDDfig(1)
              itmp = itmp + 1
 C****        Only two angles can be selected to print DDXS !!!
              if(itmp.gt.2) EXIT
              write(caz,'(A8,A1,A2,I3.3,A7)') 'DDi_(z,X',part(Nejc),')_',
      &       NINT(ANGles(nang)),'deg.zvd'
-    	       OPEN(36,file=caz,status='unknown')
+             OPEN(36,file=caz,status='unknown')
 C            write(title,'(a21,a1,2h): ,F8.2, 2Hmb)')
 C    &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
              CALL OPEN_ZVV(36,
      &        '(z,X'//part(Nejc)//') '//caz(12:14)//' deg (incl)','  ')
-	       DO ie = 1, nspec 
+             DO ie = 1, nspec 
                IF(cseaprnt(ie,nang).LE.0.d0) CYCLE
                CSEat(ie,itmp) = CSEat(ie,itmp) + cseaprnt(ie,nang)
-		     WRITE (36,'(1X,E12.6,3X,E12.6)') 
+                 WRITE (36,'(1X,E12.6,3X,E12.6)') 
      &           FLOAT(ie - 1)*DE*1.D6/recorp, 
      &           cseaprnt(ie,nang)*recorp*1.d-9 ! Energy, DDXS in b/eV/sr
              ENDDO
@@ -453,8 +453,8 @@ C    &        'tit: Emission XS (z,X',part(Nejc),totspec*DE
                ! exact DDX spectrum endpoint
      &         min((EMAx(1)-Q(Nejc,1))/recorp,FLOAT(nspec)*DE/recorp),
      &         cseaprnt(nspec + 1,nang)*recorp*1.d-9 ! DDXS in b/eV/sr
-	       CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
-	       CLOSE(36)
+             CALL CLOSE_ZVV_DDX(36,'Energy','DDXS')
+             CLOSE(36)
            enddo
          ENDIF
 C***********************************************************************  
@@ -534,9 +534,9 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &      '(1x,    '' Incl. '',A2,''   emission   '',G12.6,'' mb'')')
      &          SYMbe(Nejc),totspec*DE
 
-	  IF(Nejc.le.6 .and. IOUT.ge.3) then
-	    ftmp =  SUM(POPcseaf(0,Nejc,1:NDECSE,0:ndexclus))
-	    if(ftmp.gt.0) then
+        IF(Nejc.le.6 .and. IOUT.ge.3) then
+          ftmp =  SUM(POPcseaf(0,Nejc,1:NDECSE,0:ndexclus))
+          if(ftmp.gt.0) then
             write(8,*)
             IF(Nejc.eq.1)
      &        write(8,*) ' Test printout of POPcseaf(0,1,ie,...)',
@@ -557,7 +557,7 @@ C    &     '' MeV  (inclusive)'' )') SYMbe(nejc),cmul*esum/totspec
      &        write(8,*) ' Test printout of POPcseaf(0,6,ie,...)',
      &                   ' for all residual nuclei -helion  emitted'
             do ie=1,NDECSE
-  	        ftmp =  SUM(POPcseaf(0,Nejc,ie,0:ndexclus))
+              ftmp =  SUM(POPcseaf(0,Nejc,ie,0:ndexclus))
               IF(ftmp.GT.0) write(8,'(i5, 7E15.6)') ie,ftmp
               IF(ftmp.GT.0.99999d0) EXIT
 !     Fractions for selected  nuclei (neutrons)
@@ -695,11 +695,11 @@ C     IF (totspec.LE.CSMinim) RETURN
 99035 FORMAT (2X,'MeV ',6X,'mb/MeV ',5X,'I ',3(29X,'I '))
       WRITE (8,99045)                        
 
-	  kkmm = 1
+        kkmm = 1
       DO i = 1, kmax
         if(CSE(i,Nejc,Nnuc)>0) exit
-	    kkmm = i
-	  ENDDO
+          kkmm = i
+        ENDDO
       DO i = kkmm, kmax
 C        if(CSE(i,Nejc,Nnuc).le.0.d0) cycle
          e = FLOAT(i - 1)*DE

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4881 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 21:50:01 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -325,10 +325,10 @@ C-----DE spectra
       IF (Nnuc.NE.1 .OR. Nejc.EQ.0) THEN !skip the first CN except gammas
          xnor = Popt*DE/POPbin(Iec,Nnuc)
 
-C	   DO ie = 1, NDEcse
- 	   DO ie = 1,NEX(Nnuc)
+C        DO ie = 1, NDEcse
+         DO ie = 1,NEX(Nnuc)
             DO iejc = 0, NDEJC
-	        
+              
 C             if(Nejc_open(iejc)==0) cycle
 
               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
@@ -795,7 +795,7 @@ C--------do loop over l --- done ----------------------------------------
          IF (s.LE.smax) GOTO 20
 C--------loop over channel spin ------ done ----------------------------
          sumdl = sumdl * TUNe(Nejc,Nnuc)     ! Allowing for tuning of discrete levels
-	
+      
          if(IZA(Nnur).EQ.IZA(0)) THEN
            SCRtl(i,Nejc) = sumdl * CINRED(i) 
            Sum = Sum + sumdl    !* CINRED(i) 
@@ -840,7 +840,7 @@ C--------do loop over l --- done ----------------------------------------
          s = s + 1.
          IF (s.LE.smax) GOTO 30
          !sumdl = sumdl * TUNe(Nejc,Nnuc)  
-	   sumdl = sumdl * TUNe(Nejc,NTArget)
+         sumdl = sumdl * TUNe(Nejc,NTArget)
 
 C--------loop over channel spin ------ done ----------------------------
          SCRtl(i,Nejc) = (sumdl +sumtt -sumin)*CELred

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4915 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)

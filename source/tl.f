@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4915 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2375,25 +2375,10 @@ C     allocate MAXl(), TTLl(), TTLlj()
         WRITE(12,*) ' ERROR: Insufficient memory for TLEVAL (tl.f)'
         STOP        ' ERROR: Insufficient memory for TLEVAL (tl.f)'
       ENDIF
-      maxl  = -1
-      ttll  = 0.d0
-      ttllj = 0.d0
 C
 C-----TL trans. coeff. at zero energy must be zero
-C
-C     DO i = 1, NDETL
-C        LMAxtl(i,Nejc,Nnuc) = -1
-C        DO l = 1, NDLW
-C           TL(i,l,Nejc,Nnuc) = 0.D0
-C           IF(Nnuc.eq.NREs(Nejc)) then      
-C             DO k=1,MAXj(Nejc)
-C               TLJ(i,l,k,Nejc) = 0.D0
-C             ENDDO 
-C           ENDIF
-C        ENDDO
-C     ENDDO
-	LMAxtl(:,Nejc,Nnuc) = -1
-	TL(:,:,Nejc,Nnuc) = 0.D0
+      LMAxtl(:,Nejc,Nnuc) = -1
+      TL(:,:,Nejc,Nnuc) = 0.D0
       IF(Nnuc.eq.NREs(Nejc)) TLJ(:,:,:,Nejc) = 0.D0
 C
 C-----TARGET NUCLEUS (ELASTIC CHANNEL), incident neutron or proton
@@ -2419,7 +2404,7 @@ C-----IWARN=4 - 'Energy requested higher than recommended for this potential'
 
 C-----transfer of the calculated transmission coeff. onto TL & TLJ matrices
       DO i = 2, NDETL
-	   if(maxl(i)<0) cycle
+         if(maxl(i)<0) cycle
          LMAxtl(i,Nejc,Nnuc) = MIN(maxl(i),NDLW-1)
          DO l = 0, LMAxtl(i,Nejc,Nnuc)
             ftmp = ttll(i,l+1)
@@ -2683,7 +2668,7 @@ C
      &                 ' coupled channels (both incident and outgoing)'
                WRITE (8,*) ' Spherical OM transmission coefficients',
      &                     ' used for the uncoupled channels'
-			ELSE
+                  ELSE
                WRITE (8,*) ' Spherical OM transmission coefficients',
      &                     ' used for the inelastic outgoing channel'
               ENDIF 
@@ -2993,7 +2978,7 @@ C
      >       WRITE(8,*) 'ERROR: Reading ECIS CC files for EW'  
            CALL Close_CC_files()
          ELSE
-	     WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
+           WRITE(8,*) 'WARNING: ECIS CC files for EW not found'
          ENDIF
 C         
          IF(debug) THEN
@@ -3024,7 +3009,7 @@ C    >       CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
            write(*,'(1x,I3,1x,d12.6,1x,F5.1,1x,I2,1x,I3)') 
      >       l,CCpdiag(l)%pdiag,
      >       CCpdiag(l)%Jcn,CCpdiag(l)%Pcn,CCpdiag(l)%nceq
-	     PAUSE 
+           PAUSE 
          ENDIF
 
       ENDIF
@@ -3098,7 +3083,7 @@ C          Scattering into continuum
       ENDDO
   400 CLOSE (45)
 C
-	IF((ABScs-SINlcc).LE.(SINl + SINlcont)) THEN
+      IF((ABScs-SINlcc).LE.(SINl + SINlcont)) THEN
         WRITE (8,
      &'(1x, '' *********************************************************
      &******'' /
@@ -3118,24 +3103,24 @@ C
      &,F8.2,'' mb''/)') 
      &    SINlcc, SINl, SINlcont, xsabsj, xsabs, 
      &    xsabs+SINlcc+SINl+SINlcont, ABScs 
-  	  IF(ABScs-SINlcc.GT.SINl) then
+        IF(ABScs-SINlcc.GT.SINl) then
            WRITE (8,'(
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
      &,F8.2,'' mb SET to zero''/)') SINl, SINlcont
-C          discarding DWBA inelastic to continuum   	   
-	     SINlcont = 0.d0
+C          discarding DWBA inelastic to continuum        
+           SINlcont = 0.d0
         ELSE
            WRITE (8,'(
      &1x,'' WARNING: DWBA cross section to uncoupled discrete levels =''
      &,F8.2,'' mb SET to zero''/
      &1x,'' WARNING: DWBA cross section to levels in the continuum   =''
      &,F8.2,'' mb SET to zero''/)') SINl, SINlcont
-C          discarding DWBA inelastic to discrete and continuum   	   
-	     SINl     = 0.d0
-	     SINlcont = 0.d0
-	  ENDIF
-	ENDIF
-	ftmp = SINl + SINlcont
+C          discarding DWBA inelastic to discrete and continuum       
+           SINl     = 0.d0
+           SINlcont = 0.d0
+        ENDIF
+      ENDIF
+      ftmp = SINl + SINlcont
 C
 C     ABScs is the OMP calculated absorption
 C     xsabs is the cross section calculated as a sum over Tls (Tljs)
@@ -3162,11 +3147,11 @@ C-----Renormalizing collective Tljs
         xsabsj = coeff*sabsj/(2.d0*sxj + 1.d0)
 
         if(MAX_cc_mod.GT.0) THEN
-	    do nlev=1,MAX_cc_mod 
+          do nlev=1,MAX_cc_mod 
             IF(STLcc(nlev)%lev==levtarg) 
      &        STLcc(nlev)%tlj = STLcc(nlev)%tlj*dtmp
           enddo  
-	  endif
+        endif
         WRITE (8,
      &'(1x,'' WARNING: Transmission coefficients renormalized by a facto
      &r '',F9.6/
@@ -3560,10 +3545,10 @@ C-----Storing transmission coefficients for EMPIRE energy grid
       ENDIF
  
       IF(IOPSYS.EQ.1) THEN
- 	  CALL SYSTEM(
+        CALL SYSTEM(
      > 'del ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
      >6_*.LST ecis06.tlj')
-	ENDIF
+      ENDIF
 
       RETURN
       END
@@ -3773,7 +3758,7 @@ C-----Smatrix output
       IF(.not.TL_calc) then
         ECIs2(6:6) = 'T'
         ECIs2(10:10) = 'T'
-	ENDIF
+      ENDIF
 C-----Penetrabilities punched on cards
       ECIs2(9:9) = 'T'
       ECIs2(13:13) = 'T'
@@ -4376,12 +4361,12 @@ C     INLkey < 0  Calculation for coupled states only = CC
 
         IF(inc_channel .and. Inlkey.EQ.0) 
      >    write (*,*) '  Running ECIS (sphe) ...'
-	endif
-	
+      endif
+      
       CALL ECIS('ecis06 ',itmp)
       IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
 
-C 	write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
+C     write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
@@ -5648,7 +5633,7 @@ C     IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
 
       IF(TL_calc) RETURN
 
-C 	  to assign number of coupled channels for WFC 
+C       to assign number of coupled channels for WFC 
       MAX_CC_mod = itmp      
 
       iwin = ipipe_move('OPTMAN.INP','OPTMAN-INC.inp')

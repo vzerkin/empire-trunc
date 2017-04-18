@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4915 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3263,7 +3263,7 @@ C--------used for ENDF exclusive spectra
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
                pops = CSEmsd(icsp,Nejc)
-	         IF(pops>0) THEN
+               IF(pops>0) THEN
 C               Commented on Dec 2011 by RCN, to keep integral of spectra = XS
 C               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
                 IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue

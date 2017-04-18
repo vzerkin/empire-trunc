@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4915 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -185,7 +185,7 @@ C-----------Check for the number of branching ratios
      &          XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
               
-			WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+                  WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
      &          XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
 
@@ -1059,33 +1059,33 @@ C--------------(merely for checking purpose)
              DO nejc = 0, NDEjc
                xnorm(nejc,INExc(nnuc)) = 1.0d0
              END DO
-97547	       FORMAT(3X,' Cont. popul. with cont. g-casc. ',G12.6,4H  mb)
-97548	       FORMAT(3X,' Disc. popul. with cont. g-casc. ',G12.6,4H  mb)
-97549	       FORMAT(3X,' Total popul. with cont. g-casc. ',G12.6,4H  mb)
+97547        FORMAT(3X,' Cont. popul. with cont. g-casc. ',G12.6,4H  mb)
+97548        FORMAT(3X,' Disc. popul. with cont. g-casc. ',G12.6,4H  mb)
+97549        FORMAT(3X,' Total popul. with cont. g-casc. ',G12.6,4H  mb)
              IF (nnuc.EQ.mt91) THEN
                nejc = 1
-	         WRITE (8 ,97547) xtotsp
-	         WRITE (12,97547) xtotsp
-	         WRITE (8 ,97548) CSDirlev(1,nejc)
-	         WRITE (12,97548) CSDirlev(1,nejc)
+               WRITE (8 ,97547) xtotsp
+               WRITE (12,97547) xtotsp
+               WRITE (8 ,97548) CSDirlev(1,nejc)
+               WRITE (12,97548) CSDirlev(1,nejc)
                xtotsp = xtotsp + CSDirlev(1,nejc)
                WRITE (8 ,97549) xtotsp
                WRITE (12,97549) xtotsp
              ELSEIF (nnuc.EQ.mt649) THEN
                nejc = 2
-	         WRITE (8 ,97547) ptotsp
-	         WRITE (12,97547) ptotsp
-	         WRITE (8 ,97548) CSDirlev(1,nejc)
-	         WRITE (12,97548) CSDirlev(1,nejc)
+               WRITE (8 ,97547) ptotsp
+               WRITE (12,97547) ptotsp
+               WRITE (8 ,97548) CSDirlev(1,nejc)
+               WRITE (12,97548) CSDirlev(1,nejc)
                ptotsp = ptotsp + CSDirlev(1,nejc)     
                WRITE (8 ,97549) ptotsp
                WRITE (12,97549) ptotsp
              ELSEIF (nnuc.EQ.mt849) THEN
                nejc = 3
-	         WRITE (8 ,97547) atotsp
-	         WRITE (12,97547) atotsp
-	         WRITE (8 ,97548) CSDirlev(1,nejc)
-	         WRITE (12,97548) CSDirlev(1,nejc)
+               WRITE (8 ,97547) atotsp
+               WRITE (12,97547) atotsp
+               WRITE (8 ,97548) CSDirlev(1,nejc)
+               WRITE (12,97548) CSDirlev(1,nejc)
                atotsp = atotsp + CSDirlev(1,nejc)     
                WRITE (8 ,97549) atotsp
                WRITE (12,97549) atotsp
@@ -1695,7 +1695,7 @@ C-----gamma decay to discrete levels (stored with icse=0)
      &               RECcse(ire,0,nnur) + ftmp            
         ENDDO                  !over recoil spectrum
       ENDDO                  !over levels
-      RETURN	 
+      RETURN       
       END
 
       SUBROUTINE PRINT_RECOIL(Nnuc,React) !,qout)
@@ -1779,7 +1779,7 @@ C
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
         WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
      &                                             stmp*recorr
-	  sstmp = sstmp + stmp
+        sstmp = sstmp + stmp
       ENDDO
 
       WRITE(12,
@@ -1816,32 +1816,32 @@ C    &                G12.6,'' mb'')') xsdisc
       endif 
 
       IF(ENDF(nnuc).eq.2) THEN
-     	corr = 1.d0
+      corr = 1.d0
         if (sstmp>0) corr = CSInc(Nnuc)/(sstmp*DERec)
-	    WRITE(12,
+          WRITE(12,
      &  '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb (incl)'')') 
      &      CSInc(Nnuc)
       ELSE
         corr = (CSPrd(Nnuc)-xsdisc)/(csum*DERec)
-	    WRITE(12,
+          WRITE(12,
      &     '( 2x,''Prod. cross sect. (continuum) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)-xsdisc
         WRITE(12,
      &     '( 2x,''Prod. cross sect. (disc+cont) '',G12.6,'' mb'' )') 
      &      CSPrd(Nnuc)
-	  ENDIF
+        ENDIF
 
       IF(ENDF(nnuc).eq.2) THEN
-	    WRITE(12,
+          WRITE(12,
      &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6,''    (incl)'')') 
      &  corr 
       ELSE  
-	    WRITE(12,
+          WRITE(12,
      &  '( 2x,''Ratio continuum  XS/Recoil XS '',G12.6)') corr 
         WRITE(12,
      &  '( 2x,''Ratio Production XS/Recoil XS '',G12.6)') 
      &      CSPrd(Nnuc)/(csum*DERec)
-	ENDIF	
+      ENDIF 
       WRITE(12,*)
       WRITE(12,*)
 
@@ -2061,7 +2061,7 @@ C-----fission
          IF (ENDf(Nnuc).EQ.1 .AND. Fisxse.GT.0.d0 .AND.
      &       POPbin(Ke,Nnuc).GT.0.d0)
      &       CALL EXCLUSIVEF(Ke,Nnuc,Fisxse)
-	
+      
       ELSE ! Multimodal
          DO M = 1, INT(FISmod(Nnuc)) + 1
             Fisxse = Fisxse + Sumfism(M)*Xnor

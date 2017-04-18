@@ -1,6 +1,6 @@
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
-Ccc   * $Id: lev-dens.f 4915 2017-04-17 20:57:33Z rcapote $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Id: lev-dens.f 4916 2017-04-18 10:43:10Z rcapote $
 C
 C
 C
@@ -1477,7 +1477,7 @@ C--------set nuclear temperature to the value from the systematics
 C           write(*,*) '***',a(nnuc),z(nnuc),ux
 C           write(*,*) am, 6.d0/t, atil
             IF(am*t.LT.6.d0) then
-	        am = atil
+              am = atil
               exit
             ENDIF
             IF (ux.EQ.0.0D0) ux = t*t*(am - 3/t + SQRT((am-6/t)*am))/2.0
@@ -2107,7 +2107,7 @@ C              RO(kk,i,1,Nnuc) = 0.d0
 C              RO(kk,i,2,Nnuc) = 0.d0
 C           ENDDO
 C        ENDDO
-	   RO(:,:,:,Nnuc) = 0.d0
+         RO(:,:,:,Nnuc) = 0.d0
 
          DO kk = 1, NEXreq
 C-----------decrease energy shift above the last level to become 0 at Qn

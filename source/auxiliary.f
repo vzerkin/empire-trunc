@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4914 $
+Ccc   * $Rev: 4916 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-17 14:54:57 +0200 (Mo, 17 Apr 2017) $
+Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -52,7 +52,7 @@ C      CSEhms = 0.d0
 C      CSEhmslab = 0.d0
       AUSpec = 0.d0
       CSEa   = 0.d0
-	CSEat  = 0.d0
+      CSEat  = 0.d0
 C      CSEahms = 0.0d0
 C      CSEahmslab = 0.d0
 
