@@ -1,6 +1,6 @@
-!cc   * $Rev: 4891 $
+!cc   * $Rev: 4926 $
 !cc   * $Author: rcapote $
-!cc   * $Date: 2017-04-06 20:07:22 +0200 (Do, 06 Apr 2017) $
+!cc   * $Date: 2017-04-20 00:00:50 +0200 (Do, 20 Apr 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -10986,7 +10986,7 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')')
       i20p = 0
       i21p = 0
       i0p = 0
-
+      i01p = 0     
       i1p = 0
       i4p = 0
       i6p = 0
@@ -10995,11 +10995,8 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.1)'')')
       i12p = 0
       i1m = 0
       i3m = 0
-
       i5m = 0
-
       i7m = 0
-
       i9m = 0
 
       i22p = 0
@@ -11291,31 +11288,18 @@ C              D_Def(ND_nlv,1) = 0.0
                GOTO 500
             ENDIF
             IF (i01p.EQ.0 .AND. xjlvr.EQ.0.D0 .AND. lvpr.EQ.1) THEN
-
                i01p = ilv
-
                ND_nlv = ND_nlv + 1
-
                ICOllev(ND_nlv) = ilv + LEVcc
-
                IF (gspin.NE.0.D0 .or. DIRECT.EQ.3)
-
      >                   ICOllev(ND_nlv) = ICOllev(ND_nlv) + LEVcc
-
                D_Elv(ND_nlv) = elvr
-
                D_Lvp(ND_nlv) = lvpr
-
                D_Xjlv(ND_nlv) = xjlvr
-
                IPH(ND_nlv) = 1
-
                D_Def(ND_nlv,2) = beta3**2
-
                GOTO 500
-
             ENDIF
-
             IF (i22p.EQ.0 .AND. xjlvr.EQ.2.D0 .AND. lvpr.EQ.1) THEN
                i22p = ilv
                ND_nlv = ND_nlv + 1
@@ -11348,7 +11332,6 @@ C              D_Def(ND_nlv,1) = 0.0
                D_Xjlv(ND_nlv) = xjlvr
                IPH(ND_nlv) = 1
                D_Def(ND_nlv,2) = beta3               
-
                GOTO 500
             ENDIF
             IF (i5m.EQ.0 .AND. xjlvr.EQ.5.d0 .AND. lvpr.EQ.-1) THEN
