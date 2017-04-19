@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
+Ccc   * $Rev: 4925 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Date: 2017-04-19 23:38:45 +0200 (Mi, 19 Apr 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -123,9 +123,6 @@ C               Selected primary gammas from the CN: Nnuc=1, Nejc=0
 C               Originate from the primary excitation energy bin: Iec = NEX(1)
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
-C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,pop1)
-C               CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,   pop1)
-C               CYCLE ! for primary gammas no further processing is needed 
 C               Primary gamma table stored, they are also(!)
 C               included in the total gamma spectra
               ENDIF
@@ -329,8 +326,6 @@ C        DO ie = 1, NDEcse
          DO ie = 1,NEX(Nnuc)
             DO iejc = 0, NDEJC
               
-C             if(Nejc_open(iejc)==0) cycle
-
               IF (POPcse(Iec,iejc,ie,INExc(Nnuc)).GT.0) THEN
                   IF(ENDf(Nnur).EQ.2) THEN
                      CSE(ie,iejc,0) = CSE(ie,iejc,0)
@@ -471,7 +466,6 @@ C-----DE spectra
 C        DO iesp = 1, NDECSE
          DO iesp = 1, NEX(nnuc)
               DO iejc = 0, NDEJC
-C              if(Nejc_open(iejc)==0) cycle
                IF (POPcse(Iec,iejc,iesp,INExc(Nnuc))>0) THEN
                  IF(ENDF(Nnur).EQ.1) THEN
                    POPcse(0,iejc,iesp,INExc(Nnur))
@@ -904,38 +898,39 @@ C
      &        1X,27('*'))
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0. .and. POPlv(l,Nnuc).GT.0. AND.
-     &      ISIsom(l,Nnuc).EQ.0) THEN
+         popl = POPlv(l,Nnuc)
+         IF (popl>0) THEN
+          IF (BR(l,1,2,Nnuc).EQ.0. .and. ISIsom(l,Nnuc).EQ.0) THEN
 C-----------Normal level without branching ratios
             IF (IOUt.GT.2) WRITE (8,99010) ELV(l,Nnuc), LVP(l,Nnuc)
-     &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
+     &                            *XJLv(l,Nnuc), popl
 99010       FORMAT (1X,/,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with population ',G13.5,
      &              ' mb is not depopulated (g.s. transition assumed)')
 C-----------Well... let it go down to the ground state
-            gacs = POPlv(l,Nnuc)
-            POPlv(1,Nnuc) = POPlv(1,Nnuc) + gacs
+C           gacs = POPlv(l,Nnuc)
+            POPlv(1,Nnuc) = POPlv(1,Nnuc) + popl
             POPlv(l,Nnuc) = 0.d0
             egd = ELV(l,Nnuc)
 C           icse = min(INT(2.0001 + egd/DE),ndecse)  
             icse = min(INT(1.0001 + egd/DE),ndecse)  
-            CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
-            CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
-            CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+            CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + popl/DE
+            CSEt(icse,0) = CSEt(icse,0) + popl/DE  ! Jan 2011
+            CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + popl
 C-----------Add transition to the exclusive or inclusive gamma spectrum
 
             IF (ENDf(Nnuc).EQ.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
-     &          ,INExc(Nnuc)) + gacs/DE
+     &          ,INExc(Nnuc)) + popl/DE
             ELSE
-               CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
+               CSE(icse,0,0) = CSE(icse,0,0) + popl/DE
             ENDIF
-         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND.
+          ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND.
      &           nejc.GT.0) THEN
 C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
 C-----------Add gamma cascade population to the direct population
-            POPlv(l,Nnuc) = POPlv(l,Nnuc) + CSDirlev(l,nejc)
+            POPlv(l,Nnuc) = popl + CSDirlev(l,nejc)
             IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
 99012       FORMAT (1X,/,5X,'Level of energy  ',F8.4,' MeV',
@@ -943,80 +938,77 @@ C-----------Add gamma cascade population to the direct population
      &              ' mb is an isomer')
 C-----------We add it to the ground state to have correct total cross section
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
-         ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1) THEN
+          ELSEIF (ISIsom(l,Nnuc).EQ.1) THEN
 C-----------Isomer state in any other nucleus
 C-----------No gamma-decay of the isomeric state imposed
             IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
-     &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
+     &                            *XJLv(l,Nnuc), popl
 C-----------We add it to the ground state to have correct total cross section
-            POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
-         ELSE
+            POPlv(1,Nnuc) = POPlv(1,Nnuc) + popl
+          ELSE
 C-----------Normal level with branching ratios
-            popl = POPlv(l,Nnuc)
-            IF (popl.NE.0.0D0) THEN
-               IF (IOUt.GT.2) WRITE (8,99015) ELV(l,Nnuc), LVP(l,Nnuc)
+            IF (IOUt.GT.2) WRITE (8,99015) ELV(l,Nnuc), LVP(l,Nnuc)
      &                               *XJLv(l,Nnuc), popl
-99015          FORMAT (1X/,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
+99015       FORMAT (1X/,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
      &                 ' level with final population ',G13.5,' mb',/,5X,
      &                 'Level populated ',5X,'Egamma ',3X,
      &                 'Intensity (cross sect.)')
-               DO j = 1, NDBR
-                  j1 = NINT(BR(l,j,1,Nnuc))
-                  IF (j1.EQ.0) GOTO 100
-                  IF (j1.GE.l) THEN
-                   WRITE (8,99020)
+            DO j = 1, NDBR
+              IF(BR(l,j,2,Nnuc).LE.0.d0) CYCLE                
+              j1 = NINT(BR(l,j,1,Nnuc))
+              IF (j1.EQ.0) EXIT
+              IF (j1.GE.l) THEN
+                WRITE (8,99020)
 99020                FORMAT (
      &               10X,'WARNING: error in discrete level decay data',
      &             /,10X,'WARNING: Final level above the initial one',
      &             /,10X,'WARNING: Further decay not considered ')
-                     WRITE (8,
+                WRITE (8,
      &             '(10X,''WARNING: Nucleus '',I3,''-'',A2,'' level '',
      &             I3)') INT(A(Nnuc)), SYMb(Nnuc), l
-                     RETURN
-                  ENDIF
-                  gacs = popl*BR(l,j,2,Nnuc)
-                  POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
+                RETURN
+              ENDIF
+              gacs = popl*BR(l,j,2,Nnuc)
+              POPlv(j1,Nnuc) = POPlv(j1,Nnuc) + gacs
 
-                  gacs_noicc = gacs                 ! no int. conversion
-                  gacs = gacs/(1 + BR(l,j,3,Nnuc))  !    int. conversion
+              gacs_noicc = gacs                    ! no int. conversion
+              gacs = gacs/(1.d0 + BR(l,j,3,Nnuc))  !    int. conversion
 
-                  egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
-C                 icse = min(INT(2.0001 + egd/DE),ndecse)    
-                  icse = min(INT(1.0001 + egd/DE),ndecse)    
-                  if(icse==1) icse = 2  ! TEMPORARY; shift low energy gammas to the second bin   
-                  CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
-                  CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
-                  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-C-----------------Add transition to the exclusive gamma spectrum
-C-----------------NOTE: internal conversion taken into account
-                  IF (ENDf(Nnuc).EQ.1) THEN
-                     POPcse(0,0,icse,INExc(Nnuc))
-     &                = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
-                  ELSE
-                     CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
-                  ENDIF
-                  IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
+              egd = ELV(l,Nnuc) - ELV(j1,Nnuc)
+C             icse = min(INT(2.0001 + egd/DE),ndecse)    
+              icse = min(INT(1.0001 + egd/DE),ndecse)    
+              if(icse==1) icse = 2  ! TEMPORARY; shift low energy gammas to the second bin   
+              CSE(icse,0,Nnuc) = CSE(icse,0,Nnuc) + gacs/DE
+              CSEt(icse,0) = CSEt(icse,0) + gacs/DE  ! Jan 2011
+              CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+C-------------Add transition to the exclusive gamma spectrum
+C-------------NOTE: internal conversion taken into account
+              IF (ENDf(Nnuc).EQ.1) THEN
+                POPcse(0,0,icse,INExc(Nnuc))
+     &               = POPcse(0,0,icse,INExc(Nnuc)) + gacs/DE
+              ELSE
+                CSE(icse,0,0) = CSE(icse,0,0) + gacs/DE
+              ENDIF
+              IF (IOUt.GT.2) WRITE (8,99025) ELV(j1,Nnuc),
      &                            LVP(j1,Nnuc)*XJLv(j1,Nnuc), egd, gacs
+99025         FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
 C
-99025             FORMAT (5X,F7.4,2X,F5.1,5X,F7.4,5X,G13.5,' mb')
-C
-C                 IF(NNG_xs.gt.0 .and. ENDF(Nnuc).eq.0) then
-                  IF(NNG_xs.gt.0 .and. ENDF(Nnuc).le.1) then
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
+              IF(NNG_xs.gt.0 .and. ENDF(Nnuc).le.1) then
+                if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
+                if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
+                if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                   if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
+                if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
      &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
      &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
-                  ENDIF
-               ENDDO
-            ENDIF
+              ENDIF
+            ENDDO
+          ENDIF  ! popl>0 ?
          ENDIF
   100 ENDDO
       RETURN
@@ -1062,28 +1054,28 @@ C
 C
       DO i = 1, NLV(Nnuc) - 1
          l = NLV(Nnuc) - i + 1
-         IF (BR(l,1,2,Nnuc).EQ.0. .and. CSDirlev(l,nejc).gt.0. ) THEN
-C-----------Well... let it go down to the ground state
-            gacs = CSDirlev(l,nejc)
-            CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
-            CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+         popl = CSDirlev(l,nejc)         
+         IF(popl.LE.0.d0) CYCLE
+         IF (BR(l,1,2,Nnuc)>0) THEN
+            DO j = 1, NDBR
+              j1 = NINT(BR(l,j,1,Nnuc))
+              IF (j1.EQ.0) CYCLE
+              IF (j1.GE.l) return
+              gacs = popl*BR(l,j,2,Nnuc)
+              CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
+C             gacs_noicc = gacs                    ! no int. conversion
+              gacs = gacs/(1.d0 + BR(l,j,3,Nnuc))  ! int. conversion
+              CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+            ENDDO
          ELSE
-            popl = CSDirlev(l,nejc)
-            IF (popl.NE.0.0D0) THEN
-               DO j = 1, NDBR
-                  j1 = NINT(BR(l,j,1,Nnuc))
-                  IF (j1.EQ.0) GOTO 100
-                  IF (j1.GE.l) return
-                  gacs = popl*BR(l,j,2,Nnuc)
-                  CSDirlev(j1,Nejc) = CSDirlev(j1,Nejc) + gacs
-
-C                 gacs_noicc = gacs                 ! no int. conversion
-                  gacs = gacs/(1 + BR(l,j,3,Nnuc))  ! int. conversion
-                  CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
-               ENDDO
-            ENDIF
+C-----------Well... let it go down to the ground state
+C           gacs = CSDirlev(l,nejc)
+C           CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + gacs
+C           CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + gacs
+            CSDirlev(1,Nejc) = CSDirlev(1,Nejc) + popl
+            CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + popl
          ENDIF
-  100 ENDDO
+      ENDDO
       END
 
       SUBROUTINE TL_GAMMA(Nnuc,Iec,Jc,Ipc)

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4923 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-04-19 21:07:12 +0200 (Mi, 19 Apr 2017) $
+Ccc   * $Rev: 4925 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-04-19 23:38:45 +0200 (Mi, 19 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -25,7 +25,7 @@ C
       INTEGER ilevcol,jz,jn,imint,imaxt,na, itmp, nbr_icc
 
       DOUBLE PRECISION dtmp,delang,cspg,step,xnl,spdif,spdiff,checkprd
-      DOUBLE PRECISION ares,zres,ded,sum !,csemist
+      DOUBLE PRECISION ares,zres,ded,sum, popl !,csemist
       DOUBLE PRECISION poplev,poptot,popleft,pope,xnor,fisxse,ftmp
       DOUBLE PRECISION sumfis,sumfism(NFMOD),gang,angstep,xs_norm
                        
@@ -168,7 +168,8 @@ C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
             WRITE (12,'(1X,/,10X,40(1H-),/)')
  
             DO il = 1, NLV(nnuc)
-C-----------Check for the number of branching ratios
+              popl = CSDirlev(il,nejc)  
+C-------------Check for the number of branching ratios
               nbr = 0
               DO ib = 1, NDBR
                 IF (BR(il,ib,2,nnuc).EQ.0.) EXIT
@@ -182,11 +183,11 @@ C-----------Check for the number of branching ratios
      &                     ' are missing'
 
               WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
-     &          XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
+     &          XJLv(il,nnuc), popl, nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
               
                   WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
-     &          XJLv(il,nnuc), CSDirlev(il,nejc), nbr,
+     &          XJLv(il,nnuc), popl, nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
 
 C-----------Next IF moves levels population to the ground state
@@ -196,8 +197,8 @@ C-----------of discrete levels by a neutron, proton or alpha.
 C-----------These gammas should not go into MT=91, 649, or 849.
               IF ((nnuc.EQ.mt91 .OR. nnuc.EQ.mt649 .OR. nnuc.EQ.
      &                mt849) .AND. il>1) THEN 
-                POPlv(1,nnuc) = POPlv(1,nnuc) + CSDirlev(il,nejc)
-                POPlv(il,nnuc) = POPlv(il,nnuc) - CSDirlev(il,nejc)
+                POPlv(1,nnuc) = POPlv(1,nnuc) + popl
+                POPlv(il,nnuc) = POPlv(il,nnuc) - popl
               ENDIF
             ENDDO ! end of the loop over discrete levels
      
