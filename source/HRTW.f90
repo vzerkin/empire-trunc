@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4917 $
+   ! $Rev: 4924 $
    ! $Author: mherman $
-   ! $Date: 2017-04-18 20:21:34 +0200 (Di, 18 Apr 2017) $
+   ! $Date: 2017-04-19 21:16:11 +0200 (Mi, 19 Apr 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -2300,17 +2300,17 @@ CONTAINS
          ! write(8,*) 'Elastic channel #',j, ' abs = ',in%sig, ' xnor = ', xnor
          ! write(8,*) '                                  leg      BB               Jcn   &
          ! &               l_inc           j_inc                 J_res              l_out              J_out'
-         ! w = 1.D0
+         w = 1.0D0
          out => outchnl(iout)
          IF(out%kres > 0) CYCLE      ! skipping continuum channels
 
          xjr = out%xjrs              !residual nucleus J
          lb = out%l                  !outgoing neutron l
          jb = out%j                  !outgoing neutron j
-         IF(LHRtw==3.OR.LHRtw==4) THEN
-            w = WFC(i,iout)             !sigma corrected by Moldauer width fluctuation factor
-         ELSE
-            w=1.0d0
+         IF(LHRtw > 2) THEN
+            w = WFC(i,iout) ! Moldauer width fluctuation factor
+         ELSEIF(i==iout) THEN
+            w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
          ENDIF
          PL_lmax(-out%kres) = 2*la
          !  IF(out%kres > 0) THEN
@@ -2318,11 +2318,10 @@ CONTAINS
          !  ELSEIF(out%kres < 0) THEN
          !     PL_lmax(-out%kres) = la
          !  ENDIF
-         IF(i/=iout.AND.out%kres<=0) THEN               ! Inelastic to discrete level
-            stmp = xnor*out%t*out%rho*w*CINRED(-out%kres)
-         ELSE                                        ! Elastic and continuum
-            stmp = xnor*out%t*out%rho*w
-         ENDIF
+!         stmp = xnor*out%t*out%rho*w                 ! Inelstic (continuum eliminated by CYCLE above)
+         stmp = xnor*out%t*w                 ! Inelstic (continuum eliminated by CYCLE above)
+         IF(i==iout) stmp = stmp*CINRED(-out%kres)   ! Elastic
+
          DO lleg = 0, 2*in%l, 2    !do loop over Legendre L
             xleg = dble(lleg)
             tmp = Blatt(xjc,Ia,la,ja,sxj,xjr,lb,jb,sxj,xleg)/(2*xleg + 1.0d0)
