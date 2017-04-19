@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Rev: 4923 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-04-19 21:07:12 +0200 (Mi, 19 Apr 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -220,7 +220,7 @@ C           write(*,*) 'ELCncs =', ELCncs ! CSDirsav(LEVtarg,NPRoject)
      &                       sngl(ELAred*ELAcs), ' mb'
 
             WRITE (8,*) ' CN elastic cross section   ',
-     &                     sngl(4.d0*PI*ELCncs),' mb'
+     &                     sngl(PIx4*ELCncs),' mb'
             WRITE (12,*) ' '
             WRITE (12,
      &             '('' ELASTIC CROSS SECTION= '',1P,E12.5,'' mb'')')
