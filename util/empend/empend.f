@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-04-13 23:08:21 +0200 (Do, 13 Apr 2017) $
+Ccc   * $Date: 2017-04-20 12:41:39 +0200 (Do, 20 Apr 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -153,6 +153,7 @@ C-M  16/12 Fix the patch to switch to tabular representation.
 C-M  17/04 Extrapolate non-threshold reactions as 1/v.
 C-M        Fix roundoff errors in total inelastic.
 C-M        Fix setting of cross sections below the first EMPIRE point.
+C-M        Fix the increased number of points in the interp. table.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -6706,6 +6707,7 @@ C* Extrapolate points down to EMIN for incident neutrons
           RWO(LX+1)=EE
           RWO(LY  )=YY
           RWO(LY+1)=YY
+          NBT(1)   =NEO
           IF(YY.GT.0 .AND. 
      &          ((MT.LT.452 .AND.MT.NE.2) .OR.
      &            MT.GT.456)) THEN
