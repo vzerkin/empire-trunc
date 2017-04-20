@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4925 $
+Ccc   * $Rev: 4929 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-19 23:38:45 +0200 (Mi, 19 Apr 2017) $
+Ccc   * $Date: 2017-04-20 13:14:12 +0200 (Do, 20 Apr 2017) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -925,8 +925,7 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
             ELSE
                CSE(icse,0,0) = CSE(icse,0,0) + popl/DE
             ENDIF
-          ELSEIF (POPlv(l,Nnuc).GT.0. AND. ISIsom(l,Nnuc).EQ.1 .AND.
-     &           nejc.GT.0) THEN
+          ELSEIF (ISIsom(l,Nnuc).EQ.1 .AND. nejc.GT.0) THEN
 C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
 C-----------Add gamma cascade population to the direct population
@@ -956,7 +955,7 @@ C-----------Normal level with branching ratios
             DO j = 1, NDBR
               IF(BR(l,j,2,Nnuc).LE.0.d0) CYCLE                
               j1 = NINT(BR(l,j,1,Nnuc))
-              IF (j1.EQ.0) EXIT
+              IF (j1.EQ.0) CYCLE
               IF (j1.GE.l) THEN
                 WRITE (8,99020)
 99020                FORMAT (
