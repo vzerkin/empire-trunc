@@ -111,6 +111,14 @@ rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
 rm angdis.pnt 2>/dev/null
 
+# RUN LINEAR (2017/04/20 to accommodate log-log extrapolation to thermal)
+
+rm LINEAR.INP 2>/dev/null
+ln -sf $file.endf ENDFB.IN
+$EMPIREDIR/util/linear/linear
+rm ENDFB.IN 2>/dev/null
+mv ENDFB.OUT  $file.endf
+
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
 # moved to a new script "rec-ch-part" called from a GUI(Execute)
 $EMPIREDIR/scripts/rec-ch-part $file $MATid
