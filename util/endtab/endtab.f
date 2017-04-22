@@ -32,6 +32,7 @@ C-V  15/11 Print input instructions to screen.
 C-V  16/03 Allow MF203 for alpha (SigC/SigF).
 C-V  16/07 Fix missing "REWIND" before calling DXSEND for MF5.
 C-V  16/12 Fix printout of the backward angle in the distributions.
+C-V  17/04 Reset upper energy for plotting in multiple plots.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -250,23 +251,22 @@ C* Case: MF3/10 Energy range and grid thinning criterion
         KEA=0
 C* Select the energy interval
         WRITE(LTT,91) '$Enter the lower energy bound [eV]    : '
-        EA=EA0
-        READ (LKB,98) EE
-        IF (EE.GT.0.) EA=EE
+        READ (LKB,91) COM
+        IF(COM.NE.BLNK) READ (COM,98) EA0
         WRITE(LTT,91) '$Enter the upper energy bound [eV]    : '
-        READ (LKB,98) EB
-        IF (EB.LT.EA) EB=EB0
+        READ (LKB,91) COM
+        IF(COM.NE.BLNK) READ (COM,98) EB0
    15   WRITE(LTT,91) '$Thinning min.rel.diff.in energy pts. : '
         READ (LKB,91) COM
         IF(COM.NE.BLNK) READ (COM,98,ERR=15) EPS
         WRITE(LTT,99) ' '
-        WRITE(LTT,992) ' Selected lower energy bound [eV]     : ',EA
-        WRITE(LTT,992) ' Selected upper energy bound [eV]     : ',EB
+        WRITE(LTT,992) ' Selected lower energy bound [eV]     : ',EA0
+        WRITE(LTT,992) ' Selected upper energy bound [eV]     : ',EB0
         WRITE(LTT,992) ' Selected thinning tolerance [fract.] : ',EPS
       ELSE IF(MF0.EQ.4) THEN
         KEA=1
-        EA =   0
-        EB = 180
+        EA0=   0
+        EB0= 180
    16   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=16) EIN
         WRITE(LTT,99) ' '
@@ -276,8 +276,8 @@ C* Select the energy interval
         EP6=0.02
       ELSE IF(MF0.EQ.5 .OR. MF0.EQ.26) THEN
         KEA= 2
-        EA =0
-        EB =0
+        EA0=0
+        EB0=0
    17   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=17) EIN
         DEG=-1
@@ -294,8 +294,8 @@ C* Select the energy interval
         WRITE(LTT,992) ' Resolution-broadening fraction        :',EP6
       ELSE IF(MF0.EQ.6) THEN
         KEA=2
-        EA =0
-        EB =0
+        EA0=0
+        EB0=0
    21   WRITE(LTT,91) '$       Incident particle energy [eV] : '
         READ (LKB,98,ERR=21) EIN
    22   WRITE(LTT,91) '$  Scattered particle angle [Degrees] : '
@@ -333,6 +333,8 @@ C* Select the reaction type number
         ICOM=0
       END IF
       IER=0
+      EA =EA0
+      EB =EB0
 C* If zero and not first loop, finish
       IF(IDMY.EQ.0 .AND. MT0.NE.0) GO TO 90
 C* Check if ratio to Maxwellian is to be printed
@@ -651,7 +653,7 @@ C*    -- First point
         CALL CH11PK(E11,ED)
         WRITE(LOU,194) E11,SG1,UG1
 C...
-C...      PRINT *,'WRITTEN FIRST',KK,E11,SG1
+C...    PRINT *,'WRITTEN FIRST',KK,E11,SG1
 C...
       END IF
       IF(EE2.GE.EB .OR. KK.GE.NP) THEN
@@ -670,7 +672,7 @@ C*      -- Last point
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
 C...
-C...      PRINT *,'WRITTEN LAST',KK,E11,SG2,EE2,EB,NP
+C...    PRINT *,'WRITTEN LAST',KK,E11,SG2,EE2,EB,NP
 C...
       ELSE
 C*      -- Intermediate points
@@ -679,7 +681,7 @@ C*      -- Intermediate points
         IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
         WRITE(LOU,194) E11,SG2,UG2
 C...
-C...      PRINT *,'WRITTEN INTERM',KK,E11,SG2,NP
+C...    PRINT *,'WRITTEN INTERM',KK,E11,SG2,NP
 C...
         IF(KK.LT.NP) GO TO 81
       END IF
