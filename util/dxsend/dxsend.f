@@ -32,6 +32,7 @@ C-V  16/07 Fix undefined LXX
 C-V  16/09 Deactivate aliasing of MT 5 to 9000.
 C-V  17/03 Retrieve gamma production x.s. from MF 12/ LO 1.
 C-V  17/04 More improvements to the retrieval of gamma spectra.
+C-V        Rewrite discrete level summation of gamma-lines.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2875,7 +2876,7 @@ C* Case: Proceed with the retrieval of differential data
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-C...  print *,'     Cross section=',xs,ein,ier,yl
+c...  print *,'     Cross section=',xs,ein,ier,yl
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -3670,7 +3671,7 @@ C*
 C* Photon emission data
 C... Assume isotropic scattering - no coding to read MF 14
   120 IF(MF.EQ.13) THEN
-C* File MF13 has same structure as MF12/LO=1 but includes XS
+C* File MF13 has same structure as MF12/LO=1 but contains XS
         XS=1
         L1=1
       END IF
@@ -3685,7 +3686,7 @@ C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-C...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
+c...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
@@ -3727,11 +3728,14 @@ C*
 C*      -- All levels up to the current one read - sum the yields
 c...
 c...    print *,'     Summing discr.level yields MF/MT,LV',MF,MT0,LV
+c...    print *,(rwo(      j),j=1,10)
+c...    print *,(rwo(lli-1+j),j=1,10)
 c...
         CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
-        LLI=1
 c...
-c...    CALL SUMYLG(LV,LG,IWO,RWO,GTO,NT,NW,RWO(LLI))
+C...    print *,'sumyld',nt,nw,(rwo(      j),j=1,nw)
+c...
+        LLI=1
 C*      -- Process the gamma lines
         NX =(MRW-(LLI+NW))/2
         LXE=LLI+NW
@@ -3740,11 +3744,13 @@ C*      -- Process the gamma lines
         NE1=1
         ENR(1)=RWO(1)
         DXS(1)=0
-        DO 128 JT=1,NT
-          EOU=RWO(LLI+(JT-1)*(LG+1))
+        DO JT=1,NT
+C*        -- SUMYLD always gives output as LG=2
+c...      EOU=RWO(LLI+(JT-1)*(LG+1))
+          EOU=RWO(LLI+(JT-1)*3)
           IF(EOU.LE.0) THEN
-            PRINT *,'WARNING Gamma Eou=',EOU,' for mt,jt',MT0,JT
-            GO TO 128
+            PRINT *,'WARNING Neg.Gamma Eou=',EOU,' for mt,jt',MT0,JT
+            CYCLE
           END IF
           IF(LXB+NEN+NE1.GT.MRW) THEN
             PRINT *,'DXSEN1 ERROR - Assembling discrete gamma spectra'
@@ -3759,27 +3765,43 @@ C*      -- Process the gamma lines
 C*        -- Interpolate current distribution to the union grid
           CALL FITGRD(NE1,ENR,DXS,NE2,RWO(LUE),RWO(LUX))
           NE1=NE2
-          DO 124 I=1,NE1
+          DO I=1,NE1
             ENR(I)=RWO(LUE-1+I)
             DXS(I)=RWO(LUX-1+I)
-  124     CONTINUE
+          END DO
 C*        -- Interpolate saved distribution to the union grid
           CALL FITGRD(NEN,RWO(LXE),RWO(LXB),NE2,RWO(LUE),RWO(LUX))
 C*        -- Assume isotropic photon distributions
           ANG=0.5
 C*        -- Add the current distribution to the saved one
-          FRC=ANG*RWO(2+(JT-1)*(LG+1))
-          IF(LG.EQ.2) FRC=FRC*RWO(3+(JT-1)*(LG+1))
+C*        -- SUMYLD always gives output as LG=2
+c...      GG =RWO(2+(JT-1)*(LG+1))
+c...      TG =1
+c...      IF(LG.EQ.2) TG =RWO(3+(JT-1)*(LG+1))
+          GG =RWO(LLI+1+(JT-1)*3)
+          TG =RWO(LLI+2+(JT-1)*3)
+C...
+C...      Print *,'gamma line',eou,gg,tg
+C...
+C*
+          FRC=ANG*GG*TG
+c...
+c...      print *,'Lvl,Yield,Conv.Fract,FRC'
+c... &           ,JT,GG,TG,FRC
+c...
           DO I=1,NE1
             DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
+C...
+C...        PRINT *,I,ENR(I),DXS(I)
+C...
           END DO
           YL=1
-  128   CONTINUE
+        END DO
         GO TO 800
       ELSE IF(LO.EQ.1) THEN
 C*      -- Multiplicities given
 C...
-C...    print *,'    Multiplicities given'
+c...    print *,'    Multiplicities given'
 c...
         NK =N1
         NE1=0
@@ -3806,6 +3828,10 @@ C*      -- Photon energy and yield
         YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INA,IER)
 c...
 c...    print *,'    Yield for',IK,' of',NK,' is',YLK,' with LF',LF
+c...    print *,'Ein',EIN,xs
+c...    do i=1,np
+c...      print *,i,rwo(lxe-1+i),rwo(lxx-1+i)
+c...    end do
 c...
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
@@ -3844,6 +3870,9 @@ C*        -- Read the fractional contribution of the section
             PRINT *,'WARNING - No coding for MF 15, MT',MT0,' LF',LF
             GO TO 900
           END IF
+c...
+c...      print *,'    Fraction',YLT,' at E',EIN
+c...
           EI1=0
           NEN=0
 C*        -- Read interpolation data for the incident energies
@@ -3874,7 +3903,10 @@ C*          -- Linearise to tolerance EXS, if necessary
             IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
      1                              ,RWO(LE),RWO(LX),KX,EXS)
             IF(EI2.GE.EIN .AND. IE.GT.1) EXIT
-            EIN1=EIN2
+c...
+c...        print *,' Skip interval',ei1,ei2
+c...
+            EI1=EI2
             NEN =NF
             DO I=1,NF
               RWO(LXE-1+I)=RWO(LE-1+I)
@@ -3883,11 +3915,12 @@ C*          -- Linearise to tolerance EXS, if necessary
           END DO
           INE=2
 C*        -- Interpolate outgoing particle energy distributions
+C*           into LXE, LXX; the EI1, NEN parameters are redefined
           CALL FINT2D(EIN,EI1,NEN ,RWO(LXE),RWO(LXX),INA
      1                   ,EI2,NF  ,RWO(LE) ,RWO(LX) ,INE,KX)
 C*
 c...
-c...      print *,'    Interpolated points',nen,nf
+c...      print *,'    Interpolate points',nen,nf,' between',ei1,ei2
 c...      do k=1,5
 c...        print *,k,enr(k),dxs(k)
 c... &               ,rwo(lxe-1+k),rwo(lxx-1+k)
@@ -3957,7 +3990,7 @@ C...
 C* Scale the distribution by the cross section
       SS=YL*XS*SAN
 c...
-c...  print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
+C...  print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
 c...  sst=0
 c...  ssn=0
 c...  e2=enr(1)
@@ -3977,6 +4010,9 @@ c...    ssn=ssn+(e2-e1)*(t2+t1)/2
 c...    print *,enr(i),dxs(i),dxs(i)*ss
 c...
         DXS(I)=SS*DXS(I)
+C...
+C...    PRINT *,'FINAL',I,ENR(I),DXS(I)
+C...
       END DO
 c...
 c...      print *,'Integral before normalisation',sst,ssn
@@ -4443,29 +4479,49 @@ C* Recoils
       END IF
       RETURN
       END
-      SUBROUTINE SUMYLG(LV,LG,ID,RWO,GTO,NG,LW,GAM)
-C-Title  : Subroutine SUMYLG
-C-Purpose: Sum yields from lower levels and redefine gamma energies
-C-Version: October 2004 - rewritten to correct flawed logic
+      SUBROUTINE SRTINM(N,M,X)
+C-Title  : SRTINM subroutine
+C-Purpose: Perform a sort (on array indices) by Insertion method
 C-Description:
-C-D  LV  Total number of levels
-C-D  LG  Flag for the number of parameters:
-C-D       1  Branching ratios only
-C-D       2  Branching ratios and gamma fractions given.
-C-D  ID  index array giving the starting address of the data
-C-D      for a each level in the work array RWO.
-C-D  RWO Level energy and branching information. Level zero
-C-D      (ground state) only contains the level energy  in the
-C-D      first word or array RWO. The data for each level consist
-C-D      of pairs of numbers, giving the final level energy and
-C-D      the branching ratio to that level.
-C-D  GTO Sum of all gamma fractions - it can be used for
-C-D      checking purposes. It should be close to 1.
-C-D  NG  Final number of gamma lines packed into the output array GAM.
-C-D  LW  Length of the packed output vector.
-C-D  GAM Output array of packed gamma energies and yields.
-C-
-      DIMENSION  ID(*),RWO(*),GAM(*)
+C-D Sort the vector of N real numbers in X in ascending order
+C-D The actual entries in X remain unaffected, but on exit,
+C-D M (integer array) contains the addresses of the consecutive 
+C-D array entries to produce a sorted sequence,
+C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia
+C-Version:  1990
+C-V 2012/03 Rearrange loops to Fortran 90
+      DIMENSION M(N),X(N)
+      M(1)=1
+      DO J=2,N
+        M(J)=J
+        K = J
+        T = X(J)
+   10   L = M(K-1)
+        IF(X(L).GT.T) THEN
+          M(K)=L
+          K   = K-1
+          IF(K.GT.1) GO TO 10
+        END IF
+        M(K)=J
+      END DO
+      RETURN
+      END
+      FUNCTION KLEVEL(NL,ELVL,EK)
+C-Title  : Function KLEVEL
+C-Purpose: Locate the index of level Ek in array ELVL
+      DIMENSION ELVL(NL)
+      EPS=1.E-5
+      DO K=1,NL
+        EL=ELVL(K)
+c...  
+C...    PRINT *,'        Test levels',K,EL,EK
+c...  
+        DF=ABS(EL-EK)
+        IF(DF.LE.EPS*EL .OR. NINT(1000*DF).EQ.0) THEN
+          KLEVEL=K
+          EXIT
+        END IF
+      END DO
       RETURN
       END
       SUBROUTINE SUMYLD(LV,LG,ID,RWO,GTO,NG,LW)
@@ -4480,147 +4536,169 @@ C-D  ID  index array giving the starting address of the data
 C-D      for a each level in the work array RWO. Level zero
 C-D      (ground state) only contains the level energy  in the
 C-D      first word or array RWO. The data for each level consist
-C-D      of pairs of numbers, giving the final level energy and
-C-D      the branching ratio to that level.
+C-D      of pairs (or triplets) of numbers, giving the final level
+C-D      energy, the branching ratio to that level and the fraction
+C-D      of gammas that are actually emitted.
 C-D  GTO Sum of all gamma fractions - it can be used for
-C-D      checking purposes. It should be close to 1.
+C-D      checking purposes.
 C-D  NG  Final number of gamma lines packed into the output array.
 C-D  LW  Length of the packed output vector.
+C-D  RWO On input the array contains branching ratios (and gamma-
+C-D      emission probabilities for LV levels in the format
+C-D        (E_l, (E_i G_i,T_i, i=1,NS_l), l=1,LV)
+C-D      where:
+C-D        E_l  level energy
+C-D        G_i  level after the transition
+C-D        T_i  Probability of gamma emission from the transition
+C-D        NS_l Number of transitions for level l.
+C-D      On exit the array contains the gamma energies, the level
+C-D      yields and the probability of gamma emission from that level
+C-D      for the final level LV in a similar format:
+C-D        (E_i G_i,T_i, i=1,NG)
+C-D      but with
+C-D      definitions:
+C-D        E_i  gamma energy
+C-D        G_i  Sum of all contributions to level i
+C-D        T_i  Probability of gamma emission from level i.
+C-D        NG   Total number of gamma photons.
 C-
+C...
+      PARAMETER (MXLV=50, MXGAM=2000)
+      DIMENSION  GAMA(MXGAM,MXLV),ELVL(MXLV),NGL(MXLV)
       DIMENSION  ID(*),RWO(*)
-C* Make sure that the decaying levels form a complete set.
-C* Fill missing levels
-      DO 40 I=1,LV
-        LI=ID(I)
-        EL=RWO(1)
-        ND=ID(I+1)-LI
+C* Check size of the local arrays to store level information
+      IF(LV.GE.MXLV) STOP 'SUMYLD ERROR - MXLV array capacity exceeded'
+c...
+C...  print *,'Start SUMYLD lv',lv
+c...
+C* Initialize the local array
+      EPS=1.E-5
+      DO I=1,MXLV
+        NGL(I)=0
+      END DO
+      ELVL(1)=0
+C* Note that index of the ground state is 1 (Level E=0)
+C* Loop over levels starting from level-1
+      DO I=1,LV
+        I1=I+1
+        LL=ID(I)
+C*      -- Level energy
+        EL=RWO(LL)
+        ELVL(I1)=EL
 C...
-C...        PRINT *,'Lvl,Adr,ND',I,LI,ND,(RWO(LI-1+J),J=1,ND)
+C...    print *,'    Level',i,el,LL
 C...
-        IF(I.LT.2) GO TO 40
-        DO 26 J=1,LV
-C* Test J-th level at EA
-          EA=RWO(LI+1)
-C* Apply test to final level intervals of the present level
-          DO 24 K=2,I
-            LK=LI+1+(K-1)*(LG+1)
-            EB=RWO(LK)
-C* Check if tested level fals in between a tabulated interval
-            EE=(EB+EA)*1.E-5
+        LMX=0
+        LI =LL+1
+        JI =0
+        NS =0
+  100   NS =NS+1
+        EI =RWO(LI  )
+        GI =RWO(LI+1)
+        TI =1
+        IF(LG.GT.1) TI =RWO(LI+2)
+        IF(GI.GT.0) THEN
+c...        
+C...      PRINT *,'        Processing level',I,EL,EI,GI,JI
+c...      
+C*        -- Enter the gamma data for the primary transitions
+          IF(JI+3.GT.MXGAM) STOP 'SUMYLD ERROR - MXGAM limit exceeded'
+          EG=EL-EI
+          GAMA(JI+1,I1)=EG
+          GAMA(JI+2,I1)=GI
+          GAMA(JI+3,I1)=TI
+          NGL(I1)=NGL(I1)+1
 C...
-C...        PRINT *,'     Elvl',EL,EA,EB,(EL-EA)*(EL-EB),EE
-C...
-            IF((EL-EA)*(EL-EB).GE.-EE) GO TO 23
-C* Insert missing level and shift the rest
-            LJ=ID(I+1)-(LG+1)
-            LL=LJ-LK
-C...
-C...           PRINT *,'               Shift LJ,LK',LJ,LK
-C...
-            DO L=1,LL
-              RWO(LJ-L+LG+1)=RWO(LJ-L)
-            END DO
-            RWO(LK  )=EL
-            RWO(LK+1)=0
-            EB=EL
-   23       EA=EB
-   24     CONTINUE
-          LL=ID(J)
-          EL=RWO(LL)
-   26   CONTINUE
-C...
-C...        PRINT *,I,LI,ND,(RWO(LI-1+J),J=1,ND)
-C...
-   40 CONTINUE
-C*
-C* Transform final level energies to gamma energies
-      DO 50 I=1,LV
-        LI=ID(I)
-        EL=RWO(LI)
-C* Process final states of current level
-        DO 46 J=1,I
-          LJ=LI+1+(J-1)*(LG+1)
-          EG=EL-RWO(LJ)
-          RWO(LJ)=EG
-   46   CONTINUE
-C...
-C...      LJ=ID(I+1)-1
-C...      PRINT *,I,(RWO(J),J=LI,LJ)
-C...
-   50 CONTINUE
-C*
-C* Define gamma intensities and level population (work backwards)
-      DO 54 I=1,LV
-        LI=ID(I)
-        RWO(LI)=0
-   54 CONTINUE
-      RWO(LI)=1
-      GTO=0
-C* Overwrite level energies with level population
-      DO 80 I=1,LV
-        JV =LV+1-I
-        LI =ID(JV)
-        GLV=RWO(LI)
-C...
-C...    PRINT *,'LVL,GLV',JV,GLV
-C...
-        DO 74 J=1,JV
-          KJ =LI+2+(J-1)*(LG+1)
-          GJ =RWO(KJ)
-          GV =GLV*GJ
-          RWO(KJ)=GV
-          KV =JV-J
-          IF(KV.GT.0) THEN
-            K=ID(KV)
-            RWO(K)=RWO(K)+GV
-          ELSE
-            GTO=GTO+GV
+C...      print *,'        Storing in JI,I1,Eg',JI,I1,EG
+C...  
+          JI=JI+3
+          IL=I
+C*        -- Find the daughter level
+          LK=KLEVEL(IL,ELVL,EI)
+          IF(LK.EQ.0) THEN
+            PRINT *,'SUMYLD ERROR - Level not found [eV]',EI
+            STOP 'SUMYLD ERROR - Level not found'
           END IF
 C...
-C...      PRINT *,'  L,J,GJ,GV',LV+1-I,KV,GJ,GV
+C...      print *,'        Found match',LK,EI,NGL(LK)
+C... &           ,I,li+LG+1,id(i+1)
 C...
-   74   CONTINUE
+C*        -- Add gammas from daughter level, if not the ground state
+          IF(LK.GT.1) THEN
+C*          -- Daughter-level index
+            KG=NGL(LK)
+            IF(JI+3*KG.GT.MXGAM)
+     &        STOP 'SUMYLD ERROR - MXGAM limit exceeded'
+            KI=0
+            DO K=1,KG
 C...
-C...    LI=ID(I  )
-C...    LJ=ID(I+1)-1
-C...    PRINT *,I,(RWO(J),J=LI,LJ)
+C...          print *,'        Adding to I1,KG,Eg',I1,KG
+C... &               ,(gama(KI-1+j,LK),j=1,3)
 C...
-   80 CONTINUE
-C...
-C...      PRINT *,'                        *** Next ***'
-C...      PRINT *,0,GTO
-C...      DO 82 I=1,LV
-C...        LI=ID(I  )
-C...        LJ=ID(I+1)-1
-C...        PRINT *,I,(RWO(J),J=LI,LJ)
-C...   82 CONTINUE
-C...
+              GAMA(JI+1,I1)=GAMA(KI+1,LK)
+              GAMA(JI+2,I1)=GAMA(KI+2,LK)*GI
+              GAMA(JI+3,I1)=GAMA(KI+3,LK)
+              NGL(I1)=NGL(I1)+1
+              JI=JI+3
+              KI=KI+3
+            END DO
+          END IF
+        END IF
+
+C*      -- If not the last, try next daughter level
+        IF(NS.LT.LV) THEN
+          LI=LI+(LG+1)
+          IF(LI.LT.ID(I1)) GO TO 100
+        END IF
+C*      -- Done for all levels
+      END DO
 C*
-C* Pack the gamma energies and yields
-      LI=1
-      LW=1
-      NG=0
-      DO 88 I=1,LV
-        LI=LI+1
-        DO 86 J=1,I
-          IF(RWO(LI+2).LE.0) GO TO 85
-          RWO(LW)=RWO(LI+1)
-          DO 84 K=1,LG
-            RWO(LW+K)=RWO(LI+1+K)
-   84     CONTINUE
+C*    -- Copy gamma energies to ELVL
+      EL0=ELVL(LV+1)
+      NG1=NGL(LV+1)
+      DO I=1,NG1
+        ELVL(I)=GAMA((I-1)*3+1,LV+1)
+      END DO
+C*    -- Sort gamma energies in ascending order
+      CALL SRTINM(NG1,NGL,ELVL)
+C*    -- Move the gamma data to the output array
+      GTO=0
+      EG2=-1
+      GK2= 0
+      TK2= 1
+      NG = 0
+      DO I=1,NG1
+        II =NGL(I)
+        J2 =(II-1)*3
+        EG1=EG2
+        GK1=GK2
+        TK1=TK2
+        EG2=GAMA(J2+1,LV+1)
+        GK2=GAMA(J2+2,LV+1)
+        TK2=GAMA(J2+3,LV+1)
+        GTO=GTO+GK2*TK2
+C...
+C...    PRINT *,' Gamma',II,EG2,GK2,TK2,GK2*TK2
+C...
+        IF(ABS(EG2-EG1).LE.EPS*EG2 .AND.
+     &     ABS(TK2-TK1).LE.EPS*TK2   ) THEN
+C*        -- Sum equal energies
+          J1=(NG-1)*3
+C...
+C...      print *,'     Summing',RWO(J1+2),GK2
+C...
+          RWO(J1+2)=RWO(J1+2)+GK1
+        ELSE
+          J1=NG*3
           NG=NG+1
-          LW=LW+1+LG
-   85     LI=LI+1+LG
-   86   CONTINUE
-   88 CONTINUE
+          RWO(J1+1)=EG2
+          RWO(J1+2)=GK2
+          RWO(J1+3)=TK2
+        END IF
+      END DO
+      LW =NG*3
 C...
-C...          PRINT *,'Gamma energies and intensities'
-C...          DO 92 I=1,NG
-C...          K=(I-1)*(LG+1)
-C...          PRINT *,I,RWO(1+K),RWO(2+K)
-C...   92     CONTINUE
-C...
-C...          IF(LV.GT.2) STOP
+C...  IF(LV.GE.6) STOP
 C...
       RETURN
       END
