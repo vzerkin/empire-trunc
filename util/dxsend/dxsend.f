@@ -2928,7 +2928,8 @@ C*    -- Gamma production only from MF 6,12,13,14,15
           JT=MT
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
 c...
-          print *,'    Found MAT,MF,MT,KEA,LO,IER',mat,mf,mt,kea,l1,ier
+          print *,'    Found MAT,MF,MT,KEA,LO,L2,IER'
+     &           ,mat,mf,mt,kea,l1,l2,ier
 c...
           IF(IER.NE.0) THEN
             IF(MF.EQ.12) THEN
@@ -3671,7 +3672,7 @@ C*
 C* Photon emission data
 C... Assume isotropic scattering - no coding to read MF 14
   120 IF(MF.EQ.13) THEN
-C* File MF13 has same structure as MF12/LO=1 but contains XS
+C*      -- File MF13 has same structure as MF12/LO=1 but contains XS
         XS=1
         L1=1
       END IF
@@ -3682,17 +3683,22 @@ C* File MF13 has same structure as MF12/LO=1 but contains XS
       LLI=1
       RWO(LLI)=0
       LLI=LLI+1
+c...
+c...  print *,'    At 120 lo,lv,lg,l2',lo,lv,lg,l2
+c...
 C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-c...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv
+c...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv,lg,l2
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
 C* Changing LF between data sets is currently not accomodated
-        IF(LG.GT.0 .AND. LG.NE.L2)
-     1    STOP 'DXSEN1 ERROR - Redefined LG reading MF 12'
+        IF(LG.GT.0 .AND. LG.NE.L2) then
+          PRINT *,'ERROR - Redefined LG reading MF',MF,LG,L2
+          STOP 'DXSEN1 ERROR - Redefined LG reading MF 12'
+        END IF
         LG =L2
         NS =N1
         LL =LV*(LG+1)
@@ -3702,7 +3708,7 @@ C* Changing LF between data sets is currently not accomodated
         LX =MRW-LLI
         CALL RDLIST(LEF,ES,C2,LP,L2,NW,NT,RWO(LLI+1),LX,IER)
 c...
-c...    print *,'rdlist ier',ier,mat,mf,mt
+c...    print *,'      rdlist ier',ier,mat,mf,mt,lp,ll,nw,nt
 c...
         IF(NW.GT.LL) THEN
           IER=43
@@ -3718,7 +3724,7 @@ C*      -- Read the data for the next level
         MT =0
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...    print *,'      findmt mat,mf,mt,ier',mat,mf,mt,ier
+c...    print *,'       findmt mat,mf,mt,l1,l2,ier',mat,mf,mt,l1,l2,ier
 c...
         IF(IER.EQ.0 .AND.
      1     (MM+1.EQ.MT .AND. MT.LE.MT0) ) GO TO 122
@@ -3733,7 +3739,7 @@ c...    print *,(rwo(lli-1+j),j=1,10)
 c...
         CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
 c...
-C...    print *,'sumyld',nt,nw,(rwo(      j),j=1,nw)
+c...    print *,'sumyld',nt,nw,(rwo(      j),j=1,nw)
 c...
         LLI=1
 C*      -- Process the gamma lines
@@ -4562,9 +4568,8 @@ C-D        G_i  Sum of all contributions to level i
 C-D        T_i  Probability of gamma emission from level i.
 C-D        NG   Total number of gamma photons.
 C-
-C...
       PARAMETER (MXLV=50, MXGAM=2000)
-      DIMENSION  GAMA(MXGAM,MXLV),ELVL(MXLV),NGL(MXLV)
+      DIMENSION  GAMA(MXGAM,MXLV),ELVL(MXGAM),NGL(MXGAM)
       DIMENSION  ID(*),RWO(*)
 C* Check size of the local arrays to store level information
       IF(LV.GE.MXLV) STOP 'SUMYLD ERROR - MXLV array capacity exceeded'
@@ -4654,7 +4659,6 @@ C*      -- Done for all levels
       END DO
 C*
 C*    -- Copy gamma energies to ELVL
-      EL0=ELVL(LV+1)
       NG1=NGL(LV+1)
       DO I=1,NG1
         ELVL(I)=GAMA((I-1)*3+1,LV+1)
@@ -4669,6 +4673,9 @@ C*    -- Move the gamma data to the output array
       NG = 0
       DO I=1,NG1
         II =NGL(I)
+c...
+c...    ii =i
+c...
         J2 =(II-1)*3
         EG1=EG2
         GK1=GK2
@@ -4678,14 +4685,14 @@ C*    -- Move the gamma data to the output array
         TK2=GAMA(J2+3,LV+1)
         GTO=GTO+GK2*TK2
 C...
-C...    PRINT *,' Gamma',II,EG2,GK2,TK2,GK2*TK2
+c...    PRINT *,' Gamma',II,EG2,GK2,TK2,GK2*TK2
 C...
         IF(ABS(EG2-EG1).LE.EPS*EG2 .AND.
      &     ABS(TK2-TK1).LE.EPS*TK2   ) THEN
 C*        -- Sum equal energies
           J1=(NG-1)*3
 C...
-C...      print *,'     Summing',RWO(J1+2),GK2
+c...      print *,'     Summing',RWO(J1+2),GK2
 C...
           RWO(J1+2)=RWO(J1+2)+GK1
         ELSE
