@@ -10,6 +10,7 @@ C-V  2016/06  Fix bug when MF4 is the last on file.
 C-V           Fix processing when tabular CM distribution grid is
 C-V           sparse.
 C-V  2016/08  If no MF4, copy to output as is.
+C-V  2017/04  Increase MXRW array size limit from 800 k to 1.2 M.
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -31,7 +32,7 @@ C-
 C* Parameters defining the sizes of arrays
 C*   MXRW Size of RWO array
 C*
-      PARAMETER    (MXRW=800000,MXMT=10,MCS=901)
+      PARAMETER    (MXRW=1 200 000, MXMT=10,MCS=901)
       LOGICAL       EXST
       CHARACTER*66  C66,H66
       CHARACTER*40  BLNK
