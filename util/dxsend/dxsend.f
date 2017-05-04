@@ -912,7 +912,10 @@ C* If elastic, ejectile equals projectile
       END IF
 C*
 C* Do not include particle multiplicities for cross sections
-      IF(KEA.EQ.0 .AND. MT0/10000.NE.4) ZAP =-1
+c...  IF(KEA.EQ.0 .AND. MT0/10000.NE.4) ZAP =-1
+c...  IF((KEA.EQ.0 .ZAP.EQ.1) .AND. MT0/10000.NE.4) ZAP =-1
+      IF((KEA.EQ.0 .AND. NINT(ZAP).EQ.IZAI) .AND. 
+     &    MT0/10000.NE.4) ZAP =-1
 c...
       print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ELV'
       print *, NINT(10*ZA0),NINT(ZAP0),MF0,MT0,KEA,EIN,PAR,EPS,ELV
@@ -1024,30 +1027,33 @@ C...
       END IF
 C*
 C* Check if reaction summation is required (request MT=9000)
-c...  IF(MTJ.NE.9000) GO TO 60
-      IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
-C* Find particle emission reactions
-      REWIND LEF
-      CALL SKIPSC(LEF)
       ZAP =ZAP0
       IZAP=ZAP+0.1
+c...  IF(MTJ.NE.9000) GO TO 60
+C...  IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
+      IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5) .AND.
+     &  (MTJ.NE.4 .OR. IZAP.NE.0 ) ) GO TO 60
+C*    -- Find particle emission reactions
+      REWIND LEF
+      CALL SKIPSC(LEF)
 C*
-C* Prepare reaction list for light particles in MT9000
+C*    -- Prepare reaction list for light particles in MT9000
 C*
       IF(IZAP.GE.1 .AND.IZAP.LE.2004) THEN
 C*
-C* Particle emission (except gamma); special treatment for fission
-C* Test each reaction for chosen outgoing particle
+C*      -- Particle emission (except gamma); 
+C*         special treatment for fission
+C*      -- Test each reaction for chosen outgoing particle
         M18=0
    20   MF=3
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
-C* Select contributing reactions (yield >= 0)
+C*      -- Select contributing reactions (yield >= 0)
         CALL  YLDPOU(YI,MT,IZAP,IZAI)
         IF(MT.EQ.18) M18=1
-C* Skip chance fission if total fission is given
+C*      -- Skip chance fission if total fission is given
         IF(M18.EQ.1 .AND.
      &    (MT.EQ.19 .OR. MT.EQ.20 .OR. MT.EQ.21 .OR. MT.EQ.38)) YI=-1
         IF(YI.GE.0) THEN
@@ -1060,7 +1066,7 @@ C* Skip chance fission if total fission is given
         IF(MT.GE.800 .AND. MT.LE.849) I800=1
         GO TO 20
       ELSE IF(IZAP.GT.2004) THEN
-C* Radioactive nuclide production
+C*      -- Radioactive nuclide production
         LFS =NINT(PAR)
         MFX =3
         IF(LFS.NE.0) MFX=10
@@ -1070,7 +1076,7 @@ C* Radioactive nuclide production
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
-C* Check residual JZAP produced by the reaction
+C*      -- Check residual JZAP produced by the reaction
         CALL MTTOZA(IZAI,IZA,JZAP,MT)
         IF(MT.EQ.5 .OR. JZAP.EQ.IZAP) THEN
 C...
@@ -1086,7 +1092,7 @@ C...
         GO TO 30
       ELSE IF(IZAP.EQ.0) THEN
 C*
-C* Gamma emission: suppress angular distributions
+C*      -- Gamma emission: suppress angular distributions
         IF(KEA.EQ.1) THEN
           IF(LTT.GT.0) THEN
           WRITE(LTT,903) ' DXSEND WARNING - No Angular distrib.   '
@@ -1109,31 +1115,44 @@ C* Prepare reaction list
         END IF
         CALL SKIPSC(LEF)
 C* Select contributiong reactions
-        IF( MT.EQ.   5                  .OR.
-     &     (MT.GE.  11 .AND. MT.LE.199) .OR.
-     &     (MT.GT. 600 .AND. MT.LE.649) .OR.
-     &     (MT.GT. 800 .AND. MT.LE.849)) THEN
-          LOOP=LOOP+1
+        IF( MT0.EQ. 4 ) THEN
+          IF(MT.GE.51 .AND. MT.LE.91) THEN
+            LOOP=LOOP+1
 c...
-c...      print *,'Adding',MT,' loop',loop,' at 1'
+c...        print *,'Adding',MT,' loop',loop,' at 1'
 c...
-          LST(LOOP)=MT
-          IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
-          IF(MT.GE.600 .AND. MT.LE.649) I600=1
-          IF(MT.GE.800 .AND. MT.LE.849) I800=1
+            LST(LOOP)=MT
+            IINL=1
+          END IF
+        ELSE
+          IF( MT.EQ.   5                  .OR.
+     &       (MT.GE.  11 .AND. MT.LE.199) .OR.
+     &       (MT.GT. 600 .AND. MT.LE.649) .OR.
+     &       (MT.GT. 800 .AND. MT.LE.849)) THEN
+            LOOP=LOOP+1
 c...
-c...    else
+c...        print *,'Adding',MT,' loop',loop,' at 1'
+c...
+            LST(LOOP)=MT
+            IF(MT.GE. 50 .AND. MT.LE. 91) IINL=1
+            IF(MT.GE.600 .AND. MT.LE.649) I600=1
+            IF(MT.GE.800 .AND. MT.LE.849) I800=1
+          END IF
+c...
+c...    ELSE
 c...      print *,'Skipping MT',MT,' for gammas'
 c...
         END IF
         GO TO 44
-C* Add reactions with wholy contained cross sections in MF13
+C*      -- Add reactions with wholy contained cross sections
+C*         in MF13
    46   MF=13
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
-C* If cumulative gamma production present, set flag to exclude partials
+C*      -- If cumulative gamma production present, set flag to 
+C*         exclude partials
           IF(MT.EQ.  4) MINL=1
           IF(MT.EQ.103) M600=1
           IF(MT.EQ.107) M800=1
@@ -1195,7 +1214,7 @@ c...
       DO I=1,LOOP
         IL=IL+1
         LST(IL)=LST(I)
-        IF( LST(I).EQ.  4 .AND. IINL.EQ.1) IL=IL-1
+        IF( LST(I).EQ.  4 .AND. IINL.EQ.1 .AND. IZAP.EQ.1) IL=IL-1
         IF( LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
         IF( LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
         IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
@@ -1225,11 +1244,14 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
      1           ,RWO(LX),NE,MEN,KRW,IER)
 c...
-C...  M =NINT(ZA0)
-C...  print *,' Adding contribution from ZA/MF/MT/NE/IER'
-C... &       ,m,mf0,mt,ne,ier
+c...se &       ,m,mf0,mt,ne,ier
 c...  print *,'DXSEND',(enr(j),j=1,5)
 c...  print *,'      ',(dxs(j),j=1,5)
+c...
+c...  ina=2
+c...  exo=5.01e6
+c...  fxo=fintxs(exo,enr,dxs,Ne,INA,IER)
+c...  print *,'    A. Value at',exo,' eV is',fxo
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -1807,8 +1829,8 @@ c...
 C*
       DATA PI/3.141592654/
 C...
-c...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-c... &        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
+C... &        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -2316,7 +2338,37 @@ C*            -- Skip to the end of section
                 CALL RDTEXT(LEF,MAT,MFJ,MTJ,C66,IER)
               END DO
               GO TO 31
-            ELSE IF(MFJ.EQ.12) THEN
+            ELSE IF(MFJ.EQ.12 .OR. MFJ.EQ.13) THEN
+              REWIND LEF
+              IF     (MT0.GT. 50 .AND. MT0.LT. 91) THEN
+                MT =51
+              ELSE IF(MT0.GT.600 .AND. MT0.LT.649) THEN
+                MT =601
+              ELSE IF(MT0.GT.650 .AND. MT0.LT.699) THEN
+                MT =651
+              ELSE IF(MT0.GT.700 .AND. MT0.LT.749) THEN
+                MT =701
+              ELSE IF(MT0.GT.750 .AND. MT0.LT.799) THEN
+                MT =751
+              ELSE IF(MT0.GT.800 .AND. MT0.LT.849) THEN
+                MT=801
+              END IF
+  536         JF=MFJ
+              JT=MT
+              CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
+c...          
+              print *,'    Found MAT,MF,MT,KEA,LO,L2,IER'
+     &               ,mat,mf,mt,kea,l1,l2,ier
+c...          
+              IF(IER.NE.0) THEN
+                IF(MF.EQ.12) THEN
+                  REWIND LEF
+                  MF=13
+                  GO TO 536
+                ELSE
+                  GO TO 140
+                END IF
+              END IF
               GO TO 620
             END IF
           END IF
@@ -2846,22 +2898,69 @@ C*        -- Interpolate the yield to union grid and multiply
           END DO
           NEN=NE1
         ELSE IF(LO.EQ.2) THEN
-C*        -- Read number of photons
-C*********** WARNING: Photon cascade to lower levels is approximate
-          YLD=0
-          DO I=1,NL
-C*          -- One photon is emitted to the specified level
-            YLD=YLD+1
-C*          -- If the level is not ground state, at least one more
-            IF(RWO(2*I-1).GT.0) YLD=YLD+1
+C*        -- Transition probability arrays given
+
+          LO=L1
+          LV =0
+          LG =0
+          LLI=1
+          RWO(LLI)=0
+          LLI=LLI+1
+c...      
+c...      print *,'    At 620 lo,lv,lg,l2',lo,lv,lg,l2
+c...
+C*        -- Read photon branching ratios to all discrete-leves
+C*           up to the present
+  622     LV =LV +1
+          IWO(LV)=LLI
+C*        -- Changing LF between data sets is not accomodated
+          IF(LG.GT.0 .AND. LG.NE.L2) then
+            PRINT *,'ERROR - Redefined LG reading MF',MF,LG,L2
+            STOP 'DXSEN1 ERROR - Redefined LG reading MF 12'
+          END IF
+          LG =L2
+          NS =N1
+          LL =LV*(LG+1)
+          DO J=1,LL
+            RWO(LLI+J)=0
           END DO
-          CALL RDLIST(LEF,C1,C2,N1,N2,NW,NL,RWO,MRW,IER)
+          LX =MRW-LLI
+          CALL RDLIST(LEF,ES,C2,LP,L2,NW,NT,RWO(LLI+1),LX,IER)
+c...
+c...      print *,'      rdlist ier',ier,mat,mf,mt,lp,ll,nw,nt
+c...
+          IF(NW.GT.LL) THEN
+            IER=43
+            PRINT *,'ERROR - at 622 in MT',MT0,' Used space',NW
+     1             ,' Exceeds reserved space',LL,' for',LV,' levels'
+            GO TO 900
+          END IF
+          RWO(LLI)=ES
+          LLI=LLI+1+LL
+C*        -- Read the data for the next level
+          CALL SKIPSC(LEF)
+          MM =MT
+          MT =0
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
+c...
+c...      print *,'       findmt mat,mf,mt,l1,l2,ier'
+c... &                          ,mat,mf,mt,l1,l2,ier
+c...
+          IF(IER.EQ.0 .AND.
+     1       (MM+1.EQ.MT .AND. MT.LE.MT0) ) GO TO 622
+          IWO(LV+1)=LLI
+          IER=0
+C*
+C*        -- All levels up to the current one read - sum the yields
+c...
+c...      print *,'     Summing discr.level yields MF/MT,LV',MF,MT0,LV
+c...      print *,(rwo(      j),j=1,10)
+c...      print *,(rwo(lli-1+j),j=1,10)
+c...
+          CALL SUMYLD(LV,LG,IWO,RWO,GTO,NT,NW)
           DO I=1,NEN
-            DXS(I)=DXS(I)*YLD
+            DXS(I)=DXS(I)*GTO
           END DO
-          IF(NL.GT.1 .OR. RWO(1).GT.0)
-     &    PRINT *,'DXSEND WARNING - Photon production cascade in MF12'
-     &           ,' is incomplete for MT',MT0
         ELSE
           PRINT *,'DXSEND ERROR - Photon production in MF12'
      &           ,' not supported for MT/LO',MT0,LO
@@ -3712,7 +3811,7 @@ c...    print *,'      rdlist ier',ier,mat,mf,mt,lp,ll,nw,nt
 c...
         IF(NW.GT.LL) THEN
           IER=43
-          PRINT *,'ERROR - in MT',MT0,' Used space',NW
+          PRINT *,'ERROR - at 122 in MT',MT0,' Used space',NW
      1           ,' Exceeds reserved space for',LV,' levels'
           GO TO 900
         END IF
@@ -3854,7 +3953,7 @@ C*        -- Normalised tabulated function given in file MF15
           MF=15
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
 c...
-          print *,'    Found MAT,MF,MT,NC',MAT,MF,MT,NC,le,lxe
+          print *,'    Found MAT,MF,MT,NC',MAT,MF,MT,NC
 c...
           IF(IER.NE.0) THEN
             PRINT *,'WARNING - No tabulated data for MF15 MT',MT0
@@ -3927,6 +4026,9 @@ C*           into LXE, LXX; the EI1, NEN parameters are redefined
 C*
 c...
 c...      print *,'    Interpolate points',nen,nf,' between',ei1,ei2
+c...      exo=5.01e6
+c...      fxo=fintxs(exo,RWO(LxE),RWO(LxX),Nen,INA,IER)
+c...      print *,'   C. Value at',exo,' eV is',fxo
 c...      do k=1,5
 c...        print *,k,enr(k),dxs(k)
 c... &               ,rwo(lxe-1+k),rwo(lxx-1+k)
@@ -3957,7 +4059,9 @@ C*      -- Interpolate distribution for the current photon to the
 C*         union grid
         CALL FITGRD(NEN,RWO(LXE),RWO(LXX),NE1,RWO(LUE),RWO(LUX))
 C*      -- Assume isotropic photon distrib. and define yield factor
-        ANG=0.5
+C...    (Don't know why ANG was originally set to 0.5?)
+C...    ANG=0.5
+        ANG=1.0
         FRC=ANG*YLK
         YL =1
 C*      -- Add the current to the saved distribution
@@ -3967,6 +4071,11 @@ c...
         DO I=1,NE1
           DXS(I)=DXS(I)+RWO(LUX-1+I)*FRC
         END DO
+c...
+c...      exo=5.01e6
+c...      fxo=fintxs(exo,RWO(Lue),RWO(Lux),Ne1,INA,IER)
+c...      print *,'    B. Value at',exo,' eV is',fxo,' frc',frc
+c...
   138   CONTINUE
       ELSE
         IER=13
@@ -3996,7 +4105,7 @@ C...
 C* Scale the distribution by the cross section
       SS=YL*XS*SAN
 c...
-C...  print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
+c...  print *,'SS,YL,XS,SAN',SS,YL,XS,SAN
 c...  sst=0
 c...  ssn=0
 c...  e2=enr(1)
