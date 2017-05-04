@@ -27,6 +27,7 @@ C-V  12/06 Fix translation of discrete inelastic levels when level
 C-V        energies are given in dual representation (level energy
 C-V        or range of levels, e.g.: #20788006) (A. Trkov).
 C-V  14/12 Fix normalisation of Legendre coefficients (A. Trkov).
+C-V  17/05 Add residual to MF5/MT18 for gamma spectra (A. Trkov).
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
 C-A  -------------------------------------
@@ -1647,8 +1648,10 @@ C-----REMOVE LEADING ZEROES (EXCEPT THE LAST ONE) FROM RESIDUAL NUCLEUS.X4T14120
         IF(ZARES(J).NE.ZERO) GO TO 80
         ZARES(J)=BLANK
       END DO
-C-----IF REACTION DOES NOT END WITH ,X) IS RESIDUAL CHARACTER COUNT=0   X4T14200
-   80 IF(R1(KR1-2).NE.NX(1).OR.R1(KR1-1).NE.NX(2)) KZARES=0             X4T14210
+C-----IF REACTION DOES NOT END WITH ,X OR ,F SET RESIDUAL COUNT=0
+C..80 IF(R1(KR1-2).NE.NX(1).OR.R1(KR1-1).NE.NX(2)) KZARES=0             X4T14210
+   80 IF(R1(KR1-2).NE.NX(1).OR.
+     &  (R1(KR1-1).NE.NX(2) .AND. R1(KR1-1).NE.'F') ) KZARES=0
 C                                                                       X4T14220
 C     COPY REMAINDER OF REACTION.                                       X4T14230
 C                                                                       X4T14240
@@ -2454,7 +2457,8 @@ C-----CHECK FOR LEGAL PRODUCT ZA (ALL CHARACTERS BLANK OR DIGIT).       X4T21420
       ZANOK(7)=ZANRES(7,ISANR)                                          X4T21530
       IF(IBADZA.NE.0) WRITE(OUTP,6060) ZANOK,(ZANRAT(M,ISANR),M=1,7)    X4T21540
 C-----CHECK FOR PRODUCTION REACTIONS (MT = 9000 - 9999).                X4T21550
-      IF(MTR(ISANR).LT.9000) WRITE(OUTP,6080) (ZANRES(M,ISANR),M=1,7)   X4T21560
+      IF(MTR(ISANR).LT.9000 .AND. MTR(ISANR).NE.18)
+     &   WRITE(OUTP,6080) (ZANRES(M,ISANR),M=1,7)                         X4T21560
 C-----INSERT RESIDUAL NUCLEUS IN THE SIXTH OUTPUT FIELD (NORMALLY USED  X4T21570
 C-----FOR COSINE ERROR).                                                X4T21580
   370 CALL RESZA(OUTLIN(6),ZANRES(1,ISANR))
@@ -2555,7 +2559,7 @@ C                                                                       X4T22160
      2       10X,'            6. CANNOT DEFINE ZA OF PRODUCTS.'/        X4T22430
      3       10X,'            CHECK AND CORRECT OUTPUT.')               X4T22440
  6080 FORMAT(10X,'WARNING.....PRODUCT ZA =',7A1,                        X4T22450
-     1 ' (EXPECT MT = 9000 - 9999)')                                    X4T22460
+     1 ' (EXPECT MT = 18, OR 9000-9999)')                                 X4T22460
 C6090 FORMAT(10X,'WARNING.....EXPECT PRODUCT ZA FOR MT=9000-9999')      X4T22470
  6090 FORMAT(10X,'WARNING.....EXPECT PRODUCT ZA FOR MT=9000-9999'/      TRKOV
      1       10X,'            SET DEFAULT ',6A1,'.9')                   TRKOV
@@ -3005,9 +3009,9 @@ C                                                                       X4T26780
       IRFLAG=MFMTAB(4,I)                                                X4T26820
       KNOWN=1                                                           X4T26830
 C-----ONLY CONSIDER RESIDUAL NUCLEUS FOR PRODUCTION CROSS SECTIONS AND  X4T26840
-C-----ANGULAR DISTRIBUTIONS (MF=3 OR MF=4) AND MT=9000-9999.            X4T26850
-      IF(MF.NE.3.AND.MF.NE.4) KZARES=0                                  X4T26860
-      IF(MT.LT.9000) KZARES=0                                           X4T26870
+C-----ANGULAR/ENERGY DISTRIBUTIONS (MF=3,4,5) AND MT=9000-9999.           X4T26850
+      IF(MF.NE.3.AND.MF.NE.4 .AND. MF.NE.5) KZARES=0                      X4T26860
+      IF(MT.LT.9000 .AND. MT.NE.18) KZARES=0                              X4T26870
       RETURN                                                            X4T26880
  4000 FORMAT(1X,5A1,I3,1X,15A4)                                         X4T26890
       END                                                               X4T26900
