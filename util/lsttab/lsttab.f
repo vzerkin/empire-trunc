@@ -58,6 +58,7 @@ C-V  16/04  Fix trivial bug to print Ei to CUR file.
 C-V  16/07  Initialize MTH.
 C-V  16/12  Fix PLOTTAB input file for MF6.
 C-V  17/03  Add elemental masses to GETAWT.
+C-V  17/05  Enhancements to plot PFGS.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -251,6 +252,14 @@ C* Process the index entry
 C*
 C* Proceed with the processing of data
    56 READ (C84,92) IZ,IA,CM,IZP,MF,MT,JEP,JXP,JFX,EIN,DEG,EOU,IZI
+C*
+C*    -- Redefine photon spectra in MF15 as MF 5/IZP 0
+      IF(MF.EQ.15) THEN
+        MF=5
+        IZP=0
+      END IF
+C*    -- Reset EKTNRM if not neutron spectrum
+      IF(IZP.NE.1) EKTNRM=0
 C*
       ZAI=IZI
       MTH=MT
@@ -461,6 +470,13 @@ C* Prepare the ENDF comment header for the PLOTTAB curves file
       WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
 C* Normalise fission spectra if needed to plot ratio to Maxwellian
       FSP=1
+c...
+c...  print *,'izp,mf,mt,ektnrm,scl',izp,mf,mt,ektnrm,scl
+c...      ina=2
+c...      exo=5.01e6
+c...      fxo=fintxs(exo,es,sg,Np,INA,IER)
+c...      print *,'    Value at',exo,' eV is',fxo
+c...
       IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
         SSP=0
         E2 =ES(1)
@@ -535,6 +551,10 @@ C* Check if fission spectra are to be processed
       IF(MF0.EQ.5 .AND. MT.EQ.18 .AND. ICUR.GT.0) THEN
         LLL=LTM
         OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
+        WRITE(LLG,91) ' NOTE: Data normalised to the last curve'
+        WRITE(LLG,91) ' '
+        WRITE(LTT,91) ' NOTE: Data normalised to the last curve'
+        WRITE(LTT,91) ' '
       ELSE
         LLL=LPN
         ICUR=0
@@ -868,6 +888,7 @@ C-
       CHARACTER*11 REC(6)
       CHARACTER*25 REF,RF0,RF4,RFAU(MXAU)
       CHARACTER*84 COM2
+      CHARACTER*132 HLINE
       DATA MM/' ','M','N'/
 C* Fractional tolerance to identify "equal" arguments
 C* For best results the tolerance limits should be consistent with
@@ -903,13 +924,23 @@ C*
         NAU=0
       END DO
 C*
-   20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
-     1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
+C..20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
+C..  1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
+   20 READ (LC4,  900,END=80) HLINE
+      READ (HLINE,901) IZAI,IZA,CM,MF,MT,C1,C2,C3
+     1                ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
 c...
 c...  if(mf.eq.203 .and. mt.eq.102) then
 c...     print *,iza,iza0,cm,mm(im),ref
 c...  end if
 c...
+C* By default the outgoing spectrum refers to neutrons
+      IF(MF.EQ.5 .AND. HLINE(74:76).EQ.'   ') F6=1.9
+C* Redefine photon spectra in MF 15 as MF 5
+      IF(MF.EQ.15) THEN
+        MF =5
+        F6 =0.9
+      END IF
 C* Test for Legendre coefficients of elastic scattering
 c     IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
       IF(MF.EQ.154 .AND. NINT(F5).EQ.1) THEN
@@ -919,7 +950,7 @@ c     IF(MF.EQ.154 .AND. MT.EQ.2 .AND. NINT(F5).EQ.1) THEN
         ELSE IF(MT.EQ.9000) THEN
           F7=0
           MT=254
-c... Temporarily pick scattering mu-bar as elastic
+c...      -- Temporarily pick scattering mu-bar as elastic
 C...      MT=251
 c...
         END IF
@@ -966,7 +997,8 @@ C*      -- Test for particle production
         IF(MT.GE.9000 .AND. IZAP0.NE.IF6) GO TO 20
       ELSE IF(MF.GE.4 .AND. MF.LE.6) THEN
 C* Test outgoing particle
-        IF(MT.GE.9000) THEN
+c...    IF(MT.GE.9000) THEN
+        IF(MT.EQ.18 .OR. MT.GE.9000) THEN
           IF6=F6
 c...      IF(F6.EQ.0) IF6=1
           IF(IZAP0.NE.IF6) GO TO 20
@@ -1234,6 +1266,7 @@ C* File processing done
       WRITE(LPN,920)
       RETURN
 C*
+  900 FORMAT(A132)
   901 FORMAT(I5,I6,A1,I3,I4,3A1,8F9.0,A3,A25,A9)
   902 FORMAT(A25,15X,A84)
   911 FORMAT(1P,E11.4E1)
