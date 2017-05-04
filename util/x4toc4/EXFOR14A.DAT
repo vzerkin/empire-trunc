@@ -551,6 +551,9 @@ Added fission neutron spectrum - various combinations (A. Trkov, 06 Mar 2012)  1
 (N,F),DE,N,MXW/REL                                  1  5  18  0
 (N,F),DE,N,REL/MXW                                  1  5  18  0
                                                                                1
+Added prompt fission gamma spectrum (A. Trkov, 04 May 2017)                    1
+(N,F)PR,FY/DE,,REL                                  1  5  18  0
+                                                                               1
 (N,F),NU/DE                                         1  5  18  0
 (N,F),NU/DE,,MXW                                    1  5  18  0
 (N,F),NU/DE,,MXD                                    1  5  18 10
