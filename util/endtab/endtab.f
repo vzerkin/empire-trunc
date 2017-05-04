@@ -33,6 +33,8 @@ C-V  16/03 Allow MF203 for alpha (SigC/SigF).
 C-V  16/07 Fix missing "REWIND" before calling DXSEND for MF5.
 C-V  16/12 Fix printout of the backward angle in the distributions.
 C-V  17/04 Reset upper energy for plotting in multiple plots.
+C-V  17/05 Add outgoing particle selection for all data
+C-V        WARNING - Input specifications change.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -60,7 +62,7 @@ C-M  Instructions:
 C-M  Input instructions are entered interactively in response to the
 C-M  prompts as follows:
 C-M  - Source ENDF filenames.
-C-M  - Tabulated output in PLOTTAB format.
+C-M  - Filename of the tabulated output in PLOTTAB format.
 C-M  - MAT Required material identification: this can be specified in
 C-M    several forms:
 C-M     0  - Processing depends on the selected MF number:
@@ -78,6 +80,8 @@ C-M          Note: On first pass the ZA search identifier is
 C-M                converted to the equivalent MAT search identifier.
 C-M    <0  - The input entry is the MAT number of the required
 C-M          nuclide.
+C-M  - ZAP - Outgoing particle ZA designation (zero for gammas)
+C-M          (This entry is overwritten if MT 9000 is selected).
 C-M  - MF Required ENDF file MF number:
 C-M     3  - Request cross section data.
 C-M     4  - Request angular distribution data.
@@ -121,9 +125,6 @@ C-M    appear on the ENDF file. (Use FIXUP [1] of the PrePro codes to
 C-M    generate redundant cross sections and other quantities).
 C-M
 C-M  Case MF=4:
-C-M  - ZA Outgoing particle ZA designation.
-C-M    Note: at present the program is tested only for neutrons,
-C-M          ZA=1.
 C-M  - EIN Incident particle energy [eV].
 C-M  - MT/COM Required ENDF reaction MT number. The program cycles
 C-M    back to request additional MT numbers to be processed and
@@ -135,9 +136,6 @@ C-M    the selected outgoing particles are summed.
 C-M    COM - the same convention as described for MF=3 applies.
 C-M
 C-M  Case MF=5:
-C-M  - ZA Outgoing particle ZA designation.
-C-M    Note: at present the program is tested only for neutrons,
-C-M          ZA=1.
 C-M  - EIN Incident particle energy [eV].
 C-M  - MT/COM Required ENDF reaction MT number. The program cycles
 C-M    back to request additional MT numbers to be processed and
@@ -152,9 +150,6 @@ C-M      MT=18     The temperature of the Maxwellian fission spectrum
 C-M                is requested if ratio to Maxwellian is to be
 C-M                printed to output.
 C-M  Case MF=6:
-C-M  - ZA Outgoing particle ZA designation.
-C-M    Note: at present the program is tested only for neutrons,
-C-M          ZA=1.
 C-M  - EIN Incident particle energy [eV].
 C-M  - ANG Scattered particle angle [Degrees].
 C-M  - RES Resolution broadening fraction. This parameter is needed 
@@ -214,6 +209,9 @@ C* Default ENDF file and reaction type numbers
       DATA BLNK/'                                        '/
 C*
       DATA PI/3.1415926/
+      DEG=-1
+      EOU=-1
+      ZAP=-1
 C* Write banner
       WRITE(LTT,91)
       WRITE(LTT,91) ' ENDTAB - Extract Data from ENDF files  '
@@ -237,14 +235,15 @@ C* Select the material
    13 WRITE(LTT,91) '$Enter requested ZA(>0) or MAT(<0) No.: '
       READ (LKB,98,ERR=13) ZA0
       WRITE(LTT,991) ' Selected ZA                          : ',ZA0
+C* Select the outgoing particle 
+      WRITE(LTT,91) '$    Outgoing particla ZA designation : '
+      READ (LKB,98) ZAP
+      WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
 C* Select the ENDF file (3, 6, 10 or 15)
    14 WRITE(LTT,91) '$Enter the requested ENDF file MF No. : '
       READ (LKB,97,ERR=14) IDMY
       IF(IDMY.GT.0) MF0=IDMY
       WRITE(LTT,91) ' Selected MF                          : ',MF0
-      DEG=-1
-      EOU=-1
-      ZAP=-1
 C* Case: MF3/10 Energy range and grid thinning criterion
       IF(MF0. EQ. 1 .OR. MF0.EQ.3 .OR. MF0.EQ.10 .OR.
      &   MF0.EQ.23 .OR. MF0.EQ.203) THEN
@@ -321,7 +320,8 @@ C* Select the energy interval
         GO TO 14
       END IF
 C* Select the reaction type number
-   30 WRITE(LTT,91) ' Enter the ENDF reaction type  MT No.   '
+   30 WRITE(LTT,91) ' '
+      WRITE(LTT,91) ' Enter the ENDF reaction type  MT No.   '
       WRITE(LTT,91) '$      (MT>40000 for angle-dep. x.s.) : '
       READ (LKB,99) FLNM
       READ (FLNM(1:10),97,ERR=30) IDMY
@@ -355,8 +355,9 @@ C...
 C* Particle emission spectra
       IF( MT0.EQ.5 .OR. MT0.EQ. 9000 .OR.
      &   (ZAP.LT.0 .AND. (MF0.EQ.5 .OR. MF0.EQ.6)) ) THEN
-        WRITE(LTT,91) '$    Outgoing particla ZA designation : '
+        WRITE(LTT,91) '$    Outgoing particle ZA designation : '
         READ (LKB,98) ZAP
+        WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
       END IF
 C* Cross section at particular particle emission angle
       IF(MT0.GT.40000) THEN
@@ -365,6 +366,8 @@ C* Cross section at particular particle emission angle
         WRITE(LTT,91) '$  Scattered particle angle [Degrees] : '
         READ (LKB,98) DEG
         FST=DEG
+        WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
+        WRITE(LTT,991) ' Selected scattering angle           : ',DEG
       END IF
 C* Angular distributions
       IF(MF0.EQ.4) THEN
