@@ -2081,7 +2081,7 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-C...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
+c...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
 C...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
@@ -2094,6 +2094,10 @@ C*      -- Search for angular distributions or double differential data
    31   MFJ=0
         MTJ=MT0-10000*(MT0/10000)
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MFJ,MTJ,IER)
+C...
+C...      print *,'  Tried za0,zap,MAT,MF,MT,IER',nint(za0),izap
+C... &                                           ,MAT,MFJ,MTJ,IER
+C...
         IF(IER.NE.0 .OR.
      &     (IZAP0.EQ.0 .AND. MFJ.GT.12) .OR.
      &     (IZAP0.GT.0 .AND. MFJ.GT. 6) ) THEN
@@ -2115,7 +2119,7 @@ C...
 C*
         IF(MFJ.GT.4) GO TO 500
 C*      -- Angular distributions are allowed for two-body reactions
-        IF((IZAP0.EQ.   2 .AND. (MTJ.EQ.  2 .OR.  MTJ.EQ. 18 .OR.
+        IF((IZAP0.EQ.   1 .AND. (MTJ.EQ.  2 .OR.  MTJ.EQ. 18 .OR.
      &                          (MTJ.GE. 50 .AND. MTJ.LE. 91) ) ) .OR.
      &     (IZAP0.EQ.1001 .AND. (MTJ.EQ.2 .OR. 
      &                          (MTJ.GE.600 .AND. MTJ.LE.649) ) ) .OR.
