@@ -149,6 +149,9 @@ ERROR (COLUMN 4).                                                              1
 (8) DATA =-LOG(DATA)/THICKNESS (CONVERT TRANSMISSION TO BARNS)                 1
 (9) DATA = DATA*COULOMB (CONVERT RUTHERFORD RATIO TO CROSS SECTION)            1
 (10)DATA = DATA*MAXWELLIAN(E_KT-NORM)                                          1
+(11)DATA = Not used                                                            1
+(12)DATA = Set the reaction in the denominator of the ratio as fission         1
+(13)DATA = DATA/(E-MAX - E-MIN)                                                1
                                                                                1
 NOTE, THESE CONVENTIONS ARE CODED INTO THE TRANSLATION PROGRAM.                1
 THE USER SHOULD NOT ADD ANY OPERATIONS TO THIS LIST UNLESS THEY ARE            1
@@ -552,7 +555,12 @@ Added fission neutron spectrum - various combinations (A. Trkov, 06 Mar 2012)  1
 (N,F),DE,N,REL/MXW                                  1  5  18  0
                                                                                1
 Added prompt fission gamma spectrum (A. Trkov, 04 May 2017)                    1
+Partial (N,X) DA redefined to DE by dividing by 2*dE (operation 13)            1
 (N,F)PR,FY/DE,,REL                                  1  5  18  0
+(N,X)PAR,DA                                         1  69000 13
+(N,X)PAR,DA/DE                                      1  69000  0
+(N,X)PAR,DE                                         1  59000  0
+
                                                                                1
 (N,F),NU/DE                                         1  5  18  0
 (N,F),NU/DE,,MXW                                    1  5  18  0
@@ -678,7 +686,6 @@ Add photon-induced reactions (M. Herman, A.Trkov, Oct.2004)                    1
                                                                                1
 ANGULAR DISTRIBUTIONS                                                          1
 (N,X),DA                                            1  49000  0
-(N,X)PAR,DA                                         1  49000  0
                                                                                1
 DOUBLE DIFFERENTIAL DATA                                                       1
 (N,X),DA/DE                                         1  69000  0
