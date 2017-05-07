@@ -28,6 +28,9 @@ C-V        energies are given in dual representation (level energy
 C-V        or range of levels, e.g.: #20788006) (A. Trkov).
 C-V  14/12 Fix normalisation of Legendre coefficients (A. Trkov).
 C-V  17/05 Add residual to MF5/MT18 for gamma spectra (A. Trkov).
+C-V        Define Operation 13 to convert DA over energy intervals
+C-V        into DE by dividing with bin-width (A. Trkov)
+C-V        (to be checked if universally applicable).
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
 C-A  -------------------------------------
@@ -3782,6 +3785,7 @@ C     (9) DATA = DATA*RUTHERFORD (COULOMB) CROSS SECTION                ***** TR
 C     (10)DATA = DATA*MAXWELLIAN(E_KT-NORM)                             ***** TRKOV
 C     (11)Not used                                                      ***** TRKOV
 C     (12)REACTION IN THE DENOMINATOR OF THE RATIO IS FISSION           ***** TRKOV
+C     (13)Divide by outgoing energy interval to convert to DE           ***** TRKOV
 C                                                                       X4T33950
       INTEGER      OUTP,OTAPE
       CHARACTER*11 TITLE,UNIT,DATUM
@@ -3992,9 +3996,22 @@ C*    -- Location index of energy and spectrum
 C-----Not used
   150 CONTINUE
 C-----DEFINE DENOMINATOR REACTION RATIO AS FISSION (ALPHA)
-  160 IF(IRFLAG(ISANR).GT.12) GO TO 800
+  160 IF(IRFLAG(ISANR).GT.12) GO TO 170
 C     -- Define the denominator MT number
       MTRAT(ISANR)=18
+      GO TO 800
+C-----
+  170 IF(IRFLAG(ISANR).GT.13) GO TO 180
+C-----Divide by twice the outgoing energy half-interval
+      IF(NPT.EQ.1.AND.IRFLAG(ISANR).EQ.13) WRITE(OUTP,6092)
+      II =KMOUT(3,ISANR)
+      IX =KMOUT(4,ISANR)
+      IDE=KMOUT(8,ISANR)
+      VALUES(II)=VALUES(II)/(VALUES(IDE)*2)
+      VALUES(IX)=VALUES(IX)/(VALUES(IDE)*2)
+      GO TO 800
+C-----
+  180 CONTINUE
 C-----
   800 RETURN
  6000 FORMAT(10X,'OPERATION...CREATED EN          ',1PE11.4,' EV')      X4T35010
@@ -4016,6 +4033,7 @@ C-----
  6083 FORMAT(10X,'OPERATION...SCALED FISS.SPECTRUM BY MAXWELLIAN'
      1      ,F8.3,' MeV')
  6090 FORMAT(10X,'OPERATION...CONVERTED RUTHERFORD RATIO TO X.S.')
+ 6092 FORMAT(10X,'OPERATION...CONVERTED DA to DE')
       END                                                               X4T35120
       SUBROUTINE INTGER(CARD,N,I)                                       X4T35130
 C                                                                       X4T35140
