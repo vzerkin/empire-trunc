@@ -28,7 +28,8 @@ C-V  2015/06 - Fix bug when a single entry exists in the C4 file.
 C-V          - Tighten tolerance for lumping angular distributions.
 C-V          - Extend the grid of forced DDX entries.
 C-V  2016/03 Add MF203/MT102 for alpha (SigC/SigF)
-c-v          Add "target" qualifier to limit list to selected target.
+C-V          Add "target" qualifier to limit list to selected target.
+C-V  2017/03 Define ejectile for MF5/MT18 (PFGS).
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -534,6 +535,10 @@ C...
           IZPX  =1
         ELSE IF(MTX.EQ. 16) THEN
           IZPX  =1
+        ELSE IF(MTX.EQ. 18) THEN
+C*        -- Check ejectile on C4 file, if given
+          IZPX  =1
+          IF(PRB1.NE.0) IZPX=IFIX(PRB1)
         ELSE IF(MTX.EQ.102) THEN
           IZPX  =0
         ELSE
