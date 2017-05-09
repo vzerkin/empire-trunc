@@ -478,17 +478,30 @@ c...      fxo=fintxs(exo,es,sg,Np,INA,IER)
 c...      print *,'    Value at',exo,' eV is',fxo
 c...
       IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+C*      -- SSP is the integral over experimental points
+C*      -- SSG is the integral of Maxwellian on the same E-grid
         SSP=0
+        SSG=0
         E2 =ES(1)
         F2 =SG(1)
+        G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
         DO I=2,NP
           E1 = E2
           F1 = F2
+          G1 = G2
           E2 = ES(I)
           F2 = SG(I)
+          G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
           SSP=SSP + (E2-E1)*(F2+F1)/2
+          SSG=SSG + (E2-E1)*(G2+G1)/2
         END DO
-        IF(SSP.GT.0) FSP=1/SSP
+C...    IF(SSP.GT.0) FSP=1/SSP
+        IF(SSP.GT.0) FSP=SSG/SSP
+c...
+        print *,'  PFNS normalisation factor',FSP
+      else
+        print *,'  No PFNS normalisation'
+c...
       END IF
 C* Write the data to the PLOTTAB curves file
       WRITE(LCU,99) COM1,COM2
