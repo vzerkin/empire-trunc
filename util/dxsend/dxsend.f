@@ -3880,8 +3880,12 @@ C*        -- Interpolate current distribution to the union grid
           END DO
 C*        -- Interpolate saved distribution to the union grid
           CALL FITGRD(NEN,RWO(LXE),RWO(LXB),NE2,RWO(LUE),RWO(LUX))
-C*        -- Assume isotropic photon distributions
-          ANG=0.5
+          IF(DEG.GE.0) THEN
+C*          -- Assume isotropic photon distributions
+            ANG=0.5
+          ELSE
+            ANG=1
+          END IF
 C*        -- Add the current distribution to the saved one
 C*        -- SUMYLD always gives output as LG=2
 c...      GG =RWO(2+(JT-1)*(LG+1))
@@ -4062,10 +4066,13 @@ C*      -- Interpolate accumulated distribution to the union grid
 C*      -- Interpolate distribution for the current photon to the
 C*         union grid
         CALL FITGRD(NEN,RWO(LXE),RWO(LXX),NE1,RWO(LUE),RWO(LUX))
-C*      -- Assume isotropic photon distrib. and define yield factor
-C...    (Don't know why ANG was originally set to 0.5?)
-C...    ANG=0.5
-        ANG=1.0
+        IF(DEG.GE.0) THEN
+C*        -- Assume isotropic photon distribution
+          ANG=0.5
+        ELSE
+          ANG=1
+        END IF
+C*      -- define yield factor
         FRC=ANG*YLK
         YL =1
 C*      -- Add the current to the saved distribution
