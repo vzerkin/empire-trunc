@@ -3779,6 +3779,9 @@ C*      -- File MF13 has same structure as MF12/LO=1 but contains XS
         XS=1
         L1=1
       END IF
+c...
+      print *,'mf,mt,kea',mf,mt,kea
+c...
       IF(KEA.NE.2) GO TO 140
       LO=L1
       LV =0
