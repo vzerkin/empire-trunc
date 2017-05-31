@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4946 $
+Ccc   * $Rev: 4947 $
 Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-05-31 17:46:31 +0200 (Mi, 31 Mai 2017) $
+Ccc   * $Date: 2017-05-31 17:51:38 +0200 (Mi, 31 Mai 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -1513,7 +1513,7 @@ C Neutron spectrum
               ie=MAX(nspecc+1-nxe,0)
               POPcse(ie,1,nxe,INExc(Nnur)) =
      &           POPcse(ie,1,nxe,INExc(Nnur)) + pops
-              IF(LHMs.NE.0) THEN !HMS n & p only	
+              IF(LHMs.NE.0) THEN !HMS n & p only      
                 POPcsed(ie,1,nxe,INExc(Nnur)) =
      &           POPcsed(ie,1,nxe,INExc(Nnur)) + pops
               ENDIF
@@ -1539,7 +1539,7 @@ C Populate proton emission breakup-fusion residual nucleus
             ie=MAX(nspecc-nx,0)
             DO j=1,lmx
               pops = 0.5d0*DBRkup*dbfl(j,nx)
-	        if(pops>0) then
+              if(pops>0) then
                 POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
                 POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
               endif
@@ -1553,7 +1553,7 @@ C Proton DDX
           DO nx=1,nxx
             DO nti=1,nthi
               pops=DBRkup*dbf(nti,nx)
-	        if(pops>0) CSEa(nx+1,nti,2) = CSEa(nx+1,nti,2) + pops
+              if(pops>0) CSEa(nx+1,nti,2) = CSEa(nx+1,nti,2) + pops
              END DO
            END DO
         
@@ -1566,7 +1566,7 @@ C Proton spectrum
               ie=MAX(nspecc-nx,0)
               POPcse(ie,2,nx+1,INExc(Nnur)) =
      &            POPcse(ie,2,nx+1,INExc(Nnur)) + pops
-              IF(LHMs.NE.0) THEN !HMS n & p only	
+              IF(LHMs.NE.0) THEN !HMS n & p only      
                 POPcsed(ie,2,ie,INExc(Nnur)) =
      &            POPcsed(ie,2,nx+1,INExc(Nnur)) + pops
               ENDIF
@@ -1576,7 +1576,7 @@ C Proton spectrum
             ELSE
             DO nx=1,nxx
               pops=DBRkup*buspec(nx)            
-	        if(pops>0) then
+              if(pops>0) then
                 CSEdbk(nx+1,2)=CSEdbk(nx+1,2)+pops
                 CSE(nx+1,2,1)=CSE(nx+1,2,1)+pops
               endif
@@ -1608,7 +1608,7 @@ C-----Passing ELTL() and ELTLJ () to HRTW routine, note that they never contain
 C-----direct contribution !!!
 C
       DO i = 1, NDLW
-	   if(stl(i).LE.0.d0) CYCLE
+         if(stl(i).LE.0.d0) CYCLE
          ELTl(i) = min(stl(i)*TUNetl(i),1.0d0)
          DO j = 1, mxj
            ELTlj(i,j) = min(stlj(i,j)*TUNetl(i),1.0d0)
