@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Rev: 4946 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-05-31 17:46:31 +0200 (Mi, 31 Mai 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2834,7 +2834,14 @@ C
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
       ilv = 1
-      If(Nnuc.eq.0) ilv = Levtarg
+      IF(Nnuc.EQ.0 .and. (DIRect.EQ.1 .OR. DIRect.EQ.2)) THEN
+         ilv = Levtarg
+         write(8,*) 'ERROR: CC calculations on excited targets not yet
+     & allowed'
+         write(8,*) 'Set DIRECT to 0 in the input file'
+         write(8,*) 'Execution stopped'
+         STOP 'No CC on excited targets'
+      ENDIF
 C
 C     write(*,*) 'ilv=',ilv
 C
@@ -2903,7 +2910,7 @@ C--------(nlev=ilv corresponds to the target state)
          else
            READ (45,*,END = 200,ERR = 200) nlev, l, jj, dtmp
          endif
-C        write(*,*) nlev, l, jj, dtmp  
+!         write(*,*) 'nlev, l, jj, dtmp',nlev, l, jj, dtmp
          if(dtmp.lt.1.d-15) cycle
 
          ncoll = MAX(nlev,ncoll)

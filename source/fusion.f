@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4882 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-03 22:11:44 +0200 (Mo, 03 Apr 2017) $
+Ccc   * $Rev: 4946 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-05-31 17:46:31 +0200 (Mi, 31 Mai 2017) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -111,6 +111,7 @@ C     write(*,*) 'trgsp=',trgsp,' spin-part=',sxj
       SINlcont = 0.D0
       csmax = 0.d0
       CSFus = 0.d0
+
 
       maxlw = 0
 C     allocate stl(), stlj(), sel() 
@@ -946,7 +947,6 @@ C           restoring the input value of the key CN_isotropic
 
             NLW   = min(maxlw+2*MAXmult+NINT(trgsp+0.6d0),NDLW)
       
-C           write(*,*) maxlw,stl(maxlw),stl(maxlw+1),' sph calc'
 
          ENDIF
 
@@ -1377,6 +1377,7 @@ C           ensure we are within dimensions for the min=1, and the max=NDLW
 C                 IF(stlj(k,jindex)<=1.0d-15) CYCLE
                   sum = sum + PAR(ip,LVP(LEVtarg,Ntrg),k - 1)*
      &                min(stlj(k,jindex)*TUNetl(k),1.0d0)
+!                  write(*,*)'k,jindex,stlj',k,jindex,stlj(k,jindex)
                ENDDO
             ENDDO
             POP(NEX(1),j,ip,1) = coef*sum*(2.D0*xjc + 1.D0)*FUSred
