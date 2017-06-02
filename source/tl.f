@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4946 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-05-31 17:46:31 +0200 (Mi, 31 Mai 2017) $
+Ccc   * $Rev: 4948 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2017-06-02 21:44:02 +0200 (Fr, 02 Jun 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2834,7 +2834,8 @@ C
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
       ilv = 1
-      IF(Nnuc.EQ.0 .and. (DIRect.EQ.1 .OR. DIRect.EQ.2)) THEN
+      IF(Nnuc.EQ.0 .and. (DIRect.EQ.1 .OR. DIRect.EQ.2) .and. 
+     &   (LEVtarg .GT. 1) ) THEN
          ilv = Levtarg
          write(8,*) 'ERROR: CC calculations on excited targets not yet
      & allowed'
