@@ -33,6 +33,8 @@ C-V  16/09 Deactivate aliasing of MT 5 to 9000.
 C-V  17/03 Retrieve gamma production x.s. from MF 12/ LO 1.
 C-V  17/04 More improvements to the retrieval of gamma spectra.
 C-V        Rewrite discrete level summation of gamma-lines.
+C-V  17/06 Fix yield assignment for total, mu-bar.
+C-V        Fix printout of neutron cross sections at fixed angle.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -63,6 +65,7 @@ C-D               table. The DIMENSION of ZEL must be at least 24.
 C-D  FRC    Fractional abundance of nuclides from the list.
 C-D  ZAP  - Outgoing particle ZA designation (ZAP=1 for neutrons).
 C-D  MF0  - Requested file number (ENDF conventions).
+C-D         (use MF0=3 for cross sections at fixed angle)
 C-D  MT0  - Requested reaction number. Broadly this follows the ENDF
 C-D         conventions.
 C-D  KEA  - Control flag to select retrieval:
@@ -1898,7 +1901,12 @@ C* Continue processing the file
 C*
 C* Define particle multiplicities
       YL=1
+c...
+C...  print *,'izap0,mt0,yl',izap0,mt0,yl
+c...
+C* Assign yield, except for total, mu-bar, etc.
       IF(IZAP0.LT.0) GO TO 30
+      IF(MT0.EQ.1 .OR. (MT0.GE.251 .AND. MT0.LE.254)) GO TO 30
       CALL YLDPOU(YL,MT0,IZAP0,IZAI)
 C* Special treatment for nu-bar and neutrons from fission
       IF(IZAP0.EQ.1) THEN
@@ -2022,7 +2030,7 @@ C* Suppress searching for covariance data unless MF0=3 or 10
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C...
       iza=nint(za0)
-      print *,'  Found MAT,MF,MT,NP,Ei,ZAp',iza,MF,MTJ,NP,ein,izap0
+      print *,'  Found MAT,MF,MT,NP,Ei,ZAp',iza,MF,MTJ,NP,ein,izap0,yl
 C...
       IF(NP.EQ.0) THEN
         IER=1
@@ -2082,7 +2090,7 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
         END DO
 c...
 c...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
-C...    print *,' nen,ier,mt0',nen,ier,mt0
+c...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
@@ -2115,6 +2123,7 @@ C*        -- Skip to the end of section
         END IF
 C...
         print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
+c...    print *,'                    izap0',izap0
 C...
 C*
         IF(MFJ.GT.4) GO TO 500
@@ -2132,6 +2141,7 @@ C*      -- Angular distributions are allowed for two-body reactions
      &     (IZAP0.EQ.2004 .AND. (MTJ.EQ.2 .OR. 
      &                          (MTJ.GE.800 .AND. MTJ.LE.849) ) ))THEN
 C*        -- Proceed with processing     
+c...      print *,'              Proceed with processing'
         ELSE
 C*        -- Skip to the end of section
            DO WHILE(MTJ.GT.0)
@@ -2144,7 +2154,7 @@ C*        -- Prepare cross sections at fixed angle with MF4 given
           LTT1=L2
           MT  =MT0-10000*(MT0/10000)
 c...
-c...      print *,'Read angular distributions for MT/LTT',MT,LTT1
+c...      print *,'Read angular distrib. for MT/LTT',MT,LTT1
 c...
           IF(LTT1.EQ.0) THEN
 C*          -- Distribution is isotropic - no action needed
@@ -2153,6 +2163,9 @@ C*          -- Distribution is isotropic - no action needed
           ELSE IF(LTT1.EQ.2) THEN
 C*          -- Read incident energy definitions
             CALL RDHEAD(LEF,MAT,MFJ,MTJ,C1,C2,LI,LCT,N1,N2,IER)
+c...
+c...        print *,'LCT',LCT
+c...
             CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
 C*          -- Split the work array RWO on function and argument
 C*            LXE - argument
@@ -2175,6 +2188,9 @@ C*            -- Neutron mass, projectile mass, charge, target charge
               CALL PROMAS(IZAP0,AM1)
               ZZI=IZAP0/1000
               ZZT=NINT(ZA)/1000
+c...
+c...          print *,'izap0,zzi,zzt,am1,awn',izap0,zzi,zzt,am1,awn,awr
+c...
 C*            -- Constants (Table 1, Appendix H, ENDF-102 manual)
               PCP=  6.58211889D-16
               RAL=137.03599976D+00
@@ -2201,8 +2217,9 @@ C...          IF(NRP.GT.1)
 C... &          PRINT *,' WARNING - Multiple angle interp.ranges'
 C... &                 ,' for MF 4, MT',MT
 C...      
+              TJAC=1
               IF(LCT.EQ.2) THEN
-C*              -- Convert to CM cosine of scattering
+C*              -- Convert input Lab cosine of scattering to CM
 C*                 (take the larger root)
                 DQI=DBLE(QI)
                 DEI=DBLE(EI2)
@@ -2212,6 +2229,9 @@ C*                 (take the larger root)
                 CC1=2*BETA*(1-AIN*AIN)
                 CC0=1-AIN*AIN*(1+BET2)
                 CALL ROOTSQ(CC2,CC1,CC0,XX1,XX2,IER)
+C...
+C...            print *,'x1,x2,a,ad,b',xx1,xx2,aa,aad,beta,ain
+C...
                 IF(IER.EQ.1 .AND. XX2.LT.SMALL) THEN
 C*                -- Suppress error message for small imaginary part
                   IER=0
@@ -2245,10 +2265,17 @@ C*                -- Suppress error message for energies near threshold
                 END IF
                 IF(ACS.LT.-1) ACS=-1
                 IF(ACS.GT. 1) ACS= 1
+C*              -- Jacobian of CM-Lab transformation d_omega/d_mu
+                TJAC=BET2*(BETA+ACS)/(BET2+1+2*BETA*ACS)**1.5
               END IF
               RWO(LXE-1+IE)=EI2
               RWO(LXX-1+IE)=FINTXS(ACS,RWO(LAA),RWO(LAF)
-     &                            ,NEP1,INR(NM),IER1)
+     &                            ,NEP1,INR(NM),IER1) / TJAC
+C...
+C...          print *,'E,Ain,Ang,x1,x2,J,Dst,XS',EI2
+C... &               ,ain,acs,xx1,xx2,TJAC,RWO(LXX-1+IE)
+C... &               ,FINTXS(EI2,ENR,DXS,NEN,2,ier1)
+C...
             END DO
 C*          --Define union grid of cross sections and yields at LAA
             CALL UNIGRD(NEN,ENR,NE,RWO(LXE),NP,RWO(LAA),KX)
@@ -3178,6 +3205,9 @@ C*          Lab cosine of scattering: equation (E.11)
             XLB=(1+BET*XCM)/QBT
 C*          Jacobian of the transformation dXCM/dXLB (derivative of E.11)
             DCM=(SBT*QBT)/(BET*BET*(BET+XCM))
+c...
+c...        print *,'xcm,xlb,xsd,jcb',xcm,xlb,dxs(i),dcm
+c...
           ELSE
 C*          Lab co-ordinate system
             XLB=ENR(I)
@@ -3369,10 +3399,10 @@ Case: Interpolate outgoing particle energy distributions
      1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
         ELSE
 Case: Interpolate distrib. to a given outgoing particle energy
-
-            print *,'lxx 15 ',lxx
-            if(lxx.lt.0) stop
-
+c...
+c...        print *,'lxx 15 ',lxx
+c...        if(lxx.lt.0) stop
+c...
           EA=RWO(LXE)
           EB=RWO(LXE-1+NF)
           CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
@@ -3780,7 +3810,7 @@ C*      -- File MF13 has same structure as MF12/LO=1 but contains XS
         L1=1
       END IF
 c...
-      print *,'mf,mt,kea',mf,mt,kea
+c...  print *,'mf,mt,kea',mf,mt,kea
 c...
       IF(KEA.NE.2) GO TO 140
       LO=L1
