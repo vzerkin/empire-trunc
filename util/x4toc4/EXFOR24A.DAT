@@ -57,6 +57,7 @@ SYSTEM FLAG THE EXFOR TITLE DATA-CM HAS A 6 IN COLUMN 30).                     1
 INITIAL ENERGY                                                                 1
                                                                                1
 EN            1  999    1    1
+KT-K          1  999    1    1
 EN-MEAN       1  999    1    0
 Add operation "HALVE" to change full-width to uncertainty (A.Trkov, 08/09)     1
 EN-RSL-FW     1  999    2   12

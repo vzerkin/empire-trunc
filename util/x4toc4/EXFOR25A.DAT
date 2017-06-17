@@ -131,7 +131,10 @@ B/EV       B/EV        1.0        0.0                 0
 B/KEV      B/EV        1.00000- 3 0.0                 0
 B/MEV      B/EV        1.00000- 6 0.0                 0
                                                  Added: A. Trkov, 7 Mar 2012   1
-PT/FIS/MEV PT/FIS/EV   1.00000+ 6 0.0                 0
+PT/FIS/MEV PT/FIS/EV   1.00000+ 6 0.0                 7
+                                                 Added: A. Trkov, 21 May 2017  1
+PD/FIS/MEV PRD/FIS/EV  1.00000+ 6 0.0                 7
+PT/FIS     PT/FIS      1.00000    0.0                 7
                                                                                1
 DOUBLE DIFFERENTIAL DISTRIBUTIONS                                              1
                                                                                1
@@ -155,6 +158,9 @@ TEMPERATURE                                                                    1
 DEG-K      DEG-K       1.0        0.0                 0
 DEG-C      DEG-K       1.0        273.16              0
 DEG-F      DEG-K       0.555556   255.382             0
+                                                                               1
+ENERGY IN TERMS OF K*T                                                         1
+K          EV          8.617342-5 0.0                 0
                                                                                1
 TIME                                                                           1
                                                                                1
