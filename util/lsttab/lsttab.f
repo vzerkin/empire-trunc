@@ -363,7 +363,9 @@ C* Log the start of request
       WRITE(LTT,93) ' Scaling factor                       : ',SCL
       WRITE(LTT,95) ' Emitted particle ZA                  : ',IZP
       WRITE(LTT,96) COM2
-      write(ltt,*) '"',c84(1:60),'"'
+C...
+C...  write(ltt,*) '"',c84(1:60),'"'
+C...
 C*
       IF(C84(55:62).EQ.'        '  ) DEG=-2
       IF(C84(63:72).EQ.'          ') EOU=-2
@@ -431,130 +433,135 @@ C*          Request energy spectra
       END IF
 C*
 C* Extract the data from the ENDF file
-      DO 66 M=1,NEN
-      ICUR=0
-      ZA =ZA0
-      MTE=MT
-c... Redefinition no longer needed
-c...  IF(MT.EQ.9000) MTE=5
-      IF(NEN.GT.1) THEN
-        WRITE(LLG,91) ' ------------------------------ File  : ',FLEF(M)
-        WRITE(LTT,91) ' ------------------------------ File  : ',FLEF(M)
-      END IF
-      OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD',ERR=80)
-      NUC=0
-      EL1=ELV
-      PA1=PAR
-      ZEL(1)=ZA
-      PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,ELV,PAR'
-     1          ,nint(ZA),MF,MT,nint(zap),KEA,EIN,EL1,PA1
-      CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PA1,EP6
-     1           ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
-      IF(NP.LE.0) THEN
-        PRINT *,'LSTTAB ERROR - No matching curves for',NINT(ZA)
-        PRINT *,'       mt,kea,ein,par',mt,kea,ein,par
-        WRITE(LLG,95)' LSTTAB ERROR - No matching curve for ZA',NINT(ZA)
-        WRITE(LLG, *)' zap,mf,mt,kea,ein,par',izp,mf,mt,kea,ein,par
-      ELSE
-        PRINT *,'DXSELM No.of points',NP
-      END IF
-      CLOSE(UNIT=LEF)
-C* Prepare the ENDF comment header for the PLOTTAB curves file
-      IF(COM(M).EQ.BLNK) THEN
-        MAT =IZ*100+(IA-100*(IA/100))
-        CALL COMCUR(MAT,MF,MT,KEA,EIN,PAR,COM1)
-      ELSE
-        COM1=COM(M)
-      END IF
-      IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
-      WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
-C* Normalise fission spectra if needed to plot ratio to Maxwellian
-      FSP=1
-c...
-c...  print *,'izp,mf,mt,ektnrm,scl',izp,mf,mt,ektnrm,scl
-c...      ina=2
-c...      exo=5.01e6
-c...      fxo=fintxs(exo,es,sg,Np,INA,IER)
-c...      print *,'    Value at',exo,' eV is',fxo
-c...
-      IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
-C*      -- SSP is the integral over experimental points
-C*      -- SSG is the integral of Maxwellian on the same E-grid
-        SSP=0
-        SSG=0
-        E2 =ES(1)
-        F2 =SG(1)
-        G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
-        DO I=2,NP
-          E1 = E2
-          F1 = F2
-          G1 = G2
-          E2 = ES(I)
-          F2 = SG(I)
-          G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
-          SSP=SSP + (E2-E1)*(F2+F1)/2
-          SSG=SSG + (E2-E1)*(G2+G1)/2
+      DO M=1,NEN
+        ICUR=0
+        ZA =ZA0
+        MTE=MT
+c...    -- Redefinition no longer needed
+c...    IF(MT.EQ.9000) MTE=5
+        IF(NEN.GT.1) THEN
+          WRITE(LLG,91) ' ------------------------------ File  : '
+     &                 ,FLEF(M)
+          WRITE(LTT,91) ' ------------------------------ File  : '
+     &                 ,FLEF(M)
+        END IF
+        OPEN (UNIT=LEF,FILE=FLEF(M),STATUS='OLD',ERR=80)
+        NUC=0
+        EL1=ELV
+        PA1=PAR
+        ZEL(1)=ZA
+        PRINT *,'DXSELM: ZA,MF,MT,ZAP,KEA,EIN,ELV,PAR'
+     1            ,nint(ZA),MF,MT,nint(zap),KEA,EIN,EL1,PA1
+        CALL DXSELM(LEF,NUC,ZEL,FRC,ZAP,MF ,MTE,KEA,EIN,PA1,EP6
+     1             ,ES,SG,UG,RWO,NP,MXP,MXR,LLG,EL1)
+        IF(NP.LE.0) THEN
+          PRINT *,'LSTTAB ERROR - No matching curves for',NINT(ZA)
+          PRINT *,'       mt,kea,ein,par',mt,kea,ein,par
+          WRITE(LLG,95) ' LSTTAB ERROR - No matching curve for ZA'
+     &                 ,NINT(ZA)
+          WRITE(LLG, *)' zap,mf,mt,kea,ein,par',izp,mf,mt,kea,ein,par
+        ELSE
+          PRINT *,'DXSELM No.of points',NP
+        END IF
+        CLOSE(UNIT=LEF)
+C*      -- Prepare the ENDF comment header for the PLOTTAB curves file
+        IF(COM(M).EQ.BLNK) THEN
+          MAT =IZ*100+(IA-100*(IA/100))
+          CALL COMCUR(MAT,MF,MT,KEA,EIN,PAR,COM1)
+        ELSE
+          COM1=COM(M)
+        END IF
+        IF(EL1.GT.0) WRITE(COM2(31:40),'(''El'',1P,E7.2E1,1X)') EL1
+        WRITE(COM2(41:58),'('' P'',I6,'' Out'',I6)') IZI,IZP
+C*      -- Normalise fission spectra to plot ratio to Maxwellian
+        FSP=1
+c...    
+c...    print *,'izp,mf,mt,ektnrm,scl',izp,mf,mt,ektnrm,scl
+c...        ina=2
+c...        exo=5.01e6
+c...        fxo=fintxs(exo,es,sg,Np,INA,IER)
+c...        print *,'    Value at',exo,' eV is',fxo
+c...    
+        IF(MF.EQ.5) THEN
+          IF(MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+C*          -- SSP is the integral over points as given in the file
+C*          -- SSG is the integral of Maxwellian on the same E-grid
+            SSP=0
+            SSG=0
+            E2 =ES(1)
+            F2 =SG(1)
+            G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
+            DO I=2,NP
+              E1 = E2
+              F1 = F2
+              G1 = G2
+              E2 = ES(I)
+              F2 = SG(I)
+              G2 =(2/EKTNRM)*SQRT(E2/(PI*EKTNRM))*EXP(-E2/EKTNRM)
+              SSP=SSP + (E2-E1)*(F2+F1)/2
+              SSG=SSG + (E2-E1)*(G2+G1)/2
+            END DO
+C...        IF(SSP.GT.0) FSP=1/SSP
+            IF(SSP.GT.0) FSP=SSG/SSP
+c...      
+            print *,'  PFNS re-normalisation to Maxwellian',FSP
+          else
+            print *,'  No PFNS ratio to Maxwellian'
+c...      
+          END IF
+        END IF
+C*      -- Write the data to the PLOTTAB curves file
+        WRITE(LCU,99) COM1,COM2
+        IUF=0
+        YMX=-1.E32
+        YMN=-YMX
+        YPK= 0
+        YY0=SG(1)*SCL
+        YY1=YY0
+        DO I=1,NP
+C*        -- Suppress printing negative or zero points
+          EE=ES(I)
+          IF(KEA.EQ.1) THEN
+            IF(ABS(EE).LE.1) THEN
+              EE=ACOS(EE)*180/PI
+            ELSE
+              PRINT *,'ERROR - Cosine',ee
+            END IF
+          END IF
+          IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
+          SG(I)=SG(I)*FSP
+          UG(I)=UG(I)*FSP
+          FF=SG(I)*SCL
+          UF=UG(I)*SCL
+          IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
+            FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
+            FF=SG(I)/FC
+            UF=UG(I)/FC
+          END IF
+          IF(MF.EQ.6 .AND. FF.NE.0) THEN
+C*          -- Determine range of the ordinate
+            IF(FF.GT.YMX) YMX=FF
+            IF(FF.LT.YMN) YMN=FF
+C*          -- Determine height of the last peak
+            IF(FF.GT.YY0) YPK=FF
+C*          -- Determine depth of the last dip
+            IF(YY1.GT.YY0 .AND. FF.GT.YY0) YDP=YY0
+C*      
+            YY1=YY0
+            YY0=FF
+          END IF
+          IF(UF.GT.0) IUF=1
+          IF(SG(I).GT.0) THEN
+            IF(IUF.NE.0) THEN
+              WRITE(LCU,94) EE,FF,UF
+            ELSE
+              WRITE(LCU,94) EE,FF
+            END IF
+          END IF
         END DO
-C...    IF(SSP.GT.0) FSP=1/SSP
-        IF(SSP.GT.0) FSP=SSG/SSP
-c...
-        print *,'  PFNS normalisation factor',FSP
-      else
-        print *,'  No PFNS normalisation'
-c...
-      END IF
-C* Write the data to the PLOTTAB curves file
-      WRITE(LCU,99) COM1,COM2
-      IUF=0
-      YMX=-1.E32
-      YMN=-YMX
-      YPK= 0
-      YY0=SG(1)*SCL
-      YY1=YY0
-      DO I=1,NP
-C* Suppress printing negative or zero points
-        EE=ES(I)
-        IF(KEA.EQ.1) THEN
-          IF(ABS(EE).LE.1) THEN
-            EE=ACOS(EE)*180/PI
-          ELSE
-            PRINT *,'ERROR - Cosine',ee
-          END IF
-        END IF
-        IF(EE.GT.0 .AND. EE.LT.1.E-9) EE=1.E-9
-        SG(I)=SG(I)*FSP
-        UG(I)=UG(I)*FSP
-        FF=SG(I)*SCL
-        UF=UG(I)*SCL
-        IF(MF.EQ.5 .AND. MT.EQ.18 .AND. EKTNRM.GT.0) THEN
-          FC=(2/EKTNRM)*SQRT(EE/(PI*EKTNRM))*EXP(-EE/EKTNRM)
-          FF=SG(I)/FC
-          UF=UG(I)/FC
-        END IF
-        IF(MF.EQ.6 .AND. FF.NE.0) THEN
-C*        -- Determine range of the ordinate
-          IF(FF.GT.YMX) YMX=FF
-          IF(FF.LT.YMN) YMN=FF
-C*        -- Determine height of the last peak
-          IF(FF.GT.YY0) YPK=FF
-C*        -- Determine depth of the last dip
-          IF(YY1.GT.YY0 .AND. FF.GT.YY0) YDP=YY0
-C*
-          YY1=YY0
-          YY0=FF
-        END IF
-        IF(UF.GT.0) IUF=1
-        IF(SG(I).GT.0) THEN
-          IF(IUF.NE.0) THEN
-            WRITE(LCU,94) EE,FF,UF
-          ELSE
-            WRITE(LCU,94) EE,FF
-          END IF
-        END IF
+        WRITE(LCU,91) ' '
+        IF(NP.GT.0) ICUR=ICUR+1
       END DO
-      WRITE(LCU,91) ' '
-      IF(NP.GT.0) ICUR=1
-   66 CONTINUE
 C*
 C* Extract the data from the C4 file
    80 CONTINUE
@@ -562,6 +569,9 @@ C* Extract the data from the C4 file
       WRITE(LTT,91) ' ------------------------------ EXFOR   '
 C* Check if fission spectra are to be processed
       IF(MF0.EQ.5 .AND. MT.EQ.18 .AND. ICUR.GT.0) THEN
+c...  IF( ICUR.GT.0 .AND.
+c... &   (MF0.EQ. 5 .OR. MF0.EQ.6) .AND.
+c... &   (MT .EQ.18 .OR. MT .GE.9000) ) THEN
         LLL=LTM
         OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
         WRITE(LLG,91) ' NOTE: Data normalised to the last curve'
@@ -588,7 +598,7 @@ C* Check if fission spectra are to be processed
       ELSE
         PRINT *,'DXSEXF No.of points',NPP
         IF(LLL.EQ.LTM) THEN
-C*      -- Special processing of the fission spectra written to
+C*         -- Special processing of the fission spectra written to
 C*         the scratch unit LTM:
 C*         Renormalise each set of points to the average of the
 C*         last curve, if present
@@ -602,10 +612,10 @@ C*         last curve, if present
             READ (COM2,94) EP(KP),DA(KP),DB(KP),FP(KP),FA(KP),FB(KP)
             READ (LLL,96,END=84) COM2
           END DO
-C* Write the header of the experimental data
+C*        -- Write the header of the experimental data
    84     WRITE(LPN,124) COML
           IF(KP.GT.0) THEN
-C*        -- Integrate the function in the range of experimental data
+C*          -- Integrate the function in the range of experimental data
             EA=EP(1)
             EB=EP(KP)
             SC=YTGPNT(NP,ES,SG,EA,EB)
