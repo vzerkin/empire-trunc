@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-06-17 23:26:42 +0200 (Sa, 17 Jun 2017) $
+Ccc   * $Date: 2017-06-19 10:49:14 +0200 (Mo, 19 Jun 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -639,6 +639,7 @@ C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 700
 C...  IF(NT6.LE.0) GO TO 880
       JT4=0
+      JT0=0
       JT6=0
 C*
 C* Process angular distribution data
@@ -651,11 +652,15 @@ C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
       MT4=0
       JT4=0
+      JT0=0
       MT6=IWO(LBI-1+JT6)
 C*    -- Skip ground state for compound elastic
       IF((IZI.EQ.   1 .AND. MT6.EQ. 91) .OR.
      &   (IZI.EQ.1001 .AND. MT6.EQ.649) .OR.
-     &   (IZI.EQ.2004 .AND. MT6.EQ.849) ) JT4=1
+     &   (IZI.EQ.2004 .AND. MT6.EQ.849) ) THEN
+       JT4=1
+       JT0=1
+      END IF
 c...
 c...  print *,'mt6,jt4',mt6,jt4
 c...
@@ -726,7 +731,7 @@ c...
 C* Write the ENDF file-4 data
       MT4=2
   420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
-     1           ,MT4,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
+     1           ,MT4,JT0,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
       IF(MT4.GT.0) THEN
         WRITE(LTT,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
         WRITE(LER,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
@@ -6789,14 +6794,14 @@ C*
       
       
       SUBROUTINE WRIMF4(LOU,LTT,LER,MTH,QQM,QQI,NXS,MT6,RWO,EMIN
-     1                 ,MT,LVL,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
+     1                 ,MT,LV0,LVL,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=1100)
       CHARACTER*8  PTST
       DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INR(1)
       DIMENSION    QQ(MXQ)
-C* Tolerance limit for matching energy levels (eV)
+C* Rel. tolerance limit for matching energy levels (eV at 1 MeV)
 C... This is a tricky one!!!!
 c...  DATA DLVL/1.E2/
 C...  DATA DLVL/3.E2/
@@ -7016,12 +7021,12 @@ c...      end if
 c...
           IF(NA.GT.0) CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
         ELSE
-C*        --Find the discrete level LVL and check that EOUT matches
-C*          (Linearly interpolate angular distributions to EOU)
+C*        --Match the discrete level LVL and check that EOUT matches
           IF(IE.GT.NE1)
      &      STOP 'EMPEND ERROR - Level interp.not supported for tabular'
-          IEP =1
-C*        -- First level IEP=1 is the ground state - start from second
+C*        -- First level IEP=1 is the ground state
+C*           Check if it needs to be skipped (projectile=ejectile)
+          IEP =LV0
    32     IEP =IEP+1
           L1  =L2
           E1  =E2
@@ -7032,59 +7037,74 @@ c...
 c...      print *,'iep,nep,na1,EIN,EOU,e1,e2'
 c... &            ,iep,nep,na1,EIN,EOU,e1,e2
 c...      if(nep.gt.3) stop
-c...    
+c...
+C...      *** REDO THE LEVEL-MATCHING ALGORITHM
+C...      *** Replace EOUT matching by the sequential position, assuming
+C...      *** no levels are missing
+C*
 C*        -- Read until IEP matches LVL+1 (LVL=1 is ground)
+C*           Match the levels by their consecutive sequence (NEW)
 c...
-c...        PRINT *,'IEP-1,LVL,EIN,E1,E2,EOU',IEP-1,LVL,EIN,E1,E2,EOU
+c...      PRINT *,'IEP-1,LVL,EIN,E1,E2,EOU',IEP-1,LVL,EIN,E1,E2,EOU
 c...
-C*        -- Match the levels by their consecutive sequence (NEW)
           IF(IEP.LT.LVL+1 .AND. IEP.LT.NEP) GO TO 32
-C...
-C...      -- Match levels by outgoing energy (OLD)
-C...      -- Read until EOU is enclosed by E1 and E2
-C...      IF( E2.LT.EOU .AND. IEP.LT.NEP) GO TO 32
-c...
-c...      if(-eou.gt.2.40e6 .and. -eou.lt.2.41e6) then
-c...        print *,'EIN,EOU,e1,e2,AWR,AWI,AWP,QQI'
-c... &              ,EIN,EOU,e1,e2,AWR,AWI,AWP,QQI(IT)
-c...      end if
-c...
-C*        -- Check the closest
-          DE1=ABS(EOU-E1)
-          DE2=ABS(EOU-E2)
-          DEE=MIN(DE1,DE2)
+          DEE=ABS(EOU-E2)
+C*        -- Check for a strong mismatch in the calculated E_out
           IF(DEE.GT.TST .AND. NA1.GT.1) THEN
-C*        -- No matching levels, linearly interpolate
-C*           (except if isotropic)
-            CALL FLDINT(NA1,E1,RWO(L1+LSHF),E2,RWO(L2+LSHF),EOU,QQ)
-            WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
-            WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
-C...
-C...        print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
-C... 1             ,QQM(IT)-QQI(IT)
-C...        print *,e1,(rwo(l1+j),j=1,NA1)
-C...        print *,e2,(rwo(l2+j),j=1,NA1)
-C...        print *,'de1,de2',de1,de2
-C...        read (*,'(a1)') yes
-C...
-C...        print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
-C...        STOP
-C...
-          ELSE IF(DE1.LT.DE2) THEN
-C*          -- Move lower point
-            CALL FLDMOV(NA1,RWO(L1+LSHF),QQ)
-c...
-C...        print *,'MatchL MT,Ein,Eou,E1,Elvl',MT,EIN,EOU,E1
-C... 1             ,QQM(IT)-QQI(IT)
-c...
-          ELSE
-C*          -- Move upper point
-            CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
-c...
-c...        print *,'MatchU MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
-c... 1             ,QQM(IT)-QQI(IT)
-c...
+            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),E2,EOU
+            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),E2,EOU
           END IF
+C*        -- Move coefficients to the output field
+          CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
+C...
+C...C...      -- Match levels by outgoing energy (OLD coding)
+C...C...      -- Read until EOU is enclosed by E1 and E2
+C...C*          (Linearly interpolate angular distributions
+C...C*           to EOU in case of a large mismatch)
+C...C...      IF( E2.LT.EOU .AND. IEP.LT.NEP) GO TO 32
+C...c...
+C...c...      if(-eou.gt.2.40e6 .and. -eou.lt.2.41e6) then
+C...c...        print *,'EIN,EOU,e1,e2,AWR,AWI,AWP,QQI'
+C...c... &              ,EIN,EOU,e1,e2,AWR,AWI,AWP,QQI(IT)
+C...c...      end if
+C...c...
+C...C*        -- Check the closest
+C...          DE1=ABS(EOU-E1)
+C...          DE2=ABS(EOU-E2)
+C...          DEE=MIN(DE1,DE2)
+C...          IF(DEE.GT.TST .AND. NA1.GT.1) THEN
+C...C*        -- No matching levels, linearly interpolate
+C...C*           (except if isotropic)
+C...            CALL FLDINT(NA1,E1,RWO(L1+LSHF),E2,RWO(L2+LSHF),EOU,QQ)
+C...            WRITE(LTT,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+C...            WRITE(LER,910) 4,MT,EIN,QQM(IT)-QQI(IT),EOU,E1,E2
+C...C...
+C...C...        print *,'Inter MT,Ein,Eou,E1,E2,Elvl',MT,EIN,EOU,E1,E2
+C...C... 1             ,QQM(IT)-QQI(IT)
+C...C...        print *,e1,(rwo(l1+j),j=1,NA1)
+C...C...        print *,e2,(rwo(l2+j),j=1,NA1)
+C...C...        print *,'de1,de2',de1,de2
+C...C...        read (*,'(a1)') yes
+C...C...
+C...C...        print *,'AWR,AWI,AWP,QI',AWR,AWI,AWP,QQI(IT)
+C...C...        STOP
+C...C...
+C...          ELSE IF(DE1.LT.DE2) THEN
+C...C*          -- Move lower point
+C...            CALL FLDMOV(NA1,RWO(L1+LSHF),QQ)
+C...c...
+C...c...        print *,'MatchL MT,Ein,Eou,E1,Elvl',MT,EIN,EOU,E1
+C...c... 1             ,QQM(IT)-QQI(IT),de1,de2
+C...c...
+C...          ELSE
+C...C*          -- Move upper point
+C...            CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
+C...c...
+C...c...        print *,'MatchU MT,Ein,Eou,E2,Elvl',MT,EIN,EOU,E2
+C...c... 1             ,QQM(IT)-QQI(IT),de1,de2
+C...c...
+C...          END IF
+C...
         END IF
         IF(LANG.GT. 10) GO TO 38
         IF(IE  .GT.NE1) GO TO 36
@@ -7242,6 +7262,10 @@ C* All discrete levels processed - nothing to write
      &      ,I3,I4,1P,E10.3E1,2E12.5E1/
      &       '                  Distribution interpolated between   '
      &      ,2E12.5E1)
+  911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Eout'
+     &      ,I3,I4,1P,E10.3E1,2E12.5E1/
+     &       '                  Calculated : ',35X
+     &       , E12.5E1)
       END
       
       
