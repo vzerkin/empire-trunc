@@ -85,7 +85,7 @@ else ifeq ($(FC),ifort)
 else ifeq ($(FC),af95)
  
   #---------------------------
-  #----Absoft FORTRAN compiler
+  #----Absoft-16.0 FORTRAN compiler
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft
@@ -140,6 +140,9 @@ all:
 
 optmand: $(OBJF) 
 	$(FC) $(FFLAGS) -o optmand $(OBJF) $(LIBS)
+
+dbg:  
+	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 clean:
 	rm -f *.o *.mod
