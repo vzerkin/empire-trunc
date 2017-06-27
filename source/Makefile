@@ -1,12 +1,12 @@
-#$Rev: 4909 $
-#$Author: gnobre $
-#$Date: 2017-04-11 17:48:21 +0200 (Di, 11 Apr 2017) $
+#$Rev: 4957 $
+#$Author: mherman $
+#$Date: 2017-06-27 15:41:29 +0200 (Di, 27 Jun 2017) $
 
 # set default compilers:
 
 CC     =  gcc
-#FC   =  gfortran
-FC  =  ifort
+FC   =  gfortran
+#FC  =  ifort
 #FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
@@ -32,12 +32,12 @@ ifeq ($(FC),gfortran)
   FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp
   # -pg shoudl be added for profiling
   #----flags for ECIS
   EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -76,19 +76,19 @@ else ifeq ($(FC),ifort)
 else ifeq ($(FC),af95)
  
   #---------------------------
-  #----Absoft FORTRAN compiler
+  #----Absoft-16.0 FORTRAN compiler
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft
-  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64
+  LIBS =  -lU77 -lV77 -L/Applications/Absoft16.0/lib64
   #----flags for production
   FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
-  DFLAGS = -O0 -m64 -g -s -Rb -Rs -Rc
+  DFLAGS = -O0 -m64 -g -s -Rb -Rs -Rc -cpp
   #----flags for ECIS
   EFLAGS = -O2 -march=host -s -m64
   #----flags for OPTMAN
-  OFLAGS = -O2 -march=host -s -m64
+  OFLAGS = -O2 -march=host -s -m64 -cpp
 
 else ifeq ($(FC),pfg90)
  
