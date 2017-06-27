@@ -1,6 +1,6 @@
-!cc   * $Rev: 4926 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2017-04-20 00:00:50 +0200 (Do, 20 Apr 2017) $
+!cc   * $Rev: 4956 $
+!cc   * $Author: mherman $
+!cc   * $Date: 2017-06-27 15:36:29 +0200 (Di, 27 Jun 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -2861,7 +2861,24 @@ C
               ISIsom(1,Nnuc) = 0
             ENDIF
 
-!           Any excitaed state  parity set
+!           Any excitaed state  parity and/or spin set
+            IF (XJLv(ilv,Nnuc).LT.0.0D0) THEN
+               WRITE (8,'(''  WARNING:'')')
+               WRITE (8,'(''  WARNING: Element ='',A5,2x,2HZ=,I3)')
+     &                    chelem, izr
+               WRITE (8,'(''  WARNING: excited state No. '',I3,
+     &          '' has neither parity nor spin '')') ilv  
+!              Assuming lowest possible spin   
+               XJLv(ilv,Nnuc) = 0.d0
+               IF (A(Nnuc) - 2.0*INT(A(Nnuc)/2.0).GT.0.01D0)
+     &            XJLv(ilv,Nnuc) = 0.5d0
+!              Assuming natural parity; for odd A it is assumed that
+!              l=INT(l+s)=INT(J) while J=l-s case is ignored
+               LVP(ilv,Nnuc) = (-1)**INT(XJLv(ilv,Nnuc))
+               WRITE (8, 
+     &         '(''  WARNING: assuming spin and parity '',F4.1,I3)')  
+     &         XJLv(ilv,Nnuc), LVP(ilv,Nnuc)                       
+            ENDIF
             IF (LVP(ilv,Nnuc).EQ.0) THEN
                IF (IOUT.GE.5) THEN
                  WRITE (8,'(''  WARNING:'')')
