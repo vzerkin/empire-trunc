@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4925 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-19 23:38:45 +0200 (Mi, 19 Apr 2017) $
+Ccc   * $Rev: 4955 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-06-27 15:31:58 +0200 (Di, 27 Jun 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -743,8 +743,8 @@ C
              ENDDO 
 
              IF(csum>0) THEN
-               WRITE (8,'(1X,/,10X,''Discrete level population including 
-     & continum contribution'')')
+               WRITE (8,'(1X,/,10X,''Discrete level population after gam
+     &ma cascade from continum'')')
                WRITE (8,'(1X,/,10X,40(1H-),/)')
 C              if(nnuc.eq.1) then
 C                WRITE (12,'(1X,/,10X,''Discrete level population includ
@@ -763,7 +763,7 @@ C              endif
      &               LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc)
                  ELSE
 99071              FORMAT (I12,F10.6,I5,F8.1,G15.6,A7)
-                   WRITE (8,99071) il, ELV(il,nnuc),LVP(il,nnuc), 
+                   WRITE (8,99071) il, ELV(il,nnuc),LVP(il,nnuc),
      &                    XJLv(il,nnuc), POPlv(il,nnuc),' ISOMER'
                  ENDIF
 
@@ -785,10 +785,10 @@ C----------------Check for the number of branching ratios
      &               ' WARNING: Branching ratios for level ', il,' in ',
      &               INT(A(nnuc)), '-', SYMb(nnuc), ' are missing'
 
-                 WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
-     &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
-     &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
-     &                          ,ib = 1,nbr)
+!                 WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+!     &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
+!     &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
+!     &                          ,ib = 1,nbr)
 
                  WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
      &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
