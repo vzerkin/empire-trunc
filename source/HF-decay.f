@@ -1,6 +1,7 @@
-Ccc   * $Rev: 4955 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-06-27 15:31:58 +0200 (Di, 27 Jun 2017) $
+$DEBUG
+Ccc   * $Rev: 4961 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-06-29 00:04:21 +0200 (Do, 29 Jun 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -182,11 +183,13 @@ C-------------Check for the number of branching ratios
      &                     ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                     ' are missing'
 
-              WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+C             WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+              WRITE ( 8,99065) il, ELV(il,nnuc), LVP(il,nnuc),
      &          XJLv(il,nnuc), popl, nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
               
-                  WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+C             WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+              WRITE (12,99065) il, ELV(il,nnuc), LVP(il,nnuc),
      &          XJLv(il,nnuc), popl, nbr,
      &          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc),ib = 1,nbr)
 
@@ -751,8 +754,10 @@ C                WRITE (12,'(1X,/,10X,''Discrete level population includ
 C    &ing continum contribution'')')
 C                WRITE (12,'(1X,/,10X,40(1H-),/)')
 C              endif
-               WRITE(12,'(1X,/,10X,''**Discrete level popul. including c
-     &ontinum contribution'')')
+C              WRITE(12,'(1X,/,10X,''**Discrete level popul. including c
+C    &ontinum contribution'')')
+               WRITE(12,'(1X,/,10X,''**Discrete level population after g
+     &amma cascade from continum'')')
                WRITE (12,'(1X,/,10X,40(1H-),/)')
 
                nbr_icc = 0
@@ -763,7 +768,7 @@ C              endif
      &               LVP(il,nnuc), XJLv(il,nnuc), POPlv(il,nnuc)
                  ELSE
 99071              FORMAT (I12,F10.6,I5,F8.1,G15.6,A7)
-                   WRITE (8,99071) il, ELV(il,nnuc),LVP(il,nnuc),
+                   WRITE (8,99071) il, ELV(il,nnuc),LVP(il,nnuc), 
      &                    XJLv(il,nnuc), POPlv(il,nnuc),' ISOMER'
                  ENDIF
 
@@ -785,12 +790,14 @@ C----------------Check for the number of branching ratios
      &               ' WARNING: Branching ratios for level ', il,' in ',
      &               INT(A(nnuc)), '-', SYMb(nnuc), ' are missing'
 
-!                 WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
-!     &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
-!     &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
-!     &                          ,ib = 1,nbr)
+C                WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+                 WRITE ( 8,99065) il, ELV(il,nnuc), LVP(il,nnuc),
+     &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
+     &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
+     &                          ,ib = 1,nbr)
 
-                 WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+C                WRITE (12,99070) il, ELV(il,nnuc), LVP(il,nnuc),
+                 WRITE (12,99065) il, ELV(il,nnuc), LVP(il,nnuc),
      &                          XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &                          (NINT(BR(il,ib,1,nnuc)),BR(il,ib,2,nnuc)
      &                          ,ib = 1,nbr)
@@ -825,10 +832,11 @@ C------------------Check for the number of branching ratios
      &              XJLv(il,nnuc), POPlv(il,nnuc), nbr,
      &              (NINT(BR(il,ib,1,nnuc)),BR(il,ib,3,nnuc),ib = 1,nbr)
 C99065            FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
-99065              FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,E11.4),:/,
-     &                 (53X,7(I4,E11.4)))
+C99065              FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,E11.4),:/,
+C    &                 (53X,7(I4,E11.4)))
+99065             FORMAT (I12,F10.6,I5,F8.1,1PE15.6,I3,7(I4,E11.5E1),:/,
+     &                 (53X,7(I4,E11.5E1)))
                  ENDDO
-
                ENDIF ! nbr_icc>0
 
                WRITE (8,'(1X,/,10X,40(1H-),/)')
@@ -1538,7 +1546,8 @@ C99029 FORMAT (/' ',46x,'INELASTIC DIFFERENTIAL CROSS-SECTION',/,
 
 C
 C99070 FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
-99070 FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,F7.4),:/,(53X,7(I4,F7.4)))
+C99070 FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,F7.4),:/,
+C     & (53X,7(I4,F7.4)))
 99075 FORMAT (1X,F5.2,12E10.3)
       END
       SUBROUTINE GET_RECOIL(Ke,Nnuc)
@@ -1742,7 +1751,8 @@ C
         ENDIF
       ENDDO
 
-      IF(csum.LE.0.d0) RETURN 
+      IF(csum.LE.CSMinim*0.001d0) RETURN 
+C     IF(csum.LE.0.d0) RETURN 
 
 C     ilast = MIN(ilast + 1,NDEX)
       ilast = MIN(ilast + 1,NDEREC)
@@ -1909,7 +1919,10 @@ C    & write(*,*) '  Spectrum of recoils  ',
 C    &       React, 'ZAP=', IZA(Nnuc), ' csum=', csum
 
 C     IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
-      IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
+C     IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
+      IF(csum.LE.CSMinim*0.001d0  .or. ilast.eq.0 .or. 
+     &   A(Nnuc).eq.A(1)) RETURN
+
 C     ilast = MIN(ilast + 1,NDEX)
       ilast = MIN(ilast + 1,NDEREC)
       
