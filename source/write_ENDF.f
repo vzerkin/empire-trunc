@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4869 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-28 02:16:51 +0200 (Di, 28 Mär 2017) $
+Ccc   * $Rev: 4959 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2017-06-28 22:49:39 +0200 (Mi, 28 Jun 2017) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -131,7 +131,7 @@ C-----
          WRITE (12,*)  
 C--------Print spectra of residues
          reactionx = '(z,x)  '
-C        qout = 0.d0
+         qout = 0.d0
 
          IF(RECoil.gt.0) then
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
