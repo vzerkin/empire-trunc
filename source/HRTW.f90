@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4924 $
-   ! $Author: mherman $
-   ! $Date: 2017-04-19 21:16:11 +0200 (Mi, 19 Apr 2017) $
+   ! $Rev: 4960 $
+   ! $Author: gnobre $
+   ! $Date: 2017-06-28 22:51:04 +0200 (Mi, 28 Jun 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -2430,6 +2430,7 @@ CONTAINS
       H_Sumtl = 0.D0
       H_Tav = 0.D0
       H_Sweak = 0.D0
+      H_Sweaks = 0.D0
       H_Tl = 0.D0
 
       RETURN
