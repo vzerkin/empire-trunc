@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-06-19 10:49:14 +0200 (Mo, 19 Jun 2017) $
+Ccc   * $Date: 2017-06-28 20:35:23 +0200 (Mi, 28 Jun 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -155,6 +155,8 @@ C-M        Fix roundoff errors in total inelastic.
 C-M        Fix setting of cross sections below the first EMPIRE point.
 C-M        Fix the increased number of points in the interp. table.
 C-M  17/06 Fix matching of level energies for angular distributions.
+C-M        Fix format reading conversion coefficients.
+C-M        Allow more digits for branching ratios (backward compatible).
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -6128,10 +6130,12 @@ C...
 C-Title  : REMF12 Subroutine
 C-Purpose: Read EMPIRE output discrete levels
       CHARACTER*2    CH
-      CHARACTER*136  REC
+      CHARACTER*158  REC
       DIMENSION      NBR(MXLI),ENL(MXLI)
      1              ,LBR(MXLJ,MXLI),BRR(MXLJ,MXLI),CNV(MXLJ,MXLI)
 C*
+      ZRO=0
+      ONE=1
 C* Search for the product nucleus data
       LG=0
    20 READ (LIN,891,END=90) REC
@@ -6168,15 +6172,28 @@ C* Assume 100% transition to ground level
       END IF
 C* Read the branching ratios
       IF(REC(60:60).EQ.'.') THEN
-C*      Format OF EMPIRE-2.17 and later
-        J2=7
-        READ (REC,806,ERR=92) IL,EL,X,JL,(LBR(J,IL),BRR(J,IL),J= 1,J2)
-        IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - FORMAT 806 Limit exceeded'
-   37   J1=J2+1
-        IF(J1.LE.JL) THEN
-          J2=MIN(JL,J1+6)
-          READ(LIN,807) (LBR(J,IL),BRR(J,IL),J=J1,J2)
-          GO TO 37
+        IF(REC(65:65).NE.' ') THEN
+C*        Format OF EMPIRE-2.17 after 28 June 2017
+          J2=7
+          READ (REC,808,ERR=92) IL,EL,X,JL,(LBR(J,IL),BRR(J,IL),J= 1,J2)
+          IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - FORMAT 806 Limit exceeded'
+   37     J1=J2+1
+          IF(J1.LE.JL) THEN
+            J2=MIN(JL,J1+6)
+            READ(LIN,807) (LBR(J,IL),BRR(J,IL),J=J1,J2)
+            GO TO 37
+          END IF
+        ELSE
+C*        Format OF EMPIRE-2.17
+          J2=7
+          READ (REC,806,ERR=92) IL,EL,X,JL,(LBR(J,IL),BRR(J,IL),J= 1,J2)
+          IF(JL.GT.MXLJ) STOP 'REMF12 ERROR - FORMAT 806 Limit exceeded'
+   38     J1=J2+1
+          IF(J1.LE.JL) THEN
+            J2=MIN(JL,J1+6)
+            READ(LIN,807) (LBR(J,IL),BRR(J,IL),J=J1,J2)
+            GO TO 38
+          END IF
         END IF
       ELSE
 C*      Format up to EMPIRE-2.16 (Montenotte)
@@ -6222,7 +6239,7 @@ C* Assume 100% transition to ground level
         END IF
         GO TO 46
       END IF
-C* Read the branching ratios
+C* Read the conversion coefficients
       IF(REC(60:60).EQ.'.') THEN
 C*      Format OF EMPIRE-2.17 and later
         J2=7
@@ -6241,9 +6258,13 @@ C*      Format up to EMPIRE-2.16 (Montenotte)
 C* Check the range of the conversion coefficients
       DO J=1,JL
         CC=CNV(J,IL)
-        CC=MAX( 0.0, CC )
+C...    CC=MAX( 0.0, CC )
+        IF(CC.LE.ZRO) THEN
+          PRINT *,'WARNING - Conv.coef.lt.0 jl,il,c',jl,il,cc
+          CC=ZRO
+        END IF
         CC=1/(1+CC)
-        CNV(J,IL)=MIN( 1.0, CC )
+        CNV(J,IL)=MIN(ONE, CC )
       END DO
       GO TO 46
 C*
@@ -6262,7 +6283,7 @@ C*
   807 FORMAT(53X,7(I4,F7.0))
   808 FORMAT(I12,F10.0,13X,F15.0,I3, 7(I4,F11.0))
   809 FORMAT(53X,7(I4,F11.0))
-  891 FORMAT(A136)
+  891 FORMAT(A158)
   912 FORMAT(' EMPEND WARNING - No b.r. data for level ',I4/
      1       '                  Transfer to ground state assumed')
       END
