@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Rev: 4963 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-06-29 23:26:08 +0200 (Do, 29 Jun 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3258,8 +3258,6 @@ C              as calculated by PCROSS
 C--------add MSD/PCROSS contribution to the population spectra
 C--------used for ENDF exclusive spectra
          IF (ENDf(1).GT.0) THEN
-      write(8,*) 'Got into ACCUMSD pop spectra part Nejc, Nnur', nejc,
-     1 Nnur
             DO ie = 1, nexrt
                icsp = nexrt - ie + 1
                pops = CSEmsd(icsp,Nejc)
@@ -3381,18 +3379,17 @@ C
       ENDIF
 C-----distribution of the MSD/PCROSS contribution to discrete levels
 C-----
+      csm1 = 0.d0
+      istart = nexrt + 1
+      DO ie = istart, next
+        csm1 = csm1 + CSEmsd(ie,Nejc)*DE
+      ENDDO
+      IF(csm1.le.1.d-6) RETURN
+
       IF(Nejc.eq.NPRoject) then
 C
 C      Inelastic channel 
 C
-       csm1 = 0.d0
-       istart = nexrt + 1 
-       DO ie = istart, next
-         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
-       ENDDO
-
-       IF(csm1.le.1.d-6) RETURN
-
 C------MSD or PCROSS contribution is integrated over the discrete level region and
 C------distributed among 2+, 3- and 4+ levels (or those close to such for
 C------noninteger spin nuclei) using arbitrary weights (most to 2+ and very
@@ -3483,65 +3480,53 @@ C           Deleting the corresponding angular distribution
 
       ELSE
 C
-C     Other channels (not the inelastic)
+C      Other channels (not the inelastic)
+C      equal disribution over all energetically available levels
 C
-       csm1 = 0.d0
-       istart = nexrt +1
-       DO ie = istart, next
-         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
-       ENDDO
-
-       IF(csm1.le.1.d-6) RETURN
-
        csmtot = 0.d0
        xnor = 0.d0
-
-       DO il = NLV(Nnur),1,-1
+       DO il = 1,NLV(Nnur)           ! finding number of possible levels
          eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) EXIT
-
-         xnor = CSEmsd(istart,Nejc)*DE
+         xnor = il
+         IF (eemi.LT.0.0D0) THEN
+            xnor = il-1
+            EXIT
+         ENDIF
+       ENDDO
 C
-C        Assigning angular distribution of the first continuum bin 
-C        "istart" to the angular distribution of the discrete level "il"
-C                                                    
-         do na=1,NDAng 
-           ddxs(na) = CSEa(istart,na,Nejc)
-         enddo
+C      Assigning angular distribution of the first continuum bin
+C      "istart" to the angular distribution of the discrete levels
+       IF(CSEmsd(istart,Nejc).LT.1.0D-10) THEN
+          ddxs = 0.0D0
+       ELSE
+          do na=1,NDAng
+            ddxs(na) = CSEa(istart,na,Nejc)/(CSEmsd(istart,Nejc)*DE)
+          enddo
+       ENDIF
 
-         csmsdl = 0.d0
-         DO ie = istart, next
-           eee = DE*(ie - 1)
-           IF (eee.GT.eemi) EXIT 
-           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-           IF(ENDF(1).GT.0) then
-C            Deleting the corresponding XS from the continuum
-C              as it is moved to discrete spectra
+C      Deleting the corresponding XS from the continuum
+C      as it is moved to discrete spectra
+       IF(ENDF(1).GT.0) then
+          DO ie = istart, next
              CSEmsd(ie,Nejc) = 0.d0
 C            Deleting the corresponding angular distribution
              do na=1,NDAng 
-               CSEa(ie,na,Nejc) = 0.d0
+                CSEa(ie,na,Nejc) = 0.d0
              enddo
-           ENDIF
-C          Commented, RCN, July 2012, probably wrong, CHECK !!!!!
-C          istart = ie + 1
-         ENDDO
+          ENDDO
+       ENDIF
+
+       csmsdl = csm1/xnor        !contribution to each level
+       DO il = 1, INT(xnor)      !loop over available levels
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl
          csmtot = csmtot + csmsdl
-C--------Normalization factor
-         IF (xnor.GT.0) THEN
-            xnor = csmsdl/xnor
-         ELSE
-            xnor = 0.d0
-         ENDIF
+
 C--------Store ang. dist.
          DO na = 1, NDANG
-           CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + xnor*ddxs(na)
+           CSAlev(na,il,Nejc) = CSAlev(na,il,Nejc) + csmsdl*ddxs(na)
          ENDDO
-
        ENDDO
-
       ENDIF
 
       IF(csm1-csmtot.gt.0.1d0) then
