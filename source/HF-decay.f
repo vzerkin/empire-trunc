@@ -1,7 +1,6 @@
-$DEBUG
-Ccc   * $Rev: 4961 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-06-29 00:04:21 +0200 (Do, 29 Jun 2017) $
+Ccc   * $Rev: 4962 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2017-06-29 16:36:05 +0200 (Do, 29 Jun 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
