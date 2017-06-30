@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4960 $
-   ! $Author: gnobre $
-   ! $Date: 2017-06-28 22:51:04 +0200 (Mi, 28 Jun 2017) $
+   ! $Rev: 4964 $
+   ! $Author: mherman $
+   ! $Date: 2017-06-30 19:56:54 +0200 (Fr, 30 Jun 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -616,6 +616,7 @@ CONTAINS
             jmin = ABS(xjr - xjc)
             jmax = xjr + xjc
             kmin = jmin - MAXj(nejc) + ssxj                  ! minimum k=l+1
+            kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
             kmax = jmax - 1 + ssxj                           ! maximum k=l+1
             kmax = MIN(ndlw, kmax)                           ! ensure we are within dimensions
             DO k = kmin, kmax                                ! do loop over l in Tlj (note that k=l+1)
@@ -673,22 +674,28 @@ CONTAINS
       sumtt_w = 0.d0
 
       DO i = 1, NLV(nnur)             ! do loop over inelastic levels, elastic done after the loop
+!         if(nejc==1) write(*,*)'level ',i, XJLv(i,nnur), LVP(i,nnur)
          IF(IZA(nnur)==IZA(0) .AND. i==levtarg) CYCLE     !skip if elastic
          IF(IZA(nnur)==IZA(0) .AND. (ICOllev(i)>0 .AND. ICOllev(i)<=LEVcc)) CYCLE   !skip coupled levels
          eout = eoutc - ELV(i,nnur)
+!         if(nejc==1) write(*,*)'eout',eout, eoutc, ELV(i,nnur)
          IF(eout<0.0D0) EXIT
          CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
          jmin = abs(XJLv(i,nnur) - xjc)
          jmax = XJLv(i,nnur) + xjc
-         kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+!         if(nejc==1) write(*,*)'jmin, jmax, xjc',jmin, jmax, xjc
+         kmin = abs(jmin - MAXj(nejc) + ssxj)             !minimum k=l+1
          kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
          kmax = jmax - 1  + ssxj                          !maximum k=l+1
          kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
+!         if(nejc==1) write(*,*)'kmin, kmax ', kmin, kmax
          DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
             ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
+!            if(nejc==1) write(*,*)'ipar=',ipar
             IF(ipar==0) CYCLE
             DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
                xj = k + jndex - ssxj
+!               if(nejc==1) write(*,*)'xj, jmin, jmax',xj, jmin, jmax
                IF(xj<jmin .OR. xj>jmax) CYCLE
                !rho1 = 1.d0                               !level density variable
                rho1 = TUNe(nejc,nnuc)                     !reuse level density variable for tuning
@@ -710,6 +717,7 @@ CONTAINS
                   out%kres = -i                               !minus indicates channel leading to a discrete level 'i'
                   out%xjrs = XJLv(i,nnur)
                   out%pres = LVP(i,nnur)
+!                  write(*,*) 'i, T, rho',i,out%t,out%rho
                ELSEIF(tld>1.0d-15) THEN                       !weak channel (will not be iterated so can be stored in SCRtl)
                   SCRtl(i,nejc) = SCRtl(i,nejc) + tld*rho1 * CINred(i)
                   sumin_w = sumin_w + tld*rho1 * CINRED(i)
@@ -741,6 +749,7 @@ CONTAINS
                jmin = abs(XJLv(i,nnur) - xjc)
                jmax = XJLv(i,nnur) + xjc
                kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+               kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
                kmax = jmax - 1  + ssxj                          !maximum k=l+1
                kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
                DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
@@ -789,6 +798,7 @@ CONTAINS
             jmin = abs(XJLv(i,nnur) - xjc)
             jmax = XJLv(i,nnur) + xjc
             kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
+            kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
             kmax = jmax - 1 + ssxj                           !maximum k=l+1
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             DO k = kmin, kmax                                !do loop over k in Tlj (note that real l is k-1)
