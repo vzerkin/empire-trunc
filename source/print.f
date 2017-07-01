@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
+Ccc   * $Rev: 4965 $
 Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Date: 2017-07-01 14:38:58 +0200 (Sa, 01 Jul 2017) $
 
 C
       SUBROUTINE Print_Total(Nejc)
@@ -148,7 +148,7 @@ C
 99045 FORMAT (24X,93('-'))
       END
 
-      SUBROUTINE Print_Inclusive(Nejc,qout)
+      SUBROUTINE Print_Inclusive(Nejc)!,qout)
 Ccc
 Ccc   ********************************************************************
 Ccc   *                                                         class:iou*
@@ -176,7 +176,7 @@ C
 C Dummy arguments
 C
       INTEGER Nejc
-      DOUBLE PRECISION qout
+C     DOUBLE PRECISION qout
 C
 C Local variables
 C
@@ -252,7 +252,7 @@ C--------Exact endpoint
          WRITE(8,'(2x,
      &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
      &     esum/totspec
-         qout = qout + esum/totspec
+C        qout = qout + esum/totspec
          WRITE (8,*) ' '    
          WRITE (8,
      &   '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
@@ -274,7 +274,7 @@ C--------Exact endpoint
          WRITE(12,'(2x,
      &     ''Ave. <E>  g cont.spec '',G12.6,'' MeV  (inclusive)'')')
      &     esum/totspec
-         qout = qout + esum/totspec
+C        qout = qout + esum/totspec
          WRITE (12,*) ' '    
          WRITE (12,
      &   '(1x,'' Integrated spectrum   '',G12.6,'' mb   (inclusive)'')')
@@ -513,7 +513,7 @@ C        ! exact endpoint
      &     ''Ave. <E> '',A2,'' cont.spec '',G12.6,
      &     '' MeV  (inclusive)'' )') SYMbe(Nejc),esum/totspec
 
-         qout = qout + esum/totspec         ! multiplicity x <E>
+C        qout = qout + esum/totspec         ! multiplicity x <E>
 
 C        WRITE(12,'(2x,
 C    &     ''Ave. <Q> '',A2,'' cont.spec '',G12.6,

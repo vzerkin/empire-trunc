@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4959 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-06-28 22:49:39 +0200 (Mi, 28 Jun 2017) $
+Ccc   * $Rev: 4965 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-07-01 14:38:58 +0200 (Sa, 01 Jul 2017) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -32,7 +32,7 @@ C
       INTEGER nejc,i,nnuc,jn,jz,iz,ia,jfiss,jnmx,jzmx
       DOUBLE PRECISION csemax,ftmp,csum,xsdirect,xspreequ,totsum
 C     DOUBLE PRECISION eps,xnub,csinel,s_factor,qout,dtmp
-      DOUBLE PRECISION     xnub,csinel,s_factor,qout,dtmp
+      DOUBLE PRECISION     xnub,csinel,s_factor,     dtmp
       DOUBLE PRECISION     recorp
       INTEGER itmp, nang, ie
 C     DATA eps/1.d-8/
@@ -131,7 +131,7 @@ C-----
          WRITE (12,*)  
 C--------Print spectra of residues
          reactionx = '(z,x)  '
-         qout = 0.d0
+C        qout = 0.d0
 
          IF(RECoil.gt.0) then
           DO nnuc = 1, NNUcd    !loop over decaying nuclei
@@ -160,7 +160,7 @@ C
          WRITE (12,*) ' '    
 C--------Print inclusive spectra of gamma and ejectiles
          DO nejc = 0, NEJcm
-           CALL Print_Inclusive(nejc,qout)
+           CALL Print_Inclusive(nejc)!out)
          ENDDO
          WRITE (12,*) ' '    
 
