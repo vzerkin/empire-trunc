@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4963 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-06-29 23:26:08 +0200 (Do, 29 Jun 2017) $
+Ccc   * $Rev: 4966 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-07-02 22:21:07 +0200 (So, 02 Jul 2017) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3133,7 +3133,7 @@ C
       DOUBLE PRECISION coeff, csmsdl, echannel, ecm, eemi, erecoil,
      &                 excnq, phdj(NDLW), pops, somj, swght, w, weight,
      &                 wght(NDLV), xj, xnor, ddxs(NDAngecis), recorr
-      DOUBLE PRECISION csmtot,csm1,eee
+      DOUBLE PRECISION csmtot,csm1
       INTEGER icsp, ie, il, irec, j, na, nexrt, next, istart
 
       IF (NEX(Nnuc).LT.1) THEN
@@ -3481,7 +3481,7 @@ C           Deleting the corresponding angular distribution
       ELSE
 C
 C      Other channels (not the inelastic)
-C      equal disribution over all energetically available levels
+C      equal distribution over all energetically available levels
 C
        csmtot = 0.d0
        xnor = 0.d0
