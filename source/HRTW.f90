@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4967 $
-   ! $Author: rcapote $
-   ! $Date: 2017-07-03 22:35:05 +0200 (Mo, 03 Jul 2017) $
+   ! $Rev: 4968 $
+   ! $Author: mherman $
+   ! $Date: 2017-07-03 22:52:32 +0200 (Mo, 03 Jul 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -1425,7 +1425,7 @@ CONTAINS
       REAL*8 sumfism(nfmod) 
       REAL*8 sumin_s, sumtt_s 
       REAL*8 sigma_ab,sigma_alph_b
-      INTEGER iaa,ibb
+      INTEGER iaa,ibb, my
 
       REAL*8, DIMENSION(6) :: sig_cc !temporary to sum CC x-sec
 
@@ -1612,7 +1612,7 @@ CONTAINS
                write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
             ENDIF ! INTerf>0
 
-   	        IF(allocated(WFC)) DEALLOCATE(WFC)
+   	      IF(allocated(WFC)) DEALLOCATE(WFC)
             ALLOCATE(WFC(num%elah,num%part),STAT=my)
             IF(my /= 0) CALL WFC_error()
 
