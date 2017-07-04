@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4948 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-06-02 21:44:02 +0200 (Fr, 02 Jun 2017) $
+Ccc   * $Rev: 4969 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-07-04 15:06:06 +0200 (Di, 04 Jul 2017) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2834,15 +2834,15 @@ C
       CALL KINEMA(elab,ecms,xmas_nejc,xmas_nnuc,ak2,1,relcal)
       coeff = 10.d0*PI/ak2
       ilv = 1
-      IF(Nnuc.EQ.0 .and. (DIRect.EQ.1 .OR. DIRect.EQ.2) .and. 
-     &   (LEVtarg .GT. 1) ) THEN
-         ilv = Levtarg
-         write(8,*) 'ERROR: CC calculations on excited targets not yet
-     & allowed'
+      IF(Nnuc.EQ.0 .and. DIRect.GT.0 .and. LEVtarg.GT.1 ) THEN
+         write(8,*) 'ERROR: CC or DWBA calculations on excited targets n
+     &ot yet implemented'
          write(8,*) 'Set DIRECT to 0 in the input file'
          write(8,*) 'Execution stopped'
-         STOP 'No CC on excited targets'
+         STOP 'ERROR: No CC or DWBA calculations on excited targets'
       ENDIF
+      IF(Nnuc.EQ.0 .and. DIRect.EQ.0 .and. LEVtarg.GT.1) 
+     &   ilv = LEVtarg
 C
 C     write(*,*) 'ilv=',ilv
 C

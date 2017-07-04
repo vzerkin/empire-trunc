@@ -1,7 +1,7 @@
 MODULE width_fluct
-   ! $Rev: 4968 $
-   ! $Author: mherman $
-   ! $Date: 2017-07-03 22:52:32 +0200 (Mo, 03 Jul 2017) $
+   ! $Rev: 4969 $
+   ! $Author: rcapote $
+   ! $Date: 2017-07-04 15:06:06 +0200 (Di, 04 Jul 2017) $
    !
    !   ********************************************************************
    !   *                  W I D T H _ F L U C T                           *
@@ -482,7 +482,7 @@ CONTAINS
                !----------------------------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !----------------------------------------------------------------------------------
-               CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+               CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
 
 !               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                ! if renormalization skipped
@@ -1612,9 +1612,10 @@ CONTAINS
                write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
             ENDIF ! INTerf>0
 
-   	      IF(allocated(WFC)) DEALLOCATE(WFC)
-            ALLOCATE(WFC(num%elah,num%part),STAT=my)
+   	        IF(allocated(WFC)) DEALLOCATE(WFC)
+            ALLOCATE(WFC(num%elah-num%elal+2,num%part+1),STAT=my)
             IF(my /= 0) CALL WFC_error()
+			WFC = 0.d0
 
             ! loop over iaa=i (coupled channels in the normal space)
             DO i = num%elal, num%elah
@@ -1633,7 +1634,7 @@ CONTAINS
                   ibb = iout - num%coll + 1
                   out => outchnl(iout)
                   w = WFC2(i-num%elal+1,iout)     ! Moldauer width fluctuation factor (ECIS style)
-                  WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
+                  WFC(i-num%elal+1,iout) = w      ! saving the calculated sigma corrected by WF
                   sigma_alph_b = out%t*w
                   IF(INTerf>0 .AND. iout>=num%coll .AND. iout<=num%colh ) CYCLE ! collective channels were done already
                   Sigma_ab = sigma_alph_b
@@ -1676,7 +1677,7 @@ CONTAINS
                !---------------------------------------------------------------
                ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                !---------------------------------------------------------------
-               CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+               CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
 
 !               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
@@ -2294,8 +2295,8 @@ CONTAINS
 
    !**************************************************************
 
-   SUBROUTINE CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
-      INTEGER i
+   SUBROUTINE CN_DA_anis(ibegin, i, in, Ia, sxj, xjc, xnor)
+      INTEGER i, ibegin
       TYPE (fusion),  POINTER :: in
       REAL*8 Ia, sxj, xjc, xnor 
 
@@ -2324,7 +2325,7 @@ CONTAINS
          lb = out%l                  !outgoing neutron l
          jb = out%j                  !outgoing neutron j
          IF(LHRtw > 2) THEN
-            w = WFC(i,iout) ! Moldauer width fluctuation factor
+            w = WFC(i-ibegin+1,iout) ! Moldauer width fluctuation factor
          ELSEIF(i==iout) THEN
             w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
          ENDIF
