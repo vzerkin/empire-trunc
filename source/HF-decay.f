@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4962 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-06-29 16:36:05 +0200 (Do, 29 Jun 2017) $
+Ccc   * $Rev: 4970 $
+Ccc   * $Author: rcapote $
+Ccc   * $Date: 2017-07-04 15:41:50 +0200 (Di, 04 Jul 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -833,8 +833,8 @@ C------------------Check for the number of branching ratios
 C99065            FORMAT (I12,F10.6,I5,F8.1,G15.6,I3,7(I4,E11.4),:/,
 C99065              FORMAT (I12,F10.6,I5,F8.1,E15.6,I3,7(I4,E11.4),:/,
 C    &                 (53X,7(I4,E11.4)))
-99065             FORMAT (I12,F10.6,I5,F8.1,1PE15.6,I3,7(I4,E11.5E1),:/,
-     &                 (53X,7(I4,E11.5E1)))
+99065             FORMAT (I12,F10.6,I5,F8.1,1PE15.6,I3,7(I4,E11.5  ),:/,
+     &                 (53X,7(I4,E11.5  )))
                  ENDDO
                ENDIF ! nbr_icc>0
 
