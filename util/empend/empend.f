@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-06-28 20:35:23 +0200 (Mi, 28 Jun 2017) $
+Ccc   * $Date: 2017-07-11 21:00:41 +0200 (Di, 11 Jul 2017) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -157,6 +157,7 @@ C-M        Fix the increased number of points in the interp. table.
 C-M  17/06 Fix matching of level energies for angular distributions.
 C-M        Fix format reading conversion coefficients.
 C-M        Allow more digits for branching ratios (backward compatible).
+C-M  17/07 Small fix reading more digits for branching ratio.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -6180,7 +6181,7 @@ C*        Format OF EMPIRE-2.17 after 28 June 2017
    37     J1=J2+1
           IF(J1.LE.JL) THEN
             J2=MIN(JL,J1+6)
-            READ(LIN,807) (LBR(J,IL),BRR(J,IL),J=J1,J2)
+            READ(LIN,809) (LBR(J,IL),BRR(J,IL),J=J1,J2)
             GO TO 37
           END IF
         ELSE
