@@ -1217,7 +1217,8 @@ c...
       DO I=1,LOOP
         IL=IL+1
         LST(IL)=LST(I)
-        IF( LST(I).EQ.  4 .AND. IINL.EQ.1 .AND. IZAP.EQ.1) IL=IL-1
+c...    IF( LST(I).EQ.  4 .AND. IINL.EQ.1 .AND. IZAP.EQ.1) IL=IL-1
+        IF( LST(I).EQ.  4 .AND. IINL.EQ.1) IL=IL-1
         IF( LST(I).EQ.103 .AND. I600.EQ.1) IL=IL-1
         IF( LST(I).EQ.107 .AND. I800.EQ.1) IL=IL-1
         IF((LST(I).GT. 50 .AND. LST(I).LE. 99) .AND. MINL.EQ.1) IL=IL-1
@@ -2089,7 +2090,7 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-c...    print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
+        print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
 c...    print *,' nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
