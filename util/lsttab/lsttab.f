@@ -59,6 +59,7 @@ C-V  16/07  Initialize MTH.
 C-V  16/12  Fix PLOTTAB input file for MF6.
 C-V  17/03  Add elemental masses to GETAWT.
 C-V  17/05  Enhancements to plot PFGS.
+C-V  17/07  Restore assembly of limped reactions (e.g. MT 3,103-107)
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -258,6 +259,10 @@ C*    -- Redefine photon spectra in MF15 as MF 5/IZP 0
         MF=5
         IZP=0
       END IF
+C*    -- Suppress outgoing particle checking for composite reactions
+      IF(MF.EQ. 3 .AND.
+     & (MT.EQ.3 .OR. MT.EQ.4 .OR.
+     & (MT.GE.102 .AND. MT.LE.107) ) ) IZP=-1
 C*    -- Reset EKTNRM if not neutron spectrum
       IF(IZP.NE.1) EKTNRM=0
 C*
