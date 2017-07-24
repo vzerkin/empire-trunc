@@ -1,6 +1,6 @@
-!cc   * $Rev: 4972 $
-!cc   * $Author: mherman $
-!cc   * $Date: 2017-07-07 23:03:50 +0200 (Fr, 07 Jul 2017) $
+!cc   * $Rev: 4977 $
+!cc   * $Author: gnobre $
+!cc   * $Date: 2017-07-24 16:05:41 +0200 (Mo, 24 Jul 2017) $
 
       SUBROUTINE INPUT
 !cc
@@ -1166,21 +1166,20 @@ C
                ENDf(0) = 1
                ENDf(1) = 1
                ENDf(NTArget) = 1
-	         ENDfp(NPRoject,NTArget) = 1
-               DO in = 0, NENdf
-                  DO ip = 0, NENdf
-                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
-                     izatmp = INT(1000*ztmp + atmp)
-                     CALL WHERE(izatmp,nnuc,iloc)
-                     IF(iloc.EQ.0) THEN
+                 ENDfp(NPRoject,NTArget) = 1
+!               DO in = 0, NENdf
+!                  DO ip = 0, NENdf
+!                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+!                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+!                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
+!                     izatmp = INT(1000*ztmp + atmp)
+!                     CALL WHERE(izatmp,nnuc,iloc)
+!                     IF(iloc.EQ.0) THEN
 !                       ENDf (nnuc) = 1
-                       if(in.eq.2 .and. ip.eq.2) THEN
-                         ENDf (nnuc) = 1
-                         ENDfp(3,nnuc) = 1  ! alphas
-                         ENDfp(0,nnuc) = 1  ! gammas
-                       endif
+!!                       if(in.eq.2 .and. ip.eq.2) THEN
+!!                         ENDfp(3,nnuc) = 1  ! alphas
+!!                         ENDfp(0,nnuc) = 1
+!!                       endif
 !C                      if(in.eq.2 .and. ip.eq.1) THEN
 !C                        ENDfp(5,nnuc) = 1  ! triton
 !C                        ENDfp(0,nnuc) = 1
@@ -1189,9 +1188,9 @@ C
 !C                        ENDfp(6,nnuc) = 1  ! He-3
 !C                        ENDfp(0,nnuc) = 1
 !C                      endif
-                     ENDIF
-                  ENDDO
-               ENDDO
+!                     ENDIF
+!                  ENDDO
+!               ENDDO
 !              Making only pure neutron and pure proton emissions exclusive
                ztmp = Z(1)
                DO in = 0, MIN(8,NENdf)
