@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4971 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-07-05 16:13:57 +0200 (Mi, 05 Jul 2017) $
+Ccc   * $Rev: 4978 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -166,7 +166,7 @@ C         write(*,*) 'ELCncs =', CSDirsav(LEVtarg,NPRoject)
             WRITE (12,
      &'(1X,/,10X,''Discrete level population before gamma cascade'')')
             WRITE (12,'(1X,/,10X,40(1H-),/)')
- 
+            IF(nnuc.EQ.mt849) SUMlev_alf = 0.0
             DO il = 1, NLV(nnuc)
               popl = CSDirlev(il,nejc)  
 C-------------Check for the number of branching ratios
@@ -181,6 +181,7 @@ C-------------Check for the number of branching ratios
      &          WRITE (8,*) ' WARNING: Branching ratios for level ', il,
      &                     ' IN ', INT(A(nnuc)), '-', SYMb(nnuc),
      &                     ' are missing'
+              IF(nnuc.EQ.mt849) SUMlev_alf = SUMlev_alf + popl
 
 C             WRITE ( 8,99070) il, ELV(il,nnuc), LVP(il,nnuc),
               WRITE ( 8,99065) il, ELV(il,nnuc), LVP(il,nnuc),
@@ -392,8 +393,8 @@ C---------------locate position of the projectile among ejectiles
       ENDIF ! FITomp <= 0
 C-----Jump to end of loop after elastic when fitting
       If(FITomp.LT.0 .AND. nnuc.EQ.mt2) THEN
-       iret = 1
-      RETURN 
+        iret = 1
+        RETURN
       ENDIF
 
       kemin = 1

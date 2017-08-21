@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4965 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-07-01 14:38:58 +0200 (Sa, 01 Jul 2017) $
+Ccc   * $Rev: 4978 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
@@ -265,16 +265,16 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &      TOTcsfis, mu_bar(amass(0),NANgela,ELAred,cel_da,elada),xnub,
      &      CSPrd(1),csinel,
      &      (CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn)),
-     &      SUM(xcross(3,:,:)) ! Alpha production
-
+     &      SUM(xcross(3,:,:)),                             !Alpha production
+     &      SUM(CSinc(:)), SUMlev_alf                      !MT5, MT800+MT801+...)
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
-     &      ELAcs*ELAred  +  PIx4*ELCncs,                !CE added to elastic 
-     &                       PIx4*ELCncs,                !CN_el
+     &      ELAcs*ELAred  +  PIx4*ELCncs,                   !CE added to elastic
+     &                       PIx4*ELCncs,                   !CN_el
      &      ELAcs*ELAred                   ,                !shape elastic 
 C    &      TOTcs*TOTred*totcorr - (ELAcs*ELAred + PIx4*ELCncs),
      &      max(CSFus + (SINl+SINlcc)*FCCred + SINlcont*    !Total nonelastic
-     &         FCOred - PIx4*ELCncs,0.d0),               !   CE substracted from nonelastic
+     &         FCOred - PIx4*ELCncs,0.d0),                  !CE substracted from nonelastic
      &      CSFus*corrmsd - tothms - xsmsc,                 !CN-formation 
      &      xsdirect, xspreequ,                             !direct, preequil
      &      SINlcc*FCCred, SINl*FCCred, SINlcont*FCOred,    !CC_inl,DWBA_dis,DWBA_cont  

@@ -1,6 +1,6 @@
-! $Rev: 4915 $
-! $Author: rcapote $
-! $Date: 2017-04-17 22:57:33 +0200 (Mo, 17 Apr 2017) $
+! $Rev: 4978 $
+! $Author: mherman $
+! $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -10,7 +10,7 @@
      & SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,       &
      & SR_Ham_bet4,SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3,     &
      & SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,     &
-     & SR_Ham_dpar,SR_Ham_gshape
+     & SR_Ham_dpar,SR_Ham_gshape,SUMlev_alf
 !
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),  &
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,    &
@@ -266,7 +266,7 @@
      &                 SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4, &
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3, &
      &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,   &
-     &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape
+     &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape,SUMlev_alf
 !
 !                      This array is only used in EXCLUSIVEL, commented &  
 !    &                 , POPcselv
