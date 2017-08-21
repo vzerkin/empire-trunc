@@ -1,5 +1,5 @@
-! $Rev: 4822 $                                                          | 
-! $Date: 2017-01-03 20:25:43 +0100 (Di, 03 Jän 2017) $                                                     
+! $Rev: 4979 $                                                          | 
+! $Date: 2017-08-21 19:02:49 +0200 (Mo, 21 Aug 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -3939,9 +3939,10 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
          CALL TESTP(3,MTO)
       END IF
 !
-!     CHECK THE STATE OF TARGET NUCLEUS IS CORRECT
+!     CHECK THE STATE OF TARGET NUCLEUS IS CORRECT 
+!        -- DAB 18 Aug 2018: LISO flag not used in MF9 or 10 so test disabled
 !
-      CALL TEST2(L1H,LISO,'LISO')
+!      CALL TEST2(L1H,LISO,'LISO')
 !
 !     CHECK NUMBER OF EXCITED STATES
 !
