@@ -70,10 +70,8 @@
 
       IF(NPFNS.EQ.0) THEN
         J=0
-        write(*,*) 'MT1= ', mt1
         DO I = 1,nreac
            mt = RCTN(REACTION(I))
-           write(*,*) I, REACTION(I), mt
            IF (MT .EQ. MT1) THEN
               J=1
               exit
