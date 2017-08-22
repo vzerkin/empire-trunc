@@ -70,8 +70,10 @@
 
       IF(NPFNS.EQ.0) THEN
         J=0
+        write(*,*) 'MT1= ', mt1
         DO I = 1,nreac
            mt = RCTN(REACTION(I))
+           write(*,*) I, REACTION(I), mt
            IF (MT .EQ. MT1) THEN
               J=1
               exit
@@ -79,6 +81,7 @@
         end do
         IF (J .EQ. 0) THEN
            WRITE(0,*) 'REACTION( MT=',MT1,') NOT FOUND IN ',FILE(L1:L2)//trim(XSC)
+           write(0,*) 
            STOP 1
         ENDIF
       ENDIF
@@ -154,6 +157,7 @@
          ! WRITE(0,*) TMP(LT1:LT2),PN(LT1:LT2)
          IF (TMP(LT1:LT2) .NE. PN(LT1:LT2)) then
             write(0,*) 'WRONG PARAMETER found in ',FILE(L1:L2)//trim(MATSEN)
+            write(0,*) TMP(LT1:LT2), PN(LT1:LT2)
             stop 1
          endif
          READ(10,*) ! THIRD LINE

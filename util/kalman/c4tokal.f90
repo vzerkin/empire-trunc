@@ -4,8 +4,8 @@ program c4tokal
 
     implicit none
 
-    integer*4, parameter :: ngmt = 13      ! list of allowed MTs for Kalman fitting
-    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456/)
+    integer*4, parameter :: ngmt = 15      ! list of allowed MTs for Kalman fitting
+    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 999/)
 
     integer*4, parameter :: kctl1 = 0      ! set nonzero to read priors
     integer*4, parameter :: kctl2 = 0      ! set nonzero to write posteriors
