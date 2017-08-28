@@ -1,5 +1,5 @@
-! $Rev: 4704 $                                                         |
-! $Date: 2016-07-18 18:24:13 +0200 (Mo, 18 Jul 2016) $                                                     
+! $Rev: 4983 $                                                         |
+! $Date: 2017-08-28 17:21:29 +0200 (Mo, 28 Aug 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -11723,21 +11723,21 @@ C...        GO TO 10
       PARAMETER (NROW=18)
       DIMENSION KIJ(NROW)
       IF (NDIGIT.EQ.2)
-     & READ (JIN,20,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+     & READ (JIN,20,END=90,ERR=90) II,JJ,KIJ(1:18),MATP,MFP,MTP
       IF (NDIGIT.EQ.3)
-     & READ (JIN,30,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+     & READ (JIN,30,END=90,ERR=90) II,JJ,KIJ(1:13),MATP,MFP,MTP
       IF (NDIGIT.EQ.4)
-     & READ (JIN,40,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+     & READ (JIN,40,END=90,ERR=90) II,JJ,KIJ(1:11),MATP,MFP,MTP
       IF (NDIGIT.EQ.5)
-     & READ (JIN,50,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+     & READ (JIN,50,END=90,ERR=90) II,JJ,KIJ(1:9),MATP,MFP,MTP
       IF (NDIGIT.EQ.6)
-     & READ (JIN,60,END=90,ERR=90) II,JJ,KIJ,MATP,MFP,MTP,NSEQP
+     & READ (JIN,60,END=90,ERR=90) II,JJ,KIJ(1:1),MATP,MFP,MTP
       GO TO 100
-   20 FORMAT (2I5, 1X, 18I3, 1X, I4, I2, I3, I5)
-   30 FORMAT (2I5, 1X, 13I4, 3X, I4, I2, I3, I5)
-   40 FORMAT (2I5, 1X, 11I5, I4, I2, I3, I5)
-   50 FORMAT (2I5, 1X, 9I6, 1X, I4, I2, I3, I5)
-   60 FORMAT (2I5, 8I7, I4, I2, I3, I5)
+   20 FORMAT (2I5, 1X, 18I3, 1X, I4, I2, I3)
+   30 FORMAT (2I5, 1X, 13I4, 3X, I4, I2, I3)
+   40 FORMAT (2I5, 1X, 11I5, I4, I2, I3)
+   50 FORMAT (2I5, 1X, 9I6, 1X, I4, I2, I3)
+   60 FORMAT (2I5, 8I7, I4, I2, I3)
 !
 !     UNEXPECTED END OF FILE
 !
