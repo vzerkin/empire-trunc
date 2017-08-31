@@ -63,7 +63,7 @@ libdir = $(EMPIREDIR)/lib
 
 all:	c4service
 
-OBJH = c4service.f90 rctn.o strlen.o 
+OBJH = c4service.f90 strlen.o 
 c4service:  $(OBJH) $(libdir)/libc4io.a
 	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJH) -lc4io
 
