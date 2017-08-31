@@ -16,9 +16,10 @@ PROGRAM c4service
 
    CHARACTER*4, PARAMETER :: xsc = '.xsc'
    CHARACTER*8, PARAMETER :: inpsen = '-inp.sen'
-   CHARACTER*8, PARAMETER :: inpc4 = '-c4.inp'
+   CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
    CHARACTER*1            :: action = 'c' ! action to be taken on a section c-copy, d-delete, m-modify, s-smooth
+   CHARACTER*5            :: arg2         ! second argument on the command line
 
    REAL*4 :: y1 = 0.0, y2 = 1.0, dy1 = 0.0, dy2 = 1.0 ! section modifying parameters
    INTEGER*4 nsec     ! # of sections in C4 file
@@ -41,8 +42,12 @@ PROGRAM c4service
 
    ! get root file name of the c4 file (i.e., without .c4 extension)
    CALL getarg(1,file)
-   file = trim(file)
    CALL strlen(file,l1,l2)
+
+   CALL getarg(2,arg2)
+   write(0,*) 'second argument',arg2
+   READ(arg2,'(I5)') sec_num
+   WRITE(6,*) ' section #',sec_num,' will be printed'
 
    !  read C4 file into the memory structure c4
    WRITE(6,*) 'Reading C4 file into the c4-structure'
@@ -92,8 +97,15 @@ PROGRAM c4service
       WRITE(6,*) 'Reading new C4 file into the c4-structure'
       status = read_c4_file(file(l1:l2)//'.c4',c4)
       CALL scan(c4)
+
+      !  close, reopen new file to write c4service input file
+      CLOSE(13)
+      WRITE(6,*) 'make_input: inp will be replaced',file(l1:l2)//inpc4,'!period'
+      OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='REPLACE')
       CALL make_input(c4)
       WRITE(6,*) 'List of sections and c4service input file ',file(l1:l2)//inpc4,' have been generated'
+
+      IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subsection #sub_num e.g., for gnu plotting
 
       STOP
    END IF
@@ -104,17 +116,17 @@ PROGRAM c4service
    CALL make_input(c4)
    WRITE(6,*) 'List of sections and c4service input file ',file(l1:l2)//inpc4,' have been generated'
 
-   !   CALL print_section(c4, sec_num)  ! printing subsection #sub_num e.g., for gnu plotting
+
+
+   IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subsection #sub_num e.g., for gnu plotting
 
 
    STOP
 
 
-
-
 CONTAINS
 
-         !------------------------------------------------------------------------
+   !------------------------------------------------------------------------
 
    SUBROUTINE modify_section(sc, k, y1, y2, dy1, dy2)
       IMPLICIT NONE
@@ -142,7 +154,6 @@ CONTAINS
    END SUBROUTINE modify_section
 
 
-
    SUBROUTINE delete_section(c4,k)
       IMPLICIT NONE
       INTEGER*4 k
@@ -157,7 +168,6 @@ CONTAINS
       WRITE(6,*)' Deleted  subsection: ',k, sc%ref, sc%ent, sc%sub
       RETURN
    END SUBROUTINE delete_section
-
 
 
    SUBROUTINE smooth_section(sc, k, y1)
@@ -195,6 +205,8 @@ CONTAINS
                WRITE(6,*) 'Energies not monotonically increasing for quadruplet starting with j=',j
                STOP 'Energies not monotonic'
             END IF
+
+            ! cross sections
             s = 0.5*(p1%e - p0%e)*(p1%x + p0%x) + 0.5*(p2%e - p1%e)*(p2%x + p1%x) + &
                0.5*(p3%e - p2%e)*(p3%x + p2%x)
             l = p3%e - p0%e
@@ -207,8 +219,17 @@ CONTAINS
             p2%e = p3%e - l/3.0
             p1%x = h
             p2%x = h
-            sp = l*(p0%x+2*p1%x+2*p2%x+p3%x)/6.0
-         !            if (s /= sp) write(6,*) 'Inegral mismatch', s, sp
+!            sp = l*(p0%x+2*p1%x+2*p2%x+p3%x)/6.0
+!            if (s /= sp) write(6,*) 'Inegral mismatch', s, sp
+
+            !  x-sec uncertainties
+            s = 0.5*(p1%e - p0%e)*(p1%dx + p0%dx) + 0.5*(p2%e - p1%e)*(p2%dx + p1%dx) + &
+               0.5*(p3%e - p2%e)*(p3%dx + p2%dx)
+            h = (3*s)/(2*l) - (p0%dx + p3%dx)/4.
+            p1%dx = h
+            p2%dx = h
+!            sp = l*(p0%dx+2*p1%dx+2*p2%dx+p3%dx)/6.0
+!            if (s /= sp) write(6,*) 'Inegral mismatch', s, sp
          END DO
       END DO
       WRITE(6,*)' Subsection smoothed '
@@ -223,6 +244,7 @@ CONTAINS
       TYPE (c4_file) c4
       TYPE (c4_section), POINTER :: sc
       TYPE (c4_data_point), POINTER :: pt
+      CHARACTER author*9, year*2
 
       IF(sec_num > c4%nsec) THEN
          WRITE(6,*) 'Requested EXFOR-subentry position out of range'
@@ -230,9 +252,17 @@ CONTAINS
       END IF
       sc => c4%sec(sec_num)
 
+!      READ(sc%ref,'(a9)') author
+      author = sc%ref(1:9)
+      year   = sc%ref(23:24)
+      file   = author//'-'//year//'.c4'
+
+      WRITE(6,*) 'Print_section:',file
+      OPEN(20,FILE=file,STATUS='REPLACE')
+
       DO k=1,sc%ndat
          pt => c4%sec(sec_num)%pt(k)
-         WRITE(6,*) pt%e/10**6, pt%de/10**6, pt%x*10**3, pt%dx*10**3,  sc%ref, sc%ent, sc%sub
+         WRITE(20,*) pt%e/10**6, pt%de/10**6, pt%x*10**3, pt%dx*10**3,  sc%ref, sc%ent, sc%sub
       END DO
 
       RETURN
@@ -270,7 +300,6 @@ CONTAINS
    END SUBROUTINE scan
 
 
-
    SUBROUTINE make_input(c4)
 
       !  creates c4service input file for the next run
@@ -280,6 +309,8 @@ CONTAINS
       TYPE (c4_file) c4
       TYPE (c4_section), POINTER :: sc
       TYPE (c4_data_point), POINTER :: pt
+      INTEGER*4 k
+
 
       DO k=1,c4%nsec
          sc => c4%sec(k)
@@ -386,6 +417,7 @@ CONTAINS
 999   FORMAT(3(1X,E12.5),I4)
 
    END SUBROUTINE dataout
+
 
    SUBROUTINE sort(file_name)
       INTEGER*4 :: ioflag
