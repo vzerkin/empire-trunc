@@ -1,5 +1,5 @@
-! $Rev: 4983 $                                                         |
-! $Date: 2017-08-28 17:21:29 +0200 (Mo, 28 Aug 2017) $                                                     
+! $Rev: 4988 $                                                         |
+! $Date: 2017-09-08 20:27:25 +0200 (Fr, 08 Sep 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -3050,7 +3050,7 @@
          CALL ERROR_MESSAGE(NSEQP1)
       ELSE
 !********TEST SPIN LIMITS
-         CALL TEST6(SPIN,0.0,16.0,'SPI')
+         CALL TEST6(SPIN,0.0,22.0,'SPI')
       END IF
 !
 !     TEST SPIN TO SEE IF INTEGRAL OR HALF-INTEGRAL
