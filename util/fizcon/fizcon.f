@@ -1,5 +1,5 @@
-! $Rev: 4988 $                                                         |
-! $Date: 2017-09-08 20:27:25 +0200 (Fr, 08 Sep 2017) $                                                     
+! $Rev: 4989 $                                                         |
+! $Date: 2017-09-08 20:34:17 +0200 (Fr, 08 Sep 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -6103,7 +6103,7 @@
             ITEG(2:2) = RTYPC(I:I)
             READ(ITEG,'(I2)') IHI
             IMESS = 1
-            IF(IHI.GT.0.AND.IHI.LT.7)   THEN
+            IF(IHI.GT.0.AND.IHI.LT.8)   THEN
                IMESS = 0
             ELSE IF(IHI.EQ.0.AND.MT.NE.457)   THEN
                IMESS = 0
