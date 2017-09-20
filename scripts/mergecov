@@ -18,7 +18,8 @@ fi
 
 rm MT33 2>/dev/null
 
-cat $file-32.cov >MT33 2>/dev/null
+touch MT33
+cat $file-32.cov >>MT33 2>/dev/null
 cat $file-33-?.cov >>MT33 2>/dev/null
 cat $file-33-??.cov >>MT33 2>/dev/null
 cat $file-33-???.cov >>MT33 2>/dev/null

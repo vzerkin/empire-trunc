@@ -41,7 +41,7 @@ S107=+(800,849)
 
 EOF
 $EMPIREDIR/util/fixup/fixup < FIXUP.INP
-rm FIXUP.INP
+#rm FIXUP.INP
 mv FIXUP.LST $work/$file-log.fixup
 
 # RUN STANEF
@@ -62,5 +62,5 @@ $EMPIREDIR/util/stanef/stanef <INPUT
 rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
 rm angdis.pnt 2>/dev/null
-rm $file-tmp.endf 
+#rm $file-tmp.endf 
 exit
