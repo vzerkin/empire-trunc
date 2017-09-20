@@ -1,6 +1,6 @@
-cc   * $Rev: 4981 $
-Ccc   * $Author: gnobre $
-Ccc   * $Date: 2017-08-22 21:41:02 +0200 (Di, 22 Aug 2017) $
+cc   * $Rev: 4991 $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2017-09-20 07:02:07 +0200 (Mi, 20 Sep 2017) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -322,7 +322,7 @@ C           to include/exclude low-lying coupled states
      &      '  Total     ','  Elastic   ',' Nonel-Cel  ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
      &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn)),
-     &      '  (z,xa)  ','  MT=5   ','(n,a_disc)  '
+     &      '  (z,xa)  ','  MT=5   ','(n,a_dis)   '
             WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','     Cel    ',
      &      '   Sel      ',
