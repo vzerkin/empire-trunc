@@ -24,7 +24,7 @@
        '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonel-Cel', &
        '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    ', &
        'Elastic* ', 'Nonelast*', '(z,4np)  ', '(z,xa)   ', &
-       '     MT=5', '(n,a_disc)' /)
+       '     MT=5', '(n,a_dis)' /)
 
       integer*4, parameter :: MT(nrmax) = (/ &
        1, 2, 4, 11, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 28, 29, 30, &
