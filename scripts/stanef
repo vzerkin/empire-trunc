@@ -26,6 +26,6 @@ fi
 $EMPIREDIR/util/stan/stan  $file.endf > $file-log.stan
 
 echo "  Renaming $file.STN as $file.endf"  >> $file-log.stan
-mv $file.STN $file.endf
+mv $file.STN $file.endf 2>>$file-log.stan
 
 exit
