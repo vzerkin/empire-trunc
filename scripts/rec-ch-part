@@ -56,6 +56,7 @@ DONE
 EOF
 $EMPIREDIR/util/stanef/stanef <INPUT
 
+mv $file-full.endf $file.endf
 #$work/$file.endf is the final ENDF output file
 
 # remove left-over files
