@@ -1,6 +1,6 @@
-# $Rev: 4827 $
+# $Rev: 4993 $
 # $Author: mherman $
-# $Date: 2017-01-28 09:22:17 +0100 (Sa, 28 Jän 2017) $
+# $Date: 2017-09-21 06:52:55 +0200 (Do, 21 Sep 2017) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8486,7 +8486,7 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-total $file &} \
         -label {Reconstruct total} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file &} \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file $mat &} \
         -label {Reconstruct (n,p), (n,a) and inel} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/group $file &} \
