@@ -1210,7 +1210,7 @@ proc ::RunKALMAN {} {
       puts $file "&end"
       close $file
 #     run PTANAL
-      exec $m_szCodeDir/ptanal > ptanal.std
+      exec -ignorestderr $m_szCodeDir/ptanal > ptanal.std
       if {![file exists endfa.txt]} {
         tk_dialog .msgbox "Error" "Failed to run PTANAL.\nCheck the standard output of PTANAL" info 0 OK
         return
