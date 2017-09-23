@@ -10,6 +10,11 @@ MT=$2
 MAT=$3
 EXPDAT=$4
 
+GENKAL=genkal
+C4TOKAL=c4tokal
+KALMAN=kalman
+KALEND=kalend
+
 if [ -z $file ]; then
 echo "INPUT FILE NOT FOUND"
 exit
@@ -70,41 +75,47 @@ for k in $MT; do
     fi
 
     cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT
+$file ${k} $MAT $EXPDAT 0
 EOF
-    $EMPIREDIR/util/kalman/genkal.exe <INPUT.D >check.out
-
+    echo "*** Running" $GENKAL "***"
+    $EMPIREDIR/util/kalman/$GENKAL <INPUT.D >check.out
 
     if [ -s check.out ]; then
        exit
     fi
 
-
     if [ -s KALMAN.INP ]; then
        rm KALMAN.INP
     fi
 
-    $EMPIREDIR/util/kalman/c4tokal.exe <INPUT.D >KALMAN.INP
+    if [ -s INPUT.D ]; then
+       rm INPUT.D
+    fi
+
+    cat >INPUT.D <<EOF
+$file ${k} $MAT $EXPDAT
+EOF
+    echo "*** Running" $C4TOKAL "***"
+    $EMPIREDIR/util/kalman/$C4TOKAL <INPUT.D >KALMAN.INP
 
 
-# EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
-for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
-    l=`echo ${j}`
-    grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
-done
+    # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
+    for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
+        l=`echo ${j}`
+        grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
+    done
 
-# EXPERIMENTAL DATA AND THEIR CORRELATIONS
-
+    # EXPERIMENTAL DATA AND THEIR CORRELATIONS
     if [ "$EXPDAT" != 0 ]; then
        if [ ! -s $file-expxsc.kal ]; then
-	  cp fort.10 $file-expxsc.kal
+	       cp fort.10 $file-expxsc.kal
        else
-	  cp $file-expxsc.kal fort.10
+	       cp $file-expxsc.kal fort.10
        fi
        if [ ! -s $file-expcorr.kal ]; then
-	  cp fort.12 $file-expcorr.kal
+	       cp fort.12 $file-expcorr.kal
        else
-	  cp $file-expcorr.kal fort.12
+	       cp $file-expcorr.kal fort.12
        fi
     else
        rm fort.10
@@ -112,7 +123,7 @@ done
        rm fort.12
     fi
 
-# CORRELATIONS AMONG MODEL PARAMETERS
+    # CORRELATIONS AMONG MODEL PARAMETERS
     if [ ! -s $file-parcorr.kal ]; then
        cp fort.52 $file-parcorr.kal
     else
@@ -121,17 +132,17 @@ done
 
     if [ "$EXPDAT" != 0 ]; then
        echo 'EDIT KALMAN INPUT'
-       emacs KALMAN.INP
+       vim KALMAN.INP
     fi
 
-    $EMPIREDIR/util/kalman/kalman3.exe <KALMAN.INP >$file-out.kal
+    $EMPIREDIR/util/kalman/$KALMAN <KALMAN.INP >$file-out.kal
 
     mv fort.13 $file-xsc.kal
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
     exit
 
-    $EMPIREDIR/util/kalman/kalend2.exe <INPUT.D >check.out
+    $EMPIREDIR/util/kalman/$KALEND <INPUT.D >check.out
 
 
     if [ -s check.out ]; then
@@ -167,7 +178,4 @@ rm KALMAN.INP
 rm fort.{1*,50,52,75}
 rm check.out
 
-exit
-
-
-# l=`echo ${#k}` IT GIVES THE LENGHT OF THE STRING K
+exit # l=`echo ${#k}` IT GIVES THE LENGTH OF THE STRING K
