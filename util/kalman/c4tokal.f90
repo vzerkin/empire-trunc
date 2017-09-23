@@ -42,7 +42,7 @@ program c4tokal
         real*8, allocatable :: wt(:)               ! weights for each data set
     end type
     integer*4 :: nmt                               ! # MTs that will be fit
-    integer*4, allocatable :: kx(:)                ! section incidices
+    integer*4, allocatable :: kx(:)                ! section indices
     type (fitted_reaction), target  :: fmt(ngmt)   ! the MTs being fit
     type (fitted_reaction), pointer :: fx
 
@@ -54,7 +54,7 @@ program c4tokal
 
     ! get project name, plotting MT, MAT and fitting flag nex
 
-    read(5,*) FILE,MT1,MAT,NEX
+    read(5,*) file,mt1,mat,nex
     call strlen(file,l1,l2)
 
     i = 1
@@ -132,7 +132,7 @@ program c4tokal
 
     inquire(file=file(l1:l2)//'-kal.c4',exist=qex)
     if(qex) then
-       status = read_c4_file(file(l1:l2)//'-kal.c4',c4)
+        status = read_c4_file(file(l1:l2)//'-kal.c4',c4)
     else
        inquire(file=file(l1:l2)//'.c4',exist=qex)
        if(qex) then
@@ -196,8 +196,8 @@ program c4tokal
         end do
     end do
 
-    if(nmt == 0) then
-        write(0,'(a)') ' No data from C4 found in EMPRIRE XSC file!'
+   if(nmt == 0) then
+        write(0,'(a)') ' No data from C4 found in EMPIRE XSC file for reaction MT=',mt1,'!'
         stop 1
     endif
 
