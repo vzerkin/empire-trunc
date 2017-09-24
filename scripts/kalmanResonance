@@ -20,8 +20,9 @@ echo "INPUT FILE NOT FOUND"
 exit
 fi
 if [ -z $MT -o "$MT" = "0" ]; then
+    echo "You set MT to 0, running on MT=1, 2, 18 and 102"
 #   MT="1 2 4 16 102 103 107"
-   MT="1 2 102"
+   MT="1 2 18 102"
 fi
 if [ -z $MAT ]; then
    MAT="1111"
@@ -32,7 +33,6 @@ fi
 
 if [ ! -s $file.endf ]; then
    echo "ENDF FILE NOT FOUND ($file.endf)"
-#   exit 0
 fi
 if [ ! -s $file.xsc ]; then
    echo "CROSS SECTIONS FILE NOT FOUND ($file.xsc)"
@@ -63,12 +63,13 @@ rm $file-33-*.cov  2>/dev/null
 
 # copy from .c4 to -c4.kal (used for KALMAN input):
 #for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
-for j in "  1" "  2" "102"; do
+for j in "  1" "  2" " 18" "102"; do
     grep "^.\{12,19\}  3 $j " $file.c4 >>$file-c4.kal
 done
 
+echo ${MT}
+
 for k in $MT; do
-    echo "MT= ${k}"
 
     if [ -s INPUT.D ]; then
        rm INPUT.D
@@ -77,7 +78,7 @@ for k in $MT; do
     cat >INPUT.D <<EOF
 $file ${k} $MAT $EXPDAT 0
 EOF
-    echo "*** Running" $GENKAL "***"
+    echo "*** Running" $GENKAL "on MT=" ${k} "***"
     $EMPIREDIR/util/kalman/$GENKAL <INPUT.D >check.out
 
     if [ -s check.out ]; then
@@ -95,15 +96,17 @@ EOF
     cat >INPUT.D <<EOF
 $file ${k} $MAT $EXPDAT
 EOF
-    echo "*** Running" $C4TOKAL "***"
-    $EMPIREDIR/util/kalman/$C4TOKAL <INPUT.D >KALMAN.INP
+    echo "*** Running" $C4TOKAL "on MT=" ${k} "***"
+    $EMPIREDIR/util/kalman/$C4TOKAL <INPUT.D #>KALMAN.INP
 
 
-    # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT)
-    for j in "  1" "  2" "  4" " 16" "102" "103" "107"; do
-        l=`echo ${j}`
-        grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
-    done
+    # EXPERIMENTAL FILE FOR PLOTTING (GNUPLOT) (may have been handled by c4tokal)
+    if [ -s fort.75 ];  then
+        for j in "  1" "  2" "102"; do # "  4" " 16" "103" "107"; do
+            l=`echo ${j}`
+            grep "^.\{40,42\}$j" fort.75 >>$file-${l}-c4.gpd
+        done
+    fi
 
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
     if [ "$EXPDAT" != 0 ]; then
@@ -135,6 +138,7 @@ EOF
        vim KALMAN.INP
     fi
 
+    echo "*** Running" $KALMAN "***"
     $EMPIREDIR/util/kalman/$KALMAN <KALMAN.INP >$file-out.kal
 
     mv fort.13 $file-xsc.kal
@@ -142,6 +146,7 @@ EOF
     mv fort.15 $file-par.kal
     exit
 
+    echo "*** Running" $KALEND "***"
     $EMPIREDIR/util/kalman/$KALEND <INPUT.D >check.out
 
 
