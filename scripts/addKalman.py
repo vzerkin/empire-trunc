@@ -9,7 +9,7 @@ Copyright (c) 2008 __nndc.bnl.gov__. All rights reserved.
 
 1) run ptanal and wriurr to create basic MF2 and MF32.
 2) run Kalman update. May want to add experimental uncertainties,
-and definately want to lock down R' parameter (za***.c4 and za***-parcorr.kal 
+and definitely want to lock down R' parameter (za***.c4 and za***-parcorr.kal
 files respectively) before running Kalman
 
 then use this code to push new values back into MF2/MF32
