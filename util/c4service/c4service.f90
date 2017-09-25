@@ -18,7 +18,7 @@ PROGRAM c4service
    CHARACTER*8, PARAMETER :: inpsen = '-inp.sen'
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
-   CHARACTER*1            :: action = 'c' ! action to be taken on a section c-copy, d-delete, m-modify, s-smooth
+   CHARACTER*1            :: action = 'c' ! action to be taken on a section c-copy, d-delete, m-modify, s-smooth, l-limit (energies)
    CHARACTER*5            :: arg2         ! second argument on the command line
 
    REAL*4 :: y1 = 0.0, y2 = 1.0, dy1 = 0.0, dy2 = 1.0 ! section modifying parameters
@@ -45,9 +45,8 @@ PROGRAM c4service
    CALL strlen(file,l1,l2)
 
    CALL getarg(2,arg2)
-   write(0,*) 'second argument',arg2
    READ(arg2,'(I5)') sec_num
-   WRITE(6,*) ' section #',sec_num,' will be printed'
+   IF(sec_num /= 0) WRITE(6,*) ' section #',sec_num,' will be printed'
 
    !  read C4 file into the memory structure c4
    WRITE(6,*) 'Reading C4 file into the c4-structure'
@@ -78,10 +77,12 @@ PROGRAM c4service
             WRITE(6,*) 'Delete the ',file(l1:l2)//inpc4,' file and rerun'
             STOP 'EXFOR entry mismatch'
          END IF
-         !  perform operations on the subsections delete, modify, smooth
+         !  perform operations on the subsections delete, modify, smooth, thin
          IF(action == 'd') CALL delete_section(c4, k)
          IF(action == 'm') CALL modify_section(sc, k, y1, y2, dy1, dy2)
          IF(action == 's') CALL smooth_section(sc, k, y1)
+         IF(action == 't') CALL thin_section(sc, k, y1)
+         IF(action == 'l') CALL limit_section(sc, k, y1, y2)  !limit incident energies between y1 and y2
       ENDDO
 
       !   recreate c4 file from the internal c4-structure with modifications made above
@@ -100,7 +101,7 @@ PROGRAM c4service
 
       !  close, reopen new file to write c4service input file
       CLOSE(13)
-      WRITE(6,*) 'make_input: inp will be replaced',file(l1:l2)//inpc4,'!period'
+!      WRITE(6,*) 'make_input: inp will be replaced',file(l1:l2)//inpc4,'!period'
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='REPLACE')
       CALL make_input(c4)
       WRITE(6,*) 'List of sections and c4service input file ',file(l1:l2)//inpc4,' have been generated'
@@ -128,26 +129,94 @@ CONTAINS
 
    !------------------------------------------------------------------------
 
+   SUBROUTINE limit_section(sc, k, y1, y2)
+
+!  Reduces number of points in the experimental data set by picking up only each y1-th
+!  point from the full data set. There is no checking whether this procedure
+!  conserves the area or that the omitted points would be restored by linear interpolation
+!  between the selected points. Therefore, this thining should be applied only to experimental
+!  data sets that are reach in points and were subjected to heavy smoothing, which makes the two
+!  above mentioned conditions likely to be fulfilled.
+
+      IMPLICIT NONE
+      INTEGER*4 i,k, n
+      REAL*4 :: y1, y2 ! range of incident energies to preserve (in keV)
+      TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
+!      TYPE (c4_data_point), POINTER :: pt1, pt2
+
+      WRITE(6,*)' Cropping subsection: ',k, sc%ref, sc%ent, sc%sub
+
+      IF(y1+y2 == 0.0) RETURN   ! no limits, nothing to do
+      y1 = y1*1000.   ! converting from keV to eV
+      y2 = y2*1000.
+      if(y2 == 0.0) y2 = sc%pt(sc%ndat)%e
+      n = 0
+      DO i = 1, sc%ndat
+         IF(sc%pt(i)%e < y1 .or. sc%pt(i)%e > y2) cycle
+         n = n + 1
+         sc%pt(n) = sc%pt(i)
+      END DO
+      sc%ndat = n
+      WRITE(6,*)' Subsection limitted to incident energies between', y1,' and ',y2,' keV'
+      RETURN
+   END SUBROUTINE limit_section
+
+
+
+
+   SUBROUTINE thin_section(sc, k, y1)
+
+!  Reduces number of points in the experimental data set by picking up only each y1-th
+!  point from the full data set. There is no checking whether this procedure
+!  conserves the area or that the omitted points would be restored by linear interpolation
+!  between the selected points. Therefore, this thining should be applied only to experimental
+!  data sets that are reach in points and were subjected to heavy smoothing, which makes the two
+!  above mentioned conditions likely to be fulfilled.
+
+      IMPLICIT NONE
+      INTEGER*4 i,k, istep, n
+      REAL*4 :: y1 ! section thinning parameter (take every y1 point only)
+      TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
+!      TYPE (c4_data_point), POINTER :: pt1, pt2
+
+      WRITE(6,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
+
+      istep = y1
+      IF(sc%ndat <= istep) RETURN  !set too small for the istep
+      n = 0
+      DO i = 1, sc%ndat, istep
+         n = n + 1
+         sc%pt(n) = sc%pt(i)
+      END DO
+      IF(n*istep <= sc%ndat) THEN   ! including the last point if missing
+         n = n + 1
+         sc%pt(n) = sc%pt(sc%ndat)
+      ENDIF
+      sc%ndat = n
+      WRITE(6,*)' Subsection thinned '
+      RETURN
+   END SUBROUTINE thin_section
+
    SUBROUTINE modify_section(sc, k, y1, y2, dy1, dy2)
       IMPLICIT NONE
       INTEGER*4 i,k
-      REAL*4 :: y1, y2, dy1, dy2 ! section modifying parameters
+      REAL*4 :: y1  ! add y1 to each cross section
+      REAL*4 :: y2  ! scale each cross section by a factor of y2
+      REAL*4 :: dy1 ! add, in square, dy1 % uncertainty to the original uncertainty
+      REAL*4 :: dy2 ! scale each uncertainty by a factor of dy2
 
       TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to modify
-      !      TYPE (c4_file) c4
-      !      TYPE (c4_section), POINTER :: sc
       TYPE (c4_data_point), POINTER :: pt
 
       WRITE(6,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
 
-      !      sc => c4%sec(k)
-
       DO i = 1, sc%ndat
-         !         pt => c4%sec(k)%pt(i)
          pt => sc%pt(i)
-         pt%x  = pt%x  + y1  + pt%x*(y2-1.0) !modifying cross sections
-         pt%dx = SQRT(pt%dx**2 + dy1**2)     !adding additional uncertainty in squares
-         pt%dx = pt%dx*dy2                   !multiplying uncertainty by a factor
+         pt%x  = pt%x  + y1  + pt%x*(y2-1.0)                !modifying cross sections
+         write(*,*)'original:',pt%dx
+         pt%dx = SQRT(pt%dx**2 + (pt%x*dy1/100.)**2)       !adding additional dy1 uncertainty (in %) in squares
+         write(*,*)'modified:',pt%dx
+         pt%dx = pt%dx*dy2                                  !multiplying uncertainty by a factor
       END DO
       WRITE(6,*)' Subsection modified '
       RETURN
@@ -190,46 +259,46 @@ CONTAINS
       !      TYPE (c4_section), POINTER :: sc
       TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to smooth
       TYPE (c4_data_point), POINTER :: p0, p1, p2, p3
-      IF(int(y1) == 0) y1 = 10.0
-      WRITE(6,*)' Smoothing subsection: ',k, sc%ref, sc%ent, sc%sub
+!      IF(int(y1) == 0) y1 = 10.0
       !      sc => c4%sec(k)
-      IF(sc%ndat < 4) RETURN      ! smoothing needs at least 4 points
-      y1 = min(int(y1), sc%ndat-3)
+      IF(sc%ndat < 20) RETURN      ! smoothing needs at least 4 points but we set limit higher
+      WRITE(6,*)' Smoothing subsection: ',k, sc%ref, sc%ent, sc%sub
+      IF(y1 == 0.0) y1 = sqrt(Real(sc%ndat))
       DO i = 1, int(y1)
          DO j = 1, sc%ndat-3
             p0 => sc%pt(j)
             p1 => sc%pt(j+1)
             p2 => sc%pt(j+2)
             p3 => sc%pt(j+3)
-            IF(p1%e<p0%e .OR. p2%e<p1%e .OR. p3%e<p2%e) THEN
-               WRITE(6,*) 'Energies not monotonically increasing for quadruplet starting with j=',j
-               STOP 'Energies not monotonic'
-            END IF
+!            IF(p1%e<p0%e .OR. p2%e<p1%e .OR. p3%e<p2%e) THEN
+!               WRITE(6,*) 'Energies not monotonically increasing for quadruplet starting with j=',j
+!               STOP 'Energies not monotonic'
+!            END IF
 
             ! cross sections
-            s = 0.5*(p1%e - p0%e)*(p1%x + p0%x) + 0.5*(p2%e - p1%e)*(p2%x + p1%x) + &
-               0.5*(p3%e - p2%e)*(p3%x + p2%x)
-            l = p3%e - p0%e
+            s = 0.5*abs(p1%e - p0%e)*(p1%x + p0%x) + 0.5*abs(p2%e - p1%e)*(p2%x + p1%x) + &
+               0.5*abs(p3%e - p2%e)*(p3%x + p2%x)
+            l = abs(p3%e - p0%e)
             IF(l == 0) THEN
                WRITE(6,*)' Fatal error in smoothig: points at the same energy ', p3%e, p0%e
                STOP 'Smoothing failed due to 4 points with the same energy'
             END IF
             h = (3*s)/(2*l) - (p0%x + p3%x)/4.
-            p1%e = p0%e + l/3.0
-            p2%e = p3%e - l/3.0
+            p1%e = p0%e + (p3%e - p0%e)/3.0
+            p2%e = p3%e - (p3%e - p0%e)/3.0
             p1%x = h
             p2%x = h
 !            sp = l*(p0%x+2*p1%x+2*p2%x+p3%x)/6.0
 !            if (s /= sp) write(6,*) 'Inegral mismatch', s, sp
 
             !  x-sec uncertainties
-            s = 0.5*(p1%e - p0%e)*(p1%dx + p0%dx) + 0.5*(p2%e - p1%e)*(p2%dx + p1%dx) + &
-               0.5*(p3%e - p2%e)*(p3%dx + p2%dx)
+            s = 0.5*abs(p1%e - p0%e)*(p1%dx + p0%dx) + 0.5*abs(p2%e - p1%e)*(p2%dx + p1%dx) + &
+               0.5*abs(p3%e - p2%e)*(p3%dx + p2%dx)
             h = (3*s)/(2*l) - (p0%dx + p3%dx)/4.
             p1%dx = h
             p2%dx = h
-!            sp = l*(p0%dx+2*p1%dx+2*p2%dx+p3%dx)/6.0
-!            if (s /= sp) write(6,*) 'Inegral mismatch', s, sp
+            sp = l*(p0%dx+2*p1%dx+2*p2%dx+p3%dx)/6.0
+            if (abs(s-sp)/s > 0.00001) write(6,*) 'Inegral mismatch', s, sp
          END DO
       END DO
       WRITE(6,*)' Subsection smoothed '
@@ -318,7 +387,7 @@ CONTAINS
          WRITE(13,11) k, sc%pza, sc%tza,  pt%mf, pt%mt,  &
             sc%ref, sc%ent, sc%sub, action, y1, y2, dy1, dy2
       ENDDO
-      WRITE(6,*) 'c4service input file created '
+!      WRITE(6,*) 'c4service input file created '
       RETURN
 11    FORMAT(i4, ')', i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,f7.3) )
 
