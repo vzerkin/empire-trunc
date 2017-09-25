@@ -76,7 +76,7 @@ for k in $MT; do
     fi
 
     cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT 0
+$file ${k} $MAT $EXPDAT 0 0.0
 EOF
     echo "*** Running" $GENKAL "on MT=" ${k} "***"
     $EMPIREDIR/util/kalman/$GENKAL <INPUT.D >check.out
@@ -89,13 +89,6 @@ EOF
        rm KALMAN.INP
     fi
 
-    if [ -s INPUT.D ]; then
-       rm INPUT.D
-    fi
-
-    cat >INPUT.D <<EOF
-$file ${k} $MAT $EXPDAT
-EOF
     echo "*** Running" $C4TOKAL "on MT=" ${k} "***"
     $EMPIREDIR/util/kalman/$C4TOKAL <INPUT.D #>KALMAN.INP
 
@@ -138,9 +131,12 @@ EOF
        vim KALMAN.INP
     fi
 
-    echo "*** Running" $KALMAN "***"
-    $EMPIREDIR/util/kalman/$KALMAN <KALMAN.INP >$file-out.kal
 
+    echo "*** Running" $KALMAN "***"
+    $EMPIREDIR/util/kalman/$KALMAN
+
+    mv KALMAN.INP $file-inp.kal
+    mv KALMAN.OUT $file-out.kal
     mv fort.13 $file-xsc.kal
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
