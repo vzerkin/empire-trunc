@@ -230,7 +230,7 @@ def readKalmanOut(zam,nres):
         # read past the header, search for start of 
         # uncertainties:
         line = fkal.next()
-        if line.split()[:2] == ['PARAMETER','INITIAL']:
+        if line.upper().split()[:2] == ['PARAMETER','INITIAL']:
             #read one more:
             fkal.next()
             break
