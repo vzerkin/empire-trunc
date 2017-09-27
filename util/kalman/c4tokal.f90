@@ -5,7 +5,7 @@ program c4tokal
     implicit none
 
     integer*4, parameter :: ngmt = 15      ! list of allowed MTs for Kalman fitting
-    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 999/)
+    integer*4, parameter :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456, 5, 851/)
 
     integer*4, parameter :: kctl1 = 0      ! set nonzero to read priors
     integer*4, parameter :: kctl2 = 0      ! set nonzero to write posteriors
@@ -360,7 +360,7 @@ program c4tokal
 
     return
 
-100 FORMAT(A25,5X,A5,A3,5X,I5)
+100 FORMAT(A25,5X,A5,A3,5X,I6)
 200 FORMAT(6(1PE11.4))
 300 FORMAT(F6.3)
 999 FORMAT(3(1X,E12.5),I4)
