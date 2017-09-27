@@ -158,8 +158,8 @@ program kalend
 
     implicit none
 
-    integer*4, parameter :: nc = 8
-    integer*4, parameter :: mt(nc) = (/1,2,4,16,18,102,103,107/)
+    integer*4, parameter :: nc = 9
+    integer*4, parameter :: mt(nc) = (/1,2,4,16,18,102,103,107,851/)
 
     integer*4 i,ix,k
     character rxc*12
@@ -588,7 +588,7 @@ program kalend
     type (mf33_sect), pointer :: sct
     type (ni_cov_sect), pointer :: ni
 
-    if(mt1 > 200) return
+    if(mt1 > 900) return
     if(.not.associated(mat)) return
 
     ! create our MF33 section
