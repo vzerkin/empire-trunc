@@ -193,7 +193,7 @@ class mgBase:
             f.close()
     
     
-    def write33(self, filename):
+    def write33(self, filename, add_TPID=False):
         """
         write all reaction self-correlation matrices in the multi-group 
         covariance class out in file 33 format
@@ -218,7 +218,7 @@ class mgBase:
         mtList.sort()
         
         fout = file(filename,"w")
-        
+        if add_TPID: fout.write(' $Rev:: 5010     $  $Date:: 2017-09-28#$                             1 0  0\n')
         
         for mt in mtList:
             key = "MT%i" % mt
@@ -239,11 +239,11 @@ class mgBase:
             
             thr = self.thresholds[key]
             covmat = covmat[:thr[1]+1,:thr[1]+1] # truncate extra zeros
-            covmat = covmat[::-1,::-1]  # back to 'normal' order
+#            covmat = covmat[::-1,::-1]  # back to 'normal' order
             
             # also get elist in range of interest:
             elist = list(self.elist[:self.thresholds[key][1]+1])
-            elist = [1.e-5] + elist[::-1]
+#            elist = [1.e-5] + elist[::-1]
             
             # right-most in tuple is number of sub-sections:
             str = b.writeENDFline([self.zam,self.awt,0,0,0,1],
