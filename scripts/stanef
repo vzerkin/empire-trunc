@@ -23,7 +23,7 @@ fi
 # RUN STAN
 
 
-$EMPIREDIR/util/stan/stan  $file.endf > $file-log.stan
+$EMPIREDIR/util/stan/stan -x=1 -f --verbose -cm -o $file.endf $file-tmp.endf $file.endf > $file-log.stan
 
 echo "  Renaming $file.STN as $file.endf"  >> $file-log.stan
 mv $file.STN $file.endf 2>>$file-log.stan

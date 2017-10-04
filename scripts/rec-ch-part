@@ -54,24 +54,35 @@ S103=+(600,649)
 
 
 EOF
+
 $EMPIREDIR/util/fixup/fixup < FIXUP.INP
-rm FIXUP.INP
+
 mv FIXUP.LST $work/$file-log.fixup
+if [ ! -f $file-tmp.endf ]; then
+    echo "FIXUP output file ($file-tmp.endf) with reconstructed chrg. part. channels was not created."
+    echo " Hit any button to exit "
+    read a
+    exit
+fi
+rm FIXUP.INP
 
 # RUN STAN
-rm $file-full.endf 2>/dev/null
+rm $file-tmp.STN 2>/dev/null
 echo "Running STAN"
-$EMPIREDIR/util/stan/stan -x=1 -f --verbose -cm -o $file-full.endf $file-tmp.endf
-if [ ! -f $file-full.endf ]; then
-    echo " STAN output file ($file-full.endf) was not created."
+
+$EMPIREDIR/scripts/stanef $file-tmp
+
+if [ ! -f $file-tmp.STN ]; then
+    echo " STAN output file ($file-tmp.STN) with reconstructed chrg. part. channels was not created."
     echo " Hit any button to exit "
     read a
     exit
 fi
 
-echo " Do you want to replace current $file.endf with the STAN result (Y/n)?"
-read a
-if [ $a = "y" ]; then 
-   mv $file-full.endf $file.endf    
-fi
+#echo " Do you want to replace current $file.endf with the STAN result (Y/n)?"
+#read a
+#if [ $a = "y" ]; then 
+#   mv $file-full.endf $file.endf    
+#fi
+
 exit
