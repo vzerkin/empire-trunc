@@ -9,21 +9,51 @@ if [ -z $EMPIREDIR ]; then
 fi
 
 file=$1
-work=`pwd`
-if [ "$1" = "" ]
-   then
-echo 'ENDF files ready to run'
-echo ' '
-ls *endf
-echo ' '
-echo -n 'Choose one of the above (without .endf extention!): '
-read file
+
+if [ "$1" = "" ]; then
+	echo 'ENDF files ready to run'
+	echo ' '
+	ls *endf
+	echo ' '
+	echo -n 'Choose one of the above (without .endf extention!): '
+	read file
 fi                          
+
+# RUN STANEF
+# is commented in favor of the more modern STAN below
+#
+#rm -f INPUT
+#cat >INPUT <<EOF
+#$file.endf
+#$file.STN
+#0
+#
+#DONE
+#EOF
+#$EMPIREDIR/util/stanef/stanef <INPUT 2>| err.log
+#if grep 'Completed successfully' err.log; then
+#    mv $file.STN $file.endf
+#else
+#    echo STANEF did not finish successfully!
+#    less err.log
+#    mv err.log > $file-log.stanef
+#fi
+
 
 # RUN STAN
 
+dos2unix $file.endf
+$EMPIREDIR/util/stan/stan -x=1 -f --verbose -cm -o $file.STN $file.endf > $file-log.stan
 
-$EMPIREDIR/util/stan/stan -x=1 -f --verbose -cm -o $file.endf $file-tmp.endf $file.endf > $file-log.stan
+if [ ! -f $file.STN ]; then
+    echo " STAN output file ($file.STN) with reconstructed chrg. part. channels was not created."
+    echo " Check the input endf file " $file.endf
+    echo " Opening log file with less (hit q and enter to exit less)"
+    less $file-log.stan
+    echo " Hit any button to exit "
+    read a
+    exit
+fi
 
 echo "  Renaming $file.STN as $file.endf"  >> $file-log.stan
 mv $file.STN $file.endf 2>>$file-log.stan

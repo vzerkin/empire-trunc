@@ -65,19 +65,24 @@ if [ ! -f $file-tmp.endf ]; then
     exit
 fi
 rm FIXUP.INP
+# moving FIXUP result back to the $file.endf
+mv $file-tmp.endf $file.endf
+
 
 # RUN STAN
-rm $file-tmp.STN 2>/dev/null
+rm $file.STN 2>/dev/null
 echo "Running STAN"
 
-$EMPIREDIR/scripts/stanef $file-tmp
-
-if [ ! -f $file-tmp.STN ]; then
-    echo " STAN output file ($file-tmp.STN) with reconstructed chrg. part. channels was not created."
+$EMPIREDIR/scripts/stanef $file
+  
+if [ ! -f $file.STN ]; then
+    echo " STAN output file ($file.STN) with reconstructed chrg. part. channels was not created."
+    echo " Check the input endf file " $file.endf
     echo " Hit any button to exit "
     read a
     exit
 fi
+mv $file.STN $file.endf
 
 #echo " Do you want to replace current $file.endf with the STAN result (Y/n)?"
 #read a
