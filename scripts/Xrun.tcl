@@ -1,11 +1,10 @@
-# $Rev: 4993 $
-# $Author: mherman $
-# $Date: 2017-09-21 06:52:55 +0200 (Do, 21 Sep 2017) $
+# $Rev: 5013 $
+# $Author: zerkinv $
+# $Date: 2017-10-05 19:07:57 +0200 (Do, 05 Okt 2017) $
 #
 #!/bin/sh
 # the next line restarts using wish\
 exec wish8.4 "$0" "$@" 
-exec wish 
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -5804,9 +5803,9 @@ close $rcfl
 #  set rcfl [open $::env(EMPIREDIR)/.Xrunrc a+]
    set workdir [pwd]
    set file ""
-   set editor ""
+   set editor "gvim"
    set workdir ""
-   set psviewer ""
+   set psviewer "ggv"
    set wwwviewer ""
    set compeval ""
    set compeval2 ""
@@ -6110,7 +6109,7 @@ adjourn .top75} \
     button $site_3_0.button77 \
         -activebackground #ff0000 -activeforeground White -background #dcdcdc \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete all files related to the project except input?" "" 0 No Yes ] == 1} {
-exec $::env(EMPIREDIR)/scripts/clean $file
+exec xterm -e $::env(EMPIREDIR)/scripts/clean $file
 adjourn .top75}} \
         -cursor X_cursor -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -8403,6 +8402,8 @@ exit} \
         -value kate -variable editor -command {} -label kate 
     $site_4_0.menu97 add radiobutton \
         -value nedit -variable editor -command {} -label nedit 
+    $site_4_0.menu97 add radiobutton \
+        -value Notepad2 -variable editor -command {} -label Notepad2 
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
         -command {

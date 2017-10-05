@@ -190,8 +190,10 @@ def runE(proj):
            print('File with '+poscom[i]+'-section commentaries exists: %s' % proj+'-com'+index[i]+'.txt')
 
     if not isEmpty(proj+'.c4'):
-        ln(proj+'.c4','C4.DAT')
-        #cp(proj+'.c4','C4.DAT')
+        if os.name=='posix':    # not windows
+            ln(proj+'.c4','C4.DAT')
+        else:
+            cp(proj+'.c4','C4.DAT')
         print('Using existing file with experimental data (sorted C4): %s' % proj+'.c4')
         if not isEmpty(proj+'-natural.c4'):
             print('Experimental data for natural element exist %s' % proj+'-natural.c4')
@@ -256,7 +258,7 @@ def runE(proj):
             # save the concatenated files together in the two files we need later
             open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
 
-            if not isEmpty(proj+'.c4'): 
+            if isEmpty(proj+'.c4'): 
                 cp(proj+'-unsorted.c4',proj+'.c4')
                 print('Error retrieving experimental data: C4 files not available in /EXFOR subdirectory')
 
