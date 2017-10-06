@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4468 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
+Ccc   * $Rev: 5015 $
+Ccc   * $Author: gnobre $
+Ccc   * $Date: 2017-10-06 17:02:42 +0200 (Fr, 06 Okt 2017) $
 
 Ccc
 Ccc   ********************************************************************
@@ -119,9 +119,11 @@ c       that will be searched in the reaction headers in the -mat.sen file.
         MTLIST(16) = LISTOFMT(11,'(z,2nd)')
         MTLIST(17) = LISTOFMT(115,'(z,pd)')
         MTLIST(18) = LISTOFMT(207,'(z,xa)')
+        MTLIST(19) = LISTOFMT(5,'MT=5')
+        MTLIST(20) = LISTOFMT(851,'(n,a_dis)')
 
 C       Number of implemented reactions
-        IMPREAC=18
+        IMPREAC=20
 
 
 C       Printing which reactions have been implemented
