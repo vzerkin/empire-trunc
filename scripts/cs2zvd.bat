@@ -10,19 +10,19 @@ cls
 @echo      I                                                     I
 @echo      I                Nuclear Data Section                 I
 @echo      I         International Atomic Energy Agency          I
-@echo      I                   Vienna, 2014                      I
+@echo      I                 Vienna, 2014-2017                   I
 @echo      +-----------------------------------------------------+
 @echo.
 @echo par0=%0
-@echo par1=%1
-@echo par2=%2
-@echo par3=%3
-@echo par4=%4
-@echo par5=%5
-@echo par6=%6
-@echo par7=%7
-@echo par8=%8
-@echo par9=%9
+@if not %1.==. echo par1=%1
+@if not %2.==. echo par2=%2
+@if not %3.==. echo par3=%3
+@if not %4.==. echo par4=%4
+@if not %5.==. echo par5=%5
+@if not %6.==. echo par6=%6
+@if not %7.==. echo par7=%7
+@if not %8.==. echo par8=%8
+@if not %9.==. echo par9=%9
 @echo EMPIREDIR=%EMPIREDIR%
 @echo Working dir=%CD%
 
