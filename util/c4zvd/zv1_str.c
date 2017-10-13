@@ -27,6 +27,21 @@ int num;
     return(i);
 }
 
+
+char* mystrcpy(char *so, char *si) {
+    memmove(so,si,strlen(si)+1);
+    return so;
+}
+/*
+char* mystrcpy(char *so,char *si) {
+    for (;*si!='\0';) *so++=*si++;
+    *so='\0';
+    return so;
+}
+*/
+
+
+
 /*
 char    *my_fgets(s,ls,f)
 char    *s;
@@ -352,7 +367,7 @@ int     n;
     l=strlen(s);
     if (n>l) i=l;
     else i=n;
-    strcpy(s,&s[i]);
+    mystrcpy(s,&s[i]);
 }
 
 
@@ -362,7 +377,7 @@ char    *s,sym;
     char    *si;
     for (si=s; *si != '\0'; si++) {
     if (*si==sym) {
-        strcpy(si,si+1);
+        mystrcpy(si,si+1);
         break;
     }
     }

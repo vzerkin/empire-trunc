@@ -46,6 +46,8 @@ int   setFNumeration();
 int   setN1Numeration(int i1);
 int   myReal2ShortStr(float rr, char *str);
 int   r4tos11(float rr, char *str);
+char* mystrcpy(char *so, char *si);
+
 
 #define LREACT 300
 int     nReactions;
@@ -141,7 +143,7 @@ char    **argv;
 //            strcpy(&strName[i],&strName[i+1]);
 //        }
         if ((strName[i]=='\\')||(strName[i]=='/')||(strName[i]==':')) {
-            strcpy(strName,&strName[i+1]);
+            mystrcpy(strName,&strName[i+1]);
             break;
         }
     }
@@ -315,7 +317,7 @@ char    **argv;
             delEndSpace(str1);
             ls=strlen(str1);
             for (ii=0; ii<ls; ) {
-                if (str1[ii]=='/') strcpy(&str1[ii],&str1[ii+1]);
+                if (str1[ii]=='/') mystrcpy(&str1[ii],&str1[ii+1]);
                 else ii++;
             }
 //	    printf("[%s]\n",str1);
@@ -654,7 +656,7 @@ int myReal2ShortStr(float rr, char *str)
     ls=strlen(sss);
     for (i=0; i<ls; i++) {
         if (sss[i]=='E') {
-            strcpy(&sss[i],&sss[i+1]);
+            mystrcpy(&sss[i],&sss[i+1]);
             sscanf(&sss[i],"%d",&nn);
             sprintf(&sss[i],"%+03d",nn);
             break;
