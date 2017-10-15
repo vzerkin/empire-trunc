@@ -118,6 +118,9 @@ module ENDF_MF6_IO
         integer mt                              ! MT
         real za                                 ! ZA for material
         real awr                                ! AWR for material
+        integer jp                              ! P(nu) flag for fission
+        integer jpn                             ! P(nu_neutron) flag, computed from jp
+        integer jpp                             ! P(nu_gamma) flag, computed from jp
         integer lct                             ! ref system flag
         integer nk                              ! # reaction product subsections
         type (mf6_product), pointer :: prd(:)   ! product sub-section
@@ -143,7 +146,11 @@ module ENDF_MF6_IO
 
     type (mf6_product), pointer :: sc
 
-    call get_endf(mf6%za, mf6%awr, n, mf6%lct, mf6%nk, n)
+    call get_endf(mf6%za, mf6%awr, mf6%jp, mf6%lct, mf6%nk, n)
+    if (mf6%jp.gt.0) then
+        mf6%jpp=mf6%jp/10
+        mf6%jpn=mf6%jp-mf6%jpp
+    end if
     allocate(mf6%prd(mf6%nk),stat=n)
     if(n .ne. 0) call endf_badal
 
@@ -175,8 +182,10 @@ module ENDF_MF6_IO
             allocate(sc%law7)
             call read_law7(sc%law7)
         case default
-            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-            call endf_error(erlin)
+            if (.not.((sc%law.lt.0).and.(mf6%jp.ne.0))) then
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
+            end if
         end select
 
     end do
@@ -356,7 +365,7 @@ module ENDF_MF6_IO
     type (mf6_product), pointer :: sc
 
     call set_mt(mf6%mt)
-    call write_endf(mf6%za, mf6%awr, 0, mf6%lct, mf6%nk, 0)
+    call write_endf(mf6%za, mf6%awr, mf6%jp, mf6%lct, mf6%nk, 0)
 
     do i = 1,mf6%nk
 
@@ -378,8 +387,10 @@ module ENDF_MF6_IO
         case(7)
             call write_law7(sc%law7)
         case default
-            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-            call endf_error(erlin)
+            if (.not.((sc%law.lt.0).and.(mf6%jp.ne.0))) then
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
+            end if
         end select
 
     end do
@@ -638,8 +649,10 @@ module ENDF_MF6_IO
                 end do
             end do
         case default
-            write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
-            call endf_error(erlin)
+            if (.not.((sc%law.lt.0).and.(mf6%jp.ne.0))) then
+                write(erlin,*) 'Undefined LAW encountered in MF6:',sc%law
+                call endf_error(erlin)
+            end if
         end select
 
     end do
