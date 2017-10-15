@@ -112,7 +112,11 @@ module ENDF_MF1_IO
 
     type MF1_458
         integer nply                             ! max poly order. starts at 0
+        integer lfc                              ! flag for tabulated fission energy release
+        integer nfc                              ! number of fission components given as tables
         type (MF1_458_terms), pointer :: cmp(:)
+        type (integer), pointer :: ldrv(:)       ! flag if ith fission energy release component is derived (nfc)
+        type (tab1), pointer :: eifc(:)          ! ith fission energy release component (nfc)
     end type
 
     !~~~~~~~~~~~~~~~~~~~~~~~~~~~~  MT460  Delayed Photon Data  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -426,9 +430,11 @@ module ENDF_MF1_IO
     type (mf1_458), intent(out) :: r8
 
     integer i,j,k,n
+    real xx
 
-    call get_endf(n, n, n, n)
+    call get_endf(n, r8%lfc, n, r8%nfc)
     call read_endf(n, r8%nply, i, j)
+
     if((i /= (18*(r8%nply+1))) .or. (j /= (9*(r8%nply+1)))) then
         write(erlin,*)  'Inconsistent values for NT, NPLY in MF1/458 found: ',i,r8%nply
         call endf_error(erlin)
@@ -441,6 +447,17 @@ module ENDF_MF1_IO
     do k = 0,r8%nply
         call read_reals(r8%cmp(k)%efr,18)
     end do
+
+    if(r8%lfc.eq.1) then
+        call chk_siz(r8%nfc,'Number of energy release component tables','NFC')
+        allocate(r8%eifc(0:r8%nfc),stat=n)
+        allocate(r8%ldrv(0:r8%nfc),stat=n)
+        if(n /= 0) call endf_badal
+        do i = 1,r8%nfc
+            call read_endf(xx, xx, r8%ldrv(i), n, r8%eifc(i)%nr, r8%eifc(i)%np)
+            call read_endf(r8%eifc(i))
+        end do
+    end if
 
     return
     end subroutine read_458
@@ -735,11 +752,16 @@ module ENDF_MF1_IO
 
     integer i
 
-    call write_endf(za, awr, 0, 0, 0, 0)
+    call write_endf(za, awr, 0, r8%lfc, 0, r8%nfc)
     call write_endf(zero, zero, 0, r8%nply, 18*(r8%nply+1), 9*(r8%nply+1))
     do i = 0,r8%nply
         call write_reals(r8%cmp(i)%efr,18)
     end do
+    do i = 1,r8%nfc
+        call write_endf(zero, zero, r8%ldrv(i), i, r8%eifc(i)%nr, r8%eifc(i)%np)
+        call write_endf(r8%eifc(i))
+    end do
+
 
     return
     end subroutine write_458
@@ -806,6 +828,13 @@ module ENDF_MF1_IO
         deallocate(mf1%mt456,stat=n)
     else if(associated(mf1%mt458)) then
         if(associated(mf1%mt458%cmp)) deallocate(mf1%mt458%cmp,stat=n)
+        if(associated(mf1%mt458%eifc)) then
+            do i = 1,mf1%mt458%nfc
+                call del_tab1(mf1%mt458%eifc(i))
+            end do
+            deallocate(mf1%mt458%eifc,stat=n)
+            deallocate(mf1%mt458%ldrv,stat=n)
+        end if
         deallocate(mf1%mt458,stat=n)
     else if(associated(mf1%mt460)) then
         if(associated(mf1%mt460%e)) then
@@ -879,6 +908,9 @@ module ENDF_MF1_IO
         end if
     case(458)
         l = 3*(mf1%mt458%nply+1) + 2
+        do i = 1,mf1%mt458%nfc
+            l = l + lc_tab1(mf1%mt458%eifc(i)) + 1
+        end do
     case(460)
         if(mf1%mt460%lo == 1) then
             l = 1
