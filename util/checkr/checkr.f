@@ -1,5 +1,5 @@
-! $Rev: 4979 $                                                          | 
-! $Date: 2017-08-21 19:02:49 +0200 (Mo, 21 Aug 2017) $                                                     
+! $Rev: 5019 $                                                          | 
+! $Date: 2017-10-15 16:35:39 +0200 (So, 15 Okt 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -29,6 +29,8 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
+!-V         Version 8.22   October 2017 D. Brown
+!-v                        - Add checks of P(nu) for fission
 !-V         Version 8.21   September 2014 D. Brown, A. Trkov
 !-V                        - Disable EMAX tests for atomic relaxation data
 !-V                          (NSUB=6, Maximum energy for Atomic relaxation data)
@@ -3219,6 +3221,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
       INTEGER(KIND=I4) :: LCT
       INTEGER(KIND=I4) :: NK
+      INTEGER(KIND=I4) :: JP,JPN,JPP
       INTEGER(KIND=I4) :: LAW
       INTEGER(KIND=I4) :: LANG,LEP,NEP,NEPM
       INTEGER(KIND=I4) :: NA,ND
@@ -3248,23 +3251,38 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       CALL TESTP(3,MTO)
 !
-!     SECTION CANNOT EXIST IN EITHER FILE 4 OR FILE 5
+!     SET P(NU) JP, JPP, JPN FLAGS FOR FISSION
+!     THESE SHOULD ONLY BE SET FOR MT=18
+!
+      JP = L1H
+      JPP = JP/10
+      JPN = JP-JPP
+      IF((JP.NE.0).AND.(MT.NE.18)) THEN
+         WRITE(EMESS,'(A)') 'JP.GT.0 ONLY ALLOWED FOR MT=18'
+         CALL ERROR_MESSAGE(IONE)
+      END IF
+!
+!     SECTION CANNOT EXIST IN EITHER FILE 4 OR FILE 5 UNLESS JP.GT.0
 !
       MFM2 = MF - 2
       CALL TESTS(MFM2,MT,ISET)
       IF(NXC0.GT.0.AND.NXC0.LT.NSECMAX.AND.ISET.NE.1.AND.ISET.NE.3) THEN
+         IF(.NOT.((JP.NE.0).AND.(MT.EQ.18))) THEN
          WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
      &       'THIS SECTION REQUIRES THAT SECTION', MFM2,'/',MT,         &       
      &       ' NOT BE PRESENT'
          CALL ERROR_MESSAGE(IONE)
+         END IF
       END IF
       MFM1 = MF - 1
       CALL TESTS(MFM1,MT,ISET)
       IF(NXC0.GT.0.AND.NXC0.LT.NSECMAX.AND.ISET.NE.1.AND.ISET.NE.3) THEN
-         WRITE(EMESS,'(A,I3,A,I3,A)')                                   &       
+         IF(.NOT.((JP.NE.0).AND.(MT.EQ.18))) THEN
+         WRITE(EMESS,'(A,I3,A,I3,A)')                                   &
      &       'THIS SECTION REQUIRES THAT SECTION', MFM1,'/',MT,         &       
      &       ' NOT BE PRESENT'
          CALL ERROR_MESSAGE(IONE)
+         END IF
       END IF
 !
 !     CHECK LAB-CM FLAG
@@ -3282,7 +3300,9 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       DO I=1,NK
          CALL RDTAB1
          LAW = L2
-         CALL TEST1(LAW,0,LAWMAX,'LAW',2)
+         IF(JP.EQ.0) THEN ! disable LAW test for fission P(nu)
+            CALL TEST1(LAW,0,LAWMAX,'LAW',2)
+         END IF
          IF(LCT.EQ.3.AND.LAW.NE.1) THEN
             EMESS = 'LCT CAN BE 3 ONLY IF LAW = 1'
             CALL ERROR_MESSAGE(NSEQP1)
@@ -3291,11 +3311,11 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
          SELECT CASE (LAW)
 !
-!        UNKNOWN LAW
+!           UNKNOWN LAW
 !
             CASE (0)
 !
-!        TABULAR LAW
+!           TABULAR LAW
 !
             CASE (1)
                CALL RDTAB2(2)
@@ -3454,13 +3474,28 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                   END DO
                END DO
 !
-!           INVALID DISTRIBUTION LAW
+!           MIGHT BE INVALID DISTRIBUTION LAW
 !
             CASE DEFAULT
-               WRITE(EMESS,'(A,I3,A)')  'LAW=',LAW,' IS NOT ALLOWED'
-               CALL ERROR_MESSAGE(NSEQP1)
-               IERX = 1
-               GO TO 100
+               IF(JP.EQ.0) THEN
+                   WRITE(EMESS,'(A,I3,A)') 'LAW=',LAW,' IS NOT ALLOWED'
+                   CALL ERROR_MESSAGE(NSEQP1)
+                   IERX = 1
+                   GO TO 100
+               ELSE ! HAVE JP.GT.0
+!
+!           FOR P(NU) AND LAW.LT.0, BETTER HAVE DISTRIBUTIONS ELSEWHERE
+!           NEED TO WRITE CHECKS FOR THIS!
+!              IF ZAP.EQ.1.0, LAW.LT.0, BETTER FIND MF=4,5
+!              IF ZAP.EQ.0.0, LAW.LT.0, BETTER FIND MF=14,15
+!
+                  IF(LAW.GE.0) THEN
+                     WRITE(EMESS,'(A,I3,A)')'LAW=',LAW,' IS NOT ALLOWED'
+                     CALL ERROR_MESSAGE(NSEQP1)
+                     IERX = 1
+                     GO TO 100
+                  END IF
+              END IF
          END SELECT
       END DO
 !
