@@ -1,5 +1,5 @@
-! $Rev: 5023 $                                                          | 
-! $Date: 2017-10-16 15:49:57 +0200 (Mo, 16 Okt 2017) $                                                     
+! $Rev: 5024 $                                                          | 
+! $Date: 2017-10-16 15:58:39 +0200 (Mo, 16 Okt 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -267,7 +267,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.21'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
 !
 !     Define variable precision
 !
