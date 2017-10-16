@@ -22,6 +22,8 @@ C-V        - Refine the first and last angle intervals to half-nominal
 C-V          value.
 C-V  16/06 Allow Kalbach representation with NA=2.
 C-V  16/09 Fix error summing Legendre components in update 09/12.
+C-V  17/10 Allow negative LAW pointing to MF=|LAW| where the actual
+C-V        spectra are given (new feature for P(nu) in ENDF)
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -491,7 +493,7 @@ C*         (continuum energy-angle distributions)
         IF(LTT.GT.0) 
      &  WRITE(LTT,900) '                      Converting to Law ',LAW
         GO TO 130
-      ELSE IF(LAW0.EQ.0 .OR. LAW0.EQ.3 .OR. LAW0.EQ.4) THEN
+      ELSE IF(LAW0.LE.0 .OR. LAW0.EQ.3 .OR. LAW0.EQ.4) THEN
 C*      -- No action necessary for Law 0, 3, 4
         IF(LTT.GT.0) 
      &  WRITE(LTT,900) '                       No action needed '
