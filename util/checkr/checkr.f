@@ -1,5 +1,5 @@
-! $Rev: 5021 $                                                          | 
-! $Date: 2017-10-16 15:14:26 +0200 (Mo, 16 Okt 2017) $                                                     
+! $Rev: 5022 $                                                          | 
+! $Date: 2017-10-16 15:49:04 +0200 (Mo, 16 Okt 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -1580,6 +1580,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: NUREP,N,LO,NG
+      INTEGER(KIND=I4) :: LFC, NFC
 !
       INTEGER(KIND=I4), PARAMETER :: LNUMAX=2,LNUMAXS4=1
 !
@@ -1643,10 +1644,17 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             END IF
 !
          CASE (458)          ! ENERGY RELEASE IN FISSION
+            NFC = N2H
+            LFC = L2H
             CALL RDLIST
             CALL TEST1(L2L,0,64,'NPLY',1)
             CALL TEST2(NPL,18*(L2L+1),'NPL')
             CALL TEST2(N2L, 9*(L2L+1),'N2L')
+            IF (LFC.EQ.1) THEN ! Fission energy release as tables
+               DO N=1,NFC
+                 CALL RDTAB1
+               END DO
+            END IF
             GO TO 100
 !
          CASE (460)          ! Delayed photon data
