@@ -1,5 +1,5 @@
-! $Rev: 5019 $                                                          | 
-! $Date: 2017-10-15 16:35:39 +0200 (So, 15 Okt 2017) $                                                     
+! $Rev: 5021 $                                                          | 
+! $Date: 2017-10-16 15:14:26 +0200 (Mo, 16 Okt 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -3236,6 +3236,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       INTEGER(KIND=I4), PARAMETER :: LANGMAX=15,LEPMAX=5
       INTEGER(KIND=I4), PARAMETER :: NPSXMAX=20
 !
+      REAL ZAP
+!
       DATA IONE / 1 /
 !
 !     TEST FOR A VALID MT NUMBER
@@ -3299,6 +3301,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       DO I=1,NK
          CALL RDTAB1
+         ZAP = C1
          LAW = L2
          IF(JP.EQ.0) THEN ! disable LAW test for fission P(nu)
             CALL TEST1(LAW,0,LAWMAX,'LAW',2)
@@ -3477,7 +3480,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !           MIGHT BE INVALID DISTRIBUTION LAW
 !
             CASE DEFAULT
-               IF(JP.EQ.0) THEN
+               IF((JP.EQ.0).OR.(LAW.GE.0)) THEN
                    WRITE(EMESS,'(A,I3,A)') 'LAW=',LAW,' IS NOT ALLOWED'
                    CALL ERROR_MESSAGE(NSEQP1)
                    IERX = 1
@@ -3485,16 +3488,45 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                ELSE ! HAVE JP.GT.0
 !
 !           FOR P(NU) AND LAW.LT.0, BETTER HAVE DISTRIBUTIONS ELSEWHERE
-!           NEED TO WRITE CHECKS FOR THIS!
+!
 !              IF ZAP.EQ.1.0, LAW.LT.0, BETTER FIND MF=4,5
+!
+                  IF(INT(ZAP).eq.1) THEN
+                    CALL TESTS(4,MT,ISET)
+                    IF(ISET.GT.1) THEN
+                      WRITE(EMESS,'(A,I3,A,I3,A)')                      &
+     &                  'ZAP.EQ.1, LAW.LT.0 REQUIRES SECTION',          &
+     &                  4,'/',MT,' BE PRESENT'
+                      CALL ERROR_MESSAGE(IONE)
+                    END IF
+                    CALL TESTS(5,MT,ISET)
+                    IF(ISET.GT.1) THEN
+                      WRITE(EMESS,'(A,I3,A,I3,A)')                      &
+     &                  'LAW.LT.0 REQUIRES SECTION',                    &
+     &                  5,'/',MT,' BE PRESENT'
+                      CALL ERROR_MESSAGE(IONE)
+                    END IF
+                  END IF
+!
 !              IF ZAP.EQ.0.0, LAW.LT.0, BETTER FIND MF=14,15
 !
-                  IF(LAW.GE.0) THEN
-                     WRITE(EMESS,'(A,I3,A)')'LAW=',LAW,' IS NOT ALLOWED'
-                     CALL ERROR_MESSAGE(NSEQP1)
-                     IERX = 1
-                     GO TO 100
+                  IF(INT(ZAP).eq.0) THEN
+                    CALL TESTS(14,MT,ISET)
+                    IF(ISET.GT.1) THEN
+                      WRITE(EMESS,'(A,I3,A,I3,A)')                      &
+     &                  'ZAP.EQ.0, LAW.LT.0 REQUIRES SECTION',          &
+     &                  14,'/',MT,' BE PRESENT'
+                      CALL ERROR_MESSAGE(IONE)
+                    END IF
+                    CALL TESTS(15,MT,ISET)
+                    IF(ISET.GT.1) THEN
+                      WRITE(EMESS,'(A,I3,A,I3,A)')                      &
+     &                  'ZAP.EQ.0, LAW.LT.0 REQUIRES SECTION',          &
+     &                  15,'/',MT,' BE PRESENT'
+                      CALL ERROR_MESSAGE(IONE)
+                    END IF
                   END IF
+
               END IF
          END SELECT
       END DO
