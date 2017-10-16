@@ -1,5 +1,5 @@
-! $Rev: 5022 $                                                          | 
-! $Date: 2017-10-16 15:49:04 +0200 (Mo, 16 Okt 2017) $                                                     
+! $Rev: 5023 $                                                          | 
+! $Date: 2017-10-16 15:49:57 +0200 (Mo, 16 Okt 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -30,7 +30,8 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V         Version 8.22   October 2017 D. Brown
-!-v                        - Add checks of P(nu) for fission
+!-V                        - Add checks of P(nu) for fission
+!-V                        - Add checks of fission energy release tables
 !-V         Version 8.21   September 2014 D. Brown, A. Trkov
 !-V                        - Disable EMAX tests for atomic relaxation data
 !-V                          (NSUB=6, Maximum energy for Atomic relaxation data)
