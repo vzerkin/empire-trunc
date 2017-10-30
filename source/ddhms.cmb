@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 4793 $
-c $Id: ddhms.cmb 4793 2016-10-14 01:07:48Z bcarlson $
+c CVS Version Management $Revision: 5026 $
+c $Id: ddhms.cmb 5026 2017-10-30 01:11:15Z bcarlson $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
@@ -30,11 +30,6 @@ c
 !  ndanghms2 = number of   phi angle bins (every 5 degrees)
 
 !--------------------------------------------------------------
-c  damping rate test
-      REAL*8 vp,vh,vp2,vh2,vpe,vpe2,vhe,vhe2
-      INTEGER npv,nhv
-      common/matave/vp,vh,vp2,vh2,vpe,vpe2,vhe,vhe2,npv,nhv
-
 c input flags controling print of history file and recoil information in o/p
       common/iflagprint/ ihistlab, irecprint, iomlread
       integer ihistlab,irecprint, iomlread
@@ -184,8 +179,8 @@ c /print/ flag for printing
  
 c /const/ used in calculation   !vdepang used just in ang dist routines
       common/constmbc/ pi_g,amu,hbarc,zmnuc,zmf(2),vdep(2),vdepang,
-     +                     vv2,zkf0(2),bb,rtar,bth2,adif
-      real*8 pi_g,amu,hbarc,zmnuc,zmf,vdep,vdepang,vv2,zkf0
+     +                     zkf0(2),bb,rtar,bth2,adif
+      real*8 pi_g,amu,hbarc,zmnuc,zmf,vdep,vdepang,zkf0
       real*8 bb,rtar,bth2,adif
  
 c /isochar/isospin structure of p-h states

@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4843 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-10 05:03:26 +0100 (Fr, 10 Mär 2017) $
+Ccc   * $Rev: 5026 $
+Ccc   * $Author: bcarlson $
+Ccc   * $Date: 2017-10-30 02:11:15 +0100 (Mo, 30 Okt 2017) $
 
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
@@ -10,8 +10,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 4843 $
-C $Id: ddhms.f 4843 2017-03-10 04:03:26Z rcapote $
+C CVS Version Management $Revision: 5026 $
+C $Id: ddhms.f 5026 2017-10-30 01:11:15Z bcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -609,7 +609,6 @@ C
 C Local variables
 C
       INTEGER  jstudy, jsweep, jwarning
-      REAL*8 gg, gge
 C     INTEGER INT
 C     REAl FLOAT
 C
@@ -691,12 +690,7 @@ C               dump 1p energy into c.n. excitation
                ELSE
 C               recalculate emission and damping rates
                 CALL EMISSRATE(UEX(jsweep),GAMup(jsweep))
-                IF(IFErmi.GT.1) THEN
-                  CALL TRDENS(jsweep,gg,gge)
-                  GAMdown(jsweep)=vv2*gge
-                 ELSE
-                  CALL DAMPING(UEX(jsweep),GAMdown(jsweep))
-                 ENDIF
+                CALL DAMPING(jsweep,UEX(jsweep),GAMdown(jsweep))
                ENDIF
 
              ELSE
@@ -712,12 +706,7 @@ C               dump 1h energy into c.n. excitation
                ELSE
 C               recalculate damping rate
                 GAMup(jsweep)=0.
-                IF(IFErmi.GT.1) THEN
-                  CALL TRDENS(jsweep,gg,gge)
-                  GAMdown(jsweep)=vv2*gge
-                 ELSE
-                  CALL DAMPING(-UEX(jsweep),GAMdown(jsweep))
-                 ENDIF
+                CALL DAMPING(jsweep,-UEX(jsweep),GAMdown(jsweep))
                ENDIF
              ENDIF
            ENDIF
@@ -739,7 +728,6 @@ C Local variables
 C
       REAL*8 damprate, emrate, epart, pair
       REAL*8 ek2, ak2, ct2, ph2, ek3, ak3, ct3, ph3, ek4, ak4, ct4, ph4
-      REAL*8 gg, gge, vx, damprate0
       INTEGER jstudy, jwarning, nhresid, npresid 
 C     INTEGER INT
 
@@ -818,27 +806,19 @@ C
             IF (IPRintdiag.EQ.1) WRITE (28,*) 'N=', jstudy,
      &                                  'trapped 1p energy=', ek3
            ELSE
-C        we get here if the particle isn't trapped: now either emit or rescat
+C        we get here if the particle isnt trapped: now either emit or rescat
 C        now work out emission probability:
             CALL EMISSRATE(ek3,emrate)
             GAMup(jstudy) = emrate
-            CALL DAMPING(ek3,damprate0)
-            CALL TRDENS(jstudy,gg,gge)
-            damprate=vv2*gge
-            GAMdown(jstudy) = damprate
+            CALL DAMPING(jstudy,ek3,damprate)
+            GAMdown(jstudy)=damprate
 c            IF(NTOt.LE.5 .AND. ct3.GT.0.99d0) THEN
 c              IPRintdiag=1 
-c              write(28,'(/,a3,f10.3,4e12.4,2i4,2x,a4)') 'k3=',
+c              write(28,'(/,a3,f10.3,3e12.4,2i4,2x,a4)') 'k3=',
 c     1               ZK(jstudy),emrate,damprate,emrate/damprate,
-c     2               damprate0,jstudy,NTOT,seltype 
+c     2               jstudy,NTOT,seltype 
 c             ENDIF 
-            vx=damprate0/damprate
-            vp=vp+vx
-            vp2=vp2+vx**2
-            vx=damprate0/(damprate/ek3)
-            vpe=vpe+vx
-            vpe2=vpe2+vx**2
-            npv=npv+1
+
 C         write(8,*)'epart=',ek3,'seltype=',seltype,' emrate=',emrate,
 C       +' damprate=',damprate,' probemiss=',probemiss
 C
@@ -882,17 +862,7 @@ C       check to see if hole is trapped:
             IEXist(NTOt-1) = -1
             NEXist = NEXist + 1
             GAMup(NTOt-1) = 0.
-            CALL DAMPING(-UEX(NTOt-1),damprate0)
-            CALL TRDENS(NTOt-1,gg,gge)
-            damprate=vv2*gge
-            GAMdown(NTOt-1) = damprate
-            vx=damprate0/damprate
-            vh=vh+vx
-            vh2=vh2+vx**2
-            vx=-damprate0/(damprate/ek2)
-            vhe=vhe+vx
-            vhe2=vhe2+vx**2
-            nhv=nhv+1
+            CALL DAMPING(NTOt-1,-UEX(NTOt-1),GAMdown(NTOt-1))
            ENDIF
 
 C this is the remaining particle
@@ -922,9 +892,7 @@ C          now work out emission probability:
             NEXist = NEXist + 1
             CALL EMISSRATE(ek4,emrate)
             GAMup(NTOt) = emrate
-            CALL DAMPING(ek4,damprate0)
-            CALL TRDENS(NTOt,gg,gge)
-            damprate=vv2*gge
+            CALL DAMPING(NTOt,ek4,damprate)
             GAMdown(NTOt) = damprate
 c            IF(NTOt.LE.5 .AND. ct4.GT.0.99d0) THEN
 c              IPRintdiag=1
@@ -932,13 +900,6 @@ c              write(28,'(/,a3,f10.3,4e12.4,2i4,2x,a4)') 'k4=',
 c     1              ZK(NTOt),emrate,damprate,emrate/damprate,
 c     2              damprate0,NTOT,NTOT,coltype 
 c             ENDIF 
-            vx=damprate0/damprate
-            vp=vp+vx
-            vp2=vp2+vx**2
-            vx=damprate0/(damprate/ek4)
-            vpe=vpe+vx
-            vpe2=vpe2+vx**2
-            npv=npv+1
 C           write(8,*)'epart=',ek4,'seltype=',seltype,' emrate=',emrate,
 C        +' damprate=',damprate,' probemiss=',probemiss
 C
@@ -1013,7 +974,7 @@ C        we get here if the particle isn't trapped: now either emit or rescat
 C        now work out emission probability:
             CALL EMISSRATE(epart,emrate)
             GAMup(jstudy) = emrate
-            CALL DAMPING(epart,damprate)
+            CALL DAMPING(jstudy,epart,damprate)
             GAMdown(jstudy) = damprate
 C         write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
 C       +' damprate=',damprate,' probemiss=',probemiss
@@ -1068,7 +1029,7 @@ C       check to see if hole is trapped:
             IEXist(NTOt-1) = -1
             NEXist = NEXist + 1
             GAMup(NTOt-1) = 0.
-            CALL DAMPING(-UEX(NTOt-1),damprate)
+            CALL DAMPING(NTOt-1,-UEX(NTOt-1),damprate)
             GAMdown(NTOt-1) = damprate
            ENDIF
 
@@ -1099,7 +1060,7 @@ C          now work out emission probability:
              NEXist = NEXist + 1
              CALL EMISSRATE(epart,emrate)
              GAMup(NTOt) = emrate
-             CALL DAMPING(epart,damprate)
+             CALL DAMPING(NTOt,epart,damprate)
              GAMdown(NTOt) = damprate
 C          write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
 C        +' damprate=',damprate,' probemiss=',probemiss
@@ -1164,17 +1125,7 @@ C       check to see if hole is trapped:
            ELSE
             IEXist(jstudy) = -1
             GAMup(jstudy) = 0.
-            CALL DAMPING(-UEX(jstudy),damprate0)
-            CALL TRDENS(jstudy,gg,gge)
-            damprate=vv2*gge
-            GAMdown(jstudy) = damprate
-            vx=damprate0/damprate
-            vh=vh+vx
-            vh2=vh2+vx**2
-            vx=-damprate0/(damprate/ek3)
-            vhe=vhe+vx
-            vhe2=vhe2+vx**2
-            nhv=nhv+1
+            CALL DAMPING(jstudy,-UEX(jstudy),GAMdown(jstudy))
            ENDIF
 
 C
@@ -1218,18 +1169,9 @@ C         now work out emission probability:
             NEXist = NEXist + 1
             CALL EMISSRATE(ek2,emrate)
             GAMup(NTOt) = emrate
-            CALL DAMPING(ek2,damprate0)
-            CALL TRDENS(NTOt,gg,gge)
-            damprate=vv2*gge
+            CALL DAMPING(NTOt,ek2,damprate)
             GAMdown(NTOt) = damprate
 c            write(*,*) ZK(NTOt),emrate,damprate  
-            vx=damprate0/damprate
-            vp=vp+vx
-            vp2=vp2+vx**2
-            vx=damprate0/(damprate/ek2)
-            vpe=vpe+vx
-            vpe2=vpe2+vx**2
-            npv=npv+1
 C           write(8,*)'epart=',ek2,'seltype=',seltype,' emrate=',emrate,
 C       +' damprate=',damprate
 C
@@ -1255,17 +1197,7 @@ C       check to see if hole is trapped:
             IEXist(NTOt-1) = -1
             NEXist = NEXist + 1
             GAMup(NTOt-1) = 0.
-            CALL DAMPING(-UEX(NTOt-1),damprate0)
-            CALL TRDENS(NTOt-1,gg,gge)
-            damprate=vv2*gge
-            GAMdown(NTOt-1) = damprate
-            vx=damprate0/damprate
-            vh=vh+vx
-            vh2=vh2+vx**2
-            vx=-damprate0/(damprate/ek4)
-            vhe=vhe+vx
-            vhe2=vhe2+vx**2
-            nhv=nhv+1
+            CALL DAMPING(NTOt-1,-UEX(NTOt-1),GAMdown(NTOt-1))
            ENDIF
 
          ELSE
@@ -1352,7 +1284,7 @@ C         now work out emission probability:
             NEXist = NEXist + 1
             CALL EMISSRATE(epart,emrate)
             GAMup(NTOt) = emrate
-            CALL DAMPING(epart,damprate)
+            CALL DAMPING(NTOt,epart,damprate)
             GAMdown(NTOt) = damprate
 C           write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
 C       +' damprate=',damprate
@@ -1810,17 +1742,18 @@ C     endif
       END
 C
 C
-      SUBROUTINE DAMPING(Epart,Damprate)
+      SUBROUTINE DAMPING(jstudy,Epart,Damprate)
       IMPLICIT NONE
       INCLUDE 'ddhms.cmb'
 C
 C Dummy arguments
 C
+      INTEGER jstudy
       REAL*8 Damprate, Epart
 C
 C Local variables
 C
-      REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pauli, r0,
+      REAL*8 acomp, amultmfp, ap, beta, c, cons, dave, ds, pf1, pf2, r0,
      &       re, rhoav, rr, sigav, signnpp, signp, vfermi, z
 C     DOUBLE PRECISION DEXP, DLOG, DSQRT, DABS
 C
@@ -1896,18 +1829,26 @@ C
 C
 C     these expressions leave out inelastic x/s for the moment
 C
-C     work out averages for proton and neutron particle:
-      IF (SELtype.EQ.'neut') sigav = (ANTar*signnpp + ZTAr*signp)/ATAr !for neutron
-      IF (SELtype.EQ.'prot') sigav = (ZTAr*signnpp + ANTar*signp)/ATAr !for proton
-C
-C     now Pauli correction factors (see Blann's NPA213, 1973 paper)
-      re = vfermi/(vfermi + DABS(Epart))
+C     now Pauli correction factors 
+      if(IFErmi.gt.1) then
+         call trdens(jstudy,pf1,pf2)
+        else
+C     (see Blann's NPA213, 1973 paper) 
+         re = vfermi/(vfermi + DABS(Epart))
 C     I think above is correct (no binding red. to epart since epart=energy in
 C     nucleus)
-      IF (re.LE.0.5D0) pauli = 1. - 1.4*re
-      IF (re.GT.0.5D0) pauli = 1. - 1.4*re + 0.4*re*(2. - (1./re))**2.5
-      sigav = sigav*pauli
-C     write(8,*)'sigav,pauli,re=',sigav,pauli,re
+         IF (re.LE.0.5D0) pf1 = 1. - 1.4*re
+         IF (re.GT.0.5D0) pf1 = 1. - 1.4*re + 0.4*re*(2.-(1./re))**2.5
+        pf2=pf1    
+        endif
+
+C     work out averages for proton and neutron particle:
+        IF (SELtype.EQ.'neut') THEN
+          sigav = (ANTar*signnpp*pf1 + ZTAr*signp*pf2)/ATAr !for neutron
+         ELSE
+          sigav = (ZTAr*signnpp*pf1 + ANTar*signp*pf2)/ATAr !for proton
+         ENDIF
+C     write(8,*)'sigav,pf1,pf2,re=',sigav,pf1,pf2,reC
 C
       cons=1.0d0
 C      cons = 3.E22
@@ -2029,7 +1970,7 @@ C         check to see if hole is trapped:
             IEXist(1) = -1
             NEXist = NEXist + 1
             GAMup(1) = 0.
-            CALL DAMPING(-UEX(1),GAMdown(1))
+            CALL DAMPING(1,-UEX(1),GAMdown(1))
            ENDIF
 
 C         this is the remaining particle
@@ -2058,7 +1999,7 @@ C           now work out emission probability:
             IEXist(2) = 1
             NEXist = NEXist + 1
             CALL EMISSRATE(epart,GAMup(2))
-            CALL DAMPING(epart,GAMdown(2))
+            CALL DAMPING(2,epart,GAMdown(2))
 C            write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',
 C        + GAMup(2),' damprate=',GAMdown(2)
 C
@@ -2143,7 +2084,7 @@ C         check to see if hole is trapped:
             IEXist(1) = -1
             NEXist = NEXist + 1
             GAMup(1) = 0.
-            CALL DAMPING(-UEX(1),GAMdown(1))
+            CALL DAMPING(1,-UEX(1),GAMdown(1))
            ENDIF
 
 C         this is the particle
@@ -2172,7 +2113,7 @@ C           now work out emission probability:
             IEXist(2) = 1
             NEXist = NEXist + 1
             CALL EMISSRATE(epart,GAMup(2))
-            CALL DAMPING(epart,GAMdown(2))
+            CALL DAMPING(2,epart,GAMdown(2))
 C           write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
 C        +' damprate=',damprate,' probemiss=',probemiss
            ENDIF
@@ -2223,7 +2164,7 @@ C         check to see if hole is trapped:
             IEXist(3) = -1
             NEXist = NEXist + 1
             GAMup(3) = 0.
-            CALL DAMPING(-UEX(3),GAMdown(3))
+            CALL DAMPING(3,-UEX(3),GAMdown(3))
            ENDIF
 
 C         this is the remaining particle
@@ -2252,7 +2193,7 @@ C           now work out emission probability:
             IEXist(4) = 1
             NEXist = NEXist + 1
             CALL EMISSRATE(epart,GAMup(4))
-            CALL DAMPING(epart,GAMdown(4))
+            CALL DAMPING(4,epart,GAMdown(4))
 C           write(8,*)'epart=',epart,'seltype=',seltype,' emrate=',emrate,
 C        +' damprate=',damprate,' probemiss=',probemiss
            ENDIF
@@ -2483,9 +2424,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 4843 $')
+99005 FORMAT ('  xddhms version: $Revision: 5026 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 4843 2017-03-10 04:03:26Z rcapote $')
+99010 FORMAT ('  $Id: ddhms.f 5026 2017-10-30 01:11:15Z bcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -2591,23 +2532,6 @@ C
       WRITE (28,99100)
 99100 FORMAT ('******************** end input information *************'
      &        )
-C
-c      IF(npv.NE.0) THEN
-c        vp=vp/npv
-c        vp2=sqrt(vp2/npv-vp**2)
-c        vpe=vpe/npv
-c        vpe2=sqrt(vpe2/npv-vpe**2)
-c       ENDIF
-c      IF(nhv.NE.0) THEN
-c        vh=vh/nhv
-c        vh2=sqrt(vh2/nhv-vh**2)
-c        vhe=vhe/nhv
-c        vhe2=sqrt(vhe2/nhv-vhe**2)
-c       ENDIF
-c      write(28,*) '            n         v    st.dev_v2',
-c     1                            '     ve    st.dev_ve2'
-c      write(28,'(a4,2x,i10,4f10.3)') 'part',npv,vp,vp2,vpe,vpe2  
-c      write(28,'(a4,2x,i10,4f10.3)') 'hole',nhv,vh,vh2,vhe,vhe2  
 
       IF (IOMlread.EQ.1) THEN
          WRITE (28,*) ' '
@@ -3159,18 +3083,6 @@ Ccalculate maximum emission energy for ejectiles for printing
       sepejecp = ((RESmas(JZResid-1,JZResid+JNResid-1) + PARmas(2))
      &           - RESmas(JZResid,JZResid + JNResid))*AMU             !p emission
       ELAbejecmax = ELAbproj + SEPproj - (MIN(sepejecn,sepejecp))
-
-c zero matrix element test sums
-      vp=0.0d0
-      vp2=0.0d0
-      vh=0.0d0
-      vh2=0.0d0
-      vpe=0.0d0
-      vpe2=0.0d0
-      vhe=0.0d0
-      vhe2=0.0d0
-      npv=0
-      nhv=0
 
 C     zero emission spectrum:
       DO nen = 0, NDIM_EBINS
@@ -4226,9 +4138,6 @@ C     !in part because ikin1 option assume that the Chad-Obl a.dist
 C     !theory is in the channel frame, and an extra lab boost is
 C     !given, which makes the dist more forward-peaked.
 C
-C   average squared reduced matrix element      
-c      vv2=40.0d0*AMUltdamprate
-      vv2=0.13*AMUltdamprate
 
 c  parameters used in geometry dependence
 
@@ -4587,7 +4496,6 @@ c
      1  +ak2min**3*(cf22+cf23*ek2min+ak2min**2*(0.6d0*ek1+ek2min/6.0d0))
       wk2=cf21*(akf2*ekf2-am22*log(akf2+ekf2))-fmn
      1   +akf2**3*(cf22+cf23*ekf2+akf22*(0.6d0*ek1+ekf2/6.0d0))
-c      gg=wk2/(3.0d0*ak1*hbarc**4)
 
       x2=wk2*RANG()+fmn
       ek2=0.5d0*(ekf2+ek2min)
@@ -4700,7 +4608,6 @@ c
       cf2=ekf12+ekf22-ek12
       fmn=ekf22*(cf1+ekf2*(cf2-ekf2*(0.75d0*ek1+0.2d0*ekf2)))
       wk2=ek2x**2*(cf1+ek2x*(cf2-ek2x*(0.75d0*ek1+0.2d0*ek2x)))-fmn
-c      gg=wk2/(3.0d0*hbarc**4)
 
       x2=wk2*RANG()+fmn
       ek2=0.5d0*(ekf2+ek2x)
@@ -4768,7 +4675,7 @@ c      gg=wk2/(3.0d0*hbarc**4)
 c
 c------------------------------------------------------------------------------
 c
-      subroutine trdens(jstudy,gg,gge)
+      subroutine trdens(jstudy,pf1,pf2)
 
       implicit double precision (a-h,o-z)
 
@@ -4777,9 +4684,8 @@ c
       twopi = 2.*PI_g       !just to use PI_g
 
       ind1=1
-      if(seltype.eq.'prot') ind1=2
-      ind2=1
-      if(coltype.eq.'prot') ind2=2
+      if(SELtype.eq.'prot') ind1=2
+      ind2=3-ind1
 
       ak1=ZK(jstudy)
       ak12=ak1**2
@@ -4814,48 +4720,57 @@ c particles
           cf3=(18.0d0*(ek12-ekf12-ekf22)+7.0d0*am22)/24.0d0
           fmn=cf1*(ak2min*ek2min-am22*log(ak2min+ek2min))
      1    +ak2min**3*(cf2+cf3*ek2min+ak2min**2*(0.6d0*ek1+ek2min/6.0d0))
-          wk2=cf1*(akf2*ekf2-am22*log(akf2+ekf2))-fmn
+          pf1=cf1*(akf2*ekf2-am22*log(akf2+ekf2))-fmn
      1       +akf2**3*(cf2+cf3*ekf2+akf22*(0.6d0*ek1+ekf2/6.0d0))
-          gg=wk2/(3.0d0*ak1*hbarc**5)
-          gge=gg*(akf1/ak1)**2
+          pf1=3.0d0*pf1/ak1/(akf1**3+akf2**3)
+          pf2=pf1
          else
 c holes
           cf1=1.5d0*ek1*(ekf12+ekf22)-ekf1**3-ekf2**3-0.5d0*ek1**3
           cf2=ekf12+ekf22-ek12
           fmn=ekf22*(cf1+ekf2*(cf2-ekf2*(0.75d0*ek1+0.2d0*ekf2)))
-          wk2=ek2x**2*(cf1+ek2x*(cf2-ek2x*(0.75d0*ek1+0.2d0*ek2x)))-fmn
-          gg=wk2/(3.0d0*hbarc**5)
-          gge=gg*(akf1/ak1)**2
+          pf1=ek2x**2*(cf1+ek2x*(cf2-ek2x*(0.75d0*ek1+0.2d0*ek2x)))-fmn
+          pf1=3.0d0*pf1/ak1/(akf1**3+akf2**3)
+          pf2=pf1
          endif
 
        else
 c nonrelativistic densities
 
+        akx12=2.0d0*akf12-ak12
+        ak1min=dsqrt(max(akx12,0.0d0))  
         akx22=akf12+akf22-ak12
         ak2min=dsqrt(max(akx22,0.0d0))
 
         if(ak1.gt.akf1) then
-c particles
+c     particles
+          pf1=((ak12-1.4d0*akf12)*akf1**3+0.4d0*ak1min**5)/3.0d0
           if(ak1.ge.akf2) then
-            wk2=((ak12-akf12-0.4d0*akf22)*akf2**3+0.4d0*ak2min**5)/3.0d0
-            if(akf2.gt.akf1) wk2=wk2-(akf2-akf1)**3
+            pf2=((ak12-akf12-0.4d0*akf22)*akf2**3+0.4d0*ak2min**5)/3.0d0
+            if(akf2.gt.akf1) pf2=pf2-(akf2-akf1)**3
      &                                *((akf2+akf1)**2+akf2*akf1)/15.0d0
            else
-            wk2=(2.0d0*ak1**5-5.0d0*akf1**3*ak1**2+3.0d0*akf1**5)/15.0d0
+            pf2=(2.0d0*ak1**5-5.0d0*akf1**3*ak1**2+3.0d0*akf1**5)/15.0d0
            endif 
-          gg=ZMNuc*wk2/(ak1*hbarc**5)
-          gge=gg*(akf1/ak1)**2
+          pf1=3.0d0*pf1/ak12/(akf1**3+akf2**3)
+          pf2=3.0d0*pf2/ak12/(akf1**3+akf2**3)
          else
 c holes
-          wk2=0.25d0*(akf12-ak12)**2
-          gg=ZMNuc*wk2/hbarc**5
-          gge=gg*(akf1/ak1)**2
+          pf1=0.25d0*(akf12-ak12)**2
+          if(ak1.lt.akf2) then
+            pf2=pf1
+            if(akf1.gt.akf2) pf2=pf2-(akf12-akf22)**2
+     &           +4.0d0*ak12*(akf12-akf22)/3.0d0
+     &           +8.0d0*(ak12**2-(ak12+akf22-akf12)**(2.5d0)/ak1)/15.0d0
+           else
+            pf2=(akf22**3*(akf22-ak12)/3.0d0
+     &             -2.0d0*(akf2**5-(ak12+akf22-akf12)**2.5)/15.0d0)/ak1
+           endif
+          pf1=3.0d0*pf1/ak1/(akf1**3+akf2**3)
+          pf2=3.0d0*pf2/ak1/(akf1**3+akf2**3)
          endif
 
        endif
-c geometry-dependent reduction factor defined as thickness/thickness(b=0)
-c      rhored = (1.0d0-bb**2/bth2)/(1.0d0+exp((bb-rtar)/adif))
-c      gge=gge*rhored
 
       return
       end
@@ -4900,7 +4815,6 @@ c      write(*,*) akf1,akf2,ak1
         wk2=(2.0d0*ak1**5-5.0d0*akf1**3*ak1**2+3.0d0*akf1**5)/15.0d0
         x2=wk2*RANG()+2.0d0*akf1**5/15.0d0-akx22*akf1**3/3.0d0
        endif 
-c      gg=wk2/(ak1*hbarc**4)
 
       ak2=0.5d0*(akf2+ak2min)
       do i=1,15
@@ -5034,7 +4948,6 @@ c        wk2=(akf2**3*(akf12-ak12)/3.0d0
 c     1               -2.0d0*(akf2**5-aky52)/15.0d0)/ak1
 c        x2=wk2*RANG()+akf2**5/3.0d0-2.0d0*aky52/15.0d0
 c       endif
-c      gg=wk2/hbarc**4
 
 c      asq2=sqrt(akf12-ak12)
 c      ak2=0.5d0*(asq2+akx2)
