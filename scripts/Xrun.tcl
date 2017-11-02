@@ -1,10 +1,14 @@
-# $Rev: 5013 $
+# $Rev: 5027 $
 # $Author: zerkinv $
-# $Date: 2017-10-05 19:07:57 +0200 (Do, 05 Okt 2017) $
+# $Date: 2017-11-02 09:46:06 +0100 (Do, 02 Nov 2017) $
 #
 #!/bin/sh
 # the next line restarts using wish\
 exec wish8.4 "$0" "$@" 
+
+set my_config "$::env(EMPIREDIR)/.Xrunrc";
+#set my_config "$::env(HOME)/.Xrunrc";
+#set my_config ".Xrunrc";
 
 if {![info exists vTcl(sourcing)]} {
 
@@ -15,9 +19,11 @@ if {![info exists vTcl(sourcing)]} {
     package require Tk
     switch $tcl_platform(platform) {
     windows {
+#	    set my_config "$::env(HOME).Xrunrc";
             option add *Button.padY 0
     }
     default {
+#	    set my_config "$::env(EMPIREDIR)/.Xrunrc";
             option add *Scrollbar.width 10
             option add *Scrollbar.highlightThickness 0
             option add *Scrollbar.elementBorderWidth 2
@@ -5783,9 +5789,12 @@ global widget file profilter zvfilter archfilter
 proc ::init {argc argv} {
 global editor modules zvvplots filelist archdirlist nsh eres file profilter zvfilter archfilter workdir psviewer wwwviewer compeval compeval2 compeval3 compeval4 mat EXPDAT
 global svnfilelist selsvnfilelist svnlog repository maxwelltemp RepWriter
+global my_config
 
-if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
-   set rcfl [open $::env(EMPIREDIR)/.Xrunrc r+]
+#tk_dialog .dialogsi Confirm "Confirm \n $my_config" "" 0 No Yes;
+
+if {[file exists $my_config] == 1} {
+   set rcfl [open $my_config r]
    gets $rcfl file
    gets $rcfl editor
    gets $rcfl workdir
@@ -5800,7 +5809,7 @@ if {[file exists $::env(EMPIREDIR)/.Xrunrc] == 1} {
    gets $rcfl RepWriter
 close $rcfl
       } else {
-#  set rcfl [open $::env(EMPIREDIR)/.Xrunrc a+]
+#  set rcfl [open $my_config a+]
    set workdir [pwd]
    set file ""
    set editor "gvim"
@@ -6433,7 +6442,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_9_0.fra76" "Frame7" vTcl:WidgetProc "Toplevel1" 1
     button $site_9_0.cpd73 \
         -activebackground #ff0000 -activeforeground White -background #efefef \
-        -command {set rcfl [open $::env(EMPIREDIR)/.Xrunrc w+]
+        -command {set rcfl [open $my_config w+]
 puts $rcfl $file
 puts $rcfl $editor
 puts $rcfl $workdir
@@ -8315,7 +8324,7 @@ cd $workdir} \
         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu89 add command \
         \
-        -command {set rcfl [open $::env(EMPIREDIR)/.Xrunrc w+]
+        -command {set rcfl [open $my_config w+]
 puts $rcfl $file
 puts $rcfl $editor
 puts $rcfl $workdir
@@ -8367,7 +8376,7 @@ exit} \
         -command { editFile $::env(EMPIREDIR)/source/Makefile } \
         -label {Edit Makefile} 
     $site_3_0.menu90 add command \
-        -command { editFile $::env(EMPIREDIR)/.Xrunrc } \
+        -command { editFile $my_config } \
         -label {Edit .Xrunrc } 
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
