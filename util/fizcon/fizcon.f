@@ -1,5 +1,5 @@
-! $Rev: 4989 $                                                         |
-! $Date: 2017-09-08 20:34:17 +0200 (Fr, 08 Sep 2017) $                                                     
+! $Rev: 5029 $                                                         |
+! $Date: 2017-11-29 15:15:56 +0100 (Mi, 29 Nov 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -6282,8 +6282,13 @@
 !
 !        Check that the value of IZAP is within range
 !        Photons IZAP=0) can be the last but not the only
+!        If subactinide fission, IZAP=-1 is expected
 !
-         IF(N.LT.NS .OR. NS.EQ.1) CALL TEST6I(IZAP,3000,120000,'IZAP')
+         IF((IZAP.EQ.-1).AND.(MT.NE.18)) THEN
+             IF(N.LT.NS .OR. NS.EQ.1) THEN
+                CALL TEST6I(IZAP,3000,120000,'IZAP')
+             END IF
+         END IF
 !
 !        If IZAP can be uniquely defined from IZ, IA, MT and projectile
 !        check for valid IZAP
