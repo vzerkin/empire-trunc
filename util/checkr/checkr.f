@@ -1,5 +1,5 @@
-! $Rev: 5024 $                                                          | 
-! $Date: 2017-10-16 15:58:39 +0200 (Mo, 16 Okt 2017) $                                                     
+! $Rev: 5028 $                                                          | 
+! $Date: 2017-11-29 15:09:28 +0100 (Mi, 29 Nov 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -4064,19 +4064,21 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !        NEW REPRESENTATION USING A NON ZERO IZAP
 !
          ELSE
-            IF(IZAP.LT.IZAPP) THEN
-               EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING IZAP'
-               CALL ERROR_MESSAGE(NSEQP1)
-            ELSE IF(IZAP.EQ.IZAPP) THEN
-               IF (LFSO.LE.LFSP)  THEN
-                  EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING LFSO'
-                  CALL ERROR_MESSAGE(NSEQP1)
-               ELSE
-                  LFSP = LFSO
-               END IF
-            ELSE
-               IZAPP = IZAP
-               LFSP = -1
+            IF((IZAP.EQ.-1).AND.(MT.NE.18)) THEN
+                IF(IZAP.LT.IZAPP) THEN
+                   EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING IZAP'
+                   CALL ERROR_MESSAGE(NSEQP1)
+                ELSE IF(IZAP.EQ.IZAPP) THEN
+                   IF (LFSO.LE.LFSP)  THEN
+                      EMESS='DATA NOT GIVEN IN ORDER OF INCREASING LFSO'
+                      CALL ERROR_MESSAGE(NSEQP1)
+                   ELSE
+                      LFSP = LFSO
+                   END IF
+                ELSE
+                   IZAPP = IZAP
+                   LFSP = -1
+                END IF
             END IF
          END IF
    90   IF(IERX.EQ.1)   GO TO 100
