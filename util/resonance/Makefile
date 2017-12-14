@@ -42,6 +42,9 @@ else ifeq ($(FC),lf90)
 
 endif
 
+%.o : %.f90
+	$(FC) $(FFLAGS) -c $< -o $@
+
 OBJP =	ptanal.o
 OBJR =	readrp.o
 OBJW =	wriurr.o
