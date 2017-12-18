@@ -1,6 +1,6 @@
-! $Rev: 4468 $                                                        
-! $Date: 2015-08-29 17:06:00 +0200 (Sa, 29 Aug 2015) $
-! $Author: rcapote $
+! $Rev: 5034 $                                                        
+! $Date: 2017-12-18 18:51:01 +0100 (Mo, 18 Dez 2017) $
+! $Author: dbrown $
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -27,6 +27,9 @@
 !---MDC---
 !-T Program STANEF
 !-P Convert an ENDF file into standard form
+!-V         Version 8.10   October 2017 D. Brown
+!-V                        - Add checks of P(nu) for fission
+!-V                        - Add checks of fission energy release tables
 !-V         Version 8.09   October 2012   A. Trkov
 !-V                        Allow E-dependent scattering radius in URR
 !-V         Version 8.08   September 2012   A. Koning
@@ -1004,6 +1007,7 @@
       INTEGER(KIND=I4) :: NOFF,NFREV,NCC,MODC
       INTEGER(KIND=I4) :: MFTC,MFC,MTC
       INTEGER(KIND=I4) :: K,N,NN
+      INTEGER(KIND=I4) :: LFC, NFC
       REAL(KIND=R8) :: C1,C2,ZA
       REAL(KIND=4) ::ZZA
 !
@@ -1632,6 +1636,7 @@
 !
       INTEGER(KIND=I4) :: L1,L2,N1,N2,N,NE
       REAL(KIND=R8) :: C1,C2
+      INTEGER(KIND=I4) :: LFC, NFC
 !
    10 CALL OUT_STATUS
 !
@@ -1669,6 +1674,13 @@
 !
          CASE (458)
             CALL CANT(C1,C2,L1,L2,N1,N2)
+            NFC = N2H
+            LFC = L2H
+            IF (LFC.EQ.1) THEN ! Fission energy release as tables, just skipping over, not checking anything
+              DO N=1,NFC
+                CALL CANT1(C1,C2,L1,L2,N1,N2)
+              END DO
+            END IF
 !
 !     ENERGY RELEASE IN FISSION
 !
