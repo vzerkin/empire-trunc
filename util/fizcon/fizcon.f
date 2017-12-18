@@ -1,5 +1,5 @@
-! $Rev: 5029 $                                                         |
-! $Date: 2017-11-29 15:15:56 +0100 (Mi, 29 Nov 2017) $                                                     
+! $Rev: 5033 $                                                         |
+! $Date: 2017-12-18 18:27:38 +0100 (Mo, 18 Dez 2017) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -30,6 +30,9 @@
 !-P Check procedures and data in evaluated nuclear data files
 !-P in ENDF-5 or ENDF-6 format
 !-V
+!-V         Version 8.19   December 2017 D. Brown
+!-V                        - Add checks of P(nu) for fission
+!-V                        - Add checks of fission energy release tables
 !-V         Version 8.18   February 2015   A. Trkov
 !-V                        Check that NLS for the unresolved resonance
 !-V                        range in MF32 less or equal NLS in MF2
@@ -235,7 +238,7 @@
 !
 !     FIZCON VERSION NUMBER
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.18'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.19'
 !
 !     DEFINE VARIABLE PRECISION
 !
@@ -1990,6 +1993,7 @@
       REAL(KIND=R4) :: YK,YKK
       REAL(KIND=R4) :: SSUM
       REAL(KIND=R4) :: ET,DELTA,ERBAR
+      INTEGER(KIND=I4) :: N, LFC, NFC
 !
       MT458 = 1
       IF(LFI.NE.1)  THEN
@@ -1997,7 +2001,14 @@
      &           'FISSIONABLE ISOTOPES ONLY'
          CALL ERROR_MESSAGE(0)
       END IF
+      NFC = N2H
+      LFC = L2H
       CALL RDLIST
+      IF (LFC.EQ.1) THEN ! Fission energy release as tables, just skipping over, not checking anything
+        DO N=1,NFC
+          CALL RDTAB1
+        END DO
+      END IF
 !*****SUM PARTIAL ENERGIES AND CHECK VALUES
       SSUM = 0.0
       DO K=1,NPL,2
@@ -4085,6 +4096,7 @@
       REAL(KIND=R4), INTRINSIC :: ABS
 !
       INTEGER(KIND=I4) :: NK,LCT,LF
+      INTEGER(KIND=I4) :: JP,JPN,JPP
       INTEGER(KIND=I4) :: NE,INTS
       INTEGER(KIND=I4) :: ND,NEP,NW,NREPT,NDISC,IUPD
       INTEGER(KIND=I4) :: L,LTP,NMU,MM,II,NL
@@ -4174,6 +4186,16 @@
                NERROR = NERROR + 1
             END IF
          END IF
+      END IF
+!
+!     SET P(NU) JP, JPP, JPN FLAGS FOR FISSION
+!     THESE SHOULD ONLY BE SET FOR MT=18
+!
+      JP = L1H
+      JPP = JP/10
+      JPN = JP-JPP
+      IF((JP.NE.0).AND.(MT.NE.18)) THEN
+         WRITE(EMESS,'(A)') 'JP.GT.0 ONLY ALLOWED FOR MT=18'
       END IF
 !
 !     LOOP OVER SUBSECTIONS
