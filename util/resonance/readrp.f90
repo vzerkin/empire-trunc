@@ -21,8 +21,7 @@ program readrp
     !       local resonance parameter data (za?????.atlas)
     !
     character argv*2048
-    common/dat/sf0, sf1, D0, sf2, D1, zam, spin, ggavg(3), bn, ap, dap, abun, &
-            ss, dss, cs, dcs
+    common/dat/sf0, sf1, D0, sf2, D1, zam, spin, ggavg(3), bn, ap, dap, abun, ss, dss, cs, dcs
     common/dir/basedir, basef, ilen
     character basedir*2048, basef*8
     !
