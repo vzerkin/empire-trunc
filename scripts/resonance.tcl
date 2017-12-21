@@ -829,9 +829,11 @@ proc ::main {argc argv} {
   }
   # use EMPIREDIR variable if available:
   if {[file exists $::env(EMPIREDIR)] == 1} {
+      puts [format "Using '%s' as base directory " $::env(EMPIREDIR)]
       set m_szBaseDir $::env(EMPIREDIR)
   } else {
       set m_szBaseDir $m_szBaseDir/..
+      puts [format "$EMPIREDIR environment variable not set, using '%s' as base directory" $m_szBaseDir ]
   }
   cd $m_szBaseDir
   set m_szBaseDir [pwd]
@@ -905,15 +907,11 @@ proc ::LoadVars {} {
   global m_fD0 m_fD1 m_fD2
   global m_fSf0 m_fSf1 m_fSf2
   global m_fGg0 m_fGg1 m_fGg2
-  global m_fErmax m_fEumax
-# m_fR, m_fdR : scattering radius and its error
-  global m_fR m_fdR
-# m_fSS, m_fDSS : scattering cross section and its error
-  global m_fSS m_fDSS
-# m_fCS, m_fDCS : capture cross section and its error
-  global m_fCS m_fDCS
-# m_fLdp: level density parameter
-  global m_fLdp m_fCutoff
+  global m_fErmax m_fEumax  # m_fErmax m_fEumax : maximum energies of RRR and URR
+  global m_fR m_fdR         # m_fR, m_fdR : scattering radius and its error
+  global m_fSS m_fDSS       # m_fSS, m_fDSS : scattering cross section and its error
+  global m_fCS m_fDCS       # m_fCS, m_fDCS : capture cross section and its error
+  global m_fLdp m_fCutoff   # m_fLdp: level density parameter
   global m_nNoResToBeAdjusted
   global m_nNoResToBeEvaluated
   global m_nNoExtraRes
@@ -941,6 +939,14 @@ proc ::LoadVars {} {
   set atlasfn [format "%s.atlas" $m_szZAname]
   if {[file exists $m_szFile.atlas]} {
     exec mv -f $m_szFile.atlas $atlasfn
+    puts [format "Moving '%s.atlas' to '%s'" $m_szFile $atlasfn]
+  }
+
+  # Put in check: if we can't find the Atlas, then we can't run
+  if {[file exists $m_szBaseDir/Atlas]} {
+  } else {
+    puts [format "Error: Atlas directory not found at '%s/Atlas'" $m_szBaseDir]
+    exit
   }
 
   set output [exec $m_szCodeDir/readrp $m_nZA $m_szBaseDir]
@@ -972,20 +978,20 @@ proc ::LoadVars {} {
   set m_fDSS [format "%f" [lindex $output 16]]
   set m_fCS [format "%f" [lindex $output 17]]
   set m_fDCS [format "%f" [lindex $output 18]]
-  set m_fErmax [lindex $output 19]
-  set m_fEumax [lindex $output 20]
+  set m_fEumax [lindex $output 19]
+  set m_fErmax [lindex $output 20]
   if {$m_fEumax==0} {set m_fEumax 20e6}
 
   set m_fLdp [format "%.2f" [expr $m_nA/8.0]]
 
   if {$m_nZ/2*2 == $m_nZ && ($m_nA-$m_nZ)/2*2==$m_nA-$m_nZ} {
-#   even-even nuclide
+    #   even-even nuclide
     set pair [expr 24/sqrt($m_nA)]
   } elseif {$m_nZ/2*2 != $m_nZ && ($m_nA-$m_nZ)/2*2 != $m_nA-$m_nZ} {
-#   odd-odd nuclide
+    #   odd-odd nuclide
     set pair 0
   } else {
-#   odd nuclide
+    #   odd nuclide
     set pair [expr 12/sqrt($m_nA)]
   }
   if {$m_fLdp > 0 && $m_fBn-$pair > 0} {
@@ -994,6 +1000,7 @@ proc ::LoadVars {} {
 
   if {[file exists $atlasfn]} {
     exec mv -f $atlasfn $m_szFile.atlas
+    puts [format "Moving '%s' to '%s.atlas'" $atlasfn $m_szFile]
   } else {
     puts [format "Error: Local resonance parameter table '%s' not found" $atlasfn]
   }
@@ -1123,12 +1130,12 @@ proc ::RunKALMAN {} {
   global m_fR m_fdR m_fCutoff m_fDe m_fLdp m_fGPower
   global m_fSS m_fDSS m_fCS m_fDCS
   global m_fGn0_cut m_fGn1_cut
-  global m_nNoResToBeAdjusted m_nNoResToBeEvaluated m_nNoExtraRes
+  global m_nNoResToBeAdjusted   # m_nNoResToBeAdjusted: number of resonances to be adjusted for sensitivy calculation
+  global m_nNoResToBeEvaluated  # m_nNoResToBeEvaluated: number of resonance energies to be added to the energy grid of THERMX(revised RECENT)
+  global m_nNoExtraRes
   global m_bGotSensitivity
   global m_nKALMT
 
-# m_nNoResToBeAdjusted: number of resonances to be adjusted for sensitivy calculation
-# m_nNoResToBeEvaluated: number of resonance energies to be added to the energy grid of THERMX(revised RECENT)
 
   cd $m_szWorkingDir
   if {$m_bAllcodes1 ==0 && $m_bSensitivity == 0 &&
@@ -1136,7 +1143,7 @@ proc ::RunKALMAN {} {
     tk_dialog .msgbox "Error" "No job specified" info 0 OK
   }
 
-#   verify the integrity of input befor run
+  #   verify the integrity of input befor run
   if {$m_bAllcodes1 != 0 || $m_bSensitivity != 0} {
     if {$m_nNoResToBeAdjusted <= 0} {
       tk_dialog .msgbox "Error" "No. of resonances to be adjusted should be larger than 0" info 0 OK
@@ -1177,7 +1184,8 @@ proc ::RunKALMAN {} {
         tk_dialog .msgbox "Error" "Local resonance parameter table '$m_szFile.atlas' not found" info 0 OK
         return
       }
-#     make a input file for PTANAL
+
+      #  make a input file for PTANAL
       exec rm -f ptanal.std
       set file [open "ptanal.inp" w]
       puts $file "&data"
@@ -1209,7 +1217,8 @@ proc ::RunKALMAN {} {
       }
       puts $file "&end"
       close $file
-#     run PTANAL
+
+      # run PTANAL
       exec -ignorestderr $m_szCodeDir/ptanal > ptanal.std
       if {![file exists endfa.txt]} {
         tk_dialog .msgbox "Error" "Failed to run PTANAL.\nCheck the standard output of PTANAL" info 0 OK
@@ -1234,7 +1243,8 @@ proc ::RunKALMAN {} {
       puts $file [format "%11d%11d%11.4e%11.4e\n" 1 9999 0 $ulimit]
       puts $file [format "%11.4E%11.4E\n" 0 0.01]
       close $file
-#     run THERMX
+
+      # run THERMX
       exec $m_szCodeDir/thermx > thermx.std
 
 #      exec cp endfu.pw [format "PWD%03d-%d" $count [expr $i%6+1]]
@@ -1319,7 +1329,8 @@ proc ::RunKALMAN {} {
     set m_bGotSensitivity 1
   }
   if {$m_bAllcodes1 != 0 || $m_bKALMAN != 0} {
-#     run KALMAN
+
+    #  run KALMAN
     if {$m_nKALMT == 0} {
       set MT 1
       set EXPDAT 0
