@@ -104,14 +104,14 @@ EOF
     # EXPERIMENTAL DATA AND THEIR CORRELATIONS
     if [ "$EXPDAT" != 0 ]; then
        if [ ! -s $file-expxsc.kal ]; then
-	       cp fort.10 $file-expxsc.kal
+           cp fort.10 $file-expxsc.kal
        else
-	       cp $file-expxsc.kal fort.10
+           cp $file-expxsc.kal fort.10
        fi
        if [ ! -s $file-expcorr.kal ]; then
-	       cp fort.12 $file-expcorr.kal
+           cp fort.12 $file-expcorr.kal
        else
-	       cp $file-expcorr.kal fort.12
+           cp $file-expcorr.kal fort.12
        fi
     else
        rm fort.10
@@ -126,6 +126,7 @@ EOF
        cp $file-parcorr.kal fort.52
     fi
 
+# DON'T RUN THIS FROM GUI???
     if [ "$EXPDAT" != 0 ]; then
        echo 'EDIT KALMAN INPUT'
        vim KALMAN.INP
