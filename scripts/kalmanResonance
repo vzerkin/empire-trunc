@@ -129,7 +129,7 @@ EOF
 # DON'T RUN THIS FROM GUI???
     if [ "$EXPDAT" != 0 ]; then
        echo 'EDIT KALMAN INPUT'
-       vim KALMAN.INP
+       xterm -e vim KALMAN.INP
     fi
 
 
@@ -143,35 +143,35 @@ EOF
     mv fort.15 $file-par.kal
     exit
 
-    echo "*** Running" $KALEND "***"
-    $EMPIREDIR/util/kalman/$KALEND <INPUT.D >check.out
-
-
-    if [ -s check.out ]; then
-       exit
-    fi
-
-    sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
-    awk ' BEGIN{}
-    { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
-
-    mv fort.18 $file-${k}-err.kal
-
-
-    cp $file-${k}-c4.gpd expxscplot.d
-
-#    if [ "$EXPDAT" != 0 ]; then
-#       gnuplot $EMPIREDIR/util/kalman/corr.gp
-#    fi
-
-    mv corrplot.d $file-${k}-cov.gpd
-    mv xscplot.d  $file-${k}-xsc.gpd
-
-    rm fort.17
-    rm fort.20
-    rm expxscplot.d
-
-    echo 'COMPLETE ...'
+#     echo "*** Running" $KALEND "***"
+#     $EMPIREDIR/util/kalman/$KALEND <INPUT.D >check.out
+# 
+# 
+#     if [ -s check.out ]; then
+#        exit
+#     fi
+# 
+#     sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
+#     awk ' BEGIN{}
+#     { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
+# 
+# #    mv fort.18 $file-${k}-err.kal # KALEND makes this file 
+# 
+# 
+#     cp $file-${k}-c4.gpd expxscplot.d
+# 
+# #    if [ "$EXPDAT" != 0 ]; then
+# #       gnuplot $EMPIREDIR/util/kalman/corr.gp
+# #    fi
+# 
+#     mv corrplot.d $file-${k}-cov.gpd
+#     mv xscplot.d  $file-${k}-xsc.gpd
+# 
+# #    rm fort.17 # former output from KALEND, now is $file-err.kal
+#     rm fort.20
+#     rm expxscplot.d
+# 
+#     echo 'COMPLETE ...'
 
 done
 
