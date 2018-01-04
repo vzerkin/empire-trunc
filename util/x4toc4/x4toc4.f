@@ -1057,12 +1057,13 @@ C-----PROCESS ISO-QUNT, CMP-QUANT, NUC-QUANT OR REACTION.               X4T09290
       CALL REACTN(K-1)                                                  X4T09310
       GO TO 20                                                          X4T09320
 C-----PROCESS STATUS.                                                   X4T09330
-   60 IF(K.EQ.6) CALL STATUS(0)                                         X4T09340
-      CALL STATUS(0)
-  101 READ(ITAPE,1000,END=80,ERR=80) KEYWD1,KEYWD2,CARD1,CARD2
-      if (KEYWD1.ne.' ') goto 20
-      CALL STATUS(1)
-      GOTO 101
+   60 IF(K.EQ.6) then
+        CALL STATUS(0)
+  101   READ(ITAPE,1000,END=80,ERR=80) KEYWD1,KEYWD2,CARD1,CARD2
+        if (KEYWD1.ne.' ') goto 20
+        CALL STATUS(1)
+        GOTO 101
+      endif
 C-----PROCESS REFERENCE.                                                X4T09350
       IF(K.EQ.7) CALL REFERS                                            X4T09360
 C-----PROCESS AUTHOR.                                                   X4T09370
