@@ -57,7 +57,7 @@ rm KALMAN.INP 2>/dev/null
 rm fort.* 2>/dev/null
 rm check.out 2>/dev/null
 rm $file-*-c4.gpd 2>/dev/null
-rm $file-{c4,par,*-err}.kal 2>/dev/null
+rm $file-{c4,par}.kal 2>/dev/null
 rm $file-33-*.cov  2>/dev/null
 
 
@@ -126,11 +126,11 @@ EOF
        cp $file-parcorr.kal fort.52
     fi
 
-# DON'T RUN THIS FROM GUI???
-    if [ "$EXPDAT" != 0 ]; then
-       echo 'EDIT KALMAN INPUT'
-       xterm -e vim KALMAN.INP
-    fi
+#    # DON'T RUN THIS FROM GUI???
+#    if [ "$EXPDAT" != 0 ]; then
+#       echo 'EDIT KALMAN INPUT'
+#       xterm -e vim KALMAN.INP
+#    fi
 
 
     echo "*** Running" $KALMAN "***"
@@ -141,37 +141,28 @@ EOF
     mv fort.13 $file-xsc.kal
     mv fort.14 $file-cov.kal
     mv fort.15 $file-par.kal
-    exit
+    #    exit
 
-#     echo "*** Running" $KALEND "***"
-#     $EMPIREDIR/util/kalman/$KALEND <INPUT.D >check.out
-# 
-# 
-#     if [ -s check.out ]; then
-#        exit
-#     fi
-# 
-#     sed -i -e 's/E+0/+/g' -e 's/E-0/-/g' fort.20
-#     awk ' BEGIN{}
-#     { printf "%-66s%4d%2d%3d%5d\n", $_,substr("'$MAT'",1-4),33,substr("'${k}'",1-3),NR } END{ print "                                                                  "substr("'$MAT'",1-4)"33  099999"} ' fort.20 >$file-33-${k}.cov
-# 
-# #    mv fort.18 $file-${k}-err.kal # KALEND makes this file 
-# 
-# 
-#     cp $file-${k}-c4.gpd expxscplot.d
-# 
-# #    if [ "$EXPDAT" != 0 ]; then
-# #       gnuplot $EMPIREDIR/util/kalman/corr.gp
-# #    fi
-# 
-#     mv corrplot.d $file-${k}-cov.gpd
-#     mv xscplot.d  $file-${k}-xsc.gpd
-# 
-# #    rm fort.17 # former output from KALEND, now is $file-err.kal
-#     rm fort.20
-#     rm expxscplot.d
-# 
-#     echo 'COMPLETE ...'
+    echo  "Running kalend"
+    $EMPIREDIR/util/kalman/kalend < INPUT.D
+
+    cp ${file}-${k}-c4.gpd expxscplot.d
+
+    #PLOT DATA ONLY WITH EXPERIMENTAL DATA
+
+    if [ "$EXPDAT" != 0 ]; then
+      gnuplot $EMPIREDIR/util/kalman/corr.gp >/dev/null
+    fi
+
+    # Should consider a different name for these files in the pfns case, but which?
+    mv corrplot.d $file-${k}-cov.gpd
+    mv xscplot.d  $file-${k}-xsc.gpd
+#    mv  $file-1-err.kal $file-${k}-err.kal
+
+    rm expxscplot.d
+
+    echo 'COMPLETE ...'
+    echo
 
 done
 
