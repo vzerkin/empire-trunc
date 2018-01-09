@@ -196,7 +196,8 @@ subroutine readap()
             !        scattering cross section [barn]
             ss = fval
             dss = ferr
-        elseif (iza.eq.zam.and.keyw1.eq.'NG'.and.keyw2.eq.'D') then
+!        elseif (iza.eq.zam.and.keyw1.eq.'NG'.and.keyw2.eq.'D') then
+        elseif (iza.eq.zam.and.keyw1.eq.'NG') then
             !        capture cross section [barn]
             cs = fval
             dcs = ferr
