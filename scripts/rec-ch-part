@@ -33,6 +33,8 @@ fi
 #S106=+(750,799)
 #S107=+(800,849)
 #
+# 0.00000+00 0.00000+00          0          0${2}  4
+#
 # 0.00000+00 0.00000+00          0          0${2}103
 #
 # 0.00000+00 0.00000+00          0          0${2}107
@@ -49,7 +51,12 @@ $file-tmp.endf
 S  4=+( 50, 91)
 S103=+(600,649)
 
+ 0.00000+00 0.00000+00          0          0${2}  4
+
  0.00000+00 0.00000+00          0          0${2}103
+
+
+
 
 
 
@@ -66,7 +73,7 @@ if [ ! -f $file-tmp.endf ]; then
     exit
 fi
 rm FIXUP.INP
-echo " Moving FIXUP result back to the " $file.endf
+echo " Moving FIXUP result back to  " $file.endf
 mv $file-tmp.endf $file.endf
 
 
