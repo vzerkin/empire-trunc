@@ -1,5 +1,5 @@
-! $Rev: 5028 $                                                          | 
-! $Date: 2017-11-29 15:09:28 +0100 (Mi, 29 Nov 2017) $                                                     
+! $Rev: 5047 $                                                          | 
+! $Date: 2018-01-22 03:45:06 +0100 (Mo, 22 Jän 2018) $                                                     
 ! $Author: dbrown $                                                  
 ! **********************************************************************
 ! *
@@ -29,6 +29,8 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
+!-V         Version 8.23   January 2018 D. Brown
+!-V                        - Add MT=501, 522 and 525 for electro-atomic data in EPICS2017
 !-V         Version 8.22   October 2017 D. Brown
 !-V                        - Add checks of P(nu) for fission
 !-V                        - Add checks of fission energy release tables
@@ -267,7 +269,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.23'
 !
 !     Define variable precision
 !
@@ -6591,6 +6593,7 @@ c        END IF
       IF(IEVAL.EQ.1) THEN
          WRITE(EMESS,'(A,I4,A,I6,A)')                                   &       
      &           'MT=',MTT0,' FOR NSUB=',NSUB,' INVALID'
+         write(*,*) MTT,MT3,MFT,MTCAT,IEVAL
          CALL ERROR_MESSAGE(NSEQP1)
       ELSE IF(IEVAL.EQ.2) THEN
 !
@@ -6616,7 +6619,15 @@ c        END IF
 !       6  Activation reactions
 !       .
 !       .
-!
+!       .
+!       9  Photo-atomic reactions
+!       13 Photo-atomic form factors
+!       14 Reactions common to photo- and electro-atomic reactions
+!       15 Electro-atomic reactions
+!       16 Atomic relaxation
+!       .
+!       .
+!       .
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: MTT,MT3,MTCAT
@@ -6684,17 +6695,18 @@ c        END IF
 !     PHOTON AND ELECTRON INTERACTION   501 - 599
 !
       ELSE IF(MTT.GE.501.AND.MTT.LE.599)   THEN
-         IF(MTT.EQ.501.OR.MTT.EQ.502.OR.MTT.EQ.504)   THEN
+         IF(MTT.EQ.502.OR.MTT.EQ.504)   THEN
             MTCAT = 9
          ELSE IF(MTT.EQ.505.OR.MTT.EQ.506)   THEN
             MTCAT = 13
-         ELSE IF((MTT.GE.515.AND.MTT.LE.517).OR.MTT.EQ.522)   THEN
+         ELSE IF(MTT.GE.515.AND.MTT.LE.517)   THEN
             MTCAT = 9
-         ELSE IF(MTT.EQ.523.OR.(MTT.GE.526.AND.MTT.LE.528)) THEN
+         ELSE IF(MTT.EQ.523.OR.(MTT.GE.525.AND.MTT.LE.528)) THEN
             MTCAT = 15
          ELSE IF(MTT.EQ.533) THEN
             MTCAT = 16
-         ELSE IF(MTT.GE.534.AND.MTT.LE.599) THEN
+         ELSE IF(MTT.EQ.501.OR.MTT.EQ.522.OR.
+     &        (MTT.GE.534.AND.MTT.LE.599)) THEN
             MTCAT = 14
          END IF
 !
