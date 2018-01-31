@@ -3,7 +3,7 @@ TARGETS = sigma1 recent linear groupie dictin  fixup legend merger mixer sixpak 
 
 .SUFFIXES: .f
 .f:
-	$(F77) -o $@ $< $(COMMON)
+	$(FC) -o $@ $< $(COMMON)
 
 all: $(TARGETS)
 
@@ -24,13 +24,13 @@ install: $(TARGETS)
 	cp convert  ..
 	cp relabel  ..
 	cp comhard  ..
-	cp evalhard .. 
+	cp evalhard ..
 
 clean:
 	rm -f $(TARGETS)
 
 comhard: COMPLOT/complot.f COMPLOT/endfio.f COMPLOT/scratchb.f COMPLOT/timer.f COMPLOT/linux.f COMPLOT/hardsave.f
-	cd COMPLOT; $(F77) -o comhard complot.f endfio.f scratchb.f timer.f linux.f hardsave.f; cp comhard ..
+	cd COMPLOT; $(FC) -o comhard complot.f endfio.f scratchb.f timer.f linux.f hardsave.f; cp comhard ..
 
 evalhard: EVALPLOT/evalplot.f EVALPLOT/endfio.f EVALPLOT/scratchb.f EVALPLOT/timer.f EVALPLOT/linux.f EVALPLOT/hardsave.f
-	cd EVALPLOT; $(F77) -o evalhard evalplot.f endfio.f scratchb.f timer.f linux.f hardsave.f; cp evalhard ..
+	cd EVALPLOT; $(FC) -o evalhard evalplot.f endfio.f scratchb.f timer.f linux.f hardsave.f; cp evalhard ..
