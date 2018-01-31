@@ -11,6 +11,7 @@
 # set default compilers
 
 FC=gfortran
+#FC=af90
 #FC=ifort
 CC=gcc
 #CC=cc
