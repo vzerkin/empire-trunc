@@ -1,6 +1,6 @@
-# $Rev: 5048 $
+# $Rev: 5053 $
 # $Author: mherman $
-# $Date: 2018-01-22 23:16:59 +0100 (Mo, 22 Jän 2018) $
+# $Date: 2018-01-31 17:07:03 +0100 (Mi, 31 Jän 2018) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8362,10 +8362,10 @@ exit} \
         -command { editFile $::env(EMPIREDIR)/util/endres/ENDRES.INP } \
         -label {ENDRES input} 
     $site_3_0.menu90 add command \
-        -command { editFile $::env(EMPIREDIR)/util/fixup/FIXUP.INP } \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/FIXUP.INP } \
         -label {FIXUP input} 
     $site_3_0.menu90 add command \
-        -command { editFile $::env(EMPIREDIR)/util/Groupie/GROUPIE.INP } \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/GROUPIE.INP } \
         -label {GROUPIE input} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/c4sort/C4SORT.INP } \
@@ -8491,14 +8491,11 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file &} \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-elastic $file &} \
-        -label {Reconstruct elastic} 
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-all $file $mat &} \
+        -label {Reconstruct (n,p), (n,n) and elastic} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-total $file &} \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-total $file $mat &} \
         -label {Reconstruct total} 
-    $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/rec-ch-part $file $mat &} \
-        -label {Reconstruct (n,p), (n,a) and inel} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/group $file &} \
         -label {Create groupwise file -grp.endf} 
@@ -8692,7 +8689,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
        
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/stanef $file &} \
-        -label STANEF 
+        -label STAN 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -8815,9 +8812,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
-        -command { editFile $file-log.fixup } -font {} -label {FIXUP Log} 
+        -command { editFile $file-log1.fixup } -font {} -label {FIXUP-1 Log} 
     $site_3_0.men70 add command \
-        -command { editFile $file-log.fixup2 } -font {} -label {FIXUP-2 Log} 
+        -command { editFile $file-log2.fixup } -font {} -label {FIXUP-2 Log} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.linear } -font {} -label {LINEAR Log} 
     $site_3_0.men70 add command \
@@ -8913,10 +8910,51 @@ cd $workdir} \
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/x4toc4/manual.txt } \
         -label {X4TOC4 manual} 
+    $site_3_0.menu96 add separator \
+
     $site_3_0.menu96 add command \
-        -command { editFile $::env(EMPIREDIR)/util/fixup/manual.txt } \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Linear.txt } \
+        -label {LINEAR manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Recent.txt } \
+        -label {RECENT manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Sigma1.txt } \
+        -label {SIGMA1 manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Sixpak.txt } \
+        -label {SIXPAK manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Fixup.txt } \
         -label {FIXUP manual} 
-    menu $top.m76 \
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Legend.txt } \
+        -label {LEGEND manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Groupie.txt } \
+        -label {GROUPIE manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Merger.txt } \
+        -label {MERGER manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Activate.txt } \
+        -label {ACTIVATE manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Spectra.txt } \
+        -label {SPECTRA manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Mixer.txt } \
+        -label {MIXER manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Dictin.txt } \
+        -label {DICTIN manual} 
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/Virgin.txt } \
+        -label {VIRGIN manual} 
+
+
+
+  menu $top.m76 \
         -disabledforeground #a1a4a1 -tearoff 1 
     ###################
     # SETTING GEOMETRY

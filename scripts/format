@@ -84,7 +84,8 @@ if [ -s $file.endf ]; then
   mv $file.endf $file-prev.endf
 fi
 
-# RUN STANEF
+# RUN STANEF (In:$file-endres.endf Out:$file.endf)
+
 rm -f INPUT 2>/dev/null
 cat >INPUT <<EOF
 $file-endres.endf
@@ -98,7 +99,7 @@ rc=$?
 if [ $rc != 0 ] 
 then
    echo ' '
-   echo ' STANEF crashed, please notify Dr.A.Trkov at a.trkov@iaea.org '
+   echo ' STAN crashed, please notify Dr. D. Brown at dbrown@bnl.gov '
    echo ' '
    echo ' Press any key to exit or <CTRL>-C to abort ...'
    read yes
@@ -111,13 +112,15 @@ rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
 rm angdis.pnt 2>/dev/null
 
-# RUN LINEAR (2017/04/20 to accommodate log-log extrapolation to thermal)
+# RUN LINEAR (In:ENDFB.OUT Out:LINEAR.OUT)
 
 rm LINEAR.INP 2>/dev/null
-ln -sf $file.endf ENDFB.IN
-$EMPIREDIR/util/linear/linear
-rm ENDFB.IN 2>/dev/null
-mv ENDFB.OUT  $file.endf
+ln -sf $EMPIREDIR/util/prepro/LINEAR.INP LINEAR.INP
+ln -sf $file.endf ENDFB.OUT
+$EMPIREDIR/util/prepro/linear <LINEAR.INP
+mv LINEAR.OUT  $file.endf
+mv LINEAR.LST $work/$file-log.linear
+rm ENDFB.OUT LINEAR.INP 2>/dev/null
 
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
 # moved to a new script "rec-ch-part" called from a GUI(Execute)

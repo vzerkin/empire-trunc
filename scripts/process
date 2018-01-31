@@ -30,56 +30,63 @@ read yes
 exit 1
 fi
 
-# RUN LINEAR
+
+# RUN LINEAR (In:ENDFB.OUT Out:LINEAR.OUT)
 
 rm LINEAR.INP 2>/dev/null
-ln -sf $file.endf ENDFB.IN
-$EMPIREDIR/util/linear/linear
-mv ENDFB.OUT  $work/$file-lin.endf
+ln -sf $EMPIREDIR/util/prepro/LINEAR.INP LINEAR.INP
+ln -sf $file.endf ENDFB.OUT
+$EMPIREDIR/util/prepro/linear <LINEAR.INP
+mv LINEAR.OUT $work/$file-lin.endf
 mv LINEAR.LST $work/$file-log.linear
-rm ENDFB.IN 2>/dev/null
+rm ENDFB.OUT LINEAR.INP 2>/dev/null
 
-# RUN RECENT
+
+# RUN RECENT (In:LINEAR.OUT  Out:RECENT.OUT)
 
 rm RECENT.INP 2>/dev/null
-ln -sf $work/$file-lin.endf ENDFB.IN
-$EMPIREDIR/util/recent/recent
-mv ENDFB.OUT  $work/$file-rec.endf
+ln -sf $EMPIREDIR/util/prepro/RECENT.INP RECENT.INP
+ln -sf $work/$file-lin.endf LINEAR.OUT
+$EMPIREDIR/util/recent/recent <RECENT.INP
+mv RECENT.OUT  $work/$file-rec.endf
 mv RECENT.LST $work/$file-log.recent
-rm ENDFB.IN 2>/dev/null
+rm LINEAR.OUT 2>/dev/null
+rm RECENT.INP 2>/dev/null
 
-# RUN SIGMA1
+
+# RUN SIGMA1 (In: RECENT.OUT, Out:SIGMA1.OUT)
 
 rm SIGMA1.INP 2>/dev/null
-ln -sf $work/$file-rec.endf ENDFB.IN
-$EMPIREDIR/util/sigma1/sigma1
-mv ENDFB.OUT  $work/$file-sig.endf
+ln -sf $EMPIREDIR/util/prepro/SIGMA1.INP SIGMA1.INP
+ln -sf $work/$file-rec.endf RECENT.OUT
+$EMPIREDIR/util/sigma1/sigma1 <SIGMA1.INP
+mv SIGMA1.OUT  $work/$file-sig.endf
 mv SIGMA1.LST $work/$file-log.sigma1
-rm ENDFB.IN 2>/dev/null
+rm RECENT.OUT 2>/dev/null
+rm SIGMA1.INP 2>/dev/null
 
 # RUN MU_BAR TO ADD AVERAGE COSINE OF SCATTERING INTO MF3 MT 251
 
 ln -sf $work/$file-sig.endf ENDFB.IN
 ln -sf $EMPIREDIR/util/mu_bar/MU_BAR.INP MU_BAR.INP
-
 $EMPIREDIR/util/mu_bar/mu_bar < MU_BAR.INP
 mv MU_BAR.LST $work/$file-log.mu_bar
-rm ENDFB.IN MU_BAR.INP MU_BAR.TMP
 mv ENDFB.OUT $work/$file-mub.endf
+rm ENDFB.IN MU_BAR.INP MU_BAR.TMP
 
-# Running LEGEND to convert angular distributions into tabular form
-# cp $work/$file-mub.endf $work/$file-l.endf
+# RUN LEGEND (In: ACTIVATE.OUT, Out:LEGEND.OUT) 
+# CONVERT ANGULAR DISTRIBUTIONS INTO TABULAR FORM
 
-rm $file-l.endf LEGEND.INP ENDF.IN 2>/dev/null
-ln -sf $work/$file-mub.endf ENDF.IN
-ln -sf $EMPIREDIR/util/legend/LEGEND.INP LEGEND.INP
-
-$EMPIREDIR/util/legend/legend < LEGEND.INP
-rm ENDF.IN LEGEND.INP LEGEND.TMP
+rm $file-l.endf LEGEND.INP ACTIVATE.OUT 2>/dev/null
+ln -sf $work/$file-mub.endf ACTIVATE.OUT
+ln -sf $EMPIREDIR/util/prepro/LEGEND.INP LEGEND.INP
+$EMPIREDIR/util/prepro/legend < LEGEND.INP
+rm ACTIVATE.OUT LEGEND.INP LEGEND.TMP
 mv LEGEND.OUT $work/$file-l.endf
 mv LEGEND.LST $work/$file-log.legend
 
-# RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+# RUN SIXTAB (In:ENDF.IN , Out:ENDF.OUT)
+# TO PREPARE FILE 6 FOR PLOTTING
 
 # Saving previous file if it exists
 if [ -s $file-s.endf ]; then
@@ -88,7 +95,6 @@ fi
 rm $file-s.endf ENDF.IN SIXTAB.INP 2>/dev/null
 ln -sf $work/$file-l.endf ENDF.IN
 ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
-
 $EMPIREDIR/util/sixtab/sixtab < SIXTAB.INP
 rm ENDF.IN 
 rm SIXTAB.INP SIXTAB.TMP
@@ -97,6 +103,9 @@ mv ENDF.OUT $work/$file-s.endf
 # RUN PLTLST TO PRODUCE LISTING OR PLOTC4
 
 $EMPIREDIR/scripts/plotlst $file
+
+echo 'Press any key to clean intermediate files and exit'
+read
 
 # REMOVE INTERMEDIATE ENDF FILES
 
@@ -107,6 +116,5 @@ rm $work/$file-mub.endf 2>/dev/null
 rm $work/$file-f.endf 2>/dev/null
 rm $work/$file-endres.endf 2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
-echo 'press any key'
-read
+
 exit

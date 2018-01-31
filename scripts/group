@@ -31,60 +31,61 @@ fi
                         
 # Checking if the file processed by RECENT and LINEAR is available
 if [ ! -f $file-s.endf ]; then
-echo ' '
-echo 'Input file '$file'-s.endf is missing               '
-echo 'RECENT and LINEAR will be run'
-echo ' '
-
-# Checking if input file available
-if [ ! -f $file.endf ]; then
-echo ' '
-echo 'ERROR: Input file '$file'.endf does not exist!!!            '
-echo 'Please note that script expects the ENDF file with extension .endf, but... '
-echo 'this extension must NOT be included in the script argument.'
-echo 'Press any key to exit and retry.'
-read yes
-exit 1
+	echo ' '
+	echo 'Input file '$file'-s.endf is missing               '
+	echo 'RECENT and LINEAR will be run'
+	echo ' '
+	
+	# Checking if input file available
+	if [ ! -f $file.endf ]; then
+	echo ' '
+	echo 'ERROR: Input file '$file'.endf does not exist!!!            '
+	echo 'Please note that script expects the ENDF file with extension .endf, but... '
+	echo 'this extension must NOT be included in the script argument.'
+	echo 'Press any key to exit and retry.'
+	read yes
+	exit 1
+	fi
+	
+	# RUN LINEAR (In:ENDFB.OUT Out:LINEAR.OUT)
+	
+	rm LINEAR.INP 2>/dev/null
+	ln -sf $EMPIREDIR/util/prepro/LINEAR.INP LINEAR.INP
+	ln -sf $file.endf ENDFB.OUT
+	$EMPIREDIR/util/prepro/linear <LINEAR.INP
+	mv LINEAR.LST $work/$file-log.linear
+	rm ENDFB.OUT LINEAR.INP 2>/dev/null
+	
+	
+	# RUN RECENT (In:LINEAR.OUT  Out:RECENT.OUT)
+	
+	rm RECENT.INP 2>/dev/null
+	ln -sf $EMPIREDIR/util/prepro/RECENT.INP RECENT.INP
+	$EMPIREDIR/util/recent/recent <RECENT.INP
+	mv RECENT.OUT  $work/$file-rec.endf
+	mv RECENT.LST $work/$file-log.recent
+#	rm ENDFB.IN 2>/dev/null
+	rm LINEAR.OUT 2>/dev/null
+	
+	# SET -rec.endf FILE AS INPUT FOR GROUPIE 
+	ln -sf $work/$file-rec.endf PREPRO17.OUT
+else
+	# SET -s.endf FILE AS INPUT FOR GROUPIE 
+	ln -sf $work/$file-s.endf PREPRO17.OUT
 fi
 
-# RUN LINEAR
+# RUN GROUPIE (In:PREPRO17.OUT Out:GROUPIE.OUT) 
 
-rm LINEAR.INP 2>/dev/null
-ln -sf $file.endf ENDFB.IN
-$EMPIREDIR/util/linear/linear
-mv ENDFB.OUT  $work/$file-lin.endf
-mv LINEAR.LST $work/$file-log.linear
-rm ENDFB.IN 2>/dev/null
-
-# RUN RECENT
-
-rm RECENT.INP 2>/dev/null
-ln -sf $work/$file-lin.endf ENDFB.IN
-$EMPIREDIR/util/recent/recent
-mv ENDFB.OUT  $work/$file-rec.endf
-mv RECENT.LST $work/$file-log.recent
-rm ENDFB.IN 2>/dev/null
-
-# SET -rec.endf FILE AS INPUT FOR GROUPIE 
-ln -sf $work/$file-rec.endf ENDFB.IN
-
-fi
-
-# SET -s.endf FILE AS INPUT FOR GROUPIE 
-ln -sf $work/$file-s.endf ENDFB.IN
-
-# RUN GROUPIE 
-
-$EMPIREDIR/util/Groupie/groupie
-mv ENDFB.OUT  $work/$file-grp.endf
+ln -sf $EMPIREDIR/util/prepro/GROUPIE.INP GROUPIE.INP
+$EMPIREDIR/util/Groupie/groupie <GROUPIE.INP
+mv GROUPIE.OUT  $work/$file-grp.endf
 mv GROUPIE.LST $work/$file-log.groupie
 
 
 
 # REMOVE INTERMEDIATE FILES
 
-rm ENDFB.IN, PLOTTAB.CUR 2>/dev/null
-rm $work/$file-lin.endf 2>/dev/null
+rm ENDFB.IN, PREPRO17.OUT 2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
 
 exit
