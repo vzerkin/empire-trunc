@@ -6,7 +6,7 @@ MAT=$2
 if [ "$2" = "" ]
    then
 exec 3< $1.endf        #open file $1
-read <&3               #read fir st line
+read <&3               #read first line
 read -n 66 <&3         #read 66 chracters from the second line
 read -n 4 MAT <&3      #read MAT number
 exec 3>&-              #close the file
