@@ -3,7 +3,8 @@
 
 # set default compiler:
 #FC =  gfortran
-FC =  ifort
+FC =  af95
+#FC =  ifort
 CC = gcc
 
 # set compiler options based on compiler

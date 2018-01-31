@@ -1,0 +1,714 @@
+ ======================================================================= Virgin  
+                                                                         Virgin  
+      PROGRAM VIRGIN                                                     Virgin  
+      VERSION 76-1 (NOVEMBER 1976)                                       Virgin  
+      VERSION 84-1 (JUNE 1984)   *DOUBLE PRECISION ENERGY                Virgin  
+      VERSION 86-1 (JANUARY 1986)*FORTRAN-77/H VERSION                   Virgin  
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Virgin  
+                                  FILE NAMES (SEE, SUBROUTINE FILEIO     Virgin  
+                                  FOR DETAILS).                          Virgin  
+                                 *IMPROVED BASED ON USER COMMENTS.       Virgin  
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Virgin  
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Virgin  
+                                  CRAZY.                                 Virgin  
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Virgin  
+                                  KEYWORDS.                              Virgin  
+                                 *ADDED LIVERMORE CIVIC COMPILER         Virgin  
+                                  CONVENTIONS.                           Virgin  
+      VERSION 92-1 (JANUARY 1992)*COMPLETE RE-WRITE                      Virgin  
+                                 *OUTPUT IN PLOTTAB FORMAT               Virgin  
+                                 *UP TO 2000 THICKNESSES                 Virgin  
+                                 *INCREASED INCORE PAGE SIZE TO 6000     Virgin  
+                                  CROSS SECTION POINTS                   Virgin  
+                                 *ADDED PHOTON CALCULATIONS              Virgin  
+                                 *ADDED BLACKBODY SPECTRUM               Virgin  
+                                 *ADDED MULTIPLE LAYERS                  Virgin  
+                                 *ADDED SPATIALLY DEPENDENT DENSITY      Virgin  
+                                 *ADDED FORTRAN SAVE OPTION              Virgin  
+                                 *COMPLETELY CONSISTENT I/O ROUTINES -   Virgin  
+                                  TO MINIMIZE COMPUTER DEPENDENCE.       Virgin  
+      VERSION 92-2 (MAY 1992)    *CORRECTED TO HANDLE MULTIGROUP CROSS   Virgin  
+                                  SECTIONS AS INPUT IN ENDF/B FORMAT.    Virgin  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Virgin  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Virgin  
+                                  *ALL DOUBLE PRECISION                  Virgin  
+                                  *ON SCREEN OUTPUT                      Virgin  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Virgin  
+                                  *IMPROVED OUTPUT PRECISION             Virgin  
+                                  *DEFINED SCRATCH FILE NAMES            Virgin  
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Virgin  
+                                   POINT READ FOR MORE DIGITS            Virgin  
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Virgin  
+                                   VERSION BASED ON RECENT FORMAT CHANGE Virgin  
+                                  *GENERAL IMPROVEMENTS BASED ON         Virgin  
+                                   USER FEEDBACK                         Virgin  
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Virgin  
+                                   USER FEEDBACK                         Virgin  
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Virgin  
+      VERS. 2004-1 (MARCH 2004)   *ADDED INCLUDE FOR COMMON              Virgin  
+                                  *UP TO 2000 THICKNESSES                Virgin  
+                                  *INCREASED INCORE PAGE SIZE TO 60,000  Virgin  
+      VERS. 2007-1 (JAN.  2007)   *CHECKED AGAINST ALL ENDF/B-VII.       Virgin  
+                                  *INCREASED INCORE PAGE SIZE TO         Virgin  
+                                   240,000 FROM 60,000.                  Virgin  
+      VERS. 2007-2 (DEC.  2007)   *72 CHARACTER FILE NAME.               Virgin  
+      VERS. 2010-1 (Apr.  2010)   *General update based on user feedback Virgin  
+                                  *INCREASED INCORE PAGE SIZE TO         Virgin  
+                                   600,000 FROM 240,000.                 Virgin  
+      VERS. 2012-1 (Aug.  2012)   *Added CODENAME                        Virgin  
+                                  *32 and 64 bit Compatible              Virgin  
+                                  *Added ERROR stop                      Virgin  
+      VERS. 2015-1 (Jan.  2015)   *Extended OUT9.                        Virgin  
+                                  *Replaced ALL 3 way IF Statements.     Virgin  
+                                  *Generalized TART Group Structures.    Virgin  
+                                  *Generalized SAND-II Group Structures. Virgin  
+                                  *Extended SAND-II to 60, 150, 200 MeV. Virgin  
+      VERS. 2015-2 (Apr.  2015)   *Changed ALL data to "D" instead of    Virgin  
+                                   "E" to insure it is REAL*8 and avoid  Virgin  
+                                   Truncation ERRORS.                    Virgin  
+      VERS. 2017-1 (May   2017)   *Added UKAEA 1102 Group Structure.     Virgin  
+                                  *Increased points to 3,000,000         Virgin  
+                                  *Increased groupd to 30,000            Virgin  
+                                  *Updated based on user feedback        Virgin  
+                                  *Defintion of built-in group structure Virgin  
+                                   using SUBROUTINE GROPE is identical   Virgin  
+                                   for GROUPIE and VIRGIN.               Virgin  
+                                  *All floating point parameters changed Virgin  
+                                   to character inout + IN9 conversion.  Virgin  
+                                                                         Virgin  
+      2015-2 Acknowledgment                                              Virgin  
+      =====================                                              Virgin  
+      I thank Andrej Trkov (NDS, IAEA) for finding the problem with      Virgin  
+      the "E" formatted DATA (this effected both VIRGIN and GROUPIE).    Virgin  
+      I also thank Andrej for overseeing the entire PREPRO project       Virgin  
+      at IAEA, Vienna; he is part of a truly International team who      Virgin  
+      worked together to produce PREPRO-2015-2, and to make it           Virgin  
+      available Internationally on-line for FREE to ALL users.           Virgin  
+                                                                         Virgin  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Virgin  
+      ------------------------------------                               Virgin  
+      THE NUCLEAR DATA SECTION                                           Virgin  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Virgin  
+      P.O. BOX 100                                                       Virgin  
+      A-1400, VIENNA, AUSTRIA                                            Virgin  
+      EUROPE                                                             Virgin  
+                                                                         Virgin  
+      ORIGINALLY WRITTEN BY                                              Virgin  
+      ------------------------------------                               Virgin  
+      Dermott E. Cullen                                                  Virgin  
+                                                                         Virgin  
+      PRESENT CONTACT INFORMATION                                        Virgin  
+      ---------------------------                                        Virgin  
+      Dermott E. Cullen                                                  Virgin  
+      1466 Hudson Way                                                    Virgin  
+      Livermore, CA 94550                                                Virgin  
+      U.S.A.                                                             Virgin  
+      Telephone  925-443-1911                                            Virgin  
+      E. Mail    RedCullen1@Comcast.net                                  Virgin  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Virgin  
+                                                                         Virgin  
+      PURPOSE                                                            Virgin  
+      -------                                                            Virgin  
+      THIS PROGRAM IS DESIGNED TO CALCULATE UNCOLLIDED (I.E. VIRGIN)     Virgin  
+      FLUX AND REACTIONS DUE TO TRANSMISSION OF A MONODIRECTIONAL        Virgin  
+      BEAM OF NEUTRONS THROUGH ANY THICKNESS OF MATERIAL. IN ORDER       Virgin  
+      TO SIMULATE AN EXPERIMENTAL MEASUREMENT THE RESULTS ARE GIVEN      Virgin  
+      AS INTEGRALS OVER ENERGY TALLY GROUPS (AS OPPOSED TO POINTWISE     Virgin  
+      IN ENERGY). BY TAKING THE RATIO OF REACTIONS TO FLUX IN EACH       Virgin  
+      GROUP AN EQUIVALENT SPATIALLY DEPENDENT GROUP AVERAGED CROSS       Virgin  
+      SECTION IS CALCULATED BY THE PROGRAM.                              Virgin  
+                                                                         Virgin  
+      EVALUATED DATA                                                     Virgin  
+      --------------                                                     Virgin  
+      THE EVALUATED DATA MUST BE IN THE ENDF/B FORMAT. HOWEVER IT        Virgin  
+      MUST BE LINEAR-LINEAR INTERPOLABLE IN ENERGY-CROSS SECTION         Virgin  
+      BETWEEN TABULATED POINTS. SINCE ONLY CROSS SECTIONS (FILE 3 OR 23) Virgin  
+      ARE USED, THIS PROGRAM WILL WORK ON ANY VERSION OF ENDF/B          Virgin  
+      (I.E. ENDF/B-I, II, III, IV, V OR VI).                             Virgin  
+                                                                         Virgin  
+      RELATED COMPUTER CODES                                             Virgin  
+      ----------------------                                             Virgin  
+      IN ORDER TO CONVERT ENDF/B DATA TO THE FORM REQUIRED BY THIS CODE  Virgin  
+      THE FOLLOWING COMPUTER CODES MAY BE USED,                          Virgin  
+                                                                         Virgin  
+      LINEAR  - CONVERT FROM GENERAL ENDF/B INTERPOLATION TO LINEAR-     Virgin  
+                LINEAR INTERPOLATION.                                    Virgin  
+      RECENT  - ADD THE RESONANCE CONTRIBUTION TO TABULATED BACKGROUND   Virgin  
+                CROSS SECTIONS TO OBTAIN LINEAR-LINEAR INTERPOLABLE      Virgin  
+                RESULTS.                                                 Virgin  
+      SIGMA1  - DOPPLER BROADEN CROSS SECTION TO OBTAIN LINEAR-LINEAR    Virgin  
+                INTERPOLABLE RESULTS.                                    Virgin  
+      MIXER   - MIX INDIVIDUAL MATERIALS TOGETHER TO DEFINE COMPOSITE    Virgin  
+                MIXTURES, E.G., COMBINE MATERIALS TO DEFINE STAINLESS    Virgin  
+                STELL.                                                   Virgin  
+                                                                         Virgin  
+      IN ORDER TO PLOT THE OUTPUT RESULTS OF THIS CODE USE PROGRAM       Virgin  
+      PLOTTAB.                                                           Virgin  
+                                                                         Virgin  
+      COPIES OF ANY OR ALL OF THESE CODES MAY BE OBTAINED FROM D.E.      Virgin  
+      CULLEN AT THE ABOVE ADDRESS.                                       Virgin  
+                                                                         Virgin  
+      OUTPUT FORMAT                                                      Virgin  
+      -------------                                                      Virgin  
+      FOR ALL VERSIONS OF THIS PROGRAM PRIOR TO VERSION 92-1 OUTPUT WAS  Virgin  
+      IN TABULAR FORM.                                                   Virgin  
+                                                                         Virgin  
+      FOR VERSION 92-1 AND LATER VERSIONS OF THIS CODE ALL OUTPUT IS IN  Virgin  
+      THE PROGRAM PLOTTAB FORMAT TO ALLOW RESULTS TO BE EASILY PLOTTED.  Virgin  
+      FOR A COPY OF PROGRAM PLOTTAB CONTACT D.E. CULLEN AT THE ABOVE     Virgin  
+      ADDRESS.                                                           Virgin  
+                                                                         Virgin  
+      TALLY GROUPS                                                       Virgin  
+      ------------                                                       Virgin  
+      THE TALLY GROUP STRUCTURE MAY BE ANY SET OF MONONTONICALLY         Virgin  
+      INCREASING ENERGY BOUNDARIES. THERE MAY BE UP TO 2000 TALLY        Virgin  
+      GROUPS. BY USING THE INPUT PARAMETERS THE USER MAY SPECIFY ANY     Virgin  
+      ARBITRARY TALLY GROUP STRUCTURE OR SELECT ONE OF THE FOLLOWING     Virgin  
+      BUILT-IN GROUP STRUCTURES.                                         Virgin  
+                                                                         Virgin  
+      (0) TART 175 GROUPS                                                Virgin  
+      (1) ORNL  50 GROUPS                                                Virgin  
+      (2) ORNL 126 GROUPS                                                Virgin  
+      (3) ORNL 171 GROUPS                                                Virgin  
+      (4) SAND-II 620 GROUPS - 1.0D-4 eV UP TO 18 MEV                    Virgin  
+      (5) SAND-II 640 GROUPS - 1.0D-4 eV UP TO 20 MEV                    Virgin  
+      (6) WIMS 69 GROUPS                                                 Virgin  
+      (7) GAM-I 68 GROUPS                                                Virgin  
+      (8) GAM-II 99 GROUPS                                               Virgin  
+      (9) MUFT 54 GROUPS                                                 Virgin  
+     (10) ABBN 28 GROUPS                                                 Virgin  
+     (11) TART 616 GROUPS TO  20 MeV                                     Virgin  
+     (12) TART 700 GROUPS To   1 GeV                                     Virgin  
+     (13) SAND-II 665 GROUPS - 1.0D-5 eV UP TO 18 MEV                    Virgin  
+     (14) SAND-II 685 GROUPS - 1.0D-5 eV UP TO 20 MEV                    Virgin  
+     (15) TART 666 GROUPS TO 200 MeV                                     Virgin  
+     (16) SAND-II 725 GROUPS - 1.0D-5 eV UP TO  60 MEV                   Virgin  
+     (17) SAND-II 755 GROUPS - 1.0D-5 eV UP TO 150 MEV                   Virgin  
+     (18) SAND-II 765 GROUPS - 1.0D-5 eV UP TO 200 MEV                   Virgin  
+     (19) UKAEA  1102 GROUPS - 1.0D-5 eV UP TO 1 GeV                     Virgin  
+                                                                         Virgin  
+      INCIDENT SPECTRUM                                                  Virgin  
+      -----------------                                                  Virgin  
+      THE INCIDENT SPECTRUM MAY BE ANY TABULATED FUNCTION THAT IS        Virgin  
+      GIVEN BY A SET OF POINTS THAT IS MONOTONICALLY INCREASING IN       Virgin  
+      ENERGY AND LINEAR-LINEAR INTERPOLABLE IN ENERGY-SPECTRUM           Virgin  
+      BETWEEN TABULATED POINTS. THERE IS NO LIMIT TO THE NUMBER OF       Virgin  
+      POINTS USED TO DESCRIBE THE SPECTRUM. THERE ARE FIVE BUILT-IN      Virgin  
+      OPTIONS FOR THE SPECTRUM.                                          Virgin  
+                                                                         Virgin  
+      (1) CONSTANT...ENERGY INDEPENDENT (INPUT 0)                        Virgin  
+      (2) 1/E (INPUT 1)                                                  Virgin  
+      (3) BLACKBODY - PHOTON SPECTRUM                                    Virgin  
+      (4) BLACKBODY - ENERGY SPECTRUM (E TIMES THE PHOTON SPECTRUM)      Virgin  
+      (5) TRANSMITTED SPECTRUM FROM PREVIOUS CASE                        Virgin  
+                                                                         Virgin  
+      NORMALIZATION OF SPECTRUM                                          Virgin  
+      -------------------------                                          Virgin  
+      ANY INCIDENT SPECTRUM, EITHER READ AS INPUT OR ONE OF THE          Virgin  
+      BUILT-IN SPECTRA, WILL BE NORMALIZED TO UNITY WHEN INTEGRATED      Virgin  
+      OVER THEIR ENTIRE ENERGY RANGE.                                    Virgin  
+                                                                         Virgin  
+      TRANSMITTED SPECTRA WILL NOT BE RE-NORMALIZED, SINCE IT ALREADY    Virgin  
+      INCLUDES THE NORMALIZATION OF THE INCIDENT SPECTRUM.               Virgin  
+                                                                         Virgin  
+      NOTE, INCIDENT SPECTRA IS NORMALIZED TO UNITY OVER THEIR ENTIRE    Virgin  
+      ENERGY RANGE - NOT OVER THE ENERGY RANGE OF THE GROUPS. IF THE     Virgin  
+      ENERGY RANGE OF THE GROUPS IS LESS THAN THAT OF THE SPECTRUM       Virgin  
+      ONLY THAT PORTION OF THE SPECTRUM WILL BE USED AND THIS WILL       Virgin  
+      NOT BE RE-NORMALIZED TO UNITY.                                     Virgin  
+                                                                         Virgin  
+      COMPOSITION OF A LAYER                                             Virgin  
+      ----------------------                                             Virgin  
+      YOU MAY RUN PROBLEMS INVOLVING                                     Virgin  
+      1) A LAYER OF UNIFORM DENSITY - DENSITY FOR ATTENUATION IS THAT    Virgin  
+         OF THE TOTAL. DENSITY FOR REACTIONS IS THAT OF THE REACTION.    Virgin  
+      2) A LAYER OF UNIFORM DENSITY - DENSITY IS THE SUM OF THE TOTAL    Virgin  
+         AND REACTION DENSITIES - THE SUM OF THE CROSS SECTIONS IS       Virgin  
+         USED FOR ATTENUATION AND REACTIONS.                             Virgin  
+      3) A LAYER OF VARYING DENSITY BASED ON A UNIFORM TOTAL DENSITY     Virgin  
+         PLUS A VARIATION BETWEEN 0 AND A MAXIMUM BASED ON THE           Virgin  
+         REACTION DENSITY - 0 AT 0 THICKNESS AND MAXIMUM AT MAXIMUM      Virgin  
+         THICKNESS. IN THIS CASE THE AVERAGE REACTION DENSITY IS EQUAL   Virgin  
+         TO THE INPUT REACTION DENSITY. THE VARIATION IN REACTION        Virgin  
+         DENSITY CAN BE LINEAR, SQUARE OR CUBIC.                         Virgin  
+      4) A LAYER OF VARYING DENSITY BASED ON A TOTAL DENSITY WHICH       Virgin  
+         VARYING FROM MAXIMUM AT 0 THICKNESS TO 0 AT MAXIMUM THICKNESS   Virgin  
+         PLUS A REACTION DENSITY WHICH VARIES FROM 0 AT 0 THICKNESS      Virgin  
+         TO MAXIMUM AT MAXIMUM THICKNESS. IN THIS CASE THE AVERAGE       Virgin  
+         DENSITY OF THE TOTAL AND REACTION WILL BOTH BE EQUAL TO THE     Virgin  
+         INPUT TOTAL AND REACTION DENSITIES. THE VARIATION IN TOTAL      Virgin  
+         AND REACTION DENSITY CAN BE LINEAR, SQUARE OR CUBIC.            Virgin  
+                                                                         Virgin  
+      IN THE FIRST CASE THE TWO REQUESTED CROSS SECTIONS ARE CONSIDERED  Virgin  
+      TO BE INDEPENDENT - THE TOTAL CROSS SECTION IS USED TO CALCULATE   Virgin  
+      ATTENUATION AND THE REACTION CROSS SECTION IS USED TO CALCULATE    Virgin  
+      REACTIONS, E.G., TRANSMISSION THROUGH NATURAL URANIUM (THE TOTAL   Virgin  
+      CROSS SECTION SHOULD BE THAT OF NATURAL URANIUM) AND REACTIONS     Virgin  
+      IN A U-235 DETECTOR (THE REACTION CROSS SECTION SHOULD BE THAT OF  Virgin  
+      U-235).                                                            Virgin  
+                                                                         Virgin  
+      IN THE OTHER THREE CASES THE TWO REQUESTED CROSS SECTIONS ARE      Virgin  
+      TREATED AS TWO CONSTITUENTS OF A MIXTURE OF TWO MATERIALS AND      Virgin  
+      THE TWO CROSS SECTIONS ARE USED BOTH TO DEFINE A TOTAL CROSS       Virgin  
+      SECTION FOR ATTENUATION AND A REACTION CROSS SECTION TO DEFINE     Virgin  
+      REACTIONS. IN THESE CASES THE MIXTURE WILL VARY CONTINUOUSLY,      Virgin  
+      E.G., IN CASE 4) HALF WAY THROUGH THE LAYER THE COMPOSITION WILL   Virgin  
+      BE 1/2 THE MATERIAL DEFINED BY THE TOTAL AND 1/2 THE MATERIAL      Virgin  
+      BASED ON THE REACTION. IN THESE CASES RATHER THAN THINKING OF      Virgin  
+      THE TWO CROSS SECTIONS AS A TOTAL AND REACTION CROSS SECTION,      Virgin  
+      IT IS BETTER TO THINK OF THEM AS THE TOTAL CROSS SECTIONS FOR      Virgin  
+      MATERIALS A AND B AND THE CALCULATED REACTIONS WILL BE BASED       Virgin  
+      ON THESE TWO TOTAL CROSS SECTIONS.                                 Virgin  
+                                                                         Virgin  
+      MULTIPLE LAYERS                                                    Virgin  
+      ---------------                                                    Virgin  
+      THIS CODE MAY BE USED TO RUN EITHER A NUMBER OF INDEPENDENT        Virgin  
+      PROBLEMS, EACH INVOLVING TRANSMISSION THROUGH A SINGLE LAYER OF    Virgin  
+      MATERIAL, OR TRANSMISSION THROUGH A NUMBER OF LAYERS ONE AFTER     Virgin  
+      THE OTHER.                                                         Virgin  
+                                                                         Virgin  
+      IN THE CASE OF MULTIPLE LAYERS, ONE LAYER AFTER ANOTHER, THE       Virgin  
+      TRANSMITTED ENERGY DEPENDENT SPECTRUM IS USED AS THE INCIDENT      Virgin  
+      SPECTRUM FOR THE NEXT LAYER. THERE IS NO LIMIT TO THE NUMBER       Virgin  
+      OF LAYERS WHICH MAY BE USED - EACH LAYER IS TREATED AS A           Virgin  
+      COMPLETELY INDEPENDENT PROBLEM WITH A DEFINED INCIDENT SOURCE,     Virgin  
+      AND AS SUCH THE CYCLE OF TRANSMISSION THROUGH EACH LAYER AND       Virgin  
+      USING THE TRANSMITTED SPECTRUM AS THE INCIDENT SPECTRUM FOR THE    Virgin  
+      NEXT LAYER MAY BE REPEATED ANY NUMBER OF TIMES.                    Virgin  
+                                                                         Virgin  
+      REMEMBER - THE INCIDENT SPECTRUM IS ASSUMED TO BE LINEARLY         Virgin  
+      INTERPOLABLE IN ENERGY AND SPECTRUM BETWEEN THE ENERGIES AT        Virgin  
+      WHICH IT IS TABULATED. THE TRANSMITTED SPECTRUM WILL BE TABULATED  Virgin  
+      AT THE UNION OF ALL ENERGIES OF THE INCIDENT SPECTRUM AND CROSS    Virgin  
+      SECTIONS (TOTAL AND REACTION). IN ORDER TO INSURE THE ACCURACY     Virgin  
+      OF THE RESULT WHEN PERFORMING MULTIPLE LAYER CALCULATION BE SURE   Virgin  
+      TO SPECIFY THE INCIDENT SPECTRUM ON THE FIRST LAYER TO SUFFICIENT  Virgin  
+      DETAIL (ENOUGH ENERGY POINTS CLOSELY SPACED TOGETHER) IN ORDER TO  Virgin  
+      ALLOW THE TRANSMITTED SPECTRUM TO BE ACCURATELY REPRESENTED BY     Virgin  
+      LINEAR INTERPOLATION BETWEEN SUCCESSIVE ENERGY POINTS - THERE IS   Virgin  
+      NO LIMIT TO THE NUMBER OF POINTS ALLOWED IN THE INCIDENT SPECTRUM, Virgin  
+      SO IF YOU ARE IN DOUBT, SIMPLY USE MORE ENERGY POINTS TO SPECIFY   Virgin  
+      THE INCIDENT SPECTRUM.                                             Virgin  
+                                                                         Virgin  
+      RESULT OUTPUT UNITS                                                Virgin  
+      -------------------                                                Virgin  
+      FLUX      = EXACTLY AS CALCULATED                                  Virgin  
+      REACTIONS = 1/CM OR 1/GRAM                                         Virgin  
+      AVERAGE   = 1/CM - MACROSCOPIC UNITS                               Virgin  
+      CROSS                                                              Virgin  
+      SECTION                                                            Virgin  
+                                                                         Virgin  
+      THICKNESS AND DENSITY                                              Virgin  
+      ---------------------                                              Virgin  
+      THE UNCOLLIDED CALCULATION ONLY DEPENDS ON THE PRODUCT OF          Virgin  
+      THICKNESS AND DENSITY (I.E. GRAMS PER CM SQUARED). THIS FACT       Virgin  
+      MAY BE USED TO SIMPLIFY INPUT BY ALLOWING THE THICKNESS AND        Virgin  
+      DENSITY TO BE GIVEN EITHER AS CM AND GRAMS/CC RESPECTIVELY         Virgin  
+      OR ELSE TO GIVE THICKNESS IN GRAMS/(CM*CM) AND INPUT A             Virgin  
+      DENSITY OF 1.0 - OR IN ANY OTHER CONVENIENT UNITS AS LONG AS       Virgin  
+      THE PRODUCT OF THICKNESS AND DENSITY IS IN THE CORRECT GRAMS       Virgin  
+      PER CENTIMETER SQUARED.                                            Virgin  
+                                                                         Virgin  
+      GRAMS/(CM*CM) ARE RELATED TO ATOMS/BARN THROUGH THE RELATIONSHIP   Virgin  
+                                                                         Virgin  
+      GRAMS/(CM*CM)=(ATOMS/BARN)*(GRAMS/MOLE)*(MOLE/ATOM)                Virgin  
+                                                                         Virgin  
+      OR...                                                              Virgin  
+                                                                         Virgin  
+      GRAMS/(CM*CM)=(ATOMS/BARN)*(ATOMIC WEIGHT)/0.602                   Virgin  
+                                                                         Virgin  
+      CROSS SECTIONS AT A SPACE POINT AND OPTICAL THICKNESS              Virgin  
+      -----------------------------------------------------              Virgin  
+      THIS PROGRAM ALLOWS LAYERS OF EITHER UNIFORM DENSITY OR            Virgin  
+      CONTINUOUSLY VARYING DENSITY. THE DENSITY CAN BE ONE OF THE        Virgin  
+      FOLLOWING FORMS,                                                   Virgin  
+      1) C                   = UNIFORM DENSITY                           Virgin  
+      2) C*2*(X/T)           = LINEAR VARIATION FROM 0 TO C              Virgin  
+      3) C*(2-2*(X/T))       = LINEAR VARIATION FROM C TO 0              Virgin  
+      4) C*3*(X/T)**2        = SQUARE VARIATION FROM 0 TO C              Virgin  
+      5) C*(3-3*(X/T)**2)/2  = SQUARE VARIATION FROM C TO 0              Virgin  
+      6) C*4*(X/T)**3        = CUBIC VARIATION FROM 0 TO C               Virgin  
+      7) C*(4-4*(X/T)**3)/3  = CUBIC VARIATION FROM C TO 0               Virgin  
+                                                                         Virgin  
+      IN ORDER TO CALCULATE REACTIONS AT A POINT THE MICROSCOPIC         Virgin  
+      REACTION CROSS SECTION NEED MERELY BE SCALED BY THESE DENSITIES.   Virgin  
+                                                                         Virgin  
+      IN ORDER TO CALCULATE TRANSMISSION WE MUST DEFINE THE OPTICAL      Virgin  
+      PATH LENGTH WHICH MAY BE DEFINED BY INTEGRATING EACH OF THE        Virgin  
+      ABOVE DENSITY FORMS TO FIND,                                       Virgin  
+      1) C*X                                                             Virgin  
+      2) C*X*(X/T)                                                       Virgin  
+      3) C*X*(2-(X/T))                                                   Virgin  
+      4) C*X*(X/T)**2                                                    Virgin  
+      5) C*X*(3-(X/T)**2)/2                                              Virgin  
+      6) C*X*(X/T)**3                                                    Virgin  
+      7) C*X*(4-(X/T)**3))/3                                             Virgin  
+                                                                         Virgin  
+      IN ORDER TO CALCULATE TRANSMISSION TO A POINT THE MICROSCOPIC      Virgin  
+      TOTAL CROSS SECTION NEED MERELY BE SCALED BY THESE DENSITIES       Virgin  
+      TO DEFINE THE OPTICAL PATH LENGTH.                                 Virgin  
+                                                                         Virgin  
+      THE VARIATION OF THE DENSITY THROUGH THE LAYER MAY BE DEFINED      Virgin  
+      BY SETTING X = 0 OR X = T TO FIND,                                 Virgin  
+         X = 0      X = T                                                Virgin  
+         -----      -----                                                Virgin  
+      1) C          C                                                    Virgin  
+      2) 0          2*C                                                  Virgin  
+      3) 2*C        0                                                    Virgin  
+      4) 0          3*C                                                  Virgin  
+      5) 3*C/2      0                                                    Virgin  
+      6) 0          4*C                                                  Virgin  
+      7) 4*C/3      0                                                    Virgin  
+                                                                         Virgin  
+      THE OPTICAL PATH THROUGH A LAYER OF THICKNESS T MAY BE DEFINED     Virgin  
+      FROM THE ABOVE EXPRESSIONS BY SETTING X=T TO FIND THAT IN ALL      Virgin  
+      CASES THE ANSWER WILL BY C*T. THE CONSTANTS IN THE ABOVE           Virgin  
+      EXPRESSIONS HAVE BEEN INTRODUCED IN ORDER TO FORCE THIS RESULT.    Virgin  
+      WITH THESE FACTORS THE OPTICAL PATH LENGTH THROUGH THE LAYER       Virgin  
+      WILL EXACTLY CORRESPOND TO AN AVERAGE DENSITY CORRESPONDING TO     Virgin  
+      THAT INPUT FOR THE TOTAL AND/OR REACTION, I.E., C CORRESPONDS      Virgin  
+      TO THE INPUT DENSITY.                                              Virgin  
+                                                                         Virgin  
+      NOTE - FOR THE SAME OPTICAL PATH LENGTHS THROUGH THE LAYER THE     Virgin  
+      TRANSMISSION WILL BE EXACTLY THE SAME. HOWEVER, VARYING THE        Virgin  
+      DENSITY WILL ALLOW YOU TO MODIFY THE REACTION RATES AT SPECIFIC    Virgin  
+      DEPTHS INTO THE LAYER.                                             Virgin  
+                                                                         Virgin  
+      COMPUTATION OF INTEGRALS                                           Virgin  
+      ------------------------                                           Virgin  
+      STARTING FROM TOTAL CROSS SECTIONS, REACTION CROSS SECTIONS AND    Virgin  
+      A SOURCE SPECTRUM ALL OF WHICH ARE GIVEN IN TABULAR FORM WITH      Virgin  
+      LINEAR INTERPOLATION BETWEEN TABULATED POINTS ALL REQUIRED         Virgin  
+      INTEGRALS CAN BE DEFINED BY ANALYTICAL EXPRESSIONS INVOLVING       Virgin  
+      NOTHING MORE COMPLICATED THAN EXPONENTIALS. THE INTEGRALS THAT     Virgin  
+      MUST BE EVALUATED ARE OF THE FORM...                               Virgin  
+                                                                         Virgin  
+      FLUX                                                               Virgin  
+      ----                                                               Virgin  
+      (INTEGRAL EK TO EK+1) (S(E)* EXP(-XCT(E)*Z)*DE)                    Virgin  
+                                                                         Virgin  
+      REACTIONS                                                          Virgin  
+      ---------                                                          Virgin  
+      (INTEGRAL EK TO EK+1) (S(E)*XCR(E)*EXP(-XCT(E)*Z)*DE)              Virgin  
+                                                                         Virgin  
+      WHERE..                                                            Virgin  
+      EK TO EK+1 = LONGEST ENERGY INTERVAL OVER WHICH S(E), XCT(E) AND   Virgin  
+                   XCR(E) ARE ALL LINEARLY INTERPOLABLE.                 Virgin  
+      S(E)       = ENERGY DEPENDENT WEIGHTING SPECTRUM                   Virgin  
+      XCR(E)     = REACTION CROSS SECTION                                Virgin  
+      XCT(E)     = OPTICAL PATH LENGTH (BASED ON TOTAL CROSS SECTION)    Virgin  
+      Z          = MATERIAL THICKNESS                                    Virgin  
+                                                                         Virgin  
+      S(E), XCR(E) AND XCT(E) ARE ALL ASSUMED TO BE GIVEN IN TABULAR     Virgin  
+      FORM WITH LINEAR INTERPOLATION USED BETWEEN TABULATED POINTS.      Virgin  
+      IN OTHER WORDS BETWEEN TABULATED POINTS EACH OF THESE THREE IS     Virgin  
+      DEFINED BY A FUNCTION OF THE FORM...                               Virgin  
+                                                                         Virgin  
+      F(E)=((E - EK)*FK+1 + (EK+1 - E)*FK)/(EK+1 - EK)                   Virgin  
+                                                                         Virgin  
+      EACH OF THESE THREE CAN BE CONVERTED TO NORMAL FORM BY THE         Virgin  
+      CHANGE OF VARIABLES....                                            Virgin  
+                                                                         Virgin  
+      X=(E - 0.5*(EK+1 + EK))/(EK+1 - EK)                                Virgin  
+                                                                         Virgin  
+      IN WHICH CASE X WILL VARY FROM -1 (AT EK) TO +1 (AT EK+1) AND      Virgin  
+      EACH FUNCTION REDUCES TO THE NORMAL FORM...                        Virgin  
+                                                                         Virgin  
+      F(X)=0.5*(FK*(1 - X) + FK+1*(1 + X))                               Virgin  
+          =0.5*(FK+1 + FK) + 0.5*(FK+1 - FK)*X                           Virgin  
+                                                                         Virgin  
+      BY DEFINING THE AVERAGE VALUE AND 1/2 THE CHANGE ACROSS THE        Virgin  
+      INTERVAL.                                                          Virgin  
+                                                                         Virgin  
+      AVF=0.5*(FK+1 + FK)                                                Virgin  
+      DF= 0.5*(FK+1 - FK)                                                Virgin  
+      DE= 0.5*(EK+1 - EK)                                                Virgin  
+                                                                         Virgin  
+      EACH OF THE THREE FUNCTIONS REDUCES TO THE SIMPLE FORM...          Virgin  
+                                                                         Virgin  
+      F(X)=AVF+DF*X                                                      Virgin  
+                                                                         Virgin  
+      AND THE TWO REQUIRED INTEGRALS REDUCE TO...                        Virgin  
+                                                                         Virgin  
+      FLUX                                                               Virgin  
+      ----                                                               Virgin  
+      DE*EXP(-AVXCT*Z) * (INTEGRAL -1 TO +1)                             Virgin  
+      ((AVS+DS*X)*EXP(-DXCT*Z*X)*DX)                                     Virgin  
+                                                                         Virgin  
+      REACTION                                                           Virgin  
+      --------                                                           Virgin  
+      DE*EXP(-AVXCT*Z) * (INTEGRAL -1 TO +1)                             Virgin  
+      ((AVS*AVXCR+(AVS*DXCR+AVXCR*DS)*X+DS*DXCR*X*X)*EXP(-DXCT*Z*X)*DX)  Virgin  
+                                                                         Virgin  
+      WHERE                                                              Virgin  
+                                                                         Virgin  
+      AVXCT   = AVERAGE VALUE OF THE TOTAL CROSS SECTION                 Virgin  
+      AVXCR   = AVERAGE VALUE OF THE REACTION CROSS SECTION              Virgin  
+      AVS     = AVERAGE VALUE OF THE SOURCE                              Virgin  
+      DXCT    = 1/2 THE CHANGE IN THE TOTAL CROSS SECTION                Virgin  
+      DXCR    = 1/2 THE CHANGE IN THE REACTION CROSS SECTION             Virgin  
+      DS      = 1/2 THE CHANGE IN THE SOURCE                             Virgin  
+      DE      = 1/2 THE CHANGE IN THE ENERGY                             Virgin  
+                                                                         Virgin  
+      NOTE THAT IN THIS FORM THE ENERGY ONLY APPEARS IN FRONT OF THE     Virgin  
+      INTEGRALS AND THE INTEGRALS ARE EXPRESSED ONLY IN TERMS OF THE     Virgin  
+      TABULATED VALUES OF S(E), XCT(E) AND XCR(E). IN PARTICULAR NO      Virgin  
+      DERIVATIVES ARE USED, SO THAT THERE ARE NO NUMERICAL INSTABILITY   Virgin  
+      PROBLEMS IN THE VACINITY OF DISCONTINUITIES IN S(E), XCT(E) OR     Virgin  
+      XCR(E). INDEED, SINCE (EK+1 - EK) APPEARS IN FRONT OF THE INTEGRAL Virgin  
+      POINTS OF DISCONTINUITY AUTOMATICALLY MAKE ZERO CONTRIBUTION TO    Virgin  
+      THE INTEGRALS.                                                     Virgin  
+                                                                         Virgin  
+      THE REQUIRED INTEGRALS CAN BE EXPRESSED IN TERMS OF THE THREE      Virgin  
+      INTEGRALS IN NORMAL FORM....                                       Virgin  
+                                                                         Virgin  
+      F(A,N) = (INTEGRAL -1 TO 1) (X**N*EXP(-A*X)*DX), N=0,1 AND 2.      Virgin  
+                                                                         Virgin  
+      THESE THREE INTEGRALS CAN BE EVALUATED TO FIND...                  Virgin  
+                                                                         Virgin  
+      N=0                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,0) = (EXP(A)-EXP(-A))/A                                        Virgin  
+                                                                         Virgin  
+      N=1                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,1) = ((1-A)*EXP(A)-(1+A)*EXP(-A))/(A*A)                        Virgin  
+                                                                         Virgin  
+      N=2                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,2) = ((2-2*A+A*A)*EXP(A)-(2+2*A+A*A)*EXP(-A))/(A*A*A)          Virgin  
+                                                                         Virgin  
+      HOWEVER THESE EXPRESSIONS ARE NUMERICALLY UNSTABLE FOR SMALL       Virgin  
+      VALUES OF A. THEREFORE FOR SMALL A THE EXPONENTIAL IN THE          Virgin  
+      INTEGRALS ARE EXPANDED IN A POWER SERIES...                        Virgin  
+                                                                         Virgin  
+      EXP(-AX)=1.0-(AX)+(AX)**2/2-(AX)**3/6+(AX)**4/24-........          Virgin  
+              =(SUM K=0 TO INFINITY) (-AX)**K/(K FACTORIAL)              Virgin  
+                                                                         Virgin  
+      AND THE INTEGRAL REDUCES TO THE FORM....                           Virgin  
+                                                                         Virgin  
+      (SUM K=0 TO INFINITY) ((-A)**K/(K FACTORIAL)) *                    Virgin  
+      (INTEGRAL -1 TO 1) (X**(N+K))*DX                                   Virgin  
+                                                                         Virgin  
+      WHICH CAN BE ANALYTICALLY EVAULATED TO FIND....                    Virgin  
+      (K(N) = K FACTORIAL)                                               Virgin  
+                                                                         Virgin  
+      N=0                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,0) = 2*(1+(A**2)/K(3)+(A**4)/K(5)+(A**6)/K(7)+....             Virgin  
+                                                                         Virgin  
+      N=1                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,1) = -2*A*(2/K(3)+4*(A**2)/K(5)+6*(A**4)/K(7)+8*(A**6)/K(9)+.. Virgin  
+                                                                         Virgin  
+      N=2                                                                Virgin  
+      ---                                                                Virgin  
+      F(A,2) = 2*(2/K(3)+3*4*(A**2)/K(5)+5*6*(A**4)/K(7)+                Virgin  
+               7*8*(A**6)/K(9)+....                                      Virgin  
+                                                                         Virgin  
+      THESE EXPANSIONS ARE USED WHEN THE ABSOLUTE VALUE OF A IS LESS     Virgin  
+      THAN 0.1. BY TRUNCATING THE ABOVE SERIES BEFORE A**8 THE ERROR     Virgin  
+      RELATIVE TO THE LEADING TERM OF THE SERIES WILL BE 10**(-10),      Virgin  
+      YIELDING 10 DIGIT ACCURACY.                                        Virgin  
+                                                                         Virgin  
+      AFTER EVALUATING THE ABOVE FUNCTIONS, EITHER DIRECTLY OR BY USING  Virgin  
+      THE EXPANSION THE TWO REQUIRED INTEGRALS CAN BE WRITTEN AS...      Virgin  
+                                                                         Virgin  
+      FLUX                                                               Virgin  
+      ----                                                               Virgin  
+      DE*EXP(-AVXCT*Z)*(AVS*F(A,0) + DS*F(A,1))                          Virgin  
+                                                                         Virgin  
+      REACTIONS                                                          Virgin  
+      ---------                                                          Virgin  
+      DE*EXP(-AVXCT*Z)*                                                  Virgin  
+      (AVS*AVXCR*F(A,0) + (AVS*DXCR+AVXCR*DS)*F(A,1) + DS*DXCR*F(A,2))   Virgin  
+                                                                         Virgin  
+      INPUT FILES                                                        Virgin  
+      -----------                                                        Virgin  
+      FILENAME  UNIT  DESCRIPTION                                        Virgin  
+      --------  ----  -----------                                        Virgin  
+      INPUT       2   INPUT LINES                                        Virgin  
+      ENDFIN     10   EVALUATED DATA IN ENDF/B FORMAT                    Virgin  
+                                                                         Virgin  
+      OUTPUT FILES                                                       Virgin  
+      ------------                                                       Virgin  
+      FILENAME  UNIT  DESCRIPTION                                        Virgin  
+      --------  ----  -----------                                        Virgin  
+      OUTPUT      3   OUTPUT LISTING                                     Virgin  
+                                                                         Virgin  
+      SCRATCH FILES                                                      Virgin  
+      -------------                                                      Virgin  
+      FILENAME  UNIT  DESCRIPTION                                        Virgin  
+      --------  ----  -----------                                        Virgin  
+      SCR1       12   REACTION, FLUX AND CROSS SECTION RESULTS (BCD)     Virgin  
+                      (SORTED AT END OF RUN AND OUTPUT SEPARATELY)       Virgin  
+      SCR2       13   TALLY GROUP ENERGY BOUNDARIES (BINARY)             Virgin  
+      SCR3       14   SOURCE SPECTRUM (BINARY)                           Virgin  
+      SCR4       15   TOTAL CROSS SECTION (BINARY)                       Virgin  
+      SCR5       16   REACTION CROSS SECTION (BINARY)                    Virgin  
+                                                                         Virgin  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILIO1 AND FILEIO2)   Virgin  
+      ----------------------------------------------------------------   Virgin  
+      UNIT  FILE NAME   FORMAT                                           Virgin  
+      ----  ----------  ------                                           Virgin  
+        2   VIRGIN.INP   BCD                                             Virgin  
+        3   VIRGIN.LST   BCD                                             Virgin  
+       10   ENDFB.IN     BCD                                             Virgin  
+     11-15  (SCRATCH)   BINARY                                           Virgin  
+       16   PLOTTAB.CUR PLOTTAB OUTPUT FORMAT DATA                       Virgin  
+                                                                         Virgin  
+      INPUT LINES                                                        Virgin  
+      -----------                                                        Virgin  
+      ANY NUMBER OF CASES MAY BE RUN ONE AFTER THE OTHER. AFTER THE      Virgin  
+      FIRST CASE HAS BEEN RUN THE FOLLOWING CASES MAY USE THE SAME       Virgin  
+      THICKNESSES, GROUP STRUCTURE AND SPECTRUM AS THE PRECEDING CASE.   Virgin  
+      IN ADDITION THE TRANSMITTED SPECTRUM FROM ONE CASE MAY BE USED     Virgin  
+      AS THE INCIDENT SPECTRUM IN THE NEXT CASE, TO ALLOW MULTIPLE       Virgin  
+      LAYERS OF DIFFERENT MATERIALS.                                     Virgin  
+                                                                         Virgin  
+      LINE  COLS.  FORMAT  DESCRIPTION                                   Virgin  
+      ----  -----  ------  ----------                                    Virgin  
+         1   1-60   ENDF/B INPUT DATA FILENAME                           Virgin  
+                      (STANDARD OPTION = ENDFB.IN)                       Virgin  
+                                                                         Virgin  
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Virgin  
+      THEN USE STANDARD FILENAMES.                                       Virgin  
+                                                                         Virgin  
+       2-3   1-72   18A4   TWO LINE TITLE DESCRIBING PROBLEM             Virgin  
+         4   1- 6    I6    ZA (1000*Z+A) OF TARGET FOR TOTAL             Virgin  
+             7-11    I5    MT OF TOTAL                                   Virgin  
+            12-22   E11.4  DENSITY FOR TOTAL                             Virgin  
+            23-28    I6    ZA (1000*Z+A) OF TARGET FOR REACTION          Virgin  
+            29-33    I5    MT OF REACTION                                Virgin  
+                           = 0 - NO REACTION CALCULATION (ONLY FLUX).    Virgin  
+                           = GREATER THAN 0 - CALCULATE REACTIONS.       Virgin  
+            34-44   E11.4  DENSITY FOR REACTION                          Virgin  
+            45-50    I6    NUMBER OF TARGET THICKNESSES                  Virgin  
+                           = GREATER THAN 0 = READ FROM INPUT            Virgin  
+                             (1 TO 2000 ALLOWED)                         Virgin  
+                           =  0 = SAME AS LAST CASE                      Virgin  
+            51-55    I5    NUMBER OF TALLY GROUPS                        Virgin  
+                           (REMEMBER NUMBER OF GROUP BOUNDARIES          Virgin  
+                           IS ONE MORE THAN THE NUMBER OF GROUPS)        Virgin  
+                           UP TO 2000 GROUPS ARE ALLOWED                 Virgin  
+                           BUILT-IN GROUP STRUCTURES.                    Virgin  
+                           = GREATER THAN 0 = READ FROM INPUT            Virgin  
+                           =  0 TART 175 GROUPS                          Virgin  
+                           = -1 ORNL  50 GROUPS                          Virgin  
+                           = -2 ORNL 126 GROUPS                          Virgin  
+                           = -3 ORNL 171 GROUPS                          Virgin  
+                           = -4 SAND-II 620 GROUPS..1.0D-4 eV TO 18 MEV  Virgin  
+                           = -5 SAND-II 640 GROUPS..1.0D-4 eV TO 20 MEV  Virgin  
+                           = -6 WIMS 69 GROUPS                           Virgin  
+                           = -7 GAM-I 68 GROUPS                          Virgin  
+                           = -8 GAM-II 99 GROUPS                         Virgin  
+                           = -9 MUFT 54 GROUPS                           Virgin  
+                           =-10 ABBN 28 GROUPS                           Virgin  
+                           =-11 TART 616 GROUPS TO  20 MeV               Virgin  
+                           =-12 TART 700 GROUPS TO   1 GeV               Virgin  
+                           =-13 SAND-II 665 GROUPS..1.0D-5 eV TO 18 MEV  Virgin  
+                           =-14 SAND-II 685 GROUPS..1.0D-5 eV TO 20 MEV  Virgin  
+                           =-15 TART 666 GROUPS TO 200 MeV               Virgin  
+                           =-16 SAND-II 725 GROUPS..1.0D-5 eV TO  60 MEV Virgin  
+                           =-17 SAND-II 755 GROUPS..1.0D-5 eV TO 150 MEV Virgin  
+                           =-18 SAND-II 765 GROUPS..1.0D-5 eV TO 200 MEV Virgin  
+                           =-19 UKAEA  1102 GROUPS..1.0D-5 eV to   1 GeV Virgin  
+            56-60    I5    NUMBER OF POINTS IN SOURCE SPECTRUM           Virgin  
+                           (MUST BE AT LEAST TWO POINTS)                 Virgin  
+                           = GREATER THAN 1 = READ FROM INPUT            Virgin  
+                           =  0 = SAME AS LAST CASE                      Virgin  
+                           = -1 = CONSTANT (ENERGY INDEPENDENT)          Virgin  
+                           = -2 = 1/E                                    Virgin  
+                           = -3 = BLACKBODY - PHOTON SPECTRUM            Virgin  
+                           = -4 = BLACKBODY - ENERGY SPECTRUM            Virgin  
+                           = -5 = TRANSMITTED SPECTRUM FROM LAST CASE    Virgin  
+                           NOTE, ALL SPECTRA, EXCEPT THE TRANSMITTED     Virgin  
+                           SPECTRUM FROM THE LAST CASE, WILL BE          Virgin  
+                           NORMALIZED SUCH THAT ITS INTEGRAL OVER        Virgin  
+                           ENERGY WILL BE UNITY.                         Virgin  
+            61-64  1X,3I1  SPATIALLY DEPENDENT OUTOUT                    Virgin  
+                           = 0 = NO                                      Virgin  
+                           = 1 = YES                                     Virgin  
+                           FOR THE 3 QUANTITIES                          Virgin  
+                           COLUMN 67 FLUX                                Virgin  
+                                  68 REACTIONS                           Virgin  
+                                  69 AVERAGE CROSS SECTION               Virgin  
+            65-65    I1    ENERGY DEPENDENT OUTOUT                       Virgin  
+                           = 0 = NONE                                    Virgin  
+                           = 1 = INCIDENT SPECTRUM                       Virgin  
+                           = 2 = TRANSMITTED SPECTRUM                    Virgin  
+                           = 3 = INCIDENT REACTIONS                      Virgin  
+                           = 4 = TRANSMIITED REACTIONS                   Virgin  
+                           = 5 = TOTAL CROSS SECTION                     Virgin  
+                           = 6 = REACTION CROSS SECTION                  Virgin  
+         5   1-11   E11.4  BLACKBODY TEMPERATURE IN eV                   Virgin  
+            12-22   E11.4  FLUX NORMALIZATION                            Virgin  
+            23-33   E11.4  REACTION NORMALIZATION                        Virgin  
+                           CALCULATIONS WILL BE BASED ON THE SPECTRUM    Virgin  
+                           AND CROSS SECTIONS AS READ. AT OUTPUT THE     Virgin  
+                           RESULTS WILL BE MULTIPLIED BY THESE           Virgin  
+                           NORMALIZATION FACTORS.                        Virgin  
+            34-44    I11   DENSITY PROFILE                               Virgin  
+                           = 0 - UNIFORM - BASED ON TOTAL DENSITY        Virgin  
+                           = 1 - UNIFORM - TOTAL + REACTION DENSITY      Virgin  
+                           = 2 - TOTAL + LINEAR REACTION                 Virgin  
+                           = 3 - LINEAR (TOTAL + REACTION)               Virgin  
+                           = 4 - TOTAL + SQUARE REACTION                 Virgin  
+                           = 5 - SQUARE (TOTAL + REACTION)               Virgin  
+                           = 6 - TOTAL + CUBIC REACTION                  Virgin  
+                           = 7 - CUBIC (TOTAL + REACTION)                Virgin  
+       6-N   1-66  6E11.4  TARGET THICKNESSES IN CM                      Virgin  
+                           IF SAME AS LAST CASE THIS SECTION IS NOT      Virgin  
+                           INCLUDED IN THE INPUT.                        Virgin  
+      VARY   1-66  6E11.4  TALLY GROUP ENERGY BOUNDARIES                 Virgin  
+                           (NUMBER OF BOUNDARIES IS ONE MORE THAN        Virgin  
+                           THE NUMBER OF TALLY GROUPS)                   Virgin  
+                           IF THE STANDARD OPTION (-14 TO 0) IS          Virgin  
+                           SELECTED THIS SECTION IS NOT INCLUDED         Virgin  
+                           IN THE INPUT                                  Virgin  
+      VARY   1-66  6E11.4  SOURCE SPECTRUM IN ENERGY (eV)-SOURCE PAIRS   Virgin  
+                           (MUST BE AT LEAST TWO POINTS)                 Virgin  
+                           IF STANDARD OPTION (-5 TO 0) IS SELECTED THIS Virgin  
+                           SECTION IS NOT INCLUDED IN THE INPUT          Virgin  
+                                                                         Virgin  
+      ANY NUMBER OF CASES MAY BE RUN ONE AFTER ANOTHER.                  Virgin  
+                                                                         Virgin  
+      EXAMPLE INPUT NO. 1                                                Virgin  
+      -------------------                                                Virgin  
+      CALCULATE THE UNCOLLIDED FLUX AND CAPTURE (MT=102) THROUGH         Virgin  
+      30 CM OF IRON (DENSITY 7.87 G/CC). TALLY THE RESULTS USING         Virgin  
+      THE TART 175 GROUP STRUCTURE. THE SOURCE WILL BE CONSTANT          Virgin  
+      FROM 1 KEV TO 20 MEV. USE THE STANDARD ENDF/B INPUT DATA           Virgin  
+      FILENAME.                                                          Virgin  
+                                                                         Virgin  
+      ENDFB.IN                                                           Virgin  
+      IRON 0 TO 30 CM THICK.                                             Virgin  
+      CONSTANT SOURCE FROM 1 KEV TO 20 MEV.                              Virgin  
+       26000    1 7.8700D+ 0 26000  102 7.8700D+ 0     2    0    2 1100  Virgin  
+       0.0000D+ 0 1.0000D+ 0 1.0000D+ 0          0 0.0000D+00            Virgin  
+       0.0000D+00 3.0000D+01                                             Virgin  
+       1.0000D+03 1.0000D+00 2.0000D+07 1.0000D+00                       Virgin  
+                                                                         Virgin  
+      EXAMPLE INPUT NO. 2                                                Virgin  
+      -------------------                                                Virgin  
+      CALCULATE THE UNCOLLIDED PHOTON FLUX THROUGH A MIXTURE OF SILICON  Virgin  
+      AND IRON FOR 100 MEV PHOTONS INCIDENT. THE TRANSMISSION WILL BE    Virgin  
+      CALCULATED FOR 21 THICKNESSES VARYING BETWEEN 0 AND 1 CM. THERE    Virgin  
+      WILL BE ONLY 1 TALLY GROUP SPANNING A VERY NARROW ENERGY RANGE     Virgin  
+      NEAR 100 MEV, AND THE SOURCE SPECTRUM WILL BE CONSTANT OVER THE    Virgin  
+      SAME ENERGY RANGE. USE THE STANDARD ENDF/B INPUT DATA FILENAME     Virgin  
+      BY LEAVING THE FIRST INPUT LINE BLANK.                             Virgin  
+                                                                         Virgin  
+      (THIS IS A BLANK LINE TO USE THE STANDARD INPUT FILENAME)          Virgin  
+      100 MEV PHOTONS                                                    Virgin  
+      SILICON + 5 % IRON                                                 Virgin  
+       14000  521 2.30000+ 0 26000  521 1.15000- 1    21    1    2 1000  Virgin  
+       0.00000+ 0 1.00000+ 0 1.00000+ 0          1 0.00000+00            Virgin  
+       0.00000+00 5.00000-01 1.00000+00 1.50000+00 2.00000+00 2.50000+00 Virgin  
+       3.00000+00 3.50000+00 4.00000+00 4.50000+00 5.00000+00 5.50000+00 Virgin  
+       6.00000+00 6.50000+00 7.00000+00 7.50000+00 8.00000+00 8.50000+00 Virgin  
+       9.00000+00 9.50000+00 1.00000+01                                  Virgin  
+       9.99000+ 7 1.00100+ 8                                             Virgin  
+       9.99000+ 7 1.00000+ 4 1.00100+ 8 1.00000+ 4                       Virgin  
+                                                                         Virgin  
+ ======================================================================= Virgin  

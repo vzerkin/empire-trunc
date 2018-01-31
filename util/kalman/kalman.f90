@@ -77,6 +77,7 @@
 
     integer*4 i
 
+
     ! open KALMAN.INP file on 1, KALMAN.OUT file on 2
 
     open(1,file='KALMAN.INP',status='old',action='read')
@@ -220,6 +221,10 @@
 
     do i = 1,ndata
         do j = 1,crx%nen
+                           !  |------------------- ! energy to interpolate
+                           !  |     |------------- ! reaction index
+                           !  |     |   |--------- ! order of poly to interpolate
+                           !  |     |   |     |--- ! # point in energy grid
             d(j,i) = polynm(xdat(i),j,nord,crx%nen)
         end do
     end do
@@ -826,7 +831,7 @@
 
     return
 
-10  format(a43,i5)
+10  format(a43,i6)
 20  format(6e11.4)
 30  format(12f6.3)
 
@@ -981,9 +986,9 @@
     implicit none
 
     integer*4 index,jndex,i,j,jmax,ir,jr
-    integer*4, allocatable :: iv(:)
-    real*8, allocatable :: vg(:,:)
-    type (reaction), pointer :: rx1,rx2
+    integer*4, allocatable :: iv(:)         ! correlation matrx (0-1000)
+    real*8, allocatable :: vg(:,:)          ! covariance matrix
+    type (reaction), pointer :: rx1,rx2     ! reactions
 
     open(14,action='write')
     open(16,action='write')
@@ -1001,8 +1006,8 @@
             rx1%err(i) = dsqrt(vg(i,i))
         end do
 
-        write(14,300) rx1%nam
-        write(14,200)(index+j,j=1,rx1%nen)
+        write(14,300) rx1%nam                   ! write 'Diagonal' title
+        write(14,200)(index+j,j=1,rx1%nen)      ! write index of EMPIRE incident energies
 
         ! generate endf-like numbers
 
@@ -1010,24 +1015,24 @@
         write(16,500) (rx1%ene(i),i=1,rx1%nen)   !16
         write(16,500) (rx1%crs(i),i=1,rx1%nen)   !16
         do i=1,rx1%nen
-            write(16,500) (vg(i,j),j=1,rx1%nen)   !16
+            write(16,500) (vg(i,j),j=1,rx1%nen)   !16 write covariance matrix
         end do
 
         do i = 1,rx1%nen
             do j = 1,rx1%nen
                 if(i == j) then
-                    iv(j) = 1000
+                    iv(j) = 1000    ! correlation matrix diagonal
                 else if((rx1%err(i) == 0.D0) .or. (rx1%err(j) == 0.D0)) then
                     iv(j) = 0
                 else
-                    iv(j) = nint(1000.D0*vg(i,j)/(rx1%err(i)*rx1%err(j)))
+                    iv(j) = nint(1000.D0*vg(i,j)/(rx1%err(i)*rx1%err(j)))   ! calculate correlation matrix row
                 endif
             end do
             jmax = min(i,50)
             if(rx1%crs(i) == 0.D0) then
                 write(14,100) index+i,rx1%ene(i),rx1%err(i),(iv(j),j=1,jmax)
             else
-                write(14,100) index+i,rx1%ene(i),rx1%err(i)/rx1%crs(i)*100.D0,(iv(j),j=1,jmax)
+                write(14,100) index+i,rx1%ene(i),rx1%err(i)/rx1%crs(i)*100.D0,(iv(j),j=1,jmax)  ! write correlation matrix row
             endif
             if(jmax < i) write(14,200)(iv(j),j=jmax+1,i)
         end do
@@ -1049,9 +1054,9 @@
 
             rx2 => rxn(jr)
             allocate(vg(rx1%nen,rx2%nen),iv(rx2%nen))
-            call mulmtx(ir,jr,vg)
-            write(14,400) rx1%nam,rx2%nam
-            write(14,200)(jndex+j,j=1,rx2%nen)
+            call mulmtx(ir,jr,vg)                       ! calculate covariance matrix
+            write(14,400) rx1%nam,rx2%nam               ! write 'Off-diagonal' title
+            write(14,200)(jndex+j,j=1,rx2%nen)          ! write index of EMPIRE incident energies
 
             ! generate endf-like numbers
 
@@ -1061,6 +1066,9 @@
             do i=1,rx1%nen
                 write(16,500) (vg(i,j),j=1,rx2%nen)
             end do
+
+            ! generate ENDF covariance sections for the selected MTs
+
 
             do i = 1,rx1%nen
                 do j=1,rx2%nen

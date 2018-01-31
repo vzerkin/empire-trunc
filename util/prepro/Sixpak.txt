@@ -1,0 +1,1002 @@
+ ======================================================================= Sixpak  
+                                                                         Sixpak  
+      PROGRAM SIXPAK                                                     Sixpak  
+      ==============                                                     Sixpak  
+      VERSION 92-1 (JANUARY 1992)                                        Sixpak  
+      VERSION 92-2 (FEBRUARY 1992)*INCREASED CORE ALLOCATION TO          Sixpak  
+                                   ACCOMMODATE JEF AND EFF EVALUATIONS.  Sixpak  
+      VERSION 92-3 (APRIL 1992)   *ADDED ADDITIONAL DATA TESTS.          Sixpak  
+      VERSION 92-4 (SEPT. 1992)   *CORRECTED KALBACH-MANN CALCULATIONS.  Sixpak  
+                                  *FOR PHOTON PRODUCTION OUTPUT MF=12    Sixpak  
+                                   (MULTIPLICITY), MF=14 (ISOTROPIC      Sixpak  
+                                   ANGULAR DISTRIBUTIONS) AND MF=15      Sixpak  
+                                   (SPECTRA) - PREVIOUSLY ONLY MF=15.    Sixpak  
+                                  *FIRST ORDER CORRECTIONS TRANSFORMING  Sixpak  
+                                   CENTER-OF-MASS SPECTRA TO LAB SYSTEM  Sixpak  
+                                   FOR OUTPUT IN MF=5                    Sixpak  
+                                  *CORRECTED ISOTROPIC ANGULAR           Sixpak  
+                                   DISTRIBUTION FLAG (LI)                Sixpak  
+      VERSION 94-1 (JANUARY 1994) *VARIABLE ENDF/B INPUT DATA FILENAME   Sixpak  
+                                   TO ALLOW ACCESS TO FILE STRUCTURES    Sixpak  
+                                   (WARNING - INPUT PARAMETER FORMAT     Sixpak  
+                                   HAS BEEN CHANGED)                     Sixpak  
+                                  *CLOSE ALL FILES BEFORE TERMINATING    Sixpak  
+                                   (SEE, SUBROUTINE ENDIT)               Sixpak  
+                                  *INCREASED MAXIMUM TABLE SIZE FROM     Sixpak  
+                                   2000 TO 6000.                         Sixpak  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Sixpak  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Sixpak  
+                                  *ALL DOUBLE PRECISION                  Sixpak  
+                                  *ON SCREEN OUTPUT                      Sixpak  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Sixpak  
+                                  *IMPROVED OUTPUT PRECISION             Sixpak  
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Sixpak  
+                                   POINT READ FOR MORE DIGITS            Sixpak  
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Sixpak  
+                                   VERSION BASED ON RECENT FORMAT CHANGE Sixpak  
+                                  *GENERAL IMPROVEMENTS BASED ON         Sixpak  
+                                   USER FEEDBACK                         Sixpak  
+      VERSION 99-2 (JUNE 1999)    *ASSUME ENDF/B-VI, NOT V, IF MISSING   Sixpak  
+                                   MF=1, MT-451.                         Sixpak  
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Sixpak  
+                                   USER FEEDBACK                         Sixpak  
+      VERS. 2002-1 (JANUARY 2002) *CORRECTED ANGULAR DISTRIBUTION (MF=4) Sixpak  
+                                   OUTPUT TO INSURE USED FIELDS ARE 0    Sixpak  
+                   (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Sixpak  
+                   (NOV. 2002)    *EXTENDED TO ALLOW CHARGED PARTICLE    Sixpak  
+                                   ANGULAR DISTRIBUTION IN MF=4 -        Sixpak  
+                                   WARNING - STRICTLY SPEAKING THIS IS   Sixpak  
+                                   NOT LEGAL, SINCE MF=4 IS SUPPOSED TO  Sixpak  
+                                   BE USED ONLY FOR NEUTRON ANGULAR      Sixpak  
+                                   DISTRIBUTIONS - BUT WHERE MT MAKES    Sixpak  
+                                   IT OBVIOUS THAT THE OUTGOING PARTICLE Sixpak  
+                                   IS NOT A NEUTRON HOPEFULLY IT WILL    Sixpak  
+                                   NOT CAUSE A PROBLEM IF MF=4 IS USED   Sixpak  
+                                   FOR CHARGED PARTICLES.                Sixpak  
+      VERS. 2004-1 (MARCH 2004)   *ADDED INCLUDE FOR COMMON              Sixpak  
+                                  *INCREASED MAXIMUM TABLE SIZE FROM     Sixpak  
+                                   6,000 TO 12,000.                      Sixpak  
+                                  *ADDED DUMMY A FOR ELEMENTS            Sixpak  
+                                  *CORRECTED OUTPUT INTERPOLATON LAWS    Sixpak  
+      VERS. 2007-1 (JAN.  2007)   *CHECKED AGAINST ALL ENDF/B-VII.       Sixpak  
+                                  *INCREASED MAXIMUM TABLE SIZE FROM     Sixpak  
+                                   12,000 TO 120,000.                    Sixpak  
+      VERS. 2007-2 (DEC.  2007)   *72 CHARACTER FILE NAMES.              Sixpak  
+      VERS. 2010-1 (Apr.  2010)   *General update based on user feedback Sixpak  
+      VERS. 2011-1 (May   2011)   *Added MF/MT=9/5 yield output starting Sixpak  
+                                   from  MF/MT=6/5 distributions.        Sixpak  
+                                  *Increased maximum Legendre order from Sixpak  
+                                   30 to 1,000 - WARNING - using more    Sixpak  
+                                   than 30 results in NONSENSE = NOISE!! Sixpak  
+      VERS. 2012-1 (Oct.  2012)   *Increased max. point count to 500,000 Sixpak  
+                                  *Added CODENAME                        Sixpak  
+                                  *32 and 64 bit Compatible              Sixpak  
+                                  *Added ERROR stop                      Sixpak  
+                                  *For photons, combine discrete and     Sixpak  
+                                   continuum into tabulated increasing   Sixpak  
+                                   energy order.                         Sixpak  
+                                  *Check energy output order increasing. Sixpak  
+                                   Print WARNING if not increasing - do  Sixpak  
+                                   not STOP- stopping would prevent ALL  Sixpak  
+                                   output - the user may not be at all   Sixpak  
+                                   interested in the BAD data, but may   Sixpak  
+                                   be interested in other output data    Sixpak  
+                                   that is o.k.                          Sixpak  
+      VERS. 2015-1 (Jan.  2015)   *Extended OUT9.                        Sixpak  
+                                  *Replaced ALL 3 way IF Statements.     Sixpak  
+                                  *Deleted unused coding.                Sixpak  
+      VERS. 2017-1 (May   2017)   *Increased max. point to 600,000       Sixpak  
+                                  *Updated based on user feedback        Sixpak  
+                                                                         Sixpak  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Sixpak  
+      ------------------------------------                               Sixpak  
+      THE NUCLEAR DATA SECTION                                           Sixpak  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Sixpak  
+      P.O. BOX 100                                                       Sixpak  
+      A-1400, VIENNA, AUSTRIA                                            Sixpak  
+      EUROPE                                                             Sixpak  
+                                                                         Sixpak  
+      ORIGINALLY WRITTEN BY                                              Sixpak  
+      ------------------------------------                               Sixpak  
+      Dermott E. Cullen                                                  Sixpak  
+                                                                         Sixpak  
+      PRESENT CONTACT INFORMATION                                        Sixpak  
+      ---------------------------                                        Sixpak  
+      Dermott E. Cullen                                                  Sixpak  
+      1466 Hudson Way                                                    Sixpak  
+      Livermore, CA 94550                                                Sixpak  
+      U.S.A.                                                             Sixpak  
+      Telephone  925-443-1911                                            Sixpak  
+      E. Mail    RedCullen1@Comcast.net                                  Sixpak  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Sixpak  
+                                                                         Sixpak  
+      COLLABORATION                                                      Sixpak  
+      ================================================================== Sixpak  
+      DEVELOPED IN COLLABORATION WITH,                                   Sixpak  
+                                                                         Sixpak  
+      *THE NATIONAL NUCLEAR DATA CENTER, BROOKHAVEN NATIONAL LAB         Sixpak  
+                                                                         Sixpak  
+      *THE NUCLEAR DATA SECTION, IAEA, VIENNA, AUSTRIA                   Sixpak  
+                                                                         Sixpak  
+      *CENTRO TECNICO AEROSPACIAL, SAO JOSE DOS CAMPOS, BRAZIL           Sixpak  
+                                                                         Sixpak  
+      AS A PART OF AN INTERNATIONAL PROJECT ON THE EXCHANGE OF           Sixpak  
+      NUCLEAR DATA                                                       Sixpak  
+                                                                         Sixpak  
+      ACKNOWLEDGEMENT (VERSION 92-1)                                     Sixpak  
+      ================================================================== Sixpak  
+      THE AUTHOR THANKS SOL PEARLSTEIN (BROOKHAVEN NATIONAL LAB) FOR     Sixpak  
+      SIGNIFICANTLY CONTRIBUTING TOWARD IMPROVING THE ACCURACY AND       Sixpak  
+      COMPUTER INDEPENDENCE OF THIS CODE - THANKS, SOL                   Sixpak  
+                                                                         Sixpak  
+      ACKNOWLEDGEMENT (VERSION 92-4)                                     Sixpak  
+      ================================================================== Sixpak  
+      THE AUTHOR THANKS BOB MACFARLANE (LOS ALAMOS) FOR SUGGESTING HOW   Sixpak  
+      TO PROPERLY OUTPUT THE PHOTON PRODUCTION DATA TO PUT IT INTO       Sixpak  
+      EXACTLY THE FORM NEEDED FOR USE IN PROCESSING CODES.               Sixpak  
+                                                                         Sixpak  
+      THE AUTHOR THANKS CHRIS DEAN (WINFRITH) FOR POINTING OUT ERRORS    Sixpak  
+      IN THE EARLIER TREATMENT OF THE KALBACH-MANN FORMALISM AND IN      Sixpak  
+      THE DEFINITION OF THE ISOTROPIC ANGULAR DISTRIBUTION FLAG (LI).    Sixpak  
+                                                                         Sixpak  
+      AUTHORS MESSAGE                                                    Sixpak  
+      ================================================================== Sixpak  
+      THE COMMENTS BELOW SHOULD BE CONSIDERED THE LATEST DOCUMENTATION   Sixpak  
+      INCLUDING ALL RECENT IMPROVEMENTS. PLEASE READ ALL OF THESE        Sixpak  
+      COMMENTS BEFORE IMPLEMENTING AND USING THESE CODES.                Sixpak  
+                                                                         Sixpak  
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Sixpak  
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Sixpak  
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Sixpak  
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Sixpak  
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Sixpak  
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Sixpak  
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Sixpak  
+      COMPUTER.                                                          Sixpak  
+                                                                         Sixpak  
+      PURPOSE                                                            Sixpak  
+      ================================================================== Sixpak  
+      1) CHECK ALL DOUBLE-DIFFERENTIAL DATA (MF=6)                       Sixpak  
+                                                                         Sixpak  
+      2) OUTPUT EQUIVALENT MF = 4, 5, 12, 14 AND 15 DATA.                Sixpak  
+                                                                         Sixpak  
+      DATA CHECKING                                                      Sixpak  
+      ================================================================== Sixpak  
+      ALL OF THE ENDF/B-VI MF=6 DATA IS CHECKED - FOR DETAILS SEE BELOW. Sixpak  
+                                                                         Sixpak  
+      THE MF=6 DATA IS NOT CORRECTED AND OUTPUT IN THE ENDF/B FORMAT.    Sixpak  
+      IT IS MERELY CHECKED. IF ERRORS ARE FOUND IT IS UP TO THE USER     Sixpak  
+      TO TAKE CORRECTIVE ACTION ON THE MF=6 DATA.                        Sixpak  
+                                                                         Sixpak  
+      IN CONTRAST WHEN PROBLEMS ARE FOUND IN DATA WHICH WILL BE OUTPUT   Sixpak  
+      IN THE ENDF/B FORMAT (MF=4, 5, 12, 14 AND 15), WHENEVER POSSIBLE   Sixpak  
+      CORRECTIVE ACTION WILL BE TAKEN.                                   Sixpak  
+                                                                         Sixpak  
+      FURTHER CHECKS AND CORRECTIONS                                     Sixpak  
+      ================================================================== Sixpak  
+      ONCE THE DATA HAS BEEN OUTPUT IN MF = 4, 5, 12, 14 AND 15 FORMATS  Sixpak  
+      FURTHER CORRECTIVE ACTION CAN BE TAKEN AS FOLLOWS,                 Sixpak  
+                                                                         Sixpak  
+      PROGRAM LEGEND                                                     Sixpak  
+      ==============                                                     Sixpak  
+      CAN BE USED TO CORRECT ANGULAR DISTRIBUTIONS WHICH ARE NEGATIVE,   Sixpak  
+      TO CONVERT FROM LEGENDRE COEFFICIENTS TO TABULATED ANGULAR         Sixpak  
+      DISTRIBUTIONS AND GENERALLY PERFORM MORE EXTENSIVE TESTS OF        Sixpak  
+      ALL MF=4 DATA.                                                     Sixpak  
+                                                                         Sixpak  
+      PROGRAM EVALPLOT                                                   Sixpak  
+      ================                                                   Sixpak  
+      VERSION 92-1 AND LATER VERSIONS CAN PLOT ALL OF THE MF=4, 5 AND 15 Sixpak  
+      DATA OUTPUT BY THIS CODE. EARLIER VERSIONS CAN PLOT MF=4 AND 5.    Sixpak  
+      GRAPHICS IS AN EXCELLENT WAY TO CHECK THIS DATA.                   Sixpak  
+                                                                         Sixpak  
+      PROGRAM PLOTTAB                                                    Sixpak  
+      ===============                                                    Sixpak  
+      THIS IS A GENERAL PLOTTING PROGRAM AND THERE IS AN INTERFACE IN    Sixpak  
+      THIS CODE TO PRODUCE OUTPUT FOR ANY MF=6 DATA IN THE PLOTTAB       Sixpak  
+      INPUT FORMAT. THIS PROGRAM CAN BE USED TO CHECK ALL OF THE MF=6    Sixpak  
+      DATA AS WELL AS THE EQUIVALENT MF=4, 5, 12, 14 AND 15 DATA - AS    Sixpak  
+      WELL AS COMPARING THE ORIGINAL MF=6 AND EQUIVALENT DATA.           Sixpak  
+                                                                         Sixpak  
+      DATA OUTPUT                                                        Sixpak  
+      ================================================================== Sixpak  
+      THE ENDF/B MF=4, 5, 12, 14 AND 15 FORMATS ONLY ALLOW FOR NEUTRONS  Sixpak  
+      INCIDENTS                                                          Sixpak  
+                                                                         Sixpak  
+      THE ENDF/B MF=4 AND 5 FORMATS ONLY ALLOW FOR NEUTRONS OUTGOING.    Sixpak  
+                                                                         Sixpak  
+      THE ENDF/B MF=12, 14 AND 15 ONLY ALLOWS FOR PHOTONS OUTGOING.      Sixpak  
+                                                                         Sixpak  
+      THESE ARE THE ONLY COMBINATIONS OF DATA OUTPUT BY THIS CODE.       Sixpak  
+                                                                         Sixpak  
+      ALL OTHER COMBINATIONS OF INCIDENT AND OUTGOING PARTICLES ARE      Sixpak  
+      CHECKED, BUT THE RESULTS CANNOT BE OUTPUT IN THE ENDF/B FORMAT.    Sixpak  
+      HOWEVER, USING THE PLOTTAB INTERFACE BUILT INTO THIS CODE THIS     Sixpak  
+      DATA CAN, AND HAS BEEN, OUTPUT AND CHECKED.                        Sixpak  
+                                                                         Sixpak  
+      THE NEUTRON DATA IN MF=4 CAN BE IN THE FORM OF EITHER TABULATED    Sixpak  
+      ANGULAR DISTRIBUTIONS OR LEGENDRE COEFFICIENTS.                    Sixpak  
+                                                                         Sixpak  
+      THE NEUTRON (MF=5) OR PHOTON (MF=15) SPECTRA ARE BOTH IN EXACTLY   Sixpak  
+      THE SAME FORMAT = ARBITRARY TABULATED FUNCTIONS - ENDF/B OPTION    Sixpak  
+      LF=1.                                                              Sixpak  
+                                                                         Sixpak  
+      ENDF/B DATA OUTPUT ORDER                                           Sixpak  
+      ================================================================== Sixpak  
+      ENDF/B DATA IS OUTPUT IN ASCENDING MAT, MF, MT ORDER. IN ORDER TO  Sixpak  
+      ALLOW THIS PROGRAM TO PRODUCE ALL OUTPUT IN A SINGLE PASS THROUGH  Sixpak  
+      THE MF=6 DATA, OUTPUT FOR EACH (MAT, MT) IS OUTPUT TO SEPERATE     Sixpak  
+      FILES FOR MF=4, 5, 12, 14 AND 15.                                  Sixpak  
+                                                                         Sixpak  
+      FOR SUBSEQUENT USE THE ENDF/B FORMATTED DATA OUTPUT BY THIS CODE   Sixpak  
+      CAN BE MERGED TOGETHER USING PROGRAM MERGER (CONTAIN THE AUTHOR    Sixpak  
+      OF THIS CODE FOR A COPY OF MERGER), E.G., MERGE MF=12, 14 AND 15   Sixpak  
+      DATA IN ORDER TO THEN CALCULATE PHOTON PRODUCTION DATA OR MF=4     Sixpak  
+      AND 5 CAN BE MERGED TOGETHER TO CALCULATE NEUTRON TRANSFER - OR    Sixpak  
+      ALL OF THEM CAN BE MERGED TOGETHER TO PERFORM NEUTRON AND PHOTON   Sixpak  
+      CALCULATIONS.                                                      Sixpak  
+                                                                         Sixpak  
+      CORRELATED (MF=6) VS. UNCORRELATED (MF=4 AND 5) DATA               Sixpak  
+      ================================================================== Sixpak  
+      THE ENDF/B DOUBLE DIFFERENTAL = CORRELATED - DATA IN MF=6          Sixpak  
+      REPRESENTS DATA IN THE FORM,                                       Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS) = SIG(E)*Y(E)*G0(E,EP)*F(E,EP,COS)                     Sixpak  
+                                                                         Sixpak  
+      SIG(E)      = MF=3 CROSS SECTIONS                                  Sixpak  
+      Y(E)        = YIELD (MULTIPLICITY)                                 Sixpak  
+      G0(E,EP)    = ENERGY SPECTRUM                                      Sixpak  
+      F(E,EP,COS) = ANGULAR DISTRIBUTION                                 Sixpak  
+                                                                         Sixpak  
+      IN A SITUATION WHERE YOU HAVE MONOENERGETIC AND MONODIRECTIONAL    Sixpak  
+      NEUTRONS INCIDENT YOU WILL BE ABLE TO OBSERVE CORRELATION EFFECTS  Sixpak  
+      IN THE NEUTRON SPECTRUM AND ANGULAR DISTRIBUTION.                  Sixpak  
+                                                                         Sixpak  
+      EVEN IN SITUATIONS WHERE YOU HAVE A NARROW SPECTRUM OF NEUTRONS    Sixpak  
+      THAT ARE HIGHLY DIRECTIONALLY ORIENTED YOU MAY BE ABLE TO OBSERVE  Sixpak  
+      THESE CORRELATION EFFECTS, E.G., A NARROW 14 MEV FUSION SOURCE     Sixpak  
+      INCIDENT ON THE FIRST WALL OF A CTR DEVICE.                        Sixpak  
+                                                                         Sixpak  
+      FOR SUCH SITUATIONS USE OF THE CORRELATED (MF=6) DATA IS REQUIRED  Sixpak  
+      IN CALCULATIONS.                                                   Sixpak  
+                                                                         Sixpak  
+      HOWEVER, IN MANY APPLICATIONS WHERE THERE IS A BROAD SPECTRUM OF   Sixpak  
+      NEUTRONS AND THE NEUTRON FLUX IS NOT HIGHLY DIRECTIONALLY          Sixpak  
+      ORIENTED, THE NEUTRON MULTIPLICATION, SPECTRUM AND ORIENTATION     Sixpak  
+      CAN BE FAIRLY ACCURATELY CALCULATED WITHOUT CONSIDERING            Sixpak  
+      CORRELATION EFFECTS.                                               Sixpak  
+                                                                         Sixpak  
+      THE UNCORRELATED DATA PRODUCED BY THIS CODE REPLACES THE           Sixpak  
+      CORRELATED DATA,                                                   Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS) = SIG(E)*Y(E)*G0(E,EP)*F(E,EP,COS)                     Sixpak  
+                                                                         Sixpak  
+      BY THE UNCORRELATED DATA,                                          Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS) = SIG(E)*Y(E)*G0(E,EP)*F0(E,COS)                       Sixpak  
+                                                                         Sixpak  
+      BY INTEGRATING G0(E,EP)*F(E,EP,COS) OVER SECONDARY ENERGY (EP)     Sixpak  
+      TO DEFINE AN AVERAGE ANGULAR DISTRIBUTION, F0(E,COS).              Sixpak  
+                                                                         Sixpak  
+      WHAT IS LOST IN THIS PROCESS IS THE CORRELATION BETWEEN EP AND COS Sixpak  
+      SO THAT IN A TRANSPORT CALCULATION ALL MOMENTS OF THE FLUX WILL    Sixpak  
+      HAVE THE SAME SPECTRUM, G0(E,EP) AND EACH WILL BE EFFECTED BY THE  Sixpak  
+      AVERAGE ANGULAR DISTRIBUTION.                                      Sixpak  
+                                                                         Sixpak  
+      FOR APPLICATIONS TO HIGH ENERGY FUSION APPLICATIONS CORRELATED     Sixpak  
+      DATA SHOULD BE USED. HOWEVER, FOR LOWER ENERGY APPLICATIONS,       Sixpak  
+      SUCH AS FISSION REACTORS, IT SHOULD BE ADEQUATE TO USE THE         Sixpak  
+      UNCORRELATED DATA - IN THIS CASE THE MOST IMPORTANT EFFECT         Sixpak  
+      WILL BE THE OVERALL NEUTRON MULTIPLICATION AND SPECTRUM.           Sixpak  
+                                                                         Sixpak  
+      AN IMPORTANT CONSIDERATION IN DESIGNING THIS PROGRAM IS THAT       Sixpak  
+      MANY COMPUTER CODES - DATA PROCESSING AND TRANSPORT CODES -        Sixpak  
+      CANNOT USE THE CORRELATED (MF=6) DATA - NOR ARE THEY INTENDED      Sixpak  
+      FOR HIGH ENERGY USE. FOR THESE CODES THE UNCORRELATED DATA         Sixpak  
+      PRODUCED BY THIS CODE SHOULD BE ADEQUATE TO MEET THEIR NEEDS.      Sixpak  
+                                                                         Sixpak  
+      WARNING - IT CANNOT BE STRESSED ENOUGH THAT THE OUTPUT OF THIS     Sixpak  
+      CODE SHOULD ONLY BE USED FOR LOW ENERGY APPLICATIONS - FAILURE     Sixpak  
+      TO HEED THIS WARNING CAN LEAD TO COMPLETELY UNRELIABLE RESULTS.    Sixpak  
+                                                                         Sixpak  
+      ENDF/B FORMAT                                                      Sixpak  
+      ================================================================== Sixpak  
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Sixpak  
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Sixpak  
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Sixpak  
+                                                                         Sixpak  
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Sixpak  
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Sixpak  
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Sixpak  
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Sixpak  
+      CORRECTLY OUTPUT ON ALL LINES. THE FORMAT OF SECTION MF=1, MT=451  Sixpak  
+      AND ALL SECTIONS OF MF=6 MUST BE CORRECT. THE PROGRAM SKIPS ALL    Sixpak  
+      OTHER SECTIONS OF DATA AND AS SUCH IS INSENSITIVE TO THE FORMAT    Sixpak  
+      OF ALL OTHER SECTIONS.                                             Sixpak  
+                                                                         Sixpak  
+      CONTENTS OF OUTPUT                                                 Sixpak  
+      ================================================================== Sixpak  
+      5 ENDF/B FORMATTED OUTPUT FILES ARE PRODUCED FOR NEUTRON INCIDENT  Sixpak  
+      DATA,                                                              Sixpak  
+                                                                         Sixpak  
+      1) ENDFB.MF4 - ANGULAR DISTRIBUTIONS AND LEGENDRE COEFFICIENTS     Sixpak  
+                     FOR NEUTRONS                                        Sixpak  
+      2) ENDFB.MF5 - TABULATED NEUTRON ENERGY SPECTRA                    Sixpak  
+      3) ENDFB.M12 - PHOTON EMISSION MULTIPLICITY                        Sixpak  
+      4) ENDFB.M14 - PHOTON EMISSION ANGULAR DISTRIBUTIONS (ALWAYS       Sixpak  
+                     ISOTROPIC)                                          Sixpak  
+      5) ENDFB.M15 - TABULATED PHOTON EMISSION SPECTRA                   Sixpak  
+                                                                         Sixpak  
+      EMITTED PARTICLE YIELD                                             Sixpak  
+      ================================================================== Sixpak  
+      NEUTRONS                                                           Sixpak  
+      ========                                                           Sixpak  
+      IN MF=6 THE YIELD FOR EACH REACTION IS THE ACTUAL MULTIPLICITY OF  Sixpak  
+      THE REACTION, E.G., (N,2N) = 2. IN USING MF=4 AND 5 DATA THE       Sixpak  
+      ENDF/B CONVENTION IS THAT THE MULTIPLICITY IS IMPLIED BY THE       Sixpak  
+      MT NUMBER, E.G., MT=16 = (N,2N) = 2.                               Sixpak  
+                                                                         Sixpak  
+      THE ONLY EXCEPT IN ENDF/B-VI IS MT=201 = TOTAL NEUTRON PRODUCTION  Sixpak  
+      WHERE AN ACTUAL ENERGY DEPENDENT YIELD IS INCLUDED IN MF=6.        Sixpak  
+      HOWEVER, IN THIS CASE THE MF=3 CROSS SECTION INCLUDES THE          Sixpak  
+      MULTIPLICITY (S. PEARLSTEIN, PRIVATE COMMUNICATION, JAN. 1992),    Sixpak  
+      SIG(MT=201) = 2*SIG(N,2N)+3*SIG(N,3N).....ETC.                     Sixpak  
+                                                                         Sixpak  
+      SO THAT FOR ALL ENDF/B-VI DATA AS OF JANUARY 1992 THE MF=4 AND 5   Sixpak  
+      DATA OUTPUT BY THIS CODE CAN BE USED IN CONJUNCTION WITH THE MF=3  Sixpak  
+      CROSS SECTIONS - WITHOUT ANY REFERENCE TO THE MF=6 YIELD.          Sixpak  
+                                                                         Sixpak  
+      PHOTONS                                                            Sixpak  
+      =======                                                            Sixpak  
+      UNLIKE THE NEUTRONS WHERE WITH ONLY ONE EXCEPTION (MT=201) THE     Sixpak  
+      MF=6 YIELD IS ENERGY INDEPENDENT, IN THE CASE OF PHOTON EMISSION   Sixpak  
+      ALMOST ALL OF THE PHOTONS HAVE AN ENERGY DEPENDENT YIELD.          Sixpak  
+                                                                         Sixpak  
+      THIS PROGRAM WILL OUTPUT THE PHOTON MULTIPLICITY IN MF=12 AND      Sixpak  
+      INDICATE THAT THERE IS A NORMALIZED DISTRIBUTION IN MF=15          Sixpak  
+      (LF=1 IN MF=12).                                                   Sixpak  
+                                                                         Sixpak  
+      THIS PROGRAM WILL OUTPUT THE NORMALIZED PHOTON SPECTRA IN MF=15.   Sixpak  
+      CONTINUOUS ENERGY SPECTRA AND DISCRETE PHOTONS WILL ALL BE OUTPUT  Sixpak  
+      AS NORMALIZED SPECTRA.                                             Sixpak  
+                                                                         Sixpak  
+      THIS PROGRAM WILL ALSO OUTPUT MF=14 PHOTON ANGULAR DISTRIBUTION    Sixpak  
+      DATA, ALWAYS USING THE ISOTROPIC FLAG TO MINIMIZE OUTPUT.          Sixpak  
+                                                                         Sixpak  
+      WARNING OF ENERGY DEPENDENT YIELD                                  Sixpak  
+      =================================                                  Sixpak  
+      THIS PROGRAM WILL PRINT A WARNING MESSAGE IF A SECTION OF DATA     Sixpak  
+      BEING OUTPUT IN THE ENDF/B FORMAT HAS AN ENERGY DEPENDENT MF=6     Sixpak  
+      YIELD AND THE EMITTED PARTICLE IS A NEUTRON - SINCE THE ENDF/B     Sixpak  
+      CONVENTION IS THAT FOR EACH MT NUMBER THE MULTIPLICITY IS IMPLIED  Sixpak  
+      WE DO NOT EXPECT AN ENERGY DEPENDENT MULTIPLICITY FOR NEUTRON      Sixpak  
+      EMISSION.                                                          Sixpak  
+                                                                         Sixpak  
+      USING THE OUTPUT                                                   Sixpak  
+      ================================================================== Sixpak  
+      NOTE, THAT IN USING THIS DATA, STARTING FROM THE RELATIONSHIP,     Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS) = SIG(E)*Y(E)*G0(E,EP)*F0(E,COS)                       Sixpak  
+                                                                         Sixpak  
+      USING THE ENDF/B CONVENTION THAT THE MULTIPLICITY IS EITHER        Sixpak  
+      IMPLIED BY THE MT NUMBER (E.G., MT=16 = N,2N - MULTIPLICITY = 2)   Sixpak  
+      OR INCLUDED IN THE CROSS SECTION (E.G., MT=201 = TOTAL NEUTRON     Sixpak  
+      PRODUCTION) ALL THE INFORMATION REQUIRED FOR A CALCULATION IS      Sixpak  
+      AVAILABLE IN,                                                      Sixpak  
+                                                                         Sixpak  
+      MF=3       - SIG(E)                                                Sixpak  
+      MF=4       - F0(E,COS) - FOR OUTGOING NEUTRONS                     Sixpak  
+      MF=5       - G0(E,EP)  - FOR OUTGOING NEUTRONS                     Sixpak  
+      MF=12      - Y(E)      - FOR OUTGOING PHOTONS                      Sixpak  
+      MF=14      - F0(E,COS) - FOR OUTGOING PHOTONS (ALWAYS ISOTROPIC)   Sixpak  
+      MF=15      - G0(E,EP)  - FOR OUTGOING PHOTONS                      Sixpak  
+                                                                         Sixpak  
+      DOCUMENTATION                                                      Sixpak  
+      ================================================================== Sixpak  
+      ONLY SECTIONS OF MF=4, 5, 12, 14, 15 ARE OUTPUT ON A ENDF/B FILE.  Sixpak  
+      THE ONLY DOCUMENTATION IS THE ENDF/B TAPE LABEL (FIRST RECORD OF   Sixpak  
+      EACH FILE) WHICH IDENTIFIES THE DATA AS SIXPAK OUTPUT.             Sixpak  
+                                                                         Sixpak  
+      REACTION INDEX                                                     Sixpak  
+      ================================================================== Sixpak  
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Sixpak  
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Sixpak  
+                                                                         Sixpak  
+      SECTION SIZE                                                       Sixpak  
+      ================================================================== Sixpak  
+      ALL OF THE DATA IN ENDF/B-VI, MF=6 ARE QUITE SMALL TABLES. AS SUCH Sixpak  
+      THIS PROGRAM ONLY ALLOWS TABLES OF UP TO 12000 POINTS (12,000 X,   Sixpak  
+      Y VALUES). THIS SIZE IS MORE THAN ADEQUATE TO HANDLE ALL OF THE    Sixpak  
+      CURRENT ENDF/B-VI DATA, AND IT CAN BE EASILY INCREASED TO HANDLE   Sixpak  
+      ANY NEWER DATA AS IT BECOMES AVAILABLE.                            Sixpak  
+                                                                         Sixpak  
+      PLEASE CONTACT THE AUTHOR IF YOU HAVE AN EVALUATION WHICH EXCEEDS  Sixpak  
+      THIS LIMIT.                                                        Sixpak  
+                                                                         Sixpak  
+      SELECTION OF DATA                                                  Sixpak  
+      ================================================================== Sixpak  
+      THE PROGRAM SELECTS DATA TO BE PROCESSED BASED ON MAT/MT RANGES    Sixpak  
+      (MF=6 ASSUMED). THIS PROGRAM ALLOWS UP TO 100 MAT/MT RANGES TO BE  Sixpak  
+      SPECIFIED BY INPUT PARAMETERS. THE PROGRAM WILL ASSUME THAT THE    Sixpak  
+      ENDF/B TAPE IS IN MAT ORDER. THE PROGRAM WILL TERMINATE EXECUTION  Sixpak  
+      WHEN A MAT IS FOUND THAT IS ABOVE ALL REQUESTED MAT RANGES.        Sixpak  
+                                                                         Sixpak  
+      PROGRAM OPERATION                                                  Sixpak  
+      ================================================================== Sixpak  
+      EACH SECTION (MT) OF MF=6 DATA IS SUBDIVIDED INTO SUBSECTIONS -    Sixpak  
+      ONE SUBSECTION FOR EACH EMITTED PARTICLE.                          Sixpak  
+                                                                         Sixpak  
+      EACH SUBSECTION OF DATA IS CONSIDERED SEPARATELY. EACH SUBSECTION  Sixpak  
+      OF ENDF/B MF=6 DATA TO PROCESS IS IN THE FORM,                     Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS) = SIG(E)*Y(E)*G0(E,EP)*F(E,EP,COS)                     Sixpak  
+                                                                         Sixpak  
+      SIG(E)      = MF=3 CROSS SECTIONS                                  Sixpak  
+      Y(E)        = YIELD (MULTIPLICITY)                                 Sixpak  
+      G0(E,EP)    = ENERGY SPECTRUM                                      Sixpak  
+      F(E,EP,COS) = ANGULAR DISTRIBUTION                                 Sixpak  
+                                                                         Sixpak  
+      G0(E,EP) = 1 WHEN INTEGRATED OVER EP (SECONDARY ENERGY)            Sixpak  
+      G0(E,EP)*F(E,EP,COS) = 1 WHEN INTEGRATED OVER EP AND COS           Sixpak  
+                                                                         Sixpak  
+      THIS PROGRAM WILL DEFINE THE ZEROTH ORDER MOMENTS OF THE           Sixpak  
+      ENERGY AND ANGULAR DISTRIBUTIONS,                                  Sixpak  
+                                                                         Sixpak  
+      G0(E,EP)  = G0(E,EP)*F(E,EP,COS) INTEGRATED OVER COS               Sixpak  
+      F0(E,COS) = G0(E,EP)*F(E,EP,COS) INTEGRATED OVER EP                Sixpak  
+                                                                         Sixpak  
+      FOR NEUTRON INDUCED REACTIONS THE ENDF/B FORMATTED OUTPUT WILL BE  Sixpak  
+                                                                         Sixpak  
+      F0(E,COS)- IN ENDFB.MF4 FOR NEUTRONS OUT OF A REACTION             Sixpak  
+      G0(E,EP) - IN ENDFB.MF5 FOR NEUTRONS OUT OF A REACTION             Sixpak  
+               - IN ENDFB.M15 FOR PHOTONS OUT OF A REACTION              Sixpak  
+                                                                         Sixpak  
+      FOR NEUTRONS INCIDENT AND NEUTRONS EMITTED THIS DATA WILL BE       Sixpak  
+      OUTPUT IN MF=4 AND 5 FORMATS.                                      Sixpak  
+                                                                         Sixpak  
+      FOR NEUTRONS INCIDENT AND PHOTONS EMITTED THIS DATA WILL BE        Sixpak  
+      OUTPUT IN MF=15 FORMAT - THE SPECTRA ARE OUTPUT AND THE            Sixpak  
+      ANGULAR DISTRIBUTION IS IGNORED.                                   Sixpak  
+                                                                         Sixpak  
+      ALL PHOTON EMISSION IN THE ENDF/B-VI LIBRARY AS OF JANUARY 1992    Sixpak  
+      IS ISOTROPIC AND AS SUCH NO DISTRIBUTION OF PHOTON ANGULAR         Sixpak  
+      DISTRIBUTIONS NEED BE OUTPUT - IT IS ALWAYS ISOTROPIC.             Sixpak  
+                                                                         Sixpak  
+      FOR ALL OTHER COMBINATIONS INCIDENT AND EMITTED PARTICLES          Sixpak  
+      THERE WILL BE NO ENDF/B FORMATTED OUTPUT.                          Sixpak  
+                                                                         Sixpak  
+      VARIATIONS FROM ENDF/B MANUAL                                      Sixpak  
+      ================================================================== Sixpak  
+      LAW=1, LANG=2 = KALBACH-MANN                                       Sixpak  
+      ============================                                       Sixpak  
+      FOR THE DISTRIBUTIONS,                                             Sixpak  
+                                                                         Sixpak  
+      F(MU,E,EP) = G0(E,EP)*A*(COSH(MU*A)+R(E,EP)*SINH(MU*A))            Sixpak  
+                                                                         Sixpak  
+      G0(E,EP) = 1 - WHEN INTEGRATED OVER EP.                            Sixpak  
+                                                                         Sixpak  
+      A*(COSH(MU*A)+R(E,EP)*SINH(MU*A)) = 2 - WHEN INTEGRATD OVER MU     Sixpak  
+                                                                         Sixpak  
+      THIS MEANS AS DEFINED IN THE ENDF/B MANUAL THE DISTRIBUTIONS       Sixpak  
+      ARE NORMALIZED TO 2, INSTEAD OF 1. IN ORDER TO OBTAIN CORRECTLY    Sixpak  
+      NORMALIZED DISTRIBUTIONS THE DISTRIBUTION SHOULD BE DEFINED        Sixpak  
+      TO INCLUDE A FACTOR OF 1/2 MULTIPLYING THE ANGULAR PART OF         Sixpak  
+      THE DISTRIBUTION.                                                  Sixpak  
+                                                                         Sixpak  
+      F(MU,E,EP) = G0(E,EP)*0.5*A*(COSH(MU*A)+R(E,EP)*SINH(MU*A))        Sixpak  
+                                                                         Sixpak  
+      THIS IS THE FORM USED IN THIS CODE                                 Sixpak  
+                                                                         Sixpak  
+      LAW=1, ND NOT 0 = DISCRETE SECONDARY ENERGY DISTRIBUTION           Sixpak  
+      ========================================================           Sixpak  
+      THE ENDF/B MANUAL SAYS THESE ARE FLAGGED WITH NEGATIVE ENERGIES.   Sixpak  
+      IN ENDF/B-VI ALL OF THESE HAVE POSITIVE ENERGY. THIS CODE DOES     Sixpak  
+      NOT CONSIDER THE ENDF/B-VI DATA TO BE IN ERROR.                    Sixpak  
+                                                                         Sixpak  
+      WITH THE CONVENTION ACTUALLY USED IN ENDF/B-VI ALL SECONDARY       Sixpak  
+      ENERGIES SHOULD BE NON-NEGATIVE AND IN ASCENDING ENERGY ORDER      Sixpak  
+      FOR EACH INCIDENT ENERGY.                                          Sixpak  
+                                                                         Sixpak  
+      FROM THE ENDF/B MANUAL IT IS NOT OBVIOUS WHAT G0(E,EP) SHOULD BE   Sixpak  
+      FOR DISCRETE PHOTONS - PHYSICALLY THIS IS A DELTA FUNCTION. IN     Sixpak  
+      ENDF/B-VI IT IS ENTERED AS 1.0 = INTERPRETING IT AS INTEGRATED     Sixpak  
+      OVER SECONDARY ENERGY - IN WHICH CASE THE DELTA FUNCTION = 1.0.    Sixpak  
+                                                                         Sixpak  
+      LIMITATIONS                                                        Sixpak  
+      ================================================================== Sixpak  
+      CHECKING DATA                                                      Sixpak  
+      ================================================================== Sixpak  
+      THIS PROGRAM CHECKS ALL ENDF/B-VI MF=6 DATA. THE FOLLOWING CHECKS  Sixpak  
+      ARE PERFORMED.                                                     Sixpak  
+                                                                         Sixpak  
+      PARAMETERS                                                         Sixpak  
+      ==========                                                         Sixpak  
+      ALL PARAMETERS ARE CHECKED FOR CONSISTENCY. IF PARAMETERS ARE      Sixpak  
+      NOT CONSISTENT THE PROGRAM MAY NOT BE ABLE TO PERFORM THE          Sixpak  
+      FOLLOWING TESTS AND WILL MERELY SKIP A SECTION OF DATA.            Sixpak  
+                                                                         Sixpak  
+      INTERPOLATION LAWS                                                 Sixpak  
+      ==================                                                 Sixpak  
+      ALL INTEGRATIONS ARE PERFORMED USING THE INTERPOLATION LAW GIVEN   Sixpak  
+      FOR SECONDARY ENERGY AND/OR COSINE. INTEGRATIONS ARE NOT           Sixpak  
+      PERFORMED OVER INCIDENT - ONLY INTEGRATION OVER SECONDARY ENERGY   Sixpak  
+      AND/OR COSINE ARE PERFORMED AT EACH INCIDENT ENERGY. THEREFORE     Sixpak  
+      THE INTERPOLATION LAW FOR INCIDENT ENERGY IS NOT USED BY THIS      Sixpak  
+      CODE.                                                              Sixpak  
+                                                                         Sixpak  
+      ALL INTERPOLATION LAWS ARE CHECKED. ALL DATA ASSOCIATED WITH       Sixpak  
+      INTERPOLATION LAWS ARE CHECKED, E.G., NO NON-NEGATIVE VALUES       Sixpak  
+      REQUIRING LOG INTERPOLATION. IN ORDER TO PERFORM REQUIRED          Sixpak  
+      INTEGRALS OVER COS AND EP IT IS IMPERATIVE THAT THE INTERPOLATION  Sixpak  
+      LAWS BE COMPATIBLE WITH THE DATA.                                  Sixpak  
+                                                                         Sixpak  
+      ENDF/B-VI ALLOWS NEW INTERPOLATION LAWS FOR CORRESPONDING POINT    Sixpak  
+      AND UNIT BASE TRANSFORMATION INTERPOLATION. NONE OF THESE NEW      Sixpak  
+      INTERPOLATION LAWS ARE USED IN THE ENDF/B-VI LIBRARY AS OF         Sixpak  
+      JANUARY 1992 TO INTERPOLATE IN SECONDARY ENERGY OR COSINE.         Sixpak  
+      THEREFORE THIS PROGRAM CAN PERFORM ALL OF THE REQUIRED INTEGRALS   Sixpak  
+      OVER SECONDARY ENERGY AND/OR COSINE USING ONLY THE OLDER           Sixpak  
+      INTERPOLATION CODES. THIS PROGRAM ONLY PERFORMS INTEGRALS FOR      Sixpak  
+      EACH INCIDENT ENERGY, SO THAT INTERPOLATION IN INCIDENT ENERGY     Sixpak  
+      IS NOT PERFORMED BY THIS PROGRAM.                                  Sixpak  
+                                                                         Sixpak  
+      NEW INTERPOLATION SCHEMES ARE USED FOR INCIDENT ENERGY - FOR       Sixpak  
+      EXAMPLE, CORRESPONDING POINT INTERPOLATION IS SPECIFIED TO ALLOW   Sixpak  
+      INTERPOLATION IN G0(E,EP) TO SIMULATE CASES WHERE THE INPUT ENERGY Sixpak  
+      LIMIT IS DEFINED BY E-EP = A DIAGONAL CURVE ACROSS (E,EP) SPACE.   Sixpak  
+      THIS INTERPOLATION CODE CANNOT BE SPECIFIED IN THE MF=5 OUTPUT     Sixpak  
+      OF THIS CODE - MF=5 ONLY ALLOWS THE OLDER INTERPOLATION LAWS       Sixpak  
+      INT=1 THROUGH 5. THEREFORE THIS PROGRAM WILL USE THE CLOSEST       Sixpak  
+      CORRESPONDING INTERPOLATION CODE FOR OUTPUT TO MF=5. FOR USE       Sixpak  
+      WHERE THE OUTPUT OF THIS CODE = LOW ENERGY APPLICATIONS - THIS     Sixpak  
+      SHOULD HAVE LITTLE EFFECT ON RESULTS.                              Sixpak  
+                                                                         Sixpak  
+      FOR CONSISTENCY WITH EARLIER VERSIONS OF ENDF/B IN CREATING THE    Sixpak  
+      ENDF/B OUTPUT, IF ANY INPUT INTERPOLATION LAW IS NOT IN THE        Sixpak  
+      RANGE 1-5, IT WILL FIRST BE TESTED TO SEE IF MOD(10) IT IS         Sixpak  
+      IN THIS RANGE, FINALLY IF EVEN THIS DOESN'T WORK IT IS SET         Sixpak  
+      EQUAL TO 2 (LINEARLY INTERPOLATION). THIS METHOD WILL EFFECTIVELY  Sixpak  
+      REPLACE CORRESPONDING POINT AND UNIT BASE TRANSFORMATION BY THE    Sixpak  
+      CLOSEST RELATED INTERPOLATION LAW 1 THROUGH 5 - AGAIN NOTE, AS     Sixpak  
+      OF JANUARY 1992 NONE OF THESE NEW LAWS ARE USED IN ENDF/B-VI. IF   Sixpak  
+      THIS MUST BE DONE FOR INTERPOLATION IN SECONDARY ENERGY OR COSINE  Sixpak  
+      AN ERROR MESSAGE WILL BE PRINTED - SINCE THIS WOULD EFFECT THE     Sixpak  
+      ACCURACY OF THE INTEGRALS PERFORMED BY THIS PROGRAM. IF THIS MUST  Sixpak  
+      BE DONE FOR INCIDENT ENERGY NO MESSAGE IS PRINTED - SINCE THIS     Sixpak  
+      WILL NOT EFFECT THE ACCURACY OF THE INTEGRALS PERFORMED BY THIS    Sixpak  
+      PROGRAM.                                                           Sixpak  
+                                                                         Sixpak  
+      SPECTRA AND ANGULAR DISTRIBUTIONS                                  Sixpak  
+      =================================                                  Sixpak  
+      ALL SPECTRA AND ANGULAR DISTRIBUTIONS ARE CHECKED TO INSURE        Sixpak  
+      THEY ARE NORMALIZED AND DO NOT INCLUDE ANY NEGATIVE VALUES.        Sixpak  
+                                                                         Sixpak  
+      LEGENDRE COEFFICIENTS                                              Sixpak  
+      =====================                                              Sixpak  
+      THE NORMALIZATION, F0, CANNOT BE NEGATIVE.                         Sixpak  
+                                                                         Sixpak  
+      LEGENDRE COEFFICIENTS IN NORMAL FORM ARE CHECKED TO INSURE         Sixpak  
+      THEY ARE IN THE RANGE -1 TO +1 = THE LEGENDRE EXPANSION OF A       Sixpak  
+      DELTA FUNCTION AT COS=+1 OR -1 - COEFFICIENTS SHOULD NOT           Sixpak  
+      EXCEED WHAT YOU GET FROM A DELTA FUNCTION.                         Sixpak  
+                                                                         Sixpak  
+      ANGULAR DISTRIBUTIONS ARE CHECKED AT COS = -1, 0 AND +1.           Sixpak  
+                                                                         Sixpak  
+      CREATING ENDF/B OUTPUT                                             Sixpak  
+      ================================================================== Sixpak  
+      THIS PROGRAM CAN CREATE EQUIVALENT MF =4, 5, 12, 14, 15 DATA FOR   Sixpak  
+      ALL OF THE DATA INCLUDED IN ENDF/B-VI AS OF JANUARY 1992, EXCEPT   Sixpak  
+      FOR 1 SECTION OF LAW=6 DATA (SEE DETAILS BELOW).                   Sixpak  
+                                                                         Sixpak  
+      THIS PROGRAM HAS NOT BEEN TESTED ON OTHER DATA LIBRARIES, E.G.,    Sixpak  
+      JEF, JENDL, ETC.                                                   Sixpak  
+                                                                         Sixpak  
+      THE PROGRAM HAS THE FOLLOWING LIMITATION AS FAR AS CREATING        Sixpak  
+      ENDF/B FORMATTED OUTPUT.                                           Sixpak  
+                                                                         Sixpak  
+      ISOTROPIC PHOTON EMISSION                                          Sixpak  
+      =========================                                          Sixpak  
+      FOR PHOTON EMISSION THE DISTRIBUTIONS ARE ASSUMED TO BE ISOTROPIC  Sixpak  
+      AND ONLY THE MULTIPLICITY IS OUTPUT IN MF=12, ISOTROPIC ANGULAR    Sixpak  
+      DISTRIBUTIONS IN MF=14 AND THE SPECTRA IN MF=15. ALL ENDF/B-VI     Sixpak  
+      MF=6 DATA AS OF JANUARY 1992 INCLUDE ONLY ISOTROPIC PHOTON         Sixpak  
+      EMISSION - SO THAT THIS IS NOT A LIMITATION ON TRANSLATING         Sixpak  
+      ENDF/B-VI DATA.                                                    Sixpak  
+                                                                         Sixpak  
+      EITHER TABULATED OR LEGENDRE COEFFICIENTS                          Sixpak  
+      =========================================                          Sixpak  
+      FOR LAW=2 THE REPRESENTATION, EITHER TABULATED OR LEGENDRE         Sixpak  
+      COEFFICIENTS, CAN BE SPECIFIED FOR EACH INCIDENT ENERGY.           Sixpak  
+                                                                         Sixpak  
+      IN ORDER TO OBTAIN CORRECT ENDF/B OUTPUT THE REPRESENTATION        Sixpak  
+      MUST BE THE SAME FOR ALL INCIDENT ENERGIES = MF=4 DATA CAN ONLY    Sixpak  
+      BE TABULATED OR LEGENDRE OVER THE ENTIRE ENERGY RANGE.             Sixpak  
+                                                                         Sixpak  
+      YIELD AND OUTPUT NORMALIZATION                                     Sixpak  
+      ==============================                                     Sixpak  
+      THE YIELD INCLUDED WITH EACH SECTION OF DATA IS NOT USED FOR       Sixpak  
+      OUTPUT FOR NEUTRONS, BUT IS INCLUDED IN THE OUTPUT FOR PHOTONS.    Sixpak  
+      IN ALL CASES THE ANGULAR DISTRIBUTIONS AND SPECTRA OUTPUT ARE      Sixpak  
+      NORMALIZED TO UNITY.                                               Sixpak  
+                                                                         Sixpak  
+      LAW=0                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO OUTPUT - INCIDENT NEUTRON - EMITTED PHOTON OR NEUTRON           Sixpak  
+                  REACTIONS ARE NOT EXPECTED.                            Sixpak  
+                                                                         Sixpak  
+      LAW=1                                                              Sixpak  
+      =====                                                              Sixpak  
+      FOR EACH INCIDENT ENERGY DISCRETE AND CONTINUOUS EMISSION SPECTRA  Sixpak  
+      CANNOT BE MIXED TOGETHER - THEY MUST BE ALL EITHER DISCRETE OR     Sixpak  
+      CONTINUOUS. IF DISCRETE EMISSION IS GIVEN ONLY 1 SECONDARY         Sixpak  
+      ENERGY (NEP=1) MAY BE GIVEN = A NORMALIZED DISTRIBUTION FOR A      Sixpak  
+      SINGLE DISCRETE EMISSION ENERGY. ALL OF THE ENDF/B-VI DATA AS      Sixpak  
+      OF JANUARY 1992 CONFORM TO THESE LIMITATIONS.                      Sixpak  
+                                                                         Sixpak  
+      SINCE THE FLAG NA, TO INDICATE ISOTROPIC DISTRIBUTIONS, IS ONLY    Sixpak  
+      GIVEN FOR EACH SECONDARY ENERGY (EP) THE PROGRAM CANNOT DECIDE     Sixpak  
+      IN ADVANCE WHETHER OR NOT THE DISTRIBUTION WILL BE ISOTROPIC       Sixpak  
+      AT ALL INCIDENT ENERGIES. THEREFORE ISOTROPIC DISTRIBUTIONS        Sixpak  
+      WILL BE OUTPUT EITHER: LANG = 1 - AS 1 LEGENDRE COEFFICIENT = 0.0  Sixpak  
+      OR LANG = NOT 1 - AS A 2 POINT ANGULAR DISTRIBUTION AT COS = -1.0  Sixpak  
+      AND +1.0 WITH BOTH VALUES EQUAL TO 0.5 (A NORMALIZED ISOTROPIC     Sixpak  
+      DISTRIBUTION).                                                     Sixpak  
+                                                                         Sixpak  
+      DISCRETE PHOTONS ARE OUTPUT IN MF=15 AS 3 POINT DISTRIBUTIONS      Sixpak  
+      WITH SECONDARY ENERGY POINTS AT EP-DEP, EP, EP+DEP, WHERE          Sixpak  
+      DEP=0.001*EP. THE VALUES AT EP-DEP AND EP+DEP ARE 0.0, AND         Sixpak  
+      AT EP THE VALUE IS 1000.0/EP TO NORMALIZE THE DISTRIBUTION.        Sixpak  
+                                                                         Sixpak  
+      LAW=2                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO LIMITATION ON REPRESENTATIONS.                                  Sixpak  
+                                                                         Sixpak  
+      LAW=3                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO LIMITATION ON REPRESENTATIONS.                                  Sixpak  
+                                                                         Sixpak  
+      LAW=4                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO OUTPUT - INCIDENT NEUTRON - EMITTED PHOTON OR NEUTRON           Sixpak  
+                  REACTIONS ARE NOT EXPECTED.                            Sixpak  
+                                                                         Sixpak  
+      LAW=5                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO OUTPUT - INCIDENT NEUTRON - EMITTED PHOTON OR NEUTRON           Sixpak  
+                  REACTIONS ARE NOT EXPECTED.                            Sixpak  
+                                                                         Sixpak  
+      LAW=6                                                              Sixpak  
+      =====                                                              Sixpak  
+      NO OUTPUT - ENDF/B-VI ONLY INCLUDES 1 SECTION OF THIS TYPE OF DATA Sixpak  
+                  FOR (N,D) 2N,P.                                        Sixpak  
+                                                                         Sixpak  
+      LAW=7                                                              Sixpak  
+      =====                                                              Sixpak  
+      FOR EACH INCIDENT ENERGY THE REPRESENTATION MUST BE EITHER,        Sixpak  
+                                                                         Sixpak  
+      1) SQUARE = FOR EACH INCIDENT COSINE EXACTLY THE SAME SECONDARY    Sixpak  
+                  ENERGIES.                                              Sixpak  
+                                                                         Sixpak  
+      2) LINEAR = FOR EACH INCIDENT COSINE THE INTERPOLATION LAW         Sixpak  
+                  BETWEEN SECONDARY ENERGIES MUST BE LINEAR.             Sixpak  
+                                                                         Sixpak  
+      THESE 2 PRESENTATIONS ARE THE ONLY ONES PRESENTED IN ENDF/B-VI     Sixpak  
+      AS OF JANUARY 1992 - SO THIS PROGRAM CAN TRANSLATED ALL LAW=7      Sixpak  
+      DATA FOR ENDF/B-VI.                                                Sixpak  
+                                                                         Sixpak  
+      LABORATORY VS. CENTER-OF-MASS SYSTEM                               Sixpak  
+      ================================================================== Sixpak  
+      IN MANY CASES PEOPLE ASSUME THAT FOR HEAVY (HIGH ATOMIC WEIGHT)    Sixpak  
+      MATERIALS THE CENTER-OF-MASS AND LAB SYSTEMS ARE ALMOST IDENTICAL, Sixpak  
+      SINCE IN THIS CASE THE CENTER-OF-MASS ENERGY WILL BE MUCH SMALLER  Sixpak  
+      THAN THE INCIDENT ENERGY. FOR A PROCESS SUCH AS ELASTIC SCATTERING Sixpak  
+      WHERE FOR HEAVY MATERIALS THE SECONDARY ENERGY, EP, WILL ALWAYS    Sixpak  
+      BE A LARGE FRACTION OF THE INCIDENT ENERGY, THIS ASSUMPTION IS     Sixpak  
+      VALID. HOWEVER, FOR THE TYPICAL REACTIONS INCLUDED IN MF=6 THIS    Sixpak  
+      IS NOT ALWAYS TRUE - IN MANY OF THESE CASES THE SECONDARY ENERGY   Sixpak  
+      CAN EXTEND ALL THE WAY DOWN TO ZERO, AND IN PARTICULAR IT CAN      Sixpak  
+      BE SMALL COMPARED TO THE CENTER-OF-MASS ENERGY - WHICH MAKES THE   Sixpak  
+      TRANSFORMATION FROM CENTER-OF-MASS TO LAB IMPORTANT. THEREFORE     Sixpak  
+      GENERALLY TO TREAT MF=6 DATA WE MUST CONSIDER THIS TRANSFORMATION. Sixpak  
+                                                                         Sixpak  
+      THE FOLLOWING DISCUSSING ONLY APPLIES TO SPECTRA THAT MAY BE       Sixpak  
+      OUTPUT IN MF=5 = ONLY DATA FOR NEUTRONS INCIDENT AND EMITTED -     Sixpak  
+      IN PARTICULAR THE FOLLOWING DEFINITIONS ARE NOT GENERAL - THEY     Sixpak  
+      ARE ONLY VALID FOR INCIDENT AND EMITTED NEUTRONS.                  Sixpak  
+                                                                         Sixpak  
+      DOUBLE DIFFERENTIAL DATA IN MF=6 MAY BE GIVEN IN EITHER THE LAB    Sixpak  
+      OR C.M. SYSTEM. SIMILARLY ANGULAR DISTRIBUTIONS IN MF=4 MAY BE     Sixpak  
+      GIVEN IN EITHER THE LAB OR C.M. SYSTEM. IN CONTRAST ENERGY         Sixpak  
+      SPECTRA IN MF=5 CAN ONLY BE GIVEN IN THE LABORATORY SYSTEM.        Sixpak  
+                                                                         Sixpak  
+      THE ANGULAR DISTRIBUTIONS OUTPUT BY THIS CODE IN MF=4 ARE IN THE   Sixpak  
+      SAME SYSTEM IN WHICH THEY ARE GIVEN IN MF=6 - EITHER LAB OR        Sixpak  
+      CENTER-OF-MASS SYSTEM.                                             Sixpak  
+                                                                         Sixpak  
+      THE ENERGY SPECTRA OUTPUT BY THIS CODE IN MF=5 MUST BE IN THE LAB  Sixpak  
+      SYSTEM - THIS IS THE ONLY ALLOWED FORM FOR MF=5 DATA.              Sixpak  
+                                                                         Sixpak  
+      FOR MF=6 SPECTRA GIVEN IN THE LAB SYSTEM THIS MERELY REQUIRES      Sixpak  
+      COPYING THE GIVEN SPECTRA TO MF=5 OUTPUT.                          Sixpak  
+                                                                         Sixpak  
+      FOR MF=6 SPECTRA GIVEN IN THE CENTER-OF-MASS SYSTEM ONLY FIRST     Sixpak  
+      ORDER CORRECTIONS IN THE SPECTRA AND USED AND THEY ARE THEN        Sixpak  
+      OUTPUT IN MF=5 AS IN THE LAB SYSTEM - THE FIRST ORDER CORRECTIONS  Sixpak  
+      ARE DESCRIBED BELOW.                                               Sixpak  
+                                                                         Sixpak  
+      DEFINING,                                                          Sixpak  
+      MM      = CENTER OF MASS MOTION                                    Sixpak  
+      CM      = OUTGOING (EMITTED) PARTICLE IN CENTER OF MASS            Sixpak  
+      LAB     = OUTGOING (EMITTED) PARTICLE IN LAB                       Sixpak  
+      THETA   = CM SCATTERING ANGLE RELATIVE TO INCIDENT DIRECTION       Sixpak  
+      COS(CM) = COSINE OF THE CM SCATTERING ANGLE                        Sixpak  
+                                                                         Sixpak  
+      FOR NEUTRONS INCIDENT WITH AN ENERGY, E, AND THEREFORE A SPEED,    Sixpak  
+                                                                         Sixpak  
+      VN(E) = 2*SQRT(E)/MASS(IN)                                         Sixpak  
+                                                                         Sixpak  
+      THE CENTER-OF-MASS SPEED IS GIVEN BY,                              Sixpak  
+                                                                         Sixpak  
+      V(MM) = VN(E)/(1 + A)                                              Sixpak  
+                                                                         Sixpak  
+      AND THE CENTER OF MASS ENERGY BY,                                  Sixpak  
+                                                                         Sixpak  
+      E(MM) = 1/2*MASS(IN)*V(MM)**2                                      Sixpak  
+            = 1/2*MASS(IN)*VN(E)**2/(1 + A)**2                           Sixpak  
+            = E/(1 + A)**2                                               Sixpak  
+                                                                         Sixpak  
+      FOR DISTRIBUTIONS GIVEN IN MF=6 IN THE CM, THE SPEED, V(CM),       Sixpak  
+      SHOULD BE VECTORIALLY ADDED TO THAT OF OUTGOING PARTICLES TO       Sixpak  
+      DEFINE THE OUTGOING PARTICLES LAB VELOCITY, AND IN TURN IT'S       Sixpak  
+      ENERGY,                                                            Sixpak  
+                                                                         Sixpak  
+      V(LAB)*COS(LAB) = V(MM) + V(CM)*COS(CM)                            Sixpak  
+      V(LAB)*SIN(LAB) =         V(CM)*SIN(CM)                            Sixpak  
+                                                                         Sixpak  
+      V(LAB)**2 = V(MM)**2 + V(CM)**2 + 2*COS(CM)*V(MM)*V(CM)            Sixpak  
+                                                                         Sixpak  
+      EP(LAB)   = 0.5*MASS(OUT)*V(LAB)**2                                Sixpak  
+                                                                         Sixpak  
+                = E(MM) + EP(CM) + 2*COS(CM)*SQRT(E(MM)*EP(CM))          Sixpak  
+                                                                         Sixpak  
+      WE CAN ALSO DEFINE THE REVERSE TRANSFORMATION USING,               Sixpak  
+                                                                         Sixpak  
+      V(CM)*COS(CM) = V(LAB)*COS(LAB) - V(MM)                            Sixpak  
+      V(CM)*SIN(CM) = V(LAB)*SIN(LAB)                                    Sixpak  
+                                                                         Sixpak  
+      V(CM)**2 = V(MM)**2 + V(LAB)**2 - 2*COS(LAB)*V(MM)*V(LAB)          Sixpak  
+                                                                         Sixpak  
+      EP(CM)   = 0.5*MASS(OUT)*V(CM)**2                                  Sixpak  
+                                                                         Sixpak  
+                = E(MM) + EP(LAB) - 2*COS(LAB)*SQRT(E(MM)*EP(LAB))       Sixpak  
+                                                                         Sixpak  
+      WE CAN DEFINE COS(LAB) FROM THE RELATIONSHIP,                      Sixpak  
+                                                                         Sixpak  
+      V(LAB)*COS(LAB) = V(MM) + V(CM)*COS(CM)                            Sixpak  
+                                                                         Sixpak  
+      COS(LAB)        =[V(MM) + V(CM)*COS(CM)]/V(LAB)                    Sixpak  
+                                                                         Sixpak  
+                       [V(MM) + V(CM)*COS(CM)]                           Sixpak  
+      COS(LAB)        =---------------------------------------------     Sixpak  
+                       SQRT[V(MM)**2+V(CM)**2+2*COS(CM)*V(MM)*V(CM)]     Sixpak  
+                                                                         Sixpak  
+      OR COS(CM) FROM THE RELATIONSHIP,                                  Sixpak  
+                                                                         Sixpak  
+      V(CM)*COS(CM)  = V(LAB)*COS(LAB) - V(MM)                           Sixpak  
+                                                                         Sixpak  
+      COS(CM)         =[V(LAB)*COS(LAB) - V(MM)]/V(CM)                   Sixpak  
+                                                                         Sixpak  
+                       [V(LAB)*COS(LAB) - V(MM)]                         Sixpak  
+      COS(CM)         =------------------------------------------------  Sixpak  
+                       SQRT[V(LAB)**2+V(CM)**2-2*COS(LAB)*V(LAB)*V(MM)]  Sixpak  
+                                                                         Sixpak  
+      THE JACOBIAN CAN BE DEFINED FROM,                                  Sixpak  
+                                                                         Sixpak  
+      V(LAB)*COS(LAB) = V(MM) + V(CM)*COS(CM)                            Sixpak  
+                                                                         Sixpak  
+      J = D[COS(CM)]/D[COS(LAB)] = V(LAB)/V(CM)                          Sixpak  
+                                 = SQRT[EP(LAB)/EP(CM)]                  Sixpak  
+                                                                         Sixpak  
+      WITH THESE DEFINITIONS OF EP(LAB) AND COS(LAB) IN TERMS OF E(MM),  Sixpak  
+      EP(CM) AND COS(CM) IT IS POSSIBLE TO PERFORM A POINT-BY-POINT      Sixpak  
+      TRANSFORMATION OF DISTRIBUTIONS FROM THE CM TO LAB SYSTEM USING    Sixpak  
+      THESE DEFINITIONS - OR IF WE WISHED WE COULD PERFORM THE REVERSE   Sixpak  
+      TRANSFORMATION USING THE ABOVE RELATIONSHIPS AND THE IDENTITY,     Sixpak  
+                                                                         Sixpak  
+      F(E,EP(LAB),COS(LAB))*D(COS(LAB))=F(E,EP(CM),COS(CM))*D(COS(CM))   Sixpak  
+                                                                         Sixpak  
+      THIS IS NOT WHAT WILL BE DONE HERE, SINCE WE WILL ONLY BE          Sixpak  
+      INTERESTED IN THE ZEROTH ORDER MOMENTS OF THESE DISTRIBUTIONS,     Sixpak  
+      BUT WE WILL BE INTERESTED IN DEFINING THOSE MOMENTS IN THE         Sixpak  
+      LAB SYSTEM IN TERMS OF MF=6 SPECTRA GIVEN IN THE CM SYSTEM USING,  Sixpak  
+                                                                         Sixpak  
+      F(E,EP(LAB),COS(LAB)) = F(E,EP(CM),COS(CM))*J                      Sixpak  
+                                                                         Sixpak  
+      THE LIMITS OF EP(LAB) ARE DEFINED BY SETTING COS(CM) = +1 OR -1,   Sixpak  
+                                                                         Sixpak  
+      EP(LAB)   = (SQRT(EP(CM)) + SQRT(E(MM)))**2  FOR COS(CM) = +1      Sixpak  
+                = (SQRT(EP(CM)) - SQRT(E(MM)))**2  FOR COS(CM) = -1      Sixpak  
+                                                                         Sixpak  
+      IN THIS FORM WE CAN SEE THAT AS LONG AS THE SECONDARY ENERGY IN    Sixpak  
+      THE CENTER-OF-MASS SYSTEM, EP(CM), IS MUCH LARGER THAN THE         Sixpak  
+      ENERGY OF THE CENTER-OF-MASS, E(MM), THE CENTER-OF-MASS AND LAB    Sixpak  
+      ENERGIES WILL BE ALMOST EQUAL - SIMILARLY FOR THE COSINE, IN       Sixpak  
+      THIS CASE COS(LAB) AND COS(CM) WILL BE ALMOST EQUAL - HOWEVER,     Sixpak  
+      FOR THE MF=6 DATA WE CANNOT ASSUME THAT THIS IS TRUE.              Sixpak  
+                                                                         Sixpak  
+      TO FIRST ORDER THE ANGULAR DEPENDENCE CAN BE IGNORED,              Sixpak  
+                                                                         Sixpak  
+      EP(LAB)   = E(MM) + EP(CM)                                         Sixpak  
+                                                                         Sixpak  
+      ALL THIS SAYS IS THAT TO FIRST ORDER THE EFFECT OF TRANSFORMING    Sixpak  
+      FROM THE CM TO LAB SYSTEM IS TO INCREASE THE ENERGY OF THE         Sixpak  
+      EMITTED PARTICLE IN THE CENTER-OF-MASS SYSTEM BY THE ENERGY OF     Sixpak  
+      THE CENTER-OF-MASS TO DEFINE THE LAB ENERGY.                       Sixpak  
+                                                                         Sixpak  
+      NOT ONLY THE ENERGY, BUT ALSO THE SPECTRA MUST BE TRANSFORMED.     Sixpak  
+      STARTING FROM THE DOUBLE DIFFERENTIAL DATA IN THE LAB SYSTEM,      Sixpak  
+      F(E,EP,COS(LAB)), WE CAN DEFINE THE LAB SCALAR SPECTRUM AS,        Sixpak  
+                                                                         Sixpak  
+      G0(E,EP) = INTEGRAL F(E,EP,COS(LAB))*D(COS(LAB))                   Sixpak  
+                                                                         Sixpak  
+      THIS IS THE NORMAL CALCULATION DEFINED ABOVE AND USED FOR DATA     Sixpak  
+      GIVEN IN THE LAB SYSTEM.                                           Sixpak  
+                                                                         Sixpak  
+      STARTING FROM DATA IN THE CENTER OF MASS SYSTEM F(E,EP,COS(CM)),   Sixpak  
+      WE CAN USE THE RELATIONSHIP,                                       Sixpak  
+                                                                         Sixpak  
+      F(E,EP,COS(LAB))*D(COS(LAB)) = F(E,EP,COS(CM))*J*D(COS(LAB))       Sixpak  
+                                                                         Sixpak  
+      J         = SQRT(EP(LAB)/EP(CM)) - THE JACOBIAN                    Sixpak  
+                                                                         Sixpak  
+                = E(MM)/EP(CM) + 1 + 2*COS(CM)*SQRT(E(MM)/EP(CM))        Sixpak  
+                                                                         Sixpak  
+      AS IN THE CASE OF THE ENERGY, IN THIS FORM WE CAN SEE THAT AS      Sixpak  
+      LONG AS THE SECONDARY ENERGY IN THE CENTER-OF-MASS SYSTEM,         Sixpak  
+      EP(CM), IS LARGE COMPARED TO THE CENTER-OF-MASS ENERGY, E(MM),     Sixpak  
+      THE JACOBIAN IS ESSENTIALLY UNITY AND THE CENTER-OF-MASS AND LAB   Sixpak  
+      SPECTRA WILL BE VERY SIMILAR - AGAIN, GENERALLY WE CANNOT          Sixpak  
+      ASSUME THAT THIS IS TRUE FOR THE MF=6 SPECTRA.                     Sixpak  
+                                                                         Sixpak  
+      THEREFORE WE CAN ALSO DEFINE THE LAB SCALAR SPECTRUM IN TERMS OF   Sixpak  
+      THE CM SPECTRUM IN THE FORM,                                       Sixpak  
+                                                                         Sixpak  
+      G0(E,EP) = INTEGRAL F(E,EP,COS(CM))*J*D(COS(LAB))                  Sixpak  
+                                                                         Sixpak  
+      CONSISTENT WITH THE ABOVE ASSUMPTION THAT THE ANGULAR DEPENDENCE   Sixpak  
+      OF EP(LAB) CAN BE IGNORED THE JACOBIAN WILL NOT BE USED IN         Sixpak  
+      PERFORMING THESE INTEGRALS - IN WHICH CASE THE INTEGRAL REDUCES    Sixpak  
+      TO EXACTLY THE SAME FORM AS IF THE DATA WERE IN THE LAB SYSTEM.    Sixpak  
+                                                                         Sixpak  
+      IT SHOULD BE NOTED THAT SINCE IN THIS CASE THE MF=4 ANGULAR        Sixpak  
+      DISTRIBUTIONS ARE GIVEN IN THE CM SYSTEM AND WHEN USED IN ANY      Sixpak  
+      APPLICATION THEY WILL BE TRANSFORMED TO THE LAB SYSTEM - WHEN      Sixpak  
+      THIS IS DONE THE JACOBIAN WILL BE APPLIED.                         Sixpak  
+                                                                         Sixpak  
+      IN THIS CODE WHERE WE ARE MOSTLY CONCERNED WITH CONSERVING THE     Sixpak  
+      NUMBER OF EMITTED PARTICLES AND AVERAGE ENERGIES THE NEUTRON       Sixpak  
+      SPECTRA OUTPUT IN MF=5 WILL NOT BE COMPLETELY CONVERTED TO THE     Sixpak  
+      LAB SYSTEM - ONLY FIRST ORDER CORRECTIONS WILL BE INCLUDED BY      Sixpak  
+      INCREASING THE EMITTED PARTICLE ENERGY BY THE CENTER OF MASS       Sixpak  
+      ENERGY, I.E., FOR A CENTER OF MASS SPECTRUM TABULATED AT CENTER    Sixpak  
+      OF MASS ENERGIES EP(CM) THESE WILL ALL BE UNIFORMLY INCREASED      Sixpak  
+      BY E(MM) TO ACCOUNT FOR THE CENTER OF MASS MOTION - THE SPECTRA    Sixpak  
+      WILL NOT BE MODIFIED BY THE JACOBIAN FACTOR SQRT(EP(LAB)/EP(CM))   Sixpak  
+      SINCE THIS WOULD REQUIRE A DETAILED TRANSFORMATION IN ENERGY AND   Sixpak  
+      COS(THETA) SPACE - WHICH IS JUDGED NOT TO BE WORTH PERFORMING      Sixpak  
+      WITHIN THE LIMITS OF WHERE THE OUTPUT FROM THIS CODE IS INTENDED   Sixpak  
+      TO BE USED.                                                        Sixpak  
+                                                                         Sixpak  
+      SINCE THE ANGULAR DISTRIBUTION IS ALWAYS OUTPUT IN THE SAME        Sixpak  
+      SYSTEM AS WHICH IT IS GIVEN IN MF=6, NO TRANSFORMATION IS          Sixpak  
+      REQUIRED FOR THE MF=4 OUTPUT.                                      Sixpak  
+                                                                         Sixpak  
+      WHEN USED IN LOW ENERGY APPLICATIONS (E.G., FISSION REACTORS) THE  Sixpak  
+      HIGH ENERGY SPECTRA PRESENTED IN MF=6 WILL BE MOSTLY IMPORTANT     Sixpak  
+      SIMPLY IN CONSERVING PARTICLES, (E.G., AS IN (N,2N)) AND ENERGY    Sixpak  
+      AND THE DETAILS OF THE CORRELATION AND GROSS ENERGY SPECTRA WILL   Sixpak  
+      NOTE PLAY THAT IMPORTANT A ROLE. IN THIS CASE THE SPECTRA OUTPUT   Sixpak  
+      BY THIS PROGRAM IN MF=5 SHOULD BE ADEQUATE.                        Sixpak  
+                                                                         Sixpak  
+      PLOTTAB FORMATTED OUTPUT                                           Sixpak  
+      ================================================================== Sixpak  
+      THIS PROGRAM CONTAINS ROUTINES TO PRODUCE OUTPUT THAT CAN BE USED  Sixpak  
+      AS INPUT TO THE PLOTTAB CODE TO OBTAIN GRAPHIC RESULTS.            Sixpak  
+                                                                         Sixpak  
+      THESE ROUTINES ARE DESIGNED ONLY FOR USE BY THE AUTHOR TO CHECK    Sixpak  
+      THIS CODE. USERS ARE ASKED NOT TO ACTIVATE OR TRY TO USE THESE     Sixpak  
+      ROUTINES. UNLESS YOU COMPLETELY UNDERSTAND THIS CODE THE RESULTS   Sixpak  
+      CAN BE UNRELIABLE IF YOU ACTIVATE THESE ROUTINES.                  Sixpak  
+                                                                         Sixpak  
+      INPUT FILES                                                        Sixpak  
+      ================================================================== Sixpak  
+      UNIT  DESCRIPTION                                                  Sixpak  
+      ----  -----------                                                  Sixpak  
+         2  INPUT LINES (BCD - 80 CHARACTERS/RECORD)                     Sixpak  
+        10  ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Sixpak  
+                                                                         Sixpak  
+      OUTPUT FILES                                                       Sixpak  
+      ================================================================== Sixpak  
+      UNIT  DESCRIPTION                                                  Sixpak  
+      ----  -----------                                                  Sixpak  
+         3  OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Sixpak  
+        11  ENDF/B DATA MF=4 (BCD - 80 CHARACTERS/RECORD)                Sixpak  
+        12  ENDF/B DATA MF=5 (BCD - 80 CHARACTERS/RECORD)                Sixpak  
+        14  ENDF/B DATA MF=15 (BCD - 80 CHARACTERS/RECORD)               Sixpak  
+        17  ENDF/B DATA MF=12 (BCD - 80 CHARACTERS/RECORD)               Sixpak  
+        18  ENDF/B DATA MF=14 (BCD - 80 CHARACTERS/RECORD)               Sixpak  
+        15  PLOTTAB INPUT PARAMETERS (BCD - 80 CHARACTERS/RECORD)        Sixpak  
+        16  PLOTTAB FORMATTED OUTPUT (BCD - 80 CHARACTERS/RECORD)        Sixpak  
+                                                                         Sixpak  
+      SCRATCH FILES                                                      Sixpak  
+      ================================================================== Sixpak  
+      NONE                                                               Sixpak  
+                                                                         Sixpak  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILIO1 AND FILIO2)    Sixpak  
+      ================================================================== Sixpak  
+      UNIT  FILE NAME                                                    Sixpak  
+      ----  ----------                                                   Sixpak  
+        2   SIXPAK.INP                                                   Sixpak  
+        3   SIXPAK.LST                                                   Sixpak  
+       10   ENDFB.IN                                                     Sixpak  
+       11   ENDFB.MF4                                                    Sixpak  
+       12   ENDFB.MF5                                                    Sixpak  
+       14   ENDFB.M15                                                    Sixpak  
+       17   ENDFB.M12                                                    Sixpak  
+       18   ENDFB.M14                                                    Sixpak  
+       15   PLOTTAB.INP                                                  Sixpak  
+       16   PLOTTAB.CUR                                                  Sixpak  
+                                                                         Sixpak  
+                                                                         Sixpak  
+      INPUT PARAMETERS                                                   Sixpak  
+      ================================================================== Sixpak  
+      LINE  COLS.  DESCRIPTION                                           Sixpak  
+      ----  -----  -----------                                           Sixpak  
+         1   1-72  ENDF/B INPUT DATA FILENAME                            Sixpak  
+                   (STANDARD OPTION = ENDFB.IN)                          Sixpak  
+       2-N   1-6   MINIMUM MAT FOR REQUESTED RANGE                       Sixpak  
+             9-11  MINIMUM MT FOR REQUESTED RANGE                        Sixpak  
+            12-17  MAXIMUM MAT FOR REQUESTED RANGE                       Sixpak  
+            20-22  MAXIMUM MT FOR REQUESTED RANGE                        Sixpak  
+                                                                         Sixpak  
+      LEAVE THE DEFINITION OF THE FILENAME BLANK - THE PROGRAM WILL      Sixpak  
+      THEN USE THE STANDARD FILENAME (ENDFB.IN).                         Sixpak  
+                                                                         Sixpak  
+      UP TO 100 MAT/MT RANGES MAY BE SPECIFIED. THE LIST OF RANGES IS    Sixpak  
+      TERMINATED BY A BLANK LINE. IF THE FIRST INPUT LINE IS COMPLETELY  Sixpak  
+      BLANK ALL DATA WILL BE PROCESSED.                                  Sixpak  
+                                                                         Sixpak  
+      EXAMPLE INPUT NO. 1                                                Sixpak  
+      -------------------                                                Sixpak  
+      PROCESS ALL MF=6 DATA ON AN ENDF/B TAPE. USE THE STANDARD INPUT    Sixpak  
+      DATA FILENAME ENDFB.IN IN THIS CASE THE USER CAN EITHER EXPLICITLY Sixpak  
+      SPECIFY THE FILENAME AND MAT/MT RANGE BY THE FOLLOWING  2 INPUT    Sixpak  
+      LINES,                                                             Sixpak  
+                                                                         Sixpak  
+      ENDFB.IN                                                           Sixpak  
+           1    1  9999  999                                             Sixpak  
+                             (BLANK LINE, TERMINATES REQUEST LIST)       Sixpak  
+                                                                         Sixpak  
+      OR BY INPUTTING 2 BLANK LINE = PROCESS EVERYTHING.                 Sixpak  
+                                                                         Sixpak  
+      EXAMPLE INPUT NO. 2                                                Sixpak  
+      -------------------                                                Sixpak  
+      PROCESS BE-9, MAT=425, MT=16. READ THE DATA FROM ENDFB6\BE9.       Sixpak  
+      IN THIS CASE THE FOLLOWING 3 INPUT LINES ARE REQUIRED,             Sixpak  
+                                                                         Sixpak  
+      ENDFBB6\BE9                                                        Sixpak  
+         425   16   425   16                                             Sixpak  
+                             (BLANK LINE, TERMINATES REQUEST LIST)       Sixpak  
+                                                                         Sixpak  
+      EXAMPLE INPUT NO. 3                                                Sixpak  
+      -------------------                                                Sixpak  
+      PROCESS ALL MT=16 (N,2N) DATA. THIS CAN BE DONE BY SPECIFYING THE  Sixpak  
+      MAXIMUM MAT RANGE = 1 TO 9999, AND MT=16 FOR THE MINIMUM AND       Sixpak  
+      MAXIMUM MT RANGE. READ THE DATA FROM ENDFB6\K300. IN THIS CASE     Sixpak  
+      CASE THE FOLLOWING 3 INPUT LINES ARE REQUIRED,                     Sixpak  
+                                                                         Sixpak  
+      ENDFB6\K300                                                        Sixpak  
+           1   16  9999   16                                             Sixpak  
+                             (BLANK LINE, TERMINATES REQUEST LIST)       Sixpak  
+                                                                         Sixpak  
+ ======================================================================= Sixpak  

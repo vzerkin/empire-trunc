@@ -1,0 +1,31 @@
+gfortran -O0 -static-libgfortran  -c -o evalplot.o evalplot.f
+gfortran -O0 -static-libgfortran  -c -o endfio.o endfio.f
+gfortran -O0 -static-libgfortran  -c -o scratchb.o scratchb.f
+gfortran -O0 -static-libgfortran  -c -o timer.o timer.f
+gfortran -O0 -static-libgfortran  -c -o linux.o linux.f
+gfortran -O0 -static-libgfortran  -c -o screen.o screen.f
+gcc -I/usr/X11/include    -c -o dash.o dash.c
+dash.c:147:3: warning: implicitly declaring library function 'exit' with type 'void (int) __attribute__((noreturn))' [-Wimplicit-function-declaration]
+                exit(-1); }
+                ^
+dash.c:147:3: note: include the header <stdlib.h> or explicitly provide a declaration for 'exit'
+dash.c:423:17: warning: 'XKeycodeToKeysym' is deprecated [-Wdeprecated-declarations]
+                        keyint[0]  = XKeycodeToKeysym(display,keycode,kndex);
+                                     ^
+/usr/X11/include/X11/Xlib.h:1687:15: note: 'XKeycodeToKeysym' has been explicitly marked deprecated here
+extern KeySym XKeycodeToKeysym(
+              ^
+dash.c:448:54: warning: sizeof on array function parameter will return size of 'char *' instead of 'char []' [-Wsizeof-array-argument]
+                                              sizeof key,&keysym,NULL);
+                                                     ^
+dash.c:437:6: note: declared here
+char key[];
+     ^
+3 warnings generated.
+gfortran -o evalplot -O0 -static-libgfortran evalplot.o endfio.o scratchb.o timer.o linux.o screen.o dash.o -L/usr/X11/lib -lXt -lX11 
+gfortran -O0 -static-libgfortran  -c -o hardsave.o hardsave.f
+gfortran -o evalhard -O0 -static-libgfortran evalplot.o endfio.o scratchb.o timer.o \
+        linux.o hardsave.o
+gfortran -O0 -static-libgfortran  -c -o hardsave1.o hardsave1.f
+gfortran -o evalhard1 -O0 -static-libgfortran evalplot.o endfio.o scratchb.o timer.o \
+        linux.o hardsave1.o

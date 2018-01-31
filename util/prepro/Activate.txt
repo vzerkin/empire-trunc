@@ -1,0 +1,299 @@
+ ======================================================================= Activate
+                                                                         Activate
+      PROGRAM ACTIVATE                                                   Activate
+      ================                                                   Activate
+      VERS. 2000-1 (APRIL 2000)   *INITIAL VERSION.                      Activate
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Activate
+      VERS. 2004-1 (JAN. 2004)    *CORRECTED ERROR - FIRST RECORD AFTER  Activate
+                                   MF=10 WAS MISSING.                    Activate
+                                  *ADDED INCLUDE TO DEFINE COMMON        Activate
+                                  *INCREASED MAX. POINTS FROM 100,000    Activate
+                                   TO 1,000,000.                         Activate
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII        Activate
+      VERS. 2007-2 (DEC. 2007)    *72 CHARACTER FILE NAMES.              Activate
+      VERS. 2010-1 (Apr. 2010)    *General update based on user feedback Activate
+      VERS. 2012-1 (Aug. 2012)    *Added CODENAME                        Activate
+                                  *Added ERROR stop                      Activate
+                                  *32 and 64 bit Compatible              Activate
+      VERS. 2015-1 (Jan. 2015)    *Corrected ERROR for missing or extra  Activate
+                                   SEND and MEND lines.                  Activate
+                                  *Changed MF=8 pointer from MF=9 to 10. Activate
+                                  *INCREASED MAX. POINTS to 3,000,000.   Activate
+                                  *Added Consistency checks, e.g.,       Activate
+                                   Any MT in MF=9 requires data in MF=3. Activate
+                                  *Extended OUT9 - OUT10 is not used.    Activate
+                                  *Only processes ONE ENDF Tape - this   Activate
+                                   restriction is necessary to insure    Activate
+                                   compatibility with ALL PREPRO codes.  Activate
+                                  *Changed to current ENDF sequence      Activate
+                                   number convention, e.g., reset number Activate
+                                   for each section (MAT/MF/MT).         Activate
+                                  *Replaced ALL 3 way IF statements.     Activate
+      VERS. 2017-1 (May  2017)    *Increased MAX. POINTS to 6,000,000.   Activate
+                                  *Do not create MF=10 for any MT that   Activate
+                                   already has MF=10 data = copy MF=10   Activate
+                                   data in its original form.            Activate
+                                  *Message for every MF=7 output,        Activate
+                                   whether created or copied from input. Activate
+                                  *Updated based on user feedback.       Activate
+                                                                         Activate
+      Acknowledgement 2015                                               Activate
+      --------------------                                               Activate
+      Currently almost all improvements to this code are based upon      Activate
+      feedback from code users who report problems. This feedback        Activate
+      benefits ALL users of this code, and ALL users are encouraged      Activate
+      to report problems.                                                Activate
+                                                                         Activate
+      Improvements on the 2015 version of this code based on user        Activate
+      feedback, including IMPORTANT feedback from Andrej Trkov, up       Activate
+      to and including Feb. 2015.                                        Activate
+                                                                         Activate
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Activate
+      ------------------------------------                               Activate
+      THE NUCLEAR DATA SECTION                                           Activate
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Activate
+      P.O. BOX 100                                                       Activate
+      A-1400, VIENNA, AUSTRIA                                            Activate
+      EUROPE                                                             Activate
+                                                                         Activate
+      ORIGINALLY WRITTEN BY                                              Activate
+      ------------------------------------                               Activate
+      Dermott E. Cullen                                                  Activate
+                                                                         Activate
+      PRESENT CONTACT INFORMATION                                        Activate
+      ---------------------------                                        Activate
+      Dermott E. Cullen                                                  Activate
+      1466 Hudson Way                                                    Activate
+      Livermore, CA 94550                                                Activate
+      U.S.A.                                                             Activate
+      Telephone  925-443-1911                                            Activate
+      E. Mail    RedCullen1@Comcast.net                                  Activate
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Activate
+                                                                         Activate
+                                                                         Activate
+      AUTHORS MESSAGE                                                    Activate
+      ---------------                                                    Activate
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Activate
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Activate
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Activate
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION.                  Activate
+                                                                         Activate
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Activate
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Activate
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Activate
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Activate
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Activate
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Activate
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Activate
+      COMPUTER.                                                          Activate
+                                                                         Activate
+      PURPOSE                                                            Activate
+      -------                                                            Activate
+      THIS PROGRAM IS DESIGNED TO CREATE FILE 10 ACTIVATION CROSS        Activate
+      SECTIONS BY COMBINING FILE 3 CROSS SECTIONS AND FILE 9 MULTIPLIERS Activate
+                                                                         Activate
+      IN THE FOLLOWING DISCUSSION FOR SIMPLICITY THE ENDF TERMINOLOGY    Activate
+      ---ENDF TAPE---WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE      Activate
+      TAPE, CARDS, DISK OR ANY OTHER MEDIUM.                             Activate
+                                                                         Activate
+      ASSUMPTIONS                                                        Activate
+      -----------                                                        Activate
+      IT IS ASSUMED THAT THE FILE 3 AND 9 DATA HAVE BEEN LINEARIZED      Activate
+      BEFORE THIS CODE IS USED - FILE 3 AND 9 DATA CAN BE LINEARIZED     Activate
+      USING PROGRAM LINEAR.                                              Activate
+                                                                         Activate
+      IT IS ASSUMED THAT THE FILE 9 MULTIPLIERS ARE FAIRLY SMOOTH VERSUS Activate
+      ENERGY, AND THAT THE ACTIVATION CROSS SECTIONS FOR FILE 10 CAN BE  Activate
+      DEFINED AT EXACTLY THE SAME ENERGIES AS THE FILE 3 CROSS SECTIONS, Activate
+      AND THAT THESE NEED MERELY BE MULTIPLIED BY THE FILE 9 TO DEFINE   Activate
+      THE FILE 10 ACTIVATION CROSS SECTIONS.                             Activate
+                                                                         Activate
+      ENDF FORMAT                                                        Activate
+      -----------                                                        Activate
+      THIS PROGRAM ONLY USES THE ENDF BCD OR CARD IMAGE FORMAT (AS       Activate
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Activate
+      OF THE ENDF FORMAT (I.E., ENDF-1, 2, 3, 4, 5 OR 6 FORMAT).         Activate
+                                                                         Activate
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF         Activate
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Activate
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Activate
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Activate
+      CORRECTLY OUTPUT ON ALL LINES. THE FORMAT OF SECTION MF=1, MT=451  Activate
+      AND ALL SECTIONS OF MF=3 MUST BE CORRECT. THE PROGRAM COPIES ALL   Activate
+      OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE TO   Activate
+      THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.            Activate
+                                                                         Activate
+      OUTPUT FORMAT                                                      Activate
+      -------------                                                      Activate
+      ALL ENERGIES WILL BE OUTPUT IN F (INSTEAD OF E) FORMAT IN ORDER    Activate
+      TO ALLOW ENERGIES TO BE WRITTEN WITH UP TO 9 DIGITS OF ACCURACY.   Activate
+      COMPARISON OF THE NORMAL ENDF CONVENTION OF 6 DIGITS TO THE 9      Activate
+      DIGIT OUTPUT FROM THIS PROGRAM DEMONSTRATED THAT FAILURE TO USE    Activate
+      THE 9 DIGIT OUTPUT CAN LEAD TO LARGE ERRORS IN THE DATA DUE TO     Activate
+      TRUNCATION OF ENERGIES TO 6 DIGITS DURING OUTPUT.                  Activate
+                                                                         Activate
+      CONTENTS OF OUTPUT                                                 Activate
+      ------------------                                                 Activate
+      ENTIRE EVALUATIONS ARE OUTPUT, NOT JUST THE PROCESSED DATA, E.G.,  Activate
+      ANGULAR AND ENERGY DISTRIBUTIONS ARE ALSO INCLUDED.                Activate
+                                                                         Activate
+      DOCUMENTATION                                                      Activate
+      -------------                                                      Activate
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Activate
+      BY THE ADDITION OF 3 COMMENT LINES AT THE END OF EACH HOLLERITH    Activate
+      SECTION IN THE FORM                                                Activate
+                                                                         Activate
+      ***************** PROGRAM ACTIVATE (2017-1) ****************       Activate
+      FILE 10 ACTIVATION CROSS SECTIONS HAVE BEEN DEFINED BY COMBINING   Activate
+      FILE 3 CROSS SECTIONS AND FILE 9 MULTIPLIERS. FILE 9 DELETED.      Activate
+                                                                         Activate
+      THE ORDER OF SIMILAR COMMENTS (FROM RECENT, SIGMA1 AND GROUPIE)    Activate
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Activate
+      THE DATA BY THESE PROGRAMS.                                        Activate
+                                                                         Activate
+      THESE COMMENT LINES ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Activate
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Activate
+      OF THE HOLLERITH SECTION IN ENDF-5 DIFFERS FROM THE THAT OF        Activate
+      EARLIER VERSIONS OF ENDF. BY READING AN EXISTING MF=1, MT=451      Activate
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Activate
+      THE ENDF FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF        Activate
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Activate
+      DETERMINE WHICH VERSION OF THE ENDF FORMAT THE DATA IS IN, AND     Activate
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Activate
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Activate
+                                                                         Activate
+      REACTION INDEX                                                     Activate
+      --------------                                                     Activate
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Activate
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Activate
+                                                                         Activate
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Activate
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Activate
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Activate
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Activate
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Activate
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Activate
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Activate
+                                                                         Activate
+      SECTION SIZE                                                       Activate
+      ------------                                                       Activate
+      SECTIONS OF MF=9 MULTIPLIERS ARE LIMITED TO A MAXIMUM OF 3,000,000 Activate
+      ENERGY POINTS.                                                     Activate
+                                                                         Activate
+      THERE IS NO LIMIT ON THE NUMBER OF ENERGY POINTS IN MF=3 AND 10    Activate
+      TABLES = THIS DATA IS READ AS CHARACTERS, ONE LINE AT A TIME.      Activate
+                                                                         Activate
+      SELECTION OF DATA                                                  Activate
+      -----------------                                                  Activate
+      THE PROGRAM PROCESSES ALL ENDF DATA ON ONE ENDF TAPE.              Activate
+                                                                         Activate
+      2015 - IT NOW ONLY DOES ONE ENDF TAPE.                             Activate
+                                                                         Activate
+      PROGRAM OPERATION                                                  Activate
+      -----------------                                                  Activate
+      PASS #1                                                            Activate
+      -------                                                            Activate
+      THE ENTIRE MAT IS COPIED TO A SCRATCH FILE IN THE ENDF ASCII       Activate
+      FORMAT AND WHILE COPYING IT TO SCRATCH MF=3, 9, AND 10 ARE ALSO    Activate
+      COPIED TO SEPERATE SCRATCH FILES, I.E., THERE ARE A TOTAL OF 4     Activate
+      SCRATCH FILES - SEE THEIR DEFINITIONS BELOW.                       Activate
+                                                                         Activate
+      PASS #2                                                            Activate
+      -------                                                            Activate
+      IF NO MF=9 MULTIPLIERS ARE FOUND DURING PASS #1, THE ENTIRE MAT    Activate
+      IS COPIED FROM SCRATCH TO THE OUTPUT FILE, WITHOUT ANY CHECKS.     Activate
+                                                                         Activate
+      IF MF=9 MULTIPLIERS ARE FOUND THEY ARE USED WITH MF=3 CROSS        Activate
+      SECTIONS TO CREATE MF=10 ACTIVATION CROSS SECTIONS.                Activate
+                                                                         Activate
+      FOR ANY SECTION OF MF=10 DATA FOR WHICH NO MF=9 MULTIPLIERS ARE    Activate
+      FOUND, THE ORIGINAL MF=10 IS OUTPUT.                               Activate
+                                                                         Activate
+      FOR CONSISTENCY ALL MF=9 MULTIPLIERS ARE DELETED, I.E., THEY ARE   Activate
+      NOT INCLUDED IN THE OUTPUT.                                        Activate
+                                                                         Activate
+      KEEP EVALUATED DATA POINTS                                         Activate
+      --------------------------                                         Activate
+      THE FILE 10 OUTPUT WILL BE AT EXACTLY THE SAME ENERGY POINTS AS    Activate
+      THE FILE 3 CROSS SECTIONS USED TO DEFINE THE FILE 10 ACTIVATION    Activate
+      CROSS SECTIONS.                                                    Activate
+                                                                         Activate
+      INPUT FILES                                                        Activate
+      -----------                                                        Activate
+      UNIT  DESCRIPTION                                                  Activate
+      ----  -----------                                                  Activate
+         2  INPUT LINES (BCD - 80 CHARACTERS/RECORD)                     Activate
+        10  ORIGINAL ENDF DATA (BCD - 80 CHARACTERS/RECORD)              Activate
+                                                                         Activate
+      OUTPUT FILES                                                       Activate
+      ------------                                                       Activate
+      UNIT  DESCRIPTION                                                  Activate
+      ----  -----------                                                  Activate
+         3  OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Activate
+        11  FINAL ENDF DATA (BCD - 80 CHARACTERS/RECORD)                 Activate
+                                                                         Activate
+      SCRATCH FILES                                                      Activate
+      -------------                                                      Activate
+      UNIT  DESCRIPTION                                                  Activate
+      ----  -----------                                                  Activate
+        12  SCRATCH FILE FOR ALL MAT (BCD - 80 CHARACTERS/RECORD)        Activate
+        14  SCRATCH FILE FOR MF=3 DATA (BCD - 80 CHARACTERS/RECORD)      Activate
+        15  SCRATCH FILE FOR MF=9 DATA (BCD - 80 CHARACTERS/RECORD)      Activate
+        16  SCRATCH FILE FOR MF=10 DATA (BCD - 80 CHARACTERS/RECORD)     Activate
+                                                                         Activate
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILEIO)               Activate
+      ----------------------------------------------------               Activate
+      UNIT  FILE NAME                                                    Activate
+      ----  ----------                                                   Activate
+        2   ACTIVATE.INP                                                 Activate
+        3   ACTIVATE.LST                                                 Activate
+       10   ENDFB.IN                                                     Activate
+       11   ENDFB.OUT                                                    Activate
+       12   (SCRATCH)                                                    Activate
+       14   (SCRATCH)                                                    Activate
+       15   (SCRATCH)                                                    Activate
+                                                                         Activate
+      INPUT PARAMETERS                                                   Activate
+      ----------------                                                   Activate
+                                                                         Activate
+      LINE  COLS.  DESCRIPTION                                           Activate
+      ----  -----  -----------                                           Activate
+         1   1-72  ENDF INPUT DATA FILENAME                              Activate
+                   (STANDARD OPTION = ENDFB.IN)                          Activate
+         2   1-72  ENDF OUTPUT DATA FILENAME                             Activate
+                   (STANDARD OPTION = ENDFB.OUT)                         Activate
+                                                                         Activate
+      ONE PAIR OF INPUT LINES MAY BE USED, TO PROCESS ANY ENDF TAPE.     Activate
+                                                                         Activate
+      2015 - NOW ONLY DOES ONE ENDF TAPE.                                Activate
+                                                                         Activate
+      EXAMPLE INPUT NO. 1                                                Activate
+      -------------------                                                Activate
+      PROCESS ENDF TAPE NAMED ACTIVATE.IN AND NAME THE OUTPUT FILE       Activate
+      ACTIVATE.OUT.                                                      Activate
+                                                                         Activate
+      IN THIS CASE THE FOLLOWING 2 INPUT LINES ARE REQUIRED              Activate
+                                                                         Activate
+  ACTIVATE.IN                                                            Activate
+  ACTIVATE.OUT                                                           Activate
+                                                                         Activate
+      EXAMPLE INPUT NO. 2                                                Activate
+      -------------------                                                Activate
+      SAME AS THE ABOVE CASE, EXCEPT THAT IN THIS CASE THE ORIGINAL      Activate
+      TAPE IS IN A DIRECTORY NAMED \ENDFB6\ORIGINAL, AND THE             Activate
+      RESULTS WILL BE WRITTEN INTO A DIRECTORY NAMED \ENDFB6\ACTIVATE.   Activate
+                                                                         Activate
+      IN THIS CASE THE FOLLOWING 6 INPUT LINES ARE REQUIRED              Activate
+                                                                         Activate
+  \ENDFB6\ORIGINAL\ACTIVATE.IN                                           Activate
+  \ENDFB6\ACTIVATE\ACTIVATE.OUT                                          Activate
+                                                                         Activate
+      EXAMPLE INPUT NO. 3                                                Activate
+      -------------------                                                Activate
+      IF THERE IS NO ACTIVATE.INP FILE, OR THE FILENAMES ARE BLANK       Activate
+      THIS CODE WILL USE THE DEFAULT NAMES,                              Activate
+                                                                         Activate
+  ENDFB.IN                                                               Activate
+  ENDFB.OUT                                                              Activate
+                                                                         Activate
+ ======================================================================= Activate

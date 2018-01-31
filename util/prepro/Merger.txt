@@ -1,0 +1,335 @@
+ ======================================================================= Merger  
+                                                                         Merger  
+      PROGRAM MERGER                                                     Merger  
+      ==============                                                     Merger  
+      VERSION 80-1 (JANUARY 1980)                                        Merger  
+      VERSION 80-2 (DECEMBER 1980)                                       Merger  
+      VERSION 82-1 (JANUARY 1982)                                        Merger  
+      VERSION 83-1 (JANUARY 1983)*NEW, MORE COMPATIBLE I/O UNIT NUMBERS. Merger  
+      VERSION 85-1 (AUGUST 1985) *FORTRAN-77/H VERSION                   Merger  
+      VERSION 86-1 (JANUARY 1986)*ENDF/B-VI FORMATS                      Merger  
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Merger  
+                                  FILE NAMES (SEE, SUBROUTINES FILIO1    Merger  
+                                  AND FILIO2 FOR DETAILS).               Merger  
+                                 *IMPROVED BASED ON USER COMMENTS.       Merger  
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Merger  
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Merger  
+                                  CRAZY.                                 Merger  
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Merger  
+                                  KEYWORDS.                              Merger  
+                                 *ADDED LIVERMORE CIVIC COMPILER         Merger  
+                                  CONVENTIONS.                           Merger  
+      VERSION 92-1 (JANUARY 1992)*UPDATED BASED ON USER COMMENTS         Merger  
+                                 *ADDED FORTRAN SAVE OPTION              Merger  
+      VERSION 92-2 (JULY 1992)   *ALLOW UP TO 99 ENDF/B DATA FILES.      Merger  
+                                  (TO ALLOW MANAGEMENT OF THE ENTIRE     Merger  
+                                   ENDF/B SYSTEM).                       Merger  
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Merger  
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Merger  
+                                  (WARNING - INPUT PARAMETER FORMAT      Merger  
+                                  HAS BEEN CHANGED)                      Merger  
+                                 *ONLY SPECIFY FILENAMES - NO UNIT       Merger  
+                                  NUMBERS ON INPUT (WARNING - INPUT      Merger  
+                                  PARAMETERS FORMAT HAS BEEN CHANGED)    Merger  
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Merger  
+                                  (SEE, SUBROUTINE ENDIT)                Merger  
+                                 *REQUEST LOG DELETED                    Merger  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Merger  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Merger  
+                                  *ALL DOUBLE PRECISION                  Merger  
+                                  *ON SCREEN OUTPUT                      Merger  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Merger  
+                                  *IMPROVED OUTPUT PRECISION             Merger  
+      VERSION 99-1 (MARCH 1999)   *GENERAL IMPROVEMENTS BASED ON         Merger  
+                                   USER FEEDBACK                         Merger  
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Merger  
+                                   USER FEEDBACK                         Merger  
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Merger  
+      VERS. 2004-1 (MARCH 2004)   *ADDED INCLUDE TO DEFINE COMMON        Merger  
+                                  *ADDED TEND LINE IF NO DATA RETRIEVED  Merger  
+      VERS. 2007-1 (JAN.  2007)   *CHECKED AGAINST ALL ENDF/B-VII.       Merger  
+      VERS. 2007-2 (JUNE  2007)   *UP, TO 1,000 ENDF/B FILES.            Merger  
+                                  *72 CHARACTER FILE NAMES.              Merger  
+      VERS. 2010-1 (Apr.  2010)   *General update based on user feedback Merger  
+      VERS. 2012-1 (Aug.  2012)   *Added CODENAME                        Merger  
+                                  *32 and 64 bit Compatible              Merger  
+                                  *Added ERROR stop                      Merger  
+      VERS. 2015-1 (Jan.  2015)   *Replaced ALL 3 way IF Statements.     Merger  
+      VERS. 2017-1 (May   2017)   *Updated based on user feedbck.        Merger  
+                                                                         Merger  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Merger  
+      ------------------------------------                               Merger  
+      THE NUCLEAR DATA SECTION                                           Merger  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Merger  
+      P.O. BOX 100                                                       Merger  
+      A-1400, VIENNA, AUSTRIA                                            Merger  
+      EUROPE                                                             Merger  
+                                                                         Merger  
+      ORIGINALLY WRITTEN BY                                              Merger  
+      ------------------------------------                               Merger  
+      Dermott E. Cullen                                                  Merger  
+                                                                         Merger  
+      PRESENT CONTACT INFORMATION                                        Merger  
+      ---------------------------                                        Merger  
+      Dermott E. Cullen                                                  Merger  
+      1466 Hudson Way                                                    Merger  
+      Livermore, CA 94550                                                Merger  
+      U.S.A.                                                             Merger  
+      Telephone  925-443-1911                                            Merger  
+      E. Mail    RedCullen1@Comcast.net                                  Merger  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Merger  
+                                                                         Merger  
+      AUTHORS MESSAGE                                                    Merger  
+      ---------------                                                    Merger  
+      THE COMMENTS BELOW SHOULD BE CONSIDERED THE LATEST DOCUMENTATION   Merger  
+      FOR THIS PROGRAM INCLUDING ALL RECENT IMPROVEMENTS. PLEASE READ    Merger  
+      ALL OF THESE COMMENTS BEFORE IMPLEMENTATION, PARTICULARLY THE      Merger  
+      COMMENTS CONCERNING MACHINE DEPENDENT CODING.                      Merger  
+                                                                         Merger  
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Merger  
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Merger  
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Merger  
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Merger  
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Merger  
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Merger  
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Merger  
+      COMPUTER.                                                          Merger  
+                                                                         Merger  
+      PURPOSE                                                            Merger  
+      -------                                                            Merger  
+      THIS PROGRAM IS DESIGNED TO SELECTIVELY RETRIEVE DATA OFF OF FROM  Merger  
+      1 TO 10 ENDF/B DATA TAPES AND TO MERGE THE SELECTED DATA INTO A    Merger  
+      SINGLE MAT/MF/MT ORDERED FINAL OUTPUT FILE.                        Merger  
+                                                                         Merger  
+      IN THE DISCUSSION THAT FOLLOWS FOR SIMPLICITY THE ENDF/B           Merger  
+      TERMINOLOGY---ENDF/B TAPE---WILL BE USED. IN FACT THE ACTUAL       Merger  
+      MEDIUM USED MAY BE TAPE, CARD, DISK OR ANY OTHER MEDIUM.           Merger  
+                                                                         Merger  
+      ENDF/B FORMAT                                                      Merger  
+      -------------                                                      Merger  
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Merger  
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Merger  
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV OR V FORMAT).     Merger  
+                                                                         Merger  
+      THE ONLY NUMERICAL DATA THAT THIS PROGRAM READS IS THE ZA FROM THE Merger  
+      FIRST CARD OF EACH SECTION AND THE MAT/MF/MT FROM EACH CARD.       Merger  
+      SEQUENCE NUMBERS ARE IGNORED ON INPUT AND ALL OTHER FIELDS ARE     Merger  
+      READ AS HOLLERITH. AS SUCH THIS PROGRAM NEED NOT DISTINGUISH       Merger  
+      BETWEEN DIFFERENT VERSIONS OF THE ENDF/B FORMAT.                   Merger  
+                                                                         Merger  
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Merger  
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Merger  
+      ASSUMED THAT THE MAT, MF AND MT ON EACH CARD IS CORRECT. SEQUENCE  Merger  
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Merger  
+      CORRECTLY OUTPUT ON ALL CARDS.                                     Merger  
+                                                                         Merger  
+      SECTION SIZE                                                       Merger  
+      ------------                                                       Merger  
+      SINCE THIS PROGRAM ONLY READS THE DATA ONE CARD AT A TIME THERE    Merger  
+      IS NO LIMIT TO THE SIZE OF ANY GIVEN SECTION, E.G. THE TOTAL       Merger  
+      CROSS SECTION MAY BE DESCRIBED BY 200,000 DATA POINTS.             Merger  
+                                                                         Merger  
+      SELECTION OF DATA                                                  Merger  
+      -----------------                                                  Merger  
+      THE USER MAY CHOOSE TO MERGE ALL DATA OR THE USER MAY SPECIFY      Merger  
+      THAT ONLY CERTAIN DATA SHOULD BE SELECTED. THE DATA TO BE          Merger  
+      SELECTED IS DEFINED BY SPECIFYING UP TO 100 MAT/MF/MT OR           Merger  
+      ZA/MF/MT RANGES. EACH RANGE IS DEFINED BY LOWER AND UPPER LIMITS   Merger  
+      OF MAT/MF/MT OR ZA/MF/MT.                                          Merger  
+                                                                         Merger  
+      REQUEST LIMITS                                                     Merger  
+      --------------                                                     Merger  
+      IN ORDER TO SIMPLIFY THE INPUT OF SELECTION REQUESTS THE FOLLOWING Merger  
+      CONVENTIONS HAVE BEEN INTRODUCED IN ORDER TO DEFINE THE UPPER      Merger  
+      LIMITS OF REQUESTS IF THEY ARE NOT DEFINED BY INPUT (I.E., IF THEY Merger  
+      ARE ZERO).                                                         Merger  
+                                                                         Merger  
+      (1) MAT OR ZA - IF THE UPPER LIMIT IS ZERO IT IS SET EQUAL TO THE  Merger  
+                      LOWER LIMIT.                                       Merger  
+      (2) MF OR MT  - IF THE UPPER LIMIT IS ZERO IT IS SET EQUAL TO THE  Merger  
+                      MAXIMUM POSSIBLE VALUE, 99 OR 999 RESPECTIVELY.    Merger  
+                                                                         Merger  
+      WITH THESE CONVENTIONS AN ENTIRE EVALUATION MAY BE SELECTED BY     Merger  
+      MERELY SPECIFYING THE LOWER LIMIT OF MAT OR ZA. THE UPPER MAT OR   Merger  
+      ZA LIMIT WILL BE SET EQUAL TO THE LOWER LIMIT, THE LOWER LIMITS OF Merger  
+      MF/MT WILL BE 0/0 AND THE UPPER LIMITS OF MF/MT WILL BE SET TO     Merger  
+      99/999. THIS WILL CAUSE ALL SECTIONS OF A SINGLE EVALUATION TO BE  Merger  
+      SELECTED.                                                          Merger  
+                                                                         Merger  
+      SATISFYING SELECTION CRITERIA                                      Merger  
+      -----------------------------                                      Merger  
+      IN ORDER FOR A SECTION TO MEET THE SELECTION CRITERIA SPECIFIED    Merger  
+      BY ONE OF THE RETRIEVAL REQUESTS, EACH OF THE THREE FIELDS (       Merger  
+      MAT/MF/MT OR ZA/MF/MT) MUST INDIVIDUALLY SATISFY THE CORRESPONDING Merger  
+      LIMITS OF THE REQUEST. IT IS NOT SUFFICIENT THAT THE MAT OF A      Merger  
+      SECTION LIE BETWEEN THE MINIMUM AND MAXIMUM MATS OF A REQUEST. THE Merger  
+      MF AND MT WILL ALSO BE INDIVIDUALLY COMPARED TO THE MF AND MT      Merger  
+      LIMITS OF THE REQUEST. FOR EXAMPLE, A SECTION WITH MAT/MF/MT=      Merger  
+      2500/3/2 DOES NOT SATISFY A REQUEST THAT SPECIFIES A REQUEST USING Merger  
+      THE RANGE 2000/3/1 THROUGH 3000/3/1. THIS REQUEST SPECIFIES ALL    Merger  
+      MATERIALS WITH MAT BETWEEN 2000 AND 3000, BUT ONLY THOSE SECTIONS  Merger  
+      WITH MF/MT=3/1. SIMILARLY A REQUEST FOR 2000/3/1 THROUGH 3000/99/  Merger  
+      999 WILL NOT SELECT ANY SECTIONS WITH MF=1 OR 2, SINCE THE         Merger  
+      REQUEST SPECIFIES ALL MATERIALS WITH MAT BETWEEN 2000 AND 3000,    Merger  
+      BUT ONLY THOSE SECTIONS WITH MF= 3, OR MORE.                       Merger  
+                                                                         Merger  
+      DUPLICATE SECTIONS                                                 Merger  
+      ------------------                                                 Merger  
+      IF TWO OR MORE SECTIONS WITH THE SAME MAT/MF/MT ARE FOUND EITHER   Merger  
+      ON THE SAME OR DIFFERENT TAPES, THE SECTION FROM THE TAPE DEFINED  Merger  
+      EARLIEST IN THE INPUT CARDS WILL BE COPIED TO THE FINAL TAPE AND   Merger  
+      ALL OTHER SECTIONS WITH THE SAME MAT/MF/MT WILL BE SKIPPED. THE    Merger  
+      OUTPUT REPORT WILL INDICATE WHICH SECTIONS WERE COPIED FROM WHICH  Merger  
+      TAPES, AS WELL AS WHICH SECTIONS ARE DUPLICATE AND WERE SKIPPED.   Merger  
+                                                                         Merger  
+      REACTION INDEX                                                     Merger  
+      --------------                                                     Merger  
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Merger  
+      FOR EACH MATERIAL THE PROGRAM WILL FOLLOW THE CONVENTIONS          Merger  
+      DEFINED ABOVE AND ONLY COPY ONE SECTION MF=1, MT=451 AND SKIP      Merger  
+      ALL OTHERS (IF MORE THAN ONE). THIS CONVENTION HAS BEEN ADOPTED    Merger  
+      BECAUSE MOST USERS DO NOT REQUIRE A CORRECT REACTION INDEX FOR     Merger  
+      THERE APPLICATIONS AND IT WAS NOT CONSIDERED WORTHWHILE TO INCLUDE Merger  
+      THE OVERHEAD OF CONSTRUCTING A CORRECT REACTION INDEX IN THIS      Merger  
+      PROGRAM. HOWEVER, IF YOU REQUIRE A REACTION INDEX FOR YOUR         Merger  
+      APPLICATION AFTER RUNNING THIS PROGRAM YOU MAY USE PROGRAM         Merger  
+      DICTIN TO CREATE ONE.                                              Merger  
+                                                                         Merger  
+      RETRIEVAL STATISTICS                                               Merger  
+      --------------------                                               Merger  
+      THERE WILL ALWAYS BE AN OUTPUT REPORT LISTING INDICATING WHICH     Merger  
+      SECTIONS WHERE SELECTED, WHICH DUPLICATE SECTIONS WERE SKIPPED,    Merger  
+      WHICH TAPE THE SECTION WAS ON, WHICH REQUEST (MAT/MF/MT OR         Merger  
+      ZA/MF/MT RANGE) CAUSED THE SECTION TO BE SELECTED AND HOW MANY     Merger  
+      CARDS WERE IN THE SECTION. IN ADDITION THE USER MAY OPTIONALLY     Merger  
+      OBTAIN A FILE CONTAINING THE SAME INFORMATION. THIS FILE MAY BE    Merger  
+      COMBINED WITH OTHER SIMILAR FILES OUTPUT BY THIS PROGRAM IN ORDER  Merger  
+      TO ACCUMULATE RETRIEVAL STATISTICS OVER A PERIOD OF TIME. IF       Merger  
+      SPECIFIED THIS FILE WILL CONTAIN THE FOLLOWING INFORMATION IN      Merger  
+      6I7 FORMAT.                                                        Merger  
+                                                                         Merger  
+      (1) ZA                                                             Merger  
+      (2) MAT                                                            Merger  
+      (3) MF                                                             Merger  
+      (4) MT                                                             Merger  
+      (5) NUMBER OF CARDS IN SECTION                                     Merger  
+      (6) REQUEST NUMBER THAT CAUSED SECTION TO BE SELECTED              Merger  
+                                                                         Merger  
+      INPUT FILES                                                        Merger  
+      -----------                                                        Merger  
+      UNIT  DESCRIPTION                                                  Merger  
+      ----  -----------                                                  Merger  
+        2   INPUT CARDS (BCD - 80 CHARACTERS/RECORD)                     Merger  
+      VARY  FROM 1 TO 99 ENDF/B DATA FILES (BCD - 80 CHARACTERS/RECORD)  Merger  
+                                                                         Merger  
+      OUTPUT FILES                                                       Merger  
+      ------------                                                       Merger  
+      UNIT  DESCRIPTION                                                  Merger  
+      ----  -----------                                                  Merger  
+        3   OUTPUT REPORT LISTING (BCD - 120 CHARACTERS/RECORD)          Merger  
+       10   MERGED ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)              Merger  
+                                                                         Merger  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINES FILIO1 AND FILIO2)   Merger  
+      ----------------------------------------------------------------   Merger  
+      UNIT  FILE NAME   DESCRIPTION                                      Merger  
+      ----  ----------  -----------                                      Merger  
+        2   MERGER.INP  INPUT PARAMETERS                                 Merger  
+        3   MERGER.LST  OUTPUT LISTING                                   Merger  
+       11   ENDFB.OUT   RETRIEVED ENDF/B DATA                            Merger  
+       12   ENDFB.IN1   ENDF/B DATA TO READ...FILENAMES WILL BE DEFINED  Merger  
+       13   ENDFB.IN2   IN THE ORDER ENDFB.IN1, ENDFB.IN2,...ENDFB.I99   Merger  
+       14   ENDFB.IN3   CORRESPONDING TO THE FIRST, SECOND,...99-TH      Merger  
+       15   ENDFB.IN4   ENDF/B DATA FILE TO READ.                        Merger  
+       16   ENDFB.IN5                                                    Merger  
+       17   ENDFB.IN6                                                    Merger  
+       18   ENDFB.IN7                                                    Merger  
+              .                                                          Merger  
+              .                                                          Merger  
+      110   ENDFB.I99                                                    Merger  
+                                                                         Merger  
+       INPUT CARDS                                                       Merger  
+       -----------                                                       Merger  
+       CARD  COLUMNS  FORMAT  DESCRIPTION                                Merger  
+       ----  -------  ------  -----------                                Merger  
+         1     1-72    A72    FILENAME FOR MERGED OUTPUT.                Merger  
+                              (LEAVE BLANK FOR STANDARD = ENDFB.OUT)     Merger  
+         2     1-66  16A4,A2  MERGED FILE LABEL                          Merger  
+                              IF BLANK - LABEL FROM FIRST FILE READ WILL Merger  
+                              BE OUTPUT                                  Merger  
+              67-70    I4     MERGED FILE ENDF/B NUMBER                  Merger  
+                              IF ZERO - NUMBER OF FIRST FILE READ WILL   Merger  
+                              BE OUTPUT.                                 Merger  
+              71-72    I2     RETRIEVAL CRITERIA                         Merger  
+                              = 0 - MAT/MF/MT RANGES                     Merger  
+                              = 1 - ZA/MF/MT RANGES                      Merger  
+       3-N     1-72    A72    FILENAME FOR FILE TO RETRIEVE DATA FROM    Merger  
+                              (LEAVE BLANK FOR STANDARD..ENDFB.IN1,ETC.) Merger  
+                              TERMINATE LIST OF FILES WITH A LINE THAT   Merger  
+                              SAYS END OR end                            Merger  
+       VARY    1- 6    I6     LOWER PRIMARY LIMIT (MAT OR ZA)            Merger  
+               7- 8    I2     LOWER MF LIMIT                             Merger  
+               9-11    I3     LOWER MT LIMIT                             Merger  
+              12-17    I6     UPPER PRIMARY LIMIT (MAT OR ZA)            Merger  
+              18-19    I2     UPPER MF LIMIT                             Merger  
+              20-22    I3     UPPER MT LIMIT                             Merger  
+                              RANGES OF MAT/MF/MT OR ZA/MF/MT TO BE      Merger  
+                              RETRIEVED ARE SPECIFIED BY DEFINING        Merger  
+                              ONE RANGE (LOWER AND UPPER LIMITS) PER     Merger  
+                              CARD. THE USER MAY SPECIFY 0 TO 100        Merger  
+                              RANGES AND THE LIST OF REQUEST RANGES      Merger  
+                              IS TERMINATED BY A BLANK CARD. IF          Merger  
+                              THE FIRST CARD IS BLANK (0 REQUESTS)       Merger  
+                              ALL DATA WILL BE RETRIEVED. IF THE UPPER   Merger  
+                              PRIMARY CRITERIA (MAT OR ZA) IS LESS THAN  Merger  
+                              THE LOWER PRIMARY CRITERIA, THE UPPER      Merger  
+                              PRIMARY CRITERIA WILL BE SET EQUAL TO      Merger  
+                              THE LOWER PRIMARY CRITERIA. IF THE UPPER   Merger  
+                              MF OR MT LIMIT IS ZERO, OR BLANK, IT       Merger  
+                              WILL BE SET TO THE MAXIMUM POSSIBLE        Merger  
+                              VALUE, I.E. MF=99 OR MT=999 (SEE           Merger  
+                              EXAMPLE INPUT).                            Merger  
+                                                                         Merger  
+       EXAMPLE INPUT NO. 1                                               Merger  
+       -------------------                                               Merger  
+       MERGE ENDF/B DATA ONTO UNIT 10 FROM UNITS 11, 12, 13 AND 14.      Merger  
+       RETRIEVE DATA BY MAT NUMBER. RETRIEVE MATS 1103, 1106, ALL MATS   Merger  
+       BETWEEN 1204 AND 1215, MF=1, 3, 4 AND 5 OF MAT 1219 AND MF=3,     Merger  
+       MT=1 OF MAT 1304. USE STANDARD FILENAMES.                         Merger  
+                                                                         Merger  
+       THE FOLLOWING 13 INPUT CARDS ARE REQUIRED.                        Merger  
+                                                                         Merger  
+      ENDFB.OUT                                                          Merger  
+      EXAMPLE FILE LABEL FOR MERGER                                  0 0 Merger  
+      ENDFB.IN1                                                          Merger  
+      ENDFB.IN2                                                          Merger  
+      ENDFB.IN3                                                          Merger  
+      ENDFB.IN4                                                          Merger  
+      END                                                                Merger  
+        1103                      4317  (UPPER LIMIT SET TO 1103/99/999) Merger  
+        1106                      4317  (UPPER LIMIT SET TO 1106/99/999) Merger  
+        1204       1215           4317  (UPPER LIMIT SET TO 1215/99/999) Merger  
+        1219 1     1219 1         4317  (UPPER LIMIT SET TO 1219/ 1/999) Merger  
+        1219 3     1219 5         4317  (UPPER LIMIT SET TO 1219/ 5/999) Merger  
+        1304 3  1  1304 3  1      4317  (UPPER LIMIT COMPLETELY DEFINED) Merger  
+                                        (BLANK CARD TERMINATES REQUESTS) Merger  
+                                                                         Merger  
+       EXAMPLE INPUT NO. 2                                               Merger  
+       -------------------                                               Merger  
+       THE SAME AS EXAMPLE 1, EXCEPT SPECIFY FILENAMES                   Merger  
+                                                                         Merger  
+      \ENDFB6\MERGED.LIB                                                 Merger  
+      EXAMPLE FILE LABEL FOR MERGER                                  0 0 Merger  
+      ENDFB6.PART1                                                       Merger  
+      ENDFB6.PART2                                                       Merger  
+      ENDFB6.PART3                                                       Merger  
+      ENDFB6.PART4                                                       Merger  
+      END                                                                Merger  
+        1103                      4317  (UPPER LIMIT SET TO 1103/99/999) Merger  
+        1106                      4317  (UPPER LIMIT SET TO 1106/99/999) Merger  
+        1204       1215           4317  (UPPER LIMIT SET TO 1215/99/999) Merger  
+        1219 1     1219 1         4317  (UPPER LIMIT SET TO 1219/ 1/999) Merger  
+        1219 3     1219 5         4317  (UPPER LIMIT SET TO 1219/ 5/999) Merger  
+        1304 3  1  1304 3  1      4317  (UPPER LIMIT COMPLETELY DEFINED) Merger  
+                                        (BLANK CARD TERMINATES REQUESTS) Merger  
+                                                                         Merger  
+ ======================================================================= Merger  

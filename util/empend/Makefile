@@ -28,13 +28,15 @@ else ifeq ($(FC),ifort)
   #----flags for automatic parallelization
   #FFLAGS =  -parallel
 
-else ifeq ($(FC),af90)
+else ifeq ($(FC),af95)
 
   #---------------------------
   #----Absoft FORTRAN compiler
   #---------------------------
-  FFLAGS = -O3 -s
-  #FFLAGS = -O0 -g
+ #FFLAGS = -O3 -s
+ #----flags for debuging using absoft compiler
+ #FFLAGS = -O0 -m64 -g -s -Rb -Rs -Rc
+  FFLAGS = -O0 -g -s -Rb -Rs -Rc
 
 else ifeq ($(FC),lf90)
 

@@ -1,0 +1,905 @@
+ ======================================================================= Evalplot
+                                                                         Evalplot
+      PROGRAM EVALPLOT                                                   Evalplot
+      ================                                                   Evalplot
+      VERSION 75-1 (AUGUST 1975)                                         Evalplot
+      VERSION 76-1 (JULY 1976)                                           Evalplot
+      VERSION 77-1 (APRIL 1977)                                          Evalplot
+      VERSION 78-1 (JULY 1978)                                           Evalplot
+      VERSION 79-1 (FEBRUARY 1979)                                       Evalplot
+      VERSION 80-1 (JULY 1980)    *IBM VERSION                           Evalplot
+      VERSION 80-2 (DECEMBER 1980)                                       Evalplot
+      VERSION 81-1 (MARCH 1981)                                          Evalplot
+      VERSION 81-2 (AUGUST 1981)  *IMPROVED ZOOM CAPABILITY              Evalplot
+      VERSION 82-1 (JANUARY 1982) *IMPROVED COMPUTER COMPATIBILITY       Evalplot
+      VERSION 83-1 (JANUARY 1983) *ELIMINATED COMPUTER DEPENDENT CODING. Evalplot
+      VERSION 83-2 (OCTOBER 1983) *ADDED PLOTTING OF HISTOGRAM DATA.     Evalplot
+      VERSION 84-1 (DECEMBER 1984)*ADDED PLOTS OF LEGENDRE COEFFICENTS   Evalplot
+                                   AS A FUNCTION OF ENERGY.              Evalplot
+                                  *ADDED SMALL PLOTTING MODE.            Evalplot
+      VERSION 85-1 (AUGUST 1985)  *FORTRAN-77/H VERSION                  Evalplot
+      VERSION 86-1 (JANUARY 1986) *ENDF/B-VI FORMAT                      Evalplot
+      VERSION 88-1 (JULY 1988)    *MAJOR REVISION TO MAKE CODE EASILY    Evalplot
+                                   INTERFACEABLE TO ALMOST ANY PLOTTER.  Evalplot
+                                  *WARNING...INPUT PARAMETERS FROM BEEN  Evalplot
+                                   CHANGED (SEE, DESCRIPTION BELOW)      Evalplot
+                                  *COMPUTER INDEPENDENT SOFTWARE         Evalplot
+                                   CHARACTERS.                           Evalplot
+                                  *COLOR PLOTS.                          Evalplot
+                                  *MT NUMBER DEFINITIONS FROM DATA FILE  Evalplot
+                                   READ BY PROGRAM                       Evalplot
+                                  *FORTRAN-77 REQUIRED (FORTRAN-H NO     Evalplot
+                                   SUPPORTED BY THIS PROGRAM).           Evalplot
+                                  *OPTION...INTERNALLY DEFINE ALL I/O    Evalplot
+                                   FILE NAMES (SEE, SUBROUTINE FILEIO    Evalplot
+                                   FOR DETAILS).                         Evalplot
+                                  *IMPROVED BASED ON USER COMMENTS.      Evalplot
+      VERSION 89-1 (JANUARY 1989) *PSYCHOANALYZED BY PROGRAM FREUD TO    Evalplot
+                                   INSURE PROGRAM WILL NOT DO ANYTHING   Evalplot
+                                   CRAZY.                                Evalplot
+                                  *UPDATED TO USE NEW PROGRAM CONVERT    Evalplot
+                                   KEYWORDS.                             Evalplot
+                                  *ADDED LIVERMORE CIVIC COMPILER        Evalplot
+                                   CONVENTIONS.                          Evalplot
+                                  *FORTRAN-77/FORTRAN-H COMPATIBLE       Evalplot
+                                  *SPECIAL ENDF/B MATERIAL DEFINITIONS   Evalplot
+                                   (ZA.LT.1000) FROM DATA FILE READ      Evalplot
+                                   BY PROGRAM.                           Evalplot
+      VERSION 89-2 (MARCH 1989)   *ADDED ENDF/B-V AND VI MT              Evalplot
+                                   DEFINITIONS. PROGRAM WILL DETERMINE   Evalplot
+                                   ENDF/B FORMAT BASED ON MF=1,          Evalplot
+                                   MT=451 AND USE ASPPROPRIATE MT        Evalplot
+                                   DEFINITIONS. IF NO MF=1, MT=451       Evalplot
+                                   PROGRAM WILL USE ENDF/B-V             Evalplot
+                                   MT DEFINITIONS.                       Evalplot
+      VERSION 89-3 (JUNE 1989)    *3 CHARACTER FONTS                     Evalplot
+      VERSION 92-1 (JANUARY 1992) *COMPLETE REWRITE OF CODE              Evalplot
+                                  *ADDED PHOTON DATA, MF=23 AND 27       Evalplot
+                                  *ADDED INCIDENT CHARGED PARTICLES      Evalplot
+                                   (IDENTIFIED IN PLOT TITLES)           Evalplot
+                                  *ADDED FORTRAN SAVE OPTION.            Evalplot
+                                  *UPDATED BASED ON USER COMMENTS        Evalplot
+                                  *ADDED RETRIEVAL BY UP TO 100          Evalplot
+                                   MAT/MF/MT OR ZA/MF/MT RANGES          Evalplot
+                                  *WARNING...INPUT PARAMETER FORMAT      Evalplot
+                                   HAS BEEN CHANGED...SEE DESCRIPTION    Evalplot
+                                   BELOW.                                Evalplot
+      VERSION 92-2 (FEBRUARY 1992)*ADDED PHOTON SPECTRA, MF=15.          Evalplot
+                                  *ADDED MULTIPLICATION OF DISTRIBUTIONS Evalplot
+                                   IN MF=5 AND 15 BY PROBABILITY=YIELD.  Evalplot
+                                  *INCREASED PAGE SIZE TO 12000 POINTS   Evalplot
+      VERSION 92-3 (MAY 1992)     *CORRECTED DESCRIPTION OF INPUT        Evalplot
+                                   PARAMETERS AND EXAMPLE PROBLEMS.      Evalplot
+                                  *CORRECTED FOR ENDF/B-VI DEFINITION OF Evalplot
+                                   TEMPERATURE FROM MF=1/MT=451.         Evalplot
+                                  *CORRECTED LOGIC SO THAT EACH REQUEST  Evalplot
+                                   IS TREATED SEPARATELY TO CREATE A     Evalplot
+                                   PLOT, UNLESS REQUESTS ARE CHAINED     Evalplot
+                                   TOGETHER.                             Evalplot
+                                  *ADDED VARIABLE CHARACTER SIZE INPUT.  Evalplot
+      VERSION 93-1 (MARCH 1993)   *INCREASED PAGE SIZE FROM 12000        Evalplot
+                                   TO 210000                             Evalplot
+                                  *INCREASED THE NUMBER OF ENERGIES      Evalplot
+                                   VS. LEGENDRE COEFFICIENTS FROM        Evalplot
+                                   167 TO 7000                           Evalplot
+                                  *UPDATED FOR ON SCREEN GRAPHICS        Evalplot
+                                   USING THE LAHEY FORTRAN COMPILER.     Evalplot
+      VERSION 94-1 (JANUARY 1994) *VARIABLE ENDF/B DATA FILENAMES        Evalplot
+                                   TO ALLOW ACCESS TO FILE STRUCTURES    Evalplot
+                                   (WARNING - INPUT PARAMETER FORMAT     Evalplot
+                                   HAS BEEN CHANGED)                     Evalplot
+                                  *CLOSE ALL FILES BEFORE TERMINATING    Evalplot
+                                   (SEE, SUBROUTINE ENDIT)               Evalplot
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Evalplot
+                                  *IMPROVED COMPUTER INDEPENDENCE        Evalplot
+                                  *ALL DOUBLE PRECISION                  Evalplot
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Evalplot
+                                  *IMPROVED OUTPUT PRECISION             Evalplot
+                                  *DEFINED SCRATCH FILE NAMES            Evalplot
+                                  *ALL DOUBLE PRECISION                  Evalplot
+      VERSION 97-1 (APRIL 1997)   *INCREASED PAGE SIZE FROM 210000       Evalplot
+                                   TO 480,000                            Evalplot
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Evalplot
+                                   POINT READ FOR MORE DIGITS            Evalplot
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Evalplot
+                                   VERSION BASED ON RECENT FORMAT CHANGE Evalplot
+                                  *GENERAL IMPROVEMENTS BASED ON         Evalplot
+                                   USER FEEDBACK                         Evalplot
+      VERS. 2000-1 (FEBRUARY 2000)*ADDED MF=10, ACTIVATION CROSS         Evalplot
+                                   SECTION PLOTS.                        Evalplot
+                                  *INCREASED DIMENSIONS TO HANDLE MORE   Evalplot
+                                   SECTIONS - UP TO 1,000                Evalplot
+                                  *GENERAL IMPROVEMENTS BASED ON         Evalplot
+                                   USER FEEDBACK                         Evalplot
+      VERS. 2002-1 (Nov. 2002)    *OPTIONAL INPUT PARAMETERTS            Evalplot
+                                  *OPTIONAL BLACK OR WHITE BACKGROUND    Evalplot
+                                  *COLOR POSTSCRIPT FILES                Evalplot
+      VERS. 2004-1 (MARCH 2004)   *ADDED INCLUDE FOR COMMON              Evalplot
+                                  *INCREASED PAGE SIZE TO 600,000        Evalplot
+                                  *INCREASED THE NUMBER OF ENERGIES      Evalplot
+                                   VS. LEGENDRE COEFFICIENTS FROM        Evalplot
+                                   7000 TO 20000                         Evalplot
+      VERS. 2007-1 (JAN.  2007)   *CHECKED AGAINST ALL ENDF/B-VII.       Evalplot
+                                  *INCREASED PAGE SIZE TO 2,400,000      Evalplot
+                                   FROM 600,000.                         Evalplot
+                                   VS. LEGENDRE COEFFICIENTS TO          Evalplot
+                                   80,000 FROM 20,000 (MUST BE 1/30      Evalplot
+                                   PAGE SIZE).                           Evalplot
+                                  *ADDED (N,REMAINDER) TO FIRST PLOT.    Evalplot
+      VERS. 2007-2 (DEC.  2007)   *72 CHARACTER FILE NAMES.              Evalplot
+      VERS. 2008-1 (JULY  2008)   *UPDATED FOR MF=4/LTT = 3 = LEGENDRE   Evalplot
+                                   PLUS TABULATED                        Evalplot
+      VERS. 2010-1 (Aug.  2010)   *Extended to plots up to 100 Legendre  Evalplot
+                                   Coefficients versus incident energy.  Evalplot
+      VERS. 2011-1 (July  2011)   *Increased MT.DAT from 200 to 1,000    Evalplot
+                                   entries, to acommodate new MTs.       Evalplot
+                                  *Updated MF=10 plots to identify ZAP   Evalplot
+                                   and state for Neutron Activation.     Evalplot
+                                  *Updated for energy release parameters Evalplot
+                                   MF=3, MT=301 to 450.                  Evalplot
+      VERS. 2012-1 (Aug.  2012)   *Updated incident particle list to     Evalplot
+                                   include photon (ZA = 0).              Evalplot
+                                  *Added CODENAME                        Evalplot
+                                  *32 and 64 bit Compatible              Evalplot
+                                  *Added ERROR stops                     Evalplot
+      VERS. 2013-1 (Nov.  2013)   *OUT9 replaced NORMX                   Evalplot
+      VERS. 2015-1 (Jan.  2015)   *Updated MF=10 Labels, which requires  Evalplot
+                                   longer plot titles.                   Evalplot
+                                  *Restricted character size multiplier  Evalplot
+                                   to 0.5 to 1.5 to accommodate longer   Evalplot
+                                   plot titles.                          Evalplot
+                                  *Replaced ALL 3 way if statements.     Evalplot
+      VERS. 2015-2 (Mar.  2015)   *Minor changes based on user feedback  Evalplot
+      VERS. 2017-1 (May   2017)   *Expanded storage to handle new        Evalplot
+                                   R-M (LRF=7) angular distributions.    Evalplot
+                                  *All floating input parameters changed Evalplot
+                                   tp character input + IN9 conversion.  Evalplot
+                                  *Replaced Q Mev by MT= at top of plots Evalplot
+                                   (Q value in ENDF is now only defined  Evalplot
+                                    in MF=3, making it difficult for all Evalplot
+                                    other MF now treated by this code)   Evalplot
+                                  *Initial Linear X scaling for MF=1     Evalplot
+                                  *(nu-bar) and MF=4 (Legendre).         Evalplot
+                                  + Unless energy range is requested =   Evalplot
+                                    allows MF=1 and MF=4 default X       Evalplot
+                                    scaling to be turned off by input    Evalplot
+                                    parameters, i.e., by EVALPLOT or     Evalplot
+                                    EVALHARD.                            Evalplot
+                                  *Changed default Y range from 10^10    Evalplot
+                                   to 10^8 (Based on experience).        Evalplot
+                                                                         Evalplot
+                                                                         Evalplot
+      2015-2 Acknowledgment                                              Evalplot
+      =====================                                              Evalplot
+      I thank Chuck Whitmer (TerraPower,WA) for reporting the errors     Evalplot
+      that led to the 2015-2 Improvements in this code.                  Evalplot
+                                                                         Evalplot
+      I thank Jean-Christophe Sublet (UKAEA) for contributing MAC        Evalplot
+      executables and Bojan Zefran (IJS, Slovenia) for contributing      Evalplot
+      LINUX (32 or 63 bit) executables. And most of all I must thank     Evalplot
+      Andrej Trkov (NDS, IAEA) for overseeing the entire PREPRO project  Evalplot
+      at IAEA, Vienna. This was a truly International team who worked    Evalplot
+      together to produce PREPRO 2015-2.                                 Evalplot
+                                                                         Evalplot
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Evalplot
+      ------------------------------------                               Evalplot
+      THE NUCLEAR DATA SECTION                                           Evalplot
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Evalplot
+      P.O. BOX 100                                                       Evalplot
+      A-1400, VIENNA, AUSTRIA                                            Evalplot
+      EUROPE                                                             Evalplot
+                                                                         Evalplot
+      ORIGINALLY WRITTEN BY                                              Evalplot
+      ------------------------------------                               Evalplot
+      Dermott E. Cullen                                                  Evalplot
+                                                                         Evalplot
+      PRESENT CONTACT INFORMATION                                        Evalplot
+      ---------------------------                                        Evalplot
+      Dermott E. Cullen                                                  Evalplot
+      1466 Hudson Way                                                    Evalplot
+      Livermore, CA 94550                                                Evalplot
+      U.S.A.                                                             Evalplot
+      Telephone  925-443-1911                                            Evalplot
+      E. Mail    RedCullen1@Comcast.net                                  Evalplot
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Evalplot
+                                                                         Evalplot
+      AUTHORS MESSAGE                                                    Evalplot
+      ---------------                                                    Evalplot
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Evalplot
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Evalplot
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Evalplot
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION, PARTICULARLY     Evalplot
+      THE COMMENTS CONCERNING MACHINE DEPENDENT CODING.                  Evalplot
+                                                                         Evalplot
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Evalplot
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Evalplot
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Evalplot
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Evalplot
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Evalplot
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Evalplot
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Evalplot
+      COMPUTER.                                                          Evalplot
+                                                                         Evalplot
+      PURPOSE                                                            Evalplot
+      -------                                                            Evalplot
+      THIS PROGRAM IS DESIGNED TO READ EVALUATED DATA FROM THE ENDF/B    Evalplot
+      FORMAT AND TO PLOT THE DATA. THE USER MAY SELECT CROSS SECTIONS,   Evalplot
+      PARAMETERS (E.G. NU-BAR, MU-BAR, ETC.), ANGULAR DISTRIBUTIONS      Evalplot
+      AND/OR ENERGY DISTRIBUTIONS TO BE PLOTTED.                         Evalplot
+                                                                         Evalplot
+      IN THE FOLLOWING FOR SIMPLICITY THE ENDF/B TERMINOLOGY--ENDF/B     Evalplot
+      TAPE--WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE TAPE, CARDS,  Evalplot
+      DISK OR ANY OTHER MEDIUM.                                          Evalplot
+                                                                         Evalplot
+      ON WHAT COMPUTERS WILL THE PROGRAM RUN                             Evalplot
+      ------------------------------------------------------------------ Evalplot
+      THE PROGRAM HAS BEEN IMPLEMENTED ON A WIDE VARIETY OF COMPUTERS    Evalplot
+      FROM THE ONE EXTREME OF LARGE MAINFRAME CRAY AND IBM COMPUTERS     Evalplot
+      TO THE OTHER EXTREME OF SUN TERMINALS AND IBM PERSONAL COMPUTERS.  Evalplot
+      THE PROGRAM IS DESIGNED TO RUN ON VIRTUALLY ANY COMPUTER. FOR      Evalplot
+      SPECIAL CONSIDERATIONS SEE THE SECTIONS BELOW ON,                  Evalplot
+      (1) COMPUTER DEPENDENT CODING                                      Evalplot
+      (2) PLOTTER/GRAPHICS TERMINAL INTERFACE                            Evalplot
+                                                                         Evalplot
+      2015 PLOTTER DIMENSIONS                                            Evalplot
+      ================================================================== Evalplot
+      PLOTTER DIMENSIONS ARE IN INCHES - NOT CM, MM, OR CUBITS.          Evalplot
+      THIS IS DONE FOR HISTORICAL REASONS AND HOPEFULLY THIS WILL        Evalplot
+      NOT INCONVENIENCE ANYONE - IN PRACTICE I HAVE USED EXACTLY THE     Evalplot
+      SAME DIMENSION = X = 0 to 12.5 and Y = 0 to 10 FOR DECADES         Evalplot
+      TO PRODUCE BOTH ON-SCREEN AND HARDCOPY POSTSCRIPT PLOTS.           Evalplot
+                                                                         Evalplot
+      I STRONGLY SUGGEST THAT YOU NOT CHANGE THESE DIMENSIONS UNLESS     Evalplot
+      YOU MUST = BASED ON THE PLOT SIZE YOU OBTAIN WHEN YOU FIRST RUN    Evalplot
+      THIS CODE.                                                         Evalplot
+                                                                         Evalplot
+      GRAPHICS INTERFACE                                                 Evalplot
+      ------------------------------------------------------------------ Evalplot
+      THIS PROGRAM USES A SIMPLE CALCOMP LIKE GRAPHICS INTERFACE WHICH   Evalplot
+      REQUIRES ONLY 3 SUBROUTINES...PLOTS, PLOT AND PEN (DESCRIBED IN    Evalplot
+      DETAIL BELOW). ALL CHARACTERS AND SYMBOLS ARE DRAWN USING TABLES   Evalplot
+      OF PEN STROKES (SUPPLIED WITH THIS PROGRAM). USING THIS METHOD     Evalplot
+      THE PROGRAM SHOULD BE SIMPLE TO INTERFACE TO VIRTUALLY ANY PLOTTER Evalplot
+      OR GRAPHICS TERMINAL AND THE APPEARANCE AND LAYOUT OF THE PLOTS    Evalplot
+      SHOULD BE INDEPENDENT OF WHICH PLOTTER IS USED.                    Evalplot
+                                                                         Evalplot
+      PROGRAM IDENTIFICATION                                             Evalplot
+      ----------------------                                             Evalplot
+      AS DISTRIBUTED THE FIRST FRAME OF PLOTTED OUTPUT WILL DOCUMENT     Evalplot
+      THE PROGRAM NAME, VERSION AND INSTALLATION. THIS INFORMATION IS    Evalplot
+      STORED AS DATA IN THE ARRAY VERSES NEAR THE BEGINNING OF           Evalplot
+      SUBROUTINE FRAME1. IF YOU WISH TO CUSTOMIZE THE OUTPUT TO IDENTIFY Evalplot
+      YOUR INSTALLATION CHANGE THE LAST TWO LINES OF THE ARRAY VERSES.   Evalplot
+                                                                         Evalplot
+      SIZE OF PLOTS                                                      Evalplot
+      -------------                                                      Evalplot
+      THE PROGRAM HAS A BUILT-IN DEFAULT SIZE TO MAKE EACH PLOT 13.50    Evalplot
+      BY 10.24 INCHES. THIS SIZE WAS SELECTED ASSUMING THAT THE          Evalplot
+      RESOLUTION OF THE PLOTTER IS 1024 RASTER POINTS PER INCH. THE      Evalplot
+      USER MAY CHANGE THE SIZE OF THE PLOT BY SPECIFYING ANY REQUIRED    Evalplot
+      SIZE ON THE FIRST INPUT LINE. IN PARTICULAR FOR USE ON ANY PLOTTER Evalplot
+      THAT USES CENTIMETERS INSTEAD OF INCHES THE USER MAY MERELY        Evalplot
+      SPECIFY THE REQUIRED SIZE OF THE PLOT IN CENTIMETERS (E.G., TO     Evalplot
+      OBTAIN A 13.50 BY 10.24 INCH PLOT, THE USER NEED ONLY SPECIFY      Evalplot
+      34.3 BY 26 ON THE FIRST INPUT LINE...ASSUMING 2.54 CENTIMETERS PER Evalplot
+      INCH, OR 343 BY 260 FOR MILLIMETERS..ASSUMING 25.4 MILLIMETERS     Evalplot
+      PER INCH).                                                         Evalplot
+                                                                         Evalplot
+      CHARACTER SIZE                                                     Evalplot
+      --------------                                                     Evalplot
+      THE PLOT HAS A BUILT-IN CHARACTER SIZE WHICH HAS BEEN DEFINED FOR  Evalplot
+      COMPATIBILITY WITH THE BUILT-IN PLOT SIZE. IF THE USER SPECIFIES   Evalplot
+      BY INPUT A DIFFERENT PLOT SIZE, THE PROGRAM WILL AUOTMATICALLY     Evalplot
+      SCALE THE SIZE OF ALL CHARACTERS BY THE RATIO OF THE Y SIZE OF THE Evalplot
+      PLOT SPECIFIED BY THE USER TO THE BUILT-IN Y SIZE OF PLOTS (E.G.,  Evalplot
+      FOR PLOTS WHICH ARE ONLY 5.12 HIGH (Y DIRECTION) ALL CHARACTERS    Evalplot
+      WILL BE SCALED TO BE ONLY 1/2 THE CHARACTER SIZE ON PLOTS WHICH    Evalplot
+      ARE 10.24 HIGH (10.24 = THE BUILT-IN SIZE). NOTE, CHANGES IN THE   Evalplot
+      X SIZE OF THE PLOT WILL NOT HAVE ANY EFFECT ON THE CHARACTER SIZE  Evalplot
+      (E.G., FOR A LONG PLOT, 30 BY 10.24 THE CHARACTER SIZE WILL BE THE Evalplot
+      THE SAME AS ON A 13.50 BY 10.24 PLOT).                             Evalplot
+                                                                         Evalplot
+      PLOT PER FRAME                                                     Evalplot
+      --------------                                                     Evalplot
+      BY INPUT THE USER CAN SPECIFY NOT ONLY THE ACTUAL SIZE OF THE      Evalplot
+      LOCAL PLOTTER, BUT ALSO HOW MANY PLOTS SHOULD APPEAR ON EACH       Evalplot
+      FRAME. THIS IS DONE BY SPECIFYING THE LAYOUT OF A FRAME IN TERMS   Evalplot
+      OF THE NUMBER OF PLOTS IN THE X AND Y DIRECTION. FOR EXAMPLE BY    Evalplot
+      SPECIFYING THAT EACH FRAME BE DIVIDED INTO 3 PLOTS IN THE X        Evalplot
+      DIRECTION AND 2 PLOTS IN THE Y DIRECTION, EACH FRAME WILL CONTAIN  Evalplot
+      UP TO 6 PLOTS (3 X 2). INTERNALLY EACH PLOT WILL BE GENERATED TO   Evalplot
+      STANDARD A4 SIZE, AS DESCRIBED ABOVE, AND THEN ON OUTPUT SCALED    Evalplot
+      TO THE NUMBER OF PLOTS PER FRAME SPECIFIED BY THE USER INPUT.      Evalplot
+                                                                         Evalplot
+      ENDF/B FORMAT                                                      Evalplot
+      -------------                                                      Evalplot
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Evalplot
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Evalplot
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Evalplot
+                                                                         Evalplot
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Evalplot
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Evalplot
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Evalplot
+      NUMBERS (COLUMNS 76-80) ARE IGNORED. FORMAT OF SECTION MT=452, 455 Evalplot
+      OF MF=1, AND ALL SECTIONS OF MF=3, 4 AND 5 MUST BE CORRECT. ALL    Evalplot
+      OTHER SECTION OF DATA ARE SKIPPED AND AS SUCH THE OPERATION OF     Evalplot
+      THIS PROGRAM IS INSENSITIVE TO THE CORRECTNESS OR INCORRECTNESS    Evalplot
+      OF ALL OTHER SECTIONS.                                             Evalplot
+                                                                         Evalplot
+      INTERPOLATION LAW                                                  Evalplot
+      -----------------                                                  Evalplot
+      EACH TABLE OF DATA MAY USE EITHER COMPLETELY HISTOGRAM OR          Evalplot
+      COMPLETELY LINEAR INTERPOLATION LAW (THE TWO INTERPOLATION LAWS    Evalplot
+      CANNOT BE MIXED TOGETHER IN ONE TABLE). EITHER OF THESE TWO        Evalplot
+      REPRESENTATIONS WILL BE STORED IN CORE IN LINEARLY INTERPOLABLE    Evalplot
+      FORM. IF THIS PROGRAM FINDS ANY DATA THAT USES ANY OTHER           Evalplot
+      INTERPOLATION LAW IT WILL PRINT AN ERROR MESSAGE AND PLOT THE      Evalplot
+      TABLE AS IF IT WERE LINEARLY INTERPOLABLE. THE ONLY ERROR THAT     Evalplot
+      WILL RESULT IN THE PLOT WILL BE IN THE CURVE FOLLOWED BETWEEN      Evalplot
+      TABULATED POINTS. PROGRAM LINEAR (UCRL-50400, VOL. 17, PART A)     Evalplot
+      MAY BE USED TO CONVERT CROSS SECTIONS TO LINEARLY INTERPOLABLE     Evalplot
+      FORM. PROGRAM LEGEND CAN BE USED FOR ANGULAR DISTRIBUTIONS AND     Evalplot
+      PROGRAM ENERGY CAN BE USED FOR SECONDARY ENERGY DISTRIBUTIONS.     Evalplot
+                                                                         Evalplot
+      REACTION INDEX                                                     Evalplot
+      --------------                                                     Evalplot
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Evalplot
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Evalplot
+                                                                         Evalplot
+      PAGE SIZE                                                          Evalplot
+      ---------                                                          Evalplot
+      ONLY ONE PAGE OF DATA = 600000 DATA POINTS - IS KEPT IN CORE AT    Evalplot
+      ANY GIVEN TIME. IF THERE IS MORE THAN THIS MANY POINTS THEY WILL   Evalplot
+      BE KEPT ON A SCRATCH FILE AND LOADED INTO CORE AS NEEDED.          Evalplot
+                                                                         Evalplot
+      TO CHANGE THE PAGE SIZE,                                           Evalplot
+                                                                         Evalplot
+      1) CHANGE  600000 TO THE NEW PAGE SIZE                             Evalplot
+      2) CHANGE 1200000 TO TWO TIMES THE NEW PAGE SIZE                   Evalplot
+                                                                         Evalplot
+      SECTION SIZE                                                       Evalplot
+      ------------                                                       Evalplot
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Evalplot
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Evalplot
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Evalplot
+                                                                         Evalplot
+      THE ONLY EXCEPTION TO THIS RULE IS THAT EACH TABLE OF DATA WHICH   Evalplot
+      USES A HISTOGRAM INTERPOLATION LAW CANNOT EXCEED HALF THE SIZE     Evalplot
+      OF THE IN CORE PAGE (PRESENTLY 600000/2=300000) WHICH IS ADEQUATE  Evalplot
+      FOR ALMOST ALL HISTOGRAM (E.G. MULTIGROUP) REPRESENTATIONS OF      Evalplot
+      A SINGLE TABLE (E.G. REACTION).                                    Evalplot
+                                                                         Evalplot
+      WHAT DATA CAN BE PLOTTED                                           Evalplot
+      ------------------------                                           Evalplot
+      THIS CODE CAN PLOT VIRTUALLY ANY NEUTRON OR PHOTON CROSS SECTIONS  Evalplot
+      (MF=3 OR 23) AND ANY TABULATED ANGULAR OR ENERGY DISTRIBUTIONS OR  Evalplot
+      LEGENDRE COEFFICIENTS. WHAT IS ACTUALLY PLOTTED DEPENDS ON WHAT    Evalplot
+      DATA IS SELECTED BY THE USER.                                      Evalplot
+                                                                         Evalplot
+      SELECTION OF DATA                                                  Evalplot
+      -----------------                                                  Evalplot
+      DATA TO BE PLOTTED IS SPECIFIED BY INPUTTING UP TO 100 MAT/MF/MT   Evalplot
+      RANGES OR UP TO 100 ZA/MF/MT RANGES. IN ADDITION FOR EACH RANGE    Evalplot
+      THE USER MAY SPECIFY AN X RANGE (USUALLY ENERGY) AND THE TYPE OF   Evalplot
+      DATA TO BE PLOTTED (SEE: THE DESCRIPTION OF TYPES, BELOW).         Evalplot
+                                                                         Evalplot
+      THE X RANGE FOR MF = 1, 3, 23 AND 27 AND MF = 4 LEGENDRE           Evalplot
+      COEFFICIENTS WILL BE USED AS THE X LIMITS OF THE PLOTS, E.G.,      Evalplot
+      PLOT ENERGY DEPENDENT CROSS SECTIONS BETWEEN 1 AND 20 MEV.         Evalplot
+                                                                         Evalplot
+      THE X RANGE FOR MF = 4 AND 5 WILL BE USED TO ONLY SELECT ANGULAR   Evalplot
+      AND ENERGY DISTRIBUTION FOR WHICH THE INCIDENT NEUTRON ENERGY      Evalplot
+      IS IN THE X RANGE. E.G., ONLY PLOT ANGULAR DISTRIBUTIONS WHERE     Evalplot
+      THE INCIDENT NEUTRON ENERGY IS 1 TO 20 MEV.                        Evalplot
+                                                                         Evalplot
+      INTERACTIVE VS. BATCH MODE                                         Evalplot
+      --------------------------                                         Evalplot
+      VERSION 92-1 AND LATER VERSIONS OF THIS CODE ONLY USE A BATCH      Evalplot
+      MODE WHERE ALL REQUESTS ARE READ AND PROCESSED. EARLIER VERSIONS   Evalplot
+      OF THIS CODE HAD BOTH AN INTERACTIVE MODE (WHERE REQUESTS WHERE    Evalplot
+      READ AND EXECUTED ONE AT A TIME) AND A BATCH MODE. INTERACTIVE     Evalplot
+      MODE HAS BEEN DROPPED AND WILL NOT TO REINTRODUCED UNLESS THE      Evalplot
+      AUTHOR IS INFORMED BY USERS THAT THEY WERE USING THE INTERACTIVE   Evalplot
+      MODE.                                                              Evalplot
+                                                                         Evalplot
+      PLOT LAYOUT                                                        Evalplot
+      -----------                                                        Evalplot
+      VERSION 92-1 AND LATER VERSIONS OF THIS CODE WILL PLOT ALL         Evalplot
+      CURVES ON A SINGLE PLOT. EARLIER VERSIONS OF THIS CODE ALLOWED     Evalplot
+      THE OPTION TO HAVE,                                                Evalplot
+      MULTIPLE PLOTS - INDIVIDUAL SCALING                                Evalplot
+      MULTIPLE PLOTS - COMMON SCALING                                    Evalplot
+      SINGLE PLOT                                                        Evalplot
+      MULTILE PLOTS PER PLOT HAVE BEEN DROPPED AND WILL NOT BE           Evalplot
+      REINTRODUCED UNLESS IT IS DEMONSTRATED TO THE AUTHOR THAT THEY     Evalplot
+      ARE OF PRACTICAL USE IN SOME APPLICATION.                          Evalplot
+                                                                         Evalplot
+      PROCESSING OF DATA                                                 Evalplot
+      ------------------                                                 Evalplot
+      IN THE CASE OF NEUTRON AND PHOTON CROSS SECTIONS (MF=3 OR 23)      Evalplot
+      AND PARAMETERS (MF=1 OR 27) ALL DATA IN A FILE (MF) IS READ        Evalplot
+      GROUPED TOGETHER BY TYPE (AS EXPLAINED BELOW) AND PLOTTED.         Evalplot
+                                                                         Evalplot
+      IN THE CASE OF ANGULAR AND ENERGY DISTRIBUTIONS (MF=4 OR 5) ONLY   Evalplot
+      ONE SECTION OF DATA AT A TIME IS READ AND PLOTTED.                 Evalplot
+                                                                         Evalplot
+      TYPES OF DATA (MF=1, 3, 23 AND 27 ONLY)                            Evalplot
+      ---------------------------------------                            Evalplot
+      THESE DATA ARE DIVIDED INTO UP TO 20 TYPES AND EACH TYPE OF        Evalplot
+      DATA IS GROUPED TOGETHER AND PLOTTED (IF THE DATA IS ACTUALLY      Evalplot
+      PRESENT).                                                          Evalplot
+                                                                         Evalplot
+      WHAT TYPE OF DATA IS ACTUALLY PLOTTED CAN BE CONTROLLED BY USER    Evalplot
+      INPUT EITHER BASED ON SELECTED MAT/MF/MT OR ZA/MF/MT RANGES OR     Evalplot
+      BY EXPLICITLY SELECTING ONLY ONE TYPE OF DATA IS TO BE PLOTTED     Evalplot
+      (SEE THE DESCRIPTION OF INPUT BELOW).                              Evalplot
+                                                                         Evalplot
+      SIMPLE REQUESTS                                                    Evalplot
+      ---------------                                                    Evalplot
+      GENERALLY EACH MAT/MF/MT OR ZA/MF/MT REQUESTED IS TREATED          Evalplot
+      SEPERATELY AND THE SPECIFIED DATA IS GROUPED BY TYPE AND PLOTTED.  Evalplot
+      FOR EXAMPLE, THE USER MAY SPECIFY USING ONE REQUEST THAT ALL       Evalplot
+      TYPES OF DATA BE PLOTTED OVER THE ENTIRE ENERGY RANGE AND USE      Evalplot
+      A SECOND REQUEST TO SPECIFY THAT ONE PARTICULAR TYPE OF DATA       Evalplot
+      BE PLOTTED OVER A SPECIFIC ENERGY RANGE.                           Evalplot
+                                                                         Evalplot
+      CHAINED REQUESTS                                                   Evalplot
+      ----------------                                                   Evalplot
+      REQUESTS MAY ALSO BE CHAINED TOGETHER (SEE, THE DESCRIPTION OF     Evalplot
+      INPUT BELOW), WHERE A NUMBER OF REQUESTS MAY BE USED TO SELECT     Evalplot
+      DATA, BUT ONLY THE LAST REQUEST IN A CHAIN WILL CAUSE ALL SELECTED Evalplot
+      DATA TO BE PLOTTED. CHAINED REQUESTED ARE INDICATED ON INPUT BY    Evalplot
+      A SERIES OF REQUESTS FOR DATA TYPE = -1, EXCEPT FOR THE LAST       Evalplot
+      REQUEST OF THE CHAIN, WHICH MUST SPECIFY A TYPE DATA = 0 (ALL)     Evalplot
+      OR A POSITIVE NUMBER. UNLIKE SIMPLE REQUESTS, WHERE EACH WILL      Evalplot
+      PRODUCE ONE OR MORE PLOTS, WITH CHAINED REQUESTS THE ENTIRE        Evalplot
+      SERIES OF CHAINED REQUESTS WILL BE TREATED AS A SINGLE REQUEST     Evalplot
+      AND WILL PRODUCE ONE OR MORE PLOTS.                                Evalplot
+                                                                         Evalplot
+      FOR EXAMPLE, DATA TYPE = 1 WILL NORMALLY INCLUDE,                  Evalplot
+      MT =   1 - TOTAL                                                   Evalplot
+         =   2 - ELASTIC                                                 Evalplot
+         =   4 - TOTAL INELASTIC                                         Evalplot
+         =   5 - (N,REMAINDER)                                           Evalplot
+         =  18 - FISSION                                                 Evalplot
+         = 102 - CAPTURE                                                 Evalplot
+      IF YOU WISH TO EXCLUDE TOTAL INELASTIC FROM A PLOT YOU NEED ONLY   Evalplot
+      SPECIFY TWO CHAINED REQUESTS THE FIRST TO SELECT MT = 1 THROUGH    Evalplot
+      2 (TO INCLUDE TOTAL AND ELASTIC) AND A SECOND TO INCLUDE MT = 18   Evalplot
+      THROUGH 102. THE FIRST REQUEST SHOULD SPECIFY DATA TYPE = -1 AND   Evalplot
+      SECOND 1 (THIS WILL CHAIN THE 2 REQUESTS TOGETHER, SO THAT MT =1   Evalplot
+      THROUGH 2, AND MT = 18 THROUGH 102 ALL APPEAR ON THE SAME PLOT).   Evalplot
+      SINCE MT = 4 (TOTAL INELASTIC) IS NOT REQUESTED IT WILL NOT BE     Evalplot
+      PLOTTED.                                                           Evalplot
+                                                                         Evalplot
+      DEFINITION OF 20 DATA TYPES                                        Evalplot
+      ------------------------------------------------------------------ Evalplot
+      NEUTRONS (MF = 3)                                                  Evalplot
+      -----------------                                                  Evalplot
+      (1) TOTAL, ELASTIC, CAPTURE, FISSION, TOTAL INELASTIC, REMAINDER   Evalplot
+      (2) (N,2N), (N,3N) AND (N,N' CHARGED PARTICLE)                     Evalplot
+      (3) (N,CHARGED PARTICLE)                                           Evalplot
+      (4) PARTICLE PRODUCTION (PROTON, DEUTERON, ETC.) AND DAMAGE        Evalplot
+      (5) TOTAL, FIRST, SECOND, ETC. CHANCE FISSION.                     Evalplot
+      (6) TOTAL INELASTIC, INELASTIC DISCRETE LEVELS AND CONTINUUM       Evalplot
+      (7) (N,P) TOTAL AND LEVELS (ONLY IF LEVELS ARE GIVEN)              Evalplot
+      (8) (N,D) TOTAL AND LEVELS (ONLY IF LEVELS ARE GIVEN)              Evalplot
+      (9) (N,T) TOTAL AND LEVELS (ONLY IF LEVELS ARE GIVEN)              Evalplot
+      (10) (N,HE-3) TOTAL AND LEVELS (ONLY IF LEVELS ARE GIVEN)          Evalplot
+      (11) (N,ALPHA) TOTAL AND LEVELS (ONLY IF LEVELS ARE GIVEN)         Evalplot
+      (12) PARAMETERS MU-BAR, XI AND GAMMA                               Evalplot
+      (13) NU-BAR - TOTAL, PROMPT AND DELAYED                            Evalplot
+      (19) ENERGY RELEASE PARAMETERS, MF=3, MT=301-450                   Evalplot
+                                                                         Evalplot
+      ACTIVATION (MF=10)                                                 Evalplot
+      ------------------                                                 Evalplot
+      (20) ALL mt=1 TO 999.                                              Evalplot
+                                                                         Evalplot
+      PHOTONS  (MF=23 AND 27)                                            Evalplot
+      -----------------------                                            Evalplot
+      (14) TOTAL, COHERENT, INCOHERENT, TOTAL PHOTOELECTRIC, TOTAL       Evalplot
+           PAIR PRODUCTION                                               Evalplot
+      (15) TOTAL AND SUBSHELL PHOTOELECTRIC                              Evalplot
+      (16) TOTAL, NUCLEAR AND ELECTRON PAIR PRODUCTION                   Evalplot
+      (17) COHERENT FORM FACTOR AND INCOHERENT SCATTERING FUNCTION       Evalplot
+      (18) REAL AND IMAGINARY SCATTERING FACTORS                         Evalplot
+                                                                         Evalplot
+                                                                         Evalplot
+      IDENTIFICATION OF DATA                                             Evalplot
+      ----------------------                                             Evalplot
+      ALL PLOTS IDENTIFY THE TARGET, E.G., U-238 AND UNITS OF THE X AND  Evalplot
+      Y AXIS, E.G., X = ENERGY (MEV) OR COSINE (LAB), ETC., Y = CROSS    Evalplot
+      SECTION (BARNS) OR PROBABILITY/COSINE, ETC.                        Evalplot
+                                                                         Evalplot
+      FOR TYPES OF DATA (MF=1, 3, 23 AND 27) DIFFERENT REACTIONS (MT)    Evalplot
+      ARE GROUPED TOGETHER TO APPEAR ON THE SAME PLOT. THE TITLE AT      Evalplot
+      THE TOP OF THE PLOT WILL IDENTIFY THE TYPE OF DATA BEING PLOTTED   Evalplot
+      AND THE LEGEND BOX WITHIN THE PLOT WILL IDENTIFY EACH REACTION.    Evalplot
+                                                                         Evalplot
+      FOR ANGULAR AND ENERGY DISTRIBUTIONS (MF=4 OR 5) EACH PLOT WILL    Evalplot
+      CONTAIN DATA FOR A SINGLE REACTION (MT) AND DIFFERENT INCIDENT     Evalplot
+      NEUTRON ENERGIES. THE TITLE AT THE TOP OF THE PLOT WILL IDENTIFY   Evalplot
+      THE REACTION AND THE LEGEND BOX WITHIN THE PLOT WILL IDENTIFY      Evalplot
+      THE INCIDENT ENERGY.                                               Evalplot
+                                                                         Evalplot
+      FOR LEGENDRE COEFFICIENT THE DATA IN ENDF/B FORMAT WILL BE         Evalplot
+      INVERTED IN ORDER TO PRESENT EACH LEGENDRE COEFFICIENT VERSUS      Evalplot
+      INCIDENT ENERGY. THE TITLE AT THE TOP OF THE PLOT WILL IDENTIFY    Evalplot
+      THE REACTION AND THE LEGEND BOX WITHIN THE PLOT WILL IDENTIFY      Evalplot
+      THE LEGENDRE ORDER.                                                Evalplot
+                                                                         Evalplot
+      INPUT FILES                                                        Evalplot
+      -----------                                                        Evalplot
+      UNIT  DESCRIPTION                                                  Evalplot
+      ----  -----------                                                  Evalplot
+         2   INPUT LINES (BCD - 80 CHARACTERS/RECORD)                    Evalplot
+         9   MT DEFINITIONS (BCD - 80 CHARACTERS/RECORD)                 Evalplot
+        10   ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)                    Evalplot
+        12   SOFTWARE CHARACTERS (BCD - 80 CHARACTERS/RECORD)            Evalplot
+                                                                         Evalplot
+      OUTPUT FILES                                                       Evalplot
+      ------------                                                       Evalplot
+      UNIT  DESCRIPTION                                                  Evalplot
+      ----  -----------                                                  Evalplot
+         3   OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                 Evalplot
+        16   PLOTTING UNIT                                               Evalplot
+                                                                         Evalplot
+      SCRATCH FILES                                                      Evalplot
+      -------------                                                      Evalplot
+      UNIT  DESCRIPTION                                                  Evalplot
+      ----  -----------                                                  Evalplot
+        11  SCRATCH FILE (BINARY - 960000 WORDS/RECORD = 2*PAGE SIZE)    Evalplot
+                                                                         Evalplot
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILIO1 AND FILIO2)    Evalplot
+      ---------------------------------------------------------------    Evalplot
+      UNIT  FILE NAME                                                    Evalplot
+      ----  ----------                                                   Evalplot
+        2   EVALPLOT.INP                                                 Evalplot
+        3   EVALPLOT.LST                                                 Evalplot
+        9   MT.DAT                                                       Evalplot
+       10   ENDFB.IN    (OR AS INPUT PARAMETER)                          Evalplot
+       11   (SCRATCH)                                                    Evalplot
+       12   PLOT.CHR                                                     Evalplot
+       16   (PLOTTING UNIT...USUALLY A DUMMY)                            Evalplot
+                                                                         Evalplot
+      INPUT PARAMETERS                                                   Evalplot
+      ----------------                                                   Evalplot
+      LINE COLUMNS FORMAT  DESCRIPTION                                   Evalplot
+      ---- ------- ------  -----------                                   Evalplot
+         1   1-11   E11.4  LOWER X LIMIT OF PLOTTER                      Evalplot
+            12-22   E11.4  UPPER X LIMIT OF PLOTTER                      Evalplot
+            23-33   E11.4  LOWER Y LIMIT OF PLOTTER                      Evalplot
+            34-44   E11.4  UPPER Y LIMIT OF PLOTTER                      Evalplot
+            45-55    I11   NUMBER OF PLOTS PER FRAME IN X DIRECTION      Evalplot
+            56-66    I11   NUMBER OF PLOTS PER FRAME IN Y DIRECTION      Evalplot
+            67-70    F4.1  CHARACTER SIZE MULTIPLIER                     Evalplot
+                           = 0 OR 1    - NORMAL CHARACTER SIZE           Evalplot
+                           = OTHERWISE - CHARACTERS SCALED BY THIS       Evalplot
+                                         FACTOR.                         Evalplot
+         2   1-72    A72   ENDF/B DATA FILENAME                          Evalplot
+                           (LEAVE BLANK FOR STANDARD = ENDFB.IN)         Evalplot
+         3   1-11    I11   RETRIEVAL CRITERIA                            Evalplot
+                           = 0 - MAT                                     Evalplot
+                           = 1 - ZA                                      Evalplot
+            12-22    I11   TYPE OF GRID                                  Evalplot
+                           = 0 - TICK MARKS ON BORDER                    Evalplot
+                           = 1 - SOLID AT COARSE INTERVALS               Evalplot
+                           = 2 - DASHED AT COARSE INTERVALS              Evalplot
+                           = 3 - SOLID AT FINE INTERVALS                 Evalplot
+                           = 4 - DASHED AT FINE INTERVALS                Evalplot
+                           = 5 - SOLID COARSE/DASHED FINE GRID           Evalplot
+            23-33    I11   SHOULD BORDER BE PLOTTED ON EACH PLOT         Evalplot
+                           = 0 - NO                                      Evalplot
+                           = 1 - YES                                     Evalplot
+            34-44    I11   LINE THICKNESS                                Evalplot
+                           = 0 -  5 = BORDER/CURVES/CHARACTERS           Evalplot
+                           =-1 - -5 = BORDER/CURVES (NOT CHARACTERS)     Evalplot
+                                      NOTE, THE GRID IS NEVER THICK.     Evalplot
+            45-55    I11   SHOULD TEMPERATURE BE PLOTTED.                Evalplot
+                           = 0 - YES                                     Evalplot
+                           = 1 - NO                                      Evalplot
+            56-66   E11.4  ALLOWABLE RATIO OF PLOT Y RANGE MAXIMUM TO    Evalplot
+                           MINIMUM - IF THIS RATIO IS EXCEEDED THE Y     Evalplot
+                           RANGE MINIMUM WILL BE CHANGED TO THE Y RANGE  Evalplot
+                           MAXIMUM TIMES THIS RATIO.                     Evalplot
+                           IF THIS RATIO IS NOT POSITIVE, IT IS          Evalplot
+                           INTERPRETED TO MEAN NO LIMIT ON Y RANGE.      Evalplot
+            67-70    I4    BACKGROUND COLOR                              Evalplot
+                           = 0         = BLACK                           Evalplot
+                           = OTHERWISE = WHITE                           Evalplot
+       4-N   1- 6    I6    LOWER MAT OR ZA LIMIT                         Evalplot
+             7- 8    I2    LOWER MF LIMIT                                Evalplot
+             9-11    I3    LOWER MT LIMIT                                Evalplot
+            11-22   E11.4  LOWER X LIMIT (USUALLY ENERGY) - EV           Evalplot
+            23-28    I6    UPPER MAT OR ZA LIMIT                         Evalplot
+            29-30    I2    UPPER MF LIMIT                                Evalplot
+            31-33    I3    UPPER MT LIMIT                                Evalplot
+            34-44   E11.4  UPPER X LIMIT (USUALLY ENERGY) - EV           Evalplot
+            45-55   I11    TYPE OF DATA TO RETRIEVE AND PLOT             Evalplot
+                           =  -1  - CHAIN THIS REQUEST TO THE NEXT ONE   Evalplot
+                           =   0  - ALL                                  Evalplot
+                           = 1-20 - TYPE AS SPECIFIED ABOVE              Evalplot
+                                                                         Evalplot
+      THERE MAY BE UP 100 MAT/MF/MT OR ZA/MF/MT REQUEST RANGES. INPUT    Evalplot
+      MUST BE TERMINATED BY A BLANK LINE.                                Evalplot
+                                                                         Evalplot
+      IF X LIMITS ARE NOT SPECIFIED (I.E., LOWER AND UPPER X LIMIT = 0)  Evalplot
+      THIS WILL BE INTERPRETED TO MEAN NO LIMIT AND ALL DATA WILL BE     Evalplot
+      PLOTTED OVER THEIR ENTIRE ENERGY RANGE, I.E., YOU NEED NOT         Evalplot
+      KNOW AND SPECIFY THE ACTUAL ENERGY LIMITS OF THE DATA.             Evalplot
+                                                                         Evalplot
+      EXAMPLE DEFINITION OF PLOTTER                                      Evalplot
+      -----------------------------                                      Evalplot
+      2015 - WARNING - THE FOLLOWING DESCRIPTION IS OUT-OF-DATE.         Evalplot
+      TODAY THE DIMENSIONS OF THE PLOTTER ARE IN INCHES.                 Evalplot
+                                                                         Evalplot
+      THE FIRST INPUT LINE DEFINES THE DIMENSIONS OF THE PLOTTER BEING   Evalplot
+      USED IN ANY UNITS (INCHES, CENTIMETERS, MILLIMETERS, ANYTHING)     Evalplot
+      WHICH APPLY TO THE PLOTTER. IN ADDITION THE FIRST LINE DEFINES     Evalplot
+      HOW MANY PLOTS SHOULD APPEAR ON EACH FRAME. THE PLOTTING AREA      Evalplot
+      DEFINED ON THE FIRST INPUT LINE MAY BE SUBDIVIDED INTO ANY NUMBER  Evalplot
+      OF PLOTS IN THE X AND Y DIRECTION. FOR EXAMPLE, TO PRODUCE A       Evalplot
+      SERIES OF FRAMES EACH CONTAINING 3 PLOTS IN THE X DIRECTION AND    Evalplot
+      2 PLOTS IN THE Y DIRECTION (6 PLOTS PER FRAME) COLUMN 45-55 OF     Evalplot
+      THE FIRST INPUT LINE SHOULD BE 3 AND COLUMNS 56-66 SHOULD BE 2.    Evalplot
+                                                                         Evalplot
+      IF THE LOCAL PLOTTER USES DIMENSIONS OF INCHES IN ORDER TO OBTAIN  Evalplot
+      10 X 10 INCH FRAMES WITH 3 X 2 PLOTS PER FRAME THE FIRST INPUT     Evalplot
+      LINE SHOULD BE,                                                    Evalplot
+                                                                         Evalplot
+        0.0       10.0      0.0     10.0              3          2       Evalplot
+                                                                         Evalplot
+      IF THE LOCAL PLOTTER USES DIMENSION OF MILLIMETERS THE SAME        Evalplot
+      PHYSICAL SIZE PLOT MAY BE OBTAINED IF THE FIRST INPUT LINE IS,     Evalplot
+                                                                         Evalplot
+        0.0      254.0      0.0    254.0              3          2       Evalplot
+                                                                         Evalplot
+      FOR SIMPLICITY THE FOLLOWING EXAMPLE INPUTS WILL NOT DISCUSS THE   Evalplot
+      PHYSICAL DIMENSIONS OF THE PLOTTER AND THE FIRST INPUT LINE WILL   Evalplot
+      IN ALL CASES INDICATE 10 X 10 INCH PLOTS WITH ONLY 1 PLOT PER      Evalplot
+      FRAME.                                                             Evalplot
+                                                                         Evalplot
+      ALL OF THE FOLLOWING EXAMPLE WILL USE,                             Evalplot
+      1) A DASHED GRID          (SECOND LINE, COLS. 12-22 = 2)           Evalplot
+      2) NO BORDER              (SECOND LINE, COLS. 23-33 = 0)           Evalplot
+      3) LINE THICKNESS -2      (SECOND LINE, COLS. 34-44 =-2)           Evalplot
+      4) TEMPERATURE ON PLOTS   (SECOND LINE, COLS. 45-55 = 0)           Evalplot
+      5) NO Y RANGE LIMIT       (SECOND LINE, COLS. 56-66 = 0.0)         Evalplot
+                                                                         Evalplot
+      EXAMPLE INPUT NO. 1                                                Evalplot
+      -------------------                                                Evalplot
+      FOR ALL THORIUM AND URANIUM ISOTOPES PLOT NEUTRON CROSS SECTIONS   Evalplot
+      ENTIRE ENERGY RANGE. IN ADDITION PLOT TYPE 1 DATA, MAJOR NEUTRON   Evalplot
+      CROSS SECTIONS OVER THE ENERGY RANGE 1 EV TO 1 KEV. USE THE        Evalplot
+      STANDARD FILENAME (ENDFB.IN) FOR THE ENDF/B DATA. THE FOLLOWING    Evalplot
+      6 INPUT LINES ARE REQUIRED,                                        Evalplot
+                                                                         Evalplot
+     0.0       10.0       0.0       10.0               3          2      Evalplot
+  ENDFB.IN                                                               Evalplot
+            1          2         0         -2          0 0.0             Evalplot
+   90000 3  0           90999 3999                     0                 Evalplot
+   90000 3  0 1.00000+ 090999 3999 1.00000+ 3          1                 Evalplot
+  (BLANK LINE MUSE FOLLOW LAST REQUEST)                                  Evalplot
+                                                                         Evalplot
+      EXAMPLE INPUT NO. 2                                                Evalplot
+      -------------------                                                Evalplot
+      PLOT FE-56 ELASTIC AND INELASTIC ANGULAR DISTRIBUTIONS BETWEEN     Evalplot
+      1 AND 20 MEV. THE FOLLOWING 6 INPUT LINES ARE REQUIRED,            Evalplot
+                                                                         Evalplot
+     0.0       10.0       0.0       10.0               3          2      Evalplot
+  ENDFB.IN                                                               Evalplot
+            1          2         0         -2          0 0.0             Evalplot
+   26056 4  2 1.00000+ 626056 4  2 2.00000+ 7          0                 Evalplot
+   26056 4  4 1.00000+ 626056 4  4 2.00000+ 7          0                 Evalplot
+  (BLANK LINE MUSE FOLLOW LAST REQUEST)                                  Evalplot
+                                                                         Evalplot
+      EXAMPLE INPUT NO. 3 (CHAINED INPUT)                                Evalplot
+      -----------------------------------                                Evalplot
+      FOR ALL THORIUM AND URANIUM ISOTOPES PLOT TOTAL, ELASTIC ,CAPTURE  Evalplot
+      AND FISSION, BUT NOT INELASTIC CROSS SECTIONS OVER THERE ENTIRE    Evalplot
+      ENERGY RANGE AND FROM 1 KEV TO 1 MEV. THE FOLLOWING 8 INPUT        Evalplot
+      LINES ARE REQUIRED,                                                Evalplot
+                                                                         Evalplot
+     0.0       10.0       0.0       10.0               3          2      Evalplot
+  ENDFB.IN                                                               Evalplot
+            1          2         0         -2          0 0.0             Evalplot
+   90000 3  1           90999 3  2                    -1                 Evalplot
+   90000 3 18           90999 3102                     1                 Evalplot
+   90000 3  1 1.00000+ 390999 3  2 1.00000+ 6         -1                 Evalplot
+   90000 3 18 1.00000+ 390999 3102 1.00000+ 6          1                 Evalplot
+  (BLANK LINE MUSE FOLLOW LAST REQUEST)                                  Evalplot
+                                                                         Evalplot
+      NOTE, THIS EXAMPLE INCLUDES 2 CHAINED REQUESTED - INPUT LINES 3    Evalplot
+      AND 4 SELECTING DATA AND PRODUCING A PLOT OVER THE ENTIRE ENERGY   Evalplot
+      RANGE AND INPUT LINES 5 AND 6 SELECTING THE SAME DATA AND          Evalplot
+      PRODUCING A PLOT FROM 1 KEV TO 1 MEV.                              Evalplot
+                                                                         Evalplot
+      ANY NUMBER OF REQUEST LINES MAY TO CHAINED TOGETHER TO SELECT      Evalplot
+      DATA. THE CHAIN ENDS WHERE THE TYPE OF DATA (COLS. 45-55) IS NOT   Evalplot
+      NEGATIVE AND THEN THE SELECTED DATA WILL BE PLOTTED.               Evalplot
+                                                                         Evalplot
+      EXAMPLE INPUT NO. 4                                                Evalplot
+      -------------------                                                Evalplot
+      FOR THE SAME EXAMPLE AS ABOVE, EXCEPT USE A DIFFERENT FILENAME     Evalplot
+      FOR THE ENDF/B DATA TO READ FROM A FILE TREE STRUCTURE. THE        Evalplot
+      FOLLOWING 8 INPUT LINES ARE REQUIRED,                              Evalplot
+                                                                         Evalplot
+     0.0       10.0       0.0       10.0               3          2      Evalplot
+  EVALUATION/ENDFB6/THORIUM                                              Evalplot
+            1          2         0         -2          0 0.0             Evalplot
+   90000 3  1           90999 3  2                    -1                 Evalplot
+   90000 3 18           90999 3102                     1                 Evalplot
+   90000 3  1 1.00000+ 390999 3  2 1.00000+ 6         -1                 Evalplot
+   90000 3 18 1.00000+ 390999 3102 1.00000+ 6          1                 Evalplot
+  (BLANK LINE MUST FOLLOW LAST REQUEST)                                  Evalplot
+                                                                         Evalplot
+ ===== PLOTTER/GRAPHICS TERMINAL INTERFACE ============================= Evalplot
+                                                                         Evalplot
+       THIS PROGRAM USES A SIMPLE CALCOMP LIKE INTERFACE INVOLVING       Evalplot
+       ONLY 6 SUBROUTINES,                                               Evalplot
+                                                                         Evalplot
+       STARPLOT  - INITIALIZE PLOTTER                                    Evalplot
+       NEXTPLOT  - CLEAR THE SCREEN FOR THE NEXT PLOT                    Evalplot
+       ENDPLOTS  - TERMINATE PLOTTING                                    Evalplot
+                                                                         Evalplot
+       PLOT(X,Y,IPEN)        - DRAW OR MOVE FROM LAST LOCATION TO (X,Y), Evalplot
+                               END OF CURRENT PLOT OR END OF PLOTTING.   Evalplot
+             IPEN =   2 - DRAW                                           Evalplot
+                  =   3 - MOVE                                           Evalplot
+                                                                         Evalplot
+       PEN(IPEN)             - SELECT COLOR.                             Evalplot
+            IPEN- COLOR = 1 TO N (N = ANY POSITIVE INTEGER)              Evalplot
+                                                                         Evalplot
+       BOXCOLOR(X,Y,IFILL,IBORDER) - FILL A RECTANGULAR BOX DEFINED      Evalplot
+                                     BY THE X AND Y CORNERS - X(1),      Evalplot
+                                     X(2), Y(1),Y(2)                     Evalplot
+                    IFILL          - COLOR TO FILL BOX WITH              Evalplot
+                          IBORDER  - COLOR OF BOX BORDER                 Evalplot
+                                                                         Evalplot
+      IN ORDER TO INTERFACE THIS PROGRAM FOR USE ON ANY PLOTTER WHICH    Evalplot
+      DOES NOT USE THE ABOVE CONVENTIONS IT IS MERELY NECESSARY FOR THE  Evalplot
+      THE USER TO WRITE 6 SUBROUTINES WITH THE NAMES PLOTS, PLOT AND PEN Evalplot
+      WITH THE SUBROUTINE ARGUMENTS DESCRIBED ABOVE AND TO THEN CALL THE Evalplot
+      LOCAL EQUIVALENT ROUTINES.                                         Evalplot
+                                                                         Evalplot
+      COLOR PLOTS                                                        Evalplot
+      ------------------------------------------------------------------ Evalplot
+      TO SELECT PLOTTING COLORS SUBROUTINE PEN (DESCRIBED ABOVE) IS USED Evalplot
+      TO SELECT ONE OF THE AVAILABLE COLORS. IF YOU HAVE COLOR ON YOUR   Evalplot
+      PLOTTER YOU SHOULD PROVIDE A SUBROUTINE PEN TO SELECT COLORS.      Evalplot
+                                                                         Evalplot
+      BLACK AND WHITE PLOTS                                              Evalplot
+      ------------------------------------------------------------------ Evalplot
+      WHEN PRODUCING BLACK AND WHITE PLOTS SUBROUTINE PEN NEED MERELY    Evalplot
+      BE A DUMMY SUBROUTINE TO IGNORE ANY ATTEMPT TO CHANGE COLORS,      Evalplot
+                                                                         Evalplot
+      SUBROUTINE PEN(IPEN)                                               Evalplot
+      RETURN                                                             Evalplot
+      END                                                                Evalplot
+                                                                         Evalplot
+      SIMILAR BOXCOLOR CAN BE A DUMMY                                    Evalplot
+                                                                         Evalplot
+      SUBROUTINE BOXCOLOR(X,Y,IFILL,IBORDER)                             Evalplot
+      RETURN                                                             Evalplot
+      END                                                                Evalplot
+                                                                         Evalplot
+      CHARACTER SET                                                      Evalplot
+      ------------------------------------------------------------------ Evalplot
+      THIS PROGRAM USES COMPUTER AND PLOTTER DEVICE INDEPENDENT SOFTWARE Evalplot
+      CHARACTERS. THIS PROGRAM COMES WITH A FILE THAT DEFINES THE PEN    Evalplot
+      STROKES REQUIRED TO DRAW ALL CHARACTERS ON AN IBM KEYBOARD (UPPER  Evalplot
+      AND LOWER CASE CHARACTERS, NUMBERS, ETC.) PLUS AN ALTERNATE SET OF Evalplot
+      ALL UPPER AND LOWER CASE GREEK CHARACTERS AND ADDITIONAL SPECIAL   Evalplot
+      SYMBOLS.                                                           Evalplot
+                                                                         Evalplot
+      THE SOFTWARE CHARACTER TABLE CONTAINS X AND Y AND PEN POSITIONS TO Evalplot
+      DRAW EACH CHARACTER. IF YOU WISH TO DRAW ANY ADDITIONAL CHARACTERS Evalplot
+      OR TO MODIFY THE FONT OF THE EXISTING CHARACTERS YOU NEED ONLY     Evalplot
+      MODIFY THIS TABLE.                                                 Evalplot
+                                                                         Evalplot
+      ADDITIONAL FONTS                                                   Evalplot
+      ----------------                                                   Evalplot
+      THIS PROGRAM COMES WITH 3 COMPLETE SETS OF THE SAME CHARACTERS     Evalplot
+      USING DIFFERENT FONTS. FOR SPEED IN PLOTTING IT IS RECOMMENDED     Evalplot
+      THAT YOU USE THE SIMPLEX FONT. FOR FINISHED PLOTS SUITABLE FOR     Evalplot
+      PUBLICATION, BUT REQUIRING MORE TIME TO GENERATE A PLOT, IT IS     Evalplot
+      RECOMMENDED THAT YOU USE THE DUPLEX OR COMPLEX FONT - YOU CAN      Evalplot
+      EXPERIMENT WITH ANY OF THE 3 FONTS TO DETERMINE WHICH BEST MEETS   Evalplot
+      YOUR NEEDS.                                                        Evalplot
+                                                                         Evalplot
+      TO USE ANY ONE OF THE FONTS MERELY BY SURE THAT IT IS DEFINED AS   Evalplot
+      UNIT 12 FOR INPUT (IF USING STANDARD FILENAMES IT SHOULD BE        Evalplot
+      NAMED PLOT.CHR). SO THAT SWITCHING FONTS CAN BE SIMPLY DONE        Evalplot
+      MERELY BY COPYING THE FONT THAT YOU WANT TO THE UNIT 12 THAT       Evalplot
+      YOU ARE USING FOR INPUT.                                           Evalplot
+                                                                         Evalplot
+      CONTROL CHARACTERS                                                 Evalplot
+      ------------------------------------------------------------------ Evalplot
+      IN THE SOFTWARE CHARACTER TABLE ALL CHARACTERS TO BE PLOTTED WILL  Evalplot
+      HAVE PEN POSITION = 2 (DRAW) OR = 3 (MOVE). IN ADDITION THE TABLE  Evalplot
+      CURRENTLY CONTAINS 4 CONTROL CHARACTERS,                           Evalplot
+                                                                         Evalplot
+      PEN POSITION = 0                                                   Evalplot
+      ----------------                                                   Evalplot
+      SHIFT THE NEXT PRINTED CHARACTER BY X AND Y. 3 CONTROL CHARACTERS  Evalplot
+      ARE PRESENTLY INCLUDED IN THE SOFTWARE CHARACTER TABLE TO ALLOW    Evalplot
+      SHIFTING.                                                          Evalplot
+                                                                         Evalplot
+      {   = SHIFT UP (FOR SUPERSCRIPTS..............X= 0.0, Y= 0.5)      Evalplot
+      }   = SHIFT DOWN (FOR SUBSCRIPTS..............X= 0.0, Y=-0.5)      Evalplot
+      \   = SHIFT LEFT 1 CHARACTER (FOR BACKSPACE...X=-1.0, Y= 0.0)      Evalplot
+                                                                         Evalplot
+      PEN POSITION =-1                                                   Evalplot
+      ----------------                                                   Evalplot
+      SELECT THE NEXT PRINTED CHARACTER FROM THE ALTERNATE CHARACTER     Evalplot
+      SET. AT PRESENT THIS CONTROL CHARACTER IS,                         Evalplot
+                                                                         Evalplot
+      |   = SWITCH TO ALTERNATE CHARACTER SET                            Evalplot
+                                                                         Evalplot
+      THESE 4 CONTROL CHARACTERS ARE ONLY DEFINED BY THE VALUE OF THE    Evalplot
+      PEN POSITION IN THE SOFTWARE CHARACTER TABLE (I.E., THEY ARE NOT   Evalplot
+      HARD WIRED INTO THIS PROGRAM). AS SUCH BY MODIFYING THE SOFTWARE   Evalplot
+      CHARACTER TABLE THE USER HAS THE OPTION OF DEFINING ANY CONTROL    Evalplot
+      CHARACTERS TO MEET SPECIFIC NEEDS.                                 Evalplot
+                                                                         Evalplot
+      THESE CHARACTERS MAY BE USED IN CHARACTER STRINGS TO PRODUCE       Evalplot
+      SPECIAL EFFECTS. FOR EXAMPLE, TO PLOT SUBSCRIPT 5, B, SUPERSCRIPT  Evalplot
+      10 USE THE STRING,                                                 Evalplot
+                                                                         Evalplot
+      }5B{1{0                                                            Evalplot
+                                                                         Evalplot
+      TO PLOT B, SUBSCRIPT 5 AND SUPERSCRIPT 10 WITH THE 5 DIRECTLY      Evalplot
+      BELOW THE 1 OF THE 10 WE CAN USE THE BACKSPACE CHARACTER TO        Evalplot
+      POSITION THE 1 DIRECTLY ABOVE THE 5 USING THE STRING,              Evalplot
+                                                                         Evalplot
+      B}5\{1{0                                                           Evalplot
+                                                                         Evalplot
+      TO PLOT UPPER CASE GREEK GAMMA FOLLOWED BY THE WORD TOTAL (I.E.,   Evalplot
+      RESONANCE TOTAL WIDTH) USE THE STRING.                             Evalplot
+                                                                         Evalplot
+      |G TOTAL                                                           Evalplot
+                                                                         Evalplot
+      NOTE, WHEN THESE CONTROL CHARACTERS ARE USED THEY ONLY EFFECT THE  Evalplot
+      NEXT 1 PRINTED CHARACTER (SEE, ABOVE EXAMPLE OF PLOTTING SUPER-    Evalplot
+      SCRIPT 10 WHERE THE SHIFT UP CONTROL CHARACTER WAS USED BEFORE THE Evalplot
+      1 AND THEN AGAIN BEFORE THE 0 AND THE BACKSPACE AND SHIFT UP       Evalplot
+      CONTROL CHARACTERS WERE USED IN COMBINATION).                      Evalplot
+                                                                         Evalplot
+      IF THESE 4 CONTROL CHARACTERS ARE NOT AVAILABLE ON YOUR COMPUTER   Evalplot
+      YOU CAN MODIFY THE SOFTWARE CHARACTER TABLE TO USE ANY OTHER 4     Evalplot
+      CHARACTERS THAT YOU DO NOT NORMALLY USE IN CHARACTER STRINGS (FOR  Evalplot
+      DETAILS SEE THE SOFTWARE CHARACTER TABLE).                         Evalplot
+                                                                         Evalplot
+      STANDARD/ALTERNATE CHARACTER SETS                                  Evalplot
+      ------------------------------------------------------------------ Evalplot
+      THE SOFTWARE CHARACTER TABLE CONTAINS 2 SETS OF CHARACTERS WHICH   Evalplot
+      ARE A STANDARD SET (ALL CHARACTERS ON AN IBM KEYBOARD) AND AN      Evalplot
+      ALTERNATE SET (UPPER AND LOWER CASE GREEK CHARACTERS AND SPECIAL   Evalplot
+      CHARACTERS). TO DRAW A CHARACTER FROM THE ALTERNATE CHARACTER SET  Evalplot
+      PUT A RIGHT BRACKET CHARACTER (|) BEFORE A CHARACTER (SEE THE      Evalplot
+      ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS  Evalplot
+      CONTROL CHARACTER WILL ONLY EFFECT THE NEXT 1 PLOTTED CHARACTER.   Evalplot
+                                                                         Evalplot
+      SUB AND SUPER SCRIPTS                                              Evalplot
+      ------------------------------------------------------------------ Evalplot
+      TO DRAW SUBSCRIPT PRECEED A CHARACTER BY }. TO DRAW SUPERSCRIPT    Evalplot
+      PRECEED A CHARACTER BY { (SEE THE ABOVE EXAMPLE AND THE SOFTWARE   Evalplot
+      CHARACTER TABLE FOR DETAILS). THESE CONTROL CHARACTER WILL ONLY    Evalplot
+      EFFECT THE NEXT 1 PLOTTED CHARACTER.                               Evalplot
+                                                                         Evalplot
+      BACKSPACING                                                        Evalplot
+      ------------------------------------------------------------------ Evalplot
+      TO BACKSPACE ONE CHARACTER PRECEED A CHARACTER BY \ (SEE, THE      Evalplot
+      ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS  Evalplot
+      CONTROL CHARACTER WILL PERFORM A TRUE BACKSPACE AND WILL EFFECT    Evalplot
+      ALL FOLLOWING CHARACTERS IN THE SAME CHARACTER STRING.             Evalplot
+                                                                         Evalplot
+      PLOT DIMENSIONS                                                    Evalplot
+      ---------------                                                    Evalplot
+      ARE DEFINED BY USER INPUT. INTERNALLY THE PROGRAM WILL CREATE A    Evalplot
+      PLOT IN APPROXIMATELY A4 OR 8-1/2 BY 11 INCH FORMAT. DURING        Evalplot
+      OUTPUT THE PLOT IS TRANSFORMED TO THE UNITS (INCHES, CENTIMETERS,  Evalplot
+      MILLIMETERS, WHATEVER) OF THE PLOTTER BEING USED AND OUTPUT.       Evalplot
+                                                                         Evalplot
+ ===== PLOTTER/GRAPHICS TERMINAL INTERFACE ============================= Evalplot
+ ======================================================================= Evalplot

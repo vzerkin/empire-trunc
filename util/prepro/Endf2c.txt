@@ -1,0 +1,114 @@
+ ======================================================================= Endf2c  
+                                                                         Endf2c  
+      Program ENDF2C                                                     Endf2c  
+      ==============                                                     Endf2c  
+      Convert ENDF Data to Standard FORTRAN, C and C++ Format.           Endf2c  
+                                                                         Endf2c  
+      Version 2014-1 Feb. 2014 * Initial version.                        Endf2c  
+              2014-2 Oct. 2014 * Changed from D to E exponential form    Endf2c  
+                                 to improve compatibility between        Endf2c  
+                                 computer languages.                     Endf2c  
+              2015-1 Jan. 2015 * General updates for release with        Endf2c  
+                                 PREPRO2015.                             Endf2c  
+                               * Changed ENDF data filenames from ENDF2C Endf2c  
+                                 to ENDFB, to agree with PREPRO default  Endf2c  
+                                 definitions.                            Endf2c  
+                               * Added code name (to be compatible       Endf2c  
+                                 with PREPRO output), but NOT TIME (to   Endf2c  
+                                 keep this code as computer independent  Endf2c  
+                                 as possible).                           Endf2c  
+              2017-1 May  2017 * Updated based on user feedbsck          Endf2c  
+                                                                         Endf2c  
+      Purpose                                                            Endf2c  
+      ================================================================== Endf2c  
+      This code is designed for,                                         Endf2c  
+      1) ENDF Data in any ENDF format = ENDF-1 through ENDF-6.           Endf2c  
+      2) On any type of computer = 32 or 64 bit system/compiler          Endf2c  
+                                                                         Endf2c  
+      This code tries to keep things as simple as possible               Endf2c  
+      1) There are NO INPUT PARAMETERS.                                  Endf2c  
+      2) It reads  an ENDF formatted file named ENDFB.IN                 Endf2c  
+      3) It writes an ENDF formatted file named ENDFB.OUT                Endf2c  
+      4) It writes a report file named          ENDF2C.LST               Endf2c  
+                                                                         Endf2c  
+      Author's Message                                                   Endf2c  
+      ----------------                                                   Endf2c  
+      I consider insuring that ENDF data is in a standard, officially    Endf2c  
+      approved format for FORTRAN, C and C++ is SO IMPORTANT this code   Endf2c  
+      does only one thing - and only one thing - and it does it in the   Endf2c  
+      simplest possible manner - efficiency is NOT a consideration -     Endf2c  
+      ONLY accuracy and general utility of the ENDF data is considered.  Endf2c  
+                                                                         Endf2c  
+      Method                                                             Endf2c  
+      ------                                                             Endf2c  
+      Other codes that attempt to do the same thing - including codes    Endf2c  
+      written be me decades ago - are very complicated, and therefore    Endf2c  
+      ERROR PRONE because they try to deal with each and every variant   Endf2c  
+      in which data can be coded in the ENDF format. Needless to say     Endf2c  
+      this means that every time the ENDF formats and procedures change  Endf2c  
+      these codes MUSE also be changed.                                  Endf2c  
+                                                                         Endf2c  
+      In contrast, ENDF2C uses my almost 50 years of experience dealing  Endf2c  
+      with the ENDF format to realize that except for the comments at    Endf2c  
+      the beginning for each evaluation (MF/MT=1/451), every line of     Endf2c  
+      ENDF data is IDENTICAL - in every version of the ENDF format, from Endf2c  
+      the original ENDF to today's ENDF-6. So to translate ENDF data     Endf2c  
+      into an official format I do not have to consider differences in   Endf2c  
+      each section (MF/MT) of data.                                      Endf2c  
+                                                                         Endf2c  
+      Every line of ENDF is divided into 6 fields, each 11 columns wide. Endf2c  
+      Each of the 6 fields is either, blank, integer or floating point.  Endf2c  
+      Floating point fields ALL include a decimal point (.). So that ALL Endf2c  
+      this code does is convert every floating point field to standard   Endf2c  
+      format.                                                            Endf2c  
+                                                                         Endf2c  
+      In order to insure that this PRESERVES the accuracy of the data    Endf2c  
+      this is done by reading and writing each ENDF line as characters.  Endf2c  
+      Blank and integer fields are copied exactly as read. ALL floating  Endf2c  
+      point number that are read are converted internally from character Endf2c  
+      to floating point - they are then converted back into characters   Endf2c  
+      in a standard, officially approved format, for output.             Endf2c  
+                                                                         Endf2c  
+      As a last step to insure the accuracy of results the characters    Endf2c  
+      to be output are again converted from characters to floating       Endf2c  
+      point, and the numerical value that is output is compared to the   Endf2c  
+      numerical value originally read, and if there is ANY DIFFERENCE    Endf2c  
+      the characters strings read and written are listed in the output:  Endf2c  
+      the characters strings read and written as well as the difference  Endf2c  
+      is listed in the output report (ENDF2C.LST) and on the screen.     Endf2c  
+                                                                         Endf2c  
+      Running Time                                                       Endf2c  
+      ------------                                                       Endf2c  
+      It takes only seconds to translate an ENDF formatted evaluation,   Endf2c  
+      so running time need not be a consideration. Concentrate on        Endf2c  
+      keeping it simple and reliable - that should be your focus.        Endf2c  
+                                                                         Endf2c  
+      Documentation                                                      Endf2c  
+      -------------                                                      Endf2c  
+      ALL of my codes that process ENDF data and change it in ANY WAY    Endf2c  
+      document what they have done by adding comment lines at the end    Endf2c  
+      of the comment section (MF/MT=1/451) of each evaluation. This      Endf2c  
+      allows data users to determine the pedigree of the data they are   Endf2c  
+      using, by reading these comments. This code documents what is has  Endf2c  
+      done by adding the following 2 comment lines.                      Endf2c  
+                                                                         Endf2c  
+  ***************** Program ENDF2C (Version 2017-1) ***************      Endf2c  
+       Convert ENDF Data to Standard FORTRAN, C and C++ Format           Endf2c  
+                                                                         Endf2c  
+      WARNING - This documentation is IMPORTANT to data users and it     Endf2c  
+      should not be deleted.                                             Endf2c  
+                                                                         Endf2c  
+      Written by                                                         Endf2c  
+      ------------------------------------                               Endf2c  
+      Dermott E. Cullen                                                  Endf2c  
+      University of California (retired)                                 Endf2c  
+ -----Present Home Address---------------------------------------------- Endf2c  
+      Dermott E. Cullen                                                  Endf2c  
+      1466 Hudson Way                                                    Endf2c  
+      Livermore, CA 94550                                                Endf2c  
+      U.S.A.                                                             Endf2c  
+      Telephone  925-443-1911                                            Endf2c  
+      E. Mail    RedCullen1@Comcast.net                                  Endf2c  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Endf2c  
+                                                                         Endf2c  
+ ======================================================================= Endf2c  

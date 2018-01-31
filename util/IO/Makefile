@@ -5,8 +5,9 @@
 CC = gcc
 
 # set default fortran compiler:
-#FC     =  gfortran
-FC     =  ifort
+FC     =  gfortran
+#FC     =  ifort
+#FC     =  af90
 
 # define MODE = BLK if using unix block-mode I/O
 # this is more efficient than fortran I/O

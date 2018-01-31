@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2017-07-11 21:00:41 +0200 (Di, 11 Jul 2017) $
+Ccc   * $Author: mherman $
+Ccc   * $Date: 2018-01-31 15:28:46 +0100 (Mi, 31 Jän 2018) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -834,9 +834,9 @@ C* Write radioisotope and isomer production data (MF10)
       MF =10
       LIW=MTH+NXS
       LXI=MXI-LIW
-      CALL WRMF10(LOU,MXE,MXT,LXI,LXR,EMIN
-     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(LIW),RWO(LSC)
-     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
+C     CALL WRMF10(LOU,MXE,MXT,LXI,LXR,EMIN
+c    1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(LIW),RWO(LSC)
+c    1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
       WRITE(LTT,995) ' Number of MT sections written        : ',N10
       WRITE(LTT,995) '            Total number of reactions : ',NRC
       WRITE(LTT,991)
@@ -6745,7 +6745,9 @@ C* Extrapolate points down to EMIN for incident neutrons
             YY=0
           END IF
           LX =LX-2
+          IF(LX.LT.1) LX=1
           LY =LY-2
+          IF(LY.LT.1) LY=1
           NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
@@ -8804,7 +8806,7 @@ C-Title  : LSQLEG Subroutine
 C-Purpose: Fit Legendre coefficients to a set of data
 C-Description:
 C-D
-      DIMENSION  XP(NP),YP(NP),QQ(N1),AA(N1,1)
+      DIMENSION  XP(NP),YP(NP),QQ(N1),AA(N1,*)
 C* Perform linear transformation of the coordinate system
       IER=0
       LF=N1+1

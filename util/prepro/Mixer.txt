@@ -1,0 +1,443 @@
+ ======================================================================= Mixer   
+                                                                         Mixer   
+      PROGRAM MIXER                                                      Mixer   
+      =============                                                      Mixer   
+      VERSION 76-1 (NOVEMBER 1976)                                       Mixer   
+      VERSION 81-1 (APRIL 1981)  *IBM VERSION                            Mixer   
+      VERSION 82-1 (AUGUST 1982) *COMPUTER INDEPENDENT VERSION           Mixer   
+      VERSION 84-1 (JUNE 1984)   *SPECIAL I/O ROUTINES TO GUARANTEE      Mixer   
+                                  ACCURACY OF ENERGY.                    Mixer   
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Mixer   
+                                  (REQUIRED FOR NARROW RESONANCES).      Mixer   
+      VERSION 86-1 (JANUARY 1986)*FORTRAN-77/H VERSION                   Mixer   
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Mixer   
+                                  FILE NAMES (SEE, SUBROUTINE FILIO1     Mixer   
+                                  AND FILIO2 FOR DETAILS).               Mixer   
+                                 *IMPROVED BASED ON USER COMMENTS.       Mixer   
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Mixer   
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Mixer   
+                                  CRAZY.                                 Mixer   
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Mixer   
+                                  KEYWORDS.                              Mixer   
+                                 *ADDED LIVERMORE CIVIC COMPILER         Mixer   
+                                  CONVENTIONS.                           Mixer   
+      VERSION 92-1 (JANUARY 1992)*UPDATED BASED ON USER COMMENTS         Mixer   
+                                 *ADDED PHOTON CROSS SECTIONS            Mixer   
+                                 *ADDED FORTRAN SAVE OPTION              Mixer   
+                                 *OUTPUT IN ENDF/B-VI FORMAT             Mixer   
+                                 *COMPLETELY CONSISTENT I/O ROUTINES -   Mixer   
+                                  TO MINIMIZE COMPUTER DEPENDENCE.       Mixer   
+                                 *NOTE, CHANGE IN INPUT PARAMETER        Mixer   
+                                  FORMAT.                                Mixer   
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Mixer   
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Mixer   
+                                  (WARNING - INPUT PARAMETER FORMAT      Mixer   
+                                  HAS BEEN CHANGED)                      Mixer   
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Mixer   
+                                  (SEE, SUBROUTINE ENDIT)                Mixer   
+                                 *INCREASED INCORE PAGE SIZE FROM        Mixer   
+                                  1002 TO 4008.                          Mixer   
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Mixer   
+                                  *IMPROVED COMPUTER INDEPENDENCE        Mixer   
+                                  *ALL DOUBLE PRECISION                  Mixer   
+                                  *ON SCREEN OUTPUT                      Mixer   
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Mixer   
+                                  *IMPROVED OUTPUT PRECISION             Mixer   
+                                  *DEFINED SCRATCH FILE NAMES            Mixer   
+                                  *INCREASED INCORE PAGE SIZE FROM       Mixer   
+                                   4008 TO 12000.                        Mixer   
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Mixer   
+                                   POINT READ FOR MORE DIGITS            Mixer   
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Mixer   
+                                   VERSION BASED ON RECENT FORMAT CHANGE Mixer   
+                                  *GENERAL IMPROVEMENTS BASED ON         Mixer   
+                                   USER FEEDBACK                         Mixer   
+      VERSION 99-2 (JUNE 1999)    *ASSUME ENDF/B-VI, NOT V, IF MISSING   Mixer   
+                                   MF=1, MT-451.                         Mixer   
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Mixer   
+                                   USER FEEDBACK                         Mixer   
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Mixer   
+      VERS. 2004-1 (MARCH 2004)   *ADDED INCLUDE FOR COMMON              Mixer   
+                                  *INCREASED INCORE PAGE SIZE FROM       Mixer   
+                                   12000 TO 60000.                       Mixer   
+      VERS. 2005-1 (OCT. 2005)    *CORRECTED MERGE ERROR                 Mixer   
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII        Mixer   
+                                  *INCREASED INCORE PAGE SIZE FROM       Mixer   
+                                   60,000 TO 240,000.                    Mixer   
+      VERS. 2007-2 (DEC. 2007)    *72 CHARACTER FILE NAMES.              Mixer   
+      VERS. 2008-1 (JUNE 2008)    *ADDED GRAMS OR ATOMS INPUT            Mixer   
+      VERS. 2010-1 (Apr. 2010)    *General update based on user feedback Mixer   
+      VERS. 2012-1 (Aug. 2012)    *Added CODENAME                        Mixer   
+                                  *32 and 64 bit Compatible              Mixer   
+                                  *Added ERROR stop                      Mixer   
+      VERS. 2015-1 (Jan. 2015)    *Extended OUT9.                        Mixer   
+                                  *Replaced ALL 3 way IF Statements.     Mixer   
+      VERS. 2017-1 (May  2017)    *Increse max. points to 1,200,000      Mixer   
+                                  *updated based on user feedbsck.       Mixer   
+                                  *All floating input parameters changed Mixer   
+                                   to character input + IN9 conversion.  Mixer   
+                                                                         Mixer   
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Mixer   
+      ------------------------------------                               Mixer   
+      THE NUCLEAR DATA SECTION                                           Mixer   
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Mixer   
+      P.O. BOX 100                                                       Mixer   
+      A-1400, VIENNA, AUSTRIA                                            Mixer   
+      EUROPE                                                             Mixer   
+                                                                         Mixer   
+      ORIGINALLY WRITTEN BY                                              Mixer   
+      ------------------------------------                               Mixer   
+      Dermott E. Cullen                                                  Mixer   
+                                                                         Mixer   
+      PRESENT CONTACT INFORMATION                                        Mixer   
+      ---------------------------                                        Mixer   
+      Dermott E. Cullen                                                  Mixer   
+      1466 Hudson Way                                                    Mixer   
+      Livermore, CA 94550                                                Mixer   
+      U.S.A.                                                             Mixer   
+      Telephone  925-443-1911                                            Mixer   
+      E. Mail    RedCullen1@Comcast.net                                  Mixer   
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Mixer   
+                                                                         Mixer   
+      PURPOSE                                                            Mixer   
+      -------                                                            Mixer   
+      THIS PROGRAM IS DESIGNED TO CALCULATE THE ENERGY DEPENDENT CROSS   Mixer   
+      SECTION FOR A COMPOSITE MIXTURE OF UP TO 10 DIFFERENT MATERIALS.   Mixer   
+                                                                         Mixer   
+      THE PRESENT VERSION WILL ONLY CALCULATE THE CROSS SECTION FOR ONE  Mixer   
+      FINAL REACTION (ENDF/B SECTION), E.G. TOTAL CROSS SECTION, BUT NOT Mixer   
+      ANY OTHER REACTION.                                                Mixer   
+                                                                         Mixer   
+      NOTE, THIS PROGRAM WILL NOT COMBINE ALL REACTIONS FOR A MIXTURE    Mixer   
+      OF MATERIALS DURING A SINGLE RUN - ONLY ONE REACTION WILL BE       Mixer   
+      CREATED PER RUN.                                                   Mixer   
+                                                                         Mixer   
+      EVALUATED DATA FORMAT                                              Mixer   
+      ---------------------                                              Mixer   
+      THE CROSS SECTIONS ARE READ FROM THE ENDF/B FORMAT AND THE         Mixer   
+      COMPOSITE CROSS SECTION IS CONVERTED TO AN EQUIVALENT BARNS/ATOM   Mixer   
+      FORM AND OUTPUT IN THE ENDF/B FORMAT WITH AN EQUIVALENT ATOMIC     Mixer   
+      WEIGHT. THE USER MUST SPECIFY THE COMPOSITION BY GIVING THE ZA,    Mixer   
+      MT AND GRAMS OR ATOMS OF EACH CONSTITUENT. IN ADDITION THE USER    Mixer   
+      IDENTIFY THE COMPOSITE CROSS SECTION BY SPECIFYING THE ZA, MAT     Mixer   
+      AND MT TO BE USED IN THE ENDF/B FORMATTED OUTPUT.                  Mixer   
+                                                                         Mixer   
+      SINCE ONLY THE CROSS SECTIONS IN FILE 3 AND 23 ARE USED, AND THE   Mixer   
+      FORMAT FOR FILE 3/23 IS THE SAME IN ALL VERSIONS ON ENDF/B, THIS   Mixer   
+      PROGRAM MAY BE USED WITH ANY VERSION OF ENDF/B DATA (I.E.,         Mixer   
+      ENDF/B-I, II, III, IV, V OR VI). DURING A SINGLE RUN IT MAY EVEN   Mixer   
+      BE USED TO READ AND COMBINE EVALUATIONS WHICH ARE IN DIFFERENT     Mixer   
+      VERSIONS OF THE ENDF/B FORMAT.                                     Mixer   
+                                                                         Mixer   
+      ENDF/B FORMATTED OUTPUT WILL BE IN THE ENDF/B-VI FORMAT REGARDLESS Mixer   
+      OF THE FORMAT OF THE INPUT ENDF/B DATA. THIS WILL ONLY EFFECT THE  Mixer   
+      HOLLERITH SECTION (MF=1, MT=451). THE FORMAT OF CROSS SECTIONS     Mixer   
+      (MF=3) IS THE SAME IN ALL VERSION OF THE ENDF/B FORMAT.            Mixer   
+                                                                         Mixer   
+      IN ORDER TO GUARANTEE PROPER OPERATION OF THIS PROGRAM THE DATA    Mixer   
+      MUST BE PROPERLY CODED IN THE ENDF/B FORMAT. NO ERROR CHECKING IS  Mixer   
+      PERFORMED. IT IS PARTICULARLY IMPORTANT THAT THE FOLLOWING DATA    Mixer   
+      BE CORRECT                                                         Mixer   
+                                                                         Mixer   
+      (1) ZA, MF, MT - MUST BE CORRECT IN ORDER TO ALLOW PROGRAM TO      Mixer   
+          SELECT THE APPROPRIATE SECTIONS TO BE COMBINED.                Mixer   
+      (2) AWRE - ATOMIC WEIGHT RATIO MUST BE CORRECT TO ALLOW PROGRAM    Mixer   
+          TO CONVERT THE USER SPECIFIED GRAMS INTO ATOMS FOR             Mixer   
+          PROPER ATOM RATIO MIXING.                                      Mixer   
+      (3) (ENERGIES, CROSS SECTIONS) - MUST BE CORRECT, LINEARLY         Mixer   
+                                                        ========         Mixer   
+          INTERPOLABLE, IN ASCENDING ENERGY ORDER OF (E, BARNS).         Mixer   
+          ============                                                   Mixer   
+                                                                         Mixer   
+          TO CONVERT ENDF/B FORMATTED DATA TO THE REQUIRED INPUT FORM    Mixer   
+          THE FOLLOWING PROGRAMS MAY BE USED,                            Mixer   
+          LINEAR - CONVERT TABULATED CROSS SECTIONS TO LINEARLY          Mixer   
+                   INTERPOLABLE FORM.                                    Mixer   
+          RECENT - RECONSTRUCT RESONANCE CONTRIBUTION, ADD TO BACKGROUND Mixer   
+                   CROSS SECTION AND OUTPUT THE COMBINATION IN LINEARLY  Mixer   
+                   INTERPOLABLE FORM.                                    Mixer   
+          SIGMA1 - DOPPLER BROADEN CROSS SECTIONS TO ANY TEMPERATURE AND Mixer   
+                   OUTPUT THE RESULT IN LINEARLY INTERPOLABLE FORM.      Mixer   
+                                                                         Mixer   
+      DOCUMENTATION                                                      Mixer   
+      -------------                                                      Mixer   
+      THE FACT THAT THIS PROGRAM HAS COMBINED THE DATA IS DOCUMENTED     Mixer   
+      IN THE OUTPUT ENDF/B FORMAT IN THE HOLLERITH SECTION BY FIRST      Mixer   
+      IDENTIFYING THE VERSION OF THIS PROGRAM THAT WAS USED, IN THE FORM Mixer   
+                                                                         Mixer   
+      ********************( PROGRAM MIXER 2017-1) ********************** Mixer   
+                                                                         Mixer   
+      THIS IS FOLLOWED BY THE TWO LINE IDENTIFICATION INPUT BY THE USER. Mixer   
+      THIS IS FOLLOWED BY COMPOSITION INPUT BY THE USER.                 Mixer   
+                                                                         Mixer   
+      NEUTRON OR PHOTON DATA                                             Mixer   
+      ----------------------                                             Mixer   
+      THIS PROGRAM WILL ALLOW YOU TO PROCESS EITHER NEUTRON OR PHOTON    Mixer   
+      CROSS SECTIONS - BUT YOU CANNOT MIX THE TWO TYPES TOGETHER. BY     Mixer   
+      INPUT YOU CAN SPECIFY THE OUTPUT MF = 3 (NEUTRONS) OR 23 (PHOTONS) Mixer   
+      WHATEVER TYPE YOU SPECIFIED FOR OUTPUT IS THE ONLY TYPE OF DATA    Mixer   
+      WHICH WILL BE PROCESSED BY THIS PROGRAM.                           Mixer   
+                                                                         Mixer   
+      DEFINING THE COMPOSITION                                           Mixer   
+      ------------------------                                           Mixer   
+      THE USER MAY SPECIFY UP TO 10 DIFFERENT SECTIONS OF DATA TO BE     Mixer   
+      COMBINED, EACH SECTION IDENTIFIED BY ZA AND MT NUMBER. THE         Mixer   
+      AMOUNT OF EACH MATERIAL IS SPECIFIED BY DEFINING THE NUMBER OF     Mixer   
+      GRAMS OF EACH MATERIAL IN THE COMPOSITE MIXTURE. THIS CAN BE       Mixer   
+      DERIVED FROM THE VOLUME FRACTION SIMPLY BY MULTIPLYING THE STP     Mixer   
+      DENSITY OF EACH MATERIAL BY ITS VOLUME FRACTION. NOTE, DO NOT      Mixer   
+      INPUT ATOM FRACTIONS.                                              Mixer   
+                                                                         Mixer   
+      THE LIST OF SECTIONS TO BE COMBINED MAY BE SPECIFIED IN ANY        Mixer   
+      ORDER, I.E. THEY NEED NOT BE IN ZA ORDER OR THE ORDER THAT THE     Mixer   
+      EVALUATED DATA APPEARS ON THE ENDF/B FORMATTED TAPE.               Mixer   
+                                                                         Mixer   
+      IF ANY REQUESTED SECTION OF DATA IS NOT FOUND ON THE ORIGINAL      Mixer   
+      ENDF/B FORMATTED FILE, THE PROGRAM WILL PRINT A LIST OF THE        Mixer   
+      MISSING SECTIONS AND TERMINATE. IF ALL REQUESTED SECTIONS ARE      Mixer   
+      FOUND THE PROGRAM WILL PRODUCE A COMPOSITE SECTION USING THE       Mixer   
+      UNION OF ALL ENERGIES FOUND IN ANY SECTION. THE COMPOSITE SECTION  Mixer   
+      WILL NOT BE THINNED.                                               Mixer   
+                                                                         Mixer   
+      PRIOR TO LATER USE IN ANY APPLICATION THE NUMBER OF ENERGY POINTS  Mixer   
+      IN THE COMPOSITE CROSS SECTION MAY BE MINIMIZED BY USING PROGRAM   Mixer   
+      LINEAR, UCRL-50400, VOL. 17, PART B TO THIN THE DATA.              Mixer   
+                                                                         Mixer   
+      ONLY LINEARLY INTERPOLABLE DATA                                    Mixer   
+      -------------------------------                                    Mixer   
+      THE CROSS SECTIONS TO BE COMBINED MUST BE IN LINEARLY INTERPOLABLE Mixer   
+      TABULATED FORM (I. E., FILE 3 OR 23, INTERPOLATION LAW 2).         Mixer   
+                                                                         Mixer   
+      TO CONVERT TABULATED CROSS SECTIONS TO LINEARLY INTERPOLABLE FORM  Mixer   
+      SEE, PROGRAM LINEAR, UCRL-50400, VOL. 17, PART A.                  Mixer   
+                                                                         Mixer   
+      TO CONVERT RESONANCE PARAMETERS TO LINEARLY INTERPOLABLE FORM SEE, Mixer   
+      PROGRAM RECENT, UCRL-50400, VOL. 17, PART C.                       Mixer   
+                                                                         Mixer   
+      TO DOPPLER BROADEN LINEARLY INTERPOLABLE DATA TO ANY TEMPERATURE   Mixer   
+      SEE PROGRAM SIGMA1, UCRL-50400, VOL. 17, PART B.                   Mixer   
+                                                                         Mixer   
+      PAGING SYSTEM                                                      Mixer   
+      -------------                                                      Mixer   
+      THERE IS NO LIMIT TO THE THE NUMBER OF DATA POINTS IN EACH OF THE  Mixer   
+      SECTIONS TO BE COMBINED, NOR IS THERE A LIMIT TO THE NUMBER OF     Mixer   
+      DATA POINTS IN THE COMPOSITE MIXTURE CROSS SECTION.                Mixer   
+                                                                         Mixer   
+      ALL REQUIRED SECTIONS OF DATA ARE READ FROM THE ORIGINAL ENDF/B    Mixer   
+      FORMATTED FILE. ANY SECTION OF 60000 OR FEWER POINTS WILL BE       Mixer   
+      TOTALLY CORE RESIDENT. LARGER SECTIONS ARE LOADED INTO A PAGING    Mixer   
+      SYSTEM USING A SCRATCH FILE WITH ONLY 60000 POINTS PER SECTION     Mixer   
+      CORE RESIDENT AT ANY ONE TIME. SIMILARLY THE COMPOSITE SECTION     Mixer   
+      WILL BE TOTALLY CORE RESIDENT IF IT CONTAINS 60000 OR FEWER POINTS Mixer   
+      AND LARGER COMPOSITE SECTIONS WILL BE LOADED INTO A PAGING         Mixer   
+      SYSTEM WHERE ONLY 60000 POINTS ARE CORE RESIDENT AT ANY TIME. SINC Mixer   
+      A PAGING SYSTEM MAY BE USED BY ANY SECTION OF DATA THERE IS NO     Mixer   
+      LIMIT TO THE SIZE OF EITHER THE ORIGINAL SECTIONS, NOR TO THE      Mixer   
+      COMPOSITE SECTION, E.G. A SECTION MAY CONTAIN 100,000 ENERGIES     Mixer   
+      AND CROSS SECTIONS TO DESCRIBE A GIVEN REACTION.                   Mixer   
+                                                                         Mixer   
+      PAGE SIZE                                                          Mixer   
+      ---------                                                          Mixer   
+      THE PAGE SIZE USED IN THIS PROGRAM IS DEFINED BY THE PARAMETER     Mixer   
+      NPAGE AND THE DIMENSIONS OF THE ARRAYS XTAB AND YTAB. IN ORDER     Mixer   
+      TO ADAPT THIS PROGRAM FOR USE ON ANY COMPUTER THE PAGE SIZE MAY    Mixer   
+      BE INCREASED OR DECREASED BUT THE FOLLOWING RULES MUST BE FOLLOWED Mixer   
+                                                        ====             Mixer   
+                                                                         Mixer   
+      (1) NPAGE - MUST BE A MULTIPLE OF 3 IN ORDER TO ALLOW THE PROGRAM  Mixer   
+          TO READ FULL CARDS OF ENDF/B DATA (3 POINTS PER LINE). FAILURE Mixer   
+          TO FOLLOW THIS RULE CAN LEAD TO LOSS OF DATA AND/OR PROGRAM    Mixer   
+          ERRORS DURING EXECUTION.                                       Mixer   
+      (3) YTAB  - THE DIMENSION OF YTAB MUST BE (NPAGE,11).              Mixer   
+      (4) XTAB  - THE DIMENSION OF XTAB MUST BE (NPAGE,11).              Mixer   
+                                                                         Mixer   
+      DOPPLER BROADENING                                                 Mixer   
+      ------------------                                                 Mixer   
+      THE COMPOSITE CROSS SECTION OUTPUT FROM THIS PROGRAM SHOULD NOT    Mixer   
+      BE DOPPLER BROADENED USING PROGRAM SIGMA1, OR THE EQUIVALENT. THE  Mixer   
+      ATOMIC WEIGHT USED TO IDENTIFY THE COMPOSITE MIXTURE IS BASED ON   Mixer   
+      THE ATOM FRACTION OF EACH CONSTITUENT AND CANNOT BE USED TO        Mixer   
+      CHARACTERIZE THE BROADENING OF ANY GIVEN RESONANCE IN THE MIXTURE  Mixer   
+      DUE TO THE CONTRIBUTION OF ONE CONSTITUENT. IN ORDER TO CONSIDER   Mixer   
+      DOPPLER BROADENING FIRST USE PROGRAM SIGMA1 TO BROADEN THE CROSS   Mixer   
+      SECTION FOR EACH OF THE CONSTITUENTS AND THEN COMBINE THE          Mixer   
+      BROADENED DATA USING PROGRAM MIXER.                                Mixer   
+                                                                         Mixer   
+      EXAMPLE USE                                                        Mixer   
+      -----------                                                        Mixer   
+      THE OUTPUT FROM THIS PROGRAM HAS BEEN FOUND TO BE EXTREMELY        Mixer   
+      USEFUL IN THE FOLLOWING APPLICATIONS...                            Mixer   
+                                                                         Mixer   
+      (1) CALCULATE A COMPOSITE TOTAL CROSS SECTON FOR LATER USE AS      Mixer   
+          A WEIGHTING FUNCTION IN SELF-SHIELDING THE CROSS SECTIONS      Mixer   
+          OF EACH CONSTITUENT OF THE MIXTURE SEPARATELY.                 Mixer   
+                                                                         Mixer   
+          PROGRAM GROUPIE CAN USE THE CALCULATED COMPOSITE TOTAL CROSS   Mixer   
+          SECTION AS THE TOTAL CROSS SECTION FOR EACH CONSTITUENT OF     Mixer   
+          THE MIXTURE IN ORDER TO CALCULATE  SELF-SHIELDED CROSS SECTION Mixer   
+          FOR EACH CONSTITUENT OF THE MIXTURE.                           Mixer   
+                                                                         Mixer   
+      (2) CALCULATE COMPOSITE TOTAL AND FISSION CROSS SECTIONS IN        Mixer   
+          ORDER TO CALCULATE THE TRANSMISSION AND SELF-INDICATION        Mixer   
+          THROUGH COMPOSITE MATERIALS. GENERALLY IN THIS CASE THE        Mixer   
+          TOTAL CROSS SECTION WILL BE CALCULATED FOR THE COMPOSITION     Mixer   
+          OF THE SAMPLE AND THE FISSION CROSS SECTION WILL BE            Mixer   
+          CALCULATED FOR THE COMPOSITION OF THE FISSION CHAMBER          Mixer   
+          (WHICH GENERALLY WILL HAVE A DIFFERENT COMPOSITION THAN THE    Mixer   
+          SAMPLE).                                                       Mixer   
+                                                                         Mixer   
+          PROGRAM VIRGIN CAN USE THE OUTPUT FROM THIS PROGRAM TO         Mixer   
+          PERFORM TRANSMISSION AND SELF-INDICATION CALCULATIONS.         Mixer   
+          PROGRAM VIRGIN WILL ANALYTICALLY CALCULATE THE UNCOLLIDED      Mixer   
+          (I.E. VIRGIN) FLUX TRANSMITTED AND REACTION RATE DUE TO ANY    Mixer   
+          TABULATED LINEARLY INTERPOLABLE INCIDENT SPECTRUM. RESULTS     Mixer   
+          WILL BE PRESENTLY FOR UP TO 10 DIFFERENT SAMPLE THICKNESSES    Mixer   
+          AND BINNED INTO ENERGY GROUPS IN ORDER TO SIMULATE AN          Mixer   
+          EXPERIMENTAL MEASUREMENT.                                      Mixer   
+                                                                         Mixer   
+      (3) THE OUTPUT FROM THIS PROGRAM IS VERY USEFUL TO PLOT IN ORDER   Mixer   
+          TO SEE THE IMPORTANCE OF SPECIFIC CROSS SECTION FEATURES IN    Mixer   
+          THE COMPOSITE CROSS SECTION.                                   Mixer   
+                                                                         Mixer   
+          PROGRAM COMPLOT CAN BE USED TO PLOT THE OUTPUT FROM THIS       Mixer   
+          PROGRAM AND IF REQUIRED EXAMINE ANY PARTICULAR ENERGY RANGE    Mixer   
+          IN DETAIL. IN ORDER TO DO THIS THE (ZA, MT) EQUIVALENCE OPTION Mixer   
+          OF PROGRAM COMPLOT SHOULD BE USED. TO COMPARE ANY CONSTITUENT  Mixer   
+          CROSS SECTION TO THE COMPOSITE CROSS SECTION THE INPUT TO      Mixer   
+          COMPLOT SHOULD EQUATE THE (ZA,MT) OF THE COMPOSITE TO THE      Mixer   
+          (ZA,MT) OF ONE CONSTITUENT AND THE MULTIPLIER INPUT TO         Mixer   
+          COMPLOT SHOULD BE THE ATOM FRACTION FOR THE CONSTITUENT (THE   Mixer   
+          ATOM FRACTIONS ARE DEFINED IN THE OUTPUT LISTING FROM PROGRAM  Mixer   
+          MIXER).                                                        Mixer   
+                                                                         Mixer   
+      INPUT FILES                                                        Mixer   
+      -----------                                                        Mixer   
+      UNIT  DESCRIPTION                                                  Mixer   
+      ----  -----------                                                  Mixer   
+        2   INPUT CARDS (BCD - 80 CHARACTERS/RECORD)                     Mixer   
+       10   ORIGINAL EVALUATED DATA IN ENDF/B FORMAT                     Mixer   
+                        (BCD - 80 CHARACTERS/RECORD)                     Mixer   
+                                                                         Mixer   
+      OUTPUT FILES                                                       Mixer   
+      ------------                                                       Mixer   
+      UNIT  DESCRIPTION                                                  Mixer   
+      ----  -----------                                                  Mixer   
+        3   OUTPUT LISTING (BCD - 120 CHARACTERS/RECORD)                 Mixer   
+       11   COMPOSITE EVALUATED DATA IN ENDF/B FORMAT                    Mixer   
+                      (BCD - 80 CHARACTERS/RECORD)                       Mixer   
+                                                                         Mixer   
+      SCRATCH FILES                                                      Mixer   
+      -------------                                                      Mixer   
+      UNIT  DESCRIPTION                                                  Mixer   
+      ----  -----------                                                  Mixer   
+       12   SCRATCH FILE FOR EACH OF THE 10 SECTIONS WHICH               Mixer   
+       13   WILL BE ADDED TOGETHER TO DEFINE THE FINAL                   Mixer   
+        .   SECTION (BINARY - 60000 AND 480000 WORDS/RECORD)             Mixer   
+        . .                                                              Mixer   
+        . .                                                              Mixer   
+       20 .                                                              Mixer   
+       21 .                                                              Mixer   
+       22   SCRATCH FILE FOR COMBINED SECTION.                           Mixer   
+            (BINARY - 2004 WORDS/RECORD)                                 Mixer   
+                                                                         Mixer   
+      STANDARD FILE NAMES (SEE SUBROUTINES FILIO1 AND FILIO2)            Mixer   
+      ----------------------------------------------------------------   Mixer   
+      UNIT  FILE NAME                                                    Mixer   
+      ----  ----------                                                   Mixer   
+        2   MIXER.INP                                                    Mixer   
+        3   MIXER.LST                                                    Mixer   
+       10   ENDFB.IN                                                     Mixer   
+       11   ENDFB.OUT                                                    Mixer   
+     12-22  (SCRATCH)                                                    Mixer   
+                                                                         Mixer   
+      INPUT CARDS                                                        Mixer   
+      -----------                                                        Mixer   
+      LINE  COLS.  FORMAT  NAME    DESCRIPTION                           Mixer   
+      ----  -----  ------  ------- ----------                            Mixer   
+       1-2   1-66 16A4,A2  TITLE   TWO LINE TITLE DESCRIBING PROBLEM     Mixer   
+                                   (THIS TITLE IS USED TO IDENTIFY THE   Mixer   
+                                   OUTPUT LISTING AND IS ALSO WRITTEN    Mixer   
+                                   IN MF=1, MT=451 (HOLLERITH SECTION)   Mixer   
+                                   OF THE ENDF/B FORMATTED OUTPUT TO     Mixer   
+                                   IDENTIFY THE COMPOSITE MIXTURE).      Mixer   
+         3   1-72                  ENDF/B INPUT DATA FILENAME            Mixer   
+                                   (STANDARD OPTION = ENDFB.IN)          Mixer   
+         4   1-72                  ENDF/B OUTPUT DATA FILENAME           Mixer   
+                                   (STANDARD OPTION = ENDFB.OUT)         Mixer   
+         5   1-11    I11   IZAOUT  ZA IDENTIFICATION FOR COMBINATION     Mixer   
+         5  12-17    I6    MATOUT  MAT IDENTIFICATION FOR COMBINATION    Mixer   
+         5  18-19    I2    MFOUT   MF IDENTIFICATION FOR COMBINATION     Mixer   
+         5  20-22    I3    MTOUT   MT IDENTIFICATION FOR COMBINATION     Mixer   
+         5  23-33    I11   DEFINE INPUT DENSITY                          Mixer   
+                           = 0 = GRAMS = BACKWARDS COMPATIBLE            Mixer   
+                           > 0 = ATOMS = NEW IN 2008                     Mixer   
+       6-N   1-11    I11   IZAGET  ZA (1000*Z+A) OF MATERIAL             Mixer   
+       6-N  12-22    I11   MTGET   MT OF REACTION                        Mixer   
+       6-N  23-33  E11.4   DENSE   MATERIAL DENSITY (ATOMS OR GRAMS)     Mixer   
+                                                                         Mixer   
+      THE SIXTH LINE IS REPEATED FOR EACH SECTION (FROM 2 TO 10).        Mixer   
+      SINCE THE ENDF/B FORMATTED OUTPUT IS IN BARNS/ATOM FORM A MINIMUM  Mixer   
+      OF TWO SECTIONS MUST BE COMBINED (I.E., IF ONLY ONE SECTION IS     Mixer   
+      SPECIFIED THE OUTPUT WOULD BE IDENTICAL TO THE INPUT AND AS SUCH   Mixer   
+      THE PROGRAM WILL CONSIDER THIS TO BE AN ERROR AND NOT PERFORM THE  Mixer   
+      CALCULATION). THE LIST OF SECTIONS IS TERMINATED BY A BLANK LINE.  Mixer   
+                                                                         Mixer   
+      THE LIST OF SECTIONS TO BE COMBINED MAY BE SPECIFIED IN ANY        Mixer   
+      ORDER, I.E. THEY NEED NOT BE IN ZA ORDER OR THE ORDER THAT THE     Mixer   
+      EVALUATED DATA APPEARS ON THE ENDF/B FORMATTED TAPE.               Mixer   
+                                                                         Mixer   
+      EXAMPLE INPUT NO. 1                                                Mixer   
+      -------------------                                                Mixer   
+      CREATE THE TOTAL CROSS SECTION (MT=1) FOR STAINLESS STEEL AND      Mixer   
+      IDENTIFY THE COMBINED MATERIAL WITH ZA=26800 AND MAT=4000,         Mixer   
+      THE COMPOSITION BY VOLUME OF THE STEEL WILL BE...                  Mixer   
+                                                                         Mixer   
+      THE DATA FROM \ENDFB6\K300\LIBRARY.DAT AND WRITE DATA TO           Mixer   
+      \MIXER\STEEL.DAT                                                   Mixer   
+                                                                         Mixer   
+      IRON      - 74.8 PER-CENT                                          Mixer   
+      CHROMIUM  - 16.0                                                   Mixer   
+      NICKEL    -  6.0                                                   Mixer   
+      MANGANESE -  2.0                                                   Mixer   
+      SILICON   -  1.0                                                   Mixer   
+      CARBON    -  0.2                                                   Mixer   
+                                                                         Mixer   
+      THE INPUT MUST SPECIFY THE COMPOSITION BY GRAMS OR ATOMS. THIS IS  Mixer   
+      DEFINED AS THE PRODUCT OF THE STANDARD DENSITY (GRAMS)             Mixer   
+      TIMES THE VOLUME FRACTION. FOR THIS EXAMPLE THE FOLLOWING 12       Mixer   
+      INPUT CARDS ARE REQUIRED....                                       Mixer   
+                                                                         Mixer   
+      STAINLESS STEEL. COMPOSITION BY PER-CENT VOLUME IS 74.8-IRON,      Mixer   
+      16-CHROME, 6-NICKEL, 2-MANGANESE, 1-SILICON, 0.2-CARBON            Mixer   
+      \ENDFB6\K300\LIBRARY.DAT                                           Mixer   
+      \MIXER\STEEL.DAT                                                   Mixer   
+           26800  4000 3  1          0                                   Mixer   
+           26000          1 5.88676    (NOTE, GRAMS INPUT FOR EACH       Mixer   
+           24000          1 1.150448    CONSTITUENT, E.G. FOR IRON THE   Mixer   
+           28000          1 0.533928    STP DENSITY IS 7.87 GRAMS.       Mixer   
+           25055          1 0.1486      THE INPUT VALUE OF 5.88676 IS    Mixer   
+           14000          1 0.0233      0.748 X 7.87,I.E.  VOLUME        Mixer   
+            6012          1 0.0044958   FRACTION TIMES STP DENSITY).     Mixer   
+                                      (BLANK LINE TERMINATES INPUT LIST) Mixer   
+                                                                         Mixer   
+      EXAMPLE INPUT NO. 2                                                Mixer   
+      -------------------                                                Mixer   
+      THE SAME EXAMPLE AS THE ABOVE PROBLEM, ONLY USE THE STANDARD       Mixer   
+      ENDF/B DATA FILENAMES - ENDFB.IN AND ENDFB.OUT (THIS CAN BE        Mixer   
+      DONE BY LEAVING THE THIRD AND FOURTH INPUT LINES BLANK).           Mixer   
+      FOR THIS EXAMPLE THE FOLLOWING 12 INPUT CARDS ARE REQUIRED....     Mixer   
+                                                                         Mixer   
+      STAINLESS STEEL. COMPOSITION BY PER-CENT VOLUME IS 74.8-IRON,      Mixer   
+      16-CHROME, 6-NICKEL, 2-MANGANESE, 1-SILICON, 0.2-CARBON            Mixer   
+      (NOTE - THIS LINE IS REALLY BLANK)                                 Mixer   
+      (NOTE - THIS LINE IS REALLY BLANK)                                 Mixer   
+           26800  4000 3  1                                              Mixer   
+           26000          1 5.88676    (NOTE, GRAMS INPUT FOR EACH       Mixer   
+           24000          1 1.150448    CONSTITUENT, E.G. FOR IRON THE   Mixer   
+           28000          1 0.533928    STP DENSITY IS 7.87 GRAMS.       Mixer   
+           25055          1 0.1486      THE INPUT VALUE OF 5.88676 IS    Mixer   
+           14000          1 0.0233      0.748 X 7.87,I.E.  VOLUME        Mixer   
+            6012          1 0.0044958   FRACTION TIMES STP DENSITY).     Mixer   
+                                      (BLANK LINE TERMINATES INPUT LIST) Mixer   
+                                                                         Mixer   
+ ======================================================================= Mixer   

@@ -1,0 +1,1040 @@
+ ======================================================================= Groupie 
+                                                                         Groupie 
+      PROGRAM GROUPIE                                                    Groupie 
+      ===============                                                    Groupie 
+      VERSION 76-1 (NOVEMBER 1976)                                       Groupie 
+      VERSION 79-1 (OCTOBER 1979) CDC-7600 AND CRAY-1 VERSION.           Groupie 
+      VERSION 80-1 (MAY 1980) IBM, CDC AND CRAY VERSION                  Groupie 
+      VERSION 81-1 (JANUARY 1981) EXTENSION TO 3000 GROUPS               Groupie 
+      VERSION 81-2 (MARCH 1981) IMPROVED SPEED                           Groupie 
+      VERSION 81-3 (AUGUST 1981) BUILT-IN 1/E WEIGHTING SPECTRUM         Groupie 
+      VERSION 82-1 (JANUARY 1982) IMPROVED COMPUTER COMPATIBILITY        Groupie 
+      VERSION 83-1 (JANUARY 1983)*MAJOR RE-DESIGN.                       Groupie 
+                                 *ELIMINATED COMPUTER DEPENDENT CODING.  Groupie 
+                                 *NEW, MORE COMPATIBLE I/O UNIT NUMBERS. Groupie 
+                                 *NEW MULTI-BAND LIBRARY BINARY FORMAT.  Groupie 
+      VERSION 83-2 (OCTOBER 1983) ADDED OPTION TO ALLOW SIGMA-0 TO BE    Groupie 
+                                  DEFINED EITHER AS MULTIPLES OF         Groupie 
+                                  UNSHIELDED TOTAL CROSS SECTION IN EACH Groupie 
+                                  GROUP, OR POWERS OF 10 IN ALL GROUPS.  Groupie 
+      VERSION 84-1 (APRIL 1984)   ADDED MORE BUILT IN MULTIGROUP ENERGY  Groupie 
+                                  STRUCTURES.                            Groupie 
+      VERSION 85-1 (APRIL 1985)  *UPDATED FOR ENDF/B-VI FORMATS.         Groupie 
+                                 *SPECIAL I/O ROUTINES TO GUARANTEE      Groupie 
+                                  ACCURACY OF ENERGY.                    Groupie 
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Groupie 
+                                  (REQUIRED FOR NARROW RESONANCES).      Groupie 
+                                 *MINIMUM TOTAL CROSS SECTION TREATMENT  Groupie 
+      VERSION 85-2 (AUGUST 1985) *FORTRAN-77/H VERSION                   Groupie 
+      VERSION 86-1 (JANUARY 1986)*ENDF/B-VI FORMAT                       Groupie 
+      VERSION 86-2 (JUNE 1986)   *BUILT-IN MAXWELLIAN, 1/E AND FISSION   Groupie 
+                                  WEIGHTING SPECTRUM.                    Groupie 
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Groupie 
+                                  FILE NAMES (SEE, SUBROUTINES FILIO1    Groupie 
+                                  FILIO2 FOR DETAILS).                   Groupie 
+                                 *IMPROVED BASED ON USER COMMENTS.       Groupie 
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Groupie 
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Groupie 
+                                  CRAZY.                                 Groupie 
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Groupie 
+                                  KEYWORDS.                              Groupie 
+                                 *ADDED LIVERMORE CIVIC COMPILER         Groupie 
+                                  CONVENTIONS.                           Groupie 
+      VERSION 91-1 (JUNE 1991)   *INCREASED PAGE SIZE FROM 1002 TO 5010  Groupie 
+                                  POINTS                                 Groupie 
+                                 *UPDATED BASED ON USER COMMENTS         Groupie 
+                                 *ADDED FORTRAN SAVE OPTION              Groupie 
+                                 *COMPLETELY CONSISTENT ROUTINE TO READ  Groupie 
+                                  FLOATING POINT NUMBERS.                Groupie 
+      VERSION 92-1 (JANUARY 1992)*ADDED RESONANCE INTEGRAL CALCULATION - Groupie 
+                                  UNSHIELDED AND/OR SHIELDED - FOR       Groupie 
+                                  DETAILS SEE BELOW                      Groupie 
+                                 *INCREASED NUMBER OF ENERGY POINTS      Groupie 
+                                  IN BUILT-IN SPECTRA - TO IMPROVE       Groupie 
+                                  ACCURACY.                              Groupie 
+                                 *ALLOW SELECTION OF ZA/MF/MT OR         Groupie 
+                                  MAT/MF/MT RANGES - ALL DATA NOT        Groupie 
+                                  SELECTED IS SKIPPED ON INPUT AND       Groupie 
+                                  NOT WRITTEN AS OUTPUT.                 Groupie 
+                                 *COMPLETELY CONSISTENT I/O ROUTINES -   Groupie 
+                                  TO MINIMIZE COMPUTER DEPENDENCE.       Groupie 
+                                 *NOTE, CHANGES IN INPUT PARAMETER       Groupie 
+                                  FORMAT - FOR ZA/MF/MT OR MAT/MF/MT     Groupie 
+                                  RANGES.                                Groupie 
+      VERSION 92-2 (JUNE 1992)   *MULTIBAND PARAMETERS OUTOUT AS         Groupie 
+                                  CHARACTER (RATHER THAN BINARY) FILE.   Groupie 
+      VERSION 93-1 (APRIL 1993)  *INCREASED PAGE SIZE FROM 5010 TO       Groupie 
+                                  30000 POINTS                           Groupie 
+                                 *ELIMINATED COMPUTER DEPENDENCE.        Groupie 
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Groupie 
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Groupie 
+                                  (WARNING - INPUT PARAMETER FORMAT      Groupie 
+                                  HAS BEEN CHANGED)                      Groupie 
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Groupie 
+                                  (SEE, SUBROUTINE ENDIT)                Groupie 
+      VERSION 95-1 (JANUARY 1994)*CORRECTED MAXWELLIAN WEIGHTING         Groupie 
+                                 *CHANGING WEIGHTING SPECTRUM FROM       Groupie 
+                                  0.1 TO 0.001 % UNCERTAINTY             Groupie 
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Groupie 
+                                  *IMPROVED COMPUTER INDEPENDENCE        Groupie 
+                                  *ALL DOUBLE PRECISION                  Groupie 
+                                  *ON SCREEN OUTPUT                      Groupie 
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Groupie 
+                                  *IMPROVED OUTPUT PRECISION             Groupie 
+                                  *DEFINED SCRATCH FILE NAMES            Groupie 
+                                  *UP TO 1000 GROUP MULTI-BAND           Groupie 
+                                   CALCULATION (PREVIOUSLY 175)          Groupie 
+                                  *MAXIMUM NUMBER OF GROUPS REDUCED      Groupie 
+                                   FROM 3,000 TO 1,000                   Groupie 
+                                  *UP TO 1000 MATERIALS                  Groupie 
+                                   (PREVIOUSLY 100)                      Groupie 
+                                  *CORRECTED USE OF MAXWELLIAN +         Groupie 
+                                   1/E + FISSION SPECTRUM                Groupie 
+                                  *ONLY 2 BAND VERSION DISTRIBUTED       Groupie 
+                                   (CONTACT AUTHOR FOR DETAILS)          Groupie 
+                                  *DEFINED SCRATCH FILE NAMES            Groupie 
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Groupie 
+                                   POINT READ FOR MORE DIGITS            Groupie 
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Groupie 
+                                   VERSION BASED ON RECENT FORMAT CHANGE Groupie 
+                                  *GENERAL IMPROVEMENTS BASED ON         Groupie 
+                                   USER FEEDBACK                         Groupie 
+      VERSION 99-2 (JUNE 1999)    *ASSUME ENDF/B-VI, NOT V, IF MISSING   Groupie 
+                                   MF=1, MT-451.                         Groupie 
+      VERS. 2000-1 (FEBRUARY 2000)*ADDED MF=10, ACTIVATION CROSS SECTION Groupie 
+                                   PROCESSING.                           Groupie 
+                                  *GENERAL IMPROVEMENTS BASED ON         Groupie 
+                                   USER FEEDBACK                         Groupie 
+      VERS. 2002-1 (FEBRUARY 2002)*ADDED TART 700 GROUP STRUCTURE        Groupie 
+                                  *ADDED VARIABLE SIGMA0 INPUT OPTION    Groupie 
+                   (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Groupie 
+                   (NOV. 2002)    *ADDED SAND-II EXTENDED DOWN TO        Groupie 
+                                   1.0D-5 EV.                            Groupie 
+                   (JUNE 2003)    *CORRECTED SAND-II 620 AND 640 GROUP   Groupie 
+                                   ENERGY BOUNDARIES DEFINITIONS.        Groupie 
+      VERS. 2004-1 (SEPT. 2004)  *INCREASED PAGE SIZE FROM 30000 TO      Groupie 
+                                  120000 POINTS                          Groupie 
+                                 *ADDED "OTHER" AS ADDITIONAL REACTION   Groupie 
+                                  TO IMPROVE MULTI-BAND FITTING          Groupie 
+                                 *ADDED ITERATION FOR "BEST" PARTIAL     Groupie 
+                                  PARAMETERS.                            Groupie 
+                                 *DO NOT SKIP LOW TOTAL ENERGY RANGES    Groupie 
+                                  WHEN DEFINING AVERAGE CROSS SECTIONS - Groupie 
+                                  THIS MAKES OUTPUT COMPATIBLE WITH      Groupie 
+                                  ANY STANDARD AVERAGING PROCEDURE       Groupie 
+      VERS. 2005-1 (JAN. 2005)   *ADDED OPTION TO CHANGE TEMPERATURE OF  Groupie 
+                                  BUILT-IN STANDARD SPECTRUM.            Groupie 
+      VERS. 2007-1 (JAN. 2007)   *CHECKED AGAINST ALL ENDF/B-VII.        Groupie 
+                                 *INCREASED PAGE SIZE FROM 120,000 TO    Groupie 
+                                  600,000 POINTS                         Groupie 
+      VERS. 2008-1 (JAN. 2008)   *72 CHARACTER FILE NAMES.               Groupie 
+                                 *GENERAL UPDATES                        Groupie 
+      VERS. 2010-1 (Apr. 2010)   *INCREASED WEIGHTING SPECTRUM TO 30,000 Groupie 
+                                  FROM 3,000 ENERGY POINTS.              Groupie 
+                                 *ADDED OUTPUT TO PLOT/COMPARE SHIELDED  Groupie 
+                                  AND UNSHIELDED CROSS SECTIONS.         Groupie 
+      VERS. 2011-1 (June 2011)   *Corrected TART 700 groups to extend up Groupie 
+                                  to 1 GeV (1,000 MeV) - previously it   Groupie 
+                                  was ERRONEOUSLY cutoff at 20 MeV.      Groupie 
+      VERS. 2011-2 (Nov. 2011)   *Corrected TART 616 groups lowest       Groupie 
+                                  energy from 1.0D-4 eV to 1.0D-5 eV.    Groupie 
+                                 *Added TART 666 to 200 MeV (for TENDL). Groupie 
+                                 *Optional high energy cross section     Groupie 
+                                  extension above tabulated energy range Groupie 
+                                  (either = 0 = standard, or constant)   Groupie 
+                                  WARNING - ENDF/B standard convention   Groupie 
+                                  is that the cross section = 0 where it Groupie 
+                                  is not explicitly defined - extension  Groupie 
+                                  = 0 is standard, constant is NOT, so   Groupie 
+                                  constant extension is NOT RECOMMENDED. Groupie 
+      VERS. 2012-1 (Aug. 2012)   *Added CODENAME                         Groupie 
+                                 *32 and 64 bit Compatible               Groupie 
+                                 *Added ERROR stop.                      Groupie 
+      VERS. 2013-1 (Nov. 2013)   *Extended OUT9.                         Groupie 
+                                 *Uses OUTG, not OUT10 for energies.     Groupie 
+      VERS. 2015-1 (Jan. 2015)   *Corrected SPECTM - handle ALL included Groupie 
+                                  group structures, i.e., even those     Groupie 
+                                  that start above thremal range by      Groupie 
+                                  ALWAYS constructing weigthing spectrum Groupie 
+                                  to be AT LEAST 1.0D-5 eV to 20 MeV.    Groupie 
+                                 *Extended OUTG                          Groupie 
+                                 *Replaced ALL 3 way IF Statements.      Groupie 
+                                 *Generalized TART Group Strructures.    Groupie 
+                                 *Generalized SAND-II Group Structures.  Groupie 
+                                 *Extended SAND-II to 60, 150, 200 MeV.  Groupie 
+      VERS. 2015-2 (Mar. 2015)   *Deleted 1P from formats reading input  Groupie 
+                                  parameters, causing incorrect scaling  Groupie 
+                                 *Changed ALL data to "D" instead of     Groupie 
+                                  "E" to insure it is REAL*8 and avoid   Groupie 
+                                  Truncation ERRORS.                     Groupie 
+      VERS. 2015-3 (July 2015)   *Insure no 10 digit output - not        Groupie 
+                                  needed for multi-group and this makes  Groupie 
+                                  listings simpler.                      Groupie 
+                                 *Corrected High Energy Extension =      Groupie 
+                                  Can effect highest energy group.       Groupie 
+      VERS. 2016-1 (July 2016)   *Added UKAEA 1102 Group Structure.      Groupie 
+                                 *Increased storage to accommodate       Groupie 
+                                  much larger group structures =         Groupie 
+                                  up to 20,000 Groups.                   Groupie 
+                                 *Added output listing of the complete   Groupie 
+                                  input parameters for URRFIT, including Groupie 
+                                  the NJOY parameters LSSF and ICOMP.    Groupie 
+                                 *Changed multiple IF statements to      Groupie 
+                                  accommodate compiler optimizer         Groupie 
+                                 *Cosmetic changes based on FREUD        Groupie 
+                                  psychoanalysis.                        Groupie 
+                                 *Updated multi-band treatment to        Groupie 
+                                  explcitly handle small shielding       Groupie 
+                                  limit - without this update the small  Groupie 
+                                  limit becomes numerically unstable.    Groupie 
+      VERS. 2017-1 (May  2017)   *Increased max. points to 3,000,000.    Groupie 
+                                 *METHODB was incorrecctly named         Groupie 
+                                  METHOD  in one routine = corrected.    Groupie 
+                                 *Default multi-band is method #2 =      Groupie 
+                                  conserve <x>, <1/(x+<x>>, <1/x>.       Groupie 
+                                 *Definition of built-in group structure Groupie 
+                                  using SUBROUTINE GROPE is identical    Groupie 
+                                  for GROUPIE and VIRGIN.                Groupie 
+                                 *All floating input parameters changed  Groupie 
+                                  to character input + IN9 conversion.   Groupie 
+                                 *Output report identfies MF now that    Groupie 
+                                  this code does more than just MF=3.    Groupie 
+                                                                         Groupie 
+      2015-2 Acknowledgment                                              Groupie 
+      =====================                                              Groupie 
+      I thank Chuck Whitmer (TerraPower,WA) and Andrej Trkov (NDS,IAEA)  Groupie 
+      for reporting the errors that led to the 2015-2 Improvements in    Groupie 
+      this code.                                                         Groupie 
+                                                                         Groupie 
+      I thank Jean-Christophe Sublet (UKAEA) for contributing MAC        Groupie 
+      executables and Bojan Zefran (IJS, Slovenia) for contributing      Groupie 
+      LINUX (32 or 63 bit) executables. And most of all I must thank     Groupie 
+      Andrej Trkov (NDS, IAEA) for overseeing the entire PREPRO project  Groupie 
+      at IAEA, Vienna. This was a truly International team who worked    Groupie 
+      together to produce PREPRO 2015-2.                                 Groupie 
+                                                                         Groupie 
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Groupie 
+      ------------------------------------                               Groupie 
+      THE NUCLEAR DATA SECTION                                           Groupie 
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Groupie 
+      P.O. BOX 100                                                       Groupie 
+      A-1400, VIENNA, AUSTRIA                                            Groupie 
+      EUROPE                                                             Groupie 
+                                                                         Groupie 
+      ORIGINALLY WRITTEN BY                                              Groupie 
+      ------------------------------------                               Groupie 
+      Dermott E. Cullen                                                  Groupie 
+                                                                         Groupie 
+      PRESENT CONTACT INFORMATION                                        Groupie 
+      ---------------------------                                        Groupie 
+      Dermott E. Cullen                                                  Groupie 
+      1466 Hudson Way                                                    Groupie 
+      Livermore, CA 94550                                                Groupie 
+      U.S.A.                                                             Groupie 
+      Telephone  925-443-1911                                            Groupie 
+      E. Mail    RedCullen1@Comcast.net                                  Groupie 
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Groupie 
+                                                                         Groupie 
+      AUTHORS MESSAGE                                                    Groupie 
+      ---------------                                                    Groupie 
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Groupie 
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Groupie 
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Groupie 
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION, PARTICULARLY     Groupie 
+      THE COMMENTS CONCERNING MACHINE DEPENDENT CODING.                  Groupie 
+                                                                         Groupie 
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Groupie 
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Groupie 
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Groupie 
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Groupie 
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Groupie 
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Groupie 
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Groupie 
+      COMPUTER.                                                          Groupie 
+                                                                         Groupie 
+      PURPOSE                                                            Groupie 
+      -------                                                            Groupie 
+      THIS PROGRAM IS DESIGNED TO CALCULATE ANY COMBINATION OF           Groupie 
+      THE FOLLOWING QUANTITIES FROM LINEARLY INTERPOLABLE TABULATED      Groupie 
+      CROSS SECTIONS IN THE ENDF/B FORMAT                                Groupie 
+                                                                         Groupie 
+      (1) UNSHIELDED GROUP AVERAGED CROSS SECTIONS                       Groupie 
+      (2) BONDARENKO SELF-SHIELDED GROUP AVERAGED CROSS SECTIONS         Groupie 
+      (3) MULTI-BAND PARAMETERS                                          Groupie 
+                                                                         Groupie 
+      IN THE FOLLOWING FOR SIMPLICITY THE ENDF/B TERMINOLOGY--ENDF/B     Groupie 
+      TAPE--WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE TAPE, CARDS,  Groupie 
+      DISK OR ANY OTHER MEDIUM.                                          Groupie 
+                                                                         Groupie 
+      ENDF/B FORMAT                                                      Groupie 
+      -------------                                                      Groupie 
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Groupie 
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Groupie 
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV OR V FORMAT).     Groupie 
+                                                                         Groupie 
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Groupie 
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Groupie 
+      ASSUMED THAT THE MAT, MF AND MT ON EACH CARD IS CORRECT. SEQUENCE  Groupie 
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Groupie 
+      CORRECTLY OUTPUT ON ALL CARDS. THE FORMAT OF SECTION MF=1, MT=451  Groupie 
+      AND ALL SECTIONS OF MF= 3 MUST BE CORRECT. THE PROGRAM COPIES ALL  Groupie 
+      OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE TO   Groupie 
+      THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.            Groupie 
+                                                                         Groupie 
+      ALL FILE 3 CROSS SECTIONS THAT ARE USED BY THIS PROGRAM MUST BE    Groupie 
+      LINEARLY INTERPOLABLE IN ENERGY AND CROSS SECTION (ENDF/B          Groupie 
+      INTERPOLATION LAW 2). FILE 3 BACKGROUND CROSS SECTIONS MAY BE MADE Groupie 
+      LINEARLY INTERPOLABLE USING PROGRAM LINEAR (UCRL-50400, VOL. 17,   Groupie 
+      PART A). THE RESONANCE CONTRIBUTION MAY BE ADDED TO THE BACKGROUND Groupie 
+      CROSS SECTIONS USING PROGRAM RECENT (UCRL-50400, VOL. 17, PART B). Groupie 
+      IF THIS PROGRAM FINDS THAT THE FILE 3 CROSS SECTIONS ARE NOT       Groupie 
+      LINEARLY INTERPOLABLE THIS PROGRAM WILL TERMINATE EXECUTION.       Groupie 
+                                                                         Groupie 
+      CONTENTS OF OUTPUT                                                 Groupie 
+      ------------------                                                 Groupie 
+      IF ENDF/B FORMATTED OUTPUT IS REQUESTED ENTIRE EVALUATIONS ARE     Groupie 
+      OUTPUT, NOT JUST THE MULTI-GROUPED FILE 3 CROSS SECTIONS, E.G.     Groupie 
+      ANGULAR AND ENERGY DISTRIBUTIONS ARE ALSO INCLUDED.                Groupie 
+                                                                         Groupie 
+      DOCUMENTATION                                                      Groupie 
+      -------------                                                      Groupie 
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Groupie 
+      BY THE ADDITION OF THREE COMMENT CARDS AT THE END OF EACH          Groupie 
+      HOLLERITH SECTION TO DESCRIBE THE GROUP STRUCTURE AND WEIGHTING    Groupie 
+      SPECTRUM, E.G.                                                     Groupie 
+                                                                         Groupie 
+      ********************** PROGRAM GROUPIE (2017-1) ***************    Groupie 
+      UNSHIELDED GROUP AVERAGES USING   69 GROUPS (WIMS)                 Groupie 
+      MAXWELLIAN, 1/E AND FISSION WEIGHTING SPECTRUM                     Groupie 
+                                                                         Groupie 
+      THE ORDER OF ALL SIMILAR COMMENTS (FROM LINEAR, RECENT AND SIGMA1) Groupie 
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Groupie 
+      THE DATA.                                                          Groupie 
+                                                                         Groupie 
+      THESE COMMENT CARDS ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Groupie 
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Groupie 
+      OF THE HOLLERITH SECTION IN ENDF/B-V DIFFERS FROM THE THAT OF      Groupie 
+      EARLIER VERSIONS OF ENDF/B. BY READING AN EXISTING MF=1, MT=451    Groupie 
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Groupie 
+      THE ENDF/B FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF      Groupie 
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Groupie 
+      DETERMINE WHICH VERSION OF THE ENDF/B FORMAT THE DATA IS IN, AND   Groupie 
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Groupie 
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Groupie 
+                                                                         Groupie 
+      REACTION INDEX                                                     Groupie 
+      --------------                                                     Groupie 
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Groupie 
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Groupie 
+                                                                         Groupie 
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Groupie 
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Groupie 
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Groupie 
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Groupie 
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Groupie 
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Groupie 
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Groupie 
+                                                                         Groupie 
+      SECTION SIZE                                                       Groupie 
+      ------------                                                       Groupie 
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Groupie 
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Groupie 
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Groupie 
+                                                                         Groupie 
+      SELECTION OF DATA                                                  Groupie 
+      -----------------                                                  Groupie 
+      THE PROGRAM SELECTS MATERIALS TO BE PROCESSED BASED EITHER ON      Groupie 
+      MAT (ENDF/B MAT NO.) OR ZA. THE PROGRAM ALLOWS UP TO 100 MAT OR    Groupie 
+      ZA RANGES TO BE SPECIFIED. THE PROGRAM WILL ASSUME THAT THE        Groupie 
+      ENDF/B TAPE IS IN EITHER MAT OR ZA ORDER, WHICHEVER CRITERIA IS    Groupie 
+      USED TO SELECT MATERIALS, AND WILL TERMINATE WHEN A MAT OR ZA      Groupie 
+      IS FOUND THAT IS ABOVE THE RANGE OF ALL REQUESTS.                  Groupie 
+                                                                         Groupie 
+      ENERGY ORDER AND UNITS                                             Groupie 
+      ----------------------                                             Groupie 
+      ALL ENERGIES (FOR CROSS SECTIONS, WEIGHTING SPECTRUM OR GROUP      Groupie 
+      BOUNDARIES) MUST BE IN UNITS OF EV AND MUST BE IN ASCENDING        Groupie 
+      NUMERICAL ORDER.                                                   Groupie 
+                                                                         Groupie 
+      ENERGY GRID                                                        Groupie 
+      -----------                                                        Groupie 
+      ALTHOUGH ALL REACTIONS MUST TO LINEARLY INTERPOLABLE, THEY DO NOT  Groupie 
+      ALL HAVE TO USE THE SAME ENERGY GRID. EACH REACTION CAN BE GIVEN   Groupie 
+      BY AN INDEPENDENT ENERGY GRID. THIS PROGRAM WILL PROCEED FROM      Groupie 
+      THE LOWEST TO HIGHEST ENERGY SELECTING EACH ENERGY INTERVAL OVER   Groupie 
+      WHICH ALL DATA, FOR ANY GIVEN CALCULATION, ARE ALL LINEARLY        Groupie 
+      INTERPOLABLE.                                                      Groupie 
+                                                                         Groupie 
+      GROUP STRUCTURE                                                    Groupie 
+      ---------------                                                    Groupie 
+      THIS PROGRAM IS DESIGNED TO USE AN ARBITRARY ENERGY GROUP          Groupie 
+      STRUCTURE WHERE THE ENERGIES ARE IN EV AND ARE IN INCREASING       Groupie 
+      ENERGY ORDER. THE MAXIMUM NUMBER OF GROUPS IS 20,000.              Groupie 
+                                                                         Groupie 
+      THE USER MAY INPUT AN ARBITRARY GROUP STRUCTURE OR THE USER MAY    Groupie 
+      USE USE ONE OF THE SEVEN BUILT-IN GROUP STRUCTURES.                Groupie 
+      (0) 175 GROUP (TART STRUCTURE)                                     Groupie 
+      (1)  50 GROUP (ORNL STRUCTURE)                                     Groupie 
+      (2) 126 GROUP (ORNL STRUCTURE)                                     Groupie 
+      (3) 171 GROUP (ORNL STRUCTURE)                                     Groupie 
+      (4) 620 GROUP (SAND-II STRUCTURE, UP TO 18 MEV)                    Groupie 
+      (5) 640 GROUP (SAND-II STRUCTURE, UP TO 20 MEV)                    Groupie 
+      (6)  69 GROUP (WIMS STRUCTURE)                                     Groupie 
+      (7)  68 GROUP (GAM-I STRUCTURE)                                    Groupie 
+      (8)  99 GROUP (GAM-II STRUCTURE)                                   Groupie 
+      (9)  54 GROUP (MUFT STRUCTURE)                                     Groupie 
+     (10)  28 GROUP (ABBN STRUCTURE)                                     Groupie 
+     (11) 616 GROUP (TART STRUCTURE TO 20 MeV)                           Groupie 
+     (12) 700 GROUP (TART STRUCTURE TO 1 GEV)                            Groupie 
+     (13) 665 GROUP (SAND-II STRUCTURE, 1.0D-5 eV, UP TO 18 MEV)         Groupie 
+     (14) 685 GROUP (SAND-II STRUCTURE, 1.0D-5 eV, UP TO 20 MEV)         Groupie 
+     (15) 666 GROUP (TART STRUCTURE TO 200 MeV)                          Groupie 
+     (16) 725 GROUP (SAND-II STRUCTURE, 1.0D-5 eV, UP TO  60 MEV)        Groupie 
+     (17) 755 GROUP (SAND-II STRUCTURE, 1.0D-5 eV, UP TO 150 MEV)        Groupie 
+     (18) 765 GROUP (SAND-II STRUCTURE, 1.0D-5 eV, UP TO 200 MEV)        Groupie 
+     (19)1102 GROUP (UKAEA   STRUCTURE, 1.0D-5 eV, UP TO   1 GeV)        Groupie 
+                                                                         Groupie 
+      GROUP AVERAGES                                                     Groupie 
+      --------------                                                     Groupie 
+      THIS PROGRAM DEFINES GROUP AVERAGED CROSS SECTIONS AS...           Groupie 
+                                                                         Groupie 
+                (INTEGRAL E1 TO E2) (SIGMA(E)*S(E)*WT(E)*DE)             Groupie 
+      AVERAGE = -----------------------------------------                Groupie 
+                (INTEGRAL E1 TO E2) (S(E)*WT(E)*DE)                      Groupie 
+      WHERE...                                                           Groupie 
+                                                                         Groupie 
+      AVERAGE  = GROUP AVERAGED CROSS SECTION                            Groupie 
+      E1, E2   = ENERGY LIMITS OF THE GROUP                              Groupie 
+      SIGMA(E) = ENERGY DEPENDENT CROSS SECTION FOR ANY GIVEN REACTION   Groupie 
+      S(E)     = ENERGY DEPENDENT WEIGHTING SPECTRUM                     Groupie 
+      WT(E)    = ENERGY DEPENDENT SELF-SHIELDING FACTOR.                 Groupie 
+                                                                         Groupie 
+      ENERGY DEPENDENT WEIGHTING SPECTRUM                                Groupie 
+      -----------------------------------                                Groupie 
+      THE ENERGY DEPENDENT WEIGHTING SPECTRUM IS GIVEN BY AN ARBITRARY   Groupie 
+      TABULATED LINERLY INTERPOLABLE FUNCTION WHICH CAN BE DESCRIBED     Groupie 
+      BY AN ARBITRARY NUMBER OF POINTS. THIS ALLOWS THE USER TO          Groupie 
+      SPECIFY ANY DESIRED WEIGHTING SPECTRUM TO ANY GIVEN DEGREE OF      Groupie 
+      ACCURACY. REMEMBER THAT THE PROGRAM WILL ASSUME THAT THE SPECTRUM  Groupie 
+      IS LINEARLY INTERPOLABLE BETWEEN TABULATED POINTS. THEREFORE THE   Groupie 
+      USER SHOULD USE ENOUGH POINTS TO INSURE AN ADEQUATE REPRESENTATION Groupie 
+      OF THE SPECTRUM BETWEEN TABULATED DATA POINTS.                     Groupie 
+                                                                         Groupie 
+      THE PRESENT VERSION OF THE CODE HAS THREE BULIT-IN WEIGHTING       Groupie 
+      SPECTRA,                                                           Groupie 
+                                                                         Groupie 
+      (1) CONSTANT                                                       Groupie 
+      (2) 1/E                                                            Groupie 
+      (3) MAXWELLIAN = E*EXP(-E/KT)/KT                (0.0 TO 4*KT)      Groupie 
+          1/E        = C1/E                           (4*KT TO 67 KEV)   Groupie 
+          FISSION    = C2*EXP(-E/WA)*SINH(SQRT(E*WB)) (ABOVE 67 KEV)     Groupie 
+                                                                         Groupie 
+          KT     = 0.253 EV (293 KELVIN)                                 Groupie 
+          WA     = 9.65D+5                                               Groupie 
+          WB     = 2.29D-6                                               Groupie 
+          C1, C2 = DEFINED TO MAKE SPECTRUM CONTINUOUS                   Groupie 
+                                                                         Groupie 
+          FISSION SPECTRUM CONSTANTS FROM                                Groupie 
+          A.F.HENRY, NUCLEAR REACTOR ANALYSIS, P. 11, MIT PRESS (1975)   Groupie 
+                                                                         Groupie 
+      UNSHIELDED GROUP AVERAGES                                          Groupie 
+      -------------------------                                          Groupie 
+      FOR UNSHIELDED AVERAGES THE SELF-SHIELDING FACTOR (WT(E)) IS SET   Groupie 
+      TO UNITY. THIS PROGRAM ALLOWS UP TO 20,000 GROUPS.                 Groupie 
+                                                                         Groupie 
+      SELF-SHIELDED GROUP AVERAGES                                       Groupie 
+      ----------------------------                                       Groupie 
+      IF SELF-SHIELDED AVERAGES AND/OR MULTI-BAND PARAMETERS ARE         Groupie 
+      CALCULATED THIS PROGRAM ALLOWS UP TO 20,000 GROUPS. SELF-SHIELDED  Groupie 
+      AVERAGES AND/OR MULTI-BAND PARAMETERS ARE CALCULATED FOR THE       Groupie 
+      TOTAL, ELASTIC, CAPTURE AND FISSION.                               Groupie 
+                                                                         Groupie 
+      FOR THE TOTAL, ELASTIC, CAPTURE AND FISSION THE PROGRAM USES A     Groupie 
+      WEIGHTING FUNCTION THAT IS A PRODUCT OF THE ENERGY DEPENDENT       Groupie 
+      WEIGHTING SPECTRUM TIMES A BONDERENKO TYPE SELF-SHIELDING FACTOR.  Groupie 
+                                                                         Groupie 
+      WT(E) = S(E)/(TOTAL(E)+SIGMA0)**N                                  Groupie 
+                                                                         Groupie 
+      WHERE...                                                           Groupie 
+                                                                         Groupie 
+      S(E)     - ENERGY DEPENDENT WEIGHTING SPECTRUM (DEFINED BY         Groupie 
+                 TABULATED VALUES AND LINEAR INTERPOLATION BETWEEN       Groupie 
+                 TABULATED VALUES).                                      Groupie 
+      TOTAL(E) - ENERGY DEPENDENT TOTAL CROSS SECTION FOR ONE MATERIAL   Groupie 
+                 (DEFINED BY TABULATED VALUES AND LINEAR INTERPOLATION   Groupie 
+                 BETWEEN TABULATED VALUES).                              Groupie 
+      SIGMA0   - CROSS SECTION TO REPRESENT THE EFFECT OF ALL OTHER      Groupie 
+                 MATERIALS AND LEAKAGE (DEFINED WITHIN EACH GROUP TO BE  Groupie 
+                 A MULTIPLE OF THE UNSHIELDED TOTAL CROSS SECTION WITHIN Groupie 
+                 THAT GROUP OR POWERS OF 10 - INPUT OPTION).             Groupie 
+      N        - A POSITIVE INTEGER (0, 1, 2 OR 3).                      Groupie 
+                                                                         Groupie 
+      THE PROGRAM WILL USE ONE ENERGY DEPENDENT WEIGHTING SPECTRUM S(E)  Groupie 
+      AND 25 DIFFERENT BONDERENKO TYPE SELF-SHIELDING FACTORS (25 SIGMA0 Groupie 
+      AND N COMBINATIONS) TO DEFINE 25 DIFFERENT AVERAGE CROSS SECTIONS, Groupie 
+      FOR EACH REACTION, WITHIN EACH GROUP.                              Groupie 
+                                                                         Groupie 
+      THE 25 WEIGHTING FUNCTIONS USED ARE....                            Groupie 
+      (1)   - UNSHIELDED CROSS SECTIONS (N=0)                            Groupie 
+      (2-22)- PARTIALLY SHIELDED CROSS SECTIONS (N=1 ,VARIOUS SIGMA0)    Groupie 
+              THE VALUES OF SIGMA0 USED WILL BE EITHER,                  Groupie 
+              (A) THE VALUES OF SIGMA0 THAT ARE USED VARY FROM 1024      Groupie 
+              TIMES THE UNSHIELDED TOTAL CROSS SECTIONS IN STEPS OF 1/2  Groupie 
+              DOWN TO 1/1024 TIMES THE UNSHIELDED TOTAL CROSS SECTION    Groupie 
+              (A RANGE OF OVER 1 MILLION, CENTERED ON THE UNSHIELDED     Groupie 
+              TOTAL CROSS SECTION WITHIN EACH GROUP).                    Groupie 
+              (B) THE SAME CONSTANT VALUES OF SIGMA0 IN EACH GROUP. THE  Groupie 
+              VALUES OF SIGMA0 USED INCLUDE 40000, 20000, 10000, 7000,   Groupie 
+              4000, 2000, 1000, 700, 400, 200, 100, 70, 40, 20, 10, 7,   Groupie 
+              4, 2, 1, 0.7, 0.4 (A RANGE OF 100,000 SPANNING MORE THAN   Groupie 
+              THE RANGE OF SIGMA0 VALUES THAT MAY BE ENCOUNTERED IN      Groupie 
+              ACTUAL APPLICATIONS)                                       Groupie 
+      (23)  - TOTALLY SHIELDED FLUX WEIGHTED CROSS SECTION               Groupie 
+              (N=1, SIGMA0=0)                                            Groupie 
+      (24)  - TOTALLY SHIELDED CURRENT WEIGHTED CROSS SECTION            Groupie 
+              (N=2, SIGMA0=0)                                            Groupie 
+      (25)  - TOTALLY SHIELDED COSINE SQUARED WEIGHTED CROSS SECTION     Groupie 
+              (N=3, SIGMA0=0)                                            Groupie 
+                                                                         Groupie 
+      FOR ALL OTHER REACTIONS (EXCEPT TOTAL, ELASTIC, CAPTURE AND        Groupie 
+      FISSION) THE PROGRAM WILL USE THE ENERGY DEPENDENT WEIGHTING       Groupie 
+      SPECTRUM S(E) TO DEFINE THE UNSHIELDED (BONDERENKO N=0)            Groupie 
+      AVERAGED CROSS SECTION WITHIN EACH GROUP.                          Groupie 
+                                                                         Groupie 
+      CALCULATION OF RESONANCE INTEGRALS                                 Groupie 
+      ----------------------------------                                 Groupie 
+      IN A PURE ELASTIC ISOTROPICALLY SCATTERING MATERIAL WITH A         Groupie 
+      CONSTANT CROSS SECTION THE SPECTRUM WILL BE 1/E AND THERE WILL     Groupie 
+      BE NO SELF-SHIELDING.                                              Groupie 
+                                                                         Groupie 
+      IN THIS CASE IF THE CROSS SECTION VARIES WITH ENERGY THE           Groupie 
+      SPECTRUM WILL STILL BE 1/E AND THE SELF-SHIELDING FACTOR WILL      Groupie 
+      BE EXACTLY 1/SIG-TOT(E) - WHERE SIG-TOT(E) = SIG-EL(E), SINCE      Groupie 
+      THERE IS ONLY SCATTERING.                                          Groupie 
+                                                                         Groupie 
+      IF WE HAVE AN INFINITELY DILUTE AMOUNT OF A MATERIAL UNIFORMLY     Groupie 
+      MIXED WITH A PURE ELASTIC ISOTROPICALLY SCATTERING MATERIAL WITH   Groupie 
+      A CONSTANT CROSS SECTION THE STANDARD DEFINITION OF THE RESONANCE  Groupie 
+      INTEGRAL CAN BE USED TO DEFINE REACTION RATES FOR EACH REACTION.   Groupie 
+                                                                         Groupie 
+      THE RESONANCE INTEGRAL IS DEFINED AS,                              Groupie 
+                                                                         Groupie 
+      RI      = (INTEGRAL E1 TO E2) (SIGMA(E)*S(E)*WT(E)*DE)             Groupie 
+                                                                         Groupie 
+      WHERE NORMALLY,                                                    Groupie 
+      S(E)    = 1/E                                                      Groupie 
+      WT(E)   = 1    - NO SELF-SHIELDING                                 Groupie 
+                                                                         Groupie 
+      FROM THE ABOVE DEFINITION OF GROUP AVERAGED CROSS SECTIONS THE     Groupie 
+      RESONANCE INTEGRAL IS,                                             Groupie 
+                                                                         Groupie 
+      RI      = AVERAGE * (INTEGRAL E1 TO E2) (S(E)*WT(E)*DE)            Groupie 
+                                                                         Groupie 
+      FOR A 1/E SPECTRUM AND NO SELF-SHIELDING THIS REDUCES TO,          Groupie 
+                                                                         Groupie 
+      RI      = AVERAGE* LOG(E2/E1)                                      Groupie 
+                                                                         Groupie 
+      IN ANY OTHER SITUATION, INCLUDING ABSORPTION AND/OR ENERGY         Groupie 
+      DEPENDENT CROSS SECTIONS, THE SPECTRUM WILL NOT BE 1/E -           Groupie 
+      ABSORPTION WILL TEND TO DECREASE THE SPECTRUM PROGRESSIVELY        Groupie 
+      MORE AT LOWER ENERGIES - ENERGY DEPENDENCE OF THE CROSS SECTION    Groupie 
+      WILL LEAD TO SELF-SHIELDING.                                       Groupie 
+                                                                         Groupie 
+      HERE WE WILL NOT ATTEMPT TO PERFORM A DETAILED SPECTRUM            Groupie 
+      CALCULATION TO ACCOUNT FOR ABSORPTION.                             Groupie 
+                                                                         Groupie 
+      HOWEVER, WE WILL EXTEND THE DEFINITION OF THE RESONANCE INTEGRAL   Groupie 
+      TO ACCOUNT FOR SELF-SHIELDING EFFECTS BY ALLOWING FOR INCLUSION    Groupie 
+      OF SELF-SHIELDING EFFECTS IN THE DEFINITION OF GROUP AVERAGES      Groupie 
+      AND THEN DEFINING THE RESONANCE INTEGRAL AS,                       Groupie 
+                                                                         Groupie 
+      RI      = AVERAGE* LOG(E2/E1)                                      Groupie 
+                                                                         Groupie 
+      IN ORDER TO CALCULATE RESONANCE INTEGRALS YOU MUST FOLLOW THESE    Groupie 
+      STEPS,                                                             Groupie 
+                                                                         Groupie 
+      1) SELECT A 1/E SPECTRUM - ON FIRST LINE OF INPUT PARAMETERS.      Groupie 
+      2) SELECT THE ENERGY BOUNDARIES - NORMALLY ONLY 1 GROUP FROM       Groupie 
+         0.5 EV UP TO 20 MEV - HOWEVER, YOU ARE FREE TO SELECT ANY       Groupie 
+         ENERGY RANGE THAT YOU WISH - YOU MAY EVEN SELECT MORE THAN      Groupie 
+         1 GROUP MERELY BY SPECIFYING MORE THAN 1 GROUP AS INPUT -       Groupie 
+         THIS CAN BE USED TO DEFINE THE CONTRIBUTIONS TO THE RESONANCE   Groupie 
+         INTEGRAL FROM INDIVIDUAL ENERGY RANGES.                         Groupie 
+      3) SELECT THIS OPTION FOR THE UNSHIELDED AND/OR SHIELDED OUTPUT    Groupie 
+         LISTING - ON THE SECOND LINE OF INPUT PARAMETERS.               Groupie 
+                                                                         Groupie 
+      WHEN THIS OPTION IS USED THE PROGRAM WILL CALCULATE GROUP AVERAGED Groupie 
+      CROSS SECTIONS - AS DEFINED ABOVE - PRIOR TO OUTPUT THE RESULTS    Groupie 
+      WILL MERELY BE MULTIPLIED BY THE WIDTH OF THE GROUP ASSUMING YOU   Groupie 
+      HAVE SELECTED A 1/E SPECTRUM - THERE IS NO CHECK ON THIS - THE     Groupie 
+      PROGRAM MERELY MULTIPLIES THE GROUP AVERAGED CROSS SECTIONS BY,    Groupie 
+                                                                         Groupie 
+      LOG(E2/E1) - WHERE E2 AND E1 ARE THE GROUP ENERGY BOUNDARIES.      Groupie 
+                                                                         Groupie 
+      WARNING - IT IS UP TO YOU TO INSURE THAT YOU FOLLOW EXACTLY THE    Groupie 
+                STEPS OUTLINED ABOVE IF YOU WISH TO OBTAIN MEANINGFUL    Groupie 
+                RESULTS.                                                 Groupie 
+                                                                         Groupie 
+      NOTE - OUTPUT IN THE ENDF/B FORMAT IS ALWAYS GROUP AVERAGED CROSS  Groupie 
+             SECTIONS, REGARDLESS OF WHETHER YOU ASK FOR AVERAGED CROSS  Groupie 
+             SECTIONS OR RESONANCE INTEGRALS - THIS IS BECAUSE DATA IN   Groupie 
+             THE ENDF/B FORMAT IS EXPLICITLY DEFINED TO BE CROSS         Groupie 
+             SECTIONS.                                                   Groupie 
+                                                                         Groupie 
+             RESONANCE INTEGRAL OUTPUT CAN ONLY BE OBTAINED IN THE       Groupie 
+             LISTING FORMATS.                                            Groupie 
+                                                                         Groupie 
+      MINIMUM TOTAL CROSS SECTION TREATMENT                              Groupie 
+      -------------------------------------                              Groupie 
+      SINCE THE BONDARENKO SELF-SHIELDING DEPENDS ON 1/TOTAL CROSS       Groupie 
+      SECTION, THE ALGORITHM WILL BECOME NUMERICALLY UNSTABLE IF THE     Groupie 
+      TOTAL CROSS SECTION IS NEGATIVE (AS OCCURS IN MANY ENDF/B          Groupie 
+      EVALUATIONS). IF THE TOTAL IS LESS THAN SOME MINIMUM ALLOWABLE     Groupie 
+      VALUE (DEFINE BY OKMIN, PRESENTLY 1 MILLI-BARN) AN ERROR MESSAGE   Groupie 
+      WILL BE PRINTED AND FOR THE SELF-SHIELDING CALCULATION ALL ENERGY  Groupie 
+      INTERVALS IN WHICH THE TOTAL IS LESS THAN THE MINIMUM WILL BE      Groupie 
+      IGNORED.                                                           Groupie 
+                                                                         Groupie 
+      NOTE, FOR THE UNSHIELDED CALCULATIONS ALL CROSS SECTIONS WILL BE   Groupie 
+      CONSIDERED WHETHER THEY ARE POSITIVE OR NEGATIVE. THEREFORE IF     Groupie 
+      THE TOTAL CROSS SECTION IS NEGATIVE OR LESS THAN THE MINIMUM       Groupie 
+      VALUE THERE MAY BE AN INCONSISTENCY BETWEEN THE UNSHIELDED AND     Groupie 
+      THE SELF-SHIELDED CROSS SECTIONS. IF THE TOTAL CROSS SECTION IS    Groupie 
+      NEGATIVE AND SELF-SHIELDED CROSS SECTIONS ARE CALCULATED THE       Groupie 
+      PROGRAM WILL PRINT AN ERROR MESSAGE INDICATING THAT THE SELF-      Groupie 
+      SHIELDED RESULTS ARE UNRELIABLE AND SHOULD NOT BE USED. THEREFORE  Groupie 
+      IN THIS CASE THE PROGRAM WILL NOT ATTEMPT TO MODIFY THE UNSHIELDED Groupie 
+      RESULTS TO ELIMINATE THE EFFECT OF NEGATIVE CROSS SECTIONS, SINCE  Groupie 
+      THE UNSHIELDED RESULTS ARE THE ONLY ONES WHICH TRULY REFLECT THE   Groupie 
+      ACTUAL INPUT.                                                      Groupie 
+                                                                         Groupie 
+      RESOLVED RESONANCE REGION                                          Groupie 
+      -------------------------                                          Groupie 
+      IN THE RESOLVED RESONANCE REGION (ACTUALLY EVERYWHERE BUT IN THE   Groupie 
+      UNRESOLVED RESONANCE REGION) THE CROSS SECTIONS OUTPUT BY LINEAR-  Groupie 
+      RECENT-SIGMA1 WILL BE ACTUAL ENERGY DEPENDENT CROSS SECTIONS AND   Groupie 
+      THE CALCULATIONS BY THIS PROGRAM WILL YIELD ACTUAL SHIELDED AND    Groupie 
+      UNSHIELDED CROSS SECTIONS.                                         Groupie 
+                                                                         Groupie 
+      UNRESOLVED RESONANCE REGION                                        Groupie 
+      ---------------------------                                        Groupie 
+      IN THE UNRESOLVED RESONANCE REGION PROGRAM RECENT USES THE         Groupie 
+      UNRESOLVED RESONANCE PARAMETERS TO CALCULATE INFINITELY DILUTE     Groupie 
+      AVERAGE CROSS SECTIONS. THIS PROGRAM WILL MERELY READ THIS         Groupie 
+      INFINITELY DILUTE DATA AS IF IT WERE ENERGY DEPENDENT DATA AND     Groupie 
+      GROUP AVERAGE IT. AS SUCH THIS PROGRAM WILL PRODUCE THE CORRECT    Groupie 
+      UNSHIELDED CROSS SECTION IN THE UNRESOLVED RESONANCE REGION, BUT   Groupie 
+      IT WILL NOT PRODUCE THE CORRECT SELF-SHIELDING EFFECTS.            Groupie 
+                                                                         Groupie 
+      ACCURACY OF RESULTS                                                Groupie 
+      -------------------                                                Groupie 
+      ALL INTEGRALS ARE PERFORMED ANALYTICALLY. THEREFORE NO ERROR IS    Groupie 
+      INTRODUCED DUE TO THE USE OF TRAPAZOIDAL OR OTHER INTEGRATION      Groupie 
+      SCHEME. THE TOTAL ERROR THAT CAN BE ASSIGNED TO THE RESULTING      Groupie 
+      AVERAGES IS JUST THAT DUE TO THE ERROR IN THE CROSS SECTIONS       Groupie 
+      AND ENERGY DEPENDENT WEIGHTING SPECTRUM. GENERALLY SINCE THE       Groupie 
+      THE ENERGY DEPENDENT WEIGHTING SPECTRUM APPEARS IN BOTH THE        Groupie 
+      NUMERATOR AND THE DENOMINATOR THE AVERAGES RAPIDLY BECOME          Groupie 
+      INSENSITIVE TO THE WEIGHTING SPECTRUM AS MORE GROUPS ARE USED.     Groupie 
+      SINCE THE WEIGHTING SPECTRUM IS LOADED IN THE PAGING SYSTEM THE    Groupie 
+      USER CAN DESCRIBE THE SPECTRUM TO ANY REQUIRED ACCURACY USING      Groupie 
+      ANY NUMBER OF ENERGY VS. SPECTRUM PAIRS.                           Groupie 
+                                                                         Groupie 
+      MULTI-BAND PARAMETERS                                              Groupie 
+      ---------------------                                              Groupie 
+      MULTI-BAND PARAMETERS ARE CALCULATED FOR THE TOTAL, ELASTIC,       Groupie 
+      CAPTURE AND FISSION REACTIONS. WITH THE NUMBER OF GROUPS THAT      Groupie 
+      ARE NORMALLY USED (SEE BUILT IN GROUP STRUCTURES) ALL OTHER        Groupie 
+      REACTIONS RESULT IN A NEGLIGABLE AMOUNT OF SELF-SHIELDING. AS      Groupie 
+      SUCH THEIR EQUIVALENT BAND CROSS SECTION WILL MERELY BE THEIR      Groupie 
+      UNSHIELDED VALUE WITHIN EACH BAND.                                 Groupie 
+                                                                         Groupie 
+      FOR ANY GIVEN EVALUATION, WITHIN ANY GIVEN GROUP THIS PROGRAM      Groupie 
+      WILL GENERATE THE MINIMUM NUMBER OF BANDS REQUIRED WITHIN THAT     Groupie 
+      GROUP. AS OUTPUT TO THE COMPUTER READABLE DISK FILE THE BAND       Groupie 
+      PARAMETERS FOR EACH EVALUATION WILL BE FORMATTED TO HAVE THE       Groupie 
+      SAME NUMBER OF BANDS IN ALL GROUPS (WITH ZERO WEIGHT FOR SOME      Groupie 
+      BANDS WITHIN ANY GROUP). THE USER MAY DECIDE TO HAVE OUTPUT        Groupie 
+      EITHER WITH THE MINIMUM NUMBER OF BANDS REQUIRED FOR EACH          Groupie 
+      EVALUATION (E.G. 2 BANDS FOR HYDROGEN AND 4 BANDS FOR U-233) OR    Groupie 
+      THE SAME NUMBER OF BANDS FOR ALL EVALUATIONS (E.G. 4 BANDS FOR     Groupie 
+      BOTH HYDROGEN AND U-233).                                          Groupie 
+                                                                         Groupie 
+      FOR 2 OR FEWER BANDS THE PROGRAM USES AN ANALYTIC EXPRESSION       Groupie 
+      TO DEFINE ALL MULTI-BAND PARAMETERS. FOR MORE THAN 2 BANDS THE     Groupie 
+      PROGRAM PERFORMS A NON-LINEAR FIT TO SELECT THE MULTI-BAND         Groupie 
+      PARAMETERS THAT MINIMIZE THE MAXIMUM FRACTIONAL ERROR AT ANY       Groupie 
+      POINT ALONG THE ENTIRE SELF-SHIELDING CURVE. THE NUMBER OF BANDS   Groupie 
+      REQUIRED WITHIN ANY GIVEN GROUP IS DEFINED BY INSURING THAT THE    Groupie 
+      MULTI-BAND PARAMETERS CAN BE USED TO ACCURATELY DEFINE SELF-       Groupie 
+      SHIELDED CROSS SECTIONS ALONG THE ENTIRE SELF-SHIELDING CURVE      Groupie 
+      FROM SIGMA0 = 0 TO INFINITY. THE USER MAY DEFINE THE ACCURACY      Groupie 
+      REQUIRED.                                                          Groupie 
+                                                                         Groupie 
+      ENDF/B FORMATTED UNSHIELDED AVERAGES                               Groupie 
+      ------------------------------------                               Groupie 
+      UNSHIELDED MULTI-GROUP AVERAGED CROSS SECTIONS FOR ALL REACTIONS   Groupie 
+      MAY BE OBTAINED IN THE ENDF/B FORTRAN IN EITHER HISTOGRAM          Groupie 
+      (INTERPOLATION LAW 1) OR LINEARLY INTERPOLABLE (INTERPOLATION      Groupie 
+      LAW 2) FORM. SEE INPUT BELOW FOR DETAILS.                          Groupie 
+                                                                         Groupie 
+      MIXTURES OF MATERIALS AND RESONANCE OVERLAP                        Groupie 
+      -------------------------------------------                        Groupie 
+      THE SELF-SHIELDED CROSS SECTIONS FOR THE INDIVIDUAL CONSTITUENTS   Groupie 
+      OF ANY MIXTURE CAN BE CALCULATED BY THIS PROGRAM BY REALIZING THAT Groupie 
+      THIS PROGRAM ESSENTIALLY ONLY USES THE TOTAL CROSS SECTION AS A    Groupie 
+      WEIGHTING FUNCTION TO ACCOUNT FOR SELF-SHIELDING EFFECTS. FOR A    Groupie 
+      MIXTURE IT IS THEREFORE ONLY NECESSARY TO USE THE TOTAL CROSS      Groupie 
+      SECTION FOR THE MIXTURE IN PLACE OF THE ACTUAL TOTAL CROSS SECTION Groupie 
+      FOR EACH CONSTITUENT AND TO RUN THIS PROGRAM. THIS CAN BE DONE BY  Groupie 
+      FIRST RUNNING PROGRAM MIXER TO CALCULATE THE ENERGY DEPENDENT      Groupie 
+      TOTAL CROSS SECTION FOR ANY COMPOSITE MIXTURE. NEXT, SUBSTITUTE    Groupie 
+      THIS COMPOSITE TOTAL CROSS SECTION FOR THE ACTUAL TOTAL CROSS      Groupie 
+      SECTION OF EACH CONSTITUENT (IN EACH ENDF/B FORMATTED EVALUATION). Groupie 
+      FINALLY, RUN THIS PROGRAM TO CALCULATE THE SELF-SHIELDED CROSS     Groupie 
+      SECTION FOR EACH CONSTITUENT, PROPERLY ACCOUNTING FOR RESONANCE    Groupie 
+      OVERLAP BETWEEN THE RESONANCES OF ALL OF THE CONSTITUENTS OF THE   Groupie 
+      MIXTURE. DURING THE SAME RUN THESE SELF-SHIELDED CROSS SECTIONS    Groupie 
+      CAN IN TURN BE USED TO CALCULATE FULLY CORRELATED MULT-BAND        Groupie 
+                                                                         Groupie 
+      MULTI-BAND PARAMETER OUTPUT FORMAT                                 Groupie 
+      ----------------------------------                                 Groupie 
+      FOR VERSIONS 92-2 AND LATER VERSIONS THE MULTI-BAND PARAMETERS     Groupie 
+      ARE OUTPUT IN A SIMPLE CHARACTER FORMAT, THAT CAN BE TRANSFERRED   Groupie 
+      AND USED ON VIRTUALLY ANY COMPUTER.                                Groupie 
+                                                                         Groupie 
+      THE BINARY FORMAT USED IN EARLIER VERSIONS OF THIS CODE IS NO      Groupie 
+      LONGER USED.                                                       Groupie 
+                                                                         Groupie 
+      CONTACT THE AUTHOR IF YOU WOULD LIKE TO RECEIVE A SIMPLE PROGRAM   Groupie 
+      TO READ THE CHARACTER FORMATTED MULTI-BAND PARAMETER FILE AND      Groupie 
+      CREATE A BINARY, RANDOM ACCESS FILE FOR USE ON VIRTUALLY ANY       Groupie 
+      COMPUTER.                                                          Groupie 
+                                                                         Groupie 
+      THE FORMAT OF THE CHARACTER FILE IS,                               Groupie 
+                                                                         Groupie 
+      RECORD   COLUMNS   FORMAT   DESCRIPTION                            Groupie 
+         1       1-72     18A4    LIBRARY DESCRIPTION (AS READ)          Groupie 
+         2       1-11      I11    MATERIAL ZA                            Groupie 
+                12-22      I11    NUMBER GROUPS                          Groupie 
+                23-33      I11    NUMBER OF BANDS                        Groupie 
+                34-44     E11.4   TEMPERATURE (KELVIN)                   Groupie 
+                45-55    1X,10A1  HOLLERITH DESCRIPTION OF ZA            Groupie 
+         3       1-11     E11.4   ENERGY (EV) - GROUP BOUNDARY.          Groupie 
+                12-22     E11.4   TOTAL      (FIRST BAND)                Groupie 
+                23-33     E11.4   ELASTIC                                Groupie 
+                34-44     E11.4   CAPTURE                                Groupie 
+                35-55     E11.4   FISSION                                Groupie 
+         4       1-11     -----   BLANK                                  Groupie 
+                12-22     E11.4   TOTAL      (SECOND BAND)               Groupie 
+                23-33     E11.4   ELASTIC                                Groupie 
+                34-44     E11.4   CAPTURE                                Groupie 
+                35-55     E11.4   FISSION                                Groupie 
+                                                                         Groupie 
+      LINES 3 AND 4 ARE REPEATED FOR EACH GROUP. THE LAST LINE FOR EACH  Groupie 
+      MATERIAL (ZA) IS,                                                  Groupie 
+                                                                         Groupie 
+         N       1-11     E11.4   ENERGY (EV) - UPPER ENERGY LIMIT OF    Groupie 
+                                                LAST GROUP.              Groupie 
+                                                                         Groupie 
+      FOR EXAMPLE, A 175 GROUP, 2 BAND FILE, FOR EACH MATERIAL WILL      Groupie 
+      CONTAIN 352 LINES = 1 HEADER LINE, 175 * 2 LINES OF PARAMETERS,    Groupie 
+                          AND 1 FINAL LINE WITH THE UPPER ENERGY LIMIT   Groupie 
+                          OF THE LAST GROUP.                             Groupie 
+                                                                         Groupie 
+      INPUT FILES                                                        Groupie 
+      -----------                                                        Groupie 
+      UNIT  DESCRIPTION                                                  Groupie 
+      ----  -----------                                                  Groupie 
+        2   INPUT DATA (BCD - 80 CHARACTERS/RECORD)                      Groupie 
+       10   ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Groupie 
+                                                                         Groupie 
+      OUTPUT FILES                                                       Groupie 
+      ------------                                                       Groupie 
+      UNIT  DESCRIPTION                                                  Groupie 
+      ----  -----------                                                  Groupie 
+       31   MULTI-BAND PARAMETERS CHARACTER FILE - OPTIONAL              Groupie 
+            (BCD - 80 CHARACTERS/RECORD)                                 Groupie 
+       32   SELF-SHIELDED CROSS SECTION LISTING - OPTIONAL               Groupie 
+            (BCD - 120 CHARACTERS/RECORD)                                Groupie 
+       33   MULTI-BAND PARAMETER LISTING - OPTIONAL                      Groupie 
+            (BCD - 120 CHARACTERS/RECORD)                                Groupie 
+       34   UNSHIELDED CROSS SECTION LISTING - OPTION                    Groupie 
+            (BCD - 120 CHARACTERS/RECORD)                                Groupie 
+        3   OUTPUT REPORT (BCD - 80 CHARACTERS/RECORD)                   Groupie 
+       11   MULTI-GROUP ENDF/B DATA - OPTIONAL                           Groupie 
+            (BCD - 80 CHARACTERS/RECORD)                                 Groupie 
+                                                                         Groupie 
+      SCRATCH FILES                                                      Groupie 
+      -------------                                                      Groupie 
+      UNIT  FILENAME  DESCRIPTION                                        Groupie 
+      ----  --------  -----------                                        Groupie 
+        8   ENERGY DEPENDENT WEIGHTING SPECTRUM                          Groupie 
+            (BINARY - 40080 WORDS/BLOCK)                                 Groupie 
+        9   TOTAL CROSS SECTION                                          Groupie 
+            (BINARY - 40080 WORDS/BLOCK)                                 Groupie 
+       12   ELASTIC CROSS SECTION - ONLY FOR SELF-SHIELDING CALCULATION  Groupie 
+            (BINARY - 40080 WORDS/BLOCK)                                 Groupie 
+       13   CAPTURE CROSS SECTION - ONLY FOR SELF-SHIELDING CALCULATION  Groupie 
+            (BINARY - 40080 WORDS/BLOCK)                                 Groupie 
+       14   FISSION CROSS SECTION - ONLY FOR SELF-SHIELDING CALCULATION  Groupie 
+            (BINARY - 40080 WORDS/BLOCK)                                 Groupie 
+                                                                         Groupie 
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINES FILIO1 AND FILIO2)   Groupie 
+      ----------------------------------------------------------------   Groupie 
+      UNIT  FILE NAME                                                    Groupie 
+      ----  ----------                                                   Groupie 
+        2   GROUPIE.INP                                                  Groupie 
+        3   GROUPIE.LST                                                  Groupie 
+        8   (SCRATCH)                                                    Groupie 
+        9   (SCRATCH)                                                    Groupie 
+       10   ENDFB.IN                                                     Groupie 
+       11   ENDFB.OUT                                                    Groupie 
+       12   (SCRATCH)                                                    Groupie 
+       13   (SCRATCH)                                                    Groupie 
+       14   (SCRATCH)                                                    Groupie 
+       31   MULTBAND.TAB                                                 Groupie 
+       32   SHIELD.LST                                                   Groupie 
+       33   MULTBAND.LST                                                 Groupie 
+       34   UNSHIELD.LST                                                 Groupie 
+                                                                         Groupie 
+       I/O UNITS USED                                                    Groupie 
+       --------------                                                    Groupie 
+       UNITS 2, 3 8, 9 AND 10 WILL ALWAYS BE USED.                       Groupie 
+       UNITS 31 THROUGH 34 AND 11 ARE OPTIONALLY USED DEPENDING ON THE   Groupie 
+       OUTPUT REQUESTED.                                                 Groupie 
+       UNITS 12, 13 AND 14 WILL ONLY BE USED IF SELF-SHIELDED OR         Groupie 
+       MULTIBAND OUTPUT IS REQUESTED.                                    Groupie 
+                                                                         Groupie 
+      INPUT CARDS                                                        Groupie 
+      -----------                                                        Groupie 
+      CARD  COLS.  FORMAT  DESCRIPTION                                   Groupie 
+      ----  -----  ------  -----------                                   Groupie 
+        1    1-11    I11   SELECTION CRITERIA (0=MAT, 1=ZA)              Groupie 
+        1   12-22    I11   NUMBER OF GROUPS.                             Groupie 
+                           =.GT.0 - ARBITRARY GROUP BOUNDARIES ARE READ  Groupie 
+                                    FROM INPUT FILE (N GROUPS REQUIRE    Groupie 
+                                    N+1 GROUP BOUNDARIES). CURRENT       Groupie 
+                                    PROGRAM MAXIMUM IS 20,000 GROUPS.    Groupie 
+                                    BUILT-IN OPTIONS INCLUDE....         Groupie 
+                           =  0   - TART    175 GROUPS                   Groupie 
+                           = -1   - ORNL     50 GROUPS                   Groupie 
+                           = -2   - ORNL    126 GROUPS                   Groupie 
+                           = -3   - ORNL    171 GROUPS                   Groupie 
+                           = -4   - SAND-II 620 (665) GROUPS TO 18 MEV   Groupie 
+                           = -5   - SAND-II 640 (685) GROUPS TO 20 MEV   Groupie 
+                           = -6   - WIMS     69 GROUPS                   Groupie 
+                           = -7   - GAM-I    68 GROUPS                   Groupie 
+                           = -8   - GAM-II   99 GROUPS                   Groupie 
+                           = -9   - MUFT     54 GROUPS                   Groupie 
+                           =-10   - ABBN     28 GROUPS                   Groupie 
+                           =-11   - TART    616 GROUPS TO 20 MEV         Groupie 
+                           =-12   - TART    700 GROUPS TO 1 GEV          Groupie 
+                           =-13   - SAND-II 665 GROUPS TO 18 MEV         Groupie 
+                           =-14   - SAND-II 685 GROUPS TO 20 MEV         Groupie 
+                           =-15   - TART    666 GROUPS TO 200 MEV        Groupie 
+                           =-16   - SAND-II 725 GROUPS TO 60 MEV         Groupie 
+                           =-17   - SAND-II 755 GROUPS TO 150 MEV        Groupie 
+                           =-18   - SAND-II 765 GROUPS TO 200 MEV        Groupie 
+                           =-19   - UKAEA  1102 GROUPS TO   1 GeV        Groupie 
+        1   23-33    I11   MULTI-BAND SELECTOR                           Groupie 
+                           =  0 - NO MULTI-BAND CALCULATIONS             Groupie 
+                           =  1 - 2 BAND. CONSERVE AV(TOT), AV(1/TOT)    Groupie 
+                                  AND AV(1/TOT**2)                       Groupie 
+                           =  2 - 2 BAND. CONSERVE AV(TOT), AV(1/TOT)    Groupie 
+                                  AND AV(1/(TOT+SIGMA0)) WHERE           Groupie 
+                                  SIGMA0 = AV(TOT) IN EACH GROUP         Groupie 
+                           = 3-5- MULTI-BAND FIT. CONSERVE AV(TOT) AND   Groupie 
+                                  MINIMIZE FRACTIONAL ERROR FOR ENTIRE   Groupie 
+                                  SELF-SHIELDING CURVE (SIGMA0 = 0 TO    Groupie 
+                                  INFINITY)                              Groupie 
+                           IF THE SELECTOR IS POSITIVE (1 TO 5) THE      Groupie 
+                           MINIMUM NUMBER OF BANDS WILL BE OUTPUT FOR    Groupie 
+                           EACH ISOTOPE INDEPENDENTLY. IF THE SELECTOR   Groupie 
+                           IS NEGATIVE (-1 TO -5) THE SAME NUMBER OF     Groupie 
+                           BANDS (ABS(SELECTOR)) WILL BE OUTPUT FOR      Groupie 
+                           ALL ISOTOPES.                                 Groupie 
+        1   34-44    I11   NUMBER OF POINTS USED TO DESCRIBE ENERGY      Groupie 
+                           DEPENDENT WEIGHTING SPECTRUM S(E).            Groupie 
+                           = -2    - MAXWELLIAN - UP TO 0.1 EV           Groupie 
+                                     1/E        - 0.1 EV TO 67 KEV       Groupie 
+                                     FISSION    - ABOVE 67 KEV           Groupie 
+  05/01/20-----------------ADDED OPTION TO ALLOW TEMPERATURE OF THE      Groupie 
+                           MAXWELLIAN TO BE CHANGED - SEE INPUT LINE 4,  Groupie 
+                           COLUMNS 55 - 66.                              Groupie 
+                           = -1    - 1/E                                 Groupie 
+                           = 0 OR 1- ENERGY INDEPENDENT (SO CALLED FLAT  Groupie 
+                                     WEIGHTING SPECTRUM).                Groupie 
+                           = .GT.1 - READ THIS MANY POINTS FROM INPUT    Groupie 
+                                     TO DESCRIBE WEIGHTING SPECTRUM.     Groupie 
+                                     NO LIMIT TO THE NUMBER OF POINTS    Groupie 
+                                     USED TO DESCRIBE WEIGHTING.         Groupie 
+        1   45-55   E11.4  MULTI-BAND CONVERGENCE CRITERIA.              Groupie 
+                           ONLY USED FOR 3 OR MORE BANDS. THE NUMBER OF  Groupie 
+                           BANDS IN EACH GROUPS IS SELECTED TO INSURE    Groupie 
+                           THAT THE ENTIRE SELF-SHIELDING CURVE CAN BE   Groupie 
+                           REPRODUCED TO WITHIN THIS FRACTIONAL ERROR.   Groupie 
+                           = .LT. 0.0001 - USE STANDARD 0.001            Groupie 
+                                           (0.1 PER-CENT)                Groupie 
+                           = .GE. 0.0001 - USE AS CONVERGENCE CRITERIA   Groupie 
+        1   56-66    I11   SIGMA-0 DEFINITION SELECTOR.                  Groupie 
+                           < 0 - 21 VALUES OF SIGMA0 ARE READ INPUT AND  Groupie 
+                                 INTERPRETED AS FIXED VALUES = SAME AS   Groupie 
+                                 = 1 DESCRIPTION BELOW                   Groupie 
+                                 INPUT VALUES MUST ALL BE,               Groupie 
+                                 1) GREATER THAN 0                       Groupie 
+                                 2) IN DESCENDING VALUE ORDER            Groupie 
+                           = 0 - SIGMA-0 WILL BE DEFINED AS A MULTIPLE   Groupie 
+                                 OF THE UNSHIELDED TOTAL CROSS SECTION   Groupie 
+                                 IN EACH GROUP (VALUES OF 1/1024 TO      Groupie 
+                                 1024 IN STEPS OF A FACTOR OF 2 WILL     Groupie 
+                                 BE USED AS THE MULTIPLIER).             Groupie 
+                           = 1 - SIGMA-0 WILL BE DEFINED AS THE SAME     Groupie 
+                                 NUMBER OF BARNS IN EACH GROUP (VALUES   Groupie 
+                                 40000 TO 0.4 BARNS WILL BE USED. WITHIN Groupie 
+                                 EACH DECADE VALUES OF 10, 7, 4, 2, 1    Groupie 
+                                 BARNS WILL BE USED).                    Groupie 
+        1   67-70    I4    High energy extension = definition of cross   Groupie 
+                           section above highest tabulated energy.       Groupie 
+                           = 0 = cross section = 0 (standard ENDF/B)     Groupie 
+                           = 1 = cross section = constant (equal to      Groupie 
+                                 value at highest tabulated energy).     Groupie 
+      2-4    1-66 6E11.4   IF SIGMA-0 DEFINITION SELECTOR < 0, THE NEXT  Groupie 
+                           4 LINES OF INPUT ARE THE 22 VALUES OF SIGMA0, Groupie 
+                           6 PER LINE.                                   Groupie 
+        2    1-72    A72   ENDF/B INPUT DATA FILENAME                    Groupie 
+                           (STANDARD OPTION = ENDFB.IN)                  Groupie 
+        3    1-72    A72   ENDF/B OUTPUT DATA FILENAME                   Groupie 
+                           (STANDARD OPTION = ENDFB.OUT)                 Groupie 
+                                                                         Groupie 
+      THE FOURTH INPUT CARD IS USED TO SELECT ALL DESIRED OUTPUT MODES.  Groupie 
+      EACH OUTPUT DEVICE MAY BE TURNED OFF (0) OR ON (1). THEREFORE      Groupie 
+      THEREFORE EACH OF THE FOLLOWING INPUT PARAMETERS MAY BE EITHER     Groupie 
+      ZERO TO INDICATE NO OUTPUT OR NON-ZERO TO INDICATE OUTPUT.         Groupie 
+                                                                         Groupie 
+        4     1-11   I11   SELF-SHIELDED CROSS SECTION LISTING           Groupie 
+                           = 1 - CROSS SECTIONS                          Groupie 
+                           = 2 - RESONANCE INTEGRALS                     Groupie 
+        4    12-22   I11   MULTI-BAND PARAMETER LISTING                  Groupie 
+        4    23-33   I11   MULTI-BAND PARAMETERS COMPUTER READABLE       Groupie 
+        4    34-44   I11   UNSHIELDED CROSS SECTIONS IN ENDF/B FORMAT    Groupie 
+                           = 1 - HISTOGRAM FORMAT (INTERPOLATION LAW 1)  Groupie 
+                           = 2 - LINEAR-LINEAR (INTERPOLATION LAW 2)     Groupie 
+        4    45-55   I11   UNSHIELDED CROSS SECTIONS LISTING             Groupie 
+                           = 1 - CROSS SECTIONS                          Groupie 
+                           = 2 - RESONANCE INTEGRALS                     Groupie 
+  05/01/20 - ADDED THE BELOW OPTION                                      Groupie 
+        4    56-66   E11.4 IF THE STANDARD BUILT-IN SPECTRA IS USED,     Groupie 
+                           INPUT LINE 1, COLUMNS 34-44 = 2, THIS FIELD   Groupie 
+                           CAN BE USED TO OPTIONALLY CHANGE TEMPERATURE  Groupie 
+                           OF THE MAXWELLIAN.                            Groupie 
+                           INPUT IS IN EV (0.0253 EV = ROOM TEMPERATURE) Groupie 
+                           = 0 - USE DEFAULT 0.0253 EV, ROOM TEMPERATURE Groupie 
+                           > 0 - USE THIS AS THE TEMPERATURE             Groupie 
+                           RESTRICTION - TEMPERATURE CANNOT EXCEED       Groupie 
+                           1000 EV.                                      Groupie 
+                                                                         Groupie 
+        5     1-80   18A4  LIBRARY IDENTIFICATION. ANY TEXT THAT THE     Groupie 
+                           USER WISHES TO IDENTIFY THE MULTI-BAND        Groupie 
+                           PARAMETERS. THIS LIBRARY IDENTIFICATION IS    Groupie 
+                           WRITTEN INTO THE COMPUTER READABLE MULTI-BAND Groupie 
+                           DATA FILE.                                    Groupie 
+                                                                         Groupie 
+       6-N    1- 6    I6   LOWER MAT OR ZA LIMIT                         Groupie 
+              7- 8    I2   LOWER MF LIMIT                                Groupie 
+              9-11    I3   LOWER MT LIMIT                                Groupie 
+             12-17   I11   UPPER MAT OR ZA LIMIT                         Groupie 
+             18-19    I2   UPPER MF LIMIT                                Groupie 
+             20-22    I3   UPPER MT LIMIT                                Groupie 
+                           UP TO 100 RANGES MAY BE SPECIFIED, ONE RANGE  Groupie 
+                           PER LINE. THE LIST OF RANGES IS TERMINATED    Groupie 
+                           BY A BLANK CARD. IF THE UPPER MAT OR ZA       Groupie 
+                           LIMIT IS LESS THAN THE LOWER LIMIT THE UPPER  Groupie 
+                           IS SET EQUAL TO THE LOWER LIMIT. IF THE UPPER Groupie 
+                           MF OR MT LIMIT IS ZERO IT WILL BE SET EQUAL   Groupie 
+                           TO ITS MAXIMUM VALUE, 99 OR 999, RESPECTIVELY Groupie 
+                           IF THE FIRST REQUEST LINE IS BLANK IT WILL    Groupie 
+                           TERMINATE THE LIST OF REQUESTS AND CAUSE ALL  Groupie 
+                           DATA TO BE RETRIEVED (SEE EXAMPLE INPUT).     Groupie 
+                                                                         Groupie 
+       VARY   1-66  6E11.4 ENERGY GROUP BOUNDARIES. ONLY REQUIRED IF     Groupie 
+                           THE NUMBER OF GROUPS INDICATED ON THE FIRST   Groupie 
+                           INPUT CARD IS POSITIVE. ALL ENERGIES MUST     Groupie 
+                           BE IN ASCENDING ENERGY IN EV. THE PRESENT     Groupie 
+                           LIMITS ARE 1 TO 20,000 GROUPS. FOR N GROUPS   Groupie 
+                           N+1 BOUNDARIES WILL BE READ FROM THE          Groupie 
+                           INPUT FILE, E.G. IF THE FIRST INPUT CARD      Groupie 
+                           INDICATES 20 GROUPS, 21 ENERGY BOUNDARIES     Groupie 
+                           WILL BE READ FROM THE INPUT FILE.             Groupie 
+                                                                         Groupie 
+       VARY   1-66  6E11.4 ENERGY DEPENDENT WEIGHTING SPECTRUM. ONLY     Groupie 
+                           REQUIRED IF THE NUMBER OF POINTS INDICATED    Groupie 
+                           ON FIRST CARD IS MORE THAN ONE. DATA IS       Groupie 
+                           GIVEN IN (ENERGY, WEIGHT) PAIRS, UP TO 3      Groupie 
+                           PAIRS PER CARD, USING ANY NUMBER OF CARDS     Groupie 
+                           REQUIRED. ENERGIES MUST BE IN ASCENDING       Groupie 
+                           ORDER IN EV. THE SPECTRUM VALUES MUST BE      Groupie 
+                           NON-NEGATIVE. THE ENERGY RANGE OF SPECTRUM    Groupie 
+                           MUST AT LEAST SPAN THE ENERGY RANGE OF THE    Groupie 
+                           ENERGY GROUPS. SINCE SPECTRUM IS STORED IN    Groupie 
+                           PAGING SYSTEM THERE IS NO LIMIT TO NUMBER     Groupie 
+                           OF POINTS THAT CAN BE USED TO DESCRIBE THE    Groupie 
+                           WEIGHTING SPECTRUM.                           Groupie 
+                                                                         Groupie 
+      EXAMPLE INPUT NO. 1                                                Groupie 
+      -------------------                                                Groupie 
+      REQUEST DATA BY MAT AND PROCESS ALL DATA (ALL MAT BETWEEN 1 AND    Groupie 
+      9999). USE THE TART 175 GROUP STRUCTURE, GENERATE 2 BAND           Groupie 
+      PARAMETERS (THE FOR ALL ISOTOPES) TO 0.1 PER-CENT ACCURACY         Groupie 
+      IN THE SELF-SHIELDING CURVE. OUTPUT ALL  LISTING, COMPUTER         Groupie 
+      READABLE AND ENDF/B FORMAT GROUP AVERAGES.                         Groupie 
+                                                                         Groupie 
+      EXPLICITLY SPECIFY THE STANDARD FILENAMES.                         Groupie 
+                                                                         Groupie 
+      THE FOLLOWING 7 INPUT LINES ARE REQUIRED.                          Groupie 
+                                                                         Groupie 
+           0          0         -2          0 1.00000-03          0      Groupie 
+  ENDFB.IN                                                               Groupie 
+  ENDFB.OUT                                                              Groupie 
+           1          1          1          1          1                 Groupie 
+  TART 175 GROUP, 2 BAND LIBRARY TO 0.1 PER-CENT ACCURACY                Groupie 
+      1 1  1  9999 0  0                                                  Groupie 
+                        (BLANK CARD TERMINATES REQUEST LIST)             Groupie 
+                                                                         Groupie 
+      EXAMPLE INPUT NO. 2                                                Groupie 
+      -------------------                                                Groupie 
+      THE SAME EXAMPLE 1, AS ABOVE, ONLY THE ENDF/B DATA WILL BE READ    Groupie 
+      FROM \ENDFB6\SIGMA1\K300\ZA092238 (U-238 AT 300 KELVIN) AND        Groupie 
+      WRITTEN TO \ENDFB6\GROUPIE\K300\ZA092238                           Groupie 
+                                                                         Groupie 
+      THE FOLLOWING 7 INPUT LINES ARE REQUIRED.                          Groupie 
+                                                                         Groupie 
+           0          0         -2          0 1.00000-03          0      Groupie 
+  \ENDFB6\SIGMA1\K300\ZA092238                                           Groupie 
+  \ENDFB6\GROUPIE\K300\ZA092238                                          Groupie 
+           1          1          1          1          1                 Groupie 
+  TART 175 GROUP, 2 BAND LIBRARY TO 0.1 PER-CENT ACCURACY                Groupie 
+      1 1  1  9999 0  0                                                  Groupie 
+                        (BLANK CARD TERMINATES REQUEST LIST)             Groupie 
+                                                                         Groupie 
+      EXAMPLE INPUT NO. 3                                                Groupie 
+      -------------------                                                Groupie 
+      PROCESS ALL DATA. USE 1/E WEIGHTING IN ORDER TO CALCULATE          Groupie 
+      UNSHIELDED ONE GROUP CROSS SECTIONS OVER THE ENERGY RANGE 0.5 EV   Groupie 
+      TO 1 MEV (NOTE THAT THE RESULTS ARE SIMPLY PROPORTIONAL TO THE     Groupie 
+      RESONANCE INTEGRAL FOR EACH REACTION). OUTPUT UNSHIELDED LISTING.  Groupie 
+                                                                         Groupie 
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Groupie 
+      THEN USE STANDARD FILENAMES.                                       Groupie 
+                                                                         Groupie 
+      THE FOLLOWING 7 INPUT CARDS ARE REQUIRED.                          Groupie 
+                                                                         Groupie 
+           0          0          1         -1                     0      Groupie 
+                        (USE STANDARD FILENAME = ENDFB.IN)               Groupie 
+                        (USE STANDARD FILENAME = ENDFB.OUT)              Groupie 
+           0          0          0          0          1                 Groupie 
+  RESONANCE INTEGRAL CALCULATION (FROM 0.5 EV TO 1 MEV)                  Groupie 
+                        (RETRIEVE ALL DATA, TERMINATE REQUEST LIST)      Groupie 
+  5.00000-01 1.00000+06                                                  Groupie 
+                                                                         Groupie 
+ ======================================================================= Groupie 

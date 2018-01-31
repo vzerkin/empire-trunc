@@ -1,6 +1,6 @@
-! $Rev: 5047 $                                                          | 
-! $Date: 2018-01-22 03:45:06 +0100 (Mo, 22 Jän 2018) $                                                     
-! $Author: dbrown $                                                  
+! $Rev: 5049 $                                                          | 
+! $Date: 2018-01-31 15:28:46 +0100 (Mi, 31 Jän 2018) $                                                     
+! $Author: mherman $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -305,7 +305,7 @@
      &                               NCREMAX=4       ! Maximum of reactions per type
       INTEGER(KIND=I4), PARAMETER :: URNEMAX = 250   ! UR energy points
 !          File 4 secondary angular data
-      INTEGER(KIND=I4), PARAMETER :: NES4MAX=2000    ! Number of E(INC)
+      INTEGER(KIND=I4), PARAMETER :: NES4MAX=4000    ! Number of E(INC)
       INTEGER(KIND=I4), PARAMETER :: NLEGMAX=64      ! Legendre coefs
       INTEGER(KIND=I4), PARAMETER :: NANGMAX=201     ! Angle points
 !          File 5 secondary energy data

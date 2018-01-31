@@ -1,0 +1,593 @@
+ ======================================================================= Spectra 
+                                                                         Spectra 
+      PROGRAM SPECTRA                                                    Spectra 
+      ===============                                                    Spectra 
+      An extension of LINEAR to linearize ALl MF=5 spectra.              Spectra 
+      05/28/2012 - Added MF=15 neutron induced, photon spectra.          Spectra 
+                                                                         Spectra 
+      First released in 2010 - Earlier below dates refer to LINEAR.      Spectra 
+                                                                         Spectra 
+      VERSION 74-1 (MAY 1974)                                            Spectra 
+      VERSION 75-1 (APRIL 1975)                                          Spectra 
+      VERSION 76-2 (OCTOBER 1976)                                        Spectra 
+      VERSION 77-1 (JANUARY 1977)                                        Spectra 
+      VERSION 78-1 (JULY 1978)                                           Spectra 
+      VERSION 79-1 (JULY 1979) CDC-7600 AND CRAY-1 VERSION.              Spectra 
+      VERSION 80-1 (MAY 1980) IBM, CDC AND CRAY VERSION.                 Spectra 
+      VERSION 80-2 (DECEMBER 1980)                                       Spectra 
+      VERSION 81-1 (MARCH 1981)                                          Spectra 
+      VERSION 82-1 (JANUARY 1982) IMPROVED COMPUTER COMPATIBILITY.       Spectra 
+      VERSION 83-1 (JANUARY 1983) *MAJOR RE-DESIGN.                      Spectra 
+                                  *PAGE SIZE INCREASED - 1002 TO 3006.   Spectra 
+                                  *ELIMINATED COMPUTER DEPENDENT CODING. Spectra 
+                                  *NEW, MORE COMPATIBLE I/O UNIT NUMBER. Spectra 
+                                  *ADDED OPTION TO KEEP ALL ORIGINAL     Spectra 
+                                   ENERGY POINTS FROM EVALUATION.        Spectra 
+                                  *ADDED STANDARD ALLOWABLE ERROR OPTION Spectra 
+                                   (CURRENTLY 0.1 PER-CENT).             Spectra 
+      VERSION 83-2 (OCTOBER 1983) IMPROVED BASED ON USER COMMENTS.       Spectra 
+      VERSION 84-1 (APRIL 1984)   IMPROVED BASED ON USER COMMENTS.       Spectra 
+      VERSION 84-2 (JUNE 1984)   *UPDATED FOR ENDF/B-VI FORMATS.         Spectra 
+                                 *SPECIAL I/O ROUTINES TO GUARANTEE      Spectra 
+                                  ACCURACY OF ENERGY.                    Spectra 
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Spectra 
+                                  (REQUIRED FOR NARROW RESONANCES).      Spectra 
+      VERSION 85-1 (AUGUST 1985) *FORTRAN-77/H VERSION                   Spectra 
+      VERSION 86-1 (JANUARY 1986)*ENDF/B-VI FORMAT                       Spectra 
+      VERSION 87-1 (JANUARY 1987)*DOUBLE PRECISION TREATMENT OF CROSS    Spectra 
+                                  SECTION                                Spectra 
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Spectra 
+                                  FILE NAMES (SEE, SUBROUTINE FILEIO     Spectra 
+                                  FOR DETAILS).                          Spectra 
+                                 *IMPROVED BASED ON USER COMMENTS.       Spectra 
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Spectra 
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Spectra 
+                                  CRAZY.                                 Spectra 
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Spectra 
+                                  KEYWORDS.                              Spectra 
+                                 *ADDED LIVERMORE CIVIC COMPILER         Spectra 
+                                  CONVENTIONS.                           Spectra 
+      VERSION 90-1 (JUNE 1990)   *EXTENDED TO LINEARIZE PHOTON           Spectra 
+                                  INTERACTION DATA, MF=23 AND 27         Spectra 
+                                 *ADDED FORTRAN SAVE OPTION              Spectra 
+                                 *UPDATED BASED ON USER COMMENTS.        Spectra 
+                                 *NEW MORE CONSISTENT ENERGY OUTPUT      Spectra 
+                                  ROUTINE.                               Spectra 
+                                 *WARNING...INPUT PARAMETER FORMAT       Spectra 
+                                  HAS BEEN CHANGED...SEE DESCRIPTION     Spectra 
+                                  BELOW.                                 Spectra 
+      VERSION 91-1 (JULY 1991)   *ADDED INTERPOLATION LAW 6 - ONLY USED  Spectra 
+                                  FOR CHARGED PARTICLE CROSS SECTIONS    Spectra 
+                                  FOR COULOMB PENETRABILITIES.           Spectra 
+      VERSION 92-1 (JANUARY 1992)*ADDED NU-BAR (TOTAL, DELAYED, PROMPT)  Spectra 
+                                  POLYNOMIAL OR TABULATED ALL CONVERTED  Spectra 
+                                  TO LINEARLY INTERPOLABLE               Spectra 
+                                 *INCREASED PAGE SIZE FROM 3006 TO 5010  Spectra 
+                                  POINTS.                                Spectra 
+                                 *ALL ENERGIES INTERNALLY ROUNDED PRIOR  Spectra 
+                                  TO CALCULATIONS.                       Spectra 
+                                 *COMPLETELY CONSISTENT I/O AND ROUNDING Spectra 
+                                  ROUTINES - TO MINIMIZE COMPUTER        Spectra 
+                                  DEPENDENCE.                            Spectra 
+      VERSION 92-2 (JULY 1992)   *CORRECTED CONVERSION OF NU-BAR FROM    Spectra 
+                                  POLYNOMIAL TO TABULATED - COPY         Spectra 
+                                  SPONTANEOUS NU-BAR (BY DEFINITION      Spectra 
+                                  THE SPONTANEOUS NU-BAR IS NOT AN       Spectra 
+                                  ENERGY DEPENDENT QUANTITY).            Spectra 
+      VERSION 93-1 (MARCH 1993)  *UPDATED FOR USE WITH LAHEY COMPILER    Spectra 
+                                  ON IBM-PCS.                            Spectra 
+                                 *INCREASED PAGE SIZE FROM 5010 TO       Spectra 
+                                  30000 POINTS                           Spectra 
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Spectra 
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Spectra 
+                                  (WARNING - INPUT PARAMETER FORMAT      Spectra 
+                                  HAS BEEN CHANGED)                      Spectra 
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Spectra 
+                                  (SEE, SUBROUTINE ENDIT)                Spectra 
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Spectra 
+                                  *IMPROVED COMPUTER INDEPENDENCE        Spectra 
+                                  *ALL DOUBLE PRECISION                  Spectra 
+                                  *ON SCREEN OUTPUT                      Spectra 
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Spectra 
+                                  *IMPROVED OUTPUT PRECISION             Spectra 
+                                  *DEFINED SCRATCH FILE NAMES            Spectra 
+                                  *ALWAYS INCLUDE THERMAL VALUE          Spectra 
+                                  *INCREASED PAGE SIZE FROM 30000 TO     Spectra 
+                                   60000 POINTS                          Spectra 
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Spectra 
+                                   POINT READ FOR MORE DIGITS            Spectra 
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Spectra 
+                                   VERSION BASED ON RECENT FORMAT CHANGE Spectra 
+                                  *GENERAL IMPROVEMENTS BASED ON         Spectra 
+                                   USER FEEDBACK                         Spectra 
+      VERSION 99-2 (JUNE 1999)    *ASSUME ENDF/B-VI, NOT V, IF MISSING   Spectra 
+                                   MF=1, MT-451.                         Spectra 
+      VERS. 2000-1 (FEBRUARY 2000)*ADDED MF = 9 AND 10 LINEARIZATION     Spectra 
+                                  *GENERAL IMPROVEMENTS BASED ON         Spectra 
+                                   USER FEEDBACK                         Spectra 
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Spectra 
+      VERS. 2004-1 (JAN. 2004)    *GENERAL UPDATE BASED ON USER FEEDBACK Spectra 
+      VERS. 2005-1 (JAN. 2005)    *ALWAYS KEEP ORIGINAL TABULATED        Spectra 
+                                   NU-BAR POINTS.                        Spectra 
+      VERS. 2006-1 (FEB. 2006)    *CORRECTED INT=6 NEAR THRESHOLD        Spectra 
+                                  *NO SUBDIVIDE BELOW MINIMUM XCMIN      Spectra 
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII.       Spectra 
+                                  *INCREASED PAGE SIZE FROM 60,000 TO    Spectra 
+                                   600,000 POINTS                        Spectra 
+      VERS. 2010-1 (JUNE 2010)    *ADDED MF = 5 - MF = 6 STILL PLANNED.  Spectra 
+                                  *72 CHARACTER FILE NAMES.              Spectra 
+                                  *ONLY PROCESS MF=5 - SKIP ALL OTHERS   Spectra 
+                                   TO PREVENT CONFLICT WITH LINEAR       Spectra 
+                                   THINNING.                             Spectra 
+      VERS. 2012-1 (Aug. 2012)    *Added MF=15, neutron induced photon   Spectra 
+                                   spectra.                              Spectra 
+                                  *Added CODENAME                        Spectra 
+                                  *32 and 64 bit Compatible              Spectra 
+                                  *Added ERROR stop                      Spectra 
+      VERS. 2015-1 (Jan. 2015)    *Extended OUT9.                        Spectra 
+                                  *Replaced ALL 3 way IF Statements.     Spectra 
+                                  *Corrected MF=15 Data - it was adding  Spectra 
+                                   SEND between sub-sections.            Spectra 
+                                  *Deleted unused parts, e.g., NUBAR.    Spectra 
+      VERS. 2017-1 (May  2017)    *Increased page size to 3,000,000      Spectra 
+                                  *Updated based on user feedback        Spectra 
+                                  *Changed DGAMMA to REDGAMMA to avoid   Spectra 
+                                   conflict with possble RESERVED NAME   Spectra 
+                                  *All floating input parameters changed Spectra 
+                                   to character input + IN9 conversion.  Spectra 
+                                                                         Spectra 
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Spectra 
+      ------------------------------------                               Spectra 
+      THE NUCLEAR DATA SECTION                                           Spectra 
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Spectra 
+      P.O. BOX 100                                                       Spectra 
+      A-1400, VIENNA, AUSTRIA                                            Spectra 
+      EUROPE                                                             Spectra 
+                                                                         Spectra 
+      ORIGINALLY WRITTEN BY                                              Spectra 
+      ------------------------------------                               Spectra 
+      Dermott E. Cullen                                                  Spectra 
+                                                                         Spectra 
+      PRESENT CONTACT INFORMATION                                        Spectra 
+      ---------------------------                                        Spectra 
+      Dermott E. Cullen                                                  Spectra 
+      1466 Hudson Way                                                    Spectra 
+      Livermore, CA 94550                                                Spectra 
+      U.S.A.                                                             Spectra 
+      Telephone  925-443-1911                                            Spectra 
+      E. Mail    RedCullen1@Comcast.net                                  Spectra 
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Spectra 
+                                                                         Spectra 
+      AUTHORS MESSAGE                                                    Spectra 
+      ---------------                                                    Spectra 
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Spectra 
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Spectra 
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Spectra 
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION.                  Spectra 
+                                                                         Spectra 
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Spectra 
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Spectra 
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Spectra 
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Spectra 
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Spectra 
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Spectra 
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Spectra 
+      COMPUTER.                                                          Spectra 
+                                                                         Spectra 
+      PURPOSE                                                            Spectra 
+      -------                                                            Spectra 
+      THIS PROGRAM IS DESIGNED TO CONVERT ENDF/B FILE 3, 23 AND 27 DATA  Spectra 
+      TO LINEAR-LINEAR INTERPOLABLE FORM. ANY SECTION THAT IS ALREADY    Spectra 
+      LINEAR-LINEAR INTERPOLABLE WILL BE THINNED.                        Spectra 
+                                                                         Spectra 
+      IN THE FOLLOWING DISCUSSION FOR SIMPLICITY THE ENDF/B TERMINOLOGY  Spectra 
+      ---ENDF/B TAPE---WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE    Spectra 
+      TAPE, CARDS, DISK OR ANY OTHER MEDIUM.                             Spectra 
+                                                                         Spectra 
+      ENDF/B FORMAT                                                      Spectra 
+      -------------                                                      Spectra 
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Spectra 
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Spectra 
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Spectra 
+                                                                         Spectra 
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Spectra 
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Spectra 
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Spectra 
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Spectra 
+      CORRECTLY OUTPUT ON ALL LINES. THE FORMAT OF SECTION MF=1, MT=451  Spectra 
+      AND ALL SECTIONS OF MF=3 MUST BE CORRECT. THE PROGRAM COPIES ALL   Spectra 
+      OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE TO   Spectra 
+      THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.            Spectra 
+                                                                         Spectra 
+      OUTPUT FORMAT                                                      Spectra 
+      -------------                                                      Spectra 
+      IN THIS VERSION OF LINEAR ALL ENERGIES WILL BE OUTPUT IN           Spectra 
+      F (INSTEAD OF E) FORMAT IN ORDER TO ALLOW ENERGIES TO BE WRITTEN   Spectra 
+      WITH UP TO 9 DIGITS OF ACCURACY. IN PREVIOUS VERSIONS THIS WAS AN  Spectra 
+      OUTPUT OPTION. HOWEVER USE OF THIS OPTION TO COMPARE THE RESULTS   Spectra 
+      OF ENERGIES WRITTEN IN THE NORMAL ENDF/B CONVENTION OF 6 DIGITS    Spectra 
+      TO THE 9 DIGIT OUTPUT FROM THIS PROGRAM DEMONSTRATED THAT FAILURE  Spectra 
+      TO USE THE 9 DIGIT OUTPUT CAN LEAD TO LARGE ERRORS IN THE DATA     Spectra 
+      DUE TO TRUNCATION OF ENERGIES TO 6 DIGITS DURING OUTPUT.           Spectra 
+                                                                         Spectra 
+      CONTENTS OF OUTPUT                                                 Spectra 
+      ------------------                                                 Spectra 
+      ENTIRE EVALUATIONS ARE OUTPUT, NOT JUST THE LINEARIZED DATA        Spectra 
+      CROSS SECTIONS, E.G. ANGULAR AND ENERGY DISTRIBUTIONS ARE ALSO     Spectra 
+      INCLUDED.                                                          Spectra 
+                                                                         Spectra 
+      DOCUMENTATION                                                      Spectra 
+      -------------                                                      Spectra 
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Spectra 
+      BY THE ADDITION OF 3 COMMENT LINES AT THE END OF EACH HOLLERITH    Spectra 
+      SECTION IN THE FORM                                                Spectra 
+                                                                         Spectra 
+      ***************** PROGRAM SPECTRA (2017-1) ****************        Spectra 
+      FOR ALL DATA GREATER THAN 1.00000-10 IN ABSOLUTE VALUE             Spectra 
+      DATA LINEARIZED TO WITHIN AN ACCURACY OF  0.1  PER-CENT            Spectra 
+                                                                         Spectra 
+      THE ORDER OF SIMILAR COMMENTS (FROM RECENT, SIGMA1 AND GROUPIE)    Spectra 
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Spectra 
+      THE DATA BY THESE PROGRAMS.                                        Spectra 
+                                                                         Spectra 
+      THESE COMMENT LINES ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Spectra 
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Spectra 
+      OF THE HOLLERITH SECTION IN ENDF/B-V DIFFERS FROM THE THAT OF      Spectra 
+      EARLIER VERSIONS OF ENDF/B. BY READING AN EXISTING MF=1, MT=451    Spectra 
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Spectra 
+      THE ENDF/B FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF      Spectra 
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Spectra 
+      DETERMINE WHICH VERSION OF THE ENDF/B FORMAT THE DATA IS IN, AND   Spectra 
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Spectra 
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Spectra 
+                                                                         Spectra 
+      REACTION INDEX                                                     Spectra 
+      --------------                                                     Spectra 
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Spectra 
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Spectra 
+                                                                         Spectra 
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Spectra 
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Spectra 
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Spectra 
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Spectra 
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Spectra 
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Spectra 
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Spectra 
+                                                                         Spectra 
+      SECTION SIZE                                                       Spectra 
+      ------------                                                       Spectra 
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Spectra 
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Spectra 
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Spectra 
+                                                                         Spectra 
+      FOR ANY LINEARIZED SECTION THAT CONTAINS 60000 OR FEWER POINTS     Spectra 
+      THE ENTIRE OPERATION WILL BE PERFORMED IN CORE AND THE LINEARIZED  Spectra 
+      DATA WILL BE OUTPUT DIRECTLY TO THE ENDF/B FORMAT. FOR ANY SECTION Spectra 
+      THAT CONTAINS MORE POINTS THE DATA WILL BE LINEARIZED A PAGE AT A  Spectra 
+      TIME (1 PAGE = 60000 POINTS) AND OUTPUT TO SCRATCH. AFTER THE      Spectra 
+      ENTIRE SECTION HAS BEEN LINEARIZED THE DATA WILL BE READ BACK FROM Spectra 
+      SCRATCH AND OUTPUT TO THE ENDF/B FORMAT.                           Spectra 
+                                                                         Spectra 
+      SELECTION OF DATA                                                  Spectra 
+      -----------------                                                  Spectra 
+      THE PROGRAM SELECTS DATA TO BE LINEARIZED BASED EITHER ON EITHER   Spectra 
+      MAT (ENDF/B MAT NO.) OR ZA AS WELL AS MF AND MT NUMBERS. THIS      Spectra 
+      PROGRAM ALLOWS UP TO 100 MAT/MF/MT OR ZA/MF/MT RANGES TO BE        Spectra 
+      SPECIFIED BY INPUT PARAMETERS. THE PROGRAM WILL ASSUME THAT THE    Spectra 
+      ENDF/B TAPE IS IN MAT ORDER, REGARDLESS OF THE CRITERIA USED       Spectra 
+      TO RETRIEVE MATERIALS. IF RETRIEVAL IS BY MAT RANGE THE PROGRAM    Spectra 
+      WILL TERMINATE WHEN A MAT IS FOUND THAT IS ABOVE ALL REQUESTED     Spectra 
+      MAT RANGES. IF RETRIEVAL IS BY ZA RANGE THE PROGRAM WILL SEARCH    Spectra 
+      THE ENTIRE ENDF/B TAPE.                                            Spectra 
+                                                                         Spectra 
+      PROGRAM OPERATION                                                  Spectra 
+      -----------------                                                  Spectra 
+      EACH SECTION OF DATA IS CONSIDERED SEPARATELY. EACH SECTION OF     Spectra 
+      ENDF/B DATA TO LINEARIZE IS REPRESENTED BY A TABLE OF ENERGY       Spectra 
+      VS. CROSS SECTION AND ANY ONE OF FIVE ALLOWABLE INTERPOLATION LAWS Spectra 
+      BETWEEN ANY TWO TABULATED POINTS. THIS PROGRAM WILL REPLACE EACH   Spectra 
+      SECTION OF DATA CROSS SECTIONS BY A NEW TABLE OF ENERGY VS.        Spectra 
+      CROSS SECTION IN WHICH THE INTERPOLATION LAW IS ALWAYS LINEAR IN   Spectra 
+      ENERGY AND CROSS SECTION BETWEEN ANY TWO TABULATED POINTS.         Spectra 
+                                                                         Spectra 
+      DATA IS READ AND LINEARIZED A PAGE AT A TIME (ONE PAGE CONTAINS    Spectra 
+      60000 DATA POINTS). IF THE FINAL LINEARIZED SECTION CONTAINS TWO   Spectra 
+      PAGES OR LESS, DATA POINTS IT WILL BE ENTIRELY CORE RESIDENT       Spectra 
+      AFTER IT HAS BEEN LINEARIZED AND WILL BE WRITTEN DIRECTLY FROM     Spectra 
+      CORE TO THE OUTPUT TAPE. IF THE LINEARIZED SECTION IS LARGER THAN  Spectra 
+      TWO PAGES, AFTER EACH PAGE IS LINEARIZED IT WILL BE WRITTEN TO     Spectra 
+      SCRATCH. AFTER THE ENTIRE SECTION HAS BEEN LINEARIZED IT WILL      Spectra 
+      BE READ BACK FROM SCRATCH, TWO PAGES AT A TIME, AND WRITTEN TO     Spectra 
+      THE OUTPUT TAPE.                                                   Spectra 
+                                                                         Spectra 
+      KEEP EVALUATED DATA POINTS                                         Spectra 
+      --------------------------                                         Spectra 
+      SOMETIMES IT IS CONVENIENT TO KEEP ALL ENERGY POINTS WHICH WERE    Spectra 
+      PRESENT IN THE ORIGINAL EVALUATION AND TO MERELY SUPPLEMENT THESE  Spectra 
+      POINTS WITH ADDITIONAL ENERGY POINTS IN ORDER TO LINEARIZE THE     Spectra 
+      CROSS SECTIONS. FOR EXAMPLE, IT IS OFTEN CONVENIENT TO KEEP THE    Spectra 
+      THERMAL VALUE (AT 0.0253 EV) OR THE VALUE AT 14.1 MEV.             Spectra 
+                                                                         Spectra 
+      THE CURRENT VERSION OF THIS PROGRAM WILL ALLOW THE USER TO KEEP    Spectra 
+      ALL ORIGINAL EVALUATED DATA POINTS BY SPECIFYING 1 IN COLUMNS      Spectra 
+      34-44 OF THE FIRST INPUT LINE. THIS WILL TURN OFF THE BACKWARD     Spectra 
+      THINNING (SEE UCRL-50400, VOL. 17, PART A FOR EXPLANATION) AND     Spectra 
+      RESULT IN ALL ORIGINAL ENERGY POINTS BEING KEPT. CAUTION SHOULD    Spectra 
+      BE EXERCISED IN USING THIS OPTION SINCE IT CAN RESULT IN A         Spectra 
+      CONSIDERABLE INCREASE IN THE NUMBER OF DATA POINTS OUTPUT BY       Spectra 
+      THIS CODE.                                                         Spectra 
+                                                                         Spectra 
+      FOR ALL USERS WHO ARE NOT INTERESTED IN THIS OPTIONS NO CHANGES    Spectra 
+      ARE REQUIRED IN THE INPUT TO THIS PROGRAM, I. E. IF COLUMNS        Spectra 
+      34-44 ARE BLANK (AS FOR ALL PREVIOUS VERSIONS OF THIS CODE) THE    Spectra 
+      PROGRAM WILL OPERATE EXACTLY AS IT DID BEFORE.                     Spectra 
+                                                                         Spectra 
+      ALLOWABLE ERROR                                                    Spectra 
+      ---------------                                                    Spectra 
+      ALLOWABLE ERROR MUST ALWAYS BE SPECIFIED IN THE INPUT TO THIS      Spectra 
+      PROGRAM AS A FRACTION, NOT A PER-CENT. FOR EXAMPLE, INPUT THE      Spectra 
+      ALLOWABLE FRACTIONAL ERROR 0.001 IN ORDER TO OBTAIN DATA THAT IS   Spectra 
+      ACCURATE TO WITHIN 0.1 PER-CENT.                                   Spectra 
+                                                                         Spectra 
+      THE CONVERSION OF THE DATA FROM THE GENERAL INTERPOLATION FORM TO  Spectra 
+      LINARLY INTERPOLABLE FORM CANNOT BE PERFORMED EXACTLY. HOWEVER, IT Spectra 
+      CAN BE PERFORMED TO VIRTUALLY ANY REQUIRED ACCURACY AND MOST       Spectra 
+      IMPORTANTLY CAN BE PERFORMED TO A TOLERANCE THAT IS SMALL COMPARED Spectra 
+      TO THE UNCERTAINTY IN THE CROSS SECTIONS THEMSELVES. AS SUCH THE   Spectra 
+      CONVERSION OF CROSS SECTIONS TO LINEARLY INTERPOLABLE FORM CAN BE  Spectra 
+      PERFORMED WITH ESSENTIALLY NO LOSE OF INFORMATION.                 Spectra 
+                                                                         Spectra 
+      THE ALLOWABLE ERROR MAY BE ENERGY INDEPENDENT (CONSTANT) OR ENERGY Spectra 
+      DEPENDENT. THE ALLOWABLE ERROR IS DESCRIBED BY A TABULATED         Spectra 
+      FUNCTION OF UP TO 20 (ENERGY,ERROR) PAIRS AND LINEAR INTERPOLATION Spectra 
+      BETWEEN TABULATED POINTS. IF ONLY ONE TABULATED POINT IS GIVEN THE Spectra 
+      ERROR WILL BE CONSIDERED CONSTANT OVER THE ENTIRE ENERGY RANGE.    Spectra 
+      WITH THIS ENERGY DEPENDENT ERROR ONE MAY OPTIMIZE THE OUTPUT FOR   Spectra 
+      ANY GIVEN APPLICATION BY USING A SMALL ERROR IN THE ENERGY RANGE   Spectra 
+      OF INTEREST AND A LESS STRINGENT ERROR IN OTHER ENERGY RANGES.     Spectra 
+                                                                         Spectra 
+      DEFAULT ALLOWABLE ERROR                                            Spectra 
+      -----------------------                                            Spectra 
+      IN ORDER TO INSURE CONVERGENCE OF THE LINEARIZING ALGORITHM THE    Spectra 
+      ALLOWABLE ERROR MUST BE POSITIVE. IF THE USER INPUTS AN ERROR      Spectra 
+      THAT IS NOT POSITIVE IT WILL AUTOMATICALLY BE SET TO THE DEFAULT   Spectra 
+      VALUE (CURRENTLY 0.001, CORRESPONDING TO 0.1 PER-CENT) AND         Spectra 
+      INDICATED AS SUCH IN THE OUTPUT LISTING.                           Spectra 
+                                                                         Spectra 
+      COULOMB PENETRABILITY (INTERPOLATION LAW = 6)                      Spectra 
+      --------------------------------------------                       Spectra 
+      INTRODUCED FOR ENDF/B-VI. THIS IS DEFINED AS,                      Spectra 
+                                                                         Spectra 
+      SIG(E) = C1*EXP(-C2/SQRT(E - T))                                   Spectra 
+                                                                         Spectra 
+      THIS PROGRAM ONLY CONSIDERS EXOTHERMIC REACTIONS - T = 0           Spectra 
+                                                                         Spectra 
+      SIG(E) = C1*EXP(-C2/SQRT(E))                                       Spectra 
+                                                                         Spectra 
+      WARNING...THIS INTERPOLATION LAW SHOULD ONLY BE USED FOR REACTIONS Spectra 
+                WHICH HAVE A POSITIVE Q-VALUE (EXOTHERMIC REACTIONS),    Spectra 
+                SINCE HERE WE ONLY CONSIDER T = 0.0 IN THE FORMALISM.    Spectra 
+                IN ALL OTHER CASES A WARNING MESSAGE WILL BE PRINTED.    Spectra 
+                                                                         Spectra 
+      INPUT FILES                                                        Spectra 
+      -----------                                                        Spectra 
+      UNIT  DESCRIPTION                                                  Spectra 
+      ----  -----------                                                  Spectra 
+         2  INPUT LINES (BCD - 80 CHARACTERS/RECORD)                     Spectra 
+        10  ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Spectra 
+                                                                         Spectra 
+      OUTPUT FILES                                                       Spectra 
+      ------------                                                       Spectra 
+      UNIT  DESCRIPTION                                                  Spectra 
+      ----  -----------                                                  Spectra 
+         3  OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Spectra 
+        11  FINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)               Spectra 
+                                                                         Spectra 
+      SCRATCH FILES                                                      Spectra 
+      -------------                                                      Spectra 
+      UNIT  DESCRIPTION                                                  Spectra 
+      ----  -----------                                                  Spectra 
+        12  SCRATCH FILE (BINARY - 180000 WORDS/RECORD                   Spectra 
+                                                                         Spectra 
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILEIO)               Spectra 
+      ----------------------------------------------------               Spectra 
+      UNIT  FILE NAME                                                    Spectra 
+      ----  ----------                                                   Spectra 
+        2   SPECTRA.INP                                                  Spectra 
+        3   SPECTRA.LST                                                  Spectra 
+       10   ENDFB.IN                                                     Spectra 
+       11   ENDFB.OUT                                                    Spectra 
+       12   (SCRATCH)                                                    Spectra 
+                                                                         Spectra 
+                                                                         Spectra 
+      INPUT PARAMETERS                                                   Spectra 
+      ----------------                                                   Spectra 
+      FOR VERSIONS EARLIER THAN 90-1 THIS PROGRAM ONLY ALLOWED THE USER  Spectra 
+      TO SPECIFY BY INPUT PARAMETERS WHICH MATERIALS (MAT) TO PROCESS.   Spectra 
+      FOR EACH REQUESTED MATERIAL NEUTRON INTERACTION CROSS SECTIONS     Spectra 
+      (MF=3) WOULD BE LINEARIZED AND THE REMAINDER OF THE MATERIAL       Spectra 
+      WOULD BE COPIED.                                                   Spectra 
+                                                                         Spectra 
+      FOR VERSIONS 90-1 AND LATER THIS PROGRAM WILL ALLOW THE USER TO    Spectra 
+      TO SPECIFY BY INPUT PARAMETERS EXACTLY WHAT SECTIONS OF DATA       Spectra 
+      TO PROCESS. FOR EACH SECTION OF DATA, SPECIFIED BY MAT, MF, MT     Spectra 
+      RANGES, SECTIONS OF MF=3, 23 AND 27 WILL BE LINEARIZED AND ALL     Spectra 
+      OTHER REQUESTED SECTIONS WILL BE COPIED. ALL SECTIONS WHICH ARE    Spectra 
+      NOT EXPLICITLY REQUESTED WILL BE SKIPPED AND WILL NOT APPEAR ON    Spectra 
+      ENDF/B FILE OUTPUT BY THIS PROGRAM.                                Spectra 
+                                                                         Spectra 
+      WITH THIS NEW PROCEDURE YOU CAN MINIMIZE THE SIZE OF THE ENDF/B    Spectra 
+      FILE OUTPUT BY THIS PROGRAM, E.G., IF YOU ONLY WANT NEUTRON        Spectra 
+      CROSS SECTIONS FOR SUBSEQUENT PROCESSING YOU NEED ONLY REQUEST     Spectra 
+      ONLY MF=3 DATA.                                                    Spectra 
+                                                                         Spectra 
+      HOWEVER, YOU MUST UNDERSTAND THAT ONLY THOSE SECTIONS WHICH YOU    Spectra 
+      EXPLICITLY REQUEST WILL APPEAR ON THE ENDF/B FILE OUTPUT BY        Spectra 
+      THIS PROGRAM. FOR EXAMPLE, IF YOU WISH TO DOCUMENT EXACTLY         Spectra 
+      HOW YOU LINEARIZED THE DATA BY INCLUDING COMMENTS IN MF=1, MT=451  Spectra 
+      THEN YOU MUST EXPLICITLY REQUEST THAT MF=1, MT=451 BE PROCESSED    Spectra 
+      FOR EACH MATERIAL THAT YOU REQUEST. SIMILAR IF YOU WANT THE        Spectra 
+      ENTIRE EVALUATION YOU MUST REQUEST ALL MF AND MT TO BE OUTPUT.     Spectra 
+                                                                         Spectra 
+      LINE  COLS.  DESCRIPTION                                           Spectra 
+      ----  -----  -----------                                           Spectra 
+         1   1-11  SELECTION CRITERIA (0=MAT, 1=ZA)                      Spectra 
+            12-22  MONITOR MODE SELECTOR                                 Spectra 
+                   = 0 - NORMAL OPERATION                                Spectra 
+                   = 1 - MONITOR PROGRESS OF LINEARIZING OF THE DATA.    Spectra 
+                         EACH TIME A PAGE OF DATA POINTS IS WRITTEN TO   Spectra 
+                         THE SCRATCH FILE PRINT OUT THE TOTAL NUMBER OF  Spectra 
+                         POINTS ON SCRATCH AND THE LOWER AND UPPER       Spectra 
+                         ENERGY LIMITS OF THE PAGE (THIS OPTION MAY BE   Spectra 
+                         USED IN ORDER TO MONITOR THE EXECUTION SPEED    Spectra 
+                         OF LONG RUNNING JOBS).                          Spectra 
+            23-33  MINIMUM CROSS SECTION OF INTEREST (BARNS).            Spectra 
+                   (IF 0.0 OR LESS IS INPUT THE PROGRAM WILL             Spectra 
+                   USE 1.0E-10). ENERGY INTERVALS WILL NOT BE            Spectra 
+                   SUB-DIVIDED IF THE ABSOLUTE VALUE OF THE CROSS        Spectra 
+                   SECTION WITHIN THE INTERVAL IS LESS THAN THIS VALUE.  Spectra 
+                   AN EXCEPTION TO THIS RULE IS NEAR THRESHOLDS ENERGY   Spectra 
+                   INTERVALS WILL BE SUB-DIVIDED UNTIL CONVERGENCE       Spectra 
+                   REGARDLESS OF THE MAGNITUDE OF THE CROSS SECTION.     Spectra 
+            34-44  KEEP ORIGINAL EVALUATED DATA POINTS.                  Spectra 
+                   = 0 - NO.                                             Spectra 
+                   = 1 - YES - ADDITIONAL POINTS MAY BE ADDED IN ORDER   Spectra 
+                               TO LINEARIZE DATA, BUT ALL ORIGINAL       Spectra 
+                               DATA POINTS WILL BE INCLUDED IN THE       Spectra 
+                               RESULTS.                                  Spectra 
+         2   1-72  ENDF/B INPUT DATA FILENAME                            Spectra 
+                   (STANDARD OPTION = ENDFB.IN)                          Spectra 
+         3   1-72  ENDF/B OUTPUT DATA FILENAME                           Spectra 
+                   (STANDARD OPTION = ENDFB.OUT)                         Spectra 
+       4-N   1- 6  LOWER MAT OR ZA LIMIT                                 Spectra 
+             7- 8  LOWER MF LIMIT                                        Spectra 
+             9-11  LOWER MT LIMIT                                        Spectra 
+            12-17  UPPER MAT OR ZA LIMIT                                 Spectra 
+            18-19  UPPER MF LIMIT                                        Spectra 
+            20-22  UPPER MT LIMIT                                        Spectra 
+                   UP TO 100 RANGES MAY BE SPECIFIED, ONLY ONE RANGE     Spectra 
+                   PER LINE. THE LIST OF RANGES IS TERMINATED BY A       Spectra 
+                   BLANK LINE. IF THE UPPER MAT LIMIT OF ANY REQUEST     Spectra 
+                   IS LESS THAN THE LOW LIMIT IT WILL BE SET EQUAL TO    Spectra 
+                   THE LOWER LIMIT. IF THE UPPER LIMIT IS STILL ZERO     Spectra 
+                   IT WILL BE SET EQUAL TO 999999. IF THE UPPER MF OR    Spectra 
+                   MT LIMIT IS ZERO IT WILL BE SET TO 99 OR 999          Spectra 
+                   RESPECTIVELY.                                         Spectra 
+       VARY  1-11  ENERGY FOR ERROR LAW                                  Spectra 
+            12-22  ALLOWABLE FRACTIONAL ERROR FOR ERROR LAW.             Spectra 
+                   THE ACCEPTABLE LINEARIZING ERROR MAY BE SPECIFIED TO  Spectra 
+                   BE EITHER ENERGY INDEPENDENT (DEFINED BY A SINGLE     Spectra 
+                   ERROR), OR ENERGY DEPENDENT (DEFINED BY UP TO 20      Spectra 
+                   ENERGY, ERROR PAIRS). FOR THE ENERGY DEPENDENT CASE   Spectra 
+                   LINEAR INTERPOLATION WILL BE USED TO DEFINE THE ERROR Spectra 
+                   AT ENERGIES BETWEEN THOSE AT WHICH IT IS TABULATED.   Spectra 
+                   IN ALL CASES THE ERROR LAW IS TERMINATED BY A BLANK   Spectra 
+                   LINE. IF ONLY ONE ENERGY, ERROR PAIR IS GIVEN THE     Spectra 
+                   THE LAW WILL BE CONSIDERED TO BE ENERGY INDEPENDENT.  Spectra 
+                   IF MORE THAN ONE PAIR IS GIVEN IT WILL BE CONSIDERED  Spectra 
+                   TO BE ENERGY DEPENDENT (NOTE, ENERGY INDEPENDENT      Spectra 
+                   FORM WILL RUN FASTER THAN THE EQUIVALENT ENERGY       Spectra 
+                   DEPENDENT FORM). FOR AN ENERGY DEPENDENT ERROR LAW    Spectra 
+                   ALL ENERGIES MUST BE ASCENDING ENERGY ORDER. FOR      Spectra 
+                   CONVERGENCE OF THE LINEARIZING ALGORITHM ALL ERRORS   Spectra 
+                   MUST BE POSITIVE. IF AN ALLOWABLE ERROR IS NOT        Spectra 
+                   POSITIVE IT WILL BE SET EQUAL TO THE STANDARD OPTION  Spectra 
+                   (CURRENTLY 0.001, CORRESPONDING TO 0.1 PER-CENT).     Spectra 
+                   IF THE FIRST ERROR LINE IS BLANK IT WILL TERMINATE    Spectra 
+                   THE ERROR LAW AND THE ERROR WILL BE TREATED AS        Spectra 
+                   ENERGY INDEPENDENT, EQUAL TO THE STANDARD OPTION      Spectra 
+                   (CURRENTLY 0.1 PER-CENT). (SEE EXAMPLE INPUT 4).      Spectra 
+                                                                         Spectra 
+      EXAMPLE INPUT NO. 1                                                Spectra 
+      -------------------                                                Spectra 
+      RETRIEVE DATA BY ZA IN ORDER TO FIND ALL URANIUM ISOTOPES AND      Spectra 
+      THORIUM 232. RETRIEVE ALL NEUTRON INTERACTION CROSS SECTIONS       Spectra 
+      (MF=3). ALL ENERGY INTERVALS IN WHICH THE CROSS SECTION IS         Spectra 
+      AT LEAST 1 MICRO-BARN (1.0E-06 BARNS) WILL BE SUBDIVIDED.          Spectra 
+      BACKWARD THINNING WILL BE PERFORMED. FROM 0 TO 100 EV LINEARIZE    Spectra 
+      TO WITHIN 0.1 PER-CENT ACCURACY. FROM 100 EV TO 1 KEV VARY         Spectra 
+      ACCURACY BETWEEN 0.1 AND 1.0 PER-CENT. ABOVE 1 KEV USE 1           Spectra 
+      PER-CENT ACCURACY.                                                 Spectra 
+                                                                         Spectra 
+      EXPLICITLY SPECIFY THE STANDARD FILENAMES.                         Spectra 
+                                                                         Spectra 
+      IN THIS CASE THE FOLLOWING 11 INPUT LINES ARE REQUIRED             Spectra 
+                                                                         Spectra 
+           1          0 1.00000- 6          0                            Spectra 
+  ENDFB.IN                                                               Spectra 
+  ENDFB.OUT                                                              Spectra 
+  92000 3  0 92999 3999                                                  Spectra 
+  90232 3  0     0 3  0    (UPPER LIMIT AUTOMATICALLY SET TO 90232 3999) Spectra 
+                           (END OF REQUEST LIST)                         Spectra 
+  0.00000+ 0 1.00000-03                                                  Spectra 
+  1.00000+ 2 1.00000-03                                                  Spectra 
+  1.00000+ 3 1.00000-02                                                  Spectra 
+  1.00000+ 9 1.00000-02                                                  Spectra 
+                           (END OF ERROR LAW)                            Spectra 
+                                                                         Spectra 
+      EXAMPLE INPUT NO. 2                                                Spectra 
+      -------------------                                                Spectra 
+      SAME AS THE ABOVE CASE, EXCEPT LINEARIZE ALL DATA TO WITHIN THE    Spectra 
+      STANDARD ACCURACY (CURRENTLY 0.1 PER-CENT). IN ORDER TO USE THE    Spectra 
+      STANDARD ACCURACY YOU NEED NOT SPECIFY ANY ERROR LAW AT ALL. IN    Spectra 
+      THIS CASE INCLUDE THE HOLLERITH SECTION, MF=1, MT=451, FOR EACH    Spectra 
+      MATERIAL.                                                          Spectra 
+                                                                         Spectra 
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Spectra 
+      THEN USE STANDARD FILENAMES.                                       Spectra 
+                                                                         Spectra 
+      IN THIS CASE THE FOLLOWING 9 INPUT LINES ARE REQUIRED              Spectra 
+                                                                         Spectra 
+           1          0 1.00000- 6          0                            Spectra 
+                           (USE DEFAULT FILENAME = ENDFB.IN)             Spectra 
+                           (USE DEFAULT FILENAME = ENDFB.OUT)            Spectra 
+  92000 1451 92999 1451                                                  Spectra 
+  92000 3  0 92999 3999                                                  Spectra 
+  90232 1451     0 1451                                                  Spectra 
+  90232 3  0     0 3  0    (UPPER LIMIT AUTOMATICALLY SET TO 90232 3999) Spectra 
+                           (END OF REQUEST LIST)                         Spectra 
+                           (0.1 PER-CENT ERROR, END OF ERROR LAW)        Spectra 
+                                                                         Spectra 
+      EXAMPLE INPUT NO. 3                                                Spectra 
+      -------------------                                                Spectra 
+      LINEARIZE ALL MATERIALS ON AN ENDF/B TAPE TO WITHIN AN ACCURACY    Spectra 
+      OF 0.5 PER-CENT (0.005 AS A FRACTION). IN THIS CASE YOU NEED NOT   Spectra 
+      SPECIFY THE MAT, MF, MT RANGES.                                    Spectra 
+                                                                         Spectra 
+      READ THE ENDF/B DATA FROM \ENDFB6\ZA092238 AND WRITE THE ENDF/B    Spectra 
+      DATA TO \ENDFB6\LINEAR\ZA092238.                                   Spectra 
+                                                                         Spectra 
+      IN THIS CASE THE FOLLOWING 6 INPUT LINES ARE REQUIRED              Spectra 
+                                                                         Spectra 
+                                              (MAT, 1.0E-10 BARNS, THIN) Spectra 
+  \ENDFB6\ZA092238                                                       Spectra 
+  \ENDFB6\LINEAR\ZA092238                                                Spectra 
+                           (RETRIEVE ALL DATA, END REQUEST LIST)         Spectra 
+             5.00000-03                                                  Spectra 
+                           (END OF ERROR LAW)                            Spectra 
+                                                                         Spectra 
+      NOTE THAT IN THIS CASE IF THE INPUT HAD SPECIFIED AN EQUIVALENT    Spectra 
+      ENERGY DEPENDENT ERROR LAW BY GIVING A NUMBER OF ENERGY POINTS     Spectra 
+      AT EACH OF WHICH THE ERROR IS 0.5 PER-CENT THE PROGRAM WOULD TAKE  Spectra 
+      LONGER TO RUN (I.E., ONLY USE AN ENERGY DEPENDENT ERROR LAW WHEN   Spectra 
+      IT IS NECESSARY).                                                  Spectra 
+                                                                         Spectra 
+      EXAMPLE INPUT NO. 4                                                Spectra 
+      -------------------                                                Spectra 
+      IN ORDER TO LINEARIZE ALL MATERIALS ON AN ENDF/B TAPE TO THE       Spectra 
+      STANDARD OPTION OF 0.1 PER-CENT IT IS ADEQUATE TO INPUT A SET      Spectra 
+      OF COMPLETELY BLANK LINES WHICH WILL AUTOMATICALLY INVOKE ALL      Spectra 
+      OF THE STANDARD OPTIONS.                                           Spectra 
+                                                                         Spectra 
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Spectra 
+      THEN USE STANDARD FILENAMES.                                       Spectra 
+                                                                         Spectra 
+      IN THIS CASE THE FOLLOWING THREE INPUT LINES ARE REQUIRED          Spectra 
+                                                                         Spectra 
+                                              (MAT, 1.0E-10 BARNS, THIN) Spectra 
+                           (USE DEFAULT FILENAME = ENDFB.IN)             Spectra 
+                           (USE DEFAULT FILENAME = ENDFB.OUT)            Spectra 
+                           (RETRIEVE ALL DATA, END REQUEST LIST)         Spectra 
+                           (0.1 PER-CENT ERROR, END OF ERROR LAW)        Spectra 
+                                                                         Spectra 
+ ======================================================================= Spectra 

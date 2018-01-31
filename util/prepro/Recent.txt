@@ -1,0 +1,1598 @@
+ ======================================================================= Recent  
+                                                                         Recent  
+      PROGRAM RECENT                                                     Recent  
+      ==============                                                     Recent  
+      VERSION 79-1 (OCTOBER 1979)  CDC-7600                              Recent  
+      VERSION 80-1 (MAY 1980)      IBM, CDC AND CRAY VERSION             Recent  
+      VERSION 80-2 (DECEMBER 1980) IMPROVED TREATMENT OF UNRESOLVED      Recent  
+                                   REGION TO COMPUTE ALL REACTIONS AT    Recent  
+                                   THE SAME TIME.                        Recent  
+      VERSION 81-1 (MARCH 1981)  IMPROVED BASED ON USER COMMENTS.        Recent  
+      VERSION 81-2 (AUGUST 1981) ADDED MONITOR MODE. ADDED SPEED OPTION  Recent  
+                                 TO BYPASS BACKWARDS THINNING IF FILE 3  Recent  
+                                 ALLOWABLE ERROR = 0.0 (NOTE THIS OPTION Recent  
+                                 WILL RESULT IN ALL TABULATED POINTS     Recent  
+                                 FROM THE EVALUATION BEING KEPT IN THE   Recent  
+                                 OUTPUT FROM THIS PROGRAM).              Recent  
+      VERSION 82-1 (JANUARY 1982) IMPROVED COMPUTER COMPATIBILITY.       Recent  
+      VERSION 83-1 (JANUARY 1983)*MAJOR RE-DESIGN.                       Recent  
+                                 *PAGE SIZES INCREASED.                  Recent  
+                                 *ELIMINATED COMPUTER DEPENDENT CODING.  Recent  
+                                 *NEW, MORE COMPATIBLE I/O UNIT NUMBERS. Recent  
+                                 *ADDED OPTION TO KEEP ALL RECONSTRUCTED Recent  
+                                  AND BACKGROUND ENERGY POINTS.          Recent  
+                                 *ADDED STANDARD ALLOWABLE ERROR OPTIONS Recent  
+                                  (CURRENTLY 0.1 PER-CENT RECONSTRUCTION Recent  
+                                  AND 0.0 PER-CENT THINNING).            Recent  
+      VERSION 83-2 (OCTOBER 1983) IMPROVED BASED ON USER COMMENTS.       Recent  
+      VERSION 84-1 (JANUARY 1984) IMPROVED INTERVAL HALFING CONVERGENCE. Recent  
+      VERSION 85-1 (APRIL 1985)  *A BRAND NEW PROGRAM WHICH COMPLETELY   Recent  
+                                  SUPERCEDES ALL PREVIOUS VERSIONS OF    Recent  
+                                  THIS PROGRAM.                          Recent  
+                                 *UPDATED FOR ENDF/B-VI FORMATS.         Recent  
+                                 *ADDED GENERAL REICH-MOORE FORMALISM    Recent  
+                                  (WITH TWO FISSION CHANNELS).           Recent  
+                                 *DECREASED RUNNING TIME.                Recent  
+                                 *SPECIAL I/O ROUTINES TO GUARANTEE      Recent  
+                                  ACCURACY OF ENERGY.                    Recent  
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Recent  
+                                  (REQUIRED FOR NARROW RESONANCES).      Recent  
+      VERSION 85-2 (AUGUST 1985) *FORTRAN-77/H VERSION                   Recent  
+      VERSION 86-1 (JANUARY 1986)*ENERGY DEPENDENT SCATTERING RADIUS     Recent  
+      VERSION 86-2 (JUNE 1986)   *IF FIRST CHANCE FISSION (MT=19)        Recent  
+                                  BACKGROUND IS PRESENT ADD RESONANCE    Recent  
+                                  CONTRIBUTION OF FISSION TO IT.         Recent  
+      VERSION 86-3 (OCTOBER 1986)*MULTI-LEVEL OR REICH-MOORE..CORRECT    Recent  
+                                  POTENTIAL SCATTERING CROSS SECTION FOR Recent  
+                                  MISSING AND/OR FICTICIOUS (L,J)        Recent  
+                                  SEQUENCES.                             Recent  
+      VERSION 87-1 (JANUARY 1987)*IMPROVED COMBINING FILE 2+3            Recent  
+      VERSION 87-2 (MARCH 1987)  *CORRECTED ADLER-ADLER CALCULATIONS.    Recent  
+      VERSION 88-1 (JULY 1988)   *UPDATED REICH-MOORE ENDF/B-VI FORMAT   Recent  
+                                  TO BE THE SAME AS REICH-MOORE FORMAT   Recent  
+                                  IN EARLIER VERSIONS OF ENDF/B FORMAT.  Recent  
+                                 *CHECK FOR PRELIMINARY ENDF/B-VI        Recent  
+                                  REICH-MOORE FORMAT (NOW ABANDONED)     Recent  
+                                  AND TERMINATE EXECUTION IF DATA IS     Recent  
+                                  IN THIS FORMAT.                        Recent  
+                                 *CALCULATE CHANNEL RADIUS OR SET IT     Recent  
+                                  EQUAL TO THE SCATTERING RADIUS.        Recent  
+                                 *IMPLEMENTED HYBRID R-FUNCTION WITH THE Recent  
+                                  FOLLOWING RESTRICTIONS                 Recent  
+                                  - ONLY INELASTIC COMPETITION (NO       Recent  
+                                    CHARGED PARTICLES)                   Recent  
+                                  - NO TABULATED FILE 2 BACKGROUND       Recent  
+                                  - NO TABULATED OPTICAL MODEL PHASE     Recent  
+                                    SHIFT                                Recent  
+                                 *PROGRAM EXIT IF GENERAL R-MATRIX IN    Recent  
+                                  THE EVALUATION (THIS FORMALISM WILL    Recent  
+                                  BE IMPLEMENTED ONLY AFTER THE AUTHOR   Recent  
+                                  RECEIVES REAL EVALUATIONS WHICH USE    Recent  
+                                  THIS FORMALISM...UNTIL THEN IT IS      Recent  
+                                  IMPOSSIBLE TO ADEQUATELY TEST THAT     Recent  
+                                  THE CODING FOR THIS FORMALISM IS       Recent  
+                                  CORRECT).                              Recent  
+                                 *INCREASED MAXIMUM NUMBER OF RESONANCES Recent  
+                                  FROM 1002 TO 4008.                     Recent  
+                                 *DOUBLE PRECISION RESONANCE REGION      Recent  
+                                  LIMITS.                                Recent  
+                                 *FILE 2 AND FILE 3 ENERGIES WHICH ARE   Recent  
+                                  NEARLY EQUAL ARE TREATED AS EQUAL      Recent  
+                                  (I.E., SAME TO ABOUT 9 DIGITS).        Recent  
+                                 *CHECK FILE 3 BACKGROUND CROSS SECTIONS Recent  
+                                  IN EDIT MODE.                          Recent  
+                                 *OPTION...INTERNALLY DEFINE FILENAMES   Recent  
+                                  (SEE SUBROUTINE FILEIO FOR DETAILS).   Recent  
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Recent  
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Recent  
+                                  CRAZY.                                 Recent  
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Recent  
+                                  KEYWORDS.                              Recent  
+                                 *CORRECTED MULTILEVEL, REICH-MOORE AND  Recent  
+                                  HYBRID R-FUNCTION POTENTIAL SCATTER    Recent  
+                                  TO ACCOUNT FOR REPEATED J-VALUES FOR   Recent  
+                                  THE SAME TARGET SPIN AND L-VALUE.      Recent  
+                                 *ADDED LIVERMORE CIVIC COMPILER         Recent  
+                                  CONVENTIONS.                           Recent  
+                                 *UPDATED TO USE NEW ENDF/B-VI           Recent  
+                                  CONVENTION TO ALLOW UNRESOLVED         Recent  
+                                  RESONANCE CONTRIBUTION TO ALREADY      Recent  
+                                  BE INCLUDED IN THE FILE 3 CROSS        Recent  
+                                  SECTIONS (INFINITELY DIULUTE           Recent  
+                                  CONTRIBUTION).                         Recent  
+      VERSION 90-1 (JUNE 1990)   *UPDATED BASED ON USER COMMENTS         Recent  
+                                 *ADDED FORTRAN SAVE OPTION              Recent  
+                                 *NEW MORE CONSISTENT ENERGY OUTPUT      Recent  
+                                  ROUTINE                                Recent  
+      VERSION 91-1 (JULY 1991)   *NEW UNIFORM TREATMENT OF ALL RESONANCE Recent  
+                                  FORMALISMS (SEE, COMMENTS BELOW)       Recent  
+                                 *NEW REICH-MOORE ALGORITHM              Recent  
+                                 *MORE EXTENSIVE ERROR CHECKING AND      Recent  
+                                  ERROR MESSAGE EXPLANATIONS             Recent  
+      VERSION 92-1 (JANUARY 1992)*MAJOR RESTRUCTING TO IMPROVE ACCURACY  Recent  
+                                  AND COMPUTER INDEPENDENCE.             Recent  
+                                 *INCREASED ENERGY POINT PAGE SIZE FROM  Recent  
+                                  1002 TO 4008.                          Recent  
+                                 *NO MORE THAN 2 ENERGY POINTS WHERE     Recent  
+                                  CROSS SECTION IS ZERO AT BEGINNING     Recent  
+                                  OF A SECTION FOR EACH REACTION,E.G.,   Recent  
+                                  THRESHOLD FISSION.                     Recent  
+                                 *PROCESS ONLY A PORTION OF RESONANCE    Recent  
+                                  REGION - SEE EXPLANATION BELOW         Recent  
+                                 *ALL ENERGIES INTERNALLY ROUNDED PRIOR  Recent  
+                                  TO CALCULATIONS.                       Recent  
+                                 *COMPLETELY CONSISTENT I/O AND ROUNDING Recent  
+                                  ROUTINES - TO MINIMIZE COMPUTER        Recent  
+                                  DEPENDENCE.                            Recent  
+      VERSION 93-1 (MARCH 1993)  *UPDATED REICH-MOORE TREATMENT TO USE   Recent  
+                                  L DEPENDENT SCATTERING RADIUS (APL)    Recent  
+                                  RATHER THAN SCATTERING RADIUS (AP)     Recent  
+                                  (SEE, ENDF/B-VI FORMATS AND            Recent  
+                                   PROCEDURES MANUAL, PAGE 2.6)          Recent  
+                                 *INCREASED PAGE SIZE FROM 4008 TO       Recent  
+                                  20040 DATA POINTS.                     Recent  
+                                 *INCREASED MAXIMUM NUMBER OF RESONANCES Recent  
+                                  FROM 4008 TO 20040.                    Recent  
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Recent  
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Recent  
+                                  (WARNING - INPUT PARAMETER FORMAT      Recent  
+                                  HAS BEEN CHANGED).                     Recent  
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Recent  
+                                  (SEE, SUBROUTINE ENDIT)                Recent  
+      VERSION 94-2 (AUGUST 1994) *CORRECTED ADDJ FOR ENERGY DEPENDENT    Recent  
+                                  (TABULATED) SCATTERING RADIUS CASE.    Recent  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Recent  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Recent  
+                                  *ALL DOUBLE PRECISION                  Recent  
+                                  *ON SCREEN OUTPUT                      Recent  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Recent  
+                                  *IMPROVED OUTPUT PRECISION             Recent  
+                                  *ALWAYS INCLUDE THERMAL VALUE          Recent  
+                                  *DEFINED SCRATCH FILE NAMES            Recent  
+      VERSION 97-1 (APRIL 1997)   *OPTIONAL MAKE NEGATIVE CROSS          Recent  
+                                   SECTION = 0 FOR OUTPUT                Recent  
+                                 *INCREASED PAGE SIZE FROM 20040 TO      Recent  
+                                  120000 DATA POINTS.                    Recent  
+                                 *INCREASED MAXIMUM NUMBER OF RESONANCES Recent  
+                                  FROM 20040 TO 120000.                  Recent  
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Recent  
+                                   POINT READ FOR MORE DIGITS            Recent  
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Recent  
+                                   VERSION BASED ON RECENT FORMAT CHANGE Recent  
+                                  *UPDATED CONSTANTS BASED ON CSEWG      Recent  
+                                   SUBCOMMITTEE RECOMMENDATIONS          Recent  
+                                  *GENERAL IMPROVEMENTS BASED ON         Recent  
+                                   USER FEEDBACK                         Recent  
+      VERSION 99-2 (JUNE 1999)    *IMPLEMENTED NEW REICH-MOORE FORMALISM Recent  
+                                   TO ALLOW DEFINITION OF (L,J,S) FOR    Recent  
+                                   EACH SEQUENCE.                        Recent  
+                                  *ASSUME ENDF/B-VI, NOT V, IF MISSING   Recent  
+                                   MF=1, MT-451.                         Recent  
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Recent  
+                                   USER FEEDBACK                         Recent  
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Recent  
+                   (SEPT. 2002)   *OUTPUT RESONANCE WITH 9 DIGITS        Recent  
+                                  *TO BE C AND C++ COMPATIBLE OUTPUT     Recent  
+      VERS. 2004-1 (JAN. 2004)    *ADDED INCLUDE 'recent.h'              Recent  
+                                  *MADE ENDF/B-VII READY                 Recent  
+                                  *UPDATED FOR NEW REICH-MOORE LRF=7     Recent  
+                                   PARAMETERS WITH COMPETITION           Recent  
+                                  *ADDED COULOMB PENETRATION FACTORS FOR Recent  
+                                   LRF=7 COMPETITIVE CHANNELS.           Recent  
+                                  *EXTENDED DEFINITIONS OF PENETRATION   Recent  
+                                   FACTOR, LEVEL SHIFT FACTOR, AND       Recent  
+                                   POTENTIAL SCATTERING PHASE SHIFT      Recent  
+                                   ABOVE L = 5 TO INFINITY.              Recent  
+                                  *ADDED QUICK CALCULATION - IF THE      Recent  
+                                   INPUT ALLOWABLE ERROR IS 1.0 OR MORE  Recent  
+                                   (100 % OR MORE) THERE IS NO ITERATION Recent  
+                                   TO CONVERGENCE - CROSS SECTION ARE    Recent  
+                                   QUICKLY CALCULATED ONLY AT A FIXED    Recent  
+                                   SET OF ENERGY POINTS, BASED ON THE    Recent  
+                                   ENERGY AND WIDTH OF ALL RESONANCES.   Recent  
+                                   THIS CAN BE USED TO QUICKLY "SEE"     Recent  
+                                   NEW EVALUATIONS THAT MAY CONTAIN      Recent  
+                                   ERRORS, THAT WOULD OTHERWISE CAUSE    Recent  
+                                   THIS CODE TO RUN FOR AN EXCESSIVELY   Recent  
+                                   LONG TIME.                            Recent  
+      VERS. 2005-1 (JUNE 2005)    *ADDED ENERGY DEPENDENT SCATTERING     Recent  
+                                   RADIUS FOR ALL RESONANCE TYPES        Recent  
+                                   (EARLIER ONLY BREIT-WIGNER ALLOWED).  Recent  
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII.       Recent  
+                                  *DECOUPLED PAGE SIZE FROM MAX. # OF    Recent  
+                                   RESONANCES.                           Recent  
+                                  *INCREASED PAGE SIZE FROM 120,000 TO   Recent  
+                                   750,000 DATA POINTS.                  Recent  
+                                  *KEPT MAX. # OF RESONANCE AT 120,000.  Recent  
+                                  *CORRECTED ALL BACKGROUND = 0 CASE     Recent  
+      VERS. 2007-2 (OCT. 2007)    *NO MT=19 OUTPUT IF NO BACKGROUND,     Recent  
+                                   REGARDLESS OF INPUT OPTION.           Recent  
+                                  *72 CHARACTER FILE NAMES.              Recent  
+      VERS. 2008-1 (FEB. 2008)    *CORRECTED NAPS ERROR - NOW DEFINE FOR Recent  
+                                   ALL TYPES OF PARAMETERS - EARLIER     Recent  
+                                   ONLY DEFINED FOR B-W PARAMETERS.      Recent  
+      VERS. 2008-2 (APRIL 2008)   *CORRECTED NRO/NAPS=1/1 - MUST         Recent  
+                                   DEFINE RHOX2 AT EACH RESONANCE USING  Recent  
+                                   SETRHO1 BEFORE ENERGY DEPENDENT       Recent  
+                                   CALCULATION.                          Recent  
+                                  *ADDED PRECISION TO RESONANCE PROFILE  Recent  
+                                   IN SUBROUTINE SUBINT                  Recent  
+      VERS. 2009-1 (JULY 2009)    *NEW REICH-MOORE COMPETITIVE WIDTHS -  Recent  
+                                   IF CHARGED PARTICLE REACTION (MT=103  Recent  
+                                   THROUGH 107) WILL ADD RESONANCE       Recent  
+                                   CONTRIBUTION TO COMPETITIVE MT AND IF Recent  
+                                   PRESENT, THE GROUND LEVEL, MT = 600   Recent  
+                                   THROUGH 800. IF COMPETITIVE CHANNEL   Recent  
+                                   IS mt=4 (TOTAL N.N') IT WILL ALSO ADD Recent  
+                                   COMPETITIVE RESONANCE CONTRIBUTION TO Recent  
+                                   MT=50 (N,N' GROUND).                  Recent  
+                                  *NEW REICH-MOORE - SUM COMPETITIVE     Recent  
+                                   WIDTHS IF ALL FOR THE SAME STATE (MT) Recent  
+      VERS. 2009-2 (AUG. 2009)    *RE-WRITE TO USE 12, RATHER THAN 6,    Recent  
+                                   PAAMETERS PER RESONANCE.              Recent  
+                                  *MAJOR RE-WRITE TO ACCOMODATE GENERAL  Recent  
+                                   REICH-MOORE (LRF=7).                  Recent  
+                                  *COMPLETE RE-WRITE FOR ADLER-ADLER     Recent  
+                                   AND HRF (N O LONGER USED IN ENDF/B)   Recent  
+                                   TO USE 12 PARAMETERS PER RESNANCE.    Recent  
+      VERS. 2010-1 (April 2010)   *ADDED SAMRML LOGIC TO HANDLE ALL      Recent  
+                                   LRF=7 CASES.                          Recent  
+                                  *EXTENDED SAMRML LOGIC TO PROCESS ALL  Recent  
+                                   EVALUATIONS = RESOLVED + UNRESOLVED + Recent  
+                                   TABULATED - SAMRML ONLY DOES ONE      Recent  
+                                   SECTION OF RESOLVED LRF=7 DATA        Recent  
+                                   WITHOUT TABULATED BACKGROUND.         Recent  
+                                  *UPDATED ELASTIC POTENTIAL CALCULATION Recent  
+                                   FOR TOTAL (SLBW) AND CORRECTION FOR   Recent  
+                                   MISSING SEQUENCES (MLBW, RM, HRF).    Recent  
+                                  *ADDED HIDDEN (OPTIONAL) UNRESOLVED    Recent  
+                                   COMPETITION LISTING (NOT ENDF/B).     Recent  
+                                  *ADDED BOB MACFARLANE'S PROPOSAL - USE Recent  
+                                   LRX TO DEFINE COMPETITIVE L VALUE -   Recent  
+                                   COMPETITIVE L = LRX - 1, IF LRX > 0.  Recent  
+                                  *CHECKED FOR NEGATIVE WIDTHS.          Recent  
+      VERS. 2012-1 (Nov.  2012)   *ADDED ENERGY DEPENDENT STEP SIZE      Recent  
+                                   FOR STARTING GRID AROUND RESONANCES.  Recent  
+                                  *Added CODENAME                        Recent  
+                                  *32 and 64 bit Compatible              Recent  
+                                  *Added ERROR stops                     Recent  
+                                  *Check for no capture for Reich-Moore. Recent  
+      VERS. 2012-2 (Nov.  2012)   *Eliminated ERROR in NHIGH(0) index.   Recent  
+      VERS. 2013-1 (Nov.  2013)   *Extended OUT9.                        Recent  
+      VERS. 2015-1 (Jan.  2015)   *Multiple LRF=7, General Reich-Moore   Recent  
+                                   Resonance Regions.                    Recent  
+                                  *Added OUT10.                          Recent  
+                                  *Replaced ALL 3 way IF Statements.     Recent  
+                                  *Replaced ALL LOGICAL by INTEGER.      Recent  
+      VERS. 2016-1 (Jan.  2016)   *Do not Change LSSF during the         Recent  
+                                   reconstrcution - for compatibility    Recent  
+                                   with later URR treatment.             Recent  
+                                  *Insured that all ERROR stops print    Recent  
+                                   a message explaining why the code     Recent  
+                                   stopped.                              Recent  
+                                  *Partial Energy Range Processing       Recent  
+                                   no longer allowed - today's computers Recent  
+                                   are so fast that this option is now   Recent  
+                                   out-of-date and no longer allowed.    Recent  
+                                  *L-Value dependent fission = Earlier   Recent  
+                                   was done only by entire isotope.      Recent  
+                                  *Denser Starting Energy Grid.          Recent  
+      VERS. 2017-1 (May   2017)   *Corrected ERROR in LRF=3 treatment.   Recent  
+                                   This ERROR only existed in version    Recent  
+                                   2016-1, which was never released to   Recent  
+                                   the general public, so it will not    Recent  
+                                   effect any results calculated by code Recent  
+                                   users.                                Recent  
+                                  *All floating input parameters changed Recent  
+                                   to character input + IN9 conversion.  Recent  
+                                  *Added points to starting energy grid  Recent  
+                                   to approximate the shape of each      Recent  
+                                   resonance = based on comparisons of   Recent  
+                                   0.01% to 0.1% results.                Recent  
+                                  *Increased max. points to 1,200,000.   Recent  
+                                  *LRF=7 Shift option no longer allowed  Recent  
+                                   Set = 0, print WARNING and continue.  Recent  
+                                  *Corrected COMMON/NAPRHO/NRO,NAPS      Recent  
+                                   /NAPRHO/ mispelled - Freud found.     Recent  
+                                                                         Recent  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Recent  
+      ------------------------------------                               Recent  
+      THE NUCLEAR DATA SECTION                                           Recent  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Recent  
+      P.O. BOX 100                                                       Recent  
+      A-1400, VIENNA, AUSTRIA                                            Recent  
+      EUROPE                                                             Recent  
+                                                                         Recent  
+      ORIGINALLY WRITTEN BY                                              Recent  
+      ------------------------------------                               Recent  
+      Dermott E. Cullen                                                  Recent  
+                                                                         Recent  
+      PRESENT CONTACT INFORMATION                                        Recent  
+      ---------------------------                                        Recent  
+      Dermott E. Cullen                                                  Recent  
+      1466 Hudson Way                                                    Recent  
+      Livermore, CA 94550                                                Recent  
+      U.S.A.                                                             Recent  
+      Telephone  925-443-1911                                            Recent  
+      E. Mail    RedCullen1@Comcast.net                                  Recent  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Recent  
+                                                                         Recent  
+      Acknowledgement (Version 2004-1)                                   Recent  
+      ================================================================== Recent  
+      The author thanks Nancy Larson, ORNL, for providing her SAMRML     Recent  
+      code for comparison to RECENT output for Reich-Moore evaluations,  Recent  
+      in particular to verify results for the new LFR=7 evaluations. I   Recent  
+      also thank her for providing guidance to help me understand and    Recent  
+      implement this new teatment for Reich-Moore parameters.            Recent  
+                                                                         Recent  
+      ACKNOWLEDGEMENT (VERSION 92-1)                                     Recent  
+      ================================================================== Recent  
+      THE AUTHOR THANKS SOL PEARLSTEIN (BROOKHAVEN NATIONAL LAB) FOR     Recent  
+      SIGNIFICANTLY CONTRIBUTING TOWARD IMPROVING THE ACCURACY AND       Recent  
+      COMPUTER INDEPENDENCE OF THIS CODE - THANKS, SOL                   Recent  
+      ================================================================== Recent  
+                                                                         Recent  
+      AUTHORS MESSAGE                                                    Recent  
+      ================================================================== Recent  
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Recent  
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Recent  
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Recent  
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION, PARTICULARLY     Recent  
+      THE COMMENTS CONCERNING MACHINE DEPENDENT CODING.                  Recent  
+                                                                         Recent  
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Recent  
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Recent  
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Recent  
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Recent  
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Recent  
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Recent  
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Recent  
+      COMPUTER.                                                          Recent  
+                                                                         Recent  
+      PURPOSE                                                            Recent  
+      ================================================================== Recent  
+      THIS PROGRAM IS DESIGNED TO RECONSTRUCT THE RESONANCE CONTRIBUTION Recent  
+      TO THE CROSS SECTION IN LINEARLY INTERPOLABLE FORM, ADD IN ANY     Recent  
+      LINEARLY INTERPOLABLE BACKGROUND CROSS SECTION AND OUTPUT THE      Recent  
+      RESULT IN THE ENDF/B FORMAT. THE CROSS SECTIONS OUTPUT BY THIS     Recent  
+      PROGRAM WILL BE LINEARLY INTERPOLABLE OVER THE ENTIRE ENERGY RANGE Recent  
+                                                                         Recent  
+      THE RESONANCE CONTRIBUTION IS CALCULATED FOR TOTAL (MT=1),         Recent  
+      ELASTIC (MT=2), CAPTURE (MT=102) AND FISSION (MT=18), ADDED        Recent  
+      TO THE BACKGROUND (IF ANY) AND OUTPUT. IN ADDITION, IF THERE       Recent  
+      IS A FIRST CHANCE FISSION (MT=19) BACKGROUND PRESENT THE RESONANCE Recent  
+      CONTRIBUTION OF FISSION WILL BE ADDED TO THE BACKGROUND AND        Recent  
+      OUTPUT. IF THERE IS NO FIRST CHANCE FISSION (MT=19) BACKGROUND     Recent  
+      PRESENT THE PROGRAM WILL NOT OUTPUT MT=19.                         Recent  
+                                                                         Recent  
+      IN THE FOLLOWING FOR SIMPLICITY THE ENDF/B TERMINOLOGY--ENDF/B     Recent  
+      TAPE--WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE TAPE, CARDS,  Recent  
+      DISK OR ANY OTHER MEDIUM.                                          Recent  
+                                                                         Recent  
+      PROCESSING DATA IN THE ENDF/B-VI FORMAT                            Recent  
+      ================================================================== Recent  
+      IT HAS NOW BEEN CONFIRMED (PRIVATE COMMUNICATION, CHARLES DUNFORD, Recent  
+      APRIL, 1991) THAT THE PROPER PROCEDURE TO FOLLOW WHEN THERE ARE    Recent  
+      MISSING OR DUPLICATE J VALUES IS TO IN ALL CASES ADD A SEQUENCE    Recent  
+      WITH NO RESONANCES TO ACCOUNT FOR THE CONTRIBUTION OF THE SEQUENCE Recent  
+      TO THE POTENTIAL SCATTERING CROSS SECTION.                         Recent  
+                                                                         Recent  
+      THIS IS THE PROCEDURE WHICH WAS FOLLOWED BY ALL VERSIONS OF RECENT Recent  
+      SINCE 86-3 AND WILL CONTINUE TO BE THE PROCEDURE.                  Recent  
+                                                                         Recent  
+      INPUT ENDF/B FORMAT AND CONVENTIONS                                Recent  
+      ================================================================== Recent  
+      ENDF/B FORMAT                                                      Recent  
+      -------------                                                      Recent  
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR LINE IMAGE FORMAT (AS     Recent  
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Recent  
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Recent  
+                                                                         Recent  
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Recent  
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Recent  
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Recent  
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Recent  
+      CORRECTLY OUTPUT ON ALL CARDS. THE FORMAT OF SECTION MF=1, MT=451  Recent  
+      AND ALL SECTIONS OF MF=2 AND 3 MUST BE CORRECT. THE PROGRAM COPIES Recent  
+      ALL OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE  Recent  
+      TO THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.         Recent  
+                                                                         Recent  
+      ENDF/B FORMAT VERSION                                              Recent  
+      ---------------------                                              Recent  
+      THE FORMATS AND CONVENTIONS FOR READING AND INTERPRETING THE DATA  Recent  
+      VARIES FROM ONE VERSION OF ENDF/B TO THE NEXT. HOWEVER, IF THE     Recent  
+      HOLLERITH SECTION (MF=1, MT=451) IS PRESENT IT IS POSSIBLE FOR     Recent  
+      THIS PROGRAM TO DISTINGUISH BETWEEN DATA IN THE ENDF/B-IV, V AND   Recent  
+      VI FORMATS AND TO USE THE APPROPRIATE CONVENTIONS FOR EACH         Recent  
+      ENDF/B VERSION (SEE, SUBROUTINE FILE1 FOR A DESCRIPTION OF HOW     Recent  
+      THIS IS DONE). IF THE HOLLERITH SECTION IS NOT PRESENT THE         Recent  
+      PROGRAM WILL ASSUME THE DATA IS IN THE ENDF/B-VI FORMAT AND USE    Recent  
+      ALL CONVENTIONS APPROPRIATE TO ENDF/B-V. USERS ARE ENCOURAGED TO   Recent  
+      INSURE THAT THE HOLLERITH SECTION (MF=1, MT=451) IS PRESENT IN     Recent  
+      ALL EVALUATIONS.                                                   Recent  
+                                                                         Recent  
+      INPUT OF ENERGIES                                                  Recent  
+      -----------------                                                  Recent  
+      ALL ENERGIES ARE READ IN DOUBLE PRECISION (BY SPECIAL FORTRAN I/O  Recent  
+      ROUTINES) AND ARE TREATED IN DOUBLE PRECISION IN ALL CALCULATIONS. Recent  
+                                                                         Recent  
+      OUTPUT ENDF/B FORMAT AND CONVENTIONS                               Recent  
+      ================================================================== Recent  
+      CONTENTS OF OUTPUT                                                 Recent  
+      ------------------                                                 Recent  
+      ENTIRE EVALUATIONS ARE OUTPUT, NOT JUST THE RECONSTRUCTED FILE     Recent  
+      3 CROSS SECTIONS, E.G. ANGULAR AND ENERGY DISTRIBUTIONS ARE        Recent  
+      ALSO INCLUDED.                                                     Recent  
+                                                                         Recent  
+      DOCUMENTATION                                                      Recent  
+      -------------                                                      Recent  
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Recent  
+      BY THE ADDITION OF COMMENT CARDS AT THE END OF EACH HOLLERITH      Recent  
+      SECTION IN THE FORM                                                Recent  
+                                                                         Recent  
+      ***************** RECENT (VERSION 2017-1) ***************          Recent  
+      RESONANCE CONTRIBUTION RECONSTRUCTED TO WITHIN   0.100 PER-CENT    Recent  
+      COMBINED DATA NOT THINNED (ALL RESONANCE + BACKGROUND DATA KEPT)   Recent  
+                                                                         Recent  
+      THE ORDER OF ALL SIMILAR COMMENTS (FROM LINEAR, SIGMA1 AND GROUPY) Recent  
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Recent  
+      THE DATA, INCLUDING WHICH VERSION OF EACH PROGRAM WAS USED.        Recent  
+                                                                         Recent  
+      THESE COMMENT CARDS ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Recent  
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Recent  
+      OF THE HOLLERITH SECTION IN ENDF/B-V DIFFERS FROM THE THAT OF      Recent  
+      EARLIER VERSIONS OF ENDF/B. BY READING AN EXISTING MF=1, MT=451    Recent  
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Recent  
+      THE ENDF/B FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF      Recent  
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Recent  
+      DETERMINE WHICH VERSION OF THE ENDF/B FORMAT THE DATA IS IN, AND   Recent  
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Recent  
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Recent  
+                                                                         Recent  
+      REACTION INDEX                                                     Recent  
+      --------------                                                     Recent  
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Recent  
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Recent  
+                                                                         Recent  
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Recent  
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Recent  
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Recent  
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Recent  
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Recent  
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Recent  
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Recent  
+                                                                         Recent  
+      OUTPUT FORMAT OF ENERGIES                                          Recent  
+      -------------------------                                          Recent  
+      IN THIS VERSION OF RECENT ALL FILE 3 ENERGIES WILL BE OUTPUT IN    Recent  
+      F (INSTEAD OF E) FORMAT IN ORDER TO ALLOW ENERGIES TO BE WRITTEN   Recent  
+      WITH UP TO 9 DIGITS OF ACCURACY. IN PREVIOUS VERSIONS THIS WAS AN  Recent  
+      OUTPUT OPTION. HOWEVER USE OF THIS OPTION TO COMPARE THE RESULTS   Recent  
+      OF ENERGIES WRITTEN IN THE NORMAL ENDF/B CONVENTION OF 6 DIGITS    Recent  
+      TO THE 9 DIGIT OUTPUT FROM THIS PROGRAM DEMONSTRATED THAT FAILURE  Recent  
+      TO USE THE 9 DIGIT OUTPUT CAN LEAD TO LARGE ERRORS IN THE DATA     Recent  
+      JUST DUE TO TRANSLATION OF ENERGIES FROM THEIR INTERNAL (BINARY)   Recent  
+      REPRESENTATION TO THE ENDF/B FORMAT.                               Recent  
+                                                                         Recent  
+      ACCURACY OF ENERGY                                                 Recent  
+      ------------------                                                 Recent  
+      IN ORDER TO ALLOW ENERGIES TO BE ACCURATELY OUTPUT TO 9 DIGITS     Recent  
+      ON SHORT WORD LENGTH COMPUTERS (E.G. IBM) ALL ENERGIES AND         Recent  
+      ENERGY DEPENDENT TERMS ARE READ AND TREATED IN DOUBLE PRECISION.   Recent  
+                                                                         Recent  
+      OUTPUT OF RESONANCE PARAMETERS                                     Recent  
+      ------------------------------                                     Recent  
+      A SPECIAL CONVENTION HAS BEEN INTRODUCED REGARDING RESONANCE       Recent  
+      PARAMETERS. IN ORDER TO ALLOW THE USER TO DOPPLER BROADEN AND/OR   Recent  
+      SELF-SHIELD CROSS SECTIONS THE RESONANCE PARAMETERS ARE ALSO       Recent  
+      INCLUDED IN THE OUTPUT WITH THE EVALUATION. IN ORDER TO AVOID THE  Recent  
+      POSSIBILITY OF ADDING THE RESONANCE CONTRIBUTION A SECOND TIME     Recent  
+      TWO CONVENTIONS HAVE BEEN ADOPTED TO INDICATE THAT THE RESONANCE   Recent  
+      CONTRIBUTION HAS ALREADY BEEN ADDED TO THE FILE 3 CROSS SECTIONS,  Recent  
+                                                                         Recent  
+      (1) WHEN THE DATA IS PROCESSED BY THIS PROGRAM LRP (IN MF=1,       Recent  
+      MT=451) IS SET EQUAL TO 2. THIS IS A CONVENTION WHICH HAS BEEN     Recent  
+      ADOPTED AS A STANDARD CONVENTION IN ENDF/B-VI, BUT IS ONLY TO BE   Recent  
+      USED FOR PROCESSED DATA, AS OPPOSED TO THE ORIGINAL EVALUATIONS.   Recent  
+      IN EVALUATIONS WHICH CONTAIN MF=1, MT=451 LRP CAN BE USED TO       Recent  
+      DETERMINE IF THE MATERIAL HAS BEEN PROCESSED.                      Recent  
+                                                                         Recent  
+      (2) THE LRU FLAG IN EACH SECTION OF FILE 2 DATA IS CHANGED TO      Recent  
+      LRU=LRU+3. FOR EXAMPLE WHEN READING AN ENDF/B EVALUATION LRU=0     Recent  
+      (NO RESONANCES), =1 (RESOLVED) OR =2 (UNRESOLVED) INDICATES THAT   Recent  
+      THE DATA IS IN THE ORIGINAL ENDF/B FORM. LRU=3 (NO RESONANCES),    Recent  
+      =4 (RESOLVED) OR =5 (UNRESOLVED) INDICATES THAT THE RESONANCE      Recent  
+      CONTRIBUTION HAS ALREADY BEEN ADDED TO THE FILE 3 DATA. THIS       Recent  
+      SECOND CONVENTION HAS BEEN ADOPTED AS INSURANCE THAT THE RESONANCE Recent  
+      CONTRIBUTION WILL NOT BE ADDED TWICE, EVEN FOR EVALUATIONS WHICH   Recent  
+      DO NOT CONTAIN MF=1, MT=451 (EVALUATIONS WHICH CONTAIN MF=1,       Recent  
+      MT=451 ARE COVERED BY CONVENTION (1), DESCRIBED ABOVE).            Recent  
+                                                                         Recent  
+      UNIFORM TREATMENT OF RESONANCE FORMALISMS                          Recent  
+      ================================================================== Recent  
+      NORMALIZATION                                                      Recent  
+      =============                                                      Recent  
+      ALL OF THE RESONANCE FORMALISMS INCLUDE A FACTOR OF,               Recent  
+                                                                         Recent  
+      PI*(FRACTIONAL ABUNDANCE)/(K**2)                                   Recent  
+                                                                         Recent  
+      THIS FACTOR HAS BEEN REMOVED FROM THE CALCULATION OF EACH TYPE     Recent  
+      OF RESONANCE FORMALISM AND IS APPLIED AS A FINAL NORMALIZATION     Recent  
+      AFTER THE CALCULATION, ONLY ONE PLACE IN THIS PROGRAM.             Recent  
+                                                                         Recent  
+      FOR SIMPLICITY THIS TERM IS NOT INCLUDED IN THE FOLLOWING          Recent  
+      DERIVATIONS - IN ALL CASES THE ACTUAL CROSS SECTION IS A PRODUCT   Recent  
+      OF THE ABOVE FACTOR TIMES THE RESULTS PRESENTED BELOW.             Recent  
+                                                                         Recent  
+      SIMILARITIES                                                       Recent  
+      ============                                                       Recent  
+      FOR THE RESOLVED RESONANCE REGION, EXCEPT FOR SINGLE LEVEL BREIT   Recent  
+      WIGNER, PARAMETERS ALL OF THE FORMALISMS DEFINE THE CROSS SECTIONS Recent  
+      IN AN EQUIVALENT FORM,                                             Recent  
+                                                                         Recent  
+      TOTAL    = 2*GJ*REAL(1 - U)                                        Recent  
+               = 2*GJ*(1 - REAL(U))                                      Recent  
+      ELASTIC  =   GJ*(1 - U)**2                                         Recent  
+               =   GJ*((1 - 2*REAL(U)) + (REAL(U)**2 + IM(U)**2))        Recent  
+               = 2*GJ*(1 - REAL(U)) - GJ*(1 - (REAL(U)**2 + IM(U)**2))   Recent  
+                                                                         Recent  
+      SINCE THE FIRST TERM IS THE TOTAL, THE SECOND TERM MUST BE         Recent  
+      ABSORPTION. SO WE FIND,                                            Recent  
+                                                                         Recent  
+      ABSORPTION = GJ*(1 - (REAL(U)**2 + IM(U)**2))                      Recent  
+                                                                         Recent  
+      IN ALL CASES U IS DEFINED IN THE FORM,                             Recent  
+                                                                         Recent  
+      U        = EXP(-I*2*PS)*((1-X) - I*Y)                              Recent  
+                                                                         Recent  
+      WHERE (X) AND (Y) ARE RELATED TO THE SYMMETRIC AND ANTI-SYMMETRIC  Recent  
+      CONTRIBUTIONS OF THE RESONANCES, RESPECTIVELY. ONLY THE DEFINITION Recent  
+      OF (X) AND (Y) WILL BE DIFFERENT FOR EACH RESONANCE FORMALISM.     Recent  
+      BELOW WE WILL SHOW THAT WHAT MIGHT APPEAR TO BE A STRANGE CHOICE   Recent  
+      OF DEFINITION OF THE SIGN OF (X) AND(Y) HAS BEEN SELECTED SO THAT  Recent  
+      FOR BREIT-WIGNER PARAMETERS (X) AND (Y) CORRESPOND EXACTLY TO THE  Recent  
+      SYMMETRIC AND ANTI-SYMMETRIC CONTRIBUTION OF THE RESONANCES.       Recent  
+                                                                         Recent  
+      U        = (COS(2*PS) - I*SIN(2*PS))*((1-X) - I*Y)                 Recent  
+               =   ((1-X)*COS(2*PS) - Y*SIN(2*PS))                       Recent  
+               =-I*((1-X)*SIN(2*PS) + Y*COS(2*PS))                       Recent  
+                                                                         Recent  
+      REAL(U)  = ((1-X)*COS(2*PS) - Y*SIN(2*PS))                         Recent  
+      IM(U)    =-((1-X)*SIN(2*PS) + Y*COS(2*PS))                         Recent  
+                                                                         Recent  
+      R(U)**2  =((1-X)*COS(2*PS))**2 + (Y*SIN(2*PS))**2                  Recent  
+                -2*(1-X)*Y*COS(2*PS)*SIN(2*PS)                           Recent  
+      I(U)**2  =((1-X)*SIN(2*PS))**2 + (Y*COS(2*PS))**2                  Recent  
+                +2*(1-X)*Y*COS(2*PS)*SIN(2*PS)                           Recent  
+                                                                         Recent  
+      THE TERMS 2*(1-X)*Y*COS(2*PS)*SIN(2*PS) CANCEL AND UPON USING      Recent  
+      THE IDENTITY COS(2*PS)**2 + SIN(2*PS)**2 = 1,                      Recent  
+                                                                         Recent  
+      SUM      = (1-X)**2 + (Y)**2                                       Recent  
+                                                                         Recent  
+      WE NOW HAVE ALL THE QUANTITIES THAT WE NEED TO DEFINE THE CROSS    Recent  
+      SECTIONS,                                                          Recent  
+                                                                         Recent  
+      ELASTIC                                                            Recent  
+      =======                                                            Recent  
+      ELASTIC  =GJ*(1 - 2*REAL(U) + (REAL(U)**2 + IM(U)**2))             Recent  
+               =GJ*(1 - 2*((1-X)*COS(2*PS)-Y*SIN(2*PS))+(1-X)**2+(Y)**2) Recent  
+                                                                         Recent  
+      THIS CAN BE WRITTEN AS A SUM OF 2 SQUARES,                         Recent  
+                                                                         Recent  
+      ELASTIC  =GJ*(COS(2*PS) - (1-X))**2 + (SIN(2*PS) + Y)**2)          Recent  
+                                                                         Recent  
+               =GJ*((COS(2*PS))**2 - 2*(1-X)*COS(2*PS) + (1-X)**2) +     Recent  
+                    (SIN(2*PS))**2 + 2*Y*SIN(2*PS)    + (Y)**2)          Recent  
+                                                                         Recent  
+      AGAIN USING THE IDENTITY COS(2*PS)**2 + SIN(2*PS)**2 = 1, WE CAN   Recent  
+      SEE THAT THE DEFINITION AS THE SUM OF 2 SQUARES IS IDENTICAL TO    Recent  
+      THE PRECEDING DEFINITION OF THE ELASTIC.                           Recent  
+                                                                         Recent  
+      ELASTIC  =GJ*(COS(2*PS) - (1-X))**2 + (SIN(2*PS) + Y)**2)          Recent  
+               =GJ*((COS(2*PS)-1) + X)**2 + (SIN(2*PS) + Y)**2)          Recent  
+                                                                         Recent  
+      USING THE IDENTITY (1 - COS(2*PS))) = 2*SIN(PS)**2, WE OBTAIN      Recent  
+      THE FINAL FORM FOR THE ELASTIC,                                    Recent  
+                                                                         Recent  
+      ELASTIC =GJ*(2*SIN(PS)**2 - X)**2 + (SIN(2*PS) + Y)**2)            Recent  
+                                                                         Recent  
+      ABSORPTION                                                         Recent  
+      ==========                                                         Recent  
+      ABSORPTION = GJ*(1 - (REAL(U)**2 + IM(U)**2))                      Recent  
+                 = GJ*(1 - ((1-X)**2   + (Y)**2)                         Recent  
+                 = GJ*(1 - (1 - 2*X + (X)**2 + (Y)**2)                   Recent  
+                 = GJ*(2*X - (X)**2 + (Y)**2)                            Recent  
+                                                                         Recent  
+      SINCE PHYSICALLY THE ABSORPTION CANNOT BE NEGATIVE WE CAN SEE      Recent  
+      THAT (X) MUST BE POSITIVE AND 2*X MUST BE GREATER THAN             Recent  
+      (X)**2 + (Y)**2, FOR ALL OF THE FORMALISMS.                        Recent  
+                                                                         Recent  
+      TOTAL                                                              Recent  
+      =====                                                              Recent  
+      IN THIS PROGRAM THE TOTAL CROSS SECTION IS ALWAYS DEFINED TO BE    Recent  
+      THE SUM OF ITS PARTS - SO THE ABOVE DEFINITION IS NEVER EXPLICITLY Recent  
+      USED. HOWEVER, WE CAN LEARN SOMETHING BY EXAMINING THE DEFINITION, Recent  
+                                                                         Recent  
+      TOTAL    = 2*GJ*REAL(1 - U)                                        Recent  
+               = 2*GJ*(1 - (((1-X)*COS(2*PS) - Y*SIN(2*PS)))             Recent  
+               = 2*GJ*((1 - COS(2*PS))*(1-X) - (1-X) + Y*SIN(2*PS))      Recent  
+               = 2*GJ*(2*SIN(PS)**2*(1-X)    - (1-X) + Y*SIN(2*PS))      Recent  
+                                                                         Recent  
+               = 4*GJ*SIN(PS)**2 +                                       Recent  
+                 2*GJ*((X-1) - 2*X*SIN(PS)**2 +  Y*SIN(2*PS))            Recent  
+                                                                         Recent  
+      THE IMPORTANT POINT TO NOTE IS THAT THE DEFINITION OF THE TOTAL    Recent  
+      DOES NOT EXPLICITLY CONTAIN ANY DEPENDENCE ON X**2 AND Y**2 -      Recent  
+      THE LEVEL-LEVEL INTERFERENCE TERMS.                                Recent  
+                                                                         Recent  
+      THIS IMPLIES THAT IF A GIVEN SET OF RESONANCE PARAMETERS ARE USED  Recent  
+      WITH THIS DEFINITION THEY WILL PRODUCE EXACTLY THE SAME TOTAL      Recent  
+      CROSS SECTION - WHETHER WE CLAIM THE PARAMETERS HAVE BEEN          Recent  
+      PRODUCED USING A SINGLE OR MULTI-LEVEL FIT. THIS RESULT COULD      Recent  
+      BE VERY MISLEADING, IF THIS RESULT FOR THE TOTAL IS IMPLIED TO     Recent  
+      MEAN THAT ONE INTERPRETATION OR THE OTHER WILL NOT HAVE ANY        Recent  
+      EFFECT ON THE INDIVIDUAL CROSS SECTIONS.                           Recent  
+                                                                         Recent  
+      STARTING FROM EXACTLY THE SAME RESONANCE PARAMETERS, RELATIVE TO   Recent  
+      THE RESULTS OBTAINED USING THE SINGLE LEVEL FORMULA, MULTI-LEVEL   Recent  
+      RESULTS WILL TEND TO ALWAYS DECREASE THE ABSORPTION AND INCREASE   Recent  
+      THE ELASTIC. THIS CAN BE IMMEDIATELY SEEN FROM OUR GENERAL         Recent  
+      MULTI-LEVEL DEFINITION OF ABSORPTION,                              Recent  
+                                                                         Recent  
+      ABSORPTION =GJ*(2*X - ((X)**2 + (Y)**2))                           Recent  
+                                                                         Recent  
+      THE SINGLE LEVEL ABSORPTION IS,                                    Recent  
+                                                                         Recent  
+      ABSORPTION =GJ*(2*X)                                               Recent  
+                                                                         Recent  
+      THE DIFFERENCE BETWEEN THE TWO IS -2*GJ*(X**2 + Y**2), SO THAT     Recent  
+      REGARDLESS OF HOW WE DEFINE (X) AND (Y) THE INCLUSION OF THIS      Recent  
+      TERM WILL ALWAYS DECREASE ABSORPTION. SINCE THE TOTAL CROSS        Recent  
+      SECTION IS THE SAME IN BOTH CASE, THIS MEANS THAT THE ELASTIC      Recent  
+      HAS BEEN INCREASED BY THIS AMOUNT.                                 Recent  
+                                                                         Recent  
+      AGAIN, THESE RESULTS ARE BASED ON STARTING FROM EXACTLY THE SAME   Recent  
+      PARAMETERS - IN ANY ACTUAL CASE THE PARAMETERS BASED ON A SINGLE   Recent  
+      OR MULTI-LEVEL FIT WILL BE QUITE DIFFERENT - THE POINT THAT WE     Recent  
+      WANT TO STRESS HERE IS THAT YOU SHOULD NEVER USE PARAMETERS        Recent  
+      WHICH HAVE BEEN DEFINED BY A FIT USING ONE FORMALISM - IN THE      Recent  
+      EQUATIONS FOR A DIFFERENT FORMALISM - AND ASSUME THAT THE RESULTS  Recent  
+      WILL BE CONSISTENT - AND NEVER USE THE TOTAL CROSS SECTION TO      Recent  
+      SEE WHETHER OR NOT A SET OF SINGLE LEVEL PARAMETERS CAN BE USED    Recent  
+      WITH A MULTI-LEVEL FORMALISM.                                      Recent  
+                                                                         Recent  
+      POTENTIAL CROSS SECTION                                            Recent  
+      =======================                                            Recent  
+      FAR FROM RESONANCES (X) AND (Y) WILL BE SMALL AND THE ELASTIC      Recent  
+      CROSS SECTION REDUCES TO,                                          Recent  
+                                                                         Recent  
+      ELASTIC =GJ*(2*SIN(PS)**2)**2     + (SIN(2*PS))**2                 Recent  
+              =GJ*4*(SIN(PS)**4         + SIN(2*PS)**2                   Recent  
+                                                                         Recent  
+      USING THE IDENTITY SIN(2*PS) = 2*SIN(PS)*COS(PS)                   Recent  
+                                                                         Recent  
+              =4*GJ*(SIN(PS)**4         + (SIN(PS)*COS(PS))**2)          Recent  
+              =4*GJ*SIN(PS)**2*(SIN(PS)**2 + COS(PS)**2)                 Recent  
+              =4*GJ*SIN(PS)**2                                           Recent  
+                                                                         Recent  
+      WHICH IS THE POTENTIAL CROSS SECTION. NOTE THAT THIS RESULT IS     Recent  
+      INDEPENDENT OF THE FORMALISM USED, AS IT MUST PHYSICALLY BE,       Recent  
+      AND AS SUCH ALTHOUGH AS YET WE HAVE NOT DEFINED IT, WE CAN         Recent  
+      NOW SEE THAT IN ALL CASES (PS) MUST BE THE PHASE SHIFT AND FOR     Recent  
+      CONSISTENCY IT MUST BE DEFINED USING EXACTLY THE SAME DEFINITION   Recent  
+      IN ALL CASES.                                                      Recent  
+                                                                         Recent  
+      IN ADDITION SINCE PHYSICALLY FOR EACH L VALUE WE EXPECT TO OBTAIN  Recent  
+      A POTENTIAL CROSS SECTION,                                         Recent  
+                                                                         Recent  
+      4*(2*L+1)*SIN(PS)**2                                               Recent  
+                                                                         Recent  
+      OBVIOUSLY FOR CONSISTENCY WE MUST HAVE,                            Recent  
+                                                                         Recent  
+      (2*L+1) = (SUM OVER J) GJ                                          Recent  
+                                                                         Recent  
+      ONLY IN THIS CASE WILL THE RESULTS BE CONSISTENT - THIS POINT WILL Recent  
+      BE DISCUSSED IN DETAIL BELOW.                                      Recent  
+                                                                         Recent  
+      WHAT ARE THIS TERMS (X) AND (Y)                                    Recent  
+      ===============================                                    Recent  
+      (X) AND (Y) CAN BE EASILY IDENTIFIED BY CONSIDERING THE SINGLE     Recent  
+      AND MULTI-LEVEL BREIT WIGNER FORMALISMS. IN THESE CASES WE WILL    Recent  
+      FIND THAT,                                                         Recent  
+                                                                         Recent  
+      X        = GAM(N)*GAM(T)/2/DEN                                     Recent  
+      Y        = GAM(N)*(E-ER)/DEN                                       Recent  
+      DEN      = ((E-ER)**2 + (GAM(T)/2)**2)                             Recent  
+                                                                         Recent  
+      EXTREME CARE HAS TO BE USED TO PROPERLY DEFINE (Y) SUCH THAT IT    Recent  
+      IS NEGATIVE FOR E LESS THAN ER AND POSITIVE FOR E GREATER THAN     Recent  
+      ER. I WILL MERELY MENTION THAT THE EQUATIONS FOR ALL FORMALISMS    Recent  
+      IN ENDF-102 DO NOT CONSISTENTLY USE (E - ER) - IN SOME CASES       Recent  
+      THIS IS WRITTEN AS (ER - E), WHICH CAN LEAD TO AN INCORRECT        Recent  
+      SIGN IN THE DEFINITION OF THE (Y) THAT WE REQUIRE.                 Recent  
+                                                                         Recent  
+      THE INTERFERENCE TERMS CAN BE WRITTEN IN TERMS OF,                 Recent  
+      1) LEVEL-SELF INTERFERENCE  = THE CONTRIBUTION OF EACH LEVEL       Recent  
+                                    INTERFERRING WITH ITSELF             Recent  
+      2) LEVEL-LEVEL INTERFERENCE = THE CONTRIBUTION OF EACH LEVEL       Recent  
+                                    INTERFERRRING WITH ALL OTHER LEVELS  Recent  
+                                                                         Recent  
+      WE WILL REFER TO THESE TWO AS (L-S) AND (L-L),                     Recent  
+                                                                         Recent  
+      X**2     = (GAM(N)*(GAM(T)/2)**2/(DEN)**2      + (L-L)             Recent  
+               = (GAM(N)**2*((GAM(T)/2)**2)/(DEN)**2 + (L-L)             Recent  
+      Y**2     = (GAM(N))**2*((E-ER))**2/(DEN)**2    + (L-L)             Recent  
+                                                                         Recent  
+      X**2+Y**2= GAM(N)**2*DEN/(DEN)**2 = GAM(N)**2/DEN + (L-L)          Recent  
+                                                                         Recent  
+      TO SEE THE EFFECT OF INCLUDING MULTI-LEVEL INTERFERENCE WE CAN     Recent  
+      CONSIDER OUR GENERAL EXPRESSION FOR ABSORPTION,                    Recent  
+                                                                         Recent  
+      ABSORPTION =GJ*(2*X - ((X)**2 + (Y)**2))                           Recent  
+                                                                         Recent  
+      AND NOTE THAT FOR BOTH SINGLE AND MULTI-LEVEL BREIT WIGNER THE     Recent  
+      ENDF-102 SAYS TO TREAT ABSORPTION IN A SINGLE LEVEL APPROXIMATION  Recent  
+      I.E., IGNORE LEVEL-LEVEL INTERFERENCE. IF ALL INTERFERENCE IS      Recent  
+      IGNORED THIS IS EQUIVALENT TO COMPLETELY IGNORING X**2 + Y**2 AND  Recent  
+      DEFINING,                                                          Recent  
+                                                                         Recent  
+      ABSORPTION =GJ*2*X                                                 Recent  
+                 =2*GJ*GAM(N)*GAM(T)/DEN                                 Recent  
+                                                                         Recent  
+      WHICH IS INCORRECT - SINCE THIS SEEMS TO INDICATE EVERYTHING IS    Recent  
+      ABSORBED. IN ORDER TO OBTAIN THE CORRECT EXPRESSION WE CANNOT      Recent  
+      COMPLETELY IGNORE INTERFERENCE - WE CAN IGNORE LEVEL-LEVEL         Recent  
+      INTERFERENCE, BUT WE MUST INCLUDE LEVEL-SELF INTERFERENCE,         Recent  
+                                                                         Recent  
+      X**2+Y**2= GAM(N)**2/DEN                                           Recent  
+                                                                         Recent  
+      ABSORPTION =GJ*(2*X - ((X)**2 + (Y)**2))                           Recent  
+                 =GJ*GAM(N)*(GAM(T)-GAM(N))/DEN                          Recent  
+                 =GJ*GAM(N)*GAM(A)/DEN                                   Recent  
+                                                                         Recent  
+      SUMMARY                                                            Recent  
+      =======                                                            Recent  
+      AN IMPORTANT POINT TO NOTE IS THE DEFINITION OF (X) AND (Y)        Recent  
+      WHICH IN ALL CASES WILL CORRESPOND TO THE SYMMETRIC AND            Recent  
+      ANTI-SYMMETRIC CONTRIBUTION OF THE RESONANCES. IN PARTICULAR       Recent  
+      DEFINING (U) IN TERMS OF (1-X) INSTEAD OF (X) IS EXTREMELY         Recent  
+      IMPORTANT. NOTE, THAT THE DEFINITION OF THE ELASTIC AND            Recent  
+      ABSORPTION ONLY INVOLVE (X), NOT (1-X). FAR FROM RESONANCES        Recent  
+      (X) CAN BE EXTREMELY SMALL, THEREFORE (1-X) WILL BE VERY CLOSE     Recent  
+      TO (1). IF THE CALCULATION PROCEEDS BY FIRST CALCULATING (1-X)     Recent  
+      AND THEN DEFINING (X) BY SUBTRACTING (1), EXTREME ROUND-OFF        Recent  
+      PROBLEMS CAN RESULT. THESE PROBLEMS CAN BE AVOIDED BY IN ALL       Recent  
+      CASES DEFINING (X) DIRECTLY, WITHOUT ANY DIFFERENCES.              Recent  
+                                                                         Recent  
+      IN EACH FORMALISM THE DEFINITION OF (X) AND (Y) MAY BE DIFFERENT   Recent  
+      BUT ONCE WE HAVE DEFINED (X) AND (Y) WE CAN IMMEDIATELY WRITE      Recent  
+      THE CROSS SECTIONS USING A UNIFORM DEFINITION,                     Recent  
+                                                                         Recent  
+      ELASTIC =GJ*(2*SIN(PS)**2 - X)**2 + (SIN(2*PS) + Y)**2)            Recent  
+                                                                         Recent  
+      ABSORPTION =-GJ*(2*X + (X)**2 + (Y)**2)                            Recent  
+                                                                         Recent  
+      AND DEFINE THE TOTAL AS THE SUM OF THESE 2 PARTS.                  Recent  
+                                                                         Recent  
+      RELATIONSHIP TO SINGLE LEVEL                                       Recent  
+      ============================                                       Recent  
+      HOW DO THE SINGLE AND MULTI-LEVEL FORMALISMS COMPARE. TO SEE,      Recent  
+      STARTING FROM OUR GENERAL DEFINITION OF THE ELASTIC IN THE FORM,   Recent  
+                                                                         Recent  
+      ELASTIC =GJ*(2*SIN(PS)**2 + X)**2 + (SIN(2*PS) + Y)**2)            Recent  
+              =GJ*(4*SIN(PS)**4 - 4*X*SIN(PS)**2 + X**2                  Recent  
+                 + SIN(2*PS)**2 + 2*Y*SIN(2*PS)  + Y**2)                 Recent  
+                                                                         Recent  
+              =4*GJ*SIN(PS)**2 +                                         Recent  
+                 GJ*(X**2 + Y**2                                         Recent  
+                    -4*X*SIN(PS)**2                                      Recent  
+                    +2*Y*SIN(2*PS))                                      Recent  
+                                                                         Recent  
+      AND OUR SPECIFIC DEFINITIONS OF (X) AND (Y) FOR MULTI-LEVEL BREIT- Recent  
+      WIGNER PARAMETERS,                                                 Recent  
+                                                                         Recent  
+      X        = GAM(N)*GAM(T)/2/DEN                                     Recent  
+      Y        = GAM(N)*(E-ER)/DEN                                       Recent  
+      DEN      = ((E-ER)**2 + (GAM(T)/2)**2)                             Recent  
+                                                                         Recent  
+      X**2+Y**2= GAM(N)**2/DEN + (L-L)                                   Recent  
+                                                                         Recent  
+      WE CAN RECOGNIZE X**2 AND Y**2 AS THE INTERFERENCE - (L-S) + (L-L) Recent  
+      TERMS IN THE MULTI-LEVEL FORMALISM. IN ORDER TO OBTAIN THE SINGLE  Recent  
+      LEVEL EQUATION WE CAN ASSUME THAT EACH LEVEL DOES NOT INTERFERE    Recent  
+      WITH ANY OTHER LEVEL - THEREFORE THE (L-L) CONTRIBUTION IS ZERO.   Recent  
+                                                                         Recent  
+      ELASTIC =4*GJ*SIN(PS)**2 +                                         Recent  
+                 GJ*GAM(N)*(GAM(N)                                       Recent  
+                            -2*GAM(T)*SIN(PS)**2                         Recent  
+                            +2*(E-ER)*SIN(2*PS))/DEN                     Recent  
+                                                                         Recent  
+      WHICH IS THE FORM THAT IT APPEARS IN ENDF-102, EXCEPT FOR TWO      Recent  
+      TYPOGRAPHICAL ERRORS IN THE SECOND TERM,                           Recent  
+                                                                         Recent  
+      -2*GAM(T)*SIN(PS)**2                                               Recent  
+                                                                         Recent  
+      WHICH IN ENDF-102 IS WRITTEN,                                      Recent  
+                                                                         Recent  
+      -2*(GAM(T)-GAM(N))*SIN(2*PS)**2                                    Recent  
+                                                                         Recent  
+      PROGRAM CONVENTIONS                                                Recent  
+      ================================================================== Recent  
+      MINIMUM INPUT DATA                                                 Recent  
+      ------------------                                                 Recent  
+      FOR EACH MATERIAL TO BE PROCESSED THE MINIMUM INPUT DATA ARE THE   Recent  
+      RESONANCE PARAMETERS IN FILE 2. IF THERE ARE NO FILE 2 PARAMETERS  Recent  
+      IN A GIVEN MATERIAL THE ENTIRE MATERIAL WILL SIMPLY BE COPIED.     Recent  
+      NEITHER THE HOLLERITH SECTION (MF=1, MT=451) NOR THE BACKGROUND    Recent  
+      CROSS SECTION (SECTIONS OF MF=3) NEED BE PRESENT FOR THIS PROGRAM  Recent  
+      TO EXECUTE PROPERLY. HOWEVER, SINCE THE CONVENTIONS USED IN        Recent  
+      INTERPRETING THE RESONANCE PARAMETERS DEPENDS ON ENDF/B VERSION    Recent  
+      USERS ARE STRONGLY RECOMMENDED TO INSURE THAT MF=1, MT=451 IS      Recent  
+      PRESENT IN EACH MATERIAL TO ALLOW THE PROGRAM TO DETERMINE THE     Recent  
+      ENDF/B FORMAT VERSION.                                             Recent  
+                                                                         Recent  
+      RESONANCE PARAMETERS                                               Recent  
+      --------------------                                               Recent  
+      RESONANCE PARAMETERS MAY BE REPRESENTED USING ANY COMBINATION      Recent  
+      OF THE REPRESENTATIONS ALLOWED IN ENDF/B,                          Recent  
+      (1) RESOLVED DATA                                                  Recent  
+          (A) SINGLE LEVEL BREIT-WIGNER                                  Recent  
+          (B) MULTI-LEVEL BREIT-WIGNER                                   Recent  
+          (C) ADLER-ADLER                                                Recent  
+          (D) REICH-MOORE                                                Recent  
+          (E) HYBRID R-FUNCTION                                          Recent  
+      (2) UNRESOLVED DATA                                                Recent  
+          (A) ALL PARAMETERS ENERGY INDEPENDENT                          Recent  
+          (B) FISSION PARAMETERS ENERGY DEPENDENT                        Recent  
+          (C) ALL PARAMETERS ENERGY DEPENDENT                            Recent  
+                                                                         Recent  
+      THE FOLLOWING RESOLVED DATA FORMALISMS ARE NOT TREATED BY THIS     Recent  
+      VERSION OF THE CODE AND WILL ONLY BE IMPLEMENTED AFTER EVALUATIONS Recent  
+      USING THESE FORMALISMS ARE AVAILABLE TO THE AUTHOR OF THIS CODE    Recent  
+      FOR TESTING IN ORDER TO INSURE THAT THEY CAN BE HANDLED PROPERLY   Recent  
+          (A) GENERAL R-MATRIX                                           Recent  
+                                                                         Recent  
+      CALCULATED CROSS SECTIONS                                          Recent  
+      -------------------------                                          Recent  
+      THIS PROGRAM WILL USE THE RESONANCE PARAMETERS TO CALCULATE THE    Recent  
+      TOTAL, ELASTIC, CAPTURE AND POSSIBLY FISSION CROSS SECTIONS. THE   Recent  
+      COMPETITIVE WIDTH WILL BE USED IN THESE CALCULATIONS, BUT THE      Recent  
+      COMPETITIVE CROSS SECTION ITSELF WILL NOT BE CALCULATED. THE       Recent  
+      ENDF/B CONVENTION IS THAT ALTHOUGH A COMPETITIVE WIDTH MAY BE      Recent  
+      GIVEN, THE COMPETITIVE CROSS SECTION MUST BE SEPARATELY TABULATED  Recent  
+      AS A SECTION OF FILE 3 DATA.                                       Recent  
+                                                                         Recent  
+      RESOLVED REGION                                                    Recent  
+      ---------------                                                    Recent  
+      IN THE RESOLVED REGION THE RESOLVED PARAMETERS ARE USED TO         Recent  
+      CALCULATE COLD (0 KELVIN), LINEARLY INTERPOLABLE, ENERGY DEPENDENT Recent  
+      CROSS SECTIONS.                                                    Recent  
+                                                                         Recent  
+      SCATTERING RADIUS                                                  Recent  
+      -----------------                                                  Recent  
+      FOR SINGLE OR MULTI LEVEL BREIT-WIGNER PARAMETERS THE SCATTERING   Recent  
+      RADIUS MAY BE SPECIFIED IN EITHER ENERGY INDEPENDENT (CONSTANT)    Recent  
+      OR ENERGY DEPENDENT FORM (A TABLE OF ENERGY VS. RADIUS AND AN      Recent  
+      ASSOCIATED INTERPOLATION LAW). IN ALL OTHER CASE ONLY AN ENERGY    Recent  
+      INDEPENDENT SCATTERING RADIUS IS ALLOWED.                          Recent  
+                                                                         Recent  
+      FOR ANY ONE MATERIAL (I.E. MAT) IF ENERGY DEPENDENT SCATTERING     Recent  
+      RADII ARE GIVEN THE TOTAL NUMBER OF INTERPOLATION REGIONS AND      Recent  
+      TABULATED VALUES FOR THE ENTIRE MATERIAL CANNOT EXCEED,            Recent  
+      200 - INTERPOLATION REGIONS                                        Recent  
+      500 - TABULATED VALUES                                             Recent  
+      IF THESE LIMITS ARE EXCEEDED THE PROGRAM WILL PRINT AN ERROR       Recent  
+      MESSAGE AND TERMINATE.                                             Recent  
+                                                                         Recent  
+      IF YOU REQUIRE A LARGER NUMBER OF INTERPOLATION REGION AND/OR      Recent  
+      TABULATED VALUES,                                                  Recent  
+      (1) INTERPOLATION REGIONS - INCREASE THE DIMENSION OF NBTRHO AND   Recent  
+      INTRHO IN COMMON/TABRHO/ THROUGHOUT THE PROGRAM AND CHANGE MAXSEC  Recent  
+      IN SUBROUTINE RDAP (MAXSEC = MAXIMUM NUMBER OF INTERPOLATION       Recent  
+      REGIONS).                                                          Recent  
+      (2) TABULATED VALUES - INCREASE THE DIMENSION OF ERHOTB, RHOTAB    Recent  
+      AND APTAB IN COMMON/TABRHO/ THROUGHOUT THE PROGRAM AND CHANGE      Recent  
+      MAXRHO IN SUBROUTINE RDAP (MAXRHO = MAXIMUM NUMBER OF TABULATED    Recent  
+      VALUES).                                                           Recent  
+                                                                         Recent  
+      RESOLVED REICH-MOORE AND MULTI-LEVEL BREIT-WIGNER PARAMETERS       Recent  
+      ------------------------------------------------------------       Recent  
+      CROSS SECTIONS FOR REICH-MOORE PARAMETERS ARE CALCULATED ACCORDING Recent  
+      TO THE EQUATION (1) - (8) OF SECTION D.1.3 OF ENDF-102. IN ORDER   Recent  
+      TO CALCULATE CROSS SECTIONS FROM MULTI-LEVEL PARAMETERS IN A       Recent  
+      REASONABLE AMOUNT OF TIME THIS PROGRAM EXPRESSES THE CROSS SECTION Recent  
+      IN TERMS OF A SINGLE SUM OVER RESONANCES (SEE, ENDF-102, SECTION   Recent  
+      D.1.2, EQUATIONS 6-7), RATHER THAN AS A DOUBLE SUM (SEE, ENDF-102  Recent  
+      SECTION D.1.2, EQUATION 1-2). IN ORDER FOR THE ENDF-102 EQUATIONS  Recent  
+      TO BE CORRECT THE PARAMETERS MUST MEET THE FOLLOWING CONDITIONS,   Recent  
+                                                                         Recent  
+      (1) FOR EACH L STATE ALL PHYSICALLY POSSIBLE J SEQUENCES MUST BE   Recent  
+          PRESENT. ONLY IN THIS CASE WILL THE CONTRIBUTIONS OF THE       Recent  
+          INDIVIDUAL J SEQUENCES ADD UP TO PRODUCE THE CORRECT POTENTIAL Recent  
+          SCATTERING CONTRIBUTION FOR THE L STATE (SEE, ENDF-102,        Recent  
+          SECTION D.1.2, EQUATIONS 6-7). IF ANY J SEQUENCE IS MISSING    Recent  
+          THE PROGRAM WILL PRINT A WARNING AND ADD THE J SEQUENCE WITH   Recent  
+          NO RESONANCE PARAMETERS IN ORDER TO ALLOW THE POTENTIAL        Recent  
+          SCATTERING TO BE CALCULATED CORRECTLY (THIS IS EQUIVALENT TO   Recent  
+          ASSUMING THAT THE EVALUATOR REALIZES THAT ALL J SEQUENCES MUST Recent  
+          BE AND ARE PRESENT AND THAT THE EVALUATION STATES THAT THERE   Recent  
+          ARE NO RESONANCES WITH CERTAIN PHYSICALLY POSSIBLE J VALUES... Recent  
+          IN THIS CASE POTENTIAL CONTRIBUTION MUST STILL BE CONSIDERED). Recent  
+                                                                         Recent  
+          EXAMPLE                                                        Recent  
+          =======                                                        Recent  
+          AN EXAMPLE OF WHERE THIS OCCURS AND IS IMPORTANT TO CONSIDER   Recent  
+          IS U-238 IN ENDF/B-IV AND V LIBRARIES WHERE FOR L=1 THERE IS   Recent  
+          ONLY A J=1/2 SEQUENCE. NOT INCLUDING THE J=3/2 SEQUENCE LEADS  Recent  
+          TO UNDERESTIMATING THE POTENTIAL SCATTERING AND PRODUCES       Recent  
+          MINIMA IN THE ELASTIC CROSS SECTION WHICH ARE AN ORDER OF      Recent  
+          MAGNITUDE LOWER THAN THE CROSS SECTIONS OBTAINED BE INCLUDING  Recent  
+          THE J=3/2 SEQUENCE.                                            Recent  
+                                                                         Recent  
+      (2) FOR A GIVEN TARGET SPIN AND L VALUE THERE MAY BE 2 POSSIBLE    Recent  
+          MEANS OF OBTAINING THE SAME J VALUE. WHEN THIS OCCURS IN       Recent  
+          ORDER TO CALCULATE THE CORRECT POTENTIAL SCATTERING CROSS      Recent  
+          SECTION IT IS IMPORTANT TO INCLUDE THE EFFECT OF BOTH          Recent  
+          POSSIBLE J SEQUENCES, EVEN THOUGH FROM THE ENDF/B DATA IT IS   Recent  
+          NOT POSSIBLE TO DETERMINE WHICH OF THE 2 POSSIBLE SEQUENCES    Recent  
+          ANY GIVEN RESONANCE BELONGS TO. IN THIS CASE THIS PROGRAM      Recent  
+          TREAT ALL RESONANCES WITH THE SAME J VALUE AS BELONGING TO     Recent  
+          THE SAME J SEQUENCE (TO ALLOW INTERFERENCE) AND WILL ADD AN    Recent  
+          ADDITIONAL J SEQUENCE WITH NO RESONANCES IN ORDER TO ALLOW     Recent  
+          THE POTENTIAL CROSS SECTION TO BE CALCULATED CORRECTLY. WHEN   Recent  
+          THIS OCCURS A WARNING MESSAGE IS PRINTED, BUT BASED ON THE     Recent  
+          ENDF/B DATA THERE IS NOTHING WRONG WITH THE DATA AND THERE IS  Recent  
+          NOTHING THAT THE USER CAN DO TO CORRECT OR IN ANY WAY MODIFY   Recent  
+          THE DATA TO ELIMINATE THE PROBLEM.                             Recent  
+                                                                         Recent  
+          EXAMPLE                                                        Recent  
+          =======                                                        Recent  
+          FOR A TARGET SPIN =1 AND L=1 THE 2 RANGES OF PHYSICALLY        Recent  
+          POSSIBLE J ARE 1/2, 3/2, 5/2 AND 1/2, 3/2. BY CHECKING THE     Recent  
+          ENDF/B DATA IT IS POSSIBLE TO INSURE THAT THE 3 POSSIBLE       Recent  
+          J VALUES (1/2, 3/2, 5/2) ARE PRESENT AND TO INCLUDE ALL 3      Recent  
+          J SEQUENCES IN THE CALCULATIONS. HOWEVER, UNLESS ALL 5         Recent  
+          POSSIBLE J SEQUENCES ARE INCLUDED THE STATISTICAL WEIGHTS      Recent  
+          OF THE J SEQUENCES WILL NOT SUM UP TO 2*L+1 AND THE            Recent  
+          POTENTIAL CROSS SECTION WILL BE UNDERESTIMATED. IN THIS        Recent  
+          EXAMPLE THE SUM OF THE 3 J SEQUENCES 1/2, 3/2, 5/2 IS 2,       Recent  
+          RATHER THAN 3 AS IT SHOULD BE FOR L=1, AND THE CONTRIBUTION    Recent  
+          OF THE L=1 RESONANCES TO THE POTENTIAL SCATTERING CROSS        Recent  
+          SECTION WILL ONLY BE 2/3 OF WHAT IT SHOULD BE, UNLESS THE      Recent  
+          OTHER 2 J SEQUENCES (WITH DUPLICATE J VALUES) ARE INCLUDED     Recent  
+          IN THE CALCULATION.                                            Recent  
+                                                                         Recent  
+      (3) EACH RESONANCE MUST HAVE AN ASSIGNED, PHYSICALLY POSSIBLE      Recent  
+          J VALUE. PHYSICALLY IMPOSSIBLE OR AVERAGE J VALUES CANNOT BE   Recent  
+          UNIQUELY INTERPRETED USING THE EQUATIONS IN ENDF-102 AND       Recent  
+          THEIR USE WILL USUALLY RESULT IN PHYSICALLY UNRELIABLE CROSS   Recent  
+          SECTIONS. THIS PROGRAM WILL CHECK ALL J VALUES AND IF ANY ARE  Recent  
+          ARE FOUND TO BE PHYSICALLY IMPOSSIBLE (BASED ON TARGET SPIN    Recent  
+          AND L VALUE) AN ERROR MESSAGE WILL BE PRINTED TO INDICATE THAT Recent  
+          THE RECONSTRUCTED CROSS SECTIONS WILL BE UNRELIABLE AND THE    Recent  
+          PROGRAM WILL CONTINUE. IN AN ATTEMPT TO CALCULATE THE CORRECT  Recent  
+          POTENTIAL SCATTERING CROSS SECTION THIS PROGRAM WILL SUBTRACT  Recent  
+          THE POTENTIAL SCATTERING CONTRIBUTION DUE TO ALL FICTICIOUS J  Recent  
+          SEQUENCES AND ADD THE CONTRIBUTION OF ALL PHYSICALLY POSSIBLE  Recent  
+          J SEQUENCES (AS DESCRIBED ABOVE).                              Recent  
+                                                                         Recent  
+          WARNING (LET THE USER BEWARE)                                  Recent  
+          =============================                                  Recent  
+          (A) IT CANNOT BE STRESSED ENOUGH THAT CROSS SECTIONS OBTAINED  Recent  
+              USING PHYSICALLY IMPOSSIBLE J VALUES FOR REICH-MOORE AND   Recent  
+              MULTI-LEVEL BREIT-WIGNER RESONANCE PARAMETERS WILL RESULT  Recent  
+              IN UNRELIABLE CROSS SECTIONS. THE DECISION TO HAVE THIS    Recent  
+              PROGRAM CONTINUE TO PROCESS WHEN THIS CONDITION IS FOUND   Recent  
+              IS BASED ON AN ATTEMPT TO ALLOW THE USER TO AT LEAST HAVE  Recent  
+              SOME RESULTS (HOWEVER BAD THEY MAY BE) IF THERE IS NO      Recent  
+              OTHER EVALUATED DATA AVAILABLE.                            Recent  
+          (B) EVEN THOUGH THE REICH-MOORE AND MULTI-LEVEL EQUATIONS ARE  Recent  
+              DEFINED AS ABSOLUTE OR SQUARED CONTRIBUTIONS WHICH MUST    Recent  
+              ALL BE PHYSICALLY POSSIBLE, ATTEMPTING TO CORRECT THE      Recent  
+              POTENTIAL CROSS SECTION (AS DESCRIBED ABOVE) CAN LEAD TO   Recent  
+              NEGATIVE ELASTIC CROSS SECTIONS. THIS IS BECAUSE BASED ON  Recent  
+              THE INFORMATION AVAILABLE IN THE EVALUATION IT IS NOT      Recent  
+              NOT POSSIBLE TO CORRECTLY ACCOUNT FOR THE INTERFERENCE     Recent  
+              BETWEEN THE RESONANCE AND POTENTIAL CONTRIBUTIONS FOR EACH Recent  
+              J SEQUENCE.                                                Recent  
+                                                                         Recent  
+      UNRESOLVED RESONANCE REGION                                        Recent  
+      ---------------------------                                        Recent  
+      IN THE UNRESOLVED RESONANCE REGION THE UNRESOLVED PARAMETERS       Recent  
+      ARE USED TO CALCULATE INFINITELY DILUTE AVERAGE CROSS SECTIONS.    Recent  
+      NOTE, IT IS IMPORTANT TO UNDERSTAND THAT FROM THE DEFINITION OF    Recent  
+      THE UNRESOLVED PARAMETERS IT IS NOT POSSIBLE TO UNIQUELY CALCULATE Recent  
+      ENERGY DEPENDENT CROSS SECTIONS. ONLY AVERAGES OR DISTRIBUTIONS    Recent  
+      MAY BE CALCULATED.                                                 Recent  
+                                                                         Recent  
+      UNRESOLVED INTERPOLATION                                           Recent  
+      ------------------------                                           Recent  
+      IN THE UNRESOLVED RESONANCE REGION CROSS SECTIONS AT EACH ENERGY   Recent  
+      ARE CALCULATED BY INTERPOLATING PARAMETERS. THIS IS THE CONVENTION Recent  
+      USED IN ENDF/B-IV AND EARLIER VERSIONS OF ENDF/B. THE ENDF/B-V     Recent  
+      CONVENTION OF INTERPOLATING CROSS SECTIONS, NOT PARAMETERS, HAS    Recent  
+      BEEN ABANDONED AS IMPRACTICAL SINCE IT CAN LEAD TO THE SITUATION   Recent  
+      WHERE EXACTLY THE SAME PHYSICAL DATA CAN LEAD TO DIFFERENT RESULTS Recent  
+      DEPENDING ON WHICH OF THE THREE ENDF/B UNRESOLVED PARAMTER FORMATS Recent  
+      IS USED. FOR EXAMPLE, GIVEN A SET OF ENERGY INDEPENDENT UNRESOLVED Recent  
+      PARAMETERS IT IS POSSIBLE TO CODE THESE PARAMETERS IN EACH OF THE  Recent  
+      THREE ENDF/B UNRESOLVED PARAMETER FORMATS. SINCE PHYSICALLY WE     Recent  
+      ONLY HAVE ONE SET OF PARAMETERS WE WOULD EXPECT THE RESULTS TO BE  Recent  
+      INDEPENDENT OF HOW THEY ARE REPRESENTED IN ENDF/B. UNFORTUNATELY   Recent  
+      USING THE ENDF/B-V CONVENTION TO INTERPOLATE CROSS SECTIONS CAN    Recent  
+      LEAD TO THREE COMPLETELY DIFFERENT RESULTS. IN CONTRAST USING THE  Recent  
+      ENDF/B-IV AND EARLIER CONVENTION OF INTERPOLATING PARAMETERS LEADS Recent  
+      TO COMPLETELY CONSISTENT RESULTS.                                  Recent  
+                                                                         Recent  
+      INTERNAL REPRESENTATION OF UNRESOLVED PARAMETERS                   Recent  
+      ------------------------------------------------                   Recent  
+      ANY OF THE THREE POSSIBLE REPRESENTATIONS OF UNRESOLVED PARAMETERS Recent  
+      CAN BE UNIQUELY REPRESENTED IN THE ALL PARAMETERS ENERGY DEPENDENT Recent  
+      REPRESENTATIONS WITH THE APPROPRIATE (ENDF/B VERSION DEPENDENT)    Recent  
+      INTERPOLATION LAW. THIS IS DONE BY THE PROGRAM WHILE READING THE   Recent  
+      UNRESOLVED PARAMETERS AND ALL SUBSEQUENT CALCULATIONS NEED ONLY    Recent  
+      CONSIDER THE ALL PARAMETERS ENERGY DEPENDENT REPRESENTATION.       Recent  
+                                                                         Recent  
+      RESONANCE RECONSTRUCTION STARTING ENERGY GRID                      Recent  
+      ---------------------------------------------                      Recent  
+      AS IN ANY ITERATIVE METHOD THE WAY TO SPEED CONVERGENCE IS TO TRY  Recent  
+      TO START CLOSE TO THE ANSWER. THIS PROGRAM ATTEMPTS TO DO THIS BY  Recent  
+      STARTING FROM AN ENERGY GRID WHICH IS A GOOD APPROXIMATION TO A    Recent  
+      SIMPLE BREIT-WIGNER LINE SHAPE,                                    Recent  
+                                                                         Recent  
+      SIGMA(X)=1.0/(1.0+X*X)                                             Recent  
+                                                                         Recent  
+      WHERE X IS THE DISTANCE FROM THE PEAK IN HALF-WIDTHS               Recent  
+                                                                         Recent  
+      SUBROUTINE SUBINT HAS A BUILT-IN TABLE OF NODES WHICH ARE THE      Recent  
+      HALF-WIDTH MULTIPLES TO APPROXIMATE THE SIMPLE BREIT-LINE SHAPE    Recent  
+      TO WITHIN 1 PER-CENT OVER THE ENTIRE INTERVAL 0 TO 500 HALF-WIDTHS Recent  
+                                                                         Recent  
+      BETWEEN ANY TWO RESOLVED RESONANCES THE STARTING GRID IS BASED ON  Recent  
+      THE HALF-WIDTHS OF THE TWO RESONANCES. FROM THE LOWER ENERGY       Recent  
+      RESONANCE UP TO THE MID-POINT BETWEEN THE RESONANCES (MID-POINT    Recent  
+      IS DEFINED HERE AS AN EQUAL NUMBER OF HALF-WIDTHS FROM EACH        Recent  
+      RESONANCE) THE HALF-WIDTH OF THE LOWER ENERGY RESONANCE IS USED.   Recent  
+      FROM THE MID-POINT UP TO THE HIGHER ENERGY RESONANCE THE HALF-     Recent  
+      WIDTH OF THE UPPER ENERGY RESONANCE IS USED.                       Recent  
+                                                                         Recent  
+      WITH THIS ALOGORITHM CLOSELY SPACED RESONANCES WILL HAVE ONLY      Recent  
+      A FEW STARTING NODES PER RESONANCE (E.G. U-235). WIDELY SPACED     Recent  
+      RESONANCES WILL HAVE MORE NODES PER RESONANCE (E.G. U-238). FOR    Recent  
+      A MIX OF S, P, D ETC. RESONANCES THIS ALOGORITHM GUARANTEES AN     Recent  
+      ADEQUTE DESCRIPTION OF THE PROFILE OF EVEN EXTREMELY NARROW        Recent  
+      RESONANCES (WHICH MAY IMMEDIATELY CONVERGENCE TO THE ACCURACY      Recent  
+      REQUESTED, THUS MINIMIZING ITERATION).                             Recent  
+                                                                         Recent  
+      BACKGROUND CROSS SECTIONS                                          Recent  
+      -------------------------                                          Recent  
+      THE PROGRAM WILL SEARCH FOR BACKGROUND CROSS SECTIONS FOR TOTAL    Recent  
+      (MT=1), ELASTIC (MT=2), FISSION (MT=18), FIRST CHANCE FISSION      Recent  
+      (MT=19) AND CAPTURE (MT=102).                                      Recent  
+                                                                         Recent  
+      (1) THE BACKGROUND CROSS SECTIONS (FILE 3) CAN BE PRESENT OR NOT   Recent  
+          PRESENT FOR EACH REACTION.                                     Recent  
+      (2) IF FOR A GIVEN REACTION THE BACKGROUND CROSS SECTION IS        Recent  
+          PRESENT, IT WILL BE ADDED TO THE RESONANCE CONTRIBUTION AND    Recent  
+          THE RESULT WILL BE OUTPUT.                                     Recent  
+      (3) IF FOR A GIVEN REACTION THE BACKGROUND IS NOT PRESENT THE      Recent  
+          PROGRAM WILL,                                                  Recent  
+          (A) IF THE INPUT TO THE PROGRAM SPECIFIES NO OUTPUT FOR        Recent  
+              REACTIONS WITH NO BACKGROUND THERE WILL BE NO OUTPUT.      Recent  
+          (B) IF THE INPUT TO THE PROGRAM SPECIFIES OUTPUT FOR REACTIONS Recent  
+              WITH NO BACKGROUND,                                        Recent  
+              (I) THE RESONANCE CONTRIBUTION TO TOTAL, ELASTIC OR        Recent  
+                  CAPTURE WILL BE OUTPUT.                                Recent  
+              (II) IF ALL FISSION RESONANCE PARAMETERS ARE ZERO THE      Recent  
+                   FISSION CROSS SECTION (MT=18) WILL NOT BE OUTPUT.     Recent  
+                   OTHERWISE THE RESONANCE CONTRIBUTION OF THE FISSION   Recent  
+                   (MT=18) WILL BE OUTPUT.                               Recent  
+              (III) THERE WILL BE NO OUTPUT FOR FIRST CHANCE FISSION     Recent  
+                    (MT=19).                                             Recent  
+                                                                         Recent  
+      COMBINING RESONANCES AND BACKGROUND CROSS SECTIONS                 Recent  
+      --------------------------------------------------                 Recent  
+      IN ORDER TO BE COMBINED WITH THE RESONANCE CONTRIBUTION THE        Recent  
+      BACKGROUND CROSS SECTIONS MUST BE GIVEN AT 0 KELVIN TEMPERATURE    Recent  
+      AND MUST BE LINEARLY INTERPOLABLE. IF THESE CONDITIONS ARE MET     Recent  
+      THE RESONANCE AND BACKGROUND CONTRIBUTIONS WILL BE ADDED TOGETHER  Recent  
+      AND OUTPUT. IF THESE CONDITIONS ARE NOT MET THE BACKGROUND CROSS   Recent  
+      SECTION WILL BE IGNORED AND ONLY THE RESONANCE CONTRIBUTION WILL   Recent  
+      BE OUTPUT. IF THE BACKGROUND HAS NOT BEEN ADDED TO THE RESONANCE   Recent  
+      CONTRIBUTION AFTER THIS PROGRAM FINISHES THE USER CAN MAKE THE     Recent  
+      RESONANCE AND BACKGROUND CONTRIBUTIONS COMPATIBLE BY,              Recent  
+                                                                         Recent  
+      (1) IF THE BACKGROUND IS NOT LINEARLY INTERPOABLE, LINEARIZE THE   Recent  
+          BACKGROUND (E.G., USE PROGRAM LINEAR).                         Recent  
+      (2) IF THE BACKGROUND IS NOT GIVEN AT 0 KELVIN, DOPPLER BROADEN    Recent  
+          THE RESONANCE (NOT BACKGROUND) CONTRIBUTION TO THE SAME        Recent  
+          TEMPERATURE AS THE BACKGROUND (E.G., USE PROGRAM SIGMA1).      Recent  
+                                                                         Recent  
+      ONCE THE RESONANCE AND BACKGROUND CONTRIBUTIONS HAVE BEEN MADE     Recent  
+      COMPATIBLE THEY CAN BE ADDED TOGETHER (E.G., USE PROGRAM MIXER).   Recent  
+                                                                         Recent  
+      THE RECONSTRUCTION OF THE RESONANCE CONTRIBUTION TO THE CROSS      Recent  
+      SECTION CAN BE QUITE EXPENSIVE (IN TERMS OF COMPUTER TIME). SINCE  Recent  
+      THE RECONSTRUCTION IS PERFORMED BEFORE THE BACKGROUND CROSS        Recent  
+      SECTIONS ARE READ, THE ABOVE CONVENTIONS HAVE BEEN ADOPTED IN      Recent  
+      ORDER TO AVOID LOSE OF COMPUTER TIME INVOLVED IN RECONSTRUCTING    Recent  
+      THE RESONANCE CONTRIBUTION.                                        Recent  
+                                                                         Recent  
+      COMMON ENERGY GRID                                                 Recent  
+      ------------------                                                 Recent  
+      THIS PROGRAM WILL RECONSTRUCT THE RESONANCE CONTRIBUTION TO THE    Recent  
+      TOTAL, ELASTIC, FISSION AND CAPTURE CROSS SECTIONS ALL ON THE      Recent  
+      SAME ENERGY GRID. EACH REACTION WILL THEN BE COMBINED WITH ITS     Recent  
+      BACKGROUND CROSS SECTION (IF ANY) AND OUTPUT WITHOUT ANY FURTHER   Recent  
+      THINNING. IF THERE ARE NO BACKGROUND CROSS SECTIONS, OR IF THE     Recent  
+      BACKGROUND CROSS SECTION FOR ALL FOUR REACTIONS ARE GIVEN ON A     Recent  
+      COMMON ENERGY GRID, THE OUTPUT FROM THIS PROGRAM WILL BE ON A      Recent  
+      COMMON ENERGY GRID FOR ALL FOUR REACTIONS.                         Recent  
+                                                                         Recent  
+      THERMAL ENERGY                                                     Recent  
+      --------------                                                     Recent  
+      IF THE RESONANCE REGION SPANS THERMAL ENERGY (0.0253 EV) THIS      Recent  
+      POINT IS ALWAYS INCLUDED IN THE COMMON ENERGY GRID USED FOR ALL    Recent  
+      REACTIONS AND WILL ALWAYS APPEAR IN THE OUTPUT DATA.               Recent  
+                                                                         Recent  
+      SECTION SIZE                                                       Recent  
+      ------------                                                       Recent  
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Recent  
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Recent  
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Recent  
+                                                                         Recent  
+      SELECTION OF DATA                                                  Recent  
+      -----------------                                                  Recent  
+      THE PROGRAM SELECTS MATERIALS TO BE PROCESSED BASED EITHER ON      Recent  
+      MAT (ENDF/B MAT NO.) OR ZA. THE PROGRAM ALLOWS UP TO 100 MAT OR    Recent  
+      ZA RANGES TO BE SPECIFIED. THE PROGRAM WILL ASSUME THAT THE        Recent  
+      ENDF/B TAPE IS IN EITHER MAT OR ZA ORDER, WHICHEVER CRITERIA IS    Recent  
+      USED TO SELECT MATERIALS, AND WILL TERMINATE WHEN A MAT OR ZA      Recent  
+      IS FOUND THAT IS ABOVE THE RANGE OF ALL REQUESTS.                  Recent  
+                                                                         Recent  
+      ALLOWABLE ERROR                                                    Recent  
+      ---------------                                                    Recent  
+      THE RECONSTRUCTION OF LINEARLY INTERPOLABLE CROSS SECTIONS FROM    Recent  
+      RESONANCE PARAMETERS CANNOT BE PERFORMED EXACTLY. HOWEVER IT CAN   Recent  
+      BE PERFORMED TO VIRTUALLY ANY REQUIRED ACCURACY AND MOST           Recent  
+      IMPORTANTLY CAN BE PERFORMED TO A TOLERANCE THAT IS SMALL COMPARED Recent  
+      TO THE UNCERTAINTY IN THE CROSS SECTIONS THEMSELVES. AS SUCH THE   Recent  
+      CONVERSION OF CROSS SECTIONS TO LINEARLY INTERPOLABLE FORM CAN BE  Recent  
+      PERFORMED WITH ESSENTIALLY NO LOSS OF INFORMATION.                 Recent  
+                                                                         Recent  
+      THE ALLOWABLE ERROR MAY BE ENERGY INDEPENDENT (CONSTANT) OR ENERGY Recent  
+      DEPENDENT. THE ALLOWABLE ERROR IS DESCRIBED BY A TABULATED         Recent  
+      FUNCTION OF UP TO 20 (ENERGY,ERROR) PAIRS AND LINEAR INTERPOLATION Recent  
+      BETWEEN TABULATED POINTS. IF ONLY ONE TABULATED POINT IS GIVEN THE Recent  
+      ERROR WILL BE CONSIDERED CONSTANT OVER THE ENTIRE ENERGY RANGE.    Recent  
+      WITH THIS ENERGY DEPENDENT ERROR ONE MAY OPTIMIZE THE OUTPUT FOR   Recent  
+      ANY GIVEN APPLICATION BY USING A SMALL ERROR IN THE ENERGY RANGE   Recent  
+      OF INTEREST AND A LESS STRINGENT ERROR IN OTHER ENERGY RANGES,     Recent  
+      E.G., 0.1 PER-CENT FROM 0 UP TO THE LOW EV RANGE AND A LESS        Recent  
+      STRINGENT TOLERANCE AT HIGHER ENERGIES.                            Recent  
+                                                                         Recent  
+      DEFAULT ALLOWABLE ERROR                                            Recent  
+      -----------------------                                            Recent  
+      IN ORDER TO INSURE CONVERENCE OF THE RESONANCE RECONSTRUCTION THE  Recent  
+      ALLOWABLE ERROR MUST BE POSITIVE. IF THE USER INPUTS AN ERROR FOR  Recent  
+      RESONANCE RECONSTRUCTION THAT IS NOT POSITIVE IT WILL BE SET TO    Recent  
+      THE DEFAULT VALUE (CURRENTLY 0.1 PER-CENT) AND INDICATED AS SUCH   Recent  
+      IN THE OUTPUT LISTING.                                             Recent  
+                                                                         Recent  
+      INTERVAL HALVING ALGORITHM                                         Recent  
+      -------------------------                                          Recent  
+      THIS PROGRAM WILL START BY CALCULATING THE CROSS SECTIONS AT THE   Recent  
+      ENERGIES CORRESPONDING TO THE PEAK OF EACH RESONANCE, AS WELL AS   Recent  
+      A FIXED NUMBER OF HALF-WIDTHS ON EACH SIDE OF EACH RESONANCE.      Recent  
+      STARTING FROM THIS BASIC GRID OF POINTS THE PROGRAM WILL CONTINUE  Recent  
+      TO HALF EACH INTERVAL UNTIL THE CROSS SECTIONS FOR ALL REACTIONS   Recent  
+      AT THE CENTER OF THE INTERVAL CAN BE DEFINED BY LINEAR             Recent  
+      INTERPOLATION FROM THE ENDS OF THE INTERVAL TO WITHIN THE USER     Recent  
+      SPECIFIED ACCURACY CRITERIA.                                       Recent  
+                                                                         Recent  
+      DISTANT RESONANCE TREATMENT                                        Recent  
+      ---------------------------                                        Recent  
+      THE OPTION TO TREAT DISTANT RESONANCES, WHICH WAS AVAILABLE IN     Recent  
+      EARLIER VERSIONS OF THIS PROGRAM, IS NO LONGER AVAILABLE, BECAUSE  Recent  
+      IT WAS FOUND TO PRODUCE UNRELIABLE RESULTS. IN THIS VERSION OF     Recent  
+      THE PROGRAM ALL RESONANCES ARE TREATED EXACTLY.                    Recent  
+                                                                         Recent  
+      PROGRAM OPERATION                                                  Recent  
+      ================================================================== Recent  
+      EDIT MODE                                                          Recent  
+      ---------                                                          Recent  
+      IT IS SUGGESTED THAT BEFORE RUNNING THIS PROGRAM TO RECONSTRUCT    Recent  
+      CROSS SECTIONS FROM RESONANCE PARAMETERS (WHICH CAN BE QUITE       Recent  
+      EXPENSIVE) THE USER FIRST RUN THE PROGRAM IN THE EDIT MODE (SEE,   Recent  
+      DESCRIPTION OF INPUT PARAMETERS BELOW). IN THE EDIT MODE THE       Recent  
+      PROGRAM WILL READ, LIST AND EXTENSIVELY CHECK THE CONSISTENCY OF   Recent  
+      ALL RESONANCE PARAMETERS AND ENDF/B DEFINED RESONANCE FLAGS. THIS  Recent  
+      IS A VERY INEXPENSIVE MEANS OF CHECKING ALL DATA BEFORE INVESTING  Recent  
+      A LARGE AMOUNT OF MONEY IN RECONSTRUCTING CROSS SECTIONS. ANY AND  Recent  
+      ALL DIGNOSTICS RECEIVED FROM THE EDIT WILL SUGGEST HOW TO CORRECT  Recent  
+      THE EVALUATED DATA TO MAKE IT CONSISTENT BEFORE RECONSTRUCTING     Recent  
+      CROSS SECTIONS. IN ORDER TO OBTAIN MEANINGFUL RESULTS FROM THE     Recent  
+      RECONSTRUCTION ALL SUGGESTED CHANGES TO THE EVALUATION SHOULD BE   Recent  
+      PERFORMED BEFORE TRYING RECONSTRUCTION (OTHERWISE THE RESULT OF    Recent  
+      RECONSTRUCTION WILL NOT BE RELIABLE).                              Recent  
+                                                                         Recent  
+      RECONSTRUCTION MODE                                                Recent  
+      -------------------                                                Recent  
+      FOR EACH REQUESTED MATERIAL                                        Recent  
+      ---------------------------                                        Recent  
+      IF SECTION MF=1, MT=451 IS PRESENT COMMENTS WILL BE ADD TO         Recent  
+      DOCUMENT THAT THE MATERIAL HAS BEEN PROCESSED. MF=1, MT=451 WILL   Recent  
+      ALSO BE USED TO DETERMINE THE VERSION OF THE ENDF/B FORMAT WHICH   Recent  
+      WILL ALLOW THE PROGRAM TO USE THE APPROPRIATE CONVENTIONS.         Recent  
+                                                                         Recent  
+      ALL OF THE FILE 2 RESONANCE PARAMETERS ARE FIRST READ AND THE      Recent  
+      LINEARLY INTERPOLABLE CONTRIBUTION OF THE RESONANCE PARAMETERS     Recent  
+      TO THE TOTAL, ELASTIC, CAPTURE AND FISSION CROSS SECTIONS IS       Recent  
+      CALCULATED SIMULTANEOUSLY USING A COMMON ENERGY GRID FOR ALL       Recent  
+      FOUR REACTIONS.                                                    Recent  
+                                                                         Recent  
+      AFTER THE RESONANCE CONTRIBUTION HAS BEEN RECONSTRUCTED EACH OF    Recent  
+      THE FIVE REACTIONS (MT=1, 2, 18, 19, 102) IS CONSIDERED SEPARATELY Recent  
+      FOR COMBINATION WILL THE BACKGROUND CROSS SECTION, IF ANY, AS      Recent  
+      DESCRIBED ABOVE.                                                   Recent  
+                                                                         Recent  
+      OUTPUT WILL INCLUDE THE ENTIRE EVALUATION, INCLUDING RESONANCES    Recent  
+      PARAMETERS WITH LRU MODIFIED (AS DESCRIBED ABOVE) TO INDICATE      Recent  
+      THAT THE RESONANCE CONTRIBUTION HAS ALREADY BEEN ADDED TO THE      Recent  
+      FILE 3 CROSS SECTIONS.                                             Recent  
+                                                                         Recent  
+      THE CYCLE OF RECONSTRUCTING THE RESONANCE CONTRIBUTION AND ADDING  Recent  
+      THE BACKGROUND WILL BE REPEATED FOR EACH MATERIAL REQUESTED.       Recent  
+                                                                         Recent  
+ -----2016/3/10 - This option is no longer allowed - today's computers   Recent  
+                  are so mjuch faster that this option is no longer      Recent  
+                  needed.                                                Recent  
+      PROCESS ONLY A PORTION OF RESONANCE REGION                         Recent  
+      ================================================================== Recent  
+      MODERN EVALUATIONS MAY BE EXTREMELY LARGE AND IT MAY NOT BE        Recent  
+      POSSIBLE TO PROCESS AN ENTIRE EVALUATION (I.E., ADD THE RESONANCE  Recent  
+      CONTRIBUTION) DURING A SINGLE COMPUTER RUN.                        Recent  
+                                                                         Recent  
+      ALSO IN THE CASE WHERE YOU ARE ONLY INTERESTED IN THE CROSS        Recent  
+      SECTIONS OVER A SMALL ENERGY RANGE, YOU MAY NOT WANT TO PROCESS    Recent  
+      AN ENTIRE EVALUATION, E.G., IF YOU ONLY WANT TO KNOW WHAT THE      Recent  
+      CROSS SECTIONS ARE NEAR THERMAL ENERGY, 0.0253 EV.                 Recent  
+                                                                         Recent  
+      IN ORDER TO ALLOW AN EVALUATION TO BE PROCESSED USING A NUMBER OF  Recent  
+      SHORTER COMPUTER RUNS AN OPTION HAS BEEN ADDED TO THIS PROGRAM TO  Recent  
+      ALLOW THE USER TO SPECIFY THE ENERGY RANGE TO BE PROCESSED.        Recent  
+                                                                         Recent  
+      USING THIS OPTION YOU MAY START AT THE LOWEST ENERGY (ZERO UP TO   Recent  
+      SOME ENERGY) AND USE THE RESULTS OF THIS RUN AS INPUT TO THE       Recent  
+      NEXT RUN, WHERE YOU CAN SPECIFY THE NEXT ENERGY RANGE. THIS        Recent  
+      CYCLE CAN BE REPEATED UNTIL YOU HAVE PROCESSED THE ENTIRE          Recent  
+      EVALUATION.                                                        Recent  
+                                                                         Recent  
+      WARNING - THIS OPTION SHOULD BE USED WITH EXTREME CARE - THIS      Recent  
+      OPTION HAS BEEN RELUCTANTLY ADDED - RELUCTANTLY BECAUSE IT CAN     Recent  
+      BE EXTREMELY DANGEROUS TO USE THIS OPTION UNLESS YOU CAREFULLY     Recent  
+      CHECKED WHAT YOU ARE DOING.                                        Recent  
+                                                                         Recent  
+      THE OPTION SHOULD ONLY BE USED AS FOLLOWS,                         Recent  
+      1) YOU MUST PROCESS USING ENERGY RANGES STARTING AT LOW ENERGY     Recent  
+         AND WORKING YOUR WAY TOWARD HIGH ENERGY, E.G.,                  Recent  
+          0.0   TO  3.0+3                                                Recent  
+          3.0+3 TO 10.0+3                                                Recent  
+         10.0+3 TO 80.0+3, ETC.                                          Recent  
+      2) FOR THE LAST ENERGY RANGE THE LOWER ENERGY LIMIT MUST BE        Recent  
+         NON-ZERO (WHERE TO START) AND THE UPPER ENERGY LIMIT MUST       Recent  
+         BE ZERO (NO LIMIT)                                              Recent  
+         80.0+3 TO  0.0                                                  Recent  
+                                                                         Recent  
+      IF YOU ARE ONLY INTERESTED IN THE CROSS SECTION OVER A NARROW      Recent  
+      ENERGY INTERVAL AND DO NOT INTENT TO MAKE ANY OTHER USE OF THE     Recent  
+      RESULTS, YOU CAN IGNORE THESE WARNINGS AND MERELY SPECIFY ANY      Recent  
+      ENERGY INTERVAL OVER WHICH YOU WISH CALCULATIONS TO BE             Recent  
+      PERFORMED.                                                         Recent  
+                                                                         Recent  
+      NORMALLY WHEN THIS PROGRAM PROCESSES AN EVALUATION IT WILL SET     Recent  
+      FLAGS IN THE EVALUATION TO PREVENT THE SAME RESONANCE              Recent  
+      CONTRIBUTION FROM BEING ADDED TO THE CROSS SECTION MORE THAN       Recent  
+      ONCE, SHOULD YOU USE THE OUTPUT FROM THIS PROGRAM AS INPUT TO      Recent  
+      THE PROGRAM.                                                       Recent  
+                                                                         Recent  
+      WHEN PROCESSING ONLY PORTIONS OF THE RESONANCE REGION THIS         Recent  
+      PROGRAM CANNOT SET THESE FLAGS TO PROTECT AGAINST ADDING THE       Recent  
+      RESONANCE CONTRIBUTION MORE THAN ONCE - WHICH MAKES USE OF         Recent  
+      THIS OPTION EXTREMELY DANGEROUS.                                   Recent  
+                                                                         Recent  
+      ONLY YOU CAN CHECK TO MAKE SURE THAT YOU HAVE CORRECTLY            Recent  
+      INCLUDED EACH ENERGY RANGE ONLY ONCE - SEE THE COMMENT LINES       Recent  
+      AT THE END OF SECTION, MF=1, MT=451, FOR A COMPLETE RECORD         Recent  
+      OF EACH RUN USING THIS PROGRAM. THIS SECTION WILL CONTAIN          Recent  
+      LINES OF THE FORM                                                  Recent  
+                                                                         Recent  
+      ***************** PROGRAM RECENT (VERSION 2017-1) *************    Recent  
+      ONLY PROCESS  0.00000+ 0 TO  3.00000+ 3 EV                         Recent  
+      ***************** PROGRAM RECENT (VERSION 2017-1) *************    Recent  
+      ONLY PROCESS  3.00000+ 3 TO  1.00000+ 4 EV                         Recent  
+      ***************** PROGRAM RECENT (VERSION 2017-1) *************    Recent  
+      ONLY PROCESS  1.00000+ 4 TO  8.00000+ 4 EV                         Recent  
+      ***************** PROGRAM RECENT (VERSION 2017-1) *************    Recent  
+      ONLY PROCESS  8.00000+ 4 TO  2.00000+ 7 EV                         Recent  
+                                                                         Recent  
+      YOU SHOULD CHECK TO INSURE THAT THERE ARE NO OVERLAPPING ENERGY    Recent  
+      RANGES OR MISSING ENERGY RANGES.                                   Recent  
+                                                                         Recent  
+      WHEN YOU INDICATE BY INPUT THAT YOU ARE ABOUT TO PROCESS THE       Recent  
+      LAST ENERGY RANGE (SEE ABOVE, LOWER ENERGY LIMIT = NON-ZERO,       Recent  
+      UPPER ENERGY LIMIT = ZERO), THIS PROGRAM WILL ASSUME THAT          Recent  
+      YOU HAVE NOW COMPLETED ALL PROCESSING - AND ONLY THEN WILL         Recent  
+      IT SET FLAGS IN THE EVALUATION TO PREVENT THE RESONANCE            Recent  
+      CONTRIBUTION FROM BEING ADDED MORE THAN ONCE. FOR THIS REASON      Recent  
+      YOU CANNOT PROCESS STARTING WITH ENERGY INTERVALS AT HIGH          Recent  
+      ENERGY AND WORKING TOWARD LOW ENERGY - YOU MUST START AT LOW       Recent  
+      ENERGY AND WORK TOWARD HIGH ENERGY.                                Recent  
+ -----2016/3/10 - This option is no longer allowed - today's computers   Recent  
+                                                                         Recent  
+      I/O FILES                                                          Recent  
+      ================================================================== Recent  
+      INPUT FILES                                                        Recent  
+      -----------                                                        Recent  
+      UNIT  DESCRIPTION                                                  Recent  
+      ----  -----------                                                  Recent  
+        2   INPUT LINE (BCD - 80 CHARACTERS/RECORD)                      Recent  
+       10   ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Recent  
+                                                                         Recent  
+      OUTPUT FILES                                                       Recent  
+      ------------                                                       Recent  
+      UNIT  DESCRIPTION                                                  Recent  
+      ----  -----------                                                  Recent  
+        3   OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Recent  
+       11   FINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)               Recent  
+                                                                         Recent  
+      SCRATCH FILES                                                      Recent  
+      -------------                                                      Recent  
+      UNIT  DESCRIPTION                                                  Recent  
+      ----  -----------                                                  Recent  
+       12   SCRATCH FILE FOR DATA RECONSTRUCTED FROM RESONANCE           Recent  
+            PARAMETERS (BINARY - 100200 WORDS/RECORD)                    Recent  
+       14   SCRATCH FILE FOR COMBINED FILE 2 AND 3 DATA                  Recent  
+            (BINARY - 40080 WORDS/RECORD)                                Recent  
+                                                                         Recent  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILEIO)               Recent  
+      ================================================================== Recent  
+      UNIT  FILE NAME                                                    Recent  
+      ----  ----------                                                   Recent  
+        2   RECENT.INP                                                   Recent  
+        3   RECENT.LST                                                   Recent  
+       10   ENDFB.IN                                                     Recent  
+       11   ENDFB.OUT                                                    Recent  
+       12   (SCRATCH)                                                    Recent  
+       14   (SCRATCH)                                                    Recent  
+                                                                         Recent  
+      INPUT CARDS                                                        Recent  
+      ================================================================== Recent  
+      LINE  COLS.  FORMAT  DESCRIPTION                                   Recent  
+      ----  -----  ------  -----------                                   Recent  
+        1    1-11    I11   RETRIEVAL CRITERIA (0=MAT, 1=ZA)              Recent  
+                           THIS OPTION DEFINED WHETHER COLUMNS 1-22 OF   Recent  
+                           SUBSEQUENT INPUT CARDS SHOULD BE INTERPRETED  Recent  
+                           TO BE MAT OR ZA RANGES.                       Recent  
+            12-22   E11.4  FILE 2 MINIMUM ABSOLUTE CROSS SECTION         Recent  
+                           (IF 1.0E-10 OR LESS IS INPUT THE PROGRAM      Recent  
+                           WILL USE 1.0E-10)                             Recent  
+            23-33    I11   TREATMENT OF REACTIONS FOR WHICH BACKGROUND   Recent  
+                           CROSS SECTION IS NOT GIVEN.                   Recent  
+                           = 0 - IGNOR (I.E. NO OUTPUT)                  Recent  
+                           = 1 - OUTPUT RESONANCE CONTRIBUTION.          Recent  
+                           THIS OPTION IS USEFUL WITH PARTIAL EVALUATION Recent  
+                           (E.G. ENDF/B-V DOSIMETRY LIBRARY) WHERE ONLY  Recent  
+                           ONE OR MORE OF THE REACTIONS ARE OF ACTUAL    Recent  
+                           INTEREST.                                     Recent  
+                           WARNING...THE USE OF THIS FIELD HAS BEEN      Recent  
+                           CHANGED. THIS FIELD WAS PREVIOUSLY USED TO    Recent  
+                           DEFINE THE PRECISION OF THE CALCULATION AND   Recent  
+                           OUTPUT. THE FORMER DEFINITION OF THIS FIELD   Recent  
+                           WAS...                                        Recent  
+                           MINIMUM ENERGY SPACING FLAG                   Recent  
+                           = 0 - 6 DIGIT MINIMUM ENERGY SPACING.         Recent  
+                                 STANDARD 6 DIGIT E11.4 OUTPUT.          Recent  
+                           = 1 - 9 DIGIT MINIMUM ENERGY SPACING.         Recent  
+                                 STANDARD 6 DIGIT E11.4 OUTPUT.          Recent  
+                           = 2 - 9 DIGIT MINIMUM ENERGY SPACING.         Recent  
+                                 VARIABLE 9 DIGIT F FORMAT OUTPUT.       Recent  
+                           FROM EXPERIENCE IT HAS BEEN FOUND THAT        Recent  
+                           FAILURE TO SET THIS OPTION TO 2 CAN RESULT    Recent  
+                           IN LARGE ERRORS IN THE FINAL DATA. THEREFORE  Recent  
+                           INTERNALLY THIS OPTION IS SET TO 2.           Recent  
+            34-44    I11   OPERATING MODE                                Recent  
+                           = 0 - CACULATE. MINIMUM OUTPUT LISTING        Recent  
+                           = 1 - CACULATE. LIST ALL RESONANCE PARAMETERS Recent  
+                           = 2 - EDIT MODE. NO CALCULATION. LIST ALL     Recent  
+                                 RESONANCE PARAMETERS.                   Recent  
+                           NOTE, THE EDIT MODE (=2) IS THE SUGGESTED     Recent  
+                           MODE TO FIRST TEST THE CONSISTENCY OF THE     Recent  
+                           EVALUATED DATA, BEFORE RECONSTRUCTING CROSS   Recent  
+                           SECTIONS (SEE, COMMENTS ABOVE).               Recent  
+            45-55    I11   NEGATIVE CROSS SECTIOIN TREATMENT             Recent  
+                           = 0 - O.K. - NO CHANGE                        Recent  
+                           = 1 - SET = 0                                 Recent  
+            56-66    I11   MONITOR MODE SELECTOR                         Recent  
+                           = 0 - NORMAL OPERATION                        Recent  
+                           = 1 - MONITOR PROGRESS OF RECONSTRUCTION OF   Recent  
+                                 FILE 2 DATA AND COMBINING FILE 2 AND    Recent  
+                                 FILE 3 DATA. EACH TIME A PAGE OF DATA   Recent  
+                                 POINTS IS WRITTEN TO A SCRATCH FILE     Recent  
+                                 PRINT OUT THE TOTAL NUMBER OF POINTS    Recent  
+                                 ON SCRATCH AND THE LOWER AND UPPER      Recent  
+                                 ENERGY LIMITS OF THE PAGE (THIS OPTION  Recent  
+                                 MAY BE USED IN ORDER TO MONITOR THE     Recent  
+                                 EXECUTION SPEED OF LONG RUNNING JOBS).  Recent  
+        2    1-72    A72   ENDF/B INPUT DATA FILENAME                    Recent  
+                           (STANDARD OPTION = ENDFB.IN)                  Recent  
+        3    1-72    A72   ENDF/B OUTPUT DATA FILENAME                   Recent  
+                           (STANDARD OPTION = ENDFB.OUT)                 Recent  
+      4-N    1-11    I11   MINIMUM MAT OR ZA (SEE COLS. 1-11, LINE 1)    Recent  
+            12-22    I11   MAXIMUM MAT OR ZA (SEE COLS. 1-11, LINE 1)    Recent  
+                           UP TO 100 MAT OR ZA RANGES MAY BE SPECIFIED,  Recent  
+                           ONE RANGE PER LINE. THE LIST IS TERMINATED    Recent  
+                           BY A BLANK LINE. IF THE THE UPPER LIMIT OF    Recent  
+                           ANY REQUEST IS LESS THAN THE LOWER LIMIT THE  Recent  
+                           UPPER LIMIT WILL BE SET EQUAL TO THE LOWER    Recent  
+                           LIMIT. IF THE FIRST REQUEST LINE IS BLANK IT  Recent  
+                           WILL TERMINATE THE REQUEST LIST AND CAUSE ALL Recent  
+                           DATA TO BE RETRIEVED (SEE EXAMPLE INPUT).     Recent  
+ ----- 2016/3/10 - Partial Processing no longer allowed.                 Recent  
+                   If these fields are not blank the code will STOP      Recent  
+                   with a WARNING that this is no longer allowed.        Recent  
+            23-33   E11.4  LOWER ENERGY LIMIT FOR PROCESSING.            Recent  
+            34-44   E11.4  UPPER ENERGY LIMIT FOR PROCESSING.            Recent  
+                          *THE LOWER AND UPPER ENERGY LIMITS MUST BE     Recent  
+                           ZERO, OR BLANK, UNLESS YOU WISH TO ONLY       Recent  
+                           PROCESS A PORTION OF RESONANCE REGIONS.       Recent  
+                          *THESE ENERGY LIMITS ARE ONLY READ FROM THE    Recent  
+                           FIRST MAT/ZA REQUEST LINE                     Recent  
+                          *IF BOTH ARE ZERO (OR BLANK) THE ENTIRE        Recent  
+                           RESONANCE REGION FOR EACH MATERIAL WILL BE    Recent  
+                           PROCESSED                                     Recent  
+                          *IF LIMITS ARE INPUT ONLY THAT PORTION OF THE  Recent  
+                           RESONANCE REGION FOR EACH MATERIAL WHICH      Recent  
+                           LIES BETWEEN THESE LIMITS WILL BE PROCESSED   Recent  
+                          *SEE INSTRUCTIONS ABOVE BEFORE USING THIS      Recent  
+                           OPTION.                                       Recent  
+ ----- 2016/3/10 - Partial Processing no longer allowed.                 Recent  
+      VARY   1-11   E11.4  ENERGY FOR FILE 2 ERROR LAW     (  SEE   )    Recent  
+            12-22   E11.4  ERROR FOR FILE 2 ERROR LAW      (COMMENTS)    Recent  
+                                                           ( BELOW  )    Recent  
+                                                                         Recent  
+      NOTE, THIS VERSION OF THE PROGRAM DOES NOT THIN THE COMBINED FILE  Recent  
+      FILE 2 + 3 DATA. AS SUCH THE ERROR LAW FOR COMBINING FILE 2 + 3    Recent  
+      WHICH WAS REQUIRED IN EARLIER VERSIONS OF THIS CODE ARE NO LONGER  Recent  
+      REQUIRED.                                                          Recent  
+                                                                         Recent  
+      THE FILE 2 ERROR LAW MAY BE ENERGY INDEPENDENT (DEFINED BY A       Recent  
+      SINGLE ERROR) OR ENERGY DEPENDENT (DEFINED BY UP TO 20 ENERGY,     Recent  
+      ERROR PAIRS). FOR THE ENERGY DEPENDENT CASE LINEAR INTERPOLATION   Recent  
+      WILL BE USED TO DEFINE THE ERROR AT ENERGIES BETWEEN THOSE AT      Recent  
+      WHICH THE ERROR IS TABULATED. THE ERROR LAW IS TERMINATED BY A     Recent  
+      BLANK LINE. IF ONLY ONE ENERGY, ERROR PAIR IS GIVEN THE LAW WILL   Recent  
+      BE CONSIDERED TO BE ENERGY INDEPENDENT. IF MORE THAN ONE PAIR      Recent  
+      IS GIVEN IT BE CONSIDERED TO BE ENERGY DEPENDENT (NOTE, THAT       Recent  
+      FOR A CONSTANT ERROR THE ENERGY INDEPENDENT FORM WILL RUN FASTER.  Recent  
+      HOWEVER, FOR SPECIFIC APPLICATIONS AN ENERGY DEPENDENT ERROR MAY   Recent  
+      BY USED TO MAKE THE PROGRAM RUN CONSIDERABLE FASTER).              Recent  
+                                                                         Recent  
+      ALL ENERGIES MUST BE IN ASCENDING ENERGY ORDER. FOR CONVERGENCE    Recent  
+      OF THE FILE 2 RECONSTRUCTION ALGORITHM ALL THE ERRORS MUST BE      Recent  
+      POSITIVE. IF ERROR IS NOT POSITIVE IT WILL BE SET EQUAL TO THE     Recent  
+      STANDARD OPTION (CURRENTLY 0.001, CORRRESPONDING TO 0.1 PER-CENT). Recent  
+      IF THE FIRST LINE OF THE ERROR LAW IS BLANK IT WILL TERMINATE THE  Recent  
+      ERROR LAW AND THE ERROR WILL BE TREATED AS ENERGY INDEPENDENT,     Recent  
+      EQUAL TO THE STANDARD OPTION (CURRENTLY, 0.1 PER-CENT). SEE,       Recent  
+      EXAMPLE INPUT 4.                                                   Recent  
+                                                                         Recent  
+      EXAMPLE INPUT NO. 1                                                Recent  
+      -------------------                                                Recent  
+      CONSIDER ALL URANIUM ISOTOPES AND TH-232. CONSIDER CROSS SECTIONS  Recent  
+      WHICH ARE LARGER THAN 1.0E-8 BARNS IN ABSOLUTE VALUE. ONLY OUTPUT  Recent  
+      REACTIONS FOR WHICH A BACKGROUND IS GIVEN. LIST ALL PARAMETERS AND Recent  
+      CALCULATE CROSS SECTIONS. MONITOR THE EXECUTION PROGRESS OF THE    Recent  
+      PROGRAM. BETWEEN 0 AND 100 EV USE 0.1 PER-CENT ACCURACY. BETWEEN   Recent  
+      100 EV AND 1 KEV VARY THE ACCURACY FROM 0.1 TO 1 PER-CENT. ABOVE   Recent  
+      1 KEV USE 1 PER-CENT ACCURACY.                                     Recent  
+                                                                         Recent  
+      EXPLICITLY SPECIFY THE STANDARD FILENAMES.                         Recent  
+                                                                         Recent  
+      THE FOLLOWING 11 INPUT CARDS ARE REQUIRED.                         Recent  
+                                                                         Recent  
+           1 1.00000-08          0          1          0         1       Recent  
+  ENDFB.IN                                                               Recent  
+  ENDFB.OUT                                                              Recent  
+       92000      92999                                                  Recent  
+       90232                  (UPPER LIMIT AUTOMATICALLY SET TO 90232)   Recent  
+                              (END REQUEST LIST)                         Recent  
+  0.00000+ 0 1.00000-03                                                  Recent  
+  1.00000+02 1.00000-03                                                  Recent  
+  1.00000+03 1.00000-02                                                  Recent  
+  1.00000+09 1.00000-02                                                  Recent  
+                              (END FILE 2 ERROR LAW)                     Recent  
+                                                                         Recent  
+      EXAMPLE INPUT NO. 2                                                Recent  
+      -------------------                                                Recent  
+      CONSIDER ALL URANIUM ISOTOPES AND TH-232. CONSIDER CROSS SECTIONS  Recent  
+      WHICH ARE LARGER THAN 1.0E-8 BARNS IN ABSOLUTE VALUE. ONLY OUTPUT  Recent  
+      REACTIONS FOR WHICH A BACKGROUND IS GIVEN. CROSS SECTIONS WILL BE  Recent  
+      CALCULATED, BUT PARAMETERS WILL NOT BE LISTED. THE PROGRESS OF THE Recent  
+      PROGRAM WILL NOT BE MONITORED. USE 0.1 PER-CENT ACCURACY FOR ALL   Recent  
+      ENERGIES. SINCE 0.1 PER-CENT IS THE STANDARD OPTION FOR THE ERROR  Recent  
+      LAW THE FIRST ERROR LAW LINE MAY BE LEFT BLANK.                    Recent  
+                                                                         Recent  
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Recent  
+      THEN USE THE STANDARD FILENAMES.                                   Recent  
+                                                                         Recent  
+      THE FOLLOWING 7 INPUT CARDS ARE REQUIRED.                          Recent  
+                                                                         Recent  
+           1 1.00000-08          0          0          0         0       Recent  
+                                                                         Recent  
+                                                                         Recent  
+       92000      92999                                                  Recent  
+       90232                  (UPPER LIMIT AUTOMATICALLY SET TO 90232)   Recent  
+                              (END REQUEST LIST)                         Recent  
+                              (USE STANDARD OPTION FOR ERROR LAW)        Recent  
+                                                                         Recent  
+      EXAMPLE INPUT NO. 3                                                Recent  
+      -------------------                                                Recent  
+      THE SAME AS EXAMPLE INPUT NO. 2, ONLY IN THIS CASE ONLY CALCULATE  Recent  
+      CROSS SECTIONS OVER THE ENERGY RANGE 0.01 TO 0.1 EV - ACROSS THE   Recent  
+      THERMAL ENERGY RANGE. NOTE, THE ONLY DIFFERENCE BETWEEN THE INPUT  Recent  
+      PARAMETERS IN THIS CASE AND IN EXAMPLE NO. 2, IS THAT ON THE       Recent  
+      SECOND INPUT LINE WE HAVE ADDED THE ENERGY RANGE 0.01 TO 0.1 EV.   Recent  
+      USE \PREPRO94\LINEAR\ENDFB.OUT AS INPUT AND ENDFB.OUT AS OUTPUT -  Recent  
+      SINCE ENDFB.OUT IS THE STANDARD OUTPUT FILENAME THE NAME CAN BE    Recent  
+      EITHER INCLUDED IN THE INPUT OR LEFT BLANK.                        Recent  
+                                                                         Recent  
+      THE FOLLOWING 7 INPUT CARDS ARE REQUIRED.                          Recent  
+                                                                         Recent  
+           1 1.00000-08          0          0          0         0       Recent  
+  \PREPRO94\LINEAR\ENDFB.OUT                                             Recent  
+  ENDFB.OUT                                                              Recent  
+       92000      92999 1.00000- 2 1.00000- 1                            Recent  
+       90232                  (UPPER LIMIT AUTOMATICALLY SET TO 90232)   Recent  
+                              (END REQUEST LIST)                         Recent  
+                              (USE STANDARD OPTION FOR ERROR LAW)        Recent  
+                                                                         Recent  
+      EXAMPLE INPUT NO. 4                                                Recent  
+      -------------------                                                Recent  
+      RECONSTRUCT ALL DATA. OUTPUT ALL REACTIONS, REGARDING OF WHETHER   Recent  
+      OR NOT THERE IS A BACKGROUND CROSS SECTION. DO NOT MONITOR THE     Recent  
+      PROGRESS OF THE PROGRAM. RECONSTRUCT CROSS SECTIONS TO 1 PER-CENT  Recent  
+      ACCURACY. USE \ENDFB6\LINEAR\ZA092238 AS INPUT AND                 Recent  
+      \ENDFB6\RECENT\ZA092238 AS OUTPUT.                                 Recent  
+                                                                         Recent  
+      THE FOLLOWING 6 INPUT CARDS ARE REQUIRED.                          Recent  
+                                                                         Recent  
+           0 0.0                 1          0          0         0       Recent  
+  \ENDFB6\ZA092238                                                       Recent  
+  \ENDFB6\RECENT\ZA092238                                                Recent  
+                        (RETRIEVE ALL DATA, END REQUEST LIST)            Recent  
+             1.00000- 2                                                  Recent  
+                        (END FILE 2 ERROR LAW)                           Recent  
+                                                                         Recent  
+      EXAMPLE INPUT NO. 5                                                Recent  
+      -------------------                                                Recent  
+      RECONSTRUCT ALL DATA. ONLY OUTPUT REACTIONS FOR WHICH A BACKGROUND Recent  
+      CROSS SECTION IS GIVEN. DO NOT MONITOR THE PROGRESS OF THE PROGRAM Recent  
+      RECONSTRUCT CROSS SECTIONS TO 0.1 PER-CENT ACCURACY. USE ENDFB.IN  Recent  
+      AS INPUT AND ENDFB.OUT AS OUTPUT.                                  Recent  
+                                                                         Recent  
+      THIS CORRESPONDS TO USING ALL OF THE STANDARD OPTONS BUILT-IN TO   Recent  
+      THE PROGRAM AND ALL INPUT CARDS MAY BE BLANK.                      Recent  
+                                                                         Recent  
+      IN THIS CASE THE FOLLOWING 5 INPUT CARDS ARE REQUIRED.             Recent  
+      (ZEROES ARE INDICATED ON THE FIRST LINE, BELOW, ONLY TO INDICATE   Recent  
+      WHERE THE LINE IS. THE ACTUAL INPUT LINE CAN BE COMPLETELY BLANK). Recent  
+                                                                         Recent  
+           0 0.0                 0          0          0         0       Recent  
+                        (USE STANDARD INPUT FILENAME = ENDFB.IN)         Recent  
+                        (USE STANDARD OUTPUT FILENAME = ENDFB.OUT)       Recent  
+                        (RETRIEVE ALL DATA, END REQUEST LIST)            Recent  
+                        (0.1 ERROR, END FILE 2 ERROR LAW)                Recent  
+                                                                         Recent  
+ ======================================================================= Recent  

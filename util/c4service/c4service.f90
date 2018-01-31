@@ -131,12 +131,7 @@ CONTAINS
 
    SUBROUTINE limit_section(sc, k, y1, y2)
 
-!  Reduces number of points in the experimental data set by picking up only each y1-th
-!  point from the full data set. There is no checking whether this procedure
-!  conserves the area or that the omitted points would be restored by linear interpolation
-!  between the selected points. Therefore, this thining should be applied only to experimental
-!  data sets that are reach in points and were subjected to heavy smoothing, which makes the two
-!  above mentioned conditions likely to be fulfilled.
+!  Crops X4 section dropping points laying outside the y1 - y2 energy interval
 
       IMPLICIT NONE
       INTEGER*4 i,k, n

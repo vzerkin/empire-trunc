@@ -1,0 +1,58 @@
+#!/bin/bash
+#
+# SUSE Linux Leap 42.1
+# Gfortran 4.8
+#
+# execute ./Compile_OS name
+#
+cd COMPLOT
+rm *.o complot comhard Makelist
+make -f Suse_Makefile >& Makelist
+mv complot comhard comhard1 ../../.
+cd ..
+cd EVALPLOT
+rm *.o evalplot evalhard Makelist
+make -f Suse_Makefile >& Makelist
+mv evalplot evalhard evalhard1 ../../.
+cd ..
+#
+cat sigma1.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o sigma1    -O0 -static-libgfortran x.f
+cat recent.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o recent    -O0 -static-libgfortran   x.f
+cat linear.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o linear    -O0 -static-libgfortran   x.f
+cat groupie.f  endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o groupie   -O0 -static-libgfortran   x.f
+cat dictin.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o dictin    -O0 -static-libgfortran   x.f
+cat endf2c.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o endf2c  -O0 -static-libgfortran   x.f  
+cat fixup.f    endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o fixup     -O0 -static-libgfortran   x.f
+cat legend.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o legend    -O0 -static-libgfortran   x.f
+cat merger.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o merger    -O0 -static-libgfortran   x.f
+cat mixer.f    endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o mixer     -O0 -static-libgfortran   x.f
+cat sixpak.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o sixpak    -O0 -static-libgfortran   x.f
+cat spectra.f  endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o spectra   -O0 -static-libgfortran   x.f
+cat virgin.f   endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o virgin    -O0 -static-libgfortran   x.f
+cat activate.f endfio.f  scratchb.f  timer.f  linux.f > x.f
+gfortran -o activate  -O0 -static-libgfortran  x.f
+cat convert.f                        timer.f  linux.f > x.f
+gfortran -o convert   -O0 -static-libgfortran  x.f
+cat relabel.f                        timer.f  linux.f > x.f
+gfortran -o relabel   -O0 -static-libgfortran  x.f
+rm  x.f
+#
+# copy all executables in the directory above
+#
+mv sigma1 recent linear groupie dictin fixup legend ../.
+mv merger mixer sixpak spectra virgin activate ../.
+mv convert relabel endf2c ../.
+#

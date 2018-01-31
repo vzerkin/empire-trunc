@@ -1,0 +1,577 @@
+ ======================================================================= Sigma1  
+                                                                         Sigma1  
+      PROGRAM SIGMA1                                                     Sigma1  
+      ==============                                                     Sigma1  
+      VERSION 73-1 (MARCH 1973)                                          Sigma1  
+      VERSION 76-1 (FEBRUARY 1976)                                       Sigma1  
+      VERSION 76-2 (OCTOBER 1976)                                        Sigma1  
+      VERSION 77-1 (JANUARY 1977)                                        Sigma1  
+      VERSION 78-1 (JULY 1978)                                           Sigma1  
+      VERSION 79-1 (JULY 1979)    CDC-7600 AND CRAY-1 VERSION.           Sigma1  
+      VERSION 80-1 (MAY 1980)     IBM, CDC AND CRAY VERSION              Sigma1  
+      VERSION 80-2 (DECEMBER 1980)IMPROVED BASED ON USER COMMENTS.       Sigma1  
+      VERSION 81-1 (MARCH 1981)   DOUBLE PRECISION IBM VERSION           Sigma1  
+      VERSION 81-2 (AUGUST 1981)  IMPROVED IBM SPEED AND STABILITY       Sigma1  
+      VERSION 82-1 (JANUARY 1982) IMPROVED COMPUTER COMPATIBILITY        Sigma1  
+      VERSION 83-1 (JANUARY 1983)*MAJOR RE-DESIGN.                       Sigma1  
+                                 *PAGE SIZE INCREASED - 1002 TO 2004.    Sigma1  
+                                 *ELIMINATED COMPUTER DEPENDENT CODING.  Sigma1  
+                                 *NEW, MORE COMPATIBLE I/O UNIT NUMBER.  Sigma1  
+                                 *ADDED STANDARD ALLOWABLE ERROR OPTION  Sigma1  
+                                  (CURRENTLY 0.1 PER-CENT).              Sigma1  
+                                 *UNRESOLVED RESONANCE REGION COPIED.    Sigma1  
+                                 *1/V EXTENSION OF CROSS SECTIONS        Sigma1  
+                                  OUTSIDE OF TABULATED ENERGY RANGE AND  Sigma1  
+                                  INTO UNRESOLVED ENERGY RANGE.          Sigma1  
+      VERSION 83-2 (OCTOBER 1983)*IMPROVED BASED ON USER COMMENTS.       Sigma1  
+      VERSION 84-1 (APRIL 1984)  *IMPROVED NUMERICAL STABILITY.          Sigma1  
+                                 *PARTIAL EVALUATION TREATMENT.          Sigma1  
+      VERSION 85-1 (APRIL 1985)  *ITERATE TO CONVERGENCE (USING THE SAME Sigma1  
+                                  ENERGY GRID FOR HOT CROSS SECTION AS   Sigma1  
+                                  COLD CROSS SECTIONS WAS FOUND TO BE    Sigma1  
+                                  INACCURATE).                           Sigma1  
+                                 *NEW FASTER HIGH ENERGY BROADENING.     Sigma1  
+                                 *UPDATED FOR ENDF/B-VI FORMATS.         Sigma1  
+                                 *SPECIAL I/O ROUTINES TO GUARANTEE      Sigma1  
+                                  ACCURACY OF ENERGY.                    Sigma1  
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Sigma1  
+                                  (REQUIRED FOR NARROW RESONANCES).      Sigma1  
+      VERSION 85-2 (AUGUST 1985) *FORTRAN-77/H VERSION                   Sigma1  
+      VERSION 86-1 (JANUARY 1986)*ENERGY DEPENDENT SCATTERING RADIUS     Sigma1  
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Sigma1  
+                                  FILE NAMES (SEE, SUBROUTINE FILEIO     Sigma1  
+                                  FOR DETAILS).                          Sigma1  
+                                 *IMPROVED BASED ON USER COMMENTS.       Sigma1  
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Sigma1  
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Sigma1  
+                                  CRAZY.                                 Sigma1  
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Sigma1  
+                                  KEYWORDS.                              Sigma1  
+                                 *ADDED LIVERMORE CIVIC COMPILER         Sigma1  
+                                  CONVENTIONS.                           Sigma1  
+      VERSION 90-1 (JUNE 1990)   *UPDATED BASED ON USER COMMENTS         Sigma1  
+                                 *ADDED FORTRAN SAVE OPTION              Sigma1  
+                                 *NEW MORE CONSISTENT ENERGY OUTPUT      Sigma1  
+                                  ROUTINES                               Sigma1  
+      VERSION 91-1 (JULY 1991)   *WARNING...INPUT PARAMETER FORMAT       Sigma1  
+                                  HAS BEEN CHANGED - SEE BELOW FOR       Sigma1  
+                                  DETAILS.                               Sigma1  
+                                 *ADDED CHARGED PARTICLE PROJECTILES     Sigma1  
+                                 *OUTPUT ENERGY RANGE IS ALWAYS AT       Sigma1  
+                                  LEAST AS LARGE AS INPUT ENERGY RANGE.  Sigma1  
+                                 *NO 1/V EXTENSION OF CROSS SECTIONS     Sigma1  
+                                  FROM UNRESOLVED ENERGY RANGE.          Sigma1  
+      VERSION 92-1 (JANUARY 1992)*INSURE MINIMUM AND MAXIMUM CROSS       Sigma1  
+                                  SECTIONS ARE ALWAYS KEPT (NOT THINNED) Sigma1  
+                                 *MT=19 (FIRST CHANCE FISSION) TREATED   Sigma1  
+                                  THE SAME AS FISSION.                   Sigma1  
+                                 *VARIABLE MINIMUM CROSS SECTION OF      Sigma1  
+                                  INTEREST - TO ALLOW SMALL CROSS        Sigma1  
+                                  SECTIONS NEAR THRESHOLDS TO BE         Sigma1  
+                                  TREATED PROPERLY.                      Sigma1  
+                                 *ALL ENERGIES INTERNALLY ROUNDED PRIOR  Sigma1  
+                                  TO CALCULATIONS.                       Sigma1  
+                                 *COMPLETELY CONSISTENT I/O AND ROUNDING Sigma1  
+                                  ROUTINES - TO MINIMIZE COMPUTER        Sigma1  
+                                  DEPENDENCE.                            Sigma1  
+      VERSION 92-2 (JULY 1992)   *CORRECTED BUG ASSOCIATED WITH          Sigma1  
+                                  THRESHOLD REACTIONS.                   Sigma1  
+                                 *UNRESOLVED REGION COPIED WITHOUT       Sigma1  
+                                  THINNING (IT SHOULD BE EXACTLY THE     Sigma1  
+                                  SAME AT ALL TEMPERATURES).             Sigma1  
+                                 *NO THINNING OF REACTIONS (MT) THAT     Sigma1  
+                                  WERE NOT BROADENED.                    Sigma1  
+      VERSION 93-1 (APRIL 1993)  *INCREASED PAGE SIZE FROM 2004          Sigma1  
+                                  TO 24000 ENERGY PONTS.                 Sigma1  
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Sigma1  
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Sigma1  
+                                  (WARNING - INPUT PARAMETER FORMAT      Sigma1  
+                                  HAS BEEN CHANGED)                      Sigma1  
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Sigma1  
+                                  (SEE, SUBROUTINE ENDIT)                Sigma1  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Sigma1  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Sigma1  
+                                  *ALL DOUBLE PRECISION                  Sigma1  
+                                  *ON SCREEN OUTPUT                      Sigma1  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Sigma1  
+                                  *IMPROVED OUTPUT PRECISION             Sigma1  
+                                  *DEFINED SCRATCH FILE NAMES            Sigma1  
+                                  *ALWAYS INCLUDE THERMAL VALUE          Sigma1  
+      VERSION 97-1 (APRIL 1997)   *OPTIONALLY SET NEGATIVE CROSS         Sigma1  
+                                   SECTIONS = 0 ON INPUT AND             Sigma1  
+                                   OUTPUT.                               Sigma1  
+                                  *INCREASED PAGE SIZE FROM 24000        Sigma1  
+                                   TO 60000 ENERGY POINTS.               Sigma1  
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Sigma1  
+                                   POINT READ FOR MORE DIGITS            Sigma1  
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Sigma1  
+                                   VERSION BASED ON RECENT FORMAT CHANGE Sigma1  
+                                  *TREAT LOW ENERGY INITIAL CROSS        Sigma1  
+                                   SECTIONS AS LOG-LOG INTERPOLABLE      Sigma1  
+                                  *CONSTANT (RATHER THAN 1/V) EXTENSION  Sigma1  
+                                   TO HIGHER ENERGY.                     Sigma1  
+                                  *UPDATED CONSTANTS BASED ON CSEWG      Sigma1  
+                                   SUBCOMMITTEE RECOMMENDATIONS          Sigma1  
+                                  *GENERAL IMPROVEMENTS BASED ON         Sigma1  
+                                   USER FEEDBACK                         Sigma1  
+      VERSION 99-2 (JUNE 1999)    *EXTENDED RANGE OF INTEGRALS FROM 4    Sigma1  
+                                   TO 5 UNITS ON EACH SIDE OF ENERGY     Sigma1  
+                                   POINT TO ALLOW FOR LARGER VARIATION   Sigma1  
+                                   IN THE LOCAL CROSS SECTION            Sigma1  
+                                  *ASSUME ENDF/B-VI, NOT V, IF MISSING   Sigma1  
+                                   MF=1, MT-451.                         Sigma1  
+      VERSION 99-3 (OCTOBER 1999))*IMPROVED ERFC FUNCTION DEFINITION.    Sigma1  
+                                   I THANK BOB MACFARLANE (LANL) FOR     Sigma1  
+                                   SUPPLYING A MORE ACCURATE ERFC        Sigma1  
+                                   FUNCTION.                             Sigma1  
+      VERS. 2000-1 (FEBRUARY 2000)*CORRECTED LOW ENERGY INTERPOLATION    Sigma1  
+                                   FOR NON-POSITIVE CROSS SECTIONS       Sigma1  
+                                  *GENERAL IMPROVEMENTS BASED ON         Sigma1  
+                                   USER FEEDBACK                         Sigma1  
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Sigma1  
+      VERS. 2004-1 (JAN. 2004)    *OPTIONALLY IGNORE UNRESOLVED REGION   Sigma1  
+                                  *CORRECTED PROBLEM AT THE RESOLVED/    Sigma1  
+                                   UNRESOLVED ENERGY BOUNDARY.           Sigma1  
+                                  *CORRECTED HIGH ENERGY CONSTANT CROSS  Sigma1  
+                                   SECTION EXTENSION.                    Sigma1  
+                                  *TIGHTER CRITERIA FOR INITIAL ENERGY   Sigma1  
+                                   POINT SPACING                         Sigma1  
+                                  *TEMPERATURE DEPENDENT ENERGY POINT    Sigma1  
+                                   SPACING.                              Sigma1  
+                                  *ADDED NEW REICH-MOORE (LRF=7) TO      Sigma1  
+                                   FILE2 TO ALLOW COPY TO FIND ANY       Sigma1  
+                                   FOLLOWING UNRESOLVED PARAMETERS       Sigma1  
+      VERS. 2005-1 (JUNE 2005)    *CORRECTED ERROR IN EHOT3 EQUIVALENCE  Sigma1  
+                                   TO EHOT - THIS ONLY EFFECTS VERY BIG  Sigma1  
+                                   OUTPUT FILES.                         Sigma1  
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII.       Sigma1  
+                                  *INCREASED PAGE SIZE FROM 60,000       Sigma1  
+                                   TO 360,000 ENERGY POINTS.             Sigma1  
+      VERS. 2008-1 (APRIL 2008)   *1/2 INITIAL ENERGY POINT SPACING      Sigma1  
+                                  *72 CHARACTER FILE NAMES.              Sigma1  
+      VERS. 2010-1 (Apr. 2010)    *ASSUME LOW ENERGY LOG-LOG VARIATION   Sigma1  
+                                   UP TO 1/A (eV) FOR ALL BUT TOTAL AND  Sigma1  
+                                   ELASTIC.                              Sigma1  
+                                  *CHANGED DEFAULT UNCERTAINTY TO 0.01%  Sigma1  
+                                   FROM 0.1%                             Sigma1  
+                                  *ALLOW MULTIPLE, ADJACENT UNRESOLVED   Sigma1  
+                                   RESONANCE REGIONS = COMBINE INTO ONE  Sigma1  
+                                   LARGER ENERGY RANGE TO COPY.          Sigma1  
+                                  *DO NOT BROADEN SECTIONS THAT START    Sigma1  
+                                   ABOVE 1 MILLION KT - PREVIOUSLY IT    Sigma1  
+                                   WAS ASSUMED TOTAL, ELASTIC, CAPTURE   Sigma1  
+                                   AND FISSION, AND LARGE SECTIONS (OVER Sigma1  
+                                   10,000 ENERGY POINTS) WOULD BROADEN.  Sigma1  
+      VERS. 2012-1 (Aug. 2012)    *CHANGE COPY CRITERIA TO HANDLE NEW    Sigma1  
+                                   (N,N') DATA = THRESHOLD MAY BE VERY   Sigma1  
+                                   HIGH (OLD CRITERIA) BUT INCLUDES MANY Sigma1  
+                                   TABULATED ENERGY POINTS (NEW ADDED    Sigma1  
+                                   CRITERIA).                            Sigma1  
+                                  *ADDED STOP IF INCIDENT PARTICLE DATA  Sigma1  
+                                   CANNOT BE DOPPLER BROADENED, E.G.,    Sigma1  
+                                   PHOTON INCIDENT.                      Sigma1  
+                                  *Added CODENAME                        Sigma1  
+                                  *32 and 64 bit Compatible              Sigma1  
+                                  *Added ERROR stop                      Sigma1  
+      VERS. 2013-1 (Nov. 2013)    *Added NO broadening above 10 MeV -    Sigma1  
+                                   this is to handle newer evaluations   Sigma1  
+                                   that extend to higher energies and    Sigma1  
+                                   may do "strange" things to stop one   Sigma1  
+                                   MT and then include it as part of     Sigma1  
+                                   a sum at higher energies, e.g. this   Sigma1  
+                                   change will copy ALL points above     Sigma1  
+                                   10 MeV, thus avoiding problems near   Sigma1  
+                                   transistion energies at 20. 30, etc.  Sigma1  
+                                   MeV or higher energies.               Sigma1  
+      VERS. 2015-1 (Jan. 2015)    *Replaced ALL 3 way IF Statements.     Sigma1  
+                                  *Replaced ALL LOGICAL by INTEGER.      Sigma1  
+                                  *Extended OUT9.                        Sigma1  
+      VERS. 2017-1 (May  2017)    *For MF=2 only use MT=151 = Defines    Sigma1  
+                                   Unresolved Resonance Region (URR).    Sigma1  
+                                   Ignore - NJOY created MT=152 and 153. Sigma1  
+                                  *Increased page size to 1,2000,000.    Sigma1  
+                                  *All floating input parameters changed Sigma1  
+                                   to character input + IN9 conversion.  Sigma1  
+                                                                         Sigma1  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Sigma1  
+      ------------------------------------                               Sigma1  
+      THE NUCLEAR DATA SECTION                                           Sigma1  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Sigma1  
+      P.O. BOX 100                                                       Sigma1  
+      A-1400, VIENNA, AUSTRIA                                            Sigma1  
+      EUROPE                                                             Sigma1  
+                                                                         Sigma1  
+      ORIGINALLY WRITTEN BY                                              Sigma1  
+      ------------------------------------                               Sigma1  
+      Dermott E. Cullen                                                  Sigma1  
+                                                                         Sigma1  
+      PRESENT CONTACT INFORMATION                                        Sigma1  
+      ---------------------------                                        Sigma1  
+      Dermott E. Cullen                                                  Sigma1  
+      1466 Hudson Way                                                    Sigma1  
+      Livermore, CA 94550                                                Sigma1  
+      U.S.A.                                                             Sigma1  
+      Telephone  925-443-1911                                            Sigma1  
+      E. Mail    RedCullen1@Comcast.net                                  Sigma1  
+      Website    RedCullen1.nedt/HOMEPAGE.NEW                            Sigma1  
+                                                                         Sigma1  
+      Acknowledgement 2004                                               Sigma1  
+      --------------------                                               Sigma1  
+      Currently almost all improvements to this code are based upon      Sigma1  
+      feedback from code users who report problems. This feedback        Sigma1  
+      benefits ALL users of this code, and ALL users are encouraged      Sigma1  
+      to report problems.                                                Sigma1  
+                                                                         Sigma1  
+      Improvements on the 2004 version of this code based on user        Sigma1  
+      feedback including,                                                Sigma1  
+      1) Bret Beck  - reported a problem at the resolved/unresolved      Sigma1  
+                      energy boundary.                                   Sigma1  
+      2) S. Ganesan - reported a problem for small temperature changes.  Sigma1  
+                                                                         Sigma1  
+      AUTHORS MESSAGE                                                    Sigma1  
+      ---------------                                                    Sigma1  
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Sigma1  
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Sigma1  
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Sigma1  
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION, PARTICULARLY     Sigma1  
+      THE COMMENTS CONCERNING MACHINE DEPENDENT CODING.                  Sigma1  
+                                                                         Sigma1  
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Sigma1  
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Sigma1  
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Sigma1  
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Sigma1  
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Sigma1  
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Sigma1  
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Sigma1  
+      COMPUTER.                                                          Sigma1  
+                                                                         Sigma1  
+      PURPOSE                                                            Sigma1  
+      -------                                                            Sigma1  
+      THIS PROGRAM IS DESIGNED TO DOPPLER BROADEN NEUTRON INDUCED        Sigma1  
+      CROSS SECTIONS. EACH SECTION OF CROSS SECTIONS (FILE 3) IS READ    Sigma1  
+      FROM THE ENDF/B FORMAT. THE DATA IS DOPPLER BROADENED, THINNED     Sigma1  
+      AND OUTPUT IN THE ENDF/B FORMAT.                                   Sigma1  
+                                                                         Sigma1  
+      IN THE FOLLOWING DISCUSSION FOR SIMPLICITY THE ENDF/B TERMINOLOGY  Sigma1  
+      ---ENDF/B TAPE---WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE    Sigma1  
+      TAPE, CARDS, DISK OR ANY OTHER MEDIUM.                             Sigma1  
+                                                                         Sigma1  
+      ENDF/B FORMAT                                                      Sigma1  
+      -------------                                                      Sigma1  
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Sigma1  
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Sigma1  
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II, III, IV OR V FORMAT).    Sigma1  
+                                                                         Sigma1  
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Sigma1  
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Sigma1  
+      ASSUMED THAT THE MAT, MF AND MT ON EACH CARD IS CORRECT. SEQUENCE  Sigma1  
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Sigma1  
+      CORRECTLY OUTPUT ON ALL CARDS. THE FORMAT OF SECTION MF=1, MT=451  Sigma1  
+      AND ALL SECTIONS OF MF=3 MUST BE CORRECT. THE PROGRAM COPIES ALL   Sigma1  
+      OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE TO   Sigma1  
+      THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.            Sigma1  
+                                                                         Sigma1  
+      ALL CROSS SECTIONS THAT ARE USED BY THIS PROGRAM MUST BE TABULATED Sigma1  
+      AND LINEARLY INTERPOLABLE IN ENERGY AND CROSS SECTION (ENDF/B      Sigma1  
+      INTERPOLATION LAW 2). FILE 3 CROSS SECTIONS MAY BE MADE LINEARLY   Sigma1  
+      INTERPOLABLE BY USING PROGRAM LINEAR (UCRL-50400, VOL.17, PART A). Sigma1  
+      FILE 2 RESONANCE PARAMETERS MAY BE USED TO RECONSTRUCT ENERGY      Sigma1  
+      DEPENDENT CROSS SECTIONS AND ADD IN FILE 3 BACKGROUND CROSS        Sigma1  
+      SECTIONS TO DEFINE LINEARLY INTERPOLABLE CROSS SECTIONS BY USING   Sigma1  
+      PROGRAM RECENT (UCRL-50400, VOL. 17, PART C). IF THIS PROGRAM      Sigma1  
+      FINDS THAT THE FILE 3 CROSS SECTIONS ARE NOT LINEARLY INTERPOLABLE Sigma1  
+      THIS PROGRAM WILL TERMINATE EXECUTION.                             Sigma1  
+                                                                         Sigma1  
+      UNRESOLVED RESONANCE REGION                                        Sigma1  
+      ---------------------------                                        Sigma1  
+      IN THE UNRESOLVED RESONANCE REGION IT IS NOT POSSIBLE TO EXACTLY   Sigma1  
+      DEFINE THE ENERGY DEPENDENCE OF THE CROSS SECTIONS. THE AVERAGE    Sigma1  
+      WIDTHS AND SPACINGS GIVEN IN ENDF/B ARE ONLY ADEQUATE TO DEFINE    Sigma1  
+      AVERAGE VALUES OF THE CROSS SECTIONS. THEREFORE ALL CROSS SECTIONS Sigma1  
+      IN THE ENDF/B FORMAT FOR THE UNRESOLVED REGION ARE REALLY AVERAGE  Sigma1  
+      VALUES WHICH CANNOT BE DOPPLER BROADENED USING THE SIGMA1 METHOD   Sigma1  
+      (WHICH REQUIRES TABULATED, LINEARLY INTERPOLABLE, ENERGY DEPENDENT Sigma1  
+      CROSS SECTIONS.                                                    Sigma1  
+                                                                         Sigma1  
+      THEREFORE,                                                         Sigma1  
+      (1) ALL TABULATED POINTS WITHIN THE UNRESOLVED RESONANCE REGION    Sigma1  
+      WILL BE COPIED, WITHOUT MODIFICATION OR BROADENING. ADOPTION OF    Sigma1  
+      THIS CONVENTION WILL ALLOW SUBSEQUENT PROGRAMS TO PROPERLY DEFINE  Sigma1  
+      SELF-SHIELDED, DOPPLER BROADENED CROSS SECTIONS IN THE UNRESOLVED  Sigma1  
+      RESONANCE REGION.                                                  Sigma1  
+      (2) CROSS SECTIONS WILL BE EXTENDED AS 1/V ABOVE THE UPPER ENERGY  Sigma1  
+      LIMIT OF THE RESOLVED RESONANCE REGION AND BELOW THE LOWER ENERGY  Sigma1  
+      LIMIT OF THE CONTINUUUM REGION (I.E. INTO THE UNRESOLVED           Sigma1  
+      RESONANCE REGION). THIS CONVENTION WILL GUARANTEE A SMOOTH         Sigma1  
+      BEHAVIOR CLOSE TO THE UNRESOLVED RESONANCE REGION BOUNDARIES.      Sigma1  
+                                                                         Sigma1  
+      OUTPUT FORMAT                                                      Sigma1  
+      -------------                                                      Sigma1  
+      IN THIS VERSION OF SIGMA1 ALL FILE 3 ENERGIES WILL BE OUTPUT IN    Sigma1  
+      F (INSTEAD OF E) FORMAT IN ORDER TO ALLOW ENERGIES TO BE WRITTEN   Sigma1  
+      WITH UP TO 9 DIGITS OF ACCURACY. IN PREVIOUS VERSIONS THIS WAS AN  Sigma1  
+      OUTPUT OPTION. HOWEVER USE OF THIS OPTION TO COMPARE THE RESULTS   Sigma1  
+      OF ENERGIES WRITTEN IN THE NORMAL ENDF/B CONVENTION OF 6 DIGITS    Sigma1  
+      TO THE 9 DIGIT OUTPUT FROM THIS PROGRAM DEMONSTRATED THAT FAILURE  Sigma1  
+      TO USE THE 9 DIGIT OUTPUT CAN LEAD TO LARGE ERRORS IN THE DATA     Sigma1  
+      JUST DUE TO TRANSLATION OF THE ENERGIES TO THE ENDF/B FORMAT.      Sigma1  
+                                                                         Sigma1  
+      CONTENTS OF OUTPUT                                                 Sigma1  
+      ------------------                                                 Sigma1  
+      ENTIRE EVALUATIONS ARE OUTPUT, NOT JUST THE BROADENED FILE 3       Sigma1  
+      CROSS SECTIONS, E.G. ANGULAR AND ENERGY DISTRIBUTIONS ARE ALSO     Sigma1  
+      INCLUDED.                                                          Sigma1  
+                                                                         Sigma1  
+      DOCUMENTATION                                                      Sigma1  
+      -------------                                                      Sigma1  
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Sigma1  
+      BY THE ADDITION OF THREE COMMENTS CARDS AT THE END OF EACH         Sigma1  
+      HOLLERITH SECTION IN THE FORM                                      Sigma1  
+                                                                         Sigma1  
+      ***************** PROGRAM SIGMA1 (2017-1) ***************          Sigma1  
+      DATA DOPPLER BROADENED TO 300.0   KELVIN AND                       Sigma1  
+      DATA THINNED TO WITHIN AN ACCURACY OF  0.1 PER-CENT                Sigma1  
+                                                                         Sigma1  
+      THE ORDER OF ALL SIMILAR COMMENTS (FROM LINEAR,RECENT AND GROUPY)  Sigma1  
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Sigma1  
+      THE DATA.                                                          Sigma1  
+                                                                         Sigma1  
+      THESE COMMENT CARDS ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Sigma1  
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Sigma1  
+      OF THE HOLLERITH SECTION IN ENDF/B-V DIFFERS FROM THE THAT OF      Sigma1  
+      EARLIER VERSIONS OF ENDF/B. BY READING AN EXISTING MF=1, MT=451    Sigma1  
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Sigma1  
+      THE ENDF/B FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF      Sigma1  
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Sigma1  
+      DETERMINE WHICH VERSION OF THE ENDF/B FORMAT THE DATA IS IN, AND   Sigma1  
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Sigma1  
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Sigma1  
+                                                                         Sigma1  
+      REACTION INDEX                                                     Sigma1  
+      --------------                                                     Sigma1  
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Sigma1  
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Sigma1  
+                                                                         Sigma1  
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Sigma1  
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Sigma1  
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Sigma1  
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Sigma1  
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Sigma1  
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Sigma1  
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Sigma1  
+                                                                         Sigma1  
+      SECTION SIZE                                                       Sigma1  
+      ------------                                                       Sigma1  
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Sigma1  
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Sigma1  
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Sigma1  
+                                                                         Sigma1  
+      SELECTION OF DATA                                                  Sigma1  
+      -----------------                                                  Sigma1  
+      THE PROGRAM SELECTS MATERIALS TO BE BROADENED BASED EITHER ON      Sigma1  
+      MAT (ENDF/B MAT NO.) OR ZA. THE PROGRAM ALLOWS UP TO 100 MAT OR    Sigma1  
+      ZA RANGES TO BE SPECIFIED. THE PROGRAM WILL ASSUME THAT THE        Sigma1  
+      ENDF/B TAPE IS IN EITHER MAT OR ZA ORDER, WHICHEVER CRITERIA IS    Sigma1  
+      USED TO SELECT MATERIALS, AND WILL TERMINATE WHEN A MAT OR ZA      Sigma1  
+      IS FOUND THAT IS ABOVE THE RANGE OF ALL REQUESTS.                  Sigma1  
+                                                                         Sigma1  
+      ENERGY GRID OF BROADENED DATA                                      Sigma1  
+      -----------------------------                                      Sigma1  
+      THE ENERGY GRID FOR THE DOPPLER BROADENED CROSS SECTIONS IS        Sigma1  
+      SELECTED TO INSURE THAT THE BROADENED DATA IS LINEAR-LINEAR        Sigma1  
+      INTERPOLABLE. AS SUCH THE ENERGY GRID FOR THE BROADENED DATA       Sigma1  
+      MAY NOT BE THE SAME AS THE ENERGY GRID FOR THE ORIGINAL            Sigma1  
+      UNBROADENED DATA. GENERALLY AFTER BROADENING THERE WILL BE         Sigma1  
+      FEWER DATA POINTS IN THE RESONANCE REGION, BUT AT LOW ENERGY       Sigma1  
+      THERE MAY BE MORE POINTS, DUE TO THE 1/V LOW ENERGY EFFECT         Sigma1  
+      CREATED BY DOPPLER BROADENING.                                     Sigma1  
+                                                                         Sigma1  
+      EFFECTIVE TEMERATURE INCREASE                                      Sigma1  
+      -----------------------------                                      Sigma1  
+      IF THE ORIGINAL DATA IS NOT AT ZERO KELVIN THE PROGRAM WILL        Sigma1  
+      BROADEN THE DATA BY THE EFFECTIVE TEMPERATURE DIFFENCE TO THE      Sigma1  
+      FINAL TEMPERATURE. IF THE DATA IS ALREADY AT A TEMPERATURE THAT    Sigma1  
+      IS HIGHER THAN THE FINAL TEMPERATURE DOPPLER BROADENING IS         Sigma1  
+      NATURALLY NOT PERFORMED AND THE TEMPERATURE IN THE SECTION IS LEFT Sigma1  
+      AT ITS ORIGINAL VALUE.                                             Sigma1  
+                                                                         Sigma1  
+      MULTIPLE FINAL TEMPERATURES                                        Sigma1  
+      ---------------------------                                        Sigma1  
+      THE PRESENT VERSION ONLY DOPPLER BROADENS TO ONE FINAL TEMPERATURE Sigma1  
+      (IF THERE IS SUFFICIENT INTEREST EXPRESSED BY USERS FUTURE         Sigma1  
+      VERSION MAY BROADEN TO MULTIPLE TEMPERATURES. PLEASE               Sigma1  
+      CONTACT THE AUTHOR IF YOU ARE INTERESTED IN A MULTIPLE             Sigma1  
+      TEMPERATURE OPTION).                                               Sigma1  
+                                                                         Sigma1  
+      PROGRAM OPERATION                                                  Sigma1  
+      -----------------                                                  Sigma1  
+      EACH SECTION OF FILE 3 DATA IS CONSIDERED SEPERATELY. THE DATA     Sigma1  
+      IS READ AND DOPPLER BROADENED A PAGE AT A TIME (ONE PAGE IS        Sigma1  
+      60000 DATA POINTS). UP TO THREE PAGES OF DATA MAY BE IN THE CORE   Sigma1  
+      AT ANY GIVEN TIME, THE PAGE BEING BROADENED, THE PAGE BELOW IT     Sigma1  
+      IN ENERGY AND THE PAGE ABOVE IT IN ENERGY. AFTER A PAGE HAS BEEN   Sigma1  
+      BROADENED IT IS THINNED, IF THE ENTIRE SECTION CONTAINS ONLY       Sigma1  
+      ONE PAGE OR LESS, IT WILL STILL BE CORE RESIDENT AND WILL BE       Sigma1  
+      WRITTEN DIRECTLY FROM CORE TO THE OUTPUT TAPE. IF THE BROADENED,   Sigma1  
+      THINNED SECTION IS LARGER THAN A PAGE, AFTER A PAGE HAS BEEN       Sigma1  
+      BROADENED AND THINNED IT IS WRITTEN TO A SCRATCH FILE. AFTER THE   Sigma1  
+      ENTIRE SECTION HAS BEEN BROADENED AND THINNED THE DATA IS READ     Sigma1  
+      FROM SCRATCH TO CORE, ONE PAGE AT A TIME, THE OUTPUT TO THE OUTPUT Sigma1  
+      TAPE.                                                              Sigma1  
+                                                                         Sigma1  
+      ALLOWABLE ERROR                                                    Sigma1  
+      ---------------                                                    Sigma1  
+      AFTER DOPPLER BROADENING THE CROSS SECTION IN THE RESONANCE REGION Sigma1  
+      WILL GENERALLY BE MUCH SMOOTHER THAN THE UNBROADENED DATA AND CAN  Sigma1  
+      BE REPRESENTED TO THE SAME ACCURACY BY A SMALLER NUMBER OF ENERGY  Sigma1  
+      POINTS. THEREFORE AFTER DOPPLER BROADENING THE DATA CAN BE THINNED Sigma1  
+      WITH ESSENTIALLY NO LOSE OF INFORMATION.                           Sigma1  
+                                                                         Sigma1  
+      THE ALLOWABLE ERROR MAY BE ENERGY INDEPENDENT (CONSTANT) OR ENERGY Sigma1  
+      DEPENDENT. THE ALLOWABLE ERROR IS DESCRIBED BY A TABULATED         Sigma1  
+      FUNCTION OF UP TO 20 (ENERGY,ERROR) PAIRS AND LINEAR INTERPOLATION Sigma1  
+      BETWEEN TABULATED POINTS. IF ONLY ONE TABULATED POINT IS GIVEN THE Sigma1  
+      ERROR WILL BE CONSIDERED CONSTANT OVER THE ENTIRE ENERGY RANGE.    Sigma1  
+      WITH THIS ENERGY DEPENDENT ERROR ONE MAY OPTIMIZE THE OUTPUT FOR   Sigma1  
+      ANY GIVEN APPLICATION BY USING A SMALL ERROR IN THE ENERGY RANGE   Sigma1  
+      OF INTEREST AND A LESS STRINGENT ERROR IN OTHER ENERGY RANGES.     Sigma1  
+                                                                         Sigma1  
+      INPUT FILES                                                        Sigma1  
+      -----------                                                        Sigma1  
+      UNIT  DESCRIPTION                                                  Sigma1  
+      ----  -----------                                                  Sigma1  
+         2  INPUT CARDS (BCD - 80 CHARACTERS/RECORD)                     Sigma1  
+        10  ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Sigma1  
+                                                                         Sigma1  
+      OUTPUT FILES                                                       Sigma1  
+      ------------                                                       Sigma1  
+      UNIT  DESCRIPTION                                                  Sigma1  
+      ----  -----------                                                  Sigma1  
+         3  OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Sigma1  
+        11  FINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)               Sigma1  
+                                                                         Sigma1  
+      SCRATCH FILES                                                      Sigma1  
+      -------------                                                      Sigma1  
+      UNIT  DESCRIPTION                                                  Sigma1  
+      ----  -----------                                                  Sigma1  
+        12  SCRATCH FILE FOR BROADENED DATA                              Sigma1  
+            (BINARY - 180000 WORDS/RECORD - DOUBLE PRECISION/            Sigma1  
+                       42000 WORDS/RECORD - SINLGE PRECISION)            Sigma1  
+                                                                         Sigma1  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILEIO)               Sigma1  
+      ----------------------------------------------------               Sigma1  
+      UNIT  FILE NAME                                                    Sigma1  
+      ----  ----------                                                   Sigma1  
+        2   SIGMA1.INP                                                   Sigma1  
+        3   SIGMA1.LST                                                   Sigma1  
+       10   ENDFB.IN                                                     Sigma1  
+       11   ENDFB.OUT                                                    Sigma1  
+       12   (SCRATCH)                                                    Sigma1  
+                                                                         Sigma1  
+      INPUT CARDS                                                        Sigma1  
+      -----------                                                        Sigma1  
+      CARD  COLS.  DESCRIPTION                                           Sigma1  
+      ----  -----  -----------                                           Sigma1  
+         1   1-11  SELECTION CRITERIA (0=MAT, 1=ZA)                      Sigma1  
+            12-22  MONITOR MODE SELECTOR                                 Sigma1  
+                   = 0 - NORMAL OPERATION                                Sigma1  
+                   = 1 - MONITOR PROGRESS OF DOPPLER BROADENING OF DATA. Sigma1  
+                         EACH TIME A PAGE OF DATA POINTS IS WRITTEN TO   Sigma1  
+                         THE SCRATCH FILE PRINT OUT THE TOTAL NUMBER OF  Sigma1  
+                         POINTS ON SCRATCH AND THE LOWER AND UPPER       Sigma1  
+                         ENERGY LIMITS OF THE PAGE (THIS OPTION MAY BE   Sigma1  
+                         USED IN ORDER TO MONITOR THE EXECUTION SPEED    Sigma1  
+                         OF LONG RUNNING JOBS).                          Sigma1  
+            23-33  KELVIN TEMPERATURE                                    Sigma1  
+            34-44  MINIMUM CROSS SECTION OF INTEREST                     Sigma1  
+                   (DEFAULT VALUE = 1.0E-10 BARNS).                      Sigma1  
+            45-55  NEGATIVE CROSS SECTION TREATMENT                      Sigma1  
+                   = 0 - O.K.                                            Sigma1  
+                   = 1 - SET = 0                                         Sigma1  
+            56-66  UNRESOLVED RESONANCE REGION TREATMENT                 Sigma1  
+                   = 0 - COPY (NO BROADENING)                            Sigma1  
+                   = 1 - IGNORE (BROADEN)                                Sigma1  
+         2   1-72  ENDF/B INPUT DATA FILENAME                            Sigma1  
+                   (STANDARD OPTION = ENDFB.IN)                          Sigma1  
+         3   1-72  ENDF/B OUTPUT DATA FILENAME                           Sigma1  
+                   (STANDARD OPTION = ENDFB.OUT)                         Sigma1  
+       4-N   1-11  LOWER MAT OR ZA LIMIT                                 Sigma1  
+            12-22  UPPER MAT OR ZA LIMIT                                 Sigma1  
+                   UP TO 100 MAT OR ZA RANGES MAY BE SPECIFIED, ONE      Sigma1  
+                   RANGE PER CARD. THE LIST OF RANGES IS TERMINATED BY   Sigma1  
+                   A BLANK CARD. IF THE UPPER LIMIT IS LESS THAN THE     Sigma1  
+                   LOWER LIMIT THE UPPER LIMIT WILL BE SET EQUAL TO THE  Sigma1  
+                   LOWER LIMIT. IF THE FIRST REQUEST CARD IS BLANK IT    Sigma1  
+                   WILL TERMINATE THE LIST OF REQUESTS AND CAUSE ALL     Sigma1  
+                   DATA TO BE RETRIEVED (SEE EXAMPLE INPUT).             Sigma1  
+       VARY  1-11  ENERGY FOR ERROR LAW                                  Sigma1  
+            12-22  ERROR FOR ERROR LAW                                   Sigma1  
+                   THE ACCEPTABLE LINEARIZING ERROR CAN BE GIVEN AS AN   Sigma1  
+                   ENERGY DEPENDENT FUNCTION SPECIFIED BY UP TO 20       Sigma1  
+                   (ENERGY,ERROR) PAIRS AND LINEAR INTERPOLATION         Sigma1  
+                   TABULATE POINTS. ENERGIES MUST BE IN ASCENDING ORDER. Sigma1  
+                   THE ERROR LAW IS TERMINATED BY A BLANK CARD. IF THE   Sigma1  
+                   FIRST ERROR LAW CARD IS BLANK IT WILL TERMINATE THE   Sigma1  
+                   ERROR LAW AND THE ERROR WILL BE TREATED AS ENERGY     Sigma1  
+                   INDEPENDENT, EQUAL TO ZERO, WHICH INDICATES THAT THE  Sigma1  
+                   BROADENED DATA SHOULD NOT BE THINNED.                 Sigma1  
+                                                                         Sigma1  
+      EXAMPLE INPUT NO. 1                                                Sigma1  
+      -------------------                                                Sigma1  
+      BROADEN ALL URANIUM ISOTOPES AND THORIUM-232 TO 300 KELVIN. FROM   Sigma1  
+      0 TO 100 EV THIN OUTPUT DATA TO 0.1 PER-CENT ACCURACY. FROM 100 EV Sigma1  
+      TO 1 KEV VARY THE ERROR BETWEEN 0.1 AND 1 PER-CENT. ABOVE 1 KEV    Sigma1  
+      USE 1 PER-CENT ACCURACY.                                           Sigma1  
+                                                                         Sigma1  
+      EXPLICITLY SPECIFY THE STANDARD FILENAMES.                         Sigma1  
+                                                                         Sigma1  
+      THE FOLLOWING 11 CARDS ARE REQUIRED                                Sigma1  
+                                                                         Sigma1  
+           1          0 3.00000+ 2                                       Sigma1  
+  ENDFB.IN                                                               Sigma1  
+  ENDFB.OUT                                                              Sigma1  
+       92000      92999                                                  Sigma1  
+       90232               (UPPER LIMIT WILL AUTOMATICALLY BE DEFINED)   Sigma1  
+                           (BLANK CARD INDICATES END OF REQUEST LIST)    Sigma1  
+  0.00000+ 0 1.00000-03                                                  Sigma1  
+  1.00000+ 2 1.00000-03                                                  Sigma1  
+  1.00000+ 3 1.00000-02                                                  Sigma1  
+  1.00000+ 9 1.00000-02                                                  Sigma1  
+                           (BLANK CARD INDICATES END OF ERROR LAW)       Sigma1  
+                                                                         Sigma1  
+      EXAMPLE INPUT NO. 2                                                Sigma1  
+      -------------------                                                Sigma1  
+      BROADEN ALL DATA TO 300 KELVIN AND DO NOT THIN THE BROADEN DATA.   Sigma1  
+      ALL OF THE STANDARD OPTION MAY BE INVOKED MERELY BY SPECIFYING     Sigma1  
+      THE KELVIN TEMPERATURE ON THE FIRST CARD. ALL OTHER FIELDS MAY     Sigma1  
+      BE LEFT BLANK.                                                     Sigma1  
+                                                                         Sigma1  
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Sigma1  
+      THEN USE STANDARD FILENAMES.                                       Sigma1  
+                                                                         Sigma1  
+      THE FOLLOWING 5 CARDS ARE REQUIRED                                 Sigma1  
+                                                                         Sigma1  
+                        3.00000+ 2                                       Sigma1  
+                        (USE STANDARD FILENAME = ENDFB.IN)               Sigma1  
+                        (USE STANDARD FILENAME = ENDFB.OUT)              Sigma1  
+                        (RETRIEVE ALL DATA, TERMINATE REQUEST LIST)      Sigma1  
+                        (0.0 ALLOWABLE ERROR, TERMINATE ERROR LAW)       Sigma1  
+                                                                         Sigma1  
+      EXAMPLE INPUT NO. 3                                                Sigma1  
+      -------------------                                                Sigma1  
+      THE SAME AS ABOVE, ONLY DEFINE THE MINIMUM CROSS SECTION OF        Sigma1  
+      INTEREST TO BE 1.0E-30 BARNS (INSTEAD OF THE DEFAULT VALUE OF      Sigma1  
+      1.0E-10).                                                          Sigma1  
+                                                                         Sigma1  
+      READ ENDF/B DATA FROM \ENDFB6\RECENT\ZA092238 AND WRITE ENDF/B     Sigma1  
+      DATA TO \ENDFB\SIGMA1\ZA092238                                     Sigma1  
+                                                                         Sigma1  
+      THE FOLLOWING 5 CARDS ARE REQUIRED                                 Sigma1  
+                                                                         Sigma1  
+                        3.00000+ 2 1.00000-30                            Sigma1  
+  \ENDFB6\RECENT\ZA092238                                                Sigma1  
+  \ENDFB6\SIGMA1\ZA092238                                                Sigma1  
+                        (RETRIEVE ALL DATA, TERMINATE REQUEST LIST)      Sigma1  
+                        (0.0 ALLOWABLE ERROR, TERMINATE ERROR LAW)       Sigma1  
+                                                                         Sigma1  
+ ======================================================================= Sigma1  

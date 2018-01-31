@@ -1,155 +1,155 @@
 module c4_io
 
-    implicit none
+   implicit none
 
-    integer*4, parameter, private :: maxsec = 10000    ! maximum # data sections in C4 file
+   integer*4, parameter, private :: maxsec = 10000    ! maximum # data sections in C4 file
 
-    integer*4 :: c4_unit = 20                          ! fortran i/o unit, defaults to 20, but user may change
+   integer*4 :: c4_unit = 20                          ! fortran i/o unit, defaults to 20, but user may change
 
-    private write_point, wrl, assign_section
+   private write_point, wrl, assign_section
 
-    type c4_data_point
-        sequence
-        integer*4 mf                                   ! MF number
-        integer*4 mt                                   ! MT number
-        real*8 e                                       ! proj energy (eV)
-        real*8 de                                      ! proj energy unc
-        real*8 x                                       ! cross section (see C4 dictionary)
-        real*8 dx                                      ! cross section unc
-	real*8 cos                                     ! cos(theta)
-	real*8 dcos                                    ! cos(theta) unc
-	real*8 dat7                                    ! defined by fid field
-	real*8 dat8                                    ! defined by fid field
-        character*3 fid                                ! identification flag for dat7 & dat8.
-        character*1 x4stat                             ! EXFOR status flag
-        character*1 cm                                 ! center-of-mass flag (C=cm,blank=lab)
-        character*1 pmeta                              ! product meta-stable flag (M=metastable)
-	character*2 dum                                ! kill alignment woes
-    end type
+   type c4_data_point
+      sequence
+      integer*4 mf                                   ! MF number
+      integer*4 mt                                   ! MT number
+      real*8 e                                       ! proj energy (eV)
+      real*8 de                                      ! proj energy unc
+      real*8 x                                       ! cross section (see C4 dictionary)
+      real*8 dx                                      ! cross section unc
+      real*8 cos                                     ! cos(theta)
+      real*8 dcos                                    ! cos(theta) unc
+      real*8 dat7                                    ! defined by fid field
+      real*8 dat8                                    ! defined by fid field
+      character*3 fid                                ! identification flag for dat7 & dat8.
+      character*1 x4stat                             ! EXFOR status flag
+      character*1 cm                                 ! center-of-mass flag (C=cm,blank=lab)
+      character*1 pmeta                              ! product meta-stable flag (M=metastable)
+      character*2 dum                                ! kill alignment woes
+   end type
 
-    type c4_section
-        integer*4 pza                                  ! projectile ZA (1000*Z+A)
-        integer*4 tza                                  ! target ZA (1000*Z+A)
-        character*1 tmeta                              ! target meta-stable flag (M=metastable)
-        character*25 ref                               ! reference (first author, year)
-        character*5 ent                                ! EXFOR entry number
-        character*3 sub                                ! EXFOR sub-entry number
-        character*1 mdf                                ! multi-dimensional data flag
-        integer*4 ndat                                 ! number of data points in section
-        type (c4_data_point), pointer :: pt(:)         ! data points
-    end type
+   type c4_section
+      integer*4 pza                                  ! projectile ZA (1000*Z+A)
+      integer*4 tza                                  ! target ZA (1000*Z+A)
+      character*1 tmeta                              ! target meta-stable flag (M=metastable)
+      character*25 ref                               ! reference (first author, year)
+      character*5 ent                                ! EXFOR entry number
+      character*3 sub                                ! EXFOR sub-entry number
+      character*1 mdf                                ! multi-dimensional data flag
+      integer*4 ndat                                 ! number of data points in section
+      type (c4_data_point), pointer :: pt(:)         ! data points
+   end type
 
-    type c4_file
-        integer*4 nsec
-        type (c4_section), pointer :: sec(:)
-    end type
+   type c4_file
+      integer*4 nsec
+      type (c4_section), pointer :: sec(:)
+   end type
 
-    interface assignment (=)
-        module procedure assign_section
-    end interface
+   interface assignment (=)
+      module procedure assign_section
+   end interface
 
-    contains
+contains
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    integer*4 function read_c4_file(cfil,c4)
+   integer*4 function read_c4_file(cfil,c4)
 
-    ! read the C4 file specified in the string cfil into the c4 data structure
+      ! read the C4 file specified in the string cfil into the c4 data structure
 
-    implicit none
+      implicit none
 
-    character*(*), intent(in) :: cfil                  ! C4 file to read in
-    type (c4_file) c4
+      character*(*), intent(in) :: cfil                  ! C4 file to read in
+      type (c4_file) c4
 
-    type (c4_section), pointer :: sc
-    type (c4_data_point), pointer :: pt
+      type (c4_section), pointer :: sc
+      type (c4_data_point), pointer :: pt
 
-    logical*4 qex
-    integer*4 j,k,ios
-    character line*131
+      logical*4 qex
+      integer*4 j,k,ios
+      character line*131
 
-    type c4_sec
-        integer*4 ndat
-        character*131 line
-    end type
-    type (c4_sec), allocatable :: chk(:)
+      type c4_sec
+         integer*4 ndat
+         character*131 line
+      end type
+      type (c4_sec), allocatable :: chk(:)
 
-    inquire(file=cfil,exist=qex)
-    if(.not.qex) then
-        write(6,*) ' C4 file ',cfil,' not found'
-        read_c4_file = -1
-        return
-    endif
+      inquire(file=cfil,exist=qex)
+      if(.not.qex) then
+         write(6,*) ' C4 file ',cfil,' not found'
+         read_c4_file = -1
+         return
+      endif
 
-    open(c4_unit,file=cfil,status='old',action='read',iostat=ios)
-    if(ios /= 0) then
-        write(6,*) ' Error opening ',cfil,'. IOSTAT = ',ios
-        read_c4_file = ios
-        return
-    endif
+      open(c4_unit,file=cfil,status='old',action='read',iostat=ios)
+      if(ios /= 0) then
+         write(6,*) ' Error opening ',cfil,'. IOSTAT = ',ios
+         read_c4_file = ios
+         return
+      endif
         
-    allocate(chk(maxsec))
+      allocate(chk(maxsec))
 
-    ! scan through file once, counting # sections and size of each
+      ! scan through file once, counting # sections and size of each
 
-    k = 0
+      k = 0
 
-    do
-        read(c4_unit,'(a131)',iostat=ios) line
-        if(ios > 0) then
+      do
+         read(c4_unit,'(a131)',iostat=ios) line
+         if(ios > 0) then
             write(6,*) ' Error reading ',cfil,'. IOSTAT = ',ios
             read_c4_file = ios
             goto 10
-        else if(ios < 0) then
+         else if(ios < 0) then
             exit
-        endif
-        j = k
-        do while(j > 0)
+         endif
+         j = k
+         do while(j > 0)
             if((line(1:12) == chk(j)%line(1:12)) .and. (line(98:131) == chk(j)%line(98:131))) exit
             j = j - 1
-        end do
-        if(j > 0) then
+         end do
+         if(j > 0) then
             chk(j)%ndat = chk(j)%ndat + 1
-        else
+         else
             k = k + 1
             if(k > maxsec) then
-                write(6,*) ' Too many data sections in ',cfil
-                read_c4_file = -100
-                goto 10
+               write(6,*) ' Too many data sections in ',cfil
+               read_c4_file = -100
+               goto 10
             endif
             chk(k)%ndat = 1
             chk(k)%line = line
-        endif
-    end do
+         endif
+      end do
 
-    call delete_c4(c4)
-    allocate(c4%sec(k))
-    c4%nsec = k
+      call delete_c4(c4)
+      allocate(c4%sec(k))
+      c4%nsec = k
 
-    ! now read file again, storing the data
+      ! now read file again, storing the data
 
-    rewind(c4_unit)
+      rewind(c4_unit)
 
-    k = 0
+      k = 0
 
-    do
-        read(c4_unit,'(a131)',iostat=ios) line
-        if(ios > 0) then
+      do
+         read(c4_unit,'(a131)',iostat=ios) line
+         if(ios > 0) then
             write(6,*) ' Error reading ',cfil,'. IOSTAT = ',ios
             call delete_c4(c4)
             read_c4_file = ios
             goto 10
-        else if(ios < 0) then
+         else if(ios < 0) then
             exit
-        endif
-        j = k
-        do while(j > 0)
+         endif
+         j = k
+         do while(j > 0)
             if((line(1:12) == chk(j)%line(1:12)) .and. (line(98:131) == chk(j)%line(98:131))) exit
             j = j - 1
-        end do
-        if(j > 0) then
+         end do
+         if(j > 0) then
             sc => c4%sec(j)
-        else
+         else
             k = k + 1
             sc => c4%sec(k)
             sc%ndat   = 0
@@ -161,77 +161,77 @@ module c4_io
             sc%sub    = line(128:130)
             sc%mdf    = line(131:131)
             allocate(sc%pt(chk(k)%ndat))
-        endif
-        sc%ndat = sc%ndat + 1
-        pt => sc%pt(sc%ndat)
-        pt%pmeta  = line(20:20)
-        pt%x4stat = line(21:21)
-        pt%cm     = line(22:22)
-        pt%fid    = line(95:97)
-        read(line(13:19),'(I3,I4)') pt%mf,pt%mt
-        read(line(23:94),'(8F9.0)') pt%e, pt%de, pt%x, pt%dx, pt%cos, pt%dcos, pt%dat7, pt%dat8
-    end do
+         endif
+         sc%ndat = sc%ndat + 1
+         pt => sc%pt(sc%ndat)
+         pt%pmeta  = line(20:20)
+         pt%x4stat = line(21:21)
+         pt%cm     = line(22:22)
+         pt%fid    = line(95:97)
+         read(line(13:19),'(I3,I4)') pt%mf,pt%mt
+         read(line(23:94),'(8F9.0)') pt%e, pt%de, pt%x, pt%dx, pt%cos, pt%dcos, pt%dat7, pt%dat8
+      end do
 
-    close(c4_unit)
+      close(c4_unit)
 
-    if(c4%nsec /= k) then
-        write(6,*) ' Inconsistency reading C4 file ',cfil
-        call delete_c4(c4)
-        read_c4_file = -200
-        goto 10
-    endif
+      if(c4%nsec /= k) then
+         write(6,*) ' Inconsistency reading C4 file ',cfil
+         call delete_c4(c4)
+         read_c4_file = -200
+         goto 10
+      endif
 
-    do j = 1,c4%nsec
-        sc => c4%sec(j)
-	! type *,j,sc%ref,sc%ndat,chk(j)%ndat
-        if(sc%ndat == chk(j)%ndat) cycle
-        write(6,*) ' Inconsistency reading C4 section ',sc%ref
-        call delete_c4(c4)
-        read_c4_file = -300
-        goto 10
-    end do
+      do j = 1,c4%nsec
+         sc => c4%sec(j)
+         ! type *,j,sc%ref,sc%ndat,chk(j)%ndat
+         if(sc%ndat == chk(j)%ndat) cycle
+         write(6,*) ' Inconsistency reading C4 section ',sc%ref
+         call delete_c4(c4)
+         read_c4_file = -300
+         goto 10
+      end do
 
-    read_c4_file = 0
+      read_c4_file = 0
 
-10  deallocate(chk)
-    return
+10    deallocate(chk)
+      return
 
-    end function read_c4_file
+   end function read_c4_file
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    integer*4 function write_c4_file(cfil,c4)
+   integer*4 function write_c4_file(cfil,c4)
 
-    ! write the C4 file specified in the string cfil from the c4 data structure
+      ! write the C4 file specified in the string cfil from the c4 data structure
 
-    implicit none
+      implicit none
 
-    character*(*), intent(in) :: cfil                  ! C4 file to write
-    type (c4_file), intent(in) :: c4
+      character*(*), intent(in) :: cfil                  ! C4 file to write
+      type (c4_file), intent(in) :: c4
 
-    type (c4_section), pointer :: sc
-    type (c4_data_point), pointer :: pt
+      type (c4_section), pointer :: sc
+      type (c4_data_point), pointer :: pt
 
-    integer*4 i,j,ios
-    character line*131
+      integer*4 i,j,ios
+      character line*131
 
-    open(c4_unit,file=cfil,status='unknown',action='write',iostat=ios)
-    if(ios .ne. 0) then
-        write(6,*) ' Error creating ',cfil
-        write_c4_file = ios
-        return
-    endif
+      open(c4_unit,file=cfil,status='unknown',action='write',iostat=ios)
+      if(ios .ne. 0) then
+         write(6,*) ' Error creating ',cfil
+         write_c4_file = ios
+         return
+      endif
 
-    do i = 1,c4%nsec
-        sc => c4%sec(i)
-        write(line(1:5),'(I5)')  sc%pza
-        write(line(6:11),'(I6)') sc%tza
-        line(12:12) = sc%tmeta
-        line(98:122) = sc%ref
-        line(123:127) = sc%ent
-        line(128:130) = sc%sub
-        line(131:131) = sc%mdf
-        do j = 1,sc%ndat
+      do i = 1,c4%nsec
+         sc => c4%sec(i)
+         write(line(1:5),'(I5)')  sc%pza
+         write(line(6:11),'(I6)') sc%tza
+         line(12:12) = sc%tmeta
+         line(98:122) = sc%ref
+         line(123:127) = sc%ent
+         line(128:130) = sc%sub
+         line(131:131) = sc%mdf
+         do j = 1,sc%ndat
             pt => sc%pt(j)
             write(line(13:15),'(I3)') pt%mf
             write(line(16:19),'(I4)') pt%mt
@@ -241,135 +241,135 @@ module c4_io
             call write_point(line(23:94),pt)
             line(95:97) = pt%fid
             write(c4_unit,'(A131)') line
-        end do
-    end do
+         end do
+      end do
 
-    close(c4_unit)
+      close(c4_unit)
 
-    write_c4_file = 0
+      write_c4_file = 0
 
-    return
-    end function write_c4_file
+      return
+   end function write_c4_file
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    subroutine write_point(line,pt)
+   subroutine write_point(line,pt)
 
-    implicit none
+      implicit none
 
-    character*72, intent(out) :: line
-    type (c4_data_point), intent(in) :: pt
+      character*72, intent(out) :: line
+      type (c4_data_point), intent(in) :: pt
 
-    line(1:9)   = wrl(pt%e)
-    line(10:18) = wrl(pt%de)
-    line(19:27) = wrl(pt%x)
-    line(28:36) = wrl(pt%dx)
-    line(37:45) = wrl(pt%cos)
-    line(46:54) = wrl(pt%dcos)
-    line(55:63) = wrl(pt%dat7)
-    line(64:72) = wrl(pt%dat8)
+      line(1:9)   = wrl(pt%e)
+      line(10:18) = wrl(pt%de)
+      line(19:27) = wrl(pt%x)
+      line(28:36) = wrl(pt%dx)
+      line(37:45) = wrl(pt%cos)
+      line(46:54) = wrl(pt%dcos)
+      line(55:63) = wrl(pt%dat7)
+      line(64:72) = wrl(pt%dat8)
 
-    return
-    end subroutine write_point
+      return
+   end subroutine write_point
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    character*9 function wrl(xx)
+   character*9 function wrl(xx)
 
-    implicit none
+      implicit none
 
-    real*8, intent(in) :: xx
+      real*8, intent(in) :: xx
 
-    integer*4 k
-    character*10  lin
-    character*7 :: fmt = '(F9. )'
-    character*7 :: fmt2 = '(F10. )'
+      integer*4 k
+      character*10  lin
+      character*7 :: fmt = '(F9. )'
+      character*7 :: fmt2 = '(F10. )'
 
-    if(xx <= -9.9995D+9) then
-            write(lin,'(1PE9.2)',err=10) xx
-    else if(xx <= -9.9999995D+6) then
-            write(lin,'(1PE9.3E1)',err=10) xx
-    else if(xx <= -9.9995D-4) then
-            k = floor(log10(abs(xx)))
-            write(fmt2(6:6),'(I1)') min(6-k,7)
-            write(lin,fmt2) xx
-            if(lin(2:2) == '0') lin(1:9) = '-'//lin(3:10)
-            if(lin(1:1) == ' ') lin(1:9) = lin(2:10)
-    else if(xx <= -9.9995D-10) then
-            write(lin,'(1PE9.3E1)',err=10) xx
-    else if(xx <= 9.9995D-10) then
-            write(lin,'(1PE9.2)',err=10) xx
-    else if(xx < 9.9995D-4) then
-            write(lin,'(1PE9.3E1)',err=10) xx
-    else if(xx < 9.9999995D+6) then
-            k = floor(log10(xx))
-            write(fmt(5:5),'(I1)') min(6-k,7)
-            write(lin,fmt) xx
-            if(lin(1:1) == '0') lin(1:1) = ' '
-            if(lin(1:1) /= ' ') lin(1:9) = ' '//lin(1:8)
-    else if(xx < 9.9995D+9) then
-            write(lin,'(1PE9.3E1)',err=10) xx
-    else
-            write(lin,'(1PE9.2)',err=10) xx
-    endif
+      if(xx <= -9.9995D+9) then
+         write(lin,'(1PE9.2)',err=10) xx
+      else if(xx <= -9.9999995D+6) then
+         write(lin,'(1PE9.3E1)',err=10) xx
+      else if(xx <= -9.9995D-4) then
+         k = floor(log10(abs(xx)))
+         write(fmt2(6:6),'(I1)') min(6-k,7)
+         write(lin,fmt2) xx
+         if(lin(2:2) == '0') lin(1:9) = '-'//lin(3:10)
+         if(lin(1:1) == ' ') lin(1:9) = lin(2:10)
+      else if(xx <= -9.9995D-10) then
+         write(lin,'(1PE9.3E1)',err=10) xx
+      else if(xx <= 9.9995D-10) then
+         write(lin,'(1PE9.2)',err=10) xx
+      else if(xx < 9.9995D-4) then
+         write(lin,'(1PE9.3E1)',err=10) xx
+      else if(xx < 9.9999995D+6) then
+         k = floor(log10(xx))
+         write(fmt(5:5),'(I1)') min(6-k,7)
+         write(lin,fmt) xx
+         if(lin(1:1) == '0') lin(1:1) = ' '
+         if(lin(1:1) /= ' ') lin(1:9) = ' '//lin(1:8)
+      else if(xx < 9.9995D+9) then
+         write(lin,'(1PE9.3E1)',err=10) xx
+      else
+         write(lin,'(1PE9.2)',err=10) xx
+      endif
 
-    wrl = lin(1:9)
-    return
+      wrl = lin(1:9)
+      return
 
-10  write(6,*) 'Error occured writing real value:',xx
+10    write(6,*) 'Error occured writing real value:',xx
 
-    return
-    end function wrl
+      return
+   end function wrl
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    subroutine delete_c4(c4)
+   subroutine delete_c4(c4)
 
-    ! deallocate a C4 data structure, if allocated
+      ! deallocate a C4 data structure, if allocated
 
-    implicit none
+      implicit none
 
-    type (c4_file) :: c4
+      type (c4_file) :: c4
 
-    integer*4 i
-    type (c4_section), pointer :: sc
+      integer*4 i
+      type (c4_section), pointer :: sc
 
-    if(associated(c4%sec)) then
-        do i = 1,c4%nsec
+      if(associated(c4%sec)) then
+         do i = 1,c4%nsec
             sc => c4%sec(i)
             if(associated(sc%pt)) deallocate(sc%pt)
-        end do
-        deallocate(c4%sec)
-    endif
+         end do
+         deallocate(c4%sec)
+      endif
 
-    c4%nsec = 0
+      c4%nsec = 0
 
-    return
-    end subroutine delete_c4
+      return
+   end subroutine delete_c4
 
-    !-----------------------------------------------------------------------------------------
+   !-----------------------------------------------------------------------------------------
 
-    subroutine assign_section(sc1, sc2)
+   subroutine assign_section(sc1, sc2)
 
-    ! set sc2 = sc2
+      ! set sc2 = sc2
 
-    implicit none
+      implicit none
 
-    type (c4_section), intent(out) :: sc1
-    type (c4_section), intent(in)  :: sc2
+      type (c4_section), intent(out) :: sc1
+      type (c4_section), intent(in)  :: sc2
 
-    sc1%pza = sc2%pza
-    sc1%tza = sc2%tza
-    sc1%ndat = sc2%ndat
-    sc1%tmeta = sc2%tmeta
-    sc1%ref = sc2%ref
-    sc1%ent = sc2%ent
-    sc1%sub = sc2%sub
-    sc1%mdf = sc2%mdf
-    allocate(sc1%pt(sc1%ndat))
-    sc1%pt = sc2%pt
+      sc1%pza = sc2%pza
+      sc1%tza = sc2%tza
+      sc1%ndat = sc2%ndat
+      sc1%tmeta = sc2%tmeta
+      sc1%ref = sc2%ref
+      sc1%ent = sc2%ent
+      sc1%sub = sc2%sub
+      sc1%mdf = sc2%mdf
+      allocate(sc1%pt(sc1%ndat))
+      sc1%pt = sc2%pt
 
-    return
-    end subroutine assign_section
+      return
+   end subroutine assign_section
 
 end module c4_io

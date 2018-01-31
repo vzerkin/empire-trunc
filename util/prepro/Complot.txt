@@ -1,0 +1,1093 @@
+ ======================================================================= Complot 
+                                                                         Complot 
+      PROGRAM COMPLOT                                                    Complot 
+      ===============                                                    Complot 
+      VERSION 83-1 (FEBRUARY, 1983)                                      Complot 
+      VERSION 83-2 (MAY, 1983)                                           Complot 
+      VERSION 83-3 (DECEMBER, 1983) *MAJOR MODIFICATION.                 Complot 
+                                    *ADDED SELECTION OF PLOTS BY MAT OR  Complot 
+                                     ZA/MT/ENERGY RANGE (EV).            Complot 
+                                    *ADDED VARIABLE AXIS UNITS (PROGRAM  Complot 
+                                     CONTROLLED..X=MILLI-EV, EV, KEV,    Complot 
+                                     MEV...Y=MILLI-BARNS, BARNS).        Complot 
+      VERSION 84-1 (APRIL, 1984)    *ADDED SELECTION BY REACTION/ENERGY  Complot 
+                                     RANGE.                              Complot 
+                                    *ADDED IDENTIFY DATA POINTS OPTION   Complot 
+                                     (SMALL BOX DRAWN AROUND EACH CROSS  Complot 
+                                      SECTION AND RATIO POINT).          Complot 
+                                    *IMPROVED NON-IBM GRAPHICS INTERFACE Complot 
+                                     (ALL CHARACTER POSITIONING NOW      Complot 
+                                      BASED ON CHARACTER, NOT RASTER,    Complot 
+                                      SIZE).                             Complot 
+      VERSION 85-1 (APRIL, 1985)    *SPECIAL I/O ROUTINES TO GUARANTEE   Complot 
+                                     ACCURACY OF ENERGY.                 Complot 
+                                    *DOUBLE PRECISION TREATMENT OF       Complot 
+                                     ENERGY (REQUIRED FOR NARROW         Complot 
+                                     RESONANCES).                        Complot 
+                                    *ADDED (ZA,MT) EQUIVALENCE OPTION.   Complot 
+                                    *ADDED SMALL PLOT OPTION.            Complot 
+      VERSION 85-2 (AUGUST, 1985)   *FORTRAN-77/H VERSION                Complot 
+      VERSION 86-1 (JANUARY, 1986)  *ENERGY DEPENDENT SCATTERING RADIUS  Complot 
+      VERSION 86-2 (DECEMBER, 1986) *DOUBLE PRECISION PLOT SCALING       Complot 
+                                     (REQUIRED FOR NARROW ENERGY RANGES) Complot 
+      VERSION 88-1 (JULY 1988)      *MAJOR REVISION TO MAKE CODE EASILY  Complot 
+                                     INTERFACEABLE TO ALMOST ANY PLOTTER Complot 
+                                    *WARNING..INPUT PARAMETERS FROM BEEN Complot 
+                                     CHANGED (SEE, DESCRIPTION BELOW)    Complot 
+                                    *COMPUTER INDEPENDENT SOFTWARE       Complot 
+                                     CHARACTERS.                         Complot 
+                                    *COLOR PLOTS.                        Complot 
+                                    *MT NUMBER DEFINITIONS FROM DATA     Complot 
+                                     FILE READ BY PROGRAM                Complot 
+                                    *FORTRAN-77 REQUIRED (FORTRAN-H NO   Complot 
+                                     SUPPORTED BY THIS PROGRAM).         Complot 
+                                    *OPTION...INTERNALLY DEFINE ALL I/O  Complot 
+                                     FILE NAMES (SEE, SUBROUTINE FILEIO  Complot 
+                                     FOR DETAILS).                       Complot 
+                                    *IMPROVED BASED ON USER COMMENTS.    Complot 
+      VERSION 88-2 (OCTOBER 1988)   *IMPROVED BASED ON USER COMMENTS.    Complot 
+                                    *ADDED LIVERMORE CIVIC COMPILER      Complot 
+                                     CONVENTIONS.                        Complot 
+                                    *UPDATED TO USE NEW PROGRAM CONVERT  Complot 
+                                     KEYWORDS.                           Complot 
+      VERSION 89-1 (JANUARY 1989)   *PSYCHOANALYZED BY PROGRAM FREUD TO  Complot 
+                                     INSURE PROGRAM WILL NOT DO ANYTHING Complot 
+                                     CRAZY.                              Complot 
+                                    *FORTRAN-77/FORTRAN-H COMPATIBLE     Complot 
+                                    *SPECIAL ENDF/B MATERIAL DEFINITIONS Complot 
+                                     (ZA.LT.1000) FROM DATA FILE READ    Complot 
+                                     BY PROGRAM.                         Complot 
+      VERSION 89-2 (MARCH 1989)     *ADDED ENDF/B-V AND VI MT            Complot 
+                                     DEFINITIONS. PROGRAM WILL DETERMINE Complot 
+                                     ENDF/B FORMAT BASED ON MF=1,        Complot 
+                                     MT=451 AND USE AS PPROPRIATE MT     Complot 
+                                     DEFINITIONS. IF NO MF=1, MT=451     Complot 
+                                     PROGRAM WILL USE ENDF/B-VI          Complot 
+                                     MT DEFINITIONS.                     Complot 
+      VERSION 90-1 (AUGUST 1990)    *A NEW PROGRAM                       Complot 
+                                    *ADDED INTERACTIVE MOUSE INPUT       Complot 
+                                    *ADDED 3 CHARACTER FONTS             Complot 
+                                    *ADDED PHOTON DATA, MF=23 AND 27     Complot 
+                                    *ADDED FORTRAN SAVE OPTION.          Complot 
+                                    *ADDED MAXIMUM RATIO RANGE WHEN      Complot 
+                                     PLOTTING RATIOS.                    Complot 
+                                    *ADDED GRID TYPES                    Complot 
+                                    *ADDED VARIABLE LINE THICKNESS       Complot 
+                                    *WARNING...INPUT PARAMETER FORMAT    Complot 
+                                     HAS BEEN CHANGED...SEE DESCRIPTION  Complot 
+                                     BELOW.                              Complot 
+      VERSION 92-1 (JANUARY 1992)   *ADDED INCIDENT CHARGED PARTICLES    Complot 
+                                     (IDENTIFIED IN PLOT TITLES)         Complot 
+                                    *ADDED COMPLETELY COMPATIBLE I/O     Complot 
+                                     FOR READING FLOATING POINT NUMBERS. Complot 
+      VERSION 92-2 (MAY 1992)       *CORRECTED DESCRIPTION OF INPUT      Complot 
+                                     PARAMETERS AND EXAMPLE PROBLEMS.    Complot 
+                                    *ADDED VARIABLE CHARACTER SIZE INPUT Complot 
+      VERSION 93-1 (MARCH 1993)     *UPDATE FOR ON SCREEN GRAPHIC        Complot 
+                                     OUTPUT USING THE LAHEY COMPILER     Complot 
+                                    *ADDED NU-BAR (TOTAL, DELAYED,       Complot 
+                                     PROMPT).                            Complot 
+      VERSION 94-1 (JANUARY 1994)   *VARIABLE ENDF/B DATA FILENAMES      Complot 
+                                     TO ALLOW ACCESS TO FILE STRUCTURES  Complot 
+                                     (WARNING - INPUT PARAMETER FORMAT   Complot 
+                                     HAS BEEN CHANGED)                   Complot 
+                                    *CLOSE ALL FILES BEFORE TERMINATING  Complot 
+                                     (SEE, SUBROUTINE ENDIT)             Complot 
+      VERSION 95-1 (MARCH 1995)     *CORRECTED CROSS SECTION             Complot 
+                                     MULTIPLIER FOR EQUIVALENCES         Complot 
+                                    *CORRECTED RATIO SCALING, FOR        Complot 
+                                     MAXIMUM RATIO LESS THAN 1.0         Complot 
+      VERSION 96-1 (JANUARY 1996)   *COMPLETE RE-WRITE                   Complot 
+                                    *IMPROVED COMPUTER INDEPENDENCE      Complot 
+                                    *ALL DOUBLE PRECISION                Complot 
+                                    *UNIFORM TREATMENT OF ENDF/B I/O     Complot 
+                                    *IMPROVED OUTPUT PRECISION           Complot 
+                                    *DEFINED SCRATCH FILE NAMES          Complot 
+                                    *INCREASED PAGE SIZE FROM 24000      Complot 
+                                     TO 48000 POINTS                     Complot 
+      VERSION 97-1 (APRIL 1997)     *INCREASED PAGE SIZE FROM 48000      Complot 
+                                     TO 480000 POINTS                    Complot 
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Complot 
+                                   POINT READ FOR MORE DIGITS            Complot 
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Complot 
+                                   VERSION BASED ON RECENT FORMAT CHANGE Complot 
+                                  *GENERAL IMPROVEMENTS BASED ON         Complot 
+                                   USER FEEDBACK                         Complot 
+      VERS. 2000-1 (FEBRUARY 2000)*GENERAL IMPROVEMENTS BASED ON         Complot 
+                                   USER FEEDBACK                         Complot 
+      VERS. 2002-1 (MAY 2002)     *INPUT PARAMETERS OPTIONAL             Complot 
+                                  *CONTROL MINIMUM RATIO RANGE BY INPUT  Complot 
+                                  *OPTIONAL BLACK OR WHITE BACKGROUND    Complot 
+      VERS. 2004-1 (SEPT. 2004)   *ADDED INCLUDE FOR COMMON              Complot 
+                                  *INCREASED PAGE SIZE FROM 480000       Complot 
+                                   TO 600000 POINTS                      Complot 
+                                  *ADDED NEW REICH-MOORE TO FILE2 TO     Complot 
+                                   ALLOW IDENTIFICATION OF RESOLVED AND  Complot 
+                                   ANY FOLLOWING UNRESOLVED RESONANCE    Complot 
+                                   REGIONS.                              Complot 
+      VERS. 2007-1 (JAN.  2007)   *CHECKED AGAINST ALL ENDF/B-VII.       Complot 
+                                  *INCREASED MAXLOAD TO 600,000 FROM     Complot 
+                                   12,000                                Complot 
+      VERS. 2009-1 (JAN.  2009)   *IGNORED DIFFERENCES NEAR RESONANCE    Complot 
+                                   REGION BOUNDARIES (RESOLVED AND       Complot 
+                                   UNRESOLVED).                          Complot 
+      VERS. 2010-1 (July  2010)   *Allow comparison plot even if there   Complot 
+                                   is no difference (just see data).     Complot 
+                                  *ONLY plot linearly interpoolable data Complot 
+                                  *Include threshold energy points to    Complot 
+                                   show cross sections, but NOT ratios   Complot 
+                                   near threshold.                       Complot 
+      VERS. 2011-1 (Jan.  2011)   *Increased MT.DAT from 200 to 1,000    Complot 
+                                   entries, to accommodate new MTs.      Complot 
+      VERS. 2012-1 (Aug.  2012)   *Increased incident particle list to   Complot 
+                                   include photon (ZA = 0).              Complot 
+                                  *Added CODENAME                        Complot 
+                                  *32 and 64 bit Compatible              Complot 
+                                  *Added ERROR stop                      Complot 
+      VERS. 2013-1 (Nov. 2013)    *ONLY use min/max ratios to decide     Complot 
+                                   whether or not to plot - non-positive Complot 
+                                   cross sections are no longer used.    Complot 
+                                  *Limited per-cent differences to fit   Complot 
+                                   output format = -9999 to +9999 %.     Complot 
+                                  *OUT9 replaced NORMX                   Complot 
+      VERS. 2015-1 (Jan. 2015)    *Added MF=10 Radionuclide Production   Complot 
+                                   which requires longer plot titles.    Complot 
+                                  *Restricted character size multiplier  Complot 
+                                   to 0.5 to 1.5 to accommodate longer   Complot 
+                                   plot titles.                          Complot 
+                                  *Replaced ALL 3 way if statements.     Complot 
+      VERS. 2015-2 (Mar. 2015)    *Corrected tables for X and Y axis     Complot 
+                                   labels = see change search for 2015-2 Complot 
+      VERS. 2015-3 (Oct. 2015)    *Allow multiple LRF=7 regions plus     Complot 
+                                   unreslved region - earlier assumed    Complot 
+                                   LRF=7 never used unrsesolved.         Complot 
+      VERS. 2017-1 (May  2017)    *For MF=2 use MT=151 to define         Complot 
+                                   Unresolved Resonance Region (URR).    Complot 
+                                   Ignore NJOY MT=152 and 153.           Complot 
+                                  *All floating input parameters changed Complot 
+                                   to character input + IN9 conversion.  Complot 
+                                  *Added MF=4 Legendre Coefficient       Complot 
+                                   Comparison: f1 through f6             Complot 
+                                  *Doubled in core storage to 1,200,000. Complot 
+                                  *Replaced Q MeV by MT= at top of plots Complot 
+                                   (Q value in ENDF is now only defined  Complot 
+                                    in MF=3, making it difficult for all Complot 
+                                    other MF now treated by this code)   Complot 
+                                  *Initial Linear X scaling for MF=1     Complot 
+                                   (nu-bar) and MF=4 (Legendre) =        Complot 
+                                   this can be turned OFF by ZOOM        Complot 
+                                  + Unless energy range is requested =   Complot 
+                                   allows MF=1 and 4 default Linear X    Complot 
+                                   scaling to be turned off by input     Complot 
+                                   parameters, i.e., by COMHARD          Complot 
+                                  *Zoom lower energy limit restricted    Complot 
+                                   1.0d-5 eV - to lower zoom of linear   Complot 
+                                   energy plots (otherwise cannot find   Complot 
+                                   actual lower limit on plot).          Complot 
+                                                                         Complot 
+      2015-2 Acknowledgment                                              Complot 
+      =====================                                              Complot 
+      I thank Chuck Whitmer (TerraPower,WA) for reporting the errors     Complot 
+      that led to the 2015-2 Improvements in this code.                  Complot 
+                                                                         Complot 
+      I thank Jean-Christophe Sublet (UKAEA) for contributing MAC        Complot 
+      executables and Bojan Zefran (IJS, Slovenia) for contributing      Complot 
+      LINUX (32 or 63 bit) executables. And most of all I must thank     Complot 
+      Andrej Trkov (NDS, IAEA) for overseeing the entire PREPRO project  Complot 
+      at IAEA, Vienna. This was a truly International team who worked    Complot 
+      together to produce PREPRO 2015-2.                                 Complot 
+                                                                         Complot 
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Complot 
+      ------------------------------------                               Complot 
+      THE NUCLEAR DATA SECTION                                           Complot 
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Complot 
+      P.O. BOX 100                                                       Complot 
+      A-1400, VIENNA, AUSTRIA                                            Complot 
+      EUROPE                                                             Complot 
+                                                                         Complot 
+      ORIGINALLY WRITTEN BY                                              Complot 
+      ------------------------------------                               Complot 
+      Dermott E. Cullen                                                  Complot 
+                                                                         Complot 
+      PRESENT CONTACT INFORMATION                                        Complot 
+      ---------------------------                                        Complot 
+      Dermott E. Cullen                                                  Complot 
+      1466 Hudson Way                                                    Complot 
+      Livermore, CA 94550                                                Complot 
+      U.S.A.                                                             Complot 
+      Telephone  925-443-1911                                            Complot 
+      E. Mail    RedCullen1@Comcast.net                                  Complot 
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Complot 
+                                                                         Complot 
+      AUTHORS MESSAGE                                                    Complot 
+      ---------------                                                    Complot 
+      THE COMMENTS BELOW SHOULD BE CONSIDERED THE LATEST DOCUMENTATION   Complot 
+      ALL RECENT IMPROVEMENTS. PLEASE READ ALL OF THESE COMMENTS BEFORE, Complot 
+      PARTICULARLY THE COMMENTS CONCERNING MACHINE DEPENDENT CODING.     Complot 
+                                                                         Complot 
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Complot 
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Complot 
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Complot 
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Complot 
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Complot 
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Complot 
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Complot 
+      COMPUTER.                                                          Complot 
+                                                                         Complot 
+      PURPOSE                                                            Complot 
+      -------                                                            Complot 
+      COMPARE ENDF/B FORMATTED DATA FROM TWO SEPARATE INPUT TAPES.       Complot 
+      REACTIONS ARE CONSIDERED TO BE COMPARABLE IF THEY HAVE THE SAME    Complot 
+      (ZA,MF,MT). RESULTS ARE PRESENTED IN GRAPHICAL FORM.               Complot 
+                                                                         Complot 
+      IN THE FOLLOWING FOR SIMPLICITY THE ENDF/B TERMINOLOGY--ENDF/B     Complot 
+      TAPE--WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE TAPE, CARDS,  Complot 
+      DISK OR ANY OTHER MEDIUM.                                          Complot 
+                                                                         Complot 
+      ON WHAT COMPUTERS WILL THE PROGRAM RUN                             Complot 
+      ------------------------------------------------------------------ Complot 
+      THE PROGRAM HAS BEEN IMPLEMENTED ON A VARIETY OF COMPUTERS FROM    Complot 
+      CRAY AND IBM MAINFRAME TO SUN WORKSTATIONS TO AN IBM-AT PC. THE    Complot 
+      PROGRAM IS SMALL ENOUGH TO RUN ON VIRTUALLY ANY COMPUTER.          Complot 
+                                                                         Complot 
+      THE PROGRAM USES A SIMPLE CALCOMP LIKE GRAPHICS INTERFACE          Complot 
+      (DESCRIBED BELOW) AND ALLOWS THE USER SPECIFY THE PHYSICAL SIZE    Complot 
+      OF THE PLOTTER BEING USED, BY INPUT PARAMETERS. USING THESE        Complot 
+      CONVENTIONS THIS PROGRAM CAN BE EASILY INTERFACED TO VIRTUALLY     Complot 
+      ANY PLOTTER.                                                       Complot 
+                                                                         Complot 
+      FOR SPECIAL CONSIDERATIONS SEE THE SECTIONS BELOW ON,              Complot 
+      (1) COMPUTER DEPENDENT CODING                                      Complot 
+      (2) PLOTTER/GRAPHICS TERMINAL INTERFACE                            Complot 
+                                                                         Complot 
+      GRAPHICS INTERFACE                                                 Complot 
+      ------------------------------------------------------------------ Complot 
+      THIS PROGRAM USES A SIMPLE CALCOMP LIKE GRAPHICS INTERFACE WHICH   Complot 
+      REQUIRES ONLY 3 SUBROUTINES...PLOTS, PLOT AND PEN (DESCRIBED IN    Complot 
+      DETAIL BELOW). ALL CHARACTERS AND SYMBOLS ARE DRAWN USING TABLES   Complot 
+      OF PEN STROKES (SUPPLIED WITH THIS PROGRAM). USING THIS METHOD     Complot 
+      THE PROGRAM SHOULD BE SIMPLE TO INTERFACE TO VIRTUALLY ANY PLOTTER Complot 
+      OR GRAPHICS TERMINAL AND THE APPEARANCE AND LAYOUT OF THE PLOTS    Complot 
+      SHOULD BE INDEPENDENT OF WHICH PLOTTER IS USED.                    Complot 
+                                                                         Complot 
+      2015 PLOTTER DIMENSIONS                                            Complot 
+      ================================================================== Complot 
+      PLOTTER DIMENSIONS ARE IN INCHES - NOT CM, MM, OR CUBITS.          Complot 
+      THIS IS DONE FOR HISTORICAL REASONS AND HOPEFULLY THIS WILL        Complot 
+      NOT INCONVENIENCE ANYONE - IN PRACTICE I HAVE USED EXACTLY THE     Complot 
+      SAME DIMENSION = X = 0 to 12.5 and Y = 0 to 10 FOR DECADES         Complot 
+      TO PRODUCE BOTH ON-SCREEN AND HARDCOPY POSTSCRIPT PLOTS.           Complot 
+                                                                         Complot 
+      I STRONGLY SUGGEST THAT YOU NOT CHANGE THESE DIMENSIONS UNLESS     Complot 
+      YOU MUST = BASED ON THE PLOT SIZE YOU OBTAIN WHEN YOU FIRST RUN    Complot 
+      THIS CODE.                                                         Complot 
+                                                                         Complot 
+      PROGRAM IDENTIFICATION                                             Complot 
+      ----------------------                                             Complot 
+      AS DISTRIBUTED THE FIRST FRAME OF PLOTTED OUTPUT WILL DOCUMENT     Complot 
+      THE PROGRAM NAME, VERSION AND INSTALLATION. THIS INFORMATION IS    Complot 
+      STORED AS DATA IN THE ARRAY VERSES NEAR THE BEGINNING OF           Complot 
+      SUBROUTINE FRAME1. IF YOU WISH TO CUSTOMIZE THE OUTPUT TO IDENTIFY Complot 
+      YOUR INSTALLATION CHANGE THE LAST TWO LINES OF THE ARRAY (VERSES). Complot 
+                                                                         Complot 
+      ENDF/B FORMAT                                                      Complot 
+      -------------                                                      Complot 
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Complot 
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Complot 
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Complot 
+                                                                         Complot 
+      BOTH SETS OF EVALUATED DATA MUST BE IN THE ENDF/B FORMAT. ONLY     Complot 
+      SECTIONS OF FILE 2 (RESONANCE PARAMETERS) AND FILES 3, 23 AND 27   Complot 
+      (TABULATED DATA) WILL BE READ AND ALL OTHER SECTIONS WILL BE       Complot 
+      SKIPPED. IN FILE 2 THE ONLY IMPORTANT INFORMATION IS THE ENERGY    Complot 
+      LIMITS OF THE RESOLVED AND UNRESOLVED RESONANCE REGION WHICH IS    Complot 
+      LOCATED IN THE SAME FIELDS IN ALL VERSIONS OF THE ENDF/B FORMAT.   Complot 
+      SIMILARLY THE FORMAT OF FILES 3, 23 AND 27 IS THE SAME IN ALL      Complot 
+      VERSIONS OF ENDF/B. THEREFORE THIS PROGRAM CAN BE USED WITH DATA   Complot 
+      IN ANY ENDF/B FORMAT (I.E. ENDF/B-I, II, III, IV, V OR VI).        Complot 
+                                                                         Complot 
+      CROSS SECTION INTERPOLATION                                        Complot 
+      ---------------------------                                        Complot 
+      CROSS SECTIONS MUST BE IN EITHER HISTOGRAM (I.E., INTERPOLATION    Complot 
+      LAW 1) OR LINEARLY INTERPOLABLE (I.E. INTERPOLATION LAW 2) FORM.   Complot 
+      IF THEY ARE NOT A WARNING MESSAGE WILL BE PRINTED AND EXECUTION    Complot 
+      WILL BE TERMINATED. SEE INSTRUCTIONS BELOW ON HOW TO CONVERT       Complot 
+      DATA TO HISTOGRAM OR LINEARLY INTERPOLABLE FORM.                   Complot 
+                                                                         Complot 
+      REACTION INDEX                                                     Complot 
+      --------------                                                     Complot 
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Complot 
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Complot 
+                                                                         Complot 
+      SECTION SIZE                                                       Complot 
+      ------------                                                       Complot 
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Complot 
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Complot 
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Complot 
+                                                                         Complot 
+      DATA SELECTION                                                     Complot 
+      --------------                                                     Complot 
+      THE USER MAY SPECIFYING THE DATA TO BE COMPARED BY INPUTTING UP    Complot 
+      TO 100 MAT/MT/ENERGY OR ZA/MT/ENERGY RANGES. IF THE UPPER LIMIT    Complot 
+      OF THE MAT OR ZA RANGE IS LESS THAN THE LOWER LIMIT IT WILL BE SET Complot 
+      EQUAL TO THE LOWER LIMIT (I.E. THIS INDICATE ONLY COMPARE ONE      Complot 
+      MAT OR ZA). IF THE UPPER LIMIT IS STILL ZERO IT WILL BE SET TO     Complot 
+      9999 (NO LIMIT). IF THE UPPER MF OR MT LIMIT IS ZERO IT WILL BE    Complot 
+      SET TO 99 OR 999, RESPECTIVELY (NO LIMIT). IF THE UPPER ENERGY     Complot 
+      LIMIT IS ZERO IT WILL BE SET TO A LARGE NUMBER (NO LIMIT).         Complot 
+                                                                         Complot 
+      THE LIST OF RANGES MUST BE TERMINATED BY A BLANK LINE (I.E. ZERO   Complot 
+      LOWER AND UPPER MAT/MF/MT OR ZA/MF/MT LIMITS).                     Complot 
+                                                                         Complot 
+      IF THE FIRST RANGE LINE IS BLANK THIS LINE WILL TERMINATE THE      Complot 
+      LIST OF REQUESTS (I.E. A SECOND BLANK LINE NEED NOT BE INPUT)      Complot 
+      AND ALL PHYSICALLY COMPARABLE DATA WILL BE PLOTTED.                Complot 
+                                                                         Complot 
+      WHICH REACTIONS WILL BE PLOTTED                                    Complot 
+      -------------------------------                                    Complot 
+      THOSE REACTIONS WITH THE SAME (ZA, MF, MT) WILL BE COMPARED, BUT   Complot 
+      ONLY THOSE DATA WHICH DIFFER BY A USER SPECIFIED ALLOWABLE         Complot 
+      DIFFERENCE WILL BE PLOTTED. IN ORDER TO FORCE ALL COMPARABLE       Complot 
+      REACTIONS TO BE PLOTTED THE USER NEED ONLY SPECIFY AN ALLOWABLE    Complot 
+      DIFFERENCE OF ZERO.                                                Complot 
+                                                                         Complot 
+      EQUIVALENT REACTIONS                                               Complot 
+      --------------------                                               Complot 
+      IN ORDER TO COMPARE REACTIONS WHICH HAVE DIFFERENT ZA, MF OR MT    Complot 
+      THE USER IS ALLOWED TO SPECIFY AN EQUIVALENCE LIST OF UP TO        Complot 
+      100 (ZA,MF,MT) COMBINATIONS ON THE MASTER FILE WHICH ARE TO BE     Complot 
+      EQUATED TO DIFFERENT (ZA,MF,MT) ON THE SECOND FILE. THIS OPTION    Complot 
+      MAY BE USED TO COMPARE SIMILAR REACTIONS FROM DIFFERENT MATERIALS  Complot 
+      (E.G. IRON AND NICKEL INELASTIC SCATTERING) OR DIFFERENT REACTIONS Complot 
+      FROM THE SAME OR DIFFERENT MATERIALS (E.G. U-235 CAPTURE AND       Complot 
+      FISSION - IN WHICH CASE THE RATIO WILL BE THE CAPTURE TO FISSION   Complot 
+      RATIO) OR THE SAME REACTION IN DIFFERENT VERSIONS OF THE ENDF/B    Complot 
+      FORMAT WHICH MAY BE ASSIGNED DIFFERENT MT NUMBERS, E.G., THE       Complot 
+      PHOTOELECTRIC CROSS SECTION IS MT=602 IN ENDF/B-V AND EARLIER      Complot 
+      VERSIONS OF ENDF/B, BUT IS MT=522 IN ENDF/B-VI.                    Complot 
+                                                                         Complot 
+      IN THESE EQUIVALENCE LISTS A ZERO FIELD IMPLIES ALL. FOR EXAMPLE,  Complot 
+      TO EQUATE MT=522 FROM ONE FILE TO MT=602 ON THE OTHER, FOR ALL     Complot 
+      MATERIALS, ONE NEED ONLY SPECIFY ZA=0, MF=23, MT=522 EQUIVALENT    Complot 
+      TO ZA=0, MF=23 AND MT=602.                                         Complot 
+                                                                         Complot 
+      PLOT FORMATS                                                       Complot 
+      ------------                                                       Complot 
+      THE TWO CROSS SECTIONS ARE CONSIDERED TO BE A STANDARD (THE FIRST  Complot 
+      CROSS SECTION) AND A CROSS SECTION TO BE COMPARED TO THE STANDARD  Complot 
+      (THE SECOND CROSS SECTION). THE OUTPUT FROM THIS PROGRAM IS A      Complot 
+      SERIES OF PLOTS. EACH PLOT WILL CONTAIN THE STANDARD CROSS SECTION Complot 
+      AND IN ADDITION THE USER MAY SPECIFY THAT EACH PLOT ALSO CONTAIN   Complot 
+      THE SECOND CROSS SECTION AND/OR THE RATIO OF THE SECOND CROSS      Complot 
+      SECTION TO THE FIRST CROSS SECTION.                                Complot 
+                                                                         Complot 
+      THE USER MAY SELECT ONE OF THE FOLLOWING FIVE PLOT FORMATS (THE    Complot 
+      NUMBER PRECEDING THE OPTION IS THE VALUE OF THE PLOT MODE SELECTOR Complot 
+      THAT THE USER SHOULD SPECIFY AS INPUT ON THE FIRST LINE).          Complot 
+                                                                         Complot 
+      (0) THE STANDARD CROSS SECTION (I.E. FIRST EVALUATION) AND THE     Complot 
+          RATIO OF THE SECOND EVALUATION TO THE FIRST EVALUATION. THE    Complot 
+          DATA WILL BE PRESENETED AS TWO SUB-PLOTS PER PLOT WITH THE     Complot 
+          STANDARD CROSS SECTION IN THE UPPER HALF OF THE PLOT AND THE   Complot 
+          RATIO IN THE LOWER HALF OF THE PLOT.                           Complot 
+                                                                         Complot 
+      (1) THE STANDARD CROSS SECTION (I.E. FIRST EVALUATION) AND THE     Complot 
+          SECOND EVALUATION. THE DATA WILL BE PRESENTED AS TWO SUB-PLOTS Complot 
+          PER PLOT WITH THE STANDARD CROSS SECTION ON THE UPPER HALF     Complot 
+          OF THE PLOT AND THE SECOND CROSS SECTION IN THE LOWER HALF OF  Complot 
+          THE PLOT.                                                      Complot 
+                                                                         Complot 
+      (2) THE STANDARD CROSS SECTION (I.E. FIRST EVALUATION) AND THE     Complot 
+          SECOND EVALUATION. THE DATA WILL BE PRESENTED AS ONE PLOT      Complot 
+          CONTAINING BOTH THE STANDARD AND SECOND CROSS SECTION. THE     Complot 
+          STANDARD CROSS SECTION WILL BE PRESENTED AS A SOLID LINE AND   Complot 
+          THE SECOND CROSS SECTION WILL BE PRESENTED AS A DASHED LINE.   Complot 
+                                                                         Complot 
+      (3) THE STANDARD CROSS SECTION, SECOND CROSS SECTION AND RATIO OF  Complot 
+          THE SECOND CROSS SECTION TO THE FIRST CROSS SECTION. THE DATA  Complot 
+          WILL BE PRESENTED AS THREE SUB-PLOTS PER PLOT WITH THE         Complot 
+          STANDARD CROSS SECTION IN THE UPPER THIRD OF THE PLOT, THE     Complot 
+          SECOND CROSS SECTION IN THE MIDDLE THIRD AND THE RATIO OF THE  Complot 
+          TWO IN THE LOWER THIRD OF THE PLOT (RECOMMENDED OPTION).       Complot 
+                                                                         Complot 
+      (4) THE STANDARD CROSS SECTION, SECOND CROSS SECTION AND RATIO OF  Complot 
+          THE SECOND CROSS SECTION TO THE FIRST CROSS SECTION. THE DATA  Complot 
+          WILL BE PRESENTED AS TWO SUB-PLOTS PER PLOT WITH THE STANDARD  Complot 
+          AND SECOND CROSS SECTION ON THE SAME SUB-PLOT IN THE UPPER     Complot 
+          TWO THIRDS OF THE PLOT AND THE RATIO OF THE TWO IN THE LOWER   Complot 
+          THIRD OF THE PLOT. THE STANDARD CROSS SECTION WILL BE          Complot 
+          PRESENTED AS A SOLID LINE AND THE SECOND CROSS SECTION WILL BE Complot 
+          PRESENTED AS A DASHED LINE.                                    Complot 
+                                                                         Complot 
+      ADDITIONAL PLOT FEATURES                                           Complot 
+      ------------------------                                           Complot 
+      IN ADDITION TO THE CROSS SECTIONS AND/OR RATIO THE FOLLOWING       Complot 
+      INFORMATIONS WILL BE INCLUDED ON EACH PLOT.                        Complot 
+                                                                         Complot 
+      (1) AN IDENTIFICATION FOR EACH SET OF CROSS SECTIONS (UP TO 30     Complot 
+          CHARACTERS FOR EACH SET).                                      Complot 
+                                                                         Complot 
+      (2) THE MAXIMUM NEGATIVE AND POSITIVE PER-CENT DIFFERENCE BETWEEN  Complot 
+          THE TWO CROSS SECTIONS.                                        Complot 
+                                                                         Complot 
+      (3) ARROWS INDICATING THE ENERGY AT WHICH THE MAXIMUM DIFFERENCES  Complot 
+          (MINIMUM AND MAXIMUM RATIO) OCCUR.                             Complot 
+                                                                         Complot 
+      (4) THE ENERGY LIMITS OF THE RESOLVED AND UNRESOLVED RESONANCE     Complot 
+          REGION (IF THEY FALL WITHIN THE ENERGY LIMITS OF THE PLOT).    Complot 
+                                                                         Complot 
+      RATIO DATA                                                         Complot 
+      ----------                                                         Complot 
+      IF RATIO OUTPUT IS REQUESTED THE RATIO WILL BE DEFINED AT EACH     Complot 
+      ENERGY THAT APPEARS IN EITHER EVALUATION. BETWEEN THESE ENERGIES   Complot 
+      THE RATIO WILL BE PLOTTED ASSUMING LINEAR DEPENDENCE BETWEEN       Complot 
+      TABULATED VALUES. FOR HISTOGRAM OR LINEARLY INTERPOLABLE CROSS     Complot 
+      SECTIONS THIS REPRESENTATION WILL POINT OUT ALL EXTREMA OF THE     Complot 
+      RATIO, BUT NOT NECESSARILY THE ENERGY DEPENDENCE BETWEEN TABULATED Complot 
+      VALUES.                                                            Complot 
+                                                                         Complot 
+      IF THE EVALUATED DATA IS NOT IN EITHER HISTOGRAM OR LINRARLY       Complot 
+      INTERPOLABLE FORM THE RATIO MAY NOT EVEN FIND ALL EXTREMA. FOR     Complot 
+      EXAMPLE, IF ONE EVALUATION IS LINEARLY INTERPOLABLE AND THE        Complot 
+      OTHER NON-LINEAR, BUT BOTH AGREE AT ALL TABULATED ENERGIES THE     Complot 
+      RATIO WILL APPEAR TO BE EQUAL TO UNITY AT ALL ENERGIES, BUT IN     Complot 
+      FACT THE CROSS SECTION BETWEEN TABULATED ENERGIES MAY BE QUITE     Complot 
+      DIFFERENT USING LINEAR VS. NON-LINEAR INTERPOLATION. FOR THIS      Complot 
+      REASON ONLY LINEARLY INTERPOLABLE OR HISTOGRAM DATA IS ALLOWED     Complot 
+      AS INPUT TO THIS PROGRAM.                                          Complot 
+                                                                         Complot 
+      LINEAR INTERPOLABLE                                                Complot 
+      -------------------                                                Complot 
+      ALL CROSS SECTIONS MAY BE CONVERTED TO LINEARLY INTERPOLABLE FORM  Complot 
+      BE USING PROGRAM LINEAR (UCRL-50400, VOL. 17, PART A).             Complot 
+                                                                         Complot 
+      HISTOGRAM                                                          Complot 
+      ---------                                                          Complot 
+      ALL LINEARLY INTERPOLABLE CROSS SECTION MAY BE CONVERTED TO        Complot 
+      HISTOGRAM (I.E. MULTIGROUP) FORM BY USING PROGRAM GROUPIE          Complot 
+      (UCRL-50400, VOL. 17, PART D).                                     Complot 
+                                                                         Complot 
+      INPUT UNITS                                                        Complot 
+      -----------                                                        Complot 
+      UNIT  DESCRIPTION                                                  Complot 
+      ----  -----------                                                  Complot 
+        2   INPUT LINE                                                   Complot 
+        9   MT DEFINITIONS.                                              Complot 
+       10   FIRST ENDF/B FORMATTED EVALUATION (STANDARD).                Complot 
+       11   SECOND ENDF/B FORMATTED EVALUATION.                          Complot 
+       17   SOFTWARE CHARACTERS.                                         Complot 
+       18   SOFTWARE SYMBOLS AND LINE TYPES                              Complot 
+                                                                         Complot 
+      OUTPUT UNITS                                                       Complot 
+      ------------                                                       Complot 
+      UNIT  DESCRIPTION                                                  Complot 
+      ----  -----------                                                  Complot 
+        3   NORMAL OUTPUT REPORT.                                        Complot 
+       16   PLOTTER UNIT                                                 Complot 
+                                                                         Complot 
+      SCRATCH UNITS                                                      Complot 
+      -------------                                                      Complot 
+      UNIT  DESCRIPTION                                                  Complot 
+      ----  -----------                                                  Complot 
+       12   SCRATCH UNIT FOR FIRST EVALUATION                            Complot 
+       13   SCRATCH UNIT FOR SECOND EVALUATION                           Complot 
+       14   SCRATCH UNIT FOR RATIO (ONLY USED IF RATIOS REQUESTED).      Complot 
+                                                                         Complot 
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILIO1 AND FILIO2)    Complot 
+      ---------------------------------------------------------------    Complot 
+      UNIT  FILE NAME                                                    Complot 
+      ----  ----------                                                   Complot 
+        2   COMPLOT.INP                                                  Complot 
+        3   COMPLOT.LST                                                  Complot 
+        9   MT.DAT                                                       Complot 
+       10   ENDFB.IN1    (OR AS READ FROM INPUT)                         Complot 
+       11   ENDFB.IN2    (OR AS READ FROM INPUT)                         Complot 
+     12-14  (SCRATCH)                                                    Complot 
+       15   PLOT.CHR                                                     Complot 
+       16   (PLOTTER UNIT...USUALLY A DUMMY)                             Complot 
+                                                                         Complot 
+      INPUT PARAMETERS                                                   Complot 
+      ------------------------------------------------------------------ Complot 
+      LINE  COLUMNS  FORMAT  DESCRIPTION                                 Complot 
+      ----  -------  ------  -----------                                 Complot 
+        1     1-11    E11.4  LOWER X LIMIT OF PLOTTER                    Complot 
+             12-22    E11.4  UPPER X LIMIT OF PLOTTER                    Complot 
+             23-33    E11.4  LOWER Y LIMIT OF PLOTTER                    Complot 
+             34-44    E11.4  UPPER Y LIMIT OF PLOTTER                    Complot 
+             45-55     I11   NUMBER OF PLOTS PER FRAME IN X DIRECTION    Complot 
+             56-66     I11   NUMBER OF PLOTS PER FRAME IN Y DIRECTION    Complot 
+             67-70     F4.1  CHARACTER SIZE MULTIPLIER                   Complot 
+                             = 0 TO 1    - NORMAL CHARACTER SIZE         Complot 
+                             = OTHERWISE - CHARACTERS SCALED BY THIS     Complot 
+                                           FACTOR                        Complot 
+                                                                         Complot 
+                             PLOT ORIENTATION IS BASED ON THE UPPER X    Complot 
+                             LIMIT                                       Complot 
+                             = .GT.0 - X HORIZONTAL/Y VERTICAL           Complot 
+                             = .LT.0 - Y HORIZONTAL/X VERTICAL           Complot 
+                             AFTER TESTING THE UPPER X LIMIT WILL BE     Complot 
+                             SET TO ITS ABSOLUTE VALUE.                  Complot 
+        2     1-72     A72   FILENAME FOR FIRST ENDF/B DATA FILE         Complot 
+                             (LEAVE BLANK FOR ENDFB.IN1)                 Complot 
+        3     1-72     A72   FILENAME FOR SECOND ENDF/B DATA FILE        Complot 
+                             (LEAVE BLANK FOR ENDFB.IN2)                 Complot 
+        4     1-11     I11   RETRIEVAL MODE (0=MAT, 1=ZA)                Complot 
+             12-22     I11   GRID (SPEED) OPTION.                        Complot 
+                             = 0 - TICK MARKS ON BORDER                  Complot 
+                             = 1 - SOLID AT COARSE INTERVALS             Complot 
+                             = 2 - DASHED AT COARSE INTERVALS            Complot 
+                             = 3 - SOLID AT COARSE AND FINE INTERVALS    Complot 
+                             = 4 - DASHED AT COARSE AND FINE INTERVALS   Complot 
+                             = 5 - SOLID COARSE/DASHED FINE INTERVALS    Complot 
+             23-33     I11   SHOULD BORDER BE PLOTTED AROUND EACH PLOT   Complot 
+                             = 0 - NO                                    Complot 
+                             = 1 - YES                                   Complot 
+             34-44     I11   LINE THICKNESS                              Complot 
+                             = 0 TO  5 - LINES AND CHARACTERS            Complot 
+                             =-1 TO -5 - ONLY LINES                      Complot 
+             45-55     I11   OUTPUT MODE                                 Complot 
+                             =-1 - ONLY COMPARISON LISTING. NO PLOTS.    Complot 
+                             = 0 - CROSS SECTION OVER RATIO.             Complot 
+                             = 1 - CROSS SECTION OVER CROSS SECTION.     Complot 
+                             = 2 - TWO CROSS SECTIONS ON SAME PLOT.      Complot 
+                             = 3 - CROSS SECTION OVER CROSS SECTION OVER Complot 
+                                   RATIO.                                Complot 
+                             = 4 - TWO CROSS SECTIONS ON SAME PLOT OVER  Complot 
+                                   RATIO.                                Complot 
+             56-66     I11   STARTING PLOT NUMBER                        Complot 
+                             = 0     - DO NOT NUMBER PLOTS               Complot 
+                             = .GT.0 - NUMBER PLOTS IN LOWER LEFT HAND   Complot 
+                                       CORNER STARTING WITH INPUT NUMBER Complot 
+             67-70     I41   BACKGROUND COLOR                            Complot 
+                             = 0         = BLACK                         Complot 
+                             = OTHERWISE = WHITE                         Complot 
+         5    1-11    E11.4  ALLOWABLE FRACTIONAL DIFFERENCE. USED WHEN  Complot 
+                             PLOTTING RATIOS. ANY REACTION WHERE THE     Complot 
+                             TWO EVALUATIONS DIFFER BY MORE THAN THE     Complot 
+                             ALLOWABLE DIFFERENCE WILL BE PLOTTED. IF    Complot 
+                             ZERO IS INPUT THE STANDARD ALLOWABLE        Complot 
+                             DIFFERENCE OF 0.001 (0.1 PER-CENT) WILL BE  Complot 
+                             USED.                                       Complot 
+             12-22    E11.4  MAXIMUM ALLOWABLE RATIO. IF RATIOS ARE      Complot 
+                             PLOTTED THEY WILL BE IN THE RANGE RATMAX    Complot 
+                             TO 1/RATMAX. IF 0.0 IS INPUT THERE WILL     Complot 
+                             BE NO LIMIT ON THE RANGE OF THE RATIOS.     Complot 
+                             THIS OPTION MAY BE USED TO IGNORE LARGE     Complot 
+                             DIFFERENCES OVER VERY NARROW ENERGY RANGES  Complot 
+                             (WHICH MAY BE UNIMPORTANT) AND ALLOW ONE    Complot 
+                             TO SEE IMPORTANT, BUT SMALLER DIFFERENCES,  Complot 
+                             OVER EXTENDED ENERGY RANGES.                Complot 
+        6     1-40     40A1  IDENTIFICATION FOR UPPER EVALUATIONS        Complot 
+        7     1-40     40A1  IDENTIFICATION FOR LOWER EVALUATIONS        Complot 
+                             (IDENTIFICATIONS SHOULD BE LEFT ADJUSTED    Complot 
+                             TO START IN COLUMN 1).                      Complot 
+      8-N     1- 6      I6   LOWER MAT OR ZA LIMIT (SEE SELECTION MODE,  Complot 
+                             INPUT LINE 1, COLUMNS 1-11).                Complot 
+              7- 8      I2   LOWER MF LIMIT                              Complot 
+              9-11      I3   LOWER MT LIMIT                              Complot 
+             12-22    E11.4  LOWER ENERGY LIMIT                          Complot 
+             23-28      I6   UPPER MAT OR ZA LIMIT (SEE SELECTION MODE,  Complot 
+                             INPUT LINE 1, COLUMNS 1-11).                Complot 
+             29-30      I2   UPPER MF LIMIT                              Complot 
+             31-33      I3   UPPER MT LIMIT                              Complot 
+             34-44    E11.4  UPPER ENERGY LIMIT                          Complot 
+             45-55     I11   IDENTIFY EVALUATED DATA POINTS OPTION.      Complot 
+                             = 0 - DO NOT IDENTIFY DATA POINTS.          Complot 
+                             = 1 - IDENTIFY DATA POINTS (BY DRAWING A    Complot 
+                                   SMALL BOX AROUND EACH POINT).         Complot 
+             56-66     I11   INTERACTIVE INPUT FLAG                      Complot 
+                             = 0 - NO INTERACTIVE INPUT ALLOWED          Complot 
+                             = 1 - INTERACTIVE INPUT ALLOWED             Complot 
+                            *SETTING THIS OPTION =1 WILL TURN ON THE     Complot 
+                             MOUSE AFTER EACH PLOT AND ALLOW YOU TO      Complot 
+                             INTERACTIVELY SPECIFY PLOT LIMITS.          Complot 
+                            *IF YOU DO NOT WISH TO INTERACT WITH A PLOT  Complot 
+                             OR IF YOU HAVE NO INTERACTIVE CAPABILITY    Complot 
+                             THIS OPTION SHOULD BE SET = 0.              Complot 
+                                                                         Complot 
+                            *WARNING...DATA POINTS IDENTIFIED OPTION IS  Complot 
+                             NOT RECOMMENDED FOR PLOTS CONTAINING MANY   Complot 
+                             (I.E. THOUSANDS) OF DATA POINTS SINCE IT    Complot 
+                             WILL MERELY INCREASE THE RUNNING TIME OF    Complot 
+                             THE PROGRAM AND STILL NOT ALLOW ONE TO      Complot 
+                             ACCURATELY SEE DATA POINTS.                 Complot 
+                                                                         Complot 
+                            *UP TO 100 MAT OR ZA RANGES ARE ALLOWED.     Complot 
+                             THE LIST IS TERMINATED BY A BLANK LINE.     Complot 
+                             IF THE UPPER LIMIT IS LESS THAN THE LOWER   Complot 
+                             LIMIT IT WILL BE SET EQUAL TO THE LOWER     Complot 
+                             LIMIT. IF THE FIRST RANGE LINE IS BLANK     Complot 
+                             ALL DATA WILL BE RETRIEVED. IF THE UPPER    Complot 
+                             MT LIMIT IS ZERO IT WILL BE SET EQUAL TO    Complot 
+                             999 (NO LIMIT). IF THE UPPER ENERGY LIMIT   Complot 
+                             IS ZERO IT WILL BE INTREPRETED TO MEAN NO   Complot 
+                             LIMIT. IF THE FIRST RANGE LINE SPECIFIES    Complot 
+                             ZERO LOWER AND UPPER MAT OR ZA RANGE IT     Complot 
+                             WILL TERMINATE THE LIST BE RANGE LINES      Complot 
+                             (A SECOND BLANK LINE NEED NOT BE INPUT)     Complot 
+                             AND THE ENTIRE RANGE OF MATS WILL BE        Complot 
+                             COMPARED FOR THE SPECIFIED MT AND ENERGY    Complot 
+                             RANGES.                                     Complot 
+                                                                         Complot 
+    N+1-M                    EQUIVALENCES                                Complot 
+              1- 6      I6   MASTER ZA.                                  Complot 
+              7- 8      I2   MASTER MF.                                  Complot 
+              9-11      I3   MASTER MT.                                  Complot 
+             12-17      I6   EQUIVALENT ZA FROM SECOND FILE.             Complot 
+             18-19      I2   EQUIVALENT MF FROM SECOND FILE.             Complot 
+             20-22      I3   EQUIVALENT MT FROM SECOND FILE.             Complot 
+             23-33    E11.4  MULTIPLICATION FACTOR. ANY EQUATED ZA,MF,   Complot 
+                             MT DATA WILL BE MULTIPLIED BY THIS FACTOR.  Complot 
+                            *THIS OPTION MAY BE USED TO RE-NORMALIZE     Complot 
+                             THE SECOND CROSS SECTION OR IF COMPARING    Complot 
+                             ONE CONSTITUENT OF A MIXTURE TO THE MIXED   Complot 
+                             CROSS SECTION THIS MAY BE USED TO CONVERT   Complot 
+                             THE SECOND CROSS SECTION TO BARNS PER MIXED Complot 
+                             ATOM BY USING A MULTIPLICATION FACTOR WHICH Complot 
+                             IS EQUAL TO THE NUMBER OF ATOMS OF THE ONE  Complot 
+                             CONSTITUENT PER ATOM OF THE MIXTURE.        Complot 
+                             = 0.0 - ON INPUT WILL BE INTERPRETED AS 1.0 Complot 
+                             (WITH THIS CONVENTION THE USER NEED ONLY    Complot 
+                             INPUT MULTIPLICATION FACTORS IF THEY ARE    Complot 
+                             NOT 1.0).                                   Complot 
+                            *UP TO 100 MAT OR ZA EQUIVALENCES ARE        Complot 
+                             ALLOWED.                                    Complot 
+                            *THE LIST IS TERMINATED BY A BLANK LINE.     Complot 
+                            *A ZERO INPUT FIELD IMPLIES ALL. TO EQUATE   Complot 
+                             A GIVEN MT NUMBER TO ANOTHER MT NUMBER YOU  Complot 
+                             NEED MERELY SPECIFY ZA=0 ON INPUT.          Complot 
+                            *NOTE, IN ALL CASES THE TITLE AT TOP OF PLOT Complot 
+                             WILL ONLY INDENTIFY MASTER (ZA,MF,MT). THE  Complot 
+                             USER INPUT TITLES MUST BE USED TO IDENTIFY  Complot 
+                             THE SECOND REACTION (SEE, EXAMPLE INPUT 4   Complot 
+                             BELOW).                                     Complot 
+                                                                         Complot 
+      EXAMPLE DEFINITION OF PLOTTER                                      Complot 
+      -----------------------------                                      Complot 
+      2015 - WARNING - THE FOLLOWING DESCRIPTION IS OUT-OF-DATE.         Complot 
+      TODAY THE DIMENSIONS OF THE PLOTTER ARE IN INCHES.                 Complot 
+                                                                         Complot 
+      THE FIRST INPUT LINE DEFINES THE DIMENSIONS OF THE PLOTTER BEING   Complot 
+      USED IN ANY UNITS (INCHES, CENTIMETERS, MILLIMETERS, ANYTHING)     Complot 
+      WHICH APPLY TO THE PLOTTER. IN ADDITION THE FIRST LINE DEFINES     Complot 
+      HOW MANY PLOTS SHOULD APPEAR ON EACH FRAME. THE PLOTTING AREA      Complot 
+      DEFINED ON THE FIRST INPUT LINE MAY BE SUBDIVIDED INTO ANY NUMBER  Complot 
+      OF PLOTS IN THE X AND Y DIRECTION. FOR EXAMPLE, TO PRODUCE A       Complot 
+      SERIES OF FRAMES EACH CONTAINING 3 PLOTS IN THE X DIRECTION AND    Complot 
+      2 PLOTS IN THE Y DIRECTION (6 PLOTS PER FRAME) COLUMN 45-55 OF     Complot 
+      THE FIRST INPUT LINE SHOULD BE 3 AND COLUMNS 56-66 SHOULD BE 2.    Complot 
+                                                                         Complot 
+      IF THE LOCAL PLOTTER USES DIMENSIONS OF INCHES IN ORDER TO OBTAIN  Complot 
+      10 X 10 INCH FRAMES WITH 3 X 2 PLOTS PER FRAME THE FIRST INPUT     Complot 
+      LINE SHOULD BE,                                                    Complot 
+                                                                         Complot 
+        0.0       10.0      0.0     10.0              3          2       Complot 
+                                                                         Complot 
+      IF THE LOCAL PLOTTER USES DIMENSION OF MILLIMETERS THE SAME        Complot 
+      PHYSICAL SIZE PLOT MAY BE OBTAINED IF THE FIRST INPUT LINE IS,     Complot 
+                                                                         Complot 
+        0.0      254.0      0.0    254.0              3          2       Complot 
+                                                                         Complot 
+      FOR SIMPLICITY THE FOLLOWING EXAMPLE INPUTS WILL NOT DISCUSS THE   Complot 
+      PHYSICAL DIMENSIONS OF THE PLOTTER AND THE FIRST INPUT LINE WILL   Complot 
+      IN ALL CASES INDICATE 10 X 10 INCH PLOTS WITH ONLY 1 PLOT PER      Complot 
+      FRAME.                                                             Complot 
+                                                                         Complot 
+      IN THE FOLLOWING EXAMPLES IN ALL CASES THESE OPTIONS WILL BE USED, Complot 
+      1) DASHED GRID       - COLUMNS 12-22 OF SECOND INPUT LINE =  1     Complot 
+      2) NO BORDER         - COLUMNS 23-33 OF SECOND INPUT LINE =  0     Complot 
+      3) LINE THICKNESS    - COLUMNS 34-44 OF SECOND INPUT LINE = -2     Complot 
+      4) OUTPUT MODE       - COLUMNS 45-55 OF SECOND INPUT LINE =  3     Complot 
+      5) FIRST PLOT NUMBER - COLUMNS 56-66 OF SECOND INPUT LINE =  1     Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 1                                                    Complot 
+      ---------------                                                    Complot 
+      RETRIEVE MATS 1023, 1056 AND 1065 THROUGH 1072, MT = 1 AND 2       Complot 
+      (TOTAL AND ELASTIC) FROM THE FIRST INPUT FILE AND COMPARE TO       Complot 
+      ANY SECTION FROM THE SECOND FILE THAT HAS THE SAME ZA/MF/MT. ONLY  Complot 
+      COMPARE DATA OVER THE ENERGY RANGE 0.1 EV TO 1 KEV. IDENTIFY       Complot 
+      THE TWO SETS OF DATA AS ENDF/B-V AND ENDF/B-IV, RESPECTIVELY.      Complot 
+      ONLY PLOT THOSE REACTIONS WHICH DIFFER AT ONE OR MORE ENERGIES     Complot 
+      BY MORE THAN 1 PER-CENT (NOTE, 1 PER-CENT = 0.01 AS INPUT          Complot 
+      FRACTION). NO EQUIVALENT REACTIONS ARE SPECIFIED. FILERNAMES       Complot 
+      ARE STANDARD (THSE CAN EITHER BE EXPLICITLY INCLUDED, OR SIMPLY    Complot 
+      LEFT BLANK).                                                       Complot 
+                                                                         Complot 
+      THE FOLLOWING 12 INPUT LINES ARE REQUIRED.                         Complot 
+                                                                         Complot 
+         0.0       10.0      0.0     10.0              3          2      Complot 
+   ENDFB.IN1                                                             Complot 
+   ENDFB.IN2                                                             Complot 
+           0          1        0       -2              3          1      Complot 
+        0.01        0.0                                                  Complot 
+   ENDF/B-V DATA (STANDARD)                                              Complot 
+   ENDF/B-IV DATA                                                        Complot 
+   1023 3  1 0.1            3  2 1000.0                0                 Complot 
+   1056 3  1 0.1            3  2 1000.0                0                 Complot 
+   1065 3  1 0.1       1072 3  2 1000.0                0                 Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 2                                                    Complot 
+      ---------------                                                    Complot 
+      TO USE ALL OF THE SAME OPTIONS AS SPECIFIED IN EXAMPLE INPUT 1,    Complot 
+      EXCEPT TO RETRIEVE U-235, U-238 AND PU-239 THROUGH PU-242 THE      Complot 
+      FOLLOWING 12 INPUT LINES ARE REQUIRED.                             Complot 
+                                                                         Complot 
+         0.0       10.0      0.0     10.0              3          2      Complot 
+   ENDFB.IN1                                                             Complot 
+   ENDFB.IN2                                                             Complot 
+           1          1        0       -2              3          1      Complot 
+        0.01        0.0                                                  Complot 
+   ENDF/B-V DATA (STANDARD)                                              Complot 
+   ENDF/B-IV DATA                                                        Complot 
+  92235 3  1 0.1            3  2 1000.0                0                 Complot 
+  92238 3  1 0.1            3  2 1000.0                0                 Complot 
+  94239 3  1 0.1      94242 3  2 1000.0                0                 Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+      EXAMPLE INPUT 3                                                    Complot 
+      ---------------                                                    Complot 
+      TO USE ALL OF THE SAME OPTIONS AS SPECIFIED IN EXAMPLE INPUT 1,    Complot 
+      EXCEPT TO RETRIEVE AND COMPARE ALL MATS THE FOLLOWING 10 INPUT     Complot 
+      LINES ARE REQUIRED.                                                Complot 
+                                                                         Complot 
+        0.0       10.0      0.0     10.0              3          2       Complot 
+   ENDFB.IN1                                                             Complot 
+   ENDFB.IN2                                                             Complot 
+          0          1        0       -2              3          1       Complot 
+       0.01        0.0                                                   Complot 
+  ENDF/B-V DATA (STANDARD)                                               Complot 
+  ENDF/B-IV DATA                                                         Complot 
+      1 1  1 0.0       999999999 0.0                   0                 Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                         NOTE, ZERO LOWER AND UPPER      Complot 
+                                         MAT LIMITS INDICATES NO LIMIT.  Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 4                                                    Complot 
+      ---------------                                                    Complot 
+      RETRIEVE U-235 AND EQUATE THE FISSION CROSS SECTION (MT=18) ON     Complot 
+      THE MASTER FILE TO CAPTURE (MT=102) ON THE SECOND FILE. PLOT       Complot 
+      THE CAPTURE, FISSION AND CAPTURE TO FISSION RATIO OVER THE ENERGY  Complot 
+      RANGE 0.0253 EV TO 1 KEV. THE FOLLOWING 11 INPUT LINES ARE         Complot 
+      REQUIRED.                                                          Complot 
+                                                                         Complot 
+         0.0       10.0      0.0     10.0              3          2      Complot 
+   ENDFB.IN1                                                             Complot 
+   ENDFB.IN2                                                             Complot 
+           1          1        0       -2              3          1      Complot 
+        0.01        0.0                                                  Complot 
+   FISSION                                                               Complot 
+   CAPTURE                                                               Complot 
+  92235 3 18 0.0253   92235 3 18 1000.0                0                 Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+  92235 3 18 92235 3102                 (MULTIPLICATION OF 1.0 INFERRED) Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 5                                                    Complot 
+      ---------------                                                    Complot 
+      IN DIFFERENT VERSIONS OF THE ENDF/B FORMAT DIFFERENT MT NUMBERS    Complot 
+      ARE ASSIGNED TO THE SAME REACTION. FOR EXAMPLE, IN ENDF/B-V AND    Complot 
+      EARLIER VERSIONS OF ENDF/B THE PHOTOELECTRIC CROSS SECTION IS      Complot 
+      MT=602, WHILE IN ENDF/B-VI IT IS MT=522. IN ORDER TO COMPARE       Complot 
+      ASSUMING THAT THE MASTER IS ENDF/B-VI AND THE OTHER ENDF/B FILE    Complot 
+      IS ENDF/B-V (OR EARLIER) YOU MAY EQUATE MT=522 TO 602.             Complot 
+                                                                         Complot 
+      WHEN COMPARING PHOTOELECTRIC CROSS SECTIONS WE EXPECT THERE TO BE  Complot 
+      LARGE DIFFERENCES NEAR EDGES, SINCE IT IS UNLIKELY THAT TWO        Complot 
+      INDEPENDENT EVALUATIONS USE EXACTLY THE SAME EDGE ENERGIES. FROM   Complot 
+      A PRACTICAL VIEWPOINT THESE DIFFERENCES ARE NOT IMPORTANT IF THEY  Complot 
+      ONLY OCCUR OVER NARROW ENERGY RANGES NEAR ENERGIES. HOWEVER THESE  Complot 
+      LARGE DIFFERENCES MAY MAKE IT DIFFICULT TO SEE DIFFERENCES OVER    Complot 
+      OTHER ENERGY RANGES, WHICH MAY BE IMPORTANT. IN ORDER TO BE ABLE   Complot 
+      TO SEE IMPORTANT DIFFERENCES IN THE FOLLOWING COMPARISON WE WILL   Complot 
+      CONSTRAIN THE PLOTTED RATIO TO THE RANGE ABOUT 0.9 TO 1.1 IN       Complot 
+      ORDER TO BE ABLE TO SEE DIFFERENCES OF UP TO 10 PER-CENT. WE WILL  Complot 
+      DO THIS BY SPECIFYING A MAXIMUM RATIO OF 1.1, WHICH WILL IN TURN   Complot 
+      DEFINE A MINIMUM RATIO OF 1/1.1, OR ABOUT 0.9.                     Complot 
+                                                                         Complot 
+      IN ORDER TO COMPARE THE PHOTOELECTRIC CROSS SECTION FOR ALL        Complot 
+      MATERIALS THE FOLLOWING 11 INPUT LINES ARE REQUIRED.               Complot 
+                                                                         Complot 
+        0.0       10.0      0.0     10.0              3          2       Complot 
+   ENDFB.IN1                                                             Complot 
+   ENDFB.IN2                                                             Complot 
+          0          1        0       -2              3          1       Complot 
+       0.01        1.1                                                   Complot 
+  ENDF/B-VI                                                              Complot 
+  ENDF/B-V                                                               Complot 
+     023522           999923522                       0                  Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+     023522     023602                  (MULTIPLICATION OF 1.0 INFERRED) Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 6                                                    Complot 
+      ---------------                                                    Complot 
+      THE SAME EXAMPLE AS ABOVE, EXCEPT THAT DIFFERENT FILENAMES WILL    Complot 
+      BE USED TO READ THE DATA FROM A FILE TREE STRUCTURE. THE FOLLOWING Complot 
+      11 INPUT LINES ARE REQUIRED.                                       Complot 
+                                                                         Complot 
+        0.0       10.0      0.0     10.0              3          2       Complot 
+   /Evaluated/ENDFB6/PHOTON.IN                                           Complot 
+   /Evaluated/ENDFB5/PHOTON.IN                                           Complot 
+          0          1        0       -2              3          1       Complot 
+       0.01        1.1                                                   Complot 
+  ENDF/B-VI                                                              Complot 
+  ENDF/B-V                                                               Complot 
+     023522           999923522                       0                  Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+     023522     023602                  (MULTIPLICATION OF 1.0 INFERRED) Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                                                         Complot 
+      EXAMPLE INPUT 7                                                    Complot 
+      ---------------                                                    Complot 
+      THE OUTPUT FOR ALL OF THE ABOVE EXAMPLES ARE ORIENTED WITH X       Complot 
+      HORIZONTAL AND Y VERTICAL. TO CHANGE THE ORIENTATION OF THE PLOTS  Complot 
+      YOU NEED MERELY SPECIFY A NEGATIVE UPPER X LIMIT OF THE SIZE OF    Complot 
+      THE PLOTS ON THE FIRST INPUT LINE.                                 Complot 
+                                                                         Complot 
+      THE FOLLOWING EXAMPLE IS EXACTLY THE SAME AS THE ABOVE EXAMPLE,    Complot 
+      EXCEPT THAT THE ORIENTATION OF THE PLOTS HAS BEEN CHANGED. THE     Complot 
+      FOLLOWING 11 INPUT LINES ARE REQUIRED.                             Complot 
+                                                                         Complot 
+        0.0      -10.0      0.0     10.0              3          2       Complot 
+   /Evaluated/ENDFB6/PHOTON.IN                                           Complot 
+   /Evaluated/ENDFB5/PHOTON.IN                                           Complot 
+          0          1        0       -2              3          1       Complot 
+       0.01        1.1                                                   Complot 
+  ENDF/B-VI                                                              Complot 
+  ENDF/B-V                                                               Complot 
+     023522           999923522                       0                  Complot 
+                                        (TERMINATES REQUEST LIST)        Complot 
+     023522     023602                  (MULTIPLICATION OF 1.0 INFERRED) Complot 
+                                        (TERMINATES EQUIVALENCE LIST)    Complot 
+                                                                         Complot 
+ ===== PLOTTER/GRAPHICS TERMINAL INTERFACE ============================= Complot 
+                                                                         Complot 
+       NON-INTERACTIVE                                                   Complot 
+      ------------------------------------------------------------------ Complot 
+       THIS PROGRAM USES A SIMPLE CALCOMP LIKE INTERFACE INVOLVING       Complot 
+       ONLY 5 SUBROUTINES,                                               Complot 
+                                                                         Complot 
+       STARPLOT     - INITIALIZE PLOTTER                                 Complot 
+       NEXTPLOT     - CLEAR SCREEN FOR NEXT PLOT                         Complot 
+       ENDPLOTS     - TERMINATE PLOTTING                                 Complot 
+                                                                         Complot 
+       PLOT(X,Y,IPEN)        - DRAW OR MOVE FROM LAST LOCATION TO (X,Y), Complot 
+                               END OF CURRENT PLOT OR END OF PLOTTING.   Complot 
+             IPEN =   2 - DRAW                                           Complot 
+                  =   3 - MOVE                                           Complot 
+                                                                         Complot 
+       PEN(IPEN)             - SELECT COLOR.                             Complot 
+           IPEN- COLOR = 1 TO N (N = ANY POSITIVE INTEGER)               Complot 
+                                                                         Complot 
+       BOXCOLOR(X,Y,IFILL,IBORDER) - FILL A RECTANGLE WITH COLOR         Complot 
+                X,Y                = DEFINE THE CORNERS OF THE BOX       Complot 
+                    IFILL          = COLOR TO FILL BOX WITH              Complot 
+                          IBORDER  = COLOR OF BORDER OF BOX              Complot 
+                                                                         Complot 
+       INTERACTIVE                                                       Complot 
+      ------------------------------------------------------------------ Complot 
+       THIS PROGRAM INCLUDES AN INTERACTIVE INTERFACE FOR USE WITH A     Complot 
+       MOUSE. THE INTERFACE INVOLVES 2 SUBROUTINE,                       Complot 
+                                                                         Complot 
+       INTERACT(MYACTION)             - WHETHER OR NOT INTERACTION       Complot 
+                MYACTION              = 0 - NO (RETURNED BY INTERACT)    Complot 
+                                      = 1 - YES (RETURNED BY INTERACT)   Complot 
+                                                                         Complot 
+       MOUSEY(IWAY,XI,YI,IWAY1,IWAY2) - READ POSITION OF MOUSE           Complot 
+                              IWAY    = 0 - NO INPUT                     Complot 
+                                      = 1 - LEFT BUTTON                  Complot 
+                                      = 2 - MIDDLE BUTTON                Complot 
+                                      = 3 - RIGHT BUTTON                 Complot 
+                                      = 4 - KEYBOARD INPUT               Complot 
+                              XI      = X POSITION IN LOCAL UNITS        Complot 
+                              YI      = Y POSITION IN LOCAL UNITS        Complot 
+                              IWAY1   = MINIMUM ALLOWABLE IWAY           Complot 
+                              IWAY2   = MAXIMUM ALLOWABLE IWAY           Complot 
+                                                                         Complot 
+      AS USED BY THIS PROGRAM IWAY1   = 1                                Complot 
+                              IWAY2   = 4                                Complot 
+      KEYBOARD INPUT (IWAY=4) MEANS NO ZOOMED PLOT REQUESTED.            Complot 
+      MOUSE INPUT (IWAY=1 TO 3) MEANS A ZOOMED PLOT IS REQUESTED.        Complot 
+      MOUSEY WILL BE CALLED ONCE TO SEE IF A ZOOMED PLOT IS REQUESTED.   Complot 
+      IF IT IS XI WILL BE USED TO DEFINE ONE X (E.G., ENERGY) LIMIT OF   Complot 
+      THE ZOOMED PLOT. MOUSEY WILL THEN BE CALLED A SECOND TIME TO       Complot 
+      DEFINE A SECOND XI TO DEFINE THE OTHER X LIMIT OF THE ZOOMED       Complot 
+      PLOT.                                                              Complot 
+                                                                         Complot 
+      IF YOU DO NOT WANT INTERACTION YOU SHOULD INCLUDE THE FOLLOWING    Complot 
+      SUBROUTINES IN YOUR GRAPHIC INTERFACE,                             Complot 
+                                                                         Complot 
+      SUBROUTINE INTERACT(MYACTION)                                      Complot 
+      MYACTION=0                                                         Complot 
+      RETURN                                                             Complot 
+      END                                                                Complot 
+      SUBROUTINE MOUSEY(IWAY,XI,YI,IWAY1,IWAY2)                          Complot 
+      IWAY=4                                                             Complot 
+      XI=0.0                                                             Complot 
+      YI=0.0                                                             Complot 
+      RETURN                                                             Complot 
+      END                                                                Complot 
+                                                                         Complot 
+      ALTERNATIVE INTERACTIVE                                            Complot 
+      ------------------------------------------------------------------ Complot 
+      IF YOU DO NOT HAVE A MOUSE BUT WOULD STILL LIKE TO INTERACTIVE     Complot 
+      INPUT YOU CAN REPLACE SUBROUTINE ACTION IN THIS PROGRAM.           Complot 
+                                                                         Complot 
+      AS DISTRIBUTED SUBROUTINE ACTION USES A MOUSE TO DEFINE LOWER      Complot 
+      AND UPPER ENERGY (OR X) LIMITS WHICH ARE USED TO PRODUCE THE       Complot 
+      NEXT PLOT. A CALL TO ACTION IS OF THE FORM,                        Complot 
+                                                                         Complot 
+      CALL ACTION(KACTV,XACT1,XACT2)                                     Complot 
+                                                                         Complot 
+                  KACTV   = 0 - NO INTERACTIVE INPUT                     Complot 
+                          = 1 - INTERACTIVE INPUT                        Complot 
+                  XACT1   = LOWER ENERGY LIMIT                           Complot 
+                  XACT2   = UPPER ENERGY LIMIT                           Complot 
+                                                                         Complot 
+      IF THERE IS NO INTERACTIVE INPUT THE PROGRAM WILL PROCEED TO THE   Complot 
+      NEXT PLOT REQUESTED BY NON-INTERACTIVE INPUT.                      Complot 
+                                                                         Complot 
+      IF THERE IS INTERACTIVE INPUT THE PROGRAM WILL USE XACT1 AND       Complot 
+      XACT2 TO DEFINE THE ENERGY LIMITS OF THE NEXT PLOT USING THE       Complot 
+      SAME DATA AS APPEARED ON THE LAST PLOT. AS WITH NON-INTERACTIVE    Complot 
+      INPUT, IF YOU SELECT AN ENERGY RANGE WHERE THE MAXIMUM DIFFERENCE  Complot 
+      IS LESS THAN THAT SPECIFIED BY INPUT NO PLOT WILL BE PRODUCED      Complot 
+      AND THE CODE WILL PROCEED TO THE NEXT PLOT REQUESTED BY            Complot 
+      NON-INTERACTIVE INPUT.                                             Complot 
+                                                                         Complot 
+      YOU CAN REPLACE SUBROUTINE ACTION FOLLOWING THE ABOVE CONVENTIONS  Complot 
+      TO ALLOW INTERACTION VIA DIRECT READ OF X LIMITS, LIGHTPEN OR      Complot 
+      WHATEVER FACILITIES YOU HAVE AVAILABLE.                            Complot 
+                                                                         Complot 
+      INTERFACING                                                        Complot 
+      ------------------------------------------------------------------ Complot 
+      IN ORDER TO INTERFACE THIS PROGRAM FOR USE ON ANY PLOTTER WHICH    Complot 
+      DOES NOT USE THE ABOVE CONVENTIONS IT IS MERELY NECESSARY FOR THE  Complot 
+      THE USER TO WRITE 5 SUBROUTINES DESCRIBED ABOVE AND TO THEN CALL   Complot 
+      THE LOCAL EQUIVALENT ROUTINES.                                     Complot 
+                                                                         Complot 
+      COLOR PLOTS                                                        Complot 
+      ------------------------------------------------------------------ Complot 
+      TO SELECT PLOTTING COLORS SUBROUTINE PEN (DESCRIBED ABOVE) IS USED Complot 
+      TO SELECT ONE OF THE AVAILABLE COLORS. WHEN RUNNING ON A MAINFRAME Complot 
+      USING AN IBM GRAPHICS TERMINAL OR ON AN IBM-PC USING A HEWLETT-    Complot 
+      PACKARD PLOTTER THE GRAPHICS INTERFACE (DESCRIBED ABOVE) WILL      Complot 
+      PRODUCE COLOR PLOTS.                                               Complot 
+                                                                         Complot 
+      BLACK AND WHITE PLOTS                                              Complot 
+      ------------------------------------------------------------------ Complot 
+      WHEN PRODUCING BLACK AND WHITE HARDCOPY ON A MAINFRAME THE USER    Complot 
+      SHOULD ADD A DUMMY SUBROUTINE PEN TO THE END OF THE PROGRAM TO     Complot 
+      IGNORE ATTEMPTS TO CHANGE COLOR. ADD THE FOLLOWING SUBROUTINE,     Complot 
+                                                                         Complot 
+      SUBROUTINE PEN(IPEN)                                               Complot 
+      RETURN                                                             Complot 
+      END                                                                Complot 
+                                                                         Complot 
+      CHARACTER SET                                                      Complot 
+      ------------------------------------------------------------------ Complot 
+      THIS PROGRAM USES COMPUTER AND PLOTTER DEVICE INDEPENDENT SOFTWARE Complot 
+      CHARACTERS. THIS PROGRAM COMES WITH A FILE THAT DEFINES THE PEN    Complot 
+      STROKES REQUIRED TO DRAW ALL CHARACTERS ON AN IBM KEYBOARD (UPPER  Complot 
+      AND LOWER CASE CHARACTERS, NUMBERS, ETC.) PLUS AN ALTERNATE SET OF Complot 
+      ALL UPPER AND LOWER CASE GREEK CHARACTERS AND ADDITIONAL SPECIAL   Complot 
+      SYMBOLS.                                                           Complot 
+                                                                         Complot 
+      THE SOFTWARE CHARACTER TABLE CONTAINS X AND Y AND PEN POSITIONS TO Complot 
+      DRAW EACH CHARACTER. IF YOU WISH TO DRAW ANY ADDITIONAL CHARACTERS Complot 
+      OR TO MODIFY THE FONT OF THE EXISTING CHARACTERS YOU NEED ONLY     Complot 
+      MODIFY THIS TABLE.                                                 Complot 
+                                                                         Complot 
+      CONTROL CHARACTERS                                                 Complot 
+      ------------------------------------------------------------------ Complot 
+      IN THE SOFTWARE CHARACTER TABLE ALL CHARACTERS TO BE PLOTTED WILL  Complot 
+      HAVE PEN POSITION = 2 (DRAW) OR = 3 (MOVE). IN ADDITION THE TABLE  Complot 
+      CURRENTLY CONTAINS 4 CONTROL CHARACTERS,                           Complot 
+                                                                         Complot 
+      PEN POSITION = 0                                                   Complot 
+      ----------------                                                   Complot 
+      SHIFT THE NEXT PRINTED CHARACTER BY X AND Y. 3 CONTROL CHARACTERS  Complot 
+      ARE PRESENTLY INCLUDED IN THE SOFTWARE CHARACTER TABLE TO ALLOW    Complot 
+      SHIFTING.                                                          Complot 
+                                                                         Complot 
+      {   = SHIFT UP (FOR SUPERSCRIPTS..............X= 0.0, Y= 0.5)      Complot 
+      }   = SHIFT DOWN (FOR SUBSCRIPTS..............X= 0.0, Y=-0.5)      Complot 
+      \   = SHIFT LEFT 1 CHARACTER (FOR BACKSPACE...X=-1.0, Y= 0.0)      Complot 
+                                                                         Complot 
+      PEN POSITION =-1                                                   Complot 
+      ----------------                                                   Complot 
+      SELECT THE NEXT PRINTED CHARACTER FROM THE ALTERNATE CHARACTER     Complot 
+      SET. AT PRESENT THIS CONTROL CHARACTER IS,                         Complot 
+                                                                         Complot 
+      ]   = SWITCH TO ALTERNATE CHARACTER SET                            Complot 
+                                                                         Complot 
+      THESE 4 CONTROL CHARACTERS ARE ONLY DEFINED BY THE VALUE OF THE    Complot 
+      PEN POSITION IN THE SOFTWARE CHARACTER TABLE (I.E., THEY ARE NOT   Complot 
+      HARD WIRED INTO THIS PROGRAM). AS SUCH BY MODIFYING THE SOFTWARE   Complot 
+      CHARACTER TABLE THE USER HAS THE OPTION OF DEFINING ANY CONTROL    Complot 
+      CHARACTERS TO MEET SPECIFIC NEEDS.                                 Complot 
+                                                                         Complot 
+      THESE CHARACTERS MAY BE USED IN CHARACTER STRINGS TO PRODUCE       Complot 
+      SPECIAL EFFECTS. FOR EXAMPLE, TO PLOT SUBSCRIPT 5, B, SUPERSCRIPT  Complot 
+      10 USE THE STRING,                                                 Complot 
+                                                                         Complot 
+      }5B{1{0                                                            Complot 
+                                                                         Complot 
+      TO PLOT B, SUBSCRIPT 5 AND SUPERSCRIPT 10 WITH THE 5 DIRECTLY      Complot 
+      BELOW THE 1 OF THE 10 WE CAN USE THE BACKSPACE CHARACTER TO        Complot 
+      POSITION THE 1 DIRECTLY ABOVE THE 5 USING THE STRING,              Complot 
+                                                                         Complot 
+      B}5\{1{0                                                           Complot 
+                                                                         Complot 
+      TO PLOT UPPER CASE GREEK GAMMA FOLLOWED BY THE WORD TOTAL (I.E.,   Complot 
+      RESONANCE TOTAL WIDTH) USE THE STRING.                             Complot 
+                                                                         Complot 
+      ]G TOTAL                                                           Complot 
+                                                                         Complot 
+      NOTE, WHEN THESE CONTROL CHARACTERS ARE USED THEY ONLY EFFECT THE  Complot 
+      NEXT 1 PRINTED CHARACTER (SEE, ABOVE EXAMPLE OF PLOTTING SUPER-    Complot 
+      SCRIPT 10 WHERE THE SHIFT UP CONTROL CHARACTER WAS USED BEFORE THE Complot 
+      1 AND THEN AGAIN BEFORE THE 0 AND THE BACKSPACE AND SHIFT UP       Complot 
+      CONTROL CHARACTERS WERE USED IN COMBINATION).                      Complot 
+                                                                         Complot 
+      IF THESE 4 CONTROL CHARACTERS ARE NOT AVAILABLE ON YOUR COMPUTER   Complot 
+      YOU CAN MODIFY THE SOFTWARE CHARACTER TABLE TO USE ANY OTHER 4     Complot 
+      CHARACTERS THAT YOU DO NOT NORMALLY USE IN CHARACTER STRINGS (FOR  Complot 
+      DETAILS SEE THE SOFTWARE CHARACTER TABLE).                         Complot 
+                                                                         Complot 
+      STANDARD/ALTERNATE CHARACTER SETS                                  Complot 
+      ------------------------------------------------------------------ Complot 
+      THE SOFTWARE CHARACTER TABLE CONTAINS 2 SETS OF CHARACTERS WHICH   Complot 
+      ARE A STANDARD SET (ALL CHARACTERS ON AN IBM KEYBOARD) AND AN      Complot 
+      ALTERNATE SET (UPPER AND LOWER CASE GREEK CHARACTERS AND SPECIAL   Complot 
+      CHARACTERS). TO DRAW A CHARACTER FROM THE ALTERNATE CHARACTER SET  Complot 
+      PUT A RIGHT BRACKET CHARACTER (]) BEFORE A CHARACTER (SEE THE      Complot 
+      ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS  Complot 
+      CONTROL CHARACTER WILL ONLY EFFECT THE NEXT 1 PLOTTED CHARACTER.   Complot 
+                                                                         Complot 
+      SUB AND SUPER SCRIPTS                                              Complot 
+      ------------------------------------------------------------------ Complot 
+      TO DRAW SUBSCRIPT PRECEED A CHARACTER BY }. TO DRAW SUPERSCRIPT    Complot 
+      PRECEED A CHARACTER BY { (SEE THE ABOVE EXAMPLE AND THE SOFTWARE   Complot 
+      CHARACTER TABLE FOR DETAILS). THESE CONTROL CHARACTER WILL ONLY    Complot 
+      EFFECT THE NEXT 1 PLOTTED CHARACTER.                               Complot 
+                                                                         Complot 
+      BACKSPACING                                                        Complot 
+      ------------------------------------------------------------------ Complot 
+      TO BACKSPACE ONE CHARACTER PRECEED A CHARACTER BY \ (SEE, THE      Complot 
+      ABOVE EXAMPLE AND THE SOFTWARE CHARACTER TABLE FOR DETAILS). THIS  Complot 
+      CONTROL CHARACTER WILL PERFORM A TRUE BACKSPACE AND WILL EFFECT    Complot 
+      ALL FOLLOWING CHARACTERS IN THE SAME CHARACTER STRING.             Complot 
+                                                                         Complot 
+      PLOT DIMENSIONS                                                    Complot 
+      ---------------                                                    Complot 
+      ARE DEFINED BY USER INPUT. INTERNALLY THE PROGRAM WILL CREATE A    Complot 
+      PLOT IN APPROXIMATELY A4 OR 8-1/2 BY 11 INCH FORMAT. DURING        Complot 
+      OUTPUT THE PLOT IS TRANSFORMED TO THE UNITS (INCHES, CENTIMETERS,  Complot 
+      MILLIMETERS, WHATEVER) OF THE PLOTTER BEING USED AND OUTPUT.       Complot 
+                                                                         Complot 
+ ===== PLOTTER/GRAPHICS TERMINAL INTERFACE ============================= Complot 
+ ======================================================================= Complot 

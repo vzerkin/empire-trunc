@@ -1,0 +1,592 @@
+ ======================================================================= Linear  
+                                                                         Linear  
+      PROGRAM LINEAR                                                     Linear  
+      ==============                                                     Linear  
+      VERSION 74-1 (MAY 1974)                                            Linear  
+      VERSION 75-1 (APRIL 1975)                                          Linear  
+      VERSION 76-2 (OCTOBER 1976)                                        Linear  
+      VERSION 77-1 (JANUARY 1977)                                        Linear  
+      VERSION 78-1 (JULY 1978)                                           Linear  
+      VERSION 79-1 (JULY 1979) CDC-7600 AND CRAY-1 VERSION.              Linear  
+      VERSION 80-1 (MAY 1980) IBM, CDC AND CRAY VERSION.                 Linear  
+      VERSION 80-2 (DECEMBER 1980)                                       Linear  
+      VERSION 81-1 (MARCH 1981)                                          Linear  
+      VERSION 82-1 (JANUARY 1982) IMPROVED COMPUTER COMPATIBILITY.       Linear  
+      VERSION 83-1 (JANUARY 1983) *MAJOR RE-DESIGN.                      Linear  
+                                  *PAGE SIZE INCREASED - 1002 TO 3006.   Linear  
+                                  *ELIMINATED COMPUTER DEPENDENT CODING. Linear  
+                                  *NEW, MORE COMPATIBLE I/O UNIT NUMBER. Linear  
+                                  *ADDED OPTION TO KEEP ALL ORIGINAL     Linear  
+                                   ENERGY POINTS FROM EVALUATION.        Linear  
+                                  *ADDED STANDARD ALLOWABLE ERROR OPTION Linear  
+                                   (CURRENTLY 0.1 PER-CENT).             Linear  
+      VERSION 83-2 (OCTOBER 1983) IMPROVED BASED ON USER COMMENTS.       Linear  
+      VERSION 84-1 (APRIL 1984)   IMPROVED BASED ON USER COMMENTS.       Linear  
+      VERSION 84-2 (JUNE 1984)   *UPDATED FOR ENDF/B-VI FORMATS.         Linear  
+                                 *SPECIAL I/O ROUTINES TO GUARANTEE      Linear  
+                                  ACCURACY OF ENERGY.                    Linear  
+                                 *DOUBLE PRECISION TREATMENT OF ENERGY   Linear  
+                                  (REQUIRED FOR NARROW RESONANCES).      Linear  
+      VERSION 85-1 (AUGUST 1985) *FORTRAN-77/H VERSION                   Linear  
+      VERSION 86-1 (JANUARY 1986)*ENDF/B-VI FORMAT                       Linear  
+      VERSION 87-1 (JANUARY 1987)*DOUBLE PRECISION TREATMENT OF CROSS    Linear  
+                                  SECTION                                Linear  
+      VERSION 88-1 (JULY 1988)   *OPTION...INTERNALLY DEFINE ALL I/O     Linear  
+                                  FILE NAMES (SEE, SUBROUTINE FILEIO     Linear  
+                                  FOR DETAILS).                          Linear  
+                                 *IMPROVED BASED ON USER COMMENTS.       Linear  
+      VERSION 89-1 (JANUARY 1989)*PSYCHOANALYZED BY PROGRAM FREUD TO     Linear  
+                                  INSURE PROGRAM WILL NOT DO ANYTHING    Linear  
+                                  CRAZY.                                 Linear  
+                                 *UPDATED TO USE NEW PROGRAM CONVERT     Linear  
+                                  KEYWORDS.                              Linear  
+                                 *ADDED LIVERMORE CIVIC COMPILER         Linear  
+                                  CONVENTIONS.                           Linear  
+      VERSION 90-1 (JUNE 1990)   *EXTENDED TO LINEARIZE PHOTON           Linear  
+                                  INTERACTION DATA, MF=23 AND 27         Linear  
+                                 *ADDED FORTRAN SAVE OPTION              Linear  
+                                 *UPDATED BASED ON USER COMMENTS.        Linear  
+                                 *NEW MORE CONSISTENT ENERGY OUTPUT      Linear  
+                                  ROUTINE.                               Linear  
+                                 *WARNING...INPUT PARAMETER FORMAT       Linear  
+                                  HAS BEEN CHANGED...SEE DESCRIPTION     Linear  
+                                  BELOW.                                 Linear  
+      VERSION 91-1 (JULY 1991)   *ADDED INTERPOLATION LAW 6 - ONLY USED  Linear  
+                                  FOR CHARGED PARTICLE CROSS SECTIONS    Linear  
+                                  FOR COULOMB PENETRABILITIES.           Linear  
+      VERSION 92-1 (JANUARY 1992)*ADDED NU-BAR (TOTAL, DELAYED, PROMPT)  Linear  
+                                  POLYNOMIAL OR TABULATED ALL CONVERTED  Linear  
+                                  TO LINEARLY INTERPOLABLE               Linear  
+                                 *INCREASED PAGE SIZE FROM 3006 TO 5010  Linear  
+                                  POINTS.                                Linear  
+                                 *ALL ENERGIES INTERNALLY ROUNDED PRIOR  Linear  
+                                  TO CALCULATIONS.                       Linear  
+                                 *COMPLETELY CONSISTENT I/O AND ROUNDING Linear  
+                                  ROUTINES - TO MINIMIZE COMPUTER        Linear  
+                                  DEPENDENCE.                            Linear  
+      VERSION 92-2 (JULY 1992)   *CORRECTED CONVERSION OF NU-BAR FROM    Linear  
+                                  POLYNOMIAL TO TABULATED - COPY         Linear  
+                                  SPONTANEOUS NU-BAR (BY DEFINITION      Linear  
+                                  THE SPONTANEOUS NU-BAR IS NOT AN       Linear  
+                                  ENERGY DEPENDENT QUANTITY).            Linear  
+      VERSION 93-1 (MARCH 1993)  *UPDATED FOR USE WITH LAHEY COMPILER    Linear  
+                                  ON IBM-PCS.                            Linear  
+                                 *INCREASED PAGE SIZE FROM 5010 TO       Linear  
+                                  30000 POINTS                           Linear  
+      VERSION 94-1 (JANUARY 1994)*VARIABLE ENDF/B DATA FILENAMES         Linear  
+                                  TO ALLOW ACCESS TO FILE STRUCTURES     Linear  
+                                  (WARNING - INPUT PARAMETER FORMAT      Linear  
+                                  HAS BEEN CHANGED)                      Linear  
+                                 *CLOSE ALL FILES BEFORE TERMINATING     Linear  
+                                  (SEE, SUBROUTINE ENDIT)                Linear  
+      VERSION 96-1 (JANUARY 1996) *COMPLETE RE-WRITE                     Linear  
+                                  *IMPROVED COMPUTER INDEPENDENCE        Linear  
+                                  *ALL DOUBLE PRECISION                  Linear  
+                                  *ON SCREEN OUTPUT                      Linear  
+                                  *UNIFORM TREATMENT OF ENDF/B I/O       Linear  
+                                  *IMPROVED OUTPUT PRECISION             Linear  
+                                  *DEFINED SCRATCH FILE NAMES            Linear  
+                                  *ALWAYS INCLUDE THERMAL VALUE          Linear  
+                                  *INCREASED PAGE SIZE FROM 30000 TO     Linear  
+                                   60000 POINTS                          Linear  
+      VERSION 99-1 (MARCH 1999)   *CORRECTED CHARACTER TO FLOATING       Linear  
+                                   POINT READ FOR MORE DIGITS            Linear  
+                                  *UPDATED TEST FOR ENDF/B FORMAT        Linear  
+                                   VERSION BASED ON RECENT FORMAT CHANGE Linear  
+                                  *GENERAL IMPROVEMENTS BASED ON         Linear  
+                                   USER FEEDBACK                         Linear  
+      VERSION 99-2 (JUNE 1999)    *ASSUME ENDF/B-VI, NOT V, IF MISSING   Linear  
+                                   MF=1, MT-451.                         Linear  
+      VERS. 2000-1 (FEBRUARY 2000)*ADDED MF = 9 AND 10 LINEARIZATION     Linear  
+                                  *GENERAL IMPROVEMENTS BASED ON         Linear  
+                                   USER FEEDBACK                         Linear  
+      VERS. 2002-1 (MAY 2002)     *OPTIONAL INPUT PARAMETERS             Linear  
+      VERS. 2004-1 (JAN. 2004)    *GENERAL UPDATE BASED ON USER FEEDBACK Linear  
+      VERS. 2005-1 (JAN. 2005)    *ALWAYS KEEP ORIGINAL TABULATED        Linear  
+                                   NU-BAR POINTS.                        Linear  
+      VERS. 2006-1 (FEB. 2006)    *CORRECTED INT=6 NEAR THRESHOLD        Linear  
+                                  *NO SUBDIVIDE BELOW MINIMUM XCMIN      Linear  
+      VERS. 2007-1 (JAN. 2007)    *CHECKED AGAINST ALL ENDF/B-VII.       Linear  
+                                  *INCREASED PAGE SIZE FROM 60,000 TO    Linear  
+                                   600,000 POINTS                        Linear  
+      VERS. 2007-2 (DEC. 2007)    *72 CHARACTER FILE NAMES.              Linear  
+      VERS. 2010-1 (Apr. 2010)    *Skipped leading cross section = 0     Linear  
+                                   up to effective start, unless keeping Linear  
+                                   ALL original energy points.           Linear  
+                                  *Replaced ETHRES by ESTART - it is     Linear  
+                                   not a threshold - just a minimum      Linear  
+                                   energy - if a section starts above    Linear  
+                                   this energy with a positive cross     Linear  
+                                   section, an additional point will     Linear  
+                                   inserted with cross section = 0.      Linear  
+      VERS. 2012-1 (Aug. 2012)    *Minor Updates based on User Feedback. Linear  
+                                  *Added CODENAME                        Linear  
+                                  *32 and 64 bit Compatible              Linear  
+                                  *Added ERROR stops.                    Linear  
+      VERS. 2012-2 (Nov. 2012)    *Never thin nu-bar.                    Linear  
+      VERS. 2013-1 (Nov. 2013)    *Extended OUT9.                        Linear  
+      VERS. 2015-1 (Jan. 2015)    *Allow Imaginary Anomolous Scattering  Linear  
+                                   Factor to be Negative (MF/MT=27/506). Linear  
+                                  *Replaced ALL 3 way IF Statements.     Linear  
+      VERS. 2016-1 (June 2016)    *Cosmetic changes based on FREUD       Linear  
+                                   psychoanalysis.                       Linear  
+      VERS. 2017-1 (May  2017)    *Updated based on user feedback.       Linear  
+                                  *Inceased page size to 3,000,000.      Linear  
+                                  *All floating input parameters changed Linear  
+                                   to character input + IN9 conversion.  Linear  
+                                                                         Linear  
+      OWNED, MAINTAINED AND DISTRIBUTED BY                               Linear  
+      ------------------------------------                               Linear  
+      THE NUCLEAR DATA SECTION                                           Linear  
+      INTERNATIONAL ATOMIC ENERGY AGENCY                                 Linear  
+      P.O. BOX 100                                                       Linear  
+      A-1400, VIENNA, AUSTRIA                                            Linear  
+      EUROPE                                                             Linear  
+                                                                         Linear  
+      ORIGINALLY WRITTEN BY                                              Linear  
+      ------------------------------------                               Linear  
+      Dermott E. Cullen                                                  Linear  
+                                                                         Linear  
+      PRESENT CONTACT INFORMATION                                        Linear  
+      ---------------------------                                        Linear  
+      Dermott E. Cullen                                                  Linear  
+      1466 Hudson Way                                                    Linear  
+      Livermore, CA 94550                                                Linear  
+      U.S.A.                                                             Linear  
+      Telephone  925-443-1911                                            Linear  
+      E. Mail    RedCullen1@Comcast.net                                  Linear  
+      Website    RedCullen1.net/HOMEPAGE.NEW                             Linear  
+                                                                         Linear  
+      AUTHORS MESSAGE                                                    Linear  
+      ---------------                                                    Linear  
+      THE REPORT DESCRIBED ABOVE IS THE LATEST PUBLISHED DOCUMENTATION   Linear  
+      FOR THIS PROGRAM. HOWEVER, THE COMMENTS BELOW SHOULD BE CONSIDERED Linear  
+      THE LATEST DOCUMENTATION INCLUDING ALL RECENT IMPROVEMENTS. PLEASE Linear  
+      READ ALL OF THESE COMMENTS BEFORE IMPLEMENTATION.                  Linear  
+                                                                         Linear  
+      AT THE PRESENT TIME WE ARE ATTEMPTING TO DEVELOP A SET OF COMPUTER Linear  
+      INDEPENDENT PROGRAMS THAT CAN EASILY BE IMPLEMENTED ON ANY ONE     Linear  
+      OF A WIDE VARIETY OF COMPUTERS. IN ORDER TO ASSIST IN THIS PROJECT Linear  
+      IT WOULD BE APPECIATED IF YOU WOULD NOTIFY THE AUTHOR OF ANY       Linear  
+      COMPILER DIAGNOSTICS, OPERATING PROBLEMS OR SUGGESTIONS ON HOW TO  Linear  
+      IMPROVE THIS PROGRAM. HOPEFULLY, IN THIS WAY FUTURE VERSIONS OF    Linear  
+      THIS PROGRAM WILL BE COMPLETELY COMPATIBLE FOR USE ON YOUR         Linear  
+      COMPUTER.                                                          Linear  
+                                                                         Linear  
+      PURPOSE                                                            Linear  
+      -------                                                            Linear  
+      THIS PROGRAM IS DESIGNED TO CONVERT ENDF/B FILE 3, 23 AND 27 DATA  Linear  
+      TO LINEAR-LINEAR INTERPOLABLE FORM. ANY SECTION THAT IS ALREADY    Linear  
+      LINEAR-LINEAR INTERPOLABLE WILL BE THINNED.                        Linear  
+                                                                         Linear  
+      IN THE FOLLOWING DISCUSSION FOR SIMPLICITY THE ENDF/B TERMINOLOGY  Linear  
+      ---ENDF/B TAPE---WILL BE USED. IN FACT THE ACTUAL MEDIUM MAY BE    Linear  
+      TAPE, CARDS, DISK OR ANY OTHER MEDIUM.                             Linear  
+                                                                         Linear  
+      ENDF/B FORMAT                                                      Linear  
+      -------------                                                      Linear  
+      THIS PROGRAM ONLY USES THE ENDF/B BCD OR CARD IMAGE FORMAT (AS     Linear  
+      OPPOSED TO THE BINARY FORMAT) AND CAN HANDLE DATA IN ANY VERSION   Linear  
+      OF THE ENDF/B FORMAT (I.E., ENDF/B-I, II,III, IV, V OR VI FORMAT). Linear  
+                                                                         Linear  
+      IT IS ASSUMED THAT THE DATA IS CORRECTLY CODED IN THE ENDF/B       Linear  
+      FORMAT AND NO ERROR CHECKING IS PERFORMED. IN PARTICULAR IT IS     Linear  
+      ASSUMED THAT THE MAT, MF AND MT ON EACH LINE IS CORRECT. SEQUENCE  Linear  
+      NUMBERS (COLUMNS 76-80) ARE IGNORED ON INPUT, BUT WILL BE          Linear  
+      CORRECTLY OUTPUT ON ALL LINES. THE FORMAT OF SECTION MF=1, MT=451  Linear  
+      AND ALL SECTIONS OF MF=3 MUST BE CORRECT. THE PROGRAM COPIES ALL   Linear  
+      OTHER SECTION OF DATA AS HOLLERITH AND AS SUCH IS INSENSITIVE TO   Linear  
+      THE CORRECTNESS OR INCORRECTNESS OF ALL OTHER SECTIONS.            Linear  
+                                                                         Linear  
+      OUTPUT FORMAT                                                      Linear  
+      -------------                                                      Linear  
+      IN THIS VERSION OF LINEAR ALL ENERGIES WILL BE OUTPUT IN           Linear  
+      F (INSTEAD OF E) FORMAT IN ORDER TO ALLOW ENERGIES TO BE WRITTEN   Linear  
+      WITH UP TO 9 DIGITS OF ACCURACY. IN PREVIOUS VERSIONS THIS WAS AN  Linear  
+      OUTPUT OPTION. HOWEVER USE OF THIS OPTION TO COMPARE THE RESULTS   Linear  
+      OF ENERGIES WRITTEN IN THE NORMAL ENDF/B CONVENTION OF 6 DIGITS    Linear  
+      TO THE 9 DIGIT OUTPUT FROM THIS PROGRAM DEMONSTRATED THAT FAILURE  Linear  
+      TO USE THE 9 DIGIT OUTPUT CAN LEAD TO LARGE ERRORS IN THE DATA     Linear  
+      DUE TO TRUNCATION OF ENERGIES TO 6 DIGITS DURING OUTPUT.           Linear  
+                                                                         Linear  
+      CONTENTS OF OUTPUT                                                 Linear  
+      ------------------                                                 Linear  
+      ENTIRE EVALUATIONS ARE OUTPUT, NOT JUST THE LINEARIZED DATA        Linear  
+      CROSS SECTIONS, E.G. ANGULAR AND ENERGY DISTRIBUTIONS ARE ALSO     Linear  
+      INCLUDED.                                                          Linear  
+                                                                         Linear  
+      DOCUMENTATION                                                      Linear  
+      -------------                                                      Linear  
+      THE FACT THAT THIS PROGRAM HAS OPERATED ON THE DATA IS DOCUMENTED  Linear  
+      BY THE ADDITION OF 3 COMMENT LINES AT THE END OF EACH HOLLERITH    Linear  
+      SECTION IN THE FORM                                                Linear  
+                                                                         Linear  
+      ***************** PROGRAM LINEAR (2017-1) ****************         Linear  
+      FOR ALL DATA GREATER THAN 1.00000-10 IN ABSOLUTE VALUE             Linear  
+      DATA LINEARIZED TO WITHIN AN ACCURACY OF  0.1  PER-CENT            Linear  
+                                                                         Linear  
+      THE ORDER OF SIMILAR COMMENTS (FROM RECENT, SIGMA1 AND GROUPIE)    Linear  
+      REPRESENTS A COMPLETE HISTORY OF ALL OPERATIONS PERFORMED ON       Linear  
+      THE DATA BY THESE PROGRAMS.                                        Linear  
+                                                                         Linear  
+      THESE COMMENT LINES ARE ONLY ADDED TO EXISTING HOLLERITH SECTIONS, Linear  
+      I.E., THIS PROGRAM WILL NOT CREATE A HOLLERITH SECTION. THE FORMAT Linear  
+      OF THE HOLLERITH SECTION IN ENDF/B-V DIFFERS FROM THE THAT OF      Linear  
+      EARLIER VERSIONS OF ENDF/B. BY READING AN EXISTING MF=1, MT=451    Linear  
+      IT IS POSSIBLE FOR THIS PROGRAM TO DETERMINE WHICH VERSION OF      Linear  
+      THE ENDF/B FORMAT THE DATA IS IN. WITHOUT HAVING A SECTION OF      Linear  
+      MF=1, MT=451 PRESENT IT IS IMPOSSIBLE FOR THIS PROGRAM TO          Linear  
+      DETERMINE WHICH VERSION OF THE ENDF/B FORMAT THE DATA IS IN, AND   Linear  
+      AS SUCH IT IS IMPOSSIBLE FOR THE PROGRAM TO DETERMINE WHAT FORMAT  Linear  
+      SHOULD BE USED TO CREATE A HOLLERITH SECTION.                      Linear  
+                                                                         Linear  
+      REACTION INDEX                                                     Linear  
+      --------------                                                     Linear  
+      THIS PROGRAM DOES NOT USE THE REACTION INDEX WHICH IS GIVEN IN     Linear  
+      SECTION MF=1, MT=451 OF EACH EVALUATION.                           Linear  
+                                                                         Linear  
+      THIS PROGRAM DOES NOT UPDATE THE REACTION INDEX IN MF=1, MT=451.   Linear  
+      THIS CONVENTION HAS BEEN ADOPTED BECAUSE MOST USERS DO NOT         Linear  
+      REQUIRE A CORRECT REACTION INDEX FOR THEIR APPLICATIONS AND IT WAS Linear  
+      NOT CONSIDERED WORTHWHILE TO INCLUDE THE OVERHEAD OF CONSTRUCTING  Linear  
+      A CORRECT REACTION INDEX IN THIS PROGRAM. HOWEVER, IF YOU REQUIRE  Linear  
+      A REACTION INDEX FOR YOUR APPLICATIONS, AFTER RUNNING THIS PROGRAM Linear  
+      YOU MAY USE PROGRAM DICTIN TO CREATE A CORRECT REACTION INDEX.     Linear  
+                                                                         Linear  
+      SECTION SIZE                                                       Linear  
+      ------------                                                       Linear  
+      SINCE THIS PROGRAM USES A LOGICAL PAGING SYSTEM THERE IS NO LIMIT  Linear  
+      TO THE NUMBER OF POINTS IN ANY SECTION, E.G., THE TOTAL CROSS      Linear  
+      SECTION MAY BE REPRESENTED BY 200,000 DATA POINTS.                 Linear  
+                                                                         Linear  
+      FOR ANY LINEARIZED SECTION THAT CONTAINS 60000 OR FEWER POINTS     Linear  
+      THE ENTIRE OPERATION WILL BE PERFORMED IN CORE AND THE LINEARIZED  Linear  
+      DATA WILL BE OUTPUT DIRECTLY TO THE ENDF/B FORMAT. FOR ANY SECTION Linear  
+      THAT CONTAINS MORE POINTS THE DATA WILL BE LINEARIZED A PAGE AT A  Linear  
+      TIME (1 PAGE = 60000 POINTS) AND OUTPUT TO SCRATCH. AFTER THE      Linear  
+      ENTIRE SECTION HAS BEEN LINEARIZED THE DATA WILL BE READ BACK FROM Linear  
+      SCRATCH AND OUTPUT TO THE ENDF/B FORMAT.                           Linear  
+                                                                         Linear  
+      SELECTION OF DATA                                                  Linear  
+      -----------------                                                  Linear  
+      THE PROGRAM SELECTS DATA TO BE LINEARIZED BASED EITHER ON EITHER   Linear  
+      MAT (ENDF/B MAT NO.) OR ZA AS WELL AS MF AND MT NUMBERS. THIS      Linear  
+      PROGRAM ALLOWS UP TO 100 MAT/MF/MT OR ZA/MF/MT RANGES TO BE        Linear  
+      SPECIFIED BY INPUT PARAMETERS. THE PROGRAM WILL ASSUME THAT THE    Linear  
+      ENDF/B TAPE IS IN MAT ORDER, REGARDLESS OF THE CRITERIA USED       Linear  
+      TO RETRIEVE MATERIALS. IF RETRIEVAL IS BY MAT RANGE THE PROGRAM    Linear  
+      WILL TERMINATE WHEN A MAT IS FOUND THAT IS ABOVE ALL REQUESTED     Linear  
+      MAT RANGES. IF RETRIEVAL IS BY ZA RANGE THE PROGRAM WILL SEARCH    Linear  
+      THE ENTIRE ENDF/B TAPE.                                            Linear  
+                                                                         Linear  
+      PROGRAM OPERATION                                                  Linear  
+      -----------------                                                  Linear  
+      EACH SECTION OF DATA IS CONSIDERED SEPARATELY. EACH SECTION OF     Linear  
+      ENDF/B DATA TO LINEARIZE IS REPRESENTED BY A TABLE OF ENERGY       Linear  
+      VS. CROSS SECTION AND ANY ONE OF FIVE ALLOWABLE INTERPOLATION LAWS Linear  
+      BETWEEN ANY TWO TABULATED POINTS. THIS PROGRAM WILL REPLACE EACH   Linear  
+      SECTION OF DATA CROSS SECTIONS BY A NEW TABLE OF ENERGY VS.        Linear  
+      CROSS SECTION IN WHICH THE INTERPOLATION LAW IS ALWAYS LINEAR IN   Linear  
+      ENERGY AND CROSS SECTION BETWEEN ANY TWO TABULATED POINTS.         Linear  
+                                                                         Linear  
+      DATA IS READ AND LINEARIZED A PAGE AT A TIME (ONE PAGE CONTAINS    Linear  
+      60000 DATA POINTS). IF THE FINAL LINEARIZED SECTION CONTAINS TWO   Linear  
+      PAGES OR LESS, DATA POINTS IT WILL BE ENTIRELY CORE RESIDENT       Linear  
+      AFTER IT HAS BEEN LINEARIZED AND WILL BE WRITTEN DIRECTLY FROM     Linear  
+      CORE TO THE OUTPUT TAPE. IF THE LINEARIZED SECTION IS LARGER THAN  Linear  
+      TWO PAGES, AFTER EACH PAGE IS LINEARIZED IT WILL BE WRITTEN TO     Linear  
+      SCRATCH. AFTER THE ENTIRE SECTION HAS BEEN LINEARIZED IT WILL      Linear  
+      BE READ BACK FROM SCRATCH, TWO PAGES AT A TIME, AND WRITTEN TO     Linear  
+      THE OUTPUT TAPE.                                                   Linear  
+                                                                         Linear  
+      KEEP EVALUATED DATA POINTS                                         Linear  
+      --------------------------                                         Linear  
+      SOMETIMES IT IS CONVENIENT TO KEEP ALL ENERGY POINTS WHICH WERE    Linear  
+      PRESENT IN THE ORIGINAL EVALUATION AND TO MERELY SUPPLEMENT THESE  Linear  
+      POINTS WITH ADDITIONAL ENERGY POINTS IN ORDER TO LINEARIZE THE     Linear  
+      CROSS SECTIONS. FOR EXAMPLE, IT IS OFTEN CONVENIENT TO KEEP THE    Linear  
+      THERMAL VALUE (AT 0.0253 EV) OR THE VALUE AT 14.1 MEV.             Linear  
+                                                                         Linear  
+      THE CURRENT VERSION OF THIS PROGRAM WILL ALLOW THE USER TO KEEP    Linear  
+      ALL ORIGINAL EVALUATED DATA POINTS BY SPECIFYING 1 IN COLUMNS      Linear  
+      34-44 OF THE FIRST INPUT LINE. THIS WILL TURN OFF THE BACKWARD     Linear  
+      THINNING (SEE UCRL-50400, VOL. 17, PART A FOR EXPLANATION) AND     Linear  
+      RESULT IN ALL ORIGINAL ENERGY POINTS BEING KEPT. CAUTION SHOULD    Linear  
+      BE EXERCISED IN USING THIS OPTION SINCE IT CAN RESULT IN A         Linear  
+      CONSIDERABLE INCREASE IN THE NUMBER OF DATA POINTS OUTPUT BY       Linear  
+      THIS CODE.                                                         Linear  
+                                                                         Linear  
+      FOR ALL USERS WHO ARE NOT INTERESTED IN THIS OPTIONS NO CHANGES    Linear  
+      ARE REQUIRED IN THE INPUT TO THIS PROGRAM, I. E. IF COLUMNS        Linear  
+      34-44 ARE BLANK (AS FOR ALL PREVIOUS VERSIONS OF THIS CODE) THE    Linear  
+      PROGRAM WILL OPERATE EXACTLY AS IT DID BEFORE.                     Linear  
+                                                                         Linear  
+      ALLOWABLE ERROR                                                    Linear  
+      ---------------                                                    Linear  
+      ALLOWABLE ERROR MUST ALWAYS BE SPECIFIED IN THE INPUT TO THIS      Linear  
+      PROGRAM AS A FRACTION, NOT A PER-CENT. FOR EXAMPLE, INPUT THE      Linear  
+      ALLOWABLE FRACTIONAL ERROR 0.001 IN ORDER TO OBTAIN DATA THAT IS   Linear  
+      ACCURATE TO WITHIN 0.1 PER-CENT.                                   Linear  
+                                                                         Linear  
+      THE CONVERSION OF THE DATA FROM THE GENERAL INTERPOLATION FORM TO  Linear  
+      LINARLY INTERPOLABLE FORM CANNOT BE PERFORMED EXACTLY. HOWEVER, IT Linear  
+      CAN BE PERFORMED TO VIRTUALLY ANY REQUIRED ACCURACY AND MOST       Linear  
+      IMPORTANTLY CAN BE PERFORMED TO A TOLERANCE THAT IS SMALL COMPARED Linear  
+      TO THE UNCERTAINTY IN THE CROSS SECTIONS THEMSELVES. AS SUCH THE   Linear  
+      CONVERSION OF CROSS SECTIONS TO LINEARLY INTERPOLABLE FORM CAN BE  Linear  
+      PERFORMED WITH ESSENTIALLY NO LOSE OF INFORMATION.                 Linear  
+                                                                         Linear  
+      THE ALLOWABLE ERROR MAY BE ENERGY INDEPENDENT (CONSTANT) OR ENERGY Linear  
+      DEPENDENT. THE ALLOWABLE ERROR IS DESCRIBED BY A TABULATED         Linear  
+      FUNCTION OF UP TO 20 (ENERGY,ERROR) PAIRS AND LINEAR INTERPOLATION Linear  
+      BETWEEN TABULATED POINTS. IF ONLY ONE TABULATED POINT IS GIVEN THE Linear  
+      ERROR WILL BE CONSIDERED CONSTANT OVER THE ENTIRE ENERGY RANGE.    Linear  
+      WITH THIS ENERGY DEPENDENT ERROR ONE MAY OPTIMIZE THE OUTPUT FOR   Linear  
+      ANY GIVEN APPLICATION BY USING A SMALL ERROR IN THE ENERGY RANGE   Linear  
+      OF INTEREST AND A LESS STRINGENT ERROR IN OTHER ENERGY RANGES.     Linear  
+                                                                         Linear  
+      DEFAULT ALLOWABLE ERROR                                            Linear  
+      -----------------------                                            Linear  
+      IN ORDER TO INSURE CONVERGENCE OF THE LINEARIZING ALGORITHM THE    Linear  
+      ALLOWABLE ERROR MUST BE POSITIVE. IF THE USER INPUTS AN ERROR      Linear  
+      THAT IS NOT POSITIVE IT WILL AUTOMATICALLY BE SET TO THE DEFAULT   Linear  
+      VALUE (CURRENTLY 0.001, CORRESPONDING TO 0.1 PER-CENT) AND         Linear  
+      INDICATED AS SUCH IN THE OUTPUT LISTING.                           Linear  
+                                                                         Linear  
+      COULOMB PENETRABILITY (INTERPOLATION LAW = 6)                      Linear  
+      --------------------------------------------                       Linear  
+      INTRODUCED FOR ENDF/B-VI. THIS IS DEFINED AS,                      Linear  
+                                                                         Linear  
+      SIG(E) = C1*EXP(-C2/SQRT(E - T))                                   Linear  
+                                                                         Linear  
+      THIS PROGRAM ONLY CONSIDERS EXOTHERMIC REACTIONS - T = 0           Linear  
+                                                                         Linear  
+      SIG(E) = C1*EXP(-C2/SQRT(E))                                       Linear  
+                                                                         Linear  
+      WARNING...THIS INTERPOLATION LAW SHOULD ONLY BE USED FOR REACTIONS Linear  
+                WHICH HAVE A POSITIVE Q-VALUE (EXOTHERMIC REACTIONS),    Linear  
+                SINCE HERE WE ONLY CONSIDER T = 0.0 IN THE FORMALISM.    Linear  
+                IN ALL OTHER CASES A WARNING MESSAGE WILL BE PRINTED.    Linear  
+                                                                         Linear  
+      INPUT FILES                                                        Linear  
+      -----------                                                        Linear  
+      UNIT  DESCRIPTION                                                  Linear  
+      ----  -----------                                                  Linear  
+         2  INPUT LINES (BCD - 80 CHARACTERS/RECORD)                     Linear  
+        10  ORIGINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)            Linear  
+                                                                         Linear  
+      OUTPUT FILES                                                       Linear  
+      ------------                                                       Linear  
+      UNIT  DESCRIPTION                                                  Linear  
+      ----  -----------                                                  Linear  
+         3  OUTPUT REPORT (BCD - 120 CHARACTERS/RECORD)                  Linear  
+        11  FINAL ENDF/B DATA (BCD - 80 CHARACTERS/RECORD)               Linear  
+                                                                         Linear  
+      SCRATCH FILES                                                      Linear  
+      -------------                                                      Linear  
+      UNIT  DESCRIPTION                                                  Linear  
+      ----  -----------                                                  Linear  
+        12  SCRATCH FILE (BINARY - 180000 WORDS/RECORD                   Linear  
+                                                                         Linear  
+      OPTIONAL STANDARD FILE NAMES (SEE SUBROUTINE FILEIO)               Linear  
+      ----------------------------------------------------               Linear  
+      UNIT  FILE NAME                                                    Linear  
+      ----  ----------                                                   Linear  
+        2   LINEAR.INP                                                   Linear  
+        3   LINEAR.LST                                                   Linear  
+       10   ENDFB.IN                                                     Linear  
+       11   ENDFB.OUT                                                    Linear  
+       12   (SCRATCH)                                                    Linear  
+                                                                         Linear  
+                                                                         Linear  
+      INPUT PARAMETERS                                                   Linear  
+      ----------------                                                   Linear  
+      FOR VERSIONS EARLIER THAN 90-1 THIS PROGRAM ONLY ALLOWED THE USER  Linear  
+      TO SPECIFY BY INPUT PARAMETERS WHICH MATERIALS (MAT) TO PROCESS.   Linear  
+      FOR EACH REQUESTED MATERIAL NEUTRON INTERACTION CROSS SECTIONS     Linear  
+      (MF=3) WOULD BE LINEARIZED AND THE REMAINDER OF THE MATERIAL       Linear  
+      WOULD BE COPIED.                                                   Linear  
+                                                                         Linear  
+      FOR VERSIONS 90-1 AND LATER THIS PROGRAM WILL ALLOW THE USER TO    Linear  
+      TO SPECIFY BY INPUT PARAMETERS EXACTLY WHAT SECTIONS OF DATA       Linear  
+      TO PROCESS. FOR EACH SECTION OF DATA, SPECIFIED BY MAT, MF, MT     Linear  
+      RANGES, SECTIONS OF MF=3, 23 AND 27 WILL BE LINEARIZED AND ALL     Linear  
+      OTHER REQUESTED SECTIONS WILL BE COPIED. ALL SECTIONS WHICH ARE    Linear  
+      NOT EXPLICITLY REQUESTED WILL BE SKIPPED AND WILL NOT APPEAR ON    Linear  
+      ENDF/B FILE OUTPUT BY THIS PROGRAM.                                Linear  
+                                                                         Linear  
+      WITH THIS NEW PROCEDURE YOU CAN MINIMIZE THE SIZE OF THE ENDF/B    Linear  
+      FILE OUTPUT BY THIS PROGRAM, E.G., IF YOU ONLY WANT NEUTRON        Linear  
+      CROSS SECTIONS FOR SUBSEQUENT PROCESSING YOU NEED ONLY REQUEST     Linear  
+      ONLY MF=3 DATA.                                                    Linear  
+                                                                         Linear  
+      HOWEVER, YOU MUST UNDERSTAND THAT ONLY THOSE SECTIONS WHICH YOU    Linear  
+      EXPLICITLY REQUEST WILL APPEAR ON THE ENDF/B FILE OUTPUT BY        Linear  
+      THIS PROGRAM. FOR EXAMPLE, IF YOU WISH TO DOCUMENT EXACTLY         Linear  
+      HOW YOU LINEARIZED THE DATA BY INCLUDING COMMENTS IN MF=1, MT=451  Linear  
+      THEN YOU MUST EXPLICITLY REQUEST THAT MF=1, MT=451 BE PROCESSED    Linear  
+      FOR EACH MATERIAL THAT YOU REQUEST. SIMILAR IF YOU WANT THE        Linear  
+      ENTIRE EVALUATION YOU MUST REQUEST ALL MF AND MT TO BE OUTPUT.     Linear  
+                                                                         Linear  
+      LINE  COLS.  DESCRIPTION                                           Linear  
+      ----  -----  -----------                                           Linear  
+         1   1-11  SELECTION CRITERIA (0=MAT, 1=ZA)                      Linear  
+            12-22  MONITOR MODE SELECTOR                                 Linear  
+                   = 0 - NORMAL OPERATION                                Linear  
+                   = 1 - MONITOR PROGRESS OF LINEARIZING OF THE DATA.    Linear  
+                         EACH TIME A PAGE OF DATA POINTS IS WRITTEN TO   Linear  
+                         THE SCRATCH FILE PRINT OUT THE TOTAL NUMBER OF  Linear  
+                         POINTS ON SCRATCH AND THE LOWER AND UPPER       Linear  
+                         ENERGY LIMITS OF THE PAGE (THIS OPTION MAY BE   Linear  
+                         USED IN ORDER TO MONITOR THE EXECUTION SPEED    Linear  
+                         OF LONG RUNNING JOBS).                          Linear  
+            23-33  MINIMUM CROSS SECTION OF INTEREST (BARNS).            Linear  
+                   (IF 0.0 OR LESS IS INPUT THE PROGRAM WILL             Linear  
+                   USE 1.0E-10). ENERGY INTERVALS WILL NOT BE            Linear  
+                   SUB-DIVIDED IF THE ABSOLUTE VALUE OF THE CROSS        Linear  
+                   SECTION WITHIN THE INTERVAL IS LESS THAN THIS VALUE.  Linear  
+                   AN EXCEPTION TO THIS RULE IS NEAR THRESHOLDS ENERGY   Linear  
+                   INTERVALS WILL BE SUB-DIVIDED UNTIL CONVERGENCE       Linear  
+                   REGARDLESS OF THE MAGNITUDE OF THE CROSS SECTION.     Linear  
+            34-44  KEEP ORIGINAL EVALUATED DATA POINTS.                  Linear  
+                   = 0 - NO.                                             Linear  
+                   = 1 - YES - ADDITIONAL POINTS MAY BE ADDED IN ORDER   Linear  
+                               TO LINEARIZE DATA, BUT ALL ORIGINAL       Linear  
+                               DATA POINTS WILL BE INCLUDED IN THE       Linear  
+                               RESULTS.                                  Linear  
+         2   1-72  ENDF/B INPUT DATA FILENAME                            Linear  
+                   (STANDARD OPTION = ENDFB.IN)                          Linear  
+         3   1-72  ENDF/B OUTPUT DATA FILENAME                           Linear  
+                   (STANDARD OPTION = ENDFB.OUT)                         Linear  
+       4-N   1- 6  LOWER MAT OR ZA LIMIT                                 Linear  
+             7- 8  LOWER MF LIMIT                                        Linear  
+             9-11  LOWER MT LIMIT                                        Linear  
+            12-17  UPPER MAT OR ZA LIMIT                                 Linear  
+            18-19  UPPER MF LIMIT                                        Linear  
+            20-22  UPPER MT LIMIT                                        Linear  
+                   UP TO 100 RANGES MAY BE SPECIFIED, ONLY ONE RANGE     Linear  
+                   PER LINE. THE LIST OF RANGES IS TERMINATED BY A       Linear  
+                   BLANK LINE. IF THE UPPER MAT LIMIT OF ANY REQUEST     Linear  
+                   IS LESS THAN THE LOW LIMIT IT WILL BE SET EQUAL TO    Linear  
+                   THE LOWER LIMIT. IF THE UPPER LIMIT IS STILL ZERO     Linear  
+                   IT WILL BE SET EQUAL TO 999999. IF THE UPPER MF OR    Linear  
+                   MT LIMIT IS ZERO IT WILL BE SET TO 99 OR 999          Linear  
+                   RESPECTIVELY.                                         Linear  
+       VARY  1-11  ENERGY FOR ERROR LAW                                  Linear  
+            12-22  ALLOWABLE FRACTIONAL ERROR FOR ERROR LAW.             Linear  
+                   THE ACCEPTABLE LINEARIZING ERROR MAY BE SPECIFIED TO  Linear  
+                   BE EITHER ENERGY INDEPENDENT (DEFINED BY A SINGLE     Linear  
+                   ERROR), OR ENERGY DEPENDENT (DEFINED BY UP TO 20      Linear  
+                   ENERGY, ERROR PAIRS). FOR THE ENERGY DEPENDENT CASE   Linear  
+                   LINEAR INTERPOLATION WILL BE USED TO DEFINE THE ERROR Linear  
+                   AT ENERGIES BETWEEN THOSE AT WHICH IT IS TABULATED.   Linear  
+                   IN ALL CASES THE ERROR LAW IS TERMINATED BY A BLANK   Linear  
+                   LINE. IF ONLY ONE ENERGY, ERROR PAIR IS GIVEN THE     Linear  
+                   THE LAW WILL BE CONSIDERED TO BE ENERGY INDEPENDENT.  Linear  
+                   IF MORE THAN ONE PAIR IS GIVEN IT WILL BE CONSIDERED  Linear  
+                   TO BE ENERGY DEPENDENT (NOTE, ENERGY INDEPENDENT      Linear  
+                   FORM WILL RUN FASTER THAN THE EQUIVALENT ENERGY       Linear  
+                   DEPENDENT FORM). FOR AN ENERGY DEPENDENT ERROR LAW    Linear  
+                   ALL ENERGIES MUST BE ASCENDING ENERGY ORDER. FOR      Linear  
+                   CONVERGENCE OF THE LINEARIZING ALGORITHM ALL ERRORS   Linear  
+                   MUST BE POSITIVE. IF AN ALLOWABLE ERROR IS NOT        Linear  
+                   POSITIVE IT WILL BE SET EQUAL TO THE STANDARD OPTION  Linear  
+                   (CURRENTLY 0.001, CORRESPONDING TO 0.1 PER-CENT).     Linear  
+                   IF THE FIRST ERROR LINE IS BLANK IT WILL TERMINATE    Linear  
+                   THE ERROR LAW AND THE ERROR WILL BE TREATED AS        Linear  
+                   ENERGY INDEPENDENT, EQUAL TO THE STANDARD OPTION      Linear  
+                   (CURRENTLY 0.1 PER-CENT). (SEE EXAMPLE INPUT 4).      Linear  
+                                                                         Linear  
+      EXAMPLE INPUT NO. 1                                                Linear  
+      -------------------                                                Linear  
+      RETRIEVE DATA BY ZA IN ORDER TO FIND ALL URANIUM ISOTOPES AND      Linear  
+      THORIUM 232. RETRIEVE ALL NEUTRON INTERACTION CROSS SECTIONS       Linear  
+      (MF=3). ALL ENERGY INTERVALS IN WHICH THE CROSS SECTION IS         Linear  
+      AT LEAST 1 MICRO-BARN (1.0E-06 BARNS) WILL BE SUBDIVIDED.          Linear  
+      BACKWARD THINNING WILL BE PERFORMED. FROM 0 TO 100 EV LINEARIZE    Linear  
+      TO WITHIN 0.1 PER-CENT ACCURACY. FROM 100 EV TO 1 KEV VARY         Linear  
+      ACCURACY BETWEEN 0.1 AND 1.0 PER-CENT. ABOVE 1 KEV USE 1           Linear  
+      PER-CENT ACCURACY.                                                 Linear  
+                                                                         Linear  
+      EXPLICITLY SPECIFY THE STANDARD FILENAMES.                         Linear  
+                                                                         Linear  
+      IN THIS CASE THE FOLLOWING 11 INPUT LINES ARE REQUIRED             Linear  
+                                                                         Linear  
+           1          0 1.00000- 6          0                            Linear  
+  ENDFB.IN                                                               Linear  
+  ENDFB.OUT                                                              Linear  
+  92000 3  0 92999 3999                                                  Linear  
+  90232 3  0     0 3  0    (UPPER LIMIT AUTOMATICALLY SET TO 90232 3999) Linear  
+                           (END OF REQUEST LIST)                         Linear  
+  0.00000+ 0 1.00000-03                                                  Linear  
+  1.00000+ 2 1.00000-03                                                  Linear  
+  1.00000+ 3 1.00000-02                                                  Linear  
+  1.00000+ 9 1.00000-02                                                  Linear  
+                           (END OF ERROR LAW)                            Linear  
+                                                                         Linear  
+      EXAMPLE INPUT NO. 2                                                Linear  
+      -------------------                                                Linear  
+      SAME AS THE ABOVE CASE, EXCEPT LINEARIZE ALL DATA TO WITHIN THE    Linear  
+      STANDARD ACCURACY (CURRENTLY 0.1 PER-CENT). IN ORDER TO USE THE    Linear  
+      STANDARD ACCURACY YOU NEED NOT SPECIFY ANY ERROR LAW AT ALL. IN    Linear  
+      THIS CASE INCLUDE THE HOLLERITH SECTION, MF=1, MT=451, FOR EACH    Linear  
+      MATERIAL.                                                          Linear  
+                                                                         Linear  
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Linear  
+      THEN USE STANDARD FILENAMES.                                       Linear  
+                                                                         Linear  
+      IN THIS CASE THE FOLLOWING 9 INPUT LINES ARE REQUIRED              Linear  
+                                                                         Linear  
+           1          0 1.00000- 6          0                            Linear  
+                           (USE DEFAULT FILENAME = ENDFB.IN)             Linear  
+                           (USE DEFAULT FILENAME = ENDFB.OUT)            Linear  
+  92000 1451 92999 1451                                                  Linear  
+  92000 3  0 92999 3999                                                  Linear  
+  90232 1451     0 1451                                                  Linear  
+  90232 3  0     0 3  0    (UPPER LIMIT AUTOMATICALLY SET TO 90232 3999) Linear  
+                           (END OF REQUEST LIST)                         Linear  
+                           (0.1 PER-CENT ERROR, END OF ERROR LAW)        Linear  
+                                                                         Linear  
+      EXAMPLE INPUT NO. 3                                                Linear  
+      -------------------                                                Linear  
+      LINEARIZE ALL MATERIALS ON AN ENDF/B TAPE TO WITHIN AN ACCURACY    Linear  
+      OF 0.5 PER-CENT (0.005 AS A FRACTION). IN THIS CASE YOU NEED NOT   Linear  
+      SPECIFY THE MAT, MF, MT RANGES.                                    Linear  
+                                                                         Linear  
+      READ THE ENDF/B DATA FROM \ENDFB6\ZA092238 AND WRITE THE ENDF/B    Linear  
+      DATA TO \ENDFB6\LINEAR\ZA092238.                                   Linear  
+                                                                         Linear  
+      IN THIS CASE THE FOLLOWING 6 INPUT LINES ARE REQUIRED              Linear  
+                                                                         Linear  
+                                              (MAT, 1.0E-10 BARNS, THIN) Linear  
+  \ENDFB6\ZA092238                                                       Linear  
+  \ENDFB6\LINEAR\ZA092238                                                Linear  
+                           (RETRIEVE ALL DATA, END REQUEST LIST)         Linear  
+             5.00000-03                                                  Linear  
+                           (END OF ERROR LAW)                            Linear  
+                                                                         Linear  
+      NOTE THAT IN THIS CASE IF THE INPUT HAD SPECIFIED AN EQUIVALENT    Linear  
+      ENERGY DEPENDENT ERROR LAW BY GIVING A NUMBER OF ENERGY POINTS     Linear  
+      AT EACH OF WHICH THE ERROR IS 0.5 PER-CENT THE PROGRAM WOULD TAKE  Linear  
+      LONGER TO RUN (I.E., ONLY USE AN ENERGY DEPENDENT ERROR LAW WHEN   Linear  
+      IT IS NECESSARY).                                                  Linear  
+                                                                         Linear  
+      EXAMPLE INPUT NO. 4                                                Linear  
+      -------------------                                                Linear  
+      IN ORDER TO LINEARIZE ALL MATERIALS ON AN ENDF/B TAPE TO THE       Linear  
+      STANDARD OPTION OF 0.1 PER-CENT IT IS ADEQUATE TO INPUT A SET      Linear  
+      OF COMPLETELY BLANK LINES WHICH WILL AUTOMATICALLY INVOKE ALL      Linear  
+      OF THE STANDARD OPTIONS.                                           Linear  
+                                                                         Linear  
+      LEAVE THE DEFINITION OF THE FILENAMES BLANK - THE PROGRAM WILL     Linear  
+      THEN USE STANDARD FILENAMES.                                       Linear  
+                                                                         Linear  
+      IN THIS CASE THE FOLLOWING THREE INPUT LINES ARE REQUIRED          Linear  
+                                                                         Linear  
+                                              (MAT, 1.0E-10 BARNS, THIN) Linear  
+                           (USE DEFAULT FILENAME = ENDFB.IN)             Linear  
+                           (USE DEFAULT FILENAME = ENDFB.OUT)            Linear  
+                           (RETRIEVE ALL DATA, END REQUEST LIST)         Linear  
+                           (0.1 PER-CENT ERROR, END OF ERROR LAW)        Linear  
+                                                                         Linear  
+ ======================================================================= Linear  

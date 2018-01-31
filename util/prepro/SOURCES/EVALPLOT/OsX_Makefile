@@ -1,0 +1,39 @@
+#
+# MacIntel OsX 10.11.6 El capitan
+# Gfortran 5 & Intel ifort 17
+#
+# make -f OsX_Makefile
+#
+#FFLAGS = -O0 -static-intel
+#FFLAGS = -O0 -mmacosx-version-min=10.6 -static-libgfortran
+FFLAGS = -O0 -static-libgfortran
+CFLAGS =          
+LIBS   = -lXt -lX11 
+LIBDIR = -L/usr/X11/lib
+#CC     = icc -I/usr/X11/include
+#FC     = ifort
+CC     = gcc -I/usr/X11/include
+FC     = gfortran
+ 
+FSUB1= evalplot.f endfio.f scratchb.f timer.f linux.f screen.f
+ 
+CSUBS= dash.c
+ 
+OBJ= $(FSUB1:.f=.o) $(CSUBS:.c=.o)
+ 
+SRC= $(FSUB1) $(CSUBS)
+ 
+all: evalplot evalhard evalhard1
+ 
+evalplot: $(OBJ)
+	$(FC) -o evalplot $(FFLAGS) $(OBJ) $(LIBDIR) $(LIBS)
+ 
+evalhard: evalplot.o endfio.o scratchb.o timer.o linux.o hardsave.o
+	$(FC) -o evalhard $(FFLAGS) evalplot.o endfio.o scratchb.o timer.o \
+        linux.o hardsave.o
+
+evalhard1: evalplot.o endfio.o scratchb.o timer.o linux.o hardsave1.o
+	$(FC) -o evalhard1 $(FFLAGS) evalplot.o endfio.o scratchb.o timer.o \
+        linux.o hardsave1.o
+
+ 
