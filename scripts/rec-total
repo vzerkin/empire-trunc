@@ -23,7 +23,6 @@ echo -n 'Choose one of the above (without .endf extention!): '
 read file
 fi
 
-
 # RECONSTRUCT REDUNDANT REACTIONS WITH FIXUP (Out: FIXUP1.ENDF)
 rm -f FIXUP1.ENDF 2>/dev/null
 cat >FIXUP.INP <<EOF
@@ -42,18 +41,39 @@ FIXUP1.ENDF
 EOF
 $EMPIREDIR/util/prepro/fixup < FIXUP.INP
 mv FIXUP.LST $work/$file-log1.fixup
-if [ ! -f FIXUP1.ENDF ]; then
+
+
+
+# CHECK THAT THE testfile CONTAINS FEND RECORD AT THE END AND IS OF NON-TRIVIAL LENGTH (>5 LINES)
+# IF SAFE OVERWRITE $file.endf
+testfile=FIXUP1.ENDF
+if [ ! -f $testfile ]; then
     echo " FATAL ERROR:"
-    echo " FIXUP output file (FIXUP1.ENDF) with reconstructed  redundant x-sec was not created."
+    echo " Output file " $testfile " has not been created."
     echo " Hit any button to exit "
     read a
     exit
 fi
+fend=`tail -1 $testfile | cut -c 69-70`
+nlines=`cat $testfile | wc -l`
+echo ' '
+echo $testfile ' ends with:' `tail -1 $testfile`
+if [ $fend = -1 ]; then
+   echo 'ENDF file has ' $nlines ' lines and ends with the FEND record' 
+   if [ $nlines > 5 ]; then
+      echo $testfile ' assumed correct and will overwrite' $file.endf
+      mv $testfile $file.endf
+   else
+      echo 'Not enough lines in ' $testfile
+      echo 'Processing has failed - EXIT without overwritting ' $file.end
+      exit
+   fi
+else 
+   echo 'Not a legal FEND record at the end of ' $testfile
+   echo 'Processing has failed - EXIT without overwritting ' $file.endf
+fi
 
 
-
-echo " Moving FIXUP result back to  " $file.endf
-mv FIXUP1.ENDF $file.endf
 
 # RUN STAN
 echo "Running STAN"

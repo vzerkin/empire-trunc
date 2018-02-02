@@ -38,6 +38,7 @@ EOF
 $EMPIREDIR/util/prepro/merger < MERGER.INP
 mv MERGER.LST $work/$file-log1.merger
 
+#read dum
 
 # RECONSTRUCT REDUNDANT REACTIONS AND TOTAL WITH FIXUP (Out: FIXUP1.ENDF)
 rm -f FIXUP1.ENDF 2>/dev/null
@@ -65,6 +66,7 @@ if [ ! -f FIXUP1.ENDF ]; then
     exit
 fi
 
+#read dum
 
 # RECOVER ORIGINAL TOTAL i.e. COPY TOTAL.ENDF back to the FIXUP1.ENDF (Out: MERGER.ENDF)
 rm -f MERGER.INP MERGER.ENDF 2>/dev/null
@@ -82,6 +84,7 @@ mv MERGER.LST $work/$file-log2.merger
 mv -f MERGER.ENDF FIXUP1.ENDF
 rm TOTAL.ENDF
 
+#read dum
 
 # RECONSTRUCT ELASTIC WITH FIXUP (Out:FIXUP2.ENDF)
 rm -f FIXUP.INP FIXUP2.ENDF 2>/dev/null
@@ -103,8 +106,36 @@ if [ ! -f FIXUP2.ENDF ]; then
     exit
 fi
 
-echo " Moving FIXUP result back to  " $file.endf
-mv FIXUP2.ENDF $file.endf
+# CHECK THAT THE testfile CONTAINS FEND RECORD AT THE END AND IS OF NON-TRIVIAL LENGTH (>5 LINES)
+# IF IT IS SAFE OVERWRITE $file.endf
+testfile=FIXUP2.ENDF
+if [ ! -f $testfile ]; then
+    echo " FATAL ERROR:"
+    echo " Output file " $testfile " has not been created."
+    echo " Hit any button to exit "
+    read a
+    exit
+fi
+fend=`tail -1 $testfile | cut -c 69-70`
+nlines=`cat $testfile | wc -l`
+echo ' '
+echo $testfile ' ends with:' `tail -1 $testfile`
+if [ $fend = -1 ]; then
+   echo 'ENDF file has ' $nlines ' lines and ends with the FEND record' 
+   if [ $nlines > 5 ]; then
+      echo $testfile ' assumed correct and will overwrite' $file.endf
+      mv $testfile $file.endf
+   else
+      echo 'Not enough lines in ' $testfile
+      echo 'Processing has failed - EXIT without overwritting ' $file.end
+      exit
+   fi
+else 
+   echo 'Not a legal FEND record at the end of ' $testfile
+   echo 'Processing has failed - EXIT without overwritting ' $file.endf
+fi
+
+read dum
 
 # RUN STAN
 echo "Running STAN"

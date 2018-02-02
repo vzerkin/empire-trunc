@@ -19,11 +19,14 @@ if [ "$1" = "" ]; then
 	read file
 fi                          
 
+# STANDARDIZE THE FILE ENSURING UNIX LF AND CUTTING OUT AT 75TH COLUMN
 
+dos2unix $file.endf
+cut -c 1-75 $file.endf >cutmp
+mv cutmp $file.endf
 
 # RUN STAN
 
-dos2unix $file.endf
 $EMPIREDIR/util/stan/stan -x=1 -f --verbose -cm -o $file.STN $file.endf > $file-log.stan
 
 if [ ! -f $file.STN ]; then
@@ -36,7 +39,34 @@ if [ ! -f $file.STN ]; then
     exit
 fi
 
-echo "  Renaming $file.STN as $file.endf"  >> $file-log.stan
-mv $file.STN $file.endf 2>>$file-log.stan
+# CHECK THAT THE testfile CONTAINS FEND RECORD AT THE END AND IS OF NON-TRIVIAL LENGTH (>5 LINES)
+# IF SAFE OVERWRITE $file.endf
+testfile=$file.STN
+if [ ! -f $testfile ]; then
+    echo " FATAL ERROR:"
+    echo " Output file " $testfile " has not been created."
+    echo " Hit any button to exit "
+    read a
+    exit
+fi
+fend=`tail -1 $testfile | cut -c 69-70`
+nlines=`cat $testfile | wc -l`
+echo ' '
+echo $testfile ' ends with:' `tail -1 $testfile`
+if [ $fend = -1 ]; then
+   echo 'ENDF file has ' $nlines ' lines and ends with the FEND record' 
+   if [ $nlines > 5 ]; then
+      echo $testfile ' assumed correct and will overwrite' $file.endf
+      mv $testfile $file.endf  >> $file-log.stan
+   else
+      echo 'Not enough lines in ' $testfile
+      echo 'Processing has failed - EXIT without overwritting ' $file.end
+      exit
+   fi
+else 
+   echo 'Not a legal FEND record at the end of ' $testfile
+   echo 'Processing has failed - EXIT without overwritting ' $file.endf
+fi
+
 
 exit
