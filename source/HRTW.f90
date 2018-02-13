@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5030 $
+    ! $Rev: 5063 $
     ! $Author: mherman $
-    ! $Date: 2017-12-12 16:32:50 +0100 (Di, 12 Dez 2017) $
+    ! $Date: 2018-02-13 22:02:58 +0100 (Di, 13 Feb 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -2173,7 +2173,7 @@ CONTAINS
             ENDIF
             IF(itmp==1 .AND. (.NOT.benchm) .AND. (sumtg>0.D0 .AND. tgexper>0.D0) ) THEN
                 WRITE(8,'(1x,'' WARNING: Gamma emission could be normalized by setting TUNE to '' &
-                ,F7.3,'' in input'')')  tgexper/sumtg
+                &,F7.3,'' in input'')')  tgexper/sumtg
                 WRITE(8,*)
             ENDIF
         ENDIF
