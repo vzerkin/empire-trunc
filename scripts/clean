@@ -2,8 +2,16 @@
 #script to clean work directory
 file=$1
 mv $file.inp ttt987654321.qqq  2>/dev/null 
+mv $file.c4  ttt987654322.qqq  2>/dev/null 
+mv $file.exf ttt987654323.qqq  2>/dev/null 
 rm $file\.* $file-*\.*  core 2>/dev/null 
 mv ttt987654321.qqq $file.inp  2>/dev/null
-rm -r $file-tl 2>/dev/null
+mv ttt987654322.qqq $file.c4  2>/dev/null
+mv ttt987654323.qqq $file.exf  2>/dev/null
+rm -r $file-tl TL 2>/dev/null
+rm CN-LEV-XS.DAT INPUT.DAT OMPAR.RIPL TARGET_COLL.DAT ang_mu.lst dwba_Pchan.LST ecis06_Pchan.bin ecis06_Smatr.LST ecis06_Umatr.bin 2>/dev/null
+rm COVAR-PAR.DAT LOW_ENERGY.OUT OPTMAN-INC.inp dwba.CS  dwba_Pchan.bin ecis06_Pdiag.LST ecis06_Smatr.bin ECIS_* ecis06* 2>/dev/null
+rm FISSION.OUT OMPAR.DIR TARGET.LEV TOTCOR.DAT dwba.TLJ ecis06_Pchan.LST ecis06_Pdiag.bin ecis06_Umatr.LST TARGET_COLL_RIPL.DAT 2>/dev/null
+rm ANAPOW-yw ANG-POL C4.DAT GNASH POLARIZATION-yw ANG-DIST ANGDIS-yw CR-SECT OPTMAN-INC.out TRANSME INCIDENT.LEG TAPE16 2>/dev/null
 exit
 
