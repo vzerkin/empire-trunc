@@ -60,7 +60,7 @@ static int nMT=0;
 static int mt[8];
 
 
-main (argc,argv)
+int main (argc,argv)
 int     argc;
 char    **argv;
 {
