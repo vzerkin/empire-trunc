@@ -538,6 +538,64 @@ static struct sMTout dict_mtreac[]={
 
 
 
+    static char    ZSYNAM[11+1];	//  1..11
+    static char    ALAB  [11+1];	// 12..22
+    static char    HSUB1 [22+1];	//  1..22
+    static char    Projectile[22+1];
+    static char    outPart[22+1];
+    static int     NSUB;
+    static char    dataLabel[80];
+
+    static float ZA =-1;
+    static int   IZ =-1;
+    static int   IA =-1;
+    static float AWR=-1;
+    static int   NL =-1;
+
+    static float XMF1 =0;
+    static float XLFS1=0;
+    static int   MAT1 =-1;
+    static int   MT1  =-1;
+    static int   NC   =-1;
+    static int   NI   =-1;
+
+    static int   LT   =-1;
+    static int   LB   =-1;
+    static int   NT   =-1;
+    static int   NP   =-1;
+
+
+
+int e4extract1451()
+    {
+	int ii,i,lnsub;
+	float rr;
+	setFNumeration(); setN1Numeration(1);
+	ii=strExtract(ZSYNAM,str1451[5],5,11);	strTrim(ZSYNAM);
+	ii=strExtract(HSUB1,str1451[7],1,22);	strTrim(HSUB1);
+	for (; HSUB1[0]=='-';) strcpy(&HSUB1[0],&HSUB1[1]);
+	strTrim(HSUB1);
+        ii=floatExtract(str1451[3],44,11,&rr);
+	NSUB=rr;
+
+	lnsub=sizeof(dict_nsub)/sizeof(dict_nsub[0]);
+	strcpy(Projectile,"");
+	for (i=0; i<lnsub; i++) {
+	    if (dict_nsub[i].nsub==NSUB) {
+		strcpy(Projectile,dict_nsub[i].txpart);
+		break;
+	    }
+	}
+/*
+	printf("...ZSYNAM=[%s]\n",ZSYNAM);
+	printf("...HSUB1=[%s]\n",HSUB1);
+	printf("...NSUB=[%d]\n",NSUB);
+	printf("...Projectile=[%s]\n",Projectile);
+*/
+	return ii;
+    }
+
+
 /*
 main (argc,argv)
 int     argc;
@@ -726,62 +784,6 @@ char    **argv;
 
 
 
-
-    static char    ZSYNAM[11+1];	//  1..11
-    static char    ALAB  [11+1];	// 12..22
-    static char    HSUB1 [22+1];	//  1..22
-    static char    Projectile[22+1];
-    static char    outPart[22+1];
-    static int     NSUB;
-    static char    dataLabel[80];
-
-    static float ZA =-1;
-    static int   IZ =-1;
-    static int   IA =-1;
-    static float AWR=-1;
-    static int   NL =-1;
-
-    static float XMF1 =0;
-    static float XLFS1=0;
-    static int   MAT1 =-1;
-    static int   MT1  =-1;
-    static int   NC   =-1;
-    static int   NI   =-1;
-
-    static int   LT   =-1;
-    static int   LB   =-1;
-    static int   NT   =-1;
-    static int   NP   =-1;
-
-
-    int e4extract1451()
-    {
-	int ii,i,lnsub;
-	float rr;
-	setFNumeration(); setN1Numeration(1);
-	ii=strExtract(ZSYNAM,str1451[5],5,11);	strTrim(ZSYNAM);
-	ii=strExtract(HSUB1,str1451[7],1,22);	strTrim(HSUB1);
-	for (; HSUB1[0]=='-';) strcpy(&HSUB1[0],&HSUB1[1]);
-	strTrim(HSUB1);
-        ii=floatExtract(str1451[3],44,11,&rr);
-	NSUB=rr;
-
-	lnsub=sizeof(dict_nsub)/sizeof(dict_nsub[0]);
-	strcpy(Projectile,"");
-	for (i=0; i<lnsub; i++) {
-	    if (dict_nsub[i].nsub==NSUB) {
-		strcpy(Projectile,dict_nsub[i].txpart);
-		break;
-	    }
-	}
-/*
-	printf("...ZSYNAM=[%s]\n",ZSYNAM);
-	printf("...HSUB1=[%s]\n",HSUB1);
-	printf("...NSUB=[%d]\n",NSUB);
-	printf("...Projectile=[%s]\n",Projectile);
-*/
-	return ii;
-    }
     int e4makeReac(int mt)
     {
 	int ii,i,lmt;
