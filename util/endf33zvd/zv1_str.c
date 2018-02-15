@@ -6,6 +6,17 @@
 static int numeration=0; // 0:C, 1:Fortran
 static int iNum1=0; // 0:ls1=lExtract, 1:ls1=n1Extract
 
+
+int setNumeration(num)
+int num;
+{
+    int i;
+    i = numeration;
+    numeration = num;
+    return(i);
+}
+
+
 int setFNumeration() { return(setNumeration(1));}
 int setCNumeration() { return(setNumeration(0));}
 
@@ -48,16 +59,6 @@ int n0, ls1;
     return(ii);
 }
 
-
-
-int setNumeration(num)
-int num;
-{
-    int i;
-    i = numeration;
-    numeration = num;
-    return(i);
-}
 
 int setN1Numeration(num)
 int num;
