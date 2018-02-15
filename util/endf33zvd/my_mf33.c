@@ -566,7 +566,7 @@ static struct sMTout dict_mtreac[]={
 
 
 
-int e4extract1451()
+    int e4extract1451()
     {
 	int ii,i,lnsub;
 	float rr;
