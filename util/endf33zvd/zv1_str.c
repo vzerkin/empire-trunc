@@ -9,6 +9,47 @@ static int iNum1=0; // 0:ls1=lExtract, 1:ls1=n1Extract
 int setFNumeration() { return(setNumeration(1));}
 int setCNumeration() { return(setNumeration(0));}
 
+int delEndSpace(s)
+char    *s;
+{
+    int     i, ll;
+    ll=strlen(s);
+    for (i=ll-1; i>=0; i--) {
+    if (s[i]==' ') s[i]='\0';
+    else break;
+    }
+}
+
+int delLiderSpace(s)
+char    *s;
+{
+    int     i, ii;
+    for (i=0; s[i] !='\0'; i++) 
+        if ((s[i] !='\040') && (s[i]!='\t')) break;
+    for (ii=0; s[i] !='\0'; i++, ii++) s[ii]=s[i];
+    s[ii]='\0';
+}
+
+int strExtract(s1,s0,n0,ls1)
+char *s1, *s0;
+int n0, ls1;
+{
+    int  i, ii, ls0;
+    if (iNum1!=0) ls1=ls1-n0+1;
+    n0 = n0-numeration;
+    ls0=strlen(s0);
+    *s1='\0';
+    if (ls0<n0) return(-1);
+    for (i=n0, ii=0; (i<n0+ls1)&&(s0[i]!='\0'); i++,ii++) {
+        *s1++ = s0[i];
+    }
+    *s1='\0';
+    //printf("(n0=%d,ii=%d)",n0,ii);
+    return(ii);
+}
+
+
+
 int setNumeration(num)
 int num;
 {
@@ -105,7 +146,7 @@ FILE    *f;
     return(ss);
 }
 
-delSpaces(s)
+int delSpaces(s)
 char    *s;
 {
     char    *si;
@@ -127,7 +168,7 @@ int checkEmptyStr(char *s)
     return(iret);
 }
 
-strpad (s,k)
+int strpad (s,k)
 char    *s;
 int     k;
 {
@@ -153,6 +194,7 @@ int     k;
 int floatExtract(rr,s0,n0,ls1)
 char  *s0;
 float *rr;
+int n0,ls1;
 {
     double  num;
     char    *endnum, *ss;
@@ -221,7 +263,7 @@ float *rr;
 
 int intExtract(rr,s0,n0,ls1)
 char  *s0;
-int   *rr;
+int   *rr, n0, ls1;
 {
     long  num;
     char  *endnum;
@@ -240,6 +282,7 @@ int   *rr;
 
 int wordExtract(s1,s0,n0,ls1)
 char *s1, *s0;
+int n0, ls1;
 {
     int  i;
     char    *si;
@@ -257,6 +300,7 @@ char *s1, *s0;
 //---Word may contain 'SPACE' in it ---
 int wordSpExtract(s1,s0,n0,ls1)
 char *s1, *s0;
+int n0, ls1;
 {
     int  i;
     char    *si;
@@ -271,6 +315,7 @@ char *s1, *s0;
 
 int charExtract(s1,s0,n0)
 char *s1, *s0;
+int n0;
 {
     int  i,ls1;
     char    *si;
@@ -282,23 +327,6 @@ char *s1, *s0;
     if (i<=0) return(i);
     *s1 = tmp[0];
     return(1);
-}
-
-int strExtract(s1,s0,n0,ls1)
-char *s1, *s0;
-{
-    int  i, ii, ls0;
-    if (iNum1!=0) ls1=ls1-n0+1;
-    n0 = n0-numeration;
-    ls0=strlen(s0);
-    *s1='\0';
-    if (ls0<n0) return(-1);
-    for (i=n0, ii=0; (i<n0+ls1)&&(s0[i]!='\0'); i++,ii++) {
-        *s1++ = s0[i];
-    }
-    *s1='\0';
-    //printf("(n0=%d,ii=%d)",n0,ii);
-    return(ii);
 }
 
 
@@ -316,7 +344,7 @@ char toascii7(char ch)
     return ch;
 }
 
-str2ascii7(s)
+int str2ascii7(s)
 char    *s;
 {
     for (; *s!='\0'; s++) {
@@ -324,41 +352,20 @@ char    *s;
     }
 }
 
-strToUpper (s)
+int strToUpper (s)
 char    *s;
 {
     for (; *s!='\0'; s++) *s=toupper(*s);
 }
 
-strToLower (s)
+int strToLower (s)
 char    *s;
 {
     for (; *s!='\0'; s++) *s=tolower(*s);
 }
 
-delLiderSpace(s)
-char    *s;
-{
-    int     i, ii;
-    for (i=0; s[i] !='\0'; i++) 
-        if ((s[i] !='\040') && (s[i]!='\t')) break;
-    for (ii=0; s[i] !='\0'; i++, ii++) s[ii]=s[i];
-    s[ii]='\0';
-}
-
-delEndSpace(s)
-char    *s;
-{
-    int     i, ll;
-    ll=strlen(s);
-    for (i=ll-1; i>=0; i--) {
-    if (s[i]==' ') s[i]='\0';
-    else break;
-    }
-}
-
 /*--- <SPASEs>, <=s>, <TABs>, <:s> ---*/
-delRazdelitel(s)
+int delRazdelitel(s)
 char    *s;
 {
     int     i, ii;
@@ -368,7 +375,7 @@ char    *s;
     s[ii]='\0';
 }
 
-delComment(s,ch)
+int delComment(s,ch)
 char    *s, ch;
 {
     int     i, ii;
@@ -380,7 +387,7 @@ char    *s, ch;
 }
 
 
-strnShift(s,n)
+int strnShift(s,n)
 char    *s;
 int     n;
 {
@@ -392,7 +399,7 @@ int     n;
 }
 
 
-deleteSymbol(s,sym)
+int deleteSymbol(s,sym)
 char    *s,sym;
 {
     char    *si;
@@ -404,7 +411,7 @@ char    *s,sym;
     }
 }
 
-changeSymbol(s,sym1,sym2)
+int changeSymbol(s,sym1,sym2)
 char    *s,sym1,sym2;
 {
     char    *si;
@@ -416,7 +423,7 @@ char    *s,sym1,sym2;
     }
 }
 
-strTrim(s)
+int strTrim(s)
 char    *s;
 {
     delLiderSpace(s);
