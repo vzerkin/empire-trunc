@@ -7,7 +7,7 @@ LH     = ../
 
 OBJ0 = $(NAME).$(O) my_mf33.$(O)
 OBJ1 = 
-OBJ2 = zv1_str.$(O) d_alloc.$(O)
+OBJ2 = d_alloc.$(O)
 # dir_nt.$(O)
 
 OBJS = $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3)

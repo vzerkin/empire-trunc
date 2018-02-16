@@ -21,6 +21,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "zv1_str.c"
 
 #define LSTR 320
 static  char    str[LSTR];
@@ -39,7 +40,7 @@ static int debug=0;
 
 float  *ask_float();
 char   *my_fgets();
-static int floatExtract(char *str,int n0,int ln,float *ff);
+//static int floatExtract(char *str,int n0,int ln,float *ff);
 int printMatrix(char *e4outName,FILE *o30);
 
 static char zvdFile[LSTR]="matrix2";
