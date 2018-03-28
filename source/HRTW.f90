@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5063 $
-    ! $Author: mherman $
-    ! $Date: 2018-02-13 22:02:58 +0100 (Di, 13 Feb 2018) $
+    ! $Rev: 5073 $
+    ! $Author: capotenoyr $
+    ! $Date: 2018-03-28 21:31:24 +0200 (Mi, 28 Mär 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -230,9 +230,9 @@ CONTAINS
         inchnl%t    = 0.d0
         inchnl%sig  = 0.d0
 
-        ! IF(allocated(WFC)) DEALLOCATE(WFC)
-        ! ALLOCATE(WFC(ndfus,ndch),STAT=my)
-        ! IF(my /= 0) CALL WFC_error()
+        IF(allocated(WFC)) DEALLOCATE(WFC)
+        ALLOCATE(WFC(ndfus,ndch),STAT=my)
+        IF(my /= 0) CALL WFC_error()
 
         !  clones of scratch matrices to preserve weak channels in Moldauer WFC
         IF(allocated(SCRt_mem)) DEALLOCATE(SCRt_mem)
@@ -262,7 +262,7 @@ CONTAINS
         IF(allocated(H_Abs))   DEALLOCATE(H_Abs)
         IF(allocated(outchnl)) DEALLOCATE(outchnl)
         IF(allocated(inchnl))  DEALLOCATE(inchnl)
-        ! IF(allocated(WFC))     DEALLOCATE(WFC)
+        IF(allocated(WFC))     DEALLOCATE(WFC)
         IF(allocated(SCRt_mem))     DEALLOCATE(SCRt_mem)
         IF(allocated(SCRtl_mem))    DEALLOCATE(SCRtl_mem)
 
@@ -1612,11 +1612,6 @@ CONTAINS
                     write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
                 ENDIF ! INTerf>0
 
-                IF(allocated(WFC)) DEALLOCATE(WFC)
-                ALLOCATE(WFC(num%elah-num%elal+2,num%part+1),STAT=my)
-                IF(my /= 0) CALL WFC_error()
-                WFC = 0.d0
-
                 ! loop over iaa=i (coupled channels in the normal space)
                 DO i = num%elal, num%elah
                     iaa = i - num%elal + 1
@@ -1633,8 +1628,8 @@ CONTAINS
                     DO iout = 1, num%part
                         ibb = iout - num%coll + 1
                         out => outchnl(iout)
-                        w = WFC2(i-num%elal+1,iout)     ! Moldauer width fluctuation factor (ECIS style)
-                        WFC(i-num%elal+1,iout) = w      ! saving the calculated sigma corrected by WF
+                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
+                        WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
                         sigma_alph_b = out%t*w
                         IF(INTerf>0 .AND. iout>=num%coll .AND. iout<=num%colh ) CYCLE ! collective channels were done already
                         Sigma_ab = sigma_alph_b
@@ -1679,12 +1674,10 @@ CONTAINS
                     !---------------------------------------------------------------
                     CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
 
-                    !               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                    !   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                     CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                 ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
-
-                IF(allocated(WFC)) DEALLOCATE(WFC)
 
                 ! Gamma width calculation *************************************************************************************
                 IF((first_ein .OR. benchm) .AND. einl<=1.D0) THEN
@@ -1698,7 +1691,6 @@ CONTAINS
                         sumtg = sumtg + sumg
                     ENDIF
                 ENDIF
-
             ENDDO       !loop over decaying nucleus spin
         ENDDO          !loop over decaying nucleus parity
 
