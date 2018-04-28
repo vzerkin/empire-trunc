@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4853 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-03-15 20:27:33 +0100 (Mi, 15 Mär 2017) $
+Ccc   * $Rev: 5090 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -144,8 +144,8 @@ C     CLOSE (93,STATUS = 'delete')
       CLOSE (99,STATUS = 'delete')
       CLOSE (MR)
 
-C     INQUIRE(121,exist=fexp)                                           RCN  RCN
-C     IF (fexp) CLOSE (121)                                             RCN  RCN
+      INQUIRE(121,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (121)                                             RCN  RCN
       INQUIRE(122,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (122)                                             RCN  RCN
       INQUIRE(123,exist=fexp)                                           RCN  RCN
@@ -157,8 +157,8 @@ C     IF (fexp) CLOSE (124)                                             RCN  RCN
       INQUIRE(126,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (126)                                             RCN  RCN
 
-C     INQUIRE(221,exist=fexp)                                           RCN  RCN
-C     IF (fexp) CLOSE (221)                                             RCN  RCN
+      INQUIRE(221,exist=fexp)                                           RCN  RCN
+      IF (fexp) CLOSE (221)                                             RCN  RCN
       INQUIRE(222,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (222)                                             RCN  RCN
       INQUIRE(223,exist=fexp)                                           RCN  RCN
@@ -170,7 +170,6 @@ C     IF (fexp) CLOSE (224)                                             RCN  RCN
       INQUIRE(226,exist=fexp)                                           RCN  RCN
       IF (fexp) CLOSE (226)                                             RCN  RCN
       Max_ccch = MAXcc
-
       RETURN                                                            ECIS-041
  100  CLOSE (MR,STATUS = 'delete')                                      RCN  RCN
       RETURN                                                            ECIS-040
@@ -534,8 +533,8 @@ C MAIN INPUT.                                                           CALC-306
       CALL CALX(NW,CW,DW,LO)                                            CALC-308
 
       if(unformat) then 
-C       open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
-C       open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+        open(121,FILE = TRIM(fname)//'_Pmatr.bin',form='unformatted')   zv-2013
+        open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,FILE = TRIM(fname)//'_Pdiag.bin',form='unformatted')   zv-2013
         open(222,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
         open(123,FILE = TRIM(fname)//'_Umatr.bin',form='unformatted')   zv-2013
@@ -545,7 +544,7 @@ C       open(221,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(126,FILE = TRIM(fname)//'_Pchan.bin',form='unformatted')   zv-2013
         open(226,file=TRIM(fname)//'_Pchan.LST')                        RCN  RCN
       else 
-C       open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
+        open(121,file=TRIM(fname)//'_Pmatr.LST')                        RCN  RCN
         open(122,file=TRIM(fname)//'_Pdiag.LST')                        RCN  RCN
         open(123,file=TRIM(fname)//'_Umatr.LST')                        RCN  RCN
         open(125,file=TRIM(fname)//'_Smatr.LST')                        RCN  RCN
@@ -19363,8 +19362,8 @@ C----
       IF(I.EQ.0 .OR. J.EQ.0) LO(83)=.TRUE.                              RCN  RCN            
       IF(I.EQ.0 .OR. J.EQ.0) GOTO 28                                    RCN  RCN            
       MAXcc = MAXcc + JC 
-C     WRITE (121     ) AJ,IP(JPI+1),JC                                  RCN  RCN
-C     WRITE (221,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (121     ) AJ,IP(JPI+1),JC                                  RCN  RCN
+      WRITE (221,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (126     ) AJ,IP(JPI+1),JC                                  RCN  RCN
       WRITE (226,1005) AJ,IP(JPI+1),JC                                  RCN  RCN
 C     C-matrix commented                                                RCN  RCN 
@@ -19386,9 +19385,9 @@ C       Pchan()
           IF (WV(3,MC(JJ,1)).LT.0.D0) CYCLE                             RCN  RCN
           J=J+1                                                         RCN  RCN
 C         P-matrix
-C         write (121) I, J, P(I,J,1),P(I,J,2)                           RCN  RCN
-C         write (221,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
-C    >     I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))  RCN  RCN  
+          write (121) I, J, P(I,J,1),P(I,J,2)                           RCN  RCN
+          write (221,'(1x,2(I4,1x),2(D15.9,1x),2x,2(I3,1x),F5.1)')      RCN  RCN
+     >     I,J,P(I,J,1),P(I,J,2),MC(I,1),MC(I,2),0.5D0*DFLOAT(MC(I,3))  RCN  RCN  
 C         C-matrix commented                                            RCN  RCN       
 C         write(124,'(1x,2(I4,1x),2(D15.9,1x))') I,J,FAR(I,J),FAI(I,J)  RCN  RCN
 C
@@ -20374,6 +20373,7 @@ C         READ (94,1003)  K1,K2,K3,K4,BJ,B1,B2,B3                       RCN
    58     WRITE (60,1005) K1,K2,K3,K4,BJ,B1,B2,B3                       SCHE-477
    59 CONTINUE                                                          SCHE-478
 C     CLOSE (94,STATUS = 'delete')                                      RCN
+      CLOSE (94)                                                        RCN
    60 IF (.NOT.LO(65)) GO TO 61                                         SCHE-480
       NSA=7*(NLT+2*IPJ+1)+1                                             SCHE-481
       IF (NSA.GT.ID1) CALL MEMO('SCHE',ID1,NSA)                         SCHE-482

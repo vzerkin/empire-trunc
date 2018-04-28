@@ -1,6 +1,6 @@
-! $Rev: 4859 $
-! $Author: rcapote $
-! $Date: 2017-03-17 19:52:51 +0100 (Fr, 17 Mär 2017) $
+! $Rev: 5090 $
+! $Author: capote $
+! $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -38,10 +38,10 @@ MODULE TLJs
    END TYPE cc_umatrix
 
    TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
-   ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCsmatrix(:)
    TYPE(cc_pdiag)  , PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
+   TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
 
    PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
@@ -50,8 +50,7 @@ MODULE TLJs
                                   PPdiag(:,:), Sdiag(:,:), &
                                   ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
 
-   !COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:) ! EW matrices 
-   COMPLEX*16, PUBLIC, ALLOCATABLE :: Umatr(:,:),Smatr(:,:) ! EW matrices 
+   COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:),Tmatr(:,:) ! EW matrices 
 
    PRIVATE
    
@@ -88,14 +87,19 @@ CONTAINS
       IF(my /= 0) GOTO 30
       sigma_alph_beta = 0.0d0
 
-      !IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
-      !ALLOCATE(Pmatr(nch,nch),STAT=my)
-      !IF(my /= 0) GOTO 30
-      !Pmatr = (0.d0,0.d0)
+      IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+      ALLOCATE(Pmatr(nch,nch),STAT=my)
+      IF(my /= 0) GOTO 30
+      Pmatr = (0.d0,0.d0)
+
+      IF(allocated(Tmatr)) DEALLOCATE(Tmatr)
+      ALLOCATE(Tmatr(nch,nch),STAT=my)
+      IF(my /= 0) GOTO 30
+      Tmatr = (0.d0,0.d0)
 
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
       ALLOCATE(Smatr(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 20
+      IF(my /= 0) GOTO 30
       Smatr = (0.d0,0.d0)
 
       IF(allocated(Umatr)) DEALLOCATE(Umatr)
@@ -145,7 +149,7 @@ CONTAINS
       ! MAX_cc_mod = nch
       ! write(*,*) 'Inside AllocTLJs:',nch,MAX_cc_mod,MAX_cc
 
-         ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
+      ! TYPE(cc_channel), PUBLIC, ALLOCATABLE, TARGET :: STLcc(:)
       IF(allocated(STLcc)) DEALLOCATE(STLcc)
       ALLOCATE(STLcc(nch),STAT=my)
       IF(my /= 0) THEN
@@ -213,21 +217,21 @@ CONTAINS
       CCumatrix%icol    = 0
       CCumatrix%umatrix = (0.d0,0.d0)
 
-      !IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
-      !ALLOCATE(CCpmatrix(npmat),STAT=my)
-      !IF(my /= 0) THEN
-      !   WRITE(8,*)  'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
-      !   WRITE(12,*) 'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
-      !   STOP 'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
-      !   RETURN
-      !ENDIF
+      IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
+      ALLOCATE(CCpmatrix(npmat),STAT=my)
+      IF(my /= 0) THEN
+         WRITE(8,*)  'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
+         WRITE(12,*) 'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
+         STOP 'ERROR: Insufficient memory for CCpmatrix (in TLJs)'
+         RETURN
+      ENDIF
 
-      !CCpmatrix%Pcn     = 1
-      !CCpmatrix%Jcn     = 0.d0
-      !CCpmatrix%nceq    = 0
-      !CCpmatrix%irow    = 0
-      !CCpmatrix%icol    = 0
-      !CCpmatrix%umatrix = (0.d0,0.d0)
+      CCpmatrix%Pcn     = 1
+      CCpmatrix%Jcn     = 0.d0
+      CCpmatrix%nceq    = 0
+      CCpmatrix%irow    = 0
+      CCpmatrix%icol    = 0
+      CCpmatrix%umatrix = (0.d0,0.d0)
 
       IF(allocated(CCsmatrix)) DEALLOCATE(CCsmatrix)
       ALLOCATE(CCsmatrix(npmat),STAT=my)
@@ -256,7 +260,7 @@ CONTAINS
       IF(INTerf==0) RETURN
       IF(allocated(CCpdiag))   DEALLOCATE(CCpdiag)
       IF(allocated(CCumatrix)) DEALLOCATE(CCumatrix)
-      ! IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
+      IF(allocated(CCpmatrix)) DEALLOCATE(CCpmatrix)
       IF(allocated(CCsmatrix)) DEALLOCATE(CCsmatrix)
       RETURN
    END SUBROUTINE DelTLJs
@@ -275,7 +279,8 @@ CONTAINS
       !  EW matrices
       IF(allocated(Sphase)) DEALLOCATE(Sphase)
       IF(allocated(sigma_alph_beta)) DEALLOCATE(sigma_alph_beta)
-      ! IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+      IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
+      IF(allocated(Tmatr)) DEALLOCATE(Tmatr)
       IF(allocated(Umatr)) DEALLOCATE(Umatr)
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
       !  Temporal matrices 
@@ -314,15 +319,15 @@ CONTAINS
 
       !--The INQUIRE statement determines whether or not the file exists.
       !--If it does not, the program calculates new transmission coeff.
-      ! INQUIRE (FILE = ('INCIDENT_Pmatr.bin'),EXIST = fexist)
-      ! IF (.not. fexist) RETURN ! *_Pmatr.bin not found
+      INQUIRE (FILE = ('INCIDENT_Pmatr.bin'),EXIST = fexist)
+      IF (.not. fexist) RETURN ! *_Pmatr.bin not found
       INQUIRE (FILE = ('INCIDENT_Pdiag.bin'),EXIST = fexist)
       IF (.not. fexist) RETURN ! *_Pdiag.bin not found
       INQUIRE (FILE = ('INCIDENT_Umatr.bin'),EXIST = fexist)
       IF (.not. fexist) RETURN ! *_Umatr.bin not found
       INQUIRE (FILE = ('INCIDENT_Smatr.bin'),EXIST = fexist)
       IF (.not. fexist) RETURN ! *_Smatr.bin not found
-      ! open(125,FILE = ('INCIDENT_Pmatr.bin'), STATUS = 'old',form='unformatted')   
+      open(125,FILE = ('INCIDENT_Pmatr.bin'), STATUS = 'old',form='unformatted')   
       open( 58,FILE = ('INCIDENT_Smatr.bin'), STATUS = 'old',form='unformatted')   
       open( 60,FILE = ('INCIDENT_Umatr.bin'), STATUS = 'old',form='unformatted')   
       open( 61,FILE = ('INCIDENT_Pdiag.bin'), STATUS = 'old',form='unformatted')   
@@ -353,12 +358,12 @@ CONTAINS
    INTEGER nlev, nl
    CHARACTER*1 parc
    TYPE (cc_channel), POINTER :: ps_tlj
-   ! TYPE (cc_umatrix), POINTER :: ps_pmatrix
+   TYPE (cc_umatrix), POINTER :: ps_pmatrix
    TYPE (cc_umatrix), POINTER :: ps_smatrix
    TYPE (cc_umatrix), POINTER :: ps_umatrix
    TYPE (cc_pdiag), POINTER :: ps_pdiag
    logical debug
-   DATA debug/.FALSE./
+   DATA debug/.false./
 
    Read_CC_matrices = .FALSE.
 
@@ -407,35 +412,35 @@ CONTAINS
 
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
    !==Reading Pmatr
-   !nch = 0
-   !DO ncc = 1, MAX_cc_mod
+   nch = 0
+   DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
-   !  READ (125,END=12,ERR=12) jc, parc, nceq
+     READ (125,END=12,ERR=12) jc, parc, nceq
      !READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq
      !write(*,*) jc,parc,nceq
      !--Loop over the number of coupled equations (squared)
-   !  nelem = (nceq*(nceq+1))/2
-   !  DO i1 = 1, nelem
-   !    nch = nch + 1
-   !    ps_pmatrix => CCpmatrix(nch)
-   !    READ (125,END = 5,ERR = 5) nc1, nc2, sreal, simag
+     nelem = (nceq*(nceq+1))/2
+     DO i1 = 1, nelem
+       nch = nch + 1
+       ps_pmatrix => CCpmatrix(nch)
+       READ (125,END = 5,ERR = 5) nc1, nc2, sreal, simag
        !READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
        !write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
-   !    ps_pmatrix%Jcn = jc
-   !    ps_pmatrix%Pcn = 1
-   !    if(parc == '-') ps_pmatrix%Pcn = -1
-   !    ps_pmatrix%nceq = nceq
-   !    ps_pmatrix%irow = nc1
-   !    ps_pmatrix%icol = nc2
-   !    ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
-   !  ENDDO
-   !ENDDO
+       ps_pmatrix%Jcn = jc
+       ps_pmatrix%Pcn = 1
+       if(parc == '-') ps_pmatrix%Pcn = -1
+       ps_pmatrix%nceq = nceq
+       ps_pmatrix%irow = nc1
+       ps_pmatrix%icol = nc2
+       ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
+     ENDDO
+   ENDDO
 
-!12 MAX_pmatr = nch
-!   if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
-!   if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
-!   if (debug) pause
+12 MAX_pmatr = nch
+   if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
+   if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
+   if (debug) pause
 
    ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCsmatrix(:)
    !==Reading Smatr
@@ -537,8 +542,8 @@ RETURN
 
 4 WRITE(8,*)' WARNING: Problem reading Pchan matrix'
 STOP ' WARNING: Problem reading Pchan matrix'
-! 5 WRITE(8,*)' WARNING: Problem reading EW Pmatrix'
-! STOP ' WARNING: Problem reading EW Pmatrix'
+5 WRITE(8,*)' WARNING: Problem reading EW Pmatrix'
+STOP ' WARNING: Problem reading EW Pmatrix'
 6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
 STOP ' WARNING: Problem reading EW Smatrix'
 7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
@@ -590,7 +595,7 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       endif
    ENDDO
    if (debug) write(*,*) ' Prepare_CC: Pdiag', sngl(Jcn), pcn, ncc, nmaxp
-
+   
    IF(INTerf==0) RETURN
        
    ! if(NINT(2*CCpmatrix(nccu)%Jcn) == 1 .and. CCpmatrix(nccu)%Pcn == +1) debug = .TRUE.
@@ -620,44 +625,44 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
 
    ! debug = .false.
 
-   !if (debug) write(*,*) 'Pmatr, MAX_pumatr: ',MAX_umatr
-   !DO nccu = 1, MAX_pmatr
-      !ndim =  0
-      !nmaxu = 0
-      !if(NINT(2*CCpmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCpmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+   if (debug) write(*,*) 'Pmatr, MAX_pumatr: ',MAX_umatr
+   DO nccu = 1, MAX_pmatr
+      ndim =  0
+      nmaxu = 0
+      if(NINT(2*CCpmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCpmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
 
-      !ndim = CCpmatrix(nccu)%nceq
-      !nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
+      ndim = CCpmatrix(nccu)%nceq
+      nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
 
-      !if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCpmatrix(nccu)%Jcn), CCpmatrix(nccu)%Pcn, CCpmatrix(nccu)%nceq
-      !if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
+      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCpmatrix(nccu)%Jcn), CCpmatrix(nccu)%Pcn, CCpmatrix(nccu)%nceq
+      if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
 
-     ! do i1 = nccu, nmaxu
-	 !    icol = CCpmatrix(i1)%irow
-	 !	 irow = CCpmatrix(i1)%icol
-     !    if(irow == icol) then
-     !      Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
-     !    else
-     !      Pmatr(irow,icol) =  CONJG(CCpmatrix(i1)%umatrix)
-     !      Pmatr(icol,irow) =  CONJG(Pmatr(irow,icol))
-     !    endif
-     ! enddo
+      do i1 = nccu, nmaxu
+	     icol = CCpmatrix(i1)%irow
+	 	 irow = CCpmatrix(i1)%icol
+         if(irow == icol) then
+           Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
+         else
+           Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix 
+           Pmatr(icol,irow) =  CONJG(Pmatr(irow,icol))  ! Pmatrix is Hermitian
+         endif
+      enddo
             
-	!  if (debug) then
-    !    WRITE (*,*) 'preparing Pmatrix...'
-	!    do irow = 1, ndim
-	!      do icol = 1, ndim
-    !        WRITE (*,*) irow, icol, Pmatr(irow,icol) 
-	!      enddo
-    !    enddo
-    !    pause
-    !  endif
+	  if (debug) then
+        WRITE (*,*) 'preparing Pmatrix...'
+	    do irow = 1, ndim
+	      do icol = 1, ndim
+            WRITE (*,*) irow, icol, Pmatr(irow,icol) 
+	      enddo
+        enddo
+        pause
+      endif
 
-	!  EXIT
+	  EXIT
 
-	!ENDDO
-    !if (debug) write(*,*) ' Prepare_CC: Pmatr', sngl(Jcn), pcn, nccu, nmaxu
-	!if (debug) pause
+	ENDDO
+    if (debug) write(*,*) ' Prepare_CC: Pmatr', sngl(Jcn), pcn, nccu, nmaxu
+	if (debug) pause
 
     if (debug) write(*,*) 'Smatr, MAX_smatr: ',MAX_pmatr
 
@@ -678,8 +683,8 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
          if(irow == icol) then
            Smatr(irow,icol) =  CCsmatrix(i1)%umatrix
          else
-           Smatr(irow,icol) =  CONJG(CCSmatrix(i1)%umatrix)
-           Smatr(icol,irow) =  CONJG(Smatr(irow,icol))
+           Smatr(irow,icol) =  CCSmatrix(i1)%umatrix 
+           Smatr(icol,irow) =  Smatr(irow,icol)      ! Smatrix is symmetric !!!
          endif
       enddo
       

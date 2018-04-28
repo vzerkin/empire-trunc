@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4969 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-07-04 15:06:06 +0200 (Di, 04 Jul 2017) $
+Ccc   * $Rev: 5090 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -2899,7 +2899,7 @@ C-----nceq is the number of coupled equations
       else
         READ (45,'(1x,f9.1,4x,a1,1x,i4)',END = 200) jc, parc, nceq  ! ecis06
       endif  
-C     write(*,*) jc,parc,nceq  
+C     write(*,'(1x,f9.1,4x,a1,2(1x,i4))') jc,parc,nceq
 C
 C-----Loop over the number of coupled equations
       DO nc = 1, nceq
@@ -2972,6 +2972,7 @@ C     as the spin of the target nucleus is neglected for spherical and DWBA calc
         ENDDO
       ENDIF
 C
+C     write(*,*) 'ECIS2EMP=',MAX_cc_mod 
       IF((NINT(DIRECT).EQ.1 .or. NINT(DIRECT).EQ.2) 
      >   .and. MAX_cc_mod.GT.0) then
          CALL AllocTLJmatr(MAX_cc_mod)
@@ -2995,11 +2996,11 @@ C
      >      l,STLcc(l)%lev,STLcc(l)%l,STLcc(l)%j,STLcc(l)%tlj,
      >      STLcc(l)%Jcn,STLcc(l)%Pcn
 
-C          write(*,*) 'MAX_pmatr=',MAX_pmatr
-C          write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
-C    >       CCpmatrix(l)%irow,CCpmatrix(l)%icol,
-C    >       DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
-C    >       CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
+           write(*,*) 'MAX_pmatr=',MAX_pmatr
+           write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
+     >       CCpmatrix(l)%irow,CCpmatrix(l)%icol,
+     >       DREAL(CCpmatrix(l)%umatrix),DIMAG(CCpmatrix(l)%umatrix),
+     >       CCpmatrix(l)%Jcn,CCpmatrix(l)%Pcn,CCpmatrix(l)%nceq
 
            write(*,*) 'MAX_smatr=',MAX_pmatr
            write(*,'(1x,I3,1x,I3,1x,2(d12.6,1x),F5.1,1x,I2,1x,I3)') 
@@ -4374,7 +4375,6 @@ C     INLkey < 0  Calculation for coupled states only = CC
       CALL ECIS('ecis06 ',itmp)
       IF (IHFnew.eq.0) itmp = 0 ! disabling advanced HF
 
-C     write (*,*) 'from ECIS MAX_cc=',MAX_cc_mod
 C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
@@ -4389,9 +4389,12 @@ C     restoring the input value of the key CN_isotropic
           iwin = ipipe_move('ecis06.inp','ECIS_SPH.inp')
         ENDIF
       ELSE
-         MAX_cc_mod = itmp
-         iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
-         iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
+        IF(inc_channel .and. Inlkey.LT.0) THEN
+          MAX_cc_mod = itmp	   
+          write (*,*) 'from ECIS vib MAX_cc=',MAX_cc_mod
+        ENDIF 
+        iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
+        iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
       ENDIF
 
       RETURN 
@@ -5126,7 +5129,11 @@ C     restoring the input value of the key CN_isotropic
       CN_isotropic = logtmp
 
       IF(TL_calc) RETURN
-      MAX_cc_mod = itmp
+
+      IF(inc_channel) THEN
+        MAX_cc_mod = itmp	   
+        write (*,*) 'from ECIS rot MAX_cc=',MAX_cc_mod
+      ENDIF 
 
       IF (npho.GT.0) THEN
          iwin = ipipe_move('ecis06.out','ECIS_VIBROT.out')

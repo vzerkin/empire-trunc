@@ -1,7 +1,8 @@
+$DEBUG
 MODULE width_fluct
-    ! $Rev: 5073 $
-    ! $Author: capotenoyr $
-    ! $Date: 2018-03-28 21:31:24 +0200 (Mi, 28 Mär 2018) $
+    ! $Rev: 5090 $
+    ! $Author: capote $
+    ! $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -58,7 +59,8 @@ MODULE width_fluct
         INTEGER nout      ! position of the corresponding outgoing channel in outchnl
         INTEGER l         ! projectile l
         REAL*8 j          ! projectile j
-        REAL*8 t          ! projectile Tlj
+        REAL*8 t          ! projectile Tlj (in the EW rotated or original space) 
+        REAL*8 tlj        ! projectile Tlj (in the original space)
         REAL*8 sig        ! absorption x-section for this channel
     END TYPE fusion
 
@@ -228,6 +230,7 @@ CONTAINS
         inchnl%l    = 0
         inchnl%j    = 0.d0
         inchnl%t    = 0.d0
+        inchnl%tlj  = 0.d0
         inchnl%sig  = 0.d0
 
         IF(allocated(WFC)) DEALLOCATE(WFC)
@@ -836,6 +839,7 @@ CONTAINS
                         in%l = k-1                       !setting incident channel
                         in%j = xj                        !          "
                         in%t = tld                       !          "
+						in%tlj = tld
                         h_sumtl = h_sumtl + tld*rho1
                         h_sumtls = h_sumtls + tld**2*rho1
                     ENDDO                 ! do loop over jndex --- done -------
@@ -888,9 +892,9 @@ CONTAINS
 
         IF(ndim==0) RETURN   ! no collective channels found
 
-        write(*,*) ' '
-        write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
-            sngl(xjc), ipc, ncc, nccp, nccu, ndim
+        !write(*,*) ' '
+        !write(*,*) 'After Prepare_CCmatrix: xjc, ipc, ncc, nccp, nccu, ndim', &
+        !    sngl(xjc), ipc, ncc, nccp, nccu, ndim
         
         DO i = ncc, nccp
             tld = Pdiag(i-ncc+1)          ! use Tlj in diagonalized space Pdiag if
@@ -940,6 +944,7 @@ CONTAINS
                 in%l = out%l            !setting incident channel
                 in%j = out%j            !setting incident channel
                 in%t = tld              !setting incident channel
+                in%tlj = STLcc(i)%tlj   !setting incident channel (in the non rotated space)
             ENDIF
 
         !         ELSE
@@ -955,6 +960,8 @@ CONTAINS
         !         ENDIF
 
         ENDDO
+
+        ! write(*,*) 'Number of elastic channels ',nel, ' collective ', num%colh-num%coll+1
     !      IF (INTerf>0) THEN
     !         num%elal = num%coll
     !         num%elah = num%colh
@@ -1420,12 +1427,12 @@ CONTAINS
         INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
         REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, xjc, coef, sxj
         REAL*8 Ia
-        REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2, xnor_c, xnor_cc
+        REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2, xnor_c
         REAL*8 d0c, sumfis_mem, w, dtmp
         REAL*8 sumfism(nfmod)
         REAL*8 sumin_s, sumtt_s
-        REAL*8 sigma_ab,sigma_alph_b
-        INTEGER iaa,ibb, my
+        REAL*8 sigma_ab
+        INTEGER iaa
 
         REAL*8, DIMENSION(6) :: sig_cc !temporary to sum CC x-sec
 
@@ -1469,16 +1476,18 @@ CONTAINS
 
         relcal = .FALSE.
         IF(IRElat(0,0)>0 .OR. RELkin) relcal = .TRUE.
-        IF (AEJc(0).EQ.0.0D0) THEN
-            xmas_npro = 0.d0
-            relcal = .TRUE.
-        ENDIF
+
+        !IF (AEJc(0).EQ.0.0D0) THEN
+        !    xmas_npro = 0.d0
+        !    relcal = .TRUE.
+        !ENDIF
 
         CALL kinema(el,ecms,xmas_npro,xmas_ntrg,ak2,1,relcal)
 
         ! write(*,*) 'HRTW=',10.D0*PI/ak2,el,IRElat(0,0),RELKIN,relcal
-        coef = 1.d0
-        IF (AEJc(0)>0) coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
+        !coef = 1.d0
+        !IF (AEJc(0)>0) coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
+        coef = 10.D0*PI/ak2/(2.D0*Ia + 1.d0)/(2.D0*sxj + 1.d0)
 
         !----------------------------------------------------------
         ! start CN nucleus decay
@@ -1549,99 +1558,76 @@ CONTAINS
                 !  write(*,*)'DENhf calculated before Moldauer', DENhf
 
 
-                WRITE(8,*) 'CN decay state Jpi',xjc,ip
-                write(*,*)'DENhf calculated before Moldauer', DENhf
-                ! Engelbrecht- Weidenmueller diagonalization
-                IF(INTerf>0) CALL EW_diagonalization(xjc,ip)
-
                 !----------------------------------------------------------
                 ! Calculate WF term common for all channels
                 !----------------------------------------------------------
                 CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral
                                 ! that doesn't depend on incoming and outgoing channels
 
+                !WRITE(*,*) 'CN decay state Jpi',xjc,ip
+                write(*,*)'DENhf calculated before Moldauer', DENhf
+                ! Engelbrecht- Weidenmueller diagonalization
+                IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
+				  CALL EW_diagonalization(xjc,ip)
+
+                  !------------------------------------------------------------------
+                  ! Calculate un-normalized cross sections in the rotated channel space
+                  !------------------------------------------------------------------
+                  DO i = num%coll, num%colh  ! i = loop over incoming channels
+                    in => inchnl(i-num%coll+1)
+                    in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
+
+                    ! iout = loop over collective particle channels
+                    DO iout = num%coll, num%colh
+					   out => outchnl(iout)
+                       ! For inverse transformation to work sigma must contain 'in' and 'out' channels,
+                       ! as well as WFC, only xnor_c normalization can be applied later.
+                       sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = in%t*out%t*WFC2(i,iout)
+!                      sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC2(i,iout)/DENhf !normalized x-sec
+!                      write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
+!                                in%t, out%t, WFC2(i,iout)
+                    ENDDO ! end of outgoing channel loop over iout
+                  ENDDO
+				ENDIF
                 !----------------------------------------------------------
                 ! normalization factor without incident channel, i.e. Sigma_ab = xnor_c*Ta*Tb
                 !----------------------------------------------------------
                 xnor_c = coef*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+				!WRITE(*,*) 'Normal.xs=',xnor_c
                 SCRt_mem  = SCRt    ! store initial values
                 SCRtl_mem = SCRtl
                 sumfis_mem = sumfis
-
-
-                IF(INTerf>0) THEN
-                    !------------------------------------------------------------------
-                    ! Calculate un-normalized cross sections in the rotated channel space
-                    !------------------------------------------------------------------
-                    DO i = num%coll, num%colh  ! i = loop over incoming channels
-                        in => inchnl(i-num%coll+1)
-                        in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
-
-                        ! iout = loop over collective particle channels
-                        DO iout = num%coll, num%colh
-                            out => outchnl(iout-num%coll+1) !ATTENTION: redefining outgoing channel!!!
-                            ! For inverse transformation to work sigma must contain 'in' and 'out' channels,
-                            ! as well as WFC, only xnor_c normalization can be applied later.
-                            sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = in%t*out%t*WFC2(i,iout)
-                        !                     sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC2(i,iout)/DENhf !normalized x-sec
-                        !                     write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
-                        !                                in%t, out%t, WFC2(i,iout)
-                        ENDDO ! end of outgoing channel loop over iout
-                    ENDDO
-                    !----------------------------------------------------------
-                    ! Inverse Engelbrecht-Weidenmueller transformation for collective
-                    ! channels to obtain Sigma_iaa,ibb in the normal space
-                    !----------------------------------------------------------
-                    DO i = num%elal, num%elah ! loop over elastic (fusion) channels in normal spacce
-                        iaa = i - num%elal + 1
-                        xnor_cc = EW_absorption(iaa)        ! We'll need it to reduce real x-sec to the sum of
-                                                            ! outgoing Tlj so they can be summed on SCRt matrix
-                        SCRt   = SCRt_mem
-                        SCRtl  = SCRtl_mem
-                        sumfis = sumfis_mem
-
-                        DO iout = num%coll, num%colh !loop over all collective channels
-                            ibb = iout - num%coll + 1
-                            out => outchnl(iout)
-                            Sigma_ab = INVERSE_EW(iaa,ibb) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
-                            sig_cc(-out%kres) = sig_cc(-out%kres) + Sigma_ab*xnor_c/DENhf
-                            write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab/xnor_cc, ' level=', -out%kres
-                            CALL update_SCRt(out, Sigma_ab/xnor_cc, sumin_s, sumtt_s)
-                        ENDDO
-                    ENDDO
-                    write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
-                ENDIF ! INTerf>0
 
                 ! loop over iaa=i (coupled channels in the normal space)
                 DO i = num%elal, num%elah
                     iaa = i - num%elal + 1
                     in => inchnl(iaa)
-                    IF(INTerf>0) THEN
-                        in%sig = coef*EW_absorption(iaa)*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                        write(*,*) 'EW Incident Tl=',EW_absorption(iaa)
-                    ELSE
-                        in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                        write(*,*) '   Incident Tl=',in%t
-                    ENDIF
+                    in%sig = xnor_c*in%tlj
+					!write(*,*) ' Inc Tl=',in%tlj,' Sig=',sngl(in%sig),sngl(ip*xjc)
 
-                    ! loop over ibb=iout (all channels in the normal space)
+                    ! loop over ibb=iout (all particle channels in the normal space)
                     DO iout = 1, num%part
-                        ibb = iout - num%coll + 1
+                        !ibb = iout - num%coll + 1
                         out => outchnl(iout)
                         w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                         WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
-                        sigma_alph_b = out%t*w
-                        IF(INTerf>0 .AND. iout>=num%coll .AND. iout<=num%colh ) CYCLE ! collective channels were done already
-                        Sigma_ab = sigma_alph_b
-                        IF(iout>=num%coll .AND. iout<=num%colh ) THEN
-                            write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, ' level=', -out%kres
-                            sig_cc(-out%kres) = sig_cc(-out%kres) + in%t*Sigma_ab*xnor_c/DENhf
-                        ENDIF
+
+						IF(INTerf>0) THEN
+						  !Sigma_ab = INVERSE_EW(iaa,ibb) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
+						   Sigma_ab = INVERSE_EW(i,iout) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
+						ELSE
+                          Sigma_ab = out%t*w
+						ENDIF
+                        ! IF(iout>=num%coll .AND. iout<=num%colh ) THEN
+                        !   write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, ' level=', -out%kres
+                        !   sig_cc(-out%kres) = sig_cc(-out%kres) + in%t*Sigma_ab*xnor_c/DENhf
+                        ! ENDIF
                         CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
                     ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
-                    IF(INTerf==0) write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
+                    !IF(INTerf==0) write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
 
                     CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
+
                     !----------------------------------------------------------
                     ! Fission
                     !----------------------------------------------------------
@@ -1654,7 +1640,8 @@ CONTAINS
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                     write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
-                    IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
+                    PAUSE
+					IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
                     !               ! absorption for incoming channel
                     !               in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
@@ -1733,66 +1720,161 @@ CONTAINS
         DO i=1,NDIm_cc_matrix
             ZRtmp1(i,i) = 1.d0
         ENDDO
-
-        !Diagonalizing the Smatrix in the transformed space
-        Sdiag =   REAL(Smatr)
-        ZItmp =   IMAG(Smatr)
-        !write(*,*) 'Smatrix HRTW'
-        !DO i = 1,NDIm_cc_matrix
-        !  DO iout = 1,NDIm_cc_matrix
-        !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Sdiag(i,iout),ZItmp(i,iout)
-        !  ENDDO
-        !ENDDO
-
-        IF(debug) WRITE(*,*) 'EW transformation, space dimension',NDIm_cc_matrix
-               
-        CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
-        IF(IER/=0) WRITE (8,*) 'WARNING: EW Smatrix DIAGONALIZATION PROBLEMS for CN Jpi=',sngl(xjc*ip)
-        ! On exit Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
-        ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
+        
+        !Diagonalizing the ECIS Pmatrix in the transformed space for cross checking
+        ! ECIS values of Pdiag reproduced exactly 
+		PPdiag =   REAL(Pmatr)
+        ZItmp  =   IMAG(Pmatr)
+		if(debug) then
+         WRITE(*,*) '************ Using ECIS Pmatr' 
+         DO i = 1,NDIm_cc_matrix
+           DO iout = 1,NDIm_cc_matrix
+             write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
+           ENDDO
+         ENDDO
+		endif
+        CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+        IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
+        ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space
+        ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix
+                 
+		if(debug) then
+		 WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+         DO iout = 1,NDIm_cc_matrix
+           write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout)
+           DO I = 1,NDIm_cc_matrix
+             write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6))') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
+           ENDDO
+         ENDDO
+        endif
+        ! Construct U-matrix that diagonalized P-matrix	 (checked to comply with equalities (A8) and (A10)) 
+        ! ECIS values of Umatr reproduced exactly 
         DO i=1,NDIm_cc_matrix
-            ! write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',datan(Sdiag(i,i))
-            Sphase(i) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
-                   ! write(*,*) i,sngl(Sdiag(i,i)),sngl(Pdiag(i)),sngl(Sphase(i))
+           DO iout = 1,NDIm_cc_matrix
+              Umatr(i,iout) = cmplx(ZRtmp1(i,iout),ZItmp1(i,iout))
+           ENDDO
         ENDDO
-
-        ! setting the complex identity matrix to call DIAG()
+        !*******************************************************************************
+		! Derivation of Pmatrix from Smatrix (diagonal elements = ECIS, off-diag differ)
+		!Tmatr = MATMUL(Smatr,TRANSPOSE(CONJG(Smatr)))
         !ZRtmp1 = 0.d0
-        !do i=1,NDIm_cc_matrix
-        !  ZRtmp1(i,i) = 1.d0
-        !enddo
+        !DO i=1,NDIm_cc_matrix
+        !    ZRtmp1(i,i) = 1.d0
+        !ENDDO
         !ZItmp1 = 0.d0
-        !Diagonalizing the Pmatrix in the transformed space for cross checking
-        !PPdiag =   REAL(Pmatr)
-        !ZItmp  =   IMAG(Pmatr)
-        !write(*,*) 'Pmatrix HRTW'
+        !WRITE(*,*) '************ Using OUR Pmatr' 
+        !write(*,*) 'Calculated Pmatrix from Smatrix (foll. T=1-<S><S>^+)'
+        !Pmatr = CMPLX(ZRtmp1,ZItmp1) - Tmatr  !(*)
         !DO i = 1,NDIm_cc_matrix
         !  DO iout = 1,NDIm_cc_matrix
-        !    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
+        !    write(*,'(1x,2(I3,1x),(d12.6,1x,d12.6))') i,iout,Pmatr(i,iout)
         !  ENDDO
         !ENDDO
+
+		! Consistent with (*)
+        !write(*,*) 'Calculated Pmatrix from Smatrix (foll. Eq.(11) Kawano)'
+		!Pmatr = (0.d0,0.d0)
+        !DO iaa = 1,NDIm_cc_matrix
+        !  DO ibb = 1,NDIm_cc_matrix
+	    !	if(iaa.eq.ibb) Pmatr(iaa,ibb)=(1.d0,0.d0)
+        !    DO i = 1,NDIm_cc_matrix
+		!	  Pmatr(iaa,ibb) = Pmatr(iaa,ibb) - Smatr(iaa,i)*CONJG(Smatr(ibb,i))
+        !  	ENDDO
+        !   write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') iaa,ibb,Pmatr(iaa,ibb)
+        ! ENDDO
+        !ENDDO
+
+        !Diagonalizing our Pmatrix in the transformed space for cross checking
+        ! ECIS values of Pdiag reproduced exactly 
+		!PPdiag =   REAL(Pmatr)
+        !ZItmp  =   IMAG(Pmatr)
+
         !CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
         !IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
         ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space
         ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix
-                 
-        !WRITE(*,*) 'HRTW diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+		!WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
         !DO iout = 1,NDIm_cc_matrix
         !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout)
         !  DO I = 1,NDIm_cc_matrix
         !    write(*,'(1x,2(i3,1x),9(d12.6,1x,d12.6))') i,iout, ZRtmp1(I,iout),ZItmp1(I,iout)
         !  ENDDO
         !ENDDO
+        ! Construct our U-matrix that diagonalized "our" P-matrix (checked to comply with equalities (A8) and (A10)) 
+        !DO i=1,NDIm_cc_matrix
+        !   DO iout = 1,NDIm_cc_matrix
+        !      Umatr(i,iout) = cmplx(ZRtmp1(i,iout),ZItmp1(i,iout))
+        !   ENDDO
+        !ENDDO
+               
+        !Diagonalizing the Smatrix using the derived Umatrix
+		! This does not work 
+        Pmatr =   MATMUL(Umatr,MATMUL(Smatr,Umatr)) ! overwriting Pmatrix, as in principle not needed anympore
+		if(debug) then
+        write(*,*) 'Smatrix from ECIS'
+        DO i = 1,NDIm_cc_matrix
+          DO iout = 1,NDIm_cc_matrix
+            write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Smatr(i,iout)
+          ENDDO
+        ENDDO
+        write(*,*) 'Diag Smatrix using Umatrix (from Pmatr diag)'
+        DO i = 1,NDIm_cc_matrix
+          DO iout = 1,NDIm_cc_matrix
+            write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Pmatr(i,iout) 
+          ENDDO
+        ENDDO
+		endif
+		!PAUSE
 
-        IF(debug) THEN
+        ZRtmp1 = 0.d0
+        DO i=1,NDIm_cc_matrix
+            ZRtmp1(i,i) = 1.d0
+        ENDDO
+        ZItmp1 = 0.d0
+
+        Sdiag  = REAL(Smatr)
+        ZItmp  = IMAG(Smatr)
+
+        CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
+        IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
+        ! On exit Sdiag contains the diagonalized Smatrix = S{alpha,alpha) in the transformed space
+        ! ZRtmp1,ZItmp1 contains the real and imaginary part of the corresponding eigenvectors
+		IF(debug) then
+          write(*,*) 'Diagonal Smatrix'
+          DO i = 1,NDIm_cc_matrix
+            DO iout = 1,NDIm_cc_matrix
+              write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Sdiag(i,iout),ZItmp(i,iout)
+            ENDDO
+          ENDDO
+        ENDIF
+		       
+        ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
+        ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
+        DO i=1,NDIm_cc_matrix
+		  ibb = NDIm_cc_matrix - i + 1 
+		  Sphase(ibb) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
+          if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i),' phi(alpha)=',Sphase(i)
+          if(debug) write(*,*) i,sngl(1.d0-ABS(Sdiag(ibb,ibb))**2),sngl(Pdiag(i)),sngl(PPdiag(i,i))
+        ENDDO
+		! We diagonalize Smatr to calculate the phases from its diagonal elements
+		! However, we were not able to verify that Umatr also diagonalized Smatr
+		! Clearly, we can not calculate Umatr from Smatr as papers clearly state
+		! that Umatr is derived from the diagonalization of the Pmatr
+		!
+		! At this point, we have available Pdiag(:), Umatr(:,:), Sphase(:)
+		!PAUSE
+
+		IF(debug) THEN
             ! loop over ibb=iout (coupled channels in the normal space)
-            DO iout = num%coll, num%colh
-                ibb = iout - num%coll + 1
+            DO ibb = 1,NDIm_cc_matrix
+            !DO iout = num%coll, num%colh
+                !ibb = iout - num%coll + 1
 
                 ctmp1 = (0.d0,0.d0)
                 ctmp2 = (0.d0,0.d0)
-                DO i = num%elal, num%elah
-                    iaa = i - num%elal + 1
+                DO iaa = 1,NDIm_cc_matrix
+                !DO i = num%elal, num%elah
+                    !iaa = i - num%elal + 1
                     ! Checking equalities (A8) and (A10) over indexes iaa,ialph,ibeta
                     DO ialph = 1, NDIm_cc_matrix
                         DO ibeta = 1, NDIm_cc_matrix
@@ -1808,46 +1890,58 @@ CONTAINS
                         ENDDO
                     ENDDO
                 ENDDO ! over ibb = iout
-              ! WRITE(*,*) 'CN decay state Jpi',xjc,ip,' ibb=',ibb
-              ! WRITE(*,*) 'S1 (R,I)=', REAL(ctmp1), IMAG(ctmp1)
-              ! WRITE(*,*) 'S2 (R,I)=', REAL(ctmp2), IMAG(ctmp2)
+                WRITE(*,*) 'CN decay state Jpi',xjc,ip,' ibb=',ibb
+                WRITE(*,*) 'S1 (R,I)=', REAL(ctmp1), IMAG(ctmp1)
+                WRITE(*,*) 'S2 (R,I)=', REAL(ctmp2), IMAG(ctmp2)
             ENDDO ! over iaa = i
         ENDIF
+        !PAUSE 
+
         RETURN
 
     END SUBROUTINE EW_diagonalization
 
     !----------------------------------------------------------------------------------------------------
 
-    REAL*8 FUNCTION INVERSE_EW(iaa,ibb)
-        ! Both iaa and ibb have to be collective channels
-        ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+    REAL*8 FUNCTION INVERSE_EW(i,iout)
+        ! i is an incident (elastic) collective channels
+        ! iout is an outgoing particle channel, it can be collective or uncoupled
+		! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
    
         IMPLICIT NONE
 
         ! Dummy arguments
 
-        INTEGER, INTENT(IN) :: iaa,ibb
+        INTEGER, INTENT(IN) :: i,iout
 
         ! Local variables
         REAL*8 nu_ialph, nu_ibeta
-        INTEGER ialph,ibeta,ialph_ch,ibeta_ch
+        INTEGER ialph,ibeta,ialph_ch,ibeta_ch,iaa,ibb
         REAL*8 deg_alph,deg_beta,dtmp
         COMPLEX*16 ctmp1, ctmp2, phas
- 
-        !------------------------------------------------------------------------------
-        ! loops over collective levels in the transformed space (ialph & ibeta)
-                     
+
+        TYPE (channel), POINTER :: out
+        TYPE (fusion),  POINTER :: in
+
         ctmp1 = (0.d0,0.d0)
         ctmp2 = (0.d0,0.d0)
-        DO ialph = 1, NDIm_cc_matrix
+        iaa = i - num%elal + 1
+
+		if(num%coll.LE.iout .AND. iout.LE.num%colh) then
+          !------------------------------------------------------------------------------------------
+          !! loops over collective levels in the transformed space (ialph and ibeta) for coupled iout
+	      ibb = iout - num%coll + 1
+          DO ialph = 1, NDIm_cc_matrix
             ialph_ch = num%coll + ialph -1
             nu_ialph =  outchnl(ialph_ch)%eef/2.D0   ! half of the degree of freedom for alpha channel
             deg_alph =  DSQRT(1.d0/nu_ialph - 1.d0)
             ! first sum, Eq.(16)
             ctmp1 = ctmp1 + ABS(Umatr(ialph,iaa))**2 & !  Umatr(ialph,iaa)*CONJG(Umatr(iaa,ialph))   &
-                * ABS(Umatr(ialph,ibb))**2 & !* Umatr(ialph,ibb)*CONJG(Umatr(ibb,ialph)) &
-                * sigma_alph_beta(ialph,ialph)
+                          * ABS(Umatr(ialph,ibb))**2 & !* Umatr(ialph,ibb)*CONJG(Umatr(ibb,ialph)) &
+                          * sigma_alph_beta(ialph,ialph)
+
+                    !   sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = in%t*out%t*WFC2(i,iout)
+
             
             DO ibeta = 1, NDIm_cc_matrix
 
@@ -1868,90 +1962,42 @@ CONTAINS
                 ! second and third sums, Eq.(16)
                 ctmp2 = ctmp2 +                                           &
                     ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
-                    ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +             &   !2nd
-                    Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +           &   !2nd
-                    CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*  &   !3rd
-                    Umatr(ibeta,iaa)*Umatr(ibeta,ibb)*              &   !3rd
-                    phas*deg_alph*deg_beta )                        &   !3rd
-                    *sigma_alph_beta(ialph,ibeta)                       !2nd & 3rd
+                          ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +             &   !2nd
+                            Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +           &   !2nd
+                      CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*  &   !3rd
+                            Umatr(ibeta,iaa)*Umatr(ibeta,ibb)*              &   !3rd
+                            phas*deg_alph*deg_beta )                        &   !3rd
+                            *sigma_alph_beta(ialph,ibeta)                       !2nd & 3rd
+
+                    !   sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = in%t*out%t*WFC2(i,iout)
+
 
             ENDDO ! end of the loop over ibeta (transformed space)
-        ENDDO   ! end of the loop over ialph (transformed space)
-        INVERSE_EW = REAL(ctmp1) + REAL(ctmp2)  ! this is Sigma_ab cross section (in the normal space)
+          ENDDO   ! end of the loop over ialph (transformed space)
+          INVERSE_EW = REAL(ctmp1) + REAL(ctmp2)  ! this is Sigma_ab cross section (in the normal space)
 
-                       !WRITE(*,*) REAL (ctmp1),' REAL diag' ! the cross section \sigma_{ab} in the normal space
-                       !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
-                       !WRITE(*,*) REAL (ctmp2),' REAL offd' ! the cross section \sigma_{ab} in the normal space
-                       !WRITE(*,*) DIMAG(ctmp2),' IMAG offd' ! the imaginary part expected to be zero
-                       !WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
+          !WRITE(*,*) REAL (ctmp1),' REAL diag' ! the cross section \sigma_{ab} in the normal space
+          !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
+          !WRITE(*,*) REAL (ctmp2),' REAL offd' ! the cross section \sigma_{ab} in the normal space
+          !WRITE(*,*) DIMAG(ctmp2),' IMAG offd' ! the imaginary part expected to be zero
+          !WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
+		else
 
-        RETURN
+          !----------------------------------------------------------------------------------------
+          ! loops over collective levels over rotated space (ialph) for the uncoupled states (iout)
+          in => inchnl(iaa)
+          out => outchnl(iout)
+          dtmp = 0.d0
+          DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
+            dtmp = dtmp + in%t*out%t*WFC(i,iout)*ABS(Umatr(ialph,iaa))**2 ! WFC(i,iout)=WFC2(i,iout)
+          ENDDO   ! end of the loop over ialph (transformed space)
+
+		  INVERSE_EW = dtmp
+
+		endif
+        
+		RETURN
     END FUNCTION INVERSE_EW
-
-    !----------------------------------------------------------------------------------------------------
-
-    REAL*8 FUNCTION INVERSE_EW_diag(iaa,sigma_alph_b)
-        ! iaa is collective (incoming)
-        ! ibb is uncoupled (non-collective)
-        ! Engelbrecht-Weidenmueller backward transformation Eq.(23) TK paper
-   
-        IMPLICIT NONE
-        ! Dummy arguments
-        INTEGER, INTENT(IN) :: iaa
-        REAL*8 , INTENT(IN) :: sigma_alph_b
-        ! Local variables
-        INTEGER ialph
-        REAL*8 dtmp
- 
-        !------------------------------------------------------------------------------
-        ! loop over collective levels in the transformed space (ialph & ibeta=ibb)
-                    
-        dtmp = 0.d0
-        DO ialph = 1, NDIm_cc_matrix
-            dtmp = dtmp + sigma_alph_b*ABS(Umatr(ialph,iaa))**2
-        ENDDO   ! end of the loop over ialph (transformed space)
-        INVERSE_EW_diag = REAL(dtmp)  ! this is Sigma_ab cross section (in the normal space)
-
-        RETURN
-    END FUNCTION INVERSE_EW_diag
-
-    !----------------------------------------------------------------------------------------------------
-
-    REAL*8 FUNCTION EW_absorption(iaa)
-        !**************************************************************************************
-        !                                                                                     *
-        !                         EW-absorption                                               *
-        !                                                                                     *
-        ! For the diagonal part of the S-matrix (non-collective channels) the                 *
-        ! Engelbrecht-Weidenmueller backward transformation (Eq.(23) of TK paper)             *
-        ! can be factorized into incident and outgoing terms. This function returns           *
-        ! the incident part that playes a role of fusion Tlj in HF.                           *
-        !                                                                                     *
-        ! Input:                                                                              *
-        !    iaa - collective (incoming) channel index in the usual space                     *
-        ! Output:                                                                             *
-        !    EW-absorption - transmission coefficient for iaa channel in a                    *
-        !                    normal space calculated from the rotated (diagonalized) space.   *
-        !                                                                                     *
-        !    ialph runs over all collective channels in the rotated spce.                     *
-        !                                                                                     *
-        !**************************************************************************************
-
-        IMPLICIT NONE
-        ! Dummy arguments
-        INTEGER, INTENT(IN) :: iaa
-        ! Local variables
-        INTEGER ialph
-        REAL*8 dtmp
-
-        dtmp = 0.d0
-        DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
-            dtmp = dtmp + inchnl(ialph)%t*ABS(Umatr(ialph,iaa))**2
-        ENDDO   ! end of the loop over ialph (transformed space)
-        EW_absorption = REAL(dtmp)  ! this is Sigma_ab cross section (in the normal space)
-
-        RETURN
-    END FUNCTION EW_absorption
 
     !----------------------------------------------------------------------------------------------------
 

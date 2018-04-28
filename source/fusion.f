@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4947 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-05-31 17:51:38 +0200 (Mi, 31 Mai 2017) $
+Ccc   * $Rev: 5090 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
 
       SUBROUTINE MARENG(Npro,Ntrg,Nnurec,Nejcec)
 Ccc
@@ -233,16 +233,16 @@ C           if (fexistj .and. (DIRect.EQ.1 .or. DIRect.EQ.2)) then
               IF(MAX_cc_mod.GT.0) THEN
                 CALL AllocTLJmatr(MAX_cc_mod)
                 READ(451,ERR=42,END=42)  (STLcc(i),i=1,MAX_CC_mod)    
-                   IF(INTerf.GT.0) THEN
+                IF(INTerf.GT.0) THEN
                   CALL AllocEWmatr(MAX_cc_mod,MAX_pmatr,MAX_umatr)
                   READ(451,ERR=43,END=43) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
-C                 READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
-                  READ(451,ERR=43,END=43) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag 
+                  READ(451,ERR=43,END=43) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix
+                  READ(451,ERR=43,END=43) (CCpdiag(i),i=1,MAX_CC_mod)  ! Pdiag 
                   READ(451,ERR=43,END=43) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
                 ENDIF 
-                   CLOSE(451)
+                CLOSE(451)
               ENDIF  
-                 GOTO 44 ! EW matrices read successfully
+              GOTO 44 ! EW matrices read successfully
 
  42           IF(INTerf.GT.0) THEN
                 WRITE(8,*) 'WARNING: EW matrices not found'
@@ -730,27 +730,33 @@ C
      &              ipipe_move('ccm_Pchan.bin','INCIDENT_Pchan.bin')
 C              
                  IF(INTerf.gt.0) THEN
-C                INQUIRE (FILE = 'ccm_Pmatr.bin', EXIST = fexist)
-C                IF (fexist) iwin = 
-C    &              ipipe_move('ccm_Pmatr.bin','INCIDENT_Pmatr.bin')
+                   INQUIRE (FILE = 'ccm_Pmatr.bin', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &               ipipe_move('ccm_Pmatr.bin','INCIDENT_Pmatr.bin')
+                   INQUIRE (FILE = 'ccm_Pmatr.LST', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &               ipipe_move('ccm_Pmatr.LST','INCIDENT_Pmatr.LST')
 
-                 INQUIRE (FILE = 'ccm_Smatr.bin', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Smatr.bin','INCIDENT_Smatr.bin')
+                   INQUIRE (FILE = 'ccm_Smatr.bin', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &               ipipe_move('ccm_Smatr.bin','INCIDENT_Smatr.bin')
+                   INQUIRE (FILE = 'ccm_Smatr.LST', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &              ipipe_move('ccm_Smatr.LST','INCIDENT_Smatr.LST')
 
-                 INQUIRE (FILE = 'ccm_Pdiag.LST', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
-                 INQUIRE (FILE = 'ccm_Pdiag.bin', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Pdiag.bin','INCIDENT_Pdiag.bin')
+                   INQUIRE (FILE = 'ccm_Pdiag.LST', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &                ipipe_move('ccm_Pdiag.LST','INCIDENT_Pdiag.LST')
+                   INQUIRE (FILE = 'ccm_Pdiag.bin', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &                ipipe_move('ccm_Pdiag.bin','INCIDENT_Pdiag.bin')
 
-                 INQUIRE (FILE = 'ccm_Umatr.LST', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
-                 INQUIRE (FILE = 'ccm_Umatr.bin', EXIST = fexist)
-                 IF (fexist) iwin = 
-     &              ipipe_move('ccm_Umatr.bin','INCIDENT_Umatr.bin')
+                   INQUIRE (FILE = 'ccm_Umatr.LST', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &                ipipe_move('ccm_Umatr.LST','INCIDENT_Umatr.LST')
+                   INQUIRE (FILE = 'ccm_Umatr.bin', EXIST = fexist)
+                   IF (fexist) iwin = 
+     &                ipipe_move('ccm_Umatr.bin','INCIDENT_Umatr.bin')
                  ENDIF 
                ENDIF
 C
@@ -1069,8 +1075,8 @@ C
              if(IOUt.eq.5) then
                ctmp = ctldir//ctmp23//'_Smatr.LST'
                iwin = ipipe_move('INCIDENT_Smatr.LST',ctmp)
-C              ctmp = ctldir//ctmp23//'_Pmatr.LST'
-C              iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
+               ctmp = ctldir//ctmp23//'_Pmatr.LST'
+               iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
                ctmp = ctldir//ctmp23//'_Umatr.LST'
                iwin = ipipe_move('INCIDENT_Umatr.LST',ctmp)
                ctmp = ctldir//ctmp23//'_Pdiag.LST'
@@ -1078,8 +1084,8 @@ C              iwin = ipipe_move('INCIDENT_Pmatr.LST',ctmp)
              endif
              ctmp = ctldir//ctmp23//'_Smatr.bin'
              iwin = ipipe_move('INCIDENT_Smatr.bin',ctmp)
-C            ctmp = ctldir//ctmp23//'_Pmatr.bin'
-C            iwin = ipipe_move('INCIDENT_Pmatr.bin',ctmp)
+             ctmp = ctldir//ctmp23//'_Pmatr.bin'
+             iwin = ipipe_move('INCIDENT_Pmatr.bin',ctmp)
              ctmp = ctldir//ctmp23//'_Umatr.bin'
              iwin = ipipe_move('INCIDENT_Umatr.bin',ctmp)
              ctmp = ctldir//ctmp23//'_Pdiag.bin'
@@ -1181,8 +1187,8 @@ C    & MAX_cc_mod,MAX_pmatr,MAX_umatr
            WRITE(451) (STLcc(i),i=1,MAX_CC_mod) 
            IF(INTerf.GT.0) THEN
              WRITE(451) (CCsmatrix(i),i=1,MAX_pmatr) ! Smatrix  
-C            WRITE(451) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix 
-             WRITE(451) (CCpdiag(i),i=1,MAX_CC_mod)   ! Pdiag  
+             WRITE(451) (CCpmatrix(i),i=1,MAX_pmatr) ! Pmatrix 
+             WRITE(451) (CCpdiag(i),i=1,MAX_CC_mod)  ! Pdiag  
              WRITE(451) (CCumatrix(i),i=1,MAX_umatr) ! Umatrix
            ENDIF
          ENDIF   
@@ -2098,12 +2104,12 @@ C     write(*,*) 'Direc=',NINT(Direc),Iret,' ',Outname(1:Length)
       IF (fexist) iwin = ipipe_move('ecis06_Pchan.bin',ctmp)
 
       IF (Iret.EQ.4 .OR. Inter.EQ.0) RETURN
-C     ctmp = Outname(1:Length)//'_Pmatr.LST'
-C     INQUIRE (FILE = 'ecis06_Pmatr.LST', EXIST = fexist)
-C     IF (fexist) iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
-C     ctmp = Outname(1:Length)//'_Pmatr.bin'
-C     INQUIRE (FILE = 'ecis06_Pmatr.bin', EXIST = fexist)
-C     IF (fexist) iwin = ipipe_move('ecis06_Pmatr.bin',ctmp)
+      ctmp = Outname(1:Length)//'_Pmatr.LST'
+      INQUIRE (FILE = 'ecis06_Pmatr.LST', EXIST = fexist)
+      IF (fexist) iwin = ipipe_move('ecis06_Pmatr.LST',ctmp)
+      ctmp = Outname(1:Length)//'_Pmatr.bin'
+      INQUIRE (FILE = 'ecis06_Pmatr.bin', EXIST = fexist)
+      IF (fexist) iwin = ipipe_move('ecis06_Pmatr.bin',ctmp)
 
       ctmp = Outname(1:Length)//'_Smatr.LST'
       INQUIRE (FILE = 'ecis06_Smatr.LST', EXIST = fexist)
