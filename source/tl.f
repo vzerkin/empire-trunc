@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5090 $
+Ccc   * $Rev: 5091 $
 Ccc   * $Author: capote $
-Ccc   * $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
+Ccc   * $Date: 2018-04-30 04:45:57 +0200 (Mo, 30 Apr 2018) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -4551,6 +4551,8 @@ C--------DWBA
 c        ECIs2(42:42) = 'T'
 C        ECIs2(40:40) = 'T'
       ENDIF
+C     Default: No EW
+      ECIs2(33:33) = 'T'  ! E-W transformation NOT used
 
       xmas_nejc = EJMass(Nejc)
       xmas_nnuc = AMAss(Nnuc)
@@ -4560,11 +4562,9 @@ C     saving the input value of the key CN_isotropic
       logtmp = CN_isotropic
 
 C
-C     Uncomment the lines below to calculate ECIS CN including 
-C     the Engelcbrecht-Weidenmuller transformation
-C
-C     CN_isotropic = .FALSE.
-C     INTerf = 1
+C     IF CN_isotropic = .FALSE. & INTerf = 1
+C     then the Engelbrecht-Weidenmuller transformation
+C     is applied and Matrices P,Pdiag,U, and S are written
 C
 C-----From cms system to Lab (ECIS do inverse convertion)
       IF (El.LT.0.D0) THEN
@@ -4590,6 +4590,7 @@ C
 C       33- LO(83) NO ENGELBRETCH-WEIDENMULLER TRANSFORMATION IN CN       
         IF(INTerf.eq.1) ECIs2(33:33) = 'F'  ! E-W transformation used
         IF(INTerf.eq.0) ECIs2(33:33) = 'T'  ! E-W transformation NOT used
+C
 C       34- LO(84) UNCOUPLED LEVELS FOR COMPOUND NUCLEUS. IT IS SET       
 C                .FALSE. IF NONE ARE READ.                              
         ECIs2(34:34) = 'T'  ! THERE ARE ALWAYS UNCOUPLED LEVELS
@@ -4610,7 +4611,7 @@ C       36- LO(86) GAMMA EMISSION IN COMPOUND NUCLEUS.
         IF(ngamm_tr.gt.0)     
      &    ECIs2(36:36) = 'T'  ! .TRUE. to consider gamma emission in HF
 
-        ECIs2(37:37) = 'F'  ! Moldauer's width fluctuation correction
+        ECIs2(37:37) = 'F'    ! Moldauer's width fluctuation correction
 C
       ENDIF
 C
