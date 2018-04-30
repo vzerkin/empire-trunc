@@ -1,6 +1,6 @@
-!cc   * $Rev: 4977 $
-!cc   * $Author: gnobre $
-!cc   * $Date: 2017-07-24 16:05:41 +0200 (Mo, 24 Jul 2017) $
+!cc   * $Rev: 5092 $
+!cc   * $Author: capote $
+!cc   * $Date: 2018-04-30 04:46:48 +0200 (Mo, 30 Apr 2018) $
 
       SUBROUTINE INPUT
 !cc
@@ -3916,6 +3916,23 @@ C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf
               INTerf=0
             ENDIF 
                       
+            IF (DIRect.NE.1 .and. INTerf.GT.0) INTerf=0 ! EW disabled if DIRECT<>1
+            IF (LHRtw.EQ.0 .and. INTerf.GT.0) INTerf=0 ! EW disabled if no WFC calculation
+
+            IF (INTerf.EQ.0) THEN
+              WRITE (8,
+     &   '('' CN decay and Direct cross sections added incoherently'')')
+              WRITE (12,
+     &   '('' CN decay and Direct cross sections added incoherently'')')
+            ELSE
+	        IHFnew = 1             ! Advanced HF enabled for EW transformation
+	        CN_isotropic = .FALSE. ! Anisotropy forced
+              WRITE ( 8,'('' CN-direct interference by Engelbrecht & Wei
+     &denmuller, Phys.Rev. C8(1973)859-862 '')')
+              WRITE (12,'('' CN-direct interference by Engelbrecht & Wei
+     &denmuller, PRC8(1973)859'')')
+            ENDIF
+
             IF (.not.CN_isotropic) THEN          
                WRITE (12,'('' CN anisotropy calculated using Blatt-Biede
      &nharn coefficients'')')
@@ -3927,22 +3944,6 @@ C           write(*,*) 'LHRtw=',LHRtw,CN_isotropic,INTerf
               WRITE (12,
      &          '('' CN angular distribution assumed isotropic'')')
             ENDIF 
-
-            IF (DIRect.NE.1 .and. INTerf.GT.0) INTerf=0 ! EW disabled if DIRECT<>1
-            IF (LHRtw.EQ.0 .and. INTerf.GT.0) INTerf=0 ! EW disabled if no WFC calculation
-
-            IF (INTerf.EQ.0) THEN
-              WRITE (8,
-     &   '('' CN decay and Direct cross sections added incoherently'')')
-              WRITE (12,
-     &   '('' CN decay and Direct cross sections added incoherently'')')
-            ELSE
-	        IHFnew = 1 ! Advanced HF enabled for EW transformation
-              WRITE ( 8,'('' CN-direct interference by Engelbrecht & Wei
-     &denmuller, Phys.Rev. C8(1973)859-862 '')')
-              WRITE (12,'('' CN-direct interference by Engelbrecht & Wei
-     &denmuller, PRC8(1973)859'')')
-            ENDIF
 
             IF (IHFnew.EQ.0) THEN
               WRITE (8,
