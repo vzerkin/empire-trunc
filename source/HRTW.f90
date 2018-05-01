@@ -1,8 +1,7 @@
-$DEBUG
 MODULE width_fluct
-    ! $Rev: 5090 $
+    ! $Rev: 5093 $
     ! $Author: capote $
-    ! $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
+    ! $Date: 2018-05-01 14:16:23 +0200 (Di, 01 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -485,7 +484,8 @@ CONTAINS
                     !----------------------------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                     !----------------------------------------------------------------------------------
-                    CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
+                    !CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
+					 CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                     !               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                     ! if renormalization skipped
@@ -1659,7 +1659,8 @@ CONTAINS
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                     !---------------------------------------------------------------
-                    CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
+                    !CALL CN_DA_anis(num%elal, i, in, Ia, sxj, xjc, xnor)
+					 CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                     !   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                     CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
@@ -2340,7 +2341,8 @@ CONTAINS
 
     !**************************************************************
 
-    SUBROUTINE CN_DA_anis(ibegin, i, in, Ia, sxj, xjc, xnor)
+    !SUBROUTINE CN_DA_anis(ibegin, i, in, Ia, sxj, xjc, xnor)
+	 SUBROUTINE CN_DA_anis(        i, in, Ia, sxj, xjc, xnor)
         INTEGER i, ibegin
         TYPE (fusion),  POINTER :: in
         REAL*8 Ia, sxj, xjc, xnor
@@ -2370,7 +2372,8 @@ CONTAINS
             lb = out%l                  !outgoing neutron l
             jb = out%j                  !outgoing neutron j
             IF(LHRtw > 2) THEN
-                w = WFC(i-ibegin+1,iout) ! Moldauer width fluctuation factor
+                !w = WFC(i-ibegin+1,iout) ! Moldauer width fluctuation factor  WRONG
+				w = WFC(i,iout) ! Using stored WFC factors
             ELSEIF(i==iout) THEN
                 w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
             ENDIF
