@@ -1,31 +1,53 @@
 #! /bin/sh -
-#script to  display exp. and calculated data with ZVView
+#script to  display exp. and calculated data with ZVView by V. Zerkin
 
 XWIN=`uname`
 if [ "$XWIN" = "Darwin" ] 
-    then
-    export DISPLAY=:0
+then
+   if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
 fi
+
 file=$1
 MT=$2
 work=`pwd`
 if [ "$1" = "" ]
-    then
-    echo 'Inputs ready to run'
-    echo ' '
-    ls *endf  
-    echo ' '
-    echo -n 'Choose one of the above (without .endf extention!): '
-    read file
+   then
+echo 'Inputs ready to run'
+echo ' '
+ls *endf  
+echo ' '
+echo -n 'Choose one of the above (without .endf extention!): '
+read file
 fi                          
 if [ "$2" = "" ]
-    then
-    echo -n 'Input MT number to be plotted: '
-    read MT
+   then
+echo -n 'Input MT number to be plotted: '
+read MT
 fi                          
 
+# FIRST RECONSTRUCT (N,N), (N,P), AND (N,A) REACTIONS WITH FIXUP
+
 if [ ! -f $file-s.endf ]; then
-    $EMPIREDIR/scripts/process $file 
+   #  FIXUP input expects file named OUTPUT.ENDF:   
+   ln -sf $work/$file.endf OUTPUT.ENDF
+   ln -sf $EMPIREDIR/util/fixup/FIXUP.INP FIXUP.INP
+    
+   $EMPIREDIR/util/fixup/fixup
+   rm OUTPUT.ENDF FIXUP.INP
+   mv FIXUP.ENDF $work/$file-f.endf
+
+   # RUN SIXTAB TO PREPARE FILE 6 FOR PLOTTING
+
+   ln -sf $work/$file-f.endf ENDF.IN
+   ln -sf $EMPIREDIR/util/sixtab/SIXTAB.INP SIXTAB.INP
+
+   $EMPIREDIR/util/sixtab/sixtab
+   rm ENDF.IN SIXTAB.INP
+   mv ENDF.OUT $work/$file-s.endf
+   if  [ -f $file-s.endf ]; then
+      rm $file-f.endf 2>/dev/null
+   fi   
+
 fi
 
 # RUN ZVD
@@ -51,6 +73,16 @@ cat c4.zvd >$file-$MT.zvd
 cat end.zvd >>$file-$MT.zvd
 ln -sf $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit
 $c4zvd_dir/zvview.exe -p:$file-$MT $file-$MT.zvd ps01.tit/c
+    errCode=$?
+    #echo -n "___Pause. Press any key..."; read yes
+    #if [ $errCode -ne 0 ]; then
+    if [ $errCode -ne 0 -a $errCode -ne 1 ]; then
+        set +x
+        echo    "___ERROR running ZVView: errCode=$errCode"
+        echo    "___DISPLAY=$DISPLAY"
+        echo -n "___Pause. Press any key..."; read yes
+    fi
+
 rm ps01.tit 2>/dev/null
 
 if [ -f zv00.ps ]; then

@@ -4,7 +4,7 @@
 XWIN=`uname`
 if [ "$XWIN" = "Darwin" ] 
 then
-export DISPLAY=:0
+   if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
 fi
 
 if [ -z $EMPIREDIR ]; then
@@ -41,5 +41,8 @@ else
   mv DDXPLOT.zvd $work/$file-$2.zvd
 fi
 rm -f COMPARE.DAT angdis.p92 C4.DAT ENDF.DAT LSTTAB.CUR LSTTAB.PNT PLOTC4.LST LSTTAB.LST LSTTAB.TMP cur.zvd pnt.zvd tmp.dat 2>/dev/null
+
+#echo -n " Pause. Press any key... ";read aaa
+
 exit
 
