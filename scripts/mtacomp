@@ -10,7 +10,7 @@ fi
 XWIN=`uname`
 if [ "$XWIN" = "Darwin" ] 
 then
-export DISPLAY=:0
+   if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
 fi
 
 
