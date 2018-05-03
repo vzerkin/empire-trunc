@@ -105,7 +105,7 @@ mv ENDF.OUT $work/$file-s.endf
 $EMPIREDIR/scripts/plotlst $file
 
 echo 'Press any key to clean intermediate files and exit'
-read
+read yes
 
 # REMOVE INTERMEDIATE ENDF FILES
 
