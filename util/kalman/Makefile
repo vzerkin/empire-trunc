@@ -1,7 +1,7 @@
 # set default compiler
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af90
 #FC  =  lf95
 
@@ -96,7 +96,7 @@ empsee: empire_sees.f90
 	$(FC) $(FFLAGS) -o $@ empire_sees.f90
 
 $(libdir)/libendfio.a:
-        cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
+	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
 	rm -f *.o *.mod *.exe

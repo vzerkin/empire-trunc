@@ -30,7 +30,7 @@ get_nubar: get_nubar.f90 $(libdir)/libendfio.a
 	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o get_nubar get_nubar.f90 -lendfio
 
 $(libdir)/libendfio.a:
-        cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
+	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
 	rm -f get_nubar

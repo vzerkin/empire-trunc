@@ -69,7 +69,7 @@ c4service:  $(OBJH) $(libdir)/libc4io.a
 
 
 $(libdir)/libendfio.a:
-        cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
+	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
 
 clean:
 	rm -f *.o *.mod *.exe
