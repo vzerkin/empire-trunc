@@ -22,10 +22,28 @@ cat pnt.zvd >>$3
 cat cur.zvd >>$3
 if [ "$4" = "" ]; then
    $EMPIREDIR/util/c4zvd/zvview.exe $3 ps01.tit/c
+    errCode=$?
+    #echo -n "___Pause. Press any key..."; read yes
+    #if [ $errCode -ne 0 ]; then
+    if [ $errCode -ne 0 -a $errCode -ne 1 ]; then
+        set +x
+        echo    "___ERROR running ZVView: errCode=$errCode"
+        echo    "___DISPLAY=$DISPLAY"
+        echo -n "___Pause. Press any key..."; read yes
+    fi
    exit
 fi
 #next line makes use of the ddx.tit file with plot settings
 $EMPIREDIR/util/c4zvd/zvview.exe -p:tmp $3 ddx.tit </dev/null
+    errCode=$?
+    #echo -n "___Pause. Press any key..."; read yes
+    #if [ $errCode -ne 0 ]; then
+    if [ $errCode -ne 0 -a $errCode -ne 1 ]; then
+        set +x
+        echo    "___ERROR running ZVView: errCode=$errCode"
+        echo    "___DISPLAY=$DISPLAY"
+        echo -n "___Pause. Press any key..."; read yes
+    fi
 rm tmp.dat 2>/dev/null
 rm pnt.zvd 2>/dev/null
 rm cur.zvd 2>/dev/null

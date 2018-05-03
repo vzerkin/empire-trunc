@@ -6,6 +6,8 @@
 #		Multiplatform make for Window, Linux, Mac.
 #		Copy (link) zvview.exe optional for Window, Linux, Mac.
 #		Requires on Windows: MinGW (msys, gcc)
+# 09-Mar-2018	V.Zerkin, IAEA-NDS
+#		changed to version "v3.020" for Window, Linux, Mac.
 # -----------------------------------------------------------------------------
 
 
@@ -19,17 +21,17 @@ all:
 	@echo ------------------os=$$OS-----
 ifeq ($(OS),Windows_NT)
 	@echo ------------------$$OS-----copy zvview.exe---
-	@cp -p zvview-1.023-win.exe zvview.exe
+	@cp -p ZVView-v3.020-win.exe zvview.exe
 	@ls -la zvview.exe
 else
 ifeq ($(shell uname -s),Linux)
 	@echo ------------------Linux-----link zvview.exe---
-	ln -sf zvv2-1.020-lin.exe zvview.exe
+	ln -sf ZVView-v3.020-lin.exe zvview.exe
 	@ls -la zvview.exe
 endif
 ifeq ($(shell uname -s),Darwin)
 	@echo ------------------Darwin-----link zvview.exe---
-	ln -sf zvv2-1.020-mac.exe zvview.exe
+	ln -sf ZVView-v4.001-mac.exe zvview.exe
 	@ls -la zvview.exe
 endif
 endif
