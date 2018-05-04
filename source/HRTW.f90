@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5102 $
-    ! $Author: mwherman $
-    ! $Date: 2018-05-04 07:35:37 +0200 (Fr, 04 Mai 2018) $
+    ! $Rev: 5103 $
+    ! $Author: capote $
+    ! $Date: 2018-05-04 17:13:45 +0200 (Fr, 04 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1560,10 +1560,10 @@ CONTAINS
                 ! Engelbrecht- Weidenmueller: diagonalization & setting cross sections in the rotated space
                 !------------------------------------------------------------------------------------------
                 IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
-	               !-----------------------------------------------------------------------
-                   ! Engelbrecht- Weidenmueller: diagonalization
-                   !-----------------------------------------------------------------------
-                   CALL EW_diagonalization(xjc,ip)
+                  !-----------------------------------------------------------------------------
+                  ! Engelbrecht- Weidenmueller: diagonalization (this should be added to OPTMAN)
+                  !-----------------------------------------------------------------------------
+                  ! CALL EW_diagonalization(xjc,ip)
 
                   !-------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: set normalized cross sections in the rotated coupled channel space
@@ -1571,7 +1571,8 @@ CONTAINS
                   DO i = num%coll, num%colh  ! first loop over coupled channels
                     in => inchnl(i-num%coll+1)
                     ! MH - I don't understand the next line - it's not only elastic but all the channels - we should use in%t but after all it might be OK
-                    in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
+                    ! in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
+                    in%t = outchnl(i)%t  ! numbering of outgoing channels is different from incoming, !RCN
                     DO iout = num%coll, num%colh ! second loop over coupled channels
 					   out => outchnl(iout)
                        ! For inverse transformation to work sigma must contain 'in' and 'out' channels,
@@ -1580,12 +1581,12 @@ CONTAINS
                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                        WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
                        sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC(i,iout)
-                        write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
+                       write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
                                  in%t, out%t, WFC(i,iout)
-! HERE
+                       ! HERE
                     ENDDO ! end of loop over iout
                   ENDDO  ! end of loop over i
-				ENDIF  ! INTerf>0 EW diagonalization & setting rotated cross sections  DONE
+	            ENDIF  ! INTerf>0 EW diagonalization & setting rotated cross sections  DONE
 
 				!WRITE(*,*) 'Normal.xs=',xnor_c
                 !SCRt_mem  = SCRt    ! store initial values
@@ -1646,7 +1647,7 @@ CONTAINS
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                     write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
                     !PAUSE
-					IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
+			        IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
                     ! absorption for incoming channel
                     in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
