@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5103 $
+    ! $Rev: 5104 $
     ! $Author: capote $
-    ! $Date: 2018-05-04 17:13:45 +0200 (Fr, 04 Mai 2018) $
+    ! $Date: 2018-05-04 17:35:54 +0200 (Fr, 04 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1563,7 +1563,7 @@ CONTAINS
                   !-----------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: diagonalization (this should be added to OPTMAN)
                   !-----------------------------------------------------------------------------
-                  ! CALL EW_diagonalization(xjc,ip)
+                  CALL EW_diagonalization(xjc,ip)
 
                   !-------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: set normalized cross sections in the rotated coupled channel space
