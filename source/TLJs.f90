@@ -1,6 +1,6 @@
-! $Rev: 5090 $
+! $Rev: 5105 $
 ! $Author: capote $
-! $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
+! $Date: 2018-05-05 21:16:05 +0200 (Sa, 05 Mai 2018) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -43,16 +43,16 @@ MODULE TLJs
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
    TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
 
-   PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs
+   PUBLIC AllocTLJmatr, AllocEWmatr, DelTLJs, QDIAG
    PUBLIC AllocCCmatr, DelCCmatr, Prepare_CCmatr
    PUBLIC Open_CC_Files, Read_CC_Matrices, Close_CC_Files
    REAL*8, PUBLIC, ALLOCATABLE :: Pdiag(:), Pchan(:), Sphase(:), sigma_alph_beta(:,:), & 
                                   PPdiag(:,:), Sdiag(:,:), &
                                   ZItmp(:,:), ZRtmp1(:,:), ZItmp1(:,:)
 
-   COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:),Tmatr(:,:) ! EW matrices 
+   COMPLEX*16, PUBLIC, ALLOCATABLE :: Pmatr(:,:),Umatr(:,:),Smatr(:,:) ! EW matrices 
 
-   PRIVATE
+   PRIVATE 
    
 CONTAINS
 
@@ -92,11 +92,6 @@ CONTAINS
       IF(my /= 0) GOTO 30
       Pmatr = (0.d0,0.d0)
 
-      IF(allocated(Tmatr)) DEALLOCATE(Tmatr)
-      ALLOCATE(Tmatr(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      Tmatr = (0.d0,0.d0)
-
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
       ALLOCATE(Smatr(nch,nch),STAT=my)
       IF(my /= 0) GOTO 30
@@ -107,30 +102,32 @@ CONTAINS
       IF(my /= 0) GOTO 30
       Umatr = (0.d0,0.d0)
 
-      IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
-      ALLOCATE(Sdiag(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      Sdiag = 0.d0
+      !Temporal matrices (moved to Prepare_CC_matrix) 
 
-      IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
-      ALLOCATE(PPdiag(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      PPdiag = 0.d0
+      !IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
+      !ALLOCATE(Sdiag(nch,nch),STAT=my)
+      !IF(my /= 0) GOTO 30
+      !Sdiag = 0.d0
 
-      IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
-      ALLOCATE(ZItmp(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      ZItmp = 0.d0
+      !IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
+      !ALLOCATE(PPdiag(nch,nch),STAT=my)
+      !IF(my /= 0) GOTO 30
+      !PPdiag = 0.d0
 
-      IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
-      ALLOCATE(ZRtmp1(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      ZRtmp1 = 0.d0
+      !IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
+      !ALLOCATE(ZItmp(nch,nch),STAT=my)
+      !IF(my /= 0) GOTO 30
+      !ZItmp = 0.d0
 
-      IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
-      ALLOCATE(ZItmp1(nch,nch),STAT=my)
-      IF(my /= 0) GOTO 30
-      ZItmp1 = 0.d0
+      !IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+      !ALLOCATE(ZRtmp1(nch,nch),STAT=my)
+      !IF(my /= 0) GOTO 30
+      !ZRtmp1 = 0.d0
+
+      !IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+      !ALLOCATE(ZItmp1(nch,nch),STAT=my)
+      !IF(my /= 0) GOTO 30
+      !ZItmp1 = 0.d0
 
       RETURN
 20    WRITE(8,*)  'ERROR: Insufficient memory for CC matrices in HRTW'
@@ -276,19 +273,18 @@ CONTAINS
 
       IF(INTERF==0) RETURN
 
-      !  EW matrices
+      !EW matrices
       IF(allocated(Sphase)) DEALLOCATE(Sphase)
       IF(allocated(sigma_alph_beta)) DEALLOCATE(sigma_alph_beta)
       IF(allocated(Pmatr)) DEALLOCATE(Pmatr)
-      IF(allocated(Tmatr)) DEALLOCATE(Tmatr)
       IF(allocated(Umatr)) DEALLOCATE(Umatr)
       IF(allocated(Smatr)) DEALLOCATE(Smatr)
-      !  Temporal matrices 
-      IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
-      IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
-      IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
-      IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
-      IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+      !Temporal matrices (moved to Prepare_CC_matrix) 
+      !IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
+      !IF(allocated(PPdiag)) DEALLOCATE(PPdiag)
+      !IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
+      !IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+      !IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
 
       RETURN
    END SUBROUTINE DelCCmatr
@@ -556,7 +552,9 @@ END FUNCTION Read_CC_matrices
 SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
    IMPLICIT NONE
    REAL*8 Jcn
-   INTEGER pcn, ndim, ncc, nccu, nmaxp, nmaxu, i1, i2, irow, icol
+   INTEGER pcn, ndim, ncc, nccu, nmaxp, nmaxu, i1, i2, irow, icol, my, IER
+   REAL*8 epsil, dtmp
+   DATA epsil/1.d-12/
    LOGICAL debug
    DATA debug/.false./
    ncc  = 0
@@ -688,16 +686,6 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
          endif
       enddo
       
-	  if (debug) then
-        WRITE (*,*) 'preparing Smatrix...'
-	    do irow = 1, ndim
-	      do icol = 1, ndim
-            WRITE (*,*) irow, icol, Smatr(irow,icol) 
-	      enddo
-        enddo
-        pause
-      endif
-
 	  EXIT
 
     ENDDO
@@ -705,7 +693,194 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
     if (debug) pause
 
 
+    IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
+    ALLOCATE(Sdiag(ndim,ndim),STAT=my)
+    IF(my /= 0) GOTO 30
+    
+	IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
+    ALLOCATE(ZItmp(ndim,ndim),STAT=my)
+    IF(my /= 0) GOTO 30
+
+    IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+    ALLOCATE(ZRtmp1(ndim,ndim),STAT=my)
+    IF(my /= 0) GOTO 30
+    ZRtmp1 = 0.d0
+
+    IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+    ALLOCATE(ZItmp1(ndim,ndim),STAT=my)
+    IF(my /= 0) GOTO 30
+    ZItmp1 = 0.d0
+
+    ! setting the complex identity matrix to call DIAG()
+    DO i1=1,ndim
+      ZRtmp1(i1,i1) = 1.d0
+    ENDDO
+    Sdiag  = REAL(Smatr)
+    ZItmp  = IMAG(Smatr)
+
+	IF(debug) then
+      write(*,*) 'ECIS Smatrix read'
+      DO i1 = 1,ndim
+        DO i2 = 1,ndim
+          write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Smatr(i1,i2)
+        ENDDO
+      ENDDO
+    ENDIF
+
+    CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,ndim,epsil,dtmp,IER)
+    IF(IER/=0) WRITE (8,*) &
+	'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN J=',sngl(Jcn),' pi=',pcn
+    
+	IF(debug) then
+      write(*,*) 'Diagonal Smatrix'
+      DO i1 = 1,ndim
+        DO i2 = 1,ndim
+          write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Sdiag(i1,i2),ZItmp(i1,i2)
+        ENDDO
+      ENDDO
+    ENDIF
+	       
+    ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
+    ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
+    DO i1=1,ndim
+	  Sphase(i1) = datan(Sdiag(i1,i1)) ! from below Eq.(21), phi_{alpha}
+      if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i1, Sdiag(i1,i1),ZItmp(i1,i1), &
+          ' phi(alpha)=',Sphase(i1)
+    ENDDO
+    ! We diagonalize Smatr to calculate the phases from its diagonal elements
+	! However, we were not able to verify that Umatr also diagonalized Smatr
+	! Clearly, we can not calculate Umatr from Smatr as papers clearly state
+
+    IF(allocated(Sdiag) ) DEALLOCATE(Sdiag)
+    IF(allocated(ZItmp) ) DEALLOCATE(ZItmp)
+    IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+    IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+
+	RETURN
+
+30  WRITE(8,*)  'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+    WRITE(12,*) 'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+    STOP        'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+
 END SUBROUTINE PREPARE_CCmatr
+
+SUBROUTINE QDIAG(ZR,ZI,XR,XI,NC,EPS,AX,IER)
+        !
+        ! TAKEN FROM ECIS2006 by J. RAYNAL
+        ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE
+        ! JACOBI'S METHOD.
+        ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.
+        !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.
+        !            NC:     DIMENSION OF SQUARE MATRICES ZR,ZI,XR AND XI.
+        !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.
+        ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.
+        !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.
+        !            XR,XI:  EIGENVECTORS.
+        !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.
+        !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.
+        !***********************************************************************
+        IMPLICIT NONE
+        INTEGER NC
+        REAL*8 ZR,ZI,XR,XI
+        DIMENSION ZR(NC,NC),ZI(NC,NC),XR(NC,NC),XI(NC,NC)
+        REAL*8 EPS,AX
+        INTEGER IER
+        ! local variables
+        INTEGER NT,I,J,L,M
+        REAL*8 AR,AI,AY,BI,BR,U,V,UC,US,TC,TS,UCC,UCS,USC,USS
+
+        IER=0
+        NT=0
+1       NT=NT+1
+        IF (NT.GT.4*NC*NC) GO TO 6
+        AX=0.D0
+        L=1
+        M=2
+      
+        !     if(NT<=1) then
+        !       write(*,*) 'Inside QDIAG to diag, iter',NT,NC,sngl(EPS)
+        !       DO I = 1,NC
+        !           write(*,'(1x,9(d12.6,1x,d12.6/)') (ZR(I,J),ZI(I,J),J=1,NC)
+        !         ENDDO
+        !        write(*,*) 'Inside QDIAG unitary, iter'
+        !        DO I = 1,NC
+        !            write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
+        !          ENDDO
+        !     endif
+
+        ! SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.
+        DO I=1,NC
+            DO J=I,NC
+                IF (ZR(J,I).EQ.0.D0) ZR(I,J)=0.D0
+                IF (ZI(J,I).EQ.0.D0) ZI(I,J)=0.D0
+                IF (ZR(I,J).EQ.0.D0) ZR(J,I)=0.D0
+                IF (ZI(I,J).EQ.0.D0) ZI(J,I)=0.D0
+                AR=(ZR(I,J)+ZR(J,I))/2.D0
+                AI=(ZI(I,J)-ZI(J,I))/2.D0
+                ZR(J,I)=AR
+                ZR(I,J)=AR
+                ZI(I,J)=AI
+                ZI(J,I)=-AI
+                IF (I.EQ.J) CYCLE
+                AY=ZR(I,J)**2+ZI(I,J)**2
+                IF (AX.GT.AY) CYCLE
+                AX=AY
+                L=I
+                M=J
+            ENDDO
+        ENDDO
+        IF (AX.EQ.0.D0) RETURN
+        ! ELEMENTARY TRANSFORMATION.
+        U=DATAN2(-ZI(L,M),ZR(L,M))/2.D0
+        V=DATAN2(2.D0*DSQRT(ZR(L,M)**2+ZI(L,M)**2),ZR(M,M)-ZR(L,L))/2.D0
+        UC=DCOS(U)
+        US=DSIN(U)
+        TC=DCOS(V)
+        TS=-DSIN(V)
+        UCC=UC*TC
+        UCS=UC*TS
+        USC=US*TC
+        USS=US*TS
+        ! TRANSFORMATION OF ROWS.
+        DO I=1,NC
+            AR=XR(I,L)*UCC+XI(I,L)*USC+XR(I,M)*UCS-XI(I,M)*USS
+            BR=-XR(I,L)*UCS-XI(I,L)*USS+XR(I,M)*UCC-XI(I,M)*USC
+            AI=XI(I,L)*UCC-XR(I,L)*USC+XI(I,M)*UCS+XR(I,M)*USS
+            BI=-XI(I,L)*UCS+XR(I,L)*USS+XI(I,M)*UCC+XR(I,M)*USC
+            XR(I,L)=AR
+            XR(I,M)=BR
+            XI(I,L)=AI
+            XI(I,M)=BI
+            AR=ZR(I,L)*UCC+ZI(I,L)*USC+ZR(I,M)*UCS-ZI(I,M)*USS
+            BR=-ZR(I,L)*UCS-ZI(I,L)*USS+ZR(I,M)*UCC-ZI(I,M)*USC
+            AI=ZI(I,L)*UCC-ZR(I,L)*USC+ZI(I,M)*UCS+ZR(I,M)*USS
+            BI=-ZI(I,L)*UCS+ZR(I,L)*USS+ZI(I,M)*UCC+ZR(I,M)*USC
+            ZR(I,L)=AR
+            ZR(I,M)=BR
+            ZI(I,L)=AI
+            ZI(I,M)=BI
+        ENDDO
+        ! TRANSFORMATION OF COLUMNS.
+        DO I=1,NC
+            AR=ZR(L,I)*UCC-ZI(L,I)*USC+ZR(M,I)*UCS+ZI(M,I)*USS
+            BR=-ZR(L,I)*UCS+ZI(L,I)*USS+ZR(M,I)*UCC+ZI(M,I)*USC
+            AI=ZI(L,I)*UCC+ZR(L,I)*USC+ZI(M,I)*UCS-ZR(M,I)*USS
+            BI=-ZI(L,I)*UCS-ZR(L,I)*USS+ZI(M,I)*UCC-ZR(M,I)*USC
+            IF (DABS(AR).LT.EPS) AR=0.D0
+            IF (DABS(BR).LT.EPS) BR=0.D0
+            IF (DABS(AI).LT.EPS) AI=0.D0
+            IF (DABS(BI).LT.EPS) BI=0.D0
+            ZR(L,I)=AR
+            ZR(M,I)=BR
+            ZI(L,I)=AI
+            ZI(M,I)=BI
+        ENDDO
+        GO TO 1
+6       IER=-1
+        RETURN
+END SUBROUTINE QDIAG
+
+!**************************************************************
 
 END MODULE TLJs
 

@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5104 $
+    ! $Rev: 5105 $
     ! $Author: capote $
-    ! $Date: 2018-05-04 17:35:54 +0200 (Fr, 04 Mai 2018) $
+    ! $Date: 2018-05-05 21:16:05 +0200 (Sa, 05 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -178,7 +178,7 @@ MODULE width_fluct
 
     PUBLIC HRTW, Moldauer
 
-    PRIVATE QDIAG, INVERSE_EW
+    PRIVATE INVERSE_EW
 
 CONTAINS
 
@@ -1563,7 +1563,7 @@ CONTAINS
                   !-----------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: diagonalization (this should be added to OPTMAN)
                   !-----------------------------------------------------------------------------
-                  CALL EW_diagonalization(xjc,ip)
+                  !CALL EW_diagonalization(xjc,ip)
 
                   !-------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: set normalized cross sections in the rotated coupled channel space
@@ -2226,124 +2226,6 @@ CONTAINS
         RETURN
 
     END SUBROUTINE Gamma_renormalization
-
-    !----------------------------------------------------------------------------------------------------
-
-    SUBROUTINE QDIAG(ZR,ZI,XR,XI,NC,EPS,AX,IER)
-        !
-        ! TAKEN FROM ECIS2006 by J. RAYNAL
-        ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE
-        ! JACOBI'S METHOD.
-        ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.
-        !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.
-        !            NC:     DIMENSION OF SQUARE MATRICES ZR,ZI,XR AND XI.
-        !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.
-        ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.
-        !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.
-        !            XR,XI:  EIGENVECTORS.
-        !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.
-        !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.
-        !***********************************************************************
-        IMPLICIT NONE
-        INTEGER NC
-        REAL*8 ZR,ZI,XR,XI
-        DIMENSION ZR(NC,NC),ZI(NC,NC),XR(NC,NC),XI(NC,NC)
-        REAL*8 EPS,AX
-        INTEGER IER
-        ! local variables
-        INTEGER NT,I,J,L,M
-        REAL*8 AR,AI,AY,BI,BR,U,V,UC,US,TC,TS,UCC,UCS,USC,USS
-
-        IER=0
-        NT=0
-1       NT=NT+1
-        IF (NT.GT.4*NC*NC) GO TO 6
-        AX=0.D0
-        L=1
-        M=2
-      
-        !     if(NT<=1) then
-        !       write(*,*) 'Inside QDIAG to diag, iter',NT,NC,sngl(EPS)
-        !       DO I = 1,NC
-        !           write(*,'(1x,9(d12.6,1x,d12.6/)') (ZR(I,J),ZI(I,J),J=1,NC)
-        !         ENDDO
-        !        write(*,*) 'Inside QDIAG unitary, iter'
-        !        DO I = 1,NC
-        !            write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
-        !          ENDDO
-        !     endif
-
-        ! SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.
-        DO I=1,NC
-            DO J=I,NC
-                IF (ZR(J,I).EQ.0.D0) ZR(I,J)=0.D0
-                IF (ZI(J,I).EQ.0.D0) ZI(I,J)=0.D0
-                IF (ZR(I,J).EQ.0.D0) ZR(J,I)=0.D0
-                IF (ZI(I,J).EQ.0.D0) ZI(J,I)=0.D0
-                AR=(ZR(I,J)+ZR(J,I))/2.D0
-                AI=(ZI(I,J)-ZI(J,I))/2.D0
-                ZR(J,I)=AR
-                ZR(I,J)=AR
-                ZI(I,J)=AI
-                ZI(J,I)=-AI
-                IF (I.EQ.J) CYCLE
-                AY=ZR(I,J)**2+ZI(I,J)**2
-                IF (AX.GT.AY) CYCLE
-                AX=AY
-                L=I
-                M=J
-            ENDDO
-        ENDDO
-        IF (AX.EQ.0.D0) RETURN
-        ! ELEMENTARY TRANSFORMATION.
-        U=DATAN2(-ZI(L,M),ZR(L,M))/2.D0
-        V=DATAN2(2.D0*DSQRT(ZR(L,M)**2+ZI(L,M)**2),ZR(M,M)-ZR(L,L))/2.D0
-        UC=DCOS(U)
-        US=DSIN(U)
-        TC=DCOS(V)
-        TS=-DSIN(V)
-        UCC=UC*TC
-        UCS=UC*TS
-        USC=US*TC
-        USS=US*TS
-        ! TRANSFORMATION OF ROWS.
-        DO I=1,NC
-            AR=XR(I,L)*UCC+XI(I,L)*USC+XR(I,M)*UCS-XI(I,M)*USS
-            BR=-XR(I,L)*UCS-XI(I,L)*USS+XR(I,M)*UCC-XI(I,M)*USC
-            AI=XI(I,L)*UCC-XR(I,L)*USC+XI(I,M)*UCS+XR(I,M)*USS
-            BI=-XI(I,L)*UCS+XR(I,L)*USS+XI(I,M)*UCC+XR(I,M)*USC
-            XR(I,L)=AR
-            XR(I,M)=BR
-            XI(I,L)=AI
-            XI(I,M)=BI
-            AR=ZR(I,L)*UCC+ZI(I,L)*USC+ZR(I,M)*UCS-ZI(I,M)*USS
-            BR=-ZR(I,L)*UCS-ZI(I,L)*USS+ZR(I,M)*UCC-ZI(I,M)*USC
-            AI=ZI(I,L)*UCC-ZR(I,L)*USC+ZI(I,M)*UCS+ZR(I,M)*USS
-            BI=-ZI(I,L)*UCS+ZR(I,L)*USS+ZI(I,M)*UCC+ZR(I,M)*USC
-            ZR(I,L)=AR
-            ZR(I,M)=BR
-            ZI(I,L)=AI
-            ZI(I,M)=BI
-        ENDDO
-        ! TRANSFORMATION OF COLUMNS.
-        DO I=1,NC
-            AR=ZR(L,I)*UCC-ZI(L,I)*USC+ZR(M,I)*UCS+ZI(M,I)*USS
-            BR=-ZR(L,I)*UCS+ZI(L,I)*USS+ZR(M,I)*UCC+ZI(M,I)*USC
-            AI=ZI(L,I)*UCC+ZR(L,I)*USC+ZI(M,I)*UCS-ZR(M,I)*USS
-            BI=-ZI(L,I)*UCS-ZR(L,I)*USS+ZI(M,I)*UCC-ZR(M,I)*USC
-            IF (DABS(AR).LT.EPS) AR=0.D0
-            IF (DABS(BR).LT.EPS) BR=0.D0
-            IF (DABS(AI).LT.EPS) AI=0.D0
-            IF (DABS(BI).LT.EPS) BI=0.D0
-            ZR(L,I)=AR
-            ZR(M,I)=BR
-            ZI(L,I)=AI
-            ZI(M,I)=BI
-        ENDDO
-        GO TO 1
-6       IER=-1
-        RETURN
-    END SUBROUTINE QDIAG
 
     !**************************************************************
 
