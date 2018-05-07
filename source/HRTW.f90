@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5105 $
-    ! $Author: capote $
-    ! $Date: 2018-05-05 21:16:05 +0200 (Sa, 05 Mai 2018) $
+    ! $Rev: 5108 $
+    ! $Author: mwherman $
+    ! $Date: 2018-05-07 16:15:51 +0200 (Mo, 07 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -740,7 +740,7 @@ CONTAINS
         !----------------------------------------------------------------------------------------------------
         IF(DIRect>0 .AND. MAX_cc_mod>0) THEN !TEMPORARY to allow for the old treatment of the direct outgoing channels
 
-            CALL DECAY2CC(xjc, ipc, nejc, nnur)                   ! Decay to collective levels including elastic
+            CALL DECAY2CC(xjc, ipc, nejc, nnur)                   ! Decay to collective levels including elastic WE CURRENTLY USE!
 
         ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
             !  Old version for collective levels
@@ -882,6 +882,9 @@ CONTAINS
         !* calls:Prepare_CCmatr                                             *
         !*                                                                  *
         !********************************************************************
+
+        ! THIS THE CURRENTLY USED ROUTE
+
         INTEGER i, ipc, nel, nnur, nejc, ncc, nccp, nccu, ndim
         REAL*8 tld, xjc, rho1
         TYPE (channel), POINTER :: out
@@ -930,12 +933,12 @@ CONTAINS
 
             IF(STLcc(i)%lev==levtarg) THEN  ! we've got elastic!
                 IF(num%elal == 0) THEN
-                    !memorize position of the first coupled level in the 'outchnl' matrix
+                    !memorize position of the first elastic channel in the 'outchnl' matrix
                     num%elal = NCH
                     !set it also as the last one in case there are no more
                     num%elah = NCH
                 ENDIF
-                !in case of another coupled level augment position of last coupled channel
+                !in case of another elastic level augment position of last elastic channel
                 IF(NCH > num%elah) num%elah = NCH
                 !setting correspondence between 'nch' and elastic numbering 'nel'
                 nel = NCH - num%elal + 1
@@ -1565,25 +1568,22 @@ CONTAINS
                   !-----------------------------------------------------------------------------
                   !CALL EW_diagonalization(xjc,ip)
 
+!                  Umatr = TRANSPOSE(Umatr)   ! for testing purpose
+
                   !-------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: set normalized cross sections in the rotated coupled channel space
                   !-------------------------------------------------------------------------
+                  write(*,*) 'num%coll, num%colh', num%coll, num%colh
                   DO i = num%coll, num%colh  ! first loop over coupled channels
                     in => inchnl(i-num%coll+1)
-                    ! MH - I don't understand the next line - it's not only elastic but all the channels - we should use in%t but after all it might be OK
-                    ! in%t = outchnl(i-num%coll+1)%t  ! make incident channels the same as outgoing
                     in%t = outchnl(i)%t  ! numbering of outgoing channels is different from incoming, !RCN
                     DO iout = num%coll, num%colh ! second loop over coupled channels
 					   out => outchnl(iout)
-                       ! For inverse transformation to work sigma must contain 'in' and 'out' channels,
-                       ! as well as WFC, only xnor_c normalization can be applied later.
-                       ! MH - for EW might be safer to apply full normalization  
                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                        WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
                        sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC(i,iout)
-                       write(8,*) i, iout, sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
-                                 in%t, out%t, WFC(i,iout)
-                       ! HERE
+!                       write(*,*) 'sigma_alph_beta(', i, iout,')', sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
+!                                 in%t, out%t, WFC(i,iout)
                     ENDDO ! end of loop over iout
                   ENDDO  ! end of loop over i
 	            ENDIF  ! INTerf>0 EW diagonalization & setting rotated cross sections  DONE
@@ -1594,22 +1594,22 @@ CONTAINS
                 !sumfis_mem = sumfis
 
 				write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
-				write(*,*) 'Collect ch:',num%coll, num%colh
-
+				write(*,*) 'Collect ch:',num%coll,'-', num%colh
                 ! loop over iaa=i (coupled channels in the normal space)
                 DO i = num%elal, num%elah
                     iaa = i - num%elal + 1
                     in => inchnl(iaa)
-                    ! MH - this we should get from EW-absorption (now in INVERSE-EW)
-                    in%sig = xnor_c*in%tlj
-					!write(*,*) ' Inc Tl=',in%tlj,' Sig=',sngl(in%sig),sngl(ip*xjc)
+!                    in%sig = xnor_c*in%tlj  ! this seems to fix the balance but for the bad reason
+!					write(*,*) ' Inc Tl=',in%tlj,' Sig=',sngl(in%sig),sngl(ip*xjc)
+!					write(*,*) ' Inc Tlj=',in%tlj,' Inc Tl=',in%t
 
                     ! loop over ibb=iout (all particle channels in the normal space)
                     DO iout = 1, num%part
                         out => outchnl(iout)
 
 						IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
-                          Sigma_ab = INVERSE_EW(i,iout) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
+                          Sigma_ab = INVERSE_EW(i,iout,xnor_c) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
+!						  write(*,*) 'Sigma_', i, iout, Sigma_ab, ' versus', xnor_c*in%t*out%t
 						ELSE
                           w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                           WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
@@ -1633,7 +1633,7 @@ CONTAINS
                     !----------------------------------------------------------
                     IF(num%fiss>0) THEN
                       IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
-		                sumfis = INVERSE_EW(i,num%fiss)*outchnl(num%fiss)%rho ! MH - check whther we need rho for fission here
+		                sumfis = INVERSE_EW(i,num%fiss,xnor_c)*outchnl(num%fiss)%rho ! MH - check whther we need rho for fission here
 					  ELSE
 					    sumfis = outchnl(num%fiss)%t*outchnl(num%fiss)%rho*WFC2(i,num%fiss)  !redefining sumfis to account for WFC
 					  ENDIF
@@ -1908,7 +1908,7 @@ CONTAINS
 
     !----------------------------------------------------------------------------------------------------
 
-    REAL*8 FUNCTION INVERSE_EW(i,iout)
+    REAL*8 FUNCTION INVERSE_EW(i,iout,xnor_c)
         ! i is an incident (elastic) collective channel
         ! iout is an outgoing particle channel, it can be collective or uncoupled
 		! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
@@ -1918,6 +1918,7 @@ CONTAINS
         ! Dummy arguments
 
         INTEGER, INTENT(IN) :: i,iout
+        REAL*8, INTENT(IN) :: xnor_c
 
         ! Local variables
         REAL*8 nu_ialph, nu_ibeta
@@ -1983,7 +1984,7 @@ CONTAINS
           !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
           !WRITE(*,*) REAL (ctmp2),' REAL offd' ! the cross section \sigma_{ab} in the normal space
           !WRITE(*,*) DIMAG(ctmp2),' IMAG offd' ! the imaginary part expected to be zero
-          !WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
+          WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
 
 		else
 
@@ -1999,7 +2000,7 @@ CONTAINS
             dtmp = dtmp + in%t*out%t*w*ABS(Umatr(ialph,iaa))**2 ! WFC(i,iout)=WFC2(i,iout)
           ENDDO   ! end of the loop over ialph (transformed space)
 
-		  INVERSE_EW = dtmp
+		  INVERSE_EW = dtmp*xnor_c
 
 		endif
         
