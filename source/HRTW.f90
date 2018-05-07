@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5110 $
+    ! $Rev: 5111 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-07 18:21:03 +0200 (Mo, 07 Mai 2018) $
+    ! $Date: 2018-05-07 21:58:28 +0200 (Mo, 07 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -2013,7 +2013,8 @@ CONTAINS
           WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
           dtmp = 0.d0
           DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
-            dtmp = dtmp + in%t*out%t*w*ABS(Umatr(ialph,iaa))**2 ! WFC(i,iout)=WFC2(i,iout)
+            ialph_ch = num%coll + ialph -1
+            dtmp = dtmp + outchnl(ialph_ch)%t*out%t*w*ABS(Umatr(ialph,iaa))**2 ! WFC(i,iout)=WFC2(i,iout)
           ENDDO   ! end of the loop over ialph (transformed space)
 
 		  INVERSE_EW = dtmp*xnor_c
