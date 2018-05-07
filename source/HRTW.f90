@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5109 $
+    ! $Rev: 5110 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-07 18:03:03 +0200 (Mo, 07 Mai 2018) $
+    ! $Date: 2018-05-07 18:21:03 +0200 (Mo, 07 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1568,7 +1568,7 @@ CONTAINS
                   !-----------------------------------------------------------------------------
                   !CALL EW_diagonalization(xjc,ip)
 
-!                  Umatr = TRANSPOSE(Umatr)   ! for testing purpose
+                  Umatr = TRANSPOSE(Umatr)   ! for testing purpose
 
                   !-------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: set normalized cross sections in the rotated coupled channel space
@@ -1648,7 +1648,7 @@ CONTAINS
                     write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
 			        IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-                    IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
+                    IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN !Engelbrecht-Weidenmueller
 
                         !---------------------------------------------------------------
                         ! CN x-sec distributed over resuduals' POP and spectra
@@ -1660,7 +1660,8 @@ CONTAINS
                         !---------------------------------------------------------------
                         CALL CN_DA_anis(i, in, Ia, sxj, xjc, 1.0D0)
                         ! WARNING: setting xnor=1.0D0 likely leaves gammas unnormalized!!!
-                    ELSE
+
+                    ELSE   !no-Engelbrecht-Weidenmueller
 
                         ! absorption for incoming channel
                         in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
@@ -1683,7 +1684,7 @@ CONTAINS
                         ! CN normalize x-sec and distribute them over residuals POP; calculate spectra
                         !-----------------------------------------------------------------------------
                         CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-                    ENDIF
+                    ENDIF  ! on Engelbrecht-Weidenmueller
                 ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
                 ! Gamma width calculation *************************************************************************************
