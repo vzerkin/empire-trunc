@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5108 $
+    ! $Rev: 5109 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-07 16:15:51 +0200 (Mo, 07 Mai 2018) $
+    ! $Date: 2018-05-07 18:03:03 +0200 (Mo, 07 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1593,15 +1593,15 @@ CONTAINS
                 !SCRtl_mem = SCRtl
                 !sumfis_mem = sumfis
 
-				write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
-				write(*,*) 'Collect ch:',num%coll,'-', num%colh
+!				write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
+!				write(*,*) 'Collect ch:',num%coll,'-', num%colh
                 ! loop over iaa=i (coupled channels in the normal space)
                 DO i = num%elal, num%elah
                     iaa = i - num%elal + 1
                     in => inchnl(iaa)
 !                    in%sig = xnor_c*in%tlj  ! this seems to fix the balance but for the bad reason
-!					write(*,*) ' Inc Tl=',in%tlj,' Sig=',sngl(in%sig),sngl(ip*xjc)
-!					write(*,*) ' Inc Tlj=',in%tlj,' Inc Tl=',in%t
+!					 write(*,*) ' Inc Tl=',in%tlj,' Sig=',sngl(in%sig),sngl(ip*xjc)
+!					 write(*,*) ' Inc Tlj=',in%tlj,' Inc Tl=',in%t
 
                     ! loop over ibb=iout (all particle channels in the normal space)
                     DO iout = 1, num%part
@@ -1646,29 +1646,44 @@ CONTAINS
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                     write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
-                    !PAUSE
 			        IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
-                    ! absorption for incoming channel
-                    in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
-                    out => outchnl(i)
-                    in%t = out%t
-                    in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                    xnor = in%sig/DENhf                        ! normalization factor
-                    !               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
-                    !               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
-                    !               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
-                    !               sumfis = sumfis*xnor                         !                                  "
-                    !               sumfism = sumfism*xnor                       !                                  "
+                    IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
 
-                    !---------------------------------------------------------------
-                    ! CN angular distributions (neutron (in)elastic scattering ONLY!)
-                    !---------------------------------------------------------------
-                    CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+                        !---------------------------------------------------------------
+                        ! CN x-sec distributed over resuduals' POP and spectra
+                        !---------------------------------------------------------------
+                        CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  ! distrubute SCRt matrices and store x-sec; EW needs no normalization
 
-                    !   CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
-                    CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                        !---------------------------------------------------------------
+                        ! CN angular distributions (neutron (in)elastic scattering ONLY!)
+                        !---------------------------------------------------------------
+                        CALL CN_DA_anis(i, in, Ia, sxj, xjc, 1.0D0)
+                        ! WARNING: setting xnor=1.0D0 likely leaves gammas unnormalized!!!
+                    ELSE
 
+                        ! absorption for incoming channel
+                        in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
+                        out => outchnl(i)
+                        in%t = out%t
+                        in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+                        xnor = in%sig/DENhf                        ! normalization factor
+                        !               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
+                        !               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
+                        !               SCRtem = SCRtem*xnor                         !   unfactorized cross sections.
+                        !               sumfis = sumfis*xnor                         !                                  "
+                        !               sumfism = sumfism*xnor                       !                                  "
+
+                        !---------------------------------------------------------------
+                        ! CN angular distributions (neutron (in)elastic scattering ONLY!)
+                        !---------------------------------------------------------------
+                        CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
+
+                        !-----------------------------------------------------------------------------
+                        ! CN normalize x-sec and distribute them over residuals POP; calculate spectra
+                        !-----------------------------------------------------------------------------
+                        CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                    ENDIF
                 ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
                 ! Gamma width calculation *************************************************************************************
@@ -1984,7 +1999,7 @@ CONTAINS
           !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
           !WRITE(*,*) REAL (ctmp2),' REAL offd' ! the cross section \sigma_{ab} in the normal space
           !WRITE(*,*) DIMAG(ctmp2),' IMAG offd' ! the imaginary part expected to be zero
-          WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
+!          WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
 
 		else
 
