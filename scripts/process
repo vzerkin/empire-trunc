@@ -47,7 +47,7 @@ rm ENDFB.OUT LINEAR.INP 2>/dev/null
 rm RECENT.INP 2>/dev/null
 ln -sf $EMPIREDIR/util/prepro/RECENT.INP RECENT.INP
 ln -sf $work/$file-lin.endf LINEAR.OUT
-$EMPIREDIR/util/recent/recent <RECENT.INP
+$EMPIREDIR/util/prepro/recent <RECENT.INP
 mv RECENT.OUT  $work/$file-rec.endf
 mv RECENT.LST $work/$file-log.recent
 rm LINEAR.OUT 2>/dev/null
@@ -59,7 +59,7 @@ rm RECENT.INP 2>/dev/null
 rm SIGMA1.INP 2>/dev/null
 ln -sf $EMPIREDIR/util/prepro/SIGMA1.INP SIGMA1.INP
 ln -sf $work/$file-rec.endf RECENT.OUT
-$EMPIREDIR/util/sigma1/sigma1 <SIGMA1.INP
+$EMPIREDIR/util/prepro/sigma1 <SIGMA1.INP
 mv SIGMA1.OUT  $work/$file-sig.endf
 mv SIGMA1.LST $work/$file-log.sigma1
 rm RECENT.OUT 2>/dev/null
