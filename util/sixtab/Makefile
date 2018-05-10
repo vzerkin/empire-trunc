@@ -50,7 +50,7 @@ else
 endif
 
 sixtab: sixtab.f ../dxsend/dxsend.o
-	$(FC) $(FFLAGS) -o $@ sixtab.f ../dxsend/dxsend.o
+	$(FC) $(FFLAGS) -o $@ sixtab.f ../dxsend/dxsend.o $(STATIC)
 
 ../dxsend/dxsend.o :
 	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)

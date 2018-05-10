@@ -20,7 +20,7 @@ libdir = $(EMPIREDIR)/lib
 genfit: genfit.f90 emp_mat.o int_exp.o emp_prm.o emp_plt.o emp_fit.o get_input_file.o getline.o \
           $(libdir)/libendfio.a $(libdir)/libc4io.a $(libdir)/libcrs.a $(libdir)/libminuit.a
 	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o genfit genfit.f90 emp_mat.o emp_fit.o \
-          int_exp.o emp_prm.o emp_plt.o get_input_file.o getline.o -lreadline -lncurses -lendfio -lc4io -lcrs -lminuit
+          int_exp.o emp_prm.o emp_plt.o get_input_file.o getline.o -lreadline -lncurses -lendfio -lc4io -lcrs -lminuit  $(STATIC)
 
 emp_fit.o: emp_fit.f90 emp_mat.o int_exp.o
 	$(FC) $(FFLAGS) -I $(libdir) -c emp_fit.f90

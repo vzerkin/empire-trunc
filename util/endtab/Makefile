@@ -50,7 +50,7 @@ else
 endif
 
 endtab: endtab.f ../dxsend/dxsend.o
-	$(FC) $(FFLAGS) -o $@ endtab.f ../dxsend/dxsend.o
+	$(FC) $(FFLAGS) -o $@ endtab.f ../dxsend/dxsend.o $(STATIC)
 
 ../dxsend/dxsend.o :
 	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)

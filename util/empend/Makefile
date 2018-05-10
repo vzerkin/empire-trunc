@@ -54,7 +54,7 @@ endif
 OBJF =	empend.o
  
 empend:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

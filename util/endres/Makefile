@@ -51,7 +51,7 @@ endif
 OBJF =	endres.o
 
 endres:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

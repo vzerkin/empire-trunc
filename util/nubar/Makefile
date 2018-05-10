@@ -27,7 +27,7 @@ endif
 libdir = $(EMPIREDIR)/lib
 
 get_nubar: get_nubar.f90 $(libdir)/libendfio.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o get_nubar get_nubar.f90 -lendfio
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o get_nubar get_nubar.f90 -lendfio $(STATIC)
 
 $(libdir)/libendfio.a:
 	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)

@@ -51,7 +51,7 @@ endif
 OBJF =	fixup.o endfio.o  LINUX.o scratchb.o timer.o
 
 fixup:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

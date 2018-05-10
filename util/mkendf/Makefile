@@ -25,29 +25,29 @@ all:
 	$(MAKE) mk_nubar
 
 add_endf: add_endf.f90 $(libdir)/libendfio.a ../crs/libcrs.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -I ../crs -o $@ add_endf.f90 -lendfio ../crs/libcrs.a
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -I ../crs -o $@ add_endf.f90 -lendfio ../crs/libcrs.a $(STATIC)
 
 getmtn: getmtn.f90
-	$(FC) $(FFLAGS) -o $@ getmtn.f90
+	$(FC) $(FFLAGS) -o $@ getmtn.f90 $(STATIC)
 
 #mk_ace: mk_ace.f90
-#	$(FC) $(FFLAGS) -o $@ mk_ace.f90
+#	$(FC) $(FFLAGS) -o $@ mk_ace.f90 $(STATIC)
 
 mk_xsdir: mk_xsdir.f90
-	$(FC) $(FFLAGS) -o $@ mk_xsdir.f90
+	$(FC) $(FFLAGS) -o $@ mk_xsdir.f90 $(STATIC)
 
 read_allnjoy: read_allnjoy.f90
-	$(FC) $(FFLAGS) -o $@ read_allnjoy.f90
+	$(FC) $(FFLAGS) -o $@ read_allnjoy.f90 $(STATIC)
 
 mk_nubar: mk_nubar.f90 $(libdir)/libendfio.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ mk_nubar.f90 -lendfio
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ mk_nubar.f90 -lendfio $(STATIC)
 
 # tailor read_kal for each material
 #read_kal: read_kal.f90
-#	$(FC) $(FFLAGS) -o $@ read_kal.f90
+#	$(FC) $(FFLAGS) -o $@ read_kal.f90 $(STATIC)
 
 read_mcnp: read_mcnp.f90
-	$(FC) $(FFLAGS) -o $@ read_mcnp.f90
+	$(FC) $(FFLAGS) -o $@ read_mcnp.f90 $(STATIC)
 
 clean:
 	rm -f add_endf getmtn mk_ace mk_xsdir read_allnjoy read_kal read_mcnp

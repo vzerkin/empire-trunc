@@ -51,7 +51,7 @@ endif
 OBJF =	x4toc4.o
 
 x4toc4:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

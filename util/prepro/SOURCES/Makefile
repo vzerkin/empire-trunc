@@ -3,7 +3,7 @@ TARGETS = sigma1 recent linear groupie dictin  fixup legend merger mixer sixpak 
 
 .SUFFIXES: .f
 .f:
-	$(FC) -o $@ $< $(COMMON)
+	$(FC) -o $@ $< $(COMMON) $(STATIC)
 
 all: $(TARGETS)
 

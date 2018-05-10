@@ -51,7 +51,7 @@ endif
 OBJF =	psyche.o
 
 psyche:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

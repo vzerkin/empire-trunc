@@ -54,7 +54,7 @@ else
 endif
 
 lsttab: lsttab.f ../dxsend/dxsend.o
-	$(FC) $(FFLAGS) -o $@ lsttab.f ../dxsend/dxsend.o
+	$(FC) $(FFLAGS) -o $@ lsttab.f ../dxsend/dxsend.o $(STATIC)
 
 ../dxsend/dxsend.o :
 	cd ../dxsend/ ; $(MAKE) FC=$(FC) $(FLG)

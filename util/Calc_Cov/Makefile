@@ -53,7 +53,7 @@ OBJP =	Calc_Cov.o
 all: Calc_Cov.exe 
 
 Calc_Cov.exe:   $(OBJP)
-	$(FC) -o $@ $(OBJP)
+	$(FC) -o $@ $(OBJP) $(STATIC)
 
 clean:
 	rm -f *.o

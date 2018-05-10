@@ -23,7 +23,7 @@ LFLAGS = /out:$(NAMEEXE)
 LFLAGS = -o $(NAMEEXE)
 
 $(NAMEEXE) :  $(NAME)l.mak $(OBJS)
-	$(LINK) $(OBJS) $(LFLAGS)
+	$(LINK) $(OBJS) $(LFLAGS) $(STATIC)
 
 #.c.obj:
 #   $(CC) $(CFLAGS) { $< }

@@ -51,7 +51,7 @@ endif
 OBJF =	linux.o  endfio.o  groupie.o  scratchb.o  timer.o
 
 groupie:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

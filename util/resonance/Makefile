@@ -55,22 +55,22 @@ OBJT =	recent0.o endfio0.o scratchb.o timer.o LINUX.o
 all:	ptanal readrp scanr wriurr readx4 thermx
 
 ptanal:   $(OBJP)
-	$(FC) -o $@ $(OBJP)
+	$(FC) -o $@ $(OBJP) $(STATIC)
 
 readrp:   $(OBJR)
-	$(FC) -o $@ $(OBJR)
+	$(FC) -o $@ $(OBJR) $(STATIC)
 
 wriurr:   $(OBJW)
-	$(FC) -o $@ $(OBJW)
+	$(FC) -o $@ $(OBJW) $(STATIC)
 
 scanr:   $(OBJS)
-	$(FC) -o $@ $(OBJS)
+	$(FC) -o $@ $(OBJS) $(STATIC)
 
 readx4:   $(OBJX)
-	$(FC) -o $@ $(OBJX)
+	$(FC) -o $@ $(OBJX) $(STATIC)
 
 thermx:  $(OBJT)
-	$(FC) -o $@ $(OBJT)
+	$(FC) -o $@ $(OBJT) $(STATIC)
 
 clean:
 	rm -f *.o

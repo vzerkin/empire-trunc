@@ -51,7 +51,7 @@ endif
 OBJF =	rw1omp2fast.o
 
 rw1omp2fast.exe:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

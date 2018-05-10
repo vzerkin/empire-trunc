@@ -64,36 +64,36 @@ libdir = $(EMPIREDIR)/lib
 all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
 
 kalman : kalman.f90
-	$(FC) $(FFLAGS) -o $@ kalman.f90
+	$(FC) $(FFLAGS) -o $@ kalman.f90 $(STATIC)
 
 OBJG = kalend.f90 rctn.o strlen.o 
 kalend :   $(OBJG) $(libdir)/libendfio.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJG) -lendfio
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJG) -lendfio $(STATIC)
 
 OBJH = c4tokal.f90 rctn.o strlen.o 
 c4tokal:  $(OBJH) $(libdir)/libc4io.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJH) -lc4io
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o $@ $(OBJH) -lc4io $(STATIC)
 
 OBJI = genkal.f90 rctn.o strlen.o 
 genkal:   $(OBJI)
-	$(FC) $(FFLAGS) -o $@ $(OBJI)
+	$(FC) $(FFLAGS) -o $@ $(OBJI) $(STATIC)
 
 OBJM = pnt2kal.o aux_routines.o 
 pnt2kal:   $(OBJM)
-	$(FC) $(FFLAGS) -o $@ $(OBJM)
+	$(FC) $(FFLAGS) -o $@ $(OBJM) $(STATIC)
 
 OBJN = refmt-pfns.o aux_routines.o
 refmt-pfns :   $(OBJN)
-	$(FC) $(FFLAGS) -o $@ $(OBJN)
+	$(FC) $(FFLAGS) -o $@ $(OBJN) $(STATIC)
 
 kefkal: kefkal.f90
-	$(FC) $(FFLAGS) -o $@ kefkal.f90
+	$(FC) $(FFLAGS) -o $@ kefkal.f90 $(STATIC)
 
 newinp: newinp.f90
-	$(FC) $(FFLAGS) -o $@ newinp.f90
+	$(FC) $(FFLAGS) -o $@ newinp.f90 $(STATIC)
 
 empsee: empire_sees.f90
-	$(FC) $(FFLAGS) -o $@ empire_sees.f90
+	$(FC) $(FFLAGS) -o $@ empire_sees.f90 $(STATIC)
 
 $(libdir)/libendfio.a:
 	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)

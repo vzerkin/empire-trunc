@@ -51,7 +51,7 @@ endif
 OBJF =	cs2zvd.o
 
 cs2zvd.exe:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

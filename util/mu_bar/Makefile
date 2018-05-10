@@ -51,7 +51,7 @@ endif
 OBJF =	mu_bar.o
 
 mu_bar:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

@@ -24,7 +24,7 @@ $(EXE):$(OBJECTS)
 
 test: $(OBJECTS)
 	$(FC) -c $(FCFLAGS) fruit_driver.f90 $(INCLS) -o fruit_driver.o
-	$(FC) -o fruit_driver fruit_driver.o $(OBJECTS) $(FCFLAGS) $(LIBS)
+	$(FC) -o fruit_driver fruit_driver.o $(OBJECTS) $(FCFLAGS) $(LIBS) $(STATIC)
 	./fruit_driver
 
 .PHONY: clean

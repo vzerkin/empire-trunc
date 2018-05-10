@@ -51,7 +51,7 @@ endif
 OBJF =	fis2zvd.o
 
 fis2zvd.exe:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

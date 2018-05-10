@@ -51,7 +51,7 @@ endif
 OBJF =	preq2zvd.o
 
 preq2zvd.exe:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

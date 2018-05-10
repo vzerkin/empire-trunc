@@ -51,7 +51,7 @@ endif
 OBJF =	fizcon.o
 
 fizcon:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

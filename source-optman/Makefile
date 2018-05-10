@@ -139,7 +139,7 @@ all:
 	$(MAKE) optmand
 
 optmand: $(OBJF) 
-	$(FC) $(FFLAGS) -o optmand $(OBJF) $(LIBS)
+	$(FC) $(FFLAGS) -o optmand $(OBJF) $(LIBS) $(STATIC)
 
 dbg:  
 	$(MAKE) "FFLAGS=$(DFLAGS)" all

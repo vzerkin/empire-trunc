@@ -27,10 +27,10 @@ endif
 libdir = $(EMPIREDIR)/lib
 
 stan: stan.f90 $(libdir)/libendfio.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o stan stan.f90 -lendfio
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o stan stan.f90 -lendfio $(STATIC)
 
 chkr: chkr.f90 $(libdir)/libendfio.a
-	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o chkr chkr.f90 -lendfio
+	$(FC) $(FFLAGS) -L $(libdir) -I $(libdir) -o chkr chkr.f90 -lendfio $(STATIC)
 
 $(libdir)/libendfio.a:
 	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)

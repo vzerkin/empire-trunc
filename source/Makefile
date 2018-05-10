@@ -1,6 +1,6 @@
-#$Rev: 4957 $
-#$Author: mherman $
-#$Date: 2017-06-27 15:41:29 +0200 (Di, 27 Jun 2017) $
+#$Rev: 5113 $
+#$Author: zerkin $
+#$Date: 2018-05-10 14:10:39 +0200 (Do, 10 Mai 2018) $
 
 # set default compilers:
 
@@ -144,7 +144,7 @@ subecis06m.o: subecis06m.f
 	$(FC) $(EFLAGS) -c subecis06m.f
 
 empire: $(OBJF) 
-	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS)
+	$(FC) $(FFLAGS) -o empire $(OBJF) $(LIBS) $(STATIC)
        
 #optmand: optmand.f
 #	$(FC) $(OFLAGS) $(LIBS) -o $@ optmand.f

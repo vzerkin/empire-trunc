@@ -51,7 +51,7 @@ endif
 OBJF =	c5-nng2zvd.o
 
 c5-nng2zvd.exe:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

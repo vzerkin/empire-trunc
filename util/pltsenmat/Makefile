@@ -51,7 +51,7 @@ endif
 OBJF =	plotsenmat.o
 
 plotsenmat:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

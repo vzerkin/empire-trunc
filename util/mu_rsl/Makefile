@@ -51,7 +51,7 @@ endif
 OBJF =	mu_rsl.o
 
 mu_rsl:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

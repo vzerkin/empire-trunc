@@ -51,7 +51,7 @@ endif
 OBJF =	c4sort.o
 
 c4sort:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

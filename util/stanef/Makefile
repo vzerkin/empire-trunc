@@ -51,7 +51,7 @@ endif
 OBJF =	stanef.o
 
 stanef:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o

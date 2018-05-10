@@ -26,7 +26,7 @@ LIBS = $(L1) $(L2) $(L3)
 LFLAGS = $(LIBS) -o $(NAMEEXE)
 
 $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
-	$(LINK) $(OBJS) $(LFLAGS)
+	$(LINK) $(OBJS) $(LFLAGS) $(STATIC)
 
 #.c.obj:
 #   $(CC) $(CFLAGS) { $< }

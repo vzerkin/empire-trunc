@@ -51,7 +51,7 @@ endif
 OBJF =	mrgmat.o
 
 mrgmat:   $(OBJF)
-	$(FC) -o $@ $(OBJF)
+	$(FC) -o $@ $(OBJF) $(STATIC)
 
 clean:
 	rm -f *.o
