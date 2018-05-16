@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5115 $
+    ! $Rev: 5116 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-16 07:42:42 +0200 (Mi, 16 Mai 2018) $
+    ! $Date: 2018-05-16 22:56:50 +0200 (Mi, 16 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1265,7 +1265,7 @@ CONTAINS
         WRITE(8,*) 'Insufficient space allocated for HRTW'
         WRITE(8,*) 'ndhrtw1 in HRTW.f90 needs to be increased'
         WRITE(*,*) 'Insufficient space allocated for HRTW'
-        WRITE(*,*) 'ndhrtw2 in HRTW.f90 needs to be increased'
+        WRITE(*,*) 'ndhrtw1 in HRTW.f90 needs to be increased'
         STOP 'Insufficient space allocated for HRTW'
 
     END SUBROUTINE WFC_error
@@ -1572,10 +1572,11 @@ CONTAINS
                     DO iout = num%coll, num%colh ! second loop over coupled channels
 					   out => outchnl(iout)
                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
-                       WFC(i,iout) = w      ! saving the calculated width fluctuation correction
-                       sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*WFC(i,iout)
+                       WFC(i-num%coll+1,iout) = w      ! saving the calculated width fluctuation correction
+                                                       ! Note that WFC's first index is relative to the first elastic channel
+                       sigma_alph_beta(i-num%coll+1, iout-num%coll+1) = xnor_c*in%t*out%t*w
 !                       write(*,*) 'sigma_alph_beta(', i, iout,')', sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
-!                                 in%t, out%t, WFC(i,iout)
+!                                 in%t, out%t, WFC(i-num%coll+1,iout)
                     ENDDO ! end of loop over iout
                   ENDDO  ! end of loop over i
 
@@ -1674,7 +1675,7 @@ CONTAINS
                     DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
                        out => outchnl(iout)
                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
-                       WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
+                       WFC(iaa,iout) = w    ! saving the calculated sigma corrected by WF (relative first index)
                        Sigma_ab = out%t*w
                        CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
                     ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
@@ -2059,7 +2060,7 @@ CONTAINS
           in => inchnl(iaa)
           out => outchnl(iout)
           w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
-          WFC(i,iout) = w      ! saving the calculated sigma corrected by WF
+          WFC(iaa,iout) = w      ! saving the calculated sigma corrected by WF
 !          dtmp = 0.d0
 !          DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
 !            ialph_ch = num%coll + ialph -1
@@ -2326,8 +2327,8 @@ CONTAINS
             lb = out%l                  !outgoing neutron l
             jb = out%j                  !outgoing neutron j
             IF(LHRtw > 2) THEN
-                !w = WFC(i-ibegin+1,iout) ! Moldauer width fluctuation factor
-                w = WFC(i,iout) ! Moldauer width fluctuation factor
+                w = WFC(i-num%elal+1,iout) ! Moldauer width fluctuation factor
+!                w = WFC(i,iout) ! Moldauer width fluctuation factor
             ELSEIF(i==iout) THEN
                 w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
             ENDIF
