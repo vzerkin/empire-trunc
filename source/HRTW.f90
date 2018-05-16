@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5116 $
+    ! $Rev: 5117 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-16 22:56:50 +0200 (Mi, 16 Mai 2018) $
+    ! $Date: 2018-05-16 23:21:23 +0200 (Mi, 16 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1641,6 +1641,7 @@ CONTAINS
 !                        in%t = out%t
 !                        in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
 !                        xnor = in%sig/DENhf                        ! normalization factor
+                        xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
                         write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
                         !               SCRt = SCRt*xnor                             ! normalizing scratch matrices instead of passing xnor to XSECT,
                         !               SCRtl = SCRtl*xnor                           !   the above helps implementation of the EW transformation that provides
