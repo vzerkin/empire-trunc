@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5119 $
+    ! $Rev: 5120 $
     ! $Author: mwherman $
-    ! $Date: 2018-05-17 21:00:27 +0200 (Do, 17 Mai 2018) $
+    ! $Date: 2018-05-17 23:20:03 +0200 (Do, 17 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -841,7 +841,7 @@ CONTAINS
                         in%l = k-1                       !setting incident channel
                         in%j = xj                        !          "
                         in%t = tld                       !          "
-						in%tlj = tld
+                                    in%tlj = tld
                         h_sumtl = h_sumtl + tld*rho1
                         h_sumtls = h_sumtls + tld**2*rho1
                     ENDDO                 ! do loop over jndex --- done -------
@@ -1519,7 +1519,7 @@ CONTAINS
 
                 !----------------------------------------------------------
                 ! gammas (weak channels)
-				sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
+                        sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
                 ! if(sumg>0.d0) write(*,*) 'g**',NCH,sumg,DENhf
 
                 !----------------------------------------------------------
@@ -1528,8 +1528,8 @@ CONTAINS
                 sumfis = WFC_DECAYF(nnuc,ke,jcn,ip)
                 ! if(sumfis>0.d0) write(*,*) 'f**',NCH,sumfis,DENhf
 
-     	        IF(allocated(WFC)) DEALLOCATE(WFC)
-                ALLOCATE(WFC(num%elal+1,NCH+1),STAT=my)
+                IF(allocated(WFC)) DEALLOCATE(WFC)
+                ALLOCATE(WFC(num%colh-num%coll+1,NCH+1),STAT=my)
                 IF(my /= 0) CALL WFC_error()
 
                 !----------------------------------------------------------
@@ -1571,11 +1571,11 @@ CONTAINS
 
                   ! write(*,*) 'num%coll, num%colh', num%coll, num%colh
                   
-				  DO i = num%coll, num%colh  ! first loop over coupled channels
+                          DO i = num%coll, num%colh  ! first loop over coupled channels
                     in => inchnl(i-num%coll+1)
                     in%t = outchnl(i)%t  ! numbering of outgoing channels is different from incoming, !RCN
                     DO iout = num%coll, num%colh ! second loop over coupled channels
-					   out => outchnl(iout)
+                                 out => outchnl(iout)
                        w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                        WFC(i-num%coll+1,iout) = w      ! saving the calculated width fluctuation correction
                                                        ! Note that WFC's first index is relative to the first elastic channel
@@ -1584,12 +1584,12 @@ CONTAINS
                        !            in%t, out%t, WFC(i-num%coll+1,iout)
                     ENDDO ! end of loop over iout
                   
-				  ENDDO  ! end of loop over i
+                          ENDDO  ! end of loop over i
 
-		          ! WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
+                      ! WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
 
-				  ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
-				  ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
+                          ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
+                          ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
 
                   DO i = num%elal, num%elah ! loop over elastic=incident channels iaa=i (in the normal space)
                     iaa = i - num%elal + 1
@@ -1608,7 +1608,7 @@ CONTAINS
                     ! in%sig = in%tlj !TEST use Tlj instead of the calculated T from the rotated matrix
                     IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
                     
-					DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
+                              DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
                       out => outchnl(iout)
                       Sigma_ab = INVERSE_EW(i,iout,xnor_c) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
                       ! write(*,*) 'Sigma_', i, iout, Sigma_ab, ' versus', xnor_c*in%t*out%t
@@ -1630,14 +1630,14 @@ CONTAINS
                     !----------------------------------------------------------
                     ! IF(num%fiss>0) sumfis = INVERSE_EW(i,num%fiss,xnor_c)*outchnl(num%fiss)%rho ! MH - check whether we need rho for fission here
           
-		            !----------------------------------------------------------
+                        !----------------------------------------------------------
                     ! Renormalizing scratch matrices to recover unitarity EW
                     !----------------------------------------------------------
                     DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                     ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
-			        IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
+                          IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
 
                     ! absorption for incoming channel
                     ! in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
@@ -1657,7 +1657,7 @@ CONTAINS
                     !-----------------------------------------------------------------------------
                     CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                   
-				  ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
+                          ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
                 ELSE  !no Engelbrecht-Weidenmueller transformation
 
@@ -1671,9 +1671,9 @@ CONTAINS
                     xnor = in%t*xnor_c  ! normalization factor for absorption channel iaa (no EW so it is in the normal space)
                     write(*,*) 'xnor Mol', xnor, ' in%t', in%t
                     
-					IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
+                              IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
                     
-					DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
+                              DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
                       out => outchnl(iout)
                       w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                       WFC(iaa,iout) = w    ! saving the calculated sigma corrected by WF (relative first index)
@@ -1705,7 +1705,7 @@ CONTAINS
                     in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                     xnor = in%sig/DENhf                        ! normalization factor
                     !xnor = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
-					write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
+                              write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
 
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -1720,7 +1720,7 @@ CONTAINS
 
                 ENDIF  ! over EW transformation
 
-     	        IF(allocated(WFC)) DEALLOCATE(WFC)
+              IF(allocated(WFC)) DEALLOCATE(WFC)
 
                 ! Gamma width calculation *************************************************************************************
                 IF((first_ein .OR. benchm) .AND. einl<=1.D0) THEN
@@ -1778,23 +1778,23 @@ CONTAINS
         
         !Diagonalizing the ECIS Pmatrix in the transformed space for cross checking
         ! ECIS values of Pdiag reproduced exactly 
-		PPdiag =   REAL(Pmatr)
+            PPdiag =   REAL(Pmatr)
         ZItmp  =   IMAG(Pmatr)
-		if(debug) then
+            if(debug) then
          WRITE(*,*) '************ Using ECIS Pmatr' 
          DO i = 1,NDIm_cc_matrix
            DO iout = 1,NDIm_cc_matrix
              write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,PPdiag(i,iout),ZItmp(i,iout)
            ENDDO
          ENDDO
-		endif
+            endif
         CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
         IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
         ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space
         ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix
                  
-		if(debug) then
-		 WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+            if(debug) then
+             WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
          DO iout = 1,NDIm_cc_matrix
            write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout)
            DO I = 1,NDIm_cc_matrix
@@ -1802,7 +1802,7 @@ CONTAINS
            ENDDO
          ENDDO
         endif
-        ! Construct U-matrix that diagonalized P-matrix	 (checked to comply with equalities (A8) and (A10)) 
+        ! Construct U-matrix that diagonalized P-matrix      (checked to comply with equalities (A8) and (A10)) 
         ! ECIS values of Umatr reproduced exactly 
         DO i=1,NDIm_cc_matrix
            DO iout = 1,NDIm_cc_matrix
@@ -1810,8 +1810,8 @@ CONTAINS
            ENDDO
         ENDDO
         !*******************************************************************************
-		! Derivation of Pmatrix from Smatrix (diagonal elements = ECIS, off-diag differ)
-		!Tmatr = MATMUL(Smatr,TRANSPOSE(CONJG(Smatr)))
+            ! Derivation of Pmatrix from Smatrix (diagonal elements = ECIS, off-diag differ)
+            !Tmatr = MATMUL(Smatr,TRANSPOSE(CONJG(Smatr)))
         !ZRtmp1 = 0.d0
         !DO i=1,NDIm_cc_matrix
         !    ZRtmp1(i,i) = 1.d0
@@ -1826,29 +1826,29 @@ CONTAINS
         !  ENDDO
         !ENDDO
 
-		! Consistent with (*)
+            ! Consistent with (*)
         !write(*,*) 'Calculated Pmatrix from Smatrix (foll. Eq.(11) Kawano)'
-		!Pmatr = (0.d0,0.d0)
+            !Pmatr = (0.d0,0.d0)
         !DO iaa = 1,NDIm_cc_matrix
         !  DO ibb = 1,NDIm_cc_matrix
-	    !	if(iaa.eq.ibb) Pmatr(iaa,ibb)=(1.d0,0.d0)
+          ! if(iaa.eq.ibb) Pmatr(iaa,ibb)=(1.d0,0.d0)
         !    DO i = 1,NDIm_cc_matrix
-		!	  Pmatr(iaa,ibb) = Pmatr(iaa,ibb) - Smatr(iaa,i)*CONJG(Smatr(ibb,i))
-        !  	ENDDO
+            !       Pmatr(iaa,ibb) = Pmatr(iaa,ibb) - Smatr(iaa,i)*CONJG(Smatr(ibb,i))
+        !   ENDDO
         !   write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') iaa,ibb,Pmatr(iaa,ibb)
         ! ENDDO
         !ENDDO
 
         !Diagonalizing our Pmatrix in the transformed space for cross checking
         ! ECIS values of Pdiag reproduced exactly 
-		!PPdiag =   REAL(Pmatr)
+            !PPdiag =   REAL(Pmatr)
         !ZItmp  =   IMAG(Pmatr)
 
         !CALL QDIAG(PPdiag,ZItmp,ZRtmp1,ZItmp1,NDIm_cc_matrix,epsil,dtmp,IER)
         !IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
         ! On exit PPdiag contains the diagonalized Pmatrix = P{alpha,alpha) in the transformed space
         ! ZRtmp1,ZItmp1 contains the real and imaginary part of the eigenvectors = Umatrix
-		!WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
+            !WRITE(*,*) 'Diag: eigenvector = Umatr(,), eigenvalues = PPdiag()'
         !DO iout = 1,NDIm_cc_matrix
         !  write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Pmatr)=',iout, PPdiag(iout,iout),ZItmp(iout,iout)
         !  DO I = 1,NDIm_cc_matrix
@@ -1863,9 +1863,9 @@ CONTAINS
         !ENDDO
                
         !Diagonalizing the Smatrix using the derived Umatrix
-		! This does not work 
+            ! This does not work 
         !Pmatr =   MATMUL(TRANSPOSE(Umatr),MATMUL(Smatr,TRANSPOSE(Umatr))) ! overwriting Pmatrix, as in principle not needed anymore
-		if(debug) then
+            if(debug) then
         write(*,*) 'Smatrix from ECIS'
         DO i = 1,NDIm_cc_matrix
           DO iout = 1,NDIm_cc_matrix
@@ -1878,8 +1878,8 @@ CONTAINS
             write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iout,Pmatr(i,iout) 
           ENDDO
         ENDDO
-		endif
-		!PAUSE
+            endif
+            !PAUSE
 
         ZRtmp1 = 0.d0
         DO i=1,NDIm_cc_matrix
@@ -1894,7 +1894,7 @@ CONTAINS
         IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
         ! On exit Sdiag contains the diagonalized Smatrix = S{alpha,alpha) in the transformed space
         ! ZRtmp1,ZItmp1 contains the real and imaginary part of the corresponding eigenvectors
-		IF(debug) then
+            IF(debug) then
           write(*,*) 'Diagonal Smatrix'
           DO i = 1,NDIm_cc_matrix
             DO iout = 1,NDIm_cc_matrix
@@ -1902,25 +1902,25 @@ CONTAINS
             ENDDO
           ENDDO
         ENDIF
-		       
+                   
         ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
         ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
         DO i=1,NDIm_cc_matrix
-		  ibb = NDIm_cc_matrix - i + 1 
-		  Sphase(ibb) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
+              ibb = NDIm_cc_matrix - i + 1 
+              Sphase(ibb) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
           if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i), &
           ' phi(alpha)=',Sphase(i)
           if(debug) write(*,*) i,sngl(1.d0-ABS(Sdiag(ibb,ibb))**2),sngl(Pdiag(i)),sngl(PPdiag(i,i))
         ENDDO
-		! We diagonalize Smatr to calculate the phases from its diagonal elements
-		! However, we were not able to verify that Umatr also diagonalized Smatr
-		! Clearly, we can not calculate Umatr from Smatr as papers clearly state
-		! that Umatr is derived from the diagonalization of the Pmatr
-		!
-		! At this point, we have available Pdiag(:), Umatr(:,:), Sphase(:)
-		!PAUSE
+            ! We diagonalize Smatr to calculate the phases from its diagonal elements
+            ! However, we were not able to verify that Umatr also diagonalized Smatr
+            ! Clearly, we can not calculate Umatr from Smatr as papers clearly state
+            ! that Umatr is derived from the diagonalization of the Pmatr
+            !
+            ! At this point, we have available Pdiag(:), Umatr(:,:), Sphase(:)
+            !PAUSE
 
-		IF(debug) THEN
+            IF(debug) THEN
             ! loop over ibb=iout (coupled channels in the normal space)
             DO ibb = 1,NDIm_cc_matrix
             !DO iout = num%coll, num%colh
@@ -1962,7 +1962,7 @@ CONTAINS
     REAL*8 FUNCTION INVERSE_EW(i,iout,xnor_c)
         ! i is an incident (elastic) collective channel
         ! iout is an outgoing particle channel, it can be collective or uncoupled
-		! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+            ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
    
         IMPLICIT NONE
 
@@ -1985,11 +1985,11 @@ CONTAINS
 
         iaa = i - num%elal + 1
 
-		if(num%coll.LE.iout .AND. iout.LE.num%colh) then
+            if(num%coll.LE.iout .AND. iout.LE.num%colh) then
           !------------------------------------------------------------------------------------------
           ! loops over collective levels in the transformed space (ialph and ibeta) for coupled iout
           !------------------------------------------------------------------------------------------
-	      ibb = iout - num%coll + 1
+            ibb = iout - num%coll + 1
           DO ialph = 1, NDIm_cc_matrix
             ialph_ch = num%coll + ialph -1
             nu_ialph =  outchnl(ialph_ch)%eef/2.D0   ! half of the degree of freedom for ialph channel
@@ -2028,7 +2028,7 @@ CONTAINS
           ENDDO   ! end of the loop over ialph (transformed space)
 
           INVERSE_EW = REAL(ctmp1) + REAL(ctmp2)  ! this is Sigma_ab cross section (in the normal space)
-												  ! It is checked to be a real quantity	within 10^{-10}
+                                                                          ! It is checked to be a real quantity   within 10^{-10}
 
           !WRITE(*,*) REAL (ctmp1),' REAL diag' ! the cross section \sigma_{ab} in the normal space
           !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
@@ -2036,7 +2036,7 @@ CONTAINS
           !WRITE(*,*) DIMAG(ctmp2),' IMAG offd' ! the imaginary part expected to be zero
 !          WRITE(*,*) 'Sigma(a=',iaa,', b=',ibb,')=',INVERSE_EW
 
-		else
+            else
 
           !----------------------------------------------------------------------------------------
           ! loops over collective levels in rotated space (ialph) for the uncoupled states (iout)
@@ -2050,12 +2050,12 @@ CONTAINS
           !  ialph_ch = num%coll + ialph -1
           !  dtmp = dtmp + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
           !ENDDO   ! end of the loop over ialph (transformed space)
-		  !INVERSE_EW = dtmp*w !*xnor_c !in%sig*dtmp*w*xnor_c
-		  INVERSE_EW = in%sig*out%t*w*xnor_c
+              !INVERSE_EW = dtmp*w !*xnor_c !in%sig*dtmp*w*xnor_c
+              INVERSE_EW = in%sig*out%t*w*xnor_c
 
-		endif
+            endif
         
-		RETURN
+            RETURN
     END FUNCTION INVERSE_EW
 
     !----------------------------------------------------------------------------------------------------
