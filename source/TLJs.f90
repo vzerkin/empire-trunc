@@ -1,6 +1,6 @@
-! $Rev: 5105 $
+! $Rev: 5122 $
 ! $Author: capote $
-! $Date: 2018-05-05 21:16:05 +0200 (Sa, 05 Mai 2018) $
+! $Date: 2018-05-18 00:23:49 +0200 (Fr, 18 Mai 2018) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -610,9 +610,13 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(nccu)%Jcn), CCumatrix(nccu)%Pcn, CCumatrix(nccu)%nceq
       if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
 
+
       do i1 = nccu, nmaxu
-         if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
-         Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
+        ! if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+        ! Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
+        ! defining Umatr as TRANSPOSE(UMatr)
+		  if (debug) WRITE (*,*) CCumatrix(i1)%icol, CCumatrix(i1)%irow, CCumatrix(i1)%umatrix
+          Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
       enddo
       if (debug) write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
 
