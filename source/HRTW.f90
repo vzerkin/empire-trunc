@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5118 $
-    ! $Author: capote $
-    ! $Date: 2018-05-17 02:20:11 +0200 (Do, 17 Mai 2018) $
+    ! $Rev: 5119 $
+    ! $Author: mwherman $
+    ! $Date: 2018-05-17 21:00:27 +0200 (Do, 17 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1537,7 +1537,7 @@ CONTAINS
                 !----------------------------------------------------------
                 IF(DENhf==0.D0) CYCLE
 
-                   write(*,*)' '
+                !  write(*,*)' '
                 !  write(*,*)'SUMMARY OF DECAY FOR J=',xjc
                 !  write(*,*)'total sum of  Tls ', H_Sumtl
                 !  write(*,*)'sum of strong Tls ', H_Sumtl-H_Sweak
@@ -1586,7 +1586,7 @@ CONTAINS
                   
 				  ENDDO  ! end of loop over i
 
-		          WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
+		          ! WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
 
 				  ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
 				  ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
@@ -1603,8 +1603,8 @@ CONTAINS
                       in%sig = in%sig + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
                     ENDDO   ! end of the loop over ialph (transformed space)
                     xnor = in%sig*xnor_c
-                    write(*,*) 'xnor EW ', xnor
-                    write(*,*) 'Sum_alpha=',in%sig,' Tlj=',in%tlj,sngl(ip*xjc)
+                    ! write(*,*) 'xnor EW ', xnor
+                    ! write(*,*) 'Sum_alpha=',in%sig,' Tlj=',in%tlj,sngl(ip*xjc)
                     ! in%sig = in%tlj !TEST use Tlj instead of the calculated T from the rotated matrix
                     IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
                     
@@ -1646,7 +1646,7 @@ CONTAINS
                     ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                     ! xnor = in%sig/DENhf                        ! normalization factor
                     xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
-                    write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
+                    ! write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                     !---------------------------------------------------------------

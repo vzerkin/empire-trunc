@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5091 $
-Ccc   * $Author: capote $
-Ccc   * $Date: 2018-04-30 04:45:57 +0200 (Mo, 30 Apr 2018) $
+Ccc   * $Rev: 5119 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2018-05-17 21:00:27 +0200 (Do, 17 Mai 2018) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -4391,7 +4391,6 @@ C     restoring the input value of the key CN_isotropic
       ELSE
         IF(inc_channel .and. Inlkey.LT.0) THEN
           MAX_cc_mod = itmp	   
-          write (*,*) 'from ECIS vib MAX_cc=',MAX_cc_mod
         ENDIF 
         iwin = ipipe_move('ecis06.out','ECIS_VIB.out')
         iwin = ipipe_move('ecis06.inp','ECIS_VIB.inp')
