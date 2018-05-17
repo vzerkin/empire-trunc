@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5090 $
+Ccc   * $Rev: 5123 $
 Ccc   * $Author: capote $
-Ccc   * $Date: 2018-04-28 08:09:29 +0200 (Sa, 28 Apr 2018) $
+Ccc   * $Date: 2018-05-18 00:25:51 +0200 (Fr, 18 Mai 2018) $
 
 C--------------------------------------------------------------------------------------
 C     Customized version of ECIS06 (some printing added)
@@ -19446,7 +19446,7 @@ C=======================================================================
 C     AVOIDING CN DECAY & WF correction in ECIS to speed-up EMPIRE calcs
 C     Matrices needed for EW transformation already saved
 C=======================================================================
-C     RETURN
+      RETURN
 C
       IF (IERR.EQ.0) GO TO 28                                           SCAM-334
       WRITE (MW,1008)                                                   SCAM-335
