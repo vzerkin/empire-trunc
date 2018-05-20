@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5122 $
-    ! $Author: capote $
-    ! $Date: 2018-05-18 00:23:49 +0200 (Fr, 18 Mai 2018) $
+    ! $Rev: 5124 $
+    ! $Author: mwherman $
+    ! $Date: 2018-05-20 20:52:05 +0200 (So, 20 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -29,15 +29,15 @@ MODULE width_fluct
 
     TYPE channel
         INTEGER l         ! ejectile l
-        REAL*8 j            ! ejectile j
-        REAL*8 t            ! ejectile Tlj
-        REAL*8 ti1          ! temporary Tlj used for iteration
-        REAL*8 ti2          ! temporary Tlj used for iteration
-        REAL*8 rho          ! final level density for this channel
-        REAL*8 eef          ! elastic enhancement factor
+        REAL*8 j          ! ejectile j
+        REAL*8 t          ! ejectile Tlj
+        REAL*8 ti1        ! temporary Tlj used for iteration
+        REAL*8 ti2        ! temporary Tlj used for iteration
+        REAL*8 rho        ! final level density for this channel
+        REAL*8 eef        ! elastic enhancement factor
         INTEGER nejc      ! ejectile index (nejc)
         INTEGER kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
-        REAL*8 xjrs         ! spin of the populated state
+        REAL*8 xjrs       ! spin of the populated state
         INTEGER jres      ! spin index of the populated state
         INTEGER pres      ! parity index of the populated state
     END TYPE channel
@@ -47,7 +47,7 @@ MODULE width_fluct
         INTEGER part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
         INTEGER coll     ! position of the first (low) coupled level channel
         INTEGER colh     ! position of the last coupled channel;
-                            ! coupled channels are embedded in particle channels coll <= colh <=part
+                         ! coupled channels are embedded in particle channels coll <= colh <=part
         INTEGER elal     ! position of the first (low) elastic channel
         INTEGER elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
         INTEGER fiss     ! effective number of fission channels
@@ -76,7 +76,7 @@ MODULE width_fluct
     REAL*8 :: TFIs         ! Sum of fission transmission coefficients
     REAL*8 :: TGam         ! Sum of gamma transmission coefficients
     INTEGER :: NCH         ! Number of strong channels (Tlj's)
-    ! INTEGER :: NSCh        ! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
+    ! INTEGER :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
 
     REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
     REAL*8, ALLOCATABLE :: H_Abs(:,:)
@@ -363,11 +363,11 @@ CONTAINS
         !----------------------------------------------------------
         ! start CN nucleus decay
         !----------------------------------------------------------
-        DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
+        DO ipar = 1, 2                                       ! do loop over decaying nucleus parity
             ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
             DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
                 xjc = float(jcn) + HIS(nnuc)
-                IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE      ! skip if absorption cross section negligible
+                IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE     ! skip if absorption cross section negligible
                 ! write(8,*) ' '
                 ! write(8,*) 'CN Jpi=',xjc*ip
                 nhrtw = 0
@@ -464,12 +464,12 @@ CONTAINS
                 !Loop over incident channels to calculate cross sections and angular distributions
                 !----------------------------------------------------------------------------------
                 DO i = num%elal, num%elah                   ! do loop over elastic channels
-                    in => inchnl(i - num%elal + 1)           ! elastic channels for each Jcn are numbered 1,2,3,...
+                    in => inchnl(i - num%elal + 1)          ! elastic channels for each Jcn are numbered 1,2,3,...
                     out => outchnl(i)
                     in%t = out%t
 
                     ! write(*,*) 'Jcn, Tlj_in, Tlj_out, coef, sig ', xjc, in%t, out%t, coef, in%sig
-                    elcor = out%t*(out%eef - 1.D0)     ! elastic channel correction to SCRtl  (elcor=0 for HF)
+                    elcor = out%t*(out%eef - 1.D0)          ! elastic channel correction to SCRtl  (elcor=0 for HF)
                     ! write(*,*) 'Elcor =', elcor, '  EEF =', out%eef
                     SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + elcor
                     ! write(*,*)'post AUSTER DENhf=', DENhf + elcor
@@ -625,8 +625,8 @@ CONTAINS
                 kmax = jmax - 1 + ssxj                           ! maximum k=l+1
                 kmax = MIN(ndlw, kmax)                           ! ensure we are within dimensions
                 DO k = kmin, kmax                                ! do loop over l in Tlj (note that k=l+1)
-                    ip1 = 2 - (1 + ipc*( - 1)**(k - 1))/2         ! parity index of r.n. state populated by emission with l=k-1
-                    DO jndex = 1, MAXj(nejc)                      ! do loop over j-index in Tlj
+                    ip1 = 2 - (1 + ipc*( - 1)**(k - 1))/2        ! parity index of r.n. state populated by emission with l=k-1
+                    DO jndex = 1, MAXj(nejc)                     ! do loop over j-index in Tlj
                         xj = k + jndex - ssxj
                         IF(xj<jmin .OR. xj>jmax) CYCLE
                         DO ier = iermax, 1, -1
@@ -637,13 +637,13 @@ CONTAINS
                             IF(ier==1 .AND. nint(Z(1))==nint(Z(nnur))) rho1 = rho1*DEPart(nnur)  !correct for gap above Ecut
                             H_Sumtl = H_Sumtl + tld*rho1
                             H_Sumtls = H_Sumtls + tld**2*rho1
-                            IF(ier==1) THEN                         !correct for the edge bin in trapeizoidal integration
+                            IF(ier==1) THEN                      !correct for the edge bin in trapeizoidal integration
                                 H_Sumtl = H_Sumtl - 0.5*tld*rho1
                                 H_Sumtls = H_Sumtls - 0.5*tld**2*rho1
                             ENDIF
-                            IF(tld>H_Tthr) THEN                     !store strong channels
+                            IF(tld>H_Tthr) THEN                  !store strong channels
                                 NCH = NCH +1
-                                IF(NCH>ndhrtw1) CALL WFC_error()    !STOP - insufficient space allocation
+                                IF(NCH>ndhrtw1) CALL WFC_error() !STOP - insufficient space allocation
                                 out => outchnl(NCH)
                                 out%l = k-1
                                 out%j = xj
@@ -695,23 +695,23 @@ CONTAINS
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             !         if(nejc==1) write(*,*)'kmin, kmax ', kmin, kmax
             DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
-                ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
+                ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)   !check parity (1 if conserved, 0 if violated)
                 !            if(nejc==1) write(*,*)'ipar=',ipar
                 IF(ipar==0) CYCLE
-                DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
+                DO jndex = 1, MAXj(nejc)                     !do loop over j-index in Tlj
                     xj = k + jndex - ssxj
                     !               if(nejc==1) write(*,*)'xj, jmin, jmax',xj, jmin, jmax
                     IF(xj<jmin .OR. xj>jmax) CYCLE
-                    !rho1 = 1.d0                               !level density variable
-                    rho1 = TUNe(nejc,nnuc)                     !reuse level density variable for tuning
-                    ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
+                    !rho1 = 1.d0                             !level density variable
+                    rho1 = TUNe(nejc,nnuc)                   !reuse level density variable for tuning
+                    ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i) !if inelastic - apply respective scaling
                     tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
-                    IF(tld<1.0d-15) CYCLE                      !ignore very small channels
+                    IF(tld<1.0d-15) CYCLE                    !ignore very small channels
                     H_Sumtl = H_Sumtl + tld*rho1
                     H_Sumtls = H_Sumtls + tld**2*rho1
                     IF(tld>H_Tthr) THEN
-                        NCH = NCH + 1                             !we've got non-zero channel
-                        IF(NCH>ndhrtw1) CALL WFC_error()          !STOP - insufficient space allocation
+                        NCH = NCH + 1                        !we've got non-zero channel
+                        IF(NCH>ndhrtw1) CALL WFC_error()     !STOP - insufficient space allocation
                         out => outchnl(NCH)
                         out%l = k-1
                         out%j = xj
@@ -719,7 +719,7 @@ CONTAINS
                         out%rho = rho1
                         ! out%sig = 0.d0
                         out%nejc = nejc
-                        out%kres = -i                               !minus indicates channel leading to a discrete level 'i'
+                        out%kres = -i                        !minus indicates channel leading to a discrete level 'i'
                         out%xjrs = XJLv(i,nnur)
                         out%pres = LVP(i,nnur)
                     !                  write(*,*) 'i, T, rho',i,out%t,out%rho
@@ -745,40 +745,40 @@ CONTAINS
         ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
             !  Old version for collective levels
             IF(IZA(nnur)==IZA(0)) THEN
-                DO i = 1, NLV(nnur)                                !do loop over inelastic levels, elastic done after the loop
+                DO i = 1, NLV(nnur)                                 !do loop over inelastic levels, elastic done after the loop
                     IF(i==levtarg) CYCLE                            !skip if elastic
                     IF(ICOllev(i)==0 .OR. ICOllev(i)>LEVcc) CYCLE   !skip DWBA coupled levels
                     eout = eoutc - ELV(i,nnur)
                     IF(eout<0.0D0) EXIT
-                    CALL TLLOC(nnur,nejc,eout,il,frde)               !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
+                    CALL TLLOC(nnur,nejc,eout,il,frde)              !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                     jmin = abs(XJLv(i,nnur) - xjc)
                     jmax = XJLv(i,nnur) + xjc
-                    kmin = jmin - MAXj(nejc) + ssxj                  !minimum k=l+1
-                    kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-                    kmax = jmax - 1  + ssxj                          !maximum k=l+1
-                    kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
-                    DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
-                        ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)    !check parity (1 if conserved, 0 if violated)
+                    kmin = jmin - MAXj(nejc) + ssxj                 !minimum k=l+1
+                    kmin = MAX(kmin,1)                              !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
+                    kmax = jmax - 1  + ssxj                         !maximum k=l+1
+                    kmax = MIN(ndlw, kmax)                          !ensure we are within dimensions
+                    DO k = kmin, kmax                               !do loop over l in Tlj (note that real l is k-1)
+                        ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)  !check parity (1 if conserved, 0 if violated)
                         IF(ipar==0) CYCLE
-                        DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
+                        DO jndex = 1, MAXj(nejc)                    !do loop over j-index in Tlj
                             xj = k + jndex - ssxj
                             IF(xj<jmin .OR. xj>jmax) CYCLE
                             !rho1 = 1.d0                                         !level density variable
-                            rho1 = TUNe(nejc,nnuc)                     !reuse level density variable for tuning
+                            rho1 = TUNe(nejc,nnuc)                  !reuse level density variable for tuning
                             ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                             tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
                             !tld = min(1.d0,tld * TUNe(nejc,nnuc))       ! thsi protection is not used anywhere, should be avoided (or used in all places)
                             IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                             H_Sumtl = H_Sumtl + tld*rho1
                             H_Sumtls = H_Sumtls + tld**2*rho1
-                            NCH = NCH + 1                              !we've got non-zero channel
-                            IF(NCH>ndhrtw1) CALL WFC_error()           !STOP - insiufficent space allocation
+                            NCH = NCH + 1                           !we've got non-zero channel
+                            IF(NCH>ndhrtw1) CALL WFC_error()        !STOP - insiufficent space allocation
 
                             IF(num%coll == 0) THEN
-                                num%coll = NCH                          !memorize position of the first coupled level in the 'outchnl' matrix
-                                num%colh = NCH                          !set it also as the last one in case there are no more
+                                num%coll = NCH                      !memorize position of the first coupled level in the 'outchnl' matrix
+                                num%colh = NCH                      !set it also as the last one in case there are no more
                             ENDIF
-                            IF(NCH > num%colh) num%colh = NCH          !in case of another coupled level augment position of last coupled channel
+                            IF(NCH > num%colh) num%colh = NCH       !in case of another coupled level augment position of last coupled channel
 
                             out => outchnl(NCH)
                             out%l = k-1
@@ -786,7 +786,7 @@ CONTAINS
                             out%t = tld
                             out%rho = rho1
                             out%nejc = nejc
-                            out%kres = -i                              !minus indicates channel leading to a discrete level 'i'
+                            out%kres = -i                           !minus indicates channel leading to a discrete level 'i'
                             out%xjrs = XJLv(i,nnur)
                             out%pres = LVP(i,nnur)
                            ! WRITE(8,'(3x,A,2x,2(f5.1,1x),i2,1x,f7.3,1x,i6)')'xjc, xj, ipar, ELV(i,nnur), NCH', xjc, xj, ipar, ELV(i,nnur), NCH
@@ -811,19 +811,19 @@ CONTAINS
                     !         ipar = PAR(ipc,LVP(LEVtarg,nnur),k - 1)
                     ipar = (1.d0 - (-1.d0)*ipc*LVP(i,nnur)*(-1)**(k-1))/2.d0
                     IF(ipar==0) CYCLE
-                    DO jndex = 1, MAXj(nejc)                      !do loop over j-index in Tlj
+                    DO jndex = 1, MAXj(nejc)                     !do loop over j-index in Tlj
                         xj = k + jndex - ssxj
                         IF(xj<jmin .OR. xj>jmax) CYCLE
-                        tld = ELTLJ(k,jndex)                       !no IF - all elastic channels treated as 'strong'
+                        tld = ELTLJ(k,jndex)                     !no IF - all elastic channels treated as 'strong'
                         NCH = NCH + 1
-                        IF(NCH>ndhrtw1) CALL WFC_error()          !STOP - insufficient space allocation
+                        IF(NCH>ndhrtw1) CALL WFC_error()         !STOP - insufficient space allocation
                         IF(num%elal == 0) THEN
-                            num%elal = NCH                          !memorize position of the first elastic in the 'outchnl' matrix
-                            num%elah = NCH                          !set it also as the last one in case there are no more
+                            num%elal = NCH                       !memorize position of the first elastic in the 'outchnl' matrix
+                            num%elah = NCH                       !set it also as the last one in case there are no more
                         ENDIF
-                        IF(NCH > num%elah) num%elah = NCH          !if another elastic augment position of last elastic channel
+                        IF(NCH > num%elah) num%elah = NCH        !if another elastic augment position of last elastic channel
                         !rho1 = CELred
-                        rho1 = CELred*TUNe(nejc,NTArget)           !reuse level density variable for tuning
+                        rho1 = CELred*TUNe(nejc,NTArget)         !reuse level density variable for tuning
 
                         out => outchnl(NCH)
                         out%l = k-1
@@ -835,12 +835,12 @@ CONTAINS
                         out%xjrs = XJLv(i,nnur)
                         out%pres = LVP(i,nnur)
 
-                        nel = NCH - num%elal + 1         !setting correspondence between 'nch' and elastic numbering 'nel'
-                        in => inchnl(nel)
-                        in%nout = NCH                    !setting incident channel
-                        in%l = k-1                       !setting incident channel
-                        in%j = xj                        !          "
-                        in%t = tld                       !          "
+                        nel = NCH - num%elal + 1                 !setting correspondence between 'nch' and elastic numbering 'nel'
+                        in => inchnl(nel)                        
+                        in%nout = NCH                            !setting incident channel
+                        in%l = k-1                               !setting incident channel
+                        in%j = xj                                !          "
+                        in%t = tld                               !          "
                                     in%tlj = tld
                         h_sumtl = h_sumtl + tld*rho1
                         h_sumtls = h_sumtls + tld**2*rho1
@@ -1246,11 +1246,11 @@ CONTAINS
         tfis = sumfis/dfloat(ndivf)
         H_Sumtls = H_Sumtls + tfis**2*dfloat(ndivf)
         IF(tfis>=H_Tthr) THEN                      ! fission treated as a strong channel
-            NCH = NCH + 1                           ! otherwise 'sumfis' it is left untouched
-            num%fiss = NCH                          ! store position of fission (only one entry with 'ndivf')
+            NCH = NCH + 1                          ! otherwise 'sumfis' it is left untouched
+            num%fiss = NCH                         ! store position of fission (only one entry with 'ndivf')
             outchnl(NCH)%t = tfis
             outchnl(NCH)%rho = dfloat(ndivf)
-            outchnl(NCH)%nejc = 100                 ! nejc=100 convention identifies fission
+            outchnl(NCH)%nejc = 100                ! nejc=100 convention identifies fission
         ENDIF
 
         WFC_decayf = sumfis
@@ -1356,11 +1356,11 @@ CONTAINS
         iter: DO
             icount = icount + 1
             outchnl(1:NCH)%ti2 = outchnl(1:NCH)%t/(1.D0 + outchnl(1:NCH)%ti1*(outchnl(1:NCH)%eef-1.D0)/H_Sumtl) !actual iteration
-            H_Sumtl = SUM(outchnl(1:NCH)%ti2*outchnl(1:NCH)%rho)                                          !new integral
+            H_Sumtl = SUM(outchnl(1:NCH)%ti2*outchnl(1:NCH)%rho)                                     !new integral
             DO i = 1, NCH
-                IF(outchnl(i)%kres==1) H_Sumtl = H_Sumtl - 0.5*(outchnl(i)%ti2*outchnl(i)%rho)                   !correct integral for edge bin
+                IF(outchnl(i)%kres==1) H_Sumtl = H_Sumtl - 0.5*(outchnl(i)%ti2*outchnl(i)%rho)       !correct integral for edge bin
             ENDDO
-            H_Sumtl = H_Sumtl + H_Sweak                                                             !add weak channels that are not iterated
+            H_Sumtl = H_Sumtl + H_Sweak                                                              !add weak channels that are not iterated
             IF(icount>200) THEN
                 WRITE(8,*)' WARNING: Maximum iteration number (200) reached in AUSTER'
                 EXIT iter
@@ -1479,12 +1479,12 @@ CONTAINS
         ! start CN nucleus decay
         !----------------------------------------------------------
         DO ipar = 1, 2                                      ! do loop over decaying nucleus parity
-            ip = 1 - 2*abs(mod(ipar+1,2))                    ! actual parity of the state (+1 or -1)
-            DO jcn = 1, nlw                                  ! do loop over decaying nucleus spin
+            ip = 1 - 2*abs(mod(ipar+1,2))                   ! actual parity of the state (+1 or -1)
+            DO jcn = 1, nlw                                 ! do loop over decaying nucleus spin
                 xjc = float(jcn) + HIS(nnuc)
-                IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE      ! skip if absorption cross section negligible
-                ! write(8,*) ' '
-                ! write(8,*) 'CN Jpi=',xjc*ip
+                IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE    ! skip if absorption cross section negligible
+!                 write(*,*) ' '
+!                 write(*,*) 'CN Jpi=',xjc*ip
                 nhrtw = 0
                 ! NSCh = 0
 
@@ -1562,7 +1562,6 @@ CONTAINS
                   ! Engelbrecht- Weidenmueller: setting cross sections in the rotated space
                   !------------------------------------------------------------------------------------------
                   !CALL EW_diagonalization(xjc,ip)
-                  !Umatr = TRANSPOSE(Umatr)   ! this turns out to be needed !!!	moved to TLJs, RCN !!!
 
                   ! write(*,*) 'num%coll, num%colh', num%coll, num%colh
                   
@@ -1587,17 +1586,21 @@ CONTAINS
                   ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
 
                   DO i = num%elal, num%elah ! loop over elastic=incident channels iaa=i (in the normal space)
+                    IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
                     iaa = i - num%elal + 1
                     in => inchnl(iaa)
-                    !------------------------------------------------------------------------------------------
-                    ! Engelbrecht- Weidenmueller: getting normal incident Tlj by the inverse EW transformation
-                    !------------------------------------------------------------------------------------------
-                    in%sig = 0.d0   ! we temporarily use in%sig to store incident transmission coefficient obtained from the rotated space
-                    DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
-                      ialph_ch = num%coll + ialph -1
-                      in%sig = in%sig + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
-                    ENDDO   ! end of the loop over ialph (transformed space)
-                    xnor = in%sig*xnor_c
+!                    !------------------------------------------------------------------------------------------
+!                    ! Engelbrecht- Weidenmueller: getting normal incident Tlj by the inverse EW transformation
+!                    !------------------------------------------------------------------------------------------
+!                    in%sig = 0.d0   ! we temporarily use in%sig to store incident transmission coefficient obtained from the rotated space
+!                    DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
+!                      ialph_ch = num%coll + ialph -1
+!                      in%sig = in%sig + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
+!                    ENDDO   ! end of the loop over ialph (transformed space)
+!                    xnor = in%sig*xnor_c
+                     in%sig = coef*in%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
+                     xnor = in%sig/DENhf  ! we need to normalize gammas already in SCRt with a reasonable absorption cross section;
+                                          ! for the time being we use normal space incidnet channel Tlj for this purpose
                     ! write(*,*) 'xnor EW ', xnor
                     ! write(*,*) 'Sum_alpha=',in%sig,' Tlj=',in%tlj,sngl(ip*xjc)
                     ! in%sig = in%tlj !TEST use Tlj instead of the calculated T from the rotated matrix
@@ -1614,7 +1617,7 @@ CONTAINS
                       !  sig_cc(-out%kres) = sig_cc(-out%kres) + in%t*Sigma_ab*xnor_c/DENhf
                       !ENDIF
                       CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
-	                ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
+                    ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
                     ! write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
 
                     ! Correcting the elastic cross section for inelastic enhancement CINRED if any 
@@ -1632,15 +1635,14 @@ CONTAINS
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
                     ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
-                    IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
 
                     ! absorption for incoming channel
                     ! in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
                     ! out => outchnl(i)
                     ! in%t = out%t
                     ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                    ! xnor = in%sig/DENhf ! normalization factor
-                    xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
+                     xnor = in%sig/DENhf ! normalization factor
+                    ! xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
                     ! write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -1730,7 +1732,7 @@ CONTAINS
                     ENDIF
                 ENDIF
             ENDDO       !loop over decaying nucleus spin
-        ENDDO          !loop over decaying nucleus parity
+        ENDDO        !loop over decaying nucleus parity
 
         CALL Gamma_renormalization(d0c, sumtg, tgexper, itmp, nnuc)
 
@@ -1957,7 +1959,7 @@ CONTAINS
     REAL*8 FUNCTION INVERSE_EW(i,iout,xnor_c)
         ! i is an incident (elastic) collective channel
         ! iout is an outgoing particle channel, it can be collective or uncoupled
-            ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
+        ! Engelbrecht-Weidenmueller backward transformation Eq.(16),(17),(18) TK paper
    
         IMPLICIT NONE
 
@@ -2009,11 +2011,11 @@ CONTAINS
 
                 ! write(*,*) 'EW loops',ialph, ibeta, sngl(sigma_alph_beta(ialph,ibeta))
                 ! second and third sums, Eq.(16)
-                ctmp2 = ctmp2 +                                           &
-                    ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*  &
+                ctmp2 = ctmp2 +                                             &
+                    ( CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ibeta,ibb))*      &
                           ( Umatr(ialph,iaa)*Umatr(ibeta,ibb) +             &   !2nd
                             Umatr(ibeta,iaa)*Umatr(ialph,ibb) ) +           &   !2nd
-                      CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*  &   !3rd
+                      CONJG(Umatr(ialph,iaa))*CONJG(Umatr(ialph,ibb))*      &   !3rd
                             Umatr(ibeta,iaa)*Umatr(ibeta,ibb)*              &   !3rd
                             phas*deg_alph*deg_beta )                        &   !3rd
                             * sigma_alph_beta(ialph,ibeta)                      !2nd & 3rd
@@ -2038,15 +2040,18 @@ CONTAINS
           !------------------------------------------------------------------------------------------
           in => inchnl(iaa)
           out => outchnl(iout)
-          w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
-          WFC(iaa,iout) = w    ! saving the calculated sigma corrected by WF
           dtmp = 0.d0
-          !DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
-          !  ialph_ch = num%coll + ialph -1
-          !  dtmp = dtmp + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
-          !ENDDO   ! end of the loop over ialph (transformed space)
-          !INVERSE_EW = dtmp*w !*xnor_c !in%sig*dtmp*w*xnor_c
-          INVERSE_EW = in%sig*out%t*w*xnor_c
+          DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
+             ialph_ch = num%coll + ialph -1 ! actual index of the ialph channels in the full channels' list
+             w = WFC2(ialph_ch,iout)     ! Moldauer width fluctuation factor (ECIS style)
+             WFC(ialph,iout) = w    ! storing calculated w in WFC matrix
+             dtmp = dtmp + outchnl(ialph_ch)%t*out%t*w*ABS(Umatr(ialph,iaa))**2
+!             write(*,*) 'ialph_ch,in%t,out%t,w,ABS(Umatr(ialph,iaa))**2',ialph_ch,outchnl(ialph_ch)%t,out%t, &
+!             w,ABS(Umatr(ialph,iaa))**2
+          ENDDO   ! end of the loop over ialph (transformed space)
+          INVERSE_EW = dtmp*xnor_c
+!          write(*,*) 'sigma uncoupled', INVERSE_EW, iaa, iout, xnor_c, w, in%tlj
+          ! INVERSE_EW = in%sig*out%t*xnor_c
 
         endif
         
