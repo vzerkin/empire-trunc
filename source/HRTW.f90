@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5124 $
-    ! $Author: mwherman $
-    ! $Date: 2018-05-20 20:52:05 +0200 (So, 20 Mai 2018) $
+    ! $Rev: 5125 $
+    ! $Author: capote $
+    ! $Date: 2018-05-21 22:08:58 +0200 (Mo, 21 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1422,9 +1422,9 @@ CONTAINS
         REAL*8 sumin_s, sumtt_s
         REAL*8 sigma_ab
         INTEGER iaa
-        REAL*8 ialph, ialph_ch
+        !REAL*8 ialph, ialph_ch
 
-        REAL*8, DIMENSION(6) :: sig_cc !temporary to sum CC x-sec
+        !REAL*8, DIMENSION(6) :: sig_cc !temporary to sum CC x-sec
 
         TYPE (channel), POINTER :: out
         TYPE (fusion),  POINTER :: in
@@ -1434,8 +1434,9 @@ CONTAINS
           RETURN
         END IF
 
-        sig_cc = 0.D0
-        CALL AllocHRTW()    !allocate HRTW matrices
+        !sig_cc = 0.D0
+        
+		CALL AllocHRTW()    !allocate HRTW matrices
 
         H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
         nnuc = 1            !set CN nucleus
@@ -1592,12 +1593,6 @@ CONTAINS
 !                    !------------------------------------------------------------------------------------------
 !                    ! Engelbrecht- Weidenmueller: getting normal incident Tlj by the inverse EW transformation
 !                    !------------------------------------------------------------------------------------------
-!                    in%sig = 0.d0   ! we temporarily use in%sig to store incident transmission coefficient obtained from the rotated space
-!                    DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
-!                      ialph_ch = num%coll + ialph -1
-!                      in%sig = in%sig + outchnl(ialph_ch)%t*ABS(Umatr(ialph,iaa))**2
-!                    ENDDO   ! end of the loop over ialph (transformed space)
-!                    xnor = in%sig*xnor_c
                      in%sig = coef*in%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                      xnor = in%sig/DENhf  ! we need to normalize gammas already in SCRt with a reasonable absorption cross section;
                                           ! for the time being we use normal space incidnet channel Tlj for this purpose
@@ -1637,9 +1632,6 @@ CONTAINS
                     ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
 
                     ! absorption for incoming channel
-                    ! in => inchnl(i - num%elal + 1) ! elastic channels for each Jcn are numbered 1,2,3,...
-                    ! out => outchnl(i)
-                    ! in%t = out%t
                     ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                      xnor = in%sig/DENhf ! normalization factor
                     ! xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
@@ -1975,7 +1967,7 @@ CONTAINS
         COMPLEX*16 ctmp1, ctmp2, phas
 
         TYPE (channel), POINTER :: out
-        TYPE (fusion),  POINTER :: in
+        !TYPE (fusion),  POINTER :: in
 
         ctmp1 = (0.d0,0.d0)
         ctmp2 = (0.d0,0.d0)
@@ -2038,7 +2030,7 @@ CONTAINS
           !----------------------------------------------------------------------------------------
           ! loops over collective levels in rotated space (ialph) for the uncoupled states (iout)
           !------------------------------------------------------------------------------------------
-          in => inchnl(iaa)
+          !in => inchnl(iaa)
           out => outchnl(iout)
           dtmp = 0.d0
           DO ialph = 1, NDIm_cc_matrix  ! loop over collective levels in the transformed space
