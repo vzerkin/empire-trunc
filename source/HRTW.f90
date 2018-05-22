@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5125 $
-    ! $Author: capote $
-    ! $Date: 2018-05-21 22:08:58 +0200 (Mo, 21 Mai 2018) $
+    ! $Rev: 5126 $
+    ! $Author: mwherman $
+    ! $Date: 2018-05-22 23:24:19 +0200 (Di, 22 Mai 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -309,7 +309,7 @@ CONTAINS
         REAL*8 Ia, sxj
         REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
         REAL*8 d0c, sigma_
-        REAL*8 sumin_s, sumtt_s
+        REAL*8 sumin_s, sumtt_s !,denhf1
 
         TYPE (channel), POINTER :: out
         TYPE (fusion),  POINTER :: in
@@ -419,6 +419,7 @@ CONTAINS
                 !  write(*,*)'# of strong Tls   ', NCH
                 !  write(*,*)'average Tl        ', H_Tav
                 !  write(*,*)'pre  AUSTER DENhf=', DENhf
+                ! absorption ~ sigma_a
 
                 !----------------------------------------------------------
                 ! Collecting outgoing channels completed
@@ -428,7 +429,6 @@ CONTAINS
                     DENhf = H_Sumtl     ! reset DENhf using V's instead of T's
                 ENDIF
                 IF(DENhf .LE. 0.d0) CYCLE
-
                 !----------------------------------------------------------------------------------
                 ! construct scratch matrix for decay of the Jcn state
                 !----------------------------------------------------------------------------------
@@ -455,6 +455,7 @@ CONTAINS
                 !----------------------------------------------------------
                 ! Renormalizing scratch matrices to recover unitarity
                 !----------------------------------------------------------
+                ! denhf1 = DENhf
                 DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                 DENhf = DENhf - 0.5*SUM(SCRt(1,:,:,:))*de   !correct for the edge effect in trapezoidal integration
                 ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl', DENhf
@@ -478,18 +479,13 @@ CONTAINS
                     in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)  ! absorption for incoming channel
                     ! renormalization
                     xnor = in%sig/DENhf     ! normalization factor
-                    !               SCRt = SCRt*xnor        ! normalizing scratch matrices instead of passing xnor to XSECT,
-                    !               SCRtl = SCRtl*xnor      !   the above helps implementation of the EW transformation that provides
-                    !               SCRtem = SCRtem*xnor    !   unfactorized cross sections.
-                    !               sumfis = sumfis*xnor    !                                  "
-                    !               sumfism = sumfism*xnor  !                                  "
+                    ! xnor = in%sig/DENhf1     ! normalization factor using original DENhf (uncomment other denhf1 lines above)
 
                     !----------------------------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
                     !----------------------------------------------------------------------------------
                     CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
-                    !               CALL XSECT(nnuc,m,1.0D0,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                     ! if renormalization skipped
                     CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
@@ -1507,9 +1503,6 @@ CONTAINS
                 ENDDO                                         !do loop over ejectiles  ***done***
                 ! write(*,*) 'p**',NCH,DENhf
 
-                ! write(*,*) sumin_w,sumtt_w
-                ! write(*,*) num%elal,num%elah,num%coll,num%colh
-            
                 IF(num%elal == 0) EXIT ! if there are no elastic channels, we can exit the inner "jcn" loop
                 num%part = NCH         !store number of particle channel entries
 
@@ -1565,7 +1558,6 @@ CONTAINS
                   !CALL EW_diagonalization(xjc,ip)
 
                   ! write(*,*) 'num%coll, num%colh', num%coll, num%colh
-                  
                   DO i = num%coll, num%colh  ! first loop over coupled channels
                     in => inchnl(i-num%coll+1)
                     in%t = outchnl(i)%t  ! numbering of outgoing channels is different from incoming, !RCN
@@ -1578,10 +1570,7 @@ CONTAINS
                        ! write(*,*) 'sigma_alph_beta(', i, iout,')', sngl(sigma_alph_beta(i-num%coll + 1,iout-num%coll + 1)), &
                        !            in%t, out%t, WFC(i-num%coll+1,iout)
                     ENDDO ! end of loop over iout
-                  
                   ENDDO  ! end of loop over i
-
-                  ! WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
 
                   ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
                   ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
@@ -1590,30 +1579,23 @@ CONTAINS
                     IF(DENhf.LE.0.0D0) CYCLE ! no transitions from the current state
                     iaa = i - num%elal + 1
                     in => inchnl(iaa)
-!                    !------------------------------------------------------------------------------------------
-!                    ! Engelbrecht- Weidenmueller: getting normal incident Tlj by the inverse EW transformation
-!                    !------------------------------------------------------------------------------------------
-                     in%sig = coef*in%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                     xnor = in%sig/DENhf  ! we need to normalize gammas already in SCRt with a reasonable absorption cross section;
-                                          ! for the time being we use normal space incidnet channel Tlj for this purpose
+                     !------------------------------------------------------------------------------------------
+                     ! Engelbrecht- Weidenmueller: getting normal incident Tlj by the inverse EW transformation
+                     !------------------------------------------------------------------------------------------
+                     in%sig = coef*in%tlj*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar) !absorption calculated in the normal space
+                     xnor = in%sig/DENhf  ! we need to normalize gammas, already in SCRt, with a reasonable absorption cross section;
+                                          ! for the time being we use normal-space-absorption
                     ! write(*,*) 'xnor EW ', xnor
                     ! write(*,*) 'Sum_alpha=',in%sig,' Tlj=',in%tlj,sngl(ip*xjc)
-                    ! in%sig = in%tlj !TEST use Tlj instead of the calculated T from the rotated matrix
                     IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
-                    
                     DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
                       out => outchnl(iout)
                       Sigma_ab = INVERSE_EW(i,iout,xnor_c) ! Engelbrecht-Weidenmueller inverse transformation Eq.(16),(17),(18) TK paper
                       ! write(*,*) 'Sigma_', i, iout, Sigma_ab, ' versus', xnor_c*in%t*out%t
                       Sigma_ab = Sigma_ab/xnor !Sigma_ab is in mb, we devide it by normalization factor xnor to make it compatible with
                                                ! gammas already stored in SCRt; it will be multipled by xnor in XSECT and/or ACCUM
-                      !IF(iout>=num%coll .AND. iout<=num%colh ) THEN
-                      !  write(*,*) 'iaa, ibb, Sigma ', iaa, ibb, Sigma_ab, ' level=', -out%kres
-                      !  sig_cc(-out%kres) = sig_cc(-out%kres) + in%t*Sigma_ab*xnor_c/DENhf
-                      !ENDIF
                       CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
                     ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
-                    ! write(*,*) ' CC x-sec. ela, 1, 2, 3,...', sig_cc
 
                     ! Correcting the elastic cross section for inelastic enhancement CINRED if any 
                     IF((sumtt_s - sumin_s +  sumtt_w - sumin_w) .NE. 0.d0) CALL elastic_corr(sumin_s, sumtt_s, sumtt_w, sumin_w)
@@ -1621,7 +1603,7 @@ CONTAINS
                     !----------------------------------------------------------
                     ! Fission EW
                     !----------------------------------------------------------
-                    ! IF(num%fiss>0) sumfis = INVERSE_EW(i,num%fiss,xnor_c)*outchnl(num%fiss)%rho ! MH - check whether we need rho for fission here
+                    IF(num%fiss>0) sumfis = INVERSE_EW(i,num%fiss,xnor_c)*outchnl(num%fiss)%rho ! MH - check whether we need rho for fission here
           
                     !----------------------------------------------------------
                     ! Renormalizing scratch matrices to recover unitarity EW
@@ -1629,12 +1611,7 @@ CONTAINS
                     DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
-                    ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
-
-                    ! absorption for incoming channel
-                    ! in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
-                     xnor = in%sig/DENhf ! normalization factor
-                    ! xnor = coef*in%sig*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
+                    xnor = in%sig/DENhf ! normalization factor using DENhf after WFC and EW
                     ! write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -1650,7 +1627,7 @@ CONTAINS
 
                 ELSE  !no Engelbrecht-Weidenmueller transformation
 
-                  WRITE(*,*) 'xnor_c',xnor_c,' DENhf',DENhf
+                  ! write(*,*) 'xnor_c',xnor_c,'   DENhf',DENhf
                   ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
                   ! write(*,*) 'Collect ch:',num%coll,'-', num%colh
                   DO i = num%elal, num%elah ! loop over elastic=incident channels iaa=i (in the normal space)
@@ -1658,14 +1635,17 @@ CONTAINS
                     in => inchnl(iaa)
                     in%t = outchnl(i)%t
                     xnor = in%t*xnor_c  ! normalization factor for absorption channel iaa (no EW so it is in the normal space)
-                    write(*,*) 'xnor Mol', xnor, ' in%t', in%t
+                    ! write(*,*) 'xnor Mol', xnor, ' in%t', in%t
                     
-                              IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
+                      IF(xnor == 0) CYCLE   !skipping because of 0 absorption in channel i
                     
-                              DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
+                      DO iout = 1, num%part  ! loop over ibb=iout (all particle channels in the normal space)
                       out => outchnl(iout)
                       w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
-                      WFC(iaa,iout) = w    ! saving the calculated sigma corrected by WF (relative first index)
+                      ! if(outchnl(iout)%kres > 0) write(*,*) 'kres ', outchnl(iout)%kres, w, out%t, out%t*w
+                      ! write(*,*) 'kres ', outchnl(iout)%kres, w, out%t, out%t*w
+                      ! w = 1.0D0          ! turn off Moldauer WFC to run pure HF
+                      WFC(iaa,iout) = w    ! saving calculated width fluctuation correction (relative first index)
                       Sigma_ab = out%t*w
                       CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
                     ENDDO ! end of the loop over iout=ibb (outgoing coupled channels in the normal space)
@@ -1684,7 +1664,6 @@ CONTAINS
                     DENhf = SUM(SCRt)*de + SUM(SCRtl) + sumfis
                     dtmp = 0.5*SUM(SCRt(1,:,:,:))*de
                     DENhf = DENhf - dtmp    !correct for the edge effect in trapezoidal integration
-                    ! write(*,*)'DENhf calculated as integral of SCRt & SCRtl + sumfis', DENhf
                     IF(DENhf.LE.0.0D0) CYCLE                     ! no transitions from the current state
 
                     ! absorption for incoming channel
@@ -1693,8 +1672,7 @@ CONTAINS
                     ! in%t = out%t
                     in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                     xnor = in%sig/DENhf ! normalization factor
-                    !xnor = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)/DENhf
-                    write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
+                    ! write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
 
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
