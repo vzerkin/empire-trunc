@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4978 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
+Ccc   * $Rev: 5127 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2018-06-08 20:06:17 +0200 (Fr, 08 Jun 2018) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -34,8 +34,6 @@ C
       DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,esum,xs_cn,ftmp_disc
 C     DOUBLE PRECISION ctotsp,emedc,totsp,ftmp_gs,     xs_cn,ftmp_disc
       DOUBLE PRECISION cmulg,cmuln,cmulp,cmula,cmuld,cmult,cmulh
-
-
 
       DOUBLE PRECISION, external :: GET_DDXS
 
