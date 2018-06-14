@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5126 $
-    ! $Author: mwherman $
-    ! $Date: 2018-05-22 23:24:19 +0200 (Di, 22 Mai 2018) $
+    ! $Rev: 5128 $
+    ! $Author: capote $
+    ! $Date: 2018-06-14 17:00:04 +0200 (Do, 14 Jun 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -89,92 +89,70 @@ MODULE width_fluct
     REAL*8, ALLOCATABLE :: WFC(:,:)                       ! for Moldauer integral
     !REAL*8, ALLOCATABLE :: SCRt_mem(:,:,:,:), SCRtl_mem(:,:) ! preserve weak transitions in Moldauer looping over elastic channels for traget spin >0
 
-    !  Data (x) for Gauss-Legendre quadrature from 0 to 1
-    REAL*8, DIMENSION(1:41), PARAMETER:: xgk = (/ &
-        5.7048420586114368D-004,&
-        3.4357004074525577D-003,&
-        9.2460612748748727D-003,&
-        1.8014036361043095D-002,&
-        2.9588683084122602D-002,&
-        4.3882785874337027D-002,&
-        6.0861594373859018D-002,&
-        8.0441514088890609D-002,&
-        1.0247928558122438D-001,&
-        1.2683404676992460D-001,&
-        1.5338117183262429D-001,&
-        1.8197315963674249D-001,&
-        2.1242977659014484D-001,&
-        2.4456649902458644D-001,&
-        2.7820341238063745D-001,&
-        3.1314695564229023D-001,&
-        3.4918606594254353D-001,&
-        3.8610707442917747D-001,&
-        4.2369726737953867D-001,&
-        4.6173673943325133D-001,&
-        5.0000000000000000D-001,&
-        5.3826326056674867D-001,&
-        5.7630273262046128D-001,&
-        6.1389292557082253D-001,&
-        6.5081393405745647D-001,&
-        6.8685304435770977D-001,&
-        7.2179658761936261D-001,&
-        7.5543350097541362D-001,&
-        7.8757022340985516D-001,&
-        8.1802684036325757D-001,&
-        8.4661882816737566D-001,&
-        8.7316595323007540D-001,&
-        8.9752071441877557D-001,&
-        9.1955848591110945D-001,&
-        9.3913840562614093D-001,&
-        9.5611721412566297D-001,&
-        9.7041131691587745D-001,&
-        9.8198596363895696D-001,&
-        9.9075393872512518D-001,&
-        9.9656429959254744D-001,&
-        9.9942951579413886D-001 /)
+    !Data (x) for Gauss-Laguerre quadrature from 0 to infinite; xgk, wgk= wlg*exp(xgk)
+    REAL*8, DIMENSION(1:30), PARAMETER:: xgk30 = (/ &
+     0.04740718054080485146D0,&
+     0.24992391675316022399D0,&
+     0.61483345439276828461D0,&
+     1.14319582566610079828D0,&
+     1.83645455462257229149D0,&
+     2.69652187455721519578D0,&
+     3.72581450777950894932D0,&
+     4.92729376584988240966D0,&
+     6.30451559096507452283D0,&
+     7.86169329337026046876D0,&
+     9.60377598547926207985D0,&
+     11.5365465979561397008D0,&
+     13.6667446930642362949D0,&
+     16.0022211889810662546D0,&
+     18.5521348401431501240D0,&
+     21.3272043217831289279D0,&
+     24.3400357645326934010D0,&
+     27.6055547967809610276D0,&
+     31.1415867011112358183D0,&
+     34.9696520082490695436D0,&
+     39.1160849490678891219D0,&
+     43.6136529084848278067D0,&
+     48.5039861638042004273D0,&
+     53.8413854065075056175D0,&
+     59.6991218592354954771D0,&
+     66.1806177944384896517D0,&
+     73.4412385955598822395D0,&
+     81.7368105067276857222D0,&
+	 91.5564665225368382555D0,&
+     104.157524431058894512D0 /)
     !
-    REAL*8, DIMENSION(1:41), PARAMETER:: wgk = (/ &
-        0.003073583718520531501218293246031D0,&
-        0.008600269855642942198661787950102D0,&
-        0.014626169256971252983787960308868D0,&
-        0.020388373461266523598010231432755D0,&
-        0.025882133604951158834505067096153D0,&
-        0.031287306777032798958543119323801D0,&
-        0.036600169758200798030557240707211D0,&
-        0.041668873327973686263788305936895D0,&
-        0.046434821867497674720231880926108D0,&
-        0.050944573923728691932707670050345D0,&
-        0.055195105348285994744832372419777D0,&
-        0.059111400880639572374967220648594D0,&
-        0.062653237554781168025870122174255D0,&
-        0.065834597133618422111563556969398D0,&
-        0.068648672928521619345623411885368D0,&
-        0.071054423553444068305790361723210D0,&
-        0.073030690332786667495189417658913D0,&
-        0.074582875400499188986581418362488D0,&
-        0.075704497684556674659542775376617D0,&
-        0.076377867672080736705502835038061D0,&
-        0.076600711917999656445049901530102D0,&
-        0.076377867672080736705502835038061D0,&
-        0.075704497684556674659542775376617D0,&
-        0.074582875400499188986581418362488D0,&
-        0.073030690332786667495189417658913D0,&
-        0.071054423553444068305790361723210D0,&
-        0.068648672928521619345623411885368D0,&
-        0.065834597133618422111563556969398D0,&
-        0.062653237554781168025870122174255D0,&
-        0.059111400880639572374967220648594D0,&
-        0.055195105348285994744832372419777D0,&
-        0.050944573923728691932707670050345D0,&
-        0.046434821867497674720231880926108D0,&
-        0.041668873327973686263788305936895D0,&
-        0.036600169758200798030557240707211D0,&
-        0.031287306777032798958543119323801D0,&
-        0.025882133604951158834505067096153D0,&
-        0.020388373461266523598010231432755D0,&
-        0.014626169256971252983787960308868D0,&
-        0.008600269855642942198661787950102D0,&
-        0.003073583718520531501218293246031D0/)
+    REAL*8, DIMENSION(1:30), PARAMETER:: wgk30 = (/ &
+     0.121677895367261782D0,&
+     0.283556882734938525D0,&
+     0.446432426678773425D0,&
+     0.610532130075812840D0,&
+     0.776303478622205878D0,&
+     0.944233288641719426D0,&
+     1.114844701675211536D0,&
+     1.288705432832675647D0,&
+     1.466439137624214862D0,&
+     1.648739497854319118D0,&
+     1.836387677870411037D0,&
+     2.030274251677182471D0,&
+     2.231427182443224517D0,&
+     2.441048113091121498D0,&
+     2.660560243375089973D0,&
+     2.891672641377376235D0,&
+     3.136468333824384590D0,&
+     3.397527595790640894D0,&
+     3.678104729560672560D0,&
+     3.982388623900963749D0,&
+     4.315899244899456114D0,&
+     4.686114009126298021D0,&
+     5.103502651483418409D0,&
+     5.583332981687551254D0,&
+     6.149044408657435324D0,&
+     6.839130545794758271D0,&
+     7.722947877006187242D0,&
+     8.943742468371038952D0,&
+     10.87187293837791147D0,&
+     15.02611162812293299D0 /)
 
     PUBLIC HRTW, Moldauer
 
@@ -2108,34 +2086,28 @@ CONTAINS
 
 
         INTEGER:: i,ic
-        REAL*8:: nu_c, a1, g1, z, zm, dsum
+        REAL*8:: nu_c, a1, z, dsum
         TYPE (channel), POINTER :: out
 
         DO ic = 1, NCH                             ! do loop over all channels
             out => outchnl(ic)
-            out%eef = NU(out%t,H_Sumtl,LHRtw-2)     ! Calculate degrees of freedom for all  channels
+            out%eef = NU(out%t,H_Sumtl,LHRtw-2)    ! Calculate degrees of freedom for all  channels
         END DO
-        save_WFC1 = 0.0D0                          !logarithmic version
-        DO i = 1, 41
-            !        save_WFC1(i) = 1.0D0                    !multiplicative version
-            z = xgk(i)
-            zm = 1.d0 - z
+        save_WFC1 = 0.0D0 !logarithmic version
+
+        DO i = 1, 30  ! over integration steps
+            z = xgk30(i)
             dsum = 0.d0
-            DO ic = 1, NCH                          ! do loop over all channels
-                out => outchnl(ic)                   ! set outgoing channel shortcut
-                nu_c = out%eef/2.D0                  ! calculated number of degrees of freedom nu
-                a1 = out%t/nu_c/H_Sumtl              ! calculate alpha
-                IF(a1==0) CYCLE
-                g1 = (1.0D0-(1.0D0-a1)*z)/zm
-                !            save_WFC1(i) = save_WFC1(i)*g1**(outchnl(ic)%rho*nu_c)      !multiplicative version
-                !            save_WFC1(i) = MIN(save_WFC1(i),10.0D0**80)                 !multiplicative limit
-                dsum = dsum + outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
-            END DO !over channels
-            a1 = sumg/20.0D0/H_Sumtl                !calculate alpha for a cumulative gamma channel (nu=20 assumed)
-            g1 = (1.0D0-(1.0D0-a1)*z)/zm            !calculating G for a cumulative gamma channel
-            !         save_WFC1(i) = save_WFC1(i)*g1**20     !adding gammas multiplicative
-            save_WFC1(i) = dsum + 20.0D0*DLOG(g1)   !adding gammas logarithmic
-        END DO !over integration steps
+            DO ic = 1, NCH  ! do loop over all channels
+              out => outchnl(ic)                          ! set outgoing channel shortcut
+              nu_c = out%eef/2.D0                         ! calculated number of degrees of freedom nu
+              a1 = out%t/nu_c/H_Sumtl                     ! calculate alpha
+              IF(a1==0) CYCLE
+              dsum = dsum + nu_c*DLOG(1.0D0+a1*z)         ! outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
+            END DO          !over channels
+            a1 = sumg/20.0D0/H_Sumtl                      !calculate alpha for a cumulative gamma channel (nu=20 assumed)
+            save_WFC1(i) = dsum + 20.d0*DLOG(1.0D0+a1*z)  !adding gammas logarithmic
+        END DO        !over integration steps
         RETURN
     END SUBROUTINE WFC1
 
@@ -2148,29 +2120,22 @@ CONTAINS
         !
         IMPLICIT NONE
         INTEGER, INTENT(IN):: in, ou         ! index number of incoming (in) and outgoing (out) channels
-        REAL*8:: nu_ou, nu_in, a_in, a_ou, gl_in, gl_ou
-        REAL*8 RESK1,z,zm
+        REAL*8:: nu_ou, nu_in, a_in, a_ou
+		REAL*8 RESK1,z, zm
         INTEGER j
         nu_in =  outchnl(in)%eef/2.D0                           ! half of the degree of freedom for the incoming channel
         nu_ou =  outchnl(ou)%eef/2.D0                           ! half of the degree of freedom for the outgoing channel
         a_in = outchnl(in)%t/nu_in/H_Sumtl                      ! calculate alpha
         a_ou = outchnl(ou)%t/nu_ou/H_Sumtl                      ! calculate alpha
 
-        IF(a_in*a_ou==0) THEN
-            WFC2 = 1.0D0
-            RETURN                                         !return if any of the transmission coefficcients is 0
-        ENDIF
         resk1 = 0.0D0
-        DO j = 41,1,-1
-            z=xgk(j)
-            gl_in = DLOG(1.0D0-(1.0D0-a_in)*z)
-            gl_ou = DLOG(1.0D0-(1.0D0-a_ou)*z)
-            zm = save_WFC1(j)+gl_in+gl_ou
-            IF(zm.GT.40.d0) CYCLE
-            resk1 = resk1 + wgk(j)*dexp(-zm)  !wgk(j)/DEXP(save_WFC1(j)+gl_in+gl_ou)
+        DO j = 1,30
+            z=xgk30(j)
+            zm = save_WFC1(j)+DLOG(1.0D0+a_in*z)+DLOG(1.0D0+a_ou*z)
+            resk1 = resk1 + wgk30(j)*dexp(-zm)  !wgk(j)/DEXP(save_WFC1(j)+gl_in+gl_ou)
         ENDDO
-        WFC2 = resk1*0.5d0
-        IF(in==ou) WFC2 = (1.D0 + 1.D0/nu_in)*WFC2 ! case of elastic
+        WFC2 = resk1
+        IF(in==ou) WFC2 = (1.D0 + 1.D0/nu_in)*resk1 ! case of elastic
         !     write(8,'(''in channel '',2I5,4E12.5,2i5)') in, outchnl(in)%l, outchnl(in)%j, outchnl(in)%t, outchnl(in)%rho, &
         !                 outchnl(in)%eef, outchnl(in)%nejc, outchnl(in)%kres
         !     write(8,'(''ou channel '',2I5,4E12.5,2i5,'' WFC = '',F10.5)') ou, outchnl(ou)%l, outchnl(ou)%j, outchnl(ou)%t, &
