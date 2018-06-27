@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5129 $
+    ! $Rev: 5130 $
     ! $Author: mwherman $
-    ! $Date: 2018-06-27 18:22:46 +0200 (Mi, 27 Jun 2018) $
+    ! $Date: 2018-06-27 21:15:35 +0200 (Mi, 27 Jun 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -24,6 +24,9 @@ MODULE width_fluct
 
     INCLUDE 'dimension.h'
     INCLUDE 'global.h'
+
+!   LOGICAL*1 superr/.true./
+    LOGICAL*1 superr/.false./
 
     PRIVATE
 
@@ -287,7 +290,7 @@ CONTAINS
         REAL*8 Ia, sxj
         REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
         REAL*8 d0c, sigma_
-        REAL*8 sumin_s, sumtt_s !,denhf1
+        REAL*8 sumin_s, sumtt_s
 
         TYPE (channel), POINTER :: out
         TYPE (fusion),  POINTER :: in
@@ -608,6 +611,7 @@ CONTAINS
                             ietl = iec - ier - itlc
                             tld = TLJ(ietl,k,jndex,nejc)
                             rho1 = RO(ier,jr,ip1,nnur)*de*TUNe(nejc,nnuc)
+                            IF(superr) rho1 = rho1/sqrt(1-tld)                ! correction for superradiance
                             IF(ier==1 .AND. nint(Z(1))==nint(Z(nnur))) rho1 = rho1*DEPart(nnur)  !correct for gap above Ecut
                             ! rho1 = 0.0D0
                             rho1 = AINT(rho1)
@@ -682,6 +686,7 @@ CONTAINS
                     rho1 = TUNe(nejc,nnuc)                   !reuse level density variable for tuning
                     ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i) !if inelastic - apply respective scaling
                     tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
+                    IF(superr) rho1 = rho1/sqrt(1-tld)       !correction for superradiance
                     IF(tld<1.0d-15) CYCLE                    !ignore very small channels
                     H_Sumtl = H_Sumtl + tld*rho1
                     H_Sumtls = H_Sumtls + tld**2*rho1
@@ -743,6 +748,7 @@ CONTAINS
                             rho1 = TUNe(nejc,nnuc)                  !reuse level density variable for tuning
                             ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                             tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
+                            IF(superr) rho1 = rho1/sqrt(1-tld)         !correction for superradiance
                             !tld = min(1.d0,tld * TUNe(nejc,nnuc))     !this protection is not used anywhere, should be avoided (or used in all places)
                             IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                             H_Sumtl = H_Sumtl + tld*rho1
@@ -800,7 +806,7 @@ CONTAINS
                         IF(NCH > num%elah) num%elah = NCH        !if another elastic augment position of last elastic channel
                         !rho1 = CELred
                         rho1 = CELred*TUNe(nejc,NTArget)         !reuse level density variable for tuning
-
+                        IF(superr) rho1 = rho1/sqrt(1-tld)       !correction for superradiance
                         out => outchnl(NCH)
                         out%l = k-1
                         out%j = xj
@@ -882,6 +888,7 @@ CONTAINS
                                           !         EW transformation is requested
             !rho1 = 1.d0                  !level density variable
             rho1 = TUNe(nejc,NTArget)     !reuse level density variable for tuning
+            IF(superr) rho1 = rho1/sqrt(1-tld)       !correction for superradiance
 
             H_Sumtl = H_Sumtl + tld*rho1
             H_Sumtls = H_Sumtls + tld**2*rho1
@@ -1488,6 +1495,7 @@ CONTAINS
 
                 !----------------------------------------------------------
                 ! gammas (weak channels)
+                !----------------------------------------------------------
                 sumg = WFC_DECAYG(nnuc,ke,jcn,ip)
                 ! if(sumg>0.d0) write(*,*) 'g**',NCH,sumg,DENhf
 
@@ -2128,7 +2136,7 @@ CONTAINS
         nu_in =  outchnl(in)%eef/2.D0                           ! half of the degree of freedom for the incoming channel
         nu_ou =  outchnl(ou)%eef/2.D0                           ! half of the degree of freedom for the outgoing channel
         a_in = outchnl(in)%t/nu_in/H_Sumtl                      ! calculate alpha
-        a_ou = outchnl(ou)%t/nu_ou/H_Sumtl      ! calculate alpha
+        a_ou = outchnl(ou)%t/nu_ou/H_Sumtl                      ! calculate alpha
 
         resk1 = 0.0D0
         DO j = 1,30
