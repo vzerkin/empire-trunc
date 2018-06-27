@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5128 $
-    ! $Author: capote $
-    ! $Date: 2018-06-14 17:00:04 +0200 (Do, 14 Jun 2018) $
+    ! $Rev: 5129 $
+    ! $Author: mwherman $
+    ! $Date: 2018-06-27 18:22:46 +0200 (Mi, 27 Jun 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -609,6 +609,8 @@ CONTAINS
                             tld = TLJ(ietl,k,jndex,nejc)
                             rho1 = RO(ier,jr,ip1,nnur)*de*TUNe(nejc,nnuc)
                             IF(ier==1 .AND. nint(Z(1))==nint(Z(nnur))) rho1 = rho1*DEPart(nnur)  !correct for gap above Ecut
+                            ! rho1 = 0.0D0
+                            rho1 = AINT(rho1)
                             H_Sumtl = H_Sumtl + tld*rho1
                             H_Sumtls = H_Sumtls + tld**2*rho1
                             IF(ier==1) THEN                      !correct for the edge bin in trapeizoidal integration
@@ -716,7 +718,7 @@ CONTAINS
 
             CALL DECAY2CC(xjc, ipc, nejc, nnur)                   ! Decay to collective levels including elastic WE CURRENTLY USE!
 
-        ELSE    ! TEMPORARY to allow for the old treatment of the direct outgoing channels
+        ELSE    ! Actually NOT USED!!!; to allow for the old treatment of the direct outgoing channels
             !  Old version for collective levels
             IF(IZA(nnur)==IZA(0)) THEN
                 DO i = 1, NLV(nnur)                                 !do loop over inelastic levels, elastic done after the loop
@@ -741,12 +743,12 @@ CONTAINS
                             rho1 = TUNe(nejc,nnuc)                  !reuse level density variable for tuning
                             ! IF(IZA(nnur)==IZA(0)) rho1 = CINred(i)   !if inelastic - apply respective scaling
                             tld = TLJ(il,k,jndex,nejc) + frde*(TLJ(il + 1,k,jndex,nejc) - TLJ(il,k,jndex,nejc))   !interpolate Tlj
-                            !tld = min(1.d0,tld * TUNe(nejc,nnuc))       ! thsi protection is not used anywhere, should be avoided (or used in all places)
+                            !tld = min(1.d0,tld * TUNe(nejc,nnuc))     !this protection is not used anywhere, should be avoided (or used in all places)
                             IF(tld<1.0d-15) CYCLE                      !ignore very small channels
                             H_Sumtl = H_Sumtl + tld*rho1
                             H_Sumtls = H_Sumtls + tld**2*rho1
                             NCH = NCH + 1                           !we've got non-zero channel
-                            IF(NCH>ndhrtw1) CALL WFC_error()        !STOP - insiufficent space allocation
+                            IF(NCH>ndhrtw1) CALL WFC_error()        !STOP - insufficient space allocation
 
                             IF(num%coll == 0) THEN
                                 num%coll = NCH                      !memorize position of the first coupled level in the 'outchnl' matrix
@@ -857,7 +859,7 @@ CONTAINS
         !*                                                                  *
         !********************************************************************
 
-        ! THIS THE CURRENTLY USED ROUTE
+        ! THIS IS THE CURRENTLY USED ROUTE
 
         INTEGER i, ipc, nel, nnur, nejc, ncc, nccp, nccu, ndim
         REAL*8 tld, xjc, rho1
@@ -1526,8 +1528,8 @@ CONTAINS
                 !----------------------------------------------------------
                 ! Calculate WF term common for all channels
                 !----------------------------------------------------------
-                CALL WFC1()     ! Calculate all nu's and the part of Moldauer integral
-                                ! that doesn't depend on incoming and outgoing channels
+                CALL WFC1()     ! Calculate the part of Moldauer integral
+                                ! that doesn't depend on incoming channels
 
                 IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
                   !------------------------------------------------------------------------------------------
@@ -1622,7 +1624,7 @@ CONTAINS
                       w = WFC2(i,iout)     ! Moldauer width fluctuation factor (ECIS style)
                       ! if(outchnl(iout)%kres > 0) write(*,*) 'kres ', outchnl(iout)%kres, w, out%t, out%t*w
                       ! write(*,*) 'kres ', outchnl(iout)%kres, w, out%t, out%t*w
-                      ! w = 1.0D0          ! turn off Moldauer WFC to run pure HF
+                      !w = 1.0D0          ! turn off Moldauer WFC to run pure HF
                       WFC(iaa,iout) = w    ! saving calculated width fluctuation correction (relative first index)
                       Sigma_ab = out%t*w
                       CALL update_SCRt(out, Sigma_ab, sumin_s, sumtt_s)
@@ -1650,7 +1652,7 @@ CONTAINS
                     ! in%t = out%t
                     in%sig = coef*in%t*(2.D0*xjc + 1.D0)*FUSred*REDmsc(jcn,ipar)
                     xnor = in%sig/DENhf ! normalization factor
-                    ! write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
+                    !write(*,*) 'xnor', xnor, ' DENhf-2nd',DENhf
 
                     !---------------------------------------------------------------
                     ! CN angular distributions (neutron (in)elastic scattering ONLY!)
@@ -2103,7 +2105,7 @@ CONTAINS
               nu_c = out%eef/2.D0                         ! calculated number of degrees of freedom nu
               a1 = out%t/nu_c/H_Sumtl                     ! calculate alpha
               IF(a1==0) CYCLE
-              dsum = dsum + nu_c*DLOG(1.0D0+a1*z)         ! outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
+              dsum = dsum + outchnl(ic)%rho*nu_c*DLOG(1.0D0+a1*z)         ! outchnl(ic)%rho*nu_c*DLOG(g1)                  !logarithmic version
             END DO          !over channels
             a1 = sumg/20.0D0/H_Sumtl                      !calculate alpha for a cumulative gamma channel (nu=20 assumed)
             save_WFC1(i) = dsum + 20.d0*DLOG(1.0D0+a1*z)  !adding gammas logarithmic
@@ -2126,7 +2128,7 @@ CONTAINS
         nu_in =  outchnl(in)%eef/2.D0                           ! half of the degree of freedom for the incoming channel
         nu_ou =  outchnl(ou)%eef/2.D0                           ! half of the degree of freedom for the outgoing channel
         a_in = outchnl(in)%t/nu_in/H_Sumtl                      ! calculate alpha
-        a_ou = outchnl(ou)%t/nu_ou/H_Sumtl                      ! calculate alpha
+        a_ou = outchnl(ou)%t/nu_ou/H_Sumtl      ! calculate alpha
 
         resk1 = 0.0D0
         DO j = 1,30
@@ -2138,9 +2140,10 @@ CONTAINS
         IF(in==ou) WFC2 = (1.D0 + 1.D0/nu_in)*resk1 ! case of elastic
         !     write(8,'(''in channel '',2I5,4E12.5,2i5)') in, outchnl(in)%l, outchnl(in)%j, outchnl(in)%t, outchnl(in)%rho, &
         !                 outchnl(in)%eef, outchnl(in)%nejc, outchnl(in)%kres
-        !     write(8,'(''ou channel '',2I5,4E12.5,2i5,'' WFC = '',F10.5)') ou, outchnl(ou)%l, outchnl(ou)%j, outchnl(ou)%t, &
-        !                outchnl(ou)%rho, outchnl(ou)%eef, outchnl(ou)%nejc, outchnl(ou)%kres, WFC2
+        !    write(*,'(''ou channel '',I5,3E12.5,2i5,'' WFC = '',F10.5)') ou,  outchnl(ou)%t, &
+        !               outchnl(ou)%rho, outchnl(ou)%eef, outchnl(ou)%nejc, outchnl(ou)%kres, WFC2
         !      WFC2 = 1.0D0
+
         RETURN
     END FUNCTION WFC2
 
@@ -2289,26 +2292,26 @@ CONTAINS
 
     !----------------------------------------------------------------------------------------------------
 
-    SUBROUTINE update_SCRt(out,sigma_, sumin_s, sumtt_s)
+    SUBROUTINE update_SCRt(out,sigma, sumin_s, sumtt_s)
         IMPLICIT NONE
         TYPE (channel), POINTER :: out
-        REAL*8 sigma_, sumin_s, sumtt_s
+        REAL*8 sigma, sumin_s, sumtt_s
         REAL*8 stmp
 
         IF(out%kres>0) THEN                      !continuum channels
             SCRt(out%kres,out%jres,out%pres,out%nejc) = SCRt(out%kres,out%jres,out%pres,out%nejc) &
-                + sigma_ *out%rho/de
+                + sigma*out%rho/de
                                                   ! + out%t*out%rho*w/de
         ELSE IF(out%kres<0) THEN
             IF( (out%nejc.EQ.NPRoject) .AND. (-out%kres.NE.LEVtarg) ) THEN ! apply CINRED to discrete inelastic channels
                                                           ! stmp = out%t*out%rho*w
-                stmp = sigma_ *out%rho
+                stmp = sigma*out%rho
                 sumin_s = sumin_s + stmp * CINRED(-out%kres)
                 sumtt_s = sumtt_s + stmp
                 SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) +  stmp * CINRED(-out%kres)
             ELSE
                 ! SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + out%t*out%rho*w
-                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma_ *out%rho
+                SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) + sigma*out%rho
             ENDIF
         ENDIF
         RETURN
