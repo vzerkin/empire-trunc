@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5130 $
+    ! $Rev: 5131 $
     ! $Author: mwherman $
-    ! $Date: 2018-06-27 21:15:35 +0200 (Mi, 27 Jun 2018) $
+    ! $Date: 2018-06-28 21:11:40 +0200 (Do, 28 Jun 2018) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -1511,7 +1511,7 @@ CONTAINS
                 IF(DENhf==0.D0) CYCLE
 
                 IF(allocated(WFC)) DEALLOCATE(WFC)
-                ALLOCATE(WFC(num%colh-num%coll+1,NCH+1),STAT=my)
+                ALLOCATE(WFC(num%elah-num%elal+1,NCH+1),STAT=my)
                 IF(my /= 0) CALL WFC_error()
 
                 !  write(*,*)' '
