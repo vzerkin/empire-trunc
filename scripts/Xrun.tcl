@@ -1,13 +1,13 @@
-# $Rev: 5053 $
-# $Author: mherman $
-# $Date: 2018-01-31 17:07:03 +0100 (Mi, 31 Jän 2018) $
+# $Rev: 5135 $
+# $Author: mwherman $
+# $Date: 2018-12-02 21:04:57 +0100 (So, 02 Dez 2018) $
 #
 #!/bin/sh
 # the next line restarts using wish\
-exec wish8.4 "$0" "$@" 
+#exec wish8.4 "$0" "$@" 
 #exec wish 
 
-set my_config "$::env(EMPIREDIR)/.Xrunrc";
+set my_config  "$::env(EMPIREDIR)/.Xrunrc";
 #set my_config "$::env(HOME)/.Xrunrc";
 #set my_config ".Xrunrc";
 
