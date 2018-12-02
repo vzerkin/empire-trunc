@@ -167,7 +167,7 @@ contains
 
         implicit none
 
-        integer*4, intent(in) :: ix            ! MT or PFNS index
+!         integer*4, intent(in) :: ix            ! MT or PFNS index
         integer*4 :: iz                        ! MT for the second reaction (cross-correlations)
 
         logical*4 qfnd
