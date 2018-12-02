@@ -1,9 +1,19 @@
-          0        -11         2           0 1.0000E-03           0
+          0         44         2           0 1.0000E-03           0
 PREPRO17.OUT
-GROUPIE.OUT
-          0          0         0           0          1
-Groupie Test Run
+GROUPIE.OUT           
+          0          0         0           1          1
+Groupie with provided 44 group structure for ML
      1 1  1  999999999
+
+   1.00D-05   3.00D-03   7.50D-03   1.00D-02   2.53D-02   3.00D-02
+   4.00D-02   5.00D-02   7.00D-02   1.00D-01   1.50D-01   2.00D-01 
+   2.25D-01   2.50D-01   2.75D-01   3.25D-01   3.50D-01   3.75D-01 
+   4.00D-01   6.25D-01   1.00D-00   1.77D-00   3.00D-00   4.75D-00 
+   6.00D-00   8.10D-00   1.00D+01   3.00D+01   1.00D+02   5.50D+02 
+   3.00D+03   1.70D+04   2.50D+04   1.00D+05   4.00D+05   9.00D+05
+   1.40D+06   1.85D+06   2.35D+06   2.48D+06   3.00D+06   4.80D+06
+   6.43D+06   8.19D+06   2.00D+07
+
                         (blank line terminate request list)
  
  
@@ -18,7 +28,7 @@ Groupie Test Run
  
                                                                      0 0  0    0
 ===(this line and below is not read)==================================
-The following  group structures can be selected by repalacing second 
+The following  group structures can be selected by replacing second 
 number (columns 12-22) on the first line of the input with one of the following: 
 
    =  0   - TART    175 GROUPS

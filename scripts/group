@@ -56,15 +56,13 @@ if [ ! -f $file-s.endf ]; then
 	mv LINEAR.LST $work/$file-log.linear
 	rm ENDFB.OUT LINEAR.INP 2>/dev/null
 	
-	
 	# RUN RECENT (In:LINEAR.OUT  Out:RECENT.OUT)
 	
 	rm RECENT.INP 2>/dev/null
 	ln -sf $EMPIREDIR/util/prepro/RECENT.INP RECENT.INP
-	$EMPIREDIR/util/recent/recent <RECENT.INP
+	$EMPIREDIR/util/prepro/recent <RECENT.INP
 	mv RECENT.OUT  $work/$file-rec.endf
 	mv RECENT.LST $work/$file-log.recent
-#	rm ENDFB.IN 2>/dev/null
 	rm LINEAR.OUT 2>/dev/null
 	
 	# SET -rec.endf FILE AS INPUT FOR GROUPIE 
@@ -77,15 +75,16 @@ fi
 # RUN GROUPIE (In:PREPRO17.OUT Out:GROUPIE.OUT) 
 
 ln -sf $EMPIREDIR/util/prepro/GROUPIE.INP GROUPIE.INP
-$EMPIREDIR/util/Groupie/groupie <GROUPIE.INP
+$EMPIREDIR/util/prepro/groupie <GROUPIE.INP
+rm GROUPIE.INP 2>/dev/null
 mv GROUPIE.OUT  $work/$file-grp.endf
 mv GROUPIE.LST $work/$file-log.groupie
-
-
 
 # REMOVE INTERMEDIATE FILES
 
 rm ENDFB.IN, PREPRO17.OUT 2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
+rm PLOTTAB.CUR UNSHIELD.LST 2>/dev/null
+rm RECENT.INP 2>/dev/null
 
 exit
