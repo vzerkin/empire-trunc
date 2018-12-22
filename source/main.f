@@ -1,6 +1,6 @@
-cc   * $Rev: 4991 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-09-20 07:02:07 +0200 (Mi, 20 Sep 2017) $
+cc   * $Rev: 5137 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2018-12-22 21:58:19 +0100 (Sa, 22 Dez 2018) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -29,10 +29,12 @@ C
       DOUBLE PRECISION xsinl,xsmsc,tothms,totemis,corrmsd
       DOUBLE PRECISION epre  
 
-      INTEGER nnuc,nnurec,nejcec,ncollx,iret
+      INTEGER nnuc,nnurec,nejcec,ncollx,iret, new_par
 
       LOGICAL nvwful
+      
 
+      new_par = 0                   ! parameter to signal that sensitivities might continue
       EIN  = 0.0d0
       epre = EIN
 
@@ -41,7 +43,7 @@ C-----
 C-----Read and prepare input data
 C-----
       DO WHILE(.TRUE.)
- 
+
         CALL INPUT()
 
         CALL EMPAXS(LHMs, NDAng, NDECSE, NNuct, 
@@ -98,7 +100,8 @@ C
 C       end_of_calc is called in this if-block
 C   
    10   IF( FITomp.GE.0 ) THEN
-          CALL normal_read()   
+          CALL normal_read(new_par)
+          IF(new_par.gt.0) RETURN   
         ELSE
           CALL OMPFIT_read()
         ENDIF
@@ -372,7 +375,7 @@ C           to include/exclude low-lying coupled states
       RETURN
       END
     
-      subroutine end_of_calc()
+      subroutine end_of_calc(new_par)
       USE empcess
       implicit none
       INCLUDE "dimension.h"
@@ -388,7 +391,7 @@ C
 C     
 C     local variables
 C
-      INTEGER i
+      INTEGER i, new_par
       DOUBLE PRECISION ftmp
 
       DOUBLE PRECISION, external :: grand
@@ -429,7 +432,7 @@ C     CLOSE(58)
 C     CLOSE(151)  ! Cont-ANIS-check.dat
 
 C     CLOSE (66,STATUS = 'delete')  ! MSD-orion
-
+      
       IF(FISspe.GT.0) THEN
         CLOSE (114) ! PFNS.OUT
         CLOSE (115) ! PFNM.OUT
@@ -495,11 +498,16 @@ C     CLOSE(102)
       OPEN(222,file='EMPIRE.OK') 
       WRITE (222,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
       CLOSE(222)
+      
+      IF(KALman.gt.0) THEN
+         new_par = 1
+         RETURN
+      ENDIF
       STOP ' ' 
 
       END
 
-      subroutine normal_read()
+      subroutine normal_read(new_par)
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -507,7 +515,7 @@ C
 C     local variables
 C
       LOGICAL lheader
-      INTEGER ikey1, ikey2, ikey3, ikey4, ios, itmp
+      INTEGER ikey1, ikey2, ikey3, ikey4, ios, itmp, new_par
       DOUBLE PRECISION val
 
       CHARACTER*6 keyname
@@ -560,7 +568,7 @@ C
       READ(nextenergy,*,ERR=11570) EIN
 
       IF (EIN.LT.0.0D0) THEN
-          CALL end_of_calc()
+          CALL end_of_calc(new_par)
       ELSE
           WRITE (8,'(61(''=''))')
           WRITE (8,
@@ -594,7 +602,7 @@ C         WRITE (12,*) ' '
       ENDIF
 
       RETURN
- 1200 CALL end_of_calc()
+ 1200 CALL end_of_calc(new_par)
 
       RETURN
 11570 write(8,*) 'ERROR: Wrong input keyword ',trim(nextenergy)
@@ -647,7 +655,7 @@ C
       ENDIF
 
       RETURN
- 1200 CALL end_of_calc()
+ 1200 CALL end_of_calc(0)
 
       RETURN
 11570 write(8,*) 'ERROR: Wrong input keyword ',trim(nextenergy)
