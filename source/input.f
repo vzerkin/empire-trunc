@@ -1,6 +1,6 @@
-!cc   * $Rev: 5092 $
-!cc   * $Author: capote $
-!cc   * $Date: 2018-04-30 04:46:48 +0200 (Mo, 30 Apr 2018) $
+!cc   * $Rev: 5138 $
+!cc   * $Author: mwherman $
+!cc   * $Date: 2018-12-22 22:01:02 +0100 (Sa, 22 Dez 2018) $
 
       SUBROUTINE INPUT
 !cc
@@ -3849,7 +3849,6 @@ C       WRITE (*,*) 'DEFAULT TITLE'
   100 IF(irun.EQ.1) RETURN
       READ (5,'(A)',END=150,ERR=160) inline
       itmp = len_trim(inline)
-
       IF (inline(1:1).EQ.'*' .OR. inline(1:1).EQ.'#' .OR.
      &    inline(1:1).EQ.'!' .OR. inline(1:1).EQ.'$') GOTO 100
 
@@ -7087,13 +7086,13 @@ C-----
      & '' (several options will be reset.'')')
             GOTO 100
          ENDIF
-
 C-----Sensitivity calculations for KALMAN
-         IF (name.EQ.'KALMAN') THEN
+         IF (name.EQ.'SENSIT' .or. name.EQ.'KALMAN') THEN
             KALman = val
+            write(8,*) 'KALman set in input.f', KALman
             IF (KALman.GT.0) WRITE (8,
-     &'('' Sensitivity calculations will be performed,'',
-     & '' (will reset ENDF option to 0'')')
+     &'('' Sensitivity calculations will be performed'',
+     & '' (will reset ENDF option to 0)'')')
             GOTO 100
          ENDIF
 

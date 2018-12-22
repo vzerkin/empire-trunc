@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 5138 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2018-12-22 22:01:02 +0100 (Sa, 22 Dez 2018) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -18,12 +18,12 @@ C---   xitr    - a real constructed of the inner and outer loop iteration
 C--- It also uses a function CHISQRD(pars), provided below.
 C---
 C--- The logical variable autofit is true when fitting, false for a normal run.
-C--- The logical variable sensit is true for sensitivity calc., false for a normal run.
+C--- The logical variable sensita is true for sensitivity calc., false for a normal run.
 C
       parameter(mxfit=20)
       CHARACTER*200 EMPiredir
       CHARACTER*72 EMPtitle
-      logical autofit, sensit
+      logical autofit, sensita
       dimension pars(mxfit),dparmx(mxfit)
       COMMON /GLOBAL_E/ EMPiredir,EMPtitle
 
@@ -38,18 +38,17 @@ C
 
       open(UNIT=8,file='LIST.DAT', status='UNKNOWN')
 
-      CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensit)
-      IF(autofit .AND. sensit) THEN
+      CALL SCAN4FIT(autofit,pars,dparmx,nnft,xitr,sensita)
+      IF(autofit .AND. sensita) THEN
       WRITE(8,*) 'ERROR: OMP FIT AND SENSITIVITY CALCULATIONS CAN NOT BE
      & RUN TOGETHER'
       STOP 'NO OMP FIT TOGETHER WITH KALMAN CALCULATIONS'
       ENDIF
-
       IF (autofit) THEN
          CALL LOCALFIT(pars,dparmx,nnft,xitr)
          CALL CLEANUP(nnft)
          CALL EMPIRE
-      ELSEIF(sensit) THEN
+      ELSEIF(sensita) THEN
          CALL SENSITIVITY
       ELSE
          CALL EMPIRE
@@ -62,7 +61,7 @@ C
 C
 C-------------------------------------------------------------------
 C
-      subroutine scan4fit(autofit,pars,dparmx,nnft,xitr,sensit)
+      subroutine scan4fit(autofit,pars,dparmx,nnft,xitr,sensita)
 C
 C--- Scans INPUT.DAT for automatic omp fit request (FITOMP=2) and the corresponding
 C--- parameters. If a request is found, the fit parameters are analyzed, the
@@ -73,7 +72,7 @@ C--- If none of the requests is found, control is returned to EMPIRE, which then
 C--- runs normally.
 C--- Values returned by scan4fit:
 C---   autofit - logical variable, true for fit, false for normal run
-C---   sensit - logical variable, true for sensitivity calculations, false for normal run
+C---   sensita - logical variable, true for sensitivity calculations, false for normal run
 C---   pars    - an array of parameters to be varied in fit
 C---   dparmx  - array of max variation allowed in each parameter in vars
 C---   nnft    - number of parameters in vars
@@ -81,7 +80,7 @@ C
       parameter(mxfit=20,mxind=5000,mxinda=5000)
       parameter(disc=1.0e4)
 
-      logical autofit, sensit
+      logical autofit, sensita
       logical fexist
       character cmnd*35,cmndp*35,cmndt*35
       character pot1(6)*2,pot2(3)*1
@@ -104,7 +103,7 @@ C
       data pot2/'R','D','V'/
 
       autofit = .FALSE.
-      sensit = .FALSE.
+      sensita = .FALSE.
 
       wt0=1.0
       xitr=3.05
@@ -234,10 +233,10 @@ c        aat=0.
  10   read(5,'(a35)',end=100) cmnd
 
 C--- Check whether sensitivity matrix calculations are requested
-      if (cmnd(1:6).eq.'KALMAN') then
+      if (cmnd(1:6).eq.'SENSIT' .or. cmnd(1:6).eq.'KALMAN') then
         read(cmnd,'(6x,g10.5,4i5)') val
         if (val.gt.0) then
-          sensit = .TRUE.
+          sensita = .TRUE.
           return
          endif
        endif
@@ -1831,7 +1830,7 @@ Ccc
   
       character*1 namecat, category, dum
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
-     &        ndreac, ndkeys, j
+     &        ndreac, ndkeys, j, kalman
 
 C     integer nreac
       parameter (ndreac=90, ndkeys=141)
@@ -1862,7 +1861,7 @@ C
      &  'FISDIS', 'FISMOD', 'FISOPT', 'FISSHI', 'FITLEV', 'FITOMP',
      &  'FLAM  ', 'GCASC ', 'GDRDYN', 'GDRGFL', 'GO    ', 'MAXMUL',
      &  'GSTRFN', 'GST   ', 'HMS   ', 'HRTW  ', 'IOUT  ', 'JSTAB ',
-     &  'KALMAN', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ',
+     &  'SENSIT', 'LEVDEN', 'LTURBO', 'M1    ', 'MAXHOL', 'MSC   ',
      &  'MSD   ', 'NACC  ', 'NEX   ', 'NHMS  ', 'NIXSH ', 'NOUT  ',
      &  'NSCC  ', 'OMPOT ', 'QCC   ', 'QD    ', 'RELKIN', 'RESOLF',
      &  'STMRO ', 'TRGLEV', 'XNI   ', 'UOMPRV', 'UOMPRW', 'UOMPRS',
@@ -1910,7 +1909,6 @@ C-----T - variation of the parameter allowed; the parameters
 C-----    that do not need  i1,i2,i3... specification, e.g., TUNEPE, 
 C-----    TOTRED, FUSRED, ELARED ...
 ccc
-
       INQUIRE (FILE = ('SENSITIVITY.INP'),EXIST = fexist)
       IF(.not.fexist) THEN
          WRITE(8,*) 'SENSITIVITY CALCULATIONS REQUESTED BUT NO INPUT FIL
@@ -1921,7 +1919,7 @@ ccc
       IF(.not.fexist) THEN
          STOP 'SENSITIVITY CALCULATIONS REQUESTED BUT LEVELS FILE MISSIN
      &G. TO SOLVE: 1) TURN OFF KALMAN OPTION.2) RUN EMPIRE FOR A SINGLE 
-     &ENERGY. 3) CHECK IF .lev FILE IS PRESENT. 4) TURN ON KALMAN OPTION
+     &ENERGY. 3) CHECK IF .lev FILE IS PRESENT. 4) TURN ON SENSITOPTION
      & AND START SENSITIVITY CALCULATIONS. THANKS.'
       ENDIF
 C-----Move original (reference) input out of the way
@@ -1950,8 +1948,6 @@ C--------Read target and projectile from the input file
          IF(i.EQ.3) read(inprecord,*) aprojec,Zprojec
          WRITE(7,'(A80)') inprecord
       ENDDO
-      WRITE(8,*) 'Atarget, Ztarget, Aproj, Zproj ',atarget,ztarget,
-     &            aprojec,Zprojec
 C-----Read line of optional input
    50 READ (44,'(A80)',END = 350) inprecord
       IF (inprecord(1:1).EQ.'*' .OR. inprecord(1:1).EQ.'#' .OR.
@@ -1972,9 +1968,9 @@ C   50 READ (44,'(A6,G10.5,4I5)',ERR = 30) namee,vale,i1e, i2e, i3e, i4e
          WRITE(7,'(A6)')namee
          GOTO 70 !Jump to $ format for parameters that happens after GO
       ENDIF
-C-----Copy input but skip KALMAN
-      IF(namee.NE.'KALMAN')
-     &   WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
+C-----Copy input but skip SENSIT
+C     IF(namee.NE.'SENSIT')
+      WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
       GOTO 50
 C-----
 C-----Read and copy optional part of the standard input
@@ -1996,6 +1992,7 @@ C-----Move original (reference) outputs out of the way
       itmp=ipipe_move('LIST.DAT','LISTREF.DAT')
       itmp=ipipe_move('OUTPUT.DAT','OUTPUTREF.DAT')
       itmp=ipipe_move('XSECTIONS.OUT','XSECTIONSREF.OUT')
+
 C-----
 C-----Run sensitivity calculations
 C-----
@@ -2043,10 +2040,9 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
             itmp = ipipe_rmdir('TL')
             itmp = ipipe_mkdir('TL')
          ENDIF
-c     WRITE(8,'(''Varying parameter '',A6,''x''F10.3,4I5)')
-c    &      name, 1.0+val, i1,i2, i3, i4
+      WRITE(*,'(''Varying parameter '',A6,''x''F10.3,4I5)')
+     &      name, 1.0+val, i1,i2, i3, i4
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
-C-----
 C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,10
@@ -2100,7 +2096,8 @@ C-----Write modified input with increased value of the parameter if name matches
          ifound = 1
       ELSEIF(namee.EQ.'ENDF  ') THEN
          WRITE(7,'(A6,F10.3,4I5)')namee, 0.0, i1e, i2e, i3e, i4e
-      ELSEIF(namee.NE.'KALMAN') THEN
+C     ELSEIF(namee.NE.'SENSIT') THEN
+      ELSE
          WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
       ENDIF
       GOTO 150
@@ -2132,6 +2129,7 @@ C--------Write modified input with increased value of the parameter if name matc
       CLOSE(5)
       
       CALL EMPIRE
+      
 
 C-----Delete modified input that has been used and move XSECTIONS.OUT file
       OPEN(5,FILE=('INPUT.DAT'),STATUS='OLD',ERR=305)
