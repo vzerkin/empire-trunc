@@ -4016,8 +4016,10 @@ C-----Divide by twice the outgoing energy half-interval
       II =KMOUT(3,ISANR)
       IX =KMOUT(4,ISANR)
       IDE=KMOUT(8,ISANR)
+	if (IDE.GT.0) then !V.Zerkin, 2019-01-14
       VALUES(II)=VALUES(II)/(VALUES(IDE)*2)
       VALUES(IX)=VALUES(IX)/(VALUES(IDE)*2)
+	endif
       GO TO 800
 C-----
   180 CONTINUE
