@@ -1,6 +1,6 @@
-# $Rev: 5135 $
+# $Rev: 5140 $
 # $Author: mwherman $
-# $Date: 2018-12-02 21:04:57 +0100 (So, 02 Dez 2018) $
+# $Date: 2019-02-21 07:45:52 +0100 (Do, 21 Feb 2019) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -6605,7 +6605,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {Web EXFOR retrieval} -width 26 
+        -pady 1m -relief raised -text {Web EXFOR retrieval} -width 32 
     vTcl:DefineAlias "$site_10_0.cpd81" "Button40" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd81 "$site_10_0.cpd81 Button $top all _vTclBalloon"
     bind $site_10_0.cpd81 <<SetBalloon>> {
@@ -6618,7 +6618,7 @@ adjourn .top75} \
 adjourn .top75} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 1m -relief raised -text {Run X4TOC4} -width 12 
+        -pady 1m -relief raised -text {Run X4TOC4} -width 18 
     vTcl:DefineAlias "$site_10_0.cpd82" "Button34" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd82 "$site_10_0.cpd82 Button $top all _vTclBalloon"
     bind $site_10_0.cpd82 <<SetBalloon>> {
@@ -6629,7 +6629,7 @@ adjourn .top75} \
         -background #efefef -command { editFile $file.exf } -cursor hand2 \
         -disabledforeground #a1a4a1 -font {Helvetica -12} \
         -foreground darkgreen -highlightbackground #dcdcdc -padx 1m \
-        -text {View EXFOR} -width 12 
+        -text {View EXFOR} -width 18 
     vTcl:DefineAlias "$site_10_0.cpd83" "Button171" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_10_0.cpd83 "$site_10_0.cpd83 Button $top all _vTclBalloon"
     bind $site_10_0.cpd83 <<SetBalloon>> {
@@ -7251,7 +7251,7 @@ set compeval [tk_getOpenFile -filetypes $types  -parent .top75 -title "Select EN
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 0 \
         -relief raised -state normal -text {Delete selected files} \
-        -wraplength 80 
+        -wraplength 80 -width 22 
     vTcl:DefineAlias "$site_9_0.but123" "Button51" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.but123 "$site_9_0.but123 Button $top all _vTclBalloon"
     bind $site_9_0.but123 <<SetBalloon>> {
