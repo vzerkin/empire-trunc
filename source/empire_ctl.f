@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5138 $
+Ccc   * $Rev: 5141 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2018-12-22 22:01:02 +0100 (Sa, 22 Dez 2018) $
+Ccc   * $Date: 2019-02-22 07:35:15 +0100 (Fr, 22 Feb 2019) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -2181,9 +2181,10 @@ C     ENDDO
 C     DO i=1,nreac
       READ(36,'(A80)') inprecord
 C     ENDDO
- 180  READ(34,'(G10.5,1P,(90E12.5))',END=190) einl, (xsecu(i),i=1,ireac)
-      READ(35,'(G10.5,1P,(90E12.5))') einl, (xsecd(i),i=1,ireac)
-      READ(36,'(G10.5,1P,(90E12.5))') einl, (xsec(i),i=1,ireac)
+ 180  READ(34,'(1P,E10.4,1X,1P,95(E12.5))',END=190) einl, 
+     1         (xsecu(i),i=1,ireac)
+      READ(35,'(1P,E10.4,1X,1P,95(E12.5))') einl, (xsecd(i),i=1,ireac)
+      READ(36,'(1P,E10.4,1X,1P,95(E12.5))')  einl, (xsec(i),i=1,ireac)
       DO i = 1, ireac
          IF(ABS(xsecu(i)-xsecd(i)).LE.((xsecu(i)+xsecd(i))*1.0D-5) )THEN
             sensmat(i) = 0
