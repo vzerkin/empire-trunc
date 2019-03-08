@@ -1,6 +1,6 @@
-!cc   * $Rev: 5138 $
+!cc   * $Rev: 5144 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2018-12-22 22:01:02 +0100 (Sa, 22 Dez 2018) $
+!cc   * $Date: 2019-03-08 08:09:38 +0100 (Fr, 08 Mär 2019) $
 
       SUBROUTINE INPUT
 !cc
@@ -1167,30 +1167,30 @@ C
                ENDf(1) = 1
                ENDf(NTArget) = 1
                  ENDfp(NPRoject,NTArget) = 1
-!               DO in = 0, NENdf
-!                  DO ip = 0, NENdf
-!                     atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
-!                     ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
-!                     if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
-!                     izatmp = INT(1000*ztmp + atmp)
-!                     CALL WHERE(izatmp,nnuc,iloc)
-!                     IF(iloc.EQ.0) THEN
-!                       ENDf (nnuc) = 1
-!!                       if(in.eq.2 .and. ip.eq.2) THEN
-!!                         ENDfp(3,nnuc) = 1  ! alphas
-!!                         ENDfp(0,nnuc) = 1
-!!                       endif
-!C                      if(in.eq.2 .and. ip.eq.1) THEN
-!C                        ENDfp(5,nnuc) = 1  ! triton
-!C                        ENDfp(0,nnuc) = 1
-!C                       endif
-!C                      if(in.eq.1 .and. ip.eq.2) THEN
-!C                        ENDfp(6,nnuc) = 1  ! He-3
-!C                        ENDfp(0,nnuc) = 1
-!C                      endif
-!                     ENDIF
-!                  ENDDO
-!               ENDDO
+              DO in = 0, NENdf
+                 DO ip = 0, NENdf
+                    atmp = A(1) - FLOAT(in)*AEJc(1) - FLOAT(ip)*AEJc(2)
+                    ztmp = Z(1) - FLOAT(in)*ZEJc(1) - FLOAT(ip)*ZEJc(2)
+                    if(atmp.le.4 . or. ztmp.le.2) cycle  !residues must be heavier than alpha
+                    izatmp = INT(1000*ztmp + atmp)
+                    CALL WHERE(izatmp,nnuc,iloc)
+                    IF(iloc.EQ.0) THEN
+                      ENDf (nnuc) = 1
+!                       if(in.eq.2 .and. ip.eq.2) THEN
+!                         ENDfp(3,nnuc) = 1  ! alphas
+!                         ENDfp(0,nnuc) = 1
+!                       endif
+C                      if(in.eq.2 .and. ip.eq.1) THEN
+C                        ENDfp(5,nnuc) = 1  ! triton
+C                        ENDfp(0,nnuc) = 1
+C                       endif
+C                      if(in.eq.1 .and. ip.eq.2) THEN
+C                        ENDfp(6,nnuc) = 1  ! He-3
+C                        ENDfp(0,nnuc) = 1
+C                      endif
+                    ENDIF
+                 ENDDO
+              ENDDO
 !              Making only pure neutron and pure proton emissions exclusive
                ztmp = Z(1)
                DO in = 0, MIN(8,NENdf)
@@ -1242,6 +1242,7 @@ C
             ENDDO
             NEXclusive = itmp
          ENDIF
+         Write(*,*) 'Number of exclusive nuclei ', NEXclusive
 C
 C--------check input for consistency
 C
