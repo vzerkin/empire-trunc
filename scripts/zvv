@@ -5,11 +5,11 @@ if [ -z $EMPIREDIR ]; then
     exit
 fi
 
-XWIN=`uname`
-if [ "$XWIN" = "Darwin" ] 
-then
-   if [ -z $DISPLAY ]; then export DISPLAY=:0; fi
-fi
+#XWIN=`uname`
+#if [ "$XWIN" = "Darwin" ] 
+#then
+#   if [ -z $DISPLAY ]; then export DISPLAY=:0; fi
+#fi
 
 set -x
 blank=" "

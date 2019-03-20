@@ -1,11 +1,11 @@
 #! /bin/sh -
 #SCRIPT TO PLOT ANG. DISTR. AND DOUBLE-DIFFERENTIAL CROSS SECTIONS
 
-XWIN=`uname`
-if [ "$XWIN" = "Darwin" ] 
-then
-   if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
-fi
+# XWIN=`uname`
+# if [ "$XWIN" = "Darwin" ] 
+# then
+#    if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
+# fi
 
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
