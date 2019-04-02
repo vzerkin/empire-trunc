@@ -1,6 +1,6 @@
-! $Rev: 5049 $                                                          | 
-! $Date: 2018-01-31 15:28:46 +0100 (Mi, 31 Jän 2018) $                                                     
-! $Author: mherman $                                                  
+! $Rev: 5151 $                                                          | 
+! $Date: 2019-04-02 19:39:09 +0200 (Di, 02 Apr 2019) $                                                     
+! $Author: capote $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,8 +29,8 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
-!-V         Version 8.23   January 2018 D. Brown
-!-V                        - Add MT=501, 522 and 525 for electro-atomic data in EPICS2017
+!-V         Version 8.23   April 2019 D. Lopez Aldama (updated by RCN)
+!-V                        - For IRDFF checking (see DLA comments)
 !-V         Version 8.22   October 2017 D. Brown
 !-V                        - Add checks of P(nu) for fission
 !-V                        - Add checks of fission energy release tables
@@ -269,7 +269,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.23'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
 !
 !     Define variable precision
 !
@@ -305,7 +305,7 @@
      &                               NCREMAX=4       ! Maximum of reactions per type
       INTEGER(KIND=I4), PARAMETER :: URNEMAX = 250   ! UR energy points
 !          File 4 secondary angular data
-      INTEGER(KIND=I4), PARAMETER :: NES4MAX=4000    ! Number of E(INC)
+      INTEGER(KIND=I4), PARAMETER :: NES4MAX=2000    ! Number of E(INC)
       INTEGER(KIND=I4), PARAMETER :: NLEGMAX=64      ! Legendre coefs
       INTEGER(KIND=I4), PARAMETER :: NANGMAX=201     ! Angle points
 !          File 5 secondary energy data
@@ -4066,21 +4066,19 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !        NEW REPRESENTATION USING A NON ZERO IZAP
 !
          ELSE
-            IF((IZAP.EQ.-1).AND.(MT.NE.18)) THEN
-                IF(IZAP.LT.IZAPP) THEN
-                   EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING IZAP'
-                   CALL ERROR_MESSAGE(NSEQP1)
-                ELSE IF(IZAP.EQ.IZAPP) THEN
-                   IF (LFSO.LE.LFSP)  THEN
-                      EMESS='DATA NOT GIVEN IN ORDER OF INCREASING LFSO'
-                      CALL ERROR_MESSAGE(NSEQP1)
-                   ELSE
-                      LFSP = LFSO
-                   END IF
-                ELSE
-                   IZAPP = IZAP
-                   LFSP = -1
-                END IF
+            IF(IZAP.LT.IZAPP) THEN
+               EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING IZAP'
+               CALL ERROR_MESSAGE(NSEQP1)
+            ELSE IF(IZAP.EQ.IZAPP) THEN
+               IF (LFSO.LE.LFSP)  THEN
+                  EMESS = 'DATA NOT GIVEN IN ORDER OF INCREASING LFSO'
+                  CALL ERROR_MESSAGE(NSEQP1)
+               ELSE
+                  LFSP = LFSO
+               END IF
+            ELSE
+               IZAPP = IZAP
+               LFSP = -1
             END IF
          END IF
    90   IF(IERX.EQ.1)   GO TO 100
@@ -5451,7 +5449,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
             NI = N2H
             MF1 = IFIX(C1H)
             LFS1 = IFIX(C2H)
-            IF(LFS1.NE.0.AND.MF1.NE.10) THEN
+!DLA        IF(LFS1.NE.0.AND.MF1.NE.10) THEN
+            IF(LFS1.NE.0.AND.MF1.NE.10.AND.MF1.NE.0) THEN
                EMESS = 'XLFS1 MUST BE ZERO WHEN XMF1 IS NOT 10.0'
                CALL ERROR_MESSAGE(NSEQP)
             END IF
@@ -5463,8 +5462,10 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                MF1B = 0
                MT1B = MT
                LFS1B = LFS
-               IF(MAT1.NE.0.OR.MF1.NE.10.OR.MT1.NE.MT.OR.               &       
-     &                 LFS1.NE.LFS) THEN
+!DLA           IF(MAT1.NE.0.OR.MF1.NE.10.OR.MT1.NE.MT.OR.               &       
+!DLA &                 LFS1.NE.LFS) THEN           
+               IF(MAT1.NE.0.OR.(MF1.NE.0.AND.MF1.NE.10).OR.             &       
+     &                 MT1.NE.MT.OR.LFS1.NE.LFS) THEN
                   EMESS = 'FIRST SUB-SUBSECTION MUST BE MAT1=0, MF1=10,'
                   CALL ERROR_MESSAGE(IZRO)
                   EMESS = '    MT1=MT AND LFS1=LFS'
@@ -5602,7 +5603,8 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !     TEST THAT VALUE OF LB IS IN ALLOWED RANGE
 !
       LB = L2L
-      IF(MF.EQ.31.OR.MF.EQ.33) THEN
+!DLA      IF(MF.EQ.31.OR.MF.EQ.33) THEN
+      IF(MF.EQ.31.OR.MF.EQ.33.OR.MF.EQ.40) THEN
          LBM = 8
       ELSE
          LBM = 6
@@ -6593,7 +6595,6 @@ c        END IF
       IF(IEVAL.EQ.1) THEN
          WRITE(EMESS,'(A,I4,A,I6,A)')                                   &       
      &           'MT=',MTT0,' FOR NSUB=',NSUB,' INVALID'
-         write(*,*) MTT,MT3,MFT,MTCAT,IEVAL
          CALL ERROR_MESSAGE(NSEQP1)
       ELSE IF(IEVAL.EQ.2) THEN
 !
@@ -6619,15 +6620,7 @@ c        END IF
 !       6  Activation reactions
 !       .
 !       .
-!       .
-!       9  Photo-atomic reactions
-!       13 Photo-atomic form factors
-!       14 Reactions common to photo- and electro-atomic reactions
-!       15 Electro-atomic reactions
-!       16 Atomic relaxation
-!       .
-!       .
-!       .
+!
       IMPLICIT NONE
 !
       INTEGER(KIND=I4) :: MTT,MT3,MTCAT
@@ -6695,18 +6688,17 @@ c        END IF
 !     PHOTON AND ELECTRON INTERACTION   501 - 599
 !
       ELSE IF(MTT.GE.501.AND.MTT.LE.599)   THEN
-         IF(MTT.EQ.502.OR.MTT.EQ.504)   THEN
+         IF(MTT.EQ.501.OR.MTT.EQ.502.OR.MTT.EQ.504)   THEN
             MTCAT = 9
          ELSE IF(MTT.EQ.505.OR.MTT.EQ.506)   THEN
             MTCAT = 13
-         ELSE IF(MTT.GE.515.AND.MTT.LE.517)   THEN
+         ELSE IF((MTT.GE.515.AND.MTT.LE.517).OR.MTT.EQ.522)   THEN
             MTCAT = 9
-         ELSE IF(MTT.EQ.523.OR.(MTT.GE.525.AND.MTT.LE.528)) THEN
+         ELSE IF(MTT.EQ.523.OR.(MTT.GE.526.AND.MTT.LE.528)) THEN
             MTCAT = 15
          ELSE IF(MTT.EQ.533) THEN
             MTCAT = 16
-         ELSE IF(MTT.EQ.501.OR.MTT.EQ.522.OR.
-     &        (MTT.GE.534.AND.MTT.LE.599)) THEN
+         ELSE IF(MTT.GE.534.AND.MTT.LE.599) THEN
             MTCAT = 14
          END IF
 !
