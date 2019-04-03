@@ -1,6 +1,6 @@
-# $Rev: 5140 $
+# $Rev: 5152 $
 # $Author: mwherman $
-# $Date: 2019-02-21 07:45:52 +0100 (Do, 21 Feb 2019) $
+# $Date: 2019-04-03 20:43:38 +0200 (Mi, 03 Apr 2019) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8321,8 +8321,8 @@ cd $workdir} \
         -menu "$top.m88.menu89" -command {} -label File 
     set site_3_0 $top.m88
     menu $site_3_0.menu89 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu89 add command \
         \
         -command {set rcfl [open $my_config w+]
@@ -8347,8 +8347,8 @@ exit} \
         -menu "$top.m88.menu90" -command {} -label Options 
     set site_3_0 $top.m88
     menu $site_3_0.menu90 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel.inp } \
         -label {Default input} 
@@ -8446,8 +8446,8 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -menu "$top.m88.menu92" -command {} -label Inputs 
     set site_3_0 $top.m88
     menu $site_3_0.menu92 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 1 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu92 add command \
         -command {file copy -force $::env(EMPIREDIR)/scripts/skel.inp $file.inp} -label {Create input} 
     $site_3_0.menu92 add command \
@@ -8474,8 +8474,8 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -menu "$top.m88.menu93" -command {} -label Execute 
     set site_3_0 $top.m88
     menu $site_3_0.menu93 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 1 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/run $file $mat &} \
         -label {Full run} 
@@ -8540,7 +8540,7 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {} -label {KALMAN for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men87 \
-        -activebackground #f9f9f9 -activeforeground black -foreground black \
+        -activebackground #f9f9f9 -activeforeground black  \
         -tearoff 1 
     $site_4_0.men87 add command \
         \
@@ -8600,7 +8600,7 @@ exec mv $file.new $file.inp } \
         -command {} -label {Plot Sensitivity Matrix for} 
     set site_4_0 $site_3_0.menu93
     menu $site_4_0.men89 \
-        -activebackground #f9f9f9 -activeforeground black -foreground black \
+        -activebackground #f9f9f9 -activeforeground black \
         -tearoff 1 
     $site_4_0.men89 add command \
         \
@@ -8707,8 +8707,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -menu "$top.m88.menu94" -command {} -label Outputs 
     set site_3_0 $top.m88
     menu $site_3_0.menu94 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu94 add command \
         -command { editFile $file.lst } -label {EMPIRE full output} 
     $site_3_0.menu94 add command \
@@ -8831,8 +8831,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -menu "$top.m88.menu95" -command {} -label Plots 
     set site_3_0 $top.m88
     menu $site_3_0.menu95 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu95 add command \
         -command { pspdfView $file.ps } -label {PLOTC4 plots} 
     $site_3_0.menu95 add separator \
@@ -8883,8 +8883,8 @@ cd $workdir} \
         -menu "$top.m88.menu96" -command {} -label Help 
     set site_3_0 $top.m88
     menu $site_3_0.menu96 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu96 add command \
         -command { pspdfView $::env(EMPIREDIR)/doc/inplist.pdf } \
         -label {EMPIRE input} 
