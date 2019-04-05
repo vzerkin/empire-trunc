@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5131 $
+    ! $Rev: 5153 $
     ! $Author: mwherman $
-    ! $Date: 2018-06-28 21:11:40 +0200 (Do, 28 Jun 2018) $
+    ! $Date: 2019-04-06 00:49:33 +0200 (Sa, 06 Apr 2019) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -613,8 +613,6 @@ CONTAINS
                             rho1 = RO(ier,jr,ip1,nnur)*de*TUNe(nejc,nnuc)
                             IF(superr) rho1 = rho1/sqrt(1-tld)                ! correction for superradiance
                             IF(ier==1 .AND. nint(Z(1))==nint(Z(nnur))) rho1 = rho1*DEPart(nnur)  !correct for gap above Ecut
-                            ! rho1 = 0.0D0
-                            rho1 = AINT(rho1)
                             H_Sumtl = H_Sumtl + tld*rho1
                             H_Sumtls = H_Sumtls + tld**2*rho1
                             IF(ier==1) THEN                      !correct for the edge bin in trapeizoidal integration
