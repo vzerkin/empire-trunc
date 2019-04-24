@@ -59,7 +59,8 @@ C-V  16/07  Initialize MTH.
 C-V  16/12  Fix PLOTTAB input file for MF6.
 C-V  17/03  Add elemental masses to GETAWT.
 C-V  17/05  Enhancements to plot PFGS.
-C-V  17/07  Restore assembly of lumped reactions (e.g. MT 3,103-107)
+C-V  17/07  Restore assembly of lumped reactions (e.g. MT 3,103-107).
+C-V  18/08  Skip comments ('#' in column1) in a C4 file.
 C-M  
 C-M  Manual for Program LSTTAB
 C-M  =========================
@@ -956,6 +957,9 @@ C*
 C..20 READ (LC4,901,END=80) IZAI,IZA,CM,MF,MT,C1,C2,C3
 C..  1                     ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
    20 READ (LC4,  900,END=80) HLINE
+C*    -- Skip comments in the C4 file
+      IF(HLINE(1:1).EQ.'#') GO TO 20
+C*    -- Interpret a C4 entry record
       READ (HLINE,901) IZAI,IZA,CM,MF,MT,C1,C2,C3
      1                ,F1,F2,F3,F4,F5,F6,F7,F8,LBL,REF,CHX4
 c...
