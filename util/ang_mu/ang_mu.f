@@ -1,6 +1,6 @@
       PROGRAM ANG_MU
 C-Title  : ANG_MU Program
-C-Purpose: Legendre moments to C4 from angular distributions
+C-Purpose: Add Legendre moments to C4 from angular distributions
 C-Author : A. Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2012
 C-V  12/06 Fix bug on action when fitting is unsuccessful.
