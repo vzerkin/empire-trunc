@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2018-01-31 15:28:46 +0100 (Mi, 31 Jän 2018) $
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2019-04-24 21:18:05 +0200 (Mi, 24 Apr 2019) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -158,6 +158,7 @@ C-M  17/06 Fix matching of level energies for angular distributions.
 C-M        Fix format reading conversion coefficients.
 C-M        Allow more digits for branching ratios (backward compatible).
 C-M  17/07 Small fix reading more digits for branching ratio.
+C-M  18/09 Fix missing FEND record after MF4.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -493,9 +494,10 @@ C*
       WRITE(LER,991)
       WRITE(LER,991) ' Initial list of MT numbers for MF3     '
       WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
-C... Suppress writing MT50 because it interferes with NJOY processing
+C... Suppress writing MT50 for neutrons because it interferes
+C... with NJOY processing
       DO J=1,NXS
-        IF(IWO(MTH-1+J).EQ. 50) IWO(MTH-1+J)=-50
+        IF(IWO(MTH-1+J).EQ. 50 .AND. IZI.EQ.1) IWO(MTH-1+J)=-50
       END DO
 c...
 c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
@@ -733,6 +735,7 @@ c...
       IF(NK.LE.0) GO TO 490
 C* Write the ENDF file-4 data
       MT4=2
+      KT4=0
   420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
      1           ,MT4,JT0,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
       IF(MT4.GT.0) THEN
@@ -740,13 +743,18 @@ C* Write the ENDF file-4 data
         WRITE(LER,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
         JT4=JT4+1
         MT4=MT4+1
+        KT4=KT4+1
         GO TO 420
       END IF
       WRITE(LTT,995) BLNK
       WRITE(LER,995) BLNK
   490 IF(JT6.LT.NT6 .OR. I800.EQ.1) GO TO 400
+c...
+      print *,'JT4,JT6,NT6,I800',JT4,JT6,NT6,I800
+c...
 C* Angular distribution data processed
-      IF(JT4.GT.0) THEN
+C...  IF(JT4.GT.0) THEN
+      IF(KT4.GT.0) THEN
         NS=0
         CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
       END IF
@@ -834,9 +842,9 @@ C* Write radioisotope and isomer production data (MF10)
       MF =10
       LIW=MTH+NXS
       LXI=MXI-LIW
-C     CALL WRMF10(LOU,MXE,MXT,LXI,LXR,EMIN
-c    1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(LIW),RWO(LSC)
-c    1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
+      CALL WRMF10(LOU,MXE,MXT,LXI,LXR,EMIN
+     1           ,EIN,RWO(LXS),QQM,QQI,IWO(MTH),IWO(LIW),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NEP,NXS,ERR,N10,NRC,NS)
       WRITE(LTT,995) ' Number of MT sections written        : ',N10
       WRITE(LTT,995) '            Total number of reactions : ',NRC
       WRITE(LTT,991)
@@ -4305,13 +4313,13 @@ C* Positioned to read discrete levels
       READ (LIN,891)
       XI=0
       XC=0
-      JL=0
+      JL=-1
 C* For incident neutrons allow ground state for other particles
-      IF(IZI.EQ.   1 .AND. MT0.NE. 50) JL=-1
+      IF(IZI.EQ.   1 .AND. MT0.EQ. 50) JL=0
 C* For incident protons allow ground state for other particles
-      IF(IZI.EQ.1001 .AND. MT0.NE.600) JL=-1
+      IF(IZI.EQ.1001 .AND. MT0.EQ.600) JL=0
 C* For incident alphas allow ground state for other particles
-      IF(IZI.EQ.2004 .AND. MT0.NE.800) JL=-1
+      IF(IZI.EQ.2004 .AND. MT0.EQ.800) JL=0
 C* Loop reading discrete level cross sections
   352 READ (LIN,805) IL,EL,II,X,XS,NBR
       DO WHILE (NBR.GT.7)
@@ -6559,7 +6567,7 @@ C-
      1            ,RWO(MXR)
 C* Only one interpolation range is allowed, hence array length is one.
       DIMENSION NBT(20),INR(20)
-C* Cross sections are set to zero if Ln(cross-sect.) < SMALL
+C* Cross sections are set to zero if (cross-section < SMALL)
       DATA XSMALL,ZRO/ 1.0E-34, 0./
       DATA PTST/'        '/
 C* Initialize constants
@@ -6641,6 +6649,9 @@ c...    print *,'j,N,me,mt,xsl,e,x'
 c... &          ,j,NEN,me,mth(it),xsl,ein(j),xsc(j,it),XMX
 c...
   322 CONTINUE
+c...
+c...  print *,(rwo(mx-1+j),j=1,10)
+c...
 C* Check that there are NON-ZERO points above threshold
       IF(ME.LT.2 .OR.
      1  (ME.EQ.2 .AND.XMX.LE.SMALL)) THEN
@@ -6717,14 +6728,32 @@ C* Find pseudo-threshold
       END DO
       EPT=EIN(KX)
 C* Remove redundant zeroes below pseudo-threshold
+c...
+c...  print *,'Remove redundant zeroes below pseudo-threshold EPT,E'
+c... &       ,EPT,rwo(lx),rwo(lx+1),mth(it),lx,KX
+c...
       DO WHILE (RWO(LX+1).LT.EPT)
         NEO=NEO-1
         LX=LX+1
         LY=LY+1
+c...
+c...    print *,'RWO(LX  ),RWO(LX-1)',RWO(LX  ),RWO(LX-1)
+c...
         RWO(LX  )=RWO(LX-1)
         RWO(LY  )=0
         RWO(LY+1)=0
       END DO
+C* Insert pseudo-threshold with zero cross section, if needed
+C...  IF(EPT.GT.RWO(LX) .AND. RWO(LY).EQ.0) THEN
+      IF(EPT.GT.RWO(LX)) THEN
+        LX =LX-1
+        LY =LY-1
+        NEO=NEO+1
+        RWO(LX  )=RWO(LX+1)
+        RWO(LY  )=0
+        RWO(LX+1)=EPT
+        RWO(LY+1)=0
+      END IF
 C* Define the default interpolation law as lin-lin
       NR    =1
       INR(1)=2
@@ -6734,7 +6763,14 @@ C* Define the default interpolation law as lin-lin
         STOP 'EMPEND ERROR - assigning LX in WRIMF3'
       END IF
 C* Extrapolate points down to EMIN for incident neutrons
+c...
+c...  print *,'izi,qqi',izi,qqi(it)
+c...
       IF(IZI.EQ.1 .AND. QQI(IT).GE.0) THEN
+c...
+c...    print *,'mt,emin,Ely,Elx,Elx1,Eth'
+c... &          ,mth(it),emin,rwo(ly),rwo(lx),rwo(lx+1),Ethrm
+c...
         IF(RWO(LY+1).GT.0) THEN
           E1 =RWO(LX)
           EE =ETHRM
@@ -6745,12 +6781,14 @@ C* Extrapolate points down to EMIN for incident neutrons
             YY=0
           END IF
           LX =LX-2
-          IF(LX.LT.1) LX=1
           LY =LY-2
-          IF(LY.LT.1) LY=1
           NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
+c...
+c...      print *,(rwo(lx+j-1),j=1,5)
+c...      if(mth(it).eq.800) stop
+c...
           RWO(LY  )=YY
           RWO(LY+1)=YY
           NBT(1)   =NEO
@@ -6968,10 +7006,11 @@ C*        Determine the outgoing particle energy for discrete levels
           EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))
 c...    
 c...      IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
-c...      -- Do recoil correction unconditionally since this 
-c...         is how it is done in EMPIRE
+c...      -- Do recoil correction unconditionally since  
+c...         this is how it is done in EMPIRE
           EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
 c...
+c...      print *,'ein,qi,it',ein,qqi(it),it
 c...      print *,'AWR,AWI,AWP',AWR,AWI,AWP
 c...
           EOU=-EOU
@@ -7075,8 +7114,8 @@ c...
           DEE=ABS(EOU-E2)
 C*        -- Check for a strong mismatch in the calculated E_out
           IF(DEE.GT.TST .AND. NA1.GT.1) THEN
-            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),E2,EOU
-            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),E2,EOU
+            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),E2,EOU
+            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),E2,EOU
           END IF
 C*        -- Move coefficients to the output field
           CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
@@ -7286,9 +7325,9 @@ C* All discrete levels processed - nothing to write
      &      ,I3,I4,1P,E10.3E1,2E12.5E1/
      &       '                  Distribution interpolated between   '
      &      ,2E12.5E1)
-  911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Eout'
-     &      ,I3,I4,1P,E10.3E1,2E12.5E1/
-     &       '                  Calculated : ',35X
+  911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Qi/Eout'
+     &      ,I3,I4,1P,E10.3E1,3E12.5E1/
+     &       '                  Calculated : ',50X
      &       , E12.5E1)
       END
       
@@ -8806,7 +8845,7 @@ C-Title  : LSQLEG Subroutine
 C-Purpose: Fit Legendre coefficients to a set of data
 C-Description:
 C-D
-      DIMENSION  XP(NP),YP(NP),QQ(N1),AA(N1,*)
+      DIMENSION  XP(NP),YP(NP),QQ(N1),AA(N1,1)
 C* Perform linear transformation of the coordinate system
       IER=0
       LF=N1+1
