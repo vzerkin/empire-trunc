@@ -372,7 +372,7 @@ C-
       PARAMETER       (MXMU=80, MXPL=100, MXNB=20, MXRW=260000)
       CHARACTER*66     B66,C66
       CHARACTER*8      CLANG
-      DOUBLE PRECISION PAR,CLB,P1,P2,PP,FMU,ONE,TWO
+      DOUBLE PRECISION PAR,CLB,P1,P2,PP,FF0,FMU,ONE,TWO
       DIMENSION RWO(MXRW),NBT(MXNB),INR(MXNB)
       DIMENSION AMU(MXMU),PLL(MXPL)
 C*
@@ -484,7 +484,7 @@ C* Write the multiplicities for this particle to the output file
       CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,ZAP,AWP,LIP,LAW
      1           , NR, NP, NBT,INR,RWO(LXE),RWO(LXS))
 c...
-c...  print *,'law',law0
+c...  print *,'law0,lct0',law0,lct0
 c...
 C*
       IF     (LAW0.EQ.1) THEN
@@ -543,16 +543,17 @@ C*      -- Copy the data for Law 7
           KX=NMX/2
           LX=1+KX
           DO IM=1,NMU
-            CALL RDTAB1(LEN,C1,ACOS,L1,L2,NRP,NEP,NBT,INR
+            CALL RDTAB1(LEN,C1,FCOS,L1,L2,NRP,NEP,NBT,INR
      &                 ,RWO,RWO(LX),KX,IER)
             IF(IER.NE.0) STOP 'SIXTAB ERROR - MXRW limit exceeded'
-            CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
+            CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,FCOS,L1,L2
      1                 ,NRP,NEP,NBT,INR,RWO,RWO(LX))
           END DO
         END DO
         GO TO 800
       ELSE
 C*      Don't know how to process - file incomplete - terminate.
+        PRINT 961,LAW0,IZAP
         IF(LTT.GT.0) THEN
           WRITE(LTT,961) LAW0,IZAP
         END IF
@@ -566,15 +567,17 @@ C*    -- Read Law 1 format specifications for outgoing energies
         STOP 'MF6LW7 ERROR - reading interpolation table TAB2'
       END IF
 C...
-C...  print *,'lang,lep,nr,ne',lang,lep,nr,ne
+c...  print *,'lang,lep,nr,ne',lang,lep,nr,ne
 C...
       IF(LTT.GT.0) THEN
         IF     (LANG.EQ.1)THEN
           CLANG='Legendre'
         ELSE IF(LANG.EQ.2)THEN
           CLANG='Kalbach '
-          IF(LCT.NE.2)
+          IF(LCT0.NE.2)
      1    WRITE(LTT,900) ' WARNING - Kalbach requires CM co-ordin.'
+        ELSE IF(LANG.EQ.11 .OR. LANG.EQ.12 .OR. LANG.EQ.14) THEN
+          CLANG='Points  '
         ELSE
           CLANG='Unknown '
         END IF
@@ -747,11 +750,11 @@ C* Begin loop over the cosines for law 7
       SIG =0
       DO 500 IMU=1,NMU
       IF     (IMU.EQ.  1) THEN
-        ACOS=-1.
+        FCOS=-1.
       ELSE IF(IMU.EQ.NMU) THEN
-        ACOS=+1.
+        FCOS=+1.
       ELSE
-        ACOS=AMU(IMU)
+        FCOS=AMU(IMU)
       END IF
 C*    -- Reconstruct the energy distribution for this cosine
       IP =0
@@ -768,14 +771,19 @@ C*       increasing
         GO TO 408
       END IF
       ECM0=ECM
-      CSN=ACOS
+      CSN=FCOS
+      CLB=DBLE(FCOS)
       ELB=ECM
       DRV=1
+c...
+c...  print *,'lct,ecm,lang',lct,ecm,lang
+c...  print *,'   fcos,ads,amr,ein',fcos,ads,amr,ein
+c...
       IF (LCT.NE.1 .AND. ECM.GT.0 ) THEN
 C*      -- Convert CM to Lab co-ordinate system
 C*         Coding from NJOY-99 manual for GROUPR page VII-35
 C*         Input cosine grid is defined to be the in Lab system
-        CLB=DBLE(ACOS)
+        CLB=DBLE(FCOS)
 C*      --Equation (125) c = PAR * sqrt( EIN / ELB)
         PAR=SQRT(DBLE(ADS))/DBLE(AMR+1)
 C*      -- From Equations (123) and (125) solve quadratic for the
@@ -815,15 +823,12 @@ C*
 C*      -- Calculate the probability from Legendre polynomials
         IF(NA.GE.MXPL) STOP 'SIXTAB ERROR - MXPL limit exceeded'
         CALL PLNLEG(CSN,PLL,NA)
-c...    FMU=0
-c...    DO LL=1,NL
-c...      FMU=FMU+0.5*(2*LL-1)*PLL(LL)*RWO(LX1+NCYC*(IP-1)+LL)
-c...    END DO
 C*      -- Sum Legendre components in double precision
         LL=LX1+NCYC*(IP-1)+1
-        FMU=DBLE(PLL(1))*DBLE(RWO(LL))/TWO
+        FF0=DBLE(RWO(LL))
+        FMU=DBLE(PLL(1))*FF0/TWO
         DO L=1,NA
-          FMU=FMU+DBLE(PLL(1+L))*DBLE(RWO(LL+L))*(2*L+1)/TWO
+          FMU=FMU+DBLE(RWO(LL+L))*DBLE(PLL(1+L))*(2*L+1)/TWO
         END DO
       ELSE IF(LANG.EQ.2) THEN
 C*
@@ -839,15 +844,18 @@ C*      -- Calculate the probability from Kalbach-Mann representation
       ELSE IF(LANG.GT.10) THEN
 C*
 C*      -- Calculate the probability from pointwise representation
-        MMU=(NCYC-1)/2
-        DO KMU=1,MMU-1
-          LL=LX1+5+2*KMU+NCYC*(IP-1)
-          IF (CSN.GE.RWO(LL).AND.CSN.LE.RWO(LL+2)) GO TO 303
-        END DO
-        FMU=0.
-        GO TO 400
-  303   INTI=LANG-10
-        FMU =FINEND(INTI,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
+C*         Find the last index of the cosine below CSN
+        LL=LX1+NCYC*(IP-1)
+        FF0=DBLE(RWO(LL+1))
+        LS=LL +NCYC -4
+  302     LL =LL+2
+c...
+c...      print *,' kmu,ip,rwo',kmu,ip,(RWO(Lx1-1+j),j=1,10)
+c...      print *,'  cos range',csn,rwo(ll),rwo(ll+2),lx1,ll
+c...
+          IF (CSN.GT.RWO(LL+2) .AND. LL.LT.LS) GO TO 302
+        INTI=LANG-10
+        FMU =FF0*FINEND(INTI,CSN,RWO(LL),RWO(LL+1),RWO(LL+2),RWO(LL+3))
       ELSE
         IF(LTT.GT.0)
      &  WRITE(LTT,900) ' SIXTAB ERROR - Illegal value of LANG   ',LANG
@@ -858,11 +866,10 @@ C* Processing of distribution for one outgoing energy point completed
 C*
 C*    -- Enter energy point - skip if energy less then previous point
       IF(IP.GT.1 .AND. ELB.LT.RWO(LXE+JP-1)) GO TO 408
+      FF=FMU*DRV
+      IF(FF.LT.0) FF=0
       RWO(LXE+JP)=ELB
-      RWO(LXX+JP)=FMU*DRV
-c...
-c...  PRINT *,CLB,CSN,ELB,FMU,FMU*DRV
-c...
+      RWO(LXX+JP)=FF
       JP=JP+1
       IF(JP.GE.KX) STOP 'MF6LW7 ERROR - MXRW capacity exceeded'
 C*    -- Continue with the secondary energy loop
@@ -886,7 +893,7 @@ C*      -- Check if single point
       NBT(1)=JP
       INR(1)=LEP
 C* Write the spectrum distribution for this cosine
-      CALL WRTAB1(LSC,MAT0,MF0,MT0,NS0,C1,ACOS,L1,L2
+      CALL WRTAB1(LSC,MAT0,MF0,MT0,NS0,C1,FCOS,L1,L2
      1           , NRP,JP,NBT,INR,RWO(LXE),RWO(LXX))
 C* Add contribution to the integral
       SEN=0
@@ -911,40 +918,38 @@ C* Add contribution to the integral
         ELSE
           FF=(SEN+SEN0)/2
         END IF
-        SIG = SIG + FF*(ACOS-ACOS0)
+        SIG = SIG + FF*(FCOS-FCOS0)
       END IF
-      ACOS0= ACOS
+      FCOS0= FCOS
       SEN0 = SEN
 C*    -- Continue with the cosine loop
   500 CONTINUE
 C* Check the integral normalisation factor
+C...
+C...    WRITE(LTT,*) 'E_in,SIG',EIN,SIG
+C...
         IF(ABS(SIG-1).GT.1.E-2) THEN
           NSIG=NSIG+1
-          IF(ABS(SIG-1).GT.SIGMX) THEN
+          IF(ABS(SIG-1).GT.ABS(SIGMX)) THEN
             SIGMX=SIG-1
             EINMX=EIN
           END IF
-C...
-C...      WRITE(LTT,*) 'SIG',SIG
-C...      DO K=1,JP
-C...        WRITE(LTT,'(I4,1P,2E11.4)') K,RWO(LXE-1+K),RWO(LXX-1+K)
-C...      END DO
-C...
         END IF
 C* Copy from scratch to output and normalise distributions
       REWIND LSC
       IF(SIG.LT.1E-30) THEN
         IF(LTT.GT.0)
      &  WRITE(LTT,*) 'WARNING - small normalisation Sig',SIG
+     &              ,' for MT',MT0,' at energy',EIN
         SIG=1
       END IF
       DO IMU=1,NMU
-        CALL RDTAB1(LSC,C1,ACOS,L1,L2,NRP, JP, NBT,INR
+        CALL RDTAB1(LSC,C1,FCOS,L1,L2,NRP, JP, NBT,INR
      1             ,RWO(LXE),RWO(LXX),KX,IER)
         DO J=1,JP
           RWO(LXX+J-1)=RWO(LXX+J-1)/SIG
         END DO
-        CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,ACOS,L1,L2
+        CALL WRTAB1(LOU,MAT0,MF0,MT0,NS,C1,FCOS,L1,L2
      1             , NRP,JP,NBT,INR,RWO(LXE),RWO(LXX))
       END DO
       REWIND LSC
