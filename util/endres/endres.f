@@ -1,6 +1,6 @@
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-07-07 00:47:07 +0200 (Do, 07 Jul 2016) $
-Ccc   * $Id: endres.f 4691 2016-07-06 22:47:07Z atrkov $
+Ccc   * $Author: trkov $
+Ccc   * $Date: 2019-04-24 21:21:13 +0200 (Mi, 24 Apr 2019) $
+Ccc   * $Id: endres.f 5157 2019-04-24 19:21:13Z trkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -32,7 +32,8 @@ C-V  14/12 Allow energy-dependent scattering radius.
 C-V  15/04 Force zero cross sections in MF3 for additional reactions in
 C-V        the resolved resonance represented under LRF=7.
 C-V  15/11 Cosmetic tidying of input parameter printout.
-C-V  16/02 Add capability for multi-region data in MF2/LRF7 (RRR+URR)
+C-V  16/02 Add capability for multi-region data in MF2/LRF7 (RRR+URR).
+C-V  17/09 Convert to double precision (roundoff error printing ZA).
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -56,6 +57,8 @@ C-External routines from DXSEND.F
 C-E  RDTEXT, WRTEXT, FINDMT, WRCONT, RDHEAD, RDTAB1, RDTAB2, RDLIST
 C-E  WRTAB1, WRTAB2, WRLIST, CHENDF
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+C*
       PARAMETER    (MXRW=100000, MXNB=20, MXMT=100, MXMT7=12)
 C*
       CHARACTER*66  BL66,CH66,CR66,HD66
@@ -1044,6 +1047,7 @@ C-D  - MF9102  flag is set to 1
 C-D  - Cross sections from MF10 are read and normalised by the
 C-D    total in MF3 and written on file FLS1 on Unit LS1 as MF9.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*80 FLS1
       CHARACTER*66 CH66,BL66
       DIMENSION    RWO(MXRW)
@@ -1157,6 +1161,7 @@ C-D  are merged into EUN with NEU points. Special care is taken to
 C-D  retain double points within a grid that allow for function
 C-D  discontinuities.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION EN1(NEP1),EN2(NEP2),EUN(KX)
       IF(NEP2.LE.0) GO TO 30
       IF(NEP1.LE.0) GO TO 34
@@ -1230,6 +1235,7 @@ C-Purpose: Interpolate a tabulated function to a given grid
 C-Description:
 C-D Function XS1 at NEP1 argument values in EN1 is interpolated to
 C-D NEP2 values XS2 corresponding to argument values in EN2
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION EN1(NEP1),XS1(NEP1),EN2(NEP2),XS2(NEP2)
 C*
       IF(NEP1.LE.0) THEN
@@ -1298,6 +1304,7 @@ C-D        1  Specified material not found.
 C-D        2  End-of-file before material found.
 C-D        3  Read error.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*66 C66
 C* Initialise
       IER= 0
@@ -1388,6 +1395,7 @@ C*
       SUBROUTINE RDTEXT(LEF,MAT,MF,MT,REC,IER)
 C-Title  : RDTEXT Subroutine
 C-Purpose: Read a text record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*66  REC
       READ (LEF,40,END=81,ERR=82) REC,MAT,MF,MT
       IER=0
@@ -1410,6 +1418,7 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       IER=0
       READ (LEF,92,END=81,ERR=82) C1,C2,L1,L2,N1,N2,MAT,MF,MT
       RETURN
@@ -1433,7 +1442,8 @@ C-D       -8  WARNING - Numerical underflow (<E-36)
 C-D        8  WARNING - Numerical overflow  (>E+36)
 C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
-      DOUBLE PRECISION EE(3),XX(3)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION    EE(3),XX(3)
       DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
@@ -1480,6 +1490,7 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION    NBT(*),INR(*)
 C*
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
@@ -1496,7 +1507,8 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
-      DOUBLE PRECISION RUFL,RR(6)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION    RR(6)
       DIMENSION    VK(*)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
@@ -1530,6 +1542,7 @@ C*
       SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
 C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*66  REC
       NS=NS+1
       IF(NS.GT.99999) NS=0
@@ -1543,6 +1556,7 @@ C-Purpose: Write a text record to an ENDF file
       SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
 C-Title  : WRCONT Subroutine
 C-Purpose: Write a CONT record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DATA BLN/'           '/
       DO 10 I=1,6
@@ -1571,6 +1585,7 @@ C-Purpose: Write a CONT record to an ENDF file
      1                 ,NR,NP,NBT,INR,X,Y)
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR),X(NP),Y(NP)
       DATA BLN/'           '/
@@ -1622,6 +1637,7 @@ C* Loop for all argument&function pairs
      1                 ,NR,NZ,NBT,INR)
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
@@ -1657,6 +1673,7 @@ C* Write interpolation data
       SUBROUTINE WRLIST(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,NPL,N2,BN)
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     BN(*)
       DATA BLN/'           '/
@@ -1691,6 +1708,7 @@ C* Write data
       SUBROUTINE CHENDF(FF,CH)
 C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*1  SN
       CHARACTER*11 CH
       CH=' 0.00000+00'
