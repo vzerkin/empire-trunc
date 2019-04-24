@@ -35,6 +35,10 @@ C-V  17/04 More improvements to the retrieval of gamma spectra.
 C-V        Rewrite discrete level summation of gamma-lines.
 C-V  17/06 Fix yield assignment for total, mu-bar.
 C-V        Fix printout of neutron cross sections at fixed angle.
+C-V  17/08 Make processing of MF 13 robust.
+C-V  18/03 Do not scan MT 5 when MT 4 is requested (do not set MULN).
+C-V  18/07 Define yield as isotropic when no MF4 data are present.
+C-V  19/02 Fix light targets when residual is the desired particle.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -289,9 +293,15 @@ C*
       END
       SUBROUTINE ELMABN(IZ,NUC,ZEL,FRC)
 C-Title  : Subroutine ELMABN
-C-Purpose: Define fractional isotopic abundance of elements
+C-Purpose: Define fractional isotopic abundances in elements IZ
 C-Version:
-C-V 04/11 Add data A>60
+C-V 2004/11 Add data A>60
+C-V 2018/03 Check Li, B, C, N, O, Mg, Si, S, Cl, Ar, K, Ca, Ti, V
+C-V              ,Cr, Fe, Ni, Cu, Zn, Ga, Zr, Mo, Ag, Cd, Sn, Sb
+C-V              ,Gd, Hf, W, Pb against Ref. below.
+C-Rererence:
+C-R Atomic Weights and Isotopic Compositions for All Elements
+C-R http://www.nist.gov/pml/data/comp.cfm
       PARAMETER  (MXIZ=24,MXEL=100)
 C* Main array containing the abundances
       DIMENSION ZAB(MXIZ,MXEL),ZEL(MXIZ),FRC(MXIZ)
@@ -383,7 +393,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &  7014.,0.99632,  7015.,0.00368,      0.,0.,
+     &  7014.,0.99636,  7015.,0.00364,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
@@ -414,7 +424,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z14/
-     & 14028.,0.922297,14029.,0.046832,     0.,0.,
+     & 14028.,0.92223, 14029.,0.04685,  14030.,0.03092,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -422,11 +432,11 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     & 16032.,0.9493,  16033.,0.0076,   16034.,0.0429,
+     & 16032.,0.9499,  16033.,0.0075,   16034.,0.042,
+     & 16036.,0.0001,      0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     &     0.,0.,          0.,0.,           0.,0.,
-     & 17035.,0.7578,  17037.,0.2422,       0.,0.,
+     & 17035.,0.7576,  17037.,0.2424,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
@@ -440,8 +450,8 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
        DATA Z20/
-     & 20040.,0.9694,  20042.,0.00647,  20043.,0.00135,
-     & 20044.,0.0209,  20046.,0.00004,  20048.,0.00187,
+     & 20040.,0.96941, 20042.,0.00647,  20043.,0.00135,
+     & 20044.,0.02086, 20046.,0.00004,  20048.,0.00187,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 21021.,1.0,         0.,0.,           0.,0.,
@@ -478,13 +488,13 @@ C*
      & 28062.,0.036345,28064.,0.009256,     0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     & 29063.,0.6917,  29065.,0.3083,       0.,0.,
+     & 29063.,0.6915,  29065.,0.3085,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z30/
-     & 30064.,0.4863,  30066.,0.2790,   30067.,0.0410,
-     & 30068.,0.1875,  30070.,0.0062,       0.,0.,
+     & 30064.,0.48263, 30066.,0.27975,  30067.,0.04102,
+     & 30068.,0.19024, 30070.,0.00631,      0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 31069.,0.60108, 31071.,0.39892,      0.,0.,
@@ -534,9 +544,9 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
-     & 42092.,0.1484,  42094.,0.0925,   42095.,0.1592,
-     & 42096.,0.1668,  42097.,0.0955,   42098.,0.2413,
-     & 42100.,0.0963,      0.,0.,           0.,0.,
+     & 42092.,0.1477,  42094.,0.0923,   42095.,0.1590,
+     & 42096.,0.1668,  42097.,0.0956,   42098.,0.2419,
+     & 42100.,0.0967,      0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 43000.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -560,7 +570,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z48/
-     & 48106.,0.0125,  48108.,0.0089,   48110.,0.1280,
+     & 48106.,0.0125,  48108.,0.0089,   48110.,0.1249,
      & 48111.,0.1280,  48112.,0.2413,   48113.,0.1222,
      & 48114.,0.2873,  48116.,0.0749,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
@@ -664,7 +674,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 72174.,0.0016,  72176.,0.0526,   72177.,0.1860,
-     & 72178.,0.2728,  72179.,0.13629,  72180.,0.3508,
+     & 72178.,0.2728,  72179.,0.1362,   72180.,0.3508,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 73180.,0.00012, 73181.,0.99988,      0.,0.,
@@ -673,7 +683,7 @@ C*
      &     0.,0.,          0.,0.,           0.,0./
       DATA Z74/
      & 74180.,0.0012,  74182.,0.2650,   74183.,0.1431,
-     & 74184.,0.3064,  74186.,0.2842,       0.,0.,
+     & 74184.,0.3064,  74186.,0.2843,       0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      &     0.,0.,          0.,0.,           0.,0.,
      & 75185.,0.3740,  75187.,0.6260,       0.,0.,
@@ -884,6 +894,7 @@ C*
       M800=0
       ZAP =ZAP0
       PAR =PAR0
+      ZRO =0
 C* Identify the projectile
       MFX=1
       MTX=451
@@ -910,8 +921,9 @@ C*         (if search by ZA, FINDMT reads 2 records)
       END IF
 C* If elastic, ejectile equals projectile
       IF(MT0.EQ.2 .AND. ZAP0.LT.0) THEN
-        ZAP0=IZAI
-        ZAP =ZAP0
+c...    ZAP0=IZAI
+c...    ZAP =ZAP0
+        ZAP =IZAI
       END IF
 C*
 C* Do not include particle multiplicities for cross sections
@@ -920,8 +932,9 @@ c...  IF((KEA.EQ.0 .ZAP.EQ.1) .AND. MT0/10000.NE.4) ZAP =-1
       IF((KEA.EQ.0 .AND. NINT(ZAP).EQ.IZAI) .AND. 
      &    MT0/10000.NE.4) ZAP =-1
 c...
-      print *,'DXSEND: ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ELV'
-      print *, NINT(10*ZA0),NINT(ZAP0),MF0,MT0,KEA,EIN,PAR,EPS,ELV
+C...  print *,'DXSEND: ZA0,ZA,ZAP0,MF0,MT0,KEA,EIN,PAR,EPS,ELV'
+C...  print *, NINT(10*ZA0),NINT(ZAX),NINT(ZAP0),MF0,MT0,KEA
+C... &       ,EIN,PAR,EPS,ELV
 c...
 C*
 C* Special coding for complex quantities
@@ -1035,7 +1048,9 @@ C* Check if reaction summation is required (request MT=9000)
 c...  IF(MTJ.NE.9000) GO TO 60
 C...  IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
       IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5) .AND.
-     &  (MTJ.NE.4 .OR. IZAP.NE.0 ) ) GO TO 60
+     &  (MTJ.NE.4 .OR. IZAP.NE.0 ) .OR.
+     &  (MTJ.EQ.4 .AND. KEA.EQ.0 ) ) GO TO 60
+C... &  (MTJ.NE.4 .OR. IZAP.NE.0 ) ) GO TO 60
 C*    -- Find particle emission reactions
       REWIND LEF
       CALL SKIPSC(LEF)
@@ -1052,14 +1067,31 @@ C*      -- Test each reaction for chosen outgoing particle
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
         IF(IER.NE.0) GO TO 50
+        CALL RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,LRBRK,N1,N2,IER)
+        IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
 C*      -- Select contributing reactions (yield >= 0)
-        CALL  YLDPOU(YI,MT,IZAP,IZAI)
+        MTK=MT
+        IF(LRBRK.GT.1) MTK=LRBRK
+        CALL  YLDPOU(YI,MTK,IZAP,IZAI)
+c...
+C...    print *,'YLDPOU:YI,MT,MTK,IZAP,IZAI',YI,MT,MTK,IZAP,IZAI
+c...
+C*      -- Check the residual
+        IZA=NINT(ZA)
+        CALL MTTOZA(IZAI,IZA,JZAP,MTK)
+C*      -- Check if the residual coincides with the desired particle
+C*      -- Check for typical break-up reactions
+        CALL YLBKUP(IZAP,JZAP,YI)
+C...
+C...    PRINT *,'       MT,MTK,IZAP,JZAP,YI',MT,MTK,IZAP,JZAP,YI
+C...
+C*      -- Special treatment for fission
         IF(MT.EQ.18) M18=1
 C*      -- Skip chance fission if total fission is given
         IF(M18.EQ.1 .AND.
      &    (MT.EQ.19 .OR. MT.EQ.20 .OR. MT.EQ.21 .OR. MT.EQ.38)) YI=-1
-        IF(YI.GE.0) THEN
+        IF(YI.GE.ZRO) THEN
           LOOP=LOOP+1
           IF(LOOP.GT.MXL) STOP 'DXSEND ERROR - MXL Limit exceeded'
           LST(LOOP)=MT
@@ -1245,8 +1277,9 @@ C*
 C*
 C* Retrieve the double differential cross section energy distribution
    60 IF(MT0/10000.EQ.4 .AND. MT.LT.999) MT=MT+40000
-      CALL DXSEN1(LEF,ZA0,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS,ENR,DXS,UXS
-     1           ,RWO(LX),NE,MEN,KRW,IER)
+      ZA=ZAX
+      CALL DXSEN1(LEF,ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS
+     1           ,ENR,DXS,UXS,RWO(LX),NE,MEN,KRW,IER)
 c...
 c...se &       ,m,mf0,mt,ne,ier
 c...  print *,'DXSEND',(enr(j),j=1,5)
@@ -1264,7 +1297,8 @@ C* Check neutron emission reactions for contributions from MT5
         MULN=3
       ELSE IF(MT0.EQ.37) THEN
         MULN=4
-      ELSE IF(MT0.EQ.91 .OR. MT0.EQ.4) THEN
+c...  ELSE IF(MT0.EQ.91 .OR. MT0.EQ.4) THEN
+      ELSE IF(MT0.EQ.91              ) THEN
         MULN=1
       ELSE
         MULN=0
@@ -1450,6 +1484,64 @@ C*
      1       ,I3,' out of',I3,' reactions')
   905 FORMAT(10X,10I5)
       END
+      SUBROUTINE YLBKUP(IZAP,JZAP,YI)
+C-Title  : Subroutine YLBKUP
+C-Purpose: Add yield to particle production from breakup
+C-Author : A. Trkov, IAEA
+C-Version: 2019/02
+      ZRO=0
+      IF     (JZAP.EQ.1001) THEN
+C*      -- H-1
+        IF(IZAP.EQ.1001) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.1002) THEN
+C*      -- H-2
+        IF(IZAP.EQ.1002) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.1003) THEN
+C*      -- H-3
+        IF(IZAP.EQ.1003) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.1004) THEN
+C*      -- H-4 --> n + H-3
+        IF(IZAP.EQ.   1 .OR. IZAP.EQ.1003) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.1005) THEN
+C*      -- H-5 --> 2n + H-3
+        IF(IZAP.EQ.   1) YI=MAX(ZRO,YI)+2
+        IF(IZAP.EQ.1003) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.2003) THEN
+C*      -- He-3
+        IF(IZAP.EQ.2003) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.2004) THEN
+C*      -- He-4
+        IF(IZAP.EQ.2004) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.2005) THEN
+C*      -- He-5 --> n + He-4
+        IF(IZAP.EQ.   1 .OR. IZAP.EQ.2004) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.2006) THEN
+C*      -- He-6 --> Li-6
+        IF(IZAP.EQ.3006) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.2007) THEN
+C*      -- He-7 --> n + He-4
+        IF(IZAP.EQ.   1) YI=MAX(ZRO,YI)+1
+        IF(IZAP.EQ.3006) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.3004) THEN
+C*      -- Li-4 --> p + He-3
+        IF(IZAP.EQ.1001 .OR. IZAP.EQ.2003) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.3005) THEN
+C*      -- Li-5 --> p + He-4
+        IF(IZAP.EQ.1001 .OR. IZAP.EQ.2004) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.3008) THEN
+C*      -- Li-8 --> Be-8 --> 2He-4
+        IF(IZAP.EQ.2004) YI=MAX(ZRO,YI)+2
+      ELSE IF(JZAP.EQ.4006) THEN
+C*      -- Be-6 --> 2H-1 + He-4
+        IF(IZAP.EQ.1001) YI=MAX(ZRO,YI)+2
+        IF(IZAP.EQ.2004) YI=MAX(ZRO,YI)+1
+      ELSE IF(JZAP.EQ.4008) THEN
+C*      -- Be-8 --> 2 He-4
+        IF(IZAP.EQ.2004) YI=MAX(ZRO,YI)+2
+      END IF
+      IF(YI.LT.ZRO .AND. JZAP.EQ.IZAP) YI=0
+      RETURN
+      END
       SUBROUTINE RDNDMT(MT0,MT,IPROC)
 C-Title  : Subroutine RDNDMT
 C-Purpose: Identify contributors to redundant reactions
@@ -1502,6 +1594,36 @@ C* One-proton and gamma emission
         IF(MT.LT.600) THEN
           IPROC=0
         ELSE IF(MT.GT.649) THEN
+          IPROC=-1
+        ELSE
+          IPROC=1
+        END IF
+        RETURN
+      ELSE IF(MT0.EQ.104) THEN
+C* Deuteron and gamma emission
+        IF(MT.LT.650) THEN
+          IPROC=0
+        ELSE IF(MT.GT.699) THEN
+          IPROC=-1
+        ELSE
+          IPROC=1
+        END IF
+        RETURN
+      ELSE IF(MT0.EQ.105) THEN
+C* Triton and gamma emission
+        IF(MT.LT.700) THEN
+          IPROC=0
+        ELSE IF(MT.GT.749) THEN
+          IPROC=-1
+        ELSE
+          IPROC=1
+        END IF
+        RETURN
+      ELSE IF(MT0.EQ.106) THEN
+C* Helion and gamma emission
+        IF(MT.LT.750) THEN
+          IPROC=0
+        ELSE IF(MT.GT.799) THEN
           IPROC=-1
         ELSE
           IPROC=1
@@ -1694,7 +1816,7 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
       ELSE IF(MT.EQ.197) THEN
         JZA=IZA+IZI-3003
       ELSE IF(MT.EQ.198) THEN
-        JZA=IZA+IZI-  3-3003
+        JZA=IZA+IZI-  1-3003
       ELSE IF(MT.EQ.199) THEN
         JZA=IZA+IZI-  3-2002-2004
       ELSE IF(MT.EQ.200) THEN
@@ -1714,7 +1836,7 @@ C-Purpose: Given projectile IZI, target IZA,  MT, assign residual JZA
       END IF
       RETURN
       END
-      SUBROUTINE DXSEN1(LEF,ZA0,ZAP0,IZAI,MF0,MT0,KEA,EIN,PAR,EPS
+      SUBROUTINE DXSEN1(LEF,ZA0,ZA,ZAP0,IZAI,MF0,MT0,KEA,EIN,PAR,EPS
      1                 ,ENR,DXS,UXS,RWO,NEN,MEN,MRW,IER)
 C-Title  : Subroutine DXSEN1
 C-Purpose: Extract cross sect. and differential cross sect. from ENDF
@@ -1760,10 +1882,11 @@ C-D  system.
 C-D
 C-D  Formal parameters are:
 C-D  LEF  - File unit number from which the ENDF file is read.
-C-D  ZA0  - Requested nuclide identification number. If ZA>0 it is
+C-D  ZA0  - Requested nuclide identification number. If ZA0>0 it is
 C-D         given in terms of Z*1000+A+LIS0/10 where Z is the atomic
 C-D         number, A the mass number and LIS0 the metastable state
-C-D         number. When ZA<0 it implies the ENDF material MAT number.
+C-D         number. When ZA0<0 it implies the ENDF material MAT number.
+C-D  ZA     Target ZA designation
 C-D  ZAP0 - Outgoing particle ZA designation (ZAP0=1 for neutrons).
 C-D           ZAP0 >= 0 particle multiplicities to be calculated,
 C-D                <  0 only cross sections are required.
@@ -1833,8 +1956,8 @@ c...
 C*
       DATA PI/3.141592654/
 C...
-C...  PRINT *,'DXSEN1:ZA0,ZAP0,MF0,MT0,KEA,EIN,PAR'
-C... &        ,nint(ZA0),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
+      PRINT '(A,6I6,1P,2E11.4)','DXSEN1:ZA0,ZA,ZAP0,MF0,MT0,KEA,EIN,PAR'
+     &        ,nint(ZA0),nint(ZA),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
 C* Check the requested type of output
@@ -1848,6 +1971,7 @@ C* Check the requested type of output
       EOU=-2
       SAN= 1/(2*PI)
       MST= NINT(PAR)
+      ZRO= 0
       AWP=-1
       ZAP= ZAP0
       IZAP0=NINT(ZAP0)
@@ -1891,114 +2015,12 @@ C* Ratio of projectile mass to the neutron
         IF(AWW.GT.0) THEN
           AWI=AWW/AWN
         ELSE
-          PRINT *,'WARNING - Unrecognised sublibrary ',N1
-          PRINT *,'          Incident neutron file assumed'
-          IZAI=1
-          AWI=1
+          PRINT *,'WARNING - Incident particla ZA is',IZAI
+          PRINT *,'          Incident photon file assumed'
         END IF
       END IF
 C* Continue processing the file
       REWIND LEF
-C*
-C* Define particle multiplicities
-      YL=1
-c...
-C...  print *,'izap0,mt0,yl',izap0,mt0,yl
-c...
-C* Assign yield, except for total, mu-bar, etc.
-      IF(IZAP0.LT.0) GO TO 30
-      IF(MT0.EQ.1 .OR. (MT0.GE.251 .AND. MT0.LE.254)) GO TO 30
-      CALL YLDPOU(YL,MT0,IZAP0,IZAI)
-C* Special treatment for nu-bar and neutrons from fission
-      IF(IZAP0.EQ.1) THEN
-        IF(MT0.EQ.19) GO TO 900
-        MTJ=MT0-10000*(MT0/10000)
-        IF(MTJ.EQ.18 .OR.
-     &    (MF0.EQ.1 .AND. (MT0.EQ.452 .OR. MT0.EQ.456))) THEN
-          MF =1
-          IF(MTJ.EQ.18) THEN
-            MT =452
-          ELSE
-            MT =MT0
-          END IF
-          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
-c...
-C...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
-c...
-          IF(IER.NE.0) THEN
-            REWIND LEF
-            IF(MTJ.EQ.18) THEN
-              MT=456
-            ELSE
-              IF(MT.EQ.456) THEN
-                MT=452
-                PRINT *,' WARNING - MT 456 Substituted with 452'
-              ELSE IF(MT.EQ.452) THEN
-                PRINT *,' WARNING - MT 452 Substituted with 456'
-                MT=456
-              ELSE
-                GO TO 900
-              END IF
-            END IF
-            CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
-          END IF
-          IF(IER.NE.0) GO TO 900
-          IF     (LNU.EQ.1) THEN
-            CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,MRW,IER)
-            NN=NC-1
-            IF(MF0.GT.3) THEN
-C* Case: Neutron yield at incident energy from polynomial representation
-              YL=POLYNX(EIN,RWO,NN)
-C...
-C...          print *,'nu-bar from LNU=1 at E',EIN,' is',yl
-C...
-            ELSE
-C* Case: Assemble nu-bar from polynomial representation
-              EUP=150.E+6
-              EE = 1.E-5
-              STP= 5
-              NEN=1
-              DO WHILE(EE.LT.EUP)
-                ENR(I)=EE
-                DXS(I)=POLYNX(EE,RWO,NN)
-                EE=EE*STP
-                NEN=NEN+1
-              END DO
-              ENR(NEN)=EUP
-              DXS(NEN)=POLYNX(EUP,RWO,NN)
-              GO TO 900
-            END IF
-          ELSE IF(LNU.EQ.2) THEN
-            NX=MRW/2
-            LX=NX+1
-            CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
-     1                 ,RWO,RWO(LX),NX,IER)
-            IF(IER.NE.0) GO TO 900
-            IF(MF0.GT.3) THEN
-C* Case: Neutron yield at incident energy from pointwise representation
-              YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
-              IF(IER.NE.0) THEN
-                PRINT *,'FINTXS ERROR - IER=',IER
-                STOP 'FINTXS ERROR'
-              END IF
-c...
-c...          print *,'nu-bar from LNU=2 is',yl
-c...
-            ELSE
-C* Case: Assemble nu-bar distribution from pointwise representation
-              NEN=NP
-              DO I=1,NEN
-                ENR(I)=RWO(I)
-                DXS(I)=RWO(LX-1+I)
-              END DO
-              IF(MTJ.NE.18) GO TO 900
-            END IF
-          ELSE
-            PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
-            STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
-          END IF
-        END IF
-      END IF
 C*
 C* ------------------------------------------------------------
 C* Retrieve the cross section on MF3
@@ -2022,40 +2044,177 @@ C* Retrieve the cross section on MF3
       LU=LX+NX
       LBL=LU+NX
 C* Suppress searching for covariance data unless MF0=3 or 10
-      IF(MF0.EQ.3 .OR. MF0.EQ.10) THEN
+      IF(MF0.EQ.1 .OR. MF0.EQ.3 .OR. MF0.EQ.10) THEN
         MTJ= MT0
       ELSE
         MTJ=-MT0
       END IF
-      CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI
+      CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI,LRBRK
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
+
+C* Default particle multiplicity
+      YL=1
+c...
+c...  print *,'izap0,mt0,yl,zro',izap0,mt0,yl,zro
+c...
+C*    -- Assign yield, except for total, mu-bar, etc.
+      IF(IZAP0.LT.0) GO TO 530
+      IF(MT0.EQ.1 .OR. (MT0.GE.251 .AND. MT0.LE.254)) GO TO 530
+      MTK=MT0
+      IF(LRBRK.GT.1) MTK=LRBRK
+      CALL YLDPOU(YL,MTK,IZAP0,IZAI)
+c...
+c...  print *,'izap0,mt0,yl,zro,za',izap0,mt0,yl,zro,nint(za)
+c...
+      IZA=NINT(ZA)
+      CALL MTTOZA(IZAI,IZA,JZAP,MTK)
+C*    -- Check if the residual coincides with the desired particle
+C*    -- Check for typical break-up reactions
+      CALL YLBKUP(IZAP0,JZAP,YL)
+c...
+C...  print *,'YL,MT0,IZAP0,IZAI,JZAP',YL,MT0,IZAP0,IZAI,JZAP
+c...
+C*    -- Special treatment for nu-bar and neutrons from fission
+      IF(IZAP0.EQ.1) THEN
+        IF(MT0.EQ.19) GO TO 900
+        MTJ=MT0-10000*(MT0/10000)
+        IF(MTJ.EQ.18 .OR.
+     &    (MF0.EQ.1 .AND. (MT0.EQ.452 .OR. MT0.EQ.456))) THEN
+          MF =1
+          IF(MTJ.EQ.18) THEN
+            MT =452
+          ELSE
+            MT =MT0
+          END IF
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
+c...
+c...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
+c...
+          IF(IER.NE.0) THEN
+            REWIND LEF
+            IF(MTJ.EQ.18) THEN
+              MT=456
+            ELSE
+              IF(MT.EQ.456) THEN
+                MT=452
+                PRINT *,' WARNING - MT 456 Substituted with 452'
+              ELSE IF(MT.EQ.452) THEN
+                PRINT *,' WARNING - MT 452 Substituted with 456'
+                MT=456
+              ELSE
+                GO TO 900
+              END IF
+            END IF
+            CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
+          END IF
+          IF(IER.NE.0) THEN
+            PRINT *,'WARNING - No nu-bar data - assume nu-bar=1'
+            YL =1
+            IER=0
+          ELSE
+            IF     (LNU.EQ.1) THEN
+              CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,MRW,IER)
+              NN=NC-1
+              IF(MF0.GT.3) THEN
+C*              -- Case: Neutron yield at incident energy from 
+C*                       polynomial representation
+                YL=POLYNX(EIN,RWO,NN)
+C...          
+C...            print *,'nu-bar from LNU=1 at E',EIN,' is',yl
+C...          
+              ELSE
+C*              -- Case: Assemble nu-bar from polynomial representation
+                EUP=150.E+6
+                EE = 1.E-5
+                STP= 5
+                NEN=1
+                DO WHILE(EE.LT.EUP)
+                  ENR(I)=EE
+                  DXS(I)=POLYNX(EE,RWO,NN)
+                  EE=EE*STP
+                  NEN=NEN+1
+                END DO
+                ENR(NEN)=EUP
+                DXS(NEN)=POLYNX(EUP,RWO,NN)
+                GO TO 900
+              END IF
+            ELSE IF(LNU.EQ.2) THEN
+              NX=MRW/2
+              LX=NX+1
+              CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1                   ,RWO,RWO(LX),NX,IER)
+              IF(IER.NE.0) GO TO 900
+              IF(MF0.GT.3) THEN
+C*              -- Case: Neutron yield at incident energy 
+C*                       from pointwise representation
+                YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+                IF(IER.NE.0) THEN
+                  PRINT *,'FINTXS ERROR - IER=',IER
+                  STOP 'FINTXS ERROR'
+                END IF
+c...        
+c...            print *,'nu-bar from LNU=2 is',yl
+c...        
+              ELSE
+C*              -- Case: Assemble nu-bar distribution from 
+C*                       pointwise representation
+                NEN=NP
+                DO I=1,NEN
+                  ENR(I)=RWO(I)
+                  DXS(I)=RWO(LX-1+I)
+                END DO
+                IF(MTJ.NE.18) GO TO 900
+              END IF
+            ELSE
+              PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
+              STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
+            END IF
+          END IF
+        END IF
+      END IF
+  530 CONTINUE
 C...
-      iza=nint(za0)
-      print *,'  Found MAT,MF,MT,NP,Ei,ZAp',iza,MF,MTJ,NP,ein,izap0,yl
+      IZA=NINT(ZA0)
+      IF(NP.GT.0) THEN
+        print '(A,5I6,1P,2E11.4,I3)'
+     &    ,'  Found MAT,MF,MT,NP,Ei,ZAp,yl,LRBRK'
+     &         ,iza,MF,MTJ,NP,izap0,ein,yl,LRBRK
+      ELSE
+        print *,'  Could not find MAT,MF,MT,ZAp',iza,MF,MTJ,izap0
+      END IF
 C...
       IF(NP.EQ.0) THEN
         IER=1
         IF(KEA.EQ.2 .AND. IZAP0.EQ.0) THEN
-C* If no data found and photon spectrum requested, try MF 13
+C*        -- If no data found and photon spectrum requested, try MF 13
           REWIND LEF
           MF =13
           MT =MT0
-          CALL GETSTD(LEF,NX,ZA0,MF,MT,MST,QM,QI
+          CALL GETSTD(LEF,NX,ZA0,MF,MT,MST,QM,QI,LDMY
      &               ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
           IF(NP.GT.0) GO TO 120
         END IF
         NEN=NP
         GO TO 900
       END IF
+C...
+c...  print *,'  Here, Ein',Ein
+C...
       IF(EIN.GT.0) THEN
         IF(EIN.LT.RWO(LE) .OR. EIN.GT.RWO(LE-1+NP)) THEN
 C* Case: Required point is below thershold or above last point
+c...
+c...      print *,'  Ein',EIN,' out of range',RWO(LE),RWO(LE-1+NP)
+c...
           NEN=0
           GO TO 900
         END IF
       END IF
 C* Case: Cross section is required on output - finish processing
-      IF(KEA.EQ.0) THEN
+c...
+c...  print *,'KEA,yl',KEA,yl
+c...
+      IF(KEA.NE.0) GO TO 700
         IF(MT0/10000.EQ.4) THEN
 C*        -- Save the nu-bar
           NNU=NEN
@@ -2090,8 +2249,8 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-        print *,' Done XS for mf/mt0/zap/izap0/yl',mf,mt,zap0,izap0,yl
-c...    print *,' nen,ier,mt0',nen,ier,mt0
+c...    print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
+c...    print *,'nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
@@ -2104,8 +2263,8 @@ C*      -- Search for angular distributions or double differential data
         MTJ=MT0-10000*(MT0/10000)
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MFJ,MTJ,IER)
 C...
-C...      print *,'  Tried za0,zap,MAT,MF,MT,IER',nint(za0),izap
-C... &                                           ,MAT,MFJ,MTJ,IER
+c...    print *,'  Tried za0,zap,MAT,MF,MT,IER',nint(za0),izap
+c... &                                           ,MAT,MFJ,MTJ,IER
 C...
         IF(IER.NE.0 .OR.
      &     (IZAP0.EQ.0 .AND. MFJ.GT.12) .OR.
@@ -2123,7 +2282,7 @@ C*        -- Skip to the end of section
           GO TO 31
         END IF
 C...
-        print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
+c...    print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
 c...    print *,'                    izap0',izap0
 C...
 C*
@@ -2388,11 +2547,11 @@ C*            -- Skip to the end of section
   536         JF=MFJ
               JT=MT
               CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
-c...          
-              print *,'    Found MAT,MF,MT,KEA,LO,L2,IER'
-     &               ,mat,mf,mt,kea,l1,l2,ier
-c...          
               IF(IER.NE.0) THEN
+c...
+c...            print *,'    Failed MAT,MF,MT,KEA,LO,L2,IER'
+c... &                 ,mat,mf,mt,kea,l1,l2,ier
+c...          
                 IF(MF.EQ.12) THEN
                   REWIND LEF
                   MF=13
@@ -2401,6 +2560,10 @@ c...
                   GO TO 140
                 END IF
               END IF
+c...
+c...          print *,'    Found  MAT,MF,MT,KEA,LO,L2,IER'
+c... &               ,mat,mf,mt,kea,l1,l2,ier
+c...
               GO TO 620
             END IF
           END IF
@@ -2443,8 +2606,8 @@ C*      -- Retrieve the particle yield
 C*      -- Check for matching particle - else skip section
    33   IF(NINT(ZAP).NE.NINT(ZAP0)) THEN
 c...
-C...      print *,'Skipping particle/mf/mt/lip/law'
-C... &           ,nint(zap),mf,mt,lip,law
+c...      print *,'Skipping particle/mf/mt/lip/law'
+c... &           ,nint(zap),mf,mt,lip,law
 C...      print *,'jnk',jnk
 c...
           IF(JNK.GE.NK) THEN
@@ -2498,6 +2661,9 @@ C*          Set IER to flag error and terminate
           GO TO 32
         END IF
 C*      -- Found the required particle
+C...
+C...    print *,'    Found particle',izap0
+C...
         IPRC=IPRC+1
 C*      -- Define union grid of cross sections and yields at LXE
         CALL UNIGRD(NEN,ENR,NP,RWO(LE),NE2,RWO(LXE),LD)
@@ -2521,7 +2687,7 @@ C*        -- Save the cross section on new grid at LX0
           RWO(LX0-1+I)=RWO(LXX-1+I)
         END DO
 C...
-        PRINT *,' Added contribution of ZAP,LIP',NINT(ZAP0),LIP
+        PRINT *,'  Added contribution of ZAP,LIP',NINT(ZAP0),LIP
 C...
 C*      -- Check if there are more LIP states present for this particle
         IF(MT0/10000.NE.4) THEN
@@ -2999,15 +3165,15 @@ c...
         END IF
         GO TO 900
 C*
-C*      -- Done procssing of cross sections (KEA=0)
-      END IF
+C* Done procssing of cross sections (KEA=0)
+  700 CONTINUE
 C*
 C* Case: Proceed with the retrieval of differential data
       ETOP=RWO(NP)
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-c...  print *,'     Cross section=',xs,ein,ier,yl
+      print *,'    Cross section=',xs,ein,ier,yl
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -3019,11 +3185,11 @@ C* Find the energy/angle distribution data
    34 MF =0
       MT =MT0
       CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
-c...
-      print *,'    Found MAT,MF,MT,IZAP,IER',mat,mf,mt,izap0,ier
-c...
 C*    -- Error trapping when no data found in the ENDF file
       IF(IER.NE.0) THEN
+c...
+        print *,'    Failed MAT,MF,MT,IZAP,IER',mat,mf,mt,izap0,ier
+c...
 C*    --No MF4/5/6 possible only for discrete level (two-body isotr.)
         IF     (IZAP0.EQ.   1) THEN
           IF(MT0.EQ.2 .OR. (MT0.GE.50 .AND. MT0.LT.91) ) GO TO 40
@@ -3036,6 +3202,9 @@ C*    --No MF4/5/6 possible only for discrete level (two-body isotr.)
         PRINT *,'WARNING - No differential data for MT',MT0
         GO TO 900
       END IF
+c...
+      print *,'    Found  MAT,MF,MT,IZAP,IER',mat,mf,mt,izap0,ier
+c...
 C*    -- Gamma production only from MF 6,12,13,14,15
       IF(IZAP0.EQ.   0) THEN
         IF(MF.EQ.12 .OR. MF.EQ.13) REWIND LEF
@@ -3058,11 +3227,11 @@ C*    -- Gamma production only from MF 6,12,13,14,15
           JF=MF
           JT=MT
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,JF,JT,IER)
-c...
-          print *,'    Found MAT,MF,MT,KEA,LO,L2,IER'
-     &           ,mat,mf,mt,kea,l1,l2,ier
-c...
           IF(IER.NE.0) THEN
+c...
+            print *,'    Failed MAT,MF,MT,KEA,LO,L2,IER'
+     &             ,mat,mf,mt,kea,l1,l2,ier
+c...
             IF(MF.EQ.12) THEN
               REWIND LEF
               MF=13
@@ -3071,12 +3240,24 @@ c...
               GO TO 140
             END IF
           END IF
+c...
+          print *,'    Found  MAT,MF,MT,KEA,LO,L2,IER'
+     &           ,mat,mf,mt,kea,l1,l2,ier
+c...
           GO TO 120
         END IF
       END IF
 C*
 C* Select appropriate file processing
       IF(MF.EQ. 6) GO TO  60
+      IF(MF.EQ. 5) THEN
+        MF=4
+        YL=YL/2
+        print *,'    WARNING - No MF 4 data found, YL',YL
+C*
+        REWIND(UNIT=LEF)
+        GO TO  50
+      END IF
       IF(MF.EQ. 4) GO TO  40
         CALL SKIPSC(LEF)
         GO TO 34
@@ -3827,7 +4008,7 @@ C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-c...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv,lg,l2
+C...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv,lg,l2
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
@@ -3981,8 +4162,14 @@ c...      print *,i,rwo(lxe-1+i),rwo(lxx-1+i)
 c...    end do
 c...
         IF(IER.NE.0) THEN
-          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
-          STOP 'DXSEND1 ERROR - Reading MF12'
+          IF(IER.EQ.11) THEN
+            PRINT *,'WARNING - MF/MT/EIN',MF,MT,EIN
+     &             ,' outside range',RWO(LXE),RWO(LXE+NP-1)
+            YLK=0
+          ELSE
+            PRINT *,'ERROR Interpolating MF/MT/IER',MF,MT,IER
+            STOP 'DXSEND1 ERROR - Processing MF12'
+          END IF
         END IF
 C*      -- Modify photon energy for primary photons
         IF(LP.EQ.2) EG=EG+EIN*AWR/(AWR+1)
@@ -3994,13 +4181,13 @@ C*        -- Normalised tabulated function given in file MF15
           END IF
           MF=15
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,NC,N2,MAT,MF,MT,IER)
-c...
-          print *,'    Found MAT,MF,MT,NC',MAT,MF,MT,NC
-c...
           IF(IER.NE.0) THEN
             PRINT *,'WARNING - No tabulated data for MF15 MT',MT0
             GO TO 800
           END IF
+c...
+          print *,'    Found  MAT,MF,MT,NC',MAT,MF,MT,NC
+c...
 C*        -- Only one section for tabulated distributions is allowed
 C*           at present
           IF(NC.GT.1) THEN
@@ -4132,7 +4319,7 @@ C*
 C* Photon angular distributions
   140 CONTINUE
         IER=13
-        PRINT *,'WARNING - No coding/data for MF',MF,' MT',MT0
+        PRINT *,'WARNING - No data/coding for MF',MF,' MT',MT0
         GO TO 900
 C*
 C* Distribution assembled - check that the last point is zero
@@ -4297,9 +4484,9 @@ c...  write(83,'(1p,2e11.4)') ee,sigc
 c...
       RETURN
       END
-      SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI
+      SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI,LRBRK
      &                 ,NP,EN,XS,DX,RWO,MXRW)
-C-Title  : Subroutine LSTSTD
+C-Title  : Subroutine GETSTD
 C-Purpose: Get cross section and its absolute uncertainty
 C-Description:
 C-D Negative MT1 is a flag to skip processing the covariance data
@@ -4321,12 +4508,13 @@ C*
 C* Search the ENDF file for section MT in file MF3
       CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-C...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
+c...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*      
 C* Reaction found - read cross sections from the TAB1 record
 C* If MF10, search over metastable state
+      LRBRK=0
       JST=1
       IF(MF1.EQ.10) JST=N1
       DO J=1,JST
@@ -4355,11 +4543,15 @@ C*        Requested metastable state higher than available in MF10
         PRINT *,'WARNING - forced lin-lin interp. instead of',INR(1)
       END IF
 c...
-c...      print *,'done mf/mt, np',mf,mt,np
+c...  print *,'done xs for mf/mt,mt1,np, np',mf,mt,mt1,np
 c...
+C*    -- Position L2 is the break-up flag
+      IF(MF1.EQ.3) LRBRK=LFS
 C* Negative MT1 is a flag to skip processing the covariance data
       IF(MT1.LT.0) GO TO 90
-      IF(MF1.EQ.3) THEN
+      IF     (MF1.EQ.1) THEN
+        MF=31
+      ELSE IF(MF1.EQ.3) THEN
         MF=33
       ELSE IF(MF1.EQ.10) THEN
         MF=40
@@ -4375,7 +4567,7 @@ c...
 c...  print *,'Found mat,mf,mt,ier',mat,mf,mt,ier ,l1,l2,n1,n2
 c...
       IF(IER.NE. 0) THEN
-C...    PRINT *,'WARNING - No uncertainties for MAT/MT',NINT(ZA1),MT1
+        PRINT *,'WARNING - No uncertainties for MAT/MT',NINT(ZA1),MT1
         GO TO 90
       END IF
 C*
@@ -4420,8 +4612,8 @@ C...
             PRINT *, 'RDHEAD ERROR reading LIST in MF33',IER
             GO TO 90
           END IF
-          IF(LB.EQ.1) THEN
-C* Process section with LB=1 representation
+          IF(LB.EQ.1 .OR. LB.EQ.2) THEN
+C* Process section with LB=1,2 representation
             IF(LT.NE.0) THEN
 C*            Warn about unsupported sections
               PRINT *, 'RDHEAD WARNING - unsupported MT/LB/LT',MT,LB,LT
@@ -4435,7 +4627,8 @@ C*          Sort array to separate out energy and variance vector
             END DO
             DO K=1,NE
               RWO(LE-1+K)=RWO(LL+2*K-2)
-              RWO(LD-1+K)=RWO(LL+2*K-1)
+C*            -- LB=1 gives variance, LB=2 fractional uncertainty
+              RWO(LD-1+K)=RWO(LL+2*K-1)**LB
             END DO
             INR=1
 C*          Approximately convert variances to lin-lin form
@@ -4588,7 +4781,8 @@ C* Outgoing protons
      &     MT.EQ.156 .OR. MT.EQ.159 .OR.
      &    (MT.GE.162 .AND. MT.LE.164) .OR. MT.EQ.181 .OR.
      &     MT.EQ.183 .OR. MT.EQ.184 .OR. MT.EQ.186 .OR. MT.EQ.191 .OR.
-     &     MT.EQ.196) YI=1
+     &     MT.EQ.196 .OR.
+     &    (MT.GE.600 .AND. MT.LE.649)) YI=1
         IF(MT.EQ.44 .OR. MT.EQ.111 .OR. MT.EQ.179 .OR. MT.EQ.190 .OR.
      &     MT.EQ.194 .OR. MT.EQ.199 .OR. MT.EQ.200) YI=2
         IF(MT.EQ.197 .OR. MT.EQ.198) YI=3
@@ -4599,7 +4793,8 @@ C* Outgoing deuterons
      &     MT.EQ.104 .OR. MT.EQ.115 .OR. MT.EQ.117 .OR.
      &     MT.EQ.157 .OR. MT.EQ.158 .OR.
      &    (MT.GE.169 .AND. MT.LE.171) .OR. MT.EQ.182 .OR.
-     &     MT.EQ.183 .OR. MT.EQ.185 .OR. MT.EQ.192) YI=1
+     &     MT.EQ.183 .OR. MT.EQ.185 .OR. MT.EQ.192 .OR.
+     &    (MT.GE.650 .AND. MT.LE.699)) YI=1
       ELSE IF(KZAP.EQ.1003) THEN
 C* Outgoing tritons
         IF(MT.EQ.  5) YI=0
@@ -4607,13 +4802,15 @@ C* Outgoing tritons
      &     MT.EQ.113 .OR. MT.EQ.116 .OR. MT.EQ.154 .OR.
      &     MT.EQ.155 .OR. (MT.GE.172 .AND. MT.LE.175) .OR.
      &     MT.EQ.182 .OR. MT.EQ.184 .OR. MT.EQ.185 .OR.
-     &     MT.EQ.188 .OR. MT.EQ.189) YI=1
+     &     MT.EQ.188 .OR. MT.EQ.189 .OR.
+     &    (MT.GE.700 .AND. MT.LE.749)) YI=1
       ELSE IF(KZAP.EQ.2003) THEN
 C* Outgoing He-3
         IF(MT.EQ. 5) YI=0
         IF(MT.EQ.34 .OR. MT.EQ.106 .OR. (MT.GE.176 .AND. MT.LE.178) .OR.
      &    (MT.GE.186 .AND. MT.LE.188) .OR.
-     &    (MT.GE.191 .AND. MT.LE.193) ) YI=1
+     &    (MT.GE.191 .AND. MT.LE.193) .OR.
+     &    (MT.GE.750 .AND. MT.LE.799)) YI=1
       ELSE IF(KZAP.EQ.2004) THEN
 C* Outgoing alphas
         IF(MT.EQ. 5) YI=0
@@ -4621,7 +4818,8 @@ C* Outgoing alphas
      &     MT.EQ.107 .OR. MT.EQ.112.OR.(MT.GE.800.AND.MT.LE.849) .OR.
      &     MT.EQ.117 .OR. MT.EQ.155 .OR. MT.EQ.158 .OR. MT.EQ.159 .OR.
      &    (MT.GE.165 .AND. MT.LE.168) .OR. MT.EQ.181 .OR.
-     &     MT.EQ.189 .OR. MT.EQ.193 .OR. MT.EQ.196 .OR. MT.EQ.199) YI=1
+     &     MT.EQ.189 .OR. MT.EQ.193 .OR. MT.EQ.196 .OR. MT.EQ.199 .OR.
+     &    (MT.GE.800 .AND. MT.LE.849)) YI=1
         IF(MT.EQ.29 .OR. MT.EQ.30 .OR. MT.EQ.35 .OR. MT.EQ.36 .OR.
      &     MT.EQ.108 .OR. MT.EQ.113 .OR. MT.EQ.114 .OR. MT.EQ.180 .OR.
      &     MT.EQ.195) YI=2
