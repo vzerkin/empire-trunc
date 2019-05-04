@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5153 $
+    ! $Rev: 5163 $
     ! $Author: mwherman $
-    ! $Date: 2019-04-06 00:49:33 +0200 (Sa, 06 Apr 2019) $
+    ! $Date: 2019-05-04 08:21:48 +0200 (Sa, 04 Mai 2019) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -76,8 +76,8 @@ MODULE width_fluct
     REAL*8 :: sumg         ! Sum of gamma channels
     REAL*8 :: H_Tav        ! Avarage strong Tlj
     REAL*8 :: H_Tthr       ! Thershold for Tlj to be considered strong
-    REAL*8 :: TFIs         ! Sum of fission transmission coefficients
-    REAL*8 :: TGam         ! Sum of gamma transmission coefficients
+    ! REAL*8 :: TFIs         ! Sum of fission transmission coefficients
+    ! REAL*8 :: TGam         ! Sum of gamma transmission coefficients
     INTEGER :: NCH         ! Number of strong channels (Tlj's)
     ! INTEGER :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
 
@@ -122,7 +122,7 @@ MODULE width_fluct
      66.1806177944384896517D0,&
      73.4412385955598822395D0,&
      81.7368105067276857222D0,&
-	 91.5564665225368382555D0,&
+     91.5564665225368382555D0,&
      104.157524431058894512D0 /)
     !
     REAL*8, DIMENSION(1:30), PARAMETER:: wgk30 = (/ &
@@ -1417,7 +1417,7 @@ CONTAINS
 
         !sig_cc = 0.D0
         
-		CALL AllocHRTW()    !allocate HRTW matrices
+        CALL AllocHRTW()    !allocate HRTW matrices
 
         H_Tthr = 1.0D-6     !threshold for considering channel to be a 'strong' one
         nnuc = 1            !set CN nucleus
@@ -2129,7 +2129,7 @@ CONTAINS
         IMPLICIT NONE
         INTEGER, INTENT(IN):: in, ou         ! index number of incoming (in) and outgoing (out) channels
         REAL*8:: nu_ou, nu_in, a_in, a_ou
-		REAL*8 RESK1,z, zm
+        REAL*8 RESK1,z, zm
         INTEGER j
         nu_in =  outchnl(in)%eef/2.D0                           ! half of the degree of freedom for the incoming channel
         nu_ou =  outchnl(ou)%eef/2.D0                           ! half of the degree of freedom for the outgoing channel
