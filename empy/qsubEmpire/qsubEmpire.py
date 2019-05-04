@@ -147,7 +147,7 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
 
         if os.path.exists(dir):
             if firsterr:
-                print "Using existing energy directory"
+                print ("Using existing energy directory")
                 firsterr = False
         else: os.mkdir(dir)
 
@@ -171,7 +171,7 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
             ntl = fullName(join(dir,proj+"-tl"))
             if os.path.exists(ntl):
                 if first_tl:
-                    print "Using existing TLs"
+                    print ("Using existing TLs")
                     first_tl = False
             else: os.symlink(tln,ntl)
 
@@ -188,7 +188,7 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
         job = jp.stdout.read().strip()
         jp.stdout.close()
         exstat = jp.wait()
-        print " Queued job: ",job.split(".")[0]," E = ",ene
+        print (" Queued job: ",job.split(".")[0]," E = ",ene)
         joblst[ene] = job
 
     return joblst
@@ -289,7 +289,7 @@ def reconstructXsec(inputFile):
         xsc.write(xscA[3])
         
     xsc.close()
-    print "Processed ", name 
+    print ("Processed ", name) 
 
 
 def reconstructPFNS(inputFile):
@@ -335,7 +335,7 @@ def clean(inputFile):
         name = proj+"-"+e.strip()
         try:
             shutil.rmtree(name)
-        except OSError, e:
+        except OSError, e
             print e
 
 

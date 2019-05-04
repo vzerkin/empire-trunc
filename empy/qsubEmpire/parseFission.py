@@ -26,7 +26,7 @@ def parseFission(proj, sensLine, pars):
     Rest of fission input is copied as-is
     """
     name,val,Z,A,i3,i4 = pars[:]
-    print "Modifying %s for %i-%i"%(name,Z,A)
+    print ("Modifying %s for %i-%i"%(name,Z,A))
     
     nameP,nameM = genNames(sensLine,proj)
     
