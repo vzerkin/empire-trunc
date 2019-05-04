@@ -1,6 +1,6 @@
-# $Rev: 5152 $
+# $Rev: 5162 $
 # $Author: mwherman $
-# $Date: 2019-04-03 20:43:38 +0200 (Mi, 03 Apr 2019) $
+# $Date: 2019-05-04 08:18:16 +0200 (Sa, 04 Mai 2019) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8351,7 +8351,7 @@ exit} \
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel.inp } \
-        -label {Default input} 
+        -label {Default input GG} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel-inp.sen } \
         -label {Default sensitivity input} 
@@ -8383,8 +8383,8 @@ exit} \
         -menu "$site_3_0.menu90.menu77" -command {} -label {KALMAN option} 
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.menu77 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 1 
+        -activebackground #dcdcdc -activeforeground #000000 
+#       -background #dcdcdc -foreground #000000 -tearoff 1 
     $site_4_0.menu77 add radiobutton \
         -value 0 -variable EXPDAT -label {No exp. data} 
     $site_4_0.menu77 add radiobutton \
@@ -8396,8 +8396,8 @@ exit} \
         -menu "$site_3_0.menu90.menu97" -command {} -label {Select editor} 
     set site_4_0 $site_3_0.menu90
     menu $site_4_0.menu97 \
-        -activebackground #dcdcdc -activeforeground #000000 \
-        -background #dcdcdc -foreground #000000 -tearoff 0 
+        -activebackground #dcdcdc -activeforeground #000000 
+#       -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_4_0.menu97 add radiobutton \
         -value gedit -variable editor -command {} -label gedit 
     $site_4_0.menu97 add radiobutton \
@@ -8502,6 +8502,9 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/util/mu_rsl/mu_rsl &} \
         -label {Interactive smoothing of ddx and x-sec} 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file &} \
+        -label {Manipulate C4 file} 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
         -label {Accept last OMP fit} 
@@ -8910,8 +8913,10 @@ cd $workdir} \
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/x4toc4/manual.txt } \
         -label {X4TOC4 manual} 
-    $site_3_0.menu96 add separator \
-
+    $site_3_0.menu96 add command \
+        -command { editFile $::env(EMPIREDIR)/util/c4service/manual.txt } \
+        -label {C4SERVICE manual}     
+    $site_3_0.menu96 add separator
     $site_3_0.menu96 add command \
         -command { editFile $::env(EMPIREDIR)/util/prepro/Linear.txt } \
         -label {LINEAR manual} 

@@ -1,0 +1,160 @@
+
+Title: Program C4SERVICE
+
+Purpose: Modify experimental data retrieved from the EXFOR library and stored in the C4-formatted file. 
+         Modifications can be performed on any EXFOR subentry and include: (i) deleting subentry, 
+         (ii) modifying subentry , (iii) smoothing subentry within a selected energy range, (iv) thinning 
+         subentry (removing excessive number of points by selecting each n-th one), and (v) cropping energy 
+         range of a subentry. The log file is maitained to track the chages. The results are in the 
+         C4-formatted file ready to be used in the EMPIRE system for plotting or Kalman fitting.
+
+Origin: C4SERVICE is based on the EMPIRE IO library developed in Fortran90 by Sam Hoblit.
+
+Author:  M. Herman
+
+General description
+-------------------
+C4SERVICE package consists of the Fortran code c4service.f90 and the script c4serv. The script facilitates 
+interactive operation of the code that usually needs to be run several times. C4SERVICE reads the existing 
+C4-file produced by the EMPIRE run or downloaded from the EXFOR Web-retrieval-system. It assumes that a name 
+of a file follows EMPIRE convention, i.e. ’root-name’.c4. Since most of C4SERVICE operations are destructive 
+the c4serv script creates a copy (’root-name’-org.c4) of the original ’root-name’.c4 file. The log file 
+(’root-name’-c4.log), containing list of modifications to the C4-file, is created during the first run. This 
+file is updated at subsequent runs of the C4SERVICE code. In order to reset this file simply delete it. For 
+the time being, C4SERVICE acts only on those C4-file columns that are related to cross sections 
+(MF=3 in ENDF-6 speak).
+
+Usage instructions
+------------------
+In each run the C4SERVICE code produces an input file (’root-name’-c4.inp) for itself. This default input 
+contains a list of subentries in the C4 file with each line representing a subentry. The default input has 
+’r’ character (standing for ’retain’) in the 63-rd column followed by four parameters initially set to zero. 
+Such input is neutral, i.e. when C4SERVICE code is run with this input the C4 file is regenerated without any 
+changes. User may modify the single character (command) in the 63-rd column to request an operation on a given 
+EXFOR subentry. Some of the operations require one or more parameters. These can be specified in the four 
+fields following the command-character and explained below in order of their appearance. Note that units in the 
+C4-file are [eV] for the energy and [barns] for the cross sections; C4SERVICE retains [barns] but uses [MeV] for 
+the energies. The following operations are available:
+
+[r] retain subentry without any change (default).
+
+[d] delete a whole subentry.
+
+[m] modify subentry; PARAMETRS:
+    y1  [b] - add y1 to every cross section
+    y2      - multiply every cross section by y2 factor
+    dy1 [%] - square-add constant relative uncertainty dy1 (allows adding systematic uncertainties)
+    dy2     - multiply every uncertainty by dy2 factor.
+Specifying non-zero y1, y2, dy1, dy2 allows to perform all these adjustments in a single run. Otherwise any of 
+these parameters can be set to zero (the code is protected against zeroing existing uncertainties by setting 
+multiplicative factor dy2 to 1 if entered as 0). Denoting original EXFOR values as y and their uncertainties 
+as dy, and indicating modified values by the prime, the operations read as y′ = y+y1+y∗y2 for cross sections 
+and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
+
+[s] smooth subentry by sliding four-point, using area conserving algorithm by A.Kuprat, A.Khamayseh, D.George, 
+    and L.Larkey, Journal of Computational Physics 172, 99–118 (2001), doi:10.1006/jcph.2001.6816); PARAMETERS:
+    iter       - number of smoothing iterations
+    emin [MeV] - lower energy limit on experimental data to be smoothed, 0 for EXFOR lower limit 
+    emax [MeV] - upper energy limit on experimental data to be smoothed, 0 for EXFOR upper limit.
+
+[t] thin by taking every istep-th point in the subentry; PARAMETER: istep.
+
+[c] crop the range of incident energies for a given subentry; PARAMETERS: 
+    emin [MeV] - lower energy limit, 0 for EXFOR lower limit
+    emax [MeV] - upper energy limit, 0 for EXFOR upper limit.
+
+Only one operation per subentry can be executed at a time (except ’m’ option as described above). If more 
+operations are needed they can be executed in several subsequent runs of C4SERVICE. The default ’r’ option 
+(retain) should be kept for subentries that do not need any change.  The modification procedure may be 
+easily customized by appropriate adjustment of the indicated do-loop in the ’modify_section’ subroutine.
+
+When c4serv script is started it lounches C4SERVICE code which scans the C4 file and produces list of EXFOR 
+entries on the terminal and similar file serving as the input for the next C4SERVICE run. Examples of both 
+are reproduced below.
+
+Example of the terminal view:
+--------------------------------------------------------------------------------------------
+  num  pro targ.   MF    MT Emin        Emax     points   author             year  entry sub
+ --------------------------------------------------------------------------------------------
+   1)   1 39089     3    1 2.020E-09 - 2.878E-07     93 R.E.SCHMUNK,ET.AL.   (60)  11634   4
+   2)   1 39089     3    1 5.570E-07 - 4.222E-03     41 K.K.Seth,ET.AL.      (58)  11788   5
+   3)   1 39089     3    1 1.260E-06 - 5.190E-06      2 L.KOESTER,ET.AL.     (81)  21842  22
+   4)   1 39089     3    1 7.000E-04 - 9.050E-03     34 H.W.NEWSON,ET.AL.    (57)  11569   7
+   5)   1 39089     3    1 2.220E-03 - 1.800E-02     85 W.M.GOOD,ET.AL.      (58)  11402  22
+   6)   1 39089     3    1 5.000E-03 - 0.640         97 K.K.SETH,ET.AL.      (65)  11781   4
+   7)   1 39089     3    1 6.500E-03 - 7.420E-02    117 H.W.NEWSON,ET.AL.    (57)  11569   8
+   8)   1 39089     3    1 4.700E-02 - 0.197          8 W.P.POENITZ,ET.AL.   (83)  12853   8
+   9)   1 39089     3    1 5.500E-02 -  3.21         86 D.W.MILLER,ET.AL.    (52)  11712   7
+  10)   1 39089     3    1 6.014E-02 - 1.906E-04   3765 S.Raman,ET.AL.       (81)  10928   4
+  11)   1 39089     3    1 6.014E-02 - 5.395E-04   3504 S.Raman,ET.AL.       (81)  10928   5
+  12)   1 39089     3    1 0.101     - 0.649        542 J.F.WHALEN,ET.AL.    (68)  11425   6
+  13)   1 39089     3    1  1.01     -  1.60          3 W.P.POENITZ,ET.AL.   (83)  12853   9
+  14)   1 39089     3    1 0.472     -  4.05         37 C.Budtz-Jorgensen,   (84)  12835   2
+  15)   1 39089     3    1 0.985     -  4.40         24 W.P.POENITZ,ET.AL.   (83)  12853  11
+  16)   1 39089     3    1  1.00     -  4.83         34 C.F.Ai,ET.AL.        (74)  30297   3
+  17)   1 39089     3    1  1.01     -  2.01        101 E.Islam,ET.AL.       (73)  30134   2
+  18)   1 39089     3    1  1.82     -  19.5         67 W.P.POENITZ,ET.AL.   (83)  12853  10
+  19)   1 39089     3    1  2.40     -  15.0        235 D.G.FOSTER JR,ET.AL. (71)  10047  44
+  20)   1 39089     3    1  3.66     -  3.66          1 D.W.KENT,ET.AL.      (62)  11617  25
+  ...
+ --------------------------------------------------------------------------------------------
+
+ c4service input file Y89-c4.inp has been reset to neutral
+ Edit and SAVE input file *-c4.inp then return here to rerun c4service
+ Do you want to run c4service (y/n)
+
+and corresponding default input file:
+   1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 r  0.00000      0.00000      0.00000      0.00000    
+   2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
+   3)   1 39089   3    1 L.KOESTER,ET.AL.     (81)  21842  22 r  0.00000      0.00000      0.00000      0.00000    
+   4)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   7 r  0.00000      0.00000      0.00000      0.00000    
+   5)   1 39089   3    1 W.M.GOOD,ET.AL.      (58)  11402  22 r  0.00000      0.00000      0.00000      0.00000    
+   6)   1 39089   3    1 K.K.SETH,ET.AL.      (65)  11781   4 r  0.00000      0.00000      0.00000      0.00000    
+   7)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   8 r  0.00000      0.00000      0.00000      0.00000    
+   8)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853   8 r  0.00000      0.00000      0.00000      0.00000    
+   9)   1 39089   3    1 D.W.MILLER,ET.AL.    (52)  11712   7 r  0.00000      0.00000      0.00000      0.00000    
+  10)   1 39089   3    1 S.Raman,ET.AL.       (81)  10928   4 r  0.00000      0.00000      0.00000      0.00000    
+  11)   1 39089   3    1 S.Raman,ET.AL.       (81)  10928   5 r  0.00000      0.00000      0.00000      0.00000    
+  12)   1 39089   3    1 J.F.WHALEN,ET.AL.    (68)  11425   6 r  0.00000      0.00000      0.00000      0.00000    
+  13)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853   9 r  0.00000      0.00000      0.00000      0.00000    
+  14)   1 39089   3    1 C.Budtz-Jorgensen,   (84)  12835   2 r  0.00000      0.00000      0.00000      0.00000    
+  15)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853  11 r  0.00000      0.00000      0.00000      0.00000    
+  16)   1 39089   3    1 C.F.Ai,ET.AL.        (74)  30297   3 r  0.00000      0.00000      0.00000      0.00000    
+  17)   1 39089   3    1 E.Islam,ET.AL.       (73)  30134   2 r  0.00000      0.00000      0.00000      0.00000    
+  18)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853  10 r  0.00000      0.00000      0.00000      0.00000    
+  19)   1 39089   3    1 D.G.FOSTER JR,ET.AL. (71)  10047  44 r  0.00000      0.00000      0.00000      0.00000    
+  20)   1 39089   3    1 D.W.KENT,ET.AL.      (62)  11617  25 r  0.00000      0.00000      0.00000      0.00000    
+
+User needs to edit the above file by replacing 'r' with any desired command (d, m, s, t, or c) and eventual
+parameters for the subentries that are being modified. Am illustrative example is given below:
+
+   1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 d  0.00000      0.00000      0.00000      0.00000    
+   2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
+   3)   1 39089   3    1 L.KOESTER,ET.AL.     (81)  21842  22 r  0.00000      0.00000      0.00000      0.00000    
+   4)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   7 m  0.00000      0.90000      5.00000      0.00000    
+   5)   1 39089   3    1 W.M.GOOD,ET.AL.      (58)  11402  22 r  0.00000      0.00000      0.00000      0.00000    
+   6)   1 39089   3    1 K.K.SETH,ET.AL.      (65)  11781   4 s  100.000      0.00000      0.00000      0.00000    
+   7)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   8 r  0.00000      0.00000      0.00000      0.00000    
+   8)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853   8 r  0.00000      0.00000      0.00000      0.00000    
+   9)   1 39089   3    1 D.W.MILLER,ET.AL.    (52)  11712   7 r  0.00000      0.00000      0.00000      0.00000    
+  10)   1 39089   3    1 S.Raman,ET.AL.       (81)  10928   4 t  10.0000      0.00000      0.00000      0.00000    
+  11)   1 39089   3    1 S.Raman,ET.AL.       (81)  10928   5 r  0.00000      0.00000      0.00000      0.00000    
+  12)   1 39089   3    1 J.F.WHALEN,ET.AL.    (68)  11425   6 r  0.00000      0.00000      0.00000      0.00000    
+  13)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853   9 r  0.00000      0.00000      0.00000      0.00000    
+  14)   1 39089   3    1 C.Budtz-Jorgensen,   (84)  12835   2 r  0.00000      0.00000      0.00000      0.00000    
+  15)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853  11 r  0.00000      0.00000      0.00000      0.00000    
+  16)   1 39089   3    1 C.F.Ai,ET.AL.        (74)  30297   3 r  0.00000      0.00000      0.00000      0.00000    
+  17)   1 39089   3    1 E.Islam,ET.AL.       (73)  30134   2 r  0.00000      0.00000      0.00000      0.00000    
+  18)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853  10 c  2.00000      10.0000      0.00000      0.00000    
+  19)   1 39089   3    1 D.G.FOSTER JR,ET.AL. (71)  10047  44 r  0.00000      0.00000      0.00000      0.00000    
+  20)   1 39089   3    1 D.W.KENT,ET.AL.      (62)  11617  25 r  0.00000      0.00000      0.00000      0.00000    
+
+In the case above subentry 1) is marked for deletion, 4) will get cross sections multiplied by 0.9 while the
+uncertainties will by multiplied by the same factor (default if dy2=0) and have 5% uncertainty square-added.
+The subentry 6) will be smoothed 100 times 10) will be thined by retaining every 10-th value and 18) will be
+restricted to 2 - 10 MeV range. Saving this file, returning to the terminal and hitting 'y' will execute the 
+changes. The performed operations are displayed in the terminal and stored in the *-c4.log file. The renwed 
+list of subentries (and the new default input file) reflect changes such as removing files, changing energy 
+ranges and number of points (m and s changes are visible only inside the C4 file). To stop processing answer 'n'
+to the question in the terminal (log file will be displayed). Subequent sessions can be run later and log file 
+will keep cumulative record of the changes.  

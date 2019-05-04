@@ -4,24 +4,23 @@ PROGRAM c4service
 
    IMPLICIT NONE
 
-   INTEGER*4, PARAMETER :: ngmt = 13      ! list of allowed MTs for Kalman fitting
-   INTEGER*4, PARAMETER :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456/)
+   ! INTEGER*4, PARAMETER :: ngmt = 13      ! list of allowed MTs for Kalman fitting
+   ! INTEGER*4, PARAMETER :: goodmt(ngmt) = (/1,2,3,4,16,17,18,102,103,107,207,251,456/)
 
-   INTEGER*4, PARAMETER :: kctl1 = 0      ! set nonzero to read priors
-   INTEGER*4, PARAMETER :: kctl2 = 0      ! set nonzero to write posteriors
-   INTEGER*4, PARAMETER :: kcovex = 1     ! set nonzero to read experimental covariances
-   REAL*4, PARAMETER    :: scale = 1.0    ! scale factor for parameter unc**2
-   REAL*4, PARAMETER    :: emin = 0.0     ! lower energy limit on exp data, 0 == no limit
-   REAL*4, PARAMETER    :: emax = 0.0     ! upper energy limit on exp data, 0 == no limit
+   INTEGER*4, PARAMETER   :: kcovex = 1     ! set nonzero to read experimental covariances
+   ! REAL*4, PARAMETER    :: scale = 1.0    ! scale factor for parameter unc**2
+   ! REAL*4, PARAMETER    :: emin = 0.0     ! lower energy limit on exp data, 0 == no limit
+   ! REAL*4, PARAMETER    :: emax = 0.0     ! upper energy limit on exp data, 0 == no limit
 
    CHARACTER*4, PARAMETER :: xsc = '.xsc'
    CHARACTER*8, PARAMETER :: inpsen = '-inp.sen'
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
-   CHARACTER*1            :: action = 'c' ! action to be taken on a section c-copy, d-delete, m-modify, s-smooth, l-limit (energies)
+   CHARACTER*7, PARAMETER :: logc4 = '-c4.log'
+   CHARACTER*1            :: action = 'r' ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
    CHARACTER*5            :: arg2         ! second argument on the command line
 
-   REAL*4 :: y1 = 0.0, y2 = 1.0, dy1 = 0.0, dy2 = 1.0 ! section modifying parameters
+   REAL*4 :: y1 = 0.0, y2 = 0.0, dy1 = 0.0, dy2 = 0.0 ! section modifying parameters
    INTEGER*4 nsec     ! # of sections in C4 file
    INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
    INTEGER*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
@@ -49,7 +48,7 @@ PROGRAM c4service
    IF(sec_num /= 0) WRITE(6,*) ' section #',sec_num,' will be printed'
 
    !  read C4 file into the memory structure c4
-   WRITE(6,*) 'Reading C4 file into the c4-structure'
+   ! WRITE(6,*) 'Reading C4 file into the c4-structure'
    status = read_c4_file(file(l1:l2)//'.c4',c4)
 
    !   open c4service input file
@@ -63,39 +62,54 @@ PROGRAM c4service
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='new',IOSTAT=ios)
    ENDIF
 
+  !   open c4service log file
+   INQUIRE(FILE=file(l1:l2)//logc4,EXIST=qex)
+   IF(qex) THEN
+      OPEN(9,FILE=file(l1:l2)//logc4,STATUS='unknown',IOSTAT=ios, ACCESS='APPEND')
+   ELSE
+      WRITE(0,*) 'c4service log file not found and will be created'
+      OPEN(9,FILE=file(l1:l2)//logc4,STATUS='new',IOSTAT=ios)
+   ENDIF
+
    IF(inp_read) THEN       ! perform operations on the subsections if any
-      WRITE(6,*) 'Performing operations on the subsections'
+      WRITE(6,*) ' '
+      WRITE(6,*) 'Performed operations on the subsections'
+      WRITE(9,*) ' '
+      WRITE(9,*) 'Performed operations on the subsections'
       DO k=1,c4%nsec            !do loop over subsections
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)  ! (sc%ndat) for the last point
          READ(13,12) rk, rpza, rtza,  rmf, rmt, rref, rent, rsub, action, y1, y2, dy1, dy2
+12       FORMAT(i4, 1x, i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,G12.6) )
          IF(rent /= sc%ent .OR. rsub /= sc%sub) THEN
-            WRITE(6,*) 'FATAL: Subsection k=',k,' should have entry ',rent, &
+            WRITE(6,*) 'FATAL: Subentry k=',k,' should have entry ',rent, &
                'and subentry ',rsub
             WRITE(6,*) 'internal c4-structure has for this k entry',sc%ent, &
                'and subentry ', sc%sub
             WRITE(6,*) 'Delete the ',file(l1:l2)//inpc4,' file and rerun'
             STOP 'EXFOR entry mismatch'
          END IF
-         !  perform operations on the subsections delete, modify, smooth, thin
+         !  perform operations on the subsections: delete, print, modify, smooth, thin, crop
          IF(action == 'd') CALL delete_section(c4, k)
+         ! IF(action == 'p') CALL print_section(c4, k)
          IF(action == 'm') CALL modify_section(sc, k, y1, y2, dy1, dy2)
-         IF(action == 's') CALL smooth_section(sc, k, y1)
+         IF(action == 's') CALL smooth_section(sc, k, int(y1), y2, dy1)
          IF(action == 't') CALL thin_section(sc, k, y1)
-         IF(action == 'l') CALL limit_section(sc, k, y1, y2)  !limit incident energies between y1 and y2
+         IF(action == 'c') CALL crop_section(sc, k, y1, y2)  !limit incident energies between y1 and y2
       ENDDO
-
-      !   recreate c4 file from the internal c4-structure with modifications made above
-      WRITE(6,*) 'Writting c4 file from the internal c4-structure'
+      action = 'r'
+      ! Recreate c4 file from the internal c4-structure with modifications made above
+      ! WRITE(6,*) 'Writting c4 file from the internal c4-structure'
       status = write_c4_file(file(l1:l2)//outc4, c4)
       WRITE(6,*) ' '
-      WRITE(6,*) 'Modified c4 file stored as ',file(l1:l2)//outc4
-      WRITE(6,*) 'Moving it over the old one ',file(l1:l2)//'.c4'
+      WRITE(9,*) ' '
+      ! WRITE(6,*) 'Modified c4 file stored as ',file(l1:l2)//outc4
+      ! WRITE(6,*) 'Moving it over the old one ',file(l1:l2)//'.c4'
       command = 'mv '//file(l1:l2)//outc4//' '//file(l1:l2)//'.c4'
       CALL EXECUTE_COMMAND_LINE(command)
 
-      !    read and rescan the new C4 file, produce new input for c4service
-      WRITE(6,*) 'Reading new C4 file into the c4-structure'
+      ! Read and rescan the new C4 file, produce new input for c4service
+      ! WRITE(6,*) 'Reading new C4 file into the c4-structure'
       status = read_c4_file(file(l1:l2)//'.c4',c4)
       CALL scan(c4)
 
@@ -104,22 +118,21 @@ PROGRAM c4service
 !      WRITE(6,*) 'make_input: inp will be replaced',file(l1:l2)//inpc4,'!period'
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='REPLACE')
       CALL make_input(c4)
-      WRITE(6,*) 'List of sections and c4service input file ',file(l1:l2)//inpc4,' have been generated'
+      WRITE(6,*) 'c4service input file ',file(l1:l2)//inpc4,' has been reset to neutral'
 
-      IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subsection #sub_num e.g., for gnu plotting
+      IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subentry #sub_num e.g., for gnu plotting
 
       STOP
    END IF
-12 FORMAT(i4, 1x, i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,f7.3) )
 
    !   print list of sections and create input file for the next service run
    CALL scan(c4)
    CALL make_input(c4)
-   WRITE(6,*) 'List of sections and c4service input file ',file(l1:l2)//inpc4,' have been generated'
+   WRITE(6,*) 'c4service input file ',file(l1:l2)//inpc4,' has been reset to neutral'
 
 
 
-   IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subsection #sub_num e.g., for gnu plotting
+   IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subentry #sub_num e.g., for gnu plotting
 
 
    STOP
@@ -129,7 +142,7 @@ CONTAINS
 
    !------------------------------------------------------------------------
 
-   SUBROUTINE limit_section(sc, k, y1, y2)
+   SUBROUTINE crop_section(sc, k, y1, y2)
 
 !  Crops X4 section dropping points laying outside the y1 - y2 energy interval
 
@@ -139,11 +152,12 @@ CONTAINS
       TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
 !      TYPE (c4_data_point), POINTER :: pt1, pt2
 
-      WRITE(6,*)' Cropping subsection: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(6,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
 
       IF(y1+y2 == 0.0) RETURN   ! no limits, nothing to do
-      y1 = y1*1000.   ! converting from keV to eV
-      y2 = y2*1000.
+      y1 = y1*10**6.   ! converting from MeV to eV
+      y2 = y2*10**6.
       if(y2 == 0.0) y2 = sc%pt(sc%ndat)%e
       n = 0
       DO i = 1, sc%ndat
@@ -152,9 +166,10 @@ CONTAINS
          sc%pt(n) = sc%pt(i)
       END DO
       sc%ndat = n
-      WRITE(6,*)' Subsection limitted to incident energies between', y1,' and ',y2,' keV'
+      WRITE(6,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
+      WRITE(9,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
       RETURN
-   END SUBROUTINE limit_section
+   END SUBROUTINE crop_section
 
 
 
@@ -174,10 +189,11 @@ CONTAINS
       TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
 !      TYPE (c4_data_point), POINTER :: pt1, pt2
 
-      WRITE(6,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(6,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
 
       istep = y1
-      IF(sc%ndat <= istep) RETURN  !set too small for the istep
+      IF(sc%ndat <= 5*istep) RETURN  !set too small for the istep
       n = 0
       DO i = 1, sc%ndat, istep
          n = n + 1
@@ -188,7 +204,8 @@ CONTAINS
          sc%pt(n) = sc%pt(sc%ndat)
       ENDIF
       sc%ndat = n
-      WRITE(6,*)' Subsection thinned '
+      WRITE(6,*)'  - Subentry thinned, every ',istep,'-th value preserved'
+      WRITE(9,*)'  - Subentry thinned, every ',istep,'-th value preserved'
       RETURN
    END SUBROUTINE thin_section
 
@@ -203,17 +220,31 @@ CONTAINS
       TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to modify
       TYPE (c4_data_point), POINTER :: pt
 
-      WRITE(6,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! Check default input
+      IF (y2 > 0.0 .and. dy2 == 0.0) dy2 = y2  ! Set the same factor for uncertainties as for x-sec.
+      IF (dy2 == 0.0)  dy2 = 1.0 ! Don't zero uncertainties!
 
+      WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
+
+
+      ! This DO LOOP can be modified if another form of modification is required
       DO i = 1, sc%ndat
          pt => sc%pt(i)
-         pt%x  = pt%x  + y1  + pt%x*(y2-1.0)                !modifying cross sections
-         write(*,*)'original:',pt%dx
-         pt%dx = SQRT(pt%dx**2 + (pt%x*dy1/100.)**2)       !adding additional dy1 uncertainty (in %) in squares
-         write(*,*)'modified:',pt%dx
-         pt%dx = pt%dx*dy2                                  !multiplying uncertainty by a factor
+         pt%x  = pt%x  + y1  + pt%x*y2                         !modifying cross sections
+         ! write(*,*)'original:',pt%dx
+         pt%dx = dy2*SQRT(pt%dx**2 + (pt%x*dy1/100.)**2)       ! adding additional dy1 uncertainty (in %) in squares
+                                                               ! and multiplying uncertainty by a factor
       END DO
-      WRITE(6,*)' Subsection modified '
+      IF(y1 /= 0.0)   WRITE(6,*)'  - cross sections changed by adding ',y1, '[b]'
+      IF(y2 /= 0.0)   WRITE(6,*)'  - cross sections multiplied by ',y2
+      IF(dy1 /= 0.0)  WRITE(6,*)'  - absolute uncertainties increased by square-adding ', dy1, '[%]' 
+      IF(dy2 /= 1.0)  WRITE(6,*)'  - absolute uncertainties multiplied by ', dy2      
+      IF(y1 /= 0.0)   WRITE(9,*)'  - cross sections changed by adding ',y1, '[b]'
+      IF(y2 /= 0.0)   WRITE(9,*)'  - cross sections multiplied by ',y2
+      IF(dy1 /= 0.0)  WRITE(9,*)'  - absolute uncertainties increased by square-adding ', dy1, '[%]' 
+      IF(dy2 /= 1.0)  WRITE(9,*)'  - absolute uncertainties multiplied by ', dy2
+
       RETURN
    END SUBROUTINE modify_section
 
@@ -229,12 +260,13 @@ CONTAINS
       sc => c4%sec(k)
       sc%ndat = 0
 
-      WRITE(6,*)' Deleted  subsection: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(6,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
       RETURN
    END SUBROUTINE delete_section
 
 
-   SUBROUTINE smooth_section(sc, k, y1)
+   SUBROUTINE smooth_section(sc, k, iter, emin, emax)
 
       ! Volume Conserving Smoothing for Piecewise Linear Curves ...
       ! after Andrew Kuprat, Ahmed Khamayseh, Denise George, and Levi Larkey
@@ -244,23 +276,47 @@ CONTAINS
       ! piecewise linear curve and the x axis.
 
       IMPLICIT NONE
-      INTEGER*4 j,i,k
+      INTEGER*4 j,i,k,jmin,jmax
+      INTEGER*4 iter! number of smoothing iterations
       REAL*4 l      ! distance between the points 1 and 4
       REAL*4 h      ! new distance of points 2 and 3 from the 1 to 4 line
-      REAL*4 s,sp      ! area of the quadrilateral defined by the four points
-      REAL*4 y1     ! number of smoothing iterations
+      REAL*4 s,sp   ! area of the quadrilateral defined by the four points
+      REAL*4 emin   ! lower energy limit on exp data, 0 == no limit
+      REAL*4 emax   ! upper energy limit on exp data, 0 == no limit
 
-      !      TYPE (c4_file) c4
-      !      TYPE (c4_section), POINTER :: sc
       TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to smooth
-      TYPE (c4_data_point), POINTER :: p0, p1, p2, p3
-!      IF(int(y1) == 0) y1 = 10.0
-      !      sc => c4%sec(k)
-      IF(sc%ndat < 20) RETURN      ! smoothing needs at least 4 points but we set limit higher
-      WRITE(6,*)' Smoothing subsection: ',k, sc%ref, sc%ent, sc%sub
-      IF(y1 == 0.0) y1 = sqrt(Real(sc%ndat))
-      DO i = 1, int(y1)
-         DO j = 1, sc%ndat-3
+      TYPE (c4_data_point), POINTER :: p0, p1, p2, p3  ! 4 points involved in smoothing
+
+      WRITE(6,*)' Smoothing subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Smoothing subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      IF(iter == 0.0) iter = sqrt(Real(sc%ndat))
+
+      ! Set smoothing energy range if requested
+      IF(emin+emax == 0.0) THEN
+         jmin = 1
+         jmax = sc%ndat-3
+      ELSE
+         WRITE(6,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
+         WRITE(9,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
+         emin = emin*10**6   ! Convert to eV since C4 file is in eV
+         emax = emax*10**6    
+         DO j = 1, sc%ndat 
+            IF(sc%pt(j)%e <= emin) jmin = j
+            IF(sc%pt(j)%e >= emax) THEN
+               jmax = j-3   ! Because smoothing needs 4 points j must stop 3 points from the last
+               EXIT
+            ENDIF
+         ENDDO 
+      ENDIF
+      IF(jmax-jmin < 10) THEN ! smoothing needs at least 4 points but we set limit higher
+         WRITE(6,*) '   NO smoothing - too few points!'
+         WRITE(9,*) '   NO smoothing - too few points!'
+         RETURN 
+      ENDIF     
+
+      ! Actual smoothing starts here
+      DO i = 1, iter
+         DO j = 1, jmax
             p0 => sc%pt(j)
             p1 => sc%pt(j+1)
             p2 => sc%pt(j+2)
@@ -275,8 +331,9 @@ CONTAINS
                0.5*abs(p3%e - p2%e)*(p3%x + p2%x)
             l = abs(p3%e - p0%e)
             IF(l == 0) THEN
-               WRITE(6,*)' Fatal error in smoothig: points at the same energy ', p3%e, p0%e
-               STOP 'Smoothing failed due to 4 points with the same energy'
+               WRITE(6,*)'   Fatal error in smoothig: points at the same energy ', p3%e, p0%e
+               WRITE(9,*)'   Fatal error in smoothig: points at the same energy ', p3%e, p0%e, 'STOP'
+               STOP ' Smoothing failed due to 4 points with the same energy'
             END IF
             h = (3*s)/(2*l) - (p0%x + p3%x)/4.
             p1%e = p0%e + (p3%e - p0%e)/3.0
@@ -293,10 +350,11 @@ CONTAINS
             p1%dx = h
             p2%dx = h
             sp = l*(p0%dx+2*p1%dx+2*p2%dx+p3%dx)/6.0
-            if (abs(s-sp)/s > 0.00001) write(6,*) 'Inegral mismatch', s, sp
+            if (abs(s-sp)/s > 0.00001) write(6,*) '   integral mismatch', s, sp
          END DO
       END DO
-      WRITE(6,*)' Subsection smoothed '
+      WRITE(6,*)'  - Subentry smoothed ',int(iter),' times'
+      WRITE(9,*)'  - Subentry smoothed ',int(iter),' times'
       RETURN
    END SUBROUTINE smooth_section
 
@@ -321,7 +379,7 @@ CONTAINS
       year   = sc%ref(23:24)
       file   = author//'-'//year//'.c4'
 
-      WRITE(6,*) 'Print_section:',file
+      WRITE(6,*) ' Print subentry:',file
       OPEN(20,FILE=file,STATUS='REPLACE')
 
       DO k=1,sc%ndat
@@ -348,15 +406,23 @@ CONTAINS
       WRITE(6,*)'--------------------------------------------------------------------------------------------'
       WRITE(6,*)' num  pro targ.   MF    MT Emin        Emax     points   author             year  entry sub'
       WRITE(6,*)'--------------------------------------------------------------------------------------------'
+      ! WRITE(9,*)''
+      ! WRITE(9,*)'--------------------------------------------------------------------------------------------'
+      ! WRITE(9,*)' num  pro targ.   MF    MT Emin        Emax     points   author             year  entry sub'
+      ! WRITE(9,*)'--------------------------------------------------------------------------------------------'
 
       DO k=1,c4%nsec
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)
          WRITE(6,10) k, sc%pza, sc%tza, sc%tmeta, pt%mf, pt%mt, sc%pt(1)%e/10**6, sc%pt(sc%ndat)%e/10**6, &
             sc%ndat, sc%ref, sc%ent, sc%sub
+         ! WRITE(9,10) k, sc%pza, sc%tza, sc%tmeta, pt%mf, pt%mt, sc%pt(1)%e/10**6, sc%pt(sc%ndat)%e/10**6, &
+         !    sc%ndat, sc%ref, sc%ent, sc%sub
       ENDDO
       WRITE(6,*)'--------------------------------------------------------------------------------------------'
-      WRITE(6,*)''
+      WRITE(6,*)''      
+      ! WRITE(9,*)'--------------------------------------------------------------------------------------------'
+      ! WRITE(9,*)''
       RETURN
 
 10    FORMAT(i4, ')', i4, i6, a2, i4, i5, 1x, 1Pg9.3,' - ',1Pg9.3, i7, a26, 1x, a6, a4)
@@ -382,9 +448,9 @@ CONTAINS
          WRITE(13,11) k, sc%pza, sc%tza,  pt%mf, pt%mt,  &
             sc%ref, sc%ent, sc%sub, action, y1, y2, dy1, dy2
       ENDDO
-!      WRITE(6,*) 'c4service input file created '
+!      WRITE(6,*) ' c4service input file created '
       RETURN
-11    FORMAT(i4, ')', i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,f7.3) )
+11    FORMAT(i4, ')', i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,G12.6) )
 
    END SUBROUTINE make_input
 
