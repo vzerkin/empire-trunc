@@ -1,5 +1,5 @@
-! $Rev: 5151 $                                                          | 
-! $Date: 2019-04-02 19:39:09 +0200 (Di, 02 Apr 2019) $                                                     
+! $Rev: 5165 $                                                          | 
+! $Date: 2019-07-24 21:54:29 +0200 (Mi, 24 Jul 2019) $                                                     
 ! $Author: capote $                                                  
 ! **********************************************************************
 ! *
@@ -393,7 +393,7 @@
 !                                         !  0, YES;  1, NO
 !
       INTEGER (KIND=I4) :: CHECKR_SUCCESS !  Flag to indicate success or failure of checkr execution
-      INTEGER (KIND=I4) :: IRERUN
+!     INTEGER (KIND=I4) :: IRERUN
 !
       CHARACTER(LEN=66) :: TLABEL         ! File (TAPE) label from first record
       INTEGER (KIND=I4) :: LABEL          ! File (TAPE) number from first record
@@ -511,7 +511,7 @@
       IMPLICIT NONE
 !
       CHARACTER(LEN=1), INTRINSIC :: CHAR
-      INTEGER(KIND=I4), INTRINSIC :: MOD, ICHAR
+!     INTEGER(KIND=I4), INTRINSIC :: MOD, ICHAR
 !
       INTEGER(KIND=I4) :: IQUIT ! Flag to indicate whether or not to exit       
       INTEGER(KIND=I4) :: IFIND ! Flags whether desired material found
@@ -709,7 +709,7 @@
 !
 !     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       CHARACTER(LEN=1)  :: IW
       CHARACTER(LEN=11) :: ADATE
@@ -895,7 +895,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
+!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
 !
       CHARACTER(LEN=15) :: MATSIN
       CHARACTER(LEN=10) :: BUF
@@ -1084,7 +1084,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: ISUBTP
 !
@@ -1487,7 +1487,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       INTEGER(KIND=I4) :: I
 !
-      INTEGER(KIND=I4), INTRINSIC :: IABS
+!     INTEGER(KIND=I4), INTRINSIC :: IABS
 !
       INTEGER(KIND=I4) :: II
 !
@@ -1704,7 +1704,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
 !     Don't declare TRIM function (causes trouble for gfortran) cmattoon 10/2008
 !     CHARACTER(LEN=*), INTRINSIC :: TRIM
-      INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
+!     INTEGER(KIND=I4), INTRINSIC :: IFIX, MOD, MIN0
 !
 !     CHARACTER(LEN=11):: ZSA
       INTEGER(KIND=I4) :: IZ,IA,ISTA,IZA,IZ1
@@ -3227,7 +3227,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
       INTEGER(KIND=I4) :: LCT
@@ -3811,7 +3811,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      REAL(KIND=R4), INTRINSIC :: FLOAT
+!     REAL(KIND=R4), INTRINSIC :: FLOAT
 !
       INTEGER(KIND=I4) :: NSP,NST,ISTA
       INTEGER(KIND=I4) :: NDKT
@@ -3977,7 +3977,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,ISET,INAT
       INTEGER(KIND=I4) :: NS,LFSO,LFSP,IZAP,IZAPP
@@ -4249,7 +4249,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
       INTEGER(KIND=I4) :: NK,NI
@@ -4352,7 +4352,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
       INTEGER(KIND=I4) :: MFM1,MFM2,ISET
 !
       INTEGER(KIND=I4) :: NC
@@ -4424,7 +4424,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
 !
       IMPLICIT NONE
 !
-      REAL(KIND=R4), INTRINSIC :: ABS
+!     REAL(KIND=R4), INTRINSIC :: ABS
 !
       REAL(KIND=R4) :: ZTEST
 !
@@ -6302,7 +6302,7 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
       INTEGER(KIND=I4) :: NRT,NPT,IBMOD
       INTEGER(KIND=I4) :: NBTT(NIRMAX),JNTT(NIRMAX)
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: JJNT,KNT
       INTEGER(KIND=I4) :: JNTMIN,JNTMAX
@@ -6478,7 +6478,7 @@ c        END IF
       REAL(KIND=R4) :: A,B
       CHARACTER(LEN=*) :: KXXX
 !
-      REAL(KIND=R4), INTRINSIC :: ABS
+!     REAL(KIND=R4), INTRINSIC :: ABS
 !
       IF(ABS(A-B).GT.EPS*MAX(ABS(A),ABS(B)))  THEN
          WRITE(EMESS,'(2A,1PE13.6)')                                    &       
@@ -6625,7 +6625,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: MTT,MT3,MTCAT
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: MT7
 !
@@ -6821,7 +6821,7 @@ c        END IF
       INTEGER(KIND=I4) :: MTCAT
       INTEGER(KIND=I4) :: IEVAL
 !
-      INTEGER(KIND=I4), INTRINSIC :: MOD
+!     INTEGER(KIND=I4), INTRINSIC :: MOD
 !
       INTEGER(KIND=I4) :: ISUBTP
 !
@@ -7107,7 +7107,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: JSEQ
 !
-      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
 !       Material printout delimiter
@@ -7162,7 +7162,7 @@ c        END IF
 !
       INTEGER(KIND=I4) :: JSEQ
 !
-      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
+!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM
 !
       INTEGER(KIND=I4) :: NEMES
 !       Material printout delimiter
@@ -7219,7 +7219,7 @@ c        END IF
       CHARACTER(LEN=*) :: INSTR,OUTSTR,DELIM
       INTEGER(KIND=I4) :: ITOK
 !
-      INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
+!     INTEGER(KIND=I4), INTRINSIC :: LEN_TRIM, INDEX
 !
       INTEGER(KIND=I4) :: ILEN,JLEN
       INTEGER(KIND=I4) :: ITOKP
@@ -7298,7 +7298,7 @@ c        END IF
 !...VMS
 !/      INTEGER(KIND=2) :: ILENP2
 !...ANS
-        CHARACTER(LEN=100) :: CFILE
+!       CHARACTER(LEN=100) :: CFILE
 !---MDC---
 !
       INPAR = ' '
