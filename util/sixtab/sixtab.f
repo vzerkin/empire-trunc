@@ -840,7 +840,19 @@ C*      -- Calculate the probability from Kalbach-Mann representation
         ELSE
           AA=RWO(LX1+NCYC*(IP-1)+3)
         END IF
-        FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
+!zv2019	FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
+	FMU=SS*AA*(DCOSH(0.d0+AA*CSN)+RR*DSINH(0.d0+AA*CSN))
+     +	/(2*DSINH(0.d0+AA))
+	if (ISNAN(FMU)) then
+	    FMU=0
+!Note: EXP(-88.)=6.05460149E-39
+	    if (-AA.LT.-88.)
+     +	    FMU=DEXP(0.d0+AA*CSN-AA)*(1+RR)+DEXP(0.d0-AA*CSN-AA)*(1-RR)
+	    if (AA.LT.-88.)
+     +	    FMU=-DEXP(0.d0+AA*CSN+AA)*(1+RR)-DEXP(0.d0-AA*CSN+AA)*(1-RR)
+	    FMU=SS*AA*FMU/2
+	endif
+
       ELSE IF(LANG.GT.10) THEN
 C*
 C*      -- Calculate the probability from pointwise representation
