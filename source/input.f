@@ -1,6 +1,6 @@
-!cc   * $Rev: 5144 $
+!cc   * $Rev: 5168 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2019-03-08 08:09:38 +0100 (Fr, 08 Mär 2019) $
+!cc   * $Date: 2019-10-31 16:13:32 +0100 (Do, 31 Okt 2019) $
 
       SUBROUTINE INPUT
 !cc
@@ -464,8 +464,8 @@ C        Discrete levels not included in PCROSS calculation (default)
          MFPp = 1.5d0
          PESpin = 0   ! 1p-1h spin cut-off taken for all PE emission stages
 
-         NPAirpe = 1  ! default is to include pairing corrections in PCROSS 
-C        NPAirpe = 0  ! default changed to avoid pairing corrections in PCROSS !02/2017
+C        NPAirpe = 1  ! include pairing corrections in PCROSS 
+         NPAirpe = 0  ! default is to NOT include pairing corrections in PCROSS, 10/2019 
          CHMax = 0.d0 ! default set to 0.54 inside PCROSS
 C
 C        Breakup and pickup reactions 
@@ -1191,7 +1191,7 @@ C                      endif
                     ENDIF
                  ENDDO
               ENDDO
-!              Making only pure neutron and pure proton emissions exclusive
+!              Making pure neutron and pure proton emissions exclusive
                ztmp = Z(1)
                DO in = 0, MIN(8,NENdf)
                   atmp = A(1) - FLOAT(in)
