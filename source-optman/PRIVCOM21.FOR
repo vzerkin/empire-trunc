@@ -1,18 +1,17 @@
 C     *******************************************************
-C     START of privcom2  
+C     START of privcom21  
 C     *******************************************************
 C==========================================================================
 C     PRIVATE COMMONS FOR EACH PARALLEL THREAD TO BE USED AS INCLUDE BLOCK
+C     Filename and EMPIRE flags
 
-
-
-C     C     FROM SUBROUTINE SOSIT        
-      COMMON/CONT/P(40000),R(40000),W(40000),V(40000),E(40000),F(40000),
-     *S(40000),B(40000),Q(40000),T(40000),G(40000),Z(40000)
+      LOGICAL EMPIRE, unformatted
+      CHARACTER*20 fname 
       
-!$OMP THREADPRIVATE(/CONT/)
-      
+      COMMON/INOUT/fname,EMPIRE,unformatted
+     
+     
 
 C     *******************************************************
-C     END of pricom2
+C     END of pricom21
 C     *******************************************************

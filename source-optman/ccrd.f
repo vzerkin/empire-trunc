@@ -62,7 +62,7 @@ C     *******************************************************
 
 
       LLMA1=LLMA+1
-      LMA2=0.5252113*SQRT(VR*WW)*RR+4.D+0
+      LMA2=0.5252113*SQRT(VR*WW)*RR+8.D+0
       LMA1=1.65*(WNK(1)*RK+1.83)+4.D+0
       IF(LMA1.GT.LLMA1) LMA1=LLMA1
       DO 1 I=1,NUR
@@ -561,20 +561,19 @@ C     *******************************************************
       DOUBLE PRECISION jc,jj
       INTEGER ltlmax, itmp, LLLMAX
       CHARACTER*1 parc
-      LOGICAL unformatted
 
       PARAMETER (LLLMAX=100)
       DIMENSION STL(LLLMAX)
       
       real*8, parameter :: haf = 0.5D0
 
-      CHARACTER*20 fname
-      COMMON/INOUT/fname
+      INCLUDE 'PRIVCOM20.FOR'
 
       INCLUDE 'PRIVCOM.FOR'
       INCLUDE 'PRIVCOM7.FOR'  
       INCLUDE 'PRIVCOM10.FOR' 
       INCLUDE 'PRIVCOM13.FOR'      
+      INCLUDE 'PRIVCOM21.FOR'
       AMI=939.56536
       IF(MECHA.EQ.1) AMI=938.272029D0
        
@@ -608,7 +607,7 @@ C     NSPI=IDINT(ASP*2+0.001)
       IF(MEREL.EQ.1.OR.MEREL.EQ.3) WW=WW*RELPOT
 
 
-      LMA2=0.5252113*SQRT(VR*WW)*RR+4.D+0
+      LMA2=0.5252113*SQRT(VR*WW)*RR+8.D+0
       IF(MEPRI.GE.10 .AND. MEPRI.LT.98) 
      *  PRINT 18,RK,WW,WNK(1),LMA2,LMAX
       IF(MEPRI.GE.10 .AND. MEPRI.LT.98) 
@@ -892,6 +891,19 @@ C     PAUSE 100
       SSR(LNJ1(IC)+1)=SSR(LNJ1(IC)+1)+(1.-2.*CI(IC,IC))*(JSS+1)
       SSI(LNJ1(IC)+1)=SSI(LNJ1(IC)+1)+2.*CR(IC,IC)*(JSS+1)
    15 CONTINUE
+      
+c      write(21,*) '*** C-matrix'
+c      write(21,'(A,I2,A,<INCC>(A,I2,A,I2,A,I2,A))')
+c     * '*** J=',JSS,'/2,',(' l_in=', LNJ1(Iiic),', j_in=',
+c     *   JNJ1(Iiic),'/2, N=', NNJ1(Iiic),';' ,Iiic=1,INCC)
+c      do Iiir=1,INCR
+c        write(21,'(A,I2,A,I2,A,I2,A,<INCC>(ES13.5,A,ES13.5))') 'l_out=',
+c     *     LNJ1(Iiir),', j_out=',JNJ1(Iiir),'/2, N=', NNJ1(Iiir),'; ',
+c     *     (CR(Iiic,Iiir),'+i*',CI(Iiic,Iiir) ,Iiic=1,INCC)
+c      enddo      
+c      write(21,*) '*** C-matrix end'
+      
+      
       IF(NSS.GE.NSMA) GO TO 7
     2 CONTINUE
 C     IF(NJ.EQ.2*(NSPI+1)) GO TO 7
@@ -958,11 +970,11 @@ c       print *,'!!! BEFORE SPRT!!!: ', LL,TLL,SRL,SIL,AT,EN
        ELSEIF(LL.eq.1)then
          SFR1=0.0
        RRPRIME1=0.0
-       CALL SPRT(LL,TLL,SRL,SIL,AT,EN,SFR1,RRPRIME1)   
+       CALL SPRT(LL,TLL,SRL,SIL,AT,EN,SFR1,RRPRIME1) 	 
        ELSEIF(LL.eq.2)then
          SFR2=0.0
        RRPRIME2=0.0
-       CALL SPRT(LL,TLL,SRL,SIL,AT,EN,SFR2,RRPRIME2)   
+       CALL SPRT(LL,TLL,SRL,SIL,AT,EN,SFR2,RRPRIME2) 	 
        ENDIF
 c       print *,'!!! AFTER SPRT!!!: ', SFR0,RRPRIME0,SFR1,RRPRIME1
 c     *     ,SFR1,RRPRIME1
@@ -1004,9 +1016,9 @@ C      from ecis06
  1008  FORMAT (1X,I2,I6,F9.1,2X,1P,D18.8,0P)                            CAL1-429
 C----------------
        if (unformatted) then
-           open(unit=92,file=TRIM(fname)//'.tlj', form='unformatted')
+           open(unit=92,file=TRIM(fname)//'.TLJ', form='unformatted')
        else
-           open(unit=92,file=TRIM(fname)//'.tlj')
+           open(unit=92,file=TRIM(fname)//'.TLJ')
        endif
 
 C      WRITE(92,'(10H<TLJ     >,F10.2,F10.5,F10.2,2I5)') 
@@ -2602,6 +2614,11 @@ C     *******************************************************
       RETURN
       ENDIF
      
+      !open(unit=123,file='SMAT')
+      !write(123,'(A5,E14.6)') 'Kinc=',WNK(1)
+      !write(123,'(A5,A3,A5,A3,A3,A5,2A15)') 'J','li','ji','No',
+      !* 'lo','jo','Re(C)','Im(C)'
+      
       CALL PLEGA
       LKK=1
       ETA=CONZ/WNK(1)
@@ -2642,6 +2659,11 @@ C     *******************************************************
    13 IR=JO(NU1)
       ACR=CRD(K1,N1C,N1R)
       ACI=CID(K1,N1C,N1R)
+      
+      !write(123,'(F5.1,I3,F5.1,2I3,F5.1,2E15.5)')JS1/2.0,L1I,J1I/2.0,NU1
+      !* ,L1F,J1F/2.0,CRD(K1,N1C,N1R), CID(K1,N1C,N1R)
+      
+      
       ACR1=ACR*COR-ACI*COI
       ACI1=ACR*COI+ACI*COR
       A=(JS1+1.D0)*DSQRT((J1I+1.D0)*(J1F+1.D0))/A1
@@ -2755,6 +2777,9 @@ C     Cmat*Frez*+Frex*Cmat*=2.*ACC
       DO 10 L=1,LKK
       COE=1.D0
    10 COEF(N,L)=COEF(N,L)/COE/(2*L-1)
+      
+      !close(123)
+      
       RETURN
       END
 C     ***********************************************************
@@ -3596,6 +3621,8 @@ C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
       INCLUDE 'PRIVCOM10.FOR' 
       INCLUDE 'PRIVCOM13.FOR'
       INCLUDE 'PRIVCOM14.FOR'
+      
+      INCLUDE 'PRIVCOM20.FOR'
 
       PVV=0.D0
       PWW=0.D0
@@ -4173,8 +4200,14 @@ CCHA      DVSO=DOM_INT_WV(Eferm,EPAVER,WSBW,WSWID,INT(PDIS),EN+CDE,dtmp)
  
 CCHA      WSO=WS0+WS1*ENEF+WSBW*(ENEF+CDE)**PDIS/
 CCHA     *((ENEF+CDE)**PDIS+WSWID**PDIS)
-      IF(MECUL.EQ.3) ENESO=ENEF+CDE
-       WSO=WS0+WS1*ENESO+WSBW*(ENESO)**PDIS/
+      
+C     Corrected by DMart July 2018 (bug lasts since version 15)
+      ENESO=ENEF
+C      IF(MECUL.EQ.3) ENESO=ENEF+CDE
+      IF(MECUL.EQ.3) ENESO=ENESO+CDE
+C     Corrected by DMart July 2018
+      
+      WSO=WS0+WS1*ENESO+WSBW*(ENESO)**PDIS/
      *((ENESO)**PDIS+WSWID**PDIS)    
 C     WD=WD+WISO
       IF(WD.LE.0.)WD=0.
@@ -4470,16 +4503,25 @@ C      IF(NCA(NU1).NE.NCA(NU2)) GO TO 9
       IF(R.LE.RZ) PDC=6.*CONZ/(2.*LAC+1.)*R**LAC/RZ**(LAC+1)*BET(LAC)
       IF(R.GT.RZ) PDC=6.*CONZ/(2.*LAC+1.)*RZ**LAC/R**(LAC+1)*BET(LAC)
 
+
 C     HIGHER COULOMB MULTIPOLES AS PROPOSES BY SATCHLER
 
       IF(LAS2.EQ.1) GO TO 19
       IF(R.LE.RZ) FPVC=6.*CONZ/(2.*LAC+1)*(1.-LAC)*R**LAC/RZ**(LAC+1)
       IF(R.GT.RZ) FPVC=6.*CONZ/(2.*LAC+1)*(LAC+2)*RZ**LAC/R**(LAC+1)
-      IF(LAC.EQ.2) PDC=PDC+FPVC*(0.180223752*BET(2)+0.241795536*BET(4))
-     **BET(2)
-      IF(LAC.EQ.4) PDC=PDC+FPVC*(0.241795536*BET(2)+0.163839774*BET(4))
-     **BET(2)
-      IF(LAC.EQ.6) PDC=PDC+FPVC*0.238565132*BET(2)*BET(4)
+      IF(LAC.EQ.2) PDC=PDC+FPVC*((0.180223752*BET(2)+0.241795536*BET(4))
+     **BET(2)+0.16384*BET(4)**2+0.238565*BET(4)*BET(6)
+     *+0.160563*BET(6)**2)
+      IF(LAC.EQ.4) PDC=PDC+FPVC*((0.241795536*BET(2)+0.163839774*BET(4)
+     *+0.238565*BET(6))*BET(2)+0.136961*BET(4)**2+0.142253*
+     *BET(4)*BET(6)+0.126716*BET(6)**2)
+      IF(LAC.EQ.6) PDC=PDC+FPVC*(0.238565132*BET(2)*BET(4)+
+     *0.160563*BET(2)*BET(6)+0.142253*BET(4)**2+
+     *0.126716*BET(4)*BET(6)+0.114507*BET(6)**2)
+c            IF(LAC.EQ.6) PDC=0.d0
+c             IF(LAC.EQ.4) PDC=0.d0
+C            IF(LAC.EQ.2) PDC=0.d0
+  
 C
    19 IF(NPD.NE.0) DE=DEF(1)
       CALL POTET
@@ -5268,7 +5310,7 @@ C     ***********************************************************
       INCLUDE 'PRIVCOM10.FOR'
        INCLUDE 'PRIVCOM13.FOR'              
       MSOLIN=MESOL
-C      IF(NSS.LT.5) MESOL=2
+      IF(NSS.LT.10) MESOL=2
       IF(MESOL.LE.3) GO TO 5
       NCLLT=NCLL
       INCRT=INCR
@@ -5726,7 +5768,7 @@ C     *****************************************************************
       SUBROUTINE KLEGO1
 C     *****************************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
-      COMMON/LOFAC/A(800)
+      INCLUDE 'PRIVCOM23.FOR' ! LOFAC
       INCLUDE 'PRIVCOM1.FOR'
 C     COMMON/KG/J1,J2,M1,M2,J,M,AKG
 
@@ -6329,8 +6371,8 @@ C     *******************************************************
 C     *******************************************************
 C     AUTHOR: R. Capote, March 2005
 C     
-C     * $Date: 2017-04-10 22:59:43 +0200 (Mo, 10 Apr 2017) $
-C     * $Id: ccrd.f 4905 2017-04-10 20:59:43Z mherman $
+C     * $Date: 2019-11-07 22:15:49 +0100 (Do, 07 Nov 2019) $
+C     * $Id: ccrd.f 5169 2019-11-07 21:15:49Z capote $
 C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
 C     Note: Elapsed time must be less than one month
@@ -6373,49 +6415,70 @@ C====================================================================
       END
 C     *******************************************************
 C     SUBROUTINE WRITTEN BY Rui LI AND Weili SUN FROM IAPCM CHINA
-      SUBROUTINE ANPOW !analyzing power
+	SUBROUTINE ANPOW !analyzing power
 C     *******************************************************
       IMPLICIT REAL*8(A-H,O-Z)
-      !----------analyzing power---------------
-      REAL*8 FC_R(150),FC_I(150),X_R(4,40,50,50,150),
-     *       X_I(4,40,50,50,150),COEF_X(4),CSRX,CSIX,
-     *       CS_ANG_MIF(40,50,50,150),CS_ANG(40,150)             
-       INTEGER MII_INDEX,MII,MII_MAX,MIF_INDEX,MIF,MIF_MAX
-
-      !----analyzing power---------
+	!----------analyzing power---------------
+c	REAL*8 FC_R(150),FC_I(150),X_R(4,40,50,50,150),
+c     *       X_I(4,40,50,50,150),COEF_X(4),CSRX,CSIX,
+c     *       CS_ANG_MIF(40,50,50,150),CS_ANG(40,150)	           
+	REAL*8 FC_R,FC_I,!X_R(4,40,50,50),
+     *       !X_I(4,40,50,50),
+     *       COEF_X(4),CSRX,CSIX,
+     *       CS_ANG_MIF(40,50,50),CS_ANG(40)	           
+       INTEGER MII_INDEX,MII,MII_MAX,MIF_INDEX,MIF,MIF_MAX,
+     *        error
+      REAL*8,allocatable,dimension(:,:,:,:) :: X_R,X_I
+      
+     	!----analyzing power---------
       INCLUDE 'PRIVCOM.FOR'
       INCLUDE 'PRIVCOM1.FOR'
       INCLUDE 'PRIVCOM13.FOR'
       INCLUDE 'PRIVCOM14.FOR'           
  
-      !----------initialization----------
-      X_R=0.D0
-      X_I=0.D0
-      FC_R=0.D0
-      FC_I=0.D0
-      DISC=0.D0
-C     Px=0.
-C     Pz=0.
-      Ay=0.D0
-C     open(unit=904,file='PxPz.txt')
+      allocate(X_R(4,40,50,50),X_I(4,40,50,50),stat=error)
+      if (error.ne.0)then
+        print *,"!!!!!!!!!!!!!error:not enough memory"
+        stop
+      end if
+      
+    	!----------initialization----------
+	X_R=0.D0
+	X_I=0.D0
+	FC_R=0.D0
+	FC_I=0.D0
+	DISC=0.D0
+C	Px=0.
+C	Pz=0.
+	Ay=0.D0
+C	open(unit=904,file='PxPz.txt')
 
         CS_ANG=0.D0
       !*************initialization***********
-      CALL PLM_CAL !calculating harmonic function
+	CALL PLM_CAL !calculating harmonic function
       LKK=1
       ETA=CONZ/WNK(1)
       IC=JO(1)
-      !-------------calculate f_c(Coulomb amplitude)-------------
-      DO 627 M=1,MTET 
-      TETA=TET(M)*3.1415927/180
-      ALST2=DLOG(DSIN(TETA/2.D0))
+	!-------------calculate f_c(Coulomb amplitude)-------------
+	DO 627 MM=1,MTET 
+	X_R=0.D0
+	X_I=0.D0
+	FC_R=0.D0
+	FC_I=0.D0
+	CS_ANG=0.D0
+      CS_ANG_MIF=0.D0
+      
+	TETA=TET(MM)*3.1415927/180
+	ALST2=DLOG(DSIN(TETA/2.D0))
       ARGC=2.D0*(COPH(1,1)-ETA*ALST2)
-      temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DCOS(ARGC)
-      FC_R(M)=temp 
-      temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DSIN(ARGC)
-      FC_I(M)=temp       
-  627 continue          
-      !------------------------------------------------------------     
+	temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DCOS(ARGC)
+c	FC_R(M)=temp 
+	FC_R=temp 
+	temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DSIN(ARGC)
+c	FC_I(M)=temp       
+	FC_I=temp       
+c  627	continue		
+      !------------------------------------------------------------	
       DO 1 K1=1,NJ
       JS1=JS(K1)
       N1I=INC(K1)
@@ -6428,9 +6491,9 @@ C     open(unit=904,file='PxPz.txt')
       J1F=JNJ(K1,N1R)
       NU1=NNJ(K1,N1R)
 
-      MII_MAX=IC+1 !number of MII:2*I+1
-      DO 614 MII_INDEX=1,MII_MAX
-      MII=2*MII_INDEX-IC-2 !2*MI
+	MII_MAX=IC+1 !number of MII:2*I+1
+	DO 614 MII_INDEX=1,MII_MAX
+	MII=2*MII_INDEX-IC-2 !2*MI
       MIF_MAX=JO(NU1)+1 !number of MIF: 2*I'+1
       DO 615 MIF_INDEX=1,MIF_MAX
       MIF=2*MIF_INDEX-JO(NU1)-2 
@@ -6524,121 +6587,131 @@ C     open(unit=904,file='PxPz.txt')
       COEF_X(3)=COEF_X(3)*AKG
       COEF_X(4)=COEF_X(4)*AKG 
 
-               CORR=DCOS(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
-               COII=DSIN(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
-               CSRX=CORR*CRD(K1,N1C,N1R)-COII*CID(K1,N1C,N1R)
-               CSIX=CORR*CID(K1,N1C,N1R)+COII*CRD(K1,N1C,N1R)
-      DO 616 M=1,MTET
-      IF(NU1.EQ.1 .AND. L1I.EQ.0 .AND. J1I.EQ.1 .AND. JS1.EQ.(IC+1) 
-     * .AND. L1F.EQ.0   .AND. J1F.EQ.1 .AND. MII.EQ.MIF)
+      	   CORR=DCOS(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
+		   COII=DSIN(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
+		   CSRX=CORR*CRD(K1,N1C,N1R)-COII*CID(K1,N1C,N1R)
+		   CSIX=CORR*CID(K1,N1C,N1R)+COII*CRD(K1,N1C,N1R)
+c      DO 616 M=1,MTET
+	IF(NU1.EQ.1 .AND. L1I.EQ.0 .AND. J1I.EQ.1 .AND. JS1.EQ.(IC+1) 
+     * .AND. L1F.EQ.0	.AND. J1F.EQ.1 .AND. MII.EQ.MIF)
      *THEN !add the Coulomb amplitude(only added once for different J1I and JS1)
-      X_R(1,NU1,MII_INDEX,MIF_INDEX,M)=X_R(1,NU1,MII_INDEX,MIF_INDEX,M)+
-     *FC_R(M)
-      X_I(1,NU1,MII_INDEX,MIF_INDEX,M)=X_I(1,NU1,MII_INDEX,MIF_INDEX,M)+
-     *FC_I(M)
-      X_R(4,NU1,MII_INDEX,MIF_INDEX,M)=X_R(4,NU1,MII_INDEX,MIF_INDEX,M)+
-     *FC_R(M)
-      X_I(4,NU1,MII_INDEX,MIF_INDEX,M)=X_I(4,NU1,MII_INDEX,MIF_INDEX,M)+
-     *FC_I(M)
-      COUNT_FC=COUNT_FC+1
-      ENDIF
-      X_R(1,NU1,MII_INDEX,MIF_INDEX,M)=X_R(1,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSRX*YLM_VAL(L1F,(MII-MIF)/2,M)*COEF_X(1)
-      X_I(1,NU1,MII_INDEX,MIF_INDEX,M)=X_I(1,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSIX*YLM_VAL(L1F,(MII-MIF)/2,M)*COEF_X(1)
-      X_R(2,NU1,MII_INDEX,MIF_INDEX,M)=X_R(2,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSRX*YLM_VAL(L1F,1+(MII-MIF)/2,M)*COEF_X(2)
-      X_I(2,NU1,MII_INDEX,MIF_INDEX,M)=X_I(2,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSIX*YLM_VAL(L1F,1+(MII-MIF)/2,M)*COEF_X(2)
-      X_R(3,NU1,MII_INDEX,MIF_INDEX,M)=X_R(3,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSRX*YLM_VAL(L1F,-1+(MII-MIF)/2,M)*COEF_X(3)
-      X_I(3,NU1,MII_INDEX,MIF_INDEX,M)=X_I(3,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSIX*YLM_VAL(L1F,-1+(MII-MIF)/2,M)*COEF_X(3)
-      X_R(4,NU1,MII_INDEX,MIF_INDEX,M)=X_R(4,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSRX*YLM_VAL(L1F,(MII-MIF)/2,M)*COEF_X(4)
-      X_I(4,NU1,MII_INDEX,MIF_INDEX,M)=X_I(4,NU1,MII_INDEX,MIF_INDEX,M)+
-     *CSIX*YLM_VAL(L1F,(MII-MIF)/2,M)*COEF_X(4)
-  616 CONTINUE
+	X_R(1,NU1,MII_INDEX,MIF_INDEX)=X_R(1,NU1,MII_INDEX,MIF_INDEX)+
+     *FC_R
+	X_I(1,NU1,MII_INDEX,MIF_INDEX)=X_I(1,NU1,MII_INDEX,MIF_INDEX)+
+     *FC_I
+	X_R(4,NU1,MII_INDEX,MIF_INDEX)=X_R(4,NU1,MII_INDEX,MIF_INDEX)+
+     *FC_R
+	X_I(4,NU1,MII_INDEX,MIF_INDEX)=X_I(4,NU1,MII_INDEX,MIF_INDEX)+
+     *FC_I
+	COUNT_FC=COUNT_FC+1
+	ENDIF
+      X_R(1,NU1,MII_INDEX,MIF_INDEX)=X_R(1,NU1,MII_INDEX,MIF_INDEX)+
+     *CSRX*YLM_VAL(L1F,(MII-MIF)/2,MM)*COEF_X(1)
+      X_I(1,NU1,MII_INDEX,MIF_INDEX)=X_I(1,NU1,MII_INDEX,MIF_INDEX)+
+     *CSIX*YLM_VAL(L1F,(MII-MIF)/2,MM)*COEF_X(1)
+      X_R(2,NU1,MII_INDEX,MIF_INDEX)=X_R(2,NU1,MII_INDEX,MIF_INDEX)+
+     *CSRX*YLM_VAL(L1F,1+(MII-MIF)/2,MM)*COEF_X(2)
+      X_I(2,NU1,MII_INDEX,MIF_INDEX)=X_I(2,NU1,MII_INDEX,MIF_INDEX)+
+     *CSIX*YLM_VAL(L1F,1+(MII-MIF)/2,MM)*COEF_X(2)
+	X_R(3,NU1,MII_INDEX,MIF_INDEX)=X_R(3,NU1,MII_INDEX,MIF_INDEX)+
+     *CSRX*YLM_VAL(L1F,-1+(MII-MIF)/2,MM)*COEF_X(3)
+      X_I(3,NU1,MII_INDEX,MIF_INDEX)=X_I(3,NU1,MII_INDEX,MIF_INDEX)+
+     *CSIX*YLM_VAL(L1F,-1+(MII-MIF)/2,MM)*COEF_X(3)
+      X_R(4,NU1,MII_INDEX,MIF_INDEX)=X_R(4,NU1,MII_INDEX,MIF_INDEX)+
+     *CSRX*YLM_VAL(L1F,(MII-MIF)/2,MM)*COEF_X(4)
+      X_I(4,NU1,MII_INDEX,MIF_INDEX)=X_I(4,NU1,MII_INDEX,MIF_INDEX)+
+     *CSIX*YLM_VAL(L1F,(MII-MIF)/2,MM)*COEF_X(4)
+c  616 CONTINUE
   615 CONTINUE  
   614 CONTINUE
     8 CONTINUE
     1 CONTINUE
-    
+            
       DO 619 N=NUI,NUF
-      MII_MAX=IC+1
-      DO 612 MII_INDEX=1,MII_MAX
+	MII_MAX=IC+1
+	DO 612 MII_INDEX=1,MII_MAX
       MIF_MAX=JO(N)+1
       DO 618 MIF_INDEX=1,MIF_MAX
-      DO 617 M=1,MTET
-       CS_ANG_MIF(N,MII_INDEX,MIF_INDEX,M)=
-     *X_R(1,N,MII_INDEX,MIF_INDEX,M)**2+ 
-     *X_I(1,N,MII_INDEX,MIF_INDEX,M)**2+
-     *X_R(2,N,MII_INDEX,MIF_INDEX,M)**2+
-     *X_I(2,N,MII_INDEX,MIF_INDEX,M)**2+
-     *X_R(3,N,MII_INDEX,MIF_INDEX,M)**2+ 
-     *X_I(3,N,MII_INDEX,MIF_INDEX,M)**2+
-     *X_R(4,N,MII_INDEX,MIF_INDEX,M)**2+
-     *X_I(4,N,MII_INDEX,MIF_INDEX,M)**2
-      CS_ANG(N,M)=CS_ANG(N,M)+CS_ANG_MIF(N,MII_INDEX,MIF_INDEX,M)
+c      DO 617 M=1,MTET
+       CS_ANG_MIF(N,MII_INDEX,MIF_INDEX)=
+     *X_R(1,N,MII_INDEX,MIF_INDEX)**2+ 
+     *X_I(1,N,MII_INDEX,MIF_INDEX)**2+
+     *X_R(2,N,MII_INDEX,MIF_INDEX)**2+
+     *X_I(2,N,MII_INDEX,MIF_INDEX)**2+
+     *X_R(3,N,MII_INDEX,MIF_INDEX)**2+ 
+     *X_I(3,N,MII_INDEX,MIF_INDEX)**2+
+     *X_R(4,N,MII_INDEX,MIF_INDEX)**2+
+     *X_I(4,N,MII_INDEX,MIF_INDEX)**2
+      CS_ANG(N)=CS_ANG(N)+CS_ANG_MIF(N,MII_INDEX,MIF_INDEX)
      */MII_MAX/2.D0 !calculate the cross-section
 
+       
       IF(KEYAP.EQ.1) GO TO 625
       
-      DISC(N,M)=DISC(N,M)+    !calculate Py
-     *2.D0*(X_R(1,N,MII_INDEX,MIF_INDEX,M)*X_I(2,N,MII_INDEX,MIF_INDEX,
-     *   M)-X_I(1,N,MII_INDEX,MIF_INDEX,M)*X_R(2,N,MII_INDEX,MIF_INDEX,
-     *   M))/MII_MAX/2.D0 +
-     *2.D0*(X_R(3,N,MII_INDEX,MIF_INDEX,M)*X_I(4,N,MII_INDEX,MIF_INDEX,
-     *   M)-X_I(3,N,MII_INDEX,MIF_INDEX,M)*X_R(4,N,MII_INDEX,MIF_INDEX,
-     *   M))/MII_MAX/2.D0
+	DISC(N,MM)=DISC(N,MM)+    !calculate Py
+     *2.D0*(X_R(1,N,MII_INDEX,MIF_INDEX)*X_I(2,N,MII_INDEX,MIF_INDEX
+     *   )-X_I(1,N,MII_INDEX,MIF_INDEX)*X_R(2,N,MII_INDEX,MIF_INDEX
+     *   ))/MII_MAX/2.D0 +
+     *2.D0*(X_R(3,N,MII_INDEX,MIF_INDEX)*X_I(4,N,MII_INDEX,MIF_INDEX
+     *   )-X_I(3,N,MII_INDEX,MIF_INDEX)*X_R(4,N,MII_INDEX,MIF_INDEX
+     *   ))/MII_MAX/2.D0
      
       GO TO 617
-      
-  625 DISC(N,M)=DISC(N,M)+  !calculate Ay
-     *2.D0*(X_R(1,N,MII_INDEX,MIF_INDEX,M)*X_I(3,N,MII_INDEX,MIF_INDEX,
-     *   M)-X_I(1,N,MII_INDEX,MIF_INDEX,M)*X_R(3,N,MII_INDEX,MIF_INDEX,
-     *   M))/MII_MAX/2.D0 +
-     *2.D0*(X_R(2,N,MII_INDEX,MIF_INDEX,M)*X_I(4,N,MII_INDEX,MIF_INDEX,
-     *   M)-X_I(2,N,MII_INDEX,MIF_INDEX,M)*X_R(4,N,MII_INDEX,MIF_INDEX,
-     *   M))/MII_MAX/2.D0
+	
+  625 DISC(N,MM)=DISC(N,MM)+  !calculate Ay
+     *2.D0*(X_R(1,N,MII_INDEX,MIF_INDEX)*X_I(3,N,MII_INDEX,MIF_INDEX
+     *   )-X_I(1,N,MII_INDEX,MIF_INDEX)*X_R(3,N,MII_INDEX,MIF_INDEX
+     *   ))/MII_MAX/2.D0 +
+     *2.D0*(X_R(2,N,MII_INDEX,MIF_INDEX)*X_I(4,N,MII_INDEX,MIF_INDEX
+     *   )-X_I(2,N,MII_INDEX,MIF_INDEX)*X_R(4,N,MII_INDEX,MIF_INDEX
+     *   ))/MII_MAX/2.D0
   617 CONTINUE
   618 CONTINUE
   612 CONTINUE
-      DO 620 M=1,MTET 
+c      DO 620 M=1,MTET 
  
-      DISC(N,M)=DISC(N,M)/CS_ANG(N,M)
-      IF(KEYAP.EQ.1) DISC(N,M)=-DISC(N,M)
-  620 CONTINUE    
+      !print *, '%%%', TET(MM),CS_ANG(N)
+      
+      DISC(N,MM)=DISC(N,MM)/CS_ANG(N)
+      IF(KEYAP.EQ.1) DISC(N,MM)=-DISC(N,MM)
+c  620 CONTINUE    
   619 CONTINUE 
 
-
-      RETURN
+  627	continue		      
+      
+c      pause 333
+      deallocate(X_R,X_I,stat=error)
+      if (error.ne.0)then
+        print *,"!!!!!!!!!!!!!!!!!!!error:fail to release memory"
+        stop
+      end if   
+	RETURN
       END SUBROUTINE ANPOW
 C     *******************************************************
-      SUBROUTINE PLM_CAL
+	SUBROUTINE PLM_CAL
 C     *******************************************************
-      IMPLICIT REAL*8(A-H,O-Z)
-C     COMMON/PLM/PLM_DATA(181,181,150)
-C     COMMON/DISK/TET(150),MTET
+	IMPLICIT REAL*8(A-H,O-Z)
+C	COMMON/PLM/PLM_DATA(181,181,150)
+C	COMMON/DISK/TET(150),MTET
       INCLUDE 'PRIVCOM1.FOR'
 
-      PLM_DATA(1,1,:)=1./DSQRT(2.D0)
-      DO 636 L=1,180
-      C=1.D0
-      DO 638 INDEX_L=1,L
-      C=C*DSQRT(1.D0-1.D0/(2.D0*INDEX_L))
+	PLM_DATA(1,1,:)=1./DSQRT(2.D0)
+	DO 636 L=1,180
+	C=1.D0
+	DO 638 INDEX_L=1,L
+	C=C*DSQRT(1.D0-1.D0/(2.D0*INDEX_L))
   638 CONTINUE
 
-      DO 637 M=1,MTET
-      TETA=TET(M)*3.1415927D0/180.D0
-      COS_TETA=DCOS(TETA)
-      SIN_TETA=DSIN(TETA)
-      COT_TETA=COS_TETA/SIN_TETA
-      PLM_DATA(L+1,L+1,M)=C*(-1.D0*SIN_TETA)**L !P L L
-      PLM_DATA(L+1,L,M)=PLM_DATA(L+1,L+1,M)*(-2.D0*COT_TETA)*L/
+	DO 637 M=1,MTET
+	TETA=TET(M)*3.1415927D0/180.D0
+	COS_TETA=DCOS(TETA)
+	SIN_TETA=DSIN(TETA)
+	COT_TETA=COS_TETA/SIN_TETA
+	PLM_DATA(L+1,L+1,M)=C*(-1.D0*SIN_TETA)**L !P L L
+	PLM_DATA(L+1,L,M)=PLM_DATA(L+1,L+1,M)*(-2.D0*COT_TETA)*L/
      *  DSQRT(2.D0*L) !P L L-1
-      DO 639 LM=L-2,0,-1 !recursion from l-2 to 0 order 
-      PLM_DATA(L+1,LM+1,M)=(-2.D0*COT_TETA*(LM+1)*PLM_DATA(L+1,LM+2,M)-
+	DO 639 LM=L-2,0,-1 !recursion from l-2 to 0 order 
+	PLM_DATA(L+1,LM+1,M)=(-2.D0*COT_TETA*(LM+1)*PLM_DATA(L+1,LM+2,M)-
      *DSQRT(1.D0*(L+LM+2))*DSQRT(1.D0*(L-LM-1))*PLM_DATA(L+1,LM+3,M))/
      *(DSQRT(1.D0*(L+LM+1))*DSQRT(1.D0*(L-LM)))
   639 CONTINUE !LM LOOP
@@ -6651,9 +6724,9 @@ C     COMMON/DISK/TET(150),MTET
       IFLAG=-IFLAG
   635 CONTINUE !LM2 LOOP
   636 CONTINUE !L LOOP
-      END SUBROUTINE PLM_CAL
-C     *******************************************************     
-      FUNCTION YLM_VAL(Y_L,Y_M,Y_ANGU) !find the value according to l and m
+	END SUBROUTINE PLM_CAL
+C     *******************************************************	
+	FUNCTION YLM_VAL(Y_L,Y_M,Y_ANGU) !find the value according to l and m
 C     *******************************************************
       IMPLICIT REAL*8(A-H,O-Z)
 C     COMMON/PLM/PLM_DATA(181,181,150)
@@ -6679,47 +6752,47 @@ C     *******************************************************
 
 C     *******************************************************
 C     SUBROUTINE WRITTEN BY Rui LI AND Weili SUN FROM IAPCM CHINA
-      SUBROUTINE DEUTR !analyzing power
+	SUBROUTINE DEUTR !analyzing power
 C     *******************************************************
       IMPLICIT REAL*8(A-H,O-Z)
-      !----deutron angular distribution1---------
-      REAL*8 FC_R(150),FC_I(150),X_R(9,10,20,20,150),
+	!----deutron angular distribution1---------
+	REAL*8 FC_R(150),FC_I(150),X_R(9,10,20,20,150),
      *       X_I(9,10,20,20,150),COEF_X(9),CSRX,CSIX,
-     *       CS_ANG_MIF(9,20,20,150),CS_ANG(9,150)               
+     *       CS_ANG_MIF(9,20,20,150),CS_ANG(9,150)	           
        INTEGER MII_INDEX,MII,MII_MAX,MIF_INDEX,MIF,MIF_MAX
 
 
-      !----deutron angular distribution2---------
-            INCLUDE 'PRIVCOM.FOR'
+     	!----deutron angular distribution2---------
+     	      INCLUDE 'PRIVCOM.FOR'
             INCLUDE 'PRIVCOM1.FOR'
             INCLUDE 'PRIVCOM13.FOR' 
             INCLUDE 'PRIVCOM14.FOR'    
  
-            !----------initialization----------
-      X_R=0.D0
-      X_I=0.D0
-      FC_R=0.D0
-      FC_I=0.D0
-      DISC=0.D0
+          	!----------initialization----------
+	X_R=0.D0
+	X_I=0.D0
+	FC_R=0.D0
+	FC_I=0.D0
+	DISC=0.D0
 
 
       CS_ANG=0.D0
       !*************initialization***********
-      CALL PLM_CAL !calculating harmonic function
+	CALL PLM_CAL !calculating harmonic function
       LKK=1
       ETA=CONZ/WNK(1)
       IC=JO(1)
-      !-------------calculate f_c(Coulomb amplitude)-------------
-      DO 627 M=1,MTET 
-      TETA=TET(M)*3.1415927/180
-      ALST2=DLOG(DSIN(TETA/2.D0))
+	!-------------calculate f_c(Coulomb amplitude)-------------
+	DO 627 M=1,MTET 
+	TETA=TET(M)*3.1415927/180
+	ALST2=DLOG(DSIN(TETA/2.D0))
       ARGC=2.D0*(COPH(1,1)-ETA*ALST2)
-      temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DCOS(ARGC)
-      FC_R(M)=temp 
-      temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DSIN(ARGC)
-      FC_I(M)=temp       
-  627 continue          
-      !------------------------------------------------------------     
+	temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DCOS(ARGC)
+	FC_R(M)=temp 
+	temp=-ETA/(20.D0*WNK(1)*DSIN(TETA/2.D0)**2)*DSIN(ARGC)
+	FC_I(M)=temp       
+  627	continue		
+      !------------------------------------------------------------	
       DO 1 K1=1,NJ
       JS1=JS(K1)
       N1I=INC(K1)
@@ -6732,9 +6805,9 @@ C     *******************************************************
       J1F=JNJ(K1,N1R)
       NU1=NNJ(K1,N1R)
 
-      MII_MAX=IC+1 !number of MII:2*I+1
-      DO 614 MII_INDEX=1,MII_MAX
-      MII=2*MII_INDEX-IC-2 !2*MI
+	MII_MAX=IC+1 !number of MII:2*I+1
+	DO 614 MII_INDEX=1,MII_MAX
+	MII=2*MII_INDEX-IC-2 !2*MI
       MIF_MAX=JO(NU1)+1 !number of MIF: 2*I'+1
       DO 615 MIF_INDEX=1,MIF_MAX
       MIF=2*MIF_INDEX-JO(NU1)-2 
@@ -6908,28 +6981,28 @@ c----------------------------
       COEF_X(9)=COEF_X(9)*AKG 
 
       CORR=DCOS(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
-      COII=DSIN(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
-      CSRX=CORR*CRD(K1,N1C,N1R)-COII*CID(K1,N1C,N1R)
-      CSIX=CORR*CID(K1,N1C,N1R)+COII*CRD(K1,N1C,N1R)
+	COII=DSIN(COPH(NU1,L1F+1)+COPH(1,L1I+1)) 
+	CSRX=CORR*CRD(K1,N1C,N1R)-COII*CID(K1,N1C,N1R)
+	CSIX=CORR*CID(K1,N1C,N1R)+COII*CRD(K1,N1C,N1R)
 
       DO 616 M=1,MTET
-      IF(NU1.EQ.1 .AND. L1I.EQ.0 .AND. J1I.EQ.2   ! .AND. JS1.EQ.(IC+2) 
-     * .AND. L1F.EQ.0   .AND. J1F.EQ.2 .AND. MII.EQ.MIF)
+	IF(NU1.EQ.1 .AND. L1I.EQ.0 .AND. J1I.EQ.2   ! .AND. JS1.EQ.(IC+2) 
+     * .AND. L1F.EQ.0	.AND. J1F.EQ.2 .AND. MII.EQ.MIF)
      *THEN !add the Coulomb amplitude(only added once for different J1I and JS1)
-      X_R(1,NU1,MII_INDEX,MIF_INDEX,M)=X_R(1,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_R(1,NU1,MII_INDEX,MIF_INDEX,M)=X_R(1,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_R(M)
-      X_I(1,NU1,MII_INDEX,MIF_INDEX,M)=X_I(1,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_I(1,NU1,MII_INDEX,MIF_INDEX,M)=X_I(1,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_I(M)
-      X_R(5,NU1,MII_INDEX,MIF_INDEX,M)=X_R(5,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_R(5,NU1,MII_INDEX,MIF_INDEX,M)=X_R(5,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_R(M)
-      X_I(5,NU1,MII_INDEX,MIF_INDEX,M)=X_I(5,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_I(5,NU1,MII_INDEX,MIF_INDEX,M)=X_I(5,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_I(M)
-      X_R(9,NU1,MII_INDEX,MIF_INDEX,M)=X_R(9,NU1,MII_INDEX,MIF_INDEX,M)+
+     	X_R(9,NU1,MII_INDEX,MIF_INDEX,M)=X_R(9,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_R(M)
-      X_I(9,NU1,MII_INDEX,MIF_INDEX,M)=X_I(9,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_I(9,NU1,MII_INDEX,MIF_INDEX,M)=X_I(9,NU1,MII_INDEX,MIF_INDEX,M)+
      *FC_I(M)
-      COUNT_FC=COUNT_FC+1
-      ENDIF
+	COUNT_FC=COUNT_FC+1
+	ENDIF
       X_R(1,NU1,MII_INDEX,MIF_INDEX,M)=X_R(1,NU1,MII_INDEX,MIF_INDEX,M)+
      *CSRX*YLM_VAL(L1F,(MII-MIF)/2,M)*COEF_X(1)
       X_I(1,NU1,MII_INDEX,MIF_INDEX,M)=X_I(1,NU1,MII_INDEX,MIF_INDEX,M)+
@@ -6938,7 +7011,7 @@ c----------------------------
      *CSRX*YLM_VAL(L1F,1+(MII-MIF)/2,M)*COEF_X(2)
       X_I(2,NU1,MII_INDEX,MIF_INDEX,M)=X_I(2,NU1,MII_INDEX,MIF_INDEX,M)+
      *CSIX*YLM_VAL(L1F,1+(MII-MIF)/2,M)*COEF_X(2)
-      X_R(3,NU1,MII_INDEX,MIF_INDEX,M)=X_R(3,NU1,MII_INDEX,MIF_INDEX,M)+
+	X_R(3,NU1,MII_INDEX,MIF_INDEX,M)=X_R(3,NU1,MII_INDEX,MIF_INDEX,M)+
      *CSRX*YLM_VAL(L1F,2+(MII-MIF)/2,M)*COEF_X(3)
       X_I(3,NU1,MII_INDEX,MIF_INDEX,M)=X_I(3,NU1,MII_INDEX,MIF_INDEX,M)+
      *CSIX*YLM_VAL(L1F,2+(MII-MIF)/2,M)*COEF_X(3)
@@ -6975,8 +7048,8 @@ c----------------------------
     1 CONTINUE
     
       DO 619 N=NUI,NUF
-      MII_MAX=IC+1
-      DO 612 MII_INDEX=1,MII_MAX
+	MII_MAX=IC+1
+	DO 612 MII_INDEX=1,MII_MAX
       MIF_MAX=JO(N)+1
       DO 618 MIF_INDEX=1,MIF_MAX
       DO 617 M=1,MTET

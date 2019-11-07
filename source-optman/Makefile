@@ -4,24 +4,24 @@
 
 # set default fortran compiler:
 
-FC   =  gfortran
-#FC  =  ifort
+#FC   =  gfortran
+FC  =  ifort
 #FC  =  af95
 #FC  =  pfg90
 #FC  =  lf95
 
 
 # set mode
-MODE = EMPMODE
-# set to "EMPMODE" for EMPIRE mode or leave empty for pure OPTMAN
+MODE = EMPIRE
+# set to "EMPIRE" for EMPIRE mode or leave empty for pure OPTMAN
 
 # set formatted output for *.tlj
-OUTMODE = 
-# set to "FORMATTEDOUT" for formatted output of *.tlj or leave blank
+OUTMODE =
+# set to "formatted" for formatted output of *.tlj or leave blank
 # for unformatted
 
 # set parallel
-PARALLEL = 
+PARALLEL =
 # set to "OPENMP" for parallelization or leave blank for single thread
 
 # set matrix inversion
@@ -33,11 +33,15 @@ MATRIX =
 
 # various flags are set based on compiler FC:
 # FFLAGS are the normal complier options for production code
-# DFLAGS are the options used when debugging 
+# DFLAGS are the options used when debugging (except for ECIS)
+# EFLAGS are the options used for ECIS (no debug allowed)
+# OFLAGS are the options used for OPTMAN
 
 LIBS =
-FFLAGS = 
 DFLAGS = 
+FFLAGS = 
+EFLAGS = 
+OFLAGS = 
 
 ifeq ($(FC),gfortran)
 
@@ -45,15 +49,19 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  # FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
-  FFLAGS = -O2 -std=legacy -ffast-math -cpp
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
   ifeq ($(PARALLEL),OPENMP) 
-    FFLAGS = $(FFLAGS) -fopenmp
+    FFLAGS += -fopenmp
   endif
-  #FFLAGS = -O3 -pg -std=legacy -cpp
+  #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv  -cpp
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv 
   # -pg shoudl be added for profiling
+  #----flags for ECIS
+  EFLAGS = -O2 -std=legacy -ffast-math
+  #----flags for OPTMAN
+  OFLAGS = -O2 -std=legacy -ffast-math
+  #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
 
@@ -67,33 +75,45 @@ else ifeq ($(FC),ifort)
   #----flags for debuging
   DFLAGS = -O0 -g -debug all -check all -warn unused -fp-stack-check -ftrapuv -trace -logo
   #------------------------------------------------------------------------------------------------
-  # FFLAGS =  -O3 -x=host -logo -parallel -openmp-report1 -par-threshold2 -openmp -vec-report1
+  FFLAGS = -O3 -fpp -x=host -logo -parallel -par-threshold2
   # flags for automatic & openMP directives
   ifeq ($(MATRIX),LAPACK) 
     LIBS =  -mkl#-openmp-lib compat
   endif
   
   #----flags for automatic parallelization
-  FFLAGS = -x=host -O3 -fpp -diag-disable id8290,8291,8293  #-x=host -parallel -par-report1
+  #FFLAGS = -O3 -fpp -x=host -parallel -par-report1
   ifeq ($(PARALLEL),OPENMP) 
-    FFLAGS = $(FFLAGS) -qopenmp
+    FFLAGS += -qopenmp
+    OFLAGS += -qopenmp
   endif
+  # Flags for ECIS
+  EFLAGS = -O2 -x=host
+  # Flags for OPTMAN
+  OFLAGS = -O2 -fpp -x=host -parallel
+  #----flags for use on NNDC cluster
   ifeq ($(HOSTNAME),nlc.nndc.bnl.gov)
-      FFLAGS = -O2
+      FFLAGS = -O3
+      EFLAGS = -O2
+      OFLAGS = -O2
   endif
 
 else ifeq ($(FC),af95)
  
   #---------------------------
-  #----Absoft-16.0 FORTRAN compiler
+  #----Absoft FORTRAN compiler
   #---------------------------
   #----We need to include Unix and Vax libraries to add etime,
   #    getenv, and system functions in Absoft
-  LIBS =  -lU77 -lV77 -L/Applications/Absoft16.0/lib64
+  LIBS =  -lU77 -lV77 -L/Applications/Absoft11.1/lib64
   #----flags for production
-  FFLAGS = -march=host -m64 -O2 -s -cpp
+  FFLAGS = -march=host -m64 -O3 -s
   #----flags for debuging
-  DFLAGS = -O0 -m64 -g -s -cpp
+  DFLAGS = -O0 -m64 -g -s
+  #----flags for ECIS
+  EFLAGS = -O2 -march=host -s -m64
+  #----flags for OPTMAN
+  OFLAGS = -O2 -march=host -s -m64
 
 else ifeq ($(FC),pfg90)
  
@@ -104,6 +124,10 @@ else ifeq ($(FC),pfg90)
   FFLAGS =  -O3 
   #----flags for debuging
   DFLAGS = -O0 -g
+  #----flags for ECIS
+  EFLAGS = -O2
+  #----flags for OPTMAN
+  OFLAGS = -O2
 
 else ifeq ($(FC),lf90)
  
@@ -111,38 +135,43 @@ else ifeq ($(FC),lf90)
   #----Lahey/Fujitsu f95 compiler
   #--------------------------------------
   #----flag for Lahey/Fujitsu production 
-  FFLAGS = -O3 -Cpp
+  FFLAGS = -O3
   #----flags for debuging
   DFLAGS = -O0 -g --chk
+  #----flags for ECIS
+  EFLAGS = -O2
+  #----flags for OPTMAN
+  OFLAGS = -O2
 
 endif
 
 ifeq ($(MATRIX),LAPACK)
-   FFLAGS = $(FFLAGS) -DLAPACK
+   OFLAGS += -DLAPACK
 endif
 
-#ifeq ($(MODE),EMPIRE)
-#   FFLAGS = $(FFLAGS) -DEMPMODE
-#endif
+ifeq ($(MODE),EMPIRE)
+   OFLAGS += -DEMPMODE
+endif
 
-#ifeq ($(OUTMODE),formatted)
-#   FFLAGS = $(FFLAGS) -DFORMATTEDOUT
-#endif
+ifeq ($(OUTMODE),formatted)
+   OFLAGS += -DFORMATTEDOUT
+endif
 
 # make sure MAKE knows f90 extension
 %.o : %.f
-	$(FC) $(FFLAGS) -D$(MODE) $(OUTMODE) -c $<
+	$(FC) $(FFLAGS) -c $<
 
-OBJF = OPTMAND.o SHEMSOFD.o dispers.o KNDITD.o ccrd.o ABCTpar.o DATETpar.o LU_matrix_inv.o opt2Rmatrix.o
+ifeq ($(MATRIX),LAPACK)
+   OBJF = OPTMAND.o SHEMSOFD.o dispers.o KNDITD.o ccrd.o ABCTpar.o DATETpar.o LU_matrix_inv.o opt2Rmatrix.o
+else
+   OBJF = OPTMAND.o SHEMSOFD.o dispers.o KNDITD.o ccrd.o ABCTpar.o DATETpar.o opt2Rmatrix.o
+endif
 
 all: 
 	$(MAKE) optmand
 
 optmand: $(OBJF) 
-	$(FC) $(FFLAGS) -o optmand $(OBJF) $(LIBS) $(STATIC)
-
-dbg:  
-	$(MAKE) "FFLAGS=$(DFLAGS)" all
+	$(FC) $(OFLAGS) -o optmand $(OBJF) $(LIBS)
 
 clean:
 	rm -f *.o *.mod

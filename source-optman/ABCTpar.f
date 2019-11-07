@@ -4,10 +4,10 @@
       INTEGER IIparal
 
       CHARACTER*1  cpar
-      DIMENSION JTEMP(40)
-      LOGICAL EMPIRE
-      CHARACTER*20 fname 
-      COMMON/INOUT/fname,EMPIRE
+      DIMENSION JTEMP(40),JSHIFT(40)
+     
+      INCLUDE 'PRIVCOM21.FOR'      
+
       
       INCLUDE 'PRIVCOM.FOR'         
       INCLUDE 'PRIVCOM1.FOR'
@@ -22,10 +22,9 @@ C     Input commons (do not change with energy)
       INCLUDE 'PRIVCOM15.FOR'
       INCLUDE 'PRIVCOM16D.FOR'
       INCLUDE 'PRIVCOM20.FOR'
-      
 
       
-
+      CHARACTER*8 PNAME
       INTEGER TID
 !$    INTEGER OMP_GET_THREAD_NUM
 
@@ -37,6 +36,9 @@ C     Input commons (do not change with energy)
       EN=EE(IIparal)
 
   777 MECHA=MCHAE(IIparal)
+      
+      PNAME='NEUTRONS'
+      IF(MECHA.NE.0) PNAME=' PROTONS'       
   
 C     CREATING LEVELS FOR (P,N) ANALOG STATES CALCULATIONS
      
@@ -61,6 +63,9 @@ C     CREATING LEVELS FOR (P,N) ANALOG STATES CALCULATIONS
        DPAR=DPARIS(1)
       GSHAPE=GSHAEIS(1)
       IF(MEPOT.GT.1) GO TO 638
+      
+      JSHIFT=0
+      
       DO 601 I=1, NUR
       IF(MECHA.EQ.0.AND. NCAC(I).NE.NCAC(1)) GO TO 601
       NURC=NURC+1
@@ -79,21 +84,21 @@ C     CREATING LEVELS FOR (P,N) ANALOG STATES CALCULATIONS
       ES(NURC)=EL(NURC) 
       JU(NURC)=JO(NURC)/2
       NPI(NURC)=NPO(NURC)
-
+      IF (NNO(NURC).EQ.1) JSHIFT(NURC)=1
   601 CONTINUE
       NUR=NURC
-
+      
+      !JBASE=NINT(DBLE(JO(1))/4.0)*2
+      
       IF(MOD(JO(1),2).GT.0) THEN
           JTEMP=JU
-          JU=NINT(DBLE(JO)/4.0)*2
-          NTU=1
-          NNB=0
-          NNG=0
-          NNO=0
-          NPI=1
-      END IF      
-      
-          IF(MEDEF.GT.0.OR.MEAXI.EQ.1) CALL OVLOPT
+          !JU=NINT(DBLE(JO)/4.0)*2!-JBASE
+          JU=NINT(DBLE(JO-JO(1))/4.0)*2+JSHIFT ! FOR GS, BETA, GAMMA, AND INV PARITY BANDS
+          !!! ABNORMAL BAND SHOULD BE ASSIGNED SEPARATELY!!!
+      END IF     
+            
+      EFFDEF=0.d0
+      IF(MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.EQ.1) CALL OVLOPT
  
        DO IID=1,NUR
          DO JJD=IID,NUR
@@ -103,13 +108,13 @@ C             EFFDIS(IIS,IID,JJD,:)=EFFDEF(IID,JJD,:)
        END DO
 
       IF(MOD(JO(1),2).GT.0)  THEN
-          NUMBGS=NUMB(1)
-           DO IID=1,NUR
-             DO JJD=IID,NUR
-                IF(NUMB(IID).NE.NUMBGS.OR.NUMB(IID).NE.NUMBGS)
-     *                  EFFDEF(JJD,IID,:)=0.0
-             END DO
-           END DO          
+c          NUMBGS=NUMB(1)
+c           DO IID=1,NUR
+c             DO JJD=1,NUR
+c                IF(NUMB(IID).NE.NUMBGS.OR.NUMB(JJD).NE.NUMBGS)
+c     *                  EFFDEF(JJD,IID,:)=0.0
+c             END DO
+c           END DO          
           JU=JTEMP
       END IF         
   
@@ -164,12 +169,14 @@ C     KODMA=KOD
       NUI=1
       NUF=NMAX
       
+      IF(.not.EMPIRE) then
+
       KEYAP=1
-C      CALL ANPOW                       NOT WORKING YET !!!!!
+      CALL ANPOW                       !NOT WORKING YET !!!!!
       IF(MEPRI.NE.98) THEN
-      IF(MEPRI.LT.98) PRINT 300
-      WRITE(21,300)
-  300 FORMAT(/23X,'ANALYZING POWERS FOR SCATTERED PARTICLES'/)
+      IF(MEPRI.LT.98) PRINT 300, PNAME
+      WRITE(21,300) PNAME
+  300 FORMAT(/23X,'ANALYZING POWERS FOR SCATTERED ',A8/)
       WRITE(327,'(F10.6,2I3)') EN,MTET,NMAX
       DO 314 M=1,MTET
       IF(MEPRI.LT.98) PRINT 11,TET(M),(DISC(K,M),K=1,NMAX)
@@ -179,12 +186,12 @@ C      CALL ANPOW                       NOT WORKING YET !!!!!
       ENDIF
     
       KEYAP=2
-C      CALL ANPOW                          NOT WORKING YET !!!!!
+      CALL ANPOW                          !NOT WORKING YET !!!!!
 
       IF(MEPRI.NE.98) THEN
-      IF(MEPRI.LT.98) PRINT 338
-      WRITE(21,338)
-  338 FORMAT(/29X,'POLARIZATION FOR SCATTERED PARTICLES'/)
+      IF(MEPRI.LT.98) PRINT 338, PNAME
+      WRITE(21,338) PNAME
+  338 FORMAT(/29X,'POLARIZATION FOR SCATTERED ',A8/)
       WRITE(328,'(F10.6,2I3)') EN,MTET,NMAX
       DO 315 M=1,MTET
       IF(MEPRI.LT.98) PRINT 11,TET(M),(DISC(K,M),K=1,NMAX)
@@ -192,13 +199,15 @@ C      CALL ANPOW                          NOT WORKING YET !!!!!
       WRITE(328,111)TET(M),(DISC(K,M),K=1,NMAX)      
   315 CONTINUE
       ENDIF
-
+      
+      ENDIF 
+ 
       CALL DISCA
       
       IF(MEPRI.NE.98) THEN
-      IF(MEPRI.LT.98) PRINT 110
-      WRITE(21,110)
-  110 FORMAT(/23X,'ANGULAR DISTRIBUTIONS OF SCATTERED PARTICLES'/
+      IF(MEPRI.LT.98) PRINT 110, PNAME
+      WRITE(21,110) PNAME
+  110 FORMAT(/23X,'ANGULAR DISTRIBUTIONS OF SCATTERED ',A8/
      *'    ANGLES[deg]      gs          1st       ...      '  )
       WRITE(27,'(F10.6,2I3)') EN,MTET,NMAX
       DO 14 M=1,MTET
@@ -284,8 +293,8 @@ C     CROSS SECTION FILES
 C
 
       IF(MEPRI.EQ.98) THEN  
-        open(unit=93,file=TRIM(fname)//'.cs')
-        open(unit=98,file=TRIM(fname)//'.ics')
+        open(unit=93,file=TRIM(fname)//'.CS')
+        open(unit=98,file=TRIM(fname)//'.ICS')
 
        IF(ETA.EQ.0.D0) THEN
 C        WRITE(93,'(10H<CROSS-S.>,F10.2,F10.5,F10.2,2I5)') 
@@ -340,8 +349,8 @@ C        WRITE(93,'(1X,E14.8)') (CST - CSN(1))*1000.
        
       IF(MEPRI.EQ.98) THEN  
 C
-        open(unit=96,file=TRIM(fname)//'.leg')
-        open(unit=97,file=TRIM(fname)//'.ang')
+        open(unit=96,file=TRIM(fname)//'.LEG')
+        open(unit=97,file=TRIM(fname)//'.ANG')
 C
 c       IF(ETA.EQ.0.) WRITE(96,'(10H<LEGENDRE>,F10.2,F10.5,F10.2,2I5)') 
         IF(ETA.EQ.0.D0) WRITE(96,1000) ANEU,EN,AT,NINT(0.5*JO(1)),NMAX

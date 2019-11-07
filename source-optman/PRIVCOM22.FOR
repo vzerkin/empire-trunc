@@ -1,18 +1,14 @@
 C     *******************************************************
-C     START of privcom2  
+C     START of privcom22  
 C     *******************************************************
 C==========================================================================
 C     PRIVATE COMMONS FOR EACH PARALLEL THREAD TO BE USED AS INCLUDE BLOCK
+C     Nucleus number
 
-
-
-C     C     FROM SUBROUTINE SOSIT        
-      COMMON/CONT/P(40000),R(40000),W(40000),V(40000),E(40000),F(40000),
-     *S(40000),B(40000),Q(40000),T(40000),G(40000),Z(40000)
-      
-!$OMP THREADPRIVATE(/CONT/)
-      
+      COMMON/NIND/IIS
+!$OMP THREADPRIVATE(/NIND/)          
+     
 
 C     *******************************************************
-C     END of pricom2
+C     END of pricom22
 C     *******************************************************
