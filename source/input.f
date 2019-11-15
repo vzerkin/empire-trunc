@@ -1,6 +1,6 @@
-!cc   * $Rev: 5168 $
-!cc   * $Author: mwherman $
-!cc   * $Date: 2019-10-31 16:13:32 +0100 (Do, 31 Okt 2019) $
+!cc   * $Rev: 5171 $
+!cc   * $Author: capote $
+!cc   * $Date: 2019-11-15 09:12:32 +0100 (Fr, 15 Nov 2019) $
 
       SUBROUTINE INPUT
 !cc
@@ -5302,7 +5302,7 @@ C-----
             IF (val.GT.NDEX-1) NEXreq = NDEX-1
             WRITE (8,
      &'('' Number of energy steps in the integration set to '',
-     &I3)') NEXreq
+     &I4)') NEXreq
             GOTO 100
          ENDIF
 C===========================================================
