@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4929 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-20 13:14:12 +0200 (Do, 20 Apr 2017) $
+Ccc   * $Rev: 5172 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2019-11-17 19:03:46 +0100 (So, 17 Nov 2019) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -58,6 +58,8 @@ C-----
          excnq = EX(Iec,Nnuc) - Q(Nejc,Nnuc)
       ENDIF
       nexrt = (excnq - ECUt(Nnur))/DE + 1.0001
+C     Extending continuum for capture over the discrete levels, RCN 112019
+      if(Nejc.eq.0) nexrt = excnq/DE + 1.0001
 
       IF(nexrt.GT.0) THEN
 
@@ -123,10 +125,15 @@ C               Selected primary gammas from the CN: Nnuc=1, Nejc=0
 C               Originate from the primary excitation energy bin: Iec = NEX(1)
                 ENPg(il) = eemi
                 CSEpg(il)  = CSEpg(il) + pop1
-C               Primary gamma table stored, they are also(!)
-C               included in the total gamma spectra
-              ENDIF
+C               Primary gamma table stored 
+C
+                CYCLE  ! Skipping primary gammas
+C               Note that the CYCLE instruction above measn that primary gammas are NOT 
+C               stored into the spectrum, therefore, they are not formatted.  
+C
+             ENDIF
             ENDIF  ! Primary gammas stored in CSEpg
+
             IF(icsl.LT.nspec) THEN
                popl = pop1*(FLOAT(icsh) - xcse)/DE
                poph = pop1*(xcse - FLOAT(icsl))/DE
@@ -994,17 +1001,17 @@ C-------------NOTE: internal conversion taken into account
 C
               IF(NNG_xs.gt.0 .and. ENDF(Nnuc).le.1) then
                 if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc)).eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+     &            write(104,'(1x,4i5,1x,5(g12.5,1x))') 
+     &              4,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs,popl
                 if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+1.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+     &            write(104,'(1x,4i5,1x,5(g12.5,1x))') 
+     &             16,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs,popl
                 if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+2.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+     &            write(104,'(1x,4i5,1x,5(g12.5,1x))') 
+     &             17,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs,popl
                 if(Z(Nnuc).eq.Z(0).and.NINT(A(Nnuc))+3.eq.NINT(A(0)))
-     &                write(104,'(1x,4i5,1x,4(g12.5,1x))') 
-     &                37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs
+     &            write(104,'(1x,4i5,1x,5(g12.5,1x))') 
+     &             37,NINT(A(Nnuc)),l,j1,egd, EINl,gacs_noicc,gacs,popl
               ENDIF
             ENDDO
           ENDIF  ! popl>0 ?
