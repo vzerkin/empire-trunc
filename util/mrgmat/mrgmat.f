@@ -234,7 +234,10 @@ C* Copy the file to output
       END IF
       IF(MAT.NE.JMT) GO TO 70
    72 JS  =JS+1
-      IF(JS.GT.99999) JS=0
+      IF(JS.GT.99999) then
+          JS=0
+          if (MT.NE.0) JS=1
+      endif
       IF(MT.EQ.0 .AND. MF.GT.0) JS=99999
       WRITE(LOU,95) CH66,MAT,MF,MT,JS
       READ (LTM,95,END=60) CH66,MAT,MF,MT,IS
