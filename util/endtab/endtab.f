@@ -35,6 +35,9 @@ C-V  16/12 Fix printout of the backward angle in the distributions.
 C-V  17/04 Reset upper energy for plotting in multiple plots.
 C-V  17/05 Add outgoing particle selection for all data
 C-V        WARNING - Input specifications change.
+C-V  18/08 Allow plotting spectra (MF3/MT261) "per unit lethargy".
+C-V  19/08 Add percent uncertainty to printout.
+C-V  19/10 Shift uncertainty printout to beyond column 66.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -117,7 +120,11 @@ C-M                The outgoind particla ZA designation and the angle
 C-M                (in degrees) are requested from input.
 C-M      MT=261    The temperature of the Maxwellian fission spectrum
 C-M                is requested if ratio to Maxwellian is to be
-C-M                printed to output.
+C-M                printed to output. Special options are:
+C-M                 Temp.= 0  The spectrum is printed as it is.
+C-M                        1  Lethargy spectrum is printed.
+C-M                       >1  The ratio to a Maxwellian spectrum
+C-M                           at temperature [keV] is printed.
 C-M    The program then cycles back to request additional MT numbers
 C-M    to be processed and added to the same output file. The list is
 C-M    terminated by zero. Valid entries are those that actually
@@ -173,7 +180,9 @@ C-M
 C-M  Output format:
 C-M  The data are written to output in the PLOTTAB "curves" format:
 C-M  the header comment is followed by any number of records
-C-M  containing data pairs (argument, function). Each entry of the
+C-M  containing data pairs or triplets (argument, function,
+C-M  uncerainty). For convenience, the relative percent uncertainty
+C-M  (if applicable) is printed beyond column 66. Each entry of the
 C-M  pair is 11 columns wide. A data set is terminated by the
 C-M  end-of-file mark or by a blank record. The header comment
 C-M  of the next set may follow. There may be any number of data
@@ -236,8 +245,14 @@ C* Select the material
       READ (LKB,98,ERR=13) ZA0
       WRITE(LTT,991) ' Selected ZA                          : ',ZA0
 C* Select the outgoing particle 
-      WRITE(LTT,91) '$    Outgoing particla ZA designation : '
-      READ (LKB,98) ZAP
+      WRITE(LTT,91) '     Outgoing particla ZA designation   '
+      WRITE(LTT,91) '$     (blank or -1 for reaction x.s.) : '
+      READ (LKB,99) FLNM
+      IF(FLNM(1:40).EQ.BLNK) THEN
+        ZAP=-1
+      ELSE
+        READ (FLNM,98) ZAP
+      END IF
       WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
 C* Select the ENDF file (3, 6, 10 or 15)
    14 WRITE(LTT,91) '$Enter the requested ENDF file MF No. : '
@@ -339,12 +354,23 @@ C* If zero and not first loop, finish
       IF(IDMY.EQ.0 .AND. MT0.NE.0) GO TO 90
 C* Check if ratio to Maxwellian is to be printed
       TMXW=0
+      ILTH=0
       IF((IDMY.EQ.261 .AND. MF0.EQ.3) .OR.
      &   (IDMY.EQ. 18 .AND. MF0.EQ.5)) THEN
-        WRITE(LTT,91) '$Enter the Temperature of Maxwellian    '
-        WRITE(LTT,91) ' (zero or blank to print absolute)    : '
+        WRITE(LTT,91) ' Enter the Temperature of Maxwellian    '
+        WRITE(LTT,91) '     zero or blank to print absolute    '
+        WRITE(LTT,91) '$      <0 to print lethargy spectrum  : '
         READ (LKB,99) FLNM
-        IF(FLNM(1:40).NE.BLNK) READ(FLNM,98) TMXW
+C*      -- If TMXW<0, set flag to print lethargy spectrum
+        IF(TMXW.LT.0) THEN
+          TMXW=0
+          ILTH=1
+          WRITE(LTT,91) ' '
+          WRITE(LTT,91) ' Lethargy spectrum is selected          '
+        ELSE
+          WRITE(LTT,91) ' '
+          WRITE(LTT,91) ' Energy spectrum is selected            '
+        END IF
       END IF
 C... Special case for backward compatibility to force MT 5 explicitly
 C...  IF(IDMY.EQ.5) IDMY=-5
@@ -353,12 +379,12 @@ C...
       ELV=0
       FST=0
 C* Particle emission spectra
-      IF( MT0.EQ.5 .OR. MT0.EQ. 9000 .OR.
-     &   (ZAP.LT.0 .AND. (MF0.EQ.5 .OR. MF0.EQ.6)) ) THEN
-        WRITE(LTT,91) '$    Outgoing particle ZA designation : '
-        READ (LKB,98) ZAP
-        WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
-      END IF
+C...  IF( MT0.EQ.5 .OR. MT0.EQ. 9000 .OR.
+C... &   (ZAP.LT.0 .AND. (MF0.EQ.5 .OR. MF0.EQ.6)) ) THEN
+C...    WRITE(LTT,91) '$    Outgoing particle ZA designation : '
+C...    READ (LKB,98) ZAP
+C...    WRITE(LTT,991) ' Selected outgoing particla ZA       : ',ZAP
+C...  END IF
 C* Cross section at particular particle emission angle
       IF(MT0.GT.40000) THEN
         WRITE(LTT,91) '$    Outgoing particla ZA designation : '
@@ -644,17 +670,27 @@ C*    -- First point
         ED=DBLE(EE1)
         IF(IN2.EQ.1) THEN
           ED=DBLE(EA)
+          IF(ILTH.EQ.1) THEN
+            SG1=SG1*(EE2-EE1)/LOG(EE2/EE1)
+            UG1=UG1*(EE2-EE1)/LOG(EE2/EE1)
+          END IF
         ELSE IF(IN2.EQ.2) THEN
           IF(EE1.LE.EA) THEN
             IF(EE1.LT.EE2) SG1=SG1+(EA-EE1)*(SG2-SG1)/(EE2-EE1)
             ED=DBLE(EA)
+          END IF
+          IF(ILTH.EQ.1) THEN
+            SG1=SG1*EE1
+            UG1=UG1*EE1
           END IF
         ELSE
           STOP 'ENDTAB ERROR - Invalid interpolation law'
         END IF
         IF(ABS(ED).LE.1.D-9) ED=0
         CALL CH11PK(E11,ED)
-        WRITE(LOU,194) E11,SG1,UG1
+        PG1=0
+        IF(SG1.NE.0) PG1=100*UG1/SG1
+        WRITE(LOU,194) E11,SG1,UG1,PG1
 C...
 C...    PRINT *,'WRITTEN FIRST',KK,E11,SG1
 C...
@@ -663,6 +699,7 @@ C...
 C*      -- Last point
         IF(IN2.EQ.1) THEN
           ED=DBLE(EB)
+          IF(ILTH.EQ.1) SG2=0
         ELSE IF(IN2.EQ.2) THEN
           IF(EE1.LT.EE2 .AND. EE2.GE.EB) THEN
             SG2=SG1+(EB-EE1)*(SG2-SG1)/(EE2-EE1)
@@ -670,10 +707,19 @@ C*      -- Last point
           ELSE
             ED=DBLE(EE2)
           END IF
+          IF(ILTH.EQ.1) THEN
+            SG2=SG2*EE2
+          END IF
         END IF
         CALL CH11PK(E11,ED)
-        IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
-        WRITE(LOU,194) E11,SG2,UG2
+        IF(IN2.EQ.1) THEN
+          PG1=0
+          IF(SG1.NE.0) PG1=100*UG1/SG1
+          WRITE(LOU,194) E11,SG1,UG1,PG1
+        END IF
+        PG2=0
+        IF(SG2.NE.0) PG2=100*UG2/SG2
+        WRITE(LOU,194) E11,SG2,UG2,PG2
 C...
 C...    PRINT *,'WRITTEN LAST',KK,E11,SG2,EE2,EB,NP
 C...
@@ -681,8 +727,22 @@ C...
 C*      -- Intermediate points
         ED=DBLE(EE2)
         CALL CH11PK(E11,ED)
-        IF(IN2.EQ.1) WRITE(LOU,194) E11,SG1,UG1
-        WRITE(LOU,194) E11,SG2,UG2
+        IF(IN2.EQ.1) THEN
+          PG1=0
+          IF(SG1.NE.0) PG1=100*UG1/SG1
+          WRITE(LOU,194) E11,SG1,UG1,PG1
+          IF(ILTH.EQ.1) THEN
+            SG2=SG2*(EE2-EE1)/LOG(EE2/EE1)
+          END IF
+        ELSE
+          IF(ILTH.EQ.1) THEN
+            SG2=SG2*EE2
+            UG2=UG2*EE2
+          END IF
+        END IF
+        PG2=0
+        IF(SG2.NE.0) PG2=100*UG2/SG2
+        WRITE(LOU,194) E11,SG2,UG2,PG2
 C...
 C...    PRINT *,'WRITTEN INTERM',KK,E11,SG2,NP
 C...
@@ -722,7 +782,7 @@ C*
    97 FORMAT(BN,I10)
    98 FORMAT(BN,F10.0)
    99 FORMAT(A80)
-  194 FORMAT(A11,1P,5E11.4)
+  194 FORMAT(A11,1P,2E11.4,33X,0P,F11.2)
   922 FORMAT(' MT',I4,1X,A1,'eV',F5.1,1X,A1,'eV',F5.1)
   924 FORMAT(' MT',I4,1X,A1,'eV',F5.1,'  Deg',I3)
   925 FORMAT(' MAT',I4,' MF',I2,' MT',I3,:,20X,' EI',1P,E10.3)
