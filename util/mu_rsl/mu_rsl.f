@@ -1,12 +1,18 @@
       PROGRAM MU_RSL
 C-Title  : MU_RSL Program
-C-Purpose: Resolution-broaden cross sections
+C-Program: Resolution-broaden cross sections
 C-Author : A.Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Version: 2013 Original code
 C-V  2014/11 Major upgrade to resolution-broaden MF4 data
 C-V  2015/11 Extend MAT0=0 definition to process all materials on file.
 C-V  2016/03 Increase MXN from 300k to 800k.
 C-V  2016/04 Relax the No.of zero x.s. condition for scatt.mom. to 1%
+C-V  2017/07 - Increase MXN from 4M to 6M,
+C-V          - Implicit double precision,
+C-V          - Define upper energy for resolution-broadening.
+C-V  2018/07 Correct typo defining EEFF.
+C-V  2019/11 Allow source file to be a simple two-column table
+C-V          (PLOTTAB CUR format).
 C-M  
 C-M  Manual for Program MU_RSL
 C-M  =========================
@@ -38,6 +44,8 @@ C-M   FLOU Filename of the new updated ENDF file
 C-M        (default ENDFnew.dat).
 C-M   MAT0 Material MAT to be processed.
 C-M        If zero, all materials are processed.
+C-M        If <zero, source file is a simple "CUR" file.
+C-M        (The option to select by ZA is currently not supported).
 C-M   MT   Reaction MT to be processed
 C-M          MT>1000 implies MF=MT/1000 and MT=MT-1000*MF
 C-M          MF=   4 implies that angular distributions are
@@ -64,9 +72,10 @@ C-
 C* MXW is the real work field array dimension (MXW >> 2*MXN)
 C* MXN is the maximum number of points in the new array
 C* MXR is the maximum number of points in the resolution function array
-      PARAMETER   (MXW=12 000 000,MXN=4 000 000,MXR=2000)
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
+      PARAMETER   (MXW=12 000 000,MXN=6 000 000,MXR=2000)
       CHARACTER*80 REC,FLNM,FLIN, FLOU, FLTM
-      CHARACTER*40 BLNK
+      CHARACTER*40 BLNK,HDR
       CHARACTER*66 CH66
       DIMENSION    RWO(MXW)
       DIMENSION    ENX(MXN),XSX(MXN), ENR(MXR),RSL(MXR)
@@ -87,6 +96,8 @@ C* Default number of points for the resolution function
       NRS=50
       MF0= 3
       MOM= 0
+C* Default upper energy for resolution-broadening
+      ETOP=200.E6
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991)
       WRITE(LTT,991) ' MU_RSL - Resolution-broaden x-sections '
@@ -106,8 +117,10 @@ C* Define the output file
       OPEN (UNIT=LOU,FILE=FLOU,STATUS='UNKNOWN')
 C* Define the material to be processed
       WRITE(LTT,991) '$Material MAT to be processed           '
-      WRITE(LTT,991) '$(if MAT=0 all will be processed)     : '
+      WRITE(LTT,991) '  MAT=0 all will be processed           '
+      WRITE(LTT,991) '$ MAT<0 source file is a CUR file     : '
       READ (LKB,995) MAT0
+      IF(MAT0.LT.0) GO TO 18
 C* Define the MT to be processed
       WRITE(LTT,991) '$Reaction MT to be resolution-broaden   '
       WRITE(LTT,991) '  MT>1000 implies MF=MT/1000 and MT=MT-1000*MF'
@@ -126,7 +139,7 @@ C*      -- Check if angular distribution moments are to be calculated
         MF0=3
       END IF
 C* Define the Fractional or absolute half-width at half-maximum
-      WRITE(LTT,991) '$Fract./Abs(eV). width at half-maximum '
+   18 WRITE(LTT,991) '$Fract./Abs(eV). width at half-maximum '
       WRITE(LTT,991) '   typically 0.3 for fractional '
       WRITE(LTT,991) '   if >1.0 absolute in eV (strong ~10000) :'
       READ (LKB,996) FRC
@@ -143,15 +156,24 @@ C* Define the maximum number of points for the resolution function
       READ (LKB,986,END=20) FLNM
       IF(FLNM(1:40).NE.BLNK) READ (FLNM,995) NRS
       IF(NRS.GT.MXR) STOP 'MU_RSL ERROR - MXR limit exceeded'
+C* Define the upper energy for resolution-broadening
+      WRITE(LTT,991) ' Upper energy for resolution-broadening:'
+      READ (LKB,986,END=20) FLNM
+      IF(FLNM(1:40).EQ.BLNK) GO TO 20
+      READ(FLNM,*) ETOP
 C*
 C* Summarize input options on screen
    20 WRITE(LTT,991) BLNK  
       WRITE(LTT,991) ' ENDF file to be edited               : ',FLIN
       WRITE(LTT,991) ' Output ENDF file                     : ',FLOU
-      WRITE(LTT,997) ' Material MAT to be processed         : ',MAT0
-      WRITE(LTT,997) ' Input (combined) MT code             : ',MTCMB
-      WRITE(LTT,997) ' Reaction MF to be processed          : ',MF0
-      WRITE(LTT,997) ' Reaction MT to be processed          : ',MT0
+      IF(MAT0.LT. 0) THEN
+        WRITE(LTT,997) ' Tabulated data file to be processed    '
+      ELSE
+        WRITE(LTT,997) ' Material MAT to be processed         : ',MAT0
+        WRITE(LTT,997) ' Input (combined) MT code             : ',MTCMB
+        WRITE(LTT,997) ' Reaction MF to be processed          : ',MF0
+        WRITE(LTT,997) ' Reaction MT to be processed          : ',MT0
+      END IF
       IF(IRR.EQ.1) THEN
         WRITE(LTT,998) ' Absolute width at half-maximum (eV)  : ',FRC
         WRITE(LTT,997) ' No. of points for resolution function: ',NRS
@@ -162,6 +184,7 @@ C* Summarize input options on screen
         WRITE(LTT,998) ' WARNING - No resol.broadening requested'
         WRITE(LTT,998) '           Copy to output as is         '
       END IF
+      IF(MAT0.LT.0) GO TO 22
       IF     (MF0.EQ.3) THEN
 C*      -- Valid enrty - no action needed
       ELSE IF(MF0.EQ.4) THEN
@@ -174,7 +197,7 @@ C*      -- Valid enrty - no action needed
         WRITE(LTT,997) ' MU_RSL ERROR - Invalid option for MF ',MF0
         GO TO 902
       END IF
-      WRITE(LTT,991) BLNK
+   22 WRITE(LTT,991) BLNK
 C*
 C* Open the scratch file
       OPEN(UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
@@ -190,8 +213,21 @@ c...  end do
 c...  stop
 c...
 C*
+      IF(MAT0.GE.0) GO TO 38
+C* Process tabulated data from a CUR file
+   30 NP=0
+      READ (LIN,991,END=900) HDR
+      IF(HDR.EQ.BLNK) GO TO 900
+   32 READ (LIN,986,END=42) FLNM
+      IF(FLNM(1:40).EQ.BLNK) THEN
+        GO TO 42
+      END IF
+      NP=NP+1
+      READ(FLNM,*) ENX(NP),XSX(NP)
+      GO TO 32
+C*
 C* Copy the ENDF file header
-      NS  =-1
+   38 NS  =-1
       NMAT=0
       MAT1=MAT0
       CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
@@ -220,14 +256,59 @@ C* Even for MF4 data it is necessary to retrieve the MF 3 x.s. first
         GO TO 902
       END IF
       INR3=INR(1)
+C*    -- Extend the effective upper limit by resolution-function width
+      EEFF=ETOP
+      IF(IRR.EQ.0) THEN
+        EEFF=ETOP*(1+FRC*5)
+      ELSE
+        EEFF=ETOP+FRC*5
+      END IF
+      NP0=NP
+C*    -- Number of points to EEFF
+      NP=0
+      DO I=1,NP0
+        NP=I
+        IF(ENX(I).GE.EEFF) EXIT
+      END DO
 C*    -- Perform resolution-broadening of the cross section
 C*    -- Pack the broadened function after the original
-      LP1=NP+1
+   42 LP1=NP+1
       MX1=MXN-NP
       WRITE(LTT,*) 'MAT',MAT1,' MT',MT0,', Points to process',NP
 c---  CALL RSLBR0(NP,ENX,XSX,NPX1,MX1,ENX(LP1),XSX(LP1)
       CALL RSLBR1(NP,ENX,XSX,NPX1,MX1,ENX(LP1),XSX(LP1)
      &           ,NRS,ENR,RSL,MXW,RWO,IRR)
+      IF(ETOP.LT.ENX(NP0)) THEN
+C*      -- Find the first point above ETOP
+        NP=0
+        DO I=1,NP0
+          NP=I
+          IF(ENX(I).GT.ETOP) EXIT
+        END DO
+        NPX0=NPX1
+        NPX1=0
+        DO I=1,NPX0
+          IF(ENX(LP1-1+I).GT.ETOP) EXIT
+          NPX1=I
+        END DO
+C*      -- Copy original points above ETOP
+        IF(NPX1+NP0-NP.GT.MX1) STOP 'MU_RSL ERROR - MX1 limit exceeded'
+        DO I=NP,NP0
+          ENX(LP1+NPX1)=ENX(I)
+          XSX(LP1+NPX1)=XSX(I)
+          NPX1=NPX1+1
+        END DO
+      END IF
+C*
+C* Write tabulated smoothed data
+      IF(MAT0.LT.0) THEN
+        WRITE(LOU,991) HDR
+        DO I=1,NPX1
+          WRITE(LOU,999) ENX(LP1+I-1),XSX(LP1+I-1)
+        END DO
+        WRITE(LOU,991)
+        GO TO 30
+      END IF
 C...
 C...      -- Print the cross sections to the CUR file
 c...      WRITE(LTM,*) 'Input cross sections for MT',MT0
@@ -510,10 +591,12 @@ C*
   996 FORMAT(BN,F10.0)
   997 FORMAT(A40,I7)
   998 FORMAT(A40,F12.4)
+  999 FORMAT(1P,2E11.5E1)
       END
       SUBROUTINE FNGAUS(NEN,ENR,DXS,FRC,EPS)
 C-Title  : Subroutine FNGAUS
 C-Purpose: Tabulate normalised Gaussian function at NEN points
+C-Author : A.Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Description:
 C-D  The Gaussian function is defined as:
 C-D                 1
@@ -540,6 +623,7 @@ C-D  The Jacobian of the transformation is 1/u0
 C-D
 C-Ref: http://mathworld.wolfram.com/GaussianFunction.html
 C-
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION ENR(NEN),DXS(NEN)
 C*
       DATA PI/ 3.141592654 /
@@ -561,6 +645,7 @@ C*
      &                 ,MXW,RWO,IRR)
 C-Title  : Subroutine RSLBR1
 C-Purpose: Perform resolution broadening of tabulated data
+C-Author : A.Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Description:
 C-D  A function tabulated at NP points is given in XSX(i) with arguments
 C-D  ENX(i). The resolution-broadening function is tabulated at NRS
@@ -602,6 +687,7 @@ C-D    over double intervals.
 C-D
 C-D  No thinning of the data points is performed.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION ENX(NP),XSX(NP),ENR(NRS),RSL(NRS)
      &         ,EN1(MX1),XS1(MX1),RWO(MXW)
 C* Tolerance for interpolated cross section values
@@ -876,6 +962,7 @@ c...  END DO
       SUBROUTINE RSLBR0(NP,ENX,XSX,NX1,MX1,EN1,XS1,NRS,ENR,RSL,MXW,RWO)
 C-Title  : Subroutine RSLBR0
 C-Purpose: Perform resolution broadening of tabulated data
+C-Author : A.Trkov, Jozef Stefan Institute, Ljubljana, Slovenia
 C-Description:
 C-D  A function tabulated at NP points is given in XSX(i) with arguments
 C-D  ENX(i). The resolution-broadening function is tabulated at NRS
@@ -893,6 +980,7 @@ C-D  The energy grid of the resolution-broadened function is the union
 C-D  of the input grid and the resolution function grid. No thinning
 C-D  of the data points is performed.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION ENX(NP),XSX(NP),ENR(NRS),RSL(NRS)
      &         ,EN1(MX1),XS1(MX1),RWO(MXW)
 C* Tolerance for interpolated cross section values
@@ -1024,6 +1112,7 @@ C-D  are merged into EUN with NEU points. Special care is taken to
 C-D  retain double points within a grid that allow for function
 C-D  discontinuities.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION EN1(NEP1),EN2(NEP2),EUN(KX)
       IF(NEP2.LE.0) GO TO 30
       IF(NEP1.LE.0) GO TO 34
@@ -1097,6 +1186,7 @@ C-Purpose: Interpolate a tabulated function to a given grid
 C-Description:
 C-D Function XS1 at NEP1 argument values in EN1 is interpolated to
 C-D NEP2 values XS2 corresponding to argument values in EN2
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION EN1(NEP1),XS1(NEP1),EN2(NEP2),XS2(NEP2)
 C*
       IF(NEP1.LE.0) THEN
@@ -1139,7 +1229,7 @@ C* Case: ZERO beyond last point in original grid
       END IF
 C*
       END
-      FUNCTION FINTXS(EIN,EN,XS,NP,INR,IER)
+      DOUBLE PRECISION FUNCTION FINTXS(EIN,EN,XS,NP,INR,IER)
 C-Title  : Function FINTXS
 C-Purpose: Interpolate the cross section table to EIN
 C-Description:
@@ -1150,6 +1240,7 @@ C-D  NP   Number of points in the cross section array
 C-D  INR  Interpolation law (INR=1,2 allowed)
 C-D  IER  = 0 - normal termination
 C-D        11 - requested point outside interpolation range
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION EN(NP),XS(NP)
       IER=0
       IF     (EIN.LT.EN(1) .OR. NP.LT.2) THEN
@@ -1180,6 +1271,7 @@ C-Author : A.Trkov, IAEA, Vienna, Austria
 C-Version:
 C-V  05/01 Fix interpolation at energy boundaries
 C* WARNING: Only lin-lin or histogram interpolation allowed
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION  EOU(NEP),DXS(NEP)
 C*
       PMU=0
@@ -1237,6 +1329,7 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
       RETURN
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
@@ -1253,9 +1346,9 @@ C-D       -8  WARNING - Numerical underflow (<E-36)
 C-D        8  WARNING - Numerical overflow  (>E+36)
 C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
-      DOUBLE PRECISION EE(3),XX(3)
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION    NBT(*),INR(*)
-      DIMENSION    EN(NMX), XS(NMX)
+      DIMENSION    EN(NMX), XS(NMX), EE(3),XX(3)
 C*
       IER=0
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
@@ -1300,6 +1393,7 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       DIMENSION    NBT(*),INR(*)
 C*
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
@@ -1316,8 +1410,8 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
-      DOUBLE PRECISION RUFL,RR(6)
-      DIMENSION    VK(1)
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
+      DIMENSION    VK(*),RR(6)
 C*
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
@@ -1363,6 +1457,7 @@ C-Purpose: Write a text record to an ENDF file
       SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
 C-Title  : WRCONT Subroutine
 C-Purpose: Write a CONT record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       CHARACTER*11  BLN,REC(6)
       DATA BLN/'           '/
       DO 10 I=1,6
@@ -1391,6 +1486,7 @@ C-Purpose: Write a CONT record to an ENDF file
      1                 ,NR,NP,NBT,INR,X,Y)
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR),X(NP),Y(NP)
       DATA BLN/'           '/
@@ -1442,6 +1538,7 @@ C* Loop for all argument&function pairs
      1                 ,NR,NZ,NBT,INR)
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
@@ -1477,6 +1574,7 @@ C* Write interpolation data
       SUBROUTINE WRLIST(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,NPL,N2,BN)
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     BN(*)
       DATA BLN/'           '/
@@ -1509,6 +1607,7 @@ C* Write data
       SUBROUTINE CHENDF(FF,CH)
 C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
+      IMPLICIT DOUBLE PRECISION (A-H, O-Z)
       CHARACTER*1  SN
       CHARACTER*11 CH
       CH=' 0.00000+00'
