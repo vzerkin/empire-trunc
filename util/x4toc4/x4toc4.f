@@ -29,8 +29,11 @@ C-V        or range of levels, e.g.: #20788006) (A. Trkov).
 C-V  14/12 Fix normalisation of Legendre coefficients (A. Trkov).
 C-V  17/05 Add residual to MF5/MT18 for gamma spectra (A. Trkov).
 C-V        Define Operation 13 to convert DA over energy intervals
-C-V        into DE by dividing with bin-width (A. Trkov)
-C-V        (to be checked if universally applicable).
+C-V          given by E-MIN and E-MAX into DE by dividing with 
+C-V          bin-width. This does not work when the data represent
+C-V          discrete gamma emission, which can usually be
+C-V          distinguished by having E (and E-RSL) to specify the
+C-V          emitted gamma energy (A. Trkov).
 C-V  18/01 Loop for reading all Codes in Keyword STATUS (V.Zerkin)
 C-Author :
 C-A  OWNED, MAINTAINED AND DISTRIBUTED BY:
