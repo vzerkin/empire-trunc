@@ -155,7 +155,8 @@
          ! WRITE(0,*) TMP(LT1:LT2),PN(LT1:LT2)
          IF (TMP(LT1:LT2) .NE. PN(LT1:LT2)) then
             write(0,*) 'WRONG PARAMETER found in ',FILE(L1:L2)//trim(MATSEN)
-            write(0,*) TMP(LT1:LT2), PN(LT1:LT2)
+            write(0,*) TMP(LT1:LT2), ' vs ',PN(LT1:LT2)
+            write(0,*) 'Order in -inp.sen file might differ from -mat.sen '
             stop 1
          endif
          READ(10,*) ! THIRD LINE
