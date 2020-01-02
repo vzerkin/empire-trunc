@@ -21,7 +21,7 @@ file=$1
 if [ "$1" = "" -o "$1" = "-h" -o "$1" = "--help" -o "$1" = "-help" ]
 then
    echo " Usage:"
-   echo " c4serv file_root_name editor_name"
+   echo " c4serv file_root_name [editor_name]"
    echo " "
    echo "    file_root_name - name of the *.c4 file without .c4 extension "
    echo "    editor_name    - single-word name of the preferred editor"
