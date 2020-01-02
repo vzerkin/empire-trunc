@@ -189,7 +189,7 @@ for k in $MT; do
             cp $file-inp.kal KALMAN.INP
         else
             echo 'EDIT KALMAN INPUT'
-            emacs KALMAN.INP
+            gvim KALMAN.INP
         fi
     fi
 
