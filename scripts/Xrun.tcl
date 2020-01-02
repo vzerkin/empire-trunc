@@ -1,6 +1,6 @@
-# $Rev: 5166 $
+# $Rev: 5183 $
 # $Author: mwherman $
-# $Date: 2019-09-10 21:33:09 +0200 (Di, 10 Sep 2019) $
+# $Date: 2020-01-02 23:06:15 +0100 (Do, 02 Jän 2020) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5352,17 +5352,17 @@ proc ::RepWriter {filename} {
 
         if {$::tcl_platform(os)=="Darwin"} {
                 if [regexp {\.app} $::RepWriter] {
-                        exec open -a $::RepWriter $filename      
+                        exec open -a $::RepWriter notes/$filename      
                 } else {
                         # hopefully command is recognized:
-                        exec $::RepWriter $filename &
+                        exec $::RepWriter  notes/$filename &
                 }
         } elseif {$::tcl_platform(os)=="Linux"} {
-                exec $::RepWriter $filename &
+                exec $::RepWriter  notes/$filename &
         } else {
                 # most likely windows, I don't know how to handle this yet
                 # need a windows machine to test with
-                exec $::RepWriter $filename &
+                exec $::RepWriter  notes/$filename &
         }
 }
 #############################################################################
@@ -8771,7 +8771,7 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu94 add command \
         -command { editFile $file-cov.kal } -label {Covariance matrices} 
     $site_3_0.menu94 add command \
-        -command {exec gnuplot $::env(EMPIREDIR)/util/kalman/corr.plt &} \
+        -command {exec gnuplot $env(EMPIREDIR)/util/kalman/corr.gp &} \
         -label {Covariance plot} 
     $site_3_0.menu94 add separator \
         
