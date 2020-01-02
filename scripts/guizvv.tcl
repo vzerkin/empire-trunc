@@ -820,7 +820,7 @@ foreach i $mts {
 exec xterm -e $::env(EMPIREDIR)/scripts/showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white \
-        -text {Show selected plots} -width 15 
+        -text {Show selected plots} -width 20 
     button $top.merge \
         -activebackground #cccccc -activeforeground #00ff00 \
         -background #dcdcdc \
@@ -836,7 +836,7 @@ exec xterm -e $::env(EMPIREDIR)/scripts/zvv $zvd &
 #exec showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white \
-        -text {Merge selected plots} -width 15 
+        -text {Merge selected plots} -width 20 
     button $top.exit \
         -activebackground #f00000 -activeforeground #ffffff \
         -background #dcdcdc \
@@ -876,14 +876,14 @@ if {$i != ""} {exec xterm -e $::env(EMPIREDIR)/scripts/mtacomp $i $suff $root $d
 }} \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -pady 1m \
-        -text {Create selected} -width 15 
+        -text {Create selected} -width 20 
     button $top.creatazvd \
         -activebackground #cccccc -activeforeground #f709896d3a0e \
         -background #dcdcdc \
         -command set\ suff\ -\$suf\nexec\ xterm\ -e\ $::env(EMPIREDIR)/scripts/acomp\ \$suff\ \$root\ \$dir1\ \$name1\ \$dir2\ \$name2\ \$dir3\ \$name3\ \$dir4\ \$name4\ \
         -font {Helvetica -12} -foreground #c7ad87623be7 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Create all} \
-        -width 15 
+        -width 20 
     button $top.showall \
         -activebackground #cccccc -activeforeground #00ff00 \
         -background #dcdcdc \
@@ -897,7 +897,7 @@ foreach i $mts {
 exec xterm -e $::env(EMPIREDIR)/scripts/showzvd $zvd} \
         -font {Helvetica -12} -foreground #009900 \
         -highlightbackground #dcdcdc -highlightcolor white -text {Show all} \
-        -width 15 
+        -width 20 
     label $top.sep-lab \
         -background #dcdcdc -text {  } 
     label $top.curv1-lab \
