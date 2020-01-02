@@ -31,7 +31,7 @@ ifeq ($(shell uname -s),Linux)
 endif
 ifeq ($(shell uname -s),Darwin)
 	@echo ------------------Darwin-----link zvview.exe---
-	ln -sf ZVView-v4.001-mac.exe zvview.exe
+	ln -sf ZVView-v4.131-mac.exe zvview.exe
 	@ls -la zvview.exe
 endif
 endif
