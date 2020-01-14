@@ -1,6 +1,6 @@
-! $Rev: 5165 $                                                          | 
-! $Date: 2019-07-24 21:54:29 +0200 (Mi, 24 Jul 2019) $                                                     
-! $Author: capote $                                                  
+! $Rev: 5186 $                                                          | 
+! $Date: 2020-01-14 17:31:31 +0100 (Di, 14 Jän 2020) $                                                     
+! $Author: trkov $                                                  
 ! **********************************************************************
 ! *
 !+++MDC+++
@@ -29,6 +29,9 @@
 !-T Program CHECKR
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
+!-V         Version 8.24   January 2020 A. Trkov
+!-V                        Lift restriction on MF=4,5,6 for particles
+!-V                        other than neutrons
 !-V         Version 8.23   April 2019 D. Lopez Aldama (updated by RCN)
 !-V                        - For IRDFF checking (see DLA comments)
 !-V         Version 8.22   October 2017 D. Brown
@@ -269,7 +272,7 @@
 !
 !     CHECKR Version Number
 !
-      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.22'
+      CHARACTER(LEN=*), PARAMETER :: VERSION = '8.24'
 !
 !     Define variable precision
 !
@@ -1119,17 +1122,19 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                CALL CKF3
             END IF
          CASE (4)
-            IF(NFOR.GE.6.AND.NSUB.NE.10) THEN
-               CALL MF_ERRORS(3)
-            ELSE
+! ** Why is MF=4 forbidden for anything but neutrons?
+!           IF(NFOR.GE.6.AND.NSUB.NE.10) THEN
+!              CALL MF_ERRORS(3)
+!           ELSE
                CALL CKF4
-            END IF
+!           END IF
          CASE (5)
-            IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4)) THEN
-               CALL MF_ERRORS(2)
-            ELSE
+! ** Why is MF=5 forbidden for anything but neutrons?
+!           IF(NFOR.GE.6.AND.(NSUB.NE.10.AND.NSUB.NE.4)) THEN
+!              CALL MF_ERRORS(2)
+!           ELSE
                CALL CKF5
-            END IF
+!           END IF
          CASE (6)
             IF(NFOR.LT.6) THEN
                EMESS = 'MF=6 NOT ALLOWED PRIOR TO ENDF-6'
