@@ -1,5 +1,5 @@
-! $Rev: 5186 $                                                          | 
-! $Date: 2020-01-14 17:31:31 +0100 (Di, 14 Jän 2020) $                                                     
+! $Rev: 5187 $                                                          | 
+! $Date: 2020-01-14 17:50:55 +0100 (Di, 14 Jän 2020) $                                                     
 ! $Author: trkov $                                                  
 ! **********************************************************************
 ! *
@@ -30,7 +30,7 @@
 !-P Check format validity of an ENDF-5 or -6 format
 !-P evaluated data file
 !-V         Version 8.24   January 2020 A. Trkov
-!-V                        Lift restriction on MF=4,5,6 for particles
+!-V                        Lift restriction on MF=4,5,6,12,14,15 for particles
 !-V                        other than neutrons
 !-V         Version 8.23   April 2019 D. Lopez Aldama (updated by RCN)
 !-V                        - For IRDFF checking (see DLA comments)
@@ -1164,23 +1164,26 @@ C...  IF(IMDC.EQ.0.OR.(IW.EQ.'N'.AND.IMDC.LT.4)) THEN
                CALL CKF9
             END IF
          CASE (12:13)
-            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-               CALL MF_ERRORS(3)
-            ELSE
+! ** Why is MF=12 forbidden for anything but neutrons?
+!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!              CALL MF_ERRORS(3)
+!           ELSE
                CALL CKF12
-            END IF
+!           END IF
          CASE (14)
-            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-               CALL MF_ERRORS(3)
-            ELSE
+! ** Why is MF=14 forbidden for anything but neutrons?
+!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!              CALL MF_ERRORS(3)
+!           ELSE
                CALL CKF14
-            END IF
+!           END IF
          CASE (15)
-            IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
-               CALL MF_ERRORS(3)
-            ELSE
+! ** Why is MF=15 forbidden for anything but neutrons?
+!           IF(NFOR.GE.6.AND.NSUB.NE.10)   THEN
+!              CALL MF_ERRORS(3)
+!           ELSE
                CALL CKF15
-            END IF
+!           END IF
          CASE (23)
             IF(NFOR.GE.6.AND.(NSUB.NE.3.AND.NSUB.NE.113))  THEN
                CALL MF_ERRORS(2)
