@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4966 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-07-02 22:21:07 +0200 (So, 02 Jul 2017) $
+Ccc   * $Rev: 5188 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2020-01-22 01:19:13 +0100 (Mi, 22 Jän 2020) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3012,10 +3012,10 @@ C-----------------recover from the more dense energy grid in MSD
                   necs = (Nbinx - ne)/2 + 2
 C                 sigm = sigm/2.0
 C-----------------store ddx to continuum
-                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1)
+                  IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur) - 1) 
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.NEX(nnur)    )
 C                 IF (IDNa(2*nej,2).NE.0 .AND. necs.LE.(NEX(nnur)+ 1) )
-     &                THEN
+     &            THEN
                      CSEa(necs,na,nej) = CSEa(necs,na,nej) + sigm/2
 C-----------------discrete level region is not needed since spectra are
 C-----------------constructed out of discrete levels
