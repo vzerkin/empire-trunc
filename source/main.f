@@ -1,6 +1,6 @@
-cc   * $Rev: 5137 $
+cc   * $Rev: 5191 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2018-12-22 21:58:19 +0100 (Sa, 22 Dez 2018) $
+Ccc   * $Date: 2020-01-22 17:14:32 +0100 (Mi, 22 Jän 2020) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -114,7 +114,7 @@ C
       RETURN
       END
 
-      subroutine initial
+      SUBROUTINE initial
 
       use angular_momentum
 
@@ -122,13 +122,13 @@ C
       INCLUDE "dimension.h"
       INCLUDE "global.h"
 C
-      integer icalled
+      INTEGER icalled
       DOUBLE PRECISION xcross(0:NDEJC+3,0:15,0:20)
       COMMON /init_empire/xcross,icalled
 C
 C     Local variables
 C
-      integer i ,j
+      INTEGER i ,j
       CHARACTER*72 inprecord
       
       ICAlangs = 0
@@ -161,7 +161,7 @@ C-----Read line of optional input
       RETURN
       END
 
-      subroutine open_xs_files()
+      SUBROUTINE open_xs_files()
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -179,12 +179,12 @@ C
       COMMON /LPEXS/lbreakup, ltransfer 
 C
       CHARACTER*21 preaction(ndnuc)
-      integer nuc_print
+      INTEGER nuc_print
       common /xsfiles0/preaction
       common /xsfiles1/nuc_print
 C     
 C     local variables
-      integer nejc,i,nnuc,iloc,izares,nnur   
+      INTEGER nejc,i,nnuc,iloc,izares,nnur   
       DOUBLE PRECISION ares, zres
 C-----
 C     Initialization of energy dependent quantities 
@@ -375,7 +375,7 @@ C           to include/exclude low-lying coupled states
       RETURN
       END
     
-      subroutine end_of_calc(new_par)
+      SUBROUTINE end_of_calc(new_par)
       USE empcess
       implicit none
       INCLUDE "dimension.h"
@@ -507,7 +507,7 @@ C     CLOSE(102)
 
       END
 
-      subroutine normal_read(new_par)
+      SUBROUTINE normal_read(new_par)
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
@@ -521,7 +521,7 @@ C
       CHARACTER*6 keyname
       CHARACTER*72 nextenergy
 
-      integer*4, external :: parse_line
+      INTEGER*4, external :: parse_line
 
       lheader = .true.
  1156 READ (5,'(A72)',ERR=11570,END=1200) nextenergy
@@ -610,7 +610,7 @@ C         WRITE (12,*) ' '
       STOP
       END
 
-      subroutine OMPFIT_read()
+      SUBROUTINE OMPFIT_read()
       implicit none
       INCLUDE "dimension.h"
       INCLUDE "global.h"
