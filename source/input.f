@@ -1,6 +1,6 @@
-ccc   * $Rev: 5189 $
+ccc   * $Rev: 5190 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-01-22 16:59:43 +0100 (Mi, 22 Jän 2020) $
+ccc   * $Date: 2020-01-22 17:07:03 +0100 (Mi, 22 Jän 2020) $
 
 c     SUBROUTINE INPUT
 ccc
@@ -108,8 +108,8 @@ C     ELE2 = 1.4399652D+00  ! change from CODATA 1998 to CODATA 2010
 C                           ! in alpha*hbarc = 1.00000006
       ELE2 = 1.43996529D+00 ! CODATA 2010
 C     1/ALPHA = 137.035 999 074
-C     ALPHA = 7.297 352 5698(24) � 10-3
-C     eps0  = 8.854 187 817... � 10-12 F/m
+C     ALPHA = 7.297 352 5698(24) * 10-3
+C     eps0  = 8.854 187 817... * 10-12 F/m
 C     ELE2 = 4*pi**alpha*HBARC*eps0
 C-----Neutron mass = 1.008 664 915 60(55) u
 C     AMUneu =  1.008665D0          ! EMPIRE 3.1
@@ -117,13 +117,13 @@ C     AMUneu =  1.008665D0          ! EMPIRE 3.1
 C-----Nuclear proton mass = 1.007 276 466 88(13) u
 C     AMUpro =  1.007276466812D0      ! EMPIRE 3.1
       AMUpro =  1.007276466812D0 
-C-----Electron mass = 5.485 799 0945 x 10-4 u
+C-----Electron mass = 5.485 799 0945 * 10-4 u
 C     AMUele = 0.00054857990945D0     ! EMPIRE 3.1
       AMUele = 0.00054857990946D0     
 C-----Atomic proton mass = AMUpro + AMUele
 C
 C mn    neutron mass  1.008 664 915 78 amu 
-C me    electron mass 5.485 799 110 �10-4 amu 
+C me    electron mass 5.485 799 110 *10-4 amu 
 C mp    proton mass   1.007 276 466 88 amu 
 C md    deuteron mass 2.013 553 212 71 amu 1
 C mt    triton mass   3.015 500 713 amu 3
