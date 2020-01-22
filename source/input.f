@@ -1,23 +1,23 @@
-!cc   * $Rev: 5171 $
-!cc   * $Author: capote $
-!cc   * $Date: 2019-11-15 09:12:32 +0100 (Fr, 15 Nov 2019) $
+ccc   * $Rev: 5189 $
+ccc   * $Author: mwherman $
+ccc   * $Date: 2020-01-22 16:59:43 +0100 (Mi, 22 Jän 2020) $
 
-      SUBROUTINE INPUT
-!cc
-!cc   ********************************************************************
-!cc   *                                                         class:iou*
-!cc   *                         I N P U T                                *
-!cc   *                                                                  *
-!cc   *     Sets default values of input parameters, READs mandatory     *
-!cc   *     input and calls READIN for optional input READing.           *
-!cc   *                                                                  *
-!cc   * input:none                                                       *
-!cc   *                                                                  *
-!cc   *                                                                  *
-!cc   * output:none                                                      *
-!cc   *                                                                  *
-!cc   ********************************************************************
-!cc
+c     SUBROUTINE INPUT
+ccc
+ccc   ********************************************************************
+ccc   *                                                         class:iou*
+ccc   *                         I N P U T                                *
+ccc   *                                                                  *
+ccc   *     Sets default values of input parameters, READs mandatory     *
+ccc   *     input and calls READIN for optional input READing.           *
+ccc   *                                                                  *
+ccc   * input:none                                                       *
+ccc   *                                                                  *
+ccc   *                                                                  *
+ccc   * output:none                                                      *
+ccc   *                                                                  *
+ccc   ********************************************************************
+ccc
       use nubar_reader
       use empgdr
       ! use width_fluct
