@@ -1,8 +1,8 @@
-ccc   * $Rev: 5190 $
+ccc   * $Rev: 5193 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-01-22 17:07:03 +0100 (Mi, 22 Jän 2020) $
+ccc   * $Date: 2020-02-13 08:15:28 +0100 (Do, 13 Feb 2020) $
 
-c     SUBROUTINE INPUT
+      SUBROUTINE INPUT
 ccc
 ccc   ********************************************************************
 ccc   *                                                         class:iou*
