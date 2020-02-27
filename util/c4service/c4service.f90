@@ -17,16 +17,15 @@ PROGRAM c4service
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
    CHARACTER*7, PARAMETER :: logc4 = '-c4.log'
-   CHARACTER*1            :: action = 'r' ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
-   CHARACTER*5            :: arg2         ! second argument on the command line
-
+   CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
+   CHARACTER*5            :: arg2           ! second argument on the command line
    REAL*4 :: y1 = 0.0, y2 = 0.0, dy1 = 0.0, dy2 = 0.0 ! section modifying parameters
    INTEGER*4 nsec     ! # of sections in C4 file
    INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
    INTEGER*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
    !   INTEGER*4 nrx      ! # of reactions in EMPIRE XSC file
-   LOGICAL*4 qex   !,qmt,hmt(999)
-   LOGICAL*4 :: inp_read = .FALSE.
+   LOGICAL :: qex   !,qmt,hmt(999)
+   LOGICAL :: inp_read = .FALSE.
    INTEGER*4 i,j,k,m,ix,l1,l2,ios,status,ndat,sec_num
    CHARACTER file*25, command*100   !pname*6,line*130
 
@@ -52,7 +51,7 @@ PROGRAM c4service
    status = read_c4_file(file(l1:l2)//'.c4',c4)
 
    !   open c4service input file
-   INQUIRE(FILE=file(l1:l2)//inpc4,EXIST=qex)
+   INQUIRE(FILE=file(l1:l2)//inpc4,EXIST=qex)  
    IF(qex) THEN
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='unknown',IOSTAT=ios)
       inp_read = .TRUE.
@@ -118,7 +117,7 @@ PROGRAM c4service
 !      WRITE(6,*) 'make_input: inp will be replaced',file(l1:l2)//inpc4,'!period'
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='REPLACE')
       CALL make_input(c4)
-      WRITE(6,*) 'c4service input file ',file(l1:l2)//inpc4,' has been reset to neutral'
+      WRITE(6,*) 'New c4service input file ',file(l1:l2)//inpc4,' has been set as neutral'
 
       IF(sec_num /= 0) CALL print_section(c4, sec_num)  ! printing subentry #sub_num e.g., for gnu plotting
 
