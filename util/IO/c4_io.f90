@@ -5,6 +5,7 @@ module c4_io
    integer*4, parameter, private :: maxsec = 10000    ! maximum # data sections in C4 file
 
    integer*4 :: c4_unit = 20                          ! fortran i/o unit, defaults to 20, but user may change
+   integer*4 :: c4_temp = 21                          ! fortran i/o unit, to be used as temporary for filtering
 
    private write_point, wrl, assign_section
 
@@ -52,15 +53,20 @@ contains
 
    !-----------------------------------------------------------------------------------------
 
-   integer*4 function read_c4_file(cfil,c4)
+   integer*4 function read_c4_file(cfil, c4, Eminr, Emaxr, Xminr)
 
       ! read the C4 file specified in the string cfil into the c4 data structure
 
       implicit none
 
-      character*(*), intent(in) :: cfil                  ! C4 file to read in
+      character*(*), intent(in) :: cfil      ! C4 file to read in
+      character*(100) :: commandLine         ! comandline to copy temporary c4 file onto originalone
+      REAL*4, intent(in), optional :: Eminr  ! lower energy limit on exp data read in
+      REAL*4, intent(in), optional :: Emaxr  ! upper energy limit on exp data read in
+      REAL*4, intent(in), optional :: Xminr  ! lower cross section limit on exp data read in
+      REAL*4 :: Emin, Emax, Xmin             ! equivalents of those three above used actualy in calculations
+      REAL*4 :: e, de, x, dx                 ! energies and cross sections (with uncertainties) read from the cfil 
       type (c4_file) c4
-
       type (c4_section), pointer :: sc
       type (c4_data_point), pointer :: pt
 
@@ -74,6 +80,24 @@ contains
       end type
       type (c4_sec), allocatable :: chk(:)
 
+      if(present(Eminr))then
+        Emin = Eminr*1.0E+6
+      else
+        Emin = 0.0
+      endif
+
+      if(present(Emaxr))then
+        Emax = Emaxr*1.0E+6
+      else
+        Emax = 1.0E+9
+      endif
+
+      if(present(Xminr))then
+        Xmin = Xminr
+      else
+        Xmin = 0.0
+      endif      
+   
       inquire(file=cfil,exist=qex)
       if(.not.qex) then
          write(6,*) ' C4 file ',cfil,' not found'
@@ -87,7 +111,54 @@ contains
          read_c4_file = ios
          return
       endif
-        
+      
+      ! Scan file for the first time to filter out unwanted lines.
+      ! New 'temporary.c4' will be created and at the end of filtering
+      ! it will replace the original .c4 file assuming its name.
+
+      open(c4_temp,file='temporary.c4',status='new',action='write',iostat=ios)
+      if(ios /= 0) then
+         write(6,*) ' Error opening file: temporary.c4. IOSTAT = ',ios
+         read_c4_file = ios
+         return
+      endif
+
+      do
+         read(c4_unit,'(a131)',iostat=ios) line
+         if(ios > 0) then
+            write(6,*) ' Error reading ',cfil,'. IOSTAT = ',ios
+            read_c4_file = ios
+            goto 10
+         else if(ios < 0) then
+            exit
+         endif
+
+         read(line(23:58),'(4F9.0)') e, de, x, dx
+         if     (e < Emin ) then
+            write(0,*) 'Removed line since energy ', e, ' lower than Emin ', Emin
+            write(0,*) line
+         else if (e > Emax ) then
+            write(0,*) 'Removed line since energy ', e, ' higher than Emax ', Emax
+            write(0,*) line
+         else if (x < Xmin) then
+            write(0,*) 'Removed line since x-sec ', x, ' lower than Xmin ', Xmin
+            write(0,*) line
+         else 
+            write(c4_temp,'(a131)') line
+         endif
+      end  do    ! end of the filter loop
+
+      CLOSE(c4_temp)
+      close(c4_unit)
+      commandLine = trim("mv -f temporary.c4 "//cfil)
+      CALL EXECUTE_COMMAND_LINE(commandLine, WAIT=.true.) 
+      open(c4_unit,file=cfil,status='old',action='read',iostat=ios)
+      if(ios /= 0) then
+         write(6,*) ' Error opening ',cfil,'. IOSTAT = ',ios
+         read_c4_file = ios
+         return
+      endif
+
       allocate(chk(maxsec))
 
       ! scan through file once, counting # sections and size of each

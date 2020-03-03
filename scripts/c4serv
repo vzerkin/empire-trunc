@@ -2,10 +2,11 @@
 #Script to run c4service code multiple times on the existing *.c4 file  
 #to perform following operations:
 # - removing experiments
-# - smoothing experiments (preserves integral)
+# - smoothing experiment (entire or within an interval) preserving integral
 # - croping energy range of the experiments
 # - modifying experimental values and their uncertainties
-#Detailed instructions will be give during execution
+# - thining experiment by reducing number of incident energies
+#Detailed instructions will be given during execution
 #Usage:
 # c4serv root-file-name editor
 # 'editor' is a name of editor to open *-c4.inp file for making changes
@@ -23,12 +24,17 @@ then
    echo " Usage:"
    echo " c4serv file_root_name [editor_name]"
    echo " "
-   echo "    file_root_name - name of the *.c4 file without .c4 extension "
-   echo "    editor_name    - single-word name of the preferred editor"
+   echo "    file    - name of the *.c4 file without .c4 extension "
+   echo "    editor  - single-word name of the preferred editor [vim]"
+   echo "    Emin    - cut on minimum incident energy in MeV applied to all experiments [0.0]"
+   echo "    Emax    - cut on maximum incident energy in MeV applied to all experiments [500.0]"
+   echo "    Xmin    - cut on minimum cross section in mb applied to all experiments    [0.0]"
    echo " "
    echo " EMPIRE naming convention is assumed thus C4 file must have .c4 extension."
-   echo " The editor_name parameter is optional and if missing the default is gvim."
-   echo " c4serv facilitates operattiion of the c4service code by openinng its input"
+   echo " Only the file name is mandatory, the other 4 parameters are optional but "
+   echo " if given they must preserve the order i.e., to enter Emax one needs to "
+   echo " suply: file, editor, Emin and Emax "
+   echo " c4serv facilitates operattiion of the c4service code by opening its input"
    echo " and cycling through editing the input and running the code. In each cycle "
    echo " a neutral input is regenerated. To stop a cycle unswer 'no' to the request"
    echo " wether to run the c4service code."
@@ -37,6 +43,9 @@ else
    file=$1
 fi
 edit=$2
+Emin=$3
+Emax=$4
+Xmin=$5
 # Set editor for Linux or Mac (vim is a default for both)
 XWIN=`uname`
 if [ "$XWIN" = "Darwin" ] 
@@ -47,16 +56,28 @@ then
    else
       edit="open -a "$edit
    fi
-   echo " Editor open command on Mac set to "$edit
-   echo " To use another editor specify it as the second argument when calling this script"
+   echo " Editor open command on Mac set to " $edit
 else
    if [ "$edit" = "" ] 
    then 
       edit="gvim"
    fi
    echo " Editor command set to "$edit
-   echo " To use another one specify it as the second argument when calling this script"
 fi
+if [ "$Emin" = "" ]; then  
+   Emin="0.0" 
+fi
+if [ "$Emax" = "" ]; then
+   Emax="500." 
+fi
+if [ "$Xmin" = "" ]; then
+   Xmin="0.0" 
+fi
+echo " Global limits applied across all experiments:"
+echo " Minimum incident energy "$Emin" MeV"
+echo " Maximum incident energy "$Emax" MeV"
+echo " Minimum cross section "$Xmin" mb"
+echo "  "
 
 # Backup the original C4 file
 if [ ! -s $file-orig.c4 ]; then
@@ -66,10 +87,17 @@ fi
 
 yesno="y"
 while [ "$yesno" == "y" ]; do
-   rm $file-c4.inp 2>/dev/null
-   $EMPIREDIR/util/c4service/c4service $file
+#   rm $file-c4.inp 2>/dev/null
+   $EMPIREDIR/util/c4service/c4service $file $Emin $Emax $Xmin
    $edit $file-c4.inp 
-   echo " Edit and SAVE input file *-c4.inp then return here to rerun c4service"
+   echo " Edit and SAVE this file and return here to rerun c4service"
+   echo " You may replace 'r' in column 63 (which stands for 'retain')  with:"
+   echo " d - delete  subsection"
+   echo " m - modify subsectiion; see manual.txt for parameters "
+   echo " s - smooth subsection; number of smoothing cycles in the field to the right (usually >100)"
+   echo " c - crop energy range; lower and upper limits in MeV in the fields to the right "
+   echo " t - thin subsection; retain only each n-th energy point, 'n' in the field to the right "
+
    # echo " You may use Zvv plots from GUI to check your changes"
    echo " Do you want to run c4service (y/n)"
    read yesno
@@ -77,8 +105,8 @@ while [ "$yesno" == "y" ]; do
       echo " "
       echo " "
    else
-      echo " Showing "$file"-c4.log with list of changes"
-      $edit $file-c4.log
+#      echo " Showing "$file"-c4.log with list of changes"
+#      $edit $file-c4.log
       exit
    fi     
 

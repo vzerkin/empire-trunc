@@ -9,8 +9,7 @@ PROGRAM c4service
 
    INTEGER*4, PARAMETER   :: kcovex = 1     ! set nonzero to read experimental covariances
    ! REAL*4, PARAMETER    :: scale = 1.0    ! scale factor for parameter unc**2
-   ! REAL*4, PARAMETER    :: emin = 0.0     ! lower energy limit on exp data, 0 == no limit
-   ! REAL*4, PARAMETER    :: emax = 0.0     ! upper energy limit on exp data, 0 == no limit
+
 
    CHARACTER*4, PARAMETER :: xsc = '.xsc'
    CHARACTER*8, PARAMETER :: inpsen = '-inp.sen'
@@ -18,20 +17,23 @@ PROGRAM c4service
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
    CHARACTER*7, PARAMETER :: logc4 = '-c4.log'
    CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
-   CHARACTER*5            :: arg2           ! second argument on the command line
+   CHARACTER*10            :: arg2, arg3, arg4        ! arguments on the command line
    REAL*4 :: y1 = 0.0, y2 = 0.0, dy1 = 0.0, dy2 = 0.0 ! section modifying parameters
-   INTEGER*4 nsec     ! # of sections in C4 file
    INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
    INTEGER*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
    !   INTEGER*4 nrx      ! # of reactions in EMPIRE XSC file
-   LOGICAL :: qex   !,qmt,hmt(999)
+   LOGICAL :: qex   
    LOGICAL :: inp_read = .FALSE.
    INTEGER*4 i,j,k,m,ix,l1,l2,ios,status,ndat,sec_num
    CHARACTER file*25, command*100   !pname*6,line*130
 
    INTEGER*4 rk, rpza, rtza,  rmf, rmt
+   INTEGER*4 nsec     ! # of sections in C4 file
    CHARACTER rref*25, rent*5, rsub*3, raction*1
-   REAL*4  ry1,ry2, rdy1, rdy2
+   REAL*4 :: ry1,ry2, rdy1, rdy2  ! input parameters for c4service
+   REAL*4 :: Emin = 0.0     ! lower energy limit on exp data
+   REAL*4 :: Emax = 1000.0     ! upper energy limit on exp data
+   REAL*4 :: Xmin = 0.0     ! lower cross section limit on exp data
 
    TYPE (c4_file) c4
    TYPE (c4_section), POINTER :: sc
@@ -43,12 +45,19 @@ PROGRAM c4service
    CALL strlen(file,l1,l2)
 
    CALL getarg(2,arg2)
-   READ(arg2,'(I5)') sec_num
-   IF(sec_num /= 0) WRITE(6,*) ' section #',sec_num,' will be printed'
+   READ(arg2,'(f12.5)') Emin
+
+   CALL getarg(3,arg3)
+   READ(arg3,'(f12.5)') Emax
+
+   CALL getarg(4,arg4)
+   READ(arg4,'(f12.5)') Xmin
+
 
    !  read C4 file into the memory structure c4
    ! WRITE(6,*) 'Reading C4 file into the c4-structure'
-   status = read_c4_file(file(l1:l2)//'.c4',c4)
+   status = read_c4_file(file(l1:l2)//'.c4',c4, Emin, Emax, Xmin)
+   if ( status == -1) stop
 
    !   open c4service input file
    INQUIRE(FILE=file(l1:l2)//inpc4,EXIST=qex)  
@@ -56,8 +65,8 @@ PROGRAM c4service
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='unknown',IOSTAT=ios)
       inp_read = .TRUE.
    ELSE
-      WRITE(0,*) 'No c4service input found!'
-      WRITE(0,*) 'C4 file will be scanned and c4service input file generated'
+   !   WRITE(0,*) 'No c4service input found!'
+   !   WRITE(0,*) 'c4service input file will be generated'
       OPEN(13,FILE=file(l1:l2)//inpc4,STATUS='new',IOSTAT=ios)
    ENDIF
 
@@ -65,6 +74,7 @@ PROGRAM c4service
    INQUIRE(FILE=file(l1:l2)//logc4,EXIST=qex)
    IF(qex) THEN
       OPEN(9,FILE=file(l1:l2)//logc4,STATUS='unknown',IOSTAT=ios, ACCESS='APPEND')
+      WRITE(0,*) 'Found previous c4service log file; it will be updated'
    ELSE
       WRITE(0,*) 'c4service log file not found and will be created'
       OPEN(9,FILE=file(l1:l2)//logc4,STATUS='new',IOSTAT=ios)
@@ -269,7 +279,7 @@ CONTAINS
 
       ! Volume Conserving Smoothing for Piecewise Linear Curves ...
       ! after Andrew Kuprat, Ahmed Khamayseh, Denise George, and Levi Larkey
-      ! Journal of Computational Physics 172, 99–118 (2001)
+      ! Journal of Computational Physics 172, 99-118 (2001)
       ! doi:10.1006/jcph.2001.6816
       ! Algorithm simplified to consider integral between four-point-defined
       ! piecewise linear curve and the x axis.

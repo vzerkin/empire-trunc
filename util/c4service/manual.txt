@@ -53,7 +53,7 @@ and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
 
 [s] smooth subentry by sliding four-point, using area conserving algorithm by A.Kuprat, A.Khamayseh, D.George, 
     and L.Larkey, Journal of Computational Physics 172, 99–118 (2001), doi:10.1006/jcph.2001.6816); PARAMETERS:
-    iter       - number of smoothing iterations
+    iter       - number of smoothing iterations (generaly many are needed >10 or even 1000s)
     emin [MeV] - lower energy limit on experimental data to be smoothed, 0 for EXFOR lower limit 
     emax [MeV] - upper energy limit on experimental data to be smoothed, 0 for EXFOR upper limit.
 
@@ -126,7 +126,7 @@ and corresponding default input file:
   20)   1 39089   3    1 D.W.KENT,ET.AL.      (62)  11617  25 r  0.00000      0.00000      0.00000      0.00000    
 
 User needs to edit the above file by replacing 'r' with any desired command (d, m, s, t, or c) and eventual
-parameters for the subentries that are being modified. Am illustrative example is given below:
+parameters for the subentries that are being modified. An illustrative example is given below:
 
    1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 d  0.00000      0.00000      0.00000      0.00000    
    2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
@@ -151,10 +151,10 @@ parameters for the subentries that are being modified. Am illustrative example i
 
 In the case above subentry 1) is marked for deletion, 4) will get cross sections multiplied by 0.9 while the
 uncertainties will by multiplied by the same factor (default if dy2=0) and have 5% uncertainty square-added.
-The subentry 6) will be smoothed 100 times 10) will be thined by retaining every 10-th value and 18) will be
-restricted to 2 - 10 MeV range. Saving this file, returning to the terminal and hitting 'y' will execute the 
-changes. The performed operations are displayed in the terminal and stored in the *-c4.log file. The renwed 
-list of subentries (and the new default input file) reflect changes such as removing files, changing energy 
-ranges and number of points (m and s changes are visible only inside the C4 file). To stop processing answer 'n'
-to the question in the terminal (log file will be displayed). Subequent sessions can be run later and log file 
-will keep cumulative record of the changes.  
+The subentry 6) will be smoothed 100 times in the whole energy range, 10) will be thined by retaining every 
+10-th value and 18) will be restricted to 2 - 10 MeV range. Saving this file, returning to the terminal and 
+hitting 'y' will execute the changes. The performed operations are displayed in the terminal and stored in 
+the *-c4.log file. The renwed list of subentries (and the new default input file) reflect changes such as 
+removing files, changing energy ranges and number of points (m and s changes are visible only inside the C4 
+file). To stop processing answer 'n' (or hit return) to the question in the terminal (log file will be displayed). 
+Subequent sessions can be run later and log file will keep cumulative record of the changes.  
