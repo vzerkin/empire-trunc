@@ -1,6 +1,6 @@
-ccc   * $Rev: 5193 $
+ccc   * $Rev: 5196 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-02-13 08:15:28 +0100 (Do, 13 Feb 2020) $
+ccc   * $Date: 2020-03-04 00:38:58 +0100 (Mi, 04 Mär 2020) $
 
       SUBROUTINE INPUT
 ccc
@@ -8,8 +8,8 @@ ccc   ********************************************************************
 ccc   *                                                         class:iou*
 ccc   *                         I N P U T                                *
 ccc   *                                                                  *
-ccc   *     Sets default values of input parameters, READs mandatory     *
-ccc   *     input and calls READIN for optional input READing.           *
+ccc   *     Sets default values of input parameters, reads mandatory     *
+ccc   *     input and calls READIN for optional input reading.           *
 ccc   *                                                                  *
 ccc   * input:none                                                       *
 ccc   *                                                                  *
@@ -55,7 +55,7 @@ c     CHARACTER*23 ctmp23
 C     CHARACTER*3 ctldir
 C     DATA ctldir/'TL/'/
 
-      DATA delz/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
+      DATA delz/ 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.46, 0.,
      &     2.09, 0., 1.62, 0., 1.62, 0., 1.83, 0., 1.73, 0., 1.35, 0.,
      &     1.54, 0., 1.20, 0., 1.06, 0., 1.36, 0., 1.43, 0., 1.17, 0.,
      &     1.24, 0., 1.20, 0., 1.28, 0., 1.28, 0., 1.35, 0., 1.36, 0.,
@@ -64,7 +64,7 @@ C     DATA ctldir/'TL/'/
      &     0.72, 0., 0.75, 0., 0.71, 0., 0.87, 0., 0.83, 0., 0.89, 0.,
      &     0.79, 0., 0.89, 0., 0.78, 0., 0.69, 0., 0.61, 0., 0.72, 0.,
      &     0.77/
-      DATA deln/0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.67, 0.,
+      DATA deln/ 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 2.67, 0.,
      &     1.80, 0., 1.67, 0., 1.86, 0., 2.04, 0., 1.64, 0., 1.44, 0.,
      &     1.54, 0., 1.30, 0., 1.27, 0., 1.29, 0., 1.41, 0., 1.50, 0.,
      &     1.50, 0., 1.43, 0., 1.88, 0., 1.47, 0., 1.57, 0., 1.46, 0.,
@@ -1311,14 +1311,14 @@ c----------end GDR
 C          
 C            Checking fission input consistency 
 C          
-             IF(NINT(FISshi(i)).EQ.1 .and. NINT(FISden(i)).ne.0) THEN        
+             IF(NINT(FISshi(i)).EQ.1 .and. NINT(FISden(i)).ne.0) THEN  
                WRITE(8,*)  ' WARNING: ',
      >'For FISSHI=1 (HI fission) only EGSM LD allowed (FISDEN 0)'
                WRITE(8,*)  ' WARNING: Changing the LD model at saddles 
      >for nucleus ',A(i),SYMb(i)
                FISden(i) = 0.d0
              ENDIF
-             IF(NINT(FISmod(i)).GT.0 .and. NINT(FISden(i)).ne.0 )  THEN        
+             IF(NINT(FISmod(i)).GT.0 .and. NINT(FISden(i)).ne.0 )  THEN 
                WRITE(8,*)  ' WARNING: ',
      >'For FISMOD > 0 (multimodal fiss) only EGSM LD allowed (FISDEN 0)'
                WRITE(8,*)  ' WARNING: Changing the LD model at saddles 
@@ -1345,7 +1345,7 @@ C
          IF (PEQc.GT.0 .and. GCAsc.EQ.0.d0) THEN
             GCAsc = 1.
             WRITE (8,*) ' '
-            WRITE (8,*) ' WARNING: For PCROSS the gamma cascade must be' 
+            WRITE (8,*) ' WARNING: For PCROSS the gamma cascade must be'
             WRITE (8,*) ' WARNING: taken into account, GCASC set to 1'
             WRITE (8,*) ' '
          ENDIF
@@ -2241,7 +2241,7 @@ C-----------------Width of the partial bin relative to DE
                     fftmp=(EX(1,nnur)-ECUt(nnur))*
      &                     (A(nnur)+AEJc(nejc))/A(nnur)
                     WRITE(8,*)'WARNING: Large continuum bin correction'
-                    WRITE(8,'(1x,A48,F10.6,1x,A4,F8.6,A4,F10.6,A4)')                    
+                    WRITE(8,'(1x,A48,F10.6,1x,A4,F8.6,A4,F10.6,A4)')    
      &                'WARNING: You may reduce your incident energy of '
      &                ,EINl,' by ',fftmp, ' to ', EINl-fftmp,' MeV'
                           ENDIF
@@ -3264,7 +3264,7 @@ C       WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) '  E.Sh.Soukhovitskii and P. Talou               '
         WRITE (12,*) '                                                '
         WRITE (12,*) ' "RIPL - Reference Input Parameter Library for  '
-        WRITE (12,*) '         Calculation of Nuclear Reactions and   '          
+        WRITE (12,*) '         Calculation of Nuclear Reactions and   '
         WRITE (12,*) '         Nuclear Data Evaluations",             '
         WRITE (12,*) '                                                '
         WRITE (12,*) '  Nuclear Data Sheets 110 (2009) 3107-3214      '
