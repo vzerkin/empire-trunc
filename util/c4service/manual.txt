@@ -34,7 +34,7 @@ changes. User may modify the single character (command) in the 63-rd column to r
 EXFOR subentry. Some of the operations require one or more parameters. These can be specified in the four 
 fields following the command-character and explained below in order of their appearance. Note that units in the 
 C4-file are [eV] for the energy and [barns] for the cross sections; C4SERVICE retains [barns] but uses [MeV] for 
-the energies. The following operations are available:
+inputing the energies. The following operations are available:
 
 [r] retain subentry without any change (default).
 
@@ -63,10 +63,15 @@ and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
     emin [MeV] - lower energy limit, 0 for EXFOR lower limit
     emax [MeV] - upper energy limit, 0 for EXFOR upper limit.
 
+[h] make hole in a given dataset by dropping points in the range of incident energies; PARAMETERS: 
+    emin [MeV] - lower energy limit
+    emax [MeV] - upper energy limit
+    NOTE: both parameters are required since using EXFOR limits woudl correspond to 'd' or 'c' option.
+
 Only one operation per subentry can be executed at a time (except ’m’ option as described above). If more 
 operations are needed they can be executed in several subsequent runs of C4SERVICE. The default ’r’ option 
 (retain) should be kept for subentries that do not need any change.  The modification procedure may be 
-easily customized by appropriate adjustment of the indicated do-loop in the ’modify_section’ subroutine.
+customized by appropriate adjustment of the indicated do-loop in the ’modify_section’ subroutine.
 
 When c4serv script is started it lounches C4SERVICE code which scans the C4 file and produces list of EXFOR 
 entries on the terminal and similar file serving as the input for the next C4SERVICE run. Examples of both 
@@ -103,7 +108,7 @@ Example of the terminal view:
  Edit and SAVE input file *-c4.inp then return here to rerun c4service
  Do you want to run c4service (y/n)
 
-and corresponding default input file:
+and the corresponding default input file:
    1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 r  0.00000      0.00000      0.00000      0.00000    
    2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
    3)   1 39089   3    1 L.KOESTER,ET.AL.     (81)  21842  22 r  0.00000      0.00000      0.00000      0.00000    

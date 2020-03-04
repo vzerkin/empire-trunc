@@ -96,6 +96,7 @@ while [ "$yesno" == "y" ]; do
    echo " m - modify subsectiion; see manual.txt for parameters "
    echo " s - smooth subsection; number of smoothing cycles in the field to the right (usually >100)"
    echo " c - crop energy range; lower and upper limits in MeV in the fields to the right "
+   echo " h - make hole by dropping energy range; lower and upper limits in MeV in the fields to the right "
    echo " t - thin subsection; retain only each n-th energy point, 'n' in the field to the right "
 
    # echo " You may use Zvv plots from GUI to check your changes"
@@ -107,6 +108,7 @@ while [ "$yesno" == "y" ]; do
    else
 #      echo " Showing "$file"-c4.log with list of changes"
 #      $edit $file-c4.log
+      rm $file-c4.inp $file-mod.c4
       exit
    fi     
 

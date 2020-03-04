@@ -99,12 +99,14 @@ PROGRAM c4service
             STOP 'EXFOR entry mismatch'
          END IF
          !  perform operations on the subsections: delete, print, modify, smooth, thin, crop
-         IF(action == 'd') CALL delete_section(c4, k)
          ! IF(action == 'p') CALL print_section(c4, k)
+         IF(action == 'd') CALL delete_section(c4, k)
          IF(action == 'm') CALL modify_section(sc, k, y1, y2, dy1, dy2)
          IF(action == 's') CALL smooth_section(sc, k, int(y1), y2, dy1)
          IF(action == 't') CALL thin_section(sc, k, y1)
          IF(action == 'c') CALL crop_section(sc, k, y1, y2)  !limit incident energies between y1 and y2
+         IF(action == 'h') CALL hole_section(sc, k, y1, y2)  !remove incident energies between y1 and y2
+
       ENDDO
       action = 'r'
       ! Recreate c4 file from the internal c4-structure with modifications made above
@@ -112,9 +114,15 @@ PROGRAM c4service
       status = write_c4_file(file(l1:l2)//outc4, c4)
       WRITE(6,*) ' '
       WRITE(9,*) ' '
-      ! WRITE(6,*) 'Modified c4 file stored as ',file(l1:l2)//outc4
-      ! WRITE(6,*) 'Moving it over the old one ',file(l1:l2)//'.c4'
-      command = 'mv '//file(l1:l2)//outc4//' '//file(l1:l2)//'.c4'
+      ! Remove old c4 file
+      command = "rm "//file(l1:l2)//".c4"
+      CALL EXECUTE_COMMAND_LINE(command)      
+      ! Modified c4 file stored as 'file(l1:l2)//outc4' contains zeros inside empty fields
+      ! which makes it almost human unreadable.
+      ! Command for moving modified c4 file over the old one leaving zeros
+      ! command = 'mv '//file(l1:l2)//outc4//' '//file(l1:l2)//'.c4'     
+      ! Command to copy modified c4 file over the old one replacing zeros with blanks
+      command = "sed 's/ 0.00E+00/         /g' "//file(l1:l2)//outc4//" >> "//file(l1:l2)//".c4"
       CALL EXECUTE_COMMAND_LINE(command)
 
       ! Read and rescan the new C4 file, produce new input for c4service
@@ -179,6 +187,43 @@ CONTAINS
       WRITE(9,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
       RETURN
    END SUBROUTINE crop_section
+
+!------------------------------------------------------------------------
+
+   SUBROUTINE hole_section(sc, k, y1, y2)
+
+!  Drills hole in X4 section dropping points laying inside the y1 - y2 energy interval
+!  (inverse of crop_section subroutine)
+
+      IMPLICIT NONE
+      INTEGER*4 i,k, n
+      REAL*4 :: y1, y2 ! range of incident energies to remove (in keV)
+      TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
+!      TYPE (c4_data_point), POINTER :: pt1, pt2
+
+      WRITE(6,*)' Drilling hole in subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Drilling hole in subentry: ',k,')', sc%ref, sc%ent, sc%sub
+
+      IF(y1 == 0.0 .or. y2 == 0.0) THEN
+         WRITE(6,*)'  - NOTHING DONE! both energy limits needed for dropping energy range'
+         WRITE(9,*)'  - NOTHING DONE! both energy limits needed for dropping energy range'
+         RETURN   ! no limits, nothing to do
+      ENDIF
+
+      y1 = y1*10**6.   ! converting from MeV to eV
+      y2 = y2*10**6.
+      if(y2 == 0.0) y2 = sc%pt(sc%ndat)%e
+      n = 0
+      DO i = 1, sc%ndat
+         IF(sc%pt(i)%e > y1 .and. sc%pt(i)%e < y2) cycle
+         n = n + 1
+         sc%pt(n) = sc%pt(i)
+      END DO
+      sc%ndat = n
+      WRITE(6,*)'  - Removed points between incident energies ', y1/10**6,' and ',y2/10**6,' MeV'
+      WRITE(9,*)'  - Removed points between incident energies ', y1/10**6,' and ',y2/10**6,' MeV'
+      RETURN
+   END SUBROUTINE hole_section
 
 
 
@@ -304,6 +349,8 @@ CONTAINS
       IF(emin+emax == 0.0) THEN
          jmin = 1
          jmax = sc%ndat-3
+      ELSEIF(emax == 0.0) THEN
+         emax = sc%pt(sc%ndat)%e
       ELSE
          WRITE(6,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
          WRITE(9,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
