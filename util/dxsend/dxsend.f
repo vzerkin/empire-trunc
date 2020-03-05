@@ -39,6 +39,7 @@ C-V  17/08 Make processing of MF 13 robust.
 C-V  18/03 Do not scan MT 5 when MT 4 is requested (do not set MULN).
 C-V  18/07 Define yield as isotropic when no MF4 data are present.
 C-V  19/02 Fix light targets when residual is the desired particle.
+C-V  20/03 Fix processing of radioniclide production from MF=10/40.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -901,6 +902,9 @@ C* Identify the projectile
       REWIND LEF
       ZAX=ZA0
       CALL FINDMT(LEF,ZA0,ZA,AW, L1,L2,N1,N2,MAT,MFX,MTX,IER)
+C...
+C...  PRINT *,'Searching MAT,MF,MT',MAT,MF,MT,' IER=',ier
+C...
       IF(IER.NE.0) THEN
         IF(MAT.LT.0) THEN
           PRINT *,'WARNING - No material',NINT(ZA0)
@@ -958,6 +962,9 @@ C*      -- Check energy level for discrete inelastic ang.distr.
         MT1=0
    12   MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+C...
+C...    PRINT *,'Searching MAT,MF,MT',MAT,MF,MT,' IER=',ier
+C...
         IF(IER.NE.0 .OR. MT.GE.91) THEN
 C*        -- No more discrete levels - go to data retrieval
           IF(MTJ.NE.9000 .AND. PAR.LE.0) THEN
@@ -1052,6 +1059,9 @@ C...  IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
      &  (MTJ.EQ.4 .AND. KEA.EQ.0 ) ) GO TO 60
 C... &  (MTJ.NE.4 .OR. IZAP.NE.0 ) ) GO TO 60
 C*    -- Find particle emission reactions
+
+      print *,'Find particle emission reactions IZAP',IZAP
+
       REWIND LEF
       CALL SKIPSC(LEF)
 C*
@@ -1066,6 +1076,10 @@ C*      -- Test each reaction for chosen outgoing particle
    20   MF=3
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+
+        print *,'    Checking ZA0,ZA,AW,MAT,MF,MT,IER'
+        print *,              ZA0,ZA,AW,MAT,MF,MT,IER
+
         IF(IER.NE.0) GO TO 50
         CALL RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,LRBRK,N1,N2,IER)
         IF(IER.NE.0) GO TO 50
@@ -1103,12 +1117,17 @@ C*      -- Skip chance fission if total fission is given
       ELSE IF(IZAP.GT.2004) THEN
 C*      -- Radioactive nuclide production
         LFS =NINT(PAR)
-        MFX =3
-        IF(LFS.NE.0) MFX=10
+C...    MFX =3
+C...    IF(LFS.NE.0) MFX=10
+        MFX=10
         IZA =NINT(ZA)
    30   MF=MFX
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
+C...
+C...    print *,'    Checking ZA0,ZA,AW,MAT,MF,MT,IER'
+C...    print *,              ZA0,ZA,AW,MAT,MF,MT,IER
+C...
         IF(IER.NE.0) GO TO 50
         CALL SKIPSC(LEF)
 C*      -- Check residual JZAP produced by the reaction
@@ -1236,6 +1255,9 @@ c...
       GO TO 48
 C*
 C* All reactions found - begin processing
+
+      print *,'LOOP',LOOP
+
    50 IF(LOOP.LT.1) THEN
         WRITE(LTT,903) ' DXSEND WARNING - No data on file for MT',MT0
         GO TO 90
@@ -1281,7 +1303,8 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS
      1           ,ENR,DXS,UXS,RWO(LX),NE,MEN,KRW,IER)
 c...
-c...se &       ,m,mf0,mt,ne,ier
+c...  print *,'After DXSEN1 ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER'
+c...  print *,              ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
 c...  print *,'DXSEND',(enr(j),j=1,5)
 c...  print *,'      ',(dxs(j),j=1,5)
 c...
@@ -1956,7 +1979,8 @@ c...
 C*
       DATA PI/3.141592654/
 C...
-      PRINT '(A,6I6,1P,2E11.4)','DXSEN1:ZA0,ZA,ZAP0,MF0,MT0,KEA,EIN,PAR'
+      PRINT '(A,6I6,1P,2E11.4)',
+     & ' DXSEN1:ZA0,ZA,ZAP0,MF0,MT0,KEA,EIN,PAR'
      &        ,nint(ZA0),nint(ZA),nint(ZAP0),MF0,MT0,KEA,EIN,PAR
 C...
 C*
@@ -2049,22 +2073,22 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       ELSE
         MTJ=-MT0
       END IF
-      CALL GETSTD(LEF,NX,ZA0,MF,MTJ,MST,QM,QI,LRBRK
+      CALL GETSTD(LEF,NX,ZA0,MF,MTJ,IZAP0,MST,QM,QI,LRBRK
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
-
 C* Default particle multiplicity
       YL=1
 c...
-c...  print *,'izap0,mt0,yl,zro',izap0,mt0,yl,zro
+C...  print *,'izap0,mt0,yl,zro',izap0,mt0,yl,zro
 c...
 C*    -- Assign yield, except for total, mu-bar, etc.
       IF(IZAP0.LT.0) GO TO 530
+      IF(MT0.EQ.5 .AND. MF0.EQ.10) GO TO 530
       IF(MT0.EQ.1 .OR. (MT0.GE.251 .AND. MT0.LE.254)) GO TO 530
       MTK=MT0
       IF(LRBRK.GT.1) MTK=LRBRK
       CALL YLDPOU(YL,MTK,IZAP0,IZAI)
 c...
-c...  print *,'izap0,mt0,yl,zro,za',izap0,mt0,yl,zro,nint(za)
+C...  print *,'izap0,mt0,yl,zro,za',izap0,mt0,yl,zro,nint(za)
 c...
       IZA=NINT(ZA)
       CALL MTTOZA(IZAI,IZA,JZAP,MTK)
@@ -2177,8 +2201,8 @@ C...
       IZA=NINT(ZA0)
       IF(NP.GT.0) THEN
         print '(A,5I6,1P,2E11.4,I3)'
-     &    ,'  Found MAT,MF,MT,NP,Ei,ZAp,yl,LRBRK'
-     &         ,iza,MF,MTJ,NP,izap0,ein,yl,LRBRK
+     &    ,'  Found MAT,MF,MT,NP,ZAp,Ein,yl,LRBRK'
+     &         ,iza,MF,MTJ,NP,izap0,Ein,yl,LRBRK
       ELSE
         print *,'  Could not find MAT,MF,MT,ZAp',iza,MF,MTJ,izap0
       END IF
@@ -2190,7 +2214,7 @@ C*        -- If no data found and photon spectrum requested, try MF 13
           REWIND LEF
           MF =13
           MT =MT0
-          CALL GETSTD(LEF,NX,ZA0,MF,MT,MST,QM,QI,LDMY
+          CALL GETSTD(LEF,NX,ZA0,MF,MT,IZAP0,MST,QM,QI,LDMY
      &               ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
           IF(NP.GT.0) GO TO 120
         END IF
@@ -2210,11 +2234,12 @@ c...
           GO TO 900
         END IF
       END IF
+      IF(KEA.NE.0) GO TO 700
+C*
 C* Case: Cross section is required on output - finish processing
 c...
-c...  print *,'KEA,yl',KEA,yl
+C...    print *,'KEA,yl',KEA,yl
 c...
-      IF(KEA.NE.0) GO TO 700
         IF(MT0/10000.EQ.4) THEN
 C*        -- Save the nu-bar
           NNU=NEN
@@ -2249,8 +2274,8 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-c...    print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
-c...    print *,'nen,ier,mt0',nen,ier,mt0
+C...    print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
+C...    print *,'nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
@@ -3173,7 +3198,7 @@ C* Case: Proceed with the retrieval of differential data
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-      print *,'    Cross section=',xs,ein,ier,yl
+C...  print *,'    Cross section=',xs,ein,ier,yl
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -4484,7 +4509,7 @@ c...  write(83,'(1p,2e11.4)') ee,sigc
 c...
       RETURN
       END
-      SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,MST,QM,QI,LRBRK
+      SUBROUTINE GETSTD(LES,MXNP,ZA1,MF1,MT1,IZAP0,MST,QM,QI,LRBRK
      &                 ,NP,EN,XS,DX,RWO,MXRW)
 C-Title  : Subroutine GETSTD
 C-Purpose: Get cross section and its absolute uncertainty
@@ -4508,7 +4533,7 @@ C*
 C* Search the ENDF file for section MT in file MF3
       CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
+C...  print *,'getstd za1,mat,mf,mt,ier',za1,mat,mf,mt,ier
 c...
       IF(IER.NE. 0) GO TO 90
 C*      
@@ -4518,7 +4543,7 @@ C* If MF10, search over metastable state
       JST=1
       IF(MF1.EQ.10) JST=N1
       DO J=1,JST
-        CALL RDTAB1(LES,QM,QI,L1,LFS,N1,NP,NBT,INR,EN,XS,MXNP,IER)
+        CALL RDTAB1(LES,QM,QI,IZAP,LFS,N1,NP,NBT,INR,EN,XS,MXNP,IER)
         IF(IER.GT.0) THEN
           IF     (IER.EQ. 8 ) THEN
             PRINT *, 'GETSTD WARNING - numerical overflow'
@@ -4531,9 +4556,9 @@ C* If MF10, search over metastable state
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
         IF(MF .NE. 10) GO TO 12
 c...
-C...    PRINT *,'mf,mt,lfs,mst',mf,mt,lfs,mst
+C...    PRINT *,'mf,mt,izap,lfs',mf,mt,izap,lfs
 c...
-        IF(LFS.EQ.MST) GO TO 12
+        IF(LFS.EQ.MST .AND. (IZAP0.EQ.0 .OR. IZAP0.EQ.IZAP)) GO TO 12
       END DO
 C*        Requested metastable state higher than available in MF10
           PRINT *, 'GETSTD ERROR - requested level',MST,'>',N1
@@ -4564,7 +4589,7 @@ C*
 C* Search the ENDF file for section MT1 in file MF33
    20 CALL FINDMT(LES,ZA1,ZA,AWR,L1,L2,N1,N2,MAT,MF,MT,IER)
 c...
-c...  print *,'Found mat,mf,mt,ier',mat,mf,mt,ier ,l1,l2,n1,n2
+C...  print *,'Found mat,mf,mt,ier',mat,mf,mt,ier ,l1,l2,n1,n2
 c...
       IF(IER.NE. 0) THEN
         PRINT *,'WARNING - No uncertainties for MAT/MT',NINT(ZA1),MT1
@@ -4573,13 +4598,17 @@ c...
 C*
 C* Reaction found - read the covariance matrix
       MTL=L2
-      NST=N1
       NL =N2
+      MNL=N1
+      IF(MF.EQ.40) MNL=N1
       JST=0
+      JNL=0
 C*
-   24 IF(MF.EQ.40)
-     & CALL RDHEAD(LES,MAT,MFH,MTH,QM,QI,IZAP,LFS,IDM,NL,IER)
-      JST=JST+1
+   24 IF(MF.EQ.40) THEN
+        CALL RDHEAD(LES,MAT,MFH,MTH,QM,QI,IZAP,LFS,IDM,NL,IER)
+        JNL=JNL+1
+        JST=0
+      END IF
 C* If reaction is a constituent of a lumped reaction uncertainties
 C* the same relative uncertainty is assigned to all constituents
       IF(MTL.GT.0) THEN
@@ -4613,7 +4642,7 @@ C...
             GO TO 90
           END IF
           IF(LB.EQ.1 .OR. LB.EQ.2) THEN
-C* Process section with LB=1,2 representation
+C*          -- Process section with LB=1,2 representation
             IF(LT.NE.0) THEN
 C*            Warn about unsupported sections
               PRINT *, 'RDHEAD WARNING - unsupported MT/LB/LT',MT,LB,LT
@@ -4695,13 +4724,21 @@ c...
             END DO
           ELSE
 C* Warn about unsupported sections
-            PRINT *, 'RDHEAD WARNING - unsupported LB in MT',MT,LB
+            PRINT *, 'RDHEAD WARNING - unsupported LB',LB,' in MT',MT
           END IF
         END DO
         I33=I33+1
       END DO
-C* Check the final state
-      IF(LFS.LT.MST .AND. JST.LT.NST) GO TO 24
+      IF(MF.NE.40) GO TO 90
+C* Check the final state if MF=40
+      IF(LFS.EQ.MST .AND. (IZAP0.EQ.0 .OR. IZAP0.EQ.IZAP)) GO TO 90
+      IF(JNL.GE.MNL .AND. JST.GE.NL) THEN
+        PRINT *,' RDHEAD WARNING - ZA/LSF',IZAP0,MST,' cov. not found'
+        I33=0
+        GO TO 90
+      ELSE
+        GO TO 24
+      END IF
 C*
 C* Convert variance to absolute uncertainty
    90 IF(I33.GT.0) THEN
