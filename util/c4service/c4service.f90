@@ -497,7 +497,10 @@ CONTAINS
       TYPE (c4_data_point), POINTER :: pt
       INTEGER*4 k
 
-
+      y1  = 0.0
+      y2  = 0.0
+      dy1 = 0.0
+      dy2 = 0.0
       DO k=1,c4%nsec
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)
