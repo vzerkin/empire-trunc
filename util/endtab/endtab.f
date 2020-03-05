@@ -38,6 +38,7 @@ C-V        WARNING - Input specifications change.
 C-V  18/08 Allow plotting spectra (MF3/MT261) "per unit lethargy".
 C-V  19/08 Add percent uncertainty to printout.
 C-V  19/10 Shift uncertainty printout to beyond column 66.
+C-V  20/03 Refine default header for MF=10 MT=5.
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -464,7 +465,7 @@ c...
           ELSE
             WRITE(COM,926)  MAT,MFX,MTX
           END IF
-          IF(MT.EQ.9000 .OR. FST.GT.0)
+          IF(MT.EQ.5 .or. MT.EQ.9000 .OR. FST.GT.0)
      &      WRITE(COM(20:40),927) NINT(ZAP),NINT(FST)
           IF(MT/10000.EQ.4)
      &      WRITE(COM(20:40),928) NINT(DEG)
