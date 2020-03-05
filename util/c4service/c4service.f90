@@ -338,35 +338,44 @@ CONTAINS
       REAL*4 emin   ! lower energy limit on exp data, 0 == no limit
       REAL*4 emax   ! upper energy limit on exp data, 0 == no limit
 
-      TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to smooth
+      TYPE (c4_section), INTENT(IN) :: sc              ! C4 section to smooth
       TYPE (c4_data_point), POINTER :: p0, p1, p2, p3  ! 4 points involved in smoothing
 
       WRITE(6,*)' Smoothing subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Smoothing subentry: ',k,')', sc%ref, sc%ent, sc%sub
-      IF(iter == 0.0) iter = sqrt(Real(sc%ndat))
 
-      ! Set smoothing energy range if requested
-      IF(emin+emax == 0.0) THEN
-         jmin = 1
-         jmax = sc%ndat-3
-      ELSEIF(emax == 0.0) THEN
-         emax = sc%pt(sc%ndat)%e
-      ELSE
-         WRITE(6,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
-         WRITE(9,*) '  - smoothing energy range restricted to ',emin,' - ',emax,' MeV'  
-         emin = emin*10**6   ! Convert to eV since C4 file is in eV
-         emax = emax*10**6    
+      IF(iter == 0.0) iter = sqrt(Real(sc%ndat))
+      emin = emin*10**6   ! Convert to eV since C4 file is in eV
+      emax = emax*10**6 
+
+      ! Set full EXFOR energy range for smoothing
+      jmin = 1
+      jmax = sc%ndat-3
+      ! Set requested smoothing energy range 
+      IF(emin > 0.0) THEN
          DO j = 1, sc%ndat 
+            jmin = 1
             IF(sc%pt(j)%e <= emin) jmin = j
+         ENDDO 
+      ENDIF
+      IF(emax > 0.0) THEN
+         DO j = 1, sc%ndat 
             IF(sc%pt(j)%e >= emax) THEN
                jmax = j-3   ! Because smoothing needs 4 points j must stop 3 points from the last
                EXIT
             ENDIF
          ENDDO 
       ENDIF
+
+      IF(emin == 0.0) emin = sc%pt(1)%e
+      IF(emax == 0.0) emax = sc%pt(sc%ndat)%e
+      IF(emin > 0.0 .or. emax > 0.0) THEN
+         WRITE(6,*) '  - smoothing energy range restricted to ',emin*1.0E-6,' - ',emax*1.0E-6,' MeV'  
+         WRITE(9,*) '  - smoothing energy range restricted to ',emin*1.0E-6,' - ',emax*1.0E-6,' MeV'  
+      ENDIF
       IF(jmax-jmin < 10) THEN ! smoothing needs at least 4 points but we set limit higher
-         WRITE(6,*) '   NO smoothing - too few points!'
-         WRITE(9,*) '   NO smoothing - too few points!'
+         WRITE(6,*) '   NO smoothing - too few points! jmin=',jmin,' jmax=',jmax
+         WRITE(9,*) '   NO smoothing - too few points! jmin=',jmin,' jmax=',jmax
          RETURN 
       ENDIF     
 
@@ -377,10 +386,10 @@ CONTAINS
             p1 => sc%pt(j+1)
             p2 => sc%pt(j+2)
             p3 => sc%pt(j+3)
-!            IF(p1%e<p0%e .OR. p2%e<p1%e .OR. p3%e<p2%e) THEN
-!               WRITE(6,*) 'Energies not monotonically increasing for quadruplet starting with j=',j
-!               STOP 'Energies not monotonic'
-!            END IF
+            IF(p1%e<p0%e .OR. p2%e<p1%e .OR. p3%e<p2%e) THEN
+               WRITE(6,*) 'Energies not monotonically increasing for quadruplet starting with j=',j
+               STOP 'Energies not monotonic'
+            END IF
 
             ! cross sections
             s = 0.5*abs(p1%e - p0%e)*(p1%x + p0%x) + 0.5*abs(p2%e - p1%e)*(p2%x + p1%x) + &
@@ -388,7 +397,9 @@ CONTAINS
             l = abs(p3%e - p0%e)
             IF(l == 0) THEN
                WRITE(6,*)'   Fatal error in smoothig: points at the same energy ', p3%e, p0%e
-               WRITE(9,*)'   Fatal error in smoothig: points at the same energy ', p3%e, p0%e, 'STOP'
+               WRITE(6,*)'   The first od four at position ', j,'-th in the dataset'  
+               WRITE(9,*)'   Fatal error in smoothig: points at the same energy ', p3%e, p0%e
+               WRITE(9,*)'   The first od four at position ', j,'-th in the dataset  STOP'  
                STOP ' Smoothing failed due to 4 points with the same energy'
             END IF
             h = (3*s)/(2*l) - (p0%x + p3%x)/4.
@@ -409,8 +420,10 @@ CONTAINS
             if (abs(s-sp)/s > 0.00001) write(6,*) '   integral mismatch', s, sp
          END DO
       END DO
-      WRITE(6,*)'  - Subentry smoothed ',int(iter),' times'
-      WRITE(9,*)'  - Subentry smoothed ',int(iter),' times'
+      
+      WRITE(6,*)'  - Subentry smoothed ',int(iter),' times '
+      WRITE(9,*)'  - Subentry smoothed ',int(iter),' times ' 
+      
       RETURN
    END SUBROUTINE smooth_section
 
