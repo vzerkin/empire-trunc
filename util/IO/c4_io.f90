@@ -193,6 +193,7 @@ contains
          endif
       end do
 
+      ! try to comment the line below in case c4service crashes on memory allocation
       call delete_c4(c4)
       allocate(c4%sec(k))
       c4%nsec = k
