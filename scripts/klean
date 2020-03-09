@@ -3,9 +3,9 @@
 # script to remove left-over files from kalman
 # fitting of Empire cross sections of PFNS
 
-kln=''
+kln='y'
 echo -n "Remove existing fort.*, *.kal, *.gpd, KALMAN.INP, INPUT.D files? (Y/N) > "
-read kln
+#read kln
 
 if [ -n "$kln" ] && ( [ ${kln:0:1} = "y" ] || [ ${kln:0:1} = "Y" ] ); then
     echo -n " Removing old kalman files..."

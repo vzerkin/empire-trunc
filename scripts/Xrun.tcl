@@ -1,6 +1,6 @@
-# $Rev: 5183 $
+# $Rev: 5202 $
 # $Author: mwherman $
-# $Date: 2020-01-02 23:06:15 +0100 (Do, 02 Jän 2020) $
+# $Date: 2020-03-09 20:01:20 +0100 (Mo, 09 Mär 2020) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8681,7 +8681,13 @@ exec mv $file.new $file.inp } \
 exec xterm -e mv $file-m.endf $file.endf
 exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -label {Insert covariances} 
-    $site_3_0.menu93 add separator \
+
+     $site_3_0.menu93 add command \
+        \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/klean } \
+        -label {Clean Kalman files} 
+
+   $site_3_0.menu93 add separator \
 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/sampling.sh $file &} \
