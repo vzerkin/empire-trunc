@@ -5728,7 +5728,7 @@ C-----TEMPORARILY DO NOT ALLOW TABULATED BACKGROUND OR OPTICAL MODEL
 C-----PHASE SHIFT.
   120 IF(LBK.EQ.0.AND.LPS.EQ.0) GO TO 140
       WRITE(OUTP,130)
-      WRITE(*       )
+      WRITE(*,130)
   130 FORMAT(///' ERROR -',
      1 ' Currently Program Does NOT Allow Tabulated Background or'/
      2 ' Optical Phase Shift. Execution Terminated.'///)
