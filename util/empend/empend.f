@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2019-04-24 21:18:05 +0200 (Mi, 24 Apr 2019) $
+Ccc   * $Date: 2020-04-12 21:37:38 +0200 (So, 12 Apr 2020) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -159,6 +159,14 @@ C-M        Fix format reading conversion coefficients.
 C-M        Allow more digits for branching ratios (backward compatible).
 C-M  17/07 Small fix reading more digits for branching ratio.
 C-M  18/09 Fix missing FEND record after MF4.
+C-M  20/01 - Increase MXM from 120 to 200 (Dan Filipescu).
+C-M        - Enable discrete levels to ground state for photons.
+C-M        - Fix processing of MF=12,14 (format change in EMPIRE
+C-M          printing "Discrete level population before gamma cascade".
+C-M  20/02 Fix printing or radionuclide production in MF10.
+C-M  20/03 Add routine WRMF6D to write discrete level angular
+C-M        distributions in MF=6 (no recoils at the moment).
+C-M        NOTE: one optional extra input record.
 C-M  
 C-M  Manual for Program EMPEND
 C-M  =========================
@@ -269,6 +277,12 @@ C-M     The parameters are optional.
 C-M   - ALAB, EDATE, AUTHOR string, where each of the listed
 C-M     parameters occupies 11 columns (see ENDF-6 manual for
 C-M     details). The parameters are optional.
+C-M   - IMF4, the highest MT number of elastic and discrete angular
+C-M     distributions to be included in MF=4.
+C-M     Valid entries: 2  Elastic only.
+C-M                   91  Elastic and discrete level inelastic (dflt).
+C-M                  649  All up to discrete level proton emission.
+C-M                  849  All discrete level particle emissions.
 C-M
 C-M   NOTES:
 C-M   - Extensive exclusive spectra calculations in EMPIRE
@@ -326,7 +340,7 @@ C* MXT - Maximum number of reactions (including discrete levels).
 C* MXM - Maximum number of residual nuclei.
 C* MXR - Lengrh of the real work array RWO.
 C* MXI - Length of the integer work array IWO.
-      PARAMETER   (MXE=200,MXT=400,MXM=120,MXR=2400000,MXI=8000,MLV=3)
+      PARAMETER   (MXE=200,MXT=400,MXM=200,MXR=2400000,MXI=8000,MLV=3)
       CHARACTER*11 ALAB,EDATE,AUTHOR(3)
       CHARACTER*40 BLNK
       CHARACTER*80 FLNM,FLN1,FLN2,FLER
@@ -399,6 +413,12 @@ c...  NMOD= 0
       I800=0
       IRCOIL=0
       NT6 =0
+      IDL =0
+C* Set flag for the highest MT to be included in MF=4
+C...  IMF4=  2
+      IMF4= 91
+C...  IMF4=649
+C...  IMF4=849
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,991) ' EMPEND - Convert EMPIRE output to ENDF '
@@ -448,6 +468,17 @@ C* Define the NLIB number
 C* Define ALAB, EDATE, AUTHOR strings.
       WRITE(LTT,991) '$Enter ALAB, EDATE, AUTHOR string     : '
       READ (LKB,997,END=16) ALAB,EDATE,AUTHOR
+C* Define Max. MT to be included in MF=4
+      WRITE(LTT,991) '$Max. MT for MF4 (e.g. 2,91,649,689)  : '
+      READ (LKB,'(A)',END=16) FLNM
+      IF(FLNM(1:40).EQ.BLNK) GO TO 16
+      READ(FLNM,*) IMF4
+      IF(IMF4.NE.2 .AND. IMF4.NE. 91
+     &             .AND. IMF4.NE.649
+     &             .AND. IMF4.NE.849) THEN
+        WRITE(LTT,991) '  ERROR - Invalid IMF4'
+        STOP 'EMPEND ERROR on input - invalid IMF4'
+      END IF
 C*
 C* Write the input options to Log-file
    16 OPEN (UNIT=LER,FILE=FLER,STATUS='UNKNOWN')
@@ -497,7 +528,7 @@ C*
 C... Suppress writing MT50 for neutrons because it interferes
 C... with NJOY processing
       DO J=1,NXS
-        IF(IWO(MTH-1+J).EQ. 50 .AND. IZI.EQ.1) IWO(MTH-1+J)=-50
+        IF(IZI.EQ.1 .AND. IWO(MTH-1+J).EQ. 50) IWO(MTH-1+J)=-50
       END DO
 c...
 c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
@@ -537,6 +568,13 @@ C* Scan the EMPIRE output for all reactions with energy/angle distrib.
         REWIND LIN
         JT6=MXI-LBI
         CALL SCNMF6(LIN,LTT,LER,NT6,IWO(LBI),JT6,IZI,IZA,INCL)
+C*
+        WRITE(LTT,991)
+        WRITE(LTT,991) ' List of MT numbers with spectra        '
+        WRITE(LTT,999) (IWO(LBI-1+J),J=1,NT6)
+        WRITE(LER,991)
+        WRITE(LER,991) ' List of MT numbers with spectra        '
+        WRITE(LER,999) (IWO(LBI-1+J),J=1,NT6)
 C* Summ MT 5 contributions as necessary
         CALL SUMMT5(IZI,IZA,NXS,NEN,IWO(MTH),NT6,IWO(LBI)
      &             ,EIN,RWO(LXS),QQM,QQI,MXE,MXT,LTT,LER,INCL)
@@ -603,20 +641,82 @@ C* Write the ENDF file-3 data
           WRITE(LER,995) '       Cross section too small for MT : ',JT
         END IF
 C*      -- Flag the presence of discrete level proton and alpha production
-        IF(JT.GE.600 .AND. JT.LE.649) I600=1
-        IF(JT.GE.800 .AND. JT.LE.849) I800=1
+        IF(JT.GE.600 .AND. JT.LT.649) I600=1
+        IF(JT.GE.800 .AND. JT.LT.849) I800=1
       END DO
+C*
+      WRITE(LTT,991) ' '
+      WRITE(LTT,991) ' List of processed MT numbers for MF3   '
+      WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LER,991) ' '
+      WRITE(LER,991) ' List of MT numbers for MF3             '
+      WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
+C*
+C* Check if discrete level cross section exist, but no spectra
+      K  =0
+      KT6=NT6
+      DO I=1,NT6
+        IT6=IWO(LBI+K)
+        K  =K+1
+C...
+C...    print *,'i,k,nt6,kt6,it6',i,k,nt6,kt6,it6,i600,i800
+C...
+C*      -- Check if continuum proton emission is present
+        IF(IT6.EQ.649) THEN
+          I600=0
+          IF(I.LT.NT6) THEN
+            CYCLE
+          ELSE
+            GO TO 380
+          END IF
+        END IF
+C*      -- Check to insert isotropic proton emission
+        IF(I600.EQ.1 .AND. (IT6.GT.649 .OR. I.EQ.NT6)) THEN
+          IF(I.LE.NT6) THEN
+C*          -- Shift remaining entries
+            N=KT6-I+1
+            DO J=1,N
+              IWO(LBI+K+1-J)=IWO(LBI+K-J)
+            END DO
+          END IF
+C*        -- Flag insertion of isotropic discrete levels
+          IWO(LBI+K-1)=600
+          K  =K+1
+          KT6=KT6+1
+        END IF
+C*      -- Check if continuum alpha emission is present
+  380   IF(IT6.EQ.849) THEN
+          I800=0
+          IF(I.LT.NT6) THEN
+            CYCLE
+          END IF
+        END IF
+C*      -- Check to insert isotropic alpha emission
+        IF(I800.EQ.1 .AND. (IT6.GT.849 .OR. I.EQ.NT6)) THEN
+          IF(I.LE.NT6 .AND. IT6.GE.849) THEN
+C*          -- Shift remaining entries
+            N=KT6-I+1
+            DO J=1,N
+              IWO(LBI+K+1-J)=IWO(LBI+K-J)
+            END DO
+            IWO(LBI+K-1)=800
+          ELSE
+            IWO(LBI+K)=800
+          END IF
+C*        -- Flag insertion of isotropic discrete levels
+          K  =K+1
+          KT6=KT6+1
+        END IF
+      END DO
+      NT6=K
+C*
       IWO(LBI+NT6)=999
       ELO=EIN(1)
 C*
-      WRITE(LTT,991)
-      WRITE(LTT,991) ' List of processed MT numbers for MF3   '
-      WRITE(LTT,999) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LTT,991) ' '
       WRITE(LTT,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LTT,998) (IWO(LBI-1+J),J=1,NT6)
-      WRITE(LER,991)
-      WRITE(LER,991) ' List of MT numbers for MF3             '
-      WRITE(LER,999) (IWO(MTH-1+J),J=1,NXS)
+      WRITE(LER,991) ' '
       WRITE(LER,991) ' List of MT numbers for MF4/MF6         '
       WRITE(LER,998) (IWO(LBI-1+J),J=1,NT6)
 c...       
@@ -644,7 +744,6 @@ C* Stop processing if no energy/angle distributions present
       IF(NT6.LE.0) GO TO 700
 C...  IF(NT6.LE.0) GO TO 880
       JT4=0
-      JT0=0
       JT6=0
 C*
 C* Process angular distribution data
@@ -657,50 +756,218 @@ C* Read the EMPIRE output file to extract angular distributions
   400 JT6=JT6+1
       MT4=0
       JT4=0
-      JT0=0
       MT6=IWO(LBI-1+JT6)
 C*    -- Skip ground state for compound elastic
       IF((IZI.EQ.   1 .AND. MT6.EQ. 91) .OR.
      &   (IZI.EQ.1001 .AND. MT6.EQ.649) .OR.
      &   (IZI.EQ.2004 .AND. MT6.EQ.849) ) THEN
-       JT4=1
-       JT0=1
-      END IF
+        JT4=1
+       END IF
 c...
-c...  print *,'mt6,jt4',mt6,jt4
+C...  print *,'mt6,mt4,jt4,jt6',mt6,mt4,jt4,jt6,i800
 c...
-C*    -- Check angular distributions (if none, purely isotropic, -LCT)
-      IF(MT6.EQ.649) I600=0
-      IF(MT6.EQ.849) I800=0
-      IF(MT6.GT.649 .AND. I600.EQ.1) THEN
-        JT6 =JT6-1
-        MT6 =649
-        MT4 =600
-        I600=0
-        LCT =-2
+C* Process angular distributions of elastic and discrete levels in MF4
+      IF     (MT6.EQ.  2) THEN
+        GO TO 410
+      ELSE IF(MT6.EQ. 91 .AND. IMF4.GE. 91) THEN
+        GO TO 410
+      ELSE IF(MT6.EQ.600 .AND. IMF4.GE.649) THEN
+        LCT=-2
+        MT4=MT6
         WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
         WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
         GO TO 420
-      ELSE IF(MT6.GT.849 .AND. I800.EQ.1) THEN
-        JT6 =JT6-1
-        MT6 =849
-        MT4 =800
-        I800=0
-        LCT =-2
+      ELSE IF(MT6.EQ.649 .AND. IMF4.GE.649) THEN
+        GO TO 410
+      ELSE IF(MT6.EQ.800 .AND. IMF4.GE.849) THEN
+        LCT=-2
+        MT4=MT6
         WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
         WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
         GO TO 420
+      ELSE IF(MT6.EQ.849 .AND. IMF4.GE.849) THEN
+        GO TO 410
+      ELSE
+        GO TO 490
       END IF
-C* Process discrete levels if continuum reactions present
-      IF(MT6.NE.  2 .AND.
-     1   MT6.NE. 91 .AND.
-     1   MT6.NE.649 .AND.
-     1   MT6.NE.849) GO TO 490
+C*
+  410 LE=LBE
+      LG=LE+NEN+2
+      LA=LG+NEN+2
+      LX=MXR-LA
+      IF(LA.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+      REWIND LIN
+      JPRNT=IPRNT
+C... Disable ANGDIS printout for bad Legendre fits except for elastic
+C... Discrete level distrib. checked with continuum when processing MF6
+c...
+c...      JPRNT=-1
+c...      IF(MT6.EQ.2) JPRNT=IPRNT
+c...
+C* Reading angular distributions - MF6 flagged negative
+      KT6=-MT6
+c...
+c...  print *,'processing angular distributions for MT',MT6
+c...
+      CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
+     1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
+     1           ,KT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
+     2           ,MXE,LX,JPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
+c...
+C...  print *,'Done reamf6 MT6,KT6,ier',MT6,KT6,ier
+C...  print *,(rwo(la-1+j),j=1,20)
+C...  stop
+c...
+c...  write(ler,*) 'After REAMF6 for angular distributions'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
+c...
+      IF(IER.LT.0) GO TO 490
+      IF(NK .LE.0) GO TO 490
+C* Write the ENDF file-4 data (MT4 is defined internally)
+      MT4=2
+      KT4=0
+  420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
+     1           ,MT4,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
+      IF(MT4.GT.0) THEN
+        WRITE(LTT,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
+        WRITE(LER,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
+        JT4=JT4+1
+        MT4=MT4+1
+        KT4=KT4+1
+        GO TO 420
+      END IF
+      WRITE(LTT,995) BLNK
+      WRITE(LER,995) BLNK
+C.490 IF(JT6.LT.NT6 .OR. I800.EQ.1) GO TO 400
+  490 IF(JT6.LT.NT6) GO TO 400
+c...
+c.490 print *,'JT4,JT6,NT6,I800',JT4,JT6,NT6,I600,I800
+C...  IF(JT6.LT.NT6) GO TO 400
+c...
+C* Angular distribution data processed
+C...  IF(JT4.GT.0) THEN
+      IF(KT4.GT.0) THEN
+        NS=0
+        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+      END IF
+      JT6=0
+      DO I=1,NXS
+        IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
+      END DO
+C*
+C* Process double differential data
+      WRITE(LTT,991) ' '
+      WRITE(LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
+      WRITE(LER,991) ' '
+      WRITE(LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
+C* Check if yields for unassigned reactions need to be printed
+      NK=0
+      DO I=1,NT6
+        IF(IWO(LBI-1+I).EQ.5) GO TO 600
+        IF(IWO(LBI-1+I).EQ.201) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.203) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.204) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.205) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.206) NK=NK+1
+        IF(IWO(LBI-1+I).EQ.207) NK=NK+1
+      END DO
+      CALL WRMF6Y(LOU,MXE,MXT,LXR
+     1           ,EIN,RWO(LXS),QQI,IWO(MTH),RWO(LSC)
+     1           ,MAT,IZI,IZA,AWR,NEN,NXS,NS)
+c...
+c...  write(ler,*) 'After WRMF6Y'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...
+      WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',5
+      WRITE(LTT,995) '         Number of outgoing particles : ',NK
+      WRITE(LTT,991)
+      WRITE(LER,995) ' Processed energ./ang. distrib. for MT: ',5
+      WRITE(LER,995) '         Number of outgoing particles : ',NK
+      WRITE(LER,991)
+C* Read the EMPIRE output file to extract energy/angle distrib.
+  600 MT6=IWO(LBI+JT6)
       LE=LBE
       LG=LE+NEN+2
       LA=LG+NEN+2
       LX=MXR-LA
       IF(LA.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
+C*      -- Process discrete levels, unless already processed
+C*         IMF4 is the highest MT included in MF=4
+C...
+C...  print *,'      jt6,mt6,idl',jt6,mt6,idl
+C...
+      IF     (MT6.EQ.  2) THEN
+        GO TO 680
+      ELSE IF(MT6.EQ. 91 .AND. IMF4.LT. 91) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.600 .AND. IMF4.LT.649) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.649 .AND. IMF4.LT.649) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      ELSE IF(MT6.EQ.800 .AND. IMF4.LT.849) THEN
+        IF(IDL.NE.MT6)GO TO 650
+      ELSE IF(MT6.EQ.849 .AND. IMF4.LT.849) THEN
+        IF(IDL.NE.MT6) GO TO 650
+      END IF
+      REWIND LIN
+      CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
+     1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
+     1           ,MT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
+     2           ,MXE,LX,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
+      IF(IER.LT.0) GO TO 870
+      IF(NK .LE.0) GO TO 680
+C* Write the ENDF file-6 data
+      CALL WRIMF6(LOU,RWO(LA),MT6,MAT,IZA,AWR,ELO,NK,LCT,NS)
+      GO TO 670
+c...
+c...      print *,'Read data for',nk,' particles'
+c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
+c...
+c...  write(ler,*) 'After REAMF6 for MT 5'
+c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
+c...  stop
+c...
+c...
+C*
+C* Write discrete level ang.distr. in File-6 format
+  650 MT4=0
+      JT4=0
+      IDL=MT6
+      NK =1
+C*    -- Skip ground state for compound elastic
+      IF((IZI.EQ.   1 .AND. (MT6.GT. 50 .AND. MT6.LE. 91)) .OR.
+     &   (IZI.EQ.1001 .AND. (MT6.GT.600 .AND. MT6.LE.649)) .OR.
+     &   (IZI.EQ.2004 .AND. (MT6.GT.800 .AND. MT6.LE.849)) ) THEN
+        JT4=1
+C...
+C...    PRINT *,'MT4,MT6,JT4',MT4,MT6,JT4
+C...
+      END IF
+c...
+C...  print *,'      mt6,jt4,imf4',mt6,jt4,imf4
+c...
+C*    -- Check angular distributions (if none, purely isotropic, -LCT)
+      IF(MT6.EQ.649) I600=0
+      IF(MT6.EQ.849) I800=0
+C*
+      IF(MT6.EQ.600 .AND. IMF4.LT.649) THEN
+        LCT=-2
+        MT4=MT6+JT4
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        RWO(LA  )=1001
+        RWO(LA+1)=AWH/AWN
+        GO TO 660
+      ELSE IF(MT6.EQ.800 .AND. IMF4.LT.849) THEN
+        LCT=-2
+        MT4=MT6+JT4
+        RWO(LA  )=2004
+        RWO(LA+1)=AWA/AWN
+        WRITE (LTT,995) ' All-isotropic distribution for MT      ',MT6
+        WRITE (LER,995) ' All-isotropic distribution for MT      ',MT6
+        GO TO 660
+      END IF
       REWIND LIN
       JPRNT=IPRNT
 C... Disable ANGDIS printout for bad Legendre fits except for elastic
@@ -731,101 +998,49 @@ c...
         WRITE(LTT,995) BLNK
         WRITE(LER,995) BLNK
       END IF
-      IF(IER.LT.0) GO TO 870
-      IF(NK.LE.0) GO TO 490
-C* Write the ENDF file-4 data
-      MT4=2
-      KT4=0
-  420 CALL WRIMF4(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
-     1           ,MT4,JT0,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
+      IF(IER.LT.0) GO TO 665
+      IF(NK .LE.0) GO TO 665
+C* Write the ENDF file-6 data for discrete levels
+  660 CALL WRMF6D(LOU,LTT,LER,IWO(MTH),QQM,QQI,NXS,MT6,RWO(LA),EMIN
+     1           ,EMX,MT4,JT4,MAT,IZA,IZI,AWR,LCT,IRCOIL,NS)
       IF(MT4.GT.0) THEN
         WRITE(LTT,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
         WRITE(LER,995)' Processed angular distrib. for MT/Lvl: ',MT4,JT4
         JT4=JT4+1
         MT4=MT4+1
         KT4=KT4+1
-        GO TO 420
+        GO TO 660
       END IF
       WRITE(LTT,995) BLNK
       WRITE(LER,995) BLNK
-  490 IF(JT6.LT.NT6 .OR. I800.EQ.1) GO TO 400
+      IF(MT6.EQ.600 .OR. MT6.EQ.800) JT6=JT6+1
 c...
-      print *,'JT4,JT6,NT6,I800',JT4,JT6,NT6,I800
+C...  print *,'JT4,KT4,JT6,NT6,I800',JT4,KT4,JT6,NT6,I800
 c...
-C* Angular distribution data processed
-C...  IF(JT4.GT.0) THEN
-      IF(KT4.GT.0) THEN
-        NS=0
-        CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
-      END IF
-      JT6=0
-      DO 492 I=1,NXS
-      IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
-  492 CONTINUE
+c.665 IF(JT6.LT.NT6 .OR. I800.EQ.1) GO TO 600
+  665 IF(JT6.LT.NT6) GO TO 600
+C* Angular distribution data processed - write the SEND record
+c...  IF(KT4.GT.0) THEN
+c...    NS=0
+c...    CALL WRCONT(LOU,MAT, 0, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+c...  END IF
+C     JT6=0
+C     DO I=1,NXS
+C       IWO(MTH-1+I)=ABS(IWO(MTH-1+I))
+C     END DO
+c...
+C...  print *,'JT4,JT6,NT6,I800',JT4,JT6,NT6,I800
+c...
 C*
-C* Process double differential data
-      WRITE(LTT,991)
-      WRITE(LTT,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
-      WRITE(LER,991)
-      WRITE(LER,991) ' BEGIN PROCESSING DOUBLE-DIFERENTL.DATA '
-C* Check if yields for unassigned reactions need to be printed
-      NK=0
-      DO I=1,NT6
-        IF(IWO(LBI-1+I).EQ.5) GO TO 600
-        IF(IWO(LBI-1+I).EQ.201) NK=NK+1
-        IF(IWO(LBI-1+I).EQ.203) NK=NK+1
-        IF(IWO(LBI-1+I).EQ.204) NK=NK+1
-        IF(IWO(LBI-1+I).EQ.205) NK=NK+1
-        IF(IWO(LBI-1+I).EQ.206) NK=NK+1
-        IF(IWO(LBI-1+I).EQ.207) NK=NK+1
-      END DO
-      CALL WRMF6Y(LOU,MXE,MXT,LXR
-     1           ,EIN,RWO(LXS),QQI,IWO(MTH),RWO(LSC)
-     1           ,MAT,IZI,IZA,AWR,NEN,NXS,NS)
-c...
-c...  write(ler,*) 'After WRMF6Y'
-c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
-c...
-      WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',5
-      WRITE(LTT,995) '         Number of outgoing particles : ',NK
-      WRITE(LTT,991)
-      WRITE(LER,995) ' Processed energ./ang. distrib. for MT: ',5
-      WRITE(LER,995) '         Number of outgoing particles : ',NK
-      WRITE(LER,991)
-C* Read the EMPIRE output file to extract energy/angle distrib.
-  600 LE=LBE
-      LG=LE+NEN+2
-      LA=LG+NEN+2
-      LX=MXR-LA
-      IF(LA.GT.MXR) STOP 'EMPEND ERROR - MXR limit exceeded'
-      MT6=IWO(LBI+JT6)
-      IF(MT6.EQ.2) GO TO 620
-      REWIND LIN
-      CALL REAMF6(LIN,LTT,LER,EIN,RWO(LXS),RWO(LXG),NEN
-     1           ,RWO(LE),RWO(LG),RWO(LA),IWO(MTH)
-     1           ,MT6,IZI,IZA,QQM,QQI,AWR,EMIN,ELO,NXS,NK,LCT,IRCOIL
-     2           ,MXE,LX,IPRNT,EI1,EI2,EO1,EO2,NZA1,NZA2,IER)
-      IF(IER.LT.0) GO TO 870
-c...
-c...      print *,'Read data for',nk,' particles'
-c...      print '(1p,10e12.3)',(rwo(la-1+j),j=1,120)
-c...
-c...  write(ler,*) 'After REAMF6 for MT 5'
-c...  call prtinc(nxs,nen,iwo(mth),ein,rwo(lxs),mxe,ler)
-c...  stop
-c...
-c...
-      IF(NK.LE.0) GO TO 620
-C* Write the ENDF file-6 data
-      CALL WRIMF6(LOU,RWO(LA),MT6,MAT,IZA,AWR,ELO,NK,LCT,NS)
-      WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',MT6
+  670 WRITE(LTT,995) ' Processed energ./ang. distrib. for MT: ',MT6
       WRITE(LTT,995) '         Number of outgoing particles : ',NK
       WRITE(LTT,991)
       WRITE(LER,995) ' Processed energ./ang. distrib. for MT: ',MT6
       WRITE(LER,995) '         Number of outgoing particles : ',NK
       WRITE(LER,991)
-  620 JT6=JT6+1
+  680 JT6=JT6+1
       IF(JT6.LT.NT6) GO TO 600
+C*
 C* Energy/angle distribution data processed
       IF(JT6.GT.0) THEN
         NS=0
@@ -833,9 +1048,9 @@ C* Energy/angle distribution data processed
       END IF
 C*
 C* Write radioisotope and isomer production data (MF10)
-  700 WRITE(LTT,991)
+  700 WRITE(LTT,991) ' '
       WRITE(LTT,991) ' BEGIN WRITING ACTIVATION DATA          '
-      WRITE(LER,991)
+      WRITE(LER,991) ' '
       WRITE(LER,991) ' BEGIN WRITING ACTIVATION DATA          '
       N10=0
       NRC=0
@@ -882,6 +1097,9 @@ C* NOTE - Reactions going to ground states produce no photons
       DO I=1,NXS
         IF     (IWO(MTH-1+I).GE. 51 .AND. IWO(MTH-1+I).LT. 91) THEN
 C* Count levels of the MT50 series, set mt and IZP
+C...
+C...      print *,'Count levels of MT50s',IWO(MTH-1+I),LVLF(1)+1
+C...
           LVLF(1)=LVLF(1)+1
           LVMT(1)=51
           LVIZ(1)=1
@@ -1628,7 +1846,7 @@ C*
         END IF
 C*
         IF(PTST.EQ.' (z,p)  ') THEN
-          IF(IZI.EQ.1) THEN
+          IF(IZI.LE.1) THEN
             MT=649
           ELSE
             MT=103
@@ -1643,7 +1861,7 @@ C*
      &          ((POUT.EQ.'recoils ' .OR.
      &            POUT.EQ.'gammas  ').AND. MEQ.EQ.0)) THEN
              MT=849
-             IF(IZI.NE.1) MT=107
+             IF(IZI.GT.1) MT=107
           ELSE IF(POUT.EQ.'helium-3' .OR.
      &            POUT.EQ.'neutrons' .OR.
      &          ((POUT.EQ.'recoils ' .OR.
@@ -2962,6 +3180,10 @@ C*             spurious values at lower energies
         END DO
 C*      -- Eliminate cross sections with less than 2 significant values
         IF(NPT.LE.2 .AND. MTH(I).NE.9151 ) NPT=0
+C*      -- but not for discrete level reactions
+        IF(MTH(I).GE. 50 .AND. MTH(I).LT. 91) NPT=NEN
+        IF(MTH(I).GE.600 .AND. MTH(I).LT.649) NPT=NEN
+        IF(MTH(I).GE.800 .AND. MTH(I).LT.849) NPT=NEN
 C*
 C* Repack the array, removing All-zero cross section from the list
         IF(NPT.GT.0) THEN
@@ -3039,7 +3261,7 @@ C* Test for compound-elastic Legendre coefficients
 C* Identify the reaction and assign the MT number
       CALL EMTCHR(REC(15:22),REC(23:30),MT,IZI,IZA,MEQ)
 C...
-C...      print *,'emtchr',mt,rec(1:50)
+C...  print *,'emtchr',mt,rec(1:50)
 C...
       IF(MT .LE.0 .OR. MT.GT.999) THEN
 C*      -- Unknown reaction encountered
@@ -4839,9 +5061,6 @@ C* Test print filenames and logical file units
       ZRO=0
       IER=0
       XSMAL=1.E-10
-c...
-      lae92232=0
-c...
 C* Threshold F_back/F_forw for switching to tabular representation
       RMIN=1.E-5
 C* Test print files
@@ -4882,6 +5101,9 @@ c...      IT =0
 C*
 C* For elastic angular distributions define reaction and particles
       IF(MT6.EQ.-2) THEN
+C...
+        print *,'Processing elastic'
+C...
         MT=2
         MTC=MT
         NK =1
@@ -5021,7 +5243,7 @@ C* Find the cross section index
           IF(QQI(I).GE.0) ELO=EMIN
           ETH=MAX(ETH,EIN(1))
 c...
-c...      print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
+C...      print *,'  mt6,MTC,q,aw,eth,elo',mt6,MTC,qqi(i),awr,eth,elo,e0
 c...
           MT =MTC
           MTX=MT
@@ -5067,6 +5289,9 @@ C* Skip to next energy if current less or equal to previous point
 C*
 C* Read the elastic angular distributions
   400 IF(MT6.NE.-2) GO TO 210
+C...
+C...  print *,'Extract elastic cross section'
+C...
       XS3=0.
 C* Find the matching energy grid point index of the cross sections
       JE3=0
@@ -5083,7 +5308,7 @@ C* If no matching index is found the work array is corrupted (???!!!)
       IF(NE6.GT.0) GO TO 430
 C* Define the general File-4 data (HEAD and TAB1 rec.) on first point
 c...
-C...       print *,'je3,ne6,xs3',je3,ne6,xs3
+C...  print *,'je3,ne6,xs3',je3,ne6,xs3
 c...
       ZAP=1.
       AWP=1.
@@ -5164,7 +5389,9 @@ C*        -- Check the dynamic range of the distribution
           END DO
           RNG =SBCK/SFOR
 C...
-C...      print *,'ltte,lhi,ee,rng',ltte,lhi,ee,rng,sbck,sfor
+C...      print *,'ltte,lhi,ee,rng',ltte,lhi,ee,rng,sbck,sfor,RMIN
+C...      print *,'Coeff',(RWO(L64+L),L=1,LHI)
+C...      stop
 C...
 C*        -- If dynamic range < RMIN switch to tabular
           IF(RNG.LT.RMIN) GO TO 440
@@ -5817,7 +6044,9 @@ C*
 C-F File read - Add general reaction data into the packed array
   700 IF(NK.LE.0) RETURN
 c...
-c...        PRINT *,'REAMF6 IK,LXA',IK,LXA
+C...  PRINT *,'REAMF6 IK,LXA',IK,LXA
+C...  print *,(rwo(j),j=1,20)
+C...  stop
 c...
       IF(NE6.LE.0) THEN
         IZAP=IZAK(IK)
@@ -5926,7 +6155,6 @@ c...
       NW=LB1-LPK
       DO I=1,NW
         RWO(LP1-1+I)=RWO(LPK-1+I)
-        if(lpk-1+i.eq.lae92232) lae92232=lp1-1+i
       END DO
       LBL=LP1+NW
 c...
@@ -5943,12 +6171,9 @@ C* Reaction data read - check for next outgoing particle
 C
 C* All data for a reaction processed
   720 MT     = MTH(IT)
-      MTH(IT)=-MT
+        IF(MT.NE.51) MTH(IT)=-MT
 C* Check for skipped particles
       NK=NK-NSK
-
-      if(lae92232.gt.0) print *,'final eth',ik,rwo(lae92232)
-
       RETURN
 C*
   802 FORMAT(I3,1X,A2,1X,I3)
@@ -6856,7 +7081,7 @@ C*
       
       
       SUBROUTINE WRIMF4(LOU,LTT,LER,MTH,QQM,QQI,NXS,MT6,RWO,EMIN
-     1                 ,MT,LV0,LVL,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
+     1                 ,MT,LVL,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
 C-Title  : WRIMF4 Subroutine
 C-Purpose: Write angular distributions (file-4) data in ENDF-6 format
       PARAMETER   (MXQ=1100)
@@ -6886,6 +7111,9 @@ C* Find the appropriate discrete level MT number
       IF(IZI.EQ.   1 .AND. MT.EQ. 50) MT=MT+1
       IF(IZI.EQ.1001 .AND. MT.EQ.600) MT=MT+1
       IF(IZI.EQ.2004 .AND. MT.EQ.800) MT=MT+1
+C...
+C...  print *,'MT6,IZI,mt',MT6,IZI,mt
+C...
       DO JT=1,NXS
         IT=JT
         IF(ABS(MTH(IT)).EQ.MT ) GO TO 22
@@ -6898,8 +7126,8 @@ C* Write file MF4 angular distributions (first outgoing particle)
 c...
 c...  if(mt6.ge.600) then
 c...  if(mt6.gt.  2) then
-c...    PRINT *,'At 22,lct0,mt6',lct0,mt6
-c...    PRINT '(1x,1p,5e12.5)',(RWO(J),J=1,400)    
+C...    PRINT *,'At 22,lct0,mt6,mt',lct0,mt6,mt
+C...    PRINT '(1x,1p,5e12.5)',(RWO(J),J=1,40)    
 c...  end if
 c...
       IF(LCT0.LT.0) THEN
@@ -6915,6 +7143,7 @@ C*      -- No data given, assume purely isotropic
       LL =1
       ZAP=RWO(LL)
       IF(ZAP.EQ.0 .OR. ZAP.GT.2004.) THEN
+        WRITE(LTT,912) NINT(ZAP)
         STOP 'WRIMF4 ERROR - Illegal first particle'
       END IF
       AWP =RWO(LL+1)
@@ -6924,7 +7153,7 @@ C*      -- No data given, assume purely isotropic
       JE  =NE
       NR  =1
 c...
-c...  print *,(rwo(j),j=LL,LL+12+2*NP)
+C...  print *,'ll,rwo_ll',ll,(rwo(j),j=LL,LL+12+2*NP)
 c...  stop
 c...
       LL =LL+12+2*NP
@@ -6939,7 +7168,7 @@ C* Scan the data-set to check if any tabular data exist
       DO IE=1,NE
 c...
 C...    if(rwo(ll).ge.1.5e7) then
-C...      print *,'ie,ne,ll',ie,ne,ll,np
+C...      print *,'ie,ne,ll,np',ie,ne,ll,np
 C...      print *,(rwo(j),j=LL,LL+12+2*NP)
 C...      stop
 C...    end if
@@ -6963,6 +7192,9 @@ c...
       LTTE=1
       IF(NE2.GT.0) LTTE=3
       IF(NE2.EQ.0) NM  =0
+c...
+C...  print *,'ne,ne1,ne2,lang,ll,E',ne,ne1,ne2,lang,ll,rwo(ll)
+c...
 C* Define format-specific shift and length parameters
       IF(LANG.GT.10) THEN
         LTTE=2
@@ -6976,7 +7208,7 @@ C* Loop over the incident particle energies
       DO 40 IE=1,NE
         TT  =0.
         LT  =0
-        EIN =RWO(LL  )
+        EIN =     RWO(LL  )
         NA  =NINT(RWO(LL+1))
         NW  =NINT(RWO(LL+2))
         NEP =NINT(RWO(LL+3))
@@ -6992,7 +7224,7 @@ C*        for Legendre and mixed representation
           END IF
         END IF
 c...    
-c...    print *,'MT,Ein,NA,NW,NEP,LTTE',MT,Ein,NA,NW,NEP,LTTE
+C...    print *,'MT,Ein,NA,NW,NEP,LTTE',MT,Ein,NA,NW,NEP,LTTE
 C... &         ,IE,NA1,LSHF,LNA1
 c...    
         NA1 =ABS(NA)+LNA1
@@ -7019,15 +7251,15 @@ c...
      1     ABS(EOU)/EIN.LT.-1.E-4) THEN
 C*        -- Skip points below threshold
 c...
-c...      print *,'skip point',Ein,' below threshold',ETH
-c... &           ,' Ein,Eou',EIN,abs(EOU)
+C...      print *,'skip point',Ein,' below threshold',ETH
+C... &           ,' Ein,Eou',EIN,abs(EOU)
 c...
           JE=JE-1
           LL=LL+NW
           GO TO 40
         END IF
 C...
-C...    print *,'writing Ein,Eou,je,j2',EIN,Eou,je,j2,QQI(IT)
+C...    print *,'writing Ein,Eou,je,j2,Q',EIN,Eou,je,j2,QQI(IT)
 C...
 C*      -- Print header CONT and TAB2 records
         IF(J2.EQ.0) THEN
@@ -7057,13 +7289,13 @@ C*        -- Print isotropic threshold distribution (if necessary)
         END IF
 C*      -- Process the main data block
         RR  =0
-        L2  =LL
-        E2  =RWO(L2)
+        L2  =LL-NA-2
+        E2  =RWO(LL)
 c...    
 c...    print *,' '
-c...    print *,'First E_out',E2,' NEP,NA,LANG',NEP,NA,LANG,lshf
+C...    print *,'First E_out',E2,' NEP,NA,LANG,lshf',NEP,NA,LANG,lshf
 c...    if(mt.ge.601) then
-c...      print *,na1,ie,ne1,(rwo(l2-1+j),j=1,20)
+C...      print *,na1,ie,ne1,(rwo(ll-1+j),j=1,20)
 c...      stop
 c...    end if
 c...
@@ -7078,18 +7310,19 @@ C*        -- Copy the coefficients if a single point is given
           IF(NW.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRIMF4 exceeded'
 c...
 c...      if(mt.ge.601) then
-c...        print *,na1,ie,ne1,(rwo(l2-1+j),j=1,20)
+C...        print *,'na,l2,rwo_j',na,l2,(rwo(ll-1+j),j=1,20)
 c...        stop
 c...      end if
 c...
-          IF(NA.GT.0) CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
+          IF(NA.GT.0) CALL FLDMOV(NA1,RWO(LL+LSHF),QQ)
+          L2=LL
         ELSE
 C*        --Match the discrete level LVL and check that EOUT matches
           IF(IE.GT.NE1)
      &      STOP 'EMPEND ERROR - Level interp.not supported for tabular'
 C*        -- First level IEP=1 is the ground state
 C*           Check if it needs to be skipped (projectile=ejectile)
-          IEP =LV0
+          IEP =0
    32     IEP =IEP+1
           L1  =L2
           E1  =E2
@@ -7114,8 +7347,8 @@ c...
           DEE=ABS(EOU-E2)
 C*        -- Check for a strong mismatch in the calculated E_out
           IF(DEE.GT.TST .AND. NA1.GT.1) THEN
-            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),E2,EOU
-            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),E2,EOU
+            WRITE(LTT,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
+            WRITE(LER,911) 4,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
           END IF
 C*        -- Move coefficients to the output field
           CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
@@ -7200,12 +7433,17 @@ C*      -- Write point at EMIN if Q>=0
 C*      -- Write the angular distribution Legendre coefficients
         CALL WRLIST(LOU,MAT,MF,MT,NS,TT,EE,LT, 0,NL, 0,QQ(2))
 c...
+C...    print *,'qq',(qq(j),j=1,4)
+C...    stop
 C...    if(mt.gt.2 .and. j2.gt.3) stop
 c...
         GO TO 39
 C*
 C* Dual representation of elastic angular distributions
    36   NR  =1
+C...
+C...    print *,'ie,ne1,l2,lshf,na',ie,ne1,l2,lshf,na
+C...
         IF(IE.EQ.NE1+1) THEN
 C*        -- Write the TAB2 record for the tabular data
           NBT(1)=NE2
@@ -7216,6 +7454,9 @@ C*        -- Write the TAB2 record for the tabular data
         NP  =IABS(NA)
         NP2 =NP*2
         CALL FLDMOV(NP2,RWO(L2+LSHF),QQ)
+C...
+C...    print *,'    l2,lshf,np,na,qq',l2,lshf,np,na,(qq(j),j=1,4)
+C...
         NBT(1)=NP
 c...
 c...      PRINT *,'mt,NP,Ein',mt,NP,EIN
@@ -7329,6 +7570,445 @@ C* All discrete levels processed - nothing to write
      &      ,I3,I4,1P,E10.3E1,3E12.5E1/
      &       '                  Calculated : ',50X
      &       , E12.5E1)
+  912 FORMAT(' WRIMF4 ERROR - Illegal first particle',I8)
+      END
+      
+      
+      SUBROUTINE WRMF6D(LOU,LTT,LER,MTH,QQM,QQI,NXS,MT6,RWO,EMIN,ETOP
+     1                 ,MT,LVL,MAT,IZA,IZI,AWR,LCT0,IRCOIL,NS)
+C-Title  : WRMF6D Subroutine
+C-Purpose: Write angular distributions (file-6) data in ENDF-6 format
+C-Description:
+C-D  The routine is very similar to WRIMF4 because the format
+C-D  for discrete level angular distributions in MF=6 is similar
+C-D  to MF=4, except that it contains some additional information.
+      PARAMETER   (MXQ=1100)
+      CHARACTER*8  PTST
+      DIMENSION    RWO(*),QQM(NXS),QQI(NXS),MTH(NXS),NBT(1),INR(1)
+      DIMENSION    QQ(MXQ)
+      DIMENSION    EYL(2),YLD(2)
+C* Particle yield (constant=1)
+      DATA YLD/ 1.0, 1.0 /
+C* Rel. tolerance limit for matching energy levels (eV at 1 MeV)
+C... This is a tricky one!!!!
+c...  DATA DLVL/1.E2/
+C...  DATA DLVL/3.E2/
+C...  DATA DLVL/5.E2/
+C*   Increase tolerance in the version matching levels by sequence
+      DATA DLVL/2.0E3/
+C*
+      DATA ZRO/0./
+      DATA PTST/'        '/
+C*
+C* Consider only one particle
+      IZR=0
+      NK =1
+      JP =0
+      LCT=ABS(LCT0)
+      IF(LCT.GT.2) LCT=2
+C*
+      CALL POUCHR(PTST,IZI,AWI)
+C* Find the appropriate discrete level MT number
+      IF(MT6.EQ. 91) MT=MAX(MT, 50)
+      IF(MT6.EQ.649) MT=MAX(MT,600)
+      IF(MT6.EQ.849) MT=MAX(MT,800)
+      IF(IZI.EQ.   1 .AND. MT.EQ. 50) MT=MT+1
+      IF(IZI.EQ.1001 .AND. MT.EQ.600) MT=MT+1
+      IF(IZI.EQ.2004 .AND. MT.EQ.800) MT=MT+1
+C...
+C...  print *,'mt6,mt,lvl,lct0',mt6,mt,lvl,lct0
+C...
+      DO JT=1,NXS
+        IT=JT
+        IF(ABS(MTH(IT)).EQ.MT ) GO TO 22
+      END DO
+      GO TO 80
+C*
+C* Write file MF6 angular distributions (first outgoing particle)
+   22 MF =6
+      ZA =IZA
+      LIP=0
+      LL =1
+      ZAP=RWO(LL)
+      AWP=RWO(LL+1)
+      IF(LCT0.LT.0) THEN
+C*      -- No data given, assume purely isotropic (law=3)
+        ETH=MAX(EMIN,(-QQI(IT))*(AWR+AWI)/AWR)
+C...
+C...    PRINT *,'        it,mt,zap,awp',it,mth(it),zap,awp
+C...
+        LCT=2
+        NR =1
+        NP =2
+        NBT(1)=NP
+        INR(1)=2
+        LLE=LL
+        LLX=LLE+NP
+        EYL(1)=ETH
+        EYL(2)=ETOP
+        YLD(1)=1
+        YLD(2)=1
+        CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, JP,LCT, NK,IZR)
+C*      -- LAW=3 designates isotropic distribution
+C...    LAW=3
+C*      -- Simulate isotropic distribution explicitly with zero coeff.
+        LAW=2
+        CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW
+     &             ,NR,NP,NBT,INR,EYL,YLD)
+C*      -- No additional information is needed for LAW=3
+        IF(LAW.EQ.2) THEN
+C*        -- Additional information for LAW=2
+          CALL WRTAB2(LOU,MAT,MF,MT,NS,ZRO,ZRO,IZR,IZR
+     &             ,NR,NP,NBT,INR)
+          ND =0
+          NW =2
+          NA =0
+          NEP=2
+          YLD(1)=0
+          YLD(2)=0
+          DO I=1,NP
+            CALL WRLIST(LOU,MAT,MF,MT,NS,ZRO,EYL(I),ND,NA,NW,NEP,YLD)
+          END DO
+        END IF
+        J2=1
+        GO TO 50
+      END IF
+      LVT=0
+      LI =0
+      IF(ZAP.EQ.0 .OR. ZAP.GT.2004.) THEN
+        WRITE(LTT,912) NINT(ZAP)
+        STOP 'WRMF6D ERROR - Illegal first particle'
+      END IF
+      NP  =RWO(LL+5)+0.1
+      LANG=RWO(LL+2*NP+6)+0.1
+      NE  =RWO(LL+2*NP+9)+0.1
+      JE  =NE
+      NR  =1
+      LAW =2
+c...
+C...  print *,'ll,rwo_ll',ll,(rwo(j),j=LL,LL+12+2*NP + 20)
+C...  stop
+c...
+      LL =LL+12+2*NP
+      J2 =0
+      JTH=0
+      INR(1)= 2
+      ETH=(-QQI(IT))*(AWR+AWI)/AWR
+C* Scan the data-set to check if any tabular data exist
+      LL0=LL
+      NE1=NE
+      NM =0
+      DO IE=1,NE
+c...
+C...    if(rwo(ll).ge.1.5e7) then
+C...      print *,'ie,ne,ll',ie,ne,ll,np
+C...      print *,(rwo(j),j=LL,LL+12+2*NP)
+C...      stop
+C...    end if
+c...    stop
+c...
+        NA  =NINT(RWO(LL+1))
+        NW  =NINT(RWO(LL+2))
+        LL  =LL+4+NW
+        NM  =MAX(NM,NA)
+c...
+c...    print *,'na,nw,ll,nm,lang',na,nw,ll,nm,lang
+c...
+        IF(NA.LT.0) THEN
+          NE1=IE-1
+          EXIT
+        END IF
+      END DO
+      LL =LL0
+      JE =NE1
+      NE2=NE-NE1
+      LTTE=1
+C...
+C...  print *,'ne,ne1,ne2,ll0,ll,lang',ne,ne1,ne2,ll0,ll,lang
+C...
+      IF(NE2.GT.0) LTTE=3
+      IF(NE2.EQ.0) NM  =0
+C* Define format-specific shift and length parameters
+      IF(LANG.GT.10) THEN
+        LTTE=2
+        LSHF=0
+        LNA1=2
+        IF(NE2.GT.0)
+     &    STOP 'WRMF6D ERROR - LANG>10 and NE1<NE'
+      END IF
+C*
+C* Loop over the incident particle energies
+      DO 40 IE=1,NE
+        TT  =0.
+        LT  =0
+        EIN =     RWO(LL  )
+        NA  =NINT(RWO(LL+1))
+        NW  =NINT(RWO(LL+2))
+        NEP =NINT(RWO(LL+3))
+C*      --Define format-specific shift and length parameters
+C*        for Legendre and mixed representation
+        IF(LANG.LE.10) THEN
+          IF(IE.LE.NE1) THEN
+            LSHF=1
+            LNA1=1
+          ELSE
+            LSHF=0
+            LNA1=0
+          END IF
+        END IF
+c...    
+c...    print *,'MT,Ein,NA,NW,NEP,LTTE',MT,Ein,NA,NW,NEP,LTTE
+C... &         ,IE,NA1,LSHF,LNA1
+c...    
+        NA1 =ABS(NA)+LNA1
+        LL  =LL+4
+C*      -- Determine the outgoing particle energy for discrete levels
+        EOU=(EIN*AWR/(AWR+AWI)+QQI(IT))
+c...    
+c...    IF(IRCOIL.EQ.1) EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
+c...    -- Do recoil correction unconditionally since  
+c...       this is how it is done in EMPIRE
+        EOU=EOU*((AWR+AWI-AWP)/(AWR+AWI))
+c...
+c...    print *,'ein,qi,it',ein,qqi(it),it
+C...    print *,'AWR,AWI,AWP',AWR,AWI,AWP
+c...
+        EOU=-EOU
+        IF(EIN-ETH.LT.-1.E-4 .OR.
+     1     ABS(EOU)/EIN.LT.-1.E-4) THEN
+C*        -- Skip points below threshold
+c...
+C...      print *,'skip point',Ein,' below threshold',ETH
+C... &           ,' Ein,Eou',EIN,abs(EOU)
+c...
+          JE=JE-1
+          LL=LL+NW
+          GO TO 40
+        END IF
+C...
+C...    print *,'writing Ein,Eou,je,j2,Qi',EIN,Eou,je,j2,QQI(IT)
+C...
+C*      -- Print header CONT, TAB1 and TAB2 records
+        IF(J2.EQ.0) THEN
+          IF(ABS(EIN-ETH).LT.1.E-4*EIN .OR. LANG.GT.10) THEN
+            EIN=ETH
+          ELSE
+            IF(QQI(IT).LT.0) THEN
+C*            Set the threshold data and flag JTH to add extra point
+C*            (Legendre representation only)
+              JE=JE+1
+              JTH=1
+              NL=2
+              QQ(1)=0
+              QQ(2)=0
+            END IF
+          END IF
+          NBT(1)=2
+          EYL(1)=ETH
+          EYL(2)=ETOP
+          CALL WRCONT(LOU,MAT,MF,MT,NS, ZA,AWR, JP,LCT,NK, 0)
+          CALL WRTAB1(LOU,MAT,MF,MT,NS,ZAP,AWP,LIP,LAW,NR, 2
+     1               ,NBT,INR,EYL,YLD)
+               NBT(1)=JE
+          CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
+     1               ,NR,JE,NBT,INR)
+C*        -- Print isotropic threshold distribution (if necessary)
+          IF(JTH.EQ.1) THEN
+            CALL WRLIST(LOU,MAT,MF,MT,NS,TT,ETH,LT, 0,NL,NL,QQ)
+            J2 =J2+1
+          END IF
+        END IF
+C*      -- Process the main data block
+        RR  =0
+        L2  =LL-NA-2
+        E2  =RWO(LL)
+C*      -- Check if discrete level data are present
+        IF(E2.GE.0) EOU=ABS(EOU)
+C*
+C...
+C...    print *,'nep,na1,l2,e2,eou',nep,na1,l2,e2,eou
+C...
+        IF(NEP.LE.1) THEN
+C*        -- Copy the coefficients if a single point is given
+          IF(NW.GT.MXQ) STOP 'EMPEND ERROR - MXQ Lim.in WRMF6d exceeded'
+          IF(NA.GT.0) CALL FLDMOV(NA1,RWO(LL+LSHF),QQ)
+        ELSE
+C...
+C...      print *,'ll,lshf,rwo_ll',ll,lshf,(rwo(ll+lshf-1+j),j=1,20)
+C...      stop
+C...
+C*        --Match the discrete level LVL and check that EOUT matches
+          IF(IE.GT.NE1)
+     &      STOP 'EMPEND ERROR - Level interp.not supported for tabular'
+C*        -- First level IEP=1 is the ground state
+C*           Check if it needs to be skipped (projectile=ejectile)
+          IEP =0
+   32     IEP =IEP+1
+          L1  =L2
+          E1  =E2
+          L2  =L1+NA+2
+          E2  =RWO(L2)
+          TST =DLVL*EIN*1E-6
+C...
+C...      print *,'     iep,l2,lshf,rwo_l2',iep,l2,lshf
+C... &           ,(rwo(l2+lshf-1+j),j=1,20)
+C...
+c...    
+C...      print *,'iep,nep,na1,EIN,EOU,e1,e2'
+C... &            ,iep,nep,na1,EIN,EOU,e1,e2
+c...      if(nep.gt.3) stop
+c...
+C*
+C*        -- Read until IEP matches LVL+1 (LVL=1 is ground)
+C*           Match the levels by their consecutive sequence (NEW)
+c...
+c...      PRINT *,'IEP-1,LVL,EIN,E1,E2,EOU',IEP-1,LVL,EIN,E1,E2,EOU
+c...
+          IF(IEP.LT.LVL+1 .AND. IEP.LT.NEP) GO TO 32
+          DEE=ABS(EOU-E2)
+C*        -- Check for a strong mismatch in the calculated E_out
+          IF(DEE.GT.TST .AND. NA1.GT.1) THEN
+            WRITE(LTT,911) MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
+            WRITE(LER,911) MF,MT,EIN,QQM(IT)-QQI(IT),QQI(IT),-E2,-EOU
+          END IF
+C*        -- Move coefficients to the output field
+          CALL FLDMOV(NA1,RWO(L2+LSHF),QQ)
+        END IF
+        IF(LANG.GT. 10) GO TO 38
+        IF(IE  .GT.NE1) GO TO 36
+c...
+C...    print *,'Unnorm.',(qq(j),j=1,na)
+c...    stop
+c...
+C*      -- Condition the Legendre coefficients
+        IF(NA.EQ.0 .OR. ABS(QQ(1)).LT.1.E-20) THEN
+          NA=1
+          QQ(2)=0.
+        ELSE
+          RR  =1./QQ(1)
+          CALL FLDSCL(NA,RR,QQ(2),QQ(2))
+        END IF
+        NL=NA
+C*      -- Make the Legendre order even
+        IF(NL/2 .NE. (NL+1)/2) THEN
+          NL=NL+1
+          QQ(1+NL)=0.
+        END IF
+C*      -- Reduce the trailing zero Legendre coefficients
+   34   IF(NL.GT.2 .AND. (QQ(NL).EQ.0 .AND. QQ(1+NL).EQ.0) ) THEN
+          NL=NL-2
+          GO TO 34
+        END IF
+C*      -- Write point at EMIN if Q>=0
+        EE=EIN
+        IF(J2.EQ.0 .AND. QQI(IT).GE.0) EE=EMIN
+C*      -- Write the angular distribution Legendre coefficients
+        CALL WRLIST(LOU,MAT,MF,MT,NS,TT,EE,LT, 0,NL,NL,QQ(2))
+c...
+C...    if(mt.gt.2 .and. j2.gt.3) stop
+c...
+        GO TO 39
+C*
+C* Dual representation of elastic angular distributions
+   36   NR  =1
+        IF(IE.EQ.NE1+1) THEN
+C*        -- Write the TAB2 record for the tabular data
+          NBT(1)=NE2
+          INR(1)=2
+          CALL WRTAB2(LOU,MAT,MF,MT,NS, 0.,0., 0,  0
+     1               ,NR,NE2,NBT,INR)
+        END IF
+        NP  =IABS(NA)
+        NP2 =NP*2
+        CALL FLDMOV(NP2,RWO(L2+LSHF),QQ)
+        NBT(1)=NP
+c...
+c...      PRINT *,'mt,NP,Ein',mt,NP,EIN
+c...      IP=MIN(2*NP,500)
+c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,IP)
+C...      PRINT '(1x,1p,5e12.5)',(QQ(J+NA1),J=1,IP)
+c...      STOP
+c...c...      IF(ein.GT.4.5e6) stop
+c...
+C*      -- Normalize the distribution
+        SS=0
+        E2=QQ(1)
+        F2=QQ(NP+1)
+        DO I=2,NP
+          E1=E2
+          F1=F2
+          E2=QQ(I)
+          F2=QQ(I+NP)
+          SS=SS+(E2-E1)*(F2+F1)/2
+        END DO
+C       TO AVOID DIVISION BY ZERO, RCN
+C       if(SS.LE.0) GOTO 39  
+C       TO AVOID DIVISION BY ZERO, RCN
+        IF(SS.GT.0) THEN
+          DO I=1,NP
+            QQ(I+NP)=QQ(I+NP)/SS
+          END DO
+        ENDIF 
+        CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
+     1             ,NR,NP,NBT,INR,QQ(1),QQ(1+NP))
+        GO TO 39
+C*
+C*      -- Tabular representation of angular distributions
+   38   NP=NA/2
+        IF(2*(NA1+NP).GE.MXQ) THEN
+          PRINT *,'NA1,NP,2*(NA1+NP),MXQ',NA1,NP,2*(NA1+NP),MXQ
+          STOP 'WRMF6D ERROR - MXQ limit exceeded'
+        END IF
+C* Pack normalised distribution into QQ (vector of cos + vector of dst)
+C* (no need to store energy for MF4)
+        DO I=1,NP
+          QQ(I    )=QQ(2*I+1)
+          QQ(I+NA1)=QQ(2*I+2)
+        END DO
+C*      -- Angular distributions thinning tolerance
+c...    ERR=0
+        ERR=0.005
+        IF(ERR.GT.0) THEN
+C*        -- Cosines at QQ(1+NA1+NP), distributins at QQ(1+NP)
+          CALL THINXS(QQ(1),       QQ(1+NA1),NP
+     &               ,QQ(1+NA1+NP),QQ(1+NP ),MP,ERR)
+c...
+c...      ipp=2*(na1+np)
+c...      print *,'Thinning unsorted na1,np',na1,np,mp
+c...      PRINT '(1x,1p,5e12.5)',(QQ(J    ),J=1,ipp)
+c...
+C*        -- Re-pack cosines
+          CALL FLDMOV(MP,QQ(1+NA1+NP),QQ(1))
+        ELSE
+C*        -- Re-pack distributions
+          CALL FLDMOV(NP,QQ(1+NA1),QQ(1+NP))
+          MP=NP
+        END IF
+        NBT(1)=MP
+        CALL WRTAB1(LOU,MAT,MF,MT,NS,TT,EIN,LT, 0
+     1             ,NR,MP,NBT,INR,QQ(1),QQ(1+NP))
+C*      -- One energy point processed
+   39   LL  =LL+NW
+        J2  =J2+1
+   40 CONTINUE
+   50 IF(J2.GT.0) THEN
+        NS=99998
+        CALL WRCONT(LOU,MAT,MF, 0,NS,ZRO,ZRO, 0, 0, 0, 0)
+        NS=0
+      END IF
+      RETURN
+C* All discrete levels processed - nothing to write
+   80 MT=0
+      RETURN
+  910 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Eout'
+     &      ,I3,I4,1P,E10.3E1,2E12.5E1/
+     &       '                  Distribution interpolated between   '
+     &      ,2E12.5E1)
+  911 FORMAT(' EMPEND WARNING - MF/MT/Ein/Elvl/Qi/Eout'
+     &      ,I3,I4,1P,E10.3E1,3E12.5E1/
+     &       '                  Calculated : ',50X
+     &       , E12.5E1)
+  912 FORMAT(' WRMF6D ERROR - Illegal first particle',I8)
       END
       
       
@@ -7642,27 +8322,40 @@ C*
       ETHRM=0.0253
       DO I=1,NXS
         IF(MTH(I).GT.9999) THEN
+c...
+C...    print *,'Processing MAT',mth(i)
+c...
 C* Eliminate reactions with all-zero cross sections
           NPT=0
           DO J=1,NEN
             IF(XSC(J,I).GT.0) NPT=NPT+1
           END DO
+c...
+C...      print *,'Processing MAT',mth(i),' points',NPT
+c...
           IF(NPT.EQ.0) MTH(I)=-MTH(I)
 C* Add reactions 10*ZA+5 to 10*ZA, if present, sum duplicate entries
 C* (e.g.: 10ZA+0,1,2...=(n,a)-->107, 10ZA+5=(n,2n+2p)
-          MM=MTH(I)/10
-          MM=MTH(I)-10*MM
+          JT1=MTH(I)/10
+          MM =MTH(I)-10*JT1
           IF(MM.GE.5) THEN
-            JT1=MTH(I)-5
-            JT2=MTH(I)
+            JT2=MTH(I)-5
+            MK =0
             DO K=1,NXS
-              IF(MTH(K).EQ.JT1 .OR. MTH(K).EQ.JT2) THEN
+C...          IF(MTH(K).EQ.JT1 .OR. MTH(K).EQ.JT2) THEN
+              IF( (MM.EQ.5 .AND. MTH(K).EQ.JT1) .OR.
+     &            (MM.GT.5 .AND. MTH(K).EQ.JT2) ) THEN
+                MK=K
                 DO L=1,NEN
                   XSC(L,K)=XSC(L,K)+XSC(L,I)
                 END DO
                 MTH(I)=-ABS(MTH(I))
               END IF
             END DO
+C...
+C...        IF(MK.GT.0)
+C... &      print *,I,'Adding MAT',MTH(I),' to',MTH(MK),' MK=',MK
+C...
           END IF
 C* Suppress processing of compound-elastic for incident neutrons
 c... (Should not do this - it suppresses inelastic isomers)
@@ -7966,6 +8659,7 @@ C* Remove redundant zeroes below pseudo-threshold
 C* Extrapolate points down to EMIN
       IF(IZI.EQ.1 .AND. QQI(IT).GE.0) THEN
         IF(RWO(LY+1).GT.0) THEN
+          ELX=RWO(LX)
           EE =ETHRM
           YY =RWO(LY)
           LX =LX-2
@@ -7973,8 +8667,12 @@ C* Extrapolate points down to EMIN
           NEO=NEO+2
           RWO(LX  )=EMIN
           RWO(LX+1)=EE
-          RWO(LY  )=YY
-          RWO(LY+1)=YY
+C*        -- Extrapolate flat
+C...      RWO(LY  )=YY
+C...      RWO(LY+1)=YY
+C*        -- Extrapolate as 1/v
+          RWO(LY  )=YY*SQRT(ELX/EMIN)
+          RWO(LY+1)=YY*SQRT(ELX/EE)
         ELSE
           RWO(LX)=EMIN
         END IF
