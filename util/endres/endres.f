@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2019-04-24 21:21:13 +0200 (Mi, 24 Apr 2019) $
-Ccc   * $Id: endres.f 5157 2019-04-24 19:21:13Z trkov $
+Ccc   * $Date: 2020-04-26 16:38:46 +0200 (So, 26 Apr 2020) $
+Ccc   * $Id: endres.f 5207 2020-04-26 14:38:46Z trkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -34,6 +34,8 @@ C-V        the resolved resonance represented under LRF=7.
 C-V  15/11 Cosmetic tidying of input parameter printout.
 C-V  16/02 Add capability for multi-region data in MF2/LRF7 (RRR+URR).
 C-V  17/09 Convert to double precision (roundoff error printing ZA).
+C-V  19/09 Fix interpolation range in MF3 for multiple ranges.
+C-V  20/04 Warn if EL in RRR greater than Elow.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -79,10 +81,10 @@ C*
       DATA LEM,LRR,LOU,LLG,LKB,LTT,LSC,LS1
      &    /  1,  2,  3,  4,  5,  6,  7, 8 /
 C*
-      SMALL=1.E-4
-      TINY =2.E-6
+      SMALL=1.D-4
+      TINY =2.D-6
       NMT=0
-      ELE=1.E-5
+      ELE=1.D-5
       ERL=ELE
       NF10=0
       NF09=0
@@ -291,6 +293,10 @@ C* Process a resonance section
       CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       READ (CH66,891) EL,EH,LRU,LRF,NRO,NAPS
+      IF(EL.GT.ELE) THEN
+        WRITE(LTT,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
+        WRITE(LLG,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
+      END IF
 C*    -- Copy energy-dependent scattering radius, if present
       IF(NRO.EQ.1) THEN
         CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
@@ -306,11 +312,17 @@ C*    -- Copy energy-dependent scattering radius, if present
 C* Case: no resonance parameters
         ERL=ELE
         ERH=ELE
+c...
+C...    print *,'No RRR: ERL,ERH',ERL,ERH
+C...
         GO TO 126
       ELSE IF(LRU.EQ.1) THEN
 C* Case: Resolved resonance range present -  copy to output
         IF(JER.EQ.1) ERL=EL
         ERH=EH
+c...
+C...    print *,'RRR present: ERL,ERH',ERL,ERH,jer,el
+C...
         IF(NIS.GT.1) THEN
           WRITE(LTT,691) ' ENDRES WARNING - Multi-isotope file    '
           WRITE(LTT,691) '                  limited support       '
@@ -357,9 +369,9 @@ C*       Processing the resolved resonance range
           END DO
           IF(JER.LT.NER) GO TO 122
         ELSE IF(LRF.EQ.7) THEN
-
-          print *,'Number of spin groups',NJS
-
+c...
+C...      print *,'Number of spin groups',NJS
+c...
           DO K=1,NJS
 C*        -- LIST record of LRF 7 for channel description
             CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
@@ -546,18 +558,19 @@ C* Interpolate cross section to the upper resonance range energy
           RWO(K2)=RWO(K2)+(RWO(K2+1)-RWO(K2))
      &                   *(ERH-RWO(K1))/(RWO(K1+1)-RWO(K1))
           RWO(K1)=ERH
-          E1=ERH
+          E1 =ERH
+          KUP=K1
         END IF
       END IF
 C* Low energy limit on file is used for reactions with Q>0
       ELL=MAX(ETH,E1)
 c...
-c...  print *,'mt,eth,ell,ele',mt,eth,ell,ele
+C...  print *,'mt,eth,ell,ele',mt,eth,ell,ele
 c...
       IF(ETH.LT.ELL .AND. ELL.GT.ELE) THEN
 C* Check points below threshold
 c...
-c...    print *,'mt,k1,ele,eth,ell,erl',mt,k1,ele,eth,ell,erl
+C...    print *,'mt,k1,ele,eth,ell,erl',mt,k1,ele,eth,ell,erl
 c...
         EAD=MAX(ETH,ERL)
         NMT=NMT+1
@@ -571,6 +584,7 @@ C* Add points below the first point
           K1=K1-2
           K2=K2-2
           NP=NP+2
+C*        -- Difference in the number of points (new-old)
           ND=NP-NBT(NR)
           DO J=1,NR
             NBT(J)=NBT(J)+ND
@@ -583,9 +597,8 @@ C* Add points below the first point
               INR(J)=INR(J+1)
             END DO
           END DO
-          IF(INR(1).EQ.2) THEN
-            IF(NR.GT.1) NBT(1)=NBT(1)+2
-          ELSE
+          IF(INR(1).NE.2) THEN
+C*          -- If first panel is not linear, insert one
             DO J=1,NR
               NBT(NR+2-J)=NBT(NR+1-J)
               INR(NR+2-J)=INR(NR+1-J)
@@ -656,7 +669,7 @@ C* Modify the TAB2 record for one extra energy point
           IF(LTTE.EQ.0) THEN
             GO TO 142
 C* Duplicate the first distribution to EAD and copy the rest
-          ELSE IF(LTTE.EQ.1) THEN
+          ELSE IF(LTTE.EQ.1 .OR. LTTE.EQ.3) THEN
             CALL RDLIST(LEM,A1,EE,LT,L2,N1,NL,RWO,MXRW,IER)
             IF(ABS(EE-EAD).LT.SMALL*EE) THEN
               IF(ABS(EE-EAD).GT.TINY*EE) THEN
