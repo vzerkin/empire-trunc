@@ -40,6 +40,8 @@ C-V  18/03 Do not scan MT 5 when MT 4 is requested (do not set MULN).
 C-V  18/07 Define yield as isotropic when no MF4 data are present.
 C-V  19/02 Fix light targets when residual is the desired particle.
 C-V  20/03 Fix processing of radioniclide production from MF=10/40.
+C-V  20/05 Fix retrieval of discrete particle emission spectra
+C-V        in MF=6 Law=2 for incident photons.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -865,15 +867,15 @@ C*
      1  'Specified material not found            ',
      2  'End-of-file before material found       ',
      3  'General read error                      ',
-     4  '?','?','?','?','?',
+     4  '4','5','6','7','9',
      9  'Array limit MRW exceeded                ',
-     D  '?',
+     D  '10',
      1  'Multiple interp. ranges and/or law not 2',
      2  'Correlated ener/ang distr. not in Law-7 ',
      3  'Processing not coded for specified react',
      4  'Requested particle not found            ',
      5  'No differential data present            ',
-     6  '?','?','?','?',
+     6  '16','17','18','19',
      D  'Unknown error ?                         '/
 C*
       LOOP=0
@@ -1076,10 +1078,10 @@ C*      -- Test each reaction for chosen outgoing particle
    20   MF=3
         MT=0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,N1,N2,MAT,MF,MT,IER)
-
-        print *,'    Checking ZA0,ZA,AW,MAT,MF,MT,IER'
-        print *,              ZA0,ZA,AW,MAT,MF,MT,IER
-
+c...
+c...    print *,'    Checking ZA0,ZA,AW,MAT,MF,MT,IER'
+c...    print *,              ZA0,ZA,AW,MAT,MF,MT,IER
+C...
         IF(IER.NE.0) GO TO 50
         CALL RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,LRBRK,N1,N2,IER)
         IF(IER.NE.0) GO TO 50
@@ -1303,8 +1305,8 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS
      1           ,ENR,DXS,UXS,RWO(LX),NE,MEN,KRW,IER)
 c...
-c...  print *,'After DXSEN1 ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER'
-c...  print *,              ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
+C...  print *,'After DXSEN1 ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER'
+C...  print *,              ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
 c...  print *,'DXSEND',(enr(j),j=1,5)
 c...  print *,'      ',(dxs(j),j=1,5)
 c...
@@ -3383,7 +3385,8 @@ C* Calculate  integral SS over distribution DXS at cosines ENR
       INA=INR(1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INA)
 c...
-c...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou,LCT
+C...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
+C...  print *,'     LCT,NE1,ea,eb,awp',LCT,NE1,ea,eb,awp
 c...
 C*
 C*    Process energy distributions for two-body reactions (AWP>0)
@@ -3398,8 +3401,15 @@ C*     AAD - mass ratio of ejectile and projectile (=A-dash)
 C*    Kinematics equations for 2-body problem form ENDF-102
 C*    Appendix E Equation (E.3)
       IF(AWP.GT.0) THEN
-        AAA=AWR/AWI
-        AAD=AWP/AWI
+        IF(AWI.GT.0) THEN
+          AAA=AWR/AWI
+          AAD=AWP/AWI
+        ELSE
+C*        -- For photons AWI=0, but it cancells out
+          AAA=AWR
+          AAD=AWP
+C...      LCT=2
+        END IF
         BET=(AAA*(AAA+1-AAD)/AAD)*( 1+(1+AAA)*QI/(AAA*EIN) )
         BET=SQRT(BET)
         DO I=1,NE1
@@ -3440,13 +3450,13 @@ C...
         END DO
       END IF
 C...
-C...  print *,'XCM - cosine of scattering angle in CM system   ',XCM
-C...  print *,'XLB - cosine of scattering angle in Lab system  ',XLB
-C...  print *,'AWR - mass ratio of target and neutron          ',AWR
-C...  print *,'AWP - mass ratio of ejectile and neutron        ',AWP
-C...  print *,'AAA - mass ratio of target to projectile (=A)   ',AAA
-C...  print *,'AAD - mass ratio of ejectile to projectile (=A")',AAD
-C...  print *,'QI  - reaction Q-value                          ',QI
+c...  print *,'XCM - cosine of scattering angle in CM system   ',XCM
+c...  print *,'XLB - cosine of scattering angle in Lab system  ',XLB
+c...  print *,'AWR - mass ratio of target and neutron          ',AWR
+c...  print *,'AWP - mass ratio of ejectile and neutron        ',AWP
+c...  print *,'AAA - mass ratio of target to projectile (=A)   ',AAA
+c...  print *,'AAD - mass ratio of ejectile to projectile (=A")',AAD
+c...  print *,'QI  - reaction Q-value                          ',QI
 C...
 c...
       IF(KEA.EQ.1) THEN
@@ -3463,9 +3473,16 @@ C*       For two-body reactions no further processing is required
       END IF
       INA=2
       IF(DEG.GE.0) THEN
+C...
+C...  print *,' Case: Specified outgoing particle cosine',AIN,ne1,IER
+C...
 C* Case: Specified outgoing particle cosine
         XLB=AIN
         YA =FINTXS(XLB,ENR,DXS,NE1,INA,IER)/SS
+C...
+C...    print *,'After fintxs XLB,ier',xlb,ier
+C...    print *,'ne1',ne1,(enr(j),j=1,ne1)
+C...
         YL =YL*YA
         IF(AWP.GT.0) THEN
 C*        Interpolate precomputed Eou corresponding to Xlb
@@ -3827,7 +3844,7 @@ C*      -- Neutron multiplicities for fission are included in MF1
       END IF
 C* Check the data representation for this particle
 c...
-      print *,'    processing particle/mf/mt/law',nint(zap),mf,mt,law
+C...  print *,'    processing particle/mf/mt/law',nint(zap),mf,mt,law
 c...
       IF     (LAW.EQ.2) THEN
         GO TO 62
@@ -3846,6 +3863,9 @@ C*
 C* Process MF 6 Law 2 data
    62 CONTINUE
         CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
+c...
+c...    print *,'RTAB2 C1,C2,L1,L2,NR,NE',C1,C2,L1,L2,NR,NE
+c...
 C...    IF(NR.GT.1)
 C... 1   PRINT *,' WARNING - Multiple interp.ranges for MF 6, MT',MT
         NE1=0
@@ -3854,6 +3874,9 @@ C... 1   PRINT *,' WARNING - Multiple interp.ranges for MF 6, MT',MT
         DO IE=1,NE
 C* Process the angular distribution for each incident energy
           CALL RDLIST(LEF,C1,EI2,LANG,L2,NW,NEP1,RWO(LXX),MX,IER)
+c...
+C...      print *,'RDLIST C1,EI2,LANG,L2,NW,NEP1',C1,EI2,LANG,L2,NW,NEP1
+c...
           IF(IER.NE.0) THEN
             STOP 'DXSEN1 ERROR - Reading MF6 Law 2 data in RDLIST'
           END IF
@@ -3866,6 +3889,9 @@ C* Process the angular distribution for each incident energy
           DO J=1,NEP1
             RWO(LXE-1+J)=RWO(LXX+2*J-2)
             RWO(LXX-1+J)=RWO(LXX+2*J-1)
+c...
+c...        print *,j,RWO(LXE-1+J),RWO(LXX-1+J)
+c...
           END DO
 C* Linearise the angular distribution
           EPL=0.005
@@ -3878,6 +3904,9 @@ C* Linearise the angular distribution
 C* Lin-interpolate angular distributions over incident energies
           INA=2
           INE=2
+c...
+c...      print *,'ein,ei1,ei2',ein,ei1,ei2
+c...
           CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INA
      1                   ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,LD)
         END DO
@@ -4349,6 +4378,9 @@ C* Photon angular distributions
 C*
 C* Distribution assembled - check that the last point is zero
   800 NEN=NE1
+C...
+C...  print *,'nen',nen,ier
+C...
       IF(KEA.EQ.2) THEN
         IF(DXS(NEN).NE.0) THEN
           NEN=NEN+1
