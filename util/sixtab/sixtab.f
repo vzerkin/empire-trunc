@@ -24,6 +24,7 @@ C-V  16/06 Allow Kalbach representation with NA=2.
 C-V  16/09 Fix error summing Legendre components in update 09/12.
 C-V  17/10 Allow negative LAW pointing to MF=|LAW| where the actual
 C-V        spectra are given (new feature for P(nu) in ENDF)
+C-V  20/05 Fix LAW=2/LANG=0 (discrete level distributions) in MF=6.
 C-M
 C-M  Manual for Program SIXTAB
 C-M  =========================
@@ -840,19 +841,17 @@ C*      -- Calculate the probability from Kalbach-Mann representation
         ELSE
           AA=RWO(LX1+NCYC*(IP-1)+3)
         END IF
-!zv2019	FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
-	FMU=SS*AA*(DCOSH(0.d0+AA*CSN)+RR*DSINH(0.d0+AA*CSN))
-     +	/(2*DSINH(0.d0+AA))
-	if (ISNAN(FMU)) then
-	    FMU=0
-!Note: EXP(-88.)=6.05460149E-39
-	    if (-AA.LT.-88.)
-     +	    FMU=DEXP(0.d0+AA*CSN-AA)*(1+RR)+DEXP(0.d0-AA*CSN-AA)*(1-RR)
-	    if (AA.LT.-88.)
-     +	    FMU=-DEXP(0.d0+AA*CSN+AA)*(1+RR)-DEXP(0.d0-AA*CSN+AA)*(1-RR)
-	    FMU=SS*AA*FMU/2
-	endif
-
+C* zv2019	FMU=SS*AA*(COSH(AA*CSN)+RR*SINH(AA*CSN))/(2*SINH(AA))
+C* Note: EXP(-88.)=6.05460149E-39
+	      IF      (-AA.LT.-88.) THEN
+          FF0= EXP(DBLE(AA*CSN-AA))*(1+RR)+EXP(DBLE(-AA*CSN-AA))*(1-RR)
+	      ELSE IF ( AA.LT.-88.) THEN
+          FF0=-EXP(DBLE(AA*CSN+AA))*(1+RR)-EXP(DBLE(-AA*CSN+AA))*(1-RR)
+        ELSE
+          FF0=SS*AA*(DCOSH(0.d0+AA*CSN)+RR*DSINH(0.d0+AA*CSN))
+     &       /(SINH(DBLE(AA)))
+        END IF
+        FMU=FF0 * DBLE(SS*AA)/2
       ELSE IF(LANG.GT.10) THEN
 C*
 C*      -- Calculate the probability from pointwise representation
@@ -1007,11 +1006,15 @@ C-D      - On exit, RWO contains NXP angle/distribution pairs.
 C-D        Currently NXP=3*NL+1.
 C-D  MXRW- maximum size of the RWO array
 C-
-      DOUBLE PRECISION FF,TWO
+      PARAMETER (MXPL=64)
+      DOUBLE PRECISION FF,ONE,TWO
       DIMENSION  RWO(MXRW)
+      DIMENSION  PLL(MXPL)
+      ONE=1
       TWO=2
       NW0=NW
       NL0=NL
+      IF(NL.GT.MXPL) STOP 'LEGPNT ERROR - MXPL Limit exceeded'
 C* NXP - number of angular points
 C* LXC - address of Legendre components
 C* LXP - address of the angle/distribution pairs
@@ -1019,11 +1022,6 @@ C* LXP - address of the angle/distribution pairs
       LXC=NL+2
       LXP=LXC+NL+1
       IF(LXP+2*NXP.GT.MXRW) STOP 'LEGPNT ERROR - MXRW limit exceeded'
-C* Shift the Legendre coeff. and insert the implied P0 coefficient
-      DO L=1,NL
-        RWO(LXC-L)=RWO(LXC-1-L)
-      END DO
-      RWO(1)=1
 C* Angular cosine increment
       DCS=2
       DCS=DCS/(NXP-2)
@@ -1039,11 +1037,11 @@ C*      Cosine point
           AC=AC0+(I-1)*DCS
         END IF
 C*      Legendre components for this cosine
-        CALL PLNLEG(AC,RWO,NL)
-C*      Distribution value at this cosine
-        FF=DBLE(RWO(1))*DBLE(RWO(LXC))/TWO
+        CALL PLNLEG(AC,pll,NL)
+C*      Distribution value at this cosine (p0=1 by definition)
+        FF=ONE/TWO
         DO L=1,NL
-          FF=FF+DBLE(RWO(1+L))*DBLE(RWO(LXC+L))*(2*L+1)/TWO
+          FF=FF+DBLE(RWO(L))*PLL(L)*(2*L+1)/TWO
         END DO
 C*      Save the cosine and the distribution
         RWO(LXP+2*(I-1)  )=AC
