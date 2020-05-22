@@ -42,6 +42,8 @@ C-V  19/02 Fix light targets when residual is the desired particle.
 C-V  20/03 Fix processing of radioniclide production from MF=10/40.
 C-V  20/05 Fix retrieval of discrete particle emission spectra
 C-V        in MF=6 Law=2 for incident photons.
+C-V        Correct Fortran error in ELMABN (no impact on results).
+C-V        (Contribution by Y. Danon).
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -801,7 +803,8 @@ C*
 c...
 C...  IF(IZ.GE.60) STOP 'ERROR - Data for IZ>=59 not availabe'
 c...
-      DO I=1,MXIZ
+      MM=MXIZ/2
+      DO I=1,MM
         ZEL(I)=ZAB(2*I-1,IZ)
         FRC(I)=ZAB(2*I  ,IZ)
         IF(NINT(ZEL(I)).LE.0) RETURN
