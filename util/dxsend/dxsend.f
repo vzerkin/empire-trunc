@@ -3407,14 +3407,16 @@ C*    Appendix E Equation (E.3)
         IF(AWI.GT.0) THEN
           AAA=AWR/AWI
           AAD=AWP/AWI
+          BET=(AAA*(AAA+1-AAD)/AAD)*( 1+(1+AAA)*QI/(AAA*EIN) )
+          BET=SQRT(BET)
         ELSE
-C*        -- For photons AWI=0, but it cancells out
-          AAA=AWR
-          AAD=AWP
-C...      LCT=2
+C*        -- For photons AWI=0; assume a small mass (1E-14)
+          AWI=1.E-14
+          AAA=AWR/AWI
+          AAD=AWP/AWI
+          BET=(AAA*(AWR+AWI-AWP)/AWP)*( 1+(AWR+AWI)*QI/(AWR*EIN) )
+          BET=SQRT(BET)
         END IF
-        BET=(AAA*(AAA+1-AAD)/AAD)*( 1+(1+AAA)*QI/(AAA*EIN) )
-        BET=SQRT(BET)
         DO I=1,NE1
           IF(LCT.EQ.2) THEN
 C*          CM co-ordinate system conversion to Lab
