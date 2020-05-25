@@ -79,11 +79,17 @@ C* End of directory record in the DIR list of DOS
 C* Identify directory path in the DIR list of DOS
       IF(RECI(1:8).EQ.' Directo') THEN
         WRITE(LOU,95) ' MRGMAT files on  '//RECI, 0, 0, 0
+C*      Path string starts in column 15
         PATH=RECI(15:120)
+C*      -- Determine PATH string length LPTH (up to the first blank)
    22   IF(PATH(LPTH+1:LPTH+1).NE.' ') THEN
           LPTH=LPTH+1
           GO TO 22
         END IF
+C...
+C...    print *,'PATH length',LPTH,'"',PATH(1:LPTH),'"'
+C...
+C*      -- Add trailing backslash to the PATH string
         IF(PATH(LPTH:LPTH).NE.'\') THEN
           LPTH=LPTH+1
           IF(LPTH.GT.114) THEN
@@ -93,11 +99,14 @@ C* Identify directory path in the DIR list of DOS
           END IF
           PATH(LPTH:LPTH)='\'
         END IF
-        WRITE(LTT,91) ' Process Windows directory listing      '
+        WRITE(LTT,91) ' Process Windows directory listing on : ',PATH
         IDOS=1
         GO TO 20
       END IF
 C* Extract the filenames but skip directories
+C...
+C...  print *,'IDOS',IDOS
+C...
       IF(IDOS.NE.0) THEN
         IF(RECI(25:29).EQ.'<DIR>') THEN
 C*        Windows-NT directory listing
@@ -109,9 +118,17 @@ C*        Windows-XP directory listing
           WRITE(LTT,91) ' Identified Windows-XP directory listing'
           IDOS=3
           GO TO 21
+        ELSE IF(RECI(24:28).EQ.'<DIR>') THEN
+C*        Windows-10 directory listing
+          WRITE(LTT,91) ' Identified Windows-10 directory listing'
+          IDOS=4
+          GO TO 21
         END IF
         IF(IDOS.LT.2 .AND. RECI(15:15).EQ.':') IDOS=2
         IF(IDOS.EQ.2 .AND. RECI(39:39).NE.' ') IDOS=3
+
+        print *,'IDOS',IDOS
+
         IF(RECI(16:20).EQ.'<DIR>') GO TO 21
         IF(IDOS.EQ.1) THEN
           RECI(9:9)='.'
@@ -127,9 +144,15 @@ C*        Windows-XP directory listing
         ELSE IF(IDOS.EQ.2) THEN
 C* Case: Windows-NT directory listing
           FLNM=PATH(1:LPTH)//RECI(40:120)
-        ELSE
+        ELSE IF(IDOS.EQ.3) THEN
 C* Case: Windows-XP directory listing
           FLNM=PATH(1:LPTH)//RECI(37:120)
+        ELSE IF(IDOS.EQ.4) THEN
+C* Case: Windows-10 directory listing
+          FLNM=PATH(1:LPTH)//RECI(39:120)
+        ELSE
+C*        Coding error
+          STOP 'MRGMAT error - unsupported IDOS'
         END IF
       ELSE
 C* Simple ASCII file list
