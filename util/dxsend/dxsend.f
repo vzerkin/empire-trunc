@@ -44,6 +44,9 @@ C-V  20/05 Fix retrieval of discrete particle emission spectra
 C-V        in MF=6 Law=2 for incident photons.
 C-V        Correct Fortran error in ELMABN (no impact on results).
 C-V        (Contribution by Y. Danon).
+C-V        Fix double-precision declaration of aa,arem (R. Capote)
+C-V  20/06 Extend to process delayed neutron fraction & spectra.
+C-V        Fix numerical instability in CM->Lab for inc. photons.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -927,6 +930,10 @@ C*         (if search by ZA, FINDMT reads 2 records)
      &  CALL RDHEAD(LEF,MAT,MFX,MTX,C1,C2,L1,L2,N1,N2,IER)
         CALL RDHEAD(LEF,MAT,MFX,MTX,C1,C2,L1,L2,N1,N2,IER)
         IZAI=N1/10
+        IF(IZAI.LE.0) THEN
+          PRINT *,'WARNING - Incident particla ZA is',IZAI
+          PRINT *,'          Incident photon file assumed'
+        END IF
       END IF
 C* If elastic, ejectile equals projectile
       IF(MT0.EQ.2 .AND. ZAP0.LT.0) THEN
@@ -1308,10 +1315,12 @@ C* Retrieve the double differential cross section energy distribution
       CALL DXSEN1(LEF,ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,EPS
      1           ,ENR,DXS,UXS,RWO(LX),NE,MEN,KRW,IER)
 c...
+      print *,'  DXSEN1 assembled',NE,' points with IER=',IER
+C...
 C...  print *,'After DXSEN1 ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER'
-C...  print *,              ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
-c...  print *,'DXSEND',(enr(j),j=1,5)
-c...  print *,'      ',(dxs(j),j=1,5)
+C...  print *,'           ',ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
+C...  print *,'DXSEND',(enr(j),j=1,5)
+C...  print *,'      ',(dxs(j),j=1,5)
 c...
 c...  ina=2
 c...  exo=5.01e6
@@ -1397,7 +1406,7 @@ C*      -- Print error message
       NEN=NE
       IF(LOOP.EQ.0 .AND. MULN.EQ.0) GO TO 90
 c...
-c...  print *,'ne1,nen',ne1,nen
+C...  print *,'ne1,nen',ne1,nen
 c...
       IF( NE1.EQ.0) GO TO 70
       IF( NEN.EQ.0) THEN
@@ -1482,7 +1491,7 @@ C* Save the summed distribution
         RWO(I+NEN  )=DXS(I)
         RWO(I+NEN*2)=UXS(I)
 c...
-c...    print *,i,enr(i),dxs(i),uxs(i)
+c...    if(i.le.5) print *,i,enr(i),dxs(i),uxs(i)
 c...
       END DO
 C* Select next reaction
@@ -1972,8 +1981,8 @@ C-E        FYTG2D,UNIGRD,FITGRD,VECLIN,FINEND
 C-
 c...
       double precision  sre,sim,are,aim,aa
-     &                  arem,arep,aimm,aimp,xre,yre,xim,yim
-c...
+     &                 ,arem,arep,aimm,aimp,xre,yre,xim,yim
+      DOUBLE PRECISION  PCP,RAL,AMUEV,CC,PI
       CHARACTER*66 C66
       PARAMETER   (MIW=100, MXLEG=100, MXIN=100)
       DIMENSION    IWO(MIW)
@@ -1982,7 +1991,12 @@ c...
       DIMENSION    AMU(100),PMU(100)
       DIMENSION    PLEG(MXLEG)
 C*
-      DATA PI/3.141592654/
+      DATA PI/3.14159265359D0/
+C*    -- Constants (Table 1, Appendix H, ENDF-102 manual)
+      PCP=  6.58211889D-16
+      RAL=137.03599976D+00
+      AMUEV=9.31494013D+08
+      CC=    299792458D+00
 C...
       PRINT '(A,6I6,1P,2E11.4)',
      & ' DXSEN1:ZA0,ZA,ZAP0,MF0,MT0,KEA,EIN,PAR'
@@ -2041,11 +2055,10 @@ C* Ratio of projectile mass to the neutron
         INTR=1
         CALL PROMAS(INTR ,AWN)
         CALL PROMAS(IZAI ,AWW)
-        IF(AWW.GT.0) THEN
+        IF(AWW.GE.0) THEN
           AWI=AWW/AWN
         ELSE
           PRINT *,'WARNING - Incident particla ZA is',IZAI
-          PRINT *,'          Incident photon file assumed'
         END IF
       END IF
 C* Continue processing the file
@@ -2083,7 +2096,7 @@ C* Suppress searching for covariance data unless MF0=3 or 10
 C* Default particle multiplicity
       YL=1
 c...
-C...  print *,'izap0,mt0,yl,zro',izap0,mt0,yl,zro
+c...  print *,'izap0,mt0,np,yl,zro',izap0,mt0,np,yl,zro
 c...
 C*    -- Assign yield, except for total, mu-bar, etc.
       IF(IZAP0.LT.0) GO TO 530
@@ -2101,23 +2114,32 @@ C*    -- Check if the residual coincides with the desired particle
 C*    -- Check for typical break-up reactions
       CALL YLBKUP(IZAP0,JZAP,YL)
 c...
-C...  print *,'YL,MT0,IZAP0,IZAI,JZAP',YL,MT0,IZAP0,IZAI,JZAP
+c...  print *,'YL,MF0,MT0,IZAP0,IZAI,JZAP',YL,MF0,MT0,IZAP0,IZAI,JZAP
 c...
 C*    -- Special treatment for nu-bar and neutrons from fission
       IF(IZAP0.EQ.1) THEN
         IF(MT0.EQ.19) GO TO 900
         MTJ=MT0-10000*(MT0/10000)
-        IF(MTJ.EQ.18 .OR.
-     &    (MF0.EQ.1 .AND. (MT0.EQ.452 .OR. MT0.EQ.456))) THEN
+c...
+c...    print *,'mf0,mtj,mt0',mf0,mtj,mt0
+c...
+        IF(MTJ.EQ.18 .OR. 
+     &    (MF0.EQ.1 .AND. (MT0.EQ.452 .OR. 
+     &                     MT0.EQ.455 .OR. MT0.EQ.456)) .OR.
+     &    (MF0.EQ.5 .AND.  MT0.EQ.455)) THEN
+          REWIND LEF
           MF =1
           IF(MTJ.EQ.18) THEN
             MT =452
           ELSE
             MT =MT0
           END IF
+c...
+C...      print *,'seeking mat/mf/mt',za0,mf,mt
+c...
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
 c...
-c...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
+C...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
 c...
           IF(IER.NE.0) THEN
             REWIND LEF
@@ -2141,62 +2163,92 @@ c...
             YL =1
             IER=0
           ELSE
-            IF     (LNU.EQ.1) THEN
-              CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,MRW,IER)
-              NN=NC-1
-              IF(MF0.GT.3) THEN
-C*              -- Case: Neutron yield at incident energy from 
-C*                       polynomial representation
-                YL=POLYNX(EIN,RWO,NN)
-C...          
-C...            print *,'nu-bar from LNU=1 at E',EIN,' is',yl
-C...          
-              ELSE
-C*              -- Case: Assemble nu-bar from polynomial representation
-                EUP=150.E+6
-                EE = 1.E-5
-                STP= 5
-                NEN=1
-                DO WHILE(EE.LT.EUP)
-                  ENR(I)=EE
-                  DXS(I)=POLYNX(EE,RWO,NN)
-                  EE=EE*STP
-                  NEN=NEN+1
-                END DO
-                ENR(NEN)=EUP
-                DXS(NEN)=POLYNX(EUP,RWO,NN)
-                GO TO 900
-              END IF
-            ELSE IF(LNU.EQ.2) THEN
-              NX=MRW/2
-              LX=NX+1
-              CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
-     1                   ,RWO,RWO(LX),NX,IER)
-              IF(IER.NE.0) GO TO 900
-              IF(MF0.GT.3) THEN
-C*              -- Case: Neutron yield at incident energy 
-C*                       from pointwise representation
-                YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
-                IF(IER.NE.0) THEN
-                  PRINT *,'FINTXS ERROR - IER=',IER
-                  STOP 'FINTXS ERROR'
+            IF(MT.EQ.455) THEN
+              LDG=L1
+              IF(LDG.EQ.0 .AND. LNU.EQ.2) THEN
+C*              -- Dummy-read decay constants
+                CALL RDLIST(LEF,C1,C2,L1,L2,N1,N2,RWO,MRW,IER)
+C*              -- Total delayed neutron fraction
+                NX=MRW/2
+                LX=NX+1
+                CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1                     ,RWO,RWO(LX),NX,IER)
+                IF(IER.NE.0) GO TO 900
+                IF(MF0.GT.3) THEN
+C*                -- Case: Neutron yield at incident energy 
+C*                         from pointwise representation
+                  YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+                  IF(IER.NE.0) THEN
+                    PRINT *,'FINTXS ERROR - IER=',IER
+                    STOP 'FINTXS ERROR'
+                  END IF
                 END IF
-c...        
-c...            print *,'nu-bar from LNU=2 is',yl
-c...        
               ELSE
-C*              -- Case: Assemble nu-bar distribution from 
-C*                       pointwise representation
-                NEN=NP
-                DO I=1,NEN
-                  ENR(I)=RWO(I)
-                  DXS(I)=RWO(LX-1+I)
-                END DO
-                IF(MTJ.NE.18) GO TO 900
+                PRINT *,'ERROR - No coding for energy-dependent'
+     &                 ,' delayed neutron data or polynomial rep.'
+                IER=13
+                RETURN
               END IF
             ELSE
-              PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
-              STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
+              IF     (LNU.EQ.1) THEN
+                CALL RDLIST(LEF,C1,C2,L1,L2,NC,N2,RWO,MRW,IER)
+                NN=NC-1
+                IF(MF0.GT.3) THEN
+C*                -- Case: Neutron yield at incident energy from 
+C*                         polynomial representation
+                  YL=POLYNX(EIN,RWO,NN)
+C...            
+C...              print *,'nu-bar from LNU=1 at E',EIN,' is',yl
+C...            
+                ELSE
+C*                -- Case: Assemble nu-bar from polynomial representation
+                  EUP=150.E+6
+                  EE = 1.E-5
+                  STP= 5
+                  NEN=1
+                  DO WHILE(EE.LT.EUP)
+                    ENR(I)=EE
+                    DXS(I)=POLYNX(EE,RWO,NN)
+                    EE=EE*STP
+                    NEN=NEN+1
+                  END DO
+                  ENR(NEN)=EUP
+                  DXS(NEN)=POLYNX(EUP,RWO,NN)
+                  GO TO 900
+                END IF
+              ELSE IF(LNU.EQ.2) THEN
+                YL=1
+                NX=MRW/2
+                LE=1
+                LX=LE+NX
+                CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
+     1                     ,RWO,RWO(LX),NX,IER)
+                IF(IER.NE.0) GO TO 900
+                IF(MF0.GT.3) THEN
+C*                -- Case: Neutron yield at incident energy 
+C*                         from pointwise representation
+                  YL=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+                  IF(IER.NE.0) THEN
+                    PRINT *,'FINTXS ERROR - IER=',IER
+                    STOP 'FINTXS ERROR'
+                  END IF
+c...          
+                  print *,'nu-bar from LNU=2 is',yl
+c...          
+                ELSE
+C*                -- Case: Assemble nu-bar distribution from 
+C*                         pointwise representation
+                  NEN=NP
+                  DO I=1,NEN
+                    ENR(I)=RWO(I)
+                    DXS(I)=RWO(LX-1+I)
+                  END DO
+                  IF(MTJ.NE.18) GO TO 900
+                END IF
+              ELSE
+                PRINT *,'DXSEN1 ERROR - Invalid LNU=',LNU,' for NuBar'
+                STOP    'DXSEN1 ERROR - Invalid LNU for NuBar'
+              END IF
             END IF
           END IF
         END IF
@@ -2206,8 +2258,8 @@ C...
       IZA=NINT(ZA0)
       IF(NP.GT.0) THEN
         print '(A,5I6,1P,2E11.4,I3)'
-     &    ,'  Found MAT,MF,MT,NP,ZAp,Ein,yl,LRBRK'
-     &         ,iza,MF,MTJ,NP,izap0,Ein,yl,LRBRK
+     &    ,'   Found MAT,MF,MT,NP,ZAp,Ein,yl,LRBRK'
+     &         ,iza,MF,MT,NP,izap0,Ein,yl,LRBRK
       ELSE
         print *,'  Could not find MAT,MF,MT,ZAp',iza,MF,MTJ,izap0
       END IF
@@ -2243,7 +2295,7 @@ c...
 C*
 C* Case: Cross section is required on output - finish processing
 c...
-C...    print *,'KEA,yl',KEA,yl
+        print *,'KEA,yl',KEA,yl
 c...
         IF(MT0/10000.EQ.4) THEN
 C*        -- Save the nu-bar
@@ -2279,8 +2331,8 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-C...    print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
-C...    print *,'nen,ier,mt0',nen,ier,mt0
+        print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
+        print *,'nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
@@ -2381,11 +2433,6 @@ C*            -- Neutron mass, projectile mass, charge, target charge
 c...
 c...          print *,'izap0,zzi,zzt,am1,awn',izap0,zzi,zzt,am1,awn,awr
 c...
-C*            -- Constants (Table 1, Appendix H, ENDF-102 manual)
-              PCP=  6.58211889D-16
-              RAL=137.03599976D+00
-              AMUEV=9.31494013D+08
-              CC=    299792458D+00
               APR=DBLE(AM1)/DBLE(AWN)
               AA =DBLE(AWR)/DBLE(AWI)
               AAD=DBLE(APR)/DBLE(AWI)
@@ -2767,11 +2814,6 @@ C*          -- Neutron mass, projectile mass, charge and target charge
             CALL PROMAS(IZAP0,AM1)
             ZZI=IZAP0/1000
             ZZT=NINT(ZA)/1000
-C*          -- define constants (Table 1, Appendix H, ENDF-102 manual)
-            PCP=6.58211889E-16
-            RAL=137.03599976
-            AMUEV=9.31494013E8
-            CC=299792458
 C*          -- Calculate CM cosine of scattering (take the larger root)
             APR=AM1/AWN
             AA =AWR/AWI
@@ -3195,15 +3237,27 @@ c...
         END IF
         GO TO 900
 C*
-C* Done procssing of cross sections (KEA=0)
+C* Done procssing of cross sections (KEA=0); Start DDX
   700 CONTINUE
+      IF(MT0.EQ.455) THEN
+C*      -- Special processing for delayed neutrons
+        XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
+        YL=1
+        MF=4
+        DO I=1,NP
+          ENR(I)=RWO(LE-1+I)
+          DXS(I)=0
+        END DO
+        NEN=0
+        GO TO 50
+      END IF
 C*
 C* Case: Proceed with the retrieval of differential data
-      ETOP=RWO(NP)
+      ETOP=RWO(LE+NP-1)
       INR(1)=2
       XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-C...  print *,'    Cross section=',xs,ein,ier,yl
+      print *,'    Cross section=',xs,ein,ier,yl
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
@@ -3233,7 +3287,7 @@ C*    --No MF4/5/6 possible only for discrete level (two-body isotr.)
         GO TO 900
       END IF
 c...
-      print *,'    Found  MAT,MF,MT,IZAP,IER',mat,mf,mt,izap0,ier
+      print *,'    Found  MAT,MF,MT,IZAP0,IER',mat,mf,mt,izap0,ier
 c...
 C*    -- Gamma production only from MF 6,12,13,14,15
       IF(IZAP0.EQ.   0) THEN
@@ -3279,6 +3333,9 @@ c...
       END IF
 C*
 C* Select appropriate file processing
+c...
+c...  print *,'processing MF',MF
+c...
       IF(MF.EQ. 6) GO TO  60
       IF(MF.EQ. 5) THEN
         MF=4
@@ -3388,8 +3445,8 @@ C* Calculate  integral SS over distribution DXS at cosines ENR
       INA=INR(1)
       CALL YTGEOU(SS,EA,EB,NE1,ENR,DXS,INA)
 c...
-C...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
-C...  print *,'     LCT,NE1,ea,eb,awp',LCT,NE1,ea,eb,awp
+c...  print *,'     SS=',SS,' kea,deg,eou',kea,deg,eou
+c...  print *,'     LCT,NE1,ea,eb,awi,awp',LCT,NE1,ea,eb,awi,awp
 c...
 C*
 C*    Process energy distributions for two-body reactions (AWP>0)
@@ -3411,7 +3468,7 @@ C*    Appendix E Equation (E.3)
           BET=SQRT(BET)
         ELSE
 C*        -- For photons AWI=0; assume a small mass (1E-14)
-          AWI=1.E-14
+          AWI=1.E-12
           AAA=AWR/AWI
           AAD=AWP/AWI
           BET=(AAA*(AWR+AWI-AWP)/AWP)*( 1+(AWR+AWI)*QI/(AWR*EIN) )
@@ -3428,7 +3485,7 @@ C*          Lab cosine of scattering: equation (E.11)
 C*          Jacobian of the transformation dXCM/dXLB (derivative of E.11)
             DCM=(SBT*QBT)/(BET*BET*(BET+XCM))
 c...
-c...        print *,'xcm,xlb,xsd,jcb',xcm,xlb,dxs(i),dcm
+c...        print *,'i.xcm,xlb,xsd,jcb',i,xcm,xlb,dxs(i),dcm
 c...
           ELSE
 C*          Lab co-ordinate system
@@ -3444,13 +3501,18 @@ C*          (if XLB>0 the larger root of the quadratic is taken)
             SBT= BET*BET + 1 + 2*XCM*BET
             DCM=1
           END IF
-          EO =EIN*SBT*AAD/((AAA+1)*(AAA+1))
+C*        -- Rearrange for numerical stability
+C...      EO =EIN*(SBT*(AAD/((AAA+1)*(AAA+1))))
+          EO =EIN*(SBT/(AAA+1))*(AAD/(AAA+1))
+c...
+c...      print *,'ein,sbt,aad,aaa,eo',ein,sbt,aad,aaa,eo
+c...
 C*        Outgoing particle energy: equation (E.10)
           ENR(I)=XLB
           DXS(I)=DXS(I)*DCM
           RWO(LXE-1+I)=EO
 C...
-C...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,dxs(i)
+c...      print *,'XCM/XLB: cos CM/Lab, Jacobian',XCM,XLB,DCM,eo,dxs(i)
 C...
         END DO
       END IF
@@ -3562,11 +3624,14 @@ C* NX - Max. number of entries
       JK =0
    51 JK =JK+1
 C* Read weights for the distributions (MF5) or multiplicities(MF26)
-      CALL RDTAB1(LEF,C1,C2,L1,LF,NR,NP,NBT,INR
+      CALL RDTAB1(LEF,UU,C2,L1,LF,NR,NP,NBT,INR
      1           ,RWO(LE),RWO(LX),NX,IER)
       IF     (MF.EQ. 5) THEN
 C* Interpret Pk(e) - equal 1 for single region representation
         PK=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
+C...
+C...    PRINT *,'    JK,PK,LF',JK,PK,LF,' YL,XS,PK',YL,XS,PK,SAN
+C...
       ELSE IF(MF.EQ.26) THEN
 C* Interpret particle multiplicity
         ZAP=C1
@@ -3583,8 +3648,8 @@ C* If not the right particle skip to next one
         YL=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
       END IF
 C* Process the distributions
-      IF(LF.EQ.1) THEN
-C* Pointwise representation (Law 1)
+      IF(LF.EQ.1 .OR. LF.EQ.5) THEN
+C* Pointwise representation (Law 1, 5)
         KX =NX /2
         LXE=LE +KX
         LXX=LX +KX
@@ -3592,57 +3657,75 @@ C* Pointwise representation (Law 1)
         Y1 =0
         EI1=0
         NE1=0
-        CALL RDTAB2(LEF,C1,C2,LANG,LEP,NR,NE,NBT,INR,IER)
-        DO 54 IE=1,NE
-C* For each incident energy read the outg.particle energy distribution
-        IF(MF.EQ.5) THEN
-          CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
-     1               ,RWO(LXE),RWO(LXX),KX,IER)
-C* Linearise to tolerance EXS, if necessary
-          EXS=0.01
-          IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
-     1                            ,RWO(LXE),RWO(LXX),KX,EXS)
-          INE=2
-        ELSE
-          MX=MRW-LXE
-          CALL RDLIST(LEF,C1,EI2,L1,L2,N1,NF,RWO(LXE),MX,IER)
-          IF(NF.GT.LXX-LXE) STOP 'DXSEN1 ERROR - Array limit'
-          INE=LEP
-          IF(INE.GT.2) THEN
-            PRINT *,'WARNING - Non-linear interp. for MF/MT',MF,MT
-            INE=2
-          END IF
-          DO I=1,NF
-            RWO(LXE-1+I)=RWO(LXE-2+2*I)
-            RWO(LXX-1+I)=RWO(LXE-1+2*I)
+        IF(LF.EQ.1) THEN
+          CALL RDTAB2(LEF,C1,C2,LANG,LEP,NR,NE,NBT,INR,IER)
+          DO 54 IE=1,NE
+C*          -- For each incident E read the E_out energy distribution
+            IF(MF.EQ.5) THEN
+              CALL RDTAB1(LEF,C1,EI2,L1,L2,NRP,NF,NBT(NM),INR(NM)
+     1                   ,RWO(LXE),RWO(LXX),KX,IER)
+C*            -- Linearise to tolerance EXS, if necessary
+              EXS=0.01
+              IF(NRP.GT.1) CALL VECLIN(NRP,NF,NBT(NM),INR(NM)
+     1                                ,RWO(LXE),RWO(LXX),KX,EXS)
+              INE=2
+            ELSE
+              MX=MRW-LXE
+              CALL RDLIST(LEF,C1,EI2,L1,L2,N1,NF,RWO(LXE),MX,IER)
+              IF(NF.GT.LXX-LXE) STOP 'DXSEN1 ERROR - Array limit'
+              INE=LEP
+              IF(INE.GT.2) THEN
+                PRINT *,'WARNING - Non-linear interp. for MF/MT',MF,MT
+                INE=2
+              END IF
+              DO I=1,NF
+                RWO(LXE-1+I)=RWO(LXE-2+2*I)
+                RWO(LXX-1+I)=RWO(LXE-1+2*I)
+              END DO
+            END IF
+            IF(IER.NE.0) THEN
+              PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
+              STOP 'DXSEN1 ERROR reading energy.distrib.'
+            END IF
+    
+            PRINT *,'    KEA,EI2',KEA,EI2
+    
+            IF(KEA.EQ.2) THEN
+c* Case:      --Interpolate outgoing particle energy distributions
+              INA=INR(1)
+              CALL FINT2D(EIN,EI1,NE1 ,RWO(LE) ,RWO(LX) ,INA
+     1                         ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
+            ELSE
+c* Case:      -- Interpolate distrib. to a given outgoing particle energy
+c...    
+c...            print *,'lxx 15 ',lxx
+c...            if(lxx.lt.0) stop
+c...    
+              EA=RWO(LXE)
+              EB=RWO(LXE-1+NF)
+              CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
+              Y2=FINTXS(EOU,RWO(LXE),RWO(LXX),NF,INE,IER)/SS
+              IF(EIN.GE.EI1 .AND. EIN.LE.EI2) THEN
+                YY=( Y1 + (Y2-Y1)*(EIN-EI1)/(EI2-EI1) )
+                YL=YL*YY
+                GO TO 800
+              END IF
+            END IF
+   54     CONTINUE
+c*
+        ELSE IF(LF.EQ.5) THEN
+          CALL RDTAB1(LEF,C1,C2,L1,L2,NRP,NEP,NBT(NM),INR(NM)
+     1                ,RWO(LE),RWO(LX),KX,IER)
+          THT=FINTXS(EIN,RWO(LE),RWO(LX),NEP,INR(NM),IER)
+          CALL RDTAB1(LEF,C1,C2,L1,L2,NRP,NE1,NBT(NM),INR(NM)
+     1                ,RWO(LE),RWO(LX),KX,IER)
+C...
+C...      PRINT *,'    JK,THT',JK,THT
+C...
+          DO K=1,NE1
+            RWO(LE-1+K)=RWO(LE-1+K)*THT
           END DO
         END IF
-        IF(IER.NE.0) THEN
-          PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
-          STOP 'DXSEN1 ERROR reading energy.distrib.'
-        END IF
-        IF(KEA.EQ.2) THEN
-Case: Interpolate outgoing particle energy distributions
-          INA=INR(1)
-          CALL FINT2D(EIN,EI1,NE1 ,RWO(LE) ,RWO(LX) ,INA
-     1                   ,EI2,NF  ,RWO(LXE),RWO(LXX),INE,KX)
-        ELSE
-Case: Interpolate distrib. to a given outgoing particle energy
-c...
-c...        print *,'lxx 15 ',lxx
-c...        if(lxx.lt.0) stop
-c...
-          EA=RWO(LXE)
-          EB=RWO(LXE-1+NF)
-          CALL YTGEOU(SS,EA,EB,NF,RWO(LXE),RWO(LXX),INE)
-          Y2=FINTXS(EOU,RWO(LXE),RWO(LXX),NF,INE,IER)/SS
-          IF(EIN.GE.EI1 .AND. EIN.LE.EI2) THEN
-            YY=( Y1 + (Y2-Y1)*(EIN-EI1)/(EI2-EI1) )
-            YL=YL*YY
-            GO TO 800
-          END IF
-        END IF
-   54   CONTINUE
 C* Add contribution for one representation
         CALL UNIGRD(NEN,ENR,NE1,RWO(LE),NE2,RWO(LXE),KX)
 C* Interpolate previous distribution to the union grid
@@ -3654,11 +3737,11 @@ C* Interpolate previous distribution to the union grid
         END DO
 C* Add current distribution on the same grid
         CALL FITGRD(NE1,RWO(LE),RWO(LX),NE2,RWO(LXE),RWO(LXX))
+        NEN=NE1
         DO I=1,NEN
           DXS(I)=DXS(I)+RWO(LXX-1+I)*PK
         END DO
         IF(JK.LT.NK) GO TO 51
-        NE1=NEN
       ELSE IF(LF.EQ.7 .OR. LF.EQ.9) THEN
 C* Energy dependent Maxwellian fission spectrum (Law 7) OR
 C* Evaporation spectrum (Law 9)
@@ -3681,7 +3764,7 @@ C* Read and interpolate Maxwellian temperature parameter Theta
         END IF
         THETA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
         IF(KEA.EQ.2) THEN
-Case: Generate outgoing particle energy distributions
+Case:     --Generate outgoing particle energy distributions
           NE1=101
 C*         Limit the table to the upper energy on the ENDF file
           EE =MIN(ETOP,EIN-UPEN)
@@ -3692,7 +3775,7 @@ C*         Limit the table to the upper energy on the ENDF file
             DXS(I)=SPMAXW(EE,EIN,UPEN,THETA)
           END DO
         ELSE
-C* Case: Calculate values at the given outgoing particle energy
+C* Case:  -- Calculate values at the given outgoing particle energy
           IF(LF.EQ.7) THEN
 C*            Maxwellian fission spectrum
             YL=YL*SPMAXW(EOU,EIN,UPEN,THETA)
@@ -3703,7 +3786,7 @@ C*            Evaporation spectrum
           GO TO 800
         END IF
       ELSE IF(LF.EQ.11) THEN
-C* Energy dependent Watt spectrum (Law 11)
+C*      -- Energy dependent Watt spectrum (Law 11)
         NX=MRW/2
         LX=NX+1
         UPEN=C1
@@ -3711,7 +3794,7 @@ C* Energy dependent Watt spectrum (Law 11)
           NEN=0
           GO TO 900
         END IF
-C* Read and interpolate Watt parameter Wa
+C*      -- Read and interpolate Watt parameter Wa
         CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
      1             ,RWO,RWO(LX),NX,IER)
         INE=INR(1)
@@ -3722,7 +3805,7 @@ C* Read and interpolate Watt parameter Wa
           PRINT *,'WARNING - Non-linear interpol.law in MF5 MT',MT0
         END IF
         WA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
-C* Read and interpolate Watt parameter Wb
+C*      -- Read and interpolate Watt parameter Wb
         CALL RDTAB1(LEF,C1,C2,L1,L2,NR,NP,NBT,INR
      1             ,RWO,RWO(LX),NX,IER)
         INE=INR(1)
@@ -3734,7 +3817,7 @@ C* Read and interpolate Watt parameter Wb
         END IF
         WB=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
         IF(KEA.EQ.2) THEN
-Case: Generate outgoing particle energy distributions
+Case:     -- Generate outgoing particle energy distributions
           NE1=101
 C*         Limit the table to the upper energy on the ENDF file
           EE =MIN(ETOP,EIN-UPEN)
@@ -3745,7 +3828,7 @@ C*         Limit the table to the upper energy on the ENDF file
           DXS(I)=SPWATT(EE,EIN,UPEN,WA,WB)
    58     CONTINUE
         ELSE
-Case: Calculate values at the given outgoing particle energy
+Case:     -- Calculate values at the given outgoing particle energy
           YL=YL*SPWATT(EOU,EIN,UPEN,WA,WB)
           GO TO 800
         END IF
@@ -3838,6 +3921,9 @@ C*        Set IER to flag error and terminate
         GO TO 61
       END IF
 C*    -- Particle found - extract the yield
+c...
+c...  print *,'-- Particle',zap,' found - extract the yield'
+c...
       CALL VECLIN(NR,NP,NBT,INR,RWO,RWO(LX),KX,EPS)
       INR(1)=2
       YL6=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
@@ -3849,7 +3935,7 @@ C*      -- Neutron multiplicities for fission are included in MF1
       END IF
 C* Check the data representation for this particle
 c...
-C...  print *,'    processing particle/mf/mt/law',nint(zap),mf,mt,law
+c...  print *,'    processing particle/mf/mt/law',nint(zap),mf,mt,law
 c...
       IF     (LAW.EQ.2) THEN
         GO TO 62
@@ -3880,7 +3966,7 @@ C... 1   PRINT *,' WARNING - Multiple interp.ranges for MF 6, MT',MT
 C* Process the angular distribution for each incident energy
           CALL RDLIST(LEF,C1,EI2,LANG,L2,NW,NEP1,RWO(LXX),MX,IER)
 c...
-C...      print *,'RDLIST C1,EI2,LANG,L2,NW,NEP1',C1,EI2,LANG,L2,NW,NEP1
+c...      print *,'RDLIST C1,EI2,LANG,L2,NW,NEP1',C1,EI2,LANG,L2,NW,NEP1
 c...
           IF(IER.NE.0) THEN
             STOP 'DXSEN1 ERROR - Reading MF6 Law 2 data in RDLIST'
@@ -3915,6 +4001,12 @@ c...
           CALL FINT2D(EIN,EI1,NE1 ,ENR     ,DXS     ,INA
      1                   ,EI2,NEP1,RWO(LXE),RWO(LXX),INE,LD)
         END DO
+c...
+c...    print *,'FINT2D to EIN',EIN,' NE1',NE1
+c...    do i=1,ne1
+c...      print *,i,enr(i),dxs(i)
+c...    end do
+c...
 C* The rest of processing is identical to MF 4 case
         GO TO 45
 C*
@@ -4384,7 +4476,7 @@ C*
 C* Distribution assembled - check that the last point is zero
   800 NEN=NE1
 C...
-C...  print *,'nen',nen,ier
+C...  print *,'Number of points',nen,' IER',ier
 C...
       IF(KEA.EQ.2) THEN
         IF(DXS(NEN).NE.0) THEN
@@ -4579,6 +4671,9 @@ C* If MF10, search over metastable state
       LRBRK=0
       JST=1
       IF(MF1.EQ.10) JST=N1
+C*    -- Dummy read of delayed neutron decay constants
+      IF(MF1.EQ. 1 .AND. MT1.EQ.455)
+     &CALL RDLIST(LES,C1,C2,L1,L2,N1,N2,RWO,MXRW,IER)
       DO J=1,JST
         CALL RDTAB1(LES,QM,QI,IZAP,LFS,N1,NP,NBT,INR,EN,XS,MXNP,IER)
         IF(IER.GT.0) THEN
