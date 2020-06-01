@@ -39,6 +39,8 @@ C-V  18/08 Allow plotting spectra (MF3/MT261) "per unit lethargy".
 C-V  19/08 Add percent uncertainty to printout.
 C-V  19/10 Shift uncertainty printout to beyond column 66.
 C-V  20/03 Refine default header for MF=10 MT=5.
+C-V  20/04 Fix error defining temperature of the Maxwellian.
+C-V  20/05 Fix call to FINDMT searching MF=15 (R. Capote)
 C-Author : Andrej Trkov,  International Atomic Energy Agency
 C-A                email: Andrej.Trkov@ijs.si
 C-A      Current address: Jozef Stefan Institute
@@ -205,7 +207,6 @@ C-
       CHARACTER*11 E11
       CHARACTER*40 BLNK,COM,COM1
       CHARACTER*80 FLNM,FLIN,FLOU
-      CHARACTER*66 REC
       DOUBLE PRECISION ED
       DIMENSION    ES(MPT),SG(MPT),UG(MPT),RWO(MXR),ZEL(MXIS),FRC(MXIS)
      1            ,NBT(20),INR(20)
@@ -362,16 +363,20 @@ C* Check if ratio to Maxwellian is to be printed
         WRITE(LTT,91) '     zero or blank to print absolute    '
         WRITE(LTT,91) '$      <0 to print lethargy spectrum  : '
         READ (LKB,99) FLNM
+        IF(FLNM(1:40).NE.BLNK) READ (FLNM,*) TMXW
 C*      -- If TMXW<0, set flag to print lethargy spectrum
         IF(TMXW.LT.0) THEN
-          TMXW=0
           ILTH=1
           WRITE(LTT,91) ' '
           WRITE(LTT,91) ' Lethargy spectrum is selected          '
-        ELSE
+        ELSE IF(TMXW.EQ.0) THEN
           WRITE(LTT,91) ' '
           WRITE(LTT,91) ' Energy spectrum is selected            '
+        ELSE
+          WRITE(LTT,91) ' '
+          WRITE(LTT,91) ' Ratio to Maxwellian is selected        '
         END IF
+        IF(ILTH.EQ.1) TMXW=0
       END IF
 C... Special case for backward compatibility to force MT 5 explicitly
 C...  IF(IDMY.EQ.5) IDMY=-5
@@ -566,14 +571,13 @@ C*
 C* Process secondary neutron spectra
       ELSE IF(MF.EQ.15) THEN
 C*      -- Process photon spectra
-        CALL FINDMT(LIN,ZA0,ZA,MAT,MF,MT,REC,IER)
+        CALL FINDMT(LIN,ZA0,ZA,AW,L1,L2,NC,N2,MAT,MF,MT,IER)
         IF     (IER.EQ.1) THEN
           GO TO 90
         ELSE IF(IER.GT.1) THEN
           WRITE(LTT,91) ' ERROR - Processing terminated IER cond.',IER
           STOP 'ENDTAB ERROR - Processing terminated'
         END IF
-        READ (REC,96) C1,C2,L1,L2,NC,N2
         IF(NC.NE.1)
      1    STOP ' ENDTAB ERROR - More than one distribution given'
 C*      -- Read but ignore weights for distributions
@@ -757,11 +761,6 @@ c*
 C*
 C* Try for the next MT number
       GO TO 30
-C*
-C* Format error trap
-   88 WRITE(LTT,91) ' ENDTAB ERROR - Invalid record          '
-      WRITE(LTT,93) REC
-      STOP 'ENDTAB ERROR - Reading source ENDF file'
 C*
 C* All processing completed
    90 WRITE(LTT,91) ' More curves to plot (blank=No) ?       '
