@@ -1,6 +1,6 @@
       PROGRAM MU_BAR
 C-Title  : Program MU_BAR
-C-Purpose: Generate average cosine from angular distributions
+C-Program: Generate average cosine from angular distributions
 C-Author : A. Trkov, Jožef Stefan Institute, Ljubljana, Slovenia
 C-Version: March 2012 (original code)
 C-V  2012/09  Skip transformation matrix (for backward compatibility
@@ -11,6 +11,8 @@ C-V           Fix processing when tabular CM distribution grid is
 C-V           sparse.
 C-V  2016/08  If no MF4, copy to output as is.
 C-V  2017/04  Increase MXRW array size limit from 800 k to 1.2 M.
+C-V  2018/07  Fix bug printing higher cosine moments when LTT1=1 or 2.
+C-V  2019/02  Extend to generate P1, P2, P3 terms int MT=251,252,253.
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -32,6 +34,7 @@ C-
 C* Parameters defining the sizes of arrays
 C*   MXRW Size of RWO array
 C*
+      DOUBLE PRECISION CSJ,CSK
       PARAMETER    (MXRW=1 200 000, MXMT=10,MCS=901)
       LOGICAL       EXST
       CHARACTER*66  C66,H66
@@ -105,6 +108,9 @@ C* Skip file header
       NMAT=0
 C* Process ENDF files in sequence
   120 CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
+c...
+c...  if(mub.gt.0) print *,'mat,mf,mt',mat,mf,mt,c66(1:20)
+c...
       IF(IER.NE.0) GO TO 200
       IF(MAT.LT.0) GO TO 200
       IF(MT .LE.0) GO TO 120
@@ -223,7 +229,7 @@ c...
           END DO
           CALL RDTAB1(LIN,C1,EIN,L1,L2,NR,NP1,NBT,INR
      &                ,RWO(LC+NP),RWO(LD+NP),NMX,IER)
-C*        -- Interpolate to a dense cosine mesh
+C*        -- Interpolate linearly to a dense cosine mesh
           CALL FITGRD(NP1,RWO(LC+NP),RWO(LD+NP),NP,RWO(LC),RWO(LD))
 c...
 c...      if(nint(ein).eq.1400000) then
@@ -298,14 +304,17 @@ C*        First point
         P1J=XD*PL(2)
         P2J=XD*PL(3)
         P3J=XD*PL(4)
-C*        Integrate over all points (P0 to check integration)
+        CSJ=DBLE(RWO(LC))
+C*      ** Integrate over all points (P0 to check integration)
         DO J=2,NP
           P0K=P0J
           P1K=P1J
           P2K=P2J
           P3K=P3J
+          CSK=CSJ
           CALL PLNLEG(RWO(LC-1+J),PL,3)
-          DJ=DBLE(RWO(LC-1+J))-DBLE(RWO(LC-2+J))
+          CSJ=DBLE(RWO(LC-1+J))
+          DJ=CSJ-CSK
           XD= RWO(LD-1+J)
           P0J=XD*PL(1)
           P1J=XD*PL(2)
@@ -321,7 +330,7 @@ C*        Integrate over all points (P0 to check integration)
         RWO(LX-1+IE+MXEN)=SP2
         RWO(LX-1+IE+MXEN*2)=SP3
 C...
-c...    print *,'ein,sp0,sp1,2/3A',ie,ein,sp0,sp1 ,2/(3*awr),LE,LX
+c...    print *,'ein,sp_l,2/3A',ie,ein,sp0,sp1,sp2,sp3 ,2/(3*awr)
 C...
       END DO
 C...
@@ -352,7 +361,7 @@ c...
           END DO
         END IF
       END IF
-C* Write the MU_BAR to scratch
+C* Write the MU_BAR and P2, P3 to scratch
 C* (Three moments are calculated, only the first one is written)
 c...
 C...  print *,'Write the MU_BAR to scratch',mat0,mf0,mt0
@@ -361,26 +370,32 @@ c...
       IZR=0
       NS =0
       MF0=3
-      MT0=251
       QM =0
       QI =0
       NR =1
       NBT(1)=NE
       INR(1)=2
-      CALL WRCONT(LTM,MAT0,MF0,MT0,NS,ZA,AWR,L1,L2,N1,N2)
-      CALL WRTAB1(LTM,MAT0,MF0,MT0,NS,QM,QI,L1,L2
-     1                 ,NR,NE,NBT,INR,RWO(LE),RWO(LX))
-C...
-C...  PRINT *,'ns,nr,ne',NS,nr,ne
-C...
-C* Write the SEND, FEND, MEND records
-      CALL WRCONT(LTM,MAT0,MF0,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
+      DO L=1,3
+        MT0=250+L
+        LXI=LX+(L-1)*NE
+        CALL WRCONT(LTM,MAT0,MF0,MT0,NS,ZA,AWR,L1,L2,N1,N2)
+        CALL WRTAB1(LTM,MAT0,MF0,MT0,NS,QM,QI,L1,L2
+     1                   ,NR,NE,NBT,INR,RWO(LE),RWO(LXI))
+C...    
+C...    PRINT *,'ns,nr,ne',NS,nr,ne
+C...    
+C*      -- Write the SEND record
+        CALL WRCONT(LTM,MAT0,MF0,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
+c...    
+c...    print *,'Processed reaction',MF0,MT0
+c...    
+      END DO
+C*    -- Write the FEND, MEND records
       CALL WRCONT(LTM,MAT0,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       CALL WRCONT(LTM,IZR ,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
-c...
-C...  print *,'Processed reaction',MF0,MT0
-c...
 C* One MF4 data set processed - proceed to next data set
+c...
+      print *,'One MF4 processed - proceed to the next'
       MUB=MUB+1
       GO TO 120
 C* Print warning and skip unsupported MF4 representations
@@ -393,6 +408,9 @@ C* Print warning and skip unsupported MF4 representations
 C*
 C* All ENDF material processed - insert mu-bar into the ENDF file
   200 MON=-1
+c...
+c...  print *,'ENDF material processed - insert mu-bar'
+c...
       IF(MUB.LE.0) THEN
         WRITE(LTT,*) 'MU-BAR ERROR - No ang.distrib.data found'
         REWIND LIN
@@ -423,7 +441,7 @@ C* Copy the source ENDF file up to the position for insertion
      &  ( (MF.EQ.3 .AND.  MT.GE.MTH) .OR.
      &    (MF.EQ.0 .AND. MF0.EQ.3  )  ) ) THEN
 C...
-C...    print *,'Insert before',mat,mf,mt
+c...    print *,'Insert before',mat,mf,mt
 c...
 C*      -- If MT 251 present, skip existing dat
         DO WHILE(MT.EQ.251)
@@ -469,15 +487,18 @@ C-D  Evaluate Legendre polynomial expansion of order NL with
 C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
+      DOUBLE PRECISION SS,DQL,DPL
       PARAMETER (MXPL=80)
       DIMENSION QL(*),PL(MXPL)
       IF(NL.GE.MXPL) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL  PLNLEG(UU,PL,NL)
       N1=NL+1
-      SS=0.
-      DO 20 L=1,N1
-      SS=SS+QL(L)*PL(L)
- 20   CONTINUE
+      SS=0
+      DO L=1,N1
+        DQL=DBLE(QL(L))
+        DPL=DBLE(PL(L))
+        SS =SS+DQL*DPL
+      END DO
       POLLG1=SS
       RETURN
       END
@@ -490,15 +511,22 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
+      DOUBLE PRECISION P1,P2,P3,WW,EL
       DIMENSION PL(*)
-      PL(1)=1.
+      WW=DBLE(UU)
+      P1=1
+      PL(1)=P1
       IF(NL.LT.1) RETURN
       L2=2
       PL(L2)=UU
       IF(NL.LT.2) RETURN
-      DO 20 L=2,NL
-      PL(L+1)=(PL(L)*UU*FLOAT(2*L-1)-PL(L-1)*FLOAT(L-1))/FLOAT(L)
-   20 CONTINUE
+      DO L=2,NL
+        EL=L
+        P3=( P2*WW*(2*L-1) - P1*(L-1) )/EL
+        PL(L+1)=P3
+        P1=P2
+        P2=P3
+      END DO
       RETURN
       END
       SUBROUTINE CMLAB2B(EIN,EOU,XCM,XLB,XSD,AWR,AWI,QI,LCT)
@@ -857,7 +885,7 @@ C* Write character fiels
       END
       SUBROUTINE FITGRD(NEP1,EN1,XS1,NEP2,EN2,XS2)
 C-Title  : Subroutine FITGRD
-C-Purpose: Interpolate a tabulated function to a given grid
+C-Purpose: Interpolate linearly a tabulated function to a given grid
 C-Description:
 C-D Function XS1 at NEP1 argument values in EN1 is interpolated to
 C-D NEP2 values XS2 corresponding to argument values in EN2
