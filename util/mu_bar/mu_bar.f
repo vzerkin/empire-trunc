@@ -1,6 +1,6 @@
       PROGRAM MU_BAR
 C-Title  : Program MU_BAR
-C-Purpose: Generate average cosine from angular distributions
+C-Program: Generate average cosine from angular distributions
 C-Author : A. Trkov, Jožef Stefan Institute, Ljubljana, Slovenia
 C-Version: March 2012 (original code)
 C-V  2012/09  Skip transformation matrix (for backward compatibility
@@ -11,6 +11,9 @@ C-V           Fix processing when tabular CM distribution grid is
 C-V           sparse.
 C-V  2016/08  If no MF4, copy to output as is.
 C-V  2017/04  Increase MXRW array size limit from 800 k to 1.2 M.
+C-V  2018/07  Fix bug printing higher cosine moments when LTT1=1 or 2.
+C-V  2019/02  Extend to generate P1, P2, P3 terms int MT=251,252,253.
+C-V  2020/06  Convert to double precision.
 C-M
 C-M  Manual for Program MU_BAR
 C-M  =========================
@@ -32,13 +35,14 @@ C-
 C* Parameters defining the sizes of arrays
 C*   MXRW Size of RWO array
 C*
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       PARAMETER    (MXRW=1 200 000, MXMT=10,MCS=901)
       LOGICAL       EXST
       CHARACTER*66  C66,H66
       CHARACTER*40  BLNK
       CHARACTER*80  FLNM,FLIN,FLOU,FLTM,FLLG
       DIMENSION     RWO(MXRW),PL(65)
-      DIMENSION     MTE(MXMT),NBT(20),INR(20)
+      DIMENSION     NBT(20),INR(20)
 C*
       DATA BLNK/'                                        '/
      &     FLIN/'ENDFB.IN'/
@@ -52,6 +56,7 @@ C* Initialise variables
       ZRO=0
       IZR=0
       MUB=0
+      TWO=2
 C*
 C* Define input parameters - Write banner to terminal
       WRITE(LTT,940) ' MU_BAR - Average cosine of scattering  '
@@ -78,7 +83,7 @@ C* Open the output ENDF file
 C*
 C* Temporay file
       OPEN (UNIT=LTM,FILE=FLTM,STATUS='UNKNOWN')
-      H66=BLNK//BLNK
+      H66=BLNK//BLNK(1:26)
       MATH=7777
       NS  =-1
       CALL WRTEXT(LTM,MATH,IZR,IZR,NS, H66)
@@ -105,6 +110,9 @@ C* Skip file header
       NMAT=0
 C* Process ENDF files in sequence
   120 CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
+c...
+c...  if(mub.gt.0) print *,'mat,mf,mt',mat,mf,mt,c66(1:20)
+c...
       IF(IER.NE.0) GO TO 200
       IF(MAT.LT.0) GO TO 200
       IF(MT .LE.0) GO TO 120
@@ -114,18 +122,30 @@ C*
 C* MF 1: Read ZA, AWR and AWI
         NMAT=NMAT+1
         MAT0=MAT
+        AWI =-1
         READ (C66,961) ZA,AWR,LRP,LFI
         CALL RDTEXT(LIN,MAT,MF,MT,C66,IER)
-        CALL RDHEAD(LIN,MAT,MF,MT,AWI,EMX,L1,L2,N1,N2,IER)
+        CALL RDHEAD(LIN,MAT,MF,MT,AWI,EMX,L1,L2,NSUB,N2,IER)
         ZA0=ZA+L2*0.1
         WRITE(LTT,940) ' '
         WRITE(LTT,942) '                        Material MAT : ',MAT
         WRITE(LTT,944) '                             ZA.LIS0 : ',ZA0
+        WRITE(LTT,944) '                                 AWI : ',AWI
+C*
         WRITE(LLG,940) ' '
         WRITE(LLG,940) '              Processing source file : ',FLIN
         WRITE(LLG,940) '                         Output file : ',FLOU
         WRITE(LLG,942) '                        Material MAT : ',MAT
         WRITE(LLG,944) '                             ZA.LIS0 : ',ZA0
+        WRITE(LLG,944) '                                 AWI : ',AWI
+C*
+        IF(NINT(AWI).NE.NSUB/10) THEN
+          AWI=NSUB/10
+          WRITE(LTT,942) ' WARNING - Inconsistent AWI for NSUB : ',NSUB
+          WRITE(LTT,944) '                          AWI set to : ',AWI
+          WRITE(LLG,942) ' WARNING - Inconsistent AWI for NSUB : ',NSUB
+          WRITE(LLG,944) '                          AWI set to : ',AWI
+        END IF
       END IF
 C*
 C* Skip until MF4, MT2
@@ -184,6 +204,7 @@ C*  LD  - Scratch array of distributions
         IE=IE+1
         JE=JE+1
         IF(JE.GE.10000) THEN
+C*        -- Print to screen every 10 000 points to monitor progress
           PRINT *,' Done energies',IE
           JE=0
         END IF
@@ -200,11 +221,11 @@ c...
 c...      print *,'read TT,EIN,LT,NL,ier',TT,EIN,LT,NL,ier
 c...      print *,(rwo(llc+j),j=1,nl)
 c...
-          RWO(LLC)=0.5
+          RWO(LLC)=1/TWO
           DO L=1,NL
-            RWO(LLC+L)=RWO(LLC+L)*(2*L+1)/2
+            RWO(LLC+L)=RWO(LLC+L)*(2*L+1)/TWO
           END DO
-          DCS=2.0/(NP-1)
+          DCS=TWO/(NP-1)
           CS=-1
           DO J=1,NP
             RWO(LC-1+J)=CS
@@ -216,17 +237,18 @@ c...
           NP =MCS
           NMX=LD-LC-NP
           CS=-1
-          DCS=2.0/(NP-1)
+          DCS=TWO/(NP-1)
           DO J=1,NP
             RWO(LC-1+J)=CS
             CS=CS+DCS
           END DO
+          RWO(LC-1+NP)=1
           CALL RDTAB1(LIN,C1,EIN,L1,L2,NR,NP1,NBT,INR
      &                ,RWO(LC+NP),RWO(LD+NP),NMX,IER)
-C*        -- Interpolate to a dense cosine mesh
+C*        -- Interpolate linearly to a dense cosine mesh
           CALL FITGRD(NP1,RWO(LC+NP),RWO(LD+NP),NP,RWO(LC),RWO(LD))
 c...
-c...      if(nint(ein).eq.1400000) then
+c...      if(nint(ein).eq.15 000 000) then
 c...         write(91,*) 'Original'
 c...         do k=1,np1
 c...           write(91,'(2f11.6)') rwo(lc+np-1+k),rwo(ld+np-1+k)
@@ -283,7 +305,9 @@ C*        Outgoing particle energy: equation (E.10)
           RWO(LC-1+J)=XLB
           RWO(LD-1+J)=RWO(LD-1+J)*DCM
 c...
+c...      if(ein.gt.14e6 .and. ein.lt.16e6) then
 c...      print *,'j,cs,ds',RWO(LC-1+J),RWO(LD-1+J)
+c...      end if
 c...
         END DO
 C* Calculate Legendre moments of angular distributions
@@ -298,19 +322,27 @@ C*        First point
         P1J=XD*PL(2)
         P2J=XD*PL(3)
         P3J=XD*PL(4)
-C*        Integrate over all points (P0 to check integration)
+        CSJ=RWO(LC)
+C*      --Integrate over all points (P0 to check integration)
         DO J=2,NP
+C*        -- Save moments of distribution at previous point
           P0K=P0J
           P1K=P1J
           P2K=P2J
           P3K=P3J
+          CSK=CSJ
           CALL PLNLEG(RWO(LC-1+J),PL,3)
-          DJ=DBLE(RWO(LC-1+J))-DBLE(RWO(LC-2+J))
+          CSJ=RWO(LC-1+J)
+C*        -- Difference between two cosine points
+          DJ=CSJ-CSK
+C*        -- Distribution at the current cosine
           XD= RWO(LD-1+J)
+C*        -- Moments of the distribution at the current cosine
           P0J=XD*PL(1)
           P1J=XD*PL(2)
           P2J=XD*PL(3)
           P3J=XD*PL(4)
+C*        -- Add contribution of the current cosine to the integral
           SP0=SP0+(P0K+P0J)*DJ/2
           SP1=SP1+(P1K+P1J)*DJ/2
           SP2=SP2+(P2K+P2J)*DJ/2
@@ -321,7 +353,7 @@ C*        Integrate over all points (P0 to check integration)
         RWO(LX-1+IE+MXEN)=SP2
         RWO(LX-1+IE+MXEN*2)=SP3
 C...
-c...    print *,'ein,sp0,sp1,2/3A',ie,ein,sp0,sp1 ,2/(3*awr),LE,LX
+c...    print *,'ein,sp_l,2/3A',ie,ein,sp0,sp1,sp2,sp3 ,2/(3*awr)
 C...
       END DO
 C...
@@ -340,19 +372,10 @@ c...
           GO TO 144
         ELSE
 C*        -- Tabulated range processed - repack P2,P3
-c...
-c...      print *,'Repacking P2,P3; ne2,nee,ltt2',ne2,nee,ltt2
-c...
           NE=NEE
-          DO IE=1,NE
-            RWO(LX-1+IE+NE  )=RWO(LX-1+IE+MXEN  )
-          END DO
-          DO IE=1,NE
-            RWO(LX-1+IE+NE*2)=RWO(LX-1+IE+MXEN*2)
-          END DO
         END IF
       END IF
-C* Write the MU_BAR to scratch
+C* Write the MU_BAR and P2, P3 to scratch
 C* (Three moments are calculated, only the first one is written)
 c...
 C...  print *,'Write the MU_BAR to scratch',mat0,mf0,mt0
@@ -361,26 +384,32 @@ c...
       IZR=0
       NS =0
       MF0=3
-      MT0=251
       QM =0
       QI =0
       NR =1
       NBT(1)=NE
       INR(1)=2
-      CALL WRCONT(LTM,MAT0,MF0,MT0,NS,ZA,AWR,L1,L2,N1,N2)
-      CALL WRTAB1(LTM,MAT0,MF0,MT0,NS,QM,QI,L1,L2
-     1                 ,NR,NE,NBT,INR,RWO(LE),RWO(LX))
-C...
-C...  PRINT *,'ns,nr,ne',NS,nr,ne
-C...
-C* Write the SEND, FEND, MEND records
-      CALL WRCONT(LTM,MAT0,MF0,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
+      DO L=1,3
+        MT0=250+L
+        LXI=LX+(L-1)*MXEN
+        CALL WRCONT(LTM,MAT0,MF0,MT0,NS,ZA,AWR,L1,L2,N1,N2)
+        CALL WRTAB1(LTM,MAT0,MF0,MT0,NS,QM,QI,L1,L2
+     1                   ,NR,NE,NBT,INR,RWO(LE),RWO(LXI))
+C...    
+C...    PRINT *,'ns,nr,ne',NS,nr,ne
+C...    
+C*      -- Write the SEND record
+        CALL WRCONT(LTM,MAT0,MF0,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
+c...    
+c...    print *,'Processed reaction',MF0,MT0
+c...    
+      END DO
+C*    -- Write the FEND, MEND records
       CALL WRCONT(LTM,MAT0,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
       CALL WRCONT(LTM,IZR ,IZR,IZR,NS,ZRO,ZRO,IZR,IZR,IZR,IZR)
-c...
-C...  print *,'Processed reaction',MF0,MT0
-c...
 C* One MF4 data set processed - proceed to next data set
+c...
+      print *,'One MF4 processed - proceed to the next'
       MUB=MUB+1
       GO TO 120
 C* Print warning and skip unsupported MF4 representations
@@ -393,6 +422,9 @@ C* Print warning and skip unsupported MF4 representations
 C*
 C* All ENDF material processed - insert mu-bar into the ENDF file
   200 MON=-1
+c...
+c...  print *,'ENDF material processed - insert mu-bar'
+c...
       IF(MUB.LE.0) THEN
         WRITE(LTT,*) 'MU-BAR ERROR - No ang.distrib.data found'
         REWIND LIN
@@ -423,7 +455,7 @@ C* Copy the source ENDF file up to the position for insertion
      &  ( (MF.EQ.3 .AND.  MT.GE.MTH) .OR.
      &    (MF.EQ.0 .AND. MF0.EQ.3  )  ) ) THEN
 C...
-C...    print *,'Insert before',mat,mf,mt
+c...    print *,'Insert before',mat,mf,mt
 c...
 C*      -- If MT 251 present, skip existing dat
         DO WHILE(MT.EQ.251)
@@ -452,16 +484,13 @@ C* Copy the rest of the ENDF
 C*
       STOP 'MU_BAR Completed'
 C*
-  902 STOP 'MU_BAR ERROR - Processing terminated'
-C*
-  911 FORMAT(1P,4E11.3)
   940 FORMAT(2A40)
   942 FORMAT( A40,I5)
   944 FORMAT( A40,F7.1)
   961 FORMAT(2F11.0,4I11)
   980 FORMAT(A80)
       END
-      FUNCTION POLLG1(UU,QL,NL)
+      DOUBLE PRECISION FUNCTION POLLG1(UU,QL,NL)
 C-Title  : POLLG1 Function
 C-Purpose: Legendre polynomial Sum( Ql* Pl(u) ) function
 C-Description:
@@ -469,15 +498,18 @@ C-D  Evaluate Legendre polynomial expansion of order NL with
 C-D  coefficients QL at argument value UU in the interval [-1,1]
 C-Author : A.Trkov, Institute J.Stefan, Ljubljana, Slovenia, (1997)
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       PARAMETER (MXPL=80)
       DIMENSION QL(*),PL(MXPL)
       IF(NL.GE.MXPL) STOP 'POLLG1 ERROR - Array PL capacity exceeded'
       CALL  PLNLEG(UU,PL,NL)
       N1=NL+1
-      SS=0.
-      DO 20 L=1,N1
-      SS=SS+QL(L)*PL(L)
- 20   CONTINUE
+      SS=0
+      DO L=1,N1
+        DQL=QL(L)
+        DPL=PL(L)
+        SS =SS+DQL*DPL
+      END DO
       POLLG1=SS
       RETURN
       END
@@ -490,15 +522,22 @@ C-D  Given the argument value UU in the interval [-1,1], the
 C-D  polynomials up to order NL are calculated by a recurrence
 C-D  relation and stored in PL.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION PL(*)
-      PL(1)=1.
+      WW=UU
+      P1=1
+      PL(1)=P1
       IF(NL.LT.1) RETURN
-      L2=2
-      PL(L2)=UU
+      P2=WW
+      PL(2)=P2
       IF(NL.LT.2) RETURN
-      DO 20 L=2,NL
-      PL(L+1)=(PL(L)*UU*FLOAT(2*L-1)-PL(L-1)*FLOAT(L-1))/FLOAT(L)
-   20 CONTINUE
+      DO L=2,NL
+        EL=L
+        P3=( P2*WW*(2*L-1) - P1*(L-1) )/EL
+        PL(L+1)=P3
+        P1=P2
+        P2=P3
+      END DO
       RETURN
       END
       SUBROUTINE CMLAB2B(EIN,EOU,XCM,XLB,XSD,AWR,AWI,QI,LCT)
@@ -515,6 +554,7 @@ C-D  AWI - mass ratio of ejectile and projectile (=A-dash)
 C-D  QI  - 
 C-D  LCT - 
 C-D Kinematics equations for 2-body problem form ENDF-102 Appendix E
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       IF(AWI.LE.0) STOP 'MU_BAR ERROR - AWI undefined'
 C* Equation (E.3)
       BET=(AWR*(AWR+1-AWI)/AWI)*( 1+(1+AWR)*QI/(AWR*EIN) )
@@ -556,6 +596,8 @@ C-Purpose: Read a text record to an ENDF file
       SUBROUTINE RDHEAD(LEF,MAT,MF,MT,C1,C2,L1,L2,N1,N2,IER)
 C-Title  : Subroutine RDHEAD
 C-Purpose: Read an ENDF HEAD record
+C-Version:
+C-V  2014/02 Implement the setting of the error flag
 C-Description:
 C-D  The HEAD record of an ENDF file is read. The following error
 C-D  conditions are trapped by setting the IER flag:
@@ -563,7 +605,15 @@ C-D    IER = 0  Normal termination
 C-D          1  End-of-file
 C-D          2  Read error
 C-
-      READ (LEF,92) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      IER=0
+      READ (LEF,92,END=81,ERR=82) C1,C2,L1,L2,N1,N2,MAT,MF,MT
+      RETURN
+C* Trap aN E.O.F error
+   81 IER=1
+      RETURN
+C* Trap a read-error
+   82 IER=2
       RETURN
    92 FORMAT(2F11.0,4I11.0,I4,I2,I3,I5)
       END
@@ -575,8 +625,12 @@ C-D  The TAB1 record of an ENDF-formatted file is read.
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
-C-D        9  Available field length NMX is exceeded.
+C-D       -8  WARNING - Numerical underflow (<E-36)
+C-D        8  WARNING - Numerical overflow  (>E+36)
+C-D        9  WARNING - Available field length exceeded, NMX entries read.
 C-
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION    EE(3),XX(3)
       DIMENSION    NBT(*),INR(*)
       DIMENSION    EN(NMX), XS(NMX)
 C*
@@ -588,7 +642,25 @@ C*
         JP=NMX
         IER=9
       END IF
-      READ (LEF,904,END=100,ERR=200) (EN(J),XS(J),J=1,JP)
+      JR=(JP+2)/3
+      J=0
+      DO K=1,JR
+        READ(LEF,904,END=100,ERR=200) (EE(M),XX(M),M=1,3)
+        DO M=1,3
+          J=J+1
+          IF(J.LE.JP) THEN
+            IF(ABS(XX(M)).LT.1E-36) THEN
+              XX(M)=0
+C...          IER=-8
+            ELSE IF(ABS(XX(M)).GT.1.E36) THEN
+              XX(M)=1E36
+              IER=8
+            END IF
+            EN(J)=EE(M)
+            XS(J)=XX(M)
+          END IF
+        END DO
+      END DO
       RETURN
   100 IER=1
       RETURN
@@ -605,8 +677,10 @@ C-Purpose: Read an ENDF TAB2 record
 C-D  Error condition:
 C-D    IER=1  End-of-file
 C-D        2  Read error
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION    NBT(*),INR(*)
 C*
+      IER=0
       READ (LEF,902,END=100,ERR=200) C1,C2,L1,L2,N1,N2
       READ (LEF,903,END=100,ERR=200) (NBT(J),INR(J),J=1,N1)
       RETURN
@@ -621,9 +695,10 @@ C*
       SUBROUTINE RDLIST(LEF,C1,C2,L1,L2,N1,N2,VK,MVK,IER)
 C-Title  : Subroutine RDLIST
 C-Purpose: Read an ENDF LIST record
-      DIMENSION    RR(6)
-      DIMENSION    VK(*)
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
+      DIMENSION RR(6),VK(*)
 C*
+      IER=0
       READ (LEF,902) C1,C2,L1,L2,N1,N2
       IF(N1+5.GT.MVK) THEN
         IER=-1
@@ -655,8 +730,9 @@ C*
       SUBROUTINE WRTEXT(LIB,MAT,MF,MT,NS,REC)
 C-Title  : WRTEXT Subroutine
 C-Purpose: Write a text record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*66  REC
-   12 NS=NS+1
+      NS=NS+1
       IF(NS.GT.99999) NS=0
       IF(MT.EQ.0)     NS=99999
       IF(MF.EQ.0)     NS=0
@@ -668,6 +744,7 @@ C-Purpose: Write a text record to an ENDF file
       SUBROUTINE WRCONT(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,N1,N2)
 C-Title  : WRCONT Subroutine
 C-Purpose: Write a CONT record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DATA BLN/'           '/
       DO 10 I=1,6
@@ -696,6 +773,7 @@ C-Purpose: Write a CONT record to an ENDF file
      1                 ,NR,NP,NBT,INR,X,Y)
 C-Title  : WRTAB1 Subroutine
 C-Purpose: Write a TAB1 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR),X(NP),Y(NP)
       DATA BLN/'           '/
@@ -747,6 +825,7 @@ C* Loop for all argument&function pairs
      1                 ,NR,NZ,NBT,INR)
 C-Title  : WRTAB2 Subroutine
 C-Purpose: Write a TAB2 record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     NBT(NR),INR(NR)
       DATA BLN/'           '/
@@ -782,6 +861,7 @@ C* Write interpolation data
       SUBROUTINE WRLIST(LIB,MAT,MF,MT,NS,C1,C2,L1,L2,NPL,N2,BN)
 C-Title  : WRLIST Subroutine
 C-Purpose: Write a LIST record to an ENDF file
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*11  BLN,REC(6)
       DIMENSION     BN(*)
       DATA BLN/'           '/
@@ -806,6 +886,7 @@ C* Write data
    24 I =I +1
       IF(I.LT.6) GO TO 22
       NS=NS+1
+      IF(NS.GT.99999) NS=0
       WRITE(LIB,40) (REC(J),J=1,6),MAT,MF,MT,NS
       IF(N.LT.NPL) GO TO 20
       RETURN
@@ -815,6 +896,7 @@ C* Write data
       SUBROUTINE CHENDF(FF,CH)
 C-Title  : CHENDF Subroutine
 C-Purpose: Pack value into 11-character string
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       CHARACTER*1  SN
       CHARACTER*11 CH
       CH=' 0.00000+00'
@@ -861,6 +943,7 @@ C-Purpose: Interpolate a tabulated function to a given grid
 C-Description:
 C-D Function XS1 at NEP1 argument values in EN1 is interpolated to
 C-D NEP2 values XS2 corresponding to argument values in EN2
+      IMPLICIT DOUBLE PRECISION (A-H,O-Z)
       DIMENSION EN1(NEP1),XS1(NEP1),EN2(NEP2),XS2(NEP2)
 C*
       IF(NEP1.LE.0) THEN
