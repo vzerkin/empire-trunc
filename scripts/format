@@ -30,10 +30,7 @@ echo 'ERROR: EMPIRE output file '$file'.out is missing'
 echo '     execute EMPIRE before formatting  !            '
 echo ' '
 echo ' Press any key to exit or <CTRL>-C to abort ...'
-read yes
-exit 1
 fi
-
 # Deleting previous file if exist
 if [ -s $file-e.endf ]; then
   rm $file-e.endf 2>/dev/null
@@ -65,9 +62,8 @@ then
    echo ' Please notify Dr.A.Trkov at a.trkov@iaea.org                      '
    echo ' '
    echo ' Press any key to exit or <CTRL>-C to abort ...'
-   read yes
-   exit 3
 fi
+
 
 # RUN ENDRES (IF RESONANCE FILE IS PRESENT)
 if [ -s $file-res.endf ]; then
@@ -79,8 +75,6 @@ if [ -s $file-res.endf ]; then
    mv endf.dat $file-endres.endf
    mv endres.lst $file-log.endres
    rm ENDRES.INP empire.end ENDRES.DAT 2>/dev/null
-else
-   cp $file-e.endf $file-endres.endf
 fi
 
 # Saving previous file if exist
@@ -88,29 +82,16 @@ if [ -s $file.endf ]; then
   mv $file.endf $file-prev.endf
 fi
 
-# RUN STANEF (In:$file-endres.endf Out:$file.endf)
+# RUN STAN (In:$file-endres.endf or $file-e.endf;  Out:$file.endf)
 
-rm -f INPUT 2>/dev/null
-cat >INPUT <<EOF
-$file-endres.endf
-$file.endf
-0
-
-DONE
-EOF
-$EMPIREDIR/util/stanef/stanef <INPUT
-rc=$?
-if [ $rc != 0 ] 
-then
-   echo ' '
-   echo ' STAN crashed, please notify Dr. D. Brown at dbrown@bnl.gov '
-   echo ' '
-   echo ' Press any key to exit or <CTRL>-C to abort ...'
-   read yes
-   exit $rc
+if [ -s $file-endres.endf ]; then
+   cp $file-endres.endf $file.endf 
+else 
+   cp $file-e.endf $file.endf
 fi
+echo "Running STAN"
+$EMPIREDIR/scripts/stanef $file 
 
-#echo $file.endf was produced by STANEF
 # remove left-over files
 rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
