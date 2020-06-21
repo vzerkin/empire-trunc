@@ -66,4 +66,8 @@ $EMPIREDIR/util/psyche/psyche <INPUT
 
 
 rm -f INPUT
+
+# REMOVE EMPTY FILES
+find . -empty -type f -delete
+
 exit
