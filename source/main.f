@@ -1,6 +1,6 @@
-cc   * $Rev: 5191 $
+Ccc   * $Rev: 5222 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-01-22 17:14:32 +0100 (Mi, 22 Jän 2020) $
+Ccc   * $Date: 2020-06-22 00:15:03 +0200 (Mo, 22 Jun 2020) $
 
       SUBROUTINE EMPIRE
 Ccc
