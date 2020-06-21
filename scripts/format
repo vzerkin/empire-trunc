@@ -97,6 +97,9 @@ rm INPUT 2>/dev/null
 rm angdis.cur 2>/dev/null
 rm angdis.pnt 2>/dev/null
 
+# remove empty files
+find . -empty -type f -delete
+
 # RUN LINEAR (In:ENDFB.OUT Out:LINEAR.OUT)
 
 rm LINEAR.INP 2>/dev/null

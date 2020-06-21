@@ -13,5 +13,9 @@ rm CN-LEV-XS.DAT INPUT.DAT OMPAR.RIPL TARGET_COLL.DAT ang_mu.lst dwba_Pchan.LST 
 rm COVAR-PAR.DAT LOW_ENERGY.OUT OPTMAN-INC.inp dwba.CS  dwba_Pchan.bin ecis06_Pdiag.LST ecis06_Smatr.bin ECIS_* ecis06* 2>/dev/null
 rm FISSION.OUT OMPAR.DIR TARGET.LEV TOTCOR.DAT dwba.TLJ ecis06_Pchan.LST ecis06_Pdiag.bin ecis06_Umatr.LST TARGET_COLL_RIPL.DAT 2>/dev/null
 rm ANAPOW-yw ANG-POL C4.DAT GNASH POLARIZATION-yw ANG-DIST ANGDIS-yw CR-SECT OPTMAN-INC.out TRANSME INCIDENT.LEG TAPE16 2>/dev/null
+
+# remove empty files
+find . -empty -type f -delete
+
 exit
 

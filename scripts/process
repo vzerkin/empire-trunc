@@ -117,4 +117,8 @@ rm $work/$file-f.endf 2>/dev/null
 rm $work/$file-endres.endf 2>/dev/null
 rm $work/$file-rec.endf 2>/dev/null
 
+# REMOVE EMPTY FILES
+find . -empty -type f -delete
+
+
 exit

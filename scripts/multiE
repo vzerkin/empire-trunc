@@ -62,6 +62,10 @@ dd=$EMPIREDIR/scripts
                 exit 1
               fi
           fi
+	  
+          # remove empty files
+          find . -empty -type f -delete
+
           if [ "$4" = "1" ]
             then
              $dd/format $file $MAT ; 
