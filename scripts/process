@@ -56,18 +56,17 @@ rm RECENT.INP 2>/dev/null
 
 # RUN SIGMA1 (In: RECENT.OUT, Out:SIGMA1.OUT)
 
-# Temporary fix - SIGMA1 blocked since it removes energy points above resonance region
-#rm SIGMA1.INP 2>/dev/null
-##ln -sf $EMPIREDIR/util/prepro/SIGMA1.INP SIGMA1.INP
-##ln -sf $work/$file-rec.endf RECENT.OUT
-##$EMPIREDIR/util/prepro/sigma1 <SIGMA1.INP
-##mv SIGMA1.OUT  $work/$file-sig.endf
-##mv SIGMA1.LST $work/$file-log.sigma1
-##rm RECENT.OUT 2>/dev/null
-#rm SIGMA1.INP 2>/dev/null
+rm SIGMA1.INP 2>/dev/null
+ln -sf $EMPIREDIR/util/prepro/SIGMA1.INP SIGMA1.INP
+ln -sf $work/$file-rec.endf RECENT.OUT
+$EMPIREDIR/util/prepro/sigma1 <SIGMA1.INP
+mv SIGMA1.OUT  $work/$file-sig.endf
+mv SIGMA1.LST $work/$file-log.sigma1
+rm RECENT.OUT 2>/dev/null
+rm SIGMA1.INP 2>/dev/null
 
 # Temporary fix - rename result of RECENT as result of SIGMA1 to keep the rest unchenged
- mv $work/$file-rec.endf  $work/$file-sig.endf
+# mv $work/$file-rec.endf  $work/$file-sig.endf
 
 # RUN MU_BAR TO ADD AVERAGE COSINE OF SCATTERING INTO MF3 MT 251
 
