@@ -31,14 +31,9 @@ ln -sf $work/$file-s.endf ENDF.DAT
 echo ' '
 echo 'R U N N I N G    P L T L E N'
 
-# plotlst requires several files present in the working directory:
-#ln -sf $EMPIREDIR/util/pltlst/ENDFMF.DAT ENDFMF.DAT
-#ln -sf $EMPIREDIR/util/pltlst/ENDFMT.DAT ENDFMT.DAT
-#ln -sf $EMPIREDIR/util/pltlst/ENDFZA.DAT ENDFZA.DAT
-#ln -sf $EMPIREDIR/util/pltlst/PLOT.CHR PLOT.CHR
 ln -sf $EMPIREDIR/util/pltlen/PLTLEN.INP PLTLEN.INP
-
 $EMPIREDIR/util/pltlen/pltlen
+
 rm ENDF.DAT  PLTLEN.INP
 mv PLOTC4.LST $work/$file-log.plotc4 2>|/dev/null #ignore if same
 exit
