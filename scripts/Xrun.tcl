@@ -1,6 +1,6 @@
-# $Rev: 5202 $
+# $Rev: 5227 $
 # $Author: mwherman $
-# $Date: 2020-03-09 20:01:20 +0100 (Mo, 09 Mär 2020) $
+# $Date: 2020-07-05 04:11:11 +0200 (So, 05 Jul 2020) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5449,7 +5449,7 @@ proc ::ViewAll {} {
 ## Procedure:  adjourn
 
 proc ::adjourn {w} {
-global widget filelist archdirlist archfilelist zvvplots profilter zvfilter archfilter archdir
+global widget filelist archdirlist archfilelist zvvplots profilter zvfilter archfilter archdir workdir
 
 # list of zvv plots
 set zvvplots [glob -nocomplain *$zvfilter*.zvd]
@@ -5465,8 +5465,9 @@ foreach el $filetmp {
 }
 set filelist [lsort -dictionary $filelist]
 
-# list of archive directories
-set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
+# list of archive directories HERE
+#set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
+set archdirlistmp [glob -nocomplain $workdir/*/]
 set archdirlist {}
 foreach elm $archdirlistmp {
 if {$elm != "$::env(EMPIREDIR)/RIPL/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
@@ -5844,7 +5845,8 @@ set zvvplots [glob -nocomplain $zvfilter*.zvd]
 set zvvplots [lsort -dictionary $zvvplots]
 set filelist [glob -nocomplain $profilter*]
 set filelist [lsort -dictionary $filelist]
-set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
+#set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
+set archdirlistmp [glob -nocomplain $workdir/*/]
 set archdirlist {}
 foreach elm $archdirlistmp {
 if {$elm != "$::env(EMPIREDIR)/RIPL/" && $elm != "$::env(EMPIREDIR)/data/" &&  $elm != "$::env(EMPIREDIR)/scripts/"  && $elm != "$::env(EMPIREDIR)/CVS/"  && $elm != "$::env(EMPIREDIR)/doc/"  && $elm != "$::env(EMPIREDIR)/EXFOR/"  && $elm != "$::env(EMPIREDIR)/source/"  && $elm != "$::env(EMPIREDIR)/util/"  && $elm != "$::env(EMPIREDIR)/x4cd/" } then {
@@ -6179,7 +6181,7 @@ adjourn .top75}} \
     $top.tab88 add \
         -command {} -label Archive -width 0 
     $top.tab88 add \
-        -command {} -label Folders -width 0 
+        -command {} -label Subfolders -width 0 
     $top.tab88 add \
         -command {} -label Multi-run -width 0 
     $top.tab88 add \
@@ -7872,7 +7874,8 @@ adjourn .top75} \
         -activebackground #ff0000 -activeforeground white -background #efefef \
         -command {if {[tk_dialog .dialogsi Confirm "Are you sure you want to delete the folder?" "" 0 No Yes ] == 1} {
 exec rm -r -f $archdir
-set archdirlist [glob -nocomplain $::env(EMPIREDIR)/*/]
+#set archdirlist [glob -nocomplain $::env(EMPIREDIR)/*/]
+set archdirlist [glob -nocomplain $workdir/*/]
 set archfilelist "" }} \
         -cursor hand2 -disabledforeground #a1a4a1 -font {Helvetica -12 } \
         -foreground darkred -highlightbackground #dcdcdc \
@@ -8352,7 +8355,7 @@ exit} \
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel.inp } \
-        -label {Default input GG} 
+        -label {Default input } 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel-inp.sen } \
         -label {Default sensitivity input} 
@@ -8367,7 +8370,10 @@ exit} \
         -label {FIXUP input} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/prepro/GROUPIE.INP } \
-        -label {GROUPIE input} 
+        -label {GROUPIE input}
+    $site_3_0.menu90 add command \
+        -command { editFile $::env(EMPIREDIR)/util/prepro/SIGMA1.INP } \
+        -label {SIGMA1 input} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/util/c4sort/C4SORT.INP } \
         -label {C4SORT input} 
@@ -8420,6 +8426,35 @@ exit} \
         -command {
 set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
         -label other 
+
+ $site_3_0.menu90 add cascade \
+        -menu "$site_3_0.menu90.menu98" -command {} -label {Report editor} 
+    set site_4_0 $site_3_0.menu90
+    menu $site_4_0.menu98 \
+        -activebackground #dcdcdc -activeforeground #000000 
+#       -background #dcdcdc -foreground #000000 -tearoff 0 
+    $site_4_0.menu98 add radiobutton \
+        -value gedit -variable RepWriter -command {} -label gedit 
+    $site_4_0.menu98 add radiobutton \
+        -value gvim -variable RepWriter -command {} -label gvim 
+    $site_4_0.menu98 add radiobutton \
+        -value emacs -variable RepWriter -command {} -label emacs 
+    $site_4_0.menu98 add radiobutton \
+        -value xemacs -variable RepWriter -command {} -label xemacs 
+    $site_4_0.menu98 add radiobutton \
+        -value kedit -variable RepWriter -command {} -label kedit 
+    $site_4_0.menu98 add radiobutton \
+        -value kate -variable RepWriter -command {} -label kate 
+    $site_4_0.menu98 add radiobutton \
+        -value nedit -variable RepWriter -command {} -label nedit 
+    $site_4_0.menu98 add radiobutton \
+        -value Notepad2 -variable RepWriter -command {} -label Notepad2 
+    $site_4_0.menu98 add radiobutton \
+        -value gotfile -variable RepWriter \
+        -command {
+set RepWriter [tk_getOpenFile -parent .top75 -title "Select editor"]} \
+        -label other     
+
     $site_3_0.menu90 add cascade \
         -menu "$site_3_0.menu90.men87" -command {} -label {Select PS/pdf viewer} 
     set site_4_0 $site_3_0.menu90
@@ -8517,7 +8552,11 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -label PreProcess 
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/plotlst $file &} \
-        -label {Plot list} 
+        -label {Plot list (from .c4)} 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/plotlen $file &} \
+        -label {Plot list (from .endf)} 
+
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file &} \
         -label PLOTC4 
@@ -8859,7 +8898,12 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
-        -command { pspdfView $file-cum.ps } -label {Cumul. levels} 
+        -command { set compeval2 "" } -label {Remove compare eval 2} 
+    $site_3_0.menu95 add command \
+        -command { set compeval3 "" } -label {Remove compare eval 3} 
+    $site_3_0.menu95 add command \
+        -command { set compeval4 "" } -label {Remove compare eval 4} 
+
     $top.m88 add cascade \
         -menu "$top.m88.men77" -command {} -label Clean 
     set site_3_0 $top.m88

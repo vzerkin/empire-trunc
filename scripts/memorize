@@ -1,0 +1,28 @@
+#! /bin/sh -
+# Script to move essential results of the calculations to another directory
+# for later comparison with other calculations. All input files needed to
+# reproduce calculations are preserved.
+# Usage:
+# memorize directory_name file_root_name
+
+if [ -d $1 ]; then
+   echo 'O.K. directory:'  $1 ' exists'
+   else
+   mkdir $1              
+   touch $1/ho
+   echo 'Have created directory:'  $1
+fi                          
+file=$2
+
+cp $file-lev.col $1 
+cp $file-omp.ripl $1 
+cp $file.endf $1
+cp $file.lev $1
+cp $file-omp.dir $1  
+cp $file-s.endf $1   
+cp $file.inp $1      
+cp $file-inp.fis $1 2>>/dev/null      
+cp $file.xsc $1
+
+exit
+
