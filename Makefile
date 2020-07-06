@@ -32,7 +32,7 @@ endif
 
 UTILS = lib util/dxsend util/resonance util/endf33zvd util/mrgmat util/c4sort util/c4zvd util/Calc_Cov util/checkr \
        util/cs2zvd util/empend util/endres util/fixup util/fizcon util/plotc4 \
-       util/pltlst util/psyche util/sixtab util/stanef util/stan util/nubar \
+       util/pltlst util/pltlen util/psyche util/sixtab util/stanef util/stan util/nubar \
        util/endtab util/x4toc4 util/pltsenmat util/lsttab util/kalman util/ang_mu util/mu_bar \
        util/fis2zvd util/c5-nng2zvd util/preq2zvd util/inter util/gam-sort-2zvd util/rw1omp2fast util/Groupie \
        util/mu_rsl util/prepro util/c4service
