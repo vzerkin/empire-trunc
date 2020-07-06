@@ -85,6 +85,7 @@ PROGRAM c4service
       WRITE(6,*) 'Performed operations on the subsections'
       WRITE(9,*) ' '
       WRITE(9,*) 'Performed operations on the subsections'
+      WRITE(9,*) 'Performing operations on the subsections'
       DO k=1,c4%nsec            !do loop over subsections
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)  ! (sc%ndat) for the last point
@@ -171,6 +172,7 @@ CONTAINS
 
       WRITE(6,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Cropping subsection: ',k, sc%ref, sc%ent, sc%sub
 
       IF(y1+y2 == 0.0) RETURN   ! no limits, nothing to do
       y1 = y1*10**6.   ! converting from MeV to eV
@@ -185,6 +187,7 @@ CONTAINS
       sc%ndat = n
       WRITE(6,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
       WRITE(9,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
+      WRITE(9,*)' Subsection limitted to incident energies between', y1,' and ',y2,' keV'
       RETURN
    END SUBROUTINE crop_section
 
@@ -245,6 +248,7 @@ CONTAINS
 
       WRITE(6,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
 
       istep = y1
       IF(sc%ndat <= 5*istep) RETURN  !set too small for the istep
@@ -277,6 +281,7 @@ CONTAINS
       ! Check default input
       IF (y2 > 0.0 .and. dy2 == 0.0) dy2 = y2  ! Set the same factor for uncertainties as for x-sec.
       IF (dy2 == 0.0)  dy2 = 1.0 ! Don't zero uncertainties!
+      WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
 
       WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
@@ -316,6 +321,7 @@ CONTAINS
 
       WRITE(6,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Deleted  subsection: ',k, sc%ref, sc%ent, sc%sub
       RETURN
    END SUBROUTINE delete_section
 
