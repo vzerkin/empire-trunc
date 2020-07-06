@@ -79,6 +79,7 @@ if [ -f "XS_(z,3na).zvd"   ]; then  mv "XS_(z,3na).zvd"   $file-z3na.zvd; fi
 #if [ -f "XS_(z,3n3p).zvd"  ]; then  mv "XS_(z,3n3p).zvd"  $file-znpa.zvd; fi    # file-z3n3p.zvd; fi   
 #if [ -f "XS_(z,4n2p).zvd"  ]; then  mv "XS_(z,4n2p).zvd"  $file-z2na.zvd; fi    # $file-z4n2p.zvd; fi       
 if [ -f "XS_(z,4n3p).zvd"  ]; then  mv "XS_(z,4n3p).zvd"  $file-z2npa.zvd; fi   # $file-z4n3p.zvd; fi        
+if [ -f "XS_(z,npad).zvd"  ]; then  mv "XS_(z,npad).zvd"  $file-znpad.zvd; fi   # $file-znpad.zvd; fi        
 if [ -f "XS_(z,2n).zvd"    ]; then  mv "XS_(z,2n).zvd"    $file-z2n.zvd; fi      
 if [ -f "XS_(z,3n).zvd"    ]; then  mv "XS_(z,3n).zvd"    $file-z3n.zvd; fi      
 if [ -f "XS_(z,4n).zvd"    ]; then  mv "XS_(z,4n).zvd"    $file-z4n.zvd; fi      
