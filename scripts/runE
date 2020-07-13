@@ -456,7 +456,6 @@ def runE(proj):
     rm('mt_x4r.txt')
     rm('TAPE15', 'TAPE16', 'TAPE66')
     rm('file99')
-    rm('DEGASRESULT')
     rm('angdis.pnt', 'angdis.cur')
     rm('ccm.CS','dwba.CS','INCIDENT.CS', 'ccm.TLJ','dwba.TLJ',
             'INCIDENT.TLJ','ccm.ANG','dwba.ANG','INCIDENT.ANG',
@@ -592,13 +591,13 @@ def rm(*args, **kwargs):
             for el in f:
                 try:
                     os.remove(el)
-                except OSError, e:
+                except OSError as e:
                     if 'verbose' in kwargs.keys() and kwargs['verbose']:
                         print (e)
         else:
             try:
                 os.remove(f)
-            except OSError, e:
+            except OSError as e:
                 if 'verbose' in kwargs.keys() and kwargs['verbose']:
                     print (e)
 
@@ -612,7 +611,7 @@ def mv(source, target, verbose=True):
         shutil.move(source, target)
         #os.rename(source, target)  # no work on Windows
     #except OSError, e:
-    except IOError, e:
+    except IOError as e:
         if verbose:
             print (e)
     """
@@ -630,7 +629,7 @@ def cp(source, target, verbose=True):
     """
     try:
         shutil.copy(source, target)
-    except IOError, e:
+    except IOError as e:
         if verbose:
             print (e)
 
@@ -640,7 +639,7 @@ def ln(source, target, verbose=True):
     """
     try:
         os.symlink(source, target)
-    except OSError, e:
+    except OSError as e:
         if verbose:
             print (e)
     except AttributeError:  # no symlink on windows
