@@ -47,6 +47,7 @@ C-V        (Contribution by Y. Danon).
 C-V        Fix double-precision declaration of aa,arem (R. Capote)
 C-V  20/06 Extend to process delayed neutron fraction & spectra.
 C-V        Fix numerical instability in CM->Lab for inc. photons.
+C-V  20/07 Fix upper energy of PFNS table given as Maxwellian funct.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2291,12 +2292,13 @@ c...
           GO TO 900
         END IF
       END IF
-      IF(KEA.NE.0) GO TO 700
 C*
-C* Case: Cross section is required on output - finish processing
+C* Case: If cross section is required on output - finish processing
 c...
         print *,'KEA,yl',KEA,yl
 c...
+      IF(KEA.NE.0) GO TO 700
+C*
         IF(MT0/10000.EQ.4) THEN
 C*        -- Save the nu-bar
           NNU=NEN
@@ -3597,8 +3599,8 @@ C* Process energy distribution data in MF 5
         MT =MT0
         CALL FINDMT(LEF,ZA0,ZA,AW,L1,L2,NK,N2,MAT,MF,MT,IER)
 C...
-c...    print *,'Found ZA0,ZA,AW,NK,MAT,MF,MT,IER'
-c...    print *,       ZA0,ZA,AW,NK,MAT,MF,MT,IER
+        print *,'    Found  MAT,MF,MT,ZA0,ZA,AW,NK,IER'
+     &                     ,MAT,MF,MT,ZA0,ZA,AW,NK,IER
 C...
         IF(IER.NE.0) THEN
           PRINT *,'DXSEN1 WARNING - No MF 5 for MT',MT
@@ -3687,9 +3689,9 @@ C*            -- Linearise to tolerance EXS, if necessary
               PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
               STOP 'DXSEN1 ERROR reading energy.distrib.'
             END IF
-    
-            PRINT *,'    KEA,EI2',KEA,EI2
-    
+C...
+C...        PRINT *,'    KEA,EI2',KEA,EI2
+C...
             IF(KEA.EQ.2) THEN
 c* Case:      --Interpolate outgoing particle energy distributions
               INA=INR(1)
@@ -3765,9 +3767,13 @@ C* Read and interpolate Maxwellian temperature parameter Theta
         THETA=FINTXS(EIN,RWO(1),RWO(LX),NP,INE,IER)
         IF(KEA.EQ.2) THEN
 Case:     --Generate outgoing particle energy distributions
-          NE1=101
+          NE1=1001
 C*         Limit the table to the upper energy on the ENDF file
-          EE =MIN(ETOP,EIN-UPEN)
+          EUP=RWO(NP)
+          EE =MIN(ETOP,EUP-UPEN)
+c...
+c...      print *,'ETOP,EIN,EUP,UPEN',ETOP,EIN,EUP,UPEN
+c...
           DE =EE/(NE1-1)
           DO I=1,NE1
             EE =(I-1)*DE
