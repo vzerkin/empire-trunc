@@ -97,7 +97,7 @@ contains
       else
         Xmin = 0.0
       endif      
-   
+
       inquire(file=cfil,exist=qex)
       if(.not.qex) then
          write(6,*) ' C4 file ',cfil,' not found'
@@ -194,7 +194,7 @@ contains
       end do
 
       ! try to comment the line below in case c4service crashes on memory allocation
-      call delete_c4(c4)
+   !   call delete_c4(c4)
       allocate(c4%sec(k))
       c4%nsec = k
 
