@@ -1,6 +1,10 @@
 #!/bin/bash
 #Script to produce ZVV plots comparing four sets of calculations
 #with experimental data
+#Usage:
+# mtacomp MT plotSuffix rootName workingDirectory lineName [ pathTo2ndFile 2ndLineName ... pathTo4thFile 4thLineName]
+# Note: workingDirectory might be . for the current directory
+
 if [ -z $EMPIREDIR ]; then
     echo "Please set the 'EMPIREDIR' environment variable."
     echo "See Empire v3 documentation for more information."
