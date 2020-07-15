@@ -3,9 +3,9 @@
 #to perform following operations:
 # - removing experiments
 # - smoothing experiment (entire or within an interval) preserving integral
-# - croping energy range of the experiments
+# - cropping energy range of the experiments
 # - modifying experimental values and their uncertainties
-# - thining experiment by reducing number of incident energies
+# - thinning experiment by reducing number of incident energies
 #Detailed instructions will be given during execution
 #Usage:
 # c4serv root-file-name editor
