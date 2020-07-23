@@ -158,7 +158,7 @@
 
        if(fnl(i) == 1.0) cycle    ! nothing to do
 
-       lp = len_trim(oname(i)) - 6
+       lp = len_trim(oname(i)) - 5
        nam = oname(i)(1:lp)
 
        if(.not.(allowed(nam))) then
