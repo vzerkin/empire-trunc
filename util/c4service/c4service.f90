@@ -15,7 +15,7 @@ PROGRAM c4service
    CHARACTER*8, PARAMETER :: inpsen = '-inp.sen'
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
-   CHARACTER*7, PARAMETER :: logc4 = '-c4.log'
+   CHARACTER*7, PARAMETER :: logc4 = '-log.c4'
    CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
    CHARACTER*10            :: arg2, arg3, arg4        ! arguments on the command line
    REAL*4 :: y1 = 0.0, y2 = 0.0, dy1 = 0.0, dy2 = 0.0 ! section modifying parameters
