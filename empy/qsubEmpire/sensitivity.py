@@ -30,7 +30,7 @@ allowed = ('ATILFI', 'ATILNO', 'CHMS', 'DEFDYN', 'DEFMSD', 'DEFNOR',
         'ELARED', 'FISAT1', 'FISAT2', 'FISAT3', 'CELRED','CINRED',
         'FISVE1', 'FISVE2', 'FISVE3', 'FISDL1', 'FISDL2', 'FISDL3',
         'FISVF1', 'FISVF2', 'FISVF3', 'FISHO1', 'FISHO2', 'FISHO3',
-        'ROHFBA', 'ROHFBP', 'TUNETL')
+        'ROHFBA', 'ROHFBP', 'TUNETL', 'UOMPDS')
 
 # restricted: variations allowed only when default value provided
 restricted = ('ALS', 'BETAV', 'BETCC', 'BFUS', 'BNDG', 'CRL', 'CSGDR1',
