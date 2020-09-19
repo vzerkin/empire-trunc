@@ -12,8 +12,8 @@ echo pntzvv file.pnt file.cur file.zvd
 echo $1 $2 $3 $4
 rm $3 2>/dev/null
 rm tmp.dat 2>/dev/null
-rm pnt.zvd
-rm cur.zvd
+rm pnt.zvd 2>/dev/null
+rm cur.zvd 2>/dev/null
 $EMPIREDIR/util/c4zvd/pntdatl.exe $1 tmp.dat
 $EMPIREDIR/util/c4zvd/datzvdl.exe tmp.dat pnt.zvd
 $EMPIREDIR/util/c4zvd/curzvd3l.exe $2 cur.zvd
