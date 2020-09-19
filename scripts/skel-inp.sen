@@ -6,6 +6,9 @@ UOMPWS     0.05    00  01   1           ! omp imaginary surface depth for ZZ AAA
 UOMPWV     0.05    00  01   1           ! omp imaginary volume  depth for ZZ AAA + neutrons 
 UOMPAS     0.05    00  01   1           ! omp imaginary surface diff.  for ZZ AAA + neutrons
 UOMPAV     0.05    00  01   1           ! omp real volume diff. for ZZ AAA + neutrons
+UOMPDS     0.20     2                   ! g. state band deformation; multipolarity 2
+UOMPDS     0.20     4                   ! g. state band deformation; multipolarity 2
+UOMPDS     0.30     6                   ! g. state band deformation; multipolarity 2
 ATILNO     0.05    00  00               ! level density parameter a-tilde for ZZ AAA
 ATILNO     0.05    00  01               ! level density parameter a-tilde for ZZ AAA  
 ATILNO     0.05    00  02               ! level density parameter a-tilde for ZZ AAA 

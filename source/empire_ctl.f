@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5141 $
+Ccc   * $Rev: 5248 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2019-02-22 07:35:15 +0100 (Fr, 22 Feb 2019) $
+Ccc   * $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -1833,7 +1833,7 @@ Ccc
      &        ndreac, ndkeys, j, kalman
 
 C     integer nreac
-      parameter (ndreac=90, ndkeys=141)
+      parameter (ndreac=90, ndkeys=142)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1868,7 +1868,7 @@ C
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'PFNNIU',
      &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT',
      &  'PFNERE', 'SFACT' , 'MIXGDR', 'MIXGQR', 'MIXDMR', 'WEDNOR',
-     &  'WEQNOR', 'WEMNOR', 'FISTGA'/
+     &  'WEQNOR', 'WEMNOR', 'FISTGA', 'UOMPDS'/
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1896,7 +1896,7 @@ C
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'F'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'/
+     &  'R'     , 'R'     , 'R'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1922,6 +1922,7 @@ ccc
      &ENERGY. 3) CHECK IF .lev FILE IS PRESENT. 4) TURN ON SENSITOPTION
      & AND START SENSITIVITY CALCULATIONS. THANKS.'
       ENDIF
+
 C-----Move original (reference) input out of the way
       itmp=ipipe_move('INPUT.DAT','INPUTREF.DAT')
 C-----
@@ -2001,6 +2002,7 @@ C-----Go to the end of the SENSITIVITY.MATRIX file
   111 READ(92,*,END=112) dum
       GOTO 111
   112 CONTINUE
+
       OPEN(UNIT = 17, FILE='SENSITIVITY.INP', STATUS='old') !list of parameters to vary
 C-----Read one line of the sensitivity input
   100 READ (17,'(A80)',END = 350) inprecord
@@ -2025,6 +2027,7 @@ C-----Check category of the parameter to be varied
       WRITE(8,*) 'ERROR:PARAMETER VARIATION LARGER THAN 100%'
       STOP       'ERROR:PARAMETER VARIATION LARGER THAN 100%'
       ENDIF
+
 C-----Check whether omp is being varied - if so then move Tl directory out of the way
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
      &   .OR. name.EQ.'DEFSTA') THEN
@@ -2043,6 +2046,7 @@ C-----Check whether omp is being varied - if so then move Tl directory out of th
       WRITE(*,'(''Varying parameter '',A6,''x''F10.3,4I5)')
      &      name, 1.0+val, i1,i2, i3, i4
       OPEN (UNIT = 7,FILE='INPUT.DAT', STATUS='unknown') !input to be run (with changed parameters)
+
 C-----Read and copy mandatory part of the standard input
 C-----
       DO i=1,10
@@ -2070,7 +2074,7 @@ C
 C           IF(category.EQ.'A') THEN
             IF(category.EQ.'A'.OR.category.EQ.'T') THEN
                IF(name(1:4).EQ.'UOMP') THEN !special treatment for omp parameters (they must be negative)
-                  WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val),
+                WRITE(7,'(A6,F10.3,4I5)') name, -(1.0+val),
      &                     i1, i2, i3, i4 ! include omp parameter if missing
                ELSE
                   WRITE(7,'(A6,F10.3,4I5)') name,  (1.0+val),
@@ -2086,6 +2090,7 @@ C           IF(category.EQ.'A') THEN
          WRITE(7,'(A6)')namee
          GOTO 170 !Jump to $ format for parameters that happens to be after GO
       ENDIF
+
 C-----Write modified input with increased value of the parameter if name matches
       IF(name.EQ.namee .AND. i1.EQ.i1e .AND. i2.EQ.i2e .AND. i3.EQ.i3e
      &   .AND. i4.EQ.i4e.AND.category.EQ.'A') THEN
@@ -2127,7 +2132,6 @@ C--------Write modified input with increased value of the parameter if name matc
   300 CLOSE(7)
       CLOSE(44)
       CLOSE(5)
-      
       CALL EMPIRE
       
 
@@ -2143,7 +2147,7 @@ C-----Delete modified input that has been used and move XSECTIONS.OUT file
       ENDDO !loop over parameter+val and parameter-val
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
-     &   .OR. name.EQ.'DEFSTA') THEN
+     &   .OR. name.EQ.'DEFSTA' ) THEN
         itmp = ipipe_rmdir('TL')
         itmp = ipipe_move('TLREF','TL')
       ENDIF

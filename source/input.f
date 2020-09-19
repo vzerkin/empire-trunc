@@ -1,6 +1,6 @@
-ccc   * $Rev: 5196 $
+ccc   * $Rev: 5248 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-03-04 00:38:58 +0100 (Mi, 04 Mär 2020) $
+ccc   * $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
 
       SUBROUTINE INPUT
 ccc
@@ -184,6 +184,8 @@ C--------------Surface imaginary potential:
                FNasomp(Nejc,Nnuc) = 1.d0
             ENDDO
          ENDDO
+C--------Ground state band deformation factors
+         DEFactor(:) = 1.d0
 C--------Set TUNe for gammas in the CN to 0.999 so that 1.0 can be used
 C--------to turn off normalization to experimental Gg
          TUNe(0,1) = 0.999d0
@@ -5348,7 +5350,56 @@ C-----
             GOTO 100
          ENDIF
 C-----
-C        SAMPLING OF OMP PARAMETERS FOR COVARIANCE CALCULATION
+C        MODIFYINFG OMP PARAMETERS FOR COVARIANCE OR SENSITIVITY CALCULATION
+C
+C        CC gs deformations (rigid and soft rotor models)
+C
+C        D_Def(1,k) = DDEf(ncalc,k)*val(k)
+C  
+         IF (name.EQ.'UOMPDS') THEN
+            IF(val.lt.0.) THEN
+               izar = i1*1000 + i2
+               CALL WHERE(izar,nnuc,iloc)
+
+               IF (iloc.EQ.1) THEN
+                  WRITE (8,'('' WARNING: NUCLEUS A='',I3,'',Z='',I3,
+     &                '' NOT NEEDED'')') i2,i1
+                  WRITE (8,
+     &'('' WARNING: Real volume potential depth uncertainty ignored'')')
+                  GOTO 100
+               ENDIF
+               IF (i3.GT.NDEJC) THEN
+                  WRITE (8,
+     &           '('' WARNING: UNKNOWN EJECTILE in UOMPVV '',I2)') i3
+                  WRITE (8,
+     &'('' WARNING: Real volume potential depth uncertainty ignored'')')   
+                  GOTO 100
+               ENDIF
+               IF (i4.eq.1 .or. i4.eq.3 .or. i4.eq.5. .or. 
+     &             i4.gt.6 ) THEN
+                  WRITE (8, '('' CC rigid/soft body deformation ''
+     &            ,'' factors must be for even multipolartities ''
+     &            ,''2, 4, or 6'' )')
+                  WRITE (8, '('' Execution stopped'')')
+                  WRITE (12,'('' CC rigid/soft body deformation ''
+     &            ,'' factors must be for even multipolartities ''
+     &            ,''2, 4, or 6'')')
+                  WRITE (12,'('' Execution stopped'')')
+                  STOP 'Deformation multipolarities must be even' 
+               ENDIF
+               DEFactor(i4) = abs(val)
+               WRITE (8,
+     &        '('' GS band deformation for multipolarity '', I2,
+     &        '' varied by '',f5.2)') i4, abs(val)
+               WRITE (12,
+     &        '('' GS band deformation for multipolarity '', I2,
+     &        '' varied by '',f5.2)') i4, abs(val)
+            ELSE
+               WRITE (8,*) ' OMP variations must be negative'
+               STOP 'Make OMP variations negative'
+            ENDIF
+            GOTO 100   
+         ENDIF
 C
 C        VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
 C
@@ -10554,9 +10605,9 @@ C
 C------------Number of collective levels
              READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
      &             LMAxcc, IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
-C            For covariance calculation of static deformation
+C            For covariance calculation of static deformation (DEFactor is multiplicity dependent)
              DO j= 2,IDEfcc,2
-                D_Def(1,j) = D_Def(1,j)*DEFsta
+                D_Def(1,j) = D_Def(1,j)*DEFsta*DEFactor(j)
              ENDDO
 C
              WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, 
@@ -10761,9 +10812,9 @@ C    &'('' WARNING: Odd nucleus is assumed deformed  (beta2 = 0.2)'')')
 C-----------Number of collective levels
             READ (32,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, LMAxcc,
      &            IDEfcc, ftmp, (D_Def(1,j),j = 2,IDEfcc,2)
-C           For covariance calculation of static deformation
+C           For covariance calculation of static deformation (DEFactor is multiplicity dependent)
             DO j= 2,IDEfcc,2
-                D_Def(1,j) = D_Def(1,j)*DEFsta
+                D_Def(1,j) = D_Def(1,j)*DEFsta*DEFactor(j)
             ENDDO
 C
             WRITE (8,'(3x,3I5,1x,F5.1,1x,6(e10.4,1x))') ND_nlv, LMAxcc,

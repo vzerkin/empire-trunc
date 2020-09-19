@@ -1,6 +1,6 @@
-! $Rev: 4978 $
-! $Author: mherman $
-! $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
+! $Rev: 5248 $
+! $Author: mwherman $
+! $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -38,7 +38,8 @@
      &                 DEFprj, DEGa, DELtafis(nfhump), DENhf, DERec,    &
      &                 DEFnor(0:NDNUC), DOBs(0:ndnuc), CSGinc(ndejc),   &
      &                 DEStepp(nfhump), DFUs, DIRect, DIToro,           &
-     &                 DV, D_Def(ndcollev,nddefcc), CSInc(ndnuc),       &
+     &                 DV, D_Def(ndcollev,nddefcc), DEFactor(NDdefcc),  &
+     &                 CSInc(ndnuc),                                    &
      &                 D_Elv(ndcollev), D_Lvp(ndcollev), DEFdyn, DEFsta,&
      &                 D_Xjlv(ndcollev), ECUt(0:ndnuc), ECUtcoll,       &
      &                 ECFis(NFHUMP),ECDamp(NFHUMP),                    &
@@ -261,7 +262,7 @@
      &                 WOMv, WOMs, VSO, WSO, AVOm, AWOm, AWOmv, AVSo,   &
      &                 RNOnl, RVOm, RWOm, RWOmv, RVSo, RCOul, ACOul,    &
      &                 EEFermi, OMEmin, OMEmax, AWSo, RWSo, DIRect,     &
-     &                 D_Elv, D_Xjlv, D_Lvp, D_Def, CSEat,              &
+     &                 D_Elv, D_Xjlv, D_Lvp, D_Def, DEFactor, CSEat,    &
      &                 CSPfis, RECoil, SR_Ham_hw, SR_Ham_amb0,          &
      &                 SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4, &
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3, &
