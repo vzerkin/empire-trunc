@@ -18,7 +18,7 @@ PROGRAM c4service
    CHARACTER*7, PARAMETER :: logc4 = '-log.c4'
    CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
    CHARACTER*10            :: arg2, arg3, arg4        ! arguments on the command line
-   REAL*4 :: y1 = 0.0, y2 = 0.0, dy1 = 0.0, dy2 = 0.0 ! section modifying parameters
+   REAL*4 :: y1 = 0.0, y2 = 0.0, y3 = 0.0, y4 = 0.0 ! section modifying parameters
    INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
    INTEGER*4 nex      ! fitting flag: 1=>fit only MT1, 2=>fit all MTs.
    !   INTEGER*4 nrx      ! # of reactions in EMPIRE XSC file
@@ -30,7 +30,7 @@ PROGRAM c4service
    INTEGER*4 rk, rpza, rtza,  rmf, rmt
    INTEGER*4 nsec     ! # of sections in C4 file
    CHARACTER rref*25, rent*5, rsub*3, raction*1
-   REAL*4 :: ry1,ry2, rdy1, rdy2  ! input parameters for c4service
+   REAL*4 :: ry1,ry2, ry3, ry4  ! input parameters for c4service
    REAL*4 :: Emin = 0.0     ! lower energy limit on exp data
    REAL*4 :: Emax = 1000.0     ! upper energy limit on exp data
    REAL*4 :: Xmin = 0.0     ! lower cross section limit on exp data
@@ -89,7 +89,7 @@ PROGRAM c4service
       DO k=1,c4%nsec            !do loop over subsections
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)  ! (sc%ndat) for the last point
-         READ(13,12) rk, rpza, rtza,  rmf, rmt, rref, rent, rsub, action, y1, y2, dy1, dy2
+         READ(13,12) rk, rpza, rtza,  rmf, rmt, rref, rent, rsub, action, y1, y2, y3, y4
 12       FORMAT(i4, 1x, i4, i6, i4, i5, a26, 1x, a6, a4, 1x, a1, 4(1x,G12.6) )
          IF(rent /= sc%ent .OR. rsub /= sc%sub) THEN
             WRITE(6,*) 'FATAL: Subentry k=',k,' should have entry ',rent, &
@@ -99,14 +99,15 @@ PROGRAM c4service
             WRITE(6,*) 'Delete the ',file(l1:l2)//inpc4,' file and rerun'
             STOP 'EXFOR entry mismatch'
          END IF
-         !  perform operations on the subsections: delete, print, modify, smooth, thin, crop
+         !  perform operations on the subsections: delete, multiply, addto, smooth, thin, crop, drill_hole 
          ! IF(action == 'p') CALL print_section(c4, k)
-         IF(action == 'd') CALL delete_section(c4, k)
-         IF(action == 'm') CALL modify_section(sc, k, y1, y2, dy1, dy2)
-         IF(action == 's') CALL smooth_section(sc, k, int(y1), y2, dy1)
-         IF(action == 't') CALL thin_section(sc, k, y1)
-         IF(action == 'c') CALL crop_section(sc, k, y1, y2)  !limit incident energies between y1 and y2
-         IF(action == 'h') CALL hole_section(sc, k, y1, y2)  !remove incident energies between y1 and y2
+         IF(action == 'd') CALL delete_section(c4, k)                    ! remove section
+         IF(action == 'm') CALL multiply_section(sc, k, y1, y2)          ! multiply cross sections by y1 and uncertainties by y2 (if y2=0 y2 set y1)
+         IF(action == 'm') CALL addto_section(sc, k, y1, y2)             ! add y1 [b] to cross sections and y2 [b] to unceretainties
+         IF(action == 's') CALL smooth_section(sc, k, int(y1), y2, y3)   ! smooth cross sections int(y1) times between energies y2 and y3 MeV
+         IF(action == 't') CALL thin_section(sc, k, y1)                  ! keeps every int(y1) point only 
+         IF(action == 'c') CALL crop_section(sc, k, y1, y2)              ! limit incident energies to between y1 and y2
+         IF(action == 'h') CALL hole_section(sc, k, y1, y2)              ! remove incident energies between y1 and y2
 
       ENDDO
       action = 'r'
@@ -166,7 +167,7 @@ CONTAINS
 
       IMPLICIT NONE
       INTEGER*4 i,k, n
-      REAL*4 :: y1, y2 ! range of incident energies to preserve (in keV)
+      REAL*4 :: y1, y2 ! range of incident energies to preserve (in MeV)
       TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
 !      TYPE (c4_data_point), POINTER :: pt1, pt2
 
@@ -187,7 +188,6 @@ CONTAINS
       sc%ndat = n
       WRITE(6,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
       WRITE(9,*)'  - Subentry limitted to incident energies between', y1/10**6,' and ',y2/10**6,' MeV'
-      WRITE(9,*)' Subsection limitted to incident energies between', y1,' and ',y2,' keV'
       RETURN
    END SUBROUTINE crop_section
 
@@ -200,7 +200,7 @@ CONTAINS
 
       IMPLICIT NONE
       INTEGER*4 i,k, n
-      REAL*4 :: y1, y2 ! range of incident energies to remove (in keV)
+      REAL*4 :: y1, y2 ! range of incident energies to remove (in MeV)
       TYPE (c4_section), INTENT(INOUT) :: sc       ! C4 section to modify
 !      TYPE (c4_data_point), POINTER :: pt1, pt2
 
@@ -250,7 +250,7 @@ CONTAINS
       WRITE(9,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
 
-      istep = y1
+      istep = y1 + 0.00001
       IF(sc%ndat <= 5*istep) RETURN  !set too small for the istep
       n = 0
       DO i = 1, sc%ndat, istep
@@ -267,20 +267,49 @@ CONTAINS
       RETURN
    END SUBROUTINE thin_section
 
-   SUBROUTINE modify_section(sc, k, y1, y2, dy1, dy2)
+   SUBROUTINE multiply_section(sc, k, y1, y2)
       IMPLICIT NONE
       INTEGER*4 i,k
-      REAL*4 :: y1  ! add y1 to each cross section
-      REAL*4 :: y2  ! scale each cross section by a factor of y2
-      REAL*4 :: dy1 ! add, in square, dy1 % uncertainty to the original uncertainty
-      REAL*4 :: dy2 ! scale each uncertainty by a factor of dy2
+      REAL*4 :: y1  ! scale each cross section by a factor of y1
+      REAL*4 :: y2  ! scale each uncertainty by a factor of y2
 
       TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to modify
       TYPE (c4_data_point), POINTER :: pt
 
       ! Check default input
-      IF (y2 > 0.0 .and. dy2 == 0.0) dy2 = y2  ! Set the same factor for uncertainties as for x-sec.
-      IF (dy2 == 0.0)  dy2 = 1.0 ! Don't zero uncertainties!
+      IF (y1 > 0.0 .and. y2 == 0.0) y2 = y1  ! Set the same factor for uncertainties as for x-sec.
+      IF (y2 == 0.0)  y2 = 1.0               ! Don't zero uncertainties!
+
+      WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
+      WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
+      WRITE(9,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
+
+
+      ! This DO LOOP can be modified if another form of modification is required
+      DO i = 1, sc%ndat
+         pt => sc%pt(i)
+         pt%x  = pt%x*y1        ! miltiply cross sections by y1 factor
+         pt%dx = pt%dx*y2       ! multiplying uncertainty by the y2 factor
+      END DO
+
+      IF(y1 /= 0.0)   WRITE(6,*)'  - cross sections multiplied by ',y1
+      IF(y1 /= 0.0)   WRITE(9,*)'  - cross sections multiplied by ',y1
+      IF(y3 /= 1.0)  WRITE(6,*)'  - absolute uncertainties multiplied by ', y2      
+      IF(y3 /= 1.0)  WRITE(9,*)'  - absolute uncertainties multiplied by ', y2
+
+      RETURN
+   END SUBROUTINE multiply_section
+
+   SUBROUTINE addto_section(sc, k, y1, y2)
+      IMPLICIT NONE
+      INTEGER*4 i,k
+      REAL*4 :: y1  ! add y1 [b] to each cross section
+      REAL*4 :: y2 ! add, in square, y2 [b] uncertainty to the original uncertainty 
+
+      TYPE (c4_section), INTENT(IN) :: sc       ! C4 section to modify
+      TYPE (c4_data_point), POINTER :: pt
+
+      
       WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
 
       WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
@@ -290,23 +319,17 @@ CONTAINS
       ! This DO LOOP can be modified if another form of modification is required
       DO i = 1, sc%ndat
          pt => sc%pt(i)
-         pt%x  = pt%x  + y1  + pt%x*y2                         !modifying cross sections
-         ! write(*,*)'original:',pt%dx
-         pt%dx = dy2*SQRT(pt%dx**2 + (pt%x*dy1/100.)**2)       ! adding additional dy1 uncertainty (in %) in squares
-                                                               ! and multiplying uncertainty by a factor
+         pt%x  = pt%x  + y1                   ! modifying cross sections
+         pt%dx = SQRT(pt%dx**2 + y2**2)       ! adding additional y2 [b] uncertainty in squares                                                              
       END DO
+
       IF(y1 /= 0.0)   WRITE(6,*)'  - cross sections changed by adding ',y1, '[b]'
-      IF(y2 /= 0.0)   WRITE(6,*)'  - cross sections multiplied by ',y2
-      IF(dy1 /= 0.0)  WRITE(6,*)'  - absolute uncertainties increased by square-adding ', dy1, '[%]' 
-      IF(dy2 /= 1.0)  WRITE(6,*)'  - absolute uncertainties multiplied by ', dy2      
       IF(y1 /= 0.0)   WRITE(9,*)'  - cross sections changed by adding ',y1, '[b]'
-      IF(y2 /= 0.0)   WRITE(9,*)'  - cross sections multiplied by ',y2
-      IF(dy1 /= 0.0)  WRITE(9,*)'  - absolute uncertainties increased by square-adding ', dy1, '[%]' 
-      IF(dy2 /= 1.0)  WRITE(9,*)'  - absolute uncertainties multiplied by ', dy2
+      IF(y3 /= 0.0)  WRITE(6,*)'  - absolute uncertainties increased by square-adding ', y2, '[b]' 
+      IF(y3 /= 0.0)  WRITE(9,*)'  - absolute uncertainties increased by square-adding ', y2, '[b]' 
 
       RETURN
-   END SUBROUTINE modify_section
-
+   END SUBROUTINE addto_section
 
    SUBROUTINE delete_section(c4,k)
       IMPLICIT NONE
@@ -518,13 +541,13 @@ CONTAINS
 
       y1  = 0.0
       y2  = 0.0
-      dy1 = 0.0
-      dy2 = 0.0
+      y3 = 0.0
+      y4 = 0.0
       DO k=1,c4%nsec
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)
          WRITE(13,11) k, sc%pza, sc%tza,  pt%mf, pt%mt,  &
-            sc%ref, sc%ent, sc%sub, action, y1, y2, dy1, dy2
+            sc%ref, sc%ent, sc%sub, action, y1, y2, y3, y4
       ENDDO
 !      WRITE(6,*) ' c4service input file created '
       RETURN
