@@ -717,7 +717,7 @@ C* Try another set of points
       REWIND LC4
       GO TO 50
 C* All processing completed
-   90 STOP 
+   90 STOP 'LSTTAB Completed'
 C*
    91 FORMAT(2A40)
    92 FORMAT(I3,4X,I3,A1,I6,I4,I5,3I6,F10.3,F8.2,F10.3,6X,I8)
