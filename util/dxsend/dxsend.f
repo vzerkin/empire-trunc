@@ -48,6 +48,8 @@ C-V        Fix double-precision declaration of aa,arem (R. Capote)
 C-V  20/06 Extend to process delayed neutron fraction & spectra.
 C-V        Fix numerical instability in CM->Lab for inc. photons.
 C-V  20/07 Fix upper energy of PFNS table given as Maxwellian funct.
+C-V  20/09 Restore reconstruction of radionuclide production
+C-V        from MF=3 cross sections.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -172,7 +174,7 @@ C...  print *,' Calling FINDMT'
 C...
       CALL FINDMT(LEF,ZE,ZA,AWR,L1,L2,NS,N2,MAT,MF,MT,IER)
 c...
-C...  print *,'ZAin,ZAout,MAT,IER',zel(iel),ze,mat,IER
+C...  print *,'FINDMT:ZAin,ZAout,MAT,IER',zel(iel),ze,mat,IER
 c...
       IF(IER.EQ.0) THEN
         REWIND LEF
@@ -1072,9 +1074,9 @@ C...  IF(MTJ.NE.9000 .AND. (MF0.NE.10 .OR. MT0.NE.5)) GO TO 60
      &  (MTJ.EQ.4 .AND. KEA.EQ.0 ) ) GO TO 60
 C... &  (MTJ.NE.4 .OR. IZAP.NE.0 ) ) GO TO 60
 C*    -- Find particle emission reactions
-
+C...
       print *,'Find particle emission reactions IZAP',IZAP
-
+C...
       REWIND LEF
       CALL SKIPSC(LEF)
 C*
@@ -1130,9 +1132,12 @@ C*      -- Skip chance fission if total fission is given
       ELSE IF(IZAP.GT.2004) THEN
 C*      -- Radioactive nuclide production
         LFS =NINT(PAR)
-C...    MFX =3
-C...    IF(LFS.NE.0) MFX=10
-        MFX=10
+C... The logic needs to be checked
+        MFX =3
+        IF(LFS.NE.0 .OR. MF0.EQ.10) MFX=10
+C...
+C...    MFX=10
+C...
         IZA =NINT(ZA)
    30   MF=MFX
         MT=0
