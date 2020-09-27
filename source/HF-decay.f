@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5127 $
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2018-06-08 20:06:17 +0200 (Fr, 08 Jun 2018) $
+Ccc   * $Rev: 5255 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2020-09-27 18:13:28 +0200 (So, 27 Sep 2020) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1322,6 +1322,10 @@ C     IF(CSPrd(nnuc).GT.CSMinim) THEN
            IF(nnuc.eq.mt91 ) nejc=1
            IF(nnuc.eq.mt649)  nejc=2
            IF(nnuc.eq.mt849)  nejc=3
+C          n,2n
+           IF( A(nnuc).eq.A(1)-2 .and. Z(nnuc).eq.Z(1) ) nejc=1
+C          n,3n
+           IF( A(nnuc).eq.A(1)-3 .and. Z(nnuc).eq.Z(1) ) nejc=1
 
            checkXS = checkXS + CSPrd(nnuc)
            checkprd = CSPrd(nnuc)
