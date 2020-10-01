@@ -1,7 +1,30 @@
-Ccc   * $Author: atrkov $
-Ccc   * $Date: 2016-09-03 22:36:54 +0200 (Sa, 03 Sep 2016) $ 
-Ccc   * $Id: inter.f 4774 2016-09-03 20:36:54Z atrkov $ 
-
+Ccc   * $Author: capote $
+Ccc   * $Date: 2020-10-01 11:06:59 +0200 (Do, 01 Okt 2020) $ 
+Ccc   * $Id: inter.f 5256 2020-10-01 09:06:59Z capote $ 
+! **********************************************************************
+* Copyright (C) 2004 Broohaven National Laboratory
+* Copyright (C) 2005 International Atomic Energy Agency
+* -----------------------------------------------------------------------------
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is furnished
+* to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+*
+*-----------------------------------------------------------------------------
 !+++MDC+++
 !...VMS, ANS, WIN, UNX
 !
