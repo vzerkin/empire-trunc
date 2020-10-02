@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5255 $
-Ccc   * $Author: capote $
-Ccc   * $Date: 2020-09-27 18:13:28 +0200 (So, 27 Sep 2020) $
+Ccc   * $Rev: 5257 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2020-10-02 19:20:19 +0200 (Fr, 02 Okt 2020) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1316,41 +1316,26 @@ C         number of discrete levels is limited to 40
 
       ENDIF
 
-C     IF(CSPrd(nnuc).GT.CSMinim) THEN
       IF(CSPrd(nnuc).GT.0) THEN
-           nejc=-1
-           IF(nnuc.eq.mt91 ) nejc=1
-           IF(nnuc.eq.mt649)  nejc=2
-           IF(nnuc.eq.mt849)  nejc=3
-C          n,2n
-           IF( A(nnuc).eq.A(1)-2 .and. Z(nnuc).eq.Z(1) ) nejc=1
-C          n,3n
-           IF( A(nnuc).eq.A(1)-3 .and. Z(nnuc).eq.Z(1) ) nejc=1
-
-           checkXS = checkXS + CSPrd(nnuc)
-           checkprd = CSPrd(nnuc)
-           xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
-           if(nejc.gt.0) then
-               ilv = 0  ! count of meta-stable states
-             ftmp_gs = CSPrd(nnuc)
-             DO its= NLV(nnuc), 2, -1
-               IF(ISIsom(its,Nnuc).EQ.1) THEN
-                 ilv = ilv + 1
-                 WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+        checkXS = checkXS + CSPrd(nnuc)
+        checkprd = CSPrd(nnuc)
+        xcross(NDEJC+2,jz,jn) = CSPrd(nnuc)
+          ilv = 0  ! count of meta-stable states
+          ftmp_gs = CSPrd(nnuc)
+          DO its= NLV(nnuc), 2, -1
+            IF(ISIsom(its,Nnuc).EQ.1) THEN
+              ilv = ilv + 1
+              WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &            '' isomer state population  '',G12.6,
      &            '' mb (m'',I1,'' E='',F10.6,'' MeV Jp='',F5.1,'')'')')
-     &            iz, SYMb(nnuc), ia,  CSDirlev(its,nejc),    
-C    &            iz, SYMb(nnuc), ia, POPlv(its,Nnuc),    
+     &            iz, SYMb(nnuc), ia, POPlv(its,Nnuc),    
      &            ilv, ELV(its,Nnuc), LVP(its,Nnuc)*XJLv(its,Nnuc)
-                  ftmp_gs = ftmp_gs - CSDirlev(its,nejc)
-C                 ftmp_gs = ftmp_gs - POPlv(its,Nnuc)
-C                 CSPrd(nnuc) = CSPrd(nnuc) - POPlv(its,Nnuc)
-               ENDIF
-             ENDDO
-             IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
+              ftmp_gs = ftmp_gs - POPlv(its,Nnuc)
+            ENDIF
+          ENDDO
+          IF(ilv.GT.0) WRITE(12,'(1X,I3,''-'',A2,''-'',I3,
      &           '' ground state population  '',G12.6,'' mb'')')
      &           iz, SYMb(nnuc), ia, ftmp_gs
-           ENDIF
       ENDIF
 
 5753  FORMAT(1X,I3,'-',A2,'-',I3,
