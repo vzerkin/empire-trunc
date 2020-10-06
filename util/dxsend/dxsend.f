@@ -50,6 +50,7 @@ C-V        Fix numerical instability in CM->Lab for inc. photons.
 C-V  20/07 Fix upper energy of PFNS table given as Maxwellian funct.
 C-V  20/09 Restore reconstruction of radionuclide production
 C-V        from MF=3 cross sections.
+C-V  20/10 Fix printing isomers from exclusive reactions in MF=10.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2097,6 +2098,12 @@ C* Suppress searching for covariance data unless MF0=3 or 10
       ELSE
         MTJ=-MT0
       END IF
+      IZA=NINT(ZA)
+      CALL MTTOZA(IZAI,IZA,JZAP,MT0)
+C* Redefine the outgoing particle to residual, if not MT=5 or 9000
+      IF(MF.EQ.10 .AND.(MTJ.NE.5 .AND. MTJ.NE.9000) ) THEN
+        IZAP0=JZAP
+      END IF
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,IZAP0,MST,QM,QI,LRBRK
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
 C* Default particle multiplicity
@@ -2338,8 +2345,8 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
           UXS(I)=RWO(LU-1+I)*YY
         END DO
 c...
-        print *,'Done XS for mf/mt0/izap0/yl',mf,mt0,izap0,yl
-        print *,'nen,ier,mt0',nen,ier,mt0
+        print *,'Done XS for mf/mt0/izap0/yl/ier',mf,mt0,izap0,yl,ier
+c...    print *,'nen,ier,mt0',nen,ier,mt0
 c...
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
@@ -4699,7 +4706,7 @@ C*    -- Dummy read of delayed neutron decay constants
         IF(N1.GT.MXNB) STOP 'GETSTD ERROR - MXNB Limit exceeded'
         IF(MF .NE. 10) GO TO 12
 c...
-C...    PRINT *,'mf,mt,izap,lfs',mf,mt,izap,lfs
+C...    PRINT *,'mf,mt,izap,lfs,mst,izap0',mf,mt,izap,lfs,mst,izap0
 c...
         IF(LFS.EQ.MST .AND. (IZAP0.EQ.0 .OR. IZAP0.EQ.IZAP)) GO TO 12
       END DO
