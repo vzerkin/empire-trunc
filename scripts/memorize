@@ -1,9 +1,12 @@
 #! /bin/sh -
-# Script to move essential results of the calculations to another directory
+# Script to move essential results of the calculations and all eps plots to another directory
 # for later comparison with other calculations. All input files needed to
 # reproduce calculations are preserved.
 # Usage:
-# memorize directory_name file_root_name
+# memorize dir root
+# where:
+#    dir - name of the directory (typical subdirectory of the working directory)
+#    root - root name of the project, e.g. Ta181 for the project with input file Ta181.inp 
 
 if [ -d $1 ]; then
    echo 'O.K. directory:'  $1 ' exists'
@@ -14,15 +17,19 @@ if [ -d $1 ]; then
 fi                          
 file=$2
 
-cp $file-lev.col $1 
+# $1 could be added to the file names for indetification e.g. cp $file.lev $1/$file-$1.lev
+cp $file-lev.col $1 2>>/dev/null
 cp $file-omp.ripl $1 
-cp $file.endf $1
+# cp $file.endf $1
 cp $file.lev $1
 cp $file-omp.dir $1  
 cp $file-s.endf $1   
 cp $file.inp $1      
 cp $file-inp.fis $1 2>>/dev/null      
 cp $file.xsc $1
+mv *.eps $1
+# uncomment the next line to store also *Id*zvd  files
+# mv *Id*.zvd
 
 exit
 
