@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 5259 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2020-10-16 05:37:46 +0200 (Fr, 16 Okt 2020) $
 C
       SUBROUTINE ORION(Q2,Q3,Ktrl3,Extcom1,Ldw,Ist,Ltrmax,Atar,Ztar,
      &                 Apro,Zpro,Iout,Angle,Ndang,Icompff)
@@ -645,6 +645,7 @@ C--------Restoring KTRlom(0,0)
       Vi = WSO(Nejc,nnuc)
       Ri = RWSO(Nejc,nnuc)
       Ai = AWSO(Nejc,nnuc)
+
       END
 
 
@@ -1446,7 +1447,7 @@ C
      &                 VINti(MAXX,2), VINtr(MAXX,2), VSOr(4), VSXr(4),
      &                 WN(4), WNIni(4), WNUnit, WSFr(4), WSXr(4), XBAr,
      &                 XMAx, XMEs, XSQiv(MAXX)
-      DOUBLE COMPLEX CFOrm(MAXX,2), CMAt1(42,61), CMAt2(42,42,61), TTI,
+      DOUBLE COMPLEX CFOrm(MAXX,2), CMAt1(42,91), CMAt2(42,42,91), TTI,
      &               TTR, ZERo
       INTEGER ISTw(3), JJ, KEXcom(50), KTLout(50), KTRl(30), LDWmxr(4),
      &        LLRow(120), LMAx, LTRamx(4), MXRow, NANglr, NCHanl,
@@ -2404,7 +2405,7 @@ C
      &                 SGMa(25,NGLXX,2), SGMat(NGLXX,2), SGMaz, SQRt10,
      &                 THEta(NGLXX), U9, WNUnit, WR1(1000,2),
      &                 WR2(5000,2), XBAr, XMAx, XMEs
-      DOUBLE COMPLEX CMAt1(42,61), CMAt2(42,42,61), CSUm2(NGLXX), TTI,
+      DOUBLE COMPLEX CMAt1(42,91), CMAt2(42,42,91), CSUm2(NGLXX), TTI,
      &               TTR, XAMp(9000,4), ZERo
       INTEGER IA, IB, IC, ID, IE, IG, ISTw1, ISTw2, ISTw3, J12mxt, J1Tw,
      &        J2Tw, JAS, JBS, JCS, JLMitw, JLMxtw, JLRang, KASe, L12mxm,
