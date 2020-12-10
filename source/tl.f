@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5119 $
+Ccc   * $Rev: 5265 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2018-05-17 21:00:27 +0200 (Do, 17 Mai 2018) $
+Ccc   * $Date: 2020-12-10 08:23:02 +0100 (Do, 10 Dez 2020) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -130,6 +130,8 @@ C-----setting transmission coefficients for fusion if not distr. barr.
       ENDDO
       RETURN
       END
+
+      
       SUBROUTINE RIPL2EMPIRE(Nejc,Nnuc,E)
       implicit none 
       INCLUDE 'dimension.h'
@@ -202,8 +204,9 @@ C     the following condition means that the collective level file exists
 C     and was read to obtain the number of collective levels
 C
       IF (ND_nlv.GT.0 .AND. COLfile) coll_defined = .TRUE.
-
+      
       IF (IMOdel.EQ.1 .AND. (.NOT.coll_defined)) THEN
+     
 C
 C--------model = 'coupled-channels rigid rotor model'
 C
@@ -1625,8 +1628,10 @@ C-----pot(i,j,22) - Smith et al. , OMP reference # 118
 C-----pot(i,j,23) - Varner et al., OMP reference # 2100, 5100
 C-----pot(i,j,24) - Koning potentials, reference # 2404, 2405 ...
 C
+ 
       RCOul(Nejc,Nnuc) = RC
       ACOul(Nejc,Nnuc) = ACOu
+
 C-----Volume real potential: Woods-Saxon
       VOM(Nejc,Nnuc) = vlib(1)*FNvvomp(Nejc,Nnuc)
       RVOm(Nejc,Nnuc) = rlib(1)*FNrvomp(Nejc,Nnuc)
