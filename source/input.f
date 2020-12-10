@@ -1,6 +1,6 @@
-ccc   * $Rev: 5248 $
+ccc   * $Rev: 5262 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
+ccc   * $Date: 2020-12-10 08:06:48 +0100 (Do, 10 Dez 2020) $
 
       SUBROUTINE INPUT
 ccc
@@ -7547,11 +7547,12 @@ c        ENDIF
 C-----
          IF (name.EQ.'RESNOR') THEN
             IF(i1.EQ.0) THEN
-               DO i = 1, 5
+               DO i = 1, 7
                   DO j = 1,i + 1
                      CNOrin(i + 1,j) = val
                   ENDDO
                ENDDO
+               CNOrin(1,1) = val
                WRITE (8,
      &'('' All response functions in MSD normalized by factor '',F6.3)')
      &         val
