@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5188 $
+Ccc   * $Rev: 5264 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-01-22 01:19:13 +0100 (Mi, 22 Jän 2020) $
+Ccc   * $Date: 2020-12-10 08:22:01 +0100 (Do, 10 Dez 2020) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -128,8 +128,8 @@ C     nangle = NDANGecis
       KEXcom(3) = 10
       KEXcom(4) = 0
       icpx = KTRl(1)
-C     iout2 = KTRl(2)
-      iout2 = 1
+      iout2 = KTRl(2)
+c     iout2 = 1
       NQ1x = KEXcom(1)
       NQ2x = KEXcom(2)
       nq12x = KEXcom(3)
@@ -2849,8 +2849,7 @@ C-----------------------next two lines are for (p,alpha) calculations (orig. as
 C-----------------------came from mu)
 C-----------------------IF(KR.EQ.1)RB12=RHOB(NEP,L1P1,2)*RHOB(NEPP,L2P1,1)
 C-----------------------IF(KR.EQ.2)RB12=RHOB(NEP,L1P1,1)*RHOB(NEPP,L2P1,2) next
-C-----------------------line substitutes previous 2 according to Horst's
-C-----------------------suggestion
+C-----------------------line substitutes previous 2 by Horst's suggestion
                         rb12 = RHOb(nep,l1p1,krtx - kr + 1)
      &                         *RHOb(nepp,l2p1,kr)
                         DO icp = 1, icpx
@@ -3058,13 +3057,13 @@ C     Adding one more bin to MSD spectra
       IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
 
-      WRITE(8,*) ' '
-      WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
-     &   nmax
+   !    WRITE(8,*) ' '
+   !    WRITE(8,'('' MSD Legendre coeff.(N:1-5) for Nexc(max)='',I5)') 
+   !   &   nmax
       DO ne = 1, nmax
          ftmp = 0.d0
          DO na = 1, nangle
-            ftmp = ftmp +     CSEa(ne,nangle - na + 1,nej)
+            ftmp = ftmp + CSEa(ne,nangle - na + 1,nej)
             csfit(na) = CSEa(ne,nangle - na + 1,nej)
          ENDDO
 C
@@ -3078,10 +3077,10 @@ C        csfit(NDANGecis)
          CSEmsd(ne,nej) = CSEmsd(ne,nej) + piece
          CSMsd(nej) = CSMsd(nej) + piece*DE
          Xsinl = Xsinl + piece*DE
-         WRITE(8,'(1x,''Nexc='',I5,1x,5(D12.5,1x),4H CS=,d12.5,3H mb)') 
-     &       ne,(qq(na),na=1,5), piece*DE
-         WRITE(8,'('' Partial MSD emission '', d12.5,'' mb'')') 
-     >         CSMsd(nej)
+   !       WRITE(8,'(1x,''Nexc='',I5,1x,5(D12.5,1x),4H CS=,d12.5,3H mb)') 
+   !   &       ne,(qq(na),na=1,5), piece*DE
+   !       WRITE(8,'('' Partial MSD emission '', d12.5,'' mb'')') 
+   !   &         CSMsd(nej)
       ENDDO
       WRITE(8,*) ' '
       WRITE(8,'('' Integrated MSD emission at Elab '', G15.3,'' is ''
@@ -3384,6 +3383,7 @@ C-----
       DO ie = istart, next
         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
       ENDDO
+      write(8,*)'MSD for discrfete levels', csm1
       IF(csm1.le.1.d-6) RETURN
 
       IF(Nejc.eq.NPRoject) then
@@ -3450,6 +3450,7 @@ C
          POPlv(1,Nnur) = POPlv(1,Nnur) + csmsdl
          RETURN
        ENDIF
+       write(8,*) 'MSD to discrete levels ', csmsdl
        csmsdl = csmsdl/swght
        DO il = 2, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
