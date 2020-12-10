@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4456 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2015-08-28 16:58:23 +0200 (Fr, 28 Aug 2015) $
+Ccc   * $Rev: 5263 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2020-12-10 08:15:45 +0100 (Do, 10 Dez 2020) $
 C
       SUBROUTINE DECHMS(Jc,Ipc,Nnur,Nejc)
 Ccc
@@ -570,7 +570,7 @@ C--------calculation of the class population from the initial channel
             popart(k) = (1.0 - popars)*rbu/popart(k)
          ENDIF
 C--------correction to remove gradual absorption
-C        IF(K.EQ.1) POPART(K)=1.
+         IF(K.EQ.1) POPART(K)=1.
 C--------------------------------------------------
          popars = popars + popart(k)
          DO j = 1, NLW
