@@ -13,6 +13,7 @@ C-V          - Define upper energy for resolution-broadening.
 C-V  2018/07 Correct typo defining EEFF.
 C-V  2019/11 Allow source file to be a simple two-column table
 C-V          (PLOTTAB CUR format).
+C-V  2020/12 Fix copying the remainder of cross section above ETOP.
 C-M  
 C-M  Manual for Program MU_RSL
 C-M  =========================
@@ -53,12 +54,13 @@ C-M                  resolution-broadened
 C-M          MF= 304 implies that scattering moments are resolution
 C-M                  broadened (i.e. the cross section times the
 C-M                  distribution).
-C-M   FRC  Fractional half-width at half-maximum (tipically 0.3)
+C-M   FRC  Fractional half-width at half-maximum (tipically 0.03)
 C-M        or the absolute width (eV), if FRC>1 (~10000 for strong
 C-M        smoothing).
 C-M        WARNING2- this option needs checking!!!
 C-M   NRS  Number of points to represent the resolution function
 C-M        (tipically 20 - 50)
+C-M   ETOP Highest energy for resolution-broadening [eV]
 C-M
 C-M  NOTE : At present it is assumed that the angular distributions
 C-M         are given in Legendre polynomial representation.
@@ -122,10 +124,15 @@ C* Define the material to be processed
       READ (LKB,995) MAT0
       IF(MAT0.LT.0) GO TO 18
 C* Define the MT to be processed
-      WRITE(LTT,991) '$Reaction MT to be resolution-broaden   '
-      WRITE(LTT,991) '  MT>1000 implies MF=MT/1000 and MT=MT-1000*MF'
-      WRITE(LTT,991) '  MF=   4 for Leg. coefficients smoothing'
-      WRITE(LTT,991) '  MF= 304 for scattering moments smoothing:'
+      WRITE(LTT,991) '$Reaction MFT to be resolution-broaden  '
+      WRITE(LTT,991) '  MFT>1000 implies MF=MT/1000           '
+      WRITE(LTT,991) '                   MT=MT-1000*MF        '
+      WRITE(LTT,991) '  MF= =<3 Cross section smoothing       '
+      WRITE(LTT,991) '  MF=   4 Legendre coeff. smoothing     '
+      WRITE(LTT,991) '  MF= 304 scattering moments smoothing  '
+      WRITE(LTT,991) ' '
+      WRITE(LTT,991) ' e.g. MT=304002 for smoothing scattering'
+      WRITE(LTT,991) '         moments of elastic cross sect. '
       READ (LKB,995) MTCMB
       MT0=MTCMB
       IF(MT0.GT.1000) THEN
@@ -213,7 +220,7 @@ c...  end do
 c...  stop
 c...
 C*
-      IF(MAT0.GE.0) GO TO 38
+      IF(MAT0.GE.0) GO TO 34
 C* Process tabulated data from a CUR file
    30 NP=0
       READ (LIN,991,END=900) HDR
@@ -227,10 +234,39 @@ C* Process tabulated data from a CUR file
       GO TO 32
 C*
 C* Copy the ENDF file header
-   38 NS  =-1
+   34 NS  =-1
       NMAT=0
       MAT1=MAT0
       CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+C* Check if the comment section is present
+   36 CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      IF(MAT.NE.MAT0) GO TO 36
+      IF(MF.NE.1 .OR. MT.NE.451) GO TO 40
+C...
+C...  print *,'mat,mf,mt',mat,mf,mt
+C...
+C* Add the trace of MU_RSL code to the comments
+      CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+      READ (CH66(45:55),*) NWD
+      NWD1=NWD+2
+      WRITE(CH66(45:55),'(I11)') NWD1
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      DO I=1,NWD
+        CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
+        CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      END DO
+      CH66=BLNK//BLNK(1:26)
+      WRITE(CH66,*) '********************* MU_RSL Resolution-Broadening'
+     &,' **************'
+      CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
+      CH66=BLNK//BLNK(1:26)
+      WRITE(CH66,*) 'Acting on MAT/MF/MT',MAT,MF0,MT0,' rsl',FRC
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
    40 IF(IRR.LT.0) GO TO 80
 C* Findt the appropriate MT section of MF3 in the ENDF file
@@ -255,6 +291,9 @@ C* Even for MF4 data it is necessary to retrieve the MF 3 x.s. first
         END IF
         GO TO 902
       END IF
+c...
+C...  print *,'np,eni,etop',np,enx(np),etop
+c...
       INR3=INR(1)
 C*    -- Extend the effective upper limit by resolution-function width
       EEFF=ETOP
@@ -272,12 +311,15 @@ C*    -- Number of points to EEFF
       END DO
 C*    -- Perform resolution-broadening of the cross section
 C*    -- Pack the broadened function after the original
-   42 LP1=NP+1
+   42 LP1=NP0+1
       MX1=MXN-NP
       WRITE(LTT,*) 'MAT',MAT1,' MT',MT0,', Points to process',NP
 c---  CALL RSLBR0(NP,ENX,XSX,NPX1,MX1,ENX(LP1),XSX(LP1)
       CALL RSLBR1(NP,ENX,XSX,NPX1,MX1,ENX(LP1),XSX(LP1)
      &           ,NRS,ENR,RSL,MXW,RWO,IRR)
+c...
+C...  print *,'np0,eni,etop',np0,enx(np0),etop
+c...
       IF(ETOP.LT.ENX(NP0)) THEN
 C*      -- Find the first point above ETOP
         NP=0
@@ -285,12 +327,18 @@ C*      -- Find the first point above ETOP
           NP=I
           IF(ENX(I).GT.ETOP) EXIT
         END DO
+c...
+C...    print *,'np,np0,eni,etop',np,np0,enx(np),etop
+c...
         NPX0=NPX1
         NPX1=0
         DO I=1,NPX0
           IF(ENX(LP1-1+I).GT.ETOP) EXIT
           NPX1=I
         END DO
+c...
+C...    print *,'npx1,npx0,lp1,eni',npx1,npx0,lp1,enx(lp1-1+npx1)
+c...
 C*      -- Copy original points above ETOP
         IF(NPX1+NP0-NP.GT.MX1) STOP 'MU_RSL ERROR - MX1 limit exceeded'
         DO I=NP,NP0
