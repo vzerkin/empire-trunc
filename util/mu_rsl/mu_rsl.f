@@ -13,7 +13,7 @@ C-V          - Define upper energy for resolution-broadening.
 C-V  2018/07 Correct typo defining EEFF.
 C-V  2019/11 Allow source file to be a simple two-column table
 C-V          (PLOTTAB CUR format).
-C-V  2020/12 Fix copying the remainder of cross section above ETOP.
+C-V  2020/12 Fix copying the remainder of cross sections above ETOP.
 C-M  
 C-M  Manual for Program MU_RSL
 C-M  =========================
@@ -47,7 +47,7 @@ C-M   MAT0 Material MAT to be processed.
 C-M        If zero, all materials are processed.
 C-M        If <zero, source file is a simple "CUR" file.
 C-M        (The option to select by ZA is currently not supported).
-C-M   MT   Reaction MT to be processed
+C-M   MT   Compound reaction MF/MT dsignation to be processed:
 C-M          MT>1000 implies MF=MT/1000 and MT=MT-1000*MF
 C-M          MF=   4 implies that angular distributions are
 C-M                  resolution-broadened
@@ -63,7 +63,7 @@ C-M        (tipically 20 - 50)
 C-M   ETOP Highest energy for resolution-broadening [eV]
 C-M
 C-M  NOTE : At present it is assumed that the angular distributions
-C-M         are given in Legendre polynomial representation.
+C-M         are given in Legendre polynomial representation in MF=4.
 C-M
 C-M  WARNING: The resolution-broadening algorithm was not optimised
 C-M           for efficiency. When the number of points is large,
@@ -133,6 +133,8 @@ C* Define the MT to be processed
       WRITE(LTT,991) ' '
       WRITE(LTT,991) ' e.g. MT=304002 for smoothing scattering'
       WRITE(LTT,991) '         moments of elastic cross sect. '
+      WRITE(LTT,991) '      MT=  3002 for smoothing only the  '
+      WRITE(LTT,991) '         elastic cross section          '
       READ (LKB,995) MTCMB
       MT0=MTCMB
       IF(MT0.GT.1000) THEN
@@ -242,7 +244,7 @@ C* Copy the ENDF file header
 C* Check if the comment section is present
    36 CALL RDTEXT(LIN,MAT,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
-      IF(MAT.NE.MAT0) GO TO 36
+      IF(MAT0.NE.0 .AND. MAT.NE.MAT0) GO TO 36
       IF(MF.NE.1 .OR. MT.NE.451) GO TO 40
 C...
 C...  print *,'mat,mf,mt',mat,mf,mt
