@@ -51,6 +51,7 @@ C-V  20/07 Fix upper energy of PFNS table given as Maxwellian funct.
 C-V  20/09 Restore reconstruction of radionuclide production
 C-V        from MF=3 cross sections.
 C-V  20/10 Fix printing isomers from exclusive reactions in MF=10.
+C-V  21/01 Fix DDX yields that include fission.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2106,6 +2107,13 @@ C* Redefine the outgoing particle to residual, if not MT=5 or 9000
       END IF
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,IZAP0,MST,QM,QI,LRBRK
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
+      IF(MF0.GT.3) THEN
+C*      -- Save cross section if MF>3
+        XS=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
+C...
+        print *,'  Saved x.s.=',XS,' at E',EIN,' for MF/MT',MF0,MT0
+C...
+      END IF
 C* Default particle multiplicity
       YL=1
 c...
@@ -2152,7 +2160,7 @@ C...      print *,'seeking mat/mf/mt',za0,mf,mt
 c...
           CALL FINDMT(LEF,ZA0,ZA,AWR,L1,LNU,N1,N2,MAT,MF,MT,IER)
 c...
-C...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
+c...      print *,'found mat/mf/mt/ier',za0,mf,mt,ier
 c...
           IF(IER.NE.0) THEN
             REWIND LEF
@@ -2246,7 +2254,7 @@ C*                         from pointwise representation
                     STOP 'FINTXS ERROR'
                   END IF
 c...          
-                  print *,'nu-bar from LNU=2 is',yl
+                  print *,'  nu-bar from LNU=2 is',yl
 c...          
                 ELSE
 C*                -- Case: Assemble nu-bar distribution from 
@@ -2292,13 +2300,14 @@ C*        -- If no data found and photon spectrum requested, try MF 13
         GO TO 900
       END IF
 C...
-c...  print *,'  Here, Ein',Ein
+C...  print *,'  Here, Ein,LE,NP',Ein,LE,NP
 C...
       IF(EIN.GT.0) THEN
         IF(EIN.LT.RWO(LE) .OR. EIN.GT.RWO(LE-1+NP)) THEN
 C* Case: Required point is below thershold or above last point
 c...
-c...      print *,'  Ein',EIN,' out of range',RWO(LE),RWO(LE-1+NP)
+          print *,'  WARNING: Ein',EIN,' out of range'
+     &                            ,RWO(LE),RWO(LE-1+NP)
 c...
           NEN=0
           GO TO 900
@@ -2307,7 +2316,7 @@ c...
 C*
 C* Case: If cross section is required on output - finish processing
 c...
-        print *,'KEA,yl',KEA,yl
+      print *,'  KEA,yl',KEA,yl
 c...
       IF(KEA.NE.0) GO TO 700
 C*
@@ -3269,9 +3278,10 @@ C*
 C* Case: Proceed with the retrieval of differential data
       ETOP=RWO(LE+NP-1)
       INR(1)=2
-      XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
+      IF(MF0.LE.3) XS=FINTXS(EIN,RWO(LE),RWO(LX),NP,INR(1),IER)
 C...
-      print *,'    Cross section=',xs,ein,ier,yl
+      print *,'    Cross section=',xs,' Ein',ein
+     &                          ,' IER',ier,' yl',yl,MF0,MT0
 C...
       IF(IER.NE.0 .OR. XS .LE.0) THEN
         NEN=0
