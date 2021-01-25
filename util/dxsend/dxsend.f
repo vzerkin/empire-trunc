@@ -52,6 +52,7 @@ C-V  20/09 Restore reconstruction of radionuclide production
 C-V        from MF=3 cross sections.
 C-V  20/10 Fix printing isomers from exclusive reactions in MF=10.
 C-V  21/01 Fix DDX yields that include fission.
+C-V        Fix printout when the last contributing reaction is zero.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -59,7 +60,7 @@ C-D  specified incident particle energy and scattering angle. The
 C-D  hierarchy of the routines is as follows:
 C-D    DXSELM - main entry, looping DXSEND for all nuclides (isotopes)
 C-D             in a mixture (element), if necessary.
-C-D    DXSEND - called from DXSEND, looping over all contributing
+C-D    DXSEND - called from DXSELM, looping over all contributing
 C-D             reactions (e.g. summing over reactions emitting a
 C-D             specific nuclide to produce particle emission
 C-D             spectrum for that particle).
@@ -880,8 +881,8 @@ C*
      3  'General read error                      ',
      4  '4','5','6','7','9',
      9  'Array limit MRW exceeded                ',
-     D  '10',
-     1  'Multiple interp. ranges and/or law not 2',
+     D  'Multiple interp. ranges and/or law not 2',
+     1  'Requested energy out of range           ',
      2  'Correlated ener/ang distr. not in Law-7 ',
      3  'Processing not coded for specified react',
      4  'Requested particle not found            ',
@@ -1324,7 +1325,7 @@ C* Retrieve the double differential cross section energy distribution
      1           ,ENR,DXS,UXS,RWO(LX),NE,MEN,KRW,IER)
 c...
       print *,'  DXSEN1 assembled',NE,' points with IER=',IER
-C...
+c...
 C...  print *,'After DXSEN1 ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER'
 C...  print *,'           ',ZA0,ZA,ZAP,IZAI,MF0,MT,KEA,EIN,PAR,IER
 C...  print *,'DXSEND',(enr(j),j=1,5)
@@ -1334,6 +1335,9 @@ c...  ina=2
 c...  exo=5.01e6
 c...  fxo=fintxs(exo,enr,dxs,Ne,INA,IER)
 c...  print *,'    A. Value at',exo,' eV is',fxo
+c...
+C...
+C...  print *,'    NE,NEN,NE1,LOOP,MULN',NE,NEN,NE1,LOOP,MULN
 c...
 C* Check neutron emission reactions for contributions from MT5
       IF     (MT0.EQ.16) THEN
@@ -1398,17 +1402,24 @@ c...
           GO TO 48
         END IF
 C*      -- Print error message
+c...
+c...    print *,'    LTT,IER,MXE,MF0,MT',LTT,IER,MXE,MF0,MT
+c...
         IF(LTT.GT.0) THEN
-        IF(IER.LT.MXE) THEN
-        WRITE(LTT,901) ' DXSEND WARNING - Error encountered   : '
-     &                 ,MSG(IER)
-        ELSE
-        WRITE(LTT,903) ' DXSEND WARNING - Error condition flag: ',IER
-        END IF
-        WRITE(LTT,903) '            Failed reconstruction for MF',MF0
-        WRITE(LTT,903) '                                      MT',MT
+          IF(IER.LT.MXE) THEN
+            WRITE(LTT,901) ' DXSEND WARNING - Error encountered   : '
+     &                     ,MSG(IER)
+          ELSE
+            WRITE(LTT,903) ' DXSEND WARNING - Error condition flag: '
+     &                    ,IER
+          END IF
+          WRITE(LTT,903) '            Failed reconstruction for MF'
+     &                  ,MF0
+          WRITE(LTT,903) '                                      MT'
+     &                  ,MT
         END IF
         ML=ML+1
+        NEN=NE1
         GO TO 74
       END IF
       NEN=NE
