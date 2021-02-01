@@ -57,6 +57,9 @@ C-M                  distribution).
 C-M   FRC  Fractional half-width at half-maximum (tipically 0.03)
 C-M        or the absolute width (eV), if FRC>1 (~10000 for strong
 C-M        smoothing).
+C-M        WARNING1- Resolution-broadening of Legendre coefficients
+C-M                  is unstable if resolution width is a fraction.
+C-M                  Width of 500000*FRC is forced instead.
 C-M        WARNING2- this option needs checking!!!
 C-M   NRS  Number of points to represent the resolution function
 C-M        (tipically 20 - 50)
@@ -159,6 +162,15 @@ C*    -- Detect if relative (IRR=0) or absolute (IRR=1)
         IRR=0
         IF(NINT(FRC*10000).EQ.0) IRR=-1
       END IF
+C* Redefine resolution width to absolute for angular distributions
+c     IF(MTCMB.GT.300000 .AND. FRC.LT.1) THEN
+c       FRC=500000.*FRC
+c       IRR=1
+c       WRITE(LTT,991) '  ***                                  '
+c       WRITE(LTT,991) '  WARNING - Resolution width redefined '
+c       WRITE(LTT,991) '            to absolute for ang.dist.  '
+c       WRITE(LTT,991) '  ***                                  '
+c     END IF
 C* Define the maximum number of points for the resolution function
       WRITE(LTT,991) ' No. of points for resolution function  '
       WRITE(LTT,991) '        (typically 20-50, default 50) : '
@@ -425,9 +437,10 @@ C*               l=1 for energy,
 C*               l>1 for coefficients
 C*         where:
 C*           LP4 is the index of the energy grid in RWO
+C*               (allow NM4+6 words for reading because RDLIST overflows)
 C*           LX4 is the index of P in RWO
 C*           NE4 is the number of energy points
-        LP4=NM4+1
+        LP4=NM4+6
         MX1=MXW-LP4
         NN =(NM4+1)*NE4
         NL4=0
@@ -469,6 +482,9 @@ C...
 C...        PRINT *,J,L,J+L*NE4,RWO(J),RWO(J+L*NE4)
 C...
           END DO
+C...
+C...      print *,i,j,RWO(J),RWO(J+NE4)/xs,RWO(LP4)
+C...
         END DO
 C*      -- Redefine the Max. moment to the actual one on the file
         NL4=NLHI
@@ -481,6 +497,9 @@ C*           LPX - Address of the broadened moments
         MX1=(MXW-LPE)/3
         LPX=LPE+MX1
         LBL=LPX+MX1
+C...
+C...    print *,'LP4,LPE,LPX,NM4,NE4',LP4,LPE,LPX,NM4,NE4
+C...
         IF(MX1.LE.NE4) THEN
           WRITE(LTT,*) 'ERROR - MXW Array capacity exceeded'
           GO TO 902
@@ -744,7 +763,7 @@ C* Tolerance for interpolated cross section values
       EPS=1E-3
       INR=2
 C...
-      PRINT *,'Points to process',NP
+C...  PRINT *,'Points to process',NP  ,' in the range',ENX(1),ENX(NP)
 C...
 C*
       EXLO=ENX(1)
@@ -759,7 +778,8 @@ C* Generate the energy grid dense enough for resolution broadening
       EN1(ID)=EE
 c...
 c...  print *,'enr',(enr(j),j=1,10)
-C...  print *,'enx',(enx(j),j=1,10)
+c...  print *,'enx',(enx(j),j=1,10)
+c     stop
 c...
 C*
 C* Loop over original function mesh points
@@ -768,6 +788,7 @@ C*    -- Ee last point in the fine grid
 C*    -- Ex current point in the cross section grid
 C*    -- En next point in the cross section grid
 C*    -- Er next point of the resolution function
+c     IF(ENX(IE).LE.EX) GO TO 100
       EX =ENX(IE)
       I1 =MIN(IE+1,NP)
       EN0=EN
@@ -780,6 +801,7 @@ c...    PRINT *,'ie,ex,ee',ie,ex,ee
 c...  else
 c...    stop
 c...  end if
+C...  print *,'IE,NP,EX,EN0,XN0,EN,XN',IE,NP,EX,EN0,XN0,EN,XN
 c...
       DO IR=1,NRS
         IF(IRR.EQ.1) THEN
@@ -790,7 +812,7 @@ C*        -- Linearly transformed resolution function mesh point
           ER=EX*(1+ENR(IR))
         END IF
 c...
-c...    print *,'    ee,ex,er',ee,ex,er
+C...    print *,'    ID,ee,ex,er',ID,ee,ex,er
 c...
 C*      -- Next original function mesh point
 c...
@@ -828,6 +850,11 @@ C*       stepping in the last interval of the resolution function
       ELSE
         DE=EE*(1+ENR(NRS))/(1+ENR(NRS-1))
       END IF
+c...
+C...  print *,'ID,IRR,NRS,DE,EE,EN,EN1'
+C... &        ,ID,IRR,NRS,DE,EE,ENR(NRS),ENR(NRS-1)
+C...  if(de.le.0) stop
+c...
       EF=EE+DE
       IF(EF+DE.LT.EN) THEN
         ID=ID+1
