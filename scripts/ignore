@@ -1,0 +1,13 @@
+#! /bin/sh -
+# script to remove results of the current calculations and to restore
+# inputs from the previous run
+
+file=$1
+rm $file.endf $file-s.endf $file.lst $file.out $file.xsc  2>/dev/null
+cp -f $file-prev.inp  $file.inp 2>/dev/null
+cp -f $file-prev-inp.fis  $file-inp.fis 2>/dev/null
+cp -f $file-prev-lev.col $file-lev.col 2>/dev/null
+
+echo " For" $file "current output files were deleted and previous input files restored"
+
+exit
