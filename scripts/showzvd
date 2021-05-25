@@ -10,8 +10,10 @@ fi
 # then
 #    if [ -z $DISPLAY ]; then export DISPLAY=:0 ; fi
 # fi
-
-ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit        
+if [ -f "om-parameter-u.dat" ]; then
+  $EMPIREDIR/util/rw1omp2fast/rw1omp2fast.exe
+fi
+[[ ! -f "ps01.tit" ]] && ln -s $EMPIREDIR/util/c4zvd/ps01.tit ps01.tit        
 for file in $*
 do
 $EMPIREDIR/util/c4zvd/zvview.exe -p:$file $file ps01.tit/c
