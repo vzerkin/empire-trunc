@@ -6,7 +6,7 @@ PS_COLOR: COLOR
 PS_ORIENT: Portrait
 PS_FONTAXNUM: 1 15 Helvetica
 PS_FONTAXTEXT: 0 16 Helvetica
-PS_FONTTIT1: 0  1 Helvetica
+PS_FONTTIT1: 0 16 Helvetica
 PS_FONTTIT2: 0 16 Helvetica
 PS_FONTTIMESTAMP: 1 9 Times-Italic
 PS_RTAXNUM: 1
@@ -37,10 +37,10 @@ LG_BOX4: 0 1280 435 40 0 5
 !TIT:  
 !TIT: {+239}Pu(n,tot)
 TIT2:
-!TIT3XY: 570 510
+TIT3XY: 570 510
 !X-SCALE: log
 !X-RANGE: 5 20
-!X-RANGE: 0.020 20
+!X-RANGE: 0.005 20
 !Y-SCALE: log
 !X-GRID: 0
 !Y-GRID: 0
@@ -76,7 +76,7 @@ color: 7
 con: 0
 dot: 2
 bot: 0
-thick: 1
+thick: 2
 err: 1
 err-fill: 0
 
