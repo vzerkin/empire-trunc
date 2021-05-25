@@ -1,6 +1,6 @@
-# $Rev: 5227 $
+# $Rev: 5276 $
 # $Author: mwherman $
-# $Date: 2020-07-05 04:11:11 +0200 (So, 05 Jul 2020) $
+# $Date: 2021-05-25 03:47:05 +0200 (Di, 25 Mai 2021) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -3906,7 +3906,7 @@ proc WidgetProc {w command args} {
         return -code error "wrong # args: should be $w cget option"
         }
         # HERE could be the problem
-        set opt [::mclistbox::Canonize $w option [lindex $args 0]]  
+        set opt [::mclistbox::Canonize $w option [lindex $args 0]]
 
         set result $options($opt)
     }
@@ -5465,7 +5465,7 @@ foreach el $filetmp {
 }
 set filelist [lsort -dictionary $filelist]
 
-# list of archive directories HERE
+# list of archive directories
 #set archdirlistmp [glob -nocomplain $::env(EMPIREDIR)/*/]
 set archdirlistmp [glob -nocomplain $workdir/*/]
 set archdirlist {}
@@ -5747,7 +5747,7 @@ foreach el $stablist {
    if {$cplot == 1 && [file exists $mulinputn.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $mulinputn}
    #if {$cplot == 1 && [file exists $mulinputn-s.endf]} {exec xterm -e $::env(EMPIREDIR)/scripts/plot $mulinputn}
 
-   exec xterm -e $::env(EMPIREDIR)/scripts/run $mulinputn 1111 1
+   exec xterm -e $::env(EMPIREDIR)/scripts/multiE $mulinputn 1111 1 1 0 1 0
    set delistmul ""
    lappend delistmul $ckmlo $ckmsh $ckmlog $ckmendf  $ckmplots $ckmx4 $ckmc4  $ckmriplomp  $ckmdiromp  $ckmlev  $ckmcollev $ckminp
    foreach el $delistmul {
@@ -8355,7 +8355,7 @@ exit} \
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel.inp } \
-        -label {Default input } 
+        -label {Default input} 
     $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/scripts/skel-inp.sen } \
         -label {Default sensitivity input} 
@@ -8913,10 +8913,13 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -command {exec $::env(EMPIREDIR)/scripts/clean $file &} \
         -label {Clean project} 
     $site_3_0.men77 add command \
-        \
         -command {exec $::env(EMPIREDIR)/scripts/clean $file
 exec rm -f $file.inp} \
         -label {Delete project} 
+    $site_3_0.men77 add command \
+        -command {exec $::env(EMPIREDIR)/scripts/ignore $file} \
+        -label {Restore prev. inputs}
+
     $top.m88 add cascade \
         -menu "$top.m88.men78" -command {} -label Source 
     set site_3_0 $top.m88
