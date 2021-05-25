@@ -21,9 +21,15 @@ if [ ! -f $file-s.endf ]; then
    echo ' '
    echo ' '
    echo 'Error in pltlst; can not find: '$file-s.endf 
-#  read bye
    exit
 fi    
+
+if [ ! -f $file.c4 ]; then
+   touch $file.c4
+   echo ' '
+   echo 'Plotlen created empty file: '$file.c4
+fi    
+
 
 # RUN PLTLEN TO PRODUCE LIST OF DATA 
 
