@@ -6,14 +6,14 @@ NAMEMAK= $(NAME)_l.mak
 LH     = ../
 
 OBJ0 = $(NAME).$(O) my_mf33.$(O)
-OBJ1 = 
+OBJ1 = zv1_str.$(O)
 OBJ2 = d_alloc.$(O)
 # dir_nt.$(O)
 
 OBJS = $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3)
 
 CC     = gcc
-CFLAGS = -c
+CFLAGS = -c $(CFLAGS2)
 
 LINK   = gcc
 OPT    =
@@ -35,3 +35,7 @@ $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 
 clean:
 	rm -f *.o
+
+cleanall :
+	rm -f $(OBJS)
+	rm -f $(NAMEEXE)

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "zv1_str.h"
 
 #define LSTR 220
 static  char    str0[LSTR];

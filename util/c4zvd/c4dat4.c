@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "zv1_str.h"
 
 #define LSTR 420
 static  char    str [LSTR];
@@ -110,9 +111,7 @@ float maxAngle=-1;
 float minEinc=-1;
 float maxEinc=-1;
 
-main (argc,argv)
-int     argc;
-char    **argv;
+int main(int argc,char **argv)
 {
     int     i, ii, ans, ierr, nsub, ll, j, iDataset, found, iData;
     int     n1=0, n2=0, numFile;
@@ -435,6 +434,7 @@ int outData(char *outfilename)
     fprintf(outFile,"%-11s%11d%44s%s\n",
     "ENDREQUEST",8,"","Z999999999999");
     fclose(outFile);
+    return 0;
 }
 
 

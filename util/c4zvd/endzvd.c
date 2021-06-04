@@ -2,13 +2,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "zv1_str.h"
 
 #define LSTR 220
 static  char    str0[LSTR];
 static  char    str1[LSTR];
 
 FILE    *inFile, *outFile;
-char    *ss,*my_fgets();
+char    *ss;
+int makeNuclide(int za, char *str);
 
 char  *nucl[] = {
      "n","H","He","Li","Be","B","C","N","O"
@@ -26,9 +28,7 @@ char  *nucl[] = {
 };
 int nNucl;
 
-main (argc,argv)
-int     argc;
-char    **argv;
+int main(int argc,char **argv)
 {
     int     i, ii, ans, ierr, nsub, ll, mtNeeded, mt, j, iDataset, found, iData;
     int     n1=0, n2=0, numFile, mat, mf, num, flagBegin=0;

@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "zv1_str.h"
+#include "my_mf33.h"
 
 #define LSTR 320
 static  char    str[LSTR];
@@ -21,9 +23,8 @@ static  char    str1451[8][90];
 
 static int debug=0;
 
-static float  *ask_float();
-char   *my_fgets();
-static int floatExtract(char *str,int n0,int ln,float *ff);
+static float* ask_float(int len);
+static int myfloatExtract(char *str,int n0,int ln,float *ff);
 int printMatrix(char *e4outName,FILE *o30);
 int float2str(float rr, char *str);
 
@@ -573,9 +574,9 @@ static struct sMTout dict_mtreac[]={
 	setFNumeration(); setN1Numeration(1);
 	ii=strExtract(ZSYNAM,str1451[5],5,11);	strTrim(ZSYNAM);
 	ii=strExtract(HSUB1,str1451[7],1,22);	strTrim(HSUB1);
-	for (; HSUB1[0]=='-';) strcpy(&HSUB1[0],&HSUB1[1]);
+	for (; HSUB1[0]=='-';) mystrcpy(&HSUB1[0],&HSUB1[1]);
 	strTrim(HSUB1);
-        ii=floatExtract(str1451[3],44,11,&rr);
+        ii=myfloatExtract(str1451[3],44,11,&rr);
 	NSUB=rr;
 
 	lnsub=sizeof(dict_nsub)/sizeof(dict_nsub[0]);
@@ -642,8 +643,7 @@ char    **argv;
 
 
 
-    static float* ask_float(len)
-    int  len;
+    static float* ask_float(int len)
     {
 	float   *arr;
 	char	*my_calloc();
@@ -680,7 +680,7 @@ char    **argv;
 	int ii;
 	ii=strExtract(nowMatMfMt,str,67,75); if (ii<9) strcpy(nowMatMfMt,"???");
 	if (debug>0) printf("...ii=%d nowMatMfMt=[%s]\n",ii,nowMatMfMt);
-//	i=floatExtract(&za,str0,1,11);
+//	i=myfloatExtract(&za,str0,1,11);
         ii=intExtract(&nowMAT,str,67,70); if (ii<0) nowMAT=-1;
         ii=intExtract(&nowMF ,str,71,72); if (ii<0) nowMF =-1;
         ii=intExtract(&nowMT ,str,73,75); if (ii<0) nowMT =-1;
@@ -703,12 +703,12 @@ char    **argv;
 	}
 	if (iiEndfArray+6>llEndfArray) return 0;
         ii=0;
-        ii+= floatExtract(str, 0,11,&x1);
-        ii+= floatExtract(str,11,11,&y1);
-        ii+= floatExtract(str,22,11,&x2);
-        ii+= floatExtract(str,33,11,&y2);
-        ii+= floatExtract(str,44,11,&x3);
-        ii+= floatExtract(str,55,11,&y3);
+        ii+= myfloatExtract(str, 0,11,&x1);
+        ii+= myfloatExtract(str,11,11,&y1);
+        ii+= myfloatExtract(str,22,11,&x2);
+        ii+= myfloatExtract(str,33,11,&y2);
+        ii+= myfloatExtract(str,44,11,&x3);
+        ii+= myfloatExtract(str,55,11,&y3);
 	*arr++=x1;	*arr++=y1;
 	*arr++=x2;	*arr++=y2;
 	*arr++=x3;	*arr++=y3;
@@ -1170,8 +1170,7 @@ char    **argv;
 
 
 
-
-static int floatExtract(char *str,int n0,int ln,float *ff)
+static int myfloatExtract(char *str,int n0,int ln,float *ff)
 {
     int  i,ii,n,ie;
     //static int nnn=0;
@@ -1199,26 +1198,6 @@ static int floatExtract(char *str,int n0,int ln,float *ff)
         ss[ii++]=ch;
     }
     ss[ii]='\0';
-
-/*--------------
-    for (ii=0,i=n0; (ii<ln)&&(str[i]!='\0')&&(str[i]==' '); ii++,i++) ;
-    n=0;
-    if ((ii<ln)&&(str[i]!='\0')) {
-        ss[n++]=str[i++];
-        ii++;
-    }
-    for (ie=0; (ii<ln)&&(str[i]!='\0')&&(n<40); ii++,i++) {
-        if (str[i]==' ') continue;
-        if (toupper(str[i])=='E') ie=1;
-        if (ie==0) {
-            if ((str[i]=='+')||(str[i]=='-')) {
-                ss[n++]='e';
-            }
-        }
-        ss[n++]=str[i];
-    }
-    ss[n]='\0';
---------------*/
 
 //    printf(" [%s]",ss);
     *ff=0;

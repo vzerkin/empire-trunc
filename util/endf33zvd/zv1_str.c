@@ -2,10 +2,13 @@
 #include    <stdio.h>
 #include    <string.h>
 #include    <ctype.h>
+#include    "zv1_str.h"
 
 static int numeration=0; // 0:C, 1:Fortran
 static int iNum1=0; // 0:ls1=lExtract, 1:ls1=n1Extract
 
+int setFNumeration() { return(setNumeration(1));}
+int setCNumeration() { return(setNumeration(0));}
 
 int setNumeration(num)
 int num;
@@ -16,50 +19,6 @@ int num;
     return(i);
 }
 
-
-int setFNumeration() { return(setNumeration(1));}
-int setCNumeration() { return(setNumeration(0));}
-
-int delEndSpace(s)
-char    *s;
-{
-    int     i, ll;
-    ll=strlen(s);
-    for (i=ll-1; i>=0; i--) {
-    if (s[i]==' ') s[i]='\0';
-    else break;
-    }
-}
-
-int delLiderSpace(s)
-char    *s;
-{
-    int     i, ii;
-    for (i=0; s[i] !='\0'; i++) 
-        if ((s[i] !='\040') && (s[i]!='\t')) break;
-    for (ii=0; s[i] !='\0'; i++, ii++) s[ii]=s[i];
-    s[ii]='\0';
-}
-
-int strExtract(s1,s0,n0,ls1)
-char *s1, *s0;
-int n0, ls1;
-{
-    int  i, ii, ls0;
-    if (iNum1!=0) ls1=ls1-n0+1;
-    n0 = n0-numeration;
-    ls0=strlen(s0);
-    *s1='\0';
-    if (ls0<n0) return(-1);
-    for (i=n0, ii=0; (i<n0+ls1)&&(s0[i]!='\0'); i++,ii++) {
-        *s1++ = s0[i];
-    }
-    *s1='\0';
-    //printf("(n0=%d,ii=%d)",n0,ii);
-    return(ii);
-}
-
-
 int setN1Numeration(num)
 int num;
 {
@@ -68,6 +27,28 @@ int num;
     iNum1 = num;
     return(i);
 }
+
+
+char* mystrcpy(char *so, char *si) {
+    memmove(so,si,strlen(si)+1);
+    return so;
+}
+/*
+char* mystrcpy(char *so,char *si) {
+    for (;*si!='\0';) *so++=*si++;
+    *so='\0';
+    return so;
+}
+*/
+
+
+int strcpy2p(char *so,char *si,int k)
+{
+    int i;
+    for (i=0; i<k; i++) so[i]=si[i];
+    return 0;
+}
+
 
 /*
 char    *my_fgets(s,ls,f)
@@ -154,6 +135,7 @@ char    *s;
     for (si=s; *si != '\0'; si++)
     if ((*si!=' ')&&(*si!='\n')&&(*si!='\t'))  *s++ = *si;
     *s = '\0';
+    return 0;
 }
 
 int checkEmptyStr(char *s)
@@ -169,7 +151,7 @@ int checkEmptyStr(char *s)
     return(iret);
 }
 
-int strpad (s,k)
+int strpad(s,k)
 char    *s;
 int     k;
 {
@@ -177,9 +159,10 @@ int     k;
     i = strlen (s);
     for (; i<k; i++) s[i]=' ';
     s[k] = '\0';
+    return 0;
 }
 
-int padstr (s,k)
+int padstr(s,k)
 char    *s;
 int     k;
 {
@@ -227,6 +210,8 @@ int n0,ls1;
     if (str[0]!='\0') {
     ss=strchr(str,'E');
     if (ss==NULL) ss=strchr(str,'e');
+    if (ss==NULL) ss=strchr(str,'D');
+    if (ss==NULL) ss=strchr(str,'d');
     if (ss==NULL) {
         //--- 'E' in not found
         ss=strchr(&str[1],'+');
@@ -262,9 +247,7 @@ int n0,ls1;
     return(ii);
 }
 
-int intExtract(rr,s0,n0,ls1)
-char  *s0;
-int   *rr, n0, ls1;
+int intExtract(int *rr,char *s0,int n0,int ls1)
 {
     long  num;
     char  *endnum;
@@ -283,7 +266,7 @@ int   *rr, n0, ls1;
 
 int wordExtract(s1,s0,n0,ls1)
 char *s1, *s0;
-int n0, ls1;
+int n0,ls1;
 {
     int  i;
     char    *si;
@@ -301,7 +284,7 @@ int n0, ls1;
 //---Word may contain 'SPACE' in it ---
 int wordSpExtract(s1,s0,n0,ls1)
 char *s1, *s0;
-int n0, ls1;
+int n0,ls1;
 {
     int  i;
     char    *si;
@@ -330,54 +313,91 @@ int n0;
     return(1);
 }
 
+int strExtract(s1,s0,n0,ls1)
+char *s1, *s0;
+int n0,ls1;
+{
+    int  i, ii, ls0;
+    if (iNum1!=0) ls1=ls1-n0+1;
+    n0 = n0-numeration;
+    ls0=strlen(s0);
+    *s1='\0';
+    if (ls0<n0) return(-1);
+    for (i=n0, ii=0; (i<n0+ls1)&&(s0[i]!='\0'); i++,ii++) {
+        *s1++ = s0[i];
+    }
+    *s1='\0';
+    //printf("(n0=%d,ii=%d)",n0,ii);
+    return(ii);
+}
 
 char toascii7(char ch)
 {
     if ((ch&0x80)==0) return ch;
-    if ((ch&0xFF)==0xC4) return('-'); //Ä
-    if ((ch&0xFF)==0xC2) return('+'); //Â
-    if ((ch&0xFF)==0xB3) return('|'); //³
-    if ((ch&0xFF)==0xC5) return('+'); //Å
-    if ((ch&0xFF)==0xC1) return('+'); //Á
+    if ((ch&0xFF)==0xC4) return('-'); //A1
+    if ((ch&0xFF)==0xC2) return('+'); //A2
+    if ((ch&0xFF)==0xB3) return('|'); //^3
+    if ((ch&0xFF)==0xC5) return('+'); //A3
+    if ((ch&0xFF)==0xC1) return('+'); //A4
     if ((ch&0xFF)==0x9A) return('U'); // EOF: end of text file!!!
     if ((ch&0xFF)==0x8A) return('e'); // \n: end of line!!!
     if ((ch&0x80)==0x80) ch=ch&0x7F;	//2008-12-22
     return ch;
 }
 
-int str2ascii7(s)
-char    *s;
+int str2ascii7(char *s)
 {
     for (; *s!='\0'; s++) {
 	*s=toascii7(*s);
     }
+    return 0;
 }
 
-int strToUpper (s)
-char    *s;
+int strToUpper(char *s)
 {
     for (; *s!='\0'; s++) *s=toupper(*s);
+    return 0;
 }
 
-int strToLower (s)
-char    *s;
+int strToLower(char *s)
 {
     for (; *s!='\0'; s++) *s=tolower(*s);
+    return 0;
+}
+
+int delLiderSpace(char *s)
+{
+    int     i, ii;
+    for (i=0; s[i] !='\0'; i++) 
+        if ((s[i] !='\040') && (s[i]!='\t')) break;
+    for (ii=0; s[i] !='\0'; i++, ii++) s[ii]=s[i];
+    s[ii]='\0';
+    return 0;
+}
+
+int delEndSpace(char *s)
+{
+    int     i, ll;
+    ll=strlen(s);
+    for (i=ll-1; i>=0; i--) {
+    if (s[i]==' ') s[i]='\0';
+    else break;
+    }
+    return 0;
 }
 
 /*--- <SPASEs>, <=s>, <TABs>, <:s> ---*/
-int delRazdelitel(s)
-char    *s;
+int delRazdelitel(char *s)
 {
     int     i, ii;
     for (i=0; s[i] !='\0'; i++)
         if ((s[i] !=' ') && (s[i]!='\t') && (s[i]!='=') && (s[i]!=':') ) break;
     for (ii=0; s[i] !='\0'; i++, ii++) s[ii]=s[i];
     s[ii]='\0';
+    return 0;
 }
 
-int delComment(s,ch)
-char    *s, ch;
+int delComment(char *s,char ch)
 {
     int     i, ii;
     for (i=0; s[i] !='\0'; i++) {
@@ -385,55 +405,56 @@ char    *s, ch;
         s[i]='\0'; break;
     }
     }
+    return 0;
 }
 
 
-int strnShift(s,n)
-char    *s;
-int     n;
+int strnShift(char *s,int n)
 {
     int     i,l;
     l=strlen(s);
     if (n>l) i=l;
     else i=n;
-    strcpy(s,&s[i]);
+    mystrcpy(s,&s[i]);
+    return 0;
 }
 
 
-int deleteSymbol(s,sym)
-char    *s,sym;
+int deleteSymbol(char *s,char sym)
 {
     char    *si;
     for (si=s; *si != '\0'; si++) {
     if (*si==sym) {
-        strcpy(si,si+1);
+        mystrcpy(si,si+1);
         break;
     }
     }
+    return 0;
 }
 
-int changeSymbol(s,sym1,sym2)
-char    *s,sym1,sym2;
+int changeSymbol(char *s,char sym1,char sym2)
 {
-    char    *si;
-    for (si=s; *si != '\0'; si++) {
+    char *si;
+    int ii,ilast=-1;
+    for (si=s,ii=0; *si!='\0'; si++,ii++) {
         if (*si==sym1) {
             *si=sym2;
+	    ilast=ii;
             //break;  // change 1-st symbol
         }
     }
+    return ilast;
 }
 
-int strTrim(s)
-char    *s;
+int strTrim(char *s)
 {
     delLiderSpace(s);
     delEndSpace(s);
+    return 0;
 }
 
 
-int strTab2Space(s0,s1)
-char *s1, *s0;
+int strTab2Space(char *s0,char *s1)
 {
     int  i, ii;
     for (i=0; ;) {
@@ -473,6 +494,26 @@ int float2str(float rr, char *str)
     }
     strcpy(str,s1);
     return(0);
+}
+
+char *my_fputs(FILE *f,char *s,int nsep,char sep)
+{
+    char    *ss, *sst, *endStr, ww[10];
+    char    *si;
+    int isep;
+    ss=s;
+    if (ss==NULL) return(ss);
+    for (si=s,isep=0; *si!='\0'; si++) {
+	fprintf(f,"%c",*si);
+        if (*si==sep) {
+	    isep++;
+	    if (isep==nsep) {
+		fprintf(f,"%c",'\n');
+		isep=0;
+	    }
+        }
+    }
+    return(ss);
 }
 
 

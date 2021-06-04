@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "zv1_str.h"
 
 // 23.08.2005 ZV: reading +dY, -dY
 
@@ -45,12 +46,12 @@ struct sdataset {
 static  struct sdataset dataset;
 
 int extractData(char *str, float *rdata);
+int extractReaction(char *str0);
+int outputUnits(int mf);
 
 int firstDA_E=0;
 
-main (argc,argv)
-int     argc;
-char    **argv;
+int main(int argc,char **argv)
 {
     int     i, ii, ans, ierr, nsub, ll, mtNeeded, mt, j, iDataset, found, iData;
     int     n1=0, n2=0, numFile, mat, mf, num, flagBegin=0, iline, nn;
@@ -360,6 +361,7 @@ int outputUnits(int mf)
         fprintf(outFile,"iy-unit: 1\n");
         fprintf(outFile,"//\n"); //end mark
     }
+    return 0;
 }
 
 

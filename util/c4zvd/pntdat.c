@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include    "zv1_str.h"
 
 #define LSTR 220
 static  char    str [LSTR];
@@ -10,11 +11,16 @@ static  char    strProjectile[LSTR]="n";
 static  int     izaProjectile=1;
 int za2particle(int za, char *str);
 int za2nuclide(int za, char *str);
+void initData();
 
 FILE    *inFile, *in2File, *outFile;
-char    *ss,*my_fgets();
+char    *ss;
 int extractReaction(char *str0, int flagPrint);
 char* getReactionFromX4List(char *datasetID);
+int extractData(char *str);
+int extractAuthor(char *str00);
+void acceptData();
+void writeData();
 
 char  x4lstrFileName[LSTR]="";
 FILE  *x4lstFile=NULL;
@@ -44,9 +50,7 @@ float rdata[6];
 int   idata[6];
 char  reactionName[LSTR]="?(?,?)?";
 
-main (argc,argv)
-int     argc;
-char    **argv;
+int main(int argc,char **argv)
 {
     int     i, ii, ans, ierr, nsub, ll, mt, j, iDataset, found, iData;
     int     n1=0, n2=0, numFile, iarg;
@@ -143,7 +147,7 @@ char    **argv;
 
 
 
-writeData()
+void writeData()
 {
     int iauthor,lw,ii;
             printf("\ndataset=%d...",dataset.lData); //getch();
@@ -424,7 +428,7 @@ int extractReaction(char *str0, int flagPrint)
     return(ll);
 }
 
-initData ()
+void initData()
 {
 //??    strcpy(dataset.reaction   ,reactionName);
     sprintf(dataset.subentry,"%s%04d%03d","X",iDataset+1,2);
@@ -438,7 +442,7 @@ initData ()
     dataset.eMax  =-1e+37;
 }
 
-acceptData()
+void acceptData()
 {
     dataset.lData++;
     if (rdata[0]<dataset.eMin) dataset.eMin=rdata[0];

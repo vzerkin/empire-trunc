@@ -21,7 +21,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "zv1_str.c"
+#include "zv1_str.h"
+#include "my_mf33.h"
 
 #define LSTR 320
 static  char    str[LSTR];
@@ -227,5 +228,6 @@ if (iiok!=0) {
     if (o3!=NULL) fclose(o3);
     if (o31!=NULL) fclose(o31);
 */
+    printf("\nProgram completed.\n");
     exit(0);
 }

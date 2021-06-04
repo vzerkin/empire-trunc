@@ -14,7 +14,7 @@ OBJS = $(OBJ0) $(OBJ1) $(OBJ2) $(OBJ3)
 
 #CC     = cl
 CC     = gcc
-CFLAGS = -c
+CFLAGS = -c $(CFLAGS2)
 
 #LINK   = link
 #LINK   = cc
@@ -32,3 +32,10 @@ $(NAMEEXE) :  $(NAMEMAK) $(OBJS)
 #   $(CC) $(CFLAGS) { $< }
 .c.$(O):
 	$(CC) $(CFLAGS) $< 
+
+clean :
+	rm -f $(OBJS)
+
+cleanall :
+	rm -f $(OBJS)
+	rm -f $(NAMEEXE)
