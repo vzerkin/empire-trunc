@@ -1,0 +1,15 @@
+int e4extract1451();
+int AllocEndfArray(int maxStr);
+int FreeEndfArray();
+int e4readNextSectLines(FILE* inFile);
+int e4printNextSectLines();
+int e4makeReac(int mt);
+int e4mf33getMAT();
+int e4mf33getMF();
+int e4mf33getMT();
+float* e4mf33getXArray(int *lxa);
+float* e4mf33getYArray(int *lya);
+float* e4mf33getZArray(int *lza);
+int makeMatrix();
+int printMatrix(char *e4outName,FILE *o30);
+int printUnsertantyDiag1X(char *e4outName,FILE *o30);
