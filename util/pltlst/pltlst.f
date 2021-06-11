@@ -64,7 +64,7 @@ C-
       CHARACTER*2  CH(100)
       CHARACTER*3  CHC0,CHC1
       CHARACTER*10 CH10(3),CX10(3),BL10
-      CHARACTER*26 REF
+      CHARACTER*26 REF0,REF1
       CHARACTER*40 BLNK,FLNM,FLEX,FLLS,FLIN
       CHARACTER*80 RC1,RC2
       CHARACTER*130    REC
@@ -135,7 +135,7 @@ C     Extending the list for low energy evaluation work
       PRD3=0
       LVL1=0
       ELV1=0
-      REF1=0
+      REF1=' '
       NEN1=0
       NSU1=0
       IZIX=0
@@ -192,8 +192,13 @@ C* Read the first C4 record
   17  READ (LEX,901,END=80) REC
       IF(REC(1:1).EQ.'#') GO TO 17
       IF(REC(1:40).EQ.BLNK) GO TO 80
-      READ (REC,902) IZI0,IZA0,MS0,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
+!	ind=index(REC,',')		!patch:gfortran-10.2: 902 format:A26
+!	if (ind.gt.0) REC(ind:ind)=' '	!patch:gfortran-10.2
+      READ (REC,902,ERR=11111)
+     & IZI0,IZA0,MS0,MF0,MT0,CHA0,CHB0,ENR0,DEN0,XSR0,DXS0
      &              ,PRA0,PRB0,PRC0,PRD0,CHC0,REF0,NEN0,NSU0
+11111 continue
+!tst10	write (*,*) 'REF0:',REF0,' NEN0:',NEN0,' NSU0:',NSU0
       IF(NXSMJR.GT.0) THEN
         IF(IZI0.GT.1) MJRXS(1)=-IABS(MJRXS(1))
         DO I=1,MXXS
@@ -253,8 +258,12 @@ C* Process all C4 records and check for changes
    30 READ (LEX,901,END=40) REC
       IF(REC(1:1).EQ.'#') GO TO 30
       IF(REC(1:40).EQ.BLNK) GO TO 40
-      READ (REC,902) IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
+!	ind=index(REC,',')		!patch:gfortran-10.2: 902 format:A26
+!	if (ind.gt.0) REC(ind:ind)=' '	!patch:gfortran-10.2
+      READ (REC,902,ERR=11112)
+     & IZI1,IZA1,MS1,MF1,MT1,CHA1,CHB1,ENR1,DEN1,XSR1,DXS1
      &              ,PRA1,PRB1,PRC1,PRD1,CHC1,REF1,NEN1,NSU1
+11112 continue
       IF(NXSMJR.GT.0) THEN
         IF(IZI1.GT.1) MJRXS(1)=-IABS(MJRXS(1))
         DO I=1,MXXS
@@ -678,7 +687,7 @@ C* All processing completed
       STOP 'PLTLST Completed'
 C*
   901 FORMAT(A130)
-  902 FORMAT(I5,I6,A1,I3,I4,2A1,1X,8F9.0,A3,A26,I4,I3)
+  902 FORMAT(I5,I6,A1,I3,I4,2A1,1X,8E9.0,A3,A26,I4,I3)
   903 FORMAT(2A40)
   904 FORMAT(BN,F10.0)
   905 FORMAT(A40,1P,E10.3)
