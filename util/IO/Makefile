@@ -53,7 +53,7 @@ libdir = $(EMPIREDIR)/lib
 
 # make sure MAKE knows f90 extension
 %.o : %.f90
-	$(FC) $(FFLAGS) $(defR8) -c $<
+	$(FC) $(FFLAGS) $(FFLAGS2) $(defR8) -c $<
 
 # build library
 
@@ -75,7 +75,7 @@ $(libdir)/libendfio.a : endf.o
 	rm io.o libendfio.a
 
 $(libdir)/libc4io.a : c4_io.f90
-	$(FC) $(FFLAGS) $(defR8) -c c4_io.f90
+	$(FC) $(FFLAGS) $(FFLAGS2) $(defR8) -c c4_io.f90
 	ar -cr libc4io.a c4_io.o
 	ranlib libc4io.a
 	install -d $(libdir)
