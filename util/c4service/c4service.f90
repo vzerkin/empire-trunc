@@ -16,7 +16,7 @@ PROGRAM c4service
    CHARACTER*7, PARAMETER :: inpc4 = '-c4.inp'
    CHARACTER*8, PARAMETER :: outc4 = '-mod.c4'
    CHARACTER*7, PARAMETER :: logc4 = '-log.c4'
-   CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
+   CHARACTER*1            :: action = 'r'   ! action to be taken on a section r-retain, a-add to, d-delete, m-modify, s-smooth, c-crop energy range, t-thin
    CHARACTER*10            :: arg2, arg3, arg4        ! arguments on the command line
    REAL*4 :: y1 = 0.0, y2 = 0.0, y3 = 0.0, y4 = 0.0 ! section modifying parameters
    INTEGER*4 mt1      ! MT to plot. If MT1=0, then plot all MTs. If NEX=1, only fit this MT.
@@ -85,7 +85,7 @@ PROGRAM c4service
       WRITE(6,*) 'Performed operations on the subsections'
       WRITE(9,*) ' '
       WRITE(9,*) 'Performed operations on the subsections'
-      WRITE(9,*) 'Performing operations on the subsections'
+      ! WRITE(9,*) 'Performing operations on the subsections'
       DO k=1,c4%nsec            !do loop over subsections
          sc => c4%sec(k)
          pt => c4%sec(k)%pt(1)  ! (sc%ndat) for the last point
@@ -103,7 +103,7 @@ PROGRAM c4service
          ! IF(action == 'p') CALL print_section(c4, k)
          IF(action == 'd') CALL delete_section(c4, k)                    ! remove section
          IF(action == 'm') CALL multiply_section(sc, k, y1, y2)          ! multiply cross sections by y1 and uncertainties by y2 (if y2=0 y2 set y1)
-         IF(action == 'm') CALL addto_section(sc, k, y1, y2)             ! add y1 [b] to cross sections and y2 [b] to unceretainties
+         IF(action == 'a') CALL addto_section(sc, k, y1, y2)             ! add y1 [b] to cross sections and y2 [b] to unceretainties
          IF(action == 's') CALL smooth_section(sc, k, int(y1), y2, y3)   ! smooth cross sections int(y1) times between energies y2 and y3 MeV
          IF(action == 't') CALL thin_section(sc, k, y1)                  ! keeps every int(y1) point only 
          IF(action == 'c') CALL crop_section(sc, k, y1, y2)              ! limit incident energies to between y1 and y2
@@ -173,7 +173,7 @@ CONTAINS
 
       WRITE(6,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Cropping subentry: ',k,')', sc%ref, sc%ent, sc%sub
-      WRITE(9,*)' Cropping subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! WRITE(9,*)' Cropping subsection: ',k, sc%ref, sc%ent, sc%sub
 
       IF(y1+y2 == 0.0) RETURN   ! no limits, nothing to do
       y1 = y1*10**6.   ! converting from MeV to eV
@@ -248,7 +248,7 @@ CONTAINS
 
       WRITE(6,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Thinning subentry: ',k,')', sc%ref, sc%ent, sc%sub
-      WRITE(9,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! WRITE(9,*)' Thinning subsection: ',k, sc%ref, sc%ent, sc%sub
 
       istep = y1 + 0.00001
       IF(sc%ndat <= 5*istep) RETURN  !set too small for the istep
@@ -279,8 +279,9 @@ CONTAINS
       ! Check default input
       IF (y1 > 0.0 .and. y2 == 0.0) y2 = y1  ! Set the same factor for uncertainties as for x-sec.
       IF (y2 == 0.0)  y2 = 1.0               ! Don't zero uncertainties!
+      IF (y1 == 0.0)  y1 = 1.0               ! Don't zero cross sections!
 
-      WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
       WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
 
@@ -310,7 +311,7 @@ CONTAINS
       TYPE (c4_data_point), POINTER :: pt
 
       
-      WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! WRITE(9,*)' Modifying subsection: ',k, sc%ref, sc%ent, sc%sub
 
       WRITE(6,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Modifying subentry: ',k,')', sc%ref, sc%ent, sc%sub
@@ -344,7 +345,7 @@ CONTAINS
 
       WRITE(6,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
       WRITE(9,*)' Deleted  subentry: ',k, sc%ref, sc%ent, sc%sub
-      WRITE(9,*)' Deleted  subsection: ',k, sc%ref, sc%ent, sc%sub
+      ! WRITE(9,*)' Deleted  subsection: ',k, sc%ref, sc%ent, sc%sub
       RETURN
    END SUBROUTINE delete_section
 

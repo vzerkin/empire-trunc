@@ -1,6 +1,6 @@
-! $Rev: 5122 $
-! $Author: capote $
-! $Date: 2018-05-18 00:23:49 +0200 (Fr, 18 Mai 2018) $
+! $Rev: 5286 $
+! $Author: mwherman $
+! $Date: 2021-06-16 02:09:39 +0200 (Mi, 16 Jun 2021) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -615,7 +615,7 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
         ! if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
         ! Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
         ! defining Umatr as TRANSPOSE(UMatr)
-		  if (debug) WRITE (*,*) CCumatrix(i1)%icol, CCumatrix(i1)%irow, CCumatrix(i1)%umatrix
+        if (debug) WRITE (*,*) CCumatrix(i1)%icol, CCumatrix(i1)%irow, CCumatrix(i1)%umatrix
           Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
       enddo
       if (debug) write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
@@ -640,8 +640,8 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
       if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
 
       do i1 = nccu, nmaxu
-	     icol = CCpmatrix(i1)%irow
-	 	 irow = CCpmatrix(i1)%icol
+        icol = CCpmatrix(i1)%irow
+        irow = CCpmatrix(i1)%icol
          if(irow == icol) then
            Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
          else
@@ -650,21 +650,21 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
          endif
       enddo
             
-	  if (debug) then
+      if (debug) then
         WRITE (*,*) 'preparing Pmatrix...'
-	    do irow = 1, ndim
-	      do icol = 1, ndim
+        do irow = 1, ndim
+         do icol = 1, ndim
             WRITE (*,*) irow, icol, Pmatr(irow,icol) 
-	      enddo
+         enddo
         enddo
         pause
       endif
 
-	  EXIT
+     EXIT
 
-	ENDDO
+   ENDDO
     if (debug) write(*,*) ' Prepare_CC: Pmatr', sngl(Jcn), pcn, nccu, nmaxu
-	if (debug) pause
+    if (debug) pause
 
     if (debug) write(*,*) 'Smatr, MAX_smatr: ',MAX_pmatr
 
@@ -747,20 +747,20 @@ SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
     ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
     ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
     DO i1=1,ndim
-	  Sphase(i1) = datan(Sdiag(i1,i1)) ! from below Eq.(21), phi_{alpha}
+      Sphase(i1) = datan(Sdiag(i1,i1)) ! from below Eq.(21), phi_{alpha}
       if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i1, Sdiag(i1,i1),ZItmp(i1,i1), &
           ' phi(alpha)=',Sphase(i1)
     ENDDO
     ! We diagonalize Smatr to calculate the phases from its diagonal elements
-	! However, we were not able to verify that Umatr also diagonalized Smatr
-	! Clearly, we can not calculate Umatr from Smatr as papers clearly state
+    ! However, we were not able to verify that Umatr also diagonalized Smatr
+    ! Clearly, we can not calculate Umatr from Smatr as papers clearly state
 
     IF(allocated(Sdiag) ) DEALLOCATE(Sdiag)
     IF(allocated(ZItmp) ) DEALLOCATE(ZItmp)
     IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
     IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
 
-	RETURN
+    RETURN
 
 30  WRITE(8,*)  'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
     WRITE(12,*) 'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
