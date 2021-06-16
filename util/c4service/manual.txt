@@ -51,6 +51,8 @@ multiplicative factor dy2 to 1 if entered as 0). Denoting original EXFOR values 
 as dy, and indicating modified values by the prime, the operations read as y′ = y+y1+y∗y2 for cross sections 
 and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
 
+[a] add cross section [barn] to the selected subentry
+
 [s] smooth subentry by sliding four-point, using area conserving algorithm by A.Kuprat, A.Khamayseh, D.George, 
     and L.Larkey, Journal of Computational Physics 172, 99–118 (2001), doi:10.1006/jcph.2001.6816); PARAMETERS:
     iter       - number of smoothing iterations (generaly many are needed >10 or even 1000s)
@@ -159,7 +161,7 @@ uncertainties will by multiplied by the same factor (default if dy2=0) and have 
 The subentry 6) will be smoothed 100 times in the whole energy range, 10) will be thined by retaining every 
 10-th value and 18) will be restricted to 2 - 10 MeV range. Saving this file, returning to the terminal and 
 hitting 'y' will execute the changes. The performed operations are displayed in the terminal and stored in 
-the *-c4.log file. The renwed list of subentries (and the new default input file) reflect changes such as 
+the *-log.c4 file. The renwed list of subentries (and the new default input file) reflect changes such as 
 removing files, changing energy ranges and number of points (m and s changes are visible only inside the C4 
 file). To stop processing answer 'n' (or hit return) to the question in the terminal (log file will be displayed). 
 Subequent sessions can be run later and log file will keep cumulative record of the changes.  
