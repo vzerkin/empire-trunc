@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5172 $
-Ccc   * $Author: capote $
-Ccc   * $Date: 2019-11-17 19:03:46 +0100 (So, 17 Nov 2019) $
+Ccc   * $Rev: 5289 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2021-06-19 01:09:57 +0200 (Sa, 19 Jun 2021) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -892,7 +892,7 @@ C
       INTEGER nejc
 C
 C
-      nejc = -1
+      nejc = 0
       IF (nnuc.EQ.mt91) THEN
         nejc = 1
       ELSEIF (nnuc.EQ.mt649) THEN
@@ -900,7 +900,7 @@ C
       ELSEIF (nnuc.EQ.mt849) THEN
          nejc = 3
       ENDIF
-      IF (IOUt.GT.2 .and. nejc.GT.0) WRITE (8,99005)
+      IF (IOUt.GT.2) WRITE (8,99005) 
 99005 FORMAT (1X,/,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
      &        1X,27('*'))
       DO i = 1, NLV(Nnuc) - 1
@@ -908,12 +908,14 @@ C
          popl = POPlv(l,Nnuc)
          IF (popl>0) THEN
           IF (BR(l,1,2,Nnuc).EQ.0. .and. ISIsom(l,Nnuc).EQ.0) THEN
+C
 C-----------Normal level without branching ratios
+C
             IF (IOUt.GT.2) WRITE (8,99010) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), popl
 99010       FORMAT (1X,/,5X,'Level of energy  ',F8.4,' MeV',
      &              ' and spin ',F6.1,' with population ',G13.5,
-     &              ' mb is not depopulated (g.s. transition assumed)')
+     &              ' mb has no brenchings - g.s. transition assumed')
 C-----------Well... let it go down to the ground state
 C           gacs = POPlv(l,Nnuc)
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + popl
@@ -925,7 +927,6 @@ C           icse = min(INT(2.0001 + egd/DE),ndecse)
             CSEt(icse,0) = CSEt(icse,0) + popl/DE  ! Jan 2011
             CSEmis(0,Nnuc) = CSEmis(0,Nnuc) + popl
 C-----------Add transition to the exclusive or inclusive gamma spectrum
-
             IF (ENDf(Nnuc).EQ.1) THEN
                POPcse(0,0,icse,INExc(Nnuc)) = POPcse(0,0,icse
      &          ,INExc(Nnuc)) + popl/DE
@@ -933,9 +934,12 @@ C-----------Add transition to the exclusive or inclusive gamma spectrum
                CSE(icse,0,0) = CSE(icse,0,0) + popl/DE
             ENDIF
           ELSEIF (ISIsom(l,Nnuc).EQ.1 .AND. nejc.GT.0) THEN
+C
 C-----------Isomer state in the residue after n,p, or alpha emission
 C-----------No gamma-decay of the isomeric state imposed
 C-----------Add gamma cascade population to the direct population
+C
+
             POPlv(l,Nnuc) = popl + CSDirlev(l,nejc)
             IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), POPlv(l,Nnuc)
@@ -945,14 +949,19 @@ C-----------Add gamma cascade population to the direct population
 C-----------We add it to the ground state to have correct total cross section
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + POPlv(l,Nnuc)
           ELSEIF (ISIsom(l,Nnuc).EQ.1) THEN
+C
 C-----------Isomer state in any other nucleus
 C-----------No gamma-decay of the isomeric state imposed
+C
             IF (IOUt.GT.2) WRITE (8,99012) ELV(l,Nnuc), LVP(l,Nnuc)
      &                            *XJLv(l,Nnuc), popl
 C-----------We add it to the ground state to have correct total cross section
             POPlv(1,Nnuc) = POPlv(1,Nnuc) + popl
           ELSE
+C
 C-----------Normal level with branching ratios
+C
+
             IF (IOUt.GT.2) WRITE (8,99015) ELV(l,Nnuc), LVP(l,Nnuc)
      &                               *XJLv(l,Nnuc), popl
 99015       FORMAT (1X/,5X,'Decay of  ',F7.4,' MeV  ',F5.1,
