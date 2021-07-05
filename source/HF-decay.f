@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5257 $
-Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-10-02 19:20:19 +0200 (Fr, 02 Okt 2020) $
+Ccc   * $Rev: 5290 $
+Ccc   * $Author: capote $
+Ccc   * $Date: 2021-07-06 01:01:16 +0200 (Di, 06 Jul 2021) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1575,6 +1575,8 @@ C
      &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl, ftmp
       INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
 C
+      DOUBLE PRECISION AMAss, EJMass    
+C
 C
 C-----Normalize recoil spectrum of the parent
 C     sumnor = 0.d0
@@ -1602,7 +1604,9 @@ C--------Residual nuclei must be heavier than alpha
 C--------Decay to continuum
 C--------recorr is a recoil correction factor that
 C--------divides outgoing energies
-         recorr = DBLE(ares)/AEJc(nejc)
+C        recorr = DBLE(ares)/AEJc(nejc)
+         recorr = AMAss(Nnuc)/EJMass(nejc)
+
          exqcut = EX(Ke,Nnuc) - Q(nejc,Nnuc) - ECUt(nnur)
          DO ie = 1, NDECSE !over ejec. energy (daughter excitation)
             icse = (exqcut - (ie - 1)*DE)/DE + 1.001
@@ -1610,8 +1614,8 @@ C-----------Daughter bin
             IF (icse.LE.0) EXIT
 
             erecejc = (ie - 1)*DE/recorr
-            DO ire = 1, NDEREC          !over recoil spectrum
-              ftmp = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*coeff*recorr  
+            DO ire = 1, NDEREC          !over recoil spectrum	 ! Bug 07/21
+              ftmp = RECcse(ire,Ke,Nnuc)*AUSpec(ie,nejc)*coeff !*recorr  
               IF(ftmp>0) THEN
                  erecpar = (ire - 1)*DERec
                  DO na = 1, NDANG
@@ -1640,9 +1644,10 @@ C--------Decay to discrete levels (stored with icse=0)
             DO ire = 1, NDEREC      !over recoil spectrum
               ftmp = RECcse(ire,Ke,Nnuc)*REClev(il,nejc)*coeff                  
               IF(ftmp>0) THEN 
+                erecpar = (ire - 1)*DERec
                 DO na = 1, NDANG !over angles
-                  erecoil = (ire - 1)*DERec + erecod +
-     &                       2.0*SQRT((ire - 1)*DERec*erecod)
+                  erecoil = erecpar + erecod +
+     &                       2.0*SQRT(erecpar*erecod)
      &                      *CANgler(na)
                   irec = erecoil/DERec + 1.001
                   weight = (erecoil - (irec - 1)*DERec)/DERec
@@ -1713,7 +1718,8 @@ C     DOUBLE PRECISION qout
 C
 C Local variables
 C
-      DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,recorr,cmul,stmp
+C     DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,recorr,cmul,stmp
+      DOUBLE PRECISION csum,ftmp,corr,xsdisc,esum,       cmul,stmp
       DOUBLE PRECISION dtmp,sstmp
       INTEGER ie, ilast
 
@@ -1722,7 +1728,7 @@ C     IF (CSPrd(Nnuc).LE.CSMinim.or.NINT(A(Nnuc)).eq.NINT(A(1))) RETURN
 C-----Normalize recoil spectra to remove eventual inaccuracy
 C-----due to numerical integration of angular distributions
 C-----and find last non-zero cross section for printing
-      recorr = A(Nnuc)/(A(1)-A(Nnuc))
+C     recorr = A(Nnuc)/(A(1)-A(Nnuc))
 C
 C     To get consistent integral value
 C
@@ -1735,7 +1741,7 @@ C
         ftmp = RECcse(ie,0,Nnuc)
         IF (ftmp.GT.0) then
           csum = csum + ftmp
-          esum = esum + ftmp*FLOAT(ie - 1)*DERec/recorr
+          esum = esum + ftmp*FLOAT(ie - 1)*DERec !/recorr !bug 07/21
           ilast = ie
         ENDIF
       ENDDO
@@ -1750,7 +1756,7 @@ C     ilast = MIN(ilast + 1,NDEX)
         csum  = csum -  
      &      0.5d0*(RECcse(1,0,Nnuc)+RECcse(ilast,0,Nnuc))
         esum  = esum - RECcse(ilast,0,Nnuc)*
-     &          0.5d0*FLOAT(ilast - 1)*DERec/recorr
+     &          0.5d0*FLOAT(ilast - 1)*DERec !/recorr  !bug 07/21
       endif
 C
 C     recoil correction added by RCN, 01/2014
@@ -1777,8 +1783,8 @@ C
       DO ie = 1, ilast
         stmp = RECcse(ie,0,Nnuc)*dtmp
         if(stmp.le.0 .and. ie.ne.ilast) cycle 
-        WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec/recorr,
-     &                                             stmp*recorr
+        WRITE (12,'(F10.6,E14.5)') FLOAT(ie - 1)*DERec, !/recorr  !bug 07/21
+     &                                             stmp !*recorr  !bug 07/21
         sstmp = sstmp + stmp
       ENDDO
 
@@ -1894,7 +1900,8 @@ C-----Find last non-zero cross section for printing
       csum  = 0.d0
       esum  = 0.d0
       ilast = 0
-      recorr = A(Nnuc)/(A(1)-A(Nnuc))
+C     recorr = A(Nnuc)/(A(1)-A(Nnuc))
+      recorr = AMAss(Nnuc)/EJMass(ipart)
       DO ie = 1, NDEX                         
         ftmp = POPcse(0,ipart,ie,INExc(Nnuc))
         IF (ftmp.GT.0) then
@@ -1907,13 +1914,12 @@ C     IF (A(Nnuc).eq.A(1)-1 .and. Z(Nnuc).eq.Z(1))
 C    & write(*,*) '  Spectrum of recoils  ',
 C    &       React, 'ZAP=', IZA(Nnuc), ' csum=', csum
 
-C     IF (csum.LE.CSMinim .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
 C     IF (csum.LE.0.d0 .or. ilast.eq.0 .or. A(Nnuc).eq.A(1)) RETURN
       IF(csum.LE.CSMinim*0.001d0  .or. ilast.eq.0 .or. 
      &   A(Nnuc).eq.A(1)) RETURN
 
-C     ilast = MIN(ilast + 1,NDEX)
-      ilast = MIN(ilast + 1,NDEREC)
+      ilast = MIN(ilast + 1,NDEX)
+C     ilast = MIN(ilast + 1,NDEREC)
       
       if (ilast.gt.1) then
         csum  = csum - 0.5d0*
