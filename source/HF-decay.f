@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5290 $
+Ccc   * $Rev: 5291 $
 Ccc   * $Author: capote $
-Ccc   * $Date: 2021-07-06 01:01:16 +0200 (Di, 06 Jul 2021) $
+Ccc   * $Date: 2021-07-06 12:54:43 +0200 (Di, 06 Jul 2021) $
 
       SUBROUTINE HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
 
@@ -1574,8 +1574,6 @@ C
       DOUBLE PRECISION coeff, dang, erecejc, erecod, erecoil, erecpar,
      &  exqcut, recorr, sumnor, weight, ares, zres, csmsdl, ftmp
       INTEGER icse, ie, il, ire, irec, na, nejc, nnur, izares, iloc
-C
-      DOUBLE PRECISION AMAss, EJMass    
 C
 C
 C-----Normalize recoil spectrum of the parent
