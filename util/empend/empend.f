@@ -1,6 +1,6 @@
 Ccc   * $Id: empend.f$ 
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2020-04-12 21:37:38 +0200 (So, 12 Apr 2020) $
+Ccc   * $Date: 2021-07-20 11:21:03 +0200 (Di, 20 Jul 2021) $
 
       PROGRAM EMPEND
 C-Title  : EMPEND Program
@@ -7636,6 +7636,7 @@ C*      -- No data given, assume purely isotropic (law=3)
         ETH=MAX(EMIN,(-QQI(IT))*(AWR+AWI)/AWR)
 C...
 C...    PRINT *,'        it,mt,zap,awp',it,mth(it),zap,awp
+C...    PRINT *,'        EMIN,ETH',EMIN,ETH
 C...
         LCT=2
         NR =1
@@ -7693,7 +7694,8 @@ c...
       J2 =0
       JTH=0
       INR(1)= 2
-      ETH=(-QQI(IT))*(AWR+AWI)/AWR
+C...  ETH=(-QQI(IT))*(AWR+AWI)/AWR
+      ETH=MAX(EMIN,(-QQI(IT))*(AWR+AWI)/AWR)
 C* Scan the data-set to check if any tabular data exist
       LL0=LL
       NE1=NE
