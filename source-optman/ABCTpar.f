@@ -186,7 +186,7 @@ C     KODMA=KOD
       ENDIF
     
       KEYAP=2
-      CALL ANPOW                          !NOT WORKING YET !!!!!
+      CALL ANPOW                       !NOT WORKING YET !!!!!
 
       IF(MEPRI.NE.98) THEN
       IF(MEPRI.LT.98) PRINT 338, PNAME
@@ -293,10 +293,10 @@ C     CROSS SECTION FILES
 C
 
       IF(MEPRI.EQ.98) THEN  
-C       open(unit=93,file=TRIM(fname)//'.CS')
-C       open(unit=98,file=TRIM(fname)//'.ICS')
-        open(unit=93,file=TRIM(fname)//'.cs')
-        open(unit=98,file=TRIM(fname)//'.ics')
+        open(unit=93,file=TRIM(fname)//'.CS')
+        open(unit=98,file=TRIM(fname)//'.ICS')
+C       open(unit=93,file=TRIM(fname)//'.cs')
+C       open(unit=98,file=TRIM(fname)//'.ics')
 
        IF(ETA.EQ.0.D0) THEN
 C        WRITE(93,'(10H<CROSS-S.>,F10.2,F10.5,F10.2,2I5)') 
@@ -351,10 +351,10 @@ C        WRITE(93,'(1X,E14.8)') (CST - CSN(1))*1000.
        
       IF(MEPRI.EQ.98) THEN  
 C
-C       open(unit=96,file=TRIM(fname)//'.LEG')
-C       open(unit=97,file=TRIM(fname)//'.ANG')
-        open(unit=96,file=TRIM(fname)//'.leg')
-        open(unit=97,file=TRIM(fname)//'.ang')
+        open(unit=96,file=TRIM(fname)//'.LEG')
+        open(unit=97,file=TRIM(fname)//'.ANG')
+C       open(unit=96,file=TRIM(fname)//'.leg')
+V       open(unit=97,file=TRIM(fname)//'.ang')
 C
 c       IF(ETA.EQ.0.) WRITE(96,'(10H<LEGENDRE>,F10.2,F10.5,F10.2,2I5)') 
         IF(ETA.EQ.0.D0) WRITE(96,1000) ANEU,EN,AT,NINT(0.5*JO(1)),NMAX
