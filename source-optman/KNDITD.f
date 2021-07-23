@@ -1389,17 +1389,18 @@ c      IF(MEDEF.EQ.0) GO TO 777
   
       
        IF(L.GT.1 ) GO TO 88 
-       
-      IF(MEDEF.EQ.2.AND.KO1.eq.KO2) SCALE=DCOS(GAM0) 
-      IF(MEDEF.EQ.2.AND.IABS(KO1-KO2).EQ.4.AND.NPO(NU).EQ.NPO(NU1))   
+      !! NUMB is correct quantum number instead of KO 
+      IF(MEDEF.EQ.2.AND.NUMB1.EQ.NUMB2) SCALE=DCOS(GAM0)
+      IF(MEDEF.EQ.2.AND.IABS(KO1-KO2).EQ.4.AND.NPO(NU).EQ.NPO(NU1))
      *       SCALE=DSIN(GAM0)/SQ2
       IF(MEDEF.EQ.2) GO TO 777
     
-       
+       !! replace effective deformations of K=2 and gamma bands to ones 
+       !! of rigid asymmetric rotor since in SRM they are is not correct
        IF(MEDEF.EQ.1.AND.NUMB1.EQ.NUMB2) THEN
            IF(KO1.EQ.KO2)THEN
                SCALE=!1.D0 + EFFDEF(NU,NU1,8) +
-!     *               (EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL
+!    *             (EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL
      *             DCOS(GAM0) + EFFDEF(NU,NU1,8)+EFFDEF(NU,NU1,1)
            ELSEIF(IABS(KO1-KO2).EQ.4)THEN
                SCALE=DSIN(GAM0)/SQ2!EFFDEF(NU,NU1,3)
@@ -1417,6 +1418,8 @@ c      IF(MEDEF.EQ.0) GO TO 777
       IF(NUMB1.EQ.NUMB2) GO TO 777
       IF(L.GT.1 ) pause
        
+      !! replace effective deformations of K=2 and gamma bands to ones 
+      !! of rigid asymmetric rotor since in SRM they are is not correct
       IF (MEDEF.EQ.1.AND.NUMB1.NE.NUMB2) THEN
        IF (KO1.EQ.KO2.AND.NPO(NU).EQ.NPO(NU1)) THEN
              SCALE=!(EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL             
