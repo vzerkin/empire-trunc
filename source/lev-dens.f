@@ -1,9 +1,96 @@
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
-Ccc   * $Id: lev-dens.f 4916 2017-04-18 10:43:10Z rcapote $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2021-08-30 09:57:59 +0200 (Mo, 30 Aug 2021) $
+Ccc   * $Id: lev-dens.f 5295 2021-08-30 07:57:59Z mwherman $
 C
 C
 C
+CCC
+CCC    Following routines/functions are called from INPUT or other Empire segments
+CCC
+CCC    ROEMP                 - Empire specific level densities                                             
+CCC    |-> PRERORITO                                             
+CCC    |-> PRERO                                                 
+CCC    |-> BNDG                                                  
+CCC    |-> LEVFIT                                                 
+CCC        |-> SIGMAK                                            
+CCC        |-> SHCFADE                                           
+CCC    |-> EGSMsys                                               
+CCC    |-> DAMIRO_CRT                                            
+CCC        |-> FSHELL                                            
+CCC    |-> DAMIRO                                                
+CCC        |-> FSHELL                                            
+CCC        |-> SIGMAK                                            
+CCC        |-> BSQ                                               
+CCC        |-> ROBCS                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
+CCC        |-> RODEF                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
+CCC    |-> DAMIRO_FISHI                                          
+CCC        |-> FSHELL                                            
+CCC        |-> SIGMAK                                            
+CCC        |-> BSQ                                               
+CCC        |-> MOMFIT                                            
+CCC        |-> ROBCS                                             
+CCC        |-> RODEF                                             
+CCC    |-> PLOT_ZVV_NumCumu                                      
+CCC    |-> PLOT_ZVV_GSLD                                         
+CCC                                                              
+CCC    ROGC                  - classic Gilbert-Cameron 
+CCC    |-> PRERO
+CCC    |-> FSHELL
+CCC        |-> SHCFADE
+CCC    |-> PARITY_FRACTION (commented)
+CCC    |-> PLOT_ZVV_NumCumul
+CCC    |-> PLOT_ZVV_GSLD  
+CCC
+CCC
+CCC    ROGSM                 - Ignatyuk's Generalised Superfluid model
+CCC    |-> GSMsys
+CCC    |-> PRERORITO
+CCC    |-> DAMIRO_CRT
+CCC    |-> BCS_FG
+CCC        |-> FSHELL
+CCC        |-> VIB_KQ_GSM
+CCC        |-> ROT_KQ_GSM
+CCC    |-> PLOT_ZVV_GSLD
+CCC    |-> PLOT_ZVV_NumCumul
+CCC    
+CCC    DAMI_ROFIS           - Empire-speciic saddle point lev. dens.  
+CCC    |-> EGSMsys 
+CCC    |-> DAMIRO_CRT
+CCC    |-> FSHELL
+CCC    |-> SIGMAK
+CCC    |->RODEFF
+CCC        |-> RODEF
+CCC        |-> COLL_KQ_FIS
+CCC    |-> ROBCSF
+CCC        |-> ROBCS
+CCC        |-> COLL_KQ_FIS
+CCC    |-> PLOT_ZVV_SadLD
+CCC        
+CCC    
+CCC    READ_SHELL_CORR 
+CCC    
+CCC    ROHFB 
+CCC    |-> PRERO
+CCC        |-> SHCFADE
+CCC    |-> scale_ld
+CCC    |-> PLOT_ZVV_GSLD
+CCC    |-> PLOT_ZVV_NumCumul
+CCC    
+CCC    DAMI_RO_HFB_FIS 
+CCC    |-> HFB_FIS
+CCC    |-> PLOT_ZVV_SadLD
+
+
+
+
       SUBROUTINE ROEMP(Nnuc,Cf,Asaf)
 CCC
 CCC   *****************************************************************
@@ -11,7 +98,12 @@ CCC   *                                                      CLASS:PPU*
 CCC   *                         R O E M P                             *
 CCC   *                                                               *
 CCC   *                                                               *
-CCC   * CALCULATES TABLE OF ENERGY AND SPIN DEPENDENT LEVEL DENSITIES *
+CCC   * Calculates table of energy and spin dependent level densities *
+CCC   * using Empire-specific level density model. The fission lvel   *
+CCC   * densities are for the Heavy Ion reactions. For light particle *
+CCC   * induced fission saddle point level densities within Empire    *
+CCC   * specific model are provided by the DAMI_ROFIS routine.        *
+CCC   *                                                               *
 CCC   *                                                               *
 CCC   * INPUT:                                                        *
 CCC   *  NNUC - index of the nucleus                                  *
@@ -30,7 +122,43 @@ CCC   *     BF=3. stands for the triaxial yrast state                 *
 CCC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)      *
 CCC   *                                                               *
 CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                         *
-CCC   *       DAMIRO                                                  *
+CCC   *                                                               *
+CCC   *                                                               *
+CCC   *     ROEMP                                                     *
+CCC   *     |-> PRERORITO                                             *
+CCC   *     |-> PRERO                                                 *
+CCC   *     |-> BNDG                                                  *
+CCC   *     |-> LEVFIT                                                * 
+CCC   *         |-> SIGMAK                                            *
+CCC   *         |-> SHCFADE                                           *
+CCC   *     |-> EGSMsys                                               *
+CCC   *     |-> DAMIRO_CRT                                            *
+CCC   *         |-> FSHELL                                            *
+CCC   *     |-> DAMIRO                                                *
+CCC   *         |-> FSHELL                                            *
+CCC   *         |-> SIGMAK                                            *
+CCC   *         |-> BSQ                                               *
+CCC   *         |-> ROBCS                                             *
+CCC   *             |-> COLL_KQ_EGSM                                  *
+CCC   *                 |-> VIB_K_EGSM                                *
+CCC   *                 |-> VIB_Q_EGSM                                *
+CCC   *                 |-> ROT_Q_EGSM                                *
+CCC   *         |-> RODEF                                             *
+CCC   *             |-> COLL_KQ_EGSM                                  *
+CCC   *                 |-> VIB_K_EGSM                                *
+CCC   *                 |-> VIB_Q_EGSM                                *
+CCC   *                 |-> ROT_Q_EGSM                                *
+CCC   *     |-> DAMIRO_FISHI                                          *
+CCC   *         |-> FSHELL                                            *
+CCC   *         |-> SIGMAK                                            *
+CCC   *         |-> BSQ                                               *
+CCC   *         |-> MOMFIT                                            *
+CCC   *         |-> ROBCS                                             *
+CCC   *         |-> RODEF                                             *
+CCC   *     |-> PLOT_ZVV_NumCumu                                      *
+CCC   *     |-> PLOT_ZVV_GSLD                                         *
+CCC   *                                                               *
+CCC   *                                                               *
 CCC   *                                                               *
 CCC   *****************************************************************
 CCC
@@ -78,7 +206,9 @@ C
       ENDIF
 
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
+
       CALL PRERORITO(Nnuc)
+
       Nlwst=NLW     
       IF( (FISshi(nnuc).GT.0.99d0 .and. FISshi(nnuc).LE.1.01d0)
      &    .OR. Aejc(0).GT.4) CALL PRERO(Nnuc)
@@ -227,19 +357,19 @@ C--------spin  dependent moments of inertia for yrast states by Karwowski
 C--------(spin dependent deformation beta calculated according to B.-Mot.)
 C--------temporary value of 'a' parameter needed for ground state deformation
 C--------damping (no surface correction)
-         IF(lazy.EQ.1)goto 344
-         
-         ATIl = AP1*A(Nnuc) + AP2*A23          
-         ATIl = ATIl*ATIlnor(Nnuc)  
-         ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
-C--------here FSHELL can become negative
-         IF (ac.LE.0.0D0) RETURN      
-         CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,ac,Aj,
+         IF(lazy.EQ.0) then        
+            ATIl = AP1*A(Nnuc) + AP2*A23          
+            ATIl = ATIl*ATIlnor(Nnuc)
+            ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
+C-----------here above FSHELL can become negative !!!
+            IF (ac.LE.0.0D0) RETURN
+            CALL SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,ac,Aj,
      &               mompar,momort,A2,stab,cigor)
-C--------'a' including surface dependent factor
-         ATIl = AP1*A(Nnuc) + AP2*A23*BSQ(cigor)
-         ATIl = ATIl*ATIlnor(Nnuc)
- 344     ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
+C-----------'a' including surface dependent factor
+            ATIl = AP1*A(Nnuc) + AP2*A23*BSQ(cigor)
+            ATIl = ATIl*ATIlnor(Nnuc)
+         endif
+         ac = ATIl*FSHELL(u,SHC(Nnuc),GAMma)
          IF (ac.LE.0.0D0) RETURN
      
          IF (A2.LT.0.D0) THEN
@@ -254,8 +384,8 @@ C
             Rotemp = RODEF(A(Nnuc),u,ac,Aj,mompar,momort,T,
      &               YRAst(i,Nnuc),HIS(Nnuc),BF,EXPmax,a2,egsm)
          ENDIF
-        
- 346     RO(Kk,i,1,Nnuc) = Rotemp
+
+         RO(Kk,i,1,Nnuc) = Rotemp
          RO(Kk,i,2,Nnuc) = Rotemp
  
          IF (i.EQ.1) TNUc(Kk,Nnuc) = t
@@ -334,7 +464,8 @@ Ccc   *                         R O D E F                                 *
 Ccc   *                                                                   *
 Ccc   *  Calculates spin dependent level densities (for a single parity)  *
 Ccc   *  in the dynamical approach.                                       *
-Ccc   *  Different deformation at each spin is generally considered.      *
+Ccc   *  Different deformation at each spin could be considered if        *
+Ccc   *  'egsm' is set to 1 in DAMIRO.                                    *
 Ccc   *  Collective enhancement effects are taken into account including  *
 Ccc   *  their energy fade-out.                                           *
 Ccc   *                                                                   *
@@ -382,11 +513,12 @@ c-----FG
          ENDIF
          CALL COLL_KQ_EGSM(A,T,momort,A2,e,vib_KQ,rot_K,rot_Q)       
          RODEF = ro * rot_K * rot_Q * vib_KQ 
+
          RETURN
       ENDIF
 
 
-c-----EGSM
+c-----EGSM (classic Heavy Ion version, needs egsm variable set to 1 in DAMIRO)
       sum = 0.0
       IF (Mompar.LT.0.0D0 .OR. Momort.LT.0.0D0) THEN
          WRITE (8,*)' WARNING: Negative moment of inertia for spin ', Aj
@@ -755,7 +887,9 @@ c      momort = rbmsph*(1. + (1./3.)*a2)
       IF (ABS(A2).LE.0.001D0) Momort = Mompar
       END
 
+c*********************************************************
       REAL*8 FUNCTION FSHELL(X,Xs,Xg)
+c*********************************************************
 C
 C Dummy arguments
 C
@@ -771,9 +905,28 @@ C
       RETURN
       END
 
-c*********************************************************
       SUBROUTINE ROGSM(nnuc)
-c*********************************************************
+CCC*********************************************************
+CCC
+CCC                R O G S M 
+CCC
+CCC   Generlaised Superfluid Model following A. Ignatyuk
+CCC   BCS calculations below critical eneergy and Fermi gass
+CCC   including vibration and reotational collective enhancements
+CCC   above critical energy.   
+CCC
+CCC    ROGSM   
+CCC    |-> GSMsys
+CCC    |-> PRERORITO
+CCC    |-> DAMIRO_CRT
+CCC    |-> BCS_FG
+CCC        |-> FSHELL
+CCC        |-> VIB_KQ_GSM
+CCC        |-> ROT_KQ_GSM
+CCC    |-> PLOT_ZVV_GSLD
+CCC    |-> PLOT_ZVV_NumCumul
+CCC    
+CCC*********************************************************
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -800,7 +953,7 @@ C Local variables
       ia = INT(A(Nnuc))
       iz = INT(Z(Nnuc))
       
-      CALL ROGSM_sys(Nnuc,AP1,AP2,GAMma,DEL,DELp,om2,om3,cga)
+      CALL GSMsys(Nnuc,AP1,AP2,GAMma,DEL,DELp,om2,om3,cga)
 
       shcn = SHC(Nnuc) 
 
@@ -961,6 +1114,7 @@ Ccc
       REAL*8 T,OM,Q
       INTEGER LAM
       REAL*8 cga, gam, fn, U, S
+
       Q=1.D0
       IF(T.LT.0.01d0) RETURN
       GAM=cga*(OM**2+(2.d0*3.1415926535897932D0*T)**2)
@@ -1043,18 +1197,6 @@ C-----check of the input data ---------------------------------------
       ENDIF
       IF (EX(NEX(Nnuc),Nnuc).LE.0.0D0 .AND. FITlev.le.0.1) RETURN
 
-C-----set to 0 level density array
-C     DO i = 1, NDEX
-C       DO k = 1, NDLW
-C           IF (BF.NE.0.0D0) THEN
-C              RO(i,k,1,Nnuc) = 0.0
-C              RO(i,k,2,Nnuc) = 0.0
-C           ELSE
-C              ROF(i,k,Nnuc) = 0.0
-C           ENDIF
-C        ENDDO
-C     ENDDO
-
       IF (BF.NE.0.0D0) THEN
         RO(:,:,:,Nnuc) = 0.d0
       ELSE
@@ -1073,9 +1215,9 @@ CCC   *                                                         CLASS:APU*
 CCC   *                        P R E R O                                 *
 CCC   *                                                                  *
 CCC   *                                                                  *
-CCC   * PREPARES FOR LEVEL DENSITY CALCULATIONS. CHECKS FOR THE          *
-CCC   * ENERGY TABLE DETERMINATION, SETS YRAST ENERGIES, FISSION         *
-CCC   * BARRIERS, SCALING FACTOR, AND CLEANS UP LEVEL DENSITY TABLES.    *
+CCC   * Prepares for level density calculations. checks for the          *
+CCC   * energy table determination, sets yrast energies, fission         *
+CCC   * barriers, scaling factor, and cleans up level density tables.    *
 CCC   *                                                                  *
 CCC   *                                                                  *
 CCC   * INPUT:NNUC - index of the nucleus                                *
@@ -1161,7 +1303,7 @@ C-----determination of the LD rotational stability limit LDSTAB
       kstab = stab
 C-----set fission barrier at sky (just in case it is not calculated)
       sb0 = 1000.
-      sb = 1000.
+      sb  = 1000.
       IF (iz.GT.19 .AND. iz.LT.102) THEN
         CALL BARFIT(iz,ia,0,sb0,segs,stab)
         ldstab = stab
@@ -1301,6 +1443,14 @@ CCC   *       SCUTF - SPIN CUT-OFF FACTOR (0.146 IS RECOMMENDED)         *
 CCC   *                                                                  *
 CCC   * OUTPUT:RO(.,.,NNUC) - LEVEL DENSITIES                            *
 CCC   *                                                                  *
+CCC   *   ROGC         
+CCC   *   |-> PRERO      
+CCC   *   |-> FSHELL
+CCC   *       |-> SHCFADE
+CCC   *   |-> PARITY_FRACTION (commented)
+CCC   *   |-> PLOT_ZVV_NumCumul
+CCC   *   |-> PLOT_ZVV_GSLD  
+CCC   *  
 CCC   *                                                                  *
 CCC   ********************************************************************
 CCC
@@ -1444,20 +1594,7 @@ C
       iter = 0
       
   100 IF (am*t.LE.6.D0 .OR. iter.GT.300) THEN
-C        IF (iter.LT.301) THEN
-C         WRITE (8,*) 'WARNING: '
-C         WRITE (8,*) 'WARNING: Number of iterations in ROGC ', iter
-C         WRITE (8,*) 'WARNING: Can not calculate Ux'
-C         WRITE (8,*)'WARNING: Level density parameters inconsistent'
-C         WRITE (8,*)'WARNING: This may happen if you have used default'
-C         WRITE (8,*)'WARNING: systematics for too light nucleus or '
-C         WRITE (8,*)
-C    &              'WARNING: have allowed for too many discrete levels'
-C         WRITE (8,*)'WARNING: entering the region where these are lost'
-C         WRITE (8,*)'WARNING: Reanalise GC l.d. parameters for:'
-C         WRITE (8,*)'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
-C         WRITE (8,*)'WARNING: a=', am, ' T=', t
-C        ENDIF
+
          IF (iter.GT.300) THEN
           WRITE (8,*) 'WARNING: '
           WRITE (8,*) 
@@ -1513,7 +1650,7 @@ C     IF (NLV(Nnuc).GT.5 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
       IF (NLV(Nnuc).GT.2 .AND. ROPar(2,Nnuc).EQ.0.0D0 .AND.
      &    ROPar(5,Nnuc).EQ.0.0D0) THEN
          eps = MIN(NLV(Nnuc)*0.03, 0.5)
-         rolowint = EXP(( - eo/t))*(EXP(ELV(NLV(Nnuc),Nnuc)/t) - 1.)
+         rolowint = EXP(( - eo/t))*(EXP( ELV(NLV(Nnuc),Nnuc)/t) - 1.)
          IF (ABS(rolowint + 1.0 - NLV(Nnuc)).GT.eps)
      &      THEN
             tm = t
@@ -1736,6 +1873,13 @@ CCC   *  NNUC - INDEX OF THE NUCLEUS (POSITION IN THE TABLES)             *
 CCC   *                                                                   *
 CCC   *                                                                   *
 CCC   * OUTPUT:NONE                                                       *
+CCC   *
+CCC   *      ROHFB 
+CCC   *      |-> PRERO
+CCC   *          |-> SHCFADE
+CCC   *      |-> scale_ld
+CCC   *      |-> PLOT_ZVV_GSLD
+CCC   *      |-> PLOT_ZVV_NumCumul
 CCC   *                                                                   *
 CCC   *********************************************************************
 CCC
@@ -2100,13 +2244,7 @@ C-----than three
          iter = iter + 1
          kkl = 0
          kku = 0
-C        DO kk = 1, NDEX
-C-----------clean RO matrix
-C           DO i = 1, NDLW
-C              RO(kk,i,1,Nnuc) = 0.d0
-C              RO(kk,i,2,Nnuc) = 0.d0
-C           ENDDO
-C        ENDDO
+
          RO(:,:,:,Nnuc) = 0.d0
 
          DO kk = 1, NEXreq
@@ -2168,7 +2306,7 @@ C--------------There is a factor 1/2 steming from the trapezoid integration
 
 CCC
 CCC
-CCC   *************FISSION**********************************
+CCC   *************     F I S S I O N   **********************************
 CCC
 CCC
 
@@ -2279,8 +2417,22 @@ c-----------EGSM - J>>K (egsm=0) and EGSM (egsm=1)
       END
 
 
-c=======================================================================
       SUBROUTINE DAMI_RO_HFB_FIS(Nnuc,Ib,Rafis)
+
+CCC  ****************************************************************** 
+CCC
+CCC          D A M I _ R O _ H F B _ F I S
+CCC
+CCC   Provides tables of saddle-point level densities extracted 
+CCC   from the RIPL-3 Hartree-Fock-Bogolyubov file and interpolated to 
+CCC   the currentenergy grid. 
+CCC
+CCC    DAMI_RO_HFB_FIS 
+CCC    |-> HFB_FIS
+CCC    |-> PLOT_ZVV_SadLD
+CCC 
+CCC  ****************************************************************** 
+ 
       implicit none
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
@@ -2570,9 +2722,33 @@ C
       ENDDO
       RETURN
       END
-C==============================================================
+
+
       SUBROUTINE DAMI_ROFIS(Nnuc,Ib,Mmod,Rafis)
-C==============================================================
+
+CCC  ************************************************************
+CCC  *
+CCC  *            D A M I _ R O F I S 
+CCC  *
+CCC  *   Provides saddle point level densities using Empire
+CCC  *   specific level density model (BCS below critical energy
+CCC  *   and Fermi gas with collectiobe enhacements above)
+CCC  *
+CCC  *    DAMI_ROFIS 
+CCC  *    |-> EGSMsys 
+CCC  *    |-> DAMIRO_CRT
+CCC  *    |-> PLOT_ZVV_SadLD
+CCC  *    |-> FSHELL
+CCC  *    |-> SIGMAK
+CCC  *    |->RODEFF
+CCC  *        |-> RODEF
+CCC  *        |-> COLL_KQ_FIS
+CCC  *    |-> ROBCSF
+CCC  *        |-> ROBCS
+CCC  *        |-> COLL_KQ_FIS
+CCC  *        
+CCC  **************************************************************
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -2736,6 +2912,7 @@ C       Axial symmetry
         CALL SIGMAK(A(Nnuc),Z(Nnuc),def2,-1.d0,u,ar,
      &            aj,mompar,momort,A2,stab,cigor)
       ENDIF 
+
 C
 C-----calculation of level density parameter 'a' including surface
 C-----dependent factor
@@ -2818,6 +2995,8 @@ c
       IF(IOUT.EQ.6) CALL PLOT_ZVV_SadLD(Nnuc,Ib)
       RETURN
       END
+
+
 C
 C==============================================================
       REAL*8 FUNCTION ROBCSF(A,U,Aj,Mompar,Momort,Mompr,T,
@@ -2849,6 +3028,8 @@ c
       ROBCSF = ro *  rot_K * rot_Q * vib_KQ
       RETURN
       END
+
+
 C
 C
 C==============================================================
@@ -2880,6 +3061,7 @@ c-----Fission LD: EGSM - J>>K (egsm=0) and EGSM (egsm=1)
 
       RETURN
       END
+
 
 C====================================================================
       SUBROUTINE COLL_KQ_FIS(egsm,A,T,momo,def2,E1,vib_KQ,rot_K,rot_Q,
@@ -2914,9 +3096,9 @@ C-----rot_Q
       rot_Q  = 1.d0 - qr * (1.d0 - 1.d0/(momo*t))
       RETURN
       END
-C
 
-      SUBROUTINE ROGSM_sys(Nnuc,ap1,ap2,gamma,del,delp,om2,om3,cga)
+
+      SUBROUTINE GSMsys(Nnuc,ap1,ap2,gamma,del,delp,om2,om3,cga)
 Cccc
 Cccc  ********************************************************************
 Cccc  *                    R O G S M_sys                                 *
@@ -3049,3 +3231,7 @@ C
       ap2 = ap2*ATIlnoz(INT(Z(nnuc))) !apply elemental normalization factor
       RETURN
       END
+
+
+
+
