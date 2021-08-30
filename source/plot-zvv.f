@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4762 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2016-08-31 18:17:48 +0200 (Mi, 31 Aug 2016) $
+Ccc   * $Rev: 5298 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2021-08-30 10:20:47 +0200 (Mo, 30 Aug 2021) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -42,12 +42,14 @@ C
       IF(ADIv.eq.2)write(ldname,'(A7)') ' (GCM) '
       IF(ADIv.eq.3)write(ldname,'(A7)') ' (HFBM)'
       IF(ADIv.eq.4)write(ldname,'(A7)') ' (OGCM)'
+      IF(ADIv.eq.5)write(ldname,'(A7)') ' (GCCM)'
 
       IF(ADIv.eq.0)write(fname,'(A7)') 'LD_EGSM'
       IF(ADIv.eq.1)write(fname,'(A7)') 'LD__GSM'
       IF(ADIv.eq.2)write(fname,'(A7)') 'LD__GCM'
       IF(ADIv.eq.3)write(fname,'(A7)') 'LD_HFBM'
       IF(ADIv.eq.4)write(fname,'(A7)') 'LD_OGCM'
+      IF(ADIv.eq.5)write(fname,'(A7)') 'LD_GCCM'
 
       write(ctmp1,'(A17)') fname//'_'//caz//'.zvd'
 
@@ -326,12 +328,14 @@ C
       IF(ADIv.eq.2)write(ldname,'(A6)') '(GCM) '
       IF(ADIv.eq.3)write(ldname,'(A6)') '(HFBM)'
       IF(ADIv.eq.4)write(ldname,'(A6)') '(OGCM)'
+      IF(ADIv.eq.5)write(ldname,'(A6)') '(GCCM)'
 
       IF(ADIv.eq.0)write(fname,'(A7)') 'NL_EGSM'
       IF(ADIv.eq.1)write(fname,'(A7)') 'NL__GSM'
       IF(ADIv.eq.2)write(fname,'(A7)') 'NL__GCM'
       IF(ADIv.eq.3)write(fname,'(A7)') 'NL_HFBM'
       IF(ADIv.eq.4)write(fname,'(A7)') 'NL_OGCM'
+      IF(ADIv.eq.5)write(fname,'(A7)') 'NL_GCCM'
       write(ctmp1,'(A17)') fname//'_'//caz//'.zvd'
 
       OPEN (36, FILE=ctmp1, STATUS='unknown')
