@@ -1,6 +1,6 @@
-ccc   * $Rev: 5262 $
+ccc   * $Rev: 5296 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2020-12-10 08:06:48 +0100 (Do, 10 Dez 2020) $
+ccc   * $Date: 2021-08-30 10:07:10 +0200 (Mo, 30 Aug 2021) $
 
       SUBROUTINE INPUT
 ccc
@@ -2429,6 +2429,7 @@ C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
 99010 FORMAT (1X,14(G10.4,1x))
       END
 
+
       SUBROUTINE INP_LD(Nnur)
 
       INCLUDE 'dimension.h'
@@ -2439,11 +2440,10 @@ C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
 
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
-C     IF (ADIv.EQ.2.0D0) CALL ROGCM(nnur, 0.146D0)
       IF (ADIv.EQ.3.0D0) CALL ROHFB(nnur)
 C-----<m2> could be added to the input ( to use 0.124 if needed)
       IF (ADIv.EQ.4.0D0) CALL ROGC(nnur,0.24D0)
-C     IF (ADIv.EQ.4.0D0) CALL ROGC(nnur, 0.146D0)
+      IF (ADIv.EQ.5.0D0) CALL ROGCC(nnur, 0.0D0, 0.24D0)
 
       IF (IOUt.EQ.6) THEN
          ia = INT(A(nnur))
@@ -4100,16 +4100,6 @@ C             write (*,*) i1,i2
             GOTO 100
          ENDIF
 C
-C--------DEGAS input
-         IF (name.EQ.'DEGAS ') THEN
-              WRITE (8,
-     &'('' Exciton model calculations with code DEGAS'',/,
-     &  ''  are disabled in the current EMPIRE version'')')
-              WRITE (12,
-     &'('' Exciton model calculations with code DEGAS'',/,
-     &  ''  are disabled in the current EMPIRE version'')')
-            GOTO 100
-         ENDIF
 
 C--------PCROSS input
          IF (name.EQ.'PCROSS') THEN
@@ -4652,10 +4642,11 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'LEVDEN') THEN
-            IF(val.lt.0 .or. val.gt.4) THEN
+            IF(val.lt.0 .or. val.gt.5) THEN
               WRITE (8,'('' ERROR: LEVDEN ='',I1)') NINT(val)
               WRITE (8,
-     & '('' ERROR: LEVDEN must be 0,1,2,3,4; default EGSM = 0 used '')')
+     & '('' ERROR: LEVDEN must be 0,1,2,3,4,5; default EGSM = 0 used ''
+     & )')
               GOTO 100
          ELSE
               ADIv = val
@@ -4680,6 +4671,8 @@ C    &           '('' Gilbert-Cameron level densities selected '')')
      &lected'')')
             IF (ADIv.EQ.4.0D0) WRITE (8,
      & '('' Gilbert-Cameron (EMPIRE 2.18) level densities selected '')')
+            IF (ADIv.EQ.5.0D0) WRITE (8,
+     & '('' Collective Gilbert-Cameron level densities selected '')')
 C
             IF (ADIv.EQ.0.0D0) WRITE (12,
      &           '('' EMPIRE-specific level densities (J>>K aprox.)'')')
@@ -4700,6 +4693,8 @@ C    &           '('' Gilbert-Cameron level densities '')')
      &     '('' Microscopic parity dependent HFB level densities '')')
             IF (ADIv.EQ.4.0D0) WRITE (12,
      &     '('' Gilbert-Cameron (EMPIRE 2.18) level densities '')')
+            IF (ADIv.EQ.5.0D0) WRITE (12,
+     &   '('' Collective Gilbert-Cameron level densities selected '')')     
             GOTO 100
          ENDIF
 C-----
@@ -9286,6 +9281,7 @@ C-----Set EGSM normalization factors for each Z
          WRITE(8,'(1X)')
       ENDIF
 
+
       IF (FITLEV.GT.0 .and. ADIv.NE.3.0D0) THEN
          WRITE(8,'(1X)')
          WRITE(8,'(1X)')
@@ -9293,9 +9289,10 @@ C-----Set EGSM normalization factors for each Z
      & i t'')')
          WRITE(8,'(4X,54(''-''))')
       ENDIF
+      
 C
 C     reading from the RIPL level-densities-par.dat file 
-C       EGSM[RIPL-3], G&C[old EMPIRE] and GSM[RIPL]
+C     EGSM[RIPL-3], G&C[old EMPIRE] and GSM[RIPL]
 C
 C     Skipping header
 C
@@ -9304,11 +9301,10 @@ C               (2I4,1x,a2,f4.1,1x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))
   100 READ (24,'(2I4,8x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))',END = 200)
      &  nixz, nixa, qn, dob, ddob, esh, dap,aroc,dam,ftmp,arogc,nlevc,
      &  om2_gsm,delp_gsm,asys_gsm,asyserr_gsm,dshift_gsm
-
+      
       izar = nixz*1000 + nixa
       IF (izar.GE.izamn .AND. izar.LE.izamx) THEN
          CALL WHERE(izar,nnuc,iloc)
-
          IF (iloc.EQ.0) THEN
             DOBs(nnuc) = dob
             IF(D0_obs.GT.0.) DOBs(nnuc) = D0_obs
@@ -9319,28 +9315,30 @@ C               (2I4,1x,a2,f4.1,1x,F7.3,3E14.5,5f8.4,I4,1x,5(f8.3))
 C-----------Set up normalization factors for level density parameter 'a'
 C-----------for all level density models except HFB
 C
-C-----------EMPIRE specific (EGSM) with RIPL shell corrections
-            IF (ADIv.EQ.0) THEN
-              CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-              atil = ap1*A(nnuc) + ap2*a23
-              tcrt = 0.567*delp
-              ar = atil*(1.0 + SHC(nnuc)*gamma)
-              DO ix = 1, 20
-                 xr = ar*tcrt**2
-                 acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
-                 IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
-                 ar = acrt
-              ENDDO
-              econd = 1.5*acrt*delp**2/pi2
-              uexc = qn + del - econd
-              asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
-              atiln =  aroc/asys
+C-----------EMPIRE specific (EGSM) with RIPL shell corrections (ADIv = 0)
+C-----------or collective Gibert-Cameron (ADIv = 5)
+C
+            IF (ADIv.EQ.0 .OR. ADIv.EQ.5) THEN
+               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+               atil = ap1*A(nnuc) + ap2*a23
+               tcrt = 0.567*delp
+               ar = atil*(1.0 + SHC(nnuc)*gamma)
+               DO ix = 1, 20
+                  xr = ar*tcrt**2
+                  acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
+                  IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
+                  ar = acrt
+               ENDDO
+               econd = 1.5*acrt*delp**2/pi2
+               uexc = qn + del - econd               
+               asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
+               atiln =  aroc/asys
             ENDIF
 
 C-----------GSM (Ignatyuk) with RIPL shell corrections
             IF (ADIv.EQ.1) THEN 
-C
-C             Should be replaced once GSM is refitted
+C             DO NOT USE! GSMsys is missing!!!
+C             EGSMsys be replaced with GSMsys once refitted
               CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
               atil = ap1*A(nnuc) + ap2*a23
               tcrt = 0.567*delp
@@ -9358,59 +9356,42 @@ C             Should be replaced once GSM is refitted
             ENDIF
 
 
-C-----------Gilbert-Cameron (no explicit collective effects)
-            IF (ADIv.EQ.2.D0) THEN
-              ! for the time being, G&C not refitted !
-           ! arogc below should be replaced by the new one
-              CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-              atil = ap1*A(nnuc) + ap2*a23
-              tcrt = 0.567*delp
-              ar = atil*(1.0 + SHC(nnuc)*gamma)
-              DO ix = 1, 20
-                 xr = ar*tcrt**2
-                 acrt = atil*FSHELL(xr,SHC(nnuc),gamma)
-                 IF (ABS(acrt - ar).LE.0.001D0*acrt) EXIT
-                 ar = acrt
-              ENDDO
-              econd = 1.5*acrt*delp**2/pi2
-              uexc = qn + del - econd
-              asys = atil*FSHELL(uexc,SHC(nnuc),gamma)
-              atiln =  arogc/asys
-            ENDIF 
-
-C-----------Gilbert-Cameron (EMPIRE 2.19)
-            IF (ADIv.EQ.4.D0) THEN
-              ! for the time being, G&C not refitted !
-              del = 0.0
-              delp = 12.0/SQRT(A(nnuc))
-              IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
-              IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
-              uexc = qn - del                  
-C-------------Mebel's  parametrization (taken from the INC code for the case
-C-------------of no collective enhancements) normalized to existing exp. data
-              IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
-                atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
-                gamma = -0.051d0
-                asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
-                atiln =  arogc/asys
-              ELSE
-                atiln = 1.d0   
-              ENDIF                 
-            ENDIF 
-
-C           The internal normalization is stored into ATIlnor() at the first incident energy  
-            if(atiln.eq.0) atiln=1.d0  ! protection
-
-            if (BENchm .or. (.not.FIRst_ein)) THEN
-              atiln = 1.d0           
-              asys  = 1.d0           
-            endif
-
-            IF(ATIlnor(nnuc).EQ.0) THEN
-              ATIlnor(nnuc) = atiln
-            ELSE
-              ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+C-----------Gilbert-Cameron (no explicit collective effects & EMPIRE 2.19)
+            IF (ADIv.EQ.2.D0 .OR. ADIv.EQ.4) THEN
+               ! for the time being, G&C not refitted !
+               ! arogc below should be replaced by the new one
+               del = 0.0
+               delp = 12.0/SQRT(A(nnuc))
+               IF (MOD(XN(nnuc),2.D0).EQ.0.D0) del = delp
+               IF (MOD(Z(nnuc),2.D0).EQ.0.D0) del = del + delp
+               uexc = qn - del 
+C------------- Mebel's  parametrization (taken from the INC code for the case
+C------------- of no collective enhancements) normalized to existing exp. data
+               IF (ROPaa(Nnuc).EQ.( - 2.0D0)) THEN
+                  atil = 0.114*A(Nnuc) + 9.80E-2*A(Nnuc)**0.666667
+                  gamma = -0.051d0
+                  asys = atil*FSHELL(uexc,SHC(Nnuc),-gamma)
+                  atiln =  arogc/asys
+               ELSE
+                  atiln = 1.d0   
+               ENDIF
             ENDIF
+         ENDIF 
+
+
+C        The internal normalization is stored into ATIlnor() at the first incident energy  
+         IF(atiln.eq.0) atiln=1.d0  ! protection
+
+         IF (BENchm .or. (.not.FIRst_ein)) THEN
+            atiln = 1.d0           
+            asys  = 1.d0           
+         ENDIF
+
+         IF(ATIlnor(nnuc).EQ.0) THEN
+            ATIlnor(nnuc) = atiln
+         ELSE
+            ATIlnor(nnuc) = ATIlnor(nnuc)*atiln
+         ENDIF
 
 C           if(nnuc.eq.4 .or. nnuc.eq. 10 ) then 
 C           write(*,*) 'Is the first energy? ',FIRst_ein
@@ -9418,71 +9399,73 @@ C           WRITE(*,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
 C    &INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),ATIlnor(nnuc),ROPar(1,nnuc)
 C           endif
 
-C           Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for all models but HFB)
-            ROPar(1,nnuc) = asys*ATIlnor(nnuc)  ! small-a
-            ROPar(3,nnuc) = del                 ! pairing
+C        Initialization of ROPar(1,Nnuc) and ROPar(3,Nnuc) (for all models but HFB)
+         ROPar(1,nnuc) = asys*ATIlnor(nnuc)  ! small-a
+         ROPar(3,nnuc) = del                 ! pairing
+
 
 C-----------Print resulting level density parameters
-            IF (FITlev.GT.0) THEN
-              WRITE (8,*) ' '
-              WRITE (8,*) ' '
-              WRITE(8,
-     &           '(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
-     &           ''ext. nor. a_final'')')
 
-              IF (ADIv.EQ.0.0D0)
+         IF (FITlev.GT.0) THEN
+            WRITE (8,*) ' '
+            WRITE (8,*) ' '
+            WRITE(8,'(3X,''Nucleus    a_exp     a_sys.   int. nor.  '',
+     &                ''ext. nor. a_final'')')
+            IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.5.0D0)
      &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &          aroc,     asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
 
-              IF (ADIv.EQ.1.0D0)
+            IF (ADIv.EQ.1.0D0)
      &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &          asys_gsm, asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
 
-              IF (ADIv.EQ.2.0D0)
+            IF (ADIv.EQ.2.0D0)
      &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &          arogc,    asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
 
-              IF (ADIv.EQ.4.0D0)
+            IF (ADIv.EQ.4.0D0)
      &          WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &          INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &          arogc,    asys, atiln, ATIlnor(nnuc)/atiln,ROPar(1,nnuc)
 
-               WRITE (8,*)
+            WRITE (8,*)
      &              ' SHC=', sngl(SHC(nnuc)), ' U=', sngl(uexc)
-               WRITE (8,*) 
+            WRITE (8,*) 
      &              ' DELTA=', sngl(del),' Dobs=',sngl(dob)
 
-               WRITE (8,*)
-               WRITE (8,*) '========================'
+            WRITE (8,*)
+            WRITE (8,*) '========================'
 
-            ELSE
+         ELSE
 
-               IF (ADIv.EQ.0.0D0)
+            IF (ADIv.EQ.0.0D0 .OR. ADIv.EQ.5.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
 
-               IF (ADIv.EQ.1.0D0)
+
+
+
+            IF (ADIv.EQ.1.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         asys_gsm, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
 
-               IF (ADIv.EQ.2.0D0)   ! to be updated once G&C is refitted
+            IF (ADIv.EQ.2.0D0)   ! to be updated once G&C is refitted
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
 
-               IF (ADIv.EQ.4.0D0)
+            IF (ADIv.EQ.4.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         arogc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-
-            ENDIF
          ENDIF
       ENDIF
+
       GOTO 100
 
   200 IF(ADIv.eq.3) RETURN
@@ -12809,3 +12792,5 @@ Ccc
       close(fileunit)
 
       end
+
+
