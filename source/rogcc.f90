@@ -53,7 +53,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: BF                           ! controls shape of the nucleus (see above)
    real*8 :: DEL                          ! pairing shift (neutrons plus protons)
    real*8 :: DELp                         ! pairing shift for single gas (systematics)
-   real*8 :: Scutf                        ! spin cut-off factor (0.146 is recommended)
+   real*8 :: Scutf = 0.146                ! spin cut-off factor (0.146 is recommended)
    integer*4 :: NLWst                     ! number of partial waves up to stability against fission
    common /PARAM / AP1, AP2, GAMma, DEL, DELp, BF, A23, A2, NLWst
 
@@ -75,7 +75,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    !
    ! Local variables
    !
-   integer*4, PARAMETER :: nde = 20       ! number of exc. energies in the Fermi-gas table for matching CT
+   integer*4, PARAMETER :: nde = 200      ! number of exc. energies in the Fermi-gas table for matching CT
    real*8 :: FSHELL                       ! energy dependence of the LD 'a' parameter due to shell (function)
    real*8 :: mompar                       ! moment of inertia with respect to the symmetry axis
    real*8 :: momort                       ! moment of inertia with respect to the orthogonal to the symmetry axis
@@ -118,18 +118,22 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    else
       BF = 1.0          ! saddle point (fission)
    endif
+
    
    A23 = A(Nnuc)**0.666667d0
    ia = INT(A(Nnuc))
    iz = INT(Z(Nnuc))
    in = ia - iz
+   print *, " "
+   print *, " ROGCC called for Nnuc, Z, A: ", Nnuc, iz, ia  
 
    call PRERO(Nnuc) ! prepares for lev. dens. calculations
 
    !
    ! Fit parameters of the level densities the first time they are calculated
    !
-   if (Ux == 0.0 .or. Tct == 0.0 ) then
+   if (Ux == 0.0 .or. Tct == 0.0 ) then ! THIS MUST BE FIXED - NOW WORKS FOR THE FIRST NUCLEUS ONLY !!!!
+   
       !-----setting the lowest and highest discrete levels to fit constant temperature formula
       Nl = 3
       El = ELV(Nl,Nnuc)
@@ -148,9 +152,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
       IF (BF.EQ.0.D0 .AND. asaf.LT.0.0D0) acr = acrt
 
-      !
-      !  FITTING PARAMETERS IF NOT ALREADY DETERMINED
-      ! 
+      
       !  Fermi-gas part of the level denisties
       do i = 1, nde         ! over excitation energies (NOT realLY NEEDED HERE AS WE USE ONLY AT CRITICAL POINT)
          u = i*fde + DEL - ECOnd  
@@ -166,19 +168,20 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             am = atil*FSHELL(u,SHC(Nnuc),gamma)
             call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0, mompar,momort,a2,stab,cigor)
          endif
-         roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2)
+         roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2)  ! state density
          seff2 = mompar**0.333D0*momort**0.6666D0*T
          roFG(i) = roFG(i)/sqrt(2.0*pi*seff2)  ! sqrt() converts state into level densities
       enddo     ! over excitation energies
 
       ! ! Calculate derivatives of ro_fermi (not needed if Ux related to Ucrit)
-      ! DO i = 0, nde-2  
+      ! DO i = 1, nde-2  
       !    deriv1 = (roFG(i+1) - roFG(i  ))/fde
       !    deriv2 = (roFG(i+2) - roFG(i+1))/fde
       ! ENDDO
 
-      Ux = UCRt - DEL   ! matching is imposed to be at Ucrit (NO(!) smoth transition needed)
-      print *, "Matching energy =", Ux
+
+      Ux = UCRt - DEL   ! matching is imposed to be at Ucrit (NO(!) smooth transition needed)
+!      Ux = UCRt         ! let's try without DEL correction ?
       iux = int(Ux/fde)
       roUx = roFG(iux) + (roFG(iux+1) - roFG(iux))*(Ux/fde - float(iux)) ! interplotation in the roFG table 
 
@@ -190,17 +193,23 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       else
          Tct = 0.9 - 0.0024*A(Nnuc)
       endif
-      
-      !-----calculation of T, Ux and Eo (THIS IS ONLY IF THE PARAM WERE NOT DETRMINED; OTHERWISE GO TO 500)
-      !     Eq. 56 of Nucl. Phys. A810(2008)13 and iterate...
-      eps = Tct*roUx*exp(-Ux/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu  
-      print *, "initial eps, Tct, Ux, Nl, El,  Nu, Eu =", eps, Tct, Ux,  Nl, El,  Nu, Eu
+      ! Calculate Eo   
+      Eo = Ux - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13 
+
+      eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu  ! Eq. 55 of Nucl. Phys. A810(2008)13
+      print *, "initial: eps, Tct, Eo, Ux, Nl, El,  Nu, Eu =", eps, Tct, Eo, Ux,  Nl, El,  Nu, Eu
+
+      !-----iterate for Tct and Eo
+
       i = 0    
       do while (abs(eps) > 0.1) 
-         eps = Tct*roUx*exp(-Ux/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu      
-         tct = tct - 0.001*eps   ! THIS MIGHT BE TOO SIMPLE TO WORK!!! 
+         tct = tct - 0.001*eps   ! THIS MIGHT BE TOO SIMPLE TO WORK, BUT IT SEEMS THAT IT DOES!!! 
+         ! eps = Tct*roUx*exp(-Ux/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   ! Eq. 56 of Nucl. Phys. A810(2008)13
+         ! The same as above but more transparent in two equations
+         Eo = Ux - Tct*log(Tct*roUx)                              !  Eq. 53 of Nucl. Phys. A810(2008)13
+         eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   !  Eq. 55 of Nucl. Phys. A810(2008)13
+         print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
          i = i + 1
-         print *, "iter, Tct, eps", i, Tct, eps
          if (i > 100) then
             WRITE (8,*) 'WARNING: ROGCC'
             WRITE (8,*) 'WARNING: Maximum number of iterations in ROGCC reached for'
@@ -210,9 +219,10 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             exit
          endif 
       enddo
-      ! Calculate Eo   
-      Eo = Ux - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13
-      print *, " Ucrt, Tct, Eo =", UCRt, Tct, Eo
+      print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
+      print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
+      print *, " Matching energy =", Ux, " rhoFermi = ", roUx
+      print *, " Matching energy =", Ux, " rhoCT    = ", ro_ct(Ux, Tct, eo)
       !
       !  FITTING PARAMETERS DONE
       !
@@ -225,7 +235,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 
    if (ux.lE.0.0D0) print *, INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
 
-   !-----calculation of spin cut-off parameter from resolved levels  (TO BE UPDATED)
+   !-----calculation of spin cut-off parameter from resolved levels  (TO BE UPDATED with Eq. 24 of Nucl. Phys. A810(2008)13)
    sigl = 0.0
    do i = 2, NLV(Nnuc)
       sigl = sigl + (ABS(XJLv(i,Nnuc)) + 0.5)**2
@@ -234,10 +244,16 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    sigl = sigl/2.
    if (sigl.LT.0.5D0) sigl = 0.5
 
-   exl = Ux + DEL
+
+   exl = Ux 
    !-----IF(Scutf.LT.0.0D0) sigh calculated according to Dilg's recommendations
    !-----0.6079 = 6/pi^2   a=6/pi^2*g  sig^2 = <m^2>gt  Scutf = <m^2>
-   sigh = Scutf*0.6079*A23*SQRT(ux*am)
+   !sigh = Scutf*0.6079*A23*SQRT(ux*am)
+   
+   sigh = mompar**0.333D0*momort**0.6666D0*sqrt(Ux/ACRt)
+
+
+   print *, "sigl = ", sigl, "sigh = ", sigh
    
    !-----determination of the index in Ex-array such that Ex(IG,.).LT.EXL
    !-----(low-energy level density formula is used up to IG)
@@ -259,7 +275,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       SIG = (sigh - sigl)*(e - ECUt(Nnuc))/(exl - ECUt(Nnuc)) + sigl ! spin-cutoff interpolated
       do j = 1, NLW
          xj = j + HIS(Nnuc)
-         ro_j = j_fermi(xj, sig**2)
+         ro_j = j_fermi(xj, sig**2)*sig*sqrt(2.0*pi)
          RO(i,j,1,Nnuc) = ro_u*ro_j*ratio(1)
          RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
       enddo
