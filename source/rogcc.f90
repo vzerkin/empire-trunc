@@ -296,9 +296,10 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       endif
       seff2 = mompar**0.333D0*momort**0.6666D0
       ro_u = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)
+      sig2 = seff2*T
       do j = 1, NLW
          xj = j + HIS(Nnuc)
-         ro_j = j_fermi(xj, seff2)
+         ro_j = j_fermi(xj, sig2)
          RO(i,j,1,Nnuc) = ro_u*ro_j*ratio(1)
          RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
       enddo
