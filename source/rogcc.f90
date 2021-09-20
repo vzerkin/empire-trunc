@@ -79,13 +79,14 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: FSHELL                       ! energy dependence of the LD 'a' parameter due to shell (function)
    real*8 :: mompar                       ! moment of inertia with respect to the symmetry axis
    real*8 :: momort                       ! moment of inertia with respect to the orthogonal to the symmetry axis
-   real*8 :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0*T
+   real*8 :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
    real*8 :: ratio(1:2) = 0.5             ! parity ratio
-   real*8 :: exl = 0.0D0                  ! upper energy boundary for CT  
+   real*8 :: eMatch = 0.0D0               ! upper energy boundary for CT  
    real*8 :: ro_u = 0.0D0                 ! level density at the low-energy side of the matching point ??? 
    real*8 :: ro_j = 0.0D0                 ! spin/parity dependent level density at the low-energy side of the matching point ???
-   real*8 :: sigh = 0.0D0                 ! spin cut-off calculated from Fermi-gas at Ux
-   real*8 :: sigl = 0.0D0                 ! spin cut-off calculated from discrete levels
+   real*8 :: sig2                         ! squared spin cut-off 
+   real*8 :: sig2h = 0.0D0                ! squared spin cut-off calculated from Fermi-gas at Ux
+   real*8 :: sig2l = 0.0D0                ! squared spin cut-off calculated from discrete levels
    real*8 :: e                            ! excitation energy
    real*8 :: u                            ! excitation energy  
    real*8 :: fde = 20.0D0/nde             ! energy step in Fermi-gas LD for matching CT LD
@@ -106,7 +107,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    integer*4 :: ia                        ! nucleus mass number (A)
    integer*4 :: in                        ! number of neutrons
    integer*4 :: iz                        ! number of protons
-   integer*4 :: i, ig, j, iux       ! running indices
+   integer*4 :: i, ig, j, iux             ! running indices
 
    real*8 :: ro_fermi                     ! funtion - Fermi Gas total level densities
    real*8 :: ro_ct                        ! funtion - Constant temperature total level densities
@@ -168,9 +169,8 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             am = atil*FSHELL(u,SHC(Nnuc),gamma)
             call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0, mompar,momort,a2,stab,cigor)
          endif
-         roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2)  ! state density
-         seff2 = mompar**0.333D0*momort**0.6666D0*T
-         roFG(i) = roFG(i)/sqrt(2.0*pi*seff2)  ! sqrt() converts state into level densities
+         seff2 = mompar**0.333D0*momort**0.6666D0
+         roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)  ! level density
       enddo     ! over excitation energies
 
       ! ! Calculate derivatives of ro_fermi (not needed if Ux related to Ucrit)
@@ -181,9 +181,9 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 
 
       Ux = UCRt - DEL   ! matching is imposed to be at Ucrit (NO(!) smooth transition needed)
-!      Ux = UCRt         ! let's try without DEL correction ?
-      iux = int(Ux/fde)
-      roUx = roFG(iux) + (roFG(iux+1) - roFG(iux))*(Ux/fde - float(iux)) ! interplotation in the roFG table 
+      Ux = UCRt
+      iux = int(UCRt/fde)
+      roUx = roFG(iux) + (roFG(iux+1) - roFG(iux))*(UCRt/fde - float(iux)) ! interplotation in the roFG table 
 
       !
       !-----Constant Temperature part of the level densities
@@ -194,22 +194,18 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          Tct = 0.9 - 0.0024*A(Nnuc)
       endif
       ! Calculate Eo   
-      Eo = Ux - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13 
-
+      Eo = UCRt - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13 
       eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu  ! Eq. 55 of Nucl. Phys. A810(2008)13
-      print *, "initial: eps, Tct, Eo, Ux, Nl, El,  Nu, Eu =", eps, Tct, Eo, Ux,  Nl, El,  Nu, Eu
-
-      !-----iterate for Tct and Eo
-
+      print *, "initial: eps, Tct, Eo, Ux, Nl, Nu, Eu =", eps, Tct, Eo, Ux,  Nl, Nu, Eu
       i = 0    
-      do while (abs(eps) > 0.1) 
+      do while (abs(eps) > 0.1)  !-----iterate for Tct and Eo
          tct = tct - 0.001*eps   ! THIS MIGHT BE TOO SIMPLE TO WORK, BUT IT SEEMS THAT IT DOES!!! 
          ! eps = Tct*roUx*exp(-Ux/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   ! Eq. 56 of Nucl. Phys. A810(2008)13
          ! The same as above but more transparent in two equations
          Eo = Ux - Tct*log(Tct*roUx)                              !  Eq. 53 of Nucl. Phys. A810(2008)13
          eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   !  Eq. 55 of Nucl. Phys. A810(2008)13
-         print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
          i = i + 1
+         print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
          if (i > 100) then
             WRITE (8,*) 'WARNING: ROGCC'
             WRITE (8,*) 'WARNING: Maximum number of iterations in ROGCC reached for'
@@ -221,13 +217,13 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       enddo
       print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
       print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
-      print *, " Matching energy =", Ux, " rhoFermi = ", roUx
-      print *, " Matching energy =", Ux, " rhoCT    = ", ro_ct(Ux, Tct, eo)
+      print *, " Matching energy =", UCRt, " rhoFermi = ", roUx
+      print *, " Matching energy =", UCRt, " rhoCT    = ", ro_ct(UCRt, Tct, eo)
       !
       !  FITTING PARAMETERS DONE
       !
       ! ROPar(1,Nnuc) = am
-      ROPar(2,Nnuc) = ux
+      ROPar(2,Nnuc) = UCRt
       ROPar(3,Nnuc) = DEL
       ROPar(4,Nnuc) = eo
       ROPar(5,Nnuc) = Tct
@@ -236,46 +232,45 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    if (ux.lE.0.0D0) print *, INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
 
    !-----calculation of spin cut-off parameter from resolved levels  (TO BE UPDATED with Eq. 24 of Nucl. Phys. A810(2008)13)
-   sigl = 0.0
+   sig2l = 0.0
    do i = 2, NLV(Nnuc)
-      sigl = sigl + (ABS(XJLv(i,Nnuc)) + 0.5)**2
+      sig2l = sig2l + (ABS(XJLv(i,Nnuc)) + 0.5)**2
    enddo
-   if (NLV(Nnuc).GT.1) sigl = sigl/(NLV(Nnuc) - 1)
-   sigl = sigl/2.
-   if (sigl.LT.0.5D0) sigl = 0.5
+   if (NLV(Nnuc).GT.1) sig2l = sig2l/(NLV(Nnuc) - 1)
+   sig2l = sig2l/2.
+   if (sig2l.LT.0.5D0) sig2l = 0.5
 
 
-   exl = Ux 
-   !-----IF(Scutf.LT.0.0D0) sigh calculated according to Dilg's recommendations
-   !-----0.6079 = 6/pi^2   a=6/pi^2*g  sig^2 = <m^2>gt  Scutf = <m^2>
-   !sigh = Scutf*0.6079*A23*SQRT(ux*am)
+   eMatch = UCRt
+   !-----IF(Scutf.LT.0.0D0) sig2h calculated according to Dilg's recommendations
+   !-----0.6079 = 6/pi^2   a=6/pi^2*g  sig2^2 = <m^2>gt  Scutf = <m^2>
+   !sig2h = Scutf*0.6079*A23*SQRT(ux*am)  
+   sig2h = mompar**0.333D0*momort**0.6666D0*TCRt
+
+
+   print *, "sig2l = ", sig2l, "sig2h = ", sig2h
    
-   sigh = mompar**0.333D0*momort**0.6666D0*sqrt(Ux/ACRt)
-
-
-   print *, "sigl = ", sigl, "sigh = ", sigh
-   
-   !-----determination of the index in Ex-array such that Ex(IG,.).LT.EXL
+   !-----determination of the index in Ex-array such that Ex(IG,.).LT.eMatch
    !-----(low-energy level density formula is used up to IG)
    ig = NEX(Nnuc)
    do i = 1, NEX(Nnuc)
-      if (Ex(i,Nnuc).GT.exl) then
+      if (Ex(i,Nnuc).GT.eMatch) then
          ig = i - 1
          exit
       endif
    enddo
    !
-   !-----calculation of level densities below EXL - (T-constant formula)
+   !-----calculation of level densities below eMatch - (T-constant formula)
    !
    do i = 1, ig     ! do loop over T-constant excitation energies
       e = Ex(i,Nnuc)
       ! CALL PARITY_FRACTION(e,a1,b1,c1,ratio,igs) ! get parity multipliers 'ratio'
       ! print *, 'E, ratios, igs, nnuc', E, ratio, igs, nnuc
       ro_u = ro_ct(e, Tct, eo)
-      SIG = (sigh - sigl)*(e - ECUt(Nnuc))/(exl - ECUt(Nnuc)) + sigl ! spin-cutoff interpolated
+      sig2 = (sig2h - sig2l)*(e - ECUt(Nnuc))/(eMatch - ECUt(Nnuc)) + sig2l ! spin-cutoff interpolated
       do j = 1, NLW
          xj = j + HIS(Nnuc)
-         ro_j = j_fermi(xj, sig**2)*sig*sqrt(2.0*pi)
+         ro_j = j_fermi(xj, sig2)
          RO(i,j,1,Nnuc) = ro_u*ro_j*ratio(1)
          RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
       enddo
@@ -284,7 +279,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    enddo      ! Loop over T-constant excitation energies
 
 !
-!--------calculation of level densities for energies surpassing EXL (Fermi gas formula)
+!--------calculation of level densities for energies surpassing eMatch (Fermi gas formula)
 !
    do i = ig+1, NEX(Nnuc) ! do loop over Fermi gas excitation energies
       u = EX(i,Nnuc) + DEL - ECOnd
@@ -299,8 +294,8 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          am = atil*FSHELL(u,SHC(Nnuc),gamma)
          call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0, mompar,momort,a2,stab,cigor)
       endif
-      ro_u = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2)
-      seff2 = mompar**0.333D0*momort**0.6666D0*T
+      seff2 = mompar**0.333D0*momort**0.6666D0
+      ro_u = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)
       do j = 1, NLW
          xj = j + HIS(Nnuc)
          ro_j = j_fermi(xj, seff2)
@@ -325,14 +320,14 @@ end subroutine ROGCC
 
 
 
-real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2)
+real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
 
       implicit none
 !cc   *********************************************************************
 !cc   *                                                         class:ppu *
 !cc   *                     R O _ F E R M I                               *
 !cc   *                                                                   *
-!cc   *  Calculates total Fermi-gas state(!) densities using Ignatyuk     *
+!cc   *  Calculates total Fermi-gas level(!) densities using Ignatyuk     *
 !cc   *  approach. Collective enhancement effects are taken into          *
 !cc   *  account including their energy fade-out.                         *
 !cc   *                                                                   *
@@ -347,6 +342,8 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2)
    real*8, intent(out) :: T
    real*8, intent(in)  :: Bf
    real*8, intent(in)  :: A2
+   real*8, intent(in)  :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0*T
+
 !
 ! Local variables
 !
@@ -355,13 +352,15 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2)
    real*8  :: rot_K   
    real*8  :: rot_Q   
    real*8  :: vib_KQ   
+   real*8, parameter  :: pi = 3.1415926535897932D0    ! a number close to 3.14 :)
 
    ro_fermi = 0.d0
    IF(Ac.LE.0. .or. e.le.0.d0) RETURN
-   T = DSQRT(E/Ac)
+   T = sqrt(E/Ac)
    s = 2.* Ac * T
    det = 45.84d0 * Ac**3 * T**5
-   ro_fermi = exp(s)/sqrt(det) 
+   ro_fermi = exp(s)/sqrt(det)
+   ro_fermi = ro_fermi/sqrt(2.0d0*pi*seff2*T) 
    IF(Bf.EQ.0.d0) RETURN
    CALL COLL_KQ_EGSM(Anuc,T,Momort,A2,e,vib_KQ,rot_K,rot_Q)       
    ro_fermi = ro_fermi * rot_K * rot_Q * vib_KQ 
@@ -383,12 +382,12 @@ real*8 function j_fermi(J, seff2)
    !cc   *                                                                   *
    !cc   *********************************************************************
    
-   real*8, parameter  :: pi = 3.1415926535897932D0    ! a number close to 3.14 :)
    real*8, intent(in) :: J                            ! spin (might be signed when parity is included) 
    real*8, intent(in) :: seff2                        ! mompar**0.333D0*momort**0.6666D0*t (equivalent to \sigma^2)
    ! real*8, intent(in) :: parityRatio                  ! ratio of + (or -) parity to total level densities
 
-      j_fermi = (1.d0/(2.d0*sqrt(2.d0*pi)))*(2.d0*J + 1.d0)/seff2 **1.5*EXP(-(J+0.5)**2/(2.d0*seff2))
+      ! j_fermi = (1.d0/(2.d0*sqrt(2.d0*pi)))*(2.d0*J + 1.d0)/seff2 **1.5*EXP(-(J+0.5)**2/(2.d0*seff2))
+      j_fermi = ((2.d0*J + 1.d0)/(2*seff2))*EXP(-(J+0.5)**2/(2.d0*seff2))
    
    return
 end function j_fermi
