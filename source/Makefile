@@ -1,6 +1,6 @@
-#$Rev: 5113 $
-#$Author: zerkin $
-#$Date: 2018-05-10 14:10:39 +0200 (Do, 10 Mai 2018) $
+#$Rev: 5302 $
+#$Author: mwherman $
+#$Date: 2021-10-03 20:16:01 +0200 (So, 03 Okt 2021) $
 
 # set default compilers:
 
@@ -130,7 +130,7 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
        gamma-strength-analytic.o thora.o empire_ctl.o pfns.o dtrans.o fitbarrier.o \
        fis_io.o  plot-zvv.o kailas07emp.o systematics.o  open_files.o mubar.o S-factor.o \
        defsystematics.o pipec.o calc-fiss.o write_xs.o empire_preeq.o HF-decay.o get_ecis.o \
-       write_ENDF.o pfns_calc.o ang_mom.o subecis06m.o parse_line.o dbrkup.o
+       write_ENDF.o pfns_calc.o ang_mom.o subecis06m.o parse_line.o dbrkup.o rogcc.o
 
 all: 
 	$(MAKE) empire

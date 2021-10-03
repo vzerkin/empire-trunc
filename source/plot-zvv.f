@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5298 $
+Ccc   * $Rev: 5302 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2021-08-30 10:20:47 +0200 (Mo, 30 Aug 2021) $
+Ccc   * $Date: 2021-10-03 20:16:01 +0200 (So, 03 Okt 2021) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -179,6 +179,7 @@ C
       CLOSE (36)
       RETURN
       END
+
 C===============================================================
       SUBROUTINE PLOT_ZVV_SadLD(Nnuc,Ib) 
       INCLUDE 'dimension.h'
@@ -296,8 +297,8 @@ c==============================================================
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      COMMON /CT/ am,ux,eo,T
-      REAL*8 am,ux,t,eo
+      COMMON /CT/ am, ux, eo, T
+      REAL*8 am, ux, eo, T
 C
 C Dummy arguments
 C
@@ -312,6 +313,9 @@ C
       CHARACTER*24 ctmp1
       CHARACTER*36 ctmp2
       INTEGER ij, kk, nplot
+      
+      print *, "ux, Tct", ux, T
+
 
       if(NLV(Nnuc).le.3) return
 
@@ -355,7 +359,7 @@ C
       rocumul = 1.D0
 C     WRITE (36,*) '0.0 1.0'
 
-      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4) then
+      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4 .OR. ADIv.EQ.5) then
 
         defit = (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc)+2.d0)
      &           /(NEXreq-1) 
@@ -365,8 +369,8 @@ C     WRITE (36,*) '0.0 1.0'
 
           u = defit*(kk - 1) 
 
-          IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
-C---------GCM,OGCM
+          IF(ADIv.EQ.2 .OR. ADIv.EQ.4 .OR. ADIv.EQ.5) THEN
+C---------GCM,OGCM,GCC
             rocumul = 1.d0 + 
      &              EXP(( - eo/t))*(EXP(u/t) - 1.)
           ELSE
@@ -392,7 +396,7 @@ C---------GCM,OGCM
 
         IF(u .gt. ELV(NLV(Nnuc),Nnuc)+2.d0) exit
 
-        IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
+        IF(ADIv.EQ.2 .OR. ADIv.EQ.4 .OR. ADIv.EQ.5)THEN
 C---------GCM,OGCM
           rocumul = 1.d0 + 
      &              EXP(( - eo/t))*(EXP(u/t) - 1.)
@@ -590,7 +594,7 @@ C
      &          NLV(Nnuc),DEF(1,Nnuc),ROHfbp(Nnuc),ROHfba(Nnuc)
 99007 FORMAT ('set title "',I3,'-',A2,'-',I3,' Ncut=',I3,
      &        ' Def = ',F6.2,' ROHFBp = ',F6.3,' ROHFBa = ',F6.3,'"')
-      ELSEIF(ADIv.eq.2 .or. ADIv.eq.4) then 
+      ELSEIF(ADIv.eq.2 .or. ADIv.eq.4 .OR. ADIv.EQ.5) then 
         WRITE (8,*) ' a=', am, ' Ux=', ux, ' T=', t, ' EO=', eo
         WRITE (35,99009) INT(Z(Nnuc)), SYMb(Nnuc), INT(A(Nnuc)),
      &    t, ux, DEF(1,Nnuc), am, eo, NLV(Nnuc)
@@ -625,7 +629,7 @@ C
       WRITE (34,*) '0.0  ', rocumul
 
       ncalc =0
-      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4) then
+      if(ADIv.eq.0 .or. ADIv.eq.2 .or. ADIv.eq.4 .OR. ADIv.EQ.5) then
         defit = (ELV(NLV(Nnuc),Nnuc) + LDShif(Nnuc)+2.d0)
      &           /(NEXreq-1) 
         nplot = (ELV(NLV(Nnuc),Nnuc)+ LDShif(Nnuc)+2.d0)/defit
@@ -633,9 +637,10 @@ C
         DO kk = 2, nplot
 
           u     = defit*(kk - 1)
-
-          IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
-C---------GCM,OGCM
+          print *, "HERE COME CLOSE"
+          IF(ADIv.EQ.2 .OR. ADIv.EQ.4 .OR. ADIv.EQ.5)THEN
+C---------GCM, OGCM, GCCM
+            print *, "T in cumul plotting ", T
             rocumul = 1.d0 + 
      &              EXP(( - eo/t))*(EXP(u/t) - 1.)
           ELSE
@@ -661,7 +666,7 @@ C         IF(u.lt.0.5*ELV(NLV(Nnuc),Nnuc)) cycle
 
         IF(u .gt. ELV(NLV(Nnuc),Nnuc) + 2.d0) exit
 
-        IF(ADIv.EQ.2 .OR. ADIv.EQ.4)THEN
+        IF(ADIv.EQ.2 .OR. ADIv.EQ.4 .OR. ADIv.EQ.5)THEN
 C---------GCM,OGCM
           rocumul = 1.d0 + 
      &              EXP(( - eo/t))*(EXP(u/t) - 1.)

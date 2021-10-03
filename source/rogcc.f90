@@ -68,10 +68,10 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    common /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
    real*8 :: am                           ! level density parameter 'a' 
-   real*8 :: T                            ! nuclear temperature in Constatnt Temperature (CT) model
+   real*8 :: Tct                          ! temperature in constant temperature model
    real*8 :: eo                           ! Eo enrgy shift in CT formula 
    real*8 :: ux                           ! matching energy between CT and Fermi-gas level densities
-   common /CT/ am,ux,eo,T
+   common /CT/ am,ux,eo,Tct
    !
    ! Local variables
    !
@@ -80,6 +80,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: mompar                       ! moment of inertia with respect to the symmetry axis
    real*8 :: momort                       ! moment of inertia with respect to the orthogonal to the symmetry axis
    real*8 :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
+   real*8 :: T                            ! nuclear temperature (not constant temperature)
    real*8 :: ratio(1:2) = 0.5             ! parity ratio
    real*8 :: eMatch = 0.0D0               ! upper energy boundary for CT  
    real*8 :: ro_u = 0.0D0                 ! level density at the low-energy side of the matching point ??? 
@@ -93,7 +94,6 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: roFG(0:nde)= 0.0D0           ! total Fermi-gas LD for matching CT LD 
    ! real*8 :: deriv1, deriv2               ! derivatives of Fermi-gas level densities at two excitation energies
    real*8 :: eps                          ! tolerance when comparing two matching quantities
-   real*8 :: Tct                          ! temperature in constant temperature model
    real*8 :: El                           ! energy of the lowest discrete level used in a cumulative-number of levels fit
    real*8 :: Eu                           ! energy of the highest discrete level used in a cumulative-number of levels fit
    real*8 :: stab                         ! stability limit versus fission
@@ -133,7 +133,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    !
    ! Fit parameters of the level densities the first time they are calculated
    !
-   if (Ux == 0.0 .or. Tct == 0.0 ) then ! THIS MUST BE FIXED - NOW WORKS FOR THE FIRST NUCLEUS ONLY !!!!
+   if (ROPar(2,Nnuc) == 0.0 .or. ROPar(5,Nnuc) == 0.0 ) then 
    
       !-----setting the lowest and highest discrete levels to fit constant temperature formula
       Nl = 3
@@ -197,8 +197,9 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       Eo = UCRt - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13 
       eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu  ! Eq. 55 of Nucl. Phys. A810(2008)13
       print *, "initial: eps, Tct, Eo, Ux, Nl, Nu, Eu =", eps, Tct, Eo, Ux,  Nl, Nu, Eu
+
       i = 0    
-      do while (abs(eps) > 0.1)  !-----iterate for Tct and Eo
+      do while (abs(eps) > 0.1 .and. Nu-Nl > 3)  !-----iterate for Tct and Eo if Nu-Nl > 3
          tct = tct - 0.001*eps   ! THIS MIGHT BE TOO SIMPLE TO WORK, BUT IT SEEMS THAT IT DOES!!! 
          ! eps = Tct*roUx*exp(-Ux/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   ! Eq. 56 of Nucl. Phys. A810(2008)13
          ! The same as above but more transparent in two equations
@@ -206,11 +207,11 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   !  Eq. 55 of Nucl. Phys. A810(2008)13
          i = i + 1
          print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
-         if (i > 100) then
+         if (i > 30) then
             WRITE (8,*) 'WARNING: ROGCC'
             WRITE (8,*) 'WARNING: Maximum number of iterations in ROGCC reached for'
             WRITE (8,*) 'WARNING: Z=', INT(Z(Nnuc)), '  A=', INT(A(Nnuc))
-            WRITE (8,*) 'WARNING: The last T=', Tct,' will be used for calculations'
+            WRITE (8,*) 'WARNING: The last temperature', Tct,' will be used for calculations'
             WRITE (8,*) 'WARNING: '
             exit
          endif 
@@ -275,7 +276,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          RO(i,j,2,Nnuc) = ro_u*ro_j*ratio(2)
       enddo
       UEXcit(i,Nnuc) = e
-      TNUc(i,Nnuc) = SQRT(e/am)
+      TNUc(i,Nnuc) = Tct
    enddo      ! Loop over T-constant excitation energies
 
 !
@@ -315,6 +316,8 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    write(8,'(I3,''-'',A2,''-'',I3, 5X,5(2x,1F8.5))') &
             INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), (ROPar(j,nnuc),j=1,5)
 
+
+   print *, "ROGCC Tct before exiting ", Tct
    return
 end subroutine ROGCC
 
@@ -343,7 +346,7 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
    real*8, intent(out) :: T
    real*8, intent(in)  :: Bf
    real*8, intent(in)  :: A2
-   real*8, intent(in)  :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0*T
+   real*8, intent(in)  :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
 
 !
 ! Local variables
