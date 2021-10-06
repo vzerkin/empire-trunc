@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2020-04-26 16:38:46 +0200 (So, 26 Apr 2020) $
-Ccc   * $Id: endres.f 5207 2020-04-26 14:38:46Z trkov $
+Ccc   * $Date: 2021-10-06 10:34:29 +0200 (Mi, 06 Okt 2021) $
+Ccc   * $Id: endres.f 5303 2021-10-06 08:34:29Z trkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -36,6 +36,7 @@ C-V  16/02 Add capability for multi-region data in MF2/LRF7 (RRR+URR).
 C-V  17/09 Convert to double precision (roundoff error printing ZA).
 C-V  19/09 Fix interpolation range in MF3 for multiple ranges.
 C-V  20/04 Warn if EL in RRR greater than Elow.
+C-V  21/10 Fix Warning from 20/04 when URR is present.
 C-M
 C-M  Manual for ENDRES Program
 C-M  =========================
@@ -297,6 +298,7 @@ C* Process a resonance section
         WRITE(LTT,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
         WRITE(LLG,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
       END IF
+      ELE=EH
 C*    -- Copy energy-dependent scattering radius, if present
       IF(NRO.EQ.1) THEN
         CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
