@@ -1,6 +1,6 @@
 Ccc   * $Author: trkov $
-Ccc   * $Date: 2021-10-06 10:34:29 +0200 (Mi, 06 Okt 2021) $
-Ccc   * $Id: endres.f 5303 2021-10-06 08:34:29Z trkov $
+Ccc   * $Date: 2021-10-06 13:05:38 +0200 (Mi, 06 Okt 2021) $
+Ccc   * $Id: endres.f 5304 2021-10-06 11:05:38Z trkov $
 
       PROGRAM ENDRES
 C-Title  : Program ENDRES
@@ -87,6 +87,7 @@ C*
       NMT=0
       ELE=1.D-5
       ERL=ELE
+      EEE=ELE
       NF10=0
       NF09=0
       IZRO=0
@@ -294,11 +295,11 @@ C* Process a resonance section
       CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
       CALL WRTEXT(LOU,MAT,MF,MT,NS,CH66)
       READ (CH66,891) EL,EH,LRU,LRF,NRO,NAPS
-      IF(EL.GT.ELE) THEN
-        WRITE(LTT,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
-        WRITE(LLG,*) ' ENDRES WARNING - ERL',EL,' >Elow',ELE
+      IF(EL.GT.EEE) THEN
+        WRITE(LTT,*) ' ENDRES WARNING - ERL',EL,' >Elow',EEE
+        WRITE(LLG,*) ' ENDRES WARNING - ERL',EL,' >Elow',EEE
       END IF
-      ELE=EH
+      EEE=EH
 C*    -- Copy energy-dependent scattering radius, if present
       IF(NRO.EQ.1) THEN
         CALL RDTEXT(LRR,MA1,MF,MT,CH66,IER)
@@ -567,7 +568,7 @@ C* Interpolate cross section to the upper resonance range energy
 C* Low energy limit on file is used for reactions with Q>0
       ELL=MAX(ETH,E1)
 c...
-C...  print *,'mt,eth,ell,ele',mt,eth,ell,ele
+c...  print *,'mt,eth,ell,ele',mt,eth,ell,ele
 c...
       IF(ETH.LT.ELL .AND. ELL.GT.ELE) THEN
 C* Check points below threshold
