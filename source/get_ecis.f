@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Rev: 5305 $
+Ccc   * $Author: bvcarlson $
+Ccc   * $Date: 2021-10-14 11:50:21 +0200 (Do, 14 Okt 2021) $
 
       subroutine get_ecis_inelastic
      >  (nejcec,nnurec,ncollx,xscclow,totcorr)
@@ -92,8 +92,7 @@ C-----Check whether integral over angles agrees with x-sec. read from ECIS
         csum = csum + elada(iang)*SANgler(iang)*PI/(NDAng-1) !/90.d0
       ENDDO
       csum = 2.0d0*PI*csum 
-C     write(*,*) ELAcs,csum,' SIN'
-      if (csum.gt.0.d0) then
+      if (ELAcs*csum.gt.0.d0) then
 C-------Correct elada() for eventual imprecision
         ftmp = ELAcs/csum
         DO iang = 1, NANgela
