@@ -1,8 +1,119 @@
+*
+*------------------------------------------------------------
+*
+      MODULE brkfuswf
+
+      COMPLEX*16, ALLOCATABLE :: bfwf(:,:,:)
+      COMPLEX*16, ALLOCATABLE :: tb(:)      
+
+      CONTAINS
+
+      SUBROUTINE AXSBF(n1,n2,n3,n4)
+
+      INTEGER :: n1,n2,n3,n4
+
+      IF(ALLOCATED(bfwf)) DEALLOCATE(bfwf)
+
+      ALLOCATE(bfwf(n1,n2,n3),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for bfwf!'
+        WRITE(6,*) 'Insufficient memory for bfwf!'
+        STOP
+      ENDIF
+      bfwf = 0.0d0
+
+      IF(ALLOCATED(tb)) DEALLOCATE(tb)
+      ALLOCATE(tb(n4),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for tb!'
+        WRITE(6,*) 'Insufficient memory for tb!'
+        STOP
+      ENDIF
+      tb = 0.0d0
+
+      END SUBROUTINE AXSBF
+
+      SUBROUTINE DAXSBF
+
+      IF(ALLOCATED(bfwf)) DEALLOCATE(bfwf)
+      IF(ALLOCATED(tb)) DEALLOCATE(tb)      
+
+      END SUBROUTINE DAXSBF
+
+      END MODULE BRKFUSWF
+*
+*------------------------------------------------------------
+*
+      MODULE wavefuncs
+
+      COMPLEX*16, ALLOCATABLE :: wfs(:,:,:), wfc(:,:,:) 
+      COMPLEX*16, ALLOCATABLE :: smtrx(:,:), cph(:,:)
+
+      CONTAINS
+
+      SUBROUTINE AXSWF(nptmx,nol)
+
+      INTEGER :: nptmx, nol
+
+      IF(ALLOCATED(wfs)) DEALLOCATE(wfs)
+      ALLOCATE(wfs(nptmx,nol,7),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for wfs!'
+        WRITE(6,*) 'Insufficient memory for wfs!'
+        STOP
+      ENDIF
+      wfs = 0.0d0
+
+      IF(ALLOCATED(wfc)) DEALLOCATE(wfc)
+      ALLOCATE(wfc(nptmx,nol,9),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for wfc!'
+        WRITE(6,*) 'Insufficient memory for wfc!'
+        STOP
+      ENDIF
+      wfc = 0.0d0
+
+      IF(ALLOCATED(smtrx)) DEALLOCATE(smtrx)
+      ALLOCATE(smtrx(nol,5),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for smtrx!'
+        WRITE(6,*) 'Insufficient memory for smtrx!'
+        STOP
+      ENDIF
+      smtrx = 0.0d0
+
+      IF(ALLOCATED(cph)) DEALLOCATE(cph)
+      ALLOCATE(cph(nol,5),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for cph!'
+        WRITE(6,*) 'Insufficient memory for cph!'
+        STOP
+      ENDIF
+      cph = 0.0d0
+
+      END SUBROUTINE AXSWF
+
+      SUBROUTINE DAXSWF
+
+      IF(ALLOCATED(wfs)) DEALLOCATE(wfs)
+      IF(ALLOCATED(wfc)) DEALLOCATE(wfc)      
+      IF(ALLOCATED(smtrx)) DEALLOCATE(smtrx)
+      IF(ALLOCATED(cph)) DEALLOCATE(cph)      
+
+      END SUBROUTINE DAXSWF
+
+      END MODULE wavefuncs
+*
+*------------------------------------------------------------
+*
       subroutine  dirdbrkup(ctmp)
 
+      use wavefuncs
+      
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
+      parameter(nptmx=7500)
       parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
       character*132 ctmp
@@ -19,7 +130,7 @@
 
       common/main/ebnd,ecm,dex
       common/angles/ylmi(ndlmx,NDAngecis),thi(NDAngecis),nthi
-      common/intcons/ijkl(3),wxyz(15),lll(3),lmxwf(3)
+      common/intcons/ijkl(3),wxyz(18),lll(5),lmxwf(3)
 
 
       data iwrt/8/
@@ -34,14 +145,16 @@
         write(iwrt,'(''    l    dsig-opt    dsig-fld'')')
        ENDIF
 
+      call axswf(nptmx,nol)
       call dscat(1,ecm,lmxd,1,sigr,sigfld)
-
+      call daxswf
+      
       IF(IOUT.GT.1)
      1   write(iwrt,'(/,'' Ed='',f12.4,'' MeV'', 
      2    ''    sigr='',f12.4,'' mb   sig-fld='',f12.4,'' mb'',/)') 
      3                                      ecm,sigr,sigfld
 
-c define energy interval de and (even) number of intervals ne
+c     define number of energy intervals
       ext=ecm-ebnd       
       nxx=ext/dex
       ex0=ext-nxx*dex
@@ -187,6 +300,7 @@ C      WRITE(45,'(i6,6x,e14.5)') nxx,ex0
 
 c     character*48 filename
       complex*16 frc
+      double precision wpot
 
       double precision ylmi
 
@@ -196,9 +310,9 @@ c      dimension ax(4),pox(4,2)
 
       common/main/ebnd,ecm,dex
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/frcor/frc(nptmx),be,frcnst,dr0
-      common/intcons/npt1,npt2,npt3,dr,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                             lmx(3),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
+      common/intcons/npt1,npt2,npt3,dr,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                             lmx(5),lmxwf(3)
       common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
 
       data am0/939.0/,hc/197.32/
@@ -316,8 +430,6 @@ c thetai
       frcnst=2.*md(2)*md(3)*am0*frcnst0**2/(hc**2*(md(2)+md(3)))
       be=ebnd
 
-      zrf=mf/(mf+md(2))
-
       lmx1=max(lmxwf(2),lmxwf(3))
 
       return
@@ -327,47 +439,16 @@ c thetai
 *
 *------------------------------------------------------------
 *
-      MODULE brkfuswf
-
-      COMPLEX*16, ALLOCATABLE :: bfwf(:,:,:)
-
-      CONTAINS
-
-      SUBROUTINE AXS(n1,n2,n3)
-
-      INTEGER :: n1,n2,n3
-
-      IF(ALLOCATED(bfwf)) DEALLOCATE(bfwf)
-
-      ALLOCATE(bfwf(n1,n2,n3),STAT=myalloc)
-      IF(myalloc.NE.0) THEN
-        WRITE(*,*) 'Insufficient memory for bfwf!'
-        WRITE(6,*) 'Insufficient memory for bfwf!'
-        STOP
-      ENDIF
-      bfwf = 0.0d0
-
-      END SUBROUTINE AXS
-
-      SUBROUTINE DAXS
-
-      IF(ALLOCATED(bfwf)) DEALLOCATE(bfwf)
-
-      END SUBROUTINE DAXS
-
-      END MODULE BRKFUSWF
-*
-*------------------------------------------------------------
-*
       subroutine tmatrx(e1,e2,ed,ps,dps,dbf1,dbf2,sigi,dsigt)
 
       use brkfuswf
+      use wavefuncs
 
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
       parameter(npt1mx=500,nptmx=7500)
-      parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2,ntlmx=(2*nol+1)*ndlmx/3)
+      parameter(nol=95,ndlmx=NDLW*(NDLW+1)/2)
 
       double precision ps(nol,3),dsigt(3)
       double precision dbf1(NDANGecis),dbf2(NDANGecis)
@@ -376,7 +457,6 @@ c thetai
       complex*16 ovrlp0,ovrlp,bfint
 
       complex*16 brkup
-      complex*16 tb(ntlmx)
       double precision df1(NDANGecis),db1(NDANGecis)
       double precision df2(NDANGecis),db2(NDANGecis)
       double precision dps(nol,3)
@@ -388,8 +468,8 @@ c thetai
       double precision ylmi
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,hx,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
+      common/intcons/npt1,npt2,npt3,hx,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
       common/angles/ylmi(ndlmx,NDANGecis),thi(NDANGecis),nthi
 
       data am0/939.0d0/,hc/197.32d0/
@@ -403,25 +483,31 @@ c thetai
       df2=0.0d0
 
       call setpoints(ed,e1)
+      call axswf(nptmx,nol)
 
       call dscat(1,ed,lmxd,0,sigrd,sigfldd)
-      IF(IOUT.GT.4)
-     1  write(iwrt,'(/,''   Ed='',f12.4,'' MeV    lmaxd='', i3,
-     1    ''    sigrd='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
+c      write(iwrt,'(/,''   Ea='',f12.4,'' MeV    lmaxa='', i3,
+c     1    ''    sigra='',f12.4,'' mb'')') ed,lmx(1)-1,sigrd
 
       call dscat(2,e1,lmx1,0,sigr1,sigfld1)
-      IF(IOUT.GT.4)
-     1  write(iwrt,'(''   E1='',f12.4,'' MeV    lmax1='', i3,
-     1    ''    sigr1='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
+c      write(iwrt,'(''   Eb='',f12.4,'' MeV    lmaxb='', i3,
+c     1    ''    sigrb='',f12.4,'' mb'')') e1,lmx(2)-1,sigr1
 
       call dscat(3,e2,lmx2,0,sigr2,sigfld2)
-      IF(IOUT.GT.4)
-     1  write(iwrt,'(''   E2='',f12.4,'' MeV    lmax2='', i3,
-     1    ''    sigr2='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
+c      write(iwrt,'(''   Ex='',f12.4,'' MeV    lmaxx='', i3,
+c     1    ''    sigrx='',f12.4,'' mb'',/)') e2,lmx(3)-1,sigr2
+
+      call dscat(4,e1,lmx3,0,sigr4,sigfld4)
+c      write(iwrt,'(''   Eb='',f12.4,'' MeV    lmaxb='', i3,
+c     1    ''    sigrb='',f12.4,'' mb'')') e1,lmx(4)-1,sigr4
+
+      call dscat(5,e2,lmx4,0,sigr5,sigfld5)
+c      write(iwrt,'(''   Ex='',f12.4,'' MeV    lmaxx='', i3,
+c     1    ''    sigrx='',f12.4,'' mb'',/)') e2,lmx(5)-1,sigr5
 
       lma=max(lmx1,lmx2)
       lma=lma*(lma+1)*(2*lma+1)/6
-      call axs(npt1,2,lma)
+      call axsbf(npt1,2,lma,ndlmx*(2*nol+1)/3)
 
       sig0=80.0d0*dx0**2*(mf*am0/hc**2)**3/pidp
       do i=1,3
@@ -654,7 +740,8 @@ c
      1  write(iwrt,'(/,3x,''E1='',f7.2,3x,''E2='',f7.2,3x,
      1          ''dsig/dE='',3f10.4,'' (mb/MeV)'')') e1,e2,dsigt
 
-      call daxs
+      call daxsbf
+      call daxswf
       return
       end
 *
@@ -669,12 +756,13 @@ c
 
       real md,mf
       complex*16 frc
+      double precision wpot
 c     integer iwrt
 
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
-      common/frcor/frc(nptmx),be,frcnst,dr0
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
 
       data rmax0/1.6/,amax0/0.95/
 
@@ -698,7 +786,7 @@ C      data iwrt/8/
        end do
 
       akmx=ak(1)+ak(2)+ak(3)
-      h=min(max(1./akmx,dr0),0.1)
+      h=min(max(1./akmx,0.1),dr0)
 
       npt1=rmax1/h
       if(npt1.ge.nptmx) then
@@ -707,9 +795,10 @@ C      data iwrt/8/
       npt1=2*((npt1-1)/2)+2
 
       npt2=rmax2/h
-      npt2=min(2*((npt2-1)/2+1),nptmx)
+      npt2=min(max(2*((npt2-1)/2+1),npt1),nptmx)
 
-      dkmn=(ak(1)-ak(2)-mf*ak(3)/(mf+md(2)))*h
+      dkmn=max(ak(2)+mf*ak(3)/(mf+md(2)),ak(3)+mf*ak(2)/(mf+md(3)))
+      dkmn=(ak(1)-dkmn)*h
       npt3=min(int(10.0/dkmn),nptmx)
 
 c      write(iwrt,'(/,8(''+-+-+-+-+-+-+-''),''+'',/)')
@@ -734,46 +823,54 @@ c
 c  calculates the overlap of the projectile and the two breakup product
 c  scattering wavefunctions
 c
+      use wavefuncs
+
       parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
       complex*16 ovrlp0
       complex*16 bfwf1(npt1mx),bfwf2(npt1mx)
 
+      complex*16 ovrlpb,ovrlpx      
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
-!     complex*16 wf0,nr,wfx
-      complex*16     nr,wfx
+      double precision d22,d32,s22,s32,dx22,dx32,sx22,sx32      
+      complex*16 nr,wfx
 
-      complex*16 wfs,wfc,smtrx,cph
+      double precision wpot      
       complex*16 frc
       real md,mf
       
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
-      common/frcor/frc(nptmx),be,frcnst,dr0
-      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-     1  cph(nol,3),wpot(nptmx,3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
 
-!     data iwrt/6/
+      data iwrt/6/
 
+      ovrlpb=0.0d0
+      ovrlpx=0.0d0
+      
       ovrlp0=0.0d0
 
       wt=4.0d0/3.0d0
       dwt=-0.5d0*wt
 
       do n=1,npt2
-        ovrlp0=ovrlp0+wt*frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,3)/n
+        ovrlpx=ovrlpx+wt*frc(n,1)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,5)/n
+        ovrlpb=ovrlpb+wt*frc(n,2)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,3)/n
         wt=wt+dwt
         dwt=-dwt
        end do
 
 c  Correct for last term in real integral and first term in complex integrals
 
-      wfx=frc(npt2)*((1.0d0,-1.0d0)*conjg(wfc(1,l1,1))
+      wfx=((1.0d0,-1.0d0)*conjg(wfc(1,l1,1))
      1         +(1.0d0,1.0d0)*smtrx(l1,1)*wfc(1,l1,1))/npt2
 
-      ovrlp0=ovrlp0+0.125d0*wt*wfx*wfs(npt2,l2,2)*wfs(npt2,l3,3)
+      ovrlpx=ovrlpx+0.125d0*wt*frc(npt2,1)
+     1       *wfx*wfs(npt2,l2,2)*wfs(npt2,l3,5)      
+      ovrlpb=ovrlpb+0.125d0*wt*frc(npt2,2)
+     1       *wfx*wfs(npt2,l2,4)*wfs(npt2,l3,3)
 
 c  Decaying exponential part of Coulomb functions (k*Im(r)) from
 c  the complex plane integral are included explicitly here as 
@@ -781,13 +878,23 @@ c  differences (or decaying sums) to avoid overflow/underflow errors
 
       dx21=exp((ak(2)-md(2)*ak(1)/(md(2)+md(3)))*h)
       sx21=exp(-(ak(2)+md(2)*ak(1)/(md(2)+md(3)))*h)
-      dx31=exp((mf*ak(3)/(mf+md(2))-md(3)*ak(1)/(md(2)+md(3)))*h)
-      sx31=exp(-(mf*ak(3)/(mf+md(2))+md(3)*ak(1)/(md(2)+md(3)))*h)
+      dx31=exp((mf*ak(5)/(mf+md(2))-md(3)*ak(1)/(md(2)+md(3)))*h)
+      sx31=exp(-(mf*ak(5)/(mf+md(2))+md(3)*ak(1)/(md(2)+md(3)))*h)
+
+      dx22=exp((mf*ak(4)/(mf+md(3))-md(2)*ak(1)/(md(2)+md(3)))*h)
+      sx22=exp(-(mf*ak(4)/(mf+md(3))+md(2)*ak(1)/(md(2)+md(3)))*h)
+      dx32=exp((ak(3)-md(3)*ak(1)/(md(2)+md(3)))*h)
+      sx32=exp(-(ak(3)+md(3)*ak(1)/(md(2)+md(3)))*h)
 
       d21=1.0d0
       s21=1.0d0
       d31=1.0d0
-      s31=1.0d0  
+      s31=1.0d0
+
+      d22=1.0d0
+      s22=1.0d0
+      d32=1.0d0
+      s32=1.0d0
 
       do n=2,npt3
         nr=npt2+(0.0d0,1.0d0)*(n-1)
@@ -797,19 +904,33 @@ c  differences (or decaying sums) to avoid overflow/underflow errors
         d31=d31*dx31
         s31=s31*sx31
 
-        ovrlp0=ovrlp0
-     1   -0.125d0*wt*frc(npt2)*(conjg(wfc(n,l1,1)/nr)
-     2      *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,4)))
-     3      *(s31*conjg(wfc(n,l3,3))-smtrx(l3,3)*d31*conjg(wfc(n,l3,5)))
+        d22=d22*dx22
+        s22=s22*sx22
+        d32=d32*dx32
+        s32=s32*sx32
+
+        ovrlpx=ovrlpx
+     1   -0.125d0*wt*frc(npt2,1)*(conjg(wfc(n,l1,1)/nr)
+     2      *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,6)))
+     3      *(s31*conjg(wfc(n,l3,5))-smtrx(l3,5)*d31*conjg(wfc(n,l3,9)))
      4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
-     5                 *(d21*wfc(n,l2,4)-smtrx(l2,2)*s21*wfc(n,l2,2))
-     6                 *(d31*wfc(n,l3,5)-smtrx(l3,3)*s31*wfc(n,l3,3)))
+     5                 *(d21*wfc(n,l2,6)-smtrx(l2,2)*s21*wfc(n,l2,2))
+     6                 *(d31*wfc(n,l3,9)-smtrx(l3,5)*s31*wfc(n,l3,5)))
+        ovrlpb=ovrlpb
+     1   -0.125d0*wt*frc(npt2,2)*(conjg(wfc(n,l1,1)/nr)
+     2      *(s22*conjg(wfc(n,l2,4))-smtrx(l2,4)*d22*conjg(wfc(n,l2,8)))
+     3      *(s32*conjg(wfc(n,l3,3))-smtrx(l3,3)*d32*conjg(wfc(n,l3,7)))
+     4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
+     5                 *(d22*wfc(n,l2,8)-smtrx(l2,4)*s22*wfc(n,l2,4))
+     6                 *(d32*wfc(n,l3,7)-smtrx(l3,3)*s32*wfc(n,l3,3)))
         wt=wt+dwt
         dwt=-dwt
        end do
 
-      ovrlp0=cph(l1,1)*cph(l2,2)*cph(l3,3)*ovrlp0/(ak(1)*ak(2)*ak(3))
-
+       ovrlpx=cph(l1,1)*cph(l2,2)*cph(l3,5)*ovrlpx/(ak(1)*ak(2)*ak(5))
+       ovrlpb=cph(l1,1)*cph(l2,4)*cph(l3,3)*ovrlpb/(ak(1)*ak(4)*ak(3))
+       ovrlp0=0.5d0*(ovrlpx+ovrlpb)
+       
       do n=1,npt1
 
         bfwf1(n)=0.0d0
@@ -827,31 +948,37 @@ c
 c  calculates the overlap of the projectile and the two breakup product
 c  scattering wavefunctions
 c
+      use wavefuncs
+
       parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
       complex*16 ovrlp
-      complex*16 bfwf1(npt1),bfwf2(npt1)
+      complex*16 bfwf1(npt1mx),bfwf2(npt1mx)
+
 
       double precision d21,d31,s21,s31,dx21,dx31,sx21,sx31
-      complex*16 ovrlpi0(0:nptmx)
-!     complex*16 vrlp1,ovrlp2,nr,wfx
-      complex*16       ovrlp2,nr,wfx
-      complex*16 a11,a12,a13,a21,a22,a23,b1,b2,b3
+      double precision d22,d32,s22,s32,dx22,dx32,sx22,sx32      
 
-      complex*16 wfs,wfc,smtrx,cph
+      complex*16 ovrlpi0(0:nptmx,2)
+      complex*16 ovrlpb,ovrlpx      
+      complex*16 ovrlp1,ovrlp2,nr,wfx
+      complex*16 a11,a12,a13,a21,a22,a23,b11,b21,b31,b12,b22,b32
+
+      double precision wpot      
       complex*16 frc
       real md,mf
-      
+
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
-      common/frcor/frc(nptmx),be,frcnst,dr0
-      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-     1  cph(nol,3),wpot(nptmx,3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
 
-C      data iwrt/8/
+      data iwrt/6/
 
+      ovrlpb=0.0d0
+      ovrlpx=0.0d0
+      
       ovrlp=0.0d0
       ovrlp1=0.0d0
       ovrlp2=0.0d0
@@ -860,31 +987,35 @@ C      data iwrt/8/
       dwt=-0.5d0*wt
 
       do n=1,npt2
-        ovrlp=ovrlp+wt*frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,3)/n
+         ovrlpx=ovrlpx+wt*frc(n,1)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,5)/n
+         ovrlpb=ovrlpb+wt*frc(n,2)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,3)/n
         if(n.gt.npt1) then
-          ovrlp1=ovrlp1+wt*frc(n)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,3)/n
-          ovrlp2=ovrlp2+wt*frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,5)/n
+         ovrlp1=ovrlp1+wt*frc(n,1)*wfs(n,l1,1)*wfs(n,l2,6)*wfs(n,l3,5)/n
+         ovrlp2=ovrlp2+wt*frc(n,2)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,7)/n
          endif
         wt=wt+dwt
         dwt=-dwt
        end do
 
       ovrlp1=ovrlp1+0.25d0*wt*
-     1       frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,4)*wfs(npt1,l3,3)/npt1
+     1     frc(npt1,1)*wfs(npt1,l1,1)*wfs(npt1,l2,6)*wfs(npt1,l3,5)/npt1
       ovrlp2=ovrlp2+0.25d0*wt*
-     1       frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,2)*wfs(npt1,l3,5)/npt1
-
-c      write(*,'(3i5,3e15.5)') l1-1,l2-1,l3-1,
-c     &                           abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
+     1     frc(npt1,2)*wfs(npt1,l1,1)*wfs(npt1,l2,4)*wfs(npt1,l3,7)/npt1
 
 c  Correct for last term in real integral and first term in complex intregrals
 
-      wfx= frc(npt2)*((1.0d0,-1.0d0)*conjg(wfc(1,l1,1))
+      wfx=((1.0d0,-1.0d0)*conjg(wfc(1,l1,1))
      1         +(1.0d0,1.0d0)*smtrx(l1,1)*wfc(1,l1,1))/npt2
 
-      ovrlp=ovrlp+0.125d0*wt*wfx*wfs(npt2,l2,2)*wfs(npt2,l3,3)
-      ovrlp1=ovrlp1+0.125d0*wt*wfx*wfs(npt2,l2,4)*wfs(npt2,l3,3)
-      ovrlp2=ovrlp2+0.125d0*wt*wfx*wfs(npt2,l2,2)*wfs(npt2,l3,5)
+      ovrlpx=ovrlpx+0.125d0*wt*frc(npt2,1)
+     1     *wfx*wfs(npt2,l2,2)*wfs(npt2,l3,5)
+      ovrlpb=ovrlpb+0.125d0*wt*frc(npt2,2)
+     1     *wfx*wfs(npt2,l2,4)*wfs(npt2,l3,3)
+      
+      ovrlp1=ovrlp1+0.125d0*wt*frc(npt2,1)
+     1                        *wfx*wfs(npt2,l2,6)*wfs(npt2,l3,5)
+      ovrlp2=ovrlp2+0.125d0*wt*frc(npt2,2)
+     1                        *wfx*wfs(npt2,l2,4)*wfs(npt2,l3,7)
 
 c  Decaying exponential part of Coulomb functions (k*Im(r)) from
 c  the complex plane integral are included explicitly here as 
@@ -892,14 +1023,23 @@ c  differences (or decaying sums) to avoid overflow/underflow errors
 
       dx21=exp((ak(2)-md(2)*ak(1)/(md(2)+md(3)))*h)
       sx21=exp(-(ak(2)+md(2)*ak(1)/(md(2)+md(3)))*h)
-      dx31=exp((mf*ak(3)/(mf+md(2))-md(3)*ak(1)/(md(2)+md(3)))*h)
-      sx31=exp(-(mf*ak(3)/(mf+md(2))+md(3)*ak(1)/(md(2)+md(3)))*h)
+      dx31=exp((mf*ak(5)/(mf+md(2))-md(3)*ak(1)/(md(2)+md(3)))*h)
+      sx31=exp(-(mf*ak(5)/(mf+md(2))+md(3)*ak(1)/(md(2)+md(3)))*h)
 
+      dx22=exp((mf*ak(4)/(mf+md(3))-md(2)*ak(1)/(md(2)+md(3)))*h)
+      sx22=exp(-(mf*ak(4)/(mf+md(3))+md(2)*ak(1)/(md(2)+md(3)))*h)
+      dx32=exp((ak(3)-md(3)*ak(1)/(md(2)+md(3)))*h)
+      sx32=exp(-(ak(3)+md(3)*ak(1)/(md(2)+md(3)))*h)
 
       d21=1.0d0
       s21=1.0d0
       d31=1.0d0
-      s31=1.0d0  
+      s31=1.0d0
+
+      d22=1.0d0
+      s22=1.0d0
+      d32=1.0d0
+      s32=1.0d0
 
       do n=2,npt3
         nr=npt2+(0.0d0,1.0d0)*(n-1)
@@ -909,93 +1049,115 @@ c  differences (or decaying sums) to avoid overflow/underflow errors
         d31=d31*dx31
         s31=s31*sx31
 
-        ovrlp=ovrlp
-     1   -0.125d0*wt*frc(npt2)*(conjg(wfc(n,l1,1)/nr)
-     2      *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,4)))
-     3      *(s31*conjg(wfc(n,l3,3))-smtrx(l3,3)*d31*conjg(wfc(n,l3,5)))
-     4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
-     5                 *(d21*wfc(n,l2,4)-smtrx(l2,2)*s21*wfc(n,l2,2))
-     6                 *(d31*wfc(n,l3,5)-smtrx(l3,3)*s31*wfc(n,l3,3)))
+        d22=d22*dx22
+        s22=s22*sx22
+        d32=d32*dx32
+        s32=s32*sx32
 
-        ovrlp1=ovrlp1
-     1   +(0.0d0,0.25d0)*wt*frc(npt2)*(conjg(wfc(n,l1,1)/nr)
-     2              *d21*conjg(wfc(n,l2,4))
-     3     *(s31*conjg(wfc(n,l3,3))-smtrx(l3,3)*d31*conjg(wfc(n,l3,5)))
+        ovrlpx=ovrlpx
+     1   -0.125d0*wt*frc(npt2,1)*(conjg(wfc(n,l1,1)/nr)
+     2      *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,6)))
+     3      *(s31*conjg(wfc(n,l3,5))-smtrx(l3,5)*d31*conjg(wfc(n,l3,9)))
+     4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
+     5                 *(d21*wfc(n,l2,6)-smtrx(l2,2)*s21*wfc(n,l2,2))
+     6                 *(d31*wfc(n,l3,9)-smtrx(l3,5)*s31*wfc(n,l3,5)))
+
+        ovrlpb=ovrlpb
+     1   -0.125d0*wt*frc(npt2,2)*(conjg(wfc(n,l1,1)/nr)
+     2      *(s22*conjg(wfc(n,l2,4))-smtrx(l2,4)*d22*conjg(wfc(n,l2,8)))
+     3      *(s32*conjg(wfc(n,l3,3))-smtrx(l3,3)*d32*conjg(wfc(n,l3,7)))
+     4                   +smtrx(l1,1)*wfc(n,l1,1)/nr
+     5                 *(d22*wfc(n,l2,8)-smtrx(l2,4)*s22*wfc(n,l2,4))
+     6                 *(d32*wfc(n,l3,7)-smtrx(l3,3)*s32*wfc(n,l3,3)))
+
+       ovrlp1=ovrlp1
+     1   +(0.0d0,0.25d0)*wt*frc(npt2,1)*(conjg(wfc(n,l1,1)/nr)
+     2              *d21*conjg(wfc(n,l2,6))
+     3     *(s31*conjg(wfc(n,l3,5))-smtrx(l3,5)*d31*conjg(wfc(n,l3,9)))
      4                          +smtrx(l1,1)*wfc(n,l1,1)/nr
      5                 *s21*wfc(n,l2,2)
-     6                 *(d31*wfc(n,l3,5)-smtrx(l3,3)*s31*wfc(n,l3,3)))
+     6                 *(d31*wfc(n,l3,9)-smtrx(l3,5)*s31*wfc(n,l3,5)))
 
         ovrlp2=ovrlp2
-     1   +(0.0d0,0.25d0)*wt*frc(npt2)*(conjg(wfc(n,l1,1)/nr)
-     2     *(s21*conjg(wfc(n,l2,2))-smtrx(l2,2)*d21*conjg(wfc(n,l2,4)))
-     3              *d31*conjg(wfc(n,l3,5))
+     1   +(0.0d0,0.25d0)*wt*frc(npt2,2)*(conjg(wfc(n,l1,1)/nr)
+     2     *(s22*conjg(wfc(n,l2,4))-smtrx(l2,4)*d22*conjg(wfc(n,l2,8)))
+     3              *d32*conjg(wfc(n,l3,7))
      4                          +smtrx(l1,1)*wfc(n,l1,1)/nr
-     5                 *(d21*wfc(n,l2,4)-smtrx(l2,2)*s21*wfc(n,l2,2))
-     6                 *s31*wfc(n,l3,3))
+     5                 *(d22*wfc(n,l2,8)-smtrx(l2,4)*s22*wfc(n,l2,4))
+     6                 *s32*wfc(n,l3,3))
         wt=wt+dwt
         dwt=-dwt
        end do
 
-c      write(*,'(3i5,3e15.5)') l1-1,l2-1,l3-1,
-c     &                           abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
-
-c      write(*,'(15x,3e15.5)') abs(ovrlp),abs(ovrlp1),abs(ovrlp2)
-
-      ovrlp=cph(l1,1)*cph(l2,2)*cph(l3,3)*ovrlp/(ak(1)*ak(2)*ak(3))
-
+       ovrlpx=cph(l1,1)*cph(l2,2)*cph(l3,5)*ovrlpx/(ak(1)*ak(2)*ak(5))
+       ovrlpb=cph(l1,1)*cph(l2,4)*cph(l3,3)*ovrlpb/(ak(1)*ak(4)*ak(3))
+       ovrlp=0.5d0*(ovrlpx+ovrlpb)
+       
       ovrlp1=12.0d0*ovrlp1
       ovrlp2=12.0d0*ovrlp2
 
-      b1=0.0d0
-      ovrlpi0(0)=0.0d0
+      b11=0.0d0
+      ovrlpi0(0,1)=0.0d0
+
+      b12=0.0d0
+      ovrlpi0(0,2)=0.0d0
+
       do n=1,npt1,2
 
-        b2=frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,3)/n
-        b3=frc(n+1)*wfs(n+1,l1,1)*wfs(n+1,l2,2)*wfs(n+1,l3,3)/(n+1)
+        b21=frc(n,1)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,5)/n
+        b31=frc(n+1,1)*wfs(n+1,l1,1)*wfs(n+1,l2,2)*wfs(n+1,l3,5)/(n+1)
 
-        ovrlpi0(n)=ovrlpi0(n-1)+5.0d0*b1+8.0d0*b2-b3
-        ovrlpi0(n+1)=ovrlpi0(n)-b1+8.0d0*b2+5.0d0*b3
+        ovrlpi0(n,1)=ovrlpi0(n-1,1)+5.0d0*b11+8.0d0*b21-b31
+        ovrlpi0(n+1,1)=ovrlpi0(n,1)-b11+8.0d0*b21+5.0d0*b31
 
-        b1=b3
+        b11=b31
+
+        b22=frc(n,2)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,3)/n
+        b32=frc(n+1,2)*wfs(n+1,l1,1)*wfs(n+1,l2,4)*wfs(n+1,l3,3)/(n+1)
+
+        ovrlpi0(n,2)=ovrlpi0(n-1,2)+5.0d0*b12+8.0d0*b22-b32
+        ovrlpi0(n+1,2)=ovrlpi0(n,2)-b12+8.0d0*b22+5.0d0*b32
+
+        b12=b32
        end do
 
-      bfwf1(npt1)=wfs(npt1,l2,2)*ovrlp1+wfs(npt1,l2,4)*ovrlpi0(npt1)
-      bfwf2(npt1)=wfs(npt1,l3,3)*ovrlp2+wfs(npt1,l3,5)*ovrlpi0(npt1)
+      bfwf1(npt1)=wfs(npt1,l2,2)*ovrlp1+wfs(npt1,l2,6)*ovrlpi0(npt1,1)
+      bfwf2(npt1)=wfs(npt1,l3,3)*ovrlp2+wfs(npt1,l3,7)*ovrlpi0(npt1,2)
 
-      a11=frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,4)*wfs(npt1,l3,3)/npt1
-      a21=frc(npt1)*wfs(npt1,l1,1)*wfs(npt1,l2,2)*wfs(npt1,l3,5)/npt1
+      a11=frc(npt1,1)*wfs(npt1,l1,1)*wfs(npt1,l2,6)*wfs(npt1,l3,5)/npt1
+      a21=frc(npt1,2)*wfs(npt1,l1,1)*wfs(npt1,l2,4)*wfs(npt1,l3,7)/npt1
 
       do n=npt1-1,3,-2
-        a12=frc(n)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,3)/n
-        a13=frc(n-1)*wfs(n-1,l1,1)*wfs(n-1,l2,4)*wfs(n-1,l3,3)/(n-1)
+        a12=frc(n,1)*wfs(n,l1,1)*wfs(n,l2,6)*wfs(n,l3,5)/n
+        a13=frc(n-1,1)*wfs(n-1,l1,1)*wfs(n-1,l2,6)*wfs(n-1,l3,5)/(n-1)
 
-        a22=frc(n)*wfs(n,l1,1)*wfs(n,l2,2)*wfs(n,l3,5)/n
-        a23=frc(n-1)*wfs(n-1,l1,1)*wfs(n-1,l2,2)*wfs(n-1,l3,5)/(n-1)
+        a22=frc(n,2)*wfs(n,l1,1)*wfs(n,l2,4)*wfs(n,l3,7)/n
+        a23=frc(n-1,2)*wfs(n-1,l1,1)*wfs(n-1,l2,4)*wfs(n-1,l3,7)/(n-1)
 
         ovrlp1=ovrlp1+5.0d0*a11+8.0d0*a12-a13
         ovrlp2=ovrlp2+5.0d0*a21+8.0d0*a22-a23
 
-        bfwf1(n)=wfs(n,l2,2)*ovrlp1+wfs(n,l2,4)*ovrlpi0(n)
-        bfwf2(n)=wfs(n,l3,3)*ovrlp2+wfs(n,l3,5)*ovrlpi0(n)
+        bfwf1(n)=wfs(n,l2,2)*ovrlp1+wfs(n,l2,6)*ovrlpi0(n,1)
+        bfwf2(n)=wfs(n,l3,3)*ovrlp2+wfs(n,l3,7)*ovrlpi0(n,2)
 
         ovrlp1=ovrlp1-a11+8.0d0*a12+5.0d0*a13
         ovrlp2=ovrlp2-a21+8.0d0*a22+5.0d0*a23
 
-        bfwf1(n-1)=wfs(n-1,l2,2)*ovrlp1+wfs(n-1,l2,4)*ovrlpi0(n-1)
-        bfwf2(n-1)=wfs(n-1,l3,3)*ovrlp2+wfs(n-1,l3,5)*ovrlpi0(n-1)
+        bfwf1(n-1)=wfs(n-1,l2,2)*ovrlp1+wfs(n-1,l2,6)*ovrlpi0(n-1,1)
+        bfwf2(n-1)=wfs(n-1,l3,3)*ovrlp2+wfs(n-1,l3,7)*ovrlpi0(n-1,2)
 
         a11=a13
         a21=a23
        end do
 
-      a12=frc(1)*wfs(1,l1,1)*wfs(1,l2,4)*wfs(1,l3,3)
-      a22=frc(1)*wfs(1,l1,1)*wfs(1,l2,2)*wfs(1,l3,5)
+      a12=frc(1,1)*wfs(1,l1,1)*wfs(1,l2,6)*wfs(1,l3,5)
+      a22=frc(1,2)*wfs(1,l1,1)*wfs(1,l2,4)*wfs(1,l3,7)
 
       ovrlp1=ovrlp1+5.0d0*a11+8.0d0*a12
       ovrlp2=ovrlp2+5.0d0*a21+8.0d0*a22
 
-      bfwf1(1)=wfs(1,l2,2)*ovrlp1+wfs(1,l2,4)*ovrlpi0(1)
-      bfwf2(1)=wfs(1,l3,3)*ovrlp2+wfs(1,l3,5)*ovrlpi0(1)
+      bfwf1(1)=wfs(1,l2,2)*ovrlp1+wfs(1,l2,6)*ovrlpi0(1,1)
+      bfwf2(1)=wfs(1,l3,3)*ovrlp2+wfs(1,l3,7)*ovrlpi0(1,2)
 
       return
       end
@@ -1009,6 +1171,8 @@ c  scattering wavefunctions
 c
 c  nf = 2 or 3
 c
+      use wavefuncs
+
       parameter(npt1mx=500,nptmx=7500)
       parameter(nol=95)
 
@@ -1016,16 +1180,14 @@ c
       complex*16 bfwf1(npt1),bfwf2(npt1)
 
       complex*16 bfx
-      complex*16 wfs,wfc,smtrx,cph
+      double precision wpot      
       complex*16 frc
       real md,mf
       
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
-      common/frcor/frc(nptmx),be,frcnst,dr0
-      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-     1  cph(nol,3),wpot(nptmx,3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
 
 C      data iwrt/8/
 
@@ -1046,8 +1208,6 @@ c      write(iwrt,'(15x,3e20.12)') bfx
      1          *cph(l1p,1)*cph(l2p,2)*cph(l3p,3)
      2          *h*bfx/3.0d0/(12.0d0*ak(1)*ak(2)*ak(3))**2
 
-      if(nf.eq.3) bfint=zrf**3*bfint
-
       return
       end
 *
@@ -1057,6 +1217,8 @@ c      write(iwrt,'(15x,3e20.12)') bfx
 c***********************************************************************
 c     calcul des amplitudes de diffusion smtrx(l,j)                    *
 c***********************************************************************
+      use wavefuncs
+
       parameter(nol=95)
       parameter(nptmx=7500)
       real md,mf,mu
@@ -1066,19 +1228,16 @@ c***********************************************************************
       complex*16 frc
       complex*16 wft(nptmx),dwft(nptmx),wfh(nptmx),dwfh(nptmx)
       complex*16 hm,hp,hmp,hpp,hm2,hmp2,anorm
-      complex*16 wfs,wfc,smtrx,cph
+      double precision wpot
       complex*16 fc0(nol),fcp0(nol),hcp(nol),dhcp(nol)
       complex*16 hcp1(nol),dhcp1(nol)
       complex cgamma,zzz,ak0,rho0
-c     dimension u1(7),y1(7)
       dimension a(5),rv(5),pote(5)
       
       common/const/md(3),zd(3),sd(3),betanl(3),mf,zf
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
-      common/frcor/frc(nptmx),be,frcnst,dr0
-      common/wfns/wfs(nptmx,nol,5),wfc(nptmx,nol,5),smtrx(nol,3),
-     1 cph(nol,3),wpot(nptmx,3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
+      common/frcor/wpot(nptmx,3),frc(nptmx,2),be,frcnst,dr0
       common/potn/poti(nptmx),potr(nptmx),potf(nptmx)
 
       data iwrt/8/
@@ -1087,8 +1246,14 @@ c
 c
       h0=h
       zrc=1.0d0
-      if(ip.eq.3) zrc=zrf
-      h=h*zrc
+      if(ip.gt.3) then
+        ipx=ip-2
+        zrc=mf/(mf+md(1)-md(ipx))
+        h=h*zrc
+      else
+        ipx=ip
+        zr=1.0d0
+       endif
 c
 c     constantes
 c
@@ -1097,16 +1262,20 @@ c     ak2 = k**2
 c     ak = k
 c     w2 = 2*am0/(hbar**2)
 c
-      mu=md(ip)*mf/(md(ip)+mf)
-      el=(md(ip)+mf)*ecm/mf
+      if(ip.gt.3) then
+        mu=md(ipx)*(mf+md(1)-md(ipx))/(md(1)+mf)
+       else
+        mu=md(ip)*mf/(md(ip)+mf)
+       end if   
+      el=md(ipx)*ecm/mu
       w2=4.823401*mu/100.
       ak2=w2*ecm
       ak(ip)=sqrt(ak2)
-      zz=zd(ip)*zf
+      zz=zd(ipx)*zf
       eta(ip)=max(0.15748603*zz*sqrt(mu/ecm),1.01e-6)
 
-      call getpot(ip,md(ip),mf,el,a,rv,pote)
-c
+      call getpot(ipx,md(ipx),mf,el,a,rv,pote)
+c     
 c cutoff of imaginary potential outside Coulomb barrier
 c
       rcut=rv(1)+5.0/mf**(1./3.)-1.0
@@ -1161,10 +1330,10 @@ c     + potentiel imaginaire de surface ( gaussien)
         poti(i)=poti(i)+pote(3)*exp(yy)
        ENDIF
 c
-      potr(i)=vx(ip)*potr(i)
-      poti(i)=wx(ip)*poti(i)
+      potr(i)=vx(ipx)*potr(i)
+      poti(i)=wx(ipx)*poti(i)
 c non-locality correction
-      xnl(i)=exp(-betanl(ip)*potr(i))
+      xnl(i)=exp(-betanl(ipx)*potr(i))
 c
 c cutoff of imaginary potential outside Coulomb barrier
 c
@@ -1173,27 +1342,35 @@ c     1       poti(i)=2.0d0*poti(i)/(1.0+exp(min((r-rcut)/acut,600.)))
 c
 c finite-range correction
       if(ip.eq.1) then
-        frc(i)=be+potr(i)+(0.0d0,1.0d0)*poti(i)
+        frc(i,1)=be+potr(i)+(0.0d0,1.0d0)*poti(i)
+        frc(i,2)=be+potr(i)+(0.0d0,1.0d0)*poti(i)         
        else if(ip.eq.2) then
-        frc(i)=frc(i)-potr(i)-(0.0d0,1.0d0)*poti(i)
-       else
-        frc(i)=1.0d0
-     1         /(1.0d0-frcnst*(frc(i)-potr(i)-(0.0d0,1.0d0)*poti(i)))
-        if(abs(frc(i)).gt.1.0d0) frc(i)=1.0d0
+        frc(i,1)=frc(i,1)-potr(i)-(0.0d0,1.0d0)*poti(i)
+       else if(ip.eq.3) then
+        frc(i,2)=frc(i,2)-potr(i)-(0.0d0,1.0d0)*poti(i)
+       else if(ip.eq.4) then
+        frc(i,2)=1.0d0
+     1         /(1.0d0-frcnst*(frc(i,2)-potr(i)-(0.0d0,1.0d0)*poti(i)))
+        if(abs(frc(i,2)).gt.1.0d0) frc(i,2)=1.0d0
+       else if(ip.eq.5) then
+        frc(i,1)=1.0d0
+     1         /(1.0d0-frcnst*(frc(i,1)-potr(i)-(0.0d0,1.0d0)*poti(i)))
+        if(abs(frc(i,1)).gt.1.0d0) frc(i,1)=1.0d0
        endif
 
 c     potentiel reel + potentiel coulombien      
-      if(zz)14,18,14
-   14 if(r-rv(5))17,16,16
-   16 potr(i)=potr(i)-vcl/r
-      go to 18
-   17 potr(i)=potr(i)-0.5*vcl*(3.0-(r/rv(5))**2)/rv(5)
-   18 continue
+      if(zz .NE. 0.0) THEN
+        if(r-rv(5) .LT. 0.0) THEN
+          potr(i)=potr(i)-0.5*vcl*(3.0-(r/rv(5))**2)/rv(5)
+        ELSE
+          potr(i)=potr(i)-vcl/r
+        ENDIF
+      ENDIF
 
       potr(i)=-potr(i)*w2
       poti(i)=-poti(i)*w2
       potf(i)= potf(i)*w2
-      wpot(i,ip)=-poti(i)
+      if(ip.lt.4) wpot(i,ip)=-poti(i)
 
   100 continue
 c
@@ -1208,14 +1385,14 @@ c     fonctions de coulomb au point de raccordement
 c
       accur=1.0d-14
       step=999.0
-      call rcwfn(rho,eta(ip),0,lmxwf(ip),fc,fcp,gc,gcp,accur,step)
-      call rcwfn(rho2,eta(ip),0,lmxwf(ip),fc2,fcp2,gc2,gcp2,accur,step)
+      call rcwfn(rho,eta(ip),0,lmxwf(ipx),fc,fcp,gc,gcp,accur,step)
+      call rcwfn(rho2,eta(ip),0,lmxwf(ipx),fc2,fcp2,gc2,gcp2,accur,step)
 c
 c     regular functions at first point
 c
       ak0=sqrt(ak2-potr(1)-(0.0,1.0)*poti(1))
       rho0=ak0*h
-      call besj(rho0,lmxwf(ip),fc0,fcp0)
+      call besj(rho0,lmxwf(ipx),fc0,fcp0)
 
 c  calculation of Coulomb phase shifts
 
@@ -1230,7 +1407,7 @@ c  calculation of Coulomb phase shifts
       sigfld=0.0
 
       lmx(ip)=1
-      do l=1,lmxwf(ip)
+      do l=1,lmxwf(ipx)
 
         fl=float(l-1)
         al=dble(l-1)
@@ -1275,7 +1452,7 @@ c calculate regular wave functions integrating out
           smtrx(l,ip)=1.0d0
          endif
 
-         if(ip.gt.1) then
+         if(ip.gt.1.and.ip.lt.4) then
 c calculate outgoing wave functions integrating in 
 c and use the wronskian to renormalize
           wfh(npt1)=hp
@@ -1283,26 +1460,25 @@ c and use the wronskian to renormalize
           call intinrk(ak2,sl,wfh,dwfh)
           do i=1,npt1
             anorm=-ak(ip)/(wft(i)*dwfh(i)-dwft(i)*wfh(i))/zrc
-            wfs(i,l,ip+2)=anorm*xnl(i)*wfh(i)
+            wfs(i,l,ip+4)=anorm*xnl(i)*wfh(i)
            end do
-c calculate incoming Coulomb waves at rho = rhor+I*rhoi
-c          wfc(1,l,ip+2)=hm2
-c          dwfh(1)=hmp2
-c          call intimoutrk(ak2,sl,vcl,wfc(1,l,ip+2),dwfh)
          endif
 
-       end do ! l=1,lmxwf(ip)
+      end do ! l=1,lmxwf(ip)
+
+      if(ip.gt.1) lmx(ip)=lmx(ip)+5
 
       if(npt2.gt.npt1) then
 
         do i=npt1+1,npt2
           rho=ak(ip)*h*i
-          frc(i)=1.0d0
-          call rcwfn(rho,eta(ip),0,lmxwf(ip),fc,fcp,gc,gcp,accur,step)
-          do l=1,lmxwf(ip)
+          frc(i,1)=1.0d0
+          frc(i,2)=1.0d0          
+          call rcwfn(rho,eta(ip),0,lmxwf(ipx),fc,fcp,gc,gcp,accur,step)
+          do l=1,lmxwf(ipx)
             hp=(gc(l)+(0.0d0,1.0d0)*fc(l))
             wfs(i,l,ip)=(0.0d0,0.5d0)*(conjg(hp)-hp*smtrx(l,ip))/zrc
-            if(ip.gt.1) wfs(i,l,ip+2)=hp/zrc
+            if(ip.gt.1.and.ip.lt.4) wfs(i,l,ip+4)=hp/zrc
            end do
          end do
 
@@ -1311,54 +1487,23 @@ c          call intimoutrk(ak2,sl,vcl,wfc(1,l,ip+2),dwfh)
 c calculate outgoing Coulomb waves at rho = rhor+I*rhoi
       do i = 1,npt3
         rhoi=ak(ip)*h*(i-1)
-        call hcpwf(rho2,rhoi,eta(ip),lmxwf(ip),hcp,dhcp,ierr)
-        do l=1,lmxwf(ip)
+        call hcpwf(rho2,rhoi,eta(ip),lmxwf(ipx),hcp,dhcp,ierr)
+        do l=1,lmxwf(ipx)
           wfc(i,l,ip)=hcp(l)/zrc
          end do
         if(ip.gt.1) then
-          call hcpwf(rho,-rhoi,eta(ip),lmxwf(ip),hcp1,dhcp1,ierr)
-          do l=1,lmxwf(ip)
-            wfc(i,l,ip+2)=conjg(hcp1(l))/zrc
+          call hcpwf(rho,-rhoi,eta(ip),lmxwf(ipx),hcp1,dhcp1,ierr)
+          do l=1,lmxwf(ipx)
+            wfc(i,l,ip+4)=conjg(hcp1(l))/zrc
            end do
          endif
        end do
 
-c        do l=1,lmxwf(ip)
-c          do i=1,npt2
-c            if(ip.eq.1) then
-c              write(*,'(a1,3i5,2(2e15.5,3x))') 'r',ip,l-1,i,wfs(i,l,ip)
-c             else
-c              write(*,'(a1,3i5,2(2e15.5,3x))') 'r',ip,l-1,i,wfs(i,l,ip)
-c     1                                              ,wfs(i,l,ip+2)
-c             endif
-c            end do
-c           write(*,*)
-c
-c          do i=1,npt3
-c            if(ip.eq.1) then
-c             write(*,'(a1,3i5,2(2e15.5,3x))') 'c',ip,l-1,i-1,wfc(i,l,ip)
-c            else
-c             write(*,'(a1,3i5,2(2e15.5,3x))') 'c',ip,l-1,i-1,wfc(i,l,ip)
-c     1                                              ,wfc(i,l,ip+2)
-c            endif
-c           end do
-c           write(*,*)
-c
-c          end do
-c
-c      if(ip.eq.3) stop
-
-      lmax=lmxwf(ip)
+      lmx(ip)=min(lmx(ip)+4,lmxwf(ipx))       
+      lmax=lmxwf(ipx)
 
       sigr=tenpi*sigr/ak2
       sigfld=tenpi*sigfld/ak2
-
-C     if(ipr.gt.1) then
-C       write(iwrt,*) 'ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip):',
-C    1                 ip,npt1,nptxa,npt3,lmax,lmx(ip),lmxwf(ip)
-C       write(iwrt,10) ak(ip),eta(ip),rho,h,sigr,sigfld
-C  10   format(' k,eta,rm,dr,sigr,sigfld:',2f7.3,4f9.3)
-C      endif
 
       h=h0
 
@@ -1406,7 +1551,7 @@ c
       ax(3)=AWOm(Nejc,Nnuc)
       ax(4)=AWOmv(Nejc,Nnuc)
       ax(5)=ACOul(Nejc,Nnuc)
-      
+    
       return
       end  
 c     
@@ -1425,8 +1570,8 @@ c***********************************************************************
 
       double precision fldint
 
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
       common/inout/ie,is,is1,is2
       common/potn/poti(nptmx),potr(nptmx),potf(nptmx)
 
@@ -1462,8 +1607,8 @@ c***********************************************************************
 
       complex*16 yy(2)
 
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
       common/inout/ie,is,is1,is2
 
       nstp=1
@@ -1684,8 +1829,8 @@ c***********************************************************************
 
       complex*16 yy(2)
 
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
 
       nstp=1
 
@@ -1714,8 +1859,8 @@ c***********************************************************************
 
       complex*16 yy(2)
 
-      common/intcons/npt1,npt2,npt3,h,zrf,dx0,ak(3),eta(3),vx(3),wx(3),
-     1                                            lmx(3),lmxwf(3)
+      common/intcons/npt1,npt2,npt3,h,dx0,ak(5),eta(5),vx(3),wx(3),
+     1                                            lmx(5),lmxwf(3)
 
       nstp=1
 
@@ -2031,16 +2176,7 @@ c            write(iwrt,*) 'x:',r,rd,x,pox,potx
               pox=pox+pote(3,ip)*exp(yy)
              endif
            end do
-
-c          tstx=tstx+0.5*dwx
           potx=potx+0.5*dwx*pox
-c            write(iwrt,*) 'x:',r,rd,x,pox,potx
-
-c          xxx=psi2(rd)
-c          write(iwrt,*) r,dwd,xxx,potx,tstx
-c          write(iwrt,*) 'rd:',r,rd,xxx,potx,potf(i)
-
-c          tstf=tstf+dwd*psi2(rd)
           potf(i)=potf(i)+dwd*psi2(rd)*potx
           dwd=dwd+ddwd
           ddwd=-ddwd
@@ -2419,6 +2555,7 @@ c
        end do
       if(abs(dwfp/cwfp).lt.1.0d-10) go to 10
       ierr=1
+      write(iwrt,*) ' No convergence in dbrkup:hcpwf'
       write(iwrt,*) ' j,jmx:',j,jmx
       write(iwrt,*) ' rho,eta,lmax,dwfp,cwfp:',rhor,rhoi,etas,lmax,
      1                      abs(dwfp),abs(cwfp),abs(dwfp/cwfp)
