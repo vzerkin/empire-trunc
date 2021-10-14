@@ -1,7 +1,429 @@
-Ccc   * $Rev: 5026 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2017-10-30 02:11:15 +0100 (Mo, 30 Okt 2017) $
+Ccc   * $Rev: 5307 $
+Ccc   * $Author: bvcarlson $
+Ccc   * $Date: 2021-10-14 11:53:04 +0200 (Do, 14 Okt 2021) $
+C
+C-------------------------------------------------
+C
+      MODULE hmsspecs
 
+      DOUBLE PRECISION, ALLOCATABLE :: dxsn(:),dxsp(:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxsn(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxsp(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxsnx(:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxspx(:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxsnx(:,:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxspx(:,:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxsnex(:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxspex(:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxsnex(:,:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxspex(:,:,:,:)
+
+      DOUBLE PRECISION, ALLOCATABLE :: dxsnlab(:),dxsplab(:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxsnlab(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: ddxsplab(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxsnxlab(:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: dxspxlab(:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxsnxlab(:,:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxspxlab(:,:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: dxsnexlab(:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: dxspexlab(:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxsnexlab(:,:,:,:)
+!      DOUBLE PRECISION, ALLOCATABLE :: ddxspexlab(:,:,:,:)
+
+      DOUBLE PRECISION, ALLOCATABLE :: respop(:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: uspec(:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: ujspec(:,:,:,:)
+      DOUBLE PRECISION, ALLOCATABLE :: recspec(:,:,:,:)
+      INTEGER, ALLOCATABLE :: jmaxujspec(:,:,:)
+      INTEGER, ALLOCATABLE :: maxerecspec(:,:,:)      
+            
+      CONTAINS
+
+      SUBROUTINE axsspecs
+
+C      (ndanghms,ndim_ebins,ndim_zem,ndim_nem,
+C     *                    ndexcluhms,ndim_jbins,ndim_recbins)
+
+      IMPLICIT NONE
+      
+      INTEGER :: myalloc
+
+      INCLUDE 'ddhms.cmb'
+
+C      INTEGER :: ndanghms, ndim_ebins, ndim_zem, ndim_nem,
+C      INTEGER :: ndexcluhms,ndim_jbins,ndim_recbins
+      
+!-- Emission spectra in CM frame
+      
+      IF(ALLOCATED(dxsn)) DEALLOCATE(dxsn)
+      ALLOCATE(
+     *     dxsn(0:ndim_ebins),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsn!'
+        WRITE(6,*) 'Insufficient memory for dxsn!'
+        STOP
+      ENDIF
+      dxsn = 0.0d0
+      
+      IF(ALLOCATED(dxsp)) DEALLOCATE(dxsp)
+      ALLOCATE(
+     *     dxsp(0:ndim_ebins),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsp!'
+        WRITE(6,*) 'Insufficient memory for dxsp!'
+        STOP
+      ENDIF
+      dxsp = 0.0d0
+      
+      IF(ALLOCATED(ddxsn)) DEALLOCATE(ddxsn)
+      ALLOCATE(
+     *     ddxsn(0:ndim_ebins,ndanghms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxsn!'
+        WRITE(6,*) 'Insufficient memory for ddxsn!'
+        STOP
+      ENDIF
+      ddxsn = 0.0d0
+      
+      IF(ALLOCATED(ddxsp)) DEALLOCATE(ddxsp)
+      ALLOCATE(
+     *     ddxsp(0:ndim_ebins,ndanghms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxsp!'
+        WRITE(6,*) 'Insufficient memory for ddxsp!'
+        STOP
+      ENDIF
+      ddxsp = 0.0d0
+      
+      IF(ALLOCATED(dxsnx)) DEALLOCATE(dxsnx)
+      ALLOCATE(
+     *     dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsnx!'
+        WRITE(6,*) 'Insufficient memory for dxsnx!'
+        STOP
+      ENDIF
+      dxsnx = 0.0d0
+      
+      IF(ALLOCATED(dxspx)) DEALLOCATE(dxspx)
+      ALLOCATE(
+     *     dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxspx!'
+        WRITE(6,*) 'Insufficient memory for dxspx!'
+        STOP
+      ENDIF
+      dxspx = 0.0d0
+      
+C      IF(ALLOCATED(ddxsnx)) DEALLOCATE(ddxsnx)
+C      ALLOCATE(
+C     *     ddxsnx(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nems),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxsnx!'
+C        WRITE(6,*) 'Insufficient memory for ddxsnx!'
+C        STOP
+C      ENDIF
+C      ddxsnx = 0.0d0
+      
+C      IF(ALLOCATED(ddxspx)) DEALLOCATE(ddxspx)
+C      ALLOCATE(
+C     *     ddxspx(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nems),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxspx!'
+C        WRITE(6,*) 'Insufficient memory for ddxspx!'
+C        STOP
+C      ENDIF
+C      ddxspx = 0.0d0
+      
+      IF(ALLOCATED(dxsnex)) DEALLOCATE(dxsnex)
+      ALLOCATE(
+     *     dxsnex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsnex!'
+        WRITE(6,*) 'Insufficient memory for dxsnex!'
+        STOP
+      ENDIF
+      dxsnex = 0.0d0
+      
+      IF(ALLOCATED(dxspex)) DEALLOCATE(dxspex)
+      ALLOCATE(
+     *     dxspex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxspex!'
+        WRITE(6,*) 'Insufficient memory for dxspex!'
+        STOP
+      ENDIF
+      dxspex = 0.0d0
+      
+      IF(ALLOCATED(ddxsnex)) DEALLOCATE(ddxsnex)
+      ALLOCATE(
+     *     ddxsnex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxsnex!'
+        WRITE(6,*) 'Insufficient memory for ddxsnex!'
+        STOP
+      ENDIF
+      ddxsnex = 0.0d0
+       
+      IF(ALLOCATED(ddxspex)) DEALLOCATE(ddxspex)
+      ALLOCATE(
+     *     ddxspex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxspex!'
+        WRITE(6,*) 'Insufficient memory for ddxspex!'
+        STOP
+      ENDIF
+      ddxspex = 0.0d0
+
+!-- Emission spectra in lab frame
+      
+      IF(ALLOCATED(dxsnlab)) DEALLOCATE(dxsnlab)
+      ALLOCATE(
+     *     dxsnlab(0:ndim_ebins),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsnlab!'
+        WRITE(6,*) 'Insufficient memory for dxsnlab!'
+        STOP
+      ENDIF
+      dxsnlab = 0.0d0
+      
+      IF(ALLOCATED(dxsplab)) DEALLOCATE(dxsplab)
+      ALLOCATE(
+     *     dxsplab(0:ndim_ebins),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsplab!'
+        WRITE(6,*) 'Insufficient memory for dxsplab!'
+        STOP
+      ENDIF
+      dxsplab = 0.0d0
+      
+      IF(ALLOCATED(ddxsnlab)) DEALLOCATE(ddxsnlab)
+      ALLOCATE(
+     *     ddxsnlab(0:ndim_ebins,ndanghms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxsnlab!'
+        WRITE(6,*) 'Insufficient memory for ddxsnlab!'
+        STOP
+      ENDIF
+      ddxsnlab = 0.0d0
+      
+      IF(ALLOCATED(ddxsplab)) DEALLOCATE(ddxsplab)
+      ALLOCATE(
+     *     ddxsplab(0:ndim_ebins,ndanghms),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ddxsplab!'
+        WRITE(6,*) 'Insufficient memory for ddxsplab!'
+        STOP
+      ENDIF
+      ddxsplab = 0.0d0
+      
+      IF(ALLOCATED(dxsnxlab)) DEALLOCATE(dxsnxlab)
+      ALLOCATE(
+     *     dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxsnxlab!'
+        WRITE(6,*) 'Insufficient memory for dxsnxlab!'
+        STOP
+      ENDIF
+      dxsnxlab = 0.0d0
+      
+      IF(ALLOCATED(dxspxlab)) DEALLOCATE(dxspxlab)
+      ALLOCATE(
+     *     dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for dxspxlab!'
+        WRITE(6,*) 'Insufficient memory for dxspxlab!'
+        STOP
+      ENDIF
+      dxspxlab = 0.0d0
+      
+C      IF(ALLOCATED(ddxsnxlab)) DEALLOCATE(ddxsnxlab)
+C      ALLOCATE(
+C     *     ddxsnxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nems),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxsnxlab!'
+C        WRITE(6,*) 'Insufficient memory for ddxsnxlab!'
+C        STOP
+C      ENDIF
+C      ddxsnxlab = 0.0d0
+      
+C      IF(ALLOCATED(ddxspxlab)) DEALLOCATE(ddxspxlab)
+C      ALLOCATE(
+C     *     ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nems),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxspxlab!'
+C        WRITE(6,*) 'Insufficient memory for ddxspxlab!'
+C        STOP
+C      ENDIF
+C      ddxspxlab = 0.0d0
+      
+C      IF(ALLOCATED(dxsnexlab)) DEALLOCATE(dxsnexlab)
+C      ALLOCATE(
+C     *     dxsnexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for dxsnexlab!'
+C        WRITE(6,*) 'Insufficient memory for dxsnexlab!'
+C        STOP
+C      ENDIF
+C      dxsnexlab = 0.0d0
+      
+C      IF(ALLOCATED(dxspexlab)) DEALLOCATE(dxspexlab)
+C      ALLOCATE(
+C     *     dxspexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for dxspexlab!'
+C        WRITE(6,*) 'Insufficient memory for dxspexlab!'
+C        STOP
+C      ENDIF
+C      dxspexlab = 0.0d0
+      
+C      IF(ALLOCATED(ddxsnexlab)) DEALLOCATE(ddxsnexlab)
+C      ALLOCATE(
+C     *     ddxsnexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxsnexlab!'
+C        WRITE(6,*) 'Insufficient memory for ddxsnexlab!'
+C        STOP
+C      ENDIF
+C      ddxsnexlab = 0.0d0
+       
+C      IF(ALLOCATED(ddxspexlab)) DEALLOCATE(ddxspexlab)
+C      ALLOCATE(
+C     *     ddxspexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+C     *     STAT=myalloc)
+C      IF(myalloc.NE.0) THEN
+C        WRITE(*,*) 'Insufficient memory for ddxspexlab!'
+C        WRITE(6,*) 'Insufficient memory for ddxspexlab!'
+C        STOP
+C      ENDIF
+C      ddxspexlab = 0.0d0
+       
+!--Residual populations
+
+      IF(ALLOCATED(respop)) DEALLOCATE(respop)
+      ALLOCATE(respop(0:ndim_zem,0:ndim_nem),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for respop!'
+        WRITE(6,*) 'Insufficient memory for respop!'
+        STOP
+      ENDIF
+      respop = 0.0d0
+
+      IF(ALLOCATED(uspec)) DEALLOCATE(uspec)
+      ALLOCATE(uspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for uspec!'
+        WRITE(6,*) 'Insufficient memory for uspec!'
+        STOP
+      ENDIF
+      uspec = 0.0d0
+
+      IF(ALLOCATED(ujspec)) DEALLOCATE(ujspec)
+      ALLOCATE(ujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins,0:ndim_jbins),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for ujspec!'
+        WRITE(6,*) 'Insufficient memory for ujspec!'
+        STOP
+      ENDIF
+      ujspec = 0.0d0
+       
+      IF(ALLOCATED(recspec)) DEALLOCATE(recspec)
+      ALLOCATE(
+     *     recspec(0:ndim_recbins,0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+     *     STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for recspec!'
+        WRITE(6,*) 'Insufficient memory for recspec!'
+        STOP
+      ENDIF
+      recspec = 0.0d0
+       
+      IF(ALLOCATED(jmaxujspec)) DEALLOCATE(jmaxujspec)
+      ALLOCATE(jmaxujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
+     *   STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for jmaxujspec!'
+        WRITE(6,*) 'Insufficient memory for jmaxujspecc!'
+        STOP
+      ENDIF
+      jmaxujspec = 0
+       
+      IF(ALLOCATED(maxerecspec)) DEALLOCATE(maxerecspec)
+      ALLOCATE(maxerecspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
+     *                                            STAT=myalloc)
+      IF(myalloc.NE.0) THEN
+        WRITE(*,*) 'Insufficient memory for maxerecspec!'
+        WRITE(6,*) 'Insufficient memory for maxerecspec!'
+        STOP
+      ENDIF
+      maxerecspec = 0
+
+      END SUBROUTINE axsspecs
+
+      SUBROUTINE daxsspecs
+   
+      IF(ALLOCATED(dxsn)) DEALLOCATE(dxsn)
+      IF(ALLOCATED(dxsp)) DEALLOCATE(dxsp)
+      IF(ALLOCATED(ddxsn)) DEALLOCATE(ddxsn)
+      IF(ALLOCATED(ddxsp)) DEALLOCATE(ddxsp)
+      IF(ALLOCATED(dxsnx)) DEALLOCATE(dxsnx)
+      IF(ALLOCATED(dxspx)) DEALLOCATE(dxspx)
+C      IF(ALLOCATED(ddxsnx)) DEALLOCATE(ddxsnx)
+C      IF(ALLOCATED(ddxspx)) DEALLOCATE(ddxspx)
+      IF(ALLOCATED(dxsnex)) DEALLOCATE(dxsnex)
+      IF(ALLOCATED(dxspex)) DEALLOCATE(dxspex)
+      IF(ALLOCATED(ddxsnex)) DEALLOCATE(ddxsnex)
+      IF(ALLOCATED(ddxspex)) DEALLOCATE(ddxspex)
+      
+      IF(ALLOCATED(dxsnlab)) DEALLOCATE(dxsnlab)
+      IF(ALLOCATED(dxsplab)) DEALLOCATE(dxsplab)
+      IF(ALLOCATED(ddxsnlab)) DEALLOCATE(ddxsnlab)
+      IF(ALLOCATED(ddxsplab)) DEALLOCATE(ddxsplab)
+      IF(ALLOCATED(dxsnxlab)) DEALLOCATE(dxsnxlab)
+      IF(ALLOCATED(dxspxlab)) DEALLOCATE(dxspxlab)
+C      IF(ALLOCATED(ddxsnxlab)) DEALLOCATE(ddxsnxlab)
+C      IF(ALLOCATED(ddxspxlab)) DEALLOCATE(ddxspxlab)
+C      IF(ALLOCATED(dxsnexlab)) DEALLOCATE(dxsnexlab)
+C      IF(ALLOCATED(dxspexlab)) DEALLOCATE(dxspexlab)
+C      IF(ALLOCATED(ddxsnexlab)) DEALLOCATE(ddxsnexlab)
+C      IF(ALLOCATED(ddxspexlab)) DEALLOCATE(ddxspexlab)
+      
+      IF(ALLOCATED(respop)) DEALLOCATE(respop)
+      IF(ALLOCATED(uspec)) DEALLOCATE(uspec)
+      IF(ALLOCATED(ujspec)) DEALLOCATE(ujspec)
+      IF(ALLOCATED(recspec)) DEALLOCATE(recspec)
+      IF(ALLOCATED(jmaxujspec)) DEALLOCATE(jmaxujspec)
+      IF(ALLOCATED(maxerecspec)) DEALLOCATE(maxerecspec)
+
+      END SUBROUTINE daxsspecs
+
+      END MODULE hmsspecs
+
+C---------------------------------------------------------------
       
       SUBROUTINE DDHMS(Izaproj,Tartyper,Ajtarr,Elabprojr,Sigreacr,
      &                 Amultdamp,Debinr,Debrecr,FHMs,NHMs,Qdfracr,
@@ -10,8 +432,8 @@ C
 C
 C     Mark B. Chadwick, LANL
 C
-C CVS Version Management $Revision: 5026 $
-C $Id: ddhms.f 5026 2017-10-30 01:11:15Z bcarlson $
+C CVS Version Management $Revision: 5307 $
+C $Id: ddhms.f 5307 2021-10-14 09:53:04Z bvcarlson $
 C
 C  name ddhms stands for "double-differential HMS preeq."
 C  Computes preequilibrium spectra with hybrid Monte Carlo simulaion (HMS)
@@ -147,7 +569,10 @@ C
 C
       SUBROUTINE XHMS(Icalled)
 C
+      USE hmsspecs
+      
       IMPLICIT NONE
+      
       INCLUDE 'ddhms.cmb'
 C
 C COMMON variables
@@ -200,6 +625,8 @@ C
       nloang = 0
 
       aveb2=0.0d0
+
+      CALL axsspecs
 
       CALL INIT0(Icalled)
       CALL EXCLUMAT(matex)
@@ -589,6 +1016,7 @@ C
       perloang=dble(nloang)/nevents
       write(28,'(a7,i10,f10.5)') 'nloang=',nloang,perloang
       CALL OUTPUTPRINT
+      CALL daxsspecs
 C
       IF (IKIn.EQ.2) WRITE (8,*) '*WARNING:', NBAd,
      &                           ' events had -ve ucndump, worst case=',
@@ -2279,7 +2707,11 @@ C
 C
 C
       SUBROUTINE OUTPUTPRINT
-      IMPLICIT NONE
+
+      USE hmsspecs
+
+      IMPLICIT NONE      
+      
       INCLUDE 'ddhms.cmb'
 
 C
@@ -2424,9 +2856,9 @@ c     &                                DDXspexlab(nth,nx,ne,inx)*angnorme
        ENDDO
 C
       WRITE (28,99005)
-99005 FORMAT ('  xddhms version: $Revision: 5026 $')
+99005 FORMAT ('  xddhms version: $Revision: 5307 $')
       WRITE (28,99010)
-99010 FORMAT ('  $Id: ddhms.f 5026 2017-10-30 01:11:15Z bcarlson $')
+99010 FORMAT ('  $Id: ddhms.f 5307 2021-10-14 09:53:04Z bvcarlson $')
 C
       WRITE (28,*) ' '
       WRITE (28,*) ' exclusive ddhms code, b.v. carlson, ita'
@@ -3084,55 +3516,55 @@ Ccalculate maximum emission energy for ejectiles for printing
      &           - RESmas(JZResid,JZResid + JNResid))*AMU             !p emission
       ELAbejecmax = ELAbproj + SEPproj - (MIN(sepejecn,sepejecp))
 
-C     zero emission spectrum:
-      DO nen = 0, NDIM_EBINS
-         DXSn(nen) = 0.
-         DXSp(nen) = 0.
-         DXSnlab(nen) = 0.
-         DXSplab(nen) = 0.
-         DO jz = 0, NDIM_ZEM
-            DO jn = 0, NDIM_NEM
-               USPec(jz,jn,nen) = 0.
-               DXSnx(nen,jz,jn) = 0.
-               DXSpx(nen,jz,jn) = 0.
-               DXSnxlab(nen,jz,jn) = 0.
-               DXSpxlab(nen,jz,jn) = 0.
-               RESpop(jz,jn) = 0.
-               DO jsp = 0, NDIM_JBINS
-                 UJSpec(jz,jn,nen,jsp) = 0.
-                ENDDO
-               DO mem = 0, NDIM_RECBINS
-                 RECspec(mem,nen,jz,jn) = 0.
-                ENDDO
-             ENDDO
-          ENDDO
-         DO inx = 1, NDEXCLUHMS
-           DO nxn = 0, NDIM_EBINS
-             DXSnex(nxn,nen,inx) = 0.
-             DXSpex(nxn,nen,inx) = 0.
-c             DXSnexlab(nxn,nen,inx) = 0.
-c             DXSpexlab(nxn,nen,inx) = 0.
-             DO nth = 1, NDAnghms1
-               DDXsnex(nth,nxn,nen,inx) = 0.
-               DDXspex(nth,nxn,nen,inx) = 0.
-c               DDXsnexlab(nth,nxn,nen,inx) = 0.
-c               DDXspexlab(nth,nxn,nen,inx) = 0.
-              ENDDO
-            ENDDO
-          ENDDO
-         DO nth = 1, NDAnghms1
-            DDXsn(nen,nth) = 0.
-            DDXsp(nen,nth) = 0.
-            DDXsnlab(nen,nth) = 0.
-            DDXsplab(nen,nth) = 0.
-c            DO jz = 0, NDIM_ZEM
-c              DO jn = 0, NDIM_NEM
-c                DDXsnxlab(nen,nth,jz,jn) = 0.
-c                DDXspxlab(nen,nth,jz,jn) = 0.
-c               ENDDO
-c            ENDDO
-          ENDDO
-       ENDDO
+C     zero emission spectrum:  INITIALIZED WHEN ALLOCATED
+C      DO nen = 0, NDIM_EBINS
+C         DXSn(nen) = 0.
+C         DXSp(nen) = 0.
+C         DXSnlab(nen) = 0.
+C         DXSplab(nen) = 0.
+C         DO jz = 0, NDIM_ZEM
+C            DO jn = 0, NDIM_NEM
+C               USPec(jz,jn,nen) = 0.
+C               DXSnx(nen,jz,jn) = 0.
+C               DXSpx(nen,jz,jn) = 0.
+C               DXSnxlab(nen,jz,jn) = 0.
+C               DXSpxlab(nen,jz,jn) = 0.
+C               RESpop(jz,jn) = 0.
+C               DO jsp = 0, NDIM_JBINS
+C                 UJSpec(jz,jn,nen,jsp) = 0.
+C                ENDDO
+C               DO mem = 0, NDIM_RECBINS
+C                 RECspec(mem,nen,jz,jn) = 0.
+C                ENDDO
+C             ENDDO
+C          ENDDO
+C         DO inx = 1, NDEXCLUHMS
+C           DO nxn = 0, NDIM_EBINS
+C             DXSnex(nxn,nen,inx) = 0.
+C             DXSpex(nxn,nen,inx) = 0.
+C             DXSnexlab(nxn,nen,inx) = 0.
+C             DXSpexlab(nxn,nen,inx) = 0.
+C             DO nth = 1, NDAnghms1
+C               DDXsnex(nth,nxn,nen,inx) = 0.
+C               DDXspex(nth,nxn,nen,inx) = 0.
+C               DDXsnexlab(nth,nxn,nen,inx) = 0.
+C               DDXspexlab(nth,nxn,nen,inx) = 0.
+C              ENDDO
+C            ENDDO
+C          ENDDO
+C         DO nth = 1, NDAnghms1
+C            DDXsn(nen,nth) = 0.
+C            DDXsp(nen,nth) = 0.
+C            DDXsnlab(nen,nth) = 0.
+C            DDXsplab(nen,nth) = 0.
+C            DO jz = 0, NDIM_ZEM
+C              DO jn = 0, NDIM_NEM
+C                DDXsnxlab(nen,nth,jz,jn) = 0.
+C                DDXspxlab(nen,nth,jz,jn) = 0.
+C               ENDDO
+C            ENDDO
+C          ENDDO
+C       ENDDO
 C     zero number of bad events where res. nucl. energy goes negative
       NBAd = 0
       UBAd = 0.
@@ -3262,7 +3694,7 @@ C     emitted
 C
 C
       SUBROUTINE PAIRING(Pair)
-      IMPLICIT NONE
+      IMPLICIT NONE      
       INCLUDE 'ddhms.cmb'
 C
 C Dummy arguments
@@ -5769,6 +6201,8 @@ C
       SUBROUTINE EMPTRANS(Nemax,Jzmax,Jnmax)
 
       USE empcess
+      USE hmsspecs
+      
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
       INCLUDE 'ddhms.cmb'

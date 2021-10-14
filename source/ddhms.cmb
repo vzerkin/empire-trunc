@@ -1,5 +1,5 @@
-c CVS Version Management $Revision: 5026 $
-c $Id: ddhms.cmb 5026 2017-10-30 01:11:15Z bcarlson $
+c CVS Version Management $Revision: 5307 $
+c $Id: ddhms.cmb 5307 2021-10-14 09:53:04Z bvcarlson $
 c 
 	integer ndim_ebins
 	parameter (ndim_ebins = 200)    !must be >  emax=einc+Q /debin
@@ -80,26 +80,29 @@ c /xsection/ exclusive cross  sections
      +                 xspx(0:ndim_zem,0:ndim_nem),
      +                 xsn0,xsp0
  
-c /spec/ arrays of neutron and proton differential spectra
+
       common/binning/debin,debinrec
       real*8 debin,debinrec
-      common/spec/ dxsn(0:ndim_ebins),dxsp(0:ndim_ebins), 
-     +             ddxsn(0:ndim_ebins,ndanghms),
-     +             ddxsp(0:ndim_ebins,ndanghms),
-     +             dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +             dxsnex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
-     +             dxspex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
-     +           ddxsnex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
-     +           ddxspex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms)
+
+c memory allocated in module hmsspecs
+c /spec/ arrays of neutron and proton differential spectra
+c      common/spec/ dxsn(0:ndim_ebins),dxsp(0:ndim_ebins), 
+c     +             ddxsn(0:ndim_ebins,ndanghms),
+c     +             ddxsp(0:ndim_ebins,ndanghms),
+c     +             dxsnx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+c     +             dxspx(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+c     +             dxsnex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+c     +             dxspex(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+c     +           ddxsnex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
+c     +           ddxspex(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms)
 c23456789012345678901234567890123456789012345678901234567890123456789012
-      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx,dxsnex,dxspex,
-     +        ddxsnex,ddxspex
-      common/speclab/ dxsnlab(0:ndim_ebins),dxsplab(0:ndim_ebins), 
-     +           dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +           dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
-     +           ddxsnlab(0:ndim_ebins,ndanghms),
-     +           ddxsplab(0:ndim_ebins,ndanghms)
+c      real*8 dxsn,dxsp,ddxsn,ddxsp,dxsnx,dxspx,dxsnex,dxspex,
+c     +        ddxsnex,ddxspex
+c      common/speclab/ dxsnlab(0:ndim_ebins),dxsplab(0:ndim_ebins), 
+c     +           dxsnxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+c     +           dxspxlab(0:ndim_ebins,0:ndim_zem,0:ndim_nem),
+c     +           ddxsnlab(0:ndim_ebins,ndanghms),
+c     +           ddxsplab(0:ndim_ebins,ndanghms)
 c     +           ddxsnxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
 c     +           ddxspxlab(0:ndim_ebins,ndanghms,0:ndim_zem,0:ndim_nem),
 c     +           dxsnexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
@@ -107,7 +110,7 @@ c     +           dxspexlab(0:ndim_ebins,0:ndim_ebins,ndexcluhms),
 c     +       ddxsnexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms),
 c     +       ddxspexlab(ndanghms,0:ndim_ebins,0:ndim_ebins,ndexcluhms)
 c23456789012345678901234567890123456789012345678901234567890123456789012
-      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab,dxsnxlab,dxspxlab
+c      real*8 dxsnlab,dxsplab,ddxsnlab,ddxsplab,dxsnxlab,dxspxlab
 C     +      dxsnexlab,dxspexlab,ddxsnxlab,ddxspxlab,ddxsnexlab,ddxspexlab
  
 c /siginv/ inverse cross sections for HMS calculation
@@ -216,15 +219,16 @@ c prints of j,k distributions
                                       !scale the damp rate for evaluation work
       real*8 amultdamprate
 
-      common /resspec/uspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
-     + ujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins,0:ndim_jbins),
-     + respop(0:ndim_zem,0:ndim_nem),
-     + recspec(0:ndim_recbins,0:ndim_ebins,0:ndim_zem,0:ndim_nem)
-      common /iresspec/
-     +   jmaxujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
-     +  maxerecspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins)
-      real*8 uspec,ujspec,respop,recspec
-      integer jmaxujspec,maxerecspec
+c memory allocated in module hmsspecs
+c      common /resspec/uspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
+c     + ujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins,0:ndim_jbins),
+c     + respop(0:ndim_zem,0:ndim_nem),
+c     + recspec(0:ndim_recbins,0:ndim_ebins,0:ndim_zem,0:ndim_nem)
+c      common /iresspec/
+c     +   jmaxujspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins),
+c     +  maxerecspec(0:ndim_zem,0:ndim_nem,0:ndim_ebins)
+c      real*8 uspec,ujspec,respop,recspec
+c      integer jmaxujspec,maxerecspec
 	
 	common /inevdiag/ nev
 	integer nev
