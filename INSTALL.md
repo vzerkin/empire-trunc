@@ -2,98 +2,50 @@
                   
                       October 2013
 
-
-EMPIRE 3.2 has been tested successfully on Linux (Ubuntu, Redhat) and Mac OS X
-(Mountain Lion).  It can also be run on Windows with either the MinGW or
-Cygwin environments.  EMPIRE is distributed as a source code that MUST(!) be 
-compiled before using.
+EMPIRE 3.2 has been tested successfully on Linux and Mac OS X.  It can also 
+run on Windows with either the MinGW or Cygwin environments. EMPIRE is distributed 
+as a source code that MUST(!) be compiled before using.
 
 Required:
-    Fortran90 compiler - gfortran (recommended version 4.6 or higher) or ifort (Intel)
-    C/C++ compiler,
-    Python, 
-    Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
 
-Recommended:
-    Tcl/Tk version 8.4 (or higher) and the [incr Tcl] extension to Tcl/Tk, 
-    are both included in the ActiveTcl distributions available from the EMPIRE 
-    download page. On Mac OSX 10.6 and higher, Tcl/Tk with [incr Tcl] is preinstalled.
+   - Fortran90 compiler - gfortran (recommended version 4.6 or higher) or ifort (Intel)
+   - C/C++ compiler, 
+   - Python 2.7, 
+   - Tcl/Tk and the [incr Tcl = iTcl] extension to Tcl/Tk
 
-
-Graphical Installation 
-======================
-
-EMPIRE now has a graphical installer using IzPack.  To use it, download either
-the base distribution at
-
-    http://www.nndc.bnl.gov/empire/Resources/EMPIRE-base-installer.jar
-
-or the full, web-based distribution at
-
-    http://www.nndc.bnl.gov/empire/Resources/EMPIRE-full-installer.jar
-
-Then execute the jar file:
-
-    $ java -jar EMPIRE-base-installer.jar
-
-On MacOSX systems, you can do this by simply clicking on the jar
-file from a file manager. This installer has been tested on Linux and MacOSX.
-
-If you are on a Linux machine and need to install ActiveTcl, see the 
-instructions below for either the non-graphical or manual installations of
-ActiveTcl.
-
-To run EMPIRE you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.2-malta/Fe56new], change to it and launch the EMPIRE GUI 
-(Xrun.tcl):
-
-    $ mkdir Fe56new
-    $ cd Fe56new
-    $ empire3 & 
-
-
-
-Non-graphical Installation
-==========================
+Installation
+============
 
 1)  Download the following files from http://www.nndc.bnl.gov/empire/ and place 
+
     them in the same temporary directory (e.g. ~/empire-tmp/):
+       - install.sh
+       - EMPIRE-3.2-MALTA.tgz
+       - level-densities-hfb.tgz [Optional]
+       - C4-latest.tgz [Optional]
 
-        install.sh
-        EMPIRE-3.2-MALTA.tgz
-        level-densities-hfb.tgz [Optional]
-        C4-latest.tgz [Optional]
-        ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz [Optional - for Linux]
-
-2)  Run the setup.sh script
+2)  Run the installation script
 
         $ sh install.sh
 
     Then follow the on screen instructions.  The installation script will detect 
     whether the optional files are present in your temporary directory and 
-    attempt to install them. 
+    try to install them. 
 
-3)  [Optional] Install ActiveTcl8.4 on Linux systems:
-        $ tar xzf ~/empire-tmp/ActiveTcl8.4.7.0-linux-ix86-108887.tar.gz
-        $ cd ActiveTcl8.4.7.0-linux-ix86/
-        $ sh install.sh
-        $ cd ~/empire-tmp/
-
-To run empire you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.2-malta/Fe56new], change to it and launch the EMPIRE GUI 
+To run empire you may create a working subdirectory in your empire root 
+(e.g. ~/empire-3.2-malta/Fe56new), change to it and launch the EMPIRE GUI 
 (Xrun.tcl):
 
     $ mkdir Fe56new
     $ cd Fe56new
     $ empire3 & 
 
-
-
 Manual Installation
 ===================
 
 1)  Download the files listed above in the non-graphical installation.  We will 
-    assume that you put all of the downloaded files in the directory 
+
+    assume that you put all the downloaded files in the directory 
     ~/empire-tmp/ and are working from this directory.
 
 2)  Unpack EMPIRE-3.2-MALTA.tgz
@@ -125,6 +77,7 @@ Manual Installation
         would be used. The default compiler is gfortran.
 
 4)  [Optional] Unzip the distribution file C4-latest.zip to the corresponding
+
     subdirectory (EXFOR/) to get the automatic retrieval and plotting of EXFOR 
     experimental data:
 
@@ -139,25 +92,21 @@ Manual Installation
 
         $ python parseC4.py C4-Dec-11-2012.x4c4
 
-5)  [Optional] Install ActiveTcl8.4 suitable for your operating system, e.g.,:
-        $ tar xzf ~/empire-tmp/ActiveTcl8.4.19.6.295590-linux-ix86.tar.gz
-        $ cd ActiveTcl8.4.19.6.295590-linux-ix86
-        $ sh install.sh
-        $ cd ~/empire-tmp/
+5)  After this is all completed, you may move or rename your empire directory
 
-6)  After this is all completed, you may move or rename your empire directory
     and delete the temporary directory.
 
-7)  [Optional] Add $EMPIREDIR to your .bashrc or .cshrc and put empire in your
+6)  [Optional] Add $EMPIREDIR to your .bashrc or .cshrc and put empire in your
+
     $PATH.  In this step, we assume that your files are in the directory
     $instdir:
 
-    For a sh or similar perform
+    For a sh or similar do:
         EMPIREDIR="'$instdir'" 
         PATH="'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
         export EMPIREDIR PATH
 
-    For a csh or compatible perform
+    For a csh or compatible do:
         setenv EMPIREDIR "'$instdir'" 
         setenv PATH "'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
         export EMPIREDIR PATH 
@@ -167,16 +116,14 @@ Manual Installation
         export DISPLAY=:0
 
 To run empire you may create a working subdirectory of your empire root 
-[e.g. ~/empire-3.2-malta/Fe56new], change to it and launch the EMPIRE GUI 
+(e.g. ~/empire-3.2-malta/Fe56new), change to it and launch the EMPIRE GUI 
 (Xrun.tcl):
 
     $ mkdir Fe56new
     $ cd Fe56new
     $ empire3 & 
 
-
-
 Good calculations !
 The EMPIRE team
-_______________________________________________________________________
-Report problems to: r.capotenoy@iaea.org (IAEA); mwherman@bnl.gov (BNL)
+ 
+ Report problems to r.capotenoy@iaea.org (IAEA)and/or mwherman@lanl.gov (BNL)
