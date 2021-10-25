@@ -1,6 +1,6 @@
-ccc   * $Rev: 5296 $
+ccc   * $Rev: 5309 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2021-08-30 10:07:10 +0200 (Mo, 30 Aug 2021) $
+ccc   * $Date: 2021-10-25 09:13:46 +0200 (Mo, 25 Okt 2021) $
 
       SUBROUTINE INPUT
 ccc
@@ -9258,7 +9258,7 @@ C-----Set EGSM normalization factors for each Z
       DO iz = 1,NDZmax
          ATIlnoz(iz) = 1.d0 !default
       ENDDO
-      IF (ADIv.EQ.0.0D0) THEN
+      IF (ADIv.EQ.0.0D0 .OR. ADIV.EQ.5.0D0) THEN
          OPEN(31, FILE= trim(empiredir)//
      &   '/RIPL/densities/total/level-densities-egsm-norm.dat',
      &   STATUS='OLD')
@@ -9445,9 +9445,6 @@ C-----------Print resulting level density parameters
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')
      &         INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)),
      &         aroc, asys, atiln, ATIlnor(nnuc)/atiln, ROPar(1,nnuc)
-
-
-
 
             IF (ADIv.EQ.1.0D0)
      &         WRITE(8,'(I3,''-'',A2,''-'',I3, 5(2x,F8.5))')

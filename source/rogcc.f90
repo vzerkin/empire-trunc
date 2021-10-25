@@ -155,12 +155,14 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 
       
       !  Fermi-gas part of the level denisties
-      do i = 1, nde         ! over excitation energies (NOT realLY NEEDED HERE AS WE USE ONLY AT CRITICAL POINT)
+      !  As we need Fermi level densities only at the BCS critical energy we could calculated only this one point.
+      !  We keep the do loop over the full range to be used in future GC implementation with pure Fermi gas instead of EGSM. 
+      do i = 1, nde         ! over excitation energies (NOT REALLY NEEDED HERE AS WE USE ONLY RHO AT CRITICAL POINT)
          u = i*fde + DEL - ECOnd  
          IF(u.lt.0.d0) CYCLE
          am = atil*FSHELL(u,SHC(Nnuc),GAMma)
          IF (am.LE.0.0D0) RETURN  
-         ! next call to SIGMAK only to find cigor    
+         ! call to SIGMAK only to find cigor    
          call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0,mompar,momort,A2,stab,cigor)
          if(cigor > 1.001) then ! skip if the change in atil is negligible
             ! 'a' including surface dependent factor
@@ -180,8 +182,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       ! ENDDO
 
 
-      Ux = UCRt - DEL   ! matching is imposed to be at Ucrit (NO(!) smooth transition needed)
-      Ux = UCRt
+      Ux = UCRt         ! matching is imposed to be at Ucrit (NO(!) smooth transition needed)
       iux = int(UCRt/fde)
       roUx = roFG(iux) + (roFG(iux+1) - roFG(iux))*(UCRt/fde - float(iux)) ! interplotation in the roFG table 
 
