@@ -64,13 +64,13 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: DETcrt                       ! determinant at critical energy
    real*8 :: SCR                          ! entropy at critical energy 
    real*8 :: ACR                          ! level density parameter at critical energy
-   real*8 :: atil                         ! asymptotic value of LD parameter 'a' 
+   real*8 :: ATIl                         ! asymptotic value of LD parameter 'a' 
    common /CRIT  / TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl
 
    real*8 :: am                           ! level density parameter 'a' 
-   real*8 :: Tct                          ! temperature in constant temperature model
-   real*8 :: eo                           ! Eo enrgy shift in CT formula 
    real*8 :: ux                           ! matching energy between CT and Fermi-gas level densities
+   real*8 :: eo                           ! Eo enrgy shift in CT formula 
+   real*8 :: Tct                          ! temperature in constant temperature model
    common /CT/ am,ux,eo,Tct
    !
    ! Local variables
@@ -101,7 +101,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    real*8 :: xj                           ! running value of spin
    ! real*8 :: a1, b1, c1                   ! auxiliary variables
    ! real*8 :: enorm                        ! probbably USELES 
-   real*8 :: roUx                         ! FG total level densities at the Ux matching point (= UCRt + DEL)
+   real*8 :: roUx                         ! FG total level densities at the Ux matching point (= UCRt)
    integer*4 :: Nl                        ! number of the lowest discrete level used in a cumulative-number of levels fit
    integer*4 :: Nu                        ! number of the highest discrete level used in a cumulative-number of levels fit
    integer*4 :: ia                        ! nucleus mass number (A)
@@ -125,10 +125,19 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    ia = INT(A(Nnuc))
    iz = INT(Z(Nnuc))
    in = ia - iz
-   print *, " "
-   print *, " ROGCC called for Nnuc, Z, A: ", Nnuc, iz, ia  
+   ! print *, " "
+   ! print *, " ROGCC called for Nnuc, Z, A: ", Nnuc, iz, ia  
 
    call PRERO(Nnuc) ! prepares for lev. dens. calculations
+
+   !-----EGSM systematics for Fermi-gas model 
+   CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
+   IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) gamma = asaf
+   atil = (ap1*A(Nnuc) + ap2*a23)*atilnor(Nnuc)
+
+   !-----calculate crtical values
+   CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
+   IF (BF.EQ.0.D0 .AND. asaf.LT.0.0D0) acr = acrt
 
    !
    ! Fit parameters of the level densities the first time they are calculated
@@ -141,19 +150,6 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       Nu = NLV(nnuc)
       Eu = ELV(Nu,Nnuc)
 
-      DEL = 0.0D0
-      eo = 0.0D0
-
-      !-----EGSM systematics for Fermi-gas model 
-      CALL EGSMsys(ap1,ap2,gamma,del,delp,nnuc)
-      IF (BF.EQ.0.0D0 .AND. Asaf.GE.0.0D0) gamma = asaf
-      atil = (ap1*A(Nnuc) + ap2*a23)*atilnor(Nnuc)
-
-      !-----calculate crtical values
-      CALL DAMIRO_CRT(ia,iz,shc(nnuc),IOUt,0)
-      IF (BF.EQ.0.D0 .AND. asaf.LT.0.0D0) acr = acrt
-
-      
       !  Fermi-gas part of the level denisties
       !  As we need Fermi level densities only at the BCS critical energy we could calculated only this one point.
       !  We keep the do loop over the full range to be used in future GC implementation with pure Fermi gas instead of EGSM. 
@@ -175,7 +171,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)  ! level density
       enddo     ! over excitation energies
 
-      ! ! Calculate derivatives of ro_fermi (not needed if Ux related to Ucrit)
+      ! ! Calculate derivatives of ro_fermi (not needed if Ux set to Ucrit)
       ! DO i = 1, nde-2  
       !    deriv1 = (roFG(i+1) - roFG(i  ))/fde
       !    deriv2 = (roFG(i+2) - roFG(i+1))/fde
@@ -197,7 +193,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       ! Calculate Eo   
       Eo = UCRt - Tct*log(Tct*roUx)     !  Eq. 53 of Nucl. Phys. A810(2008)13 
       eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu  ! Eq. 55 of Nucl. Phys. A810(2008)13
-      print *, "initial: eps, Tct, Eo, Ux, Nl, Nu, Eu =", eps, Tct, Eo, Ux,  Nl, Nu, Eu
+      ! print *, "initial: eps, Tct, Eo, Ux, Nl, Nu, Eu =", eps, Tct, Eo, Ux,  Nl, Nu, Eu
 
       i = 0    
       do while (abs(eps) > 0.1 .and. Nu-Nl > 3)  !-----iterate for Tct and Eo if Nu-Nl > 3
@@ -207,7 +203,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          Eo = Ux - Tct*log(Tct*roUx)                              !  Eq. 53 of Nucl. Phys. A810(2008)13
          eps = exp(-Eo/Tct)*(exp(Eu/Tct)-exp(El/Tct)) + Nl - Nu   !  Eq. 55 of Nucl. Phys. A810(2008)13
          i = i + 1
-         print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
+         ! print *, "iter, Tct, Eo, eps", i, Tct, Eo, eps
          if (i > 30) then
             WRITE (8,*) 'WARNING: ROGCC'
             WRITE (8,*) 'WARNING: Maximum number of iterations in ROGCC reached for'
@@ -217,18 +213,24 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             exit
          endif 
       enddo
-      print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
-      print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
-      print *, " Matching energy =", UCRt, " rhoFermi = ", roUx
-      print *, " Matching energy =", UCRt, " rhoCT    = ", ro_ct(UCRt, Tct, eo)
+      ! print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
+      ! print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
+      ! print *, " Matching energy =", UCRt, " rhoFermi = ", roUx
+      ! print *, " Matching energy =", UCRt, " rhoCT    = ", ro_ct(UCRt, Tct, eo)
       !
       !  FITTING PARAMETERS DONE
       !
-      ! ROPar(1,Nnuc) = am
+      ROPar(1,Nnuc) = atil
       ROPar(2,Nnuc) = UCRt
       ROPar(3,Nnuc) = DEL
       ROPar(4,Nnuc) = eo
       ROPar(5,Nnuc) = Tct
+   else
+      atil = ROPar(1,Nnuc)
+      UCRt = ROPar(2,Nnuc)
+      DEL = ROPar(3,Nnuc)
+      eo = ROPar(4,Nnuc)
+      Tct = ROPar(5,Nnuc)
    endif
 
    if (ux.lE.0.0D0) print *, INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
@@ -247,10 +249,9 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    !-----IF(Scutf.LT.0.0D0) sig2h calculated according to Dilg's recommendations
    !-----0.6079 = 6/pi^2   a=6/pi^2*g  sig2^2 = <m^2>gt  Scutf = <m^2>
    !sig2h = Scutf*0.6079*A23*SQRT(ux*am)  
-   sig2h = mompar**0.333D0*momort**0.6666D0*TCRt
-
-
-   print *, "sig2l = ", sig2l, "sig2h = ", sig2h
+   am = atil*FSHELL(UCRt,SHC(Nnuc),GAMma)
+   call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,UCRt,am,0.0,mompar,momort,A2,stab,cigor)
+   sig2h = mompar**0.333D0*momort**0.6666D0*Tct
    
    !-----determination of the index in Ex-array such that Ex(IG,.).LT.eMatch
    !-----(low-energy level density formula is used up to IG)
@@ -318,7 +319,6 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             INT(Z(nnuc)), SYMb(nnuc), INT(A(nnuc)), (ROPar(j,nnuc),j=1,5)
 
 
-   print *, "ROGCC Tct before exiting ", Tct
    return
 end subroutine ROGCC
 
@@ -332,8 +332,8 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
 !cc   *                                                         class:ppu *
 !cc   *                     R O _ F E R M I                               *
 !cc   *                                                                   *
-!cc   *  Calculates total Fermi-gas level(!) densities using Ignatyuk     *
-!cc   *  approach. Collective enhancement effects are taken into          *
+!cc   *  Calculates total Fermi-gas level (not state!) densities using    *
+!cc   *  Ignatyuk approach. Collective enhancement effects are taken into *
 !cc   *  account including their energy fade-out.                         *
 !cc   *                                                                   *
 !cc   *  BF=0. saddle point         (rot. perpend. to symm.)              *

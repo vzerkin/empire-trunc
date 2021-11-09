@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5302 $
+Ccc   * $Rev: 5310 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2021-10-03 20:16:01 +0200 (So, 03 Okt 2021) $
+Ccc   * $Date: 2021-11-09 09:31:47 +0100 (Di, 09 Nov 2021) $
 
       SUBROUTINE PLOT_ZVV_GSLD(Nnuc) 
       INCLUDE 'dimension.h'
@@ -314,9 +314,6 @@ C
       CHARACTER*36 ctmp2
       INTEGER ij, kk, nplot
       
-      print *, "ux, Tct", ux, T
-
-
       if(NLV(Nnuc).le.3) return
 
       if(SYMb(Nnuc)(2:2).eq.' ') then
@@ -637,7 +634,6 @@ C
         DO kk = 2, nplot
 
           u     = defit*(kk - 1)
-          print *, "HERE COME CLOSE"
           IF(ADIv.EQ.2 .OR. ADIv.EQ.4 .OR. ADIv.EQ.5)THEN
 C---------GCM, OGCM, GCCM
             print *, "T in cumul plotting ", T
