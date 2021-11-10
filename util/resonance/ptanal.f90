@@ -33,6 +33,7 @@ program ptanal
     parameter (mres = 1000)
     !cho  character*1 ggflag
     character*1 ggflag, gnflag, aaflag
+    character adjust*17
     common/rps/ nres, rp(8, mres), SJ(mres), LJ(mres), ggflag(2, mres), &
             gnflag(2, mres), aaflag(2, mres)
     common/dat/ rad, awt, sf0, iset, sf1(3), D0, sf2(3), D1, ecut, ap, dap, &
@@ -50,7 +51,6 @@ program ptanal
     !cho
     namelist/data/ adjust, awt, sf0, iset, sf1, D0, sf2, D1, ecut, ap, dap, &
             zam, spin, ggavg, gncut, gncuth, mat, abun
-    character adjust*17
     !     namelist/data/ rad,awt,iset,ecut,zam,gncut,gncuth,mat,inflag
     !
     !     rad = const. to calc. AP [1.35 fm] ; OBSOLETE
@@ -126,6 +126,7 @@ program ptanal
 end
 !.....
 subroutine readinp
+    character adjust*17
     !     read 'ptanal.inp' file into dat:
     common/dat/ rad, awt, sf0, iset, sf1(3), D0, sf2(3), D1, ecut, ap, dap, &
             zam, spin, ggavg(3), gncut(3), gncuth(3), mat, abun
@@ -133,7 +134,6 @@ subroutine readinp
 
     namelist/data/ adjust, awt, sf0, iset, sf1, D0, sf2, D1, ecut, ap, dap, &
             zam, spin, ggavg, gncut, gncuth, mat, abun
-    character adjust*17
 
     open(5, file = 'ptanal.inp', status = 'old')
     read(5, data)
