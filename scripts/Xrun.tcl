@@ -1,6 +1,6 @@
-# $Rev: 5276 $
-# $Author: mwherman $
-# $Date: 2021-05-25 03:47:05 +0200 (Di, 25 Mai 2021) $
+# $Rev: 5312 $
+# $Author: zerkin $
+# $Date: 2021-11-10 10:44:03 +0100 (Mi, 10 Nov 2021) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5301,8 +5301,8 @@ proc ::editFile {filename} {
         }
         
         if {$::tcl_platform(os)=="Darwin"} {
-                if [regexp {\.app} $::editor] {
-                        exec open -a $::editor $filename
+                if { $::editor =="TextEdit"} {
+                        exec open -a $::editor $filename &
                 } else {
                         # hopefully command is recognized:
                         exec $::editor $filename &
@@ -5351,8 +5351,8 @@ proc ::RepWriter {filename} {
         }
 
         if {$::tcl_platform(os)=="Darwin"} {
-                if [regexp {\.app} $::RepWriter] {
-                        exec open -a $::RepWriter notes/$filename      
+                if { $::RepWriter =="TextEdit"} {
+                        exec open -a $::RepWriter notes/$filename &
                 } else {
                         # hopefully command is recognized:
                         exec $::RepWriter  notes/$filename &
@@ -8421,6 +8421,8 @@ exit} \
         -value nedit -variable editor -command {} -label nedit 
     $site_4_0.menu97 add radiobutton \
         -value Notepad2 -variable editor -command {} -label Notepad2 
+    $site_4_0.menu97 add radiobutton -value nano     -variable editor -command {} -label nano 
+    $site_4_0.menu97 add radiobutton -value TextEdit -variable editor -command {} -label TextEdit 
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
         -command {
@@ -8449,6 +8451,8 @@ set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
         -value nedit -variable RepWriter -command {} -label nedit 
     $site_4_0.menu98 add radiobutton \
         -value Notepad2 -variable RepWriter -command {} -label Notepad2 
+    $site_4_0.menu98 add radiobutton -value nano     -variable RepWriter -command {} -label nano 
+    $site_4_0.menu98 add radiobutton -value TextEdit -variable RepWriter -command {} -label TextEdit 
     $site_4_0.menu98 add radiobutton \
         -value gotfile -variable RepWriter \
         -command {
