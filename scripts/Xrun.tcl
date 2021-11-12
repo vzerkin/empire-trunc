@@ -1,6 +1,6 @@
-# $Rev: 5312 $
+# $Rev: 5313 $
 # $Author: zerkin $
-# $Date: 2021-11-10 10:44:03 +0100 (Mi, 10 Nov 2021) $
+# $Date: 2021-11-12 11:27:53 +0100 (Fr, 12 Nov 2021) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5301,7 +5301,7 @@ proc ::editFile {filename} {
         }
         
         if {$::tcl_platform(os)=="Darwin"} {
-                if { $::editor =="TextEdit"} {
+                if [regexp {\.app} $::editor] {
                         exec open -a $::editor $filename &
                 } else {
                         # hopefully command is recognized:
@@ -5351,7 +5351,7 @@ proc ::RepWriter {filename} {
         }
 
         if {$::tcl_platform(os)=="Darwin"} {
-                if { $::RepWriter =="TextEdit"} {
+                if [regexp {\.app} $::RepWriter] {
                         exec open -a $::RepWriter notes/$filename &
                 } else {
                         # hopefully command is recognized:
@@ -8422,7 +8422,7 @@ exit} \
     $site_4_0.menu97 add radiobutton \
         -value Notepad2 -variable editor -command {} -label Notepad2 
     $site_4_0.menu97 add radiobutton -value nano     -variable editor -command {} -label nano 
-    $site_4_0.menu97 add radiobutton -value TextEdit -variable editor -command {} -label TextEdit 
+    $site_4_0.menu97 add radiobutton -value TextEdit.app -variable editor -command {} -label TextEdit 
     $site_4_0.menu97 add radiobutton \
         -value gotfile -variable editor \
         -command {
@@ -8452,7 +8452,7 @@ set editor [tk_getOpenFile -parent .top75 -title "Select editor"]} \
     $site_4_0.menu98 add radiobutton \
         -value Notepad2 -variable RepWriter -command {} -label Notepad2 
     $site_4_0.menu98 add radiobutton -value nano     -variable RepWriter -command {} -label nano 
-    $site_4_0.menu98 add radiobutton -value TextEdit -variable RepWriter -command {} -label TextEdit 
+    $site_4_0.menu98 add radiobutton -value TextEdit.app -variable RepWriter -command {} -label TextEdit 
     $site_4_0.menu98 add radiobutton \
         -value gotfile -variable RepWriter \
         -command {
