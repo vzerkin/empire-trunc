@@ -13,7 +13,7 @@ ifeq ($(FC),gfortran)
   #----GNU FORTRAN compiler
   #-------------------------
   #----flags for production compilation
-  FFLAGS = -std=legacy -O3
+  FFLAGS = -std=gnu -O3
   #----flags for debuging
   #FFLAGS =  -g --bounds-check -std=legacy
 
