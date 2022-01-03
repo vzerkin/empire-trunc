@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5315 $
+Ccc   * $Rev: 5316 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-01-03 23:51:49 +0100 (Mo, 03 Jän 2022) $
+Ccc   * $Date: 2022-01-04 00:01:16 +0100 (Di, 04 Jän 2022) $
 
 Ccc
 Ccc   ********************************************************************
@@ -8,8 +8,8 @@ Ccc   *                                                                  *
 Ccc   *                  PLOT SENsitivity MATrix                         *
 Ccc   *                                                                  *
 Ccc   *     Reads sensitivity-matrix file, and creates a zvd file for    *
-Ccc   *     a given MT, with which the sensitivity for all parameters    *
-Ccc   *     can be plotted.                                              *
+Ccc   *     a given MT, for plotting the sensitivities to all parameters *
+Ccc   *     to which MT reaction is sensitive.                           *
 Ccc   *                                                                  *
 cc    *                                                                  *
 Ccc   ********************************************************************
