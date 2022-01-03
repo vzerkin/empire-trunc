@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5147 $
+Ccc   * $Rev: 5315 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2019-03-19 08:41:14 +0100 (Di, 19 Mär 2019) $
+Ccc   * $Date: 2022-01-03 23:51:49 +0100 (Mo, 03 Jän 2022) $
 
 Ccc
 Ccc   ********************************************************************
@@ -23,34 +23,34 @@ Ccc
         CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
          
         REAL*8 SENMAT(MAXPARAM,MAXENERG,0:MAXREAC)
+        REAL*8 SMnon0(MAXPARAM,0:MAXREAC)
 
 
         WRITE(*,*) 'Name of project: '
         READ(*,*) PROJFILE
-c       PROJFILE='pd105'
 
 C       Reading which reaction to plot
         CALL READPLOT(PLOTREAC,MT)
 
 C       Reading and storing the sensitivity matrices in variable SENMAT
-        CALL READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +MAXPARAM,MAXENERG)
+        CALL READSEN(PROJFILE,PARAM,REAC,SENMAT,SMnon0,NPARAM,NENERG,
+     +  NR,MAXPARAM,MAXENERG)
 
 C       Finding index of reaction to be plotted
         CALL FINDIPLOT(REAC,NR,PLOTREAC,IPLOT)
         
 C       Creates ZVD file with the sensitivities for all parameters
-        CALL ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
+        CALL ZVVPLOT(PROJFILE,PARAM,SENMAT,SMnon0,NPARAM,
+     +  NENERG,PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
 
          END
-
-
-C       Subroutine that reads from standard input the MT number of the
-c       reaction whose sensitivity is intended to be plotted. It returns
-c       the MT that was read and the variable PLOTREAC, which has the string
-c       that will be searched in the reaction headers in the -mat.sen file.
-        SUBROUTINE READPLOT(PLOTREAC,MT)
+         
+         
+         SUBROUTINE READPLOT(PLOTREAC,MT)
+C        Subroutine that reads from standard input the MT number of the
+c        reaction whose sensitivity is intended to be plotted. It returns
+c        the MT that was read and the variable PLOTREAC, which has the string
+cc       that will be searched in the reaction headers in the -mat.sen file.
  
         IMPLICIT REAL*8(A-H,O-Z)
 
@@ -59,7 +59,7 @@ c       that will be searched in the reaction headers in the -mat.sen file.
           CHARACTER*10 MTDESCR
         END TYPE LISTOFMT
 
-        CHARACTER*10  PLOTREAC,REACLIST(1000)
+        CHARACTER*10  PLOTREAC
         
         TYPE (LISTOFMT) MTLIST(1000)
         
@@ -83,9 +83,10 @@ c       that will be searched in the reaction headers in the -mat.sen file.
         MTLIST(18) = LISTOFMT(207,'(z,xa)')
         MTLIST(19) = LISTOFMT(5,'MT=5')
         MTLIST(20) = LISTOFMT(851,'(n,a_dis)')
+        MTLIST(21)  = LISTOFMT(17,'(z,3n)')
 
 C       Number of implemented reactions
-        IMPREAC=20
+        IMPREAC=21
 
 C       Printing which reactions have been implemented
         WRITE(*,*)
@@ -95,7 +96,7 @@ C       Printing which reactions have been implemented
           IF(MTLIST(IR)%MTNUMBER==3) THEN
             WRITE(*,50) MTLIST(IR)%MTNUMBER, MTLIST(IR)%MTDESCR
 50          FORMAT('MT= ',i3,' - ',A,' (Nonelastic not present ', 
-     &'in sensitivity file, using Reaction instead.)')
+     &      'in sensitivity file, using Reaction instead.)')
            ELSE
             WRITE(*,55) MTLIST(IR)%MTNUMBER, MTLIST(IR)%MTDESCR
 55          FORMAT('MT= ',i3,' - ',A)
@@ -137,20 +138,16 @@ c       position of this column is stored in variable IPLOT
 
 C       Matching the reaction desired
         DO IR=1, NR
-c        WRITE(*,*) REAC(IR)
          IF(INDEX(REAC(IR),PLOTREAC(1:LNBLNK(PLOTREAC))).NE.0) THEN ! Match!!
           IPLOT=IR
-c         WRITE(*,*) 'MATCH!!! IPLOT= ',IPLOT
           EXIT
-c        ELSE  ! No match...
-c         WRITE(*,*) 'No match...'
          ENDIF
         ENDDO
 
         END
         
-        SUBROUTINE READSEN(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +MAXPARAM,MAXENERG)
+        SUBROUTINE READSEN(PROJFILE,PARAM,REAC,SENMAT,SMnon0,NPARAM,
+     +  NENERG,NR,MAXPARAM,MAXENERG)
 c       Reads the full sensitivity matrices from file -mat.sen and stores
 c       in variable SENMAT(parameter,energy,reaction). Reaction index=0 in 
 c       SENMAT stores energy values.
@@ -163,6 +160,7 @@ c       SENMAT stores energy values.
         CHARACTER*10 REAC(0:MAXREAC)
          
         REAL*8 SENMAT(MAXPARAM,MAXENERG,0:MAXREAC)
+        REAL*8 SMnon0(MAXPARAM,0:MAXREAC)
 
         FILENAME=PROJFILE
         FILENAME(LNBLNK(FILENAME)+1:LNBLNK(FILENAME)+8)='-mat.sen'
@@ -178,7 +176,7 @@ C         Reading the number of reactions
 C         Reading the name of the parameter
           IF(IP.EQ.MAXPARAM) THEN
             WRITE(*,*) 'The maximum number of parameters has ',
-     +'been reached!'
+     +      'been reached!'
             STOP
           ENDIF
           READ(10,20) PARAM(IP)
@@ -190,7 +188,7 @@ C         Reading the name of the reactions
 
           DO IE=1, MAXENERG
             READ(10,'(E10.4,50(1X,E11.4))',ERR=250,END=250) 
-     +(SENMAT(IP,IE,IR),IR=0,NR)
+     +      (SENMAT(IP,IE,IR),IR=0,NR)
           ENDDO
 250       CONTINUE
           NENERG=IE-2
@@ -200,6 +198,10 @@ C         Reading the name of the reactions
 300     CONTINUE
         
         NPARAM=IP-1
+
+C       Set SMnon0 matrix elements to positive maximum for non-zero sensitivities 
+c       and 0 for all-zero sensitivities (for each combination of parameter/reaction)
+        SMnon0 = MAXVAL(ABS(SENMAT),DIM=2)
 
         END
        
@@ -228,8 +230,8 @@ c       spacing.
         
         END
         
-        SUBROUTINE ZVVPLOT(PROJFILE,PARAM,REAC,SENMAT,NPARAM,NENERG,NR,
-     +PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
+        SUBROUTINE ZVVPLOT(PROJFILE,PARAM,SENMAT,SMnon0,NPARAM,
+     +  NENERG,PLOTREAC,IPLOT,MT,MAXPARAM,MAXENERG)
 c       Creates zvd file to be plotted with zvview	
 
         IMPLICIT REAL*8(A-H,O-Z)
@@ -237,11 +239,12 @@ c       Creates zvd file to be plotted with zvview
         PARAMETER(MAXREAC=50)
 
         CHARACTER*40 PROJFILE,FILENAME,PARAM(MAXPARAM)
-        CHARACTER*10 REAC(0:MAXREAC), PLOTREAC
+        CHARACTER*10 PLOTREAC
         CHARACTER*20 CHARNUM
         CHARACTER*3  CHARMT 
          
         REAL*8 SENMAT(MAXPARAM,MAXENERG,0:MAXREAC)
+        REAL*8 SMnon0(MAXPARAM,0:MAXREAC)
 
         CHARNUM(10:19)='0123456789'
 
@@ -271,16 +274,10 @@ c       Creates zvd file to be plotted with zvview
         OPEN(20,FILE=FILENAME)
 
         DO IP=1,NPARAM
+          IF(SMnon0(IP,IPLOT) .LT. 1.0E-10) cycle
 c         Writing the header
           WRITE(20,15)
 15        FORMAT('#begin LSTTAB.CUR/u')
-c         IF(IP<10)THEN
-c           WRITE(20,10) IP
-c10         FORMAT('#begin Parameter_',I1,'/u')
-c          ELSE
-c           WRITE(20,12) IP
-c12         FORMAT('#begin Parameter_',I2,'/u')
-c         ENDIF   
           WRITE(20,20) PARAM(IP), NENERG
 20        FORMAT(7X,'fun: ',A,/,'thick: 2',/,'length: ',I4,/,'//')
 c         Writing the sensitivity matrix for each parameter
@@ -292,17 +289,10 @@ c           Writing (converting energy from MeV to eV)
 c         Writing the ending
           WRITE(20,105)
 105       FORMAT('//',/,'#end LSTTAB.CUR/u')
-c         IF(IP<10)THEN
-c           WRITE(20,100) IP
-c100        FORMAT('//',/,'#end Parameter_',I1,'/u')
-c          ELSE
-c           WRITE(20,102) IP
-c102        FORMAT('//',/,'#end Parameter_',I2,'/u')
-c         ENDIF   
         ENDDO
 
 c       Writing control information
         WRITE(20,150)
 150     FORMAT('#begin LSTTAB.CUR/c',/,'x-scale: auto',/,
-     +'y-scale: auto',/,'//',/,'#end LSTTAB.CUR/c')
+     +  'y-scale: auto',/,'//',/,'#end LSTTAB.CUR/c')
         END
