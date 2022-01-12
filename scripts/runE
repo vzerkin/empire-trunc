@@ -15,303 +15,328 @@ import sys
 import os
 import shutil
 from glob import glob
+
 # get rm(), mv(), cp(), ln() and isEmpty() functions:
-#from empy.bash import *
+# from empy.bash import *
 
-PACKAGEDIR = os.sep.join( os.path.dirname( os.path.abspath( __file__ ) ).split( os.sep )[:-1] )
+PACKAGEDIR = os.sep.join(os.path.dirname(os.path.abspath(__file__)).split(os.sep)[:-1])
 
-def get_version( ):
-    if (not os.path.exists(PACKAGEDIR + os.sep + 'version')):
-        VERSIONNUMBER = '3.2.3'  # setting default for the case that the version file is not found 
-        VERSIONNAME = 'MALTA'    # setting default for the case that the version file is not found 
-        return ( VERSIONNAME, VERSIONNUMBER )
 
-    for line in open( PACKAGEDIR + os.sep + 'version' ).readlines(): 
-        if line.startswith( 'VERSIONNUMBER' ): VERSIONNUMBER = line.split( )[-1]
-        if line.startswith( 'VERSIONNAME' ): VERSIONNAME = line.split( )[-1]
-    return ( VERSIONNAME, VERSIONNUMBER )
+def get_version():
+    VERSIONNUMBER = '3.2.3'  # setting default for the case that the version file is not found
+    VERSIONNAME = 'MALTA'  # setting default for the case that the version file is not found
+    if not os.path.exists(PACKAGEDIR + os.sep + 'version'):
+        return VERSIONNAME, VERSIONNUMBER
+
+    for line in open(PACKAGEDIR + os.sep + 'version').readlines():
+        if line.startswith('VERSIONNUMBER'):
+            VERSIONNUMBER = line.split()[-1]
+        if line.startswith('VERSIONNAME'):
+            VERSIONNAME = line.split()[-1]
+    return VERSIONNAME, VERSIONNUMBER
+
 
 def getSymbol(zzz):
     """
     Return Chemical symbol of element with z=zzz
     """
     izzz = int(zzz)
-    
-    mat = 'n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Ns Hs Mt ??'.split()
-    
-    if (izzz > 109):    SMAT = mat[-1]  # return '??' for unknown
-    else:   SMAT = mat[izzz]
+
+    mat = 'n H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr ' \
+          'Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W ' \
+          'Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Ns Hs Mt ' \
+          '??'.split()
+
+    if izzz > 109:
+        SMAT = mat[-1]  # return '??' for unknown
+    else:
+        SMAT = mat[izzz]
     return SMAT
+
 
 def runE(proj):
     """
     run EMPIRE for project named proj
     """
-    
+
     # set EMPIREDIR if necessary:
-    if (not os.environ.has_key('EMPIREDIR')) or (os.environ['EMPIREDIR']==''):
+    if ('EMPIREDIR' not in os.environ) or (os.environ['EMPIREDIR'] == ''):
         import time
-        print ("Please set environment variable EMPIREDIR in your bashrc:\n")
-        print ("export EMPIREDIR=<path to empire>\n")
-        print ("Guessing at path for now")
+        print("Please set environment variable EMPIREDIR in your bashrc:\n")
+        print("export EMPIREDIR=<path to empire>\n")
+        print("Guessing at path for now")
         time.sleep(2)
         os.environ['EMPIREDIR'] = PACKAGEDIR
-    
+
     # Preserve previous *inp,*.lst,*.out,*-s.endf,*-CN-lev.xsc files for comparison
-    if not isEmpty(proj+'.lst'):
-        cp(proj+'.inp', proj+'-prev.inp')
-        print ('Preserved existing *.inp file as: %s' % proj+'-prev.inp')
-        cp(proj+'.lst', proj+'-prev.lst')
-        print ('Preserved existing *.lst file as: %s' % proj+'-prev.lst')
-        cp(proj+'.out', proj+'-prev.out')
-        print ('Preserved existing *.out file as: %s' % proj+'-prev.out')
-        cp(proj+'.xsc', proj+'-prev.xsc')
-        print ('Preserved existing *.xsc file as: %s' % proj+'-prev.xsc')
-    if not isEmpty(proj+'-s.endf'):
-        cp(proj+'-s.endf', proj+'-prev.endf')
-        print ('Preserved existing ENDF file as: %s' % proj+'-prev.endf')
-    if not isEmpty(proj+'-CN-lev.xsc'):
-        cp(proj+'-CN-lev.xsc',proj+'-CN-lev-prev.xsc')
-        print ('Preserved existing *-CN-lev.xsc file as: %s' % proj+'-CN-lev-prev.xsc')
-  
+    if not isEmpty(proj + '.lst'):
+        cp(proj + '.inp', proj + '-prev.inp')
+        print('Preserved existing *.inp file as: %s' % proj + '-prev.inp')
+        cp(proj + '.lst', proj + '-prev.lst')
+        print('Preserved existing *.lst file as: %s' % proj + '-prev.lst')
+        cp(proj + '.out', proj + '-prev.out')
+        print('Preserved existing *.out file as: %s' % proj + '-prev.out')
+        cp(proj + '.xsc', proj + '-prev.xsc')
+        print('Preserved existing *.xsc file as: %s' % proj + '-prev.xsc')
+    if not isEmpty(proj + '-s.endf'):
+        cp(proj + '-s.endf', proj + '-prev.endf')
+        print('Preserved existing ENDF file as: %s' % proj + '-prev.endf')
+    if not isEmpty(proj + '-CN-lev.xsc'):
+        cp(proj + '-CN-lev.xsc', proj + '-CN-lev-prev.xsc')
+        print('Preserved existing *-CN-lev.xsc file as: %s' % proj + '-CN-lev-prev.xsc')
+
     # CLEAN ALL THE FILES WHICH MIGHT BE LEFT FROM THE PREVIOUS RUN
     # rm is a function defined below
-    rm('EMPIRE.OK', proj+'.out', proj+'.lst', proj+'.endf', proj+'.ps')
+    rm('EMPIRE.OK', proj + '.out', proj + '.lst', proj + '.endf', proj + '.ps')
     rm('OMP_A.DAT', 'EMPIRE.STA', 'PFNM.OUT', 'PFNS.OUT', 'CN-LEV-XS.DAT')
     rm('OUTPUT.DAT', 'LIST.DAT', 'OMPAR.RIPL', 'GAMMA.DAT', 'FUSION')
     rm('OMPAR.DIR', 'FISSION.INP', 'FISS_XS.OUT', 'FISSION.OUT', 'TOTCOR.DAT')
-    rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP')
-    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ECIS_VIB.inp')
-    rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT','ECIS_SPH.inp')
-    rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP','ECIS_SPH.out')
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT','TL')     
-    rm('SENSITIVITY.MATRIX','NUBAR.DAT','GAMMA_INT.DAT','EL_INEL.DAT')
-    rm(proj+'.xsc',proj+'-break-up.xsc',proj+'-transfer.xsc',proj+'-reac-mech.xsc')       
+    rm('CUMULPLOT.PS', 'ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp', 'OPTMAN.INP')
+    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out', 'OPTMAN.OUT', 'ECIS_VIB.inp')
+    rm('TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'warnings', 'INPUT', 'ECIS_SPH.inp')
+    rm('XS_DOWN.DAT', 'XSECTIONS.OUT', 'XS_UP.DAT', 'SENSITIVITY.INP', 'ECIS_SPH.out')
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT', 'TL')
+    rm('SENSITIVITY.MATRIX', 'NUBAR.DAT', 'GAMMA_INT.DAT', 'EL_INEL.DAT')
+    rm(proj + '.xsc', proj + '-break-up.xsc', proj + '-transfer.xsc', proj + '-reac-mech.xsc')
 
-    rm( glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
-        glob('*.LEG') + glob('TARGET-*.tl') )
-    
-    if (not os.path.exists(proj+'.inp')):
-        print("Input file : %s does not exist" % proj+'.inp')
+    rm(glob('fort.*') + glob('ecis06.*') + glob('*.leg') +
+       glob('*.LEG') + glob('TARGET-*.tl'))
+
+    if not os.path.exists(proj + '.inp'):
+        print("Input file : %s does not exist" % proj + '.inp')
         sys.exit(1)
-    
+
     # COPY Input files for our project.
     # EMPIRE wants files with certain names,
     # so we must move our files around.
-    #ln(proj+'.inp', 'INPUT.DAT')
-    cp(proj+'.inp', 'INPUT.DAT')
-    
+    # ln(proj+'.inp', 'INPUT.DAT')
+    cp(proj + '.inp', 'INPUT.DAT')
+
     # Get the Z,A of the target and projectile
-    projectileA, projectileZ = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[2].split()[:2] )
-    A, Z = map( lambda x: int(float(x)), open( proj+'.inp', 'r' ).readlines()[1].split()[:2] )
+    projectileA, projectileZ = map(lambda x: int(float(x)), open(proj + '.inp', 'r').readlines()[2].split()[:2])
+    A, Z = map(lambda x: int(float(x)), open(proj + '.inp', 'r').readlines()[1].split()[:2])
 
     # check if the file exists and has size > 0, if so keep it
 
     # make symlink to LEVELS file:
-    if not isEmpty(proj+'.lev'):
-        #ln(proj+'.lev', 'LEVELS')     
-        cp(proj+'.lev', 'LEVELS')     
-        print ('Using existing file with levels: %s' % proj+'.lev')
+    if not isEmpty(proj + '.lev'):
+        # ln(proj+'.lev', 'LEVELS')
+        cp(proj + '.lev', 'LEVELS')
+        print('Using existing file with levels: %s' % proj + '.lev')
     # make symlink to OMP files:
-    if not isEmpty(proj+'-omp.ripl'):
-        #ln(proj+'-omp.ripl', 'OMPAR.RIPL')
-        cp(proj+'-omp.ripl', 'OMPAR.RIPL')
-        print('Using existing file with optical model par: %s' % 
-                proj+'-omp.ripl')
-    if not isEmpty(proj+'-omp.dir'):
-        #ln(proj+'-omp.dir','OMPAR.DIR')
-        cp(proj+'-omp.dir','OMPAR.DIR')
-        print('Using existing file with optical model par (inel scatt): %s' % 
-                proj+'-omp.dir')
+    if not isEmpty(proj + '-omp.ripl'):
+        # ln(proj+'-omp.ripl', 'OMPAR.RIPL')
+        cp(proj + '-omp.ripl', 'OMPAR.RIPL')
+        print('Using existing file with optical model par: %s' %
+              proj + '-omp.ripl')
+    if not isEmpty(proj + '-omp.dir'):
+        # ln(proj+'-omp.dir','OMPAR.DIR')
+        cp(proj + '-omp.dir', 'OMPAR.DIR')
+        print('Using existing file with optical model par (inel scatt): %s' %
+              proj + '-omp.dir')
     # make symlink to transmission coefficient directory:
-    if os.path.isdir(proj+'-tl'):
-        ln(proj+'-tl','TL')
-        print('Using transmission coefficients stored in: %s' % proj+'-tl')
+    if os.path.isdir(proj + '-tl'):
+        ln(proj + '-tl', 'TL')
+        print('Using transmission coefficients stored in: %s' % proj + '-tl')
     else:
         try:
             shutil.rmtree('TL')
-        except OSError: #directory DNE
+        except OSError:  # directory DNE
             pass
-        os.mkdir('TL')  
-    if not isEmpty(proj+'-lev.col'):
-        #ln(proj+'-lev.col','TARGET_COLL.DAT')
-        cp(proj+'-lev.col','TARGET_COLL.DAT')
-        print('Using existing file with collective levels: %s' % 
-                proj+'-lev.col')
-    if not isEmpty(proj+'.fus'):
-        #ln(proj+'.fus','FUSION')
-        cp(proj+'.fus','FUSION')
-        print('Using existing file with fusion cross sections: %s' % 
-                proj+'.fus')
-    if not isEmpty(proj+'-inp.fis'):
-        #ln(proj+'-inp.fis','FISSION.INP')
-        cp(proj+'-inp.fis','FISSION.INP')
-        print('Using existing file with fission input: %s' % proj+'-inp.fis')
-    if not isEmpty(proj+'.exf'):
-        #ln(proj+'.exf','EXFOR.DAT')
-        cp(proj+'.exf','EXFOR.DAT')
-        print('Using existing file with experimental data (EXFOR): %s' % proj+'.exf')
-    if not isEmpty(proj+'-inp.sen'):
-        cp(proj+'-inp.sen','SENSITIVITY.INP')
-        print('File with sensitivity input exists: %s' % proj+'-inp.sen')
-    if not isEmpty(proj+'-mat.sen'):
-        cp(proj+'-mat.sen','SENSITIVITY.MATRIX')
-        print('File with sensitivity matrix exists: %s' % proj+'-mat.sen')
-    if not isEmpty(proj+'.rng'):
+        os.mkdir('TL')
+    if not isEmpty(proj + '-lev.col'):
+        # ln(proj+'-lev.col','TARGET_COLL.DAT')
+        cp(proj + '-lev.col', 'TARGET_COLL.DAT')
+        print('Using existing file with collective levels: %s' %
+              proj + '-lev.col')
+    if not isEmpty(proj + '.fus'):
+        # ln(proj+'.fus','FUSION')
+        cp(proj + '.fus', 'FUSION')
+        print('Using existing file with fusion cross sections: %s' %
+              proj + '.fus')
+    if not isEmpty(proj + '-inp.fis'):
+        # ln(proj+'-inp.fis','FISSION.INP')
+        cp(proj + '-inp.fis', 'FISSION.INP')
+        print('Using existing file with fission input: %s' % proj + '-inp.fis')
+    if not isEmpty(proj + '.exf'):
+        # ln(proj+'.exf','EXFOR.DAT')
+        cp(proj + '.exf', 'EXFOR.DAT')
+        print('Using existing file with experimental data (EXFOR): %s' % proj + '.exf')
+    if not isEmpty(proj + '-inp.sen'):
+        cp(proj + '-inp.sen', 'SENSITIVITY.INP')
+        print('File with sensitivity input exists: %s' % proj + '-inp.sen')
+    if not isEmpty(proj + '-mat.sen'):
+        cp(proj + '-mat.sen', 'SENSITIVITY.MATRIX')
+        print('File with sensitivity matrix exists: %s' % proj + '-mat.sen')
+    if not isEmpty(proj + '.rng'):
         print('Using existing random number generator seed')
-        cp(proj+'.rng','R250SEED.DAT')
+        cp(proj + '.rng', 'R250SEED.DAT')
     else:
         print('Default random number generator seed will be created if needed')
     #    open(proj+'.rng',mode='w').write( '42' ) # Nod to Douglas Adams 
-    #cp(proj+'.rng','R250SEED.DAT')
-    if not isEmpty(proj+'-nubar.dat'):
-        #ln(proj+'-nubar.dat','NUBAR.DAT')
-        cp(proj+'-nubar.dat','NUBAR.DAT')
-        print('File with evaluated NUBAR exists: %s' % proj+'-nubar.dat')  
-    else:    
+    # cp(proj+'.rng','R250SEED.DAT')
+    if not isEmpty(proj + '-nubar.dat'):
+        # ln(proj+'-nubar.dat','NUBAR.DAT')
+        cp(proj + '-nubar.dat', 'NUBAR.DAT')
+        print('File with evaluated NUBAR exists: %s' % proj + '-nubar.dat')
+    else:
         # Retrieving the nubar from ENDF evaluations
-        if Z >= 90: 
-            cmd = os.path.join(os.environ['EMPIREDIR'],'util','nubar','get_nubar ')
-            arg1= os.path.join(os.environ['EMPIREDIR'],'data','nubar.endf ')                
-            #print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, A, Z) )  
-            os.system('%s %s %i  %i' % (cmd, arg1, A, Z) )
+        if Z >= 90:
+            cmd = os.path.join(os.environ['EMPIREDIR'], 'util', 'nubar', 'get_nubar ')
+            arg1 = os.path.join(os.environ['EMPIREDIR'], 'data', 'nubar.endf ')
+            # print( 'Retrieving nubar command: %s %s %i %i' % (cmd, arg1, A, Z) )
+            os.system('%s %s %i  %i' % (cmd, arg1, A, Z))
             if not isEmpty('NUBAR.DAT'):
-                cp('NUBAR.DAT',proj+'-nubar.dat')
-                print('File with evaluated NUBAR created: %s' % proj+'-nubar.dat')  
-        #else:
+                cp('NUBAR.DAT', proj + '-nubar.dat')
+                print('File with evaluated NUBAR created: %s' % proj + '-nubar.dat')
+                # else:
         #    print( 'No evaluated nubar data for Z= %i in ENDF libraries' % Z )
 
     # Copying commentary files
-    poscom = [ '', 'top', 'mid', 'bottom' ]
-    index = [ '', '1', '2', '3' ]
-    for i in [ 1, 2, 3 ]: 
-       if not isEmpty(proj+'-com'+index[i]+'.txt'):
-           cp(proj+'-com'+index[i]+'.txt','COMMENTS'+index[i]+'.TXT')
-           print('File with '+poscom[i]+'-section commentaries exists: %s' % proj+'-com'+index[i]+'.txt')
+    poscom = ['', 'top', 'mid', 'bottom']
+    index = ['', '1', '2', '3']
+    for i in [1, 2, 3]:
+        if not isEmpty(proj + '-com' + index[i] + '.txt'):
+            cp(proj + '-com' + index[i] + '.txt', 'COMMENTS' + index[i] + '.TXT')
+            print('File with ' + poscom[i] + '-section commentaries exists: %s' % proj + '-com' + index[i] + '.txt')
 
-    if not isEmpty(proj+'.c4'):
-        if os.name=='posix':    # not windows
-            ln(proj+'.c4','C4.DAT')
+    if not isEmpty(proj + '.c4'):
+        if os.name == 'posix':  # not windows
+            ln(proj + '.c4', 'C4.DAT')
         else:
-            cp(proj+'.c4','C4.DAT')
-        print('Using existing file with experimental data (sorted C4): %s' % proj+'.c4')
-        if not isEmpty(proj+'-natural.c4'):
-            print('Experimental data for natural element exist %s' % proj+'-natural.c4')
+            cp(proj + '.c4', 'C4.DAT')
+        print('Using existing file with experimental data (sorted C4): %s' % proj + '.c4')
+        if not isEmpty(proj + '-natural.c4'):
+            print('Experimental data for natural element exist %s' % proj + '-natural.c4')
     else:
         # From parseC4.py, these are the ZA <-> directory name mappings  
         projectiles = {
-            0:'gammas',
-            1:'neutrons',
-            1001:'protons',
-            1002:'deuterons',
-            2003:'helions',
-            2004:'alphas',
-            'other':'other'
+            0: 'gammas',
+            1: 'neutrons',
+            1001: 'protons',
+            1002: 'deuterons',
+            2003: 'helions',
+            2004: 'alphas',
+            'other': 'other'
         }
 
         SKIPC4 = False
         targetState = None
- 
-        for line in open( proj+'.inp', 'r' ).readlines():
-            #print('line: %s' % line)
-            if  line.strip().upper().startswith('BENCHM'):
-                if (int(float(line.split()[1]))) == 1: 
+
+        for line in open(proj + '.inp', 'r').readlines():
+            # print('line: %s' % line)
+            if line.strip().upper().startswith('BENCHM'):
+                if (int(float(line.split()[1]))) == 1:
                     SKIPC4 = True
                     print('Benchmark calculation: experimental data not retrieved')
-            if  line.strip().upper().startswith('TRGLEV'): 
+            if line.strip().upper().startswith('TRGLEV'):
                 targetIsomer = int(float(line.split()[1]))
-                if targetIsomer > 1 : print('Reaction on excited target level %i' % targetIsomer)
+                if targetIsomer > 1:
+                    print('Reaction on excited target level %i' % targetIsomer)
 
         if not SKIPC4:
-          # Get the stuff we need to construct the correct name of the c4 file
-            el = getSymbol( Z )
-            incid = projectiles.get(projectileZ*1000+projectileA,'other') 
+            # Get the stuff we need to construct the correct name of the c4 file
+            el = getSymbol(Z)
+            incid = projectiles.get(projectileZ * 1000 + projectileA, 'other')
             print('\nRetrieval of experimental data for the following reaction:')
-            #print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )  
-            print('   %s  +  %s\n' % (incid, str(Z)+"-"+el+"-"+str(A)) )
+            # print('Proj: Zp=%i,Ap=%i on Target: Z=%i,A=%i' % (projectileZ,projectileA,Z,A) )
+            print('   %s  +  %s\n' % (incid, str(Z) + "-" + el + "-" + str(A)))
 
             # Construct the c4 file names
-            filePatternWithoutSuffixOrA = os.path.join( os.environ['EMPIREDIR'], 'EXFOR', projectiles.get( projectileZ*1000+projectileA, 'other' ), str(Z).zfill(3)+"_"+el+"_" )
-            natC4File = filePatternWithoutSuffixOrA+'000.c4'
-            sumC4File = filePatternWithoutSuffixOrA+str(A).zfill(3)+'.c4'
-            gsC4File  = filePatternWithoutSuffixOrA+str(A).zfill(3)+'_G.c4'
-            isoC4File = filePatternWithoutSuffixOrA+str(A).zfill(3)+'_M.c4'
+            filePatternWithoutSuffixOrA = os.path.join(os.environ['EMPIREDIR'], 'EXFOR',
+                                                       projectiles.get(projectileZ * 1000 + projectileA, 'other'),
+                                                       str(Z).zfill(3) + "_" + el + "_")
+            natC4File = filePatternWithoutSuffixOrA + '000.c4'
+            sumC4File = filePatternWithoutSuffixOrA + str(A).zfill(3) + '.c4'
+            gsC4File = filePatternWithoutSuffixOrA + str(A).zfill(3) + '_G.c4'
+            isoC4File = filePatternWithoutSuffixOrA + str(A).zfill(3) + '_M.c4'
 
-            if not isEmpty(natC4File): 
-                print('Experimental data found for reactions on the natural element %s :\n   %s' % (el,natC4File) )
-                cp(natC4File,proj+'-natural.c4')
-                print('Original C4 experimental data on the natural element saved as:\n   %s' % (proj+'-natural.c4'))  
-            if not isEmpty(sumC4File): print('Experimental data found for reactions on the isotope %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)),sumC4File) )
-            if not isEmpty(gsC4File):  print('Experimental data found for reactions on the ground  state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"g"),gsC4File) )
-            if not isEmpty(isoC4File): print('Experimental data found for reactions on the excited state of %s :\n   %s' % ((str(Z)+"-"+el+"-"+str(A)+"*"),isoC4File) )
-            print('\n')            
+            if not isEmpty(natC4File):
+                print('Experimental data found for reactions on the natural element %s :\n   %s' % (el, natC4File))
+                cp(natC4File, proj + '-natural.c4')
+                print('Original C4 experimental data on the natural element saved as:\n   %s' % (proj + '-natural.c4'))
+            if not isEmpty(sumC4File):
+                print('Experimental data found for reactions on the isotope %s :\n   %s' % (
+                    (str(Z) + "-" + el + "-" + str(A)), sumC4File))
+            if not isEmpty(gsC4File):
+                print(
+                    'Experimental data found for reactions on the ground  state of %s :\n   %s' % (
+                        (str(Z) + "-" + el + "-" + str(A) + "g"), gsC4File))
+            if not isEmpty(isoC4File):
+                print(
+                    'Experimental data found for reactions on the excited state of %s :\n   %s' % (
+                        (str(Z) + "-" + el + "-" + str(A) + "*"), isoC4File))
+            print('\n')
 
-          # Read in all the relevant c4 files and concatenate them
-            if targetState > 1: fList = [ sumC4File, isoC4File, natC4File]
-            else :              fList = [ sumC4File, gsC4File, natC4File]
+            # Read in all the relevant c4 files and concatenate them
+            if targetState > 1:
+                fList = [sumC4File, isoC4File, natC4File]
+            else:
+                fList = [sumC4File, gsC4File, natC4File]
             allTheC4FilesMerged = []
- 
-            for fPattern in fList: # loop through all the file patterns we just defined
-                for c4Filename in glob( fPattern ): # glob returns a list of filenames matching fPattern
-                    allTheC4FilesMerged += open( c4Filename, 'r' ).readlines() # open each filename and concatenate the file contents
-            
-            # save the concatenated files together in the two files we need later
-            open( proj+'-unsorted.c4', 'w' ).write( ''.join( allTheC4FilesMerged ) )
 
-            if isEmpty(proj+'.c4'): 
-                cp(proj+'-unsorted.c4',proj+'.c4')
+            for fPattern in fList:  # loop through all the file patterns we just defined
+                for c4Filename in glob(fPattern):  # glob returns a list of filenames matching fPattern
+                    allTheC4FilesMerged += open(c4Filename,
+                                                'r').readlines()  # open each filename and concatenate the file contents
+
+            # save the concatenated files together in the two files we need later
+            open(proj + '-unsorted.c4', 'w').write(''.join(allTheC4FilesMerged))
+
+            if isEmpty(proj + '.c4'):
+                cp(proj + '-unsorted.c4', proj + '.c4')
                 print('Error retrieving experimental data: C4 files not available in /EXFOR subdirectory')
 
                 # Sorting the newly created C4 file
-                cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-                os.system('%s %s' % (cmd, proj) )
+                cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'sortc4')
+                os.system('%s %s' % (cmd, proj))
 
-                print('Original C4 experimental data saved as: \n   %s' % (proj+'-unsorted.c4'))  
- 
-    # OK, the environment is set up, time to run EMPIRE:
-    print ('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
-    sys.stdout.flush() # print in correct order under 'qsub'
-    cmd = os.path.join(os.environ['EMPIREDIR'],'source','empire')
-    if os.name=='posix':    # not windows
+                print('Original C4 experimental data saved as: \n   %s' % (proj + '-unsorted.c4'))
+
+                # OK, the environment is set up, time to run EMPIRE:
+    print('\n%s  R U N N I N G  !! !  !   !    !     !' % proj)
+    sys.stdout.flush()  # print in correct order under 'qsub'
+    cmd = os.path.join(os.environ['EMPIREDIR'], 'source', 'empire')
+    if os.name == 'posix':  # not windows
         os.system('time nice "%s"' % cmd)
     else:
         os.system('"%s"' % cmd)
-    print ('DONE !!!')
-    #return 0    # to keep temporary files, for debugging
+    print('DONE !!!')
+    # return 0    # to keep temporary files, for debugging
 
-    #Move case-related files to the right place
-    mv('OUTPUT.DAT',proj+'.out')
-    mv('LIST.DAT',proj+'.lst')
+    # Move case-related files to the right place
+    mv('OUTPUT.DAT', proj + '.out')
+    mv('LIST.DAT', proj + '.lst')
     # Commented to avoid overwriting the existing file (not an output file)   
-    mv('LEVELS',proj+'.lev')
+    mv('LEVELS', proj + '.lev')
     if not isEmpty('GAMMA_INT.DAT'):
-        mv('GAMMA_INT.DAT',proj+'-gam-tr.xsc',0)  # no message if not present    
-    mv('EL_INEL.DAT',proj+'-preq.xsc',0)          # no message if not present    
-    mv('XSECTIONS.OUT',proj+'.xsc',0)             # no message if not present
-    mv('FISS_XS.OUT',proj+'-fiss.xsc',0)          # no message if not present
+        mv('GAMMA_INT.DAT', proj + '-gam-tr.xsc', False)  # no message if not present
+    mv('EL_INEL.DAT', proj + '-preq.xsc', False)  # no message if not present
+    mv('XSECTIONS.OUT', proj + '.xsc', False)  # no message if not present
+    mv('FISS_XS.OUT', proj + '-fiss.xsc', False)  # no message if not present
     # Commented to avoid overwriting the existing file (not an output file)   
-    mv('FISSION.INP',proj+'-inp.fis',0)           # no message if not present
-    mv('CUMULPLOT.PS',proj+'-cum.ps',0)           # no message if not present     
+    mv('FISSION.INP', proj + '-inp.fis', False)  # no message if not present
+    mv('CUMULPLOT.PS', proj + '-cum.ps', False)  # no message if not present
 
-    if not (os.path.isdir(proj+'-tl')):
-       mv('TL',proj+'-tl')
-    #if os.path.islink('TL'):
-     #   os.unlink('TL')
+    if not (os.path.isdir(proj + '-tl')):
+        mv('TL', proj + '-tl')
+    # if os.path.islink('TL'):
+    #   os.unlink('TL')
 
     # avoid overwriting, not INPUT files    
     if not isEmpty('OMPAR.RIPL'):
-        cp('OMPAR.RIPL',proj+'-omp.ripl')
+        cp('OMPAR.RIPL', proj + '-omp.ripl')
     if not isEmpty('OMPAR.DIR'):
-        cp('OMPAR.DIR',proj+'-omp.dir')
-        
+        cp('OMPAR.DIR', proj + '-omp.dir')
+
     # FISSION.INP    
-    #if not isEmpty(proj+'-inp.fis'):
+    # if not isEmpty(proj+'-inp.fis'):
     #    cp('FISSION.INP',proj+'-inp.fis',0) # no message if not present
 
-    if isEmpty(proj+'-lev.col'):
+    if isEmpty(proj + '-lev.col'):
         if not isEmpty('TARGET_COLL.DAT'):
-            mv('TARGET_COLL.DAT',proj+'-lev.col')
-            tfile = open(proj+'-lev.col','a')   # append mode
+            mv('TARGET_COLL.DAT', proj + '-lev.col')
+            tfile = open(proj + '-lev.col', 'a')  # append mode
             tfile.write('\n\n\n')
             tfile.write('-------------------------------------------------------------- \n')
             tfile.write('NOTE: this line and those below will not be used by EMPIRE. \n')
@@ -321,27 +346,27 @@ def runE(proj):
             tfile.write('-------------------------------------------------------------- \n')
             tfile.write('\n\n')
             if not isEmpty('TARGET_COLL_RIPL.DAT'):
-                tfile1 = open('TARGET_COLL_RIPL.DAT','r').readlines()
+                tfile1 = open('TARGET_COLL_RIPL.DAT', 'r').readlines()
                 # emulate 'cat >> '
                 for tline in tfile1:
                     tfile.write(tline)
             tfile.close()
         else:
             if not isEmpty('TARGET_COLL_RIPL.DAT'):
-                mv('TARGET_COLL_RIPL.DAT',proj+'-lev.col')
-    
+                mv('TARGET_COLL_RIPL.DAT', proj + '-lev.col')
+
     # beware, these commands make assumptions about the system:
-    #if not isEmpty('CUMULPLOT.PS'):
-        # no exception if ps2ps not found, just a message:
-        # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
-        # os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
+    # if not isEmpty('CUMULPLOT.PS'):
+    # no exception if ps2ps not found, just a message:
+    # os.system('ps2ps -r9200 CUMULPLOT.PS %s-cum.ps' % proj)
+    # os.system('mv CUMULPLOT.PS %s-cum.ps' % proj)
     #    mv('CUMULPLOT.PS',proj+'-cum.ps',0)         # no message if not present   
     #    if os.path.exists(proj+'-cum.ps'):
-            # read preferences from .Xrunrc:
+    # read preferences from .Xrunrc:
     #        prefs = open( os.path.join(os.environ['EMPIREDIR'],'.Xrunrc')
     #                ,'r').readlines()
     #        psviewer = prefs[3].strip()
-            # open ps file properly:
+    # open ps file properly:
     #        if sys.platform == 'darwin':
     #            if '.app' in psviewer:
     #                os.system('open -a %s %s' % (psviewer,proj+'-cum.ps'))
@@ -352,104 +377,106 @@ def runE(proj):
     #        else:
     #            # probably windows...
     #            print ('Unknown system trying to open ps file')
-    
+
     if not isEmpty('SYSTEMATICS.TXT'):
-        mv('SYSTEMATICS.TXT',proj+'.sys')
+        mv('SYSTEMATICS.TXT', proj + '.sys')
     if not isEmpty('SENSITIVITY.MATRIX'):
-        mv('SENSITIVITY.MATRIX',proj+'-mat.sen')
- 
+        mv('SENSITIVITY.MATRIX', proj + '-mat.sen')
+
     if isEmpty('EMPIRE.OK'):
-        print('\n\n*************************************************************** \nEmpire stopped !! Check the message above and the EMPIRE listing file %s' % proj+'.lst') 
-        sys.exit(2) # return 2    
-    
+        print(
+            '\n\n*************************************************************** \nEmpire stopped !! Check the '
+            'message above and the EMPIRE listing file %s' % proj + '.lst')
+        sys.exit(2)  # return 2
+
     # move files, no warning if files DNE:
     if not isEmpty('OMP_A.DAT'):
-        mv('OMP_A.DAT',proj+'-aOMP.lst',0)
+        mv('OMP_A.DAT', proj + '-aOMP.lst', False)
     if not isEmpty('COVAR-PAR.DAT'):
-        mv('COVAR-PAR.DAT',proj+'-covar-par.dat',0)
+        mv('COVAR-PAR.DAT', proj + '-covar-par.dat', False)
     if not isEmpty('TOTCOR.DAT'):
-        mv('TOTCOR.DAT',proj+'-totcor.out',0)
+        mv('TOTCOR.DAT', proj + '-totcor.out', False)
     if not isEmpty('CN-LEV-XS.DAT'):
-        mv('CN-LEV-XS.DAT',proj+'-CN-lev.xsc',0)
+        mv('CN-LEV-XS.DAT', proj + '-CN-lev.xsc', False)
 
     if not isEmpty('ECIS_SPH.inp'):
-        mv('ECIS_SPH.inp',proj+'-ecis-sph.inp',0)
+        mv('ECIS_SPH.inp', proj + '-ecis-sph.inp', False)
     if not isEmpty('ECIS_SPH.out'):
-        mv('ECIS_SPH.out',proj+'-ecis-sph.out',0)
+        mv('ECIS_SPH.out', proj + '-ecis-sph.out', False)
     if not isEmpty('ECIS_VIB.inp'):
-        mv('ECIS_VIB.inp',proj+'-ecis-vib.inp',0)
+        mv('ECIS_VIB.inp', proj + '-ecis-vib.inp', False)
     if not isEmpty('ECIS_VIB.out'):
-        mv('ECIS_VIB.out',proj+'-ecis-vib.out',0)
+        mv('ECIS_VIB.out', proj + '-ecis-vib.out', False)
     if not isEmpty('ECIS_ROT.inp'):
-        mv('ECIS_ROT.inp',proj+'-ecis-rot.inp',0)
+        mv('ECIS_ROT.inp', proj + '-ecis-rot.inp', False)
     if not isEmpty('ECIS_ROT.out'):
-        mv('ECIS_ROT.out',proj+'-ecis-rot.out',0)
+        mv('ECIS_ROT.out', proj + '-ecis-rot.out', False)
     if not isEmpty('ECIS_VIBROT.inp'):
-        mv('ECIS_VIBROT.inp',proj+'-ecis-vibrot.inp',0)
+        mv('ECIS_VIBROT.inp', proj + '-ecis-vibrot.inp', False)
     if not isEmpty('ECIS_VIBROT.out'):
-        mv('ECIS_VIBROT.out',proj+'-ecis-vibrot.out',0)
+        mv('ECIS_VIBROT.out', proj + '-ecis-vibrot.out', False)
     if not isEmpty('OPTMAN.INP'):
-        mv('OPTMAN.INP',proj+'-optman.inp',0)
+        mv('OPTMAN.INP', proj + '-optman.inp', False)
     if not isEmpty('OPTMAN.OUT'):
-        mv('OPTMAN.OUT',proj+'-optman.out',0)
-    #if isEmpty(proj+'.-default.rng'):
+        mv('OPTMAN.OUT', proj + '-optman.out', False)
+    # if isEmpty(proj+'.-default.rng'):
     #    mv('R250SEED-default.DAT',proj+'-default.rng')           
     #    print('Saving the default RNG seed')
     if not isEmpty('R250SEED.DAT'):
-        mv('R250SEED.DAT',proj+'.rng')
+        mv('R250SEED.DAT', proj + '.rng')
     # fission chances and spectra for one energy run:
     if not isEmpty('FISS_XS.ZVD'):
-        mv('FISS_XS.ZVD',proj+'-fiss.zvd',0)
+        mv('FISS_XS.ZVD', proj + '-fiss.zvd', False)
     if not isEmpty('FISSION.OUT'):
-        mv('FISSION.OUT',proj+'-fiss.out',0)
+        mv('FISSION.OUT', proj + '-fiss.out', False)
     if not isEmpty('FIT.OUT'):
-        mv('FIT.OUT',proj+'-ompfit.lst',0)
+        mv('FIT.OUT', proj + '-ompfit.lst', False)
     if not isEmpty('PFNS.OUT'):
-        mv('PFNS.OUT',proj+'-pfns.out',0)
+        mv('PFNS.OUT', proj + '-pfns.out', False)
     if not isEmpty('PFNM.OUT'):
-        mv('PFNM.OUT',proj+'-pfnm.out',0)
+        mv('PFNM.OUT', proj + '-pfnm.out', False)
     if not isEmpty('ddhms.out'):
-        mv('ddhms.out',proj+'-hms.lst',0)
+        mv('ddhms.out', proj + '-hms.lst', False)
 
     # level-density plots:
     for LDfile in glob("LD_*.zvd"):
-        mv(LDfile,proj+'-'+LDfile,0)
+        mv(LDfile, proj + '-' + LDfile, False)
     for LDfile in glob("NL_*.zvd"):
-        mv(LDfile,proj+'-'+LDfile,0)
+        mv(LDfile, proj + '-' + LDfile, False)
 
     # DE (spectra) plots:
     for LDfile in glob("DE*.zvd"):
-        mv(LDfile,proj+'-'+LDfile,0)
+        mv(LDfile, proj + '-' + LDfile, False)
 
     # DD (double differential plots):
     for LDfile in glob("DD*.zvd"):
-        mv(LDfile,proj+'-'+LDfile,0)
+        mv(LDfile, proj + '-' + LDfile, False)
 
     # Extract Warnings from the list file:
     # this is portable version of 'grep WARNING infile > outfile
-    listfile = open(proj+'.lst','r').readlines()
-    warnfile = open(proj+'.war','w')
+    listfile = open(proj + '.lst', 'r').readlines()
+    warnfile = open(proj + '.war', 'w')
     for line in listfile:
         if 'WARNING' in line:
             warnfile.write(line)
         if 'ERROR' in line:
             warnfile.write(line)
     warnfile.close()
-    
+
     # Delete temporal Input files
-    rm('LEVELS','FISSION.INP','C4.DAT','EXFOR.DAT','NUBAR.DAT')
+    rm('LEVELS', 'FISSION.INP', 'C4.DAT', 'EXFOR.DAT', 'NUBAR.DAT')
     # Delete Temporary files
-    rm('FUSION', 'fort.70', 'fort.66', 'fort.16','fort.34', 'fort.35', 'fort.36')
-    rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp','OPTMAN.INP','TAPE16','spec')
-    rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')   
-    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out','OPTMAN.OUT','ddhms.out')
-    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT','MU_BAR.LST','MU_BAR.TMP')
-    rm( glob('TARGET-*.tl'), glob('ecis06.*'))
-    rm('TARGET.LEV','OMP_A.DAT','angdis.p92','COVAR-PAR.DAT','ecis06_INC.LST')
-    rm('TOTCOR.DAT','CN-LEV-XS.DAT')    
-    rm('C4SORTM.INP')    
-    rm('c4sort.scr')        
-    rm('C4SORT.TMP')        
+    rm('FUSION', 'fort.70', 'fort.66', 'fort.16', 'fort.34', 'fort.35', 'fort.36')
+    rm('ecVIB.inp', 'ecROT.inp', 'ecVIBROT.inp', 'OPTMAN.INP', 'TAPE16', 'spec')
+    rm('ECIS_ROT.inp', 'ECIS_VIB.inp', 'ECIS_VIBROT.inp')
+    rm('ECIS_ROT.out', 'ECIS_VIB.out', 'ECIS_VIBROT.out', 'OPTMAN.OUT', 'ddhms.out')
+    rm('OMPAR.RIPL', 'TARGET_COLL.RIPL', 'TARGET_COLL.DAT', 'TARGET_COLL_RIPL.DAT', 'MU_BAR.LST', 'MU_BAR.TMP')
+    rm(glob('TARGET-*.tl'), glob('ecis06.*'))
+    rm('TARGET.LEV', 'OMP_A.DAT', 'angdis.p92', 'COVAR-PAR.DAT', 'ecis06_INC.LST')
+    rm('TOTCOR.DAT', 'CN-LEV-XS.DAT')
+    rm('C4SORTM.INP')
+    rm('c4sort.scr')
+    rm('C4SORT.TMP')
     rm('INPUT')
     rm('INPUT.DAT')
     rm('OMPdata.dat')
@@ -457,12 +484,12 @@ def runE(proj):
     rm('TAPE15', 'TAPE16', 'TAPE66')
     rm('file99')
     rm('angdis.pnt', 'angdis.cur')
-    rm('ccm.CS','dwba.CS','INCIDENT.CS', 'ccm.TLJ','dwba.TLJ',
-            'INCIDENT.TLJ','ccm.ANG','dwba.ANG','INCIDENT.ANG',
-            'ccm.ICS','dwba.ICS','INCIDENT.ICS','ccm.LEG','dwba.LEG',
-            'INCIDENT.LEG') 
-    rm('ecis06.ang','ecis06.cs','ecis06.dat','ecis06.ics','ecis06.pol',
-            'ecis06.tlj','ecis06.leg','ecis06.esp','ecis06.inp')
+    rm('ccm.CS', 'dwba.CS', 'INCIDENT.CS', 'ccm.TLJ', 'dwba.TLJ',
+       'INCIDENT.TLJ', 'ccm.ANG', 'dwba.ANG', 'INCIDENT.ANG',
+       'ccm.ICS', 'dwba.ICS', 'INCIDENT.ICS', 'ccm.LEG', 'dwba.LEG',
+       'INCIDENT.LEG')
+    rm('ecis06.ang', 'ecis06.cs', 'ecis06.dat', 'ecis06.ics', 'ecis06.pol',
+       'ecis06.tlj', 'ecis06.leg', 'ecis06.esp', 'ecis06.inp')
     rm('ecSPH.inp')
     rm('ECIS_SPH.out')
     rm('FITIN.DAT')
@@ -470,114 +497,115 @@ def runE(proj):
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
     rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
-#   rm('OPTFIT.CAL')
-#    rm('OMPAR0.DIR', 'INPUT0.DAT')
+    #   rm('OPTFIT.CAL')
+    #    rm('OMPAR0.DIR', 'INPUT0.DAT')
     rm('OMPAR.DIR')
     rm('LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
-    rm('COMMENTS1.TXT','COMMENTS2.TXT','COMMENTS3.TXT')
-    
-    #if not isEmpty(proj+'.exf'):
+    rm('COMMENTS1.TXT', 'COMMENTS2.TXT', 'COMMENTS3.TXT')
+
+    # if not isEmpty(proj+'.exf'):
     #    if isEmpty(proj+'.c4'):
     #        # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
-            
+
     #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
     #        os.system('"%s" %s' % (cmd,proj) )
-            
+
     #        # RUN c4sort TO SORT C4 DATA
-            
+
     #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
     #        os.system('"%s" %s' % (cmd,proj) )
-    
+
     # REMOVE EMPTY FILES:
-    
-    if isEmpty(proj+'-omp.dir'):
-        rm(proj+'-omp.dir')
-    if isEmpty(proj+'-lev.col'):
-        rm(proj+'-lev.col')
-    if isEmpty(proj+'.war'):
-        rm(proj+'.war')
-    if isEmpty(proj+'-ecis.in'):
-        rm(proj+'-ecis.in')
-    if isEmpty(proj+'-ecis.out'):
-        rm(proj+'-ecis.out')
-    if isEmpty(proj+'-inp.fis'):
-        rm(proj+'-inp.fis')
-    if isEmpty(proj+'-pfns.out'):
-        rm(proj+'-pfns.out')
-    if isEmpty(proj+'-MC.par'):
-        rm(proj+'-MC.par')
+
+    if isEmpty(proj + '-omp.dir'):
+        rm(proj + '-omp.dir')
+    if isEmpty(proj + '-lev.col'):
+        rm(proj + '-lev.col')
+    if isEmpty(proj + '.war'):
+        rm(proj + '.war')
+    if isEmpty(proj + '-ecis.in'):
+        rm(proj + '-ecis.in')
+    if isEmpty(proj + '-ecis.out'):
+        rm(proj + '-ecis.out')
+    if isEmpty(proj + '-inp.fis'):
+        rm(proj + '-inp.fis')
+    if isEmpty(proj + '-pfns.out'):
+        rm(proj + '-pfns.out')
+    if isEmpty(proj + '-MC.par'):
+        rm(proj + '-MC.par')
     if isEmpty('FISSION.OUT'):
         rm('FISSION.OUT')
 
     # Produce ZVD files from cross-section tables:
-    if not isEmpty(proj+'.xsc'):
-        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','cs2zvd')
+    if not isEmpty(proj + '.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'cs2zvd')
         os.system('"%s" %s' % (cmd, proj))
 
     if not isEmpty('BREAK-UP-XS.DAT'):
-        mv('BREAK-UP-XS.DAT',proj+'-break-up.xsc',0)  # no message if not present
+        mv('BREAK-UP-XS.DAT', proj + '-break-up.xsc', False)  # no message if not present
     if not isEmpty('TRANSFER-XS.DAT'):
-      mv('TRANSFER-XS.DAT',proj+'-transfer.xsc',0)  # no message if not present
+        mv('TRANSFER-XS.DAT', proj + '-transfer.xsc', False)  # no message if not present
     if not isEmpty('REAC-MECH.DAT'):
-      mv('REAC-MECH.DAT',proj+'-reac-mech.xsc',0) # no message if not present 
+        mv('REAC-MECH.DAT', proj + '-reac-mech.xsc', False)  # no message if not present
 
-    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')     
+    rm('BREAK-UP-XS.DAT', 'REAC-MECH.DAT', 'TRANSFER-XS.DAT')
 
-    if isEmpty(proj+'-break-up.zvd'):
-        rm(proj+'-break-up.zvd')  
-    if isEmpty(proj+'-transfer.zvd'):
-      rm(proj+'-transfer.zvd') 
-    if isEmpty(proj+'-reac-mech.zvd'):
-      rm(proj+'-reac-mech.zvd')     
+    if isEmpty(proj + '-break-up.zvd'):
+        rm(proj + '-break-up.zvd')
+    if isEmpty(proj + '-transfer.zvd'):
+        rm(proj + '-transfer.zvd')
+    if isEmpty(proj + '-reac-mech.zvd'):
+        rm(proj + '-reac-mech.zvd')
 
-    # Produce ZVD files from fission cross-section tables:
-    if not isEmpty(proj+'-fiss.xsc'):
-        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','fis2zvd')
+        # Produce ZVD files from fission cross-section tables:
+    if not isEmpty(proj + '-fiss.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'fis2zvd')
         os.system('"%s" %s' % (cmd, proj))
 
     # Produce ZVD files for nng 
-    if not isEmpty(proj+'.c5'):
-        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c5-nng2zvd')
+    if not isEmpty(proj + '.c5'):
+        cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'c5-nng2zvd')
         os.system('"%s" %s' % (cmd, proj))
 
     # Produce ZVD files for nng 
-    if not isEmpty(proj+'-gam-tr.xsc'):
-        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','gamsort2zvd')
+    if not isEmpty(proj + '-gam-tr.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'gamsort2zvd')
         os.system('"%s" %s' % (cmd, proj))
         # nng plots:
         for LDfile in glob("znng_*.zvd"):
-            mv(LDfile,proj+'-'+LDfile,0)
+            mv(LDfile, proj + '-' + LDfile, False)
         for LDfile in glob("z2ng_*.zvd"):
-            mv(LDfile,proj+'-'+LDfile,0)
+            mv(LDfile, proj + '-' + LDfile, False)
         for LDfile in glob("z3ng_*.zvd"):
-            mv(LDfile,proj+'-'+LDfile,0)
+            mv(LDfile, proj + '-' + LDfile, False)
         for LDfile in glob("z4ng_*.zvd"):
-            mv(LDfile,proj+'-'+LDfile,0)
+            mv(LDfile, proj + '-' + LDfile, False)
 
     # Produce ZVD files for elastic, nonelastic and preequilibrium emission 
-    if not isEmpty(proj+'-preq.xsc'):
-        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','preq2zvd')
+    if not isEmpty(proj + '-preq.xsc'):
+        cmd = os.path.join(os.environ['EMPIREDIR'], 'scripts', 'preq2zvd')
         os.system('"%s" %s' % (cmd, proj))
-    
-    sys.exit(0) # return 0
+
+    sys.exit(0)  # return 0
+
 
 def splashscreen():
     splash = [
-    ' ',\
-    ' EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 ',\
-    ' E      MM  MM  P   P  I  R   R  E             33 ',\
-    ' EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 ',\
-    ' E      M    M  P      I  R  R   E              3 ',\
-    ' EEEEE  M    M  P      I  R   R  EEEEE      33333 ',\
-    ' ',\
-    ' '.join( get_version()[0] ) + ' ( release ' + get_version()[1] +' )',\
-    ' ',\
-    ' ']
-    return '\n'.join( [ x.center(60) for x in splash ] )
+        ' ',
+        ' EEEEE  M    M  PPPP   I  RRRR   EEEEE      33333 ',
+        ' E      MM  MM  P   P  I  R   R  E             33 ',
+        ' EEE    M MM M  PPPP   I  RRRR   EEE    =   33333 ',
+        ' E      M    M  P      I  R  R   E              3 ',
+        ' EEEEE  M    M  P      I  R   R  EEEEE      33333 ',
+        ' ',
+        ' '.join(get_version()[0]) + ' ( release ' + get_version()[1] + ' )',
+        ' ',
+        ' ']
+    return '\n'.join([x.center(60) for x in splash])
 
 
-#from bash.py:
+# from bash.py:
 def rm(*args, **kwargs):
     """
     remove file or list of files, silent on error unless verbose=True
@@ -593,13 +621,13 @@ def rm(*args, **kwargs):
                     os.remove(el)
                 except OSError as e:
                     if 'verbose' in kwargs.keys() and kwargs['verbose']:
-                        print (e)
+                        print(e)
         else:
             try:
                 os.remove(f)
             except OSError as e:
                 if 'verbose' in kwargs.keys() and kwargs['verbose']:
-                    print (e)
+                    print(e)
 
 
 def mv(source, target, verbose=True):
@@ -609,11 +637,11 @@ def mv(source, target, verbose=True):
     """
     try:
         shutil.move(source, target)
-        #os.rename(source, target)  # no work on Windows
-    #except OSError, e:
+        # os.rename(source, target)  # no work on Windows
+    # except OSError, e:
     except IOError as e:
         if verbose:
-            print (e)
+            print(e)
     """
     try:
         shutil.move(source, target) # not present before v2.3
@@ -631,7 +659,8 @@ def cp(source, target, verbose=True):
         shutil.copy(source, target)
     except IOError as e:
         if verbose:
-            print (e)
+            print(e)
+
 
 def ln(source, target, verbose=True):
     """
@@ -641,7 +670,7 @@ def ln(source, target, verbose=True):
         os.symlink(source, target)
     except OSError as e:
         if verbose:
-            print (e)
+            print(e)
     except AttributeError:  # no symlink on windows
         mv(source, target, verbose)
 
@@ -651,27 +680,25 @@ def isEmpty(filename):
     emulate the [ ! -s filename ] test in bash (doesn't exist or is empty)
     also 'not isEmpty()' should be equivalent to [ -s filename ]
     """
-    return (not os.path.exists(filename)) or (os.path.getsize(filename)==0)
-    
+    return (not os.path.exists(filename)) or (os.path.getsize(filename) == 0)
 
 
 if __name__ == '__main__':
-    
-    print( splashscreen() )
-    
-    if len(sys.argv)>=2:
+
+    print(splashscreen())
+
+    if len(sys.argv) >= 2:
         proj = sys.argv[1]
-        if os.path.exists(proj+'.inp'):
-            print ("Using existing file with input: %s" % proj+'.inp' )
+        if os.path.exists(proj + '.inp'):
+            print("Using existing file with input: %s" % proj + '.inp')
         else:
-            print ("Input file %s does not exist" % proj+'.inp' )
+            print("Input file %s does not exist" % proj + '.inp')
             sys.exit(1)
-    
-    if len(sys.argv)<2:
-        print ("Inputs ready to run:\n")
+
+    if len(sys.argv) < 2:
+        print("Inputs ready to run:\n")
         for a in glob('*.inp'):
-            print ("%s\n" % a)
-        proj = raw_input(
-                "Choose one of the above (without the .inp extension): ")
-    
+            print("%s\n" % a)
+        proj = input("Choose one of the above (without the .inp extension): ")
+
     runE(proj)
