@@ -176,14 +176,19 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
             else: os.symlink(tln,ntl)
 
         log = join(dir, "empire.log")
-        cmd = "qsub -N %s%s -o %s -l ncpus=1 -v dir=%s,file=%s,energy=%s"
+#        cmd = "qsub -N %s%s -o %s -l ncpus=1 -v dir=%s,file=%s,energy=%s"
+        cmd = "sbatch --job-name=%s%s --output=%s --mincpus=1 --export=dir=%s,file=%s,energy=%s"
         if clean: cmd += ",clean=Y"
         if len(jbid) != 0: cmd += " -W depend=afterok:" + jbid[ene]
-        if hold: cmd += " -h"
-        if mail: cmd += " -m a "
-        else:    cmd += " -m n "
+        if hold: cmd += " -H"
+        if mail: cmd += " --mail-user='arcilla@bnl.gov' --mail-type=FAIL"
+        else:    cmd += " "
         cmd = cmd % (jnm, ene, log, dir, proj, ene)
         cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
+
+        print 'Final cmd string: %s'  % cmd 
+        print ''
+
         jp = Popen(cmd.split(), stdout=PIPE)
         job = jp.stdout.read().strip()
         jp.stdout.close()
@@ -335,7 +340,7 @@ def clean(inputFile):
         name = proj+"-"+e.strip()
         try:
             shutil.rmtree(name)
-        except OSError, e
+        except OSError, e:
             print e
 
 

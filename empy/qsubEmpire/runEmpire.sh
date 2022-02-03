@@ -1,7 +1,29 @@
-#PBS -m a
-#PBS -l nodes=1#shared
-#PBS -S /bin/bash
-#PBS -j oe
+#!/bin/bash
+## Script to run EMPIRE on the new NNDC Linux cluster nlc2
+## using SLURM Workload Manager/Job Scheduler
+## Based on MCNP6.2 input run_mcnp_mpi.sh.serial from Arantxa
+
+## Set partition/queue to use for submitting jobs
+#SBATCH --partition=SERIAL
+
+## Set name of job
+#SBATCH --job-name=%x.%j
+
+## Mail alert at start, end and abortion of execution
+#####SBATCH --mail-type='END,FAIL'
+
+## Send mail to this address
+#####SBATCH --mail-user='gnobre@bnl.gov'
+
+## Set the name of the output file
+#SBATCH --output=%x.%j.out
+
+########SBATCH --ntasks-per-node=36
+
+##########PBS -m a
+##########PBS -l nodes=1#shared
+##########PBS -S /bin/bash
+##########PBS -j oe
 #
 # could use -m e above to mail me when script finishes
 # right now only mails on abort
@@ -21,14 +43,15 @@ if [ -z $dir ]; then
   exit
 fi
 
-if [ -z $PBS_JOBID ]; then
-  echo " PBS JOB_ID not defined!"
+if [ -z ${SLURM_JOBID} ]; then
+  echo " SLURM JOB_ID not defined!"
   echo " Was this run from qsubEmpire?"
   exit
 fi
 
 # setup working directory on local scratch disk
-work=/dev/shm/${PBS_JOBID%%.*}
+
+work=/dev/shm/${SLURM_JOBID}
 if [ -e $work ]; then
         rm -r $work
 fi
