@@ -61,7 +61,8 @@ cp -r $dir/* ./
 
 # RUN X-SEC CALCULATIONS & EXFOR PROCESSING
 
-~/empire/scripts/runE $file
+#~/empire/scripts/runE $file
+$EMPIREDIR/scripts/runE $file
 
 # check if everything completed properly:
 if [ ! `tail -n 2 $file.out | grep -c "SUCCESSFULLY"` = 1 ]; then

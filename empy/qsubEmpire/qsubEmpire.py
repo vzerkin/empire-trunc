@@ -184,7 +184,8 @@ def runInput(inputFile, clean=False, mail=False, hold=False, jnm="emp_", tldir="
         if mail: cmd += " --mail-user='arcilla@bnl.gov' --mail-type=FAIL"
         else:    cmd += " "
         cmd = cmd % (jnm, ene, log, dir, proj, ene)
-        cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
+#       cmd += fullName(os.environ['HOME']+"/bin/runEmpire.sh")
+        cmd += fullName(os.environ['EMPIREDIR']+"/empy/qsubEmpire/runEmpire.sh")
 
         print 'Final cmd string: %s'  % cmd 
         print ''
