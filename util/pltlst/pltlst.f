@@ -30,6 +30,7 @@ C-V          - Extend the grid of forced DDX entries.
 C-V  2016/03 Add MF203/MT102 for alpha (SigC/SigF)
 C-V          Add "target" qualifier to limit list to selected target.
 C-V  2017/03 Define ejectile for MF5/MT18 (PFGS).
+C-V  2022/02 Add MF=15 to the list.
 C-M
 C-M  Manual for Program PLTLST
 C-M  -------------------------
@@ -223,7 +224,7 @@ C* Read the first C4 record
       IF(MT0.EQ. 801) IZP0=2004
       IF(MT0.EQ.9000) IZP0=PRB0
       IF(MT0.EQ.51 .OR. MT0.EQ.601 .OR. MT0.EQ.801) LVL0=1
-      IF(PRC0 .NE. 0) THEN
+      IF(PRC0 .NE. 0 .OR. PRD0.NE.0) THEN
 C*      -- Define level energy or range (if applicable)
         LVL0=1
         ELV0=PRC0
@@ -288,7 +289,7 @@ C* Process all C4 records and check for changes
       IF(MT1.EQ. 601) IZP1=1001
       IF(MT1.EQ. 801) IZP1=2004
       IF(MT1.EQ.51 .OR. MT1.EQ.601 .OR. MT1.EQ.801) LVL1=1
-      IF(PRC1 .NE. 0) THEN
+      IF(PRC1 .NE. 0 .OR. PRD1.NE.0) THEN
 C*      -- Define level energy or range (if applicable)
         LVL1=1
         ELV1=PRC1
@@ -296,9 +297,14 @@ C*      -- Define level energy or range (if applicable)
         IF(PRD1.GT.0) THEN
           ELV1=MAX(PRC1,PRD1)
 C...      IF(MT1.NE.9000) ELZ1=MIN(PRC1,PRD1)
-          IF(MT1.NE.9000 .OR. (MT1.EQ.9000 .AND. MF1.EQ.4) ) THEN
+          IF(MT1.NE.9000) THEN
             ELZ1=MIN(PRC1,PRD1)
             IF(CHC1.EQ.' E2') ELZ1=ELV1-ELZ1
+          ELSE
+            IF(MF1.EQ.4) THEN
+              ELV1=ENR1
+              ELZ1=ENR1-PRD1
+            END IF
           END IF
         END IF
       END IF
@@ -391,8 +397,9 @@ C* Mark ang.distr. MF 4 where level energy changes and save angle
           KAN(NAN)=1
         END IF
       END IF
-C* Mark spectra MF 5 where outgoing particle angle changes
+C* Mark spectra MF 5, 15 where outgoing particle angle changes
       IF(MF1 .EQ. 5 .AND. PRA1.NE.PRA0) GO TO 40
+      IF(MF1 .EQ.15 .AND. PRA1.NE.PRA0) GO TO 40
 C* Mark spectra MF 6 where outgoing particle angle changes
       IF(MF1 .EQ. 6 .AND. PRA1.NE.PRA0) GO TO 40
 C* Mark spectra where outgoing particle changes
@@ -412,8 +419,8 @@ c...
 C...  if(mf1.eq.3 .and. mt1.eq.102) print *,'passed 40'
 c...
       IF(MF0.NE.1 .AND. MF0.NE.3 .AND. MF0.NE.10 .AND.
-     &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.6  .AND.
-     &   MF0.NE.203) GO TO 60
+     &   MF0.NE.4 .AND. MF0.NE.5 .AND. MF0.NE.15 .AND.
+     &   MF0.NE.6 .AND. MF0.NE.203) GO TO 60
 C* - MF 203 is currently supported for MT102 only (alpha=SigC/SigF)
 C...  IF(MF0.EQ.203) GO TO 60
 C...  IF(MF0.EQ.203 .AND. IZA0.EQ.90232) GO TO 60
@@ -439,7 +446,7 @@ C* Consider different cases
       MMF=MF0
       MMT=MT0
       IF     (MF0.EQ.3) THEN
-C* - MF3 discrete level energy (if present)
+C*      -- MF3 discrete level energy (if present)
         IF(LVL0.NE.0) THEN
           WRITE(CH10(3),'(1P,E10.4E1)') ELV0
           IF(ELZ0.GT.0) THEN
@@ -462,7 +469,7 @@ C* - MF3 discrete level energy (if present)
             END IF
         END IF
       ELSE IF(MF0.EQ.4) THEN
-C* - MF4 incident particle energy and level
+C*      -- MF4 incident particle energy and level
         WRITE(CH10(1),'(1P,E10.3E1)') ENR0
         IF(LVL0.NE.0) THEN
           WRITE(CH10(3),'(1P,E10.4E1)') ELV0
@@ -471,8 +478,8 @@ C* - MF4 incident particle energy and level
             CH10(3)(1:1)='+'
           END IF
         END IF
-      ELSE IF(MF0.EQ.5) THEN
-C* - MF 5 incident particle energy
+      ELSE IF(MF0.EQ.5 .OR. MF0.EQ.15) THEN
+C* - MF 5,15 incident particle energy
         WRITE(CH10(1),'(1P,E10.3E1)') ENR0
       ELSE IF(MF0.EQ.6) THEN
 C* - MF 6 incident particle energy and outgoing particle angle
