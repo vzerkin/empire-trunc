@@ -1,5 +1,3 @@
-#define EMPMODE
-C
 C      VERSION 16 (January 2016, PARALLEL CALCULATIONS USING OPENMP
 C      INSTRUCTIONS, LANE CONSISTENT COULOMB CORRECTION 
 C      WITH DISPERSIVE OPTICAL POTENTIAL RELATIONS, NON-AXIAL AND
@@ -376,7 +374,7 @@ C     *******************************************************
      
       
       INCLUDE 'PRIVCOM21.FOR'
-      INCLUDE 'PRIVCOM23.FOR'
+      INCLUDE 'PRIVCOM4.FOR'
       
       INCLUDE 'PRIVCOM20.FOR'
 
@@ -395,7 +393,7 @@ C
 C     FROM SUBROUTINE KNCOE   
 C     COMMON/SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
 C     FROM SUBROUTINE KNDIT      
-Cpola     COMMON/INRMi/BB42,GAMG,DELG
+C     COMMON/INRMi/BB42,GAMG,DELG
 C     FROM SUBROUTINE KNDIT      
 C     COMMON/ALFAi/AGSIC(40) 
 C
@@ -787,7 +785,7 @@ C
 !$OMP*  COPYIN(/RAD/,/QNB/)                             ! PRIVCOM 
 
 !$OMP*  COPYIN(/LOFAC/)                                ! 
-!$OMP*  COPYIN(/INOUT/)                                ! 
+!$OMP*  COPYIN(/INOUT/)                                !                        
 
 C
 !$OMP DO SCHEDULE(DYNAMIC,1)

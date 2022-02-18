@@ -2788,9 +2788,11 @@ C     ***********************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
 C     BELOW CARD IS NECESSARY IF MEMORY IS LESS THAN 32Mb
       DOUBLE PRECISION WPSL,PL,PSL,PR,PI,PVC,PRC
-      REAL*16 ABR1,ABI1,ANR1,ANI1,ABR2,ABI2,ANR2,ANI2,
-     *CFR1,CFI1,CFR2,CFI2,CRC,CIC,ARA,AIA,ZN
-      REAL*16 CT,CY,APA,BPA,AL,AM,BEN,BTN
+c       NEXT DECLARATIONS MODED TO PRIVCOM.FOR EXCEPT FOR ZN,AL,AM,BEN,BTN
+c     REAL*16 ABR1,ABI1,ANR1,ANI1,ABR2,ABI2,ANR2,ANI2,
+c    *CFR1,CFI1,CFR2,CFI2,CRC,CIC,ARA,AIA,ZN
+c     REAL*16 CT,CY,APA,BPA,AL,AM,BEN,BTN
+      REAL*16 ZN,AL,AM,BEN,BTN ! LOCALS
       INCLUDE 'PRIVCOM.FOR'
       INCLUDE 'PRIVCOM7.FOR'  
       INCLUDE 'PRIVCOM10.FOR' 
@@ -3511,8 +3513,9 @@ C     ***********************************************************
       SUBROUTINE MATCH
 C     ***********************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z)
-      REAL*16 ABR1,ABI1,ANR1,ANI1,ABR2,ABI2,ANR2,ANI2,
-     *CFR1,CFI1,CFR2,CFI2,CRC,CIC,ARA,AIA 
+c         MOVED TO PRIVCOM.FOR
+c      REAL*16 ABR1,ABI1,ANR1,ANI1,ABR2,ABI2,ANR2,ANI2,
+c     *CFR1,CFI1,CFR2,CFI2,CRC,CIC,ARA,AIA 
       INCLUDE 'PRIVCOM.FOR'
       ZNR=ABR2*ANR1-ABI2*ANI1-ABR1*ANR2+ABI1*ANI2
       ZNI=ABI2*ANR1+ABR2*ANI1-ABR1*ANI2-ABI1*ANR2
@@ -3536,7 +3539,9 @@ C     ***********************************************************
       SUBROUTINE PADE
 C     ***********************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
-      REAL*16 AMA,CY,CT,BP,BPA,APA
+c         MOVED TO PRIVCOM.FOR EXCEPT FOR BP
+c      REAL*16 AMA,CY,CT,BP,BPA,APA
+      REAL*16 BP ! LOCAL
       INCLUDE 'PRIVCOM.FOR'
      
 C     PRINT 100,CT
@@ -3585,7 +3590,9 @@ C     ***********************************************************
       SUBROUTINE MATIN
 C     ***********************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z)
-      REAL*16 AMA,PIV,ELEM
+c      MOVED TO PRIVCOM.FOR EXCEPT FOR PIV, ELEM
+c      REAL*16 AMA,PIV,ELEM
+      REAL*16 PIV,ELEM ! LOCALS
       INCLUDE 'PRIVCOM.FOR'
       DO 60 K=1,MAM
       K1=(K-1)*MAM
@@ -5768,7 +5775,7 @@ C     *****************************************************************
       SUBROUTINE KLEGO1
 C     *****************************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
-      INCLUDE 'PRIVCOM23.FOR' ! LOFAC
+      INCLUDE 'PRIVCOM4.FOR' ! LOFAC
       INCLUDE 'PRIVCOM1.FOR'
 C     COMMON/KG/J1,J2,M1,M2,J,M,AKG
 
@@ -6371,8 +6378,8 @@ C     *******************************************************
 C     *******************************************************
 C     AUTHOR: R. Capote, March 2005
 C     
-C     * $Date: 2022-02-02 22:26:33 +0100 (Mi, 02 Feb 2022) $
-C     * $Id: ccrd.f 5318 2022-02-02 21:26:33Z gnobre $
+C     * $Date: 2022-02-18 17:31:36 +0100 (Fr, 18 Feb 2022) $
+C     * $Id: ccrd.f 5322 2022-02-18 16:31:36Z gnobre $
 C
 C     GIVES THE TIME ELAPSED SINCE THE FIRST CALL
 C     Note: Elapsed time must be less than one month
