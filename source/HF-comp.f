@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5289 $
+Ccc   * $Rev: 5325 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2021-06-19 01:09:57 +0200 (Sa, 19 Jun 2021) $
+Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 C
       SUBROUTINE ACCUM(Iec,Nnuc,Nnur,Nejc,Xnor)
       implicit none
@@ -899,6 +899,12 @@ C
          nejc = 2
       ELSEIF (nnuc.EQ.mt849) THEN
          nejc = 3
+      ELSEIF (nnuc.EQ.mt699) THEN
+         nejc = 4
+      ELSEIF (nnuc.EQ.mt749) THEN
+         nejc = 5
+      ELSEIF (nnuc.EQ.mt799) THEN
+         nejc = 6
       ENDIF
       IF (IOUt.GT.2) WRITE (8,99005) 
 99005 FORMAT (1X,/,1X,27('*'),/,1X,'Discrete gamma transitions ',/,
@@ -1566,7 +1572,7 @@ C-----temperature fade-out of the shell correction *** done *****
       ekinm = EX(Iec,Nnuc) - fisba
 C
       IF (ekinm.LT.0.0D0) RETURN
-      knm = AINT(ekinm/DE + 1.001)
+      knm = INT(ekinm/DE + 1.001)
       erest = ekinm - (knm - 1)*DE
 C-----IEC to g.s.
       sumgs = TLF(ekinm)

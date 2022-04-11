@@ -1,11 +1,12 @@
-Ccc   * $Rev: 4978 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2017-08-21 08:05:06 +0200 (Mo, 21 Aug 2017) $
+Ccc   * $Rev: 5325 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 
       SUBROUTINE write_ENDF_spectra(totcorr,corrmsd,
      & xscclow,xsinl,xsmsc,tothms,totemis)
 
       use nubar_reader
+      use HFdecay, ONLY: printRecoil
 
       implicit none
       INCLUDE "dimension.h"
@@ -148,11 +149,11 @@ C           Skipping recoils for exclusive reactions
      &         CYCLE    !(n,2p)
 
             IF (ENDf(nnuc).EQ.1 .AND. NINT(A(1))-NINT(A(Nnuc)).EQ.3
-     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.3 .AND. NENdf.GE.3) 		    
+     &        .AND. NINT(Z(1))-NINT(Z(Nnuc)).EQ.3 .AND. NENdf.GE.3)
      &         CYCLE    !(n,3p)
 
 C           Print everything else if non-zero recoil
-            CALL PRINT_RECOIL(nnuc,reactionx) 
+            CALL printRecoil(nnuc,reactionx) 
 
           ENDDO !over decaying nuclei in ENDF spectra printout
          ENDIF
@@ -266,7 +267,7 @@ C    &    TOTcs*TOTred*totcorr - ELAcs*ELAred,
      &      CSPrd(1),csinel,
      &      (CSPrd(nnuc),nnuc=3,min(nuc_print,max_prn)),
      &      SUM(xcross(3,:,:)),                             !Alpha production
-     &      SUM(CSinc(:)), SUMlev_alf                      !MT5, MT800+MT801+...)
+     &      SUM(CSinc(:)), SUMlev_alf                     !MT5, MT800+MT801+...)
             WRITE(107,'(1P,E10.4,1x,1P,95E12.5)') EINl, 
      &      TOTcs*TOTred*totcorr,                           !total = reaction + shape-el
      &      ELAcs*ELAred  +  PIx4*ELCncs,                   !CE added to elastic
@@ -648,8 +649,8 @@ C  Summary of exclusive emission cross sections
 
         IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
-        WRITE (12,'('' Deuteron emission cross sections (mb) ZAP= 1002'',
-     1              ''  Total ='',f8.2, '' mb'')') totsum
+        WRITE (12,'('' Deuteron emission cross sections (mb) ZAP= 1002''
+     1              ,''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
         DO jz = 0, jzmx 
@@ -690,8 +691,8 @@ C  Summary of exclusive emission cross sections
 
         IF (totsum.ge.0.01) THEN
         WRITE (12,*) ' '
-        WRITE (12,'('' Helium-3 emission cross sections (mb) ZAP= 2003'',
-     1              ''  Total ='',f8.2, '' mb'')') totsum
+        WRITE (12,'('' Helium-3 emission cross sections (mb) ZAP= 2003''
+     1              ,''  Total ='',f8.2, '' mb'')') totsum
         WRITE (12,*) ' '
         WRITE (12,'(''  Z / N '',20(i6,2x))') (ia-jn, jn = 0,jnmx)
 

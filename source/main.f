@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5222 $
+Ccc   * $Rev: 5325 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-06-22 00:15:03 +0200 (Mo, 22 Jun 2020) $
+Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -15,6 +15,7 @@ Ccc   ********************************************************************
       USE empcess
       USE angular_momentum
       USE TLJs, ONLY: MAX_cc_mod
+      USE HFdecay, ONLY: HF_decay
 
       Implicit none
 
@@ -47,21 +48,19 @@ C-----
         CALL INPUT()
 
         CALL EMPAXS(LHMs, NDAng, NDECSE, NNuct, 
-     1                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
+     >                        NDEX_D, NDEJCD, NDECSED, NEXclusive, NDLV)
         call open_xs_files()
 C-----
-C-----  Calculate reaction cross section and its spin distribution
+C-----  Incident channel - calculate reaction cross section and its spin distribution
 C-----
         CALL MARENG(0,0,nnurec,nejcec)
-C       write(*,*) ' after fusion MAX_cc_mod=',MAX_cc_mod       
-C
         IF(CSFus.LE.0) THEN
           write(*,*) 
           write(*,*) ' CSFus=',CSFus
           write(8,*) 
           write(8,*) ' CSFus=',CSFus
-          WRITE(8,*) ' ERROR; Absorption cross section equal zero !'
-          STOP       ' ERROR; Absorption cross section equal zero !'
+          WRITE(8,*) ' ERROR; Absorption cross section unphysical !'
+          STOP       ' ERROR; Absorption cross section unphysical !'
         ENDIF
 C 
         totcorr = 1.d0
@@ -69,29 +68,23 @@ C       Inelastic cross sections read only for particles (not photons or HI)
         IF(NINT(AEJc(0)).GT.0 .AND. NINT(AEJc(0)).LE.4)
      >    call get_ecis_inelastic(nejcec,nnurec,ncollx,xscclow,totcorr)
 C
-C       Preequilibrium 
+C-------Preequilibrium 
 C
         CALL EMPIRE_PREEQ(xsinl,xsmsc,tothms,totemis,corrmsd,
-     >    totcorr,nvwful)
+     >                    totcorr,nvwful)
 
         IF (nvwful) CYCLE ! Skipping HF 
 
-C       WRITE(151,*) 'Einc=',EINl
-
         POPmax(1) = CSFus*1.0E-25
+
 C-------Start DO loop over decaying nuclei
         DO nnuc = 1, NNUcd
-
           IF(QPRod(nnuc).LT.-999.d0) CYCLE
           CALL calc_fission(nnuc)
-
           CALL HF_decay(ncollx,nnuc,nnurec,nejcec,iret,totcorr)
-                              
-        IF(iret.gt.0) GOTO 10 ! GOTO 1155 
-        
-        ENDDO
-C-------END of DO loop over decaying nuclei
-C
+          IF(iret.gt.0) GOTO 10 ! GOTO 1155 
+        ENDDO ! over decaying nuclei
+
         CALL write_xs()
 
         CALL write_ENDF_spectra(totcorr,corrmsd,
@@ -105,10 +98,11 @@ C
         ELSE
           CALL OMPFIT_read()
         ENDIF
+
         CALL new_energy_calc(epre)
-C
+
         CALL EMPDAXS
-C
+
       ENDDO
 
       RETURN
@@ -204,9 +198,12 @@ C---- Initialization of PFNS calculations
 
 C-----Locate positions of ENDF MT-numbers 2, 91, 649, and 849
       CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
-      CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)
-      CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)
-      CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)
+      CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)          ! (n,n_cont)
+      CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)         ! (n,p_cont)
+      CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)         ! (n,a_cont)
+      CALL WHERE(IZA(1) - IZAejc(4),mt699,iloc)         ! (n,d_cont)
+      CALL WHERE(IZA(1) - IZAejc(5),mt749,iloc)         ! (n,t_cont)
+      CALL WHERE(IZA(1) - IZAejc(6),mt799,iloc)         ! (n,3He_cont)
 C-----Locate residual nuclei after CN decay
       NREs(0) = 1
       DO nejc = 1, NEJcm
@@ -400,87 +397,71 @@ C     CLOSING FILES
 C
       CLOSE (5)  ! INPUT.DAT
       IF(FUSREAD) CLOSE (11)  ! FUSION
-C     CLOSE (13)              ! RIPL levels
+      CLOSE (13)              ! RIPL levels
       IF (FILevel) CLOSE (14) ! LEVELS
 C     CLOSE (15,STATUS = 'delete')
 C     CLOSE (16,STATUS = 'delete')
 C     CLOSE (23)   ! not used 
+      CLOSE (18)
       CLOSE (24)   ! empire/data
-
+      CLOSE (26)
       CLOSE (29)
       CLOSE (33)
       IF (FITomp.LT.0) CLOSE (40) ! OPTFIT.CAL
       CLOSE (41)   ! XSECTIONS.OUT
+      CLOSE (53)   ! LOW-ENERGY.DAT
+      CLOSE (95)   ! COVAR-PAR.DAT
+C     CLOSE (102)
+      CLOSE (72)
+      CLOSE (98)    ! FISS_XS.OUT
       IF(NNG_xs.gt.0) CLOSE (104) ! 'GAMMA_INT.DAT'
       CLOSE (107)  ! 'EL_INEL.DAT'
       CLOSE (108)  ! 'TOTCOR.DAT'
       CLOSE (110)  ! 'CN-LEV-XS.DAT'
-
-      IF (ltransfer) CLOSE (117)  ! 'TRANSFER-XS.DAT'
-      IF (lbreakup)  CLOSE (113)  ! 'BREAK-UP-XS.DAT'
-      IF (ltransfer .or. lbreakup)  CLOSE (114) ! 'REAC-MECH.DAT'
-
-C     IF(DEGa.GT.0) THEN
-C       CLOSE (42)
-C     ELSE
-C       CLOSE (42,STATUS = 'delete')
-C     ENDIF
-
-      CLOSE(53)   ! LOW-ENERGY.DAT
-C     CLOSE(58)
-
-C     CLOSE(151)  ! Cont-ANIS-check.dat
-
-C     CLOSE (66,STATUS = 'delete')  ! MSD-orion
-      
       IF(FISspe.GT.0) THEN
         CLOSE (114) ! PFNS.OUT
         CLOSE (115) ! PFNM.OUT
       ENDIF
-      CLOSE (98)    ! FISS_XS.OUT
-
-      IF (IOPran.NE.0) then
-C----------Saving random seeds
-           ftmp = grand()
-           OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
-           write(94,*)  indexf, indexb
-           DO i = 1, 250
-             write(94,*) buffer(i)
-           ENDDO
-           CLOSE(94)
-C
-           WRITE (8,*)
-           WRITE (12,*)
-
-           WRITE (8 ,*) ' Saving RNG status :'
-           WRITE (12,*) ' Saving RNG status :'
-           WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                         
-           WRITE (8 ,*) 'RNG buffer(1)    ', buffer(1)
-           WRITE (8 ,*) 'RNG buffer(250)  ', buffer(250)
-           WRITE (12,*) 'RNG indexes     ', indexf, indexb                          
-           WRITE (12,*) 'RNG buffer(1)   ', buffer(1)
-           WRITE (12,*) 'RNG buffer(250) ', buffer(250)
-
-           WRITE (8,*)
-           WRITE (12,*)
-
-           WRITE (95,'(A2)') '# '
-           WRITE (95,'(A21)') '# Saving RNG status :'
-           WRITE (95,'(A21,2(1x,I10))') 
-     &     '# RNG indexes        ', indexf, indexb                            
-           WRITE (95,'(A21,2(1x,I10))') 
-     &     '# RNG buffer(1)      ', buffer(1)                           
-           WRITE (95,'(A21,2(1x,I10))') 
-     &     '# RNG buffer(250)    ', buffer(250)                         
-      ENDIF
-
-      CLOSE(95)  ! COVAR-PAR.DAT
-C     CLOSE(102)
-
+      IF (ltransfer) CLOSE (117)  ! 'TRANSFER-XS.DAT'
+      IF (lbreakup)  CLOSE (113)  ! 'BREAK-UP-XS.DAT'
+      IF (ltransfer .or. lbreakup)  CLOSE (114) ! 'REAC-MECH.DAT'
       IF (SFACT.GT.0) CLOSE(781)  ! 'S-FACTOR.DAT'
 
-      CALL EMPDAXS
+C     CLOSE(58)
+C     CLOSE(151)  ! Cont-ANIS-check.dat
+C     CLOSE (66,STATUS = 'delete')  ! MSD-orion
 
+      IF (IOPran.NE.0) then
+C--------Saving random seeds
+         ftmp = grand()
+         OPEN(94,file='R250SEED.DAT',status='UNKNOWN')
+         write(94,*)  indexf, indexb
+         DO i = 1, 250
+           write(94,*) buffer(i)
+         ENDDO
+         CLOSE(94)
+         WRITE (12,*)
+         WRITE (8 ,*) ' Saving RNG status :'
+         WRITE (12,*) ' Saving RNG status :'
+         WRITE (8 ,*) 'RNG indexes      ', indexf, indexb                         
+         WRITE (8 ,*) 'RNG buffer(1)    ', buffer(1)
+         WRITE (8 ,*) 'RNG buffer(250)  ', buffer(250)
+         WRITE (12,*) 'RNG indexes     ', indexf, indexb                          
+         WRITE (12,*) 'RNG buffer(1)   ', buffer(1)
+         WRITE (12,*) 'RNG buffer(250) ', buffer(250)
+         WRITE (8,*)
+         WRITE (12,*)
+         WRITE (95,'(A2)') '# '
+         WRITE (95,'(A21)') '# Saving RNG status :'
+         WRITE (95,'(A21,2(1x,I10))') 
+     &   '# RNG indexes        ', indexf, indexb                            
+         WRITE (95,'(A21,2(1x,I10))') 
+     &   '# RNG buffer(1)      ', buffer(1)                           
+         WRITE (95,'(A21,2(1x,I10))') 
+     &   '# RNG buffer(250)    ', buffer(250)                         
+      ENDIF
+      
+      CALL EMPDAXS
 
       WRITE (12,*) ' '
       WRITE (12,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
@@ -488,23 +469,25 @@ C     CLOSE(102)
       WRITE (*,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
       WRITE (8,*) ' '
       WRITE (8,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
-
       CALL THORA (8)
       CALL THORA(12)
+      
+      CLOSE (8)  ! output print
+      CLOSE (12)      
 
-      CLOSE (8)
-      CLOSE (12)
 
       OPEN(222,file='EMPIRE.OK') 
       WRITE (222,*) ' CALCULATIONS COMPLETED SUCCESSFULLY'
       CLOSE(222)
       
       IF(KALman.gt.0) THEN
+         CALL Clear_end_of_calc()
          new_par = 1
+         FIRst_ein = .TRUE.                                   
          RETURN
       ENDIF
-      STOP ' ' 
 
+      STOP ' ' 
       END
 
       SUBROUTINE normal_read(new_par)

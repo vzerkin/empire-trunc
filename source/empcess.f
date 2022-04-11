@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4745 $
-Ccc   * $Author: bcarlson $
-Ccc   * $Date: 2016-08-26 04:20:30 +0200 (Fr, 26 Aug 2016) $
+Ccc   * $Rev: 5325 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 
       MODULE empcess
 
@@ -78,7 +78,7 @@ C      CSEahms = 0.0d0
 
       if(allocated(CSDirsav)) deallocate(CSDirsav)
 
-      ALLOCATE(CSDirsav(ndlv,3),STAT=myalloc)
+      ALLOCATE(CSDirsav(ndlv,6),STAT=myalloc)
       IF(myalloc.NE.0) THEN
         WRITE(8,*)  
      &    'ERROR: Insufficient memory for CSDirsav'

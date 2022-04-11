@@ -1,6 +1,6 @@
-! $Rev: 5248 $
+! $Rev: 5325 $
 ! $Author: mwherman $
-! $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
+! $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -10,7 +10,7 @@
      & SR_Ham_hw,SR_Ham_amb0,SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,       &
      & SR_Ham_bet4,SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3,     &
      & SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0 ,SR_Ham_bb32,SR_Ham_gamde,     &
-     & SR_Ham_dpar,SR_Ham_gshape,SUMlev_alf
+     & SR_Ham_dpar,SR_Ham_gshape, SUMlev_alf
 !
       DOUBLE PRECISION A(0:ndnuc), ADIv, AEJc(0:ndejc), AFIs(nfparab),  &
      &                 AMAss(0:ndnuc), AMPi, AMUmev, AMUneu, AMUpro,    &
@@ -63,14 +63,14 @@
      &                 PL_CNcont(0:(2*NDLW), NDEX),                     &
      &                 gamm_tr(10), fiss_tr(NDLW,2)
 
-      INTEGER MT2, MT91, MT649, MT849, PESpin, NNG_xs, LHRtw,           &
+      INTEGER MT2, MT91, MT649, MT699, MT749, MT799, MT849,             &
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,   &
      &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe, &
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,      &
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
      &        IOUt,IPFdis(nftrans,nfparab),ENDf(0:ndnuc), IDDfig(3),    &
-     &                                     ENDfp(0:ndejc,0:ndnuc),      &
+     &        PESpin, NNG_xs, LHRtw, ENDfp(0:ndejc,0:ndnuc),            &
      &        IRElat(0:ndejc,0:ndnuc), IWArn, IX4ret, IZA(0:ndnuc),     &
      &        IZAejc(0:ndejc), JCUtcoll, JSTab(ndnuc), KEY_gdrgfl,      &
      &        KEY_shape, KTRlom(0:ndejc,0:ndnuc), KTRompcc, LEVtarg,    &
@@ -267,7 +267,8 @@
      &                 SR_Ham_amg0,SR_Ham_gam0,SR_Ham_bet0,SR_Ham_bet4, &
      &                 SR_Ham_bb42,SR_Ham_gamg,SR_Ham_delg,SR_Ham_bet3, &
      &                 SR_Ham_et0,SR_Ham_amu0,SR_Ham_hw0,SR_Ham_bb32,   &
-     &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape,SUMlev_alf
+     &                 SR_Ham_gamde,SR_Ham_dpar,SR_Ham_gshape,          &
+     &                 SUMlev_alf
 !
 !                      This array is only used in EXCLUSIVEL, commented &  
 !    &                 , POPcselv
@@ -289,7 +290,8 @@
      &                  NENdf, NEMn, NEMp, NEMa, NEXclusive, ENDfp,     &
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
-     &                  MT649, MT849, IOPran, NPRIm_g, PESpin, NNG_xs,  &
+     &                  MT649, MT699, MT749, MT799, MT849,              &
+     &                  IOPran, NPRIm_g, PESpin, NNG_xs,                &
      &                  PL_lmax, SFAct, INTerf, IPArcov, IDDfig,        &
      &                  D_Klv, D_Llv,  D_nno, IHFnew,                   &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr

@@ -1,9 +1,10 @@
-Ccc   * $Rev: 4903 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-07 22:43:51 +0200 (Fr, 07 Apr 2017) $
+Ccc   * $Rev: 5325 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 
       SUBROUTINE write_xs()
-      USE empcess, ONLY: POPcsea, CSDirsav, check_DL 
+      USE empcess, ONLY: POPcsea, CSDirsav, check_DL
+      USE HFdecay, ONLY: printBinaryRecoil, printRecoil 
 
       implicit none
       INCLUDE "dimension.h"
@@ -166,6 +167,9 @@ C------------------First emission reactions
 C------------------(discrete levels part)
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
+     &                 (nnuc.EQ.mt699 .AND. nejc.EQ.4) .OR.
+     &                 (nnuc.EQ.mt749 .AND. nejc.EQ.5) .OR.
+     &                 (nnuc.EQ.mt799 .AND. nejc.EQ.6) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
                      DO il = 1, NLV(nnuc)  ! discrete levels
 C                       espec is the outgoing energy corresponding to the level "il"
@@ -332,6 +336,9 @@ C                  Integrated spectrum
 C
                    IF ((nnuc.EQ.mt91  .AND. nejc.EQ.1) .OR.
      &                 (nnuc.EQ.mt649 .AND. nejc.EQ.2) .OR.
+     &                 (nnuc.EQ.mt699 .AND. nejc.EQ.4) .OR.
+     &                 (nnuc.EQ.mt749 .AND. nejc.EQ.5) .OR.
+     &                 (nnuc.EQ.mt799 .AND. nejc.EQ.6) .OR.
      &                 (nnuc.EQ.mt849 .AND. nejc.EQ.3) ) THEN
                      WRITE (12,
      &              '(4x,''Lev #'',5x,''Integrated Discrete Spectra'')')
@@ -432,7 +439,9 @@ C                      espec is the outgoing energy corresponding to the level "
                    IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
                    IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
                    IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
-
+                   IF (nnuc.EQ.mt699) xsdisc = CSDirlev(1,4)
+                   IF (nnuc.EQ.mt749) xsdisc = CSDirlev(1,5)
+                   IF (nnuc.EQ.mt799) xsdisc = CSDirlev(1,6)
                    cmul = dtmp/(CSPrd(nnuc)-xsdisc)
 
                    WRITE(12,'(10x,
@@ -505,6 +514,9 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
                      IF (nnuc.EQ.mt91 ) xsdisc = CSDirlev(1,1)
                      IF (nnuc.EQ.mt649) xsdisc = CSDirlev(1,2)
                      IF (nnuc.EQ.mt849) xsdisc = CSDirlev(1,3)
+                     IF (nnuc.EQ.mt699) xsdisc = CSDirlev(1,4)
+                     IF (nnuc.EQ.mt749) xsdisc = CSDirlev(1,5)
+                     IF (nnuc.EQ.mt799) xsdisc = CSDirlev(1,6)
                      WRITE(12,'(2x,'' g discr.levels       '',G12.6)') 
      &                 xsdisc
 
@@ -537,7 +549,7 @@ C    &               min((EMAx(nnur)-Q(nejc,nnur))/recorp,
               IF(RECoil.gt.0 .AND. (NINT(A(1))-NINT(A(Nnuc)).LE.8)) then
                 
                 IF (NINT(A(1))-NINT(A(Nnuc)).EQ.1 .AND. NENdf.GE.1) THEN 
-                  CALL PRINT_BIN_RECOIL(nnuc,REAction(nnuc)) !  n or p emission
+                  CALL printBinaryRecoil(nnuc,REAction(nnuc)) !  n or p emission
 C                 write(*,*) 'print_bin_recoil :',trim(REAction(nnuc)),
 C    &               NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF
@@ -545,7 +557,7 @@ C    &               NINT(A(nnuc)),NINT(Z(nnuc))
                 IF (NINT(A(1))-NINT(A(Nnuc)).LE.NENdf .AND.
      &			NINT(A(1))-NINT(A(Nnuc)).GT.1 .AND.
      &            NINT(Z(1))-NINT(Z(Nnuc)).EQ.0) THEN  
-                  CALL PRINT_RECOIL(nnuc,REAction(nnuc))	!(n,xn), x>1
+                  CALL printRecoil(nnuc,REAction(nnuc))	!(n,xn), x>1
 C                 write(*,*) 'print_recoil     :',trim(REAction(nnuc)),
 C    &               NINT(A(nnuc)),NINT(Z(nnuc))
                 ENDIF

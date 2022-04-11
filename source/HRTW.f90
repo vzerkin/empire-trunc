@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5261 $
+    ! $Rev: 5325 $
     ! $Author: mwherman $
-    ! $Date: 2020-12-10 08:03:51 +0100 (Do, 10 Dez 2020) $
+    ! $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -25,71 +25,71 @@ MODULE width_fluct
     INCLUDE 'dimension.h'
     INCLUDE 'global.h'
 
-!   LOGICAL*1 superr/.true./
+    !   LOGICAL*1 superr/.true./
     LOGICAL*1 superr/.false./
 
     PRIVATE
 
     TYPE channel
-        INTEGER l         ! ejectile l
-        REAL*8 j          ! ejectile j
-        REAL*8 t          ! ejectile Tlj
-        REAL*8 ti1        ! temporary Tlj used for iteration
-        REAL*8 ti2        ! temporary Tlj used for iteration
-        REAL*8 rho        ! final level density for this channel
-        REAL*8 eef        ! elastic enhancement factor
-        INTEGER nejc      ! ejectile index (nejc)
-        INTEGER kres      ! populated energy bin (negative for discrete levels, g.s. -1,...)
-        REAL*8 xjrs       ! spin of the populated state
-        INTEGER jres      ! spin index of the populated state
-        INTEGER pres      ! parity index of the populated state
+        INTEGER l         !! ejectile l
+        REAL*8 j          !! ejectile j
+        REAL*8 t          !! ejectile Tlj
+        REAL*8 ti1        !! temporary Tlj used for iteration
+        REAL*8 ti2        !! temporary Tlj used for iteration
+        REAL*8 rho        !! final level density for this channel
+        REAL*8 eef        !! elastic enhancement factor
+        INTEGER nejc      !! ejectile index (nejc)
+        INTEGER kres      !! populated energy bin (negative for discrete levels, g.s. -1,...)
+        REAL*8 xjrs       !! spin of the populated state
+        INTEGER jres      !! spin index of the populated state
+        INTEGER pres      !! parity index of the populated state
     END TYPE channel
 
     TYPE numchnl
-        INTEGER neut     ! number of neutron channels, i.e., number of neutron entries in the 'channel' type
-        INTEGER part     ! number of particle channels, i.e., number of particle entries in the 'channel' type
-        INTEGER coll     ! position of the first (low) coupled level channel
-        INTEGER colh     ! position of the last coupled channel;
-                         ! coupled channels are embedded in particle channels coll <= colh <=part
-        INTEGER elal     ! position of the first (low) elastic channel
-        INTEGER elah     ! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
-        INTEGER fiss     ! effective number of fission channels
-        INTEGER gamm     ! effective number of gamma channels
+        INTEGER neut     !! number of neutron channels, i.e., number of neutron entries in the 'channel' type
+        INTEGER part     !! number of particle channels, i.e., number of particle entries in the 'channel' type
+        INTEGER coll     !! position of the first (low) coupled level channel
+        INTEGER colh     !! position of the last coupled channel;
+                         !! coupled channels are embedded in particle channels coll <= colh <=part
+        INTEGER elal     !! position of the first (low) elastic channel
+        INTEGER elah     !! position of the last elastic channel; elastics are embedded in particle channels elal<=elah<=part
+        INTEGER fiss     !! effective number of fission channels
+        INTEGER gamm     !! effective number of gamma channels
     END TYPE numchnl
 
     TYPE fusion
-        INTEGER nout      ! position of the corresponding outgoing channel in outchnl
-        INTEGER l         ! projectile l
-        REAL*8 j          ! projectile j
-        REAL*8 t          ! projectile Tlj (in the EW rotated or original space) 
-        REAL*8 tlj        ! projectile Tlj (in the original space)
-        REAL*8 sig        ! absorption x-section for this channel
+        INTEGER nout      !! position of the corresponding outgoing channel in outchnl
+        INTEGER l         !! projectile l
+        REAL*8 j          !! projectile j
+        REAL*8 t          !! projectile Tlj (in the EW rotated or original space) 
+        REAL*8 tlj        !! projectile Tlj (in the original space)
+        REAL*8 sig        !! absorption x-section for this channel
     END TYPE fusion
 
-    INTEGER, PARAMETER :: ndhrtw1 = 20000        ! max. number of channels in the HRTW decay for a given CN J-pi
-    INTEGER, PARAMETER :: ndhrtw2 = 500          ! max. number of absorption channels for a given CN J-pi
+    INTEGER, PARAMETER :: ndhrtw1 = 20000        !! max. number of channels in the HRTW decay for a given CN J-pi
+    INTEGER, PARAMETER :: ndhrtw2 = 500          !! max. number of absorption channels for a given CN J-pi
 
-    REAL*8 :: H_Sumtl      ! Sum of strong Tlj
-    REAL*8 :: H_Sumtls     ! Sum of strong Tlj**2
-    REAL*8 :: H_Sweak      ! Sum of weak Tlj
-    REAL*8 :: H_Sweaks     ! Sum of weak Tlj**2
-    REAL*8 :: sumg         ! Sum of gamma channels
-    REAL*8 :: H_Tav        ! Avarage strong Tlj
-    REAL*8 :: H_Tthr       ! Thershold for Tlj to be considered strong
-    ! REAL*8 :: TFIs         ! Sum of fission transmission coefficients
-    ! REAL*8 :: TGam         ! Sum of gamma transmission coefficients
-    INTEGER :: NCH         ! Number of strong channels (Tlj's)
-    ! INTEGER :: NSCh      ! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
+    REAL*8 :: H_Sumtl      !! Sum of strong Tlj
+    REAL*8 :: H_Sumtls     !! Sum of strong Tlj**2
+    REAL*8 :: H_Sweak      !! Sum of weak Tlj
+    REAL*8 :: H_Sweaks     !! Sum of weak Tlj**2
+    REAL*8 :: sumg         !! Sum of gamma channels
+    REAL*8 :: H_Tav        !! Avarage strong Tlj
+    REAL*8 :: H_Tthr       !! Thershold for Tlj to be considered strong
+    ! REAL*8 :: TFIs         !! Sum of fission transmission coefficients
+    ! REAL*8 :: TGam         !! Sum of gamma transmission coefficients
+    INTEGER :: NCH         !! Number of strong channels (Tlj's)
+    ! INTEGER :: NSCh      !! Number of strong  Tlj processed by VT routine, i.e. position in H_Tl matrix
 
-    REAL*8, ALLOCATABLE :: H_Tl(:,:)                      ! strong transmission coefficients LIKELY TO GET RID OFF!!!
+    REAL*8, ALLOCATABLE :: H_Tl(:,:)                      !! strong transmission coefficients LIKELY TO GET RID OFF!!!
     REAL*8, ALLOCATABLE :: H_Abs(:,:)
-    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      ! outgoing channels
-    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       ! fusion channels
-    TYPE(numchnl) :: num                                  ! number of particular channels
+    TYPE(channel), ALLOCATABLE, TARGET :: outchnl(:)      !! outgoing channels
+    TYPE(fusion),  ALLOCATABLE, TARGET :: inchnl(:)       !! fusion channels
+    TYPE(numchnl) :: num                                  !! number of particular channels
 
-    REAL*8 :: save_WFC1(41)                               ! stores central part of the Moldauer integral
+    REAL*8 :: save_WFC1(41)                               !! stores central part of the Moldauer integral
 
-    REAL*8, ALLOCATABLE :: WFC(:,:)                       ! for Moldauer integral
+    REAL*8, ALLOCATABLE :: WFC(:,:)                       !! for Moldauer integral
     !REAL*8, ALLOCATABLE :: SCRt_mem(:,:,:,:), SCRtl_mem(:,:) ! preserve weak transitions in Moldauer looping over elastic channels for traget spin >0
 
     !Data (x) for Gauss-Laguerre quadrature from 0 to infinite; xgk, wgk= wlg*exp(xgk)
@@ -157,7 +157,7 @@ MODULE width_fluct
      10.87187293837791147D0,&
      15.02611162812293299D0 /)
 
-    PUBLIC HRTW, Moldauer
+    PUBLIC HRTW, Moldauer, XSECT
 
     PRIVATE INVERSE_EW
 
@@ -228,7 +228,7 @@ CONTAINS
 
         RETURN
 
-10      WRITE(8,*)  'ERROR: Insufficient memory for HRTW'
+        10 WRITE(8,*)  'ERROR: Insufficient memory for HRTW'
         WRITE(12,*) 'ERROR: Insufficient memory for HRTW'
         STOP 'ERROR: Insufficient memory for HRTW'
         RETURN
@@ -270,8 +270,8 @@ CONTAINS
 
         IMPLICIT NONE
 
-      INCLUDE 'dimension.h'
-      INCLUDE 'global.h'
+        INCLUDE 'dimension.h'
+        INCLUDE 'global.h'
 
         REAL*8 :: elada(NDAngecis), elleg(NDAngecis)
         INTEGER neles
@@ -285,7 +285,7 @@ CONTAINS
 
         LOGICAL*4 relcal
         INTEGER i, ip, ipar, jcn, ke, m, nejc, nhrtw, nnuc, nnur, itmp
-        REAL*8 cnspin, fisxse, summa, sumfis, sumg, sumtg, tgexper, xnor, elcor, xjc
+        REAL*8 cnspin, fisxse, summa, sumfis, sumtg, tgexper, xnor, elcor, xjc
         REAL*8 sumfism(nfmod)
         REAL*8 Ia, sxj
         REAL*8 xmas_npro, xmas_ntrg, el, ecms, ak2
@@ -468,7 +468,7 @@ CONTAINS
                     CALL CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
 
                     ! if renormalization skipped
-                    CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                    CALL XSECT(nnuc,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                     out => outchnl(i)
                     SCRtl(-out%kres,out%nejc) = SCRtl(-out%kres,out%nejc) - elcor    !restore SCRtl before new elastic is calculated
@@ -776,7 +776,6 @@ CONTAINS
 
 
                 ! elastic channel (old version)
-
                 i = levtarg
                 eout = eoutc - ELV(i,nnur)
                 IF(eout<0.0D0) GOTO 10
@@ -821,7 +820,7 @@ CONTAINS
                         in%l = k-1                               !setting incident channel
                         in%j = xj                                !          "
                         in%t = tld                               !          "
-                                    in%tlj = tld
+                        in%tlj = tld
                         h_sumtl = h_sumtl + tld*rho1
                         h_sumtls = h_sumtls + tld**2*rho1
                     ENDDO                 ! do loop over jndex --- done -------
@@ -830,7 +829,7 @@ CONTAINS
         ENDIF !TEMPORARY to allow for the old treatment of the direct outgoing channels
         ! decay to discrete levels --------- done --------------------
 
-10      summa = H_Sumtl - SCRtem(nejc)     !we may NOT NEED IT
+        10     summa = H_Sumtl - SCRtem(nejc)     !we may NOT NEED IT
         SCRtem(nejc) = summa               !we may NOT NEED IT
         DENhf = DENhf + summa
         IF(nejc==1) num%neut = NCH         !store number of neutron-out channels
@@ -930,9 +929,7 @@ CONTAINS
                 in%t = tld              !setting incident channel
                 in%tlj = STLcc(i)%tlj   !setting incident channel (in the non rotated space)
             ENDIF
-
         ENDDO
-
         
     END SUBROUTINE DECAY2CC
 
@@ -1379,8 +1376,8 @@ CONTAINS
         !cc
         !cc   All Eq. numbers refer to PRC94 (2016) 014612
 
-!  TO DO LIST:
-!- check that rho is not applied twice (note that update_SCRt is multiplying by rho)
+        !  TO DO LIST:
+        ! - check that rho is not applied twice (note that update_SCRt is multiplying by rho)
 
         IMPLICIT NONE
 
@@ -1465,8 +1462,7 @@ CONTAINS
             DO jcn = 1, nlw                                 ! do loop over decaying nucleus spin
                 xjc = float(jcn) + HIS(nnuc)
                 IF(POP(ke,jcn,ipar,nnuc)<=1.0d-15) CYCLE    ! skip if absorption cross section negligible
-!                 write(*,*) ' '
-!                 write(*,*) 'CN Jpi=',xjc*ip
+                ! write(*,*) 'CN Jpi=',xjc*ip
                 nhrtw = 0
                 ! NSCh = 0
 
@@ -1536,14 +1532,19 @@ CONTAINS
                 !----------------------------------------------------------
                 CALL WFC1()     ! Calculate the part of Moldauer integral
                                 ! that doesn't depend on incoming channels
-
+                ! print *, "Arrived here", INTerf, NDIm_cc_matrix 
                 IF(INTerf>0 .AND. NDIm_cc_matrix>0) THEN
                   !------------------------------------------------------------------------------------------
                   ! Engelbrecht- Weidenmueller: setting cross sections in the rotated space
                   !------------------------------------------------------------------------------------------
                   !CALL EW_diagonalization(xjc,ip)
 
-                  ! write(*,*) 'num%coll, num%colh', num%coll, num%colh
+                !   write(*,*) 'EW num%coll, num%colh', num%coll, num%colh
+                  IF(allocated(WFC)) DEALLOCATE(WFC)
+                  ALLOCATE(WFC(num%colh-num%coll+1, num%colh),STAT=my)
+                  IF(my /= 0) CALL WFC_error()                 
+                !   print *, "size WFC =  (", size(WFC,1), size(WFC,2), ")"
+                !   print *, "size sigma_alph_beta =  (", size(sigma_alph_beta,1), size(sigma_alph_beta,2), ")"
                   DO i = num%coll, num%colh  ! first loop over coupled channels
                     in => inchnl(i-num%coll+1)
                     in%t = outchnl(i)%t  ! numbering of outgoing channels is different from incoming, !RCN
@@ -1552,9 +1553,11 @@ CONTAINS
                        w = WFC2(i,iou)     ! Moldauer width fluctuation factor (ECIS style)
                        WFC(i-num%coll+1,iou) = w      ! saving the calculated width fluctuation correction
                                                        ! Note that WFC's first index is relative to the first elastic channel
+                       print *, "here-1", i-num%coll+1, iou-num%coll+1, in%t, out%t, w
                        sigma_alph_beta(i-num%coll+1, iou-num%coll+1) = xnor_c*in%t*out%t*w
-                       ! write(*,*) 'sigma_alph_beta(', i, iou,')', sngl(sigma_alph_beta(i-num%coll + 1,iou-num%coll + 1)), &
-                       !            in%t, out%t, WFC(i-num%coll+1,iou)
+                       print *, "here-2"
+                    !    write(*,*) 'sigma_alph_beta(', i, iou,')', sngl(sigma_alph_beta(i-num%coll + 1,iou-num%coll + 1)), &
+                    !                in%t, out%t, WFC(i-num%coll+1,iou)
                     ENDDO ! end of loop over iou
                   ENDDO  ! end of loop over i
                   ! write(*,*) 'Elastic ch:',num%elal, num%elah,' ip*xjc=',sngl(ip*xjc)
@@ -1606,7 +1609,7 @@ CONTAINS
                     !-----------------------------------------------------------------------------
                     ! CN normalize x-sec and distribute them over residuals POP; calculate spectra
                     !-----------------------------------------------------------------------------
-                    CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                    CALL XSECT(nnuc,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
                   
                   ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
@@ -1666,7 +1669,7 @@ CONTAINS
                     !-----------------------------------------------------------------------------
                     ! CN normalize x-sec and distribute them over residuals POP; calculate spectra
                     !-----------------------------------------------------------------------------
-                    CALL XSECT(nnuc,m,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
+                    CALL XSECT(nnuc,xnor,sumfis,sumfism,ke,ipar,jcn,fisxse)  !normalize SCRt matrices and store x-sec
 
                   ENDDO ! end of do loop over i=iaa (coupled elastic channels in the normal space)
 
@@ -1817,21 +1820,21 @@ CONTAINS
         !Diagonalizing the Smatrix using the derived Umatrix
             ! This does not work 
         !Pmatr =   MATMUL(TRANSPOSE(Umatr),MATMUL(Smatr,TRANSPOSE(Umatr))) ! overwriting Pmatrix, as in principle not needed anymore
-            if(debug) then
-        write(*,*) 'Smatrix from ECIS'
-        DO i = 1,NDIm_cc_matrix
-          DO iou = 1,NDIm_cc_matrix
-            write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iou,Smatr(i,iou)
-          ENDDO
-        ENDDO
-        write(*,*) 'Diag Smatrix using Umatrix (from Pmatr diag)'
-        DO i = 1,NDIm_cc_matrix
-          DO iou = 1,NDIm_cc_matrix
-            write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iou,Pmatr(i,iou) 
-          ENDDO
-        ENDDO
-            endif
-            !PAUSE
+        if(debug) then
+            write(*,*) 'Smatrix from ECIS'
+            DO i = 1,NDIm_cc_matrix
+                DO iou = 1,NDIm_cc_matrix
+                    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iou,Smatr(i,iou)
+                ENDDO
+            ENDDO
+            write(*,*) 'Diag Smatrix using Umatrix (from Pmatr diag)'
+            DO i = 1,NDIm_cc_matrix
+                DO iou = 1,NDIm_cc_matrix
+                    write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i,iou,Pmatr(i,iou) 
+                ENDDO
+            ENDDO
+        endif
+        !PAUSE
 
         ZRtmp1 = 0.d0
         DO i=1,NDIm_cc_matrix
@@ -1846,7 +1849,7 @@ CONTAINS
         IF(IER/=0) WRITE (8,*) 'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN Jpi=',sngl(xjc*ip)
         ! On exit Sdiag contains the diagonalized Smatrix = S{alpha,alpha) in the transformed space
         ! ZRtmp1,ZItmp1 contains the real and imaginary part of the corresponding eigenvectors
-            IF(debug) then
+        IF(debug) then
           write(*,*) 'Diagonal Smatrix'
           DO i = 1,NDIm_cc_matrix
             DO iou = 1,NDIm_cc_matrix
@@ -1858,11 +1861,11 @@ CONTAINS
         ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
         ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
         DO i=1,NDIm_cc_matrix
-              ibb = NDIm_cc_matrix - i + 1 
-              Sphase(ibb) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
-          if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i), &
-          ' phi(alpha)=',Sphase(i)
-          if(debug) write(*,*) i,sngl(1.d0-ABS(Sdiag(ibb,ibb))**2),sngl(Pdiag(i)),sngl(PPdiag(i,i))
+            ibb = NDIm_cc_matrix - i + 1 
+            Sphase(ibb) = datan(Sdiag(i,i)) ! from below Eq.(21), phi_{alpha}
+            if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i, Sdiag(i,i),ZItmp(i,i), &
+            ' phi(alpha)=',Sphase(i)
+            if(debug) write(*,*) i,sngl(1.d0-ABS(Sdiag(ibb,ibb))**2),sngl(Pdiag(i)),sngl(PPdiag(i,i))
         ENDDO
             ! We diagonalize Smatr to calculate the phases from its diagonal elements
             ! However, we were not able to verify that Umatr also diagonalized Smatr
@@ -1980,7 +1983,7 @@ CONTAINS
           ENDDO   ! end of the loop over ialph (transformed space)
 
           INVERSE_EW = REAL(ctmp1) + REAL(ctmp2)  ! this is Sigma_ab cross section (in the normal space)
-                                                                          ! It is checked to be a real quantity   within 10^{-10}
+                                                  ! It is checked to be a real quantity   within 10^{-10}
 
           !WRITE(*,*) REAL (ctmp1),' REAL diag' ! the cross section \sigma_{ab} in the normal space
           !WRITE(*,*) DIMAG(ctmp1),' IMAG diag' ! the imaginary part expected to be zero
@@ -2001,11 +2004,11 @@ CONTAINS
              w = WFC2(ialph_ch,iou)     ! Moldauer width fluctuation factor (ECIS style)
              WFC(ialph,iou) = w    ! storing calculated w in WFC matrix
              dtmp = dtmp + outchnl(ialph_ch)%t*out%t*w*ABS(Umatr(ialph,iaa))**2
-!             write(*,*) 'ialph_ch,in%t,out%t,w,ABS(Umatr(ialph,iaa))**2',ialph_ch,outchnl(ialph_ch)%t,out%t, &
-!             w,ABS(Umatr(ialph,iaa))**2
+            ! write(*,*) 'ialph_ch,in%t,out%t,w,ABS(Umatr(ialph,iaa))**2',ialph_ch,outchnl(ialph_ch)%t,out%t, &
+            ! w,ABS(Umatr(ialph,iaa))**2
           ENDDO   ! end of the loop over ialph (transformed space)
           INVERSE_EW = dtmp*xnor_c
-!          write(*,*) 'sigma uncoupled', INVERSE_EW, iaa, iou, xnor_c, w, in%tlj
+        !  write(*,*) 'sigma uncoupled', INVERSE_EW, iaa, iou, xnor_c, w, in%tlj
           ! INVERSE_EW = in%sig*out%t*xnor_c
 
         endif
@@ -2223,9 +2226,8 @@ CONTAINS
 
     END SUBROUTINE Gamma_renormalization
 
-    !**************************************************************
+    !----------------------------------------------------------------------------------------------------
 
-    !SUBROUTINE CN_DA_anis(ibegin, i, in, Ia, sxj, xjc, xnor)
     SUBROUTINE CN_DA_anis(i, in, Ia, sxj, xjc, xnor)
         INTEGER i !, ibegin
         TYPE (fusion),  POINTER :: in
@@ -2257,7 +2259,7 @@ CONTAINS
             jb = out%j                  !outgoing neutron j
             IF(LHRtw > 2) THEN
                 w = WFC(i-num%elal+1,iou) ! Moldauer width fluctuation factor
-!                w = WFC(i,iou) ! Moldauer width fluctuation factor
+            !    w = WFC(i,iou) ! Moldauer width fluctuation factor
             ELSEIF(i==iou) THEN
                 w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
             ENDIF
@@ -2382,5 +2384,61 @@ CONTAINS
 
         RETURN
     END SUBROUTINE zeroing_module_vars
+
+    SUBROUTINE XSECT(Nnuc, Xnor, Sumfis, Sumfism, Ke, Ipar, Jcn, Fisxse)
+        implicit none
+        ! INCLUDE 'dimension.h'
+        ! INCLUDE 'global.h'
+        !
+        ! COMMON variables
+        !
+        DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
+        COMMON/FIS_ISO/TFIso, TGIso, TISo, RFIso, PFIso
+        DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2
+        COMMON/IMAG/TF, TDIr, TABs, TG2
+        !
+        ! Dummy arguments
+        !
+        DOUBLE PRECISION Sumfis, Xnor, Fisxse
+        INTEGER Ipar, Jcn, Ke, M, Nnuc
+        DOUBLE PRECISION Sumfism(NFMOD)
+        !
+        ! Local variables
+        !
+        INTEGER nejc, nnur, izares, iloc
+        DOUBLE PRECISION ares, zres
+        Fisxse = 0.d0
+        !
+        !-----particles
+        DO nejc = 1, NEJcm
+            ares = A(nnuc) - AEJc(nejc)
+            zres = Z(nnuc) - ZEJc(nejc)
+            ! residual nuclei must be heavier than alpha
+            if (ares .le. 4 .and. zres .le. 2.) cycle
+            izares = INT(1000.0*zres + ares)
+            CALL WHERE (izares, nnur, iloc)
+            if (iloc .eq. 1) CYCLE
+            CALL ACCUM(Ke, Nnuc, nnur, nejc, Xnor)
+            CSEmis(nejc, Nnuc) = CSEmis(nejc, Nnuc) + Xnor*SCRtem(nejc)
+        END DO
+        !-----gammas scrtem
+        CALL ACCUM(Ke, Nnuc, Nnuc, 0, Xnor)
+        CSEmis(0, Nnuc) = CSEmis(0, Nnuc) + Xnor*SCRtem(0)
+        POP(Ke, Jcn, Ipar, Nnuc) = 0.d0
+        !-----fission
+        IF (NINT(FISmod(Nnuc)) .EQ. 0) THEN
+            Fisxse = Sumfis*Xnor
+            CSFis = CSFis + Fisxse
+            IF (ENDf(Nnuc) .EQ. 1 .AND. Fisxse .GT. 0.d0 .AND. POPbin(Ke, Nnuc) .GT. 0.d0) CALL EXCLUSIVEF(Ke, Nnuc, Fisxse)
+        ELSE ! Multimodal
+            DO M = 1, INT(FISmod(Nnuc)) + 1
+                Fisxse = Fisxse + Sumfism(M)*Xnor
+                CSFism(M) = CSFism(M) + Sumfism(M)*Xnor
+            END DO
+            CSFis = CSFis + Fisxse
+            IF (ENDf(Nnuc) .EQ. 1 .AND. Fisxse .GT. 0.d0 .AND. POPbin(Ke, Nnuc) .GT. 0.d0) CALL EXCLUSIVEF(Ke, Nnuc, Fisxse)
+        END IF
+        RETURN
+    END subroutine XSECT
 
 END MODULE width_fluct

@@ -1,6 +1,6 @@
-#$Rev: 5302 $
+#$Rev: 5325 $
 #$Author: mwherman $
-#$Date: 2021-10-03 20:16:01 +0200 (So, 03 Okt 2021) $
+#$Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
 
 # set default compilers:
 
@@ -29,15 +29,15 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
   # -pg shoudl be added for profiling
   #----flags for ECIS
-  EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
+  #EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -134,7 +134,7 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
 
 all: 
 	$(MAKE) empire
-	cd ../source-optman; $(MAKE) "FC=$(FC)"; cd ../source
+	cd ../source-optman; $(MAKE) "FC=$(FC) $(FFLAGS)"; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
@@ -155,8 +155,8 @@ dbg:
 	$(MAKE) "FFLAGS=$(DFLAGS)" all
 
 $(OBJF) : global.h dimension.h main_common.h
-main.o  : nubar_reader.o empcess.o ang_mom.o
-#input.o : nubar_reader.o empgdr.o HRTW.o
+main.o  : nubar_reader.o empcess.o ang_mom.o HF-decay.o
+input.o : nubar_reader.o empgdr.o HRTW.o
 input.o : nubar_reader.o empgdr.o 
 ddhms.o : ddhms.cmb
 tl.o    : pre_ecis.h
