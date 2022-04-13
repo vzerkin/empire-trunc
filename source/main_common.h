@@ -1,9 +1,7 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
-C
-C COMMON variables
-C
+!Ccc   * $Rev: 5329 $
+!Ccc   * $Author: mwherman $
+!Ccc   * $Date: 2022-04-13 21:29:42 +0200 (Mi, 13 Apr 2022) $
+
       DOUBLE PRECISION eps_1d(NFISBARPNT), vdef_1d(NFISBARPNT)           ! NUMBAR
       INTEGER npoints, iiextr(0:2*NFPARAB), nextr                        ! NUMBAR
       COMMON /NUMBAR/  eps_1d, vdef_1d, npoints, iiextr, nextr
