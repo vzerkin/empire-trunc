@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5325 $
+    ! $Rev: 5326 $
     ! $Author: mwherman $
-    ! $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
+    ! $Date: 2022-04-13 02:28:15 +0200 (Mi, 13 Apr 2022) $
     !
     !   ********************************************************************
     !   *                  W I D T H _ F L U C T                           *
@@ -2386,30 +2386,33 @@ CONTAINS
     END SUBROUTINE zeroing_module_vars
 
     SUBROUTINE XSECT(Nnuc, Xnor, Sumfis, Sumfism, Ke, Ipar, Jcn, Fisxse)
+
+        !****************************************************************************************
+        !
+        !                            X S E C T
+        !
+        !   Normalizes Hauser-Fesbach width of different channels with Xnor to obtain 
+        !   cross sections in mb. Produces aslo exclusive spectra by calling EXCLUSIVEF.
+        !   Most communication of the results occures through the variables in the global common.
+        !   
+        !****************************************************************************************
+
         implicit none
-        ! INCLUDE 'dimension.h'
-        ! INCLUDE 'global.h'
-        !
-        ! COMMON variables
-        !
-        DOUBLE PRECISION TFIso, TGIso, TISo, RFIso, PFIso
-        COMMON/FIS_ISO/TFIso, TGIso, TISo, RFIso, PFIso
-        DOUBLE PRECISION TF(NFPARAB), TDIr, TABs, TG2
-        COMMON/IMAG/TF, TDIr, TABs, TG2
-        !
-        ! Dummy arguments
-        !
-        DOUBLE PRECISION Sumfis, Xnor, Fisxse
-        INTEGER Ipar, Jcn, Ke, M, Nnuc
-        DOUBLE PRECISION Sumfism(NFMOD)
+        
+        REAL*8, intent(in) :: Xnor
+        REAL*8, intent(in) :: Sumfis
+        REAL*8, intent(in) :: Sumfism(NFMOD)
+        REAL*8, intent(out) :: Fisxse
+        INTEGER, intent(in) :: Ipar, Jcn, Ke, Nnuc
         !
         ! Local variables
         !
-        INTEGER nejc, nnur, izares, iloc
+        INTEGER nejc, nnur, izares, iloc, M
         DOUBLE PRECISION ares, zres
         Fisxse = 0.d0
         !
         !-----particles
+        !
         DO nejc = 1, NEJcm
             ares = A(nnuc) - AEJc(nejc)
             zres = Z(nnuc) - ZEJc(nejc)
