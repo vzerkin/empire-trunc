@@ -1,6 +1,6 @@
-! $Rev: 5286 $
+! $Rev: 5340 $
 ! $Author: mwherman $
-! $Date: 2021-06-16 02:09:39 +0200 (Mi, 16 Jun 2021) $
+! $Date: 2022-04-25 00:12:08 +0200 (Mo, 25 Apr 2022) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -367,7 +367,7 @@ CONTAINS
    npmat = 0
    numat = 0
 
-!==Reading Pchan
+   !==Reading Pchan
    DO ncc = 1, MAX_cc_mod
      !--jc,parc are the channel spin and parity
      !--nceq is the number of coupled equations
