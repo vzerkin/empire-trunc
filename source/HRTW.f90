@@ -1,20 +1,20 @@
 MODULE width_fluct
-    ! $Rev: 5326 $
+    ! $Rev: 5337 $
     ! $Author: mwherman $
-    ! $Date: 2022-04-13 02:28:15 +0200 (Mi, 13 Apr 2022) $
+    ! $Date: 2022-04-24 23:49:31 +0200 (So, 24 Apr 2022) $
     !
-    !   ********************************************************************
-    !   *                  W I D T H _ F L U C T                           *
-    !   *                                                                  *
-    !   * Calculates Hauser-Fesbach with width fluctuation correction      *
-    !   * using HRTW and Moldauer approaches including angular distr.      *
-    !   * In presence of direct reactions proper transmission coefficients *
-    !   * are used for the incoming as well as outging channels.           *
-    !   * Engelbrecht-Weidenmueller tranformation is used to account for   *
-    !   * direct reactions' effect on compound nucleus emission. (in work) *
-    !   *                                                                  *
-    !   *                                                                  *
-    !   ********************************************************************
+    !!   ********************************************************************
+    !!   *                  W I D T H _ F L U C T                           *
+    !!   *                                                                  *
+    !!   * Calculates Hauser-Fesbach with width fluctuation correction      *
+    !!   * using HRTW and Moldauer approaches including angular distr.      *
+    !!   * In presence of direct reactions proper transmission coefficients *
+    !!   * are used for the incoming as well as outging channels.           *
+    !!   * Engelbrecht-Weidenmueller tranformation is used to account for   *
+    !!   * direct reactions' effect on compound nucleus emission. (in work) *
+    !!   *                                                                  *
+    !!   *                                                                  *
+    !!   ********************************************************************
     !
 
     USE angular_momentum
