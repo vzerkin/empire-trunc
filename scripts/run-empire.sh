@@ -3,11 +3,14 @@
 
 source $EMPIREDIR/Tcl/tcltk-vars.sh
 setTclTk $EMPIREDIR/Tcl
-#echo "___TCLDIR  = $TCLDIR"
-#echo "___DISPLAY = $DISPLAY"
+#echo "TCLDIR  = $TCLDIR"
+#echo "DISPLAY = $DISPLAY"
 
 #MacOS: start X11 and set DISPLAY as following
 #export DISPLAY=:0.0
+
+wish_path=`which wish` 
+echo "Using wish      ="$wish_path
 
 #wish $EMPIREDIR/../welcome32.tcl
 wish $EMPIREDIR/scripts/Xrun.tcl &
