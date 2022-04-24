@@ -22,6 +22,7 @@ fi
 file=$proj-mat.sen
 if [ ! -s $file ]; then
    echo "SENSITIVITY-MATRIX FILE NOT FOUND  ($file)"
+   echo -n "___Pause. Press any key..."; read yes
    exit 0
 fi
 
