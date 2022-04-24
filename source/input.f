@@ -1,6 +1,6 @@
-ccc   * $Rev: 5309 $
+ccc   * $Rev: 5338 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2021-10-25 09:13:46 +0200 (Mo, 25 Okt 2021) $
+ccc   * $Date: 2022-04-24 23:57:53 +0200 (So, 24 Apr 2022) $
 
       SUBROUTINE INPUT
 ccc
@@ -22,6 +22,8 @@ ccc
       use empgdr
       ! use width_fluct
 
+      implicit none
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 C
@@ -40,7 +42,7 @@ C
       DOUBLE PRECISION aclu, ak2, ampi0, ampipm, ares, atmp, da,
      &         deln(150), delp, delz(98), e2p, e3m, emaxr, qmin,
      &         qtmp, xfis, zclu, zres, ztmp, culbar, e2pej, e3mej,
-     &         qatom,qnucl,FTMP, fftmp !, XNExc
+     &         qatom,qnucl,FTMP, fftmp, XNExc, DEFnuc, DIRpot
       CHARACTER*1 cnejec
       CHARACTER*2 deut, gamma, trit, he3, cnejec2
 c     CHARACTER*23 ctmp23
@@ -48,7 +50,9 @@ c     CHARACTER*23 ctmp23
       LOGICAL gexist, calc_fiss !, fexist
       INTEGER i, ia, iac, iae, iccerr, iend, ierr, ietl, iia, iloc, in,
      &        ip, irec, itmp, iz, izares, izatmp, j, lpar, na, nejc,
-     &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated
+     &        netl, nnuc, nnur, mulem, nucmin, hh, irepeated, iatmp, 
+     &        ichanmin, id, ih, Irun, it, iztmp, nemd, nemh, nemt, 
+     &        Numram
       INTEGER IFINDCOLL,IFINDCOLL_CCFUS
       CHARACTER*2 SMAT
 
@@ -907,7 +911,6 @@ C                    From n,np   to   n,d
                      iend = iend - 2
                      REAction(nnuc)(iend + 1:iend + 1) = 'd'
                      iend = iend + 1
-!                     ENDf(nnuc) = 1
 C                    (n,np),(n,pn),(n,d)
 C                    ENDfp(0,nnuc) = 1 
 C                    ENDfp(1,nnuc) = 1 
@@ -1574,8 +1577,8 @@ C--------set MSC  (.,3) (note no discrete transitions in MSC)
                IF (GST.GT.0) IDNa(5,3) = 1
 C--------------stop MSC charge-exchange if DDHMS or PCROSS active
                IF (PEQc.GT.0 .or. LHMs.GT.0) THEN
-                 IF (NPRoject.EQ.1)  IDNa(4,3) = 0
-                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0
+               ! HERE: IF (NPRoject.EQ.1)  IDNa(4,3) = 0 ! cont p
+                 IF (NPRoject.EQ.2)  IDNa(2,3) = 0 ! cont n
                ENDIF
             ENDIF
       ENDIF
@@ -1650,11 +1653,10 @@ C-----------stop PCROSS inelastic scattering if MSC and/or MSD active
               IF (NPRoject.EQ.2) THEN
                 IDNa(3,6) = 0
                 IDNa(4,6) = 0
-           ENDIF
+              ENDIF
               IF (NPRoject.EQ.1) THEN
                 IDNa(1,6) = 0
                 IDNa(2,6) = 0
-              ELSE
               ENDIF
             ENDIF
 C
@@ -1665,12 +1667,28 @@ C-----------stop PCROSS nucleon channels if HMS active
               IDNa(3,6) = 0 
               IDNa(4,6) = 0
             ENDIF
-
          ENDIF
-C
-C--------print IDNa matrix
- 1256    continue
 
+C--------stop PCROSS and HMS if channel active in MSC
+         IF(IDNa(1,3) .EQ. 1) THEN     ! neutron to disc.
+            IDNa(1,5) = 0              ! HMS
+            IDNa(1,6) = 0              ! PCROSS
+         ENDIF
+         IF(IDNa(2,3) .EQ. 1) THEN ! neutron to cont.
+            IDNa(2,5) = 0              ! HMS
+            IDNa(2,6) = 0              ! PCROSS
+         ENDIF
+         IF(IDNa(3,3) .EQ. 1) THEN ! protons to disc.
+            IDNa(3,5) = 0              ! HMS
+            IDNa(3,6) = 0              ! PCROSS
+         ENDIF
+         IF(IDNa(4,3) .EQ. 1) THEN ! protons to cont.
+            IDNa(4,5) = 0              ! HMS
+            IDNa(4,6) = 0              ! PCROSS
+         ENDIF
+
+C--------print IDNa matrix
+         continue
          WRITE (8,*) ' '
          WRITE (8,*)
      &             '           Use of direct and preequilibrium models '
@@ -2095,7 +2113,7 @@ C-----energy bins for recoils is increased to avoid fluctuations
 C-----if these persist increase multiplier
 C      DERec = DERec*2.00
 C-----set initial 'recoil spectrum' of CN (CM motion in LAB)
-      irec = (EINl - EIN)/DERec + 1.001
+      irec = INT((EINl - EIN)/DERec + 1.001)
 C-----setting irec=1 below practically removes CM motion energy from recoils
       irec = 1
       RECcse(irec,NEX(1),1) = 1.d0
@@ -2426,17 +2444,18 @@ C    &       (NINT(Z(nnuc)).LT.78 .OR. NINT(A(nnuc)).LT.200)) THEN
       CALL PRINPUT
       RETURN
 
-99010 FORMAT (1X,14(G10.4,1x))
       END
 
 
       SUBROUTINE INP_LD(Nnur)
 
+      IMPLICIT NONE
+
       INCLUDE 'dimension.h'
       INCLUDE 'global.h'
 
-      REAL*8 rocumul
-      INTEGER Nnur,ia
+      REAL*8 rocumul, u
+      INTEGER Nnur, ia, i, j
 
       IF (ADIv.EQ.0.0D0) CALL ROEMP(nnur,0.0D0,0.024D0)
       IF (ADIv.EQ.1.0D0) CALL ROGSM(nnur)
@@ -2643,7 +2662,8 @@ C
 
 C     Looking for Dobs and Gg for compound (resonances are stored for target nucleus)
       IF (Nnuc.eq.0 .AND. (AEJc(0).EQ.1 .AND. ZEJc(0).EQ.0) ) THEN ! only for neutrons
-        OPEN (47,FILE = trim(empiredir)//'/RIPL/resonances'
+
+         OPEN (47,FILE = trim(empiredir)//'/RIPL/resonances'
      &      //'/resonances0.dat',STATUS = 'old',ERR = 65)
         READ (47,'(///)') ! Skipping first 4 title lines
         DO i = 1, 296
@@ -2666,10 +2686,11 @@ C         Changed to RIPL-3 file
    65   WRITE (8,*) ' WARNING: ',trim(empiredir)//
      &   '/RIPL/resonances/resonances0.dat file not found '
         WRITE (8,*) 
-
      &   ' WARNING: Experimental D0 and gamma width are not available '
    70   CONTINUE
       ENDIF
+
+
       IF(Gg_obs.EQ.0) THEN   !No experimental Gg - use Kopecky's spline fit
          IF(ia.LT.40) THEN
            Gg_obs = 1593000/A(Nnuc)**2   !in meV
@@ -10206,8 +10227,8 @@ C     PROJECTILE DEFORMATIONS
 C
       IF(AEJc(0).LE.4) GOTO 350
 
-      ia = AEJc(0)
-      iz = ZEJc(0)
+      ia = int(AEJc(0))
+      iz = int(ZEJc(0))
       close(84)
       beta2 = 0.D0
       beta3 = 0.D0
