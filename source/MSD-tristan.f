@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5264 $
+Ccc   * $Rev: 5339 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-12-10 08:22:01 +0100 (Do, 10 Dez 2020) $
+Ccc   * $Date: 2022-04-25 00:10:07 +0200 (Mo, 25 Apr 2022) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -410,12 +410,9 @@ C
      &                 ceff, clex(8,8), clsc(8,8), cneg, cnorm, cpos,    
      &                 cr1(8,8), cr2, cr3(8,8), dci(8,8), dcr(8,8),      
      &                 ddr(2), dtmp, 
-c    &                 de3, deqq, dnz, dqqst(40000), dr, dwex, dwsx, e,  
-     &                 de3, deqq, dnz,               dr, dwex, dwsx, e,  
+     &                 de3, deqq, dnz, dr, dwex, dwsx, e,  
      &                 e0, efit(8,8), efitx, egr, em, emi, emisq, ep,    
-c    &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000), 
-     &                 epl, eplsq, eqq,               eqqx,ess(0:10000), 
-
+     &                 epl, eplsq, eqq, eqqx,ess(0:10000), 
      &                 est3, ext, f1, fe, ff1, fltwp1, fourpi, fpi,
      &                 greenr, greenx, greeny, hat, hcorr, homeb, phtrm,
      &                 pxmd, pymd, qqi, qqr, qqx, qqy, r, r1, rd, rdopt,
@@ -439,8 +436,7 @@ c    &                 epl, eplsq, eqq, eqqst(40000), eqqx,ess(0:10000),
      &                 rnp(3,2), rp, rqr, rrr(2), rws, rwsq, t1, t2,
      &                 umatqq, veff, vnorm, w, wbcs, we, wgr, widas,
      &                 wide(0:10000), widea, widgr, wqa, wqq,
-c     &                wqqst(40000), wqrex, x, xea(11), xir, xneg, xp,   
-     &                               wqrex, xea(8,8), xir, xneg,         
+     &                 wqrex, xea(8,8), xir, xneg,         
      &                 xpos, yea(8,8), sum                               
       EQUIVALENCE (BST(1),BST1)
       DATA rnp/1.2490D0, -0.5401D0, -0.9582D0, 1.2131D0, -0.4415D0,
@@ -904,12 +900,7 @@ C-----------------------------integral)
                                  deqq = deqq + we*fe
                               ENDDO
                               deqq = deqq/PI
-c The following statements are commented out since wqqst, dqqst
-c  and eqqst are never used (h.wienke).
-c                              wqqst(kc) = wqq*2.D0
-c                              dqqst(kc) = deqq
                               eqq = eqq + deqq
-c                              eqqst(kc) = eqq
 C
 C-----------------------------end of energy shift
 C
@@ -3054,7 +3045,7 @@ C-----integrate angular distributions over angle (and energy)
 C-----if ECIS active use only continuum part of the MSD spectrum
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)+1)
 C     Adding one more bin to MSD spectra
-      IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)  )
+      IF (DIRect.GT.0 . and. MSD.eq.1) nmax = MIN(nmax,NEX(nnur)  )
 C     IF (DIRect.GT.0) nmax = MIN(nmax,NEX(nnur)-1)
 
    !    WRITE(8,*) ' '
@@ -3142,6 +3133,7 @@ C
          WRITE (8,*) ' I HAD BETTER  S T O P'
          STOP
       ENDIF
+
 C-----
 C----- CONTINUUM
 C-----
@@ -3151,12 +3143,10 @@ C-----
          excnq = EX(NEX(Nnuc),Nnuc) - Q(Nejc,Nnuc)
       ENDIF
 C-----number of spectrum bins to continuum WARNING! might be negative!
-C     nexrt = MIN(NINT((excnq - ECUt(Nnur))/DE + 1.0001),ndecsed)
       nexrt = MIN(MAX(NINT((excnq - ECUt(Nnur))/DE+1.0001),1),ndecsed) 
 C     Continuum increased by one to fill the hole in MSD calculation
 C     IF(MSD.GT.0) nexrt = nexrt + 1      
 C-----total number of bins
-C     next  = INT(excnq/DE + 1.0001)
       next  = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed) 
 
 C     Assuming PE calculates over discrete levels' region as well
@@ -3176,82 +3166,72 @@ C-----calculate spin distribution for 1p-1h states
 
       IF (nexrt.GT.0) THEN
 C
-        IF( IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  
+         IF( IDNa(2,2).eq.1 .or. IDNa(4,2).eq.1) then  
 C
-C          distribution of the continuum neutron or proton MSD contribution -
-C          proportional to the 1p-1h (n=2) spin distribution shifted by the target
-C          target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
-C          SIG = n*0.26*A**(2.d0/3.d0) with n=2
-           SIG = 2*0.26*A(Nnur)**0.66666667
+C           Distribution of the continuum neutron or proton MSD contribution -
+C           proportional to the 1p-1h (n=2) spin distribution shifted by the target
+C           target state spin XJLV(LEVtarg,0), it is assumed the basic dependence
+C           SIG = n*0.26*A**(2.d0/3.d0) with n=2
+            SIG = 2*0.26*A(Nnur)**0.66666667
+C-----------ATTENTION! Ta181(n,a) isomer specific !!! 
+            SIG = 1.20*SIG ! gives best results for Ta181(n,a) isomers
 
-C          if PESpin>0 then spin cut-off = PESpin
-           IF(PESpin.GT.0) SIG = PESpin
+            IF(PESpin.GT.0) SIG = PESpin
 
-           somj = 0.0
-           DO j = 1, NLW
-             xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
-             phdj(j) = 0.0
-             w = (xj + 1.0)*xj/2./SIG
-             IF (w.GT.50.D0) cycle
-             phdj(j) = (2*xj + 1.)*DEXP( - w)
-             somj = somj + phdj(j)
-           ENDDO
-
-           DO j = 1, NLW
-            xnor = 0.5*phdj(j)/somj
-            DO ie = 1, nexrt
-               pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
-C
-C              Population increased to preserve total flux
-C              as calculated by PCROSS or MSD+MSC
-               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-
-               POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
-               POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
-            ENDDO
-           ENDDO
-
-         ELSE
-       
-
-C          distribution of the PCROSS continuum particle or photon emissions
-C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
-C          shifted by the target ground state target spin XJLv(LEVtarg,0)
-           DO ie = 1, nexrt
-C            if(ie.gt.NDEX) then
-C               write(*,*)'ie, nexrt, nejc',ie, nexrt, nejc
-C            endif
-             SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
-     >            0.26d0*A(Nnur)**0.66666667
-
-C            if PESpin>0 then spin cut-off = PESpin
-             IF(PESpin.GT.0) SIG = PESpin
-
-             if(SIG.LE.0) CYCLE         
-
-             somj = 0.d0
-             DO j = 1, NLW
+            somj = 0.0
+            DO j = 1, NLW
                xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
                phdj(j) = 0.0
                w = (xj + 1.0)*xj/2./SIG
                IF (w.GT.50.D0) cycle
                phdj(j) = (2*xj + 1.)*DEXP( - w)
                somj = somj + phdj(j)
-             ENDDO
+            ENDDO
 
-             DO j = 1, NLW
+            DO j = 1, NLW
                xnor = 0.5*phdj(j)/somj
-               pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
-C
-C              Population increased to preserve total flux
-C              as calculated by PCROSS 
-               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+               DO ie = 1, nexrt
+                  pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
+C                 Population increased to preserve total flux
+C                 as calculated by PCROSS or MSD+MSC
+                  if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+                  POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+                  POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+               ENDDO
+            ENDDO
 
-               POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
-               POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
-             ENDDO
-           ENDDO
-             
+         ELSE
+C          Distribution of the PCROSS continuum particle or photon emissions
+C          proportional to the calculated average exciton number ~n*0.26*A^(2/3) 
+C          shifted by the target ground state target spin XJLv(LEVtarg,0)
+            DO ie = 1, nexrt
+               SIG= max( 2, NINT(XNAver(Nejc,nexrt - ie + 1)) ) *
+     >            0.26d0*A(Nnur)**0.66666667
+
+C              if PESpin>0 then spin cut-off = PESpin
+               IF(PESpin.GT.0) SIG = PESpin
+               if(SIG.LE.0) CYCLE         
+               somj = 0.d0
+
+               DO j = 1, NLW
+                  xj = SQRT(FLOAT(j)**2 + XJLv(LEVtarg,0)**2)
+                  phdj(j) = 0.0
+                  w = (xj + 1.0)*xj/2./SIG
+                  IF (w.GT.50.D0) cycle
+                  phdj(j) = (2*xj + 1.)*DEXP( - w)
+                  somj = somj + phdj(j)
+               ENDDO
+
+               DO j = 1, NLW
+                  xnor = 0.5*phdj(j)/somj
+                  pops = xnor*CSEmsd(nexrt - ie + 1,Nejc)
+C                 Population increased to preserve total flux
+C                 as calculated by PCROSS 
+                  if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+                  POP(ie,j,1,Nnur) = POP(ie,j,1,Nnur) + pops
+                  POP(ie,j,2,Nnur) = POP(ie,j,2,Nnur) + pops
+               ENDDO
+            ENDDO
          ENDIF
 
 C--------add MSD/PCROSS contribution to the population spectra
@@ -3261,35 +3241,33 @@ C--------used for ENDF exclusive spectra
                icsp = nexrt - ie + 1
                pops = CSEmsd(icsp,Nejc)
                IF(pops>0) THEN
-C               Commented on Dec 2011 by RCN, to keep integral of spectra = XS
-C               if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
-                IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue
-                  POPcse(ie,Nejc,icsp,INExc(Nnur)) =
+C                 Commented on Dec 2011 by RCN, to keep integral of spectra = XS
+C                 if(ie.eq.1 .or. ie.eq.nexrt) pops=2*pops
+                  IF(ENDf(Nnur).EQ.1) THEN                !adding Popt to population spectra in exclusive residue
+                     POPcse(ie,Nejc,icsp,INExc(Nnur)) =
      &               POPcse(ie,Nejc,icsp,INExc(Nnur)) + pops
-
-                  IF(LHMs.NE.0 .and. Nejc.Ge.1 .and. Nejc.Le.3) THEN !HMS n & p only
-                    POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
-     &               POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
+                     IF(LHMs.NE.0 .and. Nejc.Ge.1 .and. Nejc.Le.3) THEN !HMS n & p only
+                        POPcsed(ie,Nejc,icsp,INExc(Nnur)) =
+     &                  POPcsed(ie,Nejc,icsp,INExc(Nnur)) + pops
+                     ENDIF
+C---------------     Correct last bin (not needed for POP as for this it is done at the end)
+C                    IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
+C    &                  = POPcse(ie,Nejc,icsp,INExc(Nnur))
+C    &                  - 0.5*CSEmsd(icsp,Nejc)
+C---------------     DDX 
+                     POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
+C                    equivalent to POPcseaf when only the 1st emission is anisotropic
+C                    DO na = 1,NDANG
+C                       POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
+C     &                 CSEa(icsp,na,Nejc)
+C                    ENDDO
+C---------------     DDX
+C---------------     Bin population by MSD (spin/parity integrated)
+                     POPbin(ie,Nnur) = pops
+                  ELSE                                    !inclusive residue - add Popt directly to spectra
+                     CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + pops
+                     POPcseaf(0,Nejc,icsp,0) = 1.0D0
                   ENDIF
-C---------------Correct last bin (not needed for POP as for this it is done at the end)
-C               IF (ie.EQ.1) POPcse(ie,Nejc,icsp,INExc(Nnur))
-C    &             = POPcse(ie,Nejc,icsp,INExc(Nnur))
-C    &             - 0.5*CSEmsd(icsp,Nejc)
-
-C---------------DDX 
-                POPcseaf(ie,Nejc,icsp,INExc(Nnur)) = 1.d0
-C   equivalent to POPcseaf when only the 1st emission is anisotropic
-C                DO na = 1,NDANG
-C                 POPcsea(na,ie,Nejc,icsp,INExc(Nnur)) = 
-C     &                                             CSEa(icsp,na,Nejc)
-C                ENDDO
-C---------------DDX
-C---------------Bin population by MSD (spin/parity integrated)
-                POPbin(ie,Nnur) = pops
-                ELSE                                    !inclusive residue - add Popt directly to spectra
-                  CSE(icsp,Nejc,0) = CSE(icsp,Nejc,0) + pops
-                  POPcseaf(0,Nejc,icsp,0) = 1.0D0
-                ENDIF
                ENDIF
             ENDDO
          ENDIF
@@ -3304,21 +3282,20 @@ C-----------recorr is a recoil correction factor that
 C-----------divides outgoing energies
             recorr = EJMass(Nejc)/AMAss(1)
             DO ie = 1, nexrt
-              echannel = (ie - 1)*DE*recorr
-              DO na = 1, NDANG
-                erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
-     &                         *CANgler(na)
-                irec = erecoil/DERec + 1.001
-                weight = (erecoil - (irec - 1)*DERec)/DERec
-                csmsdl = CSEa(nexrt - ie + 1,na,Nejc)*SANgler(na)
-     &                        *coeff
-                IF (irec.GE.NDEREC) EXIT                
-                RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
-     &                  + csmsdl*(1.d0 - weight)
-                IF (irec + 1.GE.NDEREC) EXIT                                
-                RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
-     &                  + csmsdl*weight
-C
+               echannel = (ie - 1)*DE*recorr
+               DO na = 1, NDANG
+                  erecoil = ecm + echannel + 2*SQRT(ecm*echannel)
+     &               *CANgler(na)
+                  irec = erecoil/DERec + 1.001
+                  weight = (erecoil - (irec - 1)*DERec)/DERec
+                  csmsdl = CSEa(nexrt - ie + 1,na,Nejc)*SANgler(na)
+     &               *coeff
+                  IF (irec.GE.NDEREC) EXIT
+                  RECcse(irec,ie,Nnur) = RECcse(irec,ie,Nnur)
+     &               + csmsdl*(1.d0 - weight)
+                  IF (irec + 1.GE.NDEREC) EXIT
+                  RECcse(irec + 1,ie,Nnur) = RECcse(irec + 1,ie,Nnur)
+     &               + csmsdl*weight
               ENDDO
             ENDDO
          ENDIF
@@ -3331,24 +3308,25 @@ C
 C     Discrete levels not used for alpha (please do not include levels into
 C                   continuum for alpha emission)
 C
-      IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.0 )  return
-      IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.0 )  return
 
-C     IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(2,3).EQ.0 )  return
-C     IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(4,3).EQ.0 )  return
-      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(1,3).EQ.0 )  return
-      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.0 )  return
-      IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.0 )  return  
+      IF (Nejc.eq.1 .and. MSD .GT.0 .and. IDNa(1,2).EQ.1 )  goto 10
+      IF (Nejc.eq.2 .and. MSD .GT.0 .and. IDNa(3,2).EQ.1 )  goto 10
+      IF (Nejc.eq.1 .and. MSC .GT.0 .and. IDNa(1,3).EQ.1 )  goto 10
+      IF (Nejc.eq.2 .and. MSC .GT.0 .and. IDNa(3,3).EQ.1 )  goto 10
+      IF (Nejc.eq.0 .and. MSC .GT.0 .and. IDNa(5,3).EQ.1 )  goto 10  
 
       IF (Nejc.eq.0 .and. PEQc.GT.0 )  return  
 C     No recoils from gamma emission for the time being
-C     IF (Nejc.eq.0 .and. PEQc.GT.0 .and. IDNa(5,6).EQ.0 )  return  
-      IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa(1,6).EQ.0 )  return
-      IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa(3,6).EQ.0 )  return
-      IF (Nejc.eq.3 .and. PEQc.GT.0 .and. IDNa(11,6).EQ.0 ) return
-      IF (Nejc.eq.4 .and. PEQc.GT.0 .and. IDNa(12,6).EQ.0 ) return
-      IF (Nejc.eq.5 .and. PEQc.GT.0 .and. IDNa(13,6).EQ.0 ) return
-      IF (Nejc.eq.6 .and. PEQc.GT.0 .and. IDNa(14,6).EQ.0 ) return
+C     IF (Nejc.eq.0 .and. PEQc.GT.0 .and. IDNa( 5,6).EQ.1 ) goto 10  
+      IF (Nejc.eq.1 .and. PEQc.GT.0 .and. IDNa( 1,6).EQ.1 ) goto 10
+      IF (Nejc.eq.2 .and. PEQc.GT.0 .and. IDNa( 3,6).EQ.1 ) goto 10
+      IF (Nejc.eq.3 .and. PEQc.GT.0 .and. IDNa(11,6).EQ.1 ) goto 10
+      IF (Nejc.eq.4 .and. PEQc.GT.0 .and. IDNa(12,6).EQ.1 ) goto 10
+      IF (Nejc.eq.5 .and. PEQc.GT.0 .and. IDNa(13,6).EQ.1 ) goto 10
+      IF (Nejc.eq.6 .and. PEQc.GT.0 .and. IDNa(14,6).EQ.1 ) goto 10
+      return
+ 10   continue
+
 C-----discrete level contribution to recoil spectra
 C-----in case only discrete levels can be populated we set nexrt to 1
 C-----(NOTE: it is usually negative in such a case)
@@ -3382,65 +3360,79 @@ C-----
       istart = nexrt + 1
       DO ie = istart, next
         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
-      ENDDO
-      write(8,*)'MSD for discrfete levels', csm1
+      enddo
       IF(csm1.le.1.d-6) RETURN
-
+      
       IF(Nejc.eq.NPRoject) then
 C
-C      Inelastic channel 
+C        Inelastic channel 
+C  
+C------  MSD or PCROSS contribution is integrated over the discrete level region and
+C------  distributed among 2+, 3- and 4+ levels (or those close to such for
+C------  noninteger spin nuclei) using arbitrary weights (most to 2+ and very
+C------  little to 4+). Angular distributions for these levels are those
+C------  provided by TRISTAN or PCROSS at the closest bin.
 C
-C------MSD or PCROSS contribution is integrated over the discrete level region and
-C------distributed among 2+, 3- and 4+ levels (or those close to such for
-C------noninteger spin nuclei) using arbitrary weights (most to 2+ and very
-C------little to 4+). Angular distributions for these levels are those
-C------provided by TRISTAN or PCROSS at the closest bin.
+         csmsdl = 0.d0
+         DO ie = istart, next
+           csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
+         ENDDO
+         !   csmsdl = csmsdl + 0.5*DE*(CSEmsd(istart,Nejc)+CSEmsd(next,Nejc))
 C
-       csmsdl = 0.d0
-       DO ie = istart, next
-         csmsdl = csmsdl + CSEmsd(ie,Nejc)*DE
-C        Setting it to zero to delete discrete spectra before redistributing 
-         IF (ENDf(1).GT.0) then
-           if( IDNa(1,2).GT.0 .and. MSD .GT.0 .and. Nejc.eq.1 ) 
-     >       CSEmsd(ie,Nejc) = 0.d0
-           if( IDNa(3,2).GT.0 .and. MSD .GT.0 .and. Nejc.eq.2 ) 
-     >       CSEmsd(ie,Nejc) = 0.d0
-           if( IDNa(1,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.1 ) 
-     >       CSEmsd(ie,Nejc) = 0.d0
-           if( IDNa(3,6).GT.0 .and. PEQc.gt.0. and. Nejc.eq.2 ) 
-     >       CSEmsd(ie,Nejc) = 0.d0
-           if( Nejc.gt.2 ) CSEmsd(ie,Nejc) = 0.d0
-         ENDIF
+C        Inelastic channel
+C
+         swght = 0.d0
+         DO il = 2, NLV(Nnur)
+           wght(il) = 0.0
+           eemi = excnq - ELV(il,Nnur)
+           IF (eemi.LT.0.0D0) CONTINUE
+   !  This commented part contains original weights for distributing MSD
+   !  contribution over discrete levels - mostly 2+, 3- and 4+  
+   !       IF (ABS(XJLv(il,Nnur) - 2.D0).LT.0.6D0 .AND. LVP(il,Nnur).EQ.1)
+   !   &       THEN
+   !          wght(il) = 4.0/(ABS(ELV(il,Nnur) + QCC(1)) + 0.2)
+   !          wght(il) = wght(il)**2
+   !          swght = swght + wght(il)
+   !       ENDIF
+   !       IF (ABS(XJLv(il,Nnur) - 3.D0).LT.0.6D0 .AND. LVP(il,Nnur)
+   !   &       .EQ.( - 1)) THEN
+   !          wght(il) = 2.0/(ABS(ELV(il,Nnur) + QCC(2)) + 0.2)
+   !          wght(il) = wght(il)**2
+   !          swght = swght + wght(il)
+   !       ENDIF
+   !       IF (ABS(XJLv(il,Nnur) - 4.D0).LT.0.6D0 .AND. LVP(il,Nnur).EQ.1)
+   !   &       THEN
+   !          wght(il) = 1.0/(ABS(ELV(il,Nnur) + QCC(2) - 1.) + 0.2)
+   !          wght(il) = wght(il)**2
+   !          swght = swght + wght(il)z
+   !       ENDIF
+
+   !  More physics related rules for distributing MSD contribution
+   !  over discrete levels based on l-transfer. The largest contribution 
+   !  is assumed to be due to l=0 transfer and smaller parts are allocated 
+   !  to l = 1 and 2 transfers.
+   !  These are distributed among the levels that can couple to the ground state
+   !  with the specified l-transfer.
+            IF (ABS(XJLv(il,Nnur) - XJLv(1,Nnur)).LT.0.6D0 .AND. 
+     &         LVP(il,Nnur) .EQ. LVP(1,Nnur)) THEN
+               wght(il) = 3.0/(ELV(il,Nnur) + 0.3)
+               wght(il) = wght(il)**2
+               swght = swght + wght(il)
+            ENDIF
+            IF (ABS(XJLv(il,Nnur) - XJLv(1,Nnur)).LT.1.6D0 .AND. 
+     &         LVP(il,Nnur) .NE. LVP(1,Nnur)) THEN
+               wght(il) = 2.0/(ELV(il,Nnur) + 0.3)
+               wght(il) = wght(il)**2
+               swght = swght + wght(il)
+            ENDIF
+            IF (ABS(XJLv(il,Nnur) - XJLv(1,Nnur)).LT.2.6D0 .AND. 
+     &         LVP(il,Nnur) .EQ. LVP(1,Nnur)) THEN
+               wght(il) = 1.0/(ELV(il,Nnur) + 0.3)
+               wght(il) = wght(il)**2
+               swght = swght + wght(il)
+            ENDIF
        ENDDO
-C
-C      Inelastic channel
-C
-       csmtot = 0.d0
-       swght = 0.d0
-       DO il = 2, NLV(Nnur)
-         wght(il) = 0.0
-         eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) GOTO 100
-         IF (ABS(XJLv(il,Nnur) - 2.D0).LT.0.6D0 .AND. LVP(il,Nnur).EQ.1)
-     &       THEN
-            wght(il) = 4.0/(ABS(ELV(il,Nnur) + QCC(1)) + 0.2)
-            wght(il) = wght(il)**2
-            swght = swght + wght(il)
-         ENDIF
-         IF (ABS(XJLv(il,Nnur) - 3.D0).LT.0.6D0 .AND. LVP(il,Nnur)
-     &       .EQ.( - 1)) THEN
-            wght(il) = 2.0/(ABS(ELV(il,Nnur) + QCC(2)) + 0.2)
-            wght(il) = wght(il)**2
-            swght = swght + wght(il)
-         ENDIF
-         IF (ABS(XJLv(il,Nnur) - 4.D0).LT.0.6D0 .AND. LVP(il,Nnur).EQ.1)
-     &       THEN
-            wght(il) = 1.0/(ABS(ELV(il,Nnur) + QCC(2) - 1.) + 0.2)
-            wght(il) = wght(il)**2
-            swght = swght + wght(il)
-         ENDIF
-       ENDDO
-  100  IF (swght.EQ.0.0D0) THEN
+       IF (swght.EQ.0.0D0) THEN
          WRITE (8,*) ' WARNING:'
          WRITE (8,*) ' WARNING: No level to put msd level contribution '
      &               , csmsdl, ' mb'
@@ -3450,11 +3442,12 @@ C
          POPlv(1,Nnur) = POPlv(1,Nnur) + csmsdl
          RETURN
        ENDIF
-       write(8,*) 'MSD to discrete levels ', csmsdl
+       write(8,*) 'MSD contribution to discrete levels ', csmsdl
        csmsdl = csmsdl/swght
+       csmtot = 0.d0
        DO il = 2, NLV(Nnur)
          eemi = excnq - ELV(il,Nnur)
-         IF (eemi.LT.0.0D0) RETURN
+         IF (eemi.LT.0.0D0) CONTINUE
          csmtot = csmtot + csmsdl*wght(il)
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl*wght(il)
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl*wght(il)
@@ -3484,9 +3477,8 @@ C
 C      Other channels (not the inelastic)
 C      equal distribution over all energetically available levels
 C
-       csmtot = 0.d0
        xnor = 0.d0
-       DO il = 1,NLV(Nnur)           ! finding number of possible levels
+       DO il = 2,NLV(Nnur)           ! finding number of possible levels
          eemi = excnq - ELV(il,Nnur)
          xnor = il
          IF (eemi.LT.0.0D0) THEN
@@ -3516,9 +3508,10 @@ C            Deleting the corresponding angular distribution
              enddo
           ENDDO
        ENDIF
-
+       
+       csmtot = 0.d0
        csmsdl = csm1/xnor        !contribution to each level
-       DO il = 1, INT(xnor)      !loop over available levels
+       DO il = 2, INT(xnor)      !loop over available levels
          POPlv(il,Nnur) = POPlv(il,Nnur) + csmsdl
          CSDirlev(il,Nejc) = CSDirlev(il,Nejc) + csmsdl
          csmtot = csmtot + csmsdl
