@@ -157,8 +157,13 @@
     pml: do i = 1,nt
 
        if(fnl(i) == 1.0) cycle    ! nothing to do
-
-       lp = len_trim(oname(i)) - 5
+       lp = len_trim(oname(i))
+       if (lp == 10) then
+         lp = lp - 4
+       elseif (lp == 9) then
+         lp = lp - 5
+       endif
+      
        nam = oname(i)(1:lp)
 
        if(.not.(allowed(nam))) then
