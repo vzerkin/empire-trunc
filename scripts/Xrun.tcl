@@ -1,6 +1,6 @@
-# $Rev: 5313 $
-# $Author: zerkin $
-# $Date: 2021-11-12 11:27:53 +0100 (Fr, 12 Nov 2021) $
+# $Rev: 5332 $
+# $Author: mwherman $
+# $Date: 2022-04-24 23:32:32 +0200 (So, 24 Apr 2022) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8381,6 +8381,9 @@ exit} \
         -command { editFile $::env(EMPIREDIR)/util/c4zvd/ps01.tit } \
         -label {ZVView options} 
     $site_3_0.menu90 add command \
+        -command { editFile $file-zvv.yml } \
+        -label {Edit Yaml for plotting} 
+    $site_3_0.menu90 add command \
         -command { editFile $::env(EMPIREDIR)/source/Makefile } \
         -label {Edit Makefile} 
     $site_3_0.menu90 add command \
@@ -8675,6 +8678,10 @@ exec mv $file.new $file.inp } \
         -label {(z,2n) MT=16} 
     $site_4_0.men89 add command \
         \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 17 $mat $EXPDAT} \
+        -label {(z,3n) MT=17} 
+    $site_4_0.men89 add command \
+        \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 18 $mat $EXPDAT} \
         -label {Fission MT=18} 
     $site_4_0.men89 add command \
@@ -8886,6 +8893,10 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     menu $site_3_0.menu95 \
         -activebackground #dcdcdc -activeforeground #000000 
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
+    $site_3_0.menu95 add command \
+        -command { exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Yaml-driven plots} 
+    $site_3_0.menu95 add separator \
+
     $site_3_0.menu95 add command \
         -command { pspdfView $file.ps } -label {PLOTC4 plots} 
     $site_3_0.menu95 add separator \
