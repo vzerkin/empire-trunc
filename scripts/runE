@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env /usr/bin/python
 # encoding: utf-8
 """
 runE.py
@@ -221,7 +221,8 @@ def runE(proj):
         }
 
         SKIPC4 = False
-        targetState = None
+       #  targetState = None
+        targetState = 0
 
         for line in open(proj + '.inp', 'r').readlines():
             # print('line: %s' % line)
@@ -496,7 +497,7 @@ def runE(proj):
     rm('TL')
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
-    rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
+    # rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
     #   rm('OPTFIT.CAL')
     #    rm('OMPAR0.DIR', 'INPUT0.DAT')
     rm('OMPAR.DIR')
