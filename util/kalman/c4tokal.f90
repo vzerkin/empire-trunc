@@ -238,9 +238,10 @@ program c4tokal
             kx(m) = kx(m) + 1
             fx%ic(kx(m)) = k
             fx%wt(kx(m)) = 1.D0            ! Default weights = 1.0
-          ! fx%wt(kx(m)) = 1.D0/fmt(m)%num  ! Normalizing by the number of experiments for each reaction
-          ! fx%wt(kx(m)) = 45.05D0/(sc%ndat)**0.5     ! Normalizing each experiment by the number of its points
-          ! fx%wt(kx(m)) = (sc%ndat)     ! Normalizing each experiment by the number of its points
+            ! fx%wt(kx(m)) = fmt(m)%num**0.5  ! Normalizing by the number of experiments for each reaction
+            ! fx%wt(kx(m)) = 45.05D0/(sc%ndat)**0.5     ! Normalizing each experiment by the number of its points
+            ! fx%wt(kx(m)) = (sc%ndat)**0.5     ! Normalizing each experiment by the number of its points
+            ! fx%wt(kx(m)) = sc%ndat     ! Normalizing each experiment by the number of its points
 
         end do
     end do
