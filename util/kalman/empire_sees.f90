@@ -20,8 +20,8 @@
     do
         read(12,'(A200)',end=100) line
         if(line(1:2) == 'GO') exit
-	read(line,'(A6,G10.5,4I5)',end=100) nam, xx, i1,i2,i3,i4
-	write(6,'(A6,2X,F10.4,4I5)') nam,xx,i1,i2,i3,i4
+        read(line,'(A6,G10.5,4I5)',end=100) nam, xx, i1,i2,i3,i4
+        write(6,'(A6,2X,F10.4,4I5)') nam,xx,i1,i2,i3,i4
     end do
     write(6,'(A2)') line(1:2)
 
