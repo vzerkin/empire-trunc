@@ -676,6 +676,8 @@
     read(11,10) dum,ne
     if(ne /= nd) then
         write(6,'(a,i0,2x,i0)') '*** No. of error points not equal to data points, ND,NE = ',nd,ne
+        write(6,'(a)') '*** Try to run "Clean previous Kalaman files" from the Kalman pulldown menu)'
+        write(6,'(a)') '*** Possibly different reaction(s) has been run previously.'
         stop 1
     endif
     read(11,20)(xx,z(i),i=1,nd)
