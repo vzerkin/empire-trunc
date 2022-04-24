@@ -61,7 +61,7 @@ libdir = $(EMPIREDIR)/lib
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee
+all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee weight_calc
 
 kalman : kalman.f90
 	$(FC) $(FFLAGS) -o $@ kalman.f90 $(STATIC)
@@ -94,6 +94,9 @@ newinp: newinp.f90
 
 empsee: empire_sees.f90
 	$(FC) $(FFLAGS) -o $@ empire_sees.f90 $(STATIC)
+
+weight_calc: weight_calc.f90
+	$(FC) $(FFLAGS) -o $@ weight_calc.f90 $(STATIC)
 
 $(libdir)/libendfio.a:
 	cd $(EMPIREDIR)/lib ; $(MAKE) FC=$(FC) $(FLG)
