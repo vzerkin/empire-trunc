@@ -1,6 +1,6 @@
-#$Rev: 5325 $
+#$Rev: 5348 $
 #$Author: mwherman $
-#$Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
+#$Date: 2022-04-26 21:29:33 +0200 (Di, 26 Apr 2022) $
 
 # set default compilers:
 
@@ -29,15 +29,15 @@ ifeq ($(FC),gfortran)
   #----GNU gfortran FORTRAN compiler
   #---------------------------------
   #----flags for production compilation with gfortran
-  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+  FFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math 
   #FFLAGS = -O3 -pg -std=legacy
   #----flags for debuging
-  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+  DFLAGS =  -O0 -g --bounds-check -std=legacy -ftrapv -cpp 
   # -pg shoudl be added for profiling
   #----flags for ECIS
   #EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp -L /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib
+  OFLAGS = -O0 -std=legacy -ftree-vectorize -ffast-math -cpp 
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -134,7 +134,7 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
 
 all: 
 	$(MAKE) empire
-	cd ../source-optman; $(MAKE) "FC=$(FC) $(FFLAGS)"; cd ../source
+	cd ../source-optman; $(MAKE) "FC=$(FC) $(OFLAGS)"; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
