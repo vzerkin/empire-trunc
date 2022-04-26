@@ -1,10 +1,10 @@
-#$Rev: 5348 $
+#$Rev: 5349 $
 #$Author: mwherman $
-#$Date: 2022-04-26 21:29:33 +0200 (Di, 26 Apr 2022) $
+#$Date: 2022-04-27 01:03:29 +0200 (Mi, 27 Apr 2022) $
 
 # set default compilers:
 
-CC     =  gcc
+CC   =  gcc
 FC   =  gfortran
 #FC  =  ifort
 #FC  =  af95
@@ -37,7 +37,7 @@ ifeq ($(FC),gfortran)
   #----flags for ECIS
   #EFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math
   #----flags for OPTMAN
-  OFLAGS = -O0 -std=legacy -ftree-vectorize -ffast-math -cpp 
+  OFLAGS = -O3 -std=legacy -ftree-vectorize -ffast-math -cpp 
   #----flags for debuging using gfortran compiler
   #----From http://www.macresearch.org/best-fortran-compiler-leopard
   #gfortran -g -fbounds-check -Wuninitialized -O -ftrapv -fimplicit-none -fno-automatic
@@ -134,7 +134,7 @@ OBJF = TLJs.o empcess.o empgdr.o HF-comp.o MSC-NVWY.o MSD-orion.o MSD-tristan.o 
 
 all: 
 	$(MAKE) empire
-	cd ../source-optman; $(MAKE) "FC=$(FC) $(OFLAGS)"; cd ../source
+	cd ../source-optman; $(MAKE) "FC=$(FC)"; cd ../source
 	cp ../source-optman/optmand .
 	#$(MAKE) optmand
 	rm -f .versionnumbers 2> /dev/null
