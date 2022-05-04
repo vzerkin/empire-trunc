@@ -1,6 +1,6 @@
-ccc   * $Rev: 5350 $
+ccc   * $Rev: 5351 $
 ccc   * $Author: gnobre $
-ccc   * $Date: 2022-05-04 22:25:30 +0200 (Mi, 04 Mai 2022) $
+ccc   * $Date: 2022-05-04 22:50:41 +0200 (Mi, 04 Mai 2022) $
 
       SUBROUTINE INPUT
 ccc
@@ -4824,8 +4824,8 @@ C-----
          IF (name.EQ.'ISOMER') THEN
          IF(val.le.0.5d0) THEN
               WRITE (8,
-     &        '('' Minimum half life of the considered isomers < 0.5s !''
-     &         ,F6.3)') val
+     &        '('' Minimum half life of the considered isomers < '',
+     &          ''0.5s !'',F6.3)') val
               WRITE (8,'('' Value reset to 0.5 s'')')
               TISomer = 0.5d0
          GOTO 100
