@@ -1,6 +1,6 @@
-ccc   * $Rev: 5338 $
-ccc   * $Author: mwherman $
-ccc   * $Date: 2022-04-24 23:57:53 +0200 (So, 24 Apr 2022) $
+ccc   * $Rev: 5350 $
+ccc   * $Author: gnobre $
+ccc   * $Date: 2022-05-04 22:25:30 +0200 (Mi, 04 Mai 2022) $
 
       SUBROUTINE INPUT
 ccc
@@ -347,7 +347,7 @@ C        Scaling factor for direct processes consideration for complex projectil
          DEFnuc = 0.d0
          DEFormed = .FALSE.  
          RECoil = 1.d0    ! Default 
-         TISomer = 1.d0   ! 1 sec. default threshold for being isomer
+         TISomer = 0.5d0   ! half sec. default threshold for being isomer
 C        S-factor default to zero
          SFAct = 0
              
@@ -4822,12 +4822,12 @@ C-----
          ENDIF
 C-----
          IF (name.EQ.'ISOMER') THEN
-         IF(val.le.1.d0) THEN
+         IF(val.le.0.5d0) THEN
               WRITE (8,
-     &        '('' Minimum half life of the considered isomers < 1s !''
+     &        '('' Minimum half life of the considered isomers < 0.5s !''
      &         ,F6.3)') val
-              WRITE (8,'('' Value reset to 1 s'')')
-              TISomer = 1.d0
+              WRITE (8,'('' Value reset to 0.5 s'')')
+              TISomer = 0.5d0
          GOTO 100
          ENDIF
             TISomer = val
