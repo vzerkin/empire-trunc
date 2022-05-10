@@ -1,6 +1,6 @@
-! $Rev: 5340 $
+! $Rev: 5353 $
 ! $Author: mwherman $
-! $Date: 2022-04-25 00:12:08 +0200 (Mo, 25 Apr 2022) $
+! $Date: 2022-05-10 04:38:13 +0200 (Di, 10 Mai 2022) $
 !
 MODULE TLJs
    IMPLICIT NONE
@@ -57,6 +57,7 @@ MODULE TLJs
 CONTAINS
 
    !----------------------------------------------------------------------------------------------------
+
    SUBROUTINE AllocCCmatr(nch)
       IMPLICIT NONE
       INTEGER, INTENT(IN) :: nch
@@ -130,13 +131,15 @@ CONTAINS
       !ZItmp1 = 0.d0
 
       RETURN
-20    WRITE(8,*)  'ERROR: Insufficient memory for CC matrices in HRTW'
+      20 WRITE(8,*)  'ERROR: Insufficient memory for CC matrices in HRTW'
       WRITE(12,*) 'ERROR: Insufficient memory for CC matrices in HRTW'
       STOP 'ERROR: Insufficient memory for CC matrices in HRTW'
-30    WRITE(8,*)  'ERROR: Insufficient memory for EW matrices in HRTW'
+      30 WRITE(8,*)  'ERROR: Insufficient memory for EW matrices in HRTW'
       WRITE(12,*) 'ERROR: Insufficient memory for EW matrices in HRTW'
       STOP 'ERROR: Insufficient memory for EW matrices in HRTW'
    END SUBROUTINE AllocCCmatr
+
+   !----------------------------------------------------------------------------------------------------
 
    SUBROUTINE AllocTLJmatr(nch)
       IMPLICIT NONE
@@ -348,544 +351,527 @@ CONTAINS
    !----------------------------------------------------------------------------------------------------
 
    LOGICAL FUNCTION Read_CC_matrices()
-   IMPLICIT NONE
-   DOUBLE PRECISION jc, jj, sreal, simag
-   INTEGER nceq, nc1, nc2, i1, i2, nelem, ncc, nch, npmat, numat
-   INTEGER nlev, nl
-   CHARACTER*1 parc
-   TYPE (cc_channel), POINTER :: ps_tlj
-   TYPE (cc_umatrix), POINTER :: ps_pmatrix
-   TYPE (cc_umatrix), POINTER :: ps_smatrix
-   TYPE (cc_umatrix), POINTER :: ps_umatrix
-   TYPE (cc_pdiag), POINTER :: ps_pdiag
-   logical debug
-   DATA debug/.false./
+      IMPLICIT NONE
+      DOUBLE PRECISION jc, jj, sreal, simag
+      INTEGER nceq, nc1, nc2, i1, i2, nelem, ncc, nch, npmat, numat
+      INTEGER nlev, nl
+      CHARACTER*1 parc
+      TYPE (cc_channel), POINTER :: ps_tlj
+      TYPE (cc_umatrix), POINTER :: ps_pmatrix
+      TYPE (cc_umatrix), POINTER :: ps_smatrix
+      TYPE (cc_umatrix), POINTER :: ps_umatrix
+      TYPE (cc_pdiag), POINTER :: ps_pdiag
+      logical debug
+      DATA debug/.false./
 
-   Read_CC_matrices = .FALSE.
+      Read_CC_matrices = .FALSE.
 
-   nch = 0
-   npmat = 0
-   numat = 0
+      nch = 0
+      npmat = 0
+      numat = 0
 
-   !==Reading Pchan
-   DO ncc = 1, MAX_cc_mod
-     !--jc,parc are the channel spin and parity
-     !--nceq is the number of coupled equations
+      !==Reading Pchan
+      DO ncc = 1, MAX_cc_mod
+        !--jc,parc are the channel spin and parity
+        !--nceq is the number of coupled equations
 
-     !READ (126,END=10,ERR=10) jc, parc, nceq
-     READ (126,END=10,ERR=10) jc, parc, nceq
-     !READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq
-     !write(*,*) jc,parc,nceq
-     npmat = npmat + (nceq*(nceq+1))/2
-     numat = numat + nceq**2
-     DO i1 = 1, nceq
-       nch = nch + 1
-       ps_tlj => STLcc(nch)
-       READ (126,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
-       !READ (126,*,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
-       !write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') nlev,nl,sngl(jj),sngl(sreal),sngl(jc),ps_tlj%Pcn
-       ps_tlj%Jcn = jc
-       ps_tlj%Pcn = 1
-       if(parc == '-') ps_tlj%Pcn = -1
-       ps_tlj%nceq = nceq
-       ps_tlj%lev = nlev
-       ps_tlj%l   = nl
-       ps_tlj%j   = jj
-       ps_tlj%pchan = sreal
-       ps_tlj%tlj = sreal
-     ENDDO
-   ENDDO
-10 if (debug) WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
-   
-   Read_CC_matrices = .TRUE.
+        !READ (126,END=10,ERR=10) jc, parc, nceq
+        READ (126,END=10,ERR=10) jc, parc, nceq
+        !READ (126,'(1x,f9.1,4x,a1,1x,i4)',END=10,ERR=10) jc, parc, nceq
+        !write(*,*) jc,parc,nceq
+        npmat = npmat + (nceq*(nceq+1))/2
+        numat = numat + nceq**2
+        DO i1 = 1, nceq
+          nch = nch + 1
+          ps_tlj => STLcc(nch)
+          READ (126,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
+          !READ (126,*,END = 4,ERR = 4) nc1, sreal, nlev, nl, jj
+          !write(*,'(1x,I3,1x,I3,1x,F5.1,d12.6,1x,F5.1,1x,I2)') nlev,nl,sngl(jj),sngl(sreal),sngl(jc),ps_tlj%Pcn
+          ps_tlj%Jcn = jc
+          ps_tlj%Pcn = 1
+          if(parc == '-') ps_tlj%Pcn = -1
+          ps_tlj%nceq = nceq
+          ps_tlj%lev = nlev
+          ps_tlj%l   = nl
+          ps_tlj%j   = jj
+          ps_tlj%pchan = sreal
+          ps_tlj%tlj = sreal
+        ENDDO
+      ENDDO
+      10 if (debug) WRITE(*,*) 'Pchan channels read:',nch,' expected',MAX_cc_mod
 
-   IF(INTerf==0) RETURN
+      Read_CC_matrices = .TRUE.
 
-   if (debug) write(*,*) 'nch,npmat,numat=',nch,npmat,numat
+      IF(INTerf==0) RETURN
 
-   CALL AllocEWmatr(nch,npmat,numat)
-   Read_CC_matrices = .FALSE.
+      if (debug) write(*,*) 'nch,npmat,numat=',nch,npmat,numat
 
-   ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
-   !==Reading Pmatr
-   nch = 0
-   DO ncc = 1, MAX_cc_mod
-     !--jc,parc are the channel spin and parity
-     !--nceq is the number of coupled equations
-     READ (125,END=12,ERR=12) jc, parc, nceq
-     !READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq
-     !write(*,*) jc,parc,nceq
-     !--Loop over the number of coupled equations (squared)
-     nelem = (nceq*(nceq+1))/2
-     DO i1 = 1, nelem
-       nch = nch + 1
-       ps_pmatrix => CCpmatrix(nch)
-       READ (125,END = 5,ERR = 5) nc1, nc2, sreal, simag
-       !READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
-       !write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
-       ps_pmatrix%Jcn = jc
-       ps_pmatrix%Pcn = 1
-       if(parc == '-') ps_pmatrix%Pcn = -1
-       ps_pmatrix%nceq = nceq
-       ps_pmatrix%irow = nc1
-       ps_pmatrix%icol = nc2
-       ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
-     ENDDO
-   ENDDO
+      CALL AllocEWmatr(nch,npmat,numat)
+      Read_CC_matrices = .FALSE.
 
-12 MAX_pmatr = nch
-   if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
-   if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
-   if (debug) pause
+      ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCpmatrix(:)
+      !==Reading Pmatr
+      nch = 0
+      DO ncc = 1, MAX_cc_mod
+        !--jc,parc are the channel spin and parity
+        !--nceq is the number of coupled equations
+        READ (125,END=12,ERR=12) jc, parc, nceq
+        !READ (125,'(1x,f9.1,4x,a1,1x,i4)',END=12,ERR=12) jc, parc, nceq
+        !write(*,*) jc,parc,nceq
+        !--Loop over the number of coupled equations (squared)
+        nelem = (nceq*(nceq+1))/2
+        DO i1 = 1, nelem
+          nch = nch + 1
+          ps_pmatrix => CCpmatrix(nch)
+          READ (125,END = 5,ERR = 5) nc1, nc2, sreal, simag
+          !READ (125,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
+          !write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
+          ps_pmatrix%Jcn = jc
+          ps_pmatrix%Pcn = 1
+          if(parc == '-') ps_pmatrix%Pcn = -1
+          ps_pmatrix%nceq = nceq
+          ps_pmatrix%irow = nc1
+          ps_pmatrix%icol = nc2
+          ps_pmatrix%umatrix = CMPLX(sreal,simag,8)
+        ENDDO
+      ENDDO
 
-   ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCsmatrix(:)
-   !==Reading Smatr
-   nch = 0
-   DO ncc = 1, MAX_cc_mod
-     !--jc,parc are the channel spin and parity
-     !--nceq is the number of coupled equations
-     READ (58,END=13,ERR=13) jc, parc, nceq
-     !READ (58,'(1x,f9.1,4x,a1,1x,i4)',END=13,ERR=13) jc, parc, nceq
-     if (debug) write(*,*) jc,parc,nceq
-     !--Loop over the number of coupled equations (squared)
-     nelem = (nceq*(nceq+1))/2
-     DO i1 = 1, nelem
-       nch = nch + 1
-       ps_smatrix => CCsmatrix(nch)
-       READ (58,END = 6,ERR = 6) nc1, nc2, sreal, simag
-       !READ (58,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
-       if (debug) write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
-       ps_smatrix%Jcn = jc
-       ps_smatrix%Pcn = 1
-       if(parc == '-') ps_smatrix%Pcn = -1
-       ps_smatrix%nceq = nceq
-       ps_smatrix%irow = nc1
-       ps_smatrix%icol = nc2
-       ps_smatrix%umatrix = CMPLX(sreal,simag,8)
-     ENDDO
-   ENDDO
+      12 MAX_pmatr = nch
+      if (debug) WRITE(*,*) 'Pmatrix channels read:',nch
+      if (debug) WRITE(*,*) 'Pmatrix channels calc:',npmat
+      if (debug) pause
 
-13 if (debug) WRITE(*,*) 'Smatrix channels read:',nch
-   if (debug) WRITE(*,*) 'Smatrix channels calc:',npmat
+      ! TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCsmatrix(:)
+      !==Reading Smatr
+      nch = 0
+      DO ncc = 1, MAX_cc_mod
+        !--jc,parc are the channel spin and parity
+        !--nceq is the number of coupled equations
+        READ (58,END=13,ERR=13) jc, parc, nceq
+        !READ (58,'(1x,f9.1,4x,a1,1x,i4)',END=13,ERR=13) jc, parc, nceq
+        if (debug) write(*,*) jc,parc,nceq
+        !--Loop over the number of coupled equations (squared)
+        nelem = (nceq*(nceq+1))/2
+        DO i1 = 1, nelem
+          nch = nch + 1
+          ps_smatrix => CCsmatrix(nch)
+          READ (58,END = 6,ERR = 6) nc1, nc2, sreal, simag
+          !READ (58,'(1x,2(I4,1x),2(D15.9,1x))',END = 6,ERR = 6) nc1, nc2, sreal, simag
+          if (debug) write(*,'(1x,I4,1x,2(I3,1x),2(1x,d12.6))') nch,nc1,nc2,sreal,simag
+          ps_smatrix%Jcn = jc
+          ps_smatrix%Pcn = 1
+          if(parc == '-') ps_smatrix%Pcn = -1
+          ps_smatrix%nceq = nceq
+          ps_smatrix%irow = nc1
+          ps_smatrix%icol = nc2
+          ps_smatrix%umatrix = CMPLX(sreal,simag,8)
+        ENDDO
+      ENDDO
 
-   !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
-   !==Reading Umatr
-   nch = 0
-   DO ncc = 1, MAX_cc_mod
-      !--jc,parc are the channel spin and parity
-      !--nceq is the number of coupled equations
-      READ (60,END=14,ERR=14) jc, parc, nceq
-      !READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq
-      if (debug) write(*,*) jc,parc,nceq
-      !
-      !--Loop over the number of coupled equations
-      DO i1 = 1, nceq
-         ! READ (60,END = 7,ERR = 7) !nc1
-         DO i2 = 1, nceq
-            nch = nch + 1
-            ps_umatrix => CCumatrix(nch)
-            READ (60,END = 7,ERR = 7) sreal,simag
-            !READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
-            if (debug) write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sreal,simag
-            ps_umatrix%Jcn = jc
-            ps_umatrix%Pcn = 1
-            if(parc == '-') ps_umatrix%Pcn = -1
-            ps_umatrix%nceq = nceq
-            ps_umatrix%irow = i2
-            ps_umatrix%icol = i1
-            ps_umatrix%umatrix = CMPLX(sreal,simag,8)
+      13 if (debug) WRITE(*,*) 'Smatrix channels read:',nch
+      if (debug) WRITE(*,*) 'Smatrix channels calc:',npmat
+
+      !TYPE(cc_umatrix), PUBLIC, ALLOCATABLE, TARGET :: CCumatrix(:)
+      !==Reading Umatr
+      nch = 0
+      DO ncc = 1, MAX_cc_mod
+         !--jc,parc are the channel spin and parity
+         !--nceq is the number of coupled equations
+         READ (60,END=14,ERR=14) jc, parc, nceq
+         !READ (60,'(1x,f9.1,4x,a1,1x,i4)',END=14,ERR=14) jc, parc, nceq
+         if (debug) write(*,*) jc,parc,nceq
+         !
+         !--Loop over the number of coupled equations
+         DO i1 = 1, nceq
+            ! READ (60,END = 7,ERR = 7) !nc1
+            DO i2 = 1, nceq
+               nch = nch + 1
+               ps_umatrix => CCumatrix(nch)
+               READ (60,END = 7,ERR = 7) sreal,simag
+               !READ (60,'(1x,D15.9,1x,D15.9)',END = 7,ERR = 7) sreal,simag
+               if (debug) write(*,'(1x,I3,1x,I3,2(1x,d12.6))') i1,i2,sreal,simag
+               ps_umatrix%Jcn = jc
+               ps_umatrix%Pcn = 1
+               if(parc == '-') ps_umatrix%Pcn = -1
+               ps_umatrix%nceq = nceq
+               ps_umatrix%irow = i2
+               ps_umatrix%icol = i1
+               ps_umatrix%umatrix = CMPLX(sreal,simag,8)
+            ENDDO
          ENDDO
       ENDDO
-   ENDDO
 
-14 MAX_umatr = nch
-   if (debug) WRITE(*,*) 'Umatrix channels read:',nch
-   if (debug) WRITE(*,*) 'Umatrix channels calc:',numat
-   if (debug) pause 'End of Umatrix read, press any key'
+      14 MAX_umatr = nch
+      if (debug) WRITE(*,*) 'Umatrix channels read:',nch
+      if (debug) WRITE(*,*) 'Umatrix channels calc:',numat
+      if (debug) pause 'End of Umatrix read, press any key'
 
-   !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)
-   !==Reading Pdiag
-   nch = 0
-   DO ncc = 1, MAX_cc_mod
-     !--jc,parc are the channel spin and parity
-     !--nceq is the number of coupled equations
-     READ (61,END=16,ERR=16) jc, parc, nceq
-     !READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq
-     ! write(*,*) jc,parc,nceq
-     !
-     !--Loop over the number of coupled equations
-     DO i1 = 1, nceq
-       nch = nch + 1
-       ps_pdiag => CCpdiag(nch)
-       READ (61,END = 8,ERR = 8) sreal
-       !READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
-       if (debug) write(*,*) nc1,sreal
-       ps_pdiag%Jcn = jc
-       ps_pdiag%Pcn = 1
-       if(parc == '-') ps_pdiag%Pcn = -1
-       ps_pdiag%nceq = nceq
-       ps_pdiag%pdiag = sreal
-     ENDDO
-   ENDDO
-
-16 if (debug) WRITE(*,*) 'Pdiag channels read:',nch
-   if (debug) WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
-   if (debug) pause
-
-Read_CC_matrices = .TRUE.
-
-RETURN
-
-4 WRITE(8,*)' WARNING: Problem reading Pchan matrix'
-STOP ' WARNING: Problem reading Pchan matrix'
-5 WRITE(8,*)' WARNING: Problem reading EW Pmatrix'
-STOP ' WARNING: Problem reading EW Pmatrix'
-6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
-STOP ' WARNING: Problem reading EW Smatrix'
-7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
-STOP ' WARNING: Problem reading EW Umatrix'
-8 WRITE(8,*)' WARNING: Problem reading EW Pdiag matrix'
-STOP ' WARNING: Problem reading EW Pdiag'
-
-END FUNCTION Read_CC_matrices
-
-SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
-   IMPLICIT NONE
-   REAL*8 Jcn
-   INTEGER pcn, ndim, ncc, nccu, nmaxp, nmaxu, i1, i2, irow, icol, my, IER
-   REAL*8 epsil, dtmp
-   DATA epsil/1.d-12/
-   LOGICAL debug
-   DATA debug/.false./
-   ncc  = 0
-   ndim = 0
-   nmaxp = 0
-   nmaxu = 0
-   
-   if (debug) write(*,*) 'Pdiag, MAX_cc_mod:',MAX_cc_mod
-
-   DO i2 = 1, MAX_cc_mod
-      ndim  = 0
-      nmaxp = 0
-      if(NINT(2*STLcc(i2)%Jcn) == NINT(2*Jcn) .and. STLcc(i2)%Pcn == Pcn) THEN
-         if(ncc.eq.0) ncc=i2
-
-         ndim = STLcc(i2)%nceq
-
-         CALL AllocCCmatr(ndim)
-
-         ! reading diagonal elements p_{alpha}
-         nmaxp = i2 + ndim - 1
-         if (debug) write(*,*) 'J,Pi,nceq=',sngl(STLcc(i2)%Jcn), STLcc(i2)%Pcn, STLcc(i2)%nceq, nmaxp
-         IF (INTerf==0) THEN
-            do i1 = i2, nmaxp
-               if (debug) WRITE (*,*) i1, i1 - i2 +1, STLcc(i1)%tlj
-               Pdiag(i1 - i2 +1) = STLcc(i1)%tlj
-            enddo
-         ELSE
-            do i1 = i2, nmaxp
-               if (debug) WRITE (*,*) i1, i1 - i2 +1, CCpdiag(i1)%pdiag
-               Pdiag(i1 - i2 +1) = CCpdiag(i1)%pdiag
-            enddo
-         END IF
-
-         EXIT
-      endif
-   ENDDO
-   if (debug) write(*,*) ' Prepare_CC: Pdiag', sngl(Jcn), pcn, ncc, nmaxp
-   
-   IF(INTerf==0) RETURN
-       
-   ! if(NINT(2*CCpmatrix(nccu)%Jcn) == 1 .and. CCpmatrix(nccu)%Pcn == +1) debug = .TRUE.
-   if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
-
-   DO nccu = 1, MAX_umatr
-      ndim =  0
-      nmaxu = 0
-      if(NINT(2*CCumatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
-
-      ndim = CCumatrix(nccu)%nceq
-      nmaxu = nccu + ndim*ndim - 1                                                                           
-
-      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(nccu)%Jcn), CCumatrix(nccu)%Pcn, CCumatrix(nccu)%nceq
-      if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
-
-
-      do i1 = nccu, nmaxu
-        ! if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
-        ! Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
-        ! defining Umatr as TRANSPOSE(UMatr)
-        if (debug) WRITE (*,*) CCumatrix(i1)%icol, CCumatrix(i1)%irow, CCumatrix(i1)%umatrix
-          Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
-      enddo
-      if (debug) write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
-
-      if (debug) pause
-      EXIT
-
-   ENDDO
-
-   ! debug = .false.
-
-   if (debug) write(*,*) 'Pmatr, MAX_pumatr: ',MAX_umatr
-   DO nccu = 1, MAX_pmatr
-      ndim =  0
-      nmaxu = 0
-      if(NINT(2*CCpmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCpmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
-
-      ndim = CCpmatrix(nccu)%nceq
-      nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
-
-      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCpmatrix(nccu)%Jcn), CCpmatrix(nccu)%Pcn, CCpmatrix(nccu)%nceq
-      if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
-
-      do i1 = nccu, nmaxu
-        icol = CCpmatrix(i1)%irow
-        irow = CCpmatrix(i1)%icol
-         if(irow == icol) then
-           Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
-         else
-           Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix 
-           Pmatr(icol,irow) =  CONJG(Pmatr(irow,icol))  ! Pmatrix is Hermitian
-         endif
-      enddo
-            
-      if (debug) then
-        WRITE (*,*) 'preparing Pmatrix...'
-        do irow = 1, ndim
-         do icol = 1, ndim
-            WRITE (*,*) irow, icol, Pmatr(irow,icol) 
-         enddo
-        enddo
-        pause
-      endif
-
-     EXIT
-
-   ENDDO
-    if (debug) write(*,*) ' Prepare_CC: Pmatr', sngl(Jcn), pcn, nccu, nmaxu
-    if (debug) pause
-
-    if (debug) write(*,*) 'Smatr, MAX_smatr: ',MAX_pmatr
-
-    DO nccu = 1, MAX_pmatr
-      ndim =  0
-      nmaxu = 0
-      if(NINT(2*CCsmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCsmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
-
-      ndim = CCsmatrix(nccu)%nceq
-      nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
-
-      if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCsmatrix(nccu)%Jcn), CCsmatrix(nccu)%Pcn, CCsmatrix(nccu)%nceq
-      if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
-
-      do i1 = nccu, nmaxu
-	     icol = CCsmatrix(i1)%irow
-		 irow = CCsmatrix(i1)%icol
-         if(irow == icol) then
-           Smatr(irow,icol) =  CCsmatrix(i1)%umatrix
-         else
-           Smatr(irow,icol) =  CCSmatrix(i1)%umatrix 
-           Smatr(icol,irow) =  Smatr(irow,icol)      ! Smatrix is symmetric !!!
-         endif
-      enddo
-      
-	  EXIT
-
-    ENDDO
-    if (debug) write(*,*) ' Prepare_CC: Smatr', sngl(Jcn), pcn, nccu, nmaxu
-    if (debug) pause
-
-
-    IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
-    ALLOCATE(Sdiag(ndim,ndim),STAT=my)
-    IF(my /= 0) GOTO 30
-    
-	IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
-    ALLOCATE(ZItmp(ndim,ndim),STAT=my)
-    IF(my /= 0) GOTO 30
-
-    IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
-    ALLOCATE(ZRtmp1(ndim,ndim),STAT=my)
-    IF(my /= 0) GOTO 30
-    ZRtmp1 = 0.d0
-
-    IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
-    ALLOCATE(ZItmp1(ndim,ndim),STAT=my)
-    IF(my /= 0) GOTO 30
-    ZItmp1 = 0.d0
-
-    ! setting the complex identity matrix to call DIAG()
-    DO i1=1,ndim
-      ZRtmp1(i1,i1) = 1.d0
-    ENDDO
-    Sdiag  = REAL(Smatr)
-    ZItmp  = IMAG(Smatr)
-
-	IF(debug) then
-      write(*,*) 'ECIS Smatrix read'
-      DO i1 = 1,ndim
-        DO i2 = 1,ndim
-          write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Smatr(i1,i2)
-        ENDDO
-      ENDDO
-    ENDIF
-
-    CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,ndim,epsil,dtmp,IER)
-    IF(IER/=0) WRITE (8,*) &
-	'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN J=',sngl(Jcn),' pi=',pcn
-    
-	IF(debug) then
-      write(*,*) 'Diagonal Smatrix'
-      DO i1 = 1,ndim
-        DO i2 = 1,ndim
-          write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Sdiag(i1,i2),ZItmp(i1,i2)
-        ENDDO
-      ENDDO
-    ENDIF
-	       
-    ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
-    ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
-    DO i1=1,ndim
-      Sphase(i1) = datan(Sdiag(i1,i1)) ! from below Eq.(21), phi_{alpha}
-      if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i1, Sdiag(i1,i1),ZItmp(i1,i1), &
-          ' phi(alpha)=',Sphase(i1)
-    ENDDO
-    ! We diagonalize Smatr to calculate the phases from its diagonal elements
-    ! However, we were not able to verify that Umatr also diagonalized Smatr
-    ! Clearly, we can not calculate Umatr from Smatr as papers clearly state
-
-    IF(allocated(Sdiag) ) DEALLOCATE(Sdiag)
-    IF(allocated(ZItmp) ) DEALLOCATE(ZItmp)
-    IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
-    IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
-
-    RETURN
-
-30  WRITE(8,*)  'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
-    WRITE(12,*) 'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
-    STOP        'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
-
-END SUBROUTINE PREPARE_CCmatr
-
-SUBROUTINE QDIAG(ZR,ZI,XR,XI,NC,EPS,AX,IER)
+      !TYPE(cc_pdiag), PUBLIC, ALLOCATABLE, TARGET :: CCpdiag(:)
+      !==Reading Pdiag
+      nch = 0
+      DO ncc = 1, MAX_cc_mod
+        !--jc,parc are the channel spin and parity
+        !--nceq is the number of coupled equations
+        READ (61,END=16,ERR=16) jc, parc, nceq
+        !READ (61,'(1x,f9.1,4x,a1,1x,i4)',END=16,ERR=16) jc, parc, nceq
+        ! write(*,*) jc,parc,nceq
         !
-        ! TAKEN FROM ECIS2006 by J. RAYNAL
-        ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE
-        ! JACOBI'S METHOD.
-        ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.
-        !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.
-        !            NC:     DIMENSION OF SQUARE MATRICES ZR,ZI,XR AND XI.
-        !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.
-        ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.
-        !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.
-        !            XR,XI:  EIGENVECTORS.
-        !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.
-        !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.
-        !***********************************************************************
-        IMPLICIT NONE
-        INTEGER NC
-        REAL*8 ZR,ZI,XR,XI
-        DIMENSION ZR(NC,NC),ZI(NC,NC),XR(NC,NC),XI(NC,NC)
-        REAL*8 EPS,AX
-        INTEGER IER
-        ! local variables
-        INTEGER NT,I,J,L,M
-        REAL*8 AR,AI,AY,BI,BR,U,V,UC,US,TC,TS,UCC,UCS,USC,USS
-
-        IER=0
-        NT=0
-1       NT=NT+1
-        IF (NT.GT.4*NC*NC) GO TO 6
-        AX=0.D0
-        L=1
-        M=2
-      
-        !     if(NT<=1) then
-        !       write(*,*) 'Inside QDIAG to diag, iter',NT,NC,sngl(EPS)
-        !       DO I = 1,NC
-        !           write(*,'(1x,9(d12.6,1x,d12.6/)') (ZR(I,J),ZI(I,J),J=1,NC)
-        !         ENDDO
-        !        write(*,*) 'Inside QDIAG unitary, iter'
-        !        DO I = 1,NC
-        !            write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
-        !          ENDDO
-        !     endif
-
-        ! SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.
-        DO I=1,NC
-            DO J=I,NC
-                IF (ZR(J,I).EQ.0.D0) ZR(I,J)=0.D0
-                IF (ZI(J,I).EQ.0.D0) ZI(I,J)=0.D0
-                IF (ZR(I,J).EQ.0.D0) ZR(J,I)=0.D0
-                IF (ZI(I,J).EQ.0.D0) ZI(J,I)=0.D0
-                AR=(ZR(I,J)+ZR(J,I))/2.D0
-                AI=(ZI(I,J)-ZI(J,I))/2.D0
-                ZR(J,I)=AR
-                ZR(I,J)=AR
-                ZI(I,J)=AI
-                ZI(J,I)=-AI
-                IF (I.EQ.J) CYCLE
-                AY=ZR(I,J)**2+ZI(I,J)**2
-                IF (AX.GT.AY) CYCLE
-                AX=AY
-                L=I
-                M=J
-            ENDDO
+        !--Loop over the number of coupled equations
+        DO i1 = 1, nceq
+          nch = nch + 1
+          ps_pdiag => CCpdiag(nch)
+          READ (61,END = 8,ERR = 8) sreal
+          !READ (61,'(1x,I4,1x,D15.9)',END = 8,ERR = 8) nc1, sreal
+          if (debug) write(*,*) nc1,sreal
+          ps_pdiag%Jcn = jc
+          ps_pdiag%Pcn = 1
+          if(parc == '-') ps_pdiag%Pcn = -1
+          ps_pdiag%nceq = nceq
+          ps_pdiag%pdiag = sreal
         ENDDO
-        IF (AX.EQ.0.D0) RETURN
-        ! ELEMENTARY TRANSFORMATION.
-        U=DATAN2(-ZI(L,M),ZR(L,M))/2.D0
-        V=DATAN2(2.D0*DSQRT(ZR(L,M)**2+ZI(L,M)**2),ZR(M,M)-ZR(L,L))/2.D0
-        UC=DCOS(U)
-        US=DSIN(U)
-        TC=DCOS(V)
-        TS=-DSIN(V)
-        UCC=UC*TC
-        UCS=UC*TS
-        USC=US*TC
-        USS=US*TS
-        ! TRANSFORMATION OF ROWS.
-        DO I=1,NC
-            AR=XR(I,L)*UCC+XI(I,L)*USC+XR(I,M)*UCS-XI(I,M)*USS
-            BR=-XR(I,L)*UCS-XI(I,L)*USS+XR(I,M)*UCC-XI(I,M)*USC
-            AI=XI(I,L)*UCC-XR(I,L)*USC+XI(I,M)*UCS+XR(I,M)*USS
-            BI=-XI(I,L)*UCS+XR(I,L)*USS+XI(I,M)*UCC+XR(I,M)*USC
-            XR(I,L)=AR
-            XR(I,M)=BR
-            XI(I,L)=AI
-            XI(I,M)=BI
-            AR=ZR(I,L)*UCC+ZI(I,L)*USC+ZR(I,M)*UCS-ZI(I,M)*USS
-            BR=-ZR(I,L)*UCS-ZI(I,L)*USS+ZR(I,M)*UCC-ZI(I,M)*USC
-            AI=ZI(I,L)*UCC-ZR(I,L)*USC+ZI(I,M)*UCS+ZR(I,M)*USS
-            BI=-ZI(I,L)*UCS+ZR(I,L)*USS+ZI(I,M)*UCC+ZR(I,M)*USC
-            ZR(I,L)=AR
-            ZR(I,M)=BR
-            ZI(I,L)=AI
-            ZI(I,M)=BI
-        ENDDO
-        ! TRANSFORMATION OF COLUMNS.
-        DO I=1,NC
-            AR=ZR(L,I)*UCC-ZI(L,I)*USC+ZR(M,I)*UCS+ZI(M,I)*USS
-            BR=-ZR(L,I)*UCS+ZI(L,I)*USS+ZR(M,I)*UCC+ZI(M,I)*USC
-            AI=ZI(L,I)*UCC+ZR(L,I)*USC+ZI(M,I)*UCS-ZR(M,I)*USS
-            BI=-ZI(L,I)*UCS-ZR(L,I)*USS+ZI(M,I)*UCC-ZR(M,I)*USC
-            IF (DABS(AR).LT.EPS) AR=0.D0
-            IF (DABS(BR).LT.EPS) BR=0.D0
-            IF (DABS(AI).LT.EPS) AI=0.D0
-            IF (DABS(BI).LT.EPS) BI=0.D0
-            ZR(L,I)=AR
-            ZR(M,I)=BR
-            ZI(L,I)=AI
-            ZI(M,I)=BI
-        ENDDO
-        GO TO 1
-6       IER=-1
-        RETURN
-END SUBROUTINE QDIAG
+      ENDDO
 
-!**************************************************************
+      16 if (debug) WRITE(*,*) 'Pdiag channels read:',nch
+      if (debug) WRITE(*,*) 'Pdiag channels expected:',MAX_cc_mod
+      if (debug) pause
+
+      Read_CC_matrices = .TRUE.
+
+      RETURN
+
+      4 WRITE(8,*)' WARNING: Problem reading Pchan matrix'
+      STOP ' WARNING: Problem reading Pchan matrix'
+      5 WRITE(8,*)' WARNING: Problem reading EW Pmatrix'
+      STOP ' WARNING: Problem reading EW Pmatrix'
+      6 WRITE(8,*)' WARNING: Problem reading EW Smatr matrix'
+      STOP ' WARNING: Problem reading EW Smatrix'
+      7 WRITE(8,*)' WARNING: Problem reading EW Umatr matrix'
+      STOP ' WARNING: Problem reading EW Umatrix'
+      8 WRITE(8,*)' WARNING: Problem reading EW Pdiag matrix'
+      STOP ' WARNING: Problem reading EW Pdiag'
+
+   END FUNCTION Read_CC_matrices
+
+   !----------------------------------------------------------------------------------------------------
+
+   SUBROUTINE PREPARE_CCmatr(Jcn, pcn, ncc, nmaxp, nmaxu, ndim)
+      IMPLICIT NONE
+      REAL*8 Jcn
+      INTEGER pcn, ndim, ncc, nccu, nmaxp, nmaxu, i1, i2, irow, icol, my, IER
+      REAL*8 epsil, dtmp
+      DATA epsil/1.d-12/
+      LOGICAL debug
+      DATA debug/.false./
+      ncc  = 0
+      ndim = 0
+      nmaxp = 0
+      nmaxu = 0
+
+      if (debug) write(*,*) 'Pdiag, MAX_cc_mod:',MAX_cc_mod
+
+      DO i2 = 1, MAX_cc_mod
+         ndim  = 0
+         nmaxp = 0
+         if(NINT(2*STLcc(i2)%Jcn) == NINT(2*Jcn) .and. STLcc(i2)%Pcn == Pcn) THEN
+            if(ncc.eq.0) ncc=i2
+
+            ndim = STLcc(i2)%nceq
+
+            CALL AllocCCmatr(ndim)
+
+            ! reading diagonal elements p_{alpha}
+            nmaxp = i2 + ndim - 1
+            if (debug) write(*,*) 'J,Pi,nceq=',sngl(STLcc(i2)%Jcn), STLcc(i2)%Pcn, STLcc(i2)%nceq, nmaxp
+            IF (INTerf==0) THEN
+               do i1 = i2, nmaxp
+                  if (debug) WRITE (*,*) i1, i1 - i2 +1, STLcc(i1)%tlj
+                  Pdiag(i1 - i2 +1) = STLcc(i1)%tlj
+               enddo
+            ELSE
+               do i1 = i2, nmaxp
+                  if (debug) WRITE (*,*) i1, i1 - i2 +1, CCpdiag(i1)%pdiag
+                  Pdiag(i1 - i2 +1) = CCpdiag(i1)%pdiag
+               enddo
+            END IF
+
+            EXIT
+         endif
+      ENDDO
+      if (debug) write(*,*) ' Prepare_CC: Pdiag', sngl(Jcn), pcn, ncc, nmaxp
+
+      IF(INTerf==0) RETURN
+
+      ! if(NINT(2*CCpmatrix(nccu)%Jcn) == 1 .and. CCpmatrix(nccu)%Pcn == +1) debug = .TRUE.
+      if (debug) write(*,*) 'Umatr, MAX_umatr: ',MAX_umatr
+
+      DO nccu = 1, MAX_umatr
+         ndim =  0
+         nmaxu = 0
+         if(NINT(2*CCumatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCumatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+
+         ndim = CCumatrix(nccu)%nceq
+         nmaxu = nccu + ndim*ndim - 1                                                                           
+
+         if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCumatrix(nccu)%Jcn), CCumatrix(nccu)%Pcn, CCumatrix(nccu)%nceq
+         if (debug) write(*,*) 'ndim,ndim^2,maxu=',ndim,ndim*ndim,nmaxu
+
+
+         do i1 = nccu, nmaxu
+           ! if (debug) WRITE (*,*) CCumatrix(i1)%irow, CCumatrix(i1)%icol, CCumatrix(i1)%umatrix
+           ! Umatr(CCumatrix(i1)%irow,CCumatrix(i1)%icol) = CCumatrix(i1)%umatrix
+           ! defining Umatr as TRANSPOSE(UMatr)
+           if (debug) WRITE (*,*) CCumatrix(i1)%icol, CCumatrix(i1)%irow, CCumatrix(i1)%umatrix
+             Umatr(CCumatrix(i1)%icol,CCumatrix(i1)%irow) = CCumatrix(i1)%umatrix
+         enddo
+         if (debug) write(*,*) ' Prepare_CC: Umatr', sngl(Jcn), pcn, nccu, nmaxu
+
+         if (debug) pause
+         EXIT
+
+      ENDDO
+
+      ! debug = .false.
+
+      if (debug) write(*,*) 'Pmatr, MAX_pumatr: ',MAX_umatr
+      DO nccu = 1, MAX_pmatr
+         ndim =  0
+         nmaxu = 0
+         if(NINT(2*CCpmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCpmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+
+         ndim = CCpmatrix(nccu)%nceq
+         nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
+
+         if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCpmatrix(nccu)%Jcn), CCpmatrix(nccu)%Pcn, CCpmatrix(nccu)%nceq
+         if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
+
+         do i1 = nccu, nmaxu
+           icol = CCpmatrix(i1)%irow
+           irow = CCpmatrix(i1)%icol
+            if(irow == icol) then
+              Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix
+            else
+              Pmatr(irow,icol) =  CCpmatrix(i1)%umatrix 
+              Pmatr(icol,irow) =  CONJG(Pmatr(irow,icol))  ! Pmatrix is Hermitian
+            endif
+         enddo
+
+         if (debug) then
+           WRITE (*,*) 'preparing Pmatrix...'
+           do irow = 1, ndim
+            do icol = 1, ndim
+               WRITE (*,*) irow, icol, Pmatr(irow,icol) 
+            enddo
+           enddo
+           pause
+         endif
+
+        EXIT
+
+      ENDDO
+      if (debug) write(*,*) ' Prepare_CC: Pmatr', sngl(Jcn), pcn, nccu, nmaxu
+      if (debug) pause
+      if (debug) write(*,*) 'Smatr, MAX_smatr: ',MAX_pmatr
+      DO nccu = 1, MAX_pmatr
+        ndim =  0
+        nmaxu = 0
+        if(NINT(2*CCsmatrix(nccu)%Jcn) /= NINT(2*Jcn) .or. CCsmatrix(nccu)%Pcn /= Pcn) cycle ! Jpi = 3/2+
+        ndim = CCsmatrix(nccu)%nceq
+        nmaxu = nccu + (ndim*(ndim+1))/2 - 1                                                                           
+        if (debug) write(*,*) 'J,Pi,nceq=',sngl(CCsmatrix(nccu)%Jcn), CCsmatrix(nccu)%Pcn, CCsmatrix(nccu)%nceq
+        if (debug) write(*,*) 'ndim,nmaxu=',ndim,nmaxu
+        do i1 = nccu, nmaxu
+           icol = CCsmatrix(i1)%irow
+           irow = CCsmatrix(i1)%icol
+            if(irow == icol) then
+              Smatr(irow,icol) =  CCsmatrix(i1)%umatrix
+            else
+              Smatr(irow,icol) =  CCSmatrix(i1)%umatrix 
+              Smatr(icol,irow) =  Smatr(irow,icol)      ! Smatrix is symmetric !!!
+            endif
+        enddo
+       EXIT
+      ENDDO
+      if (debug) write(*,*) ' Prepare_CC: Smatr', sngl(Jcn), pcn, nccu, nmaxu
+      if (debug) pause
+      IF(allocated(Sdiag)) DEALLOCATE(Sdiag)
+      ALLOCATE(Sdiag(ndim,ndim),STAT=my)
+      IF(my /= 0) GOTO 30
+      IF(allocated(ZItmp)) DEALLOCATE(ZItmp)
+       ALLOCATE(ZItmp(ndim,ndim),STAT=my)
+       IF(my /= 0) GOTO 30
+
+       IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+       ALLOCATE(ZRtmp1(ndim,ndim),STAT=my)
+       IF(my /= 0) GOTO 30
+       ZRtmp1 = 0.d0
+
+       IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+       ALLOCATE(ZItmp1(ndim,ndim),STAT=my)
+       IF(my /= 0) GOTO 30
+       ZItmp1 = 0.d0
+
+       ! setting the complex identity matrix to call DIAG()
+       DO i1=1,ndim
+         ZRtmp1(i1,i1) = 1.d0
+       ENDDO
+       Sdiag  = REAL(Smatr)
+       ZItmp  = IMAG(Smatr)
+
+      IF(debug) then
+         write(*,*) 'ECIS Smatrix read'
+         DO i1 = 1,ndim
+           DO i2 = 1,ndim
+             write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Smatr(i1,i2)
+           ENDDO
+         ENDDO
+       ENDIF
+
+       CALL QDIAG(Sdiag,ZItmp,ZRtmp1,ZItmp1,ndim,epsil,dtmp,IER)
+       IF(IER/=0) WRITE (8,*) &
+      'WARNING: EW DIAGONALIZATION PROBLEMS FOR Pmatrix in CN J=',sngl(Jcn),' pi=',pcn
+
+      IF(debug) then
+         write(*,*) 'Diagonal Smatrix'
+         DO i1 = 1,ndim
+           DO i2 = 1,ndim
+             write(*,'(1x,2(I3,1x),9(d12.6,1x,d12.6))') i1,i2,Sdiag(i1,i2),ZItmp(i1,i2)
+           ENDDO
+         ENDDO
+      ENDIF
+      ! Sdiag contains the diagonal Smatrix S_{alpha,alpha) in the transformed space
+      ! Sphase(i) represents the arctan(S_{alpha,alpha}) given in eq.(20)
+      DO i1=1,ndim
+        Sphase(i1) = datan(Sdiag(i1,i1)) ! from below Eq.(21), phi_{alpha}
+        if(debug) write (*,'(1x,A20,i3,2(1x,d12.6),3x,A12,d12.6)') 'Eigenvalues (Smatr)=',i1, Sdiag(i1,i1),ZItmp(i1,i1), &
+            ' phi(alpha)=',Sphase(i1)
+      ENDDO
+      ! We diagonalize Smatr to calculate the phases from its diagonal elements
+      ! However, we were not able to verify that Umatr also diagonalized Smatr
+      ! Clearly, we can not calculate Umatr from Smatr as papers clearly state
+      IF(allocated(Sdiag) ) DEALLOCATE(Sdiag)
+      IF(allocated(ZItmp) ) DEALLOCATE(ZItmp)
+      IF(allocated(ZRtmp1)) DEALLOCATE(ZRtmp1)
+      IF(allocated(ZItmp1)) DEALLOCATE(ZItmp1)
+      RETURN
+      30  WRITE(8,*)  'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+      WRITE(12,*) 'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+      STOP        'ERROR: Insufficient memory for temporal EW matrices in PREPARE_CCmatr'
+
+   END SUBROUTINE PREPARE_CCmatr
+
+   !----------------------------------------------------------------------------------------------------
+
+   SUBROUTINE QDIAG(ZR,ZI,XR,XI,NC,EPS,AX,IER)
+      !***********************************************************************
+      ! TAKEN FROM ECIS2006 by J. RAYNAL
+      ! DIAGONALISATION OF A HERMITIAN COMPLEX MATRIX BY AN EXTENSION OF THE
+      ! JACOBI'S METHOD.
+      ! INPUT:     ZR,ZI:  REAL AND IMAGINARY PARTS OF THE MATRIX.
+      !            XR,XI:  REAL AND IMAGINARY PARTS OF THE UNIT MATRIX.
+      !            NC:     DIMENSION OF SQUARE MATRICES ZR,ZI,XR AND XI.
+      !            EPS:    VALUE BELOW WHICH MATRIX ELEMENTS ARE SET TO 0.
+      ! OUTPUT:    ZR,ZI:  THE EIGENVALUES ARE ON THE DIAGONAL OF ZR.
+      !                    ALL THE OTHER ELEMENTS ARE 0, IF PROCESS SUCCEEDED.
+      !            XR,XI:  EIGENVECTORS.
+      !            AX:     SQUARE OF NORM OF THE LARGEST NON DIAGONAL ELEMENT.
+      !            IER:    RETURNS 0 OR -1 AFTER 4*NC**2 ROTATIONS.
+      !***********************************************************************
+      IMPLICIT NONE
+      INTEGER NC
+      REAL*8 ZR,ZI,XR,XI
+      DIMENSION ZR(NC,NC),ZI(NC,NC),XR(NC,NC),XI(NC,NC)
+      REAL*8 EPS,AX
+      INTEGER IER
+      ! local variables
+      INTEGER NT,I,J,L,M
+      REAL*8 AR,AI,AY,BI,BR,U,V,UC,US,TC,TS,UCC,UCS,USC,USS
+      IER=0
+      NT=0
+      1 NT=NT+1
+      IF (NT.GT.4*NC*NC) GO TO 6
+      AX=0.D0
+      L=1
+      M=2
+      !     if(NT<=1) then
+      !       write(*,*) 'Inside QDIAG to diag, iter',NT,NC,sngl(EPS)
+      !       DO I = 1,NC
+      !           write(*,'(1x,9(d12.6,1x,d12.6/)') (ZR(I,J),ZI(I,J),J=1,NC)
+      !         ENDDO
+      !        write(*,*) 'Inside QDIAG unitary, iter'
+      !        DO I = 1,NC
+      !            write(*,'(1x,9(d12.6,1x,d12.6/)') (XR(I,J),XI(I,J),J=1,NC)
+      !          ENDDO
+      !     endif
+      ! SYMMETRISATION AND SEARCH FOR THE LARGEST NON DIAGONAL ELEMENT.
+      DO I=1,NC
+         DO J=I,NC
+            IF (ZR(J,I).EQ.0.D0) ZR(I,J)=0.D0
+            IF (ZI(J,I).EQ.0.D0) ZI(I,J)=0.D0
+            IF (ZR(I,J).EQ.0.D0) ZR(J,I)=0.D0
+            IF (ZI(I,J).EQ.0.D0) ZI(J,I)=0.D0
+            AR=(ZR(I,J)+ZR(J,I))/2.D0
+            AI=(ZI(I,J)-ZI(J,I))/2.D0
+            ZR(J,I)=AR
+            ZR(I,J)=AR
+            ZI(I,J)=AI
+            ZI(J,I)=-AI
+            IF (I.EQ.J) CYCLE
+            AY=ZR(I,J)**2+ZI(I,J)**2
+            IF (AX.GT.AY) CYCLE
+            AX=AY
+            L=I
+            M=J
+         ENDDO
+      ENDDO
+      IF (AX.EQ.0.D0) RETURN
+      ! ELEMENTARY TRANSFORMATION.
+      U=DATAN2(-ZI(L,M),ZR(L,M))/2.D0
+      V=DATAN2(2.D0*DSQRT(ZR(L,M)**2+ZI(L,M)**2),ZR(M,M)-ZR(L,L))/2.D0
+      UC=DCOS(U)
+      US=DSIN(U)
+      TC=DCOS(V)
+      TS=-DSIN(V)
+      UCC=UC*TC
+      UCS=UC*TS
+      USC=US*TC
+      USS=US*TS
+      ! TRANSFORMATION OF ROWS.
+      DO I=1,NC
+         AR=XR(I,L)*UCC+XI(I,L)*USC+XR(I,M)*UCS-XI(I,M)*USS
+         BR=-XR(I,L)*UCS-XI(I,L)*USS+XR(I,M)*UCC-XI(I,M)*USC
+         AI=XI(I,L)*UCC-XR(I,L)*USC+XI(I,M)*UCS+XR(I,M)*USS
+         BI=-XI(I,L)*UCS+XR(I,L)*USS+XI(I,M)*UCC+XR(I,M)*USC
+         XR(I,L)=AR
+         XR(I,M)=BR
+         XI(I,L)=AI
+         XI(I,M)=BI
+         AR=ZR(I,L)*UCC+ZI(I,L)*USC+ZR(I,M)*UCS-ZI(I,M)*USS
+         BR=-ZR(I,L)*UCS-ZI(I,L)*USS+ZR(I,M)*UCC-ZI(I,M)*USC
+         AI=ZI(I,L)*UCC-ZR(I,L)*USC+ZI(I,M)*UCS+ZR(I,M)*USS
+         BI=-ZI(I,L)*UCS+ZR(I,L)*USS+ZI(I,M)*UCC+ZR(I,M)*USC
+         ZR(I,L)=AR
+         ZR(I,M)=BR
+         ZI(I,L)=AI
+         ZI(I,M)=BI
+      ENDDO
+      ! TRANSFORMATION OF COLUMNS.
+      DO I=1,NC
+         AR=ZR(L,I)*UCC-ZI(L,I)*USC+ZR(M,I)*UCS+ZI(M,I)*USS
+         BR=-ZR(L,I)*UCS+ZI(L,I)*USS+ZR(M,I)*UCC+ZI(M,I)*USC
+         AI=ZI(L,I)*UCC+ZR(L,I)*USC+ZI(M,I)*UCS-ZR(M,I)*USS
+         BI=-ZI(L,I)*UCS-ZR(L,I)*USS+ZI(M,I)*UCC-ZR(M,I)*USC
+         IF (DABS(AR).LT.EPS) AR=0.D0
+         IF (DABS(BR).LT.EPS) BR=0.D0
+         IF (DABS(AI).LT.EPS) AI=0.D0
+         IF (DABS(BI).LT.EPS) BI=0.D0
+         ZR(L,I)=AR
+         ZR(M,I)=BR
+         ZI(L,I)=AI
+         ZI(M,I)=BI
+      ENDDO
+      GO TO 1
+      6 IER=-1
+      RETURN
+   END SUBROUTINE QDIAG
 
 END MODULE TLJs
-
-
