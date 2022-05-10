@@ -1,6 +1,6 @@
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2021-08-30 09:57:59 +0200 (Mo, 30 Aug 2021) $
-Ccc   * $Id: lev-dens.f 5295 2021-08-30 07:57:59Z mwherman $
+Ccc   * $Date: 2022-05-10 04:49:51 +0200 (Di, 10 Mai 2022) $
+Ccc   * $Id: lev-dens.f 5358 2022-05-10 02:49:51Z mwherman $
 C
 C
 C
@@ -61,7 +61,7 @@ CCC        |-> ROT_KQ_GSM
 CCC    |-> PLOT_ZVV_GSLD
 CCC    |-> PLOT_ZVV_NumCumul
 CCC    
-CCC    DAMI_ROFIS           - Empire-speciic saddle point lev. dens.  
+CCC    DAMI_ROFIS           - Empire-specific saddle point lev. dens.  
 CCC    |-> EGSMsys 
 CCC    |-> DAMIRO_CRT
 CCC    |-> FSHELL
@@ -291,9 +291,23 @@ C     Added INITIALIZATION for ROPar(1,Nnuc) and ROPar(3,Nnuc)
       RETURN
       END
 
-CCC
-CCC   *****************************************************************
+
       SUBROUTINE DAMIRO(Kk,Nnuc,Dshif,Destep,Rotemp,Aj)
+CCC   *****************************************************************
+CCC        DAMIRO                                                
+CCC        |-> FSHELL                                            
+CCC        |-> SIGMAK                                            
+CCC        |-> BSQ                                               
+CCC        |-> ROBCS                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
+CCC        |-> RODEF                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                 
 CCC   *****************************************************************
 
       INCLUDE 'dimension.h'
@@ -392,15 +406,20 @@ C
       ENDDO
       RETURN
       END
-
-CCC
-CCC
+      
+      
+      
       REAL*8 FUNCTION ROBCS(A,U,Aj,Mompar,Momort,A2,T,bf)
       IMPLICIT REAL*8 (A-H,O-Z)
 CCC   ********************************************************************
 CCC   *                                                         CLASS:APU*
 CCC   *                        R O B C S                                 *
 CCC   * Calculates level densities in the framework of the BCS model     *
+CCC            ROBCS                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
 CCC   *                                                                  *
 CCC   ********************************************************************
 C
@@ -451,8 +470,8 @@ C-----CONST=1/(2*SQRT(2 PI))
       RETURN
       END
  
-CCC
-CCC
+
+
       REAL*8 FUNCTION RODEF(A,E,Ac,Aj,Mompar,Momort,T,
      &                        Yrast,Ss,Bf,Expmax,a2,egsm)
 
@@ -461,6 +480,11 @@ CCC
 Ccc   *********************************************************************
 Ccc   *                                                         class:ppu *
 Ccc   *                         R O D E F                                 *
+CCC   *        RODEF                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM   
 Ccc   *                                                                   *
 Ccc   *  Calculates spin dependent level densities (for a single parity)  *
 Ccc   *  in the dynamical approach.                                       *
@@ -701,9 +725,23 @@ C==========================================================
       END   
 
 
-c****************************************************
       SUBROUTINE DAMIRO_CRT(ia,iz,Shcn,iout,ifis)
-C****************************************************
+CCC****************************************************
+CCC    |-> DAMIRO                                                
+CCC        |-> FSHELL                                            
+CCC        |-> SIGMAK                                            
+CCC        |-> BSQ                                               
+CCC        |-> ROBCS                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
+CCC        |-> RODEF                                             
+CCC            |-> COLL_KQ_EGSM                                  
+CCC                |-> VIB_K_EGSM                                
+CCC                |-> VIB_Q_EGSM                                
+CCC                |-> ROT_Q_EGSM                                
+CCC****************************************************
 
       REAL*8 TCRt, ECOnd, ACRt, UCRt, DETcrt, SCR, ACR, ATIl    ! CRIT
       REAL*8 AP1, AP2, GAMma, DEL, DELp, BF, A23, A2            ! PARAM
