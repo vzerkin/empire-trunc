@@ -1,6 +1,6 @@
-ccc   * $Rev: 5351 $
-ccc   * $Author: gnobre $
-ccc   * $Date: 2022-05-04 22:50:41 +0200 (Mi, 04 Mai 2022) $
+ccc   * $Rev: 5352 $
+ccc   * $Author: mwherman $
+ccc   * $Date: 2022-05-10 04:35:43 +0200 (Di, 10 Mai 2022) $
 
       SUBROUTINE INPUT
 ccc
@@ -2310,6 +2310,7 @@ C-----------precise grid at low energies. from the 5-th element on the step
 C-----------is de (bin width).
 C-----------determination of etl matrix
             netl = 6
+            IF ((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc)).lt.0) CYCLE
             IF (NEX(nnuc).GT.0) netl =
      &         INT((EX(NEX(nnuc),nnuc) - Q(nejc,nnuc))/DE) + 6
             IF (netl.GT.NDETL) THEN
@@ -2331,16 +2332,17 @@ C-----------determination of etl matrix
      &                            - EX(NEXr(nejc,nnuc),nnur)
      &                            - Q(nejc,nnuc)
             ELSE
-               ETL(5,nejc,nnur) = 0.d0
+               ETL(5,nejc,nnur) = 0.5*DE
             ENDIF
-            IF (nejc.EQ.1) ETL(5,nejc,nnur) = 0.d0
+
 Cpr         WRITE(8,*) 'etl(5,.),netl',etl(5,nejc,nnur),netl
 Cpr         etlmax=EX(NEX(NNUC),NNUC)-Q(NEJC,NNUC)
 Cpr         WRITE(8,*) 'etlmax',etlmax
             ETL(1,nejc,nnur) = 0.d0
-            ETL(2,nejc,nnur) = 0.1d0*ETL(5,nejc,nnur)
-            ETL(3,nejc,nnur) = 0.2d0*ETL(5,nejc,nnur)
-            ETL(4,nejc,nnur) = 0.5d0*ETL(5,nejc,nnur)
+            ETL(2,nejc,nnur) = 0.005d0*ETL(5,nejc,nnur)
+            ETL(3,nejc,nnur) = 0.01d0*ETL(5,nejc,nnur)
+            ETL(4,nejc,nnur) = 0.1d0*ETL(5,nejc,nnur)
+
             DO ietl = 6, netl
                ETL(ietl,nejc,nnur) = ETL(ietl - 1,nejc,nnur) + DE
             ENDDO
