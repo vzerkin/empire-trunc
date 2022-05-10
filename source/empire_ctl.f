@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5248 $
+Ccc   * $Rev: 5357 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-09-19 02:32:57 +0200 (Sa, 19 Sep 2020) $
+Ccc   * $Date: 2022-05-10 04:47:24 +0200 (Di, 10 Mai 2022) $
 
       PROGRAM EMPIRE_CTL
 C
@@ -44,7 +44,7 @@ C
      & RUN TOGETHER'
       STOP 'NO OMP FIT TOGETHER WITH KALMAN CALCULATIONS'
       ENDIF
-      IF (autofit) THEN
+      IF(autofit) THEN
          CALL LOCALFIT(pars,dparmx,nnft,xitr)
          CALL CLEANUP(nnft)
          CALL EMPIRE
@@ -1832,8 +1832,12 @@ Ccc
       integer i1, i2, i3, i4, i1e, i2e, i3e, i4e, i, ifound, k, ireac,
      &        ndreac, ndkeys, j, kalman
 
+      integer iopens
+      logical itsopen
+      character*108 name_of_file
+
 C     integer nreac
-      parameter (ndreac=90, ndkeys=142)
+      parameter (ndreac=90, ndkeys=146)
       double precision val, vale, valmem, einl
       double precision xsec, xsecu, xsecd,  sensmat
       dimension xsec(ndreac), xsecu(ndreac), xsecd(ndreac),
@@ -1868,7 +1872,8 @@ C
      &  'DEFDYN', 'DEFSTA', 'DEFMSD', 'GRANGN', 'GRANGP', 'PFNNIU',
      &  'PFNTKE', 'UOMPAW', 'SHELNO', 'ROHFBA', 'ROHFBP', 'PFNRAT',
      &  'PFNERE', 'SFACT' , 'MIXGDR', 'MIXGQR', 'MIXDMR', 'WEDNOR',
-     &  'WEQNOR', 'WEMNOR', 'FISTGA', 'UOMPDS'/
+     &  'WEQNOR', 'WEMNOR', 'FISTGA', 'UOMPDS', 'FCCRED', 'FCORED',
+     &  'CELRED', 'CINRED' /
 C
 C     Fission barr and LD keys, to be included 
 C
@@ -1896,7 +1901,8 @@ C
      &  'T'     , 'T'     , 'T'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'A'     , 'A'     , 'A'     , 'A'     , 'A'     ,
      &  'A'     , 'F'     , 'R'     , 'R'     , 'R'     , 'R'     ,
-     &  'R'     , 'R'     , 'R'     , 'A'/
+     &  'R'     , 'R'     , 'R'     , 'A'     , 'A'     , 'A'     ,
+     &  'A'     , 'A'/
 C-----meaning of namecat:
 C-----A - variation of the parameter Allowed (default value is 1)
 C-----R - variation of the parameter allowed with Restriction
@@ -1989,6 +1995,18 @@ C-----
    30 CLOSE(7)
       CLOSE(44)
       CALL EMPIRE !calculations with original input
+
+      do iopens=1,462 ! make sure all opened files are closed
+        ! inquire(file=openfile, unit=iopens, opened=itsopen) 
+        inquire(unit=iopens, opened=itsopen, NAME=name_of_file)
+
+        if (itsopen) then
+          print *, iopens,' is open ', name_of_file
+          if(iopens .ne. 6) close(iopens)
+        endif
+      enddo
+      ! stop
+
 C-----Move original (reference) outputs out of the way
       itmp=ipipe_move('LIST.DAT','LISTREF.DAT')
       itmp=ipipe_move('OUTPUT.DAT','OUTPUTREF.DAT')
@@ -2021,7 +2039,10 @@ C-----Check category of the parameter to be varied
             cycle
          ENDIF
       ENDDO
-      IF(category.EQ.'F') GOTO 100
+      IF(category.EQ.'F') THEN
+        WRITE(8,*) "WARNING: Parameter ", namelst(i), " can't be varied"
+        GOTO 100
+      ENDIF
       valmem = val
       IF(val.GE.1) THEN
       WRITE(8,*) 'ERROR:PARAMETER VARIATION LARGER THAN 100%'
@@ -2066,7 +2087,8 @@ C-----Read line of optional input
         GOTO 150  ! next line
       ENDIF
 
-      READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)
+      ! READ(inprecord,'(A6,G10.5,4I5)',ERR=200,END=300)
+      READ(inprecord,'(A6,G10.5,4I5)',END=300)
      & namee,vale,i1e,i2e,i3e,i4e
 C
       IF(namee.EQ.'GO    ' ) THEN
@@ -2096,14 +2118,18 @@ C-----Write modified input with increased value of the parameter if name matches
      &   .AND. i4.EQ.i4e.AND.category.EQ.'A') THEN
          WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
          ifound = 1
+
       ELSEIF(name.EQ.namee.AND.i1e.EQ.i1p .AND. category.EQ.'T') THEN
          WRITE(7,'(A6,F10.3,4I5)')namee,vale*(1.0+val),i1e,i2e, i3e, i4e
          ifound = 1
+
       ELSEIF(namee.EQ.'ENDF  ') THEN
          WRITE(7,'(A6,F10.3,4I5)')namee, 0.0, i1e, i2e, i3e, i4e
+
 C     ELSEIF(namee.NE.'SENSIT') THEN
       ELSE
          WRITE(7,'(A6,F10.3,4I5)')namee, vale, i1e, i2e, i3e, i4e
+
       ENDIF
       GOTO 150
 C-----
@@ -2118,6 +2144,7 @@ C--------Write modified input with increased value of the parameter if name matc
      &      i3.EQ.i3e .AND. i4.EQ.i4e.AND.category.EQ.'A') THEN
             WRITE(7,'(''$'',A6,F10.3,4I5)') namee,vale*(1+val),
      &         i1e, i2e, i3e, i4e
+            print *, namee,vale*(1+val),i1e, i2e, i3e, i4e
         ELSEIF(name.EQ.namee.AND.i1e.EQ.i1p .AND. category.EQ.'T') THEN
            WRITE(7,'(''$'',A6,F10.3,4I5)')namee,vale*(1.0+val),
      &         i1e,i2e, i3e, i4e
@@ -2134,16 +2161,16 @@ C--------Write modified input with increased value of the parameter if name matc
       CLOSE(5)
       CALL EMPIRE
       
-
 C-----Delete modified input that has been used and move XSECTIONS.OUT file
       OPEN(5,FILE=('INPUT.DAT'),STATUS='OLD',ERR=305)
       CLOSE(5,STATUS='DELETE')
   305 IF(k.EQ.1) THEN
         itmp = ipipe_move('XSECTIONS.OUT','XS-UP.DAT')
+        itmp = ipipe_move('LIST.DAT','LIST-UP.DAT')
       ELSE
         itmp = ipipe_move('XSECTIONS.OUT','XS-DOWN.DAT')
+        itmp = ipipe_move('LIST.DAT','LIST-DOWN.DAT')
       ENDIF
-
       ENDDO !loop over parameter+val and parameter-val
 C-----Check whether omp has been varied - if so then restore original Tl directory and delete current
       IF(name(1:4).EQ.'UOMP' .OR. name.EQ.'DEFDYN'
@@ -2206,7 +2233,7 @@ C-----------Relative sensitivity (per variation interval)
       CLOSE(34)
       CLOSE(35)
       CLOSE(36)
-      ! WRITE(92,'('' '')') ! write a blank line to separte outputs for different parameters
+      ! WRITE(92,'('' '')') ! write a blank lines to separte outputs for different parameters
       write(92,*)
       write(92,*)
       GOTO 100 !Parameter done, return and get another parameter to vary
@@ -2215,7 +2242,9 @@ C-----------Relative sensitivity (per variation interval)
      &  '', EMPIRE STOPPED, check INPUT file'')') name
       STOP ' FATAL: INVALID FORMAT in input KEY '
 C-----Restore standard input/output
-  350 itmp=ipipe_move('INPUTREF.DAT','INPUT.DAT')
+  350 continue
+      stop
+      itmp=ipipe_move('INPUTREF.DAT','INPUT.DAT')
       itmp=ipipe_move('LISTREF.DAT','LIST.DAT')
       itmp=ipipe_move('OUTPUTREF.DAT','OUTPUT.DAT')
       itmp=ipipe_move('XSECTIONSREF.OUT','XSECTIONS.OUT')
