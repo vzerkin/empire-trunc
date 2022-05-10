@@ -1,6 +1,6 @@
-# $Rev: 5332 $
+# $Rev: 5359 $
 # $Author: mwherman $
-# $Date: 2022-04-24 23:32:32 +0200 (So, 24 Apr 2022) $
+# $Date: 2022-05-10 05:01:51 +0200 (Di, 10 Mai 2022) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -77,7 +77,7 @@ proc ::vTcl:rename {name} {
     ##    Exception added by Christian Gavin on 08/08/02.
     ## Other packages and widget toolkits have different licensing requirements.
     ##    Please read their license agreements for details.
-
+    
     regsub -all "\\." $name "_" ret
     regsub -all "\\-" $ret "_" ret
     regsub -all " " $ret "_" ret
@@ -5352,17 +5352,17 @@ proc ::RepWriter {filename} {
 
         if {$::tcl_platform(os)=="Darwin"} {
                 if [regexp {\.app} $::RepWriter] {
-                        exec open -a $::RepWriter notes/$filename &
+                        exec open -a $::RepWriter Documentation/$filename &
                 } else {
                         # hopefully command is recognized:
-                        exec $::RepWriter  notes/$filename &
+                        exec $::RepWriter Documentation/$filename &
                 }
         } elseif {$::tcl_platform(os)=="Linux"} {
-                exec $::RepWriter  notes/$filename &
+                exec $::RepWriter Documentation/$filename &
         } else {
                 # most likely windows, I don't know how to handle this yet
                 # need a windows machine to test with
-                exec $::RepWriter  notes/$filename &
+                exec $::RepWriter Documentation/$filename &
         }
 }
 #############################################################################
@@ -6465,7 +6465,7 @@ close $rcfl
 exit} \
         -cursor hand2 -disabledforeground #a3a3a3 -font {Helvetica -12} \
         -foreground darkred -highlightbackground #dcdcdc -image {} -padx 1m \
-        -pady 2m -relief raised -text {EXIT / SAVE SETTINGS} -width 14 -wraplength 70 
+        -pady 2m -relief raised -text {EXIT / SAVE SETTINGS} -width 24 -wraplength 70 
     vTcl:DefineAlias "$site_9_0.cpd73" "Button58" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_9_0.cpd73 "$site_9_0.cpd73 Button $top all _vTclBalloon"
     bind $site_9_0.cpd73 <<SetBalloon>> {
@@ -8531,6 +8531,9 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/format $file &} \
         -label Format 
     $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file &} \
+        -label Verify 
+    $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/addresonances $file &} \
         -label {Add resonances} 
     $site_3_0.menu93 add command \
@@ -8552,9 +8555,6 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/accept-omp-fit $file &} \
         -label {Accept last OMP fit} 
     $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/verify $file &} \
-        -label Verify 
-    $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/process $file 1 &} \
         -label PreProcess 
     $site_3_0.menu93 add command \
@@ -8564,9 +8564,6 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/plotlen $file &} \
         -label {Plot list (from .endf)} 
 
-    $site_3_0.menu93 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file &} \
-        -label PLOTC4 
     $site_3_0.menu93 add separator \
         
     $site_3_0.menu93 add command \
@@ -8763,6 +8760,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/sortc4 $file &} \
         -label SORTC4 
+    $site_3_0.menu93 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/plot $file &} \
+        -label PLOTC4 
     $top.m88 add cascade \
         -menu "$top.m88.menu94" -command {} -label Outputs 
     set site_3_0 $top.m88
@@ -8895,10 +8895,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu95 add command \
         -command { exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Yaml-driven plots} 
-    $site_3_0.menu95 add separator \
-
     $site_3_0.menu95 add command \
-        -command { pspdfView $file.ps } -label {PLOTC4 plots} 
+        -command { exec xterm -e $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
+
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
@@ -8910,6 +8909,10 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu95 add command \
         -command {exec $::env(EMPIREDIR)/scripts/guizvv.tcl $file &} \
         -label {Compare ZVV} 
+    $site_3_0.menu95 add separator \
+
+    $site_3_0.menu95 add command \
+        -command { pspdfView $file.ps } -label {PLOTC4 plots} 
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
@@ -8950,9 +8953,184 @@ exec xterm -e make &
 cd $workdir} \
         -label Compile 
     $top.m88 add separator \
+
+   $top.m88 add cascade \
+        -menu "$top.m88.men80" -command {} -label Kalman 
+    set site_3_0 $top.m88
+    menu $site_3_0.men80 \
+        -disabledforeground #a1a4a1 -tearoff 1 
+    $site_3_0.men80 add command \
+        -command { editFile $::env(EMPIREDIR)/scripts/skel-inp.sen } \
+        -label "Default sensitivity input" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-inp.sen } -label "Edit sensitivity input" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-mat.sen } -label "View/Edit sensitivity matrix" 
+
+
+    $site_3_0.men80 add cascade \
+        -menu "$site_3_0.men80.men89" \
+        -command {} -label "Plot sensitivity matrix for" 
+    set site_4_0 $site_3_0.men80
+    menu $site_4_0.men89 \
+        -activebackground #f9f9f9 -activeforeground black \
+        -tearoff 1 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 1 $mat $EXPDAT} \
+        -label "Total MT=1" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 2 $mat $EXPDAT} \
+        -label "Elastic MT=2" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 3 $mat $EXPDAT} \
+        -label "Nonelastic MT=3" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 4 $mat $EXPDAT} \
+        -label "Inelastic MT=4" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 11 $mat $EXPDAT} \
+        -label "(z,2nd) MT=11" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 16 $mat $EXPDAT} \
+        -label "(z,2n) MT=16" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 17 $mat $EXPDAT} \
+        -label "(z,3n) MT=17" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 18 $mat $EXPDAT} \
+        -label "Fission MT=18" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 22 $mat $EXPDAT} \
+        -label {(z,na) MT=22} 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 24 $mat $EXPDAT} \
+        -label {(z,2na) MT=24} 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 45 $mat $EXPDAT} \
+        -label "(z,npa) MT=45" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 102 $mat $EXPDAT} \
+        -label "(z,gamma) MT=102" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 103 $mat $EXPDAT} \
+        -label "(z,p) MT=103" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 104 $mat $EXPDAT} \
+        -label "(z,d) MT=104" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 105 $mat $EXPDAT} \
+        -label {(z,t) MT=105} 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 107 $mat $EXPDAT} \
+        -label "(z,a) MT=107" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 112 $mat $EXPDAT} \
+        -label "(z,pa) MT=112" 
+    $site_4_0.men89 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/zvvsenmat  $file 115 $mat $EXPDAT} \
+        -label "(z,pd) MT=115" 
+    $site_3_0.men80 add cascade \
+        -menu "$site_3_0.men80.men90" -command {} -label {KALMAN option}
+    set site_4_0 $site_3_0.men80
+    menu $site_4_0.men90 \
+        -activebackground #dcdcdc -activeforeground #000000
+         #-background #dcdcdc -foreground #000000 -tearoff 1
+    $site_4_0.men90 add radiobutton \
+        -value 0 -variable EXPDAT -label {No exp. data}
+    $site_4_0.men90 add radiobutton \
+        -value 1 -variable EXPDAT -label {Exp. data for selected reaction}
+    $site_4_0.men90 add radiobutton \
+        -value 2 -variable EXPDAT -label {All exp. data}
+    $site_3_0.men80 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
+        -label {Manipulate C4 file for KALMAN} 
+    $site_3_0.men80 add command \
+        -command { editFile $file-parcorr.kal } \
+        -label "Edit parameter uncertainties (*-parcorr.kal)"
+    $site_3_0.men80 add command \
+        -command { editFile $file-expcorr.kal } \
+        -label "Edit experimental data correlations (*-expcorr.kal)"
+# HERE1
+
+    $site_3_0.men80 add separator \
+
+     $site_3_0.men80 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/klean } \
+        -label "Clean previous KALMAN files" 
+
+    $site_3_0.men80 add cascade \
+        -menu "$site_3_0.men80.men87" \
+        -command {} -label "Run KALMAN for" 
+    set site_5_0 $site_3_0.men80
+    menu $site_5_0.men87 \
+        -activebackground #f9f9f9 -activeforeground black  \
+        -tearoff 2 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 1 $mat $EXPDAT} \
+        -label "Total MT=1" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 2 $mat $EXPDAT} \
+        -label "Elastic MT=2" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 4 $mat $EXPDAT} \
+        -label "Inelastic MT=4" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 16 $mat $EXPDAT} \
+        -label "(z,2n) MT=16" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 17 $mat $EXPDAT} \
+        -label "(z,3n) MT=17" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 18 $mat $EXPDAT} \
+        -label "(z,f) MT=18" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 102 $mat $EXPDAT} \
+        -label "(n,g) MT=102" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 103 $mat $EXPDAT} \
+        -label "(n,p) MT=103" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 107 $mat $EXPDAT} \
+        -label "(n,a) MT=107" 
+    $site_5_0.men87 add command \
+        -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
+        -label "all MTs" 
+      
+    $site_3_0.men80 add command \
+        -command { editFile $file-out.kal } -label "View KALMAN output" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-cov.kal } -label "View Covariance matrices" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-xsc.kal } -label "View KALMAN x-sections" 
+    $site_3_0.men80 add command \
+        -command { editFile $file-par.kal } -label "View KALMAN adj. parameters" 
+    $site_3_0.men80 add command \
+        -command {exec gnuplot $env(EMPIREDIR)/util/kalman/corr.gp &} \
+        -label "Gnuplot covariance" 
+
+    $site_3_0.men80 add separator \
+
+    $site_3_0.men80 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/util/kalman/newinp $file &} \
+        -label "Propagate KALMAN output to EMPIRE input (*.new)"
+    $site_3_0.men80 add command \
+        -command {exec mv $file.inp $file-old.inp
+exec mv $file.new $file.inp } \
+       -label "Replace EMPIRE input with *.new"
+
+    $site_3_0.men80 add command \
+        -command {exec xterm -e $::env(EMPIREDIR)/scripts/mergeMF33 $file 
+exec xterm -e mv $file-m.endf $file.endf
+exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
+        -label "Insert covariances into ENDF file" 
+
+
+    $site_3_0.men80 add separator \
+
+    $top.m88 add separator \
         
     $top.m88 add cascade \
-        -menu "$top.m88.menu96" -command {} -label Help 
+        -menu "$top.m88.menu96" -command {} -label "Help" 
     set site_3_0 $top.m88
     menu $site_3_0.menu96 \
         -activebackground #dcdcdc -activeforeground #000000 
