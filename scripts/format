@@ -106,8 +106,8 @@ rm LINEAR.INP 2>/dev/null
 ln -sf $EMPIREDIR/util/prepro/LINEAR.INP LINEAR.INP
 ln -sf $file.endf ENDFB.OUT
 $EMPIREDIR/util/prepro/linear <LINEAR.INP
-mv LINEAR.OUT  $file.endf
-mv LINEAR.LST $work/$file-log.linear
+mv -f LINEAR.OUT  $file.endf
+mv -f LINEAR.LST $work/$file-log.linear
 rm ENDFB.OUT LINEAR.INP 2>/dev/null
 
 # RECONSTRUCT INELASTIC, (N,P) AND (N,A) REACTIONS WITH FIXUP
