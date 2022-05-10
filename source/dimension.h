@@ -1,6 +1,6 @@
-!cc   * $Rev: 4877 $
-!cc   * $Author: rcapote $
-!cc   * $Date: 2017-04-03 21:12:41 +0200 (Mo, 03 Apr 2017) $
+!cc   * $Rev: 5360 $
+!cc   * $Author: capote $
+!cc   * $Date: 2022-05-10 15:42:38 +0200 (Di, 10 Mai 2022) $
 
       INTEGER NDNUC,NDEXCLUS,NDEX,NDLW,LEVCC,NDLV,NDBR,NDMSCS
 !
@@ -31,7 +31,9 @@
      & NDEJC=6                                                          &
      &,NDZMAX=110                                                       &
 !    &,NDECSE=NDEX+30                                                   &
+
      &,NDECSE=NDEX*1.30                                                 &
+
      &,NDEPFN=251                                                       &
      &,NDANGecis=91                                                     &
      &,NDAnghmx=37                                                      & !Must be equal to NDAnghms in ddhms.cmb
@@ -59,4 +61,4 @@
      &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=99                    &     
 !    &,NDREGIONS=14,NDMODELS=6,NDDEFCC=6,NDCOLLEV=80                    &
      &,NFtrans=40,NFMOD=3,NFisbarpnt=300                                &
-     &,NFPARAB=5,NFHUMP=3,NFISENMAX=400)
+     &,NFPARAB=5,NFHUMP=3,NFISENMAX=NDEX+50)
