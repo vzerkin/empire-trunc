@@ -1,7 +1,17 @@
-!cc   * $Rev: 5361 $
+!cc   * $Rev: 5363 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-05-16 01:18:08 +0200 (Mo, 16 Mai 2022) $
-!
+!cc   * $Date: 2022-06-06 01:56:29 +0200 (Mo, 06 Jun 2022) $
+
+!cc   ********************************************************************
+!cc   *                                                                  *
+!cc   * These routines are called after HF decay of each J-pi state      *
+!cc   * at each continuum energy. This differs HF-comp routines from     *
+!cc   * from those in the HF-decay module that are targeting whole       *
+!cc   * nuclei, rather than individual cells in the contginuum.          *
+!cc   * Thus HF-decay comes on the level above HF-comp.                  *
+!cc   *                                                                  *
+!cc   ********************************************************************
+
 subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
    !cc
    !cc   ********************************************************************
@@ -11,7 +21,6 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
    !cc   * Normalizes scratch arrays SCRT and SCRTL with the population     *
    !cc   * divided by the H-F denominator and accumulates the result on the *
    !cc   * population array POP for a given nucleus NNUR                    *
-   !cc   *                                                                  *
    !cc   *                                                                  *
    !cc   * input:Iec  - energy index of the decaying state                  *
    !cc   *       Nnuc - index of the decaying nucleus                       *
@@ -44,13 +53,11 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
    real :: FLOAT
    integer :: icse , icsh , icsl , ie , il , j , nexrt , nspec
    integer :: INT , MAX0
+   logical :: primaryGamma = .false.
 
 
-   !-----
-   !-----Continuum
-   !-----
    if(Xnor<=0)return  !, nth
-
+   
    if(Nnuc==Nnur)then
       excnq = EX(Iec , Nnuc)
    else
@@ -58,8 +65,11 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
    endif
    nexrt = INT((excnq - ECUt(Nnur))/DE + 1.0001)
    !  Extending continuum for capture over the discrete levels, RCN 112019
-   if(Nejc==0) nexrt = INT(excnq/DE + 1.0001)
-
+   if(Nejc==0) nexrt = INT(excnq/DE + 1.0001)  ! LIKELY TO BE REMOVED!
+   
+   !-----
+   !-----Continuum to continuum
+   !-----
    if(nexrt>0)then
       do ie = 1 , nexrt !loop over residual energies (continuum)
          popt = 0.D0
@@ -91,84 +101,77 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
       enddo  !over residual energies in continuum
    endif
    !-----
-   !-----Discrete levels
+   !-----Continuum to discrete levels
    !-----
-   nspec = min(INT(EMAx(Nnur)/DE) + 1 , NDECSE - 1)
+   nspec = min(INT(EMAx(Nnur)/DE) + 1 , NDECSE - 1)  ! Spectrum length
    do il = 1 , NLV(Nnur)
+      if(Nnuc==1 .and. Nejc==0 .and. Iec==NEX(1)) primaryGamma = .true.
       eemi = excnq - ELV(il , Nnur)
       if(eemi<0)return
       pop1 = Xnor*SCRtl(il , Nejc)
       if(pop1>0)then
-         !----------Add contribution to discrete level population
-         POPlv(il , Nnur) = POPlv(il , Nnur) + pop1
-         !----------Add contribution to recoils auxiliary matrix for discrete levels
-         REClev(il , Nejc) = REClev(il , Nejc) + pop1
-         !----------Add contribution of discrete levels to emission spectra
-         !----------Transitions to discrete levels are distributed
-         !----------between the nearest spectrum bins (inversely proportional to the
-         !----------distance of the actual energy to the bin energy
-         !----------Eliminate transitions from the top bin in the 1-st CN (except gammas)
-         if(Nnuc/=1 .or. ENDf(Nnuc)/=1 .or. Iec/=NEX(1) .or. Nejc==0 .or. Nejc>3)then
+         POPlv(il , Nnur) = POPlv(il , Nnur) + pop1   ! Add contribution to discrete level population
+         REClev(il , Nejc) = REClev(il , Nejc) + pop1 ! Add contribution to recoils auxiliary matrix for discrete levels
+
+         ! Add contribution of discrete levels to emission spectra
+         ! Transitions to discrete levels are distributed
+         ! between the nearest spectrum bins (inversely proportional to the
+         ! distance of the actual energy to the bin energy
+         ! Eliminate transitions from the top bin in the 1-st CN (except gammas)
+
+         if(Nnuc/=1 .or. ENDf(Nnuc)/=1 .or. Iec/=NEX(1) .or. Nejc==0)then
             xcse = eemi/DE + 1.0001
-            icsl = min(INT(xcse) , NDECSE - 1)
-            icsh = icsl + 1
-            if(NPRim_g>0)then      ! Primary gammas
-               if(Nnuc==1 .and. Nejc==0 .and. Iec==NEX(1))then
-                  !  Selected primary gammas from the CN: Nnuc=1, Nejc=0
-                  !  Originate from the primary excitation energy bin: Iec = NEX(1)
-                  ENPg(il) = eemi
-                  CSEpg(il) = CSEpg(il) + pop1
-                  !  Primary gamma table stored
-                  cycle
-                  !  Skipping primary gammas
-                  !  Note that the CYCLE instruction above means that primary gammas are NOT
-                  !  stored in the spectrum, therefore, they are not formatted.
-               endif
-            endif  ! Primary gammas stored in CSEpg
-
-            if(icsl<nspec)then
-               popl = pop1*(FLOAT(icsh) - xcse)/DE
-               poph = pop1*(xcse - FLOAT(icsl))/DE
-            else
-               popl = pop1/DE
-               poph = 0.0D0
-            endif
-            popll = popl         !we also need popl not multiplied by 2
-            if(icsl==1)popl = 2.0*popl
-            !
-            !  Addition of discrete gamma to spectra
-            !
-            if(popll>0)then
-               CSE(icsl , Nejc , Nnuc) = CSE(icsl , Nejc , Nnuc) + popl
-               CSEt(icsl , Nejc) = CSEt(icsl , Nejc) + popl
-               if(ENDf(Nnuc)==1)then
-                  !  CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
-                  call EXCLUSIVEL(Iec , icsl , Nejc , Nnuc , Nnur , popll)
+            icsl = min(INT(xcse) , NDECSE - 1)        ! Lower energy bin for the gamma transition
+            icsh = icsl + 1                           ! Upper energy bin for the gamma transition
+            if(NPRim_g>0 .and. primaryGamma)then      ! Primary gamma to be considered
+               ENPg(il) = eemi
+               CSEpg(il) = CSEpg(il) + pop1
+            else                                      ! Typical path (not a primary gamma)
+               if(icsl<nspec)then
+                  popl = pop1*(FLOAT(icsh) - xcse)/DE
+                  poph = pop1*(xcse - FLOAT(icsl))/DE
                else
-                  CSE(icsl , Nejc , 0) = CSE(icsl , Nejc , 0) + popll
+                  popl = pop1/DE
+                  poph = 0.0D0
                endif
-            endif
-
-            if(poph>0)then
-               CSE(icsh , Nejc , Nnuc) = CSE(icsh , Nejc , Nnuc) + poph
-               CSEt(icsh , Nejc) = CSEt(icsh , Nejc) + poph
-               if(ENDf(Nnuc)==1)then
-                  !  CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
-                  call EXCLUSIVEL(Iec , icsh , Nejc , Nnuc , Nnur , poph)
-               else
-                  CSE(icsh , Nejc , 0) = CSE(icsh , Nejc , 0) + poph
+               popll = popl                           !we also need popl not multiplied by 2
+               if(icsl==1)popl = 2.0*popl
+               !
+               !  Addition of continuum to discrete gamma to spectra
+               !
+               if(popll>0)then
+                  CSE(icsl , Nejc , Nnuc) = CSE(icsl , Nejc , Nnuc) + popl
+                  CSEt(icsl , Nejc) = CSEt(icsl , Nejc) + popl
+                  if(ENDf(Nnuc)==1)then
+                     CALL EXCLUSIVEL(Iec,icsl,Nejc,Nnuc,Nnur,il,popll)
+                  else
+                     CSE(icsl , Nejc , 0) = CSE(icsl , Nejc , 0) + popll
+                  endif
                endif
-            endif
+   
+               if(poph>0)then
+                  CSE(icsh , Nejc , Nnuc) = CSE(icsh , Nejc , Nnuc) + poph
+                  CSEt(icsh , Nejc) = CSEt(icsh , Nejc) + poph
+                  if(ENDf(Nnuc)==1)then
+                     CALL EXCLUSIVEL(Iec,icsh,Nejc,Nnuc,Nnur,il,poph)
+                  else
+                     CSE(icsh , Nejc , 0) = CSE(icsh , Nejc , 0) + poph
+                  endif
+               endif
+            endif  ! over primary gamma or not
          endif
-
-         !----------Add CN contribution to direct ang. distributions
+         
+         !
+         ! Add CN contribution to direct ang. distributions
+         !
          if(Nnuc==1 .and. Iec==NEX(1) .and. Nejc/=0)then
             CSDirlev(il , Nejc) = CSDirlev(il , Nejc) + pop1
             !  Compound elastic and inelastic stored for final renormalization
             CSComplev(il , Nejc) = CSComplev(il , Nejc) + pop1
-         endif   ! on top  CN state, non-gamma with non-zero population
+         endif   ! on top CN1 state, particles only
       endif    ! if pop1>0
    enddo      !loop over levels
+   primaryGamma = .false.
    return
 end subroutine ACCUM
 
@@ -370,9 +373,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
 end subroutine EXCLUSIVEC
 
 
-!  SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
-!  Index Il needed if discrete levels are going to be treated (see ### below)
-subroutine EXCLUSIVEL(Iec , Ie , Nejc , Nnuc , Nnur , Popt)
+SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt) 
    !cc
    !cc   ********************************************************************
    !cc   *                                                         class:mpu*
@@ -389,6 +390,7 @@ subroutine EXCLUSIVEL(Iec , Ie , Nejc , Nnuc , Nnur , Popt)
    !cc   *       Nejc - index of the ejectile                               *
    !cc   *       Nnuc - index of the decaying nucleus                       *
    !cc   *       Nnur - index of the final nucleus                          *
+   !cc   *       Il   - index of the populated discrete level               *
    !cc   *       Popt - x-sec/MeV for the transition from the initial       *
    !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
    !cc   *              This cross section is directly added to the spectrum*
@@ -411,9 +413,9 @@ subroutine EXCLUSIVEL(Iec , Ie , Nejc , Nnuc , Nnur , Popt)
    include 'dimension.h'
    include 'global.h'
 
-   integer :: Ie , Iec , Nejc , Nnuc , Nnur
+   integer :: Ie , Iec , Nejc , Nnuc , Nnur, Il
    real*8 :: Popt
-   intent (in) Ie , Iec , Nejc , Nnuc , Nnur , Popt
+   intent (in) Ie , Iec , Nejc , Nnuc , Nnur , Il, Popt
 
    integer :: iejc , iesp , nth
    real*8 :: xnor
@@ -441,7 +443,7 @@ subroutine EXCLUSIVEL(Iec , Ie , Nejc , Nnuc , Nnur , Popt)
             if(POPcse(Iec , iejc , iesp , INExc(Nnuc))>0)then
                if(ENDf(Nnur)==1)then
                   POPcse(0 , iejc , iesp , INExc(Nnur)) = POPcse(0 , iejc , iesp , INExc(Nnur))                                  &
-                   & + POPcse(Iec , iejc , iesp , INExc(Nnuc))*xnor
+                     & + POPcse(Iec , iejc , iesp , INExc(Nnuc))*xnor
                else
                   CSE(iesp , iejc , 0) = CSE(iesp , iejc , 0) + POPcse(Iec , iejc , iesp , INExc(Nnuc))*xnor
                   !---------------------Store also population spectra for discrete levels
@@ -449,9 +451,8 @@ subroutine EXCLUSIVEL(Iec , Ie , Nejc , Nnuc , Nnur , Popt)
                   !  ### Index Il as a dummy parameter of the routine. It is needed to uncomment this part
                   !      SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
                   !
-                  !                   POPcselv(Il,iejc,iesp,INExc(Nnur))
-                  !  &                = POPcselv(Il,iejc,iesp,INExc(Nnur))
-                  !  &                + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
+                  POPcselv(Il,iejc,iesp,INExc(Nnur)) = POPcselv(Il,iejc,iesp,INExc(Nnur)) &
+                     + POPcse(Iec,iejc,iesp,INExc(Nnuc))*xnor
                endif
             endif
 

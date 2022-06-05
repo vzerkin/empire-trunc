@@ -1,6 +1,6 @@
-! $Rev: 5325 $
+! $Rev: 5363 $
 ! $Author: mwherman $
-! $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
+! $Date: 2022-06-06 01:56:29 +0200 (Mo, 06 Jun 2022) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -65,7 +65,7 @@
 
       INTEGER MT2, MT91, MT649, MT699, MT749, MT799, MT849,             &
      &        BFF(nfhump), D_Klv(ndcollev), D_Llv(ndcollev), F_Print,   &
-     &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRIm_g, NPAirpe, &
+     &        D_nno(ndcollev), IPH(ndcollev), NRHump, NPRim_g, NPAirpe, &
      &        FHMs, ICOller(ndcollev), ICOllev(ndcollev), ICOmpff,      &
      &        IDEfcc, IDNa(ndregions,ndmodels), IFLuc, IGE1, IGE2, IGM1,&
      &        IOMwrite(0:ndejc,0:ndnuc), IOMwritecc, IOPsys, IOPran,    &
@@ -118,8 +118,7 @@
 !    &                 POPcsealab(ndangecis,0:ndex_d,2,ndecsed,         &
 !    &                 0:ndexclus),                                     &
      &                 POPlv(ndlv,ndnuc), POPmax(ndnuc), WIDcoll,       &
-!                      This array is only used in EXCLUSIVEL, commented &
-!    &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      &
+     &                 POPcselv(ndlv,0:ndejc,0:ndex_d,0:ndexclus),      &
      &                 Q(0:ndejc,0:ndnuc), QCC(ndcc), QDFrac, QFIs,     &
      &                 QPRod(0:ndnuc), RCOul(0:ndejc,0:ndnuc), REDsef,  &
      &                RECcse(nderec,0:nderec,ndnuc),REClev(ndlv,0:ndejc)&
@@ -291,7 +290,7 @@
      &                  INExc, ENDf, NANgela, NDAng, ISProd, MAXj,      &
      &                  FITomp, ICAlangs, NPAirpe, KALman, MT2, MT91,   &
      &                  MT649, MT699, MT749, MT799, MT849,              &
-     &                  IOPran, NPRIm_g, PESpin, NNG_xs,                &
+     &                  IOPran, NPRim_g, PESpin, NNG_xs,                &
      &                  PL_lmax, SFAct, INTerf, IPArcov, IDDfig,        &
      &                  D_Klv, D_Llv,  D_nno, IHFnew,                   &
      &                  ngamm_tr, nfiss_tr, PLcont_lmax, ncontr
