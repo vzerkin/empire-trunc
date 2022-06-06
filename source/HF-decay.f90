@@ -107,7 +107,7 @@ contains
                 call printPrimeResiduesAfterCascade(nnuc)
             end if
             ! Primary gammas printout
-            if (nnuc == 1 .and. NPRIm_g > 0) call printPrimaryGammas(nnuc)
+            if (nnuc == 1 .and. NPRim_g > 0) call printPrimaryGammas(nnuc)
             CALL DECAYD(nnuc) ! Gamma decay of discrete levels
         end if 
 

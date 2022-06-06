@@ -1,6 +1,6 @@
-ccc   * $Rev: 5352 $
+ccc   * $Rev: 5365 $
 ccc   * $Author: mwherman $
-ccc   * $Date: 2022-05-10 04:35:43 +0200 (Di, 10 Mai 2022) $
+ccc   * $Date: 2022-06-06 03:43:09 +0200 (Mo, 06 Jun 2022) $
 
       SUBROUTINE INPUT
 ccc
@@ -324,7 +324,7 @@ C
          CALL GETENV ('OS', empireos)
          if(empireos(1:3). eq. 'Win') IOPsys = 1 ! Windows
 
-         NPRIm_g = 0       ! No primary gammas (default)
+         NPRim_g = 0       ! No primary gammas (default)
          NNG_xs  = 0       ! Gamma production cross section not printed
 C
 C        PFNS keywords
@@ -1471,7 +1471,7 @@ C--------reset angles for inelastic calculations
          ENDIF
 C--------input consistency check  *** done ***
          IF (NENdf.eq.0) THEN          
-            NPRIm_g = 0
+            NPRim_g = 0
             WRITE (8,
      &'('' Primary gammas not stored: ENDF formatting is turned off'')')
             WRITE (12,
@@ -3243,7 +3243,7 @@ C       WRITE (12,*) '   MT=112  (n,pa)                               '
         WRITE (12,*) 'MF=6 Energy-angle distributions of reaction     '
         WRITE (12,*) '     products; EMPIRE calculations were adopted '
         WRITE (12,*) '                                                '
-        IF(NPRIm_g.gt.0) then
+        IF(NPRim_g.gt.0) then
          WRITE (12,*) '     Primary capture gammas are entered as      '
          WRITE (12,*) '     discrete lines                             '
          WRITE (12,*) '                                                '
@@ -4495,7 +4495,7 @@ C--------ECIS input  *** done ***
 C
          IF (name.EQ.'PRGAMM') THEN
             IF(val.gt.0.d0) THEN
-              NPRIm_g = 1
+              NPRim_g = 1
               WRITE (8 ,'('' Primary gammas calculated and stored'')')
               WRITE (12,'('' Primary gammas calculated and stored'')')
              ELSE

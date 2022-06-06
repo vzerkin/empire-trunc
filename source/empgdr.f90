@@ -1,19 +1,15 @@
-!cc   * $Rev: 5362 $
+!cc   * $Rev: 5365 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-05-22 09:11:03 +0200 (So, 22 Mai 2022) $
+!cc   * $Date: 2022-06-06 03:43:09 +0200 (Mo, 06 Jun 2022) $
 !
 module empgdr
    implicit none
-   !
-   ! PARAMETER definitions
-   !
-   integer , parameter :: MAXGDR = 5986 , MEXPPAR = 270 , MEXP = 9000 , MDEF = 700
-   !
-   ! Local variables
-   !
-   real*8 , allocatable , dimension(:) :: DHCs1 , DHCs2 , DHE1 , DHE2 , DHGw1 , DHGw2 , ETAt , HALpha2 , HBEtagfl , HCS1 , &
-             & HCS2 , HE1 , HE1t , HE2 , HE2t , HENergygfl , HGW1 , HGW1t , HGW2 , HGW2t
-   integer , allocatable , dimension(:) :: NANa , NANz , NARam , NNA , NNAt , NNG , NNGt , NNZ , NNZt , NZRam
+
+   integer , parameter :: MAXGDR = 5986, MEXPPAR = 270, MEXP = 9000, MDEF = 700
+
+   real*8, allocatable, dimension(:) :: DHCs1, DHCs2, DHE1, DHE2, DHGw1, DHGw2, ETAt, HALpha2, HBEtagfl  
+   real*8, allocatable, dimension(:) :: HCS1, HCS2, HE1, HE1t, HE2, HE2t, HENergygfl, HGW1, HGW1t, HGW2, HGW2t
+   integer, allocatable, dimension(:) :: NANa, NANz, NARam, NNA, NNAt, NNG, NNGt, NNZ, NNZt, NZRam
    
 
    
