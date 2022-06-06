@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5330 $
+Ccc   * $Rev: 5364 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-04-24 23:09:37 +0200 (So, 24 Apr 2022) $
+Ccc   * $Date: 2022-06-06 03:39:30 +0200 (Mo, 06 Jun 2022) $
 C
       SUBROUTINE CLEAR
 Ccc
@@ -517,7 +517,7 @@ Ccc
       MT699       = 0
       MT749       = 0
       MT799       = 0
-      s       = 0
+      s           = 0
       PESpin      = 0
       NNG_xs      = 0
       LHRtw       = 0
@@ -528,7 +528,7 @@ Ccc
       D_nno       = 0
       IPH         = 0
       NRHump      = 0
-      NPRIm_g     = 0
+      NPRim_g     = 0
       NPAirpe     = 0
       FHMs        = 0
       ICOller     = 0
