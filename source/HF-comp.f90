@@ -1,6 +1,6 @@
-!cc   * $Rev: 5363 $
+!cc   * $Rev: 5366 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-06-06 01:56:29 +0200 (Mo, 06 Jun 2022) $
+!cc   * $Date: 2022-06-13 05:21:24 +0200 (Mo, 13 Jun 2022) $
 
 !cc   ********************************************************************
 !cc   *                                                                  *
@@ -794,42 +794,53 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
    DENhf = DENhf + Sum
    SCRtem(Nejc) = Sum
    return
-   end subroutine DECAY
+end subroutine DECAY
 
 
 
-   subroutine DECAYD(Nnuc)
-      !cc
-      !cc   ********************************************************************
-      !cc   *                                                         class:ppu*
-      !cc   *                       D E C A Y D                                *
-      !cc   *                                                                  *
-      !cc   *  Calculates gamma decay of discrete levels according to          *
-      !cc   *  the decay scheme contained in the IBR matrix. Prints out        *
-      !cc   *  the results and updates gamma spectrum matrix CSE(.,0,NNUC)     *
-      !cc   *  Must be called after all particle emission is done.             *
-      !cc   *  NOTE: no particle emission from discrete levels is considered   *
-      !cc   *                                                                  *
-      !cc   * input:NNUC - nucleus index (position) in the table               *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   * output:none                                                      *
-      !cc   *                                                                  *
-      !cc   * calls:none                                                       *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !cc
+subroutine DECAYD(Nnuc)
+   !cc
+   !cc   ********************************************************************
+   !cc   *                                                         class:ppu*
+   !cc   *                       D E C A Y D                                *
+   !cc   *                                                                  *
+   !cc   *  Calculates gamma decay of discrete levels according to          *
+   !cc   *  the decay scheme contained in the IBR matrix. Prints out        *
+   !cc   *  the results and updates gamma spectrum matrix CSE(.,0,NNUC)     *
+   !cc   *  Must be called after all particle emission is done.             *
+   !cc   *  NOTE: no particle emission from discrete levels is considered   *
+   !cc   *                                                                  *
+   !cc   * input:NNUC - nucleus index (position) in the table               *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   * output:none                                                      *
+   !cc   *                                                                  *
+   !cc   * calls:none                                                       *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   ********************************************************************
+   
 
    implicit none
    include 'dimension.h'
    include 'global.h'
 
-   integer :: Nnuc
-   intent (in) Nnuc
+   type gamma_type
+      real*8 :: Eg
+      real*8 :: gXsc
+   end type gamma_type
+   
+
+   integer, intent(in) :: Nnuc
    real*8 :: egd , gacs , gacs_noicc , popl
-   integer :: i , icse , j , j1 , l , nejc
+   integer :: i , icse , j , j1 , l , nejc, igamma
    integer :: INT , NINT
+   type(gamma_type), dimension(1:250) :: discrGamma  ! List of discrete gammas emitted in transitions between levels in Nnuc) 
+
+   discrGamma(:)%Eg = 0.0d0
+   discrGamma(:)%gXsc = 0.0d0
+   igamma = 0
+
    nejc = 0
    if(Nnuc==MT91)then
       nejc = 1
@@ -870,15 +881,18 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
             CSEt(icse , 0) = CSEt(icse , 0) + popl/DE
                                                    ! Jan 2011
             CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + popl
-            !-----------Add transition to the exclusive or inclusive gamma spectrum
-            if(ENDf(Nnuc)==1)then
+            if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Prime option active
+               igamma = igamma+1
+               discrGamma(igamma)%Eg = egd
+               discrGamma(igamma)%gXsc = popl
+            elseif(ENDf(Nnuc)==1)then           ! Add transition to the exclusive or inclusive gamma spectrum
                POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + popl/DE
             else
                CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + popl/DE
             endif
          elseif(ISIsom(l , Nnuc)==1 .and. nejc>0)then
             !
-            !-----------Isomer state in the residue after n,p, or alpha emission
+            !-----------Isomer state in the residue after n,p, or alpha, d, t, or He3 emission
             !-----------No gamma-decay of the isomeric state imposed
             !-----------Add gamma cascade population to the direct population
             !
@@ -927,7 +941,11 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
                CSEmis(0 , Nnuc) = CSEmis(0 , Nnuc) + gacs
                !-------------Add transition to the exclusive gamma spectrum
                !-------------NOTE: internal conversion taken into account
-               if(ENDf(Nnuc)==1)then
+               if(NPRim_g > 0 .and. ENDf(Nnuc)==1) then  ! Store discrete transitions in discrGamma structure if Prime option active
+                  igamma = igamma+1
+                  discrGamma(igamma)%Eg = egd
+                  discrGamma(igamma)%gXsc = gacs               
+               elseif(ENDf(Nnuc)==1)then
                   POPcse(0 , 0 , icse , INExc(Nnuc)) = POPcse(0 , 0 , icse , INExc(Nnuc)) + gacs/DE
                else
                   CSE(icse , 0 , 0) = CSE(icse , 0 , 0) + gacs/DE
@@ -949,11 +967,69 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
          endif   
       endif  !over popl>0
    enddo  !over levels
+   if (NPRim_g > 0) call printDiscreteGammas(igamma,discrGamma(:))
    return
    99012 format(1x , / , 5x , 'Level of energy  ' , f8.4 , ' MeV' , ' and spin ' , f6.1 , ' with final population ' , g13.5 ,     &
             &' mb is an isomer')
 end subroutine DECAYD
 
+subroutine printDiscreteGammas(imax, discretGamma)
+
+   implicit none
+   type gamma_type
+      real*8 :: Eg
+      real*8 :: gXsc
+   end type gamma_type
+   
+   type(gamma_type), dimension(1:250) :: discretGamma
+   type(gamma_type)  tmp
+   integer, intent(in) :: imax
+   integer :: i
+   logical :: sorted = .true.
+   real*8 :: sumGamma
+
+   print *, "imax ", imax
+   print *, "Egamma 1, imax, imax+1", discretGamma(1)%Eg, discretGamma(imax)%Eg, discretGamma(imax+1)%Eg
+   do i = 1, imax
+      print '(i10,2G15.6)', i, discretGamma(i)%Eg, discretGamma(i)%gXsc
+   end do 
+
+   ! Sort discrete gammas according to increasing energy
+   do
+     sorted = .true. 
+     do i = 1, imax
+        if(discretGamma(i)%Eg > discretGamma(i+1)%Eg) then
+           tmp = discretGamma(i)
+           discretGamma(i) = discretGamma(i+1)
+           discretGamma(i+1) = tmp
+           sorted = .false.
+        end if
+     end do
+     if(sorted) exit
+   end do
+
+   sumGamma = SUM(discretGamma(1:imax)%gXsc)
+
+   ! Print discrete gammas to *.out file for ENDF-6 formatting
+   
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+   write(12, '(3x,"Discrete g emission cross section ",G10.5)') sumGamma
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+   write(12, '(9x,''i'',7x,''Egam         Disc.g CS'')')
+   write(12, '('' '')')
+   do i = 2, imax+1
+      write(12, '(i10,2G15.6)') i-1, discretGamma(i)%Eg, discretGamma(i)%gXsc
+   end do 
+   write(12, '('' '')')
+   write(12, '(10x,40(''-''))')
+   write(12, '('' '')')
+
+   return
+end subroutine printDiscreteGammas
 
 
 subroutine DECAYD_DIR(Nnuc , Nejc)
