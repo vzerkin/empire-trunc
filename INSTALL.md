@@ -103,15 +103,15 @@ Manual Installation
 
     For a sh or similar do:
         EMPIREDIR="'$instdir'" 
-        PATH="'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
+        PATH="'./:$instdir/scripts':$PATH"
         export EMPIREDIR PATH
 
     For a csh or compatible do:
         setenv EMPIREDIR "'$instdir'" 
-        setenv PATH "'$instdir/ActiveTcl/bin:./:$instdir/scripts':$PATH"
+        setenv PATH "'./:$instdir/scripts':$PATH"
         export EMPIREDIR PATH 
 
-    On the Mac, to make sure zvview works, you may also need to add this to your 
+    On older versions of Mac OS, to make sure gthat zvview works, you may also need to add this to your 
     bashrc file:
         export DISPLAY=:0
 
