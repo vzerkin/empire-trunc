@@ -237,7 +237,7 @@ C     *****************************************************************
       INCLUDE 'PRIVCOM12.FOR'
       C1=DSQRT(2.D0)
       PI3=4.D0/3.D0*DATAN(1.D0)      
-      IF (MEHAM.EQ.5.OR.MEHAM.EQ.7) GO TO 2
+C     IF (MEHAM.EQ.5.OR.MEHAM.EQ.7) GO TO 2
       AMOO=AMO
       BMOO=BMO
       CMOO=CMO
@@ -2000,9 +2000,6 @@ c             matrix elements calculations
               NNT=1
               CALL OVLAB
               FOLAB1=FOLAR ! <b1|b/b0|b2>
-              NNT=2
-              CALL OVLAB
-              FOLAB2=FOLAR ! <b1|(b/b0)^2|b2>
               NNT=0
               CALL OVLAB
               FOLAB0=FOLAR ! <b1|b2>
@@ -2067,40 +2064,33 @@ c             matrix elements calculations
               
               !FOLAG1=FOLAG1*(1+(-1)**(KAA/2+KAA2/2))/2
               !FOLAG2=FOLAG2*(1+(-1)**(KAA/2+KAA2/2))/2
-              !IF (ITAU.EQ.ITAU2) THEN
+              IF (ITAU.EQ.ITAU2) THEN
                 DTT2=1.D0
-              !ELSE
-              !  DTT2=0.D0
-              !END IF
-              
-              IF (PO1.eq.PO2) THEN
-                  DB3=1.D0
               ELSE
-                  DB3=0.D0
+                DTT2=0.D0
               END IF
   
-               DBETEFF=(FOLAB1-FOLAB0)*FOLAG0*DB3
-               GAMEFF=DTT2*(FOLAG1+GAM0*FOLAG0)*FOLAB0*DB3 !FOLAG15*FOLAB0!
-               GAM2EFF=DTT2*(FOLAG2+2*GAM0*FOLAG1+GAM0**2*FOLAG0)*FOLAB0
-     *                   *DB3!FOLAG16*FOLAB0!
-               BET3EFF=
-     *          BET3/DSQRT(1-DEXP(-2*BET3**2/AMUO**2))*
-     *          FOLAB0*FOLAG0*
-     *           (1-DB3)
+              IF (PO1.eq.PO2) THEN
+               DBETEFF=(FOLAB1-FOLAB0)*FOLAG0
+               GAMEFF=DTT2*(FOLAG1+GAM0*FOLAG0)*FOLAB0 !FOLAG15*FOLAB0!
+               GAM2EFF=DTT2*(FOLAG2+2*GAM0*FOLAG1+GAM0**2*FOLAG0)*FOLAB0        !FOLAG16*FOLAB0!
+               BET3EFF=0
+              ELSE 
+                DBETEFF=0
+                GAMEFF=0
+                GAM2EFF=0
+                BET3EFF=BET3/DSQRT(1-DEXP(-2*BET3**2/AMUO**2))
+              END IF
               
-
-               BET2SQ=(FOLAB2-2*FOLAB1+FOLAB0)*FOLAG0*DB3
-               
-               BET3SQ=(AMUO**2/2.D0+
-     *            BET3**2/(1+PO1*DEXP(-BET3**2/AMUO**2)))*
-     *                FOLAB0*FOLAG0*
-     *                DB3
-               
-               !IF(II.ne.JJ)BET3SQ=0.D0
+              IF (II.EQ.JJ) THEN
+                BET3SQ=AMUO**2/2.D0+
+     *                 BET3**2/(1+PO1*DEXP(-BET3**2/AMUO**2))
+              ELSE
+                BET3SQ=0  
+              END IF
        
-      EFFDEF(II,JJ,1:8) = (/DBETEFF,GAM2EFF/2,GAMEFF/1.41421356237309D0,
-     *  BET3EFF*DCOS(ETO),BET3EFF*DSIN(ETO)/1.41421356237309D0,
-     *  BET3SQ,BET2SQ,FOLAB0-1.d0/)
+      EFFDEF(II,JJ,1:6) = (/DBETEFF,GAM2EFF/2,GAMEFF/1.41421356237309D0,
+     *  BET3EFF*DCOS(ETO),BET3EFF*DSIN(ETO)/1.41421356237309D0,BET3SQ/)
     
               END DO
           END DO
@@ -2109,38 +2099,30 @@ C     ******************************************************************
       SUBROUTINE OVLOUT
 C     ****************************************************************** 
       IMPLICIT REAL*8(A-H,O-Z)
-      
-      INCLUDE 'PRIVCOM8.FOR'
-      INCLUDE 'PRIVCOM9.FOR' !!TOO MUCH!
-      INCLUDE 'PRIVCOM10.FOR'
-      INCLUDE 'PRIVCOM12.FOR'
-      INCLUDE 'PRIVCOM13.FOR'
-      INCLUDE 'PRIVCOM20.FOR'
-      
-!      COMMON/MAT/GAM,IS,NO
-!c      COMMON/INRM/AMO,BMO,CMO,BB42,GAMG,DELG
-!      COMMON/VEC/TM(16,16),AM(16,16),EIN(31,16),NK,KMI,ITAU
-!      COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),
-!     *NPI(40)
-!      COMMON/ENA/EN,EL(40),BET(10),NUR,NMAX,NPD,LAS
-!      COMMON/SHEM1/HW,AMG0,AMB0,GAM0,BET0,BET4,GAMDE,GSHAPE
-!     */SHEM2/GIT(40),EP0(40),EP1(40),EP2(40),EP12(40),ANG(40,2),EPB(40),
-!     *EPG(40),EGB(40),AIT(40,16),PT(40),FOG(2,8,8),XI(40),ANB(40),
-!     *CD(40,2)
-!      COMMON/OVLG/ANG1,ANG2,FOLAG,FOLAC,FOLAS,CD1,CD2,DG1,DG2,NNTG
-!     */MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
-!     *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
-!c     */FUDN/Y,DN,ANU,DNV,CDV
-!     */OVLB/X1,P1,ANU1,X2,P2,ANU2,FOLAR,NNT
-!c      COMMON/KG/J1,J2,M1,M2,J,M,AKG
-!c     */TR/B2(21,21),B4(21,21),B3(21,21)/NP/NPJ(25)
-!c     */OVLG1/FOLC2,FOLS2,FOLC3/TR1/B0(21,21)
-!     */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
-!c     */AA/ANO(40)
+      COMMON/MAT/GAM,IS,NO
+c      COMMON/INRM/AMO,BMO,CMO,BB42,GAMG,DELG
+      COMMON/VEC/TM(16,16),AM(16,16),EIN(31,16),NK,KMI,ITAU
+      COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),
+     *NPI(40)
+      COMMON/ENA/EN,EL(40),BET(10),NUR,NMAX,NPD,LAS
+      COMMON/SHEM1/HW,AMG0,AMB0,GAM0,BET0,BET4,GAMDE,GSHAPE
+     */SHEM2/GIT(40),EP0(40),EP1(40),EP2(40),EP12(40),ANG(40,2),EPB(40),
+     *EPG(40),EGB(40),AIT(40,16),PT(40),FOG(2,8,8),XI(40),ANB(40),
+     *CD(40,2)
+      COMMON/OVLG/ANG1,ANG2,FOLAG,FOLAC,FOLAS,CD1,CD2,DG1,DG2,NNTG
+     */MENU/MEJOB,MEPOT,MEHAM,MECHA,MEPRI,MESOL,MESHA,MESHO,MEHAO
+     *,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,MEDIS,MERIP
+c     */FUDN/Y,DN,ANU,DNV,CDV
+     */OVLB/X1,P1,ANU1,X2,P2,ANU2,FOLAR,NNT
+c      COMMON/KG/J1,J2,M1,M2,J,M,AKG
+c     */TR/B2(21,21),B4(21,21),B3(21,21)/NP/NPJ(25)
+c     */OVLG1/FOLC2,FOLS2,FOLC3/TR1/B0(21,21)
+     */SHAMO/BET3,ETO,AMUO,HWO,BB32,DPAR
+c     */AA/ANO(40)
       COMMON/FILENAME/OUTNAME
       COMMON/GAMCOR/GAMMAT,GAMMAT2,ITAU2,NROOT2,NGAM!GAMMAT=<ITAU,NROOT|d^nT/dg^n*g^NGAM|ITAU2,NROOT2>
-!      
-!      COMMON/EFFD/EFFDEF(40,40,7)
+      
+      COMMON/EFFD/EFFDEF(40,40,6)
       
       CHARACTER*256 OUTNAME
       CHARACTER*256 DEFOUTFILE
@@ -2214,9 +2196,6 @@ c             matrix elements calculations
               NNT=1
               CALL OVLAB
               FOLAB1=FOLAR ! <b1|b/b0|b2>
-              NNT=2
-              CALL OVLAB
-              FOLAB2=FOLAR ! <b1|(b/b0)^2|b2>
               NNT=0
               CALL OVLAB
               FOLAB0=FOLAR ! <b1|b2>
@@ -2282,35 +2261,29 @@ c             matrix elements calculations
               !FOLAG1=FOLAG1*(1+(-1)**(KAA/2+KAA2/2))/2
               !FOLAG2=FOLAG2*(1+(-1)**(KAA/2+KAA2/2))/2
               IF (ITAU.EQ.ITAU2) THEN
-                DTT2=1.D0
+                DTT2=1
               ELSE
-                DTT2=0.D0
-              END IF
-              
-              IF (PO1.eq.PO2) THEN
-                  DB3=1.D0
-              ELSE
-                  DB3=0.D0
+                DTT2=0
               END IF
   
-               DBETEFF=(FOLAB1-FOLAB0)*FOLAG0*DB3
-               GAMEFF=DTT2*(FOLAG1+GAM0*FOLAG0)*FOLAB0*DB3 !FOLAG15*FOLAB0!
-               GAM2EFF=DTT2*(FOLAG2+2*GAM0*FOLAG1+GAM0**2*FOLAG0)*FOLAB0
-     *                   *DB3!FOLAG16*FOLAB0!
-               BET3EFF=
-     *          BET3/DSQRT(1-DEXP(-2*BET3**2/AMUO**2))*
-     *          FOLAB0*FOLAG0*
-     *           (1-DB3)
+              IF (PO1.eq.PO2) THEN
+               DBETEFF=(FOLAB1-FOLAB0)*FOLAG0
+               GAMEFF=DTT2*(FOLAG1+GAM0*FOLAG0)*FOLAB0 !FOLAG15*FOLAB0!
+               GAM2EFF=DTT2*(FOLAG2+2*GAM0*FOLAG1+GAM0**2*FOLAG0)*FOLAB0        !FOLAG16*FOLAB0!
+               BET3EFF=0
+              ELSE 
+                DBETEFF=0
+                GAMEFF=0
+                GAM2EFF=0
+                BET3EFF=BET3/DSQRT(1-DEXP(-2*BET3**2/AMUO**2))
+              END IF
               
-
-               BET2SQ=(FOLAB2-2*FOLAB1+FOLAB0)*FOLAG0*DB3
-               
-               BET3SQ=(AMUO**2/2.D0+
-     *            BET3**2/(1+PO1*DEXP(-BET3**2/AMUO**2)))*
-     *                FOLAB0*FOLAG0*
-     *                DB3
-               
-               !IF(II.ne.JJ)BET3SQ=0.D0
+              IF (II.EQ.JJ) THEN
+                BET3SQ=AMUO**2/2.D0+
+     *                 BET3**2/(1+PO1*DEXP(-BET3**2/AMUO**2))
+              ELSE
+                BET3SQ=0  
+              END IF
        WRITE(*,
      * "(I2,I1,I1,I1,I1,I3,I1,I1,I1,I1,
      *  12D14.6)")

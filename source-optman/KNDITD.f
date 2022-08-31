@@ -1098,7 +1098,7 @@ C     IF(NPI1.NE.NPI2)CVNRPN(K2PN)=-CVNRPN(K2PN)
       BT1=BETB(NU)
       NUMB1=NUMB(NU)
       NCA1=NCA(NU)
-      IF(NUMB1.EQ.NUMB(1) )BT1=BET(2)
+      IF(NUMB1.EQ.0 )BT1=BET(2)
       ALFA1=1.D0
       IF(JO(1)/2*2.NE.JO(1)) ALFA1=AIGS(NU)
       JN1=J1
@@ -1118,7 +1118,7 @@ C     IF(NPI1.NE.NPI2)CVNRPN(K2PN)=-CVNRPN(K2PN)
       BT2=BETB(NU1)
       NUMB2=NUMB(NU1)
       NCA2=NCA(NU1)
-      IF(NUMB2.EQ.NUMB(1) )BT2=BET(2)
+      IF(NUMB2.EQ.0 )BT2=BET(2)
       ALFA2=1.D0
       IF(JO(1)/2*2.NE.JO(1)) ALFA2=AIGS(NU1)
       B12BGS=SQRT(BT1*BT2/BTGS**2)
@@ -1161,38 +1161,21 @@ C    *          EFFDEF(NU,NU1,6)/BTGS)*0.282094791773878D0/AVOL
  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 
 C       IF(MEVOL.EQ.1.AND.MEDEF.EQ.1.AND.K.EQ.KK) 
-       !IF(MEVOL.EQ.1.AND.K.EQ.KK)  
-      IF(MERAD.EQ.0.AND.NU.EQ.NU1) THEN
-          STATCOR=BTGS!+BET3**2/BTGS!!! CHANGE TO BTGS !!!!
-      ELSE
-          STATCOR=0.0
-      END IF 
-      
-      !IF(NU.EQ.NU1)THEN
-      !    BET32AVG=BET3**2
-      !ELSE
-      !    BET32AVG=0.0
-      !ENDIF
-      
-      
-      IF(MEVOL.EQ.1.!AND.LN1.EQ.LN2.
-     *AND.J1.EQ.J2.AND.KO1.EQ.KO2.AND.JO1.EQ.JO2.AND.NCA1.EQ.NCA2)  
-     *         CVNRV0(K2PN)=-(EFFDEF(NU,NU1,1)*BTGS*2.D0+STATCOR+!BTGS2+                           
-     *          (EFFDEF(NU,NU1,6)!-BET32AVG
-     * )/BTGS+EFFDEF(NU,NU1,7)*BTGS
-     *          )*0.282094791773878D0/AVOL*0.282094791773878D0                               
+       IF(MEVOL.EQ.1.AND.K.EQ.KK)  
+     *         CVNRV0(K2PN)=-(EFFDEF(NU,NU1,1)*BTGS*2.D0+BTGS2+                           
+     *          EFFDEF(NU,NU1,6)/BTGS)*0.282094791773878D0/AVOL
      
-      !!!if(NU.ne.1) CVNRV0(K2PN)=0
+ 
       ! IF(MEDEF.EQ.0) CVNRV0(K2PN)=0.0  ! temporary workout for odd
 
 
       JD=JO2
       JPS=JSS-1-JO2+J1+J2+LN2-LN1
-      CCC=CC*(-1)**(JPS/2)
-      
-!      write (21,'(15A4)')'J','lam','N1','I1','J1','L1','pi1','K1',
-!     *'N2','I2','J2','L2','pi2','K2', 'CVNR'
-      
+      JPS=JPS-JPS/4*4
+      IF(JPS.NE.0) GO TO 6
+      CCC=CC
+      GO TO 8
+    6 CCC=-CC
     8 DO 9 L=1,LAS2
     
       LL2=K2+L 
@@ -1238,13 +1221,15 @@ C      SUMMING BY K AND K' BY WEIGHTS AIT
 
 C     COUPLING FOR EVEN-EVEN NUCLIDES
 C     NON-AXIAL BAND LEVELS
-      !GO TO 145
+      GO TO 145
       
 C     LAST JOSES'S FORMULAS
       MUBAND=IABS(KO2-KO1)
-      IF(MUBAND.GT.4) GO TO 140     
+      MUBAND=4
+      IF(MUBAND.GT.6) GO TO 140     
+      IF(MUBAND.EQ.0) PAUSE 11
 
-      
+
       J1=JO2
       J2=2*LAM
       J=JO1
@@ -1255,20 +1240,15 @@ C     LAST JOSES'S FORMULAS
       AKGS=AKG
       M1=-KO2
       CALL KLEGO
-      AKGS=AKGS+(-1)**(JO2/2)*NPO(NU1)*AKG
+      AKGS=AKGS+(-1)**(JO2/2+NPO(NU1))*AKG
       M=-KO1
       CALL KLEGO
-      AKGS=AKGS+(-1)**((JO1+JO2)/2)*NPO(NU)*NPO(NU1)*AKG 
-      M1=KO2
+      AKGS=AKGS+(-1)**((JO1+JO2)/2+NPO(NU)+NPO(NU1))*AKG 
+      M=KO2
       CALL KLEGO
-      AKGS=AKGS+(-1)**(JO1/2)*NPO(NU)*AKG
+      AKGS=AKGS+(-1)**(JO1/2+NPO(NU))*AKG
       
-      AKG=AKGS*SQRT(J1+1.D0)!/SQ2!2.D0
-
-      IF(KO1.EQ.0.OR.KO2.EQ.0)THEN
-          AKG=AKG/SQ2
-      ENDIF
-      
+      AKG=AKGS*SQRT(J1+1.D0)/2.D0
       GO TO 129
  
       
@@ -1294,10 +1274,6 @@ C     OLD JOSE FORMULA  FOR EVEN-EVEN CASE
       CALL KLEGO
       AKG=AKG*SQRT(J1+1.D0)*(-1.D0)**(J1/2)       
  
-      IF(KO1.EQ.0.OR.KO2.EQ.0)THEN
-          AKG=AKG/SQ2
-      ENDIF      
-      
       GO TO 129
       
          
@@ -1311,10 +1287,6 @@ C     OLD JOSE FORMULA  FOR EVEN-EVEN CASE
       CALL KLEGO
       AKG=AKG*SQRT(J1+1.D0)
          
-      IF(KO1.EQ.0.OR.KO2.EQ.0)THEN
-          AKG=AKG/SQ2
-      ENDIF
-      
       GO TO 129   
 C     END JOSES'S FORMULAS FOR EVEN-EVEN CASE
 
@@ -1322,20 +1294,19 @@ C     END JOSES'S FORMULAS FOR EVEN-EVEN CASE
 C     COUPLING FOR ODD NUCLIDES, NON GS STATE LEVELS WITH GS ONES 
 
 C      IF(KO1.EQ.KO(1).OR.KO2.EQ.KO(1))  GO TO 201
-      IF(NUMB1.EQ.NUMB(1).OR. NUMB2.EQ.NUMB(1)) GO TO 201
+      IF(NUMB1.EQ.0.OR. NUMB2.EQ.0) GO TO 201
       
 C     GO TO 140
   201 CONTINUE
-      !MUBAND=IABS(KO(1)-KO1)
-      !IF(KO(1)-KO1.EQ.0) MUBAND=IABS(KO(1)-KO2)
+      MUBAND=IABS(KO(1)-KO1)
+      IF(KO(1)-KO1.EQ.0) MUBAND=IABS(KO(1)-KO2)
 C     IF(MUBAND.EQ.2.OR.MUBAND.GT.6) GO TO 140
-      !MUBAND=4
-      MUBAND=IABS(KO2-KO1)
+      MUBAND=4
       IF(MUBAND.GT.4) GO TO 140     
-      !IF(MUBAND.EQ.0) PAUSE 11
-      J1=JO2
+      IF(MUBAND.EQ.0) PAUSE 11
+      J1=JN2
       J2=2*LAM
-      J=JO1
+      J=JN1
       M1=KO2
       M2=MUBAND
       M=KO1
@@ -1345,15 +1316,15 @@ C     IF(MUBAND.EQ.2.OR.MUBAND.GT.6) GO TO 140
       CALL KLEGO
 C     BUG RCN 19 June 2014
 C     AKGS=AKGS+(-1)**((J02-1)/2)*AKG
-      AKGS=AKGS+(-1)**((JO2-1)/2)*NPO(NU1)*AKG
+      AKGS=AKGS+(-1)**((JO2-1)/2+NPO(NU1))*AKG
       M=-KO1
       CALL KLEGO
-      AKGS=AKGS+(-1)**((JO1+JO2)/2-1)*NPO(NU)*NPO(NU1)*AKG 
-      M1=KO2
+      AKGS=AKGS+(-1)**((JO1+JO2)/2-1+NPO(NU)+NPO(NU1))*AKG 
+      M=KO2
       CALL KLEGO
-      AKGS=AKGS+(-1)**((JO1-1)/2)*NPO(NU)*AKG
+      AKGS=AKGS+(-1)**((JO1-1)/2+NPO(NU))*AKG
       
-      AKG=AKGS*SQRT(J1+1.D0)!/2.D0  CHECK 1+(-1)^(lambda)*pi*pi'=1!!!!
+      AKG=AKGS*SQRT(J1+1.D0)/2.D0
       GO TO 129
  
       
@@ -1379,53 +1350,36 @@ C    EFFECTIVE DEFORMATIONS OF OTHER BANDS
       CVNN1=CCC*BKG*AKG*W
       SCALE=B12BGS**L
       IF(MEDEF.EQ.1) SCALE=0.D0       !!!!!!!!!
-        if(numb1.ne.numb(1).and.numb2.ne.numb(1)) SCALE=0.d0
       IF(NUMB1.EQ.NUMB2) SCALE=1.D0
+      
       IF(MEDEF.EQ.0.AND.MEVOL.EQ.0) GO TO 777
 c      IF(MEAXI.EQ.0) GO TO 777
 c      IF(MEDEF.EQ.0) GO TO 777
-
-      !!!IF(JO(1)/2*2.NE.JO(1)) GO TO 777
-  
+      
       
        IF(L.GT.1 ) GO TO 88 
-      !! NUMB is correct quantum number instead of KO 
-      IF(MEDEF.EQ.2.AND.NUMB1.EQ.NUMB2) SCALE=DCOS(GAM0)
-      IF(MEDEF.EQ.2.AND.IABS(KO1-KO2).EQ.4.AND.NPO(NU).EQ.NPO(NU1))
+       
+      IF(MEDEF.EQ.2.AND.NUMB1.EQ.NUMB2) SCALE=DCOS(GAM0) 
+      IF(MEDEF.EQ.2.AND.IABS(KO1-KO2).EQ.4.AND.NPO(NU).EQ.NPO(NU1))   
      *       SCALE=DSIN(GAM0)/SQ2
       IF(MEDEF.EQ.2) GO TO 777
-    
-       !! replace effective deformations of K=2 and gamma bands to ones 
-       !! of rigid asymmetric rotor since in SRM they are is not correct
-       IF(MEDEF.EQ.1.AND.NUMB1.EQ.NUMB2) THEN
-           IF(KO1.EQ.KO2)THEN
-               SCALE=!1.D0 + EFFDEF(NU,NU1,8) +
-!    *             (EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL
-     *             DCOS(GAM0) + EFFDEF(NU,NU1,8)+EFFDEF(NU,NU1,1)
-           ELSEIF(IABS(KO1-KO2).EQ.4)THEN
-               SCALE=DSIN(GAM0)/SQ2!EFFDEF(NU,NU1,3)
-           ELSE    
-               SCALE=0.0  
-           ENDIF    
-       ENDIF
-           
-
+       
+       
+       IF(MEDEF.EQ.1.AND.NUMB1.EQ.NUMB2) SCALE=1.D0 + 
+     *       (EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL   
      
        IF(MEDEF.EQ.0.AND.MEVOL.EQ.1.AND.NUMB(NNJ1(K)).EQ.NUMB(1).AND.
-     *       NUMB(NNJ1(KK)).EQ.NUMB(1)) SCALE=1.D0 + EFFDEF(NU,NU1,8)+
+     *       NUMB(NNJ1(KK)).EQ.NUMB(1)) SCALE=1.D0 + 
      *       (EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL  
             
       IF(NUMB1.EQ.NUMB2) GO TO 777
       IF(L.GT.1 ) pause
        
-      !! replace effective deformations of K=2 and gamma bands to ones 
-      !! of rigid asymmetric rotor since in SRM they are is not correct
       IF (MEDEF.EQ.1.AND.NUMB1.NE.NUMB2) THEN
        IF (KO1.EQ.KO2.AND.NPO(NU).EQ.NPO(NU1)) THEN
-             SCALE=!(EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL             
-     *         DCOS(GAM0)-1.0+EFFDEF(NU,NU1,1)
+             SCALE=(EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL             
           ELSE IF (IABS(KO1-KO2).EQ.4.AND.NPO(NU).EQ.NPO(NU1)) THEN
-             SCALE=DSIN(GAM0)/SQ2!EFFDEF(NU,NU1,3)!/BTGS!(1.D0+BTGS**2)/AVOL
+             SCALE=EFFDEF(NU,NU1,3)/(1.D0+BTGS**2)/AVOL 
           ELSE IF (KO1.EQ.KO2.AND.NPO(NU).NE.NPO(NU1)) THEN
              SCALE=EFFDEF(NU,NU1,4)/BTGS/AVOL
 C             PRINT *, SCALE,EFFDEF(NU,NU1,4),BTGS,AVOL,WE1,WE2,CVNN1
@@ -1446,7 +1400,7 @@ C  88  CVNR(LL2)=CVNR(LL2)*SCALE
       
 
 
-
+      
 C     NECESSARY TO DIVIDE BY SIN(GAMMA)/SQRT(2.)!!! for actinides
             
 C 144  IF(KO1.EQ.4.AND.KO2.EQ.4) CVNR(LL2)=CVNR(LL2)/0.1D0                 !!!!!!
@@ -1455,12 +1409,6 @@ C 144  IF(KO1.EQ.4.AND.KO2.EQ.4) CVNR(LL2)=CVNR(LL2)/0.1D0                 !!!!!
   140 CVNR(LL2)=0.D0
   141 J1=JN1
       J2=JN2
-      
-!      write(21,'(14I4,E12.4)') JSS,LAM,
-!     * NU,JO1,JN1,LN1,NPO(NU),KO(NU),
-!     * NU1,JO2,JN2,LN2,NPO(NU1),KO(NU1), 
-!     * CVNR(LL2)
-      
   444 CONTINUE
   333 CONTINUE 
     9 CONTINUE
@@ -1469,7 +1417,7 @@ C 144  IF(KO1.EQ.4.AND.KO2.EQ.4) CVNR(LL2)=CVNR(LL2)/0.1D0                 !!!!!
  
   124 IF(JO1.EQ.JO2.AND.NCA(NU).NE.NCA(NU1)) GO TO 135
       GO TO 2
-  135 IF(NUMB1.EQ.NUMB(1). AND. NUMB2.EQ.NUMB(1)) GO TO 101
+  135 IF(NUMB1.EQ.0. AND. NUMB2.EQ.0) GO TO 101
       GO TO 2
 
   101 CC=SQRT((J1+1)*(J2+1)/12.566371D0)
@@ -1477,7 +1425,11 @@ C 144  IF(KO1.EQ.4.AND.KO2.EQ.4) CVNR(LL2)=CVNR(LL2)/0.1D0                 !!!!!
       JO2=JO(NU1)
       JD=JO2
       JPS=JSS-1-JO2+J1+J2+LN2-LN1
-      CCC=CC*(-1)**(JPS/2)
+      JPS=JPS-JPS/4*4
+      IF(JPS.NE.0) GO TO 102
+      CCC=CC
+      GO TO 21
+  102 CCC=-CC       
    21 M1=-1
       M2=1
       LAM=0
@@ -1497,7 +1449,7 @@ C 144  IF(KO1.EQ.4.AND.KO2.EQ.4) CVNR(LL2)=CVNR(LL2)/0.1D0                 !!!!!
       CALL RACAH
       CVNRPN(K2PN)=CCC*BKG*AKG*W
        IF(MEDEF.EQ.1.AND.L.EQ.1)CVNRPN(K2PN)=CVNRPN(K2PN)*
-     *  (1.D0+EFFDEF(NU,NU1,8)+(EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL)
+     *  (1.D0+(EFFDEF(NU,NU1,1)-EFFDEF(NU,NU1,2))/AVOL)   
       J1=JN1
       J2=JN2
 C     WRITE(21,'(1X,8I8,1X,6(f8.4,1X))') NCLL,K,KK,KL, JO1,JO2,NCA(NU)

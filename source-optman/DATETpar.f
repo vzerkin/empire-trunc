@@ -5,7 +5,7 @@
       INTEGER NNTTii,MEISii,IIS,IIIS
       REAL*8 FUii,FUU
       CHARACTER*1 cpar
-      DIMENSION JTEMP(40), JSHIFT(40)
+      DIMENSION JTEMP(40)
 C---------------------------------
 C     These commons are also used and initialized in ABCT 
       INCLUDE 'PRIVCOM10.FOR'
@@ -28,9 +28,8 @@ C     These common is used FOR initialization CCOULii <-> CCOUL
       INCLUDE 'PRIVCOM18D.FOR'
   
 
-      INCLUDE 'PRIVCOM22.FOR'
-      CHARACTER*8 PNAME
-
+      COMMON/NIND/IIS
+!$OMP THREADPRIVATE(/NIND/)     
 
       INTEGER TID
 !$    INTEGER OMP_GET_THREAD_NUM
@@ -39,7 +38,6 @@ C     These common is used FOR initialization CCOULii <-> CCOUL
 !$    TID = OMP_GET_THREAD_NUM()
 
 
- 
       
       FUii   = 0.d0
       NNTTii = 0
@@ -65,9 +63,6 @@ C     write(*,*) 'Nuc.Index=',IIS,' AT=',NINT(ATIS(IIS))
 C---- Only two quantitites that depend on IIS (not IIIS) 
       EN=EEIS(IIS,IE)
       MECHA=MCHAIS(IIS,IE)
-      
-      PNAME='NEUTRONS'
-      IF(MECHA.NE.0) PNAME=' PROTONS'      
 C----
       WRITE (21,118) NINT(AT),NINT(ZNUC),EN
   118 FORMAT(//1X,'ADJUSTING TO EXPERIMENTAL DATA FOR NUCLEUS
@@ -99,14 +94,8 @@ C    *          A7,I2,A6,I1)
       DPAR=DPARIS(IIIS)
       GSHAPE=GSHAEIS(IIIS)
 C     GO TO 702
-      BET2SUM=0.d0
-  701 DO I=2,NPD,2
-         BET(I)=BETIS(IIIS,I)
-         BET2SUM=BET2SUM+BET(I)**2
-      END DO
-      !BET2SUM=BET2SUM+BET3**2
-      RCORR=1.d0
-      IF(MERAD.EQ.1) RCORR=1.d0-BET2SUM*7.9577471546d-2 ! 1-bet2sum/(4*pi)
+  701 DO 609 I=2,NPD,2
+  609 BET(I)=BETIS(IIIS,I)
 C      BETB(MELEV)=BETBIS(IIIS,MELEV)
 C
   702 CONTINUE
@@ -114,20 +103,15 @@ C
 C     dtmp = DBLE(NINT(ATIS(IIIS)-ATIS(1)))
       dtmp = ATIS(IIIS)-ATIS(1)
       VRLA=VRG+CAVR*dtmp
-      RR=(RRG*RCORR+CARR*dtmp)*ASQ
-      RC=RCG*RCORR*ASQ
-      RD=(RDG*RCORR+CARD*dtmp)*ASQ
-      !RD=RDG*RCORR*ASQ
-      RW=RWG*RCORR*ASQ
-      RS=RSG*RCORR*ASQ
-      RZ=RZG*RCORR*ASQ 
+      RR=(RRG+CARR*dtmp)*ASQ
+      RC=RCG*ASQ
+      RD=(RDG+CARD*dtmp)*ASQ
+      RW=RWG*ASQ
+      RS=RSG*ASQ
+      RZ=RZG*ASQ 
       AR0=ARG+CAAR*dtmp
       AC0=ACG+CAAC*dtmp
-      !AC0=ACG
-      
-      WDBW=WDBWG+CAWD*dtmp
-      WDWID=WDWIDG+CAWDW*dtmp
-       
+    
 C     PRINT 131, 'Thread ',TID,' VRG=',VRG,' RRG=',RRG,
 C    * ' RDG=',RDG,' ARG=',ARG,' ACG=',ACG,'  IIS=',IIS,' IIIS=',IIIS 
 C     WRITE(21,131) 'Thread ',TID,' VRG=',VRG,' RRG=',RRG,
@@ -144,9 +128,7 @@ C
       NURC=0
 
        IF(MEPOT.GT.1) GO TO 638
-      
-      JSHIFT=0 
-       
+
       DO 601 I=1, NUR
       IF(MECHA.EQ.0.AND. NCAIS(IIIS,I).NE.NCAIS(IIIS,1)) GO TO 601
       NURC=NURC+1
@@ -167,21 +149,20 @@ C
       ES(NURC)=EL(NURC) 
       JU(NURC)=JO(NURC)/2
       NPI(NURC)=NPO(NURC)
-      IF (NNO(NURC).EQ.1) JSHIFT(NURC)=1
   601 CONTINUE
       NUR=NURC
  
-      !JBASE=NINT(DBLE(JO(1))/4.0)*2
-      
       IF(MOD(JO(1),2).GT.0) THEN
           JTEMP=JU
-          !JU=NINT(DBLE(JO)/4.0)*2!-JBASE
-          JU=NINT(DBLE(JO-JO(1))/4.0)*2+JSHIFT ! FOR GS, BETA, GAMMA, AND INV PARITY BANDS
-          !!! ABNORMAL BAND SHOULD BE ASSIGNED SEPARATELY!!!
+          JU=NINT(DBLE(JO)/4.0)*2
+          NTU=1
+          NNB=0
+          NNG=0
+          NNO=0
+          NPI=1
       END IF
       
-      EFFDEF=0.d0
-       IF(MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.EQ.1) CALL OVLOPT 
+       IF(MEDEF.GT.0.OR.MEAXI.EQ.1) CALL OVLOPT 
        DO IID=1,NUR
          DO JJD=IID,NUR
              EFFDEF(JJD,IID,:)=EFFDEF(IID,JJD,:)
@@ -190,16 +171,16 @@ C
        END DO
 
        
-       IF(MOD(JO(1),2).GT.0)  THEN
-c          NUMBGS=NUMB(1)
-C            DO IID=1,NUR
-C              DO JJD=1,NUR
-C                IF(NUMB(IID).NE.NUMBGS.OR.NUMB(JJD).NE.NUMBGS)
-C      *                  EFFDEF(JJD,IID,:)=0.0
-C              END DO
-C            END DO          
-           JU=JTEMP
-       END IF
+      IF(MOD(JO(1),2).GT.0)  THEN
+          NUMBGS=NUMB(1)
+           DO IID=1,NUR
+             DO JJD=IID,NUR
+                IF(NUMB(IID).NE.NUMBGS.OR.NUMB(IID).NE.NUMBGS)
+     *                  EFFDEF(JJD,IID,:)=0.0
+             END DO
+           END DO          
+          JU=JTEMP
+      END IF
        
       DEFNUL=0.D0
       DEFNUL=SUM(EFFDEF*EFFDEF)     
@@ -456,14 +437,10 @@ C     FU=FU+((SRE(IIS,IE)-CSR)/DSR(IIS,IE))**2
       DISG(M)=0.D0
       DO 9 I=NUI,NUF
     9 DISG(M)=DISG(M)+DISC(I,M)
-      
-      
-      
       IF(KEYAP.EQ.0 .AND. MEPRI.LT.98) PRINT 100,
-     *                        PNAME,TID,IIS,IE,EEIS(IIS,IE),KG,NUI,NUF
-      IF(KEYAP.EQ.0) WRITE (21,100) 
-     *                        PNAME,TID,IIS,IE,EEIS(IIS,IE),KG,NUI,NUF
-  100 FORMAT(/23X,'ANGULAR DISTRIBUTIONS OF SCATTERED ',A8/
+     *                              TID,IIS,IE,EEIS(IIS,IE),KG,NUI,NUF
+      IF(KEYAP.EQ.0) WRITE (21,100) TID,IIS,IE,EEIS(IIS,IE),KG,NUI,NUF
+  100 FORMAT(/23X,'ANGULAR DISTRIBUTIONS OF SCATTERED PARTICLES'/
      *        19X,'THREAD ',I2,' IIS=',I2,' IE=',I2,' E=',F8.4,
      *            '  KG=',I2,' NUI=',I2,' NUF=',I2/)
       IF(KEYAP.EQ.0 .AND. MEPRI.LT.98) 

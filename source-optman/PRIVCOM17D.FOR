@@ -1,5 +1,5 @@
-      COMMON/OPT/XAD(35),GR(35),XAD1(35),XAD2(35),EP(35),EPSGR(35),NV
-      COMMON/OPB/C,GRR(35),FM,EPS1,NRL
+      COMMON/OPT/XAD(25),GR(25),XAD1(25),XAD2(25),EP(25),EPSGR(25),NV
+      COMMON/OPB/C,GRR(25),FM,EPS1,NRL
       COMMON/CHISQC/FU,NNTT
 
       COMMON/IREAD/VR0i,VR1i,VR2i,VR3i,VRLAi,ALAVRi,
@@ -12,5 +12,5 @@
      *               RZi,RZBWCi,RZWIDi,AZi,CCOULi,ALFi,
      *               CISOi,WCISOi,WDISOi,EAi,WDSHIi,WDWID2i,
      *               ALFNEWi,VRDi,CAVRi,CARRi,CAARi,CARDi,
-     *               CAACi,CAWDi,CAWDWi 
+     *               CAACi 
 

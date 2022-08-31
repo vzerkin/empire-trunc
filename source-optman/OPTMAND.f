@@ -1,5 +1,3 @@
-#define EMPMODE
-c
 C      VERSION 16 (January 2016, PARALLEL CALCULATIONS USING OPENMP
 C      INSTRUCTIONS, LANE CONSISTENT COULOMB CORRECTION 
 C      WITH DISPERSIVE OPTICAL POTENTIAL RELATIONS, NON-AXIAL AND
@@ -75,13 +73,14 @@ C  ****************************************************************
 C     SUBROUTINE OPTMAN12(fname)
 C  *************************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
+      LOGICAL EMPIRE, unformat
       logical f_ex
       character*20 answ
-      INCLUDE 'PRIVCOM20.FOR'
+      CHARACTER*20 fname 
+      COMMON/INOUT/fname,EMPIRE,unformat
 
       INCLUDE 'PRIVCOM10.FOR'
       INCLUDE 'PRIVCOM17D.FOR'  
-      INCLUDE 'PRIVCOM21.FOR'
       
       CHARACTER*80 TITLE
 
@@ -251,10 +250,10 @@ C        open(unit=21,file=TRIM(fname)//'.OUT',STATUS='NEW')
       CALL THORA(21)
 
             READ (20,4) TITLE
-            WRITE(21,'(7x,A)') trim(TITLE)
+            WRITE(21,'(7x,A80/)') trim(TITLE)
             READ(20,1)MEJOB,MEPOT,MEHAM,MEPRI,MESOL,MESHA,MESHO,
      *                MEHAO,MEAPP,MEVOL,MEREL,MECUL,MERZZ,MERRR,
-     *                MEDIS,MERIP,MEDEF,MEAXI,MERAD
+     *                MEDIS,MERIP,MEDEF,MEAXI
 
 C     FOR EMPIRE OPERATION MEPRI IS SET TO 98
       IF(EMPIRE) MEPRI=98    
@@ -305,9 +304,6 @@ C           1-DEFORMATIONS OF NON-GS-BAND LEVELS ARE CALCULATED FROM SOFT-ROTATO
 C           2-DEFORMATIONS OF GS-BAND LEVELS AND NON-AXIAL BAND ARE FROM RIGID-ROTATOR MODEL      
 C@18  MEAXI 0-USES AXIAL WEIGHTS (NOT AFFECT "EFFECTIVE" DEFORMATIONS)
 C           1-USES NON-AXIAL WEIGHTS
-C#19   MERAD 0-TREAT R_i as CONSTANT, BUT IF MEVOL=1 ADD STATIC TERM (BTGS2) TO VOLUME CONSERVATION  //+B_30^2 not ready yet
-C            1-R_i CORRECTION DUE TO STATIC DEFORMATIONS (CONSTANT NUCLEAR DENSITY)      
-C            2-NO RADIUS CORRECTION OF ANY KIND      
 C
 c      NTHREADS = omp_set_num_threads(16)
 !$OMP PARALLEL PRIVATE(TID) 
@@ -374,11 +370,9 @@ C     *******************************************************
       CHARACTER*4 ITEXT,IMOD,IPOT,MPOT,IFOR1,IFOR2,
      *IFOR3,ISMOD,IFOR4,IHMOD,IFOR5 
      
-      
-      INCLUDE 'PRIVCOM21.FOR'
-      INCLUDE 'PRIVCOM4.FOR'
-      
-      INCLUDE 'PRIVCOM20.FOR'
+      LOGICAL EMPIRE
+      CHARACTER*20 fname 
+      COMMON/INOUT/fname,EMPIRE
 
 C     Data read in OPTMAND
       INCLUDE 'PRIVCOM10.FOR'
@@ -460,13 +454,11 @@ C
 
 
       II1=1
-      IF(MEHAM.GT.1.OR.MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.GT.0) THEN     
-      READ(20,2)HWIS(II1),AMB0IS(II1),AMG0IS(II1),
+      IF(MEHAM.GT.1.OR.MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.GT.0)      
+     * READ(20,2)HWIS(II1),AMB0IS(II1),AMG0IS(II1),
      *GAM0IS(II1),BET0IS(II1),BET4IS(II1),BB42IS(II1),GAMGIS(II1),
      *DELGIS(II1),BET3IS(II1),ETOIS(II1),AMUOIS(II1),HWOIS(II1),
      *BB32IS(II1),GAMDIS(II1),DPARIS(II1),GSHAEIS(II1)
-      IF(MEPRI.LT.98) PRINT *, "Hamiltonian parameters are read"          
-      END IF
 
  
 C=======================================================================
@@ -480,7 +472,6 @@ C                    NO MORE THAN NCMA
 C=======================================================================
 
            READ(20,211)NUR,NST,NPD,LAS,MTET,LLMA,NCMA,NSMA,KODMA
-           IF(MEPRI.LT.98) PRINT *, "NUR etc... are read"
            
   211 FORMAT(20I3)
       IF(LLMA.EQ.0.OR.LLMA.GT.89) LLMA=89
@@ -498,24 +489,18 @@ C=======================================================================
               ENDDO
             ELSE
              READ(20,2)(EE(I),I=1,NST)
-             IF(MEPRI.LT.98) PRINT *, "EE(I) ... are read"
              READ(20,1)(MCHAE(I),I=1,NST)                          
-             IF(MEPRI.LT.98) PRINT *, "MCHAE(I) ... are read"
             ENDIF
       IF(MTET.EQ.0) GO TO 13
-           READ(20,2)(TET(I),I=1,MTET)
-           IF(MEPRI.LT.98) PRINT *, "Angles are read"
+           READ(20,2)(TET(I),I=1,MTET)   
    13 IF(MEPOT.GT.1) GO TO 16
        
            READ(20,3)(ELC(I),JOC(I),NPOC(I),KOC(I),NCAC(I),
      *     NUMBC(I),BETBC(I),AGSIC(I),NTUC(I),NNBC(I),NNGC(I),
      *                 NNOC(I),I=1,NUR)
-           IF(MEPRI.LT.98) PRINT *, "ELC(I) etc... are read"
-           
         GO TO 117
-   16   READ(20,43)(ELC(I),JOC(I),NPOC(I), NTUC(I),NNBC(I),NNGC(I),
+   16      READ(20,43)(ELC(I),JOC(I),NPOC(I), NTUC(I),NNBC(I),NNGC(I),
      *                 NNOC(I),NCAC(I),I=1,NUR)
-        IF(MEPRI.LT.98) PRINT *, "ELC(I) etc... are read"
 C====================================================================
 C     VR=VR0+VR1*EN+VR2*EN*EN      AR=AR0+AR1*EN
 C===================================================================
@@ -528,16 +513,12 @@ C                AD=AD0+AD1+BNDC
 C====================================================================
         
   117 READ(20,211)NRESN
-      IF(MEPRI.LT.98) PRINT *, "NRESN is read"
-      
       IF(NRESN.EQ.0) GO TO 17      
            READ(20,213)(ERN(I),GNN(I),GREN(I),
      *         LON(I),JMN(I),JCON(I),NEL(10),I=1,NRESN)     
-           IF(MEPRI.LT.98) PRINT *, "ERN(I) etc... are read"
   213      FORMAT(3E12.6,4I3)  
 
    17      READ(20,2)ANEU,ASP,AT,ZNUC,EFERMN,EFERMP
-           IF(MEPRI.LT.98) PRINT *, "ANEU etc... are read"
            READ(20,2)VR0,VR1,VR2,VR3,VRLA,ALAVR,
      *               WD0,WD1,WDA1,WDBW,WDWID,ALAWD,
      *               WC0,WC1,WCA1,WCBW,WCWID,BNDC,
@@ -548,8 +529,8 @@ C====================================================================
      *               RZ,RZBWC,RZWID,AZ,CCOUL,ALF,
      *               CISO,WCISO,WDISO,EA,WDSHI,WDWID2,
      *               ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
-     *               CAAC,ATI,CAWD,CAWDW
-           IF(MEPRI.LT.98) PRINT *, "Potential parameters are read"
+     *               CAAC,ATI
+     
      
       
 C      !!!!!!!!COMPARING WITH DATET YOU NEED TO INPUT ATI - REFERENCE NUCLEI NUMBER IN ABCT !!!!      
@@ -629,14 +610,6 @@ C
       IF(MEVOL.EQ.1) WRITE(21,200)
   200 FORMAT(/16X,'CALCULATIONS WITH VOLUME CONSERVATION'/)  
 
-      IF(MERAD.EQ.0.AND.MEVOL.EQ.1) WRITE(21,202)
-  202 FORMAT(/20X,'CALCULATIONS WITH STATIC PART OF VOLUME
-     * CONSERVATION TERM'/)
-      IF(MERAD.EQ.1) WRITE(21,203)
-  203 FORMAT(/16X,'CALCULATIONS WITH RADIUS CORRECTION'/)        
-      IF(MERAD.EQ.2) WRITE(21,204)
-  204 FORMAT(/16X,'CALCULATIONS WITHOUT RADIUS CORRECTION'/)        
-      
 C
       IF(MESHA.GT.1 .AND. MEPRI.LT.98) PRINT 51,IFOR1,IFOR3(MESHH),IFOR2
       IF(MESHA.GT.1) WRITE(21,51)IFOR1,IFOR3(MESHH),IFOR2
@@ -730,46 +703,27 @@ C
       WRITE(21,133) ZNUC,ATI
  133  FORMAT(/10X,'NUCLEUS CHARGE = ',F7.4,5x,
      *            'REFERENCE NUCLEUS   MASS = ',F7.3/)
-
-      RCORR=1.d0
-      
-      IF(MEPOT.GT.1) GO TO 8
+           IF(MEPOT.GT.1) GO TO 8
            IF(NPD.EQ.0) GO TO 8
            READ(20,2)(BET(I),I=2,NPD,2)
-           IF(MEPRI.LT.98) PRINT *, "BET(I) are read"
       IF(MEPRI.LT.98) PRINT 96,(I,BET(I),I=2,NPD,2)
       WRITE(21,96)(I,BET(I),I=2,NPD,2)
   96  FORMAT(6X,'NPD',5X,'DEFORMATION PARAMETER VALUES'/
      *(6X,I2,13X,F7.4))
-      
-      BET2SUM=0.d0
-      DO I=2,NPD,2
-         !BET(I)=BETIS(IIIS,I)
-         BET2SUM=BET2SUM+BET(I)**2
-         END DO
-      !BET2SUM=BET2SUM+BET3IS(1)**2
-
-      IF(MERAD.EQ.1) RCORR=1.d0-BET2SUM*7.9577471546d-2 ! 1-bet2sum/(4*pi)      
-      
-      
     1 FORMAT(36I2)
     2 FORMAT(6E12.7)
     3 FORMAT(E12.7,5I2,2E12.7,4I2)
    43 FORMAT(E12.7,7I2)
     8 ASQ=AT**(1.D0/3.D0)
       VRLA=VRLA+CAVR*(AT-ATI)
-      RR=(RR*RCORR+CARR*(AT-ATI))*ASQ
-      RC=RC*RCORR*ASQ
-      RD=(RD*RCORR+CARD*(AT-ATI))*ASQ
-      !RD=RD*RCORR*ASQ
-      RW=RW*RCORR*ASQ
-      RS=RS*RCORR*ASQ
-      RZ=RZ*RCORR*ASQ       
+      RR=(RR+CARR*(AT-ATI))*ASQ
+      RC=RC*ASQ
+      RD=(RD+CARD*(AT-ATI))*ASQ
+      RW=RW*ASQ
+      RS=RS*ASQ
+      RZ=RZ*ASQ       
       AR0=AR0+CAAR*(AT-ATI)
       AC0=AC0+CAAC*(AT-ATI)
-            
-      WDBW=WDBW+CAWD*(AT-ATI)
-      WDWID=WDWID+CAWDW*(AT-ATI)
 
 !$OMP PARALLEL PRIVATE(IIparal,TID) 
 !$OMP*  COPYIN(/MENU/)                                  ! PRIVCOM10
@@ -785,10 +739,6 @@ C
 !$OMP*  COPYIN(/RADi/,/DISPEi/,/CSBi/,/NCLMAi/)         ! PRIVCOM (b) 
 !$OMP*  COPYIN(/NCLMA/)                                 ! PRIVCOM 
 !$OMP*  COPYIN(/RAD/,/QNB/)                             ! PRIVCOM 
-
-!$OMP*  COPYIN(/LOFAC/)                                ! 
-!$OMP*  COPYIN(/INOUT/)                                !                        
-
 C
 !$OMP DO SCHEDULE(DYNAMIC,1)
 C     This is a parallel loop
@@ -835,7 +785,7 @@ C     COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),NPI(40)
       INCLUDE 'PRIVCOM16D.FOR'    ! not THREADPRIVATE
      
       DIMENSION ITEXT(3),IMOD(7),IPOT(7),MPOT(2),IFOR1(2),IFOR2(9),
-     *IFOR3(3),ISMOD(2),IFOR4(5),IHMOD(3),IFOR5(4), IBANDS(10)
+     *IFOR3(3),ISMOD(2),IFOR4(5),IHMOD(3),IFOR5(4)
 
       DATA ITEXT,IMOD/4HHAMI,4HLTON,4HIAN ,4H RV ,4H VM ,4HDCHM,
      *4H FDM,4H5PA0,4H 5PM,4HCLGB/,
@@ -849,8 +799,7 @@ C     COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),NPI(40)
 C=======================================================================
 C     
 C     MENUC-NUMBER OF ADJUSTED ISOTOPES
-C     MEBET-NUMBER OF ISOTOPE DEFORMATIONS OF WHICH ARE ADJUSTED, IF MEBET=0 THEN DEFORMATIONS 
-C           OF ALL ISOTOPES ARE ADJUSTED (BETA2,BETA4,BETA6 FOR NOW)
+C     MEBET-NUMBER OF ISOTOPE DEFORMATIONS OF WHICH ARE ADJUSTED
 C     MEIIS-NUMBER OF ISOTOPE FOR WHICH RESONSNCES ARE TO BE ADJUSTED
 C     MERES-NUMBER OF RESONANCE FOR A CHOZEN ISOTOPE THAT IS TO BE ADJUSTED
 C     MELEV-NUMBER OF LEVEL OF ISOTOPE WITH NUMBER MEBET DEFORMATION FOR WHICH IS TO BE ADJUSTED
@@ -863,7 +812,6 @@ C                 1:-COUPLED STATES ARE ORDERED BY GROWING MOMENTUM L
 C                    NO MORE THAN NCMA
 C=======================================================================
            READ(20,211)NUR,NST,NPD,LAS,MTET,LLMA,NCMA,NSMA,KODMA
-      PRINT *, "NUR etc... are read"
   211 FORMAT(20I3)
   234      FORMAT(6I3) 
       IF(LLMA.EQ.0.OR.LLMA.GT.89) LLMA=89
@@ -871,9 +819,8 @@ C=======================================================================
       IF(NSMA.EQ.0.OR.NSMA.GT.180) NSMA=180
            READ(20,234)(NSTIS(I),NURIS(I),MESOIS(I),NRES(I),
      *     MEDEIS(I),MEAXIS(I), I=1, MENUC)
-      PRINT *, "NSTIS etc... are read"
            READ(20,2) (WEI(I),I=1, MENUC)      
-      PRINT *, "WEI etc... are read"
+
       DO 600 IIS=1,MENUC
       NUR=NURIS(IIS)
       NST=NSTIS(IIS)
@@ -881,28 +828,23 @@ C=======================================================================
       MEDEF=MEDEIS(IIS)
       MEAXI=MEAXIS(IIS)
   
-      IF(MEHAM.GT.1.OR.MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.GT.0) THEN     
-          READ(20,2)HWIS(IIS),AMB0IS(IIS),AMG0IS(IIS),
+      IF(MEHAM.GT.1.OR.MEDEF.GT.0.OR.MEAXI.EQ.1.OR.MEVOL.GT.0)      
+     *    READ(20,2)HWIS(IIS),AMB0IS(IIS),AMG0IS(IIS),
      *GAM0IS(IIS),BET0IS(IIS),BET4IS(IIS),BB42IS(IIS),GAMGIS(IIS),
      *DELGIS(IIS),BET3IS(IIS),ETOIS(IIS),AMUOIS(IIS),HWOIS(IIS),
      *BB32IS(IIS),GAMDIS(IIS),DPARIS(IIS),GSHAEIS(IIS)
-      PRINT *, "Ham params are read"          
-      END IF     
-      
+           
            READ(20,2)(EEIS(IIS,I),I=1,NST)
-      PRINT *, "EEIS etc... are read"
            READ(20,1)(MCHAIS(IIS,I),I=1,NST)
-      PRINT *, "MCHAIS etc... are read"           
+                 
            IF(MEPOT.GT.1) GO TO 36
            READ(20,3)(ELIS(IIS,I),JOIS(IIS,I),NPOIS(IIS,I),
      *     KOIS(IIS,I),NCAIS(IIS,I),NUMBIS(IIS,I),BETBIS(IIS,I),
      *     AIGSIS(IIS,I),NTUIS(IIS,I),
      *     NNBIS(IIS,I),NNGIS(IIS,I),NNOIS(IIS,I),I=1,NUR)
-           PRINT *, "ELIS etc... are read"  
-           GO TO 37
+            GO TO 37
    36      READ(20,43)(ELIS(IIS,I),JOIS(IIS,I),NPOIS(IIS,I),NTUIS(IIS,I)
      *     ,NNBIS(IIS,I),NNGIS(IIS,I),NNOIS(IIS,I),NCAIS(IIS,I),I=1,NUR)
-           PRINT *, "ELIS etc... are read"  
 C====================================================================
 C     VR=VR0+VR1*EN+VR2*EN*EN      AR=AR0+AR1*EN
 C===================================================================
@@ -916,12 +858,11 @@ C====================================================================
    37      IF(NRESN.EQ.0) GO TO 212      
            READ(20,213)(ERIS(IIS,I),GNIS(IIS,I),GREIS(IIS,I)
      *      ,LOIS(IIS,I),JMIS(IIS,I),JCOIS(IIS,I),NELA(IIS,I),I=1,NRESN) 
-           PRINT *, "ERIS etc... are read"  
+     
        
   213      FORMAT(3E12.6,4I3)  
   212      READ(20,2)ANEU,ASP,ATIS(IIS),ZNUCIS(IIS),EFISN(IIS),
      *     EFISP(IIS)
-           PRINT *, "ANEU etc... are read"  
            
   600 CONTINUE 
         
@@ -935,8 +876,8 @@ C====================================================================
      *               RZ,RZBWC,RZWID,AZ,CCOULii,ALF,
      *               CISO,WCISO,WDISO,EA,WDSHI,WDWID2,
      *               ALFNEW,VRD,CAVR,CARR,CAAR,CARD,
-     *               CAAC,ABASE,CAWD,CAWDW
-         PRINT *, "Potential params are read"
+     *               CAAC 
+
       IF(MEPRI.LT.98) 
      * PRINT 500,   ASP,(NINT(ATIS(I)),NINT(ZNUCIS(I)),I=1,MENUC)
 
@@ -1018,15 +959,6 @@ C
   199 FORMAT(/20X,'CALCULATIONS WITHOUT VOLUME CONSERVATION'/)
       IF(MEVOL.EQ.1) WRITE(21,200)
   200 FORMAT(/16X,'CALCULATIONS WITH VOLUME CONSERVATION'/)  
-      
-      IF(MERAD.EQ.0.AND.MEVOL.EQ.1) WRITE(21,202)
-  202 FORMAT(/20X,'CALCULATIONS WITH STATIC PART OF VOLUME
-     * CONSERVATION TERM'/)
-      IF(MERAD.EQ.1) WRITE(21,203)
-  203 FORMAT(/16X,'CALCULATIONS WITH RADIUS CORRECTION'/)        
-      IF(MERAD.EQ.2) WRITE(21,204)
-  204 FORMAT(/16X,'CALCULATIONS WITHOUT RADIUS CORRECTION'/)        
-      
 C
       IF(MESHA.GT.1 .AND. MEPRI.LT.98) PRINT 51,IFOR1,IFOR3(MESHH),IFOR2
       IF(MESHA.GT.1) WRITE(21,51)IFOR1,IFOR3(MESHH),IFOR2
@@ -1214,7 +1146,6 @@ C133  FORMAT(/130X,'NUCLEI(I) CHARGE = ',10(I3,1x)/)
       IF(MEPOT.GT.1) GO TO 607
       IF(NPD.EQ.0) GO TO 607
       READ(20,2)(BETIS(IIS,I),I=2,NPD,2)
-      PRINT *, "BETIS etc... are read" 
       IF(MEPRI.LT.98) PRINT 96,(I,BETIS(IIS,I),I=2,NPD,2)
       WRITE(21,96)(I,BETIS(IIS,I),I=2,NPD,2)
    96  FORMAT(6X,'NPD',5X,'DEFORMATION PARAMETER VALUES'/
@@ -1241,19 +1172,15 @@ C     Storing READ values INTO new VARIABLES (RR -> RRi)
       VRG=VRLAi
       ARG=AR0i
       ACG=AC0i
-      
-      WDBWG=WDBWi
-      WDWIDG=WDWIDi
 
-      READ(20,112)(NPJ(I),I=1,77)
-      PRINT *, "NPJ(I) etc... are read"
+      READ(20,112)(NPJ(I),I=1,75)
       IF(MEPRI.LT.98) PRINT 99
       WRITE (21,99)
 
       WRITE (21,99)
    99 FORMAT(/10X,'PARAMETERS ADJUSTED'/)
-      IF(MEPRI.LT.98) PRINT 111,(NPJ(I),I=1,77)
-      WRITE(21,111)(NPJ(I),I=1,77)
+      IF(MEPRI.LT.98) PRINT 111,(NPJ(I),I=1,75)
+      WRITE(21,111)(NPJ(I),I=1,75)
   111 FORMAT(1X,6I2)
   112 FORMAT(6I2)
       DO 4 IIS=1,MENUC
@@ -1341,10 +1268,10 @@ C     Storing READ values INTO new VARIABLES (RR -> RRi)
       XAD(KEV)=WDA1
    19 IF(NPJ(10).NE.1) GO TO 20
       KEV=KEV+1
-      XAD(KEV)=WDBWG
+      XAD(KEV)=WDBW
    20 IF(NPJ(11).NE.1) GO TO 21
       KEV=KEV+1
-      XAD(KEV)=WDWIDG
+      XAD(KEV)=WDWID
    21 IF(NPJ(12).NE.1) GO TO 22
       KEV=KEV+1
       XAD(KEV)=ALAWD
@@ -1490,29 +1417,14 @@ C     Storing READ values INTO new VARIABLES (RR -> RRi)
       KEV=KEV+1
       XAD(KEV)=BET4IS(MEBET)
    88 IF(NPJ(60).NE.1) GO TO 899
-        if(MEBET.eq.0) then
-          XAD(KEV+1:KEV+MENUC)=BETIS(1:MENUC,2)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          XAD(KEV)=BETIS(MEBET,2)
-        endif
+      KEV=KEV+1
+      XAD(KEV)=BETIS(MEBET,2)
   899 IF(NPJ(61).NE.1) GO TO 901
-        if(MEBET.eq.0) then
-          XAD(KEV+1:KEV+MENUC)=BETIS(1:MENUC,4)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          XAD(KEV)=BETIS(MEBET,4)
-        endif
+      KEV=KEV+1
+      XAD(KEV)=BETIS(MEBET,4)
   901 IF(NPJ(62).NE.1) GO TO 910
-        if(MEBET.eq.0) then
-          XAD(KEV+1:KEV+MENUC)=BETIS(1:MENUC,6)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          XAD(KEV)=BETIS(MEBET,6)
-        endif
+      KEV=KEV+1
+      XAD(KEV)=BETIS(MEBET,6)
   910 IF(NPJ(63).NE.1) GO TO 92
       KEV=KEV+1
       XAD(KEV)=AMUOIS(MEBET)
@@ -1544,37 +1456,14 @@ C     Storing READ values INTO new VARIABLES (RR -> RRi)
       KEV=KEV+1
       XAD(KEV)=ABS(GREIS(MEIIS,MERES))
   758 IF(NPJ(73).NE.1) GO TO 759
-        if(MELEV.eq.0.and.MEBET.ne.0)then
-          IBANDS=-1
-          IIIB=0
-          do III=1,NURIS(MEBET)
-            if(.not.ANY(IBANDS.eq.NUMBIS(MEBET,III))
-     *             .and.NUMBIS(MEBET,III).ne.NUMBIS(MEBET,1)) then
-              IIIB=IIIB+1
-              IBANDS(IIIB)=NUMBIS(MEBET,III)
-              KEV=KEV+1
-              XAD(KEV)=ABS(BETBIS(MEBET,III)) 
-            endif
-          enddo 
-        elseif(MELEV.ne.0.and.MEBET.ne.0)then
-          KEV=KEV+1
-          XAD(KEV)=ABS(BETBIS(MEBET,MELEV)) 
-        else
-          print *,'Not supported yet.'  
-          stop
-        endif
+      KEV=KEV+1
+      XAD(KEV)=ABS(BETBIS(MEBET,MELEV)) 
   759 IF(NPJ(74).NE.1) GO TO 760
       KEV=KEV+1
       XAD(KEV)=ABS(GAM0IS(MEBET))    
-  760 IF(NPJ(75).NE.1) GO TO 761
+  760 IF(NPJ(75).NE.1) GO TO 93
       KEV=KEV+1
       XAD(KEV)=ABS(AMB0IS(MEBET))
-  761 IF(NPJ(76).NE.1) GO TO 762
-      KEV=KEV+1
-      XAD(KEV)=CAWD
-  762 IF(NPJ(77).NE.1) GO TO 93
-      KEV=KEV+1
-      XAD(KEV)=CAWDW
    93 NV=KEV       
 
       READ(20,2)(EP(K),K=1,NV)
@@ -1593,12 +1482,7 @@ C     *******************************************************
       INCLUDE 'PRIVCOM17D.FOR'  
 C     COMMON/OPT/XAD(25),GR(25),XAD1(25),XAD2(25),EP(25),EPSGR(25),NV
 C     COMMON/OPB/C,GRR(25),FM,EPS1,NRL
-      !DOUBLE PRECISION SCUR(25),SPREV(25),GRPREV(25),OMEGA
-      
-      !SCUR=0.0
-      !SPREV=0.0
-      !GRPREV=0.0
-      !GR=0.0
+
       
       NCC=1
       NI=0
@@ -1622,20 +1506,7 @@ C     COMMON/OPB/C,GRR(25),FM,EPS1,NRL
       IF(DABS(XAD2(I)-XAD1(I)).LE.DABS(EP(I))) NXX=NXX+1
    21 CONTINUE
       IF(NXX.EQ.NV)GO TO 9
-      
-      !GRPREV=GR
-     
       CALL DEFGT
-      
-      !SPREV=SCUR
-      !IF(SUM(GRPREV*GRPREV).GT.0) THEN
-      !   OMEGA=MAX(0.0,SUM((GR-GRPREV)*GR)/SUM(GRPREV*GRPREV))
-      !ELSE
-      !    OMEGA=0.0
-      !ENDIF   
-      !SCUR=GR+OMEGA*SPREV
-
-      
       LL=0
       NNK=0
       DO 13 I=1,NV
@@ -1643,19 +1514,18 @@ C     COMMON/OPB/C,GRR(25),FM,EPS1,NRL
       NI=NI+1
       C=0.
       DO 7 I=1,NV
-      GRR(I)=GR(I)!SCUR(I)!
-    7 C=C+GRR(I)**2*(300*EP(I))**2
-      !C=SUM(SCUR*GR*(300*EP)**2)
+      GRR(I)=GR(I)
+    7 C=C+GRR(I)**2
       EPS1=FM/C
     8 NX=0
       DO 30 I=1,NV
-      EPSGR(I)=EPS1*GRR(I)*(300*EP(I))**2
+      EPSGR(I)=EPS1*GRR(I)
       IF(DABS(EPSGR(I)).GT.0.3D0*DABS(XAD1(I))) GO TO 15
       IF(DABS(EPSGR(I)).LE.DABS(EP(I))) NX=NX+1
    30 CONTINUE
       IF(NNK.EQ.0) NX=0
    17 DO 2 I=1,NV
-      HS=EPS1*GRR(I)*(300*EP(I))**2
+      HS=EPS1*GRR(I)
       HS1=XAD1(I)
       XAD(I)=HS1-HS
     2 CONTINUE
@@ -1709,18 +1579,15 @@ C     *******************************************************
 C      COMMON/OPT/XAD(25),GR(25),XAD1(25),XAD2(25),EP(25),EPSGR(25),NV
 C      COMMON/OPB/C,GRR(25),FM,EPS1,NRL
 C      COMMON/CHISQC/FU
-      DIMENSION TEMPAD(35)
       F1=FU
       DO I=1,NV
       DL=EP(I)
-      TEMPAD(I)=XAD(I)
       XAD(I)=XAD(I)+DL
 C     write(*,*) 'XAD(i)=',i,XAD(i) 
       CALL XISQT
 C     write(*,*) 'XAD(i)=',i,XAD(i) 
       GR(I)=(FU-F1)/DL
-      !XAD(I)=XAD(I)-DL
-      XAD(I)=TEMPAD(I)
+      XAD(I)=XAD(I)-DL
       ENDDO
       RETURN
       END
@@ -1729,7 +1596,7 @@ C     *******************************************************
       SUBROUTINE XISQT
 C     *******************************************************
       IMPLICIT DOUBLE PRECISION(A-H,O-Z) 
-      DIMENSION XPRN(35), IBANDS(10),DBANDS(10)
+      DIMENSION XPRN(25)
       
 C     These common is used FOR initialization CCOULii <-> CCOUL
       INCLUDE 'PRIVCOM18D.FOR'
@@ -1751,7 +1618,8 @@ C     COMMON/SHEMM/ES(40),JU(40),NTU(40),NNB(40),NNG(40),NNO(40),NPI(40)
       INCLUDE 'PRIVCOM17D.FOR'    ! not THREADPRIVATE
       INCLUDE 'PRIVCOM16D.FOR'    ! not THREADPRIVATE
 
-      INCLUDE 'PRIVCOM22.FOR'   
+      COMMON/NIND/IIS
+!$OMP THREADPRIVATE(/NIND/)     
 
       INTEGER IIparal
         
@@ -1800,11 +1668,11 @@ C     Restoring READ values for other nuclei in the loop after PARALLEL executio
       XPRN(KEV)=XAD(KEV)
    19 IF(NPJ(10).NE.1) GO TO 20
       KEV=KEV+1
-      WDBWG=ABS(XAD(KEV))
+      WDBW=ABS(XAD(KEV))
       XPRN(KEV)=XAD(KEV)
    20 IF(NPJ(11).NE.1) GO TO 21
       KEV=KEV+1
-      WDWIDG=ABS(XAD(KEV))
+      WDWID=ABS(XAD(KEV))
       XPRN(KEV)=XAD(KEV)
    21 IF(NPJ(12).NE.1) GO TO 22
       KEV=KEV+1
@@ -2009,35 +1877,17 @@ C     XPRN(KEV)=XAD(KEV)*APRN
       BET4IS(MEBET)=XAD(KEV)
       XPRN(KEV)=XAD(KEV)
    87 IF(NPJ(60).NE.1) GO TO 88
-        if(MEBET.eq.0) then
-          BETIS(1:MENUC,2)=XAD(KEV+1:KEV+MENUC)
-          XPRN(KEV+1:KEV+MENUC)=XAD(KEV+1:KEV+MENUC)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          BETIS(MEBET,2)=XAD(KEV)
-          XPRN(KEV)=XAD(KEV)
-        endif
+      KEV=KEV+1
+      BETIS(MEBET,2)=XAD(KEV)
+      XPRN(KEV)=XAD(KEV)
    88 IF(NPJ(61).NE.1) GO TO 899
-        if(MEBET.eq.0) then
-          BETIS(1:MENUC,4)=XAD(KEV+1:KEV+MENUC)
-          XPRN(KEV+1:KEV+MENUC)=XAD(KEV+1:KEV+MENUC)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          BETIS(MEBET,4)=XAD(KEV)
-          XPRN(KEV)=XAD(KEV)
-        endif
+      KEV=KEV+1
+      BETIS(MEBET,4)=XAD(KEV)
+      XPRN(KEV)=XAD(KEV)
   899 IF(NPJ(62).NE.1) GO TO 901
-        if(MEBET.eq.0) then
-          BETIS(1:MENUC,6)=XAD(KEV+1:KEV+MENUC)
-          XPRN(KEV+1:KEV+MENUC)=XAD(KEV+1:KEV+MENUC)
-          KEV=KEV+MENUC
-        else
-          KEV=KEV+1
-          BETIS(MEBET,6)=XAD(KEV)
-          XPRN(KEV)=XAD(KEV)
-        endif
+      KEV=KEV+1
+      BETIS(MEBET,6)=XAD(KEV)
+      XPRN(KEV)=XAD(KEV)
   901 IF(NPJ(63).NE.1) GO TO 910
       KEV=KEV+1
       CMB=AMUOIS(MEBET)**2*BB32
@@ -2088,62 +1938,17 @@ C     XPRN(KEV)=XAD(KEV)*APRN
      *ABS(XAD(KEV))
       XPRN(KEV)=XAD(KEV)
   759 IF(NPJ(73).NE.1) GO TO 760
-        if(MELEV.eq.0.and.MEBET.ne.0)then
-          IBANDS=-1
-          DBANDS=0.0
-          IIIB=1
-          IBANDS(1)=NUMBIS(MEBET,1)
-          do III=1,NURIS(MEBET)
-            if(NUMBIS(MEBET,III).ne.NUMBIS(MEBET,1))then
-              do IIII=1,IIIB
-                if(NUMBIS(MEBET,III).eq.IBANDS(IIII))then
-                  BETBIS(MEBET,III)=DBANDS(IIII)
-                  exit
-                endif
-              enddo
-              if(IIII.eq.IIIB+1)then
-                IIIB=IIIB+1
-                IBANDS(IIIB)=NUMBIS(MEBET,III)
-                KEV=KEV+1
-                DBANDS(IIIB)=ABS(XAD(KEV))
-                BETBIS(MEBET,III)=DBANDS(IIIB)
-                XPRN(KEV)=XAD(KEV)              
-              endif
-            endif 
-          enddo
-        elseif(MELEV.ne.0.and.MEBET.ne.0)then
-          KEV=KEV+1
-          !BETBIS(MEBET,MELEV)=ABS(XAD(KEV))
-          DO III=1, NURIS(MEBET)
-             IF(NUMBIS(MEBET,III).eq.NUMBIS(MEBET,MELEV)) THEN
-                 BETBIS(MEBET,III)=ABS(XAD(KEV))
-             ENDIF
-          ENDDO
-          XPRN(KEV)=XAD(KEV)
-        else
-          print *,'Not supported yet.'  
-          stop
-        endif      
-
-      
+      KEV=KEV+1
+      BETBIS(MEBET,MELEV)=ABS(XAD(KEV))
+      XPRN(KEV)=XAD(KEV)
   760 IF(NPJ(74).NE.1) GO TO 761
       KEV=KEV+1
       GAM0IS(MEBET)=ABS(XAD(KEV))
       XPRN(KEV)=XAD(KEV)      
-  761 IF(NPJ(75).NE.1) GO TO 762
+  761 IF(NPJ(75).NE.1) GO TO 93
       KEV=KEV+1
       AMB0IS(MEBET)=ABS(XAD(KEV))
       XPRN(KEV)=XAD(KEV)        
-      
-  762 IF(NPJ(76).NE.1) GO TO 763
-      KEV=KEV+1
-      CAWD=XAD(KEV)
-      XPRN(KEV)=XAD(KEV)        
-  763 IF(NPJ(77).NE.1) GO TO 93
-      KEV=KEV+1
-      CAWDW=XAD(KEV)
-      XPRN(KEV)=XAD(KEV)        
-      
    93 FU=0.D0
 c      IF(NPJ(58).EQ.1.OR.NPJ(63).EQ.1.OR.NPJ(64).EQ.1.OR.NPJ(74).EQ.1.
 c     *OR.NPJ(75).EQ.1) CALL PREQU  

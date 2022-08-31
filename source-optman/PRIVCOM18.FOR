@@ -71,5 +71,3 @@ C     RZ    = RZi
       CAAR  = CAARi 
       CARD  = CARDi 
       CAAC =  CAACi 
-      CAWD  = CAWDi
-      CAWDW = CAWDWi
