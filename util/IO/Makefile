@@ -31,10 +31,10 @@ ifeq ($(FC),ifort)
   # FFLAGS = -trace -g -debug all -check all -warn unused -fp-stack-check -ftrapuv
 else ifeq ($(FC),gfortran)
   # flags for default real size: 4, 8 or 16 bytes:
-  defR4  =
+  defR4  = -fdefault-real-4
   defR8  = -fdefault-real-8
   defR16 = -fdefault-real-16
-  FFLAGS = -O3
+  FFLAGS = -O3 -std=legacy
 else ifeq ($(FC),af90)
   defR4 =
   defR8 = -N113
