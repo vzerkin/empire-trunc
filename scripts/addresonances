@@ -57,4 +57,4 @@ $EMPIREDIR/scripts/process $file
 
 # remove left-over files
 rm INPUT 2>/dev/null
-
+rm endres.scr 2>/dev/null
