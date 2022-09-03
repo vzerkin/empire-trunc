@@ -40,18 +40,19 @@ inputing the energies. The following operations are available:
 
 [d] delete a whole subentry.
 
-[m] modify subentry; PARAMETRS:
-    y1  [b] - add y1 to every cross section
-    y2      - multiply every cross section by y2 factor
-    dy1 [%] - square-add constant relative uncertainty dy1 (allows adding systematic uncertainties)
-    dy2     - multiply every uncertainty by dy2 factor.
+[m] multiply subentry; PARAMETRS:
+    y1   - multiply every cross section by y1 factor
+    y2   - multiply every uncertianty by y2 factor
+
 Specifying non-zero y1, y2, dy1, dy2 allows to perform all these adjustments in a single run. Otherwise any of 
 these parameters can be set to zero (the code is protected against zeroing existing uncertainties by setting 
 multiplicative factor dy2 to 1 if entered as 0). Denoting original EXFOR values as y and their uncertainties 
 as dy, and indicating modified values by the prime, the operations read as y′ = y+y1+y∗y2 for cross sections 
 and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
 
-[a] add cross section [barn] to the selected subentry
+[a] add cross section and/or uncertainty to every point in the selected subentry
+    y1 [b]       - add y1 to every cross section
+    y2 [b or %]  - square-add y2 to every uncertainty (% if y2<0)
 
 [s] smooth subentry by sliding four-point, using area conserving algorithm by A.Kuprat, A.Khamayseh, D.George, 
     and L.Larkey, Journal of Computational Physics 172, 99–118 (2001), doi:10.1006/jcph.2001.6816); PARAMETERS:
@@ -70,7 +71,7 @@ and dy′ = dy2􏰀(dy^2 + (y ∗ dy1/100)2) for their uncertainties.
     emax [MeV] - upper energy limit
     NOTE: both parameters are required since using EXFOR limits woudl correspond to 'd' or 'c' option.
 
-Only one operation per subentry can be executed at a time (except ’m’ option as described above). If more 
+Only one operation per subentry can be executed at a time (except ’m’ and 'a' options as described above). If more 
 operations are needed they can be executed in several subsequent runs of C4SERVICE. The default ’r’ option 
 (retain) should be kept for subentries that do not need any change.  The modification procedure may be 
 customized by appropriate adjustment of the indicated do-loop in the ’modify_section’ subroutine.
@@ -111,6 +112,7 @@ Example of the terminal view:
  Do you want to run c4service (y/n)
 
 and the corresponding default input file:
+
    1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 r  0.00000      0.00000      0.00000      0.00000    
    2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
    3)   1 39089   3    1 L.KOESTER,ET.AL.     (81)  21842  22 r  0.00000      0.00000      0.00000      0.00000    
@@ -132,14 +134,14 @@ and the corresponding default input file:
   19)   1 39089   3    1 D.G.FOSTER JR,ET.AL. (71)  10047  44 r  0.00000      0.00000      0.00000      0.00000    
   20)   1 39089   3    1 D.W.KENT,ET.AL.      (62)  11617  25 r  0.00000      0.00000      0.00000      0.00000    
 
-User needs to edit the above file by replacing 'r' with any desired command (d, m, s, t, or c) and eventual
-parameters for the subentries that are being modified. An illustrative example is given below:
+User needs to edit the above file by replacing 'r' with any desired command (d, m, a, s, t, or c) and eventually
+with parameters for the subentries that are being modified. An illustrative example is given below:
 
    1)   1 39089   3    1 R.E.SCHMUNK,ET.AL.   (60)  11634   4 d  0.00000      0.00000      0.00000      0.00000    
    2)   1 39089   3    1 K.K.Seth,ET.AL.      (58)  11788   5 r  0.00000      0.00000      0.00000      0.00000    
    3)   1 39089   3    1 L.KOESTER,ET.AL.     (81)  21842  22 r  0.00000      0.00000      0.00000      0.00000    
-   4)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   7 m  0.00000      0.90000      5.00000      0.00000    
-   5)   1 39089   3    1 W.M.GOOD,ET.AL.      (58)  11402  22 r  0.00000      0.00000      0.00000      0.00000    
+   4)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   7 m  0.90000      0.00000      0.00000      0.00000    
+   5)   1 39089   3    1 W.M.GOOD,ET.AL.      (58)  11402  22 a  0.00000     -3.00000      0.00000      0.00000    
    6)   1 39089   3    1 K.K.SETH,ET.AL.      (65)  11781   4 s  100.000      0.00000      0.00000      0.00000    
    7)   1 39089   3    1 H.W.NEWSON,ET.AL.    (57)  11569   8 r  0.00000      0.00000      0.00000      0.00000    
    8)   1 39089   3    1 W.P.POENITZ,ET.AL.   (83)  12853   8 r  0.00000      0.00000      0.00000      0.00000    
@@ -156,12 +158,25 @@ parameters for the subentries that are being modified. An illustrative example i
   19)   1 39089   3    1 D.G.FOSTER JR,ET.AL. (71)  10047  44 r  0.00000      0.00000      0.00000      0.00000    
   20)   1 39089   3    1 D.W.KENT,ET.AL.      (62)  11617  25 r  0.00000      0.00000      0.00000      0.00000    
 
-In the case above subentry 1) is marked for deletion, 4) will get cross sections multiplied by 0.9 while the
-uncertainties will by multiplied by the same factor (default if dy2=0) and have 5% uncertainty square-added.
-The subentry 6) will be smoothed 100 times in the whole energy range, 10) will be thined by retaining every 
-10-th value and 18) will be restricted to 2 - 10 MeV range. Saving this file, returning to the terminal and 
-hitting 'y' will execute the changes. The performed operations are displayed in the terminal and stored in 
+In the case above subentry: 
+
+1) is marked for (d)eletion
+
+4) will get cross sections multiplied by 0.9 while the uncertainties will by (m)ultiplied by the same factor 
+(default if y2=0)
+
+5) cross section will remain unchaged but 3% will be square-added to the uncertainties (note negative sign 
+   indicating [%] rather than [b]) 
+
+6) will be smoothed 100 times in the whole energy range
+
+10) will be thined by retaining every 10-th value
+
+18) will be restricted to 2 - 10 MeV range. 
+
+Saving this file, returning to the terminal and typing 'y' (withoout '') will execute the changes. 
+The performed operations will be displayed in the terminal and recorded in 
 the *-log.c4 file. The renwed list of subentries (and the new default input file) reflect changes such as 
-removing files, changing energy ranges and number of points (m and s changes are visible only inside the C4 
+removing files, changing energy ranges and number of points (m, a and s changes are visible only inside the C4 
 file). To stop processing answer 'n' (or hit return) to the question in the terminal (log file will be displayed). 
-Subequent sessions can be run later and log file will keep cumulative record of the changes.  
+Subequent sessions can be run later and log file will be updated to keep cumulative record of the changes.  
