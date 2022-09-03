@@ -1,7 +1,7 @@
 MODULE width_fluct
-    ! $Rev: 5337 $
+    ! $Rev: 5376 $
     ! $Author: mwherman $
-    ! $Date: 2022-04-24 23:49:31 +0200 (So, 24 Apr 2022) $
+    ! $Date: 2022-04-24 15:49:31 -0600 (Sun, 24 Apr 2022) $
     !
     !!   ********************************************************************
     !!   *                  W I D T H _ F L U C T                           *
@@ -66,7 +66,7 @@ MODULE width_fluct
         REAL*8 sig        !! absorption x-section for this channel
     END TYPE fusion
 
-    INTEGER, PARAMETER :: ndhrtw1 = 20000        !! max. number of channels in the HRTW decay for a given CN J-pi
+    INTEGER, PARAMETER :: ndhrtw1 = 50000        !! max. number of channels in the HRTW decay for a given CN J-pi
     INTEGER, PARAMETER :: ndhrtw2 = 500          !! max. number of absorption channels for a given CN J-pi
 
     REAL*8 :: H_Sumtl      !! Sum of strong Tlj
