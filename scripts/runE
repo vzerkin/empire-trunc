@@ -497,25 +497,25 @@ def runE(proj):
     rm('TL')
     rm('FITLEV.PS')
     rm('INPUT1.DAT')
-    # rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
-    #   rm('OPTFIT.CAL')
-    #    rm('OMPAR0.DIR', 'INPUT0.DAT')
+    rm('SENSITIVITY.INP', 'XS-DOWN.DAT', 'XS-UP.DAT')
+    rm('OPTFIT.CAL')
+    rm('OMPAR0.DIR', 'INPUT0.DAT')
     rm('OMPAR.DIR')
     rm('LOW_ENERGY.OUT', 'ecis06.exp', 'ecis06.smat')
     rm('angdis.p92', 'ecis06.dat', 'empmf1.tmp', 'FISS_XS.ZVD')
     rm('COMMENTS1.TXT', 'COMMENTS2.TXT', 'COMMENTS3.TXT')
 
-    # if not isEmpty(proj+'.exf'):
-    #    if isEmpty(proj+'.c4'):
-    #        # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
+    if not isEmpty(proj+'.exf'):
+       if isEmpty(proj+'.c4'):
+           # RUN X4TOC4 TO TRANSLATE EXFOR FILE INTO COMPUTATIONAL FORMAT
 
-    #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
-    #        os.system('"%s" %s' % (cmd,proj) )
+           cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','c4')
+           os.system('"%s" %s' % (cmd,proj) )
 
-    #        # RUN c4sort TO SORT C4 DATA
+           # RUN c4sort TO SORT C4 DATA
 
-    #        cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
-    #        os.system('"%s" %s' % (cmd,proj) )
+           cmd = os.path.join(os.environ['EMPIREDIR'],'scripts','sortc4')
+           os.system('"%s" %s' % (cmd,proj) )
 
     # REMOVE EMPTY FILES:
 
