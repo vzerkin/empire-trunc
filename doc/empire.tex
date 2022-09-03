@@ -10970,8 +10970,8 @@ I3 defines the outgoing particle, i.e., the incident particle for the inverse re
 neutron, I3=2 for protons, etc). \\
 Some examples of potential strength uncertainties are given below.
 \begin{verbatim}
-* The three lines below define 1.5% uncertainty of the real
-* volume potential strength and 10% uncertainty of the real
+* The three lines below define 1.5\% uncertainty of the real
+* volume potential strength and 10\% uncertainty of the real
 * and imaginary surface potential strength for neutron and
 * proton emission channels from the 56-Mn compound nucleus
 UOMPVV   1.50000  25    55   1
@@ -10982,6 +10982,14 @@ UOMPVV   1.50000  24    55   2
 UOMPWV   2.5000   24    55   2
 UOMPWS  10.0000   24    55   2
 \end{verbatim}
+Negative value of VAL indicates multiplying respective OM parameter by an absolute value of VAL instead of specifying its uncertainty. This option enables traceable, manual adjustment of parameters and is also used for calculating sensitivities to the optical model parameters.
+Transmission coefficient  are calculated for a specified particle (i3) impinging on Z /A nucleus and applied to the inverse reaction (emission of particle from Z/A nucleus). Perturbation of the parameters related to the incident channel is indicated by specifying compound nucleus Z/A (particle indicator i3 is necessary but irrelevant). For the above used example of n + 55Mn the relevant input line for changing/perturbing incident channel parameters would be
+\begin{verbatim}
+UOMPVV   1.50000  25    56   0
+UOMPWV  10.0000   25    56   0
+UOMPWS  10.0000   25    56   0
+\end{verbatim}
+ 
 
 
 \item [{UOMPcd}] Defines the uncertainty of the geometry component of the optical model
@@ -11002,12 +11010,19 @@ Some examples of geometry uncertainties of the optical model parameters are give
 * imaginary volume radius, and 2.5% uncertainty of the
 * imaginary volume diffuseness for a neutrons incident
 * on 55Mn nucleus
-UOMPRW   1.50000  25    55   1
-UOMPAW   2.5000   25    55   1
+UOMPRW   1.500   25    55   1
+UOMPAW   2.500   25    55   1
 * The same for the proton emission channel
 * corresponding to the surface potential.
-UOMPRS   1.50000  24    55   2
-UOMPAS   2.5000   24    55   2
+UOMPRS   1.500   24    55   2
+UOMPAS   2.500    24   55   2
+\end{verbatim}
+Negative value of VAL indicates multiplying respective OM parameter by an absolute value of VAL instead of specifying its uncertainty. This option enables traceable, manual adjustment of parameters and is also used for calculating sensitivities to the optical model parameters.
+Transmission coefficient  are calculated for a specified particle (i3) impinging on Z /A nucleus and applied to the inverse reaction (emission of particle from Z/A nucleus). Perturbation of the parameters related to the incident channel is indicated by specifying compound nucleus Z/A (particle indicator i3 is necessary but irrelevant). For the above used example of n + 55Mn the relevant input line for changing/perturbing incident channel parameters would be
+\begin{verbatim}
+UOMPRW   1.500    25    56   0
+UOMPAW   2.500     25    56   0
+
 \end{verbatim}
 
 
