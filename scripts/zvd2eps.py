@@ -13,7 +13,7 @@ import os.path
 
 def replace_string(old_string, new_string, file_to_modify):
     """
-   replace_string: Replaces all occrances of a string in a file
+   replace_string: Replaces all occurances of a string in a file
 
    Args:
        old_string (str): string to be replaced
@@ -34,7 +34,8 @@ def replace_string(old_string, new_string, file_to_modify):
 for file in glob.glob('*.zvd'):
     # Change a default zvd string to a nicer one below.
     # Multiple lines are allowed (remove comment sign!)
-    replace_string('94-Pu-239', '{+239}Pu', file)
+    replace_string('73-Ta-181', '{+181}Ta', file)
+    # replace_string('94-Pu-239', '{+239}Pu', file)
     # replace_string('92-U-233', '{+233}U', file)
     # replace_string('92-U-234', '{+234}U', file)
     # replace_string('92-U-235', '{+235}U', file)
