@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5265 $
+Ccc   * $Rev: 5377 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2020-12-10 08:23:02 +0100 (Do, 10 Dez 2020) $
+Ccc   * $Date: 2020-12-10 00:23:02 -0700 (Thu, 10 Dec 2020) $
       SUBROUTINE HITL(Stl)
 Ccc
 Ccc   ************************************************************
@@ -3558,11 +3558,15 @@ C-----Storing transmission coefficients for EMPIRE energy grid
          WRITE (462,'(2x,3I4,D15.8)') Ien,Nejc,Nnuc,sreacecis
       ENDIF
  
-      IF(IOPSYS.EQ.1) THEN
-        CALL SYSTEM(
-     > 'del ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
-     >6_*.LST ecis06.tlj')
-      ENDIF
+!       IF(IOPSYS.EQ.1) THEN
+!         CALL SYSTEM(
+!      > 'del ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
+!      >6_*.LST ecis06.tlj')
+!       ELSE
+!         CALL SYSTEM(
+!      > 'rm ecis06.ang ecis06.leg ecis06.cs ecis06.ics ecis06.smat ecis0
+!      >6_*.LST ecis06.tlj')
+!       ENDIF
 
       RETURN
       END
