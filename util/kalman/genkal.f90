@@ -152,7 +152,7 @@
          READ(10,'(13X,A6)') PN
          CALL STRLEN(PN,LT1,LT2)
          TMP=PNAME(I)
-         ! WRITE(0,*) TMP(LT1:LT2),PN(LT1:LT2)
+         WRITE(0,*) TMP(LT1:LT2),PN(LT1:LT2)
          IF (TMP(LT1:LT2) .NE. PN(LT1:LT2)) then
             write(0,*) 'WRONG PARAMETER found in ',FILE(L1:L2)//trim(MATSEN)
             write(0,*) TMP(LT1:LT2), ' vs ',PN(LT1:LT2)
