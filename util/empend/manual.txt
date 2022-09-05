@@ -100,6 +100,68 @@ Version: 1996 Original code (ENEA, Bologna, Italy)
            interpolation except in the tails, but only a single
            interpolation range can be defined in ENDF)
         - Reduce emission spectra thinning criterion from 1 to 0.5 %.
+  12/07 Fix Eout for discrete levels when no recoils are given.
+        Add to log file the printout of reactions summed into MT 5.
+  12/12 - Read angle-integrated spectra to check and normalise
+          double differential cross sections.
+        - Increase precision when writing the ENDF file.
+  13/03 Fix vertical segments at the upper end of emission spectra by
+        delta-shifting the one-but-last point.
+  13/09 Changed the way of reading strings to make the code more robust
+        (for some compiler on linux it was failing) 
+  13/12 Allow for isomer production without blank line delimiter.
+  14/01 Check the order of Legendre expansion for elastic ang.distr.
+        Try to fit tabulated distribution.
+  14/02 - Include compound elastic MF3/MT50 (MF4 still pending).
+        - Allow narrow printout of separation energies.
+  14/12 - Trivial definition of unassigned variable.
+        - Suppress printing MT50 (in SCNMF6) - interferes with NJOY.
+  15/02 - Fix a problem with mesh densification of angular
+          distributions.
+        - Fix formatting when isomer-production cross sections are
+          given.
+  15/11 - Fix test comparing population/production cross sections
+          Increase MXR from 0.8 M to 2.4 M.
+        - Major upgrade involving new convention for residual
+          production x.s. that can be split into partly-exclusive
+          and partly inclusive particle emission spectra
+        - Angular distributions for charged particles in MF4 and MF6
+          in pointwise form, controlled by setting LANG>10.
+          WARNING - ENDF file size considerably increased.
+  15/12 - Major upgrade to split more correctly the reactions
+          that produce the same residuals as (n,a) and (n,d)
+          at higher energies.
+          WARNING - full backward compatibility is not guaranteed.
+  16/01 - Fix fission cross section (mb-b prolem)
+        - Fix switching to tabular representation of elastic
+          angular distributions (LTT=3).
+  16/02 - Fix multiplicities in MF6/MT5 that were off by a factor 2.
+        - Read CHMSPC spectrum double precision to avoid underflow.
+        - Guard against incomplete decaying nucleus data.
+        - Fix isomer production from inelastic scattering.
+        - Increase precision for reading level energy of isomers
+          (backward compatible).
+  16/04 Fix bug in removing all-zero cross sections.
+  16/07 Check dynamic range of angular distributioons and switch to
+        tabular representation if needed.
+  16/12 Fix the patch to switch to tabular representation.
+  17/04 Extrapolate non-threshold reactions as 1/v.
+        Fix roundoff errors in total inelastic.
+        Fix setting of cross sections below the first EMPIRE point.
+        Fix the increased number of points in the interp. table.
+  17/06 Fix matching of level energies for angular distributions.
+        Fix format reading conversion coefficients.
+        Allow more digits for branching ratios (backward compatible).
+  17/07 Small fix reading more digits for branching ratio.
+  18/09 Fix missing FEND record after MF4.
+  20/01 - Increase MXM from 120 to 200 (Dan Filipescu).
+        - Enable discrete levels to ground state for photons.
+        - Fix processing of MF=12,14 (format change in EMPIRE
+          printing "Discrete level population before gamma cascade".
+  20/02 Fix printing or radionuclide production in MF10.
+  20/03 Add routine WRMF6D to write discrete level angular
+        distributions in MF=6 (no recoils at the moment).
+        NOTE: one optional extra input record.
   
   Manual for Program EMPEND
   =========================
@@ -126,7 +188,7 @@ Version: 1996 Original code (ENEA, Bologna, Italy)
   
   In the first sweep radionuclide production cross sections are
   located and the MT numbers are assigned, when possible.
-  Cross sections, which can not be identified uniquely by an MT
+  Cross sections, which cannot be identified uniquely by an MT
   number are assigned MT=10(Z*1000+A)+LFS where LFS is the final
   isomeric state of the nuclide. The spin of the target nucleus,
   the S0-strength function, the average gamma width, the average
@@ -210,6 +272,12 @@ Version: 1996 Original code (ENEA, Bologna, Italy)
    - ALAB, EDATE, AUTHOR string, where each of the listed
      parameters occupies 11 columns (see ENDF-6 manual for
      details). The parameters are optional.
+   - IMF4, the highest MT number of elastic and discrete angular
+     distributions to be included in MF=4.
+     Valid entries: 2  Elastic only.
+                   91  Elastic and discrete level inelastic (dflt).
+                  649  All up to discrete level proton emission.
+                  849  All discrete level particle emissions.
 
    NOTES:
    - Extensive exclusive spectra calculations in EMPIRE
@@ -260,11 +328,9 @@ Version: 1996 Original code (ENEA, Bologna, Italy)
   Additional messages monitor the progress of the data
   formatting process.
 
-
- Limits on array sizes:
- MXE - Maximum number of incident particle energy points.
- MXT - Maximum number of reactions (including discrete levels).
- MXM - Maximum number of residual nuclei.
- MXR - Lengrh of the real work array RWO.
- MXI - Length of the integer work array IWO.
-
+Limits on array sizes:
+MXE - Maximum number of incident particle energy points.
+MXT - Maximum number of reactions (including discrete levels).
+MXM - Maximum number of residual nuclei.
+MXR - Lengrh of the real work array RWO.
+MXI - Length of the integer work array IWO.
