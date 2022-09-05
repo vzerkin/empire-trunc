@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5325 $
+Ccc   * $Rev: 5384 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-04-11 04:47:34 +0200 (Mo, 11 Apr 2022) $
+Ccc   * $Date: 2022-04-10 20:47:34 -0600 (Sun, 10 Apr 2022) $
 
       SUBROUTINE EMPIRE
 Ccc
@@ -180,6 +180,11 @@ C
 C     local variables
       INTEGER nejc,i,nnuc,iloc,izares,nnur   
       DOUBLE PRECISION ares, zres
+    !   character*9, dimension(13) :: kalmanReactions =
+    !  & ['Total    ', 'Elastic  ', 'Mu-bar   ', '(z,gamma)', '(z,n)    ',
+    !  &  '(z,2n)   ', '(z,3n)   ', '(z,p)    ', '(z,d)    ', '(z,t)    ',
+    !  &  '(z,a)    ', '(z,na)   ', '(z,h)    ']                             ! HERE
+
 C-----
 C     Initialization of energy dependent quantities 
 C
@@ -196,8 +201,8 @@ C---- Initialization of PFNS calculations
       csepfns = 0.d0
       fnubar  = 1.d0
 
-C-----Locate positions of ENDF MT-numbers 2, 91, 649, and 849
-      CALL WHERE(IZA(1) - IZAejc(0),mt2,iloc)
+C-----Locate positions of ENDF MT-numbers 2, 91, 649, 699, 749, 799 and 849 
+      CALL WHERE(IZA(1) - IZAejc(1),mt2,iloc)           ! (n,elastic)
       CALL WHERE(IZA(1) - IZAejc(1),mt91,iloc)          ! (n,n_cont)
       CALL WHERE(IZA(1) - IZAejc(2),mt649,iloc)         ! (n,p_cont)
       CALL WHERE(IZA(1) - IZAejc(3),mt849,iloc)         ! (n,a_cont)
@@ -303,7 +308,7 @@ C           to include/exclude low-lying coupled states
             WRITE(41,'(''#'',A10,1X,1P,95A12)') '  Einc    ',
      &      '  Total     ','  Elastic*  ',' Nonel-Cel* ',
      &      '  Fission   ','  Mu-bar    ','  Nu-bar    ',
-     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn))
+     &         (preaction(nnuc),nnuc=1,min(nuc_print,max_prn)) !HERE
             WRITE(107,'(''#'',A10,1X,1P,20A12)')'   Einc   ',
      &      '  Total     ','  Elastic   ','     Cel    ',
      &      '   Sel      ',
