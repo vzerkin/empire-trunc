@@ -158,13 +158,19 @@
 
        if(fnl(i) == 1.0) cycle    ! nothing to do
        lp = len_trim(oname(i))
-       if (lp == 10) then
+       if (lp == 11) then
+         lp = lp - 5
+       elseif (lp == 10) then
          lp = lp - 4
        elseif (lp == 9) then
          lp = lp - 5
        endif
       
        nam = oname(i)(1:lp)
+
+       print *, oname(i)
+       print *,"parameter: ",nam, lp
+       print *,"integers ", oname(i)(lp+1:lp+6)
 
        if(.not.(allowed(nam))) then
            write(6,*) ' **** Parameter not allowed to vary: ',nam
@@ -298,7 +304,7 @@
 
     character*6, intent(in) :: pnm
 
-    integer*4, parameter :: nrs = 111
+    integer*4, parameter :: nrs = 112
     character*6, parameter :: allw(nrs) = (/'ATILFI', 'ATILNO', 'CHMS  ', 'DEFDYN', 'DEFMSD', 'DEFNOR', &
         'DEFPAR', 'DEFSTA', 'FISBIN', 'FISBOU', 'FUSRED', 'GDIVP ', 'GDRST1', 'GDRST2', 'GDRWEI', 'GDRWP ', &
         'GRANGN', 'GRANGP', 'GTILNO', 'PCROSS', 'QFIS  ', 'RESNOR', 'SHELNO', 'TOTRED', 'TUNE  ', 'TUNEFI', &
@@ -310,7 +316,7 @@
         'EGDR2 ', 'EX1   ', 'EX2   ', 'EXPUSH', 'FCC   ', 'FCD   ', 'GAPN  ', 'GAPP  ', 'GCROA ', 'GCROD ', &
         'GCROE0', 'GCROT ', 'GCROUX', 'GDIV  ', 'GDRESH', 'GDRSPL', 'GDRWA1', 'GDRWA2', 'GGDR1 ', 'GGDR2 ', &
         'HOMEGA', 'SHRD  ', 'SHRJ  ', 'SHRT  ', 'SIG   ', 'TEMP0 ', 'TORY  ', 'TRUNC ', 'WIDEX ', 'DEFNUC', &
-        'PFNNIU', 'CELRED', 'CINRED', 'TUNETL', 'UOMPDS'/)
+        'PFNNIU', 'CELRED', 'CINRED', 'TUNETL', 'UOMPDS', 'FCORED'/)
 
     integer*4 i
 
