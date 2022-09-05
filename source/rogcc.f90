@@ -159,13 +159,13 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
          am = atil*FSHELL(u,SHC(Nnuc),GAMma)
          IF (am.LE.0.0D0) RETURN  
          ! call to SIGMAK only to find cigor    
-         call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0,mompar,momort,A2,stab,cigor)
+         call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0D0,mompar,momort,A2,stab,cigor)
          if(cigor > 1.001) then ! skip if the change in atil is negligible
             ! 'a' including surface dependent factor
             atil = AP1*A(Nnuc) + AP2*A23*BSQ(cigor)
             atil = atil*ATIlnor(Nnuc)
             am = atil*FSHELL(u,SHC(Nnuc),gamma)
-            call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0, mompar,momort,a2,stab,cigor)
+            call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0D00, mompar,momort,a2,stab,cigor)
          endif
          seff2 = mompar**0.333D0*momort**0.6666D0
          roFG(i) = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)  ! level density
@@ -250,7 +250,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
    !-----0.6079 = 6/pi^2   a=6/pi^2*g  sig2^2 = <m^2>gt  Scutf = <m^2>
    !sig2h = Scutf*0.6079*A23*SQRT(ux*am)  
    am = atil*FSHELL(UCRt,SHC(Nnuc),GAMma)
-   call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,UCRt,am,0.0,mompar,momort,A2,stab,cigor)
+   call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,UCRt,am,0.0D0,mompar,momort,A2,stab,cigor)
    sig2h = mompar**0.333D0*momort**0.6666D0*Tct
    
    !-----determination of the index in Ex-array such that Ex(IG,.).LT.eMatch
@@ -290,12 +290,12 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       am = atil*FSHELL(u,SHC(Nnuc),GAMma)
       IF (am.LE.0.0D0) RETURN  
       ! next call to SIGMAK only to find cigor    
-      call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0,mompar,momort,A2,stab,cigor)
+      call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0D0,mompar,momort,A2,stab,cigor)
       if(cigor > 1.001) then ! skip if the change in atil is negligible
          atil = AP1*A(Nnuc) + AP2*A23*BSQ(cigor)
          atil = atil*ATIlnor(Nnuc)
          am = atil*FSHELL(u,SHC(Nnuc),gamma)
-         call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0, mompar,momort,a2,stab,cigor)
+         call SIGMAK(A(Nnuc),Z(Nnuc),DEF(1,Nnuc),1.0D0,u,am,0.0d0, mompar,momort,a2,stab,cigor)
       endif
       seff2 = mompar**0.333D0*momort**0.6666D0
       ro_u = ro_fermi(A(Nnuc), u, am, Momort, T, Bf, A2, seff2)
