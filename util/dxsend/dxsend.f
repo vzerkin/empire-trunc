@@ -53,6 +53,8 @@ C-V        from MF=3 cross sections.
 C-V  20/10 Fix printing isomers from exclusive reactions in MF=10.
 C-V  21/01 Fix DDX yields that include fission.
 C-V        Fix printout when the last contributing reaction is zero.
+C-V  22/08 Process MF12 when discrete inelastic are in MF6.
+C-V  22/10 Fix bug when assembling Zc/Zf ratio.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2118,11 +2120,12 @@ C* Redefine the outgoing particle to residual, if not MT=5 or 9000
       END IF
       CALL GETSTD(LEF,NX,ZA0,MF,MTJ,IZAP0,MST,QM,QI,LRBRK
      &           ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
-      IF(MF0.GT.3) THEN
+      IF(MF0.GT.3 .AND. EIN.GT.ZRO) THEN
 C*      -- Save cross section if MF>3
         XS=FINTXS(EIN,RWO,RWO(LX),NP,INR(1),IER)
 C...
         print *,'  Saved x.s.=',XS,' at E',EIN,' for MF/MT',MF0,MT0
+     &         ,' IER=',IER
 C...
       END IF
 C* Default particle multiplicity
@@ -2289,9 +2292,9 @@ C*                         pointwise representation
 C...
       IZA=NINT(ZA0)
       IF(NP.GT.0) THEN
-        print '(A,5I6,1P,2E11.4,I3)'
-     &    ,'   Found MAT,MF,MT,NP,ZAp,Ein,yl,LRBRK'
-     &         ,iza,MF,MT,NP,izap0,Ein,yl,LRBRK
+        print '(A,5I6,1P,2E11.4,2I3)'
+     &    ,'   Found MAT,MF,MT,NP,ZAp,Ein,yl,LRBRK,ier'
+     &         ,iza,MF,MT,NP,izap0,Ein,yl,LRBRK,ier
       ELSE
         print *,'  Could not find MAT,MF,MT,ZAp',iza,MF,MTJ,izap0
       END IF
@@ -2311,7 +2314,7 @@ C*        -- If no data found and photon spectrum requested, try MF 13
         GO TO 900
       END IF
 C...
-C...  print *,'  Here, Ein,LE,NP',Ein,LE,NP
+C...  print *,'  Here, Ein,LE,NP,IER',Ein,LE,NP,IER
 C...
       IF(EIN.GT.0) THEN
         IF(EIN.LT.RWO(LE) .OR. EIN.GT.RWO(LE-1+NP)) THEN
@@ -2327,7 +2330,7 @@ c...
 C*
 C* Case: If cross section is required on output - finish processing
 c...
-      print *,'  KEA,yl',KEA,yl
+      print *,'  KEA,yl,ier',KEA,yl,ier
 c...
       IF(KEA.NE.0) GO TO 700
 C*
@@ -2367,7 +2370,9 @@ C*        -- Multiply by nu-bar assuming x.s. mesh much denser than nu-bar
 c...
         print *,'Done XS for mf/mt0/izap0/yl/ier',mf,mt0,izap0,yl,ier
 c...    print *,'nen,ier,mt0',nen,ier,mt0
+C...    print *,' mt0,izap0,yl',mt0,izap0,yl
 c...
+        IF(MF0.EQ.203) GO TO 900
         IF(MT0.LT.1000 .AND. (IZAP0.LT.0 .OR. YL.GT.0)) GO TO 900
 C*      -- Find particle yields when these are not implicit in MT
 C...    IF(IZAP0.EQ.0) THEN
@@ -3327,7 +3332,16 @@ c...
 C*    -- Gamma production only from MF 6,12,13,14,15
       IF(IZAP0.EQ.   0) THEN
         IF(MF.EQ.12 .OR. MF.EQ.13) REWIND LEF
-        IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. MF.EQ.12 .OR. MF.EQ.13) THEN
+        LAW6=0
+        IF(MF.EQ. 6 .AND. (MT.GE.50 .AND. MT.LT.91)) THEN
+C*        -- Search MF=12 for two-body reactions only (LAW=2)
+          CALL RDHEAD(LEF,IDM,IDM,IDM,DMY,DMY,IDM,LAW6,IDM,IDM,IER)
+C...
+          print *,'                           LAW',LAW6
+C...
+        END IF
+        IF(MF.EQ. 4 .OR. MF.EQ. 5 .OR. (MF.EQ.6.AND.LAW6.EQ.2) .OR.
+     &     MF.EQ.12 .OR. MF.EQ.13) THEN
           IF(MF.LT.12) MF =12
           IF     (MT0.GT. 50 .AND. MT0.LT. 91) THEN
             MT =51
