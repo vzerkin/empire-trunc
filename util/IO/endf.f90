@@ -15,7 +15,7 @@ module ENDF_IO
     ! the main public interface to the ENDF IO package are the 3 routines
     ! in this module: read_endf_file, write_endf_file, and del_endf.
     !
-    ! read_end_file accepts an ENDF filename to read in, the endf
+    ! read_endf_file accepts an ENDF filename to read in, the endf
     ! structure to store the data into, and an optional argument MAT,
     ! where, if specified, indicates that only the material with the
     ! specified MAT number is read into the endf structure.
@@ -66,7 +66,7 @@ module ENDF_IO
 
     public
 
-    character*75, parameter, private :: hdlin = ' $Rev:: 4468     $  $Date:: 2015-08-29#$                             1 0  0'
+    character*75, parameter, private :: hdlin = ' $Rev:: 5387     $  $Date:: 2022-10-18#$                             1 0  0'
 
     type endf_mat
         integer mat
