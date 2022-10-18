@@ -147,6 +147,7 @@
         allocate(ew(nmsur))
         read(1,220) (ew(i),i=1,nmsur)
 
+
         if((iexp < 1) .or. (iexp > nrtot)) then
             write(6,'(a,i0)') ' Undefined reaction index specified : ',iexp
             stop 1
@@ -746,9 +747,9 @@
     do i = 1,nd
 
         if(z(i) < 0.D0) then
-            z(i) = ewt*dabs(z(i))
+            z(i) = ewt*dabs(z(i)) *sqrt(float(nd))   !*(1.+log(float(nd)))    ! HERE
         else if(z(i) > 0.D0) then
-            z(i) = ewt*yd(i)*z(i)
+            z(i) = ewt*yd(i)*z(i) *sqrt(float(nd))   !*(1.+log(float(nd)))    ! HERE
         else
             ndata = 0
             deallocate(xd,yd,vd,z)
