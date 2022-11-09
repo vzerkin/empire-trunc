@@ -1,6 +1,6 @@
-Ccc   * $Rev: 5339 $
+Ccc   * $Rev: 5389 $
 Ccc   * $Author: mwherman $
-Ccc   * $Date: 2022-04-25 00:10:07 +0200 (Mo, 25 Apr 2022) $
+Ccc   * $Date: 2022-11-09 03:08:46 +0100 (Mi, 09 Nov 2022) $
 C
       SUBROUTINE TRISTAN(Nejc,Nnuc,L1maxm,Qm,Qs,XSinl)
 CCC
@@ -3362,6 +3362,7 @@ C-----
         csm1 = csm1 + CSEmsd(ie,Nejc)*DE
       enddo
       IF(csm1.le.1.d-6) RETURN
+
       
       IF(Nejc.eq.NPRoject) then
 C
@@ -3499,15 +3500,15 @@ C      "istart" to the angular distribution of the discrete levels
 
 C      Deleting the corresponding XS from the continuum
 C      as it is moved to discrete spectra
-       IF(ENDF(1).GT.0) then
-          DO ie = istart, next
-             CSEmsd(ie,Nejc) = 0.d0
-C            Deleting the corresponding angular distribution
-             do na=1,NDAng 
-                CSEa(ie,na,Nejc) = 0.d0
-             enddo
-          ENDDO
-       ENDIF
+C       IF(ENDF(1).GT.0) then
+C          DO ie = istart, next
+C             CSEmsd(ie,Nejc) = 0.d0
+CC            Deleting the corresponding angular distribution
+C             do na=1,NDAng 
+C                CSEa(ie,na,Nejc) = 0.d0
+C             enddo
+C          ENDDO
+C       ENDIF
        
        csmtot = 0.d0
        csmsdl = csm1/xnor        !contribution to each level

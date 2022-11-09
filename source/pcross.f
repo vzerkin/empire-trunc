@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4916 $
-Ccc   * $Author: rcapote $
-Ccc   * $Date: 2017-04-18 12:43:10 +0200 (Di, 18 Apr 2017) $
+Ccc   * $Rev: 5389 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-11-09 03:08:46 +0100 (Mi, 09 Nov 2022) $
 
 C
       SUBROUTINE PCROSS(Sigr,Totemis)
@@ -234,8 +234,8 @@ C        IDNa(14,6) = 0  ! discrete H is included even with ECIS active
 
 C        to check, extend PE spectra to discrete levels for all particles
 C        require additional changes in ACCUMSD
-C        IF(PEQcont.gt.0) 
-C    &     nexrt = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed)
+         IF(PEQcont.gt.0)
+     &     nexrt = MIN(MAX(INT(excnq/DE + 1.0001),1),ndecsed)
 
          iemax(nejc) = nexrt
          DO ienerg = 2, nexrt
