@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 5391 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-11-13 19:54:36 +0100 (So, 13 Nov 2022) $
 C
       SUBROUTINE CCFUS(Stl,Rkey)
 C
@@ -32,17 +32,17 @@ C
      &                 pa(NDCC,2), ra, rb, rbar, rcal, rcald, rr, rred,
      &                 s0, s1, s2, sq, su0, su1, su2,
      &                 suma, ur, vb, vbl, vbw, vbwl, r00, sumunc
-      DOUBLE PRECISION ecrit1, bfu, critl, sigl0(NDLW), sigl1(NDLW) 
+      DOUBLE PRECISION ecrit1, bfu, critl, sigl0(NDLW), sigl1(NDLW)
       INTEGER i1, ic1, ick, il, ilim, k, n, n1(NDCC), n1t, nd, nmax,
      &        np(NDCC), ns1
 C
       sum = 0.d0
       sumunc = 0.d0
-      sigl0 = 0.d0 
+      sigl0 = 0.d0
       sigl1 = 0.d0
 
       Stl = 0.d0
-      
+
       nmax = NSCc + NACc
       ns1 = NSCc + 1
 
@@ -97,22 +97,22 @@ c -- generate printout
       WRITE (8,*)
      &          ' by Dasso and Landowne (Comp. Phys. Comm. 46(1987)187)'
       WRITE (8,*) ' '
-      WRITE (8,*) 
-      WRITE (8,*) 
+      WRITE (8,*)
+      WRITE (8,*)
      > 'DV is the parameter used to adjust the barrier (Default 20)'
-      WRITE (8,*) 
+      WRITE (8,*)
      > 'DV = 20 corresponds to the Christensen-Winther potential'
-      WRITE (8,*) 
+      WRITE (8,*)
      > 'P.R.Christensen and A.Winther, Phys. Lett. B65 (1976) 19'
-      WRITE (8,*) 
+      WRITE (8,*)
      > ' (& R.A.Broglia and A.Winther, Heavy Ion Reactions, Benjamin, NY
      >, 1981)'
-      WRITE (8,*) 
-      WRITE (8,*) 'DV =',sngl(DV),' (Barrier scaling parameter)' 
-      WRITE (8,*) 'VB =',sngl(vb) ,' (Unperturbed CCFUS barr)' 
-      WRITE (8,*) 'RB =',sngl(rbar),' (CCFUS barrier position)' 
-      WRITE (8,*) 'hw =',sngl(homega),' (CCFUS barrier thickness)' 
-      WRITE (8,*) 
+      WRITE (8,*)
+      WRITE (8,*) 'DV =',sngl(DV),' (Barrier scaling parameter)'
+      WRITE (8,*) 'VB =',sngl(vb) ,' (Unperturbed CCFUS barr)'
+      WRITE (8,*) 'RB =',sngl(rbar),' (CCFUS barrier position)'
+      WRITE (8,*) 'hw =',sngl(homega),' (CCFUS barrier thickness)'
+      WRITE (8,*)
 
       IF (NSCc.NE.0) THEN
          WRITE (8,99010)
@@ -369,5 +369,3 @@ C
       Dur = -Ur/arg1/A0R
       Ddur = Dur*(1. - 2./arg1)/A0R
       END
-
-
