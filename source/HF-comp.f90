@@ -1,13 +1,13 @@
-!cc   * $Rev: 5366 $
+!cc   * $Rev: 5390 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-06-13 05:21:24 +0200 (Mo, 13 Jun 2022) $
+!cc   * $Date: 2022-11-13 19:50:03 +0100 (So, 13 Nov 2022) $
 
 !cc   ********************************************************************
 !cc   *                                                                  *
 !cc   * These routines are called after HF decay of each J-pi state      *
 !cc   * at each continuum energy. This differs HF-comp routines from     *
 !cc   * from those in the HF-decay module that are targeting whole       *
-!cc   * nuclei, rather than individual cells in the contginuum.          *
+!cc   * nuclei, rather than individual cells in the continuum.           *
 !cc   * Thus HF-decay comes on the level above HF-comp.                  *
 !cc   *                                                                  *
 !cc   ********************************************************************
@@ -174,6 +174,7 @@ subroutine ACCUM(Iec , Nnuc , Nnur , Nejc , Xnor)
    primaryGamma = .false.
    return
 end subroutine ACCUM
+
 
 
 subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
@@ -371,6 +372,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
       enddo
    endif
 end subroutine EXCLUSIVEC
+
 
 
 SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt) 
@@ -973,6 +975,8 @@ subroutine DECAYD(Nnuc)
             &' mb is an isomer')
 end subroutine DECAYD
 
+
+
 subroutine printDiscreteGammas(imax, discretGamma)
 
    implicit none
@@ -987,12 +991,6 @@ subroutine printDiscreteGammas(imax, discretGamma)
    integer :: i
    logical :: sorted = .true.
    real*8 :: sumGamma
-
-   print *, "imax ", imax
-   print *, "Egamma 1, imax, imax+1", discretGamma(1)%Eg, discretGamma(imax)%Eg, discretGamma(imax+1)%Eg
-   do i = 1, imax
-      print '(i10,2G15.6)', i, discretGamma(i)%Eg, discretGamma(i)%gXsc
-   end do 
 
    ! Sort discrete gammas according to increasing energy
    do
@@ -1030,6 +1028,7 @@ subroutine printDiscreteGammas(imax, discretGamma)
 
    return
 end subroutine printDiscreteGammas
+
 
 
 subroutine DECAYD_DIR(Nnuc , Nejc)
@@ -1627,7 +1626,6 @@ function TLF(Ekin)
    atlf = pix2*Ekin/htom
    if(atlf<38.D0) TLF = 1./(1. + EXP((-atlf)))
 end function TLF
-
 
 
 
