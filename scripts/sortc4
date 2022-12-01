@@ -53,14 +53,17 @@ mv -f C4.TMP C4.DAT
 $EMPIREDIR/util/c4sort/c4sort < C4SORT.INP
 echo ' '
 if [ -s C4.SRT ]; then
-  mv C4.SRT $file.c4
+  # Clean c4 file from various rubbish after the first author name
+  # sed s/",ET.AL."/"       "/ C4.SRT >$file.c4 
+  # sed s/","/" "/ $file.c4 >C4.SRT
+  # mv -f C4.SRT $file.c4
+  sed s/",ET.AL."/"       "/ C4.SRT | sed s/","/" "/ >$file.c4 
   echo 'EXFOR sorted data in computational (c4) format are stored in : '$file.c4
 else
   mv C4.DAT $file.c4
   echo 'ERROR: File with EXFOR data in computational (c4) format is EMPTY or '
   echo 'ERROR: c4sort crashed. '
   echo 'ERROR: C4 file NOT sorted.'
-  read
 fi
 echo ' '
 rm ANG_MU.INP C4SORT.INP C4SORT.TMP C4.DAT iaea-std.dat c4sort.scr C4SORT.TM2
