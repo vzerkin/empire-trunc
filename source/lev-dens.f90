@@ -1,6 +1,6 @@
-   !cc   * $Author: mwherman $
-   !cc   * $Date: 2022-11-14 02:37:00 +0100 (Mo, 14 Nov 2022) $
-   !cc   * $Id: lev-dens.f90 5392 2022-11-14 01:37:00Z mwherman $
+   !cc   * $Author: gnobre $
+   !cc   * $Date: 2022-12-01 17:26:33 +0100 (Do, 01 Dez 2022) $
+   !cc   * $Id: lev-dens.f90 5393 2022-12-01 16:26:33Z gnobre $
    
    
    
@@ -1870,7 +1870,7 @@
       real :: TRIM
  
       !-----Reading MS shell corrections and deformation energies
-      open(211, file = trim(EMPiredir)//'/RIPL/DENSITIES/SHELLCOR-MS.DAT', status = 'OLD')
+      open(211, file = trim(EMPiredir)//'/RIPL/densities/shellcor-ms.dat', status = 'OLD')
       !-----Skipping header lines
       read(211, *)
       read(211, *)
