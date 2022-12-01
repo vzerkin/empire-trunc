@@ -37,8 +37,7 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 
    s = file + len - 1;
    t = lfil + len - 1;
-   while (*t-- == *s--)
-      ;
+   while(*t-- = *s--);
    lfil[len] = '\0';
 
    /*now open the file. if flg=0, open new file for output.
