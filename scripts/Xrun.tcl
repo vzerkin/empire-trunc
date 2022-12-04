@@ -1,6 +1,6 @@
-# $Rev: 5359 $
+# $Rev: 5397 $
 # $Author: mwherman $
-# $Date: 2022-05-10 05:01:51 +0200 (Di, 10 Mai 2022) $
+# $Date: 2022-12-04 02:06:43 +0100 (So, 04 Dez 2022) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -5954,7 +5954,7 @@ adjourn .top75} \
     vTcl:DefineAlias "$site_3_0.but78" "Button1" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_3_0.but78 "$site_3_0.but78 Button $top all _vTclBalloon _vTclBalloon _vTclBalloon"
     bind $site_3_0.but78 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Select  project (implie working directory)}
+        set ::vTcl::balloon::%W {Select  project (implies working directory)}
     }
     entry $site_3_0.ent79 \
         -background white -font {Helvetica -12 bold} -foreground #0000ff \
@@ -8041,6 +8041,19 @@ close $mulfile} \
     bind $site_12_0.but76 <<SetBalloon>> {
         set ::vTcl::balloon::%W {Launch full sequence of calculations for each element of the list}
     }
+
+    button $site_12_0.but176 \
+        -activebackground #eccceccceccc -activeforeground red \
+        -background #efefef -command {editFile common.inp} \
+        -cursor hand2 -font {Helvetica -12 } -foreground darkred \
+        -highlightbackground #dcdcdc -text {Edit common.inp} 
+    vTcl:DefineAlias "$site_12_0.but176" "Button143" vTcl:WidgetProc "Toplevel1" 1
+    bindtags $site_12_0.but176 "$site_12_0.but176 Button $top all _vTclBalloon"
+    bind $site_12_0.but176 <<SetBalloon>> {
+        set ::vTcl::balloon::%W {Edit common part of the list input files}
+    }
+
+
     pack $site_12_0.but77 \
         -in $site_12_0 -anchor center -expand 0 -fill x -side top 
     pack $site_12_0.ent77 \
@@ -8051,6 +8064,10 @@ close $mulfile} \
         -in $site_12_0 -anchor center -expand 0 -fill x -side top 
     pack $site_12_0.but76 \
         -in $site_12_0 -anchor center -expand 0 -fill x -side bottom 
+
+    pack $site_12_0.but176 \
+        -in $site_12_0 -anchor center -expand 0 -fill x -side top
+        
     ::iwidgets::optionmenu $site_11_0.opt86 \
         -activeforeground limegreen -command ViewAll -font {Helvetica -12 } \
         -background #d9d9d9 -foreground darkgreen -labelfont {Helvetica -12 } -labeltext {} 
@@ -8189,7 +8206,7 @@ ddlist} \
     vTcl:DefineAlias "$site_13_0.but78" "Button149" vTcl:WidgetProc "Toplevel1" 1
     bindtags $site_13_0.but78 "$site_13_0.but78 Button $top all _vTclBalloon"
     bind $site_13_0.but78 <<SetBalloon>> {
-        set ::vTcl::balloon::%W {Make the selected list item the current project}
+        set ::vTcl::balloon::%W {Set project to the list item (MUST be in the same directory)}
     }
     pack $site_13_0.ent77 \
         -in $site_13_0 -anchor center -expand 0 -fill none -padx 4 -side top 
@@ -8630,11 +8647,11 @@ set psviewer [tk_getOpenFile -parent .top75 -title "Select PS/pdf viewer"]} \
         -command {exec  xterm -e $::env(EMPIREDIR)/scripts/kalman  $file 0 $mat $EXPDAT} \
         -label {all MTs} 
     $site_3_0.menu93 add command \
-        -command { editFile $file-parcorr.kal } \
-        -label "Edit parameter uncertainties (*-parcorr.kal)"
+        -command { editFile $file-C.kal } \
+        -label "Edit parameter uncertainties (*-C.kal)"
     $site_3_0.menu93 add command \
-        -command { editFile $file-expcorr.kal } \
-        -label "Edit experimental data correlations (*-expcorr.kal)"
+        -command { editFile $file-C.kal } \
+        -label "Edit experimental data correlations (*-C.kal)"
     $site_3_0.menu93 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/util/kalman/newinp $file &} \
         -label "Propagate Kalman output into Empire input (*.new)"
@@ -8898,6 +8915,10 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.menu95 add command \
         -command { exec xterm -e $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
 
+    $site_3_0.menu95 add command \
+        -command { exec xterm -e $::env(EMPIREDIR)/scripts/c4toggle $file 
+exec xterm -e $::env(EMPIREDIR)/scripts/plotlst $file } \
+        -label {Toggle c4 & -kal.c4 files}
     $site_3_0.menu95 add separator \
         
     $site_3_0.menu95 add command \
@@ -9044,12 +9065,6 @@ cd $workdir} \
     $site_3_0.men80 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/c4serv $file-kal &} \
         -label {Manipulate C4 file for KALMAN} 
-    $site_3_0.men80 add command \
-        -command { editFile $file-parcorr.kal } \
-        -label "Edit parameter uncertainties (*-parcorr.kal)"
-    $site_3_0.men80 add command \
-        -command { editFile $file-expcorr.kal } \
-        -label "Edit experimental data correlations (*-expcorr.kal)"
 # HERE1
 
     $site_3_0.men80 add separator \
@@ -9057,6 +9072,15 @@ cd $workdir} \
      $site_3_0.men80 add command \
         -command {exec xterm -e $::env(EMPIREDIR)/scripts/klean } \
         -label "Clean previous KALMAN files" 
+
+    $site_3_0.men80 add command \
+        -command { editFile $file-expCorr.kal } -label "Edit experimental data correlations (*-expCorr.kal)" 
+
+    $site_3_0.men80 add command \
+        -command { editFile $file-parCorr.kal } -label "Edit parameter uncertainties (*-parCorr.kal)" 
+
+    $site_3_0.men80 add command \
+        -command { editFile $file-inp.kal } -label "Edit Kalman input (*-inp.kal)"         
 
     $site_3_0.men80 add cascade \
         -menu "$site_3_0.men80.men87" \
@@ -9099,14 +9123,16 @@ cd $workdir} \
     $site_3_0.men80 add command \
         -command { editFile $file-out.kal } -label "View KALMAN output" 
     $site_3_0.men80 add command \
-        -command { editFile $file-cov.kal } -label "View Covariance matrices" 
+        -command { editFile $file-cov.kal } -label "View correlation matrices" 
     $site_3_0.men80 add command \
         -command { editFile $file-xsc.kal } -label "View KALMAN x-sections" 
     $site_3_0.men80 add command \
-        -command { editFile $file-par.kal } -label "View KALMAN adj. parameters" 
+        -command { editFile $file-parCorrOut.kal } -label "View KALMAN adj. parameters" 
     $site_3_0.men80 add command \
-        -command {exec gnuplot $env(EMPIREDIR)/util/kalman/corr.gp &} \
+        -command {exec xterm -e gnuplot $::env(EMPIREDIR)/util/kalman/corr.gp &} \
         -label "Gnuplot covariance" 
+
+
 
     $site_3_0.men80 add separator \
 
@@ -9118,11 +9144,11 @@ cd $workdir} \
 exec mv $file.new $file.inp } \
        -label "Replace EMPIRE input with *.new"
 
-    $site_3_0.men80 add command \
-        -command {exec xterm -e $::env(EMPIREDIR)/scripts/mergeMF33 $file 
-exec xterm -e mv $file-m.endf $file.endf
-exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
-        -label "Insert covariances into ENDF file" 
+#     $site_3_0.men80 add command \
+#         -command {exec xterm -e $::env(EMPIREDIR)/scripts/mergeMF33 $file 
+# exec xterm -e mv $file-m.endf $file.endf
+# exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
+#         -label "Insert covariances into ENDF file" 
 
 
     $site_3_0.men80 add separator \
