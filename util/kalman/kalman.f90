@@ -88,6 +88,7 @@
 
     read(1,10) title
     read(1,20) nreac,nparm,kctl1,kctl2,kcovex,scale,emin0,emax0
+    if(emin0 == 0.D0) emin0 = 0.001
     allocate(iparm(nparm))
     read(1,'(14I5)')(iparm(i),i=1,nparm)
     if(scale == 0.D0) scale = 1.D0
@@ -638,14 +639,13 @@
     end do
 
     ! find energy with zero or smallest cross section
-
-    do i = 1,crx%nen
-        if(crx%crs(i) > 0.D0) cycle
-        set_reaction = crx%ene(i-1)
+    do i = 1,crx%nen                            ! Note: i=1 corresponds to the highest energy - search downwards 
+        ! print *, 'scanning x-sec', i, crx%ene(i), crx%crs(i)
+        if(abs(crx%crs(i)) > 0.D0) cycle        ! added abs since fit cross sections might be negative
+        set_reaction = crx%ene(max(i-1,1))
+        write(*,'(" Threshold reaction, x-sec start at ",F8.3," MeV")') set_reaction
         return
     end do
-
-    set_reaction = crx%ene(crx%nen)
 
     return
     end function set_reaction
@@ -890,6 +890,7 @@
     y2 = 1.D0
     do k = id2,id1
         if(k == j) cycle
+        if (l <= 1) print *, "ene 2 = ", k
         y1 = y1*(e - crx%ene(k))
         y2 = y2*(crx%ene(j) - crx%ene(k))
     end do
