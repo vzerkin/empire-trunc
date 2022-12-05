@@ -213,10 +213,6 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             exit
          endif 
       enddo
-      ! print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
-      ! print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
-      ! print *, " Matching energy =", UCRt, " rhoFermi = ", roUx
-      ! print *, " Matching energy =", UCRt, " rhoCT    = ", ro_ct(UCRt, Tct, eo)
       !
       !  FITTING PARAMETERS DONE
       !
@@ -233,7 +229,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       Tct = ROPar(5,Nnuc)
    endif
 
-   if (ux.lE.0.0D0) print *, INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
+   if (ux.lE.0.0D0) print *, iz, ia, 'Ux=',sngl(ux) 
 
    !-----calculation of spin cut-off parameter from resolved levels  (TO BE UPDATED with Eq. 24 of Nucl. Phys. A810(2008)13)
    sig2l = 0.0
@@ -281,9 +277,9 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       TNUc(i,Nnuc) = Tct
    enddo      ! Loop over T-constant excitation energies
 
-!
-!--------calculation of level densities for energies surpassing eMatch (Fermi gas formula)
-!
+   !
+   !--------calculation of level densities for energies surpassing eMatch (Fermi gas formula)
+   !
    do i = ig+1, NEX(Nnuc) ! do loop over Fermi gas excitation energies
       u = EX(i,Nnuc) + DEL - ECOnd
       if(u.lt.0.d0) cycle
@@ -323,22 +319,20 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 end subroutine ROGCC
 
 
-
-
 real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
 
-      implicit none
-!cc   *********************************************************************
-!cc   *                                                         class:ppu *
-!cc   *                     R O _ F E R M I                               *
-!cc   *                                                                   *
-!cc   *  Calculates total Fermi-gas level (not state!) densities using    *
-!cc   *  Ignatyuk approach. Collective enhancement effects are taken into *
-!cc   *  account including their energy fade-out.                         *
-!cc   *                                                                   *
-!cc   *  BF=0. saddle point         (rot. perpend. to symm.)              *
-!cc   *********************************************************************
-!cc
+   implicit none
+   !cc   *********************************************************************
+   !cc   *                                                         class:ppu *
+   !cc   *                     R O _ F E R M I                               *
+   !cc   *                                                                   *
+   !cc   *  Calculates total Fermi-gas level (not state!) densities using    *
+   !cc   *  Ignatyuk approach. Collective enhancement effects are taken into *
+   !cc   *  account including their energy fade-out.                         *
+   !cc   *                                                                   *
+   !cc   *  BF=0. saddle point         (rot. perpend. to symm.)              *
+   !cc   *********************************************************************
+   !cc
 
    real*8, intent(in)  :: Anuc
    real*8, intent(in)  :: E
@@ -349,9 +343,9 @@ real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
    real*8, intent(in)  :: A2
    real*8, intent(in)  :: seff2                        ! effective moment of inertia - mompar**0.333D0*momort**0.6666D0
 
-!
-! Local variables
-!
+   !
+   ! Local variables
+   !
    real*8  :: s
    real*8  :: det
    real*8  :: rot_K   
