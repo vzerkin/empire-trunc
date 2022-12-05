@@ -28,8 +28,8 @@ static struct stat file_stat;
 int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 {
    int fhn, flags;
-   int mode = 0400|0200|0040|0020|0004; // S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH
-   char lfil[len+1];
+   int mode = 0400 | 0200 | 0040 | 0020 | 0004; // S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH
+   char lfil[len + 1];
    char *s, *t;
 
    /* make local copy of filename so we can safely
@@ -37,7 +37,8 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
 
    s = file + len - 1;
    t = lfil + len - 1;
-   while(*t-- = *s--);
+   while ((*t-- = *s--))
+      ;
    lfil[len] = '\0';
 
    /*now open the file. if flg=0, open new file for output.
@@ -45,16 +46,17 @@ int open_endf_blkfile_(char *file, int *flg, int *excl, int len)
     an output file also set privs for new file. Allow the
     overwriting of existing file if excl/=0. */
 
-   if(*flg) {
-      if(*excl)
-         flags = O_WRONLY|O_CREAT;
+   if (*flg)
+   {
+      if (*excl)
+         flags = O_WRONLY | O_CREAT;
       else
-         flags = O_WRONLY|O_CREAT|O_EXCL;
+         flags = O_WRONLY | O_CREAT | O_EXCL;
       fhn = open(lfil, flags, mode);
-      }
+   }
    else
       fhn = open(lfil, O_RDONLY);
-   return fhn; 
+   return fhn;
 }
 
 int get_endf_buffer_(int *fhandl, int *numbyt, void *buf)
@@ -79,7 +81,7 @@ int endf_file_status_(int *fhandl, struct stat *sblk)
 
 int endf_file_size_(int *fhandl)
 {
-   if(fstat(*fhandl, &file_stat))
+   if (fstat(*fhandl, &file_stat))
       return 0;
    else
       return file_stat.st_size;
@@ -88,17 +90,18 @@ int endf_file_size_(int *fhandl)
 void endf_quit_(int *status)
 {
    exit(*status);
-   return ;
+   return;
 }
 
 int endf_try_(void (*rtn)(), void *arg)
 {
    int stat;
-   frame *pr1 = (frame *) malloc (sizeof(frame));
+   frame *pr1 = (frame *)malloc(sizeof(frame));
    pr1->prv = cur;
    cur = pr1;
    stat = setjmp(cur->ctx);
-   if(!stat) (*rtn)(arg);
+   if (!stat)
+      (*rtn)(arg);
    pr1 = cur->prv;
    free(cur);
    cur = pr1;
@@ -107,7 +110,8 @@ int endf_try_(void (*rtn)(), void *arg)
 
 int endf_unwind_(int *val)
 {
-   if(cur == NULL) return -1;
+   if (cur == NULL)
+      return -1;
    longjmp(cur->ctx, *val);
    return 0;
 }
