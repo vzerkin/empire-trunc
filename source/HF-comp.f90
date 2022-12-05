@@ -1,6 +1,6 @@
-!cc   * $Rev: 5390 $
+!cc   * $Rev: 5404 $
 !cc   * $Author: mwherman $
-!cc   * $Date: 2022-11-13 19:50:03 +0100 (So, 13 Nov 2022) $
+!cc   * $Date: 2022-12-05 03:21:45 +0100 (Mo, 05 Dez 2022) $
 
 !cc   ********************************************************************
 !cc   *                                                                  *
@@ -183,11 +183,12 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
    !cc   *                                                         class:mpu*
    !cc   *                   E X C L U S I V E F                            *
    !cc   *                                                                  *
+   !cc   *      DOES NOTHING, CURRENTLY NOT BEING USED !!!                  *
+   !cc   *                                                                  *
    !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
    !cc   * model into spectra for individual reactions (exclusive) as       *
    !cc   * requested by the ENDF format. EXCLUSIVEF is for transitions      *
    !cc   * to continuum.                                                    *
-   !cc   *                                                                  *
    !cc   *                                                                  *
    !cc   * input:Iec  - energy index of the decaying state                  *
    !cc   *       Nnuc - index of the decaying nucleus                       *
@@ -196,14 +197,9 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
    !cc   *              This cross section is directly added to the spectrum*
    !cc   *              and Popt*DE is used to define a portion of the      *
    !cc   *              feeding spectrum that has to be moved.              *
-   !cc   *                                                                  *
    !cc   * output:none                                                      *
    !cc   *                                                                  *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
    !cc   * calls:none                                                       *
-   !cc   *                                                                  *
-   !cc   *                                                                  *
    !cc   *                                                                  *
    !cc   ********************************************************************
    !cc
@@ -243,43 +239,42 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
       enddo
    enddo
    return
-   end subroutine EXCLUSIVEF
+end subroutine EXCLUSIVEF
 
 
-
-   subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
-      !cc
-      !cc   ********************************************************************
-      !cc   *                                                         class:mpu*
-      !cc   *                   E X C L U S I V E C                            *
-      !cc   *                                                                  *
-      !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
-      !cc   * model into spectra for individual reactions (exclusive) as       *
-      !cc   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
-      !cc   * to continuum.                                                    *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   * input:Iec  - energy index of the decaying state                  *
-      !cc   *       Ief  - energy index of the final state                     *
-      !cc   *       Nejc - index of the ejectile                               *
-      !cc   *       Nnuc - index of the decaying nucleus                       *
-      !cc   *       Nnur - index of the final nucleus                          *
-      !cc   *       Popt - x-sec/MeV for the transition from the initial       *
-      !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
-      !cc   *              This cross section is directly added to the spectrum*
-      !cc   *              and Popt*DE is used to define a portion of the      *
-      !cc   *              feeding spectrum that has to be moved.              *
-      !cc   *                                                                  *
-      !cc   * output:none                                                      *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   * calls:none                                                       *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   *                                                                  *
-      !cc   ********************************************************************
-      !cc
+subroutine EXCLUSIVEC(Iec , Ief , Nejc , Nnuc , Nnur , Excnq , Popt)
+   !cc
+   !cc   ********************************************************************
+   !cc   *                                                         class:mpu*
+   !cc   *                   E X C L U S I V E C                            *
+   !cc   *                                                                  *
+   !cc   * Deconvolutes inclusive spectra calculated by the statistical     *
+   !cc   * model into spectra for individual reactions (exclusive) as       *
+   !cc   * requested by the ENDF format. EXCLUSIVEC is for transitions      *
+   !cc   * to continuum.                                                    *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   * input:Iec  - energy index of the decaying state                  *
+   !cc   *       Ief  - energy index of the final state                     *
+   !cc   *       Nejc - index of the ejectile                               *
+   !cc   *       Nnuc - index of the decaying nucleus                       *
+   !cc   *       Nnur - index of the final nucleus                          *
+   !cc   *       Popt - x-sec/MeV for the transition from the initial       *
+   !cc   *              (Iec,Jcn,Ipar) cell to the final bin at energy Ief  *
+   !cc   *              This cross section is directly added to the spectrum*
+   !cc   *              and Popt*DE is used to define a portion of the      *
+   !cc   *              feeding spectrum that has to be moved.              *
+   !cc   *                                                                  *
+   !cc   * output:none                                                      *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   * calls:none                                                       *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   *                                                                  *
+   !cc   ********************************************************************
+   !cc
    use empcess , ONLY:POPcsea
    implicit none
    include 'dimension.h'
@@ -293,14 +288,10 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
    integer :: INT
    real*8 :: xnor
 
-
-   !
    !  data jsigma/0/,jsigma2/36/
-   !
-   !  POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the
-   !                                energy bin with index Ief in Nnuc by
-   !                                Nejc particles (cumulative over all
-   !                                decays leading to this energy bin)
+   !  POPcse(Ief,Nejc,icsp,INExc(Nnuc))  - spectrum for the population of the energy bin with index Ief in Nnuc by
+   !                                       Nejc particles (cumulative over all decays leading to this energy bin)
+
    !-----
    !-----Particle decay
    !
@@ -316,7 +307,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
    !-----
    if(POPbin(Iec , Nnuc)==0)return
    !-----DE spectra
-   if(Nnuc/=1 .or. Nejc==0)then          !skip the first CN except gammas
+   if(Nnuc/=1 .or. Nejc==0)then          !skip the first CN except gammas !REVERSE LOGIC END MAKE RETURN!
       xnor = Popt*DE/POPbin(Iec , Nnuc)
 
       !  DO ie = 1, NDEcse
@@ -327,7 +318,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
                   CSE(ie , iejc , 0) = CSE(ie , iejc , 0) + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor ! DE feeding contribution added to inclusive spectrum
                else
                   POPcse(Ief , iejc , ie , INExc(Nnur)) = POPcse(Ief , iejc , ie , INExc(Nnur))                                  &
-                   & + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor  ! DE feeding contribution added to population spectrum
+                     & + POPcse(Iec , iejc , ie , INExc(Nnuc))*xnor  ! DE feeding contribution added to population spectrum
                endif
             endif
 
@@ -338,11 +329,11 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
                if(POPcsed(Iec , iejc , ie , INExc(Nnuc))>0)then
                   if(ENDf(Nnur)==1)then
                      POPcsed(Ief , iejc , ie , INExc(Nnur)) = POPcsed(Ief , iejc , ie , INExc(Nnur))                             &
-                      & + POPcsed(Iec , iejc , ie , INExc(Nnuc))*xnor
-                                                              !DE feeding HMS/MSD contribution added to population spectrum
+                        & + POPcsed(Iec , iejc , ie , INExc(Nnuc))*xnor
+                                                               !DE feeding HMS/MSD contribution added to population spectrum
                   else
                      POPcsed(Ief , iejc , ie , 0) = POPcsed(Ief , iejc , ie , 0) + POPcsed(Iec , iejc , ie , INExc(Nnuc))*xnor
-                                                              !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
+                                                               !DE feeding HMS/MSD contribution added to inclusive spectrum POPcsed
                   endif
                endif
 
@@ -350,12 +341,12 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
                   if(ENDf(Nnur)==1)then
                      do nth = 1 , NDAng
                         POPcsea(nth , Ief , iejc , ie , INExc(Nnur)) = POPcsea(nth , Ief , iejc , ie , INExc(Nnur))              &
-                         & + POPcsea(nth , Iec , iejc , ie , INExc(Nnuc))*xnor
+                           & + POPcsea(nth , Iec , iejc , ie , INExc(Nnuc))*xnor
                      enddo
                   else
                      do nth = 1 , NDAng
                         POPcsea(nth , Ief , iejc , ie , 0) = POPcsea(nth , Ief , iejc , ie , 0)                                  &
-                         & + POPcsea(nth , Iec , iejc , ie , INExc(Nnuc))*xnor
+                           & + POPcsea(nth , Iec , iejc , ie , INExc(Nnuc))*xnor
                      enddo
                   endif
                endif
@@ -363,7 +354,7 @@ subroutine EXCLUSIVEF(Iec , Nnuc , Popt)
             elseif(POPcseaf(Iec , iejc , ie , INExc(Nnuc))>0)then
                if(ENDf(Nnur)==1)then
                   POPcseaf(Ief , iejc , ie , INExc(Nnur)) = POPcseaf(Ief , iejc , ie , INExc(Nnur))                              &
-                   & + POPcseaf(Iec , iejc , ie , INExc(Nnuc))*xnor
+                     & + POPcseaf(Iec , iejc , ie , INExc(Nnuc))*xnor
                else
                   POPcseaf(0 , iejc , ie , 0) = POPcseaf(0 , iejc , ie , 0) + POPcseaf(Iec , iejc , ie , INExc(Nnuc))*xnor
                endif
@@ -495,7 +486,6 @@ SUBROUTINE EXCLUSIVEL(Iec,Ie,Nejc,Nnuc,Nnur,Il,Popt)
       enddo
    endif
 end subroutine EXCLUSIVEL
-
 
 
 subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
@@ -799,7 +789,6 @@ subroutine DECAY(Nnuc , Iec , Jc , Ipc , Nnur , Nejc , Sum)
 end subroutine DECAY
 
 
-
 subroutine DECAYD(Nnuc)
    !cc
    !cc   ********************************************************************
@@ -837,7 +826,7 @@ subroutine DECAYD(Nnuc)
    real*8 :: egd , gacs , gacs_noicc , popl
    integer :: i , icse , j , j1 , l , nejc, igamma
    integer :: INT , NINT
-   type(gamma_type), dimension(1:250) :: discrGamma  ! List of discrete gammas emitted in transitions between levels in Nnuc) 
+   type(gamma_type) :: discrGamma(1:250)  ! List of discrete gammas emitted in transitions between levels in Nnuc) 
 
    discrGamma(:)%Eg = 0.0d0
    discrGamma(:)%gXsc = 0.0d0
@@ -1092,7 +1081,6 @@ subroutine DECAYD_DIR(Nnuc , Nejc)
 end subroutine DECAYD_DIR
 
 
-
 subroutine TL_GAMMA(Nnuc , Iec , Jc , Ipc)
    !cc
    !cc   ********************************************************************
@@ -1269,7 +1257,6 @@ subroutine TL_GAMMA(Nnuc , Iec , Jc , Ipc)
    !-----do loop over discrete levels --------- done --------------------
    return
 end subroutine TL_GAMMA
-
 
 
 subroutine DECAYG(Nnuc , Iec , Jc , Ipc , Sum)
@@ -1475,7 +1462,6 @@ subroutine DECAYG(Nnuc , Iec , Jc , Ipc , Sum)
 end subroutine DECAYG
 
 
-
 subroutine FISSION(Nnuc , Iec , Jc , Sumfis)
    !cc
    !cc   ********************************************************************
@@ -1609,7 +1595,6 @@ subroutine FISSION(Nnuc , Iec , Jc , Sumfis)
 end subroutine FISSION
 
 
-
 function TLF(Ekin)
    !-----energy dependent transmission coefficient (note that htom is
    !-----fixed below and does not depend on angular momentum as it might)
@@ -1626,7 +1611,6 @@ function TLF(Ekin)
    atlf = pix2*Ekin/htom
    if(atlf<38.D0) TLF = 1./(1. + EXP((-atlf)))
 end function TLF
-
 
 
 subroutine FISFIS(Nnuc , Iec , Ip , Jc , Sumfis , Mmod)
@@ -1972,7 +1956,6 @@ subroutine FISFIS(Nnuc , Iec , Ip , Jc , Sumfis , Mmod)
 end subroutine FISFIS
 
 
-
 subroutine SIMPSFIS(Nnuc , Ee , Jcc , Ipa , Tfcon)
    !====================================================================
    !-----Simpson integration
@@ -2020,7 +2003,6 @@ subroutine SIMPSFIS(Nnuc , Ee , Jcc , Ipa , Tfcon)
    enddo
    return
 end subroutine SIMPSFIS
-
 
 
 subroutine SIMPSTDIR(Nnuc , Ee , Jcc , Ipa , Tdircont , Barmin)
