@@ -1,5 +1,5 @@
 MODULE width_fluct
-    ! $Rev: 5376 $
+    ! $Rev: 5402 $
     ! $Author: mwherman $
     ! $Date: 2022-04-24 15:49:31 -0600 (Sun, 24 Apr 2022) $
     !
@@ -667,9 +667,9 @@ CONTAINS
             jmin = abs(XJLv(i,nnur) - xjc)
             jmax = XJLv(i,nnur) + xjc
             !         if(nejc==1) write(*,*)'jmin, jmax, xjc',jmin, jmax, xjc
-            kmin = abs(jmin - MAXj(nejc) + ssxj)             !minimum k=l+1
+            kmin = int(abs(jmin - MAXj(nejc) + ssxj))        !minimum k=l+1
             kmin = MAX(kmin,1)                               !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-            kmax = jmax - 1  + ssxj                          !maximum k=l+1
+            kmax = int(jmax - 1  + ssxj)                     !maximum k=l+1
             kmax = MIN(ndlw, kmax)                           !ensure we are within dimensions
             !         if(nejc==1) write(*,*)'kmin, kmax ', kmin, kmax
             DO k = kmin, kmax                                !do loop over l in Tlj (note that real l is k-1)
@@ -732,9 +732,9 @@ CONTAINS
                     CALL TLLOC(nnur,nejc,eout,il,frde)              !find 'il' postion of the Tlj in the ETL matrix and relative mismatch 'frde'
                     jmin = abs(XJLv(i,nnur) - xjc)
                     jmax = XJLv(i,nnur) + xjc
-                    kmin = jmin - MAXj(nejc) + ssxj                 !minimum k=l+1
+                    kmin = int(jmin - MAXj(nejc) + ssxj)            !minimum k=l+1
                     kmin = MAX(kmin,1)                              !WARNING: kmin=0 should NOT happen but it does occasionally => out of boundaries!!!
-                    kmax = jmax - 1  + ssxj                         !maximum k=l+1
+                    kmax = int(jmax - 1  + ssxj)                    !maximum k=l+1
                     kmax = MIN(ndlw, kmax)                          !ensure we are within dimensions
                     DO k = kmin, kmax                               !do loop over l in Tlj (note that real l is k-1)
                         ipar = 1 + LVP(i,nnur)*ipc*( - 1)**(k - 1)  !check parity (1 if conserved, 0 if violated)
@@ -1063,7 +1063,7 @@ CONTAINS
             DO jr = 1, jmax     !do loop over populated (residual) spins
                 xjr = dble(jr) + HIS(nnuc)
                 lambmin = MAX(1,abs(jc - jr))
-                lambmax = xjc + xjr + 0.001
+                lambmax = int(xjc + xjr + 0.001)
                 lambmax = MIN(lambmax,maxmult)
                 IF(lambmin<=lambmax) THEN
                     scrtpos = 0.0D0
@@ -1111,8 +1111,8 @@ CONTAINS
         !
         ! do loop over discrete levels -----------------------------------
         DO i = 1, NLV(nnuc)
-            kmin = abs(xjc - XJLv(i,nnuc)) + 0.001
-            kmax = xjc + XJLv(i,nnuc) + 0.001
+            kmin = int(abs(xjc - XJLv(i,nnuc)) + 0.001)
+            kmax = int(xjc + XJLv(i,nnuc) + 0.001)
             lambmin = max0(1,kmin)
             lambmax = MIN(kmax,maxmult)
             IF(lambmin<=lambmax) THEN
@@ -2263,7 +2263,7 @@ CONTAINS
             ELSEIF(i==iou) THEN
                 w = out%eef     ! HRTW elastic enhancement factor (otherwise w=1)
             ENDIF
-            PL_lmax(-out%kres) = 2*la
+            PL_lmax(-out%kres) = 2.0*la
             !  IF(out%kres > 0) THEN
             !     PLcont_lmax(out%kres) = la
             !  ELSEIF(out%kres < 0) THEN
