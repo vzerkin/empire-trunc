@@ -213,6 +213,10 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
             exit
          endif 
       enddo
+      ! print *, " Final Ucrt, Tct, Eo =", UCRt, Tct, Eo
+      ! print *, " Integrated rho(0 -> Ecut) =", exp(-Eo/Tct)*(exp(Eu/Tct)- exp(El/Tct))
+      ! print *, " Matching energy =", UCRt, " rhoFermi = ", roUx
+      ! print *, " Matching energy =", UCRt, " rhoCT    = ", ro_ct(UCRt, Tct, eo)
       !
       !  FITTING PARAMETERS DONE
       !
@@ -229,7 +233,7 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
       Tct = ROPar(5,Nnuc)
    endif
 
-   if (ux.lE.0.0D0) print *, iz, ia, 'Ux=',sngl(ux) 
+   if (ux.lE.0.0D0) print *, INT(Z(Nnuc)),INT(A(Nnuc)),'Ux=',sngl(ux) 
 
    !-----calculation of spin cut-off parameter from resolved levels  (TO BE UPDATED with Eq. 24 of Nucl. Phys. A810(2008)13)
    sig2l = 0.0
@@ -317,6 +321,8 @@ subroutine ROGCC(Nnuc,Cf,Asaf)
 
    return
 end subroutine ROGCC
+
+
 
 
 real*8 function ro_fermi(Anuc, E, Ac, Momort, T, Bf, A2, seff2)
