@@ -61,7 +61,7 @@ libdir = $(EMPIREDIR)/lib
 %.o : %.f90
 	$(FC) $(FFLAGS) -c $<
 
-all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee weight_calc
+all: kalman kalend c4tokal genkal pnt2kal refmt-pfns kefkal newinp empsee weight_calc slim
 
 kalman : kalman.f90
 	$(FC) $(FFLAGS) -o $@ kalman.f90 $(STATIC)
@@ -85,6 +85,10 @@ pnt2kal:   $(OBJM)
 OBJN = refmt-pfns.o aux_routines.o
 refmt-pfns :   $(OBJN)
 	$(FC) $(FFLAGS) -o $@ $(OBJN) $(STATIC)
+
+OBJL = slim_mod.o slim.o
+slim :   $(OBJL)
+	$(FC) $(FFLAGS) -o $@ $(OBJL) $(STATIC)
 
 kefkal: kefkal.f90
 	$(FC) $(FFLAGS) -o $@ kefkal.f90 $(STATIC)
