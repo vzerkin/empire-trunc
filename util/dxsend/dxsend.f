@@ -55,6 +55,7 @@ C-V  21/01 Fix DDX yields that include fission.
 C-V        Fix printout when the last contributing reaction is zero.
 C-V  22/08 Process MF12 when discrete inelastic are in MF6.
 C-V  22/10 Fix bug when assembling Zc/Zf ratio.
+C-V  22/12 Fix gamma spectra reconstruction when given in MF13,15/MT3.
 C-Description:
 C-D  The function of this routine is an extension of DXSEND and DXSEN1
 C-D  routines, which retrieves the differential cross section at a
@@ -2306,9 +2307,18 @@ C*        -- If no data found and photon spectrum requested, try MF 13
           REWIND LEF
           MF =13
           MT =MT0
-          CALL GETSTD(LEF,NX,ZA0,MF,MT,IZAP0,MST,QM,QI,LDMY
-     &               ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
-          IF(NP.GT.0) GO TO 120
+          CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,NK,MAT,MF,MT,IER)
+          IF(IER.NE.0) 
+     &    print *,'  Could not find MAT,MF,MT,IER',NINT(ZA0),MF,MT,IER
+c...
+c...      CALL GETSTD(LEF,NX,ZA0,MF,MT,IZAP0,MST,QM,QI,LDMY
+c... &               ,NP,RWO(LE),RWO(LX),RWO(LU),RWO(LBL),NX)
+C...      print *,'NX,ZA0,MF,MT,IZAP0,MST,QM,QI,LDMY,NP'
+C... &           , NX,ZA0,MF,MT,IZAP0,MST,QM,QI,LDMY,NP
+C...      print *,'   Enr:',(RWO(le-1+j),j=1,5)
+C...
+          print *,'  Found MAT,MF,MT,NK,IER',NINT(ZA0),MF,MT,NK,IER
+          GO TO 120
         END IF
         NEN=NP
         GO TO 900
@@ -2317,6 +2327,7 @@ C...
 C...  print *,'  Here, Ein,LE,NP,IER',Ein,LE,NP,IER
 C...
       IF(EIN.GT.0) THEN
+C*      -- Explicitly requested incident energy
         IF(EIN.LT.RWO(LE) .OR. EIN.GT.RWO(LE-1+NP)) THEN
 C* Case: Required point is below thershold or above last point
 c...
@@ -2330,12 +2341,16 @@ c...
 C*
 C* Case: If cross section is required on output - finish processing
 c...
-      print *,'  KEA,yl,ier',KEA,yl,ier
+      print *,'  KEA,MT0,yl,ier',KEA,MT0,yl,ier
 c...
       IF(KEA.NE.0) GO TO 700
 C*
-        IF(MT0/10000.EQ.4) THEN
+        MANG=MT0/10000
+        IF(MANG.EQ.4 .AND. MT0-10000*MANG.EQ.452) THEN 
 C*        -- Save the nu-bar
+c...
+          print *,'  Saving nubar NEN,NP',NEN,NP
+c...
           NNU=NEN
           LXE=LNU+NP
           LXX=LXE+NNU
@@ -2355,7 +2370,7 @@ C*        -- Save the nu-bar
         YY=1
         IF(YL.GT.0) YY=YL
 C...
-C...    print *,'lxx 0 ',lxx
+        print *,'lxx 0 ',lxx
 C...    if(lxx.lt.0) stop
 C...
         DO I=1,NEN
@@ -2384,8 +2399,8 @@ C*      -- Search for angular distributions or double differential data
         MTJ=MT0-10000*(MT0/10000)
         CALL FINDMT(LEF,ZA0,ZA,AWR,L1,L2,N1,N2,MAT,MFJ,MTJ,IER)
 C...
-c...    print *,'  Tried za0,zap,MAT,MF,MT,IER',nint(za0),izap
-c... &                                           ,MAT,MFJ,MTJ,IER
+        print *,'  Found za0,izap0,MAT,MF, MT, IER'
+     &            ,nint(za0),izap0,MAT,MFJ,MTJ,IER
 C...
         IF(IER.NE.0 .OR.
      &     (IZAP0.EQ.0 .AND. MFJ.GT.12) .OR.
@@ -2403,8 +2418,8 @@ C*        -- Skip to the end of section
           GO TO 31
         END IF
 C...
-c...    print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
-c...    print *,'                    izap0',izap0
+C...    print *,'  Found za0,MAT,MF,MT,IER',nint(za0),MAT,MFJ,MTJ,IER
+C...    print *,'                    izap0',izap0
 C...
 C*
         IF(MFJ.GT.4) GO TO 500
@@ -2422,7 +2437,7 @@ C*      -- Angular distributions are allowed for two-body reactions
      &     (IZAP0.EQ.2004 .AND. (MTJ.EQ.2 .OR. 
      &                          (MTJ.GE.800 .AND. MTJ.LE.849) ) ))THEN
 C*        -- Proceed with processing     
-c...      print *,'              Proceed with processing'
+          print *,'              Proceed with processing'
         ELSE
 C*        -- Skip to the end of section
            DO WHILE(MTJ.GT.0)
@@ -2435,17 +2450,20 @@ C*        -- Prepare cross sections at fixed angle with MF4 given
           LTT1=L2
           MT  =MT0-10000*(MT0/10000)
 c...
-c...      print *,'Read angular distrib. for MT/LTT',MT,LTT1
+          print *,'Read angular distrib. for MT/LTT',MT,LTT1
 c...
           IF(LTT1.EQ.0) THEN
 C*          -- Distribution is isotropic - no action needed
             print *,'Distribution is isotropic - no action needed',LTT1
+            DO I=1,NEN
+              DXS(I)=DXS(I) / (4*PI)
+            END DO
             GO TO 900
           ELSE IF(LTT1.EQ.2) THEN
 C*          -- Read incident energy definitions
             CALL RDHEAD(LEF,MAT,MFJ,MTJ,C1,C2,LI,LCT,N1,N2,IER)
 c...
-c...        print *,'LCT',LCT
+C...        print *,'LCT',LCT
 c...
             CALL RDTAB2(LEF,C1,C2,L1,L2,NR,NE,NBT,INR,IER)
 C*          -- Split the work array RWO on function and argument
@@ -2546,7 +2564,7 @@ C*              -- Jacobian of CM-Lab transformation d_omega/d_mu
               END IF
               RWO(LXE-1+IE)=EI2
               RWO(LXX-1+IE)=FINTXS(ACS,RWO(LAA),RWO(LAF)
-     &                            ,NEP1,INR(NM),IER1) / TJAC
+     &                            ,NEP1,INR(NM),IER1) / (TJAC)
 C...
 C...          print *,'E,Ain,Ang,x1,x2,J,Dst,XS',EI2
 C... &               ,ain,acs,xx1,xx2,TJAC,RWO(LXX-1+IE)
@@ -2577,7 +2595,7 @@ C*            the distribution * 2 (= Sig(mu,E)*4Pi)
             NEN=NP
             DO I=1,NEN
               ENR(I)=RWO(LAA-1+I)
-              DXS(I)=DXS(I)*RWO(LAF-1+I) * 2
+              DXS(I)=DXS(I)*RWO(LAF-1+I) * 2 / (4*PI)
             END DO
 C*          -- Add Coulomb contribution for charged particles
 c...
@@ -4196,7 +4214,7 @@ C*      -- File MF13 has same structure as MF12/LO=1 but contains XS
         L1=1
       END IF
 c...
-c...  print *,'mf,mt,kea',mf,mt,kea
+C...  print *,'mf,mt,kea',mf,mt,kea
 c...
       IF(KEA.NE.2) GO TO 140
       LO=L1
@@ -4206,13 +4224,13 @@ c...
       RWO(LLI)=0
       LLI=LLI+1
 c...
-c...  print *,'    At 120 lo,lv,lg,l2',lo,lv,lg,l2
+C...  print *,'    At 120 lo,lv,lg,l2',lo,lv,lg,l2
 c...
 C* Read photon branching ratios to all discrete-leves up to the present
   122 LV =LV +1
       IWO(LV)=LLI
 C...
-C...  print *,'    Request: mat/mf/mt,lo,lvl',mat,mf,mt,lo,lv,lg,l2
+      print *,'    Request: mat/mf/mt,lo,lvl,lg,l2',mat,mf,mt,lo,lv,lg,l2
 C...
       IF(LO.EQ.2) THEN
 C* Transition probability arrays given
@@ -4333,7 +4351,7 @@ C...
       ELSE IF(LO.EQ.1) THEN
 C*      -- Multiplicities given
 C...
-c...    print *,'    Multiplicities given'
+        print *,'    Multiplicities given: NK',N1
 c...
         NK =N1
         NE1=0
@@ -4354,17 +4372,13 @@ C*      -- Photon energy and yield
      1             ,RWO(LXE),RWO(LXX),KXX,IER)
         IF(IER.NE.0) THEN
           PRINT *,'ERROR READING MF/MT/IER',MF,MT,IER
-          STOP 'DXSEND1 ERROR - Reading MF12'
+          STOP 'DXSEND1 ERROR - Reading MF13'
         END IF
+C...
+c...    print *,'    EG,ES,LP,LF,NR,NP',EG,ES,LP,LF,NR,NP
+C...
         INA=INR(1)
         YLK=FINTXS(EIN,RWO(LXE),RWO(LXX),NP,INA,IER)
-c...
-c...    print *,'    Yield for',IK,' of',NK,' is',YLK,' with LF',LF
-c...    print *,'Ein',EIN,xs
-c...    do i=1,np
-c...      print *,i,rwo(lxe-1+i),rwo(lxx-1+i)
-c...    end do
-c...
         IF(IER.NE.0) THEN
           IF(IER.EQ.11) THEN
             PRINT *,'WARNING - MF/MT/EIN',MF,MT,EIN
@@ -4372,7 +4386,7 @@ c...
             YLK=0
           ELSE
             PRINT *,'ERROR Interpolating MF/MT/IER',MF,MT,IER
-            STOP 'DXSEND1 ERROR - Processing MF12'
+            STOP 'DXSEND1 ERROR - Processing MF13'
           END IF
         END IF
 C*      -- Modify photon energy for primary photons
@@ -4403,6 +4417,15 @@ C*        -- Read the fractional contribution of the section
      1               ,RWO(LE),RWO(LX),KX,IER)
           INA=INR(1)
           YLT=FINTXS(EIN,RWO(LE),RWO(LX),NP,INA,IER)
+
+c...
+          print *,'    Yield for',IK,' of',NK,' is',YLT,' IER',IER
+c...      print *,'Ein',EIN,xs
+c...      do i=1,np
+c...        print *,i,rwo(lxe-1+i),rwo(lxx-1+i)
+c...      end do
+c...
+
           IF(LF.NE.1) THEN
             IER=99
             PRINT *,'WARNING - No coding for MF 15, MT',MT0,' LF',LF
