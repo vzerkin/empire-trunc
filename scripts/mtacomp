@@ -55,6 +55,7 @@ if [ "$name1" != "" ]; then
    $EMPIREDIR/util/c4zvd/endzvdl.exe A $MT $name1 end1.zvd
    if [ -s end1.zvd ]; then
       echo '#begin aa.tit' >>end1.zvd
+      echo 'TIT: '$root 'MT='$MT >> end1.zvd
       echo '[func]' >>end1.zvd
       echo 'color: 2' >>end1.zvd
       echo 'thick: 2' >>end1.zvd
