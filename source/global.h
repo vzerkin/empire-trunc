@@ -1,6 +1,6 @@
-! $Rev: 5363 $
+! $Rev: 5413 $
 ! $Author: mwherman $
-! $Date: 2022-06-06 01:56:29 +0200 (Mo, 06 Jun 2022) $
+! $Date: 2022-12-29 01:38:39 +0100 (Do, 29 Dez 2022) $
 !
 !     The global variable EMPiredir is defined and passed throught COMMON GLOBAL_E
 !     If global.h is not included, then add the variable definition and the common
@@ -280,7 +280,7 @@
      &                  FHMs, LHMs, NHMs, NEXreq, FISspe, NRSmooth,     &
      &                  ISIsom, IFLuc, NEMc, NOUt, IOUt, NEX, LHRtw,    &
      &                  IX4ret, JCUtcoll, JSTab, IZA, NLV, NCOmp, NREs, &
-     &                  NLVc, NLVt,                                     &  ! total # of discrete levels (including those in the continuum)
+     &                  NLVc, NLVt,                                     &  ! total num of discrete levels (including those in the continuum)
      &                  LEVtarg, KTRlom, LMAxtl, IZAejc, LVP, IOMwrite, &
      &                  NEXr, IDNa, ND_nlv, LMAxcc, IDEfcc, IOPsys,     &
      &                  ICOllev, ICOller, IWArn, NTArget, NPRoject,     &
