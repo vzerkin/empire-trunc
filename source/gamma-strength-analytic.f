@@ -1,6 +1,6 @@
-Ccc   * $Rev: 4504 $
-Ccc   * $Author: mherman $
-Ccc   * $Date: 2015-11-20 23:29:16 +0100 (Fr, 20 Nov 2015) $
+Ccc   * $Rev: 5411 $
+Ccc   * $Author: mwherman $
+Ccc   * $Date: 2022-12-29 01:34:47 +0100 (Do, 29 Dez 2022) $
 
 C
       DOUBLE PRECISION FUNCTION GAMMA_STRENGTH(Znucleus,Anucleus,
@@ -21,8 +21,8 @@ C     *                                                              *
 C     *   Znucleus = atomic number of a nucleus;                     *
 C     *                                                              *
 C     *   Anucleus = mass number of a nucleus;                       *
-C     *                                                              *
 C     *   Eexcitf  = excitation energy;                              *
+C     *                                                              *
 C     *                                                              *
 C     *   Temperf = Temperf(Eexcitf) ---- temperature  at            *
 C     *                            given excitation energy;          *
