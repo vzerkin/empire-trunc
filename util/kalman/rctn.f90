@@ -18,8 +18,8 @@
        '(z,2n2a) ', '(z,nd)   ', '(z,nt)   ', '(z,nHe3) ', &
        '(z,nd2a) ', '(z,nt2a) ', '(z,4n)   ', '(z,3nf)  ', &
        '(z,2np)  ', '(z,3np)  ', '(z,n2p)  ', '(z,npa)  ', &
-       '(z,gamma)', '(z,p)    ', '(z,d)    ', '(z,t)    ', &
        '(z,He3)  ', '(z,a)    ', '(z,2a)   ', '(z,3a)   ', &
+       '(z,gamma)', '(z,p)    ', '(z,d)    ', '(z,t)    ', &
        '(z,2p)   ', '(z,pa)   ', '(z,t2a)  ', '(z,d2a)  ', &
        '(z,pd)   ', '(z,pt)   ', '(z,da)   ', 'Nonel-Cel', &
        '(z,2npa) ', 'Mu-bar   ', 'Nu-bar   ', '(z,X)    ', &
