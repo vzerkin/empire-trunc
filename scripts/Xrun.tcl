@@ -1,6 +1,6 @@
-# $Rev: 5397 $
+# $Rev: 5414 $
 # $Author: mwherman $
-# $Date: 2022-12-04 02:06:43 +0100 (So, 04 Dez 2022) $
+# $Date: 2023-01-07 04:15:09 +0100 (Sa, 07 Jän 2023) $
 #
 #!/bin/sh
 # the next line restarts using wish\
@@ -8881,6 +8881,8 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
     $site_3_0.men70 add separator \
         
     $site_3_0.men70 add command \
+        -command { editFile $file-log.stan } -font {} -label {STAN Log}
+    $site_3_0.men70 add command \
         -command { editFile $file-log.checkr } -font {} -label {CHECKR Log} 
     $site_3_0.men70 add command \
         -command { editFile $file-log.fizcon } -font {} -label {FIZCON Log} 
@@ -8911,7 +8913,9 @@ exec  xterm -e $::env(EMPIREDIR)/scripts/stanef $file & } \
         -activebackground #dcdcdc -activeforeground #000000 
 #         -background #dcdcdc -foreground #000000 -tearoff 0 
     $site_3_0.menu95 add command \
-        -command { exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Yaml-driven plots} 
+        -command { exec xterm -e $::env(EMPIREDIR)/scripts/drawPlots.py $file & } -label {Yaml-driven plots}
+    $site_3_0.menu95 add command \
+        -command { editFile $file-zvv.yml } -label {Edit Yaml}  
     $site_3_0.menu95 add command \
         -command { exec xterm -e $::env(EMPIREDIR)/scripts/zvd2eps.py & } -label {zvv => eps}
 
